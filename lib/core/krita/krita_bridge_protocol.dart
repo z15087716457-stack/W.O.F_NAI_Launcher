@@ -85,6 +85,10 @@ class KritaBridgeProtocol {
         return _decodeInpaint(id, payload, maxDecodedImageBytes);
       case 'img2img':
         return _decodeImg2Img(id, payload, maxDecodedImageBytes);
+      case 'set_params':
+        return _decodePassThrough(id, payload, isSetParams: true);
+      case 'generate':
+        return _decodePassThrough(id, payload, isSetParams: false);
       default:
         return KritaBridgeDecodeResult.error(
           KritaBridgeError(
@@ -136,6 +140,21 @@ class KritaBridgeProtocol {
 
     return KritaBridgeDecodeResult.message(
       KritaPingMessage(version: requestVersion, secret: secret!),
+    );
+  }
+
+  static KritaBridgeDecodeResult _decodePassThrough(
+    String? id,
+    Map<String, dynamic> payload, {
+    required bool isSetParams,
+  }) {
+    if (id == null || id.isEmpty) {
+      return _invalid(id, 'Missing request id');
+    }
+    return KritaBridgeDecodeResult.message(
+      isSetParams
+          ? KritaSetParamsMessage(id: id, payload: payload)
+          : KritaGenerateMessage(id: id, payload: payload),
     );
   }
 

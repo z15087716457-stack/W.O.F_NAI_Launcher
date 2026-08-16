@@ -35,6 +35,10 @@ typedef KritaBridgeCancelGeneration = void Function();
 typedef KritaBridgeClock = DateTime Function();
 typedef KritaBridgeActiveRequestReporter = void Function(String? requestId);
 
+/// AI 接管扩展：将 set_params 载荷写入 UI 参数状态，返回已应用的键列表。
+typedef KritaBridgeParamsWriter =
+    List<String> Function(Map<String, dynamic> payload);
+
 abstract class KritaBridgeMessageService {
   Future<void> handle(KritaBridgeMessage message);
 
@@ -68,6 +72,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
     required KritaBridgeFallbackGenerator generateFallback,
     required KritaBridgeExternalImageRegistrar registerExternalImage,
     required KritaBridgeCancelGeneration cancelGeneration,
+    KritaBridgeParamsWriter? writeParams,
     KritaBridgePromptSnapshotReader? readPromptSnapshot,
     KritaBridgeMinimumContextReader? readMinimumContextPixels,
     KritaBridgeClock? clock,
@@ -83,6 +88,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
        _generateFallback = generateFallback,
        _registerExternalImage = registerExternalImage,
        _cancelGeneration = cancelGeneration,
+       _writeParams = writeParams,
        _clock = clock ?? DateTime.now,
        _failureCooldown = failureCooldown,
        _readMinimumContextPixels = readMinimumContextPixels ?? (() => 88);
@@ -96,6 +102,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
   final KritaBridgeFallbackGenerator _generateFallback;
   final KritaBridgeExternalImageRegistrar _registerExternalImage;
   final KritaBridgeCancelGeneration _cancelGeneration;
+  final KritaBridgeParamsWriter? _writeParams;
   final KritaBridgeClock _clock;
   final Duration _failureCooldown;
 
@@ -138,8 +145,38 @@ class KritaBridgeService implements KritaBridgeMessageService {
         await _generate(message.id, message.toImageParams(_readBaseParams()));
       case KritaInpaintMessage():
         await _generate(message.id, message.toImageParams(_readBaseParams()));
+      case KritaSetParamsMessage():
+        _setParams(message);
+      case KritaGenerateMessage():
+        await _generate(message.id, message.toImageParams(_readBaseParams()));
       case KritaPingMessage():
         break;
+    }
+  }
+
+  void _setParams(KritaSetParamsMessage message) {
+    final writer = _writeParams;
+    if (writer == null) {
+      _sendError(
+        message.id,
+        KritaBridgeErrorCode.unsupportedMessage,
+        'set_params is not supported by this build.',
+      );
+      return;
+    }
+    try {
+      final applied = writer(message.payload);
+      _send({'type': 'params_set', 'id': message.id, 'applied': applied});
+      AppLogger.i(
+        'Applied set_params (${applied.length} keys): ${message.id}',
+        _logTag,
+      );
+    } catch (error) {
+      _sendError(
+        message.id,
+        KritaBridgeErrorCode.invalidRequest,
+        'set_params failed: $error',
+      );
     }
   }
 

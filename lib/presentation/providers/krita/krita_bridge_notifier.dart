@@ -15,6 +15,12 @@ import '../image_generation_provider.dart';
 import '../image_save_settings_provider.dart';
 import 'krita_bridge_service.dart';
 
+import 'package:uuid/uuid.dart';
+
+import '../../../data/models/character/character_prompt.dart' as char_model;
+import '../../../data/models/image/image_params.dart';
+import '../character_prompt_provider.dart';
+
 typedef KritaBridgeServerFactory = KritaBridgeServer Function();
 typedef KritaBridgeEnabledPersister = FutureOr<void> Function(bool enabled);
 typedef KritaBridgeServiceFactory =
@@ -292,6 +298,171 @@ final kritaBridgeNotifierProvider =
               .round()
               .clamp(16, 192)
               .toInt(),
+          // AI 接管扩展：set_params → GenerationParamsNotifier setters
+          writeParams: (payload) {
+            final notifier = ref.read(
+              generationParamsNotifierProvider.notifier,
+            );
+            final applied = <String>[];
+            String? str(String k) =>
+                payload[k] is String ? payload[k] as String : null;
+            int? integer(String k) =>
+                payload[k] is num ? (payload[k] as num).toInt() : null;
+            double? dbl(String k) =>
+                payload[k] is num ? (payload[k] as num).toDouble() : null;
+            bool? flag(String k) =>
+                payload[k] is bool ? payload[k] as bool : null;
+
+            void apply<T>(String key, T? value, void Function(T) setter) {
+              if (value != null) {
+                setter(value);
+                applied.add(key);
+              }
+            }
+
+            apply<String>('prompt', str('prompt'), notifier.updatePrompt);
+            apply<String>(
+              'negative_prompt',
+              str('negative_prompt'),
+              notifier.updateNegativePrompt,
+            );
+            apply<String>('model', str('model'), notifier.updateModel);
+            apply<int>('steps', integer('steps'), notifier.updateSteps);
+            apply<double>(
+              'cfg_scale',
+              dbl('cfg_scale'),
+              notifier.updateScale,
+            );
+            apply<String>(
+              'sampler',
+              str('sampler'),
+              notifier.updateSampler,
+            );
+            apply<int>('seed', integer('seed'), notifier.updateSeed);
+            final seedLock = flag('seed_lock');
+            if (seedLock != null && seedLock != notifier.isSeedLocked) {
+              notifier.toggleSeedLock();
+              applied.add('seed_lock');
+            }
+            apply<int>(
+              'n_samples',
+              integer('n_samples'),
+              notifier.updateNSamples,
+            );
+            apply<int>(
+              'uc_preset',
+              integer('uc_preset'),
+              notifier.updateUcPreset,
+            );
+            apply<bool>(
+              'quality_toggle',
+              flag('quality_toggle'),
+              notifier.updateQualityToggle,
+            );
+            apply<double>(
+              'cfg_rescale',
+              dbl('cfg_rescale'),
+              notifier.updateCfgRescale,
+            );
+            apply<String>(
+              'noise_schedule',
+              str('noise_schedule'),
+              notifier.updateNoiseSchedule,
+            );
+            apply<bool>(
+              'variety_plus',
+              flag('variety_plus'),
+              notifier.updateVarietyPlus,
+            );
+            apply<bool>(
+              'smea_auto',
+              flag('smea_auto'),
+              notifier.updateSmeaAuto,
+            );
+            apply<bool>('smea', flag('smea'), notifier.updateSmea);
+            apply<bool>(
+              'smea_dyn',
+              flag('smea_dyn'),
+              notifier.updateSmeaDyn,
+            );
+            apply<bool>(
+              'use_coords',
+              flag('use_coords'),
+              notifier.updateUseCoords,
+            );
+
+            final w = integer('width');
+            final h = integer('height');
+            if (w != null || h != null) {
+              final cur = ref.read(generationParamsNotifierProvider);
+              notifier.updateSize(w ?? cur.width, h ?? cur.height);
+              if (w != null) applied.add('width');
+              if (h != null) applied.add('height');
+            }
+
+            final chars = payload['characters'];
+            if (chars is List) {
+              // 双写：UI 角色系统（characterPromptNotifier，界面可见+UI生成用）
+              //      + 生成参数态（generationParams.characters，桥接 generate 用）
+              final uiChars = <char_model.CharacterPrompt>[];
+              final paramChars = <CharacterPrompt>[];
+              var index = 0;
+              for (final entry in chars) {
+                if (entry is! Map || entry['prompt'] is! String) continue;
+                final prompt = entry['prompt'] as String;
+                final uc = entry['uc'] is String ? entry['uc'] as String : '';
+                final x = entry['x'] is num ? (entry['x'] as num).toDouble() : null;
+                final y = entry['y'] is num ? (entry['y'] as num).toDouble() : null;
+                final hasPos = x != null && y != null;
+                uiChars.add(
+                  char_model.CharacterPrompt(
+                    id: const Uuid().v4(),
+                    name: 'Character ${index + 1}',
+                    prompt: prompt,
+                    negativePrompt: uc,
+                    positionMode: hasPos
+                        ? char_model.CharacterPositionMode.custom
+                        : char_model.CharacterPositionMode.aiChoice,
+                    customPosition: hasPos
+                        ? char_model.CharacterPosition(
+                            mode: char_model.CharacterPositionMode.custom,
+                            row: y,
+                            column: x,
+                          )
+                        : null,
+                  ),
+                );
+                paramChars.add(
+                  CharacterPrompt(
+                    prompt: prompt,
+                    negativePrompt: uc,
+                    position: entry['position'] is String
+                        ? entry['position'] as String
+                        : null,
+                    positionX: x,
+                    positionY: y,
+                  ),
+                );
+                index++;
+              }
+              ref
+                  .read(characterPromptNotifierProvider.notifier)
+                  .replaceAll(uiChars);
+              notifier.clearCharacters();
+              for (final c in paramChars) {
+                notifier.addCharacter(c);
+              }
+              applied.add('characters($index)');
+            } else if (flag('clear_characters') == true) {
+              ref
+                  .read(characterPromptNotifierProvider.notifier)
+                  .clearAllCharacters();
+              notifier.clearCharacters();
+              applied.add('clear_characters');
+            }
+
+            return applied;
+          },
           send: server.send,
           isUiGenerating: () =>
               ref.read(imageGenerationNotifierProvider).isGenerating,
