@@ -103,7 +103,10 @@ async def main():
             resp = await b.rpc('set_params', payload)
             print(json.dumps(resp, ensure_ascii=False))
         elif cmd == 'set-json':
-            payload = json.loads(sys.argv[2])
+            arg = sys.argv[2]
+            # 以 { 开头视为内联 JSON，否则按文件路径读取
+            payload = json.loads(arg) if arg.lstrip().startswith('{') else \
+                json.loads(Path(arg).read_text(encoding='utf-8'))
             resp = await b.rpc('set_params', payload)
             print(json.dumps(resp, ensure_ascii=False))
         elif cmd == 'gen':
