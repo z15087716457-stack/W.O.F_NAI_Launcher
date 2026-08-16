@@ -39,6 +39,12 @@ typedef KritaBridgeActiveRequestReporter = void Function(String? requestId);
 typedef KritaBridgeParamsWriter =
     List<String> Function(Map<String, dynamic> payload);
 
+/// AI 接管扩展：读取种子锁状态（锁在 storage 而非 ImageParams）。
+typedef KritaBridgeSeedLockReader = bool Function();
+
+/// AI 接管扩展：读取 UI 角色框系统全量状态（get_params 回读用）。
+typedef KritaBridgeCharactersReader = List<Map<String, dynamic>> Function();
+
 abstract class KritaBridgeMessageService {
   Future<void> handle(KritaBridgeMessage message);
 
@@ -73,6 +79,8 @@ class KritaBridgeService implements KritaBridgeMessageService {
     required KritaBridgeExternalImageRegistrar registerExternalImage,
     required KritaBridgeCancelGeneration cancelGeneration,
     KritaBridgeParamsWriter? writeParams,
+    KritaBridgeSeedLockReader? readSeedLock,
+    KritaBridgeCharactersReader? readCharacters,
     KritaBridgePromptSnapshotReader? readPromptSnapshot,
     KritaBridgeMinimumContextReader? readMinimumContextPixels,
     KritaBridgeClock? clock,
@@ -89,6 +97,8 @@ class KritaBridgeService implements KritaBridgeMessageService {
        _registerExternalImage = registerExternalImage,
        _cancelGeneration = cancelGeneration,
        _writeParams = writeParams,
+       _readSeedLock = readSeedLock,
+       _readCharacters = readCharacters,
        _clock = clock ?? DateTime.now,
        _failureCooldown = failureCooldown,
        _readMinimumContextPixels = readMinimumContextPixels ?? (() => 88);
@@ -103,6 +113,8 @@ class KritaBridgeService implements KritaBridgeMessageService {
   final KritaBridgeExternalImageRegistrar _registerExternalImage;
   final KritaBridgeCancelGeneration _cancelGeneration;
   final KritaBridgeParamsWriter? _writeParams;
+  final KritaBridgeSeedLockReader? _readSeedLock;
+  final KritaBridgeCharactersReader? _readCharacters;
   final KritaBridgeClock _clock;
   final Duration _failureCooldown;
 
@@ -199,6 +211,19 @@ class KritaBridgeService implements KritaBridgeMessageService {
       'noise': params.noise,
       'inpaint_strength': params.inpaintStrength,
       'minimum_context_pixels': _readMinimumContextPixels(),
+      // AI 接管扩展：全量状态回读（键名与 set_params 对称，可 get→set 往返）
+      'n_samples': params.nSamples,
+      'noise_schedule': params.noiseSchedule,
+      'cfg_rescale': params.cfgRescale,
+      'uc_preset': params.ucPreset,
+      'quality_toggle': params.qualityToggle,
+      'variety_plus': params.varietyPlus,
+      'smea_auto': params.smeaAuto,
+      'smea': params.smea,
+      'smea_dyn': params.smeaDyn,
+      'use_coords': params.useCoords,
+      'seed_lock': ?_readSeedLock?.call(),
+      'characters': ?_readCharacters?.call(),
     });
     AppLogger.d('Sent params snapshot to Krita: ${message.id}', _logTag);
   }

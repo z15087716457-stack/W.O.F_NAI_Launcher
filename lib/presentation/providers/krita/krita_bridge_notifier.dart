@@ -299,6 +299,26 @@ final kritaBridgeNotifierProvider =
               .clamp(16, 192)
               .toInt(),
           // AI 接管扩展：set_params → GenerationParamsNotifier setters
+          readSeedLock: () => ref
+              .read(generationParamsNotifierProvider.notifier)
+              .isSeedLocked,
+          // AI 接管扩展：get_params 回读 UI 角色框系统（界面可见的那套）
+          readCharacters: () {
+            final config = ref.read(characterPromptNotifierProvider);
+            return [
+              for (final c in config.characters)
+                {
+                  'name': c.name,
+                  'prompt': c.prompt,
+                  'uc': c.negativePrompt,
+                  'enabled': c.enabled,
+                  if (c.customPosition != null) ...{
+                    'x': c.customPosition!.column,
+                    'y': c.customPosition!.row,
+                  },
+                },
+            ];
+          },
           writeParams: (payload) {
             final notifier = ref.read(
               generationParamsNotifierProvider.notifier,
