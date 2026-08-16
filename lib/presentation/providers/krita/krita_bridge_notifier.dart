@@ -20,6 +20,7 @@ import 'package:uuid/uuid.dart';
 import '../../../data/models/character/character_prompt.dart' as char_model;
 import '../../../data/models/image/image_params.dart';
 import '../character_prompt_provider.dart';
+import '../prompt_token_counter_provider.dart';
 
 typedef KritaBridgeServerFactory = KritaBridgeServer Function();
 typedef KritaBridgeEnabledPersister = FutureOr<void> Function(bool enabled);
@@ -318,6 +319,20 @@ final kritaBridgeNotifierProvider =
                   },
                 },
             ];
+          },
+          // AI 接管扩展：token 用量回读（与 UI 的 373/512 计数器同源）
+          readTokens: () async {
+            final positive = await ref.read(
+              promptTokenUsageProvider(PromptTokenCountTarget.positive).future,
+            );
+            final negative = await ref.read(
+              promptTokenUsageProvider(PromptTokenCountTarget.negative).future,
+            );
+            return {
+              'prompt_tokens': positive?.usedTokens,
+              'prompt_token_limit': positive?.limit,
+              'uc_tokens': negative?.usedTokens,
+            };
           },
           writeParams: (payload) {
             final notifier = ref.read(

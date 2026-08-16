@@ -45,6 +45,9 @@ typedef KritaBridgeSeedLockReader = bool Function();
 /// AI 接管扩展：读取 UI 角色框系统全量状态（get_params 回读用）。
 typedef KritaBridgeCharactersReader = List<Map<String, dynamic>> Function();
 
+/// AI 接管扩展：读取提示词 token 用量（与 UI 计数器同源，异步）。
+typedef KritaBridgeTokensReader = Future<Map<String, dynamic>> Function();
+
 abstract class KritaBridgeMessageService {
   Future<void> handle(KritaBridgeMessage message);
 
@@ -81,6 +84,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
     KritaBridgeParamsWriter? writeParams,
     KritaBridgeSeedLockReader? readSeedLock,
     KritaBridgeCharactersReader? readCharacters,
+    KritaBridgeTokensReader? readTokens,
     KritaBridgePromptSnapshotReader? readPromptSnapshot,
     KritaBridgeMinimumContextReader? readMinimumContextPixels,
     KritaBridgeClock? clock,
@@ -99,6 +103,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
        _writeParams = writeParams,
        _readSeedLock = readSeedLock,
        _readCharacters = readCharacters,
+       _readTokens = readTokens,
        _clock = clock ?? DateTime.now,
        _failureCooldown = failureCooldown,
        _readMinimumContextPixels = readMinimumContextPixels ?? (() => 88);
@@ -115,6 +120,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
   final KritaBridgeParamsWriter? _writeParams;
   final KritaBridgeSeedLockReader? _readSeedLock;
   final KritaBridgeCharactersReader? _readCharacters;
+  final KritaBridgeTokensReader? _readTokens;
   final KritaBridgeClock _clock;
   final Duration _failureCooldown;
 
@@ -150,7 +156,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
   Future<void> handle(KritaBridgeMessage message) async {
     switch (message) {
       case KritaGetParamsMessage():
-        _sendParams(message);
+        await _sendParams(message);
       case KritaCancelMessage():
         _cancel(message);
       case KritaImg2ImgMessage():
@@ -192,9 +198,10 @@ class KritaBridgeService implements KritaBridgeMessageService {
     }
   }
 
-  void _sendParams(KritaGetParamsMessage message) {
+  Future<void> _sendParams(KritaGetParamsMessage message) async {
     final params = _readBaseParams();
     final promptSnapshot = _readPromptSnapshot(params);
+    final tokens = _readTokens == null ? null : await _readTokens.call();
     _send({
       'type': 'params',
       'id': message.id,
@@ -224,6 +231,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
       'use_coords': params.useCoords,
       'seed_lock': ?_readSeedLock?.call(),
       'characters': ?_readCharacters?.call(),
+      if (tokens != null) ...tokens,
     });
     AppLogger.d('Sent params snapshot to Krita: ${message.id}', _logTag);
   }
