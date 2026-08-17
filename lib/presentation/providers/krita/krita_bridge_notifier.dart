@@ -537,7 +537,9 @@ final kritaBridgeNotifierProvider =
               ref.read(naiImageGenerationApiServiceProvider).cancelGeneration(),
           onGenerationBilled: (params) {
             // 个人点数记账（合租账本）：桥接生成成功，按请求参数预估单价扣减
+            // 测试/独立工具环境未启动订阅链路时跳过，避免连带构建 auth 链
             try {
+              if (!ref.exists(subscriptionNotifierProvider)) return;
               final isOpus = ref.read(isOpusSubscriptionProvider);
               final cost = AnlasCalculator.calculate(params, isOpus: isOpus);
               if (cost <= 0) return;

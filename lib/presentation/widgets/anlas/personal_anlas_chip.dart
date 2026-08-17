@@ -155,9 +155,9 @@ class _PersonalAnlasDialogState extends ConsumerState<PersonalAnlasDialog> {
               children: [
                 Expanded(child: _buildField(_subCtrl, '剩余')),
                 const SizedBox(width: 8),
-                Expanded(child: _buildField(_quotaCtrl, '每月配额')),
+                Expanded(child: _buildField(_quotaCtrl, '配额')),
                 const SizedBox(width: 8),
-                Expanded(child: _buildField(_resetDayCtrl, '重置日(空=自动)')),
+                Expanded(child: _buildField(_resetDayCtrl, '重置日')),
               ],
             ),
             const SizedBox(height: 4),
@@ -212,7 +212,7 @@ class _PersonalAnlasDialogState extends ConsumerState<PersonalAnlasDialog> {
             Text(
               '当前合计：${counter.totalRemaining}'
               '${counter.isOverdrawn ? '（已超支）' : ''}\n'
-              '只统计本机生图消耗（含桥接），按界面显示单价扣减：\n先扣订阅、再扣购买。朋友的消耗不影响此账本。',
+              '只统计本机生图消耗（含桥接），按界面显示单价扣减：\n先扣订阅、再扣购买。朋友的消耗不影响此账本。\n重置日留空=按订阅到期时间自动推断。',
               style: theme.textTheme.bodySmall,
             ),
           ],

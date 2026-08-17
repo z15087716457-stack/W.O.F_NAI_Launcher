@@ -526,14 +526,15 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     // 仅当本次运行确实产出新图（completed 且列表已更新）才扣减，
     // 避免冷却拦截/取消/失败造成误扣。
     final imagesBefore = state.currentImages;
-    int costToBill;
+    // 独立测试/工具环境未启动订阅链路时，读取预估会连带构建 auth 链，
+    // 其异步异常会污染 Zone——用 ref.exists 门禁 + try/catch 双保险。
+    var costToBill = 0;
     try {
-      costToBill = ref.read(estimatedCostProvider);
+      if (ref.exists(subscriptionNotifierProvider)) {
+        costToBill = ref.read(estimatedCostProvider);
+      }
     } catch (_) {
-      costToBill = AnlasCalculator.calculate(
-        params,
-        isOpus: ref.read(isOpusSubscriptionProvider),
-      );
+      costToBill = 0;
     }
     return _generate(params).whenComplete(() {
       if (costToBill > 0 &&
