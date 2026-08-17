@@ -28,6 +28,7 @@ import '../../data/models/image/image_stream_chunk.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import '../../data/services/statistics_cache_service.dart';
 import '../../data/services/alias_resolver_service.dart';
+import '../../data/services/personal_anlas_counter_service.dart';
 import 'character_prompt_provider.dart';
 import 'fixed_tags_provider.dart';
 import 'image_save_settings_provider.dart';
@@ -36,6 +37,7 @@ import 'prompt_config_provider.dart';
 import 'quality_preset_provider.dart';
 import 'queue_execution_provider.dart';
 import 'subscription_provider.dart';
+import 'cost_estimate_provider.dart';
 import 'uc_preset_provider.dart';
 
 import 'generation/generation_models.dart';
@@ -520,7 +522,29 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   }
 
   Future<void> generate(ImageParams params) {
+    // 个人点数记账（合租账本）：生成前捕获预估单价与图片列表，
+    // 仅当本次运行确实产出新图（completed 且列表已更新）才扣减，
+    // 避免冷却拦截/取消/失败造成误扣。
+    final imagesBefore = state.currentImages;
+    int costToBill;
+    try {
+      costToBill = ref.read(estimatedCostProvider);
+    } catch (_) {
+      costToBill = AnlasCalculator.calculate(
+        params,
+        isOpus: ref.read(isOpusSubscriptionProvider),
+      );
+    }
     return _generate(params).whenComplete(() {
+      if (costToBill > 0 &&
+          state.status == GenerationStatus.completed &&
+          !identical(state.currentImages, imagesBefore)) {
+        unawaited(
+          ref
+              .read(personalAnlasCounterProvider.notifier)
+              .recordCost(costToBill),
+        );
+      }
       // App 根节点常驻监听该 provider。独立测试/工具未启动订阅链路时，
       // 不应仅为记账刷新而触发认证和平台存储初始化。
       if (ref.exists(subscriptionNotifierProvider)) {

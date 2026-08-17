@@ -7,6 +7,7 @@ import '../../providers/krita/krita_bridge_notifier.dart';
 import '../../providers/prompt_maximize_provider.dart';
 import '../../utils/asset_protection_guard.dart';
 import '../../widgets/anlas/anlas_balance_chip.dart';
+import '../../widgets/anlas/personal_anlas_chip.dart';
 import '../../widgets/common/themed_divider.dart';
 import '../../widgets/common/themed_scaffold.dart';
 import '../../widgets/common/themed_button.dart';
@@ -140,6 +141,9 @@ class _MobileGenerationLayoutState
             children: [
               // Anlas 余额显示
               const AnlasBalanceChip(compact: true),
+              const SizedBox(width: 8),
+              // 个人点数计数器（合租账本）
+              const PersonalAnlasChip(compact: true),
               const SizedBox(width: 8),
               // 抽卡模式开关
               if (showRandomTools) ...[

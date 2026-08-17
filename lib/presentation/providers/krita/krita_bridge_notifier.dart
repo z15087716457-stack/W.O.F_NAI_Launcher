@@ -7,7 +7,9 @@ import 'package:hive/hive.dart';
 
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/krita/krita_bridge_server.dart';
+import '../../../core/services/anlas_calculator.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../data/services/personal_anlas_counter_service.dart';
 import '../../../data/datasources/remote/nai_image_generation_api_service.dart';
 import '../fixed_tags_provider.dart';
 import '../generation/image_workflow_controller.dart';
@@ -21,6 +23,7 @@ import '../../../data/models/character/character_prompt.dart' as char_model;
 import '../../../data/models/image/image_params.dart';
 import '../character_prompt_provider.dart';
 import '../prompt_token_counter_provider.dart';
+import '../subscription_provider.dart';
 
 typedef KritaBridgeServerFactory = KritaBridgeServer Function();
 typedef KritaBridgeEnabledPersister = FutureOr<void> Function(bool enabled);
@@ -532,6 +535,21 @@ final kritaBridgeNotifierProvider =
               ),
           cancelGeneration: () =>
               ref.read(naiImageGenerationApiServiceProvider).cancelGeneration(),
+          onGenerationBilled: (params) {
+            // 个人点数记账（合租账本）：桥接生成成功，按请求参数预估单价扣减
+            try {
+              final isOpus = ref.read(isOpusSubscriptionProvider);
+              final cost = AnlasCalculator.calculate(params, isOpus: isOpus);
+              if (cost <= 0) return;
+              unawaited(
+                ref
+                    .read(personalAnlasCounterProvider.notifier)
+                    .recordCost(cost),
+              );
+            } catch (e) {
+              AppLogger.w('个人点数记账失败: $e', 'KritaBridge');
+            }
+          },
         ),
       );
       final enabled =

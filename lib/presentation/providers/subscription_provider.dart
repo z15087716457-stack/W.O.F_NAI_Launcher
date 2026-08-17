@@ -9,6 +9,7 @@ import '../../core/utils/app_logger.dart';
 import '../../data/datasources/remote/nai_user_info_api_service.dart';
 import '../../data/models/user/user_subscription.dart';
 import '../../data/services/anlas_statistics_service.dart';
+import '../../data/services/personal_anlas_counter_service.dart';
 import 'auth_provider.dart';
 
 part 'subscription_provider.g.dart';
@@ -297,6 +298,13 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
       _hasInitiallyLoaded = true;
       _startAutoRefresh();
 
+      // 个人点数记账：观测订阅到期时间，推断每月重置日
+      unawaited(
+        ref
+            .read(personalAnlasCounterProvider.notifier)
+            .observeSubscription(subscription.expiresAt),
+      );
+
       AppLogger.i(
         'Subscription loaded: ${subscription.tierName}, '
             'Anlas: ${subscription.anlasBalance}',
@@ -409,6 +417,13 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
 
       final subscription = UserSubscription.fromJson(data);
       _updateState(SubscriptionState.loaded(subscription));
+
+      // 个人点数记账：观测订阅到期时间，推断每月重置日
+      unawaited(
+        ref
+            .read(personalAnlasCounterProvider.notifier)
+            .observeSubscription(subscription.expiresAt),
+      );
       return true;
     } catch (e) {
       AppLogger.w('Failed to refresh balance: $e', 'Subscription');

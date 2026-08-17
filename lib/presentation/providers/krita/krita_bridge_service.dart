@@ -48,6 +48,9 @@ typedef KritaBridgeCharactersReader = List<Map<String, dynamic>> Function();
 /// AI 接管扩展：读取提示词 token 用量（与 UI 计数器同源，异步）。
 typedef KritaBridgeTokensReader = Future<Map<String, dynamic>> Function();
 
+/// AI 接管扩展：桥接生成成功后的记账回调（个人点数计数器，合租账本）。
+typedef KritaBridgeGenerationBilled = void Function(ImageParams params);
+
 abstract class KritaBridgeMessageService {
   Future<void> handle(KritaBridgeMessage message);
 
@@ -81,6 +84,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
     required KritaBridgeFallbackGenerator generateFallback,
     required KritaBridgeExternalImageRegistrar registerExternalImage,
     required KritaBridgeCancelGeneration cancelGeneration,
+    KritaBridgeGenerationBilled? onGenerationBilled,
     KritaBridgeParamsWriter? writeParams,
     KritaBridgeSeedLockReader? readSeedLock,
     KritaBridgeCharactersReader? readCharacters,
@@ -100,6 +104,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
        _generateFallback = generateFallback,
        _registerExternalImage = registerExternalImage,
        _cancelGeneration = cancelGeneration,
+       _onGenerationBilled = onGenerationBilled,
        _writeParams = writeParams,
        _readSeedLock = readSeedLock,
        _readCharacters = readCharacters,
@@ -117,6 +122,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
   final KritaBridgeFallbackGenerator _generateFallback;
   final KritaBridgeExternalImageRegistrar _registerExternalImage;
   final KritaBridgeCancelGeneration _cancelGeneration;
+  final KritaBridgeGenerationBilled? _onGenerationBilled;
   final KritaBridgeParamsWriter? _writeParams;
   final KritaBridgeSeedLockReader? _readSeedLock;
   final KritaBridgeCharactersReader? _readCharacters;
@@ -308,6 +314,9 @@ class KritaBridgeService implements KritaBridgeMessageService {
         );
         return;
       }
+
+      // 个人点数记账：桥接生成成功，按请求参数预估单价扣减
+      _onGenerationBilled?.call(request.params);
 
       final savedPath = await _registerExternalImage(
         artifact.displayImageBytes,
