@@ -206,7 +206,9 @@ void main() {
       expect(cost, 10);
     });
 
-    test('does not apply the Opus free image with character references', () {
+    test('applies the Opus free image even with character references', () {
+      // 修正后的官方规则：PR 是独立附加费（+5/参考），不取消 Opus 免费资格。
+      // 免费条件下基础为 0，只收 PR 附加费 5。
       final cost = AnlasCalculator.calculateRequestCost(
         width: 1024,
         height: 1024,
@@ -217,11 +219,10 @@ void main() {
         smeaDyn: false,
         model: model,
         subscriptionTier: AnlasCalculator.opusTier,
-        hasCharacterReference: true,
         extraPerSampleCost: 5,
       );
 
-      expect(cost, 25);
+      expect(cost, 5);
     });
 
     test('keeps per-image, per-request, and one-time fees distinct', () {
@@ -397,6 +398,63 @@ void main() {
       );
 
       expect(AnlasCalculator.resolveVibeReferenceExtraCost(params), 0);
+    });
+  });
+
+  group('Opus 免费与 PR 附加费（PR 不取消免费资格）', () {
+    int prCost({
+      int width = 832,
+      int height = 1216,
+      int steps = 28,
+      int tier = AnlasCalculator.opusTier,
+      bool hasBaseImage = false,
+      int prFee = 0,
+    }) {
+      return AnlasCalculator.calculateRequestCost(
+        width: width,
+        height: height,
+        steps: steps,
+        batchCount: 1,
+        batchSize: 1,
+        smea: false,
+        smeaDyn: false,
+        model: model,
+        subscriptionTier: tier,
+        hasBaseImage: hasBaseImage,
+        extraPerSampleCost: prFee,
+      );
+    }
+
+    test('Opus 默认尺寸无 PR：基础免费 = 0', () {
+      expect(prCost(), 0);
+    });
+
+    test('Opus 默认尺寸 + 1PR：只收 5 点附加费（基础照免）', () {
+      expect(prCost(prFee: 5), 5);
+    });
+
+    test('Opus 默认尺寸 + 2PR：10 点', () {
+      expect(prCost(prFee: 10), 10);
+    });
+
+    test('非 Opus 默认尺寸 + 1PR：基础 20 + 5 = 25', () {
+      expect(prCost(tier: 0, prFee: 5), 25);
+    });
+
+    test('Opus 大尺寸 + 1PR：基础照收 + 5', () {
+      final base = prCost(width: 1536, height: 1536);
+      expect(base, greaterThan(0));
+      expect(prCost(width: 1536, height: 1536, prFee: 5), base + 5);
+    });
+
+    test('Opus 底图(img2img/infill)：不免费，PR 附加费照加', () {
+      final base = prCost(hasBaseImage: true);
+      expect(base, greaterThan(0));
+      expect(prCost(hasBaseImage: true, prFee: 5), base + 5);
+    });
+
+    test('Opus 超 28 步：不免费', () {
+      expect(prCost(steps: 40), greaterThan(0));
     });
   });
 }

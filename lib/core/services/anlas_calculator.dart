@@ -78,7 +78,6 @@ class AnlasCalculator {
       model: params.model,
       subscriptionTier: isOpus ? opusTier : 0,
       hasBaseImage: params.action != ImageGenerationAction.generate,
-      hasCharacterReference: _usesPreciseReferences(params),
       strength: switch (params.action) {
         ImageGenerationAction.img2img => params.strength,
         ImageGenerationAction.infill => params.inpaintStrength,
@@ -101,7 +100,6 @@ class AnlasCalculator {
     required String model,
     int subscriptionTier = 0,
     bool hasBaseImage = false,
-    bool hasCharacterReference = false,
     double strength = 1.0,
     int extraPerSampleCost = 0,
     int extraPerRequestCost = 0,
@@ -124,7 +122,6 @@ class AnlasCalculator {
         model: model,
         subscriptionTier: isFirstImageInRequest ? subscriptionTier : 0,
         hasBaseImage: hasBaseImage,
-        hasCharacterReference: hasCharacterReference,
         strength: strength,
       );
       if (sampleCost == invalidCost) return invalidCost;
@@ -176,7 +173,6 @@ class AnlasCalculator {
     bool isOpus = false,
     int subscriptionTier = 0,
     bool hasBaseImage = false,
-    bool hasCharacterReference = false,
     double strength = 1.0,
   }) {
     // 计算分辨率（像素数）
@@ -216,7 +212,6 @@ class AnlasCalculator {
           steps: steps,
           resolution: r,
           hasBaseImage: hasBaseImage,
-          hasCharacterReference: hasCharacterReference,
         )
         ? 1
         : 0;
@@ -228,16 +223,20 @@ class AnlasCalculator {
   }
 
   /// 检查是否满足 Opus 免费条件
+  ///
+  /// 官方条件：单张、无底图（img2img/infill）、常规尺寸(≤1024×1024)、≤28步。
+  /// 精准参考(PR)不影响免费资格——PR 是独立附加费（每张参考 5 Anlas），
+  /// 叠加在基础费之上；Opus 免费时基础为 0，只收 PR 附加费。
+  /// 依据：docs.novelai.net/en/image/precisereference（“additional cost of
+  /// 5 Anlas”，独立于基础费）+ subscription 页免费条件未排除参考图。
   static bool _isOpusFree({
     required bool isOpus,
     required int steps,
     required int resolution,
     required bool hasBaseImage,
-    required bool hasCharacterReference,
   }) {
     return isOpus &&
         !hasBaseImage &&
-        !hasCharacterReference &&
         steps <= 28 &&
         resolution <= 1024 * 1024;
   }
@@ -252,13 +251,12 @@ class AnlasCalculator {
     return 1;
   }
 
-  /// 检查当前参数是否满足 Opus 免费条件
+  /// 检查当前参数是否满足 Opus 免费条件（基础费部分；PR 附加费另计）
   static bool isOpusFreeGeneration(ImageParams params, {required bool isOpus}) {
     if (!isOpus) return false;
     if (params.steps > 28) return false;
     if (params.nSamples > 1) return false;
     if (params.action != ImageGenerationAction.generate) return false;
-    if (_usesPreciseReferences(params)) return false;
 
     final resolution = params.width * params.height;
     return resolution <= 1024 * 1024;

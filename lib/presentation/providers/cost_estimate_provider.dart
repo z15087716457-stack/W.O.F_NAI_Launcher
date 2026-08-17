@@ -158,7 +158,6 @@ int estimatedCost(Ref ref) {
     model: params.model,
     subscriptionTier: subscriptionTier,
     hasBaseImage: params.action != ImageGenerationAction.generate,
-    hasCharacterReference: params.isV45Model && params.hasPreciseReferences,
     strength: requestInput.strength,
     extraPerSampleCost: AnlasCalculator.resolvePreciseReferenceExtraCost(
       params,
