@@ -188,7 +188,9 @@ void main() {
       expect(cost, 80);
     });
 
-    test('does not apply the Opus free image to base-image requests', () {
+    test('applies the Opus free image to base-image requests (img2img free too)', () {
+      // 官方 SDK 免费判定不含底图排除：img2img/infill 满足尺寸/步数同样免费。
+      // strength 先作用于单价再免费：ceil(20×0.5)=10 → 免费 0。
       final cost = AnlasCalculator.calculateRequestCost(
         width: 1024,
         height: 1024,
@@ -199,11 +201,10 @@ void main() {
         smeaDyn: false,
         model: model,
         subscriptionTier: AnlasCalculator.opusTier,
-        hasBaseImage: true,
         strength: 0.5,
       );
 
-      expect(cost, 10);
+      expect(cost, 0);
     });
 
     test('applies the Opus free image even with character references', () {
@@ -407,7 +408,7 @@ void main() {
       int height = 1216,
       int steps = 28,
       int tier = AnlasCalculator.opusTier,
-      bool hasBaseImage = false,
+      double strength = 1.0,
       int prFee = 0,
     }) {
       return AnlasCalculator.calculateRequestCost(
@@ -420,7 +421,7 @@ void main() {
         smeaDyn: false,
         model: model,
         subscriptionTier: tier,
-        hasBaseImage: hasBaseImage,
+        strength: strength,
         extraPerSampleCost: prFee,
       );
     }
@@ -447,10 +448,18 @@ void main() {
       expect(prCost(width: 1536, height: 1536, prFee: 5), base + 5);
     });
 
-    test('Opus 底图(img2img/infill)：不免费，PR 附加费照加', () {
-      final base = prCost(hasBaseImage: true);
+    test('Opus 图生图 1216×832 str0.7：免费（实证 case：误显 14 → 实扣 0）', () {
+      expect(prCost(width: 1216, height: 832, strength: 0.7), 0);
+    });
+
+    test('非 Opus 图生图 1216×832 str0.7：14 点', () {
+      expect(prCost(width: 1216, height: 832, strength: 0.7, tier: 0), 14);
+    });
+
+    test('Opus 底图但超尺寸：不免费，PR 附加费照加', () {
+      final base = prCost(width: 1536, height: 1536, strength: 0.7);
       expect(base, greaterThan(0));
-      expect(prCost(hasBaseImage: true, prFee: 5), base + 5);
+      expect(prCost(width: 1536, height: 1536, strength: 0.7, prFee: 5), base + 5);
     });
 
     test('Opus 超 28 步：不免费', () {

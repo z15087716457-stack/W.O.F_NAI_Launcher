@@ -93,7 +93,8 @@ void main() {
       },
     );
 
-    test('should charge Opus img2img requests with redraw strength', () {
+    test('should treat Opus img2img requests within limits as free', () {
+      // 官方 SDK：免费判定不含底图排除——1024×1024/≤28步 img2img 在 Opus 下免费
       final subscription = container.read(
         subscriptionNotifierProvider.notifier,
       );
@@ -120,11 +121,10 @@ void main() {
         smeaDyn: params.effectiveSmeaDyn,
         model: params.model,
         subscriptionTier: AnlasCalculator.opusTier,
-        hasBaseImage: true,
         strength: 0.5,
       );
 
-      expect(expected, greaterThan(0));
+      expect(expected, 0);
       expect(container.read(estimatedCostProvider), expected);
     });
 

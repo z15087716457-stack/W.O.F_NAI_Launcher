@@ -157,7 +157,6 @@ int estimatedCost(Ref ref) {
     smeaDyn: params.effectiveSmeaDyn,
     model: params.model,
     subscriptionTier: subscriptionTier,
-    hasBaseImage: params.action != ImageGenerationAction.generate,
     strength: requestInput.strength,
     extraPerSampleCost: AnlasCalculator.resolvePreciseReferenceExtraCost(
       params,
