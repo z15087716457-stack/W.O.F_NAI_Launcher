@@ -54,7 +54,7 @@ class PersonalAnlasChip extends ConsumerWidget {
             children: [
               Icon(
                 Icons.person_outline,
-                size: compact ? 14 : 16,
+                size: compact ? 15 : 16,
                 color: overdrawn
                     ? theme.colorScheme.error
                     : theme.colorScheme.secondary,
@@ -66,7 +66,7 @@ class PersonalAnlasChip extends ConsumerWidget {
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.w600,
-                  fontSize: compact ? 12 : 14,
+                  fontSize: compact ? 13 : 14,
                 ),
               ),
             ],

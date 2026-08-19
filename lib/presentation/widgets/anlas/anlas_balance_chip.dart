@@ -50,7 +50,7 @@ class AnlasBalanceChip extends ConsumerWidget {
             style: TextStyle(
               color: theme.colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w600,
-              fontSize: compact ? 12 : 14,
+              fontSize: compact ? 13 : 14,
             ),
           ),
         ],
@@ -118,7 +118,7 @@ class AnlasBalanceChip extends ConsumerWidget {
               style: TextStyle(
                 color: textColor,
                 fontWeight: FontWeight.w600,
-                fontSize: compact ? 12 : 14,
+                fontSize: compact ? 13 : 14,
               ),
             ),
           ],
@@ -151,7 +151,7 @@ class AnlasBalanceChip extends ConsumerWidget {
             children: [
               Icon(
                 Icons.error_outline,
-                size: compact ? 14 : 16,
+                size: compact ? 15 : 16,
                 color: theme.colorScheme.error,
               ),
               const SizedBox(width: 4),
@@ -160,7 +160,7 @@ class AnlasBalanceChip extends ConsumerWidget {
                 style: TextStyle(
                   color: theme.colorScheme.error,
                   fontWeight: FontWeight.w600,
-                  fontSize: compact ? 12 : 14,
+                  fontSize: compact ? 13 : 14,
                 ),
               ),
             ],
@@ -173,7 +173,7 @@ class AnlasBalanceChip extends ConsumerWidget {
   Widget _buildIcon(ThemeData theme, bool? isWarning) {
     return Icon(
       Icons.diamond_outlined,
-      size: compact ? 14 : 16,
+      size: compact ? 15 : 16,
       color: isWarning == true
           ? theme.colorScheme.error
           : theme.colorScheme.primary,
