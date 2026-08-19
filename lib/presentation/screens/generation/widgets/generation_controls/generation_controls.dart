@@ -137,8 +137,9 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
           ];
 
           if (widget.compact) {
-            // 官网钉底条单行：自动保存放右侧空位，左组只剩点数与骰子，
-            // 两侧内容变均衡后不再需要把字缩小
+            // 官网钉底条单行：自动保存放右侧空位，左组只剩点数与骰子。
+            // 余额/我的点数两个芯片上下叠放（本地魔改）——并排太挤，
+            // 叠放后宽度够用，可以用回非紧凑尺寸（字号 14/图标 16）
             return Row(
               children: [
                 Expanded(
@@ -148,10 +149,17 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                       fit: BoxFit.scaleDown,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const AnlasBalanceChip(compact: true),
-                          const SizedBox(width: 8),
-                          const PersonalAnlasChip(compact: true),
+                          const Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              AnlasBalanceChip(),
+                              SizedBox(height: 4),
+                              PersonalAnlasChip(),
+                            ],
+                          ),
                           if (showRandomTools) ...[
                             const SizedBox(width: 8),
                             RandomModeToggle(enabled: randomMode),
