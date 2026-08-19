@@ -28,7 +28,7 @@ class GroupedEntriesView extends ConsumerWidget {
     final selectionState = ref.watch(tagLibrarySelectionNotifierProvider);
 
     // 按分类分组
-    final grouped = _groupEntriesByCategory(
+    final grouped = groupEntriesByCategory(
       state.filteredEntries,
       state.categories,
       context.l10n.tagLibrary_uncategorized,
@@ -116,55 +116,6 @@ class GroupedEntriesView extends ConsumerWidget {
     );
   }
 
-  /// 按分类分组条目
-  List<CategoryGroup> _groupEntriesByCategory(
-    List<TagLibraryEntry> entries,
-    List<TagLibraryCategory> categories,
-    String uncategorizedLabel,
-  ) {
-    // 获取所有有条目的分类ID
-    final categoryIdsWithEntries = entries.map((e) => e.categoryId).toSet();
-
-    // 构建分类顺序（按 sortOrder）
-    final sortedCategories = categories.sortedByOrder();
-
-    // 创建分组
-    final groups = <CategoryGroup>[];
-
-    for (final category in sortedCategories) {
-      // 只包含有条目的分类
-      if (categoryIdsWithEntries.contains(category.id)) {
-        final categoryEntries =
-            entries.where((e) => e.categoryId == category.id).toList();
-        groups.add(
-          CategoryGroup(
-            category: category,
-            entries: categoryEntries,
-          ),
-        );
-      }
-    }
-
-    // 处理未分类条目（categoryId 为 null）
-    final uncategorizedEntries =
-        entries.where((e) => e.categoryId == null).toList();
-    if (uncategorizedEntries.isNotEmpty) {
-      groups.add(
-        CategoryGroup(
-          category: TagLibraryCategory(
-            id: 'uncategorized',
-            name: uncategorizedLabel,
-            sortOrder: -1,
-            createdAt: DateTime.now(),
-          ),
-          entries: uncategorizedEntries,
-        ),
-      );
-    }
-
-    return groups;
-  }
-
   /// 构建空状态
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
@@ -188,6 +139,55 @@ class GroupedEntriesView extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// 按分类分组条目（公开，供分组视图与瀑布流视图复用）
+List<CategoryGroup> groupEntriesByCategory(
+  List<TagLibraryEntry> entries,
+  List<TagLibraryCategory> categories,
+  String uncategorizedLabel,
+) {
+  // 获取所有有条目的分类ID
+  final categoryIdsWithEntries = entries.map((e) => e.categoryId).toSet();
+
+  // 构建分类顺序（按 sortOrder）
+  final sortedCategories = categories.sortedByOrder();
+
+  // 创建分组
+  final groups = <CategoryGroup>[];
+
+  for (final category in sortedCategories) {
+    // 只包含有条目的分类
+    if (categoryIdsWithEntries.contains(category.id)) {
+      final categoryEntries =
+          entries.where((e) => e.categoryId == category.id).toList();
+      groups.add(
+        CategoryGroup(
+          category: category,
+          entries: categoryEntries,
+        ),
+      );
+    }
+  }
+
+  // 处理未分类条目（categoryId 为 null）
+  final uncategorizedEntries =
+      entries.where((e) => e.categoryId == null).toList();
+  if (uncategorizedEntries.isNotEmpty) {
+    groups.add(
+      CategoryGroup(
+        category: TagLibraryCategory(
+          id: 'uncategorized',
+          name: uncategorizedLabel,
+          sortOrder: -1,
+          createdAt: DateTime.now(),
+        ),
+        entries: uncategorizedEntries,
+      ),
+    );
+  }
+
+  return groups;
 }
 
 /// 分类分组数据类

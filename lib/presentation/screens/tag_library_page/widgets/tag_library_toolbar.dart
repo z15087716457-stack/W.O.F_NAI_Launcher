@@ -358,6 +358,13 @@ class _TagLibraryToolbarState extends ConsumerState<TagLibraryToolbar> {
                 .read(tagLibraryPageNotifierProvider.notifier)
                 .setViewMode(TagLibraryViewMode.grouped),
           ),
+          _ViewModeButton(
+            icon: Icons.view_quilt_outlined,
+            isSelected: state.viewMode == TagLibraryViewMode.waterfall,
+            onTap: () => ref
+                .read(tagLibraryPageNotifierProvider.notifier)
+                .setViewMode(TagLibraryViewMode.waterfall),
+          ),
         ],
       ),
     );

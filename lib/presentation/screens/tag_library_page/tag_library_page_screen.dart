@@ -27,6 +27,7 @@ import 'widgets/bulk_move_category_dialog.dart';
 import 'widgets/export_dialog.dart';
 import 'widgets/import_dialog.dart';
 import 'widgets/grouped_view/grouped_entries_view.dart';
+import 'widgets/waterfall/waterfall_entries_view.dart';
 
 /// 词库页面
 class TagLibraryPageScreen extends ConsumerStatefulWidget {
@@ -326,6 +327,12 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
         return _buildListView(theme, entries);
       case TagLibraryViewMode.grouped:
         return GroupedEntriesView(
+          onEdit: _showEditDialog,
+          onDelete: _showDeleteEntryConfirmationForEntry,
+          onSend: _showEntryDetail,
+        );
+      case TagLibraryViewMode.waterfall:
+        return WaterfallEntriesView(
           onEdit: _showEditDialog,
           onDelete: _showDeleteEntryConfirmationForEntry,
           onSend: _showEntryDetail,

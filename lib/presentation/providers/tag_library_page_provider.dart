@@ -21,6 +21,9 @@ enum TagLibraryViewMode {
 
   /// 分组视图
   grouped,
+
+  /// 瀑布流视图（图片按原始宽高比排列）
+  waterfall,
 }
 
 /// 词库排序方式
@@ -198,6 +201,7 @@ class TagLibraryPageNotifier extends _$TagLibraryPageNotifier {
         0 => TagLibraryViewMode.card,
         1 => TagLibraryViewMode.list,
         2 => TagLibraryViewMode.grouped,
+        3 => TagLibraryViewMode.waterfall,
         _ => TagLibraryViewMode.grouped,
       };
 

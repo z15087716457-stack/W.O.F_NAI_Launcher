@@ -106,7 +106,7 @@ class _EntryCardState extends State<EntryCard>
     final cardPosition = renderBox.localToGlobal(Offset.zero);
 
     _overlayEntry = OverlayEntry(
-      builder: (context) => _EntryPreviewOverlay(
+      builder: (context) => EntryPreviewOverlay(
         entry: widget.entry,
         layerLink: _layerLink,
         cardSize: cardSize,
@@ -393,7 +393,14 @@ class _EntryCardState extends State<EntryCard>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _ActionIcon(
+          if (widget.onSend != null)
+            EntryActionIcon(
+              icon: Icons.send_outlined,
+              tooltip: l10n.sendToHome_dialogTitle,
+              onTap: widget.onSend!,
+            ),
+          if (widget.onSend != null) const SizedBox(width: 8),
+          EntryActionIcon(
             icon: Icons.delete_outline,
             tooltip: l10n.common_delete,
             onTap: widget.onDelete,
@@ -401,13 +408,13 @@ class _EntryCardState extends State<EntryCard>
           ),
           const SizedBox(width: 8),
           if (widget.onEdit != null)
-            _ActionIcon(
+            EntryActionIcon(
               icon: Icons.edit_outlined,
               tooltip: l10n.common_edit,
               onTap: widget.onEdit!,
             ),
           if (widget.onEdit != null) const SizedBox(width: 8),
-          _ActionIcon(
+          EntryActionIcon(
             icon: entry.isFavorite ? Icons.favorite : Icons.favorite_border,
             tooltip: entry.isFavorite
                 ? l10n.common_unfavorite
@@ -416,7 +423,7 @@ class _EntryCardState extends State<EntryCard>
             color: entry.isFavorite ? Colors.redAccent : null,
           ),
           const SizedBox(width: 8),
-          _ActionIcon(
+          EntryActionIcon(
             icon: Icons.content_copy,
             tooltip: l10n.common_copy,
             onTap: () => _copyToClipboard(entry.content),
@@ -546,15 +553,16 @@ class _EntryCardState extends State<EntryCard>
   }
 }
 
-/// 操作图标按钮（带悬浮动效和Tooltip）
-class _ActionIcon extends StatefulWidget {
+/// 操作图标按钮（带悬浮动效和Tooltip，公开供瀑布流卡片复用）
+class EntryActionIcon extends StatefulWidget {
   final IconData icon;
   final VoidCallback onTap;
   final bool isDestructive;
   final Color? color;
   final String tooltip;
 
-  const _ActionIcon({
+  const EntryActionIcon({
+    super.key,
     required this.icon,
     required this.onTap,
     required this.tooltip,
@@ -563,10 +571,10 @@ class _ActionIcon extends StatefulWidget {
   });
 
   @override
-  State<_ActionIcon> createState() => _ActionIconState();
+  State<EntryActionIcon> createState() => EntryActionIconState();
 }
 
-class _ActionIconState extends State<_ActionIcon> {
+class EntryActionIconState extends State<EntryActionIcon> {
   bool _isHovering = false;
 
   @override
@@ -689,15 +697,16 @@ class _SelectionCheckbox extends StatelessWidget {
   }
 }
 
-/// 悬停预览浮层
-class _EntryPreviewOverlay extends StatelessWidget {
+/// 悬停预览浮层（公开，供瀑布流卡片复用）
+class EntryPreviewOverlay extends StatelessWidget {
   final TagLibraryEntry entry;
   final LayerLink layerLink;
   final Size cardSize;
   final Offset cardPosition;
   final VoidCallback onDismiss;
 
-  const _EntryPreviewOverlay({
+  const EntryPreviewOverlay({
+    super.key,
     required this.entry,
     required this.layerLink,
     required this.cardSize,
