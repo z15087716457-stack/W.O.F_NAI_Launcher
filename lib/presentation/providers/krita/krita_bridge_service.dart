@@ -237,6 +237,26 @@ class KritaBridgeService implements KritaBridgeMessageService {
       'use_coords': params.useCoords,
       'seed_lock': ?_readSeedLock?.call(),
       'characters': ?_readCharacters?.call(),
+      // AI 接管扩展：UI 盲区三件套只读回读（桥接不可写，仅消除 get 盲区）
+      'precise_references': [
+        for (final r in params.preciseReferences)
+          {
+            'type': r.type.name,
+            'strength': r.strength,
+            'fidelity': r.fidelity,
+            'enabled': r.enabled,
+          },
+      ],
+      'vibe_references': [
+        for (final v in params.vibeReferencesV4)
+          {
+            'name': v.displayName,
+            'strength': v.strength,
+            'info_extracted': v.infoExtracted,
+            'enabled': v.enabled,
+          },
+      ],
+      'img2img': params.sourceImage != null,
       if (tokens != null) ...tokens,
     });
     AppLogger.d('Sent params snapshot to Krita: ${message.id}', _logTag);
