@@ -781,13 +781,29 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
     }
   }
 
+  /// 回读状态中同 id 且已带 filePath 的最新图像对象；没有则返回原对象。
+  /// 构建期捕获的 image 可能早于自动保存的 filePath 回写，点击时应以状态为准。
+  GeneratedImage _freshImageWithPath(GeneratedImage image) {
+    final s = ref.read(imageGenerationNotifierProvider);
+    for (final list in [s.currentImages, s.history, s.displayImages]) {
+      for (final candidate in list) {
+        if (candidate.id == image.id &&
+            candidate.filePath != null &&
+            candidate.filePath!.isNotEmpty) {
+          return candidate;
+        }
+      }
+    }
+    return image;
+  }
+
   /// 在文件夹中定位图片。已保存的图片直接定位原文件，未保存时先保存再定位。
   Future<void> _openImageInExplorer(
     BuildContext context,
     GeneratedImage image,
   ) async {
     try {
-      final existingPath = image.filePath;
+      final existingPath = _freshImageWithPath(image).filePath;
       if (existingPath != null &&
           existingPath.isNotEmpty &&
           await File(existingPath).exists()) {
@@ -798,15 +814,37 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
       final saveDirPath = await GalleryFolderRepository.instance.getRootPath();
       if (saveDirPath == null) return;
 
+      final seed = await ImageSaveUtils.resolveSeed(
+        metadata: image.metadata,
+        bytes: image.bytes,
+      );
+
+      // 兜底去重：同一 seed 且字节一致的文件今日已存在则直接定位，
+      // 不再另存副本（覆盖 filePath 未回写/跨会话等一切缺路径场景）
+      final identicalPath = await ImageSaveUtils.findIdenticalDatedFile(
+        rootPath: saveDirPath,
+        bytes: image.bytes,
+        seed: seed,
+      );
+      if (identicalPath != null) {
+        ref
+            .read(imageGenerationNotifierProvider.notifier)
+            .updateImageFilePath(image.id, identicalPath);
+        await FileExplorerUtils.revealFile(identicalPath);
+        return;
+      }
+
       // 原子保存：日期分类路径 + 独占防冲突 + 失败清理，全部在工具内完成
       final filePath = await ImageSaveUtils.saveBytesToDatedPath(
         rootPath: saveDirPath,
         bytes: image.bytes,
-        seed: await ImageSaveUtils.resolveSeed(
-          metadata: image.metadata,
-          bytes: image.bytes,
-        ),
+        seed: seed,
       );
+
+      // 回写保存路径，后续「打开文件夹」「保存图像」直接复用原文件
+      ref
+          .read(imageGenerationNotifierProvider.notifier)
+          .updateImageFilePath(image.id, filePath);
 
       ref.read(localGalleryNotifierProvider.notifier).refresh();
       await FileExplorerUtils.revealFile(filePath);

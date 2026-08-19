@@ -339,4 +339,117 @@ void main() {
       },
     );
   });
+
+  group('ImageSaveUtils.findIdenticalDatedFile', () {
+    final day = DateTime(2026, 8, 19);
+    final bytes = Uint8List.fromList(List.generate(1024, (i) => i % 251));
+
+    Future<Directory> createDatedDir(Directory root) async {
+      final dir = Directory('${root.path}/2026-08-19');
+      await dir.create(recursive: true);
+      return dir;
+    }
+
+    test('命中：同日目录存在同 seed 且字节一致的文件', () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'find_identical_test_',
+      );
+      try {
+        final dir = await createDatedDir(tempDir);
+        await File('${dir.path}/22-59-55-12345.png').writeAsBytes(bytes);
+
+        final found = await ImageSaveUtils.findIdenticalDatedFile(
+          rootPath: tempDir.path,
+          bytes: bytes,
+          seed: 12345,
+          now: day,
+        );
+        expect(found, endsWith('22-59-55-12345.png'));
+      } finally {
+        if (await tempDir.exists()) await tempDir.delete(recursive: true);
+      }
+    });
+
+    test('命中：冲突序号变体（-2）也能识别', () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'find_identical_test_',
+      );
+      try {
+        final dir = await createDatedDir(tempDir);
+        await File('${dir.path}/22-59-55-12345-2.png').writeAsBytes(bytes);
+
+        final found = await ImageSaveUtils.findIdenticalDatedFile(
+          rootPath: tempDir.path,
+          bytes: bytes,
+          seed: 12345,
+          now: day,
+        );
+        expect(found, endsWith('22-59-55-12345-2.png'));
+      } finally {
+        if (await tempDir.exists()) await tempDir.delete(recursive: true);
+      }
+    });
+
+    test('未命中：同 seed 但字节不同', () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'find_identical_test_',
+      );
+      try {
+        final dir = await createDatedDir(tempDir);
+        final other = Uint8List.fromList(List.generate(1024, (i) => i % 250));
+        await File('${dir.path}/22-59-55-12345.png').writeAsBytes(other);
+
+        final found = await ImageSaveUtils.findIdenticalDatedFile(
+          rootPath: tempDir.path,
+          bytes: bytes,
+          seed: 12345,
+          now: day,
+        );
+        expect(found, isNull);
+      } finally {
+        if (await tempDir.exists()) await tempDir.delete(recursive: true);
+      }
+    });
+
+    test('未命中：seed 为 null 时不做猜测', () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'find_identical_test_',
+      );
+      try {
+        final dir = await createDatedDir(tempDir);
+        await File('${dir.path}/22-59-55-12345.png').writeAsBytes(bytes);
+
+        final found = await ImageSaveUtils.findIdenticalDatedFile(
+          rootPath: tempDir.path,
+          bytes: bytes,
+          seed: null,
+          now: day,
+        );
+        expect(found, isNull);
+      } finally {
+        if (await tempDir.exists()) await tempDir.delete(recursive: true);
+      }
+    });
+
+    test('未命中：不误匹配前缀部分重叠的 seed', () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'find_identical_test_',
+      );
+      try {
+        final dir = await createDatedDir(tempDir);
+        // seed=12345 不应命中 "...-912345.png"
+        await File('${dir.path}/22-59-55-912345.png').writeAsBytes(bytes);
+
+        final found = await ImageSaveUtils.findIdenticalDatedFile(
+          rootPath: tempDir.path,
+          bytes: bytes,
+          seed: 12345,
+          now: day,
+        );
+        expect(found, isNull);
+      } finally {
+        if (await tempDir.exists()) await tempDir.delete(recursive: true);
+      }
+    });
+  });
 }

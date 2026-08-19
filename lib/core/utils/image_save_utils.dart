@@ -632,6 +632,65 @@ class ImageSaveUtils {
     return candidate;
   }
 
+  /// 在今日日期目录中查找与 [bytes] 完全一致的已保存文件。
+  ///
+  /// 按文件名中的 seed 粗筛（含 `-2`、`-3` 冲突序号变体），再按长度和
+  /// 逐字节比对确认，命中返回文件路径，未命中返回 null。
+  /// [seed] 为 null 或负值时不做猜测（不同图可能同尺寸），直接返回 null。
+  ///
+  /// 用于「打开文件夹」「保存图像」等手动入口的去重：当图像对象缺失
+  /// filePath 回写时，避免把相同字节重复另存为副本。
+  static Future<String?> findIdenticalDatedFile({
+    required String rootPath,
+    required Uint8List bytes,
+    required int? seed,
+    DateTime? now,
+  }) async {
+    if (seed == null || seed < 0) return null;
+    final time = now ?? DateTime.now();
+    String two(int v) => v.toString().padLeft(2, '0');
+    final dateFolder = '${time.year}-${two(time.month)}-${two(time.day)}';
+    final dir = Directory(p.join(rootPath, dateFolder));
+    if (!await dir.exists()) return null;
+
+    final plainSuffix = '-$seed.png';
+    final variantPattern = RegExp('-$seed-\\d+\\.png\$');
+    await for (final entity in dir.list()) {
+      if (entity is! File) continue;
+      final name = p.basename(entity.path);
+      if (!name.endsWith(plainSuffix) && !variantPattern.hasMatch(name)) {
+        continue;
+      }
+      try {
+        if (await entity.length() != bytes.length) continue;
+        if (await _fileBytesEqual(entity, bytes)) return entity.path;
+      } catch (_) {
+        // 单个候选读取失败不影响其余候选
+      }
+    }
+    return null;
+  }
+
+  /// 逐块比对文件内容与内存字节，避免一次性读入大文件
+  static Future<bool> _fileBytesEqual(File file, Uint8List bytes) async {
+    final raf = await file.open();
+    try {
+      final buffer = Uint8List(64 * 1024);
+      var offset = 0;
+      while (offset < bytes.length) {
+        final read = await raf.readInto(buffer);
+        if (read <= 0) return false;
+        for (var i = 0; i < read; i++) {
+          if (buffer[i] != bytes[offset + i]) return false;
+        }
+        offset += read;
+      }
+      return true;
+    } finally {
+      await raf.close();
+    }
+  }
+
   /// 解析图片的真实 seed：优先用已有元数据，否则从 PNG 字节解析。
   ///
   /// 用于保存入口的日期分类文件名，保证非自动保存路径（详情页保存、

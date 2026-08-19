@@ -14,6 +14,7 @@ import '../../../data/models/image/image_stream_chunk.dart';
 import '../../../data/repositories/gallery_folder_repository.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/share_image_settings_provider.dart';
+import '../../providers/image_generation_provider.dart';
 import '../../themes/theme_extension.dart';
 import '../../utils/clipboard_image.dart';
 import 'pro_context_menu.dart';
@@ -1456,16 +1457,46 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
         return;
       }
 
-      // 统一解析 seed 并原子保存：日期分类路径 + 独占防冲突 + 失败清理
-      await ImageSaveUtils.saveBytesToDatedPath(
+      final bytes = widget.imageBytes!;
+      final seed = await ImageSaveUtils.resolveSeed(bytes: bytes);
+
+      // 去重：字节一致的文件今日已存在则视为已保存，不再另存副本
+      final identicalPath = await ImageSaveUtils.findIdenticalDatedFile(
         rootPath: rootPath,
-        bytes: widget.imageBytes!,
-        seed: await ImageSaveUtils.resolveSeed(bytes: widget.imageBytes!),
+        bytes: bytes,
+        seed: seed,
       );
+      if (identicalPath != null) {
+        _reportSavedPath(identicalPath);
+        AppToast.successOnOverlay(overlay, l10n.toast_savedTo(rootPath));
+        return;
+      }
+
+      // 统一解析 seed 并原子保存：日期分类路径 + 独占防冲突 + 失败清理
+      final savedPath = await ImageSaveUtils.saveBytesToDatedPath(
+        rootPath: rootPath,
+        bytes: bytes,
+        seed: seed,
+      );
+      _reportSavedPath(savedPath);
 
       AppToast.successOnOverlay(overlay, l10n.toast_savedTo(rootPath));
     } catch (e) {
       AppToast.errorOnOverlay(overlay, l10n.image_saveFailed(e.toString()));
+    }
+  }
+
+  /// 保存成功后把文件路径回写到生成状态（若卡片关联的是生成图像），
+  /// 让「打开文件夹」等入口能直接定位原文件，避免重复另存。
+  void _reportSavedPath(String path) {
+    final identity = widget.imageIdentity;
+    if (identity is! String || identity.isEmpty) return;
+    try {
+      ref
+          .read(imageGenerationNotifierProvider.notifier)
+          .updateImageFilePath(identity, path);
+    } catch (_) {
+      // 卡片脱离生成页上下文时静默跳过（路径仅影响定位优化，不影响保存结果）
     }
   }
 
