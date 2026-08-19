@@ -1289,7 +1289,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
               _HoverActionButton(
                 icon: Icons.save_alt_rounded,
                 tooltip: context.l10n.image_save,
-                onTap: () => _saveImage(context),
+                onTap: _createSaveImageAction(context),
                 isPrimary: true,
               ),
             if (widget.enableCopyAction)
@@ -1433,14 +1433,26 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
     );
   }
 
-  Future<void> _saveImage(BuildContext context) async {
+  /// 创建保存图像动作。
+  ///
+  /// 与 [_createCopyImageAction] 同理：必须在菜单构建时（context 仍存活）
+  /// 预捕获 l10n 与根 Overlay。右键菜单的 onTap 在路由 `completed` 之后才
+  /// 触发，此时若卡片已随批次状态刷新卸载，再读 `context.l10n` 会空指针
+  /// 静默崩溃（保存与 toast 都不执行）。
+  VoidCallback _createSaveImageAction(BuildContext context) {
     final l10n = context.l10n;
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    return () => unawaited(_saveImage(l10n: l10n, overlay: overlay));
+  }
+
+  Future<void> _saveImage({
+    required AppLocalizations l10n,
+    required OverlayState? overlay,
+  }) async {
     try {
       final rootPath = await GalleryFolderRepository.instance.getRootPath();
       if (rootPath == null || rootPath.isEmpty) {
-        if (context.mounted) {
-          AppToast.error(context, l10n.toast_saveDirNotSet);
-        }
+        AppToast.errorOnOverlay(overlay, l10n.toast_saveDirNotSet);
         return;
       }
 
@@ -1451,13 +1463,9 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
         seed: await ImageSaveUtils.resolveSeed(bytes: widget.imageBytes!),
       );
 
-      if (context.mounted) {
-        AppToast.success(context, l10n.toast_savedTo(rootPath));
-      }
+      AppToast.successOnOverlay(overlay, l10n.toast_savedTo(rootPath));
     } catch (e) {
-      if (context.mounted) {
-        AppToast.error(context, l10n.image_saveFailed(e.toString()));
-      }
+      AppToast.errorOnOverlay(overlay, l10n.image_saveFailed(e.toString()));
     }
   }
 
@@ -1544,6 +1552,9 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
   /// 显示右键菜单
   Future<void> _showContextMenu(BuildContext context, Offset position) async {
     final items = <ProMenuItem>[];
+    final saveImageAction = widget.enableSaveAction
+        ? _createSaveImageAction(context)
+        : null;
     final copyImageAction = widget.enableCopyAction
         ? _createCopyImageAction(context)
         : null;
@@ -1574,7 +1585,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
           id: 'save',
           label: context.l10n.shortcut_action_save_image,
           icon: Icons.save_alt,
-          onTap: () => _saveImage(context),
+          onTap: saveImageAction,
         ),
       );
     }
