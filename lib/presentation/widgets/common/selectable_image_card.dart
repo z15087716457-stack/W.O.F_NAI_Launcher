@@ -29,12 +29,18 @@ final imageClipboardWriterProvider = Provider<ImageClipboardWriter>(
 /// 可选择的图像卡片组件
 ///
 /// 支持：
-/// - 悬浮时显示操作按钮（保存、复制、放大）
+/// - 悬浮时显示操作按钮（保存、复制、放大；由 [SelectableImageCard.showHoverActionBar] 总开关控制，默认关闭）
 /// - 边缘发光效果
 /// - 光泽扫过动画（闪卡效果）
 /// - 悬浮时轻微放大和阴影增强
 /// - 生成中状态（流式预览、进度显示）
 class SelectableImageCard extends ConsumerStatefulWidget {
+  /// 本地魔改：悬浮操作按钮条总开关。
+  ///
+  /// 默认关闭——历史缩略图上一悬浮就糊一脸图标，切图极易误点；
+  /// 全部操作右键菜单里都有。想恢复悬浮按钮条改回 true 即可。
+  static const bool showHoverActionBar = false;
+
   /// 图像数据（生成完成时必须提供，生成中时可为空）
   final Uint8List? imageBytes;
   final int? index;
@@ -1059,8 +1065,10 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                     child: _buildFavoriteButton(context),
                   ),
 
-                // 6. 操作按钮（悬浮时显示）
-                if (_isHovering && _hasHoverActions)
+                // 6. 操作按钮（悬浮时显示；本地魔改默认关闭，见 showHoverActionBar）
+                if (_isHovering &&
+                    _hasHoverActions &&
+                    SelectableImageCard.showHoverActionBar)
                   Positioned(
                     bottom: 12,
                     left: 0,
