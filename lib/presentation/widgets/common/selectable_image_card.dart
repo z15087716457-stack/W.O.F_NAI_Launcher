@@ -249,6 +249,10 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
   );
 
   bool _isHovering = false;
+  // 指针是否位于卡片内（MouseRegion enter/exit 的原始记录）。
+  // 与 _isHovering 分离：hoverEffectsEnabled 为 false 期间 onEnter 会被丢弃，
+  // 但「指针在内」这一事实需要保留，以便恢复启用时补回悬停态。
+  bool _isPointerInside = false;
   late bool _showPreparedIndexBadge;
   late bool _completedImageHasFrame;
   bool _completionPlaceholderSettledNotified = false;
@@ -354,6 +358,17 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
       _isHovering = false;
     }
 
+    // 悬停效果从禁用恢复启用（如历史面板滚动结束、拖拽预热完成）时，
+    // 若指针本就停在卡片上，MouseRegion 不会补发 onEnter——这里直接补回
+    // 悬停态，否则勾选框等悬停 UI 要把鼠标移出再移回才会出现。
+    if (_isPointerInside &&
+        !_isHovering &&
+        widget.hoverEffectsEnabled &&
+        widget.dragPreparationReady &&
+        (!oldWidget.hoverEffectsEnabled || !oldWidget.dragPreparationReady)) {
+      _isHovering = true;
+    }
+
     if (!widget.dragPreparationReady ||
         (!oldWidget.dragPreparationReady && widget.dragPreparationReady)) {
       _showPreparedIndexBadge = false;
@@ -380,6 +395,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
   }
 
   void _onHoverEnter() {
+    _isPointerInside = true;
     if (widget.shareWarmupEnabled) {
       _warmShareTransferCache();
     }
@@ -393,6 +409,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
   }
 
   void _onHoverExit() {
+    _isPointerInside = false;
     if (!widget.hoverEffectsEnabled && !_isHovering) {
       return;
     }
