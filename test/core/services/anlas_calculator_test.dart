@@ -207,6 +207,34 @@ void main() {
       expect(cost, 0);
     });
 
+    // 移植自上游 374bff6b：isOpusFreeGeneration 对 infill 的免费资格判定，
+    // 在我们的 SDK 实证公式下同样成立（832×1216 ≤ 1MP 且 ≤28 步免费，29 步不免）。
+    test('uses the request calculator for Opus redraw eligibility', () {
+      const eligible = ImageParams(
+        model: model,
+        action: ImageGenerationAction.infill,
+        width: 832,
+        height: 1216,
+        steps: 28,
+      );
+      const overStepLimit = ImageParams(
+        model: model,
+        action: ImageGenerationAction.infill,
+        width: 832,
+        height: 1216,
+        steps: 29,
+      );
+
+      expect(
+        AnlasCalculator.isOpusFreeGeneration(eligible, isOpus: true),
+        isTrue,
+      );
+      expect(
+        AnlasCalculator.isOpusFreeGeneration(overStepLimit, isOpus: true),
+        isFalse,
+      );
+    });
+
     test('applies the Opus free image even with character references', () {
       // 修正后的官方规则：PR 是独立附加费（+5/参考），不取消 Opus 免费资格。
       // 免费条件下基础为 0，只收 PR 附加费 5。

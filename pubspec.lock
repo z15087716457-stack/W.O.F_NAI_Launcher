@@ -549,7 +549,7 @@ packages:
     description:
       name: flutter_markdown_plus
       sha256: fce641d6c2106cc495de1cd603f97a4f9d615a97a64011928ded380dbdade935
-      url: "https://pub.flutter-io.cn"
+      url: "https://pub.dev"
     source: hosted
     version: "1.0.12"
   flutter_plugin_android_lifecycle:
@@ -913,7 +913,7 @@ packages:
     description:
       name: markdown
       sha256: ee85086ad7698b42522c6ad42fe195f1b9898e4d974a1af4576c1a3a176cada9
-      url: "https://pub.flutter-io.cn"
+      url: "https://pub.dev"
     source: hosted
     version: "7.3.1"
   matcher:
