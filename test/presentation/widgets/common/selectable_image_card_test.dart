@@ -55,7 +55,9 @@ void main() {
 
     expect(find.byTooltip('局部重绘'), findsOneWidget);
     expect(find.byTooltip('放大'), findsOneWidget);
-  });
+    // 悬浮操作条被魔改总开关 showHoverActionBar 默认关闭（0ff49fc7），
+    // 开关恢复 true 时这些悬浮用例才有意义；右键菜单用例不受影响
+  }, skip: !SelectableImageCard.showHoverActionBar);
 
   testWidgets('context menu should expose inpaint and upscale shortcuts', (
     tester,
@@ -136,7 +138,7 @@ void main() {
     expect(find.byTooltip('图生图'), findsOneWidget);
     expect(find.byTooltip('风格迁移'), findsOneWidget);
     expect(find.byTooltip('精准参考'), findsOneWidget);
-  });
+  }, skip: !SelectableImageCard.showHoverActionBar);
 
   testWidgets('context menu should expose generation destination shortcuts', (
     tester,
@@ -187,6 +189,7 @@ void main() {
       expect(find.byTooltip('风格迁移'), findsOneWidget);
       expect(find.byTooltip('精准参考'), findsOneWidget);
     },
+    skip: !SelectableImageCard.showHoverActionBar,
   );
 
   testWidgets(
