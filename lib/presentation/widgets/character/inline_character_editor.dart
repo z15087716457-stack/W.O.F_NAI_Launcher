@@ -11,15 +11,21 @@ import '../prompt/unified/unified.dart';
 /// 角色提示词编辑器（正/负切换 + 统一提示词编辑器）
 ///
 /// 官网布局的卡内编辑与经典布局的全宽编辑面板共用。
-/// 挂载时自动把光标送进当前输入框；输入实时写回 provider。
+/// 输入实时写回 provider。
+///
+/// [autoFocus] 控制挂载/切换角色时是否自动把光标送进输入框：
+/// 经典布局面板（true）打开即聚焦省一次点击；官网布局常驻卡
+/// （false）多卡同时在场，自动聚焦会互相抢焦点，改为点击聚焦。
 class CharacterPromptEditor extends ConsumerStatefulWidget {
   final CharacterPrompt character;
   final bool compact;
+  final bool autoFocus;
 
   const CharacterPromptEditor({
     super.key,
     required this.character,
     this.compact = false,
+    this.autoFocus = true,
   });
 
   @override
@@ -43,8 +49,9 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
   @override
   void initState() {
     super.initState();
-    // 编辑器只在进入编辑态时挂载，挂载即聚焦
-    _focusCurrentTab();
+    if (widget.autoFocus) {
+      _focusCurrentTab();
+    }
   }
 
   @override
@@ -54,7 +61,9 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
     if (oldWidget.character.id != widget.character.id) {
       _promptController.text = widget.character.prompt;
       _negativeController.text = widget.character.negativePrompt;
-      _focusCurrentTab();
+      if (widget.autoFocus) {
+        _focusCurrentTab();
+      }
       return;
     }
     // 外部状态变化（随机生成、词库导入等）时同步到输入框。
@@ -178,8 +187,10 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
       focusNode: focusNode,
       onChanged: onChanged,
       onCleared: () => onChanged(''),
-      minLines: widget.compact ? 1 : 2,
-      maxLines: widget.compact ? 4 : 6,
+      // 常驻卡（非 compact，官网布局）跟随内容自增高：3 行起步、12 行封顶，
+      // 封顶后框内滚动；经典布局面板（compact）维持 1/4 紧凑规格
+      minLines: widget.compact ? 1 : 3,
+      maxLines: widget.compact ? 4 : 12,
     );
   }
 }

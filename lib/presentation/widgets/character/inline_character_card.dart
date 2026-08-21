@@ -12,18 +12,17 @@ import '../common/decoded_memory_image.dart';
 import 'add_to_library_dialog.dart';
 import 'inline_character_editor.dart';
 
-/// 内联角色卡（内容常显，点击即编辑）
+/// 内联角色卡
 ///
-/// 官网式设计：没有折叠态，只有「只读预览」和「正在编辑」两种状态。
-/// - 未选中：头部条 + 提示词只读预览，点击任意处进入编辑
-/// - 编辑中（[inlineEditor] 为 true）：头部条 + 原位编辑器
-/// - 编辑中（[inlineEditor] 为 false，经典布局横排）：仅高亮边框，
-///   编辑器由外部的全宽面板承载，保持网格排版整齐
+/// [inlineEditor] 为 true（官网布局竖排）：编辑器常驻，没有折叠态，
+/// 点击卡片任意处即可输入（选中只剩高亮边框语义，光标聚焦哪张卡
+/// 哪张卡高亮）——对齐官网「每个角色一个常驻可编辑文本框」的形态。
+///
+/// [inlineEditor] 为 false（经典布局横排）：只读预览卡，选中仅高亮
+/// 边框，编辑器由外部的全宽面板承载，保持网格排版整齐。
+///
 /// - 词库角色的缩略图作为头部条背景横向铺满
-/// - 编辑态点击卡片外部自动退回未选中状态
-///
-/// [compact] 用于经典布局的横排行：更矮的头部、更少的预览行数、
-/// 头部只保留启用与删除按钮。
+/// - [compact] 用于经典布局的横排行：更矮的头部、更少的预览行数
 class InlineCharacterCard extends ConsumerStatefulWidget {
   final CharacterPrompt character;
   final int index;
@@ -61,9 +60,26 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
   bool _modalOpen = false;
 
   @override
+  void initState() {
+    super.initState();
+    // 常驻模式：焦点（含编辑器输入框的后代焦点）落到哪张卡，
+    // 哪张卡选中高亮——高亮跟随光标，无需用户先点头部条
+    _cardFocusNode.addListener(_handleFocusChanged);
+  }
+
+  @override
   void dispose() {
+    _cardFocusNode.removeListener(_handleFocusChanged);
     _cardFocusNode.dispose();
     super.dispose();
+  }
+
+  void _handleFocusChanged() {
+    if (!mounted || !widget.inlineEditor) return;
+    if (_cardFocusNode.hasFocus &&
+        ref.read(selectedCharacterIdProvider) != widget.character.id) {
+      _enterEditing();
+    }
   }
 
   bool get _isEditing =>
@@ -77,6 +93,11 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
   }
 
   void _toggleEditing() {
+    // 常驻模式没有展开/收起语义，点击只是选中高亮
+    if (widget.inlineEditor) {
+      _enterEditing();
+      return;
+    }
     final selector = ref.read(selectedCharacterIdProvider.notifier);
     if (ref.read(selectedCharacterIdProvider) == widget.character.id) {
       selector.clear();
@@ -110,6 +131,7 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
     if (_modalOpen) return;
     // 位置画布打开时，点画布拖锚点是位置编辑的一部分，不退出编辑态
     if (ref.read(characterPositionCanvasProvider)) return;
+    // 常驻模式点外部只取消高亮（编辑器恒在，无折叠可退）；
     // TapRegion 恒挂（结构稳定），非选中卡的外部点击直接忽略
     if (ref.read(selectedCharacterIdProvider) != widget.character.id) return;
     // TapRegion 回调发生在指针按下时，等本帧手势与焦点变化尘埃落定再判断
@@ -132,7 +154,9 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
     final colorScheme = theme.colorScheme;
     final isEditing = _isEditing;
     final enabled = widget.character.enabled;
-    final showInlineEditor = isEditing && widget.inlineEditor;
+    // 常驻模式（官网布局）编辑器恒在；经典布局始终走只读预览，
+    // 选中只负责边框高亮
+    final showInlineEditor = widget.inlineEditor;
 
     // 边框恒宽只变色：宽度变化会挤动内容造成微抖，颜色用动画过渡
     final card = AnimatedContainer(
@@ -154,7 +178,9 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildHeader(context, theme, showInlineEditor),
-          // 预览 ↔ 编辑器：高度平滑生长 + 内容交叉淡化，替代瞬时替换
+          // 常驻模式子树恒为编辑器（无切换动画）；经典布局恒为预览。
+          // AnimatedSize/AnimatedSwitcher 保留：初挂即全高无动画，
+          // 且结构稳定避免 Element 重建闪帧
           AnimatedSize(
             duration: _animDuration,
             curve: _animCurve,
@@ -174,6 +200,8 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
                         child: CharacterPromptEditor(
                           character: widget.character,
                           compact: widget.compact,
+                          // 多卡常驻不抢焦点，点击聚焦（见编辑器 doc）
+                          autoFocus: false,
                         ),
                       ),
                     )
