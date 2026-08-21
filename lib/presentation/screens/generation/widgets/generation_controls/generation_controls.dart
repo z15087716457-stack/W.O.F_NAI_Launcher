@@ -15,6 +15,7 @@ import 'package:nai_launcher/presentation/widgets/common/app_toast.dart';
 import 'package:nai_launcher/presentation/widgets/common/draggable_number_input.dart';
 import 'package:nai_launcher/presentation/widgets/generation/auto_save_toggle_chip.dart';
 import 'package:nai_launcher/presentation/widgets/anlas/anlas_balance_chip.dart';
+import 'package:nai_launcher/presentation/widgets/anlas/opus_usage_chip.dart';
 import 'package:nai_launcher/presentation/widgets/anlas/personal_anlas_chip.dart';
 import 'add_to_queue_button.dart';
 import 'batch_settings_button.dart';
@@ -137,9 +138,11 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
           ];
 
           if (widget.compact) {
-            // 官网钉底条单行：自动保存放右侧空位，左组只剩点数与骰子。
-            // 余额/我的点数两个芯片上下叠放（本地魔改）——并排太挤，
-            // 叠放后宽度够用，可以用回非紧凑尺寸（字号 14/图标 16）
+            // 官网钉底条单行：自动保存放右侧空位，左组是 2×2 点数块与骰子。
+            // 额度两格（仅 V5 显示）+ 余额/我的点数两格合成一个整体，
+            // 四格同规格（图标 16/字号 14/行距 4）逐行严格对齐；
+            // 整体套 FittedBox 右对齐贴生成按钮：窄窗口整组等比缩小，
+            // 缩放同步所以对齐不破坏，骰子也不会被生成按钮挡住
             return Row(
               children: [
                 Expanded(
@@ -151,9 +154,15 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          // 隐藏（V4）时 shrink 不占位，
+                          // 与余额列的 8 间距随自己的 margin 一起消失
+                          const OpusUsageChip(
+                            compact: true,
+                            margin: EdgeInsets.only(right: 8),
+                          ),
                           const Column(
                             mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               AnlasBalanceChip(),
                               SizedBox(height: 4),
@@ -241,6 +250,9 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                             const AnlasBalanceChip(),
                             const SizedBox(width: 8),
                             const PersonalAnlasChip(),
+                            const OpusUsageChip(
+                              margin: EdgeInsets.only(left: 8),
+                            ),
                             const SizedBox(width: 16),
                             if (showRandomTools) ...[
                               RandomModeToggle(enabled: randomMode),

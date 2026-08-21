@@ -92,6 +92,9 @@ class _PersonalAnlasDialogState extends ConsumerState<PersonalAnlasDialog> {
   late final TextEditingController _resetDayCtrl;
   late final TextEditingController _purCtrl;
   late final TextEditingController _topUpCtrl;
+  late final TextEditingController _shareCtrl;
+  late final TextEditingController _refillShareCtrl;
+  late final TextEditingController _allowanceCtrl;
 
   @override
   void initState() {
@@ -104,6 +107,11 @@ class _PersonalAnlasDialogState extends ConsumerState<PersonalAnlasDialog> {
     );
     _purCtrl = TextEditingController(text: '${s.purchasedRemaining}');
     _topUpCtrl = TextEditingController();
+    _shareCtrl = TextEditingController(text: _fmt(s.opusShareRatio * 100));
+    _refillShareCtrl = TextEditingController(
+      text: _fmt(s.opusRefillShare * 100),
+    );
+    _allowanceCtrl = TextEditingController(text: _fmt(s.opusAllowance));
   }
 
   @override
@@ -113,12 +121,32 @@ class _PersonalAnlasDialogState extends ConsumerState<PersonalAnlasDialog> {
     _resetDayCtrl.dispose();
     _purCtrl.dispose();
     _topUpCtrl.dispose();
+    _shareCtrl.dispose();
+    _refillShareCtrl.dispose();
+    _allowanceCtrl.dispose();
     super.dispose();
+  }
+
+  static String _fmt(double v) {
+    if (v == v.roundToDouble()) return '${v.round()}';
+    return v.toStringAsFixed(2);
   }
 
   int? _readInt(TextEditingController ctrl) {
     final v = int.tryParse(ctrl.text.trim());
     return v;
+  }
+
+  double? _readDouble(TextEditingController ctrl) {
+    return double.tryParse(ctrl.text.trim());
+  }
+
+  /// 把额度相关输入框刷成 state 的当前值（份额/平分/补满之后调用）
+  void _syncOpusFields() {
+    final s = ref.read(personalAnlasCounterProvider);
+    _shareCtrl.text = _fmt(s.opusShareRatio * 100);
+    _refillShareCtrl.text = _fmt(s.opusRefillShare * 100);
+    _allowanceCtrl.text = _fmt(s.opusAllowance);
   }
 
   Future<void> _save() async {
@@ -131,6 +159,15 @@ class _PersonalAnlasDialogState extends ConsumerState<PersonalAnlasDialog> {
       subscriptionQuota: _readInt(_quotaCtrl),
       resetDay: resetDay,
     );
+
+    final sharePercent = _readDouble(_shareCtrl);
+    final refillPercent = _readDouble(_refillShareCtrl);
+    await notifier.updateOpusSettings(
+      shareRatio: sharePercent == null ? null : sharePercent / 100,
+      refillShare: refillPercent == null ? null : refillPercent / 100,
+      allowance: _readDouble(_allowanceCtrl),
+    );
+
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -210,9 +247,64 @@ class _PersonalAnlasDialogState extends ConsumerState<PersonalAnlasDialog> {
             ),
             const Divider(height: 24),
             Text(
+              'V5 免费额度份额（Opus，百分比池）',
+              style: theme.textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(child: _buildField(_allowanceCtrl, '我的剩余 %')),
+                const SizedBox(width: 8),
+                Expanded(child: _buildField(_shareCtrl, '份额上限 %')),
+                const SizedBox(width: 8),
+                Expanded(child: _buildField(_refillShareCtrl, '新增分成 %')),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '我的份额剩 ${counter.opusAllowance.toStringAsFixed(1)}%'
+                    '／上限 ${counter.opusAllowanceCap.toStringAsFixed(0)}%'
+                    '${counter.isOpusAllowanceExhausted ? '（已用尽，转 Anlas 计价）' : ''}\n'
+                    '账号当前额度 '
+                    '${counter.lastObservedPoolPercent == null ? '未观测' : '${counter.lastObservedPoolPercent!.toStringAsFixed(1)}%'}'
+                    '：涨多少按新增分成拿一部分，跌多少按实测扣',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton(
+                      onPressed: () async {
+                        final people = await _askPeopleCount(context);
+                        if (people == null) return;
+                        await notifier.splitOpusAllowance(people);
+                        if (!mounted) return;
+                        setState(_syncOpusFields);
+                      },
+                      child: const Text('平分'),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        await notifier.refillOpusAllowanceNow();
+                        if (!mounted) return;
+                        setState(_syncOpusFields);
+                      },
+                      child: const Text('补满份额'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+            Text(
               '当前合计：${counter.totalRemaining}'
               '${counter.isOverdrawn ? '（已超支）' : ''}\n'
-              '只统计本机生图消耗（含桥接），按界面显示单价扣减：\n先扣订阅、再扣购买。朋友的消耗不影响此账本。\n重置日留空=按订阅到期时间自动推断。',
+              '只统计本机生图消耗（含桥接），按界面显示单价扣减：\n先扣订阅、再扣购买。朋友的消耗不影响此账本。\n重置日留空=按订阅到期时间自动推断。\n'
+              'V5 免费额度是账号级共享池，这里记的是「我的份额」：\n单张耗多少、每小时回多少都是黑盒，一概不估算——\n只跟账号额度的实际变化走，跌了扣本机在途的那部分，涨了按新增分成入账。',
               style: theme.textTheme.bodySmall,
             ),
           ],
@@ -228,12 +320,66 @@ class _PersonalAnlasDialogState extends ConsumerState<PersonalAnlasDialog> {
     );
   }
 
+  /// 问「几个人平分」，返回 null＝取消
+  Future<int?> _askPeopleCount(BuildContext context) async {
+    var people = 2;
+    return showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('平分免费额度'),
+        content: StatefulBuilder(
+          builder: (ctx, setLocal) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('合租人数（含我自己）：'),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: people > 1
+                        ? () => setLocal(() => people--)
+                        : null,
+                    icon: const Icon(Icons.remove),
+                  ),
+                  Text('$people 人', style: const TextStyle(fontSize: 16)),
+                  IconButton(
+                    onPressed: people < 20
+                        ? () => setLocal(() => people++)
+                        : null,
+                    icon: const Icon(Icons.add),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '份额上限与回充分成都设为 ${(100 / people).toStringAsFixed(1)}%',
+                style: Theme.of(ctx).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(people),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildField(TextEditingController ctrl, String label) {
     return TextField(
       controller: ctrl,
       keyboardType: TextInputType.number,
       inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'^-?\d*')),
+        FilteringTextInputFormatter.allow(RegExp(r'^-?\d*\.?\d*')),
       ],
       decoration: InputDecoration(
         labelText: label,
