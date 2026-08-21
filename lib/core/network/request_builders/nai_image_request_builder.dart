@@ -97,7 +97,9 @@ class NAIImageRequestBuilder {
       if (isStream) 'stream': 'msgpack',
     };
 
-    requestParameters['skip_cfg_above_sigma'] = params.varietyPlus
+    // V5 不支持 Variety+：UI 隐藏后存储值可能是残留的 true，这里按能力表拦截
+    final varietyPlus = params.varietyPlus && params.modelSpec.varietyPlus;
+    requestParameters['skip_cfg_above_sigma'] = varietyPlus
         ? 58.0 * sqrt(4.0 * (params.width / 8) * (params.height / 8) / 63232)
         : null;
 
