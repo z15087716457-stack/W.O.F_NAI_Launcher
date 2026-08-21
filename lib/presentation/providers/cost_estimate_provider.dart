@@ -163,6 +163,7 @@ int estimatedCost(Ref ref) {
     ),
     extraPerRequestCost: AnlasCalculator.resolveVibeReferenceExtraCost(params),
     oneTimeCost: AnlasCalculator.resolveVibeEncodingCost(params),
+    opusUsageExhausted: subscription?.isOpusUsageExhausted ?? false,
   );
 }
 

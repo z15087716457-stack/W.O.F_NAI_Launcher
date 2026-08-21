@@ -298,12 +298,7 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
       _hasInitiallyLoaded = true;
       _startAutoRefresh();
 
-      // 个人点数记账：观测订阅到期时间，推断每月重置日
-      unawaited(
-        ref
-            .read(personalAnlasCounterProvider.notifier)
-            .observeSubscription(subscription.expiresAt),
-      );
+      _observeForPersonalCounter(subscription);
 
       AppLogger.i(
         'Subscription loaded: ${subscription.tierName}, '
@@ -418,12 +413,7 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
       final subscription = UserSubscription.fromJson(data);
       _updateState(SubscriptionState.loaded(subscription));
 
-      // 个人点数记账：观测订阅到期时间，推断每月重置日
-      unawaited(
-        ref
-            .read(personalAnlasCounterProvider.notifier)
-            .observeSubscription(subscription.expiresAt),
-      );
+      _observeForPersonalCounter(subscription);
       return true;
     } catch (e) {
       AppLogger.w('Failed to refresh balance: $e', 'Subscription');
@@ -439,6 +429,22 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
 
     final expectedAccountId = expected.accountId;
     return expectedAccountId != null && current.accountId == expectedAccountId;
+  }
+
+  /// 把订阅信息喂给个人账本（合租）：
+  /// 到期时间用于推断每月点数重置日；额度用量用于结算免费额度。
+  ///
+  /// 服务端 `percent` 是全账号共享池（含合租朋友的消耗），所以不直接覆盖本地
+  /// 份额，只作为观测基线：跌幅只在「本机有生成在途时」记到我头上，涨幅按分成
+  /// 入账。单张耗多少、每小时回多少都无需估算，跟着池子的实际数字走。
+  void _observeForPersonalCounter(UserSubscription subscription) {
+    final counter = ref.read(personalAnlasCounterProvider.notifier);
+    unawaited(counter.observeSubscription(subscription.expiresAt));
+
+    final usage = subscription.usage;
+    if (usage != null) {
+      unawaited(counter.observeOpusUsage(poolPercent: usage.percent));
+    }
   }
 }
 

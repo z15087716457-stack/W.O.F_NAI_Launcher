@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../../data/models/image/image_params.dart';
+import '../constants/model_spec.dart';
 
 /// Anlas 消耗计算器
 ///
@@ -66,8 +67,16 @@ class AnlasCalculator {
   ///
   /// [params] 图像生成参数
   /// [isOpus] 是否 Opus 订阅
-  static int calculate(ImageParams params, {bool isOpus = false}) {
+  /// [opusUsageExhausted] Opus 免费额度是否已耗尽（V5 起服务端下发，
+  /// 见 `UserSubscription.isOpusUsageExhausted`）。仅对 `opusUsageLimit`
+  /// 模型生效，耗尽后不再免除首张费用。
+  static int calculate(
+    ImageParams params, {
+    bool isOpus = false,
+    bool opusUsageExhausted = false,
+  }) {
     return calculateRequestCost(
+      opusUsageExhausted: opusUsageExhausted,
       width: params.width,
       height: params.height,
       steps: params.steps,
@@ -102,6 +111,7 @@ class AnlasCalculator {
     int extraPerSampleCost = 0,
     int extraPerRequestCost = 0,
     int oneTimeCost = 0,
+    bool opusUsageExhausted = false,
   }) {
     if (batchCount <= 0 || batchSize <= 0) {
       return 0;
@@ -120,6 +130,7 @@ class AnlasCalculator {
         model: model,
         subscriptionTier: isFirstImageInRequest ? subscriptionTier : 0,
         strength: strength,
+        opusUsageExhausted: opusUsageExhausted,
       );
       if (sampleCost == invalidCost) return invalidCost;
       singleRequestCost += sampleCost;
@@ -170,6 +181,7 @@ class AnlasCalculator {
     bool isOpus = false,
     int subscriptionTier = 0,
     double strength = 1.0,
+    bool opusUsageExhausted = false,
   }) {
     // 计算分辨率（像素数）
     int r = width * height;
@@ -207,6 +219,8 @@ class AnlasCalculator {
           isOpus: isOpus || subscriptionTier >= opusTier,
           steps: steps,
           resolution: r,
+          model: model,
+          opusUsageExhausted: opusUsageExhausted,
         )
         ? 1
         : 0;
@@ -225,17 +239,28 @@ class AnlasCalculator {
   /// 作用于单价再免费）、**无参考图排除**（PR/Vibe 为独立附加费，叠加在
   /// 基础费上，免费时基础为 0 只收附加费）。
   /// 实证：默认尺寸+1PR 实扣 5；小图图生图实扣 0（用户群 goulong 报告）。
+  ///
+  /// V5 起模型带 `opusUsageLimit`：免费额度按次数计，用完即失去免费资格，
+  /// 与步数、分辨率无关。[opusUsageExhausted] 由订阅数据推导。
   static bool _isOpusFree({
     required bool isOpus,
     required int steps,
     required int resolution,
+    String model = '',
+    bool opusUsageExhausted = false,
   }) {
-    return isOpus && steps <= 28 && resolution <= 1024 * 1024;
+    if (!isOpus) return false;
+    if (opusUsageExhausted && ModelSpecs.of(model).opusUsageLimit) return false;
+    return steps <= 28 && resolution <= 1024 * 1024;
   }
 
-  /// 获取模型版本号
+  /// 获取模型计费版本号
+  ///
+  /// V4 与 V5 共用 4 号计费系数（`ModelSpec.billingVersion`）；旧模型仍按
+  /// id 前缀判定，它们不在 [ModelSpecs] 注册表内。
   static int _getModelVersion(String model) {
-    if (model.contains('diffusion-4')) return 4;
+    final spec = ModelSpecs.of(model);
+    if (spec.isV4OrLater) return spec.billingVersion;
     if (model.contains('diffusion-3') || model.contains('diffusion-furry-3')) {
       return 3;
     }
@@ -244,8 +269,15 @@ class AnlasCalculator {
   }
 
   /// 检查当前参数是否满足 Opus 免费条件（基础费部分；PR/Vibe 附加费另计）
-  static bool isOpusFreeGeneration(ImageParams params, {required bool isOpus}) {
+  ///
+  /// [opusUsageExhausted] 见 [calculate]：V5 类模型额度用尽后一律不免费。
+  static bool isOpusFreeGeneration(
+    ImageParams params, {
+    required bool isOpus,
+    bool opusUsageExhausted = false,
+  }) {
     if (!isOpus) return false;
+    if (opusUsageExhausted && params.modelSpec.opusUsageLimit) return false;
     if (params.steps > 28) return false;
     if (params.nSamples > 1) return false;
 

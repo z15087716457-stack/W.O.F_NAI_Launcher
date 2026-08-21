@@ -177,4 +177,225 @@ void main() {
       expect(s.purchasedRemaining, 0);
     });
   });
+
+  group('PersonalAnlasCounter · V5 Opus 免费额度份额', () {
+    test('默认两人平分：份额 50%，上限 50%', () async {
+      SharedPreferences.setMockInitialValues({});
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      await bootCounter(c);
+      final s = c.read(personalAnlasCounterProvider);
+      expect(s.opusShareRatio, 0.5);
+      expect(s.opusRefillShare, 0.5);
+      expect(s.opusAllowance, 50);
+      expect(s.opusAllowanceCap, 50);
+      expect(s.isOpusAllowanceExhausted, isFalse);
+    });
+
+    test('免费生成先挂在途，按服务端池子的真实跌幅落账', () async {
+      SharedPreferences.setMockInitialValues({});
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+
+      // 首次观测只记基线，不产生扣减
+      await n.observeOpusUsage(poolPercent: 80);
+      expect(c.read(personalAnlasCounterProvider).opusAllowance, 50);
+
+      // 本机发起 2 笔免费生成：单价未知，只登记在途，不猜
+      await n.recordOpusUsage(count: 2);
+      final pendingState = c.read(personalAnlasCounterProvider);
+      expect(pendingState.opusAllowance, 50);
+      expect(pendingState.pendingOpusGenerations, 2);
+
+      // 池子 80 → 76.5，这 3.5% 是我花的，按实测数值扣
+      await n.observeOpusUsage(poolPercent: 76.5);
+      final s = c.read(personalAnlasCounterProvider);
+      expect(s.opusAllowance, closeTo(46.5, 1e-9));
+      expect(s.pendingOpusGenerations, 0);
+      // 额度账本与点数账本互不干扰
+      expect(s.subscriptionRemaining, 5000);
+    });
+
+    test('没有在途生成时的跌幅算朋友消耗，不记我的账', () async {
+      SharedPreferences.setMockInitialValues({});
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+
+      await n.observeOpusUsage(poolPercent: 80);
+      await n.observeOpusUsage(poolPercent: 60);
+      expect(c.read(personalAnlasCounterProvider).opusAllowance, 50);
+    });
+
+    test('份额耗尽后 isOpusAllowanceExhausted 为真', () async {
+      SharedPreferences.setMockInitialValues({});
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+      await n.updateOpusSettings(allowance: 0);
+      expect(
+        c.read(personalAnlasCounterProvider).isOpusAllowanceExhausted,
+        isTrue,
+      );
+    });
+
+    test('splitOpusAllowance(4)：份额与回充分成都变 25%，超额剩余被压到上限', () async {
+      SharedPreferences.setMockInitialValues({});
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+
+      await n.splitOpusAllowance(4);
+      final s = c.read(personalAnlasCounterProvider);
+      expect(s.opusShareRatio, 0.25);
+      expect(s.opusRefillShare, 0.25);
+      expect(s.opusAllowanceCap, 25);
+      // 原剩余 50 > 新上限 25，必须压到 25
+      expect(s.opusAllowance, 25);
+    });
+
+    test('独占（1 人）＝整池归我，上限 100%', () async {
+      SharedPreferences.setMockInitialValues({});
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+      await n.splitOpusAllowance(1);
+      final s = c.read(personalAnlasCounterProvider);
+      expect(s.opusShareRatio, 1.0);
+      expect(s.opusAllowanceCap, 100);
+    });
+
+    /// 造一份带既有基线的存档，用于验证「池子涨了按分成入账」。
+    /// 走真实存档路径，不给生产代码开测试专用后门。
+    void seedWithPoolBaseline({
+      required double allowance,
+      required double poolPercent,
+      double shareRatio = 0.5,
+    }) {
+      SharedPreferences.setMockInitialValues({
+        'personal_anlas_counter_v1': jsonEncode({
+          'subscriptionRemaining': 5000,
+          'purchasedRemaining': 0,
+          'subscriptionQuota': 5000,
+          'resetDay': 0,
+          'opusShareRatio': shareRatio,
+          'opusAllowance': allowance,
+          'opusRefillShare': shareRatio,
+          'lastObservedPoolPercent': poolPercent,
+        }),
+      });
+    }
+
+    test('池子涨额度按新增分成入账：+20% × 50% = +10%', () async {
+      seedWithPoolBaseline(allowance: 10, poolPercent: 60);
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+
+      await n.observeOpusUsage(poolPercent: 80);
+      final s = c.read(personalAnlasCounterProvider);
+      expect(s.opusAllowance, closeTo(20, 1e-9));
+      expect(s.lastObservedPoolPercent, 80);
+    });
+
+    test('新增分成不越过份额上限（不吃朋友的份）', () async {
+      seedWithPoolBaseline(allowance: 48, poolPercent: 10);
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+
+      // 48 + (100-10) × 0.5 = 93，必须封在上限 50
+      await n.observeOpusUsage(poolPercent: 100);
+      expect(c.read(personalAnlasCounterProvider).opusAllowance, 50);
+    });
+
+    test('池子没变化时额度不动', () async {
+      seedWithPoolBaseline(allowance: 12, poolPercent: 55);
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+
+      await n.observeOpusUsage(poolPercent: 55);
+      expect(c.read(personalAnlasCounterProvider).opusAllowance, 12);
+    });
+
+    test('不带 poolPercent 的观测结不了账，在途继续挂着', () async {
+      SharedPreferences.setMockInitialValues({});
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+
+      await n.recordOpusUsage(count: 10);
+
+      await n.observeOpusUsage();
+      final s = c.read(personalAnlasCounterProvider);
+      expect(s.opusAllowance, closeTo(50, 1e-9));
+      // 没有观测值就结不了账，在途笔数继续挂着
+      expect(s.pendingOpusGenerations, 10);
+    });
+
+    test('小数额度按原样结算，不取整', () async {
+      seedWithPoolBaseline(allowance: 50, poolPercent: 82.4);
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+
+      await n.recordOpusUsage(count: 1);
+      await n.observeOpusUsage(poolPercent: 81.7);
+      expect(
+        c.read(personalAnlasCounterProvider).opusAllowance,
+        closeTo(49.3, 1e-9),
+      );
+    });
+
+    test('refillOpusAllowanceNow 直接补满到上限', () async {
+      SharedPreferences.setMockInitialValues({});
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+      await n.updateOpusSettings(allowance: 3);
+      await n.refillOpusAllowanceNow();
+      expect(c.read(personalAnlasCounterProvider).opusAllowance, 50);
+    });
+
+    test('额度字段持久化并能回读', () async {
+      SharedPreferences.setMockInitialValues({});
+      final c1 = ProviderContainer();
+      final n1 = await bootCounter(c1);
+      await n1.splitOpusAllowance(3);
+      await n1.recordOpusUsage(count: 2);
+      final saved = c1.read(personalAnlasCounterProvider).opusAllowance;
+      c1.dispose();
+
+      // 复用同一份 mock 存储重建容器
+      final c2 = ProviderContainer();
+      addTearDown(c2.dispose);
+      await bootCounter(c2);
+      final s = c2.read(personalAnlasCounterProvider);
+      expect(s.opusShareRatio, closeTo(1 / 3, 0.001));
+      expect(s.opusAllowance, closeTo(saved, 0.001));
+    });
+
+    test('旧存档（无额度字段）按份额默认值补齐，不炸', () async {
+      SharedPreferences.setMockInitialValues({
+        'personal_anlas_counter_v1': jsonEncode({
+          'subscriptionRemaining': 1234,
+          'purchasedRemaining': 56,
+          'subscriptionQuota': 5000,
+          'resetDay': 7,
+        }),
+      });
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      await bootCounter(c);
+      final s = c.read(personalAnlasCounterProvider);
+      expect(s.subscriptionRemaining, 1234);
+      expect(s.purchasedRemaining, 56);
+      expect(s.opusShareRatio, 0.5);
+      expect(s.opusAllowance, 50);
+      expect(s.pendingOpusGenerations, 0);
+      expect(s.lastObservedPoolPercent, isNull);
+    });
+  });
 }

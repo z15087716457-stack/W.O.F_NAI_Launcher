@@ -541,13 +541,25 @@ final kritaBridgeNotifierProvider =
             try {
               if (!ref.exists(subscriptionNotifierProvider)) return;
               final isOpus = ref.read(isOpusSubscriptionProvider);
-              final cost = AnlasCalculator.calculate(params, isOpus: isOpus);
-              if (cost <= 0) return;
-              unawaited(
-                ref
-                    .read(personalAnlasCounterProvider.notifier)
-                    .recordCost(cost),
+              final cost = AnlasCalculator.calculate(
+                params,
+                isOpus: isOpus,
+                opusUsageExhausted:
+                    ref
+                        .read(subscriptionNotifierProvider)
+                        .subscription
+                        ?.isOpusUsageExhausted ??
+                    false,
               );
+              final counter = ref.read(personalAnlasCounterProvider.notifier);
+              if (cost <= 0) {
+                // 花 0 Anlas＝走了 Opus 免费额度，改记额度账本
+                if (isOpus && params.modelSpec.opusUsageLimit) {
+                  unawaited(counter.recordOpusUsage());
+                }
+                return;
+              }
+              unawaited(counter.recordCost(cost));
             } catch (e) {
               AppLogger.w('个人点数记账失败: $e', 'KritaBridge');
             }

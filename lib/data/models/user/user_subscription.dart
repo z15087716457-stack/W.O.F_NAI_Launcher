@@ -45,6 +45,9 @@ class UserSubscription with _$UserSubscription {
 
     /// 是否在宽限期
     @Default(false) bool isGracePeriod,
+
+    /// Opus 免费额度用量（V5 起下发，非 Opus 账号为 null）
+    OpusUsage? usage,
   }) = _UserSubscription;
 
   factory UserSubscription.fromJson(Map<String, dynamic> json) =>
@@ -71,6 +74,14 @@ class UserSubscription with _$UserSubscription {
   /// 是否拥有有效的 Opus 订阅权益
   bool get isOpus => tier == 3 && hasActiveSubscription;
 
+  /// Opus 免费额度是否已耗尽。
+  ///
+  /// 网页端在额度耗尽后不再免除首张费用，此时 V5 生成按 Anlas 计价。
+  bool get isOpusUsageExhausted => usage?.isNegative ?? false;
+
+  /// 展示用的额度百分比（0-100），无额度数据时返回 null。
+  double? get opusUsagePercent => usage?.displayPercent;
+
   /// 当前 Anlas 余额（固定 + 购买）
   int get anlasBalance {
     if (trainingStepsLeft == null) return 0;
@@ -93,6 +104,36 @@ class UserSubscription with _$UserSubscription {
         return 'Unknown';
     }
   }
+}
+
+/// Opus 免费生成额度用量。
+///
+/// V5 起随 `/user/subscription` 下发，仅 Opus 账号存在。额度随时间自动回充，
+/// 耗尽后仍可消耗 Anlas 继续生成。派生算法对齐网页端实现。
+@freezed
+class OpusUsage with _$OpusUsage {
+  const OpusUsage._();
+
+  const factory OpusUsage({
+    /// 剩余额度百分比；[isNegative] 为真时该值表示超支深度
+    @Default(0) double percent,
+
+    /// 额度是否已耗尽（负数额度）
+    @Default(false) bool isNegative,
+
+    /// 回充 1% 所需秒数，0 表示不回充
+    @Default(0) int timeUntilNextPercent,
+  }) = _OpusUsage;
+
+  factory OpusUsage.fromJson(Map<String, dynamic> json) =>
+      _$OpusUsageFromJson(json);
+
+  /// 进度条百分比，耗尽时归零并裁剪到 0-100。
+  double get displayPercent =>
+      isNegative ? 0 : percent.clamp(0, 100).toDouble();
+
+  /// 额度是否处于告警区间（耗尽或不足 5%）。
+  bool get isLow => isNegative || percent < 5;
 }
 
 /// Anlas 训练步数信息

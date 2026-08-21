@@ -76,6 +76,12 @@ class ImageWorkflowLauncher {
                   : 0,
               extraPerSampleCost:
                   AnlasCalculator.resolvePreciseReferenceExtraCost(params),
+              opusUsageExhausted:
+                  ref
+                      .read(subscriptionNotifierProvider)
+                      .subscription
+                      ?.isOpusUsageExhausted ??
+                  false,
             )
           : null,
       showMaskExport: mode == ImageEditorMode.inpaint,

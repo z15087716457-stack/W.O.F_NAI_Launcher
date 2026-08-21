@@ -32,12 +32,43 @@ class PersonalAnlasState {
   /// 上次重置时间（用于判断是否已重置过当前周期）
   final DateTime? lastResetAt;
 
+  /// 我在合租里占的 Opus 额度份额（0-1）。默认 0.5＝两人平分。
+  ///
+  /// V5 起 Opus 的免费生成额度是一个账号级共享池（服务端以百分比下发），
+  /// 合租时所有人共用。份额只影响本地账本的可用上限，不改变服务端行为。
+  final double opusShareRatio;
+
+  /// 我剩余的免费额度（百分点，可为负＝已超用自己的份额）
+  final double opusAllowance;
+
+  /// 池子涨额度时，我认领的比例（0-1）。默认 0.5＝新增砍一半归我。
+  ///
+  /// 与 [opusShareRatio] 分开是因为两者用途不同：份额决定我能攒到的上限，
+  /// 这个比例决定每次新增怎么分。想「按份额同比例分」就设成与份额相同。
+  final double opusRefillShare;
+
+  /// 上次观测到的服务端额度百分比（共享池），null＝尚未观测过。
+  ///
+  /// 单张耗多少额度、每小时回充多少，官方都没公开，也无从推算，因此一律不估：
+  /// 只对比这个值的真实变化——跌了按实测扣，涨了按 [opusRefillShare] 分成入账。
+  final double? lastObservedPoolPercent;
+
+  /// 本机生成正在进行中的笔数。
+  ///
+  /// 大于 0 时，池子的下跌算我的消耗；等于 0 时下跌视为合租朋友所为，不记账。
+  final int pendingOpusGenerations;
+
   const PersonalAnlasState({
     required this.subscriptionRemaining,
     required this.purchasedRemaining,
     required this.subscriptionQuota,
     required this.resetDay,
     this.lastResetAt,
+    this.opusShareRatio = 0.5,
+    this.opusAllowance = 50,
+    this.opusRefillShare = 0.5,
+    this.lastObservedPoolPercent,
+    this.pendingOpusGenerations = 0,
   });
 
   factory PersonalAnlasState.initial() => const PersonalAnlasState(
@@ -51,12 +82,23 @@ class PersonalAnlasState {
 
   bool get isOverdrawn => subscriptionRemaining < 0 || purchasedRemaining < 0;
 
+  /// 我的额度上限（百分点）＝总池 × 份额
+  double get opusAllowanceCap => (100 * opusShareRatio).clamp(0, 100).toDouble();
+
+  /// 我的份额是否已用尽（不足 0.01 个百分点视为耗尽，避免浮点残渣）
+  bool get isOpusAllowanceExhausted => opusAllowance < 0.01;
+
   PersonalAnlasState copyWith({
     int? subscriptionRemaining,
     int? purchasedRemaining,
     int? subscriptionQuota,
     int? resetDay,
     Object? lastResetAt = _unset,
+    double? opusShareRatio,
+    double? opusAllowance,
+    double? opusRefillShare,
+    Object? lastObservedPoolPercent = _unset,
+    int? pendingOpusGenerations,
   }) {
     return PersonalAnlasState(
       subscriptionRemaining:
@@ -67,6 +109,14 @@ class PersonalAnlasState {
       lastResetAt: identical(lastResetAt, _unset)
           ? this.lastResetAt
           : lastResetAt as DateTime?,
+      opusShareRatio: opusShareRatio ?? this.opusShareRatio,
+      opusAllowance: opusAllowance ?? this.opusAllowance,
+      opusRefillShare: opusRefillShare ?? this.opusRefillShare,
+      lastObservedPoolPercent: identical(lastObservedPoolPercent, _unset)
+          ? this.lastObservedPoolPercent
+          : lastObservedPoolPercent as double?,
+      pendingOpusGenerations:
+          pendingOpusGenerations ?? this.pendingOpusGenerations,
     );
   }
 
@@ -76,22 +126,44 @@ class PersonalAnlasState {
         'subscriptionQuota': subscriptionQuota,
         'resetDay': resetDay,
         'lastResetAt': lastResetAt?.toIso8601String(),
+        'opusShareRatio': opusShareRatio,
+        'opusAllowance': opusAllowance,
+        'opusRefillShare': opusRefillShare,
+        'lastObservedPoolPercent': lastObservedPoolPercent,
       };
 
+  /// 反序列化。缺失的额度字段回退到默认值（旧存档平滑升级）。
   factory PersonalAnlasState.fromJson(Map<String, dynamic> json) {
     int readInt(String key, int fallback) {
       final v = json[key];
       return v is num ? v.toInt() : fallback;
     }
 
+    double readDouble(String key, double fallback) {
+      final v = json[key];
+      return v is num ? v.toDouble() : fallback;
+    }
+
+    DateTime? readDate(String key) {
+      final v = json[key];
+      return v is String ? DateTime.tryParse(v) : null;
+    }
+
+    final shareRatio = readDouble('opusShareRatio', 0.5).clamp(0.0, 1.0);
+
     return PersonalAnlasState(
       subscriptionRemaining: readInt('subscriptionRemaining', 5000),
       purchasedRemaining: readInt('purchasedRemaining', 0),
       subscriptionQuota: readInt('subscriptionQuota', 5000),
       resetDay: readInt('resetDay', 0),
-      lastResetAt: json['lastResetAt'] is String
-          ? DateTime.tryParse(json['lastResetAt'] as String)
+      lastResetAt: readDate('lastResetAt'),
+      opusShareRatio: shareRatio.toDouble(),
+      opusAllowance: readDouble('opusAllowance', 100 * shareRatio),
+      opusRefillShare: readDouble('opusRefillShare', 0.5).clamp(0.0, 1.0),
+      lastObservedPoolPercent: json['lastObservedPoolPercent'] is num
+          ? (json['lastObservedPoolPercent'] as num).toDouble()
           : null,
+      // pendingOpusGenerations 是进程内瞬态，不持久化：重启后没有在途生成
     );
   }
 }
@@ -255,6 +327,135 @@ class PersonalAnlasCounter extends Notifier<PersonalAnlasState> {
     );
     await _persist();
     AppLogger.i('订阅点已手动补满 ${state.subscriptionQuota}', _logTag);
+  }
+
+  /// 标记本机发起了 [count] 笔走免费额度的生成。
+  ///
+  /// 单张消耗多少额度官方未公开，这里不做任何估算：只把这些生成登记为"在途"，
+  /// 等 [observeOpusUsage] 观测到服务端池子的真实跌幅时再落账。
+  ///
+  /// 只在生成确实走了 Opus 免费额度（Anlas 消耗为 0）时调用；
+  /// 花 Anlas 的生成走 [recordCost]，两本账互不重叠。
+  Future<void> recordOpusUsage({int count = 1}) async {
+    if (count <= 0) return;
+    await _ready;
+    state = state.copyWith(
+      pendingOpusGenerations: state.pendingOpusGenerations + count,
+    );
+    AppLogger.i('本机免费生成 $count 笔在途，等服务端额度回报后落账', _logTag);
+  }
+
+  /// 观测服务端额度，按池子的真实变化结算我的份额。
+  ///
+  /// 服务端 `percent` 是全账号共享池，合租时也含朋友的消耗，所以不能直接覆盖
+  /// 本地份额。跌幅只认**有本机生成在途时**的那部分（我花的，按实测数值扣，
+  /// 不猜单价）；涨幅按 [PersonalAnlasState.opusRefillShare] 分成入账。
+  ///
+  /// 回充速度、单张单价都是黑盒，一概不推算——只跟着池子的实际数字走。
+  Future<void> observeOpusUsage({double? poolPercent}) async {
+    await _ready;
+    if (poolPercent == null) return;
+    await _settleObservedPool(poolPercent);
+  }
+
+  /// 用服务端池子的真实变化结算份额：跌了扣我的在途消耗，涨了按分成入账。
+  Future<void> _settleObservedPool(double poolPercent) async {
+    final previous = state.lastObservedPoolPercent;
+    final pending = state.pendingOpusGenerations;
+
+    // 首次观测只记基线，不追认历史变化
+    if (previous == null) {
+      state = state.copyWith(lastObservedPoolPercent: poolPercent);
+      await _persist();
+      return;
+    }
+
+    final delta = poolPercent - previous;
+
+    // 池子上涨（回充/月度重置）：按分成砍一部分给我，封顶在份额上限
+    if (delta > 0) {
+      final cap = state.opusAllowanceCap;
+      final gained = delta * state.opusRefillShare;
+      final next = math.min(state.opusAllowance + gained, cap);
+      state = state.copyWith(
+        opusAllowance: math.max(next, state.opusAllowance),
+        lastObservedPoolPercent: poolPercent,
+      );
+      await _persist();
+      AppLogger.i(
+        '账号额度 +${delta.toStringAsFixed(2)}%，按分成入账 '
+        '${gained.toStringAsFixed(2)}%（我的份额剩 '
+        '${state.opusAllowance.toStringAsFixed(2)}%）',
+        _logTag,
+      );
+      return;
+    }
+
+    final dropped = -delta;
+    if (dropped <= 0 || pending <= 0) {
+      state = state.copyWith(
+        lastObservedPoolPercent: poolPercent,
+        // 池子没跌却有在途笔数：生成没走额度或已被别的观测结清，清掉避免挂死
+        pendingOpusGenerations: dropped <= 0 ? 0 : pending,
+      );
+      await _persist();
+      return;
+    }
+
+    state = state.copyWith(
+      opusAllowance: state.opusAllowance - dropped,
+      lastObservedPoolPercent: poolPercent,
+      pendingOpusGenerations: 0,
+    );
+    await _persist();
+    AppLogger.i(
+      '免费额度按服务端实测扣减 ${dropped.toStringAsFixed(2)}%'
+      '（$pending 笔在途，我的份额剩 ${state.opusAllowance.toStringAsFixed(2)}%）',
+      _logTag,
+    );
+  }
+
+  /// 按合租人数平分额度：份额与新增分成都设为 1/人数，并把余额按新上限裁剪。
+  Future<void> splitOpusAllowance(int peopleCount) async {
+    if (peopleCount < 1) return;
+    await _ready;
+    final ratio = 1 / peopleCount;
+    state = state.copyWith(
+      opusShareRatio: ratio,
+      opusRefillShare: ratio,
+      opusAllowance: math.min(state.opusAllowance, 100 * ratio),
+    );
+    await _persist();
+    AppLogger.i(
+      '额度按 $peopleCount 人平分：每人 ${(ratio * 100).toStringAsFixed(1)}%',
+      _logTag,
+    );
+  }
+
+  /// 手动调整额度设置。传入的字段才会被修改。
+  Future<void> updateOpusSettings({
+    double? shareRatio,
+    double? allowance,
+    double? refillShare,
+  }) async {
+    await _ready;
+    state = state.copyWith(
+      opusShareRatio: shareRatio?.clamp(0.0, 1.0).toDouble(),
+      opusRefillShare: refillShare?.clamp(0.0, 1.0).toDouble(),
+      opusAllowance: allowance,
+    );
+    await _persist();
+  }
+
+  /// 立即把额度补满到我的份额上限
+  Future<void> refillOpusAllowanceNow() async {
+    await _ready;
+    state = state.copyWith(opusAllowance: state.opusAllowanceCap);
+    await _persist();
+    AppLogger.i(
+      '免费额度已补满至 ${state.opusAllowanceCap.toStringAsFixed(1)}%',
+      _logTag,
+    );
   }
 
   /// 观测订阅信息：重置日未设置时，从订阅到期时间推断每月重置日

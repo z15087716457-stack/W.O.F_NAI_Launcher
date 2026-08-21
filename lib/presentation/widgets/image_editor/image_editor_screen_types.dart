@@ -13,6 +13,7 @@ class ImageEditorFocusedInpaintCostConfig {
     required this.subscriptionTier,
     this.strength = 1.0,
     this.extraPerSampleCost = 0,
+    this.opusUsageExhausted = false,
   });
 
   final String model;
@@ -25,8 +26,12 @@ class ImageEditorFocusedInpaintCostConfig {
   final double strength;
   final int extraPerSampleCost;
 
+  /// Opus 免费额度是否已耗尽（V5 类模型用尽后不再免除首张费用）
+  final bool opusUsageExhausted;
+
   int estimate({required int width, required int height}) {
     return AnlasCalculator.calculateRequestCost(
+      opusUsageExhausted: opusUsageExhausted,
       width: width,
       height: height,
       steps: steps,

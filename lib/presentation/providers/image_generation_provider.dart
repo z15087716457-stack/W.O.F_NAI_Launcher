@@ -454,6 +454,12 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   }
 
   String _modelSourceName(String model) {
+    if (model.contains('diffusion-5')) {
+      if (model.contains('curated')) {
+        return 'NovelAI Diffusion V5 Curated';
+      }
+      return 'NovelAI Diffusion V5 Full';
+    }
     if (model.contains('diffusion-4-5')) {
       if (model.contains('curated')) {
         return 'NovelAI Diffusion V4.5 Curated';
@@ -529,22 +535,33 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     // 独立测试/工具环境未启动订阅链路时，读取预估会连带构建 auth 链，
     // 其异步异常会污染 Zone——用 ref.exists 门禁 + try/catch 双保险。
     var costToBill = 0;
+    // 预估为 0 且模型受 Opus 额度约束时，这次生成花的是免费额度而非 Anlas，
+    // 需要记进额度账本（合租份额）而不是点数账本。
+    var billedToOpusAllowance = false;
     try {
       if (ref.exists(subscriptionNotifierProvider)) {
         costToBill = ref.read(estimatedCostProvider);
+        billedToOpusAllowance =
+            costToBill <= 0 &&
+            ref.read(isOpusSubscriptionProvider) &&
+            params.modelSpec.opusUsageLimit;
       }
     } catch (_) {
       costToBill = 0;
+      billedToOpusAllowance = false;
     }
     return _generate(params).whenComplete(() {
-      if (costToBill > 0 &&
+      final produced =
           state.status == GenerationStatus.completed &&
-          !identical(state.currentImages, imagesBefore)) {
-        unawaited(
-          ref
-              .read(personalAnlasCounterProvider.notifier)
-              .recordCost(costToBill),
-        );
+          !identical(state.currentImages, imagesBefore);
+      if (produced) {
+        final counter = ref.read(personalAnlasCounterProvider.notifier);
+        if (costToBill > 0) {
+          unawaited(counter.recordCost(costToBill));
+        } else if (billedToOpusAllowance) {
+          // 预估 0 Anlas＝走了 Opus 免费额度，改记额度账本（合租份额）
+          unawaited(counter.recordOpusUsage(count: params.nSamples));
+        }
       }
       // App 根节点常驻监听该 provider。独立测试/工具未启动订阅链路时，
       // 不应仅为记账刷新而触发认证和平台存储初始化。
