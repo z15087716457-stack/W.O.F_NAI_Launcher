@@ -208,6 +208,11 @@ class KritaBridgeService implements KritaBridgeMessageService {
     final params = _readBaseParams();
     final promptSnapshot = _readPromptSnapshot(params);
     final tokens = _readTokens == null ? null : await _readTokens.call();
+    // 用局部变量 + collection-if 表达「值为 null 则整条省略」。
+    // 等价写法 `'k': ?expr` 是 Dart 3.9 的 null-aware element，
+    // build_runner 捆的 analyzer 尚不支持，会让四个 builder 全部报语法错。
+    final seedLock = _readSeedLock?.call();
+    final characters = _readCharacters?.call();
     _send({
       'type': 'params',
       'id': message.id,
@@ -235,8 +240,8 @@ class KritaBridgeService implements KritaBridgeMessageService {
       'smea': params.smea,
       'smea_dyn': params.smeaDyn,
       'use_coords': params.useCoords,
-      'seed_lock': ?_readSeedLock?.call(),
-      'characters': ?_readCharacters?.call(),
+      if (seedLock != null) 'seed_lock': seedLock,
+      if (characters != null) 'characters': characters,
       // AI 接管扩展：UI 盲区三件套只读回读（桥接不可写，仅消除 get 盲区）
       'precise_references': [
         for (final r in params.preciseReferences)
