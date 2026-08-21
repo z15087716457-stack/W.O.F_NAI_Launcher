@@ -9,6 +9,7 @@ import 'package:msgpack_dart/msgpack_dart.dart' as msgpack;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/constants/api_constants.dart';
+import '../../../core/constants/model_spec.dart';
 import '../../../core/models/image_generation_artifact.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/network/nai_api_endpoint_service.dart';
@@ -58,7 +59,7 @@ class NAIImageGenerationApiService {
       }
 
       // V4 及以后版本不原生支持 DDIM
-      if (model.contains('diffusion-4') || model == 'N/A') {
+      if (ModelSpecs.of(model).isV4OrLater || model == 'N/A') {
         AppLogger.w(
           'Model $model does not support DDIM sampler, '
               'falling back to Euler Ancestral',

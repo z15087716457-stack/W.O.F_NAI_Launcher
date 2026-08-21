@@ -148,10 +148,17 @@ class NoiseScheduleSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(
       generationParamsNotifierProvider.select(
-        (params) =>
-            (noiseSchedule: params.noiseSchedule, isV4Model: params.isV4Model),
+        (params) => (
+          noiseSchedule: params.noiseSchedule,
+          isV4Model: params.isV4Model,
+          supportsNoiseSchedule: params.modelSpec.noiseSchedule,
+        ),
       ),
     );
+    // V5 起噪声调度由服务端决定，整节隐藏
+    if (!data.supportsNoiseSchedule) {
+      return const SizedBox.shrink();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -236,6 +243,7 @@ class CfgScaleSection extends ConsumerWidget {
           scale: params.scale,
           decrisp: params.decrisp,
           varietyPlus: params.varietyPlus,
+          varietyPlusSupported: params.modelSpec.varietyPlus,
           isV3Model: params.isV3Model,
         ),
       ),
@@ -262,16 +270,17 @@ class CfgScaleSection extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
             ],
-            // Variety+ (所有模型)
-            _ToggleButton(
-              label: 'Variety+',
-              isEnabled: data.varietyPlus,
-              onChanged: (value) {
-                ref
-                    .read(generationParamsNotifierProvider.notifier)
-                    .updateVarietyPlus(value);
-              },
-            ),
+            // Variety+ (不支持该能力的模型隐藏，如 V5)
+            if (data.varietyPlusSupported)
+              _ToggleButton(
+                label: 'Variety+',
+                isEnabled: data.varietyPlus,
+                onChanged: (value) {
+                  ref
+                      .read(generationParamsNotifierProvider.notifier)
+                      .updateVarietyPlus(value);
+                },
+              ),
           ],
         ),
         ThemedSlider(

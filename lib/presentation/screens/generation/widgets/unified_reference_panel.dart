@@ -12,6 +12,7 @@ import '../../../../core/utils/vibe_performance_diagnostics.dart';
 import '../../../../core/constants/storage_keys.dart';
 import '../../../../core/extensions/vibe_library_extensions.dart';
 import '../../../widgets/common/themed_divider.dart';
+import '../../../../data/models/image/image_params.dart';
 import '../../../../data/models/vibe/vibe_library_entry.dart';
 import '../../../../data/models/vibe/vibe_reference.dart';
 import '../../../../data/services/vibe_library_storage_service.dart';
@@ -324,6 +325,15 @@ class _UnifiedReferencePanelState extends ConsumerState<UnifiedReferencePanel> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final supportsVibe = ref.watch(
+      generationParamsNotifierProvider.select(
+        (params) => params.modelSpec.vibetransfer,
+      ),
+    );
+    // V5 起移除 Vibe Transfer，面板整体隐藏
+    if (!supportsVibe) {
+      return const SizedBox.shrink();
+    }
     final panelData = ref.watch(
       generationParamsNotifierProvider.select(selectVibePanelViewData),
     );

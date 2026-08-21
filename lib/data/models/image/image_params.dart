@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../core/constants/model_spec.dart';
 import '../../../core/enums/precise_ref_type.dart';
 import '../vibe/vibe_reference.dart';
 
@@ -235,12 +236,19 @@ extension ImageParamsExtension on ImageParams {
   bool get isV3Model =>
       model.contains('diffusion-3') || model.contains('diffusion-furry-3');
 
-  /// 检查是否为 V4+ 模型
-  bool get isV4Model =>
-      model.contains('diffusion-4') || model.contains('diffusion-4-5');
+  /// 检查是否为 V4 及更高版本模型（含 V5）。
+  ///
+  /// 决定请求是否走 `v4_prompt` 结构，V5 同样如此。
+  bool get isV4Model => ModelSpecs.of(model).isV4OrLater;
 
-  /// 检查是否为 V4.5 模型
+  /// 检查是否支持 Precise Reference（V4.5 起提供，V5 暂未开放）。
   bool get isV45Model => model.contains('diffusion-4-5');
+
+  /// 检查是否为 V5 模型
+  bool get isV5Model => ModelSpecs.of(model).isV5;
+
+  /// 当前模型的能力描述。
+  ModelSpec get modelSpec => ModelSpecs.of(model);
 
   /// 检查是否为 Inpainting 模型
   bool get isInpaintingModel => model.contains('inpainting');

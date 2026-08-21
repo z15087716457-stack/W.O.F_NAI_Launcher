@@ -1,3 +1,5 @@
+import 'model_spec.dart';
+
 /// NovelAI API 常量定义
 class ApiConstants {
   ApiConstants._();
@@ -79,7 +81,17 @@ class ImageModels {
   static const String animeDiffusionV45FullInpainting =
       'nai-diffusion-4-5-full-inpainting';
 
+  // V5 系列
+  static const String animeDiffusionV5Curated = 'nai-diffusion-5-curated';
+  static const String animeDiffusionV5Full = 'nai-diffusion-5-full';
+  static const String animeDiffusionV5CuratedInpainting =
+      'nai-diffusion-5-curated-inpainting';
+  static const String animeDiffusionV5FullInpainting =
+      'nai-diffusion-5-full-inpainting';
+
   static const List<String> allModels = [
+    animeDiffusionV5Full,
+    animeDiffusionV5Curated,
     animeDiffusionV45Full,
     animeDiffusionV45Curated,
     animeDiffusionV4Full,
@@ -90,6 +102,8 @@ class ImageModels {
   ];
 
   static const Map<String, String> modelDisplayNames = {
+    animeDiffusionV5Full: 'NAI Diffusion V5 (Full)',
+    animeDiffusionV5Curated: 'NAI Diffusion V5 (Curated)',
     animeDiffusionV45Full: 'NAI Diffusion V4.5 (Full)',
     animeDiffusionV45Curated: 'NAI Diffusion V4.5 (Curated)',
     animeDiffusionV4Full: 'NAI Diffusion V4 (Full)',
@@ -99,12 +113,17 @@ class ImageModels {
     furryDiffusion: 'Furry Diffusion',
   };
 
-  /// 判断是否为 V4+ 模型
-  static bool isV4Model(String model) =>
-      model.contains('diffusion-4') || model.contains('diffusion-4-5');
+  /// 判断是否为 V4 及更高版本模型（含 V5）。
+  ///
+  /// 语义是「使用 `v4_prompt` 结构 + 角色框」，V5 同样满足，因此不能用
+  /// `contains('diffusion-4')` 判定。能力细节查 `ModelSpecs.of(model)`。
+  static bool isV4Model(String model) => ModelSpecs.of(model).isV4OrLater;
 
-  /// 判断是否为 V4.5 模型
+  /// 判断是否支持 Precise Reference（V4.5 起提供，V5 暂未开放）。
   static bool isV45Model(String model) => model.contains('diffusion-4-5');
+
+  /// 判断是否为 V5 模型
+  static bool isV5Model(String model) => ModelSpecs.of(model).isV5;
 
   /// 判断是否为 Inpainting 模型
   static bool isInpaintingModel(String model) => model.contains('inpainting');
@@ -114,6 +133,8 @@ class ImageModels {
     if (isInpaintingModel(model)) return model;
 
     return switch (model) {
+      animeDiffusionV5Full => animeDiffusionV5FullInpainting,
+      animeDiffusionV5Curated => animeDiffusionV5CuratedInpainting,
       animeDiffusionV45Full => animeDiffusionV45FullInpainting,
       animeDiffusionV45Curated => animeDiffusionV45CuratedInpainting,
       animeDiffusionV4Full => animeDiffusionV4FullInpainting,
@@ -126,6 +147,8 @@ class ImageModels {
   /// 将 Inpainting 请求模型还原为设置界面对应的基础模型。
   static String resolveBaseModel(String model) {
     return switch (model) {
+      animeDiffusionV5FullInpainting => animeDiffusionV5Full,
+      animeDiffusionV5CuratedInpainting => animeDiffusionV5Curated,
       animeDiffusionV45FullInpainting => animeDiffusionV45Full,
       animeDiffusionV45CuratedInpainting => animeDiffusionV45Curated,
       animeDiffusionV4FullInpainting => animeDiffusionV4Full,
@@ -139,6 +162,10 @@ class ImageModels {
   /// 判断实际请求模型是否支持在 Inpainting 中复用原图潜空间。
   static bool supportsImg2ImgInpainting(String model) {
     return switch (model) {
+      animeDiffusionV5Full ||
+      animeDiffusionV5FullInpainting ||
+      animeDiffusionV5Curated ||
+      animeDiffusionV5CuratedInpainting ||
       animeDiffusionV45Full ||
       animeDiffusionV45FullInpainting ||
       animeDiffusionV45Curated ||

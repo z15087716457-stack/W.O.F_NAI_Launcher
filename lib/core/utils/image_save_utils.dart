@@ -410,7 +410,9 @@ class ImageSaveUtils {
 
   /// 获取模型显示名称
   static String _getModelSourceName(String model) {
-    if (model.contains('diffusion-4-5')) {
+    if (model.contains('diffusion-5')) {
+      return 'NovelAI Diffusion V5';
+    } else if (model.contains('diffusion-4-5')) {
       return 'NovelAI Diffusion V4.5';
     } else if (model.contains('diffusion-4')) {
       return 'NovelAI Diffusion V4';

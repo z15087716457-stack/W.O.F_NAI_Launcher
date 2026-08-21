@@ -2,6 +2,7 @@ import 'package:dart_sentencepiece_tokenizer/dart_sentencepiece_tokenizer.dart';
 import 'package:flutter/services.dart';
 
 import '../../data/models/character/character_prompt.dart';
+import '../constants/model_spec.dart';
 import '../utils/nai_prompt_parser.dart';
 
 class PromptTokenUsage {
@@ -44,7 +45,7 @@ class PromptTokenCounterService {
   final PromptTokenEncoder _encoder;
 
   static bool supportsPromptTokenCount(String model) {
-    return model.contains('diffusion-4') || model.contains('diffusion-4-5');
+    return ModelSpecs.of(model).v4Prompts;
   }
 
   static int? tokenLimitForModel(String model) {
