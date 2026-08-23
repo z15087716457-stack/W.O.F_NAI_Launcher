@@ -8,11 +8,13 @@ import '../../core/cache/thumbnail_cache_service.dart';
 import '../../core/cache/gallery_cache_manager.dart';
 import '../../core/exceptions/gallery_exceptions.dart';
 import '../../core/utils/app_logger.dart';
+import '../../core/utils/gallery_path_utils.dart';
 import '../../data/models/gallery/local_image_record.dart';
 import '../../data/models/gallery/nai_image_metadata.dart';
 import '../../core/database/datasources/gallery_data_source.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import '../../data/services/gallery/gallery_filter_service.dart';
+import '../../data/services/gallery/gallery_sort.dart';
 import '../../data/services/gallery/gallery_stream_scanner.dart';
 import '../../data/services/gallery/scan_state_manager.dart';
 import '../../data/services/gallery/unified_gallery_service.dart';
@@ -82,6 +84,19 @@ class LocalGalleryState with _$LocalGalleryState {
     /// 过滤条件
     @Default(FilterCriteria()) FilterCriteria filterCriteria,
 
+    /// 排序字段（默认修改时间）
+    @Default(GallerySortField.modifiedAt) GallerySortField sortField,
+
+    /// 排序方向（默认降序 = 新→旧）
+    @Default(GallerySortDirection.descending)
+    GallerySortDirection sortDirection,
+
+    /// 视图模式：true=瀑布流（默认），false=网格
+    @Default(true) bool isMasonryView,
+
+    /// 逻辑列宽（px，140~480，默认 260；瀑布流按它算列数）
+    @Default(260.0) double columnWidth,
+
     /// 分组视图
     @Default(false) bool isGroupedView,
     @Default([]) List<LocalImageRecord> groupedImages,
@@ -129,6 +144,9 @@ class LocalGalleryState with _$LocalGalleryState {
   /// 是否有过滤条件
   bool get hasFilters => filterCriteria.hasFilters;
 
+  /// 是否有 naiOnly 之外的会话过滤条件（清除按钮按此显隐）
+  bool get hasSessionFilters => filterCriteria.hasSessionFilters;
+
   /// 是否可以加载更多
   bool get canLoadMore => currentPage < totalPages - 1;
 
@@ -157,6 +175,15 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   LocalGalleryService? _service;
   int _filterRequestSerial = 0;
 
+  /// 最近软删路径键集（防复活屏）：服务层重建/重扫期间兜底 loadPage 会从
+  /// 尚未摘除的内存文件列表取回含被删图的旧数据，这里在 loadPage 出口
+  /// 强制过滤。撤销/垃圾桶恢复时经 [clearRecentlyDeleted] 解除。
+  final Set<String> _recentlyDeletedKeys = {};
+
+  /// 最近一次屏幕层的真实 DPR（页面层 didChangeDependencies 写入；
+  /// 预取缩略图档位与卡片同算法同 DPR，避免档位失配重复生成）
+  double _lastKnownDpr = 1.0;
+
   @override
   LocalGalleryState build() {
     if (_cachedState != null) return _cachedState!;
@@ -177,9 +204,21 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
 
   void _resetState() {
     _cachedState = null;
+    final service = _service;
     _service = null;
     _filterRequestSerial++;
+    // 服务层排序同步回默认（修改时间 新→旧），与重置后的 state 一致
+    if (service != null) {
+      unawaited(service.setSort(const GallerySort.modifiedAtDesc()));
+    }
     _setState(const LocalGalleryState());
+  }
+
+  /// 记录屏幕层真实 DPR（页面层 didChangeDependencies 调用），
+  /// 供相邻页缩略图预取与卡片使用同一档位算法。
+  void updateDevicePixelRatio(double devicePixelRatio) {
+    if (devicePixelRatio <= 0) return;
+    _lastKnownDpr = devicePixelRatio;
   }
 
   /// 获取服务实例
@@ -391,6 +430,18 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
         }
       }
 
+      // 防复活屏：服务层重扫/重建期间 getPage 可能返回尚未摘除的软删图，
+      // 这里按最近删除键集强制过滤（撤销/恢复后由 clearRecentlyDeleted 解除）
+      if (_recentlyDeletedKeys.isNotEmpty) {
+        final before = records.length;
+        records = records
+            .where(
+              (r) => !_recentlyDeletedKeys.contains(galleryFilePathKey(r.path)),
+            )
+            .toList(growable: false);
+        if (records.length != before) {
+        }
+      }
       _setState(
         state.copyWith(
           currentImages: records,
@@ -458,12 +509,15 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
         final thumbnailService = ThumbnailService.instance;
         await thumbnailService.initialize();
 
+        // 预取档位与卡片同一算法：用页面层上报的真实 DPR，而非固定 1.25
+        final size = pickThumbnailSize(state.columnWidth, _lastKnownDpr);
+
         for (final targetPage in pagesToPreload) {
           final records = await service.getPage(targetPage, pageSize: pageSize);
           for (final record in records) {
             thumbnailService.preloadThumbnail(
               record.path,
-              size: ThumbnailSize.small,
+              size: size,
               priority: ThumbnailPriority.low,
             );
           }
@@ -683,7 +737,13 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
 
     _setState(
       state.copyWith(
-        filterCriteria: criteria.copyWith(dateStart: start, dateEnd: end),
+        filterCriteria: criteria.copyWith(
+          dateStart: start,
+          dateEnd: end,
+          // copyWith 的默认语义是非 null 才覆盖，清空必须显式传 clear 标记
+          clearDateStart: start == null,
+          clearDateEnd: end == null,
+        ),
         currentPage: 0,
       ),
     );
@@ -724,12 +784,58 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     await loadPage(0);
   }
 
-  Future<void> setFilterModel(String? model) async {
+  /// 设置排序（字段 + 方向），生效于服务层分页与过滤链路
+  Future<void> setSort(
+    GallerySortField field,
+    GallerySortDirection direction,
+  ) async {
+    if (state.sortField == field && state.sortDirection == direction) return;
+
+    _setState(state.copyWith(sortField: field, sortDirection: direction));
+
+    try {
+      final service = await getService();
+      await service.setSort(GallerySort(field: field, direction: direction));
+    } catch (e) {
+      AppLogger.d('Failed to update gallery sort: $e', 'LocalGallery');
+    }
+
+    await loadPage(0);
+  }
+
+  /// 设置视图模式（true=瀑布流 / false=网格），纯会话态，持久化由调用方负责
+  void setMasonryView(bool value) {
+    if (state.isMasonryView == value) return;
+    _setState(state.copyWith(isMasonryView: value));
+  }
+
+  /// 设置逻辑列宽（实时生效于瀑布流列数；持久化由调用方负责）
+  void setColumnWidth(double value) {
+    if (state.columnWidth == value) return;
+    _setState(state.copyWith(columnWidth: value));
+  }
+
+  /// 设置 NAI-only 过滤（进画廊时从持久化偏好恢复；切换时调用方负责持久化）
+  Future<void> setNaiOnly(bool value) async {
+    final criteria = state.filterCriteria;
+    if (criteria.naiOnly == value) return;
+
+    _setState(
+      state.copyWith(
+        filterCriteria: criteria.copyWith(naiOnly: value),
+        currentPage: 0,
+      ),
+    );
+
+    await _applyFilters();
+  }
+
+  Future<void> setFilterModels(List<String> models) async {
     _setState(
       state.copyWith(
         filterCriteria: state.filterCriteria.copyWith(
-          filterModel: model,
-          clearFilterModel: model == null,
+          filterModels: models,
+          clearFilterModels: models.isEmpty,
         ),
         currentPage: 0,
       ),
@@ -737,12 +843,12 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     await _applyFilters();
   }
 
-  Future<void> setFilterSampler(String? sampler) async {
+  Future<void> setFilterSamplers(List<String> samplers) async {
     _setState(
       state.copyWith(
         filterCriteria: state.filterCriteria.copyWith(
-          filterSampler: sampler,
-          clearFilterSampler: sampler == null,
+          filterSamplers: samplers,
+          clearFilterSamplers: samplers.isEmpty,
         ),
         currentPage: 0,
       ),
@@ -780,12 +886,40 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     await _applyFilters();
   }
 
-  Future<void> setFilterResolution(String? resolution) async {
+  Future<void> setFilterResolutions(List<String> resolutions) async {
     _setState(
       state.copyWith(
         filterCriteria: state.filterCriteria.copyWith(
-          filterResolution: resolution,
-          clearFilterResolution: resolution == null,
+          filterResolutions: resolutions,
+          clearFilterResolutions: resolutions.isEmpty,
+        ),
+        currentPage: 0,
+      ),
+    );
+    await _applyFilters();
+  }
+
+  /// 设置画面方向过滤（null=全部 / 'landscape' / 'portrait' / 'square'）
+  Future<void> setFilterOrientation(String? orientation) async {
+    _setState(
+      state.copyWith(
+        filterCriteria: state.filterCriteria.copyWith(
+          filterOrientation: orientation,
+          clearFilterOrientation: orientation == null,
+        ),
+        currentPage: 0,
+      ),
+    );
+    await _applyFilters();
+  }
+
+  /// 设置内容分级过滤（null=全部 / 'sfw' / 'nsfw'）
+  Future<void> setNsfwMode(String? mode) async {
+    _setState(
+      state.copyWith(
+        filterCriteria: state.filterCriteria.copyWith(
+          nsfwMode: mode,
+          clearNsfwMode: mode == null,
         ),
         currentPage: 0,
       ),
@@ -816,6 +950,24 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           categoryFolderPath: categoryFolderPath,
           clearCategoryId: categoryId == null,
           clearCategoryFolderPath: categoryFolderPath == null,
+        ),
+        currentPage: 0,
+      ),
+    );
+
+    await _applyFilters();
+  }
+
+  /// 设置选中的收藏集（membership 过滤；null 表示清除）
+  Future<void> setSelectedCollection(String? collectionId) async {
+    final criteria = state.filterCriteria;
+    if (criteria.collectionId == collectionId) return;
+
+    _setState(
+      state.copyWith(
+        filterCriteria: criteria.copyWith(
+          collectionId: collectionId,
+          clearCollectionId: collectionId == null,
         ),
         currentPage: 0,
       ),
@@ -867,10 +1019,99 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   }
 
   Future<void> clearAllFilters() async {
+    // 语义分界：
+    // - 浏览范围（侧栏选择的表达式，清除时保留）：categoryId /
+    //   categoryFolderPath / collectionId / showFavoritesOnly
+    // - 常驻偏好（保留）：naiOnly（进画廊时恢复、切换时持久化）
+    // - 会话筛选条件（清除）：搜索词、tag chips、日期范围、元数据/高级
+    //   筛选全部维度
+    // 用户在文件夹/收藏集/收藏里点「清除筛选」只清条件，停留在当前范围。
+    final criteria = state.filterCriteria;
     _setState(
-      state.copyWith(filterCriteria: const FilterCriteria(), currentPage: 0),
+      state.copyWith(
+        filterCriteria: FilterCriteria(
+          categoryId: criteria.categoryId,
+          categoryFolderPath: criteria.categoryFolderPath,
+          collectionId: criteria.collectionId,
+          showFavoritesOnly: criteria.showFavoritesOnly,
+          naiOnly: criteria.naiOnly,
+        ),
+        currentPage: 0,
+      ),
     );
     await _applyFilters();
+
+    // 侧栏选中态（分类/收藏集）是「浏览范围」不是筛选条件，清除筛选不碰它。
+  }
+
+  /// 删除池软删后的内存级即时移除（不触发 rescan/refresh）。
+  ///
+  /// 文件仍在盘上（物理删除推迟到下次启动），DB 已标记 is_deleted=1；
+  /// 这里把服务层内存列表与当前页/分组列表里的对应条目摘除，
+  /// 图立刻从界面消失，计数同步减。后续 refresh 由 DB 软删标记兜底
+  /// （扫描/文件列表均按 is_deleted 排除），不会复活。
+  Future<void> removeDeletedImagesFromMemory(List<String> paths) async {
+    if (paths.isEmpty) return;
+
+    // ① state 层摘除（UI 最优先，不依赖 service——实测 getService 在
+    // 服务重建/重扫期间会等待甚至 10s 超时抛出，把整个摘除链打断）
+    final removedKeys = paths.map(galleryFilePathKey).toSet();
+    _recentlyDeletedKeys.addAll(removedKeys);
+    _setState(
+      state.copyWith(
+        currentImages: state.currentImages
+            .where((r) => !removedKeys.contains(galleryFilePathKey(r.path)))
+            .toList(growable: false),
+        groupedImages: state.groupedImages
+            .where((r) => !removedKeys.contains(galleryFilePathKey(r.path)))
+            .toList(growable: false),
+      ),
+    );
+
+    // ② 服务层内存列表摘除 + 计数/页数校正（可能等待服务就绪，不挡 UI）
+    try {
+      final service = await getService();
+      service.removeImagesFromMemory(paths);
+      _setState(
+        state.copyWith(
+          totalCount: service.totalCount,
+          filteredCount: service.filteredCount,
+        ),
+      );
+
+      // 页数校正与越界回退独立兜底（失败只影响页码，不影响列表内容）
+      try {
+        final nextTotalPages =
+            ((state.filterCriteria.hasFilters ? service.filteredCount : service.totalCount) /
+                    state.pageSize)
+                .ceil();
+        if (state.totalPages != nextTotalPages) {
+          _setState(state.copyWith(totalPages: nextTotalPages));
+        }
+        // 当前页被删空/越界时回退到末页（不触发重扫）
+        if (state.currentPage >= nextTotalPages && nextTotalPages > 0) {
+          await loadPage(nextTotalPages - 1, showLoading: false);
+        }
+      } catch (e) {
+        AppLogger.w(
+          'Failed to adjust pagination after in-memory removal: $e',
+          'LocalGalleryNotifier',
+        );
+      }
+    } catch (e, stack) {
+      AppLogger.e(
+        'Failed to remove deleted images from memory',
+        e,
+        stack,
+        'LocalGalleryNotifier',
+      );
+    }
+  }
+
+  /// 解除防复活屏（撤销/垃圾桶恢复后调用，让恢复的图能重新出现）。
+  Future<void> clearRecentlyDeleted(List<String> paths) async {
+    if (paths.isEmpty) return;
+    _recentlyDeletedKeys.removeAll(paths.map(galleryFilePathKey));
   }
 
   /// 应用过滤条件
@@ -884,9 +1125,10 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       AppLogger.d(
         'Applying filters: hasFilters=${criteria.hasFilters}, search="${criteria.searchQuery}", '
             'dateStart=${criteria.dateStart}, dateEnd=${criteria.dateEnd}, favOnly=${criteria.showFavoritesOnly}, '
-            'tags=${criteria.selectedTags}, model=${criteria.filterModel}, sampler=${criteria.filterSampler}, '
+            'tags=${criteria.selectedTags}, models=${criteria.filterModels}, samplers=${criteria.filterSamplers}, '
             'steps=${criteria.filterMinSteps}-${criteria.filterMaxSteps}, cfg=${criteria.filterMinCfg}-${criteria.filterMaxCfg}, '
-            'res=${criteria.filterResolution}, width=${criteria.minWidth}-${criteria.maxWidth}, '
+            'res=${criteria.filterResolutions}, orient=${criteria.filterOrientation}, nsfw=${criteria.nsfwMode}, '
+            'width=${criteria.minWidth}-${criteria.maxWidth}, '
             'height=${criteria.minHeight}-${criteria.maxHeight}, fileSize=${criteria.minFileSize}-${criteria.maxFileSize}, '
             'metaStatuses=${criteria.metadataStatuses}',
         'LocalGalleryNotifier',
@@ -1063,17 +1305,11 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     _setState(state.copyWith(isRebuildingIndex: true, isLoading: true));
 
     try {
-      final rootPath = await GalleryFolderRepository.instance.getRootPath();
-      if (rootPath == null) {
+      // 主源 + 全部存在的额外源
+      final rootDirs = await GalleryFolderRepository.instance.getAllRootDirs();
+      if (rootDirs.isEmpty) {
         throw const GalleryScanException(
           message: 'Gallery directory is not configured',
-        );
-      }
-
-      final dir = Directory(rootPath);
-      if (!dir.existsSync()) {
-        throw const GalleryScanException(
-          message: 'Gallery directory does not exist',
         );
       }
 
@@ -1082,7 +1318,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       final scanner = GalleryStreamScanner(dataSource: dataSource);
 
       await scanner.startScanning(
-        dir,
+        rootDirs,
         retryMissingMetadata: true,
         retryFailedMetadata: true,
         onFileProcessed: (result, stats) {

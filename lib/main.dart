@@ -40,6 +40,7 @@ import 'data/repositories/gallery_folder_repository.dart';
 import 'core/cache/gallery_cache_manager.dart';
 
 import 'core/cache/tag_cache_service.dart';
+import 'data/services/gallery/gallery_delete_pool_store.dart';
 import 'data/services/gallery/index.dart';
 import 'data/services/image_metadata_service.dart';
 import 'data/services/metadata/isolate_metadata_service.dart';
@@ -490,6 +491,16 @@ Future<void> _bootstrapApplication() async {
       }
     } catch (e) {
       AppLogger.w('清理嵌套缩略图失败: $e', 'Main');
+    }
+  });
+
+  // 启动清理删除池：上次会话软删的文件逐条物理删除。
+  // 不存在=成功；删除失败（占用/权限）保留在池中，下次启动再试。
+  await _runNonFatalStartupStep('Delete pool cleanup', () async {
+    final deletedCount =
+        await const GalleryDeletePoolStore().cleanupPendingFiles();
+    if (deletedCount > 0) {
+      AppLogger.i('删除池清理完成: 删除了 $deletedCount 个文件', 'Main');
     }
   });
 

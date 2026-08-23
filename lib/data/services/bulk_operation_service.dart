@@ -10,6 +10,7 @@ import '../../core/database/datasources/gallery_data_source.dart';
 import '../../core/utils/app_logger.dart';
 import '../models/gallery/local_image_record.dart';
 import '../models/gallery/nai_image_metadata.dart';
+import 'gallery/gallery_delete_pool_store.dart';
 
 part 'bulk_operation_service.g.dart';
 
@@ -44,48 +45,53 @@ class BulkOperationService {
     return dataSource;
   }
 
-  /// 批量删除图片
+  /// 批量删除图片（软删语义）
+  ///
+  /// 不再逐张物理删除：① DB 立即标记 is_deleted=1（防扫描/搜索复活）；
+  /// ② 路径进删除池（下次启动时物理清理）。无物理 IO，瞬时完成，
+  /// 内存列表的即时移除由调用方（provider）负责。
   Future<BulkOperationResult> bulkDelete(
     List<String> imagePaths, {
     BulkProgressCallback? onProgress,
   }) async {
     final stopwatch = Stopwatch()..start();
-    var successCount = 0;
-    var failedCount = 0;
-    final errors = <String>[];
 
-    AppLogger.i('Starting bulk delete: ${imagePaths.length} images', 'BulkOperationService');
-
-    for (var i = 0; i < imagePaths.length; i++) {
-      final imagePath = imagePaths[i];
-      onProgress?.call(current: i, total: imagePaths.length, currentItem: imagePath, isComplete: false);
-
-      try {
-        final file = File(imagePath);
-        if (await file.exists()) {
-          await file.delete();
-          successCount++;
-          AppLogger.d('Deleted: $imagePath ($successCount/${imagePaths.length})', 'BulkOperationService');
-        } else {
-          failedCount++;
-          errors.add('File not found: $imagePath');
-          AppLogger.w('File not found: $imagePath', 'BulkOperationService');
-        }
-      } catch (e) {
-        failedCount++;
-        errors.add('Failed to delete $imagePath: $e');
-        AppLogger.e('Delete failed for $imagePath', e, null, 'BulkOperationService');
-      }
+    if (imagePaths.isEmpty) {
+      return (success: 0, failed: 0, errors: <String>[]);
     }
 
-    onProgress?.call(current: imagePaths.length, total: imagePaths.length, currentItem: '', isComplete: true);
-    stopwatch.stop();
     AppLogger.i(
-      'Bulk delete completed: $successCount succeeded, $failedCount failed in ${stopwatch.elapsedMilliseconds}ms',
+      'Starting bulk delete (soft): ${imagePaths.length} images',
       'BulkOperationService',
     );
 
-    return (success: successCount, failed: failedCount, errors: errors);
+    final deletable = imagePaths;
+
+    try {
+      // ① DB 软删标记
+      final dataSource = await _getDataSource();
+      await dataSource.batchMarkAsDeleted(deletable);
+      // ② 路径进删除池
+      await const GalleryDeletePoolStore().addAll(deletable);
+    } catch (e) {
+      AppLogger.e('Bulk delete (soft) failed', e, null, 'BulkOperationService');
+      rethrow;
+    }
+
+    onProgress?.call(
+      current: deletable.length,
+      total: deletable.length,
+      currentItem: '',
+      isComplete: true,
+    );
+    stopwatch.stop();
+    AppLogger.i(
+      'Bulk delete (soft) completed: ${deletable.length} images in '
+      '${stopwatch.elapsedMilliseconds}ms',
+      'BulkOperationService',
+    );
+
+    return (success: deletable.length, failed: 0, errors: <String>[]);
   }
 
   /// 批量导出图片元数据到文件

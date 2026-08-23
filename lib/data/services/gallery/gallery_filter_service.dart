@@ -9,6 +9,7 @@ import '../../../core/database/utils/lru_cache.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/isolate_pool.dart';
 import '../../../core/utils/tag_normalizer.dart';
+import 'gallery_sort.dart';
 
 export 'gallery_filter_service.dart' show FilterCriteria;
 
@@ -20,13 +21,27 @@ class FilterCriteria {
   final DateTime? dateEnd;
   final bool showFavoritesOnly;
   final List<String> selectedTags;
-  final String? filterModel;
-  final String? filterSampler;
+
+  /// 模型多选（resolution_key 式精确值；空表=不筛）
+  final List<String> filterModels;
+
+  /// 采样器多选（空表=不筛）
+  final List<String> filterSamplers;
+
   final int? filterMinSteps;
   final int? filterMaxSteps;
   final double? filterMinCfg;
   final double? filterMaxCfg;
-  final String? filterResolution;
+
+  /// 分辨率多选（'WxH' 字符串；空表=不筛）
+  final List<String> filterResolutions;
+
+  /// 画面方向：null=全部 / 'landscape' / 'portrait' / 'square'
+  final String? filterOrientation;
+
+  /// 内容分级：null=全部 / 'sfw' / 'nsfw'
+  final String? nsfwMode;
+
   final int? minWidth;
   final int? minHeight;
   final int? maxWidth;
@@ -39,19 +54,28 @@ class FilterCriteria {
   final String? categoryId;
   final String? categoryFolderPath;
 
+  /// 收藏集过滤（membership，链接式）
+  final String? collectionId;
+
+  /// 仅 NAI 图（metadata 表 has_metadata = 1）。
+  /// 默认 false：生效来源是持久化偏好（进画廊时恢复，偏好默认 true）。
+  final bool naiOnly;
+
   const FilterCriteria({
     this.searchQuery = '',
     this.dateStart,
     this.dateEnd,
     this.showFavoritesOnly = false,
     this.selectedTags = const [],
-    this.filterModel,
-    this.filterSampler,
+    this.filterModels = const [],
+    this.filterSamplers = const [],
     this.filterMinSteps,
     this.filterMaxSteps,
     this.filterMinCfg,
     this.filterMaxCfg,
-    this.filterResolution,
+    this.filterResolutions = const [],
+    this.filterOrientation,
+    this.nsfwMode,
     this.minWidth,
     this.minHeight,
     this.maxWidth,
@@ -61,6 +85,8 @@ class FilterCriteria {
     this.metadataStatuses = const [],
     this.categoryId,
     this.categoryFolderPath,
+    this.collectionId,
+    this.naiOnly = false,
   });
 
   FilterCriteria copyWith({
@@ -69,13 +95,15 @@ class FilterCriteria {
     DateTime? dateEnd,
     bool? showFavoritesOnly,
     List<String>? selectedTags,
-    String? filterModel,
-    String? filterSampler,
+    List<String>? filterModels,
+    List<String>? filterSamplers,
     int? filterMinSteps,
     int? filterMaxSteps,
     double? filterMinCfg,
     double? filterMaxCfg,
-    String? filterResolution,
+    List<String>? filterResolutions,
+    String? filterOrientation,
+    String? nsfwMode,
     int? minWidth,
     int? minHeight,
     int? maxWidth,
@@ -85,13 +113,15 @@ class FilterCriteria {
     List<String>? metadataStatuses,
     bool clearDateStart = false,
     bool clearDateEnd = false,
-    bool clearFilterModel = false,
-    bool clearFilterSampler = false,
+    bool clearFilterModels = false,
+    bool clearFilterSamplers = false,
     bool clearFilterMinSteps = false,
     bool clearFilterMaxSteps = false,
     bool clearFilterMinCfg = false,
     bool clearFilterMaxCfg = false,
-    bool clearFilterResolution = false,
+    bool clearFilterResolutions = false,
+    bool clearFilterOrientation = false,
+    bool clearNsfwMode = false,
     bool clearMinWidth = false,
     bool clearMinHeight = false,
     bool clearMaxWidth = false,
@@ -100,8 +130,11 @@ class FilterCriteria {
     bool clearMaxFileSize = false,
     String? categoryId,
     String? categoryFolderPath,
+    String? collectionId,
+    bool? naiOnly,
     bool clearCategoryId = false,
     bool clearCategoryFolderPath = false,
+    bool clearCollectionId = false,
   }) {
     return FilterCriteria(
       searchQuery: searchQuery ?? this.searchQuery,
@@ -109,10 +142,12 @@ class FilterCriteria {
       dateEnd: clearDateEnd ? null : (dateEnd ?? this.dateEnd),
       showFavoritesOnly: showFavoritesOnly ?? this.showFavoritesOnly,
       selectedTags: selectedTags ?? this.selectedTags,
-      filterModel: clearFilterModel ? null : (filterModel ?? this.filterModel),
-      filterSampler: clearFilterSampler
-          ? null
-          : (filterSampler ?? this.filterSampler),
+      filterModels: clearFilterModels
+          ? const []
+          : (filterModels ?? this.filterModels),
+      filterSamplers: clearFilterSamplers
+          ? const []
+          : (filterSamplers ?? this.filterSamplers),
       filterMinSteps: clearFilterMinSteps
           ? null
           : (filterMinSteps ?? this.filterMinSteps),
@@ -125,9 +160,13 @@ class FilterCriteria {
       filterMaxCfg: clearFilterMaxCfg
           ? null
           : (filterMaxCfg ?? this.filterMaxCfg),
-      filterResolution: clearFilterResolution
+      filterResolutions: clearFilterResolutions
+          ? const []
+          : (filterResolutions ?? this.filterResolutions),
+      filterOrientation: clearFilterOrientation
           ? null
-          : (filterResolution ?? this.filterResolution),
+          : (filterOrientation ?? this.filterOrientation),
+      nsfwMode: clearNsfwMode ? null : (nsfwMode ?? this.nsfwMode),
       minWidth: clearMinWidth ? null : (minWidth ?? this.minWidth),
       minHeight: clearMinHeight ? null : (minHeight ?? this.minHeight),
       maxWidth: clearMaxWidth ? null : (maxWidth ?? this.maxWidth),
@@ -139,6 +178,10 @@ class FilterCriteria {
       categoryFolderPath: clearCategoryFolderPath
           ? null
           : (categoryFolderPath ?? this.categoryFolderPath),
+      collectionId: clearCollectionId
+          ? null
+          : (collectionId ?? this.collectionId),
+      naiOnly: naiOnly ?? this.naiOnly,
     );
   }
 
@@ -148,13 +191,15 @@ class FilterCriteria {
       dateEnd != null ||
       showFavoritesOnly ||
       selectedTags.isNotEmpty ||
-      filterModel != null ||
-      filterSampler != null ||
+      filterModels.isNotEmpty ||
+      filterSamplers.isNotEmpty ||
       filterMinSteps != null ||
       filterMaxSteps != null ||
       filterMinCfg != null ||
       filterMaxCfg != null ||
-      filterResolution != null ||
+      filterResolutions.isNotEmpty ||
+      filterOrientation != null ||
+      nsfwMode != null ||
       minWidth != null ||
       minHeight != null ||
       maxWidth != null ||
@@ -163,12 +208,44 @@ class FilterCriteria {
       maxFileSize != null ||
       metadataStatuses.isNotEmpty ||
       categoryId != null ||
-      categoryFolderPath != null;
+      categoryFolderPath != null ||
+      collectionId != null ||
+      naiOnly;
+
+  /// 是否存在「会话筛选条件」。
+  ///
+  /// 范围字段（categoryId/categoryFolderPath/collectionId/showFavoritesOnly）
+  /// 是侧栏选择的「浏览范围」，naiOnly 是常驻偏好——三者都不属于用户本次
+  /// 会话主动施加的筛选条件，清除按钮按此显隐：在文件夹里没设任何条件时
+  /// 按钮不显示，设了才显示，点了内容仍留在当前范围。
+  bool get hasSessionFilters =>
+      searchQuery.isNotEmpty ||
+      dateStart != null ||
+      dateEnd != null ||
+      selectedTags.isNotEmpty ||
+      filterModels.isNotEmpty ||
+      filterSamplers.isNotEmpty ||
+      filterMinSteps != null ||
+      filterMaxSteps != null ||
+      filterMinCfg != null ||
+      filterMaxCfg != null ||
+      filterResolutions.isNotEmpty ||
+      filterOrientation != null ||
+      nsfwMode != null ||
+      minWidth != null ||
+      minHeight != null ||
+      maxWidth != null ||
+      maxHeight != null ||
+      minFileSize != null ||
+      maxFileSize != null ||
+      metadataStatuses.isNotEmpty;
 
   bool get hasMetadataFilters =>
-      filterModel != null ||
-      filterSampler != null ||
-      filterResolution != null ||
+      filterModels.isNotEmpty ||
+      filterSamplers.isNotEmpty ||
+      filterResolutions.isNotEmpty ||
+      filterOrientation != null ||
+      nsfwMode != null ||
       filterMinSteps != null ||
       filterMaxSteps != null ||
       filterMinCfg != null ||
@@ -191,13 +268,15 @@ class FilterCriteria {
       if (dateEnd != null) 'de:${dateEnd!.millisecondsSinceEpoch}',
       if (showFavoritesOnly) 'fav:1',
       if (selectedTags.isNotEmpty) 'tags:${selectedTags.join(",")}',
-      if (filterModel != null) 'model:$filterModel',
-      if (filterSampler != null) 'sampler:$filterSampler',
+      if (filterModels.isNotEmpty) 'models:${filterModels.join(",")}',
+      if (filterSamplers.isNotEmpty) 'samplers:${filterSamplers.join(",")}',
       if (filterMinSteps != null) 'minStep:$filterMinSteps',
       if (filterMaxSteps != null) 'maxStep:$filterMaxSteps',
       if (filterMinCfg != null) 'minCfg:$filterMinCfg',
       if (filterMaxCfg != null) 'maxCfg:$filterMaxCfg',
-      if (filterResolution != null) 'res:$filterResolution',
+      if (filterResolutions.isNotEmpty) 'res:${filterResolutions.join(",")}',
+      if (filterOrientation != null) 'orient:$filterOrientation',
+      if (nsfwMode != null) 'nsfw:$nsfwMode',
       if (minWidth != null) 'minW:$minWidth',
       if (minHeight != null) 'minH:$minHeight',
       if (maxWidth != null) 'maxW:$maxWidth',
@@ -207,6 +286,8 @@ class FilterCriteria {
       if (metadataStatuses.isNotEmpty) 'meta:${metadataStatuses.join(",")}',
       if (categoryId != null) 'catId:$categoryId',
       if (categoryFolderPath != null) 'catPath:$categoryFolderPath',
+      if (collectionId != null) 'colId:$collectionId',
+      if (naiOnly) 'nai:1',
     ];
     return parts.join('|');
   }
@@ -271,7 +352,18 @@ class GalleryFilterService {
   // 取消令牌
   final Map<String, CancelToken> _activeFilters = {};
 
+  /// 当前排序（影响 advancedSearch 的 SQL ORDER BY 与缓存键）。
+  /// 由 LocalGalleryServiceImpl.setSort 同步设置。
+  GallerySort sort = const GallerySort.modifiedAtDesc();
+
   GalleryFilterService(this._dataSource);
+
+  /// 更新排序并清空过滤缓存（排序变化会使缓存结果顺序失效）
+  void setSort(GallerySort value) {
+    if (sort == value) return;
+    sort = value;
+    _filterCache.clear();
+  }
 
   /// 获取缓存统计
   Map<String, dynamic> get cacheStatistics => _filterCache.statistics;
@@ -283,7 +375,7 @@ class GalleryFilterService {
   }
 
   String _buildCacheKey(List<File> allFiles, FilterCriteria criteria) {
-    return '${criteria.cacheKey}|files:${allFiles.length}|rev:${_dataSource.dataRevision}';
+    return '${criteria.cacheKey}|sort:${sort.cacheKey}|files:${allFiles.length}|rev:${_dataSource.dataRevision}';
   }
 
   /// 异步应用过滤条件
@@ -367,6 +459,18 @@ class GalleryFilterService {
           criteria,
           cancelToken,
         );
+      } else if (criteria.hasMetadataFilters ||
+          criteria.naiOnly ||
+          criteria.hasAdvancedFilters) {
+        // 元数据过滤（model/sampler/resolution/方向/steps/cfg/NSFW）、
+        // NAI-only 与高级筛选（尺寸/文件大小/metadataStatuses）必须走数据库
+        // 候选，本地内存路径无法读取 metadata 表。
+        filtered = await _searchInDatabase(allFiles, criteria, cancelToken);
+        filtered = await _applyPostSearchFilters(
+          filtered,
+          criteria,
+          cancelToken,
+        );
       } else {
         // 本地过滤
         filtered = await _applyLocalFilters(allFiles, criteria, cancelToken);
@@ -409,11 +513,13 @@ class GalleryFilterService {
   ) async {
     try {
       // 使用高级搜索
+      // dateEnd 与本地过滤路径（_filterByDateRange）保持一致：end 当天含入
       final imageIds = await _dataSource.advancedSearch(
         textQuery: criteria.searchQuery.toLowerCase().trim(),
         favoritesOnly: criteria.showFavoritesOnly,
         dateStart: criteria.dateStart,
-        dateEnd: criteria.dateEnd,
+        // dateEnd 与本地过滤路径（_filterByDateRange）保持一致：end 当天含入
+        dateEnd: criteria.dateEnd?.add(const Duration(days: 1)),
         minWidth: criteria.minWidth,
         minHeight: criteria.minHeight,
         maxWidth: criteria.maxWidth,
@@ -423,6 +529,25 @@ class GalleryFilterService {
         metadataStatuses: criteria.metadataStatuses.isNotEmpty
             ? criteria.metadataStatuses
             : null,
+        models: criteria.filterModels.isEmpty ? null : criteria.filterModels,
+        samplers: criteria.filterSamplers.isEmpty
+            ? null
+            : criteria.filterSamplers,
+        resolutions: criteria.filterResolutions.isEmpty
+            ? null
+            : criteria.filterResolutions,
+        orientation: criteria.filterOrientation,
+        minSteps: criteria.filterMinSteps,
+        maxSteps: criteria.filterMaxSteps,
+        minCfg: criteria.filterMinCfg,
+        maxCfg: criteria.filterMaxCfg,
+        nsfwMode: criteria.nsfwMode,
+        naiOnly: criteria.naiOnly,
+        orderByColumn: sort.sqlColumn,
+        orderAscending: sort.direction == GallerySortDirection.ascending,
+        // 候选路径 = 当前视图文件：让 SQL 的 LIMIT 只作用于视图内文件，
+        // DB 残留行（源外/软删）不会占满 LIMIT 挤掉真实文件
+        candidatePaths: allFiles.map((file) => file.path).toList(),
         limit: max(1, allFiles.length),
       );
 
@@ -492,6 +617,32 @@ class GalleryFilterService {
 
     if (cancelToken.isCancelled) return [];
 
+    // NAI-only 过滤（DB 查 has_metadata 的 image_ids）
+    if (criteria.naiOnly) {
+      filtered = await _filterByNaiOnly(filtered, cancelToken);
+      AppLogger.d(
+        '_applyLocalFilters after naiOnly filter: ${filtered.length} files',
+        'GalleryFilterService',
+      );
+    }
+
+    if (cancelToken.isCancelled) return [];
+
+    // 收藏集过滤（membership）
+    if (criteria.collectionId != null) {
+      filtered = await _filterByCollection(
+        filtered,
+        criteria.collectionId!,
+        cancelToken,
+      );
+      AppLogger.d(
+        '_applyLocalFilters after collection filter: ${filtered.length} files',
+        'GalleryFilterService',
+      );
+    }
+
+    if (cancelToken.isCancelled) return [];
+
     // 分类过滤（按文件夹路径）
     if (criteria.categoryFolderPath != null) {
       filtered = await _filterByCategory(
@@ -534,6 +685,16 @@ class GalleryFilterService {
       filtered = await _filterByCategory(
         filtered,
         criteria.categoryFolderPath!,
+        cancelToken,
+      );
+    }
+
+    if (cancelToken.isCancelled) return [];
+
+    if (criteria.collectionId != null) {
+      filtered = await _filterByCollection(
+        filtered,
+        criteria.collectionId!,
         cancelToken,
       );
     }
@@ -632,7 +793,9 @@ class GalleryFilterService {
     return criteria.dateStart != null ||
         criteria.dateEnd != null ||
         criteria.showFavoritesOnly ||
-        criteria.hasAdvancedFilters;
+        criteria.naiOnly ||
+        criteria.hasAdvancedFilters ||
+        criteria.hasMetadataFilters;
   }
 
   List<String> _parseDelimitedSearchSegments(String value) {
@@ -693,6 +856,62 @@ class GalleryFilterService {
     } catch (e) {
       AppLogger.w('Failed to filter favorites: $e', 'GalleryFilterService');
       return [];
+    }
+  }
+
+  /// 按 NAI 元数据存在性过滤（与 [_filterByFavorites] 同款 DB image_ids 口径）。
+  Future<List<File>> _filterByNaiOnly(
+    List<File> files,
+    CancelToken cancelToken,
+  ) async {
+    try {
+      final pathToIdMap = await _dataSource.getImageIdsByPaths(
+        files.map((f) => f.path).toList(),
+      );
+
+      final metadataImageIds = await _dataSource.getImageIdsWithMetadata();
+      final metadataIdSet = metadataImageIds.toSet();
+
+      return files.where((file) {
+        if (cancelToken.isCancelled) return false;
+
+        final imageId = pathToIdMap[file.path];
+        if (imageId == null) return false;
+
+        return metadataIdSet.contains(imageId);
+      }).toList();
+    } catch (e) {
+      AppLogger.w('Failed to filter NAI-only: $e', 'GalleryFilterService');
+      return files;
+    }
+  }
+
+  /// 按收藏集成员关系过滤（链接式：image_id membership）
+  Future<List<File>> _filterByCollection(
+    List<File> files,
+    String collectionId,
+    CancelToken cancelToken,
+  ) async {
+    try {
+      final pathToIdMap = await _dataSource.getImageIdsByPaths(
+        files.map((f) => f.path).toList(),
+      );
+
+      final memberIds = await _dataSource.getCollectionImageIds(collectionId);
+      final memberSet = memberIds.toSet();
+
+      return files.where((file) {
+        if (cancelToken.isCancelled) return false;
+
+        final imageId = pathToIdMap[file.path];
+        if (imageId == null) return false;
+
+        return memberSet.contains(imageId);
+      }).toList();
+    } catch (e) {
+      AppLogger.w('Failed to filter collection: $e', 'GalleryFilterService');
+      // fail-open：与 _filterByNaiOnly 口径一致，失败不丢已有结果
+      return files;
     }
   }
 

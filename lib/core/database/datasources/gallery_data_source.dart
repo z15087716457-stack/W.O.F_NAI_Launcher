@@ -2,9 +2,11 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../data/models/gallery/local_image_record.dart'
     show MetadataStatus;
+import '../../../data/models/gallery/gallery_collection_info.dart';
 import '../../../data/models/gallery/gallery_dashboard_snapshot.dart';
 import '../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../data/services/image_metadata_service.dart';
@@ -18,6 +20,10 @@ import '../utils/lru_cache.dart';
 part 'gallery_data_source_records.dart';
 part 'gallery_data_source_schema.dart';
 part 'gallery_data_source_statistics.dart';
+part 'gallery_data_source_import.dart';
+part 'gallery_data_source_advanced_search.dart';
+part 'gallery_data_source_collections.dart';
+part 'gallery_data_source_metadata.dart';
 
 /// 画廊数据源
 ///
@@ -39,6 +45,8 @@ class GalleryDataSource extends EnhancedBaseDataSource
   static const String _imageTagsTable = 'gallery_image_tags';
   static const String _scanLogsTable = 'gallery_scan_logs';
   static const String _ftsIndexTable = 'gallery_fts_index';
+  static const String _collectionsTable = 'gallery_collections';
+  static const String _collectionItemsTable = 'gallery_collection_items';
 
   // LRU 缓存
   final LRUCache<int, GalleryImageRecord> _imageCache = LRUCache(
@@ -263,6 +271,9 @@ class GalleryDataSource extends EnhancedBaseDataSource
               'file_path': newPath,
               'file_name': fileName,
               'indexed_at': DateTime.now().millisecondsSinceEpoch,
+              // 移动/重命名 = 记录有效，重置软删标记
+              // （否则一致性检查先标删旧路径后，移动后的记录不可见）
+              'is_deleted': 0,
             },
             where: 'id = ?',
             whereArgs: [imageId],
@@ -666,6 +677,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
                 'created_at': record.createdAt.millisecondsSinceEpoch,
                 'modified_at': record.modifiedAt.millisecondsSinceEpoch,
                 'indexed_at': now.millisecondsSinceEpoch,
+                'last_scanned_at': record.lastScannedAt?.millisecondsSinceEpoch,
                 'date_ymd': dateYmd,
                 'resolution_key': record.resolutionKey,
                 'metadata_status': record.metadataStatus.index,
@@ -770,6 +782,92 @@ class GalleryDataSource extends EnhancedBaseDataSource
     _markDataChanged();
   }
 
+  /// 批量恢复软删（is_deleted=1 → 0），用于删除撤销。
+  ///
+  /// 文件仍在盘上（删除池的物理删除在下次启动），撤销后恢复可见。
+  Future<void> batchRestoreDeleted(List<String> filePaths) async {
+    if (filePaths.isEmpty) return;
+
+    await execute('batchRestoreDeleted', (db) async {
+      try {
+        final idsToInvalidate = <int>{};
+
+        await db.transaction((txn) async {
+          for (final pathChunk in chunk(filePaths, 900)) {
+            final placeholders = List.filled(pathChunk.length, '?').join(',');
+            final rows = await txn.rawQuery('''
+              SELECT id FROM $_imagesTable
+              WHERE file_path IN ($placeholders)
+              ''', pathChunk);
+
+            for (final row in rows) {
+              final id = (row['id'] as num?)?.toInt();
+              if (id != null) {
+                idsToInvalidate.add(id);
+              }
+            }
+          }
+
+          final batch = txn.batch();
+
+          for (final path in filePaths) {
+            batch.update(
+              _imagesTable,
+              {'is_deleted': 0},
+              where: 'file_path = ?',
+              whereArgs: [path],
+            );
+          }
+
+          await batch.commit(noResult: true);
+        });
+
+        for (final id in idsToInvalidate) {
+          _imageCache.remove(id);
+        }
+
+        AppLogger.d(
+          'Batch restored deleted: ${filePaths.length} files',
+          'GalleryDS',
+        );
+      } catch (e, stack) {
+        AppLogger.e('Failed to batch restore deleted', e, stack, 'GalleryDS');
+        rethrow;
+      }
+    });
+
+    _markDataChanged();
+  }
+
+  /// 获取所有软删除（is_deleted=1）文件的路径集合。
+  ///
+  /// 删除池的文件仍在盘上，文件系统遍历会再次看到它们；
+  /// 会话内以本集合为准做排除（DB 是软删的唯一权威来源）。
+  Future<Set<String>> getDeletedImagePaths() async {
+    return _trackQuery('getDeletedImagePaths', () async {
+      try {
+        return await execute(
+          'getDeletedImagePaths',
+          (db) async {
+            final results = await db.rawQuery('''
+                SELECT file_path FROM $_imagesTable
+                WHERE is_deleted = 1
+                ''');
+            return results
+                .map((row) => row['file_path'] as String?)
+                .whereType<String>()
+                .toSet();
+          },
+          timeout: const Duration(seconds: 30),
+          maxRetries: 2,
+        );
+      } catch (e, stack) {
+        AppLogger.e('Failed to get deleted image paths', e, stack, 'GalleryDS');
+        return const {};
+      }
+    });
+  }
+
   Future<int> countImages({bool includeDeleted = false}) async {
     return await execute('countImages', (db) async {
       try {
@@ -790,7 +888,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
   /// 按元数据状态统计图片数量
   ///
   /// 返回一个 Map: {statusName: count}
-  /// statusName: 'success', 'failed', 'none'
+  /// statusName: 'success', 'failed', 'none', 'imported'
   Future<Map<String, int>> countImagesByMetadataStatus() async {
     return await execute('countImagesByMetadataStatus', (db) async {
       try {
@@ -805,7 +903,12 @@ class GalleryDataSource extends EnhancedBaseDataSource
         final result = await db.rawQuery(sql);
         AppLogger.d('[GalleryDS] Query result: $result', 'GalleryDS');
 
-        final counts = <String, int>{'success': 0, 'failed': 0, 'none': 0};
+        final counts = <String, int>{
+          'success': 0,
+          'failed': 0,
+          'none': 0,
+          'imported': 0,
+        };
 
         for (final row in result) {
           final statusIndex = row['metadata_status'] as int? ?? 2; // 2 = none
@@ -814,6 +917,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
           final statusName = switch (statusIndex) {
             0 => 'success',
             1 => 'failed',
+            3 => 'imported',
             _ => 'none',
           };
           counts[statusName] = count;
@@ -832,7 +936,12 @@ class GalleryDataSource extends EnhancedBaseDataSource
           stack,
           'GalleryDS',
         );
-        return {'success': 0, 'failed': 0, 'none': 0};
+        return {
+          'success': 0,
+          'failed': 0,
+          'none': 0,
+          'imported': 0,
+        };
       }
     });
   }
@@ -858,6 +967,20 @@ class GalleryDataSource extends EnhancedBaseDataSource
       await execute(
         'upsertMetadata',
         (db) async {
+          // REPLACE 会整行覆盖，先取旧 is_nsfw 以免冲掉导入器写入的分级
+          var existingNsfw = 0;
+          try {
+            final oldRows = await db.rawQuery(
+              'SELECT is_nsfw FROM $_metadataTable WHERE image_id = ?',
+              [imageId],
+            );
+            if (oldRows.isNotEmpty) {
+              existingNsfw = (oldRows.first['is_nsfw'] as num?)?.toInt() ?? 0;
+            }
+          } catch (_) {
+            // 旧库迁移缺失该列时忽略，保持默认 0
+          }
+
           await db.insert(_metadataTable, {
             'image_id': imageId,
             'prompt': metadata.prompt,
@@ -883,6 +1006,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
             'version': metadata.version,
             'raw_json': metadata.rawJson,
             'has_metadata': metadata.hasData ? 1 : 0,
+            'is_nsfw': existingNsfw,
             'full_prompt_text': fullPromptText,
           }, conflictAlgorithm: ConflictAlgorithm.replace);
         },
@@ -975,6 +1099,32 @@ class GalleryDataSource extends EnhancedBaseDataSource
         (txn) async {
           final ftsUpdates = <int, String>{};
 
+          // REPLACE 会整行覆盖，先按 image_id 批量取旧 is_nsfw，
+          // 避免冲掉导入器写入的分级（与单条 upsertMetadata 同口径）。
+          final existingNsfw = <int, int>{};
+          if (batch.isNotEmpty) {
+            final batchImageIds = batch.map((entry) => entry.key).toList();
+            final placeholders = List.filled(
+              batchImageIds.length,
+              '?',
+            ).join(',');
+            try {
+              final oldRows = await txn.rawQuery(
+                'SELECT image_id, is_nsfw FROM $_metadataTable '
+                'WHERE image_id IN ($placeholders)',
+                batchImageIds,
+              );
+              for (final row in oldRows) {
+                final imageId = (row['image_id'] as num?)?.toInt();
+                if (imageId == null) continue;
+                existingNsfw[imageId] =
+                    (row['is_nsfw'] as num?)?.toInt() ?? 0;
+              }
+            } catch (_) {
+              // 旧库迁移缺失该列时忽略，保持默认 0
+            }
+          }
+
           for (final entry in batch) {
             final imageId = entry.key;
             final metadata = entry.value;
@@ -1005,6 +1155,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
               'version': metadata.version,
               'raw_json': metadata.rawJson,
               'has_metadata': metadata.hasData ? 1 : 0,
+              'is_nsfw': existingNsfw[imageId] ?? 0,
               'full_prompt_text': fullPromptText,
             }, conflictAlgorithm: ConflictAlgorithm.replace);
 
@@ -1551,9 +1702,11 @@ class GalleryDataSource extends EnhancedBaseDataSource
     final cacheKey = _QueryCacheKey('searchByDelimitedTextSegments', {
       'segments': searchSegments.join(','),
       'limit': limit,
-      if (candidatePathList != null) 'candidateCount': candidatePathList.length,
+      // 候选路径指纹：长度 + 逐元素 hash 组合，代替 Object.hashAll 的
+      // 单一 32 位整型（元素多时碰撞概率不可忽略，撞键会返回错视图结果）
       if (candidatePathList != null)
-        'candidateHash': Object.hashAll(candidatePathList),
+        'candidateFingerprint':
+            '${candidatePathList.length}:${candidatePathList.fold<int>(0, (h, p) => h * 31 + p.hashCode)}',
     });
 
     final cached = _queryCache.get(cacheKey);
@@ -1700,164 +1853,6 @@ class GalleryDataSource extends EnhancedBaseDataSource
     }
 
     return variants.where((variant) => variant.isNotEmpty).toSet();
-  }
-
-  /// 高级搜索 - 支持多条件组合查询
-  Future<List<int>> advancedSearch({
-    String? textQuery,
-    DateTime? dateStart,
-    DateTime? dateEnd,
-    bool favoritesOnly = false,
-    int? minWidth,
-    int? minHeight,
-    int? maxWidth,
-    int? maxHeight,
-    int? minFileSize,
-    int? maxFileSize,
-    List<String>? metadataStatuses,
-    int limit = 100,
-  }) async {
-    // 缓存键
-    final cacheKey = _QueryCacheKey('advancedSearch', {
-      'textQuery': textQuery,
-      'dateStart': dateStart?.millisecondsSinceEpoch,
-      'dateEnd': dateEnd?.millisecondsSinceEpoch,
-      'favoritesOnly': favoritesOnly,
-      'minWidth': minWidth,
-      'minHeight': minHeight,
-      'maxWidth': maxWidth,
-      'maxHeight': maxHeight,
-      'minFileSize': minFileSize,
-      'maxFileSize': maxFileSize,
-      'metadataStatuses': metadataStatuses?.join(','),
-      'limit': limit,
-    });
-
-    // 检查缓存
-    final cached = _queryCache.get(cacheKey);
-    if (cached != null) {
-      return cached.cast<int>();
-    }
-
-    return _trackQuery(
-      'advancedSearch',
-      () async {
-        // 1. 预取搜索候选，兼容 prompt 与文件名两条搜索链路
-        List<int>? textSearchIds;
-        if (textQuery != null && textQuery.trim().isNotEmpty) {
-          final fullTextIds = await searchFullText(textQuery, limit: limit * 2);
-          final fileNameIds = await searchByFileName(
-            textQuery,
-            limit: limit * 2,
-          );
-          final metadataTextIds = await searchByMetadataText(
-            textQuery,
-            limit: limit * 2,
-          );
-          textSearchIds = {
-            ...fullTextIds,
-            ...fileNameIds,
-            ...metadataTextIds,
-          }.toList();
-          if (textSearchIds.isEmpty) {
-            return <int>[];
-          }
-        }
-
-        return await execute('advancedSearch', (db) async {
-          // 2. 构建查询条件
-          final conditions = <String>['i.is_deleted = 0'];
-          final args = <dynamic>[];
-
-          if (favoritesOnly) {
-            conditions.add('f.image_id IS NOT NULL');
-          }
-
-          if (dateStart != null) {
-            conditions.add('i.modified_at >= ?');
-            args.add(dateStart.millisecondsSinceEpoch);
-          }
-          if (dateEnd != null) {
-            conditions.add('i.modified_at <= ?');
-            args.add(dateEnd.millisecondsSinceEpoch);
-          }
-
-          if (minWidth != null) {
-            conditions.add('i.width >= ?');
-            args.add(minWidth);
-          }
-          if (minHeight != null) {
-            conditions.add('i.height >= ?');
-            args.add(minHeight);
-          }
-          if (maxWidth != null) {
-            conditions.add('i.width <= ?');
-            args.add(maxWidth);
-          }
-          if (maxHeight != null) {
-            conditions.add('i.height <= ?');
-            args.add(maxHeight);
-          }
-
-          if (minFileSize != null) {
-            conditions.add('i.file_size >= ?');
-            args.add(minFileSize);
-          }
-          if (maxFileSize != null) {
-            conditions.add('i.file_size <= ?');
-            args.add(maxFileSize);
-          }
-
-          if (metadataStatuses != null && metadataStatuses.isNotEmpty) {
-            final statusIndices = metadataStatuses
-                .map(
-                  (s) => MetadataStatus.values.indexWhere((v) => v.name == s),
-                )
-                .where((i) => i >= 0)
-                .toList();
-            if (statusIndices.isNotEmpty) {
-              final placeholders = List.filled(
-                statusIndices.length,
-                '?',
-              ).join(',');
-              conditions.add('i.metadata_status IN ($placeholders)');
-              args.addAll(statusIndices);
-            }
-          }
-
-          if (textSearchIds != null && textSearchIds.isNotEmpty) {
-            final placeholders = List.filled(
-              textSearchIds.length,
-              '?',
-            ).join(',');
-            conditions.add('i.id IN ($placeholders)');
-            args.addAll(textSearchIds);
-          }
-
-          final whereClause = conditions.join(' AND ');
-
-          // 3. 执行查询
-          final results = await db.rawQuery(
-            '''
-            SELECT i.id FROM $_imagesTable i
-            ${favoritesOnly ? 'INNER JOIN $_favoritesTable f ON i.id = f.image_id' : 'LEFT JOIN $_favoritesTable f ON i.id = f.image_id'}
-            WHERE $whereClause
-            ORDER BY i.modified_at DESC
-            LIMIT ?
-            ''',
-            [...args, limit],
-          );
-
-          final ids = results.map((row) => (row['id'] as num).toInt()).toList();
-
-          // 更新缓存
-          _queryCache.put(cacheKey, ids);
-
-          return ids;
-        });
-      },
-      details: 'text=${textQuery != null}, favorites=$favoritesOnly',
-    );
   }
 
   // ============================================================
@@ -2076,6 +2071,17 @@ class GalleryDataSource extends EnhancedBaseDataSource
 
   String _generateTagId(String tagName) {
     return tagName.toLowerCase().trim();
+  }
+
+  /// 批量导入标签索引条目（JSONL 索引导入专用，幂等可重导）
+  ///
+  /// 实现见 [gallery_data_source_import.dart] 的 [_importTagIndexEntries]。
+  /// 返回 (新建数, 更新数)
+  Future<(int, int)> importTagIndexEntries(
+    List<TagIndexImportEntry> entries, {
+    int batchSize = 500,
+  }) {
+    return _importTagIndexEntries(this, entries, batchSize: batchSize);
   }
 
   // ============================================================

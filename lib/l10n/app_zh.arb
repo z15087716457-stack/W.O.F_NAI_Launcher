@@ -218,6 +218,69 @@
   "settings_imageSavePath": "图片保存位置",
   "settings_autoSave": "自动保存",
   "settings_autoSaveSubtitle": "生成后自动保存图片",
+  "settings_extraRootsTitle": "图库源管理",
+  "settings_extraRootsHint": "额外图库源：将任意文件夹加入画廊浏览与搜索（只读，不参与自动保存）。添加后请在画廊页或本页底部执行重新扫描。",
+  "settings_extraRootsEmpty": "尚未添加额外图库源",
+  "settings_extraRootsAdd": "添加文件夹",
+  "settings_extraRootsAddTitle": "选择要添加的图库源文件夹",
+  "settings_extraRootsRemove": "移除该图库源",
+  "settings_extraRootsRemoveConfirmTitle": "移除图库源？",
+  "settings_extraRootsRemoveConfirmContent": "将「{path}」从画廊中移除（不会删除文件夹中的任何文件）。",
+  "settings_extraRootsAdded": "图库源已添加，重新扫描后生效",
+  "settings_extraRootsRemoved": "图库源已移除",
+  "settings_extraRootsDuplicate": "该文件夹已在图库源中",
+  "settings_extraRootsSameAsMain": "该文件夹与图片保存位置相同",
+  "settings_extraRootsNested": "图库源之间不能互相包含，请选择其他文件夹",
+  "settings_extraRootsNotFound": "所选文件夹不存在",
+  "@settings_extraRootsRemoveConfirmContent": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_importTagIndex": "导入标签索引…",
+  "settings_importTagIndexPickTitle": "选择标签索引文件 (.jsonl)",
+  "settings_importTagIndexProgress": "正在导入 {processed}/{total} 行…",
+  "@settings_importTagIndexProgress": {
+    "placeholders": {
+      "processed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "settings_importTagIndexDone": "导入完成：新增 {imported}，更新 {updated}，跳过 {skipped}，错误 {errors}",
+  "@settings_importTagIndexDone": {
+    "placeholders": {
+      "imported": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "errors": {
+        "type": "int"
+      }
+    }
+  },
+  "settings_importTagIndexFailed": "标签索引导入失败",
+  "settings_importTagIndexBlockedByScan": "画廊正在扫描中，请等待扫描完成后再导入标签索引",
+  "settings_extraRootsIndexImportTitle": "检测到标签索引",
+  "settings_extraRootsIndexImportContent": "在「{path}」下检测到标签索引 index.jsonl。先导入标签索引可让之后的扫描直接快进（跳过元数据解析），是否现在导入？",
+  "@settings_extraRootsIndexImportContent": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_extraRootsIndexImportConfirm": "现在导入",
   "settings_about": "关于",
   "settings_version": "版本 {version}",
   "settings_openSource": "开源项目",
@@ -1961,13 +2024,6 @@
   "localGallery_emptySubtitle": "生成的图片将保存在此处",
   "localGallery_noMatchingResults": "无匹配结果",
   "localGallery_loadingGroupedImages": "加载分组图片中...",
-  "localGallery_jumpedToMonth": "已跳转到 {year}-{month}",
-  "@localGallery_jumpedToMonth": {
-    "placeholders": {
-      "year": {},
-      "month": {}
-    }
-  },
   "localGallery_title": "本地画廊",
   "localGallery_allImages": "全部图片",
   "localGallery_categoryPanelTitle": "分类",
@@ -1980,14 +2036,50 @@
   "localGallery_packSelected": "打包",
   "localGallery_editMetadata": "编辑",
   "localGallery_addToCollection": "收藏",
-  "localGallery_switchToGridView": "切换到网格视图",
-  "localGallery_switchToDateGroupedView": "切换到日期分组视图",
+  "localGallery_sortButton": "排序",
+  "localGallery_sortFieldModified": "修改时间",
+  "localGallery_sortFieldCreated": "创建时间",
+  "localGallery_sortFieldName": "文件名",
+  "localGallery_sortFieldSize": "文件大小",
+  "localGallery_sortFieldDimensions": "图像尺寸",
+  "localGallery_sortToggleDirection": "切换排序方向",
+  "localGallery_aboutColumns": "约 {count} 列",
+  "@localGallery_aboutColumns": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_columnWidth": "列宽",
+  "localGallery_naiOnly": "NAI",
+  "localGallery_naiOnlyTooltip": "仅显示 NAI 生成的图片",
+  "localGallery_masonryViewLabel": "瀑布流",
+  "localGallery_switchToMasonryView": "切换到瀑布流视图",
+  "localGallery_switchToGridLayout": "切换到网格视图",
+  "localGallery_dateRangeYearMonth": "{year}年{month}月",
+  "@localGallery_dateRangeYearMonth": {
+    "placeholders": {
+      "year": {},
+      "month": {}
+    }
+  },
+  "localGallery_dateRangePrevMonth": "上个月",
+  "localGallery_dateRangeNextMonth": "下个月",
+  "localGallery_dateRangeClear": "清除",
+  "localGallery_searchInScope": "搜索：{scope}",
+  "@localGallery_searchInScope": {
+    "placeholders": {
+      "scope": {}
+    }
+  },
   "localGallery_openFilterPanel": "打开筛选面板",
   "localGallery_hideCategoryPanel": "隐藏分类面板",
   "localGallery_showCategoryPanel": "显示分类面板",
   "localGallery_enterSelectionMode": "进入选择模式",
   "localGallery_refreshTooltip": "刷新画廊\n\n自动检测新增/修改的图片并更新索引",
   "localGallery_tagIntersection": "标签交集",
+  "localGallery_filterByTags": "按标签筛选",
+  "localGallery_tagInputHint": "输入标签，回车添加",
+  "localGallery_addTag": "添加",
   "localGallery_createCategoryTitle": "新建分类",
   "localGallery_createCategoryHint": "请输入分类名称",
   "localGallery_createCategoryConfirm": "创建",
@@ -1995,19 +2087,24 @@
   "localGallery_showInFolder": "在文件夹中显示",
   "localGallery_promptCopied": "Prompt 已复制",
   "localGallery_seedCopied": "Seed 已复制",
-  "localGallery_confirmDeleteImageContent": "确定要删除图片「{name}」吗？\n\n此操作无法撤销。",
+  "localGallery_createCollectionTitle": "新建收藏集",
+  "localGallery_createCollectionHint": "输入收藏集名称",
+  "localGallery_createCollectionConfirm": "创建",
+  "localGallery_deleteCollectionContent": "确定删除收藏集「{name}」？仅移除收藏集条目，不会删除任何图片文件。",
+  "@localGallery_deleteCollectionContent": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "localGallery_unfavorite": "取消收藏",
+  "localGallery_favoriteMenuEmptyCollections": "暂无收藏集，左侧 + 创建",
+  "localGallery_confirmDeleteImageContent": "确定要删除图片「{name}」吗？\n\n图片会立即从画廊消失，文件将在下次启动时彻底清理（本次会话内可撤销）。",
   "@localGallery_confirmDeleteImageContent": {
     "placeholders": {
       "name": {}
     }
   },
-  "localGallery_imageDeleted": "图片已删除",
-  "localGallery_deleteFailed": "删除失败: {error}",
-  "@localGallery_deleteFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
+  "localGallery_externalReadonly": "外部图库源为只读，此操作不可用",
   "localGallery_categoryDeleteContent": "确定要删除此分类吗？文件夹及其内容将被保留。",
   "localGallery_protectedDeleteCategoryTitle": "保护模式：确认删除分类",
   "localGallery_protectedDeleteCategoryContent": "将删除此分类记录，文件夹及内容会保留。请再次确认。",
@@ -2308,9 +2405,20 @@
   "localGallery_filterByCfg": "按 CFG 筛选",
   "localGallery_filterByResolution": "按分辨率筛选",
   "localGallery_filterSubtitle": "精确筛选您的图片集合",
-  "localGallery_modelHint": "输入模型名称...",
-  "localGallery_samplerHint": "输入采样器名称...",
-  "localGallery_resolutionHint": "宽度x高度 (如: 1024x1024)",
+  "localGallery_filterOrientation": "画面方向",
+  "localGallery_orientationAny": "全部",
+  "localGallery_orientationLandscape": "横版",
+  "localGallery_orientationPortrait": "竖版",
+  "localGallery_orientationSquare": "方图",
+  "localGallery_filterNsfw": "内容分级",
+  "localGallery_nsfwAny": "全部",
+  "localGallery_nsfwSfw": "全年龄",
+  "localGallery_nsfwOnly": "仅 NSFW",
+  "localGallery_noModelCandidates": "暂无模型元数据，导入标签索引或扫描后可用",
+  "localGallery_noSamplerCandidates": "暂无采样器元数据，导入标签索引或扫描后可用",
+  "localGallery_noResolutionCandidates": "暂无分辨率元数据",
+  "localGallery_candidatesLoadFailed": "候选加载失败",
+  "localGallery_noTagSuggestions": "无匹配标签",
   "localGallery_activeFiltersSet": "已设置筛选",
   "localGallery_applyFilters": "应用筛选",
   "localGallery_resetAdvancedFilters": "重置高级筛选",
@@ -2339,18 +2447,50 @@
   "localGallery_undone": "已撤销",
   "localGallery_redone": "已重做",
   "localGallery_confirmBulkDelete": "确认批量删除",
-  "localGallery_confirmBulkDeleteContent": "确定要删除选中的 {count} 张图片吗？\n\n此操作将从文件系统中永久删除这些图片，无法恢复。",
+  "localGallery_confirmBulkDeleteContent": "确定要删除选中的 {count} 张图片吗？\n\n图片会立即从画廊消失，文件将在下次启动时彻底清理（本次会话内可撤销）。",
   "@localGallery_confirmBulkDeleteContent": {
     "placeholders": {
       "count": {}
     }
   },
-  "localGallery_deletedImages": "已删除 {count} 张图片",
-  "@localGallery_deletedImages": {
+  "localGallery_deletedToPool": "已删除 {count} 张图片，下次启动时彻底清理。",
+  "@localGallery_deletedToPool": {
     "placeholders": {
       "count": {}
     }
   },
+  "localGallery_trashTitle": "删除池",
+  "localGallery_trashEmpty": "删除池是空的",
+  "localGallery_trashHint": "池内文件仍在磁盘上，下次启动时彻底删除；恢复后立即回到图库。",
+  "localGallery_trashCount": "{count} 项",
+  "@localGallery_trashCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_trashRestore": "恢复",
+  "localGallery_trashRestoreAll": "全部恢复",
+  "localGallery_trashRestoreFailed": "恢复失败",
+  "localGallery_trashRestored": "已恢复 {count} 张图片",
+  "@localGallery_trashRestored": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_trashDeleteAll": "彻底删除全部",
+  "localGallery_trashDeleteAllConfirm": "将立即物理删除池内全部 {count} 个文件，不可恢复。",
+  "@localGallery_trashDeleteAllConfirm": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_trashDeletedForever": "已彻底删除 {count} 个文件",
+  "@localGallery_trashDeletedForever": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_trashFileMissing": "文件已不在磁盘上",
   "localGallery_noFoldersAvailable": "暂无可用文件夹，请先创建文件夹",
   "localGallery_moveToFolder": "移动到文件夹",
   "localGallery_imageCount": "{count} 张图片",
@@ -4468,8 +4608,6 @@
   "promptAssistant_defaultCustomRuleName": "默认自定义规则",
   "promptAssistant_defaultCustomRuleContent": "你是提示词改写助手。根据当前提示词、用户需求和可选参考图修改提示词。只输出最终可直接使用的一行提示词，不要解释。",
 
-  "localGallery_dateFilterButton": "日期过滤",
-
   "cacheStats_title": "缓存统计",
   "cacheStats_autoRefreshUpdated": "自动刷新 · 上次更新: {time}",
   "@cacheStats_autoRefreshUpdated": {
@@ -4510,7 +4648,6 @@
   "galleryCache_scanAlreadyRunning": "已有扫描任务在进行中，请等待完成后再试",
   "galleryCache_preparing": "准备中...",
   "galleryCache_noGalleryFolder": "未设置画廊目录",
-  "galleryCache_galleryFolderMissing": "画廊目录不存在",
   "galleryCache_scanningPhase": "正在扫描 {processed}/{total}...",
   "@galleryCache_scanningPhase": {
     "placeholders": {

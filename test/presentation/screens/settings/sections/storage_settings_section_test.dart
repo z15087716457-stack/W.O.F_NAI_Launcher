@@ -109,14 +109,16 @@ void main() {
     await tester.pump();
 
     final settingsCards = find.byType(SettingsCard);
-    expect(settingsCards, findsNWidgets(2));
+    expect(settingsCards, findsNWidgets(3));
 
     final primaryRect = tester.getRect(settingsCards.at(0));
-    final cacheRect = tester.getRect(settingsCards.at(1));
 
-    expect(cacheRect.left, primaryRect.left);
-    expect(cacheRect.right, primaryRect.right);
-    expect(cacheRect.width, primaryRect.width);
+    for (var i = 1; i < 3; i++) {
+      final cardRect = tester.getRect(settingsCards.at(i));
+      expect(cardRect.left, primaryRect.left);
+      expect(cardRect.right, primaryRect.right);
+      expect(cardRect.width, primaryRect.width);
+    }
   });
 }
 

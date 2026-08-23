@@ -2,11 +2,14 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../core/storage/local_storage_service.dart';
 import '../../core/utils/app_logger.dart';
+import '../../core/utils/gallery_path_utils.dart';
+import '../../data/repositories/gallery_folder_repository.dart';
 import '../models/gallery/gallery_category.dart';
 
 /// 画廊分类仓库
@@ -190,15 +193,58 @@ class GalleryCategoryRepository {
   }
 
   String _absolutePathFromNormalized(String rootPath, String normalizedPath) {
+    // 绝对路径（外部图库源节点）直接使用
+    if (isAbsoluteGalleryPath(normalizedPath)) return normalizedPath;
     return p.joinAll([rootPath, ...normalizedPath.split('/')]);
   }
 
+  /// 获取分类对应的绝对文件夹路径
+  ///
+  /// 外部图库源节点（folderPath 为绝对路径）直接返回自身；
+  /// 主源节点按相对根目录拼接
+  Future<String> _absoluteCategoryPath(
+    String rootPath,
+    GalleryCategory category,
+  ) async {
+    if (category.isExternal) return category.folderPath;
+    return p.join(rootPath, category.folderPath);
+  }
+
+  /// 分类树中是否存在外部图库源分类（用于禁用外部子树下的操作）
+  bool _categoryOrAncestorsExternal(
+    GalleryCategory category,
+    List<GalleryCategory> allCategories,
+  ) {
+    if (category.isExternal) return true;
+    // 向上找父链
+    final visited = <String>{};
+    String? parentId = category.parentId;
+    while (parentId != null && visited.add(parentId)) {
+      final parent = allCategories.findById(parentId);
+      if (parent == null) break;
+      if (parent.isExternal) return true;
+      parentId = parent.parentId;
+    }
+    return false;
+  }
+
   /// 创建分类（同时创建文件夹）
+  ///
+  /// 外部图库源子树只读：父分类属于外部源时拒绝创建
   Future<GalleryCategory?> createCategory({
     required String name,
     String? parentId,
     List<GalleryCategory> existingCategories = const [],
   }) async {
+    // 外部图库源子树只读
+    if (parentId != null) {
+      final parent = existingCategories.findById(parentId);
+      if (parent != null && _categoryOrAncestorsExternal(parent, existingCategories)) {
+        AppLogger.w('外部图库源分类为只读，禁止创建子分类: ${parent.name}');
+        return null;
+      }
+    }
+
     final rootPath = await getRootPath();
     if (rootPath == null) return null;
 
@@ -267,11 +313,18 @@ class GalleryCategoryRepository {
   }
 
   /// 重命名分类（同时重命名文件夹）
+  ///
+  /// 外部图库源分类只读
   Future<GalleryCategory?> renameCategory(
     GalleryCategory category,
     String newName,
     List<GalleryCategory> allCategories,
   ) async {
+    if (_categoryOrAncestorsExternal(category, allCategories)) {
+      AppLogger.w('外部图库源分类为只读，禁止重命名: ${category.name}');
+      return null;
+    }
+
     final rootPath = await getRootPath();
     if (rootPath == null) return null;
 
@@ -325,11 +378,27 @@ class GalleryCategoryRepository {
   }
 
   /// 移动分类到新父级（同时移动文件夹）
+  ///
+  /// 外部图库源分类只读；目标父分类属于外部源时也拒绝
   Future<GalleryCategory?> moveCategory(
     GalleryCategory category,
     String? newParentId,
     List<GalleryCategory> allCategories,
   ) async {
+    if (_categoryOrAncestorsExternal(category, allCategories)) {
+      AppLogger.w('外部图库源分类为只读，禁止移动: ${category.name}');
+      return null;
+    }
+
+    if (newParentId != null) {
+      final newParent = allCategories.findById(newParentId);
+      if (newParent != null &&
+          _categoryOrAncestorsExternal(newParent, allCategories)) {
+        AppLogger.w('外部图库源分类为只读，禁止移入: ${newParent.name}');
+        return null;
+      }
+    }
+
     final rootPath = await getRootPath();
     if (rootPath == null) return null;
 
@@ -398,12 +467,19 @@ class GalleryCategoryRepository {
   }
 
   /// 删除分类
+  ///
+  /// 外部图库源分类只读
   Future<bool> deleteCategory(
     GalleryCategory category,
     List<GalleryCategory> allCategories, {
     bool deleteFolder = true,
     bool recursive = false,
   }) async {
+    if (_categoryOrAncestorsExternal(category, allCategories)) {
+      AppLogger.w('外部图库源分类为只读，禁止删除: ${category.name}');
+      return false;
+    }
+
     final rootPath = await getRootPath();
     if (rootPath == null) return false;
 
@@ -442,16 +518,30 @@ class GalleryCategoryRepository {
   }
 
   /// 移动图片到分类
+  ///
+  /// 额外图库源文件只读（源文件）；目标分类属于外部图库源时同样拒绝
   Future<String?> moveImageToCategory(
     String imagePath,
     GalleryCategory? targetCategory,
   ) async {
+    // 源文件位于额外图库源 → 只读
+    if (await GalleryFolderRepository.instance.isExtraRootPath(imagePath)) {
+      AppLogger.w('额外图库源文件为只读，禁止移动: $imagePath');
+      return null;
+    }
+
     final rootPath = await getRootPath();
     if (rootPath == null) return null;
 
     try {
       final file = File(imagePath);
       if (!await file.exists()) return null;
+
+      // 目标分类属于外部图库源 → 只读
+      if (targetCategory != null && targetCategory.isExternal) {
+        AppLogger.w('外部图库源分类为只读，禁止移入: ${targetCategory.name}');
+        return null;
+      }
 
       final fileName = p.basename(imagePath);
       final targetDir = targetCategory == null
@@ -503,7 +593,7 @@ class GalleryCategoryRepository {
     if (rootPath == null) return 0;
 
     return _countImagesInFolder(
-      p.join(rootPath, category.folderPath),
+      await _absoluteCategoryPath(rootPath, category),
       recursive: includeDescendants,
     );
   }
@@ -512,13 +602,13 @@ class GalleryCategoryRepository {
   Future<String?> getCategoryAbsolutePath(GalleryCategory category) async {
     final rootPath = await getRootPath();
     if (rootPath == null) return null;
-    return p.join(rootPath, category.folderPath);
+    return _absoluteCategoryPath(rootPath, category);
   }
 
   /// 同步分类与文件系统
   ///
-  /// 扫描文件系统中的文件夹，创建缺失的分类
-  /// 删除不存在的分类
+  /// 扫描主源 + 全部额外图库源的文件夹，创建缺失的分类、删除不存在的分类
+  /// 额外图库源的分类节点 folderPath 存绝对路径（只读，不参与分类编辑）
   Future<List<GalleryCategory>> syncWithFileSystem(
     List<GalleryCategory> existingCategories,
   ) async {
@@ -536,7 +626,7 @@ class GalleryCategoryRepository {
 
     // 检查现有分类的文件夹是否存在
     for (final category in existingCategories) {
-      final folderPath = p.join(rootPath, category.folderPath);
+      final folderPath = await _absoluteCategoryPath(rootPath, category);
       if (await Directory(folderPath).exists()) {
         // 更新图片数量
         final imageCount = await _countImagesInFolder(folderPath);
@@ -545,7 +635,7 @@ class GalleryCategoryRepository {
       // 如果文件夹不存在，则不添加到更新列表（相当于删除）
     }
 
-    // 扫描文件系统中的新文件夹
+    // 扫描主源文件系统中的新文件夹
     await _scanAndAddNewFolders(
       rootPath,
       rootPath,
@@ -555,29 +645,80 @@ class GalleryCategoryRepository {
       updatedCategories,
     );
 
-    return updatedCategories;
+    // 扫描每个额外图库源：根节点 + 子文件夹（folderPath 为绝对路径）
+    for (final extraRoot
+        in await GalleryFolderRepository.instance.getExtraRootPaths()) {
+      if (!await Directory(extraRoot).exists()) continue;
+
+      final normalizedRoot = _normalizeCategoryPath(extraRoot);
+      var rootCategory = updatedCategories.firstWhereOrNull(
+        (c) =>
+            c.isExternal &&
+            c.parentId == null &&
+            _normalizeCategoryPath(c.folderPath) == normalizedRoot,
+      );
+      if (rootCategory == null) {
+        rootCategory = GalleryCategory.create(
+          name: p.basename(extraRoot),
+          folderPath: extraRoot,
+          parentId: null,
+          sortOrder: updatedCategories.where((c) => c.parentId == null).length,
+        );
+        existingPaths.add(normalizedRoot);
+        updatedCategories.add(rootCategory);
+      }
+
+      // 递归扫描外部源的子文件夹
+      await _scanAndAddNewFolders(
+        extraRoot,
+        extraRoot,
+        rootCategory.id,
+        existingPaths,
+        suppressedPaths,
+        updatedCategories,
+        useAbsolutePaths: true,
+      );
+    }
+
+    // 计数聚合：各分类的 imageCount 目前是「直系计数」（不含子目录），
+    // 父节点需要递归总数，才能与选中后按路径前缀过滤的实际图数一致
+    // （例如外部图库源根节点 01_图库 = 其下所有子目录图片之和）。
+    return updatedCategories.withAggregatedImageCounts();
   }
 
   /// 递归扫描并添加新文件夹
+  ///
+  /// [useAbsolutePaths] 为 true 时（外部图库源）folderPath 存绝对路径，
+  /// 否则存相对 [rootPath] 的路径
   Future<void> _scanAndAddNewFolders(
     String rootPath,
     String currentPath,
     String? parentId,
     Set<String> existingPaths,
     Set<String> suppressedPaths,
-    List<GalleryCategory> categories,
-  ) async {
+    List<GalleryCategory> categories, {
+    bool useAbsolutePaths = false,
+  }) async {
     final dir = Directory(currentPath);
     if (!await dir.exists()) return;
 
+    // 【防卡顿】大目录树（如 2.3 万目录的图库）遍历时分块让出事件循环
+    var visited = 0;
     try {
       await for (final entity in dir.list(followLinks: false)) {
+        visited++;
+        if (visited % 500 == 0) {
+          await Future<void>.delayed(Duration.zero);
+        }
+
         if (entity is Directory) {
           final folderName = p.basename(entity.path);
           // 跳过隐藏文件夹
           if (folderName.startsWith('.')) continue;
 
-          final relativePath = p.relative(entity.path, from: rootPath);
+          final relativePath = useAbsolutePaths
+              ? entity.path
+              : p.relative(entity.path, from: rootPath);
           final normalizedRelativePath = _normalizeCategoryPath(relativePath);
 
           if (suppressedPaths.contains(normalizedRelativePath)) {
@@ -605,6 +746,7 @@ class GalleryCategoryRepository {
               existingPaths,
               suppressedPaths,
               categories,
+              useAbsolutePaths: useAbsolutePaths,
             );
           } else {
             // 已存在的分类，查找其ID并递归扫描子文件夹
@@ -624,6 +766,7 @@ class GalleryCategoryRepository {
                 existingPaths,
                 suppressedPaths,
                 categories,
+                useAbsolutePaths: useAbsolutePaths,
               );
             }
           }

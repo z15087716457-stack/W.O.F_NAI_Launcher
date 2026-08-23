@@ -64,7 +64,7 @@ class CollectionNotifier extends _$CollectionNotifier {
   Future<void> _loadCollections() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final collections = _repository.getAllCollections();
+      final collections = await _repository.getAllCollections();
       state = state.copyWith(
         collections: collections,
         isLoading: false,
@@ -283,12 +283,113 @@ class CollectionNotifier extends _$CollectionNotifier {
     }
   }
 
-  /// 检查图片是否在集合中
+  /// 重命名集合
   ///
-  /// [collectionId] 集合ID
-  /// [imagePath] 图片路径
-  /// 返回图片是否在集合中
-  bool isImageInCollection(String collectionId, String imagePath) {
+  /// [id] 集合ID
+  /// [newName] 新名称
+  /// 返回重命名是否成功
+  Future<bool> renameCollection(String id, String newName) async {
+    try {
+      state = state.copyWith(error: null);
+
+      final success = await _repository.renameCollection(id, newName);
+
+      if (success) {
+        await _loadCollections();
+        AppLogger.i('Renamed collection: $id', 'CollectionNotifier');
+      }
+
+      return success;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      AppLogger.e(
+        'Failed to rename collection: $id',
+        e,
+        null,
+        'CollectionNotifier',
+      );
+      return false;
+    }
+  }
+
+  /// 重新排序集合（同级内拖拽排序）
+  Future<bool> reorder(int oldIndex, int newIndex) async {
+    final collections = state.collections;
+    if (oldIndex < 0 ||
+        oldIndex >= collections.length ||
+        newIndex < 0 ||
+        newIndex >= collections.length) {
+      return false;
+    }
+
+    try {
+      final orderedIds = collections.map((c) => c.id).toList();
+      final id = orderedIds.removeAt(oldIndex);
+      orderedIds.insert(newIndex, id);
+
+      final success = await _repository.reorderCollections(orderedIds);
+      if (success) {
+        await _loadCollections();
+      }
+      return success;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      AppLogger.e(
+        'Failed to reorder collections',
+        e,
+        null,
+        'CollectionNotifier',
+      );
+      return false;
+    }
+  }
+
+  /// 切换图片在集合中的成员关系，返回切换后的成员状态
+  Future<bool> toggleImageInCollection(
+    String collectionId,
+    String imagePath,
+  ) async {
+    try {
+      state = state.copyWith(error: null);
+
+      final imageId = await _repository.getImageIdByPath(imagePath);
+      if (imageId == null) return false;
+
+      final memberIds = await _repository.getCollectionImageIds(collectionId);
+      final isMember = memberIds.contains(imageId);
+
+      if (isMember) {
+        await _repository.removeImagesFromCollection(collectionId, [
+          imagePath,
+        ]);
+      } else {
+        await _repository.addImagesToCollection(collectionId, [imagePath]);
+      }
+
+      await _loadCollections();
+      return !isMember;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      AppLogger.e(
+        'Failed to toggle image in collection: $collectionId',
+        e,
+        null,
+        'CollectionNotifier',
+      );
+      return false;
+    }
+  }
+
+  /// 图片所在的集合 ID 集合
+  Future<Set<String>> getCollectionIdsForImage(String imagePath) async {
+    return _repository.getCollectionIdsForImage(imagePath);
+  }
+
+  /// 检查图片是否在集合中
+  Future<bool> isImageInCollection(
+    String collectionId,
+    String imagePath,
+  ) async {
     return _repository.isImageInCollection(collectionId, imagePath);
   }
 
@@ -296,7 +397,7 @@ class CollectionNotifier extends _$CollectionNotifier {
   ///
   /// [id] 集合ID
   /// 返回集合，不存在返回 null
-  ImageCollection? getCollection(String id) {
+  Future<ImageCollection?> getCollection(String id) async {
     return _repository.getCollection(id);
   }
 

@@ -8,6 +8,7 @@ import '../../core/utils/app_logger.dart';
 import '../models/gallery/nai_image_metadata.dart';
 import 'metadata/cache_manager.dart';
 import 'metadata/hash_calculator.dart';
+import 'metadata/isolate_metadata_service.dart';
 import 'metadata/preloader.dart';
 import 'metadata/unified_metadata_parser.dart';
 
@@ -256,6 +257,68 @@ class ImageMetadataService {
       _cleanupTask(hash);
       _highPrioritySemaphore.release();
     }
+  }
+
+  /// 扫描专用解析入口（不阻塞 UI isolate）
+  ///
+  /// 与 [getMetadataImmediate] 的区别：
+  /// - L1/L2 缓存命中走快速路径（同 [getMetadataImmediate]，不进 isolate）
+  /// - 未命中时解析交给 [IsolateMetadataService] 的常驻 worker 池
+  ///   （读文件 + PNG 解码 + stealth LSB 提取全部在 worker 内完成），
+  ///   避免扫描上万张剥 tEXt 的 PNG 时 UI isolate 连续阻塞
+  ///
+  /// [path] 文件路径
+  Future<NaiImageMetadata?> getMetadataForScan(String path) async {
+    final stopwatch = Stopwatch()..start();
+
+    final hash = await _hashCalculator.calculate(path);
+
+    // 快速路径：缓存命中不进 isolate
+    final memoryCached = _cacheManager.getFromMemory(hash);
+    if (memoryCached != null) {
+      stopwatch.stop();
+      _statistics.recordCacheHit();
+      return memoryCached;
+    }
+
+    final persistentCached = _cacheManager.getFromPersistent(hash);
+    if (persistentCached != null) {
+      stopwatch.stop();
+      _statistics.recordCacheHit();
+      return persistentCached;
+    }
+
+    // 慢路径：Isolate worker 池解析
+    final result = await IsolateMetadataService.instance.parseMetadata(
+      path,
+      config: const IsolateParseConfig(
+        timeout: Duration(seconds: 10),
+        useGradualRead: true,
+        useCache: false,
+      ),
+    );
+
+    stopwatch.stop();
+
+    final metadata = result.success ? result.metadata : null;
+    if (metadata != null && metadata.hasData) {
+      await _cacheManager.save(hash, metadata);
+      _statistics.recordSuccess(stopwatch.elapsed);
+    } else {
+      _statistics.recordFailure(
+        result.error ?? 'no_metadata',
+        stopwatch.elapsed,
+      );
+    }
+
+    if (stopwatch.elapsedMilliseconds > 100) {
+      AppLogger.w(
+        '[PERF] Slow getMetadataForScan: ${stopwatch.elapsedMilliseconds}ms for $path',
+        'ImageMetadataService',
+      );
+    }
+
+    return metadata;
   }
 
   /// 从文件路径获取元数据（标准入口）

@@ -5,9 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
+import '../../../core/utils/list_reorder.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/gallery/gallery_category.dart';
+import '../../../data/models/gallery/image_collection.dart';
 import '../../../data/models/gallery/local_image_record.dart';
+import '../../providers/gallery_category_provider.dart'
+    show collectionSelectedIdPrefix;
 import '../common/themed_divider.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'gallery_scan_progress_panel.dart';
@@ -39,6 +43,13 @@ class GalleryCategoryTreeView extends StatefulWidget {
   final void Function(String imagePath, String? categoryId)? onImageDrop;
   final VoidCallback? onSyncWithFileSystem;
 
+  /// 收藏集（渲染在「收藏」下方，'collection:<id>' 选中态）
+  final List<ImageCollection> collections;
+  final VoidCallback? onCreateCollection;
+  final void Function(String id, String newName)? onRenameCollection;
+  final ValueChanged<String>? onDeleteCollection;
+  final void Function(int oldIndex, int newIndex)? onCollectionReorder;
+
   const GalleryCategoryTreeView({
     super.key,
     required this.categories,
@@ -53,6 +64,11 @@ class GalleryCategoryTreeView extends StatefulWidget {
     this.onCategoryReorder,
     this.onImageDrop,
     this.onSyncWithFileSystem,
+    this.collections = const [],
+    this.onCreateCollection,
+    this.onRenameCollection,
+    this.onDeleteCollection,
+    this.onCollectionReorder,
   });
 
   @override
@@ -117,12 +133,13 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
                   count: widget.favoriteCount,
                   isSelected: widget.selectedCategoryId == 'favorites',
                   onTap: () => widget.onCategorySelected('favorites'),
+                  onHoverAction: widget.onCreateCollection,
                 ),
+                // 收藏集（「收藏」下方的缩进子条目，链接式成员）
+                ..._buildCollectionItems(theme),
                 if (widget.categories.isNotEmpty)
                   const ThemedDivider(height: 16, indent: 12, endIndent: 12),
-                ...widget.categories.rootCategories.sortedByOrder().map(
-                  (category) => _buildCategoryNode(theme, category, 0),
-                ),
+                ..._buildRootCategoryEntries(theme),
               ],
             ),
           ),
@@ -165,6 +182,8 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     final children = widget.categories.getChildren(category.id).sortedByOrder();
     final hasChildren = children.isNotEmpty;
     final isExpanded = _expandedIds.contains(category.id);
+    // 外部图库源分类只读：禁用重命名/删除/子分类/移动/移入
+    final isReadOnly = category.isExternal;
 
     Widget categoryItem = _CategoryItem(
       icon: hasChildren
@@ -186,32 +205,39 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
               }
             })
           : null,
-      onRename: widget.onCategoryRename != null
+      onRename: !isReadOnly && widget.onCategoryRename != null
           ? (newName) => widget.onCategoryRename!(category.id, newName)
           : null,
-      onDelete: widget.onCategoryDelete != null
+      onDelete: !isReadOnly && widget.onCategoryDelete != null
           ? () => widget.onCategoryDelete!(category.id)
           : null,
-      onAddSubCategory: widget.onAddSubCategory != null
+      onAddSubCategory: !isReadOnly && widget.onAddSubCategory != null
           ? () => widget.onAddSubCategory!(category.id)
           : null,
-      onMoveToRoot: category.parentId != null && widget.onCategoryMove != null
+      onMoveToRoot: !isReadOnly &&
+              category.parentId != null &&
+              widget.onCategoryMove != null
           ? () => widget.onCategoryMove!(category.id, null)
           : null,
+      // 拖拽小点：根级条目（含外部图源，用于同级排序）或可移动的内部分类
+      showDragHandle: _isDraggableCategory(category, isReadOnly),
     );
 
-    if (widget.onCategoryMove != null || widget.onCategoryReorder != null) {
+    if (_isDraggableCategory(category, isReadOnly)) {
       categoryItem = _buildDraggableCategory(category, categoryItem);
     }
 
-    if (widget.onCategoryMove != null) {
+    if (!isReadOnly && widget.onCategoryMove != null) {
       categoryItem = _buildCategoryDragTarget(theme, category, categoryItem);
     }
 
-    categoryItem = _buildImageDropTarget(
-      categoryId: category.id,
-      child: categoryItem,
-    );
+    // 只读分类不接收图片移入
+    if (!isReadOnly) {
+      categoryItem = _buildImageDropTarget(
+        categoryId: category.id,
+        child: categoryItem,
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,43 +251,251 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     );
   }
 
+  /// 根级条目是否可拖拽：根级（含外部图源，同级排序）或可移动的内部分类
+  bool _isDraggableCategory(GalleryCategory category, bool isReadOnly) {
+    if (category.parentId == null && widget.onCategoryReorder != null) {
+      return true;
+    }
+    return !isReadOnly && widget.onCategoryMove != null;
+  }
+
+  /// 根级分类条目（条目间穿插插入条，支持同级拖拽排序）
+  List<Widget> _buildRootCategoryEntries(ThemeData theme) {
+    final roots = widget.categories.rootCategories.sortedByOrder();
+    final entries = <Widget>[];
+
+    for (var i = 0; i < roots.length; i++) {
+      if (widget.onCategoryReorder != null) {
+        entries.add(
+          _buildInsertStrip<GalleryCategory>(
+            canAccept: (dragged) =>
+                dragged.parentId == null && dragged.id != roots[i].id,
+            onAccept: (dragged) => _handleRootReorder(
+              roots,
+              dragged,
+              i,
+              insertAfter: false,
+            ),
+          ),
+        );
+      }
+      entries.add(_buildCategoryNode(theme, roots[i], 0));
+    }
+
+    // 末尾插入条：允许拖到列表最后
+    if (widget.onCategoryReorder != null && roots.isNotEmpty) {
+      entries.add(
+        _buildInsertStrip<GalleryCategory>(
+          canAccept: (dragged) => dragged.parentId == null,
+          onAccept: (dragged) => _handleRootReorder(
+            roots,
+            dragged,
+            roots.length - 1,
+            insertAfter: true,
+          ),
+        ),
+      );
+    }
+
+    return entries;
+  }
+
+  /// 收藏集条目（缩进子条目 + 拖拽排序插入条）
+  List<Widget> _buildCollectionItems(ThemeData theme) {
+    final collections = widget.collections;
+    final items = <Widget>[];
+
+    for (var i = 0; i < collections.length; i++) {
+      if (widget.onCollectionReorder != null) {
+        items.add(
+          _buildInsertStrip<ImageCollection>(
+            canAccept: (dragged) => dragged.id != collections[i].id,
+            onAccept: (dragged) => _handleCollectionReorder(
+              collections,
+              dragged,
+              i,
+              insertAfter: false,
+            ),
+          ),
+        );
+      }
+      items.add(_buildCollectionRow(theme, collections[i]));
+    }
+
+    if (widget.onCollectionReorder != null && collections.isNotEmpty) {
+      items.add(
+        _buildInsertStrip<ImageCollection>(
+          canAccept: (_) => true,
+          onAccept: (dragged) => _handleCollectionReorder(
+            collections,
+            dragged,
+            collections.length - 1,
+            insertAfter: true,
+          ),
+        ),
+      );
+    }
+
+    return items;
+  }
+
+  Widget _buildCollectionRow(ThemeData theme, ImageCollection collection) {
+    final selectedId = '$collectionSelectedIdPrefix${collection.id}';
+
+    final row = _CategoryItem(
+      icon: Icons.collections_bookmark,
+      iconColor: Colors.amber.shade700,
+      label: collection.name,
+      count: collection.imageCount,
+      depth: 1,
+      isSelected: widget.selectedCategoryId == selectedId,
+      onTap: () => widget.onCategorySelected(selectedId),
+      onRename: widget.onRenameCollection != null
+          ? (newName) => widget.onRenameCollection!(collection.id, newName)
+          : null,
+      onDelete: widget.onDeleteCollection != null
+          ? () => widget.onDeleteCollection!(collection.id)
+          : null,
+      showDragHandle: widget.onCollectionReorder != null,
+    );
+
+    if (widget.onCollectionReorder == null) return row;
+
+    return Draggable<ImageCollection>(
+      data: collection,
+      feedback: _buildDragFeedback(
+        theme,
+        icon: Icons.collections_bookmark,
+        label: collection.name,
+      ),
+      childWhenDragging: Opacity(opacity: 0.4, child: row),
+      onDragStarted: () => HapticFeedback.mediumImpact(),
+      onDragEnd: (_) => setState(() => _hoveredCategoryId = null),
+      child: row,
+    );
+  }
+
+  void _handleRootReorder(
+    List<GalleryCategory> roots,
+    GalleryCategory dragged,
+    int targetIndex, {
+    required bool insertAfter,
+  }) {
+    final oldIndex = roots.indexWhere((c) => c.id == dragged.id);
+    if (oldIndex < 0) return;
+
+    final newIndex = computeReorderInsertIndex(
+      oldIndex: oldIndex,
+      targetIndex: targetIndex,
+      insertAfter: insertAfter,
+    );
+    if (newIndex == oldIndex) return;
+
+    widget.onCategoryReorder?.call(null, oldIndex, newIndex);
+  }
+
+  void _handleCollectionReorder(
+    List<ImageCollection> collections,
+    ImageCollection dragged,
+    int targetIndex, {
+    required bool insertAfter,
+  }) {
+    final oldIndex = collections.indexWhere((c) => c.id == dragged.id);
+    if (oldIndex < 0) return;
+
+    final newIndex = computeReorderInsertIndex(
+      oldIndex: oldIndex,
+      targetIndex: targetIndex,
+      insertAfter: insertAfter,
+    );
+    if (newIndex == oldIndex) return;
+
+    widget.onCollectionReorder?.call(oldIndex, newIndex);
+  }
+
+  /// 条目间插入条：悬停显示主题色细线，松开完成同级插入
+  Widget _buildInsertStrip<T extends Object>({
+    required bool Function(T data) canAccept,
+    required void Function(T data) onAccept,
+  }) {
+    return DragTarget<T>(
+      onWillAcceptWithDetails: (details) => canAccept(details.data),
+      onAcceptWithDetails: (details) {
+        HapticFeedback.mediumImpact();
+        onAccept(details.data);
+      },
+      builder: (context, candidateData, rejectedData) {
+        final isActive = candidateData.isNotEmpty;
+        final theme = Theme.of(context);
+        return SizedBox(
+          height: 6,
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 120),
+              height: isActive ? 3 : 0,
+              margin: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: isActive
+                    ? theme.colorScheme.primary
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDragFeedback(
+    ThemeData theme, {
+    required IconData icon,
+    required String label,
+  }) {
+    return Material(
+      elevation: 8,
+      borderRadius: BorderRadius.circular(8),
+      color: theme.colorScheme.surfaceContainerHigh,
+      child: Container(
+        width: 180,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: theme.colorScheme.primary.withValues(alpha: 0.5),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: theme.colorScheme.primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildDraggableCategory(GalleryCategory category, Widget child) {
     final theme = Theme.of(context);
 
     return Draggable<GalleryCategory>(
       data: category,
-      feedback: Material(
-        elevation: 8,
-        borderRadius: BorderRadius.circular(8),
-        color: theme.colorScheme.surfaceContainerHigh,
-        child: Container(
-          width: 180,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.5),
-              width: 1.5,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.folder, size: 18, color: theme.colorScheme.primary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  category.displayName,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
+      feedback: _buildDragFeedback(
+        theme,
+        icon: Icons.folder,
+        label: category.displayName,
       ),
       childWhenDragging: Opacity(opacity: 0.4, child: child),
       onDragStarted: () => HapticFeedback.mediumImpact(),
@@ -498,6 +732,12 @@ class _CategoryItem extends StatefulWidget {
   final VoidCallback? onAddSubCategory;
   final VoidCallback? onMoveToRoot;
 
+  /// 是否显示拖拽小点（悬停时；与 onRename 解耦，外部图源根级排序也显示）
+  final bool showDragHandle;
+
+  /// 悬停时显示的快捷操作（如「收藏」行的 + 按钮）
+  final VoidCallback? onHoverAction;
+
   const _CategoryItem({
     required this.icon,
     this.iconColor,
@@ -513,6 +753,8 @@ class _CategoryItem extends StatefulWidget {
     this.onDelete,
     this.onAddSubCategory,
     this.onMoveToRoot,
+    this.showDragHandle = false,
+    this.onHoverAction,
   });
 
   @override
@@ -639,7 +881,20 @@ class _CategoryItemState extends State<_CategoryItem> {
                             overflow: TextOverflow.ellipsis,
                           ),
                   ),
-                  if (_isHovering && widget.onRename != null)
+                  if (_isHovering && widget.onHoverAction != null)
+                    InkWell(
+                      onTap: widget.onHoverAction,
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Icon(
+                          Icons.add,
+                          size: 16,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  if (_isHovering && widget.showDragHandle)
                     Padding(
                       padding: const EdgeInsets.only(right: 4),
                       child: Icon(

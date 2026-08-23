@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,10 @@ import '../../../core/utils/permission_utils.dart';
 import '../../../core/utils/zip_utils.dart';
 import '../../../data/models/gallery/gallery_category.dart';
 import '../../../data/models/gallery/local_image_record.dart';
+import '../../../data/services/gallery/gallery_view_mode_store.dart';
+import '../../../data/services/gallery/gallery_column_width_store.dart';
+import '../../../data/services/gallery/gallery_nai_only_store.dart';
+import '../../../data/services/gallery/gallery_sort_store.dart';
 import '../../widgets/metadata/metadata_import_dialog.dart';
 import '../../../data/repositories/gallery_folder_repository.dart';
 import '../../providers/bulk_operation_provider.dart';
@@ -51,9 +56,9 @@ import '../../widgets/gallery/gallery_content_view.dart';
 import '../../widgets/gallery/gallery_state_views.dart';
 import '../../widgets/gallery/local_image_context_menu.dart';
 import '../../widgets/gallery/local_gallery_toolbar.dart';
+import '../../widgets/gallery/date_range_picker_dialog.dart';
 import '../../widgets/gallery_filter_panel.dart';
-import '../../widgets/grouped_grid_view.dart'
-    show GroupedGridViewState, ImageDateGroup;
+import '../../widgets/grouped_grid_view.dart' show GroupedGridViewState;
 import '../../widgets/shortcuts/shortcut_aware_widget.dart';
 
 /// 本地画廊屏幕
@@ -91,7 +96,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     ShortcutIds.openFilterPanel: () => showGalleryFilterPanel(context),
     ShortcutIds.clearFilter: _clearFilters,
     ShortcutIds.toggleCategoryPanel: _toggleCategoryPanel,
-    ShortcutIds.jumpToDate: _jumpToDate,
+    ShortcutIds.jumpToDate: _pickDateRange,
     ShortcutIds.openFolder: _openGalleryFolder,
   };
 
@@ -99,6 +104,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _restoreGalleryPreferences();
       await _checkPermissionsAndScan();
       await _showFirstTimeTip();
       await _autoRefresh();
@@ -120,6 +126,14 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         });
       },
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 把真实 DPR 上报给 provider：缩略图预取档位与卡片同算法同 DPR
+    final dpr = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0;
+    ref.read(localGalleryNotifierProvider.notifier).updateDevicePixelRatio(dpr);
   }
 
   @override
@@ -187,7 +201,8 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     final contentWidth = _showCategoryPanel && screenWidth > 800
         ? screenWidth - 250
         : screenWidth;
-    final columns = (contentWidth / 200).floor().clamp(2, 8);
+    // 列数由「可用宽度 / 逻辑列宽」推导（瀑布流内另有 LayoutBuilder 精算，两者同源）
+    final columns = (contentWidth / state.columnWidth).floor().clamp(1, 8);
     final itemWidth = contentWidth / columns;
 
     return PageShortcuts(
@@ -221,6 +236,13 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
                         onItemsPerPageChanged: (size) => ref
                             .read(localGalleryNotifierProvider.notifier)
                             .setPageSize(size),
+                        columnWidth: state.columnWidth,
+                        onColumnWidthChanged: (width) => ref
+                            .read(localGalleryNotifierProvider.notifier)
+                            .setColumnWidth(width),
+                        onColumnWidthChangeEnd: (width) => unawaited(
+                          const GalleryColumnWidthStore().save(width),
+                        ),
                         showItemsPerPage: true,
                         showTotalInfo: true,
                         compact: contentWidth < 600,
@@ -240,6 +262,8 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     LocalGalleryState state,
     GalleryCategoryState categoryState,
   ) {
+    final collectionState = ref.watch(collectionNotifierProvider);
+
     return Container(
       width: 250,
       decoration: BoxDecoration(
@@ -283,6 +307,11 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
                       .reorderCategories(parentId, oldIndex, newIndex),
                   onImageDrop: _handleImageDrop,
                   onSyncWithFileSystem: _handleSyncWithFileSystem,
+                  collections: collectionState.collections,
+                  onCreateCollection: _createCollection,
+                  onRenameCollection: _handleRenameCollection,
+                  onDeleteCollection: _handleDeleteCollection,
+                  onCollectionReorder: _handleCollectionReorder,
                 );
               },
             ),
@@ -345,6 +374,63 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     }
   }
 
+  Future<void> _createCollection() async {
+    final name = await ThemedInputDialog.show(
+      context: context,
+      title: context.l10n.localGallery_createCollectionTitle,
+      hintText: context.l10n.localGallery_createCollectionHint,
+      confirmText: context.l10n.localGallery_createCollectionConfirm,
+      cancelText: context.l10n.common_cancel,
+    );
+    if (name == null || name.trim().isEmpty || !mounted) return;
+    await ref
+        .read(collectionNotifierProvider.notifier)
+        .createCollection(name.trim());
+  }
+
+  Future<void> _handleRenameCollection(String id, String newName) async {
+    if (newName.trim().isEmpty) return;
+    await ref
+        .read(collectionNotifierProvider.notifier)
+        .renameCollection(id, newName.trim());
+  }
+
+  Future<void> _handleDeleteCollection(String id) async {
+    final collectionState = ref.read(collectionNotifierProvider);
+    final collection = collectionState.collections
+        .where((c) => c.id == id)
+        .firstOrNull;
+    final name = collection?.name ?? id;
+
+    final confirmed = await ThemedConfirmDialog.show(
+      // ignore: use_build_context_synchronously
+      context: context,
+      title: context.l10n.common_confirmDelete,
+      content: context.l10n.localGallery_deleteCollectionContent(name),
+      confirmText: context.l10n.common_delete,
+      cancelText: context.l10n.common_cancel,
+      type: ThemedConfirmDialogType.danger,
+      icon: Icons.delete_outline,
+    );
+    if (!confirmed || !mounted) return;
+
+    await ref.read(collectionNotifierProvider.notifier).deleteCollection(id);
+
+    // 若画廊正按该收藏集过滤，回到「全部」
+    final filterState = ref.read(localGalleryNotifierProvider);
+    if (filterState.filterCriteria.collectionId == id ||
+        ref.read(galleryCategoryNotifierProvider).selectedCategoryId ==
+            '$collectionSelectedIdPrefix$id') {
+      _handleCategorySelected(null);
+    }
+  }
+
+  Future<void> _handleCollectionReorder(int oldIndex, int newIndex) async {
+    await ref
+        .read(collectionNotifierProvider.notifier)
+        .reorder(oldIndex, newIndex);
+  }
+
   void _handleCategorySelected(String? id) {
     // 更新分类选中状态
     ref.read(galleryCategoryNotifierProvider.notifier).selectCategory(id);
@@ -353,12 +439,30 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     final categoryState = ref.read(galleryCategoryNotifierProvider);
     final category = id != null ? categoryState.categories.findById(id) : null;
 
-    // 应用分类过滤
     if (id == 'favorites') {
       // 收藏特殊处理
       ref
           .read(localGalleryNotifierProvider.notifier)
           .setShowFavoritesOnly(true);
+      ref
+          .read(localGalleryNotifierProvider.notifier)
+          .setSelectedCategory(null, null);
+      ref
+          .read(localGalleryNotifierProvider.notifier)
+          .setSelectedCollection(null);
+    } else if (id != null && isCollectionSelectedId(id)) {
+      // 收藏集：membership 过滤
+      ref
+          .read(localGalleryNotifierProvider.notifier)
+          .setShowFavoritesOnly(false);
+      ref
+          .read(localGalleryNotifierProvider.notifier)
+          .setSelectedCategory(null, null);
+      ref
+          .read(localGalleryNotifierProvider.notifier)
+          .setSelectedCollection(
+            id.substring(collectionSelectedIdPrefix.length),
+          );
     } else if (id != null && category != null) {
       // 普通分类：按文件夹路径过滤
       ref
@@ -367,6 +471,9 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       ref
           .read(localGalleryNotifierProvider.notifier)
           .setSelectedCategory(id, category.folderPath);
+      ref
+          .read(localGalleryNotifierProvider.notifier)
+          .setSelectedCollection(null);
     } else {
       // 全部：清除分类过滤
       ref
@@ -375,6 +482,9 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       ref
           .read(localGalleryNotifierProvider.notifier)
           .setSelectedCategory(null, null);
+      ref
+          .read(localGalleryNotifierProvider.notifier)
+          .setSelectedCollection(null);
     }
   }
 
@@ -423,12 +533,23 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
   }
 
   Future<void> _handleImageDrop(String imagePath, String? categoryId) async {
+    final l10n = context.l10n;
+
+    // 额外图库源文件只读，禁止移动到分类
+    if (await GalleryFolderRepository.instance.isExtraRootPath(imagePath)) {
+      if (mounted) {
+        AppToast.warning(context, l10n.localGallery_externalReadonly);
+      }
+      return;
+    }
+    if (!mounted) return;
+
     final protected = await AssetProtectionGuard.confirmDangerousAction(
       context: context,
       ref: ref,
-      title: context.l10n.localGallery_confirmMoveImageTitle,
-      content: context.l10n.localGallery_confirmMoveImageContent,
-      confirmText: context.l10n.localGallery_confirmMove,
+      title: l10n.localGallery_confirmMoveImageTitle,
+      content: l10n.localGallery_confirmMoveImageContent,
+      confirmText: l10n.localGallery_confirmMove,
       icon: Icons.drive_file_move_outline,
     );
     if (!protected || !mounted) return;
@@ -441,10 +562,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
           .read(localGalleryNotifierProvider.notifier)
           .refresh(scan: false);
       if (mounted) {
-        AppToast.success(
-          context,
-          context.l10n.localGallery_imageMovedToCategory,
-        );
+        AppToast.success(context, l10n.localGallery_imageMovedToCategory);
       }
     }
   }
@@ -563,6 +681,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       use3DCardView: _use3DCardView,
       columns: columns,
       itemWidth: itemWidth,
+      columnWidth: state.columnWidth,
       groupedGridViewKey: _groupedGridViewKey,
       onReuseMetadata: _importImageMetadata,
       onSendAction: (record, action) => _handleImageAction(record, action),
@@ -695,6 +814,10 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
   Future<void> _undo() async {
     await ref.read(bulkOperationNotifierProvider.notifier).undo();
     await ref.read(localGalleryNotifierProvider.notifier).refresh();
+    // 撤销后侧栏计数恢复：收藏集走 DB 重查；分类计数是文件系统口径，
+    // 重新数一遍（撤销是低频操作，成本可接受）。
+    await ref.read(collectionNotifierProvider.notifier).refresh();
+    await ref.read(galleryCategoryNotifierProvider.notifier).refresh();
     if (mounted) AppToast.info(context, context.l10n.localGallery_undone);
   }
 
@@ -746,28 +869,47 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     );
     if (!protected || !mounted) return;
 
-    final deletedImages = <LocalImageRecord>[];
-    for (final image in selectedImages) {
-      try {
-        final file = File(image.path);
-        if (await file.exists()) {
-          await file.delete();
-          deletedImages.add(image);
-        }
-      } catch (e) {
-        // Skip failed deletions
-      }
-    }
+    // 软删：DB is_deleted=1 + 入删除池 + 内存即时移除，无物理 IO，
+    // 瞬时完成；文件在下次启动时彻底清理。
+    final imagePaths = selectedImages.map((image) => image.path).toList();
+    final result = await ref
+        .read(bulkOperationNotifierProvider.notifier)
+        .bulkDelete(imagePaths);
 
     ref.read(localGallerySelectionNotifierProvider.notifier).exit();
-    await ref.read(localGalleryNotifierProvider.notifier).refresh();
 
-    if (mounted && deletedImages.isNotEmpty) {
-      AppToast.success(
-        context,
-        context.l10n.localGallery_deletedImages(deletedImages.length),
-      );
+    // 兜底重载：从（已摘除被删文件的）服务层内存列表重取当前页，
+    // 保证视图与内存状态一致——即使内存即时移除被任何竞态吞掉。
+    if (result.success > 0) {
+      final page = ref.read(localGalleryNotifierProvider).currentPage;
+      await ref
+          .read(localGalleryNotifierProvider.notifier)
+          .loadPage(page, showLoading: false);
     }
+
+    // 计数联动（内存/DB 层面，不等启动）：收藏集计数走 DB 重查，
+    // 分类计数是文件系统口径，软删文件仍在盘上，做内存级减计数。
+    await ref.read(collectionNotifierProvider.notifier).refresh();
+    await ref
+        .read(galleryCategoryNotifierProvider.notifier)
+        .applyDeletedPaths(imagePaths);
+
+    if (mounted && result.success > 0) {
+      _showDeletePoolSnackBar(result.success);
+    }
+  }
+
+  /// 删除池 SnackBar：短时轻提示（撤销入口在工具栏垃圾桶里）。
+  void _showDeletePoolSnackBar(int count) {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.localGallery_deletedToPool(count)),
+          duration: const Duration(milliseconds: 900),
+        ),
+      );
   }
 
   Future<void> _packSelectedImages() async {
@@ -843,6 +985,16 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     );
 
     if (selectedImages.isEmpty) return;
+
+    // 额外图库源文件只读，禁止移动
+    for (final image in selectedImages) {
+      if (await GalleryFolderRepository.instance.isExtraRootPath(image.path)) {
+        if (mounted) {
+          AppToast.warning(context, l10n.localGallery_externalReadonly);
+        }
+        return;
+      }
+    }
 
     final folders = folderState.folders;
 
@@ -1318,19 +1470,23 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
   }
 
   Future<void> _confirmDeleteImage(LocalImageRecord record) async {
+    final l10n = context.l10n;
+
+    if (!mounted) return;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(context.l10n.common_confirmDelete),
+        title: Text(l10n.common_confirmDelete),
         content: Text(
-          context.l10n.localGallery_confirmDeleteImageContent(
+          l10n.localGallery_confirmDeleteImageContent(
             path.basename(record.path),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(context.l10n.common_cancel),
+            child: Text(l10n.common_cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -1338,7 +1494,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
               backgroundColor: Theme.of(context).colorScheme.error,
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
-            child: Text(context.l10n.common_delete),
+            child: Text(l10n.common_delete),
           ),
         ],
       ),
@@ -1348,27 +1504,32 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       final protected = await AssetProtectionGuard.confirmDangerousAction(
         context: context,
         ref: ref,
-        title: context.l10n.localGallery_protectedDeleteTitle,
-        content: context.l10n.localGallery_protectedDeleteImageContent(
+        title: l10n.localGallery_protectedDeleteTitle,
+        content: l10n.localGallery_protectedDeleteImageContent(
           path.basename(record.path),
         ),
-        confirmText: context.l10n.localGallery_confirmDelete,
+        confirmText: l10n.localGallery_confirmDelete,
         icon: Icons.delete_outline,
       );
       if (!protected || !mounted) return;
-      try {
-        final file = File(record.path);
-        if (await file.exists()) {
-          await file.delete();
-          await ref.read(localGalleryNotifierProvider.notifier).refresh();
-          if (mounted) {
-            AppToast.success(context, context.l10n.localGallery_imageDeleted);
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          AppToast.error(context, context.l10n.localGallery_deleteFailed('$e'));
-        }
+      // 软删：DB is_deleted=1 + 入删除池 + 内存即时移除，无物理 IO；
+      // 文件在下次启动时彻底清理，撤销入口在工具栏垃圾桶里。
+      final result = await ref
+          .read(bulkOperationNotifierProvider.notifier)
+          .bulkDelete([record.path]);
+      // 兜底重载：与批量删除同保险——视图与内存状态强制对齐
+      if (result.success > 0) {
+        final page = ref.read(localGalleryNotifierProvider).currentPage;
+        await ref
+            .read(localGalleryNotifierProvider.notifier)
+            .loadPage(page, showLoading: false);
+      }
+      await ref.read(collectionNotifierProvider.notifier).refresh();
+      await ref
+          .read(galleryCategoryNotifierProvider.notifier)
+          .applyDeletedPaths([record.path]);
+      if (mounted && result.success > 0) {
+        _showDeletePoolSnackBar(1);
       }
     }
   }
@@ -1377,58 +1538,37 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     setState(() => _showCategoryPanel = !_showCategoryPanel);
   }
 
-  Future<void> _jumpToDate() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: now,
-      firstDate: DateTime(2020),
-      lastDate: now,
-      builder: (pickerContext, child) => Theme(
-        data: Theme.of(pickerContext).copyWith(
-          dialogTheme: DialogThemeData(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
-        child: child!,
-      ),
-    );
-
-    if (picked == null || !mounted) return;
-
+  /// 恢复持久化的画廊偏好：视图模式 / 列宽 / 排序 / NAI-only 过滤
+  Future<void> _restoreGalleryPreferences() async {
     final notifier = ref.read(localGalleryNotifierProvider.notifier);
-    final currentState = ref.read(localGalleryNotifierProvider);
-    if (!currentState.isGroupedView) await notifier.setGroupedView(true);
 
-    await Future.delayed(const Duration(milliseconds: 300));
+    final viewMode = await const GalleryViewModeStore().load();
+    final columnWidth = await const GalleryColumnWidthStore().load();
+    final sort = await const GallerySortStore().load();
+    final naiOnly = await const GalleryNaiOnlyStore().load();
     if (!mounted) return;
 
-    // Calculate date differences for grouping
-    final today = DateTime(now.year, now.month, now.day);
-    final selectedDate = DateTime(picked.year, picked.month, picked.day);
-    final daysDiff = today.difference(selectedDate).inDays;
-
-    late final ImageDateGroup targetGroup;
-    if (daysDiff == 0) {
-      targetGroup = ImageDateGroup.today;
-    } else if (daysDiff == 1) {
-      targetGroup = ImageDateGroup.yesterday;
-    } else if (daysDiff < today.weekday) {
-      targetGroup = ImageDateGroup.thisWeek;
-    } else {
-      targetGroup = ImageDateGroup.earlier;
+    notifier.setMasonryView(viewMode);
+    notifier.setColumnWidth(columnWidth);
+    // 排序：持久化优先，无记录时保持默认（修改时间 新→旧）
+    if (sort != null) {
+      await notifier.setSort(sort.field, sort.direction);
     }
+    // NAI-only 是过滤条件：恢复后需重新应用过滤（进画廊即默认只看 NAI 图）
+    await notifier.setNaiOnly(naiOnly);
+  }
 
-    _groupedGridViewKey.currentState?.scrollToGroup(targetGroup);
-
-    if (context.mounted) {
-      final month = picked.month.toString().padLeft(2, '0');
-      AppToast.info(
-        context,
-        context.l10n.localGallery_jumpedToMonth(picked.year, month),
-      );
-    }
+  /// 打开点选式日期范围面板（替换旧的"跳转到日期分组"行为）
+  Future<void> _pickDateRange() async {
+    final state = ref.read(localGalleryNotifierProvider);
+    final result = await showDateRangePickerDialog(
+      context,
+      initialStart: state.filterCriteria.dateStart,
+      initialEnd: state.filterCriteria.dateEnd,
+    );
+    if (result == null || !mounted) return;
+    await ref
+        .read(localGalleryNotifierProvider.notifier)
+        .setDateRange(result.start, result.end);
   }
 }

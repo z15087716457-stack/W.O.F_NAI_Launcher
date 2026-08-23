@@ -44,3 +44,12 @@ export 'gallery_stream_scanner.dart' show
 export 'gallery_filter_service.dart' show
     GalleryFilterService,
     FilterCriteria;
+
+// 标签索引导入（外部 JSONL 索引）
+export 'tag_index_import_service.dart' show
+    TagIndexImportService,
+    TagIndexImportResult,
+    TagIndexImportException,
+    findTagIndexFileForRoot,
+    tagIndexDirectoryName,
+    tagIndexFileName;

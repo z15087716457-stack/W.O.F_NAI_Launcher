@@ -220,6 +220,69 @@
   "settings_imageSavePath": "画像の保存場所",
   "settings_autoSave": "自動保存",
   "settings_autoSaveSubtitle": "生成後に画像を自動的に保存します",
+  "settings_extraRootsTitle": "ギャラリーソース",
+  "settings_extraRootsHint": "追加のギャラリーソース: 任意のフォルダをギャラリーで閲覧・検索できます（読み取り専用、自動保存の対象外）。追加後、ギャラリーまたはこのページ下部で再スキャンしてください。",
+  "settings_extraRootsEmpty": "追加のギャラリーソースはありません",
+  "settings_extraRootsAdd": "フォルダを追加",
+  "settings_extraRootsAddTitle": "ギャラリーソースとして追加するフォルダを選択",
+  "settings_extraRootsRemove": "このギャラリーソースを削除",
+  "settings_extraRootsRemoveConfirmTitle": "ギャラリーソースを削除しますか？",
+  "settings_extraRootsRemoveConfirmContent": "「{path}」をギャラリーから削除します（フォルダ内のファイルは削除されません）。",
+  "settings_extraRootsAdded": "ギャラリーソースを追加しました。再スキャン後に反映されます",
+  "settings_extraRootsRemoved": "ギャラリーソースを削除しました",
+  "settings_extraRootsDuplicate": "このフォルダはすでにギャラリーソースです",
+  "settings_extraRootsSameAsMain": "このフォルダは画像保存先と同じです",
+  "settings_extraRootsNested": "ギャラリーソース同士を互いに含めることはできません。別のフォルダを選択してください",
+  "settings_extraRootsNotFound": "選択したフォルダが存在しません",
+  "@settings_extraRootsRemoveConfirmContent": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_importTagIndex": "タグ索引をインポート…",
+  "settings_importTagIndexPickTitle": "タグ索引ファイルを選択 (.jsonl)",
+  "settings_importTagIndexProgress": "{processed}/{total} 行をインポート中…",
+  "@settings_importTagIndexProgress": {
+    "placeholders": {
+      "processed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "settings_importTagIndexDone": "インポート完了: 新規 {imported}、更新 {updated}、スキップ {skipped}、エラー {errors}",
+  "@settings_importTagIndexDone": {
+    "placeholders": {
+      "imported": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "errors": {
+        "type": "int"
+      }
+    }
+  },
+  "settings_importTagIndexFailed": "タグ索引のインポートに失敗しました",
+  "settings_importTagIndexBlockedByScan": "ギャラリーのスキャン中です。スキャン完了後にタグインデックスをインポートしてください",
+  "settings_extraRootsIndexImportTitle": "タグ索引を検出",
+  "settings_extraRootsIndexImportContent": "「{path}」にタグ索引 index.jsonl を検出しました。先にインポートすると、以降のスキャンがメタデータ解析をスキップして高速化されます。今すぐインポートしますか？",
+  "@settings_extraRootsIndexImportContent": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_extraRootsIndexImportConfirm": "今すぐインポート",
   "settings_about": "概要",
   "settings_version": "バージョン {version}",
   "@settings_version": {
@@ -2018,13 +2081,6 @@
   "localGallery_emptySubtitle": "生成された画像はここに保存されます",
   "localGallery_noMatchingResults": "一致する結果はありません",
   "localGallery_loadingGroupedImages": "グループ化された画像を読み込み中...",
-  "localGallery_jumpedToMonth": "{year}-{month} にジャンプしました",
-  "@localGallery_jumpedToMonth": {
-    "placeholders": {
-      "year": {},
-      "month": {}
-    }
-  },
   "localGallery_title": "ローカル ギャラリー",
   "localGallery_allImages": "すべての画像",
   "localGallery_categoryPanelTitle": "カテゴリ",
@@ -2037,14 +2093,50 @@
   "localGallery_packSelected": "パック",
   "localGallery_editMetadata": "編集",
   "localGallery_addToCollection": "コレクションに追加",
-  "localGallery_switchToGridView": "グリッド ビューに切り替える",
-  "localGallery_switchToDateGroupedView": "日付グループ化ビューに切り替える",
+  "localGallery_sortButton": "並べ替え",
+  "localGallery_sortFieldModified": "更新日時",
+  "localGallery_sortFieldCreated": "作成日時",
+  "localGallery_sortFieldName": "ファイル名",
+  "localGallery_sortFieldSize": "ファイルサイズ",
+  "localGallery_sortFieldDimensions": "画像サイズ",
+  "localGallery_sortToggleDirection": "並べ替え方向を切り替え",
+  "localGallery_aboutColumns": "約 {count} 列",
+  "@localGallery_aboutColumns": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_columnWidth": "列の幅",
+  "localGallery_naiOnly": "NAI",
+  "localGallery_naiOnlyTooltip": "NAI 生成画像のみ表示",
+  "localGallery_masonryViewLabel": "ウォーターフォール",
+  "localGallery_switchToMasonryView": "ウォーターフォール ビューに切り替える",
+  "localGallery_switchToGridLayout": "グリッド ビューに切り替える",
+  "localGallery_dateRangeYearMonth": "{year}年{month}月",
+  "@localGallery_dateRangeYearMonth": {
+    "placeholders": {
+      "year": {},
+      "month": {}
+    }
+  },
+  "localGallery_dateRangePrevMonth": "前の月",
+  "localGallery_dateRangeNextMonth": "次の月",
+  "localGallery_dateRangeClear": "クリア",
+  "localGallery_searchInScope": "検索：{scope}",
+  "@localGallery_searchInScope": {
+    "placeholders": {
+      "scope": {}
+    }
+  },
   "localGallery_openFilterPanel": "フィルター パネルを開く",
   "localGallery_hideCategoryPanel": "カテゴリ パネルを非表示にする",
   "localGallery_showCategoryPanel": "カテゴリ パネルを表示",
   "localGallery_enterSelectionMode": "選択モードに入ります",
   "localGallery_refreshTooltip": "ギャラリーを更新\n\n新しい画像または変更された画像を自動的に検出し、インデックスを更新します",
   "localGallery_tagIntersection": "タグの交差",
+  "localGallery_filterByTags": "タグで絞り込み",
+  "localGallery_tagInputHint": "タグを入力して Enter で追加",
+  "localGallery_addTag": "追加",
   "localGallery_createCategoryTitle": "新しいカテゴリ",
   "localGallery_createCategoryHint": "カテゴリ名を入力してください",
   "localGallery_createCategoryConfirm": "作成",
@@ -2052,19 +2144,24 @@
   "localGallery_showInFolder": "フォルダー内に表示",
   "localGallery_promptCopied": "プロンプトがコピーされました",
   "localGallery_seedCopied": "シードがコピーされました",
-  "localGallery_confirmDeleteImageContent": "画像「{name}」を削除しますか?\n\nこれを元に戻すことはできません。",
+  "localGallery_createCollectionTitle": "新しいコレクション",
+  "localGallery_createCollectionHint": "コレクション名を入力",
+  "localGallery_createCollectionConfirm": "作成",
+  "localGallery_deleteCollectionContent": "コレクション「{name}」を削除しますか？コレクションのエントリのみ削除され、画像ファイルは削除されません。",
+  "@localGallery_deleteCollectionContent": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "localGallery_unfavorite": "お気に入り解除",
+  "localGallery_favoriteMenuEmptyCollections": "コレクションがありません。左の + で作成",
+  "localGallery_confirmDeleteImageContent": "画像「{name}」を削除しますか?\n\n画像はすぐにギャラリーから消え、ファイルは次回起動時に完全に削除されます（このセッション内では元に戻せます）。",
   "@localGallery_confirmDeleteImageContent": {
     "placeholders": {
       "name": {}
     }
   },
-  "localGallery_imageDeleted": "画像が削除されました",
-  "localGallery_deleteFailed": "削除に失敗しました: {error}",
-  "@localGallery_deleteFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
+  "localGallery_externalReadonly": "外部ギャラリーソースは読み取り専用です。この操作は利用できません",
   "localGallery_categoryDeleteContent": "このカテゴリを削除しますか?フォルダーとその内容は保持されます。",
   "localGallery_protectedDeleteCategoryTitle": "保護モード: カテゴリの削除の確認",
   "localGallery_protectedDeleteCategoryContent": "これにより、カテゴリ レコードが削除されます。フォルダーとその内容は保持されます。もう一度確認してください。",
@@ -2276,9 +2373,20 @@
   "localGallery_filterByCfg": "CFG スケールによるフィルター",
   "localGallery_filterByResolution": "解像度によるフィルター",
   "localGallery_filterSubtitle": "画像コレクションを正確にフィルタリングします",
-  "localGallery_modelHint": "モデル名を入力してください...",
-  "localGallery_samplerHint": "サンプラー名を入力してください...",
-  "localGallery_resolutionHint": "幅 x 高さ (例: 1024x1024)",
+  "localGallery_filterOrientation": "向き",
+  "localGallery_orientationAny": "すべて",
+  "localGallery_orientationLandscape": "横長",
+  "localGallery_orientationPortrait": "縦長",
+  "localGallery_orientationSquare": "正方形",
+  "localGallery_filterNsfw": "コンテンツ区分",
+  "localGallery_nsfwAny": "すべて",
+  "localGallery_nsfwSfw": "全年齢",
+  "localGallery_nsfwOnly": "NSFW のみ",
+  "localGallery_noModelCandidates": "モデルのメタデータがまだありません",
+  "localGallery_noSamplerCandidates": "サンプラーのメタデータがまだありません",
+  "localGallery_noResolutionCandidates": "解像度のメタデータがまだありません",
+  "localGallery_candidatesLoadFailed": "候補の読み込みに失敗しました",
+  "localGallery_noTagSuggestions": "一致するタグがありません",
   "localGallery_activeFiltersSet": "フィルターセット",
   "localGallery_applyFilters": "フィルターを適用する",
   "localGallery_resetAdvancedFilters": "詳細フィルターをリセット",
@@ -2306,18 +2414,50 @@
   "localGallery_undone": "元に戻しました",
   "localGallery_redone": "やり直し",
   "localGallery_confirmBulkDelete": "一括削除の確認",
-  "localGallery_confirmBulkDeleteContent": "{count} 個の選択した画像を削除してもよろしいですか?\n\nこれにより、それらはファイル システムから永久に削除され、元に戻すことはできません。",
+  "localGallery_confirmBulkDeleteContent": "{count} 個の選択した画像を削除してもよろしいですか?\n\n画像はすぐにギャラリーから消え、ファイルは次回起動時に完全に削除されます（このセッション内では元に戻せます）。",
   "@localGallery_confirmBulkDeleteContent": {
     "placeholders": {
       "count": {}
     }
   },
-  "localGallery_deletedImages": "{count} 個の画像が削除されました",
-  "@localGallery_deletedImages": {
+  "localGallery_deletedToPool": "{count} 個の画像を削除しました。次回起動時に完全に削除されます。",
+  "@localGallery_deletedToPool": {
     "placeholders": {
       "count": {}
     }
   },
+  "localGallery_trashTitle": "ゴミ箱",
+  "localGallery_trashEmpty": "ゴミ箱は空です",
+  "localGallery_trashHint": "ゴミ箱内のファイルはディスクに残っており、次回起動時に完全に削除されます。復元するとすぐにギャラリーへ戻ります。",
+  "localGallery_trashCount": "{count} 件",
+  "@localGallery_trashCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_trashRestore": "復元",
+  "localGallery_trashRestoreAll": "すべて復元",
+  "localGallery_trashRestoreFailed": "復元に失敗しました",
+  "localGallery_trashRestored": "{count} 枚の画像を復元しました",
+  "@localGallery_trashRestored": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_trashDeleteAll": "完全に削除",
+  "localGallery_trashDeleteAllConfirm": "ゴミ箱内の {count} 個のファイルを今すぐ完全に削除します。元に戻せません。",
+  "@localGallery_trashDeleteAllConfirm": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_trashDeletedForever": "{count} 個のファイルを完全に削除しました",
+  "@localGallery_trashDeletedForever": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_trashFileMissing": "ファイルはディスク上にありません",
   "localGallery_noFoldersAvailable": "使用可能なフォルダーがありません。最初にフォルダーを作成してください。",
   "localGallery_moveToFolder": "フォルダーに移動",
   "localGallery_imageCount": "{count} 画像",
@@ -4692,7 +4832,6 @@
   "promptAssistant_defaultCharacterReplaceRuleContent": "あなたはキャラクター置換アシスタントです。アクション、構成、背景、スタイル、カメラ、および品質タグを保持しながら、入力プロンプト内の元のキャラクターのアイデンティティ、髪型、衣装、外観をターゲット キャラクターに置き換えます。置換された単一行プロンプトのみを出力します。",
   "promptAssistant_defaultCustomRuleName": "デフォルトのカスタム ルール",
   "promptAssistant_defaultCustomRuleContent": "あなたはプロンプト書き換えアシスタントです。現在のプロンプト、ユーザー要求、およびオプションの参照イメージに従ってプロンプトを変更します。直接使用できる最後の 1 行プロンプトのみを説明なしで出力します。",
-  "localGallery_dateFilterButton": "日付フィルター",
   "cacheStats_title": "キャッシュ統計",
   "cacheStats_autoRefreshUpdated": "自動更新 · 最終更新日: {time}",
   "@cacheStats_autoRefreshUpdated": {
@@ -4732,7 +4871,6 @@
   "galleryCache_scanAlreadyRunning": "スキャン タスクはすでに実行中です。完了するまでお待ちください。",
   "galleryCache_preparing": "準備中...",
   "galleryCache_noGalleryFolder": "ギャラリーフォルダーが設定されていません",
-  "galleryCache_galleryFolderMissing": "ギャラリー フォルダーが存在しません",
   "galleryCache_scanningPhase": "{processed}/{total} をスキャンしています...",
   "@galleryCache_scanningPhase": {
     "placeholders": {

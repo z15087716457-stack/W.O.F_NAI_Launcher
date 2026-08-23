@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../utils/app_logger.dart';
+import '../utils/gallery_path_utils.dart';
 import '../utils/isolate_pool.dart';
 
 part 'thumbnail_cache_service.g.dart';
@@ -36,6 +37,26 @@ enum ThumbnailSize {
 
   /// 获取文件后缀
   String get fileSuffix => '.$name';
+}
+
+/// 按显示尺寸挑选缩略图档位（纯函数，可单测）。
+///
+/// 物理需求宽度 = 逻辑卡片宽 × 设备像素比（DPR），
+/// 选「宽度 ≥ 需求」的最小档：≤180 物理像素 → small，≤360 → medium，否则 large。
+/// 宽屏少列大图自动走 medium/large（按需懒生成新缓存，旧小档留盘无害），
+/// 窄列多列仍走 small 省资源。
+ThumbnailSize pickThumbnailSize(
+  double logicalCardWidth,
+  double devicePixelRatio,
+) {
+  final physicalWidth = logicalCardWidth * devicePixelRatio;
+  if (physicalWidth <= ThumbnailSize.small.width) {
+    return ThumbnailSize.small;
+  }
+  if (physicalWidth <= ThumbnailSize.medium.width) {
+    return ThumbnailSize.medium;
+  }
+  return ThumbnailSize.large;
 }
 
 /// 缩略图信息
@@ -76,16 +97,16 @@ class ThumbnailInfo {
 
   /// 转换为 JSON（用于持久化）
   Map<String, dynamic> toJson() => {
-        'path': path,
-        'width': width,
-        'height': height,
-        'createdAt': createdAt.toIso8601String(),
-        'size': size.name,
-        'lastAccessedAt': lastAccessedAt.toIso8601String(),
-        'accessCount': accessCount,
-        'isVisible': isVisible,
-        'visibilityPriority': visibilityPriority,
-      };
+    'path': path,
+    'width': width,
+    'height': height,
+    'createdAt': createdAt.toIso8601String(),
+    'size': size.name,
+    'lastAccessedAt': lastAccessedAt.toIso8601String(),
+    'accessCount': accessCount,
+    'isVisible': isVisible,
+    'visibilityPriority': visibilityPriority,
+  };
 
   /// 从 JSON 创建
   factory ThumbnailInfo.fromJson(Map<String, dynamic> json) {
@@ -158,8 +179,8 @@ class ThumbnailCacheService {
   /// 缩略图生成队列（按优先级排序）
   final List<_ThumbnailTask> _taskQueue = [];
 
-  /// 画廊根目录（用于路径遍历验证）
-  String? _rootPath;
+  /// 画廊根目录列表（主源 + 额外图库源，用于路径遍历验证）
+  List<String> _rootPaths = const [];
 
   /// 最大队列长度限制
   static const int maxQueueSize = 200;
@@ -220,9 +241,9 @@ class ThumbnailCacheService {
     _activeGenerationCount = 0;
   }
 
-  /// 设置根目录路径（用于路径遍历验证）
-  void setRootPath(String rootPath) {
-    _rootPath = rootPath;
+  /// 设置根目录路径集合（主源 + 额外图库源，用于路径遍历验证）
+  void setRootPaths(List<String> rootPaths) {
+    _rootPaths = rootPaths;
   }
 
   /// 设置缓存限制
@@ -318,10 +339,7 @@ class ThumbnailCacheService {
     // 检查文件是否存在
     final originalFile = File(originalPath);
     if (!await originalFile.exists()) {
-      AppLogger.w(
-        'Original file not found: $originalPath',
-        'ThumbnailCache',
-      );
+      AppLogger.w('Original file not found: $originalPath', 'ThumbnailCache');
       return null;
     }
 
@@ -466,8 +484,9 @@ class ThumbnailCacheService {
     // 检查队列是否已满
     if (_taskQueue.length >= maxQueueSize) {
       // 移除优先级最低的任务
-      _taskQueue
-          .sort((a, b) => a.effectivePriority.compareTo(b.effectivePriority));
+      _taskQueue.sort(
+        (a, b) => a.effectivePriority.compareTo(b.effectivePriority),
+      );
       final lowestPriorityTask = _taskQueue.last;
       if (lowestPriorityTask.effectivePriority > priority) {
         _taskQueue.removeLast();
@@ -502,8 +521,9 @@ class ThumbnailCacheService {
 
   /// 按优先级排序队列
   void _sortQueueByPriority() {
-    _taskQueue
-        .sort((a, b) => a.effectivePriority.compareTo(b.effectivePriority));
+    _taskQueue.sort(
+      (a, b) => a.effectivePriority.compareTo(b.effectivePriority),
+    );
   }
 
   /// 等待正在进行的生成任务完成
@@ -539,11 +559,13 @@ class ThumbnailCacheService {
     _activeGenerationCount++;
 
     final task = _taskQueue.removeAt(0);
-    _doGenerateThumbnail(task.originalPath, size: task.size).then((path) {
-      task.completer.complete(path);
-    }).catchError((error) {
-      task.completer.completeError(error);
-    });
+    _doGenerateThumbnail(task.originalPath, size: task.size)
+        .then((path) {
+          task.completer.complete(path);
+        })
+        .catchError((error) {
+          task.completer.completeError(error);
+        });
   }
 
   /// 更新缩略图可见性
@@ -583,10 +605,7 @@ class ThumbnailCacheService {
   }
 
   /// 批量更新可见性
-  void batchUpdateVisibility(
-    List<String> visiblePaths, {
-    int priority = 1,
-  }) {
+  void batchUpdateVisibility(List<String> visiblePaths, {int priority = 1}) {
     // 重置所有可见性
     for (final entry in _visibilityInfo.entries) {
       entry.value.isVisible = false;
@@ -694,8 +713,10 @@ class ThumbnailCacheService {
       final List<String> deletedPaths = [];
 
       // 遍历所有子目录，删除 .thumbs 文件夹
-      await for (final entity
-          in rootDir.list(recursive: true, followLinks: false)) {
+      await for (final entity in rootDir.list(
+        recursive: true,
+        followLinks: false,
+      )) {
         if (entity is Directory) {
           final dirName = entity.path.split(Platform.pathSeparator).last;
           if (dirName == thumbsDirName) {
@@ -749,8 +770,10 @@ class ThumbnailCacheService {
 
       int deletedCount = 0;
 
-      await for (final entity
-          in rootDir.list(recursive: true, followLinks: false)) {
+      await for (final entity in rootDir.list(
+        recursive: true,
+        followLinks: false,
+      )) {
         if (entity is Directory) {
           final dirName = entity.path.split(Platform.pathSeparator).last;
           if (dirName == thumbsDirName) {
@@ -798,8 +821,10 @@ class ThumbnailCacheService {
     try {
       // 找到所有.thumbs目录
       final thumbsDirs = <Directory>[];
-      await for (final entity
-          in rootDir.list(recursive: true, followLinks: false)) {
+      await for (final entity in rootDir.list(
+        recursive: true,
+        followLinks: false,
+      )) {
         if (entity is Directory) {
           final dirName = p.basename(entity.path);
           if (dirName == thumbsDirName) {
@@ -810,8 +835,10 @@ class ThumbnailCacheService {
 
       // 检查每个.thumbs目录是否有嵌套的.thumbs子目录
       for (final thumbsDir in thumbsDirs) {
-        await for (final entity
-            in thumbsDir.list(recursive: true, followLinks: false)) {
+        await for (final entity in thumbsDir.list(
+          recursive: true,
+          followLinks: false,
+        )) {
           if (entity is Directory) {
             final dirName = p.basename(entity.path);
             if (dirName == thumbsDirName) {
@@ -872,10 +899,7 @@ class ThumbnailCacheService {
     final basicStats = getStats();
     final cacheSizeInfo = await getCacheSize(rootPath);
 
-    return {
-      ...basicStats,
-      'diskCache': cacheSizeInfo,
-    };
+    return {...basicStats, 'diskCache': cacheSizeInfo};
   }
 
   /// 重置统计信息
@@ -904,8 +928,10 @@ class ThumbnailCacheService {
         sizeCounts[size.name] = 0;
       }
 
-      await for (final entity
-          in rootDir.list(recursive: true, followLinks: false)) {
+      await for (final entity in rootDir.list(
+        recursive: true,
+        followLinks: false,
+      )) {
         if (entity is Directory) {
           final dirName = entity.path.split(Platform.pathSeparator).last;
           if (dirName == thumbsDirName) {
@@ -1076,8 +1102,10 @@ class ThumbnailCacheService {
         return thumbnails;
       }
 
-      await for (final entity
-          in rootDir.list(recursive: true, followLinks: false)) {
+      await for (final entity in rootDir.list(
+        recursive: true,
+        followLinks: false,
+      )) {
         if (entity is Directory) {
           final dirName = entity.path.split(Platform.pathSeparator).last;
           if (dirName == thumbsDirName) {
@@ -1132,10 +1160,7 @@ class ThumbnailCacheService {
   }
 
   /// 获取缩略图文件路径
-  String _getThumbnailPath(
-    String originalPath, {
-    required ThumbnailSize size,
-  }) {
+  String _getThumbnailPath(String originalPath, {required ThumbnailSize size}) {
     final dir = _getThumbnailDir(originalPath);
     final fileName = _getThumbnailFileName(originalPath, size: size);
     return '$dir${Platform.pathSeparator}$fileName';
@@ -1155,13 +1180,12 @@ class ThumbnailCacheService {
       );
     }
 
-    // 额外验证：如果设置了根目录，确保路径在根目录内
-    final rootPath = _rootPath;
-    if (rootPath != null &&
-        rootPath.isNotEmpty &&
-        !p.isWithin(rootPath, originalPath)) {
+    // 额外验证：如果设置了根目录，确保路径在任一图库源内
+    if (_rootPaths.isNotEmpty &&
+        !_rootPaths.any((root) => galleryPathIsWithin(root, originalPath))) {
       throw ArgumentError(
-        'Invalid path: "$originalPath" is outside of root directory "$rootPath"',
+        'Invalid path: "$originalPath" is outside of configured gallery roots '
+        '$_rootPaths',
       );
     }
 
@@ -1190,16 +1214,10 @@ class ThumbnailCacheService {
       throw ArgumentError('Invalid path: filename cannot be empty');
     }
 
-    return _buildThumbnailFileName(
-      originalFileName,
-      size: size,
-    );
+    return _buildThumbnailFileName(originalFileName, size: size);
   }
 
-  String _failureKey(
-    String originalPath, {
-    required ThumbnailSize size,
-  }) =>
+  String _failureKey(String originalPath, {required ThumbnailSize size}) =>
       '$originalPath#${size.name}';
 
   bool _isInFailureCooldown(
@@ -1282,10 +1300,7 @@ class _VisibilityInfo {
   bool isVisible;
   int priority;
 
-  _VisibilityInfo({
-    required this.isVisible,
-    required this.priority,
-  });
+  _VisibilityInfo({required this.isVisible, required this.priority});
 }
 
 /// 缩略图统计
@@ -1357,8 +1372,9 @@ Map<String, Object?> _generateThumbnailBytesInIsolate(
 
   final targetAspectRatio = targetHeight > 0 ? targetWidth / targetHeight : 1.0;
   if (aspectRatio > targetAspectRatio) {
-    thumbHeight =
-        aspectRatio > 0 ? (targetWidth / aspectRatio).round() : targetHeight;
+    thumbHeight = aspectRatio > 0
+        ? (targetWidth / aspectRatio).round()
+        : targetHeight;
   } else {
     thumbWidth = (targetHeight * aspectRatio).round();
   }

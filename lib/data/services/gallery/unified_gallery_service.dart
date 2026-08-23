@@ -9,37 +9,18 @@ import '../../../core/database/datasources/gallery_data_source.dart';
 import '../../../core/database/database.dart';
 import '../../../core/exceptions/gallery_exceptions.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/gallery_path_utils.dart';
 import '../../models/gallery/local_image_record.dart';
 import '../../models/gallery/nai_image_metadata.dart';
 import '../../repositories/gallery_folder_repository.dart';
 import '../image_metadata_service.dart';
 import 'gallery_filter_service.dart';
+import 'gallery_sort.dart';
 import 'gallery_stream_scanner.dart';
 import 'scan_state_manager.dart';
 import 'scan_config.dart' show ScanConfig;
 
 part 'unified_gallery_service.g.dart';
-
-String normalizeGalleryFilePath(String filePath) {
-  final trimmed = filePath.trim();
-  if (!Platform.isWindows) return trimmed;
-
-  var normalized = trimmed.replaceAll('/', r'\');
-  if (normalized.startsWith(r'\\?\UNC\')) {
-    normalized = r'\\' + normalized.substring(r'\\?\UNC\'.length);
-  } else if (normalized.startsWith(r'\\?\')) {
-    normalized = normalized.substring(r'\\?\'.length);
-  }
-  return normalized;
-}
-
-String galleryFilePathKey(String filePath) {
-  final normalized = normalizeGalleryFilePath(filePath);
-  return Platform.isWindows ? normalized.toLowerCase() : normalized;
-}
-
-bool galleryFilePathsEqual(String left, String right) =>
-    galleryFilePathKey(left) == galleryFilePathKey(right);
 
 enum GalleryStartupIndexAction { none, fullScan }
 
@@ -66,13 +47,15 @@ bool isFavoriteOnlyFastFilter(FilterCriteria criteria) {
       criteria.dateStart == null &&
       criteria.dateEnd == null &&
       criteria.selectedTags.isEmpty &&
-      criteria.filterModel == null &&
-      criteria.filterSampler == null &&
+      criteria.filterModels.isEmpty &&
+      criteria.filterSamplers.isEmpty &&
       criteria.filterMinSteps == null &&
       criteria.filterMaxSteps == null &&
       criteria.filterMinCfg == null &&
       criteria.filterMaxCfg == null &&
-      criteria.filterResolution == null &&
+      criteria.filterResolutions.isEmpty &&
+      criteria.filterOrientation == null &&
+      criteria.nsfwMode == null &&
       criteria.minWidth == null &&
       criteria.minHeight == null &&
       criteria.maxWidth == null &&
@@ -81,7 +64,9 @@ bool isFavoriteOnlyFastFilter(FilterCriteria criteria) {
       criteria.maxFileSize == null &&
       criteria.metadataStatuses.isEmpty &&
       criteria.categoryId == null &&
-      criteria.categoryFolderPath == null;
+      criteria.categoryFolderPath == null &&
+      criteria.collectionId == null &&
+      !criteria.naiOnly;
 }
 
 /// 画廊服务接口
@@ -201,6 +186,9 @@ abstract class LocalGalleryService {
   /// 设置分页大小
   Future<void> setPageSize(int size);
 
+  /// 设置排序（字段 + 方向）
+  Future<void> setSort(GallerySort sort);
+
   /// 清除所有过滤条件
   Future<void> clearFilters();
 
@@ -213,6 +201,13 @@ abstract class LocalGalleryService {
   ///
   /// 返回对应的图片记录列表，如果某些路径不存在则跳过
   Future<List<LocalImageRecord>> getRecordsByPaths(List<String> paths);
+
+  /// 从内存文件列表移除指定路径（删除池软删后调用，不触发重扫）。
+  ///
+  /// 删除池的文件仍在盘上：软删后必须同时从内存列表摘除，否则下一次
+  /// 分页查询会再次看到它。DB 侧的 is_deleted 标记保证扫描/搜索链路
+  /// 不会再把它带回来。
+  void removeImagesFromMemory(List<String> paths);
 
   /// 获取当前过滤结果中的所有图片路径。
   ///
@@ -234,6 +229,14 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   int _filterGeneration = 0;
   String? _activeFilterOperationId;
   int _pageSize = 50;
+
+  /// 当前排序（默认修改时间 新→旧，与历史行为一致）
+  GallerySort _sort = const GallerySort.modifiedAtDesc();
+
+  /// 文件 stat 缓存（排序用；initialize 时填充，之后增量补齐）
+  /// created=文件创建时间（内存路径的「创建时间」口径），area=图像面积 w×h（DB 补齐）
+  final Map<String, ({DateTime modified, DateTime created, int size, int area})>
+  _fileStats = {};
 
   LocalGalleryServiceImpl({
     required GalleryDataSource dataSource,
@@ -278,8 +281,103 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     _allFiles.insert(0, file);
   }
 
+  /// 补齐缺失的 stat 缓存（排序需要）；面积需要 DB 尺寸，一并补上。
+  ///
+  /// 初始化（[_getAllImageFiles]）时所有条目都以 area: 0 入缓存，
+  /// 因此这里对「无条目」和「有条目但 area==0」都要走 DB 补齐，
+  /// 否则按图像尺寸排序永远拿到 0 面积而退化成文件名序。
+  Future<void> _ensureFileStats(List<File> files) async {
+    final needArea = files
+        .where((file) {
+          final entry = _fileStats[file.path];
+          return entry == null || entry.area == 0;
+        })
+        .toList();
+    if (needArea.isEmpty) return;
+
+    // stat 只补完全缺失的条目；已有条目（area==0）保留原 stat
+    final needStat = needArea
+        .where((file) => !_fileStats.containsKey(file.path))
+        .toList();
+    if (needStat.isNotEmpty) {
+      await Future.wait(
+        needStat.map((file) async {
+          try {
+            final stat = await file.stat();
+            // created 与 DB created_at 口径一致：扫描路径写入的就是文件 mtime
+            _fileStats[file.path] = (
+              modified: stat.modified,
+              created: stat.modified,
+              size: stat.size,
+              area: 0,
+            );
+          } catch (_) {
+            // stat 失败的文件保留缺省值，排序时按最小键处理
+          }
+        }),
+      );
+    }
+
+    // 面积：从 gallery_images 的 width×height 补齐（无尺寸文件保持 0）
+    final paths = needArea.map((file) => file.path).toList();
+    try {
+      final pathToIdMap = await _dataSource.getImageIdsByPaths(paths);
+      final imageIds = pathToIdMap.values.whereType<int>().toList();
+      if (imageIds.isEmpty) return;
+      final records = await _dataSource.getImagesByIds(imageIds);
+      for (final record in records) {
+        final width = record.width;
+        final height = record.height;
+        if (width == null || height == null) continue;
+        final entry = _fileStats[record.filePath];
+        if (entry == null) continue;
+        _fileStats[record.filePath] = (
+          modified: entry.modified,
+          created: entry.created,
+          size: entry.size,
+          area: width * height,
+        );
+      }
+    } catch (e) {
+      AppLogger.w(
+        'Failed to resolve image dimensions for sort: $e',
+        'LocalGalleryService',
+      );
+    }
+  }
+
+  void _sortFileListByCache(List<File> files) {
+    files.sort((a, b) {
+      final keyA =
+          _fileStats[a.path] ??
+          (modified: DateTime(0), created: DateTime(0), size: 0, area: 0);
+      final keyB =
+          _fileStats[b.path] ??
+          (modified: DateTime(0), created: DateTime(0), size: 0, area: 0);
+      return _sort.compareFiles(
+        modifiedAtA: keyA.modified,
+        modifiedAtB: keyB.modified,
+        fileSizeA: keyA.size,
+        fileSizeB: keyB.size,
+        fileNameA: p.basename(a.path),
+        fileNameB: p.basename(b.path),
+        createdAtA: keyA.created,
+        createdAtB: keyB.created,
+        imageAreaA: keyA.area,
+        imageAreaB: keyB.area,
+      );
+    });
+  }
+
+  /// 按当前排序重排文件列表（先补 stat 缓存再排序）
+  Future<void> _sortFileList(List<File> files) async {
+    await _ensureFileStats(files);
+    _sortFileListByCache(files);
+  }
+
   Future<void> _syncFileListsAfterFavoriteChange(File file) async {
     _trackFileIfMissing(file);
+    await _sortFileList(_allFiles);
     if (_currentFilter.hasFilters) {
       await applyFilter(_currentFilter);
     } else {
@@ -345,7 +443,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     }
   }
 
-  /// 从文件系统获取所有图片文件
+  /// 从文件系统获取所有图片文件（主源 + 额外图库源）
   Future<List<File>> _getAllImageFiles() async {
     final rootPath = await GalleryFolderRepository.instance.getRootPath();
     if (rootPath == null || rootPath.isEmpty) {
@@ -363,36 +461,50 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       );
     }
 
+    // 主源 + 全部存在的额外源
+    final rootDirs = await GalleryFolderRepository.instance.getAllRootDirs();
+
     var files = <File>[];
     const supportedExtensions = {'.png', '.jpg', '.jpeg', '.webp'};
 
     // 使用 ScanConfig 的缩略图检测配置
     const scanConfig = ScanConfig();
+    final seenKeys = <String>{};
 
     try {
-      await for (final entity in rootDir.list(
-        recursive: true,
-        followLinks: false,
-      )) {
-        if (entity is File) {
-          // 排除缩略图目录和文件
-          if (scanConfig.isThumbnailPath(entity.path)) {
-            continue;
-          }
+      for (final root in rootDirs) {
+        await for (final entity in root.list(
+          recursive: true,
+          followLinks: false,
+        )) {
+          if (entity is File) {
+            // 排除缩略图目录和文件
+            if (scanConfig.isThumbnailPath(entity.path)) {
+              continue;
+            }
 
-          // 使用 path 包正确提取扩展名，避免多层扩展名问题
-          final ext = p.extension(entity.path).toLowerCase();
-          if (supportedExtensions.contains(ext)) {
-            files.add(entity);
+            // 使用 path 包正确提取扩展名，避免多层扩展名问题
+            final ext = p.extension(entity.path).toLowerCase();
+            if (supportedExtensions.contains(ext) &&
+                seenKeys.add(galleryFilePathKey(entity.path))) {
+              files.add(entity);
+            }
           }
         }
       }
 
-      // 按修改时间排序（最新的在前）
+      // 按当前排序（默认修改时间新→旧）排序，并填充 stat 缓存
       final fileStats = await Future.wait(
         files.map((file) async {
           try {
-            return (file: file, stat: await file.stat());
+            final stat = await file.stat();
+            _fileStats[file.path] = (
+              modified: stat.modified,
+              created: stat.modified,
+              size: stat.size,
+              area: 0,
+            );
+            return (file: file, stat: stat);
           } catch (_) {
             return null;
           }
@@ -402,9 +514,37 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       final validStats = fileStats
           .whereType<({File file, FileStat stat})>()
           .toList();
-      validStats.sort((a, b) => b.stat.modified.compareTo(a.stat.modified));
+      validStats.sort(
+        (a, b) => _sort.compareFiles(
+          modifiedAtA: a.stat.modified,
+          modifiedAtB: b.stat.modified,
+          fileSizeA: a.stat.size,
+          fileSizeB: b.stat.size,
+          fileNameA: p.basename(a.file.path),
+          fileNameB: p.basename(b.file.path),
+        ),
+      );
 
       files = validStats.map((e) => e.file).toList();
+
+      // 软删排除（以 DB is_deleted 为准）：删除池的文件仍在盘上，
+      // 不排除的话 refresh 后「已删」图会复活。
+      try {
+        final deletedPaths = await _dataSource.getDeletedImagePaths();
+        if (deletedPaths.isNotEmpty) {
+          final deletedKeys = deletedPaths.map(galleryFilePathKey).toSet();
+          files = files
+              .where(
+                (file) => !deletedKeys.contains(galleryFilePathKey(file.path)),
+              )
+              .toList(growable: false);
+        }
+      } catch (e) {
+        AppLogger.w(
+          'Failed to load deleted paths for file list: $e',
+          'LocalGalleryService',
+        );
+      }
     } catch (e) {
       AppLogger.e('Failed to get image files', e, null, 'LocalGalleryService');
       throw GalleryFileSystemException(
@@ -490,15 +630,15 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     }
   }
 
-  /// 执行增量扫描（使用流式逐张处理）
+  /// 执行增量扫描（使用流式逐张处理，多图库源）
   Future<void> _performIncrementalScan({
     bool retryMissingMetadata = false,
     bool retryFailedMetadata = false,
   }) async {
-    final rootPath = await GalleryFolderRepository.instance.getRootPath();
-    if (rootPath == null) {
+    final rootDirs = await GalleryFolderRepository.instance.getAllRootDirs();
+    if (rootDirs.isEmpty) {
       AppLogger.w(
-        '[UGS] _performIncrementalScan: rootPath is null',
+        '[UGS] _performIncrementalScan: no root directories',
         'LocalGalleryService',
       );
       return;
@@ -507,7 +647,8 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     // 检查是否已有扫描在进行中
     final scanManager = ScanStateManager.instance;
     AppLogger.i(
-      '[UGS] _performIncrementalScan: isScanning=${scanManager.isScanning}, rootPath=$rootPath',
+      '[UGS] _performIncrementalScan: isScanning=${scanManager.isScanning}, '
+          'roots=${rootDirs.map((d) => d.path).join(' | ')}',
       'LocalGalleryService',
     );
 
@@ -516,15 +657,13 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       return;
     }
 
-    final dir = Directory(rootPath);
-
     AppLogger.i('[UGS] 开始执行流式扫描', 'LocalGalleryService');
 
     // 使用新的流式扫描器：真正的单文件流水线
     final scanner = GalleryStreamScanner(dataSource: _dataSource);
 
     await scanner.startScanning(
-      dir,
+      rootDirs,
       retryMissingMetadata: retryMissingMetadata,
       retryFailedMetadata: retryFailedMetadata,
       // 【扫描时日志太频繁，禁用】
@@ -548,10 +687,10 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     bool retryMissingMetadata = false,
     bool retryFailedMetadata = false,
   }) async {
-    final rootPath = await GalleryFolderRepository.instance.getRootPath();
-    if (rootPath == null) {
+    final rootDirs = await GalleryFolderRepository.instance.getAllRootDirs();
+    if (rootDirs.isEmpty) {
       AppLogger.w(
-        '[UGS] _performFullScan: rootPath is null',
+        '[UGS] _performFullScan: no root directories',
         'LocalGalleryService',
       );
       return;
@@ -564,15 +703,13 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       return;
     }
 
-    final dir = Directory(rootPath);
-
     AppLogger.i('[UGS] 开始执行全量流式扫描', 'LocalGalleryService');
 
     // 使用新的流式扫描器：真正的单文件流水线
     final scanner = GalleryStreamScanner(dataSource: _dataSource);
 
     await scanner.startScanning(
-      dir,
+      rootDirs,
       retryMissingMetadata: retryMissingMetadata,
       retryFailedMetadata: retryFailedMetadata,
       // 【扫描时日志太频繁，禁用】
@@ -770,6 +907,24 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   }
 
   @override
+  void removeImagesFromMemory(List<String> paths) {
+    if (paths.isEmpty) return;
+    final removedKeys = paths.map(galleryFilePathKey).toSet();
+    _allFiles.removeWhere(
+      (file) => removedKeys.contains(galleryFilePathKey(file.path)),
+    );
+    _filteredFiles.removeWhere(
+      (file) => removedKeys.contains(galleryFilePathKey(file.path)),
+    );
+    for (final path in paths) {
+      _fileStats.remove(path);
+    }
+    // 过滤缓存键含文件数与 DB revision，批量软删已 bump revision，
+    // 无需手动清缓存；这里再清一次兜底（防 revision 竞态）。
+    _filterService.clearCache();
+  }
+
+  @override
   Future<List<LocalImageRecord>> getRecordsByPaths(List<String> paths) async {
     _ensureInitialized();
 
@@ -913,6 +1068,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
           if (pathToFile[galleryFilePathKey(record.filePath)] != null)
             pathToFile[galleryFilePathKey(record.filePath)]!,
       ];
+      await _sortFileList(_filteredFiles);
       return;
     }
 
@@ -929,6 +1085,9 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
         return;
       }
       _filteredFiles = result.files;
+      // 过滤管道（advancedSearch 结果 → allFiles 求交 → post 过滤）会打乱
+      // 相对顺序，这里按当前排序再排一遍，保证与所选排序一致。
+      await _sortFileList(_filteredFiles);
     } on FilterCancelledException {
       if (generation == _filterGeneration) {
         rethrow;
@@ -964,6 +1123,19 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   @override
   Future<void> setPageSize(int size) async {
     _pageSize = size;
+  }
+
+  @override
+  Future<void> setSort(GallerySort sort) async {
+    if (_sort == sort) return;
+
+    _sort = sort;
+    _filterService.setSort(sort);
+
+    await _sortFileList(_allFiles);
+    if (_currentFilter.hasFilters) {
+      await _sortFileList(_filteredFiles);
+    }
   }
 
   @override
@@ -1148,8 +1320,15 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
         ImageMetadataService().cacheMetadata(file.path, metadata);
       }
 
-      // 3. 添加到 _allFiles 列表开头（因为是新文件，修改时间最新）
-      _allFiles.insert(0, file);
+      // 3. 添加到 _allFiles 并按当前排序归位（不假设"最新在最前"）
+      _fileStats[file.path] = (
+        modified: stat.modified,
+        created: stat.modified,
+        size: stat.size,
+        area: _calculateArea(metadata?.width, metadata?.height),
+      );
+      _allFiles.add(file);
+      await _sortFileList(_allFiles);
 
       // 4. 重新应用过滤（如果有过滤条件）
       if (_currentFilter.hasFilters) {
@@ -1234,6 +1413,12 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       return width / height;
     }
     return null;
+  }
+
+  /// 计算图像面积（width×height）；任一缺失返回 0
+  int _calculateArea(int? width, int? height) {
+    if (width == null || height == null) return 0;
+    return width * height;
   }
 
   void _ensureInitialized() {
@@ -1396,6 +1581,9 @@ class ErrorGalleryService implements LocalGalleryService {
   Future<void> setPageSize(int size) => _throwError();
 
   @override
+  Future<void> setSort(GallerySort sort) => _throwError();
+
+  @override
   Future<void> clearFilters() => _throwError();
 
   @override
@@ -1404,6 +1592,9 @@ class ErrorGalleryService implements LocalGalleryService {
   @override
   Future<List<LocalImageRecord>> getRecordsByPaths(List<String> paths) =>
       _throwError();
+
+  @override
+  void removeImagesFromMemory(List<String> paths) {}
 
   @override
   Future<List<String>> getFilteredImagePaths() => _throwError();
@@ -1477,6 +1668,9 @@ class _PlaceholderGalleryService implements LocalGalleryService {
   Future<void> setPageSize(int size) => _throwNotInitialized();
 
   @override
+  Future<void> setSort(GallerySort sort) => _throwNotInitialized();
+
+  @override
   Future<void> clearFilters() => _throwNotInitialized();
 
   @override
@@ -1485,6 +1679,11 @@ class _PlaceholderGalleryService implements LocalGalleryService {
   @override
   Future<List<LocalImageRecord>> getRecordsByPaths(List<String> paths) =>
       _throwNotInitialized();
+
+  @override
+  void removeImagesFromMemory(List<String> paths) {
+    _throwNotInitialized();
+  }
 
   @override
   Future<List<String>> getFilteredImagePaths() => _throwNotInitialized();

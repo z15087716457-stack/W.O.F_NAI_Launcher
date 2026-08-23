@@ -577,6 +577,91 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_autoSaveSubtitle => '生成後に画像を自動的に保存します';
 
   @override
+  String get settings_extraRootsTitle => 'ギャラリーソース';
+
+  @override
+  String get settings_extraRootsHint =>
+      '追加のギャラリーソース: 任意のフォルダをギャラリーで閲覧・検索できます（読み取り専用、自動保存の対象外）。追加後、ギャラリーまたはこのページ下部で再スキャンしてください。';
+
+  @override
+  String get settings_extraRootsEmpty => '追加のギャラリーソースはありません';
+
+  @override
+  String get settings_extraRootsAdd => 'フォルダを追加';
+
+  @override
+  String get settings_extraRootsAddTitle => 'ギャラリーソースとして追加するフォルダを選択';
+
+  @override
+  String get settings_extraRootsRemove => 'このギャラリーソースを削除';
+
+  @override
+  String get settings_extraRootsRemoveConfirmTitle => 'ギャラリーソースを削除しますか？';
+
+  @override
+  String settings_extraRootsRemoveConfirmContent(String path) {
+    return '「$path」をギャラリーから削除します（フォルダ内のファイルは削除されません）。';
+  }
+
+  @override
+  String get settings_extraRootsAdded => 'ギャラリーソースを追加しました。再スキャン後に反映されます';
+
+  @override
+  String get settings_extraRootsRemoved => 'ギャラリーソースを削除しました';
+
+  @override
+  String get settings_extraRootsDuplicate => 'このフォルダはすでにギャラリーソースです';
+
+  @override
+  String get settings_extraRootsSameAsMain => 'このフォルダは画像保存先と同じです';
+
+  @override
+  String get settings_extraRootsNested =>
+      'ギャラリーソース同士を互いに含めることはできません。別のフォルダを選択してください';
+
+  @override
+  String get settings_extraRootsNotFound => '選択したフォルダが存在しません';
+
+  @override
+  String get settings_importTagIndex => 'タグ索引をインポート…';
+
+  @override
+  String get settings_importTagIndexPickTitle => 'タグ索引ファイルを選択 (.jsonl)';
+
+  @override
+  String settings_importTagIndexProgress(int processed, int total) {
+    return '$processed/$total 行をインポート中…';
+  }
+
+  @override
+  String settings_importTagIndexDone(
+    int imported,
+    int updated,
+    int skipped,
+    int errors,
+  ) {
+    return 'インポート完了: 新規 $imported、更新 $updated、スキップ $skipped、エラー $errors';
+  }
+
+  @override
+  String get settings_importTagIndexFailed => 'タグ索引のインポートに失敗しました';
+
+  @override
+  String get settings_importTagIndexBlockedByScan =>
+      'ギャラリーのスキャン中です。スキャン完了後にタグインデックスをインポートしてください';
+
+  @override
+  String get settings_extraRootsIndexImportTitle => 'タグ索引を検出';
+
+  @override
+  String settings_extraRootsIndexImportContent(String path) {
+    return '「$path」にタグ索引 index.jsonl を検出しました。先にインポートすると、以降のスキャンがメタデータ解析をスキップして高速化されます。今すぐインポートしますか？';
+  }
+
+  @override
+  String get settings_extraRootsIndexImportConfirm => '今すぐインポート';
+
+  @override
   String get settings_about => '概要';
 
   @override
@@ -4368,11 +4453,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_loadingGroupedImages => 'グループ化された画像を読み込み中...';
 
   @override
-  String localGallery_jumpedToMonth(Object year, Object month) {
-    return '$year-$month にジャンプしました';
-  }
-
-  @override
   String get localGallery_title => 'ローカル ギャラリー';
 
   @override
@@ -4410,10 +4490,67 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_addToCollection => 'コレクションに追加';
 
   @override
-  String get localGallery_switchToGridView => 'グリッド ビューに切り替える';
+  String get localGallery_sortButton => '並べ替え';
 
   @override
-  String get localGallery_switchToDateGroupedView => '日付グループ化ビューに切り替える';
+  String get localGallery_sortFieldModified => '更新日時';
+
+  @override
+  String get localGallery_sortFieldCreated => '作成日時';
+
+  @override
+  String get localGallery_sortFieldName => 'ファイル名';
+
+  @override
+  String get localGallery_sortFieldSize => 'ファイルサイズ';
+
+  @override
+  String get localGallery_sortFieldDimensions => '画像サイズ';
+
+  @override
+  String get localGallery_sortToggleDirection => '並べ替え方向を切り替え';
+
+  @override
+  String localGallery_aboutColumns(Object count) {
+    return '約 $count 列';
+  }
+
+  @override
+  String get localGallery_columnWidth => '列の幅';
+
+  @override
+  String get localGallery_naiOnly => 'NAI';
+
+  @override
+  String get localGallery_naiOnlyTooltip => 'NAI 生成画像のみ表示';
+
+  @override
+  String get localGallery_masonryViewLabel => 'ウォーターフォール';
+
+  @override
+  String get localGallery_switchToMasonryView => 'ウォーターフォール ビューに切り替える';
+
+  @override
+  String get localGallery_switchToGridLayout => 'グリッド ビューに切り替える';
+
+  @override
+  String localGallery_dateRangeYearMonth(Object year, Object month) {
+    return '$year年$month月';
+  }
+
+  @override
+  String get localGallery_dateRangePrevMonth => '前の月';
+
+  @override
+  String get localGallery_dateRangeNextMonth => '次の月';
+
+  @override
+  String get localGallery_dateRangeClear => 'クリア';
+
+  @override
+  String localGallery_searchInScope(Object scope) {
+    return '検索：$scope';
+  }
 
   @override
   String get localGallery_openFilterPanel => 'フィルター パネルを開く';
@@ -4433,6 +4570,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localGallery_tagIntersection => 'タグの交差';
+
+  @override
+  String get localGallery_filterByTags => 'タグで絞り込み';
+
+  @override
+  String get localGallery_tagInputHint => 'タグを入力して Enter で追加';
+
+  @override
+  String get localGallery_addTag => '追加';
 
   @override
   String get localGallery_createCategoryTitle => '新しいカテゴリ';
@@ -4456,17 +4602,34 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_seedCopied => 'シードがコピーされました';
 
   @override
+  String get localGallery_createCollectionTitle => '新しいコレクション';
+
+  @override
+  String get localGallery_createCollectionHint => 'コレクション名を入力';
+
+  @override
+  String get localGallery_createCollectionConfirm => '作成';
+
+  @override
+  String localGallery_deleteCollectionContent(Object name) {
+    return 'コレクション「$name」を削除しますか？コレクションのエントリのみ削除され、画像ファイルは削除されません。';
+  }
+
+  @override
+  String get localGallery_unfavorite => 'お気に入り解除';
+
+  @override
+  String get localGallery_favoriteMenuEmptyCollections =>
+      'コレクションがありません。左の + で作成';
+
+  @override
   String localGallery_confirmDeleteImageContent(Object name) {
-    return '画像「$name」を削除しますか?\n\nこれを元に戻すことはできません。';
+    return '画像「$name」を削除しますか?\n\n画像はすぐにギャラリーから消え、ファイルは次回起動時に完全に削除されます（このセッション内では元に戻せます）。';
   }
 
   @override
-  String get localGallery_imageDeleted => '画像が削除されました';
-
-  @override
-  String localGallery_deleteFailed(Object error) {
-    return '削除に失敗しました: $error';
-  }
+  String get localGallery_externalReadonly =>
+      '外部ギャラリーソースは読み取り専用です。この操作は利用できません';
 
   @override
   String get localGallery_categoryDeleteContent =>
@@ -4883,13 +5046,46 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_filterSubtitle => '画像コレクションを正確にフィルタリングします';
 
   @override
-  String get localGallery_modelHint => 'モデル名を入力してください...';
+  String get localGallery_filterOrientation => '向き';
 
   @override
-  String get localGallery_samplerHint => 'サンプラー名を入力してください...';
+  String get localGallery_orientationAny => 'すべて';
 
   @override
-  String get localGallery_resolutionHint => '幅 x 高さ (例: 1024x1024)';
+  String get localGallery_orientationLandscape => '横長';
+
+  @override
+  String get localGallery_orientationPortrait => '縦長';
+
+  @override
+  String get localGallery_orientationSquare => '正方形';
+
+  @override
+  String get localGallery_filterNsfw => 'コンテンツ区分';
+
+  @override
+  String get localGallery_nsfwAny => 'すべて';
+
+  @override
+  String get localGallery_nsfwSfw => '全年齢';
+
+  @override
+  String get localGallery_nsfwOnly => 'NSFW のみ';
+
+  @override
+  String get localGallery_noModelCandidates => 'モデルのメタデータがまだありません';
+
+  @override
+  String get localGallery_noSamplerCandidates => 'サンプラーのメタデータがまだありません';
+
+  @override
+  String get localGallery_noResolutionCandidates => '解像度のメタデータがまだありません';
+
+  @override
+  String get localGallery_candidatesLoadFailed => '候補の読み込みに失敗しました';
+
+  @override
+  String get localGallery_noTagSuggestions => '一致するタグがありません';
 
   @override
   String get localGallery_activeFiltersSet => 'フィルターセット';
@@ -4963,13 +5159,58 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String localGallery_confirmBulkDeleteContent(Object count) {
-    return '$count 個の選択した画像を削除してもよろしいですか?\n\nこれにより、それらはファイル システムから永久に削除され、元に戻すことはできません。';
+    return '$count 個の選択した画像を削除してもよろしいですか?\n\n画像はすぐにギャラリーから消え、ファイルは次回起動時に完全に削除されます（このセッション内では元に戻せます）。';
   }
 
   @override
-  String localGallery_deletedImages(Object count) {
-    return '$count 個の画像が削除されました';
+  String localGallery_deletedToPool(Object count) {
+    return '$count 個の画像を削除しました。次回起動時に完全に削除されます。';
   }
+
+  @override
+  String get localGallery_trashTitle => 'ゴミ箱';
+
+  @override
+  String get localGallery_trashEmpty => 'ゴミ箱は空です';
+
+  @override
+  String get localGallery_trashHint =>
+      'ゴミ箱内のファイルはディスクに残っており、次回起動時に完全に削除されます。復元するとすぐにギャラリーへ戻ります。';
+
+  @override
+  String localGallery_trashCount(Object count) {
+    return '$count 件';
+  }
+
+  @override
+  String get localGallery_trashRestore => '復元';
+
+  @override
+  String get localGallery_trashRestoreAll => 'すべて復元';
+
+  @override
+  String get localGallery_trashRestoreFailed => '復元に失敗しました';
+
+  @override
+  String localGallery_trashRestored(Object count) {
+    return '$count 枚の画像を復元しました';
+  }
+
+  @override
+  String get localGallery_trashDeleteAll => '完全に削除';
+
+  @override
+  String localGallery_trashDeleteAllConfirm(Object count) {
+    return 'ゴミ箱内の $count 個のファイルを今すぐ完全に削除します。元に戻せません。';
+  }
+
+  @override
+  String localGallery_trashDeletedForever(Object count) {
+    return '$count 個のファイルを完全に削除しました';
+  }
+
+  @override
+  String get localGallery_trashFileMissing => 'ファイルはディスク上にありません';
 
   @override
   String get localGallery_noFoldersAvailable =>
@@ -9136,9 +9377,6 @@ class AppLocalizationsJa extends AppLocalizations {
       'あなたはプロンプト書き換えアシスタントです。現在のプロンプト、ユーザー要求、およびオプションの参照イメージに従ってプロンプトを変更します。直接使用できる最後の 1 行プロンプトのみを説明なしで出力します。';
 
   @override
-  String get localGallery_dateFilterButton => '日付フィルター';
-
-  @override
   String get cacheStats_title => 'キャッシュ統計';
 
   @override
@@ -9201,9 +9439,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get galleryCache_noGalleryFolder => 'ギャラリーフォルダーが設定されていません';
-
-  @override
-  String get galleryCache_galleryFolderMissing => 'ギャラリー フォルダーが存在しません';
 
   @override
   String galleryCache_scanningPhase(Object processed, Object total) {

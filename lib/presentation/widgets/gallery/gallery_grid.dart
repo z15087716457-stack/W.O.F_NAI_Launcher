@@ -37,6 +37,9 @@ class GalleryGrid extends StatefulWidget {
   final int columns;
   final double spacing;
   final EdgeInsets padding;
+
+  /// 外部滚动控制器（数据集重挂后恢复滚动位置用）；不传则内部自建
+  final ScrollController? scrollController;
   final void Function(LocalImageRecord record, int index)? onTap;
   final void Function(LocalImageRecord record, int index)? onDoubleTap;
   final void Function(LocalImageRecord record, int index)? onLongPress;
@@ -46,7 +49,8 @@ class GalleryGrid extends StatefulWidget {
     TapDownDetails details,
   )?
   onSecondaryTapDown;
-  final void Function(LocalImageRecord record, int index)? onFavoriteToggle;
+  final void Function(LocalImageRecord record, int index, Offset anchor)?
+  onFavoriteToggle;
   final Future<void> Function(
     LocalImageRecord record,
     int index,
@@ -64,6 +68,7 @@ class GalleryGrid extends StatefulWidget {
     this.columns = 4,
     this.spacing = 12,
     this.padding = const EdgeInsets.all(16),
+    this.scrollController,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
@@ -91,7 +96,7 @@ class _GalleryGridState extends State<GalleryGrid> {
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
+    _scrollController = widget.scrollController ?? ScrollController();
     _scrollController.addListener(_onScroll);
   }
 
@@ -111,7 +116,9 @@ class _GalleryGridState extends State<GalleryGrid> {
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
+    if (widget.scrollController == null) {
+      _scrollController.dispose();
+    }
     super.dispose();
   }
 
@@ -227,7 +234,8 @@ class _GalleryGridState extends State<GalleryGrid> {
                   onSecondaryTapDown: (details) =>
                       widget.onSecondaryTapDown?.call(record, index, details),
                   onFavoriteToggle: widget.onFavoriteToggle != null
-                      ? () => widget.onFavoriteToggle!(record, index)
+                      ? (anchor) =>
+                            widget.onFavoriteToggle!(record, index, anchor)
                       : null,
                   onSendAction: widget.onSendAction != null
                       ? (action) => widget.onSendAction!(record, index, action)
@@ -293,7 +301,7 @@ class _GalleryImageCard extends StatefulWidget {
   final VoidCallback? onDoubleTap;
   final VoidCallback? onLongPress;
   final void Function(TapDownDetails)? onSecondaryTapDown;
-  final VoidCallback? onFavoriteToggle;
+  final void Function(Offset anchor)? onFavoriteToggle;
   final Future<void> Function(LocalImageContextAction action)? onSendAction;
   final bool isKritaConnected;
 

@@ -6,9 +6,11 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/constants/storage_keys.dart';
 import '../../core/storage/local_storage_service.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/file_name_sanitizer.dart';
+import '../../core/utils/gallery_path_utils.dart';
 import '../models/gallery/gallery_folder.dart';
 
 /// 画廊文件夹仓库
@@ -36,6 +38,109 @@ class GalleryFolderRepository {
     // 使用默认路径
     final appDir = await getApplicationDocumentsDirectory();
     return p.join(appDir.path, 'NAI_Launcher', 'images');
+  }
+
+  // ============================================================
+  // 额外图库源（只读浏览/检索，不参与自动保存）
+  // ============================================================
+
+  /// 获取额外图库源路径列表（规范化后去重）
+  Future<List<String>> getExtraRootPaths() async {
+    final data = _localStorage.getSetting<List<dynamic>>(
+      StorageKeys.galleryExtraRoots,
+    );
+    final seen = <String>{};
+    final result = <String>[];
+    for (final item in data ?? const <dynamic>[]) {
+      if (item is! String) continue;
+      final normalized = normalizeGalleryFilePath(item);
+      if (normalized.isEmpty) continue;
+      final key = galleryFilePathKey(normalized);
+      if (seen.add(key)) result.add(normalized);
+    }
+    return result;
+  }
+
+  /// 覆盖保存额外图库源路径列表
+  Future<void> setExtraRootPaths(List<String> paths) async {
+    final seen = <String>{};
+    final normalized = <String>[];
+    for (final path in paths) {
+      final item = normalizeGalleryFilePath(path);
+      if (item.isEmpty) continue;
+      final key = galleryFilePathKey(item);
+      if (seen.add(key)) normalized.add(item);
+    }
+    await _localStorage.setSetting(StorageKeys.galleryExtraRoots, normalized);
+  }
+
+  /// 添加额外图库源路径
+  ///
+  /// 返回是否新增（重复/与主源相同返回 false）
+  Future<bool> addExtraRootPath(String path) async {
+    final normalized = normalizeGalleryFilePath(path);
+    if (normalized.isEmpty) return false;
+
+    // 与主源相同视为重复
+    final rootPath = await getRootPath();
+    if (rootPath != null && galleryFilePathsEqual(rootPath, normalized)) {
+      return false;
+    }
+
+    final current = await getExtraRootPaths();
+    if (current.any((item) => galleryFilePathsEqual(item, normalized))) {
+      return false;
+    }
+
+    current.add(normalized);
+    await setExtraRootPaths(current);
+    return true;
+  }
+
+  /// 移除额外图库源路径
+  Future<bool> removeExtraRootPath(String path) async {
+    final normalized = normalizeGalleryFilePath(path);
+    final current = await getExtraRootPaths();
+    final updated = current
+        .where((item) => !galleryFilePathsEqual(item, normalized))
+        .toList();
+    if (updated.length == current.length) return false;
+    await setExtraRootPaths(updated);
+    return true;
+  }
+
+  /// [path] 是否位于某个额外图库源之内
+  Future<bool> isExtraRootPath(String path) async {
+    final normalized = normalizeGalleryFilePath(path);
+    if (normalized.isEmpty) return false;
+    final extraRoots = await getExtraRootPaths();
+    return extraRoots.any((root) => galleryPathIsWithin(root, normalized));
+  }
+
+  /// 获取所有图库源目录（主源 + 存在的额外源）
+  ///
+  /// 额外源目录不存在时静默跳过
+  Future<List<Directory>> getAllRootDirs() async {
+    final dirs = <Directory>[];
+
+    final rootPath = await getRootPath();
+    if (rootPath != null && rootPath.isNotEmpty) {
+      dirs.add(Directory(rootPath));
+    }
+
+    for (final extraPath in await getExtraRootPaths()) {
+      final dir = Directory(extraPath);
+      if (await dir.exists()) {
+        dirs.add(dir);
+      } else {
+        AppLogger.w(
+          '额外图库源目录不存在，跳过: $extraPath',
+          'GalleryFolderRepository',
+        );
+      }
+    }
+
+    return dirs;
   }
 
   /// 扫描文件夹列表
@@ -184,11 +289,15 @@ class GalleryFolderRepository {
   }
 
   /// 移动图片到文件夹
+  ///
+  /// 额外图库源中的文件为只读，禁止移动
   Future<bool> moveImageToFolder(
     String imagePath,
     String targetFolderPath,
   ) async {
     try {
+      if (await isExtraRootPath(imagePath)) return false;
+
       final file = File(imagePath);
       if (!await file.exists()) return false;
 

@@ -1278,5 +1278,203 @@ void main() {
         expect(remainingCount, equals(25));
       });
     });
+
+    // ============================================================
+    // 批量元数据 upsert 保留 is_nsfw（P0-3）
+    // ============================================================
+
+    group('batchUpsertMetadata preserves is_nsfw', () {
+      test('REPLACE 批量覆盖不冲掉导入器写入的分级', () async {
+        final id = await dataSource.upsertImage(
+          filePath: '/test/nsfw_preserve.png',
+          fileName: 'nsfw_preserve.png',
+          fileSize: 1000,
+          createdAt: DateTime(2026, 1, 1),
+          modifiedAt: DateTime(2026, 1, 1),
+        );
+
+        // 先经导入路径写入 is_nsfw=1
+        await dataSource.importTagIndexEntries([
+          TagIndexImportEntry(
+            filePath: '/test/nsfw_preserve.png',
+            fileName: 'nsfw_preserve.png',
+            fileSize: 1000,
+            modifiedAt: DateTime(2026, 1, 1),
+            nsfw: true,
+          ),
+        ]);
+
+        // 批量元数据覆盖（NaiImageMetadata 不含分级语义）
+        await dataSource.batchUpsertMetadata([
+          MapEntry(
+            id,
+            const NaiImageMetadata(
+              prompt: 'replaced by batch',
+              negativePrompt: '',
+              seed: 7,
+            ),
+          ),
+        ]);
+
+        final nsfwIds = await dataSource.advancedSearch(
+          nsfwMode: 'nsfw',
+          limit: 10,
+        );
+        expect(nsfwIds, contains(id));
+      });
+    });
+
+    // ============================================================
+    // advancedSearch 分块 + 候选路径限定（P0-5）
+    // ============================================================
+
+    group('advancedSearch chunking with candidate paths', () {
+      test('文本候选超 IN 变量上限时分块并集，视图内全部命中', () async {
+        // 1200 张图共享同一文本词：文本候选 1200 > 900 分块上限，
+        // 修复前直接拼 IN 会触发 SQLite 变量上限（>900 就够验证分块路径）
+        final now = DateTime(2026, 2, 1);
+        final paths = [for (var i = 0; i < 1200; i++) '/test/chunk_$i.png'];
+        final entries = <MapEntry<int, NaiImageMetadata>>[];
+        for (var i = 0; i < 1200; i++) {
+          final id = await dataSource.upsertImage(
+            filePath: paths[i],
+            fileName: 'chunk_$i.png',
+            fileSize: 100 + i,
+            createdAt: now,
+            modifiedAt: now.add(Duration(minutes: i)),
+          );
+          entries.add(
+            MapEntry(
+              id,
+              NaiImageMetadata(
+                prompt: 'shared_chunk_word',
+                negativePrompt: '',
+                seed: i,
+              ),
+            ),
+          );
+        }
+        await dataSource.batchUpsertMetadata(entries);
+
+        // 视图=全部 1200 → 全部命中
+        final allIds = await dataSource.advancedSearch(
+          textQuery: 'shared_chunk_word',
+          candidatePaths: paths,
+          limit: 1200,
+        );
+        expect(allIds.length, 1200);
+
+        // 视图=前 500 → 只返回视图内文件（源外候选被求交剔除）
+        final subset = paths.sublist(0, 500);
+        final subsetIds = await dataSource.advancedSearch(
+          textQuery: 'shared_chunk_word',
+          candidatePaths: subset,
+          limit: 1200,
+        );
+        expect(subsetIds.length, 500);
+      });
+
+      test('无文本查询：路径分块限定 + 视图外残留行不占 LIMIT 名额', () async {
+        // 1500 张匹配图，其中视图外 500 张修改时间更新：
+        // 修复前 SQL LIMIT 会被视图外行占满，真实文件被挤掉
+        final now = DateTime(2026, 3, 1);
+        final inViewPaths = [
+          for (var i = 0; i < 1000; i++) '/test/residual_in_$i.png',
+        ];
+        final outViewPaths = [
+          for (var i = 0; i < 500; i++) '/test/residual_out_$i.png',
+        ];
+        final entries = <MapEntry<int, NaiImageMetadata>>[];
+        for (var i = 0; i < 1000; i++) {
+          final id = await dataSource.upsertImage(
+            filePath: inViewPaths[i],
+            fileName: 'residual_in_$i.png',
+            fileSize: 100 + i,
+            createdAt: now,
+            modifiedAt: now.add(Duration(minutes: i)),
+          );
+          entries.add(
+            MapEntry(
+              id,
+              NaiImageMetadata(
+                prompt: 'residual_stale_word',
+                negativePrompt: '',
+                seed: i,
+              ),
+            ),
+          );
+        }
+        // 视图外：修改时间更晚（会先排进 LIMIT）
+        for (var i = 0; i < 500; i++) {
+          final id = await dataSource.upsertImage(
+            filePath: outViewPaths[i],
+            fileName: 'residual_out_$i.png',
+            fileSize: 100 + i,
+            createdAt: now,
+            modifiedAt: now.add(const Duration(days: 10)).add(
+              Duration(minutes: i),
+            ),
+          );
+          entries.add(
+            MapEntry(
+              id,
+              NaiImageMetadata(
+                prompt: 'residual_stale_word',
+                negativePrompt: '',
+                seed: 1000 + i,
+              ),
+            ),
+          );
+        }
+        await dataSource.batchUpsertMetadata(entries);
+
+        final viewIds = await dataSource.advancedSearch(
+          textQuery: 'residual_stale_word',
+          candidatePaths: inViewPaths,
+          limit: 1000,
+        );
+
+        // 必须全部来自视图内文件（修复前只剩 500）
+        expect(viewIds.length, 1000);
+        final viewIdSet = (await dataSource.getImageIdsByPaths(inViewPaths))
+            .values
+            .whereType<int>()
+            .toSet();
+        expect(viewIds.every(viewIdSet.contains), isTrue);
+      });
+
+      test('无文本搜索：宽度过滤 + 路径分块（800/块）同样只在视图内生效',
+          () async {
+        final now = DateTime(2026, 4, 1);
+        final paths = [for (var i = 0; i < 1200; i++) '/test/width_$i.png'];
+        for (var i = 0; i < 1200; i++) {
+          await dataSource.upsertImage(
+            filePath: paths[i],
+            fileName: 'width_$i.png',
+            fileSize: 100 + i,
+            width: i < 700 ? 200 : 50,
+            height: 100,
+            createdAt: now,
+            modifiedAt: now,
+          );
+        }
+
+        final ids = await dataSource.advancedSearch(
+          minWidth: 100,
+          candidatePaths: paths,
+          limit: 1200,
+        );
+        expect(ids.length, 700);
+
+        // 视图收窄到前 400 张（全是宽图）→ 只返回视图内
+        final subset = paths.sublist(0, 400);
+        final subsetIds = await dataSource.advancedSearch(
+          minWidth: 100,
+          candidatePaths: subset,
+          limit: 1200,
+        );
+        expect(subsetIds.length, 400);
+      });
+    });
   });
 }

@@ -76,6 +76,10 @@ class StorageKeys {
       'selected_resolution_preset_id';
   static const String imageSavePath = 'image_save_path';
   static const String autoSaveImages = 'auto_save_images';
+
+  // 画廊额外图库源（只读浏览/检索，不参与自动保存）
+  static const String galleryExtraRoots = 'gallery_extra_roots_v1';
+
   static const String shareStripMetadata = 'share_strip_metadata';
   static const String addQualityTags = 'add_quality_tags';
   static const String ucPresetType = 'uc_preset_type';
@@ -145,6 +149,25 @@ class StorageKeys {
 
   // Local Gallery Keys (本地画廊相关)
   static const String hasSeenLocalGalleryTip = 'has_seen_local_gallery_tip';
+
+  /// 本地画廊视图模式：true=瀑布流（默认），false=网格
+  static const String localGalleryViewMode = 'local_gallery_view_mode';
+
+  /// 本地画廊逻辑列宽（px，140~480，默认 260）
+  static const String localGalleryColumnWidth = 'local_gallery_column_width';
+
+  /// 本地画廊 NAI-only 过滤（默认 true：只看 NAI 生成的图）
+  static const String localGalleryNaiOnly = 'local_gallery_nai_only';
+
+  /// 本地画廊排序字段（GallerySortField.name 字符串）
+  static const String localGallerySortField = 'local_gallery_sort_field';
+
+  /// 本地画廊排序方向（GallerySortDirection.name 字符串）
+  static const String localGallerySortDirection =
+      'local_gallery_sort_direction';
+
+  /// 本地画廊删除池（软删文件路径列表，JSON string；下次启动时物理清理）
+  static const String galleryDeletePool = 'gallery_delete_pool_v1';
 
   // Vibe Library Keys (Vibe库相关)
   static const String vibeLibrarySavePath = 'vibe_library_save_path';

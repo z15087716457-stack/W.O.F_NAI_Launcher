@@ -1180,6 +1180,149 @@ abstract class AppLocalizations {
   /// **'Automatically save images after generation'**
   String get settings_autoSaveSubtitle;
 
+  /// No description provided for @settings_extraRootsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery Sources'**
+  String get settings_extraRootsTitle;
+
+  /// No description provided for @settings_extraRootsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra gallery sources: add any folder to browse and search in the gallery (read-only, not used for auto-save). After adding, run a rescan in the gallery or at the bottom of this page.'**
+  String get settings_extraRootsHint;
+
+  /// No description provided for @settings_extraRootsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No extra gallery sources added'**
+  String get settings_extraRootsEmpty;
+
+  /// No description provided for @settings_extraRootsAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Folder'**
+  String get settings_extraRootsAdd;
+
+  /// No description provided for @settings_extraRootsAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a folder to add as a gallery source'**
+  String get settings_extraRootsAddTitle;
+
+  /// No description provided for @settings_extraRootsRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this gallery source'**
+  String get settings_extraRootsRemove;
+
+  /// No description provided for @settings_extraRootsRemoveConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove gallery source?'**
+  String get settings_extraRootsRemoveConfirmTitle;
+
+  /// No description provided for @settings_extraRootsRemoveConfirmContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{path}\" from the gallery (no files in the folder will be deleted).'**
+  String settings_extraRootsRemoveConfirmContent(String path);
+
+  /// No description provided for @settings_extraRootsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery source added; rescan to apply'**
+  String get settings_extraRootsAdded;
+
+  /// No description provided for @settings_extraRootsRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery source removed'**
+  String get settings_extraRootsRemoved;
+
+  /// No description provided for @settings_extraRootsDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'This folder is already a gallery source'**
+  String get settings_extraRootsDuplicate;
+
+  /// No description provided for @settings_extraRootsSameAsMain.
+  ///
+  /// In en, this message translates to:
+  /// **'This folder is the same as the image save location'**
+  String get settings_extraRootsSameAsMain;
+
+  /// No description provided for @settings_extraRootsNested.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery sources cannot contain each other; choose another folder'**
+  String get settings_extraRootsNested;
+
+  /// No description provided for @settings_extraRootsNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected folder does not exist'**
+  String get settings_extraRootsNotFound;
+
+  /// No description provided for @settings_importTagIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Tag Index…'**
+  String get settings_importTagIndex;
+
+  /// No description provided for @settings_importTagIndexPickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select tag index file (.jsonl)'**
+  String get settings_importTagIndexPickTitle;
+
+  /// No description provided for @settings_importTagIndexProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing {processed}/{total} lines…'**
+  String settings_importTagIndexProgress(int processed, int total);
+
+  /// No description provided for @settings_importTagIndexDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Import complete: {imported} new, {updated} updated, {skipped} skipped, {errors} errors'**
+  String settings_importTagIndexDone(
+    int imported,
+    int updated,
+    int skipped,
+    int errors,
+  );
+
+  /// No description provided for @settings_importTagIndexFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag index import failed'**
+  String get settings_importTagIndexFailed;
+
+  /// No description provided for @settings_importTagIndexBlockedByScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery scan is in progress. Wait for it to finish before importing the tag index.'**
+  String get settings_importTagIndexBlockedByScan;
+
+  /// No description provided for @settings_extraRootsIndexImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag Index Found'**
+  String get settings_extraRootsIndexImportTitle;
+
+  /// No description provided for @settings_extraRootsIndexImportContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Found tag index index.jsonl under \"{path}\". Importing it first lets the upcoming scan fast-forward (skip metadata parsing). Import now?'**
+  String settings_extraRootsIndexImportContent(String path);
+
+  /// No description provided for @settings_extraRootsIndexImportConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Now'**
+  String get settings_extraRootsIndexImportConfirm;
+
   /// No description provided for @settings_about.
   ///
   /// In en, this message translates to:
@@ -8060,12 +8203,6 @@ abstract class AppLocalizations {
   /// **'Loading grouped images...'**
   String get localGallery_loadingGroupedImages;
 
-  /// No description provided for @localGallery_jumpedToMonth.
-  ///
-  /// In en, this message translates to:
-  /// **'Jumped to {year}-{month}'**
-  String localGallery_jumpedToMonth(Object year, Object month);
-
   /// No description provided for @localGallery_title.
   ///
   /// In en, this message translates to:
@@ -8138,17 +8275,119 @@ abstract class AppLocalizations {
   /// **'Collect'**
   String get localGallery_addToCollection;
 
-  /// No description provided for @localGallery_switchToGridView.
+  /// No description provided for @localGallery_sortButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get localGallery_sortButton;
+
+  /// No description provided for @localGallery_sortFieldModified.
+  ///
+  /// In en, this message translates to:
+  /// **'Modified time'**
+  String get localGallery_sortFieldModified;
+
+  /// No description provided for @localGallery_sortFieldCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created time'**
+  String get localGallery_sortFieldCreated;
+
+  /// No description provided for @localGallery_sortFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'File name'**
+  String get localGallery_sortFieldName;
+
+  /// No description provided for @localGallery_sortFieldSize.
+  ///
+  /// In en, this message translates to:
+  /// **'File size'**
+  String get localGallery_sortFieldSize;
+
+  /// No description provided for @localGallery_sortFieldDimensions.
+  ///
+  /// In en, this message translates to:
+  /// **'Image size'**
+  String get localGallery_sortFieldDimensions;
+
+  /// No description provided for @localGallery_sortToggleDirection.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle sort direction'**
+  String get localGallery_sortToggleDirection;
+
+  /// No description provided for @localGallery_aboutColumns.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {count} columns'**
+  String localGallery_aboutColumns(Object count);
+
+  /// No description provided for @localGallery_columnWidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Column width'**
+  String get localGallery_columnWidth;
+
+  /// No description provided for @localGallery_naiOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'NAI'**
+  String get localGallery_naiOnly;
+
+  /// No description provided for @localGallery_naiOnlyTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Only show NAI-generated images'**
+  String get localGallery_naiOnlyTooltip;
+
+  /// No description provided for @localGallery_masonryViewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Waterfall'**
+  String get localGallery_masonryViewLabel;
+
+  /// No description provided for @localGallery_switchToMasonryView.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to waterfall view'**
+  String get localGallery_switchToMasonryView;
+
+  /// No description provided for @localGallery_switchToGridLayout.
   ///
   /// In en, this message translates to:
   /// **'Switch to grid view'**
-  String get localGallery_switchToGridView;
+  String get localGallery_switchToGridLayout;
 
-  /// No description provided for @localGallery_switchToDateGroupedView.
+  /// No description provided for @localGallery_dateRangeYearMonth.
   ///
   /// In en, this message translates to:
-  /// **'Switch to date grouped view'**
-  String get localGallery_switchToDateGroupedView;
+  /// **'{year}/{month}'**
+  String localGallery_dateRangeYearMonth(Object year, Object month);
+
+  /// No description provided for @localGallery_dateRangePrevMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get localGallery_dateRangePrevMonth;
+
+  /// No description provided for @localGallery_dateRangeNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get localGallery_dateRangeNextMonth;
+
+  /// No description provided for @localGallery_dateRangeClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get localGallery_dateRangeClear;
+
+  /// No description provided for @localGallery_searchInScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Search: {scope}'**
+  String localGallery_searchInScope(Object scope);
 
   /// No description provided for @localGallery_openFilterPanel.
   ///
@@ -8185,6 +8424,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tag Intersection'**
   String get localGallery_tagIntersection;
+
+  /// No description provided for @localGallery_filterByTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Tags'**
+  String get localGallery_filterByTags;
+
+  /// No description provided for @localGallery_tagInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a tag, press Enter to add'**
+  String get localGallery_tagInputHint;
+
+  /// No description provided for @localGallery_addTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get localGallery_addTag;
 
   /// No description provided for @localGallery_createCategoryTitle.
   ///
@@ -8228,23 +8485,53 @@ abstract class AppLocalizations {
   /// **'Seed copied'**
   String get localGallery_seedCopied;
 
+  /// No description provided for @localGallery_createCollectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Collection'**
+  String get localGallery_createCollectionTitle;
+
+  /// No description provided for @localGallery_createCollectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter collection name'**
+  String get localGallery_createCollectionHint;
+
+  /// No description provided for @localGallery_createCollectionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get localGallery_createCollectionConfirm;
+
+  /// No description provided for @localGallery_deleteCollectionContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete collection \"{name}\"? Only the collection entry is removed; no image files are deleted.'**
+  String localGallery_deleteCollectionContent(Object name);
+
+  /// No description provided for @localGallery_unfavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Favorite'**
+  String get localGallery_unfavorite;
+
+  /// No description provided for @localGallery_favoriteMenuEmptyCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'No collections yet — create one with + on the left'**
+  String get localGallery_favoriteMenuEmptyCollections;
+
   /// No description provided for @localGallery_confirmDeleteImageContent.
   ///
   /// In en, this message translates to:
-  /// **'Delete image \"{name}\"?\n\nThis cannot be undone.'**
+  /// **'Delete image \"{name}\"?\n\nThe image will disappear from the gallery immediately; the file will be removed permanently on the next launch (can be undone in this session).'**
   String localGallery_confirmDeleteImageContent(Object name);
 
-  /// No description provided for @localGallery_imageDeleted.
+  /// No description provided for @localGallery_externalReadonly.
   ///
   /// In en, this message translates to:
-  /// **'Image deleted'**
-  String get localGallery_imageDeleted;
-
-  /// No description provided for @localGallery_deleteFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete failed: {error}'**
-  String localGallery_deleteFailed(Object error);
+  /// **'External gallery sources are read-only; this action is unavailable'**
+  String get localGallery_externalReadonly;
 
   /// No description provided for @localGallery_categoryDeleteContent.
   ///
@@ -8996,23 +9283,89 @@ abstract class AppLocalizations {
   /// **'Precisely filter your image collection'**
   String get localGallery_filterSubtitle;
 
-  /// No description provided for @localGallery_modelHint.
+  /// No description provided for @localGallery_filterOrientation.
   ///
   /// In en, this message translates to:
-  /// **'Enter model name...'**
-  String get localGallery_modelHint;
+  /// **'Orientation'**
+  String get localGallery_filterOrientation;
 
-  /// No description provided for @localGallery_samplerHint.
+  /// No description provided for @localGallery_orientationAny.
   ///
   /// In en, this message translates to:
-  /// **'Enter sampler name...'**
-  String get localGallery_samplerHint;
+  /// **'Any'**
+  String get localGallery_orientationAny;
 
-  /// No description provided for @localGallery_resolutionHint.
+  /// No description provided for @localGallery_orientationLandscape.
   ///
   /// In en, this message translates to:
-  /// **'Width x height (e.g. 1024x1024)'**
-  String get localGallery_resolutionHint;
+  /// **'Landscape'**
+  String get localGallery_orientationLandscape;
+
+  /// No description provided for @localGallery_orientationPortrait.
+  ///
+  /// In en, this message translates to:
+  /// **'Portrait'**
+  String get localGallery_orientationPortrait;
+
+  /// No description provided for @localGallery_orientationSquare.
+  ///
+  /// In en, this message translates to:
+  /// **'Square'**
+  String get localGallery_orientationSquare;
+
+  /// No description provided for @localGallery_filterNsfw.
+  ///
+  /// In en, this message translates to:
+  /// **'Content Rating'**
+  String get localGallery_filterNsfw;
+
+  /// No description provided for @localGallery_nsfwAny.
+  ///
+  /// In en, this message translates to:
+  /// **'Any'**
+  String get localGallery_nsfwAny;
+
+  /// No description provided for @localGallery_nsfwSfw.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe'**
+  String get localGallery_nsfwSfw;
+
+  /// No description provided for @localGallery_nsfwOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'NSFW only'**
+  String get localGallery_nsfwOnly;
+
+  /// No description provided for @localGallery_noModelCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'No model metadata found yet'**
+  String get localGallery_noModelCandidates;
+
+  /// No description provided for @localGallery_noSamplerCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'No sampler metadata found yet'**
+  String get localGallery_noSamplerCandidates;
+
+  /// No description provided for @localGallery_noResolutionCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'No resolution metadata found yet'**
+  String get localGallery_noResolutionCandidates;
+
+  /// No description provided for @localGallery_candidatesLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load candidates'**
+  String get localGallery_candidatesLoadFailed;
+
+  /// No description provided for @localGallery_noTagSuggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching tags'**
+  String get localGallery_noTagSuggestions;
 
   /// No description provided for @localGallery_activeFiltersSet.
   ///
@@ -9149,14 +9502,86 @@ abstract class AppLocalizations {
   /// No description provided for @localGallery_confirmBulkDeleteContent.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to delete {count} selected images?\n\nThis will permanently remove them from the file system and cannot be undone.'**
+  /// **'Are you sure you want to delete {count} selected images?\n\nThey will disappear from the gallery immediately; the files will be removed permanently on the next launch (can be undone in this session).'**
   String localGallery_confirmBulkDeleteContent(Object count);
 
-  /// No description provided for @localGallery_deletedImages.
+  /// No description provided for @localGallery_deletedToPool.
   ///
   /// In en, this message translates to:
-  /// **'Deleted {count} images'**
-  String localGallery_deletedImages(Object count);
+  /// **'Deleted {count} images. They will be removed permanently on the next launch.'**
+  String localGallery_deletedToPool(Object count);
+
+  /// No description provided for @localGallery_trashTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash'**
+  String get localGallery_trashTitle;
+
+  /// No description provided for @localGallery_trashEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash is empty'**
+  String get localGallery_trashEmpty;
+
+  /// No description provided for @localGallery_trashHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Files in the trash are still on disk and will be removed permanently on the next launch. Restored files return to the gallery immediately.'**
+  String get localGallery_trashHint;
+
+  /// No description provided for @localGallery_trashCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String localGallery_trashCount(Object count);
+
+  /// No description provided for @localGallery_trashRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get localGallery_trashRestore;
+
+  /// No description provided for @localGallery_trashRestoreAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore all'**
+  String get localGallery_trashRestoreAll;
+
+  /// No description provided for @localGallery_trashRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to restore'**
+  String get localGallery_trashRestoreFailed;
+
+  /// No description provided for @localGallery_trashRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored {count} images'**
+  String localGallery_trashRestored(Object count);
+
+  /// No description provided for @localGallery_trashDeleteAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete permanently'**
+  String get localGallery_trashDeleteAll;
+
+  /// No description provided for @localGallery_trashDeleteAllConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete all {count} files in the trash immediately. This cannot be undone.'**
+  String localGallery_trashDeleteAllConfirm(Object count);
+
+  /// No description provided for @localGallery_trashDeletedForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently deleted {count} files'**
+  String localGallery_trashDeletedForever(Object count);
+
+  /// No description provided for @localGallery_trashFileMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'File no longer on disk'**
+  String get localGallery_trashFileMissing;
 
   /// No description provided for @localGallery_noFoldersAvailable.
   ///
@@ -16475,12 +16900,6 @@ abstract class AppLocalizations {
   /// **'You are a prompt rewriting assistant. Modify the prompt according to the current prompt, the user request, and optional reference images. Output only the final single-line prompt that can be used directly, without explanation.'**
   String get promptAssistant_defaultCustomRuleContent;
 
-  /// No description provided for @localGallery_dateFilterButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Date Filter'**
-  String get localGallery_dateFilterButton;
-
   /// No description provided for @cacheStats_title.
   ///
   /// In en, this message translates to:
@@ -16588,12 +17007,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gallery folder is not set'**
   String get galleryCache_noGalleryFolder;
-
-  /// No description provided for @galleryCache_galleryFolderMissing.
-  ///
-  /// In en, this message translates to:
-  /// **'Gallery folder does not exist'**
-  String get galleryCache_galleryFolderMissing;
 
   /// No description provided for @galleryCache_scanningPhase.
   ///

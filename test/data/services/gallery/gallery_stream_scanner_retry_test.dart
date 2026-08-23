@@ -71,7 +71,7 @@ void main() {
       final imageId = await _seedStaleNoneRecord(dataSource, file);
       final scanner = GalleryStreamScanner(dataSource: dataSource);
 
-      await scanner.startScanning(tempDir);
+      await scanner.startScanning([tempDir]);
 
       final imageRecord = await dataSource.getImageById(imageId);
       final metadata =
@@ -99,7 +99,7 @@ void main() {
       final scanner = GalleryStreamScanner(dataSource: dataSource);
 
       await scanner.startScanning(
-        tempDir,
+        [tempDir],
         retryMissingMetadata: true,
       );
 
@@ -128,7 +128,7 @@ void main() {
       final scanner = GalleryStreamScanner(dataSource: dataSource);
 
       await scanner.startScanning(
-        tempDir,
+        [tempDir],
         retryMissingMetadata: true,
       );
 

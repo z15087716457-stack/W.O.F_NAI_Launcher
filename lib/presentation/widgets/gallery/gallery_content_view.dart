@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -17,7 +18,9 @@ import '../../providers/selection_mode_provider.dart';
 import '../common/app_toast.dart';
 import '../../widgets/grouped_grid_view.dart';
 import '../../utils/image_detail_opener.dart';
+import '../../../data/services/gallery/gallery_filter_service.dart' show FilterCriteria;
 import 'local_image_card_3d.dart';
+import 'gallery_favorite_menu.dart';
 import '../common/image_detail/image_detail_viewer.dart';
 import '../common/image_detail/image_detail_data.dart';
 import '../common/shimmer_skeleton.dart';
@@ -26,12 +29,13 @@ import 'gallery_state_views.dart';
 import 'local_image_context_menu.dart';
 
 /// 画廊项目构建函数类型
-typedef GalleryItemBuilder<T> = Widget Function(
-  BuildContext context,
-  T item,
-  int index,
-  GalleryItemConfig config,
-);
+typedef GalleryItemBuilder<T> =
+    Widget Function(
+      BuildContext context,
+      T item,
+      int index,
+      GalleryItemConfig config,
+    );
 
 /// 画廊项目配置
 class GalleryItemConfig {
@@ -66,6 +70,9 @@ abstract class GalleryState<T> {
   int get currentPage;
   bool get hasFilters;
   List<T> get filteredFiles;
+
+  /// 当前过滤条件（数据集重挂判定用：条件内容变化=新数据集）
+  FilterCriteria get filterCriteria;
 }
 
 /// 通用选择状态接口
@@ -74,11 +81,60 @@ abstract class SelectionState {
   Set<String> get selectedIds;
 }
 
+/// 画廊内容空态类型
+enum GalleryContentEmptyKind {
+  /// 有过滤条件但无结果（显示「无结果 + 清除过滤」）
+  noResults,
+
+  /// 无过滤条件且库为空（显示空库视图）
+  emptyLibrary,
+}
+
+/// 判定当前是否为空态（纯逻辑，便于单元测试）。
+///
+/// 返回 null = 非空态，正常渲染；否则为对应的空态类型。
+/// 有过滤时以 `filteredFiles` 为准；无过滤时 `filteredFiles` 恒为空
+/// （适配器语义），必须改用 `currentImages`，且页面加载中不视为空库。
+GalleryContentEmptyKind? galleryContentEmptyKind({
+  required bool hasFilters,
+  required bool filteredFilesEmpty,
+  required bool currentImagesEmpty,
+  required bool isPageLoading,
+}) {
+  if (hasFilters) {
+    return filteredFilesEmpty ? GalleryContentEmptyKind.noResults : null;
+  }
+  if (currentImagesEmpty && !isPageLoading) {
+    return GalleryContentEmptyKind.emptyLibrary;
+  }
+  return null;
+}
+
+/// 数据集重挂判定：同一页、同一过滤条件下当前页条目数变化（删除/恢复）
+/// 时，瀑布流/网格需要整体重挂载——条目增减若只靠 itemBuilder 的
+/// diff 链，渲染层旧卡片可能残留（实测：删除后卡片钉在屏上，
+/// 直到切换文件夹/全量刷新才消失；物理文件已删仍显示）。
+/// 翻页/切换筛选是全新数据集（现状行为正确），不触发，滚动位置保持不变。
+bool galleryNeedsRemount({
+  required int oldLength,
+  required int newLength,
+  required bool samePage,
+  required bool sameFilters,
+}) {
+  return samePage && sameFilters && oldLength != newLength;
+}
+
 /// 画廊内容视图（含分组/3D/瀑布流切换）- 泛型版本
 class GenericGalleryContentView<T> extends ConsumerStatefulWidget {
   final bool use3DCardView;
+
+  /// true=瀑布流（Masonry，卡片按真实宽高比），false=固定网格
+  final bool useMasonryView;
   final int columns;
   final double itemWidth;
+
+  /// 逻辑列宽（px）：瀑布流按「可用宽度 / 列宽」实时算列数，默认 200 保持旧行为
+  final double columnWidth;
   final GalleryState<T> state;
   final SelectionState selectionState;
   final GalleryItemBuilder<T> itemBuilder;
@@ -87,7 +143,7 @@ class GenericGalleryContentView<T> extends ConsumerStatefulWidget {
   final void Function(T item, int index)? onDoubleTap;
   final void Function(T item, int index)? onLongPress;
   final void Function(T item, Offset position)? onContextMenu;
-  final void Function(T item)? onFavoriteToggle;
+  final void Function(T item, Offset anchor)? onFavoriteToggle;
   final void Function(T item)? onSelectionToggle;
   final void Function(T item)? onEnterSelection;
   final VoidCallback? onDeleted;
@@ -109,8 +165,10 @@ class GenericGalleryContentView<T> extends ConsumerStatefulWidget {
   const GenericGalleryContentView({
     super.key,
     this.use3DCardView = true,
+    this.useMasonryView = false,
     required this.columns,
     required this.itemWidth,
+    this.columnWidth = 200.0,
     required this.state,
     required this.selectionState,
     required this.itemBuilder,
@@ -157,6 +215,13 @@ class _GenericGalleryContentViewState<T>
   final Map<String, double> _aspectRatioCache = {};
   bool _showSkeleton = false;
   final Set<int> _visibleIndices = {};
+
+  /// 数据集重挂计数：同页条目增减时 ++，掺进瀑布流/网格 key 强制重挂载
+  int _gridRemountCounter = 0;
+
+  /// 瀑布流滚动控制器（重挂后恢复滚动位置用）
+  ScrollController? _masonryScrollController;
+  double _savedScrollOffset = 0;
   late final AnimationController _emptyStateController;
   late final Animation<double> _emptyStateAnimation;
 
@@ -176,10 +241,34 @@ class _GenericGalleryContentViewState<T>
     if (!oldWidget.state.isPageLoading && widget.state.isPageLoading) {
       _initSkeletonDelay();
     }
+    final needsRemount = galleryNeedsRemount(
+      oldLength: oldWidget.state.currentImages.length,
+      newLength: widget.state.currentImages.length,
+      samePage: oldWidget.state.currentPage == widget.state.currentPage,
+      sameFilters:
+          oldWidget.state.filterCriteria == widget.state.filterCriteria,
+    );
+    if (needsRemount) {
+      // 重挂会把滚动位置弹回顶部：先记住当前位置，新 grid 挂载后跳回
+      if (_masonryScrollController?.hasClients == true) {
+        _savedScrollOffset = _masonryScrollController!.offset;
+      }
+      setState(() => _gridRemountCounter++);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final controller = _masonryScrollController;
+        if (controller != null && controller.hasClients) {
+          controller.jumpTo(
+            _savedScrollOffset.clamp(0, controller.position.maxScrollExtent),
+          );
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
+    _masonryScrollController?.dispose();
     _emptyStateController.dispose();
     super.dispose();
   }
@@ -215,7 +304,14 @@ class _GenericGalleryContentViewState<T>
       return _buildGroupedView(widget.state, widget.selectionState, theme);
     }
 
-    if (widget.state.filteredFiles.isEmpty && widget.state.hasFilters) {
+    // 空态判定前置：masonry/grid 分支之前统一生效（瀑布流不再拦截空态）
+    final emptyKind = galleryContentEmptyKind(
+      hasFilters: widget.state.hasFilters,
+      filteredFilesEmpty: widget.state.filteredFiles.isEmpty,
+      currentImagesEmpty: widget.state.currentImages.isEmpty,
+      isPageLoading: widget.state.isPageLoading,
+    );
+    if (emptyKind == GalleryContentEmptyKind.noResults) {
       return _buildAnimatedEmptyState(
         GalleryNoResultsView(
           onClearFilters: widget.onClearFilters,
@@ -224,6 +320,13 @@ class _GenericGalleryContentViewState<T>
           icon: widget.emptyIcon,
         ),
       );
+    }
+    if (emptyKind == GalleryContentEmptyKind.emptyLibrary) {
+      return _buildAnimatedEmptyState(const GalleryEmptyView());
+    }
+
+    if (widget.useMasonryView) {
+      return _buildMasonryView(widget.state, widget.selectionState);
     }
 
     if (widget.state.isPageLoading && _showSkeleton) {
@@ -312,8 +415,8 @@ class _GenericGalleryContentViewState<T>
                 ? (details) =>
                       widget.onContextMenu!(record as T, details.globalPosition)
                 : null,
-            onFavoriteToggle: () {
-              widget.onFavoriteToggle?.call(record as T);
+            onFavoriteToggle: (anchor) {
+              widget.onFavoriteToggle?.call(record as T, anchor);
             },
             onSendAction: widget.onSendAction != null
                 ? (action) => widget.onSendAction!(record, action)
@@ -389,6 +492,127 @@ class _GenericGalleryContentViewState<T>
     return const GalleryGroupedLoadingView();
   }
 
+  /// 瀑布流视图：卡片按真实宽高比排列（固定网格不再裁/压横图）
+  Widget _buildMasonryView(
+    GalleryState<T> state,
+    SelectionState selectionState,
+  ) {
+    final records = _convertToLocalImageRecords(state.currentImages);
+    final selectedIndices = <int>{};
+    for (int i = 0; i < records.length; i++) {
+      if (selectionState.selectedIds.contains(
+        widget.idExtractor(state.currentImages[i]),
+      )) {
+        selectedIndices.add(i);
+      }
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 12.0;
+        const padding = 16.0;
+        // 列数由「可用宽度 / 逻辑列宽」实时推导（最少 1 列）
+        final usableForColumns = constraints.maxWidth - padding * 2;
+        final columns = (usableForColumns / widget.columnWidth).floor().clamp(
+          1,
+          100,
+        );
+        final usableWidth =
+            constraints.maxWidth - padding * 2 - (columns - 1) * spacing;
+        final itemWidth = (usableWidth / columns).clamp(1.0, 2000.0);
+
+        return MasonryGridView.count(
+          key: PageStorageKey<String>('gallery_masonry_$_gridRemountCounter'),
+          controller: _masonryScrollController ??= ScrollController(),
+          crossAxisCount: columns,
+          mainAxisSpacing: spacing,
+          crossAxisSpacing: spacing,
+          padding: const EdgeInsets.all(padding),
+          itemCount: records.length,
+          itemBuilder: (context, index) {
+            final record = records[index];
+            final isSelected = selectedIndices.contains(index);
+            final aspectRatio = _getCachedAspectRatio(record);
+            final isVisible = _visibleIndices.contains(index);
+
+            return VisibilityDetector(
+              key: ValueKey('masonry_v_${record.path}'),
+              onVisibilityChanged: (info) {
+                if (!mounted) return;
+                final isNowVisible = info.visibleFraction > 0.05;
+                final wasVisible = _visibleIndices.contains(index);
+                if (isNowVisible != wasVisible) {
+                  setState(() {
+                    if (isNowVisible) {
+                      _visibleIndices.add(index);
+                    } else {
+                      _visibleIndices.remove(index);
+                    }
+                  });
+                }
+              },
+              child: LocalImageCard3D(
+                record: record,
+                width: itemWidth,
+                height: itemWidth / aspectRatio,
+                isSelected: isSelected,
+                isVisible: isVisible,
+                priority: isVisible ? 1 : 5,
+                onTap: () {
+                  if (selectionState.isActive) {
+                    widget.onSelectionToggle?.call(state.currentImages[index]);
+                    return;
+                  }
+                  if (widget.onTap != null) {
+                    widget.onTap!(state.currentImages[index], index);
+                  } else if (widget.view3DConfig != null) {
+                    widget.view3DConfig!.showDetailViewer(
+                      widget.view3DConfig!.images,
+                      index,
+                    );
+                  }
+                },
+                onDoubleTap: () {
+                  if (widget.onDoubleTap != null) {
+                    widget.onDoubleTap!(state.currentImages[index], index);
+                  } else if (widget.view3DConfig != null) {
+                    widget.view3DConfig!.showDetailViewer(
+                      widget.view3DConfig!.images,
+                      index,
+                    );
+                  }
+                },
+                onLongPress: () {
+                  if (!selectionState.isActive) {
+                    widget.onEnterSelection?.call(state.currentImages[index]);
+                  } else {
+                    widget.onLongPress?.call(state.currentImages[index], index);
+                  }
+                },
+                onSecondaryTapDown: (details) {
+                  widget.onContextMenu?.call(
+                    state.currentImages[index],
+                    details.globalPosition,
+                  );
+                },
+                onFavoriteToggle: (anchor) {
+                  widget.onFavoriteToggle?.call(
+                    state.currentImages[index],
+                    anchor,
+                  );
+                },
+                onSendAction: widget.onSendAction != null
+                    ? (action) => widget.onSendAction!(record, action)
+                    : null,
+                isKritaConnected: widget.isKritaConnected,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildGalleryGrid(
     GalleryState<T> state,
     SelectionState selectionState,
@@ -403,7 +627,8 @@ class _GenericGalleryContentViewState<T>
     }
 
     return GalleryGrid(
-      key: const PageStorageKey<String>('gallery_grid'),
+      key: PageStorageKey<String>('gallery_grid_$_gridRemountCounter'),
+      scrollController: _masonryScrollController ??= ScrollController(),
       images: _convertToLocalImageRecords(state.currentImages),
       columns: widget.columns,
       spacing: 12,
@@ -447,8 +672,8 @@ class _GenericGalleryContentViewState<T>
           details.globalPosition,
         );
       },
-      onFavoriteToggle: (record, index) {
-        widget.onFavoriteToggle?.call(state.currentImages[index]);
+      onFavoriteToggle: (record, index, anchor) {
+        widget.onFavoriteToggle?.call(state.currentImages[index], anchor);
       },
       onSendAction: widget.onSendAction != null
           ? (record, index, action) => widget.onSendAction!(record, action)
@@ -492,6 +717,9 @@ class _LocalGalleryStateAdapter implements GalleryState<LocalImageRecord> {
   int get currentPage => _state.currentPage;
 
   @override
+  FilterCriteria get filterCriteria => _state.filterCriteria;
+
+  @override
   bool get hasFilters => _state.hasFilters;
 
   @override
@@ -517,6 +745,9 @@ class LocalGalleryContentView extends ConsumerWidget {
   final bool use3DCardView;
   final int columns;
   final double itemWidth;
+
+  /// 逻辑列宽（px）：瀑布流按它算列数
+  final double columnWidth;
   final void Function(LocalImageRecord record)? onReuseMetadata;
   final void Function(LocalImageRecord record, Offset position)? onContextMenu;
   final Future<void> Function(
@@ -532,6 +763,7 @@ class LocalGalleryContentView extends ConsumerWidget {
     this.use3DCardView = true,
     required this.columns,
     required this.itemWidth,
+    required this.columnWidth,
     this.onReuseMetadata,
     this.onContextMenu,
     this.onSendAction,
@@ -575,7 +807,7 @@ class LocalGalleryContentView extends ConsumerWidget {
         callbacks: ImageDetailCallbacks(
           onReuseMetadata: onReuseMetadata != null
               ? (data, _) =>
-                  onReuseMetadata?.call((data as LocalImageDetailData).record)
+                    onReuseMetadata?.call((data as LocalImageDetailData).record)
               : null,
           onFavoriteToggle: (data) => ref
               .read(localGalleryNotifierProvider.notifier)
@@ -596,7 +828,9 @@ class LocalGalleryContentView extends ConsumerWidget {
           },
           onSendToReversePrompt: (data) async {
             try {
-              await ref.read(reversePromptProvider.notifier).addImage(
+              await ref
+                  .read(reversePromptProvider.notifier)
+                  .addImage(
                     await data.getImageBytes(),
                     name: data.fileInfo?.fileName ?? 'gallery-image',
                   );
@@ -619,8 +853,10 @@ class LocalGalleryContentView extends ConsumerWidget {
 
     return GenericGalleryContentView<LocalImageRecord>(
       use3DCardView: use3DCardView,
+      useMasonryView: state.isMasonryView,
       columns: columns,
       itemWidth: itemWidth,
+      columnWidth: columnWidth,
       state: _LocalGalleryStateAdapter(state),
       selectionState: _LocalSelectionStateAdapter(selectionState),
       idExtractor: (record) => record.path,
@@ -633,9 +869,12 @@ class LocalGalleryContentView extends ConsumerWidget {
         priority: config.isVisible ? 1 : 5,
         onTap: config.selectionMode ? config.onSelectionToggle : config.onTap,
         onLongPress: config.onLongPress,
-        onFavoriteToggle: () => ref
-            .read(localGalleryNotifierProvider.notifier)
-            .toggleFavorite(record.path),
+        onFavoriteToggle: (anchor) => showGalleryFavoriteMenu(
+          context,
+          ref: ref,
+          record: record,
+          anchor: anchor,
+        ),
         onSendAction: onSendAction != null
             ? (action) => onSendAction!(record, action)
             : null,
@@ -647,9 +886,12 @@ class LocalGalleryContentView extends ConsumerWidget {
       onEnterSelection: (record) => ref
           .read(localGallerySelectionNotifierProvider.notifier)
           .enterAndSelect(record.path),
-      onFavoriteToggle: (record) => ref
-          .read(localGalleryNotifierProvider.notifier)
-          .toggleFavorite(record.path),
+      onFavoriteToggle: (record, anchor) => showGalleryFavoriteMenu(
+        context,
+        ref: ref,
+        record: record,
+        anchor: anchor,
+      ),
       onContextMenu: onContextMenu,
       onDeleted: onDeleted,
       onClearFilters: () =>

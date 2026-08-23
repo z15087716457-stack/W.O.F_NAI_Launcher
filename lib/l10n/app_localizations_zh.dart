@@ -568,6 +568,89 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_autoSaveSubtitle => '生成后自动保存图片';
 
   @override
+  String get settings_extraRootsTitle => '图库源管理';
+
+  @override
+  String get settings_extraRootsHint =>
+      '额外图库源：将任意文件夹加入画廊浏览与搜索（只读，不参与自动保存）。添加后请在画廊页或本页底部执行重新扫描。';
+
+  @override
+  String get settings_extraRootsEmpty => '尚未添加额外图库源';
+
+  @override
+  String get settings_extraRootsAdd => '添加文件夹';
+
+  @override
+  String get settings_extraRootsAddTitle => '选择要添加的图库源文件夹';
+
+  @override
+  String get settings_extraRootsRemove => '移除该图库源';
+
+  @override
+  String get settings_extraRootsRemoveConfirmTitle => '移除图库源？';
+
+  @override
+  String settings_extraRootsRemoveConfirmContent(String path) {
+    return '将「$path」从画廊中移除（不会删除文件夹中的任何文件）。';
+  }
+
+  @override
+  String get settings_extraRootsAdded => '图库源已添加，重新扫描后生效';
+
+  @override
+  String get settings_extraRootsRemoved => '图库源已移除';
+
+  @override
+  String get settings_extraRootsDuplicate => '该文件夹已在图库源中';
+
+  @override
+  String get settings_extraRootsSameAsMain => '该文件夹与图片保存位置相同';
+
+  @override
+  String get settings_extraRootsNested => '图库源之间不能互相包含，请选择其他文件夹';
+
+  @override
+  String get settings_extraRootsNotFound => '所选文件夹不存在';
+
+  @override
+  String get settings_importTagIndex => '导入标签索引…';
+
+  @override
+  String get settings_importTagIndexPickTitle => '选择标签索引文件 (.jsonl)';
+
+  @override
+  String settings_importTagIndexProgress(int processed, int total) {
+    return '正在导入 $processed/$total 行…';
+  }
+
+  @override
+  String settings_importTagIndexDone(
+    int imported,
+    int updated,
+    int skipped,
+    int errors,
+  ) {
+    return '导入完成：新增 $imported，更新 $updated，跳过 $skipped，错误 $errors';
+  }
+
+  @override
+  String get settings_importTagIndexFailed => '标签索引导入失败';
+
+  @override
+  String get settings_importTagIndexBlockedByScan => '画廊正在扫描中，请等待扫描完成后再导入标签索引';
+
+  @override
+  String get settings_extraRootsIndexImportTitle => '检测到标签索引';
+
+  @override
+  String settings_extraRootsIndexImportContent(String path) {
+    return '在「$path」下检测到标签索引 index.jsonl。先导入标签索引可让之后的扫描直接快进（跳过元数据解析），是否现在导入？';
+  }
+
+  @override
+  String get settings_extraRootsIndexImportConfirm => '现在导入';
+
+  @override
   String get settings_about => '关于';
 
   @override
@@ -4304,11 +4387,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_loadingGroupedImages => '加载分组图片中...';
 
   @override
-  String localGallery_jumpedToMonth(Object year, Object month) {
-    return '已跳转到 $year-$month';
-  }
-
-  @override
   String get localGallery_title => '本地画廊';
 
   @override
@@ -4346,10 +4424,67 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_addToCollection => '收藏';
 
   @override
-  String get localGallery_switchToGridView => '切换到网格视图';
+  String get localGallery_sortButton => '排序';
 
   @override
-  String get localGallery_switchToDateGroupedView => '切换到日期分组视图';
+  String get localGallery_sortFieldModified => '修改时间';
+
+  @override
+  String get localGallery_sortFieldCreated => '创建时间';
+
+  @override
+  String get localGallery_sortFieldName => '文件名';
+
+  @override
+  String get localGallery_sortFieldSize => '文件大小';
+
+  @override
+  String get localGallery_sortFieldDimensions => '图像尺寸';
+
+  @override
+  String get localGallery_sortToggleDirection => '切换排序方向';
+
+  @override
+  String localGallery_aboutColumns(Object count) {
+    return '约 $count 列';
+  }
+
+  @override
+  String get localGallery_columnWidth => '列宽';
+
+  @override
+  String get localGallery_naiOnly => 'NAI';
+
+  @override
+  String get localGallery_naiOnlyTooltip => '仅显示 NAI 生成的图片';
+
+  @override
+  String get localGallery_masonryViewLabel => '瀑布流';
+
+  @override
+  String get localGallery_switchToMasonryView => '切换到瀑布流视图';
+
+  @override
+  String get localGallery_switchToGridLayout => '切换到网格视图';
+
+  @override
+  String localGallery_dateRangeYearMonth(Object year, Object month) {
+    return '$year年$month月';
+  }
+
+  @override
+  String get localGallery_dateRangePrevMonth => '上个月';
+
+  @override
+  String get localGallery_dateRangeNextMonth => '下个月';
+
+  @override
+  String get localGallery_dateRangeClear => '清除';
+
+  @override
+  String localGallery_searchInScope(Object scope) {
+    return '搜索：$scope';
+  }
 
   @override
   String get localGallery_openFilterPanel => '打开筛选面板';
@@ -4368,6 +4503,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localGallery_tagIntersection => '标签交集';
+
+  @override
+  String get localGallery_filterByTags => '按标签筛选';
+
+  @override
+  String get localGallery_tagInputHint => '输入标签，回车添加';
+
+  @override
+  String get localGallery_addTag => '添加';
 
   @override
   String get localGallery_createCategoryTitle => '新建分类';
@@ -4391,17 +4535,32 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_seedCopied => 'Seed 已复制';
 
   @override
+  String get localGallery_createCollectionTitle => '新建收藏集';
+
+  @override
+  String get localGallery_createCollectionHint => '输入收藏集名称';
+
+  @override
+  String get localGallery_createCollectionConfirm => '创建';
+
+  @override
+  String localGallery_deleteCollectionContent(Object name) {
+    return '确定删除收藏集「$name」？仅移除收藏集条目，不会删除任何图片文件。';
+  }
+
+  @override
+  String get localGallery_unfavorite => '取消收藏';
+
+  @override
+  String get localGallery_favoriteMenuEmptyCollections => '暂无收藏集，左侧 + 创建';
+
+  @override
   String localGallery_confirmDeleteImageContent(Object name) {
-    return '确定要删除图片「$name」吗？\n\n此操作无法撤销。';
+    return '确定要删除图片「$name」吗？\n\n图片会立即从画廊消失，文件将在下次启动时彻底清理（本次会话内可撤销）。';
   }
 
   @override
-  String get localGallery_imageDeleted => '图片已删除';
-
-  @override
-  String localGallery_deleteFailed(Object error) {
-    return '删除失败: $error';
-  }
+  String get localGallery_externalReadonly => '外部图库源为只读，此操作不可用';
 
   @override
   String get localGallery_categoryDeleteContent => '确定要删除此分类吗？文件夹及其内容将被保留。';
@@ -4814,13 +4973,46 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_filterSubtitle => '精确筛选您的图片集合';
 
   @override
-  String get localGallery_modelHint => '输入模型名称...';
+  String get localGallery_filterOrientation => '画面方向';
 
   @override
-  String get localGallery_samplerHint => '输入采样器名称...';
+  String get localGallery_orientationAny => '全部';
 
   @override
-  String get localGallery_resolutionHint => '宽度x高度 (如: 1024x1024)';
+  String get localGallery_orientationLandscape => '横版';
+
+  @override
+  String get localGallery_orientationPortrait => '竖版';
+
+  @override
+  String get localGallery_orientationSquare => '方图';
+
+  @override
+  String get localGallery_filterNsfw => '内容分级';
+
+  @override
+  String get localGallery_nsfwAny => '全部';
+
+  @override
+  String get localGallery_nsfwSfw => '全年龄';
+
+  @override
+  String get localGallery_nsfwOnly => '仅 NSFW';
+
+  @override
+  String get localGallery_noModelCandidates => '暂无模型元数据，导入标签索引或扫描后可用';
+
+  @override
+  String get localGallery_noSamplerCandidates => '暂无采样器元数据，导入标签索引或扫描后可用';
+
+  @override
+  String get localGallery_noResolutionCandidates => '暂无分辨率元数据';
+
+  @override
+  String get localGallery_candidatesLoadFailed => '候选加载失败';
+
+  @override
+  String get localGallery_noTagSuggestions => '无匹配标签';
 
   @override
   String get localGallery_activeFiltersSet => '已设置筛选';
@@ -4894,13 +5086,57 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String localGallery_confirmBulkDeleteContent(Object count) {
-    return '确定要删除选中的 $count 张图片吗？\n\n此操作将从文件系统中永久删除这些图片，无法恢复。';
+    return '确定要删除选中的 $count 张图片吗？\n\n图片会立即从画廊消失，文件将在下次启动时彻底清理（本次会话内可撤销）。';
   }
 
   @override
-  String localGallery_deletedImages(Object count) {
-    return '已删除 $count 张图片';
+  String localGallery_deletedToPool(Object count) {
+    return '已删除 $count 张图片，下次启动时彻底清理。';
   }
+
+  @override
+  String get localGallery_trashTitle => '删除池';
+
+  @override
+  String get localGallery_trashEmpty => '删除池是空的';
+
+  @override
+  String get localGallery_trashHint => '池内文件仍在磁盘上，下次启动时彻底删除；恢复后立即回到图库。';
+
+  @override
+  String localGallery_trashCount(Object count) {
+    return '$count 项';
+  }
+
+  @override
+  String get localGallery_trashRestore => '恢复';
+
+  @override
+  String get localGallery_trashRestoreAll => '全部恢复';
+
+  @override
+  String get localGallery_trashRestoreFailed => '恢复失败';
+
+  @override
+  String localGallery_trashRestored(Object count) {
+    return '已恢复 $count 张图片';
+  }
+
+  @override
+  String get localGallery_trashDeleteAll => '彻底删除全部';
+
+  @override
+  String localGallery_trashDeleteAllConfirm(Object count) {
+    return '将立即物理删除池内全部 $count 个文件，不可恢复。';
+  }
+
+  @override
+  String localGallery_trashDeletedForever(Object count) {
+    return '已彻底删除 $count 个文件';
+  }
+
+  @override
+  String get localGallery_trashFileMissing => '文件已不在磁盘上';
 
   @override
   String get localGallery_noFoldersAvailable => '暂无可用文件夹，请先创建文件夹';
@@ -9012,9 +9248,6 @@ class AppLocalizationsZh extends AppLocalizations {
       '你是提示词改写助手。根据当前提示词、用户需求和可选参考图修改提示词。只输出最终可直接使用的一行提示词，不要解释。';
 
   @override
-  String get localGallery_dateFilterButton => '日期过滤';
-
-  @override
   String get cacheStats_title => '缓存统计';
 
   @override
@@ -9076,9 +9309,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get galleryCache_noGalleryFolder => '未设置画廊目录';
-
-  @override
-  String get galleryCache_galleryFolderMissing => '画廊目录不存在';
 
   @override
   String galleryCache_scanningPhase(Object processed, Object total) {

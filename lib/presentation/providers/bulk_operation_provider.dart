@@ -9,9 +9,11 @@ import '../../core/database/datasources/gallery_data_source.dart';
 import '../../core/utils/app_logger.dart';
 import '../../data/models/gallery/local_image_record.dart';
 import '../../data/services/bulk_operation_service.dart';
+import '../../data/services/gallery/gallery_delete_pool_store.dart';
 import '../../core/utils/undo_redo_history.dart';
 import '../../l10n/app_localizations.dart';
 import 'collection_provider.dart';
+import 'local_gallery_provider.dart';
 
 part 'bulk_operation_provider.freezed.dart';
 part 'bulk_operation_provider.g.dart';
@@ -133,33 +135,56 @@ class BulkOperationState with _$BulkOperationState {
 }
 
 /// Bulk delete command for undo/redo
+///
+/// 删除是软删语义（DB is_deleted=1 + 路径进删除池），撤销可真实恢复：
+/// 出池 + DB is_deleted=0（文件仍在盘上，refresh 后回到列表）。
 class _BulkDeleteCommand extends HistoryCommand {
+  final Ref _ref;
   final List<String> _imagePaths;
 
-  _BulkDeleteCommand(super.description, this._imagePaths);
+  _BulkDeleteCommand(super.description, this._ref, this._imagePaths);
+
+  Future<GalleryDataSource> _getDataSource() async {
+    final dbManager = await _ref.read(databaseManagerProvider.future);
+    final dataSource = dbManager.getDataSource<GalleryDataSource>('gallery');
+    if (dataSource == null) {
+      throw StateError('GalleryDataSource not found');
+    }
+    return dataSource;
+  }
 
   @override
   Future<void> execute() async {
-    for (final path in _imagePaths) {
-      try {
-        final file = File(path);
-        if (await file.exists()) {
-          await file.delete();
-        }
-      } catch (e) {
-        AppLogger.e('Failed to delete $path', e, null, '_BulkDeleteCommand');
-      }
+    // redo：重新软删 + 重新入池（幂等）
+    final deletable = _imagePaths;
+    if (deletable.isEmpty) return;
+
+    final dataSource = await _getDataSource();
+    await dataSource.batchMarkAsDeleted(deletable);
+    await const GalleryDeletePoolStore().addAll(deletable);
+
+    // 与首次删除一致：内存列表即时移除（redo 后图同样立即消失）
+    try {
+      await _ref
+          .read(localGalleryNotifierProvider.notifier)
+          .removeDeletedImagesFromMemory(deletable);
+    } catch (e) {
+      AppLogger.w('Failed to remove deleted images from memory: $e', '_BulkDeleteCommand');
     }
   }
 
   @override
   Future<void> undo() async {
-    // Cannot undo file deletion - files are permanently deleted
-    // This is a limitation of the current implementation
-    AppLogger.w(
-      'Undo not supported for bulk delete - files are permanently deleted',
-      '_BulkDeleteCommand',
-    );
+    // 撤销：出池 + DB 恢复 is_deleted=0（文件仍在盘上，refresh 后回列表）
+    final dataSource = await _getDataSource();
+    await dataSource.batchRestoreDeleted(_imagePaths);
+    await const GalleryDeletePoolStore().removeAll(_imagePaths);
+    // 解除防复活屏，refresh 后恢复的图才能回到列表
+    try {
+      await _ref
+          .read(localGalleryNotifierProvider.notifier)
+          .clearRecentlyDeleted(_imagePaths);
+    } catch (_) {}
   }
 }
 
@@ -460,9 +485,23 @@ class BulkOperationNotifier extends _$BulkOperationNotifier {
             },
       );
 
+      // ③ 内存文件列表即时移除（不触发 rescan/refresh）：
+      // 图从当前页/计数立即消失，文件在盘上留到下次启动清理。
+      try {
+        await ref
+            .read(localGalleryNotifierProvider.notifier)
+            .removeDeletedImagesFromMemory(imagePaths);
+      } catch (e) {
+        AppLogger.w(
+          'Failed to remove deleted images from memory: $e',
+          'BulkOperationNotifier',
+        );
+      }
+
       // Add to history
       final command = _BulkDeleteCommand(
         'Delete ${imagePaths.length} images',
+        ref,
         imagePaths,
       );
       _history.push(command);

@@ -36,6 +36,11 @@ class CompactIconButton extends StatefulWidget {
   /// 快捷键ID（用于在提示中显示键盘快捷键）
   final String? shortcutId;
 
+  /// Whether to render the label text.
+  ///
+  /// 窄窗口降级时置 false：只显示图标（tooltip 仍保留），供工具条响应式布局使用。
+  final bool showLabel;
+
   const CompactIconButton({
     super.key,
     required this.icon,
@@ -46,6 +51,7 @@ class CompactIconButton extends StatefulWidget {
     this.isDanger = false,
     this.isLoading = false,
     this.shortcutId,
+    this.showLabel = true,
   });
 
   @override
@@ -60,7 +66,8 @@ class _CompactIconButtonState extends State<CompactIconButton> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final isEnabled = widget.onPressed != null && !widget.isLoading;
-    final hasLabel = widget.label != null && widget.label!.isNotEmpty;
+    final hasLabel =
+        widget.showLabel && widget.label != null && widget.label!.isNotEmpty;
 
     Color iconColor;
     Color bgColor;

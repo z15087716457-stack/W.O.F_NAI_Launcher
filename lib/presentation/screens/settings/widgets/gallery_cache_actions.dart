@@ -108,19 +108,13 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
     _scanController.repeat();
 
     try {
-      final rootPath = await GalleryFolderRepository.instance.getRootPath();
+      // 主源 + 全部存在的额外源
+      final rootDirs = await GalleryFolderRepository.instance.getAllRootDirs();
 
       if (!mounted) return;
 
-      if (rootPath == null) {
+      if (rootDirs.isEmpty) {
         AppToast.error(context, context.l10n.galleryCache_noGalleryFolder);
-        return;
-      }
-
-      final dir = Directory(rootPath);
-      if (!await dir.exists()) {
-        if (!mounted) return;
-        AppToast.error(context, context.l10n.galleryCache_galleryFolderMissing);
         return;
       }
 
@@ -144,7 +138,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
       });
 
       await scanner.startScanning(
-        dir,
+        rootDirs,
         retryMissingMetadata: true,
         retryFailedMetadata: true,
         onFileProcessed: (result, stats) {

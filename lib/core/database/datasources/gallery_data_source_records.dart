@@ -290,6 +290,115 @@ class GalleryMetadataRecord {
   }
 }
 
+/// 标签索引导入条目（外部 JSONL 索引，见 TagIndexImportService）
+class TagIndexImportEntry {
+  /// 规范化后的文件路径（唯一键）
+  final String filePath;
+  final String fileName;
+  final int fileSize;
+  final DateTime modifiedAt;
+  final int? width;
+  final int? height;
+  final String? source;
+  final String? software;
+  final int? seed;
+  final String? prompt;
+  final String? negativePrompt;
+  final List<String> tags;
+  final String? rawJson;
+
+  /// 生成参数（JSONL 可能携带，写入 gallery_metadata 供筛选）
+  final String? model;
+  final String? sampler;
+  final int? steps;
+  final double? cfgScale;
+  final String? noiseSchedule;
+
+  /// 是否 NSFW（写入 gallery_metadata.is_nsfw）
+  final bool? nsfw;
+
+  const TagIndexImportEntry({
+    required this.filePath,
+    required this.fileName,
+    required this.fileSize,
+    required this.modifiedAt,
+    this.width,
+    this.height,
+    this.source,
+    this.software,
+    this.seed,
+    this.prompt,
+    this.negativePrompt,
+    this.tags = const [],
+    this.rawJson,
+    this.model,
+    this.sampler,
+    this.steps,
+    this.cfgScale,
+    this.noiseSchedule,
+    this.nsfw,
+  });
+
+  TagIndexImportEntry copyWith({
+    String? filePath,
+    String? fileName,
+    int? fileSize,
+    DateTime? modifiedAt,
+    int? width,
+    int? height,
+    String? source,
+    String? software,
+    int? seed,
+    String? prompt,
+    String? negativePrompt,
+    List<String>? tags,
+    String? rawJson,
+    String? model,
+    String? sampler,
+    int? steps,
+    double? cfgScale,
+    String? noiseSchedule,
+    bool? nsfw,
+  }) {
+    return TagIndexImportEntry(
+      filePath: filePath ?? this.filePath,
+      fileName: fileName ?? this.fileName,
+      fileSize: fileSize ?? this.fileSize,
+      modifiedAt: modifiedAt ?? this.modifiedAt,
+      width: width ?? this.width,
+      height: height ?? this.height,
+      source: source ?? this.source,
+      software: software ?? this.software,
+      seed: seed ?? this.seed,
+      prompt: prompt ?? this.prompt,
+      negativePrompt: negativePrompt ?? this.negativePrompt,
+      tags: tags ?? this.tags,
+      rawJson: rawJson ?? this.rawJson,
+      model: model ?? this.model,
+      sampler: sampler ?? this.sampler,
+      steps: steps ?? this.steps,
+      cfgScale: cfgScale ?? this.cfgScale,
+      noiseSchedule: noiseSchedule ?? this.noiseSchedule,
+      nsfw: nsfw ?? this.nsfw,
+    );
+  }
+}
+
+/// distinct 候选值（模型/采样器/分辨率自动补全用）
+class GalleryDistinctValue {
+  final String value;
+  final int count;
+
+  const GalleryDistinctValue({required this.value, required this.count});
+
+  factory GalleryDistinctValue.fromMap(Map<String, dynamic> map) {
+    return GalleryDistinctValue(
+      value: map['value'] as String,
+      count: (map['count'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 /// 画廊标签记录
 class GalleryTagRecord {
   final String id;

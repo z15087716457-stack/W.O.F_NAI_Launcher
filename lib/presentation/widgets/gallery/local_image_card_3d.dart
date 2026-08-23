@@ -31,7 +31,7 @@ class LocalImageCard3D extends ConsumerStatefulWidget {
   final void Function(TapDownDetails)? onSecondaryTapDown;
   final bool isSelected;
   final bool showFavoriteIndicator;
-  final VoidCallback? onFavoriteToggle;
+  final void Function(Offset anchor)? onFavoriteToggle;
   final Future<void> Function(LocalImageContextAction action)? onSendAction;
   final bool isKritaConnected;
   final bool isVisible;
@@ -74,6 +74,14 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
   ThumbnailCacheService? _thumbnailService;
   _ImageLoadState _loadState = _ImageLoadState.idle;
   bool _isLoadingThumbnail = false;
+  double _devicePixelRatio = 1.0;
+
+  /// 最近一次请求的缩略图档位（用于检测列宽变化后是否需要换档重载）
+  ThumbnailSize? _requestedSize;
+
+  /// 列宽变化换档重载的防抖器：拖动列宽滑块期间只记目标档位，
+  /// 停止 ~300ms 后才真正换档重载，避免拖动过程反复入队。
+  Timer? _reloadDebounceTimer;
 
   @override
   void initState() {
@@ -89,15 +97,51 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _devicePixelRatio = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0;
+  }
+
+  @override
   void didUpdateWidget(LocalImageCard3D oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    // 列宽（或优先级/可见性）变化时重新评估档位；档位变了就换档重载，
+    // 否则维持原加载（避免滚动时反复重载）。
+    final widthChanged = oldWidget.width != widget.width;
+    final sizeChanged =
+        widthChanged &&
+        _thumbnailPath != null &&
+        _pickSizeForCurrentWidth() != _requestedSize;
+
     if (oldWidget.priority != widget.priority ||
         (oldWidget.isVisible != widget.isVisible && widget.isVisible)) {
-      if (_thumbnailPath == null && !_isLoadingThumbnail) {
+      if (_thumbnailPath == null) {
         _loadThumbnail();
       }
     }
+
+    // 换档重载走防抖：拖动列宽滑块期间 didUpdateWidget 高频触发，
+    // 直接重载会让整页卡片反复入队；停手 ~300ms 后再统一换档。
+    // 从未加载成功（_thumbnailPath == null）的卡片同样走防抖重试。
+    if (sizeChanged || (widthChanged && _thumbnailPath == null)) {
+      _scheduleDebouncedReload();
+    }
   }
+
+  /// 防抖换档重载：列宽变化期间只记录目标档位，停止后才真正重载。
+  void _scheduleDebouncedReload() {
+    _reloadDebounceTimer?.cancel();
+    _reloadDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      if (_pickSizeForCurrentWidth() != _requestedSize) {
+        _loadThumbnail();
+      }
+    });
+  }
+
+  ThumbnailSize _pickSizeForCurrentWidth() =>
+      pickThumbnailSize(widget.width, _devicePixelRatio);
 
   Future<void> _initAndLoadThumbnail() async {
     _thumbnailService = ThumbnailCacheService.instance;
@@ -130,9 +174,13 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
         return;
       }
 
-      final existingPath = await _thumbnailService?.getThumbnailPath(path);
+      final existingPath = await _thumbnailService?.getThumbnailPath(
+        path,
+        size: _pickSizeForCurrentWidth(),
+      );
       if (existingPath != null && await File(existingPath).exists()) {
         // AppLogger.i('[CardLoad] Using existing thumbnail: $fileName', 'LocalImageCard3D');
+        _requestedSize = _pickSizeForCurrentWidth();
         if (mounted) {
           setState(() {
             _thumbnailPath = existingPath;
@@ -153,9 +201,11 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
 
       final generatedPath = await thumbnailService.getThumbnail(
         path,
-        size: ThumbnailSize.small,
+        size: _pickSizeForCurrentWidth(),
         priority: widget.priority,
       );
+
+      _requestedSize = _pickSizeForCurrentWidth();
 
       if (!mounted || widget.record.path != path) return;
 
@@ -205,8 +255,9 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
           .read(shareImageSettingsProvider)
           .effectiveStripMetadataForCopyAndDrag;
       final sourceParts = sourceFile.path.split(RegExp(r'[/\\]'));
-      final sourceName =
-          sourceParts.isNotEmpty ? sourceParts.last : 'shared.png';
+      final sourceName = sourceParts.isNotEmpty
+          ? sourceParts.last
+          : 'shared.png';
       final originalBytes = await sourceFile.readAsBytes();
       final shareImage = await ImageShareSanitizer.prepareForCopyOrDrag(
         originalBytes,
@@ -233,8 +284,10 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
     final theme = Theme.of(context);
     final extension = theme.extension<AppThemeExtension>();
 
-    final intensity =
-        switch ((extension?.enableNeonGlow, extension?.isLightTheme)) {
+    final intensity = switch ((
+      extension?.enableNeonGlow,
+      extension?.isLightTheme,
+    )) {
       (true, _) => (edgeGlow: 1.3, gloss: 1.0),
       (_, true) => (edgeGlow: 0.6, gloss: 1.0),
       _ => (edgeGlow: 1.0, gloss: 0.8),
@@ -243,7 +296,7 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
     final glowColor = extension?.glowColor ?? theme.colorScheme.primary;
     return (
       _EffectIntensity(edgeGlow: intensity.edgeGlow, gloss: intensity.gloss),
-      glowColor
+      glowColor,
     );
   }
 
@@ -278,11 +331,11 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
             border: widget.isSelected
                 ? Border.all(color: colorScheme.primary, width: 3)
                 : _isHovered
-                    ? Border.all(
-                        color: colorScheme.primary.withValues(alpha: 0.3),
-                        width: 2,
-                      )
-                    : null,
+                ? Border.all(
+                    color: colorScheme.primary.withValues(alpha: 0.3),
+                    width: 2,
+                  )
+                : null,
             boxShadow: [
               BoxShadow(
                 color: _isHovered
@@ -331,11 +384,7 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
                       ),
                     ),
                   ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: _buildActionButtons(),
-                ),
+                Positioned(top: 8, right: 8, child: _buildActionButtons()),
                 if (widget.isSelected)
                   Positioned(
                     top: 8,
@@ -382,12 +431,12 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
   }
 
   Widget _buildImageLayer() => switch (_loadState) {
-        _ImageLoadState.error => _buildErrorPlaceholder(),
-        _ImageLoadState.loading when _displayPath == null =>
-          _buildLoadingPlaceholder(),
-        _ when _displayPath != null => _buildOptimizedImage(_displayPath!),
-        _ => _buildLoadingPlaceholder(),
-      };
+    _ImageLoadState.error => _buildErrorPlaceholder(),
+    _ImageLoadState.loading when _displayPath == null =>
+      _buildLoadingPlaceholder(),
+    _ when _displayPath != null => _buildOptimizedImage(_displayPath!),
+    _ => _buildLoadingPlaceholder(),
+  };
 
   Widget _buildLoadingPlaceholder() {
     return Container(
@@ -451,8 +500,8 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
   Widget _buildOptimizedImage(String imagePath) {
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
     final cacheWidth = (widget.width * pixelRatio * 1.5).toInt();
-    final cacheHeight =
-        ((widget.height ?? widget.width) * pixelRatio * 1.5).toInt();
+    final cacheHeight = ((widget.height ?? widget.width) * pixelRatio * 1.5)
+        .toInt();
 
     return Image.file(
       File(imagePath),
@@ -503,9 +552,12 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
       isVisible: _isHovered,
       buttons: [
         FloatingActionButtonData(
-          icon:
-              widget.record.isFavorite ? Icons.favorite : Icons.favorite_border,
-          onTap: widget.onFavoriteToggle,
+          icon: widget.record.isFavorite
+              ? Icons.favorite
+              : Icons.favorite_border,
+          onTap: widget.onFavoriteToggle != null
+              ? () => unawaited(_openFavoriteMenu(context))
+              : null,
           iconColor: widget.record.isFavorite ? Colors.red : Colors.white,
           visible: widget.onFavoriteToggle != null,
         ),
@@ -520,6 +572,14 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
         ),
       ],
     );
+  }
+
+  /// 以卡片左上角为锚点打开收藏菜单（默认出现在卡片左侧）
+  Future<void> _openFavoriteMenu(BuildContext context) async {
+    final RenderBox? cardBox = context.findRenderObject() as RenderBox?;
+    if (cardBox == null || !cardBox.attached) return;
+    final anchor = cardBox.localToGlobal(Offset.zero);
+    widget.onFavoriteToggle?.call(anchor);
   }
 
   Future<void> _showSendMenu(BuildContext context) async {
@@ -626,13 +686,16 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
         color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(4),
       ),
-      child:
-          Text(text, style: const TextStyle(color: Colors.white, fontSize: 10)),
+      child: Text(
+        text,
+        style: const TextStyle(color: Colors.white, fontSize: 10),
+      ),
     );
   }
 
   @override
   void dispose() {
+    _reloadDebounceTimer?.cancel();
     _glossController.dispose();
     super.dispose();
   }
@@ -752,48 +815,50 @@ class _GlossPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final mainPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Colors.transparent,
-          Colors.white.withValues(alpha: 0.06 * intensity),
-          Colors.white.withValues(alpha: 0.15 * intensity),
-          Colors.white.withValues(alpha: 0.06 * intensity),
-          Colors.transparent,
-        ],
-        stops: const [0.0, 0.35, 0.5, 0.65, 1.0],
-      ).createShader(
-        Rect.fromLTWH(
-          size.width * progress - size.width * 0.5,
-          size.height * progress - size.height * 0.5,
-          size.width,
-          size.height,
-        ),
-      );
+      ..shader =
+          LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.transparent,
+              Colors.white.withValues(alpha: 0.06 * intensity),
+              Colors.white.withValues(alpha: 0.15 * intensity),
+              Colors.white.withValues(alpha: 0.06 * intensity),
+              Colors.transparent,
+            ],
+            stops: const [0.0, 0.35, 0.5, 0.65, 1.0],
+          ).createShader(
+            Rect.fromLTWH(
+              size.width * progress - size.width * 0.5,
+              size.height * progress - size.height * 0.5,
+              size.width,
+              size.height,
+            ),
+          );
 
     canvas.drawRect(Offset.zero & size, mainPaint);
 
     final pearlPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Colors.transparent,
-          const Color(0xFFB8E6F5).withValues(alpha: 0.03 * intensity),
-          const Color(0xFFFFF5E1).withValues(alpha: 0.05 * intensity),
-          const Color(0xFFE6B8F5).withValues(alpha: 0.03 * intensity),
-          Colors.transparent,
-        ],
-        stops: const [0.0, 0.3, 0.5, 0.7, 1.0],
-      ).createShader(
-        Rect.fromLTWH(
-          size.width * progress - size.width * 0.6,
-          size.height * progress - size.height * 0.6,
-          size.width * 1.2,
-          size.height * 1.2,
-        ),
-      )
+      ..shader =
+          LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.transparent,
+              const Color(0xFFB8E6F5).withValues(alpha: 0.03 * intensity),
+              const Color(0xFFFFF5E1).withValues(alpha: 0.05 * intensity),
+              const Color(0xFFE6B8F5).withValues(alpha: 0.03 * intensity),
+              Colors.transparent,
+            ],
+            stops: const [0.0, 0.3, 0.5, 0.7, 1.0],
+          ).createShader(
+            Rect.fromLTWH(
+              size.width * progress - size.width * 0.6,
+              size.height * progress - size.height * 0.6,
+              size.width * 1.2,
+              size.height * 1.2,
+            ),
+          )
       ..blendMode = BlendMode.screen;
 
     canvas.drawRect(Offset.zero & size, pearlPaint);

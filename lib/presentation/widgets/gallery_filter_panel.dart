@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/core/database/datasources/gallery_data_source.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/utils/gallery_model_labels.dart';
 
 import '../providers/local_gallery_provider.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
@@ -21,41 +25,34 @@ class GalleryFilterPanel extends ConsumerStatefulWidget {
 
 class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
     with SingleTickerProviderStateMixin {
-  final TextEditingController _modelController = TextEditingController();
-  final TextEditingController _samplerController = TextEditingController();
   final TextEditingController _minStepsController = TextEditingController();
   final TextEditingController _maxStepsController = TextEditingController();
   final TextEditingController _minCfgController = TextEditingController();
   final TextEditingController _maxCfgController = TextEditingController();
-  final TextEditingController _resolutionController = TextEditingController();
+  final TextEditingController _tagController = TextEditingController();
+  final FocusNode _tagFocusNode = FocusNode();
 
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  // 常用预设
-  static const List<String> _commonResolutions = [
-    '832x1216',
-    '1216x832',
-    '1024x1024',
-    '1024x1536',
-    '1536x1024',
-    '640x640',
-  ];
+  // 筛选面板局部状态（应用按钮提交到 provider）
+  final Set<String> _selectedModels = {};
+  final Set<String> _selectedSamplers = {};
+  final Set<String> _selectedResolutions = {};
+  String? _orientation;
+  String? _nsfwMode;
 
-  static const List<String> _commonSamplers = [
-    'k_euler',
-    'k_euler_ancestral',
-    'k_dpmpp_2m',
-    'k_dpmpp_sde',
-    'k_dpmpp_2s_ancestral',
-  ];
+  // 候选（打开面板时异步拉取；失败降级为空列表）
+  late final Future<List<GalleryDistinctValue>> _modelsFuture;
+  late final Future<List<GalleryDistinctValue>> _samplersFuture;
+  late final Future<List<GalleryDistinctValue>> _resolutionsFuture;
 
-  static const List<String> _commonModels = [
-    'nai-diffusion-4-curated-preview',
-    'nai-diffusion-3',
-    'nai-diffusion-furry-3',
-  ];
+  // tag 自动补全
+  Timer? _tagDebounce;
+  List<String> _tagSuggestions = [];
+  int _tagSuggestionIndex = -1;
+  bool _tagSuggesting = false;
 
   @override
   void initState() {
@@ -80,31 +77,137 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
     _animController.forward();
 
     // Initialize with current filter values
-    final state = ref.read(localGalleryNotifierProvider);
-    _modelController.text = state.filterCriteria.filterModel ?? '';
-    _samplerController.text = state.filterCriteria.filterSampler ?? '';
+    final criteria = ref.read(localGalleryNotifierProvider).filterCriteria;
+    _selectedModels.addAll(criteria.filterModels);
+    _selectedSamplers.addAll(criteria.filterSamplers);
+    _selectedResolutions.addAll(criteria.filterResolutions);
+    _orientation = criteria.filterOrientation;
+    _nsfwMode = criteria.nsfwMode;
     _minStepsController.text =
-        state.filterCriteria.filterMinSteps?.toString() ?? '';
+        criteria.filterMinSteps?.toString() ?? '';
     _maxStepsController.text =
-        state.filterCriteria.filterMaxSteps?.toString() ?? '';
+        criteria.filterMaxSteps?.toString() ?? '';
     _minCfgController.text =
-        state.filterCriteria.filterMinCfg?.toString() ?? '';
+        criteria.filterMinCfg?.toString() ?? '';
     _maxCfgController.text =
-        state.filterCriteria.filterMaxCfg?.toString() ?? '';
-    _resolutionController.text = state.filterCriteria.filterResolution ?? '';
+        criteria.filterMaxCfg?.toString() ?? '';
+
+    // 异步拉取候选（失败时 FutureBuilder 降级显示提示，不崩）
+    final dataSource = GalleryDataSource();
+    _modelsFuture = dataSource.getDistinctModels();
+    _samplersFuture = dataSource.getDistinctSamplers();
+    _resolutionsFuture = dataSource.getDistinctResolutions();
   }
 
   @override
   void dispose() {
     _animController.dispose();
-    _modelController.dispose();
-    _samplerController.dispose();
     _minStepsController.dispose();
     _maxStepsController.dispose();
     _minCfgController.dispose();
     _maxCfgController.dispose();
-    _resolutionController.dispose();
+    _tagController.dispose();
+    _tagFocusNode.dispose();
+    _tagDebounce?.cancel();
     super.dispose();
+  }
+
+  /// 将输入框中的标签加入筛选（支持逗号分隔多个），并清空输入框
+  void _addTag() {
+    final text = _tagController.text.trim();
+    if (text.isEmpty) return;
+
+    final notifier = ref.read(localGalleryNotifierProvider.notifier);
+    final tags = text
+        .split(RegExp(r'[,，]+'))
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty)
+        .toList();
+    if (tags.isNotEmpty) {
+      notifier.addSelectedTags(tags);
+    }
+    _tagController.clear();
+    _tagSuggestions = [];
+    _tagSuggestionIndex = -1;
+    _tagSuggesting = false;
+    setState(() {});
+  }
+
+  /// 标签输入变化：防抖查询自动补全候选
+  void _onTagChanged(String value) {
+    setState(() {});
+
+    _tagDebounce?.cancel();
+    final text = value.trim();
+    if (text.isEmpty) {
+      _tagSuggestions = [];
+      _tagSuggestionIndex = -1;
+      _tagSuggesting = false;
+      return;
+    }
+    _tagSuggesting = true;
+
+    _tagDebounce = Timer(const Duration(milliseconds: 200), () async {
+      final suggestions = await GalleryDataSource().autocompleteTags(text);
+      if (!mounted) return;
+      setState(() {
+        _tagSuggestions = suggestions;
+        _tagSuggestionIndex = -1;
+      });
+    });
+  }
+
+  /// 回车：有高亮建议时加入建议，否则走普通添加
+  void _handleTagSubmitted(String _) {
+    if (_tagSuggestions.isNotEmpty &&
+        _tagSuggestionIndex >= 0 &&
+        _tagSuggestionIndex < _tagSuggestions.length) {
+      _addSuggestion(_tagSuggestions[_tagSuggestionIndex]);
+      return;
+    }
+    _addTag();
+  }
+
+  /// 加入单个自动补全建议（并清空输入）
+  void _addSuggestion(String tag) {
+    ref.read(localGalleryNotifierProvider.notifier).addSelectedTags([tag]);
+    _tagController.clear();
+    _tagSuggestions = [];
+    _tagSuggestionIndex = -1;
+    _tagSuggesting = false;
+    setState(() {});
+  }
+
+  /// 键盘上下键选择建议 / Escape 关闭下拉
+  KeyEventResult _handleTagKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    if (_tagSuggestions.isEmpty) return KeyEventResult.ignored;
+
+    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      setState(() {
+        _tagSuggestionIndex = (_tagSuggestionIndex + 1) % _tagSuggestions.length;
+      });
+      return KeyEventResult.handled;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      setState(() {
+        _tagSuggestionIndex = _tagSuggestionIndex <= 0
+            ? _tagSuggestions.length - 1
+            : _tagSuggestionIndex - 1;
+      });
+      return KeyEventResult.handled;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.escape) {
+      setState(() {
+        _tagSuggestions = [];
+        _tagSuggestionIndex = -1;
+        _tagSuggesting = false;
+      });
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 
   /// Apply all filters
@@ -112,12 +215,6 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
     final notifier = ref.read(localGalleryNotifierProvider.notifier);
 
     // Parse values
-    final model = _modelController.text.trim().isEmpty
-        ? null
-        : _modelController.text.trim();
-    final sampler = _samplerController.text.trim().isEmpty
-        ? null
-        : _samplerController.text.trim();
     final minSteps = _minStepsController.text.trim().isEmpty
         ? null
         : int.tryParse(_minStepsController.text.trim());
@@ -130,16 +227,15 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
     final maxCfg = _maxCfgController.text.trim().isEmpty
         ? null
         : double.tryParse(_maxCfgController.text.trim());
-    final resolution = _resolutionController.text.trim().isEmpty
-        ? null
-        : _resolutionController.text.trim();
 
     // Apply filters
-    notifier.setFilterModel(model);
-    notifier.setFilterSampler(sampler);
+    notifier.setFilterModels(_selectedModels.toList()..sort());
+    notifier.setFilterSamplers(_selectedSamplers.toList()..sort());
+    notifier.setFilterResolutions(_selectedResolutions.toList()..sort());
+    notifier.setFilterOrientation(_orientation);
+    notifier.setNsfwMode(_nsfwMode);
     notifier.setFilterSteps(minSteps, maxSteps);
     notifier.setFilterCfg(minCfg, maxCfg);
-    notifier.setFilterResolution(resolution);
 
     // Close the panel with animation
     _animController.reverse().then((_) {
@@ -151,33 +247,51 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
   void _resetFilters() {
     final notifier = ref.read(localGalleryNotifierProvider.notifier);
 
-    notifier.setFilterModel(null);
-    notifier.setFilterSampler(null);
+    notifier.setFilterModels(const []);
+    notifier.setFilterSamplers(const []);
+    notifier.setFilterResolutions(const []);
+    notifier.setFilterOrientation(null);
+    notifier.setNsfwMode(null);
     notifier.setFilterSteps(null, null);
     notifier.setFilterCfg(null, null);
-    notifier.setFilterResolution(null);
+    // 标签过滤同样属于会话过滤：重置时一并清空
+    notifier.setSelectedTags(const []);
 
-    // Clear text fields with animation
+    // Clear local state with animation
     setState(() {
-      _modelController.clear();
-      _samplerController.clear();
+      _selectedModels.clear();
+      _selectedSamplers.clear();
+      _selectedResolutions.clear();
+      _orientation = null;
+      _nsfwMode = null;
       _minStepsController.clear();
       _maxStepsController.clear();
       _minCfgController.clear();
       _maxCfgController.clear();
-      _resolutionController.clear();
+      _tagController.clear();
+      _tagSuggestions = [];
+      _tagSuggestionIndex = -1;
+      _tagSuggesting = false;
     });
   }
 
   /// Check if any filter is active
   bool get _hasActiveFilters {
-    return _modelController.text.isNotEmpty ||
-        _samplerController.text.isNotEmpty ||
+    return _selectedModels.isNotEmpty ||
+        _selectedSamplers.isNotEmpty ||
+        _selectedResolutions.isNotEmpty ||
+        _orientation != null ||
+        _nsfwMode != null ||
         _minStepsController.text.isNotEmpty ||
         _maxStepsController.text.isNotEmpty ||
         _minCfgController.text.isNotEmpty ||
         _maxCfgController.text.isNotEmpty ||
-        _resolutionController.text.isNotEmpty;
+        // 已选标签 chip 挂在 provider 状态上，同样计入「有活动过滤」
+        ref
+            .read(localGalleryNotifierProvider)
+            .filterCriteria
+            .selectedTags
+            .isNotEmpty;
   }
 
   @override
@@ -226,6 +340,51 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Tag filter card
+                      _buildFilterCard(
+                        theme: theme,
+                        isDark: isDark,
+                        colorScheme: colorScheme,
+                        icon: Icons.tag,
+                        iconColor: Colors.pink,
+                        title: l10n.localGallery_filterByTags,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Focus(
+                              onKeyEvent: _handleTagKeyEvent,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildModernTextField(
+                                      controller: _tagController,
+                                      focusNode: _tagFocusNode,
+                                      hintText: l10n.localGallery_tagInputHint,
+                                      theme: theme,
+                                      isDark: isDark,
+                                      colorScheme: colorScheme,
+                                      onChanged: _onTagChanged,
+                                      onSubmitted: _handleTagSubmitted,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  IconButton.filledTonal(
+                                    onPressed: _addTag,
+                                    icon: const Icon(Icons.add, size: 18),
+                                    tooltip: l10n.localGallery_addTag,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (_tagSuggesting)
+                              _buildTagSuggestions(theme, l10n, colorScheme),
+                            const SizedBox(height: 10),
+                            _buildSelectedTagChips(theme),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
                       // Model filter card
                       _buildFilterCard(
                         theme: theme,
@@ -234,24 +393,21 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
                         icon: Icons.auto_awesome,
                         iconColor: Colors.purple,
                         title: l10n.localGallery_filterByModel,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildModernTextField(
-                              controller: _modelController,
-                              hintText: l10n.localGallery_modelHint,
-                              theme: theme,
-                              isDark: isDark,
-                              colorScheme: colorScheme,
-                            ),
-                            const SizedBox(height: 10),
-                            _buildPresetChips(
-                              presets: _commonModels,
-                              controller: _modelController,
-                              theme: theme,
-                              colorScheme: colorScheme,
-                            ),
-                          ],
+                        child: _buildCandidateChips(
+                          future: _modelsFuture,
+                          selected: _selectedModels,
+                          theme: theme,
+                          colorScheme: colorScheme,
+                          emptyText: l10n.localGallery_noModelCandidates,
+                          labelBuilder: (value) =>
+                              '${galleryModelFriendlyName(value.value)} · ${value.count}',
+                          onToggle: (value) {
+                            setState(() {
+                              if (!_selectedModels.remove(value.value)) {
+                                _selectedModels.add(value.value);
+                              }
+                            });
+                          },
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -264,25 +420,35 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
                         icon: Icons.timeline,
                         iconColor: Colors.blue,
                         title: l10n.localGallery_filterBySampler,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildModernTextField(
-                              controller: _samplerController,
-                              hintText: l10n.localGallery_samplerHint,
-                              theme: theme,
-                              isDark: isDark,
-                              colorScheme: colorScheme,
-                            ),
-                            const SizedBox(height: 10),
-                            _buildPresetChips(
-                              presets: _commonSamplers,
-                              controller: _samplerController,
-                              theme: theme,
-                              colorScheme: colorScheme,
-                            ),
-                          ],
+                        child: _buildCandidateChips(
+                          future: _samplersFuture,
+                          selected: _selectedSamplers,
+                          theme: theme,
+                          colorScheme: colorScheme,
+                          emptyText: l10n.localGallery_noSamplerCandidates,
+                          labelBuilder: (value) =>
+                              '${value.value} · ${value.count}',
+                          onToggle: (value) {
+                            setState(() {
+                              if (!_selectedSamplers.remove(value.value)) {
+                                _selectedSamplers.add(value.value);
+                              }
+                            });
+                          },
                         ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // NSFW filter card
+                      _buildFilterCard(
+                        theme: theme,
+                        isDark: isDark,
+                        colorScheme: colorScheme,
+                        icon: Icons.visibility_off_outlined,
+                        iconColor: Colors.deepOrange,
+                        title: l10n.localGallery_filterNsfw,
+                        compact: true,
+                        child: _buildNsfwSelector(theme, l10n, colorScheme),
                       ),
                       const SizedBox(height: 16),
 
@@ -346,19 +512,32 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildModernTextField(
-                              controller: _resolutionController,
-                              hintText: l10n.localGallery_resolutionHint,
-                              theme: theme,
-                              isDark: isDark,
-                              colorScheme: colorScheme,
+                            Text(
+                              l10n.localGallery_filterOrientation,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                            const SizedBox(height: 10),
-                            _buildPresetChips(
-                              presets: _commonResolutions,
-                              controller: _resolutionController,
+                            const SizedBox(height: 8),
+                            _buildOrientationSelector(theme, l10n, colorScheme),
+                            const SizedBox(height: 12),
+                            _buildCandidateChips(
+                              future: _resolutionsFuture,
+                              selected: _selectedResolutions,
                               theme: theme,
                               colorScheme: colorScheme,
+                              emptyText:
+                                  l10n.localGallery_noResolutionCandidates,
+                              labelBuilder: (value) =>
+                                  '${value.value} · ${value.count}',
+                              onToggle: (value) {
+                                setState(() {
+                                  if (!_selectedResolutions.remove(value.value)) {
+                                    _selectedResolutions.add(value.value);
+                                  }
+                                });
+                              },
                             ),
                           ],
                         ),
@@ -372,6 +551,206 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
               _buildActionButtons(theme, l10n, isDark, colorScheme),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  /// tag 自动补全下拉
+  Widget _buildTagSuggestions(
+    ThemeData theme,
+    AppLocalizations l10n,
+    ColorScheme colorScheme,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.15),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < _tagSuggestions.length; i++)
+            InkWell(
+              onTap: () => _addSuggestion(_tagSuggestions[i]),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                color: i == _tagSuggestionIndex
+                    ? colorScheme.primary.withValues(alpha: 0.12)
+                    : Colors.transparent,
+                child: Text(
+                  _tagSuggestions[i],
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          if (_tagSuggestions.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                l10n.localGallery_noTagSuggestions,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// 候选 chips 流（FutureBuilder；失败/为空时显示提示文案）
+  Widget _buildCandidateChips({
+    required Future<List<GalleryDistinctValue>> future,
+    required Set<String> selected,
+    required ThemeData theme,
+    required ColorScheme colorScheme,
+    required String emptyText,
+    required String Function(GalleryDistinctValue) labelBuilder,
+    required void Function(GalleryDistinctValue) onToggle,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return FutureBuilder<List<GalleryDistinctValue>>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return _buildHintText(theme, l10n.localGallery_candidatesLoadFailed);
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return _buildHintText(theme, emptyText);
+        }
+
+        final candidates = snapshot.data!;
+        return ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 150),
+          child: SingleChildScrollView(
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final candidate in candidates)
+                  FilterChip(
+                    label: Text(
+                      labelBuilder(candidate),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    selected: selected.contains(candidate.value),
+                    onSelected: (_) => onToggle(candidate),
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    showCheckmark: false,
+                    side: BorderSide(
+                      color: selected.contains(candidate.value)
+                          ? colorScheme.primary.withValues(alpha: 0.6)
+                          : colorScheme.outline.withValues(alpha: 0.15),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHintText(ThemeData theme, String text) {
+    return Text(
+      text,
+      style: theme.textTheme.bodySmall?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+      ),
+    );
+  }
+
+  /// 画面方向三态选择
+  Widget _buildOrientationSelector(
+    ThemeData theme,
+    AppLocalizations l10n,
+    ColorScheme colorScheme,
+  ) {
+    return SegmentedButton<String>(
+      segments: [
+        ButtonSegment(
+          value: 'any',
+          label: Text(l10n.localGallery_orientationAny),
+        ),
+        ButtonSegment(
+          value: 'landscape',
+          icon: const Icon(Icons.landscape_outlined, size: 16),
+          label: Text(l10n.localGallery_orientationLandscape),
+        ),
+        ButtonSegment(
+          value: 'portrait',
+          icon: const Icon(Icons.portrait_outlined, size: 16),
+          label: Text(l10n.localGallery_orientationPortrait),
+        ),
+        ButtonSegment(
+          value: 'square',
+          icon: const Icon(Icons.square_outlined, size: 16),
+          label: Text(l10n.localGallery_orientationSquare),
+        ),
+      ],
+      selected: {_orientation ?? 'any'},
+      onSelectionChanged: (selection) {
+        setState(() {
+          final value = selection.first;
+          _orientation = value == 'any' ? null : value;
+        });
+      },
+      showSelectedIcon: false,
+      style: ButtonStyle(
+        visualDensity: VisualDensity.compact,
+        textStyle: WidgetStatePropertyAll(theme.textTheme.bodySmall),
+        padding: const WidgetStatePropertyAll(
+          EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        ),
+      ),
+    );
+  }
+
+  /// 内容分级三态选择
+  Widget _buildNsfwSelector(
+    ThemeData theme,
+    AppLocalizations l10n,
+    ColorScheme colorScheme,
+  ) {
+    return SegmentedButton<String>(
+      segments: [
+        ButtonSegment(
+          value: 'any',
+          label: Text(l10n.localGallery_nsfwAny),
+        ),
+        ButtonSegment(
+          value: 'sfw',
+          label: Text(l10n.localGallery_nsfwSfw),
+        ),
+        ButtonSegment(
+          value: 'nsfw',
+          label: Text(l10n.localGallery_nsfwOnly),
+        ),
+      ],
+      selected: {_nsfwMode ?? 'any'},
+      onSelectionChanged: (selection) {
+        setState(() {
+          final value = selection.first;
+          _nsfwMode = value == 'any' ? null : value;
+        });
+      },
+      showSelectedIcon: false,
+      style: ButtonStyle(
+        visualDensity: VisualDensity.compact,
+        textStyle: WidgetStatePropertyAll(theme.textTheme.bodySmall),
+        padding: const WidgetStatePropertyAll(
+          EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         ),
       ),
     );
@@ -514,13 +893,52 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
     );
   }
 
+  /// 当前已选标签 chips（删除即时生效）
+  Widget _buildSelectedTagChips(ThemeData theme) {
+    final tags =
+        ref.watch(localGalleryNotifierProvider).filterCriteria.selectedTags;
+    if (tags.isEmpty) {
+      return Text(
+        context.l10n.localGallery_tagIntersection,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        for (final tag in tags)
+          InputChip(
+            avatar: const Icon(Icons.tag, size: 14),
+            label: Text(tag),
+            onDeleted: () {
+              ref
+                  .read(localGalleryNotifierProvider.notifier)
+                  .removeSelectedTag(tag);
+            },
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+            side: BorderSide(
+              color: theme.colorScheme.primary.withValues(alpha: 0.35),
+            ),
+          ),
+      ],
+    );
+  }
+
   /// Build a modern text field
   Widget _buildModernTextField({
     required TextEditingController controller,
+    FocusNode? focusNode,
     required String hintText,
     required ThemeData theme,
     required bool isDark,
     required ColorScheme colorScheme,
+    ValueChanged<String>? onChanged,
+    ValueChanged<String>? onSubmitted,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -534,6 +952,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
       ),
       child: ThemedInput(
         controller: controller,
+        focusNode: focusNode,
         style: theme.textTheme.bodyMedium?.copyWith(
           color: colorScheme.onSurface,
         ),
@@ -559,12 +978,18 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
                   onPressed: () {
                     setState(() {
                       controller.clear();
+                      if (identical(controller, _tagController)) {
+                        _tagSuggestions = [];
+                        _tagSuggestionIndex = -1;
+                        _tagSuggesting = false;
+                      }
                     });
                   },
                 )
               : null,
         ),
-        onChanged: (_) => setState(() {}),
+        onChanged: onChanged ?? (_) => setState(() {}),
+        onSubmitted: onSubmitted,
       ),
     );
   }
@@ -666,59 +1091,6 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
         ),
         onChanged: (_) => setState(() {}),
       ),
-    );
-  }
-
-  /// Build preset chips
-  Widget _buildPresetChips({
-    required List<String> presets,
-    required TextEditingController controller,
-    required ThemeData theme,
-    required ColorScheme colorScheme,
-  }) {
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      children: presets.map((preset) {
-        final isSelected = controller.text == preset;
-        return InkWell(
-          onTap: () {
-            setState(() {
-              if (isSelected) {
-                controller.clear();
-              } else {
-                controller.text = preset;
-              }
-            });
-          },
-          borderRadius: BorderRadius.circular(6),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? colorScheme.primary.withValues(alpha: 0.15)
-                  : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: isSelected
-                    ? colorScheme.primary.withValues(alpha: 0.5)
-                    : colorScheme.outline.withValues(alpha: 0.1),
-              ),
-            ),
-            child: Text(
-              preset,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: isSelected
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                fontSize: 11,
-              ),
-            ),
-          ),
-        );
-      }).toList(),
     );
   }
 

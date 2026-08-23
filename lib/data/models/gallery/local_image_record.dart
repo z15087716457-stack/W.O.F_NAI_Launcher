@@ -12,6 +12,7 @@ enum MetadataStatus {
   success, // 解析成功
   failed, // 解析失败
   none, // 未解析
+  imported, // 外部标签索引导入（JSONL）
 }
 
 /// 本地图片记录模型

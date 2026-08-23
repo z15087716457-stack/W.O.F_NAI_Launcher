@@ -623,13 +623,16 @@ class _ParseWorker {
         );
       }
 
-      final bytes = await file.readAsBytes();
+      // 渐进式读取场景：文件读取也交给 Isolate（worker 内用 filePath 读），
+      // UI isolate 只传路径，避免大文件字节拷贝阻塞
+      final bool readInIsolate =
+          task.config.useGradualRead && task.filePath.isNotEmpty;
 
       // 发送任务到 Isolate
       _sendPort!.send(
         _ParseRequest(
           requestId: task.requestId,
-          bytes: bytes,
+          bytes: readInIsolate ? Uint8List(0) : await file.readAsBytes(),
           filePath: task.filePath,
           config: task.config,
         ),
@@ -730,11 +733,21 @@ void _handleParseRequest(_ParseRequest request, SendPort sendPort) {
   final stopwatch = Stopwatch()..start();
 
   try {
-    // 在 Isolate 中执行解析
-    final result = UnifiedMetadataParser.parseFromPng(
-      request.bytes,
-      filePathForLog: request.filePath,
-    );
+    // 渐进式读取场景：在 Isolate 内直接读文件解析（读文件 + 解码全部卸载到
+    // worker，UI isolate 零负担；对剥 tEXt 的 PNG 尤其关键——全图解码 +
+    // LSB 逐像素读取都在 worker 里执行）
+    final bool readInIsolate =
+        request.config.useGradualRead && request.filePath.isNotEmpty;
+    final result = readInIsolate
+        ? UnifiedMetadataParser.parseFromFile(
+            request.filePath,
+            useGradualRead: true,
+            useCache: false,
+          )
+        : UnifiedMetadataParser.parseFromPng(
+            request.bytes,
+            filePathForLog: request.filePath,
+          );
 
     stopwatch.stop();
 
@@ -744,7 +757,7 @@ void _handleParseRequest(_ParseRequest request, SendPort sendPort) {
           requestId: request.requestId,
           metadata: result.metadata,
           parseTime: stopwatch.elapsed,
-          bytesRead: request.bytes.length,
+          bytesRead: readInIsolate ? null : request.bytes.length,
           wasCancelled: false,
         ),
       );

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -8,16 +9,23 @@ import 'package:intl/intl.dart';
 
 import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../data/models/gallery/gallery_category.dart';
+import '../../../data/services/gallery/gallery_nai_only_store.dart';
+import '../../../data/services/gallery/gallery_sort.dart';
+import '../../../data/services/gallery/gallery_sort_store.dart';
+import '../../../data/services/gallery/gallery_view_mode_store.dart';
+import '../../providers/collection_provider.dart';
+import '../../providers/gallery_category_provider.dart';
 import '../../providers/local_gallery_provider.dart';
 import '../../providers/selection_mode_provider.dart';
 import '../bulk_action_bar.dart';
 import '../common/compact_icon_button.dart';
+import 'gallery_trash_panel.dart';
 import '../gallery_filter_panel.dart';
-import '../grouped_grid_view.dart' show ImageDateGroup;
 
-import '../common/app_toast.dart';
 import '../autocomplete/autocomplete_config.dart';
 import '../autocomplete/autocomplete_wrapper.dart';
+import 'date_range_picker_dialog.dart';
 
 /// Local gallery toolbar with search, filter and actions
 /// 本地画廊工具栏（搜索、过滤、操作按钮）
@@ -283,168 +291,234 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Single row: title + count + search + filter/action buttons
-              Row(
-                children: [
-                  // Title
-                  Text(
-                    l10n.localGallery_title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Image count
-                  if (!state.isIndexing)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? theme.colorScheme.primaryContainer.withValues(
-                                alpha: 0.4,
-                              )
-                            : theme.colorScheme.primaryContainer.withValues(
-                                alpha: 0.3,
-                              ),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        state.hasFilters
-                            ? '${state.filteredCount}/${state.totalCount}'
-                            : '${state.totalCount}',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: isDark
-                              ? theme.colorScheme.onPrimaryContainer
-                              : theme.colorScheme.onSurface,
-                          fontWeight: FontWeight.w500,
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final available = constraints.maxWidth;
+                  // 响应式分档（按中英日常见标题/徽标宽度估算，极端窄窗口仍由
+                  // 横向滚动兜底）：宽裕=全标签；收窄=CompactIconButton 只留
+                  // 图标（tooltip 保留）；更窄=排序/日期这类带状态按钮也压成图标。
+                  final showLabels = available >= 1740;
+                  final showStateLabels = available >= 1170;
+                  return Row(
+                    children: [
+                      // Title
+                      Text(
+                        l10n.localGallery_title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ),
-                  const SizedBox(width: 12),
-                  // Search field (expanded)
-                  Expanded(child: _buildSearchField(theme, state)),
-                  const SizedBox(width: 8),
-                  // Filter button group
-                  _buildDateRangeButton(theme, state),
-                  const SizedBox(width: 6),
-                  // 日期分组视图切换按钮
-                  CompactIconButton(
-                    icon: state.isGroupedView
-                        ? Icons.view_module
-                        : Icons.calendar_today,
-                    label: state.isGroupedView
-                        ? l10n.common_grid
-                        : l10n.common_date,
-                    tooltip: state.isGroupedView
-                        ? l10n.localGallery_switchToGridView
-                        : l10n.localGallery_switchToDateGroupedView,
-                    shortcutId: ShortcutIds.jumpToDate,
-                    isActive: state.isGroupedView,
-                    onPressed: () {
-                      if (state.isGroupedView) {
-                        // 退出分组视图
-                        ref
-                            .read(localGalleryNotifierProvider.notifier)
-                            .setGroupedView(false);
-                      } else {
-                        // 进入分组视图
-                        _pickDateAndJump(context);
-                      }
-                    },
-                  ),
-                  const SizedBox(width: 6),
-                  CompactIconButton(
-                    icon: Icons.tune,
-                    label: l10n.common_filter,
-                    tooltip: l10n.localGallery_openFilterPanel,
-                    shortcutId: ShortcutIds.openFilterPanel,
-                    onPressed: () => showGalleryFilterPanel(context),
-                  ),
-                  // Note: View mode toggle removed - only 3D card view is supported now
-                  if (state.hasFilters) ...[
-                    const SizedBox(width: 6),
-                    CompactIconButton(
-                      icon: Icons.filter_alt_off,
-                      label: l10n.common_clear,
-                      tooltip: l10n.localGallery_clearFilters,
-                      shortcutId: ShortcutIds.clearFilter,
-                      onPressed: () {
-                        _searchController.clear();
-                        ref
-                            .read(localGalleryNotifierProvider.notifier)
-                            .clearAllFilters();
-                      },
-                      isDanger: true,
-                    ),
-                  ],
-                  // Divider
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Container(
-                      width: 1,
-                      height: 24,
-                      color: theme.dividerColor.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  // Category panel toggle
-                  if (widget.onToggleCategoryPanel != null) ...[
-                    CompactIconButton(
-                      icon: widget.showCategoryPanel
-                          ? Icons.view_sidebar
-                          : Icons.view_sidebar_outlined,
-                      label: l10n.common_categories,
-                      tooltip: widget.showCategoryPanel
-                          ? l10n.localGallery_hideCategoryPanel
-                          : l10n.localGallery_showCategoryPanel,
-                      shortcutId: ShortcutIds.toggleCategoryPanel,
-                      onPressed: widget.onToggleCategoryPanel,
-                    ),
-                    const SizedBox(width: 6),
-                  ],
-                  // Undo/Redo
-                  if (widget.canUndo || widget.canRedo) ...[
-                    CompactIconButton(
-                      icon: Icons.undo,
-                      tooltip: l10n.common_undo,
-                      onPressed: widget.canUndo ? widget.onUndo : null,
-                    ),
-                    const SizedBox(width: 4),
-                    CompactIconButton(
-                      icon: Icons.redo,
-                      tooltip: l10n.common_redo,
-                      onPressed: widget.canRedo ? widget.onRedo : null,
-                    ),
-                    const SizedBox(width: 6),
-                  ],
-                  // Multi-select
-                  CompactIconButton(
-                    icon: Icons.checklist,
-                    label: l10n.common_multiSelect,
-                    tooltip: l10n.localGallery_enterSelectionMode,
-                    shortcutId: ShortcutIds.enterSelectionMode,
-                    onPressed: widget.onEnterSelectionMode,
-                  ),
-                  const SizedBox(width: 6),
-                  // Open folder
-                  CompactIconButton(
-                    icon: Icons.folder_open,
-                    label: l10n.common_folder,
-                    tooltip: l10n.shortcut_action_open_folder,
-                    shortcutId: ShortcutIds.openFolder,
-                    onPressed: widget.onOpenFolder,
-                  ),
-                  const SizedBox(width: 6),
-                  // Refresh button
-                  CompactIconButton(
-                    icon: Icons.refresh,
-                    label: l10n.common_refresh,
-                    tooltip: l10n.localGallery_refreshTooltip,
-                    shortcutId: ShortcutIds.refreshGallery,
-                    onPressed: widget.onRefresh,
-                  ),
-                ],
+                      const SizedBox(width: 8),
+                      // Image count
+                      if (!state.isIndexing)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? theme.colorScheme.primaryContainer.withValues(
+                                    alpha: 0.4,
+                                  )
+                                : theme.colorScheme.primaryContainer.withValues(
+                                    alpha: 0.3,
+                                  ),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            state.hasFilters
+                                ? '${state.filteredCount}/${state.totalCount}'
+                                : '${state.totalCount}',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: isDark
+                                  ? theme.colorScheme.onPrimaryContainer
+                                  : theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(width: 12),
+                      // Search field（弹性占位；剩余空间主要让给右侧控件簇，
+                      // 否则 50/50 均分时控件簇被压缩到横向滚动）
+                      Flexible(flex: 1, child: _buildSearchField(theme, state)),
+                      const SizedBox(width: 8),
+                      // 右侧控件簇：窄窗口下横向滚动，避免溢出
+                      Flexible(
+                        flex: 2,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // NAI-only 过滤 chip（默认开，持久化偏好）
+                              _buildNaiOnlyChip(theme, state),
+                              const SizedBox(width: 6),
+                              // 排序（字段菜单 + 方向切换）
+                              _buildSortButton(
+                                theme,
+                                state,
+                                showLabel: showStateLabels,
+                              ),
+                              const SizedBox(width: 6),
+                              // 日期范围过滤按钮（点选式日历面板）
+                              _buildDateRangeFilterButton(
+                                theme,
+                                state,
+                                showLabel: showStateLabels,
+                              ),
+                              const SizedBox(width: 6),
+                              // 视图切换：瀑布流 / 网格
+                              CompactIconButton(
+                                icon: state.isMasonryView
+                                    ? Icons.grid_view
+                                    : Icons.view_quilt,
+                                label: state.isMasonryView
+                                    ? l10n.common_grid
+                                    : l10n.localGallery_masonryViewLabel,
+                                tooltip: state.isMasonryView
+                                    ? l10n.localGallery_switchToGridLayout
+                                    : l10n.localGallery_switchToMasonryView,
+                                isActive: state.isMasonryView,
+                                showLabel: showLabels,
+                                onPressed: () {
+                                  final notifier = ref.read(
+                                    localGalleryNotifierProvider.notifier,
+                                  );
+                                  final next = !state.isMasonryView;
+                                  notifier.setMasonryView(next);
+                                  unawaited(
+                                    const GalleryViewModeStore().save(next),
+                                  );
+                                },
+                              ),
+                              const SizedBox(width: 6),
+                              CompactIconButton(
+                                icon: Icons.tune,
+                                label: l10n.common_filter,
+                                tooltip: l10n.localGallery_openFilterPanel,
+                                shortcutId: ShortcutIds.openFilterPanel,
+                                showLabel: showLabels,
+                                onPressed: () =>
+                                    showGalleryFilterPanel(context),
+                              ),
+                              // 清除按钮只对「会话过滤条件」出现：naiOnly 是常驻
+                              // 偏好（默认开），仅剩它时清除无意义，按钮不该常驻
+                              if (state.hasSessionFilters) ...[
+                                const SizedBox(width: 6),
+                                CompactIconButton(
+                                  icon: Icons.filter_alt_off,
+                                  label: l10n.common_clear,
+                                  tooltip: l10n.localGallery_clearFilters,
+                                  shortcutId: ShortcutIds.clearFilter,
+                                  showLabel: showLabels,
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    ref
+                                        .read(
+                                          localGalleryNotifierProvider.notifier,
+                                        )
+                                        .clearAllFilters();
+                                  },
+                                  isDanger: true,
+                                ),
+                              ],
+                              // Divider
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
+                                child: Container(
+                                  width: 1,
+                                  height: 24,
+                                  color: theme.dividerColor.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                ),
+                              ),
+                              // Category panel toggle
+                              if (widget.onToggleCategoryPanel != null) ...[
+                                CompactIconButton(
+                                  icon: widget.showCategoryPanel
+                                      ? Icons.view_sidebar
+                                      : Icons.view_sidebar_outlined,
+                                  label: l10n.common_categories,
+                                  tooltip: widget.showCategoryPanel
+                                      ? l10n.localGallery_hideCategoryPanel
+                                      : l10n.localGallery_showCategoryPanel,
+                                  shortcutId: ShortcutIds.toggleCategoryPanel,
+                                  showLabel: showLabels,
+                                  onPressed: widget.onToggleCategoryPanel,
+                                ),
+                                const SizedBox(width: 6),
+                              ],
+                              // Undo/Redo
+                              if (widget.canUndo || widget.canRedo) ...[
+                                CompactIconButton(
+                                  icon: Icons.undo,
+                                  tooltip: l10n.common_undo,
+                                  showLabel: showLabels,
+                                  onPressed: widget.canUndo
+                                      ? widget.onUndo
+                                      : null,
+                                ),
+                                const SizedBox(width: 4),
+                                CompactIconButton(
+                                  icon: Icons.redo,
+                                  tooltip: l10n.common_redo,
+                                  showLabel: showLabels,
+                                  onPressed: widget.canRedo
+                                      ? widget.onRedo
+                                      : null,
+                                ),
+                                const SizedBox(width: 6),
+                              ],
+                              // Multi-select
+                              CompactIconButton(
+                                icon: Icons.checklist,
+                                label: l10n.common_multiSelect,
+                                tooltip: l10n.localGallery_enterSelectionMode,
+                                shortcutId: ShortcutIds.enterSelectionMode,
+                                showLabel: showLabels,
+                                onPressed: widget.onEnterSelectionMode,
+                              ),
+                              const SizedBox(width: 6),
+                              // Open folder
+                              CompactIconButton(
+                                icon: Icons.folder_open,
+                                label: l10n.common_folder,
+                                tooltip: l10n.shortcut_action_open_folder,
+                                shortcutId: ShortcutIds.openFolder,
+                                showLabel: showLabels,
+                                onPressed: widget.onOpenFolder,
+                              ),
+                              const SizedBox(width: 6),
+                              // Refresh button
+                              CompactIconButton(
+                                icon: Icons.refresh,
+                                label: l10n.common_refresh,
+                                tooltip: l10n.localGallery_refreshTooltip,
+                                shortcutId: ShortcutIds.refreshGallery,
+                                showLabel: showLabels,
+                                onPressed: widget.onRefresh,
+                              ),
+                              const SizedBox(width: 6),
+                              // Trash (delete pool)：软删文件在此恢复/彻底删除
+                              CompactIconButton(
+                                icon: Icons.delete_outline,
+                                label: l10n.localGallery_trashTitle,
+                                tooltip: l10n.localGallery_trashTitle,
+                                showLabel: showLabels,
+                                onPressed: () =>
+                                    showGalleryTrashPanel(context, ref),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
               if (state.filterCriteria.selectedTags.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -457,9 +531,37 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     );
   }
 
+  /// 当前搜索范围名称（收藏/收藏集/分类/日期范围），无范围时返回 null
+  String? _searchScopeLabel(
+    LocalGalleryState state,
+    GalleryCategoryState categoryState,
+  ) {
+    final criteria = state.filterCriteria;
+    if (criteria.showFavoritesOnly || criteria.categoryId == 'favorites') {
+      return context.l10n.common_favorite;
+    }
+    if (criteria.collectionId != null) {
+      final collectionState = ref.read(collectionNotifierProvider);
+      final collection = collectionState.collections
+          .where((c) => c.id == criteria.collectionId)
+          .firstOrNull;
+      if (collection != null) return collection.name;
+    }
+    if (criteria.categoryId != null) {
+      final category = categoryState.categories.findById(criteria.categoryId!);
+      if (category != null) return category.displayName;
+    }
+    if (criteria.dateStart != null || criteria.dateEnd != null) {
+      return _formatDateRange(criteria.dateStart, criteria.dateEnd);
+    }
+    return null;
+  }
+
   /// Build search field
   /// 构建搜索框 - 类似在线画廊的简洁圆角样式
   Widget _buildSearchField(ThemeData theme, LocalGalleryState state) {
+    final categoryState = ref.watch(galleryCategoryNotifierProvider);
+    final scopeLabel = _searchScopeLabel(state, categoryState);
     final searchField = Container(
       height: 36,
       constraints: const BoxConstraints(maxWidth: 300),
@@ -472,7 +574,9 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
         focusNode: _searchFocusNode,
         style: theme.textTheme.bodyMedium,
         decoration: InputDecoration(
-          hintText: context.l10n.localGallery_searchFilenamePromptPlaceholder,
+          hintText: scopeLabel != null
+              ? context.l10n.localGallery_searchInScope(scopeLabel)
+              : context.l10n.localGallery_searchFilenamePromptPlaceholder,
           hintStyle: TextStyle(
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             fontSize: 13,
@@ -530,9 +634,17 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
         autoInsertComma: false,
       ),
       onSuggestionSelected: (value) {
-        // 选择补全建议后仍然作为搜索框文本处理，不转为标签 chip。
+        // 选中补全建议 → 转为标签 chip（取最后一个片段），清空搜索框
         _debounceTimer?.cancel();
-        ref.read(localGalleryNotifierProvider.notifier).setSearchQuery(value);
+        final segments = value.split(RegExp(r'[,，]+'));
+        final tag = segments.isEmpty ? value.trim() : segments.last.trim();
+        if (tag.isNotEmpty) {
+          ref.read(localGalleryNotifierProvider.notifier).addSelectedTags([
+            tag,
+          ], clearSearchQuery: true);
+        }
+        _searchController.clear();
+        setState(() {}); // 更新清除按钮可见性
       },
       child: searchField,
     );
@@ -578,32 +690,229 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     );
   }
 
-  /// Build date range button
-  /// 构建日期范围按钮
-  Widget _buildDateRangeButton(ThemeData theme, LocalGalleryState state) {
+  /// Build NAI-only filter chip
+  /// NAI-only 过滤切换 chip：点按切换并持久化偏好
+  Widget _buildNaiOnlyChip(ThemeData theme, LocalGalleryState state) {
+    final l10n = context.l10n;
+    final naiOnly = state.filterCriteria.naiOnly;
+    final colorScheme = theme.colorScheme;
+
+    return Tooltip(
+      message: l10n.localGallery_naiOnlyTooltip,
+      child: FilterChip(
+        avatar: Icon(
+          Icons.auto_awesome,
+          size: 14,
+          color: naiOnly ? colorScheme.primary : colorScheme.onSurfaceVariant,
+        ),
+        label: Text(
+          l10n.localGallery_naiOnly,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: naiOnly ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
+        selected: naiOnly,
+        onSelected: (value) {
+          ref.read(localGalleryNotifierProvider.notifier).setNaiOnly(value);
+          unawaited(const GalleryNaiOnlyStore().save(value));
+        },
+        visualDensity: VisualDensity.compact,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        showCheckmark: false,
+        side: BorderSide(
+          color: naiOnly
+              ? colorScheme.primary.withValues(alpha: 0.6)
+              : colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+        selectedColor: colorScheme.primaryContainer.withValues(alpha: 0.5),
+        backgroundColor: Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+      ),
+    );
+  }
+
+  /// Build sort control: field menu (left) + direction toggle (right)
+  /// 两段式排序：左=字段菜单（当前项打勾），右=升降序切换（点一下反转）
+  ///
+  /// [showLabel] false 时字段菜单只留图标（tooltip 保留），用于窄窗口降级。
+  Widget _buildSortButton(
+    ThemeData theme,
+    LocalGalleryState state, {
+    bool showLabel = true,
+  }) {
+    final l10n = context.l10n;
+
+    final fields = <(GallerySortField, IconData, String)>[
+      (
+        GallerySortField.modifiedAt,
+        Icons.schedule,
+        l10n.localGallery_sortFieldModified,
+      ),
+      (
+        GallerySortField.createdAt,
+        Icons.history,
+        l10n.localGallery_sortFieldCreated,
+      ),
+      (
+        GallerySortField.fileName,
+        Icons.sort_by_alpha,
+        l10n.localGallery_sortFieldName,
+      ),
+      (
+        GallerySortField.fileSize,
+        Icons.data_usage,
+        l10n.localGallery_sortFieldSize,
+      ),
+      (
+        GallerySortField.imageDimensions,
+        Icons.photo_size_select_large,
+        l10n.localGallery_sortFieldDimensions,
+      ),
+    ];
+
+    final currentFieldLabel = fields
+        .firstWhere((option) => option.$1 == state.sortField)
+        .$3;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 左半：字段菜单（切字段时方向复位为该字段默认方向）
+        PopupMenuButton<GallerySortField>(
+          tooltip: l10n.localGallery_sortButton,
+          onSelected: (field) {
+            ref
+                .read(localGalleryNotifierProvider.notifier)
+                .setSort(field, GallerySort.defaultDirectionFor(field));
+            unawaited(
+              const GallerySortStore().save(
+                GallerySort.withDefaultDirection(field),
+              ),
+            );
+          },
+          itemBuilder: (context) => [
+            for (final (field, icon, label) in fields)
+              PopupMenuItem(
+                value: field,
+                child: Row(
+                  children: [
+                    Icon(icon, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(label)),
+                    if (field == state.sortField)
+                      Icon(
+                        Icons.check,
+                        size: 16,
+                        color: theme.colorScheme.primary,
+                      ),
+                  ],
+                ),
+              ),
+          ],
+          // 子组件只是视觉壳：若直接放可点击按钮，内层按钮会赢下手势
+          // 竞技场吞掉 tap，PopupMenuButton 永远收不到点击（菜单打不开）。
+          // 用 IgnorePointer 让 PopupMenuButton 自己的 InkWell 收手势。
+          child: IgnorePointer(
+            child: showLabel
+                ? OutlinedButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.sort, size: 16),
+                    label: Text(
+                      currentFieldLabel,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  )
+                : OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      visualDensity: VisualDensity.compact,
+                      minimumSize: const Size(32, 0),
+                    ),
+                    child: const Icon(Icons.sort, size: 16),
+                  ),
+          ),
+        ),
+        const SizedBox(width: 4),
+        // 右半：升降序切换（直接反转当前字段方向）
+        Tooltip(
+          message: l10n.localGallery_sortToggleDirection,
+          child: OutlinedButton(
+            onPressed: () {
+              final next = state.sortDirection == GallerySortDirection.ascending
+                  ? GallerySortDirection.descending
+                  : GallerySortDirection.ascending;
+              ref
+                  .read(localGalleryNotifierProvider.notifier)
+                  .setSort(state.sortField, next);
+              unawaited(
+                const GallerySortStore().save(
+                  GallerySort(field: state.sortField, direction: next),
+                ),
+              );
+            },
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              visualDensity: VisualDensity.compact,
+              minimumSize: const Size(32, 0),
+            ),
+            child: Icon(
+              state.sortDirection == GallerySortDirection.descending
+                  ? Icons.arrow_downward
+                  : Icons.arrow_upward,
+              size: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Build date range filter button
+  /// 构建日期范围过滤按钮（点选式日历面板）
+  ///
+  /// [showLabel] false 时只留图标（激活色保留），用于窄窗口降级。
+  Widget _buildDateRangeFilterButton(
+    ThemeData theme,
+    LocalGalleryState state, {
+    bool showLabel = true,
+  }) {
     final hasDateRange =
         state.filterCriteria.dateStart != null ||
         state.filterCriteria.dateEnd != null;
 
     return OutlinedButton.icon(
-      onPressed: () => _selectDateRange(context, state),
+      onPressed: () => _showDateRangeDialog(),
       icon: Icon(
-        Icons.date_range,
+        Icons.calendar_today,
         size: 16,
         color: hasDateRange ? theme.colorScheme.primary : null,
       ),
-      label: Text(
-        hasDateRange
-            ? _formatDateRange(
-                state.filterCriteria.dateStart,
-                state.filterCriteria.dateEnd,
-              )
-            : context.l10n.localGallery_dateFilterButton,
-        style: TextStyle(
-          fontSize: 12,
-          color: hasDateRange ? theme.colorScheme.primary : null,
-        ),
-      ),
+      label: !showLabel
+          ? const SizedBox.shrink()
+          : Text(
+              hasDateRange
+                  ? _formatDateRange(
+                      state.filterCriteria.dateStart,
+                      state.filterCriteria.dateEnd,
+                    )
+                  : context.l10n.common_date,
+              style: TextStyle(
+                fontSize: 12,
+                color: hasDateRange ? theme.colorScheme.primary : null,
+              ),
+            ),
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         visualDensity: VisualDensity.compact,
@@ -628,120 +937,18 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     return '';
   }
 
-  /// Select date range
-  /// 选择日期范围
-  Future<void> _selectDateRange(
-    BuildContext context,
-    LocalGalleryState state,
-  ) async {
-    final now = DateTime.now();
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: now,
-      initialDateRange:
-          state.filterCriteria.dateStart != null &&
-              state.filterCriteria.dateEnd != null
-          ? DateTimeRange(
-              start: state.filterCriteria.dateStart!,
-              end: state.filterCriteria.dateEnd!,
-            )
-          : DateTimeRange(
-              start: now.subtract(const Duration(days: 30)),
-              end: now,
-            ),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            dialogTheme: DialogThemeData(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
+  /// Show date range picker dialog
+  /// 打开点选式日期范围面板，确定后写入过滤条件（单日 = start == end）
+  Future<void> _showDateRangeDialog() async {
+    final criteria = ref.read(localGalleryNotifierProvider).filterCriteria;
+    final result = await showDateRangePickerDialog(
+      context,
+      initialStart: criteria.dateStart,
+      initialEnd: criteria.dateEnd,
     );
-
-    if (picked != null) {
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .setDateRange(picked.start, picked.end);
-    }
-  }
-
-  /// Pick date and jump to corresponding group
-  /// 选择日期并跳转到对应分组
-  Future<void> _pickDateAndJump(BuildContext context) async {
-    final now = DateTime.now();
-
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: now,
-      firstDate: DateTime(2020),
-      lastDate: now,
-      builder: (pickerContext, child) {
-        return Theme(
-          data: Theme.of(pickerContext).copyWith(
-            dialogTheme: DialogThemeData(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && mounted) {
-      // Ensure grouped view is activated
-      final currentState = ref.read(localGalleryNotifierProvider);
-      final notifier = ref.read(localGalleryNotifierProvider.notifier);
-      if (!currentState.isGroupedView) {
-        notifier.setGroupedView(true);
-      }
-
-      // Wait for grouped data to load
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      if (!mounted) return;
-
-      // Calculate which group the selected date belongs to
-      final today = DateTime(now.year, now.month, now.day);
-      final yesterday = today.subtract(const Duration(days: 1));
-      final thisWeekStart = today.subtract(Duration(days: today.weekday - 1));
-      final selectedDate = DateTime(picked.year, picked.month, picked.day);
-
-      ImageDateGroup? targetGroup;
-
-      if (selectedDate == today) {
-        targetGroup = ImageDateGroup.today;
-      } else if (selectedDate == yesterday) {
-        targetGroup = ImageDateGroup.yesterday;
-      } else if (selectedDate.isAfter(thisWeekStart) &&
-          selectedDate.isBefore(today)) {
-        targetGroup = ImageDateGroup.thisWeek;
-      } else {
-        targetGroup = ImageDateGroup.earlier;
-      }
-
-      // Jump to corresponding group using the key
-      if (widget.groupedGridViewKey?.currentState != null) {
-        (widget.groupedGridViewKey!.currentState as dynamic).scrollToGroup(
-          targetGroup,
-        );
-      }
-
-      // Show hint message
-      if (context.mounted) {
-        final month = picked.month.toString().padLeft(2, '0');
-        AppToast.info(
-          context,
-          context.l10n.localGallery_jumpedToMonth(picked.year, month),
-        );
-      }
-    }
+    if (result == null || !mounted) return;
+    await ref
+        .read(localGalleryNotifierProvider.notifier)
+        .setDateRange(result.start, result.end);
   }
 }

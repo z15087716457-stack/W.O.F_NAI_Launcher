@@ -1,6 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/utils/gallery_path_utils.dart';
+
 part 'gallery_category.freezed.dart';
 part 'gallery_category.g.dart';
 
@@ -63,6 +65,11 @@ class GalleryCategory with _$GalleryCategory {
 
   /// 是否为根级分类
   bool get isRoot => parentId == null;
+
+  /// 是否属于外部图库源（folderPath 为绝对路径）
+  ///
+  /// 外部图库源只读：不允许重命名/移动/删除分类、移动图片进出
+  bool get isExternal => isAbsoluteGalleryPath(folderPath);
 
   /// 显示名称
   String get displayName => name.isNotEmpty ? name : '未命名分类';
@@ -213,6 +220,44 @@ extension GalleryCategoryListExtension on List<GalleryCategory> {
               updatedAt: DateTime.now(),
             ),)
         .toList();
+  }
+
+  /// 聚合图片数量：父节点 = 自身计数 + 所有后代计数之和（O(n)）。
+  ///
+  /// 入参各分类的 `imageCount` 视为「直系计数」（文件夹内不含子目录的图片数），
+  /// 聚合后父节点口径与「选中后按路径前缀过滤的实际图数」一致。
+  /// 实现：先按 parentId 建子节点索引，记忆化后序遍历累加（每个节点只算一次）；
+  /// 环引用（异常数据）会被 visiting 标记截断，不无限递归。
+  List<GalleryCategory> withAggregatedImageCounts() {
+    final direct = {for (final c in this) c.id: c.imageCount};
+    final childrenByParent = <String?, List<String>>{};
+    for (final c in this) {
+      childrenByParent.putIfAbsent(c.parentId, () => []).add(c.id);
+    }
+
+    final totals = <String, int>{};
+    final visiting = <String>{};
+
+    int aggregate(String id) {
+      final cached = totals[id];
+      if (cached != null) return cached;
+      // 环截断：递归路径上重复出现的节点按直系计数收尾
+      if (visiting.contains(id)) return direct[id] ?? 0;
+      visiting.add(id);
+      var total = direct[id] ?? 0;
+      for (final childId in childrenByParent[id] ?? const <String>[]) {
+        total += aggregate(childId);
+      }
+      visiting.remove(id);
+      totals[id] = total;
+      return total;
+    }
+
+    for (final c in this) {
+      aggregate(c.id);
+    }
+
+    return [for (final c in this) c.updateImageCount(totals[c.id] ?? 0)];
   }
 
   /// 搜索分类

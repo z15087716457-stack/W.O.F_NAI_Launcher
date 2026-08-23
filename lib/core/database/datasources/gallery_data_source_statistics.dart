@@ -222,3 +222,141 @@ Map<int, int> _statisticsIntCounts(List<Map<String, Object?>> rows) {
   }
   return counts;
 }
+
+// ============================================================
+// 筛选候选查询（高级筛选面板用）
+// ============================================================
+
+extension GalleryDataSourceFilterCandidates on GalleryDataSource {
+  /// distinct model 候选（带计数，按计数降序）
+  Future<List<GalleryDistinctValue>> getDistinctModels({int limit = 50}) {
+    return _queryDistinctMetadataValues('model', limit: limit);
+  }
+
+  /// distinct sampler 候选（带计数，按计数降序）
+  Future<List<GalleryDistinctValue>> getDistinctSamplers({int limit = 50}) {
+    return _queryDistinctMetadataValues('sampler', limit: limit);
+  }
+
+  /// distinct resolution_key 候选（带计数，按计数降序）
+  Future<List<GalleryDistinctValue>> getDistinctResolutions({int limit = 20}) {
+    return _queryDistinctImagesValues('resolution_key', limit: limit);
+  }
+
+  Future<List<GalleryDistinctValue>> _queryDistinctMetadataValues(
+    String column, {
+    int limit = 20,
+  }) async {
+    return _queryDistinctValues(
+      column,
+      table: GalleryDataSource._metadataTable,
+      limit: limit,
+      operationName: 'getDistinctValues',
+    );
+  }
+
+  Future<List<GalleryDistinctValue>> _queryDistinctImagesValues(
+    String column, {
+    int limit = 20,
+  }) async {
+    return _queryDistinctValues(
+      column,
+      table: GalleryDataSource._imagesTable,
+      limit: limit,
+      operationName: 'getDistinctImagesValues',
+    );
+  }
+
+  Future<List<GalleryDistinctValue>> _queryDistinctValues(
+    String column, {
+    required String table,
+    required int limit,
+    required String operationName,
+  }) async {
+    try {
+      return await execute(
+        '$operationName:$column',
+        (db) async {
+          // metadata 表需 JOIN images 过滤软删；images 表直接过滤。
+          // column 为内部硬编码白名单（model/sampler/resolution_key），安全插值。
+          final fromClause =
+              table == GalleryDataSource._metadataTable
+              ? '$table m INNER JOIN ${GalleryDataSource._imagesTable} i ON i.id = m.image_id'
+              : '$table i';
+          final valueExpr =
+              table == GalleryDataSource._metadataTable ? 'm.$column' : 'i.$column';
+
+          final results = await db.rawQuery(
+            '''
+            SELECT $valueExpr AS value, COUNT(*) AS count
+            FROM $fromClause
+            WHERE $valueExpr IS NOT NULL AND $valueExpr != ''
+              AND i.is_deleted = 0
+            GROUP BY $valueExpr
+            ORDER BY count DESC
+            LIMIT ?
+            ''',
+            [limit],
+          );
+          return results.map(GalleryDistinctValue.fromMap).toList();
+        },
+        timeout: const Duration(seconds: 15),
+        maxRetries: 2,
+      );
+    } catch (e, stack) {
+      AppLogger.e(
+        'Failed to get distinct values for $table.$column',
+        e,
+        stack,
+        'GalleryDS',
+      );
+      return [];
+    }
+  }
+
+  /// 标签自动补全（包含匹配，按 usage_count 降序）
+  ///
+  /// 兼容下划线/空格变体：`blue hair` 与 `blue_hair` 互相命中。
+  Future<List<String>> autocompleteTags(
+    String query, {
+    int limit = 8,
+  }) async {
+    final trimmed = query.trim().toLowerCase();
+    if (trimmed.isEmpty) return [];
+
+    final escaped = _escapeLikePattern(trimmed);
+    final underscoreVariant = escaped.replaceAll(' ', '_');
+    final spaceVariant = escaped.replaceAll('_', ' ');
+
+    try {
+      final results = await execute(
+        'autocompleteTags',
+        (db) async {
+          final dbResults = await db.rawQuery(
+            """
+            SELECT name FROM ${GalleryDataSource._tagsTable}
+            WHERE name LIKE ? ESCAPE '\\' OR name LIKE ? ESCAPE '\\'
+            ORDER BY usage_count DESC
+            LIMIT ?
+            """,
+            ['%$underscoreVariant%', '%$spaceVariant%', limit],
+          );
+          final names = <String>[];
+          for (final row in dbResults) {
+            final name = row['name'] as String?;
+            if (name != null && name.isNotEmpty && !names.contains(name)) {
+              names.add(name);
+            }
+          }
+          return names;
+        },
+        timeout: const Duration(seconds: 10),
+        maxRetries: 2,
+      );
+      return results;
+    } catch (e, stack) {
+      AppLogger.e('Failed to autocomplete tags: $query', e, stack, 'GalleryDS');
+      return [];
+    }
+  }
+}

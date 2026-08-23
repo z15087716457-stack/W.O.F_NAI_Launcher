@@ -11,9 +11,13 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       await _createImageTagsTable(db);
       await _createScanLogsTable(db);
       await _createFtsIndexTable(db);
+      await _createCollectionsTables(db);
 
       // 迁移：添加 last_scanned_at 列（如果缺失）
       await _migrateAddLastScannedAt(db);
+
+      // 迁移：添加 is_nsfw 列（如果缺失）
+      await _migrateAddIsNsfw(db);
 
       AppLogger.i('Gallery tables initialized', 'GalleryDS');
     });
@@ -136,6 +140,39 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
     }
   }
 
+  /// 迁移：添加 is_nsfw 列（如果缺失）
+  Future<void> _migrateAddIsNsfw(Database db) async {
+    try {
+      final tableInfo = await db.rawQuery(
+        'PRAGMA table_info(${GalleryDataSource._metadataTable})',
+      );
+      final hasColumn = tableInfo.any((col) => col['name'] == 'is_nsfw');
+
+      if (!hasColumn) {
+        AppLogger.i(
+          '[Migration] Adding is_nsfw column to ${GalleryDataSource._metadataTable}',
+          'GalleryDS',
+        );
+        await db.execute(
+          'ALTER TABLE ${GalleryDataSource._metadataTable} '
+          'ADD COLUMN is_nsfw INTEGER NOT NULL DEFAULT 0',
+        );
+        AppLogger.i(
+          '[Migration] is_nsfw column added successfully',
+          'GalleryDS',
+        );
+      }
+    } catch (e, stack) {
+      AppLogger.e(
+        '[Migration] Failed to add is_nsfw column',
+        e,
+        stack,
+        'GalleryDS',
+      );
+      // 迁移失败不应该阻止应用启动
+    }
+  }
+
   Future<void> _createMetadataTable(Database db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS ${GalleryDataSource._metadataTable} (
@@ -163,6 +200,7 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
         version TEXT,
         raw_json TEXT,
         has_metadata INTEGER NOT NULL DEFAULT 0,
+        is_nsfw INTEGER NOT NULL DEFAULT 0,
         full_prompt_text TEXT NOT NULL DEFAULT '',
         vibe_encoding TEXT,
         vibe_strength REAL,
@@ -287,6 +325,37 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
     ''');
   }
 
+  /// 收藏集表（链接式：只存 image_id 成员关系，不复制文件）
+  Future<void> _createCollectionsTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ${GalleryDataSource._collectionsTable} (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at INTEGER NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ${GalleryDataSource._collectionItemsTable} (
+        collection_id TEXT NOT NULL,
+        image_id INTEGER NOT NULL,
+        added_at INTEGER NOT NULL,
+        PRIMARY KEY (collection_id, image_id),
+        FOREIGN KEY (collection_id)
+          REFERENCES ${GalleryDataSource._collectionsTable}(id) ON DELETE CASCADE,
+        FOREIGN KEY (image_id)
+          REFERENCES ${GalleryDataSource._imagesTable}(id) ON DELETE CASCADE
+      )
+    ''');
+
+    // 按图反查成员关系的索引（卡片菜单/过滤）
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_gallery_collection_items_image_id
+      ON ${GalleryDataSource._collectionItemsTable}(image_id)
+    ''');
+  }
+
   @override
   Future<DataSourceHealth> doCheckHealth() async {
     return await execute('doCheckHealth', (db) async {
@@ -299,6 +368,8 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
         GalleryDataSource._imageTagsTable,
         GalleryDataSource._scanLogsTable,
         GalleryDataSource._ftsIndexTable,
+        GalleryDataSource._collectionsTable,
+        GalleryDataSource._collectionItemsTable,
       ];
 
       final missingTables = <String>[];

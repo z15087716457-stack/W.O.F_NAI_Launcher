@@ -2,12 +2,21 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/utils/app_logger.dart';
+import '../../core/utils/gallery_path_utils.dart';
 import '../../data/models/gallery/gallery_category.dart';
 import '../../data/repositories/gallery_category_repository.dart';
+import '../../data/repositories/gallery_folder_repository.dart';
 import 'category_operation_error.dart';
 
 part 'gallery_category_provider.freezed.dart';
 part 'gallery_category_provider.g.dart';
+
+/// 收藏集选中 ID 前缀：侧栏选中态用 'collection:<id>' 扩展 selectedCategoryId 语义
+const String collectionSelectedIdPrefix = 'collection:';
+
+/// 是否为收藏集选中 ID
+bool isCollectionSelectedId(String id) =>
+    id.startsWith(collectionSelectedIdPrefix);
 
 /// 画廊分类状态
 @freezed
@@ -125,6 +134,116 @@ class GalleryCategoryNotifier extends _$GalleryCategoryNotifier {
   /// 选择分类
   void selectCategory(String? categoryId) {
     state = state.copyWith(selectedCategoryId: categoryId);
+  }
+
+  /// 删除池软删后的内存级计数调整。
+  ///
+  /// 分类计数是文件系统口径（数盘上文件），软删文件仍在盘上、
+  /// 物理删除推迟到下次启动，因此这里按「路径位于分类文件夹内」做纯内存
+  /// 减计数：命中最深的分类 + 其全部祖先（imageCount 是聚合口径）。
+  /// 外部图库源分类（isExternal，根级无父链）按各自 folderPath 同样减。
+  Future<void> applyDeletedPaths(List<String> paths) async {
+    if (paths.isEmpty || state.categories.isEmpty) return;
+    try {
+      final rootPath = await GalleryFolderRepository.instance.getRootPath();
+      if (rootPath == null || rootPath.isEmpty) return;
+
+      final rootKey = galleryFilePathKey(rootPath);
+      final byId = {for (final c in state.categories) c.id: c};
+      final decrements = <String, int>{};
+
+      for (final filePath in paths) {
+        final key = galleryFilePathKey(filePath);
+
+        // 外部图库源：命中其 folderPath 即减（根级，无祖先链）
+        var handledExternally = false;
+        for (final category in state.categories) {
+          if (!category.isExternal) continue;
+          final folder = _trimSeparators(
+            galleryFilePathKey(category.folderPath),
+          );
+          if (folder.isEmpty) continue;
+          final fileKey = _trimSeparators(key);
+          if (fileKey == folder ||
+              fileKey.startsWith('$folder\\') ||
+              fileKey.startsWith('$folder/')) {
+            decrements.update(category.id, (v) => v + 1, ifAbsent: () => 1);
+            handledExternally = true;
+            break;
+          }
+        }
+        if (handledExternally) continue;
+
+        if (!galleryPathIsWithin(rootPath, filePath)) continue;
+        var rel = key.substring(rootKey.length);
+        while (rel.startsWith(r'\') || rel.startsWith('/')) {
+          rel = rel.substring(1);
+        }
+        if (rel.isEmpty) continue;
+
+        // 命中最深分类（folderPath 最长者）
+        GalleryCategory? deepest;
+        for (final category in state.categories) {
+          if (category.isExternal) continue;
+          final folder = _trimSeparators(
+            galleryFilePathKey(category.folderPath),
+          );
+          if (folder.isEmpty) continue;
+          final isInside = rel == folder ||
+              rel.startsWith('$folder\\') ||
+              rel.startsWith('$folder/');
+          if (isInside &&
+              (deepest == null ||
+                  folder.length >
+                      _trimSeparators(galleryFilePathKey(deepest.folderPath))
+                          .length)) {
+            deepest = category;
+          }
+        }
+        if (deepest == null) continue;
+
+        decrements.update(deepest.id, (v) => v + 1, ifAbsent: () => 1);
+        var parentId = deepest.parentId;
+        while (parentId != null) {
+          decrements.update(parentId, (v) => v + 1, ifAbsent: () => 1);
+          parentId = byId[parentId]?.parentId;
+        }
+      }
+
+      if (decrements.isEmpty) return;
+
+      state = state.copyWith(
+        categories: [
+          for (final category in state.categories)
+            (decrements[category.id] ?? 0) == 0
+                ? category
+                : category.updateImageCount(
+                    _safeSubtract(
+                      category.imageCount,
+                      decrements[category.id]!,
+                    ),
+                  ),
+        ],
+      );
+    } catch (e) {
+      AppLogger.w('Failed to adjust category counts for deleted paths: $e');
+    }
+  }
+
+  static int _safeSubtract(int value, int decrement) {
+    final result = value - decrement;
+    return result < 0 ? 0 : result;
+  }
+
+  static String _trimSeparators(String value) {
+    var out = value;
+    while (out.startsWith(r'\') || out.startsWith('/')) {
+      out = out.substring(1);
+    }
+    while (out.endsWith(r'\') || out.endsWith('/')) {
+      out = out.substring(0, out.length - 1);
+    }
+    return out;
   }
 
   /// 创建新分类
@@ -367,7 +486,9 @@ class GalleryCategoryNotifier extends _$GalleryCategoryNotifier {
     String? categoryId,
   ) async {
     GalleryCategory? category;
-    if (categoryId != null && categoryId != 'favorites') {
+    if (categoryId != null &&
+        categoryId != 'favorites' &&
+        !isCollectionSelectedId(categoryId)) {
       category = state.categories.findById(categoryId);
     }
 
@@ -401,7 +522,9 @@ class GalleryCategoryNotifier extends _$GalleryCategoryNotifier {
     String? categoryId,
   ) async {
     GalleryCategory? category;
-    if (categoryId != null && categoryId != 'favorites') {
+    if (categoryId != null &&
+        categoryId != 'favorites' &&
+        !isCollectionSelectedId(categoryId)) {
       category = state.categories.findById(categoryId);
     }
 

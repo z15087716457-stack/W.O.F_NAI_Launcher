@@ -228,6 +228,69 @@
   "settings_imageSavePath": "Image Save Location",
   "settings_autoSave": "Auto Save",
   "settings_autoSaveSubtitle": "Automatically save images after generation",
+  "settings_extraRootsTitle": "Gallery Sources",
+  "settings_extraRootsHint": "Extra gallery sources: add any folder to browse and search in the gallery (read-only, not used for auto-save). After adding, run a rescan in the gallery or at the bottom of this page.",
+  "settings_extraRootsEmpty": "No extra gallery sources added",
+  "settings_extraRootsAdd": "Add Folder",
+  "settings_extraRootsAddTitle": "Select a folder to add as a gallery source",
+  "settings_extraRootsRemove": "Remove this gallery source",
+  "settings_extraRootsRemoveConfirmTitle": "Remove gallery source?",
+  "settings_extraRootsRemoveConfirmContent": "Remove \"{path}\" from the gallery (no files in the folder will be deleted).",
+  "settings_extraRootsAdded": "Gallery source added; rescan to apply",
+  "settings_extraRootsRemoved": "Gallery source removed",
+  "settings_extraRootsDuplicate": "This folder is already a gallery source",
+  "settings_extraRootsSameAsMain": "This folder is the same as the image save location",
+  "settings_extraRootsNested": "Gallery sources cannot contain each other; choose another folder",
+  "settings_extraRootsNotFound": "The selected folder does not exist",
+  "@settings_extraRootsRemoveConfirmContent": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_importTagIndex": "Import Tag Index…",
+  "settings_importTagIndexPickTitle": "Select tag index file (.jsonl)",
+  "settings_importTagIndexProgress": "Importing {processed}/{total} lines…",
+  "@settings_importTagIndexProgress": {
+    "placeholders": {
+      "processed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "settings_importTagIndexDone": "Import complete: {imported} new, {updated} updated, {skipped} skipped, {errors} errors",
+  "@settings_importTagIndexDone": {
+    "placeholders": {
+      "imported": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "errors": {
+        "type": "int"
+      }
+    }
+  },
+  "settings_importTagIndexFailed": "Tag index import failed",
+  "settings_importTagIndexBlockedByScan": "Gallery scan is in progress. Wait for it to finish before importing the tag index.",
+  "settings_extraRootsIndexImportTitle": "Tag Index Found",
+  "settings_extraRootsIndexImportContent": "Found tag index index.jsonl under \"{path}\". Importing it first lets the upcoming scan fast-forward (skip metadata parsing). Import now?",
+  "@settings_extraRootsIndexImportContent": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_extraRootsIndexImportConfirm": "Import Now",
   "settings_about": "About",
   "settings_version": "Version {version}",
   "@settings_version": {
@@ -2053,13 +2116,6 @@
   "localGallery_emptySubtitle": "Generated images will be saved here",
   "localGallery_noMatchingResults": "No matching results",
   "localGallery_loadingGroupedImages": "Loading grouped images...",
-  "localGallery_jumpedToMonth": "Jumped to {year}-{month}",
-  "@localGallery_jumpedToMonth": {
-    "placeholders": {
-      "year": {},
-      "month": {}
-    }
-  },
   "localGallery_title": "Local Gallery",
   "localGallery_allImages": "All Images",
   "localGallery_categoryPanelTitle": "Categories",
@@ -2072,14 +2128,50 @@
   "localGallery_packSelected": "Pack",
   "localGallery_editMetadata": "Edit",
   "localGallery_addToCollection": "Collect",
-  "localGallery_switchToGridView": "Switch to grid view",
-  "localGallery_switchToDateGroupedView": "Switch to date grouped view",
+  "localGallery_sortButton": "Sort",
+  "localGallery_sortFieldModified": "Modified time",
+  "localGallery_sortFieldCreated": "Created time",
+  "localGallery_sortFieldName": "File name",
+  "localGallery_sortFieldSize": "File size",
+  "localGallery_sortFieldDimensions": "Image size",
+  "localGallery_sortToggleDirection": "Toggle sort direction",
+  "localGallery_aboutColumns": "≈ {count} columns",
+  "@localGallery_aboutColumns": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_columnWidth": "Column width",
+  "localGallery_naiOnly": "NAI",
+  "localGallery_naiOnlyTooltip": "Only show NAI-generated images",
+  "localGallery_masonryViewLabel": "Waterfall",
+  "localGallery_switchToMasonryView": "Switch to waterfall view",
+  "localGallery_switchToGridLayout": "Switch to grid view",
+  "localGallery_dateRangeYearMonth": "{year}/{month}",
+  "@localGallery_dateRangeYearMonth": {
+    "placeholders": {
+      "year": {},
+      "month": {}
+    }
+  },
+  "localGallery_dateRangePrevMonth": "Previous month",
+  "localGallery_dateRangeNextMonth": "Next month",
+  "localGallery_dateRangeClear": "Clear",
+  "localGallery_searchInScope": "Search: {scope}",
+  "@localGallery_searchInScope": {
+    "placeholders": {
+      "scope": {}
+    }
+  },
   "localGallery_openFilterPanel": "Open filter panel",
   "localGallery_hideCategoryPanel": "Hide category panel",
   "localGallery_showCategoryPanel": "Show category panel",
   "localGallery_enterSelectionMode": "Enter selection mode",
   "localGallery_refreshTooltip": "Refresh gallery\n\nAutomatically detects new or changed images and updates the index",
   "localGallery_tagIntersection": "Tag Intersection",
+  "localGallery_filterByTags": "Filter by Tags",
+  "localGallery_tagInputHint": "Type a tag, press Enter to add",
+  "localGallery_addTag": "Add",
   "localGallery_createCategoryTitle": "New Category",
   "localGallery_createCategoryHint": "Enter category name",
   "localGallery_createCategoryConfirm": "Create",
@@ -2087,19 +2179,24 @@
   "localGallery_showInFolder": "Show in Folder",
   "localGallery_promptCopied": "Prompt copied",
   "localGallery_seedCopied": "Seed copied",
-  "localGallery_confirmDeleteImageContent": "Delete image \"{name}\"?\n\nThis cannot be undone.",
+  "localGallery_createCollectionTitle": "New Collection",
+  "localGallery_createCollectionHint": "Enter collection name",
+  "localGallery_createCollectionConfirm": "Create",
+  "localGallery_deleteCollectionContent": "Delete collection \"{name}\"? Only the collection entry is removed; no image files are deleted.",
+  "@localGallery_deleteCollectionContent": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "localGallery_unfavorite": "Remove Favorite",
+  "localGallery_favoriteMenuEmptyCollections": "No collections yet — create one with + on the left",
+  "localGallery_confirmDeleteImageContent": "Delete image \"{name}\"?\n\nThe image will disappear from the gallery immediately; the file will be removed permanently on the next launch (can be undone in this session).",
   "@localGallery_confirmDeleteImageContent": {
     "placeholders": {
       "name": {}
     }
   },
-  "localGallery_imageDeleted": "Image deleted",
-  "localGallery_deleteFailed": "Delete failed: {error}",
-  "@localGallery_deleteFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
+  "localGallery_externalReadonly": "External gallery sources are read-only; this action is unavailable",
   "localGallery_categoryDeleteContent": "Delete this category? The folder and its contents will be kept.",
   "localGallery_protectedDeleteCategoryTitle": "Protected Mode: Confirm Category Deletion",
   "localGallery_protectedDeleteCategoryContent": "This will delete the category record. The folder and its contents will be kept. Confirm again.",
@@ -2314,9 +2411,20 @@
   "localGallery_filterByCfg": "Filter by CFG Scale",
   "localGallery_filterByResolution": "Filter by Resolution",
   "localGallery_filterSubtitle": "Precisely filter your image collection",
-  "localGallery_modelHint": "Enter model name...",
-  "localGallery_samplerHint": "Enter sampler name...",
-  "localGallery_resolutionHint": "Width x height (e.g. 1024x1024)",
+  "localGallery_filterOrientation": "Orientation",
+  "localGallery_orientationAny": "Any",
+  "localGallery_orientationLandscape": "Landscape",
+  "localGallery_orientationPortrait": "Portrait",
+  "localGallery_orientationSquare": "Square",
+  "localGallery_filterNsfw": "Content Rating",
+  "localGallery_nsfwAny": "Any",
+  "localGallery_nsfwSfw": "Safe",
+  "localGallery_nsfwOnly": "NSFW only",
+  "localGallery_noModelCandidates": "No model metadata found yet",
+  "localGallery_noSamplerCandidates": "No sampler metadata found yet",
+  "localGallery_noResolutionCandidates": "No resolution metadata found yet",
+  "localGallery_candidatesLoadFailed": "Failed to load candidates",
+  "localGallery_noTagSuggestions": "No matching tags",
   "localGallery_activeFiltersSet": "Filters set",
   "localGallery_applyFilters": "Apply Filters",
   "localGallery_resetAdvancedFilters": "Reset Advanced Filters",
@@ -2345,18 +2453,50 @@
   "localGallery_undone": "Undone",
   "localGallery_redone": "Redone",
   "localGallery_confirmBulkDelete": "Confirm Bulk Delete",
-  "localGallery_confirmBulkDeleteContent": "Are you sure you want to delete {count} selected images?\n\nThis will permanently remove them from the file system and cannot be undone.",
+  "localGallery_confirmBulkDeleteContent": "Are you sure you want to delete {count} selected images?\n\nThey will disappear from the gallery immediately; the files will be removed permanently on the next launch (can be undone in this session).",
   "@localGallery_confirmBulkDeleteContent": {
     "placeholders": {
       "count": {}
     }
   },
-  "localGallery_deletedImages": "Deleted {count} images",
-  "@localGallery_deletedImages": {
+  "localGallery_deletedToPool": "Deleted {count} images. They will be removed permanently on the next launch.",
+  "@localGallery_deletedToPool": {
     "placeholders": {
       "count": {}
     }
   },
+  "localGallery_trashTitle": "Trash",
+  "localGallery_trashEmpty": "Trash is empty",
+  "localGallery_trashHint": "Files in the trash are still on disk and will be removed permanently on the next launch. Restored files return to the gallery immediately.",
+  "localGallery_trashCount": "{count} items",
+  "@localGallery_trashCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_trashRestore": "Restore",
+  "localGallery_trashRestoreAll": "Restore all",
+  "localGallery_trashRestoreFailed": "Failed to restore",
+  "localGallery_trashRestored": "Restored {count} images",
+  "@localGallery_trashRestored": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_trashDeleteAll": "Delete permanently",
+  "localGallery_trashDeleteAllConfirm": "This will permanently delete all {count} files in the trash immediately. This cannot be undone.",
+  "@localGallery_trashDeleteAllConfirm": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_trashDeletedForever": "Permanently deleted {count} files",
+  "@localGallery_trashDeletedForever": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_trashFileMissing": "File no longer on disk",
   "localGallery_noFoldersAvailable": "No folders available, please create a folder first",
   "localGallery_moveToFolder": "Move to Folder",
   "localGallery_imageCount": "{count} images",
@@ -4665,8 +4805,6 @@
   "promptAssistant_defaultCustomRuleName": "Default Custom Rule",
   "promptAssistant_defaultCustomRuleContent": "You are a prompt rewriting assistant. Modify the prompt according to the current prompt, the user request, and optional reference images. Output only the final single-line prompt that can be used directly, without explanation.",
 
-  "localGallery_dateFilterButton": "Date Filter",
-
   "cacheStats_title": "Cache Statistics",
   "cacheStats_autoRefreshUpdated": "Auto refresh · Last updated: {time}",
   "@cacheStats_autoRefreshUpdated": {
@@ -4707,7 +4845,6 @@
   "galleryCache_scanAlreadyRunning": "A scan task is already running. Please wait for it to finish.",
   "galleryCache_preparing": "Preparing...",
   "galleryCache_noGalleryFolder": "Gallery folder is not set",
-  "galleryCache_galleryFolderMissing": "Gallery folder does not exist",
   "galleryCache_scanningPhase": "Scanning {processed}/{total}...",
   "@galleryCache_scanningPhase": {
     "placeholders": {

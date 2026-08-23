@@ -587,6 +587,97 @@ class AppLocalizationsEn extends AppLocalizations {
       'Automatically save images after generation';
 
   @override
+  String get settings_extraRootsTitle => 'Gallery Sources';
+
+  @override
+  String get settings_extraRootsHint =>
+      'Extra gallery sources: add any folder to browse and search in the gallery (read-only, not used for auto-save). After adding, run a rescan in the gallery or at the bottom of this page.';
+
+  @override
+  String get settings_extraRootsEmpty => 'No extra gallery sources added';
+
+  @override
+  String get settings_extraRootsAdd => 'Add Folder';
+
+  @override
+  String get settings_extraRootsAddTitle =>
+      'Select a folder to add as a gallery source';
+
+  @override
+  String get settings_extraRootsRemove => 'Remove this gallery source';
+
+  @override
+  String get settings_extraRootsRemoveConfirmTitle => 'Remove gallery source?';
+
+  @override
+  String settings_extraRootsRemoveConfirmContent(String path) {
+    return 'Remove \"$path\" from the gallery (no files in the folder will be deleted).';
+  }
+
+  @override
+  String get settings_extraRootsAdded =>
+      'Gallery source added; rescan to apply';
+
+  @override
+  String get settings_extraRootsRemoved => 'Gallery source removed';
+
+  @override
+  String get settings_extraRootsDuplicate =>
+      'This folder is already a gallery source';
+
+  @override
+  String get settings_extraRootsSameAsMain =>
+      'This folder is the same as the image save location';
+
+  @override
+  String get settings_extraRootsNested =>
+      'Gallery sources cannot contain each other; choose another folder';
+
+  @override
+  String get settings_extraRootsNotFound =>
+      'The selected folder does not exist';
+
+  @override
+  String get settings_importTagIndex => 'Import Tag Index…';
+
+  @override
+  String get settings_importTagIndexPickTitle =>
+      'Select tag index file (.jsonl)';
+
+  @override
+  String settings_importTagIndexProgress(int processed, int total) {
+    return 'Importing $processed/$total lines…';
+  }
+
+  @override
+  String settings_importTagIndexDone(
+    int imported,
+    int updated,
+    int skipped,
+    int errors,
+  ) {
+    return 'Import complete: $imported new, $updated updated, $skipped skipped, $errors errors';
+  }
+
+  @override
+  String get settings_importTagIndexFailed => 'Tag index import failed';
+
+  @override
+  String get settings_importTagIndexBlockedByScan =>
+      'Gallery scan is in progress. Wait for it to finish before importing the tag index.';
+
+  @override
+  String get settings_extraRootsIndexImportTitle => 'Tag Index Found';
+
+  @override
+  String settings_extraRootsIndexImportContent(String path) {
+    return 'Found tag index index.jsonl under \"$path\". Importing it first lets the upcoming scan fast-forward (skip metadata parsing). Import now?';
+  }
+
+  @override
+  String get settings_extraRootsIndexImportConfirm => 'Import Now';
+
+  @override
   String get settings_about => 'About';
 
   @override
@@ -4471,11 +4562,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_loadingGroupedImages => 'Loading grouped images...';
 
   @override
-  String localGallery_jumpedToMonth(Object year, Object month) {
-    return 'Jumped to $year-$month';
-  }
-
-  @override
   String get localGallery_title => 'Local Gallery';
 
   @override
@@ -4513,11 +4599,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_addToCollection => 'Collect';
 
   @override
-  String get localGallery_switchToGridView => 'Switch to grid view';
+  String get localGallery_sortButton => 'Sort';
 
   @override
-  String get localGallery_switchToDateGroupedView =>
-      'Switch to date grouped view';
+  String get localGallery_sortFieldModified => 'Modified time';
+
+  @override
+  String get localGallery_sortFieldCreated => 'Created time';
+
+  @override
+  String get localGallery_sortFieldName => 'File name';
+
+  @override
+  String get localGallery_sortFieldSize => 'File size';
+
+  @override
+  String get localGallery_sortFieldDimensions => 'Image size';
+
+  @override
+  String get localGallery_sortToggleDirection => 'Toggle sort direction';
+
+  @override
+  String localGallery_aboutColumns(Object count) {
+    return '≈ $count columns';
+  }
+
+  @override
+  String get localGallery_columnWidth => 'Column width';
+
+  @override
+  String get localGallery_naiOnly => 'NAI';
+
+  @override
+  String get localGallery_naiOnlyTooltip => 'Only show NAI-generated images';
+
+  @override
+  String get localGallery_masonryViewLabel => 'Waterfall';
+
+  @override
+  String get localGallery_switchToMasonryView => 'Switch to waterfall view';
+
+  @override
+  String get localGallery_switchToGridLayout => 'Switch to grid view';
+
+  @override
+  String localGallery_dateRangeYearMonth(Object year, Object month) {
+    return '$year/$month';
+  }
+
+  @override
+  String get localGallery_dateRangePrevMonth => 'Previous month';
+
+  @override
+  String get localGallery_dateRangeNextMonth => 'Next month';
+
+  @override
+  String get localGallery_dateRangeClear => 'Clear';
+
+  @override
+  String localGallery_searchInScope(Object scope) {
+    return 'Search: $scope';
+  }
 
   @override
   String get localGallery_openFilterPanel => 'Open filter panel';
@@ -4537,6 +4679,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localGallery_tagIntersection => 'Tag Intersection';
+
+  @override
+  String get localGallery_filterByTags => 'Filter by Tags';
+
+  @override
+  String get localGallery_tagInputHint => 'Type a tag, press Enter to add';
+
+  @override
+  String get localGallery_addTag => 'Add';
 
   @override
   String get localGallery_createCategoryTitle => 'New Category';
@@ -4560,17 +4711,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_seedCopied => 'Seed copied';
 
   @override
+  String get localGallery_createCollectionTitle => 'New Collection';
+
+  @override
+  String get localGallery_createCollectionHint => 'Enter collection name';
+
+  @override
+  String get localGallery_createCollectionConfirm => 'Create';
+
+  @override
+  String localGallery_deleteCollectionContent(Object name) {
+    return 'Delete collection \"$name\"? Only the collection entry is removed; no image files are deleted.';
+  }
+
+  @override
+  String get localGallery_unfavorite => 'Remove Favorite';
+
+  @override
+  String get localGallery_favoriteMenuEmptyCollections =>
+      'No collections yet — create one with + on the left';
+
+  @override
   String localGallery_confirmDeleteImageContent(Object name) {
-    return 'Delete image \"$name\"?\n\nThis cannot be undone.';
+    return 'Delete image \"$name\"?\n\nThe image will disappear from the gallery immediately; the file will be removed permanently on the next launch (can be undone in this session).';
   }
 
   @override
-  String get localGallery_imageDeleted => 'Image deleted';
-
-  @override
-  String localGallery_deleteFailed(Object error) {
-    return 'Delete failed: $error';
-  }
+  String get localGallery_externalReadonly =>
+      'External gallery sources are read-only; this action is unavailable';
 
   @override
   String get localGallery_categoryDeleteContent =>
@@ -4992,13 +5160,48 @@ class AppLocalizationsEn extends AppLocalizations {
       'Precisely filter your image collection';
 
   @override
-  String get localGallery_modelHint => 'Enter model name...';
+  String get localGallery_filterOrientation => 'Orientation';
 
   @override
-  String get localGallery_samplerHint => 'Enter sampler name...';
+  String get localGallery_orientationAny => 'Any';
 
   @override
-  String get localGallery_resolutionHint => 'Width x height (e.g. 1024x1024)';
+  String get localGallery_orientationLandscape => 'Landscape';
+
+  @override
+  String get localGallery_orientationPortrait => 'Portrait';
+
+  @override
+  String get localGallery_orientationSquare => 'Square';
+
+  @override
+  String get localGallery_filterNsfw => 'Content Rating';
+
+  @override
+  String get localGallery_nsfwAny => 'Any';
+
+  @override
+  String get localGallery_nsfwSfw => 'Safe';
+
+  @override
+  String get localGallery_nsfwOnly => 'NSFW only';
+
+  @override
+  String get localGallery_noModelCandidates => 'No model metadata found yet';
+
+  @override
+  String get localGallery_noSamplerCandidates =>
+      'No sampler metadata found yet';
+
+  @override
+  String get localGallery_noResolutionCandidates =>
+      'No resolution metadata found yet';
+
+  @override
+  String get localGallery_candidatesLoadFailed => 'Failed to load candidates';
+
+  @override
+  String get localGallery_noTagSuggestions => 'No matching tags';
 
   @override
   String get localGallery_activeFiltersSet => 'Filters set';
@@ -5074,13 +5277,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String localGallery_confirmBulkDeleteContent(Object count) {
-    return 'Are you sure you want to delete $count selected images?\n\nThis will permanently remove them from the file system and cannot be undone.';
+    return 'Are you sure you want to delete $count selected images?\n\nThey will disappear from the gallery immediately; the files will be removed permanently on the next launch (can be undone in this session).';
   }
 
   @override
-  String localGallery_deletedImages(Object count) {
-    return 'Deleted $count images';
+  String localGallery_deletedToPool(Object count) {
+    return 'Deleted $count images. They will be removed permanently on the next launch.';
   }
+
+  @override
+  String get localGallery_trashTitle => 'Trash';
+
+  @override
+  String get localGallery_trashEmpty => 'Trash is empty';
+
+  @override
+  String get localGallery_trashHint =>
+      'Files in the trash are still on disk and will be removed permanently on the next launch. Restored files return to the gallery immediately.';
+
+  @override
+  String localGallery_trashCount(Object count) {
+    return '$count items';
+  }
+
+  @override
+  String get localGallery_trashRestore => 'Restore';
+
+  @override
+  String get localGallery_trashRestoreAll => 'Restore all';
+
+  @override
+  String get localGallery_trashRestoreFailed => 'Failed to restore';
+
+  @override
+  String localGallery_trashRestored(Object count) {
+    return 'Restored $count images';
+  }
+
+  @override
+  String get localGallery_trashDeleteAll => 'Delete permanently';
+
+  @override
+  String localGallery_trashDeleteAllConfirm(Object count) {
+    return 'This will permanently delete all $count files in the trash immediately. This cannot be undone.';
+  }
+
+  @override
+  String localGallery_trashDeletedForever(Object count) {
+    return 'Permanently deleted $count files';
+  }
+
+  @override
+  String get localGallery_trashFileMissing => 'File no longer on disk';
 
   @override
   String get localGallery_noFoldersAvailable =>
@@ -9332,9 +9580,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'You are a prompt rewriting assistant. Modify the prompt according to the current prompt, the user request, and optional reference images. Output only the final single-line prompt that can be used directly, without explanation.';
 
   @override
-  String get localGallery_dateFilterButton => 'Date Filter';
-
-  @override
   String get cacheStats_title => 'Cache Statistics';
 
   @override
@@ -9397,10 +9642,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get galleryCache_noGalleryFolder => 'Gallery folder is not set';
-
-  @override
-  String get galleryCache_galleryFolderMissing =>
-      'Gallery folder does not exist';
 
   @override
   String galleryCache_scanningPhase(Object processed, Object total) {

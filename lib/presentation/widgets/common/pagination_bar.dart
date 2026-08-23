@@ -24,6 +24,15 @@ class PaginationBar extends StatefulWidget {
   final bool showTotalInfo;
   final bool compact;
 
+  /// 逻辑列宽（px）：提供时在「每页 N 项」右侧显示列宽调节控件
+  final double? columnWidth;
+
+  /// 列宽拖动实时回调（拖动中持续触发，UI 即时生效）
+  final ValueChanged<double>? onColumnWidthChanged;
+
+  /// 列宽拖动结束回调（用于持久化）
+  final ValueChanged<double>? onColumnWidthChangeEnd;
+
   const PaginationBar({
     super.key,
     required this.currentPage,
@@ -36,6 +45,9 @@ class PaginationBar extends StatefulWidget {
     this.showItemsPerPage = true,
     this.showTotalInfo = true,
     this.compact = false,
+    this.columnWidth,
+    this.onColumnWidthChanged,
+    this.onColumnWidthChangeEnd,
   });
 
   @override
@@ -128,9 +140,7 @@ class _PaginationBarState extends State<PaginationBar> {
       decoration: BoxDecoration(
         color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surface,
         border: Border(
-          top: BorderSide(
-            color: theme.dividerColor.withValues(alpha: 0.2),
-          ),
+          top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.2)),
         ),
       ),
       child: widget.compact
@@ -156,6 +166,10 @@ class _PaginationBarState extends State<PaginationBar> {
         // Items per page selector
         if (widget.showItemsPerPage && widget.onItemsPerPageChanged != null)
           _buildItemsPerPageSelector(theme, colorScheme),
+
+        // Column width control (本地画廊专用：提供回调时才显示)
+        if (widget.onColumnWidthChanged != null && widget.columnWidth != null)
+          _buildColumnWidthControl(theme, colorScheme),
       ],
     );
   }
@@ -163,16 +177,16 @@ class _PaginationBarState extends State<PaginationBar> {
   Widget _buildCompactLayout(ThemeData theme, ColorScheme colorScheme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildPageNavigation(theme, colorScheme),
-      ],
+      children: [_buildPageNavigation(theme, colorScheme)],
     );
   }
 
   Widget _buildTotalInfo(ThemeData theme, ColorScheme colorScheme) {
     final startItem = widget.currentPage * widget.itemsPerPage + 1;
-    final endItem = ((widget.currentPage + 1) * widget.itemsPerPage)
-        .clamp(0, widget.totalItems);
+    final endItem = ((widget.currentPage + 1) * widget.itemsPerPage).clamp(
+      0,
+      widget.totalItems,
+    );
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -209,8 +223,9 @@ class _PaginationBarState extends State<PaginationBar> {
         _buildNavButton(
           icon: Icons.first_page,
           tooltip: l10n.pagination_firstPage,
-          onPressed:
-              widget.currentPage > 0 ? () => widget.onPageChanged(0) : null,
+          onPressed: widget.currentPage > 0
+              ? () => widget.onPageChanged(0)
+              : null,
         ),
 
         // Previous page
@@ -334,8 +349,9 @@ class _PaginationBarState extends State<PaginationBar> {
               '${page + 1}',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color:
-                    isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
+                color: isSelected
+                    ? colorScheme.onPrimary
+                    : colorScheme.onSurface,
               ),
             ),
           ),
@@ -371,8 +387,10 @@ class _PaginationBarState extends State<PaginationBar> {
           ),
           decoration: InputDecoration(
             isDense: true,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 8,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(6),
               borderSide: BorderSide(color: colorScheme.primary),
@@ -452,10 +470,7 @@ class _PaginationBarState extends State<PaginationBar> {
               items: widget.itemsPerPageOptions.map((count) {
                 return DropdownMenuItem(
                   value: count,
-                  child: Text(
-                    '$count',
-                    style: theme.textTheme.bodyMedium,
-                  ),
+                  child: Text('$count', style: theme.textTheme.bodyMedium),
                 );
               }).toList(),
               onChanged: (value) {
@@ -474,6 +489,108 @@ class _PaginationBarState extends State<PaginationBar> {
           ),
         ),
       ],
+    );
+  }
+
+  /// 列宽调节控件：图标按钮点开小弹层，Slider 实时生效、松手持久化
+  Widget _buildColumnWidthControl(ThemeData theme, ColorScheme colorScheme) {
+    final l10n = context.l10n;
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 12),
+      child: MenuAnchor(
+        builder: (context, controller, child) => Tooltip(
+          message: l10n.localGallery_columnWidth,
+          child: IconButton(
+            icon: Icon(
+              Icons.view_column_outlined,
+              size: 18,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            tooltip: l10n.localGallery_columnWidth,
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            padding: const EdgeInsets.all(6),
+            onPressed: () {
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
+              }
+            },
+          ),
+        ),
+        style: const MenuStyle(
+          padding: WidgetStatePropertyAll(EdgeInsets.zero),
+        ),
+        menuChildren: [
+          _ColumnWidthMenuPanel(
+            width: widget.columnWidth ?? 260,
+            onChanged: widget.onColumnWidthChanged,
+            onChangeEnd: widget.onColumnWidthChangeEnd,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 列宽设置弹层：Slider（140~480，步进 20）+ 实时「约 N 列」
+class _ColumnWidthMenuPanel extends StatelessWidget {
+  final double width;
+  final ValueChanged<double>? onChanged;
+  final ValueChanged<double>? onChangeEnd;
+
+  const _ColumnWidthMenuPanel({
+    required this.width,
+    this.onChanged,
+    this.onChangeEnd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    // 「约 N 列」按屏幕宽度估算（列宽越窄列数越多）
+    final approxColumns = (MediaQuery.of(context).size.width / width)
+        .round()
+        .clamp(1, 99);
+
+    return Container(
+      width: 280,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l10n.localGallery_columnWidth,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                l10n.localGallery_aboutColumns(approxColumns),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          Slider(
+            value: width,
+            min: 140,
+            max: 480,
+            divisions: 17,
+            label: '${width.round()}',
+            onChanged: onChanged,
+            onChangeEnd: onChangeEnd,
+          ),
+        ],
+      ),
     );
   }
 }
