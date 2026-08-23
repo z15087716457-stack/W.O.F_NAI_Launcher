@@ -84,6 +84,8 @@ class ModelSpec {
   final bool img2imgInpainting;
 
   /// 计费公式版本，供 `AnlasCalculator` 选择面积/步数系数分支。
+  ///
+  /// V4/V4.5 = 4（现代系数）；V5 = 5（同一套系数，结果整体 ×1.5）。
   final int billingVersion;
 
   /// 是否为 V4 及更高版本（提示词结构维度）。
@@ -159,6 +161,7 @@ class ModelSpecs {
     opusUsageLimit: true,
     freeformCharacterPosition: true,
     img2imgInpainting: true,
+    billingVersion: 5,
   );
 
   /// V3 及更早模型的能力集合。

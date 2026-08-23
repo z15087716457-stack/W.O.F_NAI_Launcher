@@ -85,7 +85,8 @@ void main() {
       expect(spec.characterPrompts, isTrue);
       expect(spec.isV4OrLater, isTrue);
       expect(spec.isV5, isTrue);
-      expect(spec.billingVersion, 4);
+      // 计费仍用 V4 系数，但记为版本 5：AnlasCalculator 会整体 ×1.5。
+      expect(spec.billingVersion, 5);
     });
 
     test('drops vibe transfer, precise reference and noise schedule', () {

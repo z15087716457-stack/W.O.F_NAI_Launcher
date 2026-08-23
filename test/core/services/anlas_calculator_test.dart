@@ -494,4 +494,99 @@ void main() {
       expect(prCost(steps: 40), greaterThan(0));
     });
   });
+
+  group('AnlasCalculator V5 pricing（V4 系数 ×1.5）', () {
+    // 官网 bundle：基础价按 V4 系数算出后 family===v5 则整体 ×1.5，
+    // 乘在 SMEA 之后、img2img 强度之前。Opus 免费资格不受乘数影响。
+    const v5 = 'nai-diffusion-5-full';
+
+    test('默认尺寸 1216×832@28：V4.5 的 20 → 30', () {
+      final v5Cost = AnlasCalculator.calculateFromValues(
+        width: 1216,
+        height: 832,
+        steps: 28,
+        nSamples: 1,
+        smea: false,
+        smeaDyn: false,
+        model: v5,
+      );
+      final v45Cost = AnlasCalculator.calculateFromValues(
+        width: 1216,
+        height: 832,
+        steps: 28,
+        nSamples: 1,
+        smea: false,
+        smeaDyn: false,
+        model: model,
+      );
+
+      expect(v45Cost, 20);
+      expect(v5Cost, 30);
+    });
+
+    test('乘数作用在 img2img 强度之前：832×1216@28 str0.7 = 21', () {
+      final cost = AnlasCalculator.calculateRequestCost(
+        width: 832,
+        height: 1216,
+        steps: 28,
+        batchCount: 1,
+        batchSize: 1,
+        smea: false,
+        smeaDyn: false,
+        model: v5,
+        strength: 0.7,
+      );
+
+      expect(cost, 21);
+    });
+
+    test('Opus 免费资格不受乘数影响：默认尺寸@28 仍免费', () {
+      final cost = AnlasCalculator.calculateRequestCost(
+        width: 1216,
+        height: 832,
+        steps: 28,
+        batchCount: 1,
+        batchSize: 1,
+        smea: false,
+        smeaDyn: false,
+        model: v5,
+        subscriptionTier: AnlasCalculator.opusTier,
+      );
+
+      expect(cost, 0);
+    });
+
+    test('V5 额度耗尽（opusUsageLimit）：不再免费，全额 30', () {
+      final cost = AnlasCalculator.calculateRequestCost(
+        width: 1216,
+        height: 832,
+        steps: 28,
+        batchCount: 1,
+        batchSize: 1,
+        smea: false,
+        smeaDyn: false,
+        model: v5,
+        subscriptionTier: AnlasCalculator.opusTier,
+        opusUsageExhausted: true,
+      );
+
+      expect(cost, 30);
+    });
+
+    test('超 1MP 大尺寸：1664×928@28 = 45（Opus 不免费但基础照加价）', () {
+      final cost = AnlasCalculator.calculateRequestCost(
+        width: 1664,
+        height: 928,
+        steps: 28,
+        batchCount: 1,
+        batchSize: 1,
+        smea: false,
+        smeaDyn: false,
+        model: v5,
+        subscriptionTier: AnlasCalculator.opusTier,
+      );
+
+      expect(cost, 45);
+    });
+  });
 }

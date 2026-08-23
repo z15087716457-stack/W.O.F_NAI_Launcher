@@ -39,6 +39,9 @@ class PromptTokenCounterService {
   }) : _encoder = encoder;
 
   static const int v4PromptTokenLimit = 512;
+
+  /// V5 提示词上限（静 2026-08-21 确认：正向合计 1471，负向合计同为 1471）。
+  static const int v5PromptTokenLimit = 1471;
   static const String _t5TokenizerAssetPath =
       'assets/data/tokenizers/t5_spiece.model';
 
@@ -49,10 +52,11 @@ class PromptTokenCounterService {
   }
 
   static int? tokenLimitForModel(String model) {
-    if (!supportsPromptTokenCount(model)) {
+    final spec = ModelSpecs.of(model);
+    if (!spec.v4Prompts) {
       return null;
     }
-    return v4PromptTokenLimit;
+    return spec.isV5 ? v5PromptTokenLimit : v4PromptTokenLimit;
   }
 
   static Future<PromptTokenCounterService> createDefault() async {

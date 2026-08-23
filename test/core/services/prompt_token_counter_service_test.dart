@@ -36,6 +36,28 @@ void main() {
       expect(result.isOverLimit, isFalse);
     });
 
+    test('countUsage should use the V5 token limit for V5 models', () async {
+      final service = PromptTokenCounterService(
+        encoder: _FakePromptTokenEncoder({
+          'prompt': 400,
+          'character': 140,
+        }),
+      );
+
+      final result = await service.countUsage(
+        model: 'nai-diffusion-5-full',
+        basePrompt: 'prompt',
+        characters: [
+          CharacterPrompt.create(name: 'A', prompt: 'character'),
+        ],
+      );
+
+      expect(result, isNotNull);
+      expect(result!.usedTokens, equals(541));
+      expect(result.limit, equals(1471));
+      expect(result.isOverLimit, isFalse);
+    });
+
     test('countUsage should report over-limit usage for supported V4 models',
         () async {
       final service = PromptTokenCounterService(

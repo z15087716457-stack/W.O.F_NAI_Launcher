@@ -5,8 +5,9 @@ import '../constants/model_spec.dart';
 
 /// Anlas 消耗计算器
 ///
-/// 当前 V3/V4 基础计费公式与 NovelAI 网页端一致；Vibe 与 Precise
-/// Reference 附加费遵循官方功能文档。服务端计费仍是最终依据。
+/// 当前 V3/V4 基础计费公式与 NovelAI 网页端一致；V5 家族在同一套系数上
+/// 整体 ×1.5（2026-08-21 取自官网 bundle）；Vibe 与 Precise Reference
+/// 附加费遵循官方功能文档。服务端计费仍是最终依据。
 class AnlasCalculator {
   AnlasCalculator._();
 
@@ -19,6 +20,11 @@ class AnlasCalculator {
   static const double _stepAreaCoefficient = 5.753298233447344e-7;
   static const int _vibeCost = 2;
   static const int _preciseReferenceCost = 5;
+
+  /// V5 家族加价系数：官网 bundle 在 V4 系数结果上整体 ×1.5（家族判定
+  /// `family === v5` 后 `perSample *= 1.5`），乘在 SMEA 之后、img2img
+  /// 强度之前。官方 novelai-api SDK 截至 0.34.1 尚无 V5 定价，勿以它为准。
+  static const double _v5CostMultiplier = 1.5;
 
   static bool _usesPreciseReferences(ImageParams params) {
     return params.isV45Model && params.hasPreciseReferences;
@@ -209,6 +215,11 @@ class AnlasCalculator {
           28;
     }
 
+    // V5 家族整体上浮 50%：与官网 bundle 同序，SMEA 之后、强度系数之前。
+    if (version == 5) {
+      perSample *= _v5CostMultiplier;
+    }
+
     // 应用 img2img 强度系数
     final int cost = math.max((perSample * strength).ceil(), 2);
     if (cost > maximumPerSampleCost) return invalidCost;
@@ -256,8 +267,9 @@ class AnlasCalculator {
 
   /// 获取模型计费版本号
   ///
-  /// V4 与 V5 共用 4 号计费系数（`ModelSpec.billingVersion`）；旧模型仍按
-  /// id 前缀判定，它们不在 [ModelSpecs] 注册表内。
+  /// V4/V4.5 与 V5 共用现代面积×步数系数（`ModelSpec.billingVersion`）；
+  /// V5 记为 5，计费时在系数结果上整体乘 1.5。旧模型仍按 id 前缀判定，
+  /// 它们不在 [ModelSpecs] 注册表内。
   static int _getModelVersion(String model) {
     final spec = ModelSpecs.of(model);
     if (spec.isV4OrLater) return spec.billingVersion;
