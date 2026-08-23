@@ -210,11 +210,32 @@ class OpusUsageChip extends ConsumerWidget {
                 '／上限 ${personal.opusAllowanceCap.toStringAsFixed(0)}%',
     );
     lines.add(
-      '账号额度涨了按 ${(personal.opusRefillShare * 100).toStringAsFixed(0)}% '
-      '分给我，跌了按实测扣',
+      usage.timeUntilNextPercent > 0
+          ? '回充中：下一 +1% 还需 ${_fmtCountdown(usage.timeUntilNextPercent)}'
+          : '当前不回充（池子在回充阈值之上或已用尽）',
+    );
+    lines.add(
+      '回充按服务端回充时钟入账分成，异常涨幅按 '
+      '${(personal.opusRefillShare * 100).toStringAsFixed(0)}% 分给我，'
+      '跌了按实测扣',
     );
 
     lines.add('点击刷新');
     return lines.join('\n');
+  }
+
+  /// 秒数倒计时格式化：1 小时 23 分 / 5 分 30 秒 / 42 秒
+  static String _fmtCountdown(int seconds) {
+    if (seconds >= 3600) {
+      final h = seconds ~/ 3600;
+      final m = (seconds % 3600) ~/ 60;
+      return m > 0 ? '$h 小时 $m 分' : '$h 小时';
+    }
+    if (seconds >= 60) {
+      final m = seconds ~/ 60;
+      final s = seconds % 60;
+      return s > 0 ? '$m 分 $s 秒' : '$m 分';
+    }
+    return '$seconds 秒';
   }
 }

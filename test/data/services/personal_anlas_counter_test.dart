@@ -16,6 +16,17 @@ void main() {
     return notifier;
   }
 
+  /// 带可拨动假时钟的容器：测回充节拍结算需要控制观测间隔
+  ProviderContainer clockContainer(DateTime Function() clock) {
+    return ProviderContainer(
+      overrides: [
+        personalAnlasCounterProvider.overrideWith(
+          () => PersonalAnlasCounter(clock: clock),
+        ),
+      ],
+    );
+  }
+
   group('PersonalAnlasCounter', () {
     test('初始状态 5000/0，配额 5000，重置日未设置', () async {
       SharedPreferences.setMockInitialValues({});
@@ -396,6 +407,142 @@ void main() {
       expect(s.opusAllowance, 50);
       expect(s.pendingOpusGenerations, 0);
       expect(s.lastObservedPoolPercent, isNull);
+      expect(s.lastObservedAt, isNull);
+      expect(s.lastSecondsToNextPercent, 0);
+      expect(s.poolCeilingPercent, 100);
+    });
+  });
+
+  group('PersonalAnlasCounter · 回充时钟结算（timeUntilNextPercent 为主）', () {
+    test('朋友消耗掩盖回充：回充仍按分成入账', () async {
+      var fakeNow = DateTime(2026, 8, 23, 12, 0, 0);
+      SharedPreferences.setMockInitialValues({});
+      final c = clockContainer(() => fakeNow);
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+      await n.updateOpusSettings(allowance: 10);
+
+      // 基线：池 40%，官方倒计时 60 秒回充 1%
+      await n.observeOpusUsage(poolPercent: 40, secondsToNextPercent: 60);
+      expect(c.read(personalAnlasCounterProvider).opusAllowance, 10);
+
+      // 2 分钟后：官方节拍回充 2 点，朋友同窗耗掉 2 点 → 池子仍 40；
+      // 回充照常入账 2 × 50% = 1
+      fakeNow = fakeNow.add(const Duration(minutes: 2));
+      await n.observeOpusUsage(poolPercent: 40, secondsToNextPercent: 60);
+
+      final s = c.read(personalAnlasCounterProvider);
+      expect(s.opusAllowance, closeTo(11, 1e-9));
+      expect(s.lastObservedPoolPercent, 40);
+      expect(s.lastSecondsToNextPercent, 60);
+    });
+
+    test('回充与我的在途消耗同窗：分成入账 + 按缺口扣', () async {
+      var fakeNow = DateTime(2026, 8, 23, 12, 0, 0);
+      SharedPreferences.setMockInitialValues({});
+      final c = clockContainer(() => fakeNow);
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+      await n.updateOpusSettings(allowance: 10);
+
+      await n.observeOpusUsage(poolPercent: 40, secondsToNextPercent: 60);
+      await n.recordOpusUsage(count: 2);
+
+      // 2 分钟后：回充 2 点，我耗 1 点 → 池子 41。
+      // 回充入账 +1，消耗扣 1，净值不变——两条流分开记
+      fakeNow = fakeNow.add(const Duration(minutes: 2));
+      await n.observeOpusUsage(poolPercent: 41, secondsToNextPercent: 60);
+
+      final s = c.read(personalAnlasCounterProvider);
+      expect(s.opusAllowance, closeTo(10, 1e-9));
+      expect(s.pendingOpusGenerations, 0);
+    });
+
+    test('NAI 全员 +100% 跳变：按分成入账并抬高池顶与上限', () async {
+      var fakeNow = DateTime(2026, 8, 23, 12, 0, 0);
+      SharedPreferences.setMockInitialValues({});
+      final c = clockContainer(() => fakeNow);
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+      await n.updateOpusSettings(allowance: 10);
+
+      // 池 99、不回充（阈值之上倒计时为 0）；30 秒后官方全员 +100%
+      await n.observeOpusUsage(poolPercent: 99, secondsToNextPercent: 0);
+      fakeNow = fakeNow.add(const Duration(seconds: 30));
+      await n.observeOpusUsage(poolPercent: 199, secondsToNextPercent: 0);
+
+      final s = c.read(personalAnlasCounterProvider);
+      expect(s.poolCeilingPercent, 199);
+      expect(s.opusAllowanceCap, closeTo(99.5, 1e-9));
+      // +100 × 50% = +50，未到新上限 99.5
+      expect(s.opusAllowance, closeTo(60, 1e-9));
+
+      // 补满按钮现在能补到新上限
+      await n.refillOpusAllowanceNow();
+      expect(
+        c.read(personalAnlasCounterProvider).opusAllowance,
+        closeTo(99.5, 1e-9),
+      );
+    });
+
+    test('回充量以池顶封顶：池顶之上不再计点', () async {
+      var fakeNow = DateTime(2026, 8, 23, 12, 0, 0);
+      SharedPreferences.setMockInitialValues({});
+      final c = clockContainer(() => fakeNow);
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+      await n.updateOpusSettings(allowance: 10);
+
+      // 池 99、倒计时 60 秒：池顶 100，回充值最多 1 点
+      await n.observeOpusUsage(poolPercent: 99, secondsToNextPercent: 60);
+      fakeNow = fakeNow.add(const Duration(minutes: 5));
+      await n.observeOpusUsage(poolPercent: 100, secondsToNextPercent: 0);
+
+      // 只入账 1 × 50% = 0.5（按池顶封顶）
+      expect(
+        c.read(personalAnlasCounterProvider).opusAllowance,
+        closeTo(10.5, 1e-9),
+      );
+    });
+
+    test('离线超 10 分钟：回充时钟不可信，回退纯实测结算', () async {
+      var fakeNow = DateTime(2026, 8, 23, 12, 0, 0);
+      SharedPreferences.setMockInitialValues({});
+      final c = clockContainer(() => fakeNow);
+      addTearDown(c.dispose);
+      final n = await bootCounter(c);
+      await n.updateOpusSettings(allowance: 10);
+
+      await n.observeOpusUsage(poolPercent: 60, secondsToNextPercent: 60);
+
+      // 2 小时后再看：不按倒计时推算，只按实测涨幅 20 × 50% = +10 结算
+      fakeNow = fakeNow.add(const Duration(hours: 2));
+      await n.observeOpusUsage(poolPercent: 80, secondsToNextPercent: 60);
+
+      expect(
+        c.read(personalAnlasCounterProvider).opusAllowance,
+        closeTo(20, 1e-9),
+      );
+    });
+
+    test('回充字段持久化并能回读', () async {
+      final fakeNow = DateTime(2026, 8, 23, 12, 0, 0);
+      SharedPreferences.setMockInitialValues({});
+      final c1 = clockContainer(() => fakeNow);
+      final n1 = await bootCounter(c1);
+      await n1.updateOpusSettings(allowance: 10);
+      await n1.observeOpusUsage(poolPercent: 150, secondsToNextPercent: 300);
+      c1.dispose();
+
+      // 复用同一份 mock 存储重建容器（真实时钟）
+      final c2 = ProviderContainer();
+      addTearDown(c2.dispose);
+      await bootCounter(c2);
+      final s = c2.read(personalAnlasCounterProvider);
+      expect(s.poolCeilingPercent, 150);
+      expect(s.lastSecondsToNextPercent, 300);
+      expect(s.lastObservedAt, fakeNow);
+      expect(s.lastObservedPoolPercent, 150);
     });
   });
 }

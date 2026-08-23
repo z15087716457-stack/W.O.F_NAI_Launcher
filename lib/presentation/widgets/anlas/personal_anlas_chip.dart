@@ -270,7 +270,7 @@ class _PersonalAnlasDialogState extends ConsumerState<PersonalAnlasDialog> {
                     '${counter.isOpusAllowanceExhausted ? '（已用尽，转 Anlas 计价）' : ''}\n'
                     '账号当前额度 '
                     '${counter.lastObservedPoolPercent == null ? '未观测' : '${counter.lastObservedPoolPercent!.toStringAsFixed(1)}%'}'
-                    '：涨多少按新增分成拿一部分，跌多少按实测扣',
+                    '：回充按服务端回充时钟入账，跌了按实测扣',
                     style: theme.textTheme.bodySmall,
                   ),
                 ),
@@ -304,7 +304,10 @@ class _PersonalAnlasDialogState extends ConsumerState<PersonalAnlasDialog> {
               '当前合计：${counter.totalRemaining}'
               '${counter.isOverdrawn ? '（已超支）' : ''}\n'
               '只统计本机生图消耗（含桥接），按界面显示单价扣减：\n先扣订阅、再扣购买。朋友的消耗不影响此账本。\n重置日留空=按订阅到期时间自动推断。\n'
-              'V5 免费额度是账号级共享池，这里记的是「我的份额」：\n单张耗多少、每小时回多少都是黑盒，一概不估算——\n只跟账号额度的实际变化走，跌了扣本机在途的那部分，涨了按新增分成入账。',
+              'V5 免费额度是账号级共享池，这里记的是「我的份额」：\n'
+              '回充按服务端回充时钟（timeUntilNextPercent）入账分成；\n'
+              '异常涨幅按分成入账并抬高池顶（上限=池顶×份额，池子可超 100%）；\n'
+              '跌幅只认本机在途生成的实测值；离线超 10 分钟回退纯实测涨跌结算。',
               style: theme.textTheme.bodySmall,
             ),
           ],
