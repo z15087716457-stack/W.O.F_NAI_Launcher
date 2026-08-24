@@ -2035,6 +2035,16 @@ class NovelAiParser implements MetadataParser {
           //   'UnifiedMetadataParser',
           // );
 
+          // 部分转存件把整张 tEXt 表序列化进单个 Comment 字段，
+          // Software/Source 指纹只在信封内层、外层 textData 没有这两个键，
+          // 外层优先、信封内层兜底
+          final envelopeSoftware =
+              json['Software'] as String? ?? json['software'] as String?;
+          final envelopeSource =
+              json['Source'] as String? ?? json['source'] as String?;
+          String? preferOuter(String? outer, String? inner) =>
+              (outer != null && outer.isNotEmpty) ? outer : inner;
+
           if (comment is String) {
             try {
               final commentJson = jsonDecode(comment) as Map<String, dynamic>;
@@ -2045,8 +2055,8 @@ class NovelAiParser implements MetadataParser {
 
               final wrappedResult = NaiImageMetadata.fromNaiComment({
                 'Comment': jsonEncode(commentJson),
-                'Software': textData['Software'],
-                'Source': textData['Source'],
+                'Software': preferOuter(textData['Software'], envelopeSoftware),
+                'Source': preferOuter(textData['Source'], envelopeSource),
               }, rawJson: text);
               // PortableLogger.d('NovelAiParser: Metadata created from nested Comment', 'UnifiedMetadataParser');
               return wrappedResult;
@@ -2063,8 +2073,8 @@ class NovelAiParser implements MetadataParser {
             try {
               final result = NaiImageMetadata.fromNaiComment({
                 'Comment': jsonEncode(comment),
-                'Software': textData['Software'],
-                'Source': textData['Source'],
+                'Software': preferOuter(textData['Software'], envelopeSoftware),
+                'Source': preferOuter(textData['Source'], envelopeSource),
               }, rawJson: text);
               PortableLogger.d(
                 'NovelAiParser: Metadata created from nested Comment Map',

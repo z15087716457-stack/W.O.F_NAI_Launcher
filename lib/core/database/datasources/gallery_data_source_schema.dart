@@ -33,10 +33,12 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
   ///
   /// 旧扫描行 model 为空，但 source/software/raw_json 里带模型指纹
   ///（V5 Source「NovelAI Diffusion V5 …」、params 新信封 model_name、
-  /// V3「Stable Diffusion XL <哈希>」、转存件指纹落 software 列等）；
-  /// 版本过滤直接读 model 列，必须落库。派生走与扫描一致的入口：
-  /// source → raw_json（[NovelAiParser] 全信封规则）→ software 兜底。
-  /// 无法推导的行（如 stealth V4.5）保持 NULL，与新扫描结果一致。
+  /// V3「Stable Diffusion XL <哈希>」、转存件指纹落 software 列、
+  /// 整 tEXt 表序列化进单个 Comment 字段的信封件指纹在 raw_json
+  /// 内层 Source 键等）；版本过滤直接读 model 列，必须落库。
+  /// 派生走与扫描一致的入口：source → raw_json（[NovelAiParser] 全信封
+  /// 规则）→ software 兜底。无法推导的行（如 stealth V4.5）保持 NULL，
+  /// 与新扫描结果一致。
   Future<void> _migrateBackfillModelColumn(Database db) async {
     try {
       await db.execute('''
@@ -47,17 +49,17 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       ''');
       final done = await db.rawQuery(
         "SELECT value FROM ${GalleryDataSource._galleryMetaTable} "
-        "WHERE key = 'model_backfill_v2'",
+        "WHERE key = 'model_backfill_v3'",
       );
       if (done.isNotEmpty) return;
 
       final updated = await _backfillModelColumnImpl(db);
       await db.insert(GalleryDataSource._galleryMetaTable, {
-        'key': 'model_backfill_v2',
+        'key': 'model_backfill_v3',
         'value': '$updated',
       });
       AppLogger.i(
-        '[Migration] model column backfill v2 done: $updated rows updated',
+        '[Migration] model column backfill v3 done: $updated rows updated',
         'GalleryDS',
       );
     } catch (e, stack) {
@@ -78,7 +80,7 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       FROM ${GalleryDataSource._metadataTable}
       WHERE has_metadata = 1 AND (model IS NULL OR model = '')
         AND (source LIKE '%Diffusion%' OR software LIKE '%Diffusion%'
-             OR raw_json LIKE '%model_name%')
+             OR raw_json LIKE '%model_name%' OR raw_json LIKE '%Diffusion%')
     ''');
     if (rows.isEmpty) return 0;
 

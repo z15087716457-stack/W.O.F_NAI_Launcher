@@ -352,5 +352,56 @@ void main() {
       expect(v4.files.map((f) => f.path).toSet(), {'/n/v4_hash.png'});
       expect(v45.files.map((f) => f.path).toSet(), {'/n/v45_hash.png'});
     });
+
+    test('backfillModelColumn fills model from nested tEXt envelope', () async {
+      // 转存件把整张 tEXt 表序列化进单个 Comment 字段：source/software
+      // 列为空，指纹在 raw_json 信封内层 Source 键
+      await addImage('/n/v45_envelope.png');
+      final id = (await dataSource.getImageIdByPath('/n/v45_envelope.png'))!;
+      await dataSource.upsertMetadata(
+        id,
+        const NaiImageMetadata(
+          prompt: '1girl',
+          rawJson:
+              '{"Description":"1girl","Software":"NovelAI",'
+              '"Source":"NovelAI Diffusion V4.5 4BDE2A90",'
+              '"Comment":"{\\"prompt\\":\\"1girl\\",\\"seed\\":1,'
+              '\\"v4_prompt\\":{\\"caption\\":{\\"base_caption\\":\\"1girl\\"}}}"}',
+        ),
+      );
+
+      await dataSource.backfillModelColumn();
+
+      final result = await filterService.applyFilters(
+        allFiles(['/n/v45_envelope.png']),
+        const FilterCriteria(filterModels: ['nai-diffusion-4-5-full']),
+      );
+      expect(result.files.map((f) => f.path).toSet(), {'/n/v45_envelope.png'});
+    });
+
+    test('backfillModelColumn fills V3 model from nested envelope SDXL hash',
+        () async {
+      await addImage('/n/v3_envelope.png');
+      final id = (await dataSource.getImageIdByPath('/n/v3_envelope.png'))!;
+      await dataSource.upsertMetadata(
+        id,
+        const NaiImageMetadata(
+          prompt: '1girl',
+          rawJson:
+              '{"Description":"1girl","Software":"NovelAI",'
+              '"Source":"Stable Diffusion XL 7BCCAA2C",'
+              '"Comment":"{\\"prompt\\":\\"1girl\\",\\"seed\\":1,'
+              '\\"signed_hash\\":\\"abc\\"}"}',
+        ),
+      );
+
+      await dataSource.backfillModelColumn();
+
+      final result = await filterService.applyFilters(
+        allFiles(['/n/v3_envelope.png']),
+        const FilterCriteria(filterModels: ['nai-diffusion-3']),
+      );
+      expect(result.files.map((f) => f.path).toSet(), {'/n/v3_envelope.png'});
+    });
   });
 }
