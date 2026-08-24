@@ -1204,8 +1204,9 @@ class NaiImageMetadata with _$NaiImageMetadata {
     }
 
     // V3 官方 Source 是「Stable Diffusion XL <哈希>」无版本字样
-    //（如 7BCCAA2C / C1E1DE52 / V1D1AP52），按结构识别
-    if (RegExp(r'^stable diffusion xl [0-9a-z]{6,10}$').hasMatch(normalized)) {
+    //（如 7BCCAA2C / C1E1DE52 / V1D1AP52，固定 8 位十六进制），
+    // 按结构识别；位数不符/非 hex 不判定，避免误吞非 NAI 的 XL 指纹
+    if (RegExp(r'^stable diffusion xl [0-9a-f]{8}$').hasMatch(normalized)) {
       return ImageModels.animeDiffusionV3;
     }
 

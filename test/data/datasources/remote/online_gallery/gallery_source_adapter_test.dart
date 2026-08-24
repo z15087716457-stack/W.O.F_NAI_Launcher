@@ -381,6 +381,11 @@ void main() {
                 ),
                 // 非 NAI 命名不判定，原文落标准 model 键
                 _naiEnvelopeImage('601_p2', model: 'Stable Diffusion XL abc123'),
+                // V3 官方指纹（8 位 hex）正常判定
+                _naiEnvelopeImage(
+                  '601_p3',
+                  source: 'Stable Diffusion XL 7BCCAA2C',
+                ),
               ],
             };
           }
@@ -404,7 +409,7 @@ void main() {
 
         final detail = await adapter.detail(item);
 
-        expect(detail.media, hasLength(3));
+        expect(detail.media, hasLength(4));
         final full = detail.media[0];
         expect(full.metadata['model'], 'nai-diffusion-4-5-full');
         expect(full.metadata['seed'], 12345);
@@ -419,6 +424,7 @@ void main() {
           'Stable Diffusion XL abc123',
         );
         expect(detail.media[2].metadata.containsKey('source_model'), isFalse);
+        expect(detail.media[3].metadata['model'], 'nai-diffusion-3');
       },
     );
 
