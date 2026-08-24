@@ -194,6 +194,8 @@ class CollectionRepository {
           unresolved++;
           continue;
         }
+        // 根-子集模型：入子集即入根（幂等补心形收藏，旧数据顺带修复）
+        await _dataSource.addFavorite(imageId);
         if (await _dataSource.addImageToCollection(collectionId, imageId)) {
           added++;
         } else {

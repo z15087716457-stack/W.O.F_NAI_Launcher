@@ -208,6 +208,89 @@ void main() {
         expect(await service.getFavoriteCount(), 1);
       },
     );
+
+    // 根-子集模型：从「收藏」根移除 = 取消心形收藏并清空所有收藏集成员关系
+    test(
+      'unfavoriteImages batch-removes from favorites and all collections',
+      () async {
+        final favFile = File(p.join(galleryRoot.path, 'fav.png'));
+        final plainFile = File(p.join(galleryRoot.path, 'plain.png'));
+        await favFile.writeAsBytes(<int>[137, 80, 78, 71]);
+        await plainFile.writeAsBytes(<int>[137, 80, 78, 71]);
+
+        final now = DateTime.now();
+        final favId = await dataSource.upsertImage(
+          filePath: favFile.path,
+          fileName: p.basename(favFile.path),
+          fileSize: await favFile.length(),
+          createdAt: now,
+          modifiedAt: now,
+        );
+        final plainId = await dataSource.upsertImage(
+          filePath: plainFile.path,
+          fileName: p.basename(plainFile.path),
+          fileSize: await plainFile.length(),
+          createdAt: now,
+          modifiedAt: now,
+        );
+
+        await service.initialize();
+        expect(await service.toggleFavorite(favFile.path), isTrue);
+
+        // 模拟集合成员关系（数据层直插，不经 repo 的自动入根）
+        final collectionId = await dataSource.createCollection('batch');
+        await dataSource.addImageToCollection(collectionId, favId);
+        await dataSource.addImageToCollection(collectionId, plainId);
+
+        final removed = await service.unfavoriteImages([
+          favFile.path,
+          plainFile.path,
+        ]);
+
+        // 返回=实际取消的心形数（fav）；plain 未心形不计入
+        expect(removed, 1);
+        expect(await dataSource.isFavorite(favId), isFalse);
+        // 从根移除 = 同时移出所有子集：两张图的集合成员关系全清
+        expect(await dataSource.getCollectionImageIds(collectionId), isEmpty);
+      },
+    );
+
+    test('soft-deleted favorites are no longer counted, even after refresh',
+        () async {
+      final fileA = File(p.join(galleryRoot.path, 'del_a.png'));
+      final fileB = File(p.join(galleryRoot.path, 'del_b.png'));
+      await fileA.writeAsBytes(<int>[137, 80, 78, 71]);
+      await fileB.writeAsBytes(<int>[137, 80, 78, 71]);
+
+      await service.initialize();
+      await service.toggleFavorite(fileA.path);
+      await service.toggleFavorite(fileB.path);
+      expect(await service.getFavoriteCount(), 2);
+
+      await dataSource.batchMarkAsDeleted([fileA.path]);
+      expect(await dataSource.getFavoriteCount(), 1);
+      expect(await service.getFavoriteCount(), 1);
+
+      // 软删后重扫/重放也不复活（DB is_deleted 为权威）
+      await service.refresh(scan: false);
+      expect(await service.getFavoriteCount(), 1);
+    });
+
+    test('toggling favorite off also leaves all collections', () async {
+      final file = File(p.join(galleryRoot.path, 'toggle_off.png'));
+      await file.writeAsBytes(<int>[137, 80, 78, 71]);
+
+      await service.initialize();
+      expect(await service.toggleFavorite(file.path), isTrue);
+
+      final imageId = (await dataSource.getImageIdByPath(file.path))!;
+      final collectionId = await dataSource.createCollection('toggle');
+      await dataSource.addImageToCollection(collectionId, imageId);
+
+      expect(await service.toggleFavorite(file.path), isFalse);
+      expect(await dataSource.isFavorite(imageId), isFalse);
+      expect(await dataSource.getCollectionImageIds(collectionId), isEmpty);
+    });
   });
 }
 

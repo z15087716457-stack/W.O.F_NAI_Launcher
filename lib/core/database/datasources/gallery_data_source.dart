@@ -10,6 +10,7 @@ import '../../../data/models/gallery/gallery_collection_info.dart';
 import '../../../data/models/gallery/gallery_dashboard_snapshot.dart';
 import '../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../data/services/image_metadata_service.dart';
+import '../../../data/services/metadata/unified_metadata_parser.dart';
 import '../../utils/app_logger.dart';
 import '../../utils/tag_normalizer.dart';
 import '../base_data_source.dart';
@@ -47,6 +48,29 @@ class GalleryDataSource extends EnhancedBaseDataSource
   static const String _ftsIndexTable = 'gallery_fts_index';
   static const String _collectionsTable = 'gallery_collections';
   static const String _collectionItemsTable = 'gallery_collection_items';
+
+  /// 一次性迁移/回填作业的完成标记（key=value 小表，见 schema 迁移区）
+  static const String _galleryMetaTable = 'gallery_meta';
+
+  /// NAI-only 过滤的 SQL 条件（别名 `m` = gallery_metadata）。
+  ///
+  /// has_metadata=1 只代表「读出了生成参数」，A1111/ComfyUI 等别家工具的
+  /// 图同样会命中。真 NAI 图按三通道识别，任一命中即算：
+  /// - software/source 含 NovelAI 指纹（官方下载件、EXIF Source 指纹）
+  /// - model 为官方 slug（nai-diffusion-*）
+  /// - raw_json 含 NAI 请求特征键（ucPreset/request_type/v4_prompt/
+  ///   signed_hash/noise_schedule）——stealth 隐写图无 software 时靠它
+  static const String _naiOnlyCondition =
+      'COALESCE(m.has_metadata, 0) = 1 AND ('
+      "m.software LIKE '%NovelAI%' "
+      "OR m.source LIKE '%NovelAI%' "
+      "OR m.model LIKE 'nai-diffusion%' "
+      "OR m.raw_json LIKE '%ucPreset%' "
+      "OR m.raw_json LIKE '%request_type%' "
+      "OR m.raw_json LIKE '%v4_prompt%' "
+      "OR m.raw_json LIKE '%signed_hash%' "
+      "OR m.raw_json LIKE '%noise_schedule%'"
+      ')';
 
   // LRU 缓存
   final LRUCache<int, GalleryImageRecord> _imageCache = LRUCache(
@@ -1305,6 +1329,57 @@ class GalleryDataSource extends EnhancedBaseDataSource
   // ============================================================
   // 收藏操作
   // ============================================================
+
+  /// 幂等添加收藏（已在收藏表中则无操作）——「入子集即入根」用。
+  ///
+  /// 返回是否真正新插入。
+  Future<bool> addFavorite(int imageId) async {
+    final inserted = await execute('addFavorite', (db) async {
+      // rawUpdate 返回 sqlite3_changes()：新插入=1、OR IGNORE 跳过=0
+      return db.rawUpdate(
+        'INSERT OR IGNORE INTO $_favoritesTable (image_id, favorited_at) '
+        'VALUES (?, ?)',
+        [imageId, DateTime.now().millisecondsSinceEpoch],
+      );
+    });
+    if (inserted == 1) {
+      _favoriteCache.add(imageId);
+      _markDataChanged();
+      AppLogger.d('Added favorite (idempotent): $imageId', 'GalleryDS');
+      return true;
+    }
+    return false;
+  }
+
+  /// 批量取消收藏（从「收藏」根移除），返回实际取消的图片数。
+  Future<int> removeFavorites(List<int> imageIds) async {
+    if (imageIds.isEmpty) return 0;
+
+    var removed = 0;
+    const batchSize = 900;
+    for (final chunk in chunk(imageIds, batchSize)) {
+      final placeholders = List.filled(chunk.length, '?').join(',');
+      removed += await execute(
+        'removeFavorites',
+        (db) async {
+          return db.rawDelete(
+            'DELETE FROM $_favoritesTable WHERE image_id IN ($placeholders)',
+            chunk,
+          );
+        },
+        timeout: const Duration(seconds: 10),
+        maxRetries: 3,
+      );
+    }
+    for (final id in imageIds) {
+      _favoriteCache.remove(id);
+    }
+    if (removed > 0) {
+      _markDataChanged();
+      AppLogger.i('Removed $removed favorites in batch', 'GalleryDS');
+    }
+    return removed;
+  }
 
   Future<bool> toggleFavorite(int imageId) async {
     final isFavorite = await execute(

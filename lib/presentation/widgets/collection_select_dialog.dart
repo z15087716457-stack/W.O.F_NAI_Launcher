@@ -13,9 +13,13 @@ class CollectionSelectResult {
   final String collectionId;
   final String collectionName;
 
+  /// 是否为「收藏」根（批量取消心形收藏，而非从某个收藏集移除）
+  final bool isFavoriteRoot;
+
   const CollectionSelectResult({
     required this.collectionId,
     required this.collectionName,
+    this.isFavoriteRoot = false,
   });
 }
 
@@ -31,11 +35,15 @@ class CollectionSelectDialog extends ConsumerStatefulWidget {
   /// 当前多选的图片路径；移除模式下用于标注各集合包含几张选中图片
   final List<String> selectedImagePaths;
 
+  /// 选中图片中是心形收藏（「收藏」根成员）的张数；移除模式根条目标注用
+  final int favoriteCountInSelection;
+
   const CollectionSelectDialog({
     super.key,
     required this.theme,
     this.isRemoveMode = false,
     this.selectedImagePaths = const [],
+    this.favoriteCountInSelection = 0,
   });
 
   /// 显示集合选择对话框
@@ -46,6 +54,7 @@ class CollectionSelectDialog extends ConsumerStatefulWidget {
     required ThemeData theme,
     bool isRemoveMode = false,
     List<String> selectedImagePaths = const [],
+    int favoriteCountInSelection = 0,
   }) {
     return showDialog<CollectionSelectResult>(
       context: context,
@@ -53,6 +62,7 @@ class CollectionSelectDialog extends ConsumerStatefulWidget {
         theme: theme,
         isRemoveMode: isRemoveMode,
         selectedImagePaths: selectedImagePaths,
+        favoriteCountInSelection: favoriteCountInSelection,
       ),
     );
   }
@@ -193,6 +203,12 @@ class _CollectionSelectDialogState
     );
   }
 
+  /// 「收藏」根条目是否按当前搜索过滤匹配
+  bool _rootMatchesFilter(AppLocalizations l10n) {
+    if (_filterQuery.isEmpty) return true;
+    return l10n.common_favorite.toLowerCase().contains(_filterQuery);
+  }
+
   /// 构建集合列表
   Widget _buildCollectionList(
     ThemeData theme,
@@ -205,8 +221,11 @@ class _CollectionSelectDialogState
     }
 
     final filteredCollections = _getFilteredCollections(collections);
+    // 移除模式：顶部始终提供「收藏」根条目（根=总收藏，子集=根的细分）
+    final rootVisible = widget.isRemoveMode && _rootMatchesFilter(l10n);
+    final hasAnyEntry = filteredCollections.isNotEmpty || rootVisible;
 
-    if (collections.isEmpty) {
+    if (!hasAnyEntry && collections.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -237,7 +256,7 @@ class _CollectionSelectDialogState
       );
     }
 
-    if (filteredCollections.isEmpty) {
+    if (!hasAnyEntry) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -260,11 +279,51 @@ class _CollectionSelectDialogState
     }
 
     return ListView.builder(
-      itemCount: filteredCollections.length,
+      itemCount: filteredCollections.length + (rootVisible ? 1 : 0),
       itemBuilder: (context, index) {
-        final collection = filteredCollections[index];
+        if (rootVisible && index == 0) {
+          return _buildFavoriteRootTile(theme, l10n);
+        }
+        final collection = filteredCollections[index - (rootVisible ? 1 : 0)];
         return _buildCollectionTile(theme, l10n, collection);
       },
+    );
+  }
+
+  /// 「收藏」根条目：移除模式下从根移除 = 取消心形收藏并移出所有集合
+  Widget _buildFavoriteRootTile(ThemeData theme, AppLocalizations l10n) {
+    final memberCount = widget.favoriteCountInSelection;
+    final hasNone = memberCount == 0;
+
+    return Opacity(
+      opacity: hasNone ? 0.45 : 1.0,
+      child: ListTile(
+        leading: Icon(
+          Icons.favorite,
+          color: Colors.red.shade400,
+        ),
+        title: Text(
+          l10n.common_favorite,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        subtitle: Text(
+          memberCount > 0
+              ? l10n.collectionSelect_memberCountInFavorites(memberCount)
+              : l10n.collectionSelect_noSelectedInCollection,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.outline,
+          ),
+        ),
+        onTap: () => Navigator.of(context).pop(
+          CollectionSelectResult(
+            collectionId: 'favorites',
+            collectionName: l10n.common_favorite,
+            isFavoriteRoot: true,
+          ),
+        ),
+      ),
     );
   }
 

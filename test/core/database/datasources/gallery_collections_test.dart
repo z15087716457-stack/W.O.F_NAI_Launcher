@@ -176,5 +176,67 @@ void main() {
       final list = await dataSource.listCollectionsWithCounts();
       expect(list.single.imageCount, 1);
     });
+
+    // 收藏根-子集模型：根（gallery_favorites）= 总收藏，子集 = 根的细分
+    test('addFavorite is idempotent and removeFavorites batches', () async {
+      final img1 = await addImage('/col/f1.png');
+      final img2 = await addImage('/col/f2.png');
+
+      expect(await dataSource.addFavorite(img1), isTrue);
+      expect(await dataSource.addFavorite(img1), isFalse); // 幂等
+      expect(await dataSource.isFavorite(img1), isTrue);
+      expect(await dataSource.getFavoriteCount(), 1);
+
+      // 批量取消：img1 在收藏表、img2 不在 → 返回实际取消数 1
+      expect(await dataSource.removeFavorites([img1, img2]), 1);
+      expect(await dataSource.isFavorite(img1), isFalse);
+      expect(await dataSource.getFavoriteCount(), 0);
+    });
+
+    test('removeImagesFromAllCollections clears every membership', () async {
+      final idA = await dataSource.createCollection('A');
+      final idB = await dataSource.createCollection('B');
+      final img1 = await addImage('/col/m1.png');
+      final img2 = await addImage('/col/m2.png');
+      await dataSource.addImageToCollection(idA, img1);
+      await dataSource.addImageToCollection(idA, img2);
+      await dataSource.addImageToCollection(idB, img2);
+
+      expect(
+        await dataSource.removeImagesFromAllCollections([img1, img2]),
+        3,
+      );
+      expect(await dataSource.getCollectionImageIds(idA), isEmpty);
+      expect(await dataSource.getCollectionImageIds(idB), isEmpty);
+      // 只清成员关系，不碰收藏表
+      expect(await dataSource.getCollectionIdsForImage(img2), isEmpty);
+    });
+
+    test('migration backfills existing collection members into favorites',
+        () async {
+      final id = await dataSource.createCollection('M');
+      final img = await addImage('/col/mig1.png');
+      await dataSource.addImageToCollection(id, img);
+      expect(await dataSource.isFavorite(img), isFalse); // 旧数据：未入收藏表
+
+      // 清除迁移完成标记并重置数据源状态，模拟旧库下次启动重跑迁移
+      await dataSource.execute(
+        'test_clear_migration_flag',
+        (db) => db.delete(
+          'gallery_meta',
+          where: "key = 'favorites_collection_members_v1'",
+        ),
+      );
+      await dataSource.dispose();
+      await dataSource.initialize();
+
+      expect(await dataSource.isFavorite(img), isTrue);
+      expect(await dataSource.getFavoriteCount(), 1);
+
+      // 幂等：标记已落，再次初始化不重复补写
+      await dataSource.dispose();
+      await dataSource.initialize();
+      expect(await dataSource.getFavoriteCount(), 1);
+    });
   });
 }

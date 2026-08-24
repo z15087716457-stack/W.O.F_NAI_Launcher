@@ -5213,6 +5213,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_notInCollection => '所选图片不在该集合中';
 
   @override
+  String localGallery_removedFromFavorites(Object count) {
+    return '已从「收藏」移除 $count 张图片';
+  }
+
+  @override
   String get localGallery_alreadyInCollection => '所选图片已在该集合中';
 
   @override
@@ -5362,6 +5367,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get collectionSelect_noSelectedInCollection => '无选中图片在此集合';
+
+  @override
+  String collectionSelect_memberCountInFavorites(Object n) {
+    return '选中 $n 张在此收藏';
+  }
 
   @override
   String get collectionSelect_filterHint => '搜索集合...';

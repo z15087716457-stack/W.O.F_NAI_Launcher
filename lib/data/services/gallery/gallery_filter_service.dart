@@ -57,7 +57,8 @@ class FilterCriteria {
   /// 收藏集过滤（membership，链接式）
   final String? collectionId;
 
-  /// 仅 NAI 图（metadata 表 has_metadata = 1）。
+  /// 仅真 NAI 图（有元数据且命中 NovelAI 指纹/官方 model slug/NAI 特征键，
+  /// 见 GalleryDataSource._naiOnlyCondition）。
   /// 默认 false：生效来源是持久化偏好（进画廊时恢复，偏好默认 true）。
   final bool naiOnly;
 

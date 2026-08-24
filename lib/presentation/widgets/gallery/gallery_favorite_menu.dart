@@ -89,9 +89,15 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
     final nowMember = await ref
         .read(collectionNotifierProvider.notifier)
         .toggleImageInCollection(collectionId, widget.record.path);
+    // 入子集即入根：同步当前页记录，缩略图/预览图红心即时点亮
+    final syncedIsFav = await ref
+        .read(localGalleryNotifierProvider.notifier)
+        .syncFavoriteStatus(widget.record.path);
     if (!mounted) return;
     setState(() {
       _busy = false;
+      // null=查询失败，保持原状态
+      if (syncedIsFav != null) _isFavorite = syncedIsFav;
       if (_memberCollectionIds != null) {
         if (nowMember) {
           _memberCollectionIds!.add(collectionId);

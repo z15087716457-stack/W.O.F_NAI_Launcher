@@ -24,7 +24,7 @@ extension GalleryDataSourceAdvancedSearch on GalleryDataSource {
     double? maxCfg,
     String? nsfwMode,
 
-    /// 仅 NAI 图（metadata 表 has_metadata = 1）
+    /// 仅真 NAI 图（[GalleryDataSource._naiOnlyCondition]，排除别家工具的参数图）
     bool naiOnly = false,
 
     /// 排序字段（仅接受 [GallerySort.sqlColumn] 白名单值，内部再校验）
@@ -196,8 +196,9 @@ extension GalleryDataSourceAdvancedSearch on GalleryDataSource {
               naiOnly;
 
           if (naiOnly) {
-            // 只保留带 NAI 元数据的图片（无 metadata 行的 LEFT JOIN 结果为 0）
-            conditions.add('COALESCE(m.has_metadata, 0) = 1');
+            // 只保留真 NAI 图（排除 A1111/ComfyUI 等读出参数的非 NAI 图；
+            // 无 metadata 行的 LEFT JOIN 结果各字段为 NULL，自然不命中）
+            conditions.add(GalleryDataSource._naiOnlyCondition);
           }
 
           if (models != null && models.isNotEmpty) {

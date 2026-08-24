@@ -145,6 +145,29 @@ extension GalleryDataSourceCollections on GalleryDataSource {
     return deleted > 0;
   }
 
+  /// 从所有收藏集移除图片（图片 ID 为空时无操作）
+  ///
+  /// 「从收藏根移除」语义：取消心形收藏时，同时清掉该图在全部集合里的
+  /// 成员关系（根=总收藏，子集=根的细分）。返回删除的成员关系行数。
+  Future<int> removeImagesFromAllCollections(List<int> imageIds) async {
+    if (imageIds.isEmpty) return 0;
+
+    var removed = 0;
+    const batchSize = 900;
+    for (final chunk in chunk(imageIds, batchSize)) {
+      final placeholders = List.filled(chunk.length, '?').join(',');
+      removed += await execute('removeImagesFromAllCollections', (db) async {
+        return db.rawDelete(
+          'DELETE FROM ${GalleryDataSource._collectionItemsTable} '
+          'WHERE image_id IN ($placeholders)',
+          chunk,
+        );
+      });
+    }
+    if (removed > 0) _markDataChanged();
+    return removed;
+  }
+
   /// 收藏集内图片 ID 列表（按加入时间升序）
   Future<List<int>> getCollectionImageIds(String collectionId) async {
     if (collectionId.isEmpty) return const [];

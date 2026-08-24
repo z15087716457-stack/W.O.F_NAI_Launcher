@@ -2538,6 +2538,12 @@
     }
   },
   "localGallery_notInCollection": "Selected images are not in this collection",
+  "localGallery_removedFromFavorites": "Removed {count} images from Favorites",
+  "@localGallery_removedFromFavorites": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "localGallery_alreadyInCollection": "Images already in this collection",
   "brushPreset_selectHint": "Double tap to select this brush preset",
   "brushPreset_pencil": "Pencil",
@@ -2665,6 +2671,12 @@
     }
   },
   "collectionSelect_noSelectedInCollection": "No selected images in this collection",
+  "collectionSelect_memberCountInFavorites": "{n} selected in favorites",
+  "@collectionSelect_memberCountInFavorites": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "collectionSelect_filterHint": "Search collections...",
   "collectionSelect_noCollections": "No collections",
   "collectionSelect_createCollectionHint": "Create a collection first",

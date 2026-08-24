@@ -9715,6 +9715,12 @@ abstract class AppLocalizations {
   /// **'Selected images are not in this collection'**
   String get localGallery_notInCollection;
 
+  /// No description provided for @localGallery_removedFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {count} images from Favorites'**
+  String localGallery_removedFromFavorites(Object count);
+
   /// No description provided for @localGallery_alreadyInCollection.
   ///
   /// In en, this message translates to:
@@ -9960,6 +9966,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No selected images in this collection'**
   String get collectionSelect_noSelectedInCollection;
+
+  /// No description provided for @collectionSelect_memberCountInFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} selected in favorites'**
+  String collectionSelect_memberCountInFavorites(Object n);
 
   /// No description provided for @collectionSelect_filterHint.
   ///

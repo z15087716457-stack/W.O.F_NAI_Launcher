@@ -2538,6 +2538,12 @@
     }
   },
   "localGallery_notInCollection": "選択した画像はこのコレクションにありません",
+  "localGallery_removedFromFavorites": "お気に入りから{count}枚を削除しました",
+  "@localGallery_removedFromFavorites": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "localGallery_alreadyInCollection": "画像は既にこのコレクションに含まれています",
   "brushPreset_selectHint": "ダブルタップしてこのブラシ プリセットを選択します",
   "brushPreset_pencil": "鉛筆",
@@ -2665,6 +2671,12 @@
     }
   },
   "collectionSelect_noSelectedInCollection": "選択中の画像は含まれません",
+  "collectionSelect_memberCountInFavorites": "お気に入り内に選択中の{n}枚が含まれます",
+  "@collectionSelect_memberCountInFavorites": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "collectionSelect_filterHint": "コレクションを検索...",
   "collectionSelect_noCollections": "コレクションはありません",
   "collectionSelect_createCollectionHint": "最初にコレクションを作成してください",

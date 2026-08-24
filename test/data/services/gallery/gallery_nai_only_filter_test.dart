@@ -166,5 +166,191 @@ void main() {
       expect(off.files.length, 1);
       expect(on.criteria, isNot(off.criteria));
     });
+
+    test('naiOnly excludes WebUI/A1111 parameter images', () async {
+      await addImage('/n/webui.png');
+      final id = (await dataSource.getImageIdByPath('/n/webui.png'))!;
+      await dataSource.upsertMetadata(
+        id,
+        const NaiImageMetadata(
+          prompt: '1girl',
+          seed: 401227857,
+          sampler: 'Euler',
+          steps: 50,
+          scale: 5.0,
+          model: '3c1868387a',
+          software: 'Stable Diffusion WebUI',
+          rawJson: '1girl\nNegative prompt: lowres\nSteps: 50, Sampler: Euler',
+        ),
+      );
+
+      final result = await filterService.applyFilters(
+        allFiles(['/n/webui.png']),
+        const FilterCriteria(naiOnly: true),
+      );
+
+      expect(result.files, isEmpty);
+    });
+
+    test('naiOnly keeps stealth NAI images without software fingerprint', () async {
+      await addImage('/n/stealth.png');
+      final id = (await dataSource.getImageIdByPath('/n/stealth.png'))!;
+      await dataSource.upsertMetadata(
+        id,
+        const NaiImageMetadata(
+          prompt: '1girl',
+          seed: 123,
+          rawJson:
+              '{"prompt":"1girl","uc":"lowres","ucPreset":0,'
+              '"request_type":"TextToImageRequest","noise_schedule":"karras"}',
+        ),
+      );
+
+      final result = await filterService.applyFilters(
+        allFiles(['/n/stealth.png']),
+        const FilterCriteria(naiOnly: true),
+      );
+
+      expect(result.files.map((f) => f.path).toSet(), {'/n/stealth.png'});
+    });
+
+    test('naiOnly keeps official downloads by NovelAI software tag', () async {
+      await addImage('/n/official.png');
+      final id = (await dataSource.getImageIdByPath('/n/official.png'))!;
+      await dataSource.upsertMetadata(
+        id,
+        const NaiImageMetadata(prompt: '1girl', software: 'NovelAI'),
+      );
+
+      final result = await filterService.applyFilters(
+        allFiles(['/n/official.png']),
+        const FilterCriteria(naiOnly: true),
+      );
+
+      expect(result.files.map((f) => f.path).toSet(), {'/n/official.png'});
+    });
+
+    test('backfillModelColumn fills model from V5 source fingerprint', () async {
+      await addImage('/n/v5_src.png');
+      final id = (await dataSource.getImageIdByPath('/n/v5_src.png'))!;
+      await dataSource.upsertMetadata(
+        id,
+        const NaiImageMetadata(
+          prompt: '1girl',
+          source: 'NovelAI Diffusion V5 0ADF9AB7',
+          software: 'NovelAI',
+        ),
+      );
+
+      final updated = await dataSource.backfillModelColumn();
+      expect(updated, greaterThanOrEqualTo(1));
+
+      final result = await filterService.applyFilters(
+        allFiles(['/n/v5_src.png']),
+        const FilterCriteria(filterModels: ['nai-diffusion-5-full']),
+      );
+      expect(result.files.map((f) => f.path).toSet(), {'/n/v5_src.png'});
+    });
+
+    test('backfillModelColumn fills model from V5 params envelope', () async {
+      await addImage('/n/v5_params.png');
+      final id = (await dataSource.getImageIdByPath('/n/v5_params.png'))!;
+      await dataSource.upsertMetadata(
+        id,
+        const NaiImageMetadata(
+          prompt: '1girl',
+          rawJson:
+              '{"description":"d","software":"NovelAI",'
+              '"params":{"prompt":"1girl","seed":1,'
+              '"model_name":"NovelAI Diffusion V5",'
+              '"model_hash":"0ADF9AB7","version":1}}',
+        ),
+      );
+
+      await dataSource.backfillModelColumn();
+
+      final result = await filterService.applyFilters(
+        allFiles(['/n/v5_params.png']),
+        const FilterCriteria(filterModels: ['nai-diffusion-5-full']),
+      );
+      expect(result.files.map((f) => f.path).toSet(), {'/n/v5_params.png'});
+    });
+
+    test('backfillModelColumn leaves underivable rows untouched', () async {
+      await addImage('/n/stealth45.png');
+      final id = (await dataSource.getImageIdByPath('/n/stealth45.png'))!;
+      await dataSource.upsertMetadata(
+        id,
+        const NaiImageMetadata(
+          prompt: '1girl',
+          rawJson: '{"prompt":"1girl","uc":"lowres","seed":1}',
+        ),
+      );
+
+      await dataSource.backfillModelColumn();
+
+      final result = await filterService.applyFilters(
+        allFiles(['/n/stealth45.png']),
+        const FilterCriteria(filterModels: ['nai-diffusion-4-5-full']),
+      );
+      expect(result.files, isEmpty);
+    });
+
+    test('backfillModelColumn fills model from software-column fingerprint', () async {
+      // 转存件把 Source 指纹写进 software 列（EXIF 工具链），也要能回填
+      await addImage('/n/v3_sw.png');
+      final id = (await dataSource.getImageIdByPath('/n/v3_sw.png'))!;
+      await dataSource.upsertMetadata(
+        id,
+        const NaiImageMetadata(
+          prompt: '1girl',
+          software: 'Stable Diffusion XL 7BCCAA2C',
+        ),
+      );
+
+      await dataSource.backfillModelColumn();
+
+      final result = await filterService.applyFilters(
+        allFiles(['/n/v3_sw.png']),
+        const FilterCriteria(filterModels: ['nai-diffusion-3']),
+      );
+      expect(result.files.map((f) => f.path).toSet(), {'/n/v3_sw.png'});
+    });
+
+    test('backfillModelColumn defaults unknown V4/V4.5 hashes to Full', () async {
+      await addImage('/n/v4_hash.png');
+      final id = (await dataSource.getImageIdByPath('/n/v4_hash.png'))!;
+      await dataSource.upsertMetadata(
+        id,
+        const NaiImageMetadata(
+          prompt: '1girl',
+          source: 'NovelAI Diffusion V4 37442FCA',
+          software: 'NovelAI',
+        ),
+      );
+      await addImage('/n/v45_hash.png');
+      final id2 = (await dataSource.getImageIdByPath('/n/v45_hash.png'))!;
+      await dataSource.upsertMetadata(
+        id2,
+        const NaiImageMetadata(
+          prompt: '1girl',
+          source: 'NovelAI Diffusion V4.5 1229B44F',
+          software: 'NovelAI',
+        ),
+      );
+
+      await dataSource.backfillModelColumn();
+
+      final v4 = await filterService.applyFilters(
+        allFiles(['/n/v4_hash.png']),
+        const FilterCriteria(filterModels: ['nai-diffusion-4-full']),
+      );
+      final v45 = await filterService.applyFilters(
+        allFiles(['/n/v45_hash.png']),
+        const FilterCriteria(filterModels: ['nai-diffusion-4-5-full']),
+      );
+      expect(v4.files.map((f) => f.path).toSet(), {'/n/v4_hash.png'});
+      expect(v45.files.map((f) => f.path).toSet(), {'/n/v45_hash.png'});
+    });
   });
 }

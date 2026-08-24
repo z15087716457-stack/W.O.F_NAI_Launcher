@@ -19,8 +19,150 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       // 迁移：添加 is_nsfw 列（如果缺失）
       await _migrateAddIsNsfw(db);
 
+      // 迁移：回填历史行的 model 列（一次性，gallery_meta 记完成标记）
+      await _migrateBackfillModelColumn(db);
+
+      // 迁移：收藏集成员补写进收藏表（一次性，gallery_meta 记完成标记）
+      await _migrateCollectionMembersToFavorites(db);
+
       AppLogger.i('Gallery tables initialized', 'GalleryDS');
     });
+  }
+
+  /// 迁移：回填历史元数据行的 model 列（按版本一次性）。
+  ///
+  /// 旧扫描行 model 为空，但 source/software/raw_json 里带模型指纹
+  ///（V5 Source「NovelAI Diffusion V5 …」、params 新信封 model_name、
+  /// V3「Stable Diffusion XL <哈希>」、转存件指纹落 software 列等）；
+  /// 版本过滤直接读 model 列，必须落库。派生走与扫描一致的入口：
+  /// source → raw_json（[NovelAiParser] 全信封规则）→ software 兜底。
+  /// 无法推导的行（如 stealth V4.5）保持 NULL，与新扫描结果一致。
+  Future<void> _migrateBackfillModelColumn(Database db) async {
+    try {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ${GalleryDataSource._galleryMetaTable} (
+          key TEXT PRIMARY KEY,
+          value TEXT
+        )
+      ''');
+      final done = await db.rawQuery(
+        "SELECT value FROM ${GalleryDataSource._galleryMetaTable} "
+        "WHERE key = 'model_backfill_v2'",
+      );
+      if (done.isNotEmpty) return;
+
+      final updated = await _backfillModelColumnImpl(db);
+      await db.insert(GalleryDataSource._galleryMetaTable, {
+        'key': 'model_backfill_v2',
+        'value': '$updated',
+      });
+      AppLogger.i(
+        '[Migration] model column backfill v2 done: $updated rows updated',
+        'GalleryDS',
+      );
+    } catch (e, stack) {
+      // 迁移失败不阻止应用启动
+      AppLogger.e(
+        '[Migration] Failed to backfill model column',
+        e,
+        stack,
+        'GalleryDS',
+      );
+    }
+  }
+
+  /// 按 source/software/raw_json 指纹回填 model 列，返回更新行数。
+  Future<int> _backfillModelColumnImpl(Database db) async {
+    final rows = await db.rawQuery('''
+      SELECT image_id, source, software, raw_json
+      FROM ${GalleryDataSource._metadataTable}
+      WHERE has_metadata = 1 AND (model IS NULL OR model = '')
+        AND (source LIKE '%Diffusion%' OR software LIKE '%Diffusion%'
+             OR raw_json LIKE '%model_name%')
+    ''');
+    if (rows.isEmpty) return 0;
+
+    var updated = 0;
+    final batch = db.batch();
+    for (final row in rows) {
+      final source = row['source'] as String?;
+      final software = row['software'] as String?;
+      final rawJson = row['raw_json'] as String?;
+
+      String? derived;
+      if (source != null && source.isNotEmpty) {
+        derived = NaiImageMetadata.modelIdFromFingerprint(source);
+      }
+      if (derived == null && rawJson != null && rawJson.isNotEmpty) {
+        derived = NovelAiParser().parse({'Comment': rawJson})?.model;
+      }
+      if (derived == null && software != null && software.isNotEmpty) {
+        derived = NaiImageMetadata.modelIdFromFingerprint(software);
+      }
+      if (derived == null) continue;
+
+      batch.update(
+        GalleryDataSource._metadataTable,
+        {'model': derived},
+        where: 'image_id = ?',
+        whereArgs: [(row['image_id'] as num).toInt()],
+      );
+      updated++;
+    }
+    if (updated > 0) {
+      await batch.commit(noResult: true);
+    }
+    return updated;
+  }
+
+  /// 迁移：收藏集成员补写进收藏表（按版本一次性）。
+  ///
+  /// 旧版本收藏集与心形收藏是两套独立系统：只进集合、未心形的图在
+  /// 「收藏」根节点看不到、也无法批量移除。此迁移把
+  /// `gallery_collection_items` 的 image_id 去重补写进 `gallery_favorites`
+  ///（幂等 INSERT OR IGNORE，已有心形记录保留原 favorited_at），此后
+  /// favorites 表即「收藏」根的全集（根=总收藏，子集=根的细分）。
+  Future<void> _migrateCollectionMembersToFavorites(Database db) async {
+    try {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ${GalleryDataSource._galleryMetaTable} (
+          key TEXT PRIMARY KEY,
+          value TEXT
+        )
+      ''');
+      final done = await db.rawQuery(
+        "SELECT value FROM ${GalleryDataSource._galleryMetaTable} "
+        "WHERE key = 'favorites_collection_members_v1'",
+      );
+      if (done.isNotEmpty) return;
+
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final migrated = await db.rawUpdate(
+        'INSERT OR IGNORE INTO ${GalleryDataSource._favoritesTable} '
+        '(image_id, favorited_at) '
+        'SELECT DISTINCT image_id, ? '
+        'FROM ${GalleryDataSource._collectionItemsTable}',
+        [now],
+      );
+      await db.insert(GalleryDataSource._galleryMetaTable, {
+        'key': 'favorites_collection_members_v1',
+        'value': '$migrated',
+      });
+      // 收藏缓存可能已被旧数据预热，迁移后强制重载
+      (this as GalleryDataSource)._favoritesLoaded = false;
+      AppLogger.i(
+        '[Migration] favorites collection-members backfill done: +$migrated',
+        'GalleryDS',
+      );
+    } catch (e, stack) {
+      // 迁移失败不阻止应用启动（不落标记：下次启动重试）
+      AppLogger.e(
+        '[Migration] Failed to backfill favorites from collection members',
+        e,
+        stack,
+        'GalleryDS',
+      );
+    }
   }
 
   Future<void> _createImagesTable(Database db) async {

@@ -5288,6 +5288,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_notInCollection => '選択した画像はこのコレクションにありません';
 
   @override
+  String localGallery_removedFromFavorites(Object count) {
+    return 'お気に入りから$count枚を削除しました';
+  }
+
+  @override
   String get localGallery_alreadyInCollection => '画像は既にこのコレクションに含まれています';
 
   @override
@@ -5437,6 +5442,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get collectionSelect_noSelectedInCollection => '選択中の画像は含まれません';
+
+  @override
+  String collectionSelect_memberCountInFavorites(Object n) {
+    return 'お気に入り内に選択中の$n枚が含まれます';
+  }
 
   @override
   String get collectionSelect_filterHint => 'コレクションを検索...';

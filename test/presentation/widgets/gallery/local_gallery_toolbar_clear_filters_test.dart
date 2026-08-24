@@ -296,6 +296,9 @@ class _FakeLocalGalleryService implements LocalGalleryService {
   Future<int> getFavoriteCount() async => 0;
 
   @override
+  Future<int> unfavoriteImages(List<String> filePaths) async => 0;
+
+  @override
   Future<NaiImageMetadata?> getMetadata(String filePath) async => null;
 
   @override

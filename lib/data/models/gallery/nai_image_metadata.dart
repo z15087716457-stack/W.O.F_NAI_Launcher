@@ -176,6 +176,13 @@ class NaiImageMetadata with _$NaiImageMetadata {
   /// 从 PNG Source 字段解析出的可用模型 ID。
   String? get sourceModel => _modelIdFromSource(source);
 
+  /// 从 Source/Software 指纹文本解析模型 ID。
+  ///
+  /// source 列与转存件错写进 software 列的指纹共用同一套规则
+  ///（回填迁移等库外调用方走这个入口）。
+  static String? modelIdFromFingerprint(String? fingerprint) =>
+      _modelIdFromSource(fingerprint);
+
   /// 用于导入/展示的模型 ID。Source 是官方图片的模型来源，优先级高于旧缓存中的 model。
   String? get effectiveModel => sourceModel ?? model;
 
@@ -345,7 +352,10 @@ class NaiImageMetadata with _$NaiImageMetadata {
     }
 
     final sourceModel =
-        _modelIdFromSource(source) ?? _modelIdFromParams(commentData);
+        _modelIdFromSource(source) ??
+        _modelIdFromParams(commentData) ??
+        // 部分转存件把 Source 指纹写进了 software 列（EXIF 工具链），兜底
+        _modelIdFromSource(software);
     final importedUcPreset = _toInt(commentData['uc_preset']);
     final importedQualityToggle = _safeGetBool(commentData, 'quality_toggle');
 
@@ -1167,7 +1177,9 @@ class NaiImageMetadata with _$NaiImageMetadata {
       if (normalized.contains('v4.5 curated')) {
         return ImageModels.animeDiffusionV45Curated;
       }
-      return null;
+      // 哈希无法区分 Full/Curated 时按 Full 归（与 V5 分支同策略；
+      // 版本过滤按版本聚合不受影响，详情面板变体名可能对少数 Curated 误标）
+      return ImageModels.animeDiffusionV45Full;
     }
 
     if (normalized.contains('v4')) {
@@ -1177,7 +1189,8 @@ class NaiImageMetadata with _$NaiImageMetadata {
       if (normalized.contains('v4 curated')) {
         return ImageModels.animeDiffusionV4Curated;
       }
-      return null;
+      // 同上：版本字样确凿、变体不可知时按 Full 归
+      return ImageModels.animeDiffusionV4Full;
     }
 
     if (normalized.contains('furry') && normalized.contains('v3')) {
@@ -1188,6 +1201,12 @@ class NaiImageMetadata with _$NaiImageMetadata {
     }
     if (normalized.contains('furry')) {
       return ImageModels.furryDiffusion;
+    }
+
+    // V3 官方 Source 是「Stable Diffusion XL <哈希>」无版本字样
+    //（如 7BCCAA2C / C1E1DE52 / V1D1AP52），按结构识别
+    if (RegExp(r'^stable diffusion xl [0-9a-z]{6,10}$').hasMatch(normalized)) {
+      return ImageModels.animeDiffusionV3;
     }
 
     return null;
@@ -1203,6 +1222,10 @@ class NaiImageMetadata with _$NaiImageMetadata {
     final modelName =
         commentData['model_name']?.toString().toLowerCase() ?? '';
     if (modelName.isNotEmpty) {
+      // 文本形（如 "NovelAI Diffusion V5"）与 Source 指纹同构，先走 Source 规则
+      final fromSourceRules = _modelIdFromSource(modelName);
+      if (fromSourceRules != null) return fromSourceRules;
+
       if (modelName.contains('naiv5')) {
         return modelName.contains('curated')
             ? ImageModels.animeDiffusionV5Curated

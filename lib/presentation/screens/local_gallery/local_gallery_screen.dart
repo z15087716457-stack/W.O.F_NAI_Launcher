@@ -283,19 +283,14 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
             color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
           ),
           Expanded(
-            child: FutureBuilder<int>(
-              future: ref
-                  .read(localGalleryNotifierProvider.notifier)
-                  .getTotalFavoriteCount(),
-              builder: (context, snapshot) {
-                // 「收藏」节点计数=树形目录聚合口径：心形收藏 + 各收藏集
-                // 成员数加总（同图多处计入多次，与「全部图片」聚合子项一致）
+            child: Builder(
+              builder: (context) {
+                // 「收藏」节点计数=收藏表计数：根-子集模型下子集成员必已入根
+                // （进集合自动心形 + 启动迁移补写），收藏表即全集，不再叠加集合计数。
+                // 计数走 galleryFavoriteCountProvider：跟随画廊状态自动重查，
+                // 删除/恢复/收藏增删后即时刷新。
                 final favoriteTotal =
-                    (snapshot.data ?? 0) +
-                    collectionState.collections.fold<int>(
-                      0,
-                      (sum, c) => sum + c.imageCount,
-                    );
+                    ref.watch(galleryFavoriteCountProvider).value ?? 0;
                 return GalleryCategoryTreeView(
                   categories: categoryState.categories,
                   totalImageCount: state.totalCount,
@@ -1139,15 +1134,40 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     if (selectedImages.isEmpty || !mounted) return;
 
     final imagePaths = selectedImages.map((img) => img.path).toList();
+    // 「收藏」根条目标注：选中图片中是心形收藏（根成员）的张数
+    final favoriteCountInSelection =
+        selectedImages.where((img) => img.isFavorite).length;
 
     final result = await CollectionSelectDialog.show(
       context,
       theme: Theme.of(context),
       isRemoveMode: true,
       selectedImagePaths: imagePaths,
+      favoriteCountInSelection: favoriteCountInSelection,
     );
 
     if (result == null) return;
+
+    if (result.isFavoriteRoot) {
+      // 「收藏」根：批量取消心形收藏（同时移出所有集合）。
+      // 服务层在变更内部重放过过滤，Notifier 只重载当前页并保持页码。
+      final removedCount = await ref
+          .read(localGalleryNotifierProvider.notifier)
+          .unfavoriteImages(imagePaths);
+
+      if (mounted) {
+        if (removedCount > 0) {
+          AppToast.success(
+            context,
+            context.l10n.localGallery_removedFromFavorites(removedCount),
+          );
+          ref.read(localGallerySelectionNotifierProvider.notifier).exit();
+        } else {
+          AppToast.info(context, context.l10n.localGallery_notInCollection);
+        }
+      }
+      return;
+    }
 
     final removedCount = await ref
         .read(collectionNotifierProvider.notifier)

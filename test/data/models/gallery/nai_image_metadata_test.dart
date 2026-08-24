@@ -104,8 +104,10 @@ void main() {
     );
 
     test(
-      'fromNaiComment should not infer model from ambiguous V4.5 source',
+      'fromNaiComment defaults ambiguous V4.5 source to V4.5 Full',
       () {
+        // Source 只有版本字样、变体不可知（无哈希/full/curated 标记）时按
+        // Full 归——与 V5 分支同策略，否则版本过滤对这类图永远为空
         final metadata = NaiImageMetadata.fromNaiComment({
           'Comment': jsonEncode({'prompt': '1girl', 'uc': 'bad hands'}),
           'Software': 'NovelAI',
@@ -113,7 +115,7 @@ void main() {
         });
 
         expect(metadata.source, equals('NovelAI Diffusion V4.5'));
-        expect(metadata.model, isNull);
+        expect(metadata.model, equals(ImageModels.animeDiffusionV45Full));
       },
     );
 
@@ -648,6 +650,59 @@ void main() {
       });
 
       expect(metadata.model, ImageModels.animeDiffusionV5Full);
+    });
+
+    test('V5 params model_name text form resolves V5 Full', () {
+      // 部分 V5 图 model_name 是文本形 "NovelAI Diffusion V5" 而非
+      // 枚举形 "DiffusionModelMetaName.NAIv5"，同样要识别
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'prompt': 'test',
+        'model_name': 'NovelAI Diffusion V5',
+        'model_hash': '0ADF9AB7',
+        'version': 1,
+      });
+
+      expect(metadata.model, ImageModels.animeDiffusionV5Full);
+    });
+
+    test('V3 XL-hash Source fingerprint resolves V3', () {
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'Comment': jsonEncode({'prompt': 'test'}),
+        'Source': 'Stable Diffusion XL 7BCCAA2C',
+        'Software': 'NovelAI',
+      });
+
+      expect(metadata.model, ImageModels.animeDiffusionV3);
+    });
+
+    test('V4 hash-only Source defaults to V4 Full', () {
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'Comment': jsonEncode({'prompt': 'test'}),
+        'Source': 'NovelAI Diffusion V4 37442FCA',
+        'Software': 'NovelAI',
+      });
+
+      expect(metadata.model, ImageModels.animeDiffusionV4Full);
+    });
+
+    test('V4.5 unknown-hash Source defaults to V4.5 Full', () {
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'Comment': jsonEncode({'prompt': 'test'}),
+        'Source': 'NovelAI Diffusion V4.5 1229B44F',
+        'Software': 'NovelAI',
+      });
+
+      expect(metadata.model, ImageModels.animeDiffusionV45Full);
+    });
+
+    test('model fingerprint in Software field resolves via fallback', () {
+      // 转存件把 Source 指纹写进 software 列（EXIF 工具链），source 缺失时兜底
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'Comment': jsonEncode({'prompt': 'test'}),
+        'Software': 'Stable Diffusion XL C1E1DE52',
+      });
+
+      expect(metadata.model, ImageModels.animeDiffusionV3);
     });
 
     test('envelope Source still wins over params model_name', () {

@@ -2533,6 +2533,12 @@
     }
   },
   "localGallery_notInCollection": "所选图片不在该集合中",
+  "localGallery_removedFromFavorites": "已从「收藏」移除 {count} 张图片",
+  "@localGallery_removedFromFavorites": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "brushPreset_selectHint": "双击选择此笔刷预设",
   "brushPreset_pencil": "铅笔",
   "brushPreset_fine": "细笔",
@@ -2659,6 +2665,12 @@
     }
   },
   "collectionSelect_noSelectedInCollection": "无选中图片在此集合",
+  "collectionSelect_memberCountInFavorites": "选中 {n} 张在此收藏",
+  "@collectionSelect_memberCountInFavorites": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "collectionSelect_filterHint": "搜索集合...",
   "collectionSelect_noCollections": "暂无集合",
   "collectionSelect_createCollectionHint": "请先创建一个集合",

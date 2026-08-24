@@ -134,6 +134,17 @@ abstract class LocalGalleryService {
   /// 获取当前画廊文件中的收藏图片数量
   Future<int> getFavoriteCount();
 
+  /// 批量取消收藏（同时移出所有收藏集）——「从收藏根移除」语义
+  ///
+  /// [filePaths] 图片文件路径列表
+  ///
+  /// 返回实际取消收藏的图片数量
+  ///
+  /// 可能抛出：
+  /// - [GalleryNotInitializedException] 服务未初始化
+  /// - [GalleryDatabaseException] 数据库错误
+  Future<int> unfavoriteImages(List<String> filePaths);
+
   /// 获取图片元数据
   ///
   /// [filePath] 图片文件路径
@@ -1158,6 +1169,10 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
 
       if (imageId != null) {
         final isFavorite = await _dataSource.toggleFavorite(imageId);
+        // 根-子集模型：取消心形 = 从「收藏」根移除 = 同时移出所有收藏集
+        if (!isFavorite) {
+          await _dataSource.removeImagesFromAllCollections([imageId]);
+        }
         await _syncFileListsAfterFavoriteChange(file);
         return isFavorite;
       }
@@ -1226,6 +1241,36 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
               visiblePaths.contains(galleryFilePathKey(record.filePath)),
         )
         .length;
+  }
+
+  @override
+  Future<int> unfavoriteImages(List<String> filePaths) async {
+    _ensureInitialized();
+
+    try {
+      final resolvedPaths = [
+        for (final path in filePaths) _resolveTrackedFilePath(path),
+      ];
+      final pathToId = await _dataSource.getImageIdsByPaths(resolvedPaths);
+      final imageIds = pathToId.values.whereType<int>().toSet().toList();
+      if (imageIds.isEmpty) return 0;
+
+      final removed = await _dataSource.removeFavorites(imageIds);
+      // 根-子集模型：从「收藏」根移除 = 同时移出所有子集
+      final clearedFromCollections = await _dataSource
+          .removeImagesFromAllCollections(imageIds);
+      if (removed > 0 || clearedFromCollections > 0) {
+        // 重放当前过滤，让移除的图片从收藏根/集合视图即时消失
+        await _syncFileListsAfterFavoriteChange(File(resolvedPaths.first));
+      }
+      return removed;
+    } catch (e) {
+      throw GalleryDatabaseException(
+        operation: DatabaseOperation.update,
+        message: 'Failed to unfavorite ${filePaths.length} images',
+        cause: e,
+      );
+    }
   }
 
   // ============================================================
@@ -1557,6 +1602,9 @@ class ErrorGalleryService implements LocalGalleryService {
   Future<int> getFavoriteCount() => _throwError();
 
   @override
+  Future<int> unfavoriteImages(List<String> filePaths) => _throwError();
+
+  @override
   Future<NaiImageMetadata?> getMetadata(String filePath) => _throwError();
 
   @override
@@ -1640,6 +1688,10 @@ class _PlaceholderGalleryService implements LocalGalleryService {
 
   @override
   Future<int> getFavoriteCount() => _throwNotInitialized();
+
+  @override
+  Future<int> unfavoriteImages(List<String> filePaths) =>
+      _throwNotInitialized();
 
   @override
   Future<NaiImageMetadata?> getMetadata(String filePath) =>

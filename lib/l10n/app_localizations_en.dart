@@ -5409,6 +5409,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Selected images are not in this collection';
 
   @override
+  String localGallery_removedFromFavorites(Object count) {
+    return 'Removed $count images from Favorites';
+  }
+
+  @override
   String get localGallery_alreadyInCollection =>
       'Images already in this collection';
 
@@ -5563,6 +5568,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get collectionSelect_noSelectedInCollection =>
       'No selected images in this collection';
+
+  @override
+  String collectionSelect_memberCountInFavorites(Object n) {
+    return '$n selected in favorites';
+  }
 
   @override
   String get collectionSelect_filterHint => 'Search collections...';

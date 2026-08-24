@@ -20,6 +20,7 @@ import '../../data/services/gallery/scan_state_manager.dart';
 import '../../data/services/gallery/unified_gallery_service.dart';
 import '../../data/services/thumbnail_service.dart';
 import '../../l10n/app_localizations.dart';
+import 'collection_provider.dart';
 
 part 'local_gallery_provider.freezed.dart';
 part 'local_gallery_provider.g.dart';
@@ -162,6 +163,17 @@ class LocalGalleryState with _$LocalGalleryState {
   /// 是否是最后一页
   bool get isLastPage => currentPage >= totalPages - 1;
 }
+
+/// 侧栏「收藏」节点计数——跟随画廊状态自动重查。
+///
+/// 任何本地画廊状态变化（删除/恢复/收藏增删/过滤重放等）都触发重查，
+/// 保证侧栏计数与数据一致；状态未变时复用缓存，避免每次重建重复 SQL。
+final galleryFavoriteCountProvider = FutureProvider<int>((ref) async {
+  ref.watch(localGalleryNotifierProvider);
+  return ref
+      .read(localGalleryNotifierProvider.notifier)
+      .getTotalFavoriteCount();
+});
 
 /// 本地画廊 Notifier（使用统一服务层）
 ///
@@ -661,7 +673,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     _setState(
       state.copyWith(
         filterCriteria: criteria.copyWith(searchQuery: query),
-        currentPage: 0,
       ),
     );
 
@@ -676,7 +687,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     _setState(
       state.copyWith(
         filterCriteria: criteria.copyWith(selectedTags: normalizedTags),
-        currentPage: 0,
       ),
     );
 
@@ -704,7 +714,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           searchQuery: clearSearchQuery ? '' : criteria.searchQuery,
           selectedTags: nextTags,
         ),
-        currentPage: 0,
       ),
     );
 
@@ -724,7 +733,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     _setState(
       state.copyWith(
         filterCriteria: criteria.copyWith(selectedTags: nextTags),
-        currentPage: 0,
       ),
     );
 
@@ -744,7 +752,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           clearDateStart: start == null,
           clearDateEnd: end == null,
         ),
-        currentPage: 0,
       ),
     );
 
@@ -758,7 +765,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     _setState(
       state.copyWith(
         filterCriteria: criteria.copyWith(showFavoritesOnly: value),
-        currentPage: 0,
       ),
     );
 
@@ -823,7 +829,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     _setState(
       state.copyWith(
         filterCriteria: criteria.copyWith(naiOnly: value),
-        currentPage: 0,
       ),
     );
 
@@ -837,7 +842,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           filterModels: models,
           clearFilterModels: models.isEmpty,
         ),
-        currentPage: 0,
       ),
     );
     await _applyFilters();
@@ -850,7 +854,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           filterSamplers: samplers,
           clearFilterSamplers: samplers.isEmpty,
         ),
-        currentPage: 0,
       ),
     );
     await _applyFilters();
@@ -865,7 +868,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           clearFilterMinSteps: min == null,
           clearFilterMaxSteps: max == null,
         ),
-        currentPage: 0,
       ),
     );
     await _applyFilters();
@@ -880,7 +882,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           clearFilterMinCfg: min == null,
           clearFilterMaxCfg: max == null,
         ),
-        currentPage: 0,
       ),
     );
     await _applyFilters();
@@ -893,7 +894,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           filterResolutions: resolutions,
           clearFilterResolutions: resolutions.isEmpty,
         ),
-        currentPage: 0,
       ),
     );
     await _applyFilters();
@@ -907,7 +907,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           filterOrientation: orientation,
           clearFilterOrientation: orientation == null,
         ),
-        currentPage: 0,
       ),
     );
     await _applyFilters();
@@ -921,7 +920,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           nsfwMode: mode,
           clearNsfwMode: mode == null,
         ),
-        currentPage: 0,
       ),
     );
     await _applyFilters();
@@ -951,7 +949,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           clearCategoryId: categoryId == null,
           clearCategoryFolderPath: categoryFolderPath == null,
         ),
-        currentPage: 0,
       ),
     );
 
@@ -969,20 +966,22 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           collectionId: collectionId,
           clearCollectionId: collectionId == null,
         ),
-        currentPage: 0,
       ),
     );
 
     await _applyFilters();
   }
 
-  /// 设置分组视图
+  /// 设置分组视图。
+  ///
+  /// 视图切换不属于条件变更：切回网格只轻量重载当前页（保持页码），
+  /// 不回第一页、不重跑过滤（分组期间筛选/收藏变更已同步服务层）。
   Future<void> setGroupedView(bool value) async {
     _setState(state.copyWith(isGroupedView: value));
     if (value) {
       await _loadGroupedImages();
     } else {
-      await _applyFilters();
+      await _reloadCurrentView();
     }
   }
 
@@ -1036,7 +1035,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           showFavoritesOnly: criteria.showFavoritesOnly,
           naiOnly: criteria.naiOnly,
         ),
-        currentPage: 0,
       ),
     );
     await _applyFilters();
@@ -1114,8 +1112,15 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     _recentlyDeletedKeys.removeAll(paths.map(galleryFilePathKey));
   }
 
-  /// 应用过滤条件
+  /// 应用（重放）当前过滤条件——「条件变更」专用路径。
+  ///
+  /// 语义固定：重放过滤 → 回第一页。所有筛选/范围切换类调用方统一经此
+  /// 入口，不再各自 pre-set currentPage（消除同函数行为依赖调用方前置
+  /// 状态的隐式约定）。收藏增删等「内容变更」不走本方法，
+  /// 见 [_reloadCurrentView]（保持页码）。
   Future<void> _applyFilters() async {
+    // 回第一页是条件变更的固定语义，统一在此收敛。
+    _setState(state.copyWith(currentPage: 0));
     try {
       final service = await getService();
       final criteria = state.filterCriteria;
@@ -1162,6 +1167,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       if (state.isGroupedView) {
         await _loadGroupedImages();
       } else {
+        // 条件变更固定回第一页（本方法开头已置 currentPage=0）。
         await loadPage(0);
       }
     } on GalleryFilterException catch (e) {
@@ -1199,9 +1205,18 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
 
       _setState(state.copyWith(currentImages: updatedImages));
 
-      // 如果启用了收藏过滤，收藏/取消收藏都要重新应用，保证收藏栏即时增删。
-      if (state.filterCriteria.showFavoritesOnly) {
-        await _applyFilters();
+      // 取消收藏 = 从「收藏」根移除 = 同时移出所有收藏集：侧栏收藏集行计数
+      // 依赖 collectionNotifier，不刷新会滞留旧值。
+      if (!isFav) {
+        await ref.read(collectionNotifierProvider.notifier).refresh();
+      }
+
+      // 如果启用了收藏过滤或按集合浏览，收藏/取消收藏都要重新应用：
+      // 取消收藏（=从根移除=移出所有集合）会让图片从当前范围即时消失。
+      // 服务层在收藏写入内部已重放过过滤，这里只轻量重载（保持页码）。
+      if (state.filterCriteria.showFavoritesOnly ||
+          state.filterCriteria.collectionId != null) {
+        await _reloadCurrentView();
       }
 
       return isFav;
@@ -1229,6 +1244,114 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     } catch (e) {
       AppLogger.e('Check favorite failed', e, null, 'LocalGalleryNotifier');
       return false;
+    }
+  }
+
+  /// 从服务层重查单张图片的收藏状态并同步到当前页记录
+  ///
+  /// 收藏菜单「加入子集=入根」走的是 CollectionNotifier，不经过
+  /// [toggleFavorite]，但卡片红心/预览图收藏按钮读的是当前页记录的
+  /// [LocalImageRecord.isFavorite]——这里补一次同步，让红心即时点亮。
+  /// 返回同步后的收藏状态；查询失败返回 null（不覆盖现有状态）。
+  Future<bool?> syncFavoriteStatus(String filePath) async {
+    try {
+      final service = await getService();
+      final isFav = await service.isFavorite(filePath);
+      final targetKey = galleryFilePathKey(filePath);
+      final updatedImages = state.currentImages.map((record) {
+        if (galleryFilePathKey(record.path) == targetKey) {
+          return record.copyWith(isFavorite: isFav);
+        }
+        return record;
+      }).toList();
+      _setState(state.copyWith(currentImages: updatedImages));
+      return isFav;
+    } catch (e) {
+      AppLogger.e(
+        'Sync favorite status failed',
+        e,
+        null,
+        'LocalGalleryNotifier',
+      );
+      return null;
+    }
+  }
+
+  /// 批量取消收藏（同时移出所有收藏集）——「从收藏根移除」语义。
+  ///
+  /// 返回实际取消收藏的图片数量。
+  Future<int> unfavoriteImages(List<String> filePaths) async {
+    try {
+      final service = await getService();
+      final removedCount = await service.unfavoriteImages(filePaths);
+
+      // 更新当前页显示的收藏标记
+      final targetKeys = {
+        for (final path in filePaths) galleryFilePathKey(path),
+      };
+      final updatedImages = state.currentImages.map((record) {
+        if (targetKeys.contains(galleryFilePathKey(record.path))) {
+          return record.copyWith(isFavorite: false);
+        }
+        return record;
+      }).toList();
+      _setState(state.copyWith(currentImages: updatedImages));
+
+      // 批量取消收藏同样清空所有集合的成员关系：刷新收藏集计数，
+      // 否则侧栏集合行数字滞留（即使 removedCount=0 也可能有集合成员被清）。
+      await ref.read(collectionNotifierProvider.notifier).refresh();
+
+      // 按收藏根或任一集合过滤时，移除后的图片不再匹配当前范围，轻量重载
+      // 当前页且保持页码（服务层在变更内部已重放过过滤，不再重复跑）。
+      if (state.filterCriteria.showFavoritesOnly ||
+          state.filterCriteria.collectionId != null) {
+        await _reloadCurrentView();
+      }
+      return removedCount;
+    } on GalleryDatabaseException catch (e) {
+      AppLogger.e('Unfavorite batch failed', e, null, 'LocalGalleryNotifier');
+      _setState(
+        state.copyWith(
+          error: LocalGalleryError(
+            LocalGalleryErrorCode.favoriteFailed,
+            details: e.message,
+          ),
+        ),
+      );
+      return 0;
+    } catch (e) {
+      AppLogger.e('Unfavorite batch failed', e, null, 'LocalGalleryNotifier');
+      return 0;
+    }
+  }
+
+  /// 轻量重载当前视图——「内容变更」专用路径。
+  ///
+  /// 前置契约（跨层约定）：服务层内存过滤列表必须已是变更后状态——
+  /// 收藏写入由 `LocalGalleryServiceImpl._syncFileListsAfterFavoriteChange`
+  /// 在内部重放过滤；删除由 `removeImagesFromMemory` 摘除。本方法只同步
+  /// 计数并重载当前页/分组列表，保持页码（越界/空页由 loadPage 兜底回退
+  /// 末页），不重复跑过滤——收藏视图下取消收藏卡顿的根源就是过滤被串行
+  /// 跑两遍。调用方：收藏 toggle / 批量取消收藏 / 分组视图切回网格。
+  Future<void> _reloadCurrentView() async {
+    try {
+      final service = await getService();
+      _setState(
+        state.copyWith(
+          filteredCount: service.filteredCount,
+          totalCount: service.totalCount,
+        ),
+      );
+    } catch (e) {
+      AppLogger.w(
+        'Failed to sync counts after favorite change: $e',
+        'LocalGalleryNotifier',
+      );
+    }
+    if (state.isGroupedView) {
+      await _loadGroupedImages();
+    } else {
+      await loadPage(state.currentPage, showLoading: false);
     }
   }
 
