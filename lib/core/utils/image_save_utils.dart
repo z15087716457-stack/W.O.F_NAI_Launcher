@@ -467,7 +467,7 @@ class ImageSaveUtils {
       return true;
     }
 
-    final result = UnifiedMetadataParser.parseFromPng(imageBytes);
+    final result = UnifiedMetadataParser.parseFromImageBytes(imageBytes);
     if (!result.success) {
       return false;
     }

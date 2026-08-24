@@ -744,7 +744,7 @@ void _handleParseRequest(_ParseRequest request, SendPort sendPort) {
             useGradualRead: true,
             useCache: false,
           )
-        : UnifiedMetadataParser.parseFromPng(
+        : UnifiedMetadataParser.parseFromImageBytes(
             request.bytes,
             filePathForLog: request.filePath,
           );

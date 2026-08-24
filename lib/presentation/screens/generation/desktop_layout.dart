@@ -6,14 +6,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../core/utils/app_logger.dart';
-import '../../../data/models/queue/replication_task.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/generation/preview_selection_provider.dart';
 import '../../providers/krita/krita_bridge_notifier.dart';
 import '../../providers/layout_state_provider.dart';
 import '../../providers/prompt_maximize_provider.dart';
-import '../../providers/replication_queue_provider.dart';
 import '../../router/app_router.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/shortcuts/shortcut_aware_widget.dart';
@@ -80,15 +78,6 @@ class _DesktopGenerationLayoutState
           ref.read(imageGenerationNotifierProvider.notifier).cancel();
         } else if (ref.read(generationPreviewSelectionProvider) != null) {
           ref.read(generationPreviewSelectionProvider.notifier).clear();
-        }
-      },
-      // 加入队列
-      ShortcutIds.addToQueue: () {
-        final currentParams = ref.read(generationParamsNotifierProvider);
-        if (currentParams.prompt.isNotEmpty) {
-          final task = ReplicationTask.create(prompt: currentParams.prompt);
-          ref.read(replicationQueueNotifierProvider.notifier).add(task);
-          AppToast.success(context, context.l10n.queue_taskAdded);
         }
       },
       // 随机提示词

@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
-import 'package:nai_launcher/presentation/providers/queue_execution_provider.dart';
-import 'package:nai_launcher/presentation/providers/replication_queue_provider.dart';
 import 'package:nai_launcher/presentation/widgets/drop/image_destination_dialog.dart';
 
 void main() {
@@ -16,14 +14,6 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          replicationQueueNotifierProvider.overrideWith(
-            _TestReplicationQueueNotifier.new,
-          ),
-          queueExecutionNotifierProvider.overrideWith(
-            _TestQueueExecutionNotifier.new,
-          ),
-        ],
         child: MaterialApp(
           locale: const Locale('en'),
           supportedLocales: AppLocalizations.supportedLocales,
@@ -140,13 +130,3 @@ final _transparentPngBytes = Uint8List.fromList(const [
   0x60,
   0x82,
 ]);
-
-class _TestReplicationQueueNotifier extends ReplicationQueueNotifier {
-  @override
-  ReplicationQueueState build() => const ReplicationQueueState();
-}
-
-class _TestQueueExecutionNotifier extends QueueExecutionNotifier {
-  @override
-  QueueExecutionState build() => const QueueExecutionState();
-}

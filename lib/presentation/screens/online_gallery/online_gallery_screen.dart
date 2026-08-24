@@ -13,19 +13,21 @@ import '../../../core/cache/danbooru_image_cache_manager.dart';
 import '../../../core/services/date_formatting_service.dart';
 import '../../../core/utils/file_picker_utils.dart';
 import '../../../data/datasources/remote/danbooru_api_service.dart';
+import '../../../data/datasources/remote/online_gallery/ai_tag_gallery_source_adapter.dart';
 import '../../../data/models/online_gallery/danbooru_post.dart';
-import '../../../data/models/queue/replication_task.dart';
 import '../../../data/services/danbooru_auth_service.dart';
 import '../../../data/services/gelbooru_auth_service.dart';
 
 import '../../providers/online_gallery_provider.dart';
-import '../../providers/replication_queue_provider.dart';
 import '../../providers/selection_mode_provider.dart';
 import '../../widgets/danbooru_login_dialog.dart';
 import '../../widgets/danbooru_post_card.dart';
 import '../../widgets/gelbooru_credentials_dialog.dart';
 import '../../widgets/online_gallery/post_detail_dialog.dart';
 import '../../widgets/online_gallery/ai_tag_detail_dialog.dart';
+import '../../widgets/online_gallery/online_favorites_browser.dart';
+import '../../providers/online_favorites_provider.dart';
+import '../../../data/services/gallery/online_gallery_column_width_store.dart';
 import '../../widgets/online_gallery/blacklist_settings_panel.dart';
 
 import '../../widgets/common/app_toast.dart';
@@ -68,6 +70,9 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
   GallerySourceId? _lastFavoritesSource;
   String? _lastCacheKey;
 
+  /// 逻辑列宽（右下角滑杆调节，持久化）；0=未加载完成（用默认 200）
+  double _columnWidth = 200;
+
   @override
   bool get wantKeepAlive => true;
 
@@ -102,6 +107,14 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
       if (state.posts.isEmpty && !state.isLoading) {
         _galleryNotifier.loadPosts();
       }
+      // 恢复列宽偏好
+      const OnlineGalleryColumnWidthStore().load().then((width) {
+        if (mounted) setState(() => _columnWidth = width);
+      });
+      // AItag 本地收藏状态随源绑定
+      ref
+          .read(onlineFavoritesNotifierProvider.notifier)
+          .bindSource(state.sourceId);
       // 记录当前查询，用于切换来源或筛选后恢复独立滚动位置。
       _lastViewMode = state.viewMode;
       _lastFavoritesSource = state.favoritesSourceId;
@@ -235,8 +248,19 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
         children: [
           // 顶部工具栏
           _buildToolbar(theme, state, authState, gelbooruAuthState),
-          // 图片网格
-          Expanded(child: _buildContent(theme, state)),
+          // 图片网格（右下角悬浮列宽滑杆）
+          Expanded(
+            child: Stack(
+              children: [
+                Positioned.fill(child: _buildContent(theme, state)),
+                Positioned(
+                  right: 16,
+                  bottom: 12,
+                  child: _buildColumnWidthSlider(theme),
+                ),
+              ],
+            ),
+          ),
           // 底部分页条
           _buildPaginationBar(theme, state),
         ],
@@ -396,12 +420,6 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
           }
         },
         actions: [
-          BulkActionItem(
-            icon: Icons.playlist_add,
-            label: context.l10n.onlineGallery_addToQueue,
-            onPressed: _addSelectedToQueue,
-            color: theme.colorScheme.primary,
-          ),
           if (_canWriteFavorites(state))
             BulkActionItem(
               icon: Icons.favorite_border,
@@ -788,6 +806,26 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
         if (state.viewMode == GalleryViewMode.search &&
             activeSourceId == GallerySourceId.aiTag)
           _buildAiTagTimeRangeDropdown(state),
+        // NAI-only 在 provider 层对 aiTag 的 search/popular 都生效，
+        // UI 也得两处都给开关，否则热门榜被静默过滤、无入口可关
+        if (activeSourceId == GallerySourceId.aiTag &&
+            (state.viewMode == GalleryViewMode.search ||
+                state.viewMode == GalleryViewMode.popular))
+          FilterChip(
+            selected: state.aiTagNaiOnly,
+            showCheckmark: false,
+            label: Text(
+              context.l10n.onlineGallery_aiTagNaiOnly,
+              style: const TextStyle(fontSize: 12),
+            ),
+            tooltip: context.l10n.onlineGallery_aiTagNaiOnly,
+            onSelected: _galleryNotifier.setAiTagNaiOnly,
+            visualDensity: VisualDensity.compact,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        if (state.viewMode == GalleryViewMode.search &&
+            activeSourceId == GallerySourceId.aiTag)
+          _buildAiTagModelVersionDropdown(state),
         IconButton(
           icon: const Icon(Icons.block),
           tooltip: context.l10n.onlineGallery_blacklistTags,
@@ -852,6 +890,38 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
               .toList(growable: false),
           onChanged: (value) {
             if (value != null) _galleryNotifier.setAiTagTimeRange(value);
+          },
+        ),
+      ),
+    );
+  }
+
+  /// AiTag 模型版本过滤下拉（单选，点已选项清除；版本词注入 q 检索）
+  Widget _buildAiTagModelVersionDropdown(OnlineGalleryState state) {
+    final selected = state.aiTagModelVersion;
+    return Tooltip(
+      message: context.l10n.onlineGallery_aiTagModelVersion,
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selected,
+          isDense: true,
+          borderRadius: BorderRadius.circular(12),
+          hint: Text(
+            context.l10n.onlineGallery_aiTagModelVersion,
+            style: const TextStyle(fontSize: 12),
+          ),
+          items: aiTagModelVersionQueries.keys
+              .map(
+                (version) => DropdownMenuItem(
+                  value: version,
+                  child: Text('V$version'),
+                ),
+              )
+              .toList(growable: false),
+          onChanged: (value) {
+            _galleryNotifier.setAiTagModelVersion(
+              value == selected ? null : value,
+            );
           },
         ),
       ),
@@ -1218,7 +1288,9 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
   }
 
   bool _canWriteFavorites(OnlineGalleryState state) {
-    return _activeSource(state) == GallerySourceId.danbooru;
+    final source = _activeSource(state);
+    return source == GallerySourceId.danbooru ||
+        source == GallerySourceId.aiTag;
   }
 
   Widget _buildGelbooruFavoritesNotice(ThemeData theme) {
@@ -1374,10 +1446,53 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
     );
   }
 
+  /// 右下角列宽滑杆（与本地图库同范围 140~480，持久化）
+  Widget _buildColumnWidthSlider(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.view_module_outlined,
+            size: 16,
+            color: theme.colorScheme.outline,
+          ),
+          SizedBox(
+            width: 160,
+            child: SliderTheme(
+              data: const SliderThemeData(
+                trackHeight: 2,
+                thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
+                overlayShape: RoundSliderOverlayShape(overlayRadius: 16),
+              ),
+              child: Slider(
+                min: 140,
+                max: 480,
+                value: _columnWidth.clamp(140, 480),
+                onChanged: (value) =>
+                    setState(() => _columnWidth = (value / 20).round() * 20),
+                onChangeEnd: (value) =>
+                    const OnlineGalleryColumnWidthStore().save(value),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// 构建图片网格
   Widget _buildImageGrid(ThemeData theme, OnlineGalleryState state) {
     final screenWidth = MediaQuery.of(context).size.width - 60;
-    final columnCount = (screenWidth / 200).floor().clamp(2, 8);
+    final columnCount = (screenWidth / _columnWidth).floor().clamp(2, 8);
     final itemWidth = (screenWidth - 24 - (columnCount - 1) * 6) / columnCount;
 
     return MasonryGridView.count(
@@ -1408,45 +1523,51 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
     final post = state.posts[index];
     _prefetchImages(state, index);
     if (post.sourceId == GallerySourceId.aiTag && !post.hasValidPreview) {
-      return AnimatedSize(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOutCubic,
-        child: FutureBuilder<GalleryDetail>(
-          key: ValueKey('detail:${post.stableKey}'),
-          future: _galleryNotifier.loadDetail(post),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return AspectRatio(
-                aspectRatio: 1,
-                child: Card(
-                  child: Center(
-                    child: TextButton.icon(
-                      onPressed: () {
-                        _galleryNotifier.loadDetail(post, forceRefresh: true);
-                        setState(() {});
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: Text(context.l10n.common_retry),
-                    ),
+      // 详情已完成的直接渲染，卡片回收重建时不再闪 waiting 占位帧
+      final cachedDetail = _galleryNotifier.cachedDetailFor(post);
+      if (cachedDetail != null) {
+        return _buildResolvedPostCard(
+          state,
+          cachedDetail.item,
+          itemWidth,
+          detail: cachedDetail,
+        );
+      }
+      return FutureBuilder<GalleryDetail>(
+        key: ValueKey('detail:${post.stableKey}'),
+        future: _galleryNotifier.loadDetail(post),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return AspectRatio(
+              aspectRatio: 1,
+              child: Card(
+                child: Center(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      _galleryNotifier.loadDetail(post, forceRefresh: true);
+                      setState(() {});
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: Text(context.l10n.common_retry),
                   ),
                 ),
-              );
-            }
-            final resolved = snapshot.data?.item;
-            if (resolved == null) {
-              return const AspectRatio(
-                aspectRatio: 1,
-                child: Card(child: Center(child: CircularProgressIndicator())),
-              );
-            }
-            return _buildResolvedPostCard(
-              state,
-              resolved,
-              itemWidth,
-              detail: snapshot.data,
+              ),
             );
-          },
-        ),
+          }
+          final resolved = snapshot.data?.item;
+          if (resolved == null) {
+            return const AspectRatio(
+              aspectRatio: 1,
+              child: Card(child: Center(child: CircularProgressIndicator())),
+            );
+          }
+          return _buildResolvedPostCard(
+            state,
+            resolved,
+            itemWidth,
+            detail: snapshot.data,
+          );
+        },
       );
     }
     return _buildResolvedPostCard(state, post, itemWidth);
@@ -1464,12 +1585,17 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
         post.sourceId == GallerySourceId.gelbooru &&
         state.viewMode == GalleryViewMode.favorites &&
         state.favoritesSourceId == GallerySourceId.gelbooru;
-    final canWriteFavorite = post.sourceId == GallerySourceId.danbooru;
+    final canWriteFavorite = post.sourceId == GallerySourceId.danbooru ||
+        post.sourceId == GallerySourceId.aiTag;
     return DanbooruPostCard(
       key: ValueKey(post.stableKey),
       post: post,
       itemWidth: itemWidth,
-      isFavorited: state.favoritedPostKeys.contains(postKey),
+      isFavorited: post.sourceId == GallerySourceId.aiTag
+          ? ref
+                .watch(onlineFavoritesNotifierProvider)
+                .isFavorite(GallerySourceId.aiTag, post.id)
+          : state.favoritedPostKeys.contains(postKey),
       isFavoriteLoading: state.favoriteLoadingPostKeys.contains(postKey),
       showFavoriteAction: canWriteFavorite || favoriteReadOnly,
       favoriteReadOnly: favoriteReadOnly,
@@ -1538,6 +1664,14 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
 
   /// 构建页面显示内容（加载中、错误、空状态、网格）
   Widget _buildPageContent(ThemeData theme, OnlineGalleryState state) {
+    // AItag 的收藏视图走本地收藏浏览器（不依赖站点账号与远端请求）
+    if (state.viewMode == GalleryViewMode.favorites &&
+        _activeSource(state) == GallerySourceId.aiTag) {
+      return OnlineFavoritesBrowser(
+        columnWidth: _columnWidth,
+        onOpenItem: (item) => _showPostDetail(context, item),
+      );
+    }
     if (state.isLoading && state.posts.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -1560,7 +1694,12 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
         if (nextPost.previewUrl.isNotEmpty &&
             shouldPrefetchOnlineGalleryImage(nextPost.previewUrl)) {
           precacheImage(
-            CachedNetworkImageProvider(nextPost.previewUrl),
+            CachedNetworkImageProvider(
+              nextPost.previewUrl,
+              cacheManager: DanbooruImageCacheManager.instance,
+              cacheKey: onlineGalleryImageCacheKeyForUrl(nextPost.previewUrl),
+              headers: onlineGalleryImageHeadersForUrl(nextPost.previewUrl),
+            ),
             context,
           );
         }
@@ -1589,6 +1728,20 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
     OnlineGalleryState state,
     DanbooruPost post,
   ) async {
+    if (post.sourceId == GallerySourceId.aiTag) {
+      final nowFavorite = await ref
+          .read(onlineFavoritesNotifierProvider.notifier)
+          .toggleFavorite(post);
+      if (context.mounted) {
+        AppToast.info(
+          context,
+          nowFavorite
+              ? context.l10n.onlineGallery_favorited
+              : context.l10n.onlineGallery_unfavorited,
+        );
+      }
+      return;
+    }
     if (post.sourceId != GallerySourceId.danbooru) return;
     final authState = ref.read(danbooruAuthProvider);
     if (!authState.isLoggedIn) {
@@ -1611,83 +1764,42 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
     }
   }
 
-  /// 批量加入队列
-  Future<void> _addSelectedToQueue() async {
-    final selectionState = ref.read(onlineGallerySelectionNotifierProvider);
-    final galleryState = ref.read(onlineGalleryNotifierProvider);
-
-    final selectedPosts = galleryState.posts
-        .where((p) => selectionState.selectedIds.contains(p.stableKey))
-        .toList();
-
-    if (selectedPosts.isEmpty) return;
-
-    final tasks = <ReplicationTask>[];
-    const concurrency = 4;
-    for (var start = 0; start < selectedPosts.length; start += concurrency) {
-      final batch = selectedPosts.sublist(
-        start,
-        min(start + concurrency, selectedPosts.length),
-      );
-      final resolved = await Future.wait(
-        batch.map((post) async {
-          if (post.sourceId != GallerySourceId.aiTag) {
-            final prompt = post.tags.join(', ');
-            return prompt.isEmpty
-                ? null
-                : ReplicationTask.create(
-                    prompt: prompt,
-                    thumbnailUrl: post.previewUrl,
-                    source: ReplicationTaskSource.online,
-                  );
-          }
-          try {
-            final detail = await _galleryNotifier.loadDetail(post);
-            final media = detail.media.first;
-            final prompt =
-                media.prompt ?? detail.prompt ?? post.tags.join(', ');
-            if (prompt.isEmpty) return null;
-            return ReplicationTask.create(
-              prompt: prompt,
-              negativePrompt:
-                  media.negativePrompt ?? detail.negativePrompt ?? '',
-              thumbnailUrl: media.previewUrl,
-              source: ReplicationTaskSource.online,
-              width: media.width > 0 ? media.width : null,
-              height: media.height > 0 ? media.height : null,
-            );
-          } catch (error) {
-            debugPrint('Failed to resolve ${post.stableKey} for queue: $error');
-            return null;
-          }
-        }),
-      );
-      tasks.addAll(resolved.whereType<ReplicationTask>());
-    }
-
-    if (!mounted) return;
-    if (tasks.isEmpty) {
-      AppToast.info(context, context.l10n.onlineGallery_noTagInfo);
-      return;
-    }
-
-    final addedCount = await ref
-        .read(replicationQueueNotifierProvider.notifier)
-        .addAll(tasks);
-
-    if (mounted) {
-      AppToast.success(
-        context,
-        context.l10n.onlineGallery_addedTasksToQueue(addedCount),
-      );
-      _selectionNotifier.exit();
-    }
-  }
-
   /// 批量收藏
   Future<void> _favoriteSelected() async {
     final selectionState = ref.read(onlineGallerySelectionNotifierProvider);
     final galleryState = ref.read(onlineGalleryNotifierProvider);
+
+    // AItag：本地收藏（逐个 add，幂等）
+    final aiTagSelected = galleryState.posts
+        .where(
+          (post) =>
+              post.sourceId == GallerySourceId.aiTag &&
+              selectionState.selectedIds.contains(post.stableKey),
+        )
+        .toList();
+    if (aiTagSelected.isNotEmpty) {
+      final notifier = ref.read(onlineFavoritesNotifierProvider.notifier);
+      await notifier.bindSource(GallerySourceId.aiTag);
+      var count = 0;
+      for (final post in aiTagSelected) {
+        if (!mounted) return;
+        if (!ref
+            .read(onlineFavoritesNotifierProvider)
+            .isFavorite(GallerySourceId.aiTag, post.id)) {
+          await notifier.toggleFavorite(post);
+          count++;
+        }
+      }
+      if (mounted) {
+        AppToast.info(
+          context,
+          context.l10n.onlineGallery_favoritedImages(count),
+        );
+        _selectionNotifier.exit();
+      }
+      return;
+    }
+
     final authState = ref.read(danbooruAuthProvider);
 
     if (!authState.isLoggedIn) {

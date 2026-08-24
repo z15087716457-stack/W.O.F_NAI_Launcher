@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/constants/api_constants.dart';
 import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/gallery/gallery_category.dart';
@@ -73,6 +75,7 @@ class LocalGalleryToolbar extends ConsumerStatefulWidget {
   /// Callbacks for bulk actions
   /// 批量操作回调
   final VoidCallback? onAddToCollection;
+  final VoidCallback? onRemoveFromCollection;
   final VoidCallback? onDeleteSelected;
   final VoidCallback? onPackSelected;
   final VoidCallback? onEditMetadata;
@@ -103,6 +106,7 @@ class LocalGalleryToolbar extends ConsumerStatefulWidget {
     this.canRedo = false,
     this.groupedGridViewKey,
     this.onAddToCollection,
+    this.onRemoveFromCollection,
     this.onDeleteSelected,
     this.onPackSelected,
     this.onEditMetadata,
@@ -121,6 +125,39 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
   final TextEditingController _searchController = TextEditingController();
   late final FocusNode _searchFocusNode;
   Timer? _debounceTimer;
+
+  /// NAI 模型版本过滤 chips 的展示顺序与 label。
+  static const List<String> _naiVersionLabels = ['3', '4', '4.5', '5'];
+
+  /// NAI 版本 → 该版本包含的模型 ID 集（单击该 chip 时作为 filterModels 写入）。
+  /// 以 [ImageModels] 中实际存在的常量名为准；版本 4/4.5/5 含对应的
+  /// inpainting 变体，版本 3 按需求只列基础模型。
+  static const Map<String, List<String>> _naiVersionModelIds = {
+    '3': [
+      ImageModels.animeFull,
+      ImageModels.animeV2,
+      ImageModels.animeDiffusionV3,
+      ImageModels.furryDiffusionV3,
+    ],
+    '4': [
+      ImageModels.animeDiffusionV4Full,
+      ImageModels.animeDiffusionV4Curated,
+      ImageModels.animeDiffusionV4FullInpainting,
+      ImageModels.animeDiffusionV4CuratedInpainting,
+    ],
+    '4.5': [
+      ImageModels.animeDiffusionV45Full,
+      ImageModels.animeDiffusionV45Curated,
+      ImageModels.animeDiffusionV45FullInpainting,
+      ImageModels.animeDiffusionV45CuratedInpainting,
+    ],
+    '5': [
+      ImageModels.animeDiffusionV5Full,
+      ImageModels.animeDiffusionV5Curated,
+      ImageModels.animeDiffusionV5FullInpainting,
+      ImageModels.animeDiffusionV5CuratedInpainting,
+    ],
+  };
 
   @override
   void initState() {
@@ -258,6 +295,12 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
             color: theme.colorScheme.secondary,
           ),
           BulkActionItem(
+            icon: Icons.playlist_remove,
+            label: l10n.localGallery_removeFromCollection,
+            onPressed: widget.onRemoveFromCollection,
+            color: theme.colorScheme.secondary,
+          ),
+          BulkActionItem(
             icon: Icons.delete_outline,
             label: l10n.common_delete,
             onPressed: widget.onDeleteSelected,
@@ -353,6 +396,10 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                             children: [
                               // NAI-only 过滤 chip（默认开，持久化偏好）
                               _buildNaiOnlyChip(theme, state),
+                              const SizedBox(width: 6),
+                              // NAI 模型版本过滤（下拉菜单：单选 3/4/4.5/5，
+                              // 点已勾选项清除）
+                              _buildNaiVersionMenu(theme, state),
                               const SizedBox(width: 6),
                               // 排序（字段菜单 + 方向切换）
                               _buildSortButton(
@@ -728,6 +775,85 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
         selectedColor: colorScheme.primaryContainer.withValues(alpha: 0.5),
         backgroundColor: Colors.transparent,
         padding: const EdgeInsets.symmetric(horizontal: 6),
+      ),
+    );
+  }
+
+  /// 当前 filterModels 是否正好等于某个版本 ID 集（集合级相等；空/非空区分）。
+  bool _isNaiVersionActive(LocalGalleryState state, String version) {
+    final current = state.filterCriteria.filterModels;
+    final ids = _naiVersionModelIds[version] ?? const <String>[];
+    if (current.length != ids.length) return false;
+    return setEquals(current.toSet(), ids.toSet());
+  }
+
+  /// Build NAI model version filter dropdown menu
+  /// NAI 模型版本过滤下拉：按钮显示当前选中版本（未选显示通用标签），点击
+  /// 向下展开 3/4/4.5/5；点未勾选项=写入该版本 ID 集，点已勾选项=清空
+  /// （setFilterModels 整表替换天然满足单选）。
+  /// 视觉壳套路同 [_buildSortButton]：IgnorePointer 让 PopupMenuButton 自己
+  /// 收手势。
+  Widget _buildNaiVersionMenu(ThemeData theme, LocalGalleryState state) {
+    final l10n = context.l10n;
+    final colorScheme = theme.colorScheme;
+
+    String? activeVersion;
+    for (final version in _naiVersionLabels) {
+      if (_isNaiVersionActive(state, version)) {
+        activeVersion = version;
+        break;
+      }
+    }
+    final active = activeVersion != null;
+
+    return PopupMenuButton<String>(
+      tooltip: l10n.localGallery_naiVersionFilterTooltip,
+      onSelected: (version) {
+        final notifier = ref.read(localGalleryNotifierProvider.notifier);
+        notifier.setFilterModels(
+          version == activeVersion
+              ? const <String>[]
+              : (_naiVersionModelIds[version] ?? const []),
+        );
+      },
+      itemBuilder: (context) => [
+        for (final version in _naiVersionLabels)
+          PopupMenuItem(
+            value: version,
+            child: Row(
+              children: [
+                const Icon(Icons.memory, size: 16),
+                const SizedBox(width: 8),
+                Expanded(child: Text('NAI $version')),
+                if (version == activeVersion)
+                  Icon(Icons.check, size: 16, color: colorScheme.primary),
+              ],
+            ),
+          ),
+      ],
+      child: IgnorePointer(
+        child: OutlinedButton.icon(
+          onPressed: () {},
+          icon: Icon(
+            Icons.memory,
+            size: 16,
+            color: active ? colorScheme.primary : null,
+          ),
+          label: Text(
+            active
+                ? 'NAI $activeVersion'
+                : l10n.localGallery_naiVersionFilterLabel,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+              color: active ? colorScheme.primary : null,
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            visualDensity: VisualDensity.compact,
+          ),
+        ),
       ),
     );
   }

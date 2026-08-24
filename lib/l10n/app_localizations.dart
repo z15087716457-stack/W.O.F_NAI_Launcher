@@ -118,6 +118,78 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get common_cancel;
 
+  /// No description provided for @onlineFav_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get onlineFav_all;
+
+  /// No description provided for @onlineFav_rootCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Root'**
+  String get onlineFav_rootCollection;
+
+  /// No description provided for @onlineFav_newCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'New Collection'**
+  String get onlineFav_newCollection;
+
+  /// No description provided for @onlineFav_renameCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get onlineFav_renameCollection;
+
+  /// No description provided for @onlineFav_deleteCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Collection'**
+  String get onlineFav_deleteCollection;
+
+  /// No description provided for @onlineFav_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorited works yet'**
+  String get onlineFav_empty;
+
+  /// No description provided for @onlineFav_authorWorkCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} works'**
+  String onlineFav_authorWorkCount(Object n);
+
+  /// No description provided for @onlineFav_moveHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Move here'**
+  String get onlineFav_moveHere;
+
+  /// No description provided for @onlineFav_removeFavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfavorite'**
+  String get onlineFav_removeFavorite;
+
+  /// No description provided for @onlineFav_favoriteAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite Author'**
+  String get onlineFav_favoriteAuthor;
+
+  /// No description provided for @onlineFav_authorFavorited.
+  ///
+  /// In en, this message translates to:
+  /// **'Author favorited'**
+  String get onlineFav_authorFavorited;
+
+  /// No description provided for @onlineFav_authorUnfavorited.
+  ///
+  /// In en, this message translates to:
+  /// **'Author unfavorited'**
+  String get onlineFav_authorUnfavorited;
+
   /// No description provided for @common_confirm.
   ///
   /// In en, this message translates to:
@@ -1113,12 +1185,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Input'**
   String get settings_generationInputSection;
-
-  /// No description provided for @settings_generationRetrySection.
-  ///
-  /// In en, this message translates to:
-  /// **'Retry on Failure'**
-  String get settings_generationRetrySection;
 
   /// No description provided for @settings_generationFeedbackSection.
   ///
@@ -4561,12 +4627,6 @@ abstract class AppLocalizations {
   /// **'Send'**
   String get onlineGallery_send;
 
-  /// No description provided for @onlineGallery_addToQueue.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to Queue'**
-  String get onlineGallery_addToQueue;
-
   /// No description provided for @onlineGallery_sendToTextToImage.
   ///
   /// In en, this message translates to:
@@ -4632,18 +4692,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Metadata'**
   String get onlineGallery_metadata;
-
-  /// No description provided for @onlineGallery_addedToQueue.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to queue'**
-  String get onlineGallery_addedToQueue;
-
-  /// No description provided for @onlineGallery_queueFullMax.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue is full (maximum 50 items)'**
-  String get onlineGallery_queueFullMax;
 
   /// No description provided for @onlineGallery_chooseDownloadDirectory.
   ///
@@ -4831,12 +4879,6 @@ abstract class AppLocalizations {
   /// **'Download Selected'**
   String get onlineGallery_bulkDownload;
 
-  /// No description provided for @onlineGallery_addedTasksToQueue.
-  ///
-  /// In en, this message translates to:
-  /// **'Added {count} tasks to queue'**
-  String onlineGallery_addedTasksToQueue(Object count);
-
   /// No description provided for @onlineGallery_unfavorited.
   ///
   /// In en, this message translates to:
@@ -5010,6 +5052,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The ranking is being generated. Please try again shortly.'**
   String get onlineGallery_aiTagRankingProcessing;
+
+  /// No description provided for @onlineGallery_aiTagNaiOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'NAI only'**
+  String get onlineGallery_aiTagNaiOnly;
+
+  /// No description provided for @onlineGallery_aiTagModelVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Model version'**
+  String get onlineGallery_aiTagModelVersion;
+
+  /// No description provided for @onlineGallery_generationParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation parameters'**
+  String get onlineGallery_generationParams;
 
   /// No description provided for @onlineGallery_sourceConfigUnavailable.
   ///
@@ -8341,6 +8401,18 @@ abstract class AppLocalizations {
   /// **'Only show NAI-generated images'**
   String get localGallery_naiOnlyTooltip;
 
+  /// No description provided for @localGallery_naiVersionFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get localGallery_naiVersionFilterLabel;
+
+  /// No description provided for @localGallery_naiVersionFilterTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by NAI model version'**
+  String get localGallery_naiVersionFilterTooltip;
+
   /// No description provided for @localGallery_masonryViewLabel.
   ///
   /// In en, this message translates to:
@@ -9625,6 +9697,30 @@ abstract class AppLocalizations {
   /// **'Failed to add images to collection'**
   String get localGallery_addToCollectionFailed;
 
+  /// No description provided for @localGallery_removeFromCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Collection'**
+  String get localGallery_removeFromCollection;
+
+  /// No description provided for @localGallery_removedFromCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {count} images from collection \"{name}\"'**
+  String localGallery_removedFromCollection(Object count, Object name);
+
+  /// No description provided for @localGallery_notInCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected images are not in this collection'**
+  String get localGallery_notInCollection;
+
+  /// No description provided for @localGallery_alreadyInCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Images already in this collection'**
+  String get localGallery_alreadyInCollection;
+
   /// No description provided for @brushPreset_selectHint.
   ///
   /// In en, this message translates to:
@@ -9846,6 +9942,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Collection'**
   String get collectionSelect_dialogTitle;
+
+  /// No description provided for @collectionSelect_removeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from Collection'**
+  String get collectionSelect_removeTitle;
+
+  /// No description provided for @collectionSelect_memberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} selected in this collection'**
+  String collectionSelect_memberCount(Object n);
+
+  /// No description provided for @collectionSelect_noSelectedInCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'No selected images in this collection'**
+  String get collectionSelect_noSelectedInCollection;
 
   /// No description provided for @collectionSelect_filterHint.
   ///
@@ -12125,576 +12239,6 @@ abstract class AppLocalizations {
   /// **'Drag to move, scroll or pinch to zoom'**
   String get tagLibrary_dragToMove;
 
-  /// No description provided for @queue_management.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue Management'**
-  String get queue_management;
-
-  /// No description provided for @queue_empty.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue is empty'**
-  String get queue_empty;
-
-  /// No description provided for @queue_emptyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'No tasks in the queue'**
-  String get queue_emptyHint;
-
-  /// No description provided for @queue_taskCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} tasks'**
-  String queue_taskCount(Object count);
-
-  /// No description provided for @queue_pending.
-  ///
-  /// In en, this message translates to:
-  /// **'Pending'**
-  String get queue_pending;
-
-  /// No description provided for @queue_running.
-  ///
-  /// In en, this message translates to:
-  /// **'Running'**
-  String get queue_running;
-
-  /// No description provided for @queue_completed.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed'**
-  String get queue_completed;
-
-  /// No description provided for @queue_failed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed'**
-  String get queue_failed;
-
-  /// No description provided for @queue_paused.
-  ///
-  /// In en, this message translates to:
-  /// **'Paused'**
-  String get queue_paused;
-
-  /// No description provided for @queue_idle.
-  ///
-  /// In en, this message translates to:
-  /// **'Idle'**
-  String get queue_idle;
-
-  /// No description provided for @queue_ready.
-  ///
-  /// In en, this message translates to:
-  /// **'Ready'**
-  String get queue_ready;
-
-  /// No description provided for @queue_clickToStart.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to start queue execution'**
-  String get queue_clickToStart;
-
-  /// No description provided for @queue_clickToPause.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to pause queue'**
-  String get queue_clickToPause;
-
-  /// No description provided for @queue_clickToResume.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to resume execution'**
-  String get queue_clickToResume;
-
-  /// No description provided for @queue_noTasksToStart.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue is empty, cannot start'**
-  String get queue_noTasksToStart;
-
-  /// No description provided for @queue_allTasksCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'All tasks completed'**
-  String get queue_allTasksCompleted;
-
-  /// No description provided for @queue_executionProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'Execution Progress'**
-  String get queue_executionProgress;
-
-  /// No description provided for @queue_totalTasks.
-  ///
-  /// In en, this message translates to:
-  /// **'Total'**
-  String get queue_totalTasks;
-
-  /// No description provided for @queue_completedTasks.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed'**
-  String get queue_completedTasks;
-
-  /// No description provided for @queue_failedTasks.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed'**
-  String get queue_failedTasks;
-
-  /// No description provided for @queue_remainingTasks.
-  ///
-  /// In en, this message translates to:
-  /// **'Remaining'**
-  String get queue_remainingTasks;
-
-  /// No description provided for @queue_estimatedTime.
-  ///
-  /// In en, this message translates to:
-  /// **'Estimated: about {time}'**
-  String queue_estimatedTime(Object time);
-
-  /// No description provided for @queue_seconds.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} seconds'**
-  String queue_seconds(Object count);
-
-  /// No description provided for @queue_minutes.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} minutes'**
-  String queue_minutes(Object count);
-
-  /// No description provided for @queue_hours.
-  ///
-  /// In en, this message translates to:
-  /// **'{hours} hours {minutes} minutes'**
-  String queue_hours(Object hours, Object minutes);
-
-  /// No description provided for @queue_pause.
-  ///
-  /// In en, this message translates to:
-  /// **'Pause'**
-  String get queue_pause;
-
-  /// No description provided for @queue_resume.
-  ///
-  /// In en, this message translates to:
-  /// **'Resume'**
-  String get queue_resume;
-
-  /// No description provided for @queue_pauseExecution.
-  ///
-  /// In en, this message translates to:
-  /// **'Pause Execution'**
-  String get queue_pauseExecution;
-
-  /// No description provided for @queue_resumeExecution.
-  ///
-  /// In en, this message translates to:
-  /// **'Resume Execution'**
-  String get queue_resumeExecution;
-
-  /// No description provided for @queue_autoExecute.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto Execute'**
-  String get queue_autoExecute;
-
-  /// No description provided for @queue_autoExecuteOn.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto execute next task when completed'**
-  String get queue_autoExecuteOn;
-
-  /// No description provided for @queue_autoExecuteOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Manual click required to generate'**
-  String get queue_autoExecuteOff;
-
-  /// No description provided for @queue_clearQueue.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear Queue'**
-  String get queue_clearQueue;
-
-  /// No description provided for @queue_closeFloatingButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Close Floating Button'**
-  String get queue_closeFloatingButton;
-
-  /// No description provided for @queue_clearQueueConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to clear all queue tasks? This action cannot be undone.'**
-  String get queue_clearQueueConfirm;
-
-  /// No description provided for @queue_confirmClear.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Clear'**
-  String get queue_confirmClear;
-
-  /// No description provided for @queue_retryCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Retry {current}/{max}'**
-  String queue_retryCount(Object current, Object max);
-
-  /// No description provided for @queue_retry.
-  ///
-  /// In en, this message translates to:
-  /// **'Retry'**
-  String get queue_retry;
-
-  /// No description provided for @queue_requeue.
-  ///
-  /// In en, this message translates to:
-  /// **'Requeue'**
-  String get queue_requeue;
-
-  /// No description provided for @queue_clearFailedTasks.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear All'**
-  String get queue_clearFailedTasks;
-
-  /// No description provided for @queue_noFailedTasks.
-  ///
-  /// In en, this message translates to:
-  /// **'No failed tasks'**
-  String get queue_noFailedTasks;
-
-  /// No description provided for @queue_noCompletedTasks.
-  ///
-  /// In en, this message translates to:
-  /// **'No completed records'**
-  String get queue_noCompletedTasks;
-
-  /// No description provided for @queue_editTask.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Task'**
-  String get queue_editTask;
-
-  /// No description provided for @queue_duplicateTask.
-  ///
-  /// In en, this message translates to:
-  /// **'Duplicate Task'**
-  String get queue_duplicateTask;
-
-  /// No description provided for @queue_taskDuplicated.
-  ///
-  /// In en, this message translates to:
-  /// **'Task duplicated'**
-  String get queue_taskDuplicated;
-
-  /// No description provided for @queue_queueFull.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue is full, cannot duplicate'**
-  String get queue_queueFull;
-
-  /// No description provided for @queue_positivePrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt'**
-  String get queue_positivePrompt;
-
-  /// No description provided for @queue_enterPositivePrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter prompt...'**
-  String get queue_enterPositivePrompt;
-
-  /// No description provided for @queue_parametersPreview.
-  ///
-  /// In en, this message translates to:
-  /// **'Parameters Preview'**
-  String get queue_parametersPreview;
-
-  /// No description provided for @queue_model.
-  ///
-  /// In en, this message translates to:
-  /// **'Model'**
-  String get queue_model;
-
-  /// No description provided for @queue_seed.
-  ///
-  /// In en, this message translates to:
-  /// **'Seed'**
-  String get queue_seed;
-
-  /// No description provided for @queue_sampler.
-  ///
-  /// In en, this message translates to:
-  /// **'Sampler'**
-  String get queue_sampler;
-
-  /// No description provided for @queue_steps.
-  ///
-  /// In en, this message translates to:
-  /// **'Steps'**
-  String get queue_steps;
-
-  /// No description provided for @queue_cfg.
-  ///
-  /// In en, this message translates to:
-  /// **'CFG'**
-  String get queue_cfg;
-
-  /// No description provided for @queue_size.
-  ///
-  /// In en, this message translates to:
-  /// **'Size'**
-  String get queue_size;
-
-  /// No description provided for @queue_addToQueue.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to Queue'**
-  String get queue_addToQueue;
-
-  /// No description provided for @queue_taskAdded.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to queue'**
-  String get queue_taskAdded;
-
-  /// No description provided for @queue_negativePromptFromMain.
-  ///
-  /// In en, this message translates to:
-  /// **'Undesired Content will use main page settings'**
-  String get queue_negativePromptFromMain;
-
-  /// No description provided for @queue_pinToTop.
-  ///
-  /// In en, this message translates to:
-  /// **'Pin to Top'**
-  String get queue_pinToTop;
-
-  /// No description provided for @queue_delete.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get queue_delete;
-
-  /// No description provided for @queue_edit.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit'**
-  String get queue_edit;
-
-  /// No description provided for @queue_selectAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Select All'**
-  String get queue_selectAll;
-
-  /// No description provided for @queue_invertSelection.
-  ///
-  /// In en, this message translates to:
-  /// **'Invert'**
-  String get queue_invertSelection;
-
-  /// No description provided for @queue_cancelSelection.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get queue_cancelSelection;
-
-  /// No description provided for @queue_selectedCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} selected'**
-  String queue_selectedCount(Object count);
-
-  /// No description provided for @queue_confirmDeleteSelected.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to delete {count} selected tasks?'**
-  String queue_confirmDeleteSelected(Object count);
-
-  /// No description provided for @queue_export.
-  ///
-  /// In en, this message translates to:
-  /// **'Export'**
-  String get queue_export;
-
-  /// No description provided for @queue_import.
-  ///
-  /// In en, this message translates to:
-  /// **'Import'**
-  String get queue_import;
-
-  /// No description provided for @queue_exportImport.
-  ///
-  /// In en, this message translates to:
-  /// **'Import/Export Queue'**
-  String get queue_exportImport;
-
-  /// No description provided for @queue_exportFormat.
-  ///
-  /// In en, this message translates to:
-  /// **'Export Format'**
-  String get queue_exportFormat;
-
-  /// No description provided for @queue_exportFormatJson.
-  ///
-  /// In en, this message translates to:
-  /// **'JSON'**
-  String get queue_exportFormatJson;
-
-  /// No description provided for @queue_exportFormatJsonDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Complete data with all parameters'**
-  String get queue_exportFormatJsonDesc;
-
-  /// No description provided for @queue_exportFormatCsv.
-  ///
-  /// In en, this message translates to:
-  /// **'CSV'**
-  String get queue_exportFormatCsv;
-
-  /// No description provided for @queue_exportFormatCsvDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Table format with prompts and basic info'**
-  String get queue_exportFormatCsvDesc;
-
-  /// No description provided for @queue_exportFormatText.
-  ///
-  /// In en, this message translates to:
-  /// **'Plain Text'**
-  String get queue_exportFormatText;
-
-  /// No description provided for @queue_exportFormatTextDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompts only, one per line'**
-  String get queue_exportFormatTextDesc;
-
-  /// No description provided for @queue_importStrategy.
-  ///
-  /// In en, this message translates to:
-  /// **'Import Strategy'**
-  String get queue_importStrategy;
-
-  /// No description provided for @queue_importStrategyMerge.
-  ///
-  /// In en, this message translates to:
-  /// **'Merge'**
-  String get queue_importStrategyMerge;
-
-  /// No description provided for @queue_importStrategyMergeDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Add imported tasks to end of existing queue'**
-  String get queue_importStrategyMergeDesc;
-
-  /// No description provided for @queue_importStrategyReplace.
-  ///
-  /// In en, this message translates to:
-  /// **'Replace'**
-  String get queue_importStrategyReplace;
-
-  /// No description provided for @queue_importStrategyReplaceDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear existing queue and replace with imported'**
-  String get queue_importStrategyReplaceDesc;
-
-  /// No description provided for @queue_supportedFormats.
-  ///
-  /// In en, this message translates to:
-  /// **'Supported formats:'**
-  String get queue_supportedFormats;
-
-  /// No description provided for @queue_supportedFormatJson.
-  ///
-  /// In en, this message translates to:
-  /// **'• JSON file (.json)'**
-  String get queue_supportedFormatJson;
-
-  /// No description provided for @queue_supportedFormatCsv.
-  ///
-  /// In en, this message translates to:
-  /// **'• CSV file (.csv)'**
-  String get queue_supportedFormatCsv;
-
-  /// No description provided for @queue_supportedFormatText.
-  ///
-  /// In en, this message translates to:
-  /// **'• Plain text file (.txt) - one prompt per line'**
-  String get queue_supportedFormatText;
-
-  /// No description provided for @queue_shareSubject.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue Export'**
-  String get queue_shareSubject;
-
-  /// No description provided for @queue_unsupportedFileFormat.
-  ///
-  /// In en, this message translates to:
-  /// **'Unsupported file format: {extension}'**
-  String queue_unsupportedFileFormat(Object extension);
-
-  /// No description provided for @queue_exportSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Export successful'**
-  String get queue_exportSuccess;
-
-  /// No description provided for @queue_exportFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Export failed: {error}'**
-  String queue_exportFailed(Object error);
-
-  /// No description provided for @queue_importSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Successfully imported {count} tasks'**
-  String queue_importSuccess(Object count);
-
-  /// No description provided for @queue_importFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Import failed: {error}'**
-  String queue_importFailed(Object error);
-
-  /// No description provided for @queue_selectFile.
-  ///
-  /// In en, this message translates to:
-  /// **'Select file to import'**
-  String get queue_selectFile;
-
-  /// No description provided for @queue_noValidTasks.
-  ///
-  /// In en, this message translates to:
-  /// **'No valid tasks in file'**
-  String get queue_noValidTasks;
-
-  /// No description provided for @settings_queueRetryCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Retry Count'**
-  String get settings_queueRetryCount;
-
-  /// No description provided for @settings_queueRetryInterval.
-  ///
-  /// In en, this message translates to:
-  /// **'Retry Interval'**
-  String get settings_queueRetryInterval;
-
   /// No description provided for @settings_showRandomPromptTools.
   ///
   /// In en, this message translates to:
@@ -12719,143 +12263,11 @@ abstract class AppLocalizations {
   /// **'When prompt text is selected, use the wheel only to adjust its weight and suppress other scroll actions.'**
   String get settings_enablePromptWeightScrollSubtitle;
 
-  /// No description provided for @settings_queueRetryCountMax.
-  ///
-  /// In en, this message translates to:
-  /// **'Max {count} times'**
-  String settings_queueRetryCountMax(Object count);
-
-  /// No description provided for @settings_queueRetryIntervalValue.
-  ///
-  /// In en, this message translates to:
-  /// **'{seconds} seconds'**
-  String settings_queueRetryIntervalValue(Object seconds);
-
-  /// No description provided for @unit_times.
-  ///
-  /// In en, this message translates to:
-  /// **'times'**
-  String get unit_times;
-
   /// No description provided for @unit_seconds.
   ///
   /// In en, this message translates to:
   /// **'seconds'**
   String get unit_seconds;
-
-  /// No description provided for @settings_floatingButtonBackground.
-  ///
-  /// In en, this message translates to:
-  /// **'Floating Button Background'**
-  String get settings_floatingButtonBackground;
-
-  /// No description provided for @settings_floatingButtonBackgroundCustom.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom background set'**
-  String get settings_floatingButtonBackgroundCustom;
-
-  /// No description provided for @settings_floatingButtonBackgroundDefault.
-  ///
-  /// In en, this message translates to:
-  /// **'Default style'**
-  String get settings_floatingButtonBackgroundDefault;
-
-  /// No description provided for @settings_clearBackground.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear background'**
-  String get settings_clearBackground;
-
-  /// No description provided for @settings_selectImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Image'**
-  String get settings_selectImage;
-
-  /// No description provided for @queue_currentQueueInfo.
-  ///
-  /// In en, this message translates to:
-  /// **'Current queue contains {count} tasks'**
-  String queue_currentQueueInfo(Object count);
-
-  /// No description provided for @queue_tooltipTasksTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'Tasks: {count}'**
-  String queue_tooltipTasksTotal(Object count);
-
-  /// No description provided for @queue_tooltipCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed: {count}'**
-  String queue_tooltipCompleted(Object count);
-
-  /// No description provided for @queue_tooltipFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed: {count}'**
-  String queue_tooltipFailed(Object count);
-
-  /// No description provided for @queue_tooltipCurrentTask.
-  ///
-  /// In en, this message translates to:
-  /// **'Current: {task}'**
-  String queue_tooltipCurrentTask(Object task);
-
-  /// No description provided for @queue_tooltipNoTasks.
-  ///
-  /// In en, this message translates to:
-  /// **'No tasks in queue'**
-  String get queue_tooltipNoTasks;
-
-  /// No description provided for @queue_tooltipDoubleClickToOpen.
-  ///
-  /// In en, this message translates to:
-  /// **'Double-click to start/pause'**
-  String get queue_tooltipDoubleClickToOpen;
-
-  /// No description provided for @queue_tooltipClickToToggle.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to open queue'**
-  String get queue_tooltipClickToToggle;
-
-  /// No description provided for @queue_tooltipDragToMove.
-  ///
-  /// In en, this message translates to:
-  /// **'Drag to reposition'**
-  String get queue_tooltipDragToMove;
-
-  /// No description provided for @queue_statusIdle.
-  ///
-  /// In en, this message translates to:
-  /// **'Status: Idle'**
-  String get queue_statusIdle;
-
-  /// No description provided for @queue_statusReady.
-  ///
-  /// In en, this message translates to:
-  /// **'Status: Ready'**
-  String get queue_statusReady;
-
-  /// No description provided for @queue_statusRunning.
-  ///
-  /// In en, this message translates to:
-  /// **'Status: Running'**
-  String get queue_statusRunning;
-
-  /// No description provided for @queue_statusPaused.
-  ///
-  /// In en, this message translates to:
-  /// **'Status: Paused'**
-  String get queue_statusPaused;
-
-  /// No description provided for @queue_statusCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Status: Completed'**
-  String get queue_statusCompleted;
 
   /// No description provided for @settings_notificationSound.
   ///
@@ -13468,12 +12880,6 @@ abstract class AppLocalizations {
   /// **'Cancel Generation'**
   String get shortcut_action_cancel_generation;
 
-  /// No description provided for @shortcut_action_add_to_queue.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to Queue'**
-  String get shortcut_action_add_to_queue;
-
   /// No description provided for @shortcut_action_random_prompt.
   ///
   /// In en, this message translates to:
@@ -13780,18 +13186,6 @@ abstract class AppLocalizations {
   /// **'Show Shortcut Help'**
   String get shortcut_action_show_shortcut_help;
 
-  /// No description provided for @shortcut_action_toggle_queue.
-  ///
-  /// In en, this message translates to:
-  /// **'Toggle Queue'**
-  String get shortcut_action_toggle_queue;
-
-  /// No description provided for @shortcut_action_toggle_queue_pause.
-  ///
-  /// In en, this message translates to:
-  /// **'Toggle Queue Pause'**
-  String get shortcut_action_toggle_queue_pause;
-
   /// No description provided for @shortcut_action_toggle_theme.
   ///
   /// In en, this message translates to:
@@ -13977,18 +13371,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Read Prompt, Seed and other parameters from image'**
   String get drop_extractMetadataSubtitle;
-
-  /// No description provided for @drop_addToQueue.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to Queue'**
-  String get drop_addToQueue;
-
-  /// No description provided for @drop_addToQueueSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Extract prompt and add to generation queue'**
-  String get drop_addToQueueSubtitle;
 
   /// No description provided for @drop_vibeDetected.
   ///
@@ -17344,18 +16726,6 @@ abstract class AppLocalizations {
   /// **'Style References reached the limit ({max} images)'**
   String toast_styleReferenceLimit(Object max);
 
-  /// No description provided for @toast_noValidPromptFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No valid prompt found'**
-  String get toast_noValidPromptFound;
-
-  /// No description provided for @toast_addedToQueue.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to queue: {prompt}'**
-  String toast_addedToQueue(Object prompt);
-
   /// No description provided for @toast_noValidMaskIgnored.
   ///
   /// In en, this message translates to:
@@ -17721,12 +17091,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to extract metadata: {error}'**
   String toast_extractMetadataFailed(Object error);
-
-  /// No description provided for @toast_extractPromptFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to extract prompt: {error}'**
-  String toast_extractPromptFailed(Object error);
 
   /// No description provided for @toast_smartDecomposeSent.
   ///
@@ -18717,12 +18081,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The app will shut down safely, install the update, and restart automatically. Active generation and download tasks will stop, so save anything important first.'**
   String get updateInstallConfirmationBody;
-
-  /// No description provided for @updateActiveTasksWarning.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue tasks are still active. Installing will stop the current task.'**
-  String get updateActiveTasksWarning;
 
   /// No description provided for @remindMeLater.
   ///

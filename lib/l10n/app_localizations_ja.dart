@@ -18,6 +18,44 @@ class AppLocalizationsJa extends AppLocalizations {
   String get common_cancel => 'キャンセル';
 
   @override
+  String get onlineFav_all => 'すべて';
+
+  @override
+  String get onlineFav_rootCollection => 'ルート';
+
+  @override
+  String get onlineFav_newCollection => '新しいコレクション';
+
+  @override
+  String get onlineFav_renameCollection => '名前を変更';
+
+  @override
+  String get onlineFav_deleteCollection => 'コレクションを削除';
+
+  @override
+  String get onlineFav_empty => 'お気に入りの作品はまだありません';
+
+  @override
+  String onlineFav_authorWorkCount(Object n) {
+    return '$n 作品';
+  }
+
+  @override
+  String get onlineFav_moveHere => 'ここに移動';
+
+  @override
+  String get onlineFav_removeFavorite => 'お気に入り解除';
+
+  @override
+  String get onlineFav_favoriteAuthor => '作者をお気に入り';
+
+  @override
+  String get onlineFav_authorFavorited => '作者をお気に入りに追加しました';
+
+  @override
+  String get onlineFav_authorUnfavorited => '作者のお気に入りを解除しました';
+
+  @override
   String get common_confirm => '確認';
 
   @override
@@ -540,9 +578,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_generationInputSection => '入力';
-
-  @override
-  String get settings_generationRetrySection => '失敗時リトライ';
 
   @override
   String get settings_generationFeedbackSection => '完了通知';
@@ -2455,9 +2490,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onlineGallery_send => '送信';
 
   @override
-  String get onlineGallery_addToQueue => 'キューに追加';
-
-  @override
   String get onlineGallery_sendToTextToImage => 'テキストから画像へ送信';
 
   @override
@@ -2491,12 +2523,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get onlineGallery_metadata => 'メタデータ';
-
-  @override
-  String get onlineGallery_addedToQueue => 'キューに追加されました';
-
-  @override
-  String get onlineGallery_queueFullMax => 'キューがいっぱいです (最大 50 項目)';
 
   @override
   String get onlineGallery_chooseDownloadDirectory => 'ダウンロード ディレクトリを選択してください';
@@ -2607,11 +2633,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onlineGallery_bulkDownload => '選択項目をダウンロード';
 
   @override
-  String onlineGallery_addedTasksToQueue(Object count) {
-    return '$count タスクをキューに追加しました';
-  }
-
-  @override
   String get onlineGallery_unfavorited => 'お気に入りから削除しました';
 
   @override
@@ -2717,6 +2738,15 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get onlineGallery_aiTagRankingProcessing =>
       'ランキングを生成中です。しばらくしてから再試行してください。';
+
+  @override
+  String get onlineGallery_aiTagNaiOnly => 'NAIのみ';
+
+  @override
+  String get onlineGallery_aiTagModelVersion => 'モデルバージョン';
+
+  @override
+  String get onlineGallery_generationParams => '生成パラメータ';
 
   @override
   String get onlineGallery_sourceConfigUnavailable =>
@@ -4525,6 +4555,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_naiOnlyTooltip => 'NAI 生成画像のみ表示';
 
   @override
+  String get localGallery_naiVersionFilterLabel => 'バージョン';
+
+  @override
+  String get localGallery_naiVersionFilterTooltip => 'NAI モデルのバージョンで絞り込み';
+
+  @override
   String get localGallery_masonryViewLabel => 'ウォーターフォール';
 
   @override
@@ -5241,6 +5277,20 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_addToCollectionFailed => '画像をコレクションに追加できませんでした';
 
   @override
+  String get localGallery_removeFromCollection => 'コレクションから削除';
+
+  @override
+  String localGallery_removedFromCollection(Object count, Object name) {
+    return 'コレクション「$name」から$count枚の画像を削除しました';
+  }
+
+  @override
+  String get localGallery_notInCollection => '選択した画像はこのコレクションにありません';
+
+  @override
+  String get localGallery_alreadyInCollection => '画像は既にこのコレクションに含まれています';
+
+  @override
   String get brushPreset_selectHint => 'ダブルタップしてこのブラシ プリセットを選択します';
 
   @override
@@ -5376,6 +5426,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get collectionSelect_dialogTitle => 'コレクションを選択してください';
+
+  @override
+  String get collectionSelect_removeTitle => 'コレクションから削除';
+
+  @override
+  String collectionSelect_memberCount(Object n) {
+    return '選択中の$n枚が含まれます';
+  }
+
+  @override
+  String get collectionSelect_noSelectedInCollection => '選択中の画像は含まれません';
 
   @override
   String get collectionSelect_filterHint => 'コレクションを検索...';
@@ -6642,318 +6703,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tagLibrary_dragToMove => 'ドラッグして移動、スクロールまたはピンチしてズームします';
 
   @override
-  String get queue_management => 'キュー管理';
-
-  @override
-  String get queue_empty => 'キューが空です';
-
-  @override
-  String get queue_emptyHint => 'キューにタスクがありません';
-
-  @override
-  String queue_taskCount(Object count) {
-    return '$count タスク';
-  }
-
-  @override
-  String get queue_pending => '保留中';
-
-  @override
-  String get queue_running => '実行中';
-
-  @override
-  String get queue_completed => '完了しました';
-
-  @override
-  String get queue_failed => '失敗しました';
-
-  @override
-  String get queue_paused => '一時停止しました';
-
-  @override
-  String get queue_idle => 'アイドル状態';
-
-  @override
-  String get queue_ready => '準備完了';
-
-  @override
-  String get queue_clickToStart => 'クリックしてキューの実行を開始します';
-
-  @override
-  String get queue_clickToPause => 'クリックしてキューを一時停止します';
-
-  @override
-  String get queue_clickToResume => 'クリックして実行を再開します';
-
-  @override
-  String get queue_noTasksToStart => 'キューが空のため開始できません';
-
-  @override
-  String get queue_allTasksCompleted => 'すべてのタスクが完了しました';
-
-  @override
-  String get queue_executionProgress => '実行の進行状況';
-
-  @override
-  String get queue_totalTasks => '合計';
-
-  @override
-  String get queue_completedTasks => '完了しました';
-
-  @override
-  String get queue_failedTasks => '失敗しました';
-
-  @override
-  String get queue_remainingTasks => '残り';
-
-  @override
-  String queue_estimatedTime(Object time) {
-    return '推定: 約 $time';
-  }
-
-  @override
-  String queue_seconds(Object count) {
-    return '$count 秒';
-  }
-
-  @override
-  String queue_minutes(Object count) {
-    return '$count 分';
-  }
-
-  @override
-  String queue_hours(Object hours, Object minutes) {
-    return '$hours 時間 $minutes 分';
-  }
-
-  @override
-  String get queue_pause => '一時停止';
-
-  @override
-  String get queue_resume => '再開';
-
-  @override
-  String get queue_pauseExecution => '実行を一時停止します';
-
-  @override
-  String get queue_resumeExecution => '実行を再開';
-
-  @override
-  String get queue_autoExecute => '自動実行';
-
-  @override
-  String get queue_autoExecuteOn => '完了時に次のタスクを自動的に実行';
-
-  @override
-  String get queue_autoExecuteOff => '生成するには手動でクリックする必要があります';
-
-  @override
-  String get queue_clearQueue => 'キューをクリアします';
-
-  @override
-  String get queue_closeFloatingButton => 'フローティング ボタンを閉じる';
-
-  @override
-  String get queue_clearQueueConfirm =>
-      'すべてのキュー タスクをクリアしてもよろしいですか?この操作は元に戻すことができません。';
-
-  @override
-  String get queue_confirmClear => 'クリアの確認';
-
-  @override
-  String queue_retryCount(Object current, Object max) {
-    return '再試行 $current/$max';
-  }
-
-  @override
-  String get queue_retry => '再試行';
-
-  @override
-  String get queue_requeue => '再キューイング';
-
-  @override
-  String get queue_clearFailedTasks => 'すべてクリア';
-
-  @override
-  String get queue_noFailedTasks => '失敗したタスクはありません';
-
-  @override
-  String get queue_noCompletedTasks => '完了したレコードはありません';
-
-  @override
-  String get queue_editTask => 'タスクの編集';
-
-  @override
-  String get queue_duplicateTask => 'タスクを複製';
-
-  @override
-  String get queue_taskDuplicated => 'タスクが重複しました';
-
-  @override
-  String get queue_queueFull => 'キューがいっぱいなので複製できません';
-
-  @override
-  String get queue_positivePrompt => 'プロンプト';
-
-  @override
-  String get queue_enterPositivePrompt => 'プロンプトを入力してください...';
-
-  @override
-  String get queue_parametersPreview => 'パラメータのプレビュー';
-
-  @override
-  String get queue_model => 'モデル';
-
-  @override
-  String get queue_seed => 'シード';
-
-  @override
-  String get queue_sampler => 'サンプラー';
-
-  @override
-  String get queue_steps => 'ステップ';
-
-  @override
-  String get queue_cfg => 'CFG';
-
-  @override
-  String get queue_size => 'サイズ';
-
-  @override
-  String get queue_addToQueue => 'キューに追加';
-
-  @override
-  String get queue_taskAdded => 'キューに追加されました';
-
-  @override
-  String get queue_negativePromptFromMain => '除外したい要素にはメインページの設定が使用されます';
-
-  @override
-  String get queue_pinToTop => 'トップに固定する';
-
-  @override
-  String get queue_delete => '削除';
-
-  @override
-  String get queue_edit => '編集';
-
-  @override
-  String get queue_selectAll => 'すべて選択';
-
-  @override
-  String get queue_invertSelection => '反転';
-
-  @override
-  String get queue_cancelSelection => 'キャンセル';
-
-  @override
-  String queue_selectedCount(Object count) {
-    return '$count が選択されました';
-  }
-
-  @override
-  String queue_confirmDeleteSelected(Object count) {
-    return '$count 個の選択したタスクを削除してもよろしいですか?';
-  }
-
-  @override
-  String get queue_export => 'エクスポート';
-
-  @override
-  String get queue_import => 'インポート';
-
-  @override
-  String get queue_exportImport => 'キューのインポート/エクスポート';
-
-  @override
-  String get queue_exportFormat => 'エクスポート形式';
-
-  @override
-  String get queue_exportFormatJson => 'JSON';
-
-  @override
-  String get queue_exportFormatJsonDesc => 'すべてのパラメータを含む完全なデータ';
-
-  @override
-  String get queue_exportFormatCsv => 'CSV';
-
-  @override
-  String get queue_exportFormatCsvDesc => 'プロンプトと基本情報を含むテーブル形式';
-
-  @override
-  String get queue_exportFormatText => 'プレーンテキスト';
-
-  @override
-  String get queue_exportFormatTextDesc => 'プロンプトのみ、1 行に 1 つ';
-
-  @override
-  String get queue_importStrategy => 'インポート戦略';
-
-  @override
-  String get queue_importStrategyMerge => 'マージ';
-
-  @override
-  String get queue_importStrategyMergeDesc => 'インポートされたタスクを既存のキューの最後に追加します';
-
-  @override
-  String get queue_importStrategyReplace => '置換';
-
-  @override
-  String get queue_importStrategyReplaceDesc =>
-      '既存のキューをクリアし、インポートされたキューと置き換えます';
-
-  @override
-  String get queue_supportedFormats => 'サポートされている形式:';
-
-  @override
-  String get queue_supportedFormatJson => '• JSON ファイル (.json)';
-
-  @override
-  String get queue_supportedFormatCsv => '• CSV ファイル (.csv)';
-
-  @override
-  String get queue_supportedFormatText =>
-      '• プレーン テキスト ファイル (.txt) - 1 行に 1 つのプロンプト';
-
-  @override
-  String get queue_shareSubject => 'キューのエクスポート';
-
-  @override
-  String queue_unsupportedFileFormat(Object extension) {
-    return 'サポートされていないファイル形式: $extension';
-  }
-
-  @override
-  String get queue_exportSuccess => 'エクスポートが成功しました';
-
-  @override
-  String queue_exportFailed(Object error) {
-    return 'エクスポートに失敗しました: $error';
-  }
-
-  @override
-  String queue_importSuccess(Object count) {
-    return '$count タスクが正常にインポートされました';
-  }
-
-  @override
-  String queue_importFailed(Object error) {
-    return 'インポートに失敗しました: $error';
-  }
-
-  @override
-  String get queue_selectFile => 'インポートするファイルを選択してください';
-
-  @override
-  String get queue_noValidTasks => 'ファイル内に有効なタスクがありません';
-
-  @override
-  String get settings_queueRetryCount => '再試行回数';
-
-  @override
-  String get settings_queueRetryInterval => '再試行間隔';
-
-  @override
   String get settings_showRandomPromptTools => 'ランダムプロンプトツールを表示';
 
   @override
@@ -6968,87 +6717,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'プロンプトを選択している間は、ホイールで重みだけを調整し、ページスクロールなどの操作は行いません。';
 
   @override
-  String settings_queueRetryCountMax(Object count) {
-    return '最大 $count 回';
-  }
-
-  @override
-  String settings_queueRetryIntervalValue(Object seconds) {
-    return '$seconds 秒';
-  }
-
-  @override
-  String get unit_times => '回';
-
-  @override
   String get unit_seconds => '秒';
-
-  @override
-  String get settings_floatingButtonBackground => 'フローティング ボタンの背景';
-
-  @override
-  String get settings_floatingButtonBackgroundCustom => 'カスタム背景を設定済み';
-
-  @override
-  String get settings_floatingButtonBackgroundDefault => 'デフォルトのスタイル';
-
-  @override
-  String get settings_clearBackground => '背景をクリア';
-
-  @override
-  String get settings_selectImage => '画像を選択してください';
-
-  @override
-  String queue_currentQueueInfo(Object count) {
-    return '現在のキューには $count タスクが含まれています';
-  }
-
-  @override
-  String queue_tooltipTasksTotal(Object count) {
-    return 'タスク: $count';
-  }
-
-  @override
-  String queue_tooltipCompleted(Object count) {
-    return '完了: $count';
-  }
-
-  @override
-  String queue_tooltipFailed(Object count) {
-    return '失敗しました: $count';
-  }
-
-  @override
-  String queue_tooltipCurrentTask(Object task) {
-    return '現在: $task';
-  }
-
-  @override
-  String get queue_tooltipNoTasks => 'キューにタスクがありません';
-
-  @override
-  String get queue_tooltipDoubleClickToOpen => 'ダブルクリックして開始/一時停止します';
-
-  @override
-  String get queue_tooltipClickToToggle => 'クリックしてキューを開きます';
-
-  @override
-  String get queue_tooltipDragToMove => 'ドラッグして位置を変更します';
-
-  @override
-  String get queue_statusIdle => 'ステータス: アイドル';
-
-  @override
-  String get queue_statusReady => 'ステータス: 準備完了';
-
-  @override
-  String get queue_statusRunning => 'ステータス: 実行中';
-
-  @override
-  String get queue_statusPaused => 'ステータス: 一時停止中';
-
-  @override
-  String get queue_statusCompleted => 'ステータス: 完了';
 
   @override
   String get settings_notificationSound => '完了音';
@@ -7397,9 +7066,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shortcut_action_cancel_generation => '生成のキャンセル';
 
   @override
-  String get shortcut_action_add_to_queue => 'キューに追加';
-
-  @override
   String get shortcut_action_random_prompt => 'ランダムなプロンプト';
 
   @override
@@ -7553,12 +7219,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shortcut_action_show_shortcut_help => 'ショートカット ヘルプを表示';
 
   @override
-  String get shortcut_action_toggle_queue => 'キューの切り替え';
-
-  @override
-  String get shortcut_action_toggle_queue_pause => 'キューの一時停止の切り替え';
-
-  @override
   String get shortcut_action_toggle_theme => 'テーマの切り替え';
 
   @override
@@ -7655,12 +7315,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get drop_extractMetadataSubtitle => '画像からプロンプト、シード、その他のパラメーターを読み取ります';
-
-  @override
-  String get drop_addToQueue => 'キューに追加';
-
-  @override
-  String get drop_addToQueueSubtitle => 'プロンプトを抽出して生成キューに追加します';
 
   @override
   String get drop_vibeDetected => '事前にエンコードされた Vibe を検出しました (2 Anlas を節約)';
@@ -9638,14 +9292,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get toast_noValidPromptFound => '有効なプロンプトが見つかりません';
-
-  @override
-  String toast_addedToQueue(Object prompt) {
-    return 'キューに追加されました: $prompt';
-  }
-
-  @override
   String get toast_noValidMaskIgnored => '有効なマスクが検出されませんでした。保存結果は無視されました。';
 
   @override
@@ -9869,11 +9515,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String toast_extractMetadataFailed(Object error) {
     return 'メタデータの抽出に失敗しました: $error';
-  }
-
-  @override
-  String toast_extractPromptFailed(Object error) {
-    return 'プロンプトを抽出できませんでした: $error';
   }
 
   @override
@@ -10426,9 +10067,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get updateInstallConfirmationBody =>
       'アプリを安全に終了して更新をインストールし、自動的に再起動します。実行中の生成・ダウンロードタスクは停止するため、必要な内容を先に保存してください。';
-
-  @override
-  String get updateActiveTasksWarning => 'キュータスクが実行中です。インストールすると現在のタスクは停止します。';
 
   @override
   String get remindMeLater => '4時間後に通知';

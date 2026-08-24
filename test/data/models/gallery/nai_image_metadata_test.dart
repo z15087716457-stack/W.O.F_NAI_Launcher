@@ -619,6 +619,78 @@ void main() {
       expect(metadata.vibeReferences.first.strength, equals(0.25));
       expect(metadata.vibeReferences.last.infoExtracted, equals(0.8));
     });
+
+    test('V5 params model_name key resolves V5 Full (schema version=1 ignored)',
+        () {
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'prompt': 'test',
+        'model_name': 'DiffusionModelMetaName.NAIv5',
+        'model_hash': '0B1DA8F5',
+        'version': 1,
+      });
+
+      expect(metadata.model, ImageModels.animeDiffusionV5Full);
+    });
+
+    test('V5 params model_name with curated suffix resolves V5 Curated', () {
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'prompt': 'test',
+        'model_name': 'DiffusionModelMetaName.NAIv5Curated',
+      });
+
+      expect(metadata.model, ImageModels.animeDiffusionV5Curated);
+    });
+
+    test('official slug in version key falls back to model resolution', () {
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'prompt': 'test',
+        'version': 'nai-diffusion-5-full',
+      });
+
+      expect(metadata.model, ImageModels.animeDiffusionV5Full);
+    });
+
+    test('envelope Source still wins over params model_name', () {
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'Comment': jsonEncode({
+          'prompt': 'test',
+          'model_name': 'DiffusionModelMetaName.NAIv5',
+        }),
+        'Source': 'NovelAI Diffusion V4.5 4BDE2A90',
+        'Software': 'NovelAI',
+      });
+
+      expect(metadata.model, ImageModels.animeDiffusionV45Full);
+    });
+
+    test('envelope Source containing V5 resolves V5 Full', () {
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'Comment': jsonEncode({'prompt': 'test'}),
+        'Source': 'NovelAI Diffusion V5 XXXXXXXX',
+      });
+
+      expect(metadata.model, ImageModels.animeDiffusionV5Full);
+    });
+
+    test('stale cache with model_name rawJson upgrades model field', () {
+      final params = {
+        'prompt': 'test',
+        'model_name': 'DiffusionModelMetaName.NAIv5',
+        'model_hash': '0B1DA8F5',
+        'v4_prompt': {
+          'caption': {'base_caption': 'test', 'char_captions': <dynamic>[]},
+        },
+      };
+      final stale = NaiImageMetadata.fromNaiComment(
+        Map<String, dynamic>.from(params),
+        rawJson: jsonEncode(params),
+      );
+      final degraded = stale.copyWith(model: null);
+
+      final upgraded = degraded.upgradeFromRawJsonIfNeeded();
+
+      expect(upgraded.model, ImageModels.animeDiffusionV5Full);
+    });
   });
 
   group('Real PNG metadata drag flow', () {

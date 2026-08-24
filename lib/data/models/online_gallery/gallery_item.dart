@@ -291,6 +291,80 @@ class GalleryItem {
     return GalleryItem.fromDanbooruJson(json);
   }
 
+  /// 本地收藏快照序列化：只保留离线还原卡片所需的核心字段，
+  /// 与 fromDanbooruJson（danbooru 专用）无关
+  Map<String, dynamic> toSnapshotJson() {
+    return {
+      'id': id,
+      'source': _sourceId?.key ?? site,
+      'title': title,
+      'author': author,
+      'description': description,
+      'ai_type': aiType,
+      'created_at': createdAt,
+      'uploader_id': uploaderId,
+      'score': score,
+      'rating': rating,
+      'image_width': imageWidth,
+      'image_height': imageHeight,
+      'tags': tags,
+      'media_count': mediaCount,
+      'view_count': viewCount,
+      'fav_count': favoriteCount,
+      'rank': rank,
+      'cover': {
+        'id': cover.id,
+        'preview_url': cover.previewUrl,
+        'display_url': cover.displayUrl,
+        'download_url': cover.downloadUrl,
+        'width': cover.width,
+        'height': cover.height,
+        'extension': cover.extension,
+      },
+    };
+  }
+
+  /// [toSnapshotJson] 的还原
+  factory GalleryItem.fromSnapshotJson(Map<String, dynamic> json) {
+    final coverJson = json['cover'];
+    final cover = coverJson is Map<String, dynamic>
+        ? GalleryMedia(
+            id: coverJson['id']?.toString() ?? '',
+            previewUrl: coverJson['preview_url']?.toString() ?? '',
+            displayUrl: coverJson['display_url']?.toString() ?? '',
+            downloadUrl: coverJson['download_url']?.toString() ?? '',
+            width: (coverJson['width'] as num?)?.toInt() ?? 0,
+            height: (coverJson['height'] as num?)?.toInt() ?? 0,
+            extension: coverJson['extension']?.toString(),
+          )
+        : null;
+    final sourceKey = json['source']?.toString();
+    final tags = json['tags'];
+    return GalleryItem(
+      id: (json['id'] as num).toInt(),
+      sourceId: sourceKey == null ? null : GallerySourceId.fromKey(sourceKey),
+      site: sourceKey ?? 'danbooru',
+      title: json['title']?.toString(),
+      author: json['author']?.toString(),
+      description: json['description']?.toString(),
+      aiType: json['ai_type']?.toString(),
+      createdAt: json['created_at']?.toString() ?? '',
+      uploaderId: (json['uploader_id'] as num?)?.toInt() ?? 0,
+      score: (json['score'] as num?)?.toInt(),
+      rating: json['rating']?.toString(),
+      imageWidth: (json['image_width'] as num?)?.toInt() ?? 0,
+      imageHeight: (json['image_height'] as num?)?.toInt() ?? 0,
+      tags: tags is List
+          ? tags.map((tag) => tag.toString()).toList(growable: false)
+          : const [],
+      cover: cover,
+      mediaCount: (json['media_count'] as num?)?.toInt() ?? 1,
+      viewCount: (json['view_count'] as num?)?.toInt(),
+      favoriteCount: (json['fav_count'] as num?)?.toInt(),
+      rank: (json['rank'] as num?)?.toInt(),
+    );
+  }
+
   GalleryItem copyWith({
     int? id,
     GallerySourceId? sourceId,

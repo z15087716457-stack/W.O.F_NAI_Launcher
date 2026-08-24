@@ -35,7 +35,6 @@ import 'image_save_settings_provider.dart';
 import 'local_gallery_provider.dart';
 import 'prompt_config_provider.dart';
 import 'quality_preset_provider.dart';
-import 'queue_execution_provider.dart';
 import 'subscription_provider.dart';
 import 'cost_estimate_provider.dart';
 import 'uc_preset_provider.dart';
@@ -586,23 +585,10 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     // 获取抽卡模式设置
     final randomMode = ref.read(randomPromptModeProvider);
 
-    // 检查队列执行状态 - 队列运行时不应用抽卡模式
-    // 使用 try-catch 避免循环依赖错误（QueueExecutionNotifier 监听 ImageGenerationNotifier）
-    bool isQueueExecuting = false;
-    try {
-      final queueExecutionState = ref.read(queueExecutionNotifierProvider);
-      isQueueExecuting =
-          queueExecutionState.isRunning || queueExecutionState.isReady;
-    } catch (e) {
-      // 循环依赖或 provider 未初始化时，默认不在队列执行中
-      isQueueExecuting = false;
-    }
-
-    // 如果开启抽卡模式且不在队列执行中，先随机提示词再生成
+    // 如果开启抽卡模式，先随机提示词再生成
     // 这样生成的图像和显示的提示词能对应上
-    // 队列执行时跳过抽卡模式，使用队列任务的原始提示词
     ImageParams effectiveParams = params;
-    if (randomMode && !isQueueExecuting) {
+    if (randomMode) {
       final randomPrompt = await generateAndApplyRandomPrompt();
       if (_shouldAbortGenerationRun(generationRunId)) return;
       if (randomPrompt.isNotEmpty) {
@@ -703,7 +689,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         1,
         generationRunId,
       );
-      // 注意：生成完成通知由 QueueExecutionNotifier 统一管理
+      // 注意：生成完成音效由 GenerationCompletionWatcher 统一监听
       // 点数消耗由 AnlasBalanceWatcher 自动监听余额变化记录
       return;
     }
@@ -732,10 +718,9 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     for (int batch = 0; batch < batchCount; batch++) {
       if (_shouldAbortGenerationRun(generationRunId)) break;
 
-      // 如果开启抽卡模式且不是第一批且不在队列执行中，先随机新提示词再生成
+      // 如果开启抽卡模式且不是第一批，先随机新提示词再生成
       // 第一批已在方法开头随机过了
-      // 队列执行时跳过抽卡模式
-      if (randomMode && batch > 0 && !isQueueExecuting) {
+      if (randomMode && batch > 0) {
         final randomPrompt = await generateAndApplyRandomPrompt();
         if (_shouldAbortGenerationRun(generationRunId)) return;
         if (randomPrompt.isNotEmpty) {
@@ -880,8 +865,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       totalImages: 0,
     );
 
-    // 注意：生成完成通知由 QueueExecutionNotifier 统一管理
-    // 以避免循环依赖（ImageGenerationNotifier ↔ QueueExecutionNotifier）
+    // 注意：生成完成音效由 GenerationCompletionWatcher 统一监听
 
     // 自动保存：如果启用且生成成功，保存所有图像
     if (!_isCancelled && allImages.isNotEmpty) {

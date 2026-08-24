@@ -14,6 +14,13 @@ const _gelbooruImageHeaders = <String, String>{
   'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
 };
 
+/// pximg（Pixiv CDN）防盗链：必须带 pixiv.net 的 Referer。
+const _pximgImageHeaders = <String, String>{
+  'User-Agent': _onlineGalleryBrowserUserAgent,
+  'Referer': 'https://www.pixiv.net/',
+  'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+};
+
 /// Danbooru 图片缓存管理器
 ///
 /// 使用自定义配置提升图片加载性能：
@@ -43,8 +50,9 @@ class DanbooruImageCacheManager extends CacheManager with ImageCacheManager {
 
 Map<String, String> onlineGalleryImageHeadersForUrl(String url) {
   final uri = Uri.tryParse(url);
-  if (!_isGelbooruMediaHost(uri)) return const {};
-  return _gelbooruImageHeaders;
+  if (_isGelbooruMediaHost(uri)) return _gelbooruImageHeaders;
+  if (_isPximgMediaHost(uri)) return _pximgImageHeaders;
+  return const {};
 }
 
 String? onlineGalleryImageCacheKeyForUrl(String url) {
@@ -62,4 +70,11 @@ bool _isGelbooruMediaHost(Uri? uri) {
 
   final host = uri.host.toLowerCase();
   return host == 'gelbooru.com' || host.endsWith('.gelbooru.com');
+}
+
+bool _isPximgMediaHost(Uri? uri) {
+  if (uri == null || uri.host.isEmpty) return false;
+
+  final host = uri.host.toLowerCase();
+  return host == 'pximg.net' || host.endsWith('.pximg.net');
 }

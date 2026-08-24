@@ -22,23 +22,12 @@ import '../screens/vibe_library/vibe_library_screen.dart';
 import '../widgets/common/update_notice_banner.dart';
 import '../widgets/drop/global_drop_handler.dart';
 import '../widgets/navigation/main_nav_rail.dart';
-import '../widgets/queue/floating_queue_button.dart';
-import '../widgets/queue/queue_management_page.dart';
 
 import '../widgets/shortcuts/shortcut_aware_widget.dart';
 import '../widgets/shortcuts/shortcut_help_dialog.dart';
 import 'app_branch.dart';
 
 part 'app_router.g.dart';
-
-/// 队列管理面板显示状态 Provider
-final queueManagementVisibleProvider = StateProvider<bool>((ref) => false);
-
-/// 悬浮球手动关闭状态 Provider
-///
-/// 当用户主动关闭悬浮球时设为 true，悬浮球将不再显示
-/// 当队列有新任务添加时自动重置为 false
-final floatingButtonClosedProvider = StateProvider<bool>((ref) => false);
 
 /// Navigator Keys for StatefulShellRoute branches
 final _homeKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -401,11 +390,6 @@ class _MainShellState extends ConsumerState<MainShell> {
       ShortcutIds.showShortcutHelp: () {
         ShortcutHelpDialog.show(context);
       },
-      // 显示/隐藏队列
-      ShortcutIds.toggleQueue: () {
-        final isVisible = ref.read(queueManagementVisibleProvider);
-        ref.read(queueManagementVisibleProvider.notifier).state = !isVisible;
-      },
     };
 
     // 使用 ShortcutAwareWidget 包装全局快捷键
@@ -449,8 +433,6 @@ class DesktopShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isQueueVisible = ref.watch(queueManagementVisibleProvider);
-
     return Scaffold(
       body: Row(
         children: [
@@ -470,24 +452,6 @@ class DesktopShell extends ConsumerWidget {
                       left: 0,
                       right: 0,
                       child: UpdateNoticeBanner(),
-                    ),
-                    // 队列悬浮球 - 传入实际可用区域大小
-                    FloatingQueueButton(
-                      onTap: () =>
-                          ref
-                                  .read(queueManagementVisibleProvider.notifier)
-                                  .state =
-                              !isQueueVisible,
-                      containerSize: Size(
-                        constraints.maxWidth,
-                        constraints.maxHeight,
-                      ),
-                    ),
-                    // 队列管理面板
-                    _QueuePanel(
-                      isVisible: isQueueVisible,
-                      maxWidth: 650,
-                      heightFactor: 0.85,
                     ),
                   ],
                 );
@@ -513,7 +477,6 @@ class MobileShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isQueueVisible = ref.watch(queueManagementVisibleProvider);
     final showUpdateBadge = ref.watch(
       updateStateProvider.select((state) => state.hasNewVersion),
     );
@@ -530,22 +493,6 @@ class MobileShell extends ConsumerWidget {
                 left: 0,
                 right: 0,
                 child: UpdateNoticeBanner(),
-              ),
-              // 队列悬浮球 - 传入实际可用区域大小
-              FloatingQueueButton(
-                onTap: () =>
-                    ref.read(queueManagementVisibleProvider.notifier).state =
-                        !isQueueVisible,
-                containerSize: Size(
-                  constraints.maxWidth,
-                  constraints.maxHeight,
-                ),
-              ),
-              // 队列管理面板
-              _QueuePanel(
-                isVisible: isQueueVisible,
-                maxWidth: double.infinity,
-                heightFactor: 0.85,
               ),
             ],
           );
@@ -648,85 +595,4 @@ CustomTransitionPage<void> _buildFadeSlidePage({
       );
     },
   );
-}
-
-// ============================================
-// 队列面板组件
-// ============================================
-
-/// 队列管理面板组件
-///
-/// 带背景遮罩、滑动动画和队列管理页面
-class _QueuePanel extends ConsumerWidget {
-  final bool isVisible;
-  final double maxWidth;
-  final double heightFactor;
-
-  const _QueuePanel({
-    required this.isVisible,
-    required this.maxWidth,
-    required this.heightFactor,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Stack(
-          children: [
-            // 背景遮罩
-            if (isVisible)
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: () =>
-                      ref.read(queueManagementVisibleProvider.notifier).state =
-                          false,
-                  child: Container(color: Colors.black54),
-                ),
-              ),
-            // 滑动面板
-            TweenAnimationBuilder<Offset>(
-              tween: Tween(
-                begin: const Offset(0, 1),
-                end: isVisible ? Offset.zero : const Offset(0, 1),
-              ),
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              builder: (context, offset, child) {
-                return IgnorePointer(
-                  ignoring: offset.dy >= 0.5,
-                  child: FractionalTranslation(
-                    translation: offset,
-                    child: child,
-                  ),
-                );
-              },
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxWidth),
-                  child: Material(
-                    color: theme.scaffoldBackgroundColor,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: SafeArea(
-                      top: false,
-                      child: SizedBox(
-                        height: constraints.maxHeight * heightFactor,
-                        child: const QueueManagementPage(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

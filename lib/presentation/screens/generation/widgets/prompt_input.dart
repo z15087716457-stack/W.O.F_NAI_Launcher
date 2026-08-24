@@ -21,7 +21,6 @@ import '../../../providers/prompt_maximize_provider.dart';
 import '../../../providers/prompt_regex_rules_provider.dart';
 import '../../../providers/prompt_token_counter_provider.dart';
 import '../../../providers/quality_preset_provider.dart';
-import '../../../providers/queue_execution_provider.dart';
 import '../../../providers/uc_preset_provider.dart';
 import '../../../widgets/autocomplete/autocomplete.dart';
 import '../../../widgets/common/app_toast.dart';
@@ -393,34 +392,22 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     final theme = Theme.of(context);
 
     // 监听 Provider 变化，自动同步到本地状态
-    // 注意：队列运行时不同步，避免替换用户正在编辑的提示词
     ref.listen(
       generationParamsNotifierProvider.select(
         (params) =>
             (prompt: params.prompt, negativePrompt: params.negativePrompt),
       ),
       (previous, next) {
-        // 检查队列执行状态，队列运行/就绪时跳过同步
-        bool isQueueActive = false;
-        try {
-          final queueState = ref.read(queueExecutionNotifierProvider);
-          isQueueActive = queueState.isRunning || queueState.isReady;
-        } catch (e) {
-          // Provider 未初始化
+        if (previous?.prompt != next.prompt) {
+          _syncPromptFromProvider(next.prompt);
         }
-
-        if (!isQueueActive) {
-          if (previous?.prompt != next.prompt) {
-            _syncPromptFromProvider(next.prompt);
-          }
-          if (previous?.negativePrompt != next.negativePrompt) {
-            _syncNegativeFromProvider(next.negativePrompt);
-          }
+        if (previous?.negativePrompt != next.negativePrompt) {
+          _syncNegativeFromProvider(next.negativePrompt);
         }
       },
     );
 
-    // 监听待填充提示词变化（队列执行、画廊发送等）
+    // 监听待填充提示词变化（画廊发送等）
     ref.listen(hasPendingPromptProvider, (previous, next) {
       if (next == true) {
         WidgetsBinding.instance.addPostFrameCallback((_) {

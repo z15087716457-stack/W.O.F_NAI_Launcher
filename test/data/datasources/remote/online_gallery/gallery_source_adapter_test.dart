@@ -286,6 +286,162 @@ void main() {
       expect(detail.media[2].negativePrompt, 'comfy negative');
       expect(detail.item.mediaCount, 4);
     });
+
+    test('builds pximg master1200 preview from original_urls', () async {
+      final http = _RecordingHttpAdapter((request) {
+        if (request.uri.path == '/api/config') return _configJson;
+        return {
+          'page': 1,
+          'page_size': 60,
+          'total': 3,
+          'items': [
+            {
+              ..._aiWork(148822094),
+              // JSON string 数组，多图取第一张（p0）
+              'original_urls': jsonEncode([
+                'https://i.pximg.net/img-original/img/2026/08/24/13/50/57/148822094_p0.png',
+                'https://i.pximg.net/img-original/img/2026/08/24/13/50/57/148822094_p1.png',
+              ]),
+            },
+            {
+              ..._aiWork(200),
+              // 已解码 List 同样支持
+              'original_urls': [
+                'https://i.pximg.net/img-original/img/2026/01/01/00/00/00/200_p0.jpg',
+              ],
+            },
+            {..._aiWork(201)}..remove('original_urls'),
+          ],
+        };
+      });
+      final adapter = AiTagGallerySourceAdapter(
+        dio: Dio()..httpClientAdapter = http,
+      );
+
+      final page = await adapter.search(
+        const GallerySearchRequest(cursor: '1', pageSize: 60),
+      );
+
+      expect(page.items, hasLength(3));
+      expect(
+        page.items[0].previewUrl,
+        'https://i.pximg.net/img-master/img/2026/08/24/13/50/57/148822094_p0_master1200.jpg',
+      );
+      expect(
+        page.items[0].downloadUrl,
+        'https://i.pximg.net/img-original/img/2026/08/24/13/50/57/148822094_p0.png',
+      );
+      expect(page.items[0].hasValidPreview, isTrue);
+      expect(
+        page.items[1].previewUrl,
+        'https://i.pximg.net/img-master/img/2026/01/01/00/00/00/200_p0_master1200.jpg',
+      );
+      expect(page.items[2].hasValidPreview, isFalse);
+    });
+
+    test('aiTagPixivThumbnailUrl follows the pixiv master1200 rule', () {
+      expect(
+        aiTagPixivThumbnailUrl(
+          'https://i.pximg.net/img-original/img/2026/08/24/13/50/57/148822094_p0.png',
+        ),
+        'https://i.pximg.net/img-master/img/2026/08/24/13/50/57/148822094_p0_master1200.jpg',
+      );
+      expect(
+        aiTagPixivThumbnailUrl(
+          'https://i.pximg.net/img-original/img/2026/08/24/13/50/57/148822094_p0.jpg',
+        ),
+        'https://i.pximg.net/img-master/img/2026/08/24/13/50/57/148822094_p0_master1200.jpg',
+      );
+      expect(
+        aiTagPixivThumbnailUrl('https://i.pximg.net/forbidden.png'),
+        isEmpty,
+      );
+      expect(aiTagPixivThumbnailUrl(''), isEmpty);
+    });
+
+    test(
+      'resolves model from ai_json Source with images.model fallback',
+      () async {
+        final http = _RecordingHttpAdapter((request) {
+          if (request.uri.path == '/api/config') return _configJson;
+          if (request.uri.path == '/api/work/601') {
+            return {
+              'work': _aiWork(601),
+              'images': [
+                // 信封自带 Source 时优先信封（model 字段不同也不覆盖）
+                _naiEnvelopeImage(
+                  '601_p0',
+                  source: 'NovelAI Diffusion V4.5 4BDE2A90',
+                  model: 'NovelAI Diffusion V5 0B1DA8F5',
+                ),
+                // 信封无 Source：images[].model 兜底命中 V5 判定
+                _naiEnvelopeImage(
+                  '601_p1',
+                  model: 'NovelAI Diffusion V5 0B1DA8F5',
+                ),
+                // 非 NAI 命名不判定，原文落标准 model 键
+                _naiEnvelopeImage('601_p2', model: 'Stable Diffusion XL abc123'),
+              ],
+            };
+          }
+          throw StateError('Unexpected request ${request.uri}');
+        });
+        final adapter = AiTagGallerySourceAdapter(
+          dio: Dio()..httpClientAdapter = http,
+        );
+        const item = GalleryItem(
+          id: 601,
+          sourceId: GallerySourceId.aiTag,
+          createdAt: '',
+          uploaderId: 9,
+          cover: GalleryMedia(
+            id: 'pending',
+            previewUrl: '',
+            displayUrl: '',
+            downloadUrl: '',
+          ),
+        );
+
+        final detail = await adapter.detail(item);
+
+        expect(detail.media, hasLength(3));
+        final full = detail.media[0];
+        expect(full.metadata['model'], 'nai-diffusion-4-5-full');
+        expect(full.metadata['seed'], 12345);
+        expect(full.metadata['sampler'], 'k_euler_ancestral');
+        expect(full.metadata['steps'], 28);
+        expect(full.metadata['scale'], 5.0);
+        expect(full.width, 832);
+        expect(full.height, 1216);
+        expect(detail.media[1].metadata['model'], 'nai-diffusion-5-full');
+        expect(
+          detail.media[2].metadata['model'],
+          'Stable Diffusion XL abc123',
+        );
+        expect(detail.media[2].metadata.containsKey('source_model'), isFalse);
+      },
+    );
+
+    test('isAiTagNaiWork recognizes NAI family variants', () {
+      for (final value in ['NAI', 'nai', 'nai_x', 'naix', 'nai x', ' NAI ']) {
+        expect(isAiTagNaiWork(value), isTrue, reason: value);
+      }
+      for (final value in ['SD', 'ComfyUI', '', 'sd_xl', null]) {
+        expect(isAiTagNaiWork(value), isFalse, reason: value);
+      }
+    });
+
+    test('buildAiTagSearchQuery injects model version term', () {
+      expect(buildAiTagSearchQuery('', '5'), 'NovelAI Diffusion V5');
+      expect(
+        buildAiTagSearchQuery('1girl', '4.5'),
+        'NovelAI Diffusion V4.5 1girl',
+      );
+      expect(buildAiTagSearchQuery('1girl', '4'), 'NovelAI Diffusion V4 1girl');
+      expect(buildAiTagSearchQuery('1girl', '3'), 'Stable Diffusion XL 1girl');
+      expect(buildAiTagSearchQuery('  1girl  ', null), '1girl');
+      expect(buildAiTagSearchQuery('1girl', 'unknown'), '1girl');
+    });
   });
 }
 
@@ -369,6 +525,36 @@ Map<String, Object?> _aiImage(String fileName) => {
   'ai_json': jsonEncode({
     'parameters':
         '1girl, solo\nNegative prompt: lowres, bad hands\nSteps: 24, Sampler: Euler a, CFG scale: 6, Seed: 42, Size: 768x1152',
+  }),
+};
+
+/// 经典 NAI 信封 ai_json（大写键 Description/Comment/Source），
+/// Comment 内含 seed/sampler/steps 全套；model 为 images[].model 字段。
+Map<String, Object?> _naiEnvelopeImage(
+  String fileName, {
+  String? source,
+  String? model,
+}) => {
+  'id': fileName.hashCode,
+  'work_id': 601,
+  'author_id': 9,
+  'image_type': 'NAI',
+  'file_name': fileName,
+  if (model != null) 'model': model,
+  'ai_json': jsonEncode({
+    'Description': '1girl, solo',
+    'Software': 'NovelAI',
+    if (source != null) 'Source': source,
+    'Comment': jsonEncode({
+      'prompt': '1girl, solo',
+      'uc': 'lowres',
+      'seed': 12345,
+      'sampler': 'k_euler_ancestral',
+      'steps': 28,
+      'scale': 5.0,
+      'width': 832,
+      'height': 1216,
+    }),
   }),
 };
 

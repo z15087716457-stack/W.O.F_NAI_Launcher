@@ -242,10 +242,6 @@ class CancelGenerationIntent extends AppShortcutIntent {
   const CancelGenerationIntent();
 }
 
-class AddToQueueIntent extends AppShortcutIntent {
-  const AddToQueueIntent();
-}
-
 class RandomPromptIntent extends AppShortcutIntent {
   const RandomPromptIntent();
 }
@@ -346,14 +342,6 @@ class MinimizeToTrayIntent extends AppShortcutIntent {
 
 class QuitAppIntent extends AppShortcutIntent {
   const QuitAppIntent();
-}
-
-class ToggleQueueIntent extends AppShortcutIntent {
-  const ToggleQueueIntent();
-}
-
-class ToggleQueuePauseIntent extends AppShortcutIntent {
-  const ToggleQueuePauseIntent();
 }
 
 class ToggleThemeIntent extends AppShortcutIntent {

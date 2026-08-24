@@ -6,13 +6,11 @@ import 'package:go_router/go_router.dart';
 
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import '../../../core/shortcuts/default_shortcuts.dart';
-import '../../../data/models/queue/replication_task.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/generation/preview_selection_provider.dart';
 import '../../providers/krita/krita_bridge_notifier.dart';
 import '../../providers/layout_state_provider.dart';
-import '../../providers/replication_queue_provider.dart';
 import '../../router/app_router.dart';
 import '../../services/image_workflow_launcher.dart';
 import '../../widgets/common/app_toast.dart';
@@ -72,14 +70,6 @@ class _WebStyleGenerationLayoutState
           ref.read(imageGenerationNotifierProvider.notifier).cancel();
         } else if (ref.read(generationPreviewSelectionProvider) != null) {
           ref.read(generationPreviewSelectionProvider.notifier).clear();
-        }
-      },
-      ShortcutIds.addToQueue: () {
-        final currentParams = ref.read(generationParamsNotifierProvider);
-        if (currentParams.prompt.isNotEmpty) {
-          final task = ReplicationTask.create(prompt: currentParams.prompt);
-          ref.read(replicationQueueNotifierProvider.notifier).add(task);
-          AppToast.success(context, context.l10n.queue_taskAdded);
         }
       },
       ShortcutIds.randomPrompt: () {

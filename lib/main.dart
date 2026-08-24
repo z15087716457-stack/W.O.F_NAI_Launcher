@@ -418,15 +418,6 @@ Future<void> _bootstrapApplication() async {
   );
   // 收藏集合 Box
   await _openHiveBoxIfNeeded(StorageKeys.collectionsBox, hivePath: hivePath);
-  // 队列相关 Box（预加载以避免首次打开队列管理页面时的延迟）
-  await _openHiveBoxIfNeeded<String>(
-    StorageKeys.replicationQueueBox,
-    hivePath: hivePath,
-  );
-  await _openHiveBoxIfNeeded<String>(
-    StorageKeys.queueExecutionStateBox,
-    hivePath: hivePath,
-  );
 
   // 初始化图像元数据服务（包含持久化缓存，用于详情页快速加载）
   await _runNonFatalStartupStep(

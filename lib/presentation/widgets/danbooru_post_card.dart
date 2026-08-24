@@ -9,15 +9,27 @@ import '../../core/cache/danbooru_image_cache_manager.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../core/utils/file_picker_utils.dart';
 import '../../data/models/online_gallery/danbooru_post.dart';
-import '../../data/models/queue/replication_task.dart';
 import '../../core/autocomplete/tag_translation_lookup.dart';
 import '../providers/character_prompt_provider.dart';
 import '../providers/pending_prompt_provider.dart';
-import '../providers/replication_queue_provider.dart';
 import '../providers/reverse_prompt_provider.dart';
 import 'common/card_action_buttons.dart';
 
 import 'common/app_toast.dart';
+
+/// 已解析图片宽高比的共享缓存（previewUrl → ratio）。
+/// 卡片滚出视口回收后 State 销毁，重建时从此复用，
+/// 避免宽高未知的卡（如 AiTag）回到 1:1 占位再跳变。
+final Map<String, double> _sharedResolvedAspectRatios = <String, double>{};
+
+/// 读取共享宽高比并提级到 Map 尾部（LRU：超上限摘 keys.first 时保住热项）。
+double? _touchSharedAspectRatio(String url) {
+  final ratio = _sharedResolvedAspectRatios.remove(url);
+  if (ratio != null) {
+    _sharedResolvedAspectRatios[url] = ratio;
+  }
+  return ratio;
+}
 
 /// 图片卡片组件
 ///
@@ -101,6 +113,7 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
     final post = widget.post;
     if ((post.width > 0 && post.height > 0) ||
         _resolvedAspectRatio != null ||
+        _sharedResolvedAspectRatios.containsKey(post.previewUrl) ||
         post.previewUrl.isEmpty) {
       _detachDimensionListener();
       return;
@@ -122,7 +135,14 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
       final width = imageInfo.image.width;
       final height = imageInfo.image.height;
       if (width > 0 && height > 0) {
-        setState(() => _resolvedAspectRatio = width / height);
+        final ratio = width / height;
+        if (_sharedResolvedAspectRatios.length >= 2000) {
+          _sharedResolvedAspectRatios.remove(
+            _sharedResolvedAspectRatios.keys.first,
+          );
+        }
+        _sharedResolvedAspectRatios[url] = ratio;
+        setState(() => _resolvedAspectRatio = ratio);
       }
       _detachDimensionListener();
     }, onError: (_, __) => _detachDimensionListener());
@@ -216,7 +236,9 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
 
     final aspectRatio = widget.post.width > 0 && widget.post.height > 0
         ? widget.post.width / widget.post.height
-        : _resolvedAspectRatio ?? 1.0;
+        : _resolvedAspectRatio ??
+              _touchSharedAspectRatio(widget.post.previewUrl) ??
+              1.0;
     final itemHeight = (widget.itemWidth / aspectRatio).clamp(
       80.0,
       widget.itemWidth * 2.5,
@@ -664,39 +686,6 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
                               tooltip:
                                   context.l10n.onlineGallery_downloadOriginal,
                               onPressed: _handleDownload,
-                            ),
-                            CardActionButtonConfig(
-                              icon: Icons.playlist_add,
-                              tooltip: context.l10n.onlineGallery_addToQueue,
-                              onPressed: () async {
-                                final task = ReplicationTask.create(
-                                  prompt:
-                                      widget.promptOverride ??
-                                      widget.post.tags.join(', '),
-                                  negativePrompt:
-                                      widget.negativePromptOverride ?? '',
-                                  thumbnailUrl: widget.post.previewUrl,
-                                  source: ReplicationTaskSource.online,
-                                );
-                                final success = await ref
-                                    .read(
-                                      replicationQueueNotifierProvider.notifier,
-                                    )
-                                    .add(task);
-                                if (context.mounted) {
-                                  if (success) {
-                                    AppToast.info(
-                                      context,
-                                      context.l10n.onlineGallery_addedToQueue,
-                                    );
-                                  } else {
-                                    AppToast.info(
-                                      context,
-                                      context.l10n.onlineGallery_queueFullMax,
-                                    );
-                                  }
-                                }
-                              },
                             ),
                             CardActionButtonConfig(
                               icon: Icons.send,

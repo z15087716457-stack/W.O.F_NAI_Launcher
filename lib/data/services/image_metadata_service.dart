@@ -722,7 +722,7 @@ class ImageMetadataService {
         return null;
       }
 
-      final result = UnifiedMetadataParser.parseFromPng(bytes);
+      final result = UnifiedMetadataParser.parseFromImageBytes(bytes);
       final metadata = result.success ? result.metadata : null;
 
       if (metadata != null && metadata.hasData) {

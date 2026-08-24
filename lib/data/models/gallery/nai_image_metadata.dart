@@ -344,7 +344,8 @@ class NaiImageMetadata with _$NaiImageMetadata {
       );
     }
 
-    final sourceModel = _modelIdFromSource(source);
+    final sourceModel =
+        _modelIdFromSource(source) ?? _modelIdFromParams(commentData);
     final importedUcPreset = _toInt(commentData['uc_preset']);
     final importedQualityToggle = _safeGetBool(commentData, 'quality_toggle');
 
@@ -520,6 +521,8 @@ class NaiImageMetadata with _$NaiImageMetadata {
       'skip_cfg_above_sigma',
       'v4_prompt',
       'char_captions',
+      'model_name',
+      'model_hash',
     ];
     return markers.any(text.contains);
   }
@@ -1150,6 +1153,13 @@ class NaiImageMetadata with _$NaiImageMetadata {
 
     // Official PNG Source fingerprints are exact model identifiers. Do not
     // fall back to prompt/UC inference when the Source text is ambiguous.
+    if (normalized.contains('v5')) {
+      if (normalized.contains('curated')) {
+        return ImageModels.animeDiffusionV5Curated;
+      }
+      return ImageModels.animeDiffusionV5Full;
+    }
+
     if (normalized.contains('v4.5')) {
       if (normalized.contains('4bde2a90') || normalized.contains('v4.5 full')) {
         return ImageModels.animeDiffusionV45Full;
@@ -1178,6 +1188,58 @@ class NaiImageMetadata with _$NaiImageMetadata {
     }
     if (normalized.contains('furry')) {
       return ImageModels.furryDiffusion;
+    }
+
+    return null;
+  }
+
+  /// 从参数 JSON 内部判定模型 ID。
+  ///
+  /// V5 起官方请求新增 `model_name`/`model_hash` 键（如
+  /// DiffusionModelMetaName.NAIv5 / 0B1DA8F5），且部分图不再带信封 Source；
+  /// `version` 键在部分图里是官方 slug（nai-diffusion-*），数字则是
+  /// schema 版本不可作模型判定。
+  static String? _modelIdFromParams(Map<String, dynamic> commentData) {
+    final modelName =
+        commentData['model_name']?.toString().toLowerCase() ?? '';
+    if (modelName.isNotEmpty) {
+      if (modelName.contains('naiv5')) {
+        return modelName.contains('curated')
+            ? ImageModels.animeDiffusionV5Curated
+            : ImageModels.animeDiffusionV5Full;
+      }
+      if (modelName.contains('naiv4.5') || modelName.contains('naiv45')) {
+        return modelName.contains('curated')
+            ? ImageModels.animeDiffusionV45Curated
+            : ImageModels.animeDiffusionV45Full;
+      }
+      if (modelName.contains('naiv4')) {
+        return modelName.contains('curated')
+            ? ImageModels.animeDiffusionV4Curated
+            : ImageModels.animeDiffusionV4Full;
+      }
+    }
+
+    final version = commentData['version']?.toString().toLowerCase() ?? '';
+    if (version.contains('nai-diffusion')) {
+      if (version.contains('diffusion-5')) {
+        return version.contains('curated')
+            ? ImageModels.animeDiffusionV5Curated
+            : ImageModels.animeDiffusionV5Full;
+      }
+      if (version.contains('diffusion-4-5')) {
+        return version.contains('curated')
+            ? ImageModels.animeDiffusionV45Curated
+            : ImageModels.animeDiffusionV45Full;
+      }
+      if (version.contains('diffusion-4')) {
+        return version.contains('curated')
+            ? ImageModels.animeDiffusionV4Curated
+            : ImageModels.animeDiffusionV4Full;
+      }
+      if (version.contains('diffusion-3')) {
+        return ImageModels.animeDiffusionV3;
+      }
     }
 
     return null;

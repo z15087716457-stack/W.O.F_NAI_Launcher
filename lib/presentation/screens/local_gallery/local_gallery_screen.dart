@@ -288,10 +288,18 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
                   .read(localGalleryNotifierProvider.notifier)
                   .getTotalFavoriteCount(),
               builder: (context, snapshot) {
+                // 「收藏」节点计数=树形目录聚合口径：心形收藏 + 各收藏集
+                // 成员数加总（同图多处计入多次，与「全部图片」聚合子项一致）
+                final favoriteTotal =
+                    (snapshot.data ?? 0) +
+                    collectionState.collections.fold<int>(
+                      0,
+                      (sum, c) => sum + c.imageCount,
+                    );
                 return GalleryCategoryTreeView(
                   categories: categoryState.categories,
                   totalImageCount: state.totalCount,
-                  favoriteCount: snapshot.data ?? 0,
+                  favoriteCount: favoriteTotal,
                   selectedCategoryId: categoryState.selectedCategoryId,
                   onCategorySelected: _handleCategorySelected,
                   onCategoryRename: (id, newName) => ref
@@ -651,6 +659,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
           : null,
       groupedGridViewKey: _groupedGridViewKey,
       onAddToCollection: _addSelectedToCollection,
+      onRemoveFromCollection: _removeSelectedFromCollection,
       onDeleteSelected: _deleteSelectedImages,
       onPackSelected: _packSelectedImages,
       onEditMetadata: _editSelectedMetadata,
@@ -687,6 +696,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       onSendAction: (record, action) => _handleImageAction(record, action),
       onContextMenu: (record, position) =>
           _showImageContextMenu(record, position),
+      onViewerDelete: _confirmDeleteImage,
     );
   }
 
@@ -1088,22 +1098,81 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     if (result == null) return;
 
     final imagePaths = selectedImages.map((img) => img.path).toList();
-    final addedCount = await ref
+    final addResult = await ref
         .read(collectionNotifierProvider.notifier)
         .addImagesToCollection(result.collectionId, imagePaths);
 
     if (mounted) {
-      if (addedCount > 0) {
+      if (addResult.added > 0) {
         AppToast.success(
           context,
           context.l10n.localGallery_addedToCollection(
-            addedCount,
+            addResult.added,
+            result.collectionName,
+          ),
+        );
+        ref.read(localGallerySelectionNotifierProvider.notifier).exit();
+      } else if (addResult.alreadyIn > 0) {
+        // 没有新插入但成员关系已达成（重复添加）不算失败
+        AppToast.info(
+          context,
+          context.l10n.localGallery_alreadyInCollection,
+        );
+        ref.read(localGallerySelectionNotifierProvider.notifier).exit();
+      } else {
+        AppToast.info(context, context.l10n.localGallery_addToCollectionFailed);
+      }
+    }
+  }
+
+  Future<void> _removeSelectedFromCollection() async {
+    final selectionState = ref.read(localGallerySelectionNotifierProvider);
+
+    // 从数据库获取所有选中项的完整记录（支持跨页）
+    final service = await ref
+        .read(localGalleryNotifierProvider.notifier)
+        .getService();
+    final selectedImages = await service.getRecordsByPaths(
+      selectionState.selectedIds.toList(),
+    );
+
+    if (selectedImages.isEmpty || !mounted) return;
+
+    final imagePaths = selectedImages.map((img) => img.path).toList();
+
+    final result = await CollectionSelectDialog.show(
+      context,
+      theme: Theme.of(context),
+      isRemoveMode: true,
+      selectedImagePaths: imagePaths,
+    );
+
+    if (result == null) return;
+
+    final removedCount = await ref
+        .read(collectionNotifierProvider.notifier)
+        .removeImagesFromCollection(result.collectionId, imagePaths);
+
+    // 画廊正按该集合过滤时重放当前页，让移除的图片即时消失
+    if (ref.read(localGalleryNotifierProvider).filterCriteria.collectionId ==
+        result.collectionId) {
+      await ref
+          .read(localGalleryNotifierProvider.notifier)
+          .refresh(scan: false);
+    }
+
+    if (mounted) {
+      if (removedCount > 0) {
+        AppToast.success(
+          context,
+          context.l10n.localGallery_removedFromCollection(
+            removedCount,
             result.collectionName,
           ),
         );
         ref.read(localGallerySelectionNotifierProvider.notifier).exit();
       } else {
-        AppToast.info(context, context.l10n.localGallery_addToCollectionFailed);
+        AppToast.info(context, context.l10n.localGallery_notInCollection);
       }
     }
   }
@@ -1469,10 +1538,12 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     }
   }
 
-  Future<void> _confirmDeleteImage(LocalImageRecord record) async {
+  /// 单图删除（确认框→保护守卫→软删池→刷新）；返回是否删除成功，
+  /// 大图查看器据此决定是否从列表移除并翻页
+  Future<bool> _confirmDeleteImage(LocalImageRecord record) async {
     final l10n = context.l10n;
 
-    if (!mounted) return;
+    if (!mounted) return false;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -1511,7 +1582,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         confirmText: l10n.localGallery_confirmDelete,
         icon: Icons.delete_outline,
       );
-      if (!protected || !mounted) return;
+      if (!protected || !mounted) return false;
       // 软删：DB is_deleted=1 + 入删除池 + 内存即时移除，无物理 IO；
       // 文件在下次启动时彻底清理，撤销入口在工具栏垃圾桶里。
       final result = await ref
@@ -1531,7 +1602,9 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       if (mounted && result.success > 0) {
         _showDeletePoolSnackBar(1);
       }
+      return result.success > 0;
     }
+    return false;
   }
 
   void _toggleCategoryPanel() {

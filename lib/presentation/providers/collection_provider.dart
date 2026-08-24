@@ -211,28 +211,28 @@ class CollectionNotifier extends _$CollectionNotifier {
   ///
   /// [collectionId] 集合ID
   /// [imagePaths] 图片路径列表
-  /// 返回添加的图片数量
-  Future<int> addImagesToCollection(
+  /// 返回添加结果（新插入数/已在集合数/未解析数）
+  Future<CollectionAddResult> addImagesToCollection(
     String collectionId,
     List<String> imagePaths,
   ) async {
     try {
       state = state.copyWith(error: null);
 
-      final addedCount =
+      final result =
           await _repository.addImagesToCollection(collectionId, imagePaths);
 
       // 重新加载集合列表以更新数据
       await _loadCollections();
 
-      if (addedCount > 0) {
+      if (result.added > 0) {
         AppLogger.i(
-          'Added $addedCount images to collection: $collectionId',
+          'Added ${result.added} images to collection: $collectionId',
           'CollectionNotifier',
         );
       }
 
-      return addedCount;
+      return result;
     } catch (e) {
       state = state.copyWith(error: e.toString());
       AppLogger.e(
@@ -241,7 +241,11 @@ class CollectionNotifier extends _$CollectionNotifier {
         null,
         'CollectionNotifier',
       );
-      return 0;
+      return (
+        added: 0,
+        alreadyIn: 0,
+        unresolved: imagePaths.length,
+      );
     }
   }
 
@@ -381,8 +385,13 @@ class CollectionNotifier extends _$CollectionNotifier {
   }
 
   /// 图片所在的集合 ID 集合
-  Future<Set<String>> getCollectionIdsForImage(String imagePath) async {
+  Future<Set<String>> getCollectionIdsForImage(String imagePath) {
     return _repository.getCollectionIdsForImage(imagePath);
+  }
+
+  /// 各集合与给定图片路径的交集数（collectionId → 张数）
+  Future<Map<String, int>> countMembershipByPaths(List<String> imagePaths) {
+    return _repository.countMembershipByPaths(imagePaths);
   }
 
   /// 检查图片是否在集合中

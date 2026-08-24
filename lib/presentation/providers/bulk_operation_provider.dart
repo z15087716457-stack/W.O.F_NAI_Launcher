@@ -857,10 +857,12 @@ class BulkOperationNotifier extends _$BulkOperationNotifier {
 
     try {
       final collectionNotifier = ref.read(collectionNotifierProvider.notifier);
-      final addedCount = await collectionNotifier.addImagesToCollection(
+      final addedCount =
+          (await collectionNotifier.addImagesToCollection(
         collectionId,
         imagePaths,
-      );
+      ))
+              .added;
 
       state = state.copyWith(
         isOperationInProgress: false,

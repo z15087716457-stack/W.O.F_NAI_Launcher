@@ -22,6 +22,9 @@ class DetailTopBar extends StatelessWidget {
   final VoidCallback? onSendToImg2Img;
   final VoidCallback? onSendToReversePrompt;
 
+  /// 删除当前图片（仅支持删除的调用方传入，如本地画廊）
+  final VoidCallback? onDelete;
+
   const DetailTopBar({
     super.key,
     required this.currentIndex,
@@ -34,6 +37,7 @@ class DetailTopBar extends StatelessWidget {
     this.onCopyImage,
     this.onSendToImg2Img,
     this.onSendToReversePrompt,
+    this.onDelete,
   });
 
   @override
@@ -167,6 +171,14 @@ class DetailTopBar extends StatelessWidget {
                   onToggle: onFavoriteToggle,
                 );
               },
+            ),
+
+          // 删除按钮（仅支持删除的调用方显示）
+          if (onDelete != null)
+            IconButton(
+              icon: Icon(Icons.delete_outline, color: Colors.red.shade300),
+              onPressed: onDelete,
+              tooltip: l10n.common_delete,
             ),
         ],
       ),

@@ -21,13 +21,21 @@ class CollectionSelectResult {
 
 /// 集合选择对话框
 ///
-/// 用于选择一个集合以添加图片
+/// 用于选择一个集合以添加/移除图片
 class CollectionSelectDialog extends ConsumerStatefulWidget {
   final ThemeData theme;
+
+  /// 移除模式：标题按「从集合移除」呈现，列表项标注选中图片的成员数
+  final bool isRemoveMode;
+
+  /// 当前多选的图片路径；移除模式下用于标注各集合包含几张选中图片
+  final List<String> selectedImagePaths;
 
   const CollectionSelectDialog({
     super.key,
     required this.theme,
+    this.isRemoveMode = false,
+    this.selectedImagePaths = const [],
   });
 
   /// 显示集合选择对话框
@@ -36,11 +44,15 @@ class CollectionSelectDialog extends ConsumerStatefulWidget {
   static Future<CollectionSelectResult?> show(
     BuildContext context, {
     required ThemeData theme,
+    bool isRemoveMode = false,
+    List<String> selectedImagePaths = const [],
   }) {
     return showDialog<CollectionSelectResult>(
       context: context,
       builder: (context) => CollectionSelectDialog(
         theme: theme,
+        isRemoveMode: isRemoveMode,
+        selectedImagePaths: selectedImagePaths,
       ),
     );
   }
@@ -56,6 +68,9 @@ class _CollectionSelectDialogState
   final _filterController = TextEditingController();
   String _filterQuery = '';
 
+  /// 各集合包含的选中图片张数；null=尚未加载完成（不标注）
+  Map<String, int>? _memberCounts;
+
   @override
   void initState() {
     super.initState();
@@ -63,7 +78,18 @@ class _CollectionSelectDialogState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(collectionNotifierProvider.notifier).initialize();
     });
+    if (widget.isRemoveMode && widget.selectedImagePaths.isNotEmpty) {
+      _loadMemberCounts();
+    }
     _filterController.addListener(_onFilterChanged);
+  }
+
+  Future<void> _loadMemberCounts() async {
+    final counts = await ref
+        .read(collectionNotifierProvider.notifier)
+        .countMembershipByPaths(widget.selectedImagePaths);
+    if (!mounted) return;
+    setState(() => _memberCounts = counts);
   }
 
   void _onFilterChanged() {
@@ -114,7 +140,11 @@ class _CollectionSelectDialogState
     final isLoading = collectionState.isLoading;
 
     return AlertDialog(
-      title: Text(l10n.collectionSelect_dialogTitle),
+      title: Text(
+        widget.isRemoveMode
+            ? l10n.collectionSelect_removeTitle
+            : l10n.collectionSelect_dialogTitle,
+      ),
       content: SizedBox(
         width: 450,
         height: 500,
@@ -244,42 +274,58 @@ class _CollectionSelectDialogState
     AppLocalizations l10n,
     ImageCollection collection,
   ) {
-    return ListTile(
-      leading: Icon(
-        Icons.folder_outlined,
-        color: theme.colorScheme.primary,
-      ),
-      title: Text(
-        collection.name,
-        style: theme.textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.w500,
+    // 移除模式：标注该集合包含几张选中图片，无交集的集合淡化
+    final isRemove = widget.isRemoveMode;
+    final memberCount = _memberCounts?[collection.id];
+    final hasNone = isRemove && memberCount == 0;
+
+    return Opacity(
+      opacity: hasNone ? 0.45 : 1.0,
+      child: ListTile(
+        leading: Icon(
+          Icons.folder_outlined,
+          color: theme.colorScheme.primary,
         ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (collection.description != null)
-            Text(
-              collection.description!,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          Text(
-            l10n.collectionSelect_imageCount(collection.imageCount),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.outline,
-            ),
+        title: Text(
+          collection.name,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w500,
           ),
-        ],
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (collection.description != null)
+              Text(
+                collection.description!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            Text(
+              isRemove && memberCount != null
+                  ? (memberCount > 0
+                        ? l10n.collectionSelect_memberCount(memberCount)
+                        : l10n.collectionSelect_noSelectedInCollection)
+                  : l10n.collectionSelect_imageCount(collection.imageCount),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: !isRemove || (memberCount ?? 0) > 0
+                    ? theme.colorScheme.outline
+                    : theme.colorScheme.outlineVariant,
+              ),
+            ),
+          ],
+        ),
+        trailing: isRemove
+            ? null
+            : Icon(
+                Icons.add_circle_outline,
+                color: theme.colorScheme.primary,
+              ),
+        onTap: () => _selectCollection(collection),
       ),
-      trailing: Icon(
-        Icons.add_circle_outline,
-        color: theme.colorScheme.primary,
-      ),
-      onTap: () => _selectCollection(collection),
     );
   }
 }

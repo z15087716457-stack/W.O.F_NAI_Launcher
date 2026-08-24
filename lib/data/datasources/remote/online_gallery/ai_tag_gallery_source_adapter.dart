@@ -10,6 +10,44 @@ import '../../../models/online_gallery/gallery_source.dart';
 import '../../../services/metadata/unified_metadata_parser.dart';
 import 'gallery_source_adapter.dart';
 
+/// AI TAG 的 AI_type 是否属于 NAI 系（实测另有 nai_x / naix / nai x 变体）。
+bool isAiTagNaiWork(String? aiType) {
+  final normalized = aiType?.trim().toLowerCase();
+  return normalized == 'nai' ||
+      normalized == 'nai_x' ||
+      normalized == 'naix' ||
+      normalized == 'nai x';
+}
+
+/// AI TAG 全文检索 q 覆盖 images.model 字段（实测），版本 → 注入 q 的查询词。
+///
+/// V4 只能做到 work 级近似（多图 work 可能混 V4.5），3/4.5/5 精确。
+const Map<String, String> aiTagModelVersionQueries = {
+  '3': 'Stable Diffusion XL',
+  '4': 'NovelAI Diffusion V4',
+  '4.5': 'NovelAI Diffusion V4.5',
+  '5': 'NovelAI Diffusion V5',
+};
+
+/// 组合用户搜索词与版本注入词（版本词在前，空格拼接；无用户词时单用版本词）。
+String buildAiTagSearchQuery(String query, String? modelVersion) {
+  final trimmed = query.trim();
+  final term = aiTagModelVersionQueries[modelVersion];
+  if (term == null) return trimmed;
+  return trimmed.isEmpty ? term : '$term $trimmed';
+}
+
+/// Pixiv 原图 URL → master1200 缩略图（固定规则：`img-original`→`img-master`、
+/// 文件名去扩展名加 `_master1200.jpg`）。不符合规则时返回空串。
+String aiTagPixivThumbnailUrl(String originalUrl) {
+  const marker = '/img-original/img/';
+  if (!originalUrl.contains(marker)) return '';
+  final switched = originalUrl.replaceFirst(marker, '/img-master/img/');
+  final dot = switched.lastIndexOf('.');
+  if (dot <= switched.lastIndexOf('/')) return '';
+  return '${switched.substring(0, dot)}_master1200.jpg';
+}
+
 class AiTagGallerySourceAdapter implements GallerySourceAdapter {
   AiTagGallerySourceAdapter({required Dio dio}) : _dio = dio;
 
@@ -330,6 +368,7 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
     if (id == null || id <= 0) {
       throw const FormatException('AI TAG work id is invalid');
     }
+    final originalUrl = _firstOriginalUrl(json['original_urls']);
     return GalleryItem(
       id: id,
       sourceId: GallerySourceId.aiTag,
@@ -348,12 +387,21 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
       tags: _parseStringList(json['tags']),
       cover: GalleryMedia(
         id: '${id}_pending',
-        previewUrl: '',
+        previewUrl: aiTagPixivThumbnailUrl(originalUrl),
         displayUrl: '',
-        downloadUrl: '',
+        downloadUrl: originalUrl,
         mediaType: 'image',
       ),
     );
+  }
+
+  /// original_urls（JSON string 数组或已解码 List）的第一张原图 URL。
+  static String _firstOriginalUrl(Object? value) {
+    for (final url in _decodeList(value)) {
+      final text = url?.toString().trim() ?? '';
+      if (text.isNotEmpty) return text;
+    }
+    return '';
   }
 
   GalleryMedia _parseMedia(Map<String, dynamic> json, String assetBaseUrl) {
@@ -366,7 +414,11 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
     final url = '$assetBaseUrl$imageType/$authorId/$fileName.webp';
     final rawAiJson = _rawJsonString(json['ai_json']);
     final promptText = json['prompt_text']?.toString();
-    final parsed = _parseMetadata(rawAiJson, promptText);
+    final parsed = _parseMetadata(
+      rawAiJson,
+      promptText,
+      sourceModelHint: json['model']?.toString(),
+    );
     return GalleryMedia(
       id: fileName,
       previewUrl: url,
@@ -385,7 +437,11 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
     );
   }
 
-  MetadataParseResult _parseMetadata(String? rawAiJson, String? promptText) {
+  MetadataParseResult _parseMetadata(
+    String? rawAiJson,
+    String? promptText, {
+    String? sourceModelHint,
+  }) {
     if ((rawAiJson == null || rawAiJson.isEmpty) &&
         (promptText == null || promptText.isEmpty)) {
       return MetadataParseResult.failed(
@@ -414,6 +470,13 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
         values['parameters'] = rawAiJson;
       }
     }
+    // images[].model（如 'NovelAI Diffusion V5 0B1DA8F5'）作为 Source 兜底：
+    // ai_json 经典信封自带 Source 时优先用信封的，model 字段只补缺，
+    // 让 _modelIdFromSource 能命中 V5 等无信封 Source 的图。
+    final modelHint = sourceModelHint?.trim() ?? '';
+    if (modelHint.isNotEmpty && (values['Source']?.trim().isEmpty ?? true)) {
+      values['Source'] = modelHint;
+    }
     if (!values.containsKey('parameters') &&
         promptText != null &&
         promptText.isNotEmpty) {
@@ -426,6 +489,7 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
     return UnifiedMetadataParser.parseFromTextData({
       'parameters': promptText,
       'Description': promptText,
+      if (modelHint.isNotEmpty) 'Source': modelHint,
     });
   }
 
@@ -433,14 +497,17 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
     NaiImageMetadata? metadata,
     Map<String, dynamic> raw,
   ) {
+    final rawModel = raw['model']?.toString().trim() ?? '';
     return <String, Object?>{
       if (metadata?.seed != null) 'seed': metadata!.seed,
       if (metadata?.sampler != null) 'sampler': metadata!.sampler,
       if (metadata?.steps != null) 'steps': metadata!.steps,
       if (metadata?.scale != null) 'scale': metadata!.scale,
-      if (metadata?.model != null) 'model': metadata!.model,
+      if (metadata?.model != null)
+        'model': metadata!.model
+      else if (rawModel.isNotEmpty)
+        'model': rawModel,
       if (metadata?.software != null) 'software': metadata!.software,
-      if (raw['model'] != null) 'source_model': raw['model'].toString(),
     };
   }
 

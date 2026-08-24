@@ -52,7 +52,6 @@ void main() {
       'lib/presentation/widgets/common/image_detail/components/detail_metadata_panel.dart',
       'lib/presentation/widgets/common/image_detail/components/prompt_section.dart',
       'lib/presentation/widgets/common/image_detail/components/vibe_section.dart',
-      'lib/presentation/widgets/queue/queue_export_dialog.dart',
       'lib/presentation/widgets/gallery_filter_panel.dart',
       'lib/presentation/widgets/common/pagination_bar.dart',
       'lib/presentation/widgets/bulk_action_bar.dart',

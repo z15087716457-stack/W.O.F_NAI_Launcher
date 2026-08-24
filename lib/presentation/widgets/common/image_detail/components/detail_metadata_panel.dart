@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/utils/app_logger.dart';
 import '../../../../../core/utils/localization_extension.dart';
 import '../../../../../core/utils/nai_resolution_adapter.dart';
@@ -447,7 +448,11 @@ class _MetadataContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayModel = metadata.effectiveModel ?? metadata.source;
+    final rawModel = metadata.effectiveModel ?? metadata.source;
+    // 模型 ID（如 nai-diffusion-5-full）映射为友好显示名，未知值原样展示
+    final displayModel = rawModel == null
+        ? null
+        : ImageModels.modelDisplayNames[rawModel] ?? rawModel;
     final resolution = actualImageSize == null
         ? metadata.sizeString
         : '${actualImageSize!.$1} × ${actualImageSize!.$2}';

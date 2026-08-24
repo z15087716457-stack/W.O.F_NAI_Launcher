@@ -30,7 +30,7 @@ void main() {
     }
   });
 
-  testWidgets('外观分类包含悬浮球背景设置', (tester) async {
+  testWidgets('外观分类包含生成页布局设置', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -48,10 +48,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // 原有项仍在
     expect(find.text('生成页布局'), findsOneWidget);
-    // 自队列迁入的悬浮球背景
-    expect(find.text('悬浮球背景'), findsOneWidget);
   });
 
   testWidgets('历史点击行为默认经典并可从外观设置切换和持久化', (tester) async {

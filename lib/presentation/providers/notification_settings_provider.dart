@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/constants/storage_keys.dart';
+import '../../core/services/notification_service.dart';
 import '../../core/storage/local_storage_service.dart';
+import 'image_generation_provider.dart';
 
 part 'notification_settings_provider.g.dart';
 
@@ -63,5 +67,37 @@ class NotificationSettingsNotifier extends _$NotificationSettingsNotifier {
       await storage.deleteSetting(StorageKeys.notificationCustomSoundPath);
       state = state.copyWith(clearCustomSound: true);
     }
+  }
+}
+
+/// 生成完成音效监听器
+///
+/// 监听生成状态从 generating 变为 completed 时播放完成音效
+/// （原由 QueueExecutionNotifier 托管，队列功能移除后独立常驻）
+@Riverpod(keepAlive: true)
+class GenerationCompletionWatcher extends _$GenerationCompletionWatcher {
+  @override
+  void build() {
+    ref.listen<ImageGenerationState>(
+      imageGenerationNotifierProvider,
+      (previous, next) {
+        if (previous?.status == GenerationStatus.generating &&
+            next.status == GenerationStatus.completed) {
+          _notifyGenerationComplete();
+        }
+      },
+    );
+  }
+
+  void _notifyGenerationComplete() {
+    final settings = ref.read(notificationSettingsNotifierProvider);
+    if (!settings.soundEnabled) return;
+
+    Future.microtask(() async {
+      await NotificationService.instance.notifyGenerationComplete(
+        playSound: settings.soundEnabled,
+        customSoundPath: settings.customSoundPath,
+      );
+    });
   }
 }

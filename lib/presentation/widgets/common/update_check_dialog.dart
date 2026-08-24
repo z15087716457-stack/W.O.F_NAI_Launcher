@@ -7,7 +7,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/byte_format.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/version/version_info.dart';
-import '../../providers/queue_execution_provider.dart';
 import '../../providers/update_provider.dart';
 import 'app_toast.dart';
 
@@ -61,7 +60,7 @@ class UpdateCheckDialog extends ConsumerWidget {
         state.versionInfo!,
       ),
       UpdateStatus.downloading => _buildDownloadContent(context, state),
-      UpdateStatus.downloaded => _buildDownloadedContent(context, ref, state),
+      UpdateStatus.downloaded => _buildDownloadedContent(context, state),
       UpdateStatus.installing => _buildInstallingContent(context),
       UpdateStatus.upToDate => _buildUpToDateContent(context),
       UpdateStatus.error => _buildErrorContent(context, state.errorMessage),
@@ -203,12 +202,9 @@ class UpdateCheckDialog extends ConsumerWidget {
   /// 构建下载完成、等待安装确认的内容
   Widget _buildDownloadedContent(
     BuildContext context,
-    WidgetRef ref,
     UpdateState state,
   ) {
     final theme = Theme.of(context);
-    final queueState = ref.watch(queueExecutionNotifierProvider);
-    final hasActiveQueue = queueState.isRunning || queueState.isPaused;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -228,35 +224,6 @@ class UpdateCheckDialog extends ConsumerWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          if (hasActiveQueue) ...[
-            const SizedBox(height: 14),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.errorContainer.withValues(alpha: 0.55),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.warning_amber_rounded,
-                    size: 20,
-                    color: theme.colorScheme.onErrorContainer,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      context.l10n.updateActiveTasksWarning,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onErrorContainer,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
         ],
       ),
     );

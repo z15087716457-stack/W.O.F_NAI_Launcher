@@ -398,7 +398,7 @@ class _SaveAsPresetDialogState extends ConsumerState<SaveAsPresetDialog> {
                           onChanged: (v) => setState(() => _includeScale = v),
                         ),
                         _buildCompactCheckbox(
-                          label: l10n.queue_size,
+                          label: l10n.onlineGallery_size,
                           value: _includeSize,
                           hasData:
                               widget.metadata.width != null &&

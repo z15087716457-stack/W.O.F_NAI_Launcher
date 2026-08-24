@@ -71,7 +71,7 @@ void main() {
     expect(storage.values, isEmpty);
   });
 
-  testWidgets('按任务流展示输入、重试、提醒三个小节', (tester) async {
+  testWidgets('按任务流展示输入、提醒两个小节', (tester) async {
     final storage = _MemoryLocalStorageService();
     await tester.binding.setSurfaceSize(const Size(1000, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -92,12 +92,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('输入'), findsOneWidget);
-    expect(find.text('失败重试'), findsOneWidget);
     expect(find.text('完成提醒'), findsOneWidget);
     expect(find.text('显示随机提示词工具'), findsOneWidget);
     expect(find.text('滚轮调整提示词权重'), findsOneWidget);
-    expect(find.text('重试次数'), findsOneWidget);
-    expect(find.text('重试间隔'), findsOneWidget);
     expect(find.text('完成音效'), findsOneWidget);
   });
 

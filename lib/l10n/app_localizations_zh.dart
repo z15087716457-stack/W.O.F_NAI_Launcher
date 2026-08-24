@@ -18,6 +18,44 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_cancel => '取消';
 
   @override
+  String get onlineFav_all => '全部';
+
+  @override
+  String get onlineFav_rootCollection => '根收藏';
+
+  @override
+  String get onlineFav_newCollection => '新建子集';
+
+  @override
+  String get onlineFav_renameCollection => '重命名子集';
+
+  @override
+  String get onlineFav_deleteCollection => '删除子集';
+
+  @override
+  String get onlineFav_empty => '还没有收藏的作品';
+
+  @override
+  String onlineFav_authorWorkCount(Object n) {
+    return '$n 张作品';
+  }
+
+  @override
+  String get onlineFav_moveHere => '移到这里';
+
+  @override
+  String get onlineFav_removeFavorite => '取消收藏';
+
+  @override
+  String get onlineFav_favoriteAuthor => '收藏作者';
+
+  @override
+  String get onlineFav_authorFavorited => '已收藏作者';
+
+  @override
+  String get onlineFav_authorUnfavorited => '已取消收藏作者';
+
+  @override
   String get common_confirm => '确定';
 
   @override
@@ -531,9 +569,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_generationInputSection => '输入';
-
-  @override
-  String get settings_generationRetrySection => '失败重试';
 
   @override
   String get settings_generationFeedbackSection => '完成提醒';
@@ -2422,9 +2457,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onlineGallery_send => '发送';
 
   @override
-  String get onlineGallery_addToQueue => '加入队列';
-
-  @override
   String get onlineGallery_sendToTextToImage => '发送到文生图';
 
   @override
@@ -2458,12 +2490,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onlineGallery_metadata => '元数据';
-
-  @override
-  String get onlineGallery_addedToQueue => '已加入队列';
-
-  @override
-  String get onlineGallery_queueFullMax => '队列已满（最多50项）';
 
   @override
   String get onlineGallery_chooseDownloadDirectory => '选择下载目录';
@@ -2571,11 +2597,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onlineGallery_bulkDownload => '批量下载';
 
   @override
-  String onlineGallery_addedTasksToQueue(Object count) {
-    return '已添加 $count 个任务到队列';
-  }
-
-  @override
   String get onlineGallery_unfavorited => '已取消收藏';
 
   @override
@@ -2676,6 +2697,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onlineGallery_aiTagRankingProcessing => '排行榜生成中，请稍后重试。';
+
+  @override
+  String get onlineGallery_aiTagNaiOnly => '仅 NAI';
+
+  @override
+  String get onlineGallery_aiTagModelVersion => '模型版本';
+
+  @override
+  String get onlineGallery_generationParams => '生成参数';
 
   @override
   String get onlineGallery_sourceConfigUnavailable => '无法获取来源配置，请检查网络后重试。';
@@ -4459,6 +4489,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_naiOnlyTooltip => '仅显示 NAI 生成的图片';
 
   @override
+  String get localGallery_naiVersionFilterLabel => '版本';
+
+  @override
+  String get localGallery_naiVersionFilterTooltip => '按 NAI 模型版本过滤';
+
+  @override
   String get localGallery_masonryViewLabel => '瀑布流';
 
   @override
@@ -5166,6 +5202,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_addToCollectionFailed => '添加图片到集合失败';
 
   @override
+  String get localGallery_removeFromCollection => '移出集合';
+
+  @override
+  String localGallery_removedFromCollection(Object count, Object name) {
+    return '已从集合「$name」移除 $count 张图片';
+  }
+
+  @override
+  String get localGallery_notInCollection => '所选图片不在该集合中';
+
+  @override
+  String get localGallery_alreadyInCollection => '所选图片已在该集合中';
+
+  @override
   String get brushPreset_selectHint => '双击选择此笔刷预设';
 
   @override
@@ -5301,6 +5351,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get collectionSelect_dialogTitle => '选择集合';
+
+  @override
+  String get collectionSelect_removeTitle => '从集合移除图片';
+
+  @override
+  String collectionSelect_memberCount(Object n) {
+    return '选中 $n 张在此集合';
+  }
+
+  @override
+  String get collectionSelect_noSelectedInCollection => '无选中图片在此集合';
 
   @override
   String get collectionSelect_filterHint => '搜索集合...';
@@ -6551,315 +6612,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tagLibrary_dragToMove => '拖拽移动，滚轮或双指缩放';
 
   @override
-  String get queue_management => '队列管理';
-
-  @override
-  String get queue_empty => '队列为空';
-
-  @override
-  String get queue_emptyHint => '没有待执行的任务';
-
-  @override
-  String queue_taskCount(Object count) {
-    return '$count 个任务';
-  }
-
-  @override
-  String get queue_pending => '等待中';
-
-  @override
-  String get queue_running => '执行中';
-
-  @override
-  String get queue_completed => '已完成';
-
-  @override
-  String get queue_failed => '失败';
-
-  @override
-  String get queue_paused => '已暂停';
-
-  @override
-  String get queue_idle => '空闲';
-
-  @override
-  String get queue_ready => '就绪';
-
-  @override
-  String get queue_clickToStart => '点击开始执行队列';
-
-  @override
-  String get queue_clickToPause => '点击暂停队列';
-
-  @override
-  String get queue_clickToResume => '点击继续执行';
-
-  @override
-  String get queue_noTasksToStart => '队列为空，无法开始';
-
-  @override
-  String get queue_allTasksCompleted => '所有任务已完成';
-
-  @override
-  String get queue_executionProgress => '执行进度';
-
-  @override
-  String get queue_totalTasks => '总数';
-
-  @override
-  String get queue_completedTasks => '已完成';
-
-  @override
-  String get queue_failedTasks => '失败';
-
-  @override
-  String get queue_remainingTasks => '剩余';
-
-  @override
-  String queue_estimatedTime(Object time) {
-    return '预计：约 $time';
-  }
-
-  @override
-  String queue_seconds(Object count) {
-    return '$count 秒';
-  }
-
-  @override
-  String queue_minutes(Object count) {
-    return '$count 分钟';
-  }
-
-  @override
-  String queue_hours(Object hours, Object minutes) {
-    return '$hours 小时 $minutes 分钟';
-  }
-
-  @override
-  String get queue_pause => '暂停';
-
-  @override
-  String get queue_resume => '继续';
-
-  @override
-  String get queue_pauseExecution => '暂停执行';
-
-  @override
-  String get queue_resumeExecution => '继续执行';
-
-  @override
-  String get queue_autoExecute => '自动执行';
-
-  @override
-  String get queue_autoExecuteOn => '完成后自动执行下一个任务';
-
-  @override
-  String get queue_autoExecuteOff => '需要手动点击生成';
-
-  @override
-  String get queue_clearQueue => '清空队列';
-
-  @override
-  String get queue_closeFloatingButton => '关闭悬浮球';
-
-  @override
-  String get queue_clearQueueConfirm => '确定要清空所有队列任务吗？此操作不可撤销。';
-
-  @override
-  String get queue_confirmClear => '确认清空';
-
-  @override
-  String queue_retryCount(Object current, Object max) {
-    return '重试 $current/$max';
-  }
-
-  @override
-  String get queue_retry => '重试';
-
-  @override
-  String get queue_requeue => '重新排队';
-
-  @override
-  String get queue_clearFailedTasks => '清空全部';
-
-  @override
-  String get queue_noFailedTasks => '暂无失败任务';
-
-  @override
-  String get queue_noCompletedTasks => '暂无完成记录';
-
-  @override
-  String get queue_editTask => '编辑任务';
-
-  @override
-  String get queue_duplicateTask => '复制任务';
-
-  @override
-  String get queue_taskDuplicated => '任务已复制';
-
-  @override
-  String get queue_queueFull => '队列已满，无法复制';
-
-  @override
-  String get queue_positivePrompt => '正向提示词';
-
-  @override
-  String get queue_enterPositivePrompt => '输入正向提示词...';
-
-  @override
-  String get queue_parametersPreview => '参数预览';
-
-  @override
-  String get queue_model => '模型';
-
-  @override
-  String get queue_seed => '种子';
-
-  @override
-  String get queue_sampler => '采样器';
-
-  @override
-  String get queue_steps => '步数';
-
-  @override
-  String get queue_cfg => 'CFG';
-
-  @override
-  String get queue_size => '尺寸';
-
-  @override
-  String get queue_addToQueue => '加入队列';
-
-  @override
-  String get queue_taskAdded => '已加入队列';
-
-  @override
-  String get queue_negativePromptFromMain => '负向提示词将使用主界面设置';
-
-  @override
-  String get queue_pinToTop => '置顶';
-
-  @override
-  String get queue_delete => '删除';
-
-  @override
-  String get queue_edit => '编辑';
-
-  @override
-  String get queue_selectAll => '全选';
-
-  @override
-  String get queue_invertSelection => '反选';
-
-  @override
-  String get queue_cancelSelection => '取消';
-
-  @override
-  String queue_selectedCount(Object count) {
-    return '已选 $count 个';
-  }
-
-  @override
-  String queue_confirmDeleteSelected(Object count) {
-    return '确定要删除选中的 $count 个任务吗？';
-  }
-
-  @override
-  String get queue_export => '导出';
-
-  @override
-  String get queue_import => '导入';
-
-  @override
-  String get queue_exportImport => '队列导入/导出';
-
-  @override
-  String get queue_exportFormat => '导出格式';
-
-  @override
-  String get queue_exportFormatJson => 'JSON';
-
-  @override
-  String get queue_exportFormatJsonDesc => '完整数据，包含所有参数';
-
-  @override
-  String get queue_exportFormatCsv => 'CSV';
-
-  @override
-  String get queue_exportFormatCsvDesc => '表格格式，含提示词和基本信息';
-
-  @override
-  String get queue_exportFormatText => '纯文本';
-
-  @override
-  String get queue_exportFormatTextDesc => '仅提示词，每行一个';
-
-  @override
-  String get queue_importStrategy => '导入策略';
-
-  @override
-  String get queue_importStrategyMerge => '合并';
-
-  @override
-  String get queue_importStrategyMergeDesc => '将导入的任务添加到现有队列末尾';
-
-  @override
-  String get queue_importStrategyReplace => '替换';
-
-  @override
-  String get queue_importStrategyReplaceDesc => '清空现有队列，使用导入的任务替换';
-
-  @override
-  String get queue_supportedFormats => '支持的格式：';
-
-  @override
-  String get queue_supportedFormatJson => '• JSON 文件 (.json)';
-
-  @override
-  String get queue_supportedFormatCsv => '• CSV 文件 (.csv)';
-
-  @override
-  String get queue_supportedFormatText => '• 纯文本文件 (.txt) - 每行一个提示词';
-
-  @override
-  String get queue_shareSubject => '队列导出';
-
-  @override
-  String queue_unsupportedFileFormat(Object extension) {
-    return '不支持的文件格式: $extension';
-  }
-
-  @override
-  String get queue_exportSuccess => '导出成功';
-
-  @override
-  String queue_exportFailed(Object error) {
-    return '导出失败：$error';
-  }
-
-  @override
-  String queue_importSuccess(Object count) {
-    return '成功导入 $count 个任务';
-  }
-
-  @override
-  String queue_importFailed(Object error) {
-    return '导入失败：$error';
-  }
-
-  @override
-  String get queue_selectFile => '选择要导入的文件';
-
-  @override
-  String get queue_noValidTasks => '文件中没有有效任务';
-
-  @override
-  String get settings_queueRetryCount => '重试次数';
-
-  @override
-  String get settings_queueRetryInterval => '重试间隔';
-
-  @override
   String get settings_showRandomPromptTools => '显示随机提示词工具';
 
   @override
@@ -6874,87 +6626,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '选中提示词时，滚轮仅调整权重，不再触发页面滚动等其他滚轮操作';
 
   @override
-  String settings_queueRetryCountMax(Object count) {
-    return '最多 $count 次';
-  }
-
-  @override
-  String settings_queueRetryIntervalValue(Object seconds) {
-    return '$seconds 秒';
-  }
-
-  @override
-  String get unit_times => '次';
-
-  @override
   String get unit_seconds => '秒';
-
-  @override
-  String get settings_floatingButtonBackground => '悬浮球背景';
-
-  @override
-  String get settings_floatingButtonBackgroundCustom => '已设置自定义背景';
-
-  @override
-  String get settings_floatingButtonBackgroundDefault => '默认样式';
-
-  @override
-  String get settings_clearBackground => '清除背景';
-
-  @override
-  String get settings_selectImage => '选择图片';
-
-  @override
-  String queue_currentQueueInfo(Object count) {
-    return '当前队列包含 $count 个任务';
-  }
-
-  @override
-  String queue_tooltipTasksTotal(Object count) {
-    return '任务数：$count';
-  }
-
-  @override
-  String queue_tooltipCompleted(Object count) {
-    return '已完成：$count';
-  }
-
-  @override
-  String queue_tooltipFailed(Object count) {
-    return '失败：$count';
-  }
-
-  @override
-  String queue_tooltipCurrentTask(Object task) {
-    return '当前任务：$task';
-  }
-
-  @override
-  String get queue_tooltipNoTasks => '队列中没有任务';
-
-  @override
-  String get queue_tooltipDoubleClickToOpen => '双击开始/暂停';
-
-  @override
-  String get queue_tooltipClickToToggle => '单击打开队列管理';
-
-  @override
-  String get queue_tooltipDragToMove => '拖拽调整位置';
-
-  @override
-  String get queue_statusIdle => '状态：空闲';
-
-  @override
-  String get queue_statusReady => '状态：就绪';
-
-  @override
-  String get queue_statusRunning => '状态：运行中';
-
-  @override
-  String get queue_statusPaused => '状态：已暂停';
-
-  @override
-  String get queue_statusCompleted => '状态：已完成';
 
   @override
   String get settings_notificationSound => '完成音效';
@@ -7301,9 +6973,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcut_action_cancel_generation => '取消生成';
 
   @override
-  String get shortcut_action_add_to_queue => '加入队列';
-
-  @override
   String get shortcut_action_random_prompt => '随机提示词';
 
   @override
@@ -7457,12 +7126,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcut_action_show_shortcut_help => '显示快捷键帮助';
 
   @override
-  String get shortcut_action_toggle_queue => '切换队列';
-
-  @override
-  String get shortcut_action_toggle_queue_pause => '暂停/继续队列';
-
-  @override
   String get shortcut_action_toggle_theme => '切换主题';
 
   @override
@@ -7558,12 +7221,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get drop_extractMetadataSubtitle => '读取图片中的 Prompt、Seed 等参数';
-
-  @override
-  String get drop_addToQueue => '加入队列';
-
-  @override
-  String get drop_addToQueueSubtitle => '提取正面提示词并加入生成队列';
 
   @override
   String get drop_vibeDetected => '检测到预编码 Vibe（可节省 2 Anlas）';
@@ -9503,14 +9160,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get toast_noValidPromptFound => '未找到有效的提示词';
-
-  @override
-  String toast_addedToQueue(Object prompt) {
-    return '已加入队列: $prompt';
-  }
-
-  @override
   String get toast_noValidMaskIgnored => '没有检测到有效蒙版，保存结果已忽略。';
 
   @override
@@ -9727,11 +9376,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String toast_extractMetadataFailed(Object error) {
     return '提取元数据失败: $error';
-  }
-
-  @override
-  String toast_extractPromptFailed(Object error) {
-    return '提取提示词失败: $error';
   }
 
   @override
@@ -10269,9 +9913,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get updateInstallConfirmationBody =>
       '应用将安全关闭并安装更新，完成后自动重新启动。进行中的生成和下载任务会停止，请先保存必要内容。';
-
-  @override
-  String get updateActiveTasksWarning => '检测到队列任务仍在运行，安装会停止当前任务。';
 
   @override
   String get remindMeLater => '4 小时后提醒';

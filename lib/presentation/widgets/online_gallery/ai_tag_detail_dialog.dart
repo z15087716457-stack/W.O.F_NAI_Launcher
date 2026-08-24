@@ -10,16 +10,17 @@ import 'package:path/path.dart' as path;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/cache/danbooru_image_cache_manager.dart';
+import '../../../core/constants/api_constants.dart';
 import '../../router/app_router.dart';
 import '../../../core/utils/file_picker_utils.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/datasources/remote/online_gallery/gallery_source_adapter.dart';
+import '../../../data/models/online_gallery/gallery_source.dart';
 import '../../../data/models/online_gallery/gallery_item.dart';
-import '../../../data/models/queue/replication_task.dart';
+import '../../providers/online_favorites_provider.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/online_gallery_provider.dart';
 import '../../providers/pending_prompt_provider.dart';
-import '../../providers/replication_queue_provider.dart';
 import '../../providers/reverse_prompt_provider.dart';
 import '../common/app_toast.dart';
 
@@ -44,6 +45,8 @@ class _AiTagDetailDialog extends ConsumerStatefulWidget {
 }
 
 class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
+  /// 收藏态变更的轻量刷新信号（provider 非 watch 驱动的局部重建）
+  final ValueNotifier<int> _favTick = ValueNotifier<int>(0);
   late Future<GalleryDetail> _detailFuture;
   final PageController _pageController = PageController();
   final FocusNode _keyboardFocus = FocusNode();
@@ -61,6 +64,7 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
 
   @override
   void dispose() {
+    _favTick.dispose();
     _pageController.dispose();
     _keyboardFocus.dispose();
     super.dispose();
@@ -233,6 +237,68 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
                   ),
               ],
             ),
+          ),
+          ValueListenableBuilder<int>(
+            valueListenable: _favTick,
+            builder: (context, _, __) {
+              final favState = ref.watch(onlineFavoritesNotifierProvider);
+              final isFav = favState.isFavorite(
+                GallerySourceId.aiTag,
+                item.id,
+              );
+              final authorFav = favState.authors.any(
+                (author) => author.authorId == item.uploaderId,
+              );
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      await ref
+                          .read(onlineFavoritesNotifierProvider.notifier)
+                          .toggleFavorite(item);
+                      if (mounted) {
+                        _favTick.value++;
+                      }
+                    },
+                    icon: Icon(
+                      isFav ? Icons.favorite : Icons.favorite_border,
+                      color: isFav ? Colors.red.shade400 : null,
+                    ),
+                    tooltip: context.l10n.common_favorite,
+                  ),
+                  if (item.uploaderId > 0)
+                    IconButton(
+                      onPressed: () async {
+                        final favoritedMsg =
+                            context.l10n.onlineFav_authorFavorited;
+                        final unfavoritedMsg =
+                            context.l10n.onlineFav_authorUnfavorited;
+                        final nowFav = await ref
+                            .read(onlineFavoritesNotifierProvider.notifier)
+                            .toggleAuthor(
+                              item.uploaderId,
+                              item.author ?? '',
+                            );
+                        if (mounted) {
+                          _favTick.value++;
+                          AppToast.info(
+                            this.context,
+                            nowFav ? favoritedMsg : unfavoritedMsg,
+                          );
+                        }
+                      },
+                      icon: Icon(
+                        authorFav
+                            ? Icons.person
+                            : Icons.person_add_alt_outlined,
+                        color: authorFav ? theme.colorScheme.primary : null,
+                      ),
+                      tooltip: context.l10n.onlineFav_favoriteAuthor,
+                    ),
+                ],
+              );
+            },
           ),
           if (_downloadTotal > 0)
             Padding(
@@ -440,6 +506,7 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
               .toList(growable: false),
         ),
         const SizedBox(height: 16),
+        _buildGenerationParamsSection(theme, media),
         if (media.prompt?.isNotEmpty == true)
           _metadataSection('Prompt', media.prompt!),
         if (media.negativePrompt?.isNotEmpty == true)
@@ -483,11 +550,6 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
               label: Text(context.l10n.onlineGallery_sendToTextToImage),
             ),
             OutlinedButton.icon(
-              onPressed: () => _addToQueue(detail, media),
-              icon: const Icon(Icons.playlist_add, size: 16),
-              label: Text(context.l10n.onlineGallery_addToQueue),
-            ),
-            OutlinedButton.icon(
               onPressed: () => _sendToReverse(media),
               icon: const Icon(Icons.manage_search, size: 16),
               label: Text(context.l10n.onlineGallery_sendToReversePrompt),
@@ -509,6 +571,43 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
           ],
         ),
       ],
+    );
+  }
+
+  /// 生成参数区：model / seed / sampler / steps / scale（media.metadata
+  /// 来自 ai_json 解析，尺寸列表/详情均不提供故不显示）
+  Widget _buildGenerationParamsSection(ThemeData theme, GalleryMedia media) {
+    final metadata = media.metadata;
+    if (metadata.isEmpty) return const SizedBox.shrink();
+    final modelId = metadata['model']?.toString() ?? '';
+    final modelLabel = modelId.isEmpty
+        ? null
+        : (ImageModels.modelDisplayNames[modelId] ?? modelId);
+    final seed = metadata['seed'];
+    final sampler = metadata['sampler']?.toString() ?? '';
+    final steps = metadata['steps'];
+    final scale = metadata['scale'];
+    final chips = <Widget>[
+      if (modelLabel != null) Chip(label: Text(modelLabel)),
+      if (seed != null) Chip(label: Text('Seed $seed')),
+      if (sampler.isNotEmpty) Chip(label: Text(sampler)),
+      if (steps != null) Chip(label: Text('Steps $steps')),
+      if (scale != null) Chip(label: Text('Scale $scale')),
+    ];
+    if (chips.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.onlineGallery_generationParams,
+            style: theme.textTheme.titleSmall,
+          ),
+          const SizedBox(height: 6),
+          Wrap(spacing: 6, runSpacing: 6, children: chips),
+        ],
+      ),
     );
   }
 
@@ -587,29 +686,6 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
         );
     Navigator.pop(context);
     context.go(AppRoutes.generation);
-  }
-
-  Future<void> _addToQueue(GalleryDetail detail, GalleryMedia media) async {
-    final prompt = _promptFor(detail, media);
-    if (prompt.isEmpty) return;
-    final added = await ref
-        .read(replicationQueueNotifierProvider.notifier)
-        .add(
-          ReplicationTask.create(
-            prompt: prompt,
-            negativePrompt: media.negativePrompt ?? detail.negativePrompt ?? '',
-            thumbnailUrl: media.previewUrl,
-            source: ReplicationTaskSource.online,
-            width: media.width > 0 ? media.width : null,
-            height: media.height > 0 ? media.height : null,
-          ),
-        );
-    if (!mounted) return;
-    if (added) {
-      AppToast.success(context, context.l10n.onlineGallery_addedToQueue);
-    } else {
-      AppToast.warning(context, context.l10n.onlineGallery_queueFullMax);
-    }
   }
 
   Future<void> _sendToReverse(GalleryMedia media) async {

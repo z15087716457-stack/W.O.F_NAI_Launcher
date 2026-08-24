@@ -16,14 +16,12 @@ import '../../../core/utils/app_logger.dart';
 import '../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../data/services/image_metadata_service.dart';
 import '../../../core/utils/vibe_file_parser.dart';
-import '../../../data/models/queue/replication_task.dart';
 import '../../../data/models/vibe/vibe_library_entry.dart';
 import '../../../data/models/vibe/vibe_reference.dart';
 import '../../../data/services/vibe_library_storage_service.dart';
 import '../../../data/services/vibe_metadata_service.dart';
 import '../../providers/generation/image_workflow_controller.dart';
 import '../../providers/image_generation_provider.dart';
-import '../../providers/replication_queue_provider.dart';
 import '../../providers/precise_ref_library_provider.dart';
 import '../../providers/reverse_prompt_provider.dart';
 import '../../providers/vibe_library_provider.dart';
@@ -581,10 +579,6 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
       case ImageDestination.extractMetadata:
         await _handleExtractMetadata(detectedMetadata, bytes, l10n);
         break;
-
-      case ImageDestination.addToQueue:
-        await _handleAddToQueue(detectedMetadata, bytes, l10n);
-        break;
     }
   }
 
@@ -878,43 +872,6 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
         AppLogger.d('Error extracting metadata: $e', 'DropHandler');
       }
       _showError(l10n.toast_extractMetadataFailed(e.toString()));
-    }
-  }
-
-  Future<void> _handleAddToQueue(
-    NaiImageMetadata? detectedMetadata,
-    Uint8List bytes,
-    AppLocalizations l10n,
-  ) async {
-    try {
-      final metadata =
-          detectedMetadata ??
-          await ImageMetadataService().getMetadataFromBytes(bytes);
-
-      if (metadata == null || metadata.prompt.isEmpty) {
-        if (mounted) {
-          AppToast.warning(context, context.l10n.toast_noValidPromptFound);
-        }
-        return;
-      }
-
-      final task = ReplicationTask.create(prompt: metadata.prompt);
-      ref.read(replicationQueueNotifierProvider.notifier).add(task);
-
-      if (mounted) {
-        final displayPrompt = metadata.prompt.length > 50
-            ? '${metadata.prompt.substring(0, 50)}...'
-            : metadata.prompt;
-        AppToast.success(
-          context,
-          context.l10n.toast_addedToQueue(displayPrompt),
-        );
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        AppLogger.d('Error adding to queue: $e', 'DropHandler');
-      }
-      _showError(l10n.toast_extractPromptFailed(e.toString()));
     }
   }
 

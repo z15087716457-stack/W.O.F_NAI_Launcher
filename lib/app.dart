@@ -11,7 +11,7 @@ import 'presentation/providers/font_scale_provider.dart';
 import 'presentation/providers/locale_provider.dart';
 import 'presentation/providers/background_refresh_provider.dart';
 import 'presentation/providers/krita/krita_bridge_notifier.dart';
-import 'presentation/providers/queue_execution_provider.dart';
+import 'presentation/providers/notification_settings_provider.dart';
 import 'presentation/providers/subscription_provider.dart'
     hide anlasBalanceProvider;
 import 'presentation/themes/app_theme.dart';
@@ -26,6 +26,7 @@ class AppBootstrapEffects extends ConsumerStatefulWidget {
   final ProviderListenable<dynamic>? anlasWatcher;
   final ProviderListenable<dynamic>? backgroundRefresh;
   final ProviderListenable<dynamic>? kritaBridge;
+  final ProviderListenable<dynamic>? generationCompletionWatcher;
 
   const AppBootstrapEffects({
     super.key,
@@ -33,6 +34,7 @@ class AppBootstrapEffects extends ConsumerStatefulWidget {
     this.anlasWatcher,
     this.backgroundRefresh,
     this.kritaBridge,
+    this.generationCompletionWatcher,
   });
 
   @override
@@ -44,6 +46,7 @@ class _AppBootstrapEffectsState extends ConsumerState<AppBootstrapEffects> {
   ProviderSubscription<dynamic>? _anlasWatcherSubscription;
   ProviderSubscription<dynamic>? _backgroundRefreshSubscription;
   ProviderSubscription<dynamic>? _kritaBridgeSubscription;
+  ProviderSubscription<dynamic>? _generationCompletionSubscription;
 
   @override
   void initState() {
@@ -60,6 +63,10 @@ class _AppBootstrapEffectsState extends ConsumerState<AppBootstrapEffects> {
       widget.kritaBridge ?? kritaBridgeNotifierProvider,
       (_, __) {},
     );
+    _generationCompletionSubscription = ref.listenManual(
+      widget.generationCompletionWatcher ?? generationCompletionWatcherProvider,
+      (_, __) {},
+    );
   }
 
   @override
@@ -67,6 +74,7 @@ class _AppBootstrapEffectsState extends ConsumerState<AppBootstrapEffects> {
     _anlasWatcherSubscription?.close();
     _backgroundRefreshSubscription?.close();
     _kritaBridgeSubscription?.close();
+    _generationCompletionSubscription?.close();
     super.dispose();
   }
 
@@ -124,18 +132,6 @@ class NAILauncherApp extends ConsumerWidget {
       },
       ShortcutIds.quitApp: () {
         windowManager.close();
-      },
-      ShortcutIds.toggleQueue: () {
-        final isVisible = ref.read(queueManagementVisibleProvider);
-        ref.read(queueManagementVisibleProvider.notifier).state = !isVisible;
-      },
-      ShortcutIds.toggleQueuePause: () {
-        final executionState = ref.read(queueExecutionNotifierProvider);
-        if (executionState.isPaused) {
-          ref.read(queueExecutionNotifierProvider.notifier).resume();
-        } else if (executionState.isRunning || executionState.isReady) {
-          ref.read(queueExecutionNotifierProvider.notifier).pause();
-        }
       },
       ShortcutIds.toggleTheme: () {
         ref.read(themeNotifierProvider.notifier).nextTheme();

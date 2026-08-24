@@ -9,13 +9,11 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/cache/danbooru_image_cache_manager.dart';
 import '../../router/app_router.dart';
 import '../../../data/models/online_gallery/danbooru_post.dart';
-import '../../../data/models/queue/replication_task.dart';
 import '../../../data/services/danbooru_auth_service.dart';
 import '../../../core/autocomplete/tag_translation_lookup.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/online_gallery_provider.dart';
 import '../../providers/pending_prompt_provider.dart';
-import '../../providers/replication_queue_provider.dart';
 import '../../providers/reverse_prompt_provider.dart';
 import '../tag_chip.dart';
 import '../../widgets/common/themed_divider.dart';
@@ -599,20 +597,9 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
             ],
           ),
           const SizedBox(height: 8),
-          // 第二行：加入队列和打开链接
+          // 第二行：打开链接
           Row(
             children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _addToQueue,
-                  icon: const Icon(Icons.queue, size: 16),
-                  label: Text(context.l10n.onlineGallery_addToQueue),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _openInBrowser,
@@ -689,32 +676,6 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
           context,
           context.l10n.onlineGallery_reversePromptSendFailed('$e'),
         );
-      }
-    }
-  }
-
-  /// 加入队列
-  Future<void> _addToQueue() async {
-    if (widget.post.tags.isEmpty) {
-      AppToast.info(context, context.l10n.onlineGallery_noTagInfo);
-      return;
-    }
-
-    final task = ReplicationTask.create(
-      prompt: widget.post.tags.join(', '),
-      thumbnailUrl: widget.post.previewUrl,
-      source: ReplicationTaskSource.online,
-    );
-
-    final added = await ref
-        .read(replicationQueueNotifierProvider.notifier)
-        .add(task);
-
-    if (mounted) {
-      if (added) {
-        AppToast.success(context, context.l10n.onlineGallery_addedToQueue);
-      } else {
-        AppToast.warning(context, context.l10n.onlineGallery_queueFullMax);
       }
     }
   }

@@ -8,6 +8,10 @@ import '../../core/utils/app_logger.dart';
 import '../models/gallery/gallery_collection_info.dart';
 import '../models/gallery/image_collection.dart';
 
+/// 添加图片到集合的结果：added=新插入、alreadyIn=已在集合中、
+/// unresolved=未索引到 image_id 被跳过的路径数
+typedef CollectionAddResult = ({int added, int alreadyIn, int unresolved});
+
 /// 收藏集合仓库
 ///
 /// 负责管理图片集合的 CRUD 操作。
@@ -175,25 +179,33 @@ class CollectionRepository {
   }
 
   /// 添加图片到集合（按路径解析为 image_id 链接；已存在跳过）
-  Future<int> addImagesToCollection(
+  Future<CollectionAddResult> addImagesToCollection(
     String collectionId,
     List<String> imagePaths,
   ) async {
     try {
       final pathToId = await _dataSource.getImageIdsByPaths(imagePaths);
-      var addedCount = 0;
+      var added = 0;
+      var alreadyIn = 0;
+      var unresolved = 0;
       for (final path in imagePaths) {
         final imageId = pathToId[path];
-        if (imageId == null) continue;
+        if (imageId == null) {
+          unresolved++;
+          continue;
+        }
         if (await _dataSource.addImageToCollection(collectionId, imageId)) {
-          addedCount++;
+          added++;
+        } else {
+          alreadyIn++;
         }
       }
       AppLogger.i(
-        'Added $addedCount images to collection: $collectionId',
+        'Collection $collectionId add: $added new, $alreadyIn already in, '
+        '$unresolved unresolved',
         'CollectionRepo',
       );
-      return addedCount;
+      return (added: added, alreadyIn: alreadyIn, unresolved: unresolved);
     } catch (e) {
       AppLogger.e(
         'Failed to add images to collection: $collectionId',
@@ -201,7 +213,11 @@ class CollectionRepository {
         null,
         'CollectionRepo',
       );
-      return 0;
+      return (
+        added: 0,
+        alreadyIn: 0,
+        unresolved: imagePaths.length,
+      );
     }
   }
 
@@ -262,6 +278,31 @@ class CollectionRepository {
     final imageId = await _dataSource.getImageIdByPath(imagePath);
     if (imageId == null) return {};
     return _dataSource.getCollectionIdsForImage(imageId);
+  }
+
+  /// 各集合与给定图片路径的交集数（collectionId → 选中图片在该集合中的张数）
+  Future<Map<String, int>> countMembershipByPaths(
+    List<String> imagePaths,
+  ) async {
+    try {
+      final pathToId = await _dataSource.getImageIdsByPaths(imagePaths);
+      final ids = pathToId.values.toSet();
+      if (ids.isEmpty) return {};
+      final counts = <String, int>{};
+      for (final info in await _dataSource.listCollectionsWithCounts()) {
+        final memberIds = await _dataSource.getCollectionImageIds(info.id);
+        counts[info.id] = memberIds.where(ids.contains).length;
+      }
+      return counts;
+    } catch (e) {
+      AppLogger.e(
+        'Failed to count membership for ${imagePaths.length} paths',
+        e,
+        null,
+        'CollectionRepo',
+      );
+      return {};
+    }
   }
 
   /// 路径 → 图片 ID（null 表示未索引）

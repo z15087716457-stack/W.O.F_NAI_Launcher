@@ -14,7 +14,6 @@ class ShortcutIds {
   // 生成页面快捷键
   static const String generateImage = 'generate_image';
   static const String cancelGeneration = 'cancel_generation';
-  static const String addToQueue = 'add_to_queue';
   static const String randomPrompt = 'random_prompt';
   static const String clearPrompt = 'clear_prompt';
   static const String togglePromptMode = 'toggle_prompt_mode';
@@ -78,8 +77,6 @@ class ShortcutIds {
   static const String minimizeToTray = 'minimize_to_tray';
   static const String quitApp = 'quit_app';
   static const String showShortcutHelp = 'show_shortcut_help';
-  static const String toggleQueue = 'toggle_queue';
-  static const String toggleQueuePause = 'toggle_queue_pause';
   static const String toggleTheme = 'toggle_theme';
 
   // Vibe库快捷键
@@ -128,7 +125,6 @@ class DefaultShortcuts {
     // 生成页面
     ShortcutIds.generateImage: 'ctrl+enter',
     ShortcutIds.cancelGeneration: 'escape',
-    ShortcutIds.addToQueue: 'ctrl+shift+enter',
     ShortcutIds.randomPrompt: 'ctrl+r',
     ShortcutIds.clearPrompt: 'ctrl+l',
     ShortcutIds.togglePromptMode: 'ctrl+m',
@@ -186,8 +182,6 @@ class DefaultShortcuts {
     ShortcutIds.minimizeToTray: 'ctrl+m',
     ShortcutIds.quitApp: 'ctrl+q',
     ShortcutIds.showShortcutHelp: 'f1',
-    ShortcutIds.toggleQueue: 'ctrl+j',
-    ShortcutIds.toggleQueuePause: 'ctrl+space',
     ShortcutIds.toggleTheme: 'ctrl+shift+t',
 
     // Vibe库
@@ -219,15 +213,12 @@ class DefaultShortcuts {
       case ShortcutIds.minimizeToTray:
       case ShortcutIds.quitApp:
       case ShortcutIds.showShortcutHelp:
-      case ShortcutIds.toggleQueue:
-      case ShortcutIds.toggleQueuePause:
       case ShortcutIds.toggleTheme:
         return ShortcutContext.global;
 
       // 生成页面
       case ShortcutIds.generateImage:
       case ShortcutIds.cancelGeneration:
-      case ShortcutIds.addToQueue:
       case ShortcutIds.randomPrompt:
       case ShortcutIds.clearPrompt:
       case ShortcutIds.togglePromptMode:

@@ -489,8 +489,6 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
         return l10n.shortcut_action_generation_next_image;
       case 'shortcut_action_cancel_generation':
         return l10n.shortcut_action_cancel_generation;
-      case 'shortcut_action_add_to_queue':
-        return l10n.shortcut_action_add_to_queue;
       case 'shortcut_action_random_prompt':
         return l10n.shortcut_action_random_prompt;
       case 'shortcut_action_clear_prompt':
@@ -593,10 +591,6 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
         return l10n.shortcut_action_minimize_to_tray;
       case 'shortcut_action_quit_app':
         return l10n.shortcut_action_quit_app;
-      case 'shortcut_action_toggle_queue':
-        return l10n.shortcut_action_toggle_queue;
-      case 'shortcut_action_toggle_queue_pause':
-        return l10n.shortcut_action_toggle_queue_pause;
       case 'shortcut_action_toggle_theme':
         return l10n.shortcut_action_toggle_theme;
       default:

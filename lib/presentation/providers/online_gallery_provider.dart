@@ -187,9 +187,9 @@ class OnlineGalleryState {
     this.popularQuery = '',
     this.popularPromptQuery = '',
     this.fuzzySearchEnabled = false,
-    this.sourceId = GallerySourceId.danbooru,
-    this.popularSourceId = GallerySourceId.danbooru,
-    this.favoritesSourceId = GallerySourceId.danbooru,
+    this.sourceId = GallerySourceId.aiTag,
+    this.popularSourceId = GallerySourceId.aiTag,
+    this.favoritesSourceId = GallerySourceId.aiTag,
     this.selectedRatings = kAllRatings,
     this.viewMode = GalleryViewMode.search,
     this.searchCache = const ModeCache(),
@@ -202,6 +202,8 @@ class OnlineGalleryState {
     this.aiTagTimeRange = 'all',
     this.aiTagPopularPeriod = 'current',
     this.aiTagConfig,
+    this.aiTagNaiOnly = true,
+    this.aiTagModelVersion,
     this.favoritedPostKeys = const {},
     this.favoriteLoadingPostKeys = const {},
     this.dateRangeStart,
@@ -233,6 +235,12 @@ class OnlineGalleryState {
   final String aiTagTimeRange;
   final String aiTagPopularPeriod;
   final AiTagSourceConfig? aiTagConfig;
+
+  /// AiTag 源「仅 NAI」客户端过滤（默认开）：AI_type ∈ NAI 系变体。
+  final bool aiTagNaiOnly;
+
+  /// AiTag 源模型版本过滤（'3'/'4'/'4.5'/'5'，null=不过滤），注入 q 查询词。
+  final String? aiTagModelVersion;
   final Set<String> favoritedPostKeys;
   final Set<String> favoriteLoadingPostKeys;
   final DateTime? dateRangeStart;
@@ -246,9 +254,9 @@ class OnlineGalleryState {
   String get currentCacheKey {
     switch (viewMode) {
       case GalleryViewMode.search:
-        return 'search:${sourceId.key}:${searchQuery.trim()}|${promptQuery.trim()}|$fuzzySearchEnabled|${_ratingsKey(selectedRatings)}|${dateRangeStart?.toIso8601String() ?? ''}|${dateRangeEnd?.toIso8601String() ?? ''}|$aiTagTimeRange';
+        return 'search:${sourceId.key}:${searchQuery.trim()}|${promptQuery.trim()}|$fuzzySearchEnabled|${_ratingsKey(selectedRatings)}|${dateRangeStart?.toIso8601String() ?? ''}|${dateRangeEnd?.toIso8601String() ?? ''}|$aiTagTimeRange|$aiTagNaiOnly|${aiTagModelVersion ?? ''}';
       case GalleryViewMode.popular:
-        return 'popular:${popularSourceId.key}:${popularScale.name}|${popularDate?.toIso8601String() ?? ''}|$aiTagPopularPeriod|${popularQuery.trim()}|${popularPromptQuery.trim()}|${_ratingsKey(selectedRatings)}';
+        return 'popular:${popularSourceId.key}:${popularScale.name}|${popularDate?.toIso8601String() ?? ''}|$aiTagPopularPeriod|${popularQuery.trim()}|${popularPromptQuery.trim()}|${_ratingsKey(selectedRatings)}|$aiTagNaiOnly';
       case GalleryViewMode.favorites:
         return 'favorites:${favoritesSourceId.key}|${_ratingsKey(selectedRatings)}';
     }
@@ -313,6 +321,8 @@ class OnlineGalleryState {
     String? aiTagTimeRange,
     String? aiTagPopularPeriod,
     AiTagSourceConfig? aiTagConfig,
+    bool? aiTagNaiOnly,
+    String? aiTagModelVersion,
     Set<String>? favoritedPostKeys,
     Set<String>? favoriteLoadingPostKeys,
     DateTime? dateRangeStart,
@@ -321,6 +331,7 @@ class OnlineGalleryState {
     bool clearNotice = false,
     bool clearPopularDate = false,
     bool clearDateRange = false,
+    bool clearAiTagModelVersion = false,
   }) {
     return OnlineGalleryState(
       isLoading: isLoading ?? this.isLoading,
@@ -352,6 +363,10 @@ class OnlineGalleryState {
       aiTagTimeRange: aiTagTimeRange ?? this.aiTagTimeRange,
       aiTagPopularPeriod: aiTagPopularPeriod ?? this.aiTagPopularPeriod,
       aiTagConfig: aiTagConfig ?? this.aiTagConfig,
+      aiTagNaiOnly: aiTagNaiOnly ?? this.aiTagNaiOnly,
+      aiTagModelVersion: clearAiTagModelVersion
+          ? null
+          : (aiTagModelVersion ?? this.aiTagModelVersion),
       favoritedPostKeys: Set.unmodifiable(
         favoritedPostKeys ?? this.favoritedPostKeys,
       ),
@@ -406,12 +421,14 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
   static const int _pageSize = 40;
   static const int _maxConcurrentDetailRequests = 6;
   static const int _maxFilteredEmptyPagesPerLoad = 5;
+  static const int _maxResolvedDetailsCache = 300;
 
   CancelToken? _cancelToken;
   int _requestGeneration = 0;
   int _activeDetailRequests = 0;
   final List<Completer<void>> _detailRequestQueue = [];
   final Map<String, Future<GalleryDetail>> _detailRequests = {};
+  final Map<String, GalleryDetail> _resolvedDetails = {};
 
   @override
   OnlineGalleryState build() {
@@ -469,8 +486,19 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
 
   Future<void> switchToFavorites() async {
     _cancelCurrentRequest();
+    // 收藏视图跟随当前活动源（各源收藏体系独立：danbooru 远端 /
+    // gelbooru 远端 / aiTag 本地）
+    final active = state.viewMode == GalleryViewMode.popular
+        ? state.popularSourceId
+        : state.sourceId;
+    final followSource = active == GallerySourceId.danbooru ||
+            active == GallerySourceId.gelbooru ||
+            active == GallerySourceId.aiTag
+        ? active
+        : state.favoritesSourceId;
     state = state.copyWith(
       viewMode: GalleryViewMode.favorites,
+      favoritesSourceId: followSource,
       clearError: true,
     );
     if (state.currentCache.posts.isEmpty) await loadPosts(refresh: true);
@@ -500,7 +528,8 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
   Future<void> setFavoritesSource(Object source) async {
     final sourceId = _normalizeSource(source);
     if (sourceId != GallerySourceId.danbooru &&
-        sourceId != GallerySourceId.gelbooru) {
+        sourceId != GallerySourceId.gelbooru &&
+        sourceId != GallerySourceId.aiTag) {
       return;
     }
     if (state.favoritesSourceId == sourceId) return;
@@ -553,6 +582,30 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
     state = state.copyWith(aiTagPopularPeriod: period, clearError: true);
     if (state.viewMode == GalleryViewMode.popular &&
         state.popularSourceId == GallerySourceId.aiTag) {
+      await loadPosts(refresh: true);
+    }
+  }
+
+  /// 切换 AiTag「仅 NAI」客户端过滤。过滤结果烘焙进缓存，
+  /// 开关是缓存键的一部分——来回切换命中各自缓存，不重复请求。
+  Future<void> setAiTagNaiOnly(bool enabled) async {
+    if (state.aiTagNaiOnly == enabled) return;
+    _cancelCurrentRequest();
+    state = state.copyWith(aiTagNaiOnly: enabled, clearError: true);
+    if (state.currentCache.posts.isEmpty) await loadPosts(refresh: true);
+  }
+
+  /// 选择 AiTag 模型版本过滤（传 null 清除）。版本词注入 q 走服务端检索。
+  Future<void> setAiTagModelVersion(String? version) async {
+    if (state.aiTagModelVersion == version) return;
+    _cancelCurrentRequest();
+    state = state.copyWith(
+      aiTagModelVersion: version,
+      clearAiTagModelVersion: version == null,
+      clearError: true,
+    );
+    if (state.viewMode == GalleryViewMode.search &&
+        state.sourceId == GallerySourceId.aiTag) {
       await loadPosts(refresh: true);
     }
   }
@@ -726,7 +779,10 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
           );
         } else {
           final query = sourceId == GallerySourceId.aiTag
-              ? state.searchQuery.trim()
+              ? buildAiTagSearchQuery(
+                  state.searchQuery,
+                  state.aiTagModelVersion,
+                )
               : buildOnlineGallerySearchQuery(
                   state.searchQuery,
                   fuzzyMatch: state.fuzzySearchEnabled,
@@ -749,6 +805,23 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
           );
         }
         if (!_isCurrentRequest(generation, cacheKey)) return;
+        // AiTag「仅 NAI」客户端过滤：整页被滤空时复用下方
+        // filteredEmptyPage 逻辑继续拉下一页（与黑名单过滤同通道）。
+        if (sourceId == GallerySourceId.aiTag && state.aiTagNaiOnly) {
+          final naiItems = page.items
+              .where((item) => isAiTagNaiWork(item.aiType))
+              .toList(growable: false);
+          if (naiItems.length != page.items.length) {
+            page = GalleryPage(
+              items: naiItems,
+              cursor: page.cursor,
+              nextCursor: page.nextCursor,
+              hasMore: page.hasMore,
+              total: page.total,
+              rawItemCount: page.rawItemCount,
+            );
+          }
+        }
         final nextCursor = page.nextCursor;
         final filteredEmptyPage = page.rawItemCount > 0 && page.items.isEmpty;
         stalledCursor =
@@ -840,6 +913,11 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
 
   Future<void> _loadFavorites({required bool refresh, int? targetPage}) async {
     final sourceId = state.favoritesSourceId;
+    if (sourceId == GallerySourceId.aiTag) {
+      // AItag 收藏为本地存储（OnlineFavoritesBrowser 渲染），无远端请求
+      state = state.copyWith(isLoading: false, clearError: true);
+      return;
+    }
     final authMissing = sourceId == GallerySourceId.danbooru
         ? !_danbooruAuth.isLoggedIn || _danbooruAuth.user == null
         : false;
@@ -960,11 +1038,20 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
     bool forceRefresh = false,
   }) {
     final key = item.stableKey;
-    if (forceRefresh) _detailRequests.remove(key);
+    if (forceRefresh) {
+      _detailRequests.remove(key);
+      _resolvedDetails.remove(key);
+    }
     return _detailRequests.putIfAbsent(key, () async {
       await _acquireDetailRequestSlot();
       try {
-        return await _adapters[item.sourceId]!.detail(item);
+        final detail = await _adapters[item.sourceId]!.detail(item);
+        // 有界 LRU：详情 payload 大（整 work 的 ai_json），无界会单调涨内存
+        if (_resolvedDetails.length >= _maxResolvedDetailsCache) {
+          _resolvedDetails.remove(_resolvedDetails.keys.first);
+        }
+        _resolvedDetails[key] = detail;
+        return detail;
       } catch (_) {
         _detailRequests.remove(key);
         rethrow;
@@ -972,6 +1059,16 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
         _releaseDetailRequestSlot();
       }
     });
+  }
+
+  /// 已完成详情的同步读口：网格卡直接渲染，避免 FutureBuilder 闪 waiting 帧。
+  GalleryDetail? cachedDetailFor(GalleryItem item) {
+    final key = item.stableKey;
+    final detail = _resolvedDetails.remove(key);
+    if (detail != null) {
+      _resolvedDetails[key] = detail;
+    }
+    return detail;
   }
 
   Future<void> _acquireDetailRequestSlot() async {

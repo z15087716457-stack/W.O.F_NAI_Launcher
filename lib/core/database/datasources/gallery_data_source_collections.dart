@@ -110,23 +110,23 @@ extension GalleryDataSourceCollections on GalleryDataSource {
     return ok;
   }
 
-  /// 添加图片到收藏集（幂等）
+  /// 添加图片到收藏集（幂等；返回是否真正新插入，已在集合中返回 false）
   Future<bool> addImageToCollection(
     String collectionId,
     int imageId,
   ) async {
-    return execute('addImageToCollection', (db) async {
-      final inserted = await db.insert(
-        GalleryDataSource._collectionItemsTable,
-        {
-          'collection_id': collectionId,
-          'image_id': imageId,
-          'added_at': DateTime.now().millisecondsSinceEpoch,
-        },
-        conflictAlgorithm: ConflictAlgorithm.ignore,
+    final changed = await execute('addImageToCollection', (db) async {
+      // db.insert 返回 rowid 而非受影响行数（表非空时恒 >1，不能用来判定
+      // 是否插入成功）；rawUpdate 返回 sqlite3_changes()：插入成功=1、被
+      // OR IGNORE 跳过=0，才是可靠的幂等结果
+      return db.rawUpdate(
+        'INSERT OR IGNORE INTO ${GalleryDataSource._collectionItemsTable} '
+        '(collection_id, image_id, added_at) VALUES (?, ?, ?)',
+        [collectionId, imageId, DateTime.now().millisecondsSinceEpoch],
       );
-      return inserted == 1;
     });
+    if (changed == 1) _markDataChanged();
+    return changed == 1;
   }
 
   /// 从收藏集移除图片（不存在时返回 false，视为无成员可移除）

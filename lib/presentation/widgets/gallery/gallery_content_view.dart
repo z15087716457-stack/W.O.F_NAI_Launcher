@@ -429,8 +429,22 @@ class _GenericGalleryContentViewState<T>
   }
 
   double _getCachedAspectRatio(LocalImageRecord record) {
-    if (_aspectRatioCache.containsKey(record.path)) {
-      return _aspectRatioCache[record.path]!;
+    final cached = _aspectRatioCache[record.path];
+    if (cached != null) {
+      return cached;
+    }
+
+    // 元数据自带宽高时同步取值：否则首帧先按占位 1.0 排版、下一帧再改高，
+    // 卡片进场瞬间变高（向上滚动时还会触发瀑布流位移校正，肉眼可见地抽动）
+    final metadataWidth = record.metadata?.width;
+    final metadataHeight = record.metadata?.height;
+    if (metadataWidth != null &&
+        metadataHeight != null &&
+        metadataWidth > 0 &&
+        metadataHeight > 0) {
+      final ratio = metadataWidth / metadataHeight;
+      _aspectRatioCache[record.path] = ratio;
+      return ratio;
     }
 
     _calculateAspectRatioForRecord(record).then((value) {
@@ -524,6 +538,9 @@ class _GenericGalleryContentViewState<T>
         return MasonryGridView.count(
           key: PageStorageKey<String>('gallery_masonry_$_gridRemountCounter'),
           controller: _masonryScrollController ??= ScrollController(),
+          // 默认 cacheExtent（250px）不足一行卡片高，向上滚动时卡片频繁
+          // 回收重建（缩略图重载 + 可见性回调风暴）；放大到 1.5 屏与固定网格对齐
+          cacheExtent: constraints.maxHeight * 1.5,
           crossAxisCount: columns,
           mainAxisSpacing: spacing,
           crossAxisSpacing: spacing,
@@ -551,60 +568,67 @@ class _GenericGalleryContentViewState<T>
                   });
                 }
               },
-              child: LocalImageCard3D(
-                record: record,
-                width: itemWidth,
-                height: itemWidth / aspectRatio,
-                isSelected: isSelected,
-                isVisible: isVisible,
-                priority: isVisible ? 1 : 5,
-                onTap: () {
-                  if (selectionState.isActive) {
-                    widget.onSelectionToggle?.call(state.currentImages[index]);
-                    return;
-                  }
-                  if (widget.onTap != null) {
-                    widget.onTap!(state.currentImages[index], index);
-                  } else if (widget.view3DConfig != null) {
-                    widget.view3DConfig!.showDetailViewer(
-                      widget.view3DConfig!.images,
-                      index,
+              // 与固定网格对齐补 RepaintBoundary：悬停光泽/解码完成的重绘
+              // 只刷本卡片，不再整片网格重绘
+              child: RepaintBoundary(
+                child: LocalImageCard3D(
+                  record: record,
+                  width: itemWidth,
+                  height: itemWidth / aspectRatio,
+                  isSelected: isSelected,
+                  isVisible: isVisible,
+                  priority: isVisible ? 1 : 5,
+                  onTap: () {
+                    if (selectionState.isActive) {
+                      widget.onSelectionToggle?.call(state.currentImages[index]);
+                      return;
+                    }
+                    if (widget.onTap != null) {
+                      widget.onTap!(state.currentImages[index], index);
+                    } else if (widget.view3DConfig != null) {
+                      widget.view3DConfig!.showDetailViewer(
+                        widget.view3DConfig!.images,
+                        index,
+                      );
+                    }
+                  },
+                  onDoubleTap: () {
+                    if (widget.onDoubleTap != null) {
+                      widget.onDoubleTap!(state.currentImages[index], index);
+                    } else if (widget.view3DConfig != null) {
+                      widget.view3DConfig!.showDetailViewer(
+                        widget.view3DConfig!.images,
+                        index,
+                      );
+                    }
+                  },
+                  onLongPress: () {
+                    if (!selectionState.isActive) {
+                      widget.onEnterSelection?.call(state.currentImages[index]);
+                    } else {
+                      widget.onLongPress?.call(
+                        state.currentImages[index],
+                        index,
+                      );
+                    }
+                  },
+                  onSecondaryTapDown: (details) {
+                    widget.onContextMenu?.call(
+                      state.currentImages[index],
+                      details.globalPosition,
                     );
-                  }
-                },
-                onDoubleTap: () {
-                  if (widget.onDoubleTap != null) {
-                    widget.onDoubleTap!(state.currentImages[index], index);
-                  } else if (widget.view3DConfig != null) {
-                    widget.view3DConfig!.showDetailViewer(
-                      widget.view3DConfig!.images,
-                      index,
+                  },
+                  onFavoriteToggle: (anchor) {
+                    widget.onFavoriteToggle?.call(
+                      state.currentImages[index],
+                      anchor,
                     );
-                  }
-                },
-                onLongPress: () {
-                  if (!selectionState.isActive) {
-                    widget.onEnterSelection?.call(state.currentImages[index]);
-                  } else {
-                    widget.onLongPress?.call(state.currentImages[index], index);
-                  }
-                },
-                onSecondaryTapDown: (details) {
-                  widget.onContextMenu?.call(
-                    state.currentImages[index],
-                    details.globalPosition,
-                  );
-                },
-                onFavoriteToggle: (anchor) {
-                  widget.onFavoriteToggle?.call(
-                    state.currentImages[index],
-                    anchor,
-                  );
-                },
-                onSendAction: widget.onSendAction != null
-                    ? (action) => widget.onSendAction!(record, action)
-                    : null,
-                isKritaConnected: widget.isKritaConnected,
+                  },
+                  onSendAction: widget.onSendAction != null
+                      ? (action) => widget.onSendAction!(record, action)
+                      : null,
+                  isKritaConnected: widget.isKritaConnected,
+                ),
               ),
             );
           },
@@ -756,6 +780,9 @@ class LocalGalleryContentView extends ConsumerWidget {
   )?
   onSendAction;
   final VoidCallback? onDeleted;
+
+  /// 大图查看器内删除当前图片（返回是否删除成功，null=该入口不支持删除）
+  final Future<bool> Function(LocalImageRecord record)? onViewerDelete;
   final GlobalKey<GroupedGridViewState>? groupedGridViewKey;
 
   const LocalGalleryContentView({
@@ -768,6 +795,7 @@ class LocalGalleryContentView extends ConsumerWidget {
     this.onContextMenu,
     this.onSendAction,
     this.onDeleted,
+    this.onViewerDelete,
     this.groupedGridViewKey,
   });
 
@@ -847,6 +875,11 @@ class LocalGalleryContentView extends ConsumerWidget {
               }
             }
           },
+          onDelete: onViewerDelete != null
+              ? (data) => onViewerDelete!(
+                    (data as LocalImageDetailData).record,
+                  )
+              : null,
         ),
       );
     }

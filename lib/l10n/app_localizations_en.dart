@@ -18,6 +18,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_cancel => 'Cancel';
 
   @override
+  String get onlineFav_all => 'All';
+
+  @override
+  String get onlineFav_rootCollection => 'Root';
+
+  @override
+  String get onlineFav_newCollection => 'New Collection';
+
+  @override
+  String get onlineFav_renameCollection => 'Rename';
+
+  @override
+  String get onlineFav_deleteCollection => 'Delete Collection';
+
+  @override
+  String get onlineFav_empty => 'No favorited works yet';
+
+  @override
+  String onlineFav_authorWorkCount(Object n) {
+    return '$n works';
+  }
+
+  @override
+  String get onlineFav_moveHere => 'Move here';
+
+  @override
+  String get onlineFav_removeFavorite => 'Unfavorite';
+
+  @override
+  String get onlineFav_favoriteAuthor => 'Favorite Author';
+
+  @override
+  String get onlineFav_authorFavorited => 'Author favorited';
+
+  @override
+  String get onlineFav_authorUnfavorited => 'Author unfavorited';
+
+  @override
   String get common_confirm => 'Confirm';
 
   @override
@@ -549,9 +587,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_generationInputSection => 'Input';
-
-  @override
-  String get settings_generationRetrySection => 'Retry on Failure';
 
   @override
   String get settings_generationFeedbackSection => 'Completion Alert';
@@ -2510,9 +2545,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onlineGallery_send => 'Send';
 
   @override
-  String get onlineGallery_addToQueue => 'Add to Queue';
-
-  @override
   String get onlineGallery_sendToTextToImage => 'Send to Text to Image';
 
   @override
@@ -2548,12 +2580,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onlineGallery_metadata => 'Metadata';
-
-  @override
-  String get onlineGallery_addedToQueue => 'Added to queue';
-
-  @override
-  String get onlineGallery_queueFullMax => 'Queue is full (maximum 50 items)';
 
   @override
   String get onlineGallery_chooseDownloadDirectory =>
@@ -2666,11 +2692,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onlineGallery_bulkDownload => 'Download Selected';
 
   @override
-  String onlineGallery_addedTasksToQueue(Object count) {
-    return 'Added $count tasks to queue';
-  }
-
-  @override
   String get onlineGallery_unfavorited => 'Unfavorited';
 
   @override
@@ -2778,6 +2799,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onlineGallery_aiTagRankingProcessing =>
       'The ranking is being generated. Please try again shortly.';
+
+  @override
+  String get onlineGallery_aiTagNaiOnly => 'NAI only';
+
+  @override
+  String get onlineGallery_aiTagModelVersion => 'Model version';
+
+  @override
+  String get onlineGallery_generationParams => 'Generation parameters';
 
   @override
   String get onlineGallery_sourceConfigUnavailable =>
@@ -4634,6 +4664,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_naiOnlyTooltip => 'Only show NAI-generated images';
 
   @override
+  String get localGallery_naiVersionFilterLabel => 'Version';
+
+  @override
+  String get localGallery_naiVersionFilterTooltip =>
+      'Filter by NAI model version';
+
+  @override
   String get localGallery_masonryViewLabel => 'Waterfall';
 
   @override
@@ -5360,6 +5397,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Failed to add images to collection';
 
   @override
+  String get localGallery_removeFromCollection => 'Remove from Collection';
+
+  @override
+  String localGallery_removedFromCollection(Object count, Object name) {
+    return 'Removed $count images from collection \"$name\"';
+  }
+
+  @override
+  String get localGallery_notInCollection =>
+      'Selected images are not in this collection';
+
+  @override
+  String get localGallery_alreadyInCollection =>
+      'Images already in this collection';
+
+  @override
   String get brushPreset_selectHint => 'Double tap to select this brush preset';
 
   @override
@@ -5498,6 +5551,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionSelect_dialogTitle => 'Select Collection';
+
+  @override
+  String get collectionSelect_removeTitle => 'Remove from Collection';
+
+  @override
+  String collectionSelect_memberCount(Object n) {
+    return '$n selected in this collection';
+  }
+
+  @override
+  String get collectionSelect_noSelectedInCollection =>
+      'No selected images in this collection';
 
   @override
   String get collectionSelect_filterHint => 'Search collections...';
@@ -6795,321 +6860,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tagLibrary_dragToMove => 'Drag to move, scroll or pinch to zoom';
 
   @override
-  String get queue_management => 'Queue Management';
-
-  @override
-  String get queue_empty => 'Queue is empty';
-
-  @override
-  String get queue_emptyHint => 'No tasks in the queue';
-
-  @override
-  String queue_taskCount(Object count) {
-    return '$count tasks';
-  }
-
-  @override
-  String get queue_pending => 'Pending';
-
-  @override
-  String get queue_running => 'Running';
-
-  @override
-  String get queue_completed => 'Completed';
-
-  @override
-  String get queue_failed => 'Failed';
-
-  @override
-  String get queue_paused => 'Paused';
-
-  @override
-  String get queue_idle => 'Idle';
-
-  @override
-  String get queue_ready => 'Ready';
-
-  @override
-  String get queue_clickToStart => 'Click to start queue execution';
-
-  @override
-  String get queue_clickToPause => 'Click to pause queue';
-
-  @override
-  String get queue_clickToResume => 'Click to resume execution';
-
-  @override
-  String get queue_noTasksToStart => 'Queue is empty, cannot start';
-
-  @override
-  String get queue_allTasksCompleted => 'All tasks completed';
-
-  @override
-  String get queue_executionProgress => 'Execution Progress';
-
-  @override
-  String get queue_totalTasks => 'Total';
-
-  @override
-  String get queue_completedTasks => 'Completed';
-
-  @override
-  String get queue_failedTasks => 'Failed';
-
-  @override
-  String get queue_remainingTasks => 'Remaining';
-
-  @override
-  String queue_estimatedTime(Object time) {
-    return 'Estimated: about $time';
-  }
-
-  @override
-  String queue_seconds(Object count) {
-    return '$count seconds';
-  }
-
-  @override
-  String queue_minutes(Object count) {
-    return '$count minutes';
-  }
-
-  @override
-  String queue_hours(Object hours, Object minutes) {
-    return '$hours hours $minutes minutes';
-  }
-
-  @override
-  String get queue_pause => 'Pause';
-
-  @override
-  String get queue_resume => 'Resume';
-
-  @override
-  String get queue_pauseExecution => 'Pause Execution';
-
-  @override
-  String get queue_resumeExecution => 'Resume Execution';
-
-  @override
-  String get queue_autoExecute => 'Auto Execute';
-
-  @override
-  String get queue_autoExecuteOn => 'Auto execute next task when completed';
-
-  @override
-  String get queue_autoExecuteOff => 'Manual click required to generate';
-
-  @override
-  String get queue_clearQueue => 'Clear Queue';
-
-  @override
-  String get queue_closeFloatingButton => 'Close Floating Button';
-
-  @override
-  String get queue_clearQueueConfirm =>
-      'Are you sure you want to clear all queue tasks? This action cannot be undone.';
-
-  @override
-  String get queue_confirmClear => 'Confirm Clear';
-
-  @override
-  String queue_retryCount(Object current, Object max) {
-    return 'Retry $current/$max';
-  }
-
-  @override
-  String get queue_retry => 'Retry';
-
-  @override
-  String get queue_requeue => 'Requeue';
-
-  @override
-  String get queue_clearFailedTasks => 'Clear All';
-
-  @override
-  String get queue_noFailedTasks => 'No failed tasks';
-
-  @override
-  String get queue_noCompletedTasks => 'No completed records';
-
-  @override
-  String get queue_editTask => 'Edit Task';
-
-  @override
-  String get queue_duplicateTask => 'Duplicate Task';
-
-  @override
-  String get queue_taskDuplicated => 'Task duplicated';
-
-  @override
-  String get queue_queueFull => 'Queue is full, cannot duplicate';
-
-  @override
-  String get queue_positivePrompt => 'Prompt';
-
-  @override
-  String get queue_enterPositivePrompt => 'Enter prompt...';
-
-  @override
-  String get queue_parametersPreview => 'Parameters Preview';
-
-  @override
-  String get queue_model => 'Model';
-
-  @override
-  String get queue_seed => 'Seed';
-
-  @override
-  String get queue_sampler => 'Sampler';
-
-  @override
-  String get queue_steps => 'Steps';
-
-  @override
-  String get queue_cfg => 'CFG';
-
-  @override
-  String get queue_size => 'Size';
-
-  @override
-  String get queue_addToQueue => 'Add to Queue';
-
-  @override
-  String get queue_taskAdded => 'Added to queue';
-
-  @override
-  String get queue_negativePromptFromMain =>
-      'Undesired Content will use main page settings';
-
-  @override
-  String get queue_pinToTop => 'Pin to Top';
-
-  @override
-  String get queue_delete => 'Delete';
-
-  @override
-  String get queue_edit => 'Edit';
-
-  @override
-  String get queue_selectAll => 'Select All';
-
-  @override
-  String get queue_invertSelection => 'Invert';
-
-  @override
-  String get queue_cancelSelection => 'Cancel';
-
-  @override
-  String queue_selectedCount(Object count) {
-    return '$count selected';
-  }
-
-  @override
-  String queue_confirmDeleteSelected(Object count) {
-    return 'Are you sure you want to delete $count selected tasks?';
-  }
-
-  @override
-  String get queue_export => 'Export';
-
-  @override
-  String get queue_import => 'Import';
-
-  @override
-  String get queue_exportImport => 'Import/Export Queue';
-
-  @override
-  String get queue_exportFormat => 'Export Format';
-
-  @override
-  String get queue_exportFormatJson => 'JSON';
-
-  @override
-  String get queue_exportFormatJsonDesc => 'Complete data with all parameters';
-
-  @override
-  String get queue_exportFormatCsv => 'CSV';
-
-  @override
-  String get queue_exportFormatCsvDesc =>
-      'Table format with prompts and basic info';
-
-  @override
-  String get queue_exportFormatText => 'Plain Text';
-
-  @override
-  String get queue_exportFormatTextDesc => 'Prompts only, one per line';
-
-  @override
-  String get queue_importStrategy => 'Import Strategy';
-
-  @override
-  String get queue_importStrategyMerge => 'Merge';
-
-  @override
-  String get queue_importStrategyMergeDesc =>
-      'Add imported tasks to end of existing queue';
-
-  @override
-  String get queue_importStrategyReplace => 'Replace';
-
-  @override
-  String get queue_importStrategyReplaceDesc =>
-      'Clear existing queue and replace with imported';
-
-  @override
-  String get queue_supportedFormats => 'Supported formats:';
-
-  @override
-  String get queue_supportedFormatJson => '• JSON file (.json)';
-
-  @override
-  String get queue_supportedFormatCsv => '• CSV file (.csv)';
-
-  @override
-  String get queue_supportedFormatText =>
-      '• Plain text file (.txt) - one prompt per line';
-
-  @override
-  String get queue_shareSubject => 'Queue Export';
-
-  @override
-  String queue_unsupportedFileFormat(Object extension) {
-    return 'Unsupported file format: $extension';
-  }
-
-  @override
-  String get queue_exportSuccess => 'Export successful';
-
-  @override
-  String queue_exportFailed(Object error) {
-    return 'Export failed: $error';
-  }
-
-  @override
-  String queue_importSuccess(Object count) {
-    return 'Successfully imported $count tasks';
-  }
-
-  @override
-  String queue_importFailed(Object error) {
-    return 'Import failed: $error';
-  }
-
-  @override
-  String get queue_selectFile => 'Select file to import';
-
-  @override
-  String get queue_noValidTasks => 'No valid tasks in file';
-
-  @override
-  String get settings_queueRetryCount => 'Retry Count';
-
-  @override
-  String get settings_queueRetryInterval => 'Retry Interval';
-
-  @override
   String get settings_showRandomPromptTools => 'Show random prompt tools';
 
   @override
@@ -7125,87 +6875,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'When prompt text is selected, use the wheel only to adjust its weight and suppress other scroll actions.';
 
   @override
-  String settings_queueRetryCountMax(Object count) {
-    return 'Max $count times';
-  }
-
-  @override
-  String settings_queueRetryIntervalValue(Object seconds) {
-    return '$seconds seconds';
-  }
-
-  @override
-  String get unit_times => 'times';
-
-  @override
   String get unit_seconds => 'seconds';
-
-  @override
-  String get settings_floatingButtonBackground => 'Floating Button Background';
-
-  @override
-  String get settings_floatingButtonBackgroundCustom => 'Custom background set';
-
-  @override
-  String get settings_floatingButtonBackgroundDefault => 'Default style';
-
-  @override
-  String get settings_clearBackground => 'Clear background';
-
-  @override
-  String get settings_selectImage => 'Select Image';
-
-  @override
-  String queue_currentQueueInfo(Object count) {
-    return 'Current queue contains $count tasks';
-  }
-
-  @override
-  String queue_tooltipTasksTotal(Object count) {
-    return 'Tasks: $count';
-  }
-
-  @override
-  String queue_tooltipCompleted(Object count) {
-    return 'Completed: $count';
-  }
-
-  @override
-  String queue_tooltipFailed(Object count) {
-    return 'Failed: $count';
-  }
-
-  @override
-  String queue_tooltipCurrentTask(Object task) {
-    return 'Current: $task';
-  }
-
-  @override
-  String get queue_tooltipNoTasks => 'No tasks in queue';
-
-  @override
-  String get queue_tooltipDoubleClickToOpen => 'Double-click to start/pause';
-
-  @override
-  String get queue_tooltipClickToToggle => 'Click to open queue';
-
-  @override
-  String get queue_tooltipDragToMove => 'Drag to reposition';
-
-  @override
-  String get queue_statusIdle => 'Status: Idle';
-
-  @override
-  String get queue_statusReady => 'Status: Ready';
-
-  @override
-  String get queue_statusRunning => 'Status: Running';
-
-  @override
-  String get queue_statusPaused => 'Status: Paused';
-
-  @override
-  String get queue_statusCompleted => 'Status: Completed';
 
   @override
   String get settings_notificationSound => 'Completion Sound';
@@ -7561,9 +7231,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcut_action_cancel_generation => 'Cancel Generation';
 
   @override
-  String get shortcut_action_add_to_queue => 'Add to Queue';
-
-  @override
   String get shortcut_action_random_prompt => 'Random Prompt';
 
   @override
@@ -7717,12 +7384,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcut_action_show_shortcut_help => 'Show Shortcut Help';
 
   @override
-  String get shortcut_action_toggle_queue => 'Toggle Queue';
-
-  @override
-  String get shortcut_action_toggle_queue_pause => 'Toggle Queue Pause';
-
-  @override
   String get shortcut_action_toggle_theme => 'Toggle Theme';
 
   @override
@@ -7820,13 +7481,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get drop_extractMetadataSubtitle =>
       'Read Prompt, Seed and other parameters from image';
-
-  @override
-  String get drop_addToQueue => 'Add to Queue';
-
-  @override
-  String get drop_addToQueueSubtitle =>
-      'Extract prompt and add to generation queue';
 
   @override
   String get drop_vibeDetected => 'Pre-encoded Vibe detected (saves 2 Anlas)';
@@ -9841,14 +9495,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get toast_noValidPromptFound => 'No valid prompt found';
-
-  @override
-  String toast_addedToQueue(Object prompt) {
-    return 'Added to queue: $prompt';
-  }
-
-  @override
   String get toast_noValidMaskIgnored =>
       'No valid mask detected; save result was ignored.';
 
@@ -10077,11 +9723,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String toast_extractMetadataFailed(Object error) {
     return 'Failed to extract metadata: $error';
-  }
-
-  @override
-  String toast_extractPromptFailed(Object error) {
-    return 'Failed to extract prompt: $error';
   }
 
   @override
@@ -10650,10 +10291,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get updateInstallConfirmationBody =>
       'The app will shut down safely, install the update, and restart automatically. Active generation and download tasks will stop, so save anything important first.';
-
-  @override
-  String get updateActiveTasksWarning =>
-      'Queue tasks are still active. Installing will stop the current task.';
 
   @override
   String get remindMeLater => 'Remind Me in 4 Hours';

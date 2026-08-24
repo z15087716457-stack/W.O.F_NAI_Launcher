@@ -179,6 +179,25 @@ class UnifiedMetadataParser {
     return true;
   }
 
+  /// 检查是否为有效的 WebP 文件头（RIFF + WEBP）
+  static bool isWebpHeader(Uint8List bytes) {
+    if (bytes.length < 12) return false;
+    return bytes[0] == 0x52 && // R
+        bytes[1] == 0x49 && // I
+        bytes[2] == 0x46 && // F
+        bytes[3] == 0x46 && // F
+        bytes[8] == 0x57 && // W
+        bytes[9] == 0x45 && // E
+        bytes[10] == 0x42 && // B
+        bytes[11] == 0x50; // P
+  }
+
+  /// 检查是否为有效的 JPEG 文件头（SOI）
+  static bool isJpegHeader(Uint8List bytes) {
+    if (bytes.length < 2) return false;
+    return bytes[0] == 0xFF && bytes[1] == 0xD8;
+  }
+
   /// 从 PNG 文件路径提取元数据（智能渐进式读取）
   ///
   /// [filePath] PNG 文件路径
@@ -385,6 +404,417 @@ class UnifiedMetadataParser {
         parseTime: stopwatch.elapsed,
         bytesRead: bytes.length,
       );
+    }
+  }
+
+  /// 从图片字节中提取元数据（按文件签名自动分发 PNG / WebP / JPEG）
+  ///
+  /// [bytes] 图片字节数据
+  /// [filePathForLog] 可选的文件路径，用于错误日志记录
+  /// [useCache] 是否使用解析结果缓存（默认 false，因为字节数据通常不重复）
+  static MetadataParseResult parseFromImageBytes(
+    Uint8List bytes, {
+    String? filePathForLog,
+    bool useCache = false,
+  }) {
+    if (isPngHeader(bytes)) {
+      return parseFromPng(
+        bytes,
+        filePathForLog: filePathForLog,
+        useCache: useCache,
+      );
+    }
+    if (isWebpHeader(bytes)) {
+      return _parseFromWebp(bytes, filePathForLog: filePathForLog);
+    }
+    if (isJpegHeader(bytes)) {
+      return _parseFromJpeg(bytes, filePathForLog: filePathForLog);
+    }
+
+    _statistics.totalAttempts++;
+    final fileInfo = filePathForLog != null ? 'file=$filePathForLog, ' : '';
+    final error =
+        'Not a valid PNG/WebP/JPEG file header, ${fileInfo}bytes length=${bytes.length}';
+    PortableLogger.w(error, _tag);
+    return MetadataParseResult.failed(
+      const [],
+      error,
+      bytesRead: bytes.length,
+    );
+  }
+
+  /// 从 WebP 字节中提取元数据
+  ///
+  /// 读取链：RIFF 'EXIF' chunk（TIFF 解析）→ alpha LSB 隐写（stealth_pngcomp）
+  static MetadataParseResult _parseFromWebp(
+    Uint8List bytes, {
+    String? filePathForLog,
+  }) {
+    final stopwatch = Stopwatch()..start();
+    _statistics.totalAttempts++;
+
+    final triedParsers = <String>[];
+    final fileInfo = filePathForLog != null ? 'file=$filePathForLog, ' : '';
+
+    try {
+      // 1. EXIF chunk（通常位于文件尾部，部分读取时可能缺失）
+      final exif = _extractWebpExifChunk(bytes);
+      if (exif != null) {
+        final textData = _parseExifTiff(exif);
+        if (textData.isNotEmpty) {
+          final result = parseFromTextData(textData);
+          if (result.success) {
+            _updateStatistics(result, stopwatch.elapsed);
+            return MetadataParseResult.success(
+              result.metadata!,
+              '${result.sourceFormat} (WebP EXIF)',
+              result.rawData ?? '',
+              result.triedParsers,
+              parseTime: stopwatch.elapsed,
+              bytesRead: bytes.length,
+            );
+          }
+          triedParsers.addAll(result.triedParsers);
+        }
+      }
+
+      // 2. alpha LSB 隐写回退（需要完整文件解码）
+      try {
+        final image = img.decodeWebP(bytes);
+        if (image != null && image.hasAlpha) {
+          final stealthText = _extractStealthMetadataTextFromImage(image);
+          if (stealthText != null) {
+            final stealthResult = parseFromTextData({'Comment': stealthText});
+            if (stealthResult.success && stealthResult.metadata != null) {
+              final result = MetadataParseResult.success(
+                stealthResult.metadata!,
+                'NovelAI stealth_pngcomp (WebP)',
+                stealthText,
+                [...triedParsers, 'NovelAI stealth_pngcomp'],
+                parseTime: stopwatch.elapsed,
+                bytesRead: bytes.length,
+              );
+              _updateStatistics(result, stopwatch.elapsed);
+              return result;
+            }
+          }
+        }
+      } catch (_) {
+        // 渐进式部分读取时解码失败属预期，落到统一失败返回
+      }
+
+      final error =
+          'No metadata found in WebP, ${fileInfo}bytes length=${bytes.length}';
+      final result = MetadataParseResult.failed(
+        triedParsers,
+        error,
+        parseTime: stopwatch.elapsed,
+        bytesRead: bytes.length,
+      );
+      _updateStatistics(result, stopwatch.elapsed);
+      return result;
+    } catch (e, stack) {
+      final error =
+          'Error parsing metadata from WebP (${fileInfo}bytes=${bytes.length}): $e';
+      PortableLogger.e(error, e, stack, _tag);
+      return MetadataParseResult.failed(
+        triedParsers,
+        error,
+        parseTime: stopwatch.elapsed,
+        bytesRead: bytes.length,
+      );
+    }
+  }
+
+  /// 从 JPEG 字节中提取元数据
+  ///
+  /// 只走 APP1 EXIF（JPEG 无 alpha 通道，不存在隐写）
+  static MetadataParseResult _parseFromJpeg(
+    Uint8List bytes, {
+    String? filePathForLog,
+  }) {
+    final stopwatch = Stopwatch()..start();
+    _statistics.totalAttempts++;
+
+    final triedParsers = <String>[];
+    final fileInfo = filePathForLog != null ? 'file=$filePathForLog, ' : '';
+
+    try {
+      final exif = _extractJpegExifSegment(bytes);
+      if (exif != null) {
+        final textData = _parseExifTiff(exif);
+        if (textData.isNotEmpty) {
+          final result = parseFromTextData(textData);
+          if (result.success) {
+            _updateStatistics(result, stopwatch.elapsed);
+            return MetadataParseResult.success(
+              result.metadata!,
+              '${result.sourceFormat} (JPEG EXIF)',
+              result.rawData ?? '',
+              result.triedParsers,
+              parseTime: stopwatch.elapsed,
+              bytesRead: bytes.length,
+            );
+          }
+          triedParsers.addAll(result.triedParsers);
+        }
+      }
+
+      final error =
+          'No metadata found in JPEG, ${fileInfo}bytes length=${bytes.length}';
+      final result = MetadataParseResult.failed(
+        triedParsers,
+        error,
+        parseTime: stopwatch.elapsed,
+        bytesRead: bytes.length,
+      );
+      _updateStatistics(result, stopwatch.elapsed);
+      return result;
+    } catch (e, stack) {
+      final error =
+          'Error parsing metadata from JPEG (${fileInfo}bytes=${bytes.length}): $e';
+      PortableLogger.e(error, e, stack, _tag);
+      return MetadataParseResult.failed(
+        triedParsers,
+        error,
+        parseTime: stopwatch.elapsed,
+        bytesRead: bytes.length,
+      );
+    }
+  }
+
+  /// 遍历 WebP RIFF chunks，提取 'EXIF' chunk 数据（不含 chunk 头）
+  static Uint8List? _extractWebpExifChunk(Uint8List bytes) {
+    if (bytes.length < 12) return null;
+
+    var offset = 12; // 跳过 RIFF 头（'RIFF' + size + 'WEBP'）
+    while (offset + 8 <= bytes.length) {
+      final fourcc = latin1.decode(bytes.sublist(offset, offset + 4));
+      final size = ByteData.sublistView(
+        bytes,
+        offset + 4,
+        offset + 8,
+      ).getUint32(0, Endian.little);
+
+      // 数据不完整（渐进式部分读取）时停止
+      if (offset + 8 + size > bytes.length) return null;
+
+      if (fourcc == 'EXIF') {
+        return bytes.sublist(offset + 8, offset + 8 + size);
+      }
+
+      // chunk 数据按偶数字节对齐
+      offset += 8 + size + (size & 1);
+    }
+
+    return null;
+  }
+
+  /// 遍历 JPEG 段标记，提取 APP1 EXIF 段的 TIFF 数据（不含 'Exif\0\0' 头）
+  static Uint8List? _extractJpegExifSegment(Uint8List bytes) {
+    if (bytes.length < 4) return null;
+
+    var offset = 2; // 跳过 SOI（FFD8）
+    while (offset + 4 <= bytes.length) {
+      if (bytes[offset] != 0xFF) return null;
+      final marker = bytes[offset + 1];
+
+      // 独立标记（无长度字段）：SOI/TEM/RSTn
+      if (marker == 0xD8 ||
+          marker == 0x01 ||
+          (marker >= 0xD0 && marker <= 0xD7)) {
+        offset += 2;
+        continue;
+      }
+      // SOS / EOI：元数据段到此为止
+      if (marker == 0xDA || marker == 0xD9) return null;
+
+      final length = ByteData.sublistView(
+        bytes,
+        offset + 2,
+        offset + 4,
+      ).getUint16(0);
+      if (length < 2 || offset + 2 + length > bytes.length) return null;
+
+      if (marker == 0xE1) {
+        final segment = bytes.sublist(offset + 4, offset + 2 + length);
+        // 'Exif\0\0' 前缀
+        if (segment.length >= 6 &&
+            segment[0] == 0x45 && // E
+            segment[1] == 0x78 && // x
+            segment[2] == 0x69 && // i
+            segment[3] == 0x66 && // f
+            segment[4] == 0x00 &&
+            segment[5] == 0x00) {
+          return segment.sublist(6);
+        }
+      }
+
+      offset += 2 + length;
+    }
+
+    return null;
+  }
+
+  /// 解析 EXIF TIFF 数据，提取 NAI 常用标签为 textData Map
+  ///
+  /// 映射：ImageDescription(0x010E)→Description、Software(0x0131)→Software、
+  /// Model(0x0110)→Source（NAI 用相机 Model 标签写 Source 指纹）、
+  /// UserComment(0x9286，Exif 子 IFD)→Comment
+  static Map<String, String> _parseExifTiff(Uint8List tiff) {
+    final result = <String, String>{};
+    if (tiff.length < 8) return result;
+
+    final Endian byteOrder;
+    if (tiff[0] == 0x49 && tiff[1] == 0x49) {
+      byteOrder = Endian.little;
+    } else if (tiff[0] == 0x4D && tiff[1] == 0x4D) {
+      byteOrder = Endian.big;
+    } else {
+      return result;
+    }
+
+    try {
+      final data = ByteData.sublistView(tiff);
+      if (data.getUint16(2, byteOrder) != 42) return result;
+
+      final ifdOffset = data.getUint32(4, byteOrder);
+      _parseExifIfd(tiff, ifdOffset, byteOrder, result, 0);
+    } catch (e) {
+      PortableLogger.d('Failed to parse EXIF TIFF: $e', _tag);
+    }
+
+    return result;
+  }
+
+  /// 解析单个 IFD，递归跟进 Exif 子 IFD（0x8769）
+  static void _parseExifIfd(
+    Uint8List tiff,
+    int ifdOffset,
+    Endian byteOrder,
+    Map<String, String> result,
+    int depth,
+  ) {
+    if (depth > 2 || ifdOffset < 0 || ifdOffset + 2 > tiff.length) return;
+
+    final data = ByteData.sublistView(tiff);
+    final entryCount = data.getUint16(ifdOffset, byteOrder);
+
+    for (var i = 0; i < entryCount; i++) {
+      final entryOffset = ifdOffset + 2 + i * 12;
+      if (entryOffset + 12 > tiff.length) return;
+
+      final tag = data.getUint16(entryOffset, byteOrder);
+      final type = data.getUint16(entryOffset + 2, byteOrder);
+      final count = data.getUint32(entryOffset + 4, byteOrder);
+      final valueOffset = entryOffset + 8;
+
+      // Exif 子 IFD 指针
+      if (tag == 0x8769 && type == 4 && count == 1) {
+        final subIfdOffset = data.getUint32(valueOffset, byteOrder);
+        _parseExifIfd(tiff, subIfdOffset, byteOrder, result, depth + 1);
+        continue;
+      }
+
+      // 只关心字符串类标签
+      final isTarget = switch (tag) {
+        0x010E || 0x0131 || 0x0110 || 0x9286 => true,
+        _ => false,
+      };
+      if (!isTarget) continue;
+
+      final raw = _readExifTagBytes(tiff, type, count, valueOffset, byteOrder);
+      if (raw == null) continue;
+
+      String? value;
+      if (tag == 0x9286) {
+        value = _decodeExifUserComment(raw);
+      } else if (type == 2) {
+        value = _decodeExifAscii(raw);
+      }
+      if (value == null || value.isEmpty) continue;
+
+      switch (tag) {
+        case 0x010E:
+          result['Description'] = value;
+        case 0x0131:
+          result['Software'] = value;
+        case 0x0110:
+          result['Source'] = value;
+        case 0x9286:
+          result['Comment'] = value;
+      }
+    }
+  }
+
+  /// 读取 EXIF 标签原始字节（处理 inline 值与偏移值）
+  static Uint8List? _readExifTagBytes(
+    Uint8List tiff,
+    int type,
+    int count,
+    int valueOffset,
+    Endian byteOrder,
+  ) {
+    final typeSize = switch (type) {
+      1 || 2 || 6 || 7 => 1,
+      3 || 8 => 2,
+      4 || 9 || 11 => 4,
+      5 || 10 || 12 => 8,
+      _ => 0,
+    };
+    if (typeSize == 0 || count <= 0) return null;
+
+    final totalSize = typeSize * count;
+    if (totalSize <= 0) return null;
+
+    final data = ByteData.sublistView(tiff);
+    if (totalSize <= 4) {
+      // 值内联在 4 字节字段中
+      return tiff.sublist(valueOffset, valueOffset + totalSize);
+    }
+
+    final offset = data.getUint32(valueOffset, byteOrder);
+    if (offset < 0 || offset + totalSize > tiff.length) return null;
+    return tiff.sublist(offset, offset + totalSize);
+  }
+
+  /// 解码 EXIF ASCII 字符串（去尾部 NUL）
+  static String? _decodeExifAscii(Uint8List raw) {
+    var end = raw.length;
+    while (end > 0 && raw[end - 1] == 0) {
+      end--;
+    }
+    if (end == 0) return null;
+    try {
+      return utf8.decode(raw.sublist(0, end)).trim();
+    } catch (_) {
+      return latin1.decode(raw.sublist(0, end)).trim();
+    }
+  }
+
+  /// 解码 EXIF UserComment（跳过 8 字节字符集前缀）
+  static String? _decodeExifUserComment(Uint8List raw) {
+    var body = raw;
+    if (body.length >= 8) {
+      final prefix = latin1.decode(body.sublist(0, 8));
+      if (prefix.startsWith('ASCII') ||
+          prefix.startsWith('UNICODE') ||
+          prefix.startsWith('JIS') ||
+          prefix.codeUnitAt(0) == 0) {
+        body = body.sublist(8);
+      }
+    }
+
+    var end = body.length;
+    while (end > 0 && body[end - 1] == 0) {
+      end--;
+    }
+    if (end == 0) return null;
+
+    try {
+      return utf8.decode(body.sublist(0, end)).trim();
+    } catch (_) {
+      return latin1.decode(body.sublist(0, end)).trim();
     }
   }
 
@@ -636,7 +1066,7 @@ class UnifiedMetadataParser {
       //   '[UnifiedMetadataParser] Full read: ${bytes.length} bytes',
       //   _tag,
       // );
-      return parseFromPng(bytes, filePathForLog: filePath);
+      return parseFromImageBytes(bytes, filePathForLog: filePath);
     } catch (e) {
       final error = 'Error reading full file: $e';
       PortableLogger.e(error, e, null, _tag);
@@ -687,7 +1117,7 @@ class UnifiedMetadataParser {
       //   _tag,
       // );
 
-      return parseFromPng(bytes, filePathForLog: filePath);
+      return parseFromImageBytes(bytes, filePathForLog: filePath);
     } catch (e) {
       final error = 'Error with ${maxBytes ~/ 1024}KB read: $e';
       PortableLogger.d(error, _tag);
@@ -1199,6 +1629,19 @@ class UnifiedMetadataParser {
     try {
       final image = img.decodePng(imageBytes);
       if (image == null) return null;
+      return _extractStealthMetadataTextFromImage(image);
+    } catch (e) {
+      PortableLogger.d('Failed to extract stealth_pngcomp metadata: $e', _tag);
+      return null;
+    }
+  }
+
+  /// 从已解码图片的 alpha LSB 中读取 stealth_pngcomp 元数据。
+  ///
+  /// 泛化版本：PNG / WebP（含 alpha）通用，JPEG 无 alpha 不适用。
+  static String? _extractStealthMetadataTextFromImage(img.Image image) {
+    try {
+      if (!image.hasAlpha) return null;
 
       final magicBytes = utf8.encode(_magic);
       final headerBytes = _readAlphaLsbBytes(image, magicBytes.length + 4);
@@ -1543,6 +1986,39 @@ class NovelAiParser implements MetadataParser {
           } catch (e, stack) {
             PortableLogger.e(
               'NovelAiParser: Failed to create metadata fromNaiComment',
+              e,
+              stack,
+              'UnifiedMetadataParser',
+            );
+            continue;
+          }
+        }
+
+        // V5 官网下载件新信封：小写键 + params 取代 Comment
+        // {"description": ..., "software": ..., "source": ...,
+        //  "params": {...} 或 JSON string, ...}
+        final params = json['params'];
+        if ((params is Map || params is String) &&
+            (json['software'] != null || json['source'] != null)) {
+          try {
+            final paramsJson = params is String ? params : jsonEncode(params);
+            final paramsData = jsonDecode(paramsJson);
+            if (paramsData is Map<String, dynamic> &&
+                paramsData.containsKey('prompt')) {
+              final result = NaiImageMetadata.fromNaiComment({
+                'Comment': paramsJson,
+                'Software': json['software'] as String?,
+                'Source': json['source'] as String?,
+              }, rawJson: text);
+              PortableLogger.d(
+                'NovelAiParser: Metadata created from V5 params envelope',
+                'UnifiedMetadataParser',
+              );
+              return result;
+            }
+          } catch (e, stack) {
+            PortableLogger.e(
+              'NovelAiParser: Failed to parse V5 params envelope',
               e,
               stack,
               'UnifiedMetadataParser',

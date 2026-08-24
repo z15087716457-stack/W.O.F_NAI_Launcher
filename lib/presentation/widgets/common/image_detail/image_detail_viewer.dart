@@ -45,6 +45,9 @@ class ImageDetailCallbacks {
   /// 发送到反推模块回调
   final Future<void> Function(ImageDetailData image)? onSendToReversePrompt;
 
+  /// 删除当前图片回调（返回是否删除成功；查看器据此从列表移除并翻页）
+  final Future<bool> Function(ImageDetailData image)? onDelete;
+
   const ImageDetailCallbacks({
     this.onFavoriteToggle,
     this.onReuseMetadata,
@@ -52,6 +55,7 @@ class ImageDetailCallbacks {
     this.onCopyImage,
     this.onSendToImg2Img,
     this.onSendToReversePrompt,
+    this.onDelete,
   });
 }
 
@@ -176,6 +180,10 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
   late PageController _pageController;
   late ScrollController _thumbnailController;
   late int _currentIndex;
+
+  /// 可变的图像列表副本：查看器内删除图片后从列表移除并翻页
+  late List<ImageDetailData> _images;
+
   // 始终显示控制栏（不自动收起）
   final bool _showControls = true;
   final _focusNode = FocusNode();
@@ -187,6 +195,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    _images = List.of(widget.images);
     _pageController = PageController(initialPage: _currentIndex);
     _thumbnailController = ScrollController();
 
@@ -222,7 +231,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
   }
 
   void _goToPage(int index) {
-    if (index < 0 || index >= widget.images.length) return;
+    if (index < 0 || index >= _images.length) return;
 
     _pageController.animateToPage(
       index,
@@ -253,7 +262,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
         _goToPage(0);
         return KeyEventResult.handled;
       case LogicalKeyboardKey.end:
-        _goToPage(widget.images.length - 1);
+        _goToPage(_images.length - 1);
         return KeyEventResult.handled;
       default:
         return KeyEventResult.ignored;
@@ -321,7 +330,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
     });
   }
 
-  ImageDetailData get _currentImage => widget.images[_currentIndex];
+  ImageDetailData get _currentImage => _images[_currentIndex];
 
   /// 获取当前图片的 TransformationController
   TransformationController get _currentTransformController {
@@ -420,12 +429,49 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
   }
 
   /// 删除图片
-  void _deleteImage() {
-    // 查看器本身不直接处理删除，通过回调通知父组件
-    // 这里显示一个提示，实际删除由调用方处理
-    if (context.mounted) {
-      AppToast.info(context, context.l10n.toast_useDeleteButton);
+  ///
+  /// 有 onDelete 回调时执行真删除：成功后从列表移除当前项，补位项自动
+  /// 成为当前页（删的是最后一张则回退一张；列表清空则关闭查看器）
+  Future<void> _deleteImage() async {
+    final onDelete = widget.callbacks?.onDelete;
+    if (onDelete == null) {
+      // 无删除回调的调用方（如生成历史）：保留原提示行为
+      if (context.mounted) {
+        AppToast.info(context, context.l10n.toast_useDeleteButton);
+      }
+      return;
     }
+
+    final deleted = await onDelete(_currentImage);
+    if (!mounted || !deleted) return;
+
+    if (_images.length <= 1) {
+      _requestClose('delete-last-image');
+      return;
+    }
+
+    // 当前页的缩放控制器可能仍被页面持有：先移出并整体前移 key，
+    // 待重建完成后再 dispose，避免 use-after-dispose
+    final removed = _transformationControllers.remove(_currentIndex);
+    final shifted = <int, TransformationController>{};
+    _transformationControllers.forEach(
+      (k, v) => shifted[k > _currentIndex ? k - 1 : k] = v,
+    );
+    setState(() {
+      _images.removeAt(_currentIndex);
+      _transformationControllers
+        ..clear()
+        ..addAll(shifted);
+      if (_currentIndex >= _images.length) {
+        _currentIndex = _images.length - 1;
+      }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      removed?.dispose();
+      if (!mounted || !_pageController.hasClients) return;
+      // 删最后一张后 controller 页码越界，跳回有效页
+      _pageController.jumpToPage(_currentIndex);
+    });
   }
 
   @override
@@ -486,7 +532,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
   }
 
   Widget _buildMainContent() {
-    final showThumbnails = widget.showThumbnails && widget.images.length > 1;
+    final showThumbnails = widget.showThumbnails && _images.length > 1;
 
     return Stack(
       children: [
@@ -494,10 +540,10 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
         // 注意：移除 onTap 切换控制栏，让顶部工具栏始终显示
         PageView.builder(
           controller: _pageController,
-          itemCount: widget.images.length,
+          itemCount: _images.length,
           onPageChanged: _onPageChanged,
           itemBuilder: (context, index) {
-            final data = widget.images[index];
+            final data = _images[index];
             final heroTag =
                 widget.heroTagPrefix != null && index == _currentIndex
                     ? '${widget.heroTagPrefix}_${data.identifier}'
@@ -522,7 +568,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
           right: 0,
           child: DetailTopBar(
             currentIndex: _currentIndex,
-            totalImages: widget.images.length,
+            totalImages: _images.length,
             currentImage: _currentImage,
             onClose: () => _requestClose('top-bar-close'),
             onReuseMetadata: widget.callbacks?.onReuseMetadata != null
@@ -542,10 +588,13 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
                 : null,
             onSendToReversePrompt:
                 widget.callbacks?.onSendToReversePrompt != null
-                    ? () => widget.callbacks!.onSendToReversePrompt!(
-                          _currentImage,
-                        )
-                    : null,
+                ? () => widget.callbacks!.onSendToReversePrompt!(
+                      _currentImage,
+                    )
+                : null,
+            onDelete: widget.callbacks?.onDelete != null
+                ? () => _deleteImage()
+                : null,
           ),
         ),
 
@@ -560,7 +609,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
           ),
 
         // 左右导航按钮
-        if (_showControls && widget.images.length > 1) ...[
+        if (_showControls && _images.length > 1) ...[
           if (_currentIndex > 0)
             Positioned(
               left: 16,
@@ -573,7 +622,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
                 ),
               ),
             ),
-          if (_currentIndex < widget.images.length - 1)
+          if (_currentIndex < _images.length - 1)
             Positioned(
               right: 16,
               top: 0,
@@ -617,7 +666,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
 
           // 缩略图条
           DetailThumbnailBar(
-            images: widget.images,
+            images: _images,
             currentIndex: _currentIndex,
             scrollController: _thumbnailController,
             onTap: _goToPage,
