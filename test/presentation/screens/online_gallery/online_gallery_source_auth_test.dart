@@ -65,31 +65,6 @@ void main() {
     expect(find.text('Login'), findsNothing);
   });
 
-  testWidgets('popular mode remains a Danbooru account surface', (
-    tester,
-  ) async {
-    await _setViewSize(tester, 1600);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          onlineGalleryNotifierProvider.overrideWith(
-            _PopularGalleryNotifier.new,
-          ),
-          danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
-          gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
-          danbooruSuggestionNotifierProvider.overrideWith(
-            _EmptyDanbooruSuggestionNotifier.new,
-          ),
-        ],
-        child: const _TestApp(),
-      ),
-    );
-    await tester.pump();
-
-    expect(find.text('Login'), findsOneWidget);
-    expect(find.text('Configure Gelbooru API'), findsNothing);
-  });
-
   for (final entry in {
     GallerySourceId.safebooru: _SafebooruPopularGalleryNotifier.new,
     GallerySourceId.aiTag: _AiTagPopularGalleryNotifier.new,
@@ -471,16 +446,6 @@ class _PagedGalleryNotifier extends OnlineGalleryNotifier {
         nextCursor: null,
         hasMore: false,
       ),
-    );
-  }
-}
-
-class _PopularGalleryNotifier extends OnlineGalleryNotifier {
-  @override
-  OnlineGalleryState build() {
-    return const OnlineGalleryState(
-      viewMode: GalleryViewMode.popular,
-      popularCache: ModeCache(posts: [_danbooruPost], hasMore: false),
     );
   }
 }

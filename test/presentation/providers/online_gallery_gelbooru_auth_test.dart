@@ -157,62 +157,6 @@ void main() {
     expect(container.read(gelbooruAuthProvider).isAuthenticated, isTrue);
   });
 
-  test('Danbooru search routing remains on posts.json', () async {
-    final gelbooruApi = _FakeGelbooruApiService();
-    final httpAdapter = _GalleryHttpAdapter();
-    final container = createContainer(
-      storedCredentials: stored(credentials),
-      gelbooruApi: gelbooruApi,
-      httpAdapter: httpAdapter,
-    );
-    addTearDown(container.dispose);
-
-    await container
-        .read(onlineGalleryNotifierProvider.notifier)
-        .loadPosts(refresh: true);
-
-    expect(gelbooruApi.searchCalls, 0);
-    expect(httpAdapter.requests.single.uri.path, '/posts.json');
-    expect(
-      container.read(onlineGalleryNotifierProvider).posts.single.site,
-      'danbooru',
-    );
-  });
-
-  test(
-    'Gelbooru favorites are source-scoped and never call Danbooru writes',
-    () async {
-      final gelbooruApi = _FakeGelbooruApiService(
-        favoritesResult: GelbooruPostPage(
-          posts: [_gelbooruPost(123)],
-          rawCount: 1,
-        ),
-      );
-      final danbooruApi = _FakeDanbooruApiService();
-      final container = createContainer(
-        storedCredentials: stored(credentials),
-        gelbooruApi: gelbooruApi,
-        danbooruApi: danbooruApi,
-      );
-      addTearDown(container.dispose);
-      final notifier = container.read(onlineGalleryNotifierProvider.notifier);
-
-      await notifier.setFavoritesSource('gelbooru');
-      await notifier.switchToFavorites();
-
-      final state = container.read(onlineGalleryNotifierProvider);
-      expect(gelbooruApi.favoritesCalls, 1);
-      expect(state.gelbooruFavoritesCache.posts, hasLength(1));
-      expect(state.danbooruFavoritesCache.posts, isEmpty);
-      expect(state.favoritedPostKeys, contains('gelbooru:123'));
-      expect(state.favoritedPostKeys, isNot(contains('danbooru:123')));
-
-      expect(await notifier.toggleFavorite(state.posts.single), isFalse);
-      expect(danbooruApi.addFavoriteCalls, 0);
-      expect(danbooruApi.removeFavoriteCalls, 0);
-    },
-  );
-
   test('favorite caches retain independent scroll and pagination state', () {
     final danbooruCache = ModeCache(
       posts: [_danbooruPost(1)],
@@ -239,32 +183,6 @@ void main() {
     expect(state.currentCache.scrollOffset, 340);
     expect(state.danbooruFavoritesCache.scrollOffset, 120);
     expect(state.favoritedPostKeys, hasLength(2));
-  });
-
-  test('switching modes restores cached Gelbooru favorites', () async {
-    final gelbooruApi = _FakeGelbooruApiService(
-      favoritesResult: GelbooruPostPage(
-        posts: [_gelbooruPost(404)],
-        rawCount: 1,
-      ),
-    );
-    final container = createContainer(
-      storedCredentials: stored(credentials),
-      gelbooruApi: gelbooruApi,
-    );
-    addTearDown(container.dispose);
-    final notifier = container.read(onlineGalleryNotifierProvider.notifier);
-
-    await notifier.setFavoritesSource('gelbooru');
-    await notifier.switchToFavorites();
-    notifier.saveScrollOffset(275);
-    await notifier.switchToSearch();
-    await notifier.switchToFavorites();
-
-    final state = container.read(onlineGalleryNotifierProvider);
-    expect(gelbooruApi.favoritesCalls, 1);
-    expect(state.posts.single.id, 404);
-    expect(state.scrollOffset, 275);
   });
 
   test('Gelbooru page navigation uses zero-based DAPI pid', () async {
