@@ -65,6 +65,9 @@ def build_payload(d: dict, lock: bool = True, with_chars: bool = True) -> dict:
     # Variety+ 在元数据里体现为 skip_cfg_above_sigma 非空（其值由种子派生）
     if d.get('skip_cfg_above_sigma') is not None:
         payload['variety_plus'] = True
+    # V5 透明背景（官方 tag hint；prompt 已含 tag，桥接端拼装会去重）
+    if d.get('tag_hint_transparent_background'):
+        payload['transparent_background'] = True
     for src, dst in (('sm', 'smea'), ('sm_dyn', 'smea_dyn')):
         if d.get(src) is not None:
             payload[dst] = bool(d[src])

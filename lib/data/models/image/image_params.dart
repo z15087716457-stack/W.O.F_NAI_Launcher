@@ -154,6 +154,24 @@ class ImageParams with _$ImageParams {
     /// 使用坐标模式 (V4+ 多角色)
     @Default(false) bool useCoords,
 
+    /// 透明背景开关（V5 专属，官方 Transparent BG）。
+    ///
+    /// 开启后等效提示词追加 `transparent background`，并在请求中携带
+    /// `tag_hint_transparent_background` 与 `straight_alpha`。
+    @Default(false) bool transparentBackground,
+
+    /// 增强 Max✨ 档（V5 专属）：请求携带 `upscaled_enhance`，
+    /// 服务端端到端放大（2x、3MP 面积上限），宽高保持源图。
+    @Default(false) bool upscaledEnhance,
+
+    /// 当前 img2img 是否来自增强（Enhance）工作流。
+    ///
+    /// 仅请求层使用：非 Max 增强按官方 enhancePromptAdd 行为向提示词
+    /// 注入 `, -2::upscaled, blurry::,`。
+    @Default(false)
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    bool enhanceWorkflow,
+
     // ========== 生成动作 ==========
 
     /// 生成动作类型

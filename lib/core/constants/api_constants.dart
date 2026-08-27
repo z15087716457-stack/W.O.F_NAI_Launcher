@@ -330,6 +330,11 @@ class QualityTags {
 
   /// 各模型的质量标签映射
   static const Map<String, String> modelQualityTags = {
+    // V5 系列 (standard 档，官方 bundle 41179 f() 表)
+    ImageModels.animeDiffusionV5Full: 'very aesthetic, masterpiece, no text',
+    ImageModels.animeDiffusionV5Curated:
+        'very aesthetic, masterpiece, no text',
+
     // V4.5 系列 (添加到末尾)
     ImageModels.animeDiffusionV45Full:
         'location, very aesthetic, masterpiece, no text',
@@ -475,6 +480,19 @@ class UcPresets {
     UcPresetType.none: '',
   };
 
+  /// V5 预设（官方 bundle 28811 模块 V5 case，heavy/humanFocus 与 V4.5 Full 同文）
+  static const Map<UcPresetType, String> v5Presets = {
+    UcPresetType.heavy:
+        'lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page',
+    UcPresetType.light:
+        'lowres, bad hands, bad anatomy, artistic error, sepia, white haze, worst quality, very displeasing, jpeg artifacts, 0::ai-generated::',
+    UcPresetType.furryFocus:
+        '{worst quality}, distracting watermark, unfinished, bad quality, {widescreen}, upscale, {sequence}, {{grandfathered content}}, blurred foreground, chromatic aberration, sketch, everyone, [sketch background], simple, [flat colors], ych (character), outline, multiple scenes, [[horror (theme)]], comic',
+    UcPresetType.humanFocus:
+        'lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page, @_@, mismatched pupils, glowing eyes, bad anatomy',
+    UcPresetType.none: '',
+  };
+
   /// V3 预设
   static const Map<UcPresetType, String> v3Presets = {
     UcPresetType.heavy:
@@ -551,7 +569,10 @@ class UcPresets {
 
   /// 根据模型获取对应的预设映射
   static Map<UcPresetType, String> getPresetsForModel(String model) {
-    switch (model) {
+    switch (ImageModels.resolveBaseModel(model)) {
+      case ImageModels.animeDiffusionV5Full:
+      case ImageModels.animeDiffusionV5Curated:
+        return v5Presets;
       case ImageModels.animeDiffusionV45Full:
         return v45FullPresets;
       case ImageModels.animeDiffusionV45Curated:
@@ -577,6 +598,24 @@ class UcPresets {
   static bool hasNativeApiValue(UcPresetType type) {
     return type != UcPresetType.furryFocus;
   }
+
+  /// V5 服务端标签提示（`tag_hint_uc_preset`）的数字编码。
+  ///
+  /// 官方 bundle 34342 模块的预设↔数字全表：
+  /// 0=none 1=standard 2=heavy 3=light 4=humanFocus 5=furryFocus
+  /// 6=lowQualityPlusBadAnatomy 7=lowQuality 8=badAnatomy。
+  static int toTagHintValue(UcPresetType type) {
+    return switch (type) {
+      UcPresetType.none => 0,
+      UcPresetType.heavy => 2,
+      UcPresetType.light => 3,
+      UcPresetType.humanFocus => 4,
+      UcPresetType.furryFocus => 5,
+    };
+  }
+
+  /// V5 质量词标签提示（`tag_hint_qt`）：开=standard(1)，关=none(0)。
+  static int qualityToggleTagHintValue(bool enabled) => enabled ? 1 : 0;
 
   /// 将预设应用到负面提示词
   static String applyPreset(

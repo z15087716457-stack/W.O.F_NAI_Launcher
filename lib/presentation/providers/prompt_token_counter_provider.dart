@@ -55,6 +55,7 @@ final promptTokenUsageProvider =
           prompt: params.prompt,
           negativePrompt: params.negativePrompt,
           model: params.model,
+          transparentBackground: params.transparentBackground,
         ),
       ),
     );
@@ -87,6 +88,7 @@ final promptTokenUsageProvider =
       model: promptState.model,
       fixedTagsState: fixedTagsState,
       qualityToggle: qualityPresetState.mode == PromptPresetMode.naiDefault,
+      transparentBackground: promptState.transparentBackground,
       ucPreset: UcPresets.toApiValue(ucPresetState.presetType),
       qualityMode: qualityPresetState.mode,
       qualityContent: qualityContent,
@@ -137,6 +139,7 @@ PromptTokenCountPayload buildPromptTokenCountPayload({
   required FixedTagsState fixedTagsState,
   required bool qualityToggle,
   required int ucPreset,
+  bool transparentBackground = false,
   PromptPresetMode? qualityMode,
   String? qualityContent,
   UcPresetType? ucPresetType,
@@ -153,6 +156,7 @@ PromptTokenCountPayload buildPromptTokenCountPayload({
         fixedTagsState: fixedTagsState,
         qualityToggle: qualityToggle,
         ucPreset: ucPreset,
+        transparentBackground: transparentBackground,
         qualityMode: qualityMode,
         qualityContent: qualityContent,
         ucPresetType: ucPresetType,
@@ -168,6 +172,7 @@ PromptTokenCountPayload buildPromptTokenCountPayload({
         fixedTagsState: fixedTagsState,
         qualityToggle: qualityToggle,
         ucPreset: ucPreset,
+        transparentBackground: transparentBackground,
         qualityMode: qualityMode,
         qualityContent: qualityContent,
         ucPresetType: ucPresetType,
@@ -186,6 +191,7 @@ PromptTokenCountPayload _buildPositiveTokenCountPayload({
   required FixedTagsState fixedTagsState,
   required bool qualityToggle,
   required int ucPreset,
+  bool transparentBackground = false,
   required PromptPresetMode? qualityMode,
   required String? qualityContent,
   required UcPresetType? ucPresetType,
@@ -221,6 +227,7 @@ PromptTokenCountPayload _buildPositiveTokenCountPayload({
     model: model,
     qualityToggle: presetResolution.qualityToggle,
     ucPreset: presetResolution.ucPreset,
+    transparentBackground: transparentBackground,
   );
 
   final extraTexts = characters
@@ -277,6 +284,7 @@ PromptTokenCountPayload _buildNegativeTokenCountPayload({
   required FixedTagsState fixedTagsState,
   required bool qualityToggle,
   required int ucPreset,
+  bool transparentBackground = false,
   required PromptPresetMode? qualityMode,
   required String? qualityContent,
   required UcPresetType? ucPresetType,
@@ -314,6 +322,7 @@ PromptTokenCountPayload _buildNegativeTokenCountPayload({
     model: model,
     qualityToggle: presetResolution.qualityToggle,
     ucPreset: presetResolution.ucPreset,
+    transparentBackground: transparentBackground,
   );
 
   final extraTexts = characters

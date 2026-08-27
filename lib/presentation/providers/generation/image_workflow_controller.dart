@@ -9,6 +9,7 @@ import '../../../core/constants/storage_keys.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/focused_inpaint_utils.dart';
+import '../../../core/utils/max_enhance_utils.dart';
 import '../../../core/utils/nai_resolution_adapter.dart';
 import '../../../data/models/image/image_params.dart';
 import 'generation_params_notifier.dart';
@@ -293,6 +294,7 @@ class EnhanceWorkflowSettings {
     this.upscaleFactor = 1.0,
     this.strength = 0.5,
     this.noise = 0.175,
+    this.maxUpscale = false,
   });
 
   final double magnitude;
@@ -301,12 +303,17 @@ class EnhanceWorkflowSettings {
   final double strength;
   final double noise;
 
+  /// V5 Max✨ 档：开启后忽略 [upscaleFactor]，请求带 `upscaled_enhance`
+  /// 由服务端端到端放大。
+  final bool maxUpscale;
+
   EnhanceWorkflowSettings copyWith({
     double? magnitude,
     bool? showIndividualSettings,
     double? upscaleFactor,
     double? strength,
     double? noise,
+    bool? maxUpscale,
   }) {
     return EnhanceWorkflowSettings(
       magnitude: magnitude ?? this.magnitude,
@@ -315,6 +322,7 @@ class EnhanceWorkflowSettings {
       upscaleFactor: upscaleFactor ?? this.upscaleFactor,
       strength: strength ?? this.strength,
       noise: noise ?? this.noise,
+      maxUpscale: maxUpscale ?? this.maxUpscale,
     );
   }
 }
@@ -634,6 +642,9 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
       StorageKeys.workflowEnhanceStrength,
     );
     final rawNoise = _storage.getSetting(StorageKeys.workflowEnhanceNoise);
+    final rawMaxUpscale = _storage.getSetting<bool>(
+      StorageKeys.workflowEnhanceMaxUpscale,
+    );
 
     double asDouble(dynamic value, double fallback) {
       if (value is int) return value.toDouble();
@@ -661,6 +672,8 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
         rawNoise,
         const EnhanceWorkflowSettings().noise,
       ).clamp(0.0, 1.0),
+      maxUpscale:
+          rawMaxUpscale ?? const EnhanceWorkflowSettings().maxUpscale,
     );
   }
 
@@ -757,6 +770,12 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     );
     unawaited(
       _storage.setSetting(StorageKeys.workflowEnhanceNoise, settings.noise),
+    );
+    unawaited(
+      _storage.setSetting(
+        StorageKeys.workflowEnhanceMaxUpscale,
+        settings.maxUpscale,
+      ),
     );
   }
 
@@ -1330,11 +1349,29 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   void updateEnhanceUpscaleFactor(double factor) {
     final nextSettings = state.enhance.copyWith(
       upscaleFactor: factor <= 1.0 ? 1.0 : 1.5,
+      maxUpscale: false,
     );
     state = state.copyWith(enhance: nextSettings);
     _persistEnhanceSettings(nextSettings);
     _applyEnhanceToParams();
   }
+
+  /// 切换 V5 Max✨ 档（服务端端到端放大）。
+  ///
+  /// 关闭时回落到已保存的放大倍数档。
+  void setEnhanceMaxUpscale(bool enabled) {
+    final nextSettings = state.enhance.copyWith(maxUpscale: enabled);
+    state = state.copyWith(enhance: nextSettings);
+    _persistEnhanceSettings(nextSettings);
+    _applyEnhanceToParams();
+  }
+
+  /// 当前模型与源图是否可用 Max✨ 档。
+  bool get isEnhanceMaxUpscaleEligible => MaxEnhanceMath.isEligible(
+    _params.model,
+    state.sourceWidth,
+    state.sourceHeight,
+  );
 
   void updateEnhanceIndividualSettings({double? strength, double? noise}) {
     final nextSettings = state.enhance.copyWith(
@@ -1377,6 +1414,9 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     if (state.baseNoise != null) {
       _paramsNotifier.updateNoise(state.baseNoise!);
     }
+    // 离开增强模式时清掉请求层标记（防糊词注入与 upscaled_enhance）。
+    _paramsNotifier.updateEnhanceWorkflow(false);
+    _paramsNotifier.updateUpscaledEnhance(false);
   }
 
   void _applyEnhanceToParams() {
@@ -1386,17 +1426,24 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
 
     final baseWidth = state.sourceWidth ?? state.baseWidth ?? _params.width;
     final baseHeight = state.sourceHeight ?? state.baseHeight ?? _params.height;
-    final requestWidth = _normalizeDimension(
-      (baseWidth * state.enhance.upscaleFactor).round(),
-    );
-    final requestHeight = _normalizeDimension(
-      (baseHeight * state.enhance.upscaleFactor).round(),
-    );
+    // Max✨ 档仅对可用模型生效（模型切换后残留的开启状态自动降级）。
+    final maxEnabled =
+        state.enhance.maxUpscale && isEnhanceMaxUpscaleEligible;
+    final requestWidth = maxEnabled
+        ? baseWidth
+        : _normalizeDimension((baseWidth * state.enhance.upscaleFactor).round());
+    final requestHeight = maxEnabled
+        ? baseHeight
+        : _normalizeDimension(
+            (baseHeight * state.enhance.upscaleFactor).round(),
+          );
     final resolved = state.enhance.showIndividualSettings
         ? (state.enhance.strength, state.enhance.noise)
         : _resolveMagnitude(state.enhance.magnitude);
 
     _paramsNotifier.updateSize(requestWidth, requestHeight, persist: false);
+    _paramsNotifier.updateEnhanceWorkflow(true);
+    _paramsNotifier.updateUpscaledEnhance(maxEnabled);
     _paramsNotifier.updateStrength(resolved.$1);
     _paramsNotifier.updateNoise(resolved.$2);
     _paramsNotifier.updateAction(ImageGenerationAction.img2img);

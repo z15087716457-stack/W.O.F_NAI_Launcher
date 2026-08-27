@@ -1419,6 +1419,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_enhanceUpscaleAmount => 'Upscale Amount';
 
   @override
+  String get img2img_enhanceMax => 'Max✨';
+
+  @override
   String get img2img_focusedInpaint => 'Focused Inpainting';
 
   @override
@@ -3070,6 +3073,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get qualityTags_label => 'Quality';
+
+  @override
+  String get transparentBackground_label => 'Transparent BG';
+
+  @override
+  String get transparentBackground_tooltip =>
+      'Adds \"transparent background\" to the prompt and generates images with an alpha channel (V5 only)';
 
   @override
   String get qualityTags_positive => 'Quality (Prompt)';

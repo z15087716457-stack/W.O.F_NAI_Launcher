@@ -1385,6 +1385,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_enhanceUpscaleAmount => '画像の拡大率';
 
   @override
+  String get img2img_enhanceMax => 'Max✨';
+
+  @override
   String get img2img_focusedInpaint => 'Focused インペイント';
 
   @override
@@ -2999,6 +3002,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get qualityTags_label => '品質';
+
+  @override
+  String get transparentBackground_label => '透過背景';
+
+  @override
+  String get transparentBackground_tooltip =>
+      'プロンプトに「transparent background」を追加し、アルファチャンネル付きの画像を生成します（V5 専用）';
 
   @override
   String get qualityTags_positive => '品質 (プロンプト)';

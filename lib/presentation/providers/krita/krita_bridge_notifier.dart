@@ -397,6 +397,11 @@ final kritaBridgeNotifierProvider =
               flag('quality_toggle'),
               notifier.updateQualityToggle,
             );
+            apply<bool>(
+              'transparent_background',
+              flag('transparent_background'),
+              notifier.updateTransparentBackground,
+            );
             apply<double>(
               'cfg_rescale',
               dbl('cfg_rescale'),

@@ -13,6 +13,7 @@ import '../../../../core/comfyui/workflow_template.dart';
 import '../../../../core/utils/focused_inpaint_utils.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
+import '../../../../core/utils/max_enhance_utils.dart';
 import '../../../../data/datasources/remote/nai_image_enhancement_api_service.dart';
 import '../../../../data/models/image/image_params.dart';
 import '../../../../data/services/precise_ref_library_storage_service.dart';
@@ -688,17 +689,52 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: [1.0, 1.5].map((factor) {
-              final label = factor == 1.0 ? '1x' : '1.5x';
-              return ChoiceChip(
-                label: Text(label),
-                selected: enhance.upscaleFactor == factor,
-                onSelected: (_) =>
-                    controller.updateEnhanceUpscaleFactor(factor),
+          Builder(
+            builder: (context) {
+              // Max✨ 档（V5 专属）：服务端端到端放大，按资格位显隐。
+              final controller = ref.read(
+                imageWorkflowControllerProvider.notifier,
               );
-            }).toList(),
+              final model = ref.watch(
+                generationParamsNotifierProvider.select(
+                  (params) => params.model,
+                ),
+              );
+              final sourceWidth = workflow.sourceWidth;
+              final sourceHeight = workflow.sourceHeight;
+              final maxEligible = MaxEnhanceMath.isEligible(
+                model,
+                sourceWidth,
+                sourceHeight,
+              );
+              return Wrap(
+                spacing: 8,
+                children: [
+                  if (maxEligible)
+                    ChoiceChip(
+                      label: Text(
+                        context.l10n.img2img_enhanceMax,
+                        style: TextStyle(
+                          color: enhance.maxUpscale
+                              ? theme.colorScheme.primary
+                              : null,
+                        ),
+                      ),
+                      selected: enhance.maxUpscale,
+                      onSelected: (_) =>
+                          controller.setEnhanceMaxUpscale(!enhance.maxUpscale),
+                    ),
+                  for (final factor in const [1.0, 1.5])
+                    ChoiceChip(
+                      label: Text(factor == 1.0 ? '1x' : '1.5x'),
+                      selected:
+                          !enhance.maxUpscale && enhance.upscaleFactor == factor,
+                      onSelected: (_) =>
+                          controller.updateEnhanceUpscaleFactor(factor),
+                    ),
+                ],
+              );
+            },
           ),
           if (enhance.showIndividualSettings) ...[
             const SizedBox(height: 12),

@@ -103,6 +103,27 @@ class NAIImageRequestBuilder {
         ? 58.0 * sqrt(4.0 * (params.width / 8) * (params.height / 8) / 63232)
         : null;
 
+    // V5 透明背景：官方请求层参数（bundle 7416 K 函数）。
+    // straight_alpha 是输出 alpha 编码模式（官方设置默认 straight=true），
+    // tag_hint_* 为服务端标签提示（质量词 standard/none、UC 预设数字编码）。
+    if (params.modelSpec.transparency) {
+      requestParameters['tag_hint_transparent_background'] =
+          params.transparentBackground;
+      requestParameters['straight_alpha'] = true;
+      requestParameters['tag_hint_qt'] = UcPresets.qualityToggleTagHintValue(
+        params.qualityToggle,
+      );
+      requestParameters['tag_hint_uc_preset'] = UcPresets.toTagHintValue(
+        UcPresets.getPresetTypeFromInt(params.ucPreset),
+      );
+    }
+
+    // V5 增强 Max✨：宽高保持源图，由服务端端到端放大。
+    // 能力位门控：模型切走后残留的开启状态不再发出。
+    if (params.upscaledEnhance && params.modelSpec.maxEnhance) {
+      requestParameters['upscaled_enhance'] = true;
+    }
+
     if (!params.isV4Model) {
       requestParameters['sm'] = params.effectiveSmea;
       requestParameters['sm_dyn'] = params.effectiveSmeaDyn;
@@ -388,6 +409,33 @@ class NAIImageRequestBuilder {
         sourceImage;
   }
 
+  /// 非最大档增强（Enhance）时按官方 enhancePromptAdd 行为注入防糊负权重词。
+  ///
+  /// 官方（bundle 7416 generateEnhance）对 V4.5/V5 在提示词中插入
+  /// `, -2::upscaled, blurry::,`——插在 `text:` 块之前，无则追加末尾；
+  /// Max✨ 档不注入。已含该词或非增强工作流时原样返回。
+  String _applyEnhancePromptAdditions(String prompt) {
+    if (!params.enhanceWorkflow || params.upscaledEnhance) {
+      return prompt;
+    }
+    // 官方 enhancePromptAdd 能力位：V4.5/V5 为 true，V4.0 及更早为 false。
+    final spec = params.modelSpec;
+    if (!(params.isV45Model || spec.isV5) ||
+        prompt.contains('upscaled, blurry')) {
+      return prompt;
+    }
+    const addition = ', -2::upscaled, blurry::,';
+    final textBlock = RegExp(
+      r'(?:^|\s|[,.:[\]{}、。])text:(?!:)',
+      caseSensitive: false,
+    ).firstMatch(prompt);
+    if (textBlock == null) {
+      return '$prompt$addition';
+    }
+    final insertAt = textBlock.end - 'text:'.length;
+    return prompt.replaceRange(insertAt, insertAt, '${addition.substring(2)}');
+  }
+
   Future<NAIImageRequestBuildResult> build({
     required String sampler,
     bool isStream = false,
@@ -408,8 +456,11 @@ class NAIImageRequestBuilder {
       model: baseModel,
       qualityToggle: params.qualityToggle,
       ucPreset: params.ucPreset,
+      transparentBackground: params.transparentBackground,
     );
-    final effectivePrompt = promptSemantics.effectivePrompt;
+    final effectivePrompt = _applyEnhancePromptAdditions(
+      promptSemantics.effectivePrompt,
+    );
     final effectiveNegativePrompt = promptSemantics.effectiveNegativePrompt;
 
     final requestParameters = buildBaseParameters(

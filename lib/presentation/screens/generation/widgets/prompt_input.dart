@@ -29,6 +29,7 @@ import '../../../widgets/prompt/unified/unified_prompt_config.dart';
 import '../../../widgets/prompt/nai_syntax_controller.dart';
 import '../../../widgets/prompt/prompt_token_count_bar.dart';
 import '../../../widgets/prompt/quality_tags_selector.dart';
+import '../../../widgets/prompt/transparent_background_chip.dart';
 import '../../../widgets/prompt/random_mode_selector.dart';
 import '../../../widgets/prompt/regex_rules_dialog.dart';
 import '../../../widgets/prompt/toolbar/toolbar.dart';
@@ -529,6 +530,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             const SizedBox(width: 6),
             UcPresetSelector(model: model),
             const SizedBox(width: 2),
+            const TransparentBackgroundChip(),
             webToolbar,
           ],
         ),
@@ -558,6 +560,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
 
             // UC 预设选择器
             UcPresetSelector(model: model),
+
+            // V5 透明背景开关
+            const TransparentBackgroundChip(),
 
             // 多人角色编辑器按钮
             const CharacterPromptButton(),

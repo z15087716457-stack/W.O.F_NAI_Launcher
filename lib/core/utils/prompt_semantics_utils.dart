@@ -1,4 +1,5 @@
 import '../constants/api_constants.dart';
+import '../constants/model_spec.dart';
 
 /// 提示词语义快照
 ///
@@ -24,13 +25,28 @@ PromptSemanticsSnapshot buildPromptSemanticsSnapshot({
   required String model,
   required bool qualityToggle,
   required int ucPreset,
+  bool transparentBackground = false,
 }) {
-  final effectivePrompt =
-      qualityToggle ? QualityTags.applyQualityTags(prompt, model) : prompt;
+  // 官方 Transparent BG：把 transparent background 拼在质量词之前
+  // （bundle 34342 rr() 把它前置到质量 suffix），仅 transparency 模型生效。
+  var promptWithTransparency = prompt;
+  if (transparentBackground && ModelSpecs.of(model).transparency) {
+    const tag = 'transparent background';
+    final trimmed = prompt.trim();
+    if (!trimmed.contains(tag)) {
+      promptWithTransparency = trimmed.isEmpty
+          ? tag
+          : (trimmed.endsWith(',') ? '$trimmed $tag' : '$trimmed, $tag');
+    }
+  }
+
+  final effectivePrompt = qualityToggle
+      ? QualityTags.applyQualityTags(promptWithTransparency, model)
+      : promptWithTransparency;
 
   final effectiveNegativePrompt = UcPresets.applyPresetWithNsfwCheck(
     negativePrompt,
-    prompt,
+    promptWithTransparency,
     model,
     ucPreset,
   );

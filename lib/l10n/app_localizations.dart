@@ -2637,6 +2637,12 @@ abstract class AppLocalizations {
   /// **'Upscale Amount'**
   String get img2img_enhanceUpscaleAmount;
 
+  /// No description provided for @img2img_enhanceMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Max✨'**
+  String get img2img_enhanceMax;
+
   /// No description provided for @img2img_focusedInpaint.
   ///
   /// In en, this message translates to:
@@ -5544,6 +5550,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Quality'**
   String get qualityTags_label;
+
+  /// No description provided for @transparentBackground_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent BG'**
+  String get transparentBackground_label;
+
+  /// No description provided for @transparentBackground_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds \"transparent background\" to the prompt and generates images with an alpha channel (V5 only)'**
+  String get transparentBackground_tooltip;
 
   /// No description provided for @qualityTags_positive.
   ///

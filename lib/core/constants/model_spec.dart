@@ -36,6 +36,8 @@ class ModelSpec {
     required this.opusUsageLimit,
     required this.freeformCharacterPosition,
     required this.img2imgInpainting,
+    required this.transparency,
+    required this.maxEnhance,
     this.billingVersion = 4,
   });
 
@@ -83,6 +85,15 @@ class ModelSpec {
   /// Inpainting 时可复用原图潜空间。
   final bool img2imgInpainting;
 
+  /// 支持原生透明背景（`tag_hint_transparent_background` / `straight_alpha`）。
+  ///
+  /// V5 起启用：服务端可按提示注入 transparent background 标签并输出
+  /// 带 alpha 通道的图像。
+  final bool transparency;
+
+  /// 支持增强 Max✨ 档（`upscaled_enhance`，服务端端到端放大至 3MP 上限）。
+  final bool maxEnhance;
+
   /// 计费公式版本，供 `AnlasCalculator` 选择面积/步数系数分支。
   ///
   /// V4/V4.5 = 4（现代系数）；V5 = 5（同一套系数，结果整体 ×1.5）。
@@ -117,6 +128,8 @@ class ModelSpecs {
     opusUsageLimit: false,
     freeformCharacterPosition: false,
     img2imgInpainting: true,
+    transparency: false,
+    maxEnhance: false,
   );
 
   /// V4.5 家族能力集合：相比 V4.0 仅增加 Character Reference。
@@ -137,6 +150,8 @@ class ModelSpecs {
     opusUsageLimit: false,
     freeformCharacterPosition: false,
     img2imgInpainting: true,
+    transparency: false,
+    maxEnhance: false,
   );
 
   /// V5 家族能力集合。
@@ -161,6 +176,8 @@ class ModelSpecs {
     opusUsageLimit: true,
     freeformCharacterPosition: true,
     img2imgInpainting: true,
+    transparency: true,
+    maxEnhance: true,
     billingVersion: 5,
   );
 
@@ -182,6 +199,8 @@ class ModelSpecs {
     opusUsageLimit: false,
     freeformCharacterPosition: false,
     img2imgInpainting: true,
+    transparency: false,
+    maxEnhance: false,
     billingVersion: 3,
   );
 
@@ -202,6 +221,8 @@ class ModelSpecs {
     opusUsageLimit: base.opusUsageLimit,
     freeformCharacterPosition: base.freeformCharacterPosition,
     img2imgInpainting: base.img2imgInpainting,
+    transparency: base.transparency,
+    maxEnhance: base.maxEnhance,
     billingVersion: base.billingVersion,
   );
 

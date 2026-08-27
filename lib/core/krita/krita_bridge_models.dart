@@ -305,6 +305,8 @@ ImageParams applyKritaParamsOverlay(
     cfgRescale: dbl('cfg_rescale') ?? base.cfgRescale,
     noiseSchedule: str('noise_schedule') ?? base.noiseSchedule,
     varietyPlus: flag('variety_plus') ?? base.varietyPlus,
+    transparentBackground:
+        flag('transparent_background') ?? base.transparentBackground,
     smeaAuto: flag('smea_auto') ?? base.smeaAuto,
     smea: flag('smea') ?? base.smea,
     smeaDyn: flag('smea_dyn') ?? base.smeaDyn,

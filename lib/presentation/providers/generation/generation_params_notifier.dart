@@ -1434,6 +1434,21 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     _storage.setLastVarietyPlus(varietyPlus);
   }
 
+  /// 更新透明背景开关（V5 专属）
+  void updateTransparentBackground(bool transparentBackground) {
+    state = state.copyWith(transparentBackground: transparentBackground);
+  }
+
+  /// 更新增强工作流标记（请求层用，非 Max 增强注入防糊词）
+  void updateEnhanceWorkflow(bool enhanceWorkflow) {
+    state = state.copyWith(enhanceWorkflow: enhanceWorkflow);
+  }
+
+  /// 更新增强 Max✨ 档标记（请求携带 upscaled_enhance）
+  void updateUpscaledEnhance(bool upscaledEnhance) {
+    state = state.copyWith(upscaledEnhance: upscaledEnhance);
+  }
+
   /// 更新 Decrisp (V3 模型)
   void updateDecrisp(bool decrisp) {
     state = state.copyWith(decrisp: decrisp);

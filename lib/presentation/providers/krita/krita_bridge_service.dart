@@ -235,6 +235,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
       'cfg_rescale': params.cfgRescale,
       'uc_preset': params.ucPreset,
       'quality_toggle': params.qualityToggle,
+      'transparent_background': params.transparentBackground,
       'variety_plus': params.varietyPlus,
       'smea_auto': params.smeaAuto,
       'smea': params.smea,

@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/services/anlas_calculator.dart';
 import '../../core/utils/focused_inpaint_utils.dart';
+import '../../core/utils/max_enhance_utils.dart';
 import '../../data/models/image/image_params.dart';
 import 'image_generation_provider.dart';
 import 'generation/image_workflow_controller.dart';
@@ -50,6 +51,25 @@ _GenerationCostInput _resolveGenerationCostInput(
         strength: params.inpaintStrength,
       );
     }
+  }
+
+  // 增强 Max✨：请求宽高是源图尺寸，但服务端按端到端放大目标尺寸计费。
+  if (workflow.isEnhance &&
+      workflow.enhance.maxUpscale &&
+      MaxEnhanceMath.isEligible(
+        params.model,
+        workflow.sourceWidth,
+        workflow.sourceHeight,
+      )) {
+    final target = MaxEnhanceMath.targetSize(
+      workflow.sourceWidth ?? params.width,
+      workflow.sourceHeight ?? params.height,
+    );
+    return _GenerationCostInput(
+      width: target.width,
+      height: target.height,
+      strength: params.strength,
+    );
   }
 
   return _GenerationCostInput(

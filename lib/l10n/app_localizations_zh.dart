@@ -1364,6 +1364,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_enhanceUpscaleAmount => '放大倍数';
 
   @override
+  String get img2img_enhanceMax => 'Max✨';
+
+  @override
   String get img2img_focusedInpaint => 'Focused Inpainting（聚焦重绘）';
 
   @override
@@ -2952,6 +2955,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get qualityTags_label => '质量词';
+
+  @override
+  String get transparentBackground_label => '透明背景';
+
+  @override
+  String get transparentBackground_tooltip =>
+      '向提示词追加 transparent background 标签，生成带 alpha 通道的图像（V5 专属）';
 
   @override
   String get qualityTags_positive => '质量词（正面）';

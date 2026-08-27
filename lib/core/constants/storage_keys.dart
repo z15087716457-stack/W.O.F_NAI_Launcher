@@ -307,6 +307,7 @@ class StorageKeys {
       'workflow_enhance_upscale_factor';
   static const String workflowEnhanceStrength = 'workflow_enhance_strength';
   static const String workflowEnhanceNoise = 'workflow_enhance_noise';
+  static const String workflowEnhanceMaxUpscale = 'workflow_enhance_max_upscale';
 
   // 反推/本地模型设置
   static const String reversePromptStateJson = 'reverse_prompt_state_json';
