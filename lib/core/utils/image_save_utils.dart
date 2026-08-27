@@ -221,6 +221,7 @@ class ImageSaveUtils {
             model: params.model,
             qualityToggle: params.qualityToggle,
             ucPreset: params.ucPreset,
+            transparentBackground: params.transparentBackground,
           ).effectivePrompt,
       source: existingMetadata?.source ?? _getModelSourceName(params.model),
       software: existingMetadata?.software ?? 'NovelAI',
