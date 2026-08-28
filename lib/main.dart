@@ -148,6 +148,7 @@ class AppTrayListener extends TrayListener {
     try {
       await windowManager.show();
       await windowManager.focus();
+      await refreshWindowFrame();
       AppLogger.d('Window restored from tray (left click)', 'TrayListener');
     } catch (e) {
       AppLogger.e('Failed to restore window from tray: $e', 'TrayListener');
@@ -167,6 +168,7 @@ class AppTrayListener extends TrayListener {
         // 显示窗口
         await windowManager.show();
         await windowManager.focus();
+        await refreshWindowFrame();
         AppLogger.d('Window shown via tray menu', 'TrayListener');
       } else if (menuItem.key == 'exit') {
         await DesktopAppShutdownService.shutdownAndExit(0);
@@ -272,12 +274,27 @@ void setupWindowsWakeUpChannel() {
         await windowManager.show();
         await windowManager.focus();
         await windowManager.restore();
+        await refreshWindowFrame();
         AppLogger.i('Window woken up by new instance', 'Main');
       } catch (e) {
         AppLogger.e('Failed to wake up window: $e', 'Main');
       }
     }
   });
+}
+
+/// 请求原生层强制重绘窗口非客户区（SWP_FRAMECHANGED）。
+/// Windows 11 的 DWM 在托盘隐藏→显示后偶尔不重绘 caption 按钮
+/// （最小化/最大化按钮不可见，但命中测试仍生效），需在每次恢复显示后调用。
+Future<void> refreshWindowFrame() async {
+  if (!Platform.isWindows) return;
+  try {
+    await const MethodChannel(
+      'com.nailauncher/window_control',
+    ).invokeMethod('refreshFrame');
+  } catch (e) {
+    AppLogger.w('refreshWindowFrame failed: $e', 'Main');
+  }
 }
 
 void main() {
@@ -631,6 +648,7 @@ Future<void> _bootstrapApplication() async {
 
         await windowManager.show();
         await windowManager.focus();
+        await refreshWindowFrame();
       });
 
       // 初始化系统托盘（Windows + macOS）

@@ -115,6 +115,39 @@ bool FlutterWindow::OnCreate() {
         }
       });
 
+  // Register window control MethodChannel (Dart -> native).
+  // refreshFrame: 强制非客户区重绘。Windows 11 的 DWM 在托盘隐藏→显示后
+  // 偶尔不重绘 caption 按钮（最小化/最大化按钮不可见，但命中测试仍生效）；
+  // ±1px 双 SetWindowPos + SWP_FRAMECHANGED 是社区验证的恢复手段。
+  auto window_control_channel =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(),
+          "com.nailauncher/window_control",
+          &flutter::StandardMethodCodec::GetInstance());
+  window_control_channel->SetMethodCallHandler(
+      [this](const flutter::MethodCall<flutter::EncodableValue>& call,
+             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>>
+                 result) {
+        if (call.method_name() == "refreshFrame") {
+          HWND hwnd = GetHandle();
+          if (hwnd != nullptr) {
+            RECT rect;
+            GetWindowRect(hwnd, &rect);
+            SetWindowPos(hwnd, nullptr, rect.left, rect.top,
+                         rect.right - rect.left + 1, rect.bottom - rect.top,
+                         SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE |
+                             SWP_FRAMECHANGED);
+            SetWindowPos(hwnd, nullptr, rect.left, rect.top,
+                         rect.right - rect.left, rect.bottom - rect.top,
+                         SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE |
+                             SWP_FRAMECHANGED);
+          }
+          result->Success();
+        } else {
+          result->NotImplemented();
+        }
+      });
+
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
   });
