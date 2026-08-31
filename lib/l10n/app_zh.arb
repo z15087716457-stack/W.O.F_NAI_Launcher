@@ -375,7 +375,6 @@
   "generation_cfgRescale": "CFG 重缩放：{value}",
   "generation_noiseSchedule": "噪声调度",
   "prompt_positive": "正面",
-  "prompt_negative": "负面",
   "prompt_positivePrompt": "正向提示词",
   "prompt_negativePrompt": "负向提示词",
   "prompt_mainPositive": "主提示词（正面）",

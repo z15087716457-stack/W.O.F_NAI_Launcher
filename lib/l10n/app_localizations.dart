@@ -1815,12 +1815,6 @@ abstract class AppLocalizations {
   /// **'Prompt'**
   String get prompt_positive;
 
-  /// No description provided for @prompt_negative.
-  ///
-  /// In en, this message translates to:
-  /// **'Undesired Content'**
-  String get prompt_negative;
-
   /// No description provided for @prompt_positivePrompt.
   ///
   /// In en, this message translates to:

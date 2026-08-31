@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/models/character/character_prompt.dart';
 import '../../data/repositories/character_prompt_repository.dart';
+import 'pill_workspace_provider.dart';
 
 part 'character_prompt_provider.g.dart';
 
@@ -66,6 +67,17 @@ class CharacterPromptNotifier extends _$CharacterPromptNotifier {
   void removeCharacter(String id) {
     state = state.removeCharacter(id);
     _saveConfig();
+    _deletePillLanes({id});
+  }
+
+  /// 清理被移除角色的药丸 lane 存档（P3：正/负两个 scope）。
+  void _deletePillLanes(Set<String> characterIds) {
+    if (characterIds.isEmpty) return;
+    final storage = ref.read(pillWorkspaceStorageProvider);
+    for (final id in characterIds) {
+      unawaited(storage.deleteScope(PillScopes.charPos(id)));
+      unawaited(storage.deleteScope(PillScopes.charNeg(id)));
+    }
   }
 
   /// 更新角色
@@ -110,8 +122,10 @@ class CharacterPromptNotifier extends _$CharacterPromptNotifier {
   ///
   /// Requirements: 4.4
   void clearAllCharacters() {
+    final removedIds = state.characters.map((c) => c.id).toSet();
     state = state.clearAllCharacters();
     _saveConfig();
+    _deletePillLanes(removedIds);
   }
 
   /// 清空所有角色（别名）
@@ -121,11 +135,14 @@ class CharacterPromptNotifier extends _$CharacterPromptNotifier {
   ///
   /// 用于随机生成时一次性设置所有角色
   void replaceAll(List<CharacterPrompt> characters) {
+    final removedIds = state.characters.map((c) => c.id).toSet()
+      ..removeAll(characters.map((c) => c.id));
     state = CharacterPromptConfig(
       characters: characters,
       globalAiChoice: state.globalAiChoice,
     ).normalizeCustomPositions();
     _saveConfig();
+    _deletePillLanes(removedIds);
   }
 
   /// 追加多个角色并保留现有角色及其位置设置。

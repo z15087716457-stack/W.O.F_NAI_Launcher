@@ -5,13 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/character/character_prompt.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/image_generation_provider.dart';
-import '../prompt/toolbar/toolbar.dart';
+import '../../providers/pill_workspace_provider.dart';
+import '../prompt/pills/prompt_pill_editor.dart';
 import '../prompt/unified/unified.dart';
 
-/// 角色提示词编辑器（正/负切换 + 统一提示词编辑器）
+/// 角色提示词编辑器（正/负切换 + 药丸块编辑器）
 ///
 /// 官网布局的卡内编辑与经典布局的全宽编辑面板共用。
-/// 输入实时写回 provider。
+/// P3 起两个 tab 均为单框药丸编辑器，lane 按 `char:<id>:pos/neg` 隔离；
+/// 投影实时写回 provider（`updateCharacter`）。
 ///
 /// [autoFocus] 控制挂载/切换角色时是否自动把光标送进输入框：
 /// 经典布局面板（true）打开即聚焦省一次点击；官网布局常驻卡
@@ -34,69 +36,47 @@ class CharacterPromptEditor extends ConsumerStatefulWidget {
 }
 
 class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
-  late final TextEditingController _promptController = TextEditingController(
-    text: widget.character.prompt,
-  );
-  late final TextEditingController _negativeController = TextEditingController(
-    text: widget.character.negativePrompt,
-  );
-  final FocusNode _promptFocusNode = FocusNode();
-  final FocusNode _negativeFocusNode = FocusNode();
-
   /// 0 = 正向提示词，1 = 负向提示词
   int _tabIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.autoFocus) {
-      _focusCurrentTab();
-    }
-  }
+  String get _posScope => PillScopes.charPos(widget.character.id);
+  String get _negScope => PillScopes.charNeg(widget.character.id);
 
   @override
   void didUpdateWidget(CharacterPromptEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // 切换编辑目标（同一面板复用 State）时重置输入框并重新聚焦
+    // 切换编辑目标：pill scope 随 character.id 变化，
+    // PromptPillEditor.didUpdateWidget 自行重绑文档+按需播种，无需干预。
     if (oldWidget.character.id != widget.character.id) {
-      _promptController.text = widget.character.prompt;
-      _negativeController.text = widget.character.negativePrompt;
-      if (widget.autoFocus) {
-        _focusCurrentTab();
-      }
       return;
     }
-    // 外部状态变化（随机生成、词库导入等）时同步到输入框。
-    // 输入框聚焦中绝不同步：生命周期内的 controller.text 赋值会重置
-    // 光标并打断键盘输入连接，聚焦时以用户输入为准
-    if (!_promptFocusNode.hasFocus &&
-        widget.character.prompt != _promptController.text) {
-      _promptController.text = widget.character.prompt;
+    // 外部状态变化（随机生成、词库导入、桥接写入等）：投影不等时重建。
+    // 本框自身 onChanged 回写时投影与文本相等 → syncFromPlainText 天然
+    // no-op，不打断输入连接。
+    // 注意 didUpdateWidget 处于构建期，写 provider 必须延后到帧末。
+    final promptChanged =
+        widget.character.prompt != oldWidget.character.prompt;
+    final negativeChanged =
+        widget.character.negativePrompt != oldWidget.character.negativePrompt;
+    if (promptChanged || negativeChanged) {
+      final posScope = _posScope;
+      final negScope = _negScope;
+      final prompt = widget.character.prompt;
+      final negative = widget.character.negativePrompt;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (promptChanged) {
+          ref
+              .read(pillWorkspaceProvider(posScope).notifier)
+              .syncFromPlainText(prompt);
+        }
+        if (negativeChanged) {
+          ref
+              .read(pillWorkspaceProvider(negScope).notifier)
+              .syncFromPlainText(negative);
+        }
+      });
     }
-    if (!_negativeFocusNode.hasFocus &&
-        widget.character.negativePrompt != _negativeController.text) {
-      _negativeController.text = widget.character.negativePrompt;
-    }
-  }
-
-  @override
-  void dispose() {
-    _promptController.dispose();
-    _negativeController.dispose();
-    _promptFocusNode.dispose();
-    _negativeFocusNode.dispose();
-    super.dispose();
-  }
-
-  /// 输入框是否持有焦点（供外层 TapRegion 判断是否应退出编辑态）
-  bool get hasEditorFocus =>
-      _promptFocusNode.hasFocus || _negativeFocusNode.hasFocus;
-
-  void _focusCurrentTab() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      (_tabIndex == 0 ? _promptFocusNode : _negativeFocusNode).requestFocus();
-    });
   }
 
   void _updateCharacter(CharacterPrompt updated) {
@@ -116,35 +96,29 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
             _EditorTab(
               label: l10n.prompt_positivePrompt,
               selected: _tabIndex == 0,
-              onTap: () {
-                setState(() => _tabIndex = 0);
-                _focusCurrentTab();
-              },
+              onTap: () => setState(() => _tabIndex = 0),
             ),
             const SizedBox(width: 6),
             _EditorTab(
               label: l10n.prompt_negativePrompt,
               selected: _tabIndex == 1,
-              onTap: () {
-                setState(() => _tabIndex = 1);
-                _focusCurrentTab();
-              },
+              onTap: () => setState(() => _tabIndex = 1),
             ),
           ],
         ),
         const SizedBox(height: 6),
         if (_tabIndex == 0)
-          _buildPromptEditor(
-            controller: _promptController,
-            focusNode: _promptFocusNode,
+          _buildPillLaneEditor(
+            scope: _posScope,
+            initialText: widget.character.prompt,
             hintText: l10n.characterEditor_promptHint,
             onChanged: (value) =>
                 _updateCharacter(widget.character.copyWith(prompt: value)),
           )
         else
-          _buildPromptEditor(
-            controller: _negativeController,
-            focusNode: _negativeFocusNode,
+          _buildPillLaneEditor(
+            scope: _negScope,
+            initialText: widget.character.negativePrompt,
             hintText: l10n.characterEditor_negativePromptHint,
             onChanged: (value) => _updateCharacter(
               widget.character.copyWith(negativePrompt: value),
@@ -154,9 +128,9 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
     );
   }
 
-  Widget _buildPromptEditor({
-    required TextEditingController controller,
-    required FocusNode focusNode,
+  Widget _buildPillLaneEditor({
+    required String scope,
+    required String initialText,
     required String? hintText,
     required ValueChanged<String> onChanged,
   }) {
@@ -167,30 +141,27 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
       sdSyntaxAutoConvertSettingsProvider,
     );
 
-    final inputConfig = UnifiedPromptConfig.compactMode.copyWith(
-      hintText: hintText,
-      enableAutocomplete: enableAutocomplete,
-      enableAutoFormat: enableAutoFormat,
-      enableSyntaxHighlight: enableHighlight,
-      enableSdSyntaxAutoConvert: enableSdSyntaxAutoConvert,
-      // 清空由 UnifiedPromptInput 内部处理并回调 onChanged('')，无需重复
-      showClearButton: true,
-      clearNeedsConfirm: true,
-    );
-
-    return PromptEditorWithToolbar(
-      toolbarConfig: PromptEditorToolbarConfig.compactMode.copyWith(
-        showClearButton: false,
-      ),
-      inputConfig: inputConfig,
-      controller: controller,
-      focusNode: focusNode,
-      onChanged: onChanged,
-      onCleared: () => onChanged(''),
+    return PromptPillEditor(
+      // key 随 scope 走：tab 切换/换角色时 State 不串文档
+      key: ValueKey('character-pill-$scope'),
+      pillScope: scope,
+      initialPlainText: initialText,
+      compact: widget.compact,
       // 常驻卡（非 compact，官网布局）跟随内容自增高：3 行起步、12 行封顶，
       // 封顶后框内滚动；经典布局面板（compact）维持 1/4 紧凑规格
       minLines: widget.compact ? 1 : 3,
       maxLines: widget.compact ? 4 : 12,
+      config: UnifiedPromptConfig.compactMode.copyWith(
+        hintText: hintText,
+        enableAutocomplete: enableAutocomplete,
+        enableAutoFormat: enableAutoFormat,
+        enableSyntaxHighlight: enableHighlight,
+        enableSdSyntaxAutoConvert: enableSdSyntaxAutoConvert,
+        // 清空由 UnifiedPromptInput 内部处理并回调 onChanged('')，无需重复
+        showClearButton: true,
+        clearNeedsConfirm: true,
+      ),
+      onChanged: onChanged,
     );
   }
 }

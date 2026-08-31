@@ -409,7 +409,6 @@
   },
   "generation_noiseSchedule": "ノイズスケジュール",
   "prompt_positive": "プロンプト",
-  "prompt_negative": "除外したい要素",
   "prompt_positivePrompt": "プロンプト",
   "prompt_negativePrompt": "除外したい要素",
   "prompt_mainPositive": "メイン プロンプト (正)",

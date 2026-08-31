@@ -66,7 +66,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    await tester.tap(find.byIcon(Icons.block).first);
+    // 顶栏瘦容后负面切换为纯文字「UC」按钮
+    await tester.tap(find.text('UC').first);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
@@ -74,6 +75,99 @@ void main() {
       find.byKey(const ValueKey('generation_prompt_negative_input')),
       findsOneWidget,
     );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('负向药丸 lane：插入块投影进参数，外部写入同步进编辑器', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          promptBlockLibraryNotifierProvider.overrideWith(
+            () => _EmptyPromptBlockLibraryNotifier(
+              PromptBlockLibraryState(
+                blocks: [
+                  PromptBlock(
+                    id: 'uc-block',
+                    title: 'UC包',
+                    content: 'lowres, bad anatomy',
+                    color: '#FF123456',
+                    createdAt: DateTime.utc(2026, 8, 30),
+                    updatedAt: DateTime.utc(2026, 8, 30),
+                  ),
+                ],
+                folders: const [],
+              ),
+            ),
+          ),
+          localStorageServiceProvider.overrideWith((ref) {
+            return _TestLocalStorageService();
+          }),
+          characterPromptNotifierProvider.overrideWith(
+            _TestCharacterPromptNotifier.new,
+          ),
+          promptTokenUsageProvider(
+            PromptTokenCountTarget.positive,
+          ).overrideWith(
+            (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+          ),
+          promptTokenUsageProvider(
+            PromptTokenCountTarget.negative,
+          ).overrideWith(
+            (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+          ),
+        ],
+        child: const MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Scaffold(
+            body: SizedBox(width: 960, height: 420, child: PromptInputWidget()),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final container = ProviderScope.containerOf(
+      tester.element(
+        find.byKey(const ValueKey('generation_prompt_positive_input')),
+      ),
+    );
+
+    // 切到 UC：负向药丸编辑器挂载
+    await tester.tap(find.text('UC').first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(
+      find.byKey(const ValueKey('generation_prompt_negative_input')),
+      findsOneWidget,
+    );
+
+    // 负向 lane 插块 → 投影写回生成参数
+    container
+        .read(pillWorkspaceProvider(PillScopes.negative).notifier)
+        .insertBlockAt(offset: 0, blockId: 'uc-block');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.text('UC包'), findsOneWidget);
+    expect(
+      container.read(generationParamsNotifierProvider).negativePrompt,
+      'lowres, bad anatomy',
+    );
+
+    // 外部写入（桥接/画廊发送汇点）→ 负向 lane 同步重建
+    container
+        .read(generationParamsNotifierProvider.notifier)
+        .updateNegativePrompt('external uc');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.negative)).document.text,
+      'external uc',
+    );
+    expect(find.byType(PromptPill), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

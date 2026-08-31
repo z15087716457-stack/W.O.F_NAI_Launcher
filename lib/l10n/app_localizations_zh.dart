@@ -915,9 +915,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prompt_positive => '正面';
 
   @override
-  String get prompt_negative => '负面';
-
-  @override
   String get prompt_positivePrompt => '正向提示词';
 
   @override

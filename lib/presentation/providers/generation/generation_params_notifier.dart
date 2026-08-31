@@ -224,6 +224,10 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       ref
           .read(promptBlockWorkspaceNotifierProvider.notifier)
           .syncFromPlainText(PromptBlockLane.negative, negativePrompt);
+      // 药丸工作区负向 lane 对称同步（P3，与正向 updatePrompt 同规）。
+      ref
+          .read(pillWorkspaceProvider(PillScopes.negative).notifier)
+          .syncFromPlainText(negativePrompt);
     });
   }
 

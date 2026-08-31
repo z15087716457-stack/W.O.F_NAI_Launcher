@@ -28,7 +28,6 @@ import '../../../providers/quality_preset_provider.dart';
 import '../../../providers/uc_preset_provider.dart';
 import '../../../widgets/autocomplete/autocomplete.dart';
 import '../../../widgets/common/app_toast.dart';
-import '../../../widgets/prompt/blocks/prompt_block_editor.dart';
 import '../../../widgets/prompt/pills/prompt_pill_editor.dart';
 import '../../../widgets/prompt/unified/unified_prompt_config.dart';
 import '../../../widgets/prompt/nai_syntax_controller.dart';
@@ -132,6 +131,15 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       ref
           .read(pillWorkspaceNotifierProvider.notifier)
           .replaceWithPlainText(prompt);
+    }
+    // 负向 lane 对称播种（P3）
+    final pillNegative = ref.read(pillWorkspaceProvider(PillScopes.negative));
+    if (negativePrompt.isNotEmpty &&
+        pillNegative.document.text.isEmpty &&
+        pillNegative.document.instances.isEmpty) {
+      ref
+          .read(pillWorkspaceProvider(PillScopes.negative).notifier)
+          .replaceWithPlainText(negativePrompt);
     }
   }
 
@@ -471,24 +479,11 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   }
 
   Widget _buildTopBar(ThemeData theme) {
-    final promptCount = _promptController.text
-        .split(',')
-        .where((s) => s.trim().isNotEmpty)
-        .length;
-    final negativeCount = _negativeController.text
-        .split(',')
-        .where((s) => s.trim().isNotEmpty)
-        .length;
-
     // 获取模型
     final model = ref.watch(
       generationParamsNotifierProvider.select((params) => params.model),
     );
-    final typeSwitch = _buildPromptTypeSwitch(
-      theme,
-      promptCount,
-      negativeCount,
-    );
+    final typeSwitch = _buildPromptTypeSwitch(theme);
 
     // 工具栏（全屏、清空、设置）
     final toolbar = PromptEditorToolbar(
@@ -658,11 +653,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     ).then(_handleSettingsMenuResult);
   }
 
-  Widget _buildPromptTypeSwitch(
-    ThemeData theme,
-    int promptCount,
-    int negativeCount,
-  ) {
+  Widget _buildPromptTypeSwitch(ThemeData theme) {
     // 获取固定词数据
     final fixedTagsState = ref.watch(fixedTagsNotifierProvider);
     final enabledPrefixes = fixedTagsState.enabledPrefixes;
@@ -698,9 +689,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       children: [
         // 正面提示词按钮
         _PromptTypeButton(
-          icon: Icons.auto_awesome,
           label: context.l10n.prompt_positive,
-          count: promptCount,
           isSelected: !_isNegativeMode,
           color: theme.colorScheme.primary,
           onTap: () => _setNegativeMode(false),
@@ -718,11 +707,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           ),
         ),
         const SizedBox(width: 8),
-        // 负面提示词按钮
+        // 负面提示词按钮（顶栏瘦容：标签用 NAI 通用术语 UC，静定）
         _PromptTypeButton(
-          icon: Icons.block,
-          label: context.l10n.prompt_negative,
-          count: negativeCount,
+          label: 'UC',
           isSelected: _isNegativeMode,
           color: theme.colorScheme.error,
           onTap: () => _setNegativeMode(true),
@@ -901,9 +888,11 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     final enableSdSyntaxAutoConvert = ref.watch(
       sdSyntaxAutoConvertSettingsProvider,
     );
-    return PromptBlockEditor(
+    // P3：负向框同换单框药丸编辑器（旧段式编辑器连 38px 侧图标条一并退场）
+    return PromptPillEditor(
       key: const ValueKey('generation_prompt_negative_input'),
-      lane: PromptBlockLane.negative,
+      pillScope: PillScopes.negative,
+      initialPlainText: _negativeController.text,
       compact: false,
       autoGrow: widget.autoGrow,
       minLines: widget.autoGrow ? 2 : null,
@@ -1812,18 +1801,14 @@ class _NegativePromptTooltip extends StatelessWidget {
 
 /// 提示词类型切换按钮
 class _PromptTypeButton extends StatefulWidget {
-  final IconData icon;
   final String label;
-  final int count;
   final bool isSelected;
   final Color color;
   final VoidCallback onTap;
   final Widget Function(ThemeData theme)? tooltipBuilder;
 
   const _PromptTypeButton({
-    required this.icon,
     required this.label,
-    required this.count,
     required this.isSelected,
     required this.color,
     required this.onTap,
@@ -1881,7 +1866,7 @@ class _PromptTypeButtonState extends State<_PromptTypeButton>
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOutCubic,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               // 选中时使用渐变背景
               gradient: widget.isSelected
@@ -1918,71 +1903,20 @@ class _PromptTypeButtonState extends State<_PromptTypeButton>
                     ]
                   : null,
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 图标
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: widget.isSelected
-                        ? widget.color.withValues(alpha: 0.15)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Icon(
-                    widget.icon,
-                    size: 16,
-                    color: widget.isSelected
-                        ? widget.color
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // 文字
-                Text(
-                  widget.label,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: widget.isSelected
-                        ? FontWeight.w600
-                        : FontWeight.w500,
-                    color: widget.isSelected
-                        ? widget.color
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                // 数量徽章
-                if (widget.count > 0) ...[
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: widget.isSelected
-                          ? widget.color.withValues(alpha: 0.2)
-                          : theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      widget.count.toString(),
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: widget.isSelected
-                            ? widget.color
-                            : theme.colorScheme.onSurface.withValues(
-                                alpha: 0.6,
-                              ),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
+            // 顶栏瘦容：纯文字按钮，图标与逗号分隔计数徽章已去（静定——
+            // 计数口径意义不明，token 用量看底部 token 计数器）
+            child: Text(
+              widget.label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: widget.isSelected
+                    ? FontWeight.w600
+                    : FontWeight.w500,
+                color: widget.isSelected
+                    ? widget.color
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                letterSpacing: 0.3,
+              ),
             ),
           ),
         ),

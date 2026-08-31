@@ -410,7 +410,6 @@
   },
   "generation_noiseSchedule": "Noise Schedule",
   "prompt_positive": "Prompt",
-  "prompt_negative": "Undesired Content",
   "prompt_positivePrompt": "Prompt",
   "prompt_negativePrompt": "Undesired Content",
   "prompt_mainPositive": "Main Prompt",

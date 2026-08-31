@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/character/character_prompt.dart';
+import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
 import '../blocks/prompt_block_colors.dart';
@@ -17,7 +18,7 @@ import 'prompt_pill.dart';
 ///
 /// 与旧段式 `PromptBlockEditor` 平行存在，仅服务生成页正向主提示词。
 /// 底层文本里块 = 1 个私有区标记字符，实例数据在
-/// [pillWorkspaceNotifierProvider]，渲染钩子经 [UnifiedPromptConfig.pillBuilder]
+/// [pillWorkspaceProvider]，渲染钩子经 [UnifiedPromptConfig.pillBuilder]
 /// 注入 `NaiSyntaxController` 的 span 构建链。
 ///
 /// 块库入口不在本编辑器内（旧侧签/模态抽屉已拆除），由生成页页面级的
@@ -26,10 +27,13 @@ class PromptPillEditor extends ConsumerStatefulWidget {
   const PromptPillEditor({
     super.key,
     required this.config,
+    this.pillScope = PillScopes.main,
+    this.initialPlainText,
     this.decoration,
     this.compact = false,
     this.autoGrow = false,
     this.minLines,
+    this.maxLines,
     this.sessionId,
     this.onChanged,
     this.onOpenAssistantSettings,
@@ -37,10 +41,24 @@ class PromptPillEditor extends ConsumerStatefulWidget {
   });
 
   final UnifiedPromptConfig config;
+
+  /// 药丸工作区 lane（P3）：每个输入框一个独立 scope，
+  /// 文档/实例/墓碑缓存按 scope 隔离并分键持久化。
+  final String pillScope;
+
+  /// 首次打开（lane 无存档）时用于播种重建的存量纯文本。
+  ///
+  /// 挂载/切换 scope 时若文档为空且本值非空，先用它重建文档再对外发射
+  /// 投影——否则挂载期的空投影会经 onChanged 回写把外部存量文本抹掉
+  /// （实测：build 期捕获的陈旧投影与播种赛跑，互相覆盖振荡）。
+  final String? initialPlainText;
   final InputDecoration? decoration;
   final bool compact;
   final bool autoGrow;
   final int? minLines;
+
+  /// 最大行数（角色框 3~12 自增高封顶用）；null = 随 compact 默认。
+  final int? maxLines;
   final String? sessionId;
 
   /// 投影（块已展开的完整提示词）变化回调，接旧生成参数链路。
@@ -62,19 +80,72 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   int _lastValidOffset = 0;
   String? _lastEmittedProjection;
 
+  /// 播种挂起中：文档尚未物化，禁止对外发射投影（防陈旧空串回写）。
+  bool _pendingSeed = false;
+
   @override
   void initState() {
     super.initState();
-    final document = ref.read(pillWorkspaceNotifierProvider).document;
+    final document = ref.read(_workspace).document;
     _controller = TextEditingController(text: document.text)
       ..addListener(_handleControllerChanged);
     _focusNode = FocusNode();
     _lastValidOffset = document.text.length;
-    // 挂载即对齐一次投影（库内容可能在停机构间被编辑过）
+    _armSeedIfFresh(document);
+    // 挂载即对齐一次投影（库内容可能在停机构间被编辑过）；
+    // 有播种时先播种再发射，保证发射的是物化后的投影。
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _emitProjectionIfChanged(ref.read(pillWorkspaceNotifierProvider));
+      _runPendingSeed();
+      _emitProjectionIfChanged(ref.read(_workspace));
     });
+  }
+
+  @override
+  void didUpdateWidget(PromptPillEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // scope 切换（角色编辑面板 State 复用、切换编辑目标）：重绑文档
+    if (oldWidget.pillScope != widget.pillScope) {
+      final workspace = ref.read(_workspace);
+      _applyingExternal = true;
+      _controller.value = TextEditingValue(
+        text: workspace.document.text,
+        selection: TextSelection.collapsed(
+          offset: workspace.document.text.length,
+        ),
+      );
+      _applyingExternal = false;
+      _lastValidOffset = workspace.document.text.length;
+      _lastEmittedProjection = null;
+      _armSeedIfFresh(workspace.document);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _runPendingSeed();
+        _emitProjectionIfChanged(ref.read(_workspace));
+      });
+    }
+  }
+
+  /// 文档为空且有存量文本 → 进入播种挂起态，并预置已发射投影为存量文本
+  /// （播种后的投影必等于它：全新文档无实例），挂载期不再发射任何值。
+  void _armSeedIfFresh(PillDocument document) {
+    final initial = widget.initialPlainText;
+    if (initial == null ||
+        initial.isEmpty ||
+        document.text.isNotEmpty ||
+        document.instances.isNotEmpty) {
+      return;
+    }
+    _pendingSeed = true;
+    _lastEmittedProjection = initial;
+  }
+
+  void _runPendingSeed() {
+    if (!_pendingSeed) return;
+    _pendingSeed = false;
+    final initial = widget.initialPlainText;
+    if (initial == null) return;
+    ref.read(_workspace.notifier).replaceWithPlainText(initial);
   }
 
   @override
@@ -86,14 +157,18 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     super.dispose();
   }
 
+  /// 本编辑器绑定的药丸工作区（按 [pillScope] 取家族实例）。
+  NotifierFamilyProvider<PillWorkspaceNotifier, PillWorkspaceState, String>
+  get _workspace => pillWorkspaceProvider(widget.pillScope);
+
   @override
   Widget build(BuildContext context) {
     // 块库就绪/内容变化 → 重算投影（块内容经 resolver 实时解析进投影）
     ref.listen(promptBlockLibraryNotifierProvider, (_, __) {
-      ref.read(pillWorkspaceNotifierProvider.notifier).refreshProjection();
+      ref.read(_workspace.notifier).refreshProjection();
     });
 
-    final workspace = ref.watch(pillWorkspaceNotifierProvider);
+    final workspace = ref.watch(_workspace);
     final library = ref.watch(promptBlockLibraryNotifierProvider).valueOrNull;
 
     // provider 驱动的文本变化（插入/移动/外部重建）回写 controller
@@ -143,7 +218,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
               onComfyuiImport: widget.onComfyuiImport == null
                   ? null
                   : _handleComfyuiImport,
-              maxLines: widget.compact ? 2 : null,
+              maxLines: widget.maxLines ?? (widget.compact ? 2 : null),
               minLines: widget.minLines ?? (widget.compact ? 1 : 2),
               expands: false,
               fitContent: true,
@@ -185,7 +260,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     String marker,
     int occurrence,
   ) {
-    final workspace = ref.read(pillWorkspaceNotifierProvider);
+    final workspace = ref.read(_workspace);
     final library = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
     final instance = workspace.document.instances[marker];
 
@@ -195,7 +270,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
         alignment: PlaceholderAlignment.middle,
         child: GestureDetector(
           onTap: () => ref
-              .read(pillWorkspaceNotifierProvider.notifier)
+              .read(_workspace.notifier)
               .removeMarker(marker),
           child: PromptPill(
             title: context.l10n.promptBlockPill_unknown,
@@ -224,7 +299,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
         alignment: PlaceholderAlignment.middle,
         child: GestureDetector(
           onTap: () => ref
-              .read(pillWorkspaceNotifierProvider.notifier)
+              .read(_workspace.notifier)
               .removeMarker(marker),
           child: PromptPill(
             title: context.l10n.promptBlockPill_missing,
@@ -273,7 +348,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
         childWhenDragging: Opacity(opacity: 0.35, child: pill),
         child: GestureDetector(
           onTap: () => ref
-              .read(pillWorkspaceNotifierProvider.notifier)
+              .read(_workspace.notifier)
               .toggleEnabled(marker),
           child: pill,
         ),
@@ -288,12 +363,12 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     final dragRef = data.instanceMarker;
     if (dragRef == null) {
       ref
-          .read(pillWorkspaceNotifierProvider.notifier)
+          .read(_workspace.notifier)
           .insertBlockAt(offset: offset, blockId: data.blockId);
       _placeCaretAfter(offset + 1);
     } else {
       ref
-          .read(pillWorkspaceNotifierProvider.notifier)
+          .read(_workspace.notifier)
           .moveMarker(
             marker: dragRef.marker,
             occurrence: dragRef.occurrence,
@@ -339,7 +414,10 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       final clamped = offset.clamp(0, _controller.text.length);
       _controller.selection = TextSelection.collapsed(offset: clamped);
       _lastValidOffset = clamped;
-      ref.read(pillMainCaretOffsetProvider.notifier).state = clamped;
+      ref.read(pillActiveEditorTargetProvider.notifier).state = (
+        scope: widget.pillScope,
+        caret: clamped,
+      );
     });
   }
 
@@ -355,21 +433,25 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       _syncCaretOffset(_lastValidOffset);
     }
     if (_applyingExternal) return;
-    ref.read(pillWorkspaceNotifierProvider.notifier).setText(_controller.text);
+    ref.read(_workspace.notifier).setText(_controller.text);
   }
 
-  /// 把最近光标位置同步给块库面板（点击插入的定位依据）。
+  /// 把本框的 scope+最近光标位置同步为块库面板的点击插入目标。
   ///
   /// 本回调可能在 build 期间由 `_applyingExternal` 回写触发，
   /// 写 provider 必须延后到帧末。
   void _syncCaretOffset(int offset) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(pillMainCaretOffsetProvider.notifier).state = offset;
+      ref.read(pillActiveEditorTargetProvider.notifier).state = (
+        scope: widget.pillScope,
+        caret: offset,
+      );
     });
   }
 
   void _emitProjectionIfChanged(PillWorkspaceState workspace) {
+    if (_pendingSeed) return; // 投影未物化，发射必是陈旧值
     if (_lastEmittedProjection == workspace.projection) return;
     _lastEmittedProjection = workspace.projection;
     final onChanged = widget.onChanged;
@@ -381,7 +463,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
   void _handleComfyuiImport(String globalPrompt, List<CharacterPrompt> chars) {
     ref
-        .read(pillWorkspaceNotifierProvider.notifier)
+        .read(_workspace.notifier)
         .replaceWithPlainText(globalPrompt);
     widget.onComfyuiImport?.call(globalPrompt, chars);
   }

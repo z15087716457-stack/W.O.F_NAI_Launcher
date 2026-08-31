@@ -929,9 +929,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get prompt_positive => 'プロンプト';
 
   @override
-  String get prompt_negative => '除外したい要素';
-
-  @override
   String get prompt_positivePrompt => 'プロンプト';
 
   @override

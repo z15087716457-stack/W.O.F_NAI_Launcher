@@ -50,5 +50,11 @@ class PillWorkspaceStorage {
     );
   }
 
+  /// 删除指定 scope 的存档（如角色被删除时清理其正/负 lane）。
+  Future<void> deleteScope(String scope) async {
+    if (!Hive.isBoxOpen(boxName)) return;
+    await Hive.box<String>(boxName).delete(_key(scope));
+  }
+
   static String _key(String scope) => '$_pillPrefix$scope';
 }

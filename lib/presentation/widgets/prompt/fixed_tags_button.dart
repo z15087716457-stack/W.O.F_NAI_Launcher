@@ -92,23 +92,13 @@ class _FixedTagsButtonState extends ConsumerState<FixedTagsButton> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // 顶栏瘦容：纯图标按钮，文字标签已去（静定）；悬停 Tooltip 仍有完整说明
                 Icon(
                   hasEnabled ? Icons.push_pin : Icons.push_pin_outlined,
                   size: 14,
                   color: hasEnabled
                       ? theme.colorScheme.secondary
                       : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  context.l10n.fixedTags_label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: hasEnabled ? FontWeight.w600 : FontWeight.w500,
-                    color: hasEnabled
-                        ? theme.colorScheme.secondary
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
                 ),
                 if (hasEnabled) ...[
                   const SizedBox(width: 5),

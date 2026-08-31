@@ -38,17 +38,33 @@ final pillWorkspaceStorageProvider = Provider<PillWorkspaceStorage>(
   (ref) => PillWorkspaceStorage(),
 );
 
-/// 主提示词药丸编辑器最近一次有效光标 offset（供块库面板点击插入定位）。
-/// null = 尚未聚焦过，插入到文本末尾。
-final pillMainCaretOffsetProvider = StateProvider<int?>((ref) => null);
+/// 药丸工作区 scope 集中定义（P3 多 lane）。
+abstract final class PillScopes {
+  /// 生成页正向主提示词。
+  static const String main = 'main';
 
-/// 生成页主提示词（正向）的药丸工作区。
+  /// 生成页负向（UC）框。
+  static const String negative = 'negative';
+
+  /// 角色框正向：char:<characterId>:pos
+  static String charPos(String characterId) => 'char:$characterId:pos';
+
+  /// 角色框负向：char:<characterId>:neg
+  static String charNeg(String characterId) => 'char:$characterId:neg';
+}
+
+/// 药丸编辑器「活动插入目标」：最近一次 caret/焦点变化所在的
+/// (scope, caret)。块库面板点击插入按此路由；null = 尚未聚焦过任何
+/// 药丸框，插入到主提示词文本末尾。
+final pillActiveEditorTargetProvider =
+    StateProvider<({String scope, int caret})?>((ref) => null);
+
+/// 药丸工作区（P3 起按 scope 分 lane：正向/负向/角色框各自独立文档）。
 ///
-/// P0 原型仅覆盖此单 lane：负向/角色框/画风探索页仍走旧段式工作区。
+/// keep-alive（非 autoDispose）：切换 正面/UC tab 会卸载编辑器，
+/// 墓碑缓存与文档实例必须活过 tab 切换，否则剪切→切 tab→粘贴 变失效块。
 /// 块内容从块库 provider 实时解析，库编辑即时反映到投影。
-class PillWorkspaceNotifier extends Notifier<PillWorkspaceState> {
-  static const String persistenceScope = 'main';
-
+class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   /// 最近被移除实例的墓碑缓存（marker → 实例快照）。
   ///
   /// 剪切/删除会让标记字符从文本消失、实例被对账移除；此后若同一字符
@@ -58,9 +74,9 @@ class PillWorkspaceNotifier extends Notifier<PillWorkspaceState> {
   static const int _tombstoneCapacity = 64;
 
   @override
-  PillWorkspaceState build() {
+  PillWorkspaceState build(String scope) {
     final storage = ref.read(pillWorkspaceStorageProvider);
-    final restored = storage.tryLoadSync(persistenceScope);
+    final restored = storage.tryLoadSync(scope);
     final document = restored ?? PillDocument.empty();
     return PillWorkspaceState(
       document: document,
@@ -204,11 +220,17 @@ class PillWorkspaceNotifier extends Notifier<PillWorkspaceState> {
 
   void _persist(PillDocument document) {
     // fire-and-forget：持久化失败不打断编辑，Box 未打开时内部直接跳过。
-    ref.read(pillWorkspaceStorageProvider).persist(persistenceScope, document);
+    ref.read(pillWorkspaceStorageProvider).persist(arg, document);
   }
 }
 
-final pillWorkspaceNotifierProvider =
-    NotifierProvider<PillWorkspaceNotifier, PillWorkspaceState>(
-      PillWorkspaceNotifier.new,
-    );
+/// 按 scope 取药丸工作区（同参返回同一 provider 实例，家族内隔离）。
+final pillWorkspaceProvider =
+    NotifierProvider.family<
+      PillWorkspaceNotifier,
+      PillWorkspaceState,
+      String
+    >(PillWorkspaceNotifier.new);
+
+/// 主提示词（正向）lane 的便捷别名，等价 `pillWorkspaceProvider('main')`。
+final pillWorkspaceNotifierProvider = pillWorkspaceProvider(PillScopes.main);

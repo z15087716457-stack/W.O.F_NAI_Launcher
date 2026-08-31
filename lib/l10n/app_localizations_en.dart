@@ -947,9 +947,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prompt_positive => 'Prompt';
 
   @override
-  String get prompt_negative => 'Undesired Content';
-
-  @override
   String get prompt_positivePrompt => 'Prompt';
 
   @override

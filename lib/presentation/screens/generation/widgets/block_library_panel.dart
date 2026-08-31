@@ -398,16 +398,17 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
 
   // ==================== 插入 ====================
 
+  /// 点击插入：路由到「最近聚焦的药丸编辑框」（`pillActiveEditorTargetProvider`），
+  /// 从未聚焦过任何框时回退主提示词末尾。
   void _insertBlock(PromptBlock block) {
-    final document = ref.read(pillWorkspaceNotifierProvider).document;
-    final caret = ref.read(pillMainCaretOffsetProvider);
-    final offset = (caret ?? document.text.length).clamp(
+    final target = ref.read(pillActiveEditorTargetProvider);
+    final lane = pillWorkspaceProvider(target?.scope ?? PillScopes.main);
+    final document = ref.read(lane).document;
+    final offset = (target?.caret ?? document.text.length).clamp(
       0,
       document.text.length,
     );
-    ref
-        .read(pillWorkspaceNotifierProvider.notifier)
-        .insertBlockAt(offset: offset, blockId: block.id);
+    ref.read(lane.notifier).insertBlockAt(offset: offset, blockId: block.id);
   }
 
   // ==================== 块右键菜单 ====================
