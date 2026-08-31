@@ -51,10 +51,7 @@ class VibeLibrarySelectionNotifier extends _$VibeLibrarySelectionNotifier {
 
   /// 进入并选中
   void enterAndSelect(String id) {
-    state = SelectionModeState(
-      isActive: true,
-      selectedIds: {id},
-    );
+    state = SelectionModeState(isActive: true, selectedIds: {id});
   }
 
   /// 清空选择

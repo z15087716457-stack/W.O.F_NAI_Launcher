@@ -171,8 +171,7 @@ extension FixedTagCategoryListExtension on List<FixedTagCategory> {
 
   /// 更新排序顺序
   List<FixedTagCategory> reindex() {
-    return asMap()
-        .entries
+    return asMap().entries
         .map((e) => e.value.copyWith(sortOrder: e.key))
         .toList();
   }

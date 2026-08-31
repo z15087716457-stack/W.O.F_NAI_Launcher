@@ -45,16 +45,13 @@ class ThemedDivider extends StatelessWidget {
     if (extension != null) {
       // 霓虹发光效果主题 (RetroWave/CassetteFuturism)
       if (extension.enableNeonGlow && extension.glowColor != null) {
-        return _buildGlowDivider(
-          context,
-          extension.glowColor!,
-          isDark,
-        );
+        return _buildGlowDivider(context, extension.glowColor!, isDark);
       }
     }
 
     // 使用新的 divider 属性
-    final dividerColor = extension?.dividerColor ??
+    final dividerColor =
+        extension?.dividerColor ??
         (isDark
             ? Colors.white.withValues(alpha: 0.1)
             : Colors.black.withValues(alpha: 0.1));

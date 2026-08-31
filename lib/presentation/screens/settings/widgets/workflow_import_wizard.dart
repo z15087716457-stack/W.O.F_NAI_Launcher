@@ -211,7 +211,8 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
       _enabledSlotIds.add(slot.id);
     }
     if (_nameController.text.isEmpty) {
-      _nameController.text = _fileName?.replaceAll('.json', '') ??
+      _nameController.text =
+          _fileName?.replaceAll('.json', '') ??
           context.l10n.workflowImport_defaultName;
     }
   }
@@ -264,8 +265,9 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
                             _workflowJson!.length,
                           ),
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface
-                                .withValues(alpha: 0.6),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.6,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -283,15 +285,17 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
                         Icon(
                           Icons.upload_file,
                           size: 40,
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.4),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.4,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           context.l10n.workflowImport_selectWorkflowApi,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface
-                                .withValues(alpha: 0.5),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
                         ),
                       ],
@@ -460,8 +464,9 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
           const Spacer(),
           Text(
             value,
-            style: theme.textTheme.bodySmall
-                ?.copyWith(fontWeight: FontWeight.w600),
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
@@ -515,9 +520,7 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
               color: theme.colorScheme.errorContainer.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Text(
-              context.l10n.workflowImport_noSlotsWarning,
-            ),
+            child: Text(context.l10n.workflowImport_noSlotsWarning),
           ),
       ],
     );
@@ -532,8 +535,9 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
           const SizedBox(width: 8),
           Text(
             title,
-            style: theme.textTheme.titleSmall
-                ?.copyWith(color: theme.colorScheme.primary),
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: theme.colorScheme.primary,
+            ),
           ),
         ],
       ),
@@ -573,10 +577,12 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
     final enabledSlots = _analysis!.allSlots
         .where((s) => _enabledSlotIds.contains(s.id))
         .toList();
-    final inputs =
-        enabledSlots.where((s) => s.direction == SlotDirection.input).length;
-    final outputs =
-        enabledSlots.where((s) => s.direction == SlotDirection.output).length;
+    final inputs = enabledSlots
+        .where((s) => s.direction == SlotDirection.input)
+        .length;
+    final outputs = enabledSlots
+        .where((s) => s.direction == SlotDirection.output)
+        .length;
     final params = enabledSlots
         .where((s) => s.direction == SlotDirection.parameter)
         .length;
@@ -654,8 +660,9 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
           Flexible(
             child: Text(
               value,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
               textAlign: TextAlign.end,
             ),
           ),
@@ -684,8 +691,9 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
       version: '1.0.0',
       author: 'User',
       category: _category,
-      requiresInputImage:
-          enabledSlots.any((s) => s.direction == SlotDirection.input),
+      requiresInputImage: enabledSlots.any(
+        (s) => s.direction == SlotDirection.input,
+      ),
       requiresMask: enabledSlots.any((s) => s.dataType == SlotDataType.mask),
       slots: enabledSlots,
       workflowJson: _workflowJson!,

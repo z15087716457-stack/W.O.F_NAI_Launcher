@@ -14,13 +14,7 @@ part 'batch_generation_notifier.g.dart';
 // ==================== 批量生成状态枚举 ====================
 
 /// 批量生成状态
-enum BatchGenerationStatus {
-  idle,
-  generating,
-  completed,
-  error,
-  cancelled,
-}
+enum BatchGenerationStatus { idle, generating, completed, error, cancelled }
 
 // ==================== 批量生成项 ====================
 
@@ -74,8 +68,7 @@ class BatchGenerationItem {
   }
 
   /// 是否正在生成
-  bool get isGenerating =>
-      startTime != null && !isCompleted && error == null;
+  bool get isGenerating => startTime != null && !isCompleted && error == null;
 
   /// 是否失败
   bool get isFailed => error != null;
@@ -137,8 +130,9 @@ class BatchGenerationState {
       failedCount: failedCount ?? this.failedCount,
       batchWidth: batchWidth ?? this.batchWidth,
       batchHeight: batchHeight ?? this.batchHeight,
-      streamPreview:
-          clearStreamPreview ? null : (streamPreview ?? this.streamPreview),
+      streamPreview: clearStreamPreview
+          ? null
+          : (streamPreview ?? this.streamPreview),
       currentIndex: currentIndex ?? this.currentIndex,
     );
   }
@@ -157,19 +151,21 @@ class BatchGenerationState {
       items.isNotEmpty && completedCount + failedCount == items.length;
 
   /// 获取成功的图像列表
-  List<Uint8List> get successfulImages =>
-      items.where((i) => i.isCompleted && i.image != null)
-          .map((i) => i.image!)
-          .toList();
+  List<Uint8List> get successfulImages => items
+      .where((i) => i.isCompleted && i.image != null)
+      .map((i) => i.image!)
+      .toList();
 
   /// 获取生成的图像对象列表
   List<GeneratedImage> get generatedImages => items
       .where((i) => i.isCompleted && i.image != null)
-      .map((i) => GeneratedImage.create(
-            i.image!,
-            width: batchWidth ?? 832,
-            height: batchHeight ?? 1216,
-          ),)
+      .map(
+        (i) => GeneratedImage.create(
+          i.image!,
+          width: batchWidth ?? 832,
+          height: batchHeight ?? 1216,
+        ),
+      )
       .toList();
 }
 
@@ -259,9 +255,7 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
     for (int i = 0; i < count; i++) {
       if (_isCancelled) break;
 
-      futures.add(
-        semaphore.acquire(() => _generateSingle(params, i, count)),
-      );
+      futures.add(semaphore.acquire(() => _generateSingle(params, i, count)));
     }
 
     try {
@@ -305,11 +299,7 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
   }
 
   /// 生成单个图像
-  Future<void> _generateSingle(
-    ImageParams params,
-    int index,
-    int total,
-  ) async {
+  Future<void> _generateSingle(ImageParams params, int index, int total) async {
     if (_isCancelled) return;
 
     final startTime = DateTime.now();
@@ -317,10 +307,7 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
     // 更新当前索引和开始时间
     _updateItem(
       index,
-      (current) => current.copyWith(
-        startTime: startTime,
-        progress: 0.0,
-      ),
+      (current) => current.copyWith(startTime: startTime, progress: 0.0),
     );
 
     state = state.copyWith(currentIndex: index + 1);
@@ -338,10 +325,7 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
           if (_isCancelled) return;
 
           // 更新单个项目的进度
-          _updateItem(
-            index,
-            (current) => current.copyWith(progress: progress),
-          );
+          _updateItem(index, (current) => current.copyWith(progress: progress));
 
           // 更新总体进度
           final overallProgress = (index + progress) / total;
@@ -385,10 +369,8 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
 
       _updateItem(
         index,
-        (current) => current.copyWith(
-          error: e.toString(),
-          endTime: DateTime.now(),
-        ),
+        (current) =>
+            current.copyWith(error: e.toString(), endTime: DateTime.now()),
       );
 
       // 更新失败计数
@@ -402,7 +384,10 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
   /// 注意：此方法使用 Riverpod 的原子更新模式，通过读取最新的 state 来确保
   /// 并发任务不会覆盖彼此的状态更新。每次更新都会基于当前最新的 state.items
   /// 进行复制和修改，而不是依赖于调用方传入的旧状态。
-  void _updateItem(int index, BatchGenerationItem Function(BatchGenerationItem current) updater) {
+  void _updateItem(
+    int index,
+    BatchGenerationItem Function(BatchGenerationItem current) updater,
+  ) {
     final currentItems = state.items;
     if (index < 0 || index >= currentItems.length) return;
 
@@ -461,10 +446,7 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
     for (final index in failedIndices) {
       _updateItem(
         index,
-        (current) => BatchGenerationItem(
-          id: current.id,
-          index: index,
-        ),
+        (current) => BatchGenerationItem(id: current.id, index: index),
       );
     }
 
@@ -481,7 +463,9 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
     for (final index in failedIndices) {
       if (_isCancelled) break;
       futures.add(
-        semaphore.acquire(() => _generateSingle(params, index, state.items.length)),
+        semaphore.acquire(
+          () => _generateSingle(params, index, state.items.length),
+        ),
       );
     }
 
@@ -492,7 +476,9 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
       final failed = state.items.where((i) => i.isFailed).length;
 
       state = state.copyWith(
-        status: failed == 0 ? BatchGenerationStatus.completed : BatchGenerationStatus.error,
+        status: failed == 0
+            ? BatchGenerationStatus.completed
+            : BatchGenerationStatus.error,
         overallProgress: 1.0,
         completedCount: completed,
         failedCount: failed,
@@ -519,8 +505,9 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
 
   /// 计算平均生成耗时
   int? _calculateAverageDuration() {
-    final completedItems =
-        state.items.where((i) => i.isCompleted && i.durationMs != null);
+    final completedItems = state.items.where(
+      (i) => i.isCompleted && i.durationMs != null,
+    );
     if (completedItems.isEmpty) return null;
 
     final totalDuration = completedItems.fold<int>(

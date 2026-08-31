@@ -8,17 +8,11 @@ import 'pipe_parser.dart';
 class ComfyuiSyntaxDetector {
   // COUPLE 关键字匹配（不在引号内）
   // 匹配: COUPLE 或 COUPLE(...)
-  static final _couplePattern = RegExp(
-    r'\bCOUPLE\b',
-    caseSensitive: true,
-  );
+  static final _couplePattern = RegExp(r'\bCOUPLE\b', caseSensitive: true);
 
   // AND + MASK/AREA 组合匹配
   // 匹配: ... AND ... 且包含 MASK(...) 或 AREA(...)
-  static final _andPattern = RegExp(
-    r'\s+AND\s+',
-    caseSensitive: true,
-  );
+  static final _andPattern = RegExp(r'\s+AND\s+', caseSensitive: true);
 
   static final _maskOrAreaPattern = RegExp(
     r'\b(MASK|AREA)\s*\(',

@@ -37,10 +37,7 @@ void main() {
         layerManager.addStrokeToLayer(
           maskLayer.id,
           StrokeData(
-            points: const [
-              Offset(12, 24),
-              Offset(52, 24),
-            ],
+            points: const [Offset(12, 24), Offset(52, 24)],
             size: 18,
             color: Colors.red,
             opacity: 1,
@@ -64,129 +61,116 @@ void main() {
     });
 
     testWidgets(
-        'should export inpaint masks with hard edges even when brush hardness is soft',
-        (tester) async {
-      await tester.runAsync(() async {
-        final layerManager = LayerManager();
-        final maskLayer = layerManager.addLayer(name: '蒙版');
+      'should export inpaint masks with hard edges even when brush hardness is soft',
+      (tester) async {
+        await tester.runAsync(() async {
+          final layerManager = LayerManager();
+          final maskLayer = layerManager.addLayer(name: '蒙版');
 
-        layerManager.addStrokeToLayer(
-          maskLayer.id,
-          StrokeData(
-            points: const [
-              Offset(32, 12),
-              Offset(32, 52),
-            ],
-            size: 18,
-            color: Colors.white,
-            opacity: 0.55,
-            hardness: 0.1,
-          ),
-        );
+          layerManager.addStrokeToLayer(
+            maskLayer.id,
+            StrokeData(
+              points: const [Offset(32, 12), Offset(32, 52)],
+              size: 18,
+              color: Colors.white,
+              opacity: 0.55,
+              hardness: 0.1,
+            ),
+          );
 
-        final maskBytes = await ImageExporterNew.exportMaskFromLayers(
-          layerManager,
-          const Size(64, 64),
-          forceHardEdges: true,
-        );
+          final maskBytes = await ImageExporterNew.exportMaskFromLayers(
+            layerManager,
+            const Size(64, 64),
+            forceHardEdges: true,
+          );
 
-        final decoded = img.decodePng(maskBytes)!;
+          final decoded = img.decodePng(maskBytes)!;
 
-        expect(decoded.getPixel(32, 32).r.toInt(), equals(255));
-        expect(decoded.getPixel(20, 32).r.toInt(), equals(0));
+          expect(decoded.getPixel(32, 32).r.toInt(), equals(255));
+          expect(decoded.getPixel(20, 32).r.toInt(), equals(0));
 
-        layerManager.dispose();
-      });
-    });
+          layerManager.dispose();
+        });
+      },
+    );
 
     testWidgets(
-        'should keep accidental strokes on source layer when excluding only the base image',
-        (tester) async {
-      await tester.runAsync(() async {
-        final layerManager = LayerManager();
-        final sourceLayer = layerManager.addLayer(name: '底图');
+      'should keep accidental strokes on source layer when excluding only the base image',
+      (tester) async {
+        await tester.runAsync(() async {
+          final layerManager = LayerManager();
+          final sourceLayer = layerManager.addLayer(name: '底图');
 
-        layerManager.addStrokeToLayer(
-          sourceLayer.id,
-          StrokeData(
-            points: const [
-              Offset(16, 16),
-              Offset(48, 16),
-            ],
-            size: 16,
-            color: Colors.white,
-            opacity: 1,
-            hardness: 1,
-          ),
-        );
+          layerManager.addStrokeToLayer(
+            sourceLayer.id,
+            StrokeData(
+              points: const [Offset(16, 16), Offset(48, 16)],
+              size: 16,
+              color: Colors.white,
+              opacity: 1,
+              hardness: 1,
+            ),
+          );
 
-        final maskBytes = await ImageExporterNew.exportMaskFromLayers(
-          layerManager,
-          const Size(64, 64),
-          excludedBaseImageLayerIds: {sourceLayer.id},
-        );
+          final maskBytes = await ImageExporterNew.exportMaskFromLayers(
+            layerManager,
+            const Size(64, 64),
+            excludedBaseImageLayerIds: {sourceLayer.id},
+          );
 
-        final decoded = img.decodePng(maskBytes)!;
+          final decoded = img.decodePng(maskBytes)!;
 
-        expect(decoded.getPixel(32, 16).r.toInt(), greaterThan(240));
-        expect(decoded.getPixel(2, 2).r.toInt(), equals(0));
+          expect(decoded.getPixel(32, 16).r.toInt(), greaterThan(240));
+          expect(decoded.getPixel(2, 2).r.toInt(), equals(0));
 
-        layerManager.dispose();
-      });
-    });
+          layerManager.dispose();
+        });
+      },
+    );
 
     testWidgets(
-        'should preserve imported mask pixels while allowing eraser edits', (
-      tester,
-    ) async {
-      await tester.runAsync(() async {
-        final layerManager = LayerManager();
-        final maskBytes = _buildSolidMaskPng(
-          width: 64,
-          height: 64,
-        );
-        final maskLayer = await layerManager.addLayerFromImage(
-          maskBytes,
-          name: '已有蒙版',
-        );
+      'should preserve imported mask pixels while allowing eraser edits',
+      (tester) async {
+        await tester.runAsync(() async {
+          final layerManager = LayerManager();
+          final maskBytes = _buildSolidMaskPng(width: 64, height: 64);
+          final maskLayer = await layerManager.addLayerFromImage(
+            maskBytes,
+            name: '已有蒙版',
+          );
 
-        expect(maskLayer, isNotNull);
+          expect(maskLayer, isNotNull);
 
-        layerManager.addStrokeToLayer(
-          maskLayer!.id,
-          StrokeData(
-            points: const [
-              Offset(32, 32),
-              Offset(32, 32),
-            ],
-            size: 20,
-            color: Colors.transparent,
-            opacity: 1,
-            hardness: 1,
-            isEraser: true,
-          ),
-        );
+          layerManager.addStrokeToLayer(
+            maskLayer!.id,
+            StrokeData(
+              points: const [Offset(32, 32), Offset(32, 32)],
+              size: 20,
+              color: Colors.transparent,
+              opacity: 1,
+              hardness: 1,
+              isEraser: true,
+            ),
+          );
 
-        final exportedBytes = await ImageExporterNew.exportMaskFromLayers(
-          layerManager,
-          const Size(64, 64),
-        );
+          final exportedBytes = await ImageExporterNew.exportMaskFromLayers(
+            layerManager,
+            const Size(64, 64),
+          );
 
-        final decoded = img.decodePng(exportedBytes)!;
+          final decoded = img.decodePng(exportedBytes)!;
 
-        expect(decoded.getPixel(8, 8).r.toInt(), greaterThan(240));
-        expect(decoded.getPixel(32, 32).r.toInt(), lessThan(16));
+          expect(decoded.getPixel(8, 8).r.toInt(), greaterThan(240));
+          expect(decoded.getPixel(32, 32).r.toInt(), lessThan(16));
 
-        layerManager.dispose();
-      });
-    });
+          layerManager.dispose();
+        });
+      },
+    );
   });
 }
 
-Uint8List _buildSolidMaskPng({
-  required int width,
-  required int height,
-}) {
+Uint8List _buildSolidMaskPng({required int width, required int height}) {
   final image = img.Image(width: width, height: height);
   img.fill(image, color: img.ColorRgb8(255, 255, 255));
   return Uint8List.fromList(img.encodePng(image));

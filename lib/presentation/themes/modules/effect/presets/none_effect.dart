@@ -14,15 +14,15 @@ class NoneEffect extends BaseEffectModule {
     bool enableInsetShadow = true,
     double insetShadowDepth = 0.12,
     double insetShadowBlur = 8.0,
-  })  : _enableInsetShadow = enableInsetShadow,
-        _insetShadowDepth = insetShadowDepth,
-        _insetShadowBlur = insetShadowBlur;
+  }) : _enableInsetShadow = enableInsetShadow,
+       _insetShadowDepth = insetShadowDepth,
+       _insetShadowBlur = insetShadowBlur;
 
   /// Completely flat - no effects at all
   const NoneEffect.flat()
-      : _enableInsetShadow = false,
-        _insetShadowDepth = 0.0,
-        _insetShadowBlur = 0.0;
+    : _enableInsetShadow = false,
+      _insetShadowDepth = 0.0,
+      _insetShadowBlur = 0.0;
 
   @override
   bool get enableGlassmorphism => false;

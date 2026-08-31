@@ -15,9 +15,7 @@ void main() {
             isBalanceInsufficientProvider.overrideWith((ref) => false),
           ],
           child: const MaterialApp(
-            home: Scaffold(
-              body: AnlasCostBadge(isGenerating: true),
-            ),
+            home: Scaffold(body: AnlasCostBadge(isGenerating: true)),
           ),
         ),
       );
@@ -35,9 +33,7 @@ void main() {
             isBalanceInsufficientProvider.overrideWith((ref) => false),
           ],
           child: const MaterialApp(
-            home: Scaffold(
-              body: AnlasCostBadge(isGenerating: false),
-            ),
+            home: Scaffold(body: AnlasCostBadge(isGenerating: false)),
           ),
         ),
       );
@@ -55,9 +51,7 @@ void main() {
             isBalanceInsufficientProvider.overrideWith((ref) => false),
           ],
           child: const MaterialApp(
-            home: Scaffold(
-              body: AnlasCostBadge(isGenerating: false),
-            ),
+            home: Scaffold(body: AnlasCostBadge(isGenerating: false)),
           ),
         ),
       );
@@ -78,9 +72,7 @@ void main() {
             theme: ThemeData(
               colorScheme: const ColorScheme.light(error: Colors.red),
             ),
-            home: const Scaffold(
-              body: AnlasCostBadge(isGenerating: false),
-            ),
+            home: const Scaffold(body: AnlasCostBadge(isGenerating: false)),
           ),
         ),
       );
@@ -93,8 +85,9 @@ void main() {
       );
     });
 
-    testWidgets('shows primary container color when balance sufficient',
-        (tester) async {
+    testWidgets('shows primary container color when balance sufficient', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -104,12 +97,11 @@ void main() {
           ],
           child: MaterialApp(
             theme: ThemeData(
-              colorScheme:
-                  const ColorScheme.light(primaryContainer: Colors.blue),
+              colorScheme: const ColorScheme.light(
+                primaryContainer: Colors.blue,
+              ),
             ),
-            home: const Scaffold(
-              body: AnlasCostBadge(isGenerating: false),
-            ),
+            home: const Scaffold(body: AnlasCostBadge(isGenerating: false)),
           ),
         ),
       );

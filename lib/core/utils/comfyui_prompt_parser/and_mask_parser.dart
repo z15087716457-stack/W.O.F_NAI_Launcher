@@ -11,10 +11,7 @@ import 'position_converter.dart';
 /// - `prompt1 AREA(0 0.5, 0 1) AND prompt2 AREA(0.5 1, 0 1)`
 class AndMaskParser {
   // AND 分割模式
-  static final _andPattern = RegExp(
-    r'\s+AND\s+',
-    caseSensitive: true,
-  );
+  static final _andPattern = RegExp(r'\s+AND\s+', caseSensitive: true);
 
   // MASK 参数模式
   static final _maskPattern = RegExp(
@@ -35,9 +32,7 @@ class AndMaskParser {
   );
 
   // 权重模式（:weight 结尾）
-  static final _weightPattern = RegExp(
-    r'\s*:\s*[\d.]+\s*$',
-  );
+  static final _weightPattern = RegExp(r'\s*:\s*[\d.]+\s*$');
 
   // 性别推断模式
   static final _malePattern = RegExp(

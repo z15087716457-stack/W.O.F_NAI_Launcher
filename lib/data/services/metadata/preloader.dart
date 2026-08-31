@@ -148,11 +148,11 @@ class MetadataPreloader {
   void recordError() => _errorCount++;
 
   Map<String, dynamic> getStatistics() => {
-        'queueLength': queueLength,
-        'processingCount': processingCount,
-        'successCount': _successCount,
-        'errorCount': _errorCount,
-      };
+    'queueLength': queueLength,
+    'processingCount': processingCount,
+    'successCount': _successCount,
+    'errorCount': _errorCount,
+  };
 
   void resetStatistics() {
     _successCount = 0;

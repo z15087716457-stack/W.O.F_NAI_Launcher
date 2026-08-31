@@ -42,12 +42,7 @@ class VibePerformanceDiagnostics {
       span.finish(details: resultDetails?.call(result) ?? const {});
       return result;
     } catch (error) {
-      span.finish(
-        details: {
-          'failed': true,
-          'errorType': error.runtimeType,
-        },
-      );
+      span.finish(details: {'failed': true, 'errorType': error.runtimeType});
       rethrow;
     }
   }
@@ -69,12 +64,7 @@ class VibePerformanceDiagnostics {
       span.finish(details: resultDetails?.call(result) ?? const {});
       return result;
     } catch (error) {
-      span.finish(
-        details: {
-          'failed': true,
-          'errorType': error.runtimeType,
-        },
-      );
+      span.finish(details: {'failed': true, 'errorType': error.runtimeType});
       rethrow;
     }
   }
@@ -138,8 +128,8 @@ class VibePerfSpan {
     required this.operation,
     required this.slowThreshold,
     required Map<String, Object?> details,
-  })  : _details = Map.unmodifiable(details),
-        _stopwatch = Stopwatch()..start();
+  }) : _details = Map.unmodifiable(details),
+       _stopwatch = Stopwatch()..start();
 
   final String operation;
   final Duration slowThreshold;
@@ -162,10 +152,7 @@ class VibePerfSpan {
         VibePerformanceDiagnostics.buildSlowSpanMessage(
           operation,
           elapsed,
-          details: {
-            ..._details,
-            ...details,
-          },
+          details: {..._details, ...details},
         ),
         VibePerformanceDiagnostics.tag,
       );

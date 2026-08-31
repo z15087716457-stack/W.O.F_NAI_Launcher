@@ -58,8 +58,10 @@ class PositionConverter {
 
     try {
       // 解析 x 范围
-      final xParts =
-          parts[0].split(RegExp(r'\s+')).map((s) => s.trim()).toList();
+      final xParts = parts[0]
+          .split(RegExp(r'\s+'))
+          .map((s) => s.trim())
+          .toList();
       if (xParts.length < 2) return null;
 
       final x1 = double.parse(xParts[0]);
@@ -70,8 +72,10 @@ class PositionConverter {
       double y2 = 1.0;
 
       if (parts.length >= 2) {
-        final yParts =
-            parts[1].split(RegExp(r'\s+')).map((s) => s.trim()).toList();
+        final yParts = parts[1]
+            .split(RegExp(r'\s+'))
+            .map((s) => s.trim())
+            .toList();
         if (yParts.length >= 2) {
           y1 = double.parse(yParts[0]);
           y2 = double.parse(yParts[1]);

@@ -64,10 +64,7 @@ class _ThemedCheckboxState extends State<ThemedCheckbox>
       vsync: this,
       value: (widget.value == true || widget.value == null) ? 1.0 : 0.0,
     );
-    _scale = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutBack,
-    );
+    _scale = CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
   }
 
   @override
@@ -135,12 +132,13 @@ class _ThemedCheckboxState extends State<ThemedCheckbox>
     final backgroundColor = isCheckedOrPartial
         ? activeColorBase
         : (isDark
-            ? Color.lerp(theme.colorScheme.surface, Colors.black, 0.3)!
-            : Color.lerp(theme.colorScheme.surface, Colors.black, 0.02)!);
+              ? Color.lerp(theme.colorScheme.surface, Colors.black, 0.3)!
+              : Color.lerp(theme.colorScheme.surface, Colors.black, 0.02)!);
 
     return MouseRegion(
-      cursor:
-          widget.enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      cursor: widget.enabled
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
@@ -161,8 +159,8 @@ class _ThemedCheckboxState extends State<ThemedCheckbox>
                 color: isCheckedOrPartial
                     ? activeColorBase
                     : (_isHovered
-                        ? theme.colorScheme.primary.withValues(alpha: 0.5)
-                        : borderColorBase),
+                          ? theme.colorScheme.primary.withValues(alpha: 0.5)
+                          : borderColorBase),
                 width: 1.5,
               ),
               boxShadow: enableInsetShadow && isCheckedOrPartial
@@ -195,10 +193,7 @@ class _ThemedCheckboxState extends State<ThemedCheckbox>
     );
   }
 
-  Widget _buildCheckmark({
-    required Color checkColor,
-    required bool isPartial,
-  }) {
+  Widget _buildCheckmark({required Color checkColor, required bool isPartial}) {
     if (isPartial) {
       // 部分选中 - 横线
       return Center(
@@ -214,11 +209,7 @@ class _ThemedCheckboxState extends State<ThemedCheckbox>
     }
 
     // 完全选中 - 勾选标记
-    return Icon(
-      Icons.check,
-      size: widget.size * 0.75,
-      color: checkColor,
-    );
+    return Icon(Icons.check, size: widget.size * 0.75, color: checkColor);
   }
 }
 
@@ -298,7 +289,8 @@ class _CheckboxListTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: contentPadding ??
+        padding:
+            contentPadding ??
             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           children: [
@@ -313,26 +305,20 @@ class _CheckboxListTile extends StatelessWidget {
                 children: [
                   DefaultTextStyle(
                     style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: enabled
-                              ? null
-                              : Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge!
-                                  .color!
-                                  .withValues(alpha: 0.5),
-                        ),
+                      color: enabled
+                          ? null
+                          : Theme.of(context).textTheme.bodyLarge!.color!
+                                .withValues(alpha: 0.5),
+                    ),
                     child: title,
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
                     DefaultTextStyle(
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodySmall!
-                                .color!
-                                .withValues(alpha: enabled ? 0.7 : 0.4),
-                          ),
+                        color: Theme.of(context).textTheme.bodySmall!.color!
+                            .withValues(alpha: enabled ? 0.7 : 0.4),
+                      ),
                       child: subtitle!,
                     ),
                   ],

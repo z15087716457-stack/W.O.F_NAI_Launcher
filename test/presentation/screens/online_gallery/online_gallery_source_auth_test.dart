@@ -122,43 +122,48 @@ void main() {
   );
 
   for (final width in [1600.0, 700.0]) {
-    testWidgets('AI TAG controls adapt without overflow at width $width', (
-      tester,
-    ) async {
-      await _setViewSize(tester, width);
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            onlineGalleryNotifierProvider.overrideWith(
-              _AiTagSearchGalleryNotifier.new,
-            ),
-            danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
-            gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
-            danbooruSuggestionNotifierProvider.overrideWith(
-              _EmptyDanbooruSuggestionNotifier.new,
-            ),
-          ],
-          child: const _TestApp(),
-        ),
-      );
-      await tester.pump();
+    testWidgets(
+      'AI TAG author return controls do not overflow at width $width',
+      (tester) async {
+        await _setViewSize(tester, width);
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              onlineGalleryNotifierProvider.overrideWith(
+                _AiTagAuthorPageGalleryNotifier.new,
+              ),
+              danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
+              gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
+              danbooruSuggestionNotifierProvider.overrideWith(
+                _EmptyDanbooruSuggestionNotifier.new,
+              ),
+            ],
+            child: const _TestApp(),
+          ),
+        );
+        await tester.pump();
 
-      expect(
-        find.widgetWithText(
-          TextField,
-          'Search works, artists, titles, tags, or models',
-        ),
-        findsOneWidget,
-      );
-      expect(find.textContaining('AI Prompt search'), findsOneWidget);
-      expect(find.text('Login'), findsNothing);
-      expect(find.byIcon(Icons.tune), findsNothing);
-      expect(find.byIcon(Icons.blur_on), findsNothing);
-      expect(tester.takeException(), isNull);
-    });
+        expect(
+          find.widgetWithText(
+            TextField,
+            'Search works, artists, titles, tags, or models',
+          ),
+          findsOneWidget,
+        );
+        expect(find.textContaining('AI Prompt search'), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('ai-tag-author-return-button')),
+          findsOneWidget,
+        );
+        expect(find.text('Login'), findsNothing);
+        expect(find.byIcon(Icons.tune), findsNothing);
+        expect(find.byIcon(Icons.blur_on), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
 
-  testWidgets('AI TAG detail exposes multi-image metadata actions', (
+  testWidgets('AI TAG author return restores search query drafts', (
     tester,
   ) async {
     await _setViewSize(tester, 1200);
@@ -178,16 +183,191 @@ void main() {
       ),
     );
     await tester.pump();
+    await tester.enterText(
+      _fieldFinder('Search works, artists, titles, tags, or models'),
+      'draft search query',
+    );
+    await tester.enterText(
+      _fieldFinder(
+        'AI Prompt search (raw syntax such as ::artist: is supported)',
+      ),
+      'draft search prompt',
+    );
     await tester.tap(find.byType(DanbooruPostCard));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.text('AI TAG'), findsWidgets);
+    expect(
+      find.byKey(const ValueKey('ai-tag-detail-view-author-88')),
+      findsOneWidget,
+    );
     expect(find.text('3 images'), findsOneWidget);
     expect(find.text('Copy Prompt'), findsOneWidget);
     expect(find.text('Copy full metadata'), findsOneWidget);
     expect(find.text('Download all images in this work'), findsOneWidget);
     expect(find.byType(CachedNetworkImage), findsAtLeastNWidgets(4));
+
+    await tester.tap(
+      find.byKey(const ValueKey('ai-tag-detail-view-author-88')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.byType(Dialog), findsNothing);
+    expect(
+      _fieldText(tester, 'Search works, artists, titles, tags, or models'),
+      '88',
+    );
+    expect(
+      _fieldText(
+        tester,
+        'AI Prompt search (raw syntax such as ::artist: is supported)',
+      ),
+      '',
+    );
+    expect(
+      find.byKey(const ValueKey('ai-tag-author-return-button')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('ai-tag-author-return-button')));
+    await tester.pump();
+
+    expect(
+      _fieldText(tester, 'Search works, artists, titles, tags, or models'),
+      'draft search query',
+    );
+    expect(
+      _fieldText(
+        tester,
+        'AI Prompt search (raw syntax such as ::artist: is supported)',
+      ),
+      'draft search prompt',
+    );
+    expect(
+      find.byKey(const ValueKey('ai-tag-author-return-button')),
+      findsNothing,
+    );
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(OnlineGalleryScreen)),
+    );
+    expect(
+      container.read(onlineGalleryNotifierProvider).searchQuery,
+      'old query',
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('AI TAG author return restores popular mode and drafts', (
+    tester,
+  ) async {
+    await _setViewSize(tester, 1200);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          onlineGalleryNotifierProvider.overrideWith(
+            _AiTagPopularDetailGalleryNotifier.new,
+          ),
+          danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
+          gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
+          danbooruSuggestionNotifierProvider.overrideWith(
+            _EmptyDanbooruSuggestionNotifier.new,
+          ),
+        ],
+        child: const _TestApp(),
+      ),
+    );
+    await tester.pump();
+    await tester.enterText(
+      _fieldFinder('Search works, artists, titles, tags, or models'),
+      'draft popular query',
+    );
+    await tester.enterText(
+      _fieldFinder(
+        'AI Prompt search (raw syntax such as ::artist: is supported)',
+      ),
+      'draft popular prompt',
+    );
+    await tester.tap(find.byType(DanbooruPostCard));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    await tester.tap(
+      find.byKey(const ValueKey('ai-tag-detail-view-author-88')),
+    );
+    await tester.pump();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(OnlineGalleryScreen)),
+    );
+    expect(
+      container.read(onlineGalleryNotifierProvider).viewMode,
+      GalleryViewMode.search,
+    );
+    expect(
+      _fieldText(tester, 'Search works, artists, titles, tags, or models'),
+      '88',
+    );
+    expect(
+      find.byKey(const ValueKey('ai-tag-author-return-button')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('ai-tag-author-return-button')));
+    await tester.pump();
+
+    expect(
+      container.read(onlineGalleryNotifierProvider).viewMode,
+      GalleryViewMode.popular,
+    );
+    expect(
+      _fieldText(tester, 'Search works, artists, titles, tags, or models'),
+      'draft popular query',
+    );
+    expect(
+      _fieldText(
+        tester,
+        'AI Prompt search (raw syntax such as ::artist: is supported)',
+      ),
+      'draft popular prompt',
+    );
+    expect(find.byType(DanbooruPostCard), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('ai-tag-author-return-button')),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('AI TAG detail hides author search for invalid uploader ID', (
+    tester,
+  ) async {
+    await _setViewSize(tester, 1200);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          onlineGalleryNotifierProvider.overrideWith(
+            _AiTagInvalidAuthorDetailGalleryNotifier.new,
+          ),
+          danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
+          gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
+          danbooruSuggestionNotifierProvider.overrideWith(
+            _EmptyDanbooruSuggestionNotifier.new,
+          ),
+        ],
+        child: const _TestApp(),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byType(DanbooruPostCard));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(
+      find.byKey(const ValueKey('ai-tag-detail-view-author-0')),
+      findsNothing,
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -276,6 +456,16 @@ Future<void> _setViewSize(WidgetTester tester, double width) async {
   addTearDown(tester.view.resetPhysicalSize);
 }
 
+Finder _fieldFinder(String hintText) {
+  return find.byWidgetPredicate(
+    (widget) => widget is TextField && widget.decoration?.hintText == hintText,
+  );
+}
+
+String _fieldText(WidgetTester tester, String hintText) {
+  return tester.widget<TextField>(_fieldFinder(hintText)).controller!.text;
+}
+
 class _TestApp extends StatelessWidget {
   const _TestApp();
 
@@ -326,6 +516,26 @@ const _aiTagPost = GalleryItem(
     previewUrl: 'https://cdn.example/NAI/88/801_p0.webp',
     displayUrl: 'https://cdn.example/NAI/88/801_p0.webp',
     downloadUrl: 'https://cdn.example/NAI/88/801_p0.webp',
+    width: 768,
+    height: 1024,
+  ),
+);
+
+const _aiTagPostWithoutAuthorId = GalleryItem(
+  id: 802,
+  sourceId: GallerySourceId.aiTag,
+  createdAt: '2026-07-01',
+  uploaderId: 0,
+  title: 'Anonymous AI work',
+  author: 'Anonymous',
+  aiType: 'NAI',
+  mediaCount: 3,
+  tags: ['1girl'],
+  cover: GalleryMedia(
+    id: '802_p0',
+    previewUrl: 'https://cdn.example/NAI/0/802_p0.webp',
+    displayUrl: 'https://cdn.example/NAI/0/802_p0.webp',
+    downloadUrl: 'https://cdn.example/NAI/0/802_p0.webp',
     width: 768,
     height: 1024,
   ),
@@ -388,7 +598,104 @@ class _AiTagSearchGalleryNotifier extends OnlineGalleryNotifier {
   }
 }
 
+OnlineGalleryAuthorReturnContext _authorReturnContext(
+  OnlineGalleryState state,
+  OnlineGalleryQueryDrafts drafts,
+) {
+  return OnlineGalleryAuthorReturnContext(
+    viewMode: state.viewMode,
+    sourceId: state.sourceId,
+    popularSourceId: state.popularSourceId,
+    searchQuery: state.searchQuery,
+    promptQuery: state.promptQuery,
+    popularQuery: state.popularQuery,
+    popularPromptQuery: state.popularPromptQuery,
+    fuzzySearchEnabled: state.fuzzySearchEnabled,
+    selectedRatings: state.selectedRatings,
+    popularScale: state.popularScale,
+    popularDate: state.popularDate,
+    aiTagTimeRange: state.aiTagTimeRange,
+    aiTagPopularPeriod: state.aiTagPopularPeriod,
+    aiTagNaiOnly: state.aiTagNaiOnly,
+    aiTagModelVersion: state.aiTagModelVersion,
+    dateRangeStart: state.dateRangeStart,
+    dateRangeEnd: state.dateRangeEnd,
+    cacheKey: state.currentCacheKey,
+    cache: state.currentCache,
+    drafts: drafts,
+  );
+}
+
+class _AiTagAuthorPageGalleryNotifier extends _AiTagSearchGalleryNotifier {
+  @override
+  OnlineGalleryState build() {
+    var savedState = super.build().copyWith(
+      searchQuery: 'old query',
+      promptQuery: 'old prompt',
+    );
+    savedState = savedState.updateCurrentCache(savedState.currentCache);
+    return savedState
+        .copyWith(
+          searchQuery: '88',
+          promptQuery: '',
+          aiTagTimeRange: 'all',
+          aiTagNaiOnly: false,
+          clearAiTagModelVersion: true,
+          clearDateRange: true,
+          authorReturnContext: _authorReturnContext(
+            savedState,
+            const OnlineGalleryQueryDrafts(
+              searchQuery: 'old query',
+              searchPrompt: 'old prompt',
+              popularQuery: '',
+              popularPrompt: '',
+            ),
+          ),
+        )
+        .updateCurrentCache(
+          const ModeCache(posts: [_aiTagPost], hasMore: false),
+        );
+  }
+}
+
 class _AiTagDetailGalleryNotifier extends _AiTagSearchGalleryNotifier {
+  @override
+  OnlineGalleryState build() {
+    return super.build().copyWith(
+      searchQuery: 'old query',
+      promptQuery: 'old prompt',
+      aiTagTimeRange: 'y2025',
+      aiTagModelVersion: '5',
+      dateRangeStart: DateTime(2025, 1, 1),
+      dateRangeEnd: DateTime(2025, 12, 31),
+    );
+  }
+
+  @override
+  Future<void> searchAiTagAuthor(
+    int authorId, {
+    required OnlineGalleryQueryDrafts drafts,
+  }) async {
+    if (authorId <= 0) return;
+    var nextState = state;
+    if (nextState.authorReturnContext == null) {
+      nextState = nextState.updateCurrentCache(nextState.currentCache);
+      nextState = nextState.copyWith(
+        authorReturnContext: _authorReturnContext(nextState, drafts),
+      );
+    }
+    state = nextState.copyWith(
+      sourceId: GallerySourceId.aiTag,
+      viewMode: GalleryViewMode.search,
+      searchQuery: authorId.toString(),
+      promptQuery: '',
+      aiTagTimeRange: 'all',
+      aiTagNaiOnly: false,
+      clearAiTagModelVersion: true,
+      clearDateRange: true,
+    );
+  }
+
   @override
   Future<GalleryDetail> loadDetail(
     GalleryItem item, {
@@ -419,12 +726,38 @@ class _AiTagDetailGalleryNotifier extends _AiTagSearchGalleryNotifier {
         prompt: 'portrait',
       ),
     ];
-    return const GalleryDetail(
-      item: _aiTagPost,
+    return GalleryDetail(
+      item: item,
       media: media,
       prompt: '1girl, solo',
       negativePrompt: 'lowres',
       description: 'Description',
+    );
+  }
+}
+
+class _AiTagPopularDetailGalleryNotifier extends _AiTagDetailGalleryNotifier {
+  @override
+  OnlineGalleryState build() {
+    return super.build().copyWith(
+      viewMode: GalleryViewMode.popular,
+      popularSourceId: GallerySourceId.aiTag,
+      popularQuery: 'old popular query',
+      popularPromptQuery: 'old popular prompt',
+      popularCache: const ModeCache(posts: [_aiTagPost], hasMore: false),
+    );
+  }
+}
+
+class _AiTagInvalidAuthorDetailGalleryNotifier
+    extends _AiTagDetailGalleryNotifier {
+  @override
+  OnlineGalleryState build() {
+    return super.build().copyWith(
+      searchCache: const ModeCache(
+        posts: [_aiTagPostWithoutAuthorId],
+        hasMore: false,
+      ),
     );
   }
 }

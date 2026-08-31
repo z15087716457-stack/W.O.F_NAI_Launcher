@@ -173,9 +173,9 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
           'DanbooruTagsCacheNotifier',
         );
         // 等待数据库就绪
-        await ref.read(databaseStateMachineProvider).waitForReady(
-              timeout: const Duration(seconds: 30),
-            );
+        await ref
+            .read(databaseStateMachineProvider)
+            .waitForReady(timeout: const Duration(seconds: 30));
         AppLogger.i(
           '[ProviderLifecycle] Database is now ready, continuing build',
           'DanbooruTagsCacheNotifier',
@@ -198,8 +198,9 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
         break; // 成功，跳出重试循环
       } catch (e) {
         final errorStr = e.toString().toLowerCase();
-        final isDbClosed = errorStr.contains('database_closed') || 
-                          errorStr.contains('databaseexception');
+        final isDbClosed =
+            errorStr.contains('database_closed') ||
+            errorStr.contains('databaseexception');
         if (isDbClosed && retryCount < maxRetries - 1) {
           retryCount++;
           AppLogger.w(
@@ -213,7 +214,7 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
         }
       }
     }
-    
+
     AppLogger.i(
       '[ProviderLifecycle] DanbooruTagsCacheNotifier.build() - service initialized, hash=${_service.hashCode}',
       'DanbooruTagsCacheNotifier',
@@ -226,10 +227,12 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
     TagCategoryStats categoryStats = const TagCategoryStats();
     var statsRetryCount = 0;
     const maxStatsRetries = 5;
-    
+
     while (statsRetryCount < maxStatsRetries) {
       try {
-        final completionService = await ref.read(completionServiceProvider.future);
+        final completionService = await ref.read(
+          completionServiceProvider.future,
+        );
         count = await completionService.getTagCount();
 
         // 获取分类统计
@@ -245,8 +248,9 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
         break; // 成功，跳出重试循环
       } catch (e, stack) {
         final errorStr = e.toString().toLowerCase();
-        final isDbClosed = errorStr.contains('database_closed') || 
-                          errorStr.contains('databaseexception');
+        final isDbClosed =
+            errorStr.contains('database_closed') ||
+            errorStr.contains('databaseexception');
         if (isDbClosed && statsRetryCount < maxStatsRetries - 1) {
           statsRetryCount++;
           AppLogger.w(
@@ -256,22 +260,31 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
           // 增加等待时间，给数据库重建连接池留出更多时间
           await Future.delayed(Duration(milliseconds: 300 * statsRetryCount));
         } else {
-          AppLogger.e('Failed to load cache stats', e, stack, 'DanbooruTagsCacheNotifier');
+          AppLogger.e(
+            'Failed to load cache stats',
+            e,
+            stack,
+            'DanbooruTagsCacheNotifier',
+          );
           break; // 非 database_closed 错误或已达到最大重试次数
         }
       }
     }
-    
+
     // 获取翻译和共现数据数量（预构建数据库）
     var translationCount = 0;
     var cooccurrenceCount = 0;
     try {
-      final translationService = await ref.read(translationServiceProvider.future);
+      final translationService = await ref.read(
+        translationServiceProvider.future,
+      );
       translationCount = await translationService.getCount();
-      
-      final cooccurrenceService = await ref.read(cooccurrenceServiceProvider.future);
+
+      final cooccurrenceService = await ref.read(
+        cooccurrenceServiceProvider.future,
+      );
       cooccurrenceCount = await cooccurrenceService.getCount();
-      
+
       AppLogger.i(
         '[ProviderLifecycle] Database stats - translations: $translationCount, cooccurrences: $cooccurrenceCount',
         'DanbooruTagsCacheNotifier',
@@ -282,7 +295,7 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
         'DanbooruTagsCacheNotifier',
       );
     }
-    
+
     AppLogger.i(
       '[ProviderLifecycle] DanbooruTagsCacheNotifier.build() END - totalTags=$count',
       'DanbooruTagsCacheNotifier',
@@ -309,13 +322,14 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
       final prefs = await SharedPreferences.getInstance();
       final jsonStr = prefs.getString(StorageKeys.danbooruCategoryThresholds);
       if (jsonStr != null) {
-        final json = Map<String, dynamic>.from(
-          jsonDecode(jsonStr) as Map,
-        );
+        final json = Map<String, dynamic>.from(jsonDecode(jsonStr) as Map);
         return TagCategoryThresholds.fromJson(json);
       }
     } catch (e) {
-      AppLogger.w('Failed to load category thresholds: $e', 'DanbooruTagsCacheNotifier');
+      AppLogger.w(
+        'Failed to load category thresholds: $e',
+        'DanbooruTagsCacheNotifier',
+      );
     }
     return const TagCategoryThresholds();
   }
@@ -337,26 +351,32 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
     try {
       _requireService.onProgress = (progress, message) {
         // 更新状态
-        state = AsyncValue.data(currentState.copyWith(
-          isRefreshing: true,
-          progress: progress,
-          message: message,
-        ),);
+        state = AsyncValue.data(
+          currentState.copyWith(
+            isRefreshing: true,
+            progress: progress,
+            message: message,
+          ),
+        );
       };
 
       await _requireService.refresh();
-      
+
       // 刷新完成后重新加载标签数量
-      final completionService = await ref.read(completionServiceProvider.future);
+      final completionService = await ref.read(
+        completionServiceProvider.future,
+      );
       final count = await completionService.getTagCount();
-      
-      state = AsyncValue.data(currentState.copyWith(
-        isRefreshing: false,
-        progress: 1.0,
-        lastUpdate: DateTime.now(),
-        totalTags: count,
-        message: null,
-      ),);
+
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isRefreshing: false,
+          progress: 1.0,
+          lastUpdate: DateTime.now(),
+          totalTags: count,
+          message: null,
+        ),
+      );
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     } finally {
@@ -371,14 +391,18 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
 
   /// 设置热度档位
   Future<void> setHotPreset(TagHotPreset preset, {int? customThreshold}) async {
-    await _requireService.setHotPreset(preset, customThreshold: customThreshold);
+    await _requireService.setHotPreset(
+      preset,
+      customThreshold: customThreshold,
+    );
 
     final currentState = await future;
     state = AsyncValue.data(
       currentState.copyWith(
         categoryThresholds: currentState.categoryThresholds.copyWith(
           generalPreset: preset,
-          generalCustomThreshold: customThreshold ??
+          generalCustomThreshold:
+              customThreshold ??
               currentState.categoryThresholds.generalCustomThreshold,
         ),
       ),
@@ -389,7 +413,7 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
   Future<void> clearCache() async {
     if (_isClearing) return;
     _isClearing = true;
-    
+
     AppLogger.i(
       '[ProviderLifecycle] clearCache() START - _service=${_service?.hashCode}, _isClearing=$_isClearing',
       'DanbooruTagsCacheNotifier',
@@ -435,14 +459,14 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
         '[ProviderLifecycle] clearCache() - AFTER invalidate danbooruTagsLazyServiceProvider, _service still=${_service.hashCode}',
         'DanbooruTagsCacheNotifier',
       );
-      
+
       // 🔴 关键修复：invalidate 自己，强制 build() 重新执行
       // 注意：必须在所有数据库操作完成后才调用，否则会导致 database_closed 错误
       AppLogger.i(
         '[ProviderLifecycle] clearCache() - about to invalidateSelf(), ensure all DB operations completed',
         'DanbooruTagsCacheNotifier',
       );
-      
+
       // 延迟 invalidate，确保数据库连接已完全释放
       await Future.delayed(const Duration(milliseconds: 100));
       ref.invalidateSelf();
@@ -466,9 +490,12 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
   Future<void> setSyncArtists(bool value) async {
     final currentState = await future;
     state = AsyncValue.data(currentState.copyWith(syncArtists: value));
-    
+
     // 画师同步现在是默认行为，不再持久化设置
-    AppLogger.i('Sync artists setting changed to: $value', 'DanbooruTagsCacheNotifier');
+    AppLogger.i(
+      'Sync artists setting changed to: $value',
+      'DanbooruTagsCacheNotifier',
+    );
   }
 
   /// 同步画师数据
@@ -478,71 +505,90 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
   /// [onExternalProgress] 可选的外部进度回调，用于后台任务通知
   Future<void> syncArtists({
     bool force = false,
-    void Function(int currentPage, int importedCount, String message)? onExternalProgress,
+    void Function(int currentPage, int importedCount, String message)?
+    onExternalProgress,
   }) async {
     final currentState = await future;
-    
+
     // 检查是否启用画师同步
     if (!currentState.syncArtists && !force) {
-      AppLogger.i('Artist sync is disabled, skipping', 'DanbooruTagsCacheNotifier');
+      AppLogger.i(
+        'Artist sync is disabled, skipping',
+        'DanbooruTagsCacheNotifier',
+      );
       return;
     }
-    
+
     // 检查是否已经在同步中
     if (currentState.isSyncingArtists) {
-      AppLogger.w('Artist sync already in progress', 'DanbooruTagsCacheNotifier');
+      AppLogger.w(
+        'Artist sync already in progress',
+        'DanbooruTagsCacheNotifier',
+      );
       return;
     }
-    
+
     // 检查是否需要同步（基于画师标签数量，而不是总数）
     if (!force) {
-      final existingCount = await _requireService.getTagCountByCategory(1); // category=1 是画师
+      final existingCount = await _requireService.getTagCountByCategory(
+        1,
+      ); // category=1 是画师
       if (existingCount > 0) {
-        AppLogger.i('Artist tags already exist ($existingCount), skipping sync', 'DanbooruTagsCacheNotifier');
+        AppLogger.i(
+          'Artist tags already exist ($existingCount), skipping sync',
+          'DanbooruTagsCacheNotifier',
+        );
         return;
       }
     }
-    
+
     // 更新状态为同步中
-    state = AsyncValue.data(currentState.copyWith(
-      isSyncingArtists: true,
-      artistsProgress: 0.0,
-    ),);
-    
+    state = AsyncValue.data(
+      currentState.copyWith(isSyncingArtists: true, artistsProgress: 0.0),
+    );
+
     try {
       await _requireService.fetchArtistTags(
         onProgress: (currentPage, importedCount, message) {
-          final progress = currentPage > 0 ? (currentPage / 200).clamp(0.0, 1.0) : 0.0;
-          state = AsyncValue.data(currentState.copyWith(
-            isSyncingArtists: true,
-            artistsProgress: progress,
-            artistsTotal: importedCount,
-          ),);
+          final progress = currentPage > 0
+              ? (currentPage / 200).clamp(0.0, 1.0)
+              : 0.0;
+          state = AsyncValue.data(
+            currentState.copyWith(
+              isSyncingArtists: true,
+              artistsProgress: progress,
+              artistsTotal: importedCount,
+            ),
+          );
           // 调用外部进度回调（如果有）
           onExternalProgress?.call(currentPage, importedCount, message);
         },
         maxPages: 200,
       );
-      
+
       // 同步完成
       final stats = await _requireService.getCategoryStats();
-      state = AsyncValue.data(currentState.copyWith(
-        isSyncingArtists: false,
-        artistsProgress: 1.0,
-        artistsTotal: stats['artist'] ?? 0,
-        artistsLastUpdate: DateTime.now(),
-        categoryStats: currentState.categoryStats.copyWith(
-          artist: stats['artist'] ?? 0,
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isSyncingArtists: false,
+          artistsProgress: 1.0,
+          artistsTotal: stats['artist'] ?? 0,
+          artistsLastUpdate: DateTime.now(),
+          categoryStats: currentState.categoryStats.copyWith(
+            artist: stats['artist'] ?? 0,
+          ),
         ),
-      ),);
-      
-      AppLogger.i('Artist sync completed successfully', 'DanbooruTagsCacheNotifier');
+      );
+
+      AppLogger.i(
+        'Artist sync completed successfully',
+        'DanbooruTagsCacheNotifier',
+      );
     } catch (e, stack) {
       AppLogger.e('Artist sync failed', e, stack, 'DanbooruTagsCacheNotifier');
-      state = AsyncValue.data(currentState.copyWith(
-        isSyncingArtists: false,
-        error: '画师同步失败: $e',
-      ),);
+      state = AsyncValue.data(
+        currentState.copyWith(isSyncingArtists: false, error: '画师同步失败: $e'),
+      );
     }
   }
 
@@ -556,22 +602,35 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
       if (_service == null) {
         AppLogger.w(
           'DanbooruTagsLazyService not initialized yet, skipping artist sync check. '
-          'This is normal during cache clear recovery.',
+              'This is normal during cache clear recovery.',
           'DanbooruTagsCacheNotifier',
         );
         return;
       }
 
       // 检查是否需要同步（基于画师标签数量，而不是总数）
-      final existingCount = await _service!.getTagCountByCategory(1); // category=1 是画师
+      final existingCount = await _service!.getTagCountByCategory(
+        1,
+      ); // category=1 是画师
       if (existingCount == 0) {
-        AppLogger.i('Auto-syncing artist tags on startup...', 'DanbooruTagsCacheNotifier');
+        AppLogger.i(
+          'Auto-syncing artist tags on startup...',
+          'DanbooruTagsCacheNotifier',
+        );
         await syncArtists(force: false);
       } else {
-        AppLogger.i('Artist tags already exist ($existingCount), no sync needed', 'DanbooruTagsCacheNotifier');
+        AppLogger.i(
+          'Artist tags already exist ($existingCount), no sync needed',
+          'DanbooruTagsCacheNotifier',
+        );
       }
     } catch (e, stack) {
-      AppLogger.e('Failed to check and sync artists', e, stack, 'DanbooruTagsCacheNotifier');
+      AppLogger.e(
+        'Failed to check and sync artists',
+        e,
+        stack,
+        'DanbooruTagsCacheNotifier',
+      );
     }
   }
 
@@ -587,7 +646,10 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
   // ===========================================================================
 
   /// 设置一般标签的阈值
-  Future<void> setGeneralThreshold(TagHotPreset preset, {int? customThreshold}) async {
+  Future<void> setGeneralThreshold(
+    TagHotPreset preset, {
+    int? customThreshold,
+  }) async {
     final currentState = await future;
     final newThresholds = currentState.categoryThresholds.copyWith(
       generalPreset: preset,
@@ -595,15 +657,17 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
     );
 
     await _saveCategoryThresholds(newThresholds);
-    
+
     // 同步更新服务层的阈值
     await _requireService.setCategoryThresholds(
       generalThreshold: newThresholds.generalThreshold,
       artistThreshold: newThresholds.artistThreshold,
       characterThreshold: newThresholds.characterThreshold,
     );
-    
-    state = AsyncValue.data(currentState.copyWith(categoryThresholds: newThresholds));
+
+    state = AsyncValue.data(
+      currentState.copyWith(categoryThresholds: newThresholds),
+    );
 
     AppLogger.i(
       'General threshold set to: ${newThresholds.generalThreshold}',
@@ -612,7 +676,10 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
   }
 
   /// 设置画师标签的阈值
-  Future<void> setArtistThreshold(TagHotPreset preset, {int? customThreshold}) async {
+  Future<void> setArtistThreshold(
+    TagHotPreset preset, {
+    int? customThreshold,
+  }) async {
     final currentState = await future;
     final newThresholds = currentState.categoryThresholds.copyWith(
       artistPreset: preset,
@@ -620,15 +687,17 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
     );
 
     await _saveCategoryThresholds(newThresholds);
-    
+
     // 同步更新服务层的阈值
     await _requireService.setCategoryThresholds(
       generalThreshold: newThresholds.generalThreshold,
       artistThreshold: newThresholds.artistThreshold,
       characterThreshold: newThresholds.characterThreshold,
     );
-    
-    state = AsyncValue.data(currentState.copyWith(categoryThresholds: newThresholds));
+
+    state = AsyncValue.data(
+      currentState.copyWith(categoryThresholds: newThresholds),
+    );
 
     AppLogger.i(
       'Artist threshold set to: ${newThresholds.artistThreshold}',
@@ -637,7 +706,10 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
   }
 
   /// 设置角色标签的阈值
-  Future<void> setCharacterThreshold(TagHotPreset preset, {int? customThreshold}) async {
+  Future<void> setCharacterThreshold(
+    TagHotPreset preset, {
+    int? customThreshold,
+  }) async {
     final currentState = await future;
     final newThresholds = currentState.categoryThresholds.copyWith(
       characterPreset: preset,
@@ -645,15 +717,17 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
     );
 
     await _saveCategoryThresholds(newThresholds);
-    
+
     // 同步更新服务层的阈值
     await _requireService.setCategoryThresholds(
       generalThreshold: newThresholds.generalThreshold,
       artistThreshold: newThresholds.artistThreshold,
       characterThreshold: newThresholds.characterThreshold,
     );
-    
-    state = AsyncValue.data(currentState.copyWith(categoryThresholds: newThresholds));
+
+    state = AsyncValue.data(
+      currentState.copyWith(categoryThresholds: newThresholds),
+    );
 
     AppLogger.i(
       'Character threshold set to: ${newThresholds.characterThreshold}',
@@ -662,7 +736,10 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
   }
 
   /// 设置版权标签的阈值
-  Future<void> setCopyrightThreshold(TagHotPreset preset, {int? customThreshold}) async {
+  Future<void> setCopyrightThreshold(
+    TagHotPreset preset, {
+    int? customThreshold,
+  }) async {
     final currentState = await future;
     final newThresholds = currentState.categoryThresholds.copyWith(
       copyrightPreset: preset,
@@ -680,7 +757,9 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
       metaThreshold: newThresholds.metaThreshold,
     );
 
-    state = AsyncValue.data(currentState.copyWith(categoryThresholds: newThresholds));
+    state = AsyncValue.data(
+      currentState.copyWith(categoryThresholds: newThresholds),
+    );
 
     AppLogger.i(
       'Copyright threshold set to: ${newThresholds.copyrightThreshold}',
@@ -689,7 +768,10 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
   }
 
   /// 设置元标签的阈值
-  Future<void> setMetaThreshold(TagHotPreset preset, {int? customThreshold}) async {
+  Future<void> setMetaThreshold(
+    TagHotPreset preset, {
+    int? customThreshold,
+  }) async {
     final currentState = await future;
     final newThresholds = currentState.categoryThresholds.copyWith(
       metaPreset: preset,
@@ -707,7 +789,9 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
       metaThreshold: newThresholds.metaThreshold,
     );
 
-    state = AsyncValue.data(currentState.copyWith(categoryThresholds: newThresholds));
+    state = AsyncValue.data(
+      currentState.copyWith(categoryThresholds: newThresholds),
+    );
 
     AppLogger.i(
       'Meta threshold set to: ${newThresholds.metaThreshold}',
@@ -724,12 +808,17 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
         jsonEncode(thresholds.toJson()),
       );
     } catch (e) {
-      AppLogger.e('Failed to save category thresholds', e, null, 'DanbooruTagsCacheNotifier');
+      AppLogger.e(
+        'Failed to save category thresholds',
+        e,
+        null,
+        'DanbooruTagsCacheNotifier',
+      );
     }
   }
 
   /// 使用当前阈值重新筛选标签
-  /// 
+  ///
   /// 这会触发标签服务的重新筛选，只保留符合阈值的标签
   Future<void> applyCategoryThresholds() async {
     final currentState = await future;
@@ -758,23 +847,29 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
         meta: stats['meta'] ?? 0,
       );
 
-      state = AsyncValue.data(currentState.copyWith(
-        isRefreshing: false,
-        categoryStats: newCategoryStats,
-      ),);
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isRefreshing: false,
+          categoryStats: newCategoryStats,
+        ),
+      );
 
       AppLogger.i(
         'Category thresholds applied: general=${currentState.categoryThresholds.generalThreshold}, '
-        'artist=${currentState.categoryThresholds.artistThreshold}, '
-        'character=${currentState.categoryThresholds.characterThreshold}, '
-        'copyright=${currentState.categoryThresholds.copyrightThreshold}, '
-        'meta=${currentState.categoryThresholds.metaThreshold}',
+            'artist=${currentState.categoryThresholds.artistThreshold}, '
+            'character=${currentState.categoryThresholds.characterThreshold}, '
+            'copyright=${currentState.categoryThresholds.copyrightThreshold}, '
+            'meta=${currentState.categoryThresholds.metaThreshold}',
         'DanbooruTagsCacheNotifier',
       );
     } catch (e, stack) {
-      AppLogger.e('Failed to apply category thresholds', e, stack, 'DanbooruTagsCacheNotifier');
+      AppLogger.e(
+        'Failed to apply category thresholds',
+        e,
+        stack,
+        'DanbooruTagsCacheNotifier',
+      );
       state = AsyncValue.data(currentState.copyWith(isRefreshing: false));
     }
   }
-
-} 
+}

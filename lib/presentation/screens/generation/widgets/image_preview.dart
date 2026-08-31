@@ -1099,6 +1099,7 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
           prompt: presetResolution.prompt,
           negativePrompt: presetResolution.negativePrompt,
           qualityToggle: presetResolution.qualityToggle,
+          qualityTagPreset: presetResolution.qualityTagPreset,
           ucPreset: presetResolution.ucPreset,
           width: encodedSize?.$1 ?? params.width,
           height: encodedSize?.$2 ?? params.height,

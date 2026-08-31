@@ -10,10 +10,16 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_state_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/widgets/prompt_assistant_overlay.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_workspace_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
+import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/prompt_input.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'package:nai_launcher/presentation/widgets/common/weight_adjust_toolbar.dart';
+import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_input.dart';
 
@@ -27,6 +33,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          promptBlockLibraryNotifierProvider.overrideWith(
+            _EmptyPromptBlockLibraryNotifier.new,
+          ),
           localStorageServiceProvider.overrideWith((ref) {
             return _TestLocalStorageService();
           }),
@@ -75,6 +84,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            promptBlockLibraryNotifierProvider.overrideWith(
+              _EmptyPromptBlockLibraryNotifier.new,
+            ),
             localStorageServiceProvider.overrideWith((ref) {
               return _TestLocalStorageService();
             }),
@@ -188,6 +200,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            promptBlockLibraryNotifierProvider.overrideWith(
+              _EmptyPromptBlockLibraryNotifier.new,
+            ),
             localStorageServiceProvider.overrideWith((ref) {
               return _TestLocalStorageService();
             }),
@@ -306,6 +321,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          promptBlockLibraryNotifierProvider.overrideWith(
+            _EmptyPromptBlockLibraryNotifier.new,
+          ),
           localStorageServiceProvider.overrideWith(
             (ref) => _TestLocalStorageService(enablePromptWeightScroll: false),
           ),
@@ -357,6 +375,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            promptBlockLibraryNotifierProvider.overrideWith(
+              _EmptyPromptBlockLibraryNotifier.new,
+            ),
             localStorageServiceProvider.overrideWith(
               (ref) => _TestLocalStorageService(),
             ),
@@ -413,6 +434,151 @@ void main() {
     } finally {
       debugDefaultTargetPlatformOverride = null;
     }
+  });
+
+  testWidgets('外部 provider 写入后编辑器同步显示新文本（协调器不依赖组件兜底）', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          promptBlockLibraryNotifierProvider.overrideWith(
+            _EmptyPromptBlockLibraryNotifier.new,
+          ),
+          localStorageServiceProvider.overrideWith(
+            (ref) => _TestLocalStorageService(),
+          ),
+          characterPromptNotifierProvider.overrideWith(
+            _TestCharacterPromptNotifier.new,
+          ),
+          promptTokenUsageProvider(
+            PromptTokenCountTarget.positive,
+          ).overrideWith(
+            (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+          ),
+          promptTokenUsageProvider(
+            PromptTokenCountTarget.negative,
+          ).overrideWith(
+            (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+          ),
+        ],
+        child: const MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Scaffold(
+            body: SizedBox(width: 960, height: 420, child: PromptInputWidget()),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final container = ProviderScope.containerOf(
+      tester.element(
+        find.byKey(const ValueKey('generation_prompt_positive_input')),
+      ),
+    );
+
+    // 模拟 Krita / 元数据导入 / 反推等外部路径：只写生成参数 provider。
+    container
+        .read(generationParamsNotifierProvider.notifier)
+        .updatePrompt('external import, from bridge');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('external import, from bridge'), findsOneWidget);
+    final workspace = container.read(
+      promptBlockWorkspaceNotifierProvider.notifier,
+    );
+    expect(
+      workspace.plainTextFor(PromptBlockLane.positive),
+      'external import, from bridge',
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('带块文档被外部整串写入后压扁为纯文本', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          promptBlockLibraryNotifierProvider.overrideWith(
+            () => _EmptyPromptBlockLibraryNotifier(
+              PromptBlockLibraryState(
+                blocks: [
+                  PromptBlock(
+                    id: 'source-block-ui',
+                    title: '画师组合',
+                    content: 'artist:xyz',
+                    color: '#FF123456',
+                    createdAt: DateTime.utc(2026, 8, 30),
+                    updatedAt: DateTime.utc(2026, 8, 30),
+                  ),
+                ],
+                folders: const [],
+              ),
+            ),
+          ),
+          localStorageServiceProvider.overrideWith(
+            (ref) => _TestLocalStorageService(),
+          ),
+          characterPromptNotifierProvider.overrideWith(
+            _TestCharacterPromptNotifier.new,
+          ),
+          promptTokenUsageProvider(
+            PromptTokenCountTarget.positive,
+          ).overrideWith(
+            (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+          ),
+          promptTokenUsageProvider(
+            PromptTokenCountTarget.negative,
+          ).overrideWith(
+            (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+          ),
+        ],
+        child: const MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Scaffold(
+            body: SizedBox(width: 960, height: 420, child: PromptInputWidget()),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final container = ProviderScope.containerOf(
+      tester.element(
+        find.byKey(const ValueKey('generation_prompt_positive_input')),
+      ),
+    );
+    final pillNotifier = container.read(pillWorkspaceNotifierProvider.notifier);
+    final workspace = container.read(
+      promptBlockWorkspaceNotifierProvider.notifier,
+    );
+    pillNotifier.replaceWithPlainText('1girl, ');
+    pillNotifier.insertBlockAt(offset: 7, blockId: 'source-block-ui');
+    await tester.pump();
+    // 药丸编辑器：块渲染为内联药丸而非旧整行卡片
+    expect(find.byType(PromptPill), findsOneWidget);
+    expect(find.text('画师组合'), findsOneWidget);
+
+    container
+        .read(generationParamsNotifierProvider.notifier)
+        .updatePrompt('flattened replacement');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.byType(PromptPill), findsNothing);
+    expect(find.text('flattened replacement'), findsOneWidget);
+    expect(
+      workspace.plainTextFor(PromptBlockLane.positive),
+      'flattened replacement',
+    );
+    final pillState = container.read(pillWorkspaceNotifierProvider);
+    expect(pillState.document.text, 'flattened replacement');
+    expect(pillState.document.instances, isEmpty);
+    expect(pillState.projection, 'flattened replacement');
+    expect(tester.takeException(), isNull);
   });
 }
 
@@ -491,4 +657,15 @@ class _TestLocalStorageService extends LocalStorageService {
 class _TestCharacterPromptNotifier extends CharacterPromptNotifier {
   @override
   CharacterPromptConfig build() => const CharacterPromptConfig();
+}
+
+/// 药丸编辑器（正向主提示词）依赖块库；无 Hive 的测试环境用空库替代。
+class _EmptyPromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
+  _EmptyPromptBlockLibraryNotifier([this.initial]);
+
+  final PromptBlockLibraryState? initial;
+
+  @override
+  Future<PromptBlockLibraryState> build() async =>
+      initial ?? PromptBlockLibraryState(blocks: [], folders: []);
 }

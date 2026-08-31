@@ -12,11 +12,9 @@ typedef AssetBytesLoader = Future<ByteData> Function(String key);
 /// - `/editor/<path>`      → Flutter assets `assets/model3d_editor/<path>`
 /// - `/models/<64hex>.glb` → 模型库目录中的内容寻址文件
 class LocalAssetServer {
-  LocalAssetServer({
-    AssetBytesLoader? assetLoader,
-    Directory? modelLibraryDir,
-  })  : _assetLoader = assetLoader ?? rootBundle.load,
-        _modelLibraryDir = modelLibraryDir;
+  LocalAssetServer({AssetBytesLoader? assetLoader, Directory? modelLibraryDir})
+    : _assetLoader = assetLoader ?? rootBundle.load,
+      _modelLibraryDir = modelLibraryDir;
 
   static const _editorPrefix = '/editor/';
   static const _modelsPrefix = '/models/';

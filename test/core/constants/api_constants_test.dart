@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
+import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/core/network/nai_api_endpoint.dart';
 
 void main() {
@@ -133,7 +134,28 @@ void main() {
 
     test('quality tags should match current NovelAI documented mappings', () {
       expect(
-        QualityTags.getQualityTags(ImageModels.animeDiffusionV45Full),
+        QualityTags.getQualityTags(ImageModels.animeDiffusionV5Full),
+        QualityTags.v5Standard,
+      );
+      expect(
+        QualityTags.getQualityTags(
+          ImageModels.animeDiffusionV5Full,
+          preset: QualityTagPreset.light,
+        ),
+        QualityTags.v5Light,
+      );
+      expect(
+        QualityTags.getQualityTags(
+          ImageModels.animeDiffusionV5Full,
+          preset: QualityTagPreset.none,
+        ),
+        isNull,
+      );
+      expect(
+        QualityTags.getQualityTags(
+          ImageModels.animeDiffusionV45Full,
+          preset: QualityTagPreset.light,
+        ),
         equals('location, very aesthetic, masterpiece, no text'),
       );
       expect(
@@ -148,6 +170,9 @@ void main() {
         QualityTags.getQualityTagVariants(ImageModels.animeDiffusionV45Full),
         contains('very aesthetic, masterpiece, no text'),
       );
+      expect(QualityTags.toTagHintValue(QualityTagPreset.standard), 1);
+      expect(QualityTags.toTagHintValue(QualityTagPreset.light), 3);
+      expect(QualityTags.toTagHintValue(QualityTagPreset.none), 0);
     });
 
     test('negative presets should match current NovelAI documented mappings', () {

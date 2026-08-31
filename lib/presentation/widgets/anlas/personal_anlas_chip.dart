@@ -185,8 +185,7 @@ class _PersonalAnlasDialogState extends ConsumerState<PersonalAnlasDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('订阅点数（每月重置，用不完也补回配额）',
-                style: theme.textTheme.titleSmall),
+            Text('订阅点数（每月重置，用不完也补回配额）', style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -246,10 +245,7 @@ class _PersonalAnlasDialogState extends ConsumerState<PersonalAnlasDialog> {
               ],
             ),
             const Divider(height: 24),
-            Text(
-              'V5 免费额度份额（Opus，百分比池）',
-              style: theme.textTheme.titleSmall,
-            ),
+            Text('V5 免费额度份额（Opus，百分比池）', style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             Row(
               children: [

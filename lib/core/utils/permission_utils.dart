@@ -23,8 +23,9 @@ class PermissionUtils {
     }
 
     final isAndroid13 = await _isAndroid13OrAbove();
-    final permission =
-        isAndroid13 ? ph.Permission.photos : ph.Permission.storage;
+    final permission = isAndroid13
+        ? ph.Permission.photos
+        : ph.Permission.storage;
 
     final status = await permission.request();
     return status.isGranted || status.isLimited;
@@ -37,8 +38,9 @@ class PermissionUtils {
     }
 
     final isAndroid13 = await _isAndroid13OrAbove();
-    final permission =
-        isAndroid13 ? ph.Permission.photos : ph.Permission.storage;
+    final permission = isAndroid13
+        ? ph.Permission.photos
+        : ph.Permission.storage;
 
     final status = await permission.status;
     return status.isGranted || status.isLimited;

@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
-import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart' show FilterCriteria;
+import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart'
+    show FilterCriteria;
 import 'package:nai_launcher/presentation/widgets/gallery/gallery_content_view.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_card_3d.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_context_menu.dart';

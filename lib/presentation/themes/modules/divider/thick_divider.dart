@@ -24,9 +24,9 @@ class ThickDividerModule extends BaseDividerModule {
     required Color color,
     double thickness = 2.0,
     Color? borderColor,
-  })  : _dividerColor = color,
-        _thickness = thickness,
-        _borderColor = borderColor ?? color;
+  }) : _dividerColor = color,
+       _thickness = thickness,
+       _borderColor = borderColor ?? color;
 
   /// Brutalist style - thick black lines for ThemedDivider
   /// Panel borders use a more subtle dark gray
@@ -57,23 +57,17 @@ class ThickDividerModule extends BaseDividerModule {
 
   @override
   BoxDecoration? get horizontalDecoration => BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: _dividerColor,
-            width: _thickness,
-          ),
-        ),
-      );
+    border: Border(
+      bottom: BorderSide(color: _dividerColor, width: _thickness),
+    ),
+  );
 
   @override
   BoxDecoration? get verticalDecoration => BoxDecoration(
-        border: Border(
-          right: BorderSide(
-            color: _dividerColor,
-            width: _thickness,
-          ),
-        ),
-      );
+    border: Border(
+      right: BorderSide(color: _dividerColor, width: _thickness),
+    ),
+  );
 
   @override
   BoxDecoration panelBorder({

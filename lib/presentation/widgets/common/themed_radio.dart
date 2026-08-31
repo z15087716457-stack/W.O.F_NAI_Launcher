@@ -56,10 +56,7 @@ class _ThemedRadioState<T> extends State<ThemedRadio<T>>
       vsync: this,
       value: _isSelected ? 1.0 : 0.0,
     );
-    _scale = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutBack,
-    );
+    _scale = CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
   }
 
   @override
@@ -96,8 +93,8 @@ class _ThemedRadioState<T> extends State<ThemedRadio<T>>
     final borderColor = _isSelected
         ? activeColorBase
         : (_isHovered
-            ? theme.colorScheme.primary.withValues(alpha: 0.5)
-            : theme.colorScheme.outline.withValues(alpha: 0.5));
+              ? theme.colorScheme.primary.withValues(alpha: 0.5)
+              : theme.colorScheme.outline.withValues(alpha: 0.5));
 
     // 背景色
     final backgroundColor = isDark
@@ -108,8 +105,9 @@ class _ThemedRadioState<T> extends State<ThemedRadio<T>>
     final opacity = widget.enabled ? 1.0 : 0.5;
 
     return MouseRegion(
-      cursor:
-          widget.enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      cursor: widget.enabled
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
@@ -126,10 +124,7 @@ class _ThemedRadioState<T> extends State<ThemedRadio<T>>
             decoration: BoxDecoration(
               color: backgroundColor,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: borderColor,
-                width: 1.5,
-              ),
+              border: Border.all(color: borderColor, width: 1.5),
             ),
             child: _buildInnerDot(activeColorBase),
           ),
@@ -233,7 +228,8 @@ class _SelectListTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: contentPadding ??
+        padding:
+            contentPadding ??
             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           children: [
@@ -248,26 +244,20 @@ class _SelectListTile extends StatelessWidget {
                 children: [
                   DefaultTextStyle(
                     style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          color: enabled
-                              ? null
-                              : Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge!
-                                  .color!
-                                  .withValues(alpha: 0.5),
-                        ),
+                      color: enabled
+                          ? null
+                          : Theme.of(context).textTheme.bodyLarge!.color!
+                                .withValues(alpha: 0.5),
+                    ),
                     child: title,
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
                     DefaultTextStyle(
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodySmall!
-                                .color!
-                                .withValues(alpha: enabled ? 0.7 : 0.4),
-                          ),
+                        color: Theme.of(context).textTheme.bodySmall!.color!
+                            .withValues(alpha: enabled ? 0.7 : 0.4),
+                      ),
                       child: subtitle!,
                     ),
                   ],

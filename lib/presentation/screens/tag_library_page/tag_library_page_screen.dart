@@ -144,9 +144,7 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
                   ),
 
                   // 内容列表
-                  Expanded(
-                    child: _buildContent(theme, state),
-                  ),
+                  Expanded(child: _buildContent(theme, state)),
                 ],
               ),
             ),
@@ -164,8 +162,9 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
     if (selectedIds.isEmpty) return;
 
     final pageState = ref.read(tagLibraryPageNotifierProvider);
-    final selectedEntries =
-        pageState.entries.where((e) => selectedIds.contains(e.id)).toList();
+    final selectedEntries = pageState.entries
+        .where((e) => selectedIds.contains(e.id))
+        .toList();
 
     if (selectedEntries.isEmpty) return;
 
@@ -179,7 +178,9 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
     final content = selectedEntries.map((e) => e.content).join(', ');
 
     // 设置待填充提示词
-    ref.read(pendingPromptNotifierProvider.notifier).set(
+    ref
+        .read(pendingPromptNotifierProvider.notifier)
+        .set(
           prompt: content,
           targetType: SendTargetType.mainPrompt,
           clearOnConsume: true,
@@ -198,9 +199,7 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
     if (mounted) {
       AppToast.success(
         context,
-        context.l10n.tagLibrary_sentEntriesToMainPrompt(
-          selectedEntries.length,
-        ),
+        context.l10n.tagLibrary_sentEntriesToMainPrompt(selectedEntries.length),
       );
       // 导航到主页
       context.go(AppRoutes.home);
@@ -359,8 +358,8 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
             hasSearch
                 ? context.l10n.tagLibrary_noSearchResults
                 : (hasCategory
-                    ? context.l10n.tagLibrary_categoryEmpty
-                    : context.l10n.tagLibrary_empty),
+                      ? context.l10n.tagLibrary_categoryEmpty
+                      : context.l10n.tagLibrary_empty),
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.outline,
             ),
@@ -481,9 +480,9 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
   String _getCategoryName(List categories, String? categoryId) {
     if (categoryId == null) return '';
     final category = categories.cast().firstWhere(
-          (c) => c?.id == categoryId,
-          orElse: () => null,
-        );
+      (c) => c?.id == categoryId,
+      orElse: () => null,
+    );
     return category?.displayName ?? '';
   }
 
@@ -570,8 +569,9 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
 
     // 检查是否全部已收藏
     final state = ref.read(tagLibraryPageNotifierProvider);
-    final selectedEntries =
-        state.entries.where((e) => selectedIds.contains(e.id));
+    final selectedEntries = state.entries.where(
+      (e) => selectedIds.contains(e.id),
+    );
     final allFavorited = selectedEntries.every((e) => e.isFavorite);
 
     // 如果全部已收藏，则取消收藏；否则全部收藏
@@ -604,8 +604,9 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
     if (selectedIds.isEmpty) return;
 
     final state = ref.read(tagLibraryPageNotifierProvider);
-    final selectedEntries =
-        state.entries.where((e) => selectedIds.contains(e.id)).toList();
+    final selectedEntries = state.entries
+        .where((e) => selectedIds.contains(e.id))
+        .toList();
 
     // 按当前排序拼接内容
     final content = selectedEntries.map((e) => e.content).join(', ');
@@ -624,10 +625,7 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
 
   /// 导入词库
   void _handleImport() {
-    showDialog(
-      context: context,
-      builder: (context) => const ImportDialog(),
-    );
+    showDialog(context: context, builder: (context) => const ImportDialog());
   }
 
   /// 导出词库
@@ -635,10 +633,8 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
     final state = ref.read(tagLibraryPageNotifierProvider);
     showDialog(
       context: context,
-      builder: (context) => ExportDialog(
-        entries: state.entries,
-        categories: state.categories,
-      ),
+      builder: (context) =>
+          ExportDialog(entries: state.entries, categories: state.categories),
     );
   }
 
@@ -680,10 +676,7 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
               if (name.isNotEmpty) {
                 final result = await ref
                     .read(tagLibraryPageNotifierProvider.notifier)
-                    .addCategory(
-                      name: name,
-                      parentId: parentId,
-                    );
+                    .addCategory(name: name, parentId: parentId);
                 if (!dialogContext.mounted) return;
                 if (result != null) {
                   Navigator.of(dialogContext).pop();
@@ -750,8 +743,9 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(context.l10n.tagLibrary_deleteEntryTitle),
-        content:
-            Text(context.l10n.tagLibrary_deleteEntryConfirm(entry.displayName)),
+        content: Text(
+          context.l10n.tagLibrary_deleteEntryConfirm(entry.displayName),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -799,7 +793,9 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
         ? '<${entry.name}>'
         : SdToNaiConverter.convert(entry.content);
 
-    await ref.read(fixedTagsNotifierProvider.notifier).addEntry(
+    await ref
+        .read(fixedTagsNotifierProvider.notifier)
+        .addEntry(
           name: entry.name,
           content: content,
           sourceEntryId: entry.id, // 【新增】建立关联，用于双向同步
@@ -817,7 +813,9 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
   ) async {
     final content = _prepareContentForHome(entry, sendOptions);
 
-    ref.read(pendingPromptNotifierProvider.notifier).set(
+    ref
+        .read(pendingPromptNotifierProvider.notifier)
+        .set(
           prompt: content,
           targetType: sendOptions.targetType,
           clearOnConsume: true,
@@ -843,7 +841,8 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
 
     // 检查是否为竖线格式且需要提取角色部分
     final isPipeFormat = PipeParser.isPipeFormat(entry.content);
-    final needsCharacterExtract = isPipeFormat &&
+    final needsCharacterExtract =
+        isPipeFormat &&
         (options.targetType == SendTargetType.replaceCharacter ||
             options.targetType == SendTargetType.appendCharacter);
 
@@ -874,10 +873,8 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
     final state = ref.read(tagLibraryPageNotifierProvider);
     showDialog(
       context: context,
-      builder: (context) => EntryAddDialog(
-        categories: state.categories,
-        entry: entry,
-      ),
+      builder: (context) =>
+          EntryAddDialog(categories: state.categories, entry: entry),
     );
   }
 }

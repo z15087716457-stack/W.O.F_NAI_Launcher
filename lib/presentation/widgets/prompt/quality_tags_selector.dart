@@ -3,23 +3,44 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
 import '../../../core/constants/api_constants.dart';
+import '../../../core/enums/quality_tag_preset.dart';
 import '../../../data/models/prompt/prompt_preset_mode.dart';
 import '../../../data/models/tag_library/tag_library_entry.dart';
+import '../../providers/generation/generation_params_notifier.dart';
 import '../../providers/quality_preset_provider.dart';
 import '../tag_library/tag_library_picker_dialog.dart';
 import 'components/library_entry_menu_item.dart';
 
+/// 当前模型在质量词菜单中公开的原生档位。
+List<PromptPresetMode> qualityNativeModesForModel(String model) {
+  return ImageModels.isV5Model(model)
+      ? const [
+          PromptPresetMode.naiDefault,
+          PromptPresetMode.naiLight,
+          PromptPresetMode.none,
+        ]
+      : const [PromptPresetMode.naiDefault, PromptPresetMode.none];
+}
+
+/// 非 V5 遇到持久化残留 Light 时，UI 按原有 NAI 默认档显示。
+PromptPresetMode qualityVisibleModeForModel(
+  String model,
+  PromptPresetMode mode,
+) {
+  if (!ImageModels.isV5Model(model) && mode == PromptPresetMode.naiLight) {
+    return PromptPresetMode.naiDefault;
+  }
+  return mode;
+}
+
 /// 质量词选择器组件
 ///
-/// 显示下拉菜单，支持选择 NAI 默认、无、或从词库添加自定义质量词
+/// V5 显示 Standard/Light/None；其他模型保持 NAI 默认/无，之后均可选自定义词。
 class QualityTagsSelector extends ConsumerStatefulWidget {
   /// 当前选择的模型
   final String model;
 
-  const QualityTagsSelector({
-    super.key,
-    required this.model,
-  });
+  const QualityTagsSelector({super.key, required this.model});
 
   @override
   ConsumerState<QualityTagsSelector> createState() =>
@@ -82,11 +103,11 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
               decoration: BoxDecoration(
                 color: isEnabled
                     ? (_isHovering
-                        ? Colors.green.withValues(alpha: 0.2)
-                        : Colors.green.withValues(alpha: 0.1))
+                          ? Colors.green.withValues(alpha: 0.2)
+                          : Colors.green.withValues(alpha: 0.1))
                     : (_isHovering
-                        ? theme.colorScheme.surfaceContainerHighest
-                        : Colors.transparent),
+                          ? theme.colorScheme.surfaceContainerHighest
+                          : Colors.transparent),
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
                   color: isEnabled
@@ -171,19 +192,22 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
     QualityPresetState state,
     List<TagLibraryEntry> customEntries,
   ) {
-    switch (state.mode) {
+    final visibleMode = qualityVisibleModeForModel(widget.model, state.mode);
+    switch (visibleMode) {
       case PromptPresetMode.naiDefault:
-        return context.l10n.qualityTags_label;
+        return ImageModels.isV5Model(widget.model)
+            ? context.l10n.qualityTags_standard
+            : context.l10n.qualityTags_label;
+      case PromptPresetMode.naiLight:
+        return context.l10n.qualityTags_light;
       case PromptPresetMode.none:
         return context.l10n.qualityTags_none;
       case PromptPresetMode.custom:
-        // 找到当前选中的条目
         final currentEntry = customEntries.cast<TagLibraryEntry?>().firstWhere(
-              (e) => e?.id == state.customEntryId,
-              orElse: () => null,
-            );
+          (e) => e?.id == state.customEntryId,
+          orElse: () => null,
+        );
         if (currentEntry != null) {
-          // 截断名称
           final name = currentEntry.displayName;
           return name.length > 8 ? '${name.substring(0, 8)}...' : name;
         }
@@ -198,65 +222,51 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
   ) {
     final theme = Theme.of(context);
     final items = <PopupMenuEntry<String>>[];
+    final visibleMode = qualityVisibleModeForModel(widget.model, state.mode);
 
-    // NAI 默认
-    items.add(
-      PopupMenuItem<String>(
-        value: 'nai_default',
-        child: Row(
-          children: [
-            if (state.mode == PromptPresetMode.naiDefault)
-              Icon(Icons.check, size: 16, color: theme.colorScheme.primary)
-            else
-              const SizedBox(width: 16),
-            const SizedBox(width: 8),
-            Text(
-              context.l10n.qualityTags_naiDefault,
-              style: TextStyle(
-                fontWeight: state.mode == PromptPresetMode.naiDefault
-                    ? FontWeight.w600
-                    : FontWeight.normal,
-                color: state.mode == PromptPresetMode.naiDefault
-                    ? theme.colorScheme.primary
-                    : null,
-              ),
+    for (final mode in qualityNativeModesForModel(widget.model)) {
+      final isSelected = visibleMode == mode;
+      items.add(
+        PopupMenuItem<String>(
+          value: switch (mode) {
+            PromptPresetMode.naiDefault => 'standard',
+            PromptPresetMode.naiLight => 'light',
+            PromptPresetMode.none => 'none',
+            PromptPresetMode.custom => throw StateError(
+              'Custom quality mode is not a native menu entry',
             ),
-          ],
-        ),
-      ),
-    );
-
-    // 无
-    items.add(
-      PopupMenuItem<String>(
-        value: 'none',
-        child: Row(
-          children: [
-            if (state.mode == PromptPresetMode.none)
-              Icon(Icons.check, size: 16, color: theme.colorScheme.primary)
-            else
-              const SizedBox(width: 16),
-            const SizedBox(width: 8),
-            Text(
-              context.l10n.qualityTags_none,
-              style: TextStyle(
-                fontWeight: state.mode == PromptPresetMode.none
-                    ? FontWeight.w600
-                    : FontWeight.normal,
-                color: state.mode == PromptPresetMode.none
-                    ? theme.colorScheme.primary
-                    : null,
+          },
+          child: Row(
+            children: [
+              if (isSelected)
+                Icon(Icons.check, size: 16, color: theme.colorScheme.primary)
+              else
+                const SizedBox(width: 16),
+              const SizedBox(width: 8),
+              Text(
+                switch (mode) {
+                  PromptPresetMode.naiDefault =>
+                    ImageModels.isV5Model(widget.model)
+                        ? context.l10n.qualityTags_standard
+                        : context.l10n.qualityTags_naiDefault,
+                  PromptPresetMode.naiLight => context.l10n.qualityTags_light,
+                  PromptPresetMode.none => context.l10n.qualityTags_none,
+                  PromptPresetMode.custom => throw StateError(
+                    'Custom quality mode is not a native menu entry',
+                  ),
+                },
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: isSelected ? theme.colorScheme.primary : null,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    }
 
-    // 分隔线
     items.add(const PopupMenuDivider());
-
-    // 从词库添加
     items.add(
       PopupMenuItem<String>(
         value: 'add_from_library',
@@ -266,20 +276,18 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
             const SizedBox(width: 8),
             Text(
               context.l10n.qualityTags_addFromLibrary,
-              style: TextStyle(
-                color: theme.colorScheme.primary,
-              ),
+              style: TextStyle(color: theme.colorScheme.primary),
             ),
           ],
         ),
       ),
     );
 
-    // 所有已添加的自定义条目
     if (customEntries.isNotEmpty) {
       items.add(const PopupMenuDivider());
       for (final entry in customEntries) {
-        final isSelected = state.mode == PromptPresetMode.custom &&
+        final isSelected =
+            state.mode == PromptPresetMode.custom &&
             state.customEntryId == entry.id;
         items.add(
           LibraryEntryMenuItem(
@@ -289,6 +297,11 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
               ref
                   .read(qualityPresetNotifierProvider.notifier)
                   .removeCustomEntry(entry.id);
+              if (isSelected) {
+                ref
+                    .read(generationParamsNotifierProvider.notifier)
+                    .updateQualityPreset(QualityTagPreset.standard);
+              }
               Navigator.of(context).pop();
             },
           ),
@@ -300,23 +313,23 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
   }
 
   void _onMenuItemSelected(String value) {
+    final notifier = ref.read(generationParamsNotifierProvider.notifier);
     switch (value) {
-      case 'nai_default':
-        ref.read(qualityPresetNotifierProvider.notifier).setNaiDefault();
+      case 'standard':
+        notifier.updateQualityPreset(QualityTagPreset.standard);
+        break;
+      case 'light':
+        notifier.updateQualityPreset(QualityTagPreset.light);
         break;
       case 'none':
-        ref.read(qualityPresetNotifierProvider.notifier).setNone();
+        notifier.updateQualityPreset(QualityTagPreset.none);
         break;
       case 'add_from_library':
         _showTagLibraryPicker();
         break;
       default:
-        // 选择自定义条目
         if (value.startsWith('custom_')) {
-          final entryId = value.substring(7);
-          ref
-              .read(qualityPresetNotifierProvider.notifier)
-              .setCustomEntry(entryId);
+          notifier.updateCustomQualityPreset(value.substring(7));
         }
     }
   }
@@ -329,7 +342,9 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
       ),
     );
     if (entry != null) {
-      ref.read(qualityPresetNotifierProvider.notifier).setCustomEntry(entry.id);
+      ref
+          .read(generationParamsNotifierProvider.notifier)
+          .updateCustomQualityPreset(entry.id);
     }
   }
 
@@ -341,33 +356,28 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
     if (state.mode == PromptPresetMode.none) {
       return Text(
         context.l10n.qualityTags_disabled,
-        style: TextStyle(
-          color: theme.colorScheme.onSurface,
-          fontSize: 12,
-        ),
+        style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 12),
       );
     }
 
-    String content;
-    if (state.mode == PromptPresetMode.custom && state.customEntryId != null) {
-      final currentEntry = customEntries.cast<TagLibraryEntry?>().firstWhere(
-            (e) => e?.id == state.customEntryId,
-            orElse: () => null,
-          );
-      content = currentEntry?.content ??
-          QualityTags.getQualityTags(widget.model) ??
-          QualityTags.getQualityTags(ImageModels.animeDiffusionV45Full) ??
-          '';
-    } else {
-      content = QualityTags.getQualityTags(widget.model) ??
-          QualityTags.getQualityTags(ImageModels.animeDiffusionV45Full) ??
-          '';
-    }
-
+    final content =
+        ref
+            .read(qualityPresetNotifierProvider.notifier)
+            .getEffectiveContent(widget.model) ??
+        '';
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          _getDisplayLabel(context, state, customEntries),
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 4),
         Text(
           context.l10n.qualityTags_addToEnd,
           style: TextStyle(
@@ -378,10 +388,7 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
         const SizedBox(height: 4),
         Text(
           ', $content',
-          style: TextStyle(
-            color: Colors.green.shade700,
-            fontSize: 11,
-          ),
+          style: TextStyle(color: Colors.green.shade700, fontSize: 11),
         ),
       ],
     );

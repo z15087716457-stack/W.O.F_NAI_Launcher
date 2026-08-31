@@ -41,9 +41,7 @@ class _HoverImagePreviewState extends State<HoverImagePreview> {
   void _showOverlay() {
     if (_overlayEntry != null) return;
 
-    _overlayEntry = OverlayEntry(
-      builder: (context) => _buildOverlay(),
-    );
+    _overlayEntry = OverlayEntry(builder: (context) => _buildOverlay());
 
     Overlay.of(context).insert(_overlayEntry!);
   }
@@ -70,9 +68,7 @@ class _HoverImagePreviewState extends State<HoverImagePreview> {
               maxWidth: widget.previewMaxSize,
               maxHeight: widget.previewMaxSize,
             ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
             child: DecodedMemoryImage(
               bytes: widget.imageBytes,
               fit: BoxFit.contain,

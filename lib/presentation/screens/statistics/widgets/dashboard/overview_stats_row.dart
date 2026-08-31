@@ -10,10 +10,7 @@ import '../cards/metric_card.dart';
 class OverviewStatsRow extends StatelessWidget {
   final GalleryStatistics stats;
 
-  const OverviewStatsRow({
-    super.key,
-    required this.stats,
-  });
+  const OverviewStatsRow({super.key, required this.stats});
 
   @override
   Widget build(BuildContext context) {

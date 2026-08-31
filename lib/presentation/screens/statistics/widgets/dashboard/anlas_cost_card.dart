@@ -60,10 +60,10 @@ class AnlasCostCard extends ConsumerWidget {
                       value: _formatAnlas(
                         dailyStats.isNotEmpty
                             ? totalCost ~/
-                                dailyStats
-                                    .where((s) => s.cost > 0)
-                                    .length
-                                    .clamp(1, 999)
+                                  dailyStats
+                                      .where((s) => s.cost > 0)
+                                      .length
+                                      .clamp(1, 999)
                             : 0,
                       ),
                       isDark: isDark,
@@ -149,10 +149,12 @@ class AnlasCostCard extends ConsumerWidget {
       return FlSpot(e.key.toDouble(), e.value.cost.toDouble());
     }).toList();
 
-    final maxValue =
-        dailyStats.map((e) => e.cost).reduce((a, b) => a > b ? a : b);
-    final minValue =
-        dailyStats.map((e) => e.cost).reduce((a, b) => a < b ? a : b);
+    final maxValue = dailyStats
+        .map((e) => e.cost)
+        .reduce((a, b) => a > b ? a : b);
+    final minValue = dailyStats
+        .map((e) => e.cost)
+        .reduce((a, b) => a < b ? a : b);
     final range = maxValue - minValue;
     final padding = range > 0 ? range * 0.15 : maxValue * 0.15;
 
@@ -206,11 +208,11 @@ class AnlasCostCard extends ConsumerWidget {
               show: true,
               getDotPainter: (spot, percent, barData, index) =>
                   FlDotCirclePainter(
-                radius: 4,
-                color: Colors.amber,
-                strokeWidth: 2,
-                strokeColor: isDark ? colorScheme.surface : Colors.white,
-              ),
+                    radius: 4,
+                    color: Colors.amber,
+                    strokeWidth: 2,
+                    strokeColor: isDark ? colorScheme.surface : Colors.white,
+                  ),
             ),
             belowBarData: BarAreaData(
               show: true,

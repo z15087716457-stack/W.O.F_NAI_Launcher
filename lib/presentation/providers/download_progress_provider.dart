@@ -6,12 +6,7 @@ import '../../core/utils/app_logger.dart';
 part 'download_progress_provider.g.dart';
 
 /// 下载任务状态
-enum DownloadTaskStatus {
-  pending,
-  downloading,
-  completed,
-  failed,
-}
+enum DownloadTaskStatus { pending, downloading, completed, failed }
 
 /// 下载任务
 class DownloadTask {
@@ -99,8 +94,9 @@ class DownloadProgressNotifier extends _$DownloadProgressNotifier {
   /// 注意：当前使用预打包数据库，此方法仅初始化服务并返回状态。
   /// [force] 参数保留用于向后兼容，但不再使用。
   Future<bool> downloadCooccurrenceData({bool force = false}) async {
-    final cooccurrenceService =
-        await ref.watch(cooccurrenceServiceProvider.future);
+    final cooccurrenceService = await ref.watch(
+      cooccurrenceServiceProvider.future,
+    );
 
     AppLogger.i(
       'downloadCooccurrenceData called: isLoaded=${cooccurrenceService.isLoaded}, force=$force',

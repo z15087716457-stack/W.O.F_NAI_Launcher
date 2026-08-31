@@ -188,24 +188,27 @@ void main() {
       expect(cost, 80);
     });
 
-    test('applies the Opus free image to base-image requests (img2img free too)', () {
-      // 官方 SDK 免费判定不含底图排除：img2img/infill 满足尺寸/步数同样免费。
-      // strength 先作用于单价再免费：ceil(20×0.5)=10 → 免费 0。
-      final cost = AnlasCalculator.calculateRequestCost(
-        width: 1024,
-        height: 1024,
-        steps: 28,
-        batchCount: 1,
-        batchSize: 1,
-        smea: false,
-        smeaDyn: false,
-        model: model,
-        subscriptionTier: AnlasCalculator.opusTier,
-        strength: 0.5,
-      );
+    test(
+      'applies the Opus free image to base-image requests (img2img free too)',
+      () {
+        // 官方 SDK 免费判定不含底图排除：img2img/infill 满足尺寸/步数同样免费。
+        // strength 先作用于单价再免费：ceil(20×0.5)=10 → 免费 0。
+        final cost = AnlasCalculator.calculateRequestCost(
+          width: 1024,
+          height: 1024,
+          steps: 28,
+          batchCount: 1,
+          batchSize: 1,
+          smea: false,
+          smeaDyn: false,
+          model: model,
+          subscriptionTier: AnlasCalculator.opusTier,
+          strength: 0.5,
+        );
 
-      expect(cost, 0);
-    });
+        expect(cost, 0);
+      },
+    );
 
     // 移植自上游 374bff6b：isOpusFreeGeneration 对 infill 的免费资格判定，
     // 在我们的 SDK 实证公式下同样成立（832×1216 ≤ 1MP 且 ≤28 步免费，29 步不免）。
@@ -487,7 +490,10 @@ void main() {
     test('Opus 底图但超尺寸：不免费，PR 附加费照加', () {
       final base = prCost(width: 1536, height: 1536, strength: 0.7);
       expect(base, greaterThan(0));
-      expect(prCost(width: 1536, height: 1536, strength: 0.7, prFee: 5), base + 5);
+      expect(
+        prCost(width: 1536, height: 1536, strength: 0.7, prFee: 5),
+        base + 5,
+      );
     });
 
     test('Opus 超 28 步：不免费', () {

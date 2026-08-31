@@ -93,8 +93,10 @@ class _HSVColorPickerState extends State<HSVColorPicker> {
                 ),
                 decoration: InputDecoration(
                   isDense: true,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(4),
                     borderSide: const BorderSide(color: Colors.white24),
@@ -126,10 +128,7 @@ class _HSVColorPickerState extends State<HSVColorPicker> {
         // SV 面板
         SizedBox(
           height: 120,
-          child: _SVPanel(
-            hsvColor: _hsvColor,
-            onChanged: _onColorChanged,
-          ),
+          child: _SVPanel(hsvColor: _hsvColor, onChanged: _onColorChanged),
         ),
 
         const SizedBox(height: 8),
@@ -154,10 +153,7 @@ class _SVPanel extends StatelessWidget {
   final HSVColor hsvColor;
   final ValueChanged<HSVColor> onChanged;
 
-  const _SVPanel({
-    required this.hsvColor,
-    required this.onChanged,
-  });
+  const _SVPanel({required this.hsvColor, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -191,10 +187,7 @@ class _SVPanel extends StatelessWidget {
                   gradient: const LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black,
-                    ],
+                    colors: [Colors.transparent, Colors.black],
                   ),
                 ),
               ),
@@ -236,10 +229,7 @@ class _HueSlider extends StatelessWidget {
   final double hue;
   final ValueChanged<double> onChanged;
 
-  const _HueSlider({
-    required this.hue,
-    required this.onChanged,
-  });
+  const _HueSlider({required this.hue, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {

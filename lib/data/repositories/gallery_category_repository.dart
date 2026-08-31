@@ -119,12 +119,13 @@ class GalleryCategoryRepository {
         await parent.create(recursive: true);
       }
 
-      final normalized = paths
-          .map(_normalizeCategoryPath)
-          .where((path) => path.isNotEmpty)
-          .toSet()
-          .toList()
-        ..sort();
+      final normalized =
+          paths
+              .map(_normalizeCategoryPath)
+              .where((path) => path.isNotEmpty)
+              .toSet()
+              .toList()
+            ..sort();
 
       if (normalized.isEmpty) {
         if (await file.exists()) {
@@ -239,7 +240,8 @@ class GalleryCategoryRepository {
     // 外部图库源子树只读
     if (parentId != null) {
       final parent = existingCategories.findById(parentId);
-      if (parent != null && _categoryOrAncestorsExternal(parent, existingCategories)) {
+      if (parent != null &&
+          _categoryOrAncestorsExternal(parent, existingCategories)) {
         AppLogger.w('外部图库源分类为只读，禁止创建子分类: ${parent.name}');
         return null;
       }
@@ -261,8 +263,9 @@ class GalleryCategoryRepository {
     if (await dir.exists()) {
       final suppressedPaths = await _loadSuppressedFolderPaths();
       if (suppressedPaths.contains(_normalizeCategoryPath(relativePath))) {
-        final siblings =
-            existingCategories.where((c) => c.parentId == parentId);
+        final siblings = existingCategories.where(
+          (c) => c.parentId == parentId,
+        );
         final category = GalleryCategory.create(
           name: name,
           folderPath: relativePath,
@@ -411,7 +414,7 @@ class GalleryCategoryRepository {
     final (newRelativePath, newAbsolutePath) = newParentId == null
         ? (
             p.basename(category.folderPath),
-            p.join(rootPath, p.basename(category.folderPath))
+            p.join(rootPath, p.basename(category.folderPath)),
           )
         : _buildMovePaths(rootPath, category, newParentId, allCategories);
 
@@ -461,8 +464,10 @@ class GalleryCategoryRepository {
       AppLogger.e('目标父分类不存在: $newParentId');
       return ('', '');
     }
-    final relativePath =
-        p.join(newParent.folderPath, p.basename(category.folderPath));
+    final relativePath = p.join(
+      newParent.folderPath,
+      p.basename(category.folderPath),
+    );
     return (relativePath, p.join(rootPath, relativePath));
   }
 
@@ -796,11 +801,13 @@ class GalleryCategoryRepository {
   }) async {
     int count = 0;
     try {
-      await for (final entity in Directory(folderPath)
-          .list(recursive: recursive, followLinks: false)) {
+      await for (final entity in Directory(
+        folderPath,
+      ).list(recursive: recursive, followLinks: false)) {
         if (entity is File &&
-            _supportedExtensions
-                .contains(p.extension(entity.path).toLowerCase())) {
+            _supportedExtensions.contains(
+              p.extension(entity.path).toLowerCase(),
+            )) {
           count++;
         }
       }

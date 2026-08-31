@@ -191,21 +191,13 @@ void main() {
     });
   });
 
-  test('DIY labels and placeholders are generated for every locale', () {
+  test('Placeholder messages are generated for every locale', () {
     final english = lookupAppLocalizations(const Locale('en'));
     final japanese = lookupAppLocalizations(const Locale('ja'));
     final chinese = lookupAppLocalizations(const Locale('zh'));
 
-    expect(english.diy_branchDefaultName(2), 'Branch 2');
-    expect(japanese.diy_branchDefaultName(2), '分岐 2');
-    expect(chinese.diy_branchDefaultName(2), '分支 2');
     expect(japanese.statistics_monday, '月');
     expect(chinese.common_enabled, '已启用');
-    expect(japanese.diy_positionCoordinates('50', '25'), '行: 50%、列: 25%');
-    expect(
-      english.diy_emphasisProbabilityHint('10.0'),
-      'Each selected tag has a 10.0% chance of receiving emphasis brackets',
-    );
     expect(english.networkError_requestFailed(429), 'Request failed (429)');
     expect(
       japanese.networkError_connectionTimeout,

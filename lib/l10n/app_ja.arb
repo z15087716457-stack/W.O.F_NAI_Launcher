@@ -18,13 +18,13 @@
   "onlineFav_moveHere": "ここに移動",
   "onlineFav_removeFavorite": "お気に入り解除",
   "onlineFav_favoriteAuthor": "作者をお気に入り",
+  "onlineFav_unfavoriteAuthor": "作者のお気に入りを解除",
   "onlineFav_authorFavorited": "作者をお気に入りに追加しました",
   "onlineFav_authorUnfavorited": "作者のお気に入りを解除しました",
   "common_confirm": "確認",
   "common_continue": "続行",
   "common_selectAll": "すべて選択",
   "common_deselectAll": "すべての選択を解除",
-  "common_collapseAll": "すべて折りたたむ",
   "common_save": "保存",
   "common_delete": "削除",
   "common_edit": "編集",
@@ -39,7 +39,6 @@
   "common_retry": "再試行",
   "common_select": "選択してください",
   "common_reset": "リセット",
-  "common_search": "検索",
   "common_add": "追加",
   "common_added": "追加しました",
   "common_new": "新規",
@@ -88,7 +87,6 @@
   "common_multiSelect": "複数選択",
   "common_category": "カテゴリ",
   "common_categories": "カテゴリ",
-  "common_items": "アイテム",
   "networkError_connectionTimeout": "接続がタイムアウトしました。ネットワーク接続を確認してください。",
   "networkError_sendTimeout": "送信がタイムアウトしました。もう一度お試しください。",
   "networkError_receiveTimeout": "受信がタイムアウトしました。画像生成には時間がかかる場合があります。",
@@ -116,7 +114,6 @@
   },
   "nav_canvas": "キャンバス",
   "nav_onlineGallery": "オンライン ギャラリー",
-  "nav_randomConfig": "ランダム構成",
   "nav_dictionary": "辞書 (WIP)",
   "nav_discordCommunity": "Discord コミュニティ",
   "nav_githubRepo": "GitHub リポジトリ",
@@ -571,8 +568,6 @@
       "error": {}
     }
   },
-  "config_newPreset": "新しいプリセット",
-  "config_deletePreset": "プリセットを削除",
   "img2img_title": "Image2Image",
   "img2img_enabled": "有効",
   "img2img_sourceImage": "ソース画像",
@@ -1163,7 +1158,6 @@
       "error": {}
     }
   },
-  "preset_presetName": "プリセット名",
   "onlineGallery_search": "検索",
   "onlineGallery_popular": "人気",
   "onlineGallery_favorites": "お気に入り",
@@ -1324,6 +1318,8 @@
   "onlineGallery_aiTagRankingProcessing": "ランキングを生成中です。しばらくしてから再試行してください。",
   "onlineGallery_aiTagNaiOnly": "NAIのみ",
   "onlineGallery_aiTagModelVersion": "モデルバージョン",
+  "onlineGallery_viewAuthor": "この作者を見る",
+  "onlineGallery_returnFromAuthor": "前の閲覧位置に戻る",
   "onlineGallery_generationParams": "生成パラメータ",
   "onlineGallery_sourceConfigUnavailable": "ソース設定を取得できません。接続を確認して再試行してください。",
   "onlineGallery_sourceRateLimited": "リクエストが多すぎます。しばらくしてから再試行してください。",
@@ -1419,13 +1415,14 @@
   "tagCategory_meta": "メタ",
   "tagCategory_general": "一般",
   "qualityTags_label": "品質",
-  "transparentBackground_label": "透過背景",
   "transparentBackground_tooltip": "プロンプトに「transparent background」を追加し、アルファチャンネル付きの画像を生成します（V5 専用）",
   "qualityTags_positive": "品質 (プロンプト)",
   "qualityTags_negative": "品質 (除外したい要素)",
   "qualityTags_disabled": "品質タグが無効です\nクリックして有効にします",
   "qualityTags_addToEnd": "プロンプトの最後に追加:",
   "qualityTags_naiDefault": "NAI のデフォルト",
+  "qualityTags_standard": "標準",
+  "qualityTags_light": "ライト",
   "qualityTags_none": "なし",
   "qualityTags_addFromLibrary": "ライブラリから追加",
   "qualityTags_selectFromLibrary": "品質タグエントリの選択",
@@ -1440,8 +1437,6 @@
   "ucPreset_nsfwHint": "💡 アダルト コンテンツを生成するには、プロンプトに nsfw を追加します。nsfw タグは除外したい要素から自動的に削除されます",
   "ucPreset_addFromLibrary": "ライブラリから追加",
   "ucPreset_selectFromLibrary": "除外したい要素エントリを選択",
-  "randomMode_enabledTip": "ランダムモードが有効になりました\n各生成後にプロンプトを自動的にランダム化する",
-  "randomMode_disabledTip": "ランダムモード\nクリックすると、生成時にプロンプトが自動的にランダム化されます",
   "batchSize_title": "バッチサイズ",
   "batchSize_tooltip": "リクエストごとに {count} 個の画像",
   "@batchSize_tooltip": {
@@ -1494,7 +1489,6 @@
   "warmup_loadingTranslation": "翻訳データをロードしています...",
   "warmup_initUnifiedDatabase": "タグ データベースを初期化しています...",
   "warmup_initTagSystem": "タグ システムを初期化しています...",
-  "warmup_loadingPromptConfig": "プロンプト構成を読み込んでいます...",
   "warmup_imageEditor": "画像エディタを初期化しています...",
   "warmup_database": "最近の履歴を読み込んでいます...",
   "warmup_network": "ネットワーク接続を確認しています...",
@@ -1582,8 +1576,6 @@
   "characterEditor_addFromLibrary": "ライブラリ",
   "characterEditor_moveUp": "上に移動",
   "characterEditor_moveDown": "下に移動",
-  "toolbar_randomPrompt": "ランダムなプロンプト",
-  "randomPromptToolsHiddenHint": "ランダムプロンプトツールは設定で非表示になっています",
   "toolbar_fullscreenEdit": "フルスクリーン編集",
   "toolbar_clear": "クリア",
   "toolbar_confirmClear": "クリアの確認",
@@ -1606,57 +1598,30 @@
     }
   },
   "characterTooltip_viewFullConfig": "クリックすると完全な構成が表示されます",
-  "tagLibrary_generatedCharacters": "{count} キャラクターを生成しました",
   "@tagLibrary_generatedCharacters": {
     "placeholders": {
       "count": {}
     }
   },
-  "tagLibrary_generateFailed": "生成に失敗しました: {error}",
   "@tagLibrary_generateFailed": {
     "placeholders": {
       "error": {}
     }
   },
-  "randomMode_title": "ランダム モードを選択",
-  "randomMode_naiOfficial": "公式モード",
-  "randomMode_custom": "カスタムモード",
-  "randomMode_hybrid": "ハイブリッド モード",
-  "randomMode_naiOfficialDesc": "NovelAI 公式ランダム アルゴリズムを複製する",
-  "randomMode_customDesc": "カスタム プリセットを使用して生成",
-  "randomMode_hybridDesc": "公式アルゴリズムとカスタム プリセットを組み合わせる",
-  "randomMode_naiIndicator": "NAI",
-  "randomMode_customIndicator": "カスタム",
-  "naiMode_noTags": "タグがありません",
-  "naiAlgorithm_characterCount": "キャラクター数の分布",
   "naiAlgorithm_mainPrompt": "メイン プロンプト",
-  "tagGroup_tagCount": "{count} タグ",
   "@tagGroup_tagCount": {
     "placeholders": {
       "count": {}
     }
   },
-  "addGroup_tagGroupTab": "タググループ",
   "addGroup_displayNameLabel": "表示名 (オプション)",
   "addGroup_targetCategoryLabel": "対象カテゴリ",
-  "addGroup_poolTab": "Danbooru プール",
   "globalSettings_saveFailed": "保存に失敗しました: {error}",
   "@globalSettings_saveFailed": {
     "placeholders": {
       "error": {}
     }
   },
-  "globalSettings_category_hairColor": "髪の色",
-  "globalSettings_category_eyeColor": "目の色",
-  "globalSettings_category_hairStyle": "ヘアスタイル",
-  "globalSettings_category_expression": "式",
-  "globalSettings_category_pose": "ポーズ",
-  "globalSettings_category_clothing": "衣類",
-  "globalSettings_category_accessory": "アクセサリ",
-  "globalSettings_category_bodyFeature": "ボディの特徴",
-  "globalSettings_category_background": "背景",
-  "globalSettings_category_scene": "シーン",
-  "globalSettings_category_style": "スタイル",
   "nav_generate": "生成",
   "nav_gallery": "ギャラリー",
   "nav_settings": "設定",
@@ -1734,300 +1699,104 @@
     }
   },
   "time_never_synced": "同期されていません",
-  "preset_resetToDefault": "デフォルトにリセット",
-  "newPresetDialog_title": "新しいプリセットを作成",
-  "newPresetDialog_blank": "完全に空白",
-  "newPresetDialog_blankDesc": "プリセット コンテンツを持たずにプリセットを最初から作成します",
-  "newPresetDialog_template": "デフォルトのプリセットに基づく",
-  "newPresetDialog_templateDesc": "デフォルトのプリセットからすべての設定を開始点としてコピーします",
-  "category_dialogTitle": "カテゴリの作成",
-  "category_nameHint": "カテゴリ名を入力してください",
-  "category_nameRequired": "名前は必須です",
   "category_selectEmoji": "絵文字を選択してください",
   "category_noRecentEmoji": "最近の絵文字はありません",
   "category_searchEmoji": "絵文字を検索",
-  "characterCountConfig_title": "キャラクター数設定",
-  "characterCountConfig_weight": "ウェイト",
-  "characterCountConfig_solo": "ソロ",
-  "characterCountConfig_duo": "デュオ",
-  "characterCountConfig_trio": "トリオ",
-  "characterCountConfig_noHumans": "人間は存在しません",
-  "characterCountConfig_multiPerson": "複数人",
-  "characterCountConfig_customizable": "カスタマイズ可能",
-  "characterCountConfig_mainPrompt": "メイン プロンプト",
-  "characterCountConfig_characterPrompt": "キャラクタープロンプト",
-  "characterCountConfig_addTagOption": "キャラクタータグを追加",
-  "characterCountConfig_addMultiPersonCombo": "複数人コンボを追加",
-  "characterCountConfig_displayName": "表示名",
-  "characterCountConfig_displayNameHint": "例: トラップ",
-  "characterCountConfig_mainPromptLabel": "メイン プロンプト タグ",
-  "characterCountConfig_mainPromptHint": "例: ソロ、女の子 2 人、女の子 1 人、男の子 1 人",
-  "characterCountConfig_personCount": "人数:",
-  "characterCountConfig_slotConfig": "キャラクタースロット構成",
-  "characterCountConfig_slot": "スロット",
-  "characterCountConfig_customSlots": "カスタム スロット",
-  "characterCountConfig_customSlotsTitle": "キャラクタースロット管理",
-  "characterCountConfig_customSlotsDesc": "利用可能なキャラクター スロット オプションを追加または削除します",
-  "characterCountConfig_addSlotHint": "例: トラップ 1 つ、フタナリ 1 つ",
-  "characterCountConfig_slotExists": "このスロットはすでに存在します",
-  "randomManager_algorithmConfig": "アルゴリズム構成",
-  "randomManager_characterCountWeight": "キャラクター数の重み",
-  "randomManager_genderWeight": "性別の重み",
-  "randomManager_globalSettings": "グローバル設定",
-  "randomManager_enableSeasonalWordlists": "季節の単語リストを有効にする",
-  "randomManager_enableSeasonalWordlistsDesc": "クリスマス、ハロウィーン、その他の特別な日の単語リスト",
-  "randomManager_globalEmphasisProbability": "グローバル強調確率",
-  "randomManager_soloGenderOptions": "ソロジェンダーのオプション",
-  "randomManager_femaleShort": "F",
-  "randomManager_maleShort": "M",
-  "randomManager_other": "その他",
-  "randomManager_tagGroupList": "タググループ",
-  "randomManager_deleteTagGroupTitle": "タググループの削除",
-  "randomManager_deleteTagGroupConfirm": "タグ グループ「{name}」を削除しますか?この操作は元に戻すことができません。",
   "@randomManager_deleteTagGroupConfirm": {
     "placeholders": {
       "name": {}
     }
   },
-  "randomManager_tagGroupCount": "{count} タグ グループ",
   "@randomManager_tagGroupCount": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_categories": "カテゴリ",
-  "randomManager_tagGroups": "タググループ",
-  "randomManager_tags": "タグ",
-  "randomManager_addTagGroup": "タググループの追加",
-  "randomManager_locked": "ロックされました",
-  "randomManager_addCategory": "カテゴリを追加",
-  "randomManager_noCategories": "カテゴリがありません",
-  "randomManager_noCategoriesHint": "[カテゴリを追加] をクリックして設定を開始してください",
-  "randomManager_globalPeopleSettings": "グローバルキャラクター設定",
-  "randomManager_closePreview": "プレビューを閉じる",
-  "randomManager_importPreset": "プリセットのインポート",
-  "randomManager_importPresetSubtitle": "JSON テキストからランダムな構成プリセットをインポートします",
-  "randomManager_exportCurrentPreset": "現在のプリセットをエクスポート",
-  "randomManager_noPresetSelected": "プリセットが選択されていません",
-  "randomManager_selectPresetFirst": "最初にプリセットを選択してください",
-  "randomManager_defaultPresetReadonly": "デフォルトのプリセットは読み取り専用です。まずカスタム プリセットを作成またはコピーします。",
-  "randomManager_presetImported": "インポートされたプリセット「{name}」",
   "@randomManager_presetImported": {
     "placeholders": {
       "name": {}
     }
   },
-  "randomManager_defaultPresetV4": "デフォルト モード (V4)",
-  "randomManager_defaultPresetLegacy": "デフォルト モード (レガシー)",
-  "randomManager_defaultPresetFurry": "デフォルト モード (毛皮)",
-  "randomManager_defaultPresetV4Description": "NAI V4 モデルに基づくランダムアルゴリズム設定 (複数キャラクター対応)",
-  "randomManager_defaultPresetLegacyDescription": "NAI レガシー モデルに基づくランダム アルゴリズム構成",
-  "randomManager_defaultPresetFurryDescription": "NAI Furry モデルに基づくランダム アルゴリズム構成",
-  "randomManager_defaultPresetOfficialDescription": "NAI 公式設定に基づくランダム アルゴリズム設定",
-  "randomManager_femaleClothing": "女性服",
-  "randomManager_maleClothing": "男性服",
-  "randomManager_generalClothing": "一般衣料品",
-  "randomManager_femaleBodyType": "女性の体型",
-  "randomManager_maleBodyType": "男性の体型",
-  "randomManager_generalBodyType": "一般的な体型",
-  "randomManager_soloFemale": "女性",
-  "randomManager_soloMale": "男性",
-  "randomManager_duoGirls": "二人の女の子",
-  "randomManager_duoMixed": "女の子と男の子",
-  "randomManager_duoBoys": "二人の少年",
-  "randomManager_trioGirls": "3 人の女の子",
-  "randomManager_trioTwoGirlsOneBoy": "女の子 2 人と男の子 1 人",
-  "randomManager_trioOneGirlTwoBoys": "女の子 1 人と男の子 2 人",
-  "randomManager_trioBoys": "3 人の男の子",
-  "randomManager_noHumanScene": "人間のいないシーン",
-  "randomManager_presetCreated": "プリセット「{name}」を作成しました",
   "@randomManager_presetCreated": {
     "placeholders": {
       "name": {}
     }
   },
-  "randomManager_deletePresetConfirm": "「{name}」を削除しますか?これを元に戻すことはできません。",
   "@randomManager_deletePresetConfirm": {
     "placeholders": {
       "name": {}
     }
   },
-  "randomManager_syncCompleted": "Danbooru タグが同期されました",
-  "randomManager_syncFailed": "同期に失敗しました: {error}",
   "@randomManager_syncFailed": {
     "placeholders": {
       "error": {}
     }
   },
-  "randomManager_resetDefaultTitle": "デフォルトにリセット",
-  "randomManager_resetDefaultContent": "公式のデフォルト構成を復元します。\nカスタム タグ グループは保持されますが、無効になります。",
-  "randomManager_resetDefaultConfirm": "リセット",
-  "randomManager_resetDefaultDone": "デフォルト構成にリセット",
-  "randomManager_generatePreview": "プレビューの生成",
-  "randomManager_importExport": "インポート / エクスポート",
-  "randomManager_syncing": "同期中",
-  "randomManager_syncingWithEllipsis": "同期中...",
-  "randomManager_syncDanbooruTags": "Danbooru タグを同期",
-  "randomManager_unknownError": "不明なエラー",
-  "randomManager_readOnlyMode": "読み取り専用モード",
-  "randomManager_readOnlyTooltip": "現在のプリセットはデフォルトのプリセットであるため、すべての構成項目がロックされています",
-  "randomManager_searchCategoryOrTagGroup": "カテゴリまたはタグ グループを検索します...",
-  "randomManager_scope": "範囲",
-  "randomManager_global": "グローバル",
-  "randomManager_private": "非公開",
-  "randomManager_status": "ステータス",
-  "randomManager_enabledOnly": "有効のみ",
-  "randomManager_diyCapable": "DIY 機能あり",
-  "randomManager_addTagGroupSubtitle": "「{category}」に追加",
   "@randomManager_addTagGroupSubtitle": {
     "placeholders": {
       "category": {}
     }
   },
-  "randomManager_tagGroupName": "タググループ名",
-  "randomManager_tagGroupNameHint": "タググループ名を入力してください",
-  "randomManager_tagGroupNameRequired": "タググループ名を入力してください",
-  "randomManager_customTab": "カスタム",
-  "randomManager_tagList": "タグリスト",
-  "randomManager_tagListHelp": "1 行に 1 つのタグ。タグまたはタグ:ウェイトをサポートします。",
-  "randomManager_searchTagGroup": "タグ グループを検索...",
-  "randomManager_searchPool": "検索プール...",
-  "randomManager_itemCount": "{count} アイテム",
   "@randomManager_itemCount": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_noMatchingTagGroup": "一致するタグ グループが見つかりませんでした",
-  "randomManager_noMatchingPool": "一致するプールが見つかりませんでした",
-  "randomManager_cannotLoadPreview": "プレビューを読み込めません",
-  "randomManager_openInDanbooru": "Danbooru で表示",
-  "randomManager_editTagGroup": "タググループの編集",
-  "randomManager_basicTab": "基本",
-  "randomManager_tagsTab": "タグ ({count})",
   "@randomManager_tagsTab": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_diyAbilitiesTab": "DIY 機能",
-  "randomManager_selectionSingle": "シングル",
-  "randomManager_selectionSingleDesc": "重み付けされたランダムな 1 つの選択",
-  "randomManager_selectionAll": "すべて",
-  "randomManager_selectionAllDesc": "すべてのタグを選択",
-  "randomManager_selectionMultipleCount": "複数のカウント",
-  "randomManager_selectionMultipleCountDesc": "指定されたカウントを選択してください",
-  "randomManager_selectionMultipleProbability": "多重確率",
-  "randomManager_selectionMultipleProbabilityDesc": "各タグを個別に評価します",
-  "randomManager_selectionSequential": "シーケンシャル",
-  "randomManager_selectionSequentialDesc": "バッチ間で状態を維持する",
-  "randomManager_noTags": "タグがありません",
-  "randomManager_conditionalBranch": "条件分岐",
-  "randomManager_conditionalBranchDesc": "変数値に基づいて異なるタグのサブセットを選択します",
-  "randomManager_dependencyConfig": "依存関係構成",
-  "randomManager_dependencyConfigDesc": "カウントの選択を他のカテゴリ値に依存させる",
-  "randomManager_visibilityRules": "可視性ルール",
-  "randomManager_visibilityRulesDesc": "構成に基づいて生成するかどうかを決定",
-  "randomManager_timeCondition": "時間条件",
-  "randomManager_timeConditionDesc": "特定の日付範囲内で有効にする",
-  "randomManager_postProcessRules": "後処理ルール",
-  "randomManager_postProcessRulesDesc": "選択したタグに基づいて競合を削除します",
-  "randomManager_emphasisProbability": "強調確率",
-  "randomManager_probability": "確率",
-  "randomManager_selectionMode": "選択モード",
-  "randomManager_editHint": "{name} (クリックして編集)",
   "@randomManager_editHint": {
     "placeholders": {
       "name": {}
     }
   },
-  "randomManager_emphasisProbabilityValue": "強調確率: {percent}%",
   "@randomManager_emphasisProbabilityValue": {
     "placeholders": {
       "percent": {}
     }
   },
-  "randomManager_previewGeneration": "プレビューの生成",
-  "randomManager_generating": "生成中",
-  "randomManager_generate": "生成",
-  "randomManager_generationFailed": "生成に失敗しました",
-  "randomManager_copy": "コピー",
-  "randomManager_regenerate": "再生成",
-  "randomManager_copiedToClipboard": "クリップボードにコピーされました",
-  "randomManager_selectPresetRequired": "プリセットを選択してください",
-  "randomManager_characterCountLabel": "{count} キャラクター",
   "@randomManager_characterCountLabel": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_tagCountLabel": "{count} タグ",
   "@randomManager_tagCountLabel": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_previewHint": "[生成] をクリックしてランダムなタグをプレビューします",
-  "randomManager_generateNow": "今すぐ生成",
-  "randomManager_batchOperations": "バッチ操作",
-  "randomManager_selectedItems": "{count} が選択されました",
   "@randomManager_selectedItems": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_totalItems": "{count} 合計",
   "@randomManager_totalItems": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_enabledItems": "{count} 項目が有効になりました",
   "@randomManager_enabledItems": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_disabledItems": "{count} 項目が無効になりました",
   "@randomManager_disabledItems": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_batchDeleteTitle": "一括削除",
-  "randomManager_batchDeleteContent": "選択した {count} 個のアイテムを削除しますか?この操作は元に戻すことができません。",
   "@randomManager_batchDeleteContent": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_deletedItems": "{count} 個のアイテムが削除されました",
   "@randomManager_deletedItems": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_invertSelection": "選択範囲を反転",
-  "randomManager_moreActions": "その他のアクション",
-  "randomManager_enableSelected": "選択したものを有効にする",
-  "randomManager_disableSelected": "選択したものを無効にする",
-  "randomManager_deleteSelected": "選択したものを削除",
-  "randomManager_noHistory": "履歴はありません",
-  "randomManager_operationHistory": "操作履歴",
-  "randomManager_keyboardShortcuts": "キーボード ショートカット",
-  "randomManager_generalShortcuts": "一般",
-  "randomManager_presetActions": "プリセットアクション",
-  "randomManager_selectionActions": "選択アクション",
-  "randomManager_closeWindow": "ウィンドウを閉じる",
-  "randomManager_refreshOrSync": "更新/同期",
-  "gender_female": "女性",
-  "gender_male": "男性",
-  "scope_global": "メイン",
-  "scope_globalTooltip": "プロンプトはメイン プロンプト領域に表示されます\n適した用途: 背景、シーン、スタイルなど。",
-  "scope_character": "キャラクター",
-  "scope_characterTooltip": "プロンプトはキャラクタープロンプトにのみ表示されます\nキャラクターごとに個別に生成されます\n適用対象: 髪の色、目の色、服装、表情など。",
-  "scope_all": "両方",
-  "scope_allTooltip": "プロンプトはメイン プロンプトとキャラクター プロンプトの両方に表示されます\n用途: ポーズ、インタラクション、その他の汎用タグ",
   "vibeNoEncodingWarning": "この画像には事前にエンコードされたデータがありません",
   "vibeWillCostAnlas": "エンコードには {count} Anlas を消費します",
   "@vibeWillCostAnlas": {
@@ -2692,7 +2461,6 @@
       }
     }
   },
-  "statistics_chartTopTags": "トップのタグ",
   "statistics_chartAspectRatio": "アスペクト比の分布",
   "statistics_chartActivityHeatmap": "アクティビティ ヒートマップ",
   "statistics_chartHourlyDistribution": "時間別分布",
@@ -3317,12 +3085,7 @@
   "settings_notificationCustomSound": "カスタムサウンド",
   "settings_notificationSelectSound": "サウンドの選択",
   "settings_notificationResetSound": "デフォルトにリセット",
-  "categoryConfiguration": "カテゴリ構成",
   "resetToDefault": "デフォルトにリセット",
-  "resetToDefaultTooltip": "デフォルト構成にリセット",
-  "toggleGroupEnabled": "グループ有効状態の切り替え",
-  "diyNotAvailableForDefault": "DIY はデフォルトのプリセットでは使用できません",
-  "diyNotAvailableHint": "編集するにはカスタム プリセットにコピーしてください",
   "statistics_heatmapLess": "少ない",
   "statistics_heatmapMore": "多い",
   "statistics_heatmapActivities": "{count} アクティビティ",
@@ -3494,7 +3257,6 @@
     }
   },
   "metadataImport_noDataFound": "NovelAI メタデータが見つかりませんでした",
-  "metadataImport_noParamsSelected": "パラメータが選択されていません",
   "metadataImport_appliedCount": "適用された {count} パラメータ",
   "@metadataImport_appliedCount": {
     "placeholders": {
@@ -3511,13 +3273,11 @@
   "shortcut_context_gallery": "ギャラリーリスト",
   "shortcut_context_viewer": "画像ビューア",
   "shortcut_context_tag_library": "タグ ライブラリ",
-  "shortcut_context_random_config": "ランダム構成",
   "shortcut_context_settings": "設定",
   "shortcut_context_input": "入力フィールド",
   "shortcut_action_navigate_to_generation": "生成ページ",
   "shortcut_action_navigate_to_local_gallery": "ローカル ギャラリー",
   "shortcut_action_navigate_to_online_gallery": "オンライン ギャラリー",
-  "shortcut_action_navigate_to_random_config": "ランダム構成",
   "shortcut_action_navigate_to_tag_library": "タグ ライブラリ",
   "shortcut_action_navigate_to_statistics": "統計",
   "shortcut_action_navigate_to_settings": "設定",
@@ -3525,7 +3285,6 @@
   "shortcut_action_generation_prev_image": "前のプレビュー（履歴連動）",
   "shortcut_action_generation_next_image": "次のプレビュー（履歴連動）",
   "shortcut_action_cancel_generation": "生成のキャンセル",
-  "shortcut_action_random_prompt": "ランダムなプロンプト",
   "shortcut_action_clear_prompt": "プロンプトをクリア",
   "shortcut_action_toggle_prompt_mode": "プロンプトモードの切り替え",
   "shortcut_action_open_tag_library": "タグ ライブラリを開く",
@@ -3566,13 +3325,6 @@
   "shortcut_action_batch_copy_tags": "タグのバッチコピー",
   "shortcut_action_send_to_home": "ホームに送信",
   "shortcut_action_exit_selection_mode": "選択モードを終了します",
-  "shortcut_action_sync_danbooru": "Danbooru を同期",
-  "shortcut_action_generate_preview": "プレビューの生成",
-  "shortcut_action_search_presets": "プリセットの検索",
-  "shortcut_action_new_preset": "新しいプリセット",
-  "shortcut_action_duplicate_preset": "プリセットを複製",
-  "shortcut_action_delete_preset": "プリセットを削除",
-  "shortcut_action_close_config": "構成を閉じる",
   "shortcut_action_minimize_to_tray": "トレイに最小化",
   "shortcut_action_quit_app": "アプリケーションを終了します",
   "shortcut_action_show_shortcut_help": "ショートカット ヘルプを表示",
@@ -3581,8 +3333,6 @@
   "shortcut_settings_enable": "ショートカットを有効にする",
   "shortcut_settings_show_badges": "ショートカット バッジを表示",
   "shortcut_settings_show_in_tooltips": "ツールチップに表示",
-  "settings_showRandomPromptTools": "ランダムプロンプトツールを表示",
-  "settings_showRandomPromptToolsSubtitle": "生成ページにランダムプロンプトボタンと Random Mode の切り替えを表示します",
   "settings_enablePromptWeightScroll": "マウスホイールでプロンプトの重みを調整",
   "settings_enablePromptWeightScrollSubtitle": "プロンプトを選択している間は、ホイールで重みだけを調整し、ページスクロールなどの操作は行いません。",
   "shortcut_settings_reset_all": "すべてをデフォルトにリセット",
@@ -5018,13 +4768,9 @@
   "toast_savedToVibeLibrary": "バイブライブラリに保存しました",
   "toast_saveBundleFailed": "バンドルの保存に失敗しました",
   "toast_saveEntryFailed": "エントリの保存に失敗しました",
-  "toast_presetNameRequired": "プリセット名を入力してください",
-  "toast_selectPresetContent": "保存する項目を少なくとも 1 つ選択してください",
-  "toast_presetSaved": "プリセットは正常に保存されました",
   "toast_imagePromptCopied": "プロンプトがコピーされました",
   "toast_imageHasNoPrompt": "この画像にはプロンプトがありません",
   "toast_useDeleteButton": "UI の削除ボタンを使用します。",
-  "toast_imageHasNoMetadata": "この画像にはメタデータがありません",
   "toast_imageDataUnavailable": "画像データが利用できないため、コピーできません",
   "toast_vibeDataCopied": "Vibe データをコピーしました",
   "toast_tagCopied": "タグがコピーされました",
@@ -5166,7 +4912,14 @@
   "detail_modifiedTime": "更新日時",
   "detail_fileSize": "ファイルサイズ",
   "detail_noContent": "(コンテンツなし)",
-  "detail_savePreset": "プリセットの保存",
+  "detail_saveBlock": "ブロックとして保存",
+  "saveBlock_title": "ブロックとして保存",
+  "saveBlock_nameLabel": "ブロック名",
+  "saveBlock_nameHint": "ブロック名を入力",
+  "saveBlock_nameRequired": "ブロック名を入力してください",
+  "saveBlock_selectContent": "保存する内容を選択してください",
+  "saveBlock_negativeSuffix": "ネガティブ",
+  "saveBlock_saved": "ブロックライブラリに保存しました",
   "detail_copyLabel": "{label} をコピーします",
   "@detail_copyLabel": {
     "placeholders": {
@@ -5184,63 +4937,6 @@
   "pagination_jump": "ジャンプ",
   "pagination_itemsPerPage": "ページごと",
   "pagination_itemUnit": "アイテム",
-  "diyGuide_title": "DIY 機能ガイド",
-  "diyGuide_subtitle": "高度な機能を学び、独自のライブラリを作成します",
-  "diyGuide_intro": "このガイドでは、DIY システムの中核となる概念と高度な機能について説明し、強力な動的プロンプト ライブラリの構築に役立ちます。",
-  "diyGuide_exampleLabel": "例",
-  "diyGuide_hierarchyTitle": "階層",
-  "diyGuide_hierarchyDescription": "DIY システムは、3 レベルのカテゴリ構造を使用してプロンプトを整理し、管理と検索を容易にします。",
-  "diyGuide_hierarchyExample": "カテゴリ: キャラクターの特徴\n  -> グループ: ヘアスタイル\n      -> タグ: ロングヘア、ショートヘア、ツインテール",
-  "diyGuide_selectionModeTitle": "選択モード",
-  "diyGuide_selectionModeDescription": "グループから選択されるタグの数を制御します。",
-  "diyGuide_selectionModeExample": "• ランダム: ランダムな髪の色など、毎回 1 つのアイテムを選択します\n• すべて: 固定機能セットなど、グループ内のすべてのタグを選択します。",
-  "diyGuide_weightTitle": "ウェイト制御",
-  "diyGuide_weightDescription": "生成中の特定のプロンプトの影響を調整します。",
-  "diyGuide_weightExample": "• ブースト: masterpiece を中括弧で囲む = 1.05x ウェイト\n• 強力なブースト: masterpiece を三重中括弧で囲む = 1.16x ウェイト\n• 弱体化: [bad hands] = 0.95x ウェイト",
-  "diyGuide_genderTitle": "性別制限",
-  "diyGuide_genderDescription": "互換性のない生成された機能を避けるために、タグを特定のキャラクターの性別に制限します。",
-  "diyGuide_genderExample": "• 女性: スカートなどの女性キャラクターのみ\n• 男性: ひげなどの男性キャラクターのみ\n• 任意: T シャツなどの普遍的なもの",
-  "diyGuide_scopeTitle": "範囲",
-  "diyGuide_scopeDescription": "タグをキャラクター、背景、または画像全体のどれに適用するかを定義します。",
-  "diyGuide_scopeExample": "• キャラクター: 目や髪などのキャラクターの特徴\n• 背景: 青空や屋内などの環境の説明\n• グローバル: アート スタイルと品質タグ (最高品質など)",
-  "diyGuide_conditionalTitle": "条件分岐",
-  "diyGuide_conditionalDescription": "選択したタグまたはその他の条件に基づいて、後のタグを動的に選択します。",
-  "diyGuide_conditionalExample": "「雨」を選択した場合\n  次に、「傘」と「濡れた服」を追加します\n  ELSE「晴れ」を追加",
-  "diyGuide_dependenciesTitle": "依存関係",
-  "diyGuide_dependenciesDescription": "タグ間のリンクを作成し、1 つのタグが選択されたときに関連タグが自動的に導入されるようにします。",
-  "diyGuide_dependenciesExample": "「JK制服」を選択 -> 「学校背景」と「スクールバッグ」を自動追加",
-  "diyGuide_visibilityTitle": "可視性ルール",
-  "diyGuide_visibilityDescription": "タグが UI にいつ表示されるか、または生成中にアクティブになるかを制御します。",
-  "diyGuide_visibilityExample": "「魔法少女」カテゴリが選択されている場合に「魔法の杖」オプション グループのみを表示します",
-  "diyGuide_timeTitle": "時間条件",
-  "diyGuide_timeDescription": "リアルタイムまたは設定されたシミュレート時間に基づいて特定のタグをトリガーします。",
-  "diyGuide_timeExample": "• 06:00-18:00 -> \"daylight\" を追加\n• 18:00-06:00 -> \"night\" を追加",
-  "diyGuide_postProcessingTitle": "後処理ルール",
-  "diyGuide_postProcessingDescription": "プロンプト生成の最終段階でテキストの置換またはクリーンアップを実行します。",
-  "diyGuide_postProcessingExample": "より特徴的な説明のために、すべての「青い目」を「紺碧の目」に置き換えます。",
-  "diyGuide_emphasisTitle": "強調確率",
-  "diyGuide_emphasisDescription": "出力の多様性を高めるためにタグに重み構文をランダムに追加します。",
-  "diyGuide_emphasisExample": "確率を 30% に設定します。出力の約 1/3 は重み付きタグを使用し、2/3 はプレーン タグを出力します。",
-  "naiRules_title": "NAI ランダム ルール",
-  "naiRules_characterCountProbability": "キャラクター数の確率",
-  "naiRules_solo": "1人（ソロ）",
-  "naiRules_duo": "2名（デュオ）",
-  "naiRules_trio": "3人（トリオ）",
-  "naiRules_group": "4名（グループ）",
-  "naiRules_genderRules": "性別ルール",
-  "naiRules_female": "女性",
-  "naiRules_male": "男性",
-  "naiRules_mixed": "混合 / その他",
-  "naiRules_categoryProbability": "カテゴリの確率",
-  "naiRules_dynamicTagWeightTitle": "動的タグ重み調整",
-  "naiRules_dynamicTagWeightSubtitle": "アクション、服装、表情、背景などの複数の要素をランダムに組み合わせて、画像のテーマに基づいてカテゴリの重みを調整します。",
-  "naiRules_specialMechanisms": "特別なメカニズム",
-  "naiRules_tagStrengthening": "タグ強化",
-  "naiRules_seasonalLibraryTitle": "季節ライブラリ",
-  "naiRules_seasonalLibrarySubtitle": "季節の服装、天候、照明、雰囲気などの季節の特徴を自動的に照合します。",
-  "naiRules_v4CharacterPositioning": "V4 複数キャラクター配置",
-  "naiRules_smartPositionTitle": "スマートな位置の割り当て",
-  "naiRules_smartPositionSubtitle": "V4 モデルでは、キャラクター配置構文を使用して複数キャラクターの配置を正確に制御します。",
   "comfyImport_detectedTitle": "ComfyUI の複数キャラクタープロンプトを検出しました",
   "comfyImport_characterList": "キャラクター一覧 ({count})",
   "@comfyImport_characterList": {
@@ -5261,9 +4957,6 @@
   "comfyImport_syntaxPipe": "パイプ形式",
   "comfyImport_syntaxUnknown": "不明な構文です",
   "comfyImport_globalPrompt": "グローバル プロンプト",
-  "danbooruPreview_noTagData": "タグ データがありません",
-  "danbooruPreview_noPoolData": "プール データがありません",
-  "danbooruPreview_postCount": "{count} 件の投稿",
   "@danbooruPreview_postCount": {
     "placeholders": {
       "count": {}
@@ -5537,37 +5230,6 @@
       }
     }
   },
-  "diy_editDependencyTitle": "依存関係を編集",
-  "diy_dependencyTitle": "依存関係設定",
-  "diy_dependencySubtitle": "タグ選択間の依存関係を設定します",
-  "diy_dependencyType": "依存タイプ",
-  "diy_sourceCategory": "ソースカテゴリ",
-  "diy_selectSourceCategory": "ソースカテゴリを選択",
-  "diy_sourceCategoryId": "ソースカテゴリ ID",
-  "diy_enterCategoryId": "カテゴリ ID を入力",
-  "diy_mappingRules": "マッピングルール",
-  "diy_noMappingRules": "マッピングルールはありません",
-  "diy_deleteRule": "ルールを削除",
-  "diy_defaultValue": "デフォルト値",
-  "diy_defaultValueHint": "一致するマッピングルールがない場合に使用します",
-  "diy_enableDependency": "依存関係を有効化",
-  "diy_enableDependencyHint": "無効にすると、この依存関係は適用されません",
-  "diy_addMappingRule": "マッピングルールを追加",
-  "diy_sourceValue": "ソース値",
-  "diy_sourceValueHint": "例: 1, 2, 3",
-  "diy_resultValue": "結果値",
-  "diy_resultValueHint": "例: 0-3, 0-2, 0-1",
-  "diy_dependencyCount": "数量",
-  "diy_dependencyExists": "存在",
-  "diy_dependencyValue": "値",
-  "diy_dependencyExcludes": "除外",
-  "diy_dependencyCountDescription": "ソースカテゴリの選択数から結果数を決定します",
-  "diy_dependencyExistsDescription": "ソースカテゴリでタグが選択されている場合のみ適用します",
-  "diy_dependencyValueDescription": "ソースカテゴリで選択された特定のタグ値に依存します",
-  "diy_dependencyExcludesDescription": "ソースカテゴリでタグが選択されている場合は適用しません",
-  "diy_editConditionalTitle": "条件分岐を編集",
-  "diy_conditionalDefaultName": "条件分岐",
-  "diy_branchDefaultName": "分岐 {index}",
   "@diy_branchDefaultName": {
     "placeholders": {
       "index": {
@@ -5575,9 +5237,6 @@
       }
     }
   },
-  "diy_conditionalTitle": "条件分岐",
-  "diy_conditionalSubtitle": "確率に基づいて分岐を選択します",
-  "diy_branchCount": "{count} 件の分岐",
   "@diy_branchCount": {
     "placeholders": {
       "count": {
@@ -5585,9 +5244,6 @@
       }
     }
   },
-  "diy_noConditionalBranches": "条件分岐はありません",
-  "diy_noConditionalBranchesHint": "分岐を追加して条件選択ロジックを作成します",
-  "diy_conditionCount": "{count} 件の条件",
   "@diy_conditionCount": {
     "placeholders": {
       "count": {
@@ -5595,9 +5251,6 @@
       }
     }
   },
-  "diy_deleteBranch": "分岐を削除",
-  "diy_addBranch": "分岐を追加",
-  "diy_editBranch": "編集: {name}",
   "@diy_editBranch": {
     "placeholders": {
       "name": {
@@ -5605,10 +5258,6 @@
       }
     }
   },
-  "diy_branchName": "分岐名",
-  "diy_probability": "確率",
-  "diy_enableBranch": "この分岐を有効化",
-  "diy_ruleDefaultName": "ルール {index}",
   "@diy_ruleDefaultName": {
     "placeholders": {
       "index": {
@@ -5616,7 +5265,6 @@
       }
     }
   },
-  "diy_ruleCount": "{count} 件のルール",
   "@diy_ruleCount": {
     "placeholders": {
       "count": {
@@ -5624,31 +5272,6 @@
       }
     }
   },
-  "diy_addRule": "ルールを追加",
-  "diy_editRule": "ルールを編集",
-  "diy_ruleName": "ルール名",
-  "diy_enableRule": "このルールを有効化",
-  "diy_postProcessTitle": "後処理ルール",
-  "diy_postProcessSubtitle": "タグの競合を自動的に解決します",
-  "diy_sleepingRule": "睡眠ルール",
-  "diy_sleepingRuleDescription": "キャラクターが眠っているときに目の色の記述を削除します",
-  "diy_mermaidRule": "人魚ルール",
-  "diy_mermaidRuleDescription": "人魚、ケンタウロス、ラミアなどから脚部衣装の記述を削除します",
-  "diy_presetRules": "プリセットルール",
-  "diy_noPostProcessRules": "後処理ルールはありません",
-  "diy_noPostProcessRulesHint": "ルールを追加してタグの競合を自動的に解決します",
-  "diy_actionType": "アクションタイプ",
-  "diy_triggerTags": "トリガータグ",
-  "diy_commaSeparatedTagsHint": "カンマ区切りのタグリスト",
-  "diy_targetCategories": "対象カテゴリ",
-  "diy_commaSeparatedCategoryIdsHint": "カンマ区切りのカテゴリ ID リスト",
-  "diy_targetTags": "対象タグ",
-  "diy_actionRemoveTags": "タグを削除",
-  "diy_actionReplaceTags": "タグを置換",
-  "diy_actionAddTags": "タグを追加",
-  "diy_actionRemoveCategories": "カテゴリを削除",
-  "diy_noTriggers": "トリガーなし",
-  "diy_actionSummary": "[{triggers}] に一致した場合: {action}",
   "@diy_actionSummary": {
     "placeholders": {
       "triggers": {
@@ -5659,11 +5282,6 @@
       }
     }
   },
-  "diy_characterPositionTitle": "キャラクター位置",
-  "diy_characterPositionSubtitle": "キャラクター位置を視覚的に編集",
-  "diy_addCharacterPosition": "キャラクター位置を追加",
-  "diy_addCharacterPositionHint": "下のボタンでキャラクター位置を追加します",
-  "diy_characterIndex": "キャラクター {index}",
   "@diy_characterIndex": {
     "placeholders": {
       "index": {
@@ -5671,8 +5289,6 @@
       }
     }
   },
-  "diy_aiPositionChoice": "AI が自動選択",
-  "diy_positionCoordinates": "行: {row}%、列: {column}%",
   "@diy_positionCoordinates": {
     "placeholders": {
       "row": {
@@ -5683,8 +5299,6 @@
       }
     }
   },
-  "diy_customPosition": "カスタム",
-  "diy_emphasisPercent": "強調 {percent}%",
   "@diy_emphasisPercent": {
     "placeholders": {
       "percent": {
@@ -5692,8 +5306,6 @@
       }
     }
   },
-  "diy_characterCountWeight": "キャラクター数の重み",
-  "diy_peopleCount": "{count} 人",
   "@diy_peopleCount": {
     "placeholders": {
       "count": {
@@ -5701,13 +5313,6 @@
       }
     }
   },
-  "diy_genderProbability": "性別の確率",
-  "diy_noWeightsConfigured": "重みが設定されていません",
-  "diy_genderOther": "その他",
-  "diy_emphasisTitle": "グローバル強調",
-  "diy_emphasisSubtitle": "タグの強調効果を調整",
-  "diy_emphasisProbability": "強調確率",
-  "diy_emphasisProbabilityHint": "選択された各タグに {percent}% の確率で強調括弧が追加されます",
   "@diy_emphasisProbabilityHint": {
     "placeholders": {
       "percent": {
@@ -5715,8 +5320,6 @@
       }
     }
   },
-  "diy_bracketCount": "括弧の階層数",
-  "diy_bracketLayers": "{count} 層",
   "@diy_bracketLayers": {
     "placeholders": {
       "count": {
@@ -5724,10 +5327,6 @@
       }
     }
   },
-  "diy_effectPreview": "効果プレビュー",
-  "diy_exampleTag": "タグの例",
-  "diy_emphasisExplanation": "強調括弧はタグの重みを増やし、階層が多いほど重みが高くなります",
-  "diy_presetExportFailed": "プリセットのエクスポートに失敗しました: {error}",
   "@diy_presetExportFailed": {
     "placeholders": {
       "error": {
@@ -5735,8 +5334,6 @@
       }
     }
   },
-  "diy_presetJsonRootObject": "JSON のルートはオブジェクトである必要があります",
-  "diy_presetInvalidData": "無効なプリセットデータ: {error}",
   "@diy_presetInvalidData": {
     "placeholders": {
       "error": {
@@ -5744,58 +5341,6 @@
       }
     }
   },
-  "diy_presetExportTitle": "プリセットをエクスポート",
-  "diy_presetImportTitle": "プリセットをインポート",
-  "diy_unknown": "不明",
-  "diy_presetShareHint": "以下の内容をコピーして共有できます",
-  "diy_presetPasteJsonHint": "プリセットの JSON データをここに貼り付け...",
-  "diy_presetPreview": "プリセットのプレビュー",
-  "diy_name": "名前",
-  "diy_description": "説明",
-  "diy_categoryCount": "カテゴリ数",
-  "diy_totalTagCount": "タグ総数",
-  "diy_visibilityTitle": "表示ルール",
-  "diy_visibilitySubtitle": "条件に基づいてカテゴリの表示を制御します",
-  "diy_noVisibilityRules": "表示ルールはありません",
-  "diy_noVisibilityRulesHint": "ルールを追加して現在の構成からカテゴリの表示を制御します",
-  "diy_notSet": "未設定",
-  "diy_targetCategory": "対象カテゴリ",
-  "diy_conditionType": "条件タイプ",
-  "diy_conditionValue": "条件値",
-  "diy_conditionValueHint": "タグ名または値",
-  "diy_visibleWhenMatched": "一致した場合に表示",
-  "diy_conditionTagExists": "タグが存在する",
-  "diy_conditionTagNotExists": "タグが存在しない",
-  "diy_conditionValueEquals": "値が等しい",
-  "diy_conditionValueNotEquals": "値が等しくない",
-  "diy_conditionValueInList": "値がリストに含まれる",
-  "diy_conditionValueNotInList": "値がリストに含まれない",
-  "diy_editTimeConditionTitle": "時間条件を編集",
-  "diy_timeDefaultName": "時間条件",
-  "diy_timeTitle": "時間条件",
-  "diy_timeSubtitle": "指定した日付範囲内で有効化します",
-  "diy_enableTimeCondition": "時間条件を有効化",
-  "diy_enableTimeConditionHint": "設定した日付範囲内でのみ適用します",
-  "diy_christmas": "クリスマス",
-  "diy_christmasDescription": "12月1日から31日まで有効になるクリスマスタグ",
-  "diy_halloween": "ハロウィン",
-  "diy_halloweenDescription": "10月1日から31日まで有効になるハロウィンタグ",
-  "diy_valentinesDay": "バレンタインデー",
-  "diy_valentinesDescription": "2月1日から14日まで有効になるバレンタインタグ",
-  "diy_presetTemplates": "プリセットテンプレート",
-  "diy_dateRange": "日付範囲",
-  "diy_startDate": "開始日",
-  "diy_endDate": "終了日",
-  "diy_crossYearUnsupported": "年をまたぐ日付範囲はまだサポートされていません",
-  "diy_month": "月",
-  "diy_day": "日",
-  "diy_conditionName": "条件名",
-  "diy_conditionNameHint": "条件名を入力",
-  "diy_repeatYearly": "毎年繰り返す",
-  "diy_repeatYearlyHint": "毎年同じ日付範囲で自動的に有効化します",
-  "diy_currentlyActive": "現在有効",
-  "diy_inactive": "無効",
-  "diy_daysRemaining": "残り {count} 日",
   "@diy_daysRemaining": {
     "placeholders": {
       "count": {
@@ -5803,7 +5348,6 @@
       }
     }
   },
-  "diy_timeRangeSummary": "{name}（{startMonth}月{startDay}日～{endMonth}月{endDay}日）",
   "@diy_timeRangeSummary": {
     "placeholders": {
       "name": {
@@ -5823,7 +5367,6 @@
       }
     }
   },
-  "diy_activeBadge": "有効",
   "@preciseRefLib_confirmDelete": {
     "placeholders": {
       "name": {
@@ -5893,10 +5436,6 @@
   "common_maximum": "最大",
   "addToLibrary_displayNameHint": "この項目を識別する名前を入力",
   "addToLibrary_tagHint": "タグを入力して Enter キーで追加",
-  "newPresetDialog_nameRequired": "プリセット名を入力してください",
-  "newPresetDialog_nameLabel": "プリセット名",
-  "newPresetDialog_nameHint": "新しいプリセットの名前を入力",
-  "newPresetDialog_creationMode": "作成方法",
   "drop_saveVibeBundle": "Vibe Bundleを保存",
   "drop_saveVibeBundleSubtitle": "{name} などのVibeをライブラリに保存",
   "@drop_saveVibeBundleSubtitle": {
@@ -5927,9 +5466,6 @@
       }
     }
   },
-  "randomManager_releaseToDelete": "離すと削除",
-  "randomManager_dragHereToDelete": "ここにドラッグして削除",
-  "randomManager_keyboardShortcutsHint": "キーボードショートカット（? キーで表示）",
   "localGallery_createFolder": "フォルダーを作成",
   "galleryScan_skipped": "スキップ {count}",
   "@galleryScan_skipped": {
@@ -6057,10 +5593,6 @@
       }
     }
   },
-  "savePreset_title": "プリセットとして保存",
-  "savePreset_nameHint": "プリセット名を入力",
-  "savePreset_metadataDescription": "画像メタデータから保存",
-  "savePreset_vibeData": "Vibeデータ（{count}）",
   "@savePreset_vibeData": {
     "placeholders": {
       "count": {
@@ -6216,5 +5748,214 @@
   "autocomplete_statusDisabled": "オフ",
   "autocomplete_statusSearching": "検索中",
   "autocomplete_statusTranslating": "翻訳中",
-  "autocomplete_openSettings": "補完とデータソース設定を開く"
+  "autocomplete_openSettings": "補完とデータソース設定を開く",
+  "nav_promptBlockLibrary": "プロンプトブロック",
+  "promptBlockLibrary_title": "プロンプトブロック",
+  "promptBlockLibrary_folders": "フォルダー",
+  "promptBlockLibrary_allBlocks": "すべてのブロック",
+  "promptBlockLibrary_rootFolder": "ルート / 未分類",
+  "promptBlockLibrary_unnamedBlock": "無題のブロック",
+  "promptBlockPill_missing": "削除されたブロック",
+  "promptBlockPill_unknown": "無効なブロック",
+  "promptBlockLibrary_unnamedFolder": "無題のフォルダー",
+  "promptBlockLibrary_scope": "表示範囲",
+  "promptBlockLibrary_searchHint": "ブロックを検索...",
+  "promptBlockLibrary_newBlock": "新しいブロック",
+  "promptBlockLibrary_editBlock": "ブロックを編集",
+  "promptBlockLibrary_newFolder": "新しいフォルダー",
+  "promptBlockLibrary_newSubfolder": "新しいサブフォルダー",
+  "promptBlockLibrary_renameFolder": "フォルダー名を変更",
+  "promptBlockLibrary_moveToRoot": "ルートへ移動",
+  "promptBlockLibrary_moveToFolder": "フォルダーへ移動",
+  "promptBlockLibrary_blockTitle": "タイトル",
+  "promptBlockLibrary_titleHint": "ブロックのタイトル",
+  "promptBlockLibrary_folder": "フォルダー",
+  "promptBlockLibrary_folderName": "フォルダー名",
+  "promptBlockLibrary_folderNameHint": "フォルダー名",
+  "promptBlockLibrary_blockContent": "内容",
+  "promptBlockLibrary_contentHint": "プレーンテキストの内容",
+  "promptBlockLibrary_color": "色",
+  "promptBlockLibrary_icon": "アイコン",
+  "promptBlockLibrary_saved": "保存しました",
+  "promptBlockLibrary_copied": "内容をコピーしました",
+  "promptBlockLibrary_deleted": "削除しました",
+  "promptBlockLibrary_empty": "プロンプトブロックはまだありません",
+  "promptBlockLibrary_emptyFolder": "このフォルダーは空です",
+  "promptBlockLibrary_noSearchResults": "一致するブロックがありません",
+  "promptBlockLibrary_tryDifferentSearch": "別のキーワードを試してください",
+  "promptBlockLibrary_emptyHint": "ブロックを作成して再利用可能なテキストを整理します",
+  "promptBlockLibrary_loadFailed": "プロンプトブロックの読み込みに失敗しました: {error}",
+  "@promptBlockLibrary_loadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "promptBlockLibrary_deleteFolderTitle": "フォルダー「{name}」を削除しますか？",
+  "@promptBlockLibrary_deleteFolderTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "promptBlockLibrary_deleteFolderDescription": "このフォルダーとサブフォルダー内のブロックをどうするか選択してください。",
+  "promptBlockLibrary_moveContentsToRoot": "内容をルートへ移動",
+  "promptBlockLibrary_moveContentsToFolder": "内容を別のフォルダーへ移動",
+  "promptBlockLibrary_destinationFolder": "移動先フォルダー",
+  "promptBlockLibrary_deleteContents": "内容を削除",
+  "promptBlockLibrary_deleteContentsWarning": "フォルダー内のすべてのブロックも完全に削除されます。",
+  "promptBlockLibrary_importExport": "インポート / エクスポート",
+  "promptBlockLibrary_importTxtFiles": "TXT ファイルをインポート",
+  "promptBlockLibrary_importFromFolder": "フォルダからインポート…",
+  "promptBlockLibrary_exportLibraryBackup": "ライブラリをバックアップ…",
+  "promptBlockLibrary_importLibraryBackup": "ライブラリバックアップをインポート…",
+  "promptBlockLibrary_exportBlockAsTxt": "TXT としてエクスポート",
+  "promptBlockLibrary_exportTxtDone": "TXT をエクスポートしました",
+  "promptBlockLibrary_exportTxtFailed": "エクスポートに失敗しました：{error}",
+  "@promptBlockLibrary_exportTxtFailed": {
+    "placeholders": {
+        "error": {
+          "type": "String"
+        }
+    }
+  },
+  "promptBlockLibrary_importTxtTitle": "TXT ファイルを選択",
+  "promptBlockLibrary_txtImportDone": "{created} 個のブロックをインポート、{skipped} 個の既存ソースをスキップ",
+  "@promptBlockLibrary_txtImportDone": {
+    "placeholders": {
+        "created": {
+          "type": "int"
+        },
+        "skipped": {
+          "type": "int"
+        }
+    }
+  },
+  "promptBlockLibrary_curationTitle": "フォルダからインポート",
+  "promptBlockLibrary_curationSummary": "TXT {total} 件：新規 {created} · 変更なし {skipped} · 変更あり {changed}",
+  "@promptBlockLibrary_curationSummary": {
+    "placeholders": {
+        "total": {
+          "type": "int"
+        },
+        "created": {
+          "type": "int"
+        },
+        "skipped": {
+          "type": "int"
+        },
+        "changed": {
+          "type": "int"
+        }
+    }
+  },
+  "promptBlockLibrary_curationLocalModifiedHint": "うち {count} 件はインポート後に手動編集されています。更新するとローカル編集が上書きされます",
+  "@promptBlockLibrary_curationLocalModifiedHint": {
+    "placeholders": {
+        "count": {
+          "type": "int"
+        }
+    }
+  },
+  "promptBlockLibrary_curationUpdateChanged": "変更されたブロックをファイル内容で更新",
+  "promptBlockLibrary_curationEmpty": "選択したフォルダに TXT ファイルがありません",
+  "promptBlockLibrary_curationDone": "完了：新規 {created} · 更新 {updated} · スキップ {skipped}",
+  "@promptBlockLibrary_curationDone": {
+    "placeholders": {
+        "created": {
+          "type": "int"
+        },
+        "updated": {
+          "type": "int"
+        },
+        "skipped": {
+          "type": "int"
+        }
+    }
+  },
+  "promptBlockLibrary_curationNew": "新規",
+  "promptBlockLibrary_curationUnchanged": "変更なし",
+  "promptBlockLibrary_curationChanged": "変更あり",
+  "promptBlockLibrary_curationLocalModified": "ローカル編集済み",
+  "promptBlockLibrary_libraryBackupDone": "{count} 個のブロックのバックアップをエクスポートしました",
+  "@promptBlockLibrary_libraryBackupDone": {
+    "placeholders": {
+        "count": {
+          "type": "int"
+        }
+    }
+  },
+  "promptBlockLibrary_libraryImportTitle": "ライブラリバックアップを選択",
+  "promptBlockLibrary_libraryBackupInvalid": "有効なブロックライブラリのバックアップではありません",
+  "promptBlockLibrary_libraryImportDone": "ブロック {blocks} 個・フォルダ {folders} 個をインポート、{skipped} 個の既存をスキップ",
+  "@promptBlockLibrary_libraryImportDone": {
+    "placeholders": {
+        "blocks": {
+          "type": "int"
+        },
+        "folders": {
+          "type": "int"
+        },
+        "skipped": {
+          "type": "int"
+        }
+    }
+  },
+  "promptBlockLibrary_importFailed": "インポートに失敗しました：{error}",
+  "@promptBlockLibrary_importFailed": {
+    "placeholders": {
+        "error": {
+          "type": "String"
+        }
+    }
+  },
+  "promptBlockLibrary_sourceFile": "ソースファイル",
+  "promptBlockLibrary_importedAt": "インポート日時",
+  "promptBlockLibrary_detailedView": "詳細表示",
+  "promptBlockLibrary_compactView": "コンパクト表示",
+  "promptBlockLibrary_reorderFolders": "フォルダーの順序を変更",
+  "nav_styleExplore": "スタイル探索",
+  "styleExplore_recipeListTitle": "レシピ",
+  "styleExplore_recipesEmpty": "まだレシピがありません。新規作成するか、エディタで組み合わせて「別名保存」してください。",
+  "styleExplore_noActiveRecipe": "レシピ未関連",
+  "styleExplore_unsavedChanges": "未保存の変更があります",
+  "styleExplore_save": "保存",
+  "styleExplore_saveAs": "別名保存",
+  "styleExplore_preview": "プレビュー",
+  "styleExplore_positive": "ポジティブ",
+  "styleExplore_negative": "ネガティブ",
+  "styleExplore_newRecipe": "新規",
+  "styleExplore_load": "読み込み",
+  "styleExplore_rename": "名前変更",
+  "styleExplore_duplicate": "レシピを複製",
+  "styleExplore_deleteRecipe": "削除",
+  "styleExplore_recipeNameLabel": "レシピ名",
+  "styleExplore_recipeNameHint": "例：柔らかい光の実験",
+  "styleExplore_nameRequired": "名前を入力してください",
+  "styleExplore_recipeSaved": "「{name}」を保存しました",
+  "@styleExplore_recipeSaved": {"placeholders": {"name": {"type": "String"}}},
+  "styleExplore_recipeCreated": "「{name}」を作成しました",
+  "@styleExplore_recipeCreated": {"placeholders": {"name": {"type": "String"}}},
+  "styleExplore_recipeLoaded": "「{name}」を読み込みました",
+  "@styleExplore_recipeLoaded": {"placeholders": {"name": {"type": "String"}}},
+  "styleExplore_recipeDuplicated": "「{name}」を複製しました",
+  "@styleExplore_recipeDuplicated": {"placeholders": {"name": {"type": "String"}}},
+  "styleExplore_recipeDeleted": "「{name}」を削除しました",
+  "@styleExplore_recipeDeleted": {"placeholders": {"name": {"type": "String"}}},
+  "styleExplore_operationFailed": "操作に失敗しました",
+  "styleExplore_discardChangesTitle": "未保存の変更を破棄しますか？",
+  "styleExplore_discardChangesMessage": "ワークスペースに未保存の変更があります。続行すると破棄されます。",
+  "styleExplore_discardChangesConfirm": "続行して破棄",
+  "styleExplore_previewTitle": "プロンプトプレビュー",
+  "styleExplore_previewEmpty": "（空）",
+  "styleExplore_copyPositive": "ポジティブをコピー",
+  "styleExplore_copyNegative": "ネガティブをコピー",
+  "styleExplore_copiedToClipboard": "コピーしました",
+  "styleExplore_positiveHint": "ブロックとテキストを組み合わせてスタイルを探索",
+  "promptBlockEditor_library": "ブロックライブラリ",
+  "promptBlockEditor_back": "親フォルダーへ戻る",
+  "promptBlockEditor_preview": "内容をプレビュー",
+  "promptBlockEditor_enable": "ブロックを有効化",
+  "promptBlockEditor_disable": "ブロックを無効化",
+  "promptBlockEditor_more": "ブロック操作"
 }

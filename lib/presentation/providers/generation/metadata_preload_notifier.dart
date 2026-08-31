@@ -12,12 +12,7 @@ part 'metadata_preload_notifier.g.dart';
 // ==================== 预加载状态 ====================
 
 /// 预加载状态
-enum MetadataPreloadStatus {
-  idle,
-  loading,
-  completed,
-  error,
-}
+enum MetadataPreloadStatus { idle, loading, completed, error }
 
 /// 预加载统计
 class MetadataPreloadStats {
@@ -103,11 +98,7 @@ class MetadataPreloadTask {
   final String? filePath;
   final Uint8List? bytes;
 
-  const MetadataPreloadTask({
-    required this.taskId,
-    this.filePath,
-    this.bytes,
-  });
+  const MetadataPreloadTask({required this.taskId, this.filePath, this.bytes});
 }
 
 // ==================== MetadataPreloadNotifier ====================
@@ -145,7 +136,12 @@ class MetadataPreloadNotifier extends _$MetadataPreloadNotifier {
       await _metadataService!.initialize();
       // AppLogger.i('MetadataPreloadNotifier: ImageMetadataService initialized', 'MetadataPreload');
     } catch (e, stack) {
-      AppLogger.e('Failed to initialize ImageMetadataService', e, stack, 'MetadataPreload');
+      AppLogger.e(
+        'Failed to initialize ImageMetadataService',
+        e,
+        stack,
+        'MetadataPreload',
+      );
       state = state.copyWith(
         status: MetadataPreloadStatus.error,
         error: 'Failed to initialize metadata service: $e',
@@ -190,7 +186,12 @@ class MetadataPreloadNotifier extends _$MetadataPreloadNotifier {
     try {
       return await _metadataService!.getMetadataImmediate(path);
     } catch (e, stack) {
-      AppLogger.e('Failed to get metadata immediate: $path', e, stack, 'MetadataPreload');
+      AppLogger.e(
+        'Failed to get metadata immediate: $path',
+        e,
+        stack,
+        'MetadataPreload',
+      );
       return null;
     }
   }
@@ -217,7 +218,12 @@ class MetadataPreloadNotifier extends _$MetadataPreloadNotifier {
     try {
       return await _metadataService!.getMetadataFromBytes(bytes);
     } catch (e, stack) {
-      AppLogger.e('Failed to get metadata from bytes', e, stack, 'MetadataPreload');
+      AppLogger.e(
+        'Failed to get metadata from bytes',
+        e,
+        stack,
+        'MetadataPreload',
+      );
       return null;
     }
   }
@@ -357,9 +363,5 @@ class GeneratedImageInfo {
   final String? filePath;
   final Uint8List? bytes;
 
-  const GeneratedImageInfo({
-    required this.id,
-    this.filePath,
-    this.bytes,
-  });
+  const GeneratedImageInfo({required this.id, this.filePath, this.bytes});
 }

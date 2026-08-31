@@ -4,10 +4,7 @@ import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
 
 class KritaOutboundImage {
-  const KritaOutboundImage({
-    required this.bytes,
-    required this.name,
-  });
+  const KritaOutboundImage({required this.bytes, required this.name});
 
   final Uint8List bytes;
   final String name;

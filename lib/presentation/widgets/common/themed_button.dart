@@ -3,11 +3,7 @@ import 'package:flutter/services.dart';
 import '../../themes/theme_extension.dart';
 import '../shortcuts/shortcut_tooltip.dart';
 
-enum ThemedButtonStyle {
-  filled,
-  outlined,
-  text,
-}
+enum ThemedButtonStyle { filled, outlined, text }
 
 class ThemedButton extends StatelessWidget {
   final VoidCallback? onPressed;
@@ -38,8 +34,9 @@ class ThemedButton extends StatelessWidget {
     final pixelFont = extension?.usePixelFont ?? false;
 
     // 字体样式调整
-    final textStyle =
-        pixelFont ? const TextStyle(fontSize: 16, letterSpacing: 1.2) : null;
+    final textStyle = pixelFont
+        ? const TextStyle(fontSize: 16, letterSpacing: 1.2)
+        : null;
 
     final Widget content = Row(
       mainAxisSize: MainAxisSize.min,
@@ -59,10 +56,7 @@ class ThemedButton extends StatelessWidget {
           icon!,
           const SizedBox(width: 8),
         ],
-        DefaultTextStyle.merge(
-          style: textStyle,
-          child: label,
-        ),
+        DefaultTextStyle.merge(style: textStyle, child: label),
       ],
     );
 
@@ -291,29 +285,33 @@ class _StyledButtonState extends State<_StyledButton> {
       switch (widget.style) {
         case ThemedButtonStyle.filled:
           return _ButtonColors(
-            background:
-                enabled ? theme.colorScheme.primary : theme.disabledColor,
+            background: enabled
+                ? theme.colorScheme.primary
+                : theme.disabledColor,
             foreground: theme.colorScheme.onPrimary,
             border: theme.colorScheme.primaryContainer,
           );
         case ThemedButtonStyle.outlined:
           return _ButtonColors(
             background: theme.colorScheme.surface,
-            foreground:
-                enabled ? theme.colorScheme.primary : theme.disabledColor,
+            foreground: enabled
+                ? theme.colorScheme.primary
+                : theme.disabledColor,
             border: enabled ? theme.colorScheme.primary : theme.disabledColor,
           );
         case ThemedButtonStyle.text:
           return _ButtonColors(
             background: Colors.transparent,
-            foreground:
-                enabled ? theme.colorScheme.primary : theme.disabledColor,
+            foreground: enabled
+                ? theme.colorScheme.primary
+                : theme.disabledColor,
             border: Colors.transparent,
           );
       }
     } else {
-      final baseColor =
-          enabled ? theme.colorScheme.primary : theme.disabledColor;
+      final baseColor = enabled
+          ? theme.colorScheme.primary
+          : theme.disabledColor;
       final onBaseColor = enabled
           ? theme.colorScheme.onPrimary
           : theme.colorScheme.onSurface.withValues(alpha: 0.38);
@@ -363,8 +361,11 @@ class _StyledButtonState extends State<_StyledButton> {
                     ? []
                     : [
                         BoxShadow(
-                          color:
-                              Color.lerp(colors.background, Colors.black, 0.4)!,
+                          color: Color.lerp(
+                            colors.background,
+                            Colors.black,
+                            0.4,
+                          )!,
                           offset: Offset(0, depth),
                           blurRadius: 0,
                         ),

@@ -3,10 +3,8 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-typedef FileExplorerProcessLauncher = Future<void> Function(
-  String executable,
-  List<String> arguments,
-);
+typedef FileExplorerProcessLauncher =
+    Future<void> Function(String executable, List<String> arguments);
 
 typedef _CoInitializeNative = Int32 Function(Pointer<Void> pvReserved);
 typedef _CoInitializeDart = int Function(Pointer<Void> pvReserved);
@@ -20,33 +18,37 @@ typedef _CoTaskMemFreeDart = void Function(Pointer<Void> pv);
 typedef _CoTaskMemAllocNative = Pointer<Void> Function(IntPtr cb);
 typedef _CoTaskMemAllocDart = Pointer<Void> Function(int cb);
 
-typedef _SHParseDisplayNameNative = Int32 Function(
-  Pointer<Uint16> pszName,
-  Pointer<Void> pbc,
-  Pointer<Pointer<Void>> ppidl,
-  Uint32 sfgaoIn,
-  Pointer<Uint32> psfgaoOut,
-);
-typedef _SHParseDisplayNameDart = int Function(
-  Pointer<Uint16> pszName,
-  Pointer<Void> pbc,
-  Pointer<Pointer<Void>> ppidl,
-  int sfgaoIn,
-  Pointer<Uint32> psfgaoOut,
-);
+typedef _SHParseDisplayNameNative =
+    Int32 Function(
+      Pointer<Uint16> pszName,
+      Pointer<Void> pbc,
+      Pointer<Pointer<Void>> ppidl,
+      Uint32 sfgaoIn,
+      Pointer<Uint32> psfgaoOut,
+    );
+typedef _SHParseDisplayNameDart =
+    int Function(
+      Pointer<Uint16> pszName,
+      Pointer<Void> pbc,
+      Pointer<Pointer<Void>> ppidl,
+      int sfgaoIn,
+      Pointer<Uint32> psfgaoOut,
+    );
 
-typedef _SHOpenFolderAndSelectItemsNative = Int32 Function(
-  Pointer<Void> pidlFolder,
-  Uint32 cidl,
-  Pointer<Pointer<Void>> apidl,
-  Uint32 dwFlags,
-);
-typedef _SHOpenFolderAndSelectItemsDart = int Function(
-  Pointer<Void> pidlFolder,
-  int cidl,
-  Pointer<Pointer<Void>> apidl,
-  int dwFlags,
-);
+typedef _SHOpenFolderAndSelectItemsNative =
+    Int32 Function(
+      Pointer<Void> pidlFolder,
+      Uint32 cidl,
+      Pointer<Pointer<Void>> apidl,
+      Uint32 dwFlags,
+    );
+typedef _SHOpenFolderAndSelectItemsDart =
+    int Function(
+      Pointer<Void> pidlFolder,
+      int cidl,
+      Pointer<Pointer<Void>> apidl,
+      int dwFlags,
+    );
 
 class FileExplorerUtils {
   FileExplorerUtils._();
@@ -111,10 +113,7 @@ class FileExplorerUtils {
       if (startProcess == null && _tryRevealFileWithShellApi(absolutePath)) {
         return;
       }
-      await launcher(
-        'explorer.exe',
-        windowsRevealFileArguments(absolutePath),
-      );
+      await launcher('explorer.exe', windowsRevealFileArguments(absolutePath));
     } else if (Platform.isMacOS) {
       await launcher('open', ['-R', absolutePath]);
     } else if (Platform.isLinux) {
@@ -145,23 +144,27 @@ class FileExplorerUtils {
 
     final coInitialize = ole32
         .lookupFunction<_CoInitializeNative, _CoInitializeDart>('CoInitialize');
-    final coUninitialize =
-        ole32.lookupFunction<_CoUninitializeNative, _CoUninitializeDart>(
-      'CoUninitialize',
-    );
-    final coTaskMemFree =
-        ole32.lookupFunction<_CoTaskMemFreeNative, _CoTaskMemFreeDart>(
-      'CoTaskMemFree',
-    );
-    final coTaskMemAlloc =
-        ole32.lookupFunction<_CoTaskMemAllocNative, _CoTaskMemAllocDart>(
-      'CoTaskMemAlloc',
-    );
-    final shParseDisplayName = shell32.lookupFunction<_SHParseDisplayNameNative,
-        _SHParseDisplayNameDart>('SHParseDisplayName');
-    final shOpenFolderAndSelectItems = shell32.lookupFunction<
-        _SHOpenFolderAndSelectItemsNative,
-        _SHOpenFolderAndSelectItemsDart>('SHOpenFolderAndSelectItems');
+    final coUninitialize = ole32
+        .lookupFunction<_CoUninitializeNative, _CoUninitializeDart>(
+          'CoUninitialize',
+        );
+    final coTaskMemFree = ole32
+        .lookupFunction<_CoTaskMemFreeNative, _CoTaskMemFreeDart>(
+          'CoTaskMemFree',
+        );
+    final coTaskMemAlloc = ole32
+        .lookupFunction<_CoTaskMemAllocNative, _CoTaskMemAllocDart>(
+          'CoTaskMemAlloc',
+        );
+    final shParseDisplayName = shell32
+        .lookupFunction<_SHParseDisplayNameNative, _SHParseDisplayNameDart>(
+          'SHParseDisplayName',
+        );
+    final shOpenFolderAndSelectItems = shell32
+        .lookupFunction<
+          _SHOpenFolderAndSelectItemsNative,
+          _SHOpenFolderAndSelectItemsDart
+        >('SHOpenFolderAndSelectItems');
 
     final coInitializeResult = coInitialize(nullptr);
     const rpcEChangedMode = -2147417850;
@@ -230,8 +233,9 @@ class FileExplorerUtils {
     _CoTaskMemAllocDart allocator,
   ) {
     final codeUnits = value.codeUnits;
-    final pointer =
-        allocator((codeUnits.length + 1) * sizeOf<Uint16>()).cast<Uint16>();
+    final pointer = allocator(
+      (codeUnits.length + 1) * sizeOf<Uint16>(),
+    ).cast<Uint16>();
     if (pointer == nullptr) {
       return pointer;
     }

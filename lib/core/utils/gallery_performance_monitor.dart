@@ -8,25 +8,25 @@ import 'app_logger.dart';
 enum PerformanceMetricType {
   /// 启动时间
   startupTime,
-  
+
   /// 内存使用
   memoryUsage,
-  
+
   /// 缓存命中
   cacheHit,
-  
+
   /// 缓存未命中
   cacheMiss,
-  
+
   /// 查询执行
   queryExecution,
-  
+
   /// 滚动性能
   scrollPerformance,
-  
+
   /// 图片加载
   imageLoad,
-  
+
   /// 扫描操作
   scanOperation,
 }
@@ -35,16 +35,16 @@ enum PerformanceMetricType {
 class PerformanceMetric {
   /// 指标名称
   final String name;
-  
+
   /// 指标类型
   final PerformanceMetricType type;
-  
+
   /// 记录时间
   final DateTime timestamp;
-  
+
   /// 持续时间（毫秒）
   final double durationMs;
-  
+
   /// 附加数据
   final Map<String, dynamic> metadata;
 
@@ -65,16 +65,16 @@ class PerformanceMetric {
 class SlowQuery {
   /// SQL 语句
   final String sql;
-  
+
   /// 执行时间（毫秒）
   final double executionTimeMs;
-  
+
   /// 执行时间戳
   final DateTime timestamp;
-  
+
   /// 查询参数
   final List<dynamic>? parameters;
-  
+
   /// 调用栈（用于定位问题）
   final String? stackTrace;
 
@@ -95,22 +95,22 @@ class SlowQuery {
 class CacheStats {
   /// 缓存名称
   final String name;
-  
+
   /// 命中次数
   int hitCount = 0;
-  
+
   /// 未命中次数
   int missCount = 0;
-  
+
   /// 驱逐次数
   int evictionCount = 0;
-  
+
   /// 当前大小
   int currentSize = 0;
-  
+
   /// 最大容量
   final int maxSize;
-  
+
   /// 最后更新时间
   DateTime lastUpdated = DateTime.now();
 
@@ -141,31 +141,31 @@ class CacheStats {
   }
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'hitCount': hitCount,
-        'missCount': missCount,
-        'evictionCount': evictionCount,
-        'currentSize': currentSize,
-        'maxSize': maxSize,
-        'hitRate': hitRate,
-        'usageRate': usageRate,
-      };
+    'name': name,
+    'hitCount': hitCount,
+    'missCount': missCount,
+    'evictionCount': evictionCount,
+    'currentSize': currentSize,
+    'maxSize': maxSize,
+    'hitRate': hitRate,
+    'usageRate': usageRate,
+  };
 }
 
 /// 内存快照
 class MemorySnapshot {
   /// 记录时间
   final DateTime timestamp;
-  
+
   /// 已使用内存（MB）
   final double usedMemoryMb;
-  
+
   /// 堆内存（MB）
   final double heapMemoryMb;
-  
+
   /// 外部内存（MB）
   final double externalMemoryMb;
-  
+
   /// RSS（MB）
   final double rssMemoryMb;
 
@@ -181,13 +181,13 @@ class MemorySnapshot {
   double get totalMemoryMb => usedMemoryMb + externalMemoryMb;
 
   Map<String, dynamic> toJson() => {
-        'timestamp': timestamp.toIso8601String(),
-        'usedMemoryMb': usedMemoryMb,
-        'heapMemoryMb': heapMemoryMb,
-        'externalMemoryMb': externalMemoryMb,
-        'rssMemoryMb': rssMemoryMb,
-        'totalMemoryMb': totalMemoryMb,
-      };
+    'timestamp': timestamp.toIso8601String(),
+    'usedMemoryMb': usedMemoryMb,
+    'heapMemoryMb': heapMemoryMb,
+    'externalMemoryMb': externalMemoryMb,
+    'rssMemoryMb': rssMemoryMb,
+    'totalMemoryMb': totalMemoryMb,
+  };
 }
 
 /// 性能监控器
@@ -205,45 +205,45 @@ class GalleryPerformanceMonitor {
   GalleryPerformanceMonitor._internal();
 
   // ==================== 配置参数 ====================
-  
+
   /// 慢查询阈值（毫秒）
   static const double slowQueryThresholdMs = 100.0;
-  
+
   /// 性能问题阈值（毫秒）
   static const double performanceIssueThresholdMs = 500.0;
-  
+
   /// 最大记录的指标数量
   static const int maxMetricsHistory = 1000;
-  
+
   /// 最大慢查询记录数
   static const int maxSlowQueries = 100;
-  
+
   /// 内存监控间隔
   static const Duration memoryCheckInterval = Duration(seconds: 30);
 
   // ==================== 内部状态 ====================
-  
+
   /// 指标历史记录
   final Queue<PerformanceMetric> _metrics = Queue<PerformanceMetric>();
-  
+
   /// 慢查询记录
   final Queue<SlowQuery> _slowQueries = Queue<SlowQuery>();
-  
+
   /// 缓存统计映射
   final Map<String, CacheStats> _cacheStats = {};
-  
+
   /// 内存快照历史
   final Queue<MemorySnapshot> _memorySnapshots = Queue<MemorySnapshot>();
-  
+
   /// 启动时间记录
   final Map<String, DateTime> _startupMarks = {};
-  
+
   /// 正在进行的计时器
   final Map<String, Stopwatch> _activeTimers = {};
-  
+
   /// 内存监控定时器
   Timer? _memoryMonitorTimer;
-  
+
   /// 是否正在监控
   bool _isMonitoring = false;
 
@@ -252,10 +252,10 @@ class GalleryPerformanceMonitor {
   /// 开始监控
   void startMonitoring() {
     if (_isMonitoring) return;
-    
+
     _isMonitoring = true;
     AppLogger.i('性能监控已启动', 'GalleryPerformanceMonitor');
-    
+
     // 启动内存监控
     _startMemoryMonitoring();
   }
@@ -278,15 +278,15 @@ class GalleryPerformanceMonitor {
   double? measureStartup(String fromMark, String toMark) {
     final from = _startupMarks[fromMark];
     final to = _startupMarks[toMark];
-    
+
     if (from == null || to == null) return null;
-    
+
     final duration = to.difference(from).inMicroseconds / 1000.0;
     AppLogger.i(
       '启动时间 [$fromMark -> $toMark]: ${duration.toStringAsFixed(2)}ms',
       'GalleryPerformanceMonitor',
     );
-    
+
     return duration;
   }
 
@@ -304,17 +304,17 @@ class GalleryPerformanceMonitor {
   }) {
     final stopwatch = _activeTimers.remove(operationName);
     if (stopwatch == null) return 0.0;
-    
+
     stopwatch.stop();
     final durationMs = stopwatch.elapsedMicroseconds / 1000.0;
-    
+
     recordMetric(
       name: operationName,
       type: type,
       durationMs: durationMs,
       metadata: metadata,
     );
-    
+
     return durationMs;
   }
 
@@ -332,14 +332,14 @@ class GalleryPerformanceMonitor {
       durationMs: durationMs,
       metadata: metadata,
     );
-    
+
     _metrics.add(metric);
-    
+
     // 限制历史记录数量
     while (_metrics.length > maxMetricsHistory) {
       _metrics.removeFirst();
     }
-    
+
     // 检测性能问题
     if (durationMs > performanceIssueThresholdMs) {
       AppLogger.w(
@@ -377,7 +377,7 @@ class GalleryPerformanceMonitor {
     String? stackTrace,
   }) {
     if (executionTimeMs < slowQueryThresholdMs) return;
-    
+
     final query = SlowQuery(
       sql: sql,
       executionTimeMs: executionTimeMs,
@@ -385,16 +385,16 @@ class GalleryPerformanceMonitor {
       parameters: parameters,
       stackTrace: stackTrace,
     );
-    
+
     _slowQueries.add(query);
-    
+
     while (_slowQueries.length > maxSlowQueries) {
       _slowQueries.removeFirst();
     }
-    
+
     AppLogger.w(
       '慢查询检测 (${executionTimeMs.toStringAsFixed(2)}ms): '
-      '${sql.substring(0, math.min(100, sql.length))}',
+          '${sql.substring(0, math.min(100, sql.length))}',
       'GalleryPerformanceMonitor',
     );
   }
@@ -438,25 +438,27 @@ class GalleryPerformanceMonitor {
   double getAverageDuration(PerformanceMetricType type) {
     final metrics = getMetricsByType(type);
     if (metrics.isEmpty) return 0.0;
-    
+
     final sum = metrics.fold<double>(0.0, (sum, m) => sum + m.durationMs);
     return sum / metrics.length;
   }
 
   /// 获取 P95 延迟
   double getP95Latency(PerformanceMetricType type) {
-    final metrics = getMetricsByType(type)..sort((a, b) => a.durationMs.compareTo(b.durationMs));
+    final metrics = getMetricsByType(type)
+      ..sort((a, b) => a.durationMs.compareTo(b.durationMs));
     if (metrics.isEmpty) return 0.0;
-    
+
     final index = (metrics.length * 0.95).ceil() - 1;
     return metrics[math.max(0, index)].durationMs;
   }
 
   /// 获取 P99 延迟
   double getP99Latency(PerformanceMetricType type) {
-    final metrics = getMetricsByType(type)..sort((a, b) => a.durationMs.compareTo(b.durationMs));
+    final metrics = getMetricsByType(type)
+      ..sort((a, b) => a.durationMs.compareTo(b.durationMs));
     if (metrics.isEmpty) return 0.0;
-    
+
     final index = (metrics.length * 0.99).ceil() - 1;
     return metrics[math.max(0, index)].durationMs;
   }
@@ -485,17 +487,26 @@ class GalleryPerformanceMonitor {
     final report = generateReport();
     AppLogger.i('=== 画廊性能报告 ===', 'GalleryPerformanceMonitor');
     AppLogger.i('生成时间: ${report['generatedAt']}', 'GalleryPerformanceMonitor');
-    AppLogger.i('指标总数: ${report['summary']['totalMetrics']}', 'GalleryPerformanceMonitor');
-    AppLogger.i('慢查询数: ${report['summary']['slowQueries']}', 'GalleryPerformanceMonitor');
-    
+    AppLogger.i(
+      '指标总数: ${report['summary']['totalMetrics']}',
+      'GalleryPerformanceMonitor',
+    );
+    AppLogger.i(
+      '慢查询数: ${report['summary']['slowQueries']}',
+      'GalleryPerformanceMonitor',
+    );
+
     // 打印各类型平均延迟
     final latencies = report['latencies'] as Map<String, dynamic>;
     AppLogger.i('平均延迟:', 'GalleryPerformanceMonitor');
     latencies.forEach((type, stats) {
       final avg = (stats as Map<String, dynamic>)['average'] as double;
-      AppLogger.i('  $type: ${avg.toStringAsFixed(2)}ms', 'GalleryPerformanceMonitor');
+      AppLogger.i(
+        '  $type: ${avg.toStringAsFixed(2)}ms',
+        'GalleryPerformanceMonitor',
+      );
     });
-    
+
     // 打印缓存命中率
     final cacheRates = report['cacheHitRates'] as Map<String, dynamic>;
     AppLogger.i('缓存命中率:', 'GalleryPerformanceMonitor');
@@ -551,7 +562,7 @@ class GalleryPerformanceMonitor {
     try {
       // 获取当前内存使用情况
       final currentRss = _getCurrentRss();
-      
+
       final snapshot = MemorySnapshot(
         timestamp: DateTime.now(),
         usedMemoryMb: currentRss,
@@ -559,14 +570,14 @@ class GalleryPerformanceMonitor {
         externalMemoryMb: currentRss * 0.3, // 估算
         rssMemoryMb: currentRss,
       );
-      
+
       _memorySnapshots.add(snapshot);
-      
+
       // 限制快照数量
       while (_memorySnapshots.length > 100) {
         _memorySnapshots.removeFirst();
       }
-      
+
       // 检测内存异常
       if (currentRss > 1024) {
         // 超过 1GB
@@ -588,41 +599,41 @@ class GalleryPerformanceMonitor {
 
   Map<String, dynamic> _generateStartupReport() {
     final result = <String, dynamic>{};
-    
+
     // 查找所有启动相关的标记
     final startupMarks = _startupMarks.entries.toList()
       ..sort((a, b) => a.value.compareTo(b.value));
-    
+
     for (var i = 0; i < startupMarks.length - 1; i++) {
       final from = startupMarks[i];
       final to = startupMarks[i + 1];
       final duration = to.value.difference(from.value).inMicroseconds / 1000.0;
       result['${from.key}_to_${to.key}'] = duration;
     }
-    
+
     return result;
   }
 
   Map<String, dynamic> _generateCacheReport() {
     final result = <String, dynamic>{};
-    
+
     _cacheStats.forEach((name, stats) {
       result[name] = stats.toJson();
     });
-    
+
     return result;
   }
 
   Map<String, dynamic> _generateLatencyReport() {
     final result = <String, dynamic>{};
-    
+
     for (final type in PerformanceMetricType.values) {
       final metrics = getMetricsByType(type);
       if (metrics.isEmpty) continue;
-      
+
       final durations = metrics.map((m) => m.durationMs).toList()..sort();
       final sum = durations.fold<double>(0.0, (a, b) => a + b);
-      
+
       result[type.name] = {
         'count': durations.length,
         'average': sum / durations.length,
@@ -633,7 +644,7 @@ class GalleryPerformanceMonitor {
         'p99': durations[(durations.length * 0.99).ceil() - 1],
       };
     }
-    
+
     return result;
   }
 
@@ -641,10 +652,10 @@ class GalleryPerformanceMonitor {
     if (_memorySnapshots.isEmpty) {
       return {'available': false};
     }
-    
+
     final snapshots = _memorySnapshots.toList();
     final memoryValues = snapshots.map((s) => s.totalMemoryMb).toList()..sort();
-    
+
     return {
       'available': true,
       'snapshotCount': snapshots.length,
@@ -658,12 +669,12 @@ class GalleryPerformanceMonitor {
 
   String _calculateMemoryTrend(List<MemorySnapshot> snapshots) {
     if (snapshots.length < 10) return 'insufficient_data';
-    
+
     final recent = snapshots.sublist(snapshots.length - 10);
     final first = recent.first.totalMemoryMb;
     final last = recent.last.totalMemoryMb;
     final change = last - first;
-    
+
     if (change > 50) return 'increasing';
     if (change < -50) return 'decreasing';
     return 'stable';
@@ -671,5 +682,4 @@ class GalleryPerformanceMonitor {
 }
 
 /// 便捷访问实例
-GalleryPerformanceMonitor get performanceMonitor => 
-    GalleryPerformanceMonitor();
+GalleryPerformanceMonitor get performanceMonitor => GalleryPerformanceMonitor();

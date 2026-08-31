@@ -129,8 +129,7 @@ class CollectionRepository {
   Future<List<ImageCollection>> getAllCollections() async {
     try {
       final collections = [
-        for (final info
-            in await _dataSource.listCollectionsWithCounts())
+        for (final info in await _dataSource.listCollectionsWithCounts())
           _infoToCollection(info),
       ];
       AppLogger.d(
@@ -204,7 +203,7 @@ class CollectionRepository {
       }
       AppLogger.i(
         'Collection $collectionId add: $added new, $alreadyIn already in, '
-        '$unresolved unresolved',
+            '$unresolved unresolved',
         'CollectionRepo',
       );
       return (added: added, alreadyIn: alreadyIn, unresolved: unresolved);
@@ -215,11 +214,7 @@ class CollectionRepository {
         null,
         'CollectionRepo',
       );
-      return (
-        added: 0,
-        alreadyIn: 0,
-        unresolved: imagePaths.length,
-      );
+      return (added: 0, alreadyIn: 0, unresolved: imagePaths.length);
     }
   }
 

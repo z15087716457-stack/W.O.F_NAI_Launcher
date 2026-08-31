@@ -98,22 +98,21 @@ class GenerationSaveService {
       final existingMetadata = image.metadata;
       // 构建最终字节：已嵌入 NAI 元数据则原样保留；
       // 否则用已有元数据重新嵌入；两者都没有则原样保存
-      final finalBytes =
-          ImageSaveUtils.hasEmbeddedNovelAiMetadata(imageBytes)
-              ? imageBytes
-              : existingMetadata != null
-                  ? await ImageSaveUtils.buildPrebuiltMetadataBytes(
-                      imageBytes: imageBytes,
-                      metadata: {
-                        'Description': existingMetadata.prompt,
-                        'Software': 'NovelAI',
-                        'Source': existingMetadata.source ?? 'NovelAI Diffusion',
-                        'Comment': jsonEncode(
-                          buildCommentJsonFromMetadata(existingMetadata),
-                        ),
-                      },
-                    )
-                  : imageBytes;
+      final finalBytes = ImageSaveUtils.hasEmbeddedNovelAiMetadata(imageBytes)
+          ? imageBytes
+          : existingMetadata != null
+          ? await ImageSaveUtils.buildPrebuiltMetadataBytes(
+              imageBytes: imageBytes,
+              metadata: {
+                'Description': existingMetadata.prompt,
+                'Software': 'NovelAI',
+                'Source': existingMetadata.source ?? 'NovelAI Diffusion',
+                'Comment': jsonEncode(
+                  buildCommentJsonFromMetadata(existingMetadata),
+                ),
+              },
+            )
+          : imageBytes;
 
       // 原子保存：日期分类路径 + 独占防冲突 + 失败清理，全部在工具内完成
       await ImageSaveUtils.saveBytesToDatedPath(
@@ -164,10 +163,13 @@ class GenerationSaveService {
           .where((v) => v.vibeEncoding.isNotEmpty)
           .map((v) => v.vibeEncoding)
           .toList();
-      commentJson['reference_strength_multiple'] =
-          metadata.vibeReferences.map((v) => v.strength).toList();
-      commentJson['reference_information_extracted_multiple'] =
-          metadata.vibeReferences.map((v) => v.infoExtracted).toList();
+      commentJson['reference_strength_multiple'] = metadata.vibeReferences
+          .map((v) => v.strength)
+          .toList();
+      commentJson['reference_information_extracted_multiple'] = metadata
+          .vibeReferences
+          .map((v) => v.infoExtracted)
+          .toList();
     }
 
     return commentJson;

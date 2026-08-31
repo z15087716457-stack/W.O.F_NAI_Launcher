@@ -27,18 +27,11 @@ class ImageTag with _$ImageTag {
 
   /// 创建简单标签（只有名称）
   factory ImageTag.simple(String name) {
-    return ImageTag(
-      name: name,
-      createdAt: DateTime.now(),
-    );
+    return ImageTag(name: name, createdAt: DateTime.now());
   }
 
   /// 创建带颜色的标签
   factory ImageTag.withColor(String name, int color) {
-    return ImageTag(
-      name: name,
-      color: color,
-      createdAt: DateTime.now(),
-    );
+    return ImageTag(name: name, color: color, createdAt: DateTime.now());
   }
 }

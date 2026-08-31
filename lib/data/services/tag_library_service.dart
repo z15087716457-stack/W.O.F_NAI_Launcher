@@ -63,14 +63,20 @@ class TagLibraryService {
     await _saveJson(
       _libraryKey,
       library.toJson(),
-      onSuccess: () => AppLogger.d('Library saved: ${library.totalTagCount} tags', 'TagLibrary'),
+      onSuccess: () => AppLogger.d(
+        'Library saved: ${library.totalTagCount} tags',
+        'TagLibrary',
+      ),
     );
   }
 
   /// 加载同步配置
   Future<TagLibrarySyncConfig> loadSyncConfig() async {
     await _ensureInit();
-    final result = await _loadJson<TagLibrarySyncConfig>(_syncConfigKey, TagLibrarySyncConfig.fromJson);
+    final result = await _loadJson<TagLibrarySyncConfig>(
+      _syncConfigKey,
+      TagLibrarySyncConfig.fromJson,
+    );
     return result ?? const TagLibrarySyncConfig();
   }
 
@@ -83,7 +89,10 @@ class TagLibraryService {
   /// 加载分类过滤配置
   Future<CategoryFilterConfig> loadCategoryFilterConfig() async {
     await _ensureInit();
-    final result = await _loadJson<CategoryFilterConfig>(_categoryFilterKey, CategoryFilterConfig.fromJson);
+    final result = await _loadJson<CategoryFilterConfig>(
+      _categoryFilterKey,
+      CategoryFilterConfig.fromJson,
+    );
     return result ?? const CategoryFilterConfig();
   }
 
@@ -442,7 +451,10 @@ class TagLibraryService {
   /// 加载 Pool 同步配置
   Future<PoolSyncConfig> loadPoolSyncConfig() async {
     await _ensureInit();
-    final result = await _loadJson<PoolSyncConfig>(_poolSyncConfigKey, PoolSyncConfig.fromJson);
+    final result = await _loadJson<PoolSyncConfig>(
+      _poolSyncConfigKey,
+      PoolSyncConfig.fromJson,
+    );
     return result ?? DefaultPoolMappings.getDefaultConfig();
   }
 
@@ -476,7 +488,10 @@ class TagLibraryService {
   /// 加载 Tag Group 同步配置
   Future<TagGroupSyncConfig> loadTagGroupSyncConfig() async {
     await _ensureInit();
-    final result = await _loadJson<TagGroupSyncConfig>(_tagGroupSyncConfigKey, TagGroupSyncConfig.fromJson);
+    final result = await _loadJson<TagGroupSyncConfig>(
+      _tagGroupSyncConfigKey,
+      TagGroupSyncConfig.fromJson,
+    );
     return result ?? DefaultTagGroupMappings.getDefaultConfig();
   }
 
@@ -506,13 +521,17 @@ class TagLibraryService {
   }) {
     if (tags.isEmpty) return library;
 
-    final mergedCategories = Map<String, List<WeightedTag>>.from(library.categories);
+    final mergedCategories = Map<String, List<WeightedTag>>.from(
+      library.categories,
+    );
     var addedCount = 0;
 
     for (final entry in tags.entries) {
       final categoryName = entry.key.name;
       final existingTags = mergedCategories[categoryName] ?? [];
-      final existingNames = existingTags.map((t) => t.tag.toLowerCase()).toSet();
+      final existingNames = existingTags
+          .map((t) => t.tag.toLowerCase())
+          .toSet();
 
       for (final tag in entry.value) {
         if (!existingNames.contains(tag.tag.toLowerCase())) {
@@ -530,17 +549,19 @@ class TagLibraryService {
     return library.copyWith(
       categories: mergedCategories,
       lastUpdated: DateTime.now(),
-      hasDanbooruSupplement: updateSupplement ? true : library.hasDanbooruSupplement,
-      danbooruSupplementCount: updateSupplement ? addedCount : library.danbooruSupplementCount,
+      hasDanbooruSupplement: updateSupplement
+          ? true
+          : library.hasDanbooruSupplement,
+      danbooruSupplementCount: updateSupplement
+          ? addedCount
+          : library.danbooruSupplementCount,
     );
   }
 
   /// 从 TagGroupEntry 列表转换为 WeightedTag 列表
   ///
   /// [entries] TagGroupEntry 列表
-  List<WeightedTag> tagGroupEntriesToWeightedTags(
-    List<TagGroupEntry> entries,
-  ) {
+  List<WeightedTag> tagGroupEntriesToWeightedTags(List<TagGroupEntry> entries) {
     return entries.map((entry) {
       // 根据热度计算权重 (1-10)
       final weight = _calculateWeight(entry.postCount);

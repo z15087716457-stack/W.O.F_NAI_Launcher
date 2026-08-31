@@ -19,6 +19,8 @@ class LayoutState {
   final double fixedTagsNegativeHeight;
   final double webLeftPanelWidth;
   final bool webLeftPanelExpanded;
+  final bool blockLibraryPanelExpanded;
+  final double blockLibraryPanelWidth;
 
   const LayoutState({
     this.leftPanelExpanded = true,
@@ -34,6 +36,8 @@ class LayoutState {
     this.fixedTagsNegativeHeight = 180.0,
     this.webLeftPanelWidth = 400.0,
     this.webLeftPanelExpanded = true,
+    this.blockLibraryPanelExpanded = false,
+    this.blockLibraryPanelWidth = 320.0,
   });
 
   /// 复制并更新部分字段
@@ -51,6 +55,8 @@ class LayoutState {
     double? fixedTagsNegativeHeight,
     double? webLeftPanelWidth,
     bool? webLeftPanelExpanded,
+    bool? blockLibraryPanelExpanded,
+    double? blockLibraryPanelWidth,
   }) {
     return LayoutState(
       leftPanelExpanded: leftPanelExpanded ?? this.leftPanelExpanded,
@@ -70,6 +76,10 @@ class LayoutState {
           fixedTagsNegativeHeight ?? this.fixedTagsNegativeHeight,
       webLeftPanelWidth: webLeftPanelWidth ?? this.webLeftPanelWidth,
       webLeftPanelExpanded: webLeftPanelExpanded ?? this.webLeftPanelExpanded,
+      blockLibraryPanelExpanded:
+          blockLibraryPanelExpanded ?? this.blockLibraryPanelExpanded,
+      blockLibraryPanelWidth:
+          blockLibraryPanelWidth ?? this.blockLibraryPanelWidth,
     );
   }
 }
@@ -96,6 +106,8 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       fixedTagsNegativeHeight: storage.getFixedTagsNegativeHeight(),
       webLeftPanelWidth: storage.getWebLeftPanelWidth(),
       webLeftPanelExpanded: storage.getWebLeftPanelExpanded(),
+      blockLibraryPanelExpanded: storage.getBlockLibraryPanelExpanded(),
+      blockLibraryPanelWidth: storage.getBlockLibraryPanelWidth(),
     );
   }
 
@@ -231,5 +243,27 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
 
     final storage = ref.read(localStorageServiceProvider);
     await storage.setWebLeftPanelExpanded(expanded);
+  }
+
+  /// 设置块库面板展开状态
+  Future<void> setBlockLibraryPanelExpanded(bool expanded) async {
+    state = state.copyWith(blockLibraryPanelExpanded: expanded);
+
+    final storage = ref.read(localStorageServiceProvider);
+    await storage.setBlockLibraryPanelExpanded(expanded);
+  }
+
+  /// 切换块库面板展开状态
+  Future<void> toggleBlockLibraryPanel() async {
+    await setBlockLibraryPanelExpanded(!state.blockLibraryPanelExpanded);
+  }
+
+  /// 设置块库面板宽度
+  Future<void> setBlockLibraryPanelWidth(double width) async {
+    final clamped = width.clamp(260.0, 480.0).toDouble();
+    state = state.copyWith(blockLibraryPanelWidth: clamped);
+
+    final storage = ref.read(localStorageServiceProvider);
+    await storage.setBlockLibraryPanelWidth(clamped);
   }
 }

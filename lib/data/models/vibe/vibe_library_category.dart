@@ -163,8 +163,7 @@ extension VibeLibraryCategoryListExtension on List<VibeLibraryCategory> {
 
   /// 更新排序顺序
   List<VibeLibraryCategory> reindex() {
-    return asMap()
-        .entries
+    return asMap().entries
         .map((e) => e.value.copyWith(sortOrder: e.key))
         .toList();
   }

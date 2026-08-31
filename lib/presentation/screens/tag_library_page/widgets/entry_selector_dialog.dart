@@ -31,10 +31,8 @@ class EntrySelectorDialog extends ConsumerStatefulWidget {
     return showDialog<TagLibraryEntry?>(
       context: context,
       barrierColor: Colors.black54,
-      builder: (context) => EntrySelectorDialog(
-        entries: entries,
-        categories: categories,
-      ),
+      builder: (context) =>
+          EntrySelectorDialog(entries: entries, categories: categories),
     );
   }
 
@@ -61,9 +59,9 @@ class _EntrySelectorDialogState extends ConsumerState<EntrySelectorDialog> {
   String _getCategoryName(BuildContext context, String? categoryId) {
     if (categoryId == null) return context.l10n.tagLibrary_rootCategory;
     final category = widget.categories.cast<TagLibraryCategory?>().firstWhere(
-          (c) => c?.id == categoryId,
-          orElse: () => null,
-        );
+      (c) => c?.id == categoryId,
+      orElse: () => null,
+    );
     return category?.displayName ?? context.l10n.tagLibrary_unknownCategory;
   }
 
@@ -74,14 +72,9 @@ class _EntrySelectorDialogState extends ConsumerState<EntrySelectorDialog> {
     final filteredEntries = _filteredEntries;
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: 500,
-          maxHeight: 600,
-        ),
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -244,17 +237,15 @@ class _EntryListTile extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Material(
-      color:
-          isSelected ? theme.colorScheme.primaryContainer : Colors.transparent,
+      color: isSelected
+          ? theme.colorScheme.primaryContainer
+          : Colors.transparent,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 10,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
             children: [
               // 选择指示器

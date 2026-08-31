@@ -19,10 +19,7 @@ void main() {
         extractChoiceListFromObjectInfoField([
           'COMBO',
           {
-            'choices': [
-              'seedvr2_a.safetensors',
-              'seedvr2_b.safetensors',
-            ],
+            'choices': ['seedvr2_a.safetensors', 'seedvr2_b.safetensors'],
             'default': 'seedvr2_a.safetensors',
           },
         ]),

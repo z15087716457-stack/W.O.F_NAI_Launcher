@@ -33,8 +33,9 @@ void main() {
     }
   });
 
-  testWidgets('model3d layer round-trips through save/load/apply',
-      (tester) async {
+  testWidgets('model3d layer round-trips through save/load/apply', (
+    tester,
+  ) async {
     await tester.runAsync(() async {
       final pngBytes = base64Decode(_oneByOnePngBase64);
 
@@ -58,13 +59,15 @@ void main() {
       final project = await ProjectManager.loadProject(filePath);
 
       // 序列化侧断言:普通层不存底图(行为不变),3D 层存底图与元数据
-      final normalData =
-          project.layers.singleWhere((l) => l.id == normalLayer.id);
+      final normalData = project.layers.singleWhere(
+        (l) => l.id == normalLayer.id,
+      );
       expect(normalData.imageData, isNull);
       expect(normalData.model3d, isNull);
 
-      final model3dData =
-          project.layers.singleWhere((l) => l.id == model3dLayer.id);
+      final model3dData = project.layers.singleWhere(
+        (l) => l.id == model3dLayer.id,
+      );
       expect(model3dData.imageData, isNotNull);
       expect(model3dData.model3d, isNotNull);
 
@@ -89,8 +92,9 @@ void main() {
     });
   });
 
-  testWidgets('corrupted layer data degrades instead of failing load',
-      (tester) async {
+  testWidgets('corrupted layer data degrades instead of failing load', (
+    tester,
+  ) async {
     await tester.runAsync(() async {
       // 一个正常图层 + 一个损坏图层(base64 非法、model3d 缺 modelRef):
       // 位图为主、3D 元数据为增强,单层数据损坏不应阻断整个项目加载。

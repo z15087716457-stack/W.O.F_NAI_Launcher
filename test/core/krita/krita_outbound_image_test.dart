@@ -9,10 +9,7 @@ void main() {
     test('keeps png bytes and normalizes extension', () {
       final png = _png();
 
-      final prepared = KritaOutboundImage.prepare(
-        png,
-        name: 'sample.jpeg',
-      );
+      final prepared = KritaOutboundImage.prepare(png, name: 'sample.jpeg');
 
       expect(prepared.bytes, png);
       expect(prepared.name, 'sample.png');
@@ -21,10 +18,7 @@ void main() {
     test('converts decodable non-png images to png', () {
       final jpeg = Uint8List.fromList(img.encodeJpg(_image()));
 
-      final prepared = KritaOutboundImage.prepare(
-        jpeg,
-        name: 'photo.jpg',
-      );
+      final prepared = KritaOutboundImage.prepare(jpeg, name: 'photo.jpg');
 
       expect(prepared.name, 'photo.png');
       expect(_hasPngSignature(prepared.bytes), isTrue);

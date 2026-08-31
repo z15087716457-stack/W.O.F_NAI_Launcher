@@ -1,3 +1,4 @@
+import '../enums/quality_tag_preset.dart';
 import 'model_spec.dart';
 
 /// NovelAI API 常量定义
@@ -328,12 +329,14 @@ class CharacterPositions {
 class QualityTags {
   QualityTags._();
 
-  /// 各模型的质量标签映射
+  static const String v5Standard = 'very aesthetic, masterpiece, no text';
+  static const String v5Light = 'very aesthetic, amazing quality, no text';
+
+  /// 各模型的 Standard 质量标签映射。
   static const Map<String, String> modelQualityTags = {
-    // V5 系列 (standard 档，官方 bundle 41179 f() 表)
-    ImageModels.animeDiffusionV5Full: 'very aesthetic, masterpiece, no text',
-    ImageModels.animeDiffusionV5Curated:
-        'very aesthetic, masterpiece, no text',
+    // V5 系列 (官方 bundle 41179 f() 表)
+    ImageModels.animeDiffusionV5Full: v5Standard,
+    ImageModels.animeDiffusionV5Curated: v5Standard,
 
     // V4.5 系列 (添加到末尾)
     ImageModels.animeDiffusionV45Full:
@@ -357,9 +360,7 @@ class QualityTags {
   ///
   /// 这些值只用于读取/识别旧 PNG 元数据，不能用于新的生成请求。
   static const Map<String, List<String>> legacyModelQualityTags = {
-    ImageModels.animeDiffusionV45Full: [
-      'very aesthetic, masterpiece, no text',
-    ],
+    ImageModels.animeDiffusionV45Full: ['very aesthetic, masterpiece, no text'],
     ImageModels.animeDiffusionV45Curated: [
       'very aesthetic, masterpiece, no text, -0.8::feet::, rating:general',
     ],
@@ -368,31 +369,59 @@ class QualityTags {
     ],
   };
 
-  /// 获取指定模型的质量标签
-  static String? getQualityTags(String model) {
-    return modelQualityTags[model];
+  /// 获取指定模型和原生档位的质量标签。
+  ///
+  /// Light 是 V5 原生档位；非 V5 如果残留该状态，安全退回模型原有
+  /// Standard 质量词，避免模型切换后意外关闭质量词。
+  static String? getQualityTags(
+    String model, {
+    QualityTagPreset preset = QualityTagPreset.standard,
+  }) {
+    final baseModel = ImageModels.resolveBaseModel(model);
+    return switch (preset) {
+      QualityTagPreset.none => null,
+      QualityTagPreset.light when ImageModels.isV5Model(baseModel) => v5Light,
+      QualityTagPreset.standard ||
+      QualityTagPreset.light => modelQualityTags[baseModel],
+    };
   }
 
   /// 获取当前官方质量词和历史兼容质量词。
   static List<String> getQualityTagVariants(String model) {
-    final current = getQualityTags(model);
+    final baseModel = ImageModels.resolveBaseModel(model);
+    final standard = getQualityTags(baseModel);
+    final light = getQualityTags(baseModel, preset: QualityTagPreset.light);
     return [
-      if (current != null && current.isNotEmpty) current,
-      ...legacyModelQualityTags[model]?.where((tags) => tags != current) ??
+      if (standard != null && standard.isNotEmpty) standard,
+      if (light != null && light.isNotEmpty && light != standard) light,
+      ...legacyModelQualityTags[baseModel]?.where(
+            (tags) => tags != standard && tags != light,
+          ) ??
           const <String>[],
     ];
   }
 
-  /// 将质量标签应用到提示词
-  /// V3+ 模型添加到末尾，V2 及更早模型添加到开头
-  static String applyQualityTags(String prompt, String model) {
-    final tags = getQualityTags(model);
+  /// V5 服务端质量词标签提示（`tag_hint_qt`）数字编码。
+  static int toTagHintValue(QualityTagPreset preset) {
+    return switch (preset) {
+      QualityTagPreset.standard => 1,
+      QualityTagPreset.light => 3,
+      QualityTagPreset.none => 0,
+    };
+  }
+
+  /// 将质量标签应用到提示词。
+  static String applyQualityTags(
+    String prompt,
+    String model, {
+    QualityTagPreset preset = QualityTagPreset.standard,
+  }) {
+    final tags = getQualityTags(model, preset: preset);
     if (tags == null || tags.isEmpty) return prompt;
 
     final trimmedPrompt = prompt.trim();
     if (trimmedPrompt.isEmpty) return tags;
 
-    // V3+ 模型：标签添加到末尾
     if (trimmedPrompt.endsWith(',')) {
       return '$trimmedPrompt $tags';
     }
@@ -510,7 +539,7 @@ class UcPresets {
   ///
   /// 这些值只用于读取/剥离旧 PNG 元数据，不能用于新的生成请求。
   static const Map<String, Map<UcPresetType, List<String>>>
-      legacyPresetVariants = {
+  legacyPresetVariants = {
     ImageModels.animeDiffusionV45Full: {
       UcPresetType.heavy: [
         'nsfw, lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page',
@@ -614,8 +643,11 @@ class UcPresets {
     };
   }
 
-  /// V5 质量词标签提示（`tag_hint_qt`）：开=standard(1)，关=none(0)。
-  static int qualityToggleTagHintValue(bool enabled) => enabled ? 1 : 0;
+  /// 旧布尔质量开关的兼容映射。
+  static int qualityToggleTagHintValue(bool enabled) =>
+      QualityTags.toTagHintValue(
+        enabled ? QualityTagPreset.standard : QualityTagPreset.none,
+      );
 
   /// 将预设应用到负面提示词
   static String applyPreset(
@@ -796,10 +828,7 @@ class UcPresets {
 
   /// 检查正面提示词是否包含 nsfw tag
   static bool containsNsfwTag(String prompt) {
-    final nsfwPattern = RegExp(
-      r'[\{\[]*nsfw[\}\]]*',
-      caseSensitive: false,
-    );
+    final nsfwPattern = RegExp(r'[\{\[]*nsfw[\}\]]*', caseSensitive: false);
     return nsfwPattern.hasMatch(prompt);
   }
 

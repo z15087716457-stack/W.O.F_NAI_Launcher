@@ -49,17 +49,15 @@ class SafeDropdown<T> extends StatelessWidget {
                   ),
                 )
               : null,
-          icon: icon ??
+          icon:
+              icon ??
               Icon(
                 Icons.keyboard_arrow_down,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
           dropdownColor: theme.colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.zero,
-          style: TextStyle(
-            color: theme.colorScheme.onSurface,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 14),
         ),
       ),
     );

@@ -24,70 +24,70 @@ class LayeredShadow extends BaseShadowModule {
   /// 2层阴影，blur 2-4px，最大 offset 2px
   @override
   List<BoxShadow> get elevation1 => const [
-        BoxShadow(
-          color: Color(0x0A000000), // 4% opacity - 近距离软阴影
-          blurRadius: 2,
-          offset: Offset(0, 1),
-        ),
-        BoxShadow(
-          color: Color(0x0F000000), // 6% opacity - 中距离定义边界
-          blurRadius: 4,
-          spreadRadius: -0.5,
-          offset: Offset(0, 2),
-        ),
-      ];
+    BoxShadow(
+      color: Color(0x0A000000), // 4% opacity - 近距离软阴影
+      blurRadius: 2,
+      offset: Offset(0, 1),
+    ),
+    BoxShadow(
+      color: Color(0x0F000000), // 6% opacity - 中距离定义边界
+      blurRadius: 4,
+      spreadRadius: -0.5,
+      offset: Offset(0, 2),
+    ),
+  ];
 
   /// Level 2: 标准层叠（默认卡片、面板）
   /// 3层阴影，blur 3-12px，最大 offset 6px
   @override
   List<BoxShadow> get elevation2 => const [
-        BoxShadow(
-          color: Color(0x0A000000), // 4% opacity
-          blurRadius: 3,
-          offset: Offset(0, 1),
-        ),
-        BoxShadow(
-          color: Color(0x14000000), // 8% opacity
-          blurRadius: 6,
-          spreadRadius: -1,
-          offset: Offset(0, 3),
-        ),
-        BoxShadow(
-          color: Color(0x1F000000), // 12% opacity - 远距离氛围阴影
-          blurRadius: 12,
-          spreadRadius: -2,
-          offset: Offset(0, 6),
-        ),
-      ];
+    BoxShadow(
+      color: Color(0x0A000000), // 4% opacity
+      blurRadius: 3,
+      offset: Offset(0, 1),
+    ),
+    BoxShadow(
+      color: Color(0x14000000), // 8% opacity
+      blurRadius: 6,
+      spreadRadius: -1,
+      offset: Offset(0, 3),
+    ),
+    BoxShadow(
+      color: Color(0x1F000000), // 12% opacity - 远距离氛围阴影
+      blurRadius: 12,
+      spreadRadius: -2,
+      offset: Offset(0, 6),
+    ),
+  ];
 
   /// Level 3: 明显层叠（悬停卡片、激活状态）
   /// 4层阴影，blur 4-24px，最大 offset 12px
   @override
   List<BoxShadow> get elevation3 => const [
-        BoxShadow(
-          color: Color(0x0A000000), // 4% opacity
-          blurRadius: 4,
-          offset: Offset(0, 2),
-        ),
-        BoxShadow(
-          color: Color(0x14000000), // 8% opacity
-          blurRadius: 8,
-          spreadRadius: -1,
-          offset: Offset(0, 4),
-        ),
-        BoxShadow(
-          color: Color(0x1F000000), // 12% opacity
-          blurRadius: 16,
-          spreadRadius: -2,
-          offset: Offset(0, 8),
-        ),
-        BoxShadow(
-          color: Color(0x29000000), // 16% opacity - 强氛围阴影
-          blurRadius: 24,
-          spreadRadius: -3,
-          offset: Offset(0, 12),
-        ),
-      ];
+    BoxShadow(
+      color: Color(0x0A000000), // 4% opacity
+      blurRadius: 4,
+      offset: Offset(0, 2),
+    ),
+    BoxShadow(
+      color: Color(0x14000000), // 8% opacity
+      blurRadius: 8,
+      spreadRadius: -1,
+      offset: Offset(0, 4),
+    ),
+    BoxShadow(
+      color: Color(0x1F000000), // 12% opacity
+      blurRadius: 16,
+      spreadRadius: -2,
+      offset: Offset(0, 8),
+    ),
+    BoxShadow(
+      color: Color(0x29000000), // 16% opacity - 强氛围阴影
+      blurRadius: 24,
+      spreadRadius: -3,
+      offset: Offset(0, 12),
+    ),
+  ];
 
   /// 默认卡片使用 Level 2
   @override
@@ -102,66 +102,66 @@ class LayeredShadowDark extends BaseShadowModule {
 
   @override
   List<BoxShadow> get elevation1 => const [
-        BoxShadow(
-          color: Color(0x14000000), // 8% opacity
-          blurRadius: 2,
-          offset: Offset(0, 1),
-        ),
-        BoxShadow(
-          color: Color(0x1A000000), // 10% opacity
-          blurRadius: 4,
-          spreadRadius: -0.5,
-          offset: Offset(0, 2),
-        ),
-      ];
+    BoxShadow(
+      color: Color(0x14000000), // 8% opacity
+      blurRadius: 2,
+      offset: Offset(0, 1),
+    ),
+    BoxShadow(
+      color: Color(0x1A000000), // 10% opacity
+      blurRadius: 4,
+      spreadRadius: -0.5,
+      offset: Offset(0, 2),
+    ),
+  ];
 
   @override
   List<BoxShadow> get elevation2 => const [
-        BoxShadow(
-          color: Color(0x14000000), // 8% opacity
-          blurRadius: 3,
-          offset: Offset(0, 1),
-        ),
-        BoxShadow(
-          color: Color(0x29000000), // 16% opacity
-          blurRadius: 6,
-          spreadRadius: -1,
-          offset: Offset(0, 3),
-        ),
-        BoxShadow(
-          color: Color(0x3D000000), // 24% opacity
-          blurRadius: 12,
-          spreadRadius: -2,
-          offset: Offset(0, 6),
-        ),
-      ];
+    BoxShadow(
+      color: Color(0x14000000), // 8% opacity
+      blurRadius: 3,
+      offset: Offset(0, 1),
+    ),
+    BoxShadow(
+      color: Color(0x29000000), // 16% opacity
+      blurRadius: 6,
+      spreadRadius: -1,
+      offset: Offset(0, 3),
+    ),
+    BoxShadow(
+      color: Color(0x3D000000), // 24% opacity
+      blurRadius: 12,
+      spreadRadius: -2,
+      offset: Offset(0, 6),
+    ),
+  ];
 
   @override
   List<BoxShadow> get elevation3 => const [
-        BoxShadow(
-          color: Color(0x14000000), // 8% opacity
-          blurRadius: 4,
-          offset: Offset(0, 2),
-        ),
-        BoxShadow(
-          color: Color(0x29000000), // 16% opacity
-          blurRadius: 8,
-          spreadRadius: -1,
-          offset: Offset(0, 4),
-        ),
-        BoxShadow(
-          color: Color(0x3D000000), // 24% opacity
-          blurRadius: 16,
-          spreadRadius: -2,
-          offset: Offset(0, 8),
-        ),
-        BoxShadow(
-          color: Color(0x52000000), // 32% opacity
-          blurRadius: 24,
-          spreadRadius: -3,
-          offset: Offset(0, 12),
-        ),
-      ];
+    BoxShadow(
+      color: Color(0x14000000), // 8% opacity
+      blurRadius: 4,
+      offset: Offset(0, 2),
+    ),
+    BoxShadow(
+      color: Color(0x29000000), // 16% opacity
+      blurRadius: 8,
+      spreadRadius: -1,
+      offset: Offset(0, 4),
+    ),
+    BoxShadow(
+      color: Color(0x3D000000), // 24% opacity
+      blurRadius: 16,
+      spreadRadius: -2,
+      offset: Offset(0, 8),
+    ),
+    BoxShadow(
+      color: Color(0x52000000), // 32% opacity
+      blurRadius: 24,
+      spreadRadius: -3,
+      offset: Offset(0, 12),
+    ),
+  ];
 
   @override
   List<BoxShadow> get cardShadow => elevation2;

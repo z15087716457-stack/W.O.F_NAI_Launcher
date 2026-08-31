@@ -86,11 +86,7 @@ class TagLibraryDropHandler {
     required String fileName,
     required String prompt,
   }) async {
-    return TagLibraryDropMenu.show(
-      context,
-      fileName: fileName,
-      prompt: prompt,
-    );
+    return TagLibraryDropMenu.show(context, fileName: fileName, prompt: prompt);
   }
 
   /// 显示错误提示

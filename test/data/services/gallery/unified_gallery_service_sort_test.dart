@@ -156,10 +156,7 @@ void main() {
       await service.applyFilter(
         const FilterCriteria(dateStart: null, dateEnd: null),
       );
-      await service.setDateRange(
-        DateTime(2026, 8, 1),
-        DateTime(2026, 8, 2),
-      );
+      await service.setDateRange(DateTime(2026, 8, 1), DateTime(2026, 8, 2));
 
       final records = await service.getPage(0, pageSize: 10);
       expect(records.map((record) => p.basename(record.path)), [
@@ -175,10 +172,7 @@ void main() {
           direction: GallerySortDirection.ascending,
         ),
       );
-      await service.setDateRange(
-        DateTime(2026, 8, 1),
-        DateTime(2026, 8, 3),
-      );
+      await service.setDateRange(DateTime(2026, 8, 1), DateTime(2026, 8, 3));
 
       final records = await service.getPage(0, pageSize: 10);
       expect(records.map((record) => record.size), [50, 100, 200]);
@@ -189,68 +183,71 @@ void main() {
       ]);
     });
 
-    test('setSort by image dimensions backfills area from DB records', () async {
-      // 初始化时 _fileStats 全部以 area: 0 入缓存；等待后台扫描落库后，
-      // 显式写入 width/height，再按尺寸排序——验证 _ensureFileStats 对
-      // area==0 的既有条目也走 DB 补齐（修复前面积恒 0、比较器退化名序）。
-      await Future<void>.delayed(const Duration(milliseconds: 600));
+    test(
+      'setSort by image dimensions backfills area from DB records',
+      () async {
+        // 初始化时 _fileStats 全部以 area: 0 入缓存；等待后台扫描落库后，
+        // 显式写入 width/height，再按尺寸排序——验证 _ensureFileStats 对
+        // area==0 的既有条目也走 DB 补齐（修复前面积恒 0、比较器退化名序）。
+        await Future<void>.delayed(const Duration(milliseconds: 600));
 
-      // b.png: 100×100=10000 / c.png: 200×200=40000 / a.png: 300×300=90000
-      await dataSource.upsertImage(
-        filePath: fileB.path,
-        fileName: 'b.png',
-        fileSize: 100,
-        width: 100,
-        height: 100,
-        createdAt: DateTime(2026, 8, 1, 10),
-        modifiedAt: DateTime(2026, 8, 1, 10),
-      );
-      await dataSource.upsertImage(
-        filePath: fileC.path,
-        fileName: 'c.png',
-        fileSize: 50,
-        width: 200,
-        height: 200,
-        createdAt: DateTime(2026, 8, 2, 10),
-        modifiedAt: DateTime(2026, 8, 2, 10),
-      );
-      await dataSource.upsertImage(
-        filePath: fileA.path,
-        fileName: 'a.png',
-        fileSize: 200,
-        width: 300,
-        height: 300,
-        createdAt: DateTime(2026, 8, 3, 10),
-        modifiedAt: DateTime(2026, 8, 3, 10),
-      );
+        // b.png: 100×100=10000 / c.png: 200×200=40000 / a.png: 300×300=90000
+        await dataSource.upsertImage(
+          filePath: fileB.path,
+          fileName: 'b.png',
+          fileSize: 100,
+          width: 100,
+          height: 100,
+          createdAt: DateTime(2026, 8, 1, 10),
+          modifiedAt: DateTime(2026, 8, 1, 10),
+        );
+        await dataSource.upsertImage(
+          filePath: fileC.path,
+          fileName: 'c.png',
+          fileSize: 50,
+          width: 200,
+          height: 200,
+          createdAt: DateTime(2026, 8, 2, 10),
+          modifiedAt: DateTime(2026, 8, 2, 10),
+        );
+        await dataSource.upsertImage(
+          filePath: fileA.path,
+          fileName: 'a.png',
+          fileSize: 200,
+          width: 300,
+          height: 300,
+          createdAt: DateTime(2026, 8, 3, 10),
+          modifiedAt: DateTime(2026, 8, 3, 10),
+        );
 
-      await service.setSort(
-        const GallerySort(
-          field: GallerySortField.imageDimensions,
-          direction: GallerySortDirection.descending,
-        ),
-      );
+        await service.setSort(
+          const GallerySort(
+            field: GallerySortField.imageDimensions,
+            direction: GallerySortDirection.descending,
+          ),
+        );
 
-      var records = await service.getPage(0, pageSize: 10);
-      expect(records.map((record) => p.basename(record.path)), [
-        'a.png',
-        'c.png',
-        'b.png',
-      ]);
+        var records = await service.getPage(0, pageSize: 10);
+        expect(records.map((record) => p.basename(record.path)), [
+          'a.png',
+          'c.png',
+          'b.png',
+        ]);
 
-      await service.setSort(
-        const GallerySort(
-          field: GallerySortField.imageDimensions,
-          direction: GallerySortDirection.ascending,
-        ),
-      );
-      records = await service.getPage(0, pageSize: 10);
-      expect(records.map((record) => p.basename(record.path)), [
-        'b.png',
-        'c.png',
-        'a.png',
-      ]);
-    });
+        await service.setSort(
+          const GallerySort(
+            field: GallerySortField.imageDimensions,
+            direction: GallerySortDirection.ascending,
+          ),
+        );
+        records = await service.getPage(0, pageSize: 10);
+        expect(records.map((record) => p.basename(record.path)), [
+          'b.png',
+          'c.png',
+          'a.png',
+        ]);
+      },
+    );
   });
 }
 

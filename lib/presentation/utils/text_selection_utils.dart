@@ -115,11 +115,7 @@ class TextSelectionUtils {
       return newValue;
     }
 
-    return wrapSelection(
-      oldValue,
-      open: wrapPair.open,
-      close: wrapPair.close,
-    );
+    return wrapSelection(oldValue, open: wrapPair.open, close: wrapPair.close);
   }
 
   static bool _hasActiveComposingRange(TextEditingValue value) {

@@ -43,7 +43,8 @@ class DatabaseStateMachine {
   bool get isOperational => _currentState == DatabaseState.ready;
 
   /// 是否处于过渡状态（不应接受新请求）
-  bool get isTransitioning => _currentState == DatabaseState.initializing ||
+  bool get isTransitioning =>
+      _currentState == DatabaseState.initializing ||
       _currentState == DatabaseState.closing ||
       _currentState == DatabaseState.recovering ||
       _currentState == DatabaseState.clearing;
@@ -52,7 +53,8 @@ class DatabaseStateMachine {
   bool get isClearing => _currentState == DatabaseState.clearing;
 
   /// 历史记录
-  List<DatabaseStateChange> get history => List.unmodifiable(_transitionHistory);
+  List<DatabaseStateChange> get history =>
+      List.unmodifiable(_transitionHistory);
 
   /// 尝试状态转换
   Future<bool> transition(
@@ -76,7 +78,7 @@ class DatabaseStateMachine {
 
     AppLogger.i(
       'Database state transition: ${previousState.name} -> ${transition.to.name} '
-      '(trigger: ${event.name}, reason: $reason)',
+          '(trigger: ${event.name}, reason: $reason)',
       'DatabaseStateMachine',
     );
 
@@ -124,7 +126,9 @@ class DatabaseStateMachine {
   }
 
   /// 等待就绪
-  Future<void> waitForReady({Duration timeout = const Duration(seconds: 30)}) async {
+  Future<void> waitForReady({
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
     await waitForState(DatabaseState.ready, timeout: timeout);
   }
 

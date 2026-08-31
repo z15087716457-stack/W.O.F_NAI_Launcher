@@ -77,8 +77,10 @@ class _ThemedSliderState extends State<ThemedSlider> {
   bool _isDragging = false;
 
   double get _normalizedValue {
-    return ((widget.value - widget.min) / (widget.max - widget.min))
-        .clamp(0.0, 1.0);
+    return ((widget.value - widget.min) / (widget.max - widget.min)).clamp(
+      0.0,
+      1.0,
+    );
   }
 
   double _valueFromPosition(double localX, double trackWidth) {
@@ -102,7 +104,8 @@ class _ThemedSliderState extends State<ThemedSlider> {
 
     // 颜色
     final activeColorBase = widget.activeColor ?? theme.colorScheme.primary;
-    final inactiveColorBase = widget.inactiveColor ??
+    final inactiveColorBase =
+        widget.inactiveColor ??
         (isDark
             ? Color.lerp(theme.colorScheme.surface, Colors.black, 0.4)!
             : Color.lerp(theme.colorScheme.surface, Colors.black, 0.08)!);
@@ -117,8 +120,9 @@ class _ThemedSliderState extends State<ThemedSlider> {
     final opacity = widget.enabled ? 1.0 : 0.5;
 
     return MouseRegion(
-      cursor:
-          widget.enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      cursor: widget.enabled
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: Opacity(
@@ -263,21 +267,18 @@ class _ThemedSliderState extends State<ThemedSlider> {
     );
   }
 
-  Widget _buildThumb({
-    required Color thumbColor,
-    required bool isDark,
-  }) {
+  Widget _buildThumb({required Color thumbColor, required bool isDark}) {
     // 悬浮/拖动状态的阴影变化
     final shadowOpacity = _isDragging
         ? 0.3
         : _isHovered
-            ? 0.25
-            : 0.2;
+        ? 0.25
+        : 0.2;
     final shadowBlur = _isDragging
         ? 8.0
         : _isHovered
-            ? 6.0
-            : 4.0;
+        ? 6.0
+        : 4.0;
     final thumbScale = _isDragging ? 1.1 : 1.0;
 
     return AnimatedContainer(
@@ -377,7 +378,8 @@ class ThemedSliderListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: contentPadding ??
+      padding:
+          contentPadding ??
           const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,14 +390,12 @@ class ThemedSliderListTile extends StatelessWidget {
               Expanded(
                 child: DefaultTextStyle(
                   style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                        color: enabled
-                            ? null
-                            : Theme.of(context)
-                                .textTheme
-                                .bodyLarge!
-                                .color!
-                                .withValues(alpha: 0.5),
-                      ),
+                    color: enabled
+                        ? null
+                        : Theme.of(
+                            context,
+                          ).textTheme.bodyLarge!.color!.withValues(alpha: 0.5),
+                  ),
                   child: title,
                 ),
               ),
@@ -403,9 +403,9 @@ class ThemedSliderListTile extends StatelessWidget {
                 const SizedBox(width: 8),
                 DefaultTextStyle(
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
                   child: subtitle!,
                 ),
               ],

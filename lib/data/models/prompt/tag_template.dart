@@ -71,18 +71,12 @@ class TagTemplate with _$TagTemplate {
 
   /// 更新标签列表
   TagTemplate updateTags(List<PromptTag> newTags) {
-    return copyWith(
-      tags: newTags,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(tags: newTags, updatedAt: DateTime.now());
   }
 
   /// 更新名称
   TagTemplate updateName(String newName) {
-    return copyWith(
-      name: newName.trim(),
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(name: newName.trim(), updatedAt: DateTime.now());
   }
 
   /// 更新描述
@@ -95,10 +89,7 @@ class TagTemplate with _$TagTemplate {
 
   /// 添加标签
   TagTemplate addTag(PromptTag tag) {
-    return copyWith(
-      tags: [...tags, tag],
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(tags: [...tags, tag], updatedAt: DateTime.now());
   }
 
   /// 移除标签
@@ -111,10 +102,7 @@ class TagTemplate with _$TagTemplate {
 
   /// 清空所有标签
   TagTemplate clearTags() {
-    return copyWith(
-      tags: [],
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(tags: [], updatedAt: DateTime.now());
   }
 }
 
@@ -150,8 +138,8 @@ extension TagTemplateListExtension on List<TagTemplate> {
 
   /// 查找包含指定标签ID的模板
   List<TagTemplate> findContainingTag(String tagId) {
-    return where((template) =>
-        template.tags.any((tag) => tag.id == tagId),
+    return where(
+      (template) => template.tags.any((tag) => tag.id == tagId),
     ).toList();
   }
 
@@ -159,9 +147,10 @@ extension TagTemplateListExtension on List<TagTemplate> {
   List<TagTemplate> searchByName(String query) {
     if (query.isEmpty) return this;
     final lowerQuery = query.toLowerCase();
-    return where((template) =>
-        template.name.toLowerCase().contains(lowerQuery) ||
-        (template.description?.toLowerCase().contains(lowerQuery) ?? false),
+    return where(
+      (template) =>
+          template.name.toLowerCase().contains(lowerQuery) ||
+          (template.description?.toLowerCase().contains(lowerQuery) ?? false),
     ).toList();
   }
 }

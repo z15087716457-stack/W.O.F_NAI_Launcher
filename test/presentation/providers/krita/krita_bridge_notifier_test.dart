@@ -47,8 +47,9 @@ void main() {
   late List<bool> persistedEnabledValues;
 
   setUp(() async {
-    tempDir =
-        await Directory.systemTemp.createTemp('krita_bridge_notifier_test_');
+    tempDir = await Directory.systemTemp.createTemp(
+      'krita_bridge_notifier_test_',
+    );
     bridgeService = RecordingKritaBridgeService();
     persistedEnabledValues = [];
     notifier = KritaBridgeNotifier(
@@ -104,38 +105,39 @@ void main() {
     expect(await File(discoveryFilePath).exists(), isFalse);
   });
 
-  test('disable cancels active bridge request before clearing service',
-      () async {
-    await notifier.enable();
-    bridgeService.reportActiveRequest('img-active');
+  test(
+    'disable cancels active bridge request before clearing service',
+    () async {
+      await notifier.enable();
+      bridgeService.reportActiveRequest('img-active');
 
-    await notifier.disable();
+      await notifier.disable();
 
-    expect(bridgeService.disconnectedCalls, 1);
-    expect(notifier.state.activeRequestId, isNull);
-  });
+      expect(bridgeService.disconnectedCalls, 1);
+      expect(notifier.state.activeRequestId, isNull);
+    },
+  );
 
-  test('persists explicit enable and disable but not session regeneration',
-      () async {
-    await notifier.enable();
-    await notifier.regenerateSession();
-    await notifier.disable();
+  test(
+    'persists explicit enable and disable but not session regeneration',
+    () async {
+      await notifier.enable();
+      await notifier.regenerateSession();
+      await notifier.disable();
 
-    expect(persistedEnabledValues, [true, false]);
-  });
+      expect(persistedEnabledValues, [true, false]);
+    },
+  );
 
   test('regenerateSession invalidates the authenticated client', () async {
     await notifier.enable();
-    final socket =
-        await WebSocket.connect('ws://127.0.0.1:${notifier.state.port}/krita');
+    final socket = await WebSocket.connect(
+      'ws://127.0.0.1:${notifier.state.port}/krita',
+    );
     final iterator = StreamIterator<dynamic>(socket);
 
     socket.add(
-      jsonEncode({
-        'type': 'ping',
-        'version': 1,
-        'secret': 'notifier-secret',
-      }),
+      jsonEncode({'type': 'ping', 'version': 1, 'secret': 'notifier-secret'}),
     );
     await iterator.moveNext().timeout(const Duration(seconds: 2));
     expect(notifier.state.status, KritaBridgeStatus.connected);
@@ -158,15 +160,12 @@ void main() {
 
   test('forwards authenticated WebSocket messages to bridge service', () async {
     await notifier.enable();
-    final socket =
-        await WebSocket.connect('ws://127.0.0.1:${notifier.state.port}/krita');
+    final socket = await WebSocket.connect(
+      'ws://127.0.0.1:${notifier.state.port}/krita',
+    );
 
     socket.add(
-      jsonEncode({
-        'type': 'ping',
-        'version': 1,
-        'secret': 'notifier-secret',
-      }),
+      jsonEncode({'type': 'ping', 'version': 1, 'secret': 'notifier-secret'}),
     );
     await socket.first;
     expect(notifier.state.status, KritaBridgeStatus.connected);
@@ -182,38 +181,37 @@ void main() {
     await socket.close();
   });
 
-  test('sendImageToKrita pushes image to authenticated Krita connection',
-      () async {
-    await notifier.enable();
-    final socket =
-        await WebSocket.connect('ws://127.0.0.1:${notifier.state.port}/krita');
-    final iterator = StreamIterator<dynamic>(socket);
+  test(
+    'sendImageToKrita pushes image to authenticated Krita connection',
+    () async {
+      await notifier.enable();
+      final socket = await WebSocket.connect(
+        'ws://127.0.0.1:${notifier.state.port}/krita',
+      );
+      final iterator = StreamIterator<dynamic>(socket);
 
-    socket.add(
-      jsonEncode({
-        'type': 'ping',
-        'version': 1,
-        'secret': 'notifier-secret',
-      }),
-    );
-    await iterator.moveNext().timeout(const Duration(seconds: 2));
+      socket.add(
+        jsonEncode({'type': 'ping', 'version': 1, 'secret': 'notifier-secret'}),
+      );
+      await iterator.moveNext().timeout(const Duration(seconds: 2));
 
-    final sent = notifier.sendImageToKrita(
-      Uint8List.fromList([1, 2, 3]),
-      name: 'from_launcher.png',
-    );
+      final sent = notifier.sendImageToKrita(
+        Uint8List.fromList([1, 2, 3]),
+        name: 'from_launcher.png',
+      );
 
-    expect(sent, isTrue);
-    await iterator.moveNext().timeout(const Duration(seconds: 2));
-    final message =
-        jsonDecode(iterator.current as String) as Map<String, dynamic>;
-    expect(message['type'], 'push_image');
-    expect(message['name'], 'from_launcher.png');
-    expect(base64Decode(message['image'] as String), [1, 2, 3]);
+      expect(sent, isTrue);
+      await iterator.moveNext().timeout(const Duration(seconds: 2));
+      final message =
+          jsonDecode(iterator.current as String) as Map<String, dynamic>;
+      expect(message['type'], 'push_image');
+      expect(message['name'], 'from_launcher.png');
+      expect(base64Decode(message['image'] as String), [1, 2, 3]);
 
-    await iterator.cancel();
-    await socket.close();
-  });
+      await iterator.cancel();
+      await socket.close();
+    },
+  );
 
   test('reflects active Krita request in bridge state', () async {
     await notifier.enable();

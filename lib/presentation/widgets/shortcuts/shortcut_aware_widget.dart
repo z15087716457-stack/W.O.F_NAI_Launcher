@@ -34,7 +34,8 @@ class ShortcutAwareWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ShortcutAwareWidget> createState() => _ShortcutAwareWidgetState();
+  ConsumerState<ShortcutAwareWidget> createState() =>
+      _ShortcutAwareWidgetState();
 }
 
 class _ShortcutAwareWidgetState extends ConsumerState<ShortcutAwareWidget> {
@@ -70,10 +71,7 @@ class _ShortcutAwareWidgetState extends ConsumerState<ShortcutAwareWidget> {
   Widget _buildWithConfig(BuildContext context, ShortcutConfig config) {
     // 如果禁用快捷键，使用 FocusScope 包裹子组件以确保焦点管理一致
     if (!config.enableShortcuts) {
-      return FocusScope(
-        autofocus: widget.autofocus,
-        child: widget.child,
-      );
+      return FocusScope(autofocus: widget.autofocus, child: widget.child);
     }
 
     // 构建快捷键映射（使用 Shortcuts widget 的 Map 格式）
@@ -241,10 +239,7 @@ class _ShortcutAwareWidgetState extends ConsumerState<ShortcutAwareWidget> {
 
     // 使用 Shortcuts + Actions + Focus 确保快捷键在整个子树中都能工作
     // 使用 ValueKey 基于默认快捷键哈希值
-    final defaultHash = Object.hash(
-      'default',
-      shortcutsMap.hashCode,
-    );
+    final defaultHash = Object.hash('default', shortcutsMap.hashCode);
 
     // 关键修复：使用 Shortcuts.manager 并创建新的 ShortcutManager 实例
     final shortcutManager = ShortcutManager(shortcuts: shortcutsMap);

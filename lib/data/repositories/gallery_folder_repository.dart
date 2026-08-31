@@ -133,10 +133,7 @@ class GalleryFolderRepository {
       if (await dir.exists()) {
         dirs.add(dir);
       } else {
-        AppLogger.w(
-          '额外图库源目录不存在，跳过: $extraPath',
-          'GalleryFolderRepository',
-        );
+        AppLogger.w('额外图库源目录不存在，跳过: $extraPath', 'GalleryFolderRepository');
       }
     }
 
@@ -160,8 +157,9 @@ class GalleryFolderRepository {
           if (folder != null) folders.add(folder);
         }
       }
-      folders
-          .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      folders.sort(
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+      );
     } catch (e) {
       AppLogger.e('扫描文件夹失败', e);
     }
@@ -192,11 +190,13 @@ class GalleryFolderRepository {
   Future<int> _countImagesInFolder(String folderPath) async {
     int count = 0;
     try {
-      await for (final entity
-          in Directory(folderPath).list(followLinks: false)) {
+      await for (final entity in Directory(
+        folderPath,
+      ).list(followLinks: false)) {
         if (entity is File &&
-            _supportedExtensions
-                .contains(p.extension(entity.path).toLowerCase())) {
+            _supportedExtensions.contains(
+              p.extension(entity.path).toLowerCase(),
+            )) {
           count++;
         }
       }
@@ -377,8 +377,9 @@ class GalleryFolderRepository {
     try {
       await for (final entity in rootDir.list(followLinks: false)) {
         if (entity is File &&
-            _supportedExtensions
-                .contains(p.extension(entity.path).toLowerCase())) {
+            _supportedExtensions.contains(
+              p.extension(entity.path).toLowerCase(),
+            )) {
           count++;
         } else if (entity is Directory) {
           count += await _countImagesInFolder(entity.path);

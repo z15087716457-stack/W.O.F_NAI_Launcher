@@ -35,14 +35,7 @@ class SidebarLinkPainter extends CustomPainter {
 
       final path = Path()
         ..moveTo(start.dx, start.dy)
-        ..cubicTo(
-          start.dx + 44,
-          start.dy,
-          end.dx - 44,
-          end.dy,
-          end.dx,
-          end.dy,
-        );
+        ..cubicTo(start.dx + 44, start.dy, end.dx - 44, end.dy, end.dx, end.dy);
       final paint = Paint()
         ..color = color.withValues(alpha: isMismatched(link) ? 0.45 : 0.85)
         ..strokeWidth = isMismatched(link) ? 1.6 : 2.2

@@ -77,7 +77,8 @@ class InsetShadowContainer extends StatelessWidget {
     final blur = shadowBlur ?? appExt?.insetShadowBlur ?? 8.0;
 
     // 背景色 - 深色主题用更深的颜色，浅色主题用更浅的颜色
-    final bgColor = backgroundColor ??
+    final bgColor =
+        backgroundColor ??
         (isDark
             ? Color.lerp(theme.colorScheme.surface, Colors.black, 0.3)!
             : Color.lerp(theme.colorScheme.surface, Colors.black, 0.02)!);
@@ -97,10 +98,7 @@ class InsetShadowContainer extends StatelessWidget {
               ? Border.all(color: border, width: borderWidth)
               : null,
         ),
-        child: Padding(
-          padding: padding ?? EdgeInsets.zero,
-          child: child,
-        ),
+        child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
       );
     }
 
@@ -127,10 +125,7 @@ class InsetShadowContainer extends StatelessWidget {
             shadowBlur: blur,
             borderRadius: borderRadius - (borderWidth > 0 ? borderWidth : 0),
           ),
-          child: Padding(
-            padding: padding ?? EdgeInsets.zero,
-            child: child,
-          ),
+          child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
         ),
       ),
     );
@@ -198,8 +193,12 @@ class _InsetShadowPainter extends CustomPainter {
       ],
     );
 
-    final rightRect =
-        Rect.fromLTWH(size.width - shadowBlur, 0, shadowBlur, size.height);
+    final rightRect = Rect.fromLTWH(
+      size.width - shadowBlur,
+      0,
+      shadowBlur,
+      size.height,
+    );
     final rightPaint = Paint()..shader = rightGradient.createShader(rightRect);
     canvas.drawRect(rightRect, rightPaint);
 
@@ -209,10 +208,7 @@ class _InsetShadowPainter extends CustomPainter {
       final bottomHighlight = LinearGradient(
         begin: Alignment.bottomCenter,
         end: Alignment.topCenter,
-        colors: [
-          Colors.white.withValues(alpha: 0.02),
-          Colors.transparent,
-        ],
+        colors: [Colors.white.withValues(alpha: 0.02), Colors.transparent],
       );
 
       final bottomRect = Rect.fromLTWH(

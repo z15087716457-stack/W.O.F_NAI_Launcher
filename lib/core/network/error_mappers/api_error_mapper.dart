@@ -49,7 +49,10 @@ class ApiErrorMapper {
         _ => null,
       };
     } catch (error) {
-      AppLogger.w('Failed to extract error message from response: $error', 'Utils');
+      AppLogger.w(
+        'Failed to extract error message from response: $error',
+        'Utils',
+      );
       return null;
     }
   }

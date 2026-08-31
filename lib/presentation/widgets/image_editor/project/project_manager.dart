@@ -30,18 +30,15 @@ class _FileStatInfo {
   });
 
   /// 从FileStat创建
-  factory _FileStatInfo.fromStat(File file, FileStat stat) => _FileStatInfo(
-        file: file,
-        modified: stat.modified,
-        type: stat.type,
-      );
+  factory _FileStatInfo.fromStat(File file, FileStat stat) =>
+      _FileStatInfo(file: file, modified: stat.modified, type: stat.type);
 
   /// 表示不存在的文件
   factory _FileStatInfo.notFound(File file) => _FileStatInfo(
-        file: file,
-        modified: DateTime(0),
-        type: FileSystemEntityType.notFound,
-      );
+    file: file,
+    modified: DateTime(0),
+    type: FileSystemEntityType.notFound,
+  );
 
   bool get exists => type != FileSystemEntityType.notFound;
 }
@@ -49,10 +46,7 @@ class _FileStatInfo {
 /// 项目管理器
 class ProjectManager {
   /// 保存项目到文件
-  static Future<void> saveProject(
-    EditorState state,
-    String filePath,
-  ) async {
+  static Future<void> saveProject(EditorState state, String filePath) async {
     final projectData = _createProjectData(state);
     final json = jsonEncode(projectData.toJson());
 
@@ -79,10 +73,7 @@ class ProjectManager {
 
     // 设置画布尺寸
     state.setCanvasSize(
-      Size(
-        project.width.toDouble(),
-        project.height.toDouble(),
-      ),
+      Size(project.width.toDouble(), project.height.toDouble()),
     );
 
     // 设置颜色
@@ -192,8 +183,9 @@ class ProjectManager {
   /// 获取自动保存目录
   static Future<Directory> getAutoSaveDirectory() async {
     final appDir = await getApplicationDocumentsDirectory();
-    final autoSaveDir =
-        Directory(path.join(appDir.path, 'NAILauncher', 'autosave'));
+    final autoSaveDir = Directory(
+      path.join(appDir.path, 'NAILauncher', 'autosave'),
+    );
 
     if (!await autoSaveDir.exists()) {
       await autoSaveDir.create(recursive: true);
@@ -206,8 +198,10 @@ class ProjectManager {
   static Future<String> autoSave(EditorState state) async {
     final autoSaveDir = await getAutoSaveDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final filePath =
-        path.join(autoSaveDir.path, 'autosave_$timestamp$projectExtension');
+    final filePath = path.join(
+      autoSaveDir.path,
+      'autosave_$timestamp$projectExtension',
+    );
 
     await saveProject(state, filePath);
     return filePath;
@@ -274,10 +268,7 @@ class ProjectManager {
       try {
         await fileInfo.file.delete();
       } catch (e) {
-        AppLogger.d(
-          'Failed to delete old project file: $e',
-          'ProjectManager',
-        );
+        AppLogger.d('Failed to delete old project file: $e', 'ProjectManager');
       }
     }
   }

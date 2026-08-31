@@ -12,12 +12,12 @@ typedef Img2ImgPanelViewData = ({
 });
 
 Img2ImgPanelViewData selectImg2ImgPanelViewData(ImageParams params) => (
-      sourceImage: params.sourceImage,
-      maskImage: params.maskImage,
-      strength: params.strength,
-      noise: params.noise,
-      inpaintStrength: params.inpaintStrength,
-    );
+  sourceImage: params.sourceImage,
+  maskImage: params.maskImage,
+  strength: params.strength,
+  noise: params.noise,
+  inpaintStrength: params.inpaintStrength,
+);
 
 typedef VibePanelViewData = ({
   List<VibeReference> vibes,
@@ -25,27 +25,19 @@ typedef VibePanelViewData = ({
 });
 
 VibePanelViewData selectVibePanelViewData(ImageParams params) => (
-      vibes: params.vibeReferencesV4,
-      normalizeVibeStrength: params.normalizeVibeStrength,
-    );
+  vibes: params.vibeReferencesV4,
+  normalizeVibeStrength: params.normalizeVibeStrength,
+);
 
-typedef PreviewDimensionsViewData = ({
-  int width,
-  int height,
-});
+typedef PreviewDimensionsViewData = ({int width, int height});
 
 PreviewDimensionsViewData selectPreviewDimensionsViewData(ImageParams params) =>
-    (
-      width: params.width,
-      height: params.height,
-    );
+    (width: params.width, height: params.height);
 
 typedef CharacterPanelViewData = ({
   bool isV4Model,
   List<CharacterPrompt> characters,
 });
 
-CharacterPanelViewData selectCharacterPanelViewData(ImageParams params) => (
-      isV4Model: params.isV4Model,
-      characters: params.characters,
-    );
+CharacterPanelViewData selectCharacterPanelViewData(ImageParams params) =>
+    (isV4Model: params.isV4Model, characters: params.characters);

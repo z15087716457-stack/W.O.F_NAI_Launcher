@@ -147,7 +147,8 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                     ),
                     const SizedBox(width: 8),
                     FilledButton.icon(
-                      onPressed: _selectedEntryIds.isNotEmpty ||
+                      onPressed:
+                          _selectedEntryIds.isNotEmpty ||
                               _selectedCategoryIds.isNotEmpty
                           ? _export
                           : null,
@@ -235,12 +236,14 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
   /// 构建选择列表
   Widget _buildSelectionList(ThemeData theme) {
     // 构建分类树结构
-    final rootCategories =
-        widget.categories.where((c) => c.parentId == null).toList();
+    final rootCategories = widget.categories
+        .where((c) => c.parentId == null)
+        .toList();
 
     // 获取无分类的条目
-    final uncategorizedEntries =
-        widget.entries.where((e) => e.categoryId == null).toList();
+    final uncategorizedEntries = widget.entries
+        .where((e) => e.categoryId == null)
+        .toList();
 
     return ListView.builder(
       itemCount:
@@ -264,8 +267,9 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     List<TagLibraryEntry> entries,
   ) {
     final isExpanded = _expandedCategories.contains('__uncategorized__');
-    final selectedCount =
-        entries.where((e) => _selectedEntryIds.contains(e.id)).length;
+    final selectedCount = entries
+        .where((e) => _selectedEntryIds.contains(e.id))
+        .length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,10 +307,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                   });
                 },
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(
-                  minWidth: 32,
-                  minHeight: 32,
-                ),
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
               ),
               SizedBox(
                 width: 40,
@@ -314,8 +315,8 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                   value: selectedCount == 0
                       ? false
                       : selectedCount == entries.length
-                          ? true
-                          : null,
+                      ? true
+                      : null,
                   tristate: true,
                   onChanged: (value) {
                     setState(() {
@@ -368,27 +369,30 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     final isExpanded = _expandedCategories.contains(category.id);
 
     // 获取子分类
-    final childCategories =
-        widget.categories.where((c) => c.parentId == category.id).toList();
+    final childCategories = widget.categories
+        .where((c) => c.parentId == category.id)
+        .toList();
 
     // 获取该分类下的条目
-    final categoryEntries =
-        widget.entries.where((e) => e.categoryId == category.id).toList();
+    final categoryEntries = widget.entries
+        .where((e) => e.categoryId == category.id)
+        .toList();
 
     // 计算选中状态（用于indeterminate状态）
     final childSelectedCount = childCategories
         .where((c) => _selectedCategoryIds.contains(c.id))
         .length;
-    final entrySelectedCount =
-        categoryEntries.where((e) => _selectedEntryIds.contains(e.id)).length;
+    final entrySelectedCount = categoryEntries
+        .where((e) => _selectedEntryIds.contains(e.id))
+        .length;
     final totalChildren = childCategories.length + categoryEntries.length;
     final totalSelected = childSelectedCount + entrySelectedCount;
 
     final bool? checkboxValue = totalSelected == 0
         ? false
         : totalSelected == totalChildren && isSelected
-            ? true
-            : null;
+        ? true
+        : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -512,8 +516,9 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
         // 子项
         if (isExpanded) ...[
           // 子分类
-          ...childCategories
-              .map((child) => _buildCategoryTile(child, depth + 1)),
+          ...childCategories.map(
+            (child) => _buildCategoryTile(child, depth + 1),
+          ),
 
           // 条目
           ...categoryEntries.map((entry) => _buildEntryTile(entry, depth + 1)),
@@ -606,8 +611,9 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
 
   Future<void> _export() async {
     // 过滤选中的条目和分类
-    final selectedEntries =
-        widget.entries.where((e) => _selectedEntryIds.contains(e.id)).toList();
+    final selectedEntries = widget.entries
+        .where((e) => _selectedEntryIds.contains(e.id))
+        .toList();
     final selectedCategories = widget.categories
         .where((c) => _selectedCategoryIds.contains(c.id))
         .toList();

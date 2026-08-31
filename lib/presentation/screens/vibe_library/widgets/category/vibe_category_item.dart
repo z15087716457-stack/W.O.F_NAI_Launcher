@@ -57,7 +57,8 @@ class _VibeCategoryItemState extends State<VibeCategoryItem> {
   }
 
   KeyEventResult _handleEditKeyEvent(FocusNode node, KeyEvent event) {
-    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+    if (event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.escape) {
       _editController.text = widget.label;
       setState(() => _isEditing = false);
       return KeyEventResult.handled;
@@ -89,7 +90,8 @@ class _VibeCategoryItemState extends State<VibeCategoryItem> {
       onEnter: (_) => setState(() => _isHovering = true),
       onExit: (_) => setState(() => _isHovering = false),
       child: GestureDetector(
-        onSecondaryTapUp: widget.onRename != null ||
+        onSecondaryTapUp:
+            widget.onRename != null ||
                 widget.onAddSubCategory != null ||
                 widget.onDelete != null
             ? (details) => _showContextMenu(context, details.globalPosition)
@@ -101,8 +103,8 @@ class _VibeCategoryItemState extends State<VibeCategoryItem> {
             color: widget.isSelected
                 ? theme.colorScheme.primaryContainer
                 : (_isHovering
-                    ? theme.colorScheme.surfaceContainerHighest
-                    : Colors.transparent),
+                      ? theme.colorScheme.surfaceContainerHighest
+                      : Colors.transparent),
             borderRadius: BorderRadius.circular(8),
           ),
           child: InkWell(
@@ -139,7 +141,8 @@ class _VibeCategoryItemState extends State<VibeCategoryItem> {
                   Icon(
                     widget.icon,
                     size: 18,
-                    color: widget.iconColor ??
+                    color:
+                        widget.iconColor ??
                         (widget.isSelected
                             ? theme.colorScheme.primary
                             : theme.colorScheme.onSurfaceVariant),

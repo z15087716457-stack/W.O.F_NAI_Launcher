@@ -40,12 +40,6 @@ class PromptEditorWithToolbar extends ConsumerStatefulWidget {
   /// 文本变化回调
   final ValueChanged<String>? onChanged;
 
-  /// 随机按钮点击回调
-  final VoidCallback? onRandomPressed;
-
-  /// 随机按钮长按回调
-  final VoidCallback? onRandomLongPressed;
-
   /// 全屏按钮点击回调
   final VoidCallback? onFullscreenPressed;
 
@@ -74,7 +68,7 @@ class PromptEditorWithToolbar extends ConsumerStatefulWidget {
   ///
   /// 当用户确认导入 ComfyUI 格式的多角色提示词时触发。
   final void Function(String globalPrompt, List<CharacterPrompt> characters)?
-      onComfyuiImport;
+  onComfyuiImport;
 
   const PromptEditorWithToolbar({
     super.key,
@@ -84,8 +78,6 @@ class PromptEditorWithToolbar extends ConsumerStatefulWidget {
     this.focusNode,
     this.decoration,
     this.onChanged,
-    this.onRandomPressed,
-    this.onRandomLongPressed,
     this.onFullscreenPressed,
     this.onSettingsPressed,
     this.onCleared,
@@ -149,7 +141,7 @@ class _PromptEditorWithToolbarState
   @override
   Widget build(BuildContext context) {
     // 检查是否有任何工具栏按钮需要显示
-    final hasToolbar = widget.toolbarConfig.showRandomButton ||
+    final hasToolbar =
         widget.toolbarConfig.showFullscreenButton ||
         widget.toolbarConfig.showClearButton ||
         widget.toolbarConfig.showSettingsButton ||
@@ -167,8 +159,6 @@ class _PromptEditorWithToolbarState
             children: [
               PromptEditorToolbar(
                 config: widget.toolbarConfig,
-                onRandomPressed: widget.onRandomPressed,
-                onRandomLongPressed: widget.onRandomLongPressed,
                 onFullscreenPressed: widget.onFullscreenPressed,
                 onClearPressed: _handleClear,
                 onSettingsPressed: widget.onSettingsPressed,

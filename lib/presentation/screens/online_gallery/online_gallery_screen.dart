@@ -97,12 +97,13 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = ref.read(onlineGalleryNotifierProvider);
       // 同步搜索框文本
-      if (_searchController.text != state.searchQuery) {
-        _searchController.text = state.searchQuery;
-      }
-      if (_promptSearchController.text != state.promptQuery) {
-        _promptSearchController.text = state.promptQuery;
-      }
+      _setControllerText(_searchController, state.searchQuery);
+      _setControllerText(_promptSearchController, state.promptQuery);
+      _setControllerText(_popularSearchController, state.popularQuery);
+      _setControllerText(
+        _popularPromptSearchController,
+        state.popularPromptQuery,
+      );
       // 首次加载
       if (state.posts.isEmpty && !state.isLoading) {
         _galleryNotifier.loadPosts();
@@ -122,6 +123,29 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
     });
   }
 
+  void _setControllerText(TextEditingController controller, String text) {
+    controller.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
+
+  OnlineGalleryQueryDrafts _captureQueryDrafts() {
+    return OnlineGalleryQueryDrafts(
+      searchQuery: _searchController.text,
+      searchPrompt: _promptSearchController.text,
+      popularQuery: _popularSearchController.text,
+      popularPrompt: _popularPromptSearchController.text,
+    );
+  }
+
+  void _restoreQueryDrafts(OnlineGalleryQueryDrafts drafts) {
+    _setControllerText(_searchController, drafts.searchQuery);
+    _setControllerText(_promptSearchController, drafts.searchPrompt);
+    _setControllerText(_popularSearchController, drafts.popularQuery);
+    _setControllerText(_popularPromptSearchController, drafts.popularPrompt);
+  }
+
   /// 滚动监听 - 无限滚动加载更多
   void _onScroll() {
     if (_scrollController.position.pixels >=
@@ -139,13 +163,15 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
 
   /// 恢复滚动位置
   void _restoreScrollOffset(double offset) {
-    if (_scrollController.hasClients && offset > 0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.jumpTo(offset);
-        }
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+      final position = _scrollController.position;
+      final target = offset
+          .clamp(position.minScrollExtent, position.maxScrollExtent)
+          .toDouble();
+      if ((position.pixels - target).abs() < 0.5) return;
+      _scrollController.jumpTo(target);
+    });
   }
 
   @override
@@ -606,6 +632,23 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
             focusNode: queryFocus,
             hintText: context.l10n.onlineGallery_aiTagQuery,
             icon: Icons.manage_search,
+            suffixIcon:
+                state.viewMode == GalleryViewMode.search &&
+                    state.sourceId == GallerySourceId.aiTag &&
+                    state.authorReturnContext != null
+                ? IconButton(
+                    key: const ValueKey('ai-tag-author-return-button'),
+                    tooltip: context.l10n.onlineGallery_returnFromAuthor,
+                    onPressed: _returnFromAiTagAuthorSearch,
+                    icon: const Icon(Icons.arrow_back, size: 18),
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints.tightFor(
+                      width: 36,
+                      height: 36,
+                    ),
+                  )
+                : null,
             onSubmitted: submit,
           );
           final prompt = _buildPlainSearchField(
@@ -637,6 +680,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
     required FocusNode focusNode,
     required String hintText,
     required IconData icon,
+    Widget? suffixIcon,
     required VoidCallback onSubmitted,
   }) {
     return Container(
@@ -656,6 +700,10 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
             fontSize: 13,
           ),
           prefixIcon: Icon(icon, size: 18),
+          suffixIcon: suffixIcon,
+          suffixIconConstraints: suffixIcon == null
+              ? null
+              : const BoxConstraints.tightFor(width: 36, height: 36),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 8),
           isDense: true,
@@ -912,10 +960,8 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
           ),
           items: aiTagModelVersionQueries.keys
               .map(
-                (version) => DropdownMenuItem(
-                  value: version,
-                  child: Text('V$version'),
-                ),
+                (version) =>
+                    DropdownMenuItem(value: version, child: Text('V$version')),
               )
               .toList(growable: false),
           onChanged: (value) {
@@ -1585,7 +1631,8 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
         post.sourceId == GallerySourceId.gelbooru &&
         state.viewMode == GalleryViewMode.favorites &&
         state.favoritesSourceId == GallerySourceId.gelbooru;
-    final canWriteFavorite = post.sourceId == GallerySourceId.danbooru ||
+    final canWriteFavorite =
+        post.sourceId == GallerySourceId.danbooru ||
         post.sourceId == GallerySourceId.aiTag;
     return DanbooruPostCard(
       key: ValueKey(post.stableKey),
@@ -1669,7 +1716,15 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
         _activeSource(state) == GallerySourceId.aiTag) {
       return OnlineFavoritesBrowser(
         columnWidth: _columnWidth,
-        onOpenItem: (item) => _showPostDetail(context, item),
+        onOpenItem: (item) {
+          unawaited(
+            showAiTagDetailDialog(
+              context,
+              item: item,
+              enableAuthorSearch: false,
+            ),
+          );
+        },
       );
     }
     if (state.isLoading && state.posts.isEmpty) {
@@ -1709,7 +1764,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
 
   void _showPostDetail(BuildContext context, DanbooruPost post) {
     if (post.sourceId == GallerySourceId.aiTag) {
-      showAiTagDetailDialog(context, item: post);
+      _showAiTagPostDetail(context, post);
       return;
     }
     showPostDetailDialog(
@@ -1720,6 +1775,33 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
         _galleryNotifier.search(tag);
       },
     );
+  }
+
+  Future<void> _showAiTagPostDetail(
+    BuildContext context,
+    GalleryItem item,
+  ) async {
+    final authorId = await showAiTagDetailDialog(
+      context,
+      item: item,
+      enableAuthorSearch: true,
+    );
+    if (!mounted || authorId == null) return;
+
+    final drafts = _captureQueryDrafts();
+    _saveScrollOffset();
+    _selectionNotifier.exit();
+    final query = authorId.toString();
+    _setControllerText(_searchController, query);
+    _setControllerText(_promptSearchController, '');
+    await _galleryNotifier.searchAiTagAuthor(authorId, drafts: drafts);
+  }
+
+  void _returnFromAiTagAuthorSearch() {
+    _saveScrollOffset();
+    _selectionNotifier.exit();
+    final drafts = _galleryNotifier.returnFromAiTagAuthorSearch();
+    if (drafts != null) _restoreQueryDrafts(drafts);
   }
 
   /// 处理收藏切换

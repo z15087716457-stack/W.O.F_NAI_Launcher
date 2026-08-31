@@ -107,9 +107,6 @@ class NAILauncherApp extends ConsumerWidget {
       ShortcutIds.navigateToOnlineGallery: () {
         router.go(AppRoutes.onlineGallery);
       },
-      ShortcutIds.navigateToRandomConfig: () {
-        router.go(AppRoutes.promptConfig);
-      },
       ShortcutIds.navigateToTagLibrary: () {
         router.go(AppRoutes.tagLibraryPage);
       },
@@ -157,7 +154,6 @@ class NAILauncherApp extends ConsumerWidget {
             fontConfig: fontType.fontFamily.isEmpty ? null : fontType,
           ),
           themeMode: ThemeMode.dark, // 默认深色模式
-
           // 国际化
           locale: locale,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -169,9 +165,9 @@ class NAILauncherApp extends ConsumerWidget {
           // 字体缩放全局应用
           builder: (context, child) {
             return MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaler: TextScaler.linear(fontScale),
-              ),
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(fontScale)),
               child: child!,
             );
           },

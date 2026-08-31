@@ -59,7 +59,6 @@ class WarmupMessageLocalizer {
       'warmup_loadingTranslation' => l10n.warmup_loadingTranslation,
       'warmup_initTagSystem' => l10n.warmup_initTagSystem,
       'warmup_initUnifiedDatabase' => l10n.warmup_initUnifiedDatabase,
-      'warmup_loadingPromptConfig' => l10n.warmup_loadingPromptConfig,
       'warmup_danbooruAuth' => l10n.warmup_danbooruAuth,
       'warmup_imageEditor' => l10n.warmup_imageEditor,
       'warmup_database' => l10n.warmup_database,

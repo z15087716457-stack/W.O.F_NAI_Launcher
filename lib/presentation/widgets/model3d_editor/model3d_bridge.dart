@@ -6,10 +6,8 @@ import 'dart:typed_data';
 typedef JsEvaluator = Future<void> Function(String source);
 
 /// JS 侧主动事件回调(onReady/onModelLoaded/onLoadError/onDirty)
-typedef Model3dEventHandler = void Function(
-  String type,
-  Map<String, dynamic> data,
-);
+typedef Model3dEventHandler =
+    void Function(String type, Map<String, dynamic> data);
 
 class Model3dBridgeException implements Exception {
   final String message;
@@ -47,20 +45,22 @@ class Model3dBridge {
     final message = (args.first as Map).cast<String, dynamic>();
     final type = message['type'] is String ? message['type'] as String : null;
     if (type == 'response') {
-      final requestId =
-          message['requestId'] is int ? message['requestId'] as int : null;
+      final requestId = message['requestId'] is int
+          ? message['requestId'] as int
+          : null;
       final completer = _pending.remove(requestId);
       if (completer == null) return;
       final data =
-          ((message['data'] is Map ? message['data'] as Map : null) ??
-                  const {})
+          ((message['data'] is Map ? message['data'] as Map : null) ?? const {})
               .cast<String, dynamic>();
       if (message['ok'] == true) {
         completer.complete(data);
       } else {
-        completer.completeError(Model3dBridgeException(
-          data['error']?.toString() ?? 'unknown bridge error',
-        ));
+        completer.completeError(
+          Model3dBridgeException(
+            data['error']?.toString() ?? 'unknown bridge error',
+          ),
+        );
       }
     } else if (type != null) {
       final data = Map<String, dynamic>.from(message)..remove('type');
@@ -73,9 +73,7 @@ class Model3dBridge {
     Map<String, dynamic> payload = const {},
   ]) {
     if (_disposed) {
-      return Future.error(
-        const Model3dBridgeException('bridge disposed'),
-      );
+      return Future.error(const Model3dBridgeException('bridge disposed'));
     }
     final requestId = ++_nextRequestId;
     final completer = Completer<Map<String, dynamic>>();
@@ -87,18 +85,24 @@ class Model3dBridge {
       ...payload,
     });
     unawaited(
-      _evalJs('window.naiEditor.dispatch(${jsonEncode(command)})')
-          .catchError((Object e) {
-        _pending.remove(requestId)?.completeError(
+      _evalJs('window.naiEditor.dispatch(${jsonEncode(command)})').catchError((
+        Object e,
+      ) {
+        _pending
+            .remove(requestId)
+            ?.completeError(
               Model3dBridgeException('evaluateJavascript failed: $e'),
             );
       }),
     );
 
-    return completer.future.timeout(timeout, onTimeout: () {
-      _pending.remove(requestId);
-      throw TimeoutException('model3d bridge command timed out: $type');
-    });
+    return completer.future.timeout(
+      timeout,
+      onTimeout: () {
+        _pending.remove(requestId);
+        throw TimeoutException('model3d bridge command timed out: $type');
+      },
+    );
   }
 
   Future<Map<String, dynamic>> loadModel({
@@ -149,9 +153,7 @@ class Model3dBridge {
   void dispose() {
     _disposed = true;
     for (final completer in _pending.values) {
-      completer.completeError(
-        const Model3dBridgeException('bridge disposed'),
-      );
+      completer.completeError(const Model3dBridgeException('bridge disposed'));
     }
     _pending.clear();
   }

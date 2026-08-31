@@ -32,16 +32,14 @@ void main() {
     final clearButton = find.byIcon(Icons.filter_alt_off);
 
     testWidgets('hidden when only naiOnly is active', (tester) async {
-      await _pumpToolbar(
-        tester,
-        const FilterCriteria(naiOnly: true),
-      );
+      await _pumpToolbar(tester, const FilterCriteria(naiOnly: true));
 
       expect(clearButton, findsNothing);
     });
 
-    testWidgets('hidden when browsing a folder without session filters',
-        (tester) async {
+    testWidgets('hidden when browsing a folder without session filters', (
+      tester,
+    ) async {
       await _pumpToolbar(
         tester,
         const FilterCriteria(
@@ -54,8 +52,9 @@ void main() {
       expect(clearButton, findsNothing);
     });
 
-    testWidgets('hidden when browsing a collection without session filters',
-        (tester) async {
+    testWidgets('hidden when browsing a collection without session filters', (
+      tester,
+    ) async {
       await _pumpToolbar(
         tester,
         const FilterCriteria(naiOnly: true, collectionId: 'col-1'),
@@ -64,8 +63,9 @@ void main() {
       expect(clearButton, findsNothing);
     });
 
-    testWidgets('hidden when favorites scope without session filters',
-        (tester) async {
+    testWidgets('hidden when favorites scope without session filters', (
+      tester,
+    ) async {
       await _pumpToolbar(
         tester,
         const FilterCriteria(naiOnly: true, showFavoritesOnly: true),
@@ -83,8 +83,9 @@ void main() {
       expect(clearButton, findsOneWidget);
     });
 
-    testWidgets('visible when collection scope plus a session filter',
-        (tester) async {
+    testWidgets('visible when collection scope plus a session filter', (
+      tester,
+    ) async {
       await _pumpToolbar(
         tester,
         const FilterCriteria(
@@ -100,85 +101,81 @@ void main() {
 
   group('clearAllFilters', () {
     test(
-        'clears session filters only: keeps scope (folder/collection/favorites) '
-        'and naiOnly, leaves category selection', () async {
-      final container = ProviderContainer(
-        overrides: [
-          galleryServiceProvider.overrideWith(() => _FakeServiceNotifier()),
-          localGalleryNotifierProvider.overrideWith(
-            () => LocalGalleryNotifier(),
-          ),
-          galleryCategoryNotifierProvider.overrideWith(
-            () => _RecordingCategoryNotifier(),
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
+      'clears session filters only: keeps scope (folder/collection/favorites) '
+      'and naiOnly, leaves category selection',
+      () async {
+        final container = ProviderContainer(
+          overrides: [
+            galleryServiceProvider.overrideWith(() => _FakeServiceNotifier()),
+            localGalleryNotifierProvider.overrideWith(
+              () => LocalGalleryNotifier(),
+            ),
+            galleryCategoryNotifierProvider.overrideWith(
+              () => _RecordingCategoryNotifier(),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      final notifier = container.read(localGalleryNotifierProvider.notifier);
-      final categoryNotifier = container
-          .read(galleryCategoryNotifierProvider.notifier)
-          as _RecordingCategoryNotifier;
+        final notifier = container.read(localGalleryNotifierProvider.notifier);
+        final categoryNotifier =
+            container.read(galleryCategoryNotifierProvider.notifier)
+                as _RecordingCategoryNotifier;
 
-      await notifier.initialize();
-      await notifier.setNaiOnly(true);
-      // 浏览范围：文件夹 + 收藏集 + 收藏（收藏集的语义是互斥选择，
-      // 这里分别设置验证各自保留；组合态仅用于断言保留逻辑）
-      await notifier.setSelectedCategory('cat-1', r'aaa\bbb');
-      await notifier.setSelectedCollection('col-1');
-      await notifier.setShowFavoritesOnly(true);
-      // 会话条件
-      await notifier.setSearchQuery('solo');
-      await notifier.addSelectedTags(['solo', '1girl']);
-      await notifier.setDateRange(
-        DateTime(2026, 8, 1),
-        DateTime(2026, 8, 2),
-      );
-      await notifier.setFilterModels(['nai-diffusion-5']);
-      await notifier.setFilterSteps(20, 30);
-      await notifier.setFilterResolutions(['832x1216']);
+        await notifier.initialize();
+        await notifier.setNaiOnly(true);
+        // 浏览范围：文件夹 + 收藏集 + 收藏（收藏集的语义是互斥选择，
+        // 这里分别设置验证各自保留；组合态仅用于断言保留逻辑）
+        await notifier.setSelectedCategory('cat-1', r'aaa\bbb');
+        await notifier.setSelectedCollection('col-1');
+        await notifier.setShowFavoritesOnly(true);
+        // 会话条件
+        await notifier.setSearchQuery('solo');
+        await notifier.addSelectedTags(['solo', '1girl']);
+        await notifier.setDateRange(DateTime(2026, 8, 1), DateTime(2026, 8, 2));
+        await notifier.setFilterModels(['nai-diffusion-5']);
+        await notifier.setFilterSteps(20, 30);
+        await notifier.setFilterResolutions(['832x1216']);
 
-      final before = container.read(localGalleryNotifierProvider);
-      expect(before.filterCriteria.hasSessionFilters, isTrue);
-      final service = container
-          .read(galleryServiceProvider) as _FakeLocalGalleryService;
-      service.lastAppliedCriteria = null;
+        final before = container.read(localGalleryNotifierProvider);
+        expect(before.filterCriteria.hasSessionFilters, isTrue);
+        final service =
+            container.read(galleryServiceProvider) as _FakeLocalGalleryService;
+        service.lastAppliedCriteria = null;
 
-      await notifier.clearAllFilters();
+        await notifier.clearAllFilters();
 
-      final after = container.read(localGalleryNotifierProvider);
-      // 会话条件清空
-      expect(after.filterCriteria.searchQuery, isEmpty);
-      expect(after.filterCriteria.selectedTags, isEmpty);
-      expect(after.filterCriteria.dateStart, isNull);
-      expect(after.filterCriteria.dateEnd, isNull);
-      expect(after.filterCriteria.filterModels, isEmpty);
-      expect(after.filterCriteria.filterMinSteps, isNull);
-      expect(after.filterCriteria.filterMaxSteps, isNull);
-      expect(after.filterCriteria.filterResolutions, isEmpty);
-      expect(after.hasSessionFilters, isFalse);
-      // 浏览范围保留
-      expect(after.filterCriteria.categoryId, 'cat-1');
-      expect(after.filterCriteria.categoryFolderPath, r'aaa\bbb');
-      expect(after.filterCriteria.collectionId, 'col-1');
-      expect(after.filterCriteria.showFavoritesOnly, isTrue);
-      // naiOnly 常驻偏好保留
-      expect(after.filterCriteria.naiOnly, isTrue);
-      // 内容仍按保留后的范围过滤（applyFilter 收到的是含范围的 criteria）
-      expect(service.lastAppliedCriteria?.categoryId, 'cat-1');
-      expect(service.lastAppliedCriteria?.collectionId, 'col-1');
-      expect(service.lastAppliedCriteria?.showFavoritesOnly, isTrue);
-      expect(service.lastAppliedCriteria?.searchQuery, isEmpty);
-      // 侧栏选中范围不动（selectCategory 未被调用）
-      expect(categoryNotifier.selectCategoryCalls, 0);
-    });
+        final after = container.read(localGalleryNotifierProvider);
+        // 会话条件清空
+        expect(after.filterCriteria.searchQuery, isEmpty);
+        expect(after.filterCriteria.selectedTags, isEmpty);
+        expect(after.filterCriteria.dateStart, isNull);
+        expect(after.filterCriteria.dateEnd, isNull);
+        expect(after.filterCriteria.filterModels, isEmpty);
+        expect(after.filterCriteria.filterMinSteps, isNull);
+        expect(after.filterCriteria.filterMaxSteps, isNull);
+        expect(after.filterCriteria.filterResolutions, isEmpty);
+        expect(after.hasSessionFilters, isFalse);
+        // 浏览范围保留
+        expect(after.filterCriteria.categoryId, 'cat-1');
+        expect(after.filterCriteria.categoryFolderPath, r'aaa\bbb');
+        expect(after.filterCriteria.collectionId, 'col-1');
+        expect(after.filterCriteria.showFavoritesOnly, isTrue);
+        // naiOnly 常驻偏好保留
+        expect(after.filterCriteria.naiOnly, isTrue);
+        // 内容仍按保留后的范围过滤（applyFilter 收到的是含范围的 criteria）
+        expect(service.lastAppliedCriteria?.categoryId, 'cat-1');
+        expect(service.lastAppliedCriteria?.collectionId, 'col-1');
+        expect(service.lastAppliedCriteria?.showFavoritesOnly, isTrue);
+        expect(service.lastAppliedCriteria?.searchQuery, isEmpty);
+        // 侧栏选中范围不动（selectCategory 未被调用）
+        expect(categoryNotifier.selectCategoryCalls, 0);
+      },
+    );
   });
 }
 
-Future<void> _pumpToolbar(
-  WidgetTester tester,
-  FilterCriteria criteria,
-) async {
+Future<void> _pumpToolbar(WidgetTester tester, FilterCriteria criteria) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -205,9 +202,7 @@ Future<void> _pumpToolbar(
         locale: Locale('zh'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: LocalGalleryToolbar(),
-        ),
+        home: Scaffold(body: LocalGalleryToolbar()),
       ),
     ),
   );
@@ -215,11 +210,7 @@ Future<void> _pumpToolbar(
 }
 
 LocalImageRecord _record(String path) {
-  return LocalImageRecord(
-    path: path,
-    size: 1,
-    modifiedAt: DateTime(2026),
-  );
+  return LocalImageRecord(path: path, size: 1, modifiedAt: DateTime(2026));
 }
 
 class _StaticGalleryNotifier extends LocalGalleryNotifier {

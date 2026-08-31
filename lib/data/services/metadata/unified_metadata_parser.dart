@@ -436,11 +436,7 @@ class UnifiedMetadataParser {
     final error =
         'Not a valid PNG/WebP/JPEG file header, ${fileInfo}bytes length=${bytes.length}';
     PortableLogger.w(error, _tag);
-    return MetadataParseResult.failed(
-      const [],
-      error,
-      bytesRead: bytes.length,
-    );
+    return MetadataParseResult.failed(const [], error, bytesRead: bytes.length);
   }
 
   /// 从 WebP 字节中提取元数据

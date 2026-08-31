@@ -57,90 +57,84 @@ void main() {
       }
     });
 
-    test('writes model/sampler/steps/cfg/nsfw from jsonl into metadata',
-        () async {
-      final pngPath = p.join(tempDir.path, 'a.png');
-      final jsonlPath = p.join(tempDir.path, 'index.jsonl');
+    test(
+      'writes model/sampler/steps/cfg/nsfw from jsonl into metadata',
+      () async {
+        final pngPath = p.join(tempDir.path, 'a.png');
+        final jsonlPath = p.join(tempDir.path, 'index.jsonl');
 
-      await File(jsonlPath).writeAsString(
-        '${jsonEncode({
-          'path': pngPath,
-          'name': 'a.png',
-          'size': 12345,
-          'mtime': 1787469000,
-          'width': 832,
-          'height': 1216,
-          'source': 'NovelAI Diffusion V4.5 4BDE2A90',
-          'software': 'NovelAI',
-          'seed': 123,
-          'prompt': '1girl, solo, masterpiece',
-          'uc': 'lowres, blurry',
-          'model': 'nai-diffusion-4-5-curated',
-          'sampler': 'k_euler',
-          'steps': 28,
-          'cfg': 6.5,
-          'noise_schedule': 'native',
-          'tags': ['1girl', 'solo'],
-          'nsfw': true,
-        })}\n',
-      );
+        await File(jsonlPath).writeAsString(
+          '${jsonEncode({
+            'path': pngPath,
+            'name': 'a.png',
+            'size': 12345,
+            'mtime': 1787469000,
+            'width': 832,
+            'height': 1216,
+            'source': 'NovelAI Diffusion V4.5 4BDE2A90',
+            'software': 'NovelAI',
+            'seed': 123,
+            'prompt': '1girl, solo, masterpiece',
+            'uc': 'lowres, blurry',
+            'model': 'nai-diffusion-4-5-curated',
+            'sampler': 'k_euler',
+            'steps': 28,
+            'cfg': 6.5,
+            'noise_schedule': 'native',
+            'tags': ['1girl', 'solo'],
+            'nsfw': true,
+          })}\n',
+        );
 
-      final service = TagIndexImportService(dataSource);
-      final result = await service.importFromJsonl(
-        jsonlPath,
-        rootPaths: [tempDir.path],
-      );
+        final service = TagIndexImportService(dataSource);
+        final result = await service.importFromJsonl(
+          jsonlPath,
+          rootPaths: [tempDir.path],
+        );
 
-      expect(result.errors, 0);
-      expect(result.imported, 1);
+        expect(result.errors, 0);
+        expect(result.imported, 1);
 
-      final imageId = await dataSource.getImageIdByPath(pngPath);
-      expect(imageId, isNotNull);
+        final imageId = await dataSource.getImageIdByPath(pngPath);
+        expect(imageId, isNotNull);
 
-      final metadata =
-          (await dataSource.getMetadataByImageIds([imageId!]))[imageId];
-      expect(metadata, isNotNull);
-      expect(metadata!.model, 'nai-diffusion-4-5-curated');
-      expect(metadata.sampler, 'k_euler');
-      expect(metadata.steps, 28);
-      expect(metadata.scale, 6.5);
-      expect(metadata.noiseSchedule, 'native');
+        final metadata = (await dataSource.getMetadataByImageIds([
+          imageId!,
+        ]))[imageId];
+        expect(metadata, isNotNull);
+        expect(metadata!.model, 'nai-diffusion-4-5-curated');
+        expect(metadata.sampler, 'k_euler');
+        expect(metadata.steps, 28);
+        expect(metadata.scale, 6.5);
+        expect(metadata.noiseSchedule, 'native');
 
-      // fullPromptText 与扫描路径一致：追加 model/sampler/software/source
-      expect(
-        metadata.fullPromptText,
-        contains('nai-diffusion-4-5-curated'),
-      );
-      expect(metadata.fullPromptText, contains('k_euler'));
-      expect(metadata.fullPromptText, contains('NovelAI Diffusion V4.5'));
-      expect(metadata.fullPromptText, contains('1girl, solo, masterpiece'));
+        // fullPromptText 与扫描路径一致：追加 model/sampler/software/source
+        expect(metadata.fullPromptText, contains('nai-diffusion-4-5-curated'));
+        expect(metadata.fullPromptText, contains('k_euler'));
+        expect(metadata.fullPromptText, contains('NovelAI Diffusion V4.5'));
+        expect(metadata.fullPromptText, contains('1girl, solo, masterpiece'));
 
-      // is_nsfw 可被 advancedSearch 消费
-      final nsfwIds = await dataSource.advancedSearch(
-        nsfwMode: 'nsfw',
-        limit: 10,
-      );
-      expect(nsfwIds, contains(imageId));
+        // is_nsfw 可被 advancedSearch 消费
+        final nsfwIds = await dataSource.advancedSearch(
+          nsfwMode: 'nsfw',
+          limit: 10,
+        );
+        expect(nsfwIds, contains(imageId));
 
-      final modelIds = await dataSource.advancedSearch(
-        models: ['nai-diffusion-4-5-curated'],
-        limit: 10,
-      );
-      expect(modelIds, contains(imageId));
-    });
+        final modelIds = await dataSource.advancedSearch(
+          models: ['nai-diffusion-4-5-curated'],
+          limit: 10,
+        );
+        expect(modelIds, contains(imageId));
+      },
+    );
 
     test('missing optional keys stay null and default sfw', () async {
       final pngPath = p.join(tempDir.path, 'b.png');
       final jsonlPath = p.join(tempDir.path, 'index.jsonl');
 
       await File(jsonlPath).writeAsString(
-        '${jsonEncode({
-          'path': pngPath,
-          'name': 'b.png',
-          'size': 100,
-          'mtime': 1787469000,
-          'prompt': '1girl',
-        })}\n',
+        '${jsonEncode({'path': pngPath, 'name': 'b.png', 'size': 100, 'mtime': 1787469000, 'prompt': '1girl'})}\n',
       );
 
       final service = TagIndexImportService(dataSource);
@@ -151,8 +145,9 @@ void main() {
       expect(result.errors, 0);
 
       final imageId = await dataSource.getImageIdByPath(pngPath);
-      final metadata =
-          (await dataSource.getMetadataByImageIds([imageId!]))[imageId];
+      final metadata = (await dataSource.getMetadataByImageIds([
+        imageId!,
+      ]))[imageId];
       expect(metadata!.model, isNull);
       expect(metadata.sampler, isNull);
       expect(metadata.steps, isNull);
@@ -171,13 +166,7 @@ void main() {
 
       // 1. 首次导入带 nsfw: true
       await File(jsonlPath).writeAsString(
-        '${jsonEncode({
-          'path': pngPath,
-          'size': 100,
-          'mtime': 1787469000,
-          'prompt': '1girl',
-          'nsfw': true,
-        })}\n',
+        '${jsonEncode({'path': pngPath, 'size': 100, 'mtime': 1787469000, 'prompt': '1girl', 'nsfw': true})}\n',
       );
       await service.importFromJsonl(jsonlPath, rootPaths: [tempDir.path]);
 
@@ -190,12 +179,7 @@ void main() {
 
       // 2. 重导且 JSONL 无 nsfw 字段 → 保留已有分级（修复前落回 0）
       await File(jsonlPath).writeAsString(
-        '${jsonEncode({
-          'path': pngPath,
-          'size': 100,
-          'mtime': 1787469000,
-          'prompt': '1girl, updated',
-        })}\n',
+        '${jsonEncode({'path': pngPath, 'size': 100, 'mtime': 1787469000, 'prompt': '1girl, updated'})}\n',
       );
       final second = await service.importFromJsonl(
         jsonlPath,
@@ -213,13 +197,7 @@ void main() {
 
       // 3. 显式 nsfw: false → 覆盖为 SFW
       await File(jsonlPath).writeAsString(
-        '${jsonEncode({
-          'path': pngPath,
-          'size': 100,
-          'mtime': 1787469000,
-          'prompt': '1girl, final',
-          'nsfw': false,
-        })}\n',
+        '${jsonEncode({'path': pngPath, 'size': 100, 'mtime': 1787469000, 'prompt': '1girl, final', 'nsfw': false})}\n',
       );
       await service.importFromJsonl(jsonlPath, rootPaths: [tempDir.path]);
 

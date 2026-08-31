@@ -58,10 +58,7 @@ class AssetProtectionGuard {
     return ThemedConfirmDialog.show(
       context: context,
       title: l10n.settings_confirmExternalSendTitle,
-      content: l10n.settings_confirmExternalSendContent(
-        imageCount,
-        targetName,
-      ),
+      content: l10n.settings_confirmExternalSendContent(imageCount, targetName),
       confirmText: l10n.settings_confirmExternalSend,
       cancelText: l10n.common_cancel,
       type: ThemedConfirmDialogType.warning,

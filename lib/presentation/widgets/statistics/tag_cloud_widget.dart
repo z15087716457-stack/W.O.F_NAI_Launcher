@@ -99,9 +99,7 @@ class TagCloudWidget extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               l10n.statistics_noTagData,
-              style: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -113,11 +111,7 @@ class TagCloudWidget extends StatelessWidget {
   Widget _buildHeader(BuildContext context, ThemeData theme) {
     return Row(
       children: [
-        Icon(
-          Icons.tag,
-          size: 20,
-          color: theme.colorScheme.primary,
-        ),
+        Icon(Icons.tag, size: 20, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -148,10 +142,12 @@ class TagCloudWidget extends StatelessWidget {
   /// 构建标签云
   Widget _buildTagCloud(List<TagStatistics> displayTags, ThemeData theme) {
     // 计算最大和最小频率，用于字体大小缩放
-    final maxCount =
-        displayTags.map((t) => t.count).reduce((a, b) => a > b ? a : b);
-    final minCount =
-        displayTags.map((t) => t.count).reduce((a, b) => a < b ? a : b);
+    final maxCount = displayTags
+        .map((t) => t.count)
+        .reduce((a, b) => a > b ? a : b);
+    final minCount = displayTags
+        .map((t) => t.count)
+        .reduce((a, b) => a < b ? a : b);
 
     return Wrap(
       spacing: 8,
@@ -210,17 +206,11 @@ class TagCloudWidget extends StatelessWidget {
       child: Chip(
         label: Text(
           tag.tagName,
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w500),
         ),
         labelPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         backgroundColor: color.withValues(alpha: 0.1),
-        side: BorderSide(
-          color: color.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        side: BorderSide(color: color.withValues(alpha: 0.3), width: 1),
         avatar: CircleAvatar(
           backgroundColor: color,
           child: Text(

@@ -285,10 +285,7 @@ class InputHandler {
         event.localPosition,
         canvasSize: state.canvasSize,
       );
-      tool.onPointerHover(
-        PointerHoverEvent(position: canvasPosition),
-        state,
-      );
+      tool.onPointerHover(PointerHoverEvent(position: canvasPosition), state);
     }
   }
 
@@ -331,10 +328,7 @@ class InputHandler {
           event.localPosition,
           canvasSize: state.canvasSize,
         );
-        tool.onPointerDown(
-          PointerDownEvent(position: canvasPosition),
-          state,
-        );
+        tool.onPointerDown(PointerDownEvent(position: canvasPosition), state);
       }
     }
   }
@@ -365,10 +359,7 @@ class InputHandler {
           event.localPosition,
           canvasSize: state.canvasSize,
         );
-        tool.onPointerUp(
-          PointerUpEvent(position: canvasPosition),
-          state,
-        );
+        tool.onPointerUp(PointerUpEvent(position: canvasPosition), state);
       }
       gesture.isPrimaryButtonDown = false;
     }
@@ -415,10 +406,7 @@ class InputHandler {
           event.localPosition,
           canvasSize: state.canvasSize,
         );
-        tool.onPointerMove(
-          PointerMoveEvent(position: canvasPosition),
-          state,
-        );
+        tool.onPointerMove(PointerMoveEvent(position: canvasPosition), state);
       }
     }
   }
@@ -476,8 +464,10 @@ class InputHandler {
         final deltaX =
             details.localFocalPoint.dx - gesture.brushSizeStartPosition!.dx;
         final sizeFactor = 1.0 + deltaX / 200.0;
-        final newSize =
-            (gesture.initialBrushSize * sizeFactor).clamp(1.0, 500.0);
+        final newSize = (gesture.initialBrushSize * sizeFactor).clamp(
+          1.0,
+          500.0,
+        );
         state.setBrushSize(newSize);
         gesture.cursorPosition = gesture.brushSizeStartPosition;
         state.cursorNotifier.value = gesture.cursorPosition;

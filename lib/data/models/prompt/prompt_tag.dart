@@ -119,9 +119,9 @@ class PromptTag with _$PromptTag {
         final weightStr = weight == weight.truncateToDouble()
             ? weight.toInt().toString()
             : weight
-                .toStringAsFixed(2)
-                .replaceAll(RegExp(r'0+$'), '')
-                .replaceAll(RegExp(r'\.$'), '');
+                  .toStringAsFixed(2)
+                  .replaceAll(RegExp(r'0+$'), '')
+                  .replaceAll(RegExp(r'\.$'), '');
         return '$weightStr::$text::';
 
       case WeightSyntaxType.bracket:
@@ -195,10 +195,9 @@ class PromptTag with _$PromptTag {
 extension PromptTagListExtension on List<PromptTag> {
   /// 转换为提示词文本
   String toPromptString() {
-    return where((tag) => tag.enabled)
-        .map((tag) => tag.toSyntaxString())
-        .where((s) => s.isNotEmpty)
-        .join(', ');
+    return where(
+      (tag) => tag.enabled,
+    ).map((tag) => tag.toSyntaxString()).where((s) => s.isNotEmpty).join(', ');
   }
 
   /// 获取选中的标签

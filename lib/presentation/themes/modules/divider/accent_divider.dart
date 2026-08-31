@@ -18,8 +18,8 @@ class AccentDividerModule extends BaseDividerModule {
   const AccentDividerModule({
     required Color accentColor,
     required Color subtleColor,
-  })  : _accentColor = accentColor,
-        _subtleColor = subtleColor;
+  }) : _accentColor = accentColor,
+       _subtleColor = subtleColor;
 
   /// Herding style - gold accent with subtle background
   factory AccentDividerModule.herding() {
@@ -37,16 +37,16 @@ class AccentDividerModule extends BaseDividerModule {
 
   @override
   BoxDecoration? get horizontalDecoration => BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            _accentColor.withValues(alpha: 0.0),
-            _accentColor,
-            _accentColor,
-            _accentColor.withValues(alpha: 0.0),
-          ],
-          stops: const [0.0, 0.2, 0.8, 1.0],
-        ),
-      );
+    gradient: LinearGradient(
+      colors: [
+        _accentColor.withValues(alpha: 0.0),
+        _accentColor,
+        _accentColor,
+        _accentColor.withValues(alpha: 0.0),
+      ],
+      stops: const [0.0, 0.2, 0.8, 1.0],
+    ),
+  );
 
   @override
   BoxDecoration panelBorder({
@@ -59,13 +59,15 @@ class AccentDividerModule extends BaseDividerModule {
     return BoxDecoration(
       border: Border(
         top: top ? BorderSide(color: _subtleColor, width: 1) : BorderSide.none,
-        right:
-            right ? BorderSide(color: _subtleColor, width: 1) : BorderSide.none,
+        right: right
+            ? BorderSide(color: _subtleColor, width: 1)
+            : BorderSide.none,
         bottom: bottom
             ? BorderSide(color: _subtleColor, width: 1)
             : BorderSide.none,
-        left:
-            left ? BorderSide(color: _subtleColor, width: 1) : BorderSide.none,
+        left: left
+            ? BorderSide(color: _subtleColor, width: 1)
+            : BorderSide.none,
       ),
     );
   }

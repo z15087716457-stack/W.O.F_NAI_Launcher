@@ -30,12 +30,6 @@ class PromptEditorToolbar extends StatelessWidget {
   /// 工具栏配置
   final PromptEditorToolbarConfig config;
 
-  /// 随机按钮点击回调
-  final VoidCallback? onRandomPressed;
-
-  /// 随机按钮长按回调（用于打开配置）
-  final VoidCallback? onRandomLongPressed;
-
   /// 全屏按钮点击回调
   final VoidCallback? onFullscreenPressed;
 
@@ -54,8 +48,6 @@ class PromptEditorToolbar extends StatelessWidget {
   const PromptEditorToolbar({
     super.key,
     required this.config,
-    this.onRandomPressed,
-    this.onRandomLongPressed,
     this.onFullscreenPressed,
     this.onClearPressed,
     this.onSettingsPressed,
@@ -69,13 +61,12 @@ class PromptEditorToolbar extends StatelessWidget {
     final isCompact = config.compact;
 
     // 紧凑模式下，只显示必要操作（清空）
-    final showRandomButton = config.showRandomButton && !isCompact;
     final showFullscreenButton = config.showFullscreenButton && !isCompact;
     final showClearButton = config.showClearButton;
     final showSettingsButton = config.showSettingsButton && !isCompact;
 
     // 检查是否有任何按钮需要显示
-    final hasAnyButton = showRandomButton ||
+    final hasAnyButton =
         showFullscreenButton ||
         showClearButton ||
         showSettingsButton ||
@@ -92,9 +83,6 @@ class PromptEditorToolbar extends StatelessWidget {
         // 前置自定义按钮
         if (leadingActions != null) ...leadingActions!,
 
-        // 随机按钮（次要操作，紧凑模式隐藏）
-        if (showRandomButton) _buildRandomButton(context, theme, isCompact),
-
         // 全屏按钮（次要操作，紧凑模式隐藏）
         if (showFullscreenButton)
           _buildFullscreenButton(context, theme, isCompact),
@@ -108,36 +96,6 @@ class PromptEditorToolbar extends StatelessWidget {
         // 后置自定义按钮
         if (trailingActions != null) ...trailingActions!,
       ],
-    );
-  }
-
-  /// 构建随机按钮
-  Widget _buildRandomButton(
-    BuildContext context,
-    ThemeData theme,
-    bool isCompact,
-  ) {
-    final iconSize = isCompact ? _compactIconSize : _standardIconSize;
-    final l10n = AppLocalizations.of(context)!;
-
-    return GestureDetector(
-      onLongPress: onRandomLongPressed,
-      child: IconButton(
-        icon: Icon(
-          Icons.casino_outlined,
-          size: iconSize,
-          color: onRandomPressed != null
-              ? theme.colorScheme.primary
-              : theme.colorScheme.onSurface.withValues(alpha: 0.3),
-        ),
-        tooltip: l10n.toolbar_randomPrompt,
-        onPressed: onRandomPressed,
-        visualDensity: VisualDensity.compact,
-        constraints: isCompact
-            ? const BoxConstraints(minWidth: 32, minHeight: 32)
-            : null,
-        padding: isCompact ? const EdgeInsets.all(4) : null,
-      ),
     );
   }
 
@@ -161,8 +119,9 @@ class PromptEditorToolbar extends StatelessWidget {
       tooltip: l10n.toolbar_fullscreenEdit,
       onPressed: onFullscreenPressed,
       visualDensity: VisualDensity.compact,
-      constraints:
-          isCompact ? const BoxConstraints(minWidth: 32, minHeight: 32) : null,
+      constraints: isCompact
+          ? const BoxConstraints(minWidth: 32, minHeight: 32)
+          : null,
       padding: isCompact ? const EdgeInsets.all(4) : null,
     );
   }
@@ -191,8 +150,9 @@ class PromptEditorToolbar extends StatelessWidget {
       tooltip: l10n.toolbar_clear,
       onPressed: onClearPressed,
       visualDensity: VisualDensity.compact,
-      constraints:
-          isCompact ? const BoxConstraints(minWidth: 32, minHeight: 32) : null,
+      constraints: isCompact
+          ? const BoxConstraints(minWidth: 32, minHeight: 32)
+          : null,
       padding: isCompact ? const EdgeInsets.all(4) : null,
     );
   }
@@ -219,8 +179,9 @@ class PromptEditorToolbar extends StatelessWidget {
       enabled: onClearPressed != null,
       offset: Offset(0, menuOffset),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      constraints:
-          isCompact ? const BoxConstraints(minWidth: 32, minHeight: 32) : null,
+      constraints: isCompact
+          ? const BoxConstraints(minWidth: 32, minHeight: 32)
+          : null,
       padding: isCompact ? const EdgeInsets.all(4) : const EdgeInsets.all(8),
       itemBuilder: (context) => [
         PopupMenuItem<bool>(

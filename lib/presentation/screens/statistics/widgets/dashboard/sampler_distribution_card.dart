@@ -10,10 +10,7 @@ import '../charts/parameter_distribution_bar.dart';
 class SamplerDistributionCard extends StatelessWidget {
   final GalleryStatistics stats;
 
-  const SamplerDistributionCard({
-    super.key,
-    required this.stats,
-  });
+  const SamplerDistributionCard({super.key, required this.stats});
 
   @override
   Widget build(BuildContext context) {

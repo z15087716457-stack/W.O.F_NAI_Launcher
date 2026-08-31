@@ -40,10 +40,7 @@ class GeminiGenerateContentAdapter extends PromptAssistantProviderAdapter {
           ],
         },
         'contents': [
-          {
-            'role': 'user',
-            'parts': _parts(request.userParts),
-          },
+          {'role': 'user', 'parts': _parts(request.userParts)},
         ],
       },
       options: Options(
@@ -81,8 +78,9 @@ class GeminiGenerateContentAdapter extends PromptAssistantProviderAdapter {
 
   String _resolveGenerateEndpoint(ProviderConfig provider, String model) {
     final base = _resolveGeminiRoot(provider);
-    final normalizedModel =
-        model.startsWith('models/') ? model : 'models/$model';
+    final normalizedModel = model.startsWith('models/')
+        ? model
+        : 'models/$model';
     return '$base/$normalizedModel:generateContent';
   }
 

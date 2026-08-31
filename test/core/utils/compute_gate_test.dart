@@ -14,8 +14,9 @@ void main() {
 
       final Future<void> first = gate.run(() async {
         activeTasks++;
-        maxActiveTasks =
-            activeTasks > maxActiveTasks ? activeTasks : maxActiveTasks;
+        maxActiveTasks = activeTasks > maxActiveTasks
+            ? activeTasks
+            : maxActiveTasks;
         firstStarted.complete();
         await releaseFirst.future;
         activeTasks--;
@@ -25,8 +26,9 @@ void main() {
 
       final Future<void> second = gate.run(() async {
         activeTasks++;
-        maxActiveTasks =
-            activeTasks > maxActiveTasks ? activeTasks : maxActiveTasks;
+        maxActiveTasks = activeTasks > maxActiveTasks
+            ? activeTasks
+            : maxActiveTasks;
         activeTasks--;
       });
 

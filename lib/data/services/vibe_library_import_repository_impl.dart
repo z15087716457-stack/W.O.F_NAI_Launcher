@@ -23,7 +23,8 @@ class VibeLibraryNotifierImportRepository
     String? categoryId,
     List<String>? tags,
     VibeLibraryEntry? replaceEntry,
-  })? onSaveBundleEntry;
+  })?
+  onSaveBundleEntry;
 
   @override
   Future<List<VibeLibraryEntry>> getAllEntries() async {

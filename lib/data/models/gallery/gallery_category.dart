@@ -76,10 +76,7 @@ class GalleryCategory with _$GalleryCategory {
 
   /// 更新名称
   GalleryCategory updateName(String newName) {
-    return copyWith(
-      name: newName.trim(),
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(name: newName.trim(), updatedAt: DateTime.now());
   }
 
   /// 移动到新父分类
@@ -93,18 +90,12 @@ class GalleryCategory with _$GalleryCategory {
 
   /// 更新文件夹路径
   GalleryCategory updateFolderPath(String newFolderPath) {
-    return copyWith(
-      folderPath: newFolderPath,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(folderPath: newFolderPath, updatedAt: DateTime.now());
   }
 
   /// 更新图片数量
   GalleryCategory updateImageCount(int count) {
-    return copyWith(
-      imageCount: count,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(imageCount: count, updatedAt: DateTime.now());
   }
 }
 
@@ -213,12 +204,10 @@ extension GalleryCategoryListExtension on List<GalleryCategory> {
 
   /// 更新排序顺序
   List<GalleryCategory> reindex() {
-    return asMap()
-        .entries
-        .map((e) => e.value.copyWith(
-              sortOrder: e.key,
-              updatedAt: DateTime.now(),
-            ),)
+    return asMap().entries
+        .map(
+          (e) => e.value.copyWith(sortOrder: e.key, updatedAt: DateTime.now()),
+        )
         .toList();
   }
 

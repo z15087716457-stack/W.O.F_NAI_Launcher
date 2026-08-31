@@ -67,11 +67,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        icon: const Icon(
-          Icons.refresh_rounded,
-          color: Colors.green,
-          size: 48,
-        ),
+        icon: const Icon(Icons.refresh_rounded, color: Colors.green, size: 48),
         title: Text(context.l10n.galleryCache_rescanTitle),
         content: Text(context.l10n.galleryCache_rescanContent),
         actions: [
@@ -245,8 +241,9 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
                 LinearProgressIndicator(
                   value: _scanProgress,
                   backgroundColor: colorScheme.surfaceContainerHighest,
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(colorScheme.primary),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    colorScheme.primary,
+                  ),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 if (_totalCount > 0) ...[
@@ -272,8 +269,10 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
                   ),
                 )
               : Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -289,11 +288,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.refresh,
-                        size: 16,
-                        color: colorScheme.primary,
-                      ),
+                      Icon(Icons.refresh, size: 16, color: colorScheme.primary),
                       const SizedBox(width: 4),
                       Text(
                         context.l10n.galleryCache_scanAction,

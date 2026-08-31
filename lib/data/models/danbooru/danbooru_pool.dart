@@ -61,7 +61,7 @@ class DanbooruPool with _$DanbooruPool {
 
   /// 获取 Pool 类型的显示名称
   String get categoryDisplayName => switch (category) {
-        PoolCategory.series => 'Series',
-        PoolCategory.collection => 'Collection',
-      };
+    PoolCategory.series => 'Series',
+    PoolCategory.collection => 'Collection',
+  };
 }

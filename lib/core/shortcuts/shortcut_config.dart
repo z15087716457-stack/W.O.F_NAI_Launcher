@@ -49,7 +49,26 @@ class ShortcutConfig with _$ShortcutConfig {
   const ShortcutConfig._();
 
   factory ShortcutConfig.fromJson(Map<String, dynamic> json) =>
-      _$ShortcutConfigFromJson(json);
+      _$ShortcutConfigFromJson(_pruneStaleBindings(json));
+
+  /// 版本升级剪枝：过滤已下线快捷键的残留绑定（如旧随机系统快捷键）。
+  /// 未知 context 若不剪掉，会让枚举反序列化抛异常、整份用户快捷键被重置。
+  static Map<String, dynamic> _pruneStaleBindings(Map<String, dynamic> json) {
+    final bindings = json['bindings'];
+    if (bindings is Map<String, dynamic>) {
+      final knownContexts = ShortcutContext.values.map((c) => c.name).toSet();
+      json['bindings'] = Map<String, dynamic>.fromEntries(
+        bindings.entries.where((entry) {
+          if (!DefaultShortcuts.all.containsKey(entry.key)) return false;
+          final value = entry.value;
+          if (value is! Map<String, dynamic>) return false;
+          final context = value['context'];
+          return context is! String || knownContexts.contains(context);
+        }),
+      );
+    }
+    return json;
+  }
 
   /// 创建默认配置
   factory ShortcutConfig.createDefault() {

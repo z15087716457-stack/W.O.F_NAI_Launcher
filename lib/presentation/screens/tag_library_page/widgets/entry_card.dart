@@ -76,17 +76,11 @@ class _EntryCardState extends State<EntryCard>
     );
 
     _elevationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
     );
 
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.02).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
     );
   }
 
@@ -150,8 +144,8 @@ class _EntryCardState extends State<EntryCard>
     final borderColor = widget.isSelected
         ? theme.colorScheme.primary
         : (_isHovering
-            ? theme.colorScheme.primary.withValues(alpha: 0.5)
-            : Colors.transparent);
+              ? theme.colorScheme.primary.withValues(alpha: 0.5)
+              : Colors.transparent);
 
     // 构建卡片主体内容（在GestureDetector内）
     final cardBody = GestureDetector(
@@ -187,10 +181,7 @@ class _EntryCardState extends State<EntryCard>
                       alpha: 0.15 + (0.15 * _elevationAnimation.value),
                     ),
                     blurRadius: 10 + (12 * _elevationAnimation.value),
-                    offset: Offset(
-                      0,
-                      4 + (8 * _elevationAnimation.value),
-                    ),
+                    offset: Offset(0, 4 + (8 * _elevationAnimation.value)),
                   ),
                 ],
               ),
@@ -296,10 +287,7 @@ class _EntryCardState extends State<EntryCard>
       feedback: widget.enableDrag
           ? _buildDragFeedback(theme, entry)
           : const SizedBox.shrink(),
-      childWhenDragging: Opacity(
-        opacity: 0.4,
-        child: cardContent,
-      ),
+      childWhenDragging: Opacity(opacity: 0.4, child: cardContent),
       onDragStarted: () {
         HapticFeedback.mediumImpact();
         _hidePreviewOverlay();
@@ -342,27 +330,18 @@ class _EntryCardState extends State<EntryCard>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.grey.shade700,
-            Colors.grey.shade900,
-          ],
+          colors: [Colors.grey.shade700, Colors.grey.shade900],
         ),
       ),
       child: const Center(
-        child: Icon(
-          Icons.image_outlined,
-          size: 32,
-          color: Colors.white38,
-        ),
+        child: Icon(Icons.image_outlined, size: 32, color: Colors.white38),
       ),
     );
   }
 
   /// 构建轻微暗化遮罩
   Widget _buildDarkenOverlay() {
-    return Container(
-      color: Colors.black.withValues(alpha: 0.35),
-    );
+    return Container(color: Colors.black.withValues(alpha: 0.35));
   }
 
   /// 构建名称显示区域
@@ -481,8 +460,10 @@ class _EntryCardState extends State<EntryCard>
                 top: 8,
                 left: 8,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary,
                     borderRadius: BorderRadius.circular(6),
@@ -516,8 +497,10 @@ class _EntryCardState extends State<EntryCard>
               ),
               // 名称（靠左）
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -613,7 +596,8 @@ class EntryActionIconState extends State<EntryActionIcon> {
               child: Icon(
                 widget.icon,
                 size: 20,
-                color: widget.color ??
+                color:
+                    widget.color ??
                     (widget.isDestructive ? Colors.redAccent : Colors.white),
               ),
             ),
@@ -644,11 +628,7 @@ class _FavoriteIndicator extends StatelessWidget {
           ),
         ],
       ),
-      child: const Icon(
-        Icons.favorite,
-        size: 12,
-        color: Colors.white,
-      ),
+      child: const Icon(Icons.favorite, size: 12, color: Colors.white),
     );
   }
 }
@@ -658,10 +638,7 @@ class _SelectionCheckbox extends StatelessWidget {
   final bool isSelected;
   final VoidCallback? onTap;
 
-  const _SelectionCheckbox({
-    required this.isSelected,
-    this.onTap,
-  });
+  const _SelectionCheckbox({required this.isSelected, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -686,11 +663,7 @@ class _SelectionCheckbox extends StatelessWidget {
           ),
         ),
         child: isSelected
-            ? Icon(
-                Icons.check,
-                size: 14,
-                color: theme.colorScheme.onPrimary,
-              )
+            ? Icon(Icons.check, size: 14, color: theme.colorScheme.onPrimary)
             : null,
       ),
     );
@@ -731,10 +704,7 @@ class EntryPreviewOverlay extends StatelessWidget {
       child: CompositedTransformFollower(
         link: layerLink,
         showWhenUnlinked: false,
-        offset: Offset(
-          showOnRight ? cardSize.width + 8 : -previewWidth - 8,
-          0,
-        ),
+        offset: Offset(showOnRight ? cardSize.width + 8 : -previewWidth - 8, 0),
         child: MouseRegion(
           onExit: (_) => onDismiss(),
           child: Material(
@@ -818,7 +788,8 @@ class EntryPreviewOverlay extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 11,
                                         color: theme
-                                            .colorScheme.onPrimaryContainer,
+                                            .colorScheme
+                                            .onPrimaryContainer,
                                       ),
                                     ),
                                   );
@@ -835,8 +806,9 @@ class EntryPreviewOverlay extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  context.l10n
-                                      .tagLibrary_useCount(entry.useCount),
+                                  context.l10n.tagLibrary_useCount(
+                                    entry.useCount,
+                                  ),
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: theme.colorScheme.outline,

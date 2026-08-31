@@ -80,7 +80,8 @@ class WobblyShapeBorder extends ShapeBorder {
     // Top edge (left to right)
     for (int i = 1; i < pointsPerEdge; i++) {
       final t = i / pointsPerEdge;
-      final x = rect.left +
+      final x =
+          rect.left +
           topLeftRadius +
           (rect.width - topLeftRadius - topRightRadius) * t;
       final y = rect.top + _wobble(random, wobbleAmount);
@@ -99,7 +100,8 @@ class WobblyShapeBorder extends ShapeBorder {
     for (int i = 1; i < pointsPerEdge; i++) {
       final t = i / pointsPerEdge;
       final x = rect.right + _wobble(random, wobbleAmount);
-      final y = rect.top +
+      final y =
+          rect.top +
           topRightRadius +
           (rect.height - topRightRadius - bottomRightRadius) * t;
       path.lineTo(x, y);
@@ -116,7 +118,8 @@ class WobblyShapeBorder extends ShapeBorder {
     // Bottom edge (right to left)
     for (int i = 1; i < pointsPerEdge; i++) {
       final t = i / pointsPerEdge;
-      final x = rect.right -
+      final x =
+          rect.right -
           bottomRightRadius -
           (rect.width - bottomRightRadius - bottomLeftRadius) * t;
       final y = rect.bottom + _wobble(random, wobbleAmount);
@@ -135,7 +138,8 @@ class WobblyShapeBorder extends ShapeBorder {
     for (int i = 1; i < pointsPerEdge; i++) {
       final t = i / pointsPerEdge;
       final x = rect.left + _wobble(random, wobbleAmount);
-      final y = rect.bottom -
+      final y =
+          rect.bottom -
           bottomLeftRadius -
           (rect.height - bottomLeftRadius - topLeftRadius) * t;
       path.lineTo(x, y);
@@ -223,11 +227,6 @@ class WobblyShapeBorder extends ShapeBorder {
   }
 
   @override
-  int get hashCode => Object.hash(
-        wobbleFactor,
-        seed,
-        borderColor,
-        borderWidth,
-        baseRadius,
-      );
+  int get hashCode =>
+      Object.hash(wobbleFactor, seed, borderColor, borderWidth, baseRadius);
 }

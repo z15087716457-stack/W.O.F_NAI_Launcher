@@ -62,15 +62,9 @@ class TagSuggestionNotifier extends _$TagSuggestionNotifier {
       try {
         final apiService = ref.read(naiTagSuggestionApiServiceProvider);
         final suggestions = await apiService.suggestTags(input, model: model);
-        state = state.copyWith(
-          suggestions: suggestions,
-          isLoading: false,
-        );
+        state = state.copyWith(suggestions: suggestions, isLoading: false);
       } catch (e) {
-        state = state.copyWith(
-          isLoading: false,
-          error: e.toString(),
-        );
+        state = state.copyWith(isLoading: false, error: e.toString());
       }
     });
   }

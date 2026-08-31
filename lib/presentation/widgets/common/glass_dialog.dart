@@ -40,8 +40,9 @@ class GlassDialog extends StatelessWidget {
     final theme = Theme.of(context);
 
     final content = ClipRRect(
-      borderRadius:
-          fullScreen ? BorderRadius.zero : DesignTokens.borderRadiusLg,
+      borderRadius: fullScreen
+          ? BorderRadius.zero
+          : DesignTokens.borderRadiusLg,
       child: BackdropFilter(
         filter: ImageFilter.blur(
           sigmaX: DesignTokens.glassBlurRadius,
@@ -52,14 +53,16 @@ class GlassDialog extends StatelessWidget {
           height: height,
           padding: padding ?? const EdgeInsets.all(DesignTokens.spacingMd),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface
-                .withValues(alpha: DesignTokens.glassOpacity),
+            color: theme.colorScheme.surface.withValues(
+              alpha: DesignTokens.glassOpacity,
+            ),
             borderRadius: fullScreen ? null : DesignTokens.borderRadiusLg,
             border: fullScreen
                 ? null
                 : Border.all(
-                    color: theme.colorScheme.outline
-                        .withValues(alpha: DesignTokens.glassBorderOpacity),
+                    color: theme.colorScheme.outline.withValues(
+                      alpha: DesignTokens.glassBorderOpacity,
+                    ),
                   ),
             boxShadow: fullScreen
                 ? null
@@ -151,10 +154,7 @@ class GlassAlertDialog extends StatelessWidget {
             ),
             const SizedBox(height: DesignTokens.spacingSm),
           ],
-          Text(
-            content,
-            style: theme.textTheme.bodyMedium,
-          ),
+          Text(content, style: theme.textTheme.bodyMedium),
           const SizedBox(height: DesignTokens.spacingLg),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,

@@ -18,13 +18,13 @@
   "onlineFav_moveHere": "Move here",
   "onlineFav_removeFavorite": "Unfavorite",
   "onlineFav_favoriteAuthor": "Favorite Author",
+  "onlineFav_unfavoriteAuthor": "Unfavorite author",
   "onlineFav_authorFavorited": "Author favorited",
   "onlineFav_authorUnfavorited": "Author unfavorited",
   "common_confirm": "Confirm",
   "common_continue": "Continue",
   "common_selectAll": "Select All",
   "common_deselectAll": "Deselect All",
-  "common_collapseAll": "Collapse All",
   "common_save": "Save",
   "common_delete": "Delete",
   "common_edit": "Edit",
@@ -40,7 +40,6 @@
   "common_retry": "Retry",
   "common_select": "Select",
   "common_reset": "Reset",
-  "common_search": "Search",
   "common_add": "Add",
   "common_added": "Added",
   "common_new": "New",
@@ -89,7 +88,6 @@
   "common_multiSelect": "Multi-select",
   "common_category": "Category",
   "common_categories": "Categories",
-  "common_items": "items",
   "networkError_connectionTimeout": "Connection timed out. Check your network connection.",
   "networkError_sendTimeout": "Sending timed out. Try again.",
   "networkError_receiveTimeout": "Receiving timed out. Image generation may take longer than expected.",
@@ -117,7 +115,6 @@
   },
   "nav_canvas": "Canvas",
   "nav_onlineGallery": "Online Gallery",
-  "nav_randomConfig": "Random Config",
   "nav_dictionary": "Dictionary (WIP)",
   "nav_discordCommunity": "Discord Community",
   "nav_githubRepo": "GitHub Repository",
@@ -572,8 +569,6 @@
       "error": {}
     }
   },
-  "config_newPreset": "New Preset",
-  "config_deletePreset": "Delete Preset",
   "img2img_title": "Image2Image",
   "img2img_enabled": "Enabled",
   "img2img_sourceImage": "Source Image",
@@ -1164,7 +1159,6 @@
       "error": {}
     }
   },
-  "preset_presetName": "Preset Name",
   "onlineGallery_search": "Search",
   "onlineGallery_popular": "Popular",
   "onlineGallery_favorites": "Favorites",
@@ -1325,6 +1319,8 @@
   "onlineGallery_aiTagRankingProcessing": "The ranking is being generated. Please try again shortly.",
   "onlineGallery_aiTagNaiOnly": "NAI only",
   "onlineGallery_aiTagModelVersion": "Model version",
+  "onlineGallery_viewAuthor": "View this author",
+  "onlineGallery_returnFromAuthor": "Return to previous gallery position",
   "onlineGallery_generationParams": "Generation parameters",
   "onlineGallery_sourceConfigUnavailable": "Could not load source configuration. Check your connection and retry.",
   "onlineGallery_sourceRateLimited": "Too many requests. Please try again later.",
@@ -1420,13 +1416,14 @@
   "tagCategory_meta": "Meta",
   "tagCategory_general": "General",
   "qualityTags_label": "Quality",
-  "transparentBackground_label": "Transparent BG",
   "transparentBackground_tooltip": "Adds \"transparent background\" to the prompt and generates images with an alpha channel (V5 only)",
   "qualityTags_positive": "Quality (Prompt)",
   "qualityTags_negative": "Quality (Undesired Content)",
   "qualityTags_disabled": "Quality tags disabled\nClick to enable",
   "qualityTags_addToEnd": "Add to prompt end:",
   "qualityTags_naiDefault": "NAI Default",
+  "qualityTags_standard": "Standard",
+  "qualityTags_light": "Light",
   "qualityTags_none": "None",
   "qualityTags_addFromLibrary": "Add from Library",
   "qualityTags_selectFromLibrary": "Select Quality Tag Entry",
@@ -1441,8 +1438,6 @@
   "ucPreset_nsfwHint": "💡 To generate adult content, add nsfw to your prompt. The nsfw tag will be auto-removed from Undesired Content",
   "ucPreset_addFromLibrary": "Add from Library",
   "ucPreset_selectFromLibrary": "Select UC Entry",
-  "randomMode_enabledTip": "Random mode enabled\nAuto-randomize prompt after each generation",
-  "randomMode_disabledTip": "Random mode\nClick to auto-randomize prompts on generation",
   "batchSize_title": "Batch Size",
   "batchSize_tooltip": "{count} images per request",
   "@batchSize_tooltip": {
@@ -1495,7 +1490,6 @@
   "warmup_loadingTranslation": "Loading translation data...",
   "warmup_initUnifiedDatabase": "Initializing tag database...",
   "warmup_initTagSystem": "Initializing tag system...",
-  "warmup_loadingPromptConfig": "Loading prompt config...",
   "warmup_imageEditor": "Initializing image editor...",
   "warmup_database": "Loading recent history...",
   "warmup_network": "Checking network connection...",
@@ -1582,8 +1576,6 @@
   "characterEditor_addFromLibrary": "Library",
   "characterEditor_moveUp": "Move Up",
   "characterEditor_moveDown": "Move Down",
-  "toolbar_randomPrompt": "Random Prompt",
-  "randomPromptToolsHiddenHint": "Random prompt tools are hidden in Settings",
   "toolbar_fullscreenEdit": "Fullscreen Edit",
   "toolbar_clear": "Clear",
   "toolbar_confirmClear": "Confirm Clear",
@@ -1606,57 +1598,30 @@
     }
   },
   "characterTooltip_viewFullConfig": "Click for full configuration",
-  "tagLibrary_generatedCharacters": "Generated {count} characters",
   "@tagLibrary_generatedCharacters": {
     "placeholders": {
       "count": {}
     }
   },
-  "tagLibrary_generateFailed": "Generation failed: {error}",
   "@tagLibrary_generateFailed": {
     "placeholders": {
       "error": {}
     }
   },
-  "randomMode_title": "Select Random Mode",
-  "randomMode_naiOfficial": "Official Mode",
-  "randomMode_custom": "Custom Mode",
-  "randomMode_hybrid": "Hybrid Mode",
-  "randomMode_naiOfficialDesc": "Replicate NovelAI official random algorithm",
-  "randomMode_customDesc": "Generate using custom presets",
-  "randomMode_hybridDesc": "Combine official algorithm with custom presets",
-  "randomMode_naiIndicator": "NAI",
-  "randomMode_customIndicator": "Custom",
-  "naiMode_noTags": "No tags",
-  "naiAlgorithm_characterCount": "Character Count Distribution",
   "naiAlgorithm_mainPrompt": "Main Prompt",
-  "tagGroup_tagCount": "{count} tags",
   "@tagGroup_tagCount": {
     "placeholders": {
       "count": {}
     }
   },
-  "addGroup_tagGroupTab": "Tag Group",
   "addGroup_displayNameLabel": "Display Name (Optional)",
   "addGroup_targetCategoryLabel": "Target Category",
-  "addGroup_poolTab": "Danbooru Pool",
   "globalSettings_saveFailed": "Save failed: {error}",
   "@globalSettings_saveFailed": {
     "placeholders": {
       "error": {}
     }
   },
-  "globalSettings_category_hairColor": "Hair Color",
-  "globalSettings_category_eyeColor": "Eye Color",
-  "globalSettings_category_hairStyle": "Hair Style",
-  "globalSettings_category_expression": "Expression",
-  "globalSettings_category_pose": "Pose",
-  "globalSettings_category_clothing": "Clothing",
-  "globalSettings_category_accessory": "Accessory",
-  "globalSettings_category_bodyFeature": "Body Feature",
-  "globalSettings_category_background": "Background",
-  "globalSettings_category_scene": "Scene",
-  "globalSettings_category_style": "Style",
   "nav_generate": "Generate",
   "nav_gallery": "Gallery",
   "nav_settings": "Settings",
@@ -1734,300 +1699,104 @@
     }
   },
   "time_never_synced": "Never synced",
-  "preset_resetToDefault": "Reset to Default",
-  "newPresetDialog_title": "Create New Preset",
-  "newPresetDialog_blank": "Completely Blank",
-  "newPresetDialog_blankDesc": "Create preset from scratch with no preset content",
-  "newPresetDialog_template": "Based on Default Preset",
-  "newPresetDialog_templateDesc": "Copy all settings from default preset as starting point",
-  "category_dialogTitle": "Create Category",
-  "category_nameHint": "Enter category name",
-  "category_nameRequired": "Name is required",
   "category_selectEmoji": "Select Emoji",
   "category_noRecentEmoji": "No recent emojis",
   "category_searchEmoji": "Search emoji",
-  "characterCountConfig_title": "Character Count Config",
-  "characterCountConfig_weight": "Weight",
-  "characterCountConfig_solo": "Solo",
-  "characterCountConfig_duo": "Duo",
-  "characterCountConfig_trio": "Trio",
-  "characterCountConfig_noHumans": "No Humans",
-  "characterCountConfig_multiPerson": "Multi-Person",
-  "characterCountConfig_customizable": "Customizable",
-  "characterCountConfig_mainPrompt": "Main Prompt",
-  "characterCountConfig_characterPrompt": "Character Prompt",
-  "characterCountConfig_addTagOption": "Add Character Tag",
-  "characterCountConfig_addMultiPersonCombo": "Add Multi-Person Combo",
-  "characterCountConfig_displayName": "Display Name",
-  "characterCountConfig_displayNameHint": "e.g., Trap",
-  "characterCountConfig_mainPromptLabel": "Main Prompt Tags",
-  "characterCountConfig_mainPromptHint": "e.g., solo, 2girls, 1girl 1boy",
-  "characterCountConfig_personCount": "Person Count:",
-  "characterCountConfig_slotConfig": "Character Slot Config",
-  "characterCountConfig_slot": "Slot",
-  "characterCountConfig_customSlots": "Custom Slots",
-  "characterCountConfig_customSlotsTitle": "Character Slot Management",
-  "characterCountConfig_customSlotsDesc": "Add or remove available character slot options",
-  "characterCountConfig_addSlotHint": "e.g., 1trap, 1futanari",
-  "characterCountConfig_slotExists": "This slot already exists",
-  "randomManager_algorithmConfig": "Algorithm Config",
-  "randomManager_characterCountWeight": "Character Count Weight",
-  "randomManager_genderWeight": "Gender Weight",
-  "randomManager_globalSettings": "Global Settings",
-  "randomManager_enableSeasonalWordlists": "Enable Seasonal Wordlists",
-  "randomManager_enableSeasonalWordlistsDesc": "Wordlists for Christmas, Halloween, and other special dates",
-  "randomManager_globalEmphasisProbability": "Global Emphasis Probability",
-  "randomManager_soloGenderOptions": "Solo Gender Options",
-  "randomManager_femaleShort": "F",
-  "randomManager_maleShort": "M",
-  "randomManager_other": "Other",
-  "randomManager_tagGroupList": "Tag Groups",
-  "randomManager_deleteTagGroupTitle": "Delete Tag Group",
-  "randomManager_deleteTagGroupConfirm": "Delete tag group \"{name}\"? This action cannot be undone.",
   "@randomManager_deleteTagGroupConfirm": {
     "placeholders": {
       "name": {}
     }
   },
-  "randomManager_tagGroupCount": "{count} tag groups",
   "@randomManager_tagGroupCount": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_categories": "Categories",
-  "randomManager_tagGroups": "Tag Groups",
-  "randomManager_tags": "Tags",
-  "randomManager_addTagGroup": "Add Tag Group",
-  "randomManager_locked": "Locked",
-  "randomManager_addCategory": "Add Category",
-  "randomManager_noCategories": "No categories",
-  "randomManager_noCategoriesHint": "Click \"Add Category\" to start configuring",
-  "randomManager_globalPeopleSettings": "Global Character Settings",
-  "randomManager_closePreview": "Close preview",
-  "randomManager_importPreset": "Import Preset",
-  "randomManager_importPresetSubtitle": "Import random config preset from JSON text",
-  "randomManager_exportCurrentPreset": "Export Current Preset",
-  "randomManager_noPresetSelected": "No preset selected",
-  "randomManager_selectPresetFirst": "Please select a preset first",
-  "randomManager_defaultPresetReadonly": "Default presets are read-only. Create or copy a custom preset first.",
-  "randomManager_presetImported": "Imported preset \"{name}\"",
   "@randomManager_presetImported": {
     "placeholders": {
       "name": {}
     }
   },
-  "randomManager_defaultPresetV4": "Default Mode (V4)",
-  "randomManager_defaultPresetLegacy": "Default Mode (Legacy)",
-  "randomManager_defaultPresetFurry": "Default Mode (Furry)",
-  "randomManager_defaultPresetV4Description": "Random algorithm configuration based on the NAI V4 model, with multi-character support",
-  "randomManager_defaultPresetLegacyDescription": "Random algorithm configuration based on the NAI Legacy model",
-  "randomManager_defaultPresetFurryDescription": "Random algorithm configuration based on the NAI Furry model",
-  "randomManager_defaultPresetOfficialDescription": "Random algorithm configuration based on the NAI official setup",
-  "randomManager_femaleClothing": "Female Clothing",
-  "randomManager_maleClothing": "Male Clothing",
-  "randomManager_generalClothing": "General Clothing",
-  "randomManager_femaleBodyType": "Female Body Type",
-  "randomManager_maleBodyType": "Male Body Type",
-  "randomManager_generalBodyType": "General Body Type",
-  "randomManager_soloFemale": "Female",
-  "randomManager_soloMale": "Male",
-  "randomManager_duoGirls": "Two Girls",
-  "randomManager_duoMixed": "Girl and Boy",
-  "randomManager_duoBoys": "Two Boys",
-  "randomManager_trioGirls": "Three Girls",
-  "randomManager_trioTwoGirlsOneBoy": "Two Girls and One Boy",
-  "randomManager_trioOneGirlTwoBoys": "One Girl and Two Boys",
-  "randomManager_trioBoys": "Three Boys",
-  "randomManager_noHumanScene": "No-Human Scene",
-  "randomManager_presetCreated": "Created preset \"{name}\"",
   "@randomManager_presetCreated": {
     "placeholders": {
       "name": {}
     }
   },
-  "randomManager_deletePresetConfirm": "Delete \"{name}\"? This cannot be undone.",
   "@randomManager_deletePresetConfirm": {
     "placeholders": {
       "name": {}
     }
   },
-  "randomManager_syncCompleted": "Danbooru tags synced",
-  "randomManager_syncFailed": "Sync failed: {error}",
   "@randomManager_syncFailed": {
     "placeholders": {
       "error": {}
     }
   },
-  "randomManager_resetDefaultTitle": "Reset to Default",
-  "randomManager_resetDefaultContent": "Restore the official default configuration.\nCustom tag groups will be kept but disabled.",
-  "randomManager_resetDefaultConfirm": "Reset",
-  "randomManager_resetDefaultDone": "Reset to default configuration",
-  "randomManager_generatePreview": "Generate Preview",
-  "randomManager_importExport": "Import / Export",
-  "randomManager_syncing": "Syncing",
-  "randomManager_syncingWithEllipsis": "Syncing...",
-  "randomManager_syncDanbooruTags": "Sync Danbooru Tags",
-  "randomManager_unknownError": "Unknown error",
-  "randomManager_readOnlyMode": "Read-only Mode",
-  "randomManager_readOnlyTooltip": "The current preset is a default preset, so all configuration items are locked",
-  "randomManager_searchCategoryOrTagGroup": "Search categories or tag groups...",
-  "randomManager_scope": "Scope",
-  "randomManager_global": "Global",
-  "randomManager_private": "Private",
-  "randomManager_status": "Status",
-  "randomManager_enabledOnly": "Enabled only",
-  "randomManager_diyCapable": "Has DIY capabilities",
-  "randomManager_addTagGroupSubtitle": "Add to \"{category}\"",
   "@randomManager_addTagGroupSubtitle": {
     "placeholders": {
       "category": {}
     }
   },
-  "randomManager_tagGroupName": "Tag Group Name",
-  "randomManager_tagGroupNameHint": "Enter tag group name",
-  "randomManager_tagGroupNameRequired": "Please enter a tag group name",
-  "randomManager_customTab": "Custom",
-  "randomManager_tagList": "Tag List",
-  "randomManager_tagListHelp": "One tag per line. Supports tag or tag:weight.",
-  "randomManager_searchTagGroup": "Search Tag Group...",
-  "randomManager_searchPool": "Search Pool...",
-  "randomManager_itemCount": "{count} items",
   "@randomManager_itemCount": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_noMatchingTagGroup": "No matching Tag Groups found",
-  "randomManager_noMatchingPool": "No matching Pools found",
-  "randomManager_cannotLoadPreview": "Unable to load preview",
-  "randomManager_openInDanbooru": "View in Danbooru",
-  "randomManager_editTagGroup": "Edit Tag Group",
-  "randomManager_basicTab": "Basic",
-  "randomManager_tagsTab": "Tags ({count})",
   "@randomManager_tagsTab": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_diyAbilitiesTab": "DIY Capabilities",
-  "randomManager_selectionSingle": "Single",
-  "randomManager_selectionSingleDesc": "Weighted random single pick",
-  "randomManager_selectionAll": "All",
-  "randomManager_selectionAllDesc": "Select all tags",
-  "randomManager_selectionMultipleCount": "Multiple Count",
-  "randomManager_selectionMultipleCountDesc": "Select a specified count",
-  "randomManager_selectionMultipleProbability": "Multiple Probability",
-  "randomManager_selectionMultipleProbabilityDesc": "Evaluate each tag independently",
-  "randomManager_selectionSequential": "Sequential",
-  "randomManager_selectionSequentialDesc": "Keep state across batches",
-  "randomManager_noTags": "No tags",
-  "randomManager_conditionalBranch": "Conditional Branch",
-  "randomManager_conditionalBranchDesc": "Choose different tag subsets based on variable values",
-  "randomManager_dependencyConfig": "Dependency Config",
-  "randomManager_dependencyConfigDesc": "Make count selection depend on other category values",
-  "randomManager_visibilityRules": "Visibility Rules",
-  "randomManager_visibilityRulesDesc": "Decide whether to generate based on composition",
-  "randomManager_timeCondition": "Time Condition",
-  "randomManager_timeConditionDesc": "Enable within a specific date range",
-  "randomManager_postProcessRules": "Post-process Rules",
-  "randomManager_postProcessRulesDesc": "Remove conflicts based on selected tags",
-  "randomManager_emphasisProbability": "Emphasis Probability",
-  "randomManager_probability": "Probability",
-  "randomManager_selectionMode": "Selection Mode",
-  "randomManager_editHint": "{name} (click to edit)",
   "@randomManager_editHint": {
     "placeholders": {
       "name": {}
     }
   },
-  "randomManager_emphasisProbabilityValue": "Emphasis probability: {percent}%",
   "@randomManager_emphasisProbabilityValue": {
     "placeholders": {
       "percent": {}
     }
   },
-  "randomManager_previewGeneration": "Preview Generation",
-  "randomManager_generating": "Generating",
-  "randomManager_generate": "Generate",
-  "randomManager_generationFailed": "Generation Failed",
-  "randomManager_copy": "Copy",
-  "randomManager_regenerate": "Regenerate",
-  "randomManager_copiedToClipboard": "Copied to clipboard",
-  "randomManager_selectPresetRequired": "Please select a preset",
-  "randomManager_characterCountLabel": "{count} characters",
   "@randomManager_characterCountLabel": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_tagCountLabel": "{count} tags",
   "@randomManager_tagCountLabel": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_previewHint": "Click \"Generate\" to preview random tags",
-  "randomManager_generateNow": "Generate Now",
-  "randomManager_batchOperations": "Batch Operations",
-  "randomManager_selectedItems": "{count} selected",
   "@randomManager_selectedItems": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_totalItems": "{count} total",
   "@randomManager_totalItems": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_enabledItems": "Enabled {count} items",
   "@randomManager_enabledItems": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_disabledItems": "Disabled {count} items",
   "@randomManager_disabledItems": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_batchDeleteTitle": "Batch Delete",
-  "randomManager_batchDeleteContent": "Delete {count} selected items? This action cannot be undone.",
   "@randomManager_batchDeleteContent": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_deletedItems": "Deleted {count} items",
   "@randomManager_deletedItems": {
     "placeholders": {
       "count": {}
     }
   },
-  "randomManager_invertSelection": "Invert Selection",
-  "randomManager_moreActions": "More Actions",
-  "randomManager_enableSelected": "Enable Selected",
-  "randomManager_disableSelected": "Disable Selected",
-  "randomManager_deleteSelected": "Delete Selected",
-  "randomManager_noHistory": "No history",
-  "randomManager_operationHistory": "Operation History",
-  "randomManager_keyboardShortcuts": "Keyboard Shortcuts",
-  "randomManager_generalShortcuts": "General",
-  "randomManager_presetActions": "Preset Actions",
-  "randomManager_selectionActions": "Selection Actions",
-  "randomManager_closeWindow": "Close Window",
-  "randomManager_refreshOrSync": "Refresh / Sync",
-  "gender_female": "Female",
-  "gender_male": "Male",
-  "scope_global": "Main",
-  "scope_globalTooltip": "Prompt will appear in main prompt area\nSuitable for: background, scene, style, etc.",
-  "scope_character": "Char",
-  "scope_characterTooltip": "Prompt will only appear in character prompts\nGenerated separately for each character\nSuitable for: hair color, eye color, clothing, expression, etc.",
-  "scope_all": "Both",
-  "scope_allTooltip": "Prompt appears in both main and character prompts\nSuitable for: pose, interaction, and other universal tags",
   "vibeNoEncodingWarning": "This image has no pre-encoded data",
   "vibeWillCostAnlas": "Encoding will cost {count} Anlas",
   "@vibeWillCostAnlas": {
@@ -2692,7 +2461,6 @@
       }
     }
   },
-  "statistics_chartTopTags": "Top Tags",
   "statistics_chartAspectRatio": "Aspect Ratio Distribution",
   "statistics_chartActivityHeatmap": "Activity Heatmap",
   "statistics_chartHourlyDistribution": "Hourly Distribution",
@@ -3311,8 +3079,6 @@
   "tagLibrary_adjustDisplayRange": "Adjust Display Range",
   "tagLibrary_adjustThumbnailTitle": "Adjust Thumbnail Display Range",
   "tagLibrary_dragToMove": "Drag to move, scroll or pinch to zoom",
-  "settings_showRandomPromptTools": "Show random prompt tools",
-  "settings_showRandomPromptToolsSubtitle": "Show the Random Prompt button and Random Mode toggle on the generation page",
   "settings_enablePromptWeightScroll": "Adjust prompt weight with mouse wheel",
   "settings_enablePromptWeightScrollSubtitle": "When prompt text is selected, use the wheel only to adjust its weight and suppress other scroll actions.",
   "unit_seconds": "seconds",
@@ -3321,12 +3087,7 @@
   "settings_notificationCustomSound": "Custom Sound",
   "settings_notificationSelectSound": "Select Sound",
   "settings_notificationResetSound": "Reset to Default",
-  "categoryConfiguration": "Category Configuration",
   "resetToDefault": "Reset to Default",
-  "resetToDefaultTooltip": "Reset to default configuration",
-  "toggleGroupEnabled": "Toggle group enabled state",
-  "diyNotAvailableForDefault": "DIY not available for default preset",
-  "diyNotAvailableHint": "Please copy to a custom preset to edit",
   "statistics_heatmapLess": "Less",
   "statistics_heatmapMore": "More",
   "statistics_heatmapActivities": "{count} activities",
@@ -3498,7 +3259,6 @@
     }
   },
   "metadataImport_noDataFound": "No NovelAI metadata found",
-  "metadataImport_noParamsSelected": "No parameters selected",
   "metadataImport_appliedCount": "Applied {count} parameters",
   "@metadataImport_appliedCount": {
     "placeholders": {
@@ -3515,13 +3275,11 @@
   "shortcut_context_gallery": "Gallery List",
   "shortcut_context_viewer": "Image Viewer",
   "shortcut_context_tag_library": "Tag Library",
-  "shortcut_context_random_config": "Random Config",
   "shortcut_context_settings": "Settings",
   "shortcut_context_input": "Input Field",
   "shortcut_action_navigate_to_generation": "Generation Page",
   "shortcut_action_navigate_to_local_gallery": "Local Gallery",
   "shortcut_action_navigate_to_online_gallery": "Online Gallery",
-  "shortcut_action_navigate_to_random_config": "Random Config",
   "shortcut_action_navigate_to_tag_library": "Tag Library",
   "shortcut_action_navigate_to_statistics": "Statistics",
   "shortcut_action_navigate_to_settings": "Settings",
@@ -3529,7 +3287,6 @@
   "shortcut_action_generation_prev_image": "Previous preview (linked history)",
   "shortcut_action_generation_next_image": "Next preview (linked history)",
   "shortcut_action_cancel_generation": "Cancel Generation",
-  "shortcut_action_random_prompt": "Random Prompt",
   "shortcut_action_clear_prompt": "Clear Prompt",
   "shortcut_action_toggle_prompt_mode": "Toggle Prompt Mode",
   "shortcut_action_open_tag_library": "Open Tag Library",
@@ -3570,13 +3327,6 @@
   "shortcut_action_batch_copy_tags": "Batch Copy Tags",
   "shortcut_action_send_to_home": "Send to Home",
   "shortcut_action_exit_selection_mode": "Exit Selection Mode",
-  "shortcut_action_sync_danbooru": "Sync Danbooru",
-  "shortcut_action_generate_preview": "Generate Preview",
-  "shortcut_action_search_presets": "Search Presets",
-  "shortcut_action_new_preset": "New Preset",
-  "shortcut_action_duplicate_preset": "Duplicate Preset",
-  "shortcut_action_delete_preset": "Delete Preset",
-  "shortcut_action_close_config": "Close Config",
   "shortcut_action_minimize_to_tray": "Minimize to Tray",
   "shortcut_action_quit_app": "Quit Application",
   "shortcut_action_show_shortcut_help": "Show Shortcut Help",
@@ -5018,13 +4768,9 @@
   "toast_savedToVibeLibrary": "Saved to Vibe Library",
   "toast_saveBundleFailed": "Failed to save bundle",
   "toast_saveEntryFailed": "Failed to save entry",
-  "toast_presetNameRequired": "Enter a preset name",
-  "toast_selectPresetContent": "Select at least one item to save",
-  "toast_presetSaved": "Preset saved successfully",
   "toast_imagePromptCopied": "Prompt copied",
   "toast_imageHasNoPrompt": "This image has no Prompt",
   "toast_useDeleteButton": "Use the delete button in the UI",
-  "toast_imageHasNoMetadata": "This image has no metadata",
   "toast_imageDataUnavailable": "Image data is unavailable and cannot be copied",
   "toast_vibeDataCopied": "Vibe data copied",
   "toast_tagCopied": "Tags copied",
@@ -5166,7 +4912,14 @@
   "detail_modifiedTime": "Modified",
   "detail_fileSize": "File Size",
   "detail_noContent": "(No content)",
-  "detail_savePreset": "Save Preset",
+  "detail_saveBlock": "Save as Block",
+  "saveBlock_title": "Save as Block",
+  "saveBlock_nameLabel": "Block title",
+  "saveBlock_nameHint": "Enter block title",
+  "saveBlock_nameRequired": "Please enter a block title",
+  "saveBlock_selectContent": "Select content to save",
+  "saveBlock_negativeSuffix": "Negative",
+  "saveBlock_saved": "Saved to block library",
   "detail_copyLabel": "Copy {label}",
   "@detail_copyLabel": {
     "placeholders": {
@@ -5184,63 +4937,6 @@
   "pagination_jump": "Jump",
   "pagination_itemsPerPage": "Per page",
   "pagination_itemUnit": "items",
-  "diyGuide_title": "DIY Feature Guide",
-  "diyGuide_subtitle": "Learn advanced features and create your own library",
-  "diyGuide_intro": "This guide explains the core concepts and advanced features of the DIY system, helping you build powerful dynamic prompt libraries.",
-  "diyGuide_exampleLabel": "Example",
-  "diyGuide_hierarchyTitle": "Hierarchy",
-  "diyGuide_hierarchyDescription": "The DIY system uses a three-level category structure to organize prompts for easier management and lookup.",
-  "diyGuide_hierarchyExample": "Category: Character features\n  -> Group: Hairstyle\n      -> Tag: long hair, short hair, twintails",
-  "diyGuide_selectionModeTitle": "Selection Mode",
-  "diyGuide_selectionModeDescription": "Controls how many tags are selected from a group.",
-  "diyGuide_selectionModeExample": "• Random: select one item each time, such as a random hair color\n• All: select every tag in the group, such as a fixed feature set",
-  "diyGuide_weightTitle": "Weight Control",
-  "diyGuide_weightDescription": "Adjusts the influence of specific prompts during generation.",
-  "diyGuide_weightExample": "• Boost: curly brackets around masterpiece = 1.05x weight\n• Strong boost: triple curly brackets around masterpiece = 1.16x weight\n• Weaken: [bad hands] = 0.95x weight",
-  "diyGuide_genderTitle": "Gender Restriction",
-  "diyGuide_genderDescription": "Limits tags to specific character genders to avoid incompatible generated features.",
-  "diyGuide_genderExample": "• Female: only female characters, such as skirt\n• Male: only male characters, such as beard\n• Any: universal, such as T-shirt",
-  "diyGuide_scopeTitle": "Scope",
-  "diyGuide_scopeDescription": "Defines whether a tag applies to the character, background, or the whole image.",
-  "diyGuide_scopeExample": "• Character: character features, such as eyes and hair\n• Background: environment descriptions, such as blue sky and indoors\n• Global: art style and quality tags, such as best quality",
-  "diyGuide_conditionalTitle": "Conditional Branch",
-  "diyGuide_conditionalDescription": "Dynamically chooses later tags based on selected tags or other conditions.",
-  "diyGuide_conditionalExample": "IF selected \"rain\"\n  THEN add \"umbrella\" and \"wet clothes\"\n  ELSE add \"sunny\"",
-  "diyGuide_dependenciesTitle": "Dependencies",
-  "diyGuide_dependenciesDescription": "Creates links between tags so related tags are automatically introduced when one tag is selected.",
-  "diyGuide_dependenciesExample": "Selecting \"JK uniform\" -> automatically adds \"school background\" and \"school bag\"",
-  "diyGuide_visibilityTitle": "Visibility Rules",
-  "diyGuide_visibilityDescription": "Controls when tags are shown in the UI or become active during generation.",
-  "diyGuide_visibilityExample": "Only show the \"magic wand\" option group when the \"magical girl\" category is selected",
-  "diyGuide_timeTitle": "Time Condition",
-  "diyGuide_timeDescription": "Triggers specific tags based on real time or configured simulated time.",
-  "diyGuide_timeExample": "• 06:00-18:00 -> add \"daylight\"\n• 18:00-06:00 -> add \"night\"",
-  "diyGuide_postProcessingTitle": "Post-processing Rules",
-  "diyGuide_postProcessingDescription": "Runs text replacement or cleanup at the final stage of prompt generation.",
-  "diyGuide_postProcessingExample": "Replace every \"blue eyes\" with \"azure eyes\" for a more distinctive description",
-  "diyGuide_emphasisTitle": "Emphasis Probability",
-  "diyGuide_emphasisDescription": "Randomly adds weight syntax to tags to increase output variety.",
-  "diyGuide_emphasisExample": "Set a 30% probability: about 1/3 of outputs use a weighted tag and 2/3 output the plain tag",
-  "naiRules_title": "NAI Random Rules",
-  "naiRules_characterCountProbability": "Character Count Probability",
-  "naiRules_solo": "1 person (Solo)",
-  "naiRules_duo": "2 people (Duo)",
-  "naiRules_trio": "3 people (Trio)",
-  "naiRules_group": "4 people (Group)",
-  "naiRules_genderRules": "Gender Rules",
-  "naiRules_female": "Female",
-  "naiRules_male": "Male",
-  "naiRules_mixed": "Mixed / Other",
-  "naiRules_categoryProbability": "Category Probability",
-  "naiRules_dynamicTagWeightTitle": "Dynamic Tag Weight Adjustment",
-  "naiRules_dynamicTagWeightSubtitle": "Randomly combines multiple dimensions such as action, clothing, expression, and background, then adjusts category weights based on the image theme.",
-  "naiRules_specialMechanisms": "Special Mechanisms",
-  "naiRules_tagStrengthening": "Tag Strengthening",
-  "naiRules_seasonalLibraryTitle": "Seasonal Library",
-  "naiRules_seasonalLibrarySubtitle": "Automatically matches seasonal features, including seasonal clothing, weather, lighting, and atmosphere.",
-  "naiRules_v4CharacterPositioning": "V4 Multi-character Positioning",
-  "naiRules_smartPositionTitle": "Smart Position Assignment",
-  "naiRules_smartPositionSubtitle": "With V4 models, character positioning syntax is used to precisely control multi-character placement.",
   "comfyImport_detectedTitle": "Detected ComfyUI multi-character prompt",
   "comfyImport_characterList": "Character List ({count})",
   "@comfyImport_characterList": {
@@ -5261,9 +4957,6 @@
   "comfyImport_syntaxPipe": "Pipe format",
   "comfyImport_syntaxUnknown": "Unknown syntax",
   "comfyImport_globalPrompt": "Global Prompt",
-  "danbooruPreview_noTagData": "No tag data",
-  "danbooruPreview_noPoolData": "No Pool data",
-  "danbooruPreview_postCount": "{count} posts",
   "@danbooruPreview_postCount": {
     "placeholders": {
       "count": {}
@@ -5593,37 +5286,6 @@
       }
     }
   },
-  "diy_editDependencyTitle": "Edit Dependency",
-  "diy_dependencyTitle": "Dependency Settings",
-  "diy_dependencySubtitle": "Configure dependencies between tag selections",
-  "diy_dependencyType": "Dependency Type",
-  "diy_sourceCategory": "Source Category",
-  "diy_selectSourceCategory": "Select a source category",
-  "diy_sourceCategoryId": "Source Category ID",
-  "diy_enterCategoryId": "Enter a category ID",
-  "diy_mappingRules": "Mapping Rules",
-  "diy_noMappingRules": "No mapping rules",
-  "diy_deleteRule": "Delete rule",
-  "diy_defaultValue": "Default Value",
-  "diy_defaultValueHint": "Used when no mapping rule matches",
-  "diy_enableDependency": "Enable Dependency",
-  "diy_enableDependencyHint": "This dependency is ignored while disabled",
-  "diy_addMappingRule": "Add Mapping Rule",
-  "diy_sourceValue": "Source Value",
-  "diy_sourceValueHint": "For example: 1, 2, 3",
-  "diy_resultValue": "Result Value",
-  "diy_resultValueHint": "For example: 0-3, 0-2, 0-1",
-  "diy_dependencyCount": "Count",
-  "diy_dependencyExists": "Exists",
-  "diy_dependencyValue": "Value",
-  "diy_dependencyExcludes": "Excludes",
-  "diy_dependencyCountDescription": "Use the selected count in the source category to determine the result count",
-  "diy_dependencyExistsDescription": "Apply only when the source category has at least one selected tag",
-  "diy_dependencyValueDescription": "Depend on a specific selected tag value in the source category",
-  "diy_dependencyExcludesDescription": "Do not apply when the source category has a selected tag",
-  "diy_editConditionalTitle": "Edit Conditional Branches",
-  "diy_conditionalDefaultName": "Conditional Branches",
-  "diy_branchDefaultName": "Branch {index}",
   "@diy_branchDefaultName": {
     "placeholders": {
       "index": {
@@ -5631,9 +5293,6 @@
       }
     }
   },
-  "diy_conditionalTitle": "Conditional Branches",
-  "diy_conditionalSubtitle": "Choose a branch by probability",
-  "diy_branchCount": "{count} branches",
   "@diy_branchCount": {
     "placeholders": {
       "count": {
@@ -5641,9 +5300,6 @@
       }
     }
   },
-  "diy_noConditionalBranches": "No conditional branches",
-  "diy_noConditionalBranchesHint": "Add branches to build conditional selection logic",
-  "diy_conditionCount": "{count} conditions",
   "@diy_conditionCount": {
     "placeholders": {
       "count": {
@@ -5651,9 +5307,6 @@
       }
     }
   },
-  "diy_deleteBranch": "Delete branch",
-  "diy_addBranch": "Add Branch",
-  "diy_editBranch": "Edit: {name}",
   "@diy_editBranch": {
     "placeholders": {
       "name": {
@@ -5661,10 +5314,6 @@
       }
     }
   },
-  "diy_branchName": "Branch Name",
-  "diy_probability": "Probability",
-  "diy_enableBranch": "Enable This Branch",
-  "diy_ruleDefaultName": "Rule {index}",
   "@diy_ruleDefaultName": {
     "placeholders": {
       "index": {
@@ -5672,7 +5321,6 @@
       }
     }
   },
-  "diy_ruleCount": "{count} rules",
   "@diy_ruleCount": {
     "placeholders": {
       "count": {
@@ -5680,31 +5328,6 @@
       }
     }
   },
-  "diy_addRule": "Add Rule",
-  "diy_editRule": "Edit Rule",
-  "diy_ruleName": "Rule Name",
-  "diy_enableRule": "Enable This Rule",
-  "diy_postProcessTitle": "Post-processing Rules",
-  "diy_postProcessSubtitle": "Automatically resolve tag conflicts",
-  "diy_sleepingRule": "Sleeping Rule",
-  "diy_sleepingRuleDescription": "Remove eye-color descriptions when the character is sleeping",
-  "diy_mermaidRule": "Mermaid Rule",
-  "diy_mermaidRuleDescription": "Remove legwear descriptions for mermaids, centaurs, lamias, and similar characters",
-  "diy_presetRules": "Preset Rules",
-  "diy_noPostProcessRules": "No post-processing rules",
-  "diy_noPostProcessRulesHint": "Add rules to resolve tag conflicts automatically",
-  "diy_actionType": "Action Type",
-  "diy_triggerTags": "Trigger Tags",
-  "diy_commaSeparatedTagsHint": "Comma-separated tag list",
-  "diy_targetCategories": "Target Categories",
-  "diy_commaSeparatedCategoryIdsHint": "Comma-separated category ID list",
-  "diy_targetTags": "Target Tags",
-  "diy_actionRemoveTags": "Remove Tags",
-  "diy_actionReplaceTags": "Replace Tags",
-  "diy_actionAddTags": "Add Tags",
-  "diy_actionRemoveCategories": "Remove Categories",
-  "diy_noTriggers": "No triggers",
-  "diy_actionSummary": "When [{triggers}] matches: {action}",
   "@diy_actionSummary": {
     "placeholders": {
       "triggers": {
@@ -5715,11 +5338,6 @@
       }
     }
   },
-  "diy_characterPositionTitle": "Character Position",
-  "diy_characterPositionSubtitle": "Visually edit character positions",
-  "diy_addCharacterPosition": "Add Character Position",
-  "diy_addCharacterPositionHint": "Use the button below to add a character position",
-  "diy_characterIndex": "Character {index}",
   "@diy_characterIndex": {
     "placeholders": {
       "index": {
@@ -5727,8 +5345,6 @@
       }
     }
   },
-  "diy_aiPositionChoice": "AI chooses automatically",
-  "diy_positionCoordinates": "Row: {row}%, Column: {column}%",
   "@diy_positionCoordinates": {
     "placeholders": {
       "row": {
@@ -5739,8 +5355,6 @@
       }
     }
   },
-  "diy_customPosition": "Custom",
-  "diy_emphasisPercent": "Emphasis {percent}%",
   "@diy_emphasisPercent": {
     "placeholders": {
       "percent": {
@@ -5748,8 +5362,6 @@
       }
     }
   },
-  "diy_characterCountWeight": "Character Count Weights",
-  "diy_peopleCount": "{count} people",
   "@diy_peopleCount": {
     "placeholders": {
       "count": {
@@ -5757,13 +5369,6 @@
       }
     }
   },
-  "diy_genderProbability": "Gender Probability",
-  "diy_noWeightsConfigured": "No weights configured",
-  "diy_genderOther": "Other",
-  "diy_emphasisTitle": "Global Emphasis",
-  "diy_emphasisSubtitle": "Adjust tag emphasis effects",
-  "diy_emphasisProbability": "Emphasis Probability",
-  "diy_emphasisProbabilityHint": "Each selected tag has a {percent}% chance of receiving emphasis brackets",
   "@diy_emphasisProbabilityHint": {
     "placeholders": {
       "percent": {
@@ -5771,8 +5376,6 @@
       }
     }
   },
-  "diy_bracketCount": "Bracket Layers",
-  "diy_bracketLayers": "{count} layers",
   "@diy_bracketLayers": {
     "placeholders": {
       "count": {
@@ -5780,10 +5383,6 @@
       }
     }
   },
-  "diy_effectPreview": "Effect Preview",
-  "diy_exampleTag": "example tag",
-  "diy_emphasisExplanation": "Emphasis brackets increase tag weight; more layers apply a higher weight",
-  "diy_presetExportFailed": "Failed to export preset: {error}",
   "@diy_presetExportFailed": {
     "placeholders": {
       "error": {
@@ -5791,8 +5390,6 @@
       }
     }
   },
-  "diy_presetJsonRootObject": "The JSON root must be an object",
-  "diy_presetInvalidData": "Invalid preset data: {error}",
   "@diy_presetInvalidData": {
     "placeholders": {
       "error": {
@@ -5800,58 +5397,6 @@
       }
     }
   },
-  "diy_presetExportTitle": "Export Preset",
-  "diy_presetImportTitle": "Import Preset",
-  "diy_unknown": "Unknown",
-  "diy_presetShareHint": "Copy the content below to share it with others",
-  "diy_presetPasteJsonHint": "Paste preset JSON data here...",
-  "diy_presetPreview": "Preset Preview",
-  "diy_name": "Name",
-  "diy_description": "Description",
-  "diy_categoryCount": "Categories",
-  "diy_totalTagCount": "Total Tags",
-  "diy_visibilityTitle": "Visibility Rules",
-  "diy_visibilitySubtitle": "Control category visibility with conditions",
-  "diy_noVisibilityRules": "No visibility rules",
-  "diy_noVisibilityRulesHint": "Add rules to control category visibility from the current composition",
-  "diy_notSet": "Not set",
-  "diy_targetCategory": "Target Category",
-  "diy_conditionType": "Condition Type",
-  "diy_conditionValue": "Condition Value",
-  "diy_conditionValueHint": "Tag name or value",
-  "diy_visibleWhenMatched": "Visible When Matched",
-  "diy_conditionTagExists": "Tag Exists",
-  "diy_conditionTagNotExists": "Tag Does Not Exist",
-  "diy_conditionValueEquals": "Value Equals",
-  "diy_conditionValueNotEquals": "Value Does Not Equal",
-  "diy_conditionValueInList": "Value Is in List",
-  "diy_conditionValueNotInList": "Value Is Not in List",
-  "diy_editTimeConditionTitle": "Edit Time Condition",
-  "diy_timeDefaultName": "Time Condition",
-  "diy_timeTitle": "Time Condition",
-  "diy_timeSubtitle": "Activate within a specific date range",
-  "diy_enableTimeCondition": "Enable Time Condition",
-  "diy_enableTimeConditionHint": "Apply only within the configured date range",
-  "diy_christmas": "Christmas",
-  "diy_christmasDescription": "Christmas tags, active from December 1 through 31",
-  "diy_halloween": "Halloween",
-  "diy_halloweenDescription": "Halloween tags, active from October 1 through 31",
-  "diy_valentinesDay": "Valentine's Day",
-  "diy_valentinesDescription": "Valentine's Day tags, active from February 1 through 14",
-  "diy_presetTemplates": "Preset Templates",
-  "diy_dateRange": "Date Range",
-  "diy_startDate": "Start Date",
-  "diy_endDate": "End Date",
-  "diy_crossYearUnsupported": "Date ranges that cross into a new year are not supported yet",
-  "diy_month": "Month",
-  "diy_day": "Day",
-  "diy_conditionName": "Condition Name",
-  "diy_conditionNameHint": "Enter a condition name",
-  "diy_repeatYearly": "Repeat Yearly",
-  "diy_repeatYearlyHint": "Activate automatically during the same date range every year",
-  "diy_currentlyActive": "Currently Active",
-  "diy_inactive": "Inactive",
-  "diy_daysRemaining": "{count} days remaining",
   "@diy_daysRemaining": {
     "placeholders": {
       "count": {
@@ -5859,7 +5404,6 @@
       }
     }
   },
-  "diy_timeRangeSummary": "{name} ({startMonth}/{startDay} - {endMonth}/{endDay})",
   "@diy_timeRangeSummary": {
     "placeholders": {
       "name": {
@@ -5879,7 +5423,6 @@
       }
     }
   },
-  "diy_activeBadge": "ACTIVE",
   "common_optional": "Optional",
   "common_emptyValue": "(Empty)",
   "common_previewLoadFailed": "Failed to load preview",
@@ -5893,10 +5436,6 @@
   "common_maximum": "Maximum",
   "addToLibrary_displayNameHint": "Enter a name to identify this entry",
   "addToLibrary_tagHint": "Enter a tag and press Enter to add it",
-  "newPresetDialog_nameRequired": "Enter a preset name",
-  "newPresetDialog_nameLabel": "Preset Name",
-  "newPresetDialog_nameHint": "Enter a name for the new preset",
-  "newPresetDialog_creationMode": "Creation Method",
   "drop_saveVibeBundle": "Save Vibe Bundle",
   "drop_saveVibeBundleSubtitle": "Save {name} and the other Vibes to the library",
   "@drop_saveVibeBundleSubtitle": {
@@ -5927,9 +5466,6 @@
       }
     }
   },
-  "randomManager_releaseToDelete": "Release to delete",
-  "randomManager_dragHereToDelete": "Drag here to delete",
-  "randomManager_keyboardShortcutsHint": "Keyboard Shortcuts (press ? to view)",
   "localGallery_createFolder": "Create Folder",
   "galleryScan_skipped": "Skipped {count}",
   "@galleryScan_skipped": {
@@ -6057,10 +5593,6 @@
       }
     }
   },
-  "savePreset_title": "Save as Preset",
-  "savePreset_nameHint": "Enter preset name",
-  "savePreset_metadataDescription": "Saved from image metadata",
-  "savePreset_vibeData": "Vibe Data ({count})",
   "@savePreset_vibeData": {
     "placeholders": {
       "count": {
@@ -6216,5 +5748,214 @@
   "autocomplete_statusDisabled": "Off",
   "autocomplete_statusSearching": "Searching",
   "autocomplete_statusTranslating": "Translating",
-  "autocomplete_openSettings": "Open autocomplete and data source settings"
+  "autocomplete_openSettings": "Open autocomplete and data source settings",
+  "nav_promptBlockLibrary": "Prompt Blocks",
+  "promptBlockLibrary_title": "Prompt Blocks",
+  "promptBlockLibrary_folders": "Folders",
+  "promptBlockLibrary_allBlocks": "All blocks",
+  "promptBlockLibrary_rootFolder": "Root / Unfiled",
+  "promptBlockLibrary_unnamedBlock": "Untitled block",
+  "promptBlockPill_missing": "Block deleted",
+  "promptBlockPill_unknown": "Invalid block",
+  "promptBlockLibrary_unnamedFolder": "Untitled folder",
+  "promptBlockLibrary_scope": "Browse",
+  "promptBlockLibrary_searchHint": "Search blocks...",
+  "promptBlockLibrary_newBlock": "New block",
+  "promptBlockLibrary_editBlock": "Edit block",
+  "promptBlockLibrary_newFolder": "New folder",
+  "promptBlockLibrary_newSubfolder": "New subfolder",
+  "promptBlockLibrary_renameFolder": "Rename folder",
+  "promptBlockLibrary_moveToRoot": "Move to root",
+  "promptBlockLibrary_moveToFolder": "Move to folder",
+  "promptBlockLibrary_blockTitle": "Title",
+  "promptBlockLibrary_titleHint": "Block title",
+  "promptBlockLibrary_folder": "Folder",
+  "promptBlockLibrary_folderName": "Folder name",
+  "promptBlockLibrary_folderNameHint": "Folder name",
+  "promptBlockLibrary_blockContent": "Content",
+  "promptBlockLibrary_contentHint": "Plain text content",
+  "promptBlockLibrary_color": "Color",
+  "promptBlockLibrary_icon": "Icon",
+  "promptBlockLibrary_saved": "Saved",
+  "promptBlockLibrary_copied": "Content copied",
+  "promptBlockLibrary_deleted": "Deleted",
+  "promptBlockLibrary_empty": "No prompt blocks yet",
+  "promptBlockLibrary_emptyFolder": "This folder is empty",
+  "promptBlockLibrary_noSearchResults": "No matching blocks",
+  "promptBlockLibrary_tryDifferentSearch": "Try a different search",
+  "promptBlockLibrary_emptyHint": "Create a block to start organizing reusable text",
+  "promptBlockLibrary_loadFailed": "Failed to load prompt blocks: {error}",
+  "@promptBlockLibrary_loadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "promptBlockLibrary_deleteFolderTitle": "Delete folder \"{name}\"?",
+  "@promptBlockLibrary_deleteFolderTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "promptBlockLibrary_deleteFolderDescription": "Choose what to do with blocks inside this folder and its subfolders.",
+  "promptBlockLibrary_moveContentsToRoot": "Move contents to root",
+  "promptBlockLibrary_moveContentsToFolder": "Move contents to another folder",
+  "promptBlockLibrary_destinationFolder": "Destination folder",
+  "promptBlockLibrary_deleteContents": "Delete contents",
+  "promptBlockLibrary_deleteContentsWarning": "This also permanently deletes all blocks in the folder tree.",
+  "promptBlockLibrary_importExport": "Import / Export",
+  "promptBlockLibrary_importTxtFiles": "Import TXT files",
+  "promptBlockLibrary_importFromFolder": "Import from folder…",
+  "promptBlockLibrary_exportLibraryBackup": "Export library backup…",
+  "promptBlockLibrary_importLibraryBackup": "Import library backup…",
+  "promptBlockLibrary_exportBlockAsTxt": "Export as TXT",
+  "promptBlockLibrary_exportTxtDone": "TXT exported",
+  "promptBlockLibrary_exportTxtFailed": "Export failed: {error}",
+  "@promptBlockLibrary_exportTxtFailed": {
+    "placeholders": {
+        "error": {
+          "type": "String"
+        }
+    }
+  },
+  "promptBlockLibrary_importTxtTitle": "Select TXT files",
+  "promptBlockLibrary_txtImportDone": "Imported {created} blocks, skipped {skipped} existing sources",
+  "@promptBlockLibrary_txtImportDone": {
+    "placeholders": {
+        "created": {
+          "type": "int"
+        },
+        "skipped": {
+          "type": "int"
+        }
+    }
+  },
+  "promptBlockLibrary_curationTitle": "Import from folder",
+  "promptBlockLibrary_curationSummary": "{total} TXT files: {created} new · {skipped} unchanged · {changed} changed",
+  "@promptBlockLibrary_curationSummary": {
+    "placeholders": {
+        "total": {
+          "type": "int"
+        },
+        "created": {
+          "type": "int"
+        },
+        "skipped": {
+          "type": "int"
+        },
+        "changed": {
+          "type": "int"
+        }
+    }
+  },
+  "promptBlockLibrary_curationLocalModifiedHint": "{count} blocks were manually edited after import; updating overwrites local edits",
+  "@promptBlockLibrary_curationLocalModifiedHint": {
+    "placeholders": {
+        "count": {
+          "type": "int"
+        }
+    }
+  },
+  "promptBlockLibrary_curationUpdateChanged": "Update changed blocks with file content",
+  "promptBlockLibrary_curationEmpty": "No TXT files in the selected folder",
+  "promptBlockLibrary_curationDone": "Done: {created} created · {updated} updated · {skipped} skipped",
+  "@promptBlockLibrary_curationDone": {
+    "placeholders": {
+        "created": {
+          "type": "int"
+        },
+        "updated": {
+          "type": "int"
+        },
+        "skipped": {
+          "type": "int"
+        }
+    }
+  },
+  "promptBlockLibrary_curationNew": "New",
+  "promptBlockLibrary_curationUnchanged": "Unchanged",
+  "promptBlockLibrary_curationChanged": "Changed",
+  "promptBlockLibrary_curationLocalModified": "Locally modified",
+  "promptBlockLibrary_libraryBackupDone": "Exported backup with {count} blocks",
+  "@promptBlockLibrary_libraryBackupDone": {
+    "placeholders": {
+        "count": {
+          "type": "int"
+        }
+    }
+  },
+  "promptBlockLibrary_libraryImportTitle": "Select library backup",
+  "promptBlockLibrary_libraryBackupInvalid": "Not a valid block library backup",
+  "promptBlockLibrary_libraryImportDone": "Imported {blocks} blocks and {folders} folders, skipped {skipped} existing",
+  "@promptBlockLibrary_libraryImportDone": {
+    "placeholders": {
+        "blocks": {
+          "type": "int"
+        },
+        "folders": {
+          "type": "int"
+        },
+        "skipped": {
+          "type": "int"
+        }
+    }
+  },
+  "promptBlockLibrary_importFailed": "Import failed: {error}",
+  "@promptBlockLibrary_importFailed": {
+    "placeholders": {
+        "error": {
+          "type": "String"
+        }
+    }
+  },
+  "promptBlockLibrary_sourceFile": "Source file",
+  "promptBlockLibrary_importedAt": "Imported at",
+  "promptBlockLibrary_detailedView": "Detailed view",
+  "promptBlockLibrary_compactView": "Compact view",
+  "promptBlockLibrary_reorderFolders": "Reorder folders",
+  "nav_styleExplore": "Style Explore",
+  "styleExplore_recipeListTitle": "Recipes",
+  "styleExplore_recipesEmpty": "No recipes yet. Start a new one, or compose in the editor and \"Save as\".",
+  "styleExplore_noActiveRecipe": "No recipe linked",
+  "styleExplore_unsavedChanges": "Unsaved changes",
+  "styleExplore_save": "Save",
+  "styleExplore_saveAs": "Save as",
+  "styleExplore_preview": "Preview",
+  "styleExplore_positive": "Positive",
+  "styleExplore_negative": "Negative",
+  "styleExplore_newRecipe": "New",
+  "styleExplore_load": "Load",
+  "styleExplore_rename": "Rename",
+  "styleExplore_duplicate": "Duplicate recipe",
+  "styleExplore_deleteRecipe": "Delete",
+  "styleExplore_recipeNameLabel": "Recipe name",
+  "styleExplore_recipeNameHint": "e.g. soft lighting study",
+  "styleExplore_nameRequired": "Name cannot be empty",
+  "styleExplore_recipeSaved": "Saved \"{name}\"",
+  "@styleExplore_recipeSaved": {"placeholders": {"name": {"type": "String"}}},
+  "styleExplore_recipeCreated": "Created \"{name}\"",
+  "@styleExplore_recipeCreated": {"placeholders": {"name": {"type": "String"}}},
+  "styleExplore_recipeLoaded": "Loaded \"{name}\"",
+  "@styleExplore_recipeLoaded": {"placeholders": {"name": {"type": "String"}}},
+  "styleExplore_recipeDuplicated": "Duplicated \"{name}\"",
+  "@styleExplore_recipeDuplicated": {"placeholders": {"name": {"type": "String"}}},
+  "styleExplore_recipeDeleted": "Deleted \"{name}\"",
+  "@styleExplore_recipeDeleted": {"placeholders": {"name": {"type": "String"}}},
+  "styleExplore_operationFailed": "Operation failed",
+  "styleExplore_discardChangesTitle": "Discard unsaved changes?",
+  "styleExplore_discardChangesMessage": "The workspace has unsaved changes. Continuing will discard them.",
+  "styleExplore_discardChangesConfirm": "Continue and discard",
+  "styleExplore_previewTitle": "Prompt preview",
+  "styleExplore_previewEmpty": "(empty)",
+  "styleExplore_copyPositive": "Copy positive",
+  "styleExplore_copyNegative": "Copy negative",
+  "styleExplore_copiedToClipboard": "Copied",
+  "styleExplore_positiveHint": "Compose blocks and text to explore styles",
+  "promptBlockEditor_library": "Block library",
+  "promptBlockEditor_back": "Back to parent folder",
+  "promptBlockEditor_preview": "Preview content",
+  "promptBlockEditor_enable": "Enable block",
+  "promptBlockEditor_disable": "Disable block",
+  "promptBlockEditor_more": "Block actions"
 }

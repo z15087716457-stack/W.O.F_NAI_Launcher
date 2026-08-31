@@ -39,7 +39,10 @@ class DataSourceValidator {
     final manager = DatabaseManager.instance;
 
     if (!manager.isInitialized) {
-      AppLogger.w('Database not initialized, cannot validate', 'DataSourceValidator');
+      AppLogger.w(
+        'Database not initialized, cannot validate',
+        'DataSourceValidator',
+      );
       return const DataSourceStatus(
         danbooruTags: false,
         translations: false,
@@ -50,25 +53,30 @@ class DataSourceValidator {
     Database? db;
     try {
       db = await manager.acquireDatabase();
-    final results = await Future.wait([
-      _validateTable(db, _configs[0]),
-      _validateTable(db, _configs[1]),
-      _validateTable(db, _configs[2]),
-    ]);
+      final results = await Future.wait([
+        _validateTable(db, _configs[0]),
+        _validateTable(db, _configs[1]),
+        _validateTable(db, _configs[2]),
+      ]);
 
-    // 释放数据库连接
-    await manager.releaseDatabase(db);
+      // 释放数据库连接
+      await manager.releaseDatabase(db);
 
-    return DataSourceStatus(
-      danbooruTags: results[0].$1,
-      translations: results[1].$1,
-      cooccurrences: results[2].$1,
-      danbooruTagCount: results[0].$2,
-      translationCount: results[1].$2,
-      cooccurrenceCount: results[2].$2,
-    );
+      return DataSourceStatus(
+        danbooruTags: results[0].$1,
+        translations: results[1].$1,
+        cooccurrences: results[2].$1,
+        danbooruTagCount: results[0].$2,
+        translationCount: results[1].$2,
+        cooccurrenceCount: results[2].$2,
+      );
     } catch (e) {
-      AppLogger.e('Failed to validate data sources', e, null, 'DataSourceValidator');
+      AppLogger.e(
+        'Failed to validate data sources',
+        e,
+        null,
+        'DataSourceValidator',
+      );
       if (db != null) {
         await manager.releaseDatabase(db);
       }
@@ -83,10 +91,15 @@ class DataSourceValidator {
   Future<(bool, int)> _validateTable(Database db, (String, int) config) async {
     final (tableName, minCount) = config;
     try {
-      final result = await db.rawQuery('SELECT COUNT(*) as count FROM $tableName');
+      final result = await db.rawQuery(
+        'SELECT COUNT(*) as count FROM $tableName',
+      );
       final count = result.first['count'] as int? ?? 0;
       final isValid = count >= minCount;
-      AppLogger.i('$tableName count: $count (valid: $isValid)', 'DataSourceValidator');
+      AppLogger.i(
+        '$tableName count: $count (valid: $isValid)',
+        'DataSourceValidator',
+      );
       return (isValid, count);
     } catch (e) {
       AppLogger.w('Failed to validate $tableName: $e', 'DataSourceValidator');

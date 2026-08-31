@@ -35,10 +35,7 @@ class GallerySortStore {
   /// 保存排序（字段 + 方向）。
   Future<void> save(GallerySort sort) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      StorageKeys.localGallerySortField,
-      sort.field.name,
-    );
+    await prefs.setString(StorageKeys.localGallerySortField, sort.field.name);
     await prefs.setString(
       StorageKeys.localGallerySortDirection,
       sort.direction.name,

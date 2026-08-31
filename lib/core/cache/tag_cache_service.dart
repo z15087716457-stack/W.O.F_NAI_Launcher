@@ -36,11 +36,11 @@ class CacheEntry {
 
   /// 转换为 JSON（用于持久化）
   Map<String, dynamic> toJson() => {
-        'tags': tags.map((t) => t.toJson()).toList(),
-        'createdAt': createdAt.toIso8601String(),
-        'accessCount': accessCount,
-        'lastAccessedAt': lastAccessedAt.toIso8601String(),
-      };
+    'tags': tags.map((t) => t.toJson()).toList(),
+    'createdAt': createdAt.toIso8601String(),
+    'accessCount': accessCount,
+    'lastAccessedAt': lastAccessedAt.toIso8601String(),
+  };
 
   /// 从 JSON 创建
   factory CacheEntry.fromJson(Map<String, dynamic> json) {
@@ -189,10 +189,7 @@ class TagCacheService {
     }
 
     // 写入 L1 内存
-    _memoryCache[key] = CacheEntry(
-      tags: tags,
-      createdAt: DateTime.now(),
-    );
+    _memoryCache[key] = CacheEntry(tags: tags, createdAt: DateTime.now());
 
     AppLogger.d('Cache SET: $key (${tags.length} tags)', 'Cache');
 

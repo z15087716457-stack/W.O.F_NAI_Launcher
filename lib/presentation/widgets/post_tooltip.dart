@@ -15,11 +15,7 @@ class PostTooltip extends ConsumerWidget {
   final DanbooruPost post;
   final Widget child;
 
-  const PostTooltip({
-    super.key,
-    required this.post,
-    required this.child,
-  });
+  const PostTooltip({super.key, required this.post, required this.child});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,12 +46,7 @@ class PostTooltip extends ConsumerWidget {
     final l10n = context.l10n;
 
     // 基本信息
-    spans.add(
-      const TextSpan(
-        text: '📐 ',
-        style: TextStyle(fontSize: 13),
-      ),
-    );
+    spans.add(const TextSpan(text: '📐 ', style: TextStyle(fontSize: 13)));
     spans.add(
       TextSpan(
         text: '${post.width}×${post.height}',
@@ -64,12 +55,7 @@ class PostTooltip extends ConsumerWidget {
     );
     spans.add(const TextSpan(text: '  '));
 
-    spans.add(
-      const TextSpan(
-        text: '⬆ ',
-        style: TextStyle(fontSize: 13),
-      ),
-    );
+    spans.add(const TextSpan(text: '⬆ ', style: TextStyle(fontSize: 13)));
     spans.add(
       TextSpan(
         text: '${post.score}',
@@ -78,12 +64,7 @@ class PostTooltip extends ConsumerWidget {
     );
     spans.add(const TextSpan(text: '  '));
 
-    spans.add(
-      const TextSpan(
-        text: '❤ ',
-        style: TextStyle(fontSize: 13),
-      ),
-    );
+    spans.add(const TextSpan(text: '❤ ', style: TextStyle(fontSize: 13)));
     spans.add(
       TextSpan(
         text: '${post.favCount}',
@@ -96,12 +77,7 @@ class PostTooltip extends ConsumerWidget {
       try {
         final date = DateTime.parse(post.createdAt);
         spans.add(const TextSpan(text: '\n'));
-        spans.add(
-          const TextSpan(
-            text: '📅 ',
-            style: TextStyle(fontSize: 13),
-          ),
-        );
+        spans.add(const TextSpan(text: '📅 ', style: TextStyle(fontSize: 13)));
         spans.add(
           TextSpan(
             text: DateFormat('yyyy-MM-dd').format(date),
@@ -126,8 +102,10 @@ class PostTooltip extends ConsumerWidget {
           ),
         ),
       );
-      final artistTexts =
-          post.artistTags.take(3).map((t) => t.replaceAll('_', ' ')).join(', ');
+      final artistTexts = post.artistTags
+          .take(3)
+          .map((t) => t.replaceAll('_', ' '))
+          .join(', ');
       spans.add(
         TextSpan(
           text: artistTexts,
@@ -149,8 +127,9 @@ class PostTooltip extends ConsumerWidget {
           ),
         ),
       );
-      final charCount =
-          post.characterTags.length > 5 ? 5 : post.characterTags.length;
+      final charCount = post.characterTags.length > 5
+          ? 5
+          : post.characterTags.length;
       final charTexts = post.characterTags
           .take(charCount)
           .map((t) => t.replaceAll('_', ' '))
@@ -209,8 +188,9 @@ class PostTooltip extends ConsumerWidget {
           ),
         ),
       );
-      final tagCount =
-          post.generalTags.length > 8 ? 8 : post.generalTags.length;
+      final tagCount = post.generalTags.length > 8
+          ? 8
+          : post.generalTags.length;
       final tagTexts = post.generalTags
           .take(tagCount)
           .map((t) => t.replaceAll('_', ' '))

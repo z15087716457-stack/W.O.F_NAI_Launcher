@@ -10,10 +10,7 @@ import '../charts/aspect_ratio_chart.dart';
 class AspectRatioCard extends StatelessWidget {
   final GalleryStatistics stats;
 
-  const AspectRatioCard({
-    super.key,
-    required this.stats,
-  });
+  const AspectRatioCard({super.key, required this.stats});
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +44,7 @@ class AspectRatioCard extends StatelessWidget {
         count: e.value,
         percentage: total > 0 ? e.value / total * 100 : 0,
       );
-    }).toList()
-      ..sort((a, b) => b.count.compareTo(a.count));
+    }).toList()..sort((a, b) => b.count.compareTo(a.count));
 
     return ChartCard(
       title: l10n.statistics_chartAspectRatio,

@@ -65,22 +65,14 @@ class CollectionNotifier extends _$CollectionNotifier {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final collections = await _repository.getAllCollections();
-      state = state.copyWith(
-        collections: collections,
-        isLoading: false,
-      );
+      state = state.copyWith(collections: collections, isLoading: false);
       AppLogger.d(
         'Loaded ${collections.length} collections',
         'CollectionNotifier',
       );
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);
-      AppLogger.e(
-        'Failed to load collections',
-        e,
-        null,
-        'CollectionNotifier',
-      );
+      AppLogger.e('Failed to load collections', e, null, 'CollectionNotifier');
     }
   }
 
@@ -188,10 +180,7 @@ class CollectionNotifier extends _$CollectionNotifier {
         // 重新加载集合列表
         await _loadCollections();
 
-        AppLogger.i(
-          'Deleted collection: $id',
-          'CollectionNotifier',
-        );
+        AppLogger.i('Deleted collection: $id', 'CollectionNotifier');
       }
 
       return success;
@@ -219,8 +208,10 @@ class CollectionNotifier extends _$CollectionNotifier {
     try {
       state = state.copyWith(error: null);
 
-      final result =
-          await _repository.addImagesToCollection(collectionId, imagePaths);
+      final result = await _repository.addImagesToCollection(
+        collectionId,
+        imagePaths,
+      );
 
       // 重新加载集合列表以更新数据
       await _loadCollections();
@@ -241,11 +232,7 @@ class CollectionNotifier extends _$CollectionNotifier {
         null,
         'CollectionNotifier',
       );
-      return (
-        added: 0,
-        alreadyIn: 0,
-        unresolved: imagePaths.length,
-      );
+      return (added: 0, alreadyIn: 0, unresolved: imagePaths.length);
     }
   }
 
@@ -261,8 +248,10 @@ class CollectionNotifier extends _$CollectionNotifier {
     try {
       state = state.copyWith(error: null);
 
-      final removedCount = await _repository
-          .removeImagesFromCollection(collectionId, imagePaths);
+      final removedCount = await _repository.removeImagesFromCollection(
+        collectionId,
+        imagePaths,
+      );
 
       // 重新加载集合列表以更新数据
       await _loadCollections();
@@ -363,9 +352,7 @@ class CollectionNotifier extends _$CollectionNotifier {
       final isMember = memberIds.contains(imageId);
 
       if (isMember) {
-        await _repository.removeImagesFromCollection(collectionId, [
-          imagePath,
-        ]);
+        await _repository.removeImagesFromCollection(collectionId, [imagePath]);
       } else {
         await _repository.addImagesToCollection(collectionId, [imagePath]);
       }
@@ -415,10 +402,7 @@ class CollectionNotifier extends _$CollectionNotifier {
   /// [id] 集合ID，null 表示清除活动集合
   void setActiveCollection(String? id) {
     state = state.copyWith(activeCollectionId: id);
-    AppLogger.d(
-      'Set active collection: ${id ?? "none"}',
-      'CollectionNotifier',
-    );
+    AppLogger.d('Set active collection: ${id ?? "none"}', 'CollectionNotifier');
   }
 
   /// 清除错误状态

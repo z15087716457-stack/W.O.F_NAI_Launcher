@@ -298,10 +298,7 @@ class _CollectionSelectDialogState
     return Opacity(
       opacity: hasNone ? 0.45 : 1.0,
       child: ListTile(
-        leading: Icon(
-          Icons.favorite,
-          color: Colors.red.shade400,
-        ),
+        leading: Icon(Icons.favorite, color: Colors.red.shade400),
         title: Text(
           l10n.common_favorite,
           style: theme.textTheme.bodyLarge?.copyWith(
@@ -341,10 +338,7 @@ class _CollectionSelectDialogState
     return Opacity(
       opacity: hasNone ? 0.45 : 1.0,
       child: ListTile(
-        leading: Icon(
-          Icons.folder_outlined,
-          color: theme.colorScheme.primary,
-        ),
+        leading: Icon(Icons.folder_outlined, color: theme.colorScheme.primary),
         title: Text(
           collection.name,
           style: theme.textTheme.bodyLarge?.copyWith(
@@ -379,10 +373,7 @@ class _CollectionSelectDialogState
         ),
         trailing: isRemove
             ? null
-            : Icon(
-                Icons.add_circle_outline,
-                color: theme.colorScheme.primary,
-              ),
+            : Icon(Icons.add_circle_outline, color: theme.colorScheme.primary),
         onTap: () => _selectCollection(collection),
       ),
     );

@@ -93,7 +93,11 @@ class TagLibrarySelectionNotifier extends _$TagLibrarySelectionNotifier {
   /// 进入多选模式并选中指定项（用于长按触发）
   void enterAndSelect(String id) {
     final newIds = Set<String>.from(state.selectedIds)..add(id);
-    state = state.copyWith(isActive: true, selectedIds: newIds, lastSelectedId: id);
+    state = state.copyWith(
+      isActive: true,
+      selectedIds: newIds,
+      lastSelectedId: id,
+    );
   }
 
   /// 范围选择（Shift+点击）

@@ -128,6 +128,13 @@ class CharacterPromptNotifier extends _$CharacterPromptNotifier {
     _saveConfig();
   }
 
+  /// 追加多个角色并保留现有角色及其位置设置。
+  void appendAll(List<CharacterPrompt> characters) {
+    if (characters.isEmpty) return;
+    state = state.copyWith(characters: [...state.characters, ...characters]);
+    _saveConfig();
+  }
+
   /// 向上移动角色
   ///
   /// [index] 当前位置索引

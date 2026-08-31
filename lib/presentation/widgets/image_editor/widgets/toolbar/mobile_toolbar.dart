@@ -44,19 +44,16 @@ class MobileToolbar extends StatelessWidget {
       height: 56,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border(
-          top: BorderSide(
-            color: theme.dividerColor,
-            width: 1,
-          ),
-        ),
+        border: Border(top: BorderSide(color: theme.dividerColor, width: 1)),
       ),
       child: Row(
         children: [
           // 撤销/重做 - 监听历史管理器
           ListenableBuilder(
-            listenable:
-                Listenable.merge([state.historyManager, state.layerManager]),
+            listenable: Listenable.merge([
+              state.historyManager,
+              state.layerManager,
+            ]),
             builder: (context, _) {
               return Row(
                 children: [
@@ -124,10 +121,7 @@ class MobileToolbar extends StatelessWidget {
           ),
 
           // 图层按钮
-          _ActionButton(
-            icon: Icons.layers,
-            onTap: onLayersPressed ?? () {},
-          ),
+          _ActionButton(icon: Icons.layers, onTap: onLayersPressed ?? () {}),
         ],
       ),
     );
@@ -219,10 +213,7 @@ class _ActionButton extends StatelessWidget {
 class MobileToolSettingsSheet extends StatelessWidget {
   final EditorState state;
 
-  const MobileToolSettingsSheet({
-    super.key,
-    required this.state,
-  });
+  const MobileToolSettingsSheet({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {

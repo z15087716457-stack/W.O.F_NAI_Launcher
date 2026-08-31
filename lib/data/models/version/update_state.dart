@@ -25,20 +25,11 @@ class UpdateState with _$UpdateState {
   const UpdateState._();
 
   /// 是否正在检查更新
-  bool get isChecking => maybeWhen(
-        checking: () => true,
-        orElse: () => false,
-      );
+  bool get isChecking => maybeWhen(checking: () => true, orElse: () => false);
 
   /// 是否有可用更新
-  bool get hasUpdate => maybeWhen(
-        available: (_) => true,
-        orElse: () => false,
-      );
+  bool get hasUpdate => maybeWhen(available: (_) => true, orElse: () => false);
 
   /// 是否发生错误
-  bool get isError => maybeWhen(
-        error: (_) => true,
-        orElse: () => false,
-      );
+  bool get isError => maybeWhen(error: (_) => true, orElse: () => false);
 }

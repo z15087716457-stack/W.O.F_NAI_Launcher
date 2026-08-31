@@ -13,10 +13,7 @@ class EmojiPickerDialog extends StatelessWidget {
   /// 显示 emoji 选择器对话框
   ///
   /// 返回选中的 emoji 字符串，如果用户取消则返回 null
-  static Future<String?> show(
-    BuildContext context, {
-    String? initialEmoji,
-  }) {
+  static Future<String?> show(BuildContext context, {String? initialEmoji}) {
     return showDialog<String>(
       context: context,
       builder: (context) => const EmojiPickerDialog(),
@@ -64,9 +61,7 @@ class EmojiPickerDialog extends StatelessWidget {
               iconColorSelected: theme.colorScheme.primary,
               categoryIcons: const CategoryIcons(),
             ),
-            bottomActionBarConfig: const BottomActionBarConfig(
-              enabled: false,
-            ),
+            bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
             searchViewConfig: SearchViewConfig(
               backgroundColor: theme.colorScheme.surface,
               buttonIconColor: theme.colorScheme.primary,

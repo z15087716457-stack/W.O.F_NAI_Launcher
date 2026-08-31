@@ -22,16 +22,16 @@ class ComfyUIApiService {
   final String baseUrl;
 
   ComfyUIApiService({required String baseUrl})
-      : this._(normalizeComfyUIBaseUrl(baseUrl));
+    : this._(normalizeComfyUIBaseUrl(baseUrl));
 
   ComfyUIApiService._(this.baseUrl)
-      : _dio = Dio(
-          BaseOptions(
-            baseUrl: baseUrl,
-            connectTimeout: const Duration(seconds: 10),
-            receiveTimeout: const Duration(seconds: 300),
-          ),
-        );
+    : _dio = Dio(
+        BaseOptions(
+          baseUrl: baseUrl,
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 300),
+        ),
+      );
 
   /// 测试连接是否可用
   Future<bool> testConnection() async {
@@ -76,10 +76,7 @@ class ComfyUIApiService {
     try {
       final response = await _dio.post(
         '/prompt',
-        data: {
-          'prompt': workflow,
-          'client_id': clientId,
-        },
+        data: {'prompt': workflow, 'client_id': clientId},
       );
       final data = response.data as Map<String, dynamic>;
       return ComfyUIPromptResult(
@@ -187,8 +184,9 @@ class ComfyUIApiService {
   /// [nodeClass] 为 null 时返回全部节点信息
   Future<Map<String, dynamic>> getObjectInfo([String? nodeClass]) async {
     try {
-      final path =
-          nodeClass != null ? '/object_info/$nodeClass' : '/object_info';
+      final path = nodeClass != null
+          ? '/object_info/$nodeClass'
+          : '/object_info';
       final response = await _dio.get(path);
       return response.data as Map<String, dynamic>;
     } catch (e) {
@@ -225,10 +223,7 @@ class ComfyUIApiService {
           return e.response!.data as String;
         }
       } catch (e) {
-        AppLogger.d(
-          'Failed to parse ComfyUI error response: $e',
-          _tag,
-        );
+        AppLogger.d('Failed to parse ComfyUI error response: $e', _tag);
       }
     }
     if (e.type == DioExceptionType.connectionTimeout ||

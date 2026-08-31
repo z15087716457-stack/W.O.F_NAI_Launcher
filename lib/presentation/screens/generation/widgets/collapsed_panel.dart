@@ -56,11 +56,7 @@ class CollapseButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
 
-  const CollapseButton({
-    super.key,
-    required this.icon,
-    required this.onTap,
-  });
+  const CollapseButton({super.key, required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -74,8 +70,9 @@ class CollapseButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest
-                .withValues(alpha: 0.5),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.5,
+            ),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Icon(

@@ -25,16 +25,18 @@ class NaiPromptFormatter {
 
     // 3. 按逗号分割，对每个标签单独处理
     final tags = result.split(',');
-    final formattedTags = tags.map((tag) {
-      // 先 trim 去除首尾空格
-      final trimmed = tag.trim();
-      if (trimmed.isEmpty) return '';
-      // 对内部空格使用 TextSpaceConverter（保护尖括号内容）
-      return TextSpaceConverter.convert(
-        trimmed,
-        protectChars: TextSpaceConverter.naiFormat,
-      );
-    }).where((tag) => tag.isNotEmpty);
+    final formattedTags = tags
+        .map((tag) {
+          // 先 trim 去除首尾空格
+          final trimmed = tag.trim();
+          if (trimmed.isEmpty) return '';
+          // 对内部空格使用 TextSpaceConverter（保护尖括号内容）
+          return TextSpaceConverter.convert(
+            trimmed,
+            protectChars: TextSpaceConverter.naiFormat,
+          );
+        })
+        .where((tag) => tag.isNotEmpty);
 
     return formattedTags.join(', ');
   }

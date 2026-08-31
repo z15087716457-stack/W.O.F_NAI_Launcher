@@ -96,10 +96,7 @@ void main() {
       test('should handle empty prompts', () {
         final service = ParameterProcessingService();
 
-        final result = service.process(
-          prompt: '',
-          negativePrompt: '',
-        );
+        final result = service.process(prompt: '', negativePrompt: '');
 
         expect(result.prompt, equals(''));
         expect(result.negativePrompt, equals(''));
@@ -258,10 +255,7 @@ void main() {
         ];
         final service = ParameterProcessingService(fixedTags: fixedTags);
 
-        final result = service.process(
-          prompt: '1girl',
-          negativePrompt: '',
-        );
+        final result = service.process(prompt: '1girl', negativePrompt: '');
 
         expect(result.prompt, equals('masterpiece, best quality, 1girl'));
         expect(result.fixedTagsApplied, isTrue);
@@ -279,10 +273,7 @@ void main() {
         ];
         final service = ParameterProcessingService(fixedTags: fixedTags);
 
-        final result = service.process(
-          prompt: '1girl',
-          negativePrompt: '',
-        );
+        final result = service.process(prompt: '1girl', negativePrompt: '');
 
         expect(result.prompt, equals('1girl, detailed background'));
       });
@@ -304,10 +295,7 @@ void main() {
         ];
         final service = ParameterProcessingService(fixedTags: fixedTags);
 
-        final result = service.process(
-          prompt: 'girl',
-          negativePrompt: '',
-        );
+        final result = service.process(prompt: 'girl', negativePrompt: '');
 
         expect(result.prompt, equals('masterpiece, girl, detailed'));
       });
@@ -323,10 +311,7 @@ void main() {
         ];
         final service = ParameterProcessingService(fixedTags: fixedTags);
 
-        final result = service.process(
-          prompt: 'test',
-          negativePrompt: '',
-        );
+        final result = service.process(prompt: 'test', negativePrompt: '');
 
         expect(result.prompt, equals('test'));
         expect(result.fixedTagsApplied, isFalse);
@@ -356,10 +341,7 @@ void main() {
         ];
         final service = ParameterProcessingService(fixedTags: fixedTags);
 
-        final result = service.process(
-          prompt: 'test',
-          negativePrompt: '',
-        );
+        final result = service.process(prompt: 'test', negativePrompt: '');
 
         expect(result.prompt, equals('first, second, third, test'));
       });
@@ -376,36 +358,35 @@ void main() {
         ];
         final service = ParameterProcessingService(fixedTags: fixedTags);
 
-        final result = service.process(
-          prompt: 'test',
-          negativePrompt: '',
-        );
+        final result = service.process(prompt: 'test', negativePrompt: '');
 
         // Weight 1.2 should add braces
         expect(result.prompt.contains('{masterpiece}'), isTrue);
       });
 
-      test('should skip fixed tags application when applyFixedTags is false',
-          () {
-        final fixedTags = [
-          FixedTagEntry.create(
-            name: 'quality',
-            content: 'masterpiece',
-            position: FixedTagPosition.prefix,
-            enabled: true,
-          ),
-        ];
-        final service = ParameterProcessingService(fixedTags: fixedTags);
+      test(
+        'should skip fixed tags application when applyFixedTags is false',
+        () {
+          final fixedTags = [
+            FixedTagEntry.create(
+              name: 'quality',
+              content: 'masterpiece',
+              position: FixedTagPosition.prefix,
+              enabled: true,
+            ),
+          ];
+          final service = ParameterProcessingService(fixedTags: fixedTags);
 
-        final result = service.process(
-          prompt: 'test',
-          negativePrompt: '',
-          applyFixedTags: false,
-        );
+          final result = service.process(
+            prompt: 'test',
+            negativePrompt: '',
+            applyFixedTags: false,
+          );
 
-        expect(result.prompt, equals('test'));
-        expect(result.fixedTagsApplied, isFalse);
-      });
+          expect(result.prompt, equals('test'));
+          expect(result.fixedTagsApplied, isFalse);
+        },
+      );
 
       test('should not modify result when user prompt is empty', () {
         final fixedTags = [
@@ -424,48 +405,47 @@ void main() {
         ];
         final service = ParameterProcessingService(fixedTags: fixedTags);
 
-        final result = service.process(
-          prompt: '',
-          negativePrompt: '',
-        );
+        final result = service.process(prompt: '', negativePrompt: '');
 
         // Should still include fixed tags even if user prompt is empty
         expect(result.prompt, equals('prefix, suffix'));
       });
 
-      test('should apply negative fixed tags without changing positive prompt',
-          () {
-        final fixedTags = [
-          FixedTagEntry.create(
-            name: 'positive',
-            content: 'masterpiece',
-            position: FixedTagPosition.prefix,
-          ),
-          FixedTagEntry.create(
-            name: 'negative-prefix',
-            content: 'bad anatomy',
-            position: FixedTagPosition.prefix,
-            promptType: FixedTagPromptType.negative,
-          ),
-          FixedTagEntry.create(
-            name: 'negative-suffix',
-            content: 'text',
-            position: FixedTagPosition.suffix,
-            promptType: FixedTagPromptType.negative,
-          ),
-        ];
-        final service = ParameterProcessingService(fixedTags: fixedTags);
+      test(
+        'should apply negative fixed tags without changing positive prompt',
+        () {
+          final fixedTags = [
+            FixedTagEntry.create(
+              name: 'positive',
+              content: 'masterpiece',
+              position: FixedTagPosition.prefix,
+            ),
+            FixedTagEntry.create(
+              name: 'negative-prefix',
+              content: 'bad anatomy',
+              position: FixedTagPosition.prefix,
+              promptType: FixedTagPromptType.negative,
+            ),
+            FixedTagEntry.create(
+              name: 'negative-suffix',
+              content: 'text',
+              position: FixedTagPosition.suffix,
+              promptType: FixedTagPromptType.negative,
+            ),
+          ];
+          final service = ParameterProcessingService(fixedTags: fixedTags);
 
-        final result = service.process(
-          prompt: '1girl',
-          negativePrompt: 'bad hands',
-        );
+          final result = service.process(
+            prompt: '1girl',
+            negativePrompt: 'bad hands',
+          );
 
-        expect(result.prompt, equals('masterpiece, 1girl'));
-        expect(result.negativePrompt, equals('bad anatomy, bad hands, text'));
-        expect(result.fixedTagsApplied, isTrue);
-        expect(result.fixedTagsCount, equals(3));
-      });
+          expect(result.prompt, equals('masterpiece, 1girl'));
+          expect(result.negativePrompt, equals('bad anatomy, bad hands, text'));
+          expect(result.fixedTagsApplied, isTrue);
+          expect(result.fixedTagsCount, equals(3));
+        },
+      );
     });
 
     group('process - combined operations', () {
@@ -695,11 +675,7 @@ void main() {
 
       test('should have correct toString format', () {
         final fixedTags = [
-          FixedTagEntry.create(
-            name: 'test',
-            content: 'content',
-            enabled: true,
-          ),
+          FixedTagEntry.create(name: 'test', content: 'content', enabled: true),
         ];
         final service = ParameterProcessingService(fixedTags: fixedTags);
 
@@ -745,8 +721,10 @@ void main() {
       });
 
       test('should create unprocessed result using factory', () {
-        final result =
-            ParameterProcessingResult.unprocessed('prompt', 'negative');
+        final result = ParameterProcessingResult.unprocessed(
+          'prompt',
+          'negative',
+        );
 
         expect(result.prompt, equals('prompt'));
         expect(result.negativePrompt, equals('negative'));

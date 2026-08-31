@@ -761,25 +761,32 @@ void main() {
       },
     );
 
-    test('updateSeedvr2BlocksToSwap should clamp values to the valid range', () {
-      final controller = container.read(
-        imageWorkflowControllerProvider.notifier,
-      );
+    test(
+      'updateSeedvr2BlocksToSwap should clamp values to the valid range',
+      () {
+        final controller = container.read(
+          imageWorkflowControllerProvider.notifier,
+        );
 
-      controller.updateSeedvr2BlocksToSwap(-8);
-      expect(
-        container.read(imageWorkflowControllerProvider).upscale
-            .seedvr2BlocksToSwap,
-        equals(UpscaleWorkflowSettings.minSeedvr2BlocksToSwap),
-      );
+        controller.updateSeedvr2BlocksToSwap(-8);
+        expect(
+          container
+              .read(imageWorkflowControllerProvider)
+              .upscale
+              .seedvr2BlocksToSwap,
+          equals(UpscaleWorkflowSettings.minSeedvr2BlocksToSwap),
+        );
 
-      controller.updateSeedvr2BlocksToSwap(120);
-      expect(
-        container.read(imageWorkflowControllerProvider).upscale
-            .seedvr2BlocksToSwap,
-        equals(UpscaleWorkflowSettings.maxSeedvr2BlocksToSwap),
-      );
-    });
+        controller.updateSeedvr2BlocksToSwap(120);
+        expect(
+          container
+              .read(imageWorkflowControllerProvider)
+              .upscale
+              .seedvr2BlocksToSwap,
+          equals(UpscaleWorkflowSettings.maxSeedvr2BlocksToSwap),
+        );
+      },
+    );
 
     test('build should default upscale settings to safe local defaults', () {
       final workflow = container.read(imageWorkflowControllerProvider);

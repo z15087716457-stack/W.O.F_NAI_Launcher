@@ -39,10 +39,7 @@ class AnthropicMessagesAdapter extends PromptAssistantProviderAdapter {
         'max_tokens': 2048,
         'system': request.systemPrompt,
         'messages': [
-          {
-            'role': 'user',
-            'content': _contentParts(request.userParts),
-          },
+          {'role': 'user', 'content': _contentParts(request.userParts)},
         ],
       },
       options: Options(

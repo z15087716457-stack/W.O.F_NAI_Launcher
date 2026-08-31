@@ -107,11 +107,7 @@ void main() {
       await AppLogger.initialize(isTestEnvironment: true);
 
       // 记录认证日志（包含敏感信息）
-      AppLogger.auth(
-        '用户登录',
-        email: 'test@example.com',
-        success: true,
-      );
+      AppLogger.auth('用户登录', email: 'test@example.com', success: true);
 
       await Future.delayed(const Duration(milliseconds: 100));
 
@@ -162,7 +158,8 @@ void main() {
 
       // 手动触发清理逻辑（模拟初始化时的清理）
       files.sort(
-          (a, b) => b.statSync().modified.compareTo(a.statSync().modified),);
+        (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
+      );
       if (files.length >= 3) {
         final filesToDelete = files.sublist(2); // 保留前2个，删除后面的
         for (final file in filesToDelete) {
@@ -198,9 +195,10 @@ void main() {
         final firstTime = files[0].lastModifiedSync();
         final secondTime = files[1].lastModifiedSync();
         expect(
-            firstTime.isAfter(secondTime) ||
-                firstTime.isAtSameMomentAs(secondTime),
-            isTrue,);
+          firstTime.isAfter(secondTime) ||
+              firstTime.isAtSameMomentAs(secondTime),
+          isTrue,
+        );
       }
     });
 

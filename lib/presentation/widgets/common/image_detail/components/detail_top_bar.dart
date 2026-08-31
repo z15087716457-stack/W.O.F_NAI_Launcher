@@ -56,10 +56,7 @@ class DetailTopBar extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Colors.black.withValues(alpha: 0.7),
-            Colors.transparent,
-          ],
+          colors: [Colors.black.withValues(alpha: 0.7), Colors.transparent],
         ),
       ),
       child: Row(
@@ -144,7 +141,8 @@ class DetailTopBar extends StatelessWidget {
             Consumer(
               builder: (context, ref, child) {
                 // 如果是本地图库图片，实时监听收藏状态
-                final isLocalImage = currentImage.identifier.isNotEmpty &&
+                final isLocalImage =
+                    currentImage.identifier.isNotEmpty &&
                     currentImage is LocalImageDetailData;
 
                 bool isFavorite = currentImage.isFavorite;

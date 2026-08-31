@@ -127,8 +127,9 @@ class NaiPromptParser {
 
     // 1. 先处理 NAI 数值权重语法: weight::text::
     // 匹配: 数字::内容:: 或 数字::内容
-    final naiWeightMatch =
-        RegExp(r'^(-?\d+\.?\d*)::(.+?)(?:::)?$').firstMatch(text);
+    final naiWeightMatch = RegExp(
+      r'^(-?\d+\.?\d*)::(.+?)(?:::)?$',
+    ).firstMatch(text);
     if (naiWeightMatch != null) {
       final weightValue = double.tryParse(naiWeightMatch.group(1)!);
       if (weightValue != null) {
@@ -183,8 +184,12 @@ class NaiPromptParser {
     }
 
     // 计算有效的括号层数（取开闭括号的最小值）
-    final effectiveBraces = braceCount < closeBraceCount ? braceCount : closeBraceCount;
-    final effectiveBrackets = bracketCount < closeBracketCount ? bracketCount : closeBracketCount;
+    final effectiveBraces = braceCount < closeBraceCount
+        ? braceCount
+        : closeBraceCount;
+    final effectiveBrackets = bracketCount < closeBracketCount
+        ? bracketCount
+        : closeBracketCount;
 
     // 计算权重并移除括号
     if (effectiveBraces > 0) {

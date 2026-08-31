@@ -35,9 +35,7 @@ class OpusUsageChip extends ConsumerWidget {
     if (!hasUsageLimit) return const SizedBox.shrink();
 
     final usage = ref.watch(
-      subscriptionNotifierProvider.select(
-        (state) => state.subscription?.usage,
-      ),
+      subscriptionNotifierProvider.select((state) => state.subscription?.usage),
     );
     if (usage == null) return const SizedBox.shrink();
 

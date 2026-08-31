@@ -18,13 +18,15 @@ void main() {
       );
     });
 
-    test('strips autocomplete weight and leading brackets without lowercasing',
-        () {
-      expect(
-        TagNormalizer.normalizeAutocompleteTag('-0.5::{{Blue_Eyes'),
-        equals('Blue_Eyes'),
-      );
-    });
+    test(
+      'strips autocomplete weight and leading brackets without lowercasing',
+      () {
+        expect(
+          TagNormalizer.normalizeAutocompleteTag('-0.5::{{Blue_Eyes'),
+          equals('Blue_Eyes'),
+        );
+      },
+    );
 
     test('parses comma separated search segments', () {
       expect(

@@ -72,10 +72,7 @@ class OnlineGallerySelectionNotifier extends _$OnlineGallerySelectionNotifier {
 
   void enterAndSelect(String id) {
     _update(
-      state.copyWith(
-        isActive: true,
-        selectedIds: {...state.selectedIds, id},
-      ),
+      state.copyWith(isActive: true, selectedIds: {...state.selectedIds, id}),
     );
   }
 

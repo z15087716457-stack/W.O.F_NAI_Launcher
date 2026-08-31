@@ -7,55 +7,57 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('editor local effects', () {
-    test('every effect produces a valid changed image through compute',
-        () async {
-      final source = _buildSourceImage();
-      final sourceBytes = Uint8List.fromList(img.encodePng(source));
-      final sourceSignature = _imageSignature(source);
+    test(
+      'every effect produces a valid changed image through compute',
+      () async {
+        final source = _buildSourceImage();
+        final sourceBytes = Uint8List.fromList(img.encodePng(source));
+        final sourceSignature = _imageSignature(source);
 
-      for (final type in EditorEffectType.values) {
-        final cropRect = type == EditorEffectType.cropToSelection
-            ? const EditorEffectCropRect(x: 3, y: 2, width: 7, height: 5)
-            : null;
-        final job = EditorEffectJob(
-          imageBytes: sourceBytes,
-          effectType: type,
-          intensity: editorEffectDefaultIntensity(type),
-          cropRect: cropRect,
-        );
+        for (final type in EditorEffectType.values) {
+          final cropRect = type == EditorEffectType.cropToSelection
+              ? const EditorEffectCropRect(x: 3, y: 2, width: 7, height: 5)
+              : null;
+          final job = EditorEffectJob(
+            imageBytes: sourceBytes,
+            effectType: type,
+            intensity: editorEffectDefaultIntensity(type),
+            cropRect: cropRect,
+          );
 
-        final result = EditorEffectResult.fromMessage(
-          await compute(
-            runEditorEffectJobMessage,
-            job.toMessage(),
-            debugLabel: 'editor_effect_test_${type.name}',
-          ),
-        );
-        final decoded = img.decodePng(result.bytes);
+          final result = EditorEffectResult.fromMessage(
+            await compute(
+              runEditorEffectJobMessage,
+              job.toMessage(),
+              debugLabel: 'editor_effect_test_${type.name}',
+            ),
+          );
+          final decoded = img.decodePng(result.bytes);
 
-        expect(decoded, isNotNull, reason: '${type.name} did not decode');
-        expect(result.width, decoded!.width, reason: type.name);
-        expect(result.height, decoded.height, reason: type.name);
+          expect(decoded, isNotNull, reason: '${type.name} did not decode');
+          expect(result.width, decoded!.width, reason: type.name);
+          expect(result.height, decoded.height, reason: type.name);
 
-        if (type == EditorEffectType.rotateLeft ||
-            type == EditorEffectType.rotateRight) {
-          expect(decoded.width, source.height, reason: type.name);
-          expect(decoded.height, source.width, reason: type.name);
-        } else if (type == EditorEffectType.cropToSelection) {
-          expect(decoded.width, cropRect!.width, reason: type.name);
-          expect(decoded.height, cropRect.height, reason: type.name);
-        } else {
-          expect(decoded.width, source.width, reason: type.name);
-          expect(decoded.height, source.height, reason: type.name);
+          if (type == EditorEffectType.rotateLeft ||
+              type == EditorEffectType.rotateRight) {
+            expect(decoded.width, source.height, reason: type.name);
+            expect(decoded.height, source.width, reason: type.name);
+          } else if (type == EditorEffectType.cropToSelection) {
+            expect(decoded.width, cropRect!.width, reason: type.name);
+            expect(decoded.height, cropRect.height, reason: type.name);
+          } else {
+            expect(decoded.width, source.width, reason: type.name);
+            expect(decoded.height, source.height, reason: type.name);
+          }
+
+          expect(
+            _imageSignature(decoded),
+            isNot(sourceSignature),
+            reason: '${type.name} did not change the test image',
+          );
         }
-
-        expect(
-          _imageSignature(decoded),
-          isNot(sourceSignature),
-          reason: '${type.name} did not change the test image',
-        );
-      }
-    });
+      },
+    );
 
     test('crop effect requires a selection rectangle', () {
       final source = _buildSourceImage();

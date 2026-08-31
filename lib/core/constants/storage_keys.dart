@@ -28,6 +28,9 @@ class StorageKeys {
   static const String favoritesBox = 'favorites';
   static const String tagsBox = 'tags';
   static const String collectionsBox = 'collections';
+  static const String promptBlockLibraryBox = 'prompt_block_library_v1';
+  static const String promptWorkspaceStateBox = 'prompt_workspace_state_v1';
+  static const String styleExploreRecipesBox = 'style_explore_recipes_v1';
 
   // Settings Keys
   static const String themeType = 'theme_type';
@@ -57,6 +60,8 @@ class StorageKeys {
   static const String fixedTagsSidebarWidth = 'fixed_tags_sidebar_width';
   static const String fixedTagsSidebarViewMode = 'fixed_tags_sidebar_view_mode';
   static const String fixedTagsNegativeHeight = 'fixed_tags_negative_height';
+  static const String blockLibraryPanelExpanded = 'block_library_panel_expanded';
+  static const String blockLibraryPanelWidth = 'block_library_panel_width';
 
   // Panel Expansion State Keys (面板展开状态)
   static const String advancedOptionsExpanded = 'advanced_options_expanded';
@@ -93,9 +98,6 @@ class StorageKeys {
   // 负面词自定义条目
   static const String ucPresetCustomId = 'uc_preset_custom_id';
   static const String ucPresetCustomIds = 'uc_preset_custom_ids'; // 自定义条目ID列表
-  static const String randomPromptMode = 'random_prompt_mode';
-  static const String showRandomPromptTools = 'show_random_prompt_tools';
-  static const String randomGenerationMode = 'random_generation_mode';
   static const String imagesPerRequest = 'images_per_request';
   static const String enableAutocomplete = 'enable_autocomplete';
   static const String autocompleteResultLimit = 'autocomplete_result_limit';
@@ -155,6 +157,10 @@ class StorageKeys {
 
   /// 本地画廊逻辑列宽（px，140~480，默认 260）
   static const String localGalleryColumnWidth = 'local_gallery_column_width';
+
+  /// 提示词块管理页视图模式：true=紧凑，false=详细。
+  static const String promptBlockLibraryCompactView =
+      'prompt_block_library_compact_view';
 
   /// 在线画廊逻辑列宽（px，140~480，默认 200）
   static const String onlineGalleryColumnWidth = 'online_gallery_column_width';
@@ -307,7 +313,8 @@ class StorageKeys {
       'workflow_enhance_upscale_factor';
   static const String workflowEnhanceStrength = 'workflow_enhance_strength';
   static const String workflowEnhanceNoise = 'workflow_enhance_noise';
-  static const String workflowEnhanceMaxUpscale = 'workflow_enhance_max_upscale';
+  static const String workflowEnhanceMaxUpscale =
+      'workflow_enhance_max_upscale';
 
   // 反推/本地模型设置
   static const String reversePromptStateJson = 'reverse_prompt_state_json';

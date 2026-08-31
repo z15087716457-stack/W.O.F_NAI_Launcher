@@ -58,16 +58,10 @@ class ShortcutTooltip extends ConsumerWidget {
 
         return _buildShortcutTooltip(context, shortcut);
       },
-      loading: () => Tooltip(
-        message: message,
-        waitDuration: waitDuration,
-        child: child,
-      ),
-      error: (_, __) => Tooltip(
-        message: message,
-        waitDuration: waitDuration,
-        child: child,
-      ),
+      loading: () =>
+          Tooltip(message: message, waitDuration: waitDuration, child: child),
+      error: (_, __) =>
+          Tooltip(message: message, waitDuration: waitDuration, child: child),
     );
   }
 
@@ -117,9 +111,7 @@ class _RichTooltipContent extends StatelessWidget {
           Flexible(
             child: Text(
               message,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
             ),
           ),
           const SizedBox(width: 8),
@@ -200,38 +192,44 @@ class ShortcutBadge extends ConsumerWidget {
       children: [
         child,
         Positioned(
-          left: position == BadgePosition.topLeft ||
+          left:
+              position == BadgePosition.topLeft ||
                   position == BadgePosition.bottomLeft
               ? style.offset.dx
               : null,
-          right: position == BadgePosition.topRight ||
+          right:
+              position == BadgePosition.topRight ||
                   position == BadgePosition.bottomRight
               ? style.offset.dx
               : null,
-          top: position == BadgePosition.topLeft ||
+          top:
+              position == BadgePosition.topLeft ||
                   position == BadgePosition.topRight
               ? style.offset.dy
               : null,
-          bottom: position == BadgePosition.bottomLeft ||
+          bottom:
+              position == BadgePosition.bottomLeft ||
                   position == BadgePosition.bottomRight
               ? style.offset.dy
               : null,
           child: Container(
             padding: style.padding,
             decoration: BoxDecoration(
-              color: style.backgroundColor ??
+              color:
+                  style.backgroundColor ??
                   Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(style.borderRadius),
               border: style.border,
             ),
             child: Text(
               shortcutLabel,
-              style: style.textStyle ??
+              style:
+                  style.textStyle ??
                   Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'monospace',
-                      ),
+                    fontSize: 9,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'monospace',
+                  ),
             ),
           ),
         ),
@@ -241,12 +239,7 @@ class ShortcutBadge extends ConsumerWidget {
 }
 
 /// 徽章位置
-enum BadgePosition {
-  topLeft,
-  topRight,
-  bottomLeft,
-  bottomRight,
-}
+enum BadgePosition { topLeft, topRight, bottomLeft, bottomRight }
 
 /// 徽章样式
 class ShortcutBadgeStyle {
@@ -305,11 +298,12 @@ class ShortcutText extends ConsumerWidget {
 
         return Text(
           shortcutLabel,
-          style: style ??
+          style:
+              style ??
               Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontFamily: 'monospace',
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                fontFamily: 'monospace',
+                color: Theme.of(context).colorScheme.outline,
+              ),
         );
       },
       loading: () => fallback != null

@@ -104,8 +104,9 @@ class SlidingToggle<T> extends StatelessWidget {
                       borderRadius: BorderRadius.circular(thumbRadius),
                       boxShadow: [
                         BoxShadow(
-                          color:
-                              theme.colorScheme.primary.withValues(alpha: 0.3),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.3,
+                          ),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -125,11 +126,7 @@ class SlidingToggle<T> extends StatelessWidget {
                       width: itemWidth,
                       height: height,
                       alignment: Alignment.center,
-                      child: _buildOptionContent(
-                        context,
-                        option,
-                        isSelected,
-                      ),
+                      child: _buildOptionContent(context, option, isSelected),
                     );
                   }).toList(),
                 ),
@@ -153,11 +150,7 @@ class SlidingToggle<T> extends StatelessWidget {
 
     // 如果有图标
     if (option.icon != null) {
-      return Icon(
-        option.icon,
-        size: iconSize,
-        color: color,
-      );
+      return Icon(option.icon, size: iconSize, color: color);
     }
 
     // 如果有文本
@@ -194,7 +187,7 @@ class SlidingToggleOption<T> {
 
   /// 自定义内容构建器（可选）
   final Widget Function(BuildContext context, bool isSelected, Color color)?
-      builder;
+  builder;
 
   /// 提示文本
   final String? tooltip;
@@ -206,9 +199,9 @@ class SlidingToggleOption<T> {
     this.builder,
     this.tooltip,
   }) : assert(
-          icon != null || label != null || builder != null,
-          'At least one of icon, label, or builder must be provided',
-        );
+         icon != null || label != null || builder != null,
+         'At least one of icon, label, or builder must be provided',
+       );
 }
 
 /// 带标签的滑动切换组件
@@ -258,8 +251,9 @@ class LabeledSlidingToggle<T> extends StatelessWidget {
               color: selectedIndex == 0
                   ? theme.colorScheme.primary
                   : theme.colorScheme.outline,
-              fontWeight:
-                  selectedIndex == 0 ? FontWeight.w500 : FontWeight.normal,
+              fontWeight: selectedIndex == 0
+                  ? FontWeight.w500
+                  : FontWeight.normal,
             ),
           ),
           const SizedBox(width: 8),
@@ -282,8 +276,9 @@ class LabeledSlidingToggle<T> extends StatelessWidget {
               color: selectedIndex == 1
                   ? theme.colorScheme.primary
                   : theme.colorScheme.outline,
-              fontWeight:
-                  selectedIndex == 1 ? FontWeight.w500 : FontWeight.normal,
+              fontWeight: selectedIndex == 1
+                  ? FontWeight.w500
+                  : FontWeight.normal,
             ),
           ),
         ],

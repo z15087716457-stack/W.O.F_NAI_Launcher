@@ -37,11 +37,11 @@ class DanbooruTagRecord {
   });
 
   Map<String, dynamic> toMap() => {
-        'tag': tag,
-        'category': category,
-        'post_count': postCount,
-        'last_updated': lastUpdated,
-      };
+    'tag': tag,
+    'category': category,
+    'post_count': postCount,
+    'last_updated': lastUpdated,
+  };
 
   factory DanbooruTagRecord.fromMap(Map<String, dynamic> map) {
     return DanbooruTagRecord(
@@ -100,7 +100,9 @@ class DanbooruTagDataSource extends BaseDataSource {
   List<DanbooruTagRecord>? _hotTagsCache;
 
   // 租借助手（新架构）
-  final SimpleLeaseHelper _leaseHelper = SimpleLeaseHelper('DanbooruTagDataSource');
+  final SimpleLeaseHelper _leaseHelper = SimpleLeaseHelper(
+    'DanbooruTagDataSource',
+  );
 
   @override
   String get name => 'danbooruTag';
@@ -127,22 +129,19 @@ class DanbooruTagDataSource extends BaseDataSource {
 
     final normalizedTag = tag.toLowerCase().trim();
 
-    return await _leaseHelper.execute(
-      'getByName',
-      (db) async {
-        final result = await db.query(
-          _tableName,
-          columns: ['tag', 'category', 'post_count', 'last_updated'],
-          where: 'tag = ?',
-          whereArgs: [normalizedTag],
-          limit: 1,
-        );
+    return await _leaseHelper.execute('getByName', (db) async {
+      final result = await db.query(
+        _tableName,
+        columns: ['tag', 'category', 'post_count', 'last_updated'],
+        where: 'tag = ?',
+        whereArgs: [normalizedTag],
+        limit: 1,
+      );
 
-        if (result.isEmpty) return null;
+      if (result.isEmpty) return null;
 
-        return DanbooruTagRecord.fromMap(result.first);
-      },
-    );
+      return DanbooruTagRecord.fromMap(result.first);
+    });
   }
 
   /// 批量获取标签记录
@@ -154,18 +153,17 @@ class DanbooruTagDataSource extends BaseDataSource {
     final normalizedTags = tags.map((t) => t.toLowerCase().trim()).toList();
     final placeholders = normalizedTags.map((_) => '?').join(',');
 
-    return await _leaseHelper.execute(
-      'getByNames',
-      (db) async {
-        final result = await db.rawQuery(
-          'SELECT tag, category, post_count, last_updated '
-          'FROM $_tableName WHERE tag IN ($placeholders)',
-          normalizedTags,
-        );
+    return await _leaseHelper.execute('getByNames', (db) async {
+      final result = await db.rawQuery(
+        'SELECT tag, category, post_count, last_updated '
+        'FROM $_tableName WHERE tag IN ($placeholders)',
+        normalizedTags,
+      );
 
-        return result.map<DanbooruTagRecord>((row) => DanbooruTagRecord.fromMap(row)).toList();
-      },
-    );
+      return result
+          .map<DanbooruTagRecord>((row) => DanbooruTagRecord.fromMap(row))
+          .toList();
+    });
   }
 
   /// 搜索标签（前缀匹配）
@@ -181,34 +179,33 @@ class DanbooruTagDataSource extends BaseDataSource {
 
     final normalizedQuery = query.toLowerCase().trim();
 
-    return await _leaseHelper.execute(
-      'search',
-      (db) async {
-        String whereClause = 'tag LIKE ?';
-        final List<dynamic> whereArgs = ['$normalizedQuery%'];
+    return await _leaseHelper.execute('search', (db) async {
+      String whereClause = 'tag LIKE ?';
+      final List<dynamic> whereArgs = ['$normalizedQuery%'];
 
-        if (category != null) {
-          whereClause += ' AND category = ?';
-          whereArgs.add(category);
-        }
+      if (category != null) {
+        whereClause += ' AND category = ?';
+        whereArgs.add(category);
+      }
 
-        if (minPostCount > 0) {
-          whereClause += ' AND post_count >= ?';
-          whereArgs.add(minPostCount);
-        }
+      if (minPostCount > 0) {
+        whereClause += ' AND post_count >= ?';
+        whereArgs.add(minPostCount);
+      }
 
-        final result = await db.query(
-          _tableName,
-          columns: ['tag', 'category', 'post_count', 'last_updated'],
-          where: whereClause,
-          whereArgs: whereArgs,
-          orderBy: 'post_count DESC',
-          limit: limit,
-        );
+      final result = await db.query(
+        _tableName,
+        columns: ['tag', 'category', 'post_count', 'last_updated'],
+        where: whereClause,
+        whereArgs: whereArgs,
+        orderBy: 'post_count DESC',
+        limit: limit,
+      );
 
-        return result.map<DanbooruTagRecord>((row) => DanbooruTagRecord.fromMap(row)).toList();
-      },
-    );
+      return result
+          .map<DanbooruTagRecord>((row) => DanbooruTagRecord.fromMap(row))
+          .toList();
+    });
   }
 
   /// 模糊搜索标签（包含匹配）
@@ -224,34 +221,33 @@ class DanbooruTagDataSource extends BaseDataSource {
 
     final normalizedQuery = query.toLowerCase().trim();
 
-    return await _leaseHelper.execute(
-      'searchFuzzy',
-      (db) async {
-        String whereClause = 'tag LIKE ?';
-        final List<dynamic> whereArgs = ['%$normalizedQuery%'];
+    return await _leaseHelper.execute('searchFuzzy', (db) async {
+      String whereClause = 'tag LIKE ?';
+      final List<dynamic> whereArgs = ['%$normalizedQuery%'];
 
-        if (category != null) {
-          whereClause += ' AND category = ?';
-          whereArgs.add(category);
-        }
+      if (category != null) {
+        whereClause += ' AND category = ?';
+        whereArgs.add(category);
+      }
 
-        if (minPostCount > 0) {
-          whereClause += ' AND post_count >= ?';
-          whereArgs.add(minPostCount);
-        }
+      if (minPostCount > 0) {
+        whereClause += ' AND post_count >= ?';
+        whereArgs.add(minPostCount);
+      }
 
-        final result = await db.query(
-          _tableName,
-          columns: ['tag', 'category', 'post_count', 'last_updated'],
-          where: whereClause,
-          whereArgs: whereArgs,
-          orderBy: 'post_count DESC',
-          limit: limit,
-        );
+      final result = await db.query(
+        _tableName,
+        columns: ['tag', 'category', 'post_count', 'last_updated'],
+        where: whereClause,
+        whereArgs: whereArgs,
+        orderBy: 'post_count DESC',
+        limit: limit,
+      );
 
-        return result.map<DanbooruTagRecord>((row) => DanbooruTagRecord.fromMap(row)).toList();
-      },
-    );
+      return result
+          .map<DanbooruTagRecord>((row) => DanbooruTagRecord.fromMap(row))
+          .toList();
+    });
   }
 
   /// 获取热门标签
@@ -264,41 +260,43 @@ class DanbooruTagDataSource extends BaseDataSource {
   }) async {
     // 检查缓存
     if (_hotTagsCache != null) {
-      return _hotTagsCache!.where((tag) {
-        if (category != null && tag.category != category) return false;
-        if (tag.postCount < minPostCount) return false;
-        return true;
-      }).take(limit).toList();
+      return _hotTagsCache!
+          .where((tag) {
+            if (category != null && tag.category != category) return false;
+            if (tag.postCount < minPostCount) return false;
+            return true;
+          })
+          .take(limit)
+          .toList();
     }
 
-    return await _leaseHelper.execute(
-      'getHotTags',
-      (db) async {
-        String whereClause = 'post_count >= ?';
-        final List<dynamic> whereArgs = [minPostCount];
+    return await _leaseHelper.execute('getHotTags', (db) async {
+      String whereClause = 'post_count >= ?';
+      final List<dynamic> whereArgs = [minPostCount];
 
-        if (category != null) {
-          whereClause += ' AND category = ?';
-          whereArgs.add(category);
-        }
+      if (category != null) {
+        whereClause += ' AND category = ?';
+        whereArgs.add(category);
+      }
 
-        final result = await db.query(
-          _tableName,
-          columns: ['tag', 'category', 'post_count', 'last_updated'],
-          where: whereClause,
-          whereArgs: whereArgs,
-          orderBy: 'post_count DESC',
-          limit: limit,
-        );
+      final result = await db.query(
+        _tableName,
+        columns: ['tag', 'category', 'post_count', 'last_updated'],
+        where: whereClause,
+        whereArgs: whereArgs,
+        orderBy: 'post_count DESC',
+        limit: limit,
+      );
 
-        final tags = result.map<DanbooruTagRecord>((row) => DanbooruTagRecord.fromMap(row)).toList();
+      final tags = result
+          .map<DanbooruTagRecord>((row) => DanbooruTagRecord.fromMap(row))
+          .toList();
 
-        // 缓存结果
-        _hotTagsCache = tags;
+      // 缓存结果
+      _hotTagsCache = tags;
 
-        return tags;
-      },
-    );
+      return tags;
+    });
   }
 
   /// 清除缓存
@@ -320,18 +318,16 @@ class DanbooruTagDataSource extends BaseDataSource {
   ///
   /// 使用新架构：ConnectionLease 连接生命周期管理
   Future<void> _ensureTableExists() async {
-    await _leaseHelper.execute(
-      'ensureTableExists',
-      (db) async {
-        // 验证表是否存在
-        final result = await db.rawQuery(
-          "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-          [_tableName],
-        );
+    await _leaseHelper.execute('ensureTableExists', (db) async {
+      // 验证表是否存在
+      final result = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+        [_tableName],
+      );
 
-        if (result.isEmpty) {
-          // 创建表
-          await db.execute('''
+      if (result.isEmpty) {
+        // 创建表
+        await db.execute('''
             CREATE TABLE IF NOT EXISTS $_tableName (
               tag TEXT PRIMARY KEY,
               category INTEGER NOT NULL DEFAULT 0,
@@ -340,43 +336,39 @@ class DanbooruTagDataSource extends BaseDataSource {
             )
           ''');
 
-          // 创建索引
-          await db.execute('''
+        // 创建索引
+        await db.execute('''
             CREATE INDEX IF NOT EXISTS idx_danbooru_tags_category
             ON $_tableName(category)
           ''');
 
-          await db.execute('''
+        await db.execute('''
             CREATE INDEX IF NOT EXISTS idx_danbooru_tags_post_count
             ON $_tableName(post_count DESC)
           ''');
 
-          await db.execute('''
+        await db.execute('''
             CREATE INDEX IF NOT EXISTS idx_danbooru_tags_category_post_count
             ON $_tableName(category, post_count DESC)
           ''');
 
-          AppLogger.i('Created danbooru_tags table', 'DanbooruTagDS');
-        }
-      },
-    );
+        AppLogger.i('Created danbooru_tags table', 'DanbooruTagDS');
+      }
+    });
   }
 
   @override
   Future<DataSourceHealth> doCheckHealth() async {
     try {
-      return await _leaseHelper.execute(
-        'checkHealth',
-        (db) async {
-          // 简单的健康检查：尝试查询
-          await db.rawQuery('SELECT 1');
-          return DataSourceHealth(
-            status: HealthStatus.healthy,
-            message: 'DanbooruTagDataSource is healthy',
-            timestamp: DateTime.now(),
-          );
-        },
-      );
+      return await _leaseHelper.execute('checkHealth', (db) async {
+        // 简单的健康检查：尝试查询
+        await db.rawQuery('SELECT 1');
+        return DataSourceHealth(
+          status: HealthStatus.healthy,
+          message: 'DanbooruTagDataSource is healthy',
+          timestamp: DateTime.now(),
+        );
+      });
     } catch (e) {
       return DataSourceHealth(
         status: HealthStatus.degraded,
@@ -412,34 +404,35 @@ class DanbooruTagDataSource extends BaseDataSource {
 
     final normalizedPrefix = prefix.toLowerCase().trim();
 
-    return await _leaseHelper.execute(
-      'searchByPrefix',
-      (db) async {
-        if (category != null) {
-          final result = await db.query(
-            _tableName,
-            columns: ['tag', 'category', 'post_count', 'last_updated'],
-            where: 'tag LIKE ? AND category = ?',
-            whereArgs: ['$normalizedPrefix%', category],
-            orderBy: 'post_count DESC',
-            limit: limit,
-          );
+    return await _leaseHelper.execute('searchByPrefix', (db) async {
+      if (category != null) {
+        final result = await db.query(
+          _tableName,
+          columns: ['tag', 'category', 'post_count', 'last_updated'],
+          where: 'tag LIKE ? AND category = ?',
+          whereArgs: ['$normalizedPrefix%', category],
+          orderBy: 'post_count DESC',
+          limit: limit,
+        );
 
-          return result.map<DanbooruTagRecord>((row) => DanbooruTagRecord.fromMap(row)).toList();
-        } else {
-          final result = await db.query(
-            _tableName,
-            columns: ['tag', 'category', 'post_count', 'last_updated'],
-            where: 'tag LIKE ?',
-            whereArgs: ['$normalizedPrefix%'],
-            orderBy: 'post_count DESC',
-            limit: limit,
-          );
+        return result
+            .map<DanbooruTagRecord>((row) => DanbooruTagRecord.fromMap(row))
+            .toList();
+      } else {
+        final result = await db.query(
+          _tableName,
+          columns: ['tag', 'category', 'post_count', 'last_updated'],
+          where: 'tag LIKE ?',
+          whereArgs: ['$normalizedPrefix%'],
+          orderBy: 'post_count DESC',
+          limit: limit,
+        );
 
-          return result.map<DanbooruTagRecord>((row) => DanbooruTagRecord.fromMap(row)).toList();
-        }
-      },
-    );
+        return result
+            .map<DanbooruTagRecord>((row) => DanbooruTagRecord.fromMap(row))
+            .toList();
+      }
+    });
   }
 
   /// 检查标签是否存在
@@ -450,20 +443,17 @@ class DanbooruTagDataSource extends BaseDataSource {
 
     final normalizedTag = tag.toLowerCase().trim();
 
-    return await _leaseHelper.execute(
-      'exists',
-      (db) async {
-        final result = await db.query(
-          _tableName,
-          columns: ['tag'],
-          where: 'tag = ?',
-          whereArgs: [normalizedTag],
-          limit: 1,
-        );
+    return await _leaseHelper.execute('exists', (db) async {
+      final result = await db.query(
+        _tableName,
+        columns: ['tag'],
+        where: 'tag = ?',
+        whereArgs: [normalizedTag],
+        limit: 1,
+      );
 
-        return result.isNotEmpty;
-      },
-    );
+      return result.isNotEmpty;
+    });
   }
 
   /// 批量检查标签是否存在
@@ -475,17 +465,14 @@ class DanbooruTagDataSource extends BaseDataSource {
     final normalizedTags = tags.map((t) => t.toLowerCase().trim()).toList();
     final placeholders = normalizedTags.map((_) => '?').join(',');
 
-    return await _leaseHelper.execute(
-      'existsBatch',
-      (db) async {
-        final result = await db.rawQuery(
-          'SELECT tag FROM $_tableName WHERE tag IN ($placeholders)',
-          normalizedTags,
-        );
+    return await _leaseHelper.execute('existsBatch', (db) async {
+      final result = await db.rawQuery(
+        'SELECT tag FROM $_tableName WHERE tag IN ($placeholders)',
+        normalizedTags,
+      );
 
-        return result.map((row) => row['tag'] as String).toSet();
-      },
-    );
+      return result.map((row) => row['tag'] as String).toSet();
+    });
   }
 
   @override
@@ -497,23 +484,20 @@ class DanbooruTagDataSource extends BaseDataSource {
   ///
   /// 使用新架构：ConnectionLease 连接生命周期管理
   Future<int> getCount({int? category}) async {
-    return await _leaseHelper.execute(
-      'getCount',
-      (db) async {
-        if (category != null) {
-          final result = await db.rawQuery(
-            'SELECT COUNT(*) as count FROM $_tableName WHERE category = ?',
-            [category],
-          );
-          return (result.first['count'] as num?)?.toInt() ?? 0;
-        } else {
-          final result = await db.rawQuery(
-            'SELECT COUNT(*) as count FROM $_tableName',
-          );
-          return (result.first['count'] as num?)?.toInt() ?? 0;
-        }
-      },
-    );
+    return await _leaseHelper.execute('getCount', (db) async {
+      if (category != null) {
+        final result = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM $_tableName WHERE category = ?',
+          [category],
+        );
+        return (result.first['count'] as num?)?.toInt() ?? 0;
+      } else {
+        final result = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM $_tableName',
+        );
+        return (result.first['count'] as num?)?.toInt() ?? 0;
+      }
+    });
   }
 
   /// 批量插入标签记录
@@ -522,29 +506,25 @@ class DanbooruTagDataSource extends BaseDataSource {
   Future<void> upsertBatch(List<DanbooruTagRecord> records) async {
     if (records.isEmpty) return;
 
-    await _leaseHelper.execute(
-      'upsertBatch',
-      (db) async {
-        final batch = db.batch();
+    await _leaseHelper.execute('upsertBatch', (db) async {
+      final batch = db.batch();
 
-        for (final record in records) {
-          batch.rawInsert(
-            'INSERT OR REPLACE INTO $_tableName (tag, category, post_count, last_updated) VALUES (?, ?, ?, ?)',
-            [
-              record.tag.toLowerCase().trim(),
-              record.category,
-              record.postCount,
-              record.lastUpdated,
-            ],
-          );
-        }
+      for (final record in records) {
+        batch.rawInsert(
+          'INSERT OR REPLACE INTO $_tableName (tag, category, post_count, last_updated) VALUES (?, ?, ?, ?)',
+          [
+            record.tag.toLowerCase().trim(),
+            record.category,
+            record.postCount,
+            record.lastUpdated,
+          ],
+        );
+      }
 
-        await batch.commit(noResult: true);
+      await batch.commit(noResult: true);
 
-        // 清除热门标签缓存
-        _hotTagsCache = null;
-      },
-    );
+      // 清除热门标签缓存
+      _hotTagsCache = null;
+    });
   }
-
 }

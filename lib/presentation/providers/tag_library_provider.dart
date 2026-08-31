@@ -113,10 +113,7 @@ class TagLibraryNotifier extends _$TagLibraryNotifier {
         clearError: true,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -221,8 +218,10 @@ class TagLibraryNotifier extends _$TagLibraryNotifier {
 
   /// 设置指定分类的内置词库开关
   Future<void> setBuiltinEnabled(TagSubCategory category, bool enabled) async {
-    final newConfig =
-        state.categoryFilterConfig.setBuiltinEnabled(category, enabled);
+    final newConfig = state.categoryFilterConfig.setBuiltinEnabled(
+      category,
+      enabled,
+    );
     await updateCategoryFilterConfig(newConfig);
   }
 
@@ -253,10 +252,7 @@ class TagLibraryNotifier extends _$TagLibraryNotifier {
   Future<void> resetToBuiltin() async {
     await _libraryService.clearCache();
     final library = await _libraryService.getAvailableLibrary();
-    state = state.copyWith(
-      library: library,
-      clearError: true,
-    );
+    state = state.copyWith(library: library, clearError: true);
   }
 
   /// 合并 Pool 标签到当前词库
@@ -267,8 +263,10 @@ class TagLibraryNotifier extends _$TagLibraryNotifier {
   ) async {
     if (state.library == null || poolTags.isEmpty) return;
 
-    final mergedLibrary =
-        _libraryService.mergePoolTags(state.library!, poolTags);
+    final mergedLibrary = _libraryService.mergePoolTags(
+      state.library!,
+      poolTags,
+    );
     await _libraryService.saveLibrary(mergedLibrary);
     state = state.copyWith(library: mergedLibrary);
   }
@@ -281,8 +279,10 @@ class TagLibraryNotifier extends _$TagLibraryNotifier {
   ) async {
     if (state.library == null || tagGroupTags.isEmpty) return;
 
-    final mergedLibrary =
-        _libraryService.mergeTagGroupTags(state.library!, tagGroupTags);
+    final mergedLibrary = _libraryService.mergeTagGroupTags(
+      state.library!,
+      tagGroupTags,
+    );
     await _libraryService.saveLibrary(mergedLibrary);
     state = state.copyWith(library: mergedLibrary);
   }

@@ -117,42 +117,39 @@ void main() {
       await tempDir.delete(recursive: true);
     });
 
-    test(
-      'bulkDelete 后 currentImages 立即不含被删路径（不调 loadPage）',
-      () async {
-        final galleryNotifier = container.read(
-          localGalleryNotifierProvider.notifier,
-        );
-        await galleryNotifier.initialize();
-        await galleryNotifier.loadPage(0);
+    test('bulkDelete 后 currentImages 立即不含被删路径（不调 loadPage）', () async {
+      final galleryNotifier = container.read(
+        localGalleryNotifierProvider.notifier,
+      );
+      await galleryNotifier.initialize();
+      await galleryNotifier.loadPage(0);
 
-        var state = container.read(localGalleryNotifierProvider);
-        expect(state.currentImages.length, 3, reason: '删除前当前页 3 张');
+      var state = container.read(localGalleryNotifierProvider);
+      expect(state.currentImages.length, 3, reason: '删除前当前页 3 张');
 
-        // 与 BulkOperationNotifier.bulkDelete 相同的编排
-        await dataSource.batchMarkAsDeleted([fileA.path]);
-        await const GalleryDeletePoolStore().addAll([fileA.path]);
-        await galleryNotifier.removeDeletedImagesFromMemory([fileA.path]);
+      // 与 BulkOperationNotifier.bulkDelete 相同的编排
+      await dataSource.batchMarkAsDeleted([fileA.path]);
+      await const GalleryDeletePoolStore().addAll([fileA.path]);
+      await galleryNotifier.removeDeletedImagesFromMemory([fileA.path]);
 
-        state = container.read(localGalleryNotifierProvider);
-        expect(
-          state.currentImages.map((r) => r.path),
-          isNot(contains(fileA.path)),
-          reason: '删除后 currentImages 应立即不含被删路径',
-        );
-        expect(state.currentImages.length, 2);
-        expect(state.totalCount, 2);
+      state = container.read(localGalleryNotifierProvider);
+      expect(
+        state.currentImages.map((r) => r.path),
+        isNot(contains(fileA.path)),
+        reason: '删除后 currentImages 应立即不含被删路径',
+      );
+      expect(state.currentImages.length, 2);
+      expect(state.totalCount, 2);
 
-        // 防线：随后任何 loadPage 也不得复活
-        await galleryNotifier.loadPage(state.currentPage);
-        state = container.read(localGalleryNotifierProvider);
-        expect(
-          state.currentImages.map((r) => r.path),
-          isNot(contains(fileA.path)),
-          reason: 'loadPage 不得复活软删文件',
-        );
-      },
-    );
+      // 防线：随后任何 loadPage 也不得复活
+      await galleryNotifier.loadPage(state.currentPage);
+      state = container.read(localGalleryNotifierProvider);
+      expect(
+        state.currentImages.map((r) => r.path),
+        isNot(contains(fileA.path)),
+        reason: 'loadPage 不得复活软删文件',
+      );
+    });
   });
 }
 

@@ -188,11 +188,11 @@ class _ThumbnailDisplayState extends State<ThumbnailDisplay> {
   }
 
   Widget _buildError() => Container(
-        width: widget.width,
-        height: widget.height,
-        color: Colors.grey.shade800,
-        child: const Icon(Icons.broken_image_outlined, color: Colors.white38),
-      );
+    width: widget.width,
+    height: widget.height,
+    color: Colors.grey.shade800,
+    child: const Icon(Icons.broken_image_outlined, color: Colors.white38),
+  );
 
   static int? _decodeCacheExtent(
     double logicalExtent,

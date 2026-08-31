@@ -26,17 +26,28 @@ class CharacterPromptRepository {
     final configJson = _box.get(_configKey) as String?;
 
     if (configJson == null || configJson.isEmpty) {
-      AppLogger.d('No character prompt config found, using default', 'CharacterPromptRepo');
+      AppLogger.d(
+        'No character prompt config found, using default',
+        'CharacterPromptRepo',
+      );
       return const CharacterPromptConfig();
     }
 
     try {
       final decoded = jsonDecode(configJson) as Map<String, dynamic>;
       final config = CharacterPromptConfig.fromJson(decoded);
-      AppLogger.d('Loaded character prompt config with ${config.characters.length} characters', 'CharacterPromptRepo');
+      AppLogger.d(
+        'Loaded character prompt config with ${config.characters.length} characters',
+        'CharacterPromptRepo',
+      );
       return config;
     } catch (e, stack) {
-      AppLogger.e('Failed to load character prompt config: $e', e, stack, 'CharacterPromptRepo');
+      AppLogger.e(
+        'Failed to load character prompt config: $e',
+        e,
+        stack,
+        'CharacterPromptRepo',
+      );
       return const CharacterPromptConfig();
     }
   }
@@ -48,10 +59,18 @@ class CharacterPromptRepository {
     try {
       final json = jsonEncode(config.toJson());
       await _box.put(_configKey, json);
-      AppLogger.d('Saved character prompt config with ${config.characters.length} characters', 'CharacterPromptRepo');
+      AppLogger.d(
+        'Saved character prompt config with ${config.characters.length} characters',
+        'CharacterPromptRepo',
+      );
       return true;
     } catch (e, stack) {
-      AppLogger.e('Failed to save character prompt config: $e', e, stack, 'CharacterPromptRepo');
+      AppLogger.e(
+        'Failed to save character prompt config: $e',
+        e,
+        stack,
+        'CharacterPromptRepo',
+      );
       return false;
     }
   }
@@ -65,7 +84,12 @@ class CharacterPromptRepository {
       AppLogger.d('Cleared character prompt config', 'CharacterPromptRepo');
       return true;
     } catch (e, stack) {
-      AppLogger.e('Failed to clear character prompt config: $e', e, stack, 'CharacterPromptRepo');
+      AppLogger.e(
+        'Failed to clear character prompt config: $e',
+        e,
+        stack,
+        'CharacterPromptRepo',
+      );
       return false;
     }
   }

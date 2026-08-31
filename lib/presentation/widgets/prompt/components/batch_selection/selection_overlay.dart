@@ -154,10 +154,7 @@ class _SelectionBoxPainter extends CustomPainter {
   final Rect rect;
   final Color color;
 
-  _SelectionBoxPainter({
-    required this.rect,
-    required this.color,
-  });
+  _SelectionBoxPainter({required this.rect, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {

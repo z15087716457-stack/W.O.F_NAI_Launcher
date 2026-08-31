@@ -85,10 +85,7 @@ abstract class BaseHiveStorage<T> {
   /// 保存 JSON 对象（单值存储模式）
   ///
   /// 将整个对象序列化为 JSON 存储到 [storageKey]
-  Future<void> saveAsJson(
-    Map<String, dynamic> json, {
-    String? key,
-  }) async {
+  Future<void> saveAsJson(Map<String, dynamic> json, {String? key}) async {
     final targetKey = key ?? storageKey;
     if (targetKey == null) {
       throw ArgumentError('storageKey must be provided for JSON storage');
@@ -188,7 +185,9 @@ abstract class BaseHiveStorage<T> {
   /// 获取 Box 长度
   int get length {
     if (useLazyLoading) {
-      throw StateError('Cannot get length in lazy mode. Use getLength() instead.');
+      throw StateError(
+        'Cannot get length in lazy mode. Use getLength() instead.',
+      );
     }
     return box.length;
   }

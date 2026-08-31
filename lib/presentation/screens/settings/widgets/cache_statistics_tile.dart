@@ -11,12 +11,14 @@ import '../../../widgets/common/app_toast.dart';
 ///
 /// 使用 autoDispose 确保组件销毁时释放资源
 /// 通过统计信息失效回调机制实现实时刷新
-final cacheStatisticsProvider =
-    FutureProvider.autoDispose<CacheStatistics>((ref) async {
+final cacheStatisticsProvider = FutureProvider.autoDispose<CacheStatistics>((
+  ref,
+) async {
   GalleryCacheManager().registerOnStatisticsInvalidated(ref.invalidateSelf);
   ref.onDispose(
-    () => GalleryCacheManager()
-        .unregisterOnStatisticsInvalidated(ref.invalidateSelf),
+    () => GalleryCacheManager().unregisterOnStatisticsInvalidated(
+      ref.invalidateSelf,
+    ),
   );
   return await GalleryCacheManager().getStatistics();
 });
@@ -269,10 +271,7 @@ class _DatabaseIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return _CacheIndicator(
       label: context.l10n.cacheStats_l3Sqlite,
-      value: context.l10n.cacheStats_databaseValue(
-        imageCount,
-        metadataCount,
-      ),
+      value: context.l10n.cacheStats_databaseValue(imageCount, metadataCount),
       icon: Icons.table_chart,
       color: Colors.purple,
     );

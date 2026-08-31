@@ -57,8 +57,10 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
   }
 
   void _updateWeight(double weight) {
-    final clampedWeight =
-        weight.clamp(PromptTag.minWeight, PromptTag.maxWeight);
+    final clampedWeight = weight.clamp(
+      PromptTag.minWeight,
+      PromptTag.maxWeight,
+    );
     setState(() {
       _currentWeight = clampedWeight;
     });
@@ -84,8 +86,8 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
     final theme = Theme.of(context);
     final chipColor = TagColors.fromCategory(widget.tag.category);
     final weightPercent = (_currentWeight * 100).round();
-    final bracketLayers =
-        ((_currentWeight - 1.0) / PromptTag.weightStep).round();
+    final bracketLayers = ((_currentWeight - 1.0) / PromptTag.weightStep)
+        .round();
 
     return Container(
       decoration: BoxDecoration(
@@ -168,8 +170,8 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
                         color: _currentWeight > 1.0
                             ? Colors.orange
                             : _currentWeight < 1.0
-                                ? Colors.blue
-                                : theme.colorScheme.onSurface,
+                            ? Colors.blue
+                            : theme.colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -177,8 +179,8 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
                       bracketLayers > 0
                           ? '${'{' * bracketLayers}...${'}' * bracketLayers}'
                           : bracketLayers < 0
-                              ? '${'[' * (-bracketLayers)}...${'[' * (-bracketLayers)}'
-                              : context.l10n.weight_noBrackets,
+                          ? '${'[' * (-bracketLayers)}...${'[' * (-bracketLayers)}'
+                          : context.l10n.weight_noBrackets,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.outline,
                         fontFamily: 'monospace',
@@ -208,21 +210,22 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
                         activeTrackColor: _currentWeight > 1.0
                             ? Colors.orange
                             : _currentWeight < 1.0
-                                ? Colors.blue
-                                : theme.colorScheme.primary,
+                            ? Colors.blue
+                            : theme.colorScheme.primary,
                         inactiveTrackColor:
                             theme.colorScheme.surfaceContainerHighest,
                         thumbColor: _currentWeight > 1.0
                             ? Colors.orange
                             : _currentWeight < 1.0
-                                ? Colors.blue
-                                : theme.colorScheme.primary,
-                        overlayColor: (_currentWeight > 1.0
-                                ? Colors.orange
-                                : _currentWeight < 1.0
+                            ? Colors.blue
+                            : theme.colorScheme.primary,
+                        overlayColor:
+                            (_currentWeight > 1.0
+                                    ? Colors.orange
+                                    : _currentWeight < 1.0
                                     ? Colors.blue
                                     : theme.colorScheme.primary)
-                            .withValues(alpha: 0.2),
+                                .withValues(alpha: 0.2),
                       ),
                       child: Slider(
                         value: _currentWeight,
@@ -325,19 +328,19 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
       onPressed: () => _updateWeight(weight),
       backgroundColor: isSelected
           ? (isReset
-              ? theme.colorScheme.primaryContainer
-              : weight > 1.0
-                  ? Colors.orange.withValues(alpha: 0.2)
-                  : Colors.blue.withValues(alpha: 0.2))
+                ? theme.colorScheme.primaryContainer
+                : weight > 1.0
+                ? Colors.orange.withValues(alpha: 0.2)
+                : Colors.blue.withValues(alpha: 0.2))
           : null,
       labelStyle: TextStyle(
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         color: isSelected
             ? (isReset
-                ? theme.colorScheme.onPrimaryContainer
-                : weight > 1.0
-                    ? Colors.orange.shade700
-                    : Colors.blue.shade700)
+                  ? theme.colorScheme.onPrimaryContainer
+                  : weight > 1.0
+                  ? Colors.orange.shade700
+                  : Colors.blue.shade700)
             : null,
       ),
       side: isSelected
@@ -345,8 +348,8 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
               color: isReset
                   ? theme.colorScheme.primary
                   : weight > 1.0
-                      ? Colors.orange
-                      : Colors.blue,
+                  ? Colors.orange
+                  : Colors.blue,
             )
           : null,
     );
@@ -371,10 +374,8 @@ class TagEditDialog extends StatefulWidget {
   }) {
     return showDialog(
       context: context,
-      builder: (context) => TagEditDialog(
-        tag: tag,
-        onTextChanged: onTextChanged,
-      ),
+      builder: (context) =>
+          TagEditDialog(tag: tag, onTextChanged: onTextChanged),
     );
   }
 

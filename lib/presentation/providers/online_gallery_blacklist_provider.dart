@@ -64,7 +64,7 @@ class OnlineGalleryBlacklistNotifier
   late final Future<void> _initFuture;
 
   OnlineGalleryBlacklistNotifier(this._ref, this._storage)
-      : super(const OnlineGalleryBlacklistState()) {
+    : super(const OnlineGalleryBlacklistState()) {
     _initFuture = _loadFromStorage();
   }
 
@@ -77,13 +77,15 @@ class OnlineGalleryBlacklistNotifier
       StorageKeys.onlineGalleryRemoteBlacklistTags,
       defaultValue: const <dynamic>[],
     );
-    final autoSync = _storage.getSetting<bool>(
+    final autoSync =
+        _storage.getSetting<bool>(
           StorageKeys.onlineGalleryBlacklistAutoSync,
           defaultValue: true,
         ) ??
         true;
-    final lastSyncAtMs =
-        _storage.getSetting<int>(StorageKeys.onlineGalleryBlacklistLastSyncAt);
+    final lastSyncAtMs = _storage.getSetting<int>(
+      StorageKeys.onlineGalleryBlacklistLastSyncAt,
+    );
     final lastSyncError = _storage.getSetting<String>(
       StorageKeys.onlineGalleryBlacklistLastSyncError,
     );
@@ -130,7 +132,10 @@ class OnlineGalleryBlacklistNotifier
 
   Future<void> setAutoSyncOnStartup(bool value) async {
     await ensureInitialized();
-    await _storage.setSetting(StorageKeys.onlineGalleryBlacklistAutoSync, value);
+    await _storage.setSetting(
+      StorageKeys.onlineGalleryBlacklistAutoSync,
+      value,
+    );
     state = state.copyWith(autoSyncOnStartup: value);
   }
 
@@ -207,18 +212,12 @@ class OnlineGalleryBlacklistNotifier
       AppLogger.w(message, 'OnlineGalleryBlacklist');
       AppLogger.d('$stack', 'OnlineGalleryBlacklist');
       await _saveLastSyncError(message);
-      state = state.copyWith(
-        isSyncing: false,
-        lastSyncError: message,
-      );
+      state = state.copyWith(isSyncing: false, lastSyncError: message);
     }
   }
 
   Set<String> _normalizeTags(Iterable<String> values) {
-    return values
-        .map(_normalizeTag)
-        .whereType<String>()
-        .toSet();
+    return values.map(_normalizeTag).whereType<String>().toSet();
   }
 
   String? _normalizeTag(String value) {
@@ -260,16 +259,24 @@ class OnlineGalleryBlacklistNotifier
   }
 
   Future<void> _saveLastSyncError(String message) async {
-    await _storage.setSetting(StorageKeys.onlineGalleryBlacklistLastSyncError, message);
+    await _storage.setSetting(
+      StorageKeys.onlineGalleryBlacklistLastSyncError,
+      message,
+    );
   }
 
   Future<void> _clearLastSyncError() async {
-    await _storage.deleteSetting(StorageKeys.onlineGalleryBlacklistLastSyncError);
+    await _storage.deleteSetting(
+      StorageKeys.onlineGalleryBlacklistLastSyncError,
+    );
   }
 }
 
-final onlineGalleryBlacklistNotifierProvider = StateNotifierProvider<
-    OnlineGalleryBlacklistNotifier, OnlineGalleryBlacklistState>((ref) {
-  final storage = ref.read(localStorageServiceProvider);
-  return OnlineGalleryBlacklistNotifier(ref, storage);
-});
+final onlineGalleryBlacklistNotifierProvider =
+    StateNotifierProvider<
+      OnlineGalleryBlacklistNotifier,
+      OnlineGalleryBlacklistState
+    >((ref) {
+      final storage = ref.read(localStorageServiceProvider);
+      return OnlineGalleryBlacklistNotifier(ref, storage);
+    });

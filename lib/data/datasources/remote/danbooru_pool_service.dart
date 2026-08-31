@@ -321,8 +321,9 @@ class DanbooruPoolService {
       if (tags.isNotEmpty) {
         // 按目标分类合并
         final existingTags = results[mapping.targetCategory] ?? [];
-        final existingNames =
-            existingTags.map((t) => t.tag.toLowerCase()).toSet();
+        final existingNames = existingTags
+            .map((t) => t.tag.toLowerCase())
+            .toSet();
 
         // 添加不重复的标签
         for (final tag in tags) {
@@ -337,8 +338,10 @@ class DanbooruPoolService {
     }
 
     // 计算总标签数
-    final totalTagCount =
-        results.values.fold<int>(0, (sum, list) => sum + list.length);
+    final totalTagCount = results.values.fold<int>(
+      0,
+      (sum, list) => sum + list.length,
+    );
 
     AppLogger.i(
       'Pool sync completed: $totalTagCount tags from ${enabledMappings.length} pools (concurrent)',
@@ -347,10 +350,7 @@ class DanbooruPoolService {
 
     onProgress?.call(PoolSyncProgress.completed(totalTagCount));
 
-    return PoolSyncResult(
-      categoryTags: results,
-      poolTagCounts: poolTagCounts,
-    );
+    return PoolSyncResult(categoryTags: results, poolTagCounts: poolTagCounts);
   }
 }
 

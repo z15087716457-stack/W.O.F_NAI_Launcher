@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/enums/precise_ref_type.dart';
+import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/core/network/request_builders/nai_image_request_builder.dart';
 import 'package:nai_launcher/core/utils/nai_api_utils.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
@@ -74,6 +75,54 @@ void main() {
         );
       },
     );
+
+    test('should build all V5 quality presets with exact text and hints', () async {
+      final cases = <({QualityTagPreset preset, String prompt, int hint, bool toggle})>[
+        (
+          preset: QualityTagPreset.standard,
+          prompt:
+              '1girl, transparent background, very aesthetic, masterpiece, no text',
+          hint: 1,
+          toggle: true,
+        ),
+        (
+          preset: QualityTagPreset.light,
+          prompt:
+              '1girl, transparent background, very aesthetic, amazing quality, no text',
+          hint: 3,
+          toggle: true,
+        ),
+        (
+          preset: QualityTagPreset.none,
+          prompt: '1girl, transparent background',
+          hint: 0,
+          toggle: false,
+        ),
+      ];
+
+      for (final entry in cases) {
+        final result = await NAIImageRequestBuilder(
+          params: ImageParams(
+            prompt: '1girl',
+            model: ImageModels.animeDiffusionV5Full,
+            qualityToggle: entry.toggle,
+            qualityTagPreset: entry.preset,
+            transparentBackground: true,
+            ucPreset: UcPresets.noneApiValue,
+          ),
+          encodeVibe: _fakeEncodeVibe,
+        ).build(sampler: Samplers.kEuler);
+
+        expect(result.effectivePrompt, entry.prompt);
+        expect(result.requestData['input'], entry.prompt);
+        expect(
+          result.requestParameters['v4_prompt']['caption']['base_caption'],
+          entry.prompt,
+        );
+        expect(result.requestParameters['qualityToggle'], entry.toggle);
+        expect(result.requestParameters['tag_hint_qt'], entry.hint);
+      }
+    });
 
     test('should match web SMEA thresholds and img2img disabling', () async {
       const belowThreshold = ImageParams(
@@ -210,7 +259,7 @@ void main() {
       },
     );
 
-    test('should return vibeEncodingMap only in non-stream mode', () async {
+    test('should return vibeEncodingMap in both stream modes', () async {
       final params = ImageParams(
         model: 'nai-diffusion-4-full',
         vibeReferencesV4: [
@@ -233,19 +282,17 @@ void main() {
         encodeVibe: _fakeEncodeVibe,
       );
 
+      final expectedEncodings = {0: 'encoded-vibe', 1: 'pre-encoded'};
       final nonStreamResult = await builder.build(
         sampler: 'sampler_non_stream',
       );
-      expect(nonStreamResult.vibeEncodingMap, {
-        0: 'encoded-vibe',
-        1: 'pre-encoded',
-      });
+      expect(nonStreamResult.vibeEncodingMap, expectedEncodings);
 
       final streamResult = await builder.build(
         sampler: 'sampler_stream',
         isStream: true,
       );
-      expect(streamResult.vibeEncodingMap, isEmpty);
+      expect(streamResult.vibeEncodingMap, expectedEncodings);
     });
 
     test('should re-encode a Vibe created for a different model', () async {

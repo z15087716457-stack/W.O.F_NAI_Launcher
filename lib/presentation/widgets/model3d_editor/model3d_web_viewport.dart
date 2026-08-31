@@ -18,9 +18,7 @@ class Model3dWebViewport extends StatelessWidget {
   Widget build(BuildContext context) {
     return InAppWebView(
       initialUrlRequest: URLRequest(url: WebUri.uri(editorUrl)),
-      initialSettings: InAppWebViewSettings(
-        transparentBackground: true,
-      ),
+      initialSettings: InAppWebViewSettings(transparentBackground: true),
       onWebViewCreated: (controller) {
         controller.addJavaScriptHandler(
           handlerName: 'naiModel3d',

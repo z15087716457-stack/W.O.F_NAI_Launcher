@@ -66,7 +66,11 @@ class VibeLibraryPathHelper {
 
     try {
       final appDir = await getApplicationDocumentsDirectory();
-      final defaultPath = p.join(appDir.path, 'NAI_Launcher', _defaultFolderName);
+      final defaultPath = p.join(
+        appDir.path,
+        'NAI_Launcher',
+        _defaultFolderName,
+      );
 
       // 检查是否需要从旧路径迁移
       await _migrateFromOldLocationIfNeeded(appDir.path, defaultPath);
@@ -77,7 +81,11 @@ class VibeLibraryPathHelper {
       AppLogger.e('获取应用目录失败', e);
       // 降级方案：使用临时目录
       final tempDir = Directory.systemTemp;
-      final fallbackPath = p.join(tempDir.path, 'nai_launcher', _defaultFolderName);
+      final fallbackPath = p.join(
+        tempDir.path,
+        'nai_launcher',
+        _defaultFolderName,
+      );
       _cachedDefaultPath = fallbackPath;
       return fallbackPath;
     }
@@ -87,7 +95,10 @@ class VibeLibraryPathHelper {
   ///
   /// 旧位置：{appDir}/vibes/
   /// 新位置：{appDir}/NAI_Launcher/vibes/
-  Future<void> _migrateFromOldLocationIfNeeded(String appDirPath, String newPath) async {
+  Future<void> _migrateFromOldLocationIfNeeded(
+    String appDirPath,
+    String newPath,
+  ) async {
     try {
       // 如果新路径已存在且有文件，不需要迁移
       final newDir = Directory(newPath);

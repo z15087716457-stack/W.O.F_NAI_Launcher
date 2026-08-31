@@ -129,46 +129,64 @@ void main() {
     skip: kDisableInAppUpdate(),
   );
 
-  test('successful checks use the regular 24 hour interval', () async {
-    final service = buildService(
-      (current) async => VersionInfo(
-        version: current,
-        currentVersion: current,
-        isNewer: false,
-      ),
-    );
+  test(
+    'successful checks use the regular 24 hour interval',
+    () async {
+      final service = buildService(
+        (current) async => VersionInfo(
+          version: current,
+          currentVersion: current,
+          isNewer: false,
+        ),
+      );
 
-    expect(await service.checkForUpdates(), isNull);
-    expect(storage.success, now);
-    expect(await service.shouldCheck(), isFalse);
+      expect(await service.checkForUpdates(), isNull);
+      expect(storage.success, now);
+      expect(await service.shouldCheck(), isFalse);
 
-    now = now.add(const Duration(hours: 24));
-    expect(await service.shouldCheck(), isTrue);
-  }, skip: kDisableInAppUpdate());
+      now = now.add(const Duration(hours: 24));
+      expect(await service.shouldCheck(), isTrue);
+    },
+    skip: kDisableInAppUpdate(),
+  );
 
-  test('remind later suppresses a known update until the deadline', () async {
-    final service = buildService(
-      (current) async =>
-          VersionInfo(version: '2.0.0', currentVersion: current, isNewer: true),
-    );
+  test(
+    'remind later suppresses a known update until the deadline',
+    () async {
+      final service = buildService(
+        (current) async => VersionInfo(
+          version: '2.0.0',
+          currentVersion: current,
+          isNewer: true,
+        ),
+      );
 
-    expect(await service.checkForUpdates(), isNotNull);
-    await service.remindLater();
-    expect(storage.known, '2.0.0');
-    expect(await service.shouldCheck(), isFalse);
+      expect(await service.checkForUpdates(), isNotNull);
+      await service.remindLater();
+      expect(storage.known, '2.0.0');
+      expect(await service.shouldCheck(), isFalse);
 
-    now = now.add(const Duration(hours: 4));
-    expect(await service.shouldCheck(), isTrue);
-  }, skip: kDisableInAppUpdate());
+      now = now.add(const Duration(hours: 4));
+      expect(await service.shouldCheck(), isTrue);
+    },
+    skip: kDisableInAppUpdate(),
+  );
 
-  test('manual checks can reveal a previously skipped version', () async {
-    final service = buildService(
-      (current) async =>
-          VersionInfo(version: '2.0.0', currentVersion: current, isNewer: true),
-    );
-    await service.skipVersion('2.0.0');
+  test(
+    'manual checks can reveal a previously skipped version',
+    () async {
+      final service = buildService(
+        (current) async => VersionInfo(
+          version: '2.0.0',
+          currentVersion: current,
+          isNewer: true,
+        ),
+      );
+      await service.skipVersion('2.0.0');
 
-    expect(await service.checkForUpdates(), isNull);
-    expect(await service.checkForUpdates(ignoreSkipped: true), isNotNull);
-  }, skip: kDisableInAppUpdate());
+      expect(await service.checkForUpdates(), isNull);
+      expect(await service.checkForUpdates(ignoreSkipped: true), isNotNull);
+    },
+    skip: kDisableInAppUpdate(),
+  );
 }

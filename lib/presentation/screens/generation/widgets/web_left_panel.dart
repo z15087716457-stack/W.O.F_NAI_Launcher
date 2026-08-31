@@ -74,7 +74,8 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
   }
 
   void _toggleParamsMenu() {
-    final opening = _menuController.status == AnimationStatus.dismissed ||
+    final opening =
+        _menuController.status == AnimationStatus.dismissed ||
         _menuController.status == AnimationStatus.reverse;
     if (opening) {
       setState(() => _paramsMenuMounted = true);
@@ -98,9 +99,7 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
         : 40.0;
     final decoration = BoxDecoration(
       color: theme.colorScheme.surface,
-      border: Border(
-        right: BorderSide(color: theme.dividerColor, width: 1),
-      ),
+      border: Border(right: BorderSide(color: theme.dividerColor, width: 1)),
     );
 
     final child = layoutState.webLeftPanelExpanded
@@ -248,8 +247,9 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                                   border: Border(
                                     top: BorderSide(color: theme.dividerColor),
                                     left: BorderSide(color: theme.dividerColor),
-                                    right:
-                                        BorderSide(color: theme.dividerColor),
+                                    right: BorderSide(
+                                      color: theme.dividerColor,
+                                    ),
                                   ),
                                 ),
                                 child: const SingleChildScrollView(
@@ -315,8 +315,10 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                   const SizedBox(width: 4),
                   // 箭头随抽屉开合旋转（收起朝上提示拉出方向）
                   RotationTransition(
-                    turns: Tween<double>(begin: 0, end: 0.5)
-                        .animate(_menuAnimation),
+                    turns: Tween<double>(
+                      begin: 0,
+                      end: 0.5,
+                    ).animate(_menuAnimation),
                     child: const Icon(Icons.keyboard_arrow_up, size: 20),
                   ),
                 ],

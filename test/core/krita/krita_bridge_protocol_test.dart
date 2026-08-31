@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/core/krita/krita_bridge_models.dart';
 import 'package:nai_launcher/core/krita/krita_bridge_protocol.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
@@ -250,6 +251,26 @@ void main() {
   });
 
   group('KritaBridge request mapping', () {
+    test('quality_preset overrides legacy quality_toggle for generate', () {
+      const base = ImageParams(
+        qualityToggle: true,
+        qualityTagPreset: QualityTagPreset.standard,
+      );
+
+      final light = applyKritaParamsOverlay(base, {
+        'quality_preset': 'light',
+        'quality_toggle': false,
+      });
+      final legacyOff = applyKritaParamsOverlay(base, {
+        'quality_toggle': false,
+      });
+
+      expect(light.qualityToggle, isTrue);
+      expect(light.qualityTagPreset, QualityTagPreset.light);
+      expect(legacyOff.qualityToggle, isFalse);
+      expect(legacyOff.qualityTagPreset, QualityTagPreset.none);
+    });
+
     test('maps focused inpaint fields onto ImageParams and clamps context', () {
       final result = KritaBridgeProtocol.decodeIncoming(
         jsonEncode({

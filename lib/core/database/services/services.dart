@@ -23,19 +23,11 @@
 /// ```
 library;
 
-export 'completion_service.dart'
-    show
-        CompletionService,
-        CompletionResult;
+export 'completion_service.dart' show CompletionService, CompletionResult;
 
-export 'cooccurrence_service.dart'
-    show
-        CooccurrenceService,
-        Recommendation;
+export 'cooccurrence_service.dart' show CooccurrenceService, Recommendation;
 
-export 'translation_service.dart'
-    show
-        TranslationService;
+export 'translation_service.dart' show TranslationService;
 
 export 'service_providers.dart'
     show

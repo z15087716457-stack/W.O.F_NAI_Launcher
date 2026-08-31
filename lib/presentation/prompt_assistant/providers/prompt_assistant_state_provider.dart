@@ -33,10 +33,11 @@ class PromptAssistantOperationState {
   }
 }
 
-final promptAssistantStateProvider = StateNotifierProvider<
-    PromptAssistantStateNotifier, Map<String, PromptAssistantOperationState>>(
-  (ref) => PromptAssistantStateNotifier(),
-);
+final promptAssistantStateProvider =
+    StateNotifierProvider<
+      PromptAssistantStateNotifier,
+      Map<String, PromptAssistantOperationState>
+    >((ref) => PromptAssistantStateNotifier());
 
 class PromptAssistantStateNotifier
     extends StateNotifier<Map<String, PromptAssistantOperationState>> {
@@ -61,11 +62,9 @@ class PromptAssistantStateNotifier
   void startProcessing(String sessionId, String action) {
     _put(
       sessionId,
-      getState(sessionId).copyWith(
-        processing: true,
-        action: action,
-        clearError: true,
-      ),
+      getState(
+        sessionId,
+      ).copyWith(processing: true, action: action, clearError: true),
     );
   }
 
@@ -79,8 +78,9 @@ class PromptAssistantStateNotifier
   void setError(String sessionId, String error) {
     _put(
       sessionId,
-      getState(sessionId)
-          .copyWith(processing: false, action: null, error: error),
+      getState(
+        sessionId,
+      ).copyWith(processing: false, action: null, error: error),
     );
   }
 }

@@ -27,20 +27,14 @@ class SubtleBorders {
   ///
   /// 白色微光，60% 透明度，营造高级感
   static BoxBorder lightBorder(ColorScheme colorScheme) {
-    return Border.all(
-      color: Colors.white.withValues(alpha: 0.6),
-      width: 1.0,
-    );
+    return Border.all(color: Colors.white.withValues(alpha: 0.6), width: 1.0);
   }
 
   /// 暗色主题微光边框
   ///
   /// 降低强度至 15%，避免过亮
   static BoxBorder darkBorder(ColorScheme colorScheme) {
-    return Border.all(
-      color: Colors.white.withValues(alpha: 0.15),
-      width: 1.0,
-    );
+    return Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1.0);
   }
 
   /// 主题色微光边框（强调场景）
@@ -53,10 +47,7 @@ class SubtleBorders {
 
   /// 无边框
   static BoxBorder none() {
-    return Border.all(
-      color: Colors.transparent,
-      width: 0,
-    );
+    return Border.all(color: Colors.transparent, width: 0);
   }
 
   /// 获取 BorderSide（用于单边边框场景）
@@ -67,10 +58,7 @@ class SubtleBorders {
         width: 1.0,
       );
     }
-    return BorderSide(
-      color: Colors.white.withValues(alpha: 0.6),
-      width: 1.0,
-    );
+    return BorderSide(color: Colors.white.withValues(alpha: 0.6), width: 1.0);
   }
 
   /// 顶部高光边框（用于卡片顶部光泽效果）

@@ -44,10 +44,8 @@ class DataSourceInitProgress {
 }
 
 /// 刷新进度回调
-typedef DataSourceProgressCallback = void Function(
-  double progress,
-  String? message,
-);
+typedef DataSourceProgressCallback =
+    void Function(double progress, String? message);
 
 /// 懒加载数据源接口
 /// 统一共现数据、翻译数据、Danbooru标签的数据源架构
@@ -118,8 +116,9 @@ class UnifiedDataSourceManager {
     // 为每个数据源创建初始进度
     final progressMap = <String, DataSourceInitProgress>{};
     for (final service in _services) {
-      progressMap[service.serviceName] =
-          DataSourceInitProgress.initial(service.serviceName);
+      progressMap[service.serviceName] = DataSourceInitProgress.initial(
+        service.serviceName,
+      );
     }
 
     // 并行初始化所有数据源
@@ -272,10 +271,16 @@ class UnifiedDataSourceManagerV2 extends UnifiedDataSourceManager {
   Future<void> initializeAllLightweight() async {
     for (final service in _servicesV2.values) {
       try {
-        AppLogger.i('Lightweight init: ${service.serviceName}', 'UnifiedDataSourceV2');
+        AppLogger.i(
+          'Lightweight init: ${service.serviceName}',
+          'UnifiedDataSourceV2',
+        );
         await service.initializeLightweight();
       } catch (e) {
-        AppLogger.w('Lightweight init failed for ${service.serviceName}: $e', 'UnifiedDataSourceV2');
+        AppLogger.w(
+          'Lightweight init failed for ${service.serviceName}: $e',
+          'UnifiedDataSourceV2',
+        );
       }
     }
   }
@@ -287,7 +292,10 @@ class UnifiedDataSourceManagerV2 extends UnifiedDataSourceManager {
         try {
           await service.preloadHotDataInBackground();
         } catch (e) {
-          AppLogger.w('Hot data preload failed for ${service.serviceName}: $e', 'UnifiedDataSourceV2');
+          AppLogger.w(
+            'Hot data preload failed for ${service.serviceName}: $e',
+            'UnifiedDataSourceV2',
+          );
         }
       }),
     );

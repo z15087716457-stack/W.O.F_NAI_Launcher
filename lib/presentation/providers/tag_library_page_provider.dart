@@ -108,8 +108,9 @@ class TagLibraryPageState {
           selectedCategoryId!,
           ...categories.getDescendantIds(selectedCategoryId!),
         };
-        result =
-            result.where((e) => categoryIds.contains(e.categoryId)).toList();
+        result = result
+            .where((e) => categoryIds.contains(e.categoryId))
+            .toList();
       }
     }
 
@@ -287,17 +288,17 @@ class TagLibraryPageNotifier extends _$TagLibraryPageNotifier {
   }
 
   /// 更新条目（带同步）
-  /// 
+  ///
   /// 【新增】自动同步更新关联的固定词（双向同步）
   Future<void> updateEntry(TagLibraryEntry updatedEntry) async {
     await updateEntryWithoutSync(updatedEntry);
-    
+
     // 【新增】同步更新关联的固定词
     await _syncToFixedTags(updatedEntry);
   }
-  
+
   /// 【新增】更新条目（不带同步）
-  /// 
+  ///
   /// 用于从固定词反向同步时，避免循环同步
   Future<void> updateEntryWithoutSync(TagLibraryEntry updatedEntry) async {
     AppLogger.d(
@@ -329,9 +330,9 @@ class TagLibraryPageNotifier extends _$TagLibraryPageNotifier {
       'TagLibraryPageProvider',
     );
   }
-  
+
   /// 【新增】同步更新关联的固定词
-  /// 
+  ///
   /// 当词库条目更新时，自动更新所有 sourceEntryId 匹配的固定词
   Future<void> _syncToFixedTags(TagLibraryEntry entry) async {
     try {
@@ -344,8 +345,10 @@ class TagLibraryPageNotifier extends _$TagLibraryPageNotifier {
 
   /// 删除条目
   Future<void> deleteEntry(String entryId) async {
-    final newEntries =
-        state.entries.where((e) => e.id != entryId).toList().reindex();
+    final newEntries = state.entries
+        .where((e) => e.id != entryId)
+        .toList()
+        .reindex();
     state = state.copyWith(entries: newEntries);
     await _saveEntries();
   }
@@ -388,8 +391,10 @@ class TagLibraryPageNotifier extends _$TagLibraryPageNotifier {
 
   /// 批量删除条目
   Future<void> deleteEntries(List<String> entryIds) async {
-    final newEntries =
-        state.entries.where((e) => !entryIds.contains(e.id)).toList().reindex();
+    final newEntries = state.entries
+        .where((e) => !entryIds.contains(e.id))
+        .toList()
+        .reindex();
     state = state.copyWith(entries: newEntries);
     await _saveEntries();
   }
@@ -397,9 +402,9 @@ class TagLibraryPageNotifier extends _$TagLibraryPageNotifier {
   /// 根据ID获取条目
   TagLibraryEntry? getEntry(String entryId) {
     return state.entries.cast<TagLibraryEntry?>().firstWhere(
-          (e) => e?.id == entryId,
-          orElse: () => null,
-        );
+      (e) => e?.id == entryId,
+      orElse: () => null,
+    );
   }
 
   // ==================== 分类操作 ====================
@@ -447,8 +452,9 @@ class TagLibraryPageNotifier extends _$TagLibraryPageNotifier {
 
   /// 更新分类
   Future<void> updateCategory(TagLibraryCategory updatedCategory) async {
-    final index =
-        state.categories.indexWhere((c) => c.id == updatedCategory.id);
+    final index = state.categories.indexWhere(
+      (c) => c.id == updatedCategory.id,
+    );
     if (index == -1) return;
 
     final newCategories = [...state.categories];
@@ -483,7 +489,8 @@ class TagLibraryPageNotifier extends _$TagLibraryPageNotifier {
     state = state.copyWith(
       categories: newCategories,
       entries: newEntries,
-      clearSelectedCategory: state.selectedCategoryId != null &&
+      clearSelectedCategory:
+          state.selectedCategoryId != null &&
           categoryIds.contains(state.selectedCategoryId),
     );
 
@@ -561,11 +568,13 @@ class TagLibraryPageNotifier extends _$TagLibraryPageNotifier {
         .toList();
 
     // 合并到完整分类列表
-    final otherCategories =
-        state.categories.where((c) => c.parentId != parentId).toList();
+    final otherCategories = state.categories
+        .where((c) => c.parentId != parentId)
+        .toList();
 
-    state =
-        state.copyWith(categories: [...otherCategories, ...updatedSiblings]);
+    state = state.copyWith(
+      categories: [...otherCategories, ...updatedSiblings],
+    );
     await _saveCategories();
 
     AppLogger.d(
@@ -763,8 +772,9 @@ class TagLibraryPageNotifier extends _$TagLibraryPageNotifier {
         // 创建新ID（正常导入场景）
         final newCategory = TagLibraryCategory.create(
           name: newName,
-          parentId:
-              category.parentId != null ? idMapping[category.parentId] : null,
+          parentId: category.parentId != null
+              ? idMapping[category.parentId]
+              : null,
           sortOrder: startSortOrder++,
         );
         idMapping[category.id] = newCategory.id;

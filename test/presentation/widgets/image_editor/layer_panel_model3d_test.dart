@@ -45,8 +45,7 @@ class _StubInAppWebViewPlatform extends InAppWebViewPlatform {
   @override
   PlatformInAppWebViewWidget createPlatformInAppWebViewWidget(
     PlatformInAppWebViewWidgetCreationParams params,
-  ) =>
-      _StubInAppWebViewWidget(params);
+  ) => _StubInAppWebViewWidget(params);
 }
 
 class _StubInAppWebViewWidget extends PlatformInAppWebViewWidget {
@@ -71,8 +70,9 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     // 双击 3D 层会 push Model3dEditorScreen,其 initState 里
     // _defaultLibrary() 调 getApplicationSupportDirectory(),需 mock
-    PathProviderPlatform.instance =
-        _TestPathProviderPlatform(Directory.systemTemp.path);
+    PathProviderPlatform.instance = _TestPathProviderPlatform(
+      Directory.systemTemp.path,
+    );
     InAppWebViewPlatform.instance = _StubInAppWebViewPlatform();
   });
 
@@ -142,27 +142,29 @@ void main() {
   });
 
   testWidgets(
-      'double-tapping 3d layer name opens the editor instead of rename',
-      (tester) async {
-    final (_, observer) = await pumpPanel(tester);
+    'double-tapping 3d layer name opens the editor instead of rename',
+    (tester) async {
+      final (_, observer) = await pumpPanel(tester);
 
-    await doubleTapText(tester, 'Pose Layer');
-    // _onEdit3dLayer 内有 await(WebView2 检查),多 pump 两帧让 push 发生
-    await tester.pump();
-    await tester.pump();
+      await doubleTapText(tester, 'Pose Layer');
+      // _onEdit3dLayer 内有 await(WebView2 检查),多 pump 两帧让 push 发生
+      await tester.pump();
+      await tester.pump();
 
-    // 重命名未激活
-    expect(find.byType(ThemedInput), findsNothing);
-    // 3D 编辑器路由已推入
-    expect(observer.pushed, hasLength(1));
-    expect(find.byType(Model3dEditorScreen), findsOneWidget);
+      // 重命名未激活
+      expect(find.byType(ThemedInput), findsNothing);
+      // 3D 编辑器路由已推入
+      expect(observer.pushed, hasLength(1));
+      expect(find.byType(Model3dEditorScreen), findsOneWidget);
 
-    // 收尾:卸载整棵树,释放编辑器路由(其加载指示动画不会自然停止)
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
+      // 收尾:卸载整棵树,释放编辑器路由(其加载指示动画不会自然停止)
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 
-  testWidgets('double-tapping normal layer name still opens rename',
-      (tester) async {
+  testWidgets('double-tapping normal layer name still opens rename', (
+    tester,
+  ) async {
     final (_, observer) = await pumpPanel(tester);
 
     await doubleTapText(tester, 'Normal Layer');

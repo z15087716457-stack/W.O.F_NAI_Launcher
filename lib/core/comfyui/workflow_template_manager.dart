@@ -217,8 +217,8 @@ class WorkflowTemplateManager {
     try {
       final dir = await _getStorageDir();
       final files = dir.listSync().whereType<File>().where(
-            (f) => f.path.endsWith('.json'),
-          );
+        (f) => f.path.endsWith('.json'),
+      );
 
       for (final file in files) {
         try {
@@ -251,9 +251,7 @@ class WorkflowTemplateManager {
       'manifest': template.toManifestJson(),
       'workflow': template.workflowJson,
     };
-    await file.writeAsString(
-      const JsonEncoder.withIndent('  ').convert(data),
-    );
+    await file.writeAsString(const JsonEncoder.withIndent('  ').convert(data));
   }
 
   Future<void> _deleteCustomTemplateFile(String templateId) async {

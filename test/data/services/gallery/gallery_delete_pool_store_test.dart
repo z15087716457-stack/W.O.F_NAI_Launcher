@@ -49,43 +49,46 @@ void main() {
     expect(await store.load(), isEmpty);
   });
 
-  test('cleanupPendingFiles deletes existing files and keeps failures', () async {
-    final tempDir = await Directory.systemTemp.createTemp(
-      'gallery_delete_pool_store_',
-    );
-    RandomAccessFile? raf;
-    try {
-      final existing = File('${tempDir.path}/existing.png');
-      await existing.writeAsBytes([1, 2, 3]);
+  test(
+    'cleanupPendingFiles deletes existing files and keeps failures',
+    () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'gallery_delete_pool_store_',
+      );
+      RandomAccessFile? raf;
+      try {
+        final existing = File('${tempDir.path}/existing.png');
+        await existing.writeAsBytes([1, 2, 3]);
 
-      // 打开中的文件在 Windows 上无法删除 → 应保留在池中下次再试
-      final locked = File('${tempDir.path}/locked.png');
-      await locked.writeAsBytes([1]);
-      raf = await locked.open(mode: FileMode.write);
+        // 打开中的文件在 Windows 上无法删除 → 应保留在池中下次再试
+        final locked = File('${tempDir.path}/locked.png');
+        await locked.writeAsBytes([1]);
+        raf = await locked.open(mode: FileMode.write);
 
-      await store.addAll([
-        existing.path,
-        '${tempDir.path}/missing.png', // 不存在 = 成功
-        locked.path, // 占用 → 失败保留
-      ]);
+        await store.addAll([
+          existing.path,
+          '${tempDir.path}/missing.png', // 不存在 = 成功
+          locked.path, // 占用 → 失败保留
+        ]);
 
-      final deleted = await store.cleanupPendingFiles();
+        final deleted = await store.cleanupPendingFiles();
 
-      expect(deleted, 2); // existing + missing
-      expect(await existing.exists(), isFalse);
-      // locked 保留在池中，下次再试
-      expect(await store.load(), [locked.path]);
+        expect(deleted, 2); // existing + missing
+        expect(await existing.exists(), isFalse);
+        // locked 保留在池中，下次再试
+        expect(await store.load(), [locked.path]);
 
-      // 占用解除后再次清理成功，池清空
-      await raf.close();
-      raf = null;
-      expect(await store.cleanupPendingFiles(), 1);
-      expect(await store.load(), isEmpty);
-    } finally {
-      await raf?.close();
-      if (await tempDir.exists()) {
-        await tempDir.delete(recursive: true);
+        // 占用解除后再次清理成功，池清空
+        await raf.close();
+        raf = null;
+        expect(await store.cleanupPendingFiles(), 1);
+        expect(await store.load(), isEmpty);
+      } finally {
+        await raf?.close();
+        if (await tempDir.exists()) {
+          await tempDir.delete(recursive: true);
+        }
       }
-    }
-  });
+    },
+  );
 }

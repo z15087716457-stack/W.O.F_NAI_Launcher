@@ -85,31 +85,23 @@ void main() {
         (await dataSource.getImageIdByPath('/c/c.png'))!,
       );
 
-      final allFiles = [
-        File('/c/a.png'),
-        File('/c/b.png'),
-        File('/c/c.png'),
-      ];
+      final allFiles = [File('/c/a.png'), File('/c/b.png'), File('/c/c.png')];
 
       final result = await filterService.applyFilters(
         allFiles,
         const FilterCriteria().copyWith(collectionId: collectionId),
       );
 
-      expect(
-        result.files.map((f) => f.path).toSet(),
-        {'/c/a.png', '/c/c.png'},
-      );
+      expect(result.files.map((f) => f.path).toSet(), {'/c/a.png', '/c/c.png'});
     });
 
     test('empty membership yields empty result', () async {
       await addImage('/c/e1.png');
       final collectionId = await dataSource.createCollection('empty');
 
-      final result = await filterService.applyFilters(
-        [File('/c/e1.png')],
-        const FilterCriteria().copyWith(collectionId: collectionId),
-      );
+      final result = await filterService.applyFilters([
+        File('/c/e1.png'),
+      ], const FilterCriteria().copyWith(collectionId: collectionId));
 
       expect(result.files, isEmpty);
     });
@@ -137,8 +129,10 @@ void main() {
 
       final result = await filterService.applyFilters(
         allFiles,
-        const FilterCriteria()
-            .copyWith(collectionId: collectionId, searchQuery: 'alpha'),
+        const FilterCriteria().copyWith(
+          collectionId: collectionId,
+          searchQuery: 'alpha',
+        ),
       );
 
       // 搜索（文件名匹配 alpha）+ 收藏集交集

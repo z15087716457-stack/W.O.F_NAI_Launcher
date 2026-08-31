@@ -92,10 +92,7 @@ class TagGroupCacheService {
         _memoryCache[entry.key] = entry.value;
       }
 
-      AppLogger.d(
-        'Saved ${groups.length} TagGroups to cache',
-        'TagGroupCache',
-      );
+      AppLogger.d('Saved ${groups.length} TagGroups to cache', 'TagGroupCache');
     } catch (e, stack) {
       AppLogger.e('Failed to batch save TagGroups', e, stack, 'TagGroupCache');
       rethrow;

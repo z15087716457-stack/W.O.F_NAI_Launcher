@@ -36,7 +36,7 @@ class _TransparentBackgroundChipState
         (params) => params.transparentBackground,
       ),
     );
-    final accent = Colors.teal;
+    const accent = Colors.teal;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -69,28 +69,13 @@ class _TransparentBackgroundChipState
                     : Colors.transparent,
               ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.opacity,
-                  size: 14,
-                  color: enabled
-                      ? accent.shade700
-                      : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  context.l10n.transparentBackground_label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: enabled ? FontWeight.w600 : FontWeight.w500,
-                    color: enabled
-                        ? accent.shade700
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
-                ),
-              ],
+            // 纯图标：文字占宽且 tooltip 已说明含义
+            child: Icon(
+              Icons.opacity,
+              size: 14,
+              color: enabled
+                  ? accent.shade700
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
         ),

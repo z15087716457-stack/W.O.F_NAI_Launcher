@@ -17,10 +17,7 @@ import '../../../data/services/alias_resolver_service.dart';
 class CharacterTooltipContent extends ConsumerWidget {
   final CharacterPromptConfig config;
 
-  const CharacterTooltipContent({
-    super.key,
-    required this.config,
-  });
+  const CharacterTooltipContent({super.key, required this.config});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,10 +47,7 @@ class _EmptyStateContent extends StatelessWidget {
   final AppLocalizations l10n;
   final ColorScheme colorScheme;
 
-  const _EmptyStateContent({
-    required this.l10n,
-    required this.colorScheme,
-  });
+  const _EmptyStateContent({required this.l10n, required this.colorScheme});
 
   @override
   Widget build(BuildContext context) {
@@ -71,18 +65,12 @@ class _EmptyStateContent extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             l10n.characterTooltip_noCharacters,
-            style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
           ),
           const SizedBox(height: 4),
           Text(
             l10n.characterTooltip_clickToConfig,
-            style: TextStyle(
-              color: colorScheme.outline,
-              fontSize: 12,
-            ),
+            style: TextStyle(color: colorScheme.outline, fontSize: 12),
           ),
         ],
       ),
@@ -111,10 +99,7 @@ class _DetailedContent extends StatelessWidget {
     final enabledCount = config.characters.where((c) => c.enabled).length;
 
     return Container(
-      constraints: const BoxConstraints(
-        maxWidth: 360,
-        maxHeight: 400,
-      ),
+      constraints: const BoxConstraints(maxWidth: 360, maxHeight: 400),
       padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -193,10 +178,7 @@ class _GlobalAiStatusRow extends StatelessWidget {
         children: [
           Text(
             l10n.characterTooltip_globalAiLabel,
-            style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 12,
-            ),
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
           ),
           const SizedBox(width: 6),
           Icon(
@@ -319,8 +301,9 @@ class _CharacterItem extends StatelessWidget {
             // 提示词摘要 - 解析别名
             _PromptSummary(
               prompt: aliasResolver.resolveAliases(character.prompt),
-              negativePrompt:
-                  aliasResolver.resolveAliases(character.negativePrompt),
+              negativePrompt: aliasResolver.resolveAliases(
+                character.negativePrompt,
+              ),
               l10n: l10n,
               colorScheme: colorScheme,
             ),
@@ -359,10 +342,7 @@ class _GenderBadge extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: TextStyle(
-          color: colorScheme.onSurfaceVariant,
-          fontSize: 10,
-        ),
+        style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 10),
       ),
     );
   }
@@ -393,10 +373,7 @@ class _PositionBadge extends StatelessWidget {
         ),
         child: Text(
           l10n.characterTooltip_disabledLabel,
-          style: TextStyle(
-            color: colorScheme.outline,
-            fontSize: 10,
-          ),
+          style: TextStyle(color: colorScheme.outline, fontSize: 10),
         ),
       );
     }
@@ -412,10 +389,7 @@ class _PositionBadge extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              '✨ ',
-              style: TextStyle(fontSize: 10),
-            ),
+            const Text('✨ ', style: TextStyle(fontSize: 10)),
             Text(
               l10n.characterTooltip_positionAi,
               style: TextStyle(
@@ -486,8 +460,9 @@ class _PromptSummary extends StatelessWidget {
         // 负面提示词
         _PromptLine(
           label: l10n.characterTooltip_negativeLabel,
-          content:
-              negativePrompt.isNotEmpty ? _truncate(negativePrompt, 25) : null,
+          content: negativePrompt.isNotEmpty
+              ? _truncate(negativePrompt, 25)
+              : null,
           notSetText: l10n.characterTooltip_notSet,
           colorScheme: colorScheme,
         ),
@@ -517,10 +492,7 @@ class _PromptLine extends StatelessWidget {
       children: [
         Text(
           '$label: ',
-          style: TextStyle(
-            color: colorScheme.outline,
-            fontSize: 11,
-          ),
+          style: TextStyle(color: colorScheme.outline, fontSize: 11),
         ),
         Expanded(
           child: Text(
@@ -561,26 +533,16 @@ class _SummaryRow extends StatelessWidget {
       children: [
         Text(
           l10n.characterTooltip_summary(total, enabled),
-          style: TextStyle(
-            color: colorScheme.onSurfaceVariant,
-            fontSize: 12,
-          ),
+          style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
         ),
         const SizedBox(height: 4),
         Row(
           children: [
-            Icon(
-              Icons.touch_app,
-              size: 12,
-              color: colorScheme.outline,
-            ),
+            Icon(Icons.touch_app, size: 12, color: colorScheme.outline),
             const SizedBox(width: 4),
             Text(
               l10n.characterTooltip_viewFullConfig,
-              style: TextStyle(
-                color: colorScheme.outline,
-                fontSize: 11,
-              ),
+              style: TextStyle(color: colorScheme.outline, fontSize: 11),
             ),
           ],
         ),

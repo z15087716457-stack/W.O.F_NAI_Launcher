@@ -672,8 +672,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
         rawNoise,
         const EnhanceWorkflowSettings().noise,
       ).clamp(0.0, 1.0),
-      maxUpscale:
-          rawMaxUpscale ?? const EnhanceWorkflowSettings().maxUpscale,
+      maxUpscale: rawMaxUpscale ?? const EnhanceWorkflowSettings().maxUpscale,
     );
   }
 
@@ -1427,11 +1426,12 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     final baseWidth = state.sourceWidth ?? state.baseWidth ?? _params.width;
     final baseHeight = state.sourceHeight ?? state.baseHeight ?? _params.height;
     // Max✨ 档仅对可用模型生效（模型切换后残留的开启状态自动降级）。
-    final maxEnabled =
-        state.enhance.maxUpscale && isEnhanceMaxUpscaleEligible;
+    final maxEnabled = state.enhance.maxUpscale && isEnhanceMaxUpscaleEligible;
     final requestWidth = maxEnabled
         ? baseWidth
-        : _normalizeDimension((baseWidth * state.enhance.upscaleFactor).round());
+        : _normalizeDimension(
+            (baseWidth * state.enhance.upscaleFactor).round(),
+          );
     final requestHeight = maxEnabled
         ? baseHeight
         : _normalizeDimension(

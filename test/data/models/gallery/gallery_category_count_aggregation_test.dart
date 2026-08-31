@@ -41,10 +41,7 @@ void main() {
     });
 
     test('leaf-only list keeps counts unchanged', () {
-      final categories = [
-        cat('a', direct: 3),
-        cat('b', direct: 7),
-      ];
+      final categories = [cat('a', direct: 3), cat('b', direct: 7)];
 
       final aggregated = categories.withAggregatedImageCounts();
       expect(aggregated.map((c) => c.imageCount).toList(), [3, 7]);
@@ -61,7 +58,10 @@ void main() {
     });
 
     test('does not mutate original list entries', () {
-      final categories = [cat('root', direct: 1), cat('c', parentId: 'root', direct: 2)];
+      final categories = [
+        cat('root', direct: 1),
+        cat('c', parentId: 'root', direct: 2),
+      ];
 
       categories.withAggregatedImageCounts();
 
@@ -73,7 +73,11 @@ void main() {
       final categories = <GalleryCategory>[
         cat('root', direct: 1),
         for (var i = 0; i < 100; i++)
-          cat('level_$i', parentId: i == 0 ? 'root' : 'level_${i - 1}', direct: 1),
+          cat(
+            'level_$i',
+            parentId: i == 0 ? 'root' : 'level_${i - 1}',
+            direct: 1,
+          ),
       ];
 
       final aggregated = categories.withAggregatedImageCounts();

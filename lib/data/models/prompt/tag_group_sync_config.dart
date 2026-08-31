@@ -93,13 +93,7 @@ class PostCountThresholds {
   static const int high = 5000;
   static const int veryHigh = 10000;
 
-  static const List<int> presets = [
-    veryLow,
-    low,
-    medium,
-    high,
-    veryHigh,
-  ];
+  static const List<int> presets = [veryLow, low, medium, high, veryHigh];
 
   /// 获取阈值的描述
   static String getDescription(int threshold) {

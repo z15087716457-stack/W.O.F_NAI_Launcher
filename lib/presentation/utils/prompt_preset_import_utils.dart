@@ -6,10 +6,7 @@ import '../providers/uc_preset_provider.dart';
 
 typedef ProviderReader = T Function<T>(ProviderListenable<T> provider);
 
-void applyImportedQualityToggle(
-  ProviderReader read,
-  bool qualityToggle,
-) {
+void applyImportedQualityToggle(ProviderReader read, bool qualityToggle) {
   final notifier = read(qualityPresetNotifierProvider.notifier);
   if (qualityToggle) {
     notifier.setNaiDefault();
@@ -18,11 +15,8 @@ void applyImportedQualityToggle(
   }
 }
 
-void applyImportedUcPreset(
-  ProviderReader read,
-  int ucPreset,
-) {
-  read(ucPresetNotifierProvider.notifier).setPresetType(
-    UcPresets.getPresetTypeFromInt(ucPreset),
-  );
+void applyImportedUcPreset(ProviderReader read, int ucPreset) {
+  read(
+    ucPresetNotifierProvider.notifier,
+  ).setPresetType(UcPresets.getPresetTypeFromInt(ucPreset));
 }

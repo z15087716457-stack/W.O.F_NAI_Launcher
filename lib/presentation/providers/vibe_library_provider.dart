@@ -82,9 +82,9 @@ class VibeLibraryState with _$VibeLibraryState {
   VibeLibraryCategory? get selectedCategory {
     if (selectedCategoryId == null) return null;
     return categories.cast<VibeLibraryCategory?>().firstWhere(
-          (c) => c?.id == selectedCategoryId,
-          orElse: () => null,
-        );
+      (c) => c?.id == selectedCategoryId,
+      orElse: () => null,
+    );
   }
 
   /// 获取收藏的条目数量
@@ -101,12 +101,7 @@ class VibeLibraryState with _$VibeLibraryState {
 }
 
 /// Vibe 库排序方式
-enum VibeLibrarySortOrder {
-  createdAt,
-  lastUsed,
-  usedCount,
-  name,
-}
+enum VibeLibrarySortOrder { createdAt, lastUsed, usedCount, name }
 
 /// Vibe 库批量操作类型
 enum VibeLibraryBulkOperationType {
@@ -158,10 +153,7 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
         }
         await _loadData(isInitializing: false, showLoading: showLoading);
       },
-      details: {
-        'syncFileSystem': syncFileSystem,
-        'showLoading': showLoading,
-      },
+      details: {'syncFileSystem': syncFileSystem, 'showLoading': showLoading},
     );
   }
 
@@ -172,9 +164,7 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
       () async {
         await _loadData(isInitializing: false, showLoading: showLoading);
       },
-      details: {
-        'showLoading': showLoading,
-      },
+      details: {'showLoading': showLoading},
     );
   }
 
@@ -187,8 +177,9 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
     );
     VibeFolderSyncResult? syncResult;
     try {
-      final result =
-          await _storage.syncWithFileSystem(removeMissingEntries: true);
+      final result = await _storage.syncWithFileSystem(
+        removeMissingEntries: true,
+      );
       syncResult = result;
       AppLogger.i(
         'Vibe library synced: scanned=${result.scannedCount}, '
@@ -237,10 +228,7 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
       await VibePerformanceDiagnostics.measure(
         'provider.awaitActiveLoad',
         () async => activeLoad,
-        details: {
-          'isInitializing': isInitializing,
-          'showLoading': showLoading,
-        },
+        details: {'isInitializing': isInitializing, 'showLoading': showLoading},
       );
       return;
     }
@@ -298,8 +286,11 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
         favoritesOnly: state.favoritesOnly,
       );
       filteredCount = filteredEntries.length;
-      final currentEntries =
-          _buildPageEntries(filteredEntries, page: 0, pageSize: state.pageSize);
+      final currentEntries = _buildPageEntries(
+        filteredEntries,
+        page: 0,
+        pageSize: state.pageSize,
+      );
       currentPageCount = currentEntries.length;
 
       state = state.copyWith(
@@ -411,10 +402,7 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
       // 如果相同，切换排序方向
       state = state.copyWith(sortDescending: !state.sortDescending);
     } else {
-      state = state.copyWith(
-        sortOrder: order,
-        sortDescending: true,
-      );
+      state = state.copyWith(sortOrder: order, sortDescending: true);
     }
     await _applyFilters();
   }
@@ -451,8 +439,11 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
       selectedCategoryId: state.selectedCategoryId,
       favoritesOnly: state.favoritesOnly,
     );
-    final currentEntries =
-        _buildPageEntries(filteredEntries, page: 0, pageSize: state.pageSize);
+    final currentEntries = _buildPageEntries(
+      filteredEntries,
+      page: 0,
+      pageSize: state.pageSize,
+    );
 
     state = state.copyWith(
       filteredEntries: filteredEntries,
@@ -672,8 +663,9 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
       final count = await _storage.deleteEntries(ids);
 
       // 更新本地状态
-      final updatedEntries =
-          state.entries.where((e) => !ids.contains(e.id)).toList();
+      final updatedEntries = state.entries
+          .where((e) => !ids.contains(e.id))
+          .toList();
       state = state.copyWith(entries: updatedEntries);
       await _applyFilters();
 
@@ -902,8 +894,9 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
       if (!success) return false;
 
       // 更新本地状态
-      final updatedCategories =
-          state.categories.where((c) => c.id != id).toList();
+      final updatedCategories = state.categories
+          .where((c) => c.id != id)
+          .toList();
       state = state.copyWith(categories: updatedCategories);
 
       // 如果当前选中的是被删除的分类，清除选择
@@ -985,17 +978,17 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
   /// 根据 ID 获取条目
   VibeLibraryEntry? getEntryById(String id) {
     return state.entries.cast<VibeLibraryEntry?>().firstWhere(
-          (e) => e?.id == id,
-          orElse: () => null,
-        );
+      (e) => e?.id == id,
+      orElse: () => null,
+    );
   }
 
   /// 根据 ID 获取分类
   VibeLibraryCategory? getCategoryById(String id) {
     return state.categories.cast<VibeLibraryCategory?>().firstWhere(
-          (c) => c?.id == id,
-          orElse: () => null,
-        );
+      (c) => c?.id == id,
+      orElse: () => null,
+    );
   }
 
   /// 获取指定分类下的条目数量
@@ -1240,9 +1233,7 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
   }
 
   void _updateBulkProgress(double progress) {
-    state = state.copyWith(
-      bulkOperationProgress: progress.clamp(0.0, 1.0),
-    );
+    state = state.copyWith(bulkOperationProgress: progress.clamp(0.0, 1.0));
   }
 
   void _endBulkOperation() {

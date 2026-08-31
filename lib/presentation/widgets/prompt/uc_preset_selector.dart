@@ -15,10 +15,7 @@ class UcPresetSelector extends ConsumerStatefulWidget {
   /// 当前选择的模型
   final String model;
 
-  const UcPresetSelector({
-    super.key,
-    required this.model,
-  });
+  const UcPresetSelector({super.key, required this.model});
 
   @override
   ConsumerState<UcPresetSelector> createState() => _UcPresetSelectorState();
@@ -97,11 +94,11 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
             decoration: BoxDecoration(
               color: isEnabled
                   ? (_isHovering
-                      ? Colors.red.withValues(alpha: 0.2)
-                      : Colors.red.withValues(alpha: 0.1))
+                        ? Colors.red.withValues(alpha: 0.2)
+                        : Colors.red.withValues(alpha: 0.1))
                   : (_isHovering
-                      ? theme.colorScheme.surfaceContainerHighest
-                      : Colors.transparent),
+                        ? theme.colorScheme.surfaceContainerHighest
+                        : Colors.transparent),
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
                 color: isEnabled
@@ -237,9 +234,7 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
             const SizedBox(width: 8),
             Text(
               context.l10n.ucPreset_addFromLibrary,
-              style: TextStyle(
-                color: theme.colorScheme.primary,
-              ),
+              style: TextStyle(color: theme.colorScheme.primary),
             ),
           ],
         ),
@@ -307,10 +302,7 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
     if (!isEnabled && !isCustom) {
       return Text(
         context.l10n.ucPreset_disabled,
-        style: TextStyle(
-          color: theme.colorScheme.onSurface,
-          fontSize: 12,
-        ),
+        style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 12),
       );
     }
 
@@ -333,10 +325,7 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
         const SizedBox(height: 4),
         Text(
           content,
-          style: TextStyle(
-            color: theme.colorScheme.secondary,
-            fontSize: 11,
-          ),
+          style: TextStyle(color: theme.colorScheme.secondary, fontSize: 11),
         ),
         // 如果包含 nsfw，显示提示信息
         if (hasNsfw && !isCustom) ...[
@@ -352,10 +341,7 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
             ),
             child: Text(
               context.l10n.ucPreset_nsfwHint,
-              style: TextStyle(
-                color: theme.colorScheme.primary,
-                fontSize: 11,
-              ),
+              style: TextStyle(color: theme.colorScheme.primary, fontSize: 11),
             ),
           ),
         ],

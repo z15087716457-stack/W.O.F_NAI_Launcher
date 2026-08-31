@@ -62,10 +62,7 @@ class AliasReference {
 class AliasParser {
   /// 正则表达式: 匹配别名语法 <xxx>
   /// 不匹配空内容或只有空格的情况
-  static final RegExp _aliasPattern = RegExp(
-    r'<([^<>]+?)>',
-    multiLine: true,
-  );
+  static final RegExp _aliasPattern = RegExp(r'<([^<>]+?)>', multiLine: true);
 
   /// 解析文本中的所有别名引用
   ///

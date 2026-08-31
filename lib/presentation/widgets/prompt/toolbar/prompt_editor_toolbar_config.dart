@@ -11,11 +11,6 @@ library;
 class PromptEditorToolbarConfig {
   // ==================== 功能开关 ====================
 
-  /// 是否显示随机生成按钮
-  ///
-  /// 启用后，显示随机按钮用于随机生成提示词。
-  final bool showRandomButton;
-
   /// 是否显示全屏编辑按钮
   ///
   /// 启用后，显示全屏按钮用于打开全屏编辑模式。
@@ -44,7 +39,6 @@ class PromptEditorToolbarConfig {
   final bool confirmBeforeClear;
 
   const PromptEditorToolbarConfig({
-    this.showRandomButton = true,
     this.showFullscreenButton = true,
     this.showClearButton = true,
     this.showSettingsButton = true,
@@ -58,7 +52,6 @@ class PromptEditorToolbarConfig {
   ///
   /// 适用于主界面的提示词编辑器，启用所有功能。
   static const mainEditor = PromptEditorToolbarConfig(
-    showRandomButton: true,
     showFullscreenButton: true,
     showClearButton: true,
     showSettingsButton: true,
@@ -72,7 +65,6 @@ class PromptEditorToolbarConfig {
   /// 只启用清空按钮，其他功能（设置等）跟随主界面。
   /// 清空操作无需确认，直接执行。
   static const characterEditor = PromptEditorToolbarConfig(
-    showRandomButton: false,
     showFullscreenButton: false,
     showClearButton: true,
     showSettingsButton: false,
@@ -84,7 +76,6 @@ class PromptEditorToolbarConfig {
   ///
   /// 适用于空间有限的场景，仅显示必要的操作按钮。
   static const compactMode = PromptEditorToolbarConfig(
-    showRandomButton: false,
     showFullscreenButton: false,
     showClearButton: true,
     showSettingsButton: false,
@@ -94,7 +85,6 @@ class PromptEditorToolbarConfig {
 
   /// 创建配置副本并覆盖指定属性
   PromptEditorToolbarConfig copyWith({
-    bool? showRandomButton,
     bool? showFullscreenButton,
     bool? showClearButton,
     bool? showSettingsButton,
@@ -102,7 +92,6 @@ class PromptEditorToolbarConfig {
     bool? confirmBeforeClear,
   }) {
     return PromptEditorToolbarConfig(
-      showRandomButton: showRandomButton ?? this.showRandomButton,
       showFullscreenButton: showFullscreenButton ?? this.showFullscreenButton,
       showClearButton: showClearButton ?? this.showClearButton,
       showSettingsButton: showSettingsButton ?? this.showSettingsButton,
@@ -115,7 +104,6 @@ class PromptEditorToolbarConfig {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is PromptEditorToolbarConfig &&
-        other.showRandomButton == showRandomButton &&
         other.showFullscreenButton == showFullscreenButton &&
         other.showClearButton == showClearButton &&
         other.showSettingsButton == showSettingsButton &&
@@ -126,7 +114,6 @@ class PromptEditorToolbarConfig {
   @override
   int get hashCode {
     return Object.hash(
-      showRandomButton,
       showFullscreenButton,
       showClearButton,
       showSettingsButton,
@@ -138,7 +125,6 @@ class PromptEditorToolbarConfig {
   @override
   String toString() {
     return 'PromptEditorToolbarConfig('
-        'showRandomButton: $showRandomButton, '
         'showFullscreenButton: $showFullscreenButton, '
         'showClearButton: $showClearButton, '
         'showSettingsButton: $showSettingsButton, '

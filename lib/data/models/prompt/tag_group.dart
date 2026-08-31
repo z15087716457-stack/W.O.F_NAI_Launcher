@@ -306,10 +306,7 @@ class TagGroupSyncProgress {
     );
   }
 
-  factory TagGroupSyncProgress.fetchingTags(
-    String groupName,
-    int fetchedTags,
-  ) {
+  factory TagGroupSyncProgress.fetchingTags(String groupName, int fetchedTags) {
     return TagGroupSyncProgress(
       progress: 0.96,
       type: TagGroupSyncProgressType.fetchingTags,
@@ -362,10 +359,12 @@ class TagGroupSyncProgress {
   String localizedMessage(BuildContext context) {
     return switch (type) {
       TagGroupSyncProgressType.initial => context.l10n.sync_preparing,
-      TagGroupSyncProgressType.fetchingGroup =>
-        context.l10n.sync_fetching(currentGroup ?? ''),
-      TagGroupSyncProgressType.fetchingTags =>
-        context.l10n.sync_fetching_tags(currentGroup ?? ''),
+      TagGroupSyncProgressType.fetchingGroup => context.l10n.sync_fetching(
+        currentGroup ?? '',
+      ),
+      TagGroupSyncProgressType.fetchingTags => context.l10n.sync_fetching_tags(
+        currentGroup ?? '',
+      ),
       TagGroupSyncProgressType.filtering => context.l10n.sync_filtering,
       TagGroupSyncProgressType.merging => context.l10n.sync_merging,
       TagGroupSyncProgressType.saving => context.l10n.sync_saving,
@@ -409,9 +408,6 @@ class TagGroupSyncResult {
   });
 
   factory TagGroupSyncResult.failed(String error) {
-    return TagGroupSyncResult(
-      success: false,
-      error: error,
-    );
+    return TagGroupSyncResult(success: false, error: error);
   }
 }

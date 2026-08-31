@@ -15,7 +15,10 @@ void main() {
         galleryModelFriendlyName('nai-diffusion-4-5-curated'),
         'NAI 4.5 Curated',
       );
-      expect(galleryModelFriendlyName('nai-diffusion-4-5-full'), 'NAI 4.5 Full');
+      expect(
+        galleryModelFriendlyName('nai-diffusion-4-5-full'),
+        'NAI 4.5 Full',
+      );
       expect(
         galleryModelFriendlyName('nai-diffusion-5-curated'),
         'NAI 5 Curated',

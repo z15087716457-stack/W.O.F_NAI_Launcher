@@ -103,21 +103,18 @@ void main() {
       },
     );
 
-    test(
-      'fromNaiComment defaults ambiguous V4.5 source to V4.5 Full',
-      () {
-        // Source 只有版本字样、变体不可知（无哈希/full/curated 标记）时按
-        // Full 归——与 V5 分支同策略，否则版本过滤对这类图永远为空
-        final metadata = NaiImageMetadata.fromNaiComment({
-          'Comment': jsonEncode({'prompt': '1girl', 'uc': 'bad hands'}),
-          'Software': 'NovelAI',
-          'Source': 'NovelAI Diffusion V4.5',
-        });
+    test('fromNaiComment defaults ambiguous V4.5 source to V4.5 Full', () {
+      // Source 只有版本字样、变体不可知（无哈希/full/curated 标记）时按
+      // Full 归——与 V5 分支同策略，否则版本过滤对这类图永远为空
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'Comment': jsonEncode({'prompt': '1girl', 'uc': 'bad hands'}),
+        'Software': 'NovelAI',
+        'Source': 'NovelAI Diffusion V4.5',
+      });
 
-        expect(metadata.source, equals('NovelAI Diffusion V4.5'));
-        expect(metadata.model, equals(ImageModels.animeDiffusionV45Full));
-      },
-    );
+      expect(metadata.source, equals('NovelAI Diffusion V4.5'));
+      expect(metadata.model, equals(ImageModels.animeDiffusionV45Full));
+    });
 
     test('source model should override stale cached model values', () {
       const metadata = NaiImageMetadata(
@@ -622,17 +619,19 @@ void main() {
       expect(metadata.vibeReferences.last.infoExtracted, equals(0.8));
     });
 
-    test('V5 params model_name key resolves V5 Full (schema version=1 ignored)',
-        () {
-      final metadata = NaiImageMetadata.fromNaiComment({
-        'prompt': 'test',
-        'model_name': 'DiffusionModelMetaName.NAIv5',
-        'model_hash': '0B1DA8F5',
-        'version': 1,
-      });
+    test(
+      'V5 params model_name key resolves V5 Full (schema version=1 ignored)',
+      () {
+        final metadata = NaiImageMetadata.fromNaiComment({
+          'prompt': 'test',
+          'model_name': 'DiffusionModelMetaName.NAIv5',
+          'model_hash': '0B1DA8F5',
+          'version': 1,
+        });
 
-      expect(metadata.model, ImageModels.animeDiffusionV5Full);
-    });
+        expect(metadata.model, ImageModels.animeDiffusionV5Full);
+      },
+    );
 
     test('V5 params model_name with curated suffix resolves V5 Curated', () {
       final metadata = NaiImageMetadata.fromNaiComment({

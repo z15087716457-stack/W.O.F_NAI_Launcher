@@ -435,6 +435,21 @@ Future<void> _bootstrapApplication() async {
   );
   // 收藏集合 Box
   await _openHiveBoxIfNeeded(StorageKeys.collectionsBox, hivePath: hivePath);
+  // 全局 Prompt 块库（独立版本化 Box）
+  await _openHiveBoxIfNeeded<String>(
+    StorageKeys.promptBlockLibraryBox,
+    hivePath: hivePath,
+  );
+  // Prompt 工作区持久化（生成页 + 画风探索页文档快照）
+  await _openHiveBoxIfNeeded<String>(
+    StorageKeys.promptWorkspaceStateBox,
+    hivePath: hivePath,
+  );
+  // 画风探索 Recipe（独立版本化 Box）
+  await _openHiveBoxIfNeeded<String>(
+    StorageKeys.styleExploreRecipesBox,
+    hivePath: hivePath,
+  );
 
   // 初始化图像元数据服务（包含持久化缓存，用于详情页快速加载）
   await _runNonFatalStartupStep(
@@ -505,8 +520,8 @@ Future<void> _bootstrapApplication() async {
   // 启动清理删除池：上次会话软删的文件逐条物理删除。
   // 不存在=成功；删除失败（占用/权限）保留在池中，下次启动再试。
   await _runNonFatalStartupStep('Delete pool cleanup', () async {
-    final deletedCount =
-        await const GalleryDeletePoolStore().cleanupPendingFiles();
+    final deletedCount = await const GalleryDeletePoolStore()
+        .cleanupPendingFiles();
     if (deletedCount > 0) {
       AppLogger.i('删除池清理完成: 删除了 $deletedCount 个文件', 'Main');
     }

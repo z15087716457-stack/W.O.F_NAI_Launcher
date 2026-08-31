@@ -122,38 +122,43 @@ void main() {
       expect(pool, contains(fileB.path));
     });
 
-    test('is_deleted=1 file still on disk does not reappear after refresh',
-        () async {
-      // 文件仍在盘上
-      expect(await fileB.exists(), isTrue);
-      expect(
-        (await service.getPage(0, pageSize: 10)).map((r) => p.basename(r.path)),
-        contains('b.png'),
-      );
+    test(
+      'is_deleted=1 file still on disk does not reappear after refresh',
+      () async {
+        // 文件仍在盘上
+        expect(await fileB.exists(), isTrue);
+        expect(
+          (await service.getPage(
+            0,
+            pageSize: 10,
+          )).map((r) => p.basename(r.path)),
+          contains('b.png'),
+        );
 
-      // 软删（不删物理文件）
-      await dataSource.batchMarkAsDeleted([fileB.path]);
+        // 软删（不删物理文件）
+        await dataSource.batchMarkAsDeleted([fileB.path]);
 
-      // refresh（含扫描路径）：b.png 不得复活
-      await service.refresh(scan: false);
-      var records = await service.getPage(0, pageSize: 10);
-      expect(
-        records.map((r) => p.basename(r.path)),
-        isNot(contains('b.png')),
-      );
-      expect(service.totalCount, 2);
+        // refresh（含扫描路径）：b.png 不得复活
+        await service.refresh(scan: false);
+        var records = await service.getPage(0, pageSize: 10);
+        expect(
+          records.map((r) => p.basename(r.path)),
+          isNot(contains('b.png')),
+        );
+        expect(service.totalCount, 2);
 
-      // 完整刷新（走流式扫描器）：同样不得复活
-      await service.refresh(scan: true);
-      records = await service.getPage(0, pageSize: 10);
-      expect(
-        records.map((r) => p.basename(r.path)),
-        isNot(contains('b.png')),
-      );
-      expect(service.totalCount, 2);
-      // DB 软删标记未被扫描器复位
-      expect(await dataSource.getImageIdByPath(fileB.path), isNull);
-    });
+        // 完整刷新（走流式扫描器）：同样不得复活
+        await service.refresh(scan: true);
+        records = await service.getPage(0, pageSize: 10);
+        expect(
+          records.map((r) => p.basename(r.path)),
+          isNot(contains('b.png')),
+        );
+        expect(service.totalCount, 2);
+        // DB 软删标记未被扫描器复位
+        expect(await dataSource.getImageIdByPath(fileB.path), isNull);
+      },
+    );
 
     test('removeImagesFromMemory removes paths without rescan', () async {
       expect(service.totalCount, 3);
@@ -167,25 +172,27 @@ void main() {
       expect(await fileB.exists(), isTrue);
     });
 
-    test('undo restores the record: unmark + pool removal, refresh brings back',
-        () async {
-      await dataSource.batchMarkAsDeleted([fileB.path]);
-      await const GalleryDeletePoolStore().addAll([fileB.path]);
-      service.removeImagesFromMemory([fileB.path]);
-      expect(service.totalCount, 2);
+    test(
+      'undo restores the record: unmark + pool removal, refresh brings back',
+      () async {
+        await dataSource.batchMarkAsDeleted([fileB.path]);
+        await const GalleryDeletePoolStore().addAll([fileB.path]);
+        service.removeImagesFromMemory([fileB.path]);
+        expect(service.totalCount, 2);
 
-      // 撤销：DB 恢复 + 出池
-      await dataSource.batchRestoreDeleted([fileB.path]);
-      await const GalleryDeletePoolStore().removeAll([fileB.path]);
+        // 撤销：DB 恢复 + 出池
+        await dataSource.batchRestoreDeleted([fileB.path]);
+        await const GalleryDeletePoolStore().removeAll([fileB.path]);
 
-      expect(await dataSource.getImageIdByPath(fileB.path), isNotNull);
-      expect(await const GalleryDeletePoolStore().load(), isEmpty);
+        expect(await dataSource.getImageIdByPath(fileB.path), isNotNull);
+        expect(await const GalleryDeletePoolStore().load(), isEmpty);
 
-      await service.refresh(scan: false);
-      final records = await service.getPage(0, pageSize: 10);
-      expect(records.map((r) => p.basename(r.path)), contains('b.png'));
-      expect(service.totalCount, 3);
-    });
+        await service.refresh(scan: false);
+        final records = await service.getPage(0, pageSize: 10);
+        expect(records.map((r) => p.basename(r.path)), contains('b.png'));
+        expect(service.totalCount, 3);
+      },
+    );
   });
 }
 

@@ -78,17 +78,11 @@ class _WaterfallEntryCardState extends State<WaterfallEntryCard>
     );
 
     _elevationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
     );
 
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.02).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
     );
   }
 
@@ -152,8 +146,8 @@ class _WaterfallEntryCardState extends State<WaterfallEntryCard>
     final borderColor = widget.isSelected
         ? theme.colorScheme.primary
         : (_isHovering
-            ? theme.colorScheme.primary.withValues(alpha: 0.5)
-            : Colors.transparent);
+              ? theme.colorScheme.primary.withValues(alpha: 0.5)
+              : Colors.transparent);
 
     // 卡片主体内容（高度由图片/占位图自然撑开）
     final cardBody = GestureDetector(
@@ -188,10 +182,7 @@ class _WaterfallEntryCardState extends State<WaterfallEntryCard>
                       alpha: 0.15 + (0.15 * _elevationAnimation.value),
                     ),
                     blurRadius: 10 + (12 * _elevationAnimation.value),
-                    offset: Offset(
-                      0,
-                      4 + (8 * _elevationAnimation.value),
-                    ),
+                    offset: Offset(0, 4 + (8 * _elevationAnimation.value)),
                   ),
                 ],
               ),
@@ -290,10 +281,7 @@ class _WaterfallEntryCardState extends State<WaterfallEntryCard>
       feedback: widget.enableDrag
           ? _buildDragFeedback(theme, entry)
           : const SizedBox.shrink(),
-      childWhenDragging: Opacity(
-        opacity: 0.4,
-        child: cardContent,
-      ),
+      childWhenDragging: Opacity(opacity: 0.4, child: cardContent),
       onDragStarted: () {
         HapticFeedback.mediumImpact();
         _hidePreviewOverlay();
@@ -315,8 +303,8 @@ class _WaterfallEntryCardState extends State<WaterfallEntryCard>
   /// 构建完整图片（按原始宽高比，宽度撑满列宽，高度自适应）
   Widget _buildImage(TagLibraryEntry entry) {
     if (entry.hasThumbnail && entry.thumbnail != null) {
-      final cacheWidth =
-          (widget.width * MediaQuery.devicePixelRatioOf(context)).round();
+      final cacheWidth = (widget.width * MediaQuery.devicePixelRatioOf(context))
+          .round();
       return Image.file(
         File(entry.thumbnail!),
         fit: BoxFit.fitWidth,
@@ -338,18 +326,11 @@ class _WaterfallEntryCardState extends State<WaterfallEntryCard>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Colors.grey.shade700,
-              Colors.grey.shade900,
-            ],
+            colors: [Colors.grey.shade700, Colors.grey.shade900],
           ),
         ),
         child: const Center(
-          child: Icon(
-            Icons.image_outlined,
-            size: 32,
-            color: Colors.white38,
-          ),
+          child: Icon(Icons.image_outlined, size: 32, color: Colors.white38),
         ),
       ),
     );
@@ -376,11 +357,7 @@ class _WaterfallEntryCardState extends State<WaterfallEntryCard>
           fontWeight: FontWeight.w600,
           fontSize: 14,
           shadows: [
-            Shadow(
-              color: Colors.black,
-              blurRadius: 4,
-              offset: Offset(0, 1),
-            ),
+            Shadow(color: Colors.black, blurRadius: 4, offset: Offset(0, 1)),
           ],
         ),
         maxLines: 1,
@@ -479,8 +456,10 @@ class _WaterfallEntryCardState extends State<WaterfallEntryCard>
                 top: 8,
                 left: 8,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary,
                     borderRadius: BorderRadius.circular(6),
@@ -539,11 +518,7 @@ class _FavoriteIndicator extends StatelessWidget {
           ),
         ],
       ),
-      child: const Icon(
-        Icons.favorite,
-        size: 12,
-        color: Colors.white,
-      ),
+      child: const Icon(Icons.favorite, size: 12, color: Colors.white),
     );
   }
 }
@@ -553,10 +528,7 @@ class _SelectionCheckbox extends StatelessWidget {
   final bool isSelected;
   final VoidCallback? onTap;
 
-  const _SelectionCheckbox({
-    required this.isSelected,
-    this.onTap,
-  });
+  const _SelectionCheckbox({required this.isSelected, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -581,11 +553,7 @@ class _SelectionCheckbox extends StatelessWidget {
           ),
         ),
         child: isSelected
-            ? Icon(
-                Icons.check,
-                size: 14,
-                color: theme.colorScheme.onPrimary,
-              )
+            ? Icon(Icons.check, size: 14, color: theme.colorScheme.onPrimary)
             : null,
       ),
     );

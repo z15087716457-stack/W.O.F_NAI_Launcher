@@ -61,10 +61,10 @@ class OnlineFavoritesRepository {
 
   /// 测试注入：使用指定 DB 路径的独立实例（不影响生产单例）
   @visibleForTesting
-  OnlineFavoritesRepository.forTesting(String dbPath)
-    : _debugDbPath = dbPath;
+  OnlineFavoritesRepository.forTesting(String dbPath) : _debugDbPath = dbPath;
 
-  static final OnlineFavoritesRepository instance = OnlineFavoritesRepository._();
+  static final OnlineFavoritesRepository instance =
+      OnlineFavoritesRepository._();
 
   final String? _debugDbPath;
   Database? _database;
@@ -73,7 +73,9 @@ class OnlineFavoritesRepository {
   Future<void> initialize() {
     final db = _database;
     if (db != null && db.isOpen) return Future.value();
-    return _initialization ??= _open().whenComplete(() => _initialization = null);
+    return _initialization ??= _open().whenComplete(
+      () => _initialization = null,
+    );
   }
 
   Future<void> _open() async {
@@ -189,13 +191,16 @@ class OnlineFavoritesRepository {
   Future<List<OnlineCollectionInfo>> listCollectionsWithCounts(
     GallerySourceId source,
   ) async {
-    final rows = await (await _db()).rawQuery('''
+    final rows = await (await _db()).rawQuery(
+      '''
       SELECT c.id, c.name, c.created_at,
         (SELECT COUNT(*) FROM online_favorites f
           WHERE f.collection_id = c.id AND f.source = ?) AS item_count
       FROM online_collections c
       ORDER BY c.sort_order ASC, c.created_at ASC
-    ''', [source.key]);
+    ''',
+      [source.key],
+    );
     return [
       for (final row in rows)
         OnlineCollectionInfo(
@@ -213,30 +218,23 @@ class OnlineFavoritesRepository {
 
   /// 收藏作品（幂等）。[collectionId] 为 null 表示根收藏；
   /// 已收藏时更新其归属子集（移动语义）。
-  Future<void> addFavorite(
-    GalleryItem item, {
-    String? collectionId,
-  }) async {
+  Future<void> addFavorite(GalleryItem item, {String? collectionId}) async {
     final cover = item.cover;
-    await (await _db()).insert(
-      'online_favorites',
-      {
-        'source': item.sourceId.key,
-        'work_id': item.id,
-        'collection_id': collectionId,
-        'title': item.title,
-        'author_id': item.uploaderId,
-        'author_name': item.author ?? '',
-        'cover_url': cover.previewUrl.isNotEmpty
-            ? cover.previewUrl
-            : cover.displayUrl,
-        'cover_width': cover.width,
-        'cover_height': cover.height,
-        'saved_at': DateTime.now().millisecondsSinceEpoch,
-        'snapshot': jsonEncode(item.toSnapshotJson()),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await (await _db()).insert('online_favorites', {
+      'source': item.sourceId.key,
+      'work_id': item.id,
+      'collection_id': collectionId,
+      'title': item.title,
+      'author_id': item.uploaderId,
+      'author_name': item.author ?? '',
+      'cover_url': cover.previewUrl.isNotEmpty
+          ? cover.previewUrl
+          : cover.displayUrl,
+      'cover_width': cover.width,
+      'cover_height': cover.height,
+      'saved_at': DateTime.now().millisecondsSinceEpoch,
+      'snapshot': jsonEncode(item.toSnapshotJson()),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<void> removeFavorite(GallerySourceId source, int workId) async {
@@ -300,8 +298,9 @@ class OnlineFavoritesRepository {
       for (final row in rows)
         OnlineFavoriteEntry(
           item: GalleryItem.fromSnapshotJson(
-            Map<String, dynamic>.from(jsonDecode(row['snapshot']! as String)
-                as Map),
+            Map<String, dynamic>.from(
+              jsonDecode(row['snapshot']! as String) as Map,
+            ),
           ),
           collectionId: row['collection_id']?.toString(),
           savedAt: DateTime.fromMillisecondsSinceEpoch(
@@ -331,6 +330,16 @@ class OnlineFavoritesRepository {
   }
 
   // ============ 作者收藏 ============
+
+  /// 显式取消作者收藏，返回是否实际删除
+  Future<bool> removeAuthor(GallerySourceId source, int authorId) async {
+    final removed = await (await _db()).delete(
+      'online_favorite_authors',
+      where: 'source = ? AND author_id = ?',
+      whereArgs: [source.key, authorId],
+    );
+    return removed > 0;
+  }
 
   /// 切换作者收藏态，返回切换后是否已收藏
   Future<bool> toggleAuthor(

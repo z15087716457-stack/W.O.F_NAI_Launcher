@@ -44,9 +44,7 @@ class AddCharacterButtons extends ConsumerWidget {
           onTap: () => _addCharacter(ref, CharacterGender.other),
         ),
         // 词库按钮
-        _LibraryButton(
-          onTap: () => _addFromLibrary(context, ref),
-        ),
+        _LibraryButton(onTap: () => _addFromLibrary(context, ref)),
       ],
     );
   }
@@ -66,7 +64,9 @@ class AddCharacterButtons extends ConsumerWidget {
       ref.read(tagLibraryPageNotifierProvider.notifier).recordUsage(entry.id);
 
       // 创建新角色
-      ref.read(characterPromptNotifierProvider.notifier).addCharacter(
+      ref
+          .read(characterPromptNotifierProvider.notifier)
+          .addCharacter(
             CharacterGender.female, // 默认女性
             name: entry.displayName,
             prompt: entry.content,
@@ -129,17 +129,14 @@ class _GenderButtonState extends State<_GenderButton> {
                     : colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
               ),
               const SizedBox(width: 2),
-              Icon(
-                widget.icon,
-                size: 17,
-                color: widget.color,
-              ),
+              Icon(widget.icon, size: 17, color: widget.color),
               const SizedBox(width: 5),
               Text(
                 widget.label,
                 style: theme.textTheme.labelMedium?.copyWith(
-                  color:
-                      _isHovered ? widget.color : colorScheme.onSurfaceVariant,
+                  color: _isHovered
+                      ? widget.color
+                      : colorScheme.onSurfaceVariant,
                   fontWeight: _isHovered ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),
@@ -199,8 +196,9 @@ class _LibraryButtonState extends State<_LibraryButton> {
               Text(
                 l10n.characterEditor_addFromLibrary,
                 style: theme.textTheme.labelMedium?.copyWith(
-                  color:
-                      _isHovered ? accentColor : colorScheme.onSurfaceVariant,
+                  color: _isHovered
+                      ? accentColor
+                      : colorScheme.onSurfaceVariant,
                   fontWeight: _isHovered ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),

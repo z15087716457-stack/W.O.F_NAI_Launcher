@@ -48,8 +48,8 @@ class ProjectData {
     this.backgroundColor = 0xFFFFFFFF,
     DateTime? createdAt,
     DateTime? modifiedAt,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        modifiedAt = modifiedAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now(),
+       modifiedAt = modifiedAt ?? DateTime.now();
 
   /// 从JSON创建
   factory ProjectData.fromJson(Map<String, dynamic> json) {
@@ -141,7 +141,8 @@ class LayerProjectData {
       opacity: (json['opacity'] as num?)?.toDouble() ?? 1.0,
       blendMode: json['blendMode'] as String? ?? 'normal',
       imageData: json['imageData'] as String?,
-      strokes: (json['strokes'] as List?)
+      strokes:
+          (json['strokes'] as List?)
               ?.map(
                 (s) => StrokeProjectData.fromJson(s as Map<String, dynamic>),
               )
@@ -199,8 +200,9 @@ class StrokeProjectData {
   /// 从JSON创建
   factory StrokeProjectData.fromJson(Map<String, dynamic> json) {
     return StrokeProjectData(
-      points:
-          (json['points'] as List).map((p) => (p as num).toDouble()).toList(),
+      points: (json['points'] as List)
+          .map((p) => (p as num).toDouble())
+          .toList(),
       size: (json['size'] as num).toDouble(),
       color: json['color'] as int,
       opacity: (json['opacity'] as num).toDouble(),

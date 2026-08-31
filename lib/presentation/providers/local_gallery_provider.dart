@@ -451,8 +451,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
               (r) => !_recentlyDeletedKeys.contains(galleryFilePathKey(r.path)),
             )
             .toList(growable: false);
-        if (records.length != before) {
-        }
+        if (records.length != before) {}
       }
       _setState(
         state.copyWith(
@@ -671,9 +670,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     if (criteria.searchQuery == query) return;
 
     _setState(
-      state.copyWith(
-        filterCriteria: criteria.copyWith(searchQuery: query),
-      ),
+      state.copyWith(filterCriteria: criteria.copyWith(searchQuery: query)),
     );
 
     await _applyFilters();
@@ -731,9 +728,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     if (_sameStringList(criteria.selectedTags, nextTags)) return;
 
     _setState(
-      state.copyWith(
-        filterCriteria: criteria.copyWith(selectedTags: nextTags),
-      ),
+      state.copyWith(filterCriteria: criteria.copyWith(selectedTags: nextTags)),
     );
 
     await _applyFilters();
@@ -827,9 +822,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     if (criteria.naiOnly == value) return;
 
     _setState(
-      state.copyWith(
-        filterCriteria: criteria.copyWith(naiOnly: value),
-      ),
+      state.copyWith(filterCriteria: criteria.copyWith(naiOnly: value)),
     );
 
     await _applyFilters();
@@ -1080,7 +1073,9 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       // 页数校正与越界回退独立兜底（失败只影响页码，不影响列表内容）
       try {
         final nextTotalPages =
-            ((state.filterCriteria.hasFilters ? service.filteredCount : service.totalCount) /
+            ((state.filterCriteria.hasFilters
+                        ? service.filteredCount
+                        : service.totalCount) /
                     state.pageSize)
                 .ceil();
         if (state.totalPages != nextTotalPages) {

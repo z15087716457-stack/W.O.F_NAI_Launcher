@@ -50,18 +50,20 @@ class _FakeVibeLibraryImportRepository implements VibeLibraryImportRepository {
     VibeLibraryEntry? replaceEntry,
   }) async {
     savedBundleVibes = vibes;
-    final entry = VibeLibraryEntry.fromVibeReference(
-      name: name,
-      vibeData: vibes.first,
-      categoryId: categoryId,
-      tags: tags,
-    ).copyWith(
-      bundledVibeNames: vibes.map((vibe) => vibe.displayName).toList(),
-      bundledVibeEncodings: vibes.map((vibe) => vibe.vibeEncoding).toList(),
-      bundledVibeStrengths: vibes.map((vibe) => vibe.strength).toList(),
-      bundledVibeInfoExtracted:
-          vibes.map((vibe) => vibe.infoExtracted).toList(),
-    );
+    final entry =
+        VibeLibraryEntry.fromVibeReference(
+          name: name,
+          vibeData: vibes.first,
+          categoryId: categoryId,
+          tags: tags,
+        ).copyWith(
+          bundledVibeNames: vibes.map((vibe) => vibe.displayName).toList(),
+          bundledVibeEncodings: vibes.map((vibe) => vibe.vibeEncoding).toList(),
+          bundledVibeStrengths: vibes.map((vibe) => vibe.strength).toList(),
+          bundledVibeInfoExtracted: vibes
+              .map((vibe) => vibe.infoExtracted)
+              .toList(),
+        );
     savedEntries.add(entry);
     return entry;
   }
@@ -88,10 +90,7 @@ void main() {
                   },
                 },
                 'image': base64Encode(firstImage),
-                'importInfo': {
-                  'strength': 0.35,
-                  'information_extracted': 0.7,
-                },
+                'importInfo': {'strength': 0.35, 'information_extracted': 0.7},
               },
               {
                 'name': 'second',
@@ -101,10 +100,7 @@ void main() {
                   },
                 },
                 'image': base64Encode(secondImage),
-                'importInfo': {
-                  'strength': -0.25,
-                  'information_extracted': 0.5,
-                },
+                'importInfo': {'strength': -0.25, 'information_extracted': 0.5},
               },
             ],
           }),
@@ -120,9 +116,7 @@ void main() {
           ),
         ],
         onBundleOption: (bundleName, vibes) async {
-          return BundleImportOption.keepAsBundle(
-            configuredReferences: vibes,
-          );
+          return BundleImportOption.keepAsBundle(configuredReferences: vibes);
         },
       );
 
@@ -138,36 +132,32 @@ void main() {
   });
 
   group('VibeImportService.importFromImage', () {
-    test('should import jpg images as raw-image vibes instead of failing',
-        () async {
-      final repository = _FakeVibeLibraryImportRepository();
-      final service = VibeImportService(repository: repository);
-      final image = img.Image(width: 4, height: 4);
-      final jpgBytes = Uint8List.fromList(img.encodeJpg(image));
+    test(
+      'should import jpg images as raw-image vibes instead of failing',
+      () async {
+        final repository = _FakeVibeLibraryImportRepository();
+        final service = VibeImportService(repository: repository);
+        final image = img.Image(width: 4, height: 4);
+        final jpgBytes = Uint8List.fromList(img.encodeJpg(image));
 
-      final result = await service.importFromImage(
-        images: const <VibeImageImportItem>[].followedBy([
-          VibeImageImportItem(
-            source: 'sample.jpg',
-            bytes: jpgBytes,
-          ),
-        ]).toList(),
-      );
+        final result = await service.importFromImage(
+          images: const <VibeImageImportItem>[].followedBy([
+            VibeImageImportItem(source: 'sample.jpg', bytes: jpgBytes),
+          ]).toList(),
+        );
 
-      expect(result.successCount, 1);
-      expect(result.failCount, 0);
-      expect(repository.savedEntries, hasLength(1));
-      expect(
-        repository.savedEntries.single.sourceType,
-        equals(VibeSourceType.rawImage),
-      );
-      expect(
-        repository.savedEntries.single.rawImageData,
-        isNotEmpty,
-      );
-      expect(repository.getAllEntriesCalls, 0);
-      expect(repository.findEntryByNameCalls, greaterThan(0));
-    });
+        expect(result.successCount, 1);
+        expect(result.failCount, 0);
+        expect(repository.savedEntries, hasLength(1));
+        expect(
+          repository.savedEntries.single.sourceType,
+          equals(VibeSourceType.rawImage),
+        );
+        expect(repository.savedEntries.single.rawImageData, isNotEmpty);
+        expect(repository.getAllEntriesCalls, 0);
+        expect(repository.findEntryByNameCalls, greaterThan(0));
+      },
+    );
   });
 
   group('VibeFileStorageService.extractVibesFromBundle', () {
@@ -193,10 +183,7 @@ void main() {
               'vibe': {'encoding': encoding},
             },
           },
-          'importInfo': {
-            'strength': strength,
-            'information_extracted': 0.5,
-          },
+          'importInfo': {'strength': strength, 'information_extracted': 0.5},
         };
       }
 
@@ -221,10 +208,7 @@ void main() {
         limit: 2,
       );
 
-      expect(references.map((item) => item.displayName), [
-        'Second',
-        'Third',
-      ]);
+      expect(references.map((item) => item.displayName), ['Second', 'Third']);
       expect(references.map((item) => item.vibeEncoding), [
         'second-encoded',
         'third-encoded',
@@ -233,48 +217,42 @@ void main() {
   });
 
   group('VibeSelectorDialog selection result', () {
-    test('keeps normal library entries lightweight during confirmation',
-        () async {
-      var hydrateCalls = 0;
-      var recordUsageCalls = 0;
-      final lightEntry = VibeLibraryEntry(
-        id: 'entry-1',
-        name: 'Light Entry',
-        vibeDisplayName: 'Light Entry',
-        vibeEncoding: '',
-        strength: 0.6,
-        infoExtracted: 0.7,
-        sourceTypeIndex: VibeSourceType.naiv4vibe.index,
-        tags: const ['light'],
-        createdAt: DateTime(2026, 4, 14),
-        filePath: r'C:\vibes\entry-1.naiv4vibe',
-      );
+    test(
+      'keeps normal library entries lightweight during confirmation',
+      () async {
+        var hydrateCalls = 0;
+        var recordUsageCalls = 0;
+        final lightEntry = VibeLibraryEntry(
+          id: 'entry-1',
+          name: 'Light Entry',
+          vibeDisplayName: 'Light Entry',
+          vibeEncoding: '',
+          strength: 0.6,
+          infoExtracted: 0.7,
+          sourceTypeIndex: VibeSourceType.naiv4vibe.index,
+          tags: const ['light'],
+          createdAt: DateTime(2026, 4, 14),
+          filePath: r'C:\vibes\entry-1.naiv4vibe',
+        );
 
-      final result = await buildLightweightVibeSelectionResult(
-        selectedIds: {'entry-1'},
-        entries: [lightEntry],
-        shouldReplace: false,
-        hydrateBundleChild: (bundleEntry, index) async {
-          hydrateCalls++;
-          return null;
-        },
-        recordUsage: (id) async {
-          recordUsageCalls++;
-        },
-      );
+        final result = await buildLightweightVibeSelectionResult(
+          selectedIds: {'entry-1'},
+          entries: [lightEntry],
+          shouldReplace: false,
+          hydrateBundleChild: (bundleEntry, index) async {
+            hydrateCalls++;
+            return null;
+          },
+          recordUsage: (id) async {
+            recordUsageCalls++;
+          },
+        );
 
-      expect(result.selectedEntries, [lightEntry]);
-      expect(result.shouldReplace, isFalse);
-      expect(
-        hydrateCalls,
-        0,
-        reason: '普通条目确认阶段不应在 selector 内读取完整 Vibe 文件',
-      );
-      expect(
-        recordUsageCalls,
-        0,
-        reason: '使用次数应由真正添加成功的外层导入 handler 统一记录一次',
-      );
-    });
+        expect(result.selectedEntries, [lightEntry]);
+        expect(result.shouldReplace, isFalse);
+        expect(hydrateCalls, 0, reason: '普通条目确认阶段不应在 selector 内读取完整 Vibe 文件');
+        expect(recordUsageCalls, 0, reason: '使用次数应由真正添加成功的外层导入 handler 统一记录一次');
+      },
+    );
   });
 }

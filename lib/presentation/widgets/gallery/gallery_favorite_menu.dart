@@ -211,8 +211,9 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
                           iconColor: Colors.amber.shade700,
                           label: collection.name,
                           count: collection.imageCount,
-                          checked:
-                              _memberCollectionIds!.contains(collection.id),
+                          checked: _memberCollectionIds!.contains(
+                            collection.id,
+                          ),
                           onTap: _busy
                               ? null
                               : () => _toggleCollection(collection.id),

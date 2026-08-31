@@ -25,10 +25,11 @@ class MainNavRail extends ConsumerWidget {
   static const List<AppBranch> _railBranches = [
     AppBranch.generation,
     AppBranch.localGallery,
+    AppBranch.promptBlockLibrary,
+    AppBranch.styleExplore,
     AppBranch.onlineGallery,
     AppBranch.vibeLibrary,
     AppBranch.preciseRefLibrary,
-    AppBranch.promptConfig,
     AppBranch.tagLibrary,
     AppBranch.statistics,
     AppBranch.settings,
@@ -98,11 +99,31 @@ class MainNavRail extends ConsumerWidget {
                       ),
                     ),
 
+                    // 全局 Prompt 块库
+                    _NavIcon(
+                      icon: Icons.view_module_outlined,
+                      label: context.l10n.nav_promptBlockLibrary,
+                      isSelected: selectedIndex == 2,
+                      onTap: () => navigationShell.goBranch(
+                        AppBranch.promptBlockLibrary.index,
+                      ),
+                    ),
+
+                    // 画风探索
+                    _NavIcon(
+                      icon: Icons.travel_explore, // Style Explore
+                      label: context.l10n.nav_styleExplore,
+                      isSelected: selectedIndex == 3,
+                      onTap: () => navigationShell.goBranch(
+                        AppBranch.styleExplore.index,
+                      ),
+                    ),
+
                     // 在线画廊
                     _NavIcon(
                       icon: Icons.photo_library, // Online Gallery
                       label: context.l10n.nav_onlineGallery,
-                      isSelected: selectedIndex == 2,
+                      isSelected: selectedIndex == 4,
                       onTap: () => navigationShell.goBranch(
                         AppBranch.onlineGallery.index,
                       ),
@@ -112,7 +133,7 @@ class MainNavRail extends ConsumerWidget {
                     _NavIcon(
                       icon: Icons.auto_awesome, // Vibe Library
                       label: context.l10n.vibeLibrary_title,
-                      isSelected: selectedIndex == 3,
+                      isSelected: selectedIndex == 5,
                       onTap: () =>
                           navigationShell.goBranch(AppBranch.vibeLibrary.index),
                     ),
@@ -121,19 +142,9 @@ class MainNavRail extends ConsumerWidget {
                     _NavIcon(
                       icon: Icons.center_focus_strong,
                       label: context.l10n.nav_preciseRefLibrary,
-                      isSelected: selectedIndex == 4,
+                      isSelected: selectedIndex == 6,
                       onTap: () => navigationShell.goBranch(
                         AppBranch.preciseRefLibrary.index,
-                      ),
-                    ),
-
-                    // 随机配置
-                    _NavIcon(
-                      icon: Icons.casino, // Random prompt config
-                      label: context.l10n.nav_randomConfig,
-                      isSelected: selectedIndex == 5,
-                      onTap: () => navigationShell.goBranch(
-                        AppBranch.promptConfig.index,
                       ),
                     ),
 
@@ -141,7 +152,7 @@ class MainNavRail extends ConsumerWidget {
                     _NavIcon(
                       icon: Icons.book,
                       label: context.l10n.nav_dictionary,
-                      isSelected: selectedIndex == 6,
+                      isSelected: selectedIndex == 7,
                       onTap: () =>
                           navigationShell.goBranch(AppBranch.tagLibrary.index),
                     ),
@@ -150,7 +161,7 @@ class MainNavRail extends ConsumerWidget {
                     _NavIcon(
                       icon: Icons.bar_chart, // Gallery Statistics
                       label: context.l10n.statistics_title,
-                      isSelected: selectedIndex == 7,
+                      isSelected: selectedIndex == 8,
                       onTap: () =>
                           navigationShell.goBranch(AppBranch.statistics.index),
                     ),
@@ -177,7 +188,7 @@ class MainNavRail extends ConsumerWidget {
             _NavIcon(
               icon: Icons.settings,
               label: context.l10n.nav_settings,
-              isSelected: selectedIndex == 8,
+              isSelected: selectedIndex == 9,
               showBadge: showUpdateBadge,
               onTap: () => navigationShell.goBranch(AppBranch.settings.index),
             ),

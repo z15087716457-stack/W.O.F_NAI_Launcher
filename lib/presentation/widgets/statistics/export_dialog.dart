@@ -26,10 +26,7 @@ class StatisticsExportDialog extends ConsumerStatefulWidget {
   /// The statistics data to export
   final GalleryStatistics statistics;
 
-  const StatisticsExportDialog({
-    super.key,
-    required this.statistics,
-  });
+  const StatisticsExportDialog({super.key, required this.statistics});
 
   /// Show the export dialog
   static Future<void> show(
@@ -38,9 +35,7 @@ class StatisticsExportDialog extends ConsumerStatefulWidget {
   }) {
     return showDialog(
       context: context,
-      builder: (context) => StatisticsExportDialog(
-        statistics: statistics,
-      ),
+      builder: (context) => StatisticsExportDialog(statistics: statistics),
     );
   }
 
@@ -100,8 +95,9 @@ class _StatisticsExportDialogState
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color:
-                    theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                color: theme.colorScheme.primaryContainer.withValues(
+                  alpha: 0.3,
+                ),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: theme.colorScheme.primary.withValues(alpha: 0.3),
@@ -179,10 +175,12 @@ class _StatisticsExportDialogState
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected
-              ? theme.colorScheme.primaryContainer
-                  .withValues(alpha: isDark ? 0.3 : 0.5)
-              : theme.colorScheme.surfaceContainerHighest
-                  .withValues(alpha: isDark ? 0.3 : 0.2),
+              ? theme.colorScheme.primaryContainer.withValues(
+                  alpha: isDark ? 0.3 : 0.5,
+                )
+              : theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: isDark ? 0.3 : 0.2,
+                ),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected

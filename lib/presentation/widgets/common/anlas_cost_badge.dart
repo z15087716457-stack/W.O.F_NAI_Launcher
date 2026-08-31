@@ -10,10 +10,7 @@ import '../../providers/cost_estimate_provider.dart';
 class AnlasCostBadge extends ConsumerWidget {
   final bool isGenerating;
 
-  const AnlasCostBadge({
-    super.key,
-    required this.isGenerating,
-  });
+  const AnlasCostBadge({super.key, required this.isGenerating});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

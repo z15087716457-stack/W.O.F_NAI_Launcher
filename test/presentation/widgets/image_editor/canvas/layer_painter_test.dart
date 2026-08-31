@@ -192,34 +192,38 @@ void main() {
     );
   });
 
-  test('checkerboard paint stays clipped to non-multiple canvas size',
-      () async {
-    final state = EditorState()..setCanvasSize(const Size(33, 33));
-    addTearDown(state.dispose);
+  test(
+    'checkerboard paint stays clipped to non-multiple canvas size',
+    () async {
+      final state = EditorState()..setCanvasSize(const Size(33, 33));
+      addTearDown(state.dispose);
 
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
 
-    LayerPainter(
-      state: state,
-      showTransparentCanvasBackground: true,
-    ).paint(canvas, const Size(48, 48));
+      LayerPainter(
+        state: state,
+        showTransparentCanvasBackground: true,
+      ).paint(canvas, const Size(48, 48));
 
-    final picture = recorder.endRecording();
-    addTearDown(picture.dispose);
+      final picture = recorder.endRecording();
+      addTearDown(picture.dispose);
 
-    final image = await picture.toImage(48, 48);
-    addTearDown(image.dispose);
+      final image = await picture.toImage(48, 48);
+      addTearDown(image.dispose);
 
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-    expect(byteData, isNotNull);
+      final byteData = await image.toByteData(
+        format: ui.ImageByteFormat.rawRgba,
+      );
+      expect(byteData, isNotNull);
 
-    final insidePixel = _pixelAt(byteData!, 48, 1, 1);
-    final outsidePixel = _pixelAt(byteData, 48, 34, 16);
+      final insidePixel = _pixelAt(byteData!, 48, 1, 1);
+      final outsidePixel = _pixelAt(byteData, 48, 34, 16);
 
-    expect(_alphaByte(insidePixel), greaterThan(0));
-    expect(_alphaByte(outsidePixel), 0);
-  });
+      expect(_alphaByte(insidePixel), greaterThan(0));
+      expect(_alphaByte(outsidePixel), 0);
+    },
+  );
 
   test('layer painter does not draw live current stroke preview', () async {
     final state = EditorState()..setCanvasSize(const Size(32, 32));

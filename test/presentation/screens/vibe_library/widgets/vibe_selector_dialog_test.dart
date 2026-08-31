@@ -24,10 +24,7 @@ void main() {
   });
 }
 
-VibeLibraryEntry _buildEntry({
-  required String id,
-  required List<String> tags,
-}) {
+VibeLibraryEntry _buildEntry({required String id, required List<String> tags}) {
   return VibeLibraryEntry(
     id: id,
     name: id,

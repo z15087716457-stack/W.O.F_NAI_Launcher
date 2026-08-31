@@ -88,8 +88,8 @@ class _ThumbnailItemState extends State<_ThumbnailItem> {
     final size = widget.isSelected
         ? selectedSize
         : _isHovered
-            ? hoveredSize
-            : baseSize;
+        ? hoveredSize
+        : baseSize;
 
     // 计算边距（保持总高度不变）
     const totalHeight = 84.0;
@@ -99,15 +99,15 @@ class _ThumbnailItemState extends State<_ThumbnailItem> {
     final borderColor = widget.isSelected
         ? primary
         : _isHovered
-            ? primary.withValues(alpha: 0.7)
-            : Colors.white.withValues(alpha: 0.2);
+        ? primary.withValues(alpha: 0.7)
+        : Colors.white.withValues(alpha: 0.2);
 
     // 边框宽度
     final borderWidth = widget.isSelected
         ? 2.5
         : _isHovered
-            ? 2.0
-            : 1.0;
+        ? 2.0
+        : 1.0;
 
     // 阴影
     final shadow = widget.isSelected || _isHovered
@@ -124,8 +124,8 @@ class _ThumbnailItemState extends State<_ThumbnailItem> {
     final opacity = widget.isSelected
         ? 1.0
         : _isHovered
-            ? 0.85
-            : 0.5;
+        ? 0.85
+        : 0.5;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -145,10 +145,7 @@ class _ThumbnailItemState extends State<_ThumbnailItem> {
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: borderColor,
-              width: borderWidth,
-            ),
+            border: Border.all(color: borderColor, width: borderWidth),
             boxShadow: shadow,
           ),
           child: ClipRRect(

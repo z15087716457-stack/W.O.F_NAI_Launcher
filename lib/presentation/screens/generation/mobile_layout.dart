@@ -41,7 +41,6 @@ class _MobileGenerationLayoutState
     final isLauncherGenerating = generationState.isGenerating;
     final isGenerating =
         isLauncherGenerating || kritaBridgeState.isBridgeGenerating;
-    final showRandomTools = ref.watch(randomPromptToolsVisibilityProvider);
 
     return ThemedScaffold(
       // 使用 GlobalKey 来控制 Drawer
@@ -145,13 +144,6 @@ class _MobileGenerationLayoutState
               // 个人点数计数器（合租账本）
               const PersonalAnlasChip(compact: true),
               const SizedBox(width: 8),
-              // 抽卡模式开关
-              if (showRandomTools) ...[
-                _MobileRandomModeToggle(
-                  enabled: ref.watch(randomPromptModeProvider),
-                ),
-                const SizedBox(width: 8),
-              ],
               // 生成按钮（集成价格徽章）
               Expanded(
                 child: _MobileGenerateButton(
@@ -194,55 +186,8 @@ class _MobileGenerationLayoutState
       return;
     }
 
-    // 生成（抽卡模式逻辑在 generate 方法内部处理）
+    // 生成
     ref.read(imageGenerationNotifierProvider.notifier).generate(params);
-  }
-}
-
-/// 移动端抽卡模式开关
-class _MobileRandomModeToggle extends ConsumerWidget {
-  final bool enabled;
-
-  const _MobileRandomModeToggle({required this.enabled});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-
-    return Tooltip(
-      message: enabled
-          ? context.l10n.randomMode_enabledTip
-          : context.l10n.randomMode_disabledTip,
-      child: GestureDetector(
-        onTap: () {
-          ref.read(randomPromptModeProvider.notifier).toggle();
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: enabled
-                ? theme.colorScheme.primary.withValues(alpha: 0.15)
-                : theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: enabled
-                  ? theme.colorScheme.primary.withValues(alpha: 0.5)
-                  : theme.colorScheme.outline.withValues(alpha: 0.3),
-              width: enabled ? 1.5 : 1,
-            ),
-          ),
-          child: Icon(
-            Icons.casino_outlined,
-            size: 22,
-            color: enabled
-                ? theme.colorScheme.primary
-                : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-          ),
-        ),
-      ),
-    );
   }
 }
 

@@ -84,6 +84,9 @@ class ImageStreamChunk {
   /// 错误信息
   final String? error;
 
+  /// Vibe 原始索引到请求编码的映射（仅完成块携带）。
+  final Map<int, String>? vibeEncodings;
+
   const ImageStreamChunk({
     this.previewImage,
     this.progress = 0.0,
@@ -94,6 +97,7 @@ class ImageStreamChunk {
     this.currentStep,
     this.totalSteps,
     this.error,
+    this.vibeEncodings,
   });
 
   /// 创建进度更新块
@@ -116,12 +120,17 @@ class ImageStreamChunk {
   }
 
   /// 创建完成块
-  factory ImageStreamChunk.complete(Uint8List image, {int sampleIndex = 0}) {
+  factory ImageStreamChunk.complete(
+    Uint8List image, {
+    int sampleIndex = 0,
+    Map<int, String>? vibeEncodings,
+  }) {
     return ImageStreamChunk(
       finalImage: image,
       sampleIndex: sampleIndex,
       progress: 1.0,
       isComplete: true,
+      vibeEncodings: vibeEncodings,
     );
   }
 

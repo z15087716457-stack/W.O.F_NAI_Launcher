@@ -176,12 +176,20 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
     T pick<T>(T a, T b) => t < 0.5 ? a : b;
 
     return AppThemeExtension(
-      containerDecoration: BoxDecoration.lerp(containerDecoration, other.containerDecoration, t),
+      containerDecoration: BoxDecoration.lerp(
+        containerDecoration,
+        other.containerDecoration,
+        t,
+      ),
       blurStrength: lerpDouble(blurStrength, other.blurStrength),
       usePixelFont: pick(usePixelFont, other.usePixelFont),
       navBarStyle: pick(navBarStyle, other.navBarStyle),
       interactionStyle: pick(interactionStyle, other.interactionStyle),
-      primaryButtonStyle: ButtonStyle.lerp(primaryButtonStyle, other.primaryButtonStyle, t),
+      primaryButtonStyle: ButtonStyle.lerp(
+        primaryButtonStyle,
+        other.primaryButtonStyle,
+        t,
+      ),
       borderColor: Color.lerp(borderColor, other.borderColor, t),
       borderWidth: lerpDouble(borderWidth, other.borderWidth),
       enableCrtEffect: pick(enableCrtEffect, other.enableCrtEffect),
@@ -192,7 +200,8 @@ class AppThemeExtension extends ThemeExtension<AppThemeExtension> {
       shadowIntensity: lerpDouble(shadowIntensity, other.shadowIntensity),
       isLightTheme: pick(isLightTheme, other.isLightTheme),
       accentBarColor: Color.lerp(accentBarColor, other.accentBarColor, t),
-      dividerColor: Color.lerp(dividerColor, other.dividerColor, t) ?? dividerColor,
+      dividerColor:
+          Color.lerp(dividerColor, other.dividerColor, t) ?? dividerColor,
       dividerThickness: lerpDouble(dividerThickness, other.dividerThickness),
       useDivider: pick(useDivider, other.useDivider),
       enableInsetShadow: pick(enableInsetShadow, other.enableInsetShadow),

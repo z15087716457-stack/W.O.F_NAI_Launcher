@@ -1,7 +1,7 @@
 import 'package:package_info_plus/package_info_plus.dart';
 
 /// 应用版本号配置
-/// 
+///
 /// 从 pubspec.yaml 自动读取版本号
 /// 只需修改 pubspec.yaml 中的 version 字段即可
 class AppVersion {
@@ -32,11 +32,11 @@ class AppVersion {
     // 解析 x.y.z-prerelease+build -> 返回 x.y.z-Prerelease
     final match = RegExp(r'(\d+\.\d+\.\d+)-([^+]+)').firstMatch(version);
     if (match != null) {
-      final core = match.group(1)!;  // 1.0.0
-      final prerelease = match.group(2)!;  // beta3.1
+      final core = match.group(1)!; // 1.0.0
+      final prerelease = match.group(2)!; // beta3.1
       // 将 beta3.1 转为 Beta3.1
-      final capitalized = prerelease.substring(0, 1).toUpperCase() + 
-                          prerelease.substring(1);
+      final capitalized =
+          prerelease.substring(0, 1).toUpperCase() + prerelease.substring(1);
       return '$core-$capitalized';
     }
     // 如果没有 prerelease 部分，直接返回版本号

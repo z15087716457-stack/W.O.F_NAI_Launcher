@@ -67,12 +67,10 @@ class ZipUtils {
           if (name.endsWith('.png') ||
               name.endsWith('.jpg') ||
               name.endsWith('.jpeg')) {
-            results.add(
-              (
-                name: file.name,
-                data: Uint8List.fromList(file.content as List<int>),
-              ),
-            );
+            results.add((
+              name: file.name,
+              data: Uint8List.fromList(file.content as List<int>),
+            ));
           }
         }
       }
@@ -105,13 +103,7 @@ class ZipUtils {
           final bytes = await file.readAsBytes();
           final fileName = path.basename(imagePath);
 
-          archive.addFile(
-            ArchiveFile(
-              fileName,
-              bytes.length,
-              bytes,
-            ),
-          );
+          archive.addFile(ArchiveFile(fileName, bytes.length, bytes));
         }
 
         onProgress?.call(i + 1, imagePaths.length);
@@ -154,13 +146,7 @@ class ZipUtils {
           final bytes = await file.readAsBytes();
           final fileName = path.basename(imagePath);
 
-          archive.addFile(
-            ArchiveFile(
-              fileName,
-              bytes.length,
-              bytes,
-            ),
-          );
+          archive.addFile(ArchiveFile(fileName, bytes.length, bytes));
         }
       }
 

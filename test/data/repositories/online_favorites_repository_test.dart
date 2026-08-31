@@ -37,11 +37,9 @@ void main() {
         ),
       );
 
-      final restored =
-          GalleryItem.fromSnapshotJson(
-            jsonDecode(jsonEncode(item.toSnapshotJson()))
-                as Map<String, dynamic>,
-          );
+      final restored = GalleryItem.fromSnapshotJson(
+        jsonDecode(jsonEncode(item.toSnapshotJson())) as Map<String, dynamic>,
+      );
 
       expect(restored.id, item.id);
       expect(restored.sourceId, GallerySourceId.aiTag);
@@ -80,7 +78,11 @@ void main() {
       if (await file.exists()) await file.delete();
     });
 
-    GalleryItem makeItem(int id, {int uploader = 42, String author = 'author'}) {
+    GalleryItem makeItem(
+      int id, {
+      int uploader = 42,
+      String author = 'author',
+    }) {
       return GalleryItem(
         id: id,
         sourceId: GallerySourceId.aiTag,
@@ -172,7 +174,10 @@ void main() {
     });
 
     test('作者收藏 toggle 与列表', () async {
-      expect(await repo.toggleAuthor(GallerySourceId.aiTag, 7, 'alice'), isTrue);
+      expect(
+        await repo.toggleAuthor(GallerySourceId.aiTag, 7, 'alice'),
+        isTrue,
+      );
       expect(await repo.isAuthorFavorite(GallerySourceId.aiTag, 7), isTrue);
       final authors = await repo.listAuthors(GallerySourceId.aiTag);
       expect(authors.single.authorName, 'alice');
@@ -180,6 +185,18 @@ void main() {
         await repo.toggleAuthor(GallerySourceId.aiTag, 7, 'alice'),
         isFalse,
       );
+      expect(await repo.listAuthors(GallerySourceId.aiTag), isEmpty);
+    });
+
+    test('显式删除作者仅删除一次且不会重新加入', () async {
+      expect(
+        await repo.toggleAuthor(GallerySourceId.aiTag, 7, 'alice'),
+        isTrue,
+      );
+
+      expect(await repo.removeAuthor(GallerySourceId.aiTag, 7), isTrue);
+      expect(await repo.removeAuthor(GallerySourceId.aiTag, 7), isFalse);
+      expect(await repo.isAuthorFavorite(GallerySourceId.aiTag, 7), isFalse);
       expect(await repo.listAuthors(GallerySourceId.aiTag), isEmpty);
     });
   });

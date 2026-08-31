@@ -83,14 +83,10 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
     _selectedResolutions.addAll(criteria.filterResolutions);
     _orientation = criteria.filterOrientation;
     _nsfwMode = criteria.nsfwMode;
-    _minStepsController.text =
-        criteria.filterMinSteps?.toString() ?? '';
-    _maxStepsController.text =
-        criteria.filterMaxSteps?.toString() ?? '';
-    _minCfgController.text =
-        criteria.filterMinCfg?.toString() ?? '';
-    _maxCfgController.text =
-        criteria.filterMaxCfg?.toString() ?? '';
+    _minStepsController.text = criteria.filterMinSteps?.toString() ?? '';
+    _maxStepsController.text = criteria.filterMaxSteps?.toString() ?? '';
+    _minCfgController.text = criteria.filterMinCfg?.toString() ?? '';
+    _maxCfgController.text = criteria.filterMaxCfg?.toString() ?? '';
 
     // 异步拉取候选（失败时 FutureBuilder 降级显示提示，不崩）
     final dataSource = GalleryDataSource();
@@ -187,7 +183,8 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
       setState(() {
-        _tagSuggestionIndex = (_tagSuggestionIndex + 1) % _tagSuggestions.length;
+        _tagSuggestionIndex =
+            (_tagSuggestionIndex + 1) % _tagSuggestions.length;
       });
       return KeyEventResult.handled;
     }
@@ -533,7 +530,9 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
                                   '${value.value} · ${value.count}',
                               onToggle: (value) {
                                 setState(() {
-                                  if (!_selectedResolutions.remove(value.value)) {
+                                  if (!_selectedResolutions.remove(
+                                    value.value,
+                                  )) {
                                     _selectedResolutions.add(value.value);
                                   }
                                 });
@@ -579,7 +578,10 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
               onTap: () => _addSuggestion(_tagSuggestions[i]),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 color: i == _tagSuggestionIndex
                     ? colorScheme.primary.withValues(alpha: 0.12)
                     : Colors.transparent,
@@ -725,18 +727,9 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
   ) {
     return SegmentedButton<String>(
       segments: [
-        ButtonSegment(
-          value: 'any',
-          label: Text(l10n.localGallery_nsfwAny),
-        ),
-        ButtonSegment(
-          value: 'sfw',
-          label: Text(l10n.localGallery_nsfwSfw),
-        ),
-        ButtonSegment(
-          value: 'nsfw',
-          label: Text(l10n.localGallery_nsfwOnly),
-        ),
+        ButtonSegment(value: 'any', label: Text(l10n.localGallery_nsfwAny)),
+        ButtonSegment(value: 'sfw', label: Text(l10n.localGallery_nsfwSfw)),
+        ButtonSegment(value: 'nsfw', label: Text(l10n.localGallery_nsfwOnly)),
       ],
       selected: {_nsfwMode ?? 'any'},
       onSelectionChanged: (selection) {
@@ -895,8 +888,10 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
 
   /// 当前已选标签 chips（删除即时生效）
   Widget _buildSelectedTagChips(ThemeData theme) {
-    final tags =
-        ref.watch(localGalleryNotifierProvider).filterCriteria.selectedTags;
+    final tags = ref
+        .watch(localGalleryNotifierProvider)
+        .filterCriteria
+        .selectedTags;
     if (tags.isEmpty) {
       return Text(
         context.l10n.localGallery_tagIntersection,

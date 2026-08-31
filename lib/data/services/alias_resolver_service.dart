@@ -44,10 +44,7 @@ class AliasResolverService extends _$AliasResolverService {
         result = result.replaceRange(ref.start, ref.end, resolvedContent);
       } else {
         // 别名未找到，记录警告
-        AppLogger.w(
-          '别名未找到: ${ref.rawText}，请检查词库中是否存在该条目',
-          'AliasResolver',
-        );
+        AppLogger.w('别名未找到: ${ref.rawText}，请检查词库中是否存在该条目', 'AliasResolver');
       }
     }
 

@@ -79,9 +79,7 @@ void main() {
       expect(await repo.getCollectionImageIds(collectionId), [imageId]);
 
       // 重复添加：已在集合，但入根保持幂等、不重复计数
-      final again = await repo.addImagesToCollection(collectionId, [
-        imagePath,
-      ]);
+      final again = await repo.addImagesToCollection(collectionId, [imagePath]);
       expect(again.added, 0);
       expect(again.alreadyIn, 1);
       expect(await dataSource.getFavoriteCount(), 1);

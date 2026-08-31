@@ -59,13 +59,18 @@ class TagTemplateNotifier extends _$TagTemplateNotifier {
       // 按更新时间排序（最新的在前）
       final sortedTemplates = templates.sortByUpdatedAt();
       state = TagTemplateState(templates: sortedTemplates);
-      AppLogger.d('Loaded ${templates.length} templates', 'TagTemplateProvider');
-    } catch (e, stack) {
-      AppLogger.e('Failed to load templates: $e', e, stack, 'TagTemplateProvider');
-      state = TagTemplateState(
-        templates: [],
-        error: e.toString(),
+      AppLogger.d(
+        'Loaded ${templates.length} templates',
+        'TagTemplateProvider',
       );
+    } catch (e, stack) {
+      AppLogger.e(
+        'Failed to load templates: $e',
+        e,
+        stack,
+        'TagTemplateProvider',
+      );
+      state = TagTemplateState(templates: [], error: e.toString());
     }
   }
 
@@ -90,7 +95,10 @@ class TagTemplateNotifier extends _$TagTemplateNotifier {
 
       if (existing != null && !overwrite) {
         // 名称冲突且不允许覆盖
-        AppLogger.w('Template name already exists: $name', 'TagTemplateProvider');
+        AppLogger.w(
+          'Template name already exists: $name',
+          'TagTemplateProvider',
+        );
         state = state.copyWith(isLoading: false);
         return null;
       }
@@ -118,11 +126,13 @@ class TagTemplateNotifier extends _$TagTemplateNotifier {
 
       return template;
     } catch (e, stack) {
-      AppLogger.e('Failed to save template: $e', e, stack, 'TagTemplateProvider');
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
+      AppLogger.e(
+        'Failed to save template: $e',
+        e,
+        stack,
+        'TagTemplateProvider',
       );
+      state = state.copyWith(isLoading: false, error: e.toString());
       return null;
     }
   }
@@ -139,11 +149,13 @@ class TagTemplateNotifier extends _$TagTemplateNotifier {
 
       _loadTemplates();
     } catch (e, stack) {
-      AppLogger.e('Failed to delete template: $e', e, stack, 'TagTemplateProvider');
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
+      AppLogger.e(
+        'Failed to delete template: $e',
+        e,
+        stack,
+        'TagTemplateProvider',
       );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -171,7 +183,12 @@ class TagTemplateNotifier extends _$TagTemplateNotifier {
     try {
       return _storage.getTemplateByName(name);
     } catch (e) {
-      AppLogger.e('Failed to get template by name: $e', e, null, 'TagTemplateProvider');
+      AppLogger.e(
+        'Failed to get template by name: $e',
+        e,
+        null,
+        'TagTemplateProvider',
+      );
       return null;
     }
   }
@@ -201,11 +218,13 @@ class TagTemplateNotifier extends _$TagTemplateNotifier {
 
       _loadTemplates();
     } catch (e, stack) {
-      AppLogger.e('Failed to clear templates: $e', e, stack, 'TagTemplateProvider');
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
+      AppLogger.e(
+        'Failed to clear templates: $e',
+        e,
+        stack,
+        'TagTemplateProvider',
       );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 

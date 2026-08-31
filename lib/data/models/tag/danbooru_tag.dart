@@ -80,7 +80,8 @@ class DanbooruTag with _$DanbooruTag {
   factory DanbooruTag.fromAutocomplete(Map<String, dynamic> json) {
     return DanbooruTag(
       id: json['id'] as int? ?? 0,
-      name: (json['value'] as String?) ??
+      name:
+          (json['value'] as String?) ??
           (json['label'] as String?) ??
           (json['name'] as String?) ??
           '',

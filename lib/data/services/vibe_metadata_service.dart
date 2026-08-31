@@ -68,10 +68,7 @@ class VibeMetadataService {
       // 检查文件是否存在
       final file = File(filePath);
       if (!await file.exists()) {
-        AppLogger.w(
-          'File not found: $filePath',
-          'VibeMetadataService',
-        );
+        AppLogger.w('File not found: $filePath', 'VibeMetadataService');
         return null;
       }
 
@@ -120,10 +117,7 @@ class VibeMetadataService {
   /// 返回 true 如果图片包含 NovelAI_Vibe_Encoding_Base64 iTXt 块
   Future<bool> hasVibeMetadata(Uint8List image) async {
     try {
-      final reference = await VibeFileParser.fromPng(
-        'image.png',
-        image,
-      );
+      final reference = await VibeFileParser.fromPng('image.png', image);
 
       return reference.vibeEncoding.isNotEmpty;
     } catch (e) {

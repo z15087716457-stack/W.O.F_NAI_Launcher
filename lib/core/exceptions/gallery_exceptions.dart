@@ -42,9 +42,9 @@ class GalleryNotInitializedException extends GalleryException {
     super.message = 'Gallery service has not been initialized',
     super.cause,
   }) : super(
-          code: 'GALLERY_NOT_INITIALIZED',
-          localizationKey: 'gallery_error_not_initialized',
-        );
+         code: 'GALLERY_NOT_INITIALIZED',
+         localizationKey: 'gallery_error_not_initialized',
+       );
 }
 
 /// 画廊权限拒绝异常
@@ -59,9 +59,9 @@ class GalleryPermissionDeniedException extends GalleryException {
     super.message = 'Permission denied to access gallery folder',
     super.cause,
   }) : super(
-          code: 'GALLERY_PERMISSION_DENIED',
-          localizationKey: 'gallery_error_permission_denied',
-        );
+         code: 'GALLERY_PERMISSION_DENIED',
+         localizationKey: 'gallery_error_permission_denied',
+       );
 }
 
 /// 画廊扫描异常
@@ -84,9 +84,9 @@ class GalleryScanException extends GalleryException {
     required super.message,
     super.cause,
   }) : super(
-          code: 'GALLERY_SCAN_ERROR',
-          localizationKey: 'gallery_error_scan_failed',
-        );
+         code: 'GALLERY_SCAN_ERROR',
+         localizationKey: 'gallery_error_scan_failed',
+       );
 
   /// 创建批量扫描错误
   factory GalleryScanException.batch({
@@ -95,7 +95,8 @@ class GalleryScanException extends GalleryException {
     List<String>? sampleErrors,
   }) {
     return GalleryScanException(
-      message: 'Batch scan completed with $errorCount errors out of $totalCount files',
+      message:
+          'Batch scan completed with $errorCount errors out of $totalCount files',
       cause: sampleErrors?.isNotEmpty == true
           ? 'Sample: ${sampleErrors!.first}'
           : null,
@@ -119,9 +120,9 @@ class GalleryMetadataException extends GalleryException {
     required super.message,
     super.cause,
   }) : super(
-          code: 'GALLERY_METADATA_ERROR',
-          localizationKey: 'gallery_error_metadata_failed',
-        );
+         code: 'GALLERY_METADATA_ERROR',
+         localizationKey: 'gallery_error_metadata_failed',
+       );
 }
 
 /// 元数据错误阶段
@@ -144,9 +145,9 @@ class GalleryFilterException extends GalleryException {
     required super.message,
     super.cause,
   }) : super(
-          code: 'GALLERY_FILTER_ERROR',
-          localizationKey: 'gallery_error_filter_failed',
-        );
+         code: 'GALLERY_FILTER_ERROR',
+         localizationKey: 'gallery_error_filter_failed',
+       );
 }
 
 /// 画廊数据库异常
@@ -161,20 +162,13 @@ class GalleryDatabaseException extends GalleryException {
     required super.message,
     super.cause,
   }) : super(
-          code: 'GALLERY_DATABASE_ERROR',
-          localizationKey: 'gallery_error_database_failed',
-        );
+         code: 'GALLERY_DATABASE_ERROR',
+         localizationKey: 'gallery_error_database_failed',
+       );
 }
 
 /// 数据库操作类型
-enum DatabaseOperation {
-  query,
-  insert,
-  update,
-  delete,
-  batch,
-  transaction,
-}
+enum DatabaseOperation { query, insert, update, delete, batch, transaction }
 
 /// 画廊文件系统异常
 ///
@@ -192,21 +186,13 @@ class GalleryFileSystemException extends GalleryException {
     required super.message,
     super.cause,
   }) : super(
-          code: 'GALLERY_FILESYSTEM_ERROR',
-          localizationKey: 'gallery_error_filesystem_failed',
-        );
+         code: 'GALLERY_FILESYSTEM_ERROR',
+         localizationKey: 'gallery_error_filesystem_failed',
+       );
 }
 
 /// 文件系统操作类型
-enum FileSystemOperation {
-  read,
-  write,
-  delete,
-  move,
-  copy,
-  list,
-  stat,
-}
+enum FileSystemOperation { read, write, delete, move, copy, list, stat }
 
 /// 画廊取消操作异常
 ///
@@ -219,9 +205,9 @@ class GalleryCancelledException extends GalleryException {
     this.progress,
     super.message = 'Operation was cancelled by user',
   }) : super(
-          code: 'GALLERY_CANCELLED',
-          localizationKey: 'gallery_error_cancelled',
-        );
+         code: 'GALLERY_CANCELLED',
+         localizationKey: 'gallery_error_cancelled',
+       );
 }
 
 /// 异常转换工具
@@ -271,7 +257,8 @@ class GalleryExceptionConverter {
 
     // 默认归类为扫描异常
     return GalleryScanException(
-      message: 'Unexpected error${context != null ? ' in $context' : ''}: $error',
+      message:
+          'Unexpected error${context != null ? ' in $context' : ''}: $error',
       cause: error,
     );
   }

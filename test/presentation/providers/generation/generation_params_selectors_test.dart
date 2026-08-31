@@ -29,10 +29,7 @@ void main() {
     });
 
     test('VibePanel 视图数据忽略普通参数变化但响应引用变化', () {
-      const vibe = VibeReference(
-        displayName: 'style',
-        vibeEncoding: 'encoded',
-      );
+      const vibe = VibeReference(displayName: 'style', vibeEncoding: 'encoded');
       const base = ImageParams(vibeReferencesV4: [vibe]);
 
       expect(

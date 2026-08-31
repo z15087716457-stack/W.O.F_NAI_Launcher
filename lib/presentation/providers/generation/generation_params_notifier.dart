@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/api_constants.dart';
 import '../../../core/enums/precise_ref_type.dart';
+import '../../../core/enums/quality_tag_preset.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/nai_api_utils.dart';
@@ -19,6 +20,8 @@ import '../../../data/models/image/image_params.dart';
 import '../../../data/models/vibe/vibe_library_entry.dart';
 import '../../../data/models/vibe/vibe_reference.dart';
 import '../../../data/services/vibe_library_storage_service.dart';
+import '../prompt_block_workspace_provider.dart';
+import '../pill_workspace_provider.dart';
 import '../quality_preset_provider.dart';
 import '../subscription_provider.dart';
 import '../uc_preset_provider.dart';
@@ -140,6 +143,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
     // 从本地存储加载默认参数和上次使用的参数
     final storage = ref.read(localStorageServiceProvider);
+    final qualityPresetState = ref.read(qualityPresetNotifierProvider);
 
     return ImageParams(
       prompt: storage.getLastPrompt(),
@@ -155,6 +159,8 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       cfgRescale: storage.getLastCfgRescale(),
       noiseSchedule: storage.getLastNoiseSchedule(),
       varietyPlus: storage.getLastVarietyPlus(),
+      qualityToggle: qualityPresetState.usesNativePreset,
+      qualityTagPreset: qualityPresetState.nativePreset,
       // 从存储加载种子锁定状态
       seed: storage.getSeedLocked() && storage.getLockedSeedValue() != null
           ? storage.getLockedSeedValue()!
@@ -194,8 +200,17 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
   void updatePrompt(String prompt) {
     // 使用 Future.microtask 延迟更新，避免在 widget tree 构建期间修改 provider
     Future.microtask(() {
+      if (state.prompt == prompt) return;
       state = state.copyWith(prompt: prompt);
       _storage.setLastPrompt(prompt);
+      // 外部写入与结构化工作区文档保持一致：
+      // 所有外部路径（Krita/元数据导入/画廊复用/反推/随机/快捷键）都以本方法为
+      // 唯一汇点，在这里完成一次文档事务；投影等价时保留文档结构。
+      ref
+          .read(promptBlockWorkspaceNotifierProvider.notifier)
+          .syncFromPlainText(PromptBlockLane.positive, prompt);
+      // 药丸工作区（P0 原型，正向）对称同步；投影等价时同样保留药丸结构。
+      ref.read(pillWorkspaceNotifierProvider.notifier).syncFromPlainText(prompt);
     });
   }
 
@@ -203,8 +218,12 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
   void updateNegativePrompt(String negativePrompt) {
     // 使用 Future.microtask 延迟更新，避免在 widget tree 构建期间修改 provider
     Future.microtask(() {
+      if (state.negativePrompt == negativePrompt) return;
       state = state.copyWith(negativePrompt: negativePrompt);
       _storage.setLastNegativePrompt(negativePrompt);
+      ref
+          .read(promptBlockWorkspaceNotifierProvider.notifier)
+          .syncFromPlainText(PromptBlockLane.negative, negativePrompt);
     });
   }
 
@@ -1417,15 +1436,37 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     ref.read(ucPresetNotifierProvider.notifier).setPresetType(presetType);
   }
 
-  /// 更新质量标签开关
-  void updateQualityToggle(bool qualityToggle) {
-    state = state.copyWith(qualityToggle: qualityToggle);
+  /// 更新原生质量词档位，并同步 UI 预设状态。
+  void updateQualityPreset(QualityTagPreset preset) {
+    state = state.copyWith(
+      qualityToggle: preset != QualityTagPreset.none,
+      qualityTagPreset: preset,
+    );
     final qualityPreset = ref.read(qualityPresetNotifierProvider.notifier);
-    if (qualityToggle) {
-      qualityPreset.setNaiDefault();
-    } else {
-      qualityPreset.setNone();
+    switch (preset) {
+      case QualityTagPreset.standard:
+        qualityPreset.setNaiDefault();
+      case QualityTagPreset.light:
+        qualityPreset.setNaiLight();
+      case QualityTagPreset.none:
+        qualityPreset.setNone();
     }
+  }
+
+  /// 选择自定义质量词；内容显式拼入 prompt，原生质量预设关闭。
+  void updateCustomQualityPreset(String entryId) {
+    state = state.copyWith(
+      qualityToggle: false,
+      qualityTagPreset: QualityTagPreset.none,
+    );
+    ref.read(qualityPresetNotifierProvider.notifier).setCustomEntry(entryId);
+  }
+
+  /// 旧布尔兼容入口：true/false 固定映射为 Standard/None。
+  void updateQualityToggle(bool qualityToggle) {
+    updateQualityPreset(
+      qualityToggle ? QualityTagPreset.standard : QualityTagPreset.none,
+    );
   }
 
   /// 更新多样性增强 (V4+)

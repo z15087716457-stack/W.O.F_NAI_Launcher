@@ -37,10 +37,9 @@ class ComfyUIConnectionManager {
   ComfyUIApiService? get api => _apiService;
   ComfyUIWebSocketService? get ws => _wsService;
 
-  ComfyUIConnectionManager({
-    String serverUrl = 'http://127.0.0.1:8188',
-  })  : _serverUrl = normalizeComfyUIBaseUrl(serverUrl),
-        clientId = const Uuid().v4();
+  ComfyUIConnectionManager({String serverUrl = 'http://127.0.0.1:8188'})
+    : _serverUrl = normalizeComfyUIBaseUrl(serverUrl),
+      clientId = const Uuid().v4();
 
   /// 更新服务器地址（需要重新连接）
   void updateServerUrl(String url) {
@@ -112,21 +111,18 @@ class ComfyUIConnectionManager {
 
   void _startHeartbeat() {
     _heartbeatTimer?.cancel();
-    _heartbeatTimer = Timer.periodic(
-      const Duration(seconds: 30),
-      (_) async {
-        if (_apiService == null) return;
-        try {
-          final ok = await _apiService!.testConnection();
-          if (!ok && _status == ComfyUIConnectionStatus.connected) {
-            _setStatus(ComfyUIConnectionStatus.error);
-          }
-        } catch (_) {
-          if (_status == ComfyUIConnectionStatus.connected) {
-            _setStatus(ComfyUIConnectionStatus.error);
-          }
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
+      if (_apiService == null) return;
+      try {
+        final ok = await _apiService!.testConnection();
+        if (!ok && _status == ComfyUIConnectionStatus.connected) {
+          _setStatus(ComfyUIConnectionStatus.error);
         }
-      },
-    );
+      } catch (_) {
+        if (_status == ComfyUIConnectionStatus.connected) {
+          _setStatus(ComfyUIConnectionStatus.error);
+        }
+      }
+    });
   }
 }

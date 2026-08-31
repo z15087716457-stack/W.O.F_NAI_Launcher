@@ -11,96 +11,96 @@ class DefaultTagGroupMappings {
   /// 基于 Danbooru 的 tag_groups wiki 页面结构
   /// 参考: https://danbooru.donmai.us/wiki_pages/tag_groups
   static List<TagGroupMapping> get mappings => [
-        // 发色
-        TagGroupMapping(
-          id: 'default_hair_color',
-          groupTitle: 'tag_group:hair_color',
-          displayName: 'Hair Color',
-          targetCategory: TagSubCategory.hairColor,
-          createdAt: DateTime(2024, 1, 1),
-          includeChildren: false,
-        ),
+    // 发色
+    TagGroupMapping(
+      id: 'default_hair_color',
+      groupTitle: 'tag_group:hair_color',
+      displayName: 'Hair Color',
+      targetCategory: TagSubCategory.hairColor,
+      createdAt: DateTime(2024, 1, 1),
+      includeChildren: false,
+    ),
 
-        // 发型
-        TagGroupMapping(
-          id: 'default_hair_styles',
-          groupTitle: 'tag_group:hair_styles',
-          displayName: 'Hair Styles',
-          targetCategory: TagSubCategory.hairStyle,
-          createdAt: DateTime(2024, 1, 1),
-          includeChildren: true,
-        ),
+    // 发型
+    TagGroupMapping(
+      id: 'default_hair_styles',
+      groupTitle: 'tag_group:hair_styles',
+      displayName: 'Hair Styles',
+      targetCategory: TagSubCategory.hairStyle,
+      createdAt: DateTime(2024, 1, 1),
+      includeChildren: true,
+    ),
 
-        // 眼睛/瞳色
-        TagGroupMapping(
-          id: 'default_eyes',
-          groupTitle: 'tag_group:eyes',
-          displayName: 'Eyes',
-          targetCategory: TagSubCategory.eyeColor,
-          createdAt: DateTime(2024, 1, 1),
-          includeChildren: false,
-        ),
+    // 眼睛/瞳色
+    TagGroupMapping(
+      id: 'default_eyes',
+      groupTitle: 'tag_group:eyes',
+      displayName: 'Eyes',
+      targetCategory: TagSubCategory.eyeColor,
+      createdAt: DateTime(2024, 1, 1),
+      includeChildren: false,
+    ),
 
-        // 服装
-        TagGroupMapping(
-          id: 'default_attire',
-          groupTitle: 'tag_group:attire',
-          displayName: 'Attire',
-          targetCategory: TagSubCategory.clothing,
-          createdAt: DateTime(2024, 1, 1),
-          includeChildren: true,
-        ),
+    // 服装
+    TagGroupMapping(
+      id: 'default_attire',
+      groupTitle: 'tag_group:attire',
+      displayName: 'Attire',
+      targetCategory: TagSubCategory.clothing,
+      createdAt: DateTime(2024, 1, 1),
+      includeChildren: true,
+    ),
 
-        // 配饰
-        TagGroupMapping(
-          id: 'default_accessories',
-          groupTitle: 'tag_group:accessories',
-          displayName: 'Accessories',
-          targetCategory: TagSubCategory.accessory,
-          createdAt: DateTime(2024, 1, 1),
-          includeChildren: true,
-        ),
+    // 配饰
+    TagGroupMapping(
+      id: 'default_accessories',
+      groupTitle: 'tag_group:accessories',
+      displayName: 'Accessories',
+      targetCategory: TagSubCategory.accessory,
+      createdAt: DateTime(2024, 1, 1),
+      includeChildren: true,
+    ),
 
-        // 表情 (从 face 分组获取)
-        TagGroupMapping(
-          id: 'default_face',
-          groupTitle: 'tag_group:face_tags',
-          displayName: 'Face Tags',
-          targetCategory: TagSubCategory.expression,
-          createdAt: DateTime(2024, 1, 1),
-          includeChildren: false, // 只取直接标签，避免和眼睛分类重复
-        ),
+    // 表情 (从 face 分组获取)
+    TagGroupMapping(
+      id: 'default_face',
+      groupTitle: 'tag_group:face_tags',
+      displayName: 'Face Tags',
+      targetCategory: TagSubCategory.expression,
+      createdAt: DateTime(2024, 1, 1),
+      includeChildren: false, // 只取直接标签，避免和眼睛分类重复
+    ),
 
-        // 姿势
-        TagGroupMapping(
-          id: 'default_posture',
-          groupTitle: 'tag_group:posture',
-          displayName: 'Posture',
-          targetCategory: TagSubCategory.pose,
-          createdAt: DateTime(2024, 1, 1),
-          includeChildren: true,
-        ),
+    // 姿势
+    TagGroupMapping(
+      id: 'default_posture',
+      groupTitle: 'tag_group:posture',
+      displayName: 'Posture',
+      targetCategory: TagSubCategory.pose,
+      createdAt: DateTime(2024, 1, 1),
+      includeChildren: true,
+    ),
 
-        // 背景
-        TagGroupMapping(
-          id: 'default_backgrounds',
-          groupTitle: 'tag_group:backgrounds',
-          displayName: 'Backgrounds',
-          targetCategory: TagSubCategory.background,
-          createdAt: DateTime(2024, 1, 1),
-          includeChildren: true,
-        ),
+    // 背景
+    TagGroupMapping(
+      id: 'default_backgrounds',
+      groupTitle: 'tag_group:backgrounds',
+      displayName: 'Backgrounds',
+      targetCategory: TagSubCategory.background,
+      createdAt: DateTime(2024, 1, 1),
+      includeChildren: true,
+    ),
 
-        // 场景
-        TagGroupMapping(
-          id: 'default_image_composition',
-          groupTitle: 'tag_group:image_composition',
-          displayName: 'Image Composition',
-          targetCategory: TagSubCategory.scene,
-          createdAt: DateTime(2024, 1, 1),
-          includeChildren: false,
-        ),
-      ];
+    // 场景
+    TagGroupMapping(
+      id: 'default_image_composition',
+      groupTitle: 'tag_group:image_composition',
+      displayName: 'Image Composition',
+      targetCategory: TagSubCategory.scene,
+      createdAt: DateTime(2024, 1, 1),
+      includeChildren: false,
+    ),
+  ];
 
   /// 创建默认映射列表的深拷贝
   ///

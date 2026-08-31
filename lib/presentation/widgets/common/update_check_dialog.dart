@@ -200,10 +200,7 @@ class UpdateCheckDialog extends ConsumerWidget {
   }
 
   /// 构建下载完成、等待安装确认的内容
-  Widget _buildDownloadedContent(
-    BuildContext context,
-    UpdateState state,
-  ) {
+  Widget _buildDownloadedContent(BuildContext context, UpdateState state) {
     final theme = Theme.of(context);
 
     return Padding(

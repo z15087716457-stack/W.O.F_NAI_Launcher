@@ -91,8 +91,9 @@ class ConnectionPoolMetrics {
       'versionMismatchErrors': versionMismatchErrors,
       'errorRate': errorRate,
       'poolUtilization': poolUtilization,
-      'operationTimeHistory':
-          operationTimeHistory.map((e) => e.toJson()).toList(),
+      'operationTimeHistory': operationTimeHistory
+          .map((e) => e.toJson())
+          .toList(),
       'errorRateHistory': errorRateHistory.map((e) => e.toJson()).toList(),
     };
   }
@@ -119,21 +120,16 @@ class MetricsDataPoint {
   final DateTime timestamp;
   final double value;
 
-  const MetricsDataPoint({
-    required this.timestamp,
-    required this.value,
-  });
+  const MetricsDataPoint({required this.timestamp, required this.value});
 
   /// 转换为 Map
   Map<String, dynamic> toJson() {
-    return {
-      'timestamp': timestamp.toIso8601String(),
-      'value': value,
-    };
+    return {'timestamp': timestamp.toIso8601String(), 'value': value};
   }
 
   @override
-  String toString() => 'MetricsDataPoint(${timestamp.toIso8601String()}: $value)';
+  String toString() =>
+      'MetricsDataPoint(${timestamp.toIso8601String()}: $value)';
 }
 
 /// 数据源指标

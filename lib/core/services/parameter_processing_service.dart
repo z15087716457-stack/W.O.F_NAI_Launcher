@@ -69,8 +69,8 @@ class ParameterProcessingService {
   ParameterProcessingService({
     List<TagLibraryEntry> tagLibraryEntries = const [],
     List<FixedTagEntry> fixedTags = const [],
-  })  : _tagLibraryEntries = tagLibraryEntries,
-        _fixedTags = fixedTags;
+  }) : _tagLibraryEntries = tagLibraryEntries,
+       _fixedTags = fixedTags;
 
   /// 获取词库条目
   List<TagLibraryEntry> get tagLibraryEntries =>
@@ -120,8 +120,9 @@ class ParameterProcessingService {
     // 2. 应用固定词
     if (applyFixedTags) {
       final fixedPrompt = _applyFixedTags(processedPrompt);
-      final fixedNegativePrompt =
-          _applyNegativeFixedTags(processedNegativePrompt);
+      final fixedNegativePrompt = _applyNegativeFixedTags(
+        processedNegativePrompt,
+      );
       if (fixedPrompt != processedPrompt ||
           fixedNegativePrompt != processedNegativePrompt) {
         processedPrompt = fixedPrompt;

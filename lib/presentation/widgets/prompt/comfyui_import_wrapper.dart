@@ -22,7 +22,7 @@ class ComfyuiImportWrapper extends StatefulWidget {
   /// [globalPrompt] 全局提示词，用于替换主输入框内容
   /// [characters] 角色列表，用于替换角色配置
   final void Function(String globalPrompt, List<CharacterPrompt> characters)?
-      onImport;
+  onImport;
 
   const ComfyuiImportWrapper({
     super.key,
@@ -103,10 +103,7 @@ class _ComfyuiImportWrapperState extends State<ComfyuiImportWrapper> {
         );
 
         // 触发回调
-        widget.onImport?.call(
-          result.parseResult.globalPrompt,
-          characters,
-        );
+        widget.onImport?.call(result.parseResult.globalPrompt, characters);
 
         // 更新输入框内容为全局提示词
         widget.controller.text = result.parseResult.globalPrompt;

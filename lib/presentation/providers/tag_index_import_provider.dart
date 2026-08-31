@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/database/database.dart';
 import '../../core/database/datasources/gallery_data_source.dart';
 import '../../core/utils/app_logger.dart';
-import '../../data/services/gallery/tag_index_import_service.dart';/// 标签索引导入进度状态
+import '../../data/services/gallery/tag_index_import_service.dart';
+
+/// 标签索引导入进度状态
 class TagIndexImportState {
   /// 是否正在导入
   final bool isImporting;
@@ -139,5 +141,5 @@ class TagIndexImportNotifier extends StateNotifier<TagIndexImportState> {
 /// 标签索引导入进度 Provider
 final tagIndexImportProvider =
     StateNotifierProvider<TagIndexImportNotifier, TagIndexImportState>(
-  (ref) => TagIndexImportNotifier(ref),
-);
+      (ref) => TagIndexImportNotifier(ref),
+    );

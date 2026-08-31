@@ -22,7 +22,11 @@ class GalleryEntityMapper {
     NaiImageMetadata? metadata,
     List<String> tags = const [],
   }) {
-    return GalleryImageEntity.fromRecord(record, metadata: metadata, tags: tags);
+    return GalleryImageEntity.fromRecord(
+      record,
+      metadata: metadata,
+      tags: tags,
+    );
   }
 
   /// 从领域实体转换为数据库记录
@@ -37,8 +41,7 @@ class GalleryEntityMapper {
     Map<int, List<String>>? tagsMap,
   }) {
     return records.map((record) {
-      final metadata =
-          record.id != null ? (metadataMap?[record.id!]) : null;
+      final metadata = record.id != null ? (metadataMap?[record.id!]) : null;
       final tags = (record.id != null ? (tagsMap?[record.id!]) : null) ?? [];
       return fromRecord(record, metadata: metadata, tags: tags);
     }).toList();
@@ -78,7 +81,9 @@ class GalleryEntityMapper {
   }
 
   /// 批量转换 Hive 记录为领域实体
-  static List<GalleryImageEntity> fromLocalRecords(List<LocalImageRecord> records) {
+  static List<GalleryImageEntity> fromLocalRecords(
+    List<LocalImageRecord> records,
+  ) {
     return records.map(fromLocalRecord).toList();
   }
 
@@ -113,7 +118,8 @@ class GalleryEntityMapper {
       modifiedAt: local.modifiedAt,
       createdAt: createdAt ?? local.modifiedAt,
       indexedAt: indexedAt ?? DateTime.now(),
-      dateYmd: local.modifiedAt.year * 10000 +
+      dateYmd:
+          local.modifiedAt.year * 10000 +
           local.modifiedAt.month * 100 +
           local.modifiedAt.day,
       metadataStatus: local.metadataStatus,
@@ -150,7 +156,9 @@ class GalleryEntityMapper {
   }
 
   /// 按 ID 分组
-  static Map<int, GalleryImageEntity> mapById(List<GalleryImageEntity> entities) {
+  static Map<int, GalleryImageEntity> mapById(
+    List<GalleryImageEntity> entities,
+  ) {
     return {
       for (final entity in entities)
         if (entity.id != null) entity.id!: entity,
@@ -158,17 +166,23 @@ class GalleryEntityMapper {
   }
 
   /// 按文件路径分组
-  static Map<String, GalleryImageEntity> mapByPath(List<GalleryImageEntity> entities) {
+  static Map<String, GalleryImageEntity> mapByPath(
+    List<GalleryImageEntity> entities,
+  ) {
     return {for (final entity in entities) entity.filePath: entity};
   }
 
   /// 过滤有元数据的实体
-  static List<GalleryImageEntity> withMetadata(List<GalleryImageEntity> entities) {
+  static List<GalleryImageEntity> withMetadata(
+    List<GalleryImageEntity> entities,
+  ) {
     return entities.where((e) => e.hasMetadata).toList();
   }
 
   /// 过滤无元数据的实体
-  static List<GalleryImageEntity> withoutMetadata(List<GalleryImageEntity> entities) {
+  static List<GalleryImageEntity> withoutMetadata(
+    List<GalleryImageEntity> entities,
+  ) {
     return entities.where((e) => !e.hasMetadata).toList();
   }
 

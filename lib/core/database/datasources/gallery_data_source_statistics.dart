@@ -279,12 +279,12 @@ extension GalleryDataSourceFilterCandidates on GalleryDataSource {
         (db) async {
           // metadata 表需 JOIN images 过滤软删；images 表直接过滤。
           // column 为内部硬编码白名单（model/sampler/resolution_key），安全插值。
-          final fromClause =
-              table == GalleryDataSource._metadataTable
+          final fromClause = table == GalleryDataSource._metadataTable
               ? '$table m INNER JOIN ${GalleryDataSource._imagesTable} i ON i.id = m.image_id'
               : '$table i';
-          final valueExpr =
-              table == GalleryDataSource._metadataTable ? 'm.$column' : 'i.$column';
+          final valueExpr = table == GalleryDataSource._metadataTable
+              ? 'm.$column'
+              : 'i.$column';
 
           final results = await db.rawQuery(
             '''
@@ -317,10 +317,7 @@ extension GalleryDataSourceFilterCandidates on GalleryDataSource {
   /// 标签自动补全（包含匹配，按 usage_count 降序）
   ///
   /// 兼容下划线/空格变体：`blue hair` 与 `blue_hair` 互相命中。
-  Future<List<String>> autocompleteTags(
-    String query, {
-    int limit = 8,
-  }) async {
+  Future<List<String>> autocompleteTags(String query, {int limit = 8}) async {
     final trimmed = query.trim().toLowerCase();
     if (trimmed.isEmpty) return [];
 

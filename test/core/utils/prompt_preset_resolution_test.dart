@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
+import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/core/utils/prompt_preset_resolution.dart';
 import 'package:nai_launcher/data/models/prompt/prompt_preset_mode.dart';
 
@@ -24,7 +25,24 @@ void main() {
       expect(result.prompt, equals('1girl, sunset'));
       expect(result.negativePrompt, equals('bad hands'));
       expect(result.qualityToggle, isTrue);
+      expect(result.qualityTagPreset, QualityTagPreset.standard);
       expect(result.ucPreset, equals(0));
+    });
+
+    test('keeps V5 Light as a native preset with its own tag hint mode', () {
+      final result = resolvePromptPresetSettings(
+        prompt: '1girl',
+        negativePrompt: 'bad hands',
+        qualityMode: PromptPresetMode.naiLight,
+        qualityContent: QualityTags.v5Light,
+        ucPresetType: UcPresetType.none,
+        ucPresetContent: '',
+        useCustomUcPreset: false,
+      );
+
+      expect(result.prompt, '1girl');
+      expect(result.qualityToggle, isTrue);
+      expect(result.qualityTagPreset, QualityTagPreset.light);
     });
 
     test('turns custom presets into explicit request text', () {

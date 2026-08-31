@@ -33,8 +33,9 @@ class UcPresetState {
   }) {
     return UcPresetState(
       presetType: presetType ?? this.presetType,
-      customEntryId:
-          clearCustomEntryId ? null : (customEntryId ?? this.customEntryId),
+      customEntryId: clearCustomEntryId
+          ? null
+          : (customEntryId ?? this.customEntryId),
       customEntryIds: customEntryIds ?? this.customEntryIds,
     );
   }
@@ -78,10 +79,7 @@ class UcPresetNotifier extends _$UcPresetNotifier {
 
   /// 设置 NAI 预设类型（清除当前选中的自定义，但保留列表）
   void setPresetType(UcPresetType type) {
-    state = state.copyWith(
-      presetType: type,
-      clearCustomEntryId: true,
-    );
+    state = state.copyWith(presetType: type, clearCustomEntryId: true);
     _save();
   }
 
@@ -93,10 +91,7 @@ class UcPresetNotifier extends _$UcPresetNotifier {
       newIds.add(entryId);
     }
 
-    state = state.copyWith(
-      customEntryId: entryId,
-      customEntryIds: newIds,
-    );
+    state = state.copyWith(customEntryId: entryId, customEntryIds: newIds);
     _save();
 
     // 记录使用次数
@@ -116,10 +111,7 @@ class UcPresetNotifier extends _$UcPresetNotifier {
 
     // 如果删除的是当前选中的条目，清除当前选中
     if (state.customEntryId == entryId) {
-      state = state.copyWith(
-        clearCustomEntryId: true,
-        customEntryIds: newIds,
-      );
+      state = state.copyWith(clearCustomEntryId: true, customEntryIds: newIds);
     } else {
       state = state.copyWith(customEntryIds: newIds);
     }
@@ -142,9 +134,9 @@ class UcPresetNotifier extends _$UcPresetNotifier {
     if (state.isCustom) {
       final entries = ref.read(tagLibraryPageNotifierProvider).entries;
       final entry = entries.cast<TagLibraryEntry?>().firstWhere(
-            (e) => e?.id == state.customEntryId,
-            orElse: () => null,
-          );
+        (e) => e?.id == state.customEntryId,
+        orElse: () => null,
+      );
       return entry?.content;
     }
 
@@ -164,9 +156,9 @@ TagLibraryEntry? currentUcEntry(Ref ref) {
 
   final entries = ref.watch(tagLibraryPageNotifierProvider).entries;
   return entries.cast<TagLibraryEntry?>().firstWhere(
-        (e) => e?.id == config.customEntryId,
-        orElse: () => null,
-      );
+    (e) => e?.id == config.customEntryId,
+    orElse: () => null,
+  );
 }
 
 /// 所有已添加的 UC 自定义条目列表
@@ -178,9 +170,9 @@ List<TagLibraryEntry> ucCustomEntries(Ref ref) {
   return config.customEntryIds
       .map(
         (id) => allEntries.cast<TagLibraryEntry?>().firstWhere(
-              (e) => e?.id == id,
-              orElse: () => null,
-            ),
+          (e) => e?.id == id,
+          orElse: () => null,
+        ),
       )
       .whereType<TagLibraryEntry>()
       .toList();

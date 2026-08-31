@@ -133,8 +133,7 @@ void main() {
       await tempDir.delete(recursive: true);
     });
 
-    test('BulkOperationNotifier.bulkDelete 后 currentImages 立即减少',
-        () async {
+    test('BulkOperationNotifier.bulkDelete 后 currentImages 立即减少', () async {
       var state = container.read(localGalleryNotifierProvider);
       expect(state.currentImages.length, 3);
 

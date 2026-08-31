@@ -34,7 +34,6 @@ class _GenerationSettingsSectionState
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final showRandomTools = ref.watch(randomPromptToolsVisibilityProvider);
     final promptWeightScrollEnabled = ref.watch(
       promptWeightScrollSettingsProvider,
     );
@@ -51,15 +50,6 @@ class _GenerationSettingsSectionState
       child: Column(
         children: [
           SettingsSectionLabel(l10n.settings_generationInputSection),
-          SwitchListTile(
-            secondary: const Icon(Icons.casino_outlined),
-            title: Text(l10n.settings_showRandomPromptTools),
-            subtitle: Text(l10n.settings_showRandomPromptToolsSubtitle),
-            value: showRandomTools,
-            onChanged: (value) {
-              ref.read(randomPromptToolsVisibilityProvider.notifier).set(value);
-            },
-          ),
           SwitchListTile(
             secondary: const Icon(Icons.mouse_outlined),
             title: Text(l10n.settings_enablePromptWeightScroll),

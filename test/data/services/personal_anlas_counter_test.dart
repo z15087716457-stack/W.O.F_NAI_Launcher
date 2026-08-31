@@ -98,8 +98,9 @@ void main() {
           'purchasedRemaining': 7,
           'subscriptionQuota': 5000,
           'resetDay': resetDay,
-          'lastResetAt':
-              now.subtract(const Duration(days: 40)).toIso8601String(),
+          'lastResetAt': now
+              .subtract(const Duration(days: 40))
+              .toIso8601String(),
         }),
       });
       final c = ProviderContainer();

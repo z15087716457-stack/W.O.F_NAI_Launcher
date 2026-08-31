@@ -25,11 +25,8 @@ class BrushPreset {
     required this.hardness,
   });
 
-  BrushSettings toSettings() => BrushSettings(
-        size: size,
-        opacity: opacity,
-        hardness: hardness,
-      );
+  BrushSettings toSettings() =>
+      BrushSettings(size: size, opacity: opacity, hardness: hardness);
 }
 
 /// 默认笔刷预设列表
@@ -323,8 +320,9 @@ class _BrushSettingsPanelState extends State<_BrushSettingsPanel> {
                         onTap: () {
                           setState(() {
                             widget.tool.applyPreset(preset, index);
-                            _sizeController.text =
-                                preset.size.round().toString();
+                            _sizeController.text = preset.size
+                                .round()
+                                .toString();
                           });
                           widget.onSettingsChanged();
                         },
@@ -513,10 +511,7 @@ class _SettingRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 60,
-            child: Text(
-              label,
-              style: theme.textTheme.bodySmall,
-            ),
+            child: Text(label, style: theme.textTheme.bodySmall),
           ),
           Expanded(
             child: SliderTheme(

@@ -18,7 +18,6 @@ import '../../data/repositories/gallery_folder_repository.dart';
 import '../../data/services/gallery/unified_gallery_service.dart';
 import 'auth_provider.dart';
 import 'font_provider.dart';
-import 'prompt_config_provider.dart';
 import 'subscription_provider.dart';
 import '../../data/services/vibe_library_migration_service.dart';
 
@@ -358,18 +357,7 @@ class WarmupNotifier extends _$WarmupNotifier {
       ),
     );
 
-    // 5. 提示词配置
-    _scheduler.registerTask(
-      PhasedWarmupTask(
-        name: 'warmup_loadingPromptConfig',
-        displayName: 'warmup_loadingPromptConfig',
-        phase: WarmupPhase.quick,
-        weight: 1,
-        task: _loadPromptConfig,
-      ),
-    );
-
-    // 6. 画廊数据源初始化
+    // 5. 画廊数据源初始化
     _scheduler.registerTask(
       PhasedWarmupTask(
         name: 'warmup_galleryDataSource',
@@ -381,7 +369,7 @@ class WarmupNotifier extends _$WarmupNotifier {
       ),
     );
 
-    // 7. 画廊计数
+    // 6. 画廊计数
     _scheduler.registerTask(
       PhasedWarmupTask(
         name: 'warmup_galleryFileCount',
@@ -515,12 +503,6 @@ class WarmupNotifier extends _$WarmupNotifier {
         'Warmup',
       );
     }
-  }
-
-  /// 加载提示词配置
-  Future<void> _loadPromptConfig() async {
-    final notifier = ref.read(promptConfigNotifierProvider.notifier);
-    await notifier.whenLoaded.timeout(const Duration(seconds: 8));
   }
 
   /// 初始化画廊数据源

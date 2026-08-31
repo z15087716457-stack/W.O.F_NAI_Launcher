@@ -1,17 +1,20 @@
 import '../../data/models/prompt/prompt_preset_mode.dart';
 import '../constants/api_constants.dart';
+import '../enums/quality_tag_preset.dart';
 
 class PromptPresetResolution {
   const PromptPresetResolution({
     required this.prompt,
     required this.negativePrompt,
     required this.qualityToggle,
+    required this.qualityTagPreset,
     required this.ucPreset,
   });
 
   final String prompt;
   final String negativePrompt;
   final bool qualityToggle;
+  final QualityTagPreset qualityTagPreset;
   final int ucPreset;
 }
 
@@ -26,7 +29,14 @@ PromptPresetResolution resolvePromptPresetSettings({
 }) {
   final resolvedPrompt = switch (qualityMode) {
     PromptPresetMode.custom => _joinPromptParts([prompt, qualityContent]),
-    PromptPresetMode.naiDefault || PromptPresetMode.none => prompt,
+    PromptPresetMode.naiDefault ||
+    PromptPresetMode.naiLight ||
+    PromptPresetMode.none => prompt,
+  };
+  final qualityTagPreset = switch (qualityMode) {
+    PromptPresetMode.naiDefault => QualityTagPreset.standard,
+    PromptPresetMode.naiLight => QualityTagPreset.light,
+    PromptPresetMode.none || PromptPresetMode.custom => QualityTagPreset.none,
   };
 
   final resolvedNegativePrompt = useCustomUcPreset
@@ -36,7 +46,8 @@ PromptPresetResolution resolvePromptPresetSettings({
   return PromptPresetResolution(
     prompt: resolvedPrompt,
     negativePrompt: resolvedNegativePrompt,
-    qualityToggle: qualityMode == PromptPresetMode.naiDefault,
+    qualityToggle: qualityTagPreset != QualityTagPreset.none,
+    qualityTagPreset: qualityTagPreset,
     ucPreset: useCustomUcPreset
         ? UcPresets.noneApiValue
         : UcPresets.toApiValue(ucPresetType),

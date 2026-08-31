@@ -7,11 +7,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/enums/precise_ref_type.dart';
+import 'package:nai_launcher/data/models/character/character_prompt.dart';
+import 'package:nai_launcher/data/models/fixed_tag/fixed_tag_entry.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/models/metadata/metadata_import_options.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/l10n/app_localizations_en.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
+import 'package:nai_launcher/presentation/providers/fixed_tags_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/utils/metadata_import_coordinator.dart';
 
@@ -152,6 +155,156 @@ void main() {
       expect(characters.globalAiChoice, isTrue);
       expect(characters.characters.single.customPosition?.column, 0.8);
       expect(characters.characters.single.customPosition?.row, 0.2);
+    },
+  );
+
+  test('official import replaces app-owned prompt state completely', () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    final paramsNotifier = container.read(
+      generationParamsNotifierProvider.notifier,
+    );
+    container.read(characterPromptNotifierProvider.notifier).replaceAll([
+      CharacterPrompt.create(name: 'Old character', prompt: 'old character'),
+    ]);
+    paramsNotifier.setVibeReferences([
+      const VibeReference(
+        displayName: 'old vibe',
+        vibeEncoding: 'old-encoding',
+        sourceType: VibeSourceType.png,
+      ),
+    ]);
+    paramsNotifier.addPreciseReference(
+      Uint8List.fromList([9, 9, 9]),
+      type: PreciseRefType.character,
+    );
+    paramsNotifier.updateNegativePrompt('old negative');
+
+    final fixedTagsNotifier = container.read(
+      fixedTagsNotifierProvider.notifier,
+    );
+    await fixedTagsNotifier.addEntry(
+      name: 'old fixed',
+      content: 'old fixed',
+      position: FixedTagPosition.prefix,
+    );
+
+    const metadata = NaiImageMetadata(
+      prompt: '1girl, best quality, masterpiece',
+      characterPrompts: ['1girl, silver hair'],
+      characterInfos: [
+        CharacterPromptInfo(
+          prompt: '1girl, silver hair',
+          centerX: 0.3,
+          centerY: 0.7,
+        ),
+      ],
+      characterUseCoords: true,
+    );
+
+    await MetadataImportCoordinator.applyOfficialFullReplacement(
+      read: container.read,
+      metadata: metadata,
+    );
+    await Future<void>.delayed(Duration.zero);
+
+    final params = container.read(generationParamsNotifierProvider);
+    final characters = container.read(characterPromptNotifierProvider);
+    final fixedTags = container.read(fixedTagsNotifierProvider);
+    expect(params.prompt, metadata.prompt);
+    expect(params.negativePrompt, isEmpty);
+    expect(params.vibeReferencesV4, isEmpty);
+    expect(params.preciseReferences, isEmpty);
+    expect(characters.characters, hasLength(1));
+    expect(characters.characters.single.prompt, '1girl, silver hair');
+    expect(fixedTags.entries, isEmpty);
+    expect(fixedTags.links, isEmpty);
+  });
+
+  test(
+    'official selection appends characters without replacing existing ones',
+    () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final existing = CharacterPrompt.create(
+        name: 'Existing character',
+        prompt: '1girl, existing',
+        negativePrompt: 'existing bad',
+      );
+      container.read(characterPromptNotifierProvider.notifier).replaceAll([
+        existing,
+      ]);
+
+      const metadata = NaiImageMetadata(
+        characterPrompts: ['1boy, imported'],
+        characterInfos: [
+          CharacterPromptInfo(
+            prompt: '1boy, imported',
+            negativePrompt: 'imported bad',
+            centerX: 0.8,
+            centerY: 0.2,
+          ),
+        ],
+        characterUseCoords: true,
+      );
+
+      await MetadataImportCoordinator.applyOfficialSelection(
+        read: container.read,
+        metadata: metadata,
+        selection: const OfficialMetadataImportSelection(
+          importPrompt: false,
+          importCharacters: true,
+          characterMode: OfficialCharacterImportMode.append,
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      final characters = container
+          .read(characterPromptNotifierProvider)
+          .characters;
+      expect(characters, hasLength(2));
+      expect(characters.first.id, existing.id);
+      expect(characters.first.prompt, '1girl, existing');
+      expect(characters.last.prompt, '1boy, imported');
+      expect(characters.last.negativePrompt, 'imported bad');
+      expect(characters.last.customPosition?.column, closeTo(0.8, 0.0001));
+      expect(characters.last.customPosition?.row, closeTo(0.2, 0.0001));
+    },
+  );
+
+  test(
+    'official selection replaces and clears characters when source has none',
+    () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final paramsNotifier = container.read(
+        generationParamsNotifierProvider.notifier,
+      );
+      paramsNotifier.updatePrompt('old prompt');
+      container.read(characterPromptNotifierProvider.notifier).replaceAll([
+        CharacterPrompt.create(name: 'Existing character', prompt: 'existing'),
+      ]);
+
+      const metadata = NaiImageMetadata();
+      await MetadataImportCoordinator.applyOfficialSelection(
+        read: container.read,
+        metadata: metadata,
+        selection: const OfficialMetadataImportSelection(
+          importPrompt: true,
+          importCharacters: true,
+          characterMode: OfficialCharacterImportMode.replace,
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(container.read(generationParamsNotifierProvider).prompt, isEmpty);
+      expect(
+        container.read(characterPromptNotifierProvider).characters,
+        isEmpty,
+      );
     },
   );
 }

@@ -21,7 +21,6 @@ class MetadataImportCoordinator {
     required MetadataImportOptions options,
     required AppLocalizations l10n,
   }) async {
-    final notifier = read(generationParamsNotifierProvider.notifier);
     final characterPrompts = metadata.characterPrompts;
 
     if (options.importCharacterPrompts && characterPrompts.isNotEmpty) {
@@ -33,29 +32,7 @@ class MetadataImportCoordinator {
       metadata: metadata,
       options: options,
       currentModel: currentModel,
-      target: MetadataImportTarget(
-        updatePrompt: notifier.updatePrompt,
-        updateNegativePrompt: notifier.updateNegativePrompt,
-        updateSeed: notifier.updateSeed,
-        updateSteps: notifier.updateSteps,
-        updateScale: notifier.updateScale,
-        updateSize: notifier.updateSize,
-        updateSampler: notifier.updateSampler,
-        updateModel: notifier.updateModel,
-        updateSmea: notifier.updateSmea,
-        updateSmeaDyn: notifier.updateSmeaDyn,
-        updateVarietyPlus: notifier.updateVarietyPlus,
-        updateNoiseSchedule: notifier.updateNoiseSchedule,
-        updateCfgRescale: notifier.updateCfgRescale,
-        updateQualityToggle: (value) {
-          notifier.updateQualityToggle(value);
-          applyImportedQualityToggle(read, value);
-        },
-        updateUcPreset: (value) {
-          notifier.updateUcPreset(value);
-          applyImportedUcPreset(read, value);
-        },
-      ),
+      target: _buildTarget(read),
     );
 
     if (options.importCharacterPrompts && characterPrompts.isNotEmpty) {
@@ -67,6 +44,135 @@ class MetadataImportCoordinator {
     appliedCount += await _applyFixedTags(read, metadata, options, l10n);
 
     return appliedCount;
+  }
+
+  /// Apply a compact, website-style metadata selection.
+  static Future<int> applyOfficialSelection({
+    required ProviderReader read,
+    required NaiImageMetadata metadata,
+    required OfficialMetadataImportSelection selection,
+  }) async {
+    final notifier = read(generationParamsNotifierProvider.notifier);
+    final currentModel = read(generationParamsNotifierProvider).model;
+    final importGenerationParams = selection.importGenerationParams;
+    final generationOptions = MetadataImportOptions(
+      importPrompt: false,
+      importNegativePrompt: false,
+      importFixedTags: false,
+      importFixedPrefix: false,
+      importFixedSuffix: false,
+      importQualityTags: false,
+      importCharacterPrompts: false,
+      importVibeReferences: false,
+      importPreciseReferences: false,
+      importSeed: selection.importSeed && metadata.seed != null,
+      importSteps: importGenerationParams && metadata.steps != null,
+      importScale: importGenerationParams && metadata.scale != null,
+      importSize:
+          importGenerationParams &&
+          metadata.width != null &&
+          metadata.height != null,
+      importSampler: importGenerationParams && metadata.sampler != null,
+      importModel:
+          importGenerationParams &&
+          MetadataImportApplier.resolveImportableModel(metadata) != null,
+      importSmea: importGenerationParams && metadata.smea != null,
+      importSmeaDyn: importGenerationParams && metadata.smeaDyn != null,
+      importVarietyPlus: importGenerationParams && metadata.varietyPlus != null,
+      importNoiseSchedule:
+          importGenerationParams && metadata.noiseSchedule != null,
+      importCfgRescale: importGenerationParams && metadata.cfgRescale != null,
+      importQualityToggle:
+          importGenerationParams && metadata.qualityToggle != null,
+      importUcPreset: importGenerationParams && metadata.ucPreset != null,
+    );
+
+    var appliedCount = MetadataImportApplier.applyPromptAndGenerationParams(
+      metadata: metadata,
+      options: generationOptions,
+      currentModel: currentModel,
+      target: _buildTarget(read),
+    );
+
+    // The website reuses the complete prompt text, including quality words.
+    // Do not split it back into the app's fixed-tag or quality-tag stores.
+    if (selection.importPrompt) {
+      notifier.updatePrompt(metadata.prompt);
+      if (metadata.prompt.isNotEmpty) appliedCount++;
+      await read(fixedTagsNotifierProvider.notifier).clearAll();
+    }
+    if (selection.importNegativePrompt) {
+      // Keep the existing UC preset resolver, while allowing an empty source
+      // value to clear the current negative prompt.
+      final importedNegativePrompt =
+          MetadataImportApplier.resolveImportedNegativePrompt(
+            metadata,
+            importUcPreset: generationOptions.importUcPreset,
+            currentModel: currentModel,
+          );
+      notifier.updateNegativePrompt(importedNegativePrompt);
+      if (importedNegativePrompt.isNotEmpty) appliedCount++;
+    }
+
+    if (selection.importCharacters) {
+      final importedCharacters = _buildCharacterPrompts(metadata);
+      final characterNotifier = read(characterPromptNotifierProvider.notifier);
+      if (selection.characterMode == OfficialCharacterImportMode.replace) {
+        characterNotifier.replaceAll(importedCharacters);
+        _applyImportedCharacterCoordinates(
+          characterNotifier,
+          metadata,
+          importedCharacters,
+        );
+        appliedCount++;
+      } else if (importedCharacters.isNotEmpty) {
+        characterNotifier.appendAll(importedCharacters);
+        appliedCount++;
+      }
+    }
+
+    final vibeNotifier = notifier;
+    if (selection.importVibeReferences) {
+      vibeNotifier.setVibeReferences(metadata.vibeReferences);
+      if (metadata.vibeReferences.isNotEmpty) appliedCount++;
+    }
+
+    if (selection.importPreciseReferences) {
+      final preciseReferences = metadata.preciseReferences;
+      vibeNotifier.clearPreciseReferences();
+      for (final reference in preciseReferences) {
+        vibeNotifier.addPreciseReference(
+          reference.image,
+          type: reference.type,
+          strength: reference.strength,
+          fidelity: reference.fidelity,
+        );
+      }
+      if (preciseReferences.isNotEmpty) appliedCount++;
+    }
+
+    return appliedCount;
+  }
+
+  /// Apply the complete metadata snapshot using website replacement semantics.
+  static Future<int> applyOfficialFullReplacement({
+    required ProviderReader read,
+    required NaiImageMetadata metadata,
+  }) {
+    return applyOfficialSelection(
+      read: read,
+      metadata: metadata,
+      selection: const OfficialMetadataImportSelection(
+        importPrompt: true,
+        importNegativePrompt: true,
+        importGenerationParams: true,
+        importSeed: true,
+        importCharacters: true,
+        characterMode: OfficialCharacterImportMode.replace,
+        importVibeReferences: true,
+        importPreciseReferences: true,
+      ),
+    );
   }
 
   static Future<void> showAppliedDialog({
@@ -177,18 +283,22 @@ class MetadataImportCoordinator {
     return added > 0 ? 1 : 0;
   }
 
-  static void _applyCharacterPrompts(
-    ProviderReader read,
+  static List<char.CharacterPrompt> _buildCharacterPrompts(
     NaiImageMetadata metadata,
   ) {
     final characters = <char.CharacterPrompt>[];
     final negativePrompts = metadata.characterNegativePrompts;
     final characterInfos = metadata.characterInfos;
-    var hasImportedCenters = false;
+    final characterCount =
+        metadata.characterPrompts.length > characterInfos.length
+        ? metadata.characterPrompts.length
+        : characterInfos.length;
 
-    for (var i = 0; i < metadata.characterPrompts.length; i++) {
-      final prompt = metadata.characterPrompts[i];
+    for (var i = 0; i < characterCount; i++) {
       final info = i < characterInfos.length ? characterInfos[i] : null;
+      final prompt = i < metadata.characterPrompts.length
+          ? metadata.characterPrompts[i]
+          : info?.prompt ?? '';
       final negativePrompt =
           info?.negativePrompt ??
           (i < negativePrompts.length ? negativePrompts[i] : '');
@@ -199,7 +309,6 @@ class MetadataImportCoordinator {
           centerY != null &&
           centerX.isFinite &&
           centerY.isFinite;
-      hasImportedCenters = hasImportedCenters || hasCenter;
 
       characters.add(
         char.CharacterPrompt.create(
@@ -221,8 +330,27 @@ class MetadataImportCoordinator {
       );
     }
 
+    return characters;
+  }
+
+  static void _applyCharacterPrompts(
+    ProviderReader read,
+    NaiImageMetadata metadata,
+  ) {
     final notifier = read(characterPromptNotifierProvider.notifier);
+    final characters = _buildCharacterPrompts(metadata);
     notifier.replaceAll(characters);
+    _applyImportedCharacterCoordinates(notifier, metadata, characters);
+  }
+
+  static void _applyImportedCharacterCoordinates(
+    CharacterPromptNotifier notifier,
+    NaiImageMetadata metadata,
+    List<char.CharacterPrompt> characters,
+  ) {
+    final hasImportedCenters = characters.any(
+      (character) => character.customPosition != null,
+    );
     final useCoords = metadata.characterUseCoords ?? hasImportedCenters;
     notifier.setGlobalAiChoice(!useCoords);
   }
@@ -240,6 +368,33 @@ class MetadataImportCoordinator {
       return char.CharacterGender.male;
     }
     return char.CharacterGender.other;
+  }
+
+  static MetadataImportTarget _buildTarget(ProviderReader read) {
+    final notifier = read(generationParamsNotifierProvider.notifier);
+    return MetadataImportTarget(
+      updatePrompt: notifier.updatePrompt,
+      updateNegativePrompt: notifier.updateNegativePrompt,
+      updateSeed: notifier.updateSeed,
+      updateSteps: notifier.updateSteps,
+      updateScale: notifier.updateScale,
+      updateSize: notifier.updateSize,
+      updateSampler: notifier.updateSampler,
+      updateModel: notifier.updateModel,
+      updateSmea: notifier.updateSmea,
+      updateSmeaDyn: notifier.updateSmeaDyn,
+      updateVarietyPlus: notifier.updateVarietyPlus,
+      updateNoiseSchedule: notifier.updateNoiseSchedule,
+      updateCfgRescale: notifier.updateCfgRescale,
+      updateQualityToggle: (value) {
+        notifier.updateQualityToggle(value);
+        applyImportedQualityToggle(read, value);
+      },
+      updateUcPreset: (value) {
+        notifier.updateUcPreset(value);
+        applyImportedUcPreset(read, value);
+      },
+    );
   }
 
   static int _applyReferenceParams(

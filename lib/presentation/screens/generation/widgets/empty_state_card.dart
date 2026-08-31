@@ -93,8 +93,9 @@ class _EmptyStateCardState extends State<EmptyStateCard> {
                             size: 40,
                             color: _isHovered
                                 ? theme.colorScheme.primary
-                                : theme.colorScheme.outline
-                                    .withValues(alpha: 0.6),
+                                : theme.colorScheme.outline.withValues(
+                                    alpha: 0.6,
+                                  ),
                           ),
                         ),
                 ),

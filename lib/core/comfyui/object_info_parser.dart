@@ -19,8 +19,10 @@ List<String>? extractChoiceListFromObjectInfoField(dynamic field) {
 
     final first = field.first;
     if (first is List) {
-      final nested =
-          first.whereType<String>().where((s) => s.isNotEmpty).toList();
+      final nested = first
+          .whereType<String>()
+          .where((s) => s.isNotEmpty)
+          .toList();
       return nested.isEmpty ? null : nested;
     }
 

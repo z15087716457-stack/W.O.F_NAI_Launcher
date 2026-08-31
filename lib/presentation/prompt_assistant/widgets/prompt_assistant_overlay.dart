@@ -83,10 +83,8 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
     await _runAction(
       context.l10n.promptAssistant_translateProcessing,
       inputText,
-      (service, input) => service.translatePrompt(
-        input,
-        sessionId: widget.sessionId,
-      ),
+      (service, input) =>
+          service.translatePrompt(input, sessionId: widget.sessionId),
     );
   }
 
@@ -95,10 +93,8 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
     await _runAction(
       context.l10n.promptAssistant_optimizeProcessing,
       inputText,
-      (service, input) => service.optimizePrompt(
-        input,
-        sessionId: widget.sessionId,
-      ),
+      (service, input) =>
+          service.optimizePrompt(input, sessionId: widget.sessionId),
     );
   }
 
@@ -133,9 +129,9 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
     final enabledProviders = config.providers.where((p) => p.enabled).toList();
     if (enabledProviders.isEmpty) return null;
     return enabledProviders.cast<ProviderConfig?>().firstWhere(
-          (provider) => provider?.id == providerId,
-          orElse: () => enabledProviders.first,
-        );
+      (provider) => provider?.id == providerId,
+      orElse: () => enabledProviders.first,
+    );
   }
 
   Future<void> _runCharacterReplace() async {
@@ -160,8 +156,9 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
   }
 
   Future<CharacterPrompt?> _selectCharacterForReplacement() async {
-    final character =
-        ref.read(reversePromptCharacterProvider.notifier).selectedCharacter;
+    final character = ref
+        .read(reversePromptCharacterProvider.notifier)
+        .selectedCharacter;
     if (character != null) {
       return character;
     }
@@ -198,7 +195,7 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
     String label,
     String inputText,
     Stream<dynamic> Function(PromptAssistantService service, String input)
-        builder,
+    builder,
   ) async {
     final text = inputText.trim();
     if (text.isEmpty) {
@@ -240,20 +237,22 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
         if (buffer.isNotEmpty) {
           final finalText = buffer.toString();
           widget.controller.text = finalText;
-          widget.controller.selection =
-              TextSelection.collapsed(offset: widget.controller.text.length);
+          widget.controller.selection = TextSelection.collapsed(
+            offset: widget.controller.text.length,
+          );
         }
         stateNotifier.finishProcessing(widget.sessionId);
         final afterText = widget.controller.text;
-        ref.read(promptAssistantHistoryProvider.notifier).recordExternalChange(
+        ref
+            .read(promptAssistantHistoryProvider.notifier)
+            .recordExternalChange(
               widget.sessionId,
               before: beforeText,
               after: afterText,
             );
-        ref.read(promptAssistantHistoryProvider.notifier).push(
-              widget.sessionId,
-              afterText,
-            );
+        ref
+            .read(promptAssistantHistoryProvider.notifier)
+            .push(widget.sessionId, afterText);
       },
       cancelOnError: true,
     );
@@ -280,48 +279,50 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
     await _streamSub?.cancel();
     _streamSub = service
         .customPrompt(
-      inputText,
-      sessionId: widget.sessionId,
-      userRequest: result.userRequest,
-      images: result.images,
-    )
+          inputText,
+          sessionId: widget.sessionId,
+          userRequest: result.userRequest,
+          images: result.images,
+        )
         .listen(
-      (chunk) {
-        if (chunk.done == true) return;
-        final delta = chunk.delta as String? ?? '';
-        if (delta.isEmpty) return;
-        buffer.write(delta);
-      },
-      onError: (e) {
-        stateNotifier.setError(widget.sessionId, e.toString());
-        if (mounted) {
-          AppToast.error(
-            context,
-            context.l10n.promptAssistant_requestFailed(e),
-          );
-        }
-      },
-      onDone: () {
-        if (buffer.isNotEmpty) {
-          final finalText = buffer.toString();
-          widget.controller.text = finalText;
-          widget.controller.selection =
-              TextSelection.collapsed(offset: widget.controller.text.length);
-        }
-        stateNotifier.finishProcessing(widget.sessionId);
-        final afterText = widget.controller.text;
-        ref.read(promptAssistantHistoryProvider.notifier).recordExternalChange(
-              widget.sessionId,
-              before: beforeText,
-              after: afterText,
-            );
-        ref.read(promptAssistantHistoryProvider.notifier).push(
-              widget.sessionId,
-              afterText,
-            );
-      },
-      cancelOnError: true,
-    );
+          (chunk) {
+            if (chunk.done == true) return;
+            final delta = chunk.delta as String? ?? '';
+            if (delta.isEmpty) return;
+            buffer.write(delta);
+          },
+          onError: (e) {
+            stateNotifier.setError(widget.sessionId, e.toString());
+            if (mounted) {
+              AppToast.error(
+                context,
+                context.l10n.promptAssistant_requestFailed(e),
+              );
+            }
+          },
+          onDone: () {
+            if (buffer.isNotEmpty) {
+              final finalText = buffer.toString();
+              widget.controller.text = finalText;
+              widget.controller.selection = TextSelection.collapsed(
+                offset: widget.controller.text.length,
+              );
+            }
+            stateNotifier.finishProcessing(widget.sessionId);
+            final afterText = widget.controller.text;
+            ref
+                .read(promptAssistantHistoryProvider.notifier)
+                .recordExternalChange(
+                  widget.sessionId,
+                  before: beforeText,
+                  after: afterText,
+                );
+            ref
+                .read(promptAssistantHistoryProvider.notifier)
+                .push(widget.sessionId, afterText);
+          },
+          cancelOnError: true,
+        );
   }
 
   String _assistantInputText() {
@@ -336,8 +337,9 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
         .undo(widget.sessionId, widget.controller.text);
     if (value != null) {
       widget.controller.text = value;
-      widget.controller.selection =
-          TextSelection.collapsed(offset: value.length);
+      widget.controller.selection = TextSelection.collapsed(
+        offset: value.length,
+      );
     }
   }
 
@@ -347,8 +349,9 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
         .redo(widget.sessionId, widget.controller.text);
     if (value != null) {
       widget.controller.text = value;
-      widget.controller.selection =
-          TextSelection.collapsed(offset: value.length);
+      widget.controller.selection = TextSelection.collapsed(
+        offset: value.length,
+      );
     }
   }
 
@@ -364,15 +367,12 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
           itemBuilder: (context, index) {
             final entry = history[history.length - 1 - index];
             return ListTile(
-              title: Text(
-                entry,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              title: Text(entry, maxLines: 2, overflow: TextOverflow.ellipsis),
               onTap: () {
                 widget.controller.text = entry;
-                widget.controller.selection =
-                    TextSelection.collapsed(offset: entry.length);
+                widget.controller.selection = TextSelection.collapsed(
+                  offset: entry.length,
+                );
                 Navigator.pop(context);
               },
             );
@@ -413,9 +413,9 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
         ],
       ).then((value) async {
         if (value == 'cancel') {
-          await ref.read(promptAssistantServiceProvider).cancelCurrentTask(
-                sessionId: widget.sessionId,
-              );
+          await ref
+              .read(promptAssistantServiceProvider)
+              .cancelCurrentTask(sessionId: widget.sessionId);
           ref
               .read(promptAssistantStateProvider.notifier)
               .finishProcessing(widget.sessionId);
@@ -543,22 +543,19 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
                       : const EdgeInsets.all(2),
                   decoration: BoxDecoration(
                     color: isExpanded
-                        ? Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest
-                            .withValues(alpha: state.hovering ? 0.9 : 0.82)
-                        : Theme.of(context)
-                            .colorScheme
-                            .surface
-                            .withValues(alpha: 0.12),
+                        ? Theme.of(context).colorScheme.surfaceContainerHighest
+                              .withValues(alpha: state.hovering ? 0.9 : 0.82)
+                        : Theme.of(
+                            context,
+                          ).colorScheme.surface.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(isExpanded ? 12 : 15),
                     boxShadow: [
                       BoxShadow(
                         color: Theme.of(context).colorScheme.primary.withValues(
-                              alpha: isExpanded
-                                  ? 0.09
-                                  : (0.10 * breath * glowBoost),
-                            ),
+                          alpha: isExpanded
+                              ? 0.09
+                              : (0.10 * breath * glowBoost),
+                        ),
                         blurRadius: isExpanded ? 8 : (10 * breath * glowBoost),
                         spreadRadius: isExpanded ? 0 : 0.2,
                       ),
@@ -582,10 +579,9 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
                       notifier.setExpanded(widget.sessionId, !isExpanded),
                   iconColor: isExpanded
                       ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.78),
+                      : Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.78),
                   iconSize: isExpanded ? 14 : 13,
                   buttonSize: isExpanded ? 24 : 26,
                 ),
@@ -634,9 +630,7 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
                         ? () async {
                             await ref
                                 .read(promptAssistantServiceProvider)
-                                .cancelCurrentTask(
-                                  sessionId: widget.sessionId,
-                                );
+                                .cancelCurrentTask(sessionId: widget.sessionId);
                             notifier.finishProcessing(widget.sessionId);
                           }
                         : () => _showMenu(),
@@ -649,11 +643,7 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
       ),
     );
 
-    return Positioned(
-      right: 8,
-      bottom: 8,
-      child: child,
-    );
+    return Positioned(right: 8, bottom: 8, child: child);
   }
 
   Widget _miniButton({
@@ -674,15 +664,14 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
         color: Colors.black.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(8),
       ),
-      textStyle: const TextStyle(
-        color: Colors.white,
-        fontSize: 12,
-      ),
+      textStyle: const TextStyle(color: Colors.white, fontSize: 12),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 1),
         child: IconButton(
-          constraints:
-              BoxConstraints.tightFor(width: buttonSize, height: buttonSize),
+          constraints: BoxConstraints.tightFor(
+            width: buttonSize,
+            height: buttonSize,
+          ),
           padding: EdgeInsets.zero,
           icon: Icon(icon, size: iconSize, color: iconColor),
           onPressed: onPressed,

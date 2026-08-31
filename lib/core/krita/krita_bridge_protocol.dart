@@ -102,13 +102,11 @@ class KritaBridgeProtocol {
 
   static Map<String, dynamic> encodePong({
     List<int> supportedVersions = const [],
-  }) =>
-      {
-        'type': 'pong',
-        'version': version,
-        if (supportedVersions.isNotEmpty)
-          'supported_versions': supportedVersions,
-      };
+  }) => {
+    'type': 'pong',
+    'version': version,
+    if (supportedVersions.isNotEmpty) 'supported_versions': supportedVersions,
+  };
 
   static Map<String, dynamic> encodeError(KritaBridgeError error) {
     return error.toJson();
@@ -185,17 +183,9 @@ class KritaBridgeProtocol {
 
     try {
       _rejectUnsupportedScaleMetadata(payload);
-      final image = _requiredBase64(
-        payload,
-        'image',
-        maxDecodedImageBytes,
-      );
+      final image = _requiredBase64(payload, 'image', maxDecodedImageBytes);
       final imageDimensions = _requiredPngDimensions(image, 'image');
-      final mask = _requiredBase64(
-        payload,
-        'mask',
-        maxDecodedImageBytes,
-      );
+      final mask = _requiredBase64(payload, 'mask', maxDecodedImageBytes);
       final maskDimensions = _requiredPngDimensions(mask, 'mask');
       if (imageDimensions != maskDimensions) {
         throw const _ProtocolException(
@@ -257,11 +247,7 @@ class KritaBridgeProtocol {
       return KritaBridgeDecodeResult.message(
         KritaImg2ImgMessage(
           id: id,
-          image: _requiredPng(
-            payload,
-            'image',
-            maxDecodedImageBytes,
-          ),
+          image: _requiredPng(payload, 'image', maxDecodedImageBytes),
           prompt: _optionalString(payload, 'prompt') ?? '',
           negativePrompt: _optionalString(payload, 'negative_prompt') ?? '',
           strength: _optionalDouble(payload, 'strength') ?? 0.5,
@@ -356,7 +342,8 @@ class KritaBridgeProtocol {
 
     final data = ByteData.sublistView(bytes);
     final ihdrLength = data.getUint32(8);
-    final hasIhdrType = bytes[12] == 0x49 &&
+    final hasIhdrType =
+        bytes[12] == 0x49 &&
         bytes[13] == 0x48 &&
         bytes[14] == 0x44 &&
         bytes[15] == 0x52;
@@ -391,8 +378,8 @@ class KritaBridgeProtocol {
     final padding = compact.endsWith('==')
         ? 2
         : compact.endsWith('=')
-            ? 1
-            : 0;
+        ? 1
+        : 0;
     final estimatedDecodedBytes = (compact.length * 3 ~/ 4) - padding;
     if (estimatedDecodedBytes > maxDecodedImageBytes) {
       throw _PayloadTooLargeException('Decoded image is too large: $key');
@@ -499,10 +486,7 @@ class _PayloadTooLargeException implements Exception {
 }
 
 class _PngDimensions {
-  const _PngDimensions({
-    required this.width,
-    required this.height,
-  });
+  const _PngDimensions({required this.width, required this.height});
 
   final int width;
   final int height;

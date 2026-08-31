@@ -6,11 +6,12 @@ enum AppBranch {
   localGallery,
   onlineGallery,
   settings,
-  promptConfig,
   statistics,
   tagLibrary,
   vibeLibrary,
   preciseRefLibrary,
+  promptBlockLibrary,
+  styleExplore,
 }
 
 /// Global navigation shortcuts and their destination branches.
@@ -19,7 +20,6 @@ const Map<String, AppBranch> globalNavigationShortcutBranches = {
   ShortcutIds.navigateToLocalGallery: AppBranch.localGallery,
   ShortcutIds.navigateToOnlineGallery: AppBranch.onlineGallery,
   ShortcutIds.navigateToSettings: AppBranch.settings,
-  ShortcutIds.navigateToRandomConfig: AppBranch.promptConfig,
   ShortcutIds.navigateToStatistics: AppBranch.statistics,
   ShortcutIds.navigateToTagLibrary: AppBranch.tagLibrary,
   ShortcutIds.navigateToVibeLibrary: AppBranch.vibeLibrary,

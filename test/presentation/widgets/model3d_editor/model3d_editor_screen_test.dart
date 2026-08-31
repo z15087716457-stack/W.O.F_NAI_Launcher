@@ -17,25 +17,28 @@ Model3dBridge autoReplyBridge() {
   bridge = Model3dBridge(
     evalJs: (source) async {
       final match = RegExp(r'dispatch\((.+)\)$').firstMatch(source)!;
-      final command = jsonDecode(jsonDecode(match.group(1)!) as String)
-          as Map<String, dynamic>;
+      final command =
+          jsonDecode(jsonDecode(match.group(1)!) as String)
+              as Map<String, dynamic>;
       final data = switch (command['type'] as String) {
         'render' => {'png': _tinyPng},
         'serialize' => {
-            'sceneState': {'version': 1},
-          },
+          'sceneState': {'version': 1},
+        },
         'loadModel' => {'boneCount': 19, 'duplicateBoneNames': <String>[]},
         _ => <String, dynamic>{},
       };
       // 模拟 JS 异步回复
-      Future.microtask(() => bridge.handleJsMessage([
-            {
-              'type': 'response',
-              'requestId': command['requestId'],
-              'ok': true,
-              'data': data,
-            },
-          ]));
+      Future.microtask(
+        () => bridge.handleJsMessage([
+          {
+            'type': 'response',
+            'requestId': command['requestId'],
+            'ok': true,
+            'data': data,
+          },
+        ]),
+      );
     },
   );
   return bridge;
@@ -48,45 +51,47 @@ Future<Future<Model3dEditResult?>> pumpEditor(
   Model3dBridge? bridge,
 }) async {
   late Future<Model3dEditResult?> resultFuture;
-  await tester.pumpWidget(MaterialApp(
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: Builder(
-      builder: (context) => ElevatedButton(
-        onPressed: () {
-          resultFuture = Navigator.push<Model3dEditResult>(
-            context,
-            MaterialPageRoute(
-              builder: (_) => Model3dEditorScreen(
-                renderWidth: 8,
-                renderHeight: 8,
-                existing: existing,
-                bridgeOverride: bridge ?? autoReplyBridge(),
-                viewportBuilder: (_) => const ColoredBox(color: Colors.black),
-                markReadyForTest: true,
+  await tester.pumpWidget(
+    MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Builder(
+        builder: (context) => ElevatedButton(
+          onPressed: () {
+            resultFuture = Navigator.push<Model3dEditResult>(
+              context,
+              MaterialPageRoute(
+                builder: (_) => Model3dEditorScreen(
+                  renderWidth: 8,
+                  renderHeight: 8,
+                  existing: existing,
+                  bridgeOverride: bridge ?? autoReplyBridge(),
+                  viewportBuilder: (_) => const ColoredBox(color: Colors.black),
+                  markReadyForTest: true,
+                ),
               ),
-            ),
-          );
-        },
-        child: const Text('open'),
+            );
+          },
+          child: const Text('open'),
+        ),
       ),
     ),
-  ));
+  );
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
   return resultFuture;
 }
 
 void main() {
-  testWidgets('empty scene shows mannequin and import entries',
-      (tester) async {
+  testWidgets('empty scene shows mannequin and import entries', (tester) async {
     await pumpEditor(tester);
     expect(find.text('Add Built-in Mannequin'), findsOneWidget);
     expect(find.text('Import Model (.glb/.gltf)'), findsOneWidget);
   });
 
-  testWidgets('adding mannequin hides empty state and enables apply',
-      (tester) async {
+  testWidgets('adding mannequin hides empty state and enables apply', (
+    tester,
+  ) async {
     await pumpEditor(tester);
     await tester.tap(find.text('Add Built-in Mannequin'));
     await tester.pumpAndSettle();

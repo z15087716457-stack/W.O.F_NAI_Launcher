@@ -13,15 +13,12 @@ import '../../core/divider_module.dart';
 class MaterialDividerModule extends BaseDividerModule {
   final Color _outlineColor;
 
-  const MaterialDividerModule({
-    required Color outlineColor,
-  }) : _outlineColor = outlineColor;
+  const MaterialDividerModule({required Color outlineColor})
+    : _outlineColor = outlineColor;
 
   /// Create from a color scheme
   factory MaterialDividerModule.fromColorScheme(ColorScheme scheme) {
-    return MaterialDividerModule(
-      outlineColor: scheme.outline,
-    );
+    return MaterialDividerModule(outlineColor: scheme.outline);
   }
 
   @override

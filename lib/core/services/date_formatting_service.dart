@@ -55,7 +55,8 @@ class DateFormattingService {
       }
 
       AppLogger.d(
-          'Formatted date range (empty): empty', 'DateFormattingService',
+        'Formatted date range (empty): empty',
+        'DateFormattingService',
       );
       return '';
     } catch (e) {

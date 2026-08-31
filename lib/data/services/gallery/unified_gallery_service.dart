@@ -298,12 +298,10 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   /// 因此这里对「无条目」和「有条目但 area==0」都要走 DB 补齐，
   /// 否则按图像尺寸排序永远拿到 0 面积而退化成文件名序。
   Future<void> _ensureFileStats(List<File> files) async {
-    final needArea = files
-        .where((file) {
-          final entry = _fileStats[file.path];
-          return entry == null || entry.area == 0;
-        })
-        .toList();
+    final needArea = files.where((file) {
+      final entry = _fileStats[file.path];
+      return entry == null || entry.area == 0;
+    }).toList();
     if (needArea.isEmpty) return;
 
     // stat 只补完全缺失的条目；已有条目（area==0）保留原 stat

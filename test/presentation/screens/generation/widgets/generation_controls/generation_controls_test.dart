@@ -17,7 +17,6 @@ void main() {
   ) async {
     final storage = _MemoryLocalStorageService({
       StorageKeys.autoSaveImages: false,
-      StorageKeys.showRandomPromptTools: true,
     });
 
     await tester.pumpWidget(

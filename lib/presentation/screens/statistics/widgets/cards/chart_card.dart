@@ -110,15 +110,17 @@ class _ChartCardState extends State<ChartCard> {
               ? [
                   BoxShadow(
                     color: Colors.black.withValues(
-                      alpha:
-                          _isHovered ? shadowIntensity * 1.5 : shadowIntensity,
+                      alpha: _isHovered
+                          ? shadowIntensity * 1.5
+                          : shadowIntensity,
                     ),
                     blurRadius: _isHovered ? 16 : 12,
                     offset: Offset(0, _isHovered ? 6 : 4),
                   ),
                   BoxShadow(
-                    color:
-                        Colors.black.withValues(alpha: shadowIntensity * 0.5),
+                    color: Colors.black.withValues(
+                      alpha: shadowIntensity * 0.5,
+                    ),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
@@ -207,7 +209,8 @@ class StatRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: labelStyle ??
+            style:
+                labelStyle ??
                 theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -215,13 +218,15 @@ class StatRow extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color:
-                  (valueColor ?? colorScheme.primary).withValues(alpha: 0.08),
+              color: (valueColor ?? colorScheme.primary).withValues(
+                alpha: 0.08,
+              ),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               value,
-              style: valueStyle ??
+              style:
+                  valueStyle ??
                   theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: valueColor ?? colorScheme.onSurface,
@@ -294,8 +299,9 @@ class ChartEmptyState extends StatelessWidget {
                     child: Icon(
                       icon,
                       size: 48,
-                      color:
-                          colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                      color: colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.6,
+                      ),
                     ),
                   ),
                 );

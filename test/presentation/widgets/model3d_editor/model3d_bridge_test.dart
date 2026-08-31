@@ -15,15 +15,21 @@ void main() {
 
   /// 从 evaluateJavascript 源码中还原 dispatch 的命令 JSON
   Map<String, dynamic> lastCommand() {
-    final match = RegExp(r'^window\.naiEditor\.dispatch\((.+)\)$')
-        .firstMatch(evaluated.last)!;
+    final match = RegExp(
+      r'^window\.naiEditor\.dispatch\((.+)\)$',
+    ).firstMatch(evaluated.last)!;
     final inner = jsonDecode(match.group(1)!) as String;
     return jsonDecode(inner) as Map<String, dynamic>;
   }
 
   void reply(int requestId, {required bool ok, Map<String, dynamic>? data}) {
     bridge.handleJsMessage([
-      {'type': 'response', 'requestId': requestId, 'ok': ok, 'data': data ?? {}},
+      {
+        'type': 'response',
+        'requestId': requestId,
+        'ok': ok,
+        'data': data ?? {},
+      },
     ]);
   }
 
@@ -37,19 +43,22 @@ void main() {
     );
   });
 
-  test('sends command as double-encoded json and resolves on response', () async {
-    final future = bridge.serialize();
-    final command = lastCommand();
-    expect(command['type'], 'serialize');
-    reply(
-      command['requestId'] as int,
-      ok: true,
-      data: {
-        'sceneState': {'version': 1},
-      },
-    );
-    expect(await future, {'version': 1});
-  });
+  test(
+    'sends command as double-encoded json and resolves on response',
+    () async {
+      final future = bridge.serialize();
+      final command = lastCommand();
+      expect(command['type'], 'serialize');
+      reply(
+        command['requestId'] as int,
+        ok: true,
+        data: {
+          'sceneState': {'version': 1},
+        },
+      );
+      expect(await future, {'version': 1});
+    },
+  );
 
   test('loadModel passes url/builtin/sceneState', () async {
     final future = bridge.loadModel(
@@ -70,7 +79,9 @@ void main() {
     reply(
       command['requestId'] as int,
       ok: true,
-      data: {'png': base64Encode([137, 80, 78, 71])},
+      data: {
+        'png': base64Encode([137, 80, 78, 71]),
+      },
     );
     expect(await future, [137, 80, 78, 71]);
   });
@@ -86,10 +97,7 @@ void main() {
   });
 
   test('times out when no response arrives', () async {
-    await expectLater(
-      bridge.undoPose(),
-      throwsA(isA<TimeoutException>()),
-    );
+    await expectLater(bridge.undoPose(), throwsA(isA<TimeoutException>()));
   });
 
   test('forwards non-response messages as events', () {

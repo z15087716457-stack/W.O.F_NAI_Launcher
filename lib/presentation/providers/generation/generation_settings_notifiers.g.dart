@@ -139,43 +139,6 @@ final cooccurrenceSettingsProvider =
 );
 
 typedef _$CooccurrenceSettings = Notifier<bool>;
-String _$randomPromptModeHash() => r'b667d7f5ea6f1cdd7f9a2df1424f0cf509dd1926';
-
-/// 抽卡模式设置 Notifier（生成时自动随机提示词）
-///
-/// Copied from [RandomPromptMode].
-@ProviderFor(RandomPromptMode)
-final randomPromptModeProvider =
-    NotifierProvider<RandomPromptMode, bool>.internal(
-  RandomPromptMode.new,
-  name: r'randomPromptModeProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$randomPromptModeHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$RandomPromptMode = Notifier<bool>;
-String _$randomPromptToolsVisibilityHash() =>
-    r'8a716d03e1a8818ee0558e60395e4fbb5dc70bbb';
-
-/// 随机提示词工具入口显示设置 Notifier
-///
-/// Copied from [RandomPromptToolsVisibility].
-@ProviderFor(RandomPromptToolsVisibility)
-final randomPromptToolsVisibilityProvider =
-    NotifierProvider<RandomPromptToolsVisibility, bool>.internal(
-  RandomPromptToolsVisibility.new,
-  name: r'randomPromptToolsVisibilityProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$randomPromptToolsVisibilityHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$RandomPromptToolsVisibility = Notifier<bool>;
 String _$imagesPerRequestHash() => r'1100f132419f744de697cc84ea53fe27a258abbd';
 
 /// 每次请求生成图片数量设置 Notifier（1-4张）

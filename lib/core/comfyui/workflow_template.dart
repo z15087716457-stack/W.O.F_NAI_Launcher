@@ -18,15 +18,7 @@ enum SlotDirection {
 }
 
 /// 槽位数据类型
-enum SlotDataType {
-  image,
-  mask,
-  string,
-  number,
-  integer,
-  choice,
-  boolean,
-}
+enum SlotDataType { image, mask, string, number, integer, choice, boolean }
 
 /// 输出获取方式
 enum OutputMethod {
@@ -95,9 +87,7 @@ class WorkflowSlot {
       direction: SlotDirection.values.firstWhere(
         (e) => e.name == json['direction'],
       ),
-      dataType: SlotDataType.values.firstWhere(
-        (e) => e.name == json['type'],
-      ),
+      dataType: SlotDataType.values.firstWhere((e) => e.name == json['type']),
       nodeId: json['node_id'] as String,
       field: json['field'] as String?,
       label: json['label'] as String,
@@ -117,31 +107,25 @@ class WorkflowSlot {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'direction': direction.name,
-        'type': dataType.name,
-        'node_id': nodeId,
-        if (field != null) 'field': field,
-        'label': label,
-        if (required) 'required': required,
-        if (defaultValue != null) 'default': defaultValue,
-        if (min != null) 'min': min,
-        if (max != null) 'max': max,
-        if (step != null) 'step': step,
-        if (choices != null) 'choices': choices,
-        if (outputMethod != null) 'output_method': outputMethod!.name,
-        if (nodeClass != null) 'node_class': nodeClass,
-      };
+    'id': id,
+    'direction': direction.name,
+    'type': dataType.name,
+    'node_id': nodeId,
+    if (field != null) 'field': field,
+    'label': label,
+    if (required) 'required': required,
+    if (defaultValue != null) 'default': defaultValue,
+    if (min != null) 'min': min,
+    if (max != null) 'max': max,
+    if (step != null) 'step': step,
+    if (choices != null) 'choices': choices,
+    if (outputMethod != null) 'output_method': outputMethod!.name,
+    if (nodeClass != null) 'node_class': nodeClass,
+  };
 }
 
 /// 工作流模板分类
-enum WorkflowCategory {
-  enhance,
-  img2img,
-  inpaint,
-  txt2img,
-  custom,
-}
+enum WorkflowCategory { enhance, img2img, inpaint, txt2img, custom }
 
 /// 工作流模板
 class WorkflowTemplate {
@@ -188,9 +172,8 @@ class WorkflowTemplate {
       slots.where((s) => s.direction == SlotDirection.output).toList();
 
   /// 是否使用 WebSocket 输出
-  bool get usesWebSocketOutput => outputSlots.any(
-        (s) => s.outputMethod == OutputMethod.websocket,
-      );
+  bool get usesWebSocketOutput =>
+      outputSlots.any((s) => s.outputMethod == OutputMethod.websocket);
 
   factory WorkflowTemplate.fromJson(
     Map<String, dynamic> manifest,
@@ -219,16 +202,16 @@ class WorkflowTemplate {
 
   /// 序列化 manifest 部分（不含 workflowJson）
   Map<String, dynamic> toManifestJson() => {
-        'id': id,
-        'name': name,
-        'description': description,
-        'version': version,
-        'author': author,
-        'category': category.name,
-        'requires_input_image': requiresInputImage,
-        'requires_mask': requiresMask,
-        'slots': slots.map((s) => s.toJson()).toList(),
-      };
+    'id': id,
+    'name': name,
+    'description': description,
+    'version': version,
+    'author': author,
+    'category': category.name,
+    'requires_input_image': requiresInputImage,
+    'requires_mask': requiresMask,
+    'slots': slots.map((s) => s.toJson()).toList(),
+  };
 
   /// 创建副本并替换部分属性
   WorkflowTemplate copyWith({

@@ -13,7 +13,6 @@ import '../../core/utils/app_logger.dart';
 import '../../core/utils/image_save_utils.dart';
 import '../../core/utils/image_share_sanitizer.dart';
 import '../../core/utils/inpaint_mask_utils.dart';
-import '../../core/utils/nai_prompt_formatter.dart';
 import '../../core/utils/nai_resolution_adapter.dart';
 import '../../core/utils/pica_lanczos_resizer.dart';
 import '../../core/utils/prompt_preset_resolution.dart';
@@ -33,7 +32,6 @@ import 'character_prompt_provider.dart';
 import 'fixed_tags_provider.dart';
 import 'image_save_settings_provider.dart';
 import 'local_gallery_provider.dart';
-import 'prompt_config_provider.dart';
 import 'quality_preset_provider.dart';
 import 'subscription_provider.dart';
 import 'cost_estimate_provider.dart';
@@ -582,31 +580,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
     final generationRunId = _startGenerationRun();
 
-    // 获取抽卡模式设置
-    final randomMode = ref.read(randomPromptModeProvider);
-
-    // 如果开启抽卡模式，先随机提示词再生成
-    // 这样生成的图像和显示的提示词能对应上
     ImageParams effectiveParams = params;
-    if (randomMode) {
-      final randomPrompt = await generateAndApplyRandomPrompt();
-      if (_shouldAbortGenerationRun(generationRunId)) return;
-      if (randomPrompt.isNotEmpty) {
-        AppLogger.d(
-          'Random prompt before generation: $randomPrompt',
-          'RandomMode',
-        );
-        // 重新读取角色配置（已被 generateAndApplyRandomPrompt 更新）
-        final characterConfig = ref.read(characterPromptNotifierProvider);
-        final apiCharacters = _convertCharactersToApiFormat(characterConfig);
-        effectiveParams = params.copyWith(
-          prompt: randomPrompt,
-          characters: apiCharacters,
-          useCoords:
-              apiCharacters.isNotEmpty && !characterConfig.globalAiChoice,
-        );
-      }
-    }
 
     // 开始生成前清空当前图片
     state = state.copyWith(
@@ -673,6 +647,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     // NAI 官方预设保持为 API 开关；自定义预设展开成显式提示词，避免官方预设重复生效。
     final ImageParams baseParams = effectiveParams.copyWith(
       qualityToggle: presetResolution.qualityToggle,
+      qualityTagPreset: presetResolution.qualityTagPreset,
       ucPreset: presetResolution.ucPreset,
       characters: apiCharacters,
       // 如果有角色且使用自定义位置，启用坐标模式
@@ -712,44 +687,11 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     Object? lastBatchError;
     DateTime? concurrencyDeadline;
 
-    // 当前使用的参数（可能会被抽卡模式修改）
-    ImageParams currentParams = preparedParams;
+    // 当前使用的参数
+    final ImageParams currentParams = preparedParams;
 
     for (int batch = 0; batch < batchCount; batch++) {
       if (_shouldAbortGenerationRun(generationRunId)) break;
-
-      // 如果开启抽卡模式且不是第一批，先随机新提示词再生成
-      // 第一批已在方法开头随机过了
-      if (randomMode && batch > 0) {
-        final randomPrompt = await generateAndApplyRandomPrompt();
-        if (_shouldAbortGenerationRun(generationRunId)) return;
-        if (randomPrompt.isNotEmpty) {
-          AppLogger.d(
-            'Batch ${batch + 1}/$batchCount - Random before generation: $randomPrompt',
-            'RandomMode',
-          );
-          // 随机提示词是原始文本，必须重跑开头对第一批做过的正面词管线
-          //（别名展开 → 固定词 → 质量词），否则第二批起会丢固定词和质量词
-          var preparedPrompt = aliasResolver.resolveAliases(randomPrompt);
-          preparedPrompt = fixedTagsState.applyToPrompt(preparedPrompt);
-          preparedPrompt = _resolvePromptPresets(
-            currentParams.copyWith(prompt: preparedPrompt, negativePrompt: ''),
-          ).prompt;
-
-          // 重新读取角色配置并更新参数
-          final newCharacterConfig = ref.read(characterPromptNotifierProvider);
-          final newApiCharacters = _convertCharactersToApiFormat(
-            newCharacterConfig,
-          );
-          currentParams = currentParams.copyWith(
-            prompt: preparedPrompt,
-            characters: newApiCharacters,
-            useCoords:
-                newApiCharacters.isNotEmpty &&
-                !newCharacterConfig.globalAiChoice,
-          );
-        }
-      }
 
       // 更新当前进度
       state = state.copyWith(
@@ -879,9 +821,12 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     ImageParams params,
   ) async {
     final saveSettings = ref.read(imageSaveSettingsNotifierProvider);
+    final currentVibes = ref
+        .read(generationParamsNotifierProvider)
+        .vibeReferencesV4;
     await _saveImagesToGallery(
       images,
-      params,
+      params.copyWith(vibeReferencesV4: currentVibes),
       saveImages: saveSettings.autoSave,
     );
   }
@@ -1410,6 +1355,9 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
             if (chunk.isComplete && chunk.hasFinalImage) {
               finalImages[chunk.sampleIndex] = chunk.finalImage!;
+              if (chunk.vibeEncodings?.isNotEmpty == true) {
+                _saveVibeEncodings(chunk.vibeEncodings!);
+              }
               _rememberStreamPreview(
                 bytes: chunk.finalImage!,
                 params: requestParams,
@@ -1619,6 +1567,9 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
         if (chunk.isComplete && chunk.hasFinalImage) {
           finalImages[chunk.sampleIndex] = chunk.finalImage!;
+          if (chunk.vibeEncodings?.isNotEmpty == true) {
+            _saveVibeEncodings(chunk.vibeEncodings!);
+          }
           _rememberStreamPreview(
             bytes: chunk.finalImage!,
             params: params,
@@ -2009,76 +1960,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     return CharacterConversionService(
       aliasResolver: aliasResolver.resolveAliases,
     ).convert(config).characters;
-  }
-
-  /// 统一随机提示词生成并应用方法
-  ///
-  /// 此方法是随机按钮和自动随机模式的唯一入口
-  /// 生成随机提示词并自动应用到主提示词和角色提示词
-  ///
-  /// [seed] 随机种子（可选）
-  /// 返回生成的主提示词字符串（用于日志/显示）
-  Future<String> generateAndApplyRandomPrompt({int? seed}) async {
-    // 获取当前模型是否为 V4
-    final params = ref.read(generationParamsNotifierProvider);
-    final isV4Model = params.isV4Model;
-
-    // 使用统一的生成入口
-    final result = await ref
-        .read(promptConfigNotifierProvider.notifier)
-        .generateRandomPrompt(isV4Model: isV4Model, seed: seed);
-
-    // 格式化生成的提示词（空格转下划线等）
-    final formattedPrompt = NaiPromptFormatter.format(result.mainPrompt);
-
-    // 应用主提示词
-    ref
-        .read(generationParamsNotifierProvider.notifier)
-        .updatePrompt(formattedPrompt);
-
-    // 记录格式化信息
-    if (formattedPrompt != result.mainPrompt) {
-      AppLogger.d(
-        'Formatted random prompt: ${result.mainPrompt} → $formattedPrompt',
-        'RandomMode',
-      );
-    }
-
-    // 应用角色提示词（同时进行格式化）
-    if (result.hasCharacters && isV4Model) {
-      final characterPrompts = result.toCharacterPrompts().map((char) {
-        return char.copyWith(
-          prompt: NaiPromptFormatter.format(char.prompt),
-          negativePrompt: char.negativePrompt.isNotEmpty
-              ? NaiPromptFormatter.format(char.negativePrompt)
-              : char.negativePrompt,
-        );
-      }).toList();
-      AppLogger.d(
-        'Random result: ${result.characterCount} characters, prompts: ${characterPrompts.length}',
-        'RandomMode',
-      );
-      for (var i = 0; i < characterPrompts.length; i++) {
-        AppLogger.d(
-          'Character $i: ${characterPrompts[i].prompt}',
-          'RandomMode',
-        );
-      }
-      ref
-          .read(characterPromptNotifierProvider.notifier)
-          .replaceAll(characterPrompts);
-
-      AppLogger.d(
-        'Applied ${result.characterCount} characters from random generation',
-        'RandomMode',
-      );
-    } else if (result.noHumans) {
-      // 无人物场景，清空角色
-      ref.read(characterPromptNotifierProvider.notifier).clearAll();
-      AppLogger.d('No humans scene, cleared characters', 'RandomMode');
-    }
-
-    return formattedPrompt;
   }
 
   // ============================================================

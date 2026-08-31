@@ -5,10 +5,7 @@ import '../../../core/services/prompt_token_counter_service.dart';
 import '../../../core/utils/localization_extension.dart';
 
 class PromptTokenCountAsyncBar extends StatelessWidget {
-  const PromptTokenCountAsyncBar({
-    super.key,
-    required this.usage,
-  });
+  const PromptTokenCountAsyncBar({super.key, required this.usage});
 
   final AsyncValue<PromptTokenUsage?> usage;
 
@@ -27,10 +24,7 @@ class PromptTokenCountAsyncBar extends StatelessWidget {
 }
 
 class PromptTokenCountBar extends StatelessWidget {
-  const PromptTokenCountBar({
-    super.key,
-    required this.usage,
-  });
+  const PromptTokenCountBar({super.key, required this.usage});
 
   final PromptTokenUsage usage;
 

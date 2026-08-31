@@ -1,10 +1,11 @@
 import 'package:file_picker/file_picker.dart';
 
-typedef DirectoryPathPicker = Future<String?> Function({
-  String? dialogTitle,
-  bool lockParentWindow,
-  String? initialDirectory,
-});
+typedef DirectoryPathPicker =
+    Future<String?> Function({
+      String? dialogTitle,
+      bool lockParentWindow,
+      String? initialDirectory,
+    });
 
 class FilePickerUtils {
   FilePickerUtils._();

@@ -104,9 +104,7 @@ class _CustomRadarChartState extends State<CustomRadarChart>
                   animationValue: _animation.value,
                 ),
                 child: widget.showLabels
-                    ? Stack(
-                        children: _buildLabels(theme, center, radius + 25),
-                      )
+                    ? Stack(children: _buildLabels(theme, center, radius + 25))
                     : null,
               ),
             );

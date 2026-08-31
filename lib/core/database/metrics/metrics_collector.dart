@@ -102,11 +102,13 @@ class MetricsCollector {
     _isCollecting = true;
 
     try {
-      _acquireRecords.add(ConnectionAcquireRecord(
-        timestamp: DateTime.now(),
-        waitTime: waitTime,
-        dataSource: dataSource,
-      ),);
+      _acquireRecords.add(
+        ConnectionAcquireRecord(
+          timestamp: DateTime.now(),
+          waitTime: waitTime,
+          dataSource: dataSource,
+        ),
+      );
 
       // 限制历史记录数量
       while (_acquireRecords.length > _maxHistoryPoints) {
@@ -114,12 +116,7 @@ class MetricsCollector {
       }
 
       // 更新数据源指标
-      _updateDataSourceMetrics(
-        dataSource,
-        Duration.zero,
-        true,
-        null,
-      );
+      _updateDataSourceMetrics(dataSource, Duration.zero, true, null);
     } finally {
       _isCollecting = false;
     }
@@ -133,10 +130,12 @@ class MetricsCollector {
     _isCollecting = true;
 
     try {
-      _releaseRecords.add(ConnectionReleaseRecord(
-        timestamp: DateTime.now(),
-        usageTime: usageTime,
-      ),);
+      _releaseRecords.add(
+        ConnectionReleaseRecord(
+          timestamp: DateTime.now(),
+          usageTime: usageTime,
+        ),
+      );
 
       // 限制历史记录数量
       while (_releaseRecords.length > _maxHistoryPoints) {
@@ -172,7 +171,10 @@ class MetricsCollector {
         _errorCounts.remove(minKey);
       }
 
-      AppLogger.d('MetricsCollector recorded error: $type in $operation', 'MetricsCollector');
+      AppLogger.d(
+        'MetricsCollector recorded error: $type in $operation',
+        'MetricsCollector',
+      );
     } finally {
       _isCollecting = false;
     }
@@ -187,7 +189,10 @@ class MetricsCollector {
       _poolResetCount++;
       _waitQueueLength = 0;
 
-      AppLogger.i('MetricsCollector recorded pool reset #$_poolResetCount', 'MetricsCollector');
+      AppLogger.i(
+        'MetricsCollector recorded pool reset #$_poolResetCount',
+        'MetricsCollector',
+      );
     } finally {
       _isCollecting = false;
     }
@@ -241,7 +246,8 @@ class MetricsCollector {
       double p95Time = 0.0;
       double p99Time = 0.0;
       if (recentOperations.isNotEmpty) {
-        final times = recentOperations.map((r) => r.durationMs).toList()..sort();
+        final times = recentOperations.map((r) => r.durationMs).toList()
+          ..sort();
         p95Time = _percentile(times, 0.95);
         p99Time = _percentile(times, 0.99);
       }
@@ -315,7 +321,8 @@ class MetricsCollector {
 
     try {
       return Map<String, DataSourceMetrics>.fromEntries(
-        _dataSourceMetrics.entries.map((e) => MapEntry(
+        _dataSourceMetrics.entries.map(
+          (e) => MapEntry(
             e.key,
             DataSourceMetrics(
               name: e.key,
@@ -324,7 +331,8 @@ class MetricsCollector {
               averageOperationTime: e.value.averageOperationTime,
               errorBreakdown: Map<String, int>.from(e.value.errorBreakdown),
             ),
-          ),),
+          ),
+        ),
       );
     } finally {
       _isCollecting = false;
@@ -403,7 +411,8 @@ class MetricsCollector {
     if (!success) {
       entry.errorCount++;
       if (errorType != null) {
-        entry.errorBreakdown[errorType] = (entry.errorBreakdown[errorType] ?? 0) + 1;
+        entry.errorBreakdown[errorType] =
+            (entry.errorBreakdown[errorType] ?? 0) + 1;
       }
     }
 
@@ -447,11 +456,10 @@ class MetricsCollector {
     final intervalMs = end.difference(start).inMilliseconds / _maxHistoryPoints;
 
     for (var i = 0; i < min(values.length, _maxHistoryPoints); i++) {
-      final timestamp = start.add(Duration(milliseconds: (intervalMs * i).round()));
-      points.add(MetricsDataPoint(
-        timestamp: timestamp,
-        value: values[i],
-      ),);
+      final timestamp = start.add(
+        Duration(milliseconds: (intervalMs * i).round()),
+      );
+      points.add(MetricsDataPoint(timestamp: timestamp, value: values[i]));
     }
 
     return points;
@@ -470,17 +478,15 @@ class MetricsCollector {
       final windowEnd = windowStart.add(interval);
 
       final windowOps = _operationRecords.where(
-        (r) => r.startTime.isAfter(windowStart) && r.startTime.isBefore(windowEnd),
+        (r) =>
+            r.startTime.isAfter(windowStart) && r.startTime.isBefore(windowEnd),
       );
 
       final windowTotal = windowOps.length;
       final windowFailed = windowOps.where((r) => !r.success).length;
       final errorRate = windowTotal > 0 ? windowFailed / windowTotal : 0.0;
 
-      points.add(MetricsDataPoint(
-        timestamp: windowStart,
-        value: errorRate,
-      ),);
+      points.add(MetricsDataPoint(timestamp: windowStart, value: errorRate));
     }
 
     return points;

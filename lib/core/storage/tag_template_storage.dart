@@ -9,10 +9,8 @@ part 'tag_template_storage.g.dart';
 
 /// 标签模板存储服务 - 使用 Hive 持久化标签模板数据
 class TagTemplateStorage extends BaseHiveStorage<void> {
-  TagTemplateStorage() : super(
-    boxName: StorageKeys.tagTemplatesBox,
-    useLazyLoading: false,
-  );
+  TagTemplateStorage()
+    : super(boxName: StorageKeys.tagTemplatesBox, useLazyLoading: false);
 
   /// 初始化存储 (box 应在 main.dart 中预先打开)
   Future<void> init() async {
@@ -27,7 +25,9 @@ class TagTemplateStorage extends BaseHiveStorage<void> {
     } catch (e) {
       // 处理存储配额超限等错误
       if (e is HiveError) {
-        throw TagTemplateStorageException('Storage quota exceeded or error: ${e.message}');
+        throw TagTemplateStorageException(
+          'Storage quota exceeded or error: ${e.message}',
+        );
       }
       rethrow;
     }
@@ -39,7 +39,9 @@ class TagTemplateStorage extends BaseHiveStorage<void> {
       await box.delete(templateId);
     } catch (e) {
       if (e is HiveError) {
-        throw TagTemplateStorageException('Failed to delete template: ${e.message}');
+        throw TagTemplateStorageException(
+          'Failed to delete template: ${e.message}',
+        );
       }
       rethrow;
     }
@@ -95,7 +97,9 @@ class TagTemplateStorage extends BaseHiveStorage<void> {
       await box.clear();
     } catch (e) {
       if (e is HiveError) {
-        throw TagTemplateStorageException('Failed to clear templates: ${e.message}');
+        throw TagTemplateStorageException(
+          'Failed to clear templates: ${e.message}',
+        );
       }
       rethrow;
     }

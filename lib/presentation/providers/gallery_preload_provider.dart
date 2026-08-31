@@ -189,12 +189,12 @@ class PreloadQueue {
   }
 
   Map<String, int> get stats => {
-        'high': _highPriority.length,
-        'medium': _mediumPriority.length,
-        'low': _lowPriority.length,
-        'inProgress': _inProgress.length,
-        'completed': _completed.length,
-      };
+    'high': _highPriority.length,
+    'medium': _mediumPriority.length,
+    'low': _lowPriority.length,
+    'inProgress': _inProgress.length,
+    'completed': _completed.length,
+  };
 
   int get length =>
       _highPriority.length + _mediumPriority.length + _lowPriority.length;
@@ -242,13 +242,12 @@ class PreloadState {
     int? loadedCount,
     int? pendingCount,
     int? errorCount,
-  }) =>
-      PreloadState(
-        isLoading: isLoading ?? this.isLoading,
-        loadedCount: loadedCount ?? this.loadedCount,
-        pendingCount: pendingCount ?? this.pendingCount,
-        errorCount: errorCount ?? this.errorCount,
-      );
+  }) => PreloadState(
+    isLoading: isLoading ?? this.isLoading,
+    loadedCount: loadedCount ?? this.loadedCount,
+    pendingCount: pendingCount ?? this.pendingCount,
+    errorCount: errorCount ?? this.errorCount,
+  );
 }
 
 /// 预加载状态 Notifier
@@ -291,10 +290,12 @@ class PreloadNotifier extends StateNotifier<PreloadState> {
     // 高优先级：当前可见项
     for (final index in visibleIndices) {
       if (index >= 0 && index < allRecords.length) {
-        newTasks.add(PreloadTask(
-          path: allRecords[index].path,
-          priority: PreloadPriority.high,
-        ),);
+        newTasks.add(
+          PreloadTask(
+            path: allRecords[index].path,
+            priority: PreloadPriority.high,
+          ),
+        );
       }
     }
 
@@ -307,32 +308,41 @@ class PreloadNotifier extends StateNotifier<PreloadState> {
     }
 
     // 中优先级：即将进入可视区域的项
-    final mediumStart =
-        (minVisible - _config.mediumPriorityBuffer).clamp(0, allRecords.length);
-    final mediumEnd =
-        (maxVisible + _config.mediumPriorityBuffer).clamp(0, allRecords.length);
+    final mediumStart = (minVisible - _config.mediumPriorityBuffer).clamp(
+      0,
+      allRecords.length,
+    );
+    final mediumEnd = (maxVisible + _config.mediumPriorityBuffer).clamp(
+      0,
+      allRecords.length,
+    );
 
     for (var i = mediumStart; i < mediumEnd; i++) {
       if (!visibleIndices.contains(i)) {
-        newTasks.add(PreloadTask(
-          path: allRecords[i].path,
-          priority: PreloadPriority.medium,
-        ),);
+        newTasks.add(
+          PreloadTask(
+            path: allRecords[i].path,
+            priority: PreloadPriority.medium,
+          ),
+        );
       }
     }
 
     // 低优先级：更远处的项
-    final lowStart =
-        (minVisible - _config.mediumPriorityBuffer * 2).clamp(0, allRecords.length);
-    final lowEnd =
-        (maxVisible + _config.mediumPriorityBuffer * 2).clamp(0, allRecords.length);
+    final lowStart = (minVisible - _config.mediumPriorityBuffer * 2).clamp(
+      0,
+      allRecords.length,
+    );
+    final lowEnd = (maxVisible + _config.mediumPriorityBuffer * 2).clamp(
+      0,
+      allRecords.length,
+    );
 
     for (var i = lowStart; i < lowEnd; i++) {
       if (i < mediumStart || i >= mediumEnd) {
-        newTasks.add(PreloadTask(
-          path: allRecords[i].path,
-          priority: PreloadPriority.low,
-        ),);
+        newTasks.add(
+          PreloadTask(path: allRecords[i].path, priority: PreloadPriority.low),
+        );
       }
     }
 
@@ -417,8 +427,8 @@ class PreloadNotifier extends StateNotifier<PreloadState> {
 /// 画廊预加载 Provider
 final galleryPreloadProvider =
     StateNotifierProvider<PreloadNotifier, PreloadState>(
-  (ref) => PreloadNotifier(),
-);
+      (ref) => PreloadNotifier(),
+    );
 
 /// 当前可见索引 Provider
 final visibleGalleryIndicesProvider = StateProvider<Set<int>>((ref) => {});

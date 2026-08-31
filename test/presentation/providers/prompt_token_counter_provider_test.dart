@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart' as api;
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
@@ -49,129 +50,145 @@ void main() {
 
   group('buildPromptTokenCountPayload', () {
     test(
-        'positive payload should include request-aligned quality tags and raw enabled character prompts only',
-        () {
+      'positive payload should include request-aligned quality tags and raw enabled character prompts only',
+      () {
+        final payload = buildPromptTokenCountPayload(
+          target: PromptTokenCountTarget.positive,
+          prompt: '<hero>',
+          negativePrompt: '<bad>',
+          model: 'nai-diffusion-4-5-full',
+          fixedTagsState: FixedTagsState(
+            entries: [
+              FixedTagEntry.create(
+                name: 'prefix',
+                content: 'year 2025',
+                position: FixedTagPosition.prefix,
+                sortOrder: 0,
+              ),
+              FixedTagEntry.create(
+                name: 'suffix',
+                content: 'cinematic lighting',
+                position: FixedTagPosition.suffix,
+                sortOrder: 1,
+              ),
+            ],
+          ),
+          qualityToggle: true,
+          ucPreset: api.UcPresets.toApiValue(api.UcPresetType.heavy),
+          characters: [
+            CharacterPrompt.create(name: 'A', prompt: '<dress>'),
+            CharacterPrompt.create(
+              name: 'Positioned',
+              prompt: '<cape>',
+            ).copyWith(
+              positionMode: CharacterPositionMode.custom,
+              customPosition: const CharacterPosition(row: 0.0, column: 1.0),
+            ),
+            CharacterPrompt.create(
+              name: 'B',
+              prompt: 'ignored',
+            ).copyWith(enabled: false),
+            CharacterPrompt.create(name: 'C', prompt: ''),
+          ],
+          resolveAliases: _resolveAliases,
+        );
+
+        expect(
+          payload.mainText,
+          equals(
+            'year 2025, 1girl, cinematic lighting, location, very aesthetic, masterpiece, no text',
+          ),
+        );
+        expect(payload.extraTexts, equals(['blue dress', 'red cape']));
+        expect(
+          payload.breakdown.map((item) => item.label).toList(),
+          equals(['提示词', '固定词', '质量预设', '角色']),
+        );
+      },
+    );
+
+    test('positive payload should count the V5 Light quality text', () {
       final payload = buildPromptTokenCountPayload(
         target: PromptTokenCountTarget.positive,
-        prompt: '<hero>',
-        negativePrompt: '<bad>',
-        model: 'nai-diffusion-4-5-full',
-        fixedTagsState: FixedTagsState(
-          entries: [
-            FixedTagEntry.create(
-              name: 'prefix',
-              content: 'year 2025',
-              position: FixedTagPosition.prefix,
-              sortOrder: 0,
-            ),
-            FixedTagEntry.create(
-              name: 'suffix',
-              content: 'cinematic lighting',
-              position: FixedTagPosition.suffix,
-              sortOrder: 1,
-            ),
-          ],
-        ),
+        prompt: '1girl',
+        negativePrompt: '',
+        model: api.ImageModels.animeDiffusionV5Full,
+        fixedTagsState: const FixedTagsState(),
         qualityToggle: true,
-        ucPreset: api.UcPresets.toApiValue(api.UcPresetType.heavy),
-        characters: [
-          CharacterPrompt.create(
-            name: 'A',
-            prompt: '<dress>',
-          ),
-          CharacterPrompt.create(
-            name: 'Positioned',
-            prompt: '<cape>',
-          ).copyWith(
-            positionMode: CharacterPositionMode.custom,
-            customPosition: const CharacterPosition(row: 0.0, column: 1.0),
-          ),
-          CharacterPrompt.create(
-            name: 'B',
-            prompt: 'ignored',
-          ).copyWith(enabled: false),
-          CharacterPrompt.create(
-            name: 'C',
-            prompt: '',
-          ),
-        ],
-        resolveAliases: _resolveAliases,
+        qualityTagPreset: QualityTagPreset.light,
+        ucPreset: api.UcPresets.noneApiValue,
+        qualityMode: PromptPresetMode.naiLight,
+        qualityContent: api.QualityTags.v5Light,
+        characters: const [],
+        resolveAliases: (text) => text,
       );
 
       expect(
         payload.mainText,
-        equals(
-          'year 2025, 1girl, cinematic lighting, location, very aesthetic, masterpiece, no text',
-        ),
+        '1girl, very aesthetic, amazing quality, no text',
       );
       expect(
-        payload.extraTexts,
-        equals(['blue dress', 'red cape']),
-      );
-      expect(
-        payload.breakdown.map((item) => item.label).toList(),
-        equals(['提示词', '固定词', '质量预设', '角色']),
+        payload.breakdown.singleWhere((item) => item.label == '质量预设').texts,
+        [api.QualityTags.v5Light],
       );
     });
 
     test(
-        'negative payload should include request-aligned uc preset, negative prompt and character negatives',
-        () {
-      final payload = buildPromptTokenCountPayload(
-        target: PromptTokenCountTarget.negative,
-        prompt: '<hero>',
-        negativePrompt: '<bad>',
-        model: 'nai-diffusion-4-5-full',
-        fixedTagsState: FixedTagsState(
-          entries: [
-            FixedTagEntry.create(
-              name: 'negative-prefix',
-              content: 'bad anatomy',
-              position: FixedTagPosition.prefix,
-              promptType: FixedTagPromptType.negative,
-              sortOrder: 0,
-            ),
-            FixedTagEntry.create(
-              name: 'negative-suffix',
-              content: 'text',
-              position: FixedTagPosition.suffix,
-              promptType: FixedTagPromptType.negative,
-              sortOrder: 1,
-            ),
-          ],
-        ),
-        qualityToggle: true,
-        ucPreset: api.UcPresets.toApiValue(api.UcPresetType.light),
-        characters: [
-          CharacterPrompt.create(
-            name: 'A',
-            prompt: '1girl',
-            negativePrompt: '<charBad>',
+      'negative payload should include request-aligned uc preset, negative prompt and character negatives',
+      () {
+        final payload = buildPromptTokenCountPayload(
+          target: PromptTokenCountTarget.negative,
+          prompt: '<hero>',
+          negativePrompt: '<bad>',
+          model: 'nai-diffusion-4-5-full',
+          fixedTagsState: FixedTagsState(
+            entries: [
+              FixedTagEntry.create(
+                name: 'negative-prefix',
+                content: 'bad anatomy',
+                position: FixedTagPosition.prefix,
+                promptType: FixedTagPromptType.negative,
+                sortOrder: 0,
+              ),
+              FixedTagEntry.create(
+                name: 'negative-suffix',
+                content: 'text',
+                position: FixedTagPosition.suffix,
+                promptType: FixedTagPromptType.negative,
+                sortOrder: 1,
+              ),
+            ],
           ),
-          CharacterPrompt.create(
-            name: 'B',
-            prompt: '1boy',
-            negativePrompt: 'ignored',
-          ).copyWith(enabled: false),
-        ],
-        resolveAliases: _resolveAliases,
-      );
+          qualityToggle: true,
+          ucPreset: api.UcPresets.toApiValue(api.UcPresetType.light),
+          characters: [
+            CharacterPrompt.create(
+              name: 'A',
+              prompt: '1girl',
+              negativePrompt: '<charBad>',
+            ),
+            CharacterPrompt.create(
+              name: 'B',
+              prompt: '1boy',
+              negativePrompt: 'ignored',
+            ).copyWith(enabled: false),
+          ],
+          resolveAliases: _resolveAliases,
+        );
 
-      expect(
-        payload.mainText,
-        equals(
-          'lowres, artistic error, scan artifacts, worst quality, bad quality, jpeg artifacts, multiple views, very displeasing, too many watermarks, negative space, blank page, bad anatomy, bad hands, text',
-        ),
-      );
-      expect(
-        payload.extraTexts,
-        equals(['extra fingers']),
-      );
-      expect(
-        payload.breakdown.map((item) => item.label).toList(),
-        equals(['负面提示词', '负面固定词', '负面预设', '角色负面']),
-      );
-    });
+        expect(
+          payload.mainText,
+          equals(
+            'lowres, artistic error, scan artifacts, worst quality, bad quality, jpeg artifacts, multiple views, very displeasing, too many watermarks, negative space, blank page, bad anatomy, bad hands, text',
+          ),
+        );
+        expect(payload.extraTexts, equals(['extra fingers']));
+        expect(
+          payload.breakdown.map((item) => item.label).toList(),
+          equals(['负面提示词', '负面固定词', '负面预设', '角色负面']),
+        );
+      },
+    );
   });
 
   group('metadata prompt preset import', () {
@@ -287,7 +304,9 @@ void main() {
     );
     final initialCallCount = _FakePromptTokenEncoder.callCount;
 
-    container.read(generationParamsNotifierProvider.notifier).addVibeReference(
+    container
+        .read(generationParamsNotifierProvider.notifier)
+        .addVibeReference(
           const VibeReference(
             displayName: 'vibe',
             vibeEncoding: 'encoded',

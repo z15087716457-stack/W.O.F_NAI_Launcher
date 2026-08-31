@@ -18,9 +18,8 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         home: Scaffold(
           body: Builder(
-            builder: (context) => Material(
-              child: tool.buildSettingsPanel(context, state),
-            ),
+            builder: (context) =>
+                Material(child: tool.buildSettingsPanel(context, state)),
           ),
         ),
       ),

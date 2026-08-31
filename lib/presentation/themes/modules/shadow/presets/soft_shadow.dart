@@ -13,43 +13,43 @@ class SoftShadow extends BaseShadowModule {
 
   @override
   List<BoxShadow> get elevation1 => const [
-        BoxShadow(
-          color: Color(0x1A000000), // 0.1 opacity
-          blurRadius: 8,
-          spreadRadius: -1,
-          offset: Offset(0, 2),
-        ),
-      ];
+    BoxShadow(
+      color: Color(0x1A000000), // 0.1 opacity
+      blurRadius: 8,
+      spreadRadius: -1,
+      offset: Offset(0, 2),
+    ),
+  ];
 
   @override
   List<BoxShadow> get elevation2 => const [
-        BoxShadow(
-          color: Color(0x26000000), // 0.15 opacity
-          blurRadius: 16,
-          spreadRadius: -1,
-          offset: Offset(0, 3),
-        ),
-      ];
+    BoxShadow(
+      color: Color(0x26000000), // 0.15 opacity
+      blurRadius: 16,
+      spreadRadius: -1,
+      offset: Offset(0, 3),
+    ),
+  ];
 
   @override
   List<BoxShadow> get elevation3 => const [
-        BoxShadow(
-          color: Color(0x33000000), // 0.2 opacity - matches design spec
-          blurRadius: 24,
-          spreadRadius: -1,
-          offset: Offset(0, 4),
-        ),
-      ];
+    BoxShadow(
+      color: Color(0x33000000), // 0.2 opacity - matches design spec
+      blurRadius: 24,
+      spreadRadius: -1,
+      offset: Offset(0, 4),
+    ),
+  ];
 
   /// Card shadow matching design spec exactly:
   /// box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2)
   @override
   List<BoxShadow> get cardShadow => const [
-        BoxShadow(
-          color: Color(0x33000000), // rgba(0,0,0,0.2)
-          blurRadius: 24,
-          spreadRadius: -1,
-          offset: Offset(0, 4),
-        ),
-      ];
+    BoxShadow(
+      color: Color(0x33000000), // rgba(0,0,0,0.2)
+      blurRadius: 24,
+      spreadRadius: -1,
+      offset: Offset(0, 4),
+    ),
+  ];
 }

@@ -87,10 +87,7 @@ class TagLibrary with _$TagLibrary {
   TagLibrary setCategory(TagSubCategory category, List<WeightedTag> tags) {
     final newCategories = Map<String, List<WeightedTag>>.from(categories);
     newCategories[category.name] = tags;
-    return copyWith(
-      categories: newCategories,
-      lastUpdated: DateTime.now(),
-    );
+    return copyWith(categories: newCategories, lastUpdated: DateTime.now());
   }
 
   /// 合并另一个词库
@@ -145,9 +142,9 @@ class TagLibrary with _$TagLibrary {
     for (final entry in categories.entries) {
       // 尝试解析分类名称
       final category = TagSubCategory.values.cast<TagSubCategory?>().firstWhere(
-            (c) => c?.name == entry.key,
-            orElse: () => null,
-          );
+        (c) => c?.name == entry.key,
+        orElse: () => null,
+      );
 
       // 如果分类配置启用了 Danbooru 补充，计入全部标签
       // 否则只计入非 Danbooru 来源的标签
@@ -189,9 +186,9 @@ class TagLibrary with _$TagLibrary {
     final result = <TagSubCategory>{};
     for (final entry in categories.entries) {
       final category = TagSubCategory.values.cast<TagSubCategory?>().firstWhere(
-            (c) => c?.name == entry.key,
-            orElse: () => null,
-          );
+        (c) => c?.name == entry.key,
+        orElse: () => null,
+      );
       if (category != null && entry.value.any((t) => t.isDanbooruSupplement)) {
         result.add(category);
       }

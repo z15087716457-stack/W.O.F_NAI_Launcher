@@ -191,7 +191,8 @@ Uint8List _buildJpegWithExifUserComment(String jsonText) {
 
   final exifBody = Uint8List.fromList([
     ...latin1.encode('Exif'),
-    0, 0,
+    0,
+    0,
     ...tiff.toBytes(),
   ]);
 

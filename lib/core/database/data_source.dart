@@ -1,13 +1,7 @@
 import '../utils/app_logger.dart';
 
 /// 数据源状态
-enum DataSourceState {
-  uninitialized,
-  initializing,
-  ready,
-  error,
-  disposed,
-}
+enum DataSourceState { uninitialized, initializing, ready, error, disposed }
 
 /// 数据源类型
 enum DataSourceType {
@@ -23,12 +17,7 @@ enum DataSourceType {
 }
 
 /// 健康状态
-enum HealthStatus {
-  healthy,
-  degraded,
-  corrupted,
-  unknown,
-}
+enum HealthStatus { healthy, degraded, corrupted, unknown }
 
 /// 健康检查结果
 class DataSourceHealth {
@@ -156,12 +145,12 @@ abstract class BaseDataSource implements DataSource {
 
   @override
   DataSourceInfo get info => DataSourceInfo(
-        name: name,
-        type: type,
-        state: _state,
-        errorMessage: _errorMessage,
-        initializedAt: _initializedAt,
-      );
+    name: name,
+    type: type,
+    state: _state,
+    errorMessage: _errorMessage,
+    initializedAt: _initializedAt,
+  );
 
   @override
   bool get isInitialized => _state == DataSourceState.ready;
@@ -266,12 +255,7 @@ abstract class BaseDataSource implements DataSource {
       await doClear();
       AppLogger.i('DataSource "$name" cleared', 'DataSource');
     } catch (e, stack) {
-      AppLogger.e(
-        'Failed to clear DataSource "$name"',
-        e,
-        stack,
-        'DataSource',
-      );
+      AppLogger.e('Failed to clear DataSource "$name"', e, stack, 'DataSource');
       rethrow;
     }
   }

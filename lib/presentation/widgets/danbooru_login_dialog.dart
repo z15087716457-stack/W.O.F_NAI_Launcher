@@ -36,10 +36,9 @@ class _DanbooruLoginDialogState extends ConsumerState<DanbooruLoginDialog> {
 
     setState(() => _isLoading = true);
 
-    final success = await ref.read(danbooruAuthProvider.notifier).login(
-          _usernameController.text.trim(),
-          _apiKeyController.text.trim(),
-        );
+    final success = await ref
+        .read(danbooruAuthProvider.notifier)
+        .login(_usernameController.text.trim(), _apiKeyController.text.trim());
 
     setState(() => _isLoading = false);
 

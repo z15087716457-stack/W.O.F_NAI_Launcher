@@ -160,9 +160,7 @@ class _GalleryTrashPanelDialogState
         await ref
             .read(localGalleryNotifierProvider.notifier)
             .loadPage(galleryState.currentPage, showLoading: false);
-        await ref
-            .read(galleryCategoryNotifierProvider.notifier)
-            .refresh();
+        await ref.read(galleryCategoryNotifierProvider.notifier).refresh();
       } catch (e) {
         AppLogger.w('Trash purge gallery refresh failed: $e', 'Trash');
       }
@@ -245,7 +243,9 @@ class _GalleryTrashPanelDialogState
       actions: [
         if (!_loading && _entries.isNotEmpty) ...[
           TextButton(
-            onPressed: _busy ? null : () => _restore(_entries.map((e) => e.path).toList()),
+            onPressed: _busy
+                ? null
+                : () => _restore(_entries.map((e) => e.path).toList()),
             child: Text(l10n.localGallery_trashRestoreAll),
           ),
           FilledButton.icon(
@@ -287,17 +287,10 @@ class _GalleryTrashPanelDialogState
                     color: theme.colorScheme.outline,
                   ),
                 )
-              : Icon(
-                  Icons.help_outline,
-                  color: theme.colorScheme.outline,
-                ),
+              : Icon(Icons.help_outline, color: theme.colorScheme.outline),
         ),
       ),
-      title: Text(
-        entry.fileName,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: Text(entry.fileName, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(
         entry.existsOnDisk
             ? p.dirname(entry.path)

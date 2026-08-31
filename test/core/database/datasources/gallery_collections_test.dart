@@ -75,33 +75,35 @@ void main() {
           "AND name IN ('gallery_collections', 'gallery_collection_items')",
         ),
       );
-      expect(tables.map((t) => t['name']), containsAll([
-        'gallery_collections',
-        'gallery_collection_items',
-      ]));
+      expect(
+        tables.map((t) => t['name']),
+        containsAll(['gallery_collections', 'gallery_collection_items']),
+      );
     });
 
-    test('create/list with counts, ordered by sort_order then created_at',
-        () async {
-      final idA = await dataSource.createCollection('A');
-      final idB = await dataSource.createCollection('B');
-      await dataSource.createCollection('C');
+    test(
+      'create/list with counts, ordered by sort_order then created_at',
+      () async {
+        final idA = await dataSource.createCollection('A');
+        final idB = await dataSource.createCollection('B');
+        await dataSource.createCollection('C');
 
-      // 成员：A 两张，B 一张
-      final img1 = await addImage('/col/a1.png');
-      final img2 = await addImage('/col/a2.png');
-      final img3 = await addImage('/col/b1.png');
-      await dataSource.addImageToCollection(idA, img1);
-      await dataSource.addImageToCollection(idA, img2);
-      await dataSource.addImageToCollection(idB, img3);
+        // 成员：A 两张，B 一张
+        final img1 = await addImage('/col/a1.png');
+        final img2 = await addImage('/col/a2.png');
+        final img3 = await addImage('/col/b1.png');
+        await dataSource.addImageToCollection(idA, img1);
+        await dataSource.addImageToCollection(idA, img2);
+        await dataSource.addImageToCollection(idB, img3);
 
-      final list = await dataSource.listCollectionsWithCounts();
-      expect(list.map((c) => c.name).toList(), ['A', 'B', 'C']);
-      expect(list[0].imageCount, 2);
-      expect(list[1].imageCount, 1);
-      expect(list[2].imageCount, 0);
-      expect(list[0].id, idA);
-    });
+        final list = await dataSource.listCollectionsWithCounts();
+        expect(list.map((c) => c.name).toList(), ['A', 'B', 'C']);
+        expect(list[0].imageCount, 2);
+        expect(list[1].imageCount, 1);
+        expect(list[2].imageCount, 0);
+        expect(list[0].id, idA);
+      },
+    );
 
     test('rename updates name', () async {
       final id = await dataSource.createCollection('old');
@@ -202,41 +204,40 @@ void main() {
       await dataSource.addImageToCollection(idA, img2);
       await dataSource.addImageToCollection(idB, img2);
 
-      expect(
-        await dataSource.removeImagesFromAllCollections([img1, img2]),
-        3,
-      );
+      expect(await dataSource.removeImagesFromAllCollections([img1, img2]), 3);
       expect(await dataSource.getCollectionImageIds(idA), isEmpty);
       expect(await dataSource.getCollectionImageIds(idB), isEmpty);
       // 只清成员关系，不碰收藏表
       expect(await dataSource.getCollectionIdsForImage(img2), isEmpty);
     });
 
-    test('migration backfills existing collection members into favorites',
-        () async {
-      final id = await dataSource.createCollection('M');
-      final img = await addImage('/col/mig1.png');
-      await dataSource.addImageToCollection(id, img);
-      expect(await dataSource.isFavorite(img), isFalse); // 旧数据：未入收藏表
+    test(
+      'migration backfills existing collection members into favorites',
+      () async {
+        final id = await dataSource.createCollection('M');
+        final img = await addImage('/col/mig1.png');
+        await dataSource.addImageToCollection(id, img);
+        expect(await dataSource.isFavorite(img), isFalse); // 旧数据：未入收藏表
 
-      // 清除迁移完成标记并重置数据源状态，模拟旧库下次启动重跑迁移
-      await dataSource.execute(
-        'test_clear_migration_flag',
-        (db) => db.delete(
-          'gallery_meta',
-          where: "key = 'favorites_collection_members_v1'",
-        ),
-      );
-      await dataSource.dispose();
-      await dataSource.initialize();
+        // 清除迁移完成标记并重置数据源状态，模拟旧库下次启动重跑迁移
+        await dataSource.execute(
+          'test_clear_migration_flag',
+          (db) => db.delete(
+            'gallery_meta',
+            where: "key = 'favorites_collection_members_v1'",
+          ),
+        );
+        await dataSource.dispose();
+        await dataSource.initialize();
 
-      expect(await dataSource.isFavorite(img), isTrue);
-      expect(await dataSource.getFavoriteCount(), 1);
+        expect(await dataSource.isFavorite(img), isTrue);
+        expect(await dataSource.getFavoriteCount(), 1);
 
-      // 幂等：标记已落，再次初始化不重复补写
-      await dataSource.dispose();
-      await dataSource.initialize();
-      expect(await dataSource.getFavoriteCount(), 1);
-    });
+        // 幂等：标记已落，再次初始化不重复补写
+        await dataSource.dispose();
+        await dataSource.initialize();
+        expect(await dataSource.getFavoriteCount(), 1);
+      },
+    );
   });
 }

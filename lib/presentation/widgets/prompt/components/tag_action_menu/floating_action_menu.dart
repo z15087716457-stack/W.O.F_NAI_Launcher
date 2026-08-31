@@ -61,10 +61,7 @@ class FloatingActionMenu extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           // 权重控制区域
-          _WeightControlSection(
-            tag: tag,
-            onWeightChanged: onWeightChanged,
-          ),
+          _WeightControlSection(tag: tag, onWeightChanged: onWeightChanged),
 
           _buildDivider(theme),
 
@@ -96,10 +93,7 @@ class _WeightControlSection extends StatelessWidget {
   final PromptTag tag;
   final ValueChanged<double>? onWeightChanged;
 
-  const _WeightControlSection({
-    required this.tag,
-    this.onWeightChanged,
-  });
+  const _WeightControlSection({required this.tag, this.onWeightChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -114,8 +108,10 @@ class _WeightControlSection extends StatelessWidget {
           tooltip: context.l10n.tooltip_decreaseWeight,
           color: PromptTagColors.weightDecrease,
           onTap: () {
-            final newWeight = (tag.weight - PromptTag.weightStep)
-                .clamp(PromptTag.minWeight, PromptTag.maxWeight);
+            final newWeight = (tag.weight - PromptTag.weightStep).clamp(
+              PromptTag.minWeight,
+              PromptTag.maxWeight,
+            );
             onWeightChanged?.call(newWeight);
             HapticFeedback.lightImpact();
           },
@@ -144,8 +140,8 @@ class _WeightControlSection extends StatelessWidget {
                   color: tag.weight > 1.0
                       ? PromptTagColors.weightIncrease
                       : tag.weight < 1.0
-                          ? PromptTagColors.weightDecrease
-                          : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      ? PromptTagColors.weightDecrease
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
@@ -159,8 +155,10 @@ class _WeightControlSection extends StatelessWidget {
           tooltip: context.l10n.tooltip_increaseWeight,
           color: PromptTagColors.weightIncrease,
           onTap: () {
-            final newWeight = (tag.weight + PromptTag.weightStep)
-                .clamp(PromptTag.minWeight, PromptTag.maxWeight);
+            final newWeight = (tag.weight + PromptTag.weightStep).clamp(
+              PromptTag.minWeight,
+              PromptTag.maxWeight,
+            );
             onWeightChanged?.call(newWeight);
             HapticFeedback.lightImpact();
           },
@@ -380,9 +378,6 @@ class _FloatingMenuPortalState extends State<FloatingMenuPortal> {
 
   @override
   Widget build(BuildContext context) {
-    return CompositedTransformTarget(
-      link: _link,
-      child: widget.child,
-    );
+    return CompositedTransformTarget(link: _link, child: widget.child);
   }
 }

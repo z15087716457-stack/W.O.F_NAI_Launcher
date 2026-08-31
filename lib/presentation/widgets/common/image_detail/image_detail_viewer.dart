@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -9,12 +10,10 @@ import '../../../../core/shortcuts/shortcuts.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/image_share_sanitizer.dart';
 import '../../../../core/utils/window_focus_tracker.dart';
-import '../../../../data/models/metadata/metadata_import_options.dart';
 import '../../../providers/share_image_settings_provider.dart';
 import '../../../utils/clipboard_image.dart';
 import '../../shortcuts/shortcuts.dart';
 import '../app_toast.dart';
-import '../../metadata/metadata_import_dialog.dart';
 import 'components/detail_image_page.dart';
 import 'components/detail_metadata_panel.dart';
 import 'components/detail_thumbnail_bar.dart';
@@ -26,12 +25,8 @@ class ImageDetailCallbacks {
   /// 收藏切换回调
   final void Function(ImageDetailData image)? onFavoriteToggle;
 
-  /// 复用元数据回调
-  /// 接收图像数据和用户选择的导入选项
-  final void Function(
-    ImageDetailData image,
-    MetadataImportOptions options,
-  )? onReuseMetadata;
+  /// 复用元数据回调。调用方完成全量导入后才返回。
+  final Future<void> Function(ImageDetailData image)? onReuseMetadata;
 
   /// 保存回调
   final Future<void> Function(ImageDetailData image)? onSave;
@@ -111,10 +106,12 @@ class ImageDetailViewer extends ConsumerStatefulWidget {
     String? heroTagPrefix,
   }) {
     final isWindows = Platform.isWindows;
-    final transitionDuration =
-        isWindows ? Duration.zero : const Duration(milliseconds: 300);
-    final reverseTransitionDuration =
-        isWindows ? Duration.zero : const Duration(milliseconds: 250);
+    final transitionDuration = isWindows
+        ? Duration.zero
+        : const Duration(milliseconds: 300);
+    final reverseTransitionDuration = isWindows
+        ? Duration.zero
+        : const Duration(milliseconds: 250);
 
     return Navigator.of(context).push(
       PageRouteBuilder(
@@ -138,10 +135,7 @@ class ImageDetailViewer extends ConsumerStatefulWidget {
             return viewer;
           }
           return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOut,
-            ),
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
             child: viewer,
           );
         },
@@ -424,7 +418,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
   /// 复用参数
   void _reuseGalleryParams() {
     if (widget.callbacks?.onReuseMetadata != null) {
-      _handleReuseMetadata(context);
+      unawaited(_handleReuseMetadata(context));
     }
   }
 
@@ -516,9 +510,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
           body: isDesktop && widget.showMetadataPanel
               ? Row(
                   children: [
-                    Expanded(
-                      child: _buildMainContent(),
-                    ),
+                    Expanded(child: _buildMainContent()),
                     DetailMetadataPanel(
                       currentImage: _currentImage,
                       initialExpanded: true,
@@ -546,8 +538,8 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
             final data = _images[index];
             final heroTag =
                 widget.heroTagPrefix != null && index == _currentIndex
-                    ? '${widget.heroTagPrefix}_${data.identifier}'
-                    : null;
+                ? '${widget.heroTagPrefix}_${data.identifier}'
+                : null;
             // 确保每个页面都有 TransformationController
             if (!_transformationControllers.containsKey(index)) {
               _transformationControllers[index] = TransformationController();
@@ -572,7 +564,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
             currentImage: _currentImage,
             onClose: () => _requestClose('top-bar-close'),
             onReuseMetadata: widget.callbacks?.onReuseMetadata != null
-                ? () => _handleReuseMetadata(context)
+                ? () => unawaited(_handleReuseMetadata(context))
                 : null,
             onFavoriteToggle: widget.callbacks?.onFavoriteToggle != null
                 ? () => widget.callbacks!.onFavoriteToggle!(_currentImage)
@@ -588,9 +580,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
                 : null,
             onSendToReversePrompt:
                 widget.callbacks?.onSendToReversePrompt != null
-                ? () => widget.callbacks!.onSendToReversePrompt!(
-                      _currentImage,
-                    )
+                ? () => widget.callbacks!.onSendToReversePrompt!(_currentImage)
                 : null,
             onDelete: widget.callbacks?.onDelete != null
                 ? () => _deleteImage()
@@ -648,10 +638,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
         gradient: LinearGradient(
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
-          colors: [
-            Colors.black.withValues(alpha: 0.8),
-            Colors.transparent,
-          ],
+          colors: [Colors.black.withValues(alpha: 0.8), Colors.transparent],
         ),
       ),
       child: Column(
@@ -703,10 +690,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 12,
-        ),
+        style: const TextStyle(color: Colors.white, fontSize: 12),
       ),
     );
   }
@@ -743,22 +727,10 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
 
   /// 处理复用元数据
   Future<void> _handleReuseMetadata(BuildContext context) async {
-    final metadata = _currentImage.metadata;
-    if (metadata == null || !metadata.hasData) {
-      AppToast.warning(context, context.l10n.toast_imageHasNoMetadata);
-      return;
-    }
+    final onReuseMetadata = widget.callbacks?.onReuseMetadata;
+    if (onReuseMetadata == null) return;
 
-    // 显示参数选择对话框
-    final options = await MetadataImportDialog.show(
-      context,
-      metadata: metadata,
-    );
-
-    if (options == null || !context.mounted) return; // 用户取消
-
-    // 调用回调并传递选项
-    widget.callbacks?.onReuseMetadata?.call(_currentImage, options);
+    await onReuseMetadata(_currentImage);
 
     // 关闭图像详情页
     if (context.mounted) {
@@ -784,10 +756,7 @@ class _NavigationButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
 
-  const _NavigationButton({
-    required this.icon,
-    required this.onPressed,
-  });
+  const _NavigationButton({required this.icon, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -799,11 +768,7 @@ class _NavigationButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: 32,
-          ),
+          child: Icon(icon, color: Colors.white, size: 32),
         ),
       ),
     );

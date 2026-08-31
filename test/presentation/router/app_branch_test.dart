@@ -9,11 +9,25 @@ void main() {
       ShortcutIds.navigateToLocalGallery: AppBranch.localGallery,
       ShortcutIds.navigateToOnlineGallery: AppBranch.onlineGallery,
       ShortcutIds.navigateToSettings: AppBranch.settings,
-      ShortcutIds.navigateToRandomConfig: AppBranch.promptConfig,
       ShortcutIds.navigateToStatistics: AppBranch.statistics,
       ShortcutIds.navigateToTagLibrary: AppBranch.tagLibrary,
       ShortcutIds.navigateToVibeLibrary: AppBranch.vibeLibrary,
     });
+  });
+
+  test('prompt block branch keeps its ordinal after random config removal', () {
+    // 旧随机配置 Branch 删除后，块库 ordinal 从 9 收缩到 8；
+    // 侧栏显示顺序与 enum 无关（MainNavRail._railBranches 自行排列）。
+    expect(AppBranch.promptBlockLibrary.index, 8);
+    expect(mobileNavigationBranches, const [
+      AppBranch.generation,
+      AppBranch.localGallery,
+      AppBranch.settings,
+    ]);
+    expect(
+      mobileNavigationIndexForBranch(AppBranch.promptBlockLibrary.index),
+      mobileNavigationBranches.indexOf(AppBranch.generation),
+    );
   });
 
   test('mobile navigation maps settings and gallery branches correctly', () {

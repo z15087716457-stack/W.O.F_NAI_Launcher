@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../core/constants/model_spec.dart';
 import '../../../core/enums/precise_ref_type.dart';
+import '../../../core/enums/quality_tag_preset.dart';
 import '../vibe/vibe_reference.dart';
 
 part 'image_params.freezed.dart';
@@ -136,8 +137,11 @@ class ImageParams with _$ImageParams {
     /// UC 预设 (0=Heavy, 1=Light, 2=Human Focus, 3=None)
     @Default(0) int ucPreset,
 
-    /// 质量标签开关
+    /// 旧质量标签开关。关闭时强制等效 None；开启时使用 [qualityTagPreset]。
     @Default(true) bool qualityToggle,
+
+    /// 原生质量词档位（V5 支持 Standard/Light/None）。
+    @Default(QualityTagPreset.standard) QualityTagPreset qualityTagPreset,
 
     /// 添加原始图像
     @Default(true) bool addOriginalImage,
@@ -264,6 +268,13 @@ extension ImageParamsExtension on ImageParams {
 
   /// 检查是否为 V5 模型
   bool get isV5Model => ModelSpecs.of(model).isV5;
+
+  /// 旧布尔关闭时强制 None；开启时使用所选原生档位。
+  QualityTagPreset get effectiveQualityTagPreset =>
+      qualityToggle ? qualityTagPreset : QualityTagPreset.none;
+
+  bool get effectiveQualityToggle =>
+      effectiveQualityTagPreset != QualityTagPreset.none;
 
   /// 当前模型的能力描述。
   ModelSpec get modelSpec => ModelSpecs.of(model);

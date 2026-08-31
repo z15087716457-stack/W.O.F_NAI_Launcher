@@ -10,10 +10,7 @@ import '../../providers/subscription_provider.dart';
 import '../../widgets/common/app_toast.dart';
 
 class DirectorToolsScreen extends ConsumerStatefulWidget {
-  const DirectorToolsScreen({
-    super.key,
-    required this.sourceImage,
-  });
+  const DirectorToolsScreen({super.key, required this.sourceImage});
 
   final Uint8List sourceImage;
 
@@ -24,8 +21,7 @@ class DirectorToolsScreen extends ConsumerStatefulWidget {
     return Navigator.push<Uint8List?>(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            DirectorToolsScreen(sourceImage: sourceImage),
+        builder: (context) => DirectorToolsScreen(sourceImage: sourceImage),
       ),
     );
   }
@@ -43,9 +39,7 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
     super.initState();
     _promptController = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(directorToolsNotifierProvider.notifier)
-          .init(widget.sourceImage);
+      ref.read(directorToolsNotifierProvider.notifier).init(widget.sourceImage);
     });
   }
 
@@ -89,15 +83,9 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
   Widget _buildDesktopLayout(ThemeData theme, DirectorToolsState state) {
     return Row(
       children: [
-        Expanded(
-          flex: 3,
-          child: _buildImageArea(theme, state),
-        ),
+        Expanded(flex: 3, child: _buildImageArea(theme, state)),
         VerticalDivider(width: 1, color: theme.dividerColor),
-        SizedBox(
-          width: 360,
-          child: _buildControlPanel(theme, state),
-        ),
+        SizedBox(width: 360, child: _buildControlPanel(theme, state)),
       ],
     );
   }
@@ -105,15 +93,9 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
   Widget _buildMobileLayout(ThemeData theme, DirectorToolsState state) {
     return Column(
       children: [
-        Expanded(
-          flex: 2,
-          child: _buildImageArea(theme, state),
-        ),
+        Expanded(flex: 2, child: _buildImageArea(theme, state)),
         Divider(height: 1, color: theme.dividerColor),
-        Expanded(
-          flex: 3,
-          child: _buildControlPanel(theme, state),
-        ),
+        Expanded(flex: 3, child: _buildControlPanel(theme, state)),
       ],
     );
   }
@@ -133,11 +115,7 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Image.memory(
-          source,
-          fit: BoxFit.contain,
-          gaplessPlayback: true,
-        ),
+        child: Image.memory(source, fit: BoxFit.contain, gaplessPlayback: true),
       ),
     );
   }
@@ -158,7 +136,10 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
                   children: [
                     Text(
                       context.l10n.img2img_directorSourceImage,
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Flexible(
@@ -180,7 +161,10 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
                   children: [
                     Text(
                       context.l10n.img2img_directorResult,
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Flexible(
@@ -321,10 +305,7 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
     ];
   }
 
-  List<Widget> _buildEmotionOptions(
-    ThemeData theme,
-    DirectorToolsState state,
-  ) {
+  List<Widget> _buildEmotionOptions(ThemeData theme, DirectorToolsState state) {
     return [
       Row(
         children: [
@@ -392,8 +373,7 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
       children: [
         Expanded(
           child: FilledButton.icon(
-            onPressed:
-                state.isRunning ? null : () => _runTool(),
+            onPressed: state.isRunning ? null : () => _runTool(),
             icon: state.isRunning
                 ? const SizedBox(
                     width: 16,
@@ -406,9 +386,7 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
                   ? context.l10n.img2img_directorRunning
                   : context.l10n.img2img_directorRun(label),
             ),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(0, 48),
-            ),
+            style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
           ),
         ),
         if (state.imageWidth > 0 && state.imageHeight > 0) ...[
@@ -458,13 +436,9 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
         Expanded(
           child: OutlinedButton.icon(
             onPressed: () {
-              final notifier =
-                  ref.read(directorToolsNotifierProvider.notifier);
+              final notifier = ref.read(directorToolsNotifierProvider.notifier);
               notifier.applyResultAsSource();
-              AppToast.success(
-                context,
-                context.l10n.img2img_directorApplied,
-              );
+              AppToast.success(context, context.l10n.img2img_directorApplied);
             },
             icon: const Icon(Icons.swap_horiz, size: 18),
             label: Text(

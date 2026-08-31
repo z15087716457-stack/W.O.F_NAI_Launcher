@@ -78,26 +78,31 @@ class _CompactIconButtonState extends State<CompactIconButton> {
       bgColor = _isHovered
           ? theme.colorScheme.error.withValues(alpha: isDark ? 0.2 : 0.12)
           : theme.colorScheme.error.withValues(alpha: isDark ? 0.08 : 0.04);
-      borderColor =
-          theme.colorScheme.error.withValues(alpha: isDark ? 0.3 : 0.2);
+      borderColor = theme.colorScheme.error.withValues(
+        alpha: isDark ? 0.3 : 0.2,
+      );
     } else if (widget.isActive) {
       iconColor = theme.colorScheme.primary;
       bgColor = _isHovered
           ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.25 : 0.15)
           : theme.colorScheme.primary.withValues(alpha: isDark ? 0.15 : 0.08);
-      borderColor =
-          theme.colorScheme.primary.withValues(alpha: isDark ? 0.4 : 0.25);
+      borderColor = theme.colorScheme.primary.withValues(
+        alpha: isDark ? 0.4 : 0.25,
+      );
     } else {
       iconColor = isEnabled
           ? theme.colorScheme.onSurfaceVariant
           : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
       bgColor = _isHovered
-          ? theme.colorScheme.onSurfaceVariant
-              .withValues(alpha: isDark ? 0.15 : 0.1)
-          : theme.colorScheme.onSurfaceVariant
-              .withValues(alpha: isDark ? 0.06 : 0.03);
-      borderColor = theme.colorScheme.outlineVariant
-          .withValues(alpha: isDark ? 0.3 : 0.4);
+          ? theme.colorScheme.onSurfaceVariant.withValues(
+              alpha: isDark ? 0.15 : 0.1,
+            )
+          : theme.colorScheme.onSurfaceVariant.withValues(
+              alpha: isDark ? 0.06 : 0.03,
+            );
+      borderColor = theme.colorScheme.outlineVariant.withValues(
+        alpha: isDark ? 0.3 : 0.4,
+      );
     }
 
     final buttonContent = MouseRegion(

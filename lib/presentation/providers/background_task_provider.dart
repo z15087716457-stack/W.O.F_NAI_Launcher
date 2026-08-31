@@ -7,13 +7,7 @@ import '../../core/utils/app_logger.dart';
 part 'background_task_provider.g.dart';
 
 /// 后台任务状态
-enum BackgroundTaskStatus {
-  pending,
-  running,
-  paused,
-  completed,
-  failed,
-}
+enum BackgroundTaskStatus { pending, running, paused, completed, failed }
 
 /// 后台任务信息
 class BackgroundTask {
@@ -78,15 +72,9 @@ class BackgroundTaskState {
   final List<BackgroundTask> tasks;
   final bool isPaused;
 
-  const BackgroundTaskState({
-    this.tasks = const [],
-    this.isPaused = false,
-  });
+  const BackgroundTaskState({this.tasks = const [], this.isPaused = false});
 
-  BackgroundTaskState copyWith({
-    List<BackgroundTask>? tasks,
-    bool? isPaused,
-  }) {
+  BackgroundTaskState copyWith({List<BackgroundTask>? tasks, bool? isPaused}) {
     return BackgroundTaskState(
       tasks: tasks ?? this.tasks,
       isPaused: isPaused ?? this.isPaused,
@@ -148,11 +136,7 @@ class BackgroundTaskNotifier extends _$BackgroundTaskNotifier {
     final existingIndex = state.tasks.indexWhere((t) => t.id == id);
     if (existingIndex >= 0) return; // 已存在
 
-    final newTask = BackgroundTask(
-      id: id,
-      name: id,
-      displayName: displayName,
-    );
+    final newTask = BackgroundTask(id: id, name: id, displayName: displayName);
 
     state = state.copyWith(tasks: [...state.tasks, newTask]);
     AppLogger.i('Registered background task: $id', 'BackgroundTask');

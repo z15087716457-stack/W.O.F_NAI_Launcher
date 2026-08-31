@@ -36,10 +36,12 @@ class _SpikePageState extends State<_SpikePage> {
   @override
   void initState() {
     super.initState();
-    _server.start().then((base) => setState(() {
-          _base = base;
-          _status = 'server at $base';
-        }));
+    _server.start().then(
+      (base) => setState(() {
+        _base = base;
+        _status = 'server at $base';
+      }),
+    );
   }
 
   @override
@@ -49,7 +51,9 @@ class _SpikePageState extends State<_SpikePage> {
   }
 
   void _diagLog(String line) {
-    File('${Directory.systemTemp.path}/model3d_spike_log.txt').writeAsStringSync(
+    File(
+      '${Directory.systemTemp.path}/model3d_spike_log.txt',
+    ).writeAsStringSync(
       '${DateTime.now().toIso8601String()} $line\n',
       mode: FileMode.append,
     );
@@ -62,8 +66,9 @@ class _SpikePageState extends State<_SpikePage> {
       if (mounted) {
         setState(() => _status = 'bridge ready (onReady received)');
       }
-      File('${Directory.systemTemp.path}/model3d_spike_ready.txt')
-          .writeAsStringSync(DateTime.now().toIso8601String());
+      File(
+        '${Directory.systemTemp.path}/model3d_spike_ready.txt',
+      ).writeAsStringSync(DateTime.now().toIso8601String());
       _dispatch({'type': 'loadModel', 'builtin': 'mannequin'});
     } else if (msg['type'] == 'response') {
       if (msg['ok'] != true) {
@@ -74,8 +79,9 @@ class _SpikePageState extends State<_SpikePage> {
       final png = data['png'] as String?;
       if (png == null) return; // 非渲染类响应(如 loadModel),日志已记录
       final bytes = base64Decode(png);
-      File('${Directory.systemTemp.path}/model3d_spike_render.png')
-          .writeAsBytesSync(bytes);
+      File(
+        '${Directory.systemTemp.path}/model3d_spike_render.png',
+      ).writeAsBytesSync(bytes);
       if (!mounted) return;
       showDialog<void>(
         context: context,
@@ -95,10 +101,7 @@ class _SpikePageState extends State<_SpikePage> {
       _dispatch({'type': 'render', 'width': 640, 'height': 640});
 
   Future<void> _dispatch(Map<String, dynamic> message) async {
-    final command = jsonEncode({
-      ...message,
-      'requestId': ++_nextRequestId,
-    });
+    final command = jsonEncode({...message, 'requestId': ++_nextRequestId});
     await _controller?.evaluateJavascript(
       source: 'window.naiEditor.dispatch(${jsonEncode(command)})',
     );
@@ -113,7 +116,8 @@ class _SpikePageState extends State<_SpikePage> {
         children: [
           FloatingActionButton(
             heroTag: 'mannequin',
-            onPressed: () => _dispatch({'type': 'loadModel', 'builtin': 'mannequin'}),
+            onPressed: () =>
+                _dispatch({'type': 'loadModel', 'builtin': 'mannequin'}),
             child: const Icon(Icons.accessibility_new),
           ),
           const SizedBox(height: 8),

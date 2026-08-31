@@ -4,6 +4,7 @@ import 'dart:io';
 enum ScanPriority {
   /// 高优先级 - 最小延迟，适合启动扫描
   high,
+
   /// 低优先级 - 较大延迟，适合后台扫描
   low,
 }
@@ -76,7 +77,18 @@ class ScanConfig {
     this.enableProgressThrottling = true,
     this.progressThrottleInterval = const Duration(milliseconds: 100),
     this.skipHiddenFiles = true,
-    this.thumbnailDirNames = const ['.thumbs', 'thumbs', '.thumb', 'thumb', 'thumbnails', '.thumbnails', 'cache', '.cache', 'temp', '.temp'],
+    this.thumbnailDirNames = const [
+      '.thumbs',
+      'thumbs',
+      '.thumb',
+      'thumb',
+      'thumbnails',
+      '.thumbnails',
+      'cache',
+      '.cache',
+      'temp',
+      '.temp',
+    ],
   });
 
   /// 快速扫描配置（用于启动时）
@@ -89,10 +101,7 @@ class ScanConfig {
     this.smallFileThreshold = 16 * 1024,
     this.hashHeadBytes = 8192,
     this.hashTailBytes = 8192,
-    this.progressiveReadThresholds = const [
-      100 * 1024,
-      500 * 1024,
-    ],
+    this.progressiveReadThresholds = const [100 * 1024, 500 * 1024],
     this.maxConcurrentIsolates = 1,
     this.enableHashCache = true,
     this.enableProgressThrottling = true,
@@ -228,12 +237,16 @@ class ScanConfig {
 enum ScanType {
   /// 快速扫描 - 只扫描最近的文件
   quick,
+
   /// 增量扫描 - 检测变更
   incremental,
+
   /// 全量扫描 - 扫描所有文件
   full,
+
   /// 元数据补全 - 为缺少元数据的文件解析
   fillMetadata,
+
   /// 数据一致性修复 - 标记文件系统中不存在的记录
   consistencyFix,
 }
@@ -242,24 +255,34 @@ enum ScanType {
 enum ScanPhase {
   /// 空闲
   idle,
+
   /// 检测中
   checking,
+
   /// 扫描目录
   scanning,
+
   /// 计算哈希
   hashing,
+
   /// 解析元数据
   parsing,
+
   /// 写入数据库
   indexing,
+
   /// 补全元数据
   fillingMetadata,
+
   /// 清理已删除文件
   cleaning,
+
   /// 完成
   completed,
+
   /// 错误
   error,
+
   /// 暂停
   paused,
 }

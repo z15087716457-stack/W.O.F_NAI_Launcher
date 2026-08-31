@@ -7,13 +7,16 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/enums/precise_ref_type.dart';
+import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/utils/nai_api_utils.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_service.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
+import 'package:nai_launcher/data/models/prompt/prompt_preset_mode.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
+import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -65,6 +68,44 @@ void main() {
 
     final storage = LocalStorageService();
     expect(storage.getLastVarietyPlus(), isTrue);
+  });
+
+  test('build should restore the persisted V5 Light quality preset', () async {
+    final storage = LocalStorageService();
+    await storage.setQualityPresetMode(PromptPresetMode.naiLight.index);
+
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    final params = container.read(generationParamsNotifierProvider);
+    expect(params.qualityToggle, isTrue);
+    expect(params.qualityTagPreset, QualityTagPreset.light);
+  });
+
+  test('quality preset updates should keep params and UI provider in sync', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final notifier = container.read(generationParamsNotifierProvider.notifier);
+
+    notifier.updateQualityPreset(QualityTagPreset.light);
+    expect(
+      container.read(generationParamsNotifierProvider).qualityTagPreset,
+      QualityTagPreset.light,
+    );
+    expect(
+      container.read(qualityPresetNotifierProvider).mode,
+      PromptPresetMode.naiLight,
+    );
+
+    notifier.updateQualityToggle(true);
+    expect(
+      container.read(generationParamsNotifierProvider).qualityTagPreset,
+      QualityTagPreset.standard,
+    );
+    expect(
+      container.read(qualityPresetNotifierProvider).mode,
+      PromptPresetMode.naiDefault,
+    );
   });
 
   test('encodeVibeWithCache 会区分 model 和 informationExtracted', () async {

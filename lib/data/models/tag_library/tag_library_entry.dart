@@ -229,19 +229,13 @@ class TagLibraryEntry with _$TagLibraryEntry {
 
   /// 切换收藏状态
   TagLibraryEntry toggleFavorite() {
-    return copyWith(
-      isFavorite: !isFavorite,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isFavorite: !isFavorite, updatedAt: DateTime.now());
   }
 
   /// 添加标签
   TagLibraryEntry addTag(String tag) {
     if (tags.contains(tag)) return this;
-    return copyWith(
-      tags: [...tags, tag],
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(tags: [...tags, tag], updatedAt: DateTime.now());
   }
 
   /// 移除标签
@@ -280,20 +274,15 @@ extension TagLibraryEntryListExtension on List<TagLibraryEntry> {
   /// 按名称排序
   List<TagLibraryEntry> sortedByName() {
     return [...this]..sort(
-        (a, b) =>
-            a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase()),
-      );
+      (a, b) =>
+          a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase()),
+    );
   }
 
   /// 更新排序顺序
   List<TagLibraryEntry> reindex() {
     return indexed
-        .map(
-          (e) => e.$2.copyWith(
-            sortOrder: e.$1,
-            updatedAt: DateTime.now(),
-          ),
-        )
+        .map((e) => e.$2.copyWith(sortOrder: e.$1, updatedAt: DateTime.now()))
         .toList();
   }
 

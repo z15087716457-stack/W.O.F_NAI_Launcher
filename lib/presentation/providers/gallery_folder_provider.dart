@@ -92,10 +92,7 @@ class GalleryFolderNotifier extends _$GalleryFolderNotifier {
       // 初始加载
       await _loadFolders();
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: '初始化失败: $e',
-      );
+      state = state.copyWith(isLoading: false, error: '初始化失败: $e');
     }
   }
 
@@ -118,10 +115,7 @@ class GalleryFolderNotifier extends _$GalleryFolderNotifier {
         isLoading: false,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: '加载文件夹失败: $e',
-      );
+      state = state.copyWith(isLoading: false, error: '加载文件夹失败: $e');
     }
   }
 
@@ -159,8 +153,10 @@ class GalleryFolderNotifier extends _$GalleryFolderNotifier {
   /// [folderPath] 文件夹路径
   /// [recursive] 是否递归删除
   Future<bool> deleteFolder(String folderPath, {bool recursive = false}) async {
-    final success =
-        await _repository.deleteFolder(folderPath, recursive: recursive);
+    final success = await _repository.deleteFolder(
+      folderPath,
+      recursive: recursive,
+    );
     if (success) {
       // 如果删除的是当前选中的文件夹，切换到"全部"
       final currentFolder = state.selectedFolder;
@@ -184,9 +180,13 @@ class GalleryFolderNotifier extends _$GalleryFolderNotifier {
 
   /// 移动图片到文件夹
   Future<bool> moveImageToFolder(
-      String imagePath, String targetFolderPath,) async {
-    final success =
-        await _repository.moveImageToFolder(imagePath, targetFolderPath);
+    String imagePath,
+    String targetFolderPath,
+  ) async {
+    final success = await _repository.moveImageToFolder(
+      imagePath,
+      targetFolderPath,
+    );
     if (success) {
       await _loadFolders();
     }
@@ -195,9 +195,13 @@ class GalleryFolderNotifier extends _$GalleryFolderNotifier {
 
   /// 批量移动图片到文件夹
   Future<int> moveImagesToFolder(
-      List<String> imagePaths, String targetFolderPath,) async {
-    final count =
-        await _repository.moveImagesToFolder(imagePaths, targetFolderPath);
+    List<String> imagePaths,
+    String targetFolderPath,
+  ) async {
+    final count = await _repository.moveImagesToFolder(
+      imagePaths,
+      targetFolderPath,
+    );
     if (count > 0) {
       await _loadFolders();
     }

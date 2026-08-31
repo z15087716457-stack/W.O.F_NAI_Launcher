@@ -38,8 +38,9 @@ void main() {
     expect(find.byIcon(Icons.check), findsOneWidget);
   });
 
-  testWidgets('selecting a field updates the sort on the provider',
-      (tester) async {
+  testWidgets('selecting a field updates the sort on the provider', (
+    tester,
+  ) async {
     final notifier = await _pumpToolbar(tester);
 
     await tester.tap(find.byTooltip('排序'));
@@ -49,10 +50,7 @@ void main() {
 
     // 菜单选择生效：字段 + 该字段默认方向（名称默认升序）
     expect(notifier.lastSortField, GallerySortField.fileName);
-    expect(
-      notifier.lastSortDirection,
-      GallerySortDirection.ascending,
-    );
+    expect(notifier.lastSortDirection, GallerySortDirection.ascending);
 
     // 按钮标签跟随当前字段
     expect(find.text('文件名'), findsWidgets);
@@ -90,9 +88,7 @@ Future<_RecordingGalleryNotifier> _pumpToolbar(WidgetTester tester) async {
         locale: Locale('zh'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: LocalGalleryToolbar(),
-        ),
+        home: Scaffold(body: LocalGalleryToolbar()),
       ),
     ),
   );
@@ -101,11 +97,7 @@ Future<_RecordingGalleryNotifier> _pumpToolbar(WidgetTester tester) async {
 }
 
 LocalImageRecord _record(String path) {
-  return LocalImageRecord(
-    path: path,
-    size: 1,
-    modifiedAt: DateTime(2026),
-  );
+  return LocalImageRecord(path: path, size: 1, modifiedAt: DateTime(2026));
 }
 
 class _RecordingGalleryNotifier extends LocalGalleryNotifier {

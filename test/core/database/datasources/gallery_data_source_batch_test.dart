@@ -101,19 +101,18 @@ void main() {
         expect(result, isEmpty);
       });
 
-      test('should return map with null values for non-existent paths',
-          () async {
-        final paths = [
-          '/non/existent/path1.png',
-          '/non/existent/path2.png',
-        ];
+      test(
+        'should return map with null values for non-existent paths',
+        () async {
+          final paths = ['/non/existent/path1.png', '/non/existent/path2.png'];
 
-        final result = await dataSource.getImageIdsByPaths(paths);
+          final result = await dataSource.getImageIdsByPaths(paths);
 
-        expect(result.length, equals(2));
-        expect(result[paths[0]], isNull);
-        expect(result[paths[1]], isNull);
-      });
+          expect(result.length, equals(2));
+          expect(result[paths[0]], isNull);
+          expect(result[paths[1]], isNull);
+        },
+      );
 
       test('should return correct IDs for existing paths', () async {
         // 插入测试数据
@@ -170,8 +169,9 @@ void main() {
         // 标记为删除
         await dataSource.markAsDeleted('/test/deleted.png');
 
-        final result =
-            await dataSource.getImageIdsByPaths(['/test/deleted.png']);
+        final result = await dataSource.getImageIdsByPaths([
+          '/test/deleted.png',
+        ]);
 
         expect(result['/test/deleted.png'], isNull);
       });
@@ -546,12 +546,11 @@ void main() {
         ]);
 
         final filterService = GalleryFilterService(dataSource);
-        final result = await filterService.applyFilters(
-          [matchingFile, blueOnlyFile, blondeOnlyFile],
-          const FilterCriteria(
-            selectedTags: ['blue_eyes', 'blonde_hair'],
-          ),
-        );
+        final result = await filterService.applyFilters([
+          matchingFile,
+          blueOnlyFile,
+          blondeOnlyFile,
+        ], const FilterCriteria(selectedTags: ['blue_eyes', 'blonde_hair']));
 
         expect(result.files.map((file) => file.path), [matchingFile.path]);
       });
@@ -623,190 +622,194 @@ void main() {
         expect(result.files.map((file) => file.path), [matchingFile.path]);
       });
 
-      test('should split comma search query and match segments by containment',
-          () async {
-        final now = DateTime.now();
-        final matchingFile = File('/test/comma_search_match.png');
-        final sweetoneOnlyFile = File('/test/comma_search_sweetone_only.png');
-        final shycocoaOnlyFile = File('/test/comma_search_shycocoa_only.png');
+      test(
+        'should split comma search query and match segments by containment',
+        () async {
+          final now = DateTime.now();
+          final matchingFile = File('/test/comma_search_match.png');
+          final sweetoneOnlyFile = File('/test/comma_search_sweetone_only.png');
+          final shycocoaOnlyFile = File('/test/comma_search_shycocoa_only.png');
 
-        final matchingId = await dataSource.upsertImage(
-          filePath: matchingFile.path,
-          fileName: 'comma_search_match.png',
-          fileSize: 1024,
-          createdAt: now,
-          modifiedAt: now,
-        );
-        final sweetoneOnlyId = await dataSource.upsertImage(
-          filePath: sweetoneOnlyFile.path,
-          fileName: 'comma_search_sweetone_only.png',
-          fileSize: 1024,
-          createdAt: now,
-          modifiedAt: now,
-        );
-        final shycocoaOnlyId = await dataSource.upsertImage(
-          filePath: shycocoaOnlyFile.path,
-          fileName: 'comma_search_shycocoa_only.png',
-          fileSize: 1024,
-          createdAt: now,
-          modifiedAt: now,
-        );
+          final matchingId = await dataSource.upsertImage(
+            filePath: matchingFile.path,
+            fileName: 'comma_search_match.png',
+            fileSize: 1024,
+            createdAt: now,
+            modifiedAt: now,
+          );
+          final sweetoneOnlyId = await dataSource.upsertImage(
+            filePath: sweetoneOnlyFile.path,
+            fileName: 'comma_search_sweetone_only.png',
+            fileSize: 1024,
+            createdAt: now,
+            modifiedAt: now,
+          );
+          final shycocoaOnlyId = await dataSource.upsertImage(
+            filePath: shycocoaOnlyFile.path,
+            fileName: 'comma_search_shycocoa_only.png',
+            fileSize: 1024,
+            createdAt: now,
+            modifiedAt: now,
+          );
 
-        await dataSource.batchUpsertMetadata([
-          MapEntry(
-            matchingId,
-            const NaiImageMetadata(
-              prompt: 'artist:shycocoa, sweetonedollar, 1girl',
-              negativePrompt: '',
-              seed: 1,
+          await dataSource.batchUpsertMetadata([
+            MapEntry(
+              matchingId,
+              const NaiImageMetadata(
+                prompt: 'artist:shycocoa, sweetonedollar, 1girl',
+                negativePrompt: '',
+                seed: 1,
+              ),
             ),
-          ),
-          MapEntry(
-            sweetoneOnlyId,
-            const NaiImageMetadata(
-              prompt: 'sweetonedollar, solo, blue eyes',
-              negativePrompt: '',
-              seed: 2,
+            MapEntry(
+              sweetoneOnlyId,
+              const NaiImageMetadata(
+                prompt: 'sweetonedollar, solo, blue eyes',
+                negativePrompt: '',
+                seed: 2,
+              ),
             ),
-          ),
-          MapEntry(
-            shycocoaOnlyId,
-            const NaiImageMetadata(
-              prompt: 'artist:shycocoa, solo, blonde hair',
-              negativePrompt: '',
-              seed: 3,
+            MapEntry(
+              shycocoaOnlyId,
+              const NaiImageMetadata(
+                prompt: 'artist:shycocoa, solo, blonde hair',
+                negativePrompt: '',
+                seed: 3,
+              ),
             ),
-          ),
-        ]);
+          ]);
 
-        final filterService = GalleryFilterService(dataSource);
-        final result = await filterService.applyFilters(
-          [matchingFile, sweetoneOnlyFile, shycocoaOnlyFile],
-          const FilterCriteria(
-            searchQuery: 'sweetone,shycocoa',
-          ),
-        );
+          final filterService = GalleryFilterService(dataSource);
+          final result = await filterService.applyFilters([
+            matchingFile,
+            sweetoneOnlyFile,
+            shycocoaOnlyFile,
+          ], const FilterCriteria(searchQuery: 'sweetone,shycocoa'));
 
-        expect(result.files.map((file) => file.path), [matchingFile.path]);
+          expect(result.files.map((file) => file.path), [matchingFile.path]);
 
-        final partialResult = await filterService.applyFilters(
-          [matchingFile, sweetoneOnlyFile, shycocoaOnlyFile],
-          const FilterCriteria(
-            searchQuery: 'sweetone,',
-          ),
-        );
+          final partialResult = await filterService.applyFilters([
+            matchingFile,
+            sweetoneOnlyFile,
+            shycocoaOnlyFile,
+          ], const FilterCriteria(searchQuery: 'sweetone,'));
 
-        expect(partialResult.files.map((file) => file.path), [
-          matchingFile.path,
-          sweetoneOnlyFile.path,
-        ]);
-      });
+          expect(partialResult.files.map((file) => file.path), [
+            matchingFile.path,
+            sweetoneOnlyFile.path,
+          ]);
+        },
+      );
 
-      test('should apply comma search inside database prefiltered results',
-          () async {
-        final now = DateTime.now();
-        final favoriteMatch = File('/test/comma_prefilter_favorite.png');
-        final decoyA = File('/test/comma_prefilter_decoy_a.png');
-        final decoyB = File('/test/comma_prefilter_decoy_b.png');
+      test(
+        'should apply comma search inside database prefiltered results',
+        () async {
+          final now = DateTime.now();
+          final favoriteMatch = File('/test/comma_prefilter_favorite.png');
+          final decoyA = File('/test/comma_prefilter_decoy_a.png');
+          final decoyB = File('/test/comma_prefilter_decoy_b.png');
 
-        final favoriteId = await dataSource.upsertImage(
-          filePath: favoriteMatch.path,
-          fileName: 'comma_prefilter_favorite.png',
-          fileSize: 1024,
-          createdAt: now.subtract(const Duration(days: 3)),
-          modifiedAt: now.subtract(const Duration(days: 3)),
-        );
-        final decoyAId = await dataSource.upsertImage(
-          filePath: decoyA.path,
-          fileName: 'comma_prefilter_decoy_a.png',
-          fileSize: 1024,
-          createdAt: now,
-          modifiedAt: now,
-        );
-        final decoyBId = await dataSource.upsertImage(
-          filePath: decoyB.path,
-          fileName: 'comma_prefilter_decoy_b.png',
-          fileSize: 1024,
-          createdAt: now.subtract(const Duration(hours: 1)),
-          modifiedAt: now.subtract(const Duration(hours: 1)),
-        );
+          final favoriteId = await dataSource.upsertImage(
+            filePath: favoriteMatch.path,
+            fileName: 'comma_prefilter_favorite.png',
+            fileSize: 1024,
+            createdAt: now.subtract(const Duration(days: 3)),
+            modifiedAt: now.subtract(const Duration(days: 3)),
+          );
+          final decoyAId = await dataSource.upsertImage(
+            filePath: decoyA.path,
+            fileName: 'comma_prefilter_decoy_a.png',
+            fileSize: 1024,
+            createdAt: now,
+            modifiedAt: now,
+          );
+          final decoyBId = await dataSource.upsertImage(
+            filePath: decoyB.path,
+            fileName: 'comma_prefilter_decoy_b.png',
+            fileSize: 1024,
+            createdAt: now.subtract(const Duration(hours: 1)),
+            modifiedAt: now.subtract(const Duration(hours: 1)),
+          );
 
-        await dataSource.batchUpsertMetadata([
-          MapEntry(
-            favoriteId,
-            const NaiImageMetadata(
-              prompt: 'artist:shycocoa, sweetonedollar, selected favorite',
-              negativePrompt: '',
-              seed: 10,
+          await dataSource.batchUpsertMetadata([
+            MapEntry(
+              favoriteId,
+              const NaiImageMetadata(
+                prompt: 'artist:shycocoa, sweetonedollar, selected favorite',
+                negativePrompt: '',
+                seed: 10,
+              ),
             ),
-          ),
-          MapEntry(
-            decoyAId,
-            const NaiImageMetadata(
-              prompt: 'artist:shycocoa, sweetonedollar, newer decoy',
-              negativePrompt: '',
-              seed: 11,
+            MapEntry(
+              decoyAId,
+              const NaiImageMetadata(
+                prompt: 'artist:shycocoa, sweetonedollar, newer decoy',
+                negativePrompt: '',
+                seed: 11,
+              ),
             ),
-          ),
-          MapEntry(
-            decoyBId,
-            const NaiImageMetadata(
-              prompt: 'artist:shycocoa, sweetonedollar, second newer decoy',
-              negativePrompt: '',
-              seed: 12,
+            MapEntry(
+              decoyBId,
+              const NaiImageMetadata(
+                prompt: 'artist:shycocoa, sweetonedollar, second newer decoy',
+                negativePrompt: '',
+                seed: 12,
+              ),
             ),
-          ),
-        ]);
+          ]);
 
-        await dataSource.toggleFavorite(favoriteId);
+          await dataSource.toggleFavorite(favoriteId);
 
-        final filterService = GalleryFilterService(dataSource);
-        final result = await filterService.applyFilters(
-          [favoriteMatch, decoyA, decoyB],
-          const FilterCriteria(
-            searchQuery: 'sweetone,shycocoa',
-            showFavoritesOnly: true,
-          ),
-        );
+          final filterService = GalleryFilterService(dataSource);
+          final result = await filterService.applyFilters(
+            [favoriteMatch, decoyA, decoyB],
+            const FilterCriteria(
+              searchQuery: 'sweetone,shycocoa',
+              showFavoritesOnly: true,
+            ),
+          );
 
-        expect(result.files.map((file) => file.path), [favoriteMatch.path]);
-      });
+          expect(result.files.map((file) => file.path), [favoriteMatch.path]);
+        },
+      );
     });
 
     group('GalleryFilterService date filtering', () {
-      test('should filter date range across more than one legacy batch',
-          () async {
-        final tempDir = Directory.systemTemp.createTempSync(
-          'gallery_filter_date_',
-        );
-        addTearDown(() async {
-          if (await tempDir.exists()) {
-            await tempDir.delete(recursive: true);
+      test(
+        'should filter date range across more than one legacy batch',
+        () async {
+          final tempDir = Directory.systemTemp.createTempSync(
+            'gallery_filter_date_',
+          );
+          addTearDown(() async {
+            if (await tempDir.exists()) {
+              await tempDir.delete(recursive: true);
+            }
+          });
+
+          final files = <File>[];
+          final outsideDate = DateTime(2026, 1, 9, 12);
+          final insideDate = DateTime(2026, 1, 10, 12);
+
+          for (var i = 0; i < 51; i++) {
+            final file = File('${tempDir.path}/image_$i.png');
+            await file.writeAsBytes([i]);
+            await file.setLastModified(i == 50 ? insideDate : outsideDate);
+            files.add(file);
           }
-        });
 
-        final files = <File>[];
-        final outsideDate = DateTime(2026, 1, 9, 12);
-        final insideDate = DateTime(2026, 1, 10, 12);
+          final filterService = GalleryFilterService(dataSource);
+          final result = await filterService.applyFilters(
+            files,
+            FilterCriteria(
+              dateStart: DateTime(2026, 1, 10),
+              dateEnd: DateTime(2026, 1, 10),
+            ),
+          );
 
-        for (var i = 0; i < 51; i++) {
-          final file = File('${tempDir.path}/image_$i.png');
-          await file.writeAsBytes([i]);
-          await file.setLastModified(i == 50 ? insideDate : outsideDate);
-          files.add(file);
-        }
-
-        final filterService = GalleryFilterService(dataSource);
-        final result = await filterService.applyFilters(
-          files,
-          FilterCriteria(
-            dateStart: DateTime(2026, 1, 10),
-            dateEnd: DateTime(2026, 1, 10),
-          ),
-        );
-
-        expect(result.files.map((file) => file.path), [files.last.path]);
-      });
+          expect(result.files.map((file) => file.path), [files.last.path]);
+        },
+      );
     });
 
     // ============================================================
@@ -1159,8 +1162,9 @@ void main() {
         expect(isFav, isTrue);
 
         // 5. 批量查询验证所有数据
-        final idsResult =
-            await dataSource.getImageIdsByPaths(['/test/workflow.png']);
+        final idsResult = await dataSource.getImageIdsByPaths([
+          '/test/workflow.png',
+        ]);
         expect(idsResult['/test/workflow.png'], equals(id));
 
         final imagesResult = await dataSource.getImagesByIds([id]);
@@ -1411,9 +1415,9 @@ void main() {
             fileName: 'residual_out_$i.png',
             fileSize: 100 + i,
             createdAt: now,
-            modifiedAt: now.add(const Duration(days: 10)).add(
-              Duration(minutes: i),
-            ),
+            modifiedAt: now
+                .add(const Duration(days: 10))
+                .add(Duration(minutes: i)),
           );
           entries.add(
             MapEntry(
@@ -1436,15 +1440,13 @@ void main() {
 
         // 必须全部来自视图内文件（修复前只剩 500）
         expect(viewIds.length, 1000);
-        final viewIdSet = (await dataSource.getImageIdsByPaths(inViewPaths))
-            .values
-            .whereType<int>()
-            .toSet();
+        final viewIdSet = (await dataSource.getImageIdsByPaths(
+          inViewPaths,
+        )).values.whereType<int>().toSet();
         expect(viewIds.every(viewIdSet.contains), isTrue);
       });
 
-      test('无文本搜索：宽度过滤 + 路径分块（800/块）同样只在视图内生效',
-          () async {
+      test('无文本搜索：宽度过滤 + 路径分块（800/块）同样只在视图内生效', () async {
         final now = DateTime(2026, 4, 1);
         final paths = [for (var i = 0; i < 1200; i++) '/test/width_$i.png'];
         for (var i = 0; i < 1200; i++) {

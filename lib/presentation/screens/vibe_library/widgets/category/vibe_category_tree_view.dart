@@ -106,8 +106,8 @@ class _VibeCategoryTreeViewState extends State<VibeCategoryTreeView> {
             const ThemedDivider(height: 16, indent: 12, endIndent: 12),
           // 分类树
           ...widget.categories.rootCategories.sortedByOrder().map(
-                (category) => _buildCategoryNode(theme, category, 0),
-              ),
+            (category) => _buildCategoryNode(theme, category, 0),
+          ),
         ],
       ),
     );
@@ -192,8 +192,9 @@ class _VibeCategoryTreeViewState extends State<VibeCategoryTreeView> {
       children: [
         categoryItem,
         if (hasChildren && isExpanded)
-          ...children
-              .map((child) => _buildCategoryNode(theme, child, depth + 1)),
+          ...children.map(
+            (child) => _buildCategoryNode(theme, child, depth + 1),
+          ),
       ],
     );
   }
@@ -228,11 +229,7 @@ class _VibeCategoryTreeViewState extends State<VibeCategoryTreeView> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.folder,
-                size: 18,
-                color: theme.colorScheme.primary,
-              ),
+              Icon(Icons.folder, size: 18, color: theme.colorScheme.primary),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -248,10 +245,7 @@ class _VibeCategoryTreeViewState extends State<VibeCategoryTreeView> {
           ),
         ),
       ),
-      childWhenDragging: Opacity(
-        opacity: 0.4,
-        child: child,
-      ),
+      childWhenDragging: Opacity(opacity: 0.4, child: child),
       onDragStarted: () {
         HapticFeedback.mediumImpact();
       },
@@ -281,8 +275,10 @@ class _VibeCategoryTreeViewState extends State<VibeCategoryTreeView> {
         // 不能拖到自己
         if (draggedCategory.id == targetCategory.id) return false;
         // 检查循环引用
-        if (widget.categories
-            .wouldCreateCycle(draggedCategory.id, targetCategory.id)) {
+        if (widget.categories.wouldCreateCycle(
+          draggedCategory.id,
+          targetCategory.id,
+        )) {
           return false;
         }
         // 已经是子分类则不接受
@@ -305,8 +301,9 @@ class _VibeCategoryTreeViewState extends State<VibeCategoryTreeView> {
             _hoveredCategoryId = targetCategory.id;
           });
           // 如果有子分类，启动自动展开定时器
-          final hasChildren =
-              widget.categories.getChildren(targetCategory.id).isNotEmpty;
+          final hasChildren = widget.categories
+              .getChildren(targetCategory.id)
+              .isNotEmpty;
           if (hasChildren && !_expandedIds.contains(targetCategory.id)) {
             _startAutoExpandTimer(targetCategory.id);
           }
@@ -331,16 +328,13 @@ class _VibeCategoryTreeViewState extends State<VibeCategoryTreeView> {
                 ? theme.colorScheme.primary.withValues(alpha: 0.1)
                 : Colors.transparent,
             border: isAccepting
-                ? Border.all(
-                    color: theme.colorScheme.primary,
-                    width: 2,
-                  )
+                ? Border.all(color: theme.colorScheme.primary, width: 2)
                 : isRejected
-                    ? Border.all(
-                        color: theme.colorScheme.error.withValues(alpha: 0.5),
-                        width: 1,
-                      )
-                    : null,
+                ? Border.all(
+                    color: theme.colorScheme.error.withValues(alpha: 0.5),
+                    width: 1,
+                  )
+                : null,
             borderRadius: BorderRadius.circular(8),
           ),
           child: child,

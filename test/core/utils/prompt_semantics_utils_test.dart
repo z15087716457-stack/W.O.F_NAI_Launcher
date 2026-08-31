@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
+import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/core/utils/prompt_semantics_utils.dart';
 
 void main() {
@@ -27,21 +28,39 @@ void main() {
       expect(snapshot.effectiveNegativePrompt, endsWith('bad hands'));
     });
 
-    test(
-        'should keep prompt unchanged when quality and uc presets are disabled',
-        () {
+    test('should place V5 transparency before Light quality tags', () {
       final snapshot = buildPromptSemanticsSnapshot(
         prompt: '1girl',
-        negativePrompt: 'blurry',
-        model: ImageModels.animeDiffusionV45Full,
-        qualityToggle: false,
+        negativePrompt: '',
+        model: ImageModels.animeDiffusionV5Full,
+        qualityToggle: true,
+        qualityTagPreset: QualityTagPreset.light,
         ucPreset: UcPresets.toApiValue(UcPresetType.none),
+        transparentBackground: true,
       );
 
-      expect(snapshot.basePrompt, equals('1girl'));
-      expect(snapshot.baseNegativePrompt, equals('blurry'));
-      expect(snapshot.effectivePrompt, equals('1girl'));
-      expect(snapshot.effectiveNegativePrompt, equals('blurry'));
+      expect(
+        snapshot.effectivePrompt,
+        '1girl, transparent background, very aesthetic, amazing quality, no text',
+      );
     });
+
+    test(
+      'should keep prompt unchanged when quality and uc presets are disabled',
+      () {
+        final snapshot = buildPromptSemanticsSnapshot(
+          prompt: '1girl',
+          negativePrompt: 'blurry',
+          model: ImageModels.animeDiffusionV45Full,
+          qualityToggle: false,
+          ucPreset: UcPresets.toApiValue(UcPresetType.none),
+        );
+
+        expect(snapshot.basePrompt, equals('1girl'));
+        expect(snapshot.baseNegativePrompt, equals('blurry'));
+        expect(snapshot.effectivePrompt, equals('1girl'));
+        expect(snapshot.effectiveNegativePrompt, equals('blurry'));
+      },
+    );
   });
 }

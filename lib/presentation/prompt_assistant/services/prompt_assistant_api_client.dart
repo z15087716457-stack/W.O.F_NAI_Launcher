@@ -61,11 +61,9 @@ class PromptAssistantApiClient {
         request,
         maxBytes: imageUploadMaxBytes,
       );
-      final content = await _adapterFor(uploadRequest.provider).complete(
-        dio: _dio,
-        request: uploadRequest,
-        cancelToken: cancelToken,
-      );
+      final content = await _adapterFor(
+        uploadRequest.provider,
+      ).complete(dio: _dio, request: uploadRequest, cancelToken: cancelToken);
       final trimmed = content.trim();
       if (trimmed.isEmpty) {
         throw StateError(
@@ -205,7 +203,8 @@ class PromptAssistantApiClient {
     final response = error.response;
     final status = response?.statusCode;
     final target = _safeRequestTarget(response?.requestOptions);
-    final detail = _extractDioErrorDetail(response?.data) ??
+    final detail =
+        _extractDioErrorDetail(response?.data) ??
         error.message ??
         error.error?.toString();
 

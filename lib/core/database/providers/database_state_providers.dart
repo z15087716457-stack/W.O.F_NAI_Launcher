@@ -137,8 +137,9 @@ class DatabaseStatusNotifier extends _$DatabaseStatusNotifier {
           await db.execute('BEGIN TRANSACTION');
           try {
             for (final table in tables) {
-              final countResult =
-                  await db.rawQuery('SELECT COUNT(*) as count FROM $table');
+              final countResult = await db.rawQuery(
+                'SELECT COUNT(*) as count FROM $table',
+              );
               stats[table] = (countResult.first['count'] as num?)?.toInt() ?? 0;
               await db.execute('DELETE FROM $table');
             }

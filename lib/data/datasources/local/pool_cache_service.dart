@@ -40,13 +40,13 @@ class PoolCacheEntry {
   bool get isFullySynced => cachedPostCount >= totalPostCount;
 
   Map<String, dynamic> toJson() => {
-        'poolId': poolId,
-        'poolName': poolName,
-        'posts': posts.map((p) => p.toJson()).toList(),
-        'totalPostCount': totalPostCount,
-        'lastSyncedAt': lastSyncedAt.toIso8601String(),
-        'version': _cacheFormatVersion,
-      };
+    'poolId': poolId,
+    'poolName': poolName,
+    'posts': posts.map((p) => p.toJson()).toList(),
+    'totalPostCount': totalPostCount,
+    'lastSyncedAt': lastSyncedAt.toIso8601String(),
+    'version': _cacheFormatVersion,
+  };
 
   factory PoolCacheEntry.fromJson(Map<String, dynamic> json) {
     // 检查版本，如果是旧版本（没有 version 或 version < 当前版本），返回空 posts

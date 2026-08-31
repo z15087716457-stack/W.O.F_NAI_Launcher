@@ -43,7 +43,8 @@ class OnlineFavoritesState {
 }
 
 class OnlineFavoritesNotifier extends StateNotifier<OnlineFavoritesState> {
-  OnlineFavoritesNotifier(this._repository) : super(const OnlineFavoritesState());
+  OnlineFavoritesNotifier(this._repository)
+    : super(const OnlineFavoritesState());
 
   final OnlineFavoritesRepository _repository;
 
@@ -94,12 +95,7 @@ class OnlineFavoritesNotifier extends StateNotifier<OnlineFavoritesState> {
       state = state.copyWith(favoritedWorkIds: ids);
       return !wasFavorite;
     } catch (e) {
-      AppLogger.e(
-        'Online favorite toggle failed',
-        e,
-        null,
-        'OnlineFav',
-      );
+      AppLogger.e('Online favorite toggle failed', e, null, 'OnlineFav');
       return wasFavorite;
     }
   }
@@ -109,24 +105,13 @@ class OnlineFavoritesNotifier extends StateNotifier<OnlineFavoritesState> {
     final source = _source;
     if (source == null) return;
     try {
-      final entries = await _repository.listFavorites(
-        source,
-        includeAll: true,
-      );
+      final entries = await _repository.listFavorites(source, includeAll: true);
       final entry = entries.where((e) => e.item.id == workId).firstOrNull;
       if (entry == null) return;
-      await _repository.addFavorite(
-        entry.item,
-        collectionId: collectionId,
-      );
+      await _repository.addFavorite(entry.item, collectionId: collectionId);
       await _reload();
     } catch (e) {
-      AppLogger.e(
-        'Online favorite move failed',
-        e,
-        null,
-        'OnlineFav',
-      );
+      AppLogger.e('Online favorite move failed', e, null, 'OnlineFav');
     }
   }
 
@@ -167,6 +152,19 @@ class OnlineFavoritesNotifier extends StateNotifier<OnlineFavoritesState> {
     state = state.copyWith(authors: authors);
     return nowFavorite;
   }
+
+  /// 显式取消作者收藏；返回是否实际删除
+  Future<bool> removeAuthor(int authorId) async {
+    final source = _source;
+    if (source == null) {
+      await bindSource(GallerySourceId.aiTag);
+      return removeAuthor(authorId);
+    }
+    final removed = await _repository.removeAuthor(source, authorId);
+    final authors = await _repository.listAuthors(source);
+    state = state.copyWith(authors: authors);
+    return removed;
+  }
 }
 
 final onlineFavoritesRepositoryProvider = Provider<OnlineFavoritesRepository>(
@@ -175,5 +173,6 @@ final onlineFavoritesRepositoryProvider = Provider<OnlineFavoritesRepository>(
 
 final onlineFavoritesNotifierProvider =
     StateNotifierProvider<OnlineFavoritesNotifier, OnlineFavoritesState>(
-  (ref) => OnlineFavoritesNotifier(ref.read(onlineFavoritesRepositoryProvider)),
-);
+      (ref) =>
+          OnlineFavoritesNotifier(ref.read(onlineFavoritesRepositoryProvider)),
+    );

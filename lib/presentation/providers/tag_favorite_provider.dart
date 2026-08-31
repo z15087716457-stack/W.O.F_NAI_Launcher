@@ -57,13 +57,18 @@ class TagFavoriteNotifier extends _$TagFavoriteNotifier {
     try {
       final favorites = _storage.getFavorites();
       state = TagFavoriteState(favorites: favorites);
-      AppLogger.d('Loaded ${favorites.length} favorites', 'TagFavoriteProvider');
-    } catch (e, stack) {
-      AppLogger.e('Failed to load favorites: $e', e, stack, 'TagFavoriteProvider');
-      state = TagFavoriteState(
-        favorites: [],
-        error: e.toString(),
+      AppLogger.d(
+        'Loaded ${favorites.length} favorites',
+        'TagFavoriteProvider',
       );
+    } catch (e, stack) {
+      AppLogger.e(
+        'Failed to load favorites: $e',
+        e,
+        stack,
+        'TagFavoriteProvider',
+      );
+      state = TagFavoriteState(favorites: [], error: e.toString());
     }
   }
 
@@ -119,11 +124,13 @@ class TagFavoriteNotifier extends _$TagFavoriteNotifier {
       await _storage.addFavorite(favorite);
       _loadFavorites();
     } catch (e, stack) {
-      AppLogger.e('Failed to add favorite: $e', e, stack, 'TagFavoriteProvider');
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
+      AppLogger.e(
+        'Failed to add favorite: $e',
+        e,
+        stack,
+        'TagFavoriteProvider',
       );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -139,11 +146,13 @@ class TagFavoriteNotifier extends _$TagFavoriteNotifier {
 
       _loadFavorites();
     } catch (e, stack) {
-      AppLogger.e('Failed to remove favorite: $e', e, stack, 'TagFavoriteProvider');
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
+      AppLogger.e(
+        'Failed to remove favorite: $e',
+        e,
+        stack,
+        'TagFavoriteProvider',
       );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
@@ -194,11 +203,13 @@ class TagFavoriteNotifier extends _$TagFavoriteNotifier {
 
       _loadFavorites();
     } catch (e, stack) {
-      AppLogger.e('Failed to clear favorites: $e', e, stack, 'TagFavoriteProvider');
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
+      AppLogger.e(
+        'Failed to clear favorites: $e',
+        e,
+        stack,
+        'TagFavoriteProvider',
       );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 

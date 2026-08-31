@@ -25,22 +25,18 @@ class StandardShapes extends BaseShapeModule {
   double get menuRadius => 4.0;
 
   @override
-  ShapeBorder get cardShape => RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(largeRadius),
-      );
+  ShapeBorder get cardShape =>
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(largeRadius));
 
   @override
-  ShapeBorder get buttonShape => RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(mediumRadius),
-      );
+  ShapeBorder get buttonShape =>
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(mediumRadius));
 
   @override
-  ShapeBorder get inputShape => RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(mediumRadius),
-      );
+  ShapeBorder get inputShape =>
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(mediumRadius));
 
   @override
-  ShapeBorder get menuShape => RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(menuRadius),
-      );
+  ShapeBorder get menuShape =>
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(menuRadius));
 }

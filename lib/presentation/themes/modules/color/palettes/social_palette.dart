@@ -22,21 +22,21 @@ class SocialPalette extends BaseColorModule {
 
   @override
   ColorScheme get darkScheme => const ColorScheme.dark(
-        primary: _primary,
-        onPrimary: Colors.white,
-        primaryContainer: Color(0xFF2C2D5F), // Dark blurple for contrast
-        onPrimaryContainer: Color(0xFFD3D6FF), // Light blurple for text/icons
-        secondary: _secondary,
-        onSecondary: Colors.black,
-        tertiary: Color(0xFFFEE75C),
-        onTertiary: Colors.black,
-        surface: _surface,
-        onSurface: Colors.white,
-        onSurfaceVariant: Color(0xFFB5BAC1), // Discord light gray
-        surfaceContainerHighest: _card,
-        outline: Color(0xFF5C5E66), // Discord border gray
-        error: Color(0xFFED4245),
-      );
+    primary: _primary,
+    onPrimary: Colors.white,
+    primaryContainer: Color(0xFF2C2D5F), // Dark blurple for contrast
+    onPrimaryContainer: Color(0xFFD3D6FF), // Light blurple for text/icons
+    secondary: _secondary,
+    onSecondary: Colors.black,
+    tertiary: Color(0xFFFEE75C),
+    onTertiary: Colors.black,
+    surface: _surface,
+    onSurface: Colors.white,
+    onSurfaceVariant: Color(0xFFB5BAC1), // Discord light gray
+    surfaceContainerHighest: _card,
+    outline: Color(0xFF5C5E66), // Discord border gray
+    error: Color(0xFFED4245),
+  );
 
   @override
   bool get supportsDarkMode => true;

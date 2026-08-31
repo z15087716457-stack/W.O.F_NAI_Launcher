@@ -89,44 +89,43 @@ void main() {
     },
   );
 
-  testWidgets(
-    'cancelStroke clears a pending preview immediately',
-    (tester) async {
-      final state = EditorState()..setCanvasSize(const Size(128, 128));
-      addTearDown(state.dispose);
+  testWidgets('cancelStroke clears a pending preview immediately', (
+    tester,
+  ) async {
+    final state = EditorState()..setCanvasSize(const Size(128, 128));
+    addTearDown(state.dispose);
 
-      var renderNotifications = 0;
-      final previewPointCounts = <int>[];
-      state.renderNotifier.addListener(() {
-        renderNotifications++;
-      });
-      state.strokePreviewNotifier.addListener(() {
-        previewPointCounts.add(state.currentStrokePoints.length);
-      });
+    var renderNotifications = 0;
+    final previewPointCounts = <int>[];
+    state.renderNotifier.addListener(() {
+      renderNotifications++;
+    });
+    state.strokePreviewNotifier.addListener(() {
+      previewPointCounts.add(state.currentStrokePoints.length);
+    });
 
-      state.startStroke(const Offset(1, 1));
-      renderNotifications = 0;
-      previewPointCounts.clear();
+    state.startStroke(const Offset(1, 1));
+    renderNotifications = 0;
+    previewPointCounts.clear();
 
-      state.updateStroke(const Offset(2, 2));
+    state.updateStroke(const Offset(2, 2));
 
-      expect(state.currentStrokePoints, hasLength(2));
-      expect(renderNotifications, 0);
-      expect(previewPointCounts, isEmpty);
+    expect(state.currentStrokePoints, hasLength(2));
+    expect(renderNotifications, 0);
+    expect(previewPointCounts, isEmpty);
 
-      state.cancelStroke();
+    state.cancelStroke();
 
-      expect(renderNotifications, 0);
-      expect(previewPointCounts, <int>[0]);
-      expect(state.currentStrokePoints, isEmpty);
-      expect(state.isDrawing, isFalse);
+    expect(renderNotifications, 0);
+    expect(previewPointCounts, <int>[0]);
+    expect(state.currentStrokePoints, isEmpty);
+    expect(state.isDrawing, isFalse);
 
-      await tester.pump();
+    await tester.pump();
 
-      expect(renderNotifications, 0);
-      expect(previewPointCounts, <int>[0]);
-    },
-  );
+    expect(renderNotifications, 0);
+    expect(previewPointCounts, <int>[0]);
+  });
 
   testWidgets('runBatch defers state toolNotifier until batch completion', (
     tester,

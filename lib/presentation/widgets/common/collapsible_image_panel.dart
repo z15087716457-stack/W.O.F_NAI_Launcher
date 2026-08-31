@@ -69,8 +69,9 @@ class CollapsibleImagePanel extends StatelessWidget {
               // Header
               InkWell(
                 onTap: onToggle,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Row(
@@ -81,9 +82,10 @@ class CollapsibleImagePanel extends StatelessWidget {
                         color: showBackground
                             ? Colors.white
                             : hasData
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurface
-                                    .withValues(alpha: 0.6),
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface.withValues(
+                                alpha: 0.6,
+                              ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -93,8 +95,8 @@ class CollapsibleImagePanel extends StatelessWidget {
                             color: showBackground
                                 ? Colors.white
                                 : hasData
-                                    ? theme.colorScheme.primary
-                                    : null,
+                                ? theme.colorScheme.primary
+                                : null,
                           ),
                         ),
                       ),
@@ -166,11 +168,7 @@ class _CollapsedBackgroundImage extends StatelessWidget {
             maxWidth: width,
             minHeight: _previewHeight,
             maxHeight: _previewHeight,
-            child: SizedBox(
-              width: width,
-              height: _previewHeight,
-              child: child,
-            ),
+            child: SizedBox(width: width, height: _previewHeight, child: child),
           ),
         );
       },

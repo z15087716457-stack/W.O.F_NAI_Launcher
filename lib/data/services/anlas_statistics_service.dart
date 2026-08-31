@@ -12,20 +12,17 @@ class DailyAnlasStat {
   final DateTime date;
   final int cost;
 
-  const DailyAnlasStat({
-    required this.date,
-    required this.cost,
-  });
+  const DailyAnlasStat({required this.date, required this.cost});
 
   Map<String, dynamic> toJson() => {
-        'date': date.toIso8601String(),
-        'cost': cost,
-      };
+    'date': date.toIso8601String(),
+    'cost': cost,
+  };
 
   factory DailyAnlasStat.fromJson(Map<String, dynamic> json) => DailyAnlasStat(
-        date: DateTime.parse(json['date'] as String),
-        cost: json['cost'] as int,
-      );
+    date: DateTime.parse(json['date'] as String),
+    cost: json['cost'] as int,
+  );
 }
 
 /// Anlas统计服务 - 记录和管理点数消耗数据
@@ -73,10 +70,7 @@ class AnlasStatisticsService extends _$AnlasStatisticsService {
       _cleanOldData();
 
       final stats = _dailyStats.entries.map((e) {
-        return DailyAnlasStat(
-          date: _keyToDate(e.key),
-          cost: e.value,
-        ).toJson();
+        return DailyAnlasStat(date: _keyToDate(e.key), cost: e.value).toJson();
       }).toList();
 
       await _prefs.setString(_storageKey, jsonEncode(stats));
@@ -116,15 +110,13 @@ class AnlasStatisticsService extends _$AnlasStatisticsService {
     final now = DateTime.now();
 
     for (int i = days - 1; i >= 0; i--) {
-      final date =
-          DateTime(now.year, now.month, now.day).subtract(Duration(days: i));
+      final date = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: i));
       final key = _dateToKey(date);
-      result.add(
-        DailyAnlasStat(
-          date: date,
-          cost: _dailyStats[key] ?? 0,
-        ),
-      );
+      result.add(DailyAnlasStat(date: date, cost: _dailyStats[key] ?? 0));
     }
 
     return result;

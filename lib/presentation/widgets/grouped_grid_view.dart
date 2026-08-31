@@ -150,11 +150,14 @@ class GroupedGridViewState extends ConsumerState<GroupedGridView> {
                   ),
                   const SizedBox(width: 12),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer
-                          .withValues(alpha: 0.5),
+                      color: theme.colorScheme.primaryContainer.withValues(
+                        alpha: 0.5,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(

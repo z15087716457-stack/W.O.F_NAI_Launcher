@@ -4,12 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
 /// 进度通知状态
-enum ProgressNotificationState {
-  pending,
-  running,
-  completed,
-  failed,
-}
+enum ProgressNotificationState { pending, running, completed, failed }
 
 /// 进度通知数据
 class ProgressNotificationData {
@@ -267,10 +262,7 @@ class _ProgressNotificationControllerImpl
 class GlobalProgressNotificationOverlay extends StatefulWidget {
   final Widget child;
 
-  const GlobalProgressNotificationOverlay({
-    super.key,
-    required this.child,
-  });
+  const GlobalProgressNotificationOverlay({super.key, required this.child});
 
   @override
   State<GlobalProgressNotificationOverlay> createState() =>
@@ -346,14 +338,16 @@ class _ProgressNotificationCard extends StatelessWidget {
     final backgroundColor = isError
         ? const Color(0xFFE53935)
         : isSuccess
-            ? const Color(0xFF4CAF50)
-            : theme.colorScheme.surfaceContainerHigh;
+        ? const Color(0xFF4CAF50)
+        : theme.colorScheme.surfaceContainerHigh;
 
-    final textColor =
-        isError || isSuccess ? Colors.white : theme.colorScheme.onSurface;
+    final textColor = isError || isSuccess
+        ? Colors.white
+        : theme.colorScheme.onSurface;
 
-    final iconColor =
-        isError || isSuccess ? Colors.white : theme.colorScheme.primary;
+    final iconColor = isError || isSuccess
+        ? Colors.white
+        : theme.colorScheme.primary;
 
     return Material(
       color: Colors.transparent,
@@ -547,16 +541,11 @@ class ProgressTaskWrapper<T> {
     // 在异步操作前获取本地化字符串
     final l10n = context.l10n;
 
-    _controller = context.showProgressNotification(
-      id: id,
-      title: title,
-    );
+    _controller = context.showProgressNotification(id: id, title: title);
 
     try {
       final result = await task(_controller!);
-      _controller!.complete(
-        title: l10n.download_completed(title),
-      );
+      _controller!.complete(title: l10n.download_completed(title));
       return result;
     } catch (e) {
       _controller!.fail(

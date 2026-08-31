@@ -134,19 +134,13 @@ class CompletionService {
   ///
   /// [prefix] 输入前缀
   /// [limit] 返回结果数量限制
-  Future<List<String>> prefixSearch(
-    String prefix, {
-    int limit = 20,
-  }) async {
+  Future<List<String>> prefixSearch(String prefix, {int limit = 20}) async {
     if (prefix.isEmpty) {
       return [];
     }
 
     try {
-      final records = await _tagDataSource.searchByPrefix(
-        prefix,
-        limit: limit,
-      );
+      final records = await _tagDataSource.searchByPrefix(prefix, limit: limit);
 
       return records.map((r) => r.tag).toList();
     } catch (e, stack) {
@@ -238,10 +232,7 @@ class CompletionService {
 
     try {
       // 1. 模糊搜索（使用 LIKE %query% 模式）
-      final tagRecords = await _tagDataSource.searchFuzzy(
-        query,
-        limit: limit,
-      );
+      final tagRecords = await _tagDataSource.searchFuzzy(query, limit: limit);
 
       if (tagRecords.isEmpty) {
         return [];
@@ -315,12 +306,7 @@ class CompletionService {
         );
       }).toList();
     } catch (e, stack) {
-      AppLogger.e(
-        'Failed to get hot tags',
-        e,
-        stack,
-        'CompletionService',
-      );
+      AppLogger.e('Failed to get hot tags', e, stack, 'CompletionService');
       return [];
     }
   }
@@ -390,11 +376,7 @@ class CompletionService {
   // 私有辅助方法
 
   /// 计算前缀搜索的相关度分数
-  double _calculateRelevanceScore(
-    String tag,
-    String prefix,
-    int postCount,
-  ) {
+  double _calculateRelevanceScore(String tag, String prefix, int postCount) {
     double score = 0.0;
     final normalizedTag = tag.toLowerCase();
     final normalizedPrefix = prefix.toLowerCase();

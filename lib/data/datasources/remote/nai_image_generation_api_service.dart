@@ -738,6 +738,7 @@ class NAIImageGenerationApiService {
                   yield ImageStreamChunk.complete(
                     compositedImage.displayImageBytes,
                     sampleIndex: sampleIndex,
+                    vibeEncodings: requestBuildResult.vibeEncodingMap,
                   );
                   continue;
                 }
@@ -829,6 +830,7 @@ class NAIImageGenerationApiService {
               }
               yield ImageStreamChunk.complete(
                 compositedImage.displayImageBytes,
+                vibeEncodings: requestBuildResult.vibeEncodingMap,
               );
               return;
             }
@@ -873,6 +875,7 @@ class NAIImageGenerationApiService {
                   }
                   yield ImageStreamChunk.complete(
                     compositedImage.displayImageBytes,
+                    vibeEncodings: requestBuildResult.vibeEncodingMap,
                   );
                   return;
                 }

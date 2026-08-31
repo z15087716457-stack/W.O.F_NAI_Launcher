@@ -960,12 +960,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
           stack,
           'GalleryDS',
         );
-        return {
-          'success': 0,
-          'failed': 0,
-          'none': 0,
-          'imported': 0,
-        };
+        return {'success': 0, 'failed': 0, 'none': 0, 'imported': 0};
       }
     });
   }
@@ -1141,8 +1136,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
               for (final row in oldRows) {
                 final imageId = (row['image_id'] as num?)?.toInt();
                 if (imageId == null) continue;
-                existingNsfw[imageId] =
-                    (row['is_nsfw'] as num?)?.toInt() ?? 0;
+                existingNsfw[imageId] = (row['is_nsfw'] as num?)?.toInt() ?? 0;
               }
             } catch (_) {
               // 旧库迁移缺失该列时忽略，保持默认 0

@@ -16,8 +16,8 @@ class DataSourceProviderState {
     Map<String, EnhancedBaseDataSource>? dataSources,
     Map<String, DataSourceHealth>? healthStatus,
     this.isDisposed = false,
-  })  : _dataSources = dataSources ?? const {},
-        _healthStatus = healthStatus ?? const {};
+  }) : _dataSources = dataSources ?? const {},
+       _healthStatus = healthStatus ?? const {};
 
   DataSourceProviderState copyWith({
     Map<String, EnhancedBaseDataSource>? dataSources,
@@ -70,8 +70,8 @@ class DataSourceProvider extends StateNotifier<DataSourceProviderState> {
   final registry.DataSourceRegistry _registry;
 
   DataSourceProvider({registry.DataSourceRegistry? explicitRegistry})
-      : _registry = explicitRegistry ?? registry.DataSourceRegistry.instance,
-        super(const DataSourceProviderState());
+    : _registry = explicitRegistry ?? registry.DataSourceRegistry.instance,
+      super(const DataSourceProviderState());
 
   /// 注册数据源
   ///
@@ -88,11 +88,15 @@ class DataSourceProvider extends StateNotifier<DataSourceProviderState> {
     }
 
     // 添加到注册表
-    _registry.register(dataSource as registry.DataSource, autoInitialize: false);
+    _registry.register(
+      dataSource as registry.DataSource,
+      autoInitialize: false,
+    );
 
     // 更新状态
-    final newDataSources =
-        Map<String, EnhancedBaseDataSource>.from(state._dataSources);
+    final newDataSources = Map<String, EnhancedBaseDataSource>.from(
+      state._dataSources,
+    );
     newDataSources[name] = dataSource;
     state = state.copyWith(dataSources: newDataSources);
 
@@ -116,8 +120,9 @@ class DataSourceProvider extends StateNotifier<DataSourceProviderState> {
     await _registry.unregister(name, dispose: dispose);
 
     // 更新状态
-    final newDataSources =
-        Map<String, EnhancedBaseDataSource>.from(state._dataSources);
+    final newDataSources = Map<String, EnhancedBaseDataSource>.from(
+      state._dataSources,
+    );
     newDataSources.remove(name);
 
     final newHealth = Map<String, DataSourceHealth>.from(state._healthStatus);
@@ -176,8 +181,9 @@ class DataSourceProvider extends StateNotifier<DataSourceProviderState> {
       if (dataSource is EnhancedBaseDataSource) {
         // 检查是否已在状态中
         if (!state._dataSources.containsKey(name)) {
-          final newDataSources =
-              Map<String, EnhancedBaseDataSource>.from(state._dataSources);
+          final newDataSources = Map<String, EnhancedBaseDataSource>.from(
+            state._dataSources,
+          );
           newDataSources[name] = dataSource;
           state = state.copyWith(dataSources: newDataSources);
         }
@@ -270,12 +276,7 @@ class DataSourceProvider extends StateNotifier<DataSourceProviderState> {
         return false;
       }
     } catch (e, stack) {
-      AppLogger.e(
-        'Recovery failed for $name',
-        e,
-        stack,
-        'DataSourceProvider',
-      );
+      AppLogger.e('Recovery failed for $name', e, stack, 'DataSourceProvider');
       return false;
     }
   }
@@ -365,23 +366,17 @@ class DataSourceProvider extends StateNotifier<DataSourceProviderState> {
     return {
       'dataSourceCount': state._dataSources.length,
       'dataSources': state._dataSources.map(
-        (name, ds) => MapEntry(
-          name,
-          {
-            'type': ds.type.toString(),
-            'state': ds.state.toString(),
-            'isInitialized': ds.isInitialized,
-          },
-        ),
+        (name, ds) => MapEntry(name, {
+          'type': ds.type.toString(),
+          'state': ds.state.toString(),
+          'isInitialized': ds.isInitialized,
+        }),
       ),
       'healthStatus': state._healthStatus.map(
-        (name, health) => MapEntry(
-          name,
-          {
-            'status': health.status.toString(),
-            'message': health.message,
-          },
-        ),
+        (name, health) => MapEntry(name, {
+          'status': health.status.toString(),
+          'message': health.message,
+        }),
       ),
       'isDisposed': state.isDisposed,
     };
@@ -393,18 +388,18 @@ class DataSourceProvider extends StateNotifier<DataSourceProviderState> {
 /// 全局 DataSourceProvider 实例
 final dataSourceProvider =
     StateNotifierProvider<DataSourceProvider, DataSourceProviderState>((ref) {
-  final provider = DataSourceProvider();
+      final provider = DataSourceProvider();
 
-  // 自动初始化
-  provider.initializeAll();
+      // 自动初始化
+      provider.initializeAll();
 
-  // 在 Provider 销毁时清理
-  ref.onDispose(() {
-    provider.dispose();
-  });
+      // 在 Provider 销毁时清理
+      ref.onDispose(() {
+        provider.dispose();
+      });
 
-  return provider;
-});
+      return provider;
+    });
 
 /// 特定 DataSource Provider
 ///
@@ -416,35 +411,32 @@ final dataSourceProvider =
 /// ```
 final specificDataSourceProvider =
     Provider.family<EnhancedBaseDataSource?, String>((ref, name) {
-  final state = ref.watch(dataSourceProvider);
-  return state.getDataSource(name);
-});
+      final state = ref.watch(dataSourceProvider);
+      return state.getDataSource(name);
+    });
 
 /// DataSource 健康状态 Stream Provider
 ///
 /// 用于监控 DataSource 健康状态变化
 final dataSourceHealthStreamProvider =
     StreamProvider.family<DataSourceHealth, String>((ref, name) async* {
-  final initialState = ref.read(dataSourceProvider);
+      final initialState = ref.read(dataSourceProvider);
 
-  // 初始状态
-  final initialHealth = initialState.getHealth(name);
-  if (initialHealth != null) {
-    yield initialHealth;
-  }
+      // 初始状态
+      final initialHealth = initialState.getHealth(name);
+      if (initialHealth != null) {
+        yield initialHealth;
+      }
 
-  // 监听状态变化
-  await for (final state in ref.watch(
-    dataSourceProvider.select(
-      (s) => Stream.periodic(
-        const Duration(seconds: 1),
-        (_) => s,
-      ),
-    ),
-  )) {
-    final health = state.getHealth(name);
-    if (health != null) {
-      yield health;
-    }
-  }
-});
+      // 监听状态变化
+      await for (final state in ref.watch(
+        dataSourceProvider.select(
+          (s) => Stream.periodic(const Duration(seconds: 1), (_) => s),
+        ),
+      )) {
+        final health = state.getHealth(name);
+        if (health != null) {
+          yield health;
+        }
+      }
+    });

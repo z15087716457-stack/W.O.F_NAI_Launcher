@@ -25,24 +25,23 @@ class WobblyShapes extends BaseShapeModule {
   // Placeholder - will be replaced with WobblyShapeBorder in Task 8
   @override
   ShapeBorder get cardShape => RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(mediumRadius),
-        side: const BorderSide(color: Color(0xFF2D2D2D), width: 2),
-      );
+    borderRadius: BorderRadius.circular(mediumRadius),
+    side: const BorderSide(color: Color(0xFF2D2D2D), width: 2),
+  );
 
   @override
   ShapeBorder get buttonShape => RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(smallRadius),
-        side: const BorderSide(color: Color(0xFF2D2D2D), width: 2),
-      );
+    borderRadius: BorderRadius.circular(smallRadius),
+    side: const BorderSide(color: Color(0xFF2D2D2D), width: 2),
+  );
 
   @override
   ShapeBorder get inputShape => RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(smallRadius),
-        side: const BorderSide(color: Color(0xFF2D2D2D), width: 2),
-      );
+    borderRadius: BorderRadius.circular(smallRadius),
+    side: const BorderSide(color: Color(0xFF2D2D2D), width: 2),
+  );
 
   @override
-  ShapeBorder get menuShape => RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(menuRadius),
-      );
+  ShapeBorder get menuShape =>
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(menuRadius));
 }

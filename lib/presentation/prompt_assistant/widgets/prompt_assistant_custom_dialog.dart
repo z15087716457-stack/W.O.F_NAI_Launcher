@@ -54,8 +54,9 @@ class _PromptAssistantCustomDialogState
     final remaining = _maxImages - _images.length;
     if (remaining <= 0) {
       setState(
-        () => _error =
-            context.l10n.promptAssistant_maxReferenceImages(_maxImages),
+        () => _error = context.l10n.promptAssistant_maxReferenceImages(
+          _maxImages,
+        ),
       );
       return;
     }
@@ -74,8 +75,9 @@ class _PromptAssistantCustomDialogState
       final mimeType = detectImageMime(bytes);
       if (mimeType == null) {
         setState(
-          () => _error =
-              context.l10n.promptAssistant_unsupportedImageFormat(file.name),
+          () => _error = context.l10n.promptAssistant_unsupportedImageFormat(
+            file.name,
+          ),
         );
         continue;
       }
@@ -225,10 +227,7 @@ class _PromptAssistantCustomDialogState
 }
 
 class _ImageChip extends StatelessWidget {
-  const _ImageChip({
-    required this.image,
-    required this.onRemove,
-  });
+  const _ImageChip({required this.image, required this.onRemove});
 
   final PromptAssistantImageInput image;
   final VoidCallback onRemove;

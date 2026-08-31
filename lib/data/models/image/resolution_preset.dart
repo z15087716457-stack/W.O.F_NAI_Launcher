@@ -1,19 +1,8 @@
 /// 分辨率预设分组
-enum ResolutionGroup {
-  normal,
-  large,
-  wallpaper,
-  small,
-  custom,
-}
+enum ResolutionGroup { normal, large, wallpaper, small, custom }
 
 /// 分辨率类型
-enum ResolutionType {
-  portrait,
-  landscape,
-  square,
-  custom,
-}
+enum ResolutionType { portrait, landscape, square, custom }
 
 /// 分辨率预设
 class ResolutionPreset {

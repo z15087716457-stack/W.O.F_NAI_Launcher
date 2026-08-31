@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import '../constants/api_constants.dart';
+import '../enums/quality_tag_preset.dart';
 import '../../data/models/image/image_params.dart';
 
 enum KritaBridgeErrorCode {
@@ -25,29 +26,22 @@ enum KritaBridgeErrorCode {
 }
 
 class KritaBridgeError {
-  const KritaBridgeError({
-    required this.code,
-    required this.message,
-    this.id,
-  });
+  const KritaBridgeError({required this.code, required this.message, this.id});
 
   final KritaBridgeErrorCode code;
   final String message;
   final String? id;
 
   Map<String, dynamic> toJson() => {
-        'type': 'error',
-        if (id != null) 'id': id,
-        'code': code.value,
-        'message': message,
-      };
+    'type': 'error',
+    if (id != null) 'id': id,
+    'code': code.value,
+    'message': message,
+  };
 }
 
 class KritaBridgeDecodeResult {
-  const KritaBridgeDecodeResult._({
-    this.message,
-    this.error,
-  });
+  const KritaBridgeDecodeResult._({this.message, this.error});
 
   factory KritaBridgeDecodeResult.message(KritaBridgeMessage message) {
     return KritaBridgeDecodeResult._(message: message);
@@ -69,10 +63,7 @@ abstract class KritaBridgeMessage {
 }
 
 class KritaPingMessage extends KritaBridgeMessage {
-  const KritaPingMessage({
-    required this.version,
-    required this.secret,
-  });
+  const KritaPingMessage({required this.version, required this.secret});
 
   @override
   String get type => 'ping';
@@ -101,9 +92,7 @@ class KritaUnsupportedPingVersionMessage extends KritaBridgeMessage {
 }
 
 class KritaGetParamsMessage extends KritaBridgeMessage {
-  const KritaGetParamsMessage({
-    required this.id,
-  });
+  const KritaGetParamsMessage({required this.id});
 
   @override
   String get type => 'get_params';
@@ -113,9 +102,7 @@ class KritaGetParamsMessage extends KritaBridgeMessage {
 }
 
 class KritaCancelMessage extends KritaBridgeMessage {
-  const KritaCancelMessage({
-    required this.id,
-  });
+  const KritaCancelMessage({required this.id});
 
   @override
   String get type => 'cancel';
@@ -215,10 +202,7 @@ class KritaInpaintMessage extends KritaBridgeMessage {
 /// AI 接管扩展：set_params 消息。
 /// 将参数写入应用 UI 状态（GenerationParamsNotifier），用户在界面上实时可见。
 class KritaSetParamsMessage extends KritaBridgeMessage {
-  const KritaSetParamsMessage({
-    required this.id,
-    required this.payload,
-  });
+  const KritaSetParamsMessage({required this.id, required this.payload});
 
   @override
   String get type => 'set_params';
@@ -234,10 +218,7 @@ class KritaSetParamsMessage extends KritaBridgeMessage {
 /// 在当前 UI 参数基础上静默覆盖参数并生成，不改变 UI 状态。
 /// payload 为空时等价于远程按下 Generate 按钮。
 class KritaGenerateMessage extends KritaBridgeMessage {
-  const KritaGenerateMessage({
-    required this.id,
-    required this.payload,
-  });
+  const KritaGenerateMessage({required this.id, required this.payload});
 
   @override
   String get type => 'generate';
@@ -259,10 +240,7 @@ class KritaGenerateMessage extends KritaBridgeMessage {
 /// 将 JSON 覆盖层应用到 [base] 参数上（generate 消息用）。
 /// 未出现的键保持 base 原值；characters 键为整体替换；
 /// clear_characters=true 清空角色列表。
-ImageParams applyKritaParamsOverlay(
-  ImageParams base,
-  Map<String, dynamic> p,
-) {
+ImageParams applyKritaParamsOverlay(ImageParams base, Map<String, dynamic> p) {
   String? str(String k) => p[k] is String ? p[k] as String : null;
   int? integer(String k) => p[k] is num ? (p[k] as num).toInt() : null;
   double? dbl(String k) => p[k] is num ? (p[k] as num).toDouble() : null;
@@ -276,18 +254,37 @@ ImageParams applyKritaParamsOverlay(
         if (entry is Map && entry['prompt'] is String)
           CharacterPrompt(
             prompt: entry['prompt'] as String,
-            negativePrompt:
-                entry['uc'] is String ? entry['uc'] as String : '',
+            negativePrompt: entry['uc'] is String ? entry['uc'] as String : '',
             position: entry['position'] is String
                 ? entry['position'] as String
                 : null,
-            positionX:
-                entry['x'] is num ? (entry['x'] as num).toDouble() : null,
-            positionY:
-                entry['y'] is num ? (entry['y'] as num).toDouble() : null,
+            positionX: entry['x'] is num
+                ? (entry['x'] as num).toDouble()
+                : null,
+            positionY: entry['y'] is num
+                ? (entry['y'] as num).toDouble()
+                : null,
           ),
     ];
   }
+
+  final hasQualityPreset = p.containsKey('quality_preset');
+  final requestedQualityPreset = QualityTagPreset.tryParse(
+    str('quality_preset'),
+  );
+  final legacyQualityToggle = flag('quality_toggle');
+  final qualityTagPreset = hasQualityPreset
+      ? requestedQualityPreset ?? base.qualityTagPreset
+      : legacyQualityToggle == null
+      ? base.qualityTagPreset
+      : legacyQualityToggle
+      ? QualityTagPreset.standard
+      : QualityTagPreset.none;
+  final qualityToggle = hasQualityPreset
+      ? requestedQualityPreset == null
+            ? base.qualityToggle
+            : requestedQualityPreset != QualityTagPreset.none
+      : legacyQualityToggle ?? base.qualityToggle;
 
   return base.copyWith(
     prompt: str('prompt') ?? base.prompt,
@@ -301,7 +298,8 @@ ImageParams applyKritaParamsOverlay(
     seed: integer('seed') ?? base.seed,
     nSamples: integer('n_samples') ?? base.nSamples,
     ucPreset: integer('uc_preset') ?? base.ucPreset,
-    qualityToggle: flag('quality_toggle') ?? base.qualityToggle,
+    qualityToggle: qualityToggle,
+    qualityTagPreset: qualityTagPreset,
     cfgRescale: dbl('cfg_rescale') ?? base.cfgRescale,
     noiseSchedule: str('noise_schedule') ?? base.noiseSchedule,
     varietyPlus: flag('variety_plus') ?? base.varietyPlus,
@@ -312,7 +310,8 @@ ImageParams applyKritaParamsOverlay(
     smeaDyn: flag('smea_dyn') ?? base.smeaDyn,
     decrisp: flag('decrisp') ?? base.decrisp,
     useCoords: flag('use_coords') ?? base.useCoords,
-    characters: characters ??
+    characters:
+        characters ??
         (flag('clear_characters') == true ? const [] : base.characters),
   );
 }

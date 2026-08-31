@@ -42,10 +42,7 @@ class SliderSettingTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              if (leading != null) ...[
-                leading!,
-                const SizedBox(width: 16),
-              ],
+              if (leading != null) ...[leading!, const SizedBox(width: 16)],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,10 +162,7 @@ class RangeSliderSettingTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              if (leading != null) ...[
-                leading!,
-                const SizedBox(width: 16),
-              ],
+              if (leading != null) ...[leading!, const SizedBox(width: 16)],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,9 +189,7 @@ class RangeSliderSettingTile extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              trackHeight: 4,
-            ),
+            data: SliderTheme.of(context).copyWith(trackHeight: 4),
             child: RangeSlider(
               values: RangeValues(
                 start.toDouble().clamp(min.toDouble(), max.toDouble()),
@@ -253,10 +245,7 @@ class ChipSelectTile<T> extends StatelessWidget {
         children: [
           Row(
             children: [
-              if (leading != null) ...[
-                leading!,
-                const SizedBox(width: 16),
-              ],
+              if (leading != null) ...[leading!, const SizedBox(width: 16)],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,11 +293,7 @@ class SettingSectionHeader extends StatelessWidget {
   final String title;
   final Widget? trailing;
 
-  const SettingSectionHeader({
-    super.key,
-    required this.title,
-    this.trailing,
-  });
+  const SettingSectionHeader({super.key, required this.title, this.trailing});
 
   @override
   Widget build(BuildContext context) {
@@ -325,10 +310,7 @@ class SettingSectionHeader extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          if (trailing != null) ...[
-            const Spacer(),
-            trailing!,
-          ],
+          if (trailing != null) ...[const Spacer(), trailing!],
         ],
       ),
     );

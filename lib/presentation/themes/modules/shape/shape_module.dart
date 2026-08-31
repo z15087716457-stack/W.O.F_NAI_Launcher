@@ -17,8 +17,6 @@ abstract class BaseShapeModule implements ShapeModule {
 
   /// Helper to create RoundedRectangleBorder.
   static ShapeBorder roundedShape(double radius) {
-    return RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(radius),
-    );
+    return RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
   }
 }

@@ -32,8 +32,10 @@ class GenerationScreen extends ConsumerWidget {
             return mobileLayout;
           }
 
-          final maxSidebarWidth =
-              (constraints.maxWidth * 0.45).clamp(240.0, 400.0);
+          final maxSidebarWidth = (constraints.maxWidth * 0.45).clamp(
+            240.0,
+            400.0,
+          );
           final sidebarWidth = layoutState.fixedTagsSidebarWidth
               .clamp(240.0, maxSidebarWidth)
               .toDouble();

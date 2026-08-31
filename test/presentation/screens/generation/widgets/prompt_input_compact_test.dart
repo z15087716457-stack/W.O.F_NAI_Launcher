@@ -5,6 +5,7 @@ import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/prompt_input.dart';
 
 void main() {
@@ -12,6 +13,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          promptBlockLibraryNotifierProvider.overrideWith(
+            _EmptyPromptBlockLibraryNotifier.new,
+          ),
           localStorageServiceProvider.overrideWith((ref) {
             return _TestLocalStorageService();
           }),
@@ -104,4 +108,11 @@ class _TestLocalStorageService extends LocalStorageService {
 
   @override
   int? getLockedSeedValue() => null;
+}
+
+/// 药丸编辑器（正向主提示词）依赖块库；无 Hive 的测试环境用空库替代。
+class _EmptyPromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
+  @override
+  Future<PromptBlockLibraryState> build() async =>
+      PromptBlockLibraryState(blocks: [], folders: []);
 }

@@ -33,18 +33,12 @@ class ImageGenerationResult {
 
   /// 创建取消结果
   factory ImageGenerationResult.cancelled() {
-    return const ImageGenerationResult(
-      images: [],
-      isCancelled: true,
-    );
+    return const ImageGenerationResult(images: [], isCancelled: true);
   }
 
   /// 创建错误结果
   factory ImageGenerationResult.error(String message) {
-    return ImageGenerationResult(
-      images: const [],
-      error: message,
-    );
+    return ImageGenerationResult(images: const [], error: message);
   }
 }
 
@@ -54,17 +48,18 @@ class ImageGenerationResult {
 /// [total] - 总图像数量
 /// [progress] - 总体进度 (0.0 - 1.0)
 /// [previewImage] - 流式预览图像（如果有）
-typedef GenerationProgressCallback = void Function(
-  int current,
-  int total,
-  double progress, {
-  Uint8List? previewImage,
-});
+typedef GenerationProgressCallback =
+    void Function(
+      int current,
+      int total,
+      double progress, {
+      Uint8List? previewImage,
+    });
 
 /// 批量生成结果（包含图像和 vibe encodings）
 typedef _BatchGenerationResult = ({
   List<GeneratedImage> images,
-  Map<String, String> vibeEncodings
+  Map<String, String> vibeEncodings,
 });
 
 /// 图像生成服务
@@ -88,9 +83,8 @@ class ImageGenerationService {
   bool _isCancelled = false;
 
   /// 构造函数
-  ImageGenerationService({
-    required NAIImageGenerationApiService apiService,
-  }) : _apiService = apiService;
+  ImageGenerationService({required NAIImageGenerationApiService apiService})
+    : _apiService = apiService;
 
   /// 是否已取消
   bool get isCancelled => _isCancelled;
@@ -161,7 +155,7 @@ class ImageGenerationService {
     required int batchCount,
     required int batchSize,
     void Function(int batchIndex, int currentImage, int totalImages)?
-        onBatchStart,
+    onBatchStart,
     GenerationProgressCallback? onProgress,
     void Function(List<GeneratedImage> batchImages)? onBatchComplete,
   }) async {
@@ -245,6 +239,7 @@ class ImageGenerationService {
   }) async {
     bool streamingNotAllowed = false;
     final finalImages = <int, Uint8List>{};
+    final vibeEncodings = <String, String>{};
 
     try {
       final stream = _apiService.generateImageStream(params);
@@ -277,6 +272,10 @@ class ImageGenerationService {
 
         if (chunk.isComplete && chunk.hasFinalImage) {
           finalImages[chunk.sampleIndex] = chunk.finalImage!;
+          for (final entry
+              in (chunk.vibeEncodings ?? const <int, String>{}).entries) {
+            vibeEncodings['0_${entry.key}'] = entry.value;
+          }
         }
       }
 
@@ -293,19 +292,9 @@ class ImageGenerationService {
               ),
             )
             .toList();
-        // 注意：Streaming API 的响应中不包含 vibe encodings 数据
-        // 只有非流式 API (generateImage) 会返回 vibe encodings
-        // 这是 NovelAI API 的已知限制，非本实现问题
-        //
-        // 如果需要获取 vibe encodings，有以下选择：
-        // 1. 使用非流式生成（禁用流式预览）
-        // 2. 在流式生成成功后，使用相同的参数再调用一次非流式 API
-        //    （但这会增加 API 调用成本，不推荐）
-        //
-        // 由于 vibe encodings 主要用于保存和复用 Vibe Transfer 特征，
-        // 而大多数用户更重视流式预览体验，因此此处优先保证流式功能
         return ImageGenerationResult(
           images: generatedImages,
+          vibeEncodings: vibeEncodings,
         );
       }
 
@@ -367,11 +356,8 @@ class ImageGenerationService {
         try {
           // 使用非流式回退
           if (useNonStreamFallback) {
-            final (fallbackImages, fallbackVibes) =
-                await _apiService.generateImage(
-              singleParams,
-              onProgress: (_, __) {},
-            );
+            final (fallbackImages, fallbackVibes) = await _apiService
+                .generateImage(singleParams, onProgress: (_, __) {});
             if (fallbackImages.isNotEmpty) {
               image = fallbackImages.first;
               // 将 API 返回的 Map<int, String> 转换为 Map<String, String>
@@ -387,8 +373,9 @@ class ImageGenerationService {
 
           // 尝试流式生成
           bool streamingNotAllowed = false;
-          await for (final chunk
-              in _apiService.generateImageStream(singleParams)) {
+          await for (final chunk in _apiService.generateImageStream(
+            singleParams,
+          )) {
             if (_isCancelled) break;
 
             if (chunk.hasError) {
@@ -411,16 +398,18 @@ class ImageGenerationService {
 
             if (chunk.isComplete && chunk.hasFinalImage) {
               image = chunk.finalImage;
+              imageVibeEncodings = {
+                for (final entry
+                    in (chunk.vibeEncodings ?? const <int, String>{}).entries)
+                  '${currentIndex}_${entry.key}': entry.value,
+              };
             }
           }
 
           // 流式不支持，使用非流式回退
           if (streamingNotAllowed) {
-            final (fallbackImages, fallbackVibes) =
-                await _apiService.generateImage(
-              singleParams,
-              onProgress: (_, __) {},
-            );
+            final (fallbackImages, fallbackVibes) = await _apiService
+                .generateImage(singleParams, onProgress: (_, __) {});
             if (fallbackImages.isNotEmpty) {
               image = fallbackImages.first;
               // 将 API 返回的 Map<int, String> 转换为 Map<String, String>
@@ -438,11 +427,8 @@ class ImageGenerationService {
           }
 
           // 流式未返回图像，尝试非流式
-          final (fallbackImages, fallbackVibes) =
-              await _apiService.generateImage(
-            singleParams,
-            onProgress: (_, __) {},
-          );
+          final (fallbackImages, fallbackVibes) = await _apiService
+              .generateImage(singleParams, onProgress: (_, __) {});
           if (fallbackImages.isNotEmpty) {
             image = fallbackImages.first;
             // 将 API 返回的 Map<int, String> 转换为 Map<String, String>
@@ -458,11 +444,8 @@ class ImageGenerationService {
           if (_isStreamingNotAllowed(e.toString())) {
             useNonStreamFallback = true;
             try {
-              final (fallbackImages, fallbackVibes) =
-                  await _apiService.generateImage(
-                singleParams,
-                onProgress: (_, __) {},
-              );
+              final (fallbackImages, fallbackVibes) = await _apiService
+                  .generateImage(singleParams, onProgress: (_, __) {});
               if (fallbackImages.isNotEmpty) {
                 image = fallbackImages.first;
                 // 将 API 返回的 Map<int, String> 转换为 Map<String, String>

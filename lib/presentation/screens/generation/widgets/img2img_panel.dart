@@ -728,7 +728,8 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
                     ChoiceChip(
                       label: Text(factor == 1.0 ? '1x' : '1.5x'),
                       selected:
-                          !enhance.maxUpscale && enhance.upscaleFactor == factor,
+                          !enhance.maxUpscale &&
+                          enhance.upscaleFactor == factor,
                       onSelected: (_) =>
                           controller.updateEnhanceUpscaleFactor(factor),
                     ),

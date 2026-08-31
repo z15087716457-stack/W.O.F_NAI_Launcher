@@ -60,10 +60,7 @@ class _ThemedSwitchState extends State<ThemedSwitch>
       vsync: this,
       value: widget.value ? 1.0 : 0.0,
     );
-    _position = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    );
+    _position = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
   }
 
   @override
@@ -103,7 +100,8 @@ class _ThemedSwitchState extends State<ThemedSwitch>
 
     // 颜色
     final activeTrackColor = widget.activeColor ?? theme.colorScheme.primary;
-    final inactiveTrackColor = widget.inactiveColor ??
+    final inactiveTrackColor =
+        widget.inactiveColor ??
         (isDark
             ? Color.lerp(theme.colorScheme.surface, Colors.black, 0.4)!
             : Color.lerp(theme.colorScheme.surface, Colors.black, 0.08)!);
@@ -118,8 +116,9 @@ class _ThemedSwitchState extends State<ThemedSwitch>
     final opacity = widget.enabled ? 1.0 : 0.5;
 
     return MouseRegion(
-      cursor:
-          widget.enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      cursor: widget.enabled
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
@@ -140,7 +139,8 @@ class _ThemedSwitchState extends State<ThemedSwitch>
               )!;
 
               // 计算滑块位置
-              final thumbOffset = thumbPadding +
+              final thumbOffset =
+                  thumbPadding +
                   (_position.value *
                       (trackWidth - thumbSize - thumbPadding * 2));
 
@@ -232,13 +232,13 @@ class _ThemedSwitchState extends State<ThemedSwitch>
     final shadowOpacity = _isPressed
         ? 0.15
         : _isHovered
-            ? 0.25
-            : 0.2;
+        ? 0.25
+        : 0.2;
     final shadowBlur = _isPressed
         ? 2.0
         : _isHovered
-            ? 6.0
-            : 4.0;
+        ? 6.0
+        : 4.0;
     final shadowOffset = _isPressed ? const Offset(0, 1) : const Offset(0, 2);
 
     return AnimatedContainer(

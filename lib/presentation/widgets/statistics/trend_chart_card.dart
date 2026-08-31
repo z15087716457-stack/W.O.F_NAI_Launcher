@@ -64,8 +64,9 @@ class TrendChartCard extends StatelessWidget {
               height: 200,
               child: LineChart(
                 _buildChartData(theme, l10n),
-                duration:
-                    animate ? const Duration(milliseconds: 800) : Duration.zero,
+                duration: animate
+                    ? const Duration(milliseconds: 800)
+                    : Duration.zero,
               ),
             ),
 
@@ -113,11 +114,7 @@ class TrendChartCard extends StatelessWidget {
   ) {
     return Row(
       children: [
-        Icon(
-          Icons.show_chart,
-          size: 20,
-          color: theme.colorScheme.primary,
-        ),
+        Icon(Icons.show_chart, size: 20, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -135,11 +132,7 @@ class TrendChartCard extends StatelessWidget {
         ),
         const SizedBox(width: 16),
         if (trends.any((t) => t.favoriteCount > 0))
-          _buildLegendItem(
-            theme,
-            Colors.red,
-            l10n.statistics_favoriteCount,
-          ),
+          _buildLegendItem(theme, Colors.red, l10n.statistics_favoriteCount),
       ],
     );
   }
@@ -158,10 +151,7 @@ class TrendChartCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 4),
-        Text(
-          label,
-          style: theme.textTheme.bodySmall,
-        ),
+        Text(label, style: theme.textTheme.bodySmall),
       ],
     );
   }
@@ -176,10 +166,7 @@ class TrendChartCard extends StatelessWidget {
 
     // 主线（生成数量）
     final mainSpots = sortedTrends.asMap().entries.map((entry) {
-      return FlSpot(
-        entry.key.toDouble(),
-        entry.value.count.toDouble(),
-      );
+      return FlSpot(entry.key.toDouble(), entry.value.count.toDouble());
     }).toList();
 
     return LineChartData(
@@ -213,9 +200,7 @@ class TrendChartCard extends StatelessWidget {
             },
           ),
         ),
-        topTitles: const AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         rightTitles: const AxisTitles(
           sideTitles: SideTitles(showTitles: false),
         ),

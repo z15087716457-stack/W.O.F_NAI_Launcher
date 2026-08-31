@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import '../../../widgets/autocomplete/autocomplete_config.dart';
+import '../nai_syntax_controller.dart';
 
 /// 统一提示词输入配置
 ///
@@ -86,6 +87,16 @@ class UnifiedPromptConfig {
   /// 自动补全配置
   final AutocompleteConfig autocompleteConfig;
 
+  // ==================== 药丸块（P0 原型） ====================
+
+  /// 药丸 span 构建器；非 null 时文本中的块标记字符渲染为内联药丸。
+  ///
+  /// 仅药丸编辑器（生成页主提示词）使用；其余输入框保持 null。
+  final PillSpanBuilder? pillBuilder;
+
+  /// 药丸视觉签名：实例或块库内容变化时递增，驱动药丸重渲染。
+  final int pillVisualsSignature;
+
   const UnifiedPromptConfig({
     this.enableAutocomplete = true,
     this.enableSyntaxHighlight = true,
@@ -103,6 +114,8 @@ class UnifiedPromptConfig {
     this.onClearPressed,
     this.clearNeedsConfirm = false,
     this.autocompleteConfig = const AutocompleteConfig(),
+    this.pillBuilder,
+    this.pillVisualsSignature = 0,
   });
 
   /// 角色编辑器预设配置
@@ -176,6 +189,8 @@ class UnifiedPromptConfig {
     VoidCallback? onClearPressed,
     bool? clearNeedsConfirm,
     AutocompleteConfig? autocompleteConfig,
+    PillSpanBuilder? pillBuilder,
+    int? pillVisualsSignature,
   }) {
     return UnifiedPromptConfig(
       enableAutocomplete: enableAutocomplete ?? this.enableAutocomplete,
@@ -197,6 +212,8 @@ class UnifiedPromptConfig {
       onClearPressed: onClearPressed ?? this.onClearPressed,
       clearNeedsConfirm: clearNeedsConfirm ?? this.clearNeedsConfirm,
       autocompleteConfig: autocompleteConfig ?? this.autocompleteConfig,
+      pillBuilder: pillBuilder ?? this.pillBuilder,
+      pillVisualsSignature: pillVisualsSignature ?? this.pillVisualsSignature,
     );
   }
 

@@ -148,9 +148,7 @@ class VibeExportOptions with _$VibeExportOptions {
   }
 
   /// 创建用于纯编码导出的选项
-  factory VibeExportOptions.encoding({
-    String? fileName,
-  }) {
+  factory VibeExportOptions.encoding({String? fileName}) {
     return VibeExportOptions(
       format: VibeExportFormat.encoding,
       includeEncoding: true,

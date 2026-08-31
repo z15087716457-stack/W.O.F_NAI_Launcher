@@ -113,7 +113,8 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
   Future<void> _startServices() async {
     final library = widget.libraryService ?? await _defaultLibrary();
     if (widget.viewportBuilder == null) {
-      final server = widget.serverOverride ??
+      final server =
+          widget.serverOverride ??
           LocalAssetServer(modelLibraryDir: library.libraryDir);
       final base = await server.start();
       if (!mounted) {
@@ -151,9 +152,7 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
       case 'onDirty':
         setState(() => _dirty = true);
       case 'onLoadError':
-        _showSnack(
-          '${context.l10n.model3d_loadError}: ${data['error'] ?? ''}',
-        );
+        _showSnack('${context.l10n.model3d_loadError}: ${data['error'] ?? ''}');
     }
   }
 
@@ -217,10 +216,7 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
   }) async {
     if (confirm && !await _confirmReplace()) return;
     await _runBusy(() async {
-      await _bridge!.loadModel(
-        builtin: 'mannequin',
-        sceneState: sceneState,
-      );
+      await _bridge!.loadModel(builtin: 'mannequin', sceneState: sceneState);
       if (!mounted) return;
       setState(() {
         _modelRef = Model3dLibraryService.builtinMannequinRef;
@@ -238,9 +234,7 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
       try {
         final ref = await _library!.importModel(file);
         final path = _library!.urlPathFor(ref)!;
-        await _bridge!.loadModel(
-          url: _editorUrl!.resolve(path).toString(),
-        );
+        await _bridge!.loadModel(url: _editorUrl!.resolve(path).toString());
         if (!mounted) return;
         setState(() {
           _modelRef = ref;
@@ -329,12 +323,27 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                slider(l10n.model3d_lightIntensity, _lightIntensity, 0, 3,
-                    (v) => _lightIntensity = v),
-                slider(l10n.model3d_lightAzimuth, _lightAzimuth, -180, 180,
-                    (v) => _lightAzimuth = v),
-                slider(l10n.model3d_lightElevation, _lightElevation, 0, 90,
-                    (v) => _lightElevation = v),
+                slider(
+                  l10n.model3d_lightIntensity,
+                  _lightIntensity,
+                  0,
+                  3,
+                  (v) => _lightIntensity = v,
+                ),
+                slider(
+                  l10n.model3d_lightAzimuth,
+                  _lightAzimuth,
+                  -180,
+                  180,
+                  (v) => _lightAzimuth = v,
+                ),
+                slider(
+                  l10n.model3d_lightElevation,
+                  _lightElevation,
+                  0,
+                  90,
+                  (v) => _lightElevation = v,
+                ),
               ],
             ),
           );
@@ -359,8 +368,9 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
 
   void _showSnack(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<bool> _confirmExit() async {
@@ -405,14 +415,12 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
             IconButton(
               tooltip: l10n.model3d_undo,
               icon: const Icon(Icons.undo),
-              onPressed:
-                  hasModel && !_busy ? () => _bridge!.undoPose() : null,
+              onPressed: hasModel && !_busy ? () => _bridge!.undoPose() : null,
             ),
             IconButton(
               tooltip: l10n.model3d_resetPose,
               icon: const Icon(Icons.restart_alt),
-              onPressed:
-                  hasModel && !_busy ? () => _bridge!.resetPose() : null,
+              onPressed: hasModel && !_busy ? () => _bridge!.resetPose() : null,
             ),
             const SizedBox(width: 8),
             FilledButton(
@@ -434,8 +442,7 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
                   else if (_editorUrl != null)
                     Model3dWebViewport(
                       editorUrl: _editorUrl!,
-                      onBridgeMessage: (args) =>
-                          _bridge?.handleJsMessage(args),
+                      onBridgeMessage: (args) => _bridge?.handleJsMessage(args),
                       onControllerReady: (controller) {
                         _bridge ??= Model3dBridge(
                           evalJs: (source) =>
@@ -484,9 +491,9 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
               selected: {_mode},
               onSelectionChanged: hasModel
                   ? (selection) => _setMode(
-                        selection.first,
-                        selection.first == 'pose' ? 'rotate' : _gizmo,
-                      )
+                      selection.first,
+                      selection.first == 'pose' ? 'rotate' : _gizmo,
+                    )
                   : null,
             ),
             const SizedBox(width: 12),

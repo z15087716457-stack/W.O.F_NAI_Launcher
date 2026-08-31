@@ -228,10 +228,12 @@ class _ElevatedCardState extends State<ElevatedCard> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final translateY =
-        _isHovered && widget.enableHoverEffect ? widget.hoverTranslateY : 0.0;
-    final scale =
-        _isHovered && widget.enableHoverEffect ? widget.hoverScale : 1.0;
+    final translateY = _isHovered && widget.enableHoverEffect
+        ? widget.hoverTranslateY
+        : 0.0;
+    final scale = _isHovered && widget.enableHoverEffect
+        ? widget.hoverScale
+        : 1.0;
 
     // 使用层次化背景色系统：卡片比页面亮 10%
     final baseBackgroundColor =
@@ -304,10 +306,7 @@ class _ElevatedCardState extends State<ElevatedCard> {
 
   Widget _buildContent() {
     if (widget.padding != null) {
-      return Padding(
-        padding: widget.padding!,
-        child: widget.child,
-      );
+      return Padding(padding: widget.padding!, child: widget.child);
     }
     return widget.child;
   }
@@ -381,41 +380,27 @@ class CardGradients {
   static const Gradient aurora = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF00FFFF),
-      Color(0xFF0080FF),
-      Color(0xFFFF00FF),
-    ],
+    colors: [Color(0xFF00FFFF), Color(0xFF0080FF), Color(0xFFFF00FF)],
   );
 
   /// 金色渐变边框
   static const Gradient gold = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFFFFD700),
-      Color(0xFFFFA500),
-      Color(0xFFFF8C00),
-    ],
+    colors: [Color(0xFFFFD700), Color(0xFFFFA500), Color(0xFFFF8C00)],
   );
 
   /// 成功状态渐变边框
   static const Gradient success = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF22C55E),
-      Color(0xFF16A34A),
-    ],
+    colors: [Color(0xFF22C55E), Color(0xFF16A34A)],
   );
 
   /// 警告状态渐变边框
   static const Gradient warning = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFFF59E0B),
-      Color(0xFFD97706),
-    ],
+    colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
   );
 }

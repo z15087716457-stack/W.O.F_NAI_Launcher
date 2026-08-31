@@ -20,8 +20,9 @@ class ParameterPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final advancedOptionsExpanded = ref.watch(
-      generationParamsNotifierProvider
-          .select((params) => params.advancedOptionsExpanded),
+      generationParamsNotifierProvider.select(
+        (params) => params.advancedOptionsExpanded,
+      ),
     );
 
     return ListView(
@@ -95,9 +96,7 @@ class ParameterPanel extends ConsumerWidget {
                 .read(generationParamsNotifierProvider.notifier)
                 .setAdvancedOptionsExpanded(expanded);
           },
-          children: const [
-            AdvancedSamplingOptions(),
-          ],
+          children: const [AdvancedSamplingOptions()],
         ),
       ],
     );

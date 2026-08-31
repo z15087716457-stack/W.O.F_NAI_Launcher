@@ -54,11 +54,7 @@ class WorkflowAnalyzer {
       final inputs = nodeData['inputs'] as Map<String, dynamic>? ?? {};
 
       nodeInfos.add(
-        AnalyzedNode(
-          nodeId: nodeId,
-          classType: classType,
-          title: title,
-        ),
+        AnalyzedNode(nodeId: nodeId, classType: classType, title: title),
       );
 
       // 识别输入图像节点
@@ -171,10 +167,10 @@ class WorkflowAnalysisResult {
 
   /// 所有自动识别的槽位合并
   List<WorkflowSlot> get allSlots => [
-        ...inputSlots,
-        ...parameterSlots,
-        ...outputSlots,
-      ];
+    ...inputSlots,
+    ...parameterSlots,
+    ...outputSlots,
+  ];
 }
 
 /// 分析出的节点信息

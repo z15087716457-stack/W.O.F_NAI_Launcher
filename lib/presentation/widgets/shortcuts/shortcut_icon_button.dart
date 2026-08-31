@@ -55,10 +55,7 @@ class ShortcutIconButton extends ConsumerWidget {
     );
 
     if (shortcutId == null) {
-      return Tooltip(
-        message: tooltip,
-        child: button,
-      );
+      return Tooltip(message: tooltip, child: button);
     }
 
     return ShortcutTooltip(
@@ -177,9 +174,9 @@ class ShortcutMenuItem extends ConsumerWidget {
           child: Text(
             shortcutLabel,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontFamily: 'monospace',
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              fontFamily: 'monospace',
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         );
       }

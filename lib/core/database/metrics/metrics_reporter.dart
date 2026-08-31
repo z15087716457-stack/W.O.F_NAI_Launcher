@@ -76,17 +76,27 @@ class MetricsReporter {
     buffer.writeln('Available Connections: ${metrics.availableConnections}');
     buffer.writeln('In-Use Connections: ${metrics.inUseConnections}');
     buffer.writeln('Total Connections: ${metrics.totalConnections}');
-    buffer.writeln('Pool Utilization: ${(metrics.poolUtilization * 100).toStringAsFixed(1)}%');
+    buffer.writeln(
+      'Pool Utilization: ${(metrics.poolUtilization * 100).toStringAsFixed(1)}%',
+    );
     buffer.writeln('Wait Queue Length: ${metrics.waitQueueLength}');
 
     // 操作统计
     buffer.writeln('\n--- Operation Statistics ---');
     buffer.writeln('Total Operations: ${metrics.totalOperations}');
     buffer.writeln('Failed Operations: ${metrics.failedOperations}');
-    buffer.writeln('Error Rate: ${(metrics.errorRate * 100).toStringAsFixed(2)}%');
-    buffer.writeln('Average Operation Time: ${metrics.averageOperationTime.toStringAsFixed(2)} ms');
-    buffer.writeln('P95 Operation Time: ${metrics.p95OperationTime.toStringAsFixed(2)} ms');
-    buffer.writeln('P99 Operation Time: ${metrics.p99OperationTime.toStringAsFixed(2)} ms');
+    buffer.writeln(
+      'Error Rate: ${(metrics.errorRate * 100).toStringAsFixed(2)}%',
+    );
+    buffer.writeln(
+      'Average Operation Time: ${metrics.averageOperationTime.toStringAsFixed(2)} ms',
+    );
+    buffer.writeln(
+      'P95 Operation Time: ${metrics.p95OperationTime.toStringAsFixed(2)} ms',
+    );
+    buffer.writeln(
+      'P99 Operation Time: ${metrics.p99OperationTime.toStringAsFixed(2)} ms',
+    );
 
     // 错误统计
     buffer.writeln('\n--- Error Statistics ---');
@@ -99,11 +109,13 @@ class MetricsReporter {
       buffer.writeln('\n--- Data Source Metrics ---');
       for (final entry in dataSourceMetrics.entries) {
         final ds = entry.value;
-        buffer.writeln('${ds.name}: '
-            'ops=${ds.operationCount}, '
-            'errors=${ds.errorCount}, '
-            'avg=${ds.averageOperationTime.toStringAsFixed(2)}ms, '
-            'rate=${(ds.errorRate * 100).toStringAsFixed(2)}%');
+        buffer.writeln(
+          '${ds.name}: '
+          'ops=${ds.operationCount}, '
+          'errors=${ds.errorCount}, '
+          'avg=${ds.averageOperationTime.toStringAsFixed(2)}ms, '
+          'rate=${(ds.errorRate * 100).toStringAsFixed(2)}%',
+        );
       }
     }
 
@@ -163,19 +175,29 @@ class MetricsReporter {
 
     // 错误率检查
     if (metrics.errorRate >= _criticalErrorRateThreshold) {
-      issues.add('Critical error rate: ${(metrics.errorRate * 100).toStringAsFixed(1)}%');
-      recommendations.add('Investigate error logs and check database connectivity');
+      issues.add(
+        'Critical error rate: ${(metrics.errorRate * 100).toStringAsFixed(1)}%',
+      );
+      recommendations.add(
+        'Investigate error logs and check database connectivity',
+      );
     } else if (metrics.errorRate >= _highErrorRateThreshold) {
-      issues.add('High error rate: ${(metrics.errorRate * 100).toStringAsFixed(1)}%');
+      issues.add(
+        'High error rate: ${(metrics.errorRate * 100).toStringAsFixed(1)}%',
+      );
       recommendations.add('Monitor error trends and review recent changes');
     }
 
     // 连接池利用率检查
     if (metrics.poolUtilization >= _criticalUtilizationThreshold) {
       issues.add('Connection pool fully utilized');
-      recommendations.add('Consider increasing max connections or optimizing queries');
+      recommendations.add(
+        'Consider increasing max connections or optimizing queries',
+      );
     } else if (metrics.poolUtilization >= _highUtilizationThreshold) {
-      issues.add('Connection pool nearly full: ${(metrics.poolUtilization * 100).toStringAsFixed(0)}%');
+      issues.add(
+        'Connection pool nearly full: ${(metrics.poolUtilization * 100).toStringAsFixed(0)}%',
+      );
       recommendations.add('Monitor for connection leaks');
     }
 
@@ -188,7 +210,9 @@ class MetricsReporter {
     // 操作时间检查
     if (metrics.p99OperationTime > 5000) {
       // 5秒
-      issues.add('High P99 latency: ${metrics.p99OperationTime.toStringAsFixed(0)}ms');
+      issues.add(
+        'High P99 latency: ${metrics.p99OperationTime.toStringAsFixed(0)}ms',
+      );
       recommendations.add('Optimize slow queries and add indexes');
     }
 
@@ -221,7 +245,12 @@ class MetricsReporter {
         );
       }
     } catch (e, stack) {
-      AppLogger.e('Failed to generate metrics report', e, stack, 'MetricsReporter');
+      AppLogger.e(
+        'Failed to generate metrics report',
+        e,
+        stack,
+        'MetricsReporter',
+      );
     }
   }
 

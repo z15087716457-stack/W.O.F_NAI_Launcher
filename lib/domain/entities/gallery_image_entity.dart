@@ -116,7 +116,8 @@ class GalleryImageEntity {
       modifiedAt: modifiedAt,
       createdAt: createdAt,
       indexedAt: indexedAt,
-      dateYmd: modifiedAt.year * 10000 + modifiedAt.month * 100 + modifiedAt.day,
+      dateYmd:
+          modifiedAt.year * 10000 + modifiedAt.month * 100 + modifiedAt.day,
       resolutionKey: resolutionKey,
       metadataStatus: metadataStatus,
       isFavorite: isFavorite,

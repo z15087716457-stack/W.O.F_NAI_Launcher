@@ -255,26 +255,28 @@ void main() {
       },
     );
 
-    test('soft-deleted favorites are no longer counted, even after refresh',
-        () async {
-      final fileA = File(p.join(galleryRoot.path, 'del_a.png'));
-      final fileB = File(p.join(galleryRoot.path, 'del_b.png'));
-      await fileA.writeAsBytes(<int>[137, 80, 78, 71]);
-      await fileB.writeAsBytes(<int>[137, 80, 78, 71]);
+    test(
+      'soft-deleted favorites are no longer counted, even after refresh',
+      () async {
+        final fileA = File(p.join(galleryRoot.path, 'del_a.png'));
+        final fileB = File(p.join(galleryRoot.path, 'del_b.png'));
+        await fileA.writeAsBytes(<int>[137, 80, 78, 71]);
+        await fileB.writeAsBytes(<int>[137, 80, 78, 71]);
 
-      await service.initialize();
-      await service.toggleFavorite(fileA.path);
-      await service.toggleFavorite(fileB.path);
-      expect(await service.getFavoriteCount(), 2);
+        await service.initialize();
+        await service.toggleFavorite(fileA.path);
+        await service.toggleFavorite(fileB.path);
+        expect(await service.getFavoriteCount(), 2);
 
-      await dataSource.batchMarkAsDeleted([fileA.path]);
-      expect(await dataSource.getFavoriteCount(), 1);
-      expect(await service.getFavoriteCount(), 1);
+        await dataSource.batchMarkAsDeleted([fileA.path]);
+        expect(await dataSource.getFavoriteCount(), 1);
+        expect(await service.getFavoriteCount(), 1);
 
-      // 软删后重扫/重放也不复活（DB is_deleted 为权威）
-      await service.refresh(scan: false);
-      expect(await service.getFavoriteCount(), 1);
-    });
+        // 软删后重扫/重放也不复活（DB is_deleted 为权威）
+        await service.refresh(scan: false);
+        expect(await service.getFavoriteCount(), 1);
+      },
+    );
 
     test('toggling favorite off also leaves all collections', () async {
       final file = File(p.join(galleryRoot.path, 'toggle_off.png'));

@@ -36,9 +36,7 @@ class Debouncer with _DebouncerBase {
   @override
   Timer? timer;
 
-  Debouncer({
-    this.delay = const Duration(milliseconds: 300),
-  });
+  Debouncer({this.delay = const Duration(milliseconds: 300)});
 
   /// 执行防抖操作
   /// [action] 要执行的回调函数
@@ -75,9 +73,7 @@ class DebouncerWithArg<T> with _DebouncerBase {
   /// 待执行的回调
   void Function(T)? _pendingAction;
 
-  DebouncerWithArg({
-    this.delay = const Duration(milliseconds: 300),
-  });
+  DebouncerWithArg({this.delay = const Duration(milliseconds: 300)});
 
   /// 执行防抖操作
   /// [arg] 传递给回调函数的参数
@@ -117,9 +113,7 @@ class AsyncDebouncer<T> with _DebouncerBase {
   /// 当前待处理的 completer，用于在取消时完成它
   Completer<T>? _pendingCompleter;
 
-  AsyncDebouncer({
-    this.delay = const Duration(milliseconds: 300),
-  });
+  AsyncDebouncer({this.delay = const Duration(milliseconds: 300)});
 
   /// 执行异步防抖操作
   /// [action] 要执行的异步回调函数

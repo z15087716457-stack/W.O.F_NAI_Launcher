@@ -27,10 +27,7 @@ class _AnimatedBarChartState extends State<AnimatedBarChart>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
     _animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOutCubic,

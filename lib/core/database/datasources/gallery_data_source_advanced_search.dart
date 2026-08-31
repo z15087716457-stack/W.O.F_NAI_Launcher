@@ -334,10 +334,7 @@ extension GalleryDataSourceAdvancedSearch on GalleryDataSource {
               for (var i = 0; i < textSearchIds.length; i += textIdChunkSize) {
                 final end = min(i + textIdChunkSize, textSearchIds.length);
                 final idChunk = textSearchIds.sublist(i, end);
-                final placeholders = List.filled(
-                  idChunk.length,
-                  '?',
-                ).join(',');
+                final placeholders = List.filled(idChunk.length, '?').join(',');
                 final results = await db.rawQuery(
                   '''
                   $selectPrefix

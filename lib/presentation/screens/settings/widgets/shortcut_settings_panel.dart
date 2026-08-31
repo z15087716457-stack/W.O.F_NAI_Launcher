@@ -473,8 +473,6 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
         return l10n.shortcut_action_navigate_to_local_gallery;
       case 'shortcut_action_navigate_to_online_gallery':
         return l10n.shortcut_action_navigate_to_online_gallery;
-      case 'shortcut_action_navigate_to_random_config':
-        return l10n.shortcut_action_navigate_to_random_config;
       case 'shortcut_action_navigate_to_tag_library':
         return l10n.shortcut_action_navigate_to_tag_library;
       case 'shortcut_action_navigate_to_statistics':
@@ -489,8 +487,6 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
         return l10n.shortcut_action_generation_next_image;
       case 'shortcut_action_cancel_generation':
         return l10n.shortcut_action_cancel_generation;
-      case 'shortcut_action_random_prompt':
-        return l10n.shortcut_action_random_prompt;
       case 'shortcut_action_clear_prompt':
         return l10n.shortcut_action_clear_prompt;
       case 'shortcut_action_toggle_prompt_mode':
@@ -571,20 +567,6 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
         return l10n.shortcut_action_send_to_home;
       case 'shortcut_action_exit_selection_mode':
         return l10n.shortcut_action_exit_selection_mode;
-      case 'shortcut_action_sync_danbooru':
-        return l10n.shortcut_action_sync_danbooru;
-      case 'shortcut_action_generate_preview':
-        return l10n.shortcut_action_generate_preview;
-      case 'shortcut_action_search_presets':
-        return l10n.shortcut_action_search_presets;
-      case 'shortcut_action_new_preset':
-        return l10n.shortcut_action_new_preset;
-      case 'shortcut_action_duplicate_preset':
-        return l10n.shortcut_action_duplicate_preset;
-      case 'shortcut_action_delete_preset':
-        return l10n.shortcut_action_delete_preset;
-      case 'shortcut_action_close_config':
-        return l10n.shortcut_action_close_config;
       case 'shortcut_action_show_shortcut_help':
         return l10n.shortcut_action_show_shortcut_help;
       case 'shortcut_action_minimize_to_tray':
@@ -612,8 +594,6 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
         return l10n.shortcut_context_viewer;
       case ShortcutContext.tagLibrary:
         return l10n.shortcut_context_tag_library;
-      case ShortcutContext.randomConfig:
-        return l10n.shortcut_context_random_config;
       case ShortcutContext.settings:
         return l10n.shortcut_context_settings;
       case ShortcutContext.input:

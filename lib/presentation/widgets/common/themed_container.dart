@@ -28,7 +28,8 @@ class ThemedContainer extends StatelessWidget {
     final extension = theme.extension<AppThemeExtension>();
 
     // 合并默认装饰和传入的装饰
-    final defaultDecoration = extension?.containerDecoration ??
+    final defaultDecoration =
+        extension?.containerDecoration ??
         BoxDecoration(
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(8),
@@ -66,7 +67,8 @@ class ThemedContainer extends StatelessWidget {
       return Container(
         margin: margin, // Margin 需要在外部
         child: ClipRRect(
-          borderRadius: effectiveDecoration.borderRadius as BorderRadius? ??
+          borderRadius:
+              effectiveDecoration.borderRadius as BorderRadius? ??
               BorderRadius.zero,
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
@@ -75,7 +77,8 @@ class ThemedContainer extends StatelessWidget {
               height: height,
               padding: padding,
               decoration: effectiveDecoration.copyWith(
-                color: effectiveDecoration.color?.withValues(alpha: 0.3) ??
+                color:
+                    effectiveDecoration.color?.withValues(alpha: 0.3) ??
                     Colors.transparent,
               ),
               child: child,

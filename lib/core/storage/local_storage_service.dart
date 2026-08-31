@@ -324,50 +324,6 @@ class LocalStorageService {
     await setSetting(StorageKeys.qualityPresetCustomIds, ids);
   }
 
-  // ==================== Random Prompt Mode ====================
-
-  /// 获取抽卡模式 (默认关闭)
-  bool getRandomPromptMode() {
-    return getSetting<bool>(
-          StorageKeys.randomPromptMode,
-          defaultValue: false,
-        ) ??
-        false;
-  }
-
-  /// 保存抽卡模式
-  Future<void> setRandomPromptMode(bool value) async {
-    await setSetting(StorageKeys.randomPromptMode, value);
-  }
-
-  /// 获取是否显示随机提示词工具入口 (默认开启)
-  bool getShowRandomPromptTools() {
-    return getSetting<bool>(
-          StorageKeys.showRandomPromptTools,
-          defaultValue: true,
-        ) ??
-        true;
-  }
-
-  /// 保存是否显示随机提示词工具入口
-  Future<void> setShowRandomPromptTools(bool value) async {
-    await setSetting(StorageKeys.showRandomPromptTools, value);
-  }
-
-  /// 获取随机生成算法模式
-  String getRandomGenerationMode() {
-    return getSetting<String>(
-          StorageKeys.randomGenerationMode,
-          defaultValue: 'nai_official',
-        ) ??
-        'nai_official';
-  }
-
-  /// 保存随机生成算法模式
-  Future<void> setRandomGenerationMode(String value) async {
-    await setSetting(StorageKeys.randomGenerationMode, value);
-  }
-
   /// 获取每次请求生成的图片数量 (默认1，最大4)
   int getImagesPerRequest() {
     return getSetting<int>(StorageKeys.imagesPerRequest, defaultValue: 1) ?? 1;
@@ -776,6 +732,33 @@ class LocalStorageService {
   /// 保存固定词侧边栏宽度
   Future<void> setFixedTagsSidebarWidth(double width) async {
     await setSetting(StorageKeys.fixedTagsSidebarWidth, width);
+  }
+
+  /// 获取块库面板展开状态 (默认收起)
+  bool getBlockLibraryPanelExpanded() {
+    return getSetting<bool>(
+          StorageKeys.blockLibraryPanelExpanded,
+          defaultValue: false,
+        ) ??
+        false;
+  }
+
+  /// 保存块库面板展开状态
+  Future<void> setBlockLibraryPanelExpanded(bool expanded) async {
+    await setSetting(StorageKeys.blockLibraryPanelExpanded, expanded);
+  }
+
+  /// 获取块库面板宽度 (默认320)
+  double getBlockLibraryPanelWidth() {
+    final value = getSetting(StorageKeys.blockLibraryPanelWidth);
+    if (value is int) return value.toDouble();
+    if (value is double) return value;
+    return 320.0;
+  }
+
+  /// 保存块库面板宽度
+  Future<void> setBlockLibraryPanelWidth(double width) async {
+    await setSetting(StorageKeys.blockLibraryPanelWidth, width);
   }
 
   /// 获取固定词侧边栏视图模式

@@ -20,10 +20,7 @@ class NAITagSuggestionApiService {
   NAITagSuggestionApiService(this._dio, this._endpointService);
 
   /// 获取标签建议
-  Future<List<TagSuggestion>> suggestTags(
-    String input, {
-    String? model,
-  }) async {
+  Future<List<TagSuggestion>> suggestTags(String input, {String? model}) async {
     if (input.trim().length < 2) return [];
 
     try {
@@ -35,10 +32,7 @@ class NAITagSuggestionApiService {
       final response = await _dio.get(
         _endpointService.imageUrl(ApiConstants.suggestTagsEndpoint),
         queryParameters: queryParams,
-        options: Options(
-          receiveTimeout: _timeout,
-          sendTimeout: _timeout,
-        ),
+        options: Options(receiveTimeout: _timeout, sendTimeout: _timeout),
       );
 
       final data = response.data;

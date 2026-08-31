@@ -32,9 +32,7 @@ class _FixedTagsSidebarSlotState extends ConsumerState<FixedTagsSidebarSlot> {
     final width = layoutState.fixedTagsSidebarWidth;
     final decoration = BoxDecoration(
       color: Theme.of(context).colorScheme.surface,
-      border: Border(
-        right: BorderSide(color: Theme.of(context).dividerColor),
-      ),
+      border: Border(right: BorderSide(color: Theme.of(context).dividerColor)),
     );
     final child = FixedTagsSidebar(isResizing: _isResizing);
 

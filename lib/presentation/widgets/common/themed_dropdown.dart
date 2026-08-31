@@ -64,8 +64,10 @@ class ThemedDropdown<T> extends StatelessWidget {
           focusedBorder: InputBorder.none,
           errorBorder: InputBorder.none,
           disabledBorder: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
         ),
         dropdownColor: Theme.of(context).colorScheme.surfaceContainerHigh,
       ),
@@ -173,8 +175,10 @@ class ThemedTextField extends StatelessWidget {
           focusedBorder: InputBorder.none,
           errorBorder: InputBorder.none,
           disabledBorder: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
           // 浮动标签样式
           labelStyle: TextStyle(
             fontSize: 12,

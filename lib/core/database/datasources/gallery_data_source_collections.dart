@@ -14,8 +14,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
         'SELECT COALESCE(MAX(sort_order), -1) + 1 AS next '
         'FROM ${GalleryDataSource._collectionsTable}',
       );
-      final nextSortOrder =
-          (sortResult.first['next'] as num?)?.toInt() ?? 0;
+      final nextSortOrder = (sortResult.first['next'] as num?)?.toInt() ?? 0;
 
       await db.insert(GalleryDataSource._collectionsTable, {
         'id': id,
@@ -82,9 +81,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
           FROM ${GalleryDataSource._collectionsTable} c
           ORDER BY c.sort_order ASC, c.created_at ASC
         ''');
-        return [
-          for (final row in rows) GalleryCollectionInfo.fromMap(row),
-        ];
+        return [for (final row in rows) GalleryCollectionInfo.fromMap(row)];
       });
     });
   }
@@ -111,10 +108,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
   }
 
   /// 添加图片到收藏集（幂等；返回是否真正新插入，已在集合中返回 false）
-  Future<bool> addImageToCollection(
-    String collectionId,
-    int imageId,
-  ) async {
+  Future<bool> addImageToCollection(String collectionId, int imageId) async {
     final changed = await execute('addImageToCollection', (db) async {
       // db.insert 返回 rowid 而非受影响行数（表非空时恒 >1，不能用来判定
       // 是否插入成功）；rawUpdate 返回 sqlite3_changes()：插入成功=1、被
@@ -174,14 +168,15 @@ extension GalleryDataSourceCollections on GalleryDataSource {
 
     return _trackQuery('getCollectionImageIds', () async {
       return execute('getCollectionImageIds', (db) async {
-        final rows = await db.rawQuery('''
+        final rows = await db.rawQuery(
+          '''
           SELECT image_id FROM ${GalleryDataSource._collectionItemsTable}
           WHERE collection_id = ?
           ORDER BY added_at ASC
-        ''', [collectionId]);
-        return [
-          for (final row in rows) (row['image_id'] as num).toInt(),
-        ];
+        ''',
+          [collectionId],
+        );
+        return [for (final row in rows) (row['image_id'] as num).toInt()];
       });
     });
   }
@@ -190,10 +185,13 @@ extension GalleryDataSourceCollections on GalleryDataSource {
   Future<Set<String>> getCollectionIdsForImage(int imageId) async {
     return _trackQuery('getCollectionIdsForImage', () async {
       return execute('getCollectionIdsForImage', (db) async {
-        final rows = await db.rawQuery('''
+        final rows = await db.rawQuery(
+          '''
           SELECT collection_id FROM ${GalleryDataSource._collectionItemsTable}
           WHERE image_id = ?
-        ''', [imageId]);
+        ''',
+          [imageId],
+        );
         return {for (final row in rows) row['collection_id'] as String};
       });
     });

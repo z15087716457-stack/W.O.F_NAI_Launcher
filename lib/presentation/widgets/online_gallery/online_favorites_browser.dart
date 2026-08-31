@@ -8,6 +8,7 @@ import '../../../data/models/online_gallery/gallery_item.dart';
 import '../../../data/models/online_gallery/gallery_source.dart';
 import '../../../data/repositories/online_favorites_repository.dart';
 import '../../providers/online_favorites_provider.dart';
+import '../common/app_toast.dart';
 
 /// AItag 本地收藏浏览器：子集 chips + 收藏作者卡 + 收藏网格
 ///
@@ -69,6 +70,20 @@ class _OnlineFavoritesBrowserState
     } catch (_) {
       if (!mounted) return;
       setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _removeAuthor(OnlineFavoriteAuthor author) async {
+    final removed = await ref
+        .read(onlineFavoritesNotifierProvider.notifier)
+        .removeAuthor(author.authorId);
+    if (!removed || !mounted) return;
+    if (_authorFilter == author.authorId) {
+      setState(() => _authorFilter = null);
+    }
+    await _reload();
+    if (mounted) {
+      AppToast.success(context, context.l10n.onlineFav_authorUnfavorited);
     }
   }
 
@@ -286,6 +301,7 @@ class _OnlineFavoritesBrowserState
               .take(4)
               .toList();
           return _AuthorCard(
+            authorId: author.authorId,
             authorName: author.authorName,
             workCount: count,
             sampleUrls: [
@@ -300,6 +316,7 @@ class _OnlineFavoritesBrowserState
               setState(() => _authorFilter = selected ? null : author.authorId);
               _reload();
             },
+            onRemove: () => _removeAuthor(author),
           );
         },
       ),
@@ -318,7 +335,10 @@ class _OnlineFavoritesBrowserState
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 12),
-            Text(context.l10n.onlineFav_empty, style: theme.textTheme.titleMedium),
+            Text(
+              context.l10n.onlineFav_empty,
+              style: theme.textTheme.titleMedium,
+            ),
           ],
         ),
       );
@@ -413,14 +433,12 @@ class _FavoriteCardMenu extends ConsumerWidget {
     return IconButton(
       iconSize: 18,
       visualDensity: VisualDensity.compact,
-      icon: Icon(
-        Icons.more_vert,
-        color: Theme.of(context).colorScheme.outline,
-      ),
+      icon: Icon(Icons.more_vert, color: Theme.of(context).colorScheme.outline),
       onPressed: () async {
         final notifier = ref.read(onlineFavoritesNotifierProvider.notifier);
-        final collections =
-            ref.read(onlineFavoritesNotifierProvider).collections;
+        final collections = ref
+            .read(onlineFavoritesNotifierProvider)
+            .collections;
         final action = await showModalBottomSheet<String>(
           context: context,
           builder: (context) => SafeArea(
@@ -469,20 +487,24 @@ class _FavoriteCardMenu extends ConsumerWidget {
 /// Pixiv 式作者卡：圆形头像 + 名字/张数 + 示例小图
 class _AuthorCard extends StatelessWidget {
   const _AuthorCard({
+    required this.authorId,
     required this.authorName,
     required this.workCount,
     required this.sampleUrls,
     required this.fallbackAvatarSeed,
     required this.selected,
     required this.onTap,
+    required this.onRemove,
   });
 
+  final int authorId;
   final String authorName;
   final int workCount;
   final List<String> sampleUrls;
   final int fallbackAvatarSeed;
   final bool selected;
   final VoidCallback onTap;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -496,93 +518,119 @@ class _AuthorCard extends StatelessWidget {
       Colors.pink.shade300,
     ];
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        width: 200,
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: selected
-              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.5)
-              : theme.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: selected
-                ? theme.colorScheme.primary
-                : Colors.transparent,
-            width: 1.5,
+    return SizedBox(
+      width: 200,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(8, 8, 30, 8),
+              decoration: BoxDecoration(
+                color: selected
+                    ? theme.colorScheme.primaryContainer.withValues(alpha: 0.5)
+                    : theme.colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: selected
+                      ? theme.colorScheme.primary
+                      : Colors.transparent,
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor:
+                        avatarColors[fallbackAvatarSeed % avatarColors.length],
+                    foregroundImage: avatarUrl.isEmpty
+                        ? null
+                        : CachedNetworkImageProvider(avatarUrl),
+                    child: avatarUrl.isEmpty
+                        ? Text(
+                            authorName.isNotEmpty
+                                ? authorName[0].toUpperCase()
+                                : '?',
+                            style: const TextStyle(color: Colors.white),
+                          )
+                        : null,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          authorName.isEmpty ? '???' : authorName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          context.l10n.onlineFav_authorWorkCount(workCount),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  SizedBox(
+                    width: 56,
+                    height: 40,
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 2,
+                      crossAxisSpacing: 2,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        for (var i = 0; i < 4; i++)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(3),
+                              image: i < sampleUrls.length
+                                  ? DecorationImage(
+                                      image: CachedNetworkImageProvider(
+                                        sampleUrls[i],
+                                      ),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor:
-                  avatarColors[fallbackAvatarSeed % avatarColors.length],
-              foregroundImage: avatarUrl.isEmpty
-                  ? null
-                  : CachedNetworkImageProvider(avatarUrl),
-              child: avatarUrl.isEmpty
-                  ? Text(
-                      authorName.isNotEmpty ? authorName[0].toUpperCase() : '?',
-                      style: const TextStyle(color: Colors.white),
-                    )
-                  : null,
+          Positioned(
+            top: 2,
+            right: 2,
+            child: IconButton(
+              key: ValueKey('online-favorite-author-remove-$authorId'),
+              tooltip: context.l10n.onlineFav_unfavoriteAuthor,
+              onPressed: onRemove,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+              visualDensity: VisualDensity.compact,
+              iconSize: 17,
+              color: theme.colorScheme.error.withValues(alpha: 0.72),
+              icon: const Icon(Icons.person_remove_outlined),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    authorName.isEmpty ? '???' : authorName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    context.l10n.onlineFav_authorWorkCount(workCount),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.outline,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 6),
-            SizedBox(
-              width: 56,
-              height: 40,
-              child: GridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 2,
-                crossAxisSpacing: 2,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  for (var i = 0; i < 4; i++)
-                    Container(
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(3),
-                        image: i < sampleUrls.length
-                            ? DecorationImage(
-                                image: CachedNetworkImageProvider(
-                                  sampleUrls[i],
-                                ),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

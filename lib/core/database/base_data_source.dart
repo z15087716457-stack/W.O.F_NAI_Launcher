@@ -19,7 +19,8 @@ class DataSourceOperationException implements Exception {
   });
 
   @override
-  String toString() => 'DataSourceOperationException: $message (operation: $operationName)';
+  String toString() =>
+      'DataSourceOperationException: $message (operation: $operationName)';
 }
 
 class DatabaseOperation<T> {
@@ -65,11 +66,23 @@ abstract class EnhancedBaseDataSource extends ds.BaseDataSource {
         return result;
       } on ConnectionVersionMismatchException catch (e) {
         attempt++;
-        _logRetry(operationId, attempt, effectiveMaxRetries, 'version mismatch', e);
+        _logRetry(
+          operationId,
+          attempt,
+          effectiveMaxRetries,
+          'version mismatch',
+          e,
+        );
         await Future.delayed(Duration(milliseconds: 200 * attempt));
       } on ConnectionInvalidException catch (e) {
         attempt++;
-        _logRetry(operationId, attempt, effectiveMaxRetries, 'connection invalid', e);
+        _logRetry(
+          operationId,
+          attempt,
+          effectiveMaxRetries,
+          'connection invalid',
+          e,
+        );
         await Future.delayed(Duration(milliseconds: 200 * attempt));
       } on TimeoutException catch (e) {
         attempt++;
@@ -78,8 +91,16 @@ abstract class EnhancedBaseDataSource extends ds.BaseDataSource {
       } catch (e) {
         if (_isRetryableError(e) && attempt < effectiveMaxRetries - 1) {
           attempt++;
-          _logRetry(operationId, attempt, effectiveMaxRetries, 'database error', e);
-          final isDbClosed = e.toString().toLowerCase().contains('database has already been closed');
+          _logRetry(
+            operationId,
+            attempt,
+            effectiveMaxRetries,
+            'database error',
+            e,
+          );
+          final isDbClosed = e.toString().toLowerCase().contains(
+            'database has already been closed',
+          );
           final delayMs = isDbClosed ? 500 * attempt : 200 * attempt;
           await Future.delayed(Duration(milliseconds: delayMs));
         } else {
@@ -121,11 +142,19 @@ abstract class EnhancedBaseDataSource extends ds.BaseDataSource {
         }
 
         for (final op in batch) {
-          final result = await lease.execute(op.executor, validateBefore: false);
+          final result = await lease.execute(
+            op.executor,
+            validateBefore: false,
+          );
           yield result;
         }
       } catch (e, stack) {
-        AppLogger.e('Batch operation failed at batch $batchIndex', e, stack, name);
+        AppLogger.e(
+          'Batch operation failed at batch $batchIndex',
+          e,
+          stack,
+          name,
+        );
         rethrow;
       } finally {
         await lease?.dispose();
@@ -194,7 +223,8 @@ abstract class EnhancedBaseDataSource extends ds.BaseDataSource {
   }
 
   Future<ConnectionLease> _acquireLease({String? operationId}) async {
-    final id = operationId ?? '${name}_${DateTime.now().millisecondsSinceEpoch}';
+    final id =
+        operationId ?? '${name}_${DateTime.now().millisecondsSinceEpoch}';
 
     var waitCount = 0;
     while (!ConnectionPoolHolder.isInitialized && waitCount < 50) {
@@ -227,14 +257,26 @@ abstract class EnhancedBaseDataSource extends ds.BaseDataSource {
         errorStr.contains('bad state');
   }
 
-  void _logRetry(String operationId, int attempt, int maxRetries, String reason, dynamic error) {
-    AppLogger.w('[$operationId] $reason, retrying ($attempt/$maxRetries): $error', name);
+  void _logRetry(
+    String operationId,
+    int attempt,
+    int maxRetries,
+    String reason,
+    dynamic error,
+  ) {
+    AppLogger.w(
+      '[$operationId] $reason, retrying ($attempt/$maxRetries): $error',
+      name,
+    );
   }
 
   void _logOperationDuration(String operationId, int durationMs) {
     // 【优化】只在慢操作时记录，减少日志量
     if (durationMs > 1000) {
-      AppLogger.w('Slow operation: $operationId took ${durationMs}ms', 'DataSource');
+      AppLogger.w(
+        'Slow operation: $operationId took ${durationMs}ms',
+        'DataSource',
+      );
     }
     // 正常操作不记录，避免日志刷屏
   }

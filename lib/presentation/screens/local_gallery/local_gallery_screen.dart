@@ -24,7 +24,6 @@ import '../../../data/services/gallery/gallery_view_mode_store.dart';
 import '../../../data/services/gallery/gallery_column_width_store.dart';
 import '../../../data/services/gallery/gallery_nai_only_store.dart';
 import '../../../data/services/gallery/gallery_sort_store.dart';
-import '../../widgets/metadata/metadata_import_dialog.dart';
 import '../../../data/repositories/gallery_folder_repository.dart';
 import '../../providers/bulk_operation_provider.dart';
 import '../../providers/collection_provider.dart';
@@ -57,6 +56,7 @@ import '../../widgets/gallery/gallery_state_views.dart';
 import '../../widgets/gallery/local_image_context_menu.dart';
 import '../../widgets/gallery/local_gallery_toolbar.dart';
 import '../../widgets/gallery/date_range_picker_dialog.dart';
+import '../../widgets/metadata/metadata_import_dialog.dart';
 import '../../widgets/gallery_filter_panel.dart';
 import '../../widgets/grouped_grid_view.dart' show GroupedGridViewState;
 import '../../widgets/shortcuts/shortcut_aware_widget.dart';
@@ -1109,10 +1109,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         ref.read(localGallerySelectionNotifierProvider.notifier).exit();
       } else if (addResult.alreadyIn > 0) {
         // 没有新插入但成员关系已达成（重复添加）不算失败
-        AppToast.info(
-          context,
-          context.l10n.localGallery_alreadyInCollection,
-        );
+        AppToast.info(context, context.l10n.localGallery_alreadyInCollection);
         ref.read(localGallerySelectionNotifierProvider.notifier).exit();
       } else {
         AppToast.info(context, context.l10n.localGallery_addToCollectionFailed);
@@ -1135,8 +1132,9 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
 
     final imagePaths = selectedImages.map((img) => img.path).toList();
     // 「收藏」根条目标注：选中图片中是心形收藏（根成员）的张数
-    final favoriteCountInSelection =
-        selectedImages.where((img) => img.isFavorite).length;
+    final favoriteCountInSelection = selectedImages
+        .where((img) => img.isFavorite)
+        .length;
 
     final result = await CollectionSelectDialog.show(
       context,
@@ -1371,42 +1369,25 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         return;
       }
 
-      final options = await MetadataImportDialog.show(
+      final selection = await MetadataImportDialog.showOfficial(
         context,
         metadata: metadata,
       );
-      if (options == null || !mounted) return;
+      if (selection == null || !mounted) return;
 
-      final appliedCount = await MetadataImportCoordinator.apply(
-        read: ref.read,
-        metadata: metadata,
-        options: options,
-        l10n: context.l10n,
-      );
+      final appliedCount =
+          await MetadataImportCoordinator.applyOfficialSelection(
+            read: ref.read,
+            metadata: metadata,
+            selection: selection,
+          );
       if (!mounted) return;
 
-      if (appliedCount == 0) {
-        AppToast.warning(context, context.l10n.metadataImport_noParamsSelected);
-        return;
-      }
-
-      final l10n = context.l10n;
-      final currentModel = ref.read(generationParamsNotifierProvider).model;
-      final rootNavigator = Navigator.of(context, rootNavigator: true);
-      AppToast.success(context, l10n.metadataImport_appliedCount(appliedCount));
-      context.go(AppRoutes.home);
-
-      await WidgetsBinding.instance.endOfFrame;
-      if (!rootNavigator.mounted) return;
-      unawaited(
-        MetadataImportCoordinator.showAppliedDialog(
-          context: rootNavigator.context,
-          metadata: metadata,
-          options: options,
-          l10n: l10n,
-          currentModel: currentModel,
-        ),
+      AppToast.success(
+        context,
+        context.l10n.metadataImport_appliedCount(appliedCount),
       );
+      context.go(AppRoutes.home);
     } catch (e, stack) {
       AppLogger.e('导入图片元数据失败', e, stack, 'LocalGallery');
       if (mounted) {

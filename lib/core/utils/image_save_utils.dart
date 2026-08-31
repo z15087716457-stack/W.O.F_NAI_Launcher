@@ -11,6 +11,7 @@ import '../../data/services/image_metadata_service.dart';
 import '../../data/services/metadata/unified_metadata_parser.dart';
 import '../constants/api_constants.dart';
 import '../enums/precise_ref_type.dart';
+import '../enums/quality_tag_preset.dart';
 import 'app_logger.dart';
 import 'prompt_semantics_utils.dart';
 
@@ -59,7 +60,11 @@ class ImageSaveUtils {
       'sm': params.smea,
       'sm_dyn': params.smeaDyn,
       'model': params.model,
-      'quality_toggle': params.qualityToggle,
+      'quality_toggle': params.effectiveQualityToggle,
+      if (params.isV5Model)
+        'tag_hint_qt': QualityTags.toTagHintValue(
+          params.effectiveQualityTagPreset,
+        ),
       'uc_preset': params.ucPreset,
       // NAI官方格式字段
       'version': params.isV4Model ? 1 : 'v3',
@@ -220,6 +225,7 @@ class ImageSaveUtils {
             negativePrompt: params.negativePrompt,
             model: params.model,
             qualityToggle: params.qualityToggle,
+            qualityTagPreset: params.effectiveQualityTagPreset,
             ucPreset: params.ucPreset,
             transparentBackground: params.transparentBackground,
           ).effectivePrompt,
@@ -362,6 +368,7 @@ class ImageSaveUtils {
               metadata.ucPreset!,
             )
           : metadata.negativePrompt;
+      final qualityTagPreset = _qualityTagPresetFromMetadata(metadata);
       var params = ImageParams(
         prompt: metadata.prompt,
         negativePrompt: restoredNegativePrompt,
@@ -377,7 +384,9 @@ class ImageSaveUtils {
         smea: metadata.smea ?? false,
         smeaDyn: metadata.smeaDyn ?? false,
         varietyPlus: metadata.varietyPlus ?? false,
-        qualityToggle: metadata.qualityToggle ?? false,
+        qualityToggle:
+            metadata.qualityToggle ?? qualityTagPreset != QualityTagPreset.none,
+        qualityTagPreset: qualityTagPreset,
         ucPreset: metadata.ucPreset ?? UcPresets.noneApiValue,
       );
 
@@ -407,6 +416,28 @@ class ImageSaveUtils {
       );
       return null;
     }
+  }
+
+  static QualityTagPreset _qualityTagPresetFromMetadata(
+    NaiImageMetadata metadata,
+  ) {
+    final rawJson = metadata.rawJson;
+    if (rawJson != null && rawJson.isNotEmpty) {
+      final decoded = _tryDecodeJsonMap(rawJson);
+      if (decoded != null) {
+        final comment = _unwrapCommentIfWrapped(decoded);
+        final rawHint = comment['tag_hint_qt'];
+        final hint = rawHint is num ? rawHint.toInt() : null;
+        final preset = QualityTagPreset.fromTagHintValue(hint);
+        if (preset != null) {
+          return preset;
+        }
+      }
+    }
+
+    return metadata.qualityToggle == true
+        ? QualityTagPreset.standard
+        : QualityTagPreset.none;
   }
 
   /// 获取模型显示名称
@@ -707,8 +738,9 @@ class ImageSaveUtils {
       return metadata.seed;
     }
     if (bytes != null) {
-      final extracted = await ImageMetadataService()
-          .getMetadataFromBytes(bytes);
+      final extracted = await ImageMetadataService().getMetadataFromBytes(
+        bytes,
+      );
       if (extracted?.seed != null && extracted!.seed! >= 0) {
         return extracted.seed;
       }

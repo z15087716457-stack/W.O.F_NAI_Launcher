@@ -1220,8 +1220,7 @@ class NaiImageMetadata with _$NaiImageMetadata {
   /// `version` 键在部分图里是官方 slug（nai-diffusion-*），数字则是
   /// schema 版本不可作模型判定。
   static String? _modelIdFromParams(Map<String, dynamic> commentData) {
-    final modelName =
-        commentData['model_name']?.toString().toLowerCase() ?? '';
+    final modelName = commentData['model_name']?.toString().toLowerCase() ?? '';
     if (modelName.isNotEmpty) {
       // 文本形（如 "NovelAI Diffusion V5"）与 Source 指纹同构，先走 Source 规则
       final fromSourceRules = _modelIdFromSource(modelName);

@@ -161,9 +161,7 @@ class _TagBottomActionSheetState extends State<TagBottomActionSheet> {
       decoration: BoxDecoration(
         color: tagColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: tagColor.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: tagColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -180,8 +178,9 @@ class _TagBottomActionSheetState extends State<TagBottomActionSheet> {
                     color: widget.tag.enabled
                         ? theme.colorScheme.onSurface
                         : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                    decoration:
-                        widget.tag.enabled ? null : TextDecoration.lineThrough,
+                    decoration: widget.tag.enabled
+                        ? null
+                        : TextDecoration.lineThrough,
                   ),
                 ),
                 if (widget.tag.translation != null) ...[
@@ -264,16 +263,20 @@ class _TagBottomActionSheetState extends State<TagBottomActionSheet> {
               Row(
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: isIncrease
-                          ? PromptTagColors.weightIncrease
-                              .withValues(alpha: 0.15)
+                          ? PromptTagColors.weightIncrease.withValues(
+                              alpha: 0.15,
+                            )
                           : isDecrease
-                              ? PromptTagColors.weightDecrease
-                                  .withValues(alpha: 0.15)
-                              : theme.colorScheme.surfaceContainerHighest,
+                          ? PromptTagColors.weightDecrease.withValues(
+                              alpha: 0.15,
+                            )
+                          : theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -284,8 +287,8 @@ class _TagBottomActionSheetState extends State<TagBottomActionSheet> {
                         color: isIncrease
                             ? PromptTagColors.weightIncrease
                             : isDecrease
-                                ? PromptTagColors.weightDecrease
-                                : theme.colorScheme.onSurface,
+                            ? PromptTagColors.weightDecrease
+                            : theme.colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -309,8 +312,9 @@ class _TagBottomActionSheetState extends State<TagBottomActionSheet> {
                           context.l10n.weight_reset,
                           style: TextStyle(
                             fontSize: 12,
-                            color: theme.colorScheme.onSurface
-                                .withValues(alpha: 0.6),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.6,
+                            ),
                           ),
                         ),
                       ),
@@ -328,29 +332,31 @@ class _TagBottomActionSheetState extends State<TagBottomActionSheet> {
               activeTrackColor: isIncrease
                   ? PromptTagColors.weightIncrease
                   : isDecrease
-                      ? PromptTagColors.weightDecrease
-                      : theme.colorScheme.primary,
+                  ? PromptTagColors.weightDecrease
+                  : theme.colorScheme.primary,
               inactiveTrackColor: theme.colorScheme.surfaceContainerHighest,
               thumbColor: isIncrease
                   ? PromptTagColors.weightIncrease
                   : isDecrease
-                      ? PromptTagColors.weightDecrease
-                      : theme.colorScheme.primary,
-              overlayColor: (isIncrease
-                      ? PromptTagColors.weightIncrease
-                      : isDecrease
+                  ? PromptTagColors.weightDecrease
+                  : theme.colorScheme.primary,
+              overlayColor:
+                  (isIncrease
+                          ? PromptTagColors.weightIncrease
+                          : isDecrease
                           ? PromptTagColors.weightDecrease
                           : theme.colorScheme.primary)
-                  .withValues(alpha: 0.2),
+                      .withValues(alpha: 0.2),
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
             ),
             child: Slider(
               value: _currentWeight,
               min: PromptTag.minWeight,
               max: PromptTag.maxWeight,
-              divisions: ((PromptTag.maxWeight - PromptTag.minWeight) /
-                      PromptTag.weightStep)
-                  .round(),
+              divisions:
+                  ((PromptTag.maxWeight - PromptTag.minWeight) /
+                          PromptTag.weightStep)
+                      .round(),
               onChanged: (value) {
                 _onWeightChanged(value);
                 HapticFeedback.selectionClick();
@@ -398,8 +404,9 @@ class _TagBottomActionSheetState extends State<TagBottomActionSheet> {
           if (widget.onToggleFavorite != null) ...[
             Expanded(
               child: _ActionButton(
-                icon:
-                    widget.isFavorite ? Icons.favorite : Icons.favorite_border,
+                icon: widget.isFavorite
+                    ? Icons.favorite
+                    : Icons.favorite_border,
                 label: widget.isFavorite ? 'Unfavorite' : 'Favorite',
                 onTap: () {
                   widget.onToggleFavorite?.call();
@@ -488,8 +495,9 @@ class _ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color =
-        isDestructive ? theme.colorScheme.error : theme.colorScheme.onSurface;
+    final color = isDestructive
+        ? theme.colorScheme.error
+        : theme.colorScheme.onSurface;
 
     return Material(
       color: Colors.transparent,
@@ -504,8 +512,9 @@ class _ActionButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: isDestructive
                 ? theme.colorScheme.error.withValues(alpha: 0.1)
-                : theme.colorScheme.surfaceContainerHighest
-                    .withValues(alpha: 0.5),
+                : theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isDestructive

@@ -20,6 +20,7 @@ import 'handlers/generation_action_handlers.dart';
 import 'widgets/resize_handle.dart';
 import 'widgets/left_panel.dart';
 import 'widgets/fixed_tags_sidebar_slot.dart';
+import 'widgets/block_library_panel_slot.dart';
 import 'widgets/main_workspace.dart';
 import 'widgets/right_panel.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -80,14 +81,6 @@ class _DesktopGenerationLayoutState
           ref.read(generationPreviewSelectionProvider.notifier).clear();
         }
       },
-      // 随机提示词
-      ShortcutIds.randomPrompt: () {
-        if (ref.read(randomPromptToolsVisibilityProvider)) {
-          ref.read(randomPromptModeProvider.notifier).toggle();
-        } else {
-          AppToast.info(context, context.l10n.randomPromptToolsHiddenHint);
-        }
-      },
       // 清空提示词
       ShortcutIds.clearPrompt: () {
         ref.read(generationParamsNotifierProvider.notifier).updatePrompt('');
@@ -143,6 +136,9 @@ class _DesktopGenerationLayoutState
           ),
 
         const FixedTagsSidebarSlot(),
+
+        // 块库面板（页面级非模态 dock，顶栏按钮切换）
+        const BlockLibraryPanelSlot(),
 
         // 中间 - 主工作区（包裹在 ShortcutAwareWidget 中，确保整个区域都支持快捷键）
         Expanded(

@@ -39,72 +39,88 @@ void main() {
       expect(off.hasFilters, isFalse);
     });
 
-    test('hasSessionFilters counts session filters only, not scope/naiOnly',
-        () {
-      // 范围字段与 naiOnly 都不算会话条件
-      expect(const FilterCriteria(naiOnly: true).hasSessionFilters, isFalse);
-      expect(
-        const FilterCriteria(categoryId: 'cat-1').hasSessionFilters,
-        isFalse,
-      );
-      expect(
-        const FilterCriteria(categoryFolderPath: r'aaa\bbb').hasSessionFilters,
-        isFalse,
-      );
-      expect(
-        const FilterCriteria(collectionId: 'col-1').hasSessionFilters,
-        isFalse,
-      );
-      expect(
-        const FilterCriteria(showFavoritesOnly: true).hasSessionFilters,
-        isFalse,
-      );
-      // 范围 + naiOnly 组合仍不算（用户只是浏览该范围，没施加条件）
-      expect(
-        const FilterCriteria(
-          naiOnly: true,
-          categoryId: 'cat-1',
-          collectionId: 'col-1',
-          showFavoritesOnly: true,
-        ).hasSessionFilters,
-        isFalse,
-      );
+    test(
+      'hasSessionFilters counts session filters only, not scope/naiOnly',
+      () {
+        // 范围字段与 naiOnly 都不算会话条件
+        expect(const FilterCriteria(naiOnly: true).hasSessionFilters, isFalse);
+        expect(
+          const FilterCriteria(categoryId: 'cat-1').hasSessionFilters,
+          isFalse,
+        );
+        expect(
+          const FilterCriteria(
+            categoryFolderPath: r'aaa\bbb',
+          ).hasSessionFilters,
+          isFalse,
+        );
+        expect(
+          const FilterCriteria(collectionId: 'col-1').hasSessionFilters,
+          isFalse,
+        );
+        expect(
+          const FilterCriteria(showFavoritesOnly: true).hasSessionFilters,
+          isFalse,
+        );
+        // 范围 + naiOnly 组合仍不算（用户只是浏览该范围，没施加条件）
+        expect(
+          const FilterCriteria(
+            naiOnly: true,
+            categoryId: 'cat-1',
+            collectionId: 'col-1',
+            showFavoritesOnly: true,
+          ).hasSessionFilters,
+          isFalse,
+        );
 
-      // 任意会话条件即算
-      expect(
-        const FilterCriteria(naiOnly: true, searchQuery: 'solo')
-            .hasSessionFilters,
-        isTrue,
-      );
-      expect(
-        const FilterCriteria(categoryId: 'cat-1', selectedTags: ['solo'])
-            .hasSessionFilters,
-        isTrue,
-      );
-      expect(
-        const FilterCriteria(collectionId: 'col-1', dateStart: null)
-            .hasSessionFilters,
-        isFalse, // dateStart=null 不算
-      );
-      expect(
-        const FilterCriteria(collectionId: 'col-1', filterModels: ['x'])
-            .hasSessionFilters,
-        isTrue,
-      );
-      expect(
-        const FilterCriteria(showFavoritesOnly: true, nsfwMode: 'nsfw')
-            .hasSessionFilters,
-        isTrue,
-      );
-      expect(
-        const FilterCriteria(showFavoritesOnly: true, minFileSize: 100)
-            .hasSessionFilters,
-        isTrue,
-      );
+        // 任意会话条件即算
+        expect(
+          const FilterCriteria(
+            naiOnly: true,
+            searchQuery: 'solo',
+          ).hasSessionFilters,
+          isTrue,
+        );
+        expect(
+          const FilterCriteria(
+            categoryId: 'cat-1',
+            selectedTags: ['solo'],
+          ).hasSessionFilters,
+          isTrue,
+        );
+        expect(
+          const FilterCriteria(
+            collectionId: 'col-1',
+            dateStart: null,
+          ).hasSessionFilters,
+          isFalse, // dateStart=null 不算
+        );
+        expect(
+          const FilterCriteria(
+            collectionId: 'col-1',
+            filterModels: ['x'],
+          ).hasSessionFilters,
+          isTrue,
+        );
+        expect(
+          const FilterCriteria(
+            showFavoritesOnly: true,
+            nsfwMode: 'nsfw',
+          ).hasSessionFilters,
+          isTrue,
+        );
+        expect(
+          const FilterCriteria(
+            showFavoritesOnly: true,
+            minFileSize: 100,
+          ).hasSessionFilters,
+          isTrue,
+        );
 
-      // 完全无过滤
-      expect(const FilterCriteria().hasSessionFilters, isFalse);
-    });
+        // 完全无过滤
+        expect(const FilterCriteria().hasSessionFilters, isFalse);
+      },
+    );
 
     test('hasMetadataFilters covers all new dimensions', () {
       expect(

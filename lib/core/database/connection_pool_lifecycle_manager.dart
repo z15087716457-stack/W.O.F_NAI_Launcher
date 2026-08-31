@@ -4,14 +4,7 @@ import '../utils/app_logger.dart';
 import 'connection_pool_holder.dart';
 
 /// 连接池状态
-enum PoolState {
-  uninitialized,
-  creating,
-  ready,
-  closing,
-  closed,
-  error,
-}
+enum PoolState { uninitialized, creating, ready, closing, closed, error }
 
 /// 连接池生命周期管理器
 class ConnectionPoolLifecycleManager {
@@ -67,19 +60,29 @@ class ConnectionPoolLifecycleManager {
     }
 
     if (_dbPath == null) {
-      throw StateError('ConnectionPoolLifecycleManager not initialized. Call initialize() first.');
+      throw StateError(
+        'ConnectionPoolLifecycleManager not initialized. Call initialize() first.',
+      );
     }
 
     _setState(PoolState.creating);
 
     try {
       await _closeExistingPool();
-      await ConnectionPoolHolder.initialize(dbPath: _dbPath!, maxConnections: _maxConnections);
+      await ConnectionPoolHolder.initialize(
+        dbPath: _dbPath!,
+        maxConnections: _maxConnections,
+      );
       _setState(PoolState.ready);
       AppLogger.i('Connection pool created', 'ConnectionPoolLifecycle');
     } catch (e, stack) {
       _setState(PoolState.error);
-      AppLogger.e('Failed to create connection pool', e, stack, 'ConnectionPoolLifecycle');
+      AppLogger.e(
+        'Failed to create connection pool',
+        e,
+        stack,
+        'ConnectionPoolLifecycle',
+      );
       rethrow;
     }
   }
@@ -100,13 +103,21 @@ class ConnectionPoolLifecycleManager {
     _setState(PoolState.creating);
 
     try {
-      await ConnectionPoolHolder.reset(dbPath: _dbPath!, maxConnections: _maxConnections);
+      await ConnectionPoolHolder.reset(
+        dbPath: _dbPath!,
+        maxConnections: _maxConnections,
+      );
       await _verifyPoolReady();
       _setState(PoolState.ready);
       AppLogger.i('Connection pool reset', 'ConnectionPoolLifecycle');
     } catch (e, stack) {
       _setState(PoolState.error);
-      AppLogger.e('Failed to reset connection pool', e, stack, 'ConnectionPoolLifecycle');
+      AppLogger.e(
+        'Failed to reset connection pool',
+        e,
+        stack,
+        'ConnectionPoolLifecycle',
+      );
       rethrow;
     }
   }
@@ -121,7 +132,9 @@ class ConnectionPoolLifecycleManager {
         return;
       } catch (e) {
         if (attempts >= maxAttempts - 1) {
-          throw StateError('Connection pool not ready after $maxAttempts attempts: $e');
+          throw StateError(
+            'Connection pool not ready after $maxAttempts attempts: $e',
+          );
         }
         await Future.delayed(const Duration(milliseconds: 50));
       }

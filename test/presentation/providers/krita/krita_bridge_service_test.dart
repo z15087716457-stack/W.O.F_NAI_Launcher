@@ -59,6 +59,8 @@ void main() {
       expect(sent.single['noise'], 0.1);
       expect(sent.single['inpaint_strength'], 0.8);
       expect(sent.single['minimum_context_pixels'], 64);
+      expect(sent.single['quality_toggle'], isTrue);
+      expect(sent.single['quality_preset'], 'standard');
       expectNoSensitiveBridgeData(sent.single);
     });
 

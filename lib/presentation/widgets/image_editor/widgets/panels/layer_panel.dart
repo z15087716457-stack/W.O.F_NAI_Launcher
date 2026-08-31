@@ -499,7 +499,8 @@ class _LayerTileState extends State<_LayerTile>
                       : GestureDetector(
                           // 3D 图层(onDoubleTap 非空)双击名字进入 3D 编辑器;
                           // 普通图层保留双击重命名。3D 图层仍可经右键菜单重命名。
-                          onDoubleTap: widget.onDoubleTap ??
+                          onDoubleTap:
+                              widget.onDoubleTap ??
                               () => setState(() => _isEditing = true),
                           child: Text(
                             widget.layer.name,
@@ -527,10 +528,7 @@ class _LayerTileState extends State<_LayerTile>
                       color: theme.colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text(
-                      '3D',
-                      style: theme.textTheme.labelSmall,
-                    ),
+                    child: Text('3D', style: theme.textTheme.labelSmall),
                   ),
 
                 // 不透明度指示

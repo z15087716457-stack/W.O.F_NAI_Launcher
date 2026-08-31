@@ -39,10 +39,7 @@ class ParsedPosition with _$ParsedPosition {
     required double y1,
     required double y2,
   }) {
-    return ParsedPosition(
-      x: (x1 + x2) / 2,
-      y: (y1 + y2) / 2,
-    );
+    return ParsedPosition(x: (x1 + x2) / 2, y: (y1 + y2) / 2);
   }
 }
 

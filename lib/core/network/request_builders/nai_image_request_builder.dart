@@ -74,7 +74,7 @@ class NAIImageRequestBuilder {
       'steps': params.steps,
       'n_samples': params.nSamples,
       'ucPreset': params.ucPreset,
-      'qualityToggle': params.qualityToggle,
+      'qualityToggle': params.effectiveQualityToggle,
       'autoSmea': false,
       'dynamic_thresholding': params.isV3Model && params.decrisp,
       'controlnet_strength': 1,
@@ -105,13 +105,13 @@ class NAIImageRequestBuilder {
 
     // V5 透明背景：官方请求层参数（bundle 7416 K 函数）。
     // straight_alpha 是输出 alpha 编码模式（官方设置默认 straight=true），
-    // tag_hint_* 为服务端标签提示（质量词 standard/none、UC 预设数字编码）。
+    // tag_hint_* 为服务端标签提示（质量词 Standard/Light/None、UC 预设数字编码）。
     if (params.modelSpec.transparency) {
       requestParameters['tag_hint_transparent_background'] =
           params.transparentBackground;
       requestParameters['straight_alpha'] = true;
-      requestParameters['tag_hint_qt'] = UcPresets.qualityToggleTagHintValue(
-        params.qualityToggle,
+      requestParameters['tag_hint_qt'] = QualityTags.toTagHintValue(
+        params.effectiveQualityTagPreset,
       );
       requestParameters['tag_hint_uc_preset'] = UcPresets.toTagHintValue(
         UcPresets.getPresetTypeFromInt(params.ucPreset),
@@ -293,23 +293,29 @@ class NAIImageRequestBuilder {
     }
 
     final encodedVibes = params.vibeReferencesV4
-        .where((v) => v.enabled)
-        .where((v) => !v.needsEncodingForModel(params.model))
-        .where((v) => v.vibeEncoding.isNotEmpty)
+        .asMap()
+        .entries
+        .where((entry) => entry.value.enabled)
+        .where((entry) => !entry.value.needsEncodingForModel(params.model))
+        .where((entry) => entry.value.vibeEncoding.isNotEmpty)
         .toList();
     final rawImageVibes = params.vibeReferencesV4
-        .where((v) => v.enabled)
-        .where((v) => v.needsEncodingForModel(params.model))
+        .asMap()
+        .entries
+        .where((entry) => entry.value.enabled)
+        .where((entry) => entry.value.needsEncodingForModel(params.model))
         .toList();
 
     final allEncodings = <String>[];
     final allStrengths = <double>[];
     final allInfoExtracted = <double>[];
 
-    for (final vibe in encodedVibes) {
+    for (final entry in encodedVibes) {
+      final vibe = entry.value;
       allEncodings.add(vibe.vibeEncoding);
       allStrengths.add(vibe.strength);
       allInfoExtracted.add(vibe.infoExtracted);
+      vibeEncodingMap[entry.key] = vibe.vibeEncoding;
     }
 
     if (rawImageVibes.isNotEmpty) {
@@ -317,7 +323,8 @@ class NAIImageRequestBuilder {
         'V4 Vibe (Stream): Encoding ${rawImageVibes.length} raw images (2 Anlas each)...',
         'ImgGen',
       );
-      for (final vibe in rawImageVibes) {
+      for (final entry in rawImageVibes) {
+        final vibe = entry.value;
         try {
           final encoding = await encodeVibe(
             vibe.rawImageData!,
@@ -328,19 +335,20 @@ class NAIImageRequestBuilder {
             allEncodings.add(encoding);
             allStrengths.add(vibe.strength);
             allInfoExtracted.add(vibe.infoExtracted);
+            vibeEncodingMap[entry.key] = encoding;
             AppLogger.d(
-              'V4 Vibe (Stream): Encoded raw image successfully',
+              'V4 Vibe (Stream): Encoded raw image at index ${entry.key} successfully',
               'ImgGen',
             );
           } else {
             AppLogger.w(
-              'V4 Vibe (Stream): Failed to encode raw image (empty result)',
+              'V4 Vibe (Stream): Failed to encode raw image at index ${entry.key} (empty result)',
               'ImgGen',
             );
           }
         } catch (e) {
           AppLogger.e(
-            'V4 Vibe (Stream): Failed to encode raw image: $e',
+            'V4 Vibe (Stream): Failed to encode raw image at index ${entry.key}: $e',
             'ImgGen',
           );
         }
@@ -433,7 +441,7 @@ class NAIImageRequestBuilder {
       return '$prompt$addition';
     }
     final insertAt = textBlock.end - 'text:'.length;
-    return prompt.replaceRange(insertAt, insertAt, '${addition.substring(2)}');
+    return prompt.replaceRange(insertAt, insertAt, addition.substring(2));
   }
 
   Future<NAIImageRequestBuildResult> build({
@@ -455,6 +463,7 @@ class NAIImageRequestBuilder {
       negativePrompt: params.negativePrompt,
       model: baseModel,
       qualityToggle: params.qualityToggle,
+      qualityTagPreset: params.effectiveQualityTagPreset,
       ucPreset: params.ucPreset,
       transparentBackground: params.transparentBackground,
     );

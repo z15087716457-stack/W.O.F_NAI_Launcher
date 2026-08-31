@@ -30,8 +30,8 @@ class DatabaseAccessRequest<T> {
     required this.priority,
     required this.executor,
     this.timeout,
-  })  : completer = Completer<T>(),
-        createdAt = DateTime.now();
+  }) : completer = Completer<T>(),
+       createdAt = DateTime.now();
 
   bool get isExpired =>
       timeout != null && DateTime.now().difference(createdAt) > timeout!;
@@ -40,8 +40,7 @@ class DatabaseAccessRequest<T> {
 /// 数据库访问门控
 class DatabaseAccessGate {
   final DatabaseStateMachine _stateMachine;
-  final _pendingRequests =
-      PriorityQueue<DatabaseAccessRequest>((a, b) {
+  final _pendingRequests = PriorityQueue<DatabaseAccessRequest>((a, b) {
     return a.priority.index.compareTo(b.priority.index);
   });
   final _activeOperations = <String, DatabaseAccessRequest>{};
@@ -65,8 +64,7 @@ class DatabaseAccessGate {
     bool allowDuringClearing = false,
   }) async {
     final request = DatabaseAccessRequest<T>(
-      id:
-          '${operation}_${DateTime.now().millisecondsSinceEpoch}_${_pendingRequests.length}',
+      id: '${operation}_${DateTime.now().millisecondsSinceEpoch}_${_pendingRequests.length}',
       operation: operation,
       priority: priority,
       executor: executor,
@@ -127,7 +125,9 @@ class DatabaseAccessGate {
 
     try {
       AppLogger.d(
-          'Executing database request: ${request.operation}', 'DatabaseAccessGate',);
+        'Executing database request: ${request.operation}',
+        'DatabaseAccessGate',
+      );
       final result = await request.executor();
       request.completer.complete(result);
       return result;
@@ -164,7 +164,8 @@ class DatabaseAccessGate {
       if (request.isExpired) {
         request.completer.completeError(
           TimeoutException(
-              'Request expired while waiting: ${request.operation}',),
+            'Request expired while waiting: ${request.operation}',
+          ),
         );
         continue;
       }
@@ -208,9 +209,7 @@ class DatabaseAccessGate {
 
     for (final request in expiredRequests) {
       request.completer.completeError(
-        TimeoutException(
-          'Request expired: ${request.operation}',
-        ),
+        TimeoutException('Request expired: ${request.operation}'),
       );
     }
   }
@@ -226,11 +225,11 @@ class DatabaseAccessGate {
 
   /// 获取当前状态
   Map<String, dynamic> get status => {
-        'currentState': _stateMachine.currentState.name,
-        'pendingRequests': _pendingRequests.length,
-        'activeOperations': _activeOperations.length,
-        'isOperational': _stateMachine.isOperational,
-      };
+    'currentState': _stateMachine.currentState.name,
+    'pendingRequests': _pendingRequests.length,
+    'activeOperations': _activeOperations.length,
+    'isOperational': _stateMachine.isOperational,
+  };
 }
 
 /// 自定义异常

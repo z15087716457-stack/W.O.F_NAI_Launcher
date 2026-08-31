@@ -145,9 +145,6 @@ class _PromptFormatterWrapperState extends State<PromptFormatterWrapper> {
     }
 
     // 使用内部 focusNode 包装
-    return Focus(
-      focusNode: _focusNode,
-      child: widget.child,
-    );
+    return Focus(focusNode: _focusNode, child: widget.child);
   }
 }

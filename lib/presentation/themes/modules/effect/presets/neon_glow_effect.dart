@@ -14,9 +14,9 @@ class NeonGlowEffect extends BaseEffectModule {
     Color glowColor = const Color(0xFFFF2975),
     double insetShadowDepth = 0.2,
     double insetShadowBlur = 10.0,
-  })  : _glowColor = glowColor,
-        _insetShadowDepth = insetShadowDepth,
-        _insetShadowBlur = insetShadowBlur;
+  }) : _glowColor = glowColor,
+       _insetShadowDepth = insetShadowDepth,
+       _insetShadowBlur = insetShadowBlur;
 
   @override
   bool get enableGlassmorphism => false;

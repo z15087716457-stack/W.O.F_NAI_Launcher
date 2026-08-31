@@ -5,7 +5,6 @@ class ShortcutIds {
   static const String navigateToGeneration = 'navigate_to_generation';
   static const String navigateToLocalGallery = 'navigate_to_local_gallery';
   static const String navigateToOnlineGallery = 'navigate_to_online_gallery';
-  static const String navigateToRandomConfig = 'navigate_to_random_config';
   static const String navigateToTagLibrary = 'navigate_to_tag_library';
   static const String navigateToStatistics = 'navigate_to_statistics';
   static const String navigateToSettings = 'navigate_to_settings';
@@ -14,7 +13,6 @@ class ShortcutIds {
   // 生成页面快捷键
   static const String generateImage = 'generate_image';
   static const String cancelGeneration = 'cancel_generation';
-  static const String randomPrompt = 'random_prompt';
   static const String clearPrompt = 'clear_prompt';
   static const String togglePromptMode = 'toggle_prompt_mode';
   static const String openTagLibrary = 'open_tag_library';
@@ -65,13 +63,6 @@ class ShortcutIds {
   static const String exitSelectionMode = 'exit_selection_mode';
 
   // 随机配置页面快捷键
-  static const String syncDanbooru = 'sync_danbooru';
-  static const String generatePreview = 'generate_preview';
-  static const String searchPresets = 'search_presets';
-  static const String newPreset = 'new_preset';
-  static const String duplicatePreset = 'duplicate_preset';
-  static const String deletePreset = 'delete_preset';
-  static const String closeConfig = 'close_config';
 
   // 全局应用快捷键
   static const String minimizeToTray = 'minimize_to_tray';
@@ -101,7 +92,6 @@ enum ShortcutContext {
   gallery, // 画廊列表
   viewer, // 图片查看器
   tagLibrary, // 词库
-  randomConfig, // 随机配置
   settings, // 设置
   input, // 输入框（编辑状态）
   vibeDetail, // Vibe 详情页
@@ -116,7 +106,6 @@ class DefaultShortcuts {
     ShortcutIds.navigateToGeneration: 'ctrl+1',
     ShortcutIds.navigateToLocalGallery: 'ctrl+2',
     ShortcutIds.navigateToOnlineGallery: 'ctrl+3',
-    ShortcutIds.navigateToRandomConfig: 'ctrl+4',
     ShortcutIds.navigateToTagLibrary: 'ctrl+5',
     ShortcutIds.navigateToStatistics: 'ctrl+6',
     ShortcutIds.navigateToSettings: 'ctrl+comma',
@@ -125,7 +114,6 @@ class DefaultShortcuts {
     // 生成页面
     ShortcutIds.generateImage: 'ctrl+enter',
     ShortcutIds.cancelGeneration: 'escape',
-    ShortcutIds.randomPrompt: 'ctrl+r',
     ShortcutIds.clearPrompt: 'ctrl+l',
     ShortcutIds.togglePromptMode: 'ctrl+m',
     ShortcutIds.openTagLibrary: 'ctrl+t',
@@ -169,15 +157,6 @@ class DefaultShortcuts {
     ShortcutIds.sendToHome: 'enter',
     ShortcutIds.exitSelectionMode: 'escape',
 
-    // 随机配置
-    ShortcutIds.syncDanbooru: 'ctrl+s',
-    ShortcutIds.generatePreview: 'ctrl+g',
-    ShortcutIds.searchPresets: 'ctrl+f',
-    ShortcutIds.newPreset: 'ctrl+n',
-    ShortcutIds.duplicatePreset: 'ctrl+d',
-    ShortcutIds.deletePreset: 'delete',
-    ShortcutIds.closeConfig: 'escape',
-
     // 全局
     ShortcutIds.minimizeToTray: 'ctrl+m',
     ShortcutIds.quitApp: 'ctrl+q',
@@ -205,7 +184,6 @@ class DefaultShortcuts {
       case ShortcutIds.navigateToGeneration:
       case ShortcutIds.navigateToLocalGallery:
       case ShortcutIds.navigateToOnlineGallery:
-      case ShortcutIds.navigateToRandomConfig:
       case ShortcutIds.navigateToTagLibrary:
       case ShortcutIds.navigateToStatistics:
       case ShortcutIds.navigateToSettings:
@@ -219,7 +197,6 @@ class DefaultShortcuts {
       // 生成页面
       case ShortcutIds.generateImage:
       case ShortcutIds.cancelGeneration:
-      case ShortcutIds.randomPrompt:
       case ShortcutIds.clearPrompt:
       case ShortcutIds.togglePromptMode:
       case ShortcutIds.openTagLibrary:
@@ -267,16 +244,6 @@ class DefaultShortcuts {
       case ShortcutIds.sendToHome:
       case ShortcutIds.exitSelectionMode:
         return ShortcutContext.tagLibrary;
-
-      // 随机配置
-      case ShortcutIds.syncDanbooru:
-      case ShortcutIds.generatePreview:
-      case ShortcutIds.searchPresets:
-      case ShortcutIds.newPreset:
-      case ShortcutIds.duplicatePreset:
-      case ShortcutIds.deletePreset:
-      case ShortcutIds.closeConfig:
-        return ShortcutContext.randomConfig;
 
       // Vibe库
       case ShortcutIds.vibeImport:

@@ -179,10 +179,7 @@ void main() {
       final imageData = Uint8List.fromList([1, 2, 3]);
 
       for (final type in PreciseRefType.values) {
-        final reference = PreciseReference(
-          image: imageData,
-          type: type,
-        );
+        final reference = PreciseReference(image: imageData, type: type);
         expect(reference.type, equals(type));
       }
     });

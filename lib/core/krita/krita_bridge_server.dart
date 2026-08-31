@@ -19,11 +19,10 @@ class KritaBridgeServer {
     KritaBridgePidProvider? pidProvider,
     KritaBridgeClock? clock,
     this.maxTextFrameBytes = KritaBridgeProtocol.defaultMaxTextFrameBytes,
-  })  : _discoveryDirectory =
-            discoveryDirectory ?? _defaultDiscoveryDirectory(),
-        _secretGenerator = secretGenerator ?? _generateSecret,
-        _pidProvider = pidProvider ?? (() => pid),
-        _clock = clock ?? DateTime.now;
+  }) : _discoveryDirectory = discoveryDirectory ?? _defaultDiscoveryDirectory(),
+       _secretGenerator = secretGenerator ?? _generateSecret,
+       _pidProvider = pidProvider ?? (() => pid),
+       _clock = clock ?? DateTime.now;
 
   static const String discoveryFileName = 'krita-bridge.json';
   static const String _logTag = 'KritaBridge';
@@ -287,7 +286,8 @@ class KritaBridgeServer {
       return Directory(_join(appData, 'nai-launcher'));
     }
 
-    final home = Platform.environment['HOME'] ??
+    final home =
+        Platform.environment['HOME'] ??
         Platform.environment['USERPROFILE'] ??
         Directory.current.path;
     return Directory(_join(home, '.nai-launcher'));
@@ -307,8 +307,9 @@ class KritaBridgeServer {
       return address;
     }
 
-    final safeUserAgent =
-        userAgent.length > 80 ? '${userAgent.substring(0, 80)}...' : userAgent;
+    final safeUserAgent = userAgent.length > 80
+        ? '${userAgent.substring(0, 80)}...'
+        : userAgent;
     return '$address ($safeUserAgent)';
   }
 

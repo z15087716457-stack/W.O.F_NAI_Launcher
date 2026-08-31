@@ -42,97 +42,94 @@ void main() {
 
   group('DraggableMemoryImage', () {
     testWidgets(
-        'should not register drag widget when prepared file is required but unavailable',
-        (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: DraggableMemoryImage(
-                imageBytes: Uint8List.fromList(const [1, 2, 3]),
-                requirePreparedDragFile: true,
-                child: const Text('preview'),
+      'should not register drag widget when prepared file is required but unavailable',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: DraggableMemoryImage(
+                  imageBytes: Uint8List.fromList(const [1, 2, 3]),
+                  requirePreparedDragFile: true,
+                  child: const Text('preview'),
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('preview'), findsOneWidget);
-      expect(find.byType(DragItemWidget), findsNothing);
-    });
+        expect(find.text('preview'), findsOneWidget);
+        expect(find.byType(DragItemWidget), findsNothing);
+      },
+    );
   });
 
   group('ShareImagePreparationService metadata safety', () {
-    test('does not expose an unstripped fallback while strip variant prepares',
-        () async {
-      final tempDir = await Directory.systemTemp.createTemp(
-        'share_image_preparation_no_fallback_',
-      );
-      addTearDown(() async {
-        if (await tempDir.exists()) {
-          await tempDir.delete(recursive: true);
-        }
-      });
+    test(
+      'does not expose an unstripped fallback while strip variant prepares',
+      () async {
+        final tempDir = await Directory.systemTemp.createTemp(
+          'share_image_preparation_no_fallback_',
+        );
+        addTearDown(() async {
+          if (await tempDir.exists()) {
+            await tempDir.delete(recursive: true);
+          }
+        });
 
-      final sourceFile = File('${tempDir.path}/source.png');
-      await sourceFile.writeAsBytes(const [1, 2, 3, 4]);
-      final allowPrepare = Completer<void>();
-      var prepareStripValue = false;
+        final sourceFile = File('${tempDir.path}/source.png');
+        await sourceFile.writeAsBytes(const [1, 2, 3, 4]);
+        final allowPrepare = Completer<void>();
+        var prepareStripValue = false;
 
-      final service = ShareImagePreparationService(
-        prepareImage: (
-          bytes, {
-          required fileName,
-          required stripMetadata,
-        }) async {
-          prepareStripValue = stripMetadata;
-          await allowPrepare.future;
-          return SanitizedShareImage(
-            bytes: Uint8List.fromList(
-              stripMetadata ? const [9, 9, 9] : const [1, 2, 3, 4],
-            ),
-            fileName: fileName,
-            mimeType: 'image/png',
-          );
-        },
-        writePreparedFile: (cacheKey, image) async {
-          final file = File('${tempDir.path}/$cacheKey.png');
-          await file.writeAsBytes(image.bytes);
-          return file;
-        },
-      );
-      addTearDown(service.clearAll);
+        final service = ShareImagePreparationService(
+          prepareImage:
+              (bytes, {required fileName, required stripMetadata}) async {
+                prepareStripValue = stripMetadata;
+                await allowPrepare.future;
+                return SanitizedShareImage(
+                  bytes: Uint8List.fromList(
+                    stripMetadata ? const [9, 9, 9] : const [1, 2, 3, 4],
+                  ),
+                  fileName: fileName,
+                  mimeType: 'image/png',
+                );
+              },
+          writePreparedFile: (cacheKey, image) async {
+            final file = File('${tempDir.path}/$cacheKey.png');
+            await file.writeAsBytes(image.bytes);
+            return file;
+          },
+        );
+        addTearDown(service.clearAll);
 
-      service.enqueue(
-        imageId: 'image-a',
-        imageBytes: Uint8List.fromList(const [1, 2, 3, 4]),
-        fileName: 'image-a.png',
-        sourceFilePath: sourceFile.path,
-        stripMetadata: true,
-      );
-      await Future<void>.delayed(Duration.zero);
+        service.enqueue(
+          imageId: 'image-a',
+          imageBytes: Uint8List.fromList(const [1, 2, 3, 4]),
+          fileName: 'image-a.png',
+          sourceFilePath: sourceFile.path,
+          stripMetadata: true,
+        );
+        await Future<void>.delayed(Duration.zero);
 
-      expect(prepareStripValue, isTrue);
-      expect(
-        service.readyFileFor('image-a', stripMetadata: true),
-        isNull,
-      );
-      expect(
-        service.snapshotFor('image-a', stripMetadata: true).status,
-        ShareImagePreparationStatus.preparing,
-      );
+        expect(prepareStripValue, isTrue);
+        expect(service.readyFileFor('image-a', stripMetadata: true), isNull);
+        expect(
+          service.snapshotFor('image-a', stripMetadata: true).status,
+          ShareImagePreparationStatus.preparing,
+        );
 
-      allowPrepare.complete();
-      final readyFile = await service.waitUntilReady(
-        'image-a',
-        stripMetadata: true,
-      );
+        allowPrepare.complete();
+        final readyFile = await service.waitUntilReady(
+          'image-a',
+          stripMetadata: true,
+        );
 
-      expect(readyFile, isNotNull);
-      expect(await readyFile!.readAsBytes(), equals(const [9, 9, 9]));
-      expect(readyFile.path, isNot(equals(sourceFile.path)));
-    });
+        expect(readyFile, isNotNull);
+        expect(await readyFile!.readAsBytes(), equals(const [9, 9, 9]));
+        expect(readyFile.path, isNot(equals(sourceFile.path)));
+      },
+    );
 
     test('keeps strip and original variants isolated', () async {
       final tempDir = await Directory.systemTemp.createTemp(
@@ -148,19 +145,16 @@ void main() {
       await sourceFile.writeAsBytes(const [1, 2, 3, 4]);
 
       final service = ShareImagePreparationService(
-        prepareImage: (
-          bytes, {
-          required fileName,
-          required stripMetadata,
-        }) async {
-          return SanitizedShareImage(
-            bytes: Uint8List.fromList(
-              stripMetadata ? const [7, 7, 7] : const [5, 5, 5],
-            ),
-            fileName: fileName,
-            mimeType: 'image/png',
-          );
-        },
+        prepareImage:
+            (bytes, {required fileName, required stripMetadata}) async {
+              return SanitizedShareImage(
+                bytes: Uint8List.fromList(
+                  stripMetadata ? const [7, 7, 7] : const [5, 5, 5],
+                ),
+                fileName: fileName,
+                mimeType: 'image/png',
+              );
+            },
         writePreparedFile: (cacheKey, image) async {
           final file = File('${tempDir.path}/$cacheKey.png');
           await file.writeAsBytes(image.bytes);
@@ -182,10 +176,7 @@ void main() {
       );
 
       expect(originalReady!.path, equals(sourceFile.path));
-      expect(
-        service.readyFileFor('image-a', stripMetadata: true),
-        isNull,
-      );
+      expect(service.readyFileFor('image-a', stripMetadata: true), isNull);
 
       service.enqueue(
         imageId: 'image-a',
@@ -218,17 +209,14 @@ void main() {
       });
 
       final service = ShareImagePreparationService(
-        prepareImage: (
-          bytes, {
-          required fileName,
-          required stripMetadata,
-        }) async {
-          return SanitizedShareImage(
-            bytes: bytes,
-            fileName: fileName,
-            mimeType: 'image/png',
-          );
-        },
+        prepareImage:
+            (bytes, {required fileName, required stripMetadata}) async {
+              return SanitizedShareImage(
+                bytes: bytes,
+                fileName: fileName,
+                mimeType: 'image/png',
+              );
+            },
         writePreparedFile: (cacheKey, image) async {
           final file = File('${tempDir.path}/$cacheKey.png');
           await file.writeAsBytes(image.bytes);
@@ -273,54 +261,58 @@ void main() {
 
   group('SelectableImageCard hover gating', () {
     testWidgets(
-        'keeps the last stream preview behind completed image until first frame',
-        (tester) async {
-      var placeholderSettled = false;
+      'keeps the last stream preview behind completed image until first frame',
+      (tester) async {
+        var placeholderSettled = false;
 
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: SizedBox(
-                width: 160,
-                height: 160,
-                child: SelectableImageCard(
-                  imageBytes: base64Decode(_oneByOnePngBase64),
-                  completionPlaceholderBytes: base64Decode(_oneByOnePngBase64),
-                  enableSelection: false,
-                  onCompletionPlaceholderSettled: () {
-                    placeholderSettled = true;
-                  },
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: SizedBox(
+                  width: 160,
+                  height: 160,
+                  child: SelectableImageCard(
+                    imageBytes: base64Decode(_oneByOnePngBase64),
+                    completionPlaceholderBytes: base64Decode(
+                      _oneByOnePngBase64,
+                    ),
+                    enableSelection: false,
+                    onCompletionPlaceholderSettled: () {
+                      placeholderSettled = true;
+                    },
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      final placeholderFinder = find.byKey(
-        const ValueKey('completed-image-preview-placeholder'),
-      );
-      expect(placeholderFinder, findsOneWidget);
-      expect(
-        find.byKey(const ValueKey('selectable-image-completed-image')),
-        findsOneWidget,
-      );
+        final placeholderFinder = find.byKey(
+          const ValueKey('completed-image-preview-placeholder'),
+        );
+        expect(placeholderFinder, findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('selectable-image-completed-image')),
+          findsOneWidget,
+        );
 
-      await tester.pump(const Duration(milliseconds: 899));
+        await tester.pump(const Duration(milliseconds: 899));
 
-      expect(placeholderSettled, isFalse);
-      expect(placeholderFinder, findsOneWidget);
+        expect(placeholderSettled, isFalse);
+        expect(placeholderFinder, findsOneWidget);
 
-      await tester.pump(const Duration(milliseconds: 1));
-      await tester.pump();
+        await tester.pump(const Duration(milliseconds: 1));
+        await tester.pump();
 
-      expect(placeholderSettled, isTrue);
-      expect(placeholderFinder, findsNothing);
-    });
+        expect(placeholderSettled, isTrue);
+        expect(placeholderFinder, findsNothing);
+      },
+    );
 
-    testWidgets('reuses stream preview when the same card becomes completed',
-        (tester) async {
+    testWidgets('reuses stream preview when the same card becomes completed', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -367,187 +359,191 @@ void main() {
     });
 
     testWidgets(
-        'keeps the preview visible with bottom preview progress until drag preparation is ready',
-        (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: SizedBox(
-                width: 160,
-                height: 160,
-                child: SelectableImageCard(
-                  imageBytes: base64Decode(_oneByOnePngBase64),
-                  index: 0,
-                  enableSelection: false,
-                  dragPreparationReady: false,
+      'keeps the preview visible with bottom preview progress until drag preparation is ready',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: SizedBox(
+                  width: 160,
+                  height: 160,
+                  child: SelectableImageCard(
+                    imageBytes: base64Decode(_oneByOnePngBase64),
+                    index: 0,
+                    enableSelection: false,
+                    dragPreparationReady: false,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      var preview = tester.widget<DecodedMemoryImage>(
-        find.byType(DecodedMemoryImage).first,
-      );
-      expect(preview.decodeScale, equals(1.0));
-      expect(
-        find.byKey(const ValueKey('drag-preparation-progress')),
-        findsNothing,
-      );
-      expect(
-        find.byKey(const ValueKey('drag-preparation-circular-progress')),
-        findsNothing,
-      );
-      final progressFinder = find.byKey(
-        const ValueKey('drag-preparation-preview-progress-ring'),
-      );
-      final percentageFinder = find.byKey(
-        const ValueKey('drag-preparation-preview-progress-percent'),
-      );
-      final indexBadgeFinder = find.byKey(
-        const ValueKey('selectable-image-index-badge-offstage'),
-        skipOffstage: false,
-      );
-      expect(progressFinder, findsOneWidget);
-      expect(percentageFinder, findsOneWidget);
-      expect(find.text('96%'), findsOneWidget);
-      expect(find.text('1'), findsNothing);
-      expect(indexBadgeFinder, findsOneWidget);
-      expect(tester.widget<Offstage>(indexBadgeFinder).offstage, isTrue);
-      expect(
-        tester
-            .widget<AnimatedOpacity>(
-              find.byKey(
-                const ValueKey('drag-preparation-preview-overlay-opacity'),
-              ),
-            )
-            .opacity,
-        equals(1),
-      );
-      expect(
-        tester
-            .widget<AnimatedOpacity>(
-              find.byKey(
-                const ValueKey('drag-preparation-preview-overlay-opacity'),
-              ),
-            )
-            .duration,
-        equals(const Duration(milliseconds: 140)),
-      );
-      expect(
-        tester.widget<CircularProgressIndicator>(progressFinder).value,
-        equals(0.96),
-      );
+        var preview = tester.widget<DecodedMemoryImage>(
+          find.byType(DecodedMemoryImage).first,
+        );
+        expect(preview.decodeScale, equals(1.0));
+        expect(
+          find.byKey(const ValueKey('drag-preparation-progress')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(const ValueKey('drag-preparation-circular-progress')),
+          findsNothing,
+        );
+        final progressFinder = find.byKey(
+          const ValueKey('drag-preparation-preview-progress-ring'),
+        );
+        final percentageFinder = find.byKey(
+          const ValueKey('drag-preparation-preview-progress-percent'),
+        );
+        final indexBadgeFinder = find.byKey(
+          const ValueKey('selectable-image-index-badge-offstage'),
+          skipOffstage: false,
+        );
+        expect(progressFinder, findsOneWidget);
+        expect(percentageFinder, findsOneWidget);
+        expect(find.text('96%'), findsOneWidget);
+        expect(find.text('1'), findsNothing);
+        expect(indexBadgeFinder, findsOneWidget);
+        expect(tester.widget<Offstage>(indexBadgeFinder).offstage, isTrue);
+        expect(
+          tester
+              .widget<AnimatedOpacity>(
+                find.byKey(
+                  const ValueKey('drag-preparation-preview-overlay-opacity'),
+                ),
+              )
+              .opacity,
+          equals(1),
+        );
+        expect(
+          tester
+              .widget<AnimatedOpacity>(
+                find.byKey(
+                  const ValueKey('drag-preparation-preview-overlay-opacity'),
+                ),
+              )
+              .duration,
+          equals(const Duration(milliseconds: 140)),
+        );
+        expect(
+          tester.widget<CircularProgressIndicator>(progressFinder).value,
+          equals(0.96),
+        );
 
-      final progressTopLeft = tester.getTopLeft(progressFinder);
-      final cardTopLeft = tester.getTopLeft(
-        find.byType(SelectableImageCard),
-      );
-      final cardBottomRight = tester.getBottomRight(
-        find.byType(SelectableImageCard),
-      );
-      expect(progressTopLeft.dx, lessThan(cardTopLeft.dx + 40));
-      expect(progressTopLeft.dy, greaterThan(cardBottomRight.dy - 40));
+        final progressTopLeft = tester.getTopLeft(progressFinder);
+        final cardTopLeft = tester.getTopLeft(find.byType(SelectableImageCard));
+        final cardBottomRight = tester.getBottomRight(
+          find.byType(SelectableImageCard),
+        );
+        expect(progressTopLeft.dx, lessThan(cardTopLeft.dx + 40));
+        expect(progressTopLeft.dy, greaterThan(cardBottomRight.dy - 40));
 
-      final oldProgressFinder = find.byKey(
-        const ValueKey('drag-preparation-circular-progress'),
-      );
-      expect(oldProgressFinder, findsNothing);
-      final previewElementBefore = tester.element(
-        find.byType(DecodedMemoryImage).first,
-      );
+        final oldProgressFinder = find.byKey(
+          const ValueKey('drag-preparation-circular-progress'),
+        );
+        expect(oldProgressFinder, findsNothing);
+        final previewElementBefore = tester.element(
+          find.byType(DecodedMemoryImage).first,
+        );
 
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: SizedBox(
-                width: 160,
-                height: 160,
-                child: SelectableImageCard(
-                  imageBytes: base64Decode(_oneByOnePngBase64),
-                  index: 0,
-                  enableSelection: false,
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: SizedBox(
+                  width: 160,
+                  height: 160,
+                  child: SelectableImageCard(
+                    imageBytes: base64Decode(_oneByOnePngBase64),
+                    index: 0,
+                    enableSelection: false,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pump();
+        );
+        await tester.pump();
 
-      expect(tester.widget<Offstage>(indexBadgeFinder).offstage, isTrue);
-      expect(
-        tester
-            .widget<AnimatedOpacity>(
-              find.byKey(
-                const ValueKey('drag-preparation-preview-overlay-opacity'),
-              ),
-            )
-            .opacity,
-        equals(0),
-      );
+        expect(tester.widget<Offstage>(indexBadgeFinder).offstage, isTrue);
+        expect(
+          tester
+              .widget<AnimatedOpacity>(
+                find.byKey(
+                  const ValueKey('drag-preparation-preview-overlay-opacity'),
+                ),
+              )
+              .opacity,
+          equals(0),
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      preview = tester.widget<DecodedMemoryImage>(
-        find.byType(DecodedMemoryImage).first,
-      );
-      expect(preview.decodeScale, equals(1.0));
-      expect(
-        tester.element(find.byType(DecodedMemoryImage).first),
-        same(previewElementBefore),
-      );
-      expect(progressFinder, findsOneWidget);
-      expect(percentageFinder, findsOneWidget);
-      expect(find.text('1'), findsOneWidget);
-      expect(indexBadgeFinder, findsOneWidget);
-      expect(tester.widget<Offstage>(indexBadgeFinder).offstage, isFalse);
-      expect(
-        tester
-            .widget<AnimatedOpacity>(
-              find.byKey(
-                const ValueKey('drag-preparation-preview-overlay-opacity'),
-              ),
-            )
-            .opacity,
-        equals(0),
-      );
-    });
+        preview = tester.widget<DecodedMemoryImage>(
+          find.byType(DecodedMemoryImage).first,
+        );
+        expect(preview.decodeScale, equals(1.0));
+        expect(
+          tester.element(find.byType(DecodedMemoryImage).first),
+          same(previewElementBefore),
+        );
+        expect(progressFinder, findsOneWidget);
+        expect(percentageFinder, findsOneWidget);
+        expect(find.text('1'), findsOneWidget);
+        expect(indexBadgeFinder, findsOneWidget);
+        expect(tester.widget<Offstage>(indexBadgeFinder).offstage, isFalse);
+        expect(
+          tester
+              .widget<AnimatedOpacity>(
+                find.byKey(
+                  const ValueKey('drag-preparation-preview-overlay-opacity'),
+                ),
+              )
+              .opacity,
+          equals(0),
+        );
+      },
+    );
 
     testWidgets(
-        'should not expose hover action bar when hover effects disabled',
-        (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: SizedBox(
-                width: 160,
-                height: 160,
-                child: SelectableImageCard(
-                  imageBytes: base64Decode(_oneByOnePngBase64),
-                  enableSelection: false,
-                  hoverEffectsEnabled: false,
-                  shareWarmupEnabled: false,
-                  onUpscale: () {},
+      'should not expose hover action bar when hover effects disabled',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: SizedBox(
+                  width: 160,
+                  height: 160,
+                  child: SelectableImageCard(
+                    imageBytes: base64Decode(_oneByOnePngBase64),
+                    enableSelection: false,
+                    hoverEffectsEnabled: false,
+                    shareWarmupEnabled: false,
+                    onUpscale: () {},
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(gesture.removePointer);
-      await gesture.addPointer();
-      await gesture.moveTo(tester.getCenter(find.byType(SelectableImageCard)));
-      await tester.pumpAndSettle();
+        final gesture = await tester.createGesture(
+          kind: PointerDeviceKind.mouse,
+        );
+        addTearDown(gesture.removePointer);
+        await gesture.addPointer();
+        await gesture.moveTo(
+          tester.getCenter(find.byType(SelectableImageCard)),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.byTooltip('放大'), findsNothing);
-    });
+        expect(find.byTooltip('放大'), findsNothing);
+      },
+    );
   });
 }
 

@@ -23,7 +23,6 @@ class HiveStorageHelper {
   /// 默认子目录名称
   static const String _defaultSubDir = 'hive';
 
-
   /// Settings box 中的自定义路径键名
   static const String _customHivePathKey = 'hive_storage_path';
 
@@ -61,7 +60,10 @@ class HiveStorageHelper {
     try {
       // 检查旧位置的 settings.hive 文件
       final appDir = await getApplicationDocumentsDirectory();
-      final oldSettingsPath = p.join(appDir.path, '${StorageKeys.settingsBox}.hive');
+      final oldSettingsPath = p.join(
+        appDir.path,
+        '${StorageKeys.settingsBox}.hive',
+      );
       final oldSettingsFile = File(oldSettingsPath);
 
       // 如果旧位置存在 settings.hive，说明还没有迁移，返回 null 使用默认路径
@@ -73,7 +75,10 @@ class HiveStorageHelper {
       // 注意：getApplicationSupportDirectory() 已经包含应用包名，不需要再加 NAI_Launcher
       final appSupportDir = await getApplicationSupportDirectory();
       final newPath = p.join(appSupportDir.path, _defaultSubDir);
-      final newSettingsPath = p.join(newPath, '${StorageKeys.settingsBox}.hive');
+      final newSettingsPath = p.join(
+        newPath,
+        '${StorageKeys.settingsBox}.hive',
+      );
       final newSettingsFile = File(newSettingsPath);
 
       if (await newSettingsFile.exists()) {
@@ -224,7 +229,8 @@ class HiveStorageHelper {
 
           final newSize = newFileStat.size;
           final oldSize = oldFileStat.size;
-          final shouldPreferOldBySize = oldSize > 0 &&
+          final shouldPreferOldBySize =
+              oldSize > 0 &&
               (newSize == 0 || (newSize <= 1024 && oldSize >= newSize * 4));
 
           if (!shouldPreferOldBySize &&
@@ -292,8 +298,8 @@ class HiveStorageHelper {
         final shouldDelete = switch (ext) {
           '.hive' => migratedHiveFileNames.contains(fileName),
           '.lock' || '.crc' => migratedHiveFileNames.contains(
-              '${p.basenameWithoutExtension(fileName)}.hive',
-            ),
+            '${p.basenameWithoutExtension(fileName)}.hive',
+          ),
           _ => false,
         };
 

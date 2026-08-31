@@ -71,23 +71,22 @@ void main() {
       expect(details, contains('long=${'x' * 117}...'));
     });
 
-    test('buildSlowSpanMessage includes operation, elapsed, severity, details',
-        () {
-      final message = VibePerformanceDiagnostics.buildSlowSpanMessage(
-        'storage.getDisplayEntries',
-        const Duration(milliseconds: 75),
-        details: const {
-          'cacheReady': true,
-          'entries': 12,
-        },
-      );
+    test(
+      'buildSlowSpanMessage includes operation, elapsed, severity, details',
+      () {
+        final message = VibePerformanceDiagnostics.buildSlowSpanMessage(
+          'storage.getDisplayEntries',
+          const Duration(milliseconds: 75),
+          details: const {'cacheReady': true, 'entries': 12},
+        );
 
-      expect(message, contains('operation=storage.getDisplayEntries'));
-      expect(message, contains('elapsed=75ms'));
-      expect(message, contains('severity=moderate'));
-      expect(message, contains('cacheReady=true'));
-      expect(message, contains('entries=12'));
-    });
+        expect(message, contains('operation=storage.getDisplayEntries'));
+        expect(message, contains('elapsed=75ms'));
+        expect(message, contains('severity=moderate'));
+        expect(message, contains('cacheReady=true'));
+        expect(message, contains('entries=12'));
+      },
+    );
 
     test('measureSync returns the action result', () {
       final result = VibePerformanceDiagnostics.measureSync(

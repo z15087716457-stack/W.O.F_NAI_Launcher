@@ -28,8 +28,9 @@ class AccountAvatar extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(size / 2),
-        splashColor:
-            Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+        splashColor: Theme.of(
+          context,
+        ).colorScheme.primary.withValues(alpha: 0.2),
         customBorder: const CircleBorder(side: BorderSide.none),
         child: Padding(
           padding: EdgeInsets.all(showEditBadge ? size * 0.15 : 0),
@@ -106,10 +107,7 @@ class AccountAvatar extends StatelessWidget {
         decoration: BoxDecoration(
           color: theme.colorScheme.primary,
           shape: BoxShape.circle,
-          border: Border.all(
-            color: theme.colorScheme.surface,
-            width: 2,
-          ),
+          border: Border.all(color: theme.colorScheme.surface, width: 2),
         ),
         child: Icon(
           Icons.camera_alt,
@@ -223,10 +221,7 @@ class AccountAvatarSmall extends StatelessWidget {
       decoration: isSelected
           ? BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: theme.colorScheme.primary,
-                width: 2,
-              ),
+              border: Border.all(color: theme.colorScheme.primary, width: 2),
             )
           : null,
       child: CircleAvatar(

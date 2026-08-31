@@ -19,11 +19,7 @@ class AccountDetailTile extends ConsumerWidget {
   /// 登录按钮点击回调（未登录状态）
   final VoidCallback? onLogin;
 
-  const AccountDetailTile({
-    super.key,
-    this.onEdit,
-    this.onLogin,
-  });
+  const AccountDetailTile({super.key, this.onEdit, this.onLogin});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -102,8 +98,9 @@ class AccountDetailTile extends ConsumerWidget {
                       Text(
                         account.email,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.5),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.5,
+                          ),
                           fontSize: 12,
                         ),
                         maxLines: 1,
@@ -196,11 +193,8 @@ class AccountDetailTile extends ConsumerWidget {
           ],
         );
       },
-      error: (_) => Icon(
-        Icons.error_outline,
-        size: 16,
-        color: theme.colorScheme.error,
-      ),
+      error: (_) =>
+          Icon(Icons.error_outline, size: 16, color: theme.colorScheme.error),
     );
   }
 

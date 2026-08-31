@@ -94,14 +94,12 @@ class TagCategoryThresholds {
   });
 
   /// 获取一般标签的阈值
-  int get generalThreshold => generalPreset.isCustom 
-      ? generalCustomThreshold 
-      : generalPreset.threshold;
+  int get generalThreshold =>
+      generalPreset.isCustom ? generalCustomThreshold : generalPreset.threshold;
 
   /// 获取画师标签的阈值
-  int get artistThreshold => artistPreset.isCustom 
-      ? artistCustomThreshold 
-      : artistPreset.threshold;
+  int get artistThreshold =>
+      artistPreset.isCustom ? artistCustomThreshold : artistPreset.threshold;
 
   /// 获取角色标签的阈值
   int get characterThreshold => characterPreset.isCustom
@@ -114,22 +112,31 @@ class TagCategoryThresholds {
       : copyrightPreset.threshold;
 
   /// 获取元标签的阈值
-  int get metaThreshold => metaPreset.isCustom
-      ? metaCustomThreshold
-      : metaPreset.threshold;
+  int get metaThreshold =>
+      metaPreset.isCustom ? metaCustomThreshold : metaPreset.threshold;
 
   /// 从JSON解析
   factory TagCategoryThresholds.fromJson(Map<String, dynamic> json) {
     return TagCategoryThresholds(
-      generalPreset: TagHotPreset.fromThreshold(json['generalThreshold'] as int? ?? 1000),
+      generalPreset: TagHotPreset.fromThreshold(
+        json['generalThreshold'] as int? ?? 1000,
+      ),
       generalCustomThreshold: json['generalCustomThreshold'] as int? ?? 1000,
-      artistPreset: TagHotPreset.fromThreshold(json['artistThreshold'] as int? ?? 50),
+      artistPreset: TagHotPreset.fromThreshold(
+        json['artistThreshold'] as int? ?? 50,
+      ),
       artistCustomThreshold: json['artistCustomThreshold'] as int? ?? 50,
-      characterPreset: TagHotPreset.fromThreshold(json['characterThreshold'] as int? ?? 100),
+      characterPreset: TagHotPreset.fromThreshold(
+        json['characterThreshold'] as int? ?? 100,
+      ),
       characterCustomThreshold: json['characterCustomThreshold'] as int? ?? 100,
-      copyrightPreset: TagHotPreset.fromThreshold(json['copyrightThreshold'] as int? ?? 500),
+      copyrightPreset: TagHotPreset.fromThreshold(
+        json['copyrightThreshold'] as int? ?? 500,
+      ),
       copyrightCustomThreshold: json['copyrightCustomThreshold'] as int? ?? 500,
-      metaPreset: TagHotPreset.fromThreshold(json['metaThreshold'] as int? ?? 10000),
+      metaPreset: TagHotPreset.fromThreshold(
+        json['metaThreshold'] as int? ?? 10000,
+      ),
       metaCustomThreshold: json['metaCustomThreshold'] as int? ?? 10000,
     );
   }
@@ -162,13 +169,17 @@ class TagCategoryThresholds {
   }) {
     return TagCategoryThresholds(
       generalPreset: generalPreset ?? this.generalPreset,
-      generalCustomThreshold: generalCustomThreshold ?? this.generalCustomThreshold,
+      generalCustomThreshold:
+          generalCustomThreshold ?? this.generalCustomThreshold,
       artistPreset: artistPreset ?? this.artistPreset,
-      artistCustomThreshold: artistCustomThreshold ?? this.artistCustomThreshold,
+      artistCustomThreshold:
+          artistCustomThreshold ?? this.artistCustomThreshold,
       characterPreset: characterPreset ?? this.characterPreset,
-      characterCustomThreshold: characterCustomThreshold ?? this.characterCustomThreshold,
+      characterCustomThreshold:
+          characterCustomThreshold ?? this.characterCustomThreshold,
       copyrightPreset: copyrightPreset ?? this.copyrightPreset,
-      copyrightCustomThreshold: copyrightCustomThreshold ?? this.copyrightCustomThreshold,
+      copyrightCustomThreshold:
+          copyrightCustomThreshold ?? this.copyrightCustomThreshold,
       metaPreset: metaPreset ?? this.metaPreset,
       metaCustomThreshold: metaCustomThreshold ?? this.metaCustomThreshold,
     );
@@ -196,10 +207,10 @@ class TranslationCacheMeta {
   }
 
   Map<String, dynamic> toJson() => {
-        'lastUpdate': lastUpdate.toIso8601String(),
-        'totalTags': totalTags,
-        'version': version,
-      };
+    'lastUpdate': lastUpdate.toIso8601String(),
+    'totalTags': totalTags,
+    'version': version,
+  };
 
   TranslationCacheMeta copyWith({
     DateTime? lastUpdate,
@@ -235,17 +246,21 @@ class TagsCacheMeta {
       lastUpdate: DateTime.parse(json['lastUpdate'] as String),
       totalTags: json['totalTags'] as int? ?? 0,
       hotThreshold: json['hotThreshold'] as int? ?? 1000,
-      hotPreset: TagHotPreset.fromThreshold(json['hotThreshold'] as int? ?? 1000),
-      refreshInterval: AutoRefreshInterval.fromDays(json['refreshIntervalDays'] as int? ?? 30),
+      hotPreset: TagHotPreset.fromThreshold(
+        json['hotThreshold'] as int? ?? 1000,
+      ),
+      refreshInterval: AutoRefreshInterval.fromDays(
+        json['refreshIntervalDays'] as int? ?? 30,
+      ),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'lastUpdate': lastUpdate.toIso8601String(),
-        'totalTags': totalTags,
-        'hotThreshold': hotThreshold,
-        'refreshIntervalDays': refreshInterval.days,
-      };
+    'lastUpdate': lastUpdate.toIso8601String(),
+    'totalTags': totalTags,
+    'hotThreshold': hotThreshold,
+    'refreshIntervalDays': refreshInterval.days,
+  };
 
   TagsCacheMeta copyWith({
     DateTime? lastUpdate,
@@ -266,10 +281,10 @@ class TagsCacheMeta {
 
 /// 画师标签同步状态
 enum ArtistSyncStatus {
-  idle,      // 空闲状态
-  running,   // 进行中
-  paused,    // 用户暂停
-  failed,    // 失败（可恢复）
+  idle, // 空闲状态
+  running, // 进行中
+  paused, // 用户暂停
+  failed, // 失败（可恢复）
   completed, // 已完成
 }
 
@@ -277,12 +292,12 @@ enum ArtistSyncStatus {
 ///
 /// 用于记录画师标签拉取进度，支持断点续传
 class ArtistsSyncCheckpoint {
-  final int lastFetchedPage;      // 最后成功拉取的页码（0表示从未开始）
-  final int importedCount;        // 已导入的记录数
-  final DateTime? startTime;      // 本次同步开始时间
-  final ArtistSyncStatus status;  // 同步状态
-  final String? sessionId;        // 本次同步会话ID（防止多次启动冲突）
-  final DateTime? lastUpdated;    // 最后更新时间
+  final int lastFetchedPage; // 最后成功拉取的页码（0表示从未开始）
+  final int importedCount; // 已导入的记录数
+  final DateTime? startTime; // 本次同步开始时间
+  final ArtistSyncStatus status; // 同步状态
+  final String? sessionId; // 本次同步会话ID（防止多次启动冲突）
+  final DateTime? lastUpdated; // 最后更新时间
 
   const ArtistsSyncCheckpoint({
     this.lastFetchedPage = 0,
@@ -324,7 +339,8 @@ class ArtistsSyncCheckpoint {
 
   /// 是否可以恢复
   bool get canResume =>
-      (status == ArtistSyncStatus.paused || status == ArtistSyncStatus.failed) &&
+      (status == ArtistSyncStatus.paused ||
+          status == ArtistSyncStatus.failed) &&
       !isStale;
 
   /// 是否已过期（超过24小时）
@@ -377,11 +393,11 @@ class ArtistsCacheMeta {
   }
 
   Map<String, dynamic> toJson() => {
-        'lastUpdate': lastUpdate.toIso8601String(),
-        'totalArtists': totalArtists,
-        'syncFailed': syncFailed,
-        'minPostCount': minPostCount,
-      };
+    'lastUpdate': lastUpdate.toIso8601String(),
+    'totalArtists': totalArtists,
+    'syncFailed': syncFailed,
+    'minPostCount': minPostCount,
+  };
 
   ArtistsCacheMeta copyWith({
     DateTime? lastUpdate,

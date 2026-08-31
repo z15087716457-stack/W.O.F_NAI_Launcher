@@ -17,7 +17,10 @@ class FileSystemUtils {
   /// [path] 目录路径
   /// [logTag] 日志标签，用于区分调用来源
   /// 返回是否成功创建或路径已存在
-  static Future<bool> ensureDirectory(String path, {String logTag = 'FileSystem'}) async {
+  static Future<bool> ensureDirectory(
+    String path, {
+    String logTag = 'FileSystem',
+  }) async {
     try {
       final dir = Directory(path);
       if (!await dir.exists()) {
@@ -36,7 +39,10 @@ class FileSystemUtils {
   /// [source] 源目录
   /// [destination] 目标目录
   /// 会递归复制所有子目录和文件
-  static Future<void> copyDirectory(Directory source, Directory destination) async {
+  static Future<void> copyDirectory(
+    Directory source,
+    Directory destination,
+  ) async {
     if (!await destination.exists()) {
       await destination.create(recursive: true);
     }

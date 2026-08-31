@@ -12,10 +12,7 @@ class ImageSaveSettings {
   /// 是否自动保存
   final bool autoSave;
 
-  const ImageSaveSettings({
-    this.customPath,
-    this.autoSave = false,
-  });
+  const ImageSaveSettings({this.customPath, this.autoSave = false});
 
   ImageSaveSettings copyWith({
     String? customPath,

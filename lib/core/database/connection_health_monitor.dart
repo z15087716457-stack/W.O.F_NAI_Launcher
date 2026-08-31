@@ -170,17 +170,17 @@ class HealthCheckResult {
 
   /// 转换为诊断信息
   Map<String, dynamic> toDiagnostics() => {
-        'timestamp': timestamp.toIso8601String(),
-        'status': status.name,
-        'connectionAcquireLatencyMs': connectionAcquireLatency.inMilliseconds,
-        'validationQuerySuccess': validationQuerySuccess,
-        'validationError': validationError,
-        'poolVersion': poolVersion,
-        'activeConnections': activeConnections,
-        'availableConnections': availableConnections,
-        'failureRate': failureRate,
-        'averageOperationTimeMs': averageOperationTimeMs,
-      };
+    'timestamp': timestamp.toIso8601String(),
+    'status': status.name,
+    'connectionAcquireLatencyMs': connectionAcquireLatency.inMilliseconds,
+    'validationQuerySuccess': validationQuerySuccess,
+    'validationError': validationError,
+    'poolVersion': poolVersion,
+    'activeConnections': activeConnections,
+    'availableConnections': availableConnections,
+    'failureRate': failureRate,
+    'averageOperationTimeMs': averageOperationTimeMs,
+  };
 }
 
 // ============================================================
@@ -188,18 +188,16 @@ class HealthCheckResult {
 // ============================================================
 
 /// 健康状态变化回调
-typedef HealthStatusChangeCallback = void Function(
-  ConnectionHealthStatus oldStatus,
-  ConnectionHealthStatus newStatus,
-  HealthCheckResult result,
-);
+typedef HealthStatusChangeCallback =
+    void Function(
+      ConnectionHealthStatus oldStatus,
+      ConnectionHealthStatus newStatus,
+      HealthCheckResult result,
+    );
 
 /// 健康告警回调
-typedef HealthAlertCallback = void Function(
-  String alertType,
-  String message,
-  HealthCheckResult result,
-);
+typedef HealthAlertCallback =
+    void Function(String alertType, String message, HealthCheckResult result);
 
 // ============================================================
 // 连接池健康监控器
@@ -250,11 +248,10 @@ class ConnectionHealthMonitor {
     HealthStatusChangeCallback? onStatusChange,
     HealthAlertCallback? onAlert,
     ConnectionMetricsCollector? metricsCollector,
-  })  : _config = config ?? HealthCheckConfig(),
-        _onStatusChange = onStatusChange,
-        _onAlert = onAlert,
-        _metricsCollector =
-            metricsCollector ?? ConnectionMetricsCollector();
+  }) : _config = config ?? HealthCheckConfig(),
+       _onStatusChange = onStatusChange,
+       _onAlert = onAlert,
+       _metricsCollector = metricsCollector ?? ConnectionMetricsCollector();
 
   /// 启动健康检查
   void start() {
@@ -326,8 +323,8 @@ class ConnectionHealthMonitor {
     try {
       final acquireStopwatch = Stopwatch()..start();
       testConnection = await ConnectionPoolHolder.instance.acquire().timeout(
-            _config.connectionAcquireTimeoutThreshold * 2,
-          );
+        _config.connectionAcquireTimeoutThreshold * 2,
+      );
       acquireLatency = acquireStopwatch.elapsed;
 
       // 记录连接获取时间
@@ -415,8 +412,8 @@ class ConnectionHealthMonitor {
     if (_config.verboseLogging) {
       AppLogger.d(
         'Health check completed: $status, '
-        'latency: ${acquireLatency.inMilliseconds}ms, '
-        'active: $activeConnections, available: $availableConnections',
+            'latency: ${acquireLatency.inMilliseconds}ms, '
+            'active: $activeConnections, available: $availableConnections',
         'ConnectionHealthMonitor',
       );
     }
@@ -458,7 +455,8 @@ class ConnectionHealthMonitor {
     if (ConnectionPoolHolder.isInitialized) {
       final pool = ConnectionPoolHolder.instance;
       final activeRatio =
-          activeConnections / math.max(1, pool.inUseCount + pool.availableCount);
+          activeConnections /
+          math.max(1, pool.inUseCount + pool.availableCount);
       if (activeRatio * 100 >= _config.activeConnectionWarningThreshold) {
         severity++;
       }
@@ -485,8 +483,8 @@ class ConnectionHealthMonitor {
 
       AppLogger.w(
         'Health status changed: $oldStatus -> $newStatus '
-        '(latency: ${result.connectionAcquireLatency.inMilliseconds}ms, '
-        'failureRate: ${result.failureRate.toStringAsFixed(2)}%)',
+            '(latency: ${result.connectionAcquireLatency.inMilliseconds}ms, '
+            'failureRate: ${result.failureRate.toStringAsFixed(2)}%)',
         'ConnectionHealthMonitor',
       );
 
@@ -519,12 +517,12 @@ class ConnectionHealthMonitor {
 
   /// 获取诊断信息
   Map<String, dynamic> get diagnostics => {
-        'currentStatus': _currentStatus.name,
-        'isRunning': isRunning,
-        'checkIntervalMs': _config.checkInterval.inMilliseconds,
-        'lastResult': _lastResult?.toDiagnostics(),
-        'metrics': _metricsCollector.snapshot.toDiagnostics(),
-      };
+    'currentStatus': _currentStatus.name,
+    'isRunning': isRunning,
+    'checkIntervalMs': _config.checkInterval.inMilliseconds,
+    'lastResult': _lastResult?.toDiagnostics(),
+    'metrics': _metricsCollector.snapshot.toDiagnostics(),
+  };
 
   /// 释放资源
   void dispose() {
@@ -602,7 +600,8 @@ class DatabaseRecoveryEvent {
 /// ));
 /// ```
 class DatabaseRecoveryEventBus {
-  static final _controller = StreamController<DatabaseRecoveryEvent>.broadcast();
+  static final _controller =
+      StreamController<DatabaseRecoveryEvent>.broadcast();
 
   /// 获取事件流
   static Stream<DatabaseRecoveryEvent> get events => _controller.stream;
@@ -687,15 +686,15 @@ class ConnectionMetricsSnapshot {
 
   /// 转换为诊断信息
   Map<String, dynamic> toDiagnostics() => {
-        'averageOperationTimeMs': averageOperationTime.inMilliseconds,
-        'failureRate': failureRate,
-        'activeConnections': activeConnections,
-        'totalOperations': totalOperations,
-        'successfulOperations': successfulOperations,
-        'failedOperations': failedOperations,
-        'averageAcquireTimeMs': averageAcquireTime.inMilliseconds,
-        'averageUsageTimeMs': averageUsageTime.inMilliseconds,
-      };
+    'averageOperationTimeMs': averageOperationTime.inMilliseconds,
+    'failureRate': failureRate,
+    'activeConnections': activeConnections,
+    'totalOperations': totalOperations,
+    'successfulOperations': successfulOperations,
+    'failedOperations': failedOperations,
+    'averageAcquireTimeMs': averageAcquireTime.inMilliseconds,
+    'averageUsageTimeMs': averageUsageTime.inMilliseconds,
+  };
 
   @override
   String toString() =>
@@ -909,19 +908,17 @@ class ConnectionMetricsCollector {
       final successes = records.where((r) => r.success).length;
       final avgMs =
           records.fold<int>(0, (sum, r) => sum + r.duration.inMilliseconds) ~/
-              total;
+          total;
 
-      return MapEntry(
-        name,
-        {
-          'total': total,
-          'successes': successes,
-          'failures': total - successes,
-          'averageTimeMs': avgMs,
-          'successRate':
-              total > 0 ? (successes / total * 100).toStringAsFixed(1) : '0.0',
-        },
-      );
+      return MapEntry(name, {
+        'total': total,
+        'successes': successes,
+        'failures': total - successes,
+        'averageTimeMs': avgMs,
+        'successRate': total > 0
+            ? (successes / total * 100).toStringAsFixed(1)
+            : '0.0',
+      });
     });
   }
 }

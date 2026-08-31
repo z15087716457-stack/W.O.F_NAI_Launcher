@@ -50,6 +50,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onlineFav_favoriteAuthor => 'Favorite Author';
 
   @override
+  String get onlineFav_unfavoriteAuthor => 'Unfavorite author';
+
+  @override
   String get onlineFav_authorFavorited => 'Author favorited';
 
   @override
@@ -66,9 +69,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_deselectAll => 'Deselect All';
-
-  @override
-  String get common_collapseAll => 'Collapse All';
 
   @override
   String get common_save => 'Save';
@@ -114,9 +114,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_reset => 'Reset';
-
-  @override
-  String get common_search => 'Search';
 
   @override
   String get common_add => 'Add';
@@ -221,9 +218,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_categories => 'Categories';
 
   @override
-  String get common_items => 'items';
-
-  @override
   String get networkError_connectionTimeout =>
       'Connection timed out. Check your network connection.';
 
@@ -290,9 +284,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nav_onlineGallery => 'Online Gallery';
-
-  @override
-  String get nav_randomConfig => 'Random Config';
 
   @override
   String get nav_dictionary => 'Dictionary (WIP)';
@@ -1243,12 +1234,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String image_copyFailed(Object error) {
     return 'Copy failed: $error';
   }
-
-  @override
-  String get config_newPreset => 'New Preset';
-
-  @override
-  String get config_deletePreset => 'Delete Preset';
 
   @override
   String get img2img_title => 'Image2Image';
@@ -2450,9 +2435,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get preset_presetName => 'Preset Name';
-
-  @override
   String get onlineGallery_search => 'Search';
 
   @override
@@ -2810,6 +2792,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onlineGallery_aiTagModelVersion => 'Model version';
 
   @override
+  String get onlineGallery_viewAuthor => 'View this author';
+
+  @override
+  String get onlineGallery_returnFromAuthor =>
+      'Return to previous gallery position';
+
+  @override
   String get onlineGallery_generationParams => 'Generation parameters';
 
   @override
@@ -3075,9 +3064,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qualityTags_label => 'Quality';
 
   @override
-  String get transparentBackground_label => 'Transparent BG';
-
-  @override
   String get transparentBackground_tooltip =>
       'Adds \"transparent background\" to the prompt and generates images with an alpha channel (V5 only)';
 
@@ -3095,6 +3081,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get qualityTags_naiDefault => 'NAI Default';
+
+  @override
+  String get qualityTags_standard => 'Standard';
+
+  @override
+  String get qualityTags_light => 'Light';
 
   @override
   String get qualityTags_none => 'None';
@@ -3138,14 +3130,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ucPreset_selectFromLibrary => 'Select UC Entry';
-
-  @override
-  String get randomMode_enabledTip =>
-      'Random mode enabled\nAuto-randomize prompt after each generation';
-
-  @override
-  String get randomMode_disabledTip =>
-      'Random mode\nClick to auto-randomize prompts on generation';
 
   @override
   String get batchSize_title => 'Batch Size';
@@ -3222,9 +3206,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get warmup_initTagSystem => 'Initializing tag system...';
-
-  @override
-  String get warmup_loadingPromptConfig => 'Loading prompt config...';
 
   @override
   String get warmup_imageEditor => 'Initializing image editor...';
@@ -3486,13 +3467,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get characterEditor_moveDown => 'Move Down';
 
   @override
-  String get toolbar_randomPrompt => 'Random Prompt';
-
-  @override
-  String get randomPromptToolsHiddenHint =>
-      'Random prompt tools are hidden in Settings';
-
-  @override
   String get toolbar_fullscreenEdit => 'Fullscreen Edit';
 
   @override
@@ -3544,60 +3518,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get characterTooltip_viewFullConfig => 'Click for full configuration';
 
   @override
-  String tagLibrary_generatedCharacters(Object count) {
-    return 'Generated $count characters';
-  }
-
-  @override
-  String tagLibrary_generateFailed(Object error) {
-    return 'Generation failed: $error';
-  }
-
-  @override
-  String get randomMode_title => 'Select Random Mode';
-
-  @override
-  String get randomMode_naiOfficial => 'Official Mode';
-
-  @override
-  String get randomMode_custom => 'Custom Mode';
-
-  @override
-  String get randomMode_hybrid => 'Hybrid Mode';
-
-  @override
-  String get randomMode_naiOfficialDesc =>
-      'Replicate NovelAI official random algorithm';
-
-  @override
-  String get randomMode_customDesc => 'Generate using custom presets';
-
-  @override
-  String get randomMode_hybridDesc =>
-      'Combine official algorithm with custom presets';
-
-  @override
-  String get randomMode_naiIndicator => 'NAI';
-
-  @override
-  String get randomMode_customIndicator => 'Custom';
-
-  @override
-  String get naiMode_noTags => 'No tags';
-
-  @override
-  String get naiAlgorithm_characterCount => 'Character Count Distribution';
-
-  @override
   String get naiAlgorithm_mainPrompt => 'Main Prompt';
-
-  @override
-  String tagGroup_tagCount(Object count) {
-    return '$count tags';
-  }
-
-  @override
-  String get addGroup_tagGroupTab => 'Tag Group';
 
   @override
   String get addGroup_displayNameLabel => 'Display Name (Optional)';
@@ -3606,45 +3527,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addGroup_targetCategoryLabel => 'Target Category';
 
   @override
-  String get addGroup_poolTab => 'Danbooru Pool';
-
-  @override
   String globalSettings_saveFailed(Object error) {
     return 'Save failed: $error';
   }
-
-  @override
-  String get globalSettings_category_hairColor => 'Hair Color';
-
-  @override
-  String get globalSettings_category_eyeColor => 'Eye Color';
-
-  @override
-  String get globalSettings_category_hairStyle => 'Hair Style';
-
-  @override
-  String get globalSettings_category_expression => 'Expression';
-
-  @override
-  String get globalSettings_category_pose => 'Pose';
-
-  @override
-  String get globalSettings_category_clothing => 'Clothing';
-
-  @override
-  String get globalSettings_category_accessory => 'Accessory';
-
-  @override
-  String get globalSettings_category_bodyFeature => 'Body Feature';
-
-  @override
-  String get globalSettings_category_background => 'Background';
-
-  @override
-  String get globalSettings_category_scene => 'Scene';
-
-  @override
-  String get globalSettings_category_style => 'Style';
 
   @override
   String get nav_generate => 'Generate';
@@ -3748,35 +3633,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get time_never_synced => 'Never synced';
 
   @override
-  String get preset_resetToDefault => 'Reset to Default';
-
-  @override
-  String get newPresetDialog_title => 'Create New Preset';
-
-  @override
-  String get newPresetDialog_blank => 'Completely Blank';
-
-  @override
-  String get newPresetDialog_blankDesc =>
-      'Create preset from scratch with no preset content';
-
-  @override
-  String get newPresetDialog_template => 'Based on Default Preset';
-
-  @override
-  String get newPresetDialog_templateDesc =>
-      'Copy all settings from default preset as starting point';
-
-  @override
-  String get category_dialogTitle => 'Create Category';
-
-  @override
-  String get category_nameHint => 'Enter category name';
-
-  @override
-  String get category_nameRequired => 'Name is required';
-
-  @override
   String get category_selectEmoji => 'Select Emoji';
 
   @override
@@ -3784,637 +3640,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get category_searchEmoji => 'Search emoji';
-
-  @override
-  String get characterCountConfig_title => 'Character Count Config';
-
-  @override
-  String get characterCountConfig_weight => 'Weight';
-
-  @override
-  String get characterCountConfig_solo => 'Solo';
-
-  @override
-  String get characterCountConfig_duo => 'Duo';
-
-  @override
-  String get characterCountConfig_trio => 'Trio';
-
-  @override
-  String get characterCountConfig_noHumans => 'No Humans';
-
-  @override
-  String get characterCountConfig_multiPerson => 'Multi-Person';
-
-  @override
-  String get characterCountConfig_customizable => 'Customizable';
-
-  @override
-  String get characterCountConfig_mainPrompt => 'Main Prompt';
-
-  @override
-  String get characterCountConfig_characterPrompt => 'Character Prompt';
-
-  @override
-  String get characterCountConfig_addTagOption => 'Add Character Tag';
-
-  @override
-  String get characterCountConfig_addMultiPersonCombo =>
-      'Add Multi-Person Combo';
-
-  @override
-  String get characterCountConfig_displayName => 'Display Name';
-
-  @override
-  String get characterCountConfig_displayNameHint => 'e.g., Trap';
-
-  @override
-  String get characterCountConfig_mainPromptLabel => 'Main Prompt Tags';
-
-  @override
-  String get characterCountConfig_mainPromptHint =>
-      'e.g., solo, 2girls, 1girl 1boy';
-
-  @override
-  String get characterCountConfig_personCount => 'Person Count:';
-
-  @override
-  String get characterCountConfig_slotConfig => 'Character Slot Config';
-
-  @override
-  String get characterCountConfig_slot => 'Slot';
-
-  @override
-  String get characterCountConfig_customSlots => 'Custom Slots';
-
-  @override
-  String get characterCountConfig_customSlotsTitle =>
-      'Character Slot Management';
-
-  @override
-  String get characterCountConfig_customSlotsDesc =>
-      'Add or remove available character slot options';
-
-  @override
-  String get characterCountConfig_addSlotHint => 'e.g., 1trap, 1futanari';
-
-  @override
-  String get characterCountConfig_slotExists => 'This slot already exists';
-
-  @override
-  String get randomManager_algorithmConfig => 'Algorithm Config';
-
-  @override
-  String get randomManager_characterCountWeight => 'Character Count Weight';
-
-  @override
-  String get randomManager_genderWeight => 'Gender Weight';
-
-  @override
-  String get randomManager_globalSettings => 'Global Settings';
-
-  @override
-  String get randomManager_enableSeasonalWordlists =>
-      'Enable Seasonal Wordlists';
-
-  @override
-  String get randomManager_enableSeasonalWordlistsDesc =>
-      'Wordlists for Christmas, Halloween, and other special dates';
-
-  @override
-  String get randomManager_globalEmphasisProbability =>
-      'Global Emphasis Probability';
-
-  @override
-  String get randomManager_soloGenderOptions => 'Solo Gender Options';
-
-  @override
-  String get randomManager_femaleShort => 'F';
-
-  @override
-  String get randomManager_maleShort => 'M';
-
-  @override
-  String get randomManager_other => 'Other';
-
-  @override
-  String get randomManager_tagGroupList => 'Tag Groups';
-
-  @override
-  String get randomManager_deleteTagGroupTitle => 'Delete Tag Group';
-
-  @override
-  String randomManager_deleteTagGroupConfirm(Object name) {
-    return 'Delete tag group \"$name\"? This action cannot be undone.';
-  }
-
-  @override
-  String randomManager_tagGroupCount(Object count) {
-    return '$count tag groups';
-  }
-
-  @override
-  String get randomManager_categories => 'Categories';
-
-  @override
-  String get randomManager_tagGroups => 'Tag Groups';
-
-  @override
-  String get randomManager_tags => 'Tags';
-
-  @override
-  String get randomManager_addTagGroup => 'Add Tag Group';
-
-  @override
-  String get randomManager_locked => 'Locked';
-
-  @override
-  String get randomManager_addCategory => 'Add Category';
-
-  @override
-  String get randomManager_noCategories => 'No categories';
-
-  @override
-  String get randomManager_noCategoriesHint =>
-      'Click \"Add Category\" to start configuring';
-
-  @override
-  String get randomManager_globalPeopleSettings => 'Global Character Settings';
-
-  @override
-  String get randomManager_closePreview => 'Close preview';
-
-  @override
-  String get randomManager_importPreset => 'Import Preset';
-
-  @override
-  String get randomManager_importPresetSubtitle =>
-      'Import random config preset from JSON text';
-
-  @override
-  String get randomManager_exportCurrentPreset => 'Export Current Preset';
-
-  @override
-  String get randomManager_noPresetSelected => 'No preset selected';
-
-  @override
-  String get randomManager_selectPresetFirst => 'Please select a preset first';
-
-  @override
-  String get randomManager_defaultPresetReadonly =>
-      'Default presets are read-only. Create or copy a custom preset first.';
-
-  @override
-  String randomManager_presetImported(Object name) {
-    return 'Imported preset \"$name\"';
-  }
-
-  @override
-  String get randomManager_defaultPresetV4 => 'Default Mode (V4)';
-
-  @override
-  String get randomManager_defaultPresetLegacy => 'Default Mode (Legacy)';
-
-  @override
-  String get randomManager_defaultPresetFurry => 'Default Mode (Furry)';
-
-  @override
-  String get randomManager_defaultPresetV4Description =>
-      'Random algorithm configuration based on the NAI V4 model, with multi-character support';
-
-  @override
-  String get randomManager_defaultPresetLegacyDescription =>
-      'Random algorithm configuration based on the NAI Legacy model';
-
-  @override
-  String get randomManager_defaultPresetFurryDescription =>
-      'Random algorithm configuration based on the NAI Furry model';
-
-  @override
-  String get randomManager_defaultPresetOfficialDescription =>
-      'Random algorithm configuration based on the NAI official setup';
-
-  @override
-  String get randomManager_femaleClothing => 'Female Clothing';
-
-  @override
-  String get randomManager_maleClothing => 'Male Clothing';
-
-  @override
-  String get randomManager_generalClothing => 'General Clothing';
-
-  @override
-  String get randomManager_femaleBodyType => 'Female Body Type';
-
-  @override
-  String get randomManager_maleBodyType => 'Male Body Type';
-
-  @override
-  String get randomManager_generalBodyType => 'General Body Type';
-
-  @override
-  String get randomManager_soloFemale => 'Female';
-
-  @override
-  String get randomManager_soloMale => 'Male';
-
-  @override
-  String get randomManager_duoGirls => 'Two Girls';
-
-  @override
-  String get randomManager_duoMixed => 'Girl and Boy';
-
-  @override
-  String get randomManager_duoBoys => 'Two Boys';
-
-  @override
-  String get randomManager_trioGirls => 'Three Girls';
-
-  @override
-  String get randomManager_trioTwoGirlsOneBoy => 'Two Girls and One Boy';
-
-  @override
-  String get randomManager_trioOneGirlTwoBoys => 'One Girl and Two Boys';
-
-  @override
-  String get randomManager_trioBoys => 'Three Boys';
-
-  @override
-  String get randomManager_noHumanScene => 'No-Human Scene';
-
-  @override
-  String randomManager_presetCreated(Object name) {
-    return 'Created preset \"$name\"';
-  }
-
-  @override
-  String randomManager_deletePresetConfirm(Object name) {
-    return 'Delete \"$name\"? This cannot be undone.';
-  }
-
-  @override
-  String get randomManager_syncCompleted => 'Danbooru tags synced';
-
-  @override
-  String randomManager_syncFailed(Object error) {
-    return 'Sync failed: $error';
-  }
-
-  @override
-  String get randomManager_resetDefaultTitle => 'Reset to Default';
-
-  @override
-  String get randomManager_resetDefaultContent =>
-      'Restore the official default configuration.\nCustom tag groups will be kept but disabled.';
-
-  @override
-  String get randomManager_resetDefaultConfirm => 'Reset';
-
-  @override
-  String get randomManager_resetDefaultDone => 'Reset to default configuration';
-
-  @override
-  String get randomManager_generatePreview => 'Generate Preview';
-
-  @override
-  String get randomManager_importExport => 'Import / Export';
-
-  @override
-  String get randomManager_syncing => 'Syncing';
-
-  @override
-  String get randomManager_syncingWithEllipsis => 'Syncing...';
-
-  @override
-  String get randomManager_syncDanbooruTags => 'Sync Danbooru Tags';
-
-  @override
-  String get randomManager_unknownError => 'Unknown error';
-
-  @override
-  String get randomManager_readOnlyMode => 'Read-only Mode';
-
-  @override
-  String get randomManager_readOnlyTooltip =>
-      'The current preset is a default preset, so all configuration items are locked';
-
-  @override
-  String get randomManager_searchCategoryOrTagGroup =>
-      'Search categories or tag groups...';
-
-  @override
-  String get randomManager_scope => 'Scope';
-
-  @override
-  String get randomManager_global => 'Global';
-
-  @override
-  String get randomManager_private => 'Private';
-
-  @override
-  String get randomManager_status => 'Status';
-
-  @override
-  String get randomManager_enabledOnly => 'Enabled only';
-
-  @override
-  String get randomManager_diyCapable => 'Has DIY capabilities';
-
-  @override
-  String randomManager_addTagGroupSubtitle(Object category) {
-    return 'Add to \"$category\"';
-  }
-
-  @override
-  String get randomManager_tagGroupName => 'Tag Group Name';
-
-  @override
-  String get randomManager_tagGroupNameHint => 'Enter tag group name';
-
-  @override
-  String get randomManager_tagGroupNameRequired =>
-      'Please enter a tag group name';
-
-  @override
-  String get randomManager_customTab => 'Custom';
-
-  @override
-  String get randomManager_tagList => 'Tag List';
-
-  @override
-  String get randomManager_tagListHelp =>
-      'One tag per line. Supports tag or tag:weight.';
-
-  @override
-  String get randomManager_searchTagGroup => 'Search Tag Group...';
-
-  @override
-  String get randomManager_searchPool => 'Search Pool...';
-
-  @override
-  String randomManager_itemCount(Object count) {
-    return '$count items';
-  }
-
-  @override
-  String get randomManager_noMatchingTagGroup => 'No matching Tag Groups found';
-
-  @override
-  String get randomManager_noMatchingPool => 'No matching Pools found';
-
-  @override
-  String get randomManager_cannotLoadPreview => 'Unable to load preview';
-
-  @override
-  String get randomManager_openInDanbooru => 'View in Danbooru';
-
-  @override
-  String get randomManager_editTagGroup => 'Edit Tag Group';
-
-  @override
-  String get randomManager_basicTab => 'Basic';
-
-  @override
-  String randomManager_tagsTab(Object count) {
-    return 'Tags ($count)';
-  }
-
-  @override
-  String get randomManager_diyAbilitiesTab => 'DIY Capabilities';
-
-  @override
-  String get randomManager_selectionSingle => 'Single';
-
-  @override
-  String get randomManager_selectionSingleDesc => 'Weighted random single pick';
-
-  @override
-  String get randomManager_selectionAll => 'All';
-
-  @override
-  String get randomManager_selectionAllDesc => 'Select all tags';
-
-  @override
-  String get randomManager_selectionMultipleCount => 'Multiple Count';
-
-  @override
-  String get randomManager_selectionMultipleCountDesc =>
-      'Select a specified count';
-
-  @override
-  String get randomManager_selectionMultipleProbability =>
-      'Multiple Probability';
-
-  @override
-  String get randomManager_selectionMultipleProbabilityDesc =>
-      'Evaluate each tag independently';
-
-  @override
-  String get randomManager_selectionSequential => 'Sequential';
-
-  @override
-  String get randomManager_selectionSequentialDesc =>
-      'Keep state across batches';
-
-  @override
-  String get randomManager_noTags => 'No tags';
-
-  @override
-  String get randomManager_conditionalBranch => 'Conditional Branch';
-
-  @override
-  String get randomManager_conditionalBranchDesc =>
-      'Choose different tag subsets based on variable values';
-
-  @override
-  String get randomManager_dependencyConfig => 'Dependency Config';
-
-  @override
-  String get randomManager_dependencyConfigDesc =>
-      'Make count selection depend on other category values';
-
-  @override
-  String get randomManager_visibilityRules => 'Visibility Rules';
-
-  @override
-  String get randomManager_visibilityRulesDesc =>
-      'Decide whether to generate based on composition';
-
-  @override
-  String get randomManager_timeCondition => 'Time Condition';
-
-  @override
-  String get randomManager_timeConditionDesc =>
-      'Enable within a specific date range';
-
-  @override
-  String get randomManager_postProcessRules => 'Post-process Rules';
-
-  @override
-  String get randomManager_postProcessRulesDesc =>
-      'Remove conflicts based on selected tags';
-
-  @override
-  String get randomManager_emphasisProbability => 'Emphasis Probability';
-
-  @override
-  String get randomManager_probability => 'Probability';
-
-  @override
-  String get randomManager_selectionMode => 'Selection Mode';
-
-  @override
-  String randomManager_editHint(Object name) {
-    return '$name (click to edit)';
-  }
-
-  @override
-  String randomManager_emphasisProbabilityValue(Object percent) {
-    return 'Emphasis probability: $percent%';
-  }
-
-  @override
-  String get randomManager_previewGeneration => 'Preview Generation';
-
-  @override
-  String get randomManager_generating => 'Generating';
-
-  @override
-  String get randomManager_generate => 'Generate';
-
-  @override
-  String get randomManager_generationFailed => 'Generation Failed';
-
-  @override
-  String get randomManager_copy => 'Copy';
-
-  @override
-  String get randomManager_regenerate => 'Regenerate';
-
-  @override
-  String get randomManager_copiedToClipboard => 'Copied to clipboard';
-
-  @override
-  String get randomManager_selectPresetRequired => 'Please select a preset';
-
-  @override
-  String randomManager_characterCountLabel(Object count) {
-    return '$count characters';
-  }
-
-  @override
-  String randomManager_tagCountLabel(Object count) {
-    return '$count tags';
-  }
-
-  @override
-  String get randomManager_previewHint =>
-      'Click \"Generate\" to preview random tags';
-
-  @override
-  String get randomManager_generateNow => 'Generate Now';
-
-  @override
-  String get randomManager_batchOperations => 'Batch Operations';
-
-  @override
-  String randomManager_selectedItems(Object count) {
-    return '$count selected';
-  }
-
-  @override
-  String randomManager_totalItems(Object count) {
-    return '$count total';
-  }
-
-  @override
-  String randomManager_enabledItems(Object count) {
-    return 'Enabled $count items';
-  }
-
-  @override
-  String randomManager_disabledItems(Object count) {
-    return 'Disabled $count items';
-  }
-
-  @override
-  String get randomManager_batchDeleteTitle => 'Batch Delete';
-
-  @override
-  String randomManager_batchDeleteContent(Object count) {
-    return 'Delete $count selected items? This action cannot be undone.';
-  }
-
-  @override
-  String randomManager_deletedItems(Object count) {
-    return 'Deleted $count items';
-  }
-
-  @override
-  String get randomManager_invertSelection => 'Invert Selection';
-
-  @override
-  String get randomManager_moreActions => 'More Actions';
-
-  @override
-  String get randomManager_enableSelected => 'Enable Selected';
-
-  @override
-  String get randomManager_disableSelected => 'Disable Selected';
-
-  @override
-  String get randomManager_deleteSelected => 'Delete Selected';
-
-  @override
-  String get randomManager_noHistory => 'No history';
-
-  @override
-  String get randomManager_operationHistory => 'Operation History';
-
-  @override
-  String get randomManager_keyboardShortcuts => 'Keyboard Shortcuts';
-
-  @override
-  String get randomManager_generalShortcuts => 'General';
-
-  @override
-  String get randomManager_presetActions => 'Preset Actions';
-
-  @override
-  String get randomManager_selectionActions => 'Selection Actions';
-
-  @override
-  String get randomManager_closeWindow => 'Close Window';
-
-  @override
-  String get randomManager_refreshOrSync => 'Refresh / Sync';
-
-  @override
-  String get gender_female => 'Female';
-
-  @override
-  String get gender_male => 'Male';
-
-  @override
-  String get scope_global => 'Main';
-
-  @override
-  String get scope_globalTooltip =>
-      'Prompt will appear in main prompt area\nSuitable for: background, scene, style, etc.';
-
-  @override
-  String get scope_character => 'Char';
-
-  @override
-  String get scope_characterTooltip =>
-      'Prompt will only appear in character prompts\nGenerated separately for each character\nSuitable for: hair color, eye color, clothing, expression, etc.';
-
-  @override
-  String get scope_all => 'Both';
-
-  @override
-  String get scope_allTooltip =>
-      'Prompt appears in both main and character prompts\nSuitable for: pose, interaction, and other universal tags';
 
   @override
   String get vibeNoEncodingWarning => 'This image has no pre-encoded data';
@@ -5602,9 +4827,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String collectionSelect_imageCount(int count) {
     return '$count images';
   }
-
-  @override
-  String get statistics_chartTopTags => 'Top Tags';
 
   @override
   String get statistics_chartAspectRatio => 'Aspect Ratio Distribution';
@@ -6880,13 +6102,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tagLibrary_dragToMove => 'Drag to move, scroll or pinch to zoom';
 
   @override
-  String get settings_showRandomPromptTools => 'Show random prompt tools';
-
-  @override
-  String get settings_showRandomPromptToolsSubtitle =>
-      'Show the Random Prompt button and Random Mode toggle on the generation page';
-
-  @override
   String get settings_enablePromptWeightScroll =>
       'Adjust prompt weight with mouse wheel';
 
@@ -6914,23 +6129,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_notificationResetSound => 'Reset to Default';
 
   @override
-  String get categoryConfiguration => 'Category Configuration';
-
-  @override
   String get resetToDefault => 'Reset to Default';
-
-  @override
-  String get resetToDefaultTooltip => 'Reset to default configuration';
-
-  @override
-  String get toggleGroupEnabled => 'Toggle group enabled state';
-
-  @override
-  String get diyNotAvailableForDefault =>
-      'DIY not available for default preset';
-
-  @override
-  String get diyNotAvailableHint => 'Please copy to a custom preset to edit';
 
   @override
   String get statistics_heatmapLess => 'Less';
@@ -7174,9 +6373,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get metadataImport_noDataFound => 'No NovelAI metadata found';
 
   @override
-  String get metadataImport_noParamsSelected => 'No parameters selected';
-
-  @override
   String metadataImport_appliedCount(int count) {
     return 'Applied $count parameters';
   }
@@ -7207,9 +6403,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcut_context_tag_library => 'Tag Library';
 
   @override
-  String get shortcut_context_random_config => 'Random Config';
-
-  @override
   String get shortcut_context_settings => 'Settings';
 
   @override
@@ -7223,9 +6416,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortcut_action_navigate_to_online_gallery => 'Online Gallery';
-
-  @override
-  String get shortcut_action_navigate_to_random_config => 'Random Config';
 
   @override
   String get shortcut_action_navigate_to_tag_library => 'Tag Library';
@@ -7249,9 +6439,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortcut_action_cancel_generation => 'Cancel Generation';
-
-  @override
-  String get shortcut_action_random_prompt => 'Random Prompt';
 
   @override
   String get shortcut_action_clear_prompt => 'Clear Prompt';
@@ -7372,27 +6559,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortcut_action_exit_selection_mode => 'Exit Selection Mode';
-
-  @override
-  String get shortcut_action_sync_danbooru => 'Sync Danbooru';
-
-  @override
-  String get shortcut_action_generate_preview => 'Generate Preview';
-
-  @override
-  String get shortcut_action_search_presets => 'Search Presets';
-
-  @override
-  String get shortcut_action_new_preset => 'New Preset';
-
-  @override
-  String get shortcut_action_duplicate_preset => 'Duplicate Preset';
-
-  @override
-  String get shortcut_action_delete_preset => 'Delete Preset';
-
-  @override
-  String get shortcut_action_close_config => 'Close Config';
 
   @override
   String get shortcut_action_minimize_to_tray => 'Minimize to Tray';
@@ -9655,15 +8821,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toast_saveEntryFailed => 'Failed to save entry';
 
   @override
-  String get toast_presetNameRequired => 'Enter a preset name';
-
-  @override
-  String get toast_selectPresetContent => 'Select at least one item to save';
-
-  @override
-  String get toast_presetSaved => 'Preset saved successfully';
-
-  @override
   String get toast_imagePromptCopied => 'Prompt copied';
 
   @override
@@ -9671,9 +8828,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get toast_useDeleteButton => 'Use the delete button in the UI';
-
-  @override
-  String get toast_imageHasNoMetadata => 'This image has no metadata';
 
   @override
   String get toast_imageDataUnavailable =>
@@ -9925,7 +9079,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detail_noContent => '(No content)';
 
   @override
-  String get detail_savePreset => 'Save Preset';
+  String get detail_saveBlock => 'Save as Block';
+
+  @override
+  String get saveBlock_title => 'Save as Block';
+
+  @override
+  String get saveBlock_nameLabel => 'Block title';
+
+  @override
+  String get saveBlock_nameHint => 'Enter block title';
+
+  @override
+  String get saveBlock_nameRequired => 'Please enter a block title';
+
+  @override
+  String get saveBlock_selectContent => 'Select content to save';
+
+  @override
+  String get saveBlock_negativeSuffix => 'Negative';
+
+  @override
+  String get saveBlock_saved => 'Saved to block library';
 
   @override
   String detail_copyLabel(Object label) {
@@ -9966,206 +9141,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pagination_itemUnit => 'items';
 
   @override
-  String get diyGuide_title => 'DIY Feature Guide';
-
-  @override
-  String get diyGuide_subtitle =>
-      'Learn advanced features and create your own library';
-
-  @override
-  String get diyGuide_intro =>
-      'This guide explains the core concepts and advanced features of the DIY system, helping you build powerful dynamic prompt libraries.';
-
-  @override
-  String get diyGuide_exampleLabel => 'Example';
-
-  @override
-  String get diyGuide_hierarchyTitle => 'Hierarchy';
-
-  @override
-  String get diyGuide_hierarchyDescription =>
-      'The DIY system uses a three-level category structure to organize prompts for easier management and lookup.';
-
-  @override
-  String get diyGuide_hierarchyExample =>
-      'Category: Character features\n  -> Group: Hairstyle\n      -> Tag: long hair, short hair, twintails';
-
-  @override
-  String get diyGuide_selectionModeTitle => 'Selection Mode';
-
-  @override
-  String get diyGuide_selectionModeDescription =>
-      'Controls how many tags are selected from a group.';
-
-  @override
-  String get diyGuide_selectionModeExample =>
-      '• Random: select one item each time, such as a random hair color\n• All: select every tag in the group, such as a fixed feature set';
-
-  @override
-  String get diyGuide_weightTitle => 'Weight Control';
-
-  @override
-  String get diyGuide_weightDescription =>
-      'Adjusts the influence of specific prompts during generation.';
-
-  @override
-  String get diyGuide_weightExample =>
-      '• Boost: curly brackets around masterpiece = 1.05x weight\n• Strong boost: triple curly brackets around masterpiece = 1.16x weight\n• Weaken: [bad hands] = 0.95x weight';
-
-  @override
-  String get diyGuide_genderTitle => 'Gender Restriction';
-
-  @override
-  String get diyGuide_genderDescription =>
-      'Limits tags to specific character genders to avoid incompatible generated features.';
-
-  @override
-  String get diyGuide_genderExample =>
-      '• Female: only female characters, such as skirt\n• Male: only male characters, such as beard\n• Any: universal, such as T-shirt';
-
-  @override
-  String get diyGuide_scopeTitle => 'Scope';
-
-  @override
-  String get diyGuide_scopeDescription =>
-      'Defines whether a tag applies to the character, background, or the whole image.';
-
-  @override
-  String get diyGuide_scopeExample =>
-      '• Character: character features, such as eyes and hair\n• Background: environment descriptions, such as blue sky and indoors\n• Global: art style and quality tags, such as best quality';
-
-  @override
-  String get diyGuide_conditionalTitle => 'Conditional Branch';
-
-  @override
-  String get diyGuide_conditionalDescription =>
-      'Dynamically chooses later tags based on selected tags or other conditions.';
-
-  @override
-  String get diyGuide_conditionalExample =>
-      'IF selected \"rain\"\n  THEN add \"umbrella\" and \"wet clothes\"\n  ELSE add \"sunny\"';
-
-  @override
-  String get diyGuide_dependenciesTitle => 'Dependencies';
-
-  @override
-  String get diyGuide_dependenciesDescription =>
-      'Creates links between tags so related tags are automatically introduced when one tag is selected.';
-
-  @override
-  String get diyGuide_dependenciesExample =>
-      'Selecting \"JK uniform\" -> automatically adds \"school background\" and \"school bag\"';
-
-  @override
-  String get diyGuide_visibilityTitle => 'Visibility Rules';
-
-  @override
-  String get diyGuide_visibilityDescription =>
-      'Controls when tags are shown in the UI or become active during generation.';
-
-  @override
-  String get diyGuide_visibilityExample =>
-      'Only show the \"magic wand\" option group when the \"magical girl\" category is selected';
-
-  @override
-  String get diyGuide_timeTitle => 'Time Condition';
-
-  @override
-  String get diyGuide_timeDescription =>
-      'Triggers specific tags based on real time or configured simulated time.';
-
-  @override
-  String get diyGuide_timeExample =>
-      '• 06:00-18:00 -> add \"daylight\"\n• 18:00-06:00 -> add \"night\"';
-
-  @override
-  String get diyGuide_postProcessingTitle => 'Post-processing Rules';
-
-  @override
-  String get diyGuide_postProcessingDescription =>
-      'Runs text replacement or cleanup at the final stage of prompt generation.';
-
-  @override
-  String get diyGuide_postProcessingExample =>
-      'Replace every \"blue eyes\" with \"azure eyes\" for a more distinctive description';
-
-  @override
-  String get diyGuide_emphasisTitle => 'Emphasis Probability';
-
-  @override
-  String get diyGuide_emphasisDescription =>
-      'Randomly adds weight syntax to tags to increase output variety.';
-
-  @override
-  String get diyGuide_emphasisExample =>
-      'Set a 30% probability: about 1/3 of outputs use a weighted tag and 2/3 output the plain tag';
-
-  @override
-  String get naiRules_title => 'NAI Random Rules';
-
-  @override
-  String get naiRules_characterCountProbability =>
-      'Character Count Probability';
-
-  @override
-  String get naiRules_solo => '1 person (Solo)';
-
-  @override
-  String get naiRules_duo => '2 people (Duo)';
-
-  @override
-  String get naiRules_trio => '3 people (Trio)';
-
-  @override
-  String get naiRules_group => '4 people (Group)';
-
-  @override
-  String get naiRules_genderRules => 'Gender Rules';
-
-  @override
-  String get naiRules_female => 'Female';
-
-  @override
-  String get naiRules_male => 'Male';
-
-  @override
-  String get naiRules_mixed => 'Mixed / Other';
-
-  @override
-  String get naiRules_categoryProbability => 'Category Probability';
-
-  @override
-  String get naiRules_dynamicTagWeightTitle => 'Dynamic Tag Weight Adjustment';
-
-  @override
-  String get naiRules_dynamicTagWeightSubtitle =>
-      'Randomly combines multiple dimensions such as action, clothing, expression, and background, then adjusts category weights based on the image theme.';
-
-  @override
-  String get naiRules_specialMechanisms => 'Special Mechanisms';
-
-  @override
-  String get naiRules_tagStrengthening => 'Tag Strengthening';
-
-  @override
-  String get naiRules_seasonalLibraryTitle => 'Seasonal Library';
-
-  @override
-  String get naiRules_seasonalLibrarySubtitle =>
-      'Automatically matches seasonal features, including seasonal clothing, weather, lighting, and atmosphere.';
-
-  @override
-  String get naiRules_v4CharacterPositioning =>
-      'V4 Multi-character Positioning';
-
-  @override
-  String get naiRules_smartPositionTitle => 'Smart Position Assignment';
-
-  @override
-  String get naiRules_smartPositionSubtitle =>
-      'With V4 models, character positioning syntax is used to precisely control multi-character placement.';
-
-  @override
   String get comfyImport_detectedTitle =>
       'Detected ComfyUI multi-character prompt';
 
@@ -10200,17 +9175,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get comfyImport_globalPrompt => 'Global Prompt';
-
-  @override
-  String get danbooruPreview_noTagData => 'No tag data';
-
-  @override
-  String get danbooruPreview_noPoolData => 'No Pool data';
-
-  @override
-  String danbooruPreview_postCount(Object count) {
-    return '$count posts';
-  }
 
   @override
   String get checkForUpdate => 'Check for Updates';
@@ -10681,519 +9645,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get diy_editDependencyTitle => 'Edit Dependency';
-
-  @override
-  String get diy_dependencyTitle => 'Dependency Settings';
-
-  @override
-  String get diy_dependencySubtitle =>
-      'Configure dependencies between tag selections';
-
-  @override
-  String get diy_dependencyType => 'Dependency Type';
-
-  @override
-  String get diy_sourceCategory => 'Source Category';
-
-  @override
-  String get diy_selectSourceCategory => 'Select a source category';
-
-  @override
-  String get diy_sourceCategoryId => 'Source Category ID';
-
-  @override
-  String get diy_enterCategoryId => 'Enter a category ID';
-
-  @override
-  String get diy_mappingRules => 'Mapping Rules';
-
-  @override
-  String get diy_noMappingRules => 'No mapping rules';
-
-  @override
-  String get diy_deleteRule => 'Delete rule';
-
-  @override
-  String get diy_defaultValue => 'Default Value';
-
-  @override
-  String get diy_defaultValueHint => 'Used when no mapping rule matches';
-
-  @override
-  String get diy_enableDependency => 'Enable Dependency';
-
-  @override
-  String get diy_enableDependencyHint =>
-      'This dependency is ignored while disabled';
-
-  @override
-  String get diy_addMappingRule => 'Add Mapping Rule';
-
-  @override
-  String get diy_sourceValue => 'Source Value';
-
-  @override
-  String get diy_sourceValueHint => 'For example: 1, 2, 3';
-
-  @override
-  String get diy_resultValue => 'Result Value';
-
-  @override
-  String get diy_resultValueHint => 'For example: 0-3, 0-2, 0-1';
-
-  @override
-  String get diy_dependencyCount => 'Count';
-
-  @override
-  String get diy_dependencyExists => 'Exists';
-
-  @override
-  String get diy_dependencyValue => 'Value';
-
-  @override
-  String get diy_dependencyExcludes => 'Excludes';
-
-  @override
-  String get diy_dependencyCountDescription =>
-      'Use the selected count in the source category to determine the result count';
-
-  @override
-  String get diy_dependencyExistsDescription =>
-      'Apply only when the source category has at least one selected tag';
-
-  @override
-  String get diy_dependencyValueDescription =>
-      'Depend on a specific selected tag value in the source category';
-
-  @override
-  String get diy_dependencyExcludesDescription =>
-      'Do not apply when the source category has a selected tag';
-
-  @override
-  String get diy_editConditionalTitle => 'Edit Conditional Branches';
-
-  @override
-  String get diy_conditionalDefaultName => 'Conditional Branches';
-
-  @override
-  String diy_branchDefaultName(int index) {
-    return 'Branch $index';
-  }
-
-  @override
-  String get diy_conditionalTitle => 'Conditional Branches';
-
-  @override
-  String get diy_conditionalSubtitle => 'Choose a branch by probability';
-
-  @override
-  String diy_branchCount(int count) {
-    return '$count branches';
-  }
-
-  @override
-  String get diy_noConditionalBranches => 'No conditional branches';
-
-  @override
-  String get diy_noConditionalBranchesHint =>
-      'Add branches to build conditional selection logic';
-
-  @override
-  String diy_conditionCount(int count) {
-    return '$count conditions';
-  }
-
-  @override
-  String get diy_deleteBranch => 'Delete branch';
-
-  @override
-  String get diy_addBranch => 'Add Branch';
-
-  @override
-  String diy_editBranch(String name) {
-    return 'Edit: $name';
-  }
-
-  @override
-  String get diy_branchName => 'Branch Name';
-
-  @override
-  String get diy_probability => 'Probability';
-
-  @override
-  String get diy_enableBranch => 'Enable This Branch';
-
-  @override
-  String diy_ruleDefaultName(int index) {
-    return 'Rule $index';
-  }
-
-  @override
-  String diy_ruleCount(int count) {
-    return '$count rules';
-  }
-
-  @override
-  String get diy_addRule => 'Add Rule';
-
-  @override
-  String get diy_editRule => 'Edit Rule';
-
-  @override
-  String get diy_ruleName => 'Rule Name';
-
-  @override
-  String get diy_enableRule => 'Enable This Rule';
-
-  @override
-  String get diy_postProcessTitle => 'Post-processing Rules';
-
-  @override
-  String get diy_postProcessSubtitle => 'Automatically resolve tag conflicts';
-
-  @override
-  String get diy_sleepingRule => 'Sleeping Rule';
-
-  @override
-  String get diy_sleepingRuleDescription =>
-      'Remove eye-color descriptions when the character is sleeping';
-
-  @override
-  String get diy_mermaidRule => 'Mermaid Rule';
-
-  @override
-  String get diy_mermaidRuleDescription =>
-      'Remove legwear descriptions for mermaids, centaurs, lamias, and similar characters';
-
-  @override
-  String get diy_presetRules => 'Preset Rules';
-
-  @override
-  String get diy_noPostProcessRules => 'No post-processing rules';
-
-  @override
-  String get diy_noPostProcessRulesHint =>
-      'Add rules to resolve tag conflicts automatically';
-
-  @override
-  String get diy_actionType => 'Action Type';
-
-  @override
-  String get diy_triggerTags => 'Trigger Tags';
-
-  @override
-  String get diy_commaSeparatedTagsHint => 'Comma-separated tag list';
-
-  @override
-  String get diy_targetCategories => 'Target Categories';
-
-  @override
-  String get diy_commaSeparatedCategoryIdsHint =>
-      'Comma-separated category ID list';
-
-  @override
-  String get diy_targetTags => 'Target Tags';
-
-  @override
-  String get diy_actionRemoveTags => 'Remove Tags';
-
-  @override
-  String get diy_actionReplaceTags => 'Replace Tags';
-
-  @override
-  String get diy_actionAddTags => 'Add Tags';
-
-  @override
-  String get diy_actionRemoveCategories => 'Remove Categories';
-
-  @override
-  String get diy_noTriggers => 'No triggers';
-
-  @override
-  String diy_actionSummary(String triggers, String action) {
-    return 'When [$triggers] matches: $action';
-  }
-
-  @override
-  String get diy_characterPositionTitle => 'Character Position';
-
-  @override
-  String get diy_characterPositionSubtitle =>
-      'Visually edit character positions';
-
-  @override
-  String get diy_addCharacterPosition => 'Add Character Position';
-
-  @override
-  String get diy_addCharacterPositionHint =>
-      'Use the button below to add a character position';
-
-  @override
-  String diy_characterIndex(int index) {
-    return 'Character $index';
-  }
-
-  @override
-  String get diy_aiPositionChoice => 'AI chooses automatically';
-
-  @override
-  String diy_positionCoordinates(String row, String column) {
-    return 'Row: $row%, Column: $column%';
-  }
-
-  @override
-  String get diy_customPosition => 'Custom';
-
-  @override
-  String diy_emphasisPercent(String percent) {
-    return 'Emphasis $percent%';
-  }
-
-  @override
-  String get diy_characterCountWeight => 'Character Count Weights';
-
-  @override
-  String diy_peopleCount(int count) {
-    return '$count people';
-  }
-
-  @override
-  String get diy_genderProbability => 'Gender Probability';
-
-  @override
-  String get diy_noWeightsConfigured => 'No weights configured';
-
-  @override
-  String get diy_genderOther => 'Other';
-
-  @override
-  String get diy_emphasisTitle => 'Global Emphasis';
-
-  @override
-  String get diy_emphasisSubtitle => 'Adjust tag emphasis effects';
-
-  @override
-  String get diy_emphasisProbability => 'Emphasis Probability';
-
-  @override
-  String diy_emphasisProbabilityHint(String percent) {
-    return 'Each selected tag has a $percent% chance of receiving emphasis brackets';
-  }
-
-  @override
-  String get diy_bracketCount => 'Bracket Layers';
-
-  @override
-  String diy_bracketLayers(int count) {
-    return '$count layers';
-  }
-
-  @override
-  String get diy_effectPreview => 'Effect Preview';
-
-  @override
-  String get diy_exampleTag => 'example tag';
-
-  @override
-  String get diy_emphasisExplanation =>
-      'Emphasis brackets increase tag weight; more layers apply a higher weight';
-
-  @override
-  String diy_presetExportFailed(String error) {
-    return 'Failed to export preset: $error';
-  }
-
-  @override
-  String get diy_presetJsonRootObject => 'The JSON root must be an object';
-
-  @override
-  String diy_presetInvalidData(String error) {
-    return 'Invalid preset data: $error';
-  }
-
-  @override
-  String get diy_presetExportTitle => 'Export Preset';
-
-  @override
-  String get diy_presetImportTitle => 'Import Preset';
-
-  @override
-  String get diy_unknown => 'Unknown';
-
-  @override
-  String get diy_presetShareHint =>
-      'Copy the content below to share it with others';
-
-  @override
-  String get diy_presetPasteJsonHint => 'Paste preset JSON data here...';
-
-  @override
-  String get diy_presetPreview => 'Preset Preview';
-
-  @override
-  String get diy_name => 'Name';
-
-  @override
-  String get diy_description => 'Description';
-
-  @override
-  String get diy_categoryCount => 'Categories';
-
-  @override
-  String get diy_totalTagCount => 'Total Tags';
-
-  @override
-  String get diy_visibilityTitle => 'Visibility Rules';
-
-  @override
-  String get diy_visibilitySubtitle =>
-      'Control category visibility with conditions';
-
-  @override
-  String get diy_noVisibilityRules => 'No visibility rules';
-
-  @override
-  String get diy_noVisibilityRulesHint =>
-      'Add rules to control category visibility from the current composition';
-
-  @override
-  String get diy_notSet => 'Not set';
-
-  @override
-  String get diy_targetCategory => 'Target Category';
-
-  @override
-  String get diy_conditionType => 'Condition Type';
-
-  @override
-  String get diy_conditionValue => 'Condition Value';
-
-  @override
-  String get diy_conditionValueHint => 'Tag name or value';
-
-  @override
-  String get diy_visibleWhenMatched => 'Visible When Matched';
-
-  @override
-  String get diy_conditionTagExists => 'Tag Exists';
-
-  @override
-  String get diy_conditionTagNotExists => 'Tag Does Not Exist';
-
-  @override
-  String get diy_conditionValueEquals => 'Value Equals';
-
-  @override
-  String get diy_conditionValueNotEquals => 'Value Does Not Equal';
-
-  @override
-  String get diy_conditionValueInList => 'Value Is in List';
-
-  @override
-  String get diy_conditionValueNotInList => 'Value Is Not in List';
-
-  @override
-  String get diy_editTimeConditionTitle => 'Edit Time Condition';
-
-  @override
-  String get diy_timeDefaultName => 'Time Condition';
-
-  @override
-  String get diy_timeTitle => 'Time Condition';
-
-  @override
-  String get diy_timeSubtitle => 'Activate within a specific date range';
-
-  @override
-  String get diy_enableTimeCondition => 'Enable Time Condition';
-
-  @override
-  String get diy_enableTimeConditionHint =>
-      'Apply only within the configured date range';
-
-  @override
-  String get diy_christmas => 'Christmas';
-
-  @override
-  String get diy_christmasDescription =>
-      'Christmas tags, active from December 1 through 31';
-
-  @override
-  String get diy_halloween => 'Halloween';
-
-  @override
-  String get diy_halloweenDescription =>
-      'Halloween tags, active from October 1 through 31';
-
-  @override
-  String get diy_valentinesDay => 'Valentine\'s Day';
-
-  @override
-  String get diy_valentinesDescription =>
-      'Valentine\'s Day tags, active from February 1 through 14';
-
-  @override
-  String get diy_presetTemplates => 'Preset Templates';
-
-  @override
-  String get diy_dateRange => 'Date Range';
-
-  @override
-  String get diy_startDate => 'Start Date';
-
-  @override
-  String get diy_endDate => 'End Date';
-
-  @override
-  String get diy_crossYearUnsupported =>
-      'Date ranges that cross into a new year are not supported yet';
-
-  @override
-  String get diy_month => 'Month';
-
-  @override
-  String get diy_day => 'Day';
-
-  @override
-  String get diy_conditionName => 'Condition Name';
-
-  @override
-  String get diy_conditionNameHint => 'Enter a condition name';
-
-  @override
-  String get diy_repeatYearly => 'Repeat Yearly';
-
-  @override
-  String get diy_repeatYearlyHint =>
-      'Activate automatically during the same date range every year';
-
-  @override
-  String get diy_currentlyActive => 'Currently Active';
-
-  @override
-  String get diy_inactive => 'Inactive';
-
-  @override
-  String diy_daysRemaining(int count) {
-    return '$count days remaining';
-  }
-
-  @override
-  String diy_timeRangeSummary(
-    String name,
-    int startMonth,
-    int startDay,
-    int endMonth,
-    int endDay,
-  ) {
-    return '$name ($startMonth/$startDay - $endMonth/$endDay)';
-  }
-
-  @override
-  String get diy_activeBadge => 'ACTIVE';
-
-  @override
   String get common_optional => 'Optional';
 
   @override
@@ -11234,18 +9685,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addToLibrary_tagHint => 'Enter a tag and press Enter to add it';
 
   @override
-  String get newPresetDialog_nameRequired => 'Enter a preset name';
-
-  @override
-  String get newPresetDialog_nameLabel => 'Preset Name';
-
-  @override
-  String get newPresetDialog_nameHint => 'Enter a name for the new preset';
-
-  @override
-  String get newPresetDialog_creationMode => 'Creation Method';
-
-  @override
   String get drop_saveVibeBundle => 'Save Vibe Bundle';
 
   @override
@@ -11280,16 +9719,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String vibe_import_reencodeFailed(String name) {
     return 'Failed to re-encode Vibe: $name';
   }
-
-  @override
-  String get randomManager_releaseToDelete => 'Release to delete';
-
-  @override
-  String get randomManager_dragHereToDelete => 'Drag here to delete';
-
-  @override
-  String get randomManager_keyboardShortcutsHint =>
-      'Keyboard Shortcuts (press ? to view)';
 
   @override
   String get localGallery_createFolder => 'Create Folder';
@@ -11410,20 +9839,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String editor_appliedDimensionLimit(int max) {
     return 'Applied dimensions must not exceed $max.';
-  }
-
-  @override
-  String get savePreset_title => 'Save as Preset';
-
-  @override
-  String get savePreset_nameHint => 'Enter preset name';
-
-  @override
-  String get savePreset_metadataDescription => 'Saved from image metadata';
-
-  @override
-  String savePreset_vibeData(int count) {
-    return 'Vibe Data ($count)';
   }
 
   @override
@@ -11659,4 +10074,393 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get autocomplete_openSettings =>
       'Open autocomplete and data source settings';
+
+  @override
+  String get nav_promptBlockLibrary => 'Prompt Blocks';
+
+  @override
+  String get promptBlockLibrary_title => 'Prompt Blocks';
+
+  @override
+  String get promptBlockLibrary_folders => 'Folders';
+
+  @override
+  String get promptBlockLibrary_allBlocks => 'All blocks';
+
+  @override
+  String get promptBlockLibrary_rootFolder => 'Root / Unfiled';
+
+  @override
+  String get promptBlockLibrary_unnamedBlock => 'Untitled block';
+
+  @override
+  String get promptBlockPill_missing => 'Block deleted';
+
+  @override
+  String get promptBlockPill_unknown => 'Invalid block';
+
+  @override
+  String get promptBlockLibrary_unnamedFolder => 'Untitled folder';
+
+  @override
+  String get promptBlockLibrary_scope => 'Browse';
+
+  @override
+  String get promptBlockLibrary_searchHint => 'Search blocks...';
+
+  @override
+  String get promptBlockLibrary_newBlock => 'New block';
+
+  @override
+  String get promptBlockLibrary_editBlock => 'Edit block';
+
+  @override
+  String get promptBlockLibrary_newFolder => 'New folder';
+
+  @override
+  String get promptBlockLibrary_newSubfolder => 'New subfolder';
+
+  @override
+  String get promptBlockLibrary_renameFolder => 'Rename folder';
+
+  @override
+  String get promptBlockLibrary_moveToRoot => 'Move to root';
+
+  @override
+  String get promptBlockLibrary_moveToFolder => 'Move to folder';
+
+  @override
+  String get promptBlockLibrary_blockTitle => 'Title';
+
+  @override
+  String get promptBlockLibrary_titleHint => 'Block title';
+
+  @override
+  String get promptBlockLibrary_folder => 'Folder';
+
+  @override
+  String get promptBlockLibrary_folderName => 'Folder name';
+
+  @override
+  String get promptBlockLibrary_folderNameHint => 'Folder name';
+
+  @override
+  String get promptBlockLibrary_blockContent => 'Content';
+
+  @override
+  String get promptBlockLibrary_contentHint => 'Plain text content';
+
+  @override
+  String get promptBlockLibrary_color => 'Color';
+
+  @override
+  String get promptBlockLibrary_icon => 'Icon';
+
+  @override
+  String get promptBlockLibrary_saved => 'Saved';
+
+  @override
+  String get promptBlockLibrary_copied => 'Content copied';
+
+  @override
+  String get promptBlockLibrary_deleted => 'Deleted';
+
+  @override
+  String get promptBlockLibrary_empty => 'No prompt blocks yet';
+
+  @override
+  String get promptBlockLibrary_emptyFolder => 'This folder is empty';
+
+  @override
+  String get promptBlockLibrary_noSearchResults => 'No matching blocks';
+
+  @override
+  String get promptBlockLibrary_tryDifferentSearch => 'Try a different search';
+
+  @override
+  String get promptBlockLibrary_emptyHint =>
+      'Create a block to start organizing reusable text';
+
+  @override
+  String promptBlockLibrary_loadFailed(String error) {
+    return 'Failed to load prompt blocks: $error';
+  }
+
+  @override
+  String promptBlockLibrary_deleteFolderTitle(Object name) {
+    return 'Delete folder \"$name\"?';
+  }
+
+  @override
+  String get promptBlockLibrary_deleteFolderDescription =>
+      'Choose what to do with blocks inside this folder and its subfolders.';
+
+  @override
+  String get promptBlockLibrary_moveContentsToRoot => 'Move contents to root';
+
+  @override
+  String get promptBlockLibrary_moveContentsToFolder =>
+      'Move contents to another folder';
+
+  @override
+  String get promptBlockLibrary_destinationFolder => 'Destination folder';
+
+  @override
+  String get promptBlockLibrary_deleteContents => 'Delete contents';
+
+  @override
+  String get promptBlockLibrary_deleteContentsWarning =>
+      'This also permanently deletes all blocks in the folder tree.';
+
+  @override
+  String get promptBlockLibrary_importExport => 'Import / Export';
+
+  @override
+  String get promptBlockLibrary_importTxtFiles => 'Import TXT files';
+
+  @override
+  String get promptBlockLibrary_importFromFolder => 'Import from folder…';
+
+  @override
+  String get promptBlockLibrary_exportLibraryBackup => 'Export library backup…';
+
+  @override
+  String get promptBlockLibrary_importLibraryBackup => 'Import library backup…';
+
+  @override
+  String get promptBlockLibrary_exportBlockAsTxt => 'Export as TXT';
+
+  @override
+  String get promptBlockLibrary_exportTxtDone => 'TXT exported';
+
+  @override
+  String promptBlockLibrary_exportTxtFailed(String error) {
+    return 'Export failed: $error';
+  }
+
+  @override
+  String get promptBlockLibrary_importTxtTitle => 'Select TXT files';
+
+  @override
+  String promptBlockLibrary_txtImportDone(int created, int skipped) {
+    return 'Imported $created blocks, skipped $skipped existing sources';
+  }
+
+  @override
+  String get promptBlockLibrary_curationTitle => 'Import from folder';
+
+  @override
+  String promptBlockLibrary_curationSummary(
+    int total,
+    int created,
+    int skipped,
+    int changed,
+  ) {
+    return '$total TXT files: $created new · $skipped unchanged · $changed changed';
+  }
+
+  @override
+  String promptBlockLibrary_curationLocalModifiedHint(int count) {
+    return '$count blocks were manually edited after import; updating overwrites local edits';
+  }
+
+  @override
+  String get promptBlockLibrary_curationUpdateChanged =>
+      'Update changed blocks with file content';
+
+  @override
+  String get promptBlockLibrary_curationEmpty =>
+      'No TXT files in the selected folder';
+
+  @override
+  String promptBlockLibrary_curationDone(
+    int created,
+    int updated,
+    int skipped,
+  ) {
+    return 'Done: $created created · $updated updated · $skipped skipped';
+  }
+
+  @override
+  String get promptBlockLibrary_curationNew => 'New';
+
+  @override
+  String get promptBlockLibrary_curationUnchanged => 'Unchanged';
+
+  @override
+  String get promptBlockLibrary_curationChanged => 'Changed';
+
+  @override
+  String get promptBlockLibrary_curationLocalModified => 'Locally modified';
+
+  @override
+  String promptBlockLibrary_libraryBackupDone(int count) {
+    return 'Exported backup with $count blocks';
+  }
+
+  @override
+  String get promptBlockLibrary_libraryImportTitle => 'Select library backup';
+
+  @override
+  String get promptBlockLibrary_libraryBackupInvalid =>
+      'Not a valid block library backup';
+
+  @override
+  String promptBlockLibrary_libraryImportDone(
+    int blocks,
+    int folders,
+    int skipped,
+  ) {
+    return 'Imported $blocks blocks and $folders folders, skipped $skipped existing';
+  }
+
+  @override
+  String promptBlockLibrary_importFailed(String error) {
+    return 'Import failed: $error';
+  }
+
+  @override
+  String get promptBlockLibrary_sourceFile => 'Source file';
+
+  @override
+  String get promptBlockLibrary_importedAt => 'Imported at';
+
+  @override
+  String get promptBlockLibrary_detailedView => 'Detailed view';
+
+  @override
+  String get promptBlockLibrary_compactView => 'Compact view';
+
+  @override
+  String get promptBlockLibrary_reorderFolders => 'Reorder folders';
+
+  @override
+  String get nav_styleExplore => 'Style Explore';
+
+  @override
+  String get styleExplore_recipeListTitle => 'Recipes';
+
+  @override
+  String get styleExplore_recipesEmpty =>
+      'No recipes yet. Start a new one, or compose in the editor and \"Save as\".';
+
+  @override
+  String get styleExplore_noActiveRecipe => 'No recipe linked';
+
+  @override
+  String get styleExplore_unsavedChanges => 'Unsaved changes';
+
+  @override
+  String get styleExplore_save => 'Save';
+
+  @override
+  String get styleExplore_saveAs => 'Save as';
+
+  @override
+  String get styleExplore_preview => 'Preview';
+
+  @override
+  String get styleExplore_positive => 'Positive';
+
+  @override
+  String get styleExplore_negative => 'Negative';
+
+  @override
+  String get styleExplore_newRecipe => 'New';
+
+  @override
+  String get styleExplore_load => 'Load';
+
+  @override
+  String get styleExplore_rename => 'Rename';
+
+  @override
+  String get styleExplore_duplicate => 'Duplicate recipe';
+
+  @override
+  String get styleExplore_deleteRecipe => 'Delete';
+
+  @override
+  String get styleExplore_recipeNameLabel => 'Recipe name';
+
+  @override
+  String get styleExplore_recipeNameHint => 'e.g. soft lighting study';
+
+  @override
+  String get styleExplore_nameRequired => 'Name cannot be empty';
+
+  @override
+  String styleExplore_recipeSaved(String name) {
+    return 'Saved \"$name\"';
+  }
+
+  @override
+  String styleExplore_recipeCreated(String name) {
+    return 'Created \"$name\"';
+  }
+
+  @override
+  String styleExplore_recipeLoaded(String name) {
+    return 'Loaded \"$name\"';
+  }
+
+  @override
+  String styleExplore_recipeDuplicated(String name) {
+    return 'Duplicated \"$name\"';
+  }
+
+  @override
+  String styleExplore_recipeDeleted(String name) {
+    return 'Deleted \"$name\"';
+  }
+
+  @override
+  String get styleExplore_operationFailed => 'Operation failed';
+
+  @override
+  String get styleExplore_discardChangesTitle => 'Discard unsaved changes?';
+
+  @override
+  String get styleExplore_discardChangesMessage =>
+      'The workspace has unsaved changes. Continuing will discard them.';
+
+  @override
+  String get styleExplore_discardChangesConfirm => 'Continue and discard';
+
+  @override
+  String get styleExplore_previewTitle => 'Prompt preview';
+
+  @override
+  String get styleExplore_previewEmpty => '(empty)';
+
+  @override
+  String get styleExplore_copyPositive => 'Copy positive';
+
+  @override
+  String get styleExplore_copyNegative => 'Copy negative';
+
+  @override
+  String get styleExplore_copiedToClipboard => 'Copied';
+
+  @override
+  String get styleExplore_positiveHint =>
+      'Compose blocks and text to explore styles';
+
+  @override
+  String get promptBlockEditor_library => 'Block library';
+
+  @override
+  String get promptBlockEditor_back => 'Back to parent folder';
+
+  @override
+  String get promptBlockEditor_preview => 'Preview content';
+
+  @override
+  String get promptBlockEditor_enable => 'Enable block';
+
+  @override
+  String get promptBlockEditor_disable => 'Disable block';
+
+  @override
+  String get promptBlockEditor_more => 'Block actions';
 }

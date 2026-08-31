@@ -66,10 +66,7 @@ class ConnectionPoolHolder {
     _version++;
     final currentVersion = _version;
 
-    _instance = ConnectionPool(
-      dbPath: dbPath,
-      maxConnections: maxConnections,
-    );
+    _instance = ConnectionPool(dbPath: dbPath, maxConnections: maxConnections);
     await _instance!.initialize();
 
     AppLogger.i(
@@ -214,17 +211,11 @@ class ConnectionPoolHolder {
     int warmupConnections = 3,
     Duration warmupTimeout = const Duration(seconds: 5),
   }) async {
-    await reset(
-      dbPath: dbPath,
-      maxConnections: maxConnections,
-    );
+    await reset(dbPath: dbPath, maxConnections: maxConnections);
 
     // 小延迟确保连接池完全就绪
     await Future.delayed(const Duration(milliseconds: 100));
 
-    return await warmup(
-      connections: warmupConnections,
-      timeout: warmupTimeout,
-    );
+    return await warmup(connections: warmupConnections, timeout: warmupTimeout);
   }
 }

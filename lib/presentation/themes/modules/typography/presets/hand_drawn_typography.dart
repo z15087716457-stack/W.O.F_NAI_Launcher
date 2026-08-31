@@ -18,7 +18,7 @@ class HandDrawnTypography extends BaseTypographyModule {
 
   @override
   TextTheme get textTheme => BaseTypographyModule.createTextTheme(
-        displayFamily: displayFontFamily,
-        bodyFamily: bodyFontFamily,
-      );
+    displayFamily: displayFontFamily,
+    bodyFamily: bodyFontFamily,
+  );
 }

@@ -9,10 +9,8 @@ part 'tag_favorite_storage.g.dart';
 
 /// 标签收藏存储服务 - 使用 Hive 持久化标签收藏数据
 class TagFavoriteStorage extends BaseHiveStorage<void> {
-  TagFavoriteStorage() : super(
-    boxName: StorageKeys.tagFavoritesBox,
-    useLazyLoading: false,
-  );
+  TagFavoriteStorage()
+    : super(boxName: StorageKeys.tagFavoritesBox, useLazyLoading: false);
 
   /// 初始化存储 (box 应在 main.dart 中预先打开)
   Future<void> init() async {
@@ -27,7 +25,9 @@ class TagFavoriteStorage extends BaseHiveStorage<void> {
     } catch (e) {
       // 处理存储配额超限等错误
       if (e is HiveError) {
-        throw TagFavoriteStorageException('Storage quota exceeded or error: ${e.message}');
+        throw TagFavoriteStorageException(
+          'Storage quota exceeded or error: ${e.message}',
+        );
       }
       rethrow;
     }
@@ -39,7 +39,9 @@ class TagFavoriteStorage extends BaseHiveStorage<void> {
       await box.delete(favoriteId);
     } catch (e) {
       if (e is HiveError) {
-        throw TagFavoriteStorageException('Failed to remove favorite: ${e.message}');
+        throw TagFavoriteStorageException(
+          'Failed to remove favorite: ${e.message}',
+        );
       }
       rethrow;
     }
@@ -84,7 +86,9 @@ class TagFavoriteStorage extends BaseHiveStorage<void> {
       await box.clear();
     } catch (e) {
       if (e is HiveError) {
-        throw TagFavoriteStorageException('Failed to clear favorites: ${e.message}');
+        throw TagFavoriteStorageException(
+          'Failed to clear favorites: ${e.message}',
+        );
       }
       rethrow;
     }

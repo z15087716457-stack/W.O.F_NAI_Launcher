@@ -93,7 +93,6 @@ void main() {
 
     expect(find.text('输入'), findsOneWidget);
     expect(find.text('完成提醒'), findsOneWidget);
-    expect(find.text('显示随机提示词工具'), findsOneWidget);
     expect(find.text('滚轮调整提示词权重'), findsOneWidget);
     expect(find.text('完成音效'), findsOneWidget);
   });

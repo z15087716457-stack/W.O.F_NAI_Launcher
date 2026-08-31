@@ -148,38 +148,6 @@ class CooccurrenceSettings extends _$CooccurrenceSettings {
   }
 }
 
-/// 抽卡模式设置 Notifier（生成时自动随机提示词）
-@Riverpod(keepAlive: true)
-class RandomPromptMode extends _$RandomPromptMode {
-  LocalStorageService get _storage => ref.read(localStorageServiceProvider);
-
-  @override
-  bool build() => _storage.getRandomPromptMode();
-
-  void toggle() => set(!state);
-
-  void set(bool value) {
-    state = value;
-    _storage.setRandomPromptMode(value);
-  }
-}
-
-/// 随机提示词工具入口显示设置 Notifier
-@Riverpod(keepAlive: true)
-class RandomPromptToolsVisibility extends _$RandomPromptToolsVisibility {
-  LocalStorageService get _storage => ref.read(localStorageServiceProvider);
-
-  @override
-  bool build() => _storage.getShowRandomPromptTools();
-
-  void toggle() => set(!state);
-
-  void set(bool value) {
-    state = value;
-    _storage.setShowRandomPromptTools(value);
-  }
-}
-
 /// 每次请求生成图片数量设置 Notifier（1-4张）
 @Riverpod(keepAlive: true)
 class ImagesPerRequest extends _$ImagesPerRequest {

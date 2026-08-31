@@ -161,8 +161,7 @@ extension TagLibraryCategoryListExtension on List<TagLibraryCategory> {
 
   /// 更新排序顺序
   List<TagLibraryCategory> reindex() {
-    return asMap()
-        .entries
+    return asMap().entries
         .map((e) => e.value.copyWith(sortOrder: e.key))
         .toList();
   }

@@ -20,10 +20,10 @@ class GlowDividerModule extends BaseDividerModule {
     required Color glowColor,
     double glowIntensity = 1.0,
     Color? borderColor,
-  })  : _glowColor = glowColor,
-        _glowIntensity = glowIntensity,
-        _borderColor =
-            borderColor ?? const Color(0x0FFFFFFF); // 6% white default
+  }) : _glowColor = glowColor,
+       _glowIntensity = glowIntensity,
+       _borderColor =
+           borderColor ?? const Color(0x0FFFFFFF); // 6% white default
 
   /// RetroWave style - orange/pink neon glow
   /// Glow effect uses bright orange, but panel borders use subtle white
@@ -50,42 +50,42 @@ class GlowDividerModule extends BaseDividerModule {
 
   @override
   BoxDecoration? get horizontalDecoration => BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: _glowColor.withValues(alpha: 0.8),
-            width: thickness,
-          ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: _glowColor.withValues(alpha: 0.3 * _glowIntensity),
-            blurRadius: 4,
-            spreadRadius: 0,
-          ),
-          BoxShadow(
-            color: _glowColor.withValues(alpha: 0.2 * _glowIntensity),
-            blurRadius: 8,
-            spreadRadius: 0,
-          ),
-        ],
-      );
+    border: Border(
+      bottom: BorderSide(
+        color: _glowColor.withValues(alpha: 0.8),
+        width: thickness,
+      ),
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: _glowColor.withValues(alpha: 0.3 * _glowIntensity),
+        blurRadius: 4,
+        spreadRadius: 0,
+      ),
+      BoxShadow(
+        color: _glowColor.withValues(alpha: 0.2 * _glowIntensity),
+        blurRadius: 8,
+        spreadRadius: 0,
+      ),
+    ],
+  );
 
   @override
   BoxDecoration? get verticalDecoration => BoxDecoration(
-        border: Border(
-          right: BorderSide(
-            color: _glowColor.withValues(alpha: 0.8),
-            width: thickness,
-          ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: _glowColor.withValues(alpha: 0.3 * _glowIntensity),
-            blurRadius: 4,
-            spreadRadius: 0,
-          ),
-        ],
-      );
+    border: Border(
+      right: BorderSide(
+        color: _glowColor.withValues(alpha: 0.8),
+        width: thickness,
+      ),
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: _glowColor.withValues(alpha: 0.3 * _glowIntensity),
+        blurRadius: 4,
+        spreadRadius: 0,
+      ),
+    ],
+  );
 
   @override
   BoxDecoration panelBorder({

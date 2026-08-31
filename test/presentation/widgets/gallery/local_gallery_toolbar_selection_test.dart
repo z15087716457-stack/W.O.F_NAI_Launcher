@@ -8,35 +8,36 @@ import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart
 import 'package:nai_launcher/presentation/widgets/gallery/local_gallery_toolbar.dart';
 
 void main() {
-  testWidgets('selection toolbar separates current page and all result actions',
-      (tester) async {
-    await _pumpToolbar(tester);
+  testWidgets(
+    'selection toolbar separates current page and all result actions',
+    (tester) async {
+      await _pumpToolbar(tester);
 
-    expect(find.byTooltip('选择本页'), findsOneWidget);
-    expect(find.byTooltip('选择全部'), findsOneWidget);
-    expect(find.byTooltip('全选'), findsNothing);
-  });
+      expect(find.byTooltip('选择本页'), findsOneWidget);
+      expect(find.byTooltip('选择全部'), findsOneWidget);
+      expect(find.byTooltip('全选'), findsNothing);
+    },
+  );
 
-  testWidgets('select current page only selects visible page paths',
-      (tester) async {
+  testWidgets('select current page only selects visible page paths', (
+    tester,
+  ) async {
     final container = await _pumpToolbar(tester);
 
     await tester.tap(find.byTooltip('选择本页'));
     await tester.pump();
 
-    expect(
-      container.read(localGallerySelectionNotifierProvider).selectedIds,
-      {
-        r'C:\gallery\page-1.png',
-        r'C:\gallery\page-2.png',
-      },
-    );
+    expect(container.read(localGallerySelectionNotifierProvider).selectedIds, {
+      r'C:\gallery\page-1.png',
+      r'C:\gallery\page-2.png',
+    });
     expect(find.byTooltip('取消本页'), findsOneWidget);
     expect(find.byTooltip('选择全部'), findsOneWidget);
   });
 
-  testWidgets('select all replaces selection with all filtered result paths',
-      (tester) async {
+  testWidgets('select all replaces selection with all filtered result paths', (
+    tester,
+  ) async {
     final container = await _pumpToolbar(
       tester,
       initialSelectedIds: {r'C:\gallery\stale.png'},
@@ -45,16 +46,13 @@ void main() {
     await tester.tap(find.byTooltip('选择全部'));
     await tester.pumpAndSettle();
 
-    expect(
-      container.read(localGallerySelectionNotifierProvider).selectedIds,
-      {
-        r'C:\gallery\page-1.png',
-        r'C:\gallery\page-2.png',
-        r'C:\gallery\result-3.png',
-        r'C:\gallery\result-4.png',
-        r'C:\gallery\result-5.png',
-      },
-    );
+    expect(container.read(localGallerySelectionNotifierProvider).selectedIds, {
+      r'C:\gallery\page-1.png',
+      r'C:\gallery\page-2.png',
+      r'C:\gallery\result-3.png',
+      r'C:\gallery\result-4.png',
+      r'C:\gallery\result-5.png',
+    });
     expect(find.byTooltip('取消全部'), findsOneWidget);
   });
 }
@@ -95,9 +93,7 @@ Future<ProviderContainer> _pumpToolbar(
         locale: Locale('zh'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: LocalGalleryToolbar(),
-        ),
+        home: Scaffold(body: LocalGalleryToolbar()),
       ),
     ),
   );
@@ -108,18 +104,11 @@ Future<ProviderContainer> _pumpToolbar(
 }
 
 LocalImageRecord _record(String path) {
-  return LocalImageRecord(
-    path: path,
-    size: 1,
-    modifiedAt: DateTime(2026),
-  );
+  return LocalImageRecord(path: path, size: 1, modifiedAt: DateTime(2026));
 }
 
 class _ToolbarGalleryNotifier extends LocalGalleryNotifier {
-  _ToolbarGalleryNotifier(
-    this._initialState, {
-    required this.filteredPaths,
-  });
+  _ToolbarGalleryNotifier(this._initialState, {required this.filteredPaths});
 
   final LocalGalleryState _initialState;
   final List<String> filteredPaths;
@@ -138,9 +127,6 @@ class _ActiveSelectionNotifier extends LocalGallerySelectionNotifier {
 
   @override
   SelectionModeState build() {
-    return SelectionModeState(
-      isActive: true,
-      selectedIds: _initialSelectedIds,
-    );
+    return SelectionModeState(isActive: true, selectedIds: _initialSelectedIds);
   }
 }

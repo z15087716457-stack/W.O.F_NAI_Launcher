@@ -30,10 +30,7 @@ class TagFavorite with _$TagFavorite {
       _$TagFavoriteFromJson(json);
 
   /// 创建新收藏
-  factory TagFavorite.create({
-    required PromptTag tag,
-    String? notes,
-  }) {
+  factory TagFavorite.create({required PromptTag tag, String? notes}) {
     return TagFavorite(
       id: const Uuid().v4(),
       tag: tag,

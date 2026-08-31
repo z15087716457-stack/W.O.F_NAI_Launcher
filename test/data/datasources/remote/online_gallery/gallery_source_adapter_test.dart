@@ -380,7 +380,10 @@ void main() {
                   model: 'NovelAI Diffusion V5 0B1DA8F5',
                 ),
                 // 非 NAI 命名不判定，原文落标准 model 键
-                _naiEnvelopeImage('601_p2', model: 'Stable Diffusion XL abc123'),
+                _naiEnvelopeImage(
+                  '601_p2',
+                  model: 'Stable Diffusion XL abc123',
+                ),
                 // V3 官方指纹（8 位 hex）正常判定
                 _naiEnvelopeImage(
                   '601_p3',
@@ -419,10 +422,7 @@ void main() {
         expect(full.width, 832);
         expect(full.height, 1216);
         expect(detail.media[1].metadata['model'], 'nai-diffusion-5-full');
-        expect(
-          detail.media[2].metadata['model'],
-          'Stable Diffusion XL abc123',
-        );
+        expect(detail.media[2].metadata['model'], 'Stable Diffusion XL abc123');
         expect(detail.media[2].metadata.containsKey('source_model'), isFalse);
         expect(detail.media[3].metadata['model'], 'nai-diffusion-3');
       },

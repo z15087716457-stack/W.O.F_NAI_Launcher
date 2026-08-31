@@ -1,12 +1,7 @@
 import 'dart:typed_data';
 
 /// ComfyUI 连接状态
-enum ComfyUIConnectionStatus {
-  disconnected,
-  connecting,
-  connected,
-  error,
-}
+enum ComfyUIConnectionStatus { disconnected, connecting, connected, error }
 
 /// ComfyUI 任务状态
 enum ComfyUITaskStatus {
@@ -58,8 +53,7 @@ class ComfyUIProgress {
       totalSteps: totalSteps ?? this.totalSteps,
       currentNodeId: currentNodeId ?? this.currentNodeId,
       errorMessage: errorMessage ?? this.errorMessage,
-      previewImage:
-          clearPreview ? null : (previewImage ?? this.previewImage),
+      previewImage: clearPreview ? null : (previewImage ?? this.previewImage),
     );
   }
 }
@@ -69,10 +63,7 @@ class ComfyUIPromptResult {
   final String promptId;
   final int? number;
 
-  const ComfyUIPromptResult({
-    required this.promptId,
-    this.number,
-  });
+  const ComfyUIPromptResult({required this.promptId, this.number});
 }
 
 /// ComfyUI 系统状态
@@ -81,9 +72,5 @@ class ComfyUISystemStats {
   final int? vramTotal;
   final int? vramFree;
 
-  const ComfyUISystemStats({
-    this.cudaDevice,
-    this.vramTotal,
-    this.vramFree,
-  });
+  const ComfyUISystemStats({this.cudaDevice, this.vramTotal, this.vramFree});
 }

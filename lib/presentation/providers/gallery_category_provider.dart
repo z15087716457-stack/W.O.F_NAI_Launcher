@@ -189,14 +189,16 @@ class GalleryCategoryNotifier extends _$GalleryCategoryNotifier {
             galleryFilePathKey(category.folderPath),
           );
           if (folder.isEmpty) continue;
-          final isInside = rel == folder ||
+          final isInside =
+              rel == folder ||
               rel.startsWith('$folder\\') ||
               rel.startsWith('$folder/');
           if (isInside &&
               (deepest == null ||
                   folder.length >
-                      _trimSeparators(galleryFilePathKey(deepest.folderPath))
-                          .length)) {
+                      _trimSeparators(
+                        galleryFilePathKey(deepest.folderPath),
+                      ).length)) {
             deepest = category;
           }
         }

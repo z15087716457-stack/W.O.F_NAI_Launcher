@@ -62,10 +62,10 @@ class PhaseProgress {
   });
 
   factory PhaseProgress.initial(WarmupPhase phase) => PhaseProgress(
-        phase: phase,
-        progress: 0.0,
-        currentTask: 'warmup_preparing',
-      );
+    phase: phase,
+    progress: 0.0,
+    currentTask: 'warmup_preparing',
+  );
 }
 
 /// 带阶段划分的预热任务调度器
@@ -107,10 +107,12 @@ class WarmupTaskScheduler {
 
   /// 计算阶段总权重
   int _getPhaseWeight(WarmupPhase phase) {
-    final taskWeight =
-        _getTasksForPhase(phase).fold(0, (sum, t) => sum + t.weight);
-    final groupWeight =
-        _getGroupsForPhase(phase).fold(0, (sum, g) => sum + g.weight);
+    final taskWeight = _getTasksForPhase(
+      phase,
+    ).fold(0, (sum, t) => sum + t.weight);
+    final groupWeight = _getGroupsForPhase(
+      phase,
+    ).fold(0, (sum, g) => sum + g.weight);
     return taskWeight + groupWeight;
   }
 

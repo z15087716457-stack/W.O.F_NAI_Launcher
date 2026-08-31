@@ -14,9 +14,9 @@ class GlassmorphismEffect extends BaseEffectModule {
     double blurStrength = 12.0,
     double insetShadowDepth = 0.1,
     double insetShadowBlur = 6.0,
-  })  : _blurStrength = blurStrength,
-        _insetShadowDepth = insetShadowDepth,
-        _insetShadowBlur = insetShadowBlur;
+  }) : _blurStrength = blurStrength,
+       _insetShadowDepth = insetShadowDepth,
+       _insetShadowBlur = insetShadowBlur;
 
   @override
   bool get enableGlassmorphism => true;

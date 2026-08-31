@@ -174,9 +174,7 @@ class ThemedConfirmDialog extends StatelessWidget {
 
     return AlertDialog(
       backgroundColor: theme.colorScheme.surfaceContainerHigh,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       title: Row(
         children: [
           if (icon != null) ...[
@@ -215,11 +213,13 @@ class ThemedConfirmDialog extends StatelessWidget {
         FilledButton(
           onPressed: () => Navigator.of(context).pop(true),
           style: FilledButton.styleFrom(
-            backgroundColor: type == ThemedConfirmDialogType.danger ||
+            backgroundColor:
+                type == ThemedConfirmDialogType.danger ||
                     type == ThemedConfirmDialogType.warning
                 ? accentColor
                 : null,
-            foregroundColor: type == ThemedConfirmDialogType.danger ||
+            foregroundColor:
+                type == ThemedConfirmDialogType.danger ||
                     type == ThemedConfirmDialogType.warning
                 ? theme.colorScheme.onError
                 : null,

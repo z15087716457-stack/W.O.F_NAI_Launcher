@@ -12,9 +12,7 @@ void main() {
   test('切换到分类后再清空分类过滤，应恢复显示全部 Vibe', () async {
     final storage = _CategorizedStorageService();
     final container = ProviderContainer(
-      overrides: [
-        vibeLibraryStorageServiceProvider.overrideWithValue(storage),
-      ],
+      overrides: [vibeLibraryStorageServiceProvider.overrideWithValue(storage)],
     );
     addTearDown(container.dispose);
 
@@ -53,9 +51,7 @@ void main() {
   test('loadFromCache 会并行读取 entries 和 categories', () async {
     final storage = _ParallelProbeStorageService();
     final container = ProviderContainer(
-      overrides: [
-        vibeLibraryStorageServiceProvider.overrideWithValue(storage),
-      ],
+      overrides: [vibeLibraryStorageServiceProvider.overrideWithValue(storage)],
     );
     addTearDown(container.dispose);
 
@@ -80,9 +76,7 @@ void main() {
   test('loadFromCache 不应暴露 entries 已加载但 currentEntries 仍为空的中间态', () async {
     final storage = _LoadedStorageService();
     final container = ProviderContainer(
-      overrides: [
-        vibeLibraryStorageServiceProvider.overrideWithValue(storage),
-      ],
+      overrides: [vibeLibraryStorageServiceProvider.overrideWithValue(storage)],
     );
     addTearDown(container.dispose);
 
@@ -140,27 +134,27 @@ class _ParallelProbeStorageService extends VibeLibraryStorageService {
 class _LoadedStorageService extends VibeLibraryStorageService {
   @override
   Future<List<VibeLibraryEntry>> getDisplayEntries() async => [
-        VibeLibraryEntry(
-          id: 'a',
-          name: 'Alpha',
-          vibeDisplayName: 'Alpha',
-          vibeEncoding: 'enc-a',
-          strength: 0.6,
-          infoExtracted: 0.7,
-          sourceTypeIndex: VibeSourceType.naiv4vibe.index,
-          createdAt: DateTime(2026, 4, 14),
-        ),
-        VibeLibraryEntry(
-          id: 'b',
-          name: 'Beta',
-          vibeDisplayName: 'Beta',
-          vibeEncoding: 'enc-b',
-          strength: 0.6,
-          infoExtracted: 0.7,
-          sourceTypeIndex: VibeSourceType.naiv4vibe.index,
-          createdAt: DateTime(2026, 4, 14),
-        ),
-      ];
+    VibeLibraryEntry(
+      id: 'a',
+      name: 'Alpha',
+      vibeDisplayName: 'Alpha',
+      vibeEncoding: 'enc-a',
+      strength: 0.6,
+      infoExtracted: 0.7,
+      sourceTypeIndex: VibeSourceType.naiv4vibe.index,
+      createdAt: DateTime(2026, 4, 14),
+    ),
+    VibeLibraryEntry(
+      id: 'b',
+      name: 'Beta',
+      vibeDisplayName: 'Beta',
+      vibeEncoding: 'enc-b',
+      strength: 0.6,
+      infoExtracted: 0.7,
+      sourceTypeIndex: VibeSourceType.naiv4vibe.index,
+      createdAt: DateTime(2026, 4, 14),
+    ),
+  ];
 
   @override
   Future<List<VibeLibraryCategory>> getAllCategories() async => const [];
@@ -169,35 +163,35 @@ class _LoadedStorageService extends VibeLibraryStorageService {
 class _CategorizedStorageService extends VibeLibraryStorageService {
   @override
   Future<List<VibeLibraryEntry>> getDisplayEntries() async => [
-        VibeLibraryEntry(
-          id: 'a',
-          name: 'Alpha',
-          vibeDisplayName: 'Alpha',
-          vibeEncoding: 'enc-a',
-          strength: 0.6,
-          infoExtracted: 0.7,
-          categoryId: 'cat-a',
-          sourceTypeIndex: VibeSourceType.naiv4vibe.index,
-          createdAt: DateTime(2026, 4, 14),
-        ),
-        VibeLibraryEntry(
-          id: 'b',
-          name: 'Beta',
-          vibeDisplayName: 'Beta',
-          vibeEncoding: 'enc-b',
-          strength: 0.6,
-          infoExtracted: 0.7,
-          sourceTypeIndex: VibeSourceType.naiv4vibe.index,
-          createdAt: DateTime(2026, 4, 14, 0, 0, 1),
-        ),
-      ];
+    VibeLibraryEntry(
+      id: 'a',
+      name: 'Alpha',
+      vibeDisplayName: 'Alpha',
+      vibeEncoding: 'enc-a',
+      strength: 0.6,
+      infoExtracted: 0.7,
+      categoryId: 'cat-a',
+      sourceTypeIndex: VibeSourceType.naiv4vibe.index,
+      createdAt: DateTime(2026, 4, 14),
+    ),
+    VibeLibraryEntry(
+      id: 'b',
+      name: 'Beta',
+      vibeDisplayName: 'Beta',
+      vibeEncoding: 'enc-b',
+      strength: 0.6,
+      infoExtracted: 0.7,
+      sourceTypeIndex: VibeSourceType.naiv4vibe.index,
+      createdAt: DateTime(2026, 4, 14, 0, 0, 1),
+    ),
+  ];
 
   @override
   Future<List<VibeLibraryCategory>> getAllCategories() async => [
-        VibeLibraryCategory(
-          id: 'cat-a',
-          name: '分类 A',
-          createdAt: DateTime(2026, 4, 14),
-        ),
-      ];
+    VibeLibraryCategory(
+      id: 'cat-a',
+      name: '分类 A',
+      createdAt: DateTime(2026, 4, 14),
+    ),
+  ];
 }

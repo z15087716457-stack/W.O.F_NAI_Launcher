@@ -80,7 +80,10 @@ class FileHashCalculator {
       paths.add(newPath);
     }
 
-    AppLogger.d('Hash mapping updated: $oldPath -> $newPath', 'FileHashCalculator');
+    AppLogger.d(
+      'Hash mapping updated: $oldPath -> $newPath',
+      'FileHashCalculator',
+    );
   }
 
   /// 获取哈希对应的所有路径

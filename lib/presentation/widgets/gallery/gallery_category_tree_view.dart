@@ -214,7 +214,8 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       onAddSubCategory: !isReadOnly && widget.onAddSubCategory != null
           ? () => widget.onAddSubCategory!(category.id)
           : null,
-      onMoveToRoot: !isReadOnly &&
+      onMoveToRoot:
+          !isReadOnly &&
               category.parentId != null &&
               widget.onCategoryMove != null
           ? () => widget.onCategoryMove!(category.id, null)
@@ -270,12 +271,8 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
           _buildInsertStrip<GalleryCategory>(
             canAccept: (dragged) =>
                 dragged.parentId == null && dragged.id != roots[i].id,
-            onAccept: (dragged) => _handleRootReorder(
-              roots,
-              dragged,
-              i,
-              insertAfter: false,
-            ),
+            onAccept: (dragged) =>
+                _handleRootReorder(roots, dragged, i, insertAfter: false),
           ),
         );
       }

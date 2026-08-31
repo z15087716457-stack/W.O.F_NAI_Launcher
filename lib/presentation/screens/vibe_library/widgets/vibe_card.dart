@@ -106,18 +106,19 @@ class _VibeCardState extends ConsumerState<VibeCard>
         .read(vibeLibraryStorageServiceProvider)
         .getDisplayThumbnail(entryId)
         .then((thumbnail) {
-      if (!mounted || widget.entry.id != entryId) {
-        return;
-      }
+          if (!mounted || widget.entry.id != entryId) {
+            return;
+          }
 
-      if (thumbnail != null && thumbnail.isNotEmpty) {
-        setState(() => _lazyThumbnailData = thumbnail);
-      }
-    }).whenComplete(() {
-      if (mounted && widget.entry.id == entryId) {
-        _thumbnailLoadFuture = null;
-      }
-    });
+          if (thumbnail != null && thumbnail.isNotEmpty) {
+            setState(() => _lazyThumbnailData = thumbnail);
+          }
+        })
+        .whenComplete(() {
+          if (mounted && widget.entry.id == entryId) {
+            _thumbnailLoadFuture = null;
+          }
+        });
   }
 
   void _onHoverEnter(PointerEvent event) {
@@ -272,8 +273,11 @@ class _VibeCardState extends ConsumerState<VibeCard>
                 return Container(
                   color: Colors.grey[300],
                   child: const Center(
-                    child:
-                        Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                    child: Icon(
+                      Icons.broken_image,
+                      size: 48,
+                      color: Colors.grey,
+                    ),
                   ),
                 );
               },
@@ -318,9 +322,7 @@ class _VibeCardState extends ConsumerState<VibeCard>
 
     // 单张居中显示
     if (count == 1) {
-      return Center(
-        child: _buildSingleCard(previews[0], progress, 0),
-      );
+      return Center(child: _buildSingleCard(previews[0], progress, 0));
     }
 
     // 多张扇形展开
@@ -471,10 +473,7 @@ class _VibeCardState extends ConsumerState<VibeCard>
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Colors.transparent,
-              Colors.black.withValues(alpha: 0.8),
-            ],
+            colors: [Colors.transparent, Colors.black.withValues(alpha: 0.8)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -629,11 +628,7 @@ class _VibeCardState extends ConsumerState<VibeCard>
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: Colors.white, width: 2),
               ),
-              child: Icon(
-                Icons.check,
-                color: colorScheme.onPrimary,
-                size: 18,
-              ),
+              child: Icon(Icons.check, color: colorScheme.onPrimary, size: 18),
             ),
           ),
         ),
@@ -734,8 +729,8 @@ class _ActionButtonState extends State<_ActionButton> {
     final colorScheme = Theme.of(context).colorScheme;
     final backgroundColor = widget.isDanger
         ? (_isHovered
-            ? colorScheme.error
-            : colorScheme.error.withValues(alpha: 0.9))
+              ? colorScheme.error
+              : colorScheme.error.withValues(alpha: 0.9))
         : (_isHovered ? Colors.white : Colors.white.withValues(alpha: 0.9));
     final iconColor = widget.isDanger
         ? colorScheme.onError
@@ -762,8 +757,9 @@ class _ActionButtonState extends State<_ActionButton> {
                 color: backgroundColor,
                 boxShadow: [
                   BoxShadow(
-                    color:
-                        Colors.black.withValues(alpha: _isHovered ? 0.28 : 0.2),
+                    color: Colors.black.withValues(
+                      alpha: _isHovered ? 0.28 : 0.2,
+                    ),
                     blurRadius: _isHovered ? 8 : 4,
                     offset: Offset(0, _isHovered ? 3 : 2),
                   ),
@@ -785,8 +781,10 @@ class _ActionButtonState extends State<_ActionButton> {
                   opacity: _showTooltip ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 100),
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.88),
                       borderRadius: BorderRadius.circular(6),

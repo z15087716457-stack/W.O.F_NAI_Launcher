@@ -338,9 +338,7 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
             builder: (dialogContext) => AlertDialog(
               icon: const Icon(Icons.upload_file_outlined),
               title: Text(l10n.settings_extraRootsIndexImportTitle),
-              content: Text(
-                l10n.settings_extraRootsIndexImportContent(result),
-              ),
+              content: Text(l10n.settings_extraRootsIndexImportContent(result)),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -489,8 +487,9 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
 
     if (confirmed != true || !mounted) return;
 
-    final removed = await GalleryFolderRepository.instance
-        .removeExtraRootPath(path);
+    final removed = await GalleryFolderRepository.instance.removeExtraRootPath(
+      path,
+    );
     if (removed) {
       await _loadExtraRoots();
       if (mounted) {
@@ -562,8 +561,7 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 FilledButton.tonalIcon(
-                  onPressed:
-                      importState.isImporting ? null : _importTagIndex,
+                  onPressed: importState.isImporting ? null : _importTagIndex,
                   icon: const Icon(Icons.upload_file_outlined, size: 18),
                   label: Text(context.l10n.settings_importTagIndex),
                 ),
@@ -653,10 +651,10 @@ class _VibeLibraryPathTileState extends State<VibeLibraryPathTile> {
           final displayPath = hasCustomPath
               ? (customPath ?? '')
               : (snapshot.data != null
-                  ? context.l10n.settings_defaultVibePath(snapshot.data!)
-                  : context.l10n.settings_defaultVibePath(
-                      'Documents/NAI_Launcher/vibes/',
-                    ));
+                    ? context.l10n.settings_defaultVibePath(snapshot.data!)
+                    : context.l10n.settings_defaultVibePath(
+                        'Documents/NAI_Launcher/vibes/',
+                      ));
           return Text(
             displayPath,
             maxLines: 1,

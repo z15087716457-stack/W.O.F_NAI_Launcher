@@ -68,14 +68,8 @@ class _ShimmerSkeletonState extends State<ShimmerSkeleton>
           decoration: BoxDecoration(
             borderRadius: widget.borderRadius,
             gradient: LinearGradient(
-              begin: Alignment(
-                -1.0 + (_controller.value * 2),
-                -0.3,
-              ),
-              end: Alignment(
-                1.0 + (_controller.value * 2),
-                0.3,
-              ),
+              begin: Alignment(-1.0 + (_controller.value * 2), -0.3),
+              end: Alignment(1.0 + (_controller.value * 2), 0.3),
               colors: [baseColor, highlightColor, baseColor],
               stops: const [0.1, 0.5, 0.9],
             ),

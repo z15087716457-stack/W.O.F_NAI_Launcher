@@ -145,8 +145,8 @@ class ThumbnailBatch {
     required this.description,
     required this.tasks,
     required this.priority,
-  })  : createdAt = DateTime.now(),
-        isCancelled = false;
+  }) : createdAt = DateTime.now(),
+       isCancelled = false;
 
   /// 获取总任务数
   int get totalCount => tasks.length;
@@ -224,8 +224,9 @@ class ThumbnailService {
   // ==================== 队列 ====================
 
   /// 任务队列（按优先级排序）
-  final PriorityQueue<ThumbnailTask> _taskQueue =
-      PriorityQueue<ThumbnailTask>((a, b) => a.effectivePriority.compareTo(b.effectivePriority));
+  final PriorityQueue<ThumbnailTask> _taskQueue = PriorityQueue<ThumbnailTask>(
+    (a, b) => a.effectivePriority.compareTo(b.effectivePriority),
+  );
 
   /// 活跃任务映射（路径 -> 任务）
   final Map<String, ThumbnailTask> _activeTasks = {};
@@ -284,7 +285,12 @@ class ThumbnailService {
       _setState(ThumbnailServiceState.running);
     } catch (e, stack) {
       _setState(ThumbnailServiceState.uninitialized);
-      AppLogger.e('Failed to initialize ThumbnailService', e, stack, 'ThumbnailService');
+      AppLogger.e(
+        'Failed to initialize ThumbnailService',
+        e,
+        stack,
+        'ThumbnailService',
+      );
       rethrow;
     }
   }
@@ -316,17 +322,16 @@ class ThumbnailService {
     _ensureInitialized();
 
     // 首先检查缓存
-    final cachedPath = await _cacheService!.getThumbnailPath(originalPath, size: size);
+    final cachedPath = await _cacheService!.getThumbnailPath(
+      originalPath,
+      size: size,
+    );
     if (cachedPath != null) {
       return cachedPath;
     }
 
     // 创建任务并等待完成
-    final task = _createTask(
-      originalPath,
-      size: size,
-      priority: priority,
-    );
+    final task = _createTask(originalPath, size: size, priority: priority);
 
     _enqueueTask(task);
 
@@ -337,7 +342,10 @@ class ThumbnailService {
     return completer.future.timeout(
       const Duration(seconds: 30),
       onTimeout: () {
-        AppLogger.w('Thumbnail generation timeout: $originalPath', 'ThumbnailService');
+        AppLogger.w(
+          'Thumbnail generation timeout: $originalPath',
+          'ThumbnailService',
+        );
         return null;
       },
     );
@@ -367,11 +375,7 @@ class ThumbnailService {
       return; // 已在处理中
     }
 
-    final task = _createTask(
-      originalPath,
-      size: size,
-      priority: priority,
-    );
+    final task = _createTask(originalPath, size: size, priority: priority);
 
     _enqueueTask(task);
   }
@@ -387,14 +391,11 @@ class ThumbnailService {
   }) async {
     _ensureInitialized();
 
-    final batchId = 'batch_${DateTime.now().millisecondsSinceEpoch}_${_activeBatches.length}';
+    final batchId =
+        'batch_${DateTime.now().millisecondsSinceEpoch}_${_activeBatches.length}';
 
     final tasks = originalPaths.map((path) {
-      return _createTask(
-        path,
-        size: size,
-        priority: priority,
-      );
+      return _createTask(path, size: size, priority: priority);
     }).toList();
 
     final batch = ThumbnailBatch(
@@ -564,7 +565,8 @@ class ThumbnailService {
     if (_taskQueue.isEmpty) return;
     if (_activeGenerationCount >= maxConcurrentGenerations) return;
 
-    while (_activeGenerationCount < maxConcurrentGenerations && _taskQueue.isNotEmpty) {
+    while (_activeGenerationCount < maxConcurrentGenerations &&
+        _taskQueue.isNotEmpty) {
       final task = _taskQueue.removeFirst();
 
       if (task.state == ThumbnailTaskState.cancelled) {
@@ -802,13 +804,19 @@ class ThumbnailService {
   // ==================== 缓存代理 ====================
 
   /// 清除缓存
-  Future<int> clearCache(String rootPath, {Map<String, dynamic>? options}) async {
+  Future<int> clearCache(
+    String rootPath, {
+    Map<String, dynamic>? options,
+  }) async {
     _ensureInitialized();
     return await _cacheService!.clearCache(rootPath, options: options);
   }
 
   /// 删除缩略图
-  Future<bool> deleteThumbnail(String originalPath, {ThumbnailSize? size}) async {
+  Future<bool> deleteThumbnail(
+    String originalPath, {
+    ThumbnailSize? size,
+  }) async {
     _ensureInitialized();
     return await _cacheService!.deleteThumbnail(originalPath, size: size);
   }
@@ -831,7 +839,9 @@ class ThumbnailService {
 
   void _ensureInitialized() {
     if (_state != ThumbnailServiceState.running) {
-      throw StateError('ThumbnailService not initialized. Call initialize() first.');
+      throw StateError(
+        'ThumbnailService not initialized. Call initialize() first.',
+      );
     }
   }
 
@@ -864,7 +874,9 @@ class _ThumbnailServiceStats {
       'successCount': successCount,
       'failedCount': failedCount,
       'totalCount': total,
-      'successRate': total > 0 ? '${(successCount / total * 100).toStringAsFixed(1)}%' : '0.0%',
+      'successRate': total > 0
+          ? '${(successCount / total * 100).toStringAsFixed(1)}%'
+          : '0.0%',
     };
   }
 }

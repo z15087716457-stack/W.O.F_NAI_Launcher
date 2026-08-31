@@ -89,8 +89,9 @@ void main() {
         })}\n',
       );
 
-      final importResult = await TagIndexImportService(dataSource)
-          .importFromJsonl(jsonlPath, rootPaths: [tempDir.path]);
+      final importResult = await TagIndexImportService(
+        dataSource,
+      ).importFromJsonl(jsonlPath, rootPaths: [tempDir.path]);
       expect(importResult.imported, 1);
 
       final imageId = (await dataSource.getImageIdByPath(pngPath))!;

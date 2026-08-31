@@ -13,7 +13,7 @@ import '../../../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../../../data/models/vibe/vibe_reference.dart';
 import '../../add_to_library_dialog.dart';
 import '../../app_toast.dart';
-import '../../save_as_preset_dialog.dart';
+import '../../save_as_block_dialog.dart';
 import '../../save_vibe_dialog.dart';
 import '../../themed_divider.dart';
 import '../file_image_detail_data.dart';
@@ -954,9 +954,9 @@ class _ActionButtons extends StatelessWidget {
               Expanded(
                 child: _ActionButton(
                   icon: Icons.bookmark_add,
-                  label: context.l10n.detail_savePreset,
+                  label: context.l10n.detail_saveBlock,
                   onPressed: () =>
-                      SaveAsPresetDialog.show(context, metadata: metadata),
+                      SaveAsBlockDialog.show(context, metadata: metadata),
                 ),
               ),
             ],

@@ -15,11 +15,7 @@ class GalleryErrorView extends StatelessWidget {
   /// 重试按钮回调
   final VoidCallback? onRetry;
 
-  const GalleryErrorView({
-    super.key,
-    this.error,
-    this.onRetry,
-  });
+  const GalleryErrorView({super.key, this.error, this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -29,28 +25,20 @@ class GalleryErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 48,
-            color: theme.colorScheme.error,
-          ),
+          Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
           const SizedBox(height: 16),
           Text(
             context.l10n.localGallery_loadFailed(
               error ?? context.l10n.localGallery_unknownError,
             ),
-            style: TextStyle(
-              color: theme.colorScheme.onSurface,
-            ),
+            style: TextStyle(color: theme.colorScheme.onSurface),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: onRetry,
             child: Text(
               context.l10n.common_retry,
-              style: TextStyle(
-                color: theme.colorScheme.onPrimary,
-              ),
+              style: TextStyle(color: theme.colorScheme.onPrimary),
             ),
           ),
         ],
@@ -66,10 +54,7 @@ class GalleryLoadingView extends StatelessWidget {
   /// 显示的加载信息
   final String? message;
 
-  const GalleryLoadingView({
-    super.key,
-    this.message,
-  });
+  const GalleryLoadingView({super.key, this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -79,15 +64,11 @@ class GalleryLoadingView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
-            color: theme.colorScheme.primary,
-          ),
+          CircularProgressIndicator(color: theme.colorScheme.primary),
           const SizedBox(height: 16),
           Text(
             message ?? context.l10n.localGallery_indexingLocalImages,
-            style: TextStyle(
-              color: theme.colorScheme.onSurface,
-            ),
+            style: TextStyle(color: theme.colorScheme.onSurface),
           ),
         ],
       ),
@@ -129,22 +110,22 @@ class GalleryEmptyView extends StatelessWidget {
           Icon(
             icon,
             size: 64,
-            color: theme.colorScheme.onSurfaceVariant
-                .withValues(alpha: isDark ? 0.6 : 1.0),
+            color: theme.colorScheme.onSurfaceVariant.withValues(
+              alpha: isDark ? 0.6 : 1.0,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             title ?? context.l10n.localGallery_emptyTitle,
-            style: TextStyle(
-              color: theme.colorScheme.onSurface,
-            ),
+            style: TextStyle(color: theme.colorScheme.onSurface),
           ),
           const SizedBox(height: 8),
           Text(
             subtitle ?? context.l10n.localGallery_emptySubtitle,
             style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant
-                  .withValues(alpha: isDark ? 0.7 : 1.0),
+              color: theme.colorScheme.onSurfaceVariant.withValues(
+                alpha: isDark ? 0.7 : 1.0,
+              ),
             ),
           ),
         ],
@@ -192,8 +173,9 @@ class GalleryNoResultsView extends ConsumerWidget {
           Icon(
             icon ?? Icons.search_off,
             size: 48,
-            color: theme.colorScheme.onSurfaceVariant
-                .withValues(alpha: isDark ? 0.6 : 0.5),
+            color: theme.colorScheme.onSurfaceVariant.withValues(
+              alpha: isDark ? 0.6 : 0.5,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
@@ -213,7 +195,8 @@ class GalleryNoResultsView extends ConsumerWidget {
           ],
           const SizedBox(height: 8),
           TextButton.icon(
-            onPressed: onClearFilters ??
+            onPressed:
+                onClearFilters ??
                 () {
                   ref
                       .read(localGalleryNotifierProvider.notifier)
@@ -244,15 +227,11 @@ class GalleryGroupedLoadingView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
-            color: theme.colorScheme.primary,
-          ),
+          CircularProgressIndicator(color: theme.colorScheme.primary),
           const SizedBox(height: 16),
           Text(
             context.l10n.localGallery_loadingGroupedImages,
-            style: TextStyle(
-              color: theme.colorScheme.onSurface,
-            ),
+            style: TextStyle(color: theme.colorScheme.onSurface),
           ),
         ],
       ),

@@ -6,11 +6,7 @@ class ImportProgress {
   final int total;
   final String message;
 
-  const ImportProgress({
-    this.current = 0,
-    this.total = 0,
-    this.message = '',
-  });
+  const ImportProgress({this.current = 0, this.total = 0, this.message = ''});
 
   /// 获取进度比例 (0.0 - 1.0)，如果 total 为 0 则返回 null
   double? get progress => total > 0 ? current / total : null;
@@ -21,11 +17,7 @@ class ImportProgress {
   /// 是否已完成
   bool get isComplete => total > 0 && current == total;
 
-  ImportProgress copyWith({
-    int? current,
-    int? total,
-    String? message,
-  }) {
+  ImportProgress copyWith({int? current, int? total, String? message}) {
     return ImportProgress(
       current: current ?? this.current,
       total: total ?? this.total,

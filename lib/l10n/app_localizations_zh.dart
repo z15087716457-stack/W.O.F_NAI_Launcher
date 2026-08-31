@@ -50,6 +50,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onlineFav_favoriteAuthor => '收藏作者';
 
   @override
+  String get onlineFav_unfavoriteAuthor => '取消收藏作者';
+
+  @override
   String get onlineFav_authorFavorited => '已收藏作者';
 
   @override
@@ -66,9 +69,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get common_deselectAll => '全不选';
-
-  @override
-  String get common_collapseAll => '收起全部';
 
   @override
   String get common_save => '保存';
@@ -114,9 +114,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get common_reset => '重置';
-
-  @override
-  String get common_search => '搜索';
 
   @override
   String get common_add => '添加';
@@ -221,9 +218,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_categories => '分类';
 
   @override
-  String get common_items => '项';
-
-  @override
   String get networkError_connectionTimeout => '连接超时，请检查网络连接。';
 
   @override
@@ -284,9 +278,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get nav_onlineGallery => '画廊';
-
-  @override
-  String get nav_randomConfig => '随机配置';
 
   @override
   String get nav_dictionary => '词库 (WIP)';
@@ -1198,12 +1189,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String image_copyFailed(Object error) {
     return '复制失败: $error';
   }
-
-  @override
-  String get config_newPreset => '新建预设';
-
-  @override
-  String get config_deletePreset => '删除预设';
 
   @override
   String get img2img_title => '图生图';
@@ -2362,9 +2347,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get preset_presetName => '预设名称';
-
-  @override
   String get onlineGallery_search => '搜索';
 
   @override
@@ -2708,6 +2690,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onlineGallery_aiTagModelVersion => '模型版本';
 
   @override
+  String get onlineGallery_viewAuthor => '查看此作者';
+
+  @override
+  String get onlineGallery_returnFromAuthor => '返回之前的浏览位置';
+
+  @override
   String get onlineGallery_generationParams => '生成参数';
 
   @override
@@ -2957,9 +2945,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qualityTags_label => '质量词';
 
   @override
-  String get transparentBackground_label => '透明背景';
-
-  @override
   String get transparentBackground_tooltip =>
       '向提示词追加 transparent background 标签，生成带 alpha 通道的图像（V5 专属）';
 
@@ -2977,6 +2962,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get qualityTags_naiDefault => 'NAI 默认';
+
+  @override
+  String get qualityTags_standard => '标准';
+
+  @override
+  String get qualityTags_light => '轻量';
 
   @override
   String get qualityTags_none => '无';
@@ -3020,12 +3011,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ucPreset_selectFromLibrary => '选择负面词条目';
-
-  @override
-  String get randomMode_enabledTip => '抽卡模式已开启\n每次生成后自动随机新提示词';
-
-  @override
-  String get randomMode_disabledTip => '抽卡模式\n点击开启后每次生成自动随机提示词';
 
   @override
   String get batchSize_title => '批次大小';
@@ -3097,9 +3082,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get warmup_initTagSystem => '初始化标签系统...';
-
-  @override
-  String get warmup_loadingPromptConfig => '加载提示词配置...';
 
   @override
   String get warmup_imageEditor => '初始化图像编辑器...';
@@ -3347,12 +3329,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get characterEditor_moveDown => '下移';
 
   @override
-  String get toolbar_randomPrompt => '随机提示词';
-
-  @override
-  String get randomPromptToolsHiddenHint => '随机提示词工具已在设置中隐藏';
-
-  @override
   String get toolbar_fullscreenEdit => '全屏编辑';
 
   @override
@@ -3403,58 +3379,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get characterTooltip_viewFullConfig => '点击查看完整配置';
 
   @override
-  String tagLibrary_generatedCharacters(Object count) {
-    return '已生成 $count 个角色';
-  }
-
-  @override
-  String tagLibrary_generateFailed(Object error) {
-    return '生成失败: $error';
-  }
-
-  @override
-  String get randomMode_title => '选择随机模式';
-
-  @override
-  String get randomMode_naiOfficial => '官网模式';
-
-  @override
-  String get randomMode_custom => '自定义模式';
-
-  @override
-  String get randomMode_hybrid => '混合模式';
-
-  @override
-  String get randomMode_naiOfficialDesc => '复刻 NovelAI 官方随机算法';
-
-  @override
-  String get randomMode_customDesc => '使用自定义预设生成';
-
-  @override
-  String get randomMode_hybridDesc => '结合官方算法和自定义预设';
-
-  @override
-  String get randomMode_naiIndicator => 'NAI';
-
-  @override
-  String get randomMode_customIndicator => '自定义';
-
-  @override
-  String get naiMode_noTags => '暂无标签';
-
-  @override
-  String get naiAlgorithm_characterCount => '角色数量分布';
-
-  @override
   String get naiAlgorithm_mainPrompt => '主提示词';
-
-  @override
-  String tagGroup_tagCount(Object count) {
-    return '$count 标签';
-  }
-
-  @override
-  String get addGroup_tagGroupTab => '标签词库';
 
   @override
   String get addGroup_displayNameLabel => '显示名称（可选）';
@@ -3463,45 +3388,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get addGroup_targetCategoryLabel => '目标分类';
 
   @override
-  String get addGroup_poolTab => '图集';
-
-  @override
   String globalSettings_saveFailed(Object error) {
     return '保存失败: $error';
   }
-
-  @override
-  String get globalSettings_category_hairColor => '发色';
-
-  @override
-  String get globalSettings_category_eyeColor => '瞳色';
-
-  @override
-  String get globalSettings_category_hairStyle => '发型';
-
-  @override
-  String get globalSettings_category_expression => '表情';
-
-  @override
-  String get globalSettings_category_pose => '姿势';
-
-  @override
-  String get globalSettings_category_clothing => '服装';
-
-  @override
-  String get globalSettings_category_accessory => '配饰';
-
-  @override
-  String get globalSettings_category_bodyFeature => '身体特征';
-
-  @override
-  String get globalSettings_category_background => '背景';
-
-  @override
-  String get globalSettings_category_scene => '场景';
-
-  @override
-  String get globalSettings_category_style => '风格';
 
   @override
   String get nav_generate => '生成';
@@ -3605,33 +3494,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get time_never_synced => '从未同步';
 
   @override
-  String get preset_resetToDefault => '重置为默认';
-
-  @override
-  String get newPresetDialog_title => '创建新预设';
-
-  @override
-  String get newPresetDialog_blank => '完全空白';
-
-  @override
-  String get newPresetDialog_blankDesc => '从头开始创建预设，不包含任何预设内容';
-
-  @override
-  String get newPresetDialog_template => '基于默认预设';
-
-  @override
-  String get newPresetDialog_templateDesc => '复制默认预设的所有设置作为起点';
-
-  @override
-  String get category_dialogTitle => '创建新类别';
-
-  @override
-  String get category_nameHint => '输入类别名称';
-
-  @override
-  String get category_nameRequired => '请输入类别名称';
-
-  @override
   String get category_selectEmoji => '选择 Emoji';
 
   @override
@@ -3639,612 +3501,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get category_searchEmoji => '搜索 Emoji';
-
-  @override
-  String get characterCountConfig_title => '人数类别配置';
-
-  @override
-  String get characterCountConfig_weight => '权重';
-
-  @override
-  String get characterCountConfig_solo => '单人';
-
-  @override
-  String get characterCountConfig_duo => '双人';
-
-  @override
-  String get characterCountConfig_trio => '三人';
-
-  @override
-  String get characterCountConfig_noHumans => '无人';
-
-  @override
-  String get characterCountConfig_multiPerson => '多人';
-
-  @override
-  String get characterCountConfig_customizable => '可自定义';
-
-  @override
-  String get characterCountConfig_mainPrompt => '主提示词';
-
-  @override
-  String get characterCountConfig_characterPrompt => '角色提示词';
-
-  @override
-  String get characterCountConfig_addTagOption => '添加角色标签';
-
-  @override
-  String get characterCountConfig_addMultiPersonCombo => '添加多人组合';
-
-  @override
-  String get characterCountConfig_displayName => '显示名称';
-
-  @override
-  String get characterCountConfig_displayNameHint => '例如：伪娘';
-
-  @override
-  String get characterCountConfig_mainPromptLabel => '主提示词标签';
-
-  @override
-  String get characterCountConfig_mainPromptHint =>
-      '例如：solo, 2girls, 1girl 1boy';
-
-  @override
-  String get characterCountConfig_personCount => '人数：';
-
-  @override
-  String get characterCountConfig_slotConfig => '角色槽位配置';
-
-  @override
-  String get characterCountConfig_slot => '槽位';
-
-  @override
-  String get characterCountConfig_customSlots => '自定义槽位';
-
-  @override
-  String get characterCountConfig_customSlotsTitle => '角色槽位管理';
-
-  @override
-  String get characterCountConfig_customSlotsDesc => '添加或删除可用的角色槽位选项';
-
-  @override
-  String get characterCountConfig_addSlotHint => '例如：1trap, 1futanari';
-
-  @override
-  String get characterCountConfig_slotExists => '该槽位已存在';
-
-  @override
-  String get randomManager_algorithmConfig => '算法配置';
-
-  @override
-  String get randomManager_characterCountWeight => '角色数量权重';
-
-  @override
-  String get randomManager_genderWeight => '性别权重';
-
-  @override
-  String get randomManager_globalSettings => '全局设置';
-
-  @override
-  String get randomManager_enableSeasonalWordlists => '启用季节性词库';
-
-  @override
-  String get randomManager_enableSeasonalWordlistsDesc => '圣诞节、万圣节等特殊日期词库';
-
-  @override
-  String get randomManager_globalEmphasisProbability => '全局强调概率';
-
-  @override
-  String get randomManager_soloGenderOptions => '单人性别选项';
-
-  @override
-  String get randomManager_femaleShort => '女';
-
-  @override
-  String get randomManager_maleShort => '男';
-
-  @override
-  String get randomManager_other => '其他';
-
-  @override
-  String get randomManager_tagGroupList => '词组列表';
-
-  @override
-  String get randomManager_deleteTagGroupTitle => '删除词组';
-
-  @override
-  String randomManager_deleteTagGroupConfirm(Object name) {
-    return '确定要删除词组「$name」吗？此操作不可撤销。';
-  }
-
-  @override
-  String randomManager_tagGroupCount(Object count) {
-    return '$count 个词组';
-  }
-
-  @override
-  String get randomManager_categories => '类别';
-
-  @override
-  String get randomManager_tagGroups => '词组';
-
-  @override
-  String get randomManager_tags => '标签';
-
-  @override
-  String get randomManager_addTagGroup => '添加词组';
-
-  @override
-  String get randomManager_locked => '已锁定';
-
-  @override
-  String get randomManager_addCategory => '新增类别';
-
-  @override
-  String get randomManager_noCategories => '暂无类别';
-
-  @override
-  String get randomManager_noCategoriesHint => '点击“新增类别”开始配置';
-
-  @override
-  String get randomManager_globalPeopleSettings => '全局人数设置';
-
-  @override
-  String get randomManager_closePreview => '关闭预览';
-
-  @override
-  String get randomManager_importPreset => '导入预设';
-
-  @override
-  String get randomManager_importPresetSubtitle => '从 JSON 文本导入随机配置预设';
-
-  @override
-  String get randomManager_exportCurrentPreset => '导出当前预设';
-
-  @override
-  String get randomManager_noPresetSelected => '未选择预设';
-
-  @override
-  String get randomManager_selectPresetFirst => '请先选择预设';
-
-  @override
-  String get randomManager_defaultPresetReadonly => '默认预设为只读，请先新建或复制为自定义预设';
-
-  @override
-  String randomManager_presetImported(Object name) {
-    return '已导入预设 \"$name\"';
-  }
-
-  @override
-  String get randomManager_defaultPresetV4 => '默认模式 (V4)';
-
-  @override
-  String get randomManager_defaultPresetLegacy => '默认模式 (Legacy)';
-
-  @override
-  String get randomManager_defaultPresetFurry => '默认模式 (Furry)';
-
-  @override
-  String get randomManager_defaultPresetV4Description =>
-      '基于 NAI V4 模型的随机算法配置，支持多角色';
-
-  @override
-  String get randomManager_defaultPresetLegacyDescription =>
-      '基于 NAI Legacy 模型的随机算法配置';
-
-  @override
-  String get randomManager_defaultPresetFurryDescription =>
-      '基于 NAI Furry 模型的随机算法配置';
-
-  @override
-  String get randomManager_defaultPresetOfficialDescription =>
-      '基于 NAI 官网的随机算法配置';
-
-  @override
-  String get randomManager_femaleClothing => '女性服装';
-
-  @override
-  String get randomManager_maleClothing => '男性服装';
-
-  @override
-  String get randomManager_generalClothing => '通用服装';
-
-  @override
-  String get randomManager_femaleBodyType => '女性体型';
-
-  @override
-  String get randomManager_maleBodyType => '男性体型';
-
-  @override
-  String get randomManager_generalBodyType => '通用体型';
-
-  @override
-  String get randomManager_soloFemale => '女性';
-
-  @override
-  String get randomManager_soloMale => '男性';
-
-  @override
-  String get randomManager_duoGirls => '双女';
-
-  @override
-  String get randomManager_duoMixed => '一女一男';
-
-  @override
-  String get randomManager_duoBoys => '双男';
-
-  @override
-  String get randomManager_trioGirls => '三女';
-
-  @override
-  String get randomManager_trioTwoGirlsOneBoy => '二女一男';
-
-  @override
-  String get randomManager_trioOneGirlTwoBoys => '一女二男';
-
-  @override
-  String get randomManager_trioBoys => '三男';
-
-  @override
-  String get randomManager_noHumanScene => '无人场景';
-
-  @override
-  String randomManager_presetCreated(Object name) {
-    return '已创建预设 \"$name\"';
-  }
-
-  @override
-  String randomManager_deletePresetConfirm(Object name) {
-    return '确定要删除 \"$name\" 吗？此操作不可撤销。';
-  }
-
-  @override
-  String get randomManager_syncCompleted => 'Danbooru 标签同步完成';
-
-  @override
-  String randomManager_syncFailed(Object error) {
-    return '同步失败: $error';
-  }
-
-  @override
-  String get randomManager_resetDefaultTitle => '重置为默认配置';
-
-  @override
-  String get randomManager_resetDefaultContent =>
-      '将恢复官方默认配置。\n您添加的自定义词组会被保留但禁用。';
-
-  @override
-  String get randomManager_resetDefaultConfirm => '确认重置';
-
-  @override
-  String get randomManager_resetDefaultDone => '已重置为默认配置';
-
-  @override
-  String get randomManager_generatePreview => '生成预览';
-
-  @override
-  String get randomManager_importExport => '导入/导出';
-
-  @override
-  String get randomManager_syncing => '同步中';
-
-  @override
-  String get randomManager_syncingWithEllipsis => '同步中...';
-
-  @override
-  String get randomManager_syncDanbooruTags => '同步 Danbooru 标签';
-
-  @override
-  String get randomManager_unknownError => '未知错误';
-
-  @override
-  String get randomManager_readOnlyMode => '只读模式';
-
-  @override
-  String get randomManager_readOnlyTooltip => '当前预设为默认预设，所有配置项已锁定';
-
-  @override
-  String get randomManager_searchCategoryOrTagGroup => '搜索类别或标签组...';
-
-  @override
-  String get randomManager_scope => '作用域';
-
-  @override
-  String get randomManager_global => '全局';
-
-  @override
-  String get randomManager_private => '私有';
-
-  @override
-  String get randomManager_status => '状态';
-
-  @override
-  String get randomManager_enabledOnly => '仅启用';
-
-  @override
-  String get randomManager_diyCapable => '有 DIY 能力';
-
-  @override
-  String randomManager_addTagGroupSubtitle(Object category) {
-    return '添加到 \"$category\"';
-  }
-
-  @override
-  String get randomManager_tagGroupName => '词组名称';
-
-  @override
-  String get randomManager_tagGroupNameHint => '输入词组名称';
-
-  @override
-  String get randomManager_tagGroupNameRequired => '请输入词组名称';
-
-  @override
-  String get randomManager_customTab => '自定义';
-
-  @override
-  String get randomManager_tagList => '标签列表';
-
-  @override
-  String get randomManager_tagListHelp => '每行一个标签，支持格式: tag 或 tag:weight';
-
-  @override
-  String get randomManager_searchTagGroup => '搜索 Tag Group...';
-
-  @override
-  String get randomManager_searchPool => '搜索 Pool...';
-
-  @override
-  String randomManager_itemCount(Object count) {
-    return '$count 个';
-  }
-
-  @override
-  String get randomManager_noMatchingTagGroup => '未找到匹配的 Tag Group';
-
-  @override
-  String get randomManager_noMatchingPool => '未找到匹配的 Pool';
-
-  @override
-  String get randomManager_cannotLoadPreview => '无法加载预览';
-
-  @override
-  String get randomManager_openInDanbooru => '在 Danbooru 中查看';
-
-  @override
-  String get randomManager_editTagGroup => '编辑词组';
-
-  @override
-  String get randomManager_basicTab => '基础';
-
-  @override
-  String randomManager_tagsTab(Object count) {
-    return '标签 ($count)';
-  }
-
-  @override
-  String get randomManager_diyAbilitiesTab => 'DIY 能力';
-
-  @override
-  String get randomManager_selectionSingle => '单选';
-
-  @override
-  String get randomManager_selectionSingleDesc => '加权随机选择一个';
-
-  @override
-  String get randomManager_selectionAll => '全选';
-
-  @override
-  String get randomManager_selectionAllDesc => '选择所有标签';
-
-  @override
-  String get randomManager_selectionMultipleCount => '多选数量';
-
-  @override
-  String get randomManager_selectionMultipleCountDesc => '选择指定数量';
-
-  @override
-  String get randomManager_selectionMultipleProbability => '多选概率';
-
-  @override
-  String get randomManager_selectionMultipleProbabilityDesc => '每个独立判断';
-
-  @override
-  String get randomManager_selectionSequential => '顺序轮替';
-
-  @override
-  String get randomManager_selectionSequentialDesc => '跨批次保持状态';
-
-  @override
-  String get randomManager_noTags => '暂无标签';
-
-  @override
-  String get randomManager_conditionalBranch => '条件分支';
-
-  @override
-  String get randomManager_conditionalBranchDesc => '根据变量值选择不同的标签子集';
-
-  @override
-  String get randomManager_dependencyConfig => '依赖配置';
-
-  @override
-  String get randomManager_dependencyConfigDesc => '选择数量依赖其他类别的值';
-
-  @override
-  String get randomManager_visibilityRules => '可见性规则';
-
-  @override
-  String get randomManager_visibilityRulesDesc => '根据构图决定是否生成';
-
-  @override
-  String get randomManager_timeCondition => '时间条件';
-
-  @override
-  String get randomManager_timeConditionDesc => '特定日期范围启用';
-
-  @override
-  String get randomManager_postProcessRules => '后处理规则';
-
-  @override
-  String get randomManager_postProcessRulesDesc => '根据已选标签移除冲突';
-
-  @override
-  String get randomManager_emphasisProbability => '强调概率';
-
-  @override
-  String get randomManager_probability => '概率';
-
-  @override
-  String get randomManager_selectionMode => '选择模式';
-
-  @override
-  String randomManager_editHint(Object name) {
-    return '$name (点击编辑)';
-  }
-
-  @override
-  String randomManager_emphasisProbabilityValue(Object percent) {
-    return '强调概率: $percent%';
-  }
-
-  @override
-  String get randomManager_previewGeneration => '预览生成';
-
-  @override
-  String get randomManager_generating => '生成中';
-
-  @override
-  String get randomManager_generate => '生成';
-
-  @override
-  String get randomManager_generationFailed => '生成失败';
-
-  @override
-  String get randomManager_copy => '复制';
-
-  @override
-  String get randomManager_regenerate => '重新生成';
-
-  @override
-  String get randomManager_copiedToClipboard => '已复制到剪贴板';
-
-  @override
-  String get randomManager_selectPresetRequired => '请选择一个预设';
-
-  @override
-  String randomManager_characterCountLabel(Object count) {
-    return '$count人';
-  }
-
-  @override
-  String randomManager_tagCountLabel(Object count) {
-    return '$count标签';
-  }
-
-  @override
-  String get randomManager_previewHint => '点击\"生成\"预览随机标签';
-
-  @override
-  String get randomManager_generateNow => '立即生成';
-
-  @override
-  String get randomManager_batchOperations => '批量操作';
-
-  @override
-  String randomManager_selectedItems(Object count) {
-    return '已选择 $count 项';
-  }
-
-  @override
-  String randomManager_totalItems(Object count) {
-    return '共 $count 项';
-  }
-
-  @override
-  String randomManager_enabledItems(Object count) {
-    return '已启用 $count 个项目';
-  }
-
-  @override
-  String randomManager_disabledItems(Object count) {
-    return '已禁用 $count 个项目';
-  }
-
-  @override
-  String get randomManager_batchDeleteTitle => '批量删除';
-
-  @override
-  String randomManager_batchDeleteContent(Object count) {
-    return '确定要删除选中的 $count 个项目吗？此操作不可撤销。';
-  }
-
-  @override
-  String randomManager_deletedItems(Object count) {
-    return '已删除 $count 个项目';
-  }
-
-  @override
-  String get randomManager_invertSelection => '反选';
-
-  @override
-  String get randomManager_moreActions => '更多操作';
-
-  @override
-  String get randomManager_enableSelected => '启用选中';
-
-  @override
-  String get randomManager_disableSelected => '禁用选中';
-
-  @override
-  String get randomManager_deleteSelected => '删除选中';
-
-  @override
-  String get randomManager_noHistory => '无历史记录';
-
-  @override
-  String get randomManager_operationHistory => '操作历史';
-
-  @override
-  String get randomManager_keyboardShortcuts => '键盘快捷键';
-
-  @override
-  String get randomManager_generalShortcuts => '通用';
-
-  @override
-  String get randomManager_presetActions => '预设操作';
-
-  @override
-  String get randomManager_selectionActions => '选择操作';
-
-  @override
-  String get randomManager_closeWindow => '关闭窗口';
-
-  @override
-  String get randomManager_refreshOrSync => '刷新/同步';
-
-  @override
-  String get gender_female => '女性';
-
-  @override
-  String get gender_male => '男性';
-
-  @override
-  String get scope_global => '主提示词';
-
-  @override
-  String get scope_globalTooltip => '提示词将出现在主提示词区域\n适合：背景、场景、画面风格等';
-
-  @override
-  String get scope_character => '角色';
-
-  @override
-  String get scope_characterTooltip =>
-      '提示词将只出现在角色提示词内\n每个角色单独生成\n适合：发色、眵色、服装、表情等';
-
-  @override
-  String get scope_all => '通用';
-
-  @override
-  String get scope_allTooltip => '提示词同时出现在主提示词和角色提示词\n适合：姿势、互动等通用标签';
 
   @override
   String get vibeNoEncodingWarning => '此图片没有预编码数据';
@@ -5399,9 +4655,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String collectionSelect_imageCount(int count) {
     return '$count 张图片';
   }
-
-  @override
-  String get statistics_chartTopTags => '热门标签';
 
   @override
   String get statistics_chartAspectRatio => '宽高比分布';
@@ -6632,13 +5885,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tagLibrary_dragToMove => '拖拽移动，滚轮或双指缩放';
 
   @override
-  String get settings_showRandomPromptTools => '显示随机提示词工具';
-
-  @override
-  String get settings_showRandomPromptToolsSubtitle =>
-      '在生成页显示“随机提示词”按钮和“抽卡模式”开关';
-
-  @override
   String get settings_enablePromptWeightScroll => '滚轮调整提示词权重';
 
   @override
@@ -6664,22 +5910,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_notificationResetSound => '恢复默认';
 
   @override
-  String get categoryConfiguration => '类别配置';
-
-  @override
   String get resetToDefault => '重置为默认';
-
-  @override
-  String get resetToDefaultTooltip => '重置为默认配置';
-
-  @override
-  String get toggleGroupEnabled => '切换词组启用状态';
-
-  @override
-  String get diyNotAvailableForDefault => '默认预设不支持 DIY 配置';
-
-  @override
-  String get diyNotAvailableHint => '请复制为自定义预设后编辑';
 
   @override
   String get statistics_heatmapLess => '少';
@@ -6919,9 +6150,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get metadataImport_noDataFound => '未找到 NovelAI 元数据';
 
   @override
-  String get metadataImport_noParamsSelected => '未选择任何要应用的参数';
-
-  @override
   String metadataImport_appliedCount(int count) {
     return '已应用 $count 项参数';
   }
@@ -6951,9 +6179,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcut_context_tag_library => '词库';
 
   @override
-  String get shortcut_context_random_config => '随机配置';
-
-  @override
   String get shortcut_context_settings => '设置';
 
   @override
@@ -6967,9 +6192,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortcut_action_navigate_to_online_gallery => '在线画廊';
-
-  @override
-  String get shortcut_action_navigate_to_random_config => '随机配置';
 
   @override
   String get shortcut_action_navigate_to_tag_library => '词库页面';
@@ -6991,9 +6213,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortcut_action_cancel_generation => '取消生成';
-
-  @override
-  String get shortcut_action_random_prompt => '随机提示词';
 
   @override
   String get shortcut_action_clear_prompt => '清空提示词';
@@ -7114,27 +6333,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortcut_action_exit_selection_mode => '退出选择模式';
-
-  @override
-  String get shortcut_action_sync_danbooru => '同步Danbooru';
-
-  @override
-  String get shortcut_action_generate_preview => '生成预览';
-
-  @override
-  String get shortcut_action_search_presets => '搜索预设';
-
-  @override
-  String get shortcut_action_new_preset => '新建预设';
-
-  @override
-  String get shortcut_action_duplicate_preset => '复制预设';
-
-  @override
-  String get shortcut_action_delete_preset => '删除预设';
-
-  @override
-  String get shortcut_action_close_config => '关闭配置';
 
   @override
   String get shortcut_action_minimize_to_tray => '最小化到托盘';
@@ -9312,15 +8510,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get toast_saveEntryFailed => '保存条目失败';
 
   @override
-  String get toast_presetNameRequired => '请输入预设名称';
-
-  @override
-  String get toast_selectPresetContent => '请至少选择一项要保存的内容';
-
-  @override
-  String get toast_presetSaved => '预设保存成功';
-
-  @override
   String get toast_imagePromptCopied => '已复制 Prompt';
 
   @override
@@ -9328,9 +8517,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get toast_useDeleteButton => '请使用界面删除按钮';
-
-  @override
-  String get toast_imageHasNoMetadata => '此图片没有元数据';
 
   @override
   String get toast_imageDataUnavailable => '图像数据不可用，无法复制';
@@ -9568,7 +8754,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get detail_noContent => '(无内容)';
 
   @override
-  String get detail_savePreset => '保存预设';
+  String get detail_saveBlock => '保存为块';
+
+  @override
+  String get saveBlock_title => '保存为块';
+
+  @override
+  String get saveBlock_nameLabel => '块标题';
+
+  @override
+  String get saveBlock_nameHint => '输入块标题';
+
+  @override
+  String get saveBlock_nameRequired => '请输入块标题';
+
+  @override
+  String get saveBlock_selectContent => '请选择要保存的内容';
+
+  @override
+  String get saveBlock_negativeSuffix => '负向';
+
+  @override
+  String get saveBlock_saved => '已保存到块库';
 
   @override
   String detail_copyLabel(Object label) {
@@ -9609,191 +8816,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pagination_itemUnit => '项';
 
   @override
-  String get diyGuide_title => 'DIY 功能指南';
-
-  @override
-  String get diyGuide_subtitle => '了解高级功能，创建专属词库';
-
-  @override
-  String get diyGuide_intro => '本指南介绍了 DIY 系统的核心概念和高级功能，帮助您构建强大的动态提示词库。';
-
-  @override
-  String get diyGuide_exampleLabel => '示例';
-
-  @override
-  String get diyGuide_hierarchyTitle => '层级结构 (Hierarchy)';
-
-  @override
-  String get diyGuide_hierarchyDescription => 'DIY 系统采用三级分类结构来组织提示词，便于管理和检索。';
-
-  @override
-  String get diyGuide_hierarchyExample =>
-      'Category (分类): 角色特征\n  -> Group (分组): 发型\n      -> Tag (标签): 长发, 短发, 双马尾';
-
-  @override
-  String get diyGuide_selectionModeTitle => '选择模式 (Selection Mode)';
-
-  @override
-  String get diyGuide_selectionModeDescription => '决定从一个分组(Group)中选取多少个标签。';
-
-  @override
-  String get diyGuide_selectionModeExample =>
-      '• Random (随机): 每次随机选取一个 (如：随机发色)\n• All (全选): 选取组内所有标签 (如：固定特征组合)';
-
-  @override
-  String get diyGuide_weightTitle => '权重控制 (Weight)';
-
-  @override
-  String get diyGuide_weightDescription => '调整特定提示词在生成过程中的影响力。';
-
-  @override
-  String get diyGuide_weightExample =>
-      '• 增强: 用花括号包裹 masterpiece = 1.05 倍权重\n• 强力增强: 三层花括号包裹 masterpiece = 1.16 倍权重\n• 减弱: [bad hands] = 0.95 倍权重';
-
-  @override
-  String get diyGuide_genderTitle => '性别限制 (Gender)';
-
-  @override
-  String get diyGuide_genderDescription => '限制标签仅对特定性别的角色生效，避免生成错误的特征。';
-
-  @override
-  String get diyGuide_genderExample =>
-      '• Female: 仅女性角色可用 (如：裙子)\n• Male: 仅男性角色可用 (如：胡须)\n• Any: 通用 (如：T恤)';
-
-  @override
-  String get diyGuide_scopeTitle => '作用域 (Scope)';
-
-  @override
-  String get diyGuide_scopeDescription => '定义标签是作用于角色本身、背景环境还是全局画面。';
-
-  @override
-  String get diyGuide_scopeExample =>
-      '• Character: 角色特征 (眼睛, 头发)\n• Background: 环境描述 (蓝天, 室内)\n• Global: 画风, 质量词 (best quality)';
-
-  @override
-  String get diyGuide_conditionalTitle => '条件分支 (Conditional)';
-
-  @override
-  String get diyGuide_conditionalDescription => '基于已选标签或其他条件来动态决定后续标签。';
-
-  @override
-  String get diyGuide_conditionalExample =>
-      'IF (已选 \"下雨\")\n  THEN 添加 \"雨伞\", \"湿衣服\"\n  ELSE 添加 \"晴朗\"';
-
-  @override
-  String get diyGuide_dependenciesTitle => '依赖引用 (Dependencies)';
-
-  @override
-  String get diyGuide_dependenciesDescription =>
-      '建立标签间的关联，选中一个标签时自动引入相关联的其他标签。';
-
-  @override
-  String get diyGuide_dependenciesExample =>
-      '选中 \"JK制服\" -> 自动引入 \"学校背景\", \"书包\"';
-
-  @override
-  String get diyGuide_visibilityTitle => '可见性规则 (Visibility)';
-
-  @override
-  String get diyGuide_visibilityDescription => '控制标签在界面上的显示条件，或在生成时的生效条件。';
-
-  @override
-  String get diyGuide_visibilityExample => '仅当选中 \"魔法少女\" 分类时，显示 \"魔杖\" 选项组';
-
-  @override
-  String get diyGuide_timeTitle => '时间条件 (Time)';
-
-  @override
-  String get diyGuide_timeDescription => '根据现实时间或设定的模拟时间触发特定标签。';
-
-  @override
-  String get diyGuide_timeExample =>
-      '• 06:00-18:00 -> 添加 \"daylight\"\n• 18:00-06:00 -> 添加 \"night\"';
-
-  @override
-  String get diyGuide_postProcessingTitle => '后处理规则 (Post-processing)';
-
-  @override
-  String get diyGuide_postProcessingDescription => '在提示词生成最后阶段进行文本替换或清理。';
-
-  @override
-  String get diyGuide_postProcessingExample =>
-      '将所有 \"blue eyes\" 替换为 \"azure eyes\" 以获得更独特的描述';
-
-  @override
-  String get diyGuide_emphasisTitle => '强调概率 (Emphasis)';
-
-  @override
-  String get diyGuide_emphasisDescription => '为标签随机添加权重符号的概率，增加结果的多样性。';
-
-  @override
-  String get diyGuide_emphasisExample =>
-      '设置 30% 概率: 约有 1/3 的机会输出加权 tag，2/3 的机会输出普通 tag';
-
-  @override
-  String get naiRules_title => 'NAI 随机规则说明';
-
-  @override
-  String get naiRules_characterCountProbability => '角色数量概率';
-
-  @override
-  String get naiRules_solo => '1人 (Solo)';
-
-  @override
-  String get naiRules_duo => '2人 (Duo)';
-
-  @override
-  String get naiRules_trio => '3人 (Trio)';
-
-  @override
-  String get naiRules_group => '4人 (Group)';
-
-  @override
-  String get naiRules_genderRules => '性别规则';
-
-  @override
-  String get naiRules_female => '女性 (Female)';
-
-  @override
-  String get naiRules_male => '男性 (Male)';
-
-  @override
-  String get naiRules_mixed => '混合/其他 (Mixed)';
-
-  @override
-  String get naiRules_categoryProbability => '类别概率';
-
-  @override
-  String get naiRules_dynamicTagWeightTitle => '标签权重动态调整';
-
-  @override
-  String get naiRules_dynamicTagWeightSubtitle =>
-      '包含动作、服饰、表情、背景等多个维度的随机组合，根据画面主题动态调整各类别的抽取权重';
-
-  @override
-  String get naiRules_specialMechanisms => '特殊机制';
-
-  @override
-  String get naiRules_tagStrengthening => '强调机制 (Tag Strengthening)';
-
-  @override
-  String get naiRules_seasonalLibraryTitle => '季节词库';
-
-  @override
-  String get naiRules_seasonalLibrarySubtitle =>
-      '自动匹配季节特征，包含季节性服饰、天气、光照效果和环境氛围';
-
-  @override
-  String get naiRules_v4CharacterPositioning => 'V4 多角色位置';
-
-  @override
-  String get naiRules_smartPositionTitle => '智能位置分配';
-
-  @override
-  String get naiRules_smartPositionSubtitle =>
-      '在 V4 模型下，使用 character positioning 语法精确控制多角色站位';
-
-  @override
   String get comfyImport_detectedTitle => '检测到 ComfyUI 多角色提示词';
 
   @override
@@ -9826,17 +8848,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get comfyImport_globalPrompt => '全局提示词';
-
-  @override
-  String get danbooruPreview_noTagData => '暂无标签数据';
-
-  @override
-  String get danbooruPreview_noPoolData => '暂无 Pool 数据';
-
-  @override
-  String danbooruPreview_postCount(Object count) {
-    return '$count 个帖子';
-  }
 
   @override
   String get checkForUpdate => '检查更新';
@@ -10285,496 +9296,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get diy_editDependencyTitle => '编辑依赖配置';
-
-  @override
-  String get diy_dependencyTitle => '依赖配置';
-
-  @override
-  String get diy_dependencySubtitle => '配置标签选择之间的依赖关系';
-
-  @override
-  String get diy_dependencyType => '依赖类型';
-
-  @override
-  String get diy_sourceCategory => '源类别';
-
-  @override
-  String get diy_selectSourceCategory => '选择源类别';
-
-  @override
-  String get diy_sourceCategoryId => '源类别 ID';
-
-  @override
-  String get diy_enterCategoryId => '输入类别 ID';
-
-  @override
-  String get diy_mappingRules => '映射规则';
-
-  @override
-  String get diy_noMappingRules => '暂无映射规则';
-
-  @override
-  String get diy_deleteRule => '删除规则';
-
-  @override
-  String get diy_defaultValue => '默认值';
-
-  @override
-  String get diy_defaultValueHint => '没有匹配的映射规则时使用';
-
-  @override
-  String get diy_enableDependency => '启用依赖配置';
-
-  @override
-  String get diy_enableDependencyHint => '禁用后将忽略此依赖配置';
-
-  @override
-  String get diy_addMappingRule => '添加映射规则';
-
-  @override
-  String get diy_sourceValue => '源值';
-
-  @override
-  String get diy_sourceValueHint => '例如：1, 2, 3';
-
-  @override
-  String get diy_resultValue => '结果值';
-
-  @override
-  String get diy_resultValueHint => '例如：0-3, 0-2, 0-1';
-
-  @override
-  String get diy_dependencyCount => '数量';
-
-  @override
-  String get diy_dependencyExists => '存在';
-
-  @override
-  String get diy_dependencyValue => '值';
-
-  @override
-  String get diy_dependencyExcludes => '排斥';
-
-  @override
-  String get diy_dependencyCountDescription => '根据源类别的已选数量决定结果数量';
-
-  @override
-  String get diy_dependencyExistsDescription => '仅在源类别中存在已选标签时生效';
-
-  @override
-  String get diy_dependencyValueDescription => '依赖源类别中选定的特定标签值';
-
-  @override
-  String get diy_dependencyExcludesDescription => '源类别中存在已选标签时不生效';
-
-  @override
-  String get diy_editConditionalTitle => '编辑条件分支';
-
-  @override
-  String get diy_conditionalDefaultName => '条件分支配置';
-
-  @override
-  String diy_branchDefaultName(int index) {
-    return '分支 $index';
-  }
-
-  @override
-  String get diy_conditionalTitle => '条件分支配置';
-
-  @override
-  String get diy_conditionalSubtitle => '根据概率选择不同分支';
-
-  @override
-  String diy_branchCount(int count) {
-    return '$count 个分支';
-  }
-
-  @override
-  String get diy_noConditionalBranches => '暂无条件分支';
-
-  @override
-  String get diy_noConditionalBranchesHint => '添加分支以实现条件选择逻辑';
-
-  @override
-  String diy_conditionCount(int count) {
-    return '$count 个条件';
-  }
-
-  @override
-  String get diy_deleteBranch => '删除分支';
-
-  @override
-  String get diy_addBranch => '添加分支';
-
-  @override
-  String diy_editBranch(String name) {
-    return '编辑：$name';
-  }
-
-  @override
-  String get diy_branchName => '分支名称';
-
-  @override
-  String get diy_probability => '概率';
-
-  @override
-  String get diy_enableBranch => '启用此分支';
-
-  @override
-  String diy_ruleDefaultName(int index) {
-    return '规则 $index';
-  }
-
-  @override
-  String diy_ruleCount(int count) {
-    return '$count 条规则';
-  }
-
-  @override
-  String get diy_addRule => '添加规则';
-
-  @override
-  String get diy_editRule => '编辑规则';
-
-  @override
-  String get diy_ruleName => '规则名称';
-
-  @override
-  String get diy_enableRule => '启用此规则';
-
-  @override
-  String get diy_postProcessTitle => '后处理规则';
-
-  @override
-  String get diy_postProcessSubtitle => '自动处理标签冲突';
-
-  @override
-  String get diy_sleepingRule => '睡眠规则';
-
-  @override
-  String get diy_sleepingRuleDescription => '角色睡眠时移除眼睛颜色描述';
-
-  @override
-  String get diy_mermaidRule => '美人鱼规则';
-
-  @override
-  String get diy_mermaidRuleDescription => '移除美人鱼、半人马、蛇女等角色的腿部服装描述';
-
-  @override
-  String get diy_presetRules => '预设规则';
-
-  @override
-  String get diy_noPostProcessRules => '暂无后处理规则';
-
-  @override
-  String get diy_noPostProcessRulesHint => '添加规则以自动处理标签冲突';
-
-  @override
-  String get diy_actionType => '操作类型';
-
-  @override
-  String get diy_triggerTags => '触发标签';
-
-  @override
-  String get diy_commaSeparatedTagsHint => '用逗号分隔标签';
-
-  @override
-  String get diy_targetCategories => '目标类别';
-
-  @override
-  String get diy_commaSeparatedCategoryIdsHint => '用逗号分隔类别 ID';
-
-  @override
-  String get diy_targetTags => '目标标签';
-
-  @override
-  String get diy_actionRemoveTags => '移除标签';
-
-  @override
-  String get diy_actionReplaceTags => '替换标签';
-
-  @override
-  String get diy_actionAddTags => '添加标签';
-
-  @override
-  String get diy_actionRemoveCategories => '移除类别';
-
-  @override
-  String get diy_noTriggers => '无触发条件';
-
-  @override
-  String diy_actionSummary(String triggers, String action) {
-    return '当 [$triggers] 匹配时：$action';
-  }
-
-  @override
-  String get diy_characterPositionTitle => '角色位置';
-
-  @override
-  String get diy_characterPositionSubtitle => '可视化编辑角色位置';
-
-  @override
-  String get diy_addCharacterPosition => '添加角色位置';
-
-  @override
-  String get diy_addCharacterPositionHint => '点击下方按钮添加角色位置';
-
-  @override
-  String diy_characterIndex(int index) {
-    return '角色 $index';
-  }
-
-  @override
-  String get diy_aiPositionChoice => 'AI 自动选择';
-
-  @override
-  String diy_positionCoordinates(String row, String column) {
-    return '行：$row%，列：$column%';
-  }
-
-  @override
-  String get diy_customPosition => '自定义';
-
-  @override
-  String diy_emphasisPercent(String percent) {
-    return '强调 $percent%';
-  }
-
-  @override
-  String get diy_characterCountWeight => '角色数量权重';
-
-  @override
-  String diy_peopleCount(int count) {
-    return '$count 人';
-  }
-
-  @override
-  String get diy_genderProbability => '性别概率';
-
-  @override
-  String get diy_noWeightsConfigured => '未设置权重';
-
-  @override
-  String get diy_genderOther => '其他';
-
-  @override
-  String get diy_emphasisTitle => '全局强调配置';
-
-  @override
-  String get diy_emphasisSubtitle => '调整标签强调效果';
-
-  @override
-  String get diy_emphasisProbability => '强调概率';
-
-  @override
-  String diy_emphasisProbabilityHint(String percent) {
-    return '每个选中的标签有 $percent% 的概率被添加强调括号';
-  }
-
-  @override
-  String get diy_bracketCount => '括号层数';
-
-  @override
-  String diy_bracketLayers(int count) {
-    return '$count 层';
-  }
-
-  @override
-  String get diy_effectPreview => '效果预览';
-
-  @override
-  String get diy_exampleTag => '示例标签';
-
-  @override
-  String get diy_emphasisExplanation => '强调括号会增加标签的权重，层数越多权重越高';
-
-  @override
-  String diy_presetExportFailed(String error) {
-    return '导出预设失败：$error';
-  }
-
-  @override
-  String get diy_presetJsonRootObject => 'JSON 根节点必须是对象';
-
-  @override
-  String diy_presetInvalidData(String error) {
-    return '无效的预设数据：$error';
-  }
-
-  @override
-  String get diy_presetExportTitle => '导出预设';
-
-  @override
-  String get diy_presetImportTitle => '导入预设';
-
-  @override
-  String get diy_unknown => '未知';
-
-  @override
-  String get diy_presetShareHint => '复制以下内容分享给其他人';
-
-  @override
-  String get diy_presetPasteJsonHint => '在此粘贴预设 JSON 数据……';
-
-  @override
-  String get diy_presetPreview => '预设预览';
-
-  @override
-  String get diy_name => '名称';
-
-  @override
-  String get diy_description => '描述';
-
-  @override
-  String get diy_categoryCount => '类别数';
-
-  @override
-  String get diy_totalTagCount => '总标签数';
-
-  @override
-  String get diy_visibilityTitle => '可见性规则';
-
-  @override
-  String get diy_visibilitySubtitle => '根据条件控制类别可见性';
-
-  @override
-  String get diy_noVisibilityRules => '暂无可见性规则';
-
-  @override
-  String get diy_noVisibilityRulesHint => '添加规则以根据当前构图控制类别可见性';
-
-  @override
-  String get diy_notSet => '未设置';
-
-  @override
-  String get diy_targetCategory => '目标类别';
-
-  @override
-  String get diy_conditionType => '条件类型';
-
-  @override
-  String get diy_conditionValue => '条件值';
-
-  @override
-  String get diy_conditionValueHint => '标签名或值';
-
-  @override
-  String get diy_visibleWhenMatched => '条件匹配时可见';
-
-  @override
-  String get diy_conditionTagExists => '标签存在';
-
-  @override
-  String get diy_conditionTagNotExists => '标签不存在';
-
-  @override
-  String get diy_conditionValueEquals => '值等于';
-
-  @override
-  String get diy_conditionValueNotEquals => '值不等于';
-
-  @override
-  String get diy_conditionValueInList => '值在列表中';
-
-  @override
-  String get diy_conditionValueNotInList => '值不在列表中';
-
-  @override
-  String get diy_editTimeConditionTitle => '编辑时间条件';
-
-  @override
-  String get diy_timeDefaultName => '时间条件';
-
-  @override
-  String get diy_timeTitle => '时间条件';
-
-  @override
-  String get diy_timeSubtitle => '在指定日期范围内激活';
-
-  @override
-  String get diy_enableTimeCondition => '启用时间条件';
-
-  @override
-  String get diy_enableTimeConditionHint => '仅在设置的日期范围内生效';
-
-  @override
-  String get diy_christmas => '圣诞节';
-
-  @override
-  String get diy_christmasDescription => '圣诞节词库，在 12 月 1 日至 31 日启用';
-
-  @override
-  String get diy_halloween => '万圣节';
-
-  @override
-  String get diy_halloweenDescription => '万圣节词库，在 10 月 1 日至 31 日启用';
-
-  @override
-  String get diy_valentinesDay => '情人节';
-
-  @override
-  String get diy_valentinesDescription => '情人节词库，在 2 月 1 日至 14 日启用';
-
-  @override
-  String get diy_presetTemplates => '预设模板';
-
-  @override
-  String get diy_dateRange => '日期范围';
-
-  @override
-  String get diy_startDate => '开始日期';
-
-  @override
-  String get diy_endDate => '结束日期';
-
-  @override
-  String get diy_crossYearUnsupported => '暂不支持跨年的日期范围';
-
-  @override
-  String get diy_month => '月';
-
-  @override
-  String get diy_day => '日';
-
-  @override
-  String get diy_conditionName => '条件名称';
-
-  @override
-  String get diy_conditionNameHint => '输入条件名称';
-
-  @override
-  String get diy_repeatYearly => '每年重复';
-
-  @override
-  String get diy_repeatYearlyHint => '每年在相同日期范围内自动启用';
-
-  @override
-  String get diy_currentlyActive => '当前激活';
-
-  @override
-  String get diy_inactive => '未激活';
-
-  @override
-  String diy_daysRemaining(int count) {
-    return '剩余 $count 天';
-  }
-
-  @override
-  String diy_timeRangeSummary(
-    String name,
-    int startMonth,
-    int startDay,
-    int endMonth,
-    int endDay,
-  ) {
-    return '$name（$startMonth 月 $startDay 日至 $endMonth 月 $endDay 日）';
-  }
-
-  @override
-  String get diy_activeBadge => '生效中';
-
-  @override
   String get common_optional => '可选';
 
   @override
@@ -10814,18 +9335,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get addToLibrary_tagHint => '输入标签并按 Enter 添加';
 
   @override
-  String get newPresetDialog_nameRequired => '请输入预设名称';
-
-  @override
-  String get newPresetDialog_nameLabel => '预设名称';
-
-  @override
-  String get newPresetDialog_nameHint => '输入新预设的名称';
-
-  @override
-  String get newPresetDialog_creationMode => '创建方式';
-
-  @override
   String get drop_saveVibeBundle => '保存 Vibe Bundle';
 
   @override
@@ -10857,15 +9366,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String vibe_import_reencodeFailed(String name) {
     return 'Vibe 重新编码失败: $name';
   }
-
-  @override
-  String get randomManager_releaseToDelete => '松开删除';
-
-  @override
-  String get randomManager_dragHereToDelete => '拖到这里删除';
-
-  @override
-  String get randomManager_keyboardShortcutsHint => '键盘快捷键（按 ? 查看）';
 
   @override
   String get localGallery_createFolder => '创建文件夹';
@@ -10983,20 +9483,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String editor_appliedDimensionLimit(int max) {
     return '应用后的尺寸不能超过 $max。';
-  }
-
-  @override
-  String get savePreset_title => '另存为预设';
-
-  @override
-  String get savePreset_nameHint => '输入预设名称';
-
-  @override
-  String get savePreset_metadataDescription => '从图片元数据保存';
-
-  @override
-  String savePreset_vibeData(int count) {
-    return 'Vibe 数据（$count）';
   }
 
   @override
@@ -11222,4 +9708,384 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get autocomplete_openSettings => '打开补全与数据源设置';
+
+  @override
+  String get nav_promptBlockLibrary => '提示词块';
+
+  @override
+  String get promptBlockLibrary_title => '提示词块';
+
+  @override
+  String get promptBlockLibrary_folders => '文件夹';
+
+  @override
+  String get promptBlockLibrary_allBlocks => '全部块';
+
+  @override
+  String get promptBlockLibrary_rootFolder => '根目录 / 未分类';
+
+  @override
+  String get promptBlockLibrary_unnamedBlock => '未命名块';
+
+  @override
+  String get promptBlockPill_missing => '块已删除';
+
+  @override
+  String get promptBlockPill_unknown => '失效块';
+
+  @override
+  String get promptBlockLibrary_unnamedFolder => '未命名文件夹';
+
+  @override
+  String get promptBlockLibrary_scope => '浏览范围';
+
+  @override
+  String get promptBlockLibrary_searchHint => '搜索块……';
+
+  @override
+  String get promptBlockLibrary_newBlock => '新建块';
+
+  @override
+  String get promptBlockLibrary_editBlock => '编辑块';
+
+  @override
+  String get promptBlockLibrary_newFolder => '新建文件夹';
+
+  @override
+  String get promptBlockLibrary_newSubfolder => '新建子文件夹';
+
+  @override
+  String get promptBlockLibrary_renameFolder => '重命名文件夹';
+
+  @override
+  String get promptBlockLibrary_moveToRoot => '移到根目录';
+
+  @override
+  String get promptBlockLibrary_moveToFolder => '移动到文件夹';
+
+  @override
+  String get promptBlockLibrary_blockTitle => '标题';
+
+  @override
+  String get promptBlockLibrary_titleHint => '块标题';
+
+  @override
+  String get promptBlockLibrary_folder => '文件夹';
+
+  @override
+  String get promptBlockLibrary_folderName => '文件夹名称';
+
+  @override
+  String get promptBlockLibrary_folderNameHint => '文件夹名称';
+
+  @override
+  String get promptBlockLibrary_blockContent => '正文';
+
+  @override
+  String get promptBlockLibrary_contentHint => '纯文本正文';
+
+  @override
+  String get promptBlockLibrary_color => '颜色';
+
+  @override
+  String get promptBlockLibrary_icon => '图标';
+
+  @override
+  String get promptBlockLibrary_saved => '已保存';
+
+  @override
+  String get promptBlockLibrary_copied => '正文已复制';
+
+  @override
+  String get promptBlockLibrary_deleted => '已删除';
+
+  @override
+  String get promptBlockLibrary_empty => '还没有提示词块';
+
+  @override
+  String get promptBlockLibrary_emptyFolder => '此文件夹为空';
+
+  @override
+  String get promptBlockLibrary_noSearchResults => '没有匹配的块';
+
+  @override
+  String get promptBlockLibrary_tryDifferentSearch => '请尝试其他搜索词';
+
+  @override
+  String get promptBlockLibrary_emptyHint => '新建一个块，开始整理可复用的文本';
+
+  @override
+  String promptBlockLibrary_loadFailed(String error) {
+    return '加载提示词块失败：$error';
+  }
+
+  @override
+  String promptBlockLibrary_deleteFolderTitle(Object name) {
+    return '删除文件夹“$name”？';
+  }
+
+  @override
+  String get promptBlockLibrary_deleteFolderDescription =>
+      '请选择如何处理此文件夹及其子文件夹中的块。';
+
+  @override
+  String get promptBlockLibrary_moveContentsToRoot => '将内容移到根目录';
+
+  @override
+  String get promptBlockLibrary_moveContentsToFolder => '将内容移到其他文件夹';
+
+  @override
+  String get promptBlockLibrary_destinationFolder => '目标文件夹';
+
+  @override
+  String get promptBlockLibrary_deleteContents => '删除内容';
+
+  @override
+  String get promptBlockLibrary_deleteContentsWarning => '这会永久删除整个文件夹树中的所有块。';
+
+  @override
+  String get promptBlockLibrary_importExport => '导入 / 导出';
+
+  @override
+  String get promptBlockLibrary_importTxtFiles => '导入 TXT 文件';
+
+  @override
+  String get promptBlockLibrary_importFromFolder => '从文件夹导入…';
+
+  @override
+  String get promptBlockLibrary_exportLibraryBackup => '导出库备份…';
+
+  @override
+  String get promptBlockLibrary_importLibraryBackup => '导入库备份…';
+
+  @override
+  String get promptBlockLibrary_exportBlockAsTxt => '导出为 TXT';
+
+  @override
+  String get promptBlockLibrary_exportTxtDone => '已导出 TXT';
+
+  @override
+  String promptBlockLibrary_exportTxtFailed(String error) {
+    return '导出失败：$error';
+  }
+
+  @override
+  String get promptBlockLibrary_importTxtTitle => '选择 TXT 文件';
+
+  @override
+  String promptBlockLibrary_txtImportDone(int created, int skipped) {
+    return '导入 $created 个块，跳过 $skipped 个已有来源';
+  }
+
+  @override
+  String get promptBlockLibrary_curationTitle => '从文件夹导入';
+
+  @override
+  String promptBlockLibrary_curationSummary(
+    int total,
+    int created,
+    int skipped,
+    int changed,
+  ) {
+    return '共 $total 个 TXT：新增 $created · 未变更 $skipped · 已变更 $changed';
+  }
+
+  @override
+  String promptBlockLibrary_curationLocalModifiedHint(int count) {
+    return '其中 $count 个块导入后手动修改过，更新会覆盖本地修改';
+  }
+
+  @override
+  String get promptBlockLibrary_curationUpdateChanged => '用文件内容更新已变更的块';
+
+  @override
+  String get promptBlockLibrary_curationEmpty => '所选文件夹中没有 TXT 文件';
+
+  @override
+  String promptBlockLibrary_curationDone(
+    int created,
+    int updated,
+    int skipped,
+  ) {
+    return '导入完成：新增 $created · 更新 $updated · 跳过 $skipped';
+  }
+
+  @override
+  String get promptBlockLibrary_curationNew => '新增';
+
+  @override
+  String get promptBlockLibrary_curationUnchanged => '未变更';
+
+  @override
+  String get promptBlockLibrary_curationChanged => '已变更';
+
+  @override
+  String get promptBlockLibrary_curationLocalModified => '本地已修改';
+
+  @override
+  String promptBlockLibrary_libraryBackupDone(int count) {
+    return '已导出 $count 个块的库备份';
+  }
+
+  @override
+  String get promptBlockLibrary_libraryImportTitle => '选择库备份文件';
+
+  @override
+  String get promptBlockLibrary_libraryBackupInvalid => '不是有效的块库备份文件';
+
+  @override
+  String promptBlockLibrary_libraryImportDone(
+    int blocks,
+    int folders,
+    int skipped,
+  ) {
+    return '导入 $blocks 个块、$folders 个文件夹，跳过 $skipped 个已存在';
+  }
+
+  @override
+  String promptBlockLibrary_importFailed(String error) {
+    return '导入失败：$error';
+  }
+
+  @override
+  String get promptBlockLibrary_sourceFile => '来源文件';
+
+  @override
+  String get promptBlockLibrary_importedAt => '导入时间';
+
+  @override
+  String get promptBlockLibrary_detailedView => '详细视图';
+
+  @override
+  String get promptBlockLibrary_compactView => '紧凑视图';
+
+  @override
+  String get promptBlockLibrary_reorderFolders => '调整文件夹顺序';
+
+  @override
+  String get nav_styleExplore => '画风探索';
+
+  @override
+  String get styleExplore_recipeListTitle => '配方';
+
+  @override
+  String get styleExplore_recipesEmpty => '还没有配方。新建一个开始探索，或在编辑区组合后「另存为」。';
+
+  @override
+  String get styleExplore_noActiveRecipe => '未关联配方';
+
+  @override
+  String get styleExplore_unsavedChanges => '有未保存的修改';
+
+  @override
+  String get styleExplore_save => '保存';
+
+  @override
+  String get styleExplore_saveAs => '另存为';
+
+  @override
+  String get styleExplore_preview => '预览';
+
+  @override
+  String get styleExplore_positive => '正向';
+
+  @override
+  String get styleExplore_negative => '负向';
+
+  @override
+  String get styleExplore_newRecipe => '新建';
+
+  @override
+  String get styleExplore_load => '载入';
+
+  @override
+  String get styleExplore_rename => '重命名';
+
+  @override
+  String get styleExplore_duplicate => '复制配方';
+
+  @override
+  String get styleExplore_deleteRecipe => '删除';
+
+  @override
+  String get styleExplore_recipeNameLabel => '配方名称';
+
+  @override
+  String get styleExplore_recipeNameHint => '例如：柔和光影试验';
+
+  @override
+  String get styleExplore_nameRequired => '名称不能为空';
+
+  @override
+  String styleExplore_recipeSaved(String name) {
+    return '已保存「$name」';
+  }
+
+  @override
+  String styleExplore_recipeCreated(String name) {
+    return '已创建「$name」';
+  }
+
+  @override
+  String styleExplore_recipeLoaded(String name) {
+    return '已载入「$name」';
+  }
+
+  @override
+  String styleExplore_recipeDuplicated(String name) {
+    return '已复制「$name」';
+  }
+
+  @override
+  String styleExplore_recipeDeleted(String name) {
+    return '已删除「$name」';
+  }
+
+  @override
+  String get styleExplore_operationFailed => '操作失败';
+
+  @override
+  String get styleExplore_discardChangesTitle => '放弃未保存的修改？';
+
+  @override
+  String get styleExplore_discardChangesMessage => '当前工作区有未保存的修改，继续将丢弃这些修改。';
+
+  @override
+  String get styleExplore_discardChangesConfirm => '继续并丢弃';
+
+  @override
+  String get styleExplore_previewTitle => 'Prompt 预览';
+
+  @override
+  String get styleExplore_previewEmpty => '（空）';
+
+  @override
+  String get styleExplore_copyPositive => '复制正向';
+
+  @override
+  String get styleExplore_copyNegative => '复制负向';
+
+  @override
+  String get styleExplore_copiedToClipboard => '已复制';
+
+  @override
+  String get styleExplore_positiveHint => '组合块与文本，探索画风';
+
+  @override
+  String get promptBlockEditor_library => '块库';
+
+  @override
+  String get promptBlockEditor_back => '返回上级文件夹';
+
+  @override
+  String get promptBlockEditor_preview => '预览正文';
+
+  @override
+  String get promptBlockEditor_enable => '启用块';
+
+  @override
+  String get promptBlockEditor_disable => '禁用块';
+
+  @override
+  String get promptBlockEditor_more => '块操作';
 }

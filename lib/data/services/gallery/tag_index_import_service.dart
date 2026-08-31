@@ -19,7 +19,9 @@ const String tagIndexFileName = 'index.jsonl';
 Future<File?> findTagIndexFileForRoot(String rootPath) async {
   try {
     final normalizedRoot = normalizeGalleryFilePath(rootPath);
-    final file = File(p.join(normalizedRoot, tagIndexDirectoryName, tagIndexFileName));
+    final file = File(
+      p.join(normalizedRoot, tagIndexDirectoryName, tagIndexFileName),
+    );
     if (await file.exists()) return file;
   } catch (e) {
     AppLogger.w('查找标签索引文件失败: $rootPath, $e', 'TagIndexImport');
@@ -126,10 +128,7 @@ class TagIndexImportService {
     // 此时导入会把扫描器刚写下的行再覆盖一遍（且 is_nsfw/收藏等字段
     // 存在互相覆盖窗口），等待扫描完成再导入。
     if (ScanStateManager.instance.isScanning) {
-      AppLogger.w(
-        '[TagIndexImport] 扫描进行中，拒绝导入（等待扫描完成）',
-        'TagIndexImport',
-      );
+      AppLogger.w('[TagIndexImport] 扫描进行中，拒绝导入（等待扫描完成）', 'TagIndexImport');
       throw const TagIndexImportBlockedByScanException();
     }
 
@@ -166,7 +165,7 @@ class TagIndexImportService {
 
     AppLogger.i(
       '[TagIndexImport] 开始导入: $jsonlPath, $totalLines 行, '
-      'roots=${roots.join(' | ')}',
+          'roots=${roots.join(' | ')}',
       'TagIndexImport',
     );
 
@@ -284,7 +283,7 @@ class TagIndexImportService {
 
     AppLogger.i(
       '[TagIndexImport] 完成: total=$totalLines, imported=$imported, '
-      'updated=$updated, skipped=$skipped, errors=$errors',
+          'updated=$updated, skipped=$skipped, errors=$errors',
       'TagIndexImport',
     );
 
@@ -294,9 +293,8 @@ class TagIndexImportService {
   /// 统计文件行数（流式）
   Future<int> _countLines(File file) async {
     var count = 0;
-    await for (final line in utf8.decoder
-        .bind(file.openRead())
-        .transform(const LineSplitter())) {
+    await for (final line
+        in utf8.decoder.bind(file.openRead()).transform(const LineSplitter())) {
       if (line.trim().isNotEmpty) count++;
     }
     return count;
@@ -325,9 +323,11 @@ class TagIndexImportService {
       final model = json['model'] as String?;
       final sampler = json['sampler'] as String?;
       final steps = (json['steps'] as num?)?.toInt();
-      final cfg = (json['cfg'] as num?)?.toDouble() ??
+      final cfg =
+          (json['cfg'] as num?)?.toDouble() ??
           (json['cfg_scale'] as num?)?.toDouble();
-      final noiseSchedule = (json['noise_schedule'] as String?) ??
+      final noiseSchedule =
+          (json['noise_schedule'] as String?) ??
           (json['noiseSchedule'] as String?);
       final nsfw = json['nsfw'];
       final rawTags = json['tags'];

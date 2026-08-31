@@ -25,10 +25,7 @@ void main() {
       expect(await store.load(), isTrue);
 
       final prefs = await SharedPreferences.getInstance();
-      expect(
-        prefs.getBool(StorageKeys.localGalleryViewMode),
-        isTrue,
-      );
+      expect(prefs.getBool(StorageKeys.localGalleryViewMode), isTrue);
     });
 
     test('stored value wins over default', () async {

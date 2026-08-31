@@ -25,10 +25,7 @@ void main() {
     });
 
     test('truncates after sanitizing', () {
-      expect(
-        FileNameSanitizer.sanitize('abcdef', maxLength: 3),
-        'abc',
-      );
+      expect(FileNameSanitizer.sanitize('abcdef', maxLength: 3), 'abc');
     });
   });
 }

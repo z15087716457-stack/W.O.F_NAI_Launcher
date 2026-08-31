@@ -22,10 +22,9 @@ void main() {
     );
     Hive.init(hiveTempDir.path);
     await Hive.openBox(StorageKeys.settingsBox);
-    await Hive.box(StorageKeys.settingsBox).put(
-      StorageKeys.imageSavePath,
-      galleryRoot.path,
-    );
+    await Hive.box(
+      StorageKeys.settingsBox,
+    ).put(StorageKeys.imageSavePath, galleryRoot.path);
     repository = GalleryCategoryRepository.instance;
   });
 
@@ -39,27 +38,25 @@ void main() {
     }
   });
 
-  test('sync does not recreate a category deleted while keeping its folder',
-      () async {
-    final folder =
-        Directory('${galleryRoot.path}${Platform.pathSeparator}keep');
-    await folder.create();
+  test(
+    'sync does not recreate a category deleted while keeping its folder',
+    () async {
+      final folder = Directory(
+        '${galleryRoot.path}${Platform.pathSeparator}keep',
+      );
+      await folder.create();
 
-    final category = GalleryCategory.create(
-      name: 'keep',
-      folderPath: 'keep',
-    );
+      final category = GalleryCategory.create(name: 'keep', folderPath: 'keep');
 
-    final deleted = await repository.deleteCategory(
-      category,
-      [category],
-      deleteFolder: false,
-    );
-    expect(deleted, isTrue);
+      final deleted = await repository.deleteCategory(category, [
+        category,
+      ], deleteFolder: false);
+      expect(deleted, isTrue);
 
-    final syncedCategories = await repository.syncWithFileSystem(const []);
+      final syncedCategories = await repository.syncWithFileSystem(const []);
 
-    expect(syncedCategories, isEmpty);
-    expect(await folder.exists(), isTrue);
-  });
+      expect(syncedCategories, isEmpty);
+      expect(await folder.exists(), isTrue);
+    },
+  );
 }

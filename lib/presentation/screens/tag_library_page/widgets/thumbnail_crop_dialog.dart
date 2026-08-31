@@ -73,21 +73,23 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
   /// 加载图像尺寸
   void _loadImageSize() {
     final imageProvider = FileImage(File(widget.imagePath));
-    imageProvider.resolve(const ImageConfiguration()).addListener(
-      ImageStreamListener((ImageInfo info, bool synchronousCall) {
-        if (mounted) {
-          setState(() {
-            _imageSize = Size(
-              info.image.width.toDouble(),
-              info.image.height.toDouble(),
-            );
-            // 根据初始 offset 计算裁剪框位置
-            _cropX = widget.initialOffsetX;
-            _cropY = widget.initialOffsetY;
-          });
-        }
-      }),
-    );
+    imageProvider
+        .resolve(const ImageConfiguration())
+        .addListener(
+          ImageStreamListener((ImageInfo info, bool synchronousCall) {
+            if (mounted) {
+              setState(() {
+                _imageSize = Size(
+                  info.image.width.toDouble(),
+                  info.image.height.toDouble(),
+                );
+                // 根据初始 offset 计算裁剪框位置
+                _cropX = widget.initialOffsetX;
+                _cropY = widget.initialOffsetY;
+              });
+            }
+          }),
+        );
   }
 
   /// 计算图像在显示区域中的尺寸（保持比例）
@@ -169,11 +171,7 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
   /// 确认
   void _confirm() {
     widget.onConfirm(
-      ThumbnailCropResult(
-        offsetX: _cropX,
-        offsetY: _cropY,
-        scale: _cropScale,
-      ),
+      ThumbnailCropResult(offsetX: _cropX, offsetY: _cropY, scale: _cropScale),
     );
     Navigator.of(context).pop();
   }
@@ -234,10 +232,7 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.crop_free,
-            color: theme.colorScheme.primary,
-          ),
+          Icon(Icons.crop_free, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
           Text(
             l10n.tagLibrary_adjustThumbnailTitle,
@@ -260,11 +255,7 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
   Widget _buildHint(ThemeData theme, AppLocalizations l10n) {
     return Row(
       children: [
-        Icon(
-          Icons.touch_app,
-          size: 16,
-          color: theme.colorScheme.outline,
-        ),
+        Icon(Icons.touch_app, size: 16, color: theme.colorScheme.outline),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -303,9 +294,11 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
     // 图像居中偏移 + 基础居中位置 + 用户拖拽偏移
     // 公式: imageOffset + (displayed - crop) / 2 + _crop * (displayed - crop) / 2
     //      = imageOffset + (displayed - crop) / 2 * (1 + _crop)
-    final cropLeft = imageOffsetX +
+    final cropLeft =
+        imageOffsetX +
         (displayedSize.width - cropSize.width) / 2 * (1 + _cropX);
-    final cropTop = imageOffsetY +
+    final cropTop =
+        imageOffsetY +
         (displayedSize.height - cropSize.height) / 2 * (1 + _cropY);
 
     return Container(
@@ -372,8 +365,10 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
                       if (event is PointerScrollEvent) {
                         final delta = event.scrollDelta.dy;
                         final scaleDelta = delta > 0 ? -0.1 : 0.1;
-                        final newScale =
-                            (_cropScale + scaleDelta).clamp(1.0, 3.0);
+                        final newScale = (_cropScale + scaleDelta).clamp(
+                          1.0,
+                          3.0,
+                        );
                         if (newScale != _cropScale) {
                           setState(() {
                             _cropScale = newScale;
@@ -386,10 +381,7 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
                       width: cropSize.width,
                       height: cropSize.height,
                       decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 2,
-                        ),
+                        border: Border.all(color: Colors.white, width: 2),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.5),
@@ -486,10 +478,7 @@ class _CropOverlayPainter extends CustomPainter {
     canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint());
 
     // 绘制半透明背景
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      paint,
-    );
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
 
     // 使用混合模式清除中间区域
     final clearPaint = Paint()..blendMode = BlendMode.clear;

@@ -51,11 +51,7 @@ class SettingsCard extends StatelessWidget {
               child: Row(
                 children: [
                   if (icon != null) ...[
-                    Icon(
-                      icon,
-                      size: 20,
-                      color: theme.colorScheme.primary,
-                    ),
+                    Icon(icon, size: 20, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
                   ],
                   Expanded(

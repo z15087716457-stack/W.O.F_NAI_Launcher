@@ -39,10 +39,7 @@ void main() {
     final ref1 = await service.importModel(s1);
     final ref2 = await service.importModel(s2);
     expect(ref1, ref2);
-    expect(
-      libraryDir.listSync().whereType<File>(),
-      hasLength(1),
-    );
+    expect(libraryDir.listSync().whereType<File>(), hasLength(1));
   });
 
   test('rejects oversized file', () async {

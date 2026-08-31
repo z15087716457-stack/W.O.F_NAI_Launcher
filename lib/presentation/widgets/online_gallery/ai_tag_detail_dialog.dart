@@ -24,21 +24,27 @@ import '../../providers/pending_prompt_provider.dart';
 import '../../providers/reverse_prompt_provider.dart';
 import '../common/app_toast.dart';
 
-Future<void> showAiTagDetailDialog(
+Future<int?> showAiTagDetailDialog(
   BuildContext context, {
   required GalleryItem item,
+  bool enableAuthorSearch = false,
 }) {
-  return showDialog<void>(
+  return showDialog<int>(
     context: context,
     barrierDismissible: true,
-    builder: (_) => _AiTagDetailDialog(item: item),
+    builder: (_) =>
+        _AiTagDetailDialog(item: item, enableAuthorSearch: enableAuthorSearch),
   );
 }
 
 class _AiTagDetailDialog extends ConsumerStatefulWidget {
-  const _AiTagDetailDialog({required this.item});
+  const _AiTagDetailDialog({
+    required this.item,
+    required this.enableAuthorSearch,
+  });
 
   final GalleryItem item;
+  final bool enableAuthorSearch;
 
   @override
   ConsumerState<_AiTagDetailDialog> createState() => _AiTagDetailDialogState();
@@ -231,6 +237,9 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
                 if (item.author?.isNotEmpty == true)
                   Text(
                     item.author!,
+                    key: ValueKey(
+                      'ai-tag-detail-author-text-${item.uploaderId}',
+                    ),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -242,10 +251,7 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
             valueListenable: _favTick,
             builder: (context, _, __) {
               final favState = ref.watch(onlineFavoritesNotifierProvider);
-              final isFav = favState.isFavorite(
-                GallerySourceId.aiTag,
-                item.id,
-              );
+              final isFav = favState.isFavorite(GallerySourceId.aiTag, item.id);
               final authorFav = favState.authors.any(
                 (author) => author.authorId == item.uploaderId,
               );
@@ -276,10 +282,7 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
                             context.l10n.onlineFav_authorUnfavorited;
                         final nowFav = await ref
                             .read(onlineFavoritesNotifierProvider.notifier)
-                            .toggleAuthor(
-                              item.uploaderId,
-                              item.author ?? '',
-                            );
+                            .toggleAuthor(item.uploaderId, item.author ?? '');
                         if (mounted) {
                           _favTick.value++;
                           AppToast.info(
@@ -300,6 +303,13 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
               );
             },
           ),
+          if (widget.enableAuthorSearch && item.uploaderId > 0)
+            IconButton(
+              key: ValueKey('ai-tag-detail-view-author-${item.uploaderId}'),
+              onPressed: () => Navigator.pop(context, item.uploaderId),
+              icon: const Icon(Icons.person_search_outlined),
+              tooltip: context.l10n.onlineGallery_viewAuthor,
+            ),
           if (_downloadTotal > 0)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),

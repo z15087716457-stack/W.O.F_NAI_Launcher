@@ -169,7 +169,10 @@ class _BulkDeleteCommand extends HistoryCommand {
           .read(localGalleryNotifierProvider.notifier)
           .removeDeletedImagesFromMemory(deletable);
     } catch (e) {
-      AppLogger.w('Failed to remove deleted images from memory: $e', '_BulkDeleteCommand');
+      AppLogger.w(
+        'Failed to remove deleted images from memory: $e',
+        '_BulkDeleteCommand',
+      );
     }
   }
 
@@ -857,12 +860,10 @@ class BulkOperationNotifier extends _$BulkOperationNotifier {
 
     try {
       final collectionNotifier = ref.read(collectionNotifierProvider.notifier);
-      final addedCount =
-          (await collectionNotifier.addImagesToCollection(
+      final addedCount = (await collectionNotifier.addImagesToCollection(
         collectionId,
         imagePaths,
-      ))
-              .added;
+      )).added;
 
       state = state.copyWith(
         isOperationInProgress: false,

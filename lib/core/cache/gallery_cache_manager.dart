@@ -109,17 +109,17 @@ class CacheStatistics {
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() => {
-        'l1MemorySize': l1MemorySize,
-        'l1HitRate': l1HitRate,
-        'l1MemoryBytes': l1MemoryBytes,
-        'l2HiveSize': l2HiveSize,
-        'l2HitRate': l2HitRate,
-        'l2HiveBytes': l2HiveBytes,
-        'l3DatabaseImageCount': l3DatabaseImageCount,
-        'l3DatabaseMetadataCount': l3DatabaseMetadataCount,
-        'totalHitRate': totalHitRate,
-        'lastUpdated': lastUpdated.toIso8601String(),
-      };
+    'l1MemorySize': l1MemorySize,
+    'l1HitRate': l1HitRate,
+    'l1MemoryBytes': l1MemoryBytes,
+    'l2HiveSize': l2HiveSize,
+    'l2HitRate': l2HitRate,
+    'l2HiveBytes': l2HiveBytes,
+    'l3DatabaseImageCount': l3DatabaseImageCount,
+    'l3DatabaseMetadataCount': l3DatabaseMetadataCount,
+    'totalHitRate': totalHitRate,
+    'lastUpdated': lastUpdated.toIso8601String(),
+  };
 
   /// 从 JSON 创建
   factory CacheStatistics.fromJson(Map<String, dynamic> json) {
@@ -133,7 +133,8 @@ class CacheStatistics {
       l3DatabaseImageCount: json['l3DatabaseImageCount'] as int? ?? 0,
       l3DatabaseMetadataCount: json['l3DatabaseMetadataCount'] as int? ?? 0,
       totalHitRate: json['totalHitRate'] as double? ?? 0.0,
-      lastUpdated: DateTime.tryParse(json['lastUpdated'] as String? ?? '') ??
+      lastUpdated:
+          DateTime.tryParse(json['lastUpdated'] as String? ?? '') ??
           DateTime.now(),
     );
   }
@@ -373,7 +374,8 @@ class GalleryCacheManager {
     final metadataCount = await _getMetadataCount(dataSource);
 
     // 计算总命中率（加权平均）
-    final totalRequests = (l1HitRate > 0 ? l1Size / l1HitRate : 0) +
+    final totalRequests =
+        (l1HitRate > 0 ? l1Size / l1HitRate : 0) +
         (l2HitRate > 0 ? l2Size / l2HitRate : 0);
     final totalHits = l1Size + l2Size;
     final totalHitRate = totalRequests > 0 ? totalHits / totalRequests : 0.0;
@@ -653,8 +655,8 @@ class L2CacheCleaner {
   Future<int> _getCacheSizeMB() async {
     try {
       final bytes = await GalleryCacheManager().getStatistics().then(
-            (s) => s.l2HiveBytes,
-          );
+        (s) => s.l2HiveBytes,
+      );
       return bytes ~/ (1024 * 1024);
     } catch (_) {
       return 0;

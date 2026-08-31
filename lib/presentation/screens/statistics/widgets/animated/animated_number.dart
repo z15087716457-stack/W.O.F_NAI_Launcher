@@ -28,10 +28,7 @@ class _AnimatedNumberState extends State<AnimatedNumber>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
     _animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOutCubic,
@@ -59,10 +56,7 @@ class _AnimatedNumberState extends State<AnimatedNumber>
       animation: _animation,
       builder: (context, child) {
         final value = (_animation.value * widget.targetValue).toInt();
-        return Text(
-          '$value${widget.suffix}',
-          style: widget.style,
-        );
+        return Text('$value${widget.suffix}', style: widget.style);
       },
     );
   }

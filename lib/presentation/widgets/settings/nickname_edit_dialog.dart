@@ -13,10 +13,7 @@ class NicknameEditDialog extends StatefulWidget {
   /// 当前账号
   final SavedAccount account;
 
-  const NicknameEditDialog({
-    super.key,
-    required this.account,
-  });
+  const NicknameEditDialog({super.key, required this.account});
 
   /// 显示昵称编辑弹窗
   ///
@@ -34,23 +31,15 @@ class NicknameEditDialog extends StatefulWidget {
       transitionDuration: const Duration(milliseconds: 200),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return ScaleTransition(
-          scale: CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutCubic,
-          ),
+          scale: CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
           child: FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOut,
-            ),
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
             child: child,
           ),
         );
       },
       pageBuilder: (dialogContext, animation, secondaryAnimation) {
-        return NicknameEditDialog(
-          account: account,
-        );
+        return NicknameEditDialog(account: account);
       },
     ).then((result) {
       // result 是用户点击的按钮类型
@@ -147,9 +136,7 @@ class _NicknameEditDialogState extends State<NicknameEditDialog> {
     return Dialog(
       backgroundColor: theme.colorScheme.surface,
       surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(6),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       child: Container(
         width: 400,
         padding: const EdgeInsets.all(24),
@@ -218,7 +205,8 @@ class _NicknameEditDialogState extends State<NicknameEditDialog> {
                 ),
                 const SizedBox(width: 12),
                 FilledButton(
-                  onPressed: _validateNickname(_controller.text) == null &&
+                  onPressed:
+                      _validateNickname(_controller.text) == null &&
                           _controller.text.trim().isNotEmpty
                       ? _onSave
                       : null,

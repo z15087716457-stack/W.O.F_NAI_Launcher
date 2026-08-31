@@ -15,10 +15,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: PromptTokenCountBar(
-              usage: PromptTokenUsage(
-                usedTokens: 128,
-                limit: 512,
-              ),
+              usage: PromptTokenUsage(usedTokens: 128, limit: 512),
             ),
           ),
         ),
@@ -38,10 +35,7 @@ void main() {
           theme: theme,
           home: const Scaffold(
             body: PromptTokenCountBar(
-              usage: PromptTokenUsage(
-                usedTokens: 520,
-                limit: 512,
-              ),
+              usage: PromptTokenUsage(usedTokens: 520, limit: 512),
             ),
           ),
         ),
@@ -51,8 +45,9 @@ void main() {
       expect(text.style?.color, equals(theme.colorScheme.error));
     });
 
-    testWidgets('shows breakdown tooltip when composition is available',
-        (tester) async {
+    testWidgets('shows breakdown tooltip when composition is available', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           locale: Locale('zh'),
@@ -75,14 +70,12 @@ void main() {
       );
 
       final tooltip = tester.widget<Tooltip>(find.byType(Tooltip));
-      expect(
-        tooltip.message,
-        equals('提示词 100\n固定词 20\n网页端校准 1'),
-      );
+      expect(tooltip.message, equals('提示词 100\n固定词 20\n网页端校准 1'));
     });
 
-    testWidgets('shows whole-prompt adjustment when breakdown sum differs',
-        (tester) async {
+    testWidgets('shows whole-prompt adjustment when breakdown sum differs', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           locale: Locale('zh'),
@@ -105,32 +98,24 @@ void main() {
       );
 
       final tooltip = tester.widget<Tooltip>(find.byType(Tooltip));
-      expect(
-        tooltip.message,
-        equals('提示词 100\n固定词 28\n网页端校准 1'),
-      );
+      expect(tooltip.message, equals('提示词 100\n固定词 28\n网页端校准 1'));
     });
 
     testWidgets('keeps previous token usage while reloading', (tester) async {
-      final reloadingUsage =
-          const AsyncLoading<PromptTokenUsage?>().copyWithPrevious(
-        const AsyncData<PromptTokenUsage?>(
-          PromptTokenUsage(
-            usedTokens: 128,
-            limit: 512,
-          ),
-        ),
-        isRefresh: false,
-      );
+      final reloadingUsage = const AsyncLoading<PromptTokenUsage?>()
+          .copyWithPrevious(
+            const AsyncData<PromptTokenUsage?>(
+              PromptTokenUsage(usedTokens: 128, limit: 512),
+            ),
+            isRefresh: false,
+          );
 
       await tester.pumpWidget(
         MaterialApp(
           locale: const Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: PromptTokenCountAsyncBar(usage: reloadingUsage),
-          ),
+          home: Scaffold(body: PromptTokenCountAsyncBar(usage: reloadingUsage)),
         ),
       );
 

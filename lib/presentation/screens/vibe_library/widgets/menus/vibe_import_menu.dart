@@ -7,11 +7,7 @@ class ImportMenu extends PopupRoute<void> {
   final List<ProMenuItem> items;
   final void Function(ProMenuItem)? onSelect;
 
-  ImportMenu({
-    required this.position,
-    required this.items,
-    this.onSelect,
-  });
+  ImportMenu({required this.position, required this.items, this.onSelect});
 
   @override
   Color? get barrierColor => null;
@@ -39,7 +35,8 @@ class ImportMenu extends PopupRoute<void> {
           // Calculate menu position to ensure it stays within screen bounds
           final screenSize = MediaQuery.of(context).size;
           const menuWidth = 180.0;
-          final menuHeight = items.where((i) => !i.isDivider).length * 36.0 +
+          final menuHeight =
+              items.where((i) => !i.isDivider).length * 36.0 +
               items.where((i) => i.isDivider).length * 1.0;
 
           double left = position.dx;
@@ -92,10 +89,7 @@ class ImportMenu extends PopupRoute<void> {
     return FadeTransition(
       opacity: animation,
       child: ScaleTransition(
-        scale: CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOutBack,
-        ),
+        scale: CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
         child: child,
       ),
     );
@@ -110,12 +104,8 @@ extension ImportMenuExtension on BuildContext {
     required List<ProMenuItem> items,
     void Function(ProMenuItem)? onSelect,
   }) async {
-    await Navigator.of(this).push(
-      ImportMenu(
-        position: position,
-        items: items,
-        onSelect: onSelect,
-      ),
-    );
+    await Navigator.of(
+      this,
+    ).push(ImportMenu(position: position, items: items, onSelect: onSelect));
   }
 }

@@ -18,22 +18,26 @@ class RetryPolicyNotifier extends _$RetryPolicyNotifier {
   @override
   RetryPolicy build() {
     return RetryPolicy(
-      maxRetries: _storage.getSetting<int>(
+      maxRetries:
+          _storage.getSetting<int>(
             _StorageKeys.maxRetries,
             defaultValue: RetryPolicy.defaultMaxRetries,
           ) ??
           RetryPolicy.defaultMaxRetries,
-      retryIntervalMs: _storage.getSetting<int>(
+      retryIntervalMs:
+          _storage.getSetting<int>(
             _StorageKeys.retryIntervalMs,
             defaultValue: RetryPolicy.defaultRetryIntervalMs,
           ) ??
           RetryPolicy.defaultRetryIntervalMs,
-      retryEnabled: _storage.getSetting<bool>(
+      retryEnabled:
+          _storage.getSetting<bool>(
             _StorageKeys.retryEnabled,
             defaultValue: RetryPolicy.defaultRetryEnabled,
           ) ??
           RetryPolicy.defaultRetryEnabled,
-      backoffMultiplier: _storage.getSetting<double>(
+      backoffMultiplier:
+          _storage.getSetting<double>(
             _StorageKeys.backoffMultiplier,
             defaultValue: RetryPolicy.defaultBackoffMultiplier,
           ) ??

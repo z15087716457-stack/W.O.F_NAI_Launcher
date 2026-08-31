@@ -8,7 +8,7 @@ void main() {
       PreciseRefType.style: ('style', 'preciseRef_typeStyle'),
       PreciseRefType.characterAndStyle: (
         'character&style',
-        'preciseRef_typeCharacterAndStyle'
+        'preciseRef_typeCharacterAndStyle',
       ),
     };
 
@@ -35,8 +35,9 @@ void main() {
     });
 
     test('all API strings should be unique', () {
-      final apiStrings =
-          PreciseRefType.values.map((t) => t.toApiString()).toList();
+      final apiStrings = PreciseRefType.values
+          .map((t) => t.toApiString())
+          .toList();
       expect(apiStrings.toSet().length, equals(apiStrings.length));
     });
 

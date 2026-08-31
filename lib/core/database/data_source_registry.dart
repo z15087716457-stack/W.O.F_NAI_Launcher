@@ -14,13 +14,7 @@ enum DataSourceType {
 }
 
 /// 数据源状态
-enum DataSourceState {
-  uninitialized,
-  initializing,
-  ready,
-  error,
-  disposed,
-}
+enum DataSourceState { uninitialized, initializing, ready, error, disposed }
 
 /// 数据源信息
 class DataSourceInfo {
@@ -63,12 +57,7 @@ class DataSourceInfo {
 }
 
 /// 健康状态
-enum HealthStatus {
-  healthy,
-  degraded,
-  corrupted,
-  unknown,
-}
+enum HealthStatus { healthy, degraded, corrupted, unknown }
 
 /// 数据源健康信息
 class DataSourceHealth {
@@ -244,13 +233,18 @@ class DataSourceRegistry {
       return;
     }
 
-    AppLogger.i('Initializing all data sources (${_sources.length})', 'DataSourceRegistry');
+    AppLogger.i(
+      'Initializing all data sources (${_sources.length})',
+      'DataSourceRegistry',
+    );
 
     if (parallel) {
       await Future.wait(
-        _sources.keys.map((name) => initializeSource(name).catchError((e) {
-          AppLogger.w('Failed to initialize $name: $e', 'DataSourceRegistry');
-        }),),
+        _sources.keys.map(
+          (name) => initializeSource(name).catchError((e) {
+            AppLogger.w('Failed to initialize $name: $e', 'DataSourceRegistry');
+          }),
+        ),
       );
     } else {
       for (final name in _sources.keys) {
@@ -351,7 +345,10 @@ class DataSourceRegistry {
     );
 
     if (failed.isNotEmpty) {
-      AppLogger.w('Failed data sources: ${failed.join(', ')}', 'DataSourceRegistry');
+      AppLogger.w(
+        'Failed data sources: ${failed.join(', ')}',
+        'DataSourceRegistry',
+      );
     }
   }
 
@@ -384,14 +381,19 @@ class DataSourceRegistry {
   ///
   /// [name] 数据源名称
   /// [throwIfNotReady] 如果数据源未就绪是否抛出异常
-  T getSource<T extends DataSource>(String name, {bool throwIfNotReady = true}) {
+  T getSource<T extends DataSource>(
+    String name, {
+    bool throwIfNotReady = true,
+  }) {
     final source = _sources[name];
     if (source == null) {
       throw ArgumentError('DataSource "$name" not found');
     }
 
     if (throwIfNotReady && !source.info.isReady) {
-      throw StateError('DataSource "$name" is not ready (state: ${source.info.state})');
+      throw StateError(
+        'DataSource "$name" is not ready (state: ${source.info.state})',
+      );
     }
 
     return source as T;
@@ -497,15 +499,23 @@ class DataSourceRegistry {
     return {
       'total': infos.length,
       'ready': infos.where((i) => i.isReady).length,
-      'initializing': infos.where((i) => i.state == DataSourceState.initializing).length,
+      'initializing': infos
+          .where((i) => i.state == DataSourceState.initializing)
+          .length,
       'error': infos.where((i) => i.hasError).length,
-      'uninitialized': infos.where((i) => i.state == DataSourceState.uninitialized).length,
-      'sources': infos.map((i) => {
-        'name': i.name,
-        'type': i.type.name,
-        'state': i.state.name,
-        'ready': i.isReady,
-      },).toList(),
+      'uninitialized': infos
+          .where((i) => i.state == DataSourceState.uninitialized)
+          .length,
+      'sources': infos
+          .map(
+            (i) => {
+              'name': i.name,
+              'type': i.type.name,
+              'state': i.state.name,
+              'ready': i.isReady,
+            },
+          )
+          .toList(),
     };
   }
 

@@ -11,30 +11,18 @@ class HardOffsetShadow extends BaseShadowModule {
 
   @override
   List<BoxShadow> get elevation1 => const [
-        BoxShadow(
-          color: _shadowColor,
-          blurRadius: 0,
-          offset: Offset(2, 2),
-        ),
-      ];
+    BoxShadow(color: _shadowColor, blurRadius: 0, offset: Offset(2, 2)),
+  ];
 
   @override
   List<BoxShadow> get elevation2 => const [
-        BoxShadow(
-          color: _shadowColor,
-          blurRadius: 0,
-          offset: Offset(4, 4),
-        ),
-      ];
+    BoxShadow(color: _shadowColor, blurRadius: 0, offset: Offset(4, 4)),
+  ];
 
   @override
   List<BoxShadow> get elevation3 => const [
-        BoxShadow(
-          color: _shadowColor,
-          blurRadius: 0,
-          offset: Offset(6, 6),
-        ),
-      ];
+    BoxShadow(color: _shadowColor, blurRadius: 0, offset: Offset(6, 6)),
+  ];
 
   @override
   List<BoxShadow> get cardShadow => elevation2;

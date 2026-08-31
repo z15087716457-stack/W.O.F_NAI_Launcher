@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/alias_parser.dart';
+import '../../../core/utils/pill_document_editor.dart';
+
+/// 药丸 span 构建器：把文本中的块标记字符渲染为内联 widget。
+///
+/// [occurrence] 是该字符在文本中的第几次出现（0 起），供拖拽定位用。
+/// 返回 null 时标记字符按普通文本原样渲染。
+typedef PillSpanBuilder =
+    InlineSpan? Function(
+      BuildContext context,
+      String markerChar,
+      int occurrence,
+    );
 
 /// NAI 语法高亮控制器
 /// 继承 TextEditingController，重写 buildTextSpan 实现语法着色
@@ -9,6 +21,17 @@ class NaiSyntaxController extends TextEditingController {
   bool _numericEmphasisEnabled;
 
   static final RegExp _numericPrefixPattern = RegExp(r'-?\d*\.?\d*$');
+
+  /// 药丸构建器；null 时标记字符按普通文本处理（默认，零行为变化）。
+  ///
+  /// 纯字段不自动刷新：调用方改完后应调 [refreshPillSpans]。
+  PillSpanBuilder? pillBuilder;
+
+  /// 药丸视觉数据（实例/块库）变化后强制重建 span 缓存。
+  void refreshPillSpans() {
+    clearCache();
+    notifyListeners();
+  }
 
   /// 是否启用官网强调高亮。
   bool get highlightEnabled => _highlightEnabled;
@@ -31,7 +54,6 @@ class NaiSyntaxController extends TextEditingController {
   // 缓存：避免每次光标移动都重新解析
   String? _cachedText;
   int? _cachedColorSignature;
-  List<TextSpan>? _cachedSpans;
 
   List<TextRange> _searchMatches = const [];
   int _activeSearchMatchIndex = -1;
@@ -78,7 +100,7 @@ class NaiSyntaxController extends TextEditingController {
   void clearCache() {
     _cachedText = null;
     _cachedColorSignature = null;
-    _cachedSpans = null;
+    _cachedFinalSpans = null;
   }
 
   @override
@@ -95,8 +117,8 @@ class NaiSyntaxController extends TextEditingController {
     // 检查缓存是否有效（文本未变化且主题未变化）
     if (_cachedText == text &&
         _cachedColorSignature == colors.cacheSignature &&
-        _cachedSpans != null) {
-      return TextSpan(style: baseStyle, children: _cachedSpans);
+        _cachedFinalSpans != null) {
+      return TextSpan(style: baseStyle, children: _cachedFinalSpans);
     }
 
     // 官网的竖线提示独立于“高亮强调”开关，搜索高亮也需要继续叠加。
@@ -108,12 +130,77 @@ class NaiSyntaxController extends TextEditingController {
     );
     final resolvedSpans = _applySearchHighlights(spans, baseStyle, colors);
 
+    final builder = pillBuilder;
+    final List<InlineSpan> finalSpans;
+    if (builder == null || !_containsPillMarker(text)) {
+      finalSpans = resolvedSpans;
+    } else {
+      finalSpans = _splicePillSpans(resolvedSpans, context, builder);
+    }
+
     // 更新缓存
     _cachedText = text;
     _cachedColorSignature = colors.cacheSignature;
-    _cachedSpans = resolvedSpans;
+    _cachedFinalSpans = finalSpans;
 
-    return TextSpan(style: baseStyle, children: resolvedSpans);
+    return TextSpan(style: baseStyle, children: finalSpans);
+  }
+
+  /// 药丸拼接后的 span 缓存（与 [_cachedSpans] 同生命周期）。
+  List<InlineSpan>? _cachedFinalSpans;
+
+  bool _containsPillMarker(String value) {
+    for (var i = 0; i < value.length; i++) {
+      if (isPillMarkerCodeUnit(value.codeUnitAt(i))) return true;
+    }
+    return false;
+  }
+
+  /// 把解析后的扁平 span 序列在标记字符处切开，原位插入药丸 WidgetSpan。
+  ///
+  /// 输入来自 `_buildHighlightedSpans`/`_applySearchHighlights`，均为扁平
+  /// `TextSpan(text:...)`，无嵌套 children，可安全平铺遍历。
+  List<InlineSpan> _splicePillSpans(
+    List<TextSpan> spans,
+    BuildContext context,
+    PillSpanBuilder builder,
+  ) {
+    final out = <InlineSpan>[];
+    final occurrenceCounter = <String, int>{};
+    for (final span in spans) {
+      final spanText = span.text;
+      if (spanText == null || spanText.isEmpty) {
+        out.add(span);
+        continue;
+      }
+      var start = 0;
+      var touched = false;
+      for (var i = 0; i < spanText.length; i++) {
+        if (!isPillMarkerCodeUnit(spanText.codeUnitAt(i))) continue;
+        touched = true;
+        if (i > start) {
+          out.add(
+            TextSpan(text: spanText.substring(start, i), style: span.style),
+          );
+        }
+        final marker = spanText[i];
+        final occurrence = (occurrenceCounter[marker] ?? 0);
+        occurrenceCounter[marker] = occurrence + 1;
+        final pill = builder(context, marker, occurrence);
+        if (pill != null) {
+          out.add(pill);
+        } else {
+          out.add(TextSpan(text: marker, style: span.style));
+        }
+        start = i + 1;
+      }
+      if (!touched) {
+        out.add(span);
+      } else if (start < spanText.length) {
+        out.add(TextSpan(text: spanText.substring(start), style: span.style));
+      }
+    }
+    return out;
   }
 
   List<TextSpan> _applySearchHighlights(

@@ -195,10 +195,7 @@ class FixedTagEntry with _$FixedTagEntry {
 
   /// 切换启用状态
   FixedTagEntry toggleEnabled() {
-    return copyWith(
-      enabled: !enabled,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(enabled: !enabled, updatedAt: DateTime.now());
   }
 
   /// 切换位置
@@ -221,60 +218,60 @@ extension FixedTagEntryListExtension on List<FixedTagEntry> {
       where((e) => e.promptType == FixedTagPromptType.negative).toList();
 
   /// 获取启用的条目
-  List<FixedTagEntry> get enabled =>
-      where((e) => e.enabled && e.promptType == FixedTagPromptType.positive)
-          .toList();
+  List<FixedTagEntry> get enabled => where(
+    (e) => e.enabled && e.promptType == FixedTagPromptType.positive,
+  ).toList();
 
   /// 获取禁用的条目
-  List<FixedTagEntry> get disabled =>
-      where((e) => !e.enabled && e.promptType == FixedTagPromptType.positive)
-          .toList();
+  List<FixedTagEntry> get disabled => where(
+    (e) => !e.enabled && e.promptType == FixedTagPromptType.positive,
+  ).toList();
 
   /// 获取前缀条目
   List<FixedTagEntry> get prefixes => where(
-        (e) =>
-            e.promptType == FixedTagPromptType.positive &&
-            e.position == FixedTagPosition.prefix,
-      ).toList();
+    (e) =>
+        e.promptType == FixedTagPromptType.positive &&
+        e.position == FixedTagPosition.prefix,
+  ).toList();
 
   /// 获取后缀条目
   List<FixedTagEntry> get suffixes => where(
-        (e) =>
-            e.promptType == FixedTagPromptType.positive &&
-            e.position == FixedTagPosition.suffix,
-      ).toList();
+    (e) =>
+        e.promptType == FixedTagPromptType.positive &&
+        e.position == FixedTagPosition.suffix,
+  ).toList();
 
   /// 获取启用的前缀条目
   List<FixedTagEntry> get enabledPrefixes => where(
-        (e) =>
-            e.enabled &&
-            e.promptType == FixedTagPromptType.positive &&
-            e.position == FixedTagPosition.prefix,
-      ).toList();
+    (e) =>
+        e.enabled &&
+        e.promptType == FixedTagPromptType.positive &&
+        e.position == FixedTagPosition.prefix,
+  ).toList();
 
   /// 获取启用的后缀条目
   List<FixedTagEntry> get enabledSuffixes => where(
-        (e) =>
-            e.enabled &&
-            e.promptType == FixedTagPromptType.positive &&
-            e.position == FixedTagPosition.suffix,
-      ).toList();
+    (e) =>
+        e.enabled &&
+        e.promptType == FixedTagPromptType.positive &&
+        e.position == FixedTagPosition.suffix,
+  ).toList();
 
   /// 获取启用的负向前缀条目
   List<FixedTagEntry> get negativeEnabledPrefixes => where(
-        (e) =>
-            e.enabled &&
-            e.promptType == FixedTagPromptType.negative &&
-            e.position == FixedTagPosition.prefix,
-      ).toList();
+    (e) =>
+        e.enabled &&
+        e.promptType == FixedTagPromptType.negative &&
+        e.position == FixedTagPosition.prefix,
+  ).toList();
 
   /// 获取启用的负向后缀条目
   List<FixedTagEntry> get negativeEnabledSuffixes => where(
-        (e) =>
-            e.enabled &&
-            e.promptType == FixedTagPromptType.negative &&
-            e.position == FixedTagPosition.suffix,
-      ).toList();
+    (e) =>
+        e.enabled &&
+        e.promptType == FixedTagPromptType.negative &&
+        e.position == FixedTagPosition.suffix,
+  ).toList();
 
   /// 按排序顺序排列
   List<FixedTagEntry> sortedByOrder() {
@@ -329,13 +326,9 @@ extension FixedTagEntryListExtension on List<FixedTagEntry> {
   ///
   /// 根据列表当前顺序重新分配 sortOrder
   List<FixedTagEntry> reindex() {
-    return asMap()
-        .entries
+    return asMap().entries
         .map(
-          (e) => e.value.copyWith(
-            sortOrder: e.key,
-            updatedAt: DateTime.now(),
-          ),
+          (e) => e.value.copyWith(sortOrder: e.key, updatedAt: DateTime.now()),
         )
         .toList();
   }

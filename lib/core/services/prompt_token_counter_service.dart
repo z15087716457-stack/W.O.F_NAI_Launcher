@@ -20,10 +20,7 @@ class PromptTokenUsage {
 }
 
 class PromptTokenBreakdownEntry {
-  const PromptTokenBreakdownEntry({
-    required this.label,
-    required this.tokens,
-  });
+  const PromptTokenBreakdownEntry({required this.label, required this.tokens});
 
   final String label;
   final int tokens;
@@ -34,9 +31,8 @@ abstract class PromptTokenEncoder {
 }
 
 class PromptTokenCounterService {
-  const PromptTokenCounterService({
-    required PromptTokenEncoder encoder,
-  }) : _encoder = encoder;
+  const PromptTokenCounterService({required PromptTokenEncoder encoder})
+    : _encoder = encoder;
 
   static const int v4PromptTokenLimit = 512;
 
@@ -79,10 +75,7 @@ class PromptTokenCounterService {
     }
 
     final usedTokens = await countTokensForTexts(
-      _collectCountedTexts(
-        mainText: mainText,
-        extraTexts: extraTexts,
-      ),
+      _collectCountedTexts(mainText: mainText, extraTexts: extraTexts),
       applyWebAdjustment: applyWebAdjustment,
     );
 
@@ -187,9 +180,7 @@ class PromptTokenCounterService {
         parenDepth--;
       }
 
-      if (char == '|' &&
-          i + 1 < trimmed.length &&
-          trimmed[i + 1] == '|') {
+      if (char == '|' && i + 1 < trimmed.length && trimmed[i + 1] == '|') {
         inPipe = !inPipe;
         segmentBuffer.write('||');
         i++;
@@ -217,9 +208,9 @@ class PromptTokenCounterService {
 
   static String _stripSegmentWeightSyntaxPreservingWhitespace(String segment) {
     final leadingWhitespaceLength = segment.length - segment.trimLeft().length;
-    final trailingWhitespaceLength = segment.length - segment.trimRight().length;
-    final leadingWhitespace =
-        segment.substring(0, leadingWhitespaceLength);
+    final trailingWhitespaceLength =
+        segment.length - segment.trimRight().length;
+    final leadingWhitespace = segment.substring(0, leadingWhitespaceLength);
     final trailingWhitespace = segment.substring(
       segment.length - trailingWhitespaceLength,
     );
@@ -240,9 +231,7 @@ class T5PromptTokenEncoder implements PromptTokenEncoder {
 
   final SentencePieceTokenizer _tokenizer;
 
-  static Future<T5PromptTokenEncoder> load({
-    required String assetPath,
-  }) {
+  static Future<T5PromptTokenEncoder> load({required String assetPath}) {
     return _instanceFuture ??= _loadFromAsset(assetPath);
   }
 
@@ -262,10 +251,7 @@ class T5PromptTokenEncoder implements PromptTokenEncoder {
       return 0;
     }
 
-    final encoding = _tokenizer.encode(
-      normalized,
-      addSpecialTokens: false,
-    );
+    final encoding = _tokenizer.encode(normalized, addSpecialTokens: false);
     return encoding.ids.length;
   }
 }

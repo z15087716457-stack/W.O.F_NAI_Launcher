@@ -10,8 +10,9 @@ class TagNormalizer {
   static final RegExp _leadingBracketPattern = RegExp(r'^[\{\[\(]+');
   static final RegExp _commaSeparatorPattern = RegExp(r'[,，]+');
   static final RegExp _searchSeparatorPattern = RegExp(r'[_/\\|,，;；\n\r\t]+');
-  static final RegExp _delimitedSearchSeparatorPattern =
-      RegExp(r'[/\\|,，;；\n\r\t]+');
+  static final RegExp _delimitedSearchSeparatorPattern = RegExp(
+    r'[/\\|,，;；\n\r\t]+',
+  );
   static final RegExp _bracketPattern = RegExp(r'[\{\}\[\]\(\)]');
   static final RegExp _colonPattern = RegExp(r'[:]+');
   static final RegExp _whitespacePattern = RegExp(r'\s+');
@@ -77,9 +78,9 @@ class TagNormalizer {
 
   /// 去掉自动补全输入开头的括号前缀，不改变大小写。
   static String normalizeAutocompleteTag(String tag) {
-    return stripWeightPrefix(tag.trim())
-        .replaceAll(_leadingBracketPattern, '')
-        .trim();
+    return stripWeightPrefix(
+      tag.trim(),
+    ).replaceAll(_leadingBracketPattern, '').trim();
   }
 
   /// 标准化画廊搜索文本；下划线按空格处理以便包含匹配。
@@ -95,10 +96,9 @@ class TagNormalizer {
 
   /// 标准化标签匹配文本。
   static String normalizeTagForMatch(String value) {
-    return normalizeSearchText(value)
-        .replaceAll(_colonPattern, ' ')
-        .replaceAll(_whitespacePattern, ' ')
-        .trim();
+    return normalizeSearchText(
+      value,
+    ).replaceAll(_colonPattern, ' ').replaceAll(_whitespacePattern, ' ').trim();
   }
 
   /// 标准化数据库逗号分段搜索；保留下划线以便生成空格/下划线两种变体。

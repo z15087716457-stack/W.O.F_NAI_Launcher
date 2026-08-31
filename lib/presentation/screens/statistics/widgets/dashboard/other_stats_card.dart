@@ -10,10 +10,7 @@ import '../cards/chart_card.dart';
 class OtherStatsCard extends StatelessWidget {
   final GalleryStatistics stats;
 
-  const OtherStatsCard({
-    super.key,
-    required this.stats,
-  });
+  const OtherStatsCard({super.key, required this.stats});
 
   @override
   Widget build(BuildContext context) {
@@ -80,8 +77,9 @@ class _StatItem extends StatelessWidget {
         color: colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color:
-              colorScheme.outlineVariant.withValues(alpha: isDark ? 0.08 : 0.1),
+          color: colorScheme.outlineVariant.withValues(
+            alpha: isDark ? 0.08 : 0.1,
+          ),
           width: 1,
         ),
       ),

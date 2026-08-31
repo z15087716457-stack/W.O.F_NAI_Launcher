@@ -23,11 +23,7 @@ class TagLibraryDropMenu extends StatelessWidget {
   /// 提取的提示词（如果有）
   final String? prompt;
 
-  const TagLibraryDropMenu({
-    super.key,
-    required this.fileName,
-    this.prompt,
-  });
+  const TagLibraryDropMenu({super.key, required this.fileName, this.prompt});
 
   /// 显示对话框
   static Future<TagLibraryDropAction?> show(
@@ -38,10 +34,8 @@ class TagLibraryDropMenu extends StatelessWidget {
     return showDialog<TagLibraryDropAction>(
       context: context,
       barrierColor: Colors.black54,
-      builder: (context) => TagLibraryDropMenu(
-        fileName: fileName,
-        prompt: prompt,
-      ),
+      builder: (context) =>
+          TagLibraryDropMenu(fileName: fileName, prompt: prompt),
     );
   }
 
@@ -61,9 +55,7 @@ class TagLibraryDropMenu extends StatelessWidget {
         : null;
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
         child: Padding(
@@ -125,8 +117,9 @@ class TagLibraryDropMenu extends StatelessWidget {
                 icon: Icons.image_search_outlined,
                 title: l10n.tagLibrary_updateExistingThumbnail,
                 subtitle: l10n.tagLibrary_updateExistingThumbnailSubtitle,
-                onTap: () => Navigator.of(context)
-                    .pop(TagLibraryDropAction.updateThumbnail),
+                onTap: () => Navigator.of(
+                  context,
+                ).pop(TagLibraryDropAction.updateThumbnail),
               ),
 
               const SizedBox(height: 20),
@@ -184,10 +177,7 @@ class _ActionButton extends StatelessWidget {
                   color: theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
-                  icon,
-                  color: theme.colorScheme.onPrimaryContainer,
-                ),
+                child: Icon(icon, color: theme.colorScheme.onPrimaryContainer),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -212,10 +202,7 @@ class _ActionButton extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                color: theme.colorScheme.outline,
-              ),
+              Icon(Icons.chevron_right, color: theme.colorScheme.outline),
             ],
           ),
         ),

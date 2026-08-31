@@ -12,15 +12,10 @@ import 'position_converter.dart';
 /// - `base_prompt FILL() COUPLE(0 0.5) char1 COUPLE(0.5 1) char2`
 class CoupleParser {
   // COUPLE 分割模式（捕获 COUPLE 及其参数）
-  static final _couplePattern = RegExp(
-    r'\s+COUPLE\b',
-    caseSensitive: true,
-  );
+  static final _couplePattern = RegExp(r'\s+COUPLE\b', caseSensitive: true);
 
   // COUPLE 后的参数模式: COUPLE(x1 x2) 或 COUPLE(x1 x2, y1 y2)
-  static final _coupleParamsPattern = RegExp(
-    r'^\s*\(([^)]+)\)',
-  );
+  static final _coupleParamsPattern = RegExp(r'^\s*\(([^)]+)\)');
 
   // MASK 参数模式
   static final _maskPattern = RegExp(
@@ -29,10 +24,7 @@ class CoupleParser {
   );
 
   // FILL() 模式
-  static final _fillPattern = RegExp(
-    r'\bFILL\s*\(\s*\)',
-    caseSensitive: true,
-  );
+  static final _fillPattern = RegExp(r'\bFILL\s*\(\s*\)', caseSensitive: true);
 
   // IMASK 模式（索引引用）
   static final _imaskPattern = RegExp(

@@ -18,7 +18,8 @@ import '../../providers/selection_mode_provider.dart';
 import '../common/app_toast.dart';
 import '../../widgets/grouped_grid_view.dart';
 import '../../utils/image_detail_opener.dart';
-import '../../../data/services/gallery/gallery_filter_service.dart' show FilterCriteria;
+import '../../../data/services/gallery/gallery_filter_service.dart'
+    show FilterCriteria;
 import 'local_image_card_3d.dart';
 import 'gallery_favorite_menu.dart';
 import '../common/image_detail/image_detail_viewer.dart';
@@ -580,7 +581,9 @@ class _GenericGalleryContentViewState<T>
                   priority: isVisible ? 1 : 5,
                   onTap: () {
                     if (selectionState.isActive) {
-                      widget.onSelectionToggle?.call(state.currentImages[index]);
+                      widget.onSelectionToggle?.call(
+                        state.currentImages[index],
+                      );
                       return;
                     }
                     if (widget.onTap != null) {
@@ -772,7 +775,7 @@ class LocalGalleryContentView extends ConsumerWidget {
 
   /// 逻辑列宽（px）：瀑布流按它算列数
   final double columnWidth;
-  final void Function(LocalImageRecord record)? onReuseMetadata;
+  final Future<void> Function(LocalImageRecord record)? onReuseMetadata;
   final void Function(LocalImageRecord record, Offset position)? onContextMenu;
   final Future<void> Function(
     LocalImageRecord record,
@@ -834,8 +837,8 @@ class LocalGalleryContentView extends ConsumerWidget {
         showThumbnails: images.length > 1,
         callbacks: ImageDetailCallbacks(
           onReuseMetadata: onReuseMetadata != null
-              ? (data, _) =>
-                    onReuseMetadata?.call((data as LocalImageDetailData).record)
+              ? (data) =>
+                    onReuseMetadata!((data as LocalImageDetailData).record)
               : null,
           onFavoriteToggle: (data) => ref
               .read(localGalleryNotifierProvider.notifier)
@@ -876,9 +879,7 @@ class LocalGalleryContentView extends ConsumerWidget {
             }
           },
           onDelete: onViewerDelete != null
-              ? (data) => onViewerDelete!(
-                    (data as LocalImageDetailData).record,
-                  )
+              ? (data) => onViewerDelete!((data as LocalImageDetailData).record)
               : null,
         ),
       );

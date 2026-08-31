@@ -14,7 +14,8 @@ import 'package:nai_launcher/core/utils/app_logger.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_stream_scanner.dart';
-import 'package:nai_launcher/data/services/gallery/scan_config.dart' show ScanType;
+import 'package:nai_launcher/data/services/gallery/scan_config.dart'
+    show ScanType;
 import 'package:nai_launcher/data/services/gallery/scan_state_manager.dart';
 import 'package:nai_launcher/data/services/gallery/tag_index_import_service.dart';
 import 'package:nai_launcher/data/services/image_metadata_service.dart';
@@ -105,8 +106,9 @@ void main() {
       expect(record.height, 1216);
 
       // 元数据
-      final metadata =
-          (await dataSource.getMetadataByImageIds([imageId]))[imageId];
+      final metadata = (await dataSource.getMetadataByImageIds([
+        imageId,
+      ]))[imageId];
       expect(metadata, isNotNull);
       expect(metadata!.prompt, '1girl, solo, masterpiece');
       expect(metadata.negativePrompt, 'lowres, blurry');
@@ -169,8 +171,9 @@ void main() {
       expect(second.updated, 1);
 
       final imageId = (await dataSource.getImageIdByPath(pngPath))!;
-      final metadata =
-          (await dataSource.getMetadataByImageIds([imageId]))[imageId];
+      final metadata = (await dataSource.getMetadataByImageIds([
+        imageId,
+      ]))[imageId];
       expect(metadata!.prompt, '2girls, group');
 
       final tags = await dataSource.getImageTags(imageId);
@@ -194,42 +197,30 @@ void main() {
       );
 
       final service = TagIndexImportService(dataSource);
-      await service.importFromJsonl(
-        jsonlPath,
-        rootPaths: [tempDir.path],
-      );
+      await service.importFromJsonl(jsonlPath, rootPaths: [tempDir.path]);
 
       final filterService = GalleryFilterService(dataSource);
 
       // chips 中选中的标签 → 交集过滤命中
-      final hit = await filterService.applyFilters(
-        [File(pngPath)],
-        const FilterCriteria(selectedTags: ['blue_hair']),
-      );
+      final hit = await filterService.applyFilters([
+        File(pngPath),
+      ], const FilterCriteria(selectedTags: ['blue_hair']));
       expect(hit.files.map((f) => f.path), contains(pngPath));
 
       // 未导入的标签 → 过滤为空
-      final miss = await filterService.applyFilters(
-        [File(pngPath)],
-        const FilterCriteria(selectedTags: ['nonexistent_tag']),
-      );
+      final miss = await filterService.applyFilters([
+        File(pngPath),
+      ], const FilterCriteria(selectedTags: ['nonexistent_tag']));
       expect(miss.files, isEmpty);
     });
 
     test('源外路径/非图片/坏 JSON 行分别计跳过与错误', () async {
-      final outsidePath = p.join(
-        Directory.systemTemp.path,
-        'outside_x.png',
-      );
+      final outsidePath = p.join(Directory.systemTemp.path, 'outside_x.png');
       final jsonlPath = p.join(tempDir.path, 'index.jsonl');
 
       final lines = [
         // 源外路径 → 跳过
-        jsonEncode({
-          'path': outsidePath,
-          'size': 1,
-          'mtime': 1787469000,
-        }),
+        jsonEncode({'path': outsidePath, 'size': 1, 'mtime': 1787469000}),
         // 源内但非图片 → 跳过
         jsonEncode({
           'path': p.join(tempDir.path, 'note.txt'),
@@ -290,8 +281,9 @@ void main() {
       expect(result.imported, 1);
 
       final imageId = (await dataSource.getImageIdByPath(pngPath))!;
-      var metadata =
-          (await dataSource.getMetadataByImageIds([imageId]))[imageId];
+      var metadata = (await dataSource.getMetadataByImageIds([
+        imageId,
+      ]))[imageId];
       expect(metadata!.prompt, 'imported_prompt_tag');
 
       // 扫描（普通 PNG 解析失败 → metadata_status 变为 failed）
@@ -316,8 +308,7 @@ void main() {
       expect(ftsIds, contains(imageId));
     });
 
-    test('JSONL 缺 mtime 时 stat 文件取真实时间；文件不存在则跳过该行',
-        () async {
+    test('JSONL 缺 mtime 时 stat 文件取真实时间；文件不存在则跳过该行', () async {
       // 真实 PNG（无 mtime 字段）→ created_at 用文件系统 mtime
       final pngPath = p.join(tempDir.path, 'no_mtime.png');
       final pngBytes = _buildBasePngBytes();
@@ -333,11 +324,7 @@ void main() {
           'prompt': 'no_mtime_prompt',
         })}\n'
         // 不存在的文件 + 无 mtime → stat 失败 → 跳过
-        '${jsonEncode({
-          'path': p.join(tempDir.path, 'ghost.png'),
-          'size': 1,
-          'prompt': 'ghost',
-        })}\n',
+        '${jsonEncode({'path': p.join(tempDir.path, 'ghost.png'), 'size': 1, 'prompt': 'ghost'})}\n',
       );
 
       final service = TagIndexImportService(dataSource);
@@ -371,11 +358,7 @@ void main() {
       try {
         final jsonlPath = p.join(tempDir.path, 'index.jsonl');
         await File(jsonlPath).writeAsString(
-          '${jsonEncode({
-            'path': p.join(tempDir.path, 'ok.png'),
-            'size': 1,
-            'mtime': 1787469000,
-          })}\n',
+          '${jsonEncode({'path': p.join(tempDir.path, 'ok.png'), 'size': 1, 'mtime': 1787469000})}\n',
         );
 
         final service = TagIndexImportService(dataSource);

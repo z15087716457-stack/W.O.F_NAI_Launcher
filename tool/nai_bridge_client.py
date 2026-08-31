@@ -14,9 +14,12 @@
 
 支持的 set/gen 键（均为可选，未传保持原值）:
   prompt, negative_prompt, model, width, height, steps, cfg_scale, sampler,
-  seed, n_samples, uc_preset, quality_toggle, cfg_rescale, noise_schedule,
-  variety_plus, smea_auto, smea, smea_dyn, use_coords,
+  seed, n_samples, uc_preset, quality_preset=standard|light|none,
+  quality_toggle, cfg_rescale, noise_schedule, variety_plus, smea_auto, smea,
+  smea_dyn, use_coords,
   characters=[{"prompt":..., "uc":..., "position":"B2"}], clear_characters=true
+
+quality_preset 与 quality_toggle 同时出现时新键优先；旧布尔键仍映射 Standard/None。
 """
 import asyncio
 import base64

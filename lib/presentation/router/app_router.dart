@@ -11,12 +11,13 @@ import '../screens/auth/login_screen.dart';
 import '../screens/generation/generation_screen.dart';
 import '../screens/local_gallery/local_gallery_screen.dart';
 import '../screens/online_gallery/online_gallery_screen.dart';
-import '../screens/prompt_config/prompt_config_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/slideshow_screen.dart';
 import '../screens/image_comparison_screen.dart';
 import '../screens/statistics/statistics_screen.dart';
+import '../screens/style_explore/style_explore_screen.dart';
 import '../screens/precise_ref_library/precise_ref_library_screen.dart';
+import '../screens/prompt_block_library/prompt_block_library_screen.dart';
 import '../screens/tag_library_page/tag_library_page_screen.dart';
 import '../screens/vibe_library/vibe_library_screen.dart';
 import '../widgets/common/update_notice_banner.dart';
@@ -36,7 +37,6 @@ final _onlineGalleryKey = GlobalKey<NavigatorState>(
   debugLabel: 'onlineGallery',
 );
 final _settingsKey = GlobalKey<NavigatorState>(debugLabel: 'settings');
-final _promptConfigKey = GlobalKey<NavigatorState>(debugLabel: 'promptConfig');
 final _statisticsKey = GlobalKey<NavigatorState>(debugLabel: 'statistics');
 final _tagLibraryPageKey = GlobalKey<NavigatorState>(
   debugLabel: 'tagLibraryPage',
@@ -45,6 +45,10 @@ final _vibeLibraryKey = GlobalKey<NavigatorState>(debugLabel: 'vibeLibrary');
 final _preciseRefLibraryKey = GlobalKey<NavigatorState>(
   debugLabel: 'preciseRefLibrary',
 );
+final _promptBlockLibraryKey = GlobalKey<NavigatorState>(
+  debugLabel: 'promptBlockLibrary',
+);
+final _styleExploreKey = GlobalKey<NavigatorState>(debugLabel: 'styleExplore');
 
 /// 路由路径常量
 class AppRoutes {
@@ -56,13 +60,14 @@ class AppRoutes {
   static const String localGallery = '/local-gallery';
   static const String onlineGallery = '/online-gallery';
   static const String settings = '/settings';
-  static const String promptConfig = '/prompt-config';
   static const String slideshow = '/slideshow';
   static const String comparison = '/comparison';
   static const String statistics = '/statistics';
   static const String tagLibraryPage = '/tag-library';
   static const String vibeLibrary = '/vibe-library';
   static const String preciseRefLibrary = '/precise-ref-library';
+  static const String promptBlockLibrary = '/prompt-block-library';
+  static const String styleExplore = '/style-explore';
 }
 
 /// 应用路由 Provider
@@ -243,19 +248,7 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
 
-          // Branch 4: 随机提示词配置页 - 不保活
-          StatefulShellBranch(
-            navigatorKey: _promptConfigKey,
-            routes: [
-              GoRoute(
-                path: AppRoutes.promptConfig,
-                name: 'promptConfig',
-                builder: (context, state) => const PromptConfigScreen(),
-              ),
-            ],
-          ),
-
-          // Branch 5: 统计页 - 不保活
+          // Branch 4: 统计页 - 不保活
           StatefulShellBranch(
             navigatorKey: _statisticsKey,
             routes: [
@@ -267,7 +260,7 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
 
-          // Branch 6: 词库页 - 保活
+          // Branch 5: 词库页 - 保活
           StatefulShellBranch(
             navigatorKey: _tagLibraryPageKey,
             routes: [
@@ -279,7 +272,7 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
 
-          // Branch 7: Vibe库页 - 保活
+          // Branch 6: Vibe库页 - 保活
           StatefulShellBranch(
             navigatorKey: _vibeLibraryKey,
             routes: [
@@ -291,7 +284,7 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
 
-          // Branch 8: 精准参考库页 - 保活
+          // Branch 7: 精准参考库页 - 保活
           StatefulShellBranch(
             navigatorKey: _preciseRefLibraryKey,
             routes: [
@@ -299,6 +292,30 @@ GoRouter appRouter(Ref ref) {
                 path: AppRoutes.preciseRefLibrary,
                 name: 'preciseRefLibrary',
                 builder: (context, state) => const PreciseRefLibraryScreen(),
+              ),
+            ],
+          ),
+
+          // Branch 8: 全局 Prompt 块库 - 保活
+          StatefulShellBranch(
+            navigatorKey: _promptBlockLibraryKey,
+            routes: [
+              GoRoute(
+                path: AppRoutes.promptBlockLibrary,
+                name: 'promptBlockLibrary',
+                builder: (context, state) => const PromptBlockLibraryScreen(),
+              ),
+            ],
+          ),
+
+          // Branch 9: 画风探索页 - 不保活（工作区状态在 provider 层保持）
+          StatefulShellBranch(
+            navigatorKey: _styleExploreKey,
+            routes: [
+              GoRoute(
+                path: AppRoutes.styleExplore,
+                name: 'styleExplore',
+                builder: (context, state) => const StyleExploreScreen(),
               ),
             ],
           ),
@@ -319,7 +336,8 @@ GoRouter appRouter(Ref ref) {
 ///
 /// 使用混合保活策略：
 /// - 画廊页面（索引 1, 2）使用 Offstage 保活
-/// - Vibe库页面（索引 7）使用 Offstage 保活
+/// - Vibe库页面（索引 7）和精准参考库（索引 8）使用 Offstage 保活
+/// - Prompt 块库（索引 9）使用 Offstage 保活；画风探索（索引 10）不保活
 /// - 其他页面不保活
 class MainShell extends ConsumerStatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -356,7 +374,8 @@ class _MainShellState extends ConsumerState<MainShell> {
 
     // 构建混合保活内容栈
     // - 索引 1 (localGallery) 和 2 (onlineGallery) 使用 Offstage 保活
-    // - 索引 7 (vibeLibrary) 和 8 (preciseRefLibrary) 使用 Offstage 保活
+    // - 索引 7 (vibeLibrary)、8 (preciseRefLibrary) 和 9 (promptBlockLibrary)
+    //   使用 Offstage 保活
     // - 其他索引不保活，切换时销毁重建
     final contentStack = IndexedStack(
       index: currentIndex,
@@ -365,9 +384,13 @@ class _MainShellState extends ConsumerState<MainShell> {
         final child = entry.value;
         final isActive = index == currentIndex;
 
-        // 保活页面：画廊（1, 2）、Vibe 库（7）和精准参考库（8）
+        // 保活页面：画廊（1, 2）、Vibe 库（7）、精准参考库（8）和块库（9）
         // 始终保持在树中，通过 TickerMode 控制动画
-        if (index == 1 || index == 2 || index == 7 || index == 8) {
+        if (index == 1 ||
+            index == 2 ||
+            index == 7 ||
+            index == 8 ||
+            index == 9) {
           return TickerMode(enabled: isActive, child: child);
         }
 

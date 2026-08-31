@@ -79,7 +79,12 @@ class CooccurrenceService {
 
       return _hasData;
     } catch (e, stack) {
-      AppLogger.e('Cooccurrence service initialization failed', e, stack, 'Cooccurrence');
+      AppLogger.e(
+        'Cooccurrence service initialization failed',
+        e,
+        stack,
+        'Cooccurrence',
+      );
       _isLoaded = true;
       _hasData = false;
       return false;
@@ -178,9 +183,13 @@ class CooccurrenceService {
   /// 获取热门共现标签
   ///
   /// [limit] 返回结果数量限制
-  Future<List<Recommendation>> getPopularCooccurrences({int limit = 100}) async {
+  Future<List<Recommendation>> getPopularCooccurrences({
+    int limit = 100,
+  }) async {
     try {
-      final popularTags = await _dataSource.getPopularCooccurrences(limit: limit);
+      final popularTags = await _dataSource.getPopularCooccurrences(
+        limit: limit,
+      );
 
       final recommendations = popularTags
           .map(
@@ -271,8 +280,9 @@ class CooccurrenceService {
     }
 
     // 多个标签，批量获取并合并结果
-    final normalizedTags =
-        selectedTags.map((t) => t.toLowerCase().trim()).toList();
+    final normalizedTags = selectedTags
+        .map((t) => t.toLowerCase().trim())
+        .toList();
     final batchResults = await _dataSource.getRelatedTagsBatch(
       normalizedTags,
       limit: limit * 2, // 获取更多以便合并

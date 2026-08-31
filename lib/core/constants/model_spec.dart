@@ -106,6 +106,7 @@ class ModelSpec {
 
   bool get isInpainting => id.contains('inpainting');
 }
+
 /// 模型能力注册表。
 class ModelSpecs {
   ModelSpecs._();
@@ -262,4 +263,3 @@ class ModelSpecs {
   /// 已注册的全部模型 id（含 inpainting 变体）。
   static Iterable<String> get registeredIds => _specs.keys;
 }
-

@@ -94,7 +94,9 @@ void main() {
       for (var i = 0; i < count; i++) {
         final file = File(p.join(galleryRoot.path, 'img_$i.png'));
         await file.writeAsBytes(<int>[137, 80, 78, 71]);
-        await file.setLastModified(DateTime(2026, 1, 1).add(Duration(minutes: i)));
+        await file.setLastModified(
+          DateTime(2026, 1, 1).add(Duration(minutes: i)),
+        );
         files.add(file);
       }
       return files;
@@ -168,7 +170,9 @@ void main() {
       final target = state.currentImages.first.path;
       await galleryNotifier.toggleFavorite(target);
       expect(
-        container.read(localGalleryNotifierProvider).currentImages
+        container
+            .read(localGalleryNotifierProvider)
+            .currentImages
             .firstWhere((r) => r.path == target)
             .isFavorite,
         isTrue,

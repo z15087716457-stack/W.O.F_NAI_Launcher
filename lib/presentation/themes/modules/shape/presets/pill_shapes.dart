@@ -20,20 +20,17 @@ class PillShapes extends BaseShapeModule {
   double get menuRadius => 0.0;
 
   @override
-  ShapeBorder get cardShape => RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(mediumRadius),
-      );
+  ShapeBorder get cardShape =>
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(mediumRadius));
 
   @override
   ShapeBorder get buttonShape => const StadiumBorder(); // Pill shape
 
   @override
-  ShapeBorder get inputShape => RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(smallRadius),
-      );
+  ShapeBorder get inputShape =>
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(smallRadius));
 
   @override
-  ShapeBorder get menuShape => RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(menuRadius),
-      );
+  ShapeBorder get menuShape =>
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(menuRadius));
 }

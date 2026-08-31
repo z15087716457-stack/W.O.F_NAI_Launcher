@@ -31,7 +31,8 @@ class SectionContainer extends StatelessWidget {
 
     return Container(
       key: sectionKey,
-      padding: padding ??
+      padding:
+          padding ??
           EdgeInsets.symmetric(
             horizontal: isDesktop ? 24 : 16,
             vertical: isDesktop ? 24 : 20,
@@ -48,11 +49,7 @@ class SectionContainer extends StatelessWidget {
                   color: colorScheme.primaryContainer.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: colorScheme.primary,
-                ),
+                child: Icon(icon, size: 20, color: colorScheme.primary),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -105,8 +102,8 @@ class StatsGrid extends StatelessWidget {
     final columns = screenWidth >= 900
         ? desktopColumns
         : screenWidth >= 600
-            ? tabletColumns
-            : mobileColumns;
+        ? tabletColumns
+        : mobileColumns;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -117,10 +114,7 @@ class StatsGrid extends StatelessWidget {
           spacing: spacing,
           runSpacing: runSpacing,
           children: children.map((child) {
-            return SizedBox(
-              width: itemWidth,
-              child: child,
-            );
+            return SizedBox(width: itemWidth, child: child);
           }).toList(),
         );
       },

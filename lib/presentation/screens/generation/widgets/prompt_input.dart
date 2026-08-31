@@ -13,24 +13,29 @@ import '../../../../core/utils/sd_to_nai_converter.dart';
 import '../../../../data/models/character/character_prompt.dart';
 import '../../../../data/models/fixed_tag/fixed_tag_entry.dart';
 import '../../../../data/models/prompt/prompt_preset_mode.dart';
+import '../../../../data/models/prompt_block/prompt_block_document.dart';
+import '../../../../data/models/prompt_block/prompt_block_segment.dart';
 import '../../../../data/services/alias_resolver_service.dart';
 import '../../../providers/character_prompt_provider.dart';
 import '../../../providers/fixed_tags_provider.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/prompt_maximize_provider.dart';
+import '../../../providers/prompt_block_workspace_provider.dart';
+import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_regex_rules_provider.dart';
 import '../../../providers/prompt_token_counter_provider.dart';
 import '../../../providers/quality_preset_provider.dart';
 import '../../../providers/uc_preset_provider.dart';
 import '../../../widgets/autocomplete/autocomplete.dart';
 import '../../../widgets/common/app_toast.dart';
-import '../../../widgets/prompt/unified/unified_prompt_input.dart';
+import '../../../widgets/prompt/blocks/prompt_block_editor.dart';
+import '../../../widgets/prompt/pills/prompt_pill_editor.dart';
 import '../../../widgets/prompt/unified/unified_prompt_config.dart';
 import '../../../widgets/prompt/nai_syntax_controller.dart';
 import '../../../widgets/prompt/prompt_token_count_bar.dart';
 import '../../../widgets/prompt/quality_tags_selector.dart';
 import '../../../widgets/prompt/transparent_background_chip.dart';
-import '../../../widgets/prompt/random_mode_selector.dart';
+import '../../../widgets/prompt/block_library_panel_toggle.dart';
 import '../../../widgets/prompt/regex_rules_dialog.dart';
 import '../../../widgets/prompt/toolbar/toolbar.dart';
 import '../../../widgets/prompt/uc_preset_selector.dart';
@@ -83,12 +88,18 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     super.initState();
     final params = ref.read(generationParamsNotifierProvider);
 
-    // 使用 NAI 语法高亮控制器
+    // 使用 NAI 语法高亮控制器作为兼容投影/工具栏读数。
     _promptController = NaiSyntaxController(text: params.prompt);
     _negativeController = NaiSyntaxController(text: params.negativePrompt);
+    _bootstrapWorkspace(
+      prompt: params.prompt,
+      negativePrompt: params.negativePrompt,
+    );
 
     _promptFocusNode.addListener(_onPromptFocusChanged);
     _negativeFocusNode.addListener(_onNegativeFocusChanged);
+    _promptController.addListener(_onPromptProxyChanged);
+    _negativeController.addListener(_onNegativeProxyChanged);
 
     // 检查并消费待填充提示词（从画廊发送）
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -97,6 +108,37 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
 
     _isNegativeMode = widget.negativeModeNotifier?.value ?? false;
     widget.negativeModeNotifier?.addListener(_onExternalNegativeModeChanged);
+  }
+
+  void _bootstrapWorkspace({
+    required String prompt,
+    required String negativePrompt,
+  }) {
+    final notifier = ref.read(promptBlockWorkspaceNotifierProvider.notifier);
+    final state = ref.read(promptBlockWorkspaceNotifierProvider);
+    if (prompt.isNotEmpty &&
+        _isFreshWorkspaceDocument(state.positiveDocument)) {
+      notifier.replacePlainText(PromptBlockLane.positive, prompt);
+    }
+    if (negativePrompt.isNotEmpty &&
+        _isFreshWorkspaceDocument(state.negativeDocument)) {
+      notifier.replacePlainText(PromptBlockLane.negative, negativePrompt);
+    }
+    // 药丸工作区（正向）对称恢复：仅在全新文档时用存储的提示词重建
+    final pillState = ref.read(pillWorkspaceNotifierProvider);
+    if (prompt.isNotEmpty &&
+        pillState.document.text.isEmpty &&
+        pillState.document.instances.isEmpty) {
+      ref
+          .read(pillWorkspaceNotifierProvider.notifier)
+          .replaceWithPlainText(prompt);
+    }
+  }
+
+  bool _isFreshWorkspaceDocument(PromptBlockDocument document) {
+    if (document.segments.length != 1) return false;
+    final segment = document.segments.single;
+    return segment is TextSegment && segment.text.isEmpty;
   }
 
   /// 消费待填充提示词（从画廊或词库发送）
@@ -148,7 +190,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         negativePrompt = SdToNaiConverter.convert(negativePrompt);
         negativePrompt = NaiPromptFormatter.format(negativePrompt);
 
-        _negativeController.text = negativePrompt;
+        _setProxyText(_negativeController, negativePrompt);
         ref
             .read(generationParamsNotifierProvider.notifier)
             .updateNegativePrompt(negativePrompt);
@@ -161,8 +203,16 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
 
   /// 应用到主提示词
   void _applyToMainPrompt(String prompt) {
-    _promptController.text = prompt;
+    _setProxyText(_promptController, prompt);
     ref.read(generationParamsNotifierProvider.notifier).updatePrompt(prompt);
+  }
+
+  void _setProxyText(TextEditingController controller, String text) {
+    if (controller.text == text) return;
+    controller.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
   }
 
   /// 应用到角色提示词
@@ -267,6 +317,8 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     widget.negativeModeNotifier?.removeListener(_onExternalNegativeModeChanged);
     _promptFocusNode.removeListener(_onPromptFocusChanged);
     _negativeFocusNode.removeListener(_onNegativeFocusChanged);
+    _promptController.removeListener(_onPromptProxyChanged);
+    _negativeController.removeListener(_onNegativeProxyChanged);
     _promptController.dispose();
     _negativeController.dispose();
     _promptFocusNode.dispose();
@@ -284,6 +336,14 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     setState(() {});
   }
 
+  void _onPromptProxyChanged() {
+    if (mounted) setState(() {});
+  }
+
+  void _onNegativeProxyChanged() {
+    if (mounted) setState(() {});
+  }
+
   void _onExternalNegativeModeChanged() {
     final value = widget.negativeModeNotifier?.value ?? false;
     if (!mounted || value == _isNegativeMode) return;
@@ -296,61 +356,8 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     widget.negativeModeNotifier?.value = value;
   }
 
-  /// 从 Provider 同步提示词到本地状态
-  void _syncPromptFromProvider(String prompt) {
-    // 避免循环触发：只在内容不同时更新
-    if (_promptController.text != prompt) {
-      _promptController.text = prompt;
-    }
-  }
-
-  /// 从 Provider 同步负向提示词到本地状态
-  void _syncNegativeFromProvider(String negativePrompt) {
-    if (_negativeController.text != negativePrompt) {
-      _negativeController.text = negativePrompt;
-    }
-  }
-
-  /// 生成随机提示词
-  Future<void> _generateRandomPrompt() async {
-    try {
-      // 使用统一的随机提示词生成并应用方法
-      await ref
-          .read(imageGenerationNotifierProvider.notifier)
-          .generateAndApplyRandomPrompt();
-
-      // 检查是否有角色被生成（用于 Toast 提示）
-      final characterConfig = ref.read(characterPromptNotifierProvider);
-      final hasCharacters = characterConfig.characters.any(
-        (c) => c.enabled && c.prompt.isNotEmpty,
-      );
-
-      if (hasCharacters && mounted) {
-        final count = characterConfig.characters
-            .where((c) => c.enabled && c.prompt.isNotEmpty)
-            .length;
-        AppToast.success(
-          context,
-          context.l10n.tagLibrary_generatedCharacters(count.toString()),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        AppToast.error(
-          context,
-          context.l10n.tagLibrary_generateFailed(e.toString()),
-        );
-      }
-    }
-  }
-
-  /// 显示随机模式选择
-  void _showRandomModeSelector() {
-    RandomModeBottomSheet.show(context);
-  }
-
   void _clearPrompt() {
-    _promptController.clear();
+    _setProxyText(_promptController, '');
     ref.read(generationParamsNotifierProvider.notifier).updatePrompt('');
     // 同时清空角色提示词
     ref.read(characterPromptNotifierProvider.notifier).clearAllCharacters();
@@ -392,7 +399,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // 监听 Provider 变化，自动同步到本地状态
+    // 监听 Provider 变化，同步代理控制器（工具栏计数 / tooltip / compact 清空按钮）。
+    // 结构化工作区文档由 updatePrompt/updateNegativePrompt 内联协调，
+    // 不再依赖本组件生命周期兜底压扁。
     ref.listen(
       generationParamsNotifierProvider.select(
         (params) =>
@@ -400,10 +409,10 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       ),
       (previous, next) {
         if (previous?.prompt != next.prompt) {
-          _syncPromptFromProvider(next.prompt);
+          _setProxyText(_promptController, next.prompt);
         }
         if (previous?.negativePrompt != next.negativePrompt) {
-          _syncNegativeFromProvider(next.negativePrompt);
+          _setProxyText(_negativeController, next.negativePrompt);
         }
       },
     );
@@ -475,22 +484,17 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     final model = ref.watch(
       generationParamsNotifierProvider.select((params) => params.model),
     );
-    final showRandomTools = ref.watch(randomPromptToolsVisibilityProvider);
-
     final typeSwitch = _buildPromptTypeSwitch(
       theme,
       promptCount,
       negativeCount,
     );
 
-    // 工具栏（随机、全屏、清空、设置）
+    // 工具栏（全屏、清空、设置）
     final toolbar = PromptEditorToolbar(
       config: PromptEditorToolbarConfig.mainEditor.copyWith(
-        showRandomButton: showRandomTools,
         showFullscreenButton: widget.showMaximizeButton,
       ),
-      onRandomPressed: showRandomTools ? _generateRandomPrompt : null,
-      onRandomLongPressed: showRandomTools ? _showRandomModeSelector : null,
       // 使用传入的回调或 Provider 切换最大化
       onFullscreenPressed:
           widget.onToggleMaximize ??
@@ -500,12 +504,10 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     );
 
     if (widget.autoGrow) {
-      // 官网布局工具栏不放「角色」与「随机」按钮：角色区常驻提示词下方、
-      // 随机在生成条与快捷键均有入口；行更短后 FittedBox 缩放更小，
-      // 其余按钮字号更大
+      // 官网布局工具栏不放「角色」按钮：角色区常驻提示词下方；
+      // 行更短后 FittedBox 缩放更小，其余按钮字号更大
       final webToolbar = PromptEditorToolbar(
         config: PromptEditorToolbarConfig.mainEditor.copyWith(
-          showRandomButton: false,
           showFullscreenButton: widget.showMaximizeButton,
         ),
         onFullscreenPressed:
@@ -531,6 +533,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             UcPresetSelector(model: model),
             const SizedBox(width: 2),
             const TransparentBackgroundChip(),
+            const BlockLibraryPanelToggleButton(),
             webToolbar,
           ],
         ),
@@ -563,6 +566,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
 
             // V5 透明背景开关
             const TransparentBackgroundChip(),
+
+            // 块库面板开关
+            const BlockLibraryPanelToggleButton(),
 
             // 多人角色编辑器按钮
             const CharacterPromptButton(),
@@ -735,7 +741,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   }
 
   void _clearNegative() {
-    _negativeController.clear();
+    _setProxyText(_negativeController, '');
     ref
         .read(generationParamsNotifierProvider.notifier)
         .updateNegativePrompt('');
@@ -748,10 +754,11 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     final enableSdSyntaxAutoConvert = ref.watch(
       sdSyntaxAutoConvertSettingsProvider,
     );
-    return UnifiedPromptInput(
+    return PromptPillEditor(
       key: const ValueKey('generation_prompt_positive_input'),
-      controller: _promptController,
-      focusNode: _promptFocusNode,
+      compact: false,
+      autoGrow: widget.autoGrow,
+      minLines: widget.autoGrow ? 2 : null,
       sessionId: PromptHistorySessionIds.generationPrompt,
       onOpenAssistantSettings: _openAssistantQuickSettings,
       config: UnifiedPromptConfig(
@@ -772,27 +779,22 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             : context.l10n.prompt_describeImage,
       ),
       decoration: const InputDecoration(contentPadding: EdgeInsets.all(12)),
-      maxLines: null,
-      minLines: widget.autoGrow ? 4 : null,
-      expands: !widget.autoGrow,
-      fitContent: widget.autoGrow,
       onComfyuiImport: (globalPrompt, characters) {
-        // 清空现有角色并替换
+        // 清空现有角色并替换；块工作区由编辑器先切回纯文本。
         ref.read(characterPromptNotifierProvider.notifier).clearAll();
         ref
             .read(characterPromptNotifierProvider.notifier)
             .replaceAll(characters);
-        // 更新全局提示词
         ref
             .read(generationParamsNotifierProvider.notifier)
             .updatePrompt(globalPrompt);
-        // 显示成功提示
         AppToast.success(
           context,
           context.l10n.prompt_importedCharacters(characters.length),
         );
       },
       onChanged: (value) {
+        _setProxyText(_promptController, value);
         ref.read(generationParamsNotifierProvider.notifier).updatePrompt(value);
       },
     );
@@ -899,10 +901,12 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     final enableSdSyntaxAutoConvert = ref.watch(
       sdSyntaxAutoConvertSettingsProvider,
     );
-    return UnifiedPromptInput(
+    return PromptBlockEditor(
       key: const ValueKey('generation_prompt_negative_input'),
-      controller: _negativeController,
-      focusNode: _negativeFocusNode,
+      lane: PromptBlockLane.negative,
+      compact: false,
+      autoGrow: widget.autoGrow,
+      minLines: widget.autoGrow ? 2 : null,
       sessionId: PromptHistorySessionIds.generationNegative,
       onOpenAssistantSettings: _openAssistantQuickSettings,
       config: UnifiedPromptConfig(
@@ -920,11 +924,8 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         hintText: context.l10n.prompt_unwantedContent,
       ),
       decoration: const InputDecoration(contentPadding: EdgeInsets.all(12)),
-      maxLines: null,
-      minLines: widget.autoGrow ? 4 : null,
-      expands: !widget.autoGrow,
-      fitContent: widget.autoGrow,
       onChanged: (value) {
+        _setProxyText(_negativeController, value);
         ref
             .read(generationParamsNotifierProvider.notifier)
             .updateNegativePrompt(value);
@@ -942,9 +943,10 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       children: [
         SizedBox(
           height: 72,
-          child: UnifiedPromptInput(
-            controller: _promptController,
-            focusNode: _promptFocusNode,
+          child: PromptPillEditor(
+            key: const ValueKey('generation_prompt_positive_input'),
+            compact: true,
+            minLines: 1,
             sessionId: PromptHistorySessionIds.generationPrompt,
             onOpenAssistantSettings: _openAssistantQuickSettings,
             config: UnifiedPromptConfig(
@@ -984,8 +986,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
                 ],
               ),
             ),
-            maxLines: 2,
-            minLines: 1,
             onComfyuiImport: (globalPrompt, characters) {
               ref.read(characterPromptNotifierProvider.notifier).clearAll();
               ref
@@ -1000,6 +1000,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
               );
             },
             onChanged: (value) {
+              _setProxyText(_promptController, value);
               ref
                   .read(generationParamsNotifierProvider.notifier)
                   .updatePrompt(value);

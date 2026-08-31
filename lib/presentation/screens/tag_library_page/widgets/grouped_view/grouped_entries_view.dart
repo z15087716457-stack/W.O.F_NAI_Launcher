@@ -75,9 +75,7 @@ class GroupedEntriesView extends ConsumerWidget {
           ),
         ],
         // 底部留白
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 32),
-        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 32)),
       ],
     );
   }
@@ -159,20 +157,17 @@ List<CategoryGroup> groupEntriesByCategory(
   for (final category in sortedCategories) {
     // 只包含有条目的分类
     if (categoryIdsWithEntries.contains(category.id)) {
-      final categoryEntries =
-          entries.where((e) => e.categoryId == category.id).toList();
-      groups.add(
-        CategoryGroup(
-          category: category,
-          entries: categoryEntries,
-        ),
-      );
+      final categoryEntries = entries
+          .where((e) => e.categoryId == category.id)
+          .toList();
+      groups.add(CategoryGroup(category: category, entries: categoryEntries));
     }
   }
 
   // 处理未分类条目（categoryId 为 null）
-  final uncategorizedEntries =
-      entries.where((e) => e.categoryId == null).toList();
+  final uncategorizedEntries = entries
+      .where((e) => e.categoryId == null)
+      .toList();
   if (uncategorizedEntries.isNotEmpty) {
     groups.add(
       CategoryGroup(

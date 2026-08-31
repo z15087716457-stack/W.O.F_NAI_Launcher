@@ -26,9 +26,7 @@ class OpenAiResponsesAdapter extends PromptAssistantProviderAdapter {
     required PromptAssistantRequest request,
     required CancelToken cancelToken,
   }) async {
-    final headers = <String, dynamic>{
-      'Content-Type': 'application/json',
-    };
+    final headers = <String, dynamic>{'Content-Type': 'application/json'};
     if (request.apiKey != null && request.apiKey!.trim().isNotEmpty) {
       headers['Authorization'] = 'Bearer ${request.apiKey!.trim()}';
     }
@@ -40,10 +38,7 @@ class OpenAiResponsesAdapter extends PromptAssistantProviderAdapter {
         'stream': false,
         'instructions': request.systemPrompt,
         'input': [
-          {
-            'role': 'user',
-            'content': _inputParts(request.userParts),
-          },
+          {'role': 'user', 'content': _inputParts(request.userParts)},
         ],
       },
       options: Options(

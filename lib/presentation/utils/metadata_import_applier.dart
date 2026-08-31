@@ -50,9 +50,7 @@ class MetadataImportApplier {
     var count = 0;
 
     if (options.importPrompt && metadata.prompt.isNotEmpty) {
-      target.updatePrompt(
-        metadata.hasSeparatedFields ? metadata.mainPrompt : metadata.prompt,
-      );
+      target.updatePrompt(metadata.prompt);
       count++;
     }
 
@@ -152,11 +150,7 @@ class MetadataImportApplier {
     }
 
     final model = resolveImportableModel(metadata) ?? currentModel;
-    return UcPresets.stripPresetByInt(
-      baseNegative,
-      model,
-      metadata.ucPreset!,
-    );
+    return UcPresets.stripPresetByInt(baseNegative, model, metadata.ucPreset!);
   }
 
   static String? toImportableModelId(String? model) {

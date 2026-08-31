@@ -91,16 +91,14 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
     );
   }
 
-  DateTime _dateOnly(DateTime value) => DateTime(value.year, value.month, value.day);
+  DateTime _dateOnly(DateTime value) =>
+      DateTime(value.year, value.month, value.day);
 
   DateTime get _firstDate => widget.firstDate ?? DateTime(2020);
 
   void _changeMonth(int delta) {
     setState(() {
-      _visibleMonth = DateTime(
-        _visibleMonth.year,
-        _visibleMonth.month + delta,
-      );
+      _visibleMonth = DateTime(_visibleMonth.year, _visibleMonth.month + delta);
     });
   }
 
@@ -129,7 +127,9 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
 
     // 当月首日所在周的周一作为网格起点，固定 6 行
     final firstOfMonth = DateTime(_visibleMonth.year, _visibleMonth.month);
-    final gridStart = firstOfMonth.subtract(Duration(days: firstOfMonth.weekday - 1));
+    final gridStart = firstOfMonth.subtract(
+      Duration(days: firstOfMonth.weekday - 1),
+    );
     final days = List.generate(42, (i) => gridStart.add(Duration(days: i)));
 
     return Dialog(
@@ -151,7 +151,9 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
                         _visibleMonth.year,
                         _visibleMonth.month - 1,
                       );
-                      if (!target.isBefore(DateTime(_firstDate.year, _firstDate.month))) {
+                      if (!target.isBefore(
+                        DateTime(_firstDate.year, _firstDate.month),
+                      )) {
                         _changeMonth(-1);
                       }
                     },
@@ -168,7 +170,10 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
                   IconButton(
                     icon: const Icon(Icons.chevron_right),
                     tooltip: l10n.localGallery_dateRangeNextMonth,
-                    onPressed: _visibleMonth.isBefore(DateTime(_today.year, _today.month))
+                    onPressed:
+                        _visibleMonth.isBefore(
+                          DateTime(_today.year, _today.month),
+                        )
                         ? () => _changeMonth(1)
                         : null,
                   ),
@@ -197,9 +202,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
                 crossAxisCount: 7,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  for (final day in days) _buildDayCell(theme, day),
-                ],
+                children: [for (final day in days) _buildDayCell(theme, day)],
               ),
               const SizedBox(height: 8),
               // 清除 / 取消 / 确定
@@ -209,11 +212,11 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
                   // 清除：仅当进入对话框时已有日期范围（initialStart/initialEnd
                   // 任一非空）才可用；点击清空选择并关闭，调用方写入空范围
                   TextButton(
-                    onPressed: widget.initialStart != null ||
-                            widget.initialEnd != null
-                        ? () => Navigator.of(context).pop(
-                            const DateRangeSelectionState(),
-                          )
+                    onPressed:
+                        widget.initialStart != null || widget.initialEnd != null
+                        ? () => Navigator.of(
+                            context,
+                          ).pop(const DateRangeSelectionState())
                         : null,
                     child: Text(l10n.localGallery_dateRangeClear),
                   ),
@@ -273,9 +276,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
           child: Text(
             '${day.day}',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isSelected
-                  ? theme.colorScheme.onPrimary
-                  : textColor,
+              color: isSelected ? theme.colorScheme.onPrimary : textColor,
               fontWeight: isToday || isSelected
                   ? FontWeight.w700
                   : FontWeight.w400,

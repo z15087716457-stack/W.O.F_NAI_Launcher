@@ -175,6 +175,66 @@ class ModeCache {
   }
 }
 
+class OnlineGalleryQueryDrafts {
+  const OnlineGalleryQueryDrafts({
+    required this.searchQuery,
+    required this.searchPrompt,
+    required this.popularQuery,
+    required this.popularPrompt,
+  });
+
+  final String searchQuery;
+  final String searchPrompt;
+  final String popularQuery;
+  final String popularPrompt;
+}
+
+class OnlineGalleryAuthorReturnContext {
+  OnlineGalleryAuthorReturnContext({
+    required this.viewMode,
+    required this.sourceId,
+    required this.popularSourceId,
+    required this.searchQuery,
+    required this.promptQuery,
+    required this.popularQuery,
+    required this.popularPromptQuery,
+    required this.fuzzySearchEnabled,
+    required Set<String> selectedRatings,
+    required this.popularScale,
+    required this.popularDate,
+    required this.aiTagTimeRange,
+    required this.aiTagPopularPeriod,
+    required this.aiTagNaiOnly,
+    required this.aiTagModelVersion,
+    required this.dateRangeStart,
+    required this.dateRangeEnd,
+    required this.cacheKey,
+    required this.cache,
+    required this.drafts,
+  }) : selectedRatings = Set.unmodifiable(selectedRatings);
+
+  final GalleryViewMode viewMode;
+  final GallerySourceId sourceId;
+  final GallerySourceId popularSourceId;
+  final String searchQuery;
+  final String promptQuery;
+  final String popularQuery;
+  final String popularPromptQuery;
+  final bool fuzzySearchEnabled;
+  final Set<String> selectedRatings;
+  final PopularScale popularScale;
+  final DateTime? popularDate;
+  final String aiTagTimeRange;
+  final String aiTagPopularPeriod;
+  final bool aiTagNaiOnly;
+  final String? aiTagModelVersion;
+  final DateTime? dateRangeStart;
+  final DateTime? dateRangeEnd;
+  final String cacheKey;
+  final ModeCache cache;
+  final OnlineGalleryQueryDrafts drafts;
+}
+
 class OnlineGalleryState {
   const OnlineGalleryState({
     this.isLoading = false,
@@ -208,6 +268,7 @@ class OnlineGalleryState {
     this.favoriteLoadingPostKeys = const {},
     this.dateRangeStart,
     this.dateRangeEnd,
+    this.authorReturnContext,
   });
 
   final bool isLoading;
@@ -245,6 +306,7 @@ class OnlineGalleryState {
   final Set<String> favoriteLoadingPostKeys;
   final DateTime? dateRangeStart;
   final DateTime? dateRangeEnd;
+  final OnlineGalleryAuthorReturnContext? authorReturnContext;
 
   GallerySourceCapabilities get activeCapabilities =>
       gallerySourceCapabilities[viewMode == GalleryViewMode.popular
@@ -327,11 +389,13 @@ class OnlineGalleryState {
     Set<String>? favoriteLoadingPostKeys,
     DateTime? dateRangeStart,
     DateTime? dateRangeEnd,
+    OnlineGalleryAuthorReturnContext? authorReturnContext,
     bool clearError = false,
     bool clearNotice = false,
     bool clearPopularDate = false,
     bool clearDateRange = false,
     bool clearAiTagModelVersion = false,
+    bool clearAuthorReturnContext = false,
   }) {
     return OnlineGalleryState(
       isLoading: isLoading ?? this.isLoading,
@@ -377,6 +441,9 @@ class OnlineGalleryState {
           ? null
           : (dateRangeStart ?? this.dateRangeStart),
       dateRangeEnd: clearDateRange ? null : (dateRangeEnd ?? this.dateRangeEnd),
+      authorReturnContext: clearAuthorReturnContext
+          ? null
+          : (authorReturnContext ?? this.authorReturnContext),
     );
   }
 
@@ -491,7 +558,8 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
     final active = state.viewMode == GalleryViewMode.popular
         ? state.popularSourceId
         : state.sourceId;
-    final followSource = active == GallerySourceId.danbooru ||
+    final followSource =
+        active == GallerySourceId.danbooru ||
             active == GallerySourceId.gelbooru ||
             active == GallerySourceId.aiTag
         ? active
@@ -623,6 +691,100 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
       clearError: true,
     );
     await loadPosts(refresh: true);
+  }
+
+  Future<void> searchAiTagAuthor(
+    int authorId, {
+    required OnlineGalleryQueryDrafts drafts,
+  }) async {
+    if (authorId <= 0) return;
+    _cancelCurrentRequest();
+
+    var nextState = state;
+    if (nextState.authorReturnContext == null) {
+      nextState = nextState.updateCurrentCache(nextState.currentCache);
+      final returnContext = OnlineGalleryAuthorReturnContext(
+        viewMode: nextState.viewMode,
+        sourceId: nextState.sourceId,
+        popularSourceId: nextState.popularSourceId,
+        searchQuery: nextState.searchQuery,
+        promptQuery: nextState.promptQuery,
+        popularQuery: nextState.popularQuery,
+        popularPromptQuery: nextState.popularPromptQuery,
+        fuzzySearchEnabled: nextState.fuzzySearchEnabled,
+        selectedRatings: nextState.selectedRatings,
+        popularScale: nextState.popularScale,
+        popularDate: nextState.popularDate,
+        aiTagTimeRange: nextState.aiTagTimeRange,
+        aiTagPopularPeriod: nextState.aiTagPopularPeriod,
+        aiTagNaiOnly: nextState.aiTagNaiOnly,
+        aiTagModelVersion: nextState.aiTagModelVersion,
+        dateRangeStart: nextState.dateRangeStart,
+        dateRangeEnd: nextState.dateRangeEnd,
+        cacheKey: nextState.currentCacheKey,
+        cache: nextState.currentCache,
+        drafts: drafts,
+      );
+      nextState = nextState.copyWith(authorReturnContext: returnContext);
+    }
+
+    state = nextState.copyWith(
+      sourceId: GallerySourceId.aiTag,
+      viewMode: GalleryViewMode.search,
+      searchQuery: authorId.toString(),
+      promptQuery: '',
+      aiTagTimeRange: 'all',
+      aiTagNaiOnly: false,
+      clearAiTagModelVersion: true,
+      clearDateRange: true,
+      clearError: true,
+      clearNotice: true,
+    );
+    await loadPosts(refresh: true);
+  }
+
+  OnlineGalleryQueryDrafts? returnFromAiTagAuthorSearch() {
+    final returnContext = state.authorReturnContext;
+    if (returnContext == null) return null;
+
+    _cancelCurrentRequest();
+    final restoredCaches = <String, ModeCache>{
+      ...state.caches,
+      returnContext.cacheKey: returnContext.cache,
+    };
+    var restoredState = state.copyWith(
+      isLoading: false,
+      isLoadingMore: false,
+      caches: restoredCaches,
+      clearError: true,
+      clearNotice: true,
+      clearPopularDate: true,
+      clearDateRange: true,
+      clearAiTagModelVersion: true,
+      clearAuthorReturnContext: true,
+    );
+    restoredState = restoredState.copyWith(
+      viewMode: returnContext.viewMode,
+      sourceId: returnContext.sourceId,
+      popularSourceId: returnContext.popularSourceId,
+      searchQuery: returnContext.searchQuery,
+      promptQuery: returnContext.promptQuery,
+      popularQuery: returnContext.popularQuery,
+      popularPromptQuery: returnContext.popularPromptQuery,
+      fuzzySearchEnabled: returnContext.fuzzySearchEnabled,
+      selectedRatings: returnContext.selectedRatings,
+      popularScale: returnContext.popularScale,
+      popularDate: returnContext.popularDate,
+      aiTagTimeRange: returnContext.aiTagTimeRange,
+      aiTagPopularPeriod: returnContext.aiTagPopularPeriod,
+      aiTagNaiOnly: returnContext.aiTagNaiOnly,
+      aiTagModelVersion: returnContext.aiTagModelVersion,
+      dateRangeStart: returnContext.dateRangeStart,
+      dateRangeEnd: returnContext.dateRangeEnd,
+    );
+    assert(restoredState.currentCacheKey == returnContext.cacheKey);
+    state = restoredState.updateCurrentCache(returnContext.cache);
+    return returnContext.drafts;
   }
 
   Future<void> searchPopular({

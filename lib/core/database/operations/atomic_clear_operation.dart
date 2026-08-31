@@ -24,20 +24,15 @@ class ClearOperationResult {
     required int totalRemoved,
     required Map<String, int> tableStats,
     required Duration duration,
-  }) =>
-      ClearOperationResult(
-        success: true,
-        totalRemoved: totalRemoved,
-        tableStats: tableStats,
-        duration: duration,
-      );
+  }) => ClearOperationResult(
+    success: true,
+    totalRemoved: totalRemoved,
+    tableStats: tableStats,
+    duration: duration,
+  );
 
   factory ClearOperationResult.failure(String error, Duration duration) =>
-      ClearOperationResult(
-        success: false,
-        error: error,
-        duration: duration,
-      );
+      ClearOperationResult(success: false, error: error, duration: duration);
 }
 
 /// 原子清除操作协调器
@@ -71,7 +66,10 @@ class AtomicClearOperation {
         try {
           // 执行一个简单的查询来验证连接可用
           await db.rawQuery('SELECT 1');
-          AppLogger.d('Connection pool warmed up successfully', 'AtomicClearOperation');
+          AppLogger.d(
+            'Connection pool warmed up successfully',
+            'AtomicClearOperation',
+          );
           return;
         } finally {
           await _lifecycleManager.releaseConnection(db);
@@ -152,7 +150,10 @@ class AtomicClearOperation {
 
       // 步骤 7: 确保连接池完全准备好
       // 这样当状态转换为 ready 时，连接池一定可用
-      AppLogger.d('Verifying connection pool is ready before marking state', 'AtomicClearOperation');
+      AppLogger.d(
+        'Verifying connection pool is ready before marking state',
+        'AtomicClearOperation',
+      );
       _lifecycleManager.syncWithHolder();
 
       // 步骤 8: 转换到 ready 状态（必须在 postClear 之前！）
@@ -166,17 +167,26 @@ class AtomicClearOperation {
       // 步骤 9: 预热连接池（关键修复）
       // 在刷新 Provider 之前，先执行一个实际查询来确保连接池完全准备好
       // 这可以防止 Provider 刷新后的首次查询遇到 database_closed 错误
-      AppLogger.d('Warming up connection pool before refreshing providers', 'AtomicClearOperation');
+      AppLogger.d(
+        'Warming up connection pool before refreshing providers',
+        'AtomicClearOperation',
+      );
       await _warmUpConnectionPool();
 
       // 步骤 10: 执行后置清理（刷新 Provider）
       // 现在状态已经是 ready，连接池也已预热，Provider 可以正常查询
       if (postClear != null) {
-        AppLogger.d('Executing post-clear callback (refreshing providers)', 'AtomicClearOperation');
+        AppLogger.d(
+          'Executing post-clear callback (refreshing providers)',
+          'AtomicClearOperation',
+        );
         await postClear();
       }
-      
-      AppLogger.i('Atomic clear operation state transition completed', 'AtomicClearOperation');
+
+      AppLogger.i(
+        'Atomic clear operation state transition completed',
+        'AtomicClearOperation',
+      );
 
       stopwatch.stop();
 
@@ -208,14 +218,14 @@ class AtomicClearOperation {
       try {
         // 关键修复：使用 resetPool 而不是 createPool，确保状态一致性
         await _lifecycleManager.resetPool();
-        
+
         // 强制转换到 ready 状态
         final currentState = _stateMachine.currentState;
         AppLogger.w(
           'Recovering from clear failure, current state: $currentState',
           'AtomicClearOperation',
         );
-        
+
         // 尝试转换到 ready 状态（从任何状态）
         try {
           await _stateMachine.transition(
@@ -230,10 +240,7 @@ class AtomicClearOperation {
           // 忽略状态转换错误，继续执行
         }
       } catch (recoveryError) {
-        AppLogger.w(
-          'Recovery failed: $recoveryError',
-          'AtomicClearOperation',
-        );
+        AppLogger.w('Recovery failed: $recoveryError', 'AtomicClearOperation');
         // 尝试标记为错误状态
         try {
           await _stateMachine.transition(
@@ -242,10 +249,7 @@ class AtomicClearOperation {
           );
         } catch (e) {
           // 如果标记错误也失败，记录日志但不抛出
-          AppLogger.w(
-            'Failed to mark error state: $e',
-            'AtomicClearOperation',
-          );
+          AppLogger.w('Failed to mark error state: $e', 'AtomicClearOperation');
         }
       }
 

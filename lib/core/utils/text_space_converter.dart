@@ -99,7 +99,7 @@ class TextSpaceConverter {
       // 如果前后非空格字符在保护集中，保留空格
       final shouldPreserve =
           (prevChar != null && protectChars.contains(prevChar)) ||
-              (nextChar != null && protectChars.contains(nextChar));
+          (nextChar != null && protectChars.contains(nextChar));
 
       result.write(shouldPreserve ? ' ' : '_');
     }

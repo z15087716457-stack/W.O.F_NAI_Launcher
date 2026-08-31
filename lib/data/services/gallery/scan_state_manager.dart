@@ -100,12 +100,12 @@ class ScanProgressInfo {
   });
 
   const ScanProgressInfo.initial()
-      : processed = 0,
-        total = 0,
-        currentFile = null,
-        phase = ScanPhase.idle,
-        speed = null,
-        estimatedRemaining = null;
+    : processed = 0,
+      total = 0,
+      currentFile = null,
+      phase = ScanPhase.idle,
+      speed = null,
+      estimatedRemaining = null;
 
   /// 复制并修改
   ScanProgressInfo copyWith({
@@ -127,13 +127,13 @@ class ScanProgressInfo {
   }
 
   Map<String, dynamic> toJson() => {
-        'processed': processed,
-        'total': total,
-        'currentFile': currentFile,
-        'phase': phase.name,
-        'speed': speed,
-        'estimatedRemaining': estimatedRemaining?.inMilliseconds,
-      };
+    'processed': processed,
+    'total': total,
+    'currentFile': currentFile,
+    'phase': phase.name,
+    'speed': speed,
+    'estimatedRemaining': estimatedRemaining?.inMilliseconds,
+  };
 
   factory ScanProgressInfo.fromJson(Map<String, dynamic> json) {
     return ScanProgressInfo(
@@ -174,11 +174,11 @@ class ScanLogEntry {
   });
 
   Map<String, dynamic> toJson() => {
-        'timestamp': timestamp.toIso8601String(),
-        'level': level.name,
-        'message': message,
-        'details': details,
-      };
+    'timestamp': timestamp.toIso8601String(),
+    'level': level.name,
+    'message': message,
+    'details': details,
+  };
 
   factory ScanLogEntry.fromJson(Map<String, dynamic> json) {
     return ScanLogEntry(
@@ -194,12 +194,7 @@ class ScanLogEntry {
 }
 
 /// 扫描日志级别
-enum ScanLogLevel {
-  debug,
-  info,
-  warning,
-  error,
-}
+enum ScanLogLevel { debug, info, warning, error }
 
 /// 扫描统计信息
 class ScanStatistics {
@@ -245,14 +240,14 @@ class ScanStatistics {
   });
 
   const ScanStatistics.initial()
-      : filesScanned = 0,
-        filesAdded = 0,
-        filesUpdated = 0,
-        filesDeleted = 0,
-        filesSkipped = 0,
-        filesFailed = 0,
-        startTime = null,
-        endTime = null;
+    : filesScanned = 0,
+      filesAdded = 0,
+      filesUpdated = 0,
+      filesDeleted = 0,
+      filesSkipped = 0,
+      filesFailed = 0,
+      startTime = null,
+      endTime = null;
 
   /// 复制并修改
   ScanStatistics copyWith({
@@ -278,15 +273,15 @@ class ScanStatistics {
   }
 
   Map<String, dynamic> toJson() => {
-        'filesScanned': filesScanned,
-        'filesAdded': filesAdded,
-        'filesUpdated': filesUpdated,
-        'filesDeleted': filesDeleted,
-        'filesSkipped': filesSkipped,
-        'filesFailed': filesFailed,
-        'startTime': startTime?.toIso8601String(),
-        'endTime': endTime?.toIso8601String(),
-      };
+    'filesScanned': filesScanned,
+    'filesAdded': filesAdded,
+    'filesUpdated': filesUpdated,
+    'filesDeleted': filesDeleted,
+    'filesSkipped': filesSkipped,
+    'filesFailed': filesFailed,
+    'startTime': startTime?.toIso8601String(),
+    'endTime': endTime?.toIso8601String(),
+  };
 
   factory ScanStatistics.fromJson(Map<String, dynamic> json) {
     return ScanStatistics(
@@ -336,13 +331,13 @@ class ScanCheckpoint {
   });
 
   Map<String, dynamic> toJson() => {
-        'rootPath': rootPath,
-        'scanType': scanType.name,
-        'processedPaths': processedPaths.toList(),
-        'lastProcessedPath': lastProcessedPath,
-        'statistics': statistics.toJson(),
-        'createdAt': createdAt.toIso8601String(),
-      };
+    'rootPath': rootPath,
+    'scanType': scanType.name,
+    'processedPaths': processedPaths.toList(),
+    'lastProcessedPath': lastProcessedPath,
+    'statistics': statistics.toJson(),
+    'createdAt': createdAt.toIso8601String(),
+  };
 
   factory ScanCheckpoint.fromJson(Map<String, dynamic> json) {
     return ScanCheckpoint(
@@ -351,7 +346,8 @@ class ScanCheckpoint {
         (e) => e.name == json['scanType'],
         orElse: () => ScanType.incremental,
       ),
-      processedPaths: (json['processedPaths'] as List<dynamic>?)
+      processedPaths:
+          (json['processedPaths'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toSet() ??
           const {},
@@ -568,7 +564,8 @@ class ScanStateManager {
     _statisticsController.add(_statistics);
     logInfo(
       '扫描完成',
-      details: '耗时: ${_statistics.duration.inSeconds}s, '
+      details:
+          '耗时: ${_statistics.duration.inSeconds}s, '
           '扫描: ${_statistics.filesScanned}, '
           '新增: ${_statistics.filesAdded}, '
           '更新: ${_statistics.filesUpdated}',
@@ -872,10 +869,11 @@ ScanPhase _adaptPhase(String phase) {
 /// 旧的进度回调类型（保持兼容）
 ///
 /// 改进：添加 filesSkipped 参数，让UI可以显示包含跳过文件的总进度
-typedef ScanProgressCallback = void Function({
-  required int processed,
-  required int total,
-  String? currentFile,
-  required String phase,
-  int? filesSkipped, // 新增：跳过的文件数
-});
+typedef ScanProgressCallback =
+    void Function({
+      required int processed,
+      required int total,
+      String? currentFile,
+      required String phase,
+      int? filesSkipped, // 新增：跳过的文件数
+    });

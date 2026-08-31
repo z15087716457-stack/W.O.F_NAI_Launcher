@@ -31,9 +31,7 @@ void main() {
   }) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          collectionRepositoryProvider.overrideWithValue(repository),
-        ],
+        overrides: [collectionRepositoryProvider.overrideWithValue(repository)],
         child: MaterialApp(
           locale: const Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -67,22 +65,22 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('remove mode shows favorites root entry with member count',
-      (tester) async {
+  testWidgets('remove mode shows favorites root entry with member count', (
+    tester,
+  ) async {
     await pumpAndOpen(tester, isRemoveMode: true, favoriteCountInSelection: 3);
 
     expect(find.text('收藏'), findsOneWidget);
     expect(find.text('选中 3 张在此收藏'), findsOneWidget);
   });
 
-  testWidgets('tapping favorites root pops with isFavoriteRoot result',
-      (tester) async {
+  testWidgets('tapping favorites root pops with isFavoriteRoot result', (
+    tester,
+  ) async {
     CollectionSelectResult? result;
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          collectionRepositoryProvider.overrideWithValue(repository),
-        ],
+        overrides: [collectionRepositoryProvider.overrideWithValue(repository)],
         child: MaterialApp(
           locale: const Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,

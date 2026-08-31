@@ -14,9 +14,7 @@ import '../../core/divider_module.dart';
 class SocialDividerModule extends BaseDividerModule {
   final Color _dividerColor;
 
-  const SocialDividerModule({
-    required Color color,
-  }) : _dividerColor = color;
+  const SocialDividerModule({required Color color}) : _dividerColor = color;
 
   /// Discord style - dark gray divider
   factory SocialDividerModule.discord() {

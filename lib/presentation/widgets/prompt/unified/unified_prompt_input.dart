@@ -128,6 +128,9 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
   NaiSyntaxController? _syntaxController;
   bool _syncingControllerValue = false;
 
+  /// 最近一次应用的药丸视觉签名（用于检测实例/块库变化）
+  int _pillVisualsSignature = 0;
+
   /// 焦点节点
   FocusNode? _internalFocusNode;
 
@@ -279,6 +282,8 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     if (widget.controller != null) {
       _syntaxController!.value = widget.controller!.value;
     }
+    _syntaxController!.pillBuilder = widget.config.pillBuilder;
+    _pillVisualsSignature = widget.config.pillVisualsSignature;
     _syntaxController!.addListener(_syncToExternalController);
 
     // 初始化焦点节点（如果需要）
@@ -333,6 +338,13 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     _syntaxController?.highlightEnabled = widget.config.enableSyntaxHighlight;
     _syntaxController?.numericEmphasisEnabled =
         widget.config.numericEmphasisEnabled;
+
+    // 药丸构建器与视觉签名：实例/块库变化时强制重建 span（文本本身可能没变）
+    _syntaxController?.pillBuilder = widget.config.pillBuilder;
+    if (widget.config.pillVisualsSignature != _pillVisualsSignature) {
+      _pillVisualsSignature = widget.config.pillVisualsSignature;
+      _syntaxController?.refreshPillSpans();
+    }
   }
 
   @override

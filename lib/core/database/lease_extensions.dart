@@ -5,7 +5,7 @@ import 'connection_lease.dart';
 import 'connection_pool_holder.dart';
 
 /// 连接租借扩展
-/// 
+///
 /// 为现有的 DataSource 提供简单的租借集成
 extension ConnectionLeaseExtension on Database {
   /// 检查连接是否仍然有效
@@ -20,13 +20,13 @@ extension ConnectionLeaseExtension on Database {
 }
 
 /// 数据源基础扩展
-/// 
+///
 /// 提供统一的数据库操作模式
 abstract class LeaseBasedDataSource {
   String get name;
 
   /// 使用租借执行操作
-  /// 
+  ///
   /// 这是推荐的操作模式，自动处理：
   /// - 连接获取
   /// - 健康检查
@@ -40,7 +40,8 @@ abstract class LeaseBasedDataSource {
     int maxRetries = 3,
   }) async {
     var attempt = 0;
-    final operationId = '$name.$operationName#${DateTime.now().millisecondsSinceEpoch}';
+    final operationId =
+        '$name.$operationName#${DateTime.now().millisecondsSinceEpoch}';
 
     while (attempt < maxRetries) {
       ConnectionLease? lease;
@@ -53,9 +54,9 @@ abstract class LeaseBasedDataSource {
         );
 
         // 执行操作
-        final result = await lease.execute(operation).timeout(
-          timeout ?? const Duration(seconds: 30),
-        );
+        final result = await lease
+            .execute(operation)
+            .timeout(timeout ?? const Duration(seconds: 30));
 
         return result;
       } on ConnectionVersionMismatchException {
@@ -93,13 +94,11 @@ abstract class LeaseBasedDataSource {
       }
     }
 
-    throw StateError(
-      '[$operationId] Failed after $maxRetries attempts',
-    );
+    throw StateError('[$operationId] Failed after $maxRetries attempts');
   }
 
   /// 批量执行操作
-  /// 
+  ///
   /// 每批操作使用独立的连接，避免长时间持有连接
   Stream<T> withLeaseBatch<T>(
     String operationName,
@@ -156,7 +155,7 @@ abstract class LeaseBasedDataSource {
 }
 
 /// 简化版租借获取（兼容现有代码）
-/// 
+///
 /// 用于逐步迁移现有代码
 class SimpleLeaseHelper {
   final String dataSourceName;
@@ -171,7 +170,8 @@ class SimpleLeaseHelper {
     int maxRetries = 3,
   }) async {
     var attempt = 0;
-    final operationId = '$dataSourceName.$operationName#${DateTime.now().millisecondsSinceEpoch}';
+    final operationId =
+        '$dataSourceName.$operationName#${DateTime.now().millisecondsSinceEpoch}';
 
     while (attempt < maxRetries) {
       ConnectionLease? lease;
@@ -195,10 +195,9 @@ class SimpleLeaseHelper {
         );
 
         // 执行操作
-        final result = await lease.execute(
-          (db) => operation(db),
-          validateBefore: true,
-        ).timeout(timeout ?? const Duration(seconds: 30));
+        final result = await lease
+            .execute((db) => operation(db), validateBefore: true)
+            .timeout(timeout ?? const Duration(seconds: 30));
 
         return result;
       } on ConnectionVersionMismatchException {
@@ -224,7 +223,7 @@ class SimpleLeaseHelper {
           stack,
           dataSourceName,
         );
-        
+
         if (errorStr.contains('database_closed') ||
             errorStr.contains('databaseexception') ||
             errorStr.contains('bad state') ||

@@ -91,13 +91,19 @@ class TempImageService {
               deletedCount++;
             }
           } catch (e) {
-            AppLogger.w('Failed to check/delete temp file: ${entity.path}', 'TempImageService');
+            AppLogger.w(
+              'Failed to check/delete temp file: ${entity.path}',
+              'TempImageService',
+            );
           }
         }
       }
 
       if (deletedCount > 0) {
-        AppLogger.i('Cleaned up $deletedCount old temp files', 'TempImageService');
+        AppLogger.i(
+          'Cleaned up $deletedCount old temp files',
+          'TempImageService',
+        );
       }
     } catch (e, stack) {
       AppLogger.e('Failed to cleanup temp files', e, stack, 'TempImageService');
@@ -129,7 +135,10 @@ class TempImageService {
           await entity.delete();
           deletedCount++;
         } catch (e) {
-          AppLogger.w('Failed to delete temp file: ${entity.path}', 'TempImageService');
+          AppLogger.w(
+            'Failed to delete temp file: ${entity.path}',
+            'TempImageService',
+          );
         }
       }
     }
@@ -140,7 +149,11 @@ class TempImageService {
   /// 将临时文件移动到正式目录
   ///
   /// 返回新的正式文件路径
-  Future<String> moveToPermanent(String tempId, String targetDir, String fileName) async {
+  Future<String> moveToPermanent(
+    String tempId,
+    String targetDir,
+    String fileName,
+  ) async {
     final tempDir = await getTempDirectory();
     final tempFile = File(p.join(tempDir.path, 'temp_$tempId.png'));
 
@@ -158,7 +171,11 @@ class TempImageService {
   /// 复制临时文件到正式目录
   ///
   /// 返回新的正式文件路径
-  Future<String> copyToPermanent(String tempId, String targetDir, String fileName) async {
+  Future<String> copyToPermanent(
+    String tempId,
+    String targetDir,
+    String fileName,
+  ) async {
     final tempDir = await getTempDirectory();
     final tempFile = File(p.join(tempDir.path, 'temp_$tempId.png'));
 

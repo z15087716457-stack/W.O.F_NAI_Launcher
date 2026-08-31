@@ -55,98 +55,98 @@ class MetadataImportOptions with _$MetadataImportOptions {
 
   /// 快速预设：全部选中
   factory MetadataImportOptions.all() => const MetadataImportOptions(
-        importSeed: true,
-        importSteps: true,
-        importScale: true,
-        importSize: true,
-        importSampler: true,
-        importModel: true,
-        importSmea: true,
-        importSmeaDyn: true,
-        importVarietyPlus: true,
-        importNoiseSchedule: true,
-        importCfgRescale: true,
-        importQualityToggle: true,
-        importUcPreset: true,
-      );
+    importSeed: true,
+    importSteps: true,
+    importScale: true,
+    importSize: true,
+    importSampler: true,
+    importModel: true,
+    importSmea: true,
+    importSmeaDyn: true,
+    importVarietyPlus: true,
+    importNoiseSchedule: true,
+    importCfgRescale: true,
+    importQualityToggle: true,
+    importUcPreset: true,
+  );
 
   /// 快速预设：仅提示词相关
   factory MetadataImportOptions.promptsOnly() => const MetadataImportOptions(
-        importPrompt: true,
-        importNegativePrompt: true,
-        importFixedTags: true,
-        importFixedPrefix: true,
-        importFixedSuffix: true,
-        importQualityTags: true,
-        importCharacterPrompts: true,
-        importVibeReferences: false,
-        importPreciseReferences: false,
-        importSeed: false,
-        importSteps: false,
-        importScale: false,
-        importSize: false,
-        importSampler: false,
-        importModel: false,
-        importSmea: false,
-        importSmeaDyn: false,
-        importVarietyPlus: false,
-        importNoiseSchedule: false,
-        importCfgRescale: false,
-        importQualityToggle: false,
-        importUcPreset: false,
-      );
+    importPrompt: true,
+    importNegativePrompt: true,
+    importFixedTags: true,
+    importFixedPrefix: true,
+    importFixedSuffix: true,
+    importQualityTags: true,
+    importCharacterPrompts: true,
+    importVibeReferences: false,
+    importPreciseReferences: false,
+    importSeed: false,
+    importSteps: false,
+    importScale: false,
+    importSize: false,
+    importSampler: false,
+    importModel: false,
+    importSmea: false,
+    importSmeaDyn: false,
+    importVarietyPlus: false,
+    importNoiseSchedule: false,
+    importCfgRescale: false,
+    importQualityToggle: false,
+    importUcPreset: false,
+  );
 
   /// 快速预设：仅生成参数（不包含提示词）
   factory MetadataImportOptions.generationOnly() => const MetadataImportOptions(
-        importPrompt: false,
-        importNegativePrompt: false,
-        importFixedTags: false,
-        importFixedPrefix: false,
-        importFixedSuffix: false,
-        importQualityTags: false,
-        importCharacterPrompts: false,
-        importVibeReferences: true,
-        importPreciseReferences: true,
-        importSeed: true,
-        importSteps: true,
-        importScale: true,
-        importSize: true,
-        importSampler: true,
-        importModel: true,
-        importSmea: true,
-        importSmeaDyn: true,
-        importVarietyPlus: true,
-        importNoiseSchedule: true,
-        importCfgRescale: true,
-        importQualityToggle: true,
-        importUcPreset: true,
-      );
+    importPrompt: false,
+    importNegativePrompt: false,
+    importFixedTags: false,
+    importFixedPrefix: false,
+    importFixedSuffix: false,
+    importQualityTags: false,
+    importCharacterPrompts: false,
+    importVibeReferences: true,
+    importPreciseReferences: true,
+    importSeed: true,
+    importSteps: true,
+    importScale: true,
+    importSize: true,
+    importSampler: true,
+    importModel: true,
+    importSmea: true,
+    importSmeaDyn: true,
+    importVarietyPlus: true,
+    importNoiseSchedule: true,
+    importCfgRescale: true,
+    importQualityToggle: true,
+    importUcPreset: true,
+  );
 
   /// 全不选
   factory MetadataImportOptions.none() => const MetadataImportOptions(
-        importPrompt: false,
-        importNegativePrompt: false,
-        importFixedTags: false,
-        importFixedPrefix: false,
-        importFixedSuffix: false,
-        importQualityTags: false,
-        importCharacterPrompts: false,
-        importVibeReferences: false,
-        importPreciseReferences: false,
-        importSeed: false,
-        importSteps: false,
-        importScale: false,
-        importSize: false,
-        importSampler: false,
-        importModel: false,
-        importSmea: false,
-        importSmeaDyn: false,
-        importVarietyPlus: false,
-        importNoiseSchedule: false,
-        importCfgRescale: false,
-        importQualityToggle: false,
-        importUcPreset: false,
-      );
+    importPrompt: false,
+    importNegativePrompt: false,
+    importFixedTags: false,
+    importFixedPrefix: false,
+    importFixedSuffix: false,
+    importQualityTags: false,
+    importCharacterPrompts: false,
+    importVibeReferences: false,
+    importPreciseReferences: false,
+    importSeed: false,
+    importSteps: false,
+    importScale: false,
+    importSize: false,
+    importSampler: false,
+    importModel: false,
+    importSmea: false,
+    importSmeaDyn: false,
+    importVarietyPlus: false,
+    importNoiseSchedule: false,
+    importCfgRescale: false,
+    importQualityToggle: false,
+    importUcPreset: false,
+  );
 
   /// 获取已选中的可用参数数量。
   ///
@@ -158,10 +158,12 @@ class MetadataImportOptions with _$MetadataImportOptions {
     if (importPrompt && metadata.prompt.isNotEmpty) count++;
     if (importNegativePrompt && metadata.negativePrompt.isNotEmpty) count++;
 
-    final hasSelectedFixedPrefix = importFixedPrefix &&
+    final hasSelectedFixedPrefix =
+        importFixedPrefix &&
         (metadata.fixedPrefixTags.isNotEmpty ||
             metadata.fixedNegativePrefixTags.isNotEmpty);
-    final hasSelectedFixedSuffix = importFixedSuffix &&
+    final hasSelectedFixedSuffix =
+        importFixedSuffix &&
         (metadata.fixedSuffixTags.isNotEmpty ||
             metadata.fixedNegativeSuffixTags.isNotEmpty);
     if (importFixedTags && (hasSelectedFixedPrefix || hasSelectedFixedSuffix)) {
@@ -265,4 +267,57 @@ class MetadataImportOptions with _$MetadataImportOptions {
 
   bool isNoneSelectedFor(NaiImageMetadata metadata) =>
       selectedCountFor(metadata) == 0;
+}
+
+/// 官网式元数据导入中的角色处理方式。
+enum OfficialCharacterImportMode { replace, append }
+
+/// 官网式元数据导入选择。
+///
+/// 这里仅暴露官网复用图片时的高层选项，不拆分固定词或质量词；完整提示词
+/// 始终作为一个整体导入。
+class OfficialMetadataImportSelection {
+  const OfficialMetadataImportSelection({
+    this.importPrompt = true,
+    this.importNegativePrompt = false,
+    this.importGenerationParams = false,
+    this.importSeed = false,
+    this.importCharacters = false,
+    this.characterMode = OfficialCharacterImportMode.replace,
+    this.importVibeReferences = false,
+    this.importPreciseReferences = false,
+  });
+
+  final bool importPrompt;
+  final bool importNegativePrompt;
+  final bool importGenerationParams;
+  final bool importSeed;
+  final bool importCharacters;
+  final OfficialCharacterImportMode characterMode;
+  final bool importVibeReferences;
+  final bool importPreciseReferences;
+
+  OfficialMetadataImportSelection copyWith({
+    bool? importPrompt,
+    bool? importNegativePrompt,
+    bool? importGenerationParams,
+    bool? importSeed,
+    bool? importCharacters,
+    OfficialCharacterImportMode? characterMode,
+    bool? importVibeReferences,
+    bool? importPreciseReferences,
+  }) {
+    return OfficialMetadataImportSelection(
+      importPrompt: importPrompt ?? this.importPrompt,
+      importNegativePrompt: importNegativePrompt ?? this.importNegativePrompt,
+      importGenerationParams:
+          importGenerationParams ?? this.importGenerationParams,
+      importSeed: importSeed ?? this.importSeed,
+      importCharacters: importCharacters ?? this.importCharacters,
+      characterMode: characterMode ?? this.characterMode,
+      importVibeReferences: importVibeReferences ?? this.importVibeReferences,
+      importPreciseReferences:
+          importPreciseReferences ?? this.importPreciseReferences,
+    );
+  }
 }

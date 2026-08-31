@@ -94,23 +94,17 @@ abstract class BaseDividerModule implements DividerModule {
 
   @override
   BoxDecoration? get horizontalDecoration => BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: dividerColor,
-            width: thickness,
-          ),
-        ),
-      );
+    border: Border(
+      bottom: BorderSide(color: dividerColor, width: thickness),
+    ),
+  );
 
   @override
   BoxDecoration? get verticalDecoration => BoxDecoration(
-        border: Border(
-          right: BorderSide(
-            color: dividerColor,
-            width: thickness,
-          ),
-        ),
-      );
+    border: Border(
+      right: BorderSide(color: dividerColor, width: thickness),
+    ),
+  );
 
   @override
   BoxDecoration panelBorder({

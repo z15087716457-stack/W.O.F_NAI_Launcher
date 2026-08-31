@@ -34,8 +34,9 @@ class FontConfig {
     }
     final parts = key.split(':');
     if (parts.length >= 2) {
-      final source =
-          parts[0] == 'google' ? FontSource.google : FontSource.system;
+      final source = parts[0] == 'google'
+          ? FontSource.google
+          : FontSource.system;
       final fontFamily = parts.sublist(1).join(':'); // 处理字体名中包含冒号的情况
 
       // 检查是否是默认字体
@@ -85,82 +86,82 @@ class FontConfig {
 /// 注意：fontFamily 必须是 GoogleFonts.getFont() 能识别的名称格式
 class GoogleFontPresets {
   static List<FontConfig> get all => [
-        const FontConfig(
-          displayName: '思源黑体',
-          fontFamily: 'Noto Sans SC',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '思源宋体',
-          fontFamily: 'Noto Serif SC',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '思源黑体港',
-          fontFamily: 'Noto Sans HK',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '思源等宽',
-          fontFamily: 'Noto Sans Mono',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '站酷小薇',
-          fontFamily: 'ZCOOL XiaoWei',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '站酷快乐',
-          fontFamily: 'ZCOOL KuaiLe',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '马善政楷书',
-          fontFamily: 'Ma Shan Zheng',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '龙藏体',
-          fontFamily: 'Long Cang',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '刘建毛草',
-          fontFamily: 'Liu Jian Mao Cao',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '志漫行',
-          fontFamily: 'Zhi Mang Xing',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '代码字体',
-          fontFamily: 'Source Code Pro',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '现代窄体',
-          fontFamily: 'Saira Condensed',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '古典衬线',
-          fontFamily: 'Cinzel',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '科幻风',
-          fontFamily: 'Orbitron',
-          source: FontSource.google,
-        ),
-        const FontConfig(
-          displayName: '科技风',
-          fontFamily: 'Rajdhani',
-          source: FontSource.google,
-        ),
-      ];
+    const FontConfig(
+      displayName: '思源黑体',
+      fontFamily: 'Noto Sans SC',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '思源宋体',
+      fontFamily: 'Noto Serif SC',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '思源黑体港',
+      fontFamily: 'Noto Sans HK',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '思源等宽',
+      fontFamily: 'Noto Sans Mono',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '站酷小薇',
+      fontFamily: 'ZCOOL XiaoWei',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '站酷快乐',
+      fontFamily: 'ZCOOL KuaiLe',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '马善政楷书',
+      fontFamily: 'Ma Shan Zheng',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '龙藏体',
+      fontFamily: 'Long Cang',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '刘建毛草',
+      fontFamily: 'Liu Jian Mao Cao',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '志漫行',
+      fontFamily: 'Zhi Mang Xing',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '代码字体',
+      fontFamily: 'Source Code Pro',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '现代窄体',
+      fontFamily: 'Saira Condensed',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '古典衬线',
+      fontFamily: 'Cinzel',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '科幻风',
+      fontFamily: 'Orbitron',
+      source: FontSource.google,
+    ),
+    const FontConfig(
+      displayName: '科技风',
+      fontFamily: 'Rajdhani',
+      source: FontSource.google,
+    ),
+  ];
 }
 
 /// 字体状态 Notifier

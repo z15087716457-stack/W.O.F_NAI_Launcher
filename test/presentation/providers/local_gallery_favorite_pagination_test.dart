@@ -95,7 +95,9 @@ void main() {
       for (var i = 0; i < count; i++) {
         final file = File(p.join(galleryRoot.path, 'img_$i.png'));
         await file.writeAsBytes(<int>[137, 80, 78, 71]);
-        await file.setLastModified(DateTime(2026, 1, 1).add(Duration(minutes: i)));
+        await file.setLastModified(
+          DateTime(2026, 1, 1).add(Duration(minutes: i)),
+        );
         files.add(file);
       }
       return files;
@@ -136,11 +138,7 @@ void main() {
       await notifier.toggleFavorite(target);
 
       state = container.read(localGalleryNotifierProvider);
-      expect(
-        state.currentPage,
-        2,
-        reason: '取消收藏后不得跳回第 0 页',
-      );
+      expect(state.currentPage, 2, reason: '取消收藏后不得跳回第 0 页');
       expect(
         state.currentImages.map((r) => r.path),
         isNot(contains(target)),
@@ -260,10 +258,7 @@ void main() {
       );
 
       // 批量取消收藏同理
-      await galleryNotifier.unfavoriteImages([
-        files[1].path,
-        files[2].path,
-      ]);
+      await galleryNotifier.unfavoriteImages([files[1].path, files[2].path]);
       expect(
         container.read(collectionNotifierProvider).collections.first.imageCount,
         0,

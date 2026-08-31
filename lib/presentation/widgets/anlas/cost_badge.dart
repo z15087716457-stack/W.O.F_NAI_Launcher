@@ -10,10 +10,7 @@ class CostBadge extends ConsumerWidget {
   /// 紧凑模式（移动端使用）
   final bool compact;
 
-  const CostBadge({
-    super.key,
-    this.compact = false,
-  });
+  const CostBadge({super.key, this.compact = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,8 +33,9 @@ class CostBadge extends ConsumerWidget {
       textColor = theme.colorScheme.error;
       displayText = cost.toString();
     } else {
-      backgroundColor =
-          theme.colorScheme.primaryContainer.withValues(alpha: 0.5);
+      backgroundColor = theme.colorScheme.primaryContainer.withValues(
+        alpha: 0.5,
+      );
       textColor = theme.colorScheme.primary;
       displayText = cost.toString();
     }

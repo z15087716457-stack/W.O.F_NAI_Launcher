@@ -22,10 +22,9 @@ class GalleryCollectionInfo {
       name: row['name'] as String,
       imageCount: (row['image_count'] as num?)?.toInt() ?? 0,
       sortOrder: (row['sort_order'] as num?)?.toInt() ?? 0,
-      createdAt:
-          DateTime.fromMillisecondsSinceEpoch(
-            (row['created_at'] as num?)?.toInt() ?? 0,
-          ),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+        (row['created_at'] as num?)?.toInt() ?? 0,
+      ),
     );
   }
 }

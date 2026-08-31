@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/enums/precise_ref_type.dart';
+import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 
 void main() {
@@ -17,10 +18,7 @@ void main() {
       final imageData = Uint8List.fromList([1, 2, 3]);
       final params = ImageParams(
         preciseReferences: [
-          PreciseReference(
-            image: imageData,
-            type: PreciseRefType.character,
-          ),
+          PreciseReference(image: imageData, type: PreciseRefType.character),
         ],
       );
 
@@ -29,28 +27,23 @@ void main() {
     });
 
     test(
-        'preciseReferenceCount should return correct count with multiple references',
-        () {
-      final imageData = Uint8List.fromList([1, 2, 3]);
-      final params = ImageParams(
-        preciseReferences: [
-          PreciseReference(
-            image: imageData,
-            type: PreciseRefType.character,
-          ),
-          PreciseReference(
-            image: imageData,
-            type: PreciseRefType.style,
-          ),
-          PreciseReference(
-            image: imageData,
-            type: PreciseRefType.characterAndStyle,
-          ),
-        ],
-      );
+      'preciseReferenceCount should return correct count with multiple references',
+      () {
+        final imageData = Uint8List.fromList([1, 2, 3]);
+        final params = ImageParams(
+          preciseReferences: [
+            PreciseReference(image: imageData, type: PreciseRefType.character),
+            PreciseReference(image: imageData, type: PreciseRefType.style),
+            PreciseReference(
+              image: imageData,
+              type: PreciseRefType.characterAndStyle,
+            ),
+          ],
+        );
 
-      expect(params.preciseReferenceCount, equals(3));
-    });
+        expect(params.preciseReferenceCount, equals(3));
+      },
+    );
 
     test('preciseReferenceCost should return 0 when no references', () {
       const params = ImageParams();
@@ -62,10 +55,7 @@ void main() {
       final imageData = Uint8List.fromList([1, 2, 3]);
       final params = ImageParams(
         preciseReferences: [
-          PreciseReference(
-            image: imageData,
-            type: PreciseRefType.character,
-          ),
+          PreciseReference(image: imageData, type: PreciseRefType.character),
         ],
       );
 
@@ -73,24 +63,19 @@ void main() {
     });
 
     test(
-        'preciseReferenceCost should return correct cost with multiple references',
-        () {
-      final imageData = Uint8List.fromList([1, 2, 3]);
-      final params = ImageParams(
-        preciseReferences: [
-          PreciseReference(
-            image: imageData,
-            type: PreciseRefType.character,
-          ),
-          PreciseReference(
-            image: imageData,
-            type: PreciseRefType.style,
-          ),
-        ],
-      );
+      'preciseReferenceCost should return correct cost with multiple references',
+      () {
+        final imageData = Uint8List.fromList([1, 2, 3]);
+        final params = ImageParams(
+          preciseReferences: [
+            PreciseReference(image: imageData, type: PreciseRefType.character),
+            PreciseReference(image: imageData, type: PreciseRefType.style),
+          ],
+        );
 
-      expect(params.preciseReferenceCost, equals(10));
-    });
+        expect(params.preciseReferenceCost, equals(10));
+      },
+    );
 
     test('preciseReferenceCost should be proportional to count', () {
       final imageData = Uint8List.fromList([1, 2, 3]);
@@ -120,10 +105,7 @@ void main() {
       final imageData = Uint8List.fromList([1, 2, 3]);
       final params = ImageParams(
         preciseReferences: [
-          PreciseReference(
-            image: imageData,
-            type: PreciseRefType.character,
-          ),
+          PreciseReference(image: imageData, type: PreciseRefType.character),
         ],
       );
 
@@ -158,10 +140,7 @@ void main() {
 
       final params2 = params1.copyWith(
         preciseReferences: [
-          PreciseReference(
-            image: imageData,
-            type: PreciseRefType.character,
-          ),
+          PreciseReference(image: imageData, type: PreciseRefType.character),
         ],
       );
 
@@ -173,10 +152,7 @@ void main() {
       final imageData = Uint8List.fromList([1, 2, 3]);
       final params1 = ImageParams(
         preciseReferences: [
-          PreciseReference(
-            image: imageData,
-            type: PreciseRefType.character,
-          ),
+          PreciseReference(image: imageData, type: PreciseRefType.character),
         ],
       );
 
@@ -187,6 +163,25 @@ void main() {
       expect(params2.preciseReferenceCount, equals(0));
       expect(params2.preciseReferenceCost, equals(0));
       expect(params2.hasPreciseReferences, isFalse);
+    });
+  });
+
+  group('ImageParams quality preset compatibility', () {
+    test('old JSON defaults the new quality preset to Standard', () {
+      final params = ImageParams.fromJson({'qualityToggle': true});
+
+      expect(params.qualityTagPreset, QualityTagPreset.standard);
+      expect(params.effectiveQualityTagPreset, QualityTagPreset.standard);
+    });
+
+    test('legacy false toggle forces the effective preset to None', () {
+      const params = ImageParams(
+        qualityToggle: false,
+        qualityTagPreset: QualityTagPreset.light,
+      );
+
+      expect(params.effectiveQualityTagPreset, QualityTagPreset.none);
+      expect(params.effectiveQualityToggle, isFalse);
     });
   });
 

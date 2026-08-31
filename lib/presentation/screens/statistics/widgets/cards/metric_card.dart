@@ -117,11 +117,7 @@ class _MetricCardState extends State<MetricCard> {
             color: effectiveIconColor.withValues(alpha: isDark ? 0.15 : 0.1),
             borderRadius: BorderRadius.circular(6),
           ),
-          child: Icon(
-            widget.icon,
-            size: 18,
-            color: effectiveIconColor,
-          ),
+          child: Icon(widget.icon, size: 18, color: effectiveIconColor),
         ),
         const SizedBox(width: 12),
         // Label
@@ -166,15 +162,12 @@ class _MetricCardState extends State<MetricCard> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color:
-                    effectiveIconColor.withValues(alpha: isDark ? 0.15 : 0.1),
+                color: effectiveIconColor.withValues(
+                  alpha: isDark ? 0.15 : 0.1,
+                ),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Icon(
-                widget.icon,
-                size: 20,
-                color: effectiveIconColor,
-              ),
+              child: Icon(widget.icon, size: 20, color: effectiveIconColor),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -234,11 +227,7 @@ class TrendData {
   final String? label;
   final bool isPercentage;
 
-  const TrendData({
-    required this.value,
-    this.label,
-    this.isPercentage = true,
-  });
+  const TrendData({required this.value, this.label, this.isPercentage = true});
 
   bool get isPositive => value > 0;
   bool get isNegative => value < 0;
@@ -311,7 +300,8 @@ class TrendIndicator extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             displayValue,
-            style: textStyle ??
+            style:
+                textStyle ??
                 theme.textTheme.labelSmall?.copyWith(
                   color: primaryColor,
                   fontWeight: FontWeight.w700,
@@ -387,11 +377,11 @@ class MiniSparkline extends StatelessWidget {
               show: showDots,
               getDotPainter: (spot, percent, barData, index) =>
                   FlDotCirclePainter(
-                radius: 3,
-                color: color,
-                strokeWidth: 1.5,
-                strokeColor: Colors.white,
-              ),
+                    radius: 3,
+                    color: color,
+                    strokeWidth: 1.5,
+                    strokeColor: Colors.white,
+                  ),
             ),
             belowBarData: showArea
                 ? BarAreaData(

@@ -15,7 +15,6 @@ import 'package:nai_launcher/presentation/widgets/anlas/opus_usage_chip.dart';
 import 'package:nai_launcher/presentation/widgets/anlas/personal_anlas_chip.dart';
 import 'batch_settings_button.dart';
 import 'generate_button.dart';
-import 'random_mode_toggle.dart';
 
 /// 生成控制按钮
 class GenerationControls extends ConsumerStatefulWidget {
@@ -45,9 +44,6 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
     // 生成中常驻显示取消入口（与移动端一致）
     final showCancel = isLauncherGenerating;
 
-    final randomMode = ref.watch(randomPromptModeProvider);
-    final showRandomTools = ref.watch(randomPromptToolsVisibilityProvider);
-
     // 快捷键已由父级 DesktopGenerationLayout 统一处理
     // 这里只负责布局
     return LayoutBuilder(
@@ -55,7 +51,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
         final isNarrow = widget.compact || constraints.maxWidth < 500;
 
         // 生成按钮几何居中：左右两个等宽弹性区吸收其余控件，
-        // 按钮位置不随随机工具等元素的显隐漂移
+        // 按钮位置不随左侧点数块显隐漂移
         final generateButton = GenerateButtonWithCost(
           height: widget.compact ? 40 : 48,
           isGenerating: isGenerating,
@@ -93,14 +89,14 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
           ];
 
           if (widget.compact) {
-            // 官网钉底条单行：自动保存放右侧空位，左组是 2×2 点数块与骰子。
+            // 官网钉底条单行：自动保存放右侧空位，左组是 2×2 点数块。
             // 额度两格（仅 V5 显示）+ 余额/我的点数两格合成一个整体，
             // 四格同规格（图标 16/字号 14/行距 4）逐行严格对齐；
             // 整体套 FittedBox 右对齐贴生成按钮：窄窗口整组等比缩小，
-            // 缩放同步所以对齐不破坏，骰子也不会被生成按钮挡住
+            // 缩放同步所以对齐不破坏，点数块也不会被生成按钮挡住
             return Row(
               children: [
-                Expanded(
+                const Expanded(
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: FittedBox(
@@ -111,11 +107,11 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                         children: [
                           // 隐藏（V4）时 shrink 不占位，
                           // 与余额列的 8 间距随自己的 margin 一起消失
-                          const OpusUsageChip(
+                          OpusUsageChip(
                             compact: true,
                             margin: EdgeInsets.only(right: 8),
                           ),
-                          const Column(
+                          Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -124,10 +120,6 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                               PersonalAnlasChip(),
                             ],
                           ),
-                          if (showRandomTools) ...[
-                            const SizedBox(width: 8),
-                            RandomModeToggle(enabled: randomMode),
-                          ],
                         ],
                       ),
                     ),
@@ -159,15 +151,6 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
           // 经典布局窄宽：单行三段，生成按钮居中
           return Row(
             children: [
-              Expanded(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerRight,
-                  child: showRandomTools
-                      ? RandomModeToggle(enabled: randomMode)
-                      : const SizedBox.shrink(),
-                ),
-              ),
               const SizedBox(width: 8),
               generateButton,
               const SizedBox(width: 8),
@@ -185,15 +168,15 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
           );
         }
 
-        // 正常布局 - 自动保存锚最左，点数/随机贴按钮左，批量控件贴按钮右；
+        // 正常布局 - 自动保存锚最左，点数贴按钮左，批量控件贴按钮右；
         // 左右组空间不足时内部等比缩小，避免溢出叠到生成按钮上
         return Row(
           children: [
-            Expanded(
+            const Expanded(
               child: Row(
                 children: [
-                  const AutoSaveToggleChip(),
-                  const SizedBox(width: 8),
+                  AutoSaveToggleChip(),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
@@ -202,17 +185,10 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const AnlasBalanceChip(),
-                            const SizedBox(width: 8),
-                            const PersonalAnlasChip(),
-                            const OpusUsageChip(
-                              margin: EdgeInsets.only(left: 8),
-                            ),
-                            const SizedBox(width: 16),
-                            if (showRandomTools) ...[
-                              RandomModeToggle(enabled: randomMode),
-                              const SizedBox(width: 12),
-                            ],
+                            AnlasBalanceChip(),
+                            SizedBox(width: 8),
+                            PersonalAnlasChip(),
+                            OpusUsageChip(margin: EdgeInsets.only(left: 8)),
                           ],
                         ),
                       ),

@@ -5,8 +5,9 @@ class FileNameSanitizer {
   FileNameSanitizer._();
 
   static final RegExp _invalidFileNameChars = RegExp(r'[<>:"/\\|?*\x00-\x1F]');
-  static final RegExp _invalidFileNameCharsWithoutControls =
-      RegExp(r'[<>:"/\\|?*]');
+  static final RegExp _invalidFileNameCharsWithoutControls = RegExp(
+    r'[<>:"/\\|?*]',
+  );
   static final RegExp _whitespacePattern = RegExp(r'\s+');
 
   static String sanitize(

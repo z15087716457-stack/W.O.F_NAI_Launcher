@@ -20,9 +20,9 @@ List<String> findMissingWorkflowNodeTypes({
       .map((key) => key.trim())
       .where((key) => key.isNotEmpty)
       .toSet();
-  final missing = extractWorkflowNodeTypes(workflow)
-      .where((nodeType) => !availableTypes.contains(nodeType))
-      .toList();
+  final missing = extractWorkflowNodeTypes(
+    workflow,
+  ).where((nodeType) => !availableTypes.contains(nodeType)).toList();
   missing.sort();
   return missing;
 }

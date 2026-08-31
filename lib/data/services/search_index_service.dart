@@ -74,10 +74,7 @@ class SearchIndexService {
         final decoded = jsonDecode(documentsJson) as Map<String, dynamic>;
         _documents = decoded.map((key, value) {
           final recordMap = value as Map<String, dynamic>;
-          return MapEntry(
-            key,
-            _localImageRecordFromJson(recordMap),
-          );
+          return MapEntry(key, _localImageRecordFromJson(recordMap));
         });
       }
 
@@ -110,8 +107,9 @@ class SearchIndexService {
       await _box?.put(_indexKey, indexJson);
 
       final documentsJson = jsonEncode(
-        _documents
-            .map((key, value) => MapEntry(key, _localImageRecordToJson(value))),
+        _documents.map(
+          (key, value) => MapEntry(key, _localImageRecordToJson(value)),
+        ),
       );
       await _box?.put(_documentsKey, documentsJson);
 
@@ -398,11 +396,11 @@ class SearchIndexService {
       'lastUpdated': _lastUpdated?.toIso8601String(),
       'averageTokensPerDocument': _documentCount > 0
           ? (_invertedIndex.values.fold<int>(
-                    0,
-                    (sum, postings) => sum + postings.length,
-                  ) /
-                  _documentCount)
-              .toStringAsFixed(2)
+                      0,
+                      (sum, postings) => sum + postings.length,
+                    ) /
+                    _documentCount)
+                .toStringAsFixed(2)
           : '0.00',
     };
   }

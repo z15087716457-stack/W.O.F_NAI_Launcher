@@ -56,10 +56,7 @@ class _AccountSettingsSectionState
       return;
     }
 
-    AccountProfileBottomSheet.show(
-      context: context,
-      account: account,
-    );
+    AccountProfileBottomSheet.show(context: context, account: account);
   }
 
   /// 导航到登录页面

@@ -97,8 +97,9 @@ class DanbooruTagGroupService {
         title: title,
         displayName: TagGroup.titleToDisplayName(title),
         childGroupTitles: parseResult.childGroups,
-        tags:
-            parseResult.tags.map((name) => TagGroupEntry(name: name)).toList(),
+        tags: parseResult.tags
+            .map((name) => TagGroupEntry(name: name))
+            .toList(),
         lastUpdated: DateTime.now(),
       );
 
@@ -154,10 +155,7 @@ class DanbooruTagGroupService {
     // 更新标签的热度信息
     final enrichedTags = group.tags.map((tag) {
       final postCount = _postCountCache[tag.name] ?? 0;
-      return tag.copyWith(
-        postCount: postCount,
-        hasPostCount: true,
-      );
+      return tag.copyWith(postCount: postCount, hasPostCount: true);
     }).toList();
 
     // 按热度排序
@@ -392,8 +390,9 @@ class DanbooruTagGroupService {
       }
     }
 
-    onProgress
-        ?.call(TagGroupSyncProgress.completed(totalFetched, totalFiltered));
+    onProgress?.call(
+      TagGroupSyncProgress.completed(totalFetched, totalFiltered),
+    );
 
     return TagGroupSyncResult(
       tagsByCategory: tagsByCategory,
@@ -650,8 +649,9 @@ class DanbooruTagGroupService {
     for (final title in groupTitles) {
       if (_groupCache.containsKey(title)) {
         final group = _groupCache[title]!;
-        result[title] =
-            group.tags.where((t) => !t.name.startsWith('tag_group')).length;
+        result[title] = group.tags
+            .where((t) => !t.name.startsWith('tag_group'))
+            .length;
       }
     }
     return result;
@@ -687,29 +687,31 @@ class DanbooruTagGroupService {
         final currentIndex = nextIndex++;
         final item = items[currentIndex];
 
-        final future = task(item).then((result) {
-          results[currentIndex] = result;
-          onItemComplete?.call(item, result);
-          completedCount++;
-          activeTasks.remove(currentIndex);
+        final future = task(item)
+            .then((result) {
+              results[currentIndex] = result;
+              onItemComplete?.call(item, result);
+              completedCount++;
+              activeTasks.remove(currentIndex);
 
-          if (completedCount == items.length) {
-            completer.complete();
-          } else {
-            startNextTask();
-          }
-        }).catchError((e) {
-          // 记录错误但继续处理其他任务
-          AppLogger.w('Concurrent task failed: $e', 'TagGroup');
-          completedCount++;
-          activeTasks.remove(currentIndex);
+              if (completedCount == items.length) {
+                completer.complete();
+              } else {
+                startNextTask();
+              }
+            })
+            .catchError((e) {
+              // 记录错误但继续处理其他任务
+              AppLogger.w('Concurrent task failed: $e', 'TagGroup');
+              completedCount++;
+              activeTasks.remove(currentIndex);
 
-          if (completedCount == items.length) {
-            completer.complete();
-          } else {
-            startNextTask();
-          }
-        });
+              if (completedCount == items.length) {
+                completer.complete();
+              } else {
+                startNextTask();
+              }
+            });
 
         activeTasks[currentIndex] = future;
       }
@@ -728,9 +730,7 @@ class DanbooruTagGroupService {
 
 /// Provider
 @Riverpod(keepAlive: true)
-DanbooruTagGroupService danbooruTagGroupService(
-  Ref ref,
-) {
+DanbooruTagGroupService danbooruTagGroupService(Ref ref) {
   final apiService = ref.watch(danbooruApiServiceProvider);
   final cacheService = ref.watch(tagGroupCacheServiceProvider);
   return DanbooruTagGroupService(apiService, cacheService);

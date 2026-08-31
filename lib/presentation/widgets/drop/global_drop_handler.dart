@@ -835,38 +835,22 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
       }
 
       if (!mounted) return;
-      final options = await MetadataImportDialog.show(
+      final selection = await MetadataImportDialog.showOfficial(
         context,
         metadata: metadata,
       );
-      if (options == null || !mounted) return;
+      if (selection == null || !mounted) return;
 
-      final appliedCount = await MetadataImportCoordinator.apply(
-        read: ref.read,
-        metadata: metadata,
-        options: options,
-        l10n: context.l10n,
-      );
+      final appliedCount =
+          await MetadataImportCoordinator.applyOfficialSelection(
+            read: ref.read,
+            metadata: metadata,
+            selection: selection,
+          );
 
       if (!mounted) return;
 
-      if (appliedCount > 0) {
-        AppToast.success(
-          context,
-          l10n.metadataImport_appliedCount(appliedCount),
-        );
-        unawaited(
-          MetadataImportCoordinator.showAppliedDialog(
-            context: context,
-            metadata: metadata,
-            options: options,
-            l10n: l10n,
-            currentModel: ref.read(generationParamsNotifierProvider).model,
-          ),
-        );
-      } else {
-        AppToast.warning(context, l10n.metadataImport_noParamsSelected);
-      }
+      AppToast.success(context, l10n.metadataImport_appliedCount(appliedCount));
     } catch (e) {
       if (kDebugMode) {
         AppLogger.d('Error extracting metadata: $e', 'DropHandler');

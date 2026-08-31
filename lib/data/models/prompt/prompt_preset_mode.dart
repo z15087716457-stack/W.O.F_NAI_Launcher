@@ -3,7 +3,7 @@
 /// 用于质量词和负面提示词的预设选择
 enum PromptPresetMode {
   /// NAI 默认
-  /// - 质量词：使用 NAI 官方随模型切换的质量词
+  /// - 质量词：使用 NAI 官方随模型切换的 Standard 质量词
   /// - 负面词：使用 NAI 官方预设 (Heavy/Light 等)
   naiDefault,
 
@@ -15,4 +15,9 @@ enum PromptPresetMode {
   /// 自定义（从词库选择）
   /// - 使用用户从词库中选择的条目内容
   custom,
+
+  /// NAI Light（V5 原生质量词档位）
+  ///
+  /// 追加在尾部以保持旧持久化枚举索引不变。
+  naiLight,
 }

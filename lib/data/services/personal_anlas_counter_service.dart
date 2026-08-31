@@ -87,18 +87,19 @@ class PersonalAnlasState {
   });
 
   factory PersonalAnlasState.initial() => const PersonalAnlasState(
-        subscriptionRemaining: 5000,
-        purchasedRemaining: 0,
-        subscriptionQuota: 5000,
-        resetDay: 0,
-      );
+    subscriptionRemaining: 5000,
+    purchasedRemaining: 0,
+    subscriptionQuota: 5000,
+    resetDay: 0,
+  );
 
   int get totalRemaining => subscriptionRemaining + purchasedRemaining;
 
   bool get isOverdrawn => subscriptionRemaining < 0 || purchasedRemaining < 0;
 
   /// 我的额度上限（百分点）＝池顶 × 份额（池顶可超过 100）
-  double get opusAllowanceCap => math.max(0, poolCeilingPercent * opusShareRatio);
+  double get opusAllowanceCap =>
+      math.max(0, poolCeilingPercent * opusShareRatio);
 
   /// 我的份额是否已用尽（不足 0.01 个百分点视为耗尽，避免浮点残渣）
   bool get isOpusAllowanceExhausted => opusAllowance < 0.01;
@@ -145,19 +146,19 @@ class PersonalAnlasState {
   }
 
   Map<String, dynamic> toJson() => {
-        'subscriptionRemaining': subscriptionRemaining,
-        'purchasedRemaining': purchasedRemaining,
-        'subscriptionQuota': subscriptionQuota,
-        'resetDay': resetDay,
-        'lastResetAt': lastResetAt?.toIso8601String(),
-        'opusShareRatio': opusShareRatio,
-        'opusAllowance': opusAllowance,
-        'opusRefillShare': opusRefillShare,
-        'lastObservedPoolPercent': lastObservedPoolPercent,
-        'lastObservedAt': lastObservedAt?.toIso8601String(),
-        'lastSecondsToNextPercent': lastSecondsToNextPercent,
-        'poolCeilingPercent': poolCeilingPercent,
-      };
+    'subscriptionRemaining': subscriptionRemaining,
+    'purchasedRemaining': purchasedRemaining,
+    'subscriptionQuota': subscriptionQuota,
+    'resetDay': resetDay,
+    'lastResetAt': lastResetAt?.toIso8601String(),
+    'opusShareRatio': opusShareRatio,
+    'opusAllowance': opusAllowance,
+    'opusRefillShare': opusRefillShare,
+    'lastObservedPoolPercent': lastObservedPoolPercent,
+    'lastObservedAt': lastObservedAt?.toIso8601String(),
+    'lastSecondsToNextPercent': lastSecondsToNextPercent,
+    'poolCeilingPercent': poolCeilingPercent,
+  };
 
   /// 反序列化。缺失的额度字段回退到默认值（旧存档平滑升级）。
   factory PersonalAnlasState.fromJson(Map<String, dynamic> json) {
@@ -176,9 +177,14 @@ class PersonalAnlasState {
       return v is String ? DateTime.tryParse(v) : null;
     }
 
-    final double shareRatio =
-        readDouble('opusShareRatio', 0.5).clamp(0.0, 1.0).toDouble();
-    final double ceiling = math.max(100.0, readDouble('poolCeilingPercent', 100));
+    final double shareRatio = readDouble(
+      'opusShareRatio',
+      0.5,
+    ).clamp(0.0, 1.0).toDouble();
+    final double ceiling = math.max(
+      100.0,
+      readDouble('poolCeilingPercent', 100),
+    );
 
     return PersonalAnlasState(
       subscriptionRemaining: readInt('subscriptionRemaining', 5000),
@@ -221,7 +227,7 @@ class PersonalAnlasCounter extends Notifier<PersonalAnlasState> {
   final DateTime Function() _now;
 
   PersonalAnlasCounter({DateTime Function()? clock})
-      : _now = clock ?? DateTime.now;
+    : _now = clock ?? DateTime.now;
 
   @override
   PersonalAnlasState build() {
@@ -300,10 +306,7 @@ class PersonalAnlasCounter extends Notifier<PersonalAnlasState> {
       lastResetAt: boundary,
     );
     unawaited(_persist());
-    AppLogger.i(
-      '订阅点已按月重置为 ${state.subscriptionQuota}（购买点不变）',
-      _logTag,
-    );
+    AppLogger.i('订阅点已按月重置为 ${state.subscriptionQuota}（购买点不变）', _logTag);
   }
 
   /// 记录一次本机生图消耗：先扣订阅、再扣购买
@@ -316,15 +319,9 @@ class PersonalAnlasCounter extends Notifier<PersonalAnlasState> {
     final fromSub = cost <= sub ? cost : (sub > 0 ? sub : 0);
     sub -= fromSub;
     pur -= cost - fromSub;
-    state = state.copyWith(
-      subscriptionRemaining: sub,
-      purchasedRemaining: pur,
-    );
+    state = state.copyWith(subscriptionRemaining: sub, purchasedRemaining: pur);
     await _persist();
-    AppLogger.i(
-      '个人点数扣减 $cost（订阅剩 $sub，购买剩 $pur）',
-      _logTag,
-    );
+    AppLogger.i('个人点数扣减 $cost（订阅剩 $sub，购买剩 $pur）', _logTag);
   }
 
   /// 手动充值购买点（给朋友钱冲点时自己加）
@@ -335,10 +332,7 @@ class PersonalAnlasCounter extends Notifier<PersonalAnlasState> {
       purchasedRemaining: state.purchasedRemaining + amount,
     );
     await _persist();
-    AppLogger.i(
-      '购买点充值 $amount（剩 ${state.purchasedRemaining}）',
-      _logTag,
-    );
+    AppLogger.i('购买点充值 $amount（剩 ${state.purchasedRemaining}）', _logTag);
   }
 
   /// 手动校准/设置。传入的字段才会被修改。
@@ -465,7 +459,8 @@ class PersonalAnlasCounter extends Notifier<PersonalAnlasState> {
       final jump = poolPercent - predicted;
       final gained = (refill + jump) * state.opusRefillShare;
       allowance = math.max(math.min(allowance + gained, cap), allowance);
-      log = '账号额度跳变 +${jump.toStringAsFixed(1)}%（模型回充 '
+      log =
+          '账号额度跳变 +${jump.toStringAsFixed(1)}%（模型回充 '
           '${refill.toStringAsFixed(0)}%），按分成入账 '
           '${gained.toStringAsFixed(2)}%';
     } else {
@@ -479,20 +474,20 @@ class PersonalAnlasCounter extends Notifier<PersonalAnlasState> {
         // 我的在途消耗按实测数值扣
         allowance -= consumption;
         nextPending = 0;
-        log = '免费额度按服务端实测扣减 ${consumption.toStringAsFixed(2)}%'
+        log =
+            '免费额度按服务端实测扣减 ${consumption.toStringAsFixed(2)}%'
             '（$pending 笔在途，回充 ${refill.toStringAsFixed(0)}% 已入账）';
       } else if (consumption > _eps) {
         // 朋友的消耗：回充照常入账，跌幅不记我的账
-        log = '账号额度跌 ${consumption.toStringAsFixed(2)}%（无在途，视为合租'
+        log =
+            '账号额度跌 ${consumption.toStringAsFixed(2)}%（无在途，视为合租'
             '朋友消耗，不记账）；回充 ${refill.toStringAsFixed(0)}% 已按分成入账';
       } else if (pending > 0) {
         // 池子与模型吻合：在途生成没走到池子或已被结清，清掉避免挂死
         nextPending = 0;
         log = '账号额度与回充模型吻合，清掉 $pending 笔在途';
       } else {
-        log = refill > 0
-            ? '回充 ${refill.toStringAsFixed(0)}% 按分成入账'
-            : '账号额度无变化';
+        log = refill > 0 ? '回充 ${refill.toStringAsFixed(0)}% 按分成入账' : '账号额度无变化';
       }
     }
 
@@ -507,8 +502,8 @@ class PersonalAnlasCounter extends Notifier<PersonalAnlasState> {
     await _persist();
     AppLogger.i(
       '$log（我的份额剩 ${state.opusAllowance.toStringAsFixed(2)}%'
-          '/${state.opusAllowanceCap.toStringAsFixed(1)}%，池顶 '
-          '${ceiling.toStringAsFixed(0)}%）',
+      '/${state.opusAllowanceCap.toStringAsFixed(1)}%，池顶 '
+      '${ceiling.toStringAsFixed(0)}%）',
       _logTag,
     );
   }
@@ -521,7 +516,10 @@ class PersonalAnlasCounter extends Notifier<PersonalAnlasState> {
     state = state.copyWith(
       opusShareRatio: ratio,
       opusRefillShare: ratio,
-      opusAllowance: math.min(state.opusAllowance, state.poolCeilingPercent * ratio),
+      opusAllowance: math.min(
+        state.opusAllowance,
+        state.poolCeilingPercent * ratio,
+      ),
     );
     await _persist();
     AppLogger.i(
@@ -576,5 +574,5 @@ class PersonalAnlasCounter extends Notifier<PersonalAnlasState> {
 /// 个人点数计数器 Provider（常驻，不随页面销毁）
 final personalAnlasCounterProvider =
     NotifierProvider<PersonalAnlasCounter, PersonalAnlasState>(
-  PersonalAnlasCounter.new,
-);
+      PersonalAnlasCounter.new,
+    );

@@ -14,10 +14,7 @@ class NotificationSettings {
   final bool soundEnabled;
   final String? customSoundPath;
 
-  const NotificationSettings({
-    this.soundEnabled = true,
-    this.customSoundPath,
-  });
+  const NotificationSettings({this.soundEnabled = true, this.customSoundPath});
 
   NotificationSettings copyWith({
     bool? soundEnabled,
@@ -26,8 +23,9 @@ class NotificationSettings {
   }) {
     return NotificationSettings(
       soundEnabled: soundEnabled ?? this.soundEnabled,
-      customSoundPath:
-          clearCustomSound ? null : (customSoundPath ?? this.customSoundPath),
+      customSoundPath: clearCustomSound
+          ? null
+          : (customSoundPath ?? this.customSoundPath),
     );
   }
 }
@@ -39,7 +37,8 @@ class NotificationSettingsNotifier extends _$NotificationSettingsNotifier {
   NotificationSettings build() {
     final storage = ref.read(localStorageServiceProvider);
     return NotificationSettings(
-      soundEnabled: storage.getSetting<bool>(
+      soundEnabled:
+          storage.getSetting<bool>(
             StorageKeys.notificationSoundEnabled,
             defaultValue: true,
           ) ??
@@ -78,15 +77,15 @@ class NotificationSettingsNotifier extends _$NotificationSettingsNotifier {
 class GenerationCompletionWatcher extends _$GenerationCompletionWatcher {
   @override
   void build() {
-    ref.listen<ImageGenerationState>(
-      imageGenerationNotifierProvider,
-      (previous, next) {
-        if (previous?.status == GenerationStatus.generating &&
-            next.status == GenerationStatus.completed) {
-          _notifyGenerationComplete();
-        }
-      },
-    );
+    ref.listen<ImageGenerationState>(imageGenerationNotifierProvider, (
+      previous,
+      next,
+    ) {
+      if (previous?.status == GenerationStatus.generating &&
+          next.status == GenerationStatus.completed) {
+        _notifyGenerationComplete();
+      }
+    });
   }
 
   void _notifyGenerationComplete() {

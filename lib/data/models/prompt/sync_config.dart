@@ -155,10 +155,7 @@ class SyncProgress {
   });
 
   factory SyncProgress.initial() {
-    return const SyncProgress(
-      progress: 0,
-      type: SyncProgressType.initial,
-    );
+    return const SyncProgress(progress: 0, type: SyncProgressType.initial);
   }
 
   factory SyncProgress.fetching(String category, int fetched, int total) {
@@ -172,17 +169,11 @@ class SyncProgress {
   }
 
   factory SyncProgress.processing() {
-    return const SyncProgress(
-      progress: 0.9,
-      type: SyncProgressType.processing,
-    );
+    return const SyncProgress(progress: 0.9, type: SyncProgressType.processing);
   }
 
   factory SyncProgress.saving() {
-    return const SyncProgress(
-      progress: 0.95,
-      type: SyncProgressType.saving,
-    );
+    return const SyncProgress(progress: 0.95, type: SyncProgressType.saving);
   }
 
   factory SyncProgress.completed(int count) {
@@ -205,8 +196,9 @@ class SyncProgress {
   String localizedMessage(BuildContext context) {
     return switch (type) {
       SyncProgressType.initial => context.l10n.sync_preparing,
-      SyncProgressType.fetching =>
-        context.l10n.sync_fetching(currentCategory ?? ''),
+      SyncProgressType.fetching => context.l10n.sync_fetching(
+        currentCategory ?? '',
+      ),
       SyncProgressType.processing => context.l10n.sync_processing,
       SyncProgressType.saving => context.l10n.sync_saving,
       SyncProgressType.completed => context.l10n.sync_completed(fetchedCount),

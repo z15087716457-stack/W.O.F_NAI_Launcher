@@ -81,23 +81,13 @@ class _DetailImagePageState extends State<DetailImagePage>
       final y = -position.dy * (_doubleTapScale - 1);
       endMatrix = Matrix4.identity()
         ..translateByDouble(x, y, 0, 1)
-        ..scaleByDouble(
-          _doubleTapScale,
-          _doubleTapScale,
-          _doubleTapScale,
-          1,
-        );
+        ..scaleByDouble(_doubleTapScale, _doubleTapScale, _doubleTapScale, 1);
     }
 
-    _animation = Matrix4Tween(
-      begin: _transformController.value,
-      end: endMatrix,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOut,
-      ),
-    );
+    _animation = Matrix4Tween(begin: _transformController.value, end: endMatrix)
+        .animate(
+          CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+        );
 
     _animationController.forward(from: 0);
   }
@@ -190,10 +180,7 @@ class _DetailImagePageState extends State<DetailImagePage>
     );
 
     if (widget.heroTag != null) {
-      imageWidget = Hero(
-        tag: widget.heroTag!,
-        child: imageWidget,
-      );
+      imageWidget = Hero(tag: widget.heroTag!, child: imageWidget);
     }
 
     return Stack(
@@ -211,10 +198,7 @@ class _DetailImagePageState extends State<DetailImagePage>
         ),
 
         // 加载指示器
-        if (_isLoading)
-          Positioned.fill(
-            child: _buildLoadingIndicator(context),
-          ),
+        if (_isLoading) Positioned.fill(child: _buildLoadingIndicator(context)),
       ],
     );
   }

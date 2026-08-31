@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
 import '../../../core/constants/storage_keys.dart';
+import '../../../core/enums/quality_tag_preset.dart';
 import '../../../core/krita/krita_bridge_server.dart';
 import '../../../core/services/anlas_calculator.dart';
 import '../../../core/utils/app_logger.dart';
@@ -303,9 +304,8 @@ final kritaBridgeNotifierProvider =
               .clamp(16, 192)
               .toInt(),
           // AI 接管扩展：set_params → GenerationParamsNotifier setters
-          readSeedLock: () => ref
-              .read(generationParamsNotifierProvider.notifier)
-              .isSeedLocked,
+          readSeedLock: () =>
+              ref.read(generationParamsNotifierProvider.notifier).isSeedLocked,
           // AI 接管扩展：get_params 回读 UI 角色框系统（界面可见的那套）
           readCharacters: () {
             final config = ref.read(characterPromptNotifierProvider);
@@ -366,16 +366,8 @@ final kritaBridgeNotifierProvider =
             );
             apply<String>('model', str('model'), notifier.updateModel);
             apply<int>('steps', integer('steps'), notifier.updateSteps);
-            apply<double>(
-              'cfg_scale',
-              dbl('cfg_scale'),
-              notifier.updateScale,
-            );
-            apply<String>(
-              'sampler',
-              str('sampler'),
-              notifier.updateSampler,
-            );
+            apply<double>('cfg_scale', dbl('cfg_scale'), notifier.updateScale);
+            apply<String>('sampler', str('sampler'), notifier.updateSampler);
             apply<int>('seed', integer('seed'), notifier.updateSeed);
             final seedLock = flag('seed_lock');
             if (seedLock != null && seedLock != notifier.isSeedLocked) {
@@ -392,11 +384,25 @@ final kritaBridgeNotifierProvider =
               integer('uc_preset'),
               notifier.updateUcPreset,
             );
-            apply<bool>(
-              'quality_toggle',
-              flag('quality_toggle'),
-              notifier.updateQualityToggle,
-            );
+            if (payload.containsKey('quality_preset')) {
+              final presetValue = str('quality_preset');
+              final preset = QualityTagPreset.tryParse(presetValue);
+              if (preset == null) {
+                throw ArgumentError.value(
+                  payload['quality_preset'],
+                  'quality_preset',
+                  'Expected standard, light, or none',
+                );
+              }
+              notifier.updateQualityPreset(preset);
+              applied.add('quality_preset');
+            } else {
+              apply<bool>(
+                'quality_toggle',
+                flag('quality_toggle'),
+                notifier.updateQualityToggle,
+              );
+            }
             apply<bool>(
               'transparent_background',
               flag('transparent_background'),
@@ -423,11 +429,7 @@ final kritaBridgeNotifierProvider =
               notifier.updateSmeaAuto,
             );
             apply<bool>('smea', flag('smea'), notifier.updateSmea);
-            apply<bool>(
-              'smea_dyn',
-              flag('smea_dyn'),
-              notifier.updateSmeaDyn,
-            );
+            apply<bool>('smea_dyn', flag('smea_dyn'), notifier.updateSmeaDyn);
             apply<bool>(
               'use_coords',
               flag('use_coords'),
@@ -454,8 +456,12 @@ final kritaBridgeNotifierProvider =
                 if (entry is! Map || entry['prompt'] is! String) continue;
                 final prompt = entry['prompt'] as String;
                 final uc = entry['uc'] is String ? entry['uc'] as String : '';
-                final x = entry['x'] is num ? (entry['x'] as num).toDouble() : null;
-                final y = entry['y'] is num ? (entry['y'] as num).toDouble() : null;
+                final x = entry['x'] is num
+                    ? (entry['x'] as num).toDouble()
+                    : null;
+                final y = entry['y'] is num
+                    ? (entry['y'] as num).toDouble()
+                    : null;
                 final hasPos = x != null && y != null;
                 uiChars.add(
                   char_model.CharacterPrompt(

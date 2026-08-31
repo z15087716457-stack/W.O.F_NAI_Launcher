@@ -60,13 +60,10 @@ Future<(int, int)> _importTagIndexEntries(
         // 1. 批量查询现有记录（一次查询），并保留收藏状态
         final filePaths = batch.map((e) => e.filePath).toList();
         final placeholders = List.filled(filePaths.length, '?').join(',');
-        final existingResults = await txn.rawQuery(
-          '''
+        final existingResults = await txn.rawQuery('''
           SELECT id, file_path, is_favorite FROM ${GalleryDataSource._imagesTable}
           WHERE file_path IN ($placeholders)
-          ''',
-          filePaths,
-        );
+          ''', filePaths);
 
         final pathToIdMap = <String, int>{};
         final pathToFavorite = <String, bool>{};
@@ -81,21 +78,19 @@ Future<(int, int)> _importTagIndexEntries(
 
         // 1.5 批量取旧 is_nsfw 分级（metadata 表；REPLACE 会整行覆盖，
         // JSONL 无 nsfw 字段时保留已有分级，显式 true/false 才覆盖）
-        final existingImageIds =
-            pathToIdMap.values.where((id) => id > 0).toList();
+        final existingImageIds = pathToIdMap.values
+            .where((id) => id > 0)
+            .toList();
         final pathToNsfw = <String, int>{};
         if (existingImageIds.isNotEmpty) {
           final idPlaceholders = List.filled(
             existingImageIds.length,
             '?',
           ).join(',');
-          final nsfwRows = await txn.rawQuery(
-            '''
+          final nsfwRows = await txn.rawQuery('''
             SELECT image_id, is_nsfw FROM ${GalleryDataSource._metadataTable}
             WHERE image_id IN ($idPlaceholders)
-            ''',
-            existingImageIds,
-          );
+            ''', existingImageIds);
           final idToNsfw = <int, int>{
             for (final row in nsfwRows)
               if (row['image_id'] != null)
@@ -118,9 +113,8 @@ Future<(int, int)> _importTagIndexEntries(
             'file_size': entry.fileSize,
             'width': entry.width,
             'height': entry.height,
-            'aspect_ratio': entry.width != null &&
-                    entry.height != null &&
-                    entry.height! > 0
+            'aspect_ratio':
+                entry.width != null && entry.height != null && entry.height! > 0
                 ? entry.width! / entry.height!
                 : null,
             'modified_at': entry.modifiedAt.millisecondsSinceEpoch,
@@ -178,16 +172,16 @@ Future<(int, int)> _importTagIndexEntries(
               'raw_json': entry.rawJson,
               'has_metadata':
                   (entry.prompt?.isNotEmpty == true ||
-                          entry.negativePrompt?.isNotEmpty == true ||
-                          entry.source != null ||
-                          entry.software != null ||
-                          entry.seed != null ||
-                          entry.model != null ||
-                          entry.sampler != null ||
-                          entry.steps != null ||
-                          entry.cfgScale != null)
-                      ? 1
-                      : 0,
+                      entry.negativePrompt?.isNotEmpty == true ||
+                      entry.source != null ||
+                      entry.software != null ||
+                      entry.seed != null ||
+                      entry.model != null ||
+                      entry.sampler != null ||
+                      entry.steps != null ||
+                      entry.cfgScale != null)
+                  ? 1
+                  : 0,
               // JSONL 无 nsfw 字段（null）时保留已有分级，显式 true/false 才覆盖
               'is_nsfw': (entry.nsfw ?? (pathToNsfw[entry.filePath] ?? 0) == 1)
                   ? 1
@@ -270,7 +264,7 @@ Future<(int, int)> _importTagIndexEntries(
 
   AppLogger.i(
     'Imported ${entries.length} tag index entries: '
-    '$importedCount new, $updatedCount updated',
+        '$importedCount new, $updatedCount updated',
     'GalleryDS',
   );
 

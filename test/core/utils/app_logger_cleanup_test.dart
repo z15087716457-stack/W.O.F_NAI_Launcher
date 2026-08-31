@@ -12,8 +12,9 @@ void main() {
 
     setUp(() async {
       // 创建临时日志目录
-      tempLogDir =
-          Directory.systemTemp.createTempSync('app_logger_cleanup_test_');
+      tempLogDir = Directory.systemTemp.createTempSync(
+        'app_logger_cleanup_test_',
+      );
     });
 
     tearDown(() async {
@@ -31,8 +32,9 @@ void main() {
         final fileName =
             'app_${timestamp.year}${_pad(timestamp.month)}${_pad(timestamp.day)}_'
             '${_pad(timestamp.hour)}${_pad(timestamp.minute)}${_pad(timestamp.second + i)}.log';
-        final file =
-            File('${tempLogDir.path}${Platform.pathSeparator}$fileName');
+        final file = File(
+          '${tempLogDir.path}${Platform.pathSeparator}$fileName',
+        );
         await file.writeAsString('旧日志内容 $i');
         files.add(file);
         await Future.delayed(const Duration(milliseconds: 10));
@@ -47,8 +49,9 @@ void main() {
       expect(allFiles.length, equals(5));
 
       // 模拟清理逻辑：保留最新的2个，删除其余的
-      allFiles
-          .sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+      allFiles.sort(
+        (a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()),
+      );
 
       const maxLogFiles = 3;
       if (allFiles.length >= maxLogFiles) {
@@ -69,14 +72,18 @@ void main() {
 
     test('清理只删除app_和test_开头的日志文件', () async {
       // 创建各种文件
-      await File('${tempLogDir.path}${Platform.pathSeparator}app_old1.log')
-          .writeAsString('old1');
-      await File('${tempLogDir.path}${Platform.pathSeparator}test_old1.log')
-          .writeAsString('test1');
-      await File('${tempLogDir.path}${Platform.pathSeparator}other_file.log')
-          .writeAsString('other');
-      await File('${tempLogDir.path}${Platform.pathSeparator}data.txt')
-          .writeAsString('data');
+      await File(
+        '${tempLogDir.path}${Platform.pathSeparator}app_old1.log',
+      ).writeAsString('old1');
+      await File(
+        '${tempLogDir.path}${Platform.pathSeparator}test_old1.log',
+      ).writeAsString('test1');
+      await File(
+        '${tempLogDir.path}${Platform.pathSeparator}other_file.log',
+      ).writeAsString('other');
+      await File(
+        '${tempLogDir.path}${Platform.pathSeparator}data.txt',
+      ).writeAsString('data');
 
       // 模拟过滤逻辑
       final logFiles = await tempLogDir
@@ -84,9 +91,10 @@ void main() {
           .where((e) => e is File)
           .map((e) => e as File)
           .where((file) {
-        final name = file.path.split(Platform.pathSeparator).last;
-        return name.startsWith('app_') || name.startsWith('test_');
-      }).toList();
+            final name = file.path.split(Platform.pathSeparator).last;
+            return name.startsWith('app_') || name.startsWith('test_');
+          })
+          .toList();
 
       // 验证只识别出2个日志文件
       expect(logFiles.length, equals(2));
@@ -94,18 +102,21 @@ void main() {
 
     test('日志文件按修改时间正确排序', () async {
       // 创建3个文件，确保有不同的修改时间
-      final file1 =
-          File('${tempLogDir.path}${Platform.pathSeparator}app_1.log');
+      final file1 = File(
+        '${tempLogDir.path}${Platform.pathSeparator}app_1.log',
+      );
       await file1.writeAsString('content1');
       await file1.setLastModified(DateTime(2024, 1, 1, 12, 0, 1));
 
-      final file2 =
-          File('${tempLogDir.path}${Platform.pathSeparator}app_2.log');
+      final file2 = File(
+        '${tempLogDir.path}${Platform.pathSeparator}app_2.log',
+      );
       await file2.writeAsString('content2');
       await file2.setLastModified(DateTime(2024, 1, 1, 12, 0, 2));
 
-      final file3 =
-          File('${tempLogDir.path}${Platform.pathSeparator}app_3.log');
+      final file3 = File(
+        '${tempLogDir.path}${Platform.pathSeparator}app_3.log',
+      );
       await file3.writeAsString('content3');
       await file3.setLastModified(DateTime(2024, 1, 1, 12, 0, 3));
 
@@ -116,8 +127,9 @@ void main() {
           .map((e) => e as File)
           .toList();
 
-      files
-          .sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+      files.sort(
+        (a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()),
+      );
 
       // 验证顺序（最新的在前）
       expect(files[0].path, contains('app_3.log'));
@@ -173,18 +185,21 @@ void main() {
           .where((e) => e is File)
           .map((e) => e as File)
           .where((file) {
-        final name = file.path.split(Platform.pathSeparator).last;
-        return name.startsWith('app_') || name.startsWith('test_');
-      }).toList();
+            final name = file.path.split(Platform.pathSeparator).last;
+            return name.startsWith('app_') || name.startsWith('test_');
+          })
+          .toList();
 
       // 验证识别出3个日志文件
       expect(logFiles.length, equals(3));
 
       // 验证包含app和test
-      final appFiles =
-          logFiles.where((f) => _baseName(f).startsWith('app_')).toList();
-      final testFiles =
-          logFiles.where((f) => _baseName(f).startsWith('test_')).toList();
+      final appFiles = logFiles
+          .where((f) => _baseName(f).startsWith('app_'))
+          .toList();
+      final testFiles = logFiles
+          .where((f) => _baseName(f).startsWith('test_'))
+          .toList();
 
       expect(appFiles.length, equals(2));
       expect(testFiles.length, equals(1));
@@ -192,14 +207,18 @@ void main() {
 
     test('getLogFiles只返回日志文件', () async {
       // 在临时目录创建各种文件
-      await File('${tempLogDir.path}${Platform.pathSeparator}app_valid.log')
-          .writeAsString('valid');
-      await File('${tempLogDir.path}${Platform.pathSeparator}test_valid.log')
-          .writeAsString('valid');
-      await File('${tempLogDir.path}${Platform.pathSeparator}other.txt')
-          .writeAsString('other');
-      await File('${tempLogDir.path}${Platform.pathSeparator}data.json')
-          .writeAsString('{}');
+      await File(
+        '${tempLogDir.path}${Platform.pathSeparator}app_valid.log',
+      ).writeAsString('valid');
+      await File(
+        '${tempLogDir.path}${Platform.pathSeparator}test_valid.log',
+      ).writeAsString('valid');
+      await File(
+        '${tempLogDir.path}${Platform.pathSeparator}other.txt',
+      ).writeAsString('other');
+      await File(
+        '${tempLogDir.path}${Platform.pathSeparator}data.json',
+      ).writeAsString('{}');
 
       // 模拟 getLogFiles 逻辑
       final files = await tempLogDir
@@ -207,9 +226,10 @@ void main() {
           .where((entity) => entity is File)
           .map((entity) => entity as File)
           .where((file) {
-        final name = file.path.split(Platform.pathSeparator).last;
-        return name.startsWith('app_') || name.startsWith('test_');
-      }).toList();
+            final name = file.path.split(Platform.pathSeparator).last;
+            return name.startsWith('app_') || name.startsWith('test_');
+          })
+          .toList();
 
       // 验证只返回2个日志文件
       expect(files.length, equals(2));
@@ -217,7 +237,8 @@ void main() {
 
     test('时间戳格式正确', () {
       final now = DateTime(2024, 1, 15, 9, 30, 45);
-      final timestamp = '${now.year}${_pad(now.month)}${_pad(now.day)}_'
+      final timestamp =
+          '${now.year}${_pad(now.month)}${_pad(now.day)}_'
           '${_pad(now.hour)}${_pad(now.minute)}${_pad(now.second)}';
 
       expect(timestamp, equals('20240115_093045'));
@@ -226,7 +247,8 @@ void main() {
 
     test('文件名生成包含正确的时间戳', () {
       final now = DateTime(2024, 6, 20, 14, 25, 30);
-      final timestamp = '${now.year}${_pad(now.month)}${_pad(now.day)}_'
+      final timestamp =
+          '${now.year}${_pad(now.month)}${_pad(now.day)}_'
           '${_pad(now.hour)}${_pad(now.minute)}${_pad(now.second)}';
       final fileName = 'app_$timestamp.log';
 
@@ -249,13 +271,10 @@ void main() {
       AppLogger.debugSetMinimumLevelForTesting(Level.warning);
 
       var messageBuilt = false;
-      AppLogger.d(
-        () {
-          messageBuilt = true;
-          return 'expensive debug message';
-        },
-        'AppLoggerTest',
-      );
+      AppLogger.d(() {
+        messageBuilt = true;
+        return 'expensive debug message';
+      }, 'AppLoggerTest');
 
       expect(messageBuilt, isFalse);
     });
@@ -268,13 +287,10 @@ void main() {
       AppLogger.debugSetMinimumLevelForTesting(Level.warning);
 
       var messageBuilt = false;
-      AppLogger.w(
-        () {
-          messageBuilt = true;
-          return 'warning message';
-        },
-        'AppLoggerTest',
-      );
+      AppLogger.w(() {
+        messageBuilt = true;
+        return 'warning message';
+      }, 'AppLoggerTest');
 
       expect(messageBuilt, isTrue);
     });

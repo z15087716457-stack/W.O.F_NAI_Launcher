@@ -54,15 +54,18 @@ void main() {
       expect(loaded.direction, GallerySortDirection.descending);
     });
 
-    test('invalid enum names fall back to null (caller uses default)', () async {
-      SharedPreferences.setMockInitialValues({
-        StorageKeys.localGallerySortField: 'not_a_field',
-        StorageKeys.localGallerySortDirection: 'descending',
-      });
-      const store = GallerySortStore();
+    test(
+      'invalid enum names fall back to null (caller uses default)',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          StorageKeys.localGallerySortField: 'not_a_field',
+          StorageKeys.localGallerySortDirection: 'descending',
+        });
+        const store = GallerySortStore();
 
-      expect(await store.load(), isNull);
-    });
+        expect(await store.load(), isNull);
+      },
+    );
 
     test('missing direction falls back to null', () async {
       SharedPreferences.setMockInitialValues({

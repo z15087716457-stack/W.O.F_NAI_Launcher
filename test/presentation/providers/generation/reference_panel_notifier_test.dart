@@ -63,20 +63,17 @@ void main() {
     final notifier = container.read(referencePanelNotifierProvider.notifier);
     final raw = Uint8List.fromList(const [1, 2, 3, 4]);
 
-    final encoded = await notifier.encodeVibesNow(
-      [
-        VibeReference(
-          displayName: 'raw-vibe',
-          vibeEncoding: '',
-          rawImageData: raw,
-          thumbnail: raw,
-          strength: -0.4,
-          infoExtracted: 0.2,
-          sourceType: VibeSourceType.rawImage,
-        ),
-      ],
-      model: 'nai-diffusion-4-full',
-    );
+    final encoded = await notifier.encodeVibesNow([
+      VibeReference(
+        displayName: 'raw-vibe',
+        vibeEncoding: '',
+        rawImageData: raw,
+        thumbnail: raw,
+        strength: -0.4,
+        infoExtracted: 0.2,
+        sourceType: VibeSourceType.rawImage,
+      ),
+    ], model: 'nai-diffusion-4-full');
 
     expect(encoded, isNotNull);
     expect(encoded!.single.vibeEncoding, 'nai-diffusion-4-full|0.2|1');
@@ -117,8 +114,10 @@ void main() {
     final added = await notifier.addLibraryVibe(staleEntry);
 
     expect(added, isTrue);
-    final vibe =
-        container.read(generationParamsNotifierProvider).vibeReferencesV4.single;
+    final vibe = container
+        .read(generationParamsNotifierProvider)
+        .vibeReferencesV4
+        .single;
     expect(vibe.vibeEncoding, 'actual-encoding');
     expect(vibe.rawImageData, actualEntry.rawImageData);
     expect(vibe.infoExtracted, 0.25);

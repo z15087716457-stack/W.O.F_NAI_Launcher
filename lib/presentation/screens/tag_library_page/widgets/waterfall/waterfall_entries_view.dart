@@ -44,8 +44,7 @@ class WaterfallEntriesView extends ConsumerWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columnCount =
-            (constraints.maxWidth / 220).floor().clamp(2, 8);
+        final columnCount = (constraints.maxWidth / 220).floor().clamp(2, 8);
         final itemWidth =
             (constraints.maxWidth - 32 - (columnCount - 1) * 12) / columnCount;
 
@@ -80,9 +79,7 @@ class WaterfallEntriesView extends ConsumerWidget {
               ),
             ],
             // 底部留白
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 32),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 32)),
           ],
         );
       },

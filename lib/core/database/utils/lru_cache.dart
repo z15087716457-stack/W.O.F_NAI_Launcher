@@ -74,11 +74,11 @@ class LRUCache<K, V> {
 
   /// 获取统计信息
   Map<String, dynamic> get statistics => {
-        'size': _cache.length,
-        'maxSize': maxSize,
-        'hitCount': _hitCount,
-        'missCount': _missCount,
-        'evictionCount': _evictionCount,
-        'hitRate': hitRate,
-      };
+    'size': _cache.length,
+    'maxSize': maxSize,
+    'hitCount': _hitCount,
+    'missCount': _missCount,
+    'evictionCount': _evictionCount,
+    'hitRate': hitRate,
+  };
 }
