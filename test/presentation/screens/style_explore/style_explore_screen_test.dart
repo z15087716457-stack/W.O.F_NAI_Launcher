@@ -4,11 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/storage/style_explore_recipe_storage.dart';
-import 'package:nai_launcher/data/models/prompt_block/prompt_block_document.dart';
-import 'package:nai_launcher/data/models/prompt_block/prompt_block_segment.dart';
+import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/style_explore/style_explore_recipe.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
-import 'package:nai_launcher/presentation/providers/prompt_block_workspace_provider.dart';
+import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore_provider.dart';
 import 'package:nai_launcher/presentation/screens/style_explore/style_explore_screen.dart';
 
@@ -111,6 +111,12 @@ class _TestLocalStorageService extends LocalStorageService {
   int? getLockedSeedValue() => null;
 }
 
+class _FakeLibraryNotifier extends PromptBlockLibraryNotifier {
+  @override
+  Future<PromptBlockLibraryState> build() async =>
+      PromptBlockLibraryState(blocks: const [], folders: const []);
+}
+
 void main() {
   late _MemoryRecipeStorage recipeStorage;
 
@@ -118,19 +124,14 @@ void main() {
     recipeStorage = _MemoryRecipeStorage();
   });
 
-  PromptBlockDocument doc(String id, String text) {
-    return PromptBlockDocument(
-      documentId: id,
-      segments: [PromptBlockSegment.text(id: '$id-seg', text: text)],
-      updatedAt: DateTime.utc(2026, 8, 31),
-    );
-  }
+  PillDocument doc(String text) =>
+      PillDocument(text: text, instances: const {});
 
   Future<StyleExploreRecipe> seedRecipe(String name, String positive) async {
     final recipe = StyleExploreRecipe.create(
       name: name,
-      positiveDocument: doc(name.hashCode.toString(), positive),
-      negativeDocument: doc('${name.hashCode}-neg', 'lowres'),
+      positiveDocument: doc(positive),
+      negativeDocument: doc('lowres'),
     );
     await recipeStorage.putRecipe(recipe);
     return recipe;
@@ -143,6 +144,9 @@ void main() {
           (ref) => _TestLocalStorageService(),
         ),
         styleExploreRecipeStorageProvider.overrideWithValue(recipeStorage),
+        promptBlockLibraryNotifierProvider.overrideWith(
+          () => _FakeLibraryNotifier(),
+        ),
       ],
       child: const MaterialApp(
         locale: Locale('zh'),
@@ -153,24 +157,42 @@ void main() {
     );
   }
 
-  Future<void> pumpScreen(WidgetTester tester) async {
+  Future<ProviderContainer> pumpScreen(WidgetTester tester) async {
+    // 宽窗：左栏 + 右栏画廊都展开（画廊默认断点 1100）。
+    tester.view.physicalSize = const Size(1600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
     await tester.pumpWidget(buildScreen());
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
+    return ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
   }
 
-  testWidgets('renders recipes, toolbar, and both lane editors', (
+  testWidgets('renders sidebar placeholders, toolbar, and both lane editors', (
     tester,
   ) async {
     await seedRecipe('柔和光影', 'soft lighting');
     await seedRecipe('厚重色彩', 'vivid colors');
-    await pumpScreen(tester);
+    final container = await pumpScreen(tester);
 
+    // 左栏：探索任务占位 + Recipe 缩略列表。
     expect(find.text('柔和光影'), findsOneWidget);
     expect(find.text('厚重色彩'), findsOneWidget);
+    expect(find.byKey(const Key('style-explore-new-run')), findsOneWidget);
+    expect(
+      find.byKey(const Key('style-explore-recipe-manager')),
+      findsOneWidget,
+    );
+    // 顶栏按钮。
     expect(find.byKey(const Key('style-explore-save')), findsOneWidget);
     expect(find.byKey(const Key('style-explore-save-as')), findsOneWidget);
     expect(find.byKey(const Key('style-explore-preview')), findsOneWidget);
+    expect(
+      find.byKey(const Key('style-explore-gallery-toggle')),
+      findsOneWidget,
+    );
+    // 中栏两个药丸编辑器。
     expect(
       find.byKey(const Key('style-explore-positive-editor')),
       findsOneWidget,
@@ -179,26 +201,34 @@ void main() {
       find.byKey(const Key('style-explore-negative-editor')),
       findsOneWidget,
     );
+    // 右栏候选画廊空态占位（宽窗默认展开）。
+    expect(
+      find.byKey(const Key('style-explore-gallery-panel')),
+      findsOneWidget,
+    );
     expect(find.text('未关联配方'), findsOneWidget);
+    expect(
+      container.read(styleExploreSessionNotifierProvider).activeRecipeId,
+      isNull,
+    );
   });
 
   testWidgets(
-    'tapping a recipe loads its snapshot into the explore workspace',
+    'tapping a recipe in the sidebar preview loads it into the pill lanes',
     (tester) async {
       final recipe = await seedRecipe('载入目标', 'loaded content');
-      await pumpScreen(tester);
+      final container = await pumpScreen(tester);
 
       await tester.tap(find.text('载入目标'));
       await tester.pump();
       // AppToast.success 内部有 3 秒自动关闭定时器，推进到它结束。
       await tester.pump(const Duration(milliseconds: 3300));
 
-      final element = tester.element(find.byType(StyleExploreScreen));
-      final container = ProviderScope.containerOf(element);
       expect(
         container
-            .read(styleExploreWorkspaceNotifierProvider.notifier)
-            .plainTextFor(PromptBlockLane.positive),
+            .read(pillWorkspaceProvider(PillScopes.explorePos))
+            .document
+            .text,
         'loaded content',
       );
       expect(
@@ -208,10 +238,10 @@ void main() {
     },
   );
 
-  testWidgets('editing in the explore page does not touch the main workspace', (
+  testWidgets('editing in the explore page does not touch the main lane', (
     tester,
   ) async {
-    await pumpScreen(tester);
+    final container = await pumpScreen(tester);
 
     final textField = find.descendant(
       of: find.byKey(const Key('style-explore-positive-editor')),
@@ -220,23 +250,20 @@ void main() {
     await tester.enterText(textField.first, '探索页输入');
     await tester.pump();
 
-    final element = tester.element(find.byType(StyleExploreScreen));
-    final container = ProviderScope.containerOf(element);
     expect(
       container
-          .read(styleExploreWorkspaceNotifierProvider.notifier)
-          .plainTextFor(PromptBlockLane.positive),
+          .read(pillWorkspaceProvider(PillScopes.explorePos))
+          .document
+          .text,
       '探索页输入',
     );
     expect(
-      container
-          .read(promptBlockWorkspaceNotifierProvider.notifier)
-          .plainTextFor(PromptBlockLane.positive),
+      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
       '',
     );
   });
 
-  testWidgets('preview dialog shows plain-text projection without titles', (
+  testWidgets('preview dialog shows pill projections without titles', (
     tester,
   ) async {
     await seedRecipe('预览配方', 'preview, content');
@@ -254,5 +281,58 @@ void main() {
       find.byKey(const Key('style-explore-preview-copy-positive')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('recipe manager dialog reuses the full list panel', (
+    tester,
+  ) async {
+    await seedRecipe('管理目标', 'managed content');
+    final container = await pumpScreen(tester);
+
+    await tester.tap(find.byKey(const Key('style-explore-recipe-manager')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(
+      find.byKey(const Key('style-explore-recipe-dialog')),
+      findsOneWidget,
+    );
+    // 弹窗内完整列表交互：点击载入后弹窗关闭、会话关联。
+    // （侧栏缩略列表有同名条目，必须限定在弹窗内查找。）
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('style-explore-recipe-dialog')),
+        matching: find.text('管理目标'),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 3300));
+
+    expect(find.byKey(const Key('style-explore-recipe-dialog')), findsNothing);
+    expect(
+      container.read(styleExploreSessionNotifierProvider).activeRecipeId,
+      isNotNull,
+    );
+    expect(
+      container
+          .read(pillWorkspaceProvider(PillScopes.explorePos))
+          .document
+          .text,
+      'managed content',
+    );
+  });
+
+  testWidgets('new-run placeholder reports next-stage availability', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+
+    await tester.tap(find.byKey(const Key('style-explore-new-run')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('探索任务将在下一阶段开放'), findsOneWidget);
+    // 信息 toast 有自动关闭定时器，推进到结束。
+    await tester.pump(const Duration(milliseconds: 3300));
   });
 }

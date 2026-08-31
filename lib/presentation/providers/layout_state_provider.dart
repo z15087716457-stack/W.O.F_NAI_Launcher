@@ -21,6 +21,7 @@ class LayoutState {
   final bool webLeftPanelExpanded;
   final bool blockLibraryPanelExpanded;
   final double blockLibraryPanelWidth;
+  final double styleExploreGalleryWidth;
 
   const LayoutState({
     this.leftPanelExpanded = true,
@@ -38,6 +39,7 @@ class LayoutState {
     this.webLeftPanelExpanded = true,
     this.blockLibraryPanelExpanded = false,
     this.blockLibraryPanelWidth = 320.0,
+    this.styleExploreGalleryWidth = 360.0,
   });
 
   /// 复制并更新部分字段
@@ -57,6 +59,7 @@ class LayoutState {
     bool? webLeftPanelExpanded,
     bool? blockLibraryPanelExpanded,
     double? blockLibraryPanelWidth,
+    double? styleExploreGalleryWidth,
   }) {
     return LayoutState(
       leftPanelExpanded: leftPanelExpanded ?? this.leftPanelExpanded,
@@ -80,6 +83,8 @@ class LayoutState {
           blockLibraryPanelExpanded ?? this.blockLibraryPanelExpanded,
       blockLibraryPanelWidth:
           blockLibraryPanelWidth ?? this.blockLibraryPanelWidth,
+      styleExploreGalleryWidth:
+          styleExploreGalleryWidth ?? this.styleExploreGalleryWidth,
     );
   }
 }
@@ -108,6 +113,7 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       webLeftPanelExpanded: storage.getWebLeftPanelExpanded(),
       blockLibraryPanelExpanded: storage.getBlockLibraryPanelExpanded(),
       blockLibraryPanelWidth: storage.getBlockLibraryPanelWidth(),
+      styleExploreGalleryWidth: storage.getStyleExploreGalleryWidth(),
     );
   }
 
@@ -265,5 +271,14 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
 
     final storage = ref.read(localStorageServiceProvider);
     await storage.setBlockLibraryPanelWidth(clamped);
+  }
+
+  /// 设置画风探索页候选画廊宽度
+  Future<void> setStyleExploreGalleryWidth(double width) async {
+    final clamped = width.clamp(320.0, 560.0).toDouble();
+    state = state.copyWith(styleExploreGalleryWidth: clamped);
+
+    final storage = ref.read(localStorageServiceProvider);
+    await storage.setStyleExploreGalleryWidth(clamped);
   }
 }

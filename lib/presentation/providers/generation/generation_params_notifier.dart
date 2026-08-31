@@ -20,7 +20,6 @@ import '../../../data/models/image/image_params.dart';
 import '../../../data/models/vibe/vibe_library_entry.dart';
 import '../../../data/models/vibe/vibe_reference.dart';
 import '../../../data/services/vibe_library_storage_service.dart';
-import '../prompt_block_workspace_provider.dart';
 import '../pill_workspace_provider.dart';
 import '../quality_preset_provider.dart';
 import '../subscription_provider.dart';
@@ -203,14 +202,12 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       if (state.prompt == prompt) return;
       state = state.copyWith(prompt: prompt);
       _storage.setLastPrompt(prompt);
-      // 外部写入与结构化工作区文档保持一致：
+      // 外部写入与药丸工作区文档保持一致：
       // 所有外部路径（Krita/元数据导入/画廊复用/反推/随机/快捷键）都以本方法为
-      // 唯一汇点，在这里完成一次文档事务；投影等价时保留文档结构。
+      // 唯一汇点，在这里完成一次文档事务；投影等价时保留药丸结构。
       ref
-          .read(promptBlockWorkspaceNotifierProvider.notifier)
-          .syncFromPlainText(PromptBlockLane.positive, prompt);
-      // 药丸工作区（P0 原型，正向）对称同步；投影等价时同样保留药丸结构。
-      ref.read(pillWorkspaceNotifierProvider.notifier).syncFromPlainText(prompt);
+          .read(pillWorkspaceNotifierProvider.notifier)
+          .syncFromPlainText(prompt);
     });
   }
 
@@ -221,9 +218,6 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       if (state.negativePrompt == negativePrompt) return;
       state = state.copyWith(negativePrompt: negativePrompt);
       _storage.setLastNegativePrompt(negativePrompt);
-      ref
-          .read(promptBlockWorkspaceNotifierProvider.notifier)
-          .syncFromPlainText(PromptBlockLane.negative, negativePrompt);
       // 药丸工作区负向 lane 对称同步（P3，与正向 updatePrompt 同规）。
       ref
           .read(pillWorkspaceProvider(PillScopes.negative).notifier)

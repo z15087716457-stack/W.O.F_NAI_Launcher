@@ -440,7 +440,7 @@ Future<void> _bootstrapApplication() async {
     StorageKeys.promptBlockLibraryBox,
     hivePath: hivePath,
   );
-  // Prompt 工作区持久化（生成页 + 画风探索页文档快照）
+  // 药丸 Prompt 工作区持久化（生成页/角色框/画风探索 lane 文档快照）
   await _openHiveBoxIfNeeded<String>(
     StorageKeys.promptWorkspaceStateBox,
     hivePath: hivePath,

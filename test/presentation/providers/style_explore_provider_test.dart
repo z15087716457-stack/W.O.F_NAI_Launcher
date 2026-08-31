@@ -4,18 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
-import 'package:nai_launcher/core/storage/prompt_workspace_state_storage.dart';
+import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/style_explore_recipe_storage.dart';
+import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
-import 'package:nai_launcher/data/models/prompt_block/prompt_block_document.dart';
-import 'package:nai_launcher/data/models/prompt_block/prompt_block_segment.dart';
-import 'package:nai_launcher/presentation/providers/prompt_block_workspace_provider.dart';
+import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore_provider.dart';
 
 void main() {
   late Directory hiveDirectory;
   late StyleExploreRecipeStorage recipeStorage;
-  late PromptWorkspaceStateStorage workspaceStorage;
 
   setUpAll(() async {
     hiveDirectory = await Directory.systemTemp.createTemp(
@@ -24,45 +23,49 @@ void main() {
     Hive.init(hiveDirectory.path);
     recipeStorage = StyleExploreRecipeStorage();
     await recipeStorage.init();
-    workspaceStorage = PromptWorkspaceStateStorage();
-    await workspaceStorage.init();
+    // 药丸工作区持久化与 Recipe 各自独立 Box；直接开 Box 即可，
+    // PillWorkspaceStorage 无 init 流程。
+    await Hive.openBox<String>(StorageKeys.promptWorkspaceStateBox);
   });
 
   setUp(() async {
     await recipeStorage.clear();
-    await workspaceStorage.clear();
+    await Hive.box<String>(StorageKeys.promptWorkspaceStateBox).clear();
   });
 
   tearDownAll(() async {
     await recipeStorage.close();
-    await workspaceStorage.close();
     await Hive.close();
     if (await hiveDirectory.exists()) {
       await hiveDirectory.delete(recursive: true);
     }
   });
 
-  ProviderContainer container() {
+  ProviderContainer container({List<Override> overrides = const []}) {
     final c = ProviderContainer(
       overrides: [
         styleExploreRecipeStorageProvider.overrideWithValue(recipeStorage),
-        promptWorkspaceStateStorageProvider.overrideWithValue(workspaceStorage),
+        ...overrides,
       ],
     );
     addTearDown(c.dispose);
     return c;
   }
 
-  PromptBlock block(String content) {
-    return PromptBlock(
-      id: 'source-${content.hashCode}',
-      title: '块$content',
-      content: content,
-      color: '#FF123456',
-      createdAt: DateTime.utc(2026, 8, 31),
-      updatedAt: DateTime.utc(2026, 8, 31),
-    );
-  }
+  PillDocument doc(String text) =>
+      PillDocument(text: text, instances: const {});
+
+  PillWorkspaceNotifier explorePos(ProviderContainer c) =>
+      c.read(pillWorkspaceProvider(PillScopes.explorePos).notifier);
+
+  PillWorkspaceNotifier exploreNeg(ProviderContainer c) =>
+      c.read(pillWorkspaceProvider(PillScopes.exploreNeg).notifier);
+
+  PillDocument explorePosDocument(ProviderContainer c) =>
+      c.read(pillWorkspaceProvider(PillScopes.explorePos)).document;
+
+  PillDocument exploreNegDocument(ProviderContainer c) =>
+      c.read(pillWorkspaceProvider(PillScopes.exploreNeg)).document;
 
   group('recipe list notifier', () {
     test('create / rename / duplicate / delete keep list consistent', () async {
@@ -71,8 +74,8 @@ void main() {
 
       final created = await notifier.create(
         name: '探索一',
-        positiveDocument: _doc('doc-p', 'soft light'),
-        negativeDocument: _doc('doc-n', 'lowres'),
+        positiveDocument: doc('soft light'),
+        negativeDocument: doc('lowres'),
       );
       var list = await c.read(styleExploreRecipeListNotifierProvider.future);
       expect(list.recipes, hasLength(1));
@@ -100,11 +103,8 @@ void main() {
       () async {
         final c = container();
         final session = c.read(styleExploreSessionNotifierProvider.notifier);
-        final workspace = c.read(
-          styleExploreWorkspaceNotifierProvider.notifier,
-        );
 
-        workspace.replacePlainText(PromptBlockLane.positive, 'start');
+        explorePos(c).setText('start');
         expect(c.read(styleExploreDirtyProvider), isFalse);
 
         final created = await session.saveAsNew('配方A');
@@ -115,57 +115,40 @@ void main() {
         expect(c.read(styleExploreActiveRecipeProvider)?.name, '配方A');
         expect(c.read(styleExploreDirtyProvider), isFalse);
 
-        workspace.replacePlainText(PromptBlockLane.positive, 'start, edited');
+        explorePos(c).setText('start, edited');
         expect(c.read(styleExploreDirtyProvider), isTrue);
 
         final saved = await session.saveActive();
         expect(saved, isNotNull);
         expect(c.read(styleExploreDirtyProvider), isFalse);
         final stored = await recipeStorage.getRecipe(created.id);
-        expect(
-          stored!.positiveDocument.segments.first,
-          isA<TextSegment>().having(
-            (segment) => segment.text,
-            'text',
-            'start, edited',
-          ),
-        );
+        expect(stored!.positiveDocument.text, 'start, edited');
       },
     );
 
     test('loadRecipe replaces both lanes; missing recipe is a no-op', () async {
       final c = container();
       final session = c.read(styleExploreSessionNotifierProvider.notifier);
-      final workspace = c.read(styleExploreWorkspaceNotifierProvider.notifier);
 
       final listNotifier = c.read(
         styleExploreRecipeListNotifierProvider.notifier,
       );
       final created = await listNotifier.create(
         name: '载入目标',
-        positiveDocument: _doc('rp', 'loaded positive'),
-        negativeDocument: _doc('rn', 'loaded negative'),
+        positiveDocument: doc('loaded positive'),
+        negativeDocument: doc('loaded negative'),
       );
 
-      workspace.replacePlainText(PromptBlockLane.positive, '本地未保存');
+      explorePos(c).setText('本地未保存');
       final ok = await session.loadRecipe(created.id);
       expect(ok, isTrue);
-      expect(
-        c.read(styleExploreWorkspaceNotifierProvider).positiveDocument,
-        created.positiveDocument,
-      );
-      expect(
-        workspace.plainTextFor(PromptBlockLane.negative),
-        'loaded negative',
-      );
+      expect(explorePosDocument(c), created.positiveDocument);
+      expect(exploreNegDocument(c).text, 'loaded negative');
       expect(c.read(styleExploreDirtyProvider), isFalse);
 
       final missing = await session.loadRecipe('no-such-id');
       expect(missing, isFalse);
-      expect(
-        c.read(styleExploreWorkspaceNotifierProvider).positiveDocument,
-        created.positiveDocument,
-      );
+      expect(explorePosDocument(c), created.positiveDocument);
     });
 
     test('handleRecipeDeleted unlinks only the active recipe', () async {
@@ -176,8 +159,8 @@ void main() {
       );
       final created = await listNotifier.create(
         name: '会被删',
-        positiveDocument: _doc('dp', '删除后仍在'),
-        negativeDocument: _doc('dn', 'lowres'),
+        positiveDocument: doc('删除后仍在'),
+        negativeDocument: doc('lowres'),
       );
       await session.loadRecipe(created.id);
 
@@ -193,118 +176,121 @@ void main() {
         isNull,
       );
       // 工作区内容保留，用户可另存。
-      expect(workspaceText(c), isNot(''));
+      expect(explorePosDocument(c).text, isNot(''));
     });
   });
 
   group('workspace isolation and persistence', () {
-    test('main and explore workspaces are fully isolated', () async {
+    test('main and explore lanes are fully isolated', () {
       final c = container();
-      final main = c.read(promptBlockWorkspaceNotifierProvider.notifier);
-      final explore = c.read(styleExploreWorkspaceNotifierProvider.notifier);
+      final main = c.read(pillWorkspaceProvider(PillScopes.main).notifier);
+      final explore = explorePos(c);
 
-      main.replacePlainText(PromptBlockLane.positive, '生成页内容');
-      explore.replacePlainText(PromptBlockLane.positive, '探索页内容');
+      main.setText('生成页内容');
+      explore.setText('探索页内容');
 
-      expect(main.plainTextFor(PromptBlockLane.positive), '生成页内容');
-      expect(explore.plainTextFor(PromptBlockLane.positive), '探索页内容');
       expect(
-        c.read(promptBlockWorkspaceNotifierProvider).positiveDocument,
-        isNot(c.read(styleExploreWorkspaceNotifierProvider).positiveDocument),
+        c.read(pillWorkspaceProvider(PillScopes.main)).document.text,
+        '生成页内容',
       );
+      expect(explorePosDocument(c).text, '探索页内容');
     });
 
     test(
-      'workspace state survives provider rebuild via Hive snapshot',
+      'explore lane state survives provider rebuild via Hive snapshot',
       () async {
         final c = container();
-        final explore = c.read(styleExploreWorkspaceNotifierProvider.notifier);
-        explore.replacePlainText(PromptBlockLane.positive, '持久化 A');
-        explore.insertBlockAtTextOffset(
-          PromptBlockLane.positive,
-          textSegmentId: exploreTextSegmentId(c),
-          offset: 3,
-          block: block('[块]'),
-        );
+        explorePos(c).setText('持久化 A');
+        exploreNeg(c).setText('持久化负向');
         // 手动冲刷 fire-and-forget 的持久化。
-        await flushWorkspacePersist(c, 'styleExplore');
+        final storage = c.read(pillWorkspaceStorageProvider);
+        await storage.persist(PillScopes.explorePos, explorePosDocument(c));
+        await storage.persist(PillScopes.exploreNeg, exploreNegDocument(c));
 
         final rebuilt = container();
-        final state = rebuilt.read(styleExploreWorkspaceNotifierProvider);
-        expect(state.positiveDocument.segments, hasLength(3));
-        final restoredBlock = state.positiveDocument.segments[1];
-        expect(restoredBlock, isA<BlockSegment>());
+        expect(explorePosDocument(rebuilt).text, '持久化 A');
+        expect(exploreNegDocument(rebuilt).text, '持久化负向');
+        // 主 lane 不受探索 lane 影响。
         expect(
-          rebuilt
-              .read(styleExploreWorkspaceNotifierProvider.notifier)
-              .plainTextFor(PromptBlockLane.positive),
-          '持久化[块] A',
+          rebuilt.read(pillWorkspaceProvider(PillScopes.main)).document.text,
+          '',
         );
-
-        // 生成页 scope 不受探索页影响。
-        final mainState = rebuilt.read(promptBlockWorkspaceNotifierProvider);
-        expect(mainState.positiveDocument.segments.single, isA<TextSegment>());
       },
     );
+  });
 
-    test('main workspace state is restored under its own scope', () async {
+  group('restoreDocument', () {
+    test('restores a complete document snapshot verbatim', () {
       final c = container();
-      final main = c.read(promptBlockWorkspaceNotifierProvider.notifier);
-      main.replacePlainText(PromptBlockLane.negative, '生成页负向');
-      await flushWorkspacePersist(c, 'main');
+      const marker = '\uE000';
+      const snapshot = PillDocument(
+        text: 'head \uE000 tail',
+        instances: {marker: PillInstance(blockId: 'block-1', enabled: false)},
+      );
 
-      final rebuilt = container();
-      expect(
-        rebuilt
-            .read(promptBlockWorkspaceNotifierProvider.notifier)
-            .plainTextFor(PromptBlockLane.negative),
-        '生成页负向',
-      );
-      expect(
-        rebuilt
-            .read(styleExploreWorkspaceNotifierProvider.notifier)
-            .plainTextFor(PromptBlockLane.negative),
-        '',
-      );
+      explorePos(c).restoreDocument(snapshot);
+
+      expect(explorePosDocument(c), snapshot);
+      // 固定模式实例不触发 roll，enabled 原样保留。
+      final restored = explorePosDocument(c).instances[marker]!;
+      expect(restored.enabled, isFalse);
+      expect(restored.currentRoll, isNull);
     });
+
+    test(
+      'random instance missing currentRoll is materialized on restore',
+      () async {
+        final c = container(
+          overrides: [
+            promptBlockLibraryNotifierProvider.overrideWith(
+              () => _FakeLibraryNotifier(
+                PromptBlockLibraryState(
+                  blocks: [
+                    PromptBlock(
+                      id: 'block-1',
+                      title: '画风',
+                      content: 'A, B',
+                      createdAt: DateTime.utc(2026, 8, 31),
+                      updatedAt: DateTime.utc(2026, 8, 31),
+                    ),
+                  ],
+                  folders: const [],
+                ),
+              ),
+            ),
+          ],
+        );
+        await c.read(promptBlockLibraryNotifierProvider.future);
+
+        const marker = '\uE000';
+        const snapshot = PillDocument(
+          text: '\uE000',
+          instances: {
+            marker: PillInstance(
+              blockId: 'block-1',
+              settings: PillInstanceSettings(mode: PillRollMode.random),
+            ),
+          },
+        );
+
+        explorePos(c).restoreDocument(snapshot);
+
+        final restored = explorePosDocument(c).instances[marker]!;
+        expect(restored.currentRoll, isNotNull);
+        expect(
+          c.read(pillWorkspaceProvider(PillScopes.explorePos)).projection,
+          restored.currentRoll,
+        );
+      },
+    );
   });
 }
 
-PromptBlockDocument _doc(String id, String text) {
-  return PromptBlockDocument(
-    documentId: id,
-    segments: [PromptBlockSegment.text(id: '$id-seg', text: text)],
-    updatedAt: DateTime.utc(2026, 8, 31),
-  );
-}
+class _FakeLibraryNotifier extends PromptBlockLibraryNotifier {
+  _FakeLibraryNotifier(this.initialState);
 
-String workspaceText(ProviderContainer c) {
-  return c
-      .read(styleExploreWorkspaceNotifierProvider.notifier)
-      .plainTextFor(PromptBlockLane.positive);
-}
+  final PromptBlockLibraryState initialState;
 
-String exploreTextSegmentId(ProviderContainer c) {
-  return c
-      .read(styleExploreWorkspaceNotifierProvider)
-      .positiveDocument
-      .segments
-      .single
-      .id;
-}
-
-/// 手动执行一次同步持久化，等价于 notifier 内 fire-and-forget 的最终落盘。
-Future<void> flushWorkspacePersist(ProviderContainer c, String scope) async {
-  final storage = c.read(promptWorkspaceStateStorageProvider);
-  final state = c.read(styleExploreWorkspaceNotifierProvider);
-  final stateForScope = scope == 'main'
-      ? c.read(promptBlockWorkspaceNotifierProvider)
-      : state;
-  await storage.persist(
-    scope,
-    PromptWorkspaceSnapshot(
-      positiveDocument: stateForScope.positiveDocument,
-      negativeDocument: stateForScope.negativeDocument,
-    ),
-  );
+  @override
+  Future<PromptBlockLibraryState> build() async => initialState;
 }

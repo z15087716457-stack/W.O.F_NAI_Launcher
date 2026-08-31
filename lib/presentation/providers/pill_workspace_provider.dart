@@ -55,6 +55,12 @@ abstract final class PillScopes {
 
   /// 角色框负向：char:<characterId>:neg
   static String charNeg(String characterId) => 'char:$characterId:neg';
+
+  /// 画风探索页正向 lane。
+  static const String explorePos = 'explore:pos';
+
+  /// 画风探索页负向 lane。
+  static const String exploreNeg = 'explore:neg';
 }
 
 /// 药丸编辑器「活动插入目标」：最近一次 caret/焦点变化所在的
@@ -235,6 +241,14 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     if (state.projection == text) return false;
     replaceWithPlainText(text);
     return true;
+  }
+
+  /// 用完整文档快照整体恢复（Recipe 载入等外部场景）。
+  ///
+  /// 与 [build] 恢复同一路径：`_apply` 内部兜底物化缺失的 currentRoll
+  /// （不新增 roll 时机）、记录墓碑并重算投影、分键持久化。
+  void restoreDocument(PillDocument document) {
+    _apply(document);
   }
 
   /// 块库内容变化后由编辑器调用：投影可能已变，需要重新发出。

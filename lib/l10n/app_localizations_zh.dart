@@ -10156,20 +10156,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_positiveHint => '组合块与文本，探索画风';
 
   @override
+  String get styleExplore_runSectionTitle => '探索任务';
+
+  @override
+  String get styleExplore_runEmptyHint => '探索任务（Run）固化提示词与参数快照，批量生成候选并筛选。';
+
+  @override
+  String get styleExplore_newRun => '新建任务';
+
+  @override
+  String get styleExplore_runNextStage => '探索任务将在下一阶段开放';
+
+  @override
+  String get styleExplore_manageRecipes => '管理';
+
+  @override
+  String styleExplore_recipeMoreCount(int count) {
+    return '还有 $count 个配方…';
+  }
+
+  @override
+  String get styleExplore_galleryTitle => '候选画廊';
+
+  @override
+  String get styleExplore_galleryEmptyHint => '候选画廊将在下一阶段开放';
+
+  @override
   String get promptBlockEditor_library => '块库';
-
-  @override
-  String get promptBlockEditor_back => '返回上级文件夹';
-
-  @override
-  String get promptBlockEditor_preview => '预览正文';
-
-  @override
-  String get promptBlockEditor_enable => '启用块';
-
-  @override
-  String get promptBlockEditor_disable => '禁用块';
-
-  @override
-  String get promptBlockEditor_more => '块操作';
 }

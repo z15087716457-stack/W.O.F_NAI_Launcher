@@ -5980,10 +5980,14 @@
   "styleExplore_copyNegative": "Copy negative",
   "styleExplore_copiedToClipboard": "Copied",
   "styleExplore_positiveHint": "Compose blocks and text to explore styles",
-  "promptBlockEditor_library": "Block library",
-  "promptBlockEditor_back": "Back to parent folder",
-  "promptBlockEditor_preview": "Preview content",
-  "promptBlockEditor_enable": "Enable block",
-  "promptBlockEditor_disable": "Disable block",
-  "promptBlockEditor_more": "Block actions"
+  "styleExplore_runSectionTitle": "Explore runs",
+  "styleExplore_runEmptyHint": "An explore run captures prompt and parameter snapshots, generates candidates in batch, then reviews them.",
+  "styleExplore_newRun": "New run",
+  "styleExplore_runNextStage": "Explore runs will be available in the next phase",
+  "styleExplore_manageRecipes": "Manage",
+  "styleExplore_recipeMoreCount": "{count} more…",
+  "@styleExplore_recipeMoreCount": {"placeholders": {"count": {"type": "int"}}},
+  "styleExplore_galleryTitle": "Candidate gallery",
+  "styleExplore_galleryEmptyHint": "The candidate gallery will be available in the next phase",
+  "promptBlockEditor_library": "Block library"
 }

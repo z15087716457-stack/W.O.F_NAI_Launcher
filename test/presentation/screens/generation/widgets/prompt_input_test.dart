@@ -11,7 +11,6 @@ import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assi
 import 'package:nai_launcher/presentation/prompt_assistant/widgets/prompt_assistant_overlay.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
-import 'package:nai_launcher/presentation/providers/prompt_block_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
@@ -78,9 +77,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('负向药丸 lane：插入块投影进参数，外部写入同步进编辑器', (
-    tester,
-  ) async {
+  testWidgets('负向药丸 lane：插入块投影进参数，外部写入同步进编辑器', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -580,13 +577,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.text('external import, from bridge'), findsOneWidget);
-    final workspace = container.read(
-      promptBlockWorkspaceNotifierProvider.notifier,
-    );
-    expect(
-      workspace.plainTextFor(PromptBlockLane.positive),
-      'external import, from bridge',
-    );
+    final pillWorkspace = container.read(pillWorkspaceNotifierProvider);
+    expect(pillWorkspace.document.text, 'external import, from bridge');
+    expect(pillWorkspace.projection, 'external import, from bridge');
     expect(tester.takeException(), isNull);
   });
 
@@ -646,9 +639,6 @@ void main() {
       ),
     );
     final pillNotifier = container.read(pillWorkspaceNotifierProvider.notifier);
-    final workspace = container.read(
-      promptBlockWorkspaceNotifierProvider.notifier,
-    );
     pillNotifier.replaceWithPlainText('1girl, ');
     pillNotifier.insertBlockAt(offset: 7, blockId: 'source-block-ui');
     await tester.pump();
@@ -664,10 +654,6 @@ void main() {
 
     expect(find.byType(PromptPill), findsNothing);
     expect(find.text('flattened replacement'), findsOneWidget);
-    expect(
-      workspace.plainTextFor(PromptBlockLane.positive),
-      'flattened replacement',
-    );
     final pillState = container.read(pillWorkspaceNotifierProvider);
     expect(pillState.document.text, 'flattened replacement');
     expect(pillState.document.instances, isEmpty);

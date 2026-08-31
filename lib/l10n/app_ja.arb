@@ -5980,10 +5980,14 @@
   "styleExplore_copyNegative": "ネガティブをコピー",
   "styleExplore_copiedToClipboard": "コピーしました",
   "styleExplore_positiveHint": "ブロックとテキストを組み合わせてスタイルを探索",
-  "promptBlockEditor_library": "ブロックライブラリ",
-  "promptBlockEditor_back": "親フォルダーへ戻る",
-  "promptBlockEditor_preview": "内容をプレビュー",
-  "promptBlockEditor_enable": "ブロックを有効化",
-  "promptBlockEditor_disable": "ブロックを無効化",
-  "promptBlockEditor_more": "ブロック操作"
+  "styleExplore_runSectionTitle": "探索ラン",
+  "styleExplore_runEmptyHint": "探索ランはプロンプトとパラメータのスナップショットを固定し、候補を一括生成して選別します。",
+  "styleExplore_newRun": "新規ラン",
+  "styleExplore_runNextStage": "探索ランは次のフェーズで公開予定です",
+  "styleExplore_manageRecipes": "管理",
+  "styleExplore_recipeMoreCount": "あと {count} 件…",
+  "@styleExplore_recipeMoreCount": {"placeholders": {"count": {"type": "int"}}},
+  "styleExplore_galleryTitle": "候補ギャラリー",
+  "styleExplore_galleryEmptyHint": "候補ギャラリーは次のフェーズで公開予定です",
+  "promptBlockEditor_library": "ブロックライブラリ"
 }

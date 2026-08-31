@@ -13,14 +13,11 @@ import '../../../../core/utils/sd_to_nai_converter.dart';
 import '../../../../data/models/character/character_prompt.dart';
 import '../../../../data/models/fixed_tag/fixed_tag_entry.dart';
 import '../../../../data/models/prompt/prompt_preset_mode.dart';
-import '../../../../data/models/prompt_block/prompt_block_document.dart';
-import '../../../../data/models/prompt_block/prompt_block_segment.dart';
 import '../../../../data/services/alias_resolver_service.dart';
 import '../../../providers/character_prompt_provider.dart';
 import '../../../providers/fixed_tags_provider.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/prompt_maximize_provider.dart';
-import '../../../providers/prompt_block_workspace_provider.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_regex_rules_provider.dart';
 import '../../../providers/prompt_token_counter_provider.dart';
@@ -113,17 +110,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     required String prompt,
     required String negativePrompt,
   }) {
-    final notifier = ref.read(promptBlockWorkspaceNotifierProvider.notifier);
-    final state = ref.read(promptBlockWorkspaceNotifierProvider);
-    if (prompt.isNotEmpty &&
-        _isFreshWorkspaceDocument(state.positiveDocument)) {
-      notifier.replacePlainText(PromptBlockLane.positive, prompt);
-    }
-    if (negativePrompt.isNotEmpty &&
-        _isFreshWorkspaceDocument(state.negativeDocument)) {
-      notifier.replacePlainText(PromptBlockLane.negative, negativePrompt);
-    }
-    // 药丸工作区（正向）对称恢复：仅在全新文档时用存储的提示词重建
+    // 药丸工作区（正向）恢复：仅在全新文档时用存储的提示词重建
     final pillState = ref.read(pillWorkspaceNotifierProvider);
     if (prompt.isNotEmpty &&
         pillState.document.text.isEmpty &&
@@ -141,12 +128,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           .read(pillWorkspaceProvider(PillScopes.negative).notifier)
           .replaceWithPlainText(negativePrompt);
     }
-  }
-
-  bool _isFreshWorkspaceDocument(PromptBlockDocument document) {
-    if (document.segments.length != 1) return false;
-    final segment = document.segments.single;
-    return segment is TextSegment && segment.text.isEmpty;
   }
 
   /// 消费待填充提示词（从画廊或词库发送）

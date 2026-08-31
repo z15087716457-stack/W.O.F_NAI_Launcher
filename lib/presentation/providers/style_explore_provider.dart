@@ -2,11 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../core/storage/style_explore_recipe_storage.dart';
-import '../../data/models/prompt_block/prompt_block_document.dart';
-import '../../data/models/prompt_block/prompt_block_segment.dart';
+import '../../data/models/prompt_block/pill_document.dart';
 import '../../data/models/style_explore/style_explore_recipe.dart';
 import '../../data/repositories/style_explore_recipe_repository.dart';
-import 'prompt_block_workspace_provider.dart';
+import 'pill_workspace_provider.dart';
 
 part 'style_explore_provider.freezed.dart';
 
@@ -62,8 +61,8 @@ class StyleExploreRecipeListNotifier
 
   Future<StyleExploreRecipe> create({
     required String name,
-    required PromptBlockDocument positiveDocument,
-    required PromptBlockDocument negativeDocument,
+    required PillDocument positiveDocument,
+    required PillDocument negativeDocument,
   }) {
     return _mutate(
       (repository) => repository.create(
@@ -116,17 +115,22 @@ class StyleExploreSessionState with _$StyleExploreSessionState {
       _StyleExploreSessionState;
 }
 
-/// 探索会话：工作区（探索专用实例）与 Recipe 快照之间的载入/保存协调。
+/// 探索会话：药丸工作区（探索专用正负 lane）与 Recipe 快照之间的
+/// 载入/保存协调。
 ///
-/// 载入把 Recipe 文档快照写进探索工作区；保存把工作区当前文档写回
-/// Recipe。两者都只搬运不可变快照，不触碰公共块库。
+/// 载入把 Recipe 文档快照恢复进探索 lane（[PillWorkspaceNotifier.restoreDocument]，
+/// 与 lane 启动恢复同一物化语义）；保存把 lane 当前文档写回 Recipe。
+/// 两者都只搬运不可变快照，不触碰公共块库。
 class StyleExploreSessionNotifier extends Notifier<StyleExploreSessionState> {
   @override
   StyleExploreSessionState build() =>
       const StyleExploreSessionState(activeRecipeId: null);
 
-  PromptBlockWorkspaceNotifier get _workspace =>
-      ref.read(styleExploreWorkspaceNotifierProvider.notifier);
+  PillWorkspaceNotifier get _positiveLane =>
+      ref.read(pillWorkspaceProvider(PillScopes.explorePos).notifier);
+
+  PillWorkspaceNotifier get _negativeLane =>
+      ref.read(pillWorkspaceProvider(PillScopes.exploreNeg).notifier);
 
   /// 把 Recipe 快照载入探索工作区。
   ///
@@ -137,22 +141,16 @@ class StyleExploreSessionNotifier extends Notifier<StyleExploreSessionState> {
         .getRecipe(recipeId);
     if (recipe == null) return false;
 
-    _workspace.replaceDocument(
-      PromptBlockLane.positive,
-      recipe.positiveDocument,
-    );
-    _workspace.replaceDocument(
-      PromptBlockLane.negative,
-      recipe.negativeDocument,
-    );
+    _positiveLane.restoreDocument(recipe.positiveDocument);
+    _negativeLane.restoreDocument(recipe.negativeDocument);
     state = StyleExploreSessionState(activeRecipeId: recipe.id);
     return true;
   }
 
   /// 从空白文档开始新的探索；不关联任何 Recipe。
   void startNew() {
-    _workspace.replacePlainText(PromptBlockLane.positive, '');
-    _workspace.replacePlainText(PromptBlockLane.negative, '');
+    _positiveLane.replaceWithPlainText('');
+    _negativeLane.replaceWithPlainText('');
     state = const StyleExploreSessionState(activeRecipeId: null);
   }
 
@@ -172,11 +170,11 @@ class StyleExploreSessionNotifier extends Notifier<StyleExploreSessionState> {
         .overwrite(
           recipe.copyWith(
             positiveDocument: ref
-                .read(styleExploreWorkspaceNotifierProvider)
-                .positiveDocument,
+                .read(pillWorkspaceProvider(PillScopes.explorePos))
+                .document,
             negativeDocument: ref
-                .read(styleExploreWorkspaceNotifierProvider)
-                .negativeDocument,
+                .read(pillWorkspaceProvider(PillScopes.exploreNeg))
+                .document,
           ),
         );
   }
@@ -188,11 +186,11 @@ class StyleExploreSessionNotifier extends Notifier<StyleExploreSessionState> {
         .create(
           name: name,
           positiveDocument: ref
-              .read(styleExploreWorkspaceNotifierProvider)
-              .positiveDocument,
+              .read(pillWorkspaceProvider(PillScopes.explorePos))
+              .document,
           negativeDocument: ref
-              .read(styleExploreWorkspaceNotifierProvider)
-              .negativeDocument,
+              .read(pillWorkspaceProvider(PillScopes.exploreNeg))
+              .document,
         );
     state = StyleExploreSessionState(activeRecipeId: created.id);
     return created;
@@ -213,8 +211,8 @@ final styleExploreSessionNotifierProvider =
 
 /// 工作区相对关联 Recipe 是否有未保存修改。
 ///
-/// 无关联 Recipe 或列表尚未就绪时视为不脏；比较只看两份文档的
-/// segments，时间戳不参与。
+/// 无关联 Recipe 或列表尚未就绪时视为不脏；比较按 [PillDocument] 全等
+/// （文本 + 实例逐键值），Recipe 里的 createdAt/updatedAt 不参与。
 final styleExploreDirtyProvider = Provider<bool>((ref) {
   final session = ref.watch(styleExploreSessionNotifierProvider);
   final activeId = session.activeRecipeId;
@@ -226,25 +224,11 @@ final styleExploreDirtyProvider = Provider<bool>((ref) {
       ?.recipeById(activeId);
   if (recipe == null) return false;
 
-  final workspace = ref.watch(styleExploreWorkspaceNotifierProvider);
-  return !_segmentsEqual(
-        recipe.positiveDocument.segments,
-        workspace.positiveDocument.segments,
-      ) ||
-      !_segmentsEqual(
-        recipe.negativeDocument.segments,
-        workspace.negativeDocument.segments,
-      );
+  final positive = ref.watch(pillWorkspaceProvider(PillScopes.explorePos));
+  final negative = ref.watch(pillWorkspaceProvider(PillScopes.exploreNeg));
+  return recipe.positiveDocument != positive.document ||
+      recipe.negativeDocument != negative.document;
 });
-
-/// Dart 的 List == 是同一性比较；脏检测必须逐段比较内容。
-bool _segmentsEqual(List<PromptBlockSegment> a, List<PromptBlockSegment> b) {
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
-}
 
 /// 当前关联的 Recipe（可能为 null：未关联或列表未就绪）。
 final styleExploreActiveRecipeProvider = Provider<StyleExploreRecipe?>((ref) {

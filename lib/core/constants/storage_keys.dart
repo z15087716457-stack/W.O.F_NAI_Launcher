@@ -60,8 +60,10 @@ class StorageKeys {
   static const String fixedTagsSidebarWidth = 'fixed_tags_sidebar_width';
   static const String fixedTagsSidebarViewMode = 'fixed_tags_sidebar_view_mode';
   static const String fixedTagsNegativeHeight = 'fixed_tags_negative_height';
-  static const String blockLibraryPanelExpanded = 'block_library_panel_expanded';
+  static const String blockLibraryPanelExpanded =
+      'block_library_panel_expanded';
   static const String blockLibraryPanelWidth = 'block_library_panel_width';
+  static const String styleExploreGalleryWidth = 'style_explore_gallery_width';
 
   // Panel Expansion State Keys (面板展开状态)
   static const String advancedOptionsExpanded = 'advanced_options_expanded';

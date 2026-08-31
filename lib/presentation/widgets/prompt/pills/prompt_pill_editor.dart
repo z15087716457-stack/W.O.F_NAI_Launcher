@@ -17,10 +17,11 @@ import 'prompt_pill.dart';
 
 /// 药丸块编辑器：单个完整输入框 + 内联药丸。
 ///
-/// 与旧段式 `PromptBlockEditor` 平行存在，仅服务生成页正向主提示词。
-/// 底层文本里块 = 1 个私有区标记字符，实例数据在
-/// [pillWorkspaceProvider]，渲染钩子经 [UnifiedPromptConfig.pillBuilder]
-/// 注入 `NaiSyntaxController` 的 span 构建链。
+/// 每个输入框绑定一个药丸工作区 lane（[PillScopes]）：生成页正向/负向/
+/// 角色框、画风探索页正负 lane 均复用本组件。底层文本里块 = 1 个私有区
+/// 标记字符，实例数据在 [pillWorkspaceProvider]，渲染钩子经
+/// [UnifiedPromptConfig.pillBuilder] 注入 `NaiSyntaxController` 的 span
+/// 构建链。
 ///
 /// 块库入口不在本编辑器内（旧侧签/模态抽屉已拆除），由生成页页面级的
 /// 块库面板承担；本编辑器只负责拖放落点与文内拖动排序。

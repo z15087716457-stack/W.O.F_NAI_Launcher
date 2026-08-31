@@ -8,7 +8,7 @@ import '../utils/app_logger.dart';
 
 /// 药丸工作区的 Hive 持久化层（P0 原型）。
 ///
-/// 与 `PromptWorkspaceStateStorage` 共用同一个 Box、按 key 前缀隔离；
+/// 独占 `prompt_workspace_state_v1` Box、按 key 前缀隔离；
 /// Box 未打开时读写都安全跳过，测试环境无需准备 Hive。
 class PillWorkspaceStorage {
   static const String boxName = StorageKeys.promptWorkspaceStateBox;

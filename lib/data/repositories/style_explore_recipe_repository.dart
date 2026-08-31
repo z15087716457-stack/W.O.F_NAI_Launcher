@@ -1,5 +1,5 @@
 import '../../core/storage/style_explore_recipe_storage.dart';
-import '../../data/models/prompt_block/prompt_block_document.dart';
+import '../../data/models/prompt_block/pill_document.dart';
 import '../models/style_explore/style_explore_recipe.dart';
 
 /// 画风探索 Recipe Repository。
@@ -19,8 +19,8 @@ class StyleExploreRecipeRepository {
   /// 从工作区文档快照创建新 Recipe。
   Future<StyleExploreRecipe> create({
     required String name,
-    required PromptBlockDocument positiveDocument,
-    required PromptBlockDocument negativeDocument,
+    required PillDocument positiveDocument,
+    required PillDocument negativeDocument,
   }) async {
     final recipe = StyleExploreRecipe.create(
       name: name,

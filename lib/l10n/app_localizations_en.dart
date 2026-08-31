@@ -10531,20 +10531,34 @@ class AppLocalizationsEn extends AppLocalizations {
       'Compose blocks and text to explore styles';
 
   @override
+  String get styleExplore_runSectionTitle => 'Explore runs';
+
+  @override
+  String get styleExplore_runEmptyHint =>
+      'An explore run captures prompt and parameter snapshots, generates candidates in batch, then reviews them.';
+
+  @override
+  String get styleExplore_newRun => 'New run';
+
+  @override
+  String get styleExplore_runNextStage =>
+      'Explore runs will be available in the next phase';
+
+  @override
+  String get styleExplore_manageRecipes => 'Manage';
+
+  @override
+  String styleExplore_recipeMoreCount(int count) {
+    return '$count more…';
+  }
+
+  @override
+  String get styleExplore_galleryTitle => 'Candidate gallery';
+
+  @override
+  String get styleExplore_galleryEmptyHint =>
+      'The candidate gallery will be available in the next phase';
+
+  @override
   String get promptBlockEditor_library => 'Block library';
-
-  @override
-  String get promptBlockEditor_back => 'Back to parent folder';
-
-  @override
-  String get promptBlockEditor_preview => 'Preview content';
-
-  @override
-  String get promptBlockEditor_enable => 'Enable block';
-
-  @override
-  String get promptBlockEditor_disable => 'Disable block';
-
-  @override
-  String get promptBlockEditor_more => 'Block actions';
 }

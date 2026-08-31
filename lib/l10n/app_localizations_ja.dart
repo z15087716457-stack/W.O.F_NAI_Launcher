@@ -10302,20 +10302,32 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_positiveHint => 'ブロックとテキストを組み合わせてスタイルを探索';
 
   @override
+  String get styleExplore_runSectionTitle => '探索ラン';
+
+  @override
+  String get styleExplore_runEmptyHint =>
+      '探索ランはプロンプトとパラメータのスナップショットを固定し、候補を一括生成して選別します。';
+
+  @override
+  String get styleExplore_newRun => '新規ラン';
+
+  @override
+  String get styleExplore_runNextStage => '探索ランは次のフェーズで公開予定です';
+
+  @override
+  String get styleExplore_manageRecipes => '管理';
+
+  @override
+  String styleExplore_recipeMoreCount(int count) {
+    return 'あと $count 件…';
+  }
+
+  @override
+  String get styleExplore_galleryTitle => '候補ギャラリー';
+
+  @override
+  String get styleExplore_galleryEmptyHint => '候補ギャラリーは次のフェーズで公開予定です';
+
+  @override
   String get promptBlockEditor_library => 'ブロックライブラリ';
-
-  @override
-  String get promptBlockEditor_back => '親フォルダーへ戻る';
-
-  @override
-  String get promptBlockEditor_preview => '内容をプレビュー';
-
-  @override
-  String get promptBlockEditor_enable => 'ブロックを有効化';
-
-  @override
-  String get promptBlockEditor_disable => 'ブロックを無効化';
-
-  @override
-  String get promptBlockEditor_more => 'ブロック操作';
 }

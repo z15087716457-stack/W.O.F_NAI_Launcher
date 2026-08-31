@@ -18403,41 +18403,59 @@ abstract class AppLocalizations {
   /// **'Compose blocks and text to explore styles'**
   String get styleExplore_positiveHint;
 
+  /// No description provided for @styleExplore_runSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore runs'**
+  String get styleExplore_runSectionTitle;
+
+  /// No description provided for @styleExplore_runEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'An explore run captures prompt and parameter snapshots, generates candidates in batch, then reviews them.'**
+  String get styleExplore_runEmptyHint;
+
+  /// No description provided for @styleExplore_newRun.
+  ///
+  /// In en, this message translates to:
+  /// **'New run'**
+  String get styleExplore_newRun;
+
+  /// No description provided for @styleExplore_runNextStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore runs will be available in the next phase'**
+  String get styleExplore_runNextStage;
+
+  /// No description provided for @styleExplore_manageRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get styleExplore_manageRecipes;
+
+  /// No description provided for @styleExplore_recipeMoreCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more…'**
+  String styleExplore_recipeMoreCount(int count);
+
+  /// No description provided for @styleExplore_galleryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate gallery'**
+  String get styleExplore_galleryTitle;
+
+  /// No description provided for @styleExplore_galleryEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The candidate gallery will be available in the next phase'**
+  String get styleExplore_galleryEmptyHint;
+
   /// No description provided for @promptBlockEditor_library.
   ///
   /// In en, this message translates to:
   /// **'Block library'**
   String get promptBlockEditor_library;
-
-  /// No description provided for @promptBlockEditor_back.
-  ///
-  /// In en, this message translates to:
-  /// **'Back to parent folder'**
-  String get promptBlockEditor_back;
-
-  /// No description provided for @promptBlockEditor_preview.
-  ///
-  /// In en, this message translates to:
-  /// **'Preview content'**
-  String get promptBlockEditor_preview;
-
-  /// No description provided for @promptBlockEditor_enable.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable block'**
-  String get promptBlockEditor_enable;
-
-  /// No description provided for @promptBlockEditor_disable.
-  ///
-  /// In en, this message translates to:
-  /// **'Disable block'**
-  String get promptBlockEditor_disable;
-
-  /// No description provided for @promptBlockEditor_more.
-  ///
-  /// In en, this message translates to:
-  /// **'Block actions'**
-  String get promptBlockEditor_more;
 }
 
 class _AppLocalizationsDelegate

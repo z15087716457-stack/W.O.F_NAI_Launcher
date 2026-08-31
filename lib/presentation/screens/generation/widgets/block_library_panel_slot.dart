@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../providers/layout_state_provider.dart';
+import '../../../providers/pill_workspace_provider.dart';
 import 'block_library_panel.dart';
 import 'resize_handle.dart';
 
@@ -9,7 +10,13 @@ import 'resize_handle.dart';
 ///
 /// 自管理拖拽宽度与动画状态；面板收起时渲染为空。
 class BlockLibraryPanelSlot extends ConsumerStatefulWidget {
-  const BlockLibraryPanelSlot({super.key});
+  const BlockLibraryPanelSlot({
+    super.key,
+    this.fallbackScope = PillScopes.main,
+  });
+
+  /// 透传给 [BlockLibraryPanel] 的点击插入回退 lane。
+  final String fallbackScope;
 
   @override
   ConsumerState<BlockLibraryPanelSlot> createState() =>
@@ -34,7 +41,7 @@ class _BlockLibraryPanelSlotState extends ConsumerState<BlockLibraryPanelSlot> {
       color: Theme.of(context).colorScheme.surface,
       border: Border(right: BorderSide(color: Theme.of(context).dividerColor)),
     );
-    const child = BlockLibraryPanel();
+    final child = BlockLibraryPanel(fallbackScope: widget.fallbackScope);
 
     return Row(
       mainAxisSize: MainAxisSize.min,

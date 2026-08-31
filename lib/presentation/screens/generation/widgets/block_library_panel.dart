@@ -23,7 +23,11 @@ import '../../prompt_block_library/widgets/prompt_block_folder_tree.dart';
 /// 点击药丸 = 插入到主提示词最近光标处；拖拽药丸 = 落点插入；
 /// 悬停 800ms 显示内容预览；右键 = 编辑/收藏/移动/删除。
 class BlockLibraryPanel extends ConsumerStatefulWidget {
-  const BlockLibraryPanel({super.key});
+  const BlockLibraryPanel({super.key, this.fallbackScope = PillScopes.main});
+
+  /// 点击插入的回退 lane：从未聚焦过任何药丸框时插入到这里
+  /// （生成页 = 主提示词；画风探索页 = 探索正向 lane）。
+  final String fallbackScope;
 
   @override
   ConsumerState<BlockLibraryPanel> createState() => _BlockLibraryPanelState();
@@ -314,10 +318,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
           onTap: () => _insertBlock(block),
           onSecondaryTapUp: (details) =>
               _showBlockContextMenu(block, details.globalPosition),
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: chip,
-          ),
+          child: MouseRegion(cursor: SystemMouseCursors.click, child: chip),
         ),
       ),
     );
@@ -370,16 +371,16 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
       selectedFolderId: _allSelected ? null : _selectedFolderId,
       onSelectAll: () => _selectScope(all: true),
       onSelectRoot: () => _selectScope(all: false, folderId: null),
-      onSelectFolder: (folderId) => _selectScope(all: false, folderId: folderId),
+      onSelectFolder: (folderId) =>
+          _selectScope(all: false, folderId: folderId),
       onCreateFolder: (parentId) => _showFolderNameDialog(parentId: parentId),
       onRenameFolder: (folderId) {
         final folder = state.folderById(folderId);
         if (folder != null) _showFolderNameDialog(folder: folder);
       },
-      onMoveFolderToRoot: (folderId) =>
-          ref
-              .read(promptBlockLibraryNotifierProvider.notifier)
-              .moveFolder(folderId, null),
+      onMoveFolderToRoot: (folderId) => ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .moveFolder(folderId, null),
       onDeleteFolder: (folderId) => _deleteFolder(state, folderId),
       onReorderFolders: (parentId, orderedIds) => ref
           .read(promptBlockLibraryNotifierProvider.notifier)
@@ -399,10 +400,10 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
   // ==================== 插入 ====================
 
   /// 点击插入：路由到「最近聚焦的药丸编辑框」（`pillActiveEditorTargetProvider`），
-  /// 从未聚焦过任何框时回退主提示词末尾。
+  /// 从未聚焦过任何框时回退到 [fallbackScope] 末尾。
   void _insertBlock(PromptBlock block) {
     final target = ref.read(pillActiveEditorTargetProvider);
-    final lane = pillWorkspaceProvider(target?.scope ?? PillScopes.main);
+    final lane = pillWorkspaceProvider(target?.scope ?? widget.fallbackScope);
     final document = ref.read(lane).document;
     final offset = (target?.caret ?? document.text.length).clamp(
       0,
