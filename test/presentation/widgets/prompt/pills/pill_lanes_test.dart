@@ -125,8 +125,12 @@ void main() {
       tester.element(find.byType(MaterialApp)),
     );
 
-    container.read(pillWorkspaceProvider('lane-a').notifier).setText('text of A');
-    container.read(pillWorkspaceProvider('lane-b').notifier).setText('text of B');
+    container
+        .read(pillWorkspaceProvider('lane-a').notifier)
+        .setText('text of A');
+    container
+        .read(pillWorkspaceProvider('lane-b').notifier)
+        .setText('text of B');
     await tester.pump();
     expect(find.text('text of A'), findsOneWidget);
 
@@ -296,7 +300,10 @@ Future<ProviderContainer> _pumpEditor(
   return ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
 }
 
-Widget _editorAppBody({required String scope, ValueChanged<String>? onChanged}) {
+Widget _editorAppBody({
+  required String scope,
+  ValueChanged<String>? onChanged,
+}) {
   return MaterialApp(
     locale: const Locale('zh'),
     localizationsDelegates: AppLocalizations.localizationsDelegates,

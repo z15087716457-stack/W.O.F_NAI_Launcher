@@ -92,11 +92,14 @@ abstract final class PillDocumentEditor {
   }
 
   /// 投影为最终提示词：普通字符原样；标记字符按实例展开
-  /// （启用 → [resolveContent] 的内容；禁用/未知/已删块 → 空串）。
+  /// （启用 → [resolveInstance] 的内容；禁用/未知/已删块 → 空串）。
   /// 不做 trim、格式化、分隔符补全——与旧 Composer 的空串拼接语义一致。
+  ///
+  /// [resolveInstance] 收整个实例（P2.5）：固定模式解析块库内容，
+  /// 随机模式读物化的 `currentRoll`——**投影永不 roll**（蓝图红线）。
   static String project(
     PillDocument document,
-    String? Function(String blockId) resolveContent,
+    String? Function(PillInstance instance) resolveInstance,
   ) {
     if (document.instances.isEmpty) return stripMarkers(document.text);
     final buffer = StringBuffer();
@@ -109,7 +112,7 @@ abstract final class PillDocumentEditor {
       }
       final instance = document.instances[String.fromCharCode(codeUnit)];
       if (instance == null || !instance.enabled) continue;
-      buffer.write(resolveContent(instance.blockId) ?? '');
+      buffer.write(resolveInstance(instance) ?? '');
     }
     return buffer.toString();
   }

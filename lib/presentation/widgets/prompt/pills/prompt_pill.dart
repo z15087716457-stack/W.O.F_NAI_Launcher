@@ -11,6 +11,7 @@ class PromptPill extends StatelessWidget {
     required this.color,
     this.enabled = true,
     this.icon,
+    this.showRollBadge = false,
     this.variant = PromptPillVariant.normal,
   });
 
@@ -20,6 +21,9 @@ class PromptPill extends StatelessWidget {
 
   /// 块自定义图标；null 时用默认模块图标（异常态图标不受此影响）。
   final IconData? icon;
+
+  /// 随机抽取实例的骰子角标（P2.5）：标题后加小号骰子，区分固定/随机实例。
+  final bool showRollBadge;
   final PromptPillVariant variant;
 
   @override
@@ -73,6 +77,10 @@ class PromptPill extends StatelessWidget {
               ),
             ),
           ),
+          if (showRollBadge) ...[
+            const SizedBox(width: 2),
+            Icon(Icons.casino_outlined, size: 11, color: borderColor),
+          ],
         ],
       ),
     );

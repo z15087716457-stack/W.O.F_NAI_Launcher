@@ -9731,6 +9731,93 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockPill_unknown => '失效块';
 
   @override
+  String get pillCardReroll => '重抽';
+
+  @override
+  String get pillCardSettings => '随机设置';
+
+  @override
+  String get pillCardEnable => '启用';
+
+  @override
+  String get pillCardDisable => '禁用';
+
+  @override
+  String get pillCardDeleteInstance => '删除实例';
+
+  @override
+  String get pillCardEmptyRoll => '（本次为空）';
+
+  @override
+  String get pillSettingsTitle => '块实例设置';
+
+  @override
+  String get pillSettingsModeFixed => '固定';
+
+  @override
+  String get pillSettingsModeRandom => '随机抽取';
+
+  @override
+  String get pillSettingsCount => '抽取数量';
+
+  @override
+  String get pillSettingsOrder => '输出顺序';
+
+  @override
+  String get pillSettingsOrderDrawn => '抽中序';
+
+  @override
+  String get pillSettingsOrderOriginal => '按原序';
+
+  @override
+  String get pillSettingsWeight => '随机权重';
+
+  @override
+  String get pillSettingsWeightMin => '最小';
+
+  @override
+  String get pillSettingsWeightMax => '最大';
+
+  @override
+  String get pillSettingsWeightAverage => '平均';
+
+  @override
+  String get pillSettingsDispersion => '离散';
+
+  @override
+  String get pillSettingsDispersionFocused => '集中';
+
+  @override
+  String get pillSettingsDispersionBalanced => '均衡';
+
+  @override
+  String get pillSettingsDispersionSpread => '发散';
+
+  @override
+  String get pillSettingsAdvanced => '高级';
+
+  @override
+  String get pillSettingsLeftDispersion => '左离散';
+
+  @override
+  String get pillSettingsRightDispersion => '右离散';
+
+  @override
+  String get pillSettingsSoftBalance => '软平衡';
+
+  @override
+  String get pillSettingsSoftBalanceStrength => '回拉强度';
+
+  @override
+  String get pillSettingsTriggerProbability => '触发概率';
+
+  @override
+  String get pillSettingsCancel => '取消';
+
+  @override
+  String get pillSettingsApply => '确定';
+
+  @override
   String get promptBlockLibrary_unnamedFolder => '未命名文件夹';
 
   @override

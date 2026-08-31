@@ -85,6 +85,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
     required KritaBridgeExternalImageRegistrar registerExternalImage,
     required KritaBridgeCancelGeneration cancelGeneration,
     KritaBridgeGenerationBilled? onGenerationBilled,
+    void Function()? onGenerationEnqueued,
     KritaBridgeParamsWriter? writeParams,
     KritaBridgeSeedLockReader? readSeedLock,
     KritaBridgeCharactersReader? readCharacters,
@@ -105,6 +106,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
        _registerExternalImage = registerExternalImage,
        _cancelGeneration = cancelGeneration,
        _onGenerationBilled = onGenerationBilled,
+       _onGenerationEnqueued = onGenerationEnqueued,
        _writeParams = writeParams,
        _readSeedLock = readSeedLock,
        _readCharacters = readCharacters,
@@ -123,6 +125,10 @@ class KritaBridgeService implements KritaBridgeMessageService {
   final KritaBridgeExternalImageRegistrar _registerExternalImage;
   final KritaBridgeCancelGeneration _cancelGeneration;
   final KritaBridgeGenerationBilled? _onGenerationBilled;
+
+  /// 请求参数冻结（mapping 已捕获）、确认受理后触发（P2.5 块实例随机：
+  /// 本次请求用入队前的 roll，这里重 roll 让下一张/界面显示新内容）。
+  final void Function()? _onGenerationEnqueued;
   final KritaBridgeParamsWriter? _writeParams;
   final KritaBridgeSeedLockReader? _readSeedLock;
   final KritaBridgeCharactersReader? _readCharacters;
@@ -309,6 +315,10 @@ class KritaBridgeService implements KritaBridgeMessageService {
       );
       return;
     }
+
+    // P2.5：参数已在 handle() 的 mapping 里冻结，受理后重 roll 随机块实例，
+    // 下一次桥接生成（和 UI 显示）拿到新内容。
+    _onGenerationEnqueued?.call();
 
     final request = KritaBridgeGenerateRequest(
       id: id,

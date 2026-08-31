@@ -27,11 +27,7 @@ void main() {
       );
       expect(doc.text, 'hello$markerA');
 
-      final doc2 = PillDocumentEditor.insertBlock(
-        doc,
-        offset: 2,
-        blockId: 'b',
-      );
+      final doc2 = PillDocumentEditor.insertBlock(doc, offset: 2, blockId: 'b');
       expect(doc2.text, 'he$markerB${'llo'}$markerA');
     });
   });
@@ -132,8 +128,10 @@ void main() {
         text: 'a$markerA',
         instances: {markerA: PillInstance(blockId: 'a')},
       );
-      expect(identical(PillDocumentEditor.reconcile(doc, 'a$markerA'), doc),
-          isTrue);
+      expect(
+        identical(PillDocumentEditor.reconcile(doc, 'a$markerA'), doc),
+        isTrue,
+      );
     });
   });
 
@@ -146,8 +144,8 @@ void main() {
           markerB: PillInstance(blockId: 'b', enabled: false),
         },
       );
-      final projection = PillDocumentEditor.project(doc, (id) {
-        return switch (id) {
+      final projection = PillDocumentEditor.project(doc, (instance) {
+        return switch (instance.blockId) {
           'a' => 'AAA',
           'b' => 'BBB',
           _ => null,
@@ -173,9 +171,7 @@ void main() {
     test('document survives toJson/fromJson', () {
       const doc = PillDocument(
         text: 'x$markerA',
-        instances: {
-          markerA: PillInstance(blockId: 'a', enabled: false),
-        },
+        instances: {markerA: PillInstance(blockId: 'a', enabled: false)},
       );
       final restored = PillDocument.fromJson(doc.toJson());
       expect(restored, doc);

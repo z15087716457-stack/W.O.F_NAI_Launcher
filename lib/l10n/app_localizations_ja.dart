@@ -9873,6 +9873,93 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockPill_unknown => '無効なブロック';
 
   @override
+  String get pillCardReroll => '再抽選';
+
+  @override
+  String get pillCardSettings => 'ランダム設定';
+
+  @override
+  String get pillCardEnable => '有効化';
+
+  @override
+  String get pillCardDisable => '無効化';
+
+  @override
+  String get pillCardDeleteInstance => 'インスタンス削除';
+
+  @override
+  String get pillCardEmptyRoll => '（今回は空）';
+
+  @override
+  String get pillSettingsTitle => 'ブロックインスタンス設定';
+
+  @override
+  String get pillSettingsModeFixed => '固定';
+
+  @override
+  String get pillSettingsModeRandom => 'ランダム抽出';
+
+  @override
+  String get pillSettingsCount => '抽出数';
+
+  @override
+  String get pillSettingsOrder => '出力順';
+
+  @override
+  String get pillSettingsOrderDrawn => '抽選順';
+
+  @override
+  String get pillSettingsOrderOriginal => '元の順序';
+
+  @override
+  String get pillSettingsWeight => 'ランダム重み';
+
+  @override
+  String get pillSettingsWeightMin => '最小';
+
+  @override
+  String get pillSettingsWeightMax => '最大';
+
+  @override
+  String get pillSettingsWeightAverage => '平均';
+
+  @override
+  String get pillSettingsDispersion => '分散';
+
+  @override
+  String get pillSettingsDispersionFocused => '集中';
+
+  @override
+  String get pillSettingsDispersionBalanced => '均衡';
+
+  @override
+  String get pillSettingsDispersionSpread => '拡散';
+
+  @override
+  String get pillSettingsAdvanced => '詳細';
+
+  @override
+  String get pillSettingsLeftDispersion => '左分散';
+
+  @override
+  String get pillSettingsRightDispersion => '右分散';
+
+  @override
+  String get pillSettingsSoftBalance => 'ソフトバランス';
+
+  @override
+  String get pillSettingsSoftBalanceStrength => '強度';
+
+  @override
+  String get pillSettingsTriggerProbability => '発動確率';
+
+  @override
+  String get pillSettingsCancel => 'キャンセル';
+
+  @override
+  String get pillSettingsApply => '適用';
+
+  @override
   String get promptBlockLibrary_unnamedFolder => '無題のフォルダー';
 
   @override

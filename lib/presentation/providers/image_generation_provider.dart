@@ -32,6 +32,8 @@ import 'character_prompt_provider.dart';
 import 'fixed_tags_provider.dart';
 import 'image_save_settings_provider.dart';
 import 'local_gallery_provider.dart';
+import 'pill_roll_coordinator.dart';
+import 'pill_workspace_provider.dart';
 import 'quality_preset_provider.dart';
 import 'subscription_provider.dart';
 import 'cost_estimate_provider.dart';
@@ -524,6 +526,70 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     );
   }
 
+  /// 提示词管线（P2.5 抽出）：别名 → 固定词 → 预设 → 角色转换。
+  /// 批次循环每批重跑，让重 roll 的块实例投影逐张生效；
+  /// vibes 编码（`_prepareVibesForGeneration`）不在其中，只跑一次。
+  ImageParams _applyPromptPipeline(ImageParams params) {
+    var effectiveParams = params;
+
+    // 解析别名（将 <词库名> 展开为实际内容）
+    final aliasResolver = ref.read(aliasResolverServiceProvider.notifier);
+    final promptWithAliases = aliasResolver.resolveAliases(
+      effectiveParams.prompt,
+    );
+    final negativeWithAliases = aliasResolver.resolveAliases(
+      effectiveParams.negativePrompt,
+    );
+    if (promptWithAliases != effectiveParams.prompt ||
+        negativeWithAliases != effectiveParams.negativePrompt) {
+      AppLogger.d('Resolved aliases in prompts', 'AliasResolver');
+      effectiveParams = effectiveParams.copyWith(
+        prompt: promptWithAliases,
+        negativePrompt: negativeWithAliases,
+      );
+    }
+
+    // 应用固定词到提示词
+    final fixedTagsState = ref.read(fixedTagsNotifierProvider);
+    final promptWithFixedTags = fixedTagsState.applyToPrompt(
+      effectiveParams.prompt,
+    );
+    final negativePromptWithFixedTags = fixedTagsState.applyToNegativePrompt(
+      effectiveParams.negativePrompt,
+    );
+    if (promptWithFixedTags != effectiveParams.prompt ||
+        negativePromptWithFixedTags != effectiveParams.negativePrompt) {
+      AppLogger.d(
+        'Applied fixed tags: positive=${fixedTagsState.enabledCount}, negative=${fixedTagsState.negativeEnabledCount}',
+        'FixedTags',
+      );
+      effectiveParams = effectiveParams.copyWith(
+        prompt: promptWithFixedTags,
+        negativePrompt: negativePromptWithFixedTags,
+      );
+    }
+
+    final presetResolution = _resolvePromptPresets(effectiveParams);
+    effectiveParams = effectiveParams.copyWith(
+      prompt: presetResolution.prompt,
+      negativePrompt: presetResolution.negativePrompt,
+    );
+
+    // 读取多角色提示词配置并转换为 API 格式
+    final characterConfig = ref.read(characterPromptNotifierProvider);
+    final apiCharacters = _convertCharactersToApiFormat(characterConfig);
+
+    // NAI 官方预设保持为 API 开关；自定义预设展开成显式提示词，避免官方预设重复生效。
+    return effectiveParams.copyWith(
+      qualityToggle: presetResolution.qualityToggle,
+      qualityTagPreset: presetResolution.qualityTagPreset,
+      ucPreset: presetResolution.ucPreset,
+      characters: apiCharacters,
+      // 如果有角色且使用自定义位置，启用坐标模式
+      useCoords: apiCharacters.isNotEmpty && !characterConfig.globalAiChoice,
+    );
+  }
+
   Future<void> generate(ImageParams params) {
     // 个人点数记账（合租账本）：生成前捕获预估单价与图片列表，
     // 仅当本次运行确实产出新图（completed 且列表已更新）才扣减，
@@ -580,7 +646,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
     final generationRunId = _startGenerationRun();
 
-    ImageParams effectiveParams = params;
+    final effectiveParams = params;
 
     // 开始生成前清空当前图片
     state = state.copyWith(
@@ -596,74 +662,22 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final batchSize = ref.read(imagesPerRequestProvider);
     final totalImages = batchCount * batchSize;
 
-    // 解析别名（将 <词库名> 展开为实际内容）
-    // 统一在此处解析所有提示词（主提示词、负向提示词）
-    final aliasResolver = ref.read(aliasResolverServiceProvider.notifier);
-    final promptWithAliases = aliasResolver.resolveAliases(
-      effectiveParams.prompt,
-    );
-    final negativeWithAliases = aliasResolver.resolveAliases(
-      effectiveParams.negativePrompt,
-    );
-    if (promptWithAliases != effectiveParams.prompt ||
-        negativeWithAliases != effectiveParams.negativePrompt) {
-      AppLogger.d('Resolved aliases in prompts', 'AliasResolver');
-      effectiveParams = effectiveParams.copyWith(
-        prompt: promptWithAliases,
-        negativePrompt: negativeWithAliases,
-      );
-    }
-
-    // 应用固定词到提示词
-    final fixedTagsState = ref.read(fixedTagsNotifierProvider);
-    final promptWithFixedTags = fixedTagsState.applyToPrompt(
-      effectiveParams.prompt,
-    );
-    final negativePromptWithFixedTags = fixedTagsState.applyToNegativePrompt(
-      effectiveParams.negativePrompt,
-    );
-    if (promptWithFixedTags != effectiveParams.prompt ||
-        negativePromptWithFixedTags != effectiveParams.negativePrompt) {
-      AppLogger.d(
-        'Applied fixed tags: positive=${fixedTagsState.enabledCount}, negative=${fixedTagsState.negativeEnabledCount}',
-        'FixedTags',
-      );
-      effectiveParams = effectiveParams.copyWith(
-        prompt: promptWithFixedTags,
-        negativePrompt: negativePromptWithFixedTags,
-      );
-    }
-
-    final presetResolution = _resolvePromptPresets(effectiveParams);
-    effectiveParams = effectiveParams.copyWith(
-      prompt: presetResolution.prompt,
-      negativePrompt: presetResolution.negativePrompt,
-    );
-
-    // 读取多角色提示词配置并转换为 API 格式
-    final characterConfig = ref.read(characterPromptNotifierProvider);
-    final apiCharacters = _convertCharactersToApiFormat(characterConfig);
-
-    // NAI 官方预设保持为 API 开关；自定义预设展开成显式提示词，避免官方预设重复生效。
-    final ImageParams baseParams = effectiveParams.copyWith(
-      qualityToggle: presetResolution.qualityToggle,
-      qualityTagPreset: presetResolution.qualityTagPreset,
-      ucPreset: presetResolution.ucPreset,
-      characters: apiCharacters,
-      // 如果有角色且使用自定义位置，启用坐标模式
-      useCoords: apiCharacters.isNotEmpty && !characterConfig.globalAiChoice,
-    );
+    final baseParams = _applyPromptPipeline(effectiveParams);
     final preparedParams = await _prepareVibesForGeneration(baseParams);
     if (_shouldAbortGenerationRun(generationRunId)) return;
 
     // 如果只生成 1 张，直接生成；随机种子在进入请求前实体化，便于失败快照保留真实 seed。
     if (batchCount == 1 && batchSize == 1) {
-      await _generateSingle(
+      final singleFuture = _generateSingle(
         _materializeRandomSeed(preparedParams),
         1,
         1,
         generationRunId,
       );
+      // P2.5：入队后即刻重 roll 随机块实例——本张用入队前的投影，
+      // UI 随即显示下一张的内容（roll 时机 4）。
+      ref.read(pillRollCoordinatorProvider).rollAllLanesAndSync();
+      await singleFuture;
       // 注意：生成完成音效由 GenerationCompletionWatcher 统一监听
       // 点数消耗由 AnlasBalanceWatcher 自动监听余额变化记录
       return;
@@ -687,8 +701,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     Object? lastBatchError;
     DateTime? concurrencyDeadline;
 
-    // 当前使用的参数
-    final ImageParams currentParams = preparedParams;
+    // 当前使用的参数（P2.5：批次间重 roll 块实例后重跑提示词管线，逐张换内容）
+    var currentParams = preparedParams;
 
     for (int batch = 0; batch < batchCount; batch++) {
       if (_shouldAbortGenerationRun(generationRunId)) break;
@@ -771,6 +785,27 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         lastBatchError = e;
         AppLogger.e('生成第 ${batch + 1} 批失败: $e');
         generatedImages += batchSize;
+      }
+
+      // P2.5 逐张重抽：本批已结束（成功或失败），重 roll 随机块实例并把
+      // 新投影重跑提示词管线，下一批生效；429 重试（continue）不消耗 roll。
+      if (batch + 1 < batchCount) {
+        final rolled = ref
+            .read(pillRollCoordinatorProvider)
+            .rollAllLanesAndSync();
+        if (rolled.isNotEmpty) {
+          final freshParams = ref.read(generationParamsNotifierProvider);
+          currentParams =
+              _applyPromptPipeline(
+                params.copyWith(
+                  prompt: rolled[PillScopes.main] ?? freshParams.prompt,
+                  negativePrompt:
+                      rolled[PillScopes.negative] ?? freshParams.negativePrompt,
+                ),
+              )
+              // vibes 编码只跑一次：保留已准备结果，不被管线重建覆盖
+              .copyWith(vibeReferencesV4: currentParams.vibeReferencesV4);
+        }
       }
     }
 

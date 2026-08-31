@@ -1,7 +1,11 @@
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/storage/pill_workspace_storage.dart';
 import '../../core/utils/pill_document_editor.dart';
+import '../../core/utils/pill_roll_engine.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import 'prompt_block_library_provider.dart';
 
@@ -73,11 +77,26 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   final Map<String, PillInstance> _tombstones = {};
   static const int _tombstoneCapacity = 64;
 
+  /// 全局随机数源（roll 不可复现是特性：复现链 = currentRoll 快照 +
+  /// 生成图元数据 + nai_fill.py 回填，不做种子系统）。
+  /// 测试可替换为 seeded Random 锁定确定性。
+  @visibleForTesting
+  static Random rng = Random();
+
+  /// 活跃 lane 注册表（P2.5）：roll 协调器据此枚举各工作区。
+  /// keep-alive 家族实例一旦建立即常驻；角色删除走 [forgetScope] 摘除。
+  static final Set<String> activeScopes = <String>{};
+
+  /// 从注册表摘除 lane（角色删除/清空时随 `deleteScope` 一并调用）。
+  static void forgetScope(String scope) => activeScopes.remove(scope);
+
   @override
   PillWorkspaceState build(String scope) {
+    activeScopes.add(scope);
     final storage = ref.read(pillWorkspaceStorageProvider);
     final restored = storage.tryLoadSync(scope);
-    final document = restored ?? PillDocument.empty();
+    // 挂载即兜底物化：存档里的随机实例若缺 currentRoll 先 roll 再投影
+    final document = _materializeRolls(restored ?? PillDocument.empty());
     return PillWorkspaceState(
       document: document,
       projection: _project(document),
@@ -153,6 +172,48 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     );
   }
 
+  /// 更新实例随机参数（L2 弹窗确定，roll 时机 2）：
+  /// 写设置；切到/更新随机模式时立即重 roll 一次。
+  void updateInstanceSettings(String marker, PillInstanceSettings settings) {
+    final instance = state.document.instances[marker];
+    if (instance == null) return;
+    var updated = instance.copyWith(settings: settings);
+    if (settings.isRandom) {
+      updated = updated.copyWith(currentRoll: _rollFor(updated));
+    }
+    final instances = Map<String, PillInstance>.of(state.document.instances)
+      ..[marker] = updated;
+    _apply(state.document.copyWith(instances: instances));
+  }
+
+  /// 手动重 roll（L1 骰子，roll 时机 3）；固定模式无操作。
+  void rollMarker(String marker) {
+    final instance = state.document.instances[marker];
+    if (instance == null || !instance.settings.isRandom) return;
+    final instances = Map<String, PillInstance>.of(state.document.instances)
+      ..[marker] = instance.copyWith(currentRoll: _rollFor(instance));
+    _apply(state.document.copyWith(instances: instances));
+  }
+
+  /// 本 lane 全部随机实例重 roll（roll 时机 4：每次生成入队后）。
+  /// 返回是否有实例的 currentRoll 发生了变化（协调器据此推送投影）。
+  bool rollAllRandom() {
+    var changed = false;
+    final instances = Map<String, PillInstance>.of(state.document.instances);
+    for (final entry in instances.entries) {
+      final instance = entry.value;
+      if (!instance.settings.isRandom) continue;
+      final rolled = _rollFor(instance);
+      if (rolled != instance.currentRoll) {
+        instances[entry.key] = instance.copyWith(currentRoll: rolled);
+        changed = true;
+      }
+    }
+    if (!changed) return false;
+    _apply(state.document.copyWith(instances: instances));
+    return true;
+  }
+
   /// 删除标记（含未知/失效标记），文本中的出现一并清除。
   void removeMarker(String marker) {
     _apply(PillDocumentEditor.removeMarker(state.document, marker));
@@ -185,10 +246,17 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   }
 
   String _project(PillDocument document) {
-    return PillDocumentEditor.project(document, _resolveContent);
+    return PillDocumentEditor.project(document, _resolveInstance);
   }
 
-  String? _resolveContent(String blockId) {
+  /// 实例内容解析（P2.5）：固定模式 = 块库实时内容；随机模式 =
+  /// 物化的 `currentRoll`（投影永不 roll，物化只在文档变更点发生）。
+  String? _resolveInstance(PillInstance instance) {
+    if (instance.settings.isRandom) return instance.currentRoll;
+    return _resolveBlockContent(instance.blockId);
+  }
+
+  String? _resolveBlockContent(String blockId) {
     return ref
         .read(promptBlockLibraryNotifierProvider)
         .valueOrNull
@@ -196,7 +264,35 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         ?.content;
   }
 
+  /// 随机实例的兜底物化：`currentRoll == null` 时立即 roll 一次。
+  /// 保证「L1 显示 = 生成发送 = token 计数」三者永远同一份。
+  PillDocument _materializeRolls(PillDocument document) {
+    var changed = false;
+    final instances = Map<String, PillInstance>.of(document.instances);
+    for (final entry in instances.entries) {
+      final instance = entry.value;
+      if (instance.settings.isRandom && instance.currentRoll == null) {
+        instances[entry.key] = instance.copyWith(
+          currentRoll: _rollFor(instance),
+        );
+        changed = true;
+      }
+    }
+    return changed ? document.copyWith(instances: instances) : document;
+  }
+
+  /// 对单个实例执行 roll：块内容切原子 → 随机引擎。
+  String _rollFor(PillInstance instance) {
+    final content = _resolveBlockContent(instance.blockId) ?? '';
+    return PillRollEngine.rollInstance(
+      settings: instance.settings,
+      atoms: PillRollEngine.splitTopLevelAtoms(content),
+      rng: rng,
+    );
+  }
+
   void _apply(PillDocument document) {
+    document = _materializeRolls(document);
     _recordTombstones(state.document, document);
     state = PillWorkspaceState(
       document: document,
@@ -226,11 +322,9 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
 
 /// 按 scope 取药丸工作区（同参返回同一 provider 实例，家族内隔离）。
 final pillWorkspaceProvider =
-    NotifierProvider.family<
-      PillWorkspaceNotifier,
-      PillWorkspaceState,
-      String
-    >(PillWorkspaceNotifier.new);
+    NotifierProvider.family<PillWorkspaceNotifier, PillWorkspaceState, String>(
+      PillWorkspaceNotifier.new,
+    );
 
 /// 主提示词（正向）lane 的便捷别名，等价 `pillWorkspaceProvider('main')`。
 final pillWorkspaceNotifierProvider = pillWorkspaceProvider(PillScopes.main);

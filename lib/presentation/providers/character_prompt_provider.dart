@@ -77,6 +77,9 @@ class CharacterPromptNotifier extends _$CharacterPromptNotifier {
     for (final id in characterIds) {
       unawaited(storage.deleteScope(PillScopes.charPos(id)));
       unawaited(storage.deleteScope(PillScopes.charNeg(id)));
+      // 同步摘除活跃 lane 注册表，roll 协调器不再枚举已删角色
+      PillWorkspaceNotifier.forgetScope(PillScopes.charPos(id));
+      PillWorkspaceNotifier.forgetScope(PillScopes.charNeg(id));
     }
   }
 

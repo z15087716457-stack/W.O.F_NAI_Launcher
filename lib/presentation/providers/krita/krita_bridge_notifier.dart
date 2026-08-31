@@ -16,6 +16,7 @@ import '../fixed_tags_provider.dart';
 import '../generation/image_workflow_controller.dart';
 import '../image_generation_provider.dart';
 import '../image_save_settings_provider.dart';
+import '../pill_roll_coordinator.dart';
 import 'krita_bridge_service.dart';
 
 import 'package:uuid/uuid.dart';
@@ -288,6 +289,9 @@ final kritaBridgeNotifierProvider =
             box.put(StorageKeys.kritaBridgeEnabled, enabled),
         serviceFactory: (server) => KritaBridgeService(
           readBaseParams: () => ref.read(generationParamsNotifierProvider),
+          // P2.5：桥接生成受理后重 roll 随机块实例（逐张重抽）
+          onGenerationEnqueued: () =>
+              ref.read(pillRollCoordinatorProvider).rollAllLanesAndSync(),
           readPromptSnapshot: (params) {
             final fixedTags = ref.read(fixedTagsNotifierProvider);
             return (

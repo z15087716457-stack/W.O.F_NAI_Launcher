@@ -17632,6 +17632,180 @@ abstract class AppLocalizations {
   /// **'Invalid block'**
   String get promptBlockPill_unknown;
 
+  /// No description provided for @pillCardReroll.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-roll'**
+  String get pillCardReroll;
+
+  /// No description provided for @pillCardSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Random settings'**
+  String get pillCardSettings;
+
+  /// No description provided for @pillCardEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get pillCardEnable;
+
+  /// No description provided for @pillCardDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get pillCardDisable;
+
+  /// No description provided for @pillCardDeleteInstance.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove instance'**
+  String get pillCardDeleteInstance;
+
+  /// No description provided for @pillCardEmptyRoll.
+  ///
+  /// In en, this message translates to:
+  /// **'(empty roll this time)'**
+  String get pillCardEmptyRoll;
+
+  /// No description provided for @pillSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Block instance settings'**
+  String get pillSettingsTitle;
+
+  /// No description provided for @pillSettingsModeFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get pillSettingsModeFixed;
+
+  /// No description provided for @pillSettingsModeRandom.
+  ///
+  /// In en, this message translates to:
+  /// **'Random draw'**
+  String get pillSettingsModeRandom;
+
+  /// No description provided for @pillSettingsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw count'**
+  String get pillSettingsCount;
+
+  /// No description provided for @pillSettingsOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Output order'**
+  String get pillSettingsOrder;
+
+  /// No description provided for @pillSettingsOrderDrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'As drawn'**
+  String get pillSettingsOrderDrawn;
+
+  /// No description provided for @pillSettingsOrderOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Original order'**
+  String get pillSettingsOrderOriginal;
+
+  /// No description provided for @pillSettingsWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Random weight'**
+  String get pillSettingsWeight;
+
+  /// No description provided for @pillSettingsWeightMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Min'**
+  String get pillSettingsWeightMin;
+
+  /// No description provided for @pillSettingsWeightMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Max'**
+  String get pillSettingsWeightMax;
+
+  /// No description provided for @pillSettingsWeightAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get pillSettingsWeightAverage;
+
+  /// No description provided for @pillSettingsDispersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispersion'**
+  String get pillSettingsDispersion;
+
+  /// No description provided for @pillSettingsDispersionFocused.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused'**
+  String get pillSettingsDispersionFocused;
+
+  /// No description provided for @pillSettingsDispersionBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced'**
+  String get pillSettingsDispersionBalanced;
+
+  /// No description provided for @pillSettingsDispersionSpread.
+  ///
+  /// In en, this message translates to:
+  /// **'Spread'**
+  String get pillSettingsDispersionSpread;
+
+  /// No description provided for @pillSettingsAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get pillSettingsAdvanced;
+
+  /// No description provided for @pillSettingsLeftDispersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get pillSettingsLeftDispersion;
+
+  /// No description provided for @pillSettingsRightDispersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Right'**
+  String get pillSettingsRightDispersion;
+
+  /// No description provided for @pillSettingsSoftBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft balance'**
+  String get pillSettingsSoftBalance;
+
+  /// No description provided for @pillSettingsSoftBalanceStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get pillSettingsSoftBalanceStrength;
+
+  /// No description provided for @pillSettingsTriggerProbability.
+  ///
+  /// In en, this message translates to:
+  /// **'Trigger chance'**
+  String get pillSettingsTriggerProbability;
+
+  /// No description provided for @pillSettingsCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get pillSettingsCancel;
+
+  /// No description provided for @pillSettingsApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get pillSettingsApply;
+
   /// No description provided for @promptBlockLibrary_unnamedFolder.
   ///
   /// In en, this message translates to:

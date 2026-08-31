@@ -6,6 +6,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_drag_data.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/pills/pill_instance_card.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill_editor.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
@@ -39,7 +40,7 @@ void main() {
     expect(state.projection, 'artist:foo, artist:bar');
   });
 
-  testWidgets('tapping a pill toggles enabled and updates projection', (
+  testWidgets('tapping a pill opens the L1 card; disable via card', (
     tester,
   ) async {
     final emissions = <String>[];
@@ -56,7 +57,16 @@ void main() {
         .insertBlockAt(offset: 0, blockId: 'style');
     await tester.pump();
 
+    // P2.5：点药丸 = 开 L1 实例卡（启停挪进卡里，不再直接 toggle）
     await tester.tap(find.byType(PromptPill));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(PillInstanceCard), findsOneWidget);
+    // 卡内显示块内容预览
+    expect(find.text('CONTENT'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.visibility_outlined));
     await tester.pump();
 
     final state = container.read(pillWorkspaceNotifierProvider);
@@ -99,10 +109,7 @@ void main() {
     final container = await _pump(
       tester,
       libraryState: PromptBlockLibraryState(
-        blocks: [
-          _block('a', 'A', 'AAA'),
-          _block('b', 'B', 'BBB'),
-        ],
+        blocks: [_block('a', 'A', 'AAA'), _block('b', 'B', 'BBB')],
         folders: const [],
       ),
     );
@@ -175,10 +182,7 @@ void main() {
 
     await tester.tap(find.byType(PromptPill));
     await tester.pump();
-    expect(
-      container.read(pillWorkspaceNotifierProvider).document.text,
-      'abc',
-    );
+    expect(container.read(pillWorkspaceNotifierProvider).document.text, 'abc');
     expect(find.byType(PromptPill), findsNothing);
   });
 
@@ -195,7 +199,10 @@ void main() {
     final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
     notifier.insertBlockAt(offset: 0, blockId: 'style');
     await tester.pump();
-    expect(container.read(pillWorkspaceNotifierProvider).document.text, markerA);
+    expect(
+      container.read(pillWorkspaceNotifierProvider).document.text,
+      markerA,
+    );
 
     // 剪切：marker 从文本消失 → 实例被对账移除（进墓碑缓存）
     notifier.setText('');

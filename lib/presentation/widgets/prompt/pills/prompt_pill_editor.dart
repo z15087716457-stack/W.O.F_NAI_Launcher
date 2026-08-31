@@ -12,6 +12,7 @@ import '../blocks/prompt_block_drag_data.dart';
 import '../blocks/prompt_block_icons.dart';
 import '../unified/unified_prompt_config.dart';
 import '../unified/unified_prompt_input.dart';
+import 'pill_instance_card.dart';
 import 'prompt_pill.dart';
 
 /// 药丸块编辑器：单个完整输入框 + 内联药丸。
@@ -83,6 +84,9 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   /// 播种挂起中：文档尚未物化，禁止对外发射投影（防陈旧空串回写）。
   bool _pendingSeed = false;
 
+  /// L1 实例卡浮层（P2.5）：同屏只开一张，编辑器卸载时必须带走。
+  OverlayEntry? _instanceCardEntry;
+
   @override
   void initState() {
     super.initState();
@@ -150,11 +154,33 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
   @override
   void dispose() {
+    _dismissInstanceCard();
     _controller
       ..removeListener(_handleControllerChanged)
       ..dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  // ==================== L1 实例卡 ====================
+
+  /// 点药丸开 L1 实例卡（P2.5）：点击位置浮卡，点外/再点别处关闭。
+  void _showInstanceCard(String marker, Offset globalPosition) {
+    _dismissInstanceCard();
+    final entry = buildPillInstanceOverlayEntry(
+      scope: widget.pillScope,
+      marker: marker,
+      globalPosition: globalPosition,
+      onDismiss: _dismissInstanceCard,
+    );
+    _instanceCardEntry = entry;
+    Overlay.of(context, rootOverlay: true).insert(entry);
+  }
+
+  void _dismissInstanceCard() {
+    final entry = _instanceCardEntry;
+    _instanceCardEntry = null;
+    entry?.remove();
   }
 
   /// 本编辑器绑定的药丸工作区（按 [pillScope] 取家族实例）。
@@ -194,7 +220,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
     return DragTarget<PromptBlockDragData>(
       onWillAcceptWithDetails: (_) => true,
-      onAcceptWithDetails: (details) => _handleDrop(details.data, details.offset),
+      onAcceptWithDetails: (details) =>
+          _handleDrop(details.data, details.offset),
       builder: (context, candidateData, rejectedData) {
         final highlighted = candidateData.isNotEmpty;
         return AnimatedContainer(
@@ -244,6 +271,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
         Object.hash(
           marker,
           instance.enabled,
+          instance.settings.isRandom,
           block?.title ?? '',
           block?.color ?? '',
           block?.iconName ?? '',
@@ -269,9 +297,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       return WidgetSpan(
         alignment: PlaceholderAlignment.middle,
         child: GestureDetector(
-          onTap: () => ref
-              .read(_workspace.notifier)
-              .removeMarker(marker),
+          onTap: () => ref.read(_workspace.notifier).removeMarker(marker),
           child: PromptPill(
             title: context.l10n.promptBlockPill_unknown,
             color: Theme.of(context).colorScheme.outline,
@@ -298,9 +324,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       return WidgetSpan(
         alignment: PlaceholderAlignment.middle,
         child: GestureDetector(
-          onTap: () => ref
-              .read(_workspace.notifier)
-              .removeMarker(marker),
+          onTap: () => ref.read(_workspace.notifier).removeMarker(marker),
           child: PromptPill(
             title: context.l10n.promptBlockPill_missing,
             color: Theme.of(context).colorScheme.error,
@@ -318,6 +342,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       color: promptBlockColorFromString(block.color),
       enabled: instance.enabled,
       icon: promptBlockIconFromName(block.iconName),
+      showRollBadge: instance.settings.isRandom,
     );
 
     return WidgetSpan(
@@ -346,10 +371,11 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
           ),
         ),
         childWhenDragging: Opacity(opacity: 0.35, child: pill),
+        // P2.5：点击从「直接切启停」改为开 L1 实例卡（启停/删除/重 roll/
+        // 高级选项都在卡里）；即按即拖与 tap 天然分流，不受影响。
         child: GestureDetector(
-          onTap: () => ref
-              .read(_workspace.notifier)
-              .toggleEnabled(marker),
+          onTapUp: (details) =>
+              _showInstanceCard(marker, details.globalPosition),
           child: pill,
         ),
       ),
@@ -462,9 +488,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   }
 
   void _handleComfyuiImport(String globalPrompt, List<CharacterPrompt> chars) {
-    ref
-        .read(_workspace.notifier)
-        .replaceWithPlainText(globalPrompt);
+    ref.read(_workspace.notifier).replaceWithPlainText(globalPrompt);
     widget.onComfyuiImport?.call(globalPrompt, chars);
   }
 }

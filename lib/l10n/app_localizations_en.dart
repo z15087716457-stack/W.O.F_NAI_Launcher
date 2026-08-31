@@ -10097,6 +10097,93 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockPill_unknown => 'Invalid block';
 
   @override
+  String get pillCardReroll => 'Re-roll';
+
+  @override
+  String get pillCardSettings => 'Random settings';
+
+  @override
+  String get pillCardEnable => 'Enable';
+
+  @override
+  String get pillCardDisable => 'Disable';
+
+  @override
+  String get pillCardDeleteInstance => 'Remove instance';
+
+  @override
+  String get pillCardEmptyRoll => '(empty roll this time)';
+
+  @override
+  String get pillSettingsTitle => 'Block instance settings';
+
+  @override
+  String get pillSettingsModeFixed => 'Fixed';
+
+  @override
+  String get pillSettingsModeRandom => 'Random draw';
+
+  @override
+  String get pillSettingsCount => 'Draw count';
+
+  @override
+  String get pillSettingsOrder => 'Output order';
+
+  @override
+  String get pillSettingsOrderDrawn => 'As drawn';
+
+  @override
+  String get pillSettingsOrderOriginal => 'Original order';
+
+  @override
+  String get pillSettingsWeight => 'Random weight';
+
+  @override
+  String get pillSettingsWeightMin => 'Min';
+
+  @override
+  String get pillSettingsWeightMax => 'Max';
+
+  @override
+  String get pillSettingsWeightAverage => 'Average';
+
+  @override
+  String get pillSettingsDispersion => 'Dispersion';
+
+  @override
+  String get pillSettingsDispersionFocused => 'Focused';
+
+  @override
+  String get pillSettingsDispersionBalanced => 'Balanced';
+
+  @override
+  String get pillSettingsDispersionSpread => 'Spread';
+
+  @override
+  String get pillSettingsAdvanced => 'Advanced';
+
+  @override
+  String get pillSettingsLeftDispersion => 'Left';
+
+  @override
+  String get pillSettingsRightDispersion => 'Right';
+
+  @override
+  String get pillSettingsSoftBalance => 'Soft balance';
+
+  @override
+  String get pillSettingsSoftBalanceStrength => 'Strength';
+
+  @override
+  String get pillSettingsTriggerProbability => 'Trigger chance';
+
+  @override
+  String get pillSettingsCancel => 'Cancel';
+
+  @override
+  String get pillSettingsApply => 'Apply';
+
+  @override
   String get promptBlockLibrary_unnamedFolder => 'Untitled folder';
 
   @override
