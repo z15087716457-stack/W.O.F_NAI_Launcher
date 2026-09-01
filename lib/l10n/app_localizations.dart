@@ -18834,6 +18834,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Block library'**
   String get promptBlockEditor_library;
+
+  /// No description provided for @styleExplore_lineageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lineage'**
+  String get styleExplore_lineageTitle;
+
+  /// No description provided for @styleExplore_createFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Create family'**
+  String get styleExplore_createFamily;
+
+  /// No description provided for @styleExplore_familyCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Family \"{name}\" created'**
+  String styleExplore_familyCreated(String name);
+
+  /// No description provided for @styleExplore_familyNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Family name'**
+  String get styleExplore_familyNameLabel;
+
+  /// No description provided for @styleExplore_familyNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Soft light main line'**
+  String get styleExplore_familyNameHint;
+
+  /// No description provided for @styleExplore_familyParentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Parents ({count})'**
+  String styleExplore_familyParentsTitle(int count);
+
+  /// No description provided for @styleExplore_customParentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom parent string'**
+  String get styleExplore_customParentLabel;
+
+  /// No description provided for @styleExplore_customParentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a prompt string as a parent'**
+  String get styleExplore_customParentHint;
+
+  /// No description provided for @styleExplore_addCustomParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Add custom string'**
+  String get styleExplore_addCustomParent;
+
+  /// No description provided for @styleExplore_createFamilyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep at least one valid parent string'**
+  String get styleExplore_createFamilyEmpty;
+
+  /// No description provided for @styleExplore_parentSetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gen {generation} parent set'**
+  String styleExplore_parentSetTitle(int generation);
+
+  /// No description provided for @styleExplore_candidatePileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gen {generation} pile · {count}'**
+  String styleExplore_candidatePileTitle(int generation, int count);
+
+  /// No description provided for @styleExplore_parentSetActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get styleExplore_parentSetActive;
+
+  /// No description provided for @styleExplore_parentSetUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Backcrossed'**
+  String get styleExplore_parentSetUsed;
+
+  /// No description provided for @styleExplore_branchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch: {name}'**
+  String styleExplore_branchLabel(String name);
+
+  /// No description provided for @styleExplore_createDeepRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Create round'**
+  String get styleExplore_createDeepRound;
+
+  /// No description provided for @styleExplore_anotherDeepRound.
+  ///
+  /// In en, this message translates to:
+  /// **'New round'**
+  String get styleExplore_anotherDeepRound;
+
+  /// No description provided for @styleExplore_deepRoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deep candidate round'**
+  String get styleExplore_deepRoundTitle;
+
+  /// No description provided for @styleExplore_deepRoundCountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Count must be at least {min} (one per parent)'**
+  String styleExplore_deepRoundCountHint(int min);
+
+  /// No description provided for @styleExplore_deepRoundNoInstance.
+  ///
+  /// In en, this message translates to:
+  /// **'No enabled random block instance in the main prompt; deep round unavailable'**
+  String get styleExplore_deepRoundNoInstance;
+
+  /// No description provided for @styleExplore_deepRoundEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Mutation engine could not produce enough distinct children'**
+  String get styleExplore_deepRoundEmpty;
+
+  /// No description provided for @styleExplore_sortParents.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank'**
+  String get styleExplore_sortParents;
+
+  /// No description provided for @styleExplore_sortTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pairwise parent ranking'**
+  String get styleExplore_sortTitle;
+
+  /// No description provided for @styleExplore_sortPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Which string is closer to the desired result?'**
+  String get styleExplore_sortPrompt;
+
+  /// No description provided for @styleExplore_sortLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left is better'**
+  String get styleExplore_sortLeft;
+
+  /// No description provided for @styleExplore_sortRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Right is better'**
+  String get styleExplore_sortRight;
+
+  /// No description provided for @styleExplore_sortNeither.
+  ///
+  /// In en, this message translates to:
+  /// **'Neither'**
+  String get styleExplore_sortNeither;
+
+  /// No description provided for @styleExplore_sortSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get styleExplore_sortSkip;
+
+  /// No description provided for @styleExplore_sortProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Pair {current}/{total}'**
+  String styleExplore_sortProgress(int current, int total);
+
+  /// No description provided for @styleExplore_sortDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranking finished'**
+  String get styleExplore_sortDone;
+
+  /// No description provided for @styleExplore_branchSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select for branch'**
+  String get styleExplore_branchSelect;
+
+  /// No description provided for @styleExplore_createBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Create branch'**
+  String get styleExplore_createBranch;
+
+  /// No description provided for @styleExplore_branchNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch name (optional)'**
+  String get styleExplore_branchNameLabel;
+
+  /// No description provided for @styleExplore_branchCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch created ({count} parents)'**
+  String styleExplore_branchCreated(int count);
+
+  /// No description provided for @styleExplore_branchNeedLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Branches can only be created from the latest generation pile'**
+  String get styleExplore_branchNeedLatest;
+
+  /// No description provided for @styleExplore_branchRoundsIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'The current generation still has unfinished rounds'**
+  String get styleExplore_branchRoundsIncomplete;
+
+  /// No description provided for @styleExplore_branchDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'A selected child duplicates a first-generation parent string'**
+  String get styleExplore_branchDuplicate;
+
+  /// No description provided for @styleExplore_branchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one child candidate'**
+  String get styleExplore_branchEmpty;
+
+  /// No description provided for @styleExplore_preferenceValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pref {value}'**
+  String styleExplore_preferenceValue(String value);
+
+  /// No description provided for @styleExplore_roundsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} rounds'**
+  String styleExplore_roundsSummary(int count);
+
+  /// No description provided for @styleExplore_pileEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No deep candidates yet — start with \"Create round\"'**
+  String get styleExplore_pileEmpty;
 }
 
 class _AppLocalizationsDelegate

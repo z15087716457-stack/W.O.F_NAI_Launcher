@@ -10399,4 +10399,147 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptBlockEditor_library => '块库';
+
+  @override
+  String get styleExplore_lineageTitle => '谱系';
+
+  @override
+  String get styleExplore_createFamily => '建家族';
+
+  @override
+  String styleExplore_familyCreated(String name) {
+    return '已创建家族「$name」';
+  }
+
+  @override
+  String get styleExplore_familyNameLabel => '家族名称';
+
+  @override
+  String get styleExplore_familyNameHint => '例如：柔光主线';
+
+  @override
+  String styleExplore_familyParentsTitle(int count) {
+    return '父本（$count）';
+  }
+
+  @override
+  String get styleExplore_customParentLabel => '自定义父本串';
+
+  @override
+  String get styleExplore_customParentHint => '输入一段提示词串作为父本';
+
+  @override
+  String get styleExplore_addCustomParent => '添加自定义串';
+
+  @override
+  String get styleExplore_createFamilyEmpty => '请至少保留一个有效父本串';
+
+  @override
+  String styleExplore_parentSetTitle(int generation) {
+    return '第 $generation 代父本集';
+  }
+
+  @override
+  String styleExplore_candidatePileTitle(int generation, int count) {
+    return '第 $generation 代候选堆 · $count 张';
+  }
+
+  @override
+  String get styleExplore_parentSetActive => '活跃';
+
+  @override
+  String get styleExplore_parentSetUsed => '已回交';
+
+  @override
+  String styleExplore_branchLabel(String name) {
+    return '分支：$name';
+  }
+
+  @override
+  String get styleExplore_createDeepRound => '创建候选轮';
+
+  @override
+  String get styleExplore_anotherDeepRound => '新增一轮';
+
+  @override
+  String get styleExplore_deepRoundTitle => '深度候选轮';
+
+  @override
+  String styleExplore_deepRoundCountHint(int min) {
+    return '出图数至少 $min（每个父本保底一张）';
+  }
+
+  @override
+  String get styleExplore_deepRoundNoInstance => '主提示词中没有启用的随机块实例，无法进行深度轮';
+
+  @override
+  String get styleExplore_deepRoundEmpty => '变异引擎无法产出足够不同的子代串';
+
+  @override
+  String get styleExplore_sortParents => '排序';
+
+  @override
+  String get styleExplore_sortTitle => '父本两两排序';
+
+  @override
+  String get styleExplore_sortPrompt => '哪一串更贴近想要的效果？';
+
+  @override
+  String get styleExplore_sortLeft => '左边好';
+
+  @override
+  String get styleExplore_sortRight => '右边好';
+
+  @override
+  String get styleExplore_sortNeither => '都不好';
+
+  @override
+  String get styleExplore_sortSkip => '跳过';
+
+  @override
+  String styleExplore_sortProgress(int current, int total) {
+    return '第 $current/$total 对';
+  }
+
+  @override
+  String get styleExplore_sortDone => '排序完成';
+
+  @override
+  String get styleExplore_branchSelect => '多选建分支';
+
+  @override
+  String get styleExplore_createBranch => '建分支';
+
+  @override
+  String get styleExplore_branchNameLabel => '分支名称（可选）';
+
+  @override
+  String styleExplore_branchCreated(int count) {
+    return '已创建分支（$count 个父本）';
+  }
+
+  @override
+  String get styleExplore_branchNeedLatest => '只能从最新代候选堆建分支';
+
+  @override
+  String get styleExplore_branchRoundsIncomplete => '当前代还有未完成的候选轮';
+
+  @override
+  String get styleExplore_branchDuplicate => '所选子代与第一代父本串完全重复';
+
+  @override
+  String get styleExplore_branchEmpty => '请至少选择一张子代候选';
+
+  @override
+  String styleExplore_preferenceValue(String value) {
+    return '偏好 $value';
+  }
+
+  @override
+  String styleExplore_roundsSummary(int count) {
+    return '$count 轮';
+  }
+
+  @override
+  String get styleExplore_pileEmpty => '尚无深度候选，点「创建候选轮」开始';
 }

@@ -1,10 +1,15 @@
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/explore_mutation_engine.dart';
 import '../../../data/models/image/image_params.dart';
 import '../../../data/models/style_explore/explore_run.dart';
 import '../image_generation_provider.dart';
+import '../pill_roll_coordinator.dart';
 import '../pill_workspace_provider.dart';
 import 'explore_roll_capture.dart';
 import 'explore_run_provider.dart';
@@ -20,6 +25,28 @@ final exploreGenerateFnProvider = Provider<ExploreGenerateFn>(
           .read(imageGenerationNotifierProvider.notifier)
           .generateForExplore(params),
 );
+
+/// 深度轮门禁失败原因（UI 据此映射文案）。
+enum ExploreDeepRoundRejection {
+  /// main lane 没有可用的启用随机实例（子代串没有落点）。
+  noRandomInstance,
+
+  /// 变异引擎在去重空间内无法产出任何子代串。
+  mutationEmpty,
+
+  /// 父本集/家族数据不完整。
+  invalidParentSet,
+}
+
+/// 深度轮启动前的校验失败（UI 捕获后按 [reason] 提示）。
+class ExploreDeepRoundException implements Exception {
+  const ExploreDeepRoundException(this.reason);
+
+  final ExploreDeepRoundRejection reason;
+
+  @override
+  String toString() => 'ExploreDeepRoundException($reason)';
+}
 
 /// Runner 运行态（UI 订阅：当前 run/进度/当前张）。
 class ExploreRunRunnerState {
@@ -71,6 +98,10 @@ class ExploreRunRunnerState {
 class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
   bool _pauseRequested = false;
   bool _cancelRequested = false;
+
+  /// 深度轮变异引擎的随机源（生产不可复现；测试换 seeded Random 锁确定性）。
+  @visibleForTesting
+  static Random deepRng = Random();
 
   @override
   ExploreRunRunnerState build() {
@@ -169,7 +200,144 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       totalCount: pending.length,
     );
 
-    await _runLoop(runId, [for (final candidate in pending) candidate.id]);
+    // 批量生成期间独占 roll 时机：抑制协调器的外部 roll（主生成/桥接
+    // 入队 roll），药丸显示始终=本张实际发送的 roll；循环任何出口
+    // （完成/暂停/取消/异常）都恢复，run 结束后 lane 停留最后一张用过的串。
+    PillRollCoordinator.suppressRoll();
+    try {
+      await _runLoop(runId, [for (final candidate in pending) candidate.id]);
+    } finally {
+      PillRollCoordinator.releaseRollSuppression();
+    }
+    return true;
+  }
+
+  /// 启动深度轮（阶段 D）：变异引擎按父本集出 N 个子代串 → 登记深度
+  /// 候选（lineage.operation=mutation/crossover/injection、generation+1、
+  /// mutatedText/targetBlockId 随候选持久化）→ 逐张生成（每张 roll 后把
+  /// 目标随机实例的 currentRoll 覆盖为子代串再抓快照）。
+  ///
+  /// 返回 false = 门禁拒绝（重入/主生成在跑/run 状态不可启动）；
+  /// 数据或引擎校验失败抛 [ExploreDeepRoundException]（UI 捕获提示）。
+  Future<bool> startDeepRound(
+    String runId, {
+    required String familyId,
+    required String parentSetId,
+    required int count,
+  }) async {
+    if (state.isRunning) return false; // 防重入：同时间只允许一个 run
+    if (ref.read(imageGenerationNotifierProvider).isGenerating) return false;
+    final repository = ref.read(styleExploreRunRepositoryProvider);
+    final run = await repository.getRun(runId);
+    if (run == null) return false;
+    const startable = {
+      ExploreRunStatus.draft,
+      ExploreRunStatus.paused,
+      ExploreRunStatus.generated,
+      ExploreRunStatus.reviewing,
+      ExploreRunStatus.completed,
+    };
+    if (!startable.contains(run.status)) return false;
+
+    final family = run.familyById(familyId);
+    final parentSet = run.parentSetById(parentSetId);
+    if (family == null ||
+        parentSet == null ||
+        parentSet.familyId != family.id ||
+        parentSet.parents.isEmpty) {
+      throw const ExploreDeepRoundException(
+        ExploreDeepRoundRejection.invalidParentSet,
+      );
+    }
+
+    // 子代串的落点 = 与父本来源同 blockId 的 main lane 随机实例
+    // （找不到回退第一个随机实例）；完全没有则不允许深度轮。
+    final targetBlockId = exploreTargetBlockIdForParentSet(run, parentSet);
+    if (resolveExploreOverrideMarker(ref, blockId: targetBlockId) == null) {
+      throw const ExploreDeepRoundException(
+        ExploreDeepRoundRejection.noRandomInstance,
+      );
+    }
+
+    final children = ExploreMutationEngine.generateDeepCandidates(
+      parents: [
+        for (final parent in parentSet.parents)
+          ExploreMutationParent(
+            id: parent.id,
+            text: parent.artistString,
+            preference: parent.preference,
+            sourceCandidateId: parent.sourceCandidateId,
+          ),
+      ],
+      count: count,
+      injectionPool: buildExploreInjectionPool(ref, run),
+      rng: deepRng,
+    );
+    if (children.isEmpty) {
+      throw const ExploreDeepRoundException(
+        ExploreDeepRoundRejection.mutationEmpty,
+      );
+    }
+
+    final childGeneration = parentSet.generation + 1;
+    final round = ExploreRound(
+      id: const Uuid().v4(),
+      number: run.rounds.length + 1,
+      phase: ExploreRoundPhase.deep,
+      status: ExploreRoundStatus.generating,
+      createdAt: DateTime.now(),
+      targetCount: children.length,
+      familyId: family.id,
+      parentSetId: parentSet.id,
+      generation: childGeneration,
+    );
+    final candidates = [
+      for (final child in children)
+        ExploreCandidate(
+          id: const Uuid().v4(),
+          roundId: round.id,
+          lineage: ExploreLineage(
+            parentCandidateIds: [
+              ...{
+                for (final parent in child.parents)
+                  if (parent.sourceCandidateId case final sourceId?) sourceId,
+              },
+            ],
+            operation: child.operation,
+            generation: childGeneration,
+            mutatedText: child.text,
+            targetBlockId: targetBlockId,
+          ),
+        ),
+    ];
+
+    final listNotifier = ref.read(exploreRunListNotifierProvider.notifier);
+    await listNotifier.overwrite(
+      run.copyWith(
+        status: ExploreRunStatus.generating,
+        rounds: [
+          ...run.rounds,
+          round.copyWith(candidateIds: [for (final c in candidates) c.id]),
+        ],
+        candidates: [...run.candidates, ...candidates],
+      ),
+    );
+
+    _pauseRequested = false;
+    _cancelRequested = false;
+    state = ExploreRunRunnerState(
+      runId: runId,
+      isRunning: true,
+      totalCount: candidates.length,
+    );
+
+    // 与 start 同理：深度轮期间同样独占 roll 时机。
+    PillRollCoordinator.suppressRoll();
+    try {
+      await _runLoop(runId, [for (final candidate in candidates) candidate.id]);
+    } finally {
+      PillRollCoordinator.releaseRollSuppression();
+    }
     return true;
   }
 
@@ -231,6 +399,11 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       state = const ExploreRunRunnerState();
       return;
     }
+    // 谱系在登记后不可变，循环内按 id 查（深度候选带 mutatedText 需 override）。
+    final lineageByCandidateId = {
+      for (final candidate in loaded.candidates)
+        candidate.id: candidate.lineage,
+    };
 
     try {
       for (final candidateId in pendingIds) {
@@ -249,6 +422,33 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
         ref
             .read(pillWorkspaceProvider(PillScopes.negative).notifier)
             .rollAllRandom();
+
+        // 深度候选：把目标随机实例的 currentRoll 覆盖为子代串（物化语义，
+        // 投影自然采用）。目标实例在生成间隙被删光时本张标失败跳过。
+        final lineage = lineageByCandidateId[candidateId];
+        final mutatedText = lineage?.mutatedText;
+        if (mutatedText != null) {
+          final marker = resolveExploreOverrideMarker(
+            ref,
+            blockId: lineage?.targetBlockId,
+          );
+          if (marker == null) {
+            await listNotifier.updateGeneration(
+              runId,
+              candidateId,
+              const ExploreCandidateGeneration(
+                status: ExploreCandidateGenerationStatus.failed,
+                error: 'no random instance for override',
+              ),
+            );
+            state = state.copyWith(processedCount: state.processedCount + 1);
+            if (_cancelRequested) break;
+            continue;
+          }
+          ref
+              .read(pillWorkspaceProvider(PillScopes.main).notifier)
+              .setInstanceRollOverride(marker, mutatedText);
+        }
         final rollSnapshot = captureExploreRollSnapshot(ref);
 
         // 红线：roll 后立刻读 generationParams 的 prompt 是旧值

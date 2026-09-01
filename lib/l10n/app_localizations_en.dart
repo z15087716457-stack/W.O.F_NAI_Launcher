@@ -10778,4 +10778,156 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptBlockEditor_library => 'Block library';
+
+  @override
+  String get styleExplore_lineageTitle => 'Lineage';
+
+  @override
+  String get styleExplore_createFamily => 'Create family';
+
+  @override
+  String styleExplore_familyCreated(String name) {
+    return 'Family \"$name\" created';
+  }
+
+  @override
+  String get styleExplore_familyNameLabel => 'Family name';
+
+  @override
+  String get styleExplore_familyNameHint => 'e.g. Soft light main line';
+
+  @override
+  String styleExplore_familyParentsTitle(int count) {
+    return 'Parents ($count)';
+  }
+
+  @override
+  String get styleExplore_customParentLabel => 'Custom parent string';
+
+  @override
+  String get styleExplore_customParentHint =>
+      'Enter a prompt string as a parent';
+
+  @override
+  String get styleExplore_addCustomParent => 'Add custom string';
+
+  @override
+  String get styleExplore_createFamilyEmpty =>
+      'Keep at least one valid parent string';
+
+  @override
+  String styleExplore_parentSetTitle(int generation) {
+    return 'Gen $generation parent set';
+  }
+
+  @override
+  String styleExplore_candidatePileTitle(int generation, int count) {
+    return 'Gen $generation pile · $count';
+  }
+
+  @override
+  String get styleExplore_parentSetActive => 'Active';
+
+  @override
+  String get styleExplore_parentSetUsed => 'Backcrossed';
+
+  @override
+  String styleExplore_branchLabel(String name) {
+    return 'Branch: $name';
+  }
+
+  @override
+  String get styleExplore_createDeepRound => 'Create round';
+
+  @override
+  String get styleExplore_anotherDeepRound => 'New round';
+
+  @override
+  String get styleExplore_deepRoundTitle => 'Deep candidate round';
+
+  @override
+  String styleExplore_deepRoundCountHint(int min) {
+    return 'Count must be at least $min (one per parent)';
+  }
+
+  @override
+  String get styleExplore_deepRoundNoInstance =>
+      'No enabled random block instance in the main prompt; deep round unavailable';
+
+  @override
+  String get styleExplore_deepRoundEmpty =>
+      'Mutation engine could not produce enough distinct children';
+
+  @override
+  String get styleExplore_sortParents => 'Rank';
+
+  @override
+  String get styleExplore_sortTitle => 'Pairwise parent ranking';
+
+  @override
+  String get styleExplore_sortPrompt =>
+      'Which string is closer to the desired result?';
+
+  @override
+  String get styleExplore_sortLeft => 'Left is better';
+
+  @override
+  String get styleExplore_sortRight => 'Right is better';
+
+  @override
+  String get styleExplore_sortNeither => 'Neither';
+
+  @override
+  String get styleExplore_sortSkip => 'Skip';
+
+  @override
+  String styleExplore_sortProgress(int current, int total) {
+    return 'Pair $current/$total';
+  }
+
+  @override
+  String get styleExplore_sortDone => 'Ranking finished';
+
+  @override
+  String get styleExplore_branchSelect => 'Select for branch';
+
+  @override
+  String get styleExplore_createBranch => 'Create branch';
+
+  @override
+  String get styleExplore_branchNameLabel => 'Branch name (optional)';
+
+  @override
+  String styleExplore_branchCreated(int count) {
+    return 'Branch created ($count parents)';
+  }
+
+  @override
+  String get styleExplore_branchNeedLatest =>
+      'Branches can only be created from the latest generation pile';
+
+  @override
+  String get styleExplore_branchRoundsIncomplete =>
+      'The current generation still has unfinished rounds';
+
+  @override
+  String get styleExplore_branchDuplicate =>
+      'A selected child duplicates a first-generation parent string';
+
+  @override
+  String get styleExplore_branchEmpty => 'Select at least one child candidate';
+
+  @override
+  String styleExplore_preferenceValue(String value) {
+    return 'Pref $value';
+  }
+
+  @override
+  String styleExplore_roundsSummary(int count) {
+    return '$count rounds';
+  }
+
+  @override
+  String get styleExplore_pileEmpty =>
+      'No deep candidates yet — start with \"Create round\"';
 }

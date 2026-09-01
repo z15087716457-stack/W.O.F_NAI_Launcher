@@ -10548,4 +10548,148 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get promptBlockEditor_library => 'ブロックライブラリ';
+
+  @override
+  String get styleExplore_lineageTitle => '系譜';
+
+  @override
+  String get styleExplore_createFamily => 'ファミリー作成';
+
+  @override
+  String styleExplore_familyCreated(String name) {
+    return 'ファミリー「$name」を作成しました';
+  }
+
+  @override
+  String get styleExplore_familyNameLabel => 'ファミリー名';
+
+  @override
+  String get styleExplore_familyNameHint => '例：柔らかい光の本線';
+
+  @override
+  String styleExplore_familyParentsTitle(int count) {
+    return '親（$count）';
+  }
+
+  @override
+  String get styleExplore_customParentLabel => 'カスタム親文字列';
+
+  @override
+  String get styleExplore_customParentHint => 'プロンプト文字列を親として入力';
+
+  @override
+  String get styleExplore_addCustomParent => 'カスタム文字列を追加';
+
+  @override
+  String get styleExplore_createFamilyEmpty => '有効な親文字列を少なくとも 1 つ残してください';
+
+  @override
+  String styleExplore_parentSetTitle(int generation) {
+    return '第 $generation 世代の親セット';
+  }
+
+  @override
+  String styleExplore_candidatePileTitle(int generation, int count) {
+    return '第 $generation 世代の候補パイル · $count 枚';
+  }
+
+  @override
+  String get styleExplore_parentSetActive => 'アクティブ';
+
+  @override
+  String get styleExplore_parentSetUsed => 'バッククロス済み';
+
+  @override
+  String styleExplore_branchLabel(String name) {
+    return 'ブランチ：$name';
+  }
+
+  @override
+  String get styleExplore_createDeepRound => '候補ラウンド作成';
+
+  @override
+  String get styleExplore_anotherDeepRound => 'もう一ラウンド';
+
+  @override
+  String get styleExplore_deepRoundTitle => '深層候補ラウンド';
+
+  @override
+  String styleExplore_deepRoundCountHint(int min) {
+    return '枚数は最低 $min（各親につき 1 枚保証）';
+  }
+
+  @override
+  String get styleExplore_deepRoundNoInstance =>
+      'メインプロンプトに有効なランダムブロックインスタンスがないため、深層ラウンドを開始できません';
+
+  @override
+  String get styleExplore_deepRoundEmpty => '変異エンジンが十分に異なる子代を生成できませんでした';
+
+  @override
+  String get styleExplore_sortParents => 'ランク付け';
+
+  @override
+  String get styleExplore_sortTitle => '親のペアワイズランク付け';
+
+  @override
+  String get styleExplore_sortPrompt => 'どちらの文字列が狙いに近いですか？';
+
+  @override
+  String get styleExplore_sortLeft => '左が良い';
+
+  @override
+  String get styleExplore_sortRight => '右が良い';
+
+  @override
+  String get styleExplore_sortNeither => 'どちらも良くない';
+
+  @override
+  String get styleExplore_sortSkip => 'スキップ';
+
+  @override
+  String styleExplore_sortProgress(int current, int total) {
+    return '$current/$total 組目';
+  }
+
+  @override
+  String get styleExplore_sortDone => 'ランク付け完了';
+
+  @override
+  String get styleExplore_branchSelect => '複数選択でブランチ';
+
+  @override
+  String get styleExplore_createBranch => 'ブランチ作成';
+
+  @override
+  String get styleExplore_branchNameLabel => 'ブランチ名（任意）';
+
+  @override
+  String styleExplore_branchCreated(int count) {
+    return 'ブランチを作成しました（$count 親）';
+  }
+
+  @override
+  String get styleExplore_branchNeedLatest => 'ブランチは最新世代の候補パイルからのみ作成できます';
+
+  @override
+  String get styleExplore_branchRoundsIncomplete => '現世代に未完了のラウンドがあります';
+
+  @override
+  String get styleExplore_branchDuplicate => '選択した子代が第一世代の親文字列と完全に重複しています';
+
+  @override
+  String get styleExplore_branchEmpty => '子代候補を少なくとも 1 枚選択してください';
+
+  @override
+  String styleExplore_preferenceValue(String value) {
+    return '選好 $value';
+  }
+
+  @override
+  String styleExplore_roundsSummary(int count) {
+    return '$count ラウンド';
+  }
+
+  @override
+  String get styleExplore_pileEmpty => '深層候補はまだありません。「候補ラウンド作成」から始めてください';
 }

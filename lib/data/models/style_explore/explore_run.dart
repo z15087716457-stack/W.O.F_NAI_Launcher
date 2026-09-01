@@ -41,6 +41,9 @@ enum ExploreLineageOperation {
 
 enum ExploreParentSetStatus { active, used }
 
+/// 两两比较结果（阶段 D 偏好排序）：左胜 / 右胜 / 都不好 / 跳过。
+enum ExploreComparisonResult { left, right, neither, skip }
+
 /// 生成参数精简快照（创建 Run 时固化；后续主参数页改动不污染历史轮）。
 ///
 /// 已知边界：fixed tags/质量词/UC 预设/角色/vibe 等主环境项不入快照，
@@ -193,6 +196,14 @@ class ExploreLineage with _$ExploreLineage {
     @Default([]) List<String> parentCandidateIds,
     required ExploreLineageOperation operation,
     @Default(1) int generation,
+
+    /// 深度轮变异产物串（登记时写入，生成时 override 目标实例用；
+    /// null = 非深度候选）。持久化后暂停/续跑不丢失。
+    String? mutatedText,
+
+    /// 深度轮 override 的目标随机实例所属块 id（生成时按它定位
+    /// main lane 实例；找不到回退第一个随机实例）。
+    String? targetBlockId,
   }) = _ExploreLineage;
 
   factory ExploreLineage.fromJson(Map<String, dynamic> json) =>
@@ -292,6 +303,20 @@ class ExploreParent with _$ExploreParent {
       _$ExploreParentFromJson(json);
 }
 
+/// 一次两两比较记录（阶段 D 偏好排序；skip 只记录不改偏好）。
+@freezed
+class ExplorePairwiseComparison with _$ExplorePairwiseComparison {
+  const factory ExplorePairwiseComparison({
+    required String leftParentId,
+    required String rightParentId,
+    required ExploreComparisonResult result,
+    required DateTime comparedAt,
+  }) = _ExplorePairwiseComparison;
+
+  factory ExplorePairwiseComparison.fromJson(Map<String, dynamic> json) =>
+      _$ExplorePairwiseComparisonFromJson(json);
+}
+
 /// 父本集（阶段 D）：平铺存于 Run 内，家族按 id 引用。
 @freezed
 class ExploreParentSet with _$ExploreParentSet {
@@ -306,6 +331,11 @@ class ExploreParentSet with _$ExploreParentSet {
     @JsonSerializable(explicitToJson: true)
     @Default([])
     List<ExploreParent> parents,
+
+    /// 两两比较记录（偏好排序的审计轨迹）。
+    @JsonSerializable(explicitToJson: true)
+    @Default([])
+    List<ExplorePairwiseComparison> comparisons,
   }) = _ExploreParentSet;
 
   factory ExploreParentSet.fromJson(Map<String, dynamic> json) =>
@@ -413,6 +443,20 @@ class ExploreRun with _$ExploreRun {
   ExploreRound? roundById(String roundId) {
     for (final round in rounds) {
       if (round.id == roundId) return round;
+    }
+    return null;
+  }
+
+  ExploreFamily? familyById(String familyId) {
+    for (final family in families) {
+      if (family.id == familyId) return family;
+    }
+    return null;
+  }
+
+  ExploreParentSet? parentSetById(String parentSetId) {
+    for (final parentSet in parentSets) {
+      if (parentSet.id == parentSetId) return parentSet;
     }
     return null;
   }

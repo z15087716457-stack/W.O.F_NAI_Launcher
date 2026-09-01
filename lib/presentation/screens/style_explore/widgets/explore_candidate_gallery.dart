@@ -7,10 +7,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../providers/style_explore/explore_roll_capture.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 import 'explore_candidate_actions.dart';
+import 'explore_create_family_dialog.dart';
 import 'explore_formal_review_overlay.dart';
+import 'explore_lineage_panel.dart';
 
 /// 右栏候选画廊：筛选 chips + 正式筛选入口 + 网格/牌堆视图 + 大图详情弹窗。
 ///
@@ -62,6 +65,11 @@ class _ExploreCandidateGalleryState
         else
           _buildToolbar(theme, l10n, run, filter, viewMode),
         Divider(height: 1, color: theme.dividerColor),
+        // 谱系区（阶段 D）：无家族时不渲染，只留工具条+候选网格。
+        ExploreLineagePanel(
+          run: run,
+          onOpenCandidate: (candidate) => _openCandidateDetail(run, candidate),
+        ),
         Expanded(
           child: filtered.isEmpty
               ? _EmptyHint(
@@ -149,7 +157,11 @@ class _ExploreCandidateGalleryState
   Widget _buildSelectionBar(AppLocalizations l10n, ExploreRun run) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
-      child: Row(
+      // 窄栏（320px）下按钮可换行，防多语言长文案溢出。
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           IconButton(
             key: const Key('explore-gallery-select-exit'),
@@ -163,7 +175,14 @@ class _ExploreCandidateGalleryState
             l10n.styleExplore_selectedCount(_selectedIds.length),
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const Spacer(),
+          FilledButton.tonalIcon(
+            key: const Key('explore-gallery-create-family'),
+            onPressed: _selectedIds.isEmpty
+                ? null
+                : () => _createFamilyFromSelection(run),
+            icon: const Icon(Icons.account_tree_outlined, size: 16),
+            label: Text(l10n.styleExplore_createFamily),
+          ),
           FilledButton.tonalIcon(
             key: const Key('explore-gallery-merge-adopt'),
             onPressed: _selectedIds.isEmpty ? null : () => _adoptSelected(run),
@@ -350,6 +369,57 @@ class _ExploreCandidateGalleryState
       candidates: selected,
     );
     if (created && mounted) _exitSelection();
+  }
+
+  /// 候选详情弹窗（谱系区候选堆缩略图点击共用）。
+  void _openCandidateDetail(ExploreRun run, ExploreCandidate candidate) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => ExploreCandidateDetailDialog(
+        runId: run.id,
+        candidateId: candidate.id,
+      ),
+    );
+  }
+
+  /// 多选建家族（阶段 D）：对话框确认命名/自定义串后创建家族 +
+  /// 第一代父本集，谱系区选中新家族并退出多选。
+  Future<void> _createFamilyFromSelection(ExploreRun run) async {
+    final selected = [
+      for (final candidate in run.candidates)
+        if (_selectedIds.contains(candidate.id)) candidate,
+    ];
+    if (selected.isEmpty) return;
+    final l10n = context.l10n;
+    final result = await ExploreCreateFamilyDialog.show(
+      context,
+      candidates: selected,
+    );
+    if (result == null || !mounted) return;
+
+    final parents = <({String? sourceCandidateId, String artistString})>[
+      for (final candidate in selected)
+        (
+          sourceCandidateId: candidate.id,
+          artistString: exploreParentStringFor(candidate),
+        ),
+      for (final text in result.customStrings)
+        (sourceCandidateId: null, artistString: text),
+    ];
+    try {
+      final family = await ref
+          .read(exploreRunListNotifierProvider.notifier)
+          .createFamily(run.id, name: result.name, parents: parents);
+      ref.read(exploreActiveFamilyIdProvider.notifier).state = family.id;
+      if (mounted) {
+        AppToast.success(context, l10n.styleExplore_familyCreated(family.name));
+        _exitSelection();
+      }
+    } on StateError {
+      if (mounted) {
+        AppToast.warning(context, l10n.styleExplore_createFamilyEmpty);
+      }
+    }
   }
 
   Future<void> _enterFormalReview(ExploreRun run) async {

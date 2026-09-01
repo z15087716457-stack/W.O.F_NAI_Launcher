@@ -110,18 +110,20 @@ void main() {
               parentCandidateIds: ['cand-0'],
               operation: ExploreLineageOperation.basicRoll,
               generation: 1,
+              mutatedText: '0.9::watercolor::',
+              targetBlockId: 'block-1',
             ),
           ),
           ExploreCandidate.shell(roundId: 'round-2', id: 'cand-2'),
         ],
         parentSets: [
-          const ExploreParentSet(
+          ExploreParentSet(
             id: 'pset-2',
             familyId: 'family-1',
             generation: 2,
             status: ExploreParentSetStatus.used,
             branchName: '回交分支',
-            parents: [
+            parents: const [
               ExploreParent(
                 id: 'parent-1',
                 sourceCandidateId: 'cand-1',
@@ -129,6 +131,20 @@ void main() {
                 preference: 1.5,
               ),
               ExploreParent(id: 'parent-2', artistString: 'custom string'),
+            ],
+            comparisons: [
+              ExplorePairwiseComparison(
+                leftParentId: 'parent-1',
+                rightParentId: 'parent-2',
+                result: ExploreComparisonResult.left,
+                comparedAt: DateTime.utc(2026, 8, 31, 11),
+              ),
+              ExplorePairwiseComparison(
+                leftParentId: 'parent-1',
+                rightParentId: 'parent-2',
+                result: ExploreComparisonResult.skip,
+                comparedAt: DateTime.utc(2026, 8, 31, 12),
+              ),
             ],
           ),
         ],
@@ -167,6 +183,27 @@ void main() {
         ExploreCandidateGenerationStatus.pending,
       );
       expect(decoded.parentSets.single.status, ExploreParentSetStatus.used);
+      expect(decoded.candidates[0].lineage.mutatedText, '0.9::watercolor::');
+      expect(decoded.candidates[0].lineage.targetBlockId, 'block-1');
+      expect(decoded.parentSets.single.comparisons, hasLength(2));
+      expect(
+        decoded.parentSets.single.comparisons[1].result,
+        ExploreComparisonResult.skip,
+      );
+      // 旧数据无新键：缺省 null/空表，零迁移兼容。
+      final legacy = ExploreLineage.fromJson(const {
+        'operation': 'mutation',
+        'generation': 3,
+      });
+      expect(legacy.mutatedText, isNull);
+      expect(legacy.targetBlockId, isNull);
+      final legacySet = ExploreParentSet.fromJson(const {
+        'id': 'p',
+        'familyId': 'f',
+        'generation': 1,
+        'status': 'active',
+      });
+      expect(legacySet.comparisons, isEmpty);
     });
 
     test('lineage operation serializes to snake_case wire values', () {

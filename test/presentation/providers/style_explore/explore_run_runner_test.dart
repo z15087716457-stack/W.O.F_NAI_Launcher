@@ -16,6 +16,7 @@ import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/data/services/explore_run_image_store.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_models.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
+import 'package:nai_launcher/presentation/providers/pill_roll_coordinator.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
@@ -69,6 +70,8 @@ void main() {
     await Hive.box(StorageKeys.settingsBox).clear();
     await Hive.box<String>(StorageKeys.promptWorkspaceStateBox).clear();
     PillWorkspaceNotifier.rng = Random();
+    ExploreRunRunner.deepRng = Random();
+    PillRollCoordinator.resetRollSuppression();
   });
 
   tearDownAll(() async {
@@ -500,5 +503,313 @@ void main() {
         expect(after.status, ExploreRunStatus.paused);
       },
     );
+  });
+
+  group('deep round（阶段 D）', () {
+    const marker = '\uE000';
+
+    /// 家族种子：generated run + 家族/第一代父本集（单自定义父本）。
+    /// recipeSnapshot 正向挂 b-1 随机实例（深度轮注入池来源）。
+    Future<ExploreRun> seedRunWithFamily() async {
+      final run = ExploreRun.create(
+        name: '深度任务',
+        recipeSnapshot: const ExploreRecipeSnapshot(
+          positive: PillDocument(
+            text: 'base',
+            instances: {
+              marker: PillInstance(
+                blockId: 'b-1',
+                settings: PillInstanceSettings(mode: PillRollMode.random),
+              ),
+            },
+          ),
+          negative: PillDocument(text: 'neg', instances: {}),
+        ),
+        paramsSnapshot: testSnapshot(),
+        targetCount: 2,
+      );
+      const parentSet = ExploreParentSet(
+        id: 'ps-1',
+        familyId: 'fam-1',
+        generation: 1,
+        status: ExploreParentSetStatus.active,
+        parents: [ExploreParent(id: 'par-1', artistString: 'alpha')],
+      );
+      final family = ExploreFamily(
+        id: 'fam-1',
+        name: '家族甲',
+        createdAt: DateTime.utc(2026, 9, 1),
+        rootParentSetId: 'ps-1',
+        activeParentSetId: 'ps-1',
+      );
+      final seeded = run.copyWith(
+        status: ExploreRunStatus.generated,
+        parentSets: [parentSet],
+        families: [family],
+      );
+      await runStorage.putRun(seeded);
+      return seeded;
+    }
+
+    PromptBlock poolBlock() => PromptBlock(
+      id: 'b-1',
+      title: '画风池',
+      content: 'alpha, beta, gamma',
+      createdAt: DateTime.utc(2026, 9, 1),
+      updatedAt: DateTime.utc(2026, 9, 1),
+    );
+
+    test('startDeepRound 登记子代并 override 目标实例（快照采用变异串）', () async {
+      final run = await seedRunWithFamily();
+      final sentPrompts = <String>[];
+      final c = container(
+        blocks: [poolBlock()],
+        generateFn: (params) async {
+          sentPrompts.add(params.prompt);
+          return okResult(sentPrompts.length);
+        },
+      );
+      c.read(exploreRunRunnerProvider);
+      await Future<void>.delayed(Duration.zero);
+      await c.read(promptBlockLibraryNotifierProvider.future);
+
+      ExploreRunRunner.deepRng = Random(42);
+      // main lane 挂启用随机实例作为 override 落点。
+      c
+          .read(pillWorkspaceProvider(PillScopes.main).notifier)
+          .restoreDocument(
+            const PillDocument(
+              text: 'base, \uE000',
+              instances: {
+                marker: PillInstance(
+                  blockId: 'b-1',
+                  settings: PillInstanceSettings(mode: PillRollMode.random),
+                ),
+              },
+            ),
+          );
+
+      final started = await c
+          .read(exploreRunRunnerProvider.notifier)
+          .startDeepRound(
+            run.id,
+            familyId: 'fam-1',
+            parentSetId: 'ps-1',
+            count: 2,
+          );
+      expect(started, isTrue);
+
+      final after = await reload(c, run.id);
+      expect(after.status, ExploreRunStatus.generated);
+      expect(after.rounds, hasLength(1));
+      final deepRound = after.rounds.single;
+      expect(deepRound.phase, ExploreRoundPhase.deep);
+      expect(deepRound.status, ExploreRoundStatus.generated);
+      expect(deepRound.familyId, 'fam-1');
+      expect(deepRound.parentSetId, 'ps-1');
+      expect(deepRound.generation, 2);
+      expect(after.candidates, hasLength(2));
+
+      final seenTexts = <String>{};
+      for (var i = 0; i < 2; i++) {
+        final candidate = after.candidates[i];
+        final lineage = candidate.lineage;
+        expect(lineage.generation, 2);
+        expect(lineage.mutatedText, isNotNull);
+        expect(lineage.mutatedText, isNot('alpha'), reason: '不与父本重复');
+        expect(seenTexts.add(lineage.mutatedText!), isTrue, reason: '子代去重');
+        expect(lineage.operation, isNot(ExploreLineageOperation.basicRoll));
+        expect(
+          candidate.generation.status,
+          ExploreCandidateGenerationStatus.done,
+        );
+        // override 物化：roll 快照里目标实例 rolledText = 变异串，
+        // 投影/实发提示词都带上它。
+        final snapshot = candidate.rollSnapshot!;
+        expect(snapshot.instanceRolls.single.rolledText, lineage.mutatedText);
+        expect(snapshot.positive, 'base, ${lineage.mutatedText}');
+        expect(sentPrompts[i], snapshot.positive);
+      }
+    });
+
+    test('main lane 无随机实例时拒绝深度轮（noRandomInstance）', () async {
+      final run = await seedRunWithFamily();
+      final c = container(generateFn: (params) async => okResult(1));
+      c.read(exploreRunRunnerProvider);
+      await Future<void>.delayed(Duration.zero);
+      await c.read(promptBlockLibraryNotifierProvider.future);
+
+      await expectLater(
+        c
+            .read(exploreRunRunnerProvider.notifier)
+            .startDeepRound(
+              run.id,
+              familyId: 'fam-1',
+              parentSetId: 'ps-1',
+              count: 2,
+            ),
+        throwsA(
+          isA<ExploreDeepRoundException>().having(
+            (e) => e.reason,
+            'reason',
+            ExploreDeepRoundRejection.noRandomInstance,
+          ),
+        ),
+      );
+      // 未登记任何轮次/候选。
+      final after = await reload(c, run.id);
+      expect(after.rounds, isEmpty);
+      expect(after.candidates, isEmpty);
+    });
+
+    test('深度轮失败候选经 retryFailed 续跑仍带 override', () async {
+      final run = await seedRunWithFamily();
+      var call = 0;
+      final c = container(
+        blocks: [poolBlock()],
+        generateFn: (params) async {
+          call += 1;
+          return call == 1 ? null : okResult(call);
+        },
+      );
+      c.read(exploreRunRunnerProvider);
+      await Future<void>.delayed(Duration.zero);
+      await c.read(promptBlockLibraryNotifierProvider.future);
+      ExploreRunRunner.deepRng = Random(7);
+      c
+          .read(pillWorkspaceProvider(PillScopes.main).notifier)
+          .restoreDocument(
+            const PillDocument(
+              text: 'base, \uE000',
+              instances: {
+                marker: PillInstance(
+                  blockId: 'b-1',
+                  settings: PillInstanceSettings(mode: PillRollMode.random),
+                ),
+              },
+            ),
+          );
+
+      await c
+          .read(exploreRunRunnerProvider.notifier)
+          .startDeepRound(
+            run.id,
+            familyId: 'fam-1',
+            parentSetId: 'ps-1',
+            count: 2,
+          );
+      var after = await reload(c, run.id);
+      expect(after.failedCount, 1);
+
+      final retried = await c
+          .read(exploreRunRunnerProvider.notifier)
+          .retryFailed(run.id);
+      expect(retried, isTrue);
+      after = await reload(c, run.id);
+      expect(after.failedCount, 0);
+      // 重试的深度候选 roll 快照仍是登记的变异串。
+      final first = after.candidates.first;
+      expect(
+        first.rollSnapshot!.instanceRolls.single.rolledText,
+        first.lineage.mutatedText,
+      );
+    });
+  });
+
+  group('roll ownership（runner 独占 roll 时机）', () {
+    const marker = '\uE000';
+
+    test('批量期间外部 roll 被抑制；药丸显示=本张发送 roll；结束后驻留', () async {
+      final block = PromptBlock(
+        id: 'b-1',
+        title: '画风池',
+        content: 'alpha, beta, gamma',
+        createdAt: DateTime.utc(2026, 8, 31),
+        updatedAt: DateTime.utc(2026, 8, 31),
+      );
+      final run = await seedRun(targetCount: 2);
+      final captured =
+          <
+            ({
+              String prompt,
+              String rollAtGenerate,
+              bool suppressed,
+              Map<String, String> externalResult,
+              String rollAfterExternal,
+            })
+          >[];
+      late ProviderContainer c;
+      c = container(
+        blocks: [block],
+        generateFn: (params) async {
+          final lane = c.read(pillWorkspaceProvider(PillScopes.main));
+          final rollAtGenerate = lane.document.instances[marker]!.currentRoll!;
+          // 模拟 run 期间的外部 roll 触发（主生成/桥接入队路径）。
+          final externalResult = c
+              .read(pillRollCoordinatorProvider)
+              .rollAllLanesAndSync();
+          final laneAfter = c.read(pillWorkspaceProvider(PillScopes.main));
+          captured.add((
+            prompt: params.prompt,
+            rollAtGenerate: rollAtGenerate,
+            suppressed: PillRollCoordinator.isRollSuppressed,
+            externalResult: externalResult,
+            rollAfterExternal:
+                laneAfter.document.instances[marker]!.currentRoll!,
+          ));
+          return okResult(captured.length);
+        },
+      );
+      c.read(exploreRunRunnerProvider);
+      await Future<void>.delayed(Duration.zero);
+      await c.read(promptBlockLibraryNotifierProvider.future);
+
+      PillWorkspaceNotifier.rng = _CyclicRandom();
+      c
+          .read(pillWorkspaceProvider(PillScopes.main).notifier)
+          .restoreDocument(
+            const PillDocument(
+              text: 'base, \uE000',
+              instances: {
+                marker: PillInstance(
+                  blockId: 'b-1',
+                  settings: PillInstanceSettings(mode: PillRollMode.random),
+                ),
+              },
+            ),
+          );
+
+      await c.read(exploreRunRunnerProvider.notifier).start(run.id);
+
+      expect(captured, hasLength(2));
+      for (final entry in captured) {
+        expect(entry.suppressed, isTrue, reason: 'runner 批量期间协调器处于抑制态');
+        expect(
+          entry.externalResult,
+          isEmpty,
+          reason: '外部 rollAllLanesAndSync 被抑制，不产生任何 roll',
+        );
+        expect(
+          entry.rollAfterExternal,
+          entry.rollAtGenerate,
+          reason: '外部触发不得改动 lane 的 currentRoll',
+        );
+        // 药丸显示（lane currentRoll）= 本张实际发送的 roll（tempParams）。
+        expect(entry.prompt, 'base, ${entry.rollAtGenerate}');
+      }
+
+      // 循环出口恢复抑制；run 结束后 lane 停留最后一张用过的串。
+      expect(PillRollCoordinator.isRollSuppressed, isFalse);
+      final laneAfterRun = c.read(pillWorkspaceProvider(PillScopes.main));
+      expect(
+        laneAfterRun.document.instances[marker]!.currentRoll,
+        captured.last.rollAtGenerate,
+      );
+
+      // 抑制解除后协调器恢复正常（主生成 P2.5 逐张重抽语义不受影响）。
+      final rolled = c.read(pillRollCoordinatorProvider).rollAllLanesAndSync();
+      expect(rolled, isNotEmpty);
+      expect(rolled[PillScopes.main], isNot(laneAfterRun.projection));
+    });
   });
 }

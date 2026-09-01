@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'character_prompt_provider.dart';
@@ -10,16 +11,41 @@ import 'pill_workspace_provider.dart';
 /// 到外部汇点（生成参数/角色配置）——编辑器被 tab 切换卸载后 onChanged
 /// 链断开，不推的话下一张生成会用陈旧提示词。推送目标内部
 /// `syncFromPlainText(投影)` 与投影等价，天然无回环。
+///
+/// **抑制**：探索 run 批量生成期间 runner 独占 roll 时机（每张 roll 时机
+/// 与快照/发送严格对齐），主生成/桥接等外部路径的入队 roll 全部挂起，
+/// 防止药丸显示的 currentRoll 被刷成与本张快照无关的值。计数式挂起/
+/// 恢复配对使用。
 class PillRollCoordinator {
   const PillRollCoordinator(this._ref);
 
   final Ref _ref;
 
+  /// 抑制计数（>0 时 rollAllLanesAndSync 秒退）。
+  static int _suppressCount = 0;
+
+  /// 当前是否处于抑制期（测试与调试可读）。
+  static bool get isRollSuppressed => _suppressCount > 0;
+
+  /// 挂起全局 roll（与 [releaseRollSuppression] 配对）。
+  static void suppressRoll() => _suppressCount++;
+
+  /// 恢复全局 roll；计数有下限保护，重复调用安全。
+  static void releaseRollSuppression() {
+    if (_suppressCount > 0) _suppressCount--;
+  }
+
+  /// 测试专用：强制清零抑制计数（用例间隔离）。
+  @visibleForTesting
+  static void resetRollSuppression() => _suppressCount = 0;
+
   /// 全部活跃 lane roll + 同步；没有任何随机实例时秒退（零开销）。
+  /// 抑制期（探索 run 批量生成中）整体秒退：roll 时机归探索 runner 独占。
   ///
   /// 返回「本次 roll 出新投影」的 scope→投影表：生成批次循环直接取用，
   /// 绕开 updatePrompt 的 microtask 延迟（读完即重建参数，等不到下一拍）。
   Map<String, String> rollAllLanesAndSync() {
+    if (isRollSuppressed) return const {};
     final rolled = <String, String>{};
     // 快照一份再遍历：推送过程可能触发 forgetScope 改动注册表
     final scopes = PillWorkspaceNotifier.activeScopes.toList();

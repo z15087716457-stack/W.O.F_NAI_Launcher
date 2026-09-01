@@ -1,9 +1,79 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/pill_roll_engine.dart';
 import '../../../data/models/prompt_block/pill_document.dart';
 import '../../../data/models/style_explore/explore_run.dart';
 import '../pill_workspace_provider.dart';
 import '../prompt_block_library_provider.dart';
+
+/// 解析深度轮 override 的目标随机实例 marker（纯函数）：
+/// 优先文档中与 [blockId] 相同的启用随机实例（父本来源实例），
+/// 找不到回退第一个启用随机实例；都没有 → null（不允许深度轮）。
+String? resolveExploreOverrideMarkerInDocument(
+  PillDocument document, {
+  String? blockId,
+}) {
+  String? first;
+  for (final entry in document.instances.entries) {
+    final instance = entry.value;
+    if (!instance.enabled || !instance.settings.isRandom) continue;
+    first ??= entry.key;
+    if (blockId != null && instance.blockId == blockId) return entry.key;
+  }
+  return first;
+}
+
+/// Ref 版 [resolveExploreOverrideMarkerInDocument]：读 main lane 当前文档。
+String? resolveExploreOverrideMarker(Ref ref, {String? blockId}) {
+  return resolveExploreOverrideMarkerInDocument(
+    ref.read(pillWorkspaceProvider(PillScopes.main)).document,
+    blockId: blockId,
+  );
+}
+
+/// 提取候选的父本串（建家族/建分支用）：
+/// roll 快照中第一个随机实例的 rolledText；无实例或空串回退正向全文。
+String exploreParentStringFor(ExploreCandidate candidate) {
+  final snapshot = candidate.rollSnapshot;
+  if (snapshot == null) return '';
+  if (snapshot.instanceRolls.isNotEmpty) {
+    final rolled = snapshot.instanceRolls.first.rolledText.trim();
+    if (rolled.isNotEmpty) return snapshot.instanceRolls.first.rolledText;
+  }
+  return snapshot.positive;
+}
+
+/// 解析父本集深度轮 override 的目标块 id：
+/// 第一个带来源候选的父本，其 roll 快照第一个随机实例的 blockId。
+String? exploreTargetBlockIdForParentSet(
+  ExploreRun run,
+  ExploreParentSet parentSet,
+) {
+  for (final parent in parentSet.parents) {
+    final sourceId = parent.sourceCandidateId;
+    if (sourceId == null) continue;
+    final rolls = run.candidateById(sourceId)?.rollSnapshot?.instanceRolls;
+    if (rolls != null && rolls.isNotEmpty) return rolls.first.blockId;
+  }
+  return null;
+}
+
+/// 组装深度轮注入池：run 快照正向文档中随机实例的块内容原子
+/// （块内容按当前块库解析；池 = 顶层逗号切分后的原子集合，去重保序）。
+List<String> buildExploreInjectionPool(Ref ref, ExploreRun run) {
+  final library = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
+  final pool = <String>[];
+  final seen = <String>{};
+  for (final instance in run.recipeSnapshot.positive.instances.values) {
+    if (!instance.settings.isRandom) continue;
+    final content = library?.blockById(instance.blockId)?.content;
+    if (content == null) continue;
+    for (final atom in PillRollEngine.splitTopLevelAtoms(content)) {
+      if (seen.add(atom)) pool.add(atom);
+    }
+  }
+  return pool;
+}
 
 /// 抓 main/negative 双 lane 当前投影 + 启用随机实例的 roll 明细。
 ///

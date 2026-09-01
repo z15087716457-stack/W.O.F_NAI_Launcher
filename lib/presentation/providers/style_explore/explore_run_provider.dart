@@ -5,6 +5,7 @@ import '../../../core/storage/style_explore_run_storage.dart';
 import '../../../data/models/style_explore/explore_run.dart';
 import '../../../data/repositories/style_explore_run_repository.dart';
 import '../../../data/services/explore_run_image_store.dart';
+import 'explore_roll_capture.dart';
 
 final styleExploreRunStorageProvider = Provider<StyleExploreRunStorage>(
   (ref) => StyleExploreRunStorage(),
@@ -246,6 +247,232 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     );
   }
 
+  /// 建家族（阶段 D）：父本串列表 → 家族 + 第一代父本集（active）。
+  ///
+  /// 父本串去首尾空白、去空、按串去重（保序）；至少需要一个有效串，
+  /// 否则抛 [StateError]。名称为空时回退「家族 N」。
+  Future<ExploreFamily> createFamily(
+    String runId, {
+    required String name,
+    required List<({String? sourceCandidateId, String artistString})> parents,
+  }) {
+    return _mutateRun(runId, (run) {
+      final deduped = <({String? sourceCandidateId, String artistString})>[];
+      final seen = <String>{};
+      for (final parent in parents) {
+        final text = parent.artistString.trim();
+        if (text.isEmpty) continue;
+        if (seen.add(text)) {
+          deduped.add((
+            sourceCandidateId: parent.sourceCandidateId,
+            artistString: text,
+          ));
+        }
+      }
+      if (deduped.isEmpty) {
+        throw StateError('创建家族至少需要一个有效父本串');
+      }
+      final familyId = const Uuid().v4();
+      final parentSet = ExploreParentSet(
+        id: const Uuid().v4(),
+        familyId: familyId,
+        generation: 1,
+        status: ExploreParentSetStatus.active,
+        parents: [
+          for (final parent in deduped)
+            ExploreParent(
+              id: const Uuid().v4(),
+              sourceCandidateId: parent.sourceCandidateId,
+              artistString: parent.artistString,
+            ),
+        ],
+      );
+      final trimmedName = name.trim();
+      final family = ExploreFamily(
+        id: familyId,
+        name: trimmedName.isEmpty
+            ? '家族 ${run.families.length + 1}'
+            : trimmedName,
+        createdAt: DateTime.now(),
+        rootParentSetId: parentSet.id,
+        activeParentSetId: parentSet.id,
+      );
+      return run.copyWith(
+        parentSets: [...run.parentSets, parentSet],
+        families: [...run.families, family],
+      );
+    }).then((run) => run.families.last);
+  }
+
+  /// 建分支（阶段 D）：多选最新代优秀子代 + 第一代父本回交 →
+  /// 新父本集（generation+1，旧活跃集置 used，家族活跃指针前移）。
+  ///
+  /// 不变量（违反抛 [StateError]，消息为稳定语义串供测试断言）：
+  /// - 所选候选必须全部属于活跃父本集的深度轮（只能从最新代选）；
+  /// - 活跃集的所有深度轮必须全部完成（无 pending 候选/未完成轮次）；
+  /// - 子代串去重后不得与第一代回交父本串完全重复。
+  Future<ExploreParentSet> createBranch(
+    String runId, {
+    required String familyId,
+    required List<String> selectedCandidateIds,
+    String? branchName,
+  }) {
+    String? newParentSetId;
+    return _mutateRun(runId, (run) {
+      final family = run.familyById(familyId);
+      if (family == null) throw StateError('家族不存在: $familyId');
+      final activeSet = run.parentSetById(family.activeParentSetId);
+      if (activeSet == null) {
+        throw StateError('活跃父本集不存在: ${family.activeParentSetId}');
+      }
+
+      // 当前代轮次全完成。
+      if (!exploreParentSetRoundsComplete(run, activeSet)) {
+        throw StateError('当前代还有未完成的候选轮');
+      }
+
+      // 只能从最新代选：所选候选必须属于活跃集的深度轮。
+      final activeRoundIds = {
+        for (final round in run.rounds)
+          if (round.parentSetId == activeSet.id) round.id,
+      };
+      final selected = <ExploreCandidate>[];
+      for (final id in selectedCandidateIds) {
+        final candidate = run.candidateById(id);
+        if (candidate == null || !activeRoundIds.contains(candidate.roundId)) {
+          throw StateError('只能从最新代候选堆建分支');
+        }
+        selected.add(candidate);
+      }
+      if (selected.isEmpty) {
+        throw StateError('请选择至少一张子代候选');
+      }
+
+      // 子代串：优先登记时的变异串，回退 roll 快照提取；按串去重。
+      final newParents = <ExploreParent>[];
+      final seenStrings = <String>{};
+      for (final candidate in selected) {
+        final text =
+            (candidate.lineage.mutatedText ?? exploreParentStringFor(candidate))
+                .trim();
+        if (text.isEmpty || !seenStrings.add(text)) continue;
+        newParents.add(
+          ExploreParent(
+            id: const Uuid().v4(),
+            sourceCandidateId: candidate.id,
+            artistString: text,
+          ),
+        );
+      }
+      if (newParents.isEmpty) {
+        throw StateError('所选子代没有可用的串');
+      }
+
+      // 回交：第一代父本全部并入（新 id、保留偏好）；子代串不得与其重复。
+      final rootSet = run.parentSetById(family.rootParentSetId);
+      final backcross = [
+        if (rootSet != null)
+          for (final parent in rootSet.parents)
+            ExploreParent(
+              id: const Uuid().v4(),
+              sourceCandidateId: parent.sourceCandidateId,
+              artistString: parent.artistString,
+              preference: parent.preference,
+            ),
+      ];
+      final backcrossStrings = {
+        for (final parent in backcross) parent.artistString,
+      };
+      for (final child in newParents) {
+        if (backcrossStrings.contains(child.artistString)) {
+          throw StateError('所选子代与父本串完全重复');
+        }
+      }
+
+      final trimmedBranch = branchName?.trim();
+      final newSet = ExploreParentSet(
+        id: const Uuid().v4(),
+        familyId: family.id,
+        generation: activeSet.generation + 1,
+        status: ExploreParentSetStatus.active,
+        branchName: trimmedBranch == null || trimmedBranch.isEmpty
+            ? null
+            : trimmedBranch,
+        parents: [...newParents, ...backcross],
+      );
+      newParentSetId = newSet.id;
+      return run.copyWith(
+        parentSets: [
+          for (final set in run.parentSets)
+            set.id == activeSet.id
+                ? set.copyWith(status: ExploreParentSetStatus.used)
+                : set,
+          newSet,
+        ],
+        families: [
+          for (final entry in run.families)
+            entry.id == family.id
+                ? entry.copyWith(activeParentSetId: newSet.id)
+                : entry,
+        ],
+      );
+    }).then((run) => run.parentSetById(newParentSetId!)!);
+  }
+
+  /// 两两比较登记（阶段 D 偏好排序简版）：
+  /// left/right 胜方 preference +1.0；neither 各 -0.25（下限 0.25）；
+  /// skip 只记录不改偏好。记录附加到父本集 comparisons。
+  Future<ExploreRun> recordComparison(
+    String runId,
+    String parentSetId, {
+    required String leftParentId,
+    required String rightParentId,
+    required ExploreComparisonResult result,
+  }) {
+    return _mutateRun(runId, (run) {
+      final set = run.parentSetById(parentSetId);
+      if (set == null) throw StateError('父本集不存在: $parentSetId');
+      final ids = {for (final parent in set.parents) parent.id};
+      if (!ids.contains(leftParentId) || !ids.contains(rightParentId)) {
+        throw StateError('比较目标父本不在父本集中: $parentSetId');
+      }
+      final parents = [
+        for (final parent in set.parents)
+          if (parent.id == leftParentId &&
+              result == ExploreComparisonResult.left)
+            parent.copyWith(preference: parent.preference + 1.0)
+          else if (parent.id == rightParentId &&
+              result == ExploreComparisonResult.right)
+            parent.copyWith(preference: parent.preference + 1.0)
+          else if ((parent.id == leftParentId || parent.id == rightParentId) &&
+              result == ExploreComparisonResult.neither)
+            parent.copyWith(
+              preference: (parent.preference - 0.25)
+                  .clamp(0.25, double.infinity)
+                  .toDouble(),
+            )
+          else
+            parent,
+      ];
+      final comparison = ExplorePairwiseComparison(
+        leftParentId: leftParentId,
+        rightParentId: rightParentId,
+        result: result,
+        comparedAt: DateTime.now(),
+      );
+      final updated = set.copyWith(
+        parents: parents,
+        comparisons: [...set.comparisons, comparison],
+      );
+      return run.copyWith(
+        parentSets: [
+          for (final entry in run.parentSets)
+            entry.id == parentSetId ? updated : entry,
+        ],
+      );
+    });
+  }
+
   Future<ExploreRun> _mutateRun(
     String runId,
     ExploreRun Function(ExploreRun run) update,
@@ -366,4 +593,80 @@ String mergeExploreRollPositives(Iterable<String> positives) {
     }
   }
   return atoms.join(', ');
+}
+
+// ==================== 阶段 D：家族 / 谱系 ====================
+
+/// 谱系区当前选中的家族 id（UI 态；切换 run 时由谱系面板校正）。
+final exploreActiveFamilyIdProvider = StateProvider<String?>((ref) => null);
+
+/// 谱系区代际卡片列的内容高度（session 态，拖拽手柄调整，重启不保留）。
+final exploreLineagePanelHeightProvider = StateProvider<double>((ref) => 320);
+
+/// 谱系区内容高度的可调范围。
+const exploreLineagePanelMinHeight = 160.0;
+const exploreLineagePanelMaxHeight = 600.0;
+
+/// 父本集的所有深度轮是否全部完成（建分支前置条件）：
+/// 无未完成状态的轮次，且轮内无 pending 候选。
+bool exploreParentSetRoundsComplete(
+  ExploreRun run,
+  ExploreParentSet parentSet,
+) {
+  final roundIds = <String>{};
+  for (final round in run.rounds) {
+    if (round.parentSetId != parentSet.id) continue;
+    if (round.status == ExploreRoundStatus.pending ||
+        round.status == ExploreRoundStatus.generating) {
+      return false;
+    }
+    roundIds.add(round.id);
+  }
+  return !run.candidates.any(
+    (candidate) =>
+        roundIds.contains(candidate.roundId) &&
+        candidate.generation.status == ExploreCandidateGenerationStatus.pending,
+  );
+}
+
+/// 谱系区一代的展示数据：父本集 + 该集深度轮 + 深度轮产出的候选堆。
+class ExploreLineageGeneration {
+  ExploreLineageGeneration({
+    required this.parentSet,
+    required List<ExploreRound> rounds,
+    required List<ExploreCandidate> pile,
+  }) : rounds = List.unmodifiable(rounds),
+       pile = List.unmodifiable(pile);
+
+  final ExploreParentSet parentSet;
+  final List<ExploreRound> rounds;
+
+  /// 该父本集深度轮产出的候选（按登记序）。
+  final List<ExploreCandidate> pile;
+}
+
+/// 组装家族的代际卡片列（按父本集 generation 升序；纯函数可测）。
+List<ExploreLineageGeneration> exploreFamilyGenerations(
+  ExploreRun run,
+  ExploreFamily family,
+) {
+  final sets = [
+    for (final set in run.parentSets)
+      if (set.familyId == family.id) set,
+  ]..sort((a, b) => a.generation.compareTo(b.generation));
+  return [
+    for (final set in sets)
+      ExploreLineageGeneration(
+        parentSet: set,
+        rounds: [
+          for (final round in run.rounds)
+            if (round.parentSetId == set.id) round,
+        ],
+        pile: [
+          for (final candidate in run.candidates)
+            if (run.roundById(candidate.roundId)?.parentSetId == set.id)
+              candidate,
+        ],
+      ),
+  ];
 }

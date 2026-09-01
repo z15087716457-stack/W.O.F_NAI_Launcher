@@ -193,6 +193,25 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     _apply(state.document.copyWith(instances: instances));
   }
 
+  /// 深度迭代：把实例的物化 roll 覆盖为外部给定文本（变异子代串）。
+  ///
+  /// 与随机 roll 同语义：写 `currentRoll` → `_apply` → 投影自然采用，
+  /// 不新增 roll 时机。仅对随机模式实例有意义（固定模式投影不读
+  /// `currentRoll`）；marker 不存在时告警并忽略。
+  void setInstanceRollOverride(String marker, String text) {
+    final instance = state.document.instances[marker];
+    if (instance == null) {
+      AppLogger.w(
+        'setInstanceRollOverride: marker not found in lane "$arg", ignored',
+        'PillWorkspace',
+      );
+      return;
+    }
+    final instances = Map<String, PillInstance>.of(state.document.instances)
+      ..[marker] = instance.copyWith(currentRoll: text);
+    _apply(state.document.copyWith(instances: instances));
+  }
+
   /// 手动重 roll（L1 骰子，roll 时机 3）；固定模式无操作。
   void rollMarker(String marker) {
     final instance = state.document.instances[marker];

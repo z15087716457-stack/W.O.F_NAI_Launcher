@@ -1,5 +1,6 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/app_logger.dart';
@@ -9,6 +10,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../providers/style_explore/explore_run_runner.dart';
 import '../../../widgets/common/app_toast.dart';
+import '../../../widgets/common/draggable_number_input.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import 'explore_run_actions.dart';
 
@@ -28,31 +30,6 @@ class ExploreRunControlBar extends ConsumerStatefulWidget {
 }
 
 class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
-  late final TextEditingController _targetController;
-
-  @override
-  void initState() {
-    super.initState();
-    _targetController = TextEditingController(
-      text: widget.run.targetCount.toString(),
-    );
-  }
-
-  @override
-  void didUpdateWidget(covariant ExploreRunControlBar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.run.id != widget.run.id ||
-        oldWidget.run.targetCount != widget.run.targetCount) {
-      _targetController.text = widget.run.targetCount.toString();
-    }
-  }
-
-  @override
-  void dispose() {
-    _targetController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -134,23 +111,15 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
           ),
         ),
         const SizedBox(width: 4),
-        SizedBox(
-          width: 56,
-          height: 32,
-          child: TextField(
-            key: const Key('explore-run-target-count'),
-            controller: _targetController,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            style: theme.textTheme.bodySmall,
-            decoration: const InputDecoration(
-              isDense: true,
-              contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: _submitTargetCount,
-            onTapOutside: (_) => _submitTargetCount(_targetController.text),
-          ),
+        // 与底条 ×N 同款的紧凑数值芯片（点击编辑/拖拽/滚轮），
+        // 替换掉原先的大号描边输入框（静反馈满高框笨重、越调越高）。
+        DraggableNumberInput(
+          key: const Key('explore-run-target-count'),
+          value: widget.run.targetCount,
+          min: 1,
+          max: 200,
+          prefix: '',
+          onChanged: (value) => unawaited(_submitTargetCount('$value')),
         ),
       ],
     );
