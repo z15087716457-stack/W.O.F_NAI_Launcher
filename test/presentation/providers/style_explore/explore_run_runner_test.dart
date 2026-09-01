@@ -440,6 +440,7 @@ void main() {
                 instances: {
                   marker: PillInstance(
                     blockId: 'b-1',
+                    evolutionEnabled: true,
                     settings: PillInstanceSettings(mode: PillRollMode.random),
                   ),
                 },
@@ -519,6 +520,7 @@ void main() {
             instances: {
               marker: PillInstance(
                 blockId: 'b-1',
+                evolutionEnabled: true,
                 settings: PillInstanceSettings(mode: PillRollMode.random),
               ),
             },
@@ -583,6 +585,7 @@ void main() {
               instances: {
                 marker: PillInstance(
                   blockId: 'b-1',
+                  evolutionEnabled: true,
                   settings: PillInstanceSettings(mode: PillRollMode.random),
                 ),
               },
@@ -684,6 +687,7 @@ void main() {
               instances: {
                 marker: PillInstance(
                   blockId: 'b-1',
+                  evolutionEnabled: true,
                   settings: PillInstanceSettings(mode: PillRollMode.random),
                 ),
               },
@@ -773,6 +777,7 @@ void main() {
               instances: {
                 marker: PillInstance(
                   blockId: 'b-1',
+                  evolutionEnabled: true,
                   settings: PillInstanceSettings(mode: PillRollMode.random),
                 ),
               },

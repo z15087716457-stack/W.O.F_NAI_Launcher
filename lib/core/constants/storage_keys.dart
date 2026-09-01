@@ -161,7 +161,15 @@ class StorageKeys {
   /// 本地画廊逻辑列宽（px，140~480，默认 260）
   static const String localGalleryColumnWidth = 'local_gallery_column_width';
 
-  /// 提示词块管理页视图模式：true=紧凑，false=详细。
+  /// 提示词块管理页视图模式：list 或 grid。
+  static const String promptBlockLibraryViewMode =
+      'prompt_block_library_view_mode';
+
+  /// 提示词块管理页网格卡片宽度（约 100~320，步进 20，默认 220）。
+  static const String promptBlockLibraryCardWidth =
+      'prompt_block_library_card_width';
+
+  /// 旧版详细/紧凑列表视图键，保留供旧数据读取兼容。
   static const String promptBlockLibraryCompactView =
       'prompt_block_library_compact_view';
 

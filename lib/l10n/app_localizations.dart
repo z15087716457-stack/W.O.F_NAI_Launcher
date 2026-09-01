@@ -17668,6 +17668,36 @@ abstract class AppLocalizations {
   /// **'(empty roll this time)'**
   String get pillCardEmptyRoll;
 
+  /// No description provided for @pillCardEvolutionEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable evolution'**
+  String get pillCardEvolutionEnable;
+
+  /// No description provided for @pillCardEvolutionDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable evolution'**
+  String get pillCardEvolutionDisable;
+
+  /// No description provided for @pillCardEvolutionExploreOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution is available only in Style Explore'**
+  String get pillCardEvolutionExploreOnly;
+
+  /// No description provided for @pillCardEvolutionRequiresRandom.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the instance to random first'**
+  String get pillCardEvolutionRequiresRandom;
+
+  /// No description provided for @pillCardEvolutionRequiresEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable the instance first'**
+  String get pillCardEvolutionRequiresEnabled;
+
   /// No description provided for @pillSettingsTitle.
   ///
   /// In en, this message translates to:
@@ -18187,17 +18217,23 @@ abstract class AppLocalizations {
   /// **'Imported at'**
   String get promptBlockLibrary_importedAt;
 
-  /// No description provided for @promptBlockLibrary_detailedView.
+  /// No description provided for @promptBlockLibrary_listView.
   ///
   /// In en, this message translates to:
-  /// **'Detailed view'**
-  String get promptBlockLibrary_detailedView;
+  /// **'List view'**
+  String get promptBlockLibrary_listView;
 
-  /// No description provided for @promptBlockLibrary_compactView.
+  /// No description provided for @promptBlockLibrary_gridView.
   ///
   /// In en, this message translates to:
-  /// **'Compact view'**
-  String get promptBlockLibrary_compactView;
+  /// **'Grid view'**
+  String get promptBlockLibrary_gridView;
+
+  /// No description provided for @promptBlockLibrary_cardSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Card size'**
+  String get promptBlockLibrary_cardSize;
 
   /// No description provided for @promptBlockLibrary_reorderFolders.
   ///
@@ -18952,7 +18988,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_deepRoundNoInstance.
   ///
   /// In en, this message translates to:
-  /// **'No enabled random block instance in the main prompt; deep round unavailable'**
+  /// **'No enabled random evolution block in the main prompt; deep round unavailable'**
   String get styleExplore_deepRoundNoInstance;
 
   /// No description provided for @styleExplore_deepRoundEmpty.

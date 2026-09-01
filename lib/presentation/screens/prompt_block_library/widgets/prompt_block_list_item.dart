@@ -13,6 +13,8 @@ class PromptBlockListItem extends StatelessWidget {
     required this.onEdit,
     required this.onCopy,
     required this.onDelete,
+    this.onTap,
+    this.selected = false,
     this.onExport,
     this.onToggleFavorite,
     this.reorderIndex,
@@ -24,6 +26,8 @@ class PromptBlockListItem extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onCopy;
   final VoidCallback onDelete;
+  final VoidCallback? onTap;
+  final bool selected;
 
   /// 导出为 TXT；null 时不显示导出按钮。
   final VoidCallback? onExport;
@@ -46,7 +50,10 @@ class PromptBlockListItem extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
         side: BorderSide(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.45),
+          color: selected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.outlineVariant.withValues(alpha: 0.45),
+          width: selected ? 1.3 : 1,
         ),
       ),
       child: IntrinsicHeight(
@@ -54,35 +61,38 @@ class PromptBlockListItem extends StatelessWidget {
           children: [
             SizedBox(width: 6, child: ColoredBox(color: blockColor)),
             Expanded(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  14,
-                  compact ? 7 : 11,
-                  8,
-                  compact ? 7 : 11,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      displayTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+              child: InkWell(
+                onTap: onTap,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    14,
+                    compact ? 7 : 11,
+                    8,
+                    compact ? 7 : 11,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        displayTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: compact ? 2 : 5),
-                    Text(
-                      preview,
-                      maxLines: compact ? 1 : 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        height: 1.35,
+                      SizedBox(height: compact ? 2 : 5),
+                      Text(
+                        preview,
+                        maxLines: compact ? 1 : 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          height: 1.35,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

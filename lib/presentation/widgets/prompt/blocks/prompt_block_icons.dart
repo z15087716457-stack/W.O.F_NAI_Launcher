@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/localization_extension.dart';
+
 /// 块自定义图标的预设表：键稳定入库存储（`PromptBlock.iconName`），
 /// 值为 Material 图标。新增图标只增不改键名，保证旧数据不失效。
 const Map<String, IconData> kPromptBlockIconOptions = {
@@ -54,7 +56,7 @@ IconData promptBlockIconFromName(String? name) {
   return kPromptBlockIconOptions[name] ?? kPromptBlockDefaultIcon;
 }
 
-/// 编辑对话框里的图标选择网格：再点已选中项 = 清除回默认。
+/// 编辑对话框里的紧凑图标选择器：再点已选中项 = 清除回默认。
 class PromptBlockIconPicker extends StatelessWidget {
   const PromptBlockIconPicker({
     super.key,
@@ -68,31 +70,78 @@ class PromptBlockIconPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Wrap(
-      spacing: 4,
-      runSpacing: 4,
-      children: [
-        for (final entry in kPromptBlockIconOptions.entries)
-          _buildCell(context, theme, entry),
+    MenuController? menuController;
+    return MenuAnchor(
+      key: const Key('prompt-block-icon-picker'),
+      style: const MenuStyle(
+        padding: WidgetStatePropertyAll(EdgeInsets.all(8)),
+        maximumSize: WidgetStatePropertyAll(Size(300, 320)),
+      ),
+      builder: (context, controller, child) {
+        menuController = controller;
+        return OutlinedButton.icon(
+          key: const Key('prompt-block-icon-trigger'),
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          icon: Icon(
+            promptBlockIconFromName(selected),
+            size: 19,
+            color: theme.colorScheme.primary,
+          ),
+          label: Text(selected ?? context.l10n.common_default),
+          style: OutlinedButton.styleFrom(
+            visualDensity: VisualDensity.compact,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          ),
+        );
+      },
+      menuChildren: [
+        SizedBox(
+          width: 280,
+          child: SingleChildScrollView(
+            primary: false,
+            child: Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: [
+                for (final entry in kPromptBlockIconOptions.entries)
+                  _buildCell(
+                    theme,
+                    entry,
+                    onClose: () => menuController?.close(),
+                  ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildCell(
-    BuildContext context,
     ThemeData theme,
-    MapEntry<String, IconData> entry,
-  ) {
+    MapEntry<String, IconData> entry, {
+    required VoidCallback onClose,
+  }) {
     final isSelected = selected == entry.key;
     return Tooltip(
       message: entry.key,
       waitDuration: const Duration(milliseconds: 500),
       child: InkWell(
+        key: ValueKey('prompt-block-icon-option-${entry.key}'),
         borderRadius: BorderRadius.circular(6),
-        onTap: () => onChanged(isSelected ? null : entry.key),
+        onTap: () {
+          onChanged(isSelected ? null : entry.key);
+          onClose();
+        },
         child: Container(
-          width: 34,
-          height: 34,
+          width: 30,
+          height: 30,
           decoration: BoxDecoration(
             color: isSelected
                 ? theme.colorScheme.primaryContainer
@@ -107,7 +156,7 @@ class PromptBlockIconPicker extends StatelessWidget {
           ),
           child: Icon(
             entry.value,
-            size: 18,
+            size: 17,
             color: isSelected
                 ? theme.colorScheme.onPrimaryContainer
                 : theme.colorScheme.onSurfaceVariant,

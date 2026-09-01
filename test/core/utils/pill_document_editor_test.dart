@@ -168,13 +168,27 @@ void main() {
   });
 
   group('json round trip', () {
-    test('document survives toJson/fromJson', () {
+    test('evolution defaults off and old instance json stays compatible', () {
+      const instance = PillInstance(blockId: 'a');
+      expect(instance.evolutionEnabled, isFalse);
+      expect(PillInstance.fromJson({'blockId': 'a'}).evolutionEnabled, isFalse);
+      expect(instance.toJson()['evolutionEnabled'], isFalse);
+    });
+
+    test('document survives toJson/fromJson with evolution state', () {
       const doc = PillDocument(
         text: 'x$markerA',
-        instances: {markerA: PillInstance(blockId: 'a', enabled: false)},
+        instances: {
+          markerA: PillInstance(
+            blockId: 'a',
+            enabled: false,
+            evolutionEnabled: true,
+          ),
+        },
       );
       final restored = PillDocument.fromJson(doc.toJson());
       expect(restored, doc);
+      expect(restored.instances[markerA]!.evolutionEnabled, isTrue);
     });
   });
 }

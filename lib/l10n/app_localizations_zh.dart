@@ -9749,6 +9749,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pillCardEmptyRoll => '（本次为空）';
 
   @override
+  String get pillCardEvolutionEnable => '开启遗传';
+
+  @override
+  String get pillCardEvolutionDisable => '关闭遗传';
+
+  @override
+  String get pillCardEvolutionExploreOnly => '遗传开关仅在画风探索页可用';
+
+  @override
+  String get pillCardEvolutionRequiresRandom => '需先设为随机抽取';
+
+  @override
+  String get pillCardEvolutionRequiresEnabled => '需先启用实例';
+
+  @override
   String get pillSettingsTitle => '块实例设置';
 
   @override
@@ -10038,10 +10053,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_importedAt => '导入时间';
 
   @override
-  String get promptBlockLibrary_detailedView => '详细视图';
+  String get promptBlockLibrary_listView => '列表视图';
 
   @override
-  String get promptBlockLibrary_compactView => '紧凑视图';
+  String get promptBlockLibrary_gridView => '网格视图';
+
+  @override
+  String get promptBlockLibrary_cardSize => '卡片大小';
 
   @override
   String get promptBlockLibrary_reorderFolders => '调整文件夹顺序';
@@ -10470,7 +10488,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_deepRoundNoInstance => '主提示词中没有启用的随机块实例，无法进行深度轮';
+  String get styleExplore_deepRoundNoInstance => '主提示词中没有启用的随机遗传块，无法进行深度轮';
 
   @override
   String get styleExplore_deepRoundEmpty => '变异引擎无法产出足够不同的子代串';

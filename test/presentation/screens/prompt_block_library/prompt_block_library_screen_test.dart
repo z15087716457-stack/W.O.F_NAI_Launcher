@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block_folder.dart';
 import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/screens/prompt_block_library/prompt_block_library_screen.dart';
+import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_card.dart';
 import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_folder_delete_dialog.dart';
+import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_quick_settings_panel.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_icons.dart';
 
 class _FakePromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
   _FakePromptBlockLibraryNotifier({required this.initialState});
@@ -32,6 +37,10 @@ class _FakePromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
 }
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   PromptBlock makeBlock(String id, String title, String content) {
     return PromptBlock.create(
       id: id,
@@ -104,29 +113,366 @@ void main() {
     expect(find.text('角色块'), findsOneWidget);
   });
 
-  testWidgets('editing a block preserves content whitespace', (tester) async {
+  testWidgets('defaults to grid and switches to list mode', (tester) async {
+    await pumpScreen(
+      tester,
+      buildScreen(
+        blocks: [
+          makeBlock('first', '第一个', 'one'),
+          makeBlock('second', '第二个', 'two'),
+        ],
+      ),
+    );
+
+    expect(find.byKey(const Key('prompt-block-grid')), findsOneWidget);
+    expect(find.byKey(const Key('prompt-block-list')), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.view_agenda_outlined));
+    await tester.pump();
+    expect(find.byKey(const Key('prompt-block-list')), findsOneWidget);
+    expect(find.byKey(const Key('prompt-block-grid')), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.grid_view_outlined));
+    await tester.pump();
+    expect(find.byKey(const Key('prompt-block-grid')), findsOneWidget);
+  });
+
+  testWidgets(
+    'clicking cards selects blocks and controls the quick settings rail',
+    (tester) async {
+      final first = makeBlock('first', '第一个', 'one');
+      final second = makeBlock('second', '第二个', 'two');
+      await pumpScreen(tester, buildScreen(blocks: [first, second]));
+
+      await tester.tap(
+        find.byKey(const ValueKey('prompt-block-card-body-first')),
+      );
+      await tester.pump();
+      expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
+      expect(
+        tester
+            .getSize(
+              find.byKey(const Key('prompt-block-quick-settings-header')),
+            )
+            .height,
+        64,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('prompt-block-quick-settings-header')),
+          matching: find.text('编辑'),
+        ),
+        findsOneWidget,
+      );
+      var panel = tester.widget<PromptBlockQuickSettingsPanel>(
+        find.byType(PromptBlockQuickSettingsPanel),
+      );
+      expect(panel.block.id, 'first');
+
+      await tester.tap(
+        find.byKey(const ValueKey('prompt-block-card-body-second')),
+      );
+      await tester.pump();
+      panel = tester.widget<PromptBlockQuickSettingsPanel>(
+        find.byType(PromptBlockQuickSettingsPanel),
+      );
+      expect(panel.block.id, 'second');
+
+      await tester.tap(
+        find.byKey(const Key('prompt-block-quick-settings-collapse')),
+      );
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(
+        find.byKey(const Key('prompt-block-quick-settings-collapsed')),
+        findsOneWidget,
+      );
+      expect(find.byType(PromptBlockQuickSettingsPanel), findsNothing);
+
+      await tester.tap(
+        find.byKey(const Key('prompt-block-quick-settings-collapsed')),
+      );
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
+    },
+  );
+
+  testWidgets('card size slider updates immediately and persists on release', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      buildScreen(blocks: [makeBlock('slider', '滑块', 'content')]),
+    );
+
+    final sliderFinder = find.byKey(const Key('prompt-block-card-size-slider'));
+    expect(sliderFinder, findsOneWidget);
+    expect(tester.widget<Slider>(sliderFinder).value, 220);
+
+    tester.widget<Slider>(sliderFinder).onChanged?.call(260);
+    await tester.pump();
+    expect(tester.widget<Slider>(sliderFinder).value, 260);
+
+    tester.widget<Slider>(sliderFinder).onChangeEnd?.call(260);
+    await tester.pump();
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getDouble(StorageKeys.promptBlockLibraryCardWidth), 260);
+  });
+
+  testWidgets('minimum card size uses wrapping pills without card actions', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      buildScreen(
+        blocks: [
+          makeBlock('pill-one', '第一个 Pill', 'hidden one'),
+          makeBlock('pill-two', '第二个 Pill', 'hidden two'),
+          makeBlock('pill-three', '第三个 Pill', 'hidden three'),
+        ],
+      ),
+    );
+
+    final sliderFinder = find.byKey(const Key('prompt-block-card-size-slider'));
+    final gridStackFinder = find.byKey(const Key('prompt-block-grid-stack'));
+    final gridRightInset =
+        tester.getBottomRight(gridStackFinder).dx -
+        tester.getBottomRight(sliderFinder).dx;
+    final gridBottomInset =
+        tester.getBottomRight(gridStackFinder).dy -
+        tester.getBottomRight(sliderFinder).dy;
+
+    tester.widget<Slider>(sliderFinder).onChanged?.call(100);
+    await tester.pump();
+
+    expect(find.byType(PromptBlockCard), findsNothing);
+    expect(find.byType(PromptBlockPill), findsNWidgets(3));
+    expect(find.byIcon(Icons.more_horiz), findsNothing);
+    expect(find.text('hidden one'), findsNothing);
+
+    final scrollFinder = find.byKey(const Key('prompt-block-pill-grid-scroll'));
+    final pillTopLeft = tester.getTopLeft(
+      find.byKey(const ValueKey('prompt-block-pill-body-pill-one')),
+    );
+    final scrollTopLeft = tester.getTopLeft(scrollFinder);
+    expect(pillTopLeft.dx, closeTo(scrollTopLeft.dx + 16, 1));
+    expect(pillTopLeft.dy, closeTo(scrollTopLeft.dy + 16, 1));
+
+    final pillRightInset =
+        tester.getBottomRight(gridStackFinder).dx -
+        tester.getBottomRight(sliderFinder).dx;
+    final pillBottomInset =
+        tester.getBottomRight(gridStackFinder).dy -
+        tester.getBottomRight(sliderFinder).dy;
+    expect(pillRightInset, closeTo(gridRightInset, 1));
+    expect(pillBottomInset, closeTo(gridBottomInset, 1));
+
+    await tester.tap(
+      find.byKey(const ValueKey('prompt-block-pill-body-pill-one')),
+    );
+    await tester.pump();
+    expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
+  });
+
+  testWidgets('quick settings stays within a narrow layout', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(760, 600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await pumpScreen(
+      tester,
+      buildScreen(blocks: [makeBlock('narrow', '窄窗口', 'content')]),
+    );
+    await tester.tap(
+      find.byKey(const ValueKey('prompt-block-card-body-narrow')),
+    );
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('direct editing saves and keeps the block in the quick rail', (
+    tester,
+  ) async {
     final block = makeBlock('edit', '待编辑', 'before');
     final notifier = _FakePromptBlockLibraryNotifier(
       initialState: PromptBlockLibraryState(blocks: [block], folders: const []),
     );
 
     await pumpScreen(tester, buildScreen(notifier: notifier));
-    await tester.tap(find.byIcon(Icons.edit_outlined));
+    await tester.tap(find.byKey(const ValueKey('prompt-block-card-body-edit')));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
 
-    final fields = find.byType(TextField);
-    expect(fields, findsNWidgets(3));
-    await tester.enterText(fields.at(2), '  first line\nsecond line  ');
-    await tester.tap(find.text('保存'));
+    final titleField = find.descendant(
+      of: find.byKey(const Key('prompt-block-quick-title')),
+      matching: find.byType(TextField),
+    );
+    final contentField = find.descendant(
+      of: find.byKey(const Key('prompt-block-quick-content')),
+      matching: find.byType(TextField),
+    );
+    expect(titleField, findsOneWidget);
+    expect(contentField, findsOneWidget);
+
+    await tester.enterText(titleField, '已编辑');
+    await tester.enterText(contentField, '  first line\nsecond line  ');
+    await tester.tap(find.byKey(const Key('prompt-block-quick-save')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(seconds: 3));
 
-    expect(
-      notifier.state.valueOrNull?.blockById(block.id)?.content,
-      '  first line\nsecond line  ',
+    final saved = notifier.state.valueOrNull?.blockById(block.id);
+    expect(saved?.title, '已编辑');
+    expect(saved?.content, '  first line\nsecond line  ');
+    expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
+    expect(tester.widget<TextField>(titleField).controller?.text, '已编辑');
+  });
+
+  testWidgets(
+    'content expand editor saves or cancels without early persistence',
+    (tester) async {
+      final block = makeBlock('content-dialog', '正文编辑', 'before');
+      final notifier = _FakePromptBlockLibraryNotifier(
+        initialState: PromptBlockLibraryState(
+          blocks: [block],
+          folders: const [],
+        ),
+      );
+
+      await pumpScreen(tester, buildScreen(notifier: notifier));
+      await tester.tap(
+        find.byKey(const ValueKey('prompt-block-card-body-content-dialog')),
+      );
+      await tester.pump();
+
+      final contentField = find.descendant(
+        of: find.byKey(const Key('prompt-block-quick-content')),
+        matching: find.byType(TextField),
+      );
+      final expandButton = find.byKey(
+        const Key('prompt-block-quick-content-expand'),
+      );
+      await tester.ensureVisible(expandButton);
+      await tester.tap(expandButton);
+      await tester.pumpAndSettle();
+
+      final dialog = find.byKey(const Key('prompt-block-quick-content-dialog'));
+      final dialogField = find.byKey(
+        const Key('prompt-block-quick-content-dialog-field'),
+      );
+      expect(dialog, findsOneWidget);
+      expect(dialogField, findsOneWidget);
+      await tester.enterText(
+        find.descendant(of: dialogField, matching: find.byType(TextField)),
+        '  cancelled line\nkeep original  ',
+      );
+      await tester.tap(
+        find.byKey(const Key('prompt-block-quick-content-dialog-cancel')),
+      );
+      await tester.pumpAndSettle();
+      expect(dialog, findsNothing);
+      expect(tester.widget<TextField>(contentField).controller?.text, 'before');
+      expect(
+        notifier.state.valueOrNull?.blockById(block.id)?.content,
+        'before',
+      );
+
+      await tester.ensureVisible(expandButton);
+      await tester.tap(expandButton);
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.descendant(of: dialogField, matching: find.byType(TextField)),
+        '  expanded line\nkeep spaces  ',
+      );
+      await tester.tap(
+        find.byKey(const Key('prompt-block-quick-content-dialog-save')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<TextField>(contentField).controller?.text,
+        '  expanded line\nkeep spaces  ',
+      );
+      expect(
+        notifier.state.valueOrNull?.blockById(block.id)?.content,
+        'before',
+      );
+
+      await tester.tap(find.byKey(const Key('prompt-block-quick-save')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(seconds: 3));
+      expect(
+        notifier.state.valueOrNull?.blockById(block.id)?.content,
+        '  expanded line\nkeep spaces  ',
+      );
+    },
+  );
+
+  testWidgets('wide toolbar uses the shared header height', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1100, 600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await pumpScreen(
+      tester,
+      buildScreen(blocks: [makeBlock('wide', '宽屏', 'content')]),
     );
+
+    expect(
+      tester.getSize(find.byKey(const Key('prompt-block-toolbar'))).height,
+      64,
+    );
+  });
+
+  testWidgets('color and icon pickers use compact auto-closing menus', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      buildScreen(blocks: [makeBlock('picker', '选择器', 'content')]),
+    );
+    await tester.tap(
+      find.byKey(const ValueKey('prompt-block-card-body-picker')),
+    );
+    await tester.pump();
+
+    final colorOption = find.byKey(
+      const ValueKey('prompt-block-color-option-#FFE53935'),
+    );
+    await tester.ensureVisible(
+      find.byKey(const Key('prompt-block-color-trigger')),
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('prompt-block-color-trigger')));
+    await tester.pump();
+    expect(colorOption, findsOneWidget);
+    await tester.tap(colorOption);
+    await tester.pump();
+    expect(colorOption, findsNothing);
+
+    final iconPicker = find.byType(PromptBlockIconPicker);
+    final iconOption = find.byKey(
+      const ValueKey('prompt-block-icon-option-palette'),
+    );
+    await tester.ensureVisible(
+      find.byKey(const Key('prompt-block-icon-trigger')),
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('prompt-block-icon-trigger')));
+    await tester.pump();
+    expect(iconOption, findsOneWidget);
+    await tester.tap(iconOption);
+    await tester.pump();
+    expect(iconOption, findsNothing);
+    expect(
+      tester.widget<PromptBlockIconPicker>(iconPicker).selected,
+      'palette',
+    );
+
+    await tester.tap(find.byKey(const Key('prompt-block-icon-trigger')));
+    await tester.pump();
+    await tester.tap(iconOption);
+    await tester.pump();
+    expect(tester.widget<PromptBlockIconPicker>(iconPicker).selected, isNull);
   });
 
   testWidgets('empty library shows the create action', (tester) async {

@@ -26,6 +26,10 @@ class _FakeLibraryNotifier extends PromptBlockLibraryNotifier {
       PromptBlockLibraryState(blocks: blocks, folders: const []);
 }
 
+final _captureExploreRollSnapshotProvider = Provider<ExploreRollSnapshot>(
+  (ref) => captureExploreRollSnapshot(ref),
+);
+
 void main() {
   late Directory hiveDirectory;
   late StyleExploreRunStorage runStorage;
@@ -632,6 +636,7 @@ void main() {
           instances: {
             marker: PillInstance(
               blockId: 'b-1',
+              evolutionEnabled: true,
               settings: PillInstanceSettings(mode: PillRollMode.random),
             ),
           },
@@ -663,10 +668,12 @@ void main() {
         instances: {
           '\uE001': PillInstance(
             blockId: 'b-1',
+            evolutionEnabled: true,
             settings: PillInstanceSettings(mode: PillRollMode.random),
           ),
           '\uE002': PillInstance(
             blockId: 'b-2',
+            evolutionEnabled: true,
             settings: PillInstanceSettings(mode: PillRollMode.random),
           ),
         },
@@ -688,6 +695,52 @@ void main() {
       );
       expect(resolveExploreOverrideMarkerInDocument(fixedOnly), isNull);
     });
+
+    test(
+      'roll capture only keeps enabled random evolution instances',
+      () async {
+        final block = PromptBlock(
+          id: 'b-1',
+          title: '画风池',
+          content: 'alpha, beta',
+          createdAt: DateTime.utc(2026, 9, 1),
+          updatedAt: DateTime.utc(2026, 9, 1),
+        );
+        final c = container(blocks: [block]);
+        await c.read(promptBlockLibraryNotifierProvider.future);
+        c
+            .read(pillWorkspaceProvider(PillScopes.main).notifier)
+            .restoreDocument(
+              const PillDocument(
+                text: '\uE000 \uE001 \uE002 \uE003',
+                instances: {
+                  '\uE000': PillInstance(
+                    blockId: 'b-1',
+                    evolutionEnabled: true,
+                    settings: PillInstanceSettings(mode: PillRollMode.random),
+                  ),
+                  '\uE001': PillInstance(
+                    blockId: 'b-1',
+                    settings: PillInstanceSettings(mode: PillRollMode.random),
+                  ),
+                  '\uE002': PillInstance(
+                    blockId: 'b-1',
+                    enabled: false,
+                    evolutionEnabled: true,
+                    settings: PillInstanceSettings(mode: PillRollMode.random),
+                  ),
+                  '\uE003': PillInstance(
+                    blockId: 'b-1',
+                    evolutionEnabled: true,
+                  ),
+                },
+              ),
+            );
+
+        final snapshot = c.read(_captureExploreRollSnapshotProvider);
+        expect(snapshot.instanceRolls.map((roll) => roll.marker), ['\uE000']);
+      },
+    );
 
     test('exploreTargetBlockIdForParentSet 取第一个有来源父本的块 id', () {
       final run = ExploreRun(

@@ -28,7 +28,7 @@ final exploreGenerateFnProvider = Provider<ExploreGenerateFn>(
 
 /// 深度轮门禁失败原因（UI 据此映射文案）。
 enum ExploreDeepRoundRejection {
-  /// main lane 没有可用的启用随机实例（子代串没有落点）。
+  /// main lane 没有可用的启用随机遗传实例（子代串没有落点）。
   noRandomInstance,
 
   /// 变异引擎在去重空间内无法产出任何子代串。
@@ -215,7 +215,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
   /// 启动深度轮（阶段 D）：变异引擎按父本集出 N 个子代串 → 登记深度
   /// 候选（lineage.operation=mutation/crossover/injection、generation+1、
   /// mutatedText/targetBlockId 随候选持久化）→ 逐张生成（每张 roll 后把
-  /// 目标随机实例的 currentRoll 覆盖为子代串再抓快照）。
+  /// 目标遗传实例的 currentRoll 覆盖为子代串再抓快照）。
   ///
   /// 返回 false = 门禁拒绝（重入/主生成在跑/run 状态不可启动）；
   /// 数据或引擎校验失败抛 [ExploreDeepRoundException]（UI 捕获提示）。
@@ -250,8 +250,8 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       );
     }
 
-    // 子代串的落点 = 与父本来源同 blockId 的 main lane 随机实例
-    // （找不到回退第一个随机实例）；完全没有则不允许深度轮。
+    // 子代串的落点 = 与父本来源同 blockId 的 main lane 随机遗传实例
+    // （找不到回退第一个随机遗传实例）；完全没有则不允许深度轮。
     final targetBlockId = exploreTargetBlockIdForParentSet(run, parentSet);
     if (resolveExploreOverrideMarker(ref, blockId: targetBlockId) == null) {
       throw const ExploreDeepRoundException(
@@ -423,7 +423,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
             .read(pillWorkspaceProvider(PillScopes.negative).notifier)
             .rollAllRandom();
 
-        // 深度候选：把目标随机实例的 currentRoll 覆盖为子代串（物化语义，
+        // 深度候选：把目标遗传实例的 currentRoll 覆盖为子代串（物化语义，
         // 投影自然采用）。目标实例在生成间隙被删光时本张标失败跳过。
         final lineage = lineageByCandidateId[candidateId];
         final mutatedText = lineage?.mutatedText;

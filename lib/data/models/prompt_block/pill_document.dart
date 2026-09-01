@@ -182,17 +182,22 @@ class PillInstanceSettings {
   );
 }
 
-/// 单个块实例：引用库中的块 + 启用态 + 随机参数 + 物化 roll 结果。
+/// 单个块实例：引用库中的块 + 启用态 + 遗传开关 + 随机参数 + 物化 roll 结果。
 class PillInstance {
   const PillInstance({
     required this.blockId,
     this.enabled = true,
+    this.evolutionEnabled = false,
     this.settings = PillInstanceSettings.fixedDefault,
     this.currentRoll,
   });
 
   final String blockId;
   final bool enabled;
+
+  /// 是否把该实例作为画风探索深度轮的遗传块。
+  /// 这是实例级开关，不改变普通投影或 roll 语义；旧存档缺键时关闭。
+  final bool evolutionEnabled;
   final PillInstanceSettings settings;
 
   /// 随机模式下的物化提示词串：L1 卡显示 = 生成发送 = token 计数三者同源。
@@ -202,12 +207,14 @@ class PillInstance {
   PillInstance copyWith({
     String? blockId,
     bool? enabled,
+    bool? evolutionEnabled,
     PillInstanceSettings? settings,
     String? currentRoll,
   }) {
     return PillInstance(
       blockId: blockId ?? this.blockId,
       enabled: enabled ?? this.enabled,
+      evolutionEnabled: evolutionEnabled ?? this.evolutionEnabled,
       settings: settings ?? this.settings,
       currentRoll: currentRoll ?? this.currentRoll,
     );
@@ -216,6 +223,7 @@ class PillInstance {
   Map<String, dynamic> toJson() => {
     'blockId': blockId,
     'enabled': enabled,
+    'evolutionEnabled': evolutionEnabled,
     'settings': settings.toJson(),
     if (currentRoll != null) 'currentRoll': currentRoll,
   };
@@ -225,6 +233,7 @@ class PillInstance {
     return PillInstance(
       blockId: json['blockId'] as String? ?? '',
       enabled: json['enabled'] as bool? ?? true,
+      evolutionEnabled: json['evolutionEnabled'] as bool? ?? false,
       settings: rawSettings is Map
           ? PillInstanceSettings.fromJson(
               Map<String, dynamic>.from(rawSettings),
@@ -239,11 +248,13 @@ class PillInstance {
       other is PillInstance &&
       other.blockId == blockId &&
       other.enabled == enabled &&
+      other.evolutionEnabled == evolutionEnabled &&
       other.settings == settings &&
       other.currentRoll == currentRoll;
 
   @override
-  int get hashCode => Object.hash(blockId, enabled, settings, currentRoll);
+  int get hashCode =>
+      Object.hash(blockId, enabled, evolutionEnabled, settings, currentRoll);
 }
 
 /// 药丸工作区文档：文本（含标记字符）+ 实例表。

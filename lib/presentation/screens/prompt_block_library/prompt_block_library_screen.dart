@@ -17,10 +17,14 @@ import '../../providers/prompt_block_library_provider.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
 import 'widgets/curation_import_preview_dialog.dart';
+import 'widgets/prompt_block_card.dart';
 import 'widgets/prompt_block_edit_dialog.dart';
 import 'widgets/prompt_block_folder_delete_dialog.dart';
 import 'widgets/prompt_block_folder_tree.dart';
 import 'widgets/prompt_block_list_item.dart';
+import 'widgets/prompt_block_quick_settings_panel.dart';
+
+enum _PromptBlockViewMode { list, grid }
 
 class PromptBlockLibraryScreen extends ConsumerStatefulWidget {
   const PromptBlockLibraryScreen({super.key});
@@ -37,7 +41,10 @@ class _PromptBlockLibraryScreenState
 
   bool _allSelected = true;
   String? _selectedFolderId;
-  bool _compactView = false;
+  _PromptBlockViewMode _viewMode = _PromptBlockViewMode.grid;
+  double _cardWidth = 220;
+  String? _selectedBlockId;
+  bool _quickPanelExpanded = true;
 
   @override
   void initState() {
@@ -55,16 +62,42 @@ class _PromptBlockLibraryScreenState
   Future<void> _loadViewPreference() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
-    setState(
-      () => _compactView =
-          prefs.getBool(StorageKeys.promptBlockLibraryCompactView) ?? false,
+    final storedMode = prefs.getString(StorageKeys.promptBlockLibraryViewMode);
+    final storedWidth = prefs.getDouble(
+      StorageKeys.promptBlockLibraryCardWidth,
+    );
+    setState(() {
+      _viewMode = storedMode == 'list'
+          ? _PromptBlockViewMode.list
+          : _PromptBlockViewMode.grid;
+      _cardWidth = _snapCardWidth(storedWidth ?? 220);
+    });
+  }
+
+  Future<void> _setViewMode(_PromptBlockViewMode mode) async {
+    setState(() => _viewMode = mode);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      StorageKeys.promptBlockLibraryViewMode,
+      mode == _PromptBlockViewMode.list ? 'list' : 'grid',
     );
   }
 
-  Future<void> _setCompactView(bool compact) async {
-    setState(() => _compactView = compact);
+  void _setCardWidth(double value) {
+    setState(() => _cardWidth = _snapCardWidth(value));
+  }
+
+  Future<void> _persistCardWidth(double value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(StorageKeys.promptBlockLibraryCompactView, compact);
+    await prefs.setDouble(
+      StorageKeys.promptBlockLibraryCardWidth,
+      _snapCardWidth(value),
+    );
+  }
+
+  double _snapCardWidth(double value) {
+    final clamped = value.clamp(100.0, 320.0).toDouble();
+    return 100 + ((clamped - 100) / 20).round() * 20;
   }
 
   @override
@@ -74,11 +107,29 @@ class _PromptBlockLibraryScreenState
       body: LayoutBuilder(
         builder: (context, constraints) {
           final showSidebar = constraints.maxWidth >= 760;
+          final state = library.valueOrNull;
+          final visibleBlocks = state == null
+              ? const <PromptBlock>[]
+              : _visibleBlocks(state);
+          final selectedBlock = _selectedVisibleBlock(visibleBlocks);
+          if (_selectedBlockId != null && selectedBlock == null) {
+            final staleId = _selectedBlockId;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted || _selectedBlockId != staleId) return;
+              setState(() {
+                _selectedBlockId = null;
+                _quickPanelExpanded = false;
+              });
+            });
+          }
+          final showQuickPanel =
+              constraints.maxWidth >= 720 && selectedBlock != null;
           return Row(
             children: [
               if (showSidebar) _buildSidebar(context, library),
               Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildToolbar(context, library),
                     if (!showSidebar && library.valueOrNull != null)
@@ -87,9 +138,60 @@ class _PromptBlockLibraryScreenState
                   ],
                 ),
               ),
+              if (showQuickPanel)
+                _buildQuickSettingsRail(selectedBlock, state!.folders),
             ],
           );
         },
+      ),
+    );
+  }
+
+  PromptBlock? _selectedVisibleBlock(List<PromptBlock> blocks) {
+    final selectedId = _selectedBlockId;
+    if (selectedId == null) return null;
+    for (final block in blocks) {
+      if (block.id == selectedId) return block;
+    }
+    return null;
+  }
+
+  Widget _buildQuickSettingsRail(
+    PromptBlock block,
+    List<PromptBlockFolder> folders,
+  ) {
+    final theme = Theme.of(context);
+    final width = _quickPanelExpanded ? 320.0 : 40.0;
+    return ClipRect(
+      child: AnimatedContainer(
+        key: const Key('prompt-block-quick-settings-rail'),
+        duration: const Duration(milliseconds: 200),
+        width: width,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          border: Border(left: BorderSide(color: theme.dividerColor)),
+        ),
+        child: _quickPanelExpanded
+            ? PromptBlockQuickSettingsPanel(
+                block: block,
+                folders: folders,
+                onToggleFavorite: () => _toggleFavorite(block),
+                onCopy: () => AppToast.success(
+                  context,
+                  context.l10n.promptBlockLibrary_copied,
+                ),
+                onExport: () => _exportBlockAsTxt(block),
+                onSave: (result) => _saveBlockEdit(context, block, result),
+                onDelete: () => _deleteBlock(context, block),
+                onCollapse: () => setState(() => _quickPanelExpanded = false),
+                onClose: () => setState(() {
+                  _selectedBlockId = null;
+                  _quickPanelExpanded = false;
+                }),
+              )
+            : PromptBlockQuickSettingsCollapsed(
+                onExpand: () => setState(() => _quickPanelExpanded = true),
+              ),
       ),
     );
   }
@@ -187,170 +289,195 @@ class _PromptBlockLibraryScreenState
     AsyncValue<PromptBlockLibraryState> library,
   ) {
     final theme = Theme.of(context);
-    return Container(
-      constraints: const BoxConstraints(minHeight: 62),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.45),
+    return LayoutBuilder(
+      builder: (context, toolbarConstraints) {
+        final compact = toolbarConstraints.maxWidth < 792;
+        return Container(
+          key: const Key('prompt-block-toolbar'),
+          height: compact ? null : promptBlockLibraryWideHeaderHeight,
+          constraints: compact ? const BoxConstraints(minHeight: 62) : null,
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: compact ? 12 : 8,
           ),
-        ),
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final compact = constraints.maxWidth < 760;
-          final actions = Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              PopupMenuButton<String>(
-                tooltip: context.l10n.promptBlockLibrary_importExport,
-                icon: const Icon(Icons.import_export),
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'importTxt',
-                    child: Text(context.l10n.promptBlockLibrary_importTxtFiles),
-                  ),
-                  PopupMenuItem(
-                    value: 'importFolder',
-                    child: Text(
-                      context.l10n.promptBlockLibrary_importFromFolder,
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem(
-                    value: 'exportBackup',
-                    child: Text(
-                      context.l10n.promptBlockLibrary_exportLibraryBackup,
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'importBackup',
-                    child: Text(
-                      context.l10n.promptBlockLibrary_importLibraryBackup,
-                    ),
-                  ),
-                ],
-                onSelected: (value) {
-                  switch (value) {
-                    case 'importTxt':
-                      _importTxtFiles();
-                    case 'importFolder':
-                      _importFromFolder();
-                    case 'exportBackup':
-                      _exportLibraryBackup();
-                    case 'importBackup':
-                      _importLibraryBackup();
-                  }
-                },
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            border: Border(
+              bottom: BorderSide(
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.45),
               ),
-              ToggleButtons(
-                key: const Key('prompt-block-view-mode'),
-                isSelected: [!_compactView, _compactView],
-                onPressed: (index) => _setCompactView(index == 1),
-                borderRadius: BorderRadius.circular(8),
-                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            ),
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxWidth < 760;
+              final actions = Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Tooltip(
-                    message: context.l10n.promptBlockLibrary_detailedView,
-                    child: const Icon(Icons.view_agenda_outlined, size: 18),
+                  PopupMenuButton<String>(
+                    tooltip: context.l10n.promptBlockLibrary_importExport,
+                    icon: const Icon(Icons.import_export),
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'importTxt',
+                        child: Text(
+                          context.l10n.promptBlockLibrary_importTxtFiles,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'importFolder',
+                        child: Text(
+                          context.l10n.promptBlockLibrary_importFromFolder,
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem(
+                        value: 'exportBackup',
+                        child: Text(
+                          context.l10n.promptBlockLibrary_exportLibraryBackup,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'importBackup',
+                        child: Text(
+                          context.l10n.promptBlockLibrary_importLibraryBackup,
+                        ),
+                      ),
+                    ],
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'importTxt':
+                          _importTxtFiles();
+                        case 'importFolder':
+                          _importFromFolder();
+                        case 'exportBackup':
+                          _exportLibraryBackup();
+                        case 'importBackup':
+                          _importLibraryBackup();
+                      }
+                    },
                   ),
-                  Tooltip(
-                    message: context.l10n.promptBlockLibrary_compactView,
-                    child: const Icon(Icons.view_headline_outlined, size: 18),
+                  ToggleButtons(
+                    key: const Key('prompt-block-view-mode'),
+                    isSelected: [
+                      _viewMode == _PromptBlockViewMode.list,
+                      _viewMode == _PromptBlockViewMode.grid,
+                    ],
+                    onPressed: (index) => _setViewMode(
+                      index == 0
+                          ? _PromptBlockViewMode.list
+                          : _PromptBlockViewMode.grid,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
+                    children: [
+                      Tooltip(
+                        message: context.l10n.promptBlockLibrary_listView,
+                        child: const Icon(Icons.view_agenda_outlined, size: 18),
+                      ),
+                      Tooltip(
+                        message: context.l10n.promptBlockLibrary_gridView,
+                        child: const Icon(Icons.grid_view_outlined, size: 18),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    tooltip: context.l10n.common_refresh,
+                    onPressed: () => ref
+                        .read(promptBlockLibraryNotifierProvider.notifier)
+                        .refresh(),
+                    icon: const Icon(Icons.refresh),
+                  ),
+                  FilledButton.icon(
+                    onPressed: () => _showFolderNameDialog(context),
+                    icon: const Icon(
+                      Icons.create_new_folder_outlined,
+                      size: 18,
+                    ),
+                    label: Text(context.l10n.promptBlockLibrary_newFolder),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton.icon(
+                    onPressed: () => _showCreateBlock(context),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: Text(context.l10n.promptBlockLibrary_newBlock),
                   ),
                 ],
-              ),
-              IconButton(
-                tooltip: context.l10n.common_refresh,
-                onPressed: () => ref
-                    .read(promptBlockLibraryNotifierProvider.notifier)
-                    .refresh(),
-                icon: const Icon(Icons.refresh),
-              ),
-              FilledButton.icon(
-                onPressed: () => _showFolderNameDialog(context),
-                icon: const Icon(Icons.create_new_folder_outlined, size: 18),
-                label: Text(context.l10n.promptBlockLibrary_newFolder),
-              ),
-              const SizedBox(width: 8),
-              FilledButton.icon(
-                onPressed: () => _showCreateBlock(context),
-                icon: const Icon(Icons.add, size: 18),
-                label: Text(context.l10n.promptBlockLibrary_newBlock),
-              ),
-            ],
-          );
+              );
 
-          final heading = Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.view_module_outlined,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                context.l10n.promptBlockLibrary_title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              if (library.valueOrNull != null) ...[
-                const SizedBox(width: 8),
-                Text(
-                  '${_visibleBlocks(library.requireValue).length}',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+              final heading = Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.view_module_outlined,
+                    color: theme.colorScheme.primary,
                   ),
-                ),
-              ],
-            ],
-          );
-
-          final search = _buildSearchField(context);
-          if (compact) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: heading),
-                    IconButton(
-                      tooltip: context.l10n.common_refresh,
-                      onPressed: () => ref
-                          .read(promptBlockLibraryNotifierProvider.notifier)
-                          .refresh(),
-                      icon: const Icon(Icons.refresh),
+                  const SizedBox(width: 8),
+                  Text(
+                    context.l10n.promptBlockLibrary_title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (library.valueOrNull != null) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      '${_visibleBlocks(library.requireValue).length}',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 8),
-                search,
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: actions,
-                  ),
-                ),
-              ],
-            );
-          }
+                ],
+              );
 
-          return Row(
-            children: [
-              heading,
-              const SizedBox(width: 16),
-              Expanded(child: search),
-              const SizedBox(width: 12),
-              actions,
-            ],
-          );
-        },
-      ),
+              final search = _buildSearchField(context);
+              if (compact) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: heading),
+                        IconButton(
+                          tooltip: context.l10n.common_refresh,
+                          onPressed: () => ref
+                              .read(promptBlockLibraryNotifierProvider.notifier)
+                              .refresh(),
+                          icon: const Icon(Icons.refresh),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    search,
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: actions,
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              return Row(
+                children: [
+                  heading,
+                  const SizedBox(width: 16),
+                  Expanded(child: search),
+                  const SizedBox(width: 12),
+                  actions,
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -465,10 +592,15 @@ class _PromptBlockLibraryScreenState
         final blocks = _visibleBlocks(state);
         if (blocks.isEmpty) return _buildEmptyState(context, state);
 
+        if (_viewMode == _PromptBlockViewMode.grid) {
+          return _buildGrid(context, blocks);
+        }
+
         final reorderable =
             !_allSelected && _searchController.text.trim().isEmpty;
         if (reorderable) {
           return ReorderableListView.builder(
+            key: const Key('prompt-block-list'),
             padding: const EdgeInsets.all(16),
             buildDefaultDragHandles: false,
             itemCount: blocks.length,
@@ -480,12 +612,149 @@ class _PromptBlockLibraryScreenState
         }
 
         return ListView.builder(
+          key: const Key('prompt-block-list'),
           padding: const EdgeInsets.all(16),
           itemCount: blocks.length,
           itemBuilder: (context, index) =>
               _buildBlockItem(context, blocks[index]),
         );
       },
+    );
+  }
+
+  Widget _buildGrid(BuildContext context, List<PromptBlock> blocks) {
+    if (_cardWidth <= 160) return _buildPillGrid(context, blocks);
+
+    final cardHeight = _cardWidth < 240 ? 174.0 : 208.0;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final sliderWidth = (constraints.maxWidth - 74)
+            .clamp(80.0, 164.0)
+            .toDouble();
+        return Stack(
+          key: const Key('prompt-block-grid-stack'),
+          children: [
+            Positioned.fill(
+              child: GridView.builder(
+                key: const Key('prompt-block-grid'),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 82),
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: _cardWidth,
+                  mainAxisExtent: cardHeight,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                ),
+                itemCount: blocks.length,
+                itemBuilder: (context, index) =>
+                    _buildBlockCard(context, blocks[index], width: _cardWidth),
+              ),
+            ),
+            Positioned(
+              right: 16,
+              bottom: 12,
+              child: _buildCardSizeControl(context, sliderWidth),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildPillGrid(BuildContext context, List<PromptBlock> blocks) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final sliderWidth = (constraints.maxWidth - 74)
+            .clamp(80.0, 164.0)
+            .toDouble();
+        return Stack(
+          key: const Key('prompt-block-grid-stack'),
+          children: [
+            Positioned.fill(
+              child: SingleChildScrollView(
+                key: const Key('prompt-block-pill-grid-scroll'),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 82),
+                child: Wrap(
+                  alignment: WrapAlignment.start,
+                  runAlignment: WrapAlignment.start,
+                  crossAxisAlignment: WrapCrossAlignment.start,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final block in blocks)
+                      _buildBlockPill(context, block, maxWidth: _cardWidth),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              right: 16,
+              bottom: 12,
+              child: _buildCardSizeControl(context, sliderWidth),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildBlockPill(
+    BuildContext context,
+    PromptBlock block, {
+    required double maxWidth,
+  }) {
+    final title = block.title.isEmpty
+        ? context.l10n.promptBlockLibrary_unnamedBlock
+        : block.title;
+    return PromptBlockPill(
+      key: ValueKey(block.id),
+      block: block,
+      displayTitle: title,
+      maxWidth: maxWidth,
+      selected: _selectedBlockId == block.id,
+      onTap: () => _selectBlock(block),
+    );
+  }
+
+  Widget _buildCardSizeControl(BuildContext context, double sliderWidth) {
+    final theme = Theme.of(context);
+    return Tooltip(
+      message: context.l10n.promptBlockLibrary_cardSize,
+      child: Material(
+        elevation: 3,
+        color: theme.colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.view_module_outlined,
+                size: 17,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              SizedBox(
+                width: sliderWidth,
+                child: Slider(
+                  key: const Key('prompt-block-card-size-slider'),
+                  value: _cardWidth,
+                  min: 100,
+                  max: 320,
+                  divisions: 11,
+                  label: '${_cardWidth.round()}',
+                  onChanged: _setCardWidth,
+                  onChangeEnd: _persistCardWidth,
+                ),
+              ),
+              Icon(
+                Icons.view_module,
+                size: 19,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -502,14 +771,46 @@ class _PromptBlockLibraryScreenState
       block: block,
       displayTitle: title,
       reorderIndex: reorderIndex,
-      compact: _compactView,
-      onEdit: () => _showEditBlock(context, block),
+      selected: _selectedBlockId == block.id,
+      onTap: () => _selectBlock(block),
+      onEdit: () => _selectBlock(block),
       onCopy: () =>
           AppToast.success(context, context.l10n.promptBlockLibrary_copied),
       onExport: () => _exportBlockAsTxt(block),
       onToggleFavorite: () => _toggleFavorite(block),
       onDelete: () => _deleteBlock(context, block),
     );
+  }
+
+  Widget _buildBlockCard(
+    BuildContext context,
+    PromptBlock block, {
+    required double width,
+  }) {
+    final title = block.title.isEmpty
+        ? context.l10n.promptBlockLibrary_unnamedBlock
+        : block.title;
+    return PromptBlockCard(
+      key: ValueKey(block.id),
+      block: block,
+      displayTitle: title,
+      width: width,
+      selected: _selectedBlockId == block.id,
+      onTap: () => _selectBlock(block),
+      onEdit: () => _selectBlock(block),
+      onCopy: () =>
+          AppToast.success(context, context.l10n.promptBlockLibrary_copied),
+      onExport: () => _exportBlockAsTxt(block),
+      onToggleFavorite: () => _toggleFavorite(block),
+      onDelete: () => _deleteBlock(context, block),
+    );
+  }
+
+  void _selectBlock(PromptBlock block) {
+    setState(() {
+      _selectedBlockId = block.id;
+      _quickPanelExpanded = true;
+    });
   }
 
   Widget _buildEmptyState(BuildContext context, PromptBlockLibraryState state) {
@@ -867,17 +1168,12 @@ class _PromptBlockLibraryScreenState
     }
   }
 
-  Future<void> _showEditBlock(BuildContext context, PromptBlock block) async {
+  Future<void> _saveBlockEdit(
+    BuildContext context,
+    PromptBlock block,
+    PromptBlockEditResult result,
+  ) async {
     final l10n = context.l10n;
-    final state = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
-    if (state == null) return;
-    final result = await PromptBlockEditDialog.show(
-      context: context,
-      block: block,
-      folders: state.folders,
-    );
-    if (result == null || !context.mounted) return;
-
     try {
       final updated = await ref
           .read(promptBlockLibraryNotifierProvider.notifier)
@@ -926,6 +1222,12 @@ class _PromptBlockLibraryScreenState
       await ref
           .read(promptBlockLibraryNotifierProvider.notifier)
           .deleteBlock(block.id);
+      if (_selectedBlockId == block.id && mounted) {
+        setState(() {
+          _selectedBlockId = null;
+          _quickPanelExpanded = false;
+        });
+      }
       if (context.mounted) {
         AppToast.success(context, l10n.promptBlockLibrary_deleted);
       }
@@ -1073,7 +1375,11 @@ class _PromptBlockLibraryScreenState
     int oldIndex,
     int newIndex,
   ) async {
-    if (_allSelected || _searchController.text.trim().isNotEmpty) return;
+    if (_viewMode != _PromptBlockViewMode.list ||
+        _allSelected ||
+        _searchController.text.trim().isNotEmpty) {
+      return;
+    }
     final orderedIds = blocks.map((block) => block.id).toList();
     final moved = orderedIds.removeAt(oldIndex);
     orderedIds.insert(newIndex, moved);

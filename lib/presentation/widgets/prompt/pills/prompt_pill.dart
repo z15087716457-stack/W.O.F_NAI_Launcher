@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'dna_icon.dart';
+
 /// 药丸编辑器中文本流内联渲染的块药丸（P0 原型）。
 ///
 /// 纯视觉组件：颜色胶囊 + 标题；禁用态降透明度，异常态（块已删/失效标记）
@@ -12,6 +14,8 @@ class PromptPill extends StatelessWidget {
     this.enabled = true,
     this.icon,
     this.showRollBadge = false,
+    this.evolutionEnabled = false,
+    this.allowEvolutionToggle = false,
     this.variant = PromptPillVariant.normal,
   });
 
@@ -24,6 +28,12 @@ class PromptPill extends StatelessWidget {
 
   /// 随机抽取实例的骰子角标（P2.5）：标题后加小号骰子，区分固定/随机实例。
   final bool showRollBadge;
+
+  /// 画风探索深度轮使用的实例级遗传角标；只影响 UI，不进入提示词文本。
+  final bool evolutionEnabled;
+
+  /// 当前页面是否允许操作遗传开关；探索页彩色，主生成页灰色。
+  final bool allowEvolutionToggle;
   final PromptPillVariant variant;
 
   @override
@@ -51,6 +61,10 @@ class PromptPill extends StatelessWidget {
         Icons.help_outline,
       ),
     };
+
+    final evolutionColor = allowEvolutionToggle
+        ? color
+        : theme.colorScheme.onSurfaceVariant;
 
     // 尺寸对齐主提示词正文（bodyMedium）：药丸曾用 labelSmall 明显小于正文字号
     return Container(
@@ -80,6 +94,10 @@ class PromptPill extends StatelessWidget {
           if (showRollBadge) ...[
             const SizedBox(width: 2),
             Icon(Icons.casino_outlined, size: 11, color: borderColor),
+          ],
+          if (evolutionEnabled) ...[
+            const SizedBox(width: 2),
+            DnaIcon(size: 12, color: evolutionColor),
           ],
         ],
       ),

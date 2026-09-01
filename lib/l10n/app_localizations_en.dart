@@ -10115,6 +10115,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pillCardEmptyRoll => '(empty roll this time)';
 
   @override
+  String get pillCardEvolutionEnable => 'Enable evolution';
+
+  @override
+  String get pillCardEvolutionDisable => 'Disable evolution';
+
+  @override
+  String get pillCardEvolutionExploreOnly =>
+      'Evolution is available only in Style Explore';
+
+  @override
+  String get pillCardEvolutionRequiresRandom =>
+      'Set the instance to random first';
+
+  @override
+  String get pillCardEvolutionRequiresEnabled => 'Enable the instance first';
+
+  @override
   String get pillSettingsTitle => 'Block instance settings';
 
   @override
@@ -10410,10 +10427,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_importedAt => 'Imported at';
 
   @override
-  String get promptBlockLibrary_detailedView => 'Detailed view';
+  String get promptBlockLibrary_listView => 'List view';
 
   @override
-  String get promptBlockLibrary_compactView => 'Compact view';
+  String get promptBlockLibrary_gridView => 'Grid view';
+
+  @override
+  String get promptBlockLibrary_cardSize => 'Card size';
 
   @override
   String get promptBlockLibrary_reorderFolders => 'Reorder folders';
@@ -10852,7 +10872,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_deepRoundNoInstance =>
-      'No enabled random block instance in the main prompt; deep round unavailable';
+      'No enabled random evolution block in the main prompt; deep round unavailable';
 
   @override
   String get styleExplore_deepRoundEmpty =>

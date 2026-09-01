@@ -14,6 +14,7 @@ import 'package:nai_launcher/presentation/providers/generation/generation_params
 import 'package:nai_launcher/presentation/providers/pill_roll_coordinator.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/pills/dna_icon.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/pill_instance_card.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/pill_instance_settings_dialog.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
@@ -151,6 +152,48 @@ void main() {
       final state = container.read(pillWorkspaceNotifierProvider);
       expect(state.projection, 'A, B');
     });
+
+    test('evolution toggle requires enabled random instances', () async {
+      final container = makeContainer();
+      await container.read(promptBlockLibraryNotifierProvider.future);
+      final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+
+      notifier.insertBlockAt(offset: 0, blockId: 'style');
+      notifier.toggleEvolution(markerA);
+      expect(
+        container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!
+            .evolutionEnabled,
+        isFalse,
+        reason: 'fixed instances cannot be inherited',
+      );
+
+      notifier.updateInstanceSettings(markerA, randomSettings);
+      notifier.toggleEnabled(markerA);
+      notifier.toggleEvolution(markerA);
+      expect(
+        container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!
+            .evolutionEnabled,
+        isFalse,
+        reason: 'disabled instances cannot be inherited',
+      );
+
+      notifier.toggleEnabled(markerA);
+      notifier.toggleEvolution(markerA);
+      expect(
+        container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!
+            .evolutionEnabled,
+        isTrue,
+      );
+    });
   });
 
   group('roll coordinator', () {
@@ -247,10 +290,12 @@ void main() {
       final notifier = container.read(pillWorkspaceNotifierProvider.notifier)
         ..insertBlockAt(offset: 0, blockId: 'style');
       notifier.updateInstanceSettings(markerA, randomSettings);
+      notifier.toggleEvolution(markerA);
       await tester.pump();
 
-      // 药丸带骰子角标
+      // 药丸带骰子角标，遗传角标紧随其后
       expect(find.byIcon(Icons.casino_outlined), findsOneWidget);
+      expect(find.byType(DnaIcon), findsOneWidget);
 
       await tester.tap(find.byType(PromptPill));
       await tester.pump();

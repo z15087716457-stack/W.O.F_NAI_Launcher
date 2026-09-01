@@ -485,7 +485,10 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
           height: 280,
           child: Container(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-            child: const PromptInputWidget(showMaximizeButton: false),
+            child: const PromptInputWidget(
+              showMaximizeButton: false,
+              allowEvolutionToggle: true,
+            ),
           ),
         ),
         const InlineCharacterRow(),

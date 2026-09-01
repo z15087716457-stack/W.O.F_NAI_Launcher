@@ -173,6 +173,22 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     );
   }
 
+  /// 切换实例遗传开关。
+  ///
+  /// 只有启用中的随机实例允许参与切换；开关本身不触发 roll，普通投影
+  /// 与 roll 语义保持不变。
+  void toggleEvolution(String marker) {
+    final instance = state.document.instances[marker];
+    if (instance == null || !instance.enabled || !instance.settings.isRandom) {
+      return;
+    }
+    final instances = Map<String, PillInstance>.of(state.document.instances)
+      ..[marker] = instance.copyWith(
+        evolutionEnabled: !instance.evolutionEnabled,
+      );
+    _apply(state.document.copyWith(instances: instances));
+  }
+
   /// 更新实例随机参数（L2 弹窗确定，roll 时机 2）：
   /// 写设置；切到/更新随机模式时立即重 roll 一次。
   void updateInstanceSettings(String marker, PillInstanceSettings settings) {

@@ -37,6 +37,7 @@ class PromptPillEditor extends ConsumerStatefulWidget {
     this.minLines,
     this.maxLines,
     this.sessionId,
+    this.allowEvolutionToggle = false,
     this.onChanged,
     this.onOpenAssistantSettings,
     this.onComfyuiImport,
@@ -62,6 +63,9 @@ class PromptPillEditor extends ConsumerStatefulWidget {
   /// 最大行数（角色框 3~12 自增高封顶用）；null = 随 compact 默认。
   final int? maxLines;
   final String? sessionId;
+
+  /// 是否允许在实例卡中切换遗传开关（仅画风探索页开启）。
+  final bool allowEvolutionToggle;
 
   /// 投影（块已展开的完整提示词）变化回调，接旧生成参数链路。
   final ValueChanged<String>? onChanged;
@@ -173,6 +177,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       marker: marker,
       globalPosition: globalPosition,
       onDismiss: _dismissInstanceCard,
+      allowEvolutionToggle: widget.allowEvolutionToggle,
     );
     _instanceCardEntry = entry;
     Overlay.of(context, rootOverlay: true).insert(entry);
@@ -259,8 +264,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
   // ==================== 药丸渲染 ====================
 
-  /// 药丸视觉签名：实例启用态与被引用块的标题/颜色/存亡都参与，
-  /// 文本本身的变化由 controller 文本缓存键覆盖，无需进签名。
+  /// 药丸视觉签名：实例启用态、遗传态、页面操作权限与被引用块的
+  /// 标题/颜色/存亡都参与，文本本身的变化由 controller 文本缓存键覆盖。
   int _pillSignature(
     PillWorkspaceState workspace,
     PromptBlockLibraryState? library,
@@ -273,6 +278,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
           marker,
           instance.enabled,
           instance.settings.isRandom,
+          instance.evolutionEnabled,
+          widget.allowEvolutionToggle,
           block?.title ?? '',
           block?.color ?? '',
           block?.iconName ?? '',
@@ -344,6 +351,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       enabled: instance.enabled,
       icon: promptBlockIconFromName(block.iconName),
       showRollBadge: instance.settings.isRandom,
+      evolutionEnabled: instance.evolutionEnabled,
+      allowEvolutionToggle: widget.allowEvolutionToggle,
     );
 
     return WidgetSpan(

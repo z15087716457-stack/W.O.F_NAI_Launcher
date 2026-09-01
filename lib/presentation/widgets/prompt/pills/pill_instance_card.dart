@@ -6,13 +6,14 @@ import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
 import '../blocks/prompt_block_colors.dart';
+import 'dna_icon.dart';
 import 'pill_instance_settings_dialog.dart';
 
 /// L1 块实例卡（P2.5）：点药丸弹出的点击位置浮卡。
 ///
 /// 内容 = 实例当前提示词（随机模式显示物化的 currentRoll——即「L1 显示
 /// = 生成发送 = token 计数」三者同一份；固定模式显示块库实时内容）+
-/// 操作行：🎲 重 roll / ⚙ 进 L2 / 启停 / 删除。
+/// 操作行：🎲 重 roll / ⚙ 进 L2 / 启停 / DNA 遗传 / 删除。
 ///
 /// 宿主编辑器用 [buildPillInstanceOverlayEntry] 生成 OverlayEntry 并自行
 /// 持有/关闭；实例消失（文本里标记被删）时卡片自动请求关闭。
@@ -22,11 +23,15 @@ class PillInstanceCard extends ConsumerWidget {
     required this.scope,
     required this.marker,
     required this.onDismiss,
+    this.allowEvolutionToggle = false,
   });
 
   final String scope;
   final String marker;
   final VoidCallback onDismiss;
+
+  /// 探索页才允许切换实例遗传开关；主生成页仅展示灰色状态。
+  final bool allowEvolutionToggle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -116,6 +121,38 @@ class PillInstanceCard extends ConsumerWidget {
                       .read(pillWorkspaceProvider(scope).notifier)
                       .toggleEnabled(marker),
                 ),
+                Builder(
+                  builder: (context) {
+                    final canToggleEvolution =
+                        allowEvolutionToggle && instance.enabled && isRandom;
+                    final evolutionTooltip = !allowEvolutionToggle
+                        ? l10n.pillCardEvolutionExploreOnly
+                        : !instance.enabled
+                        ? l10n.pillCardEvolutionRequiresEnabled
+                        : !isRandom
+                        ? l10n.pillCardEvolutionRequiresRandom
+                        : instance.evolutionEnabled
+                        ? l10n.pillCardEvolutionDisable
+                        : l10n.pillCardEvolutionEnable;
+                    return IconButton(
+                      key: const Key('pill-evolution-toggle'),
+                      icon: DnaIcon(
+                        size: 18,
+                        color: canToggleEvolution
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.45,
+                              ),
+                      ),
+                      tooltip: evolutionTooltip,
+                      onPressed: canToggleEvolution
+                          ? () => ref
+                                .read(pillWorkspaceProvider(scope).notifier)
+                                .toggleEvolution(marker)
+                          : null,
+                    );
+                  },
+                ),
                 const Spacer(),
                 IconButton(
                   icon: Icon(
@@ -168,6 +205,7 @@ OverlayEntry buildPillInstanceOverlayEntry({
   required String marker,
   required Offset globalPosition,
   required VoidCallback onDismiss,
+  bool allowEvolutionToggle = false,
 }) {
   return OverlayEntry(
     builder: (overlayContext) {
@@ -200,6 +238,7 @@ OverlayEntry buildPillInstanceOverlayEntry({
               scope: scope,
               marker: marker,
               onDismiss: onDismiss,
+              allowEvolutionToggle: allowEvolutionToggle,
             ),
           ),
         ],

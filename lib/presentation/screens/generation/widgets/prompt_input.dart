@@ -52,6 +52,9 @@ class PromptInputWidget extends ConsumerStatefulWidget {
   final bool showMaximizeButton;
   final ValueNotifier<bool>? negativeModeNotifier;
 
+  /// 是否允许正向药丸实例切换画风探索遗传开关。
+  final bool allowEvolutionToggle;
+
   /// 编辑器随内容自增高（用于一体式滚动布局），
   /// 关闭时编辑器填充父级给定的高度并内部滚动。
   final bool autoGrow;
@@ -63,6 +66,7 @@ class PromptInputWidget extends ConsumerStatefulWidget {
     this.isMaximized = false,
     this.showMaximizeButton = true,
     this.negativeModeNotifier,
+    this.allowEvolutionToggle = false,
     this.autoGrow = false,
   });
 
@@ -728,6 +732,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       autoGrow: widget.autoGrow,
       minLines: widget.autoGrow ? 2 : null,
       sessionId: PromptHistorySessionIds.generationPrompt,
+      allowEvolutionToggle: widget.allowEvolutionToggle,
       onOpenAssistantSettings: _openAssistantQuickSettings,
       config: UnifiedPromptConfig(
         enableSyntaxHighlight: enableHighlight,
@@ -878,6 +883,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       autoGrow: widget.autoGrow,
       minLines: widget.autoGrow ? 2 : null,
       sessionId: PromptHistorySessionIds.generationNegative,
+      allowEvolutionToggle: false,
       onOpenAssistantSettings: _openAssistantQuickSettings,
       config: UnifiedPromptConfig(
         enableSyntaxHighlight: enableHighlight,
@@ -918,6 +924,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             compact: true,
             minLines: 1,
             sessionId: PromptHistorySessionIds.generationPrompt,
+            allowEvolutionToggle: widget.allowEvolutionToggle,
             onOpenAssistantSettings: _openAssistantQuickSettings,
             config: UnifiedPromptConfig(
               enableSyntaxHighlight: enableHighlight,

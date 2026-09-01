@@ -6,9 +6,9 @@ import '../../../data/models/style_explore/explore_run.dart';
 import '../pill_workspace_provider.dart';
 import '../prompt_block_library_provider.dart';
 
-/// 解析深度轮 override 的目标随机实例 marker（纯函数）：
-/// 优先文档中与 [blockId] 相同的启用随机实例（父本来源实例），
-/// 找不到回退第一个启用随机实例；都没有 → null（不允许深度轮）。
+/// 解析深度轮 override 的目标遗传实例 marker（纯函数）：
+/// 优先文档中与 [blockId] 相同的启用随机遗传实例（父本来源实例），
+/// 找不到回退第一个启用随机遗传实例；都没有 → null（不允许深度轮）。
 String? resolveExploreOverrideMarkerInDocument(
   PillDocument document, {
   String? blockId,
@@ -16,7 +16,11 @@ String? resolveExploreOverrideMarkerInDocument(
   String? first;
   for (final entry in document.instances.entries) {
     final instance = entry.value;
-    if (!instance.enabled || !instance.settings.isRandom) continue;
+    if (!instance.enabled ||
+        !instance.settings.isRandom ||
+        !instance.evolutionEnabled) {
+      continue;
+    }
     first ??= entry.key;
     if (blockId != null && instance.blockId == blockId) return entry.key;
   }
@@ -32,7 +36,7 @@ String? resolveExploreOverrideMarker(Ref ref, {String? blockId}) {
 }
 
 /// 提取候选的父本串（建家族/建分支用）：
-/// roll 快照中第一个随机实例的 rolledText；无实例或空串回退正向全文。
+/// roll 快照中第一个遗传随机实例的 rolledText；无实例或空串回退正向全文。
 String exploreParentStringFor(ExploreCandidate candidate) {
   final snapshot = candidate.rollSnapshot;
   if (snapshot == null) return '';
@@ -44,7 +48,7 @@ String exploreParentStringFor(ExploreCandidate candidate) {
 }
 
 /// 解析父本集深度轮 override 的目标块 id：
-/// 第一个带来源候选的父本，其 roll 快照第一个随机实例的 blockId。
+/// 第一个带来源候选的父本，其 roll 快照第一个遗传实例的 blockId。
 String? exploreTargetBlockIdForParentSet(
   ExploreRun run,
   ExploreParentSet parentSet,
@@ -58,14 +62,18 @@ String? exploreTargetBlockIdForParentSet(
   return null;
 }
 
-/// 组装深度轮注入池：run 快照正向文档中随机实例的块内容原子
+/// 组装深度轮注入池：run 快照正向文档中遗传随机实例的块内容原子
 /// （块内容按当前块库解析；池 = 顶层逗号切分后的原子集合，去重保序）。
 List<String> buildExploreInjectionPool(Ref ref, ExploreRun run) {
   final library = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
   final pool = <String>[];
   final seen = <String>{};
   for (final instance in run.recipeSnapshot.positive.instances.values) {
-    if (!instance.settings.isRandom) continue;
+    if (!instance.enabled ||
+        !instance.settings.isRandom ||
+        !instance.evolutionEnabled) {
+      continue;
+    }
     final content = library?.blockById(instance.blockId)?.content;
     if (content == null) continue;
     for (final atom in PillRollEngine.splitTopLevelAtoms(content)) {
@@ -75,9 +83,9 @@ List<String> buildExploreInjectionPool(Ref ref, ExploreRun run) {
   return pool;
 }
 
-/// 抓 main/negative 双 lane 当前投影 + 启用随机实例的 roll 明细。
+/// 抓 main/negative 双 lane 当前投影 + 启用随机遗传实例的 roll 明细。
 ///
-/// lane 合并后探索变量就是主 lane 的随机块实例：runner 批量生成与
+/// lane 合并后探索变量就是主 lane 的随机遗传实例：runner 批量生成与
 /// 探索页手动单张登记共用同一份抓取逻辑。投影是同步现值（roll 后
 /// 立即可读，不经 generationParams 的 microtask 回写——红线）。
 ExploreRollSnapshot captureExploreRollSnapshot(Ref ref) {
@@ -101,7 +109,9 @@ List<ExploreInstanceRoll> _laneInstanceRolls(
 ) {
   return [
     for (final entry in document.instances.entries)
-      if (entry.value.enabled && entry.value.settings.isRandom)
+      if (entry.value.enabled &&
+          entry.value.settings.isRandom &&
+          entry.value.evolutionEnabled)
         ExploreInstanceRoll(
           lane: lane,
           marker: entry.key,

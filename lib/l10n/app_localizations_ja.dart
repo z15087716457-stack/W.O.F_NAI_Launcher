@@ -9891,6 +9891,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pillCardEmptyRoll => '（今回は空）';
 
   @override
+  String get pillCardEvolutionEnable => '遺伝を有効化';
+
+  @override
+  String get pillCardEvolutionDisable => '遺伝を無効化';
+
+  @override
+  String get pillCardEvolutionExploreOnly => '遺伝はスタイル探索でのみ使用できます';
+
+  @override
+  String get pillCardEvolutionRequiresRandom => '先にランダム抽出に設定してください';
+
+  @override
+  String get pillCardEvolutionRequiresEnabled => '先にインスタンスを有効化してください';
+
+  @override
   String get pillSettingsTitle => 'ブロックインスタンス設定';
 
   @override
@@ -10182,10 +10197,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_importedAt => 'インポート日時';
 
   @override
-  String get promptBlockLibrary_detailedView => '詳細表示';
+  String get promptBlockLibrary_listView => 'リスト表示';
 
   @override
-  String get promptBlockLibrary_compactView => 'コンパクト表示';
+  String get promptBlockLibrary_gridView => 'グリッド表示';
+
+  @override
+  String get promptBlockLibrary_cardSize => 'カードサイズ';
 
   @override
   String get promptBlockLibrary_reorderFolders => 'フォルダーの順序を変更';
@@ -10620,7 +10638,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_deepRoundNoInstance =>
-      'メインプロンプトに有効なランダムブロックインスタンスがないため、深層ラウンドを開始できません';
+      'メインプロンプトに有効なランダム遺伝ブロックがないため、深層ラウンドを開始できません';
 
   @override
   String get styleExplore_deepRoundEmpty => '変異エンジンが十分に異なる子代を生成できませんでした';

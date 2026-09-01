@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_drag_data.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/pills/dna_icon.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/pill_instance_card.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill_editor.dart';
@@ -73,6 +75,78 @@ void main() {
     expect(state.document.instances[markerA]?.enabled, isFalse);
     expect(state.projection, '');
     expect(emissions.last, '');
+  });
+
+  testWidgets(
+    'evolution badge follows the dice badge and main card is read-only',
+    (tester) async {
+      final container = await _pump(
+        tester,
+        allowEvolutionToggle: false,
+        libraryState: PromptBlockLibraryState(
+          blocks: [_block('style', '画风1', 'CONTENT')],
+          folders: const [],
+        ),
+      );
+      final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+      notifier.insertBlockAt(offset: 0, blockId: 'style');
+      notifier.updateInstanceSettings(
+        markerA,
+        const PillInstanceSettings(mode: PillRollMode.random),
+      );
+      notifier.toggleEvolution(markerA);
+      await tester.pump();
+
+      expect(find.byIcon(Icons.casino_outlined), findsOneWidget);
+      expect(find.byType(DnaIcon), findsOneWidget);
+
+      await tester.tap(find.byType(PromptPill));
+      await tester.pump();
+      await tester.pump();
+      final evolutionButton = tester.widget<IconButton>(
+        find.byKey(const Key('pill-evolution-toggle')),
+      );
+      expect(evolutionButton.onPressed, isNull);
+    },
+  );
+
+  testWidgets('explore card can toggle evolution for enabled random instance', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      allowEvolutionToggle: true,
+      libraryState: PromptBlockLibraryState(
+        blocks: [_block('style', '画风1', 'CONTENT')],
+        folders: const [],
+      ),
+    );
+    final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+    notifier.insertBlockAt(offset: 0, blockId: 'style');
+    notifier.updateInstanceSettings(
+      markerA,
+      const PillInstanceSettings(mode: PillRollMode.random),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byType(PromptPill));
+    await tester.pump();
+    await tester.pump();
+    final evolutionButton = tester.widget<IconButton>(
+      find.byKey(const Key('pill-evolution-toggle')),
+    );
+    expect(evolutionButton.onPressed, isNotNull);
+
+    await tester.tap(find.byKey(const Key('pill-evolution-toggle')));
+    await tester.pump();
+    expect(
+      container
+          .read(pillWorkspaceNotifierProvider)
+          .document
+          .instances[markerA]!
+          .evolutionEnabled,
+      isTrue,
+    );
   });
 
   testWidgets('dropping a library block inserts at the drop offset', (
@@ -282,6 +356,7 @@ Future<ProviderContainer> _pump(
   required PromptBlockLibraryState libraryState,
   ValueChanged<String>? onChanged,
   _FakePromptBlockLibraryNotifier? libraryNotifier,
+  bool allowEvolutionToggle = false,
 }) async {
   final originalSize = tester.view.physicalSize;
   final originalDpr = tester.view.devicePixelRatio;
@@ -314,6 +389,7 @@ Future<ProviderContainer> _pump(
                 enableAutoFormat: false,
                 enableRegexReplace: false,
               ),
+              allowEvolutionToggle: allowEvolutionToggle,
               onChanged: onChanged,
             ),
           ),
