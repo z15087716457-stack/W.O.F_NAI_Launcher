@@ -526,10 +526,11 @@ class ExploreCandidateDetailDialog extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(flex: 5, child: _buildDetailImage(theme, l10n)),
+                  // 图:信息 = 7:3（静定）：图区给足，信息列窄排
+                  Expanded(flex: 7, child: _buildDetailImage(theme, l10n)),
                   VerticalDivider(width: 1, color: theme.dividerColor),
                   Expanded(
-                    flex: 4,
+                    flex: 3,
                     child: ListView(
                       padding: const EdgeInsets.all(12),
                       children: [

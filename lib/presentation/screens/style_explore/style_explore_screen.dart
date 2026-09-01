@@ -6,12 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/style_explore/style_explore_recipe.dart';
+import '../../providers/character_position_canvas_provider.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/layout_state_provider.dart';
 import '../../providers/pill_workspace_provider.dart';
 import '../../providers/style_explore/explore_manual_capture.dart';
 import '../../providers/style_explore/explore_run_provider.dart';
 import '../../providers/style_explore_provider.dart';
+import '../../widgets/character/character_position_canvas.dart';
 import '../../widgets/character/inline_character_row.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
@@ -66,6 +68,17 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
     final theme = Theme.of(context);
     final activeRecipe = ref.watch(styleExploreActiveRecipeProvider);
     final isDirty = ref.watch(styleExploreDirtyProvider);
+
+    // 探索页没有画布宿主（主页画布占图像预览区）：✥ 入口改走轻量弹窗。
+    // 弹窗打开后 provider 再关（画布自带关闭按钮/再次点 ✥）由弹窗内
+    // 监听同步收窗，见 _showPositionCanvasDialog。
+    ref.listen(characterPositionCanvasProvider, (previous, next) {
+      if (next && !(previous ?? false)) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) unawaited(_showPositionCanvasDialog());
+        });
+      }
+    });
 
     return Scaffold(
       body: LayoutBuilder(
@@ -486,11 +499,46 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
             ),
           ),
           child: GenerationControls(
+            // 中栏宽度有限，用紧凑钉底条（与主生成页左面板同款 2×2
+            // 点数块布局），正常布局在此宽度会把点数 chips 压到重叠
+            compact: true,
             onGenerateInvoked: _handleExploreGenerateInvoked,
           ),
         ),
       ],
     );
+  }
+
+  /// 位置画布轻量弹窗（探索页无画布宿主的替代入口）。
+  ///
+  /// 画布自带关闭按钮写 `provider.close()`，弹窗内监听其关闭同步收窗；
+  /// 点外部/返回键关窗时反向收 provider，避免状态悬空（主页 ✥ 图标会
+  /// 残留选中态）。
+  Future<void> _showPositionCanvasDialog() async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return Consumer(
+          builder: (context, ref, _) {
+            ref.listen(characterPositionCanvasProvider, (previous, next) {
+              if (!next) Navigator.of(dialogContext).pop();
+            });
+            final screen = MediaQuery.sizeOf(context);
+            return Dialog(
+              child: SizedBox(
+                width: screen.width * 0.6,
+                height: screen.height * 0.85,
+                child: const CharacterPositionCanvasView(),
+              ),
+            );
+          },
+        );
+      },
+    );
+    if (!mounted) return;
+    if (ref.read(characterPositionCanvasProvider)) {
+      ref.read(characterPositionCanvasProvider.notifier).close();
+    }
   }
 
   /// 探索页生成按钮钩子（generate() 同步启动后触发，此刻 roll 尚未发生）：
