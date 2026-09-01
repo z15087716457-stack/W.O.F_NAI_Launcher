@@ -326,4 +326,152 @@ void main() {
       );
     });
   });
+
+  group('phase C: formal review lifecycle', () {
+    ExploreCandidate doneCandidate(String id, {ExploreReviewLabel? label}) {
+      return ExploreCandidate.shell(roundId: 'r-1', id: id).copyWith(
+        generation: const ExploreCandidateGeneration(
+          status: ExploreCandidateGenerationStatus.done,
+          filePath: '/tmp/x.png',
+          seed: 1,
+        ),
+        review: ExploreCandidateReview(label: label),
+      );
+    }
+
+    Future<ExploreRun> seedGeneratedRun(
+      ProviderContainer c,
+      List<ExploreCandidate> candidates,
+    ) {
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      return createRun(c).then(
+        (created) => notifier.overwrite(
+          created.copyWith(
+            status: ExploreRunStatus.generated,
+            candidates: candidates,
+          ),
+        ),
+      );
+    }
+
+    test(
+      'updateReview writes formal label with timestamp and clears both',
+      () async {
+        final c = container();
+        final notifier = c.read(exploreRunListNotifierProvider.notifier);
+        final run = await seedGeneratedRun(c, [doneCandidate('cand-1')]);
+        final reviewedAt = DateTime.utc(2026, 9, 1, 9);
+
+        await notifier.updateReview(
+          run.id,
+          'cand-1',
+          label: ExploreReviewLabel.treasure,
+          formalReviewedAt: reviewedAt,
+        );
+        var stored = (await c.read(
+          exploreRunListNotifierProvider.future,
+        )).runById(run.id)!;
+        var review = stored.candidateById('cand-1')!.review;
+        expect(review.label, ExploreReviewLabel.treasure);
+        expect(review.formalReviewedAt, reviewedAt);
+
+        await notifier.updateReview(run.id, 'cand-1', clearLabel: true);
+        stored = (await c.read(
+          exploreRunListNotifierProvider.future,
+        )).runById(run.id)!;
+        review = stored.candidateById('cand-1')!.review;
+        expect(review.label, isNull);
+        expect(review.formalReviewedAt, isNull, reason: '清标签一并清归类时间');
+      },
+    );
+
+    test(
+      'beginReview: generated/draft enter reviewing, guards reject',
+      () async {
+        final c = container();
+        final notifier = c.read(exploreRunListNotifierProvider.notifier);
+        final run = await seedGeneratedRun(c, [doneCandidate('cand-1')]);
+
+        final reviewing = await notifier.beginReview(run.id);
+        expect(reviewing.status, ExploreRunStatus.reviewing);
+
+        // 续筛：reviewing 幂等。
+        final again = await notifier.beginReview(run.id);
+        expect(again.status, ExploreRunStatus.reviewing);
+
+        // 手动候选 run（draft + done 候选）可进入。
+        await notifier.overwrite(
+          again.copyWith(status: ExploreRunStatus.draft),
+        );
+        final fromDraft = await notifier.beginReview(run.id);
+        expect(fromDraft.status, ExploreRunStatus.reviewing);
+
+        // 无可审查候选拒绝。
+        final empty = await createRun(c, name: '空任务');
+        expect(
+          () => notifier.beginReview(empty.id),
+          throwsA(isA<StateError>()),
+        );
+
+        // generating/paused/cancelled 不放行。
+        await notifier.overwrite(
+          fromDraft.copyWith(status: ExploreRunStatus.generating),
+        );
+        expect(() => notifier.beginReview(run.id), throwsA(isA<StateError>()));
+        await notifier.overwrite(
+          fromDraft.copyWith(status: ExploreRunStatus.paused),
+        );
+        expect(() => notifier.beginReview(run.id), throwsA(isA<StateError>()));
+      },
+    );
+
+    test('completeReview requires reviewing status and all labeled', () async {
+      final c = container();
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final run = await seedGeneratedRun(c, [
+        doneCandidate('cand-1', label: ExploreReviewLabel.treasure),
+        doneCandidate('cand-2'),
+      ]);
+
+      // 未进筛选态：拒绝。
+      expect(await notifier.completeReview(run.id), isFalse);
+
+      await notifier.beginReview(run.id);
+      // 还有一张未归类：拒绝且状态不变。
+      expect(await notifier.completeReview(run.id), isFalse);
+      var stored = (await c.read(
+        exploreRunListNotifierProvider.future,
+      )).runById(run.id)!;
+      expect(stored.status, ExploreRunStatus.reviewing);
+
+      await notifier.updateReview(
+        run.id,
+        'cand-2',
+        label: ExploreReviewLabel.reject,
+        formalReviewedAt: DateTime.utc(2026, 9, 1),
+      );
+      expect(await notifier.completeReview(run.id), isTrue);
+      stored = (await c.read(
+        exploreRunListNotifierProvider.future,
+      )).runById(run.id)!;
+      expect(stored.status, ExploreRunStatus.completed);
+    });
+  });
+
+  group('mergeExploreRollPositives', () {
+    test('merges atoms with trim, dedup and no trailing comma', () {
+      expect(
+        mergeExploreRollPositives([
+          'soft light, watercolor',
+          'watercolor, 1girl,',
+        ]),
+        'soft light, watercolor, 1girl',
+      );
+      expect(mergeExploreRollPositives(['  a , b ', 'b, c']), 'a, b, c');
+      expect(mergeExploreRollPositives([]), '');
+      expect(mergeExploreRollPositives([' , ', '']), '');
+      // 单串等价原子规范化（去尾部逗号）。
+      expect(mergeExploreRollPositives(['x, y,']), 'x, y');
+    });
+  });
 }

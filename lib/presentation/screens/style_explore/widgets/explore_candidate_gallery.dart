@@ -8,20 +8,34 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
+import '../../../widgets/common/app_toast.dart';
+import 'explore_candidate_actions.dart';
+import 'explore_formal_review_overlay.dart';
 
-/// 右栏候选画廊：筛选 chips + 候选网格 + 大图详情弹窗。
+/// 右栏候选画廊：筛选 chips + 正式筛选入口 + 网格/牌堆视图 + 大图详情弹窗。
 ///
 /// 牌堆语义：心形与 T/S/R 预标记全部是纯数据注释（review 字段），
 /// 任何时刻不移动/改名图库文件；run 目录副本随 run 删除。
-class ExploreCandidateGallery extends ConsumerWidget {
+class ExploreCandidateGallery extends ConsumerStatefulWidget {
   const ExploreCandidateGallery({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ExploreCandidateGallery> createState() =>
+      _ExploreCandidateGalleryState();
+}
+
+class _ExploreCandidateGalleryState
+    extends ConsumerState<ExploreCandidateGallery> {
+  bool _selectionMode = false;
+  final Set<String> _selectedIds = {};
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final run = ref.watch(exploreActiveRunProvider);
     final filter = ref.watch(exploreGalleryFilterProvider);
+    final viewMode = ref.watch(exploreGalleryViewModeProvider);
 
     if (run == null) {
       return _EmptyHint(
@@ -31,6 +45,10 @@ class ExploreCandidateGallery extends ConsumerWidget {
     }
 
     final candidates = run.candidates;
+    // 候选集合变化后清掉失效的选择项（删 run/重选 run 等）。
+    final existingIds = candidates.map((c) => c.id).toSet();
+    _selectedIds.removeWhere((id) => !existingIds.contains(id));
+
     final filtered = [
       for (final candidate in candidates)
         if (exploreCandidateMatchesFilter(candidate, filter)) candidate,
@@ -39,36 +57,10 @@ class ExploreCandidateGallery extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-          child: Wrap(
-            spacing: 6,
-            runSpacing: 4,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              for (final entry in _filterEntries(l10n))
-                FilterChip(
-                  key: Key('explore-filter-${entry.value.name}'),
-                  label: Text(entry.key),
-                  selected: filter == entry.value,
-                  visualDensity: VisualDensity.compact,
-                  onSelected: (_) =>
-                      ref.read(exploreGalleryFilterProvider.notifier).state =
-                          entry.value,
-                ),
-              // 正式筛选（阶段 C 开放，先置灰）。
-              Tooltip(
-                message: l10n.styleExplore_formalReviewNextStage,
-                child: ActionChip(
-                  key: const Key('explore-formal-review'),
-                  avatar: const Icon(Icons.rate_review_outlined, size: 16),
-                  label: Text(l10n.styleExplore_formalReview),
-                  onPressed: null,
-                ),
-              ),
-            ],
-          ),
-        ),
+        if (_selectionMode)
+          _buildSelectionBar(l10n, run)
+        else
+          _buildToolbar(theme, l10n, run, filter, viewMode),
         Divider(height: 1, color: theme.dividerColor),
         Expanded(
           child: filtered.isEmpty
@@ -76,34 +68,306 @@ class ExploreCandidateGallery extends ConsumerWidget {
                   icon: Icons.filter_alt_off_outlined,
                   text: l10n.styleExplore_galleryEmptyHint,
                 )
-              : LayoutBuilder(
-                  builder: (context, constraints) {
-                    final crossAxisCount = (constraints.maxWidth / 160)
-                        .floor()
-                        .clamp(2, 3);
-                    return GridView.builder(
-                      padding: const EdgeInsets.all(8),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        mainAxisSpacing: 8,
-                        crossAxisSpacing: 8,
-                      ),
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) {
-                        final candidate = filtered[index];
-                        return _CandidateCard(
-                          key: ValueKey('explore-candidate-${candidate.id}'),
-                          run: run,
-                          candidate: candidate,
-                          sequenceNumber: candidates.indexOf(candidate) + 1,
-                        );
-                      },
-                    );
-                  },
-                ),
+              : _selectionMode || viewMode == ExploreGalleryViewMode.grid
+              ? _buildGrid(run, filtered)
+              : _buildDeck(theme, l10n, run, filtered),
         ),
       ],
     );
+  }
+
+  // ==================== 工具条 ====================
+
+  Widget _buildToolbar(
+    ThemeData theme,
+    AppLocalizations l10n,
+    ExploreRun run,
+    ExploreGalleryFilter filter,
+    ExploreGalleryViewMode viewMode,
+  ) {
+    final canReview =
+        exploreReviewableStatuses.contains(run.status) &&
+        run.reviewableCandidates.isNotEmpty;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          for (final entry in _filterEntries(l10n))
+            FilterChip(
+              key: Key('explore-filter-${entry.value.name}'),
+              label: Text(entry.key),
+              selected: filter == entry.value,
+              visualDensity: VisualDensity.compact,
+              onSelected: (_) =>
+                  ref.read(exploreGalleryFilterProvider.notifier).state =
+                      entry.value,
+            ),
+          // 正式筛选入口：有可审查候选（done）且状态允许时可用。
+          ActionChip(
+            key: const Key('explore-formal-review'),
+            avatar: const Icon(Icons.rate_review_outlined, size: 16),
+            label: Text(l10n.styleExplore_formalReview),
+            onPressed: canReview ? () => _enterFormalReview(run) : null,
+          ),
+          // 网格/牌堆视图切换。
+          IconButton(
+            key: const Key('explore-gallery-view-toggle'),
+            iconSize: 18,
+            visualDensity: VisualDensity.compact,
+            tooltip: viewMode == ExploreGalleryViewMode.grid
+                ? l10n.styleExplore_viewDeck
+                : l10n.styleExplore_viewGrid,
+            onPressed: () =>
+                ref
+                    .read(exploreGalleryViewModeProvider.notifier)
+                    .state = viewMode == ExploreGalleryViewMode.grid
+                ? ExploreGalleryViewMode.deck
+                : ExploreGalleryViewMode.grid,
+            icon: Icon(
+              viewMode == ExploreGalleryViewMode.grid
+                  ? Icons.view_agenda_outlined
+                  : Icons.grid_view_outlined,
+            ),
+          ),
+          // 多选模式。
+          IconButton(
+            key: const Key('explore-gallery-select-toggle'),
+            iconSize: 18,
+            visualDensity: VisualDensity.compact,
+            tooltip: l10n.styleExplore_selectCandidates,
+            onPressed: () => setState(() => _selectionMode = true),
+            icon: const Icon(Icons.checklist),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectionBar(AppLocalizations l10n, ExploreRun run) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
+      child: Row(
+        children: [
+          IconButton(
+            key: const Key('explore-gallery-select-exit'),
+            iconSize: 18,
+            visualDensity: VisualDensity.compact,
+            tooltip: l10n.common_close,
+            onPressed: _exitSelection,
+            icon: const Icon(Icons.close),
+          ),
+          Text(
+            l10n.styleExplore_selectedCount(_selectedIds.length),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const Spacer(),
+          FilledButton.tonalIcon(
+            key: const Key('explore-gallery-merge-adopt'),
+            onPressed: _selectedIds.isEmpty ? null : () => _adoptSelected(run),
+            icon: const Icon(Icons.inventory_2_outlined, size: 16),
+            label: Text(l10n.styleExplore_mergeAdopt),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==================== 网格 / 牌堆 ====================
+
+  Widget _buildGrid(ExploreRun run, List<ExploreCandidate> filtered) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = (constraints.maxWidth / 160).floor().clamp(2, 3);
+        return GridView.builder(
+          padding: const EdgeInsets.all(8),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+          ),
+          itemCount: filtered.length,
+          itemBuilder: (context, index) =>
+              _buildCandidateCard(run, filtered[index]),
+        );
+      },
+    );
+  }
+
+  /// 牌堆视图：按正式标签分组（珍宝/特殊/拒绝/未归类），组头计数，
+  /// 组内复用候选卡；预标记仍作角标留在卡上。
+  Widget _buildDeck(
+    ThemeData theme,
+    AppLocalizations l10n,
+    ExploreRun run,
+    List<ExploreCandidate> filtered,
+  ) {
+    final groups = <(ExploreReviewLabel?, String, IconData, Color)>[
+      (
+        ExploreReviewLabel.treasure,
+        l10n.styleExplore_markTreasure,
+        Icons.diamond_outlined,
+        Colors.amber.shade700,
+      ),
+      (
+        ExploreReviewLabel.special,
+        l10n.styleExplore_markSpecial,
+        Icons.star_outline,
+        Colors.deepPurple,
+      ),
+      (
+        ExploreReviewLabel.reject,
+        l10n.styleExplore_markReject,
+        Icons.block,
+        theme.colorScheme.error,
+      ),
+      (
+        null,
+        l10n.styleExplore_reviewUnlabeled,
+        Icons.inbox_outlined,
+        theme.colorScheme.onSurfaceVariant,
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = (constraints.maxWidth / 160).floor().clamp(2, 3);
+        return ListView(
+          padding: const EdgeInsets.all(8),
+          children: [
+            for (final (label, title, icon, color) in groups)
+              ..._deckSection(
+                theme,
+                run,
+                filtered,
+                label: label,
+                title: title,
+                icon: icon,
+                color: color,
+                crossAxisCount: crossAxisCount,
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  List<Widget> _deckSection(
+    ThemeData theme,
+    ExploreRun run,
+    List<ExploreCandidate> filtered, {
+    required ExploreReviewLabel? label,
+    required String title,
+    required IconData icon,
+    required Color color,
+    required int crossAxisCount,
+  }) {
+    final members = [
+      for (final candidate in filtered)
+        if (candidate.review.label == label) candidate,
+    ];
+    if (members.isEmpty) return const [];
+    return [
+      Padding(
+        key: Key('explore-deck-header-${label?.name ?? 'unlabeled'}'),
+        padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
+        child: Row(
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 6),
+            Text(
+              '$title · ${members.length}',
+              style: theme.textTheme.titleSmall?.copyWith(color: color),
+            ),
+          ],
+        ),
+      ),
+      GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+        ),
+        itemCount: members.length,
+        itemBuilder: (context, index) =>
+            _buildCandidateCard(run, members[index]),
+      ),
+    ];
+  }
+
+  Widget _buildCandidateCard(ExploreRun run, ExploreCandidate candidate) {
+    return _CandidateCard(
+      key: ValueKey('explore-candidate-${candidate.id}'),
+      run: run,
+      candidate: candidate,
+      sequenceNumber: run.candidates.indexOf(candidate) + 1,
+      selectionMode: _selectionMode,
+      selected: _selectedIds.contains(candidate.id),
+      onToggleSelect: () => _toggleSelect(candidate.id),
+      onEnterSelection: () => _enterSelection(candidate.id),
+    );
+  }
+
+  // ==================== 多选与出口 ====================
+
+  void _toggleSelect(String candidateId) {
+    setState(() {
+      if (!_selectedIds.remove(candidateId)) {
+        _selectedIds.add(candidateId);
+      }
+    });
+  }
+
+  void _enterSelection(String candidateId) {
+    setState(() {
+      _selectionMode = true;
+      _selectedIds.add(candidateId);
+    });
+  }
+
+  void _exitSelection() {
+    setState(() {
+      _selectionMode = false;
+      _selectedIds.clear();
+    });
+  }
+
+  /// 多选合并收编：成功后退出多选，取消则保留选择。
+  Future<void> _adoptSelected(ExploreRun run) async {
+    final selected = [
+      for (final candidate in run.candidates)
+        if (_selectedIds.contains(candidate.id)) candidate,
+    ];
+    if (selected.isEmpty) return;
+    final created = await ExploreCandidateActions.adoptMerged(
+      context,
+      ref,
+      run: run,
+      candidates: selected,
+    );
+    if (created && mounted) _exitSelection();
+  }
+
+  Future<void> _enterFormalReview(ExploreRun run) async {
+    try {
+      await ref
+          .read(exploreRunListNotifierProvider.notifier)
+          .beginReview(run.id);
+    } catch (_) {
+      return;
+    }
+    if (!mounted) return;
+    final completed = await ExploreFormalReviewOverlay.show(
+      context,
+      runId: run.id,
+    );
+    if (completed && mounted) {
+      AppToast.success(context, context.l10n.styleExplore_reviewCompleted);
+    }
   }
 
   static List<MapEntry<String, ExploreGalleryFilter>> _filterEntries(
@@ -156,17 +420,26 @@ class _EmptyHint extends StatelessWidget {
 }
 
 /// 候选卡：缩略图 + #序号 + 轮次号 + 状态图标 + 心形 + T/S/R 预标记。
+/// 多选模式下点按切换选择、角标换勾选圈；普通模式长按进入多选。
 class _CandidateCard extends ConsumerWidget {
   const _CandidateCard({
     super.key,
     required this.run,
     required this.candidate,
     required this.sequenceNumber,
+    required this.selectionMode,
+    required this.selected,
+    required this.onToggleSelect,
+    required this.onEnterSelection,
   });
 
   final ExploreRun run;
   final ExploreCandidate candidate;
   final int sequenceNumber;
+  final bool selectionMode;
+  final bool selected;
+  final VoidCallback onToggleSelect;
+  final VoidCallback onEnterSelection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -179,7 +452,8 @@ class _CandidateCard extends ConsumerWidget {
       borderRadius: BorderRadius.circular(8),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => _showDetail(context, ref),
+        onTap: selectionMode ? onToggleSelect : () => _showDetail(context),
+        onLongPress: selectionMode ? null : onEnterSelection,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -188,6 +462,20 @@ class _CandidateCard extends ConsumerWidget {
                 fit: StackFit.expand,
                 children: [
                   _buildThumbnail(theme, l10n),
+                  if (selected)
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: theme.colorScheme.primary,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
                   Positioned(
                     left: 4,
                     top: 4,
@@ -200,7 +488,9 @@ class _CandidateCard extends ConsumerWidget {
                   Positioned(
                     right: 4,
                     top: 4,
-                    child: _buildStatusIcon(theme, l10n),
+                    child: selectionMode
+                        ? _buildSelectionIndicator(theme)
+                        : _buildStatusIcon(theme, l10n),
                   ),
                 ],
               ),
@@ -260,22 +550,36 @@ class _CandidateCard extends ConsumerWidget {
     );
   }
 
+  Widget _buildSelectionIndicator(ThemeData theme) {
+    return Icon(
+      selected ? Icons.check_circle : Icons.radio_button_unchecked,
+      size: 18,
+      color: selected
+          ? theme.colorScheme.primary
+          : theme.colorScheme.onSurfaceVariant,
+    );
+  }
+
   Widget _buildThumbnail(ThemeData theme, AppLocalizations l10n) {
     final filePath = candidate.generation.filePath;
     if (candidate.generation.status ==
             ExploreCandidateGenerationStatus.pending ||
         filePath == null) {
       return _ThumbnailPlaceholder(
-        icon:
-            candidate.generation.status ==
-                ExploreCandidateGenerationStatus.failed
-            ? Icons.error_outline
-            : Icons.hourglass_empty,
+        icon: switch (candidate.generation.status) {
+          ExploreCandidateGenerationStatus.failed => Icons.error_outline,
+          // done 但无副本 = 已删图（记录保留）。
+          ExploreCandidateGenerationStatus.done => Icons.broken_image_outlined,
+          ExploreCandidateGenerationStatus.pending => Icons.hourglass_empty,
+        },
         tooltip:
             candidate.generation.status ==
                 ExploreCandidateGenerationStatus.failed
             ? (candidate.generation.error ?? '')
-            : null,
+            : (candidate.generation.status ==
+                      ExploreCandidateGenerationStatus.done
+                  ? l10n.styleExplore_candidateMissing
+                  : null),
       );
     }
     return Image.file(
@@ -328,11 +632,13 @@ class _CandidateCard extends ConsumerWidget {
         );
   }
 
-  void _showDetail(BuildContext context, WidgetRef ref) {
+  void _showDetail(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (dialogContext) =>
-          ExploreCandidateDetailDialog(run: run, candidate: candidate),
+      builder: (dialogContext) => ExploreCandidateDetailDialog(
+        runId: run.id,
+        candidateId: candidate.id,
+      ),
     );
   }
 }
@@ -472,21 +778,53 @@ class _SmallLabelButton extends StatelessWidget {
   }
 }
 
-/// 候选详情弹窗：大图 + Roll 快照全文（可复制）+ seed + 参数快照 + 状态。
-class ExploreCandidateDetailDialog extends StatelessWidget {
+/// 候选详情弹窗：大图 + Roll 快照全文（可复制）+ seed + 参数快照 + 出口动作
+/// （收编为块 / 固化为模板 / Reject 删图）。
+///
+/// 按 id 实时解析 run 与候选，评审/删图等写操作后内容自动刷新。
+class ExploreCandidateDetailDialog extends ConsumerWidget {
   const ExploreCandidateDetailDialog({
     super.key,
-    required this.run,
-    required this.candidate,
+    required this.runId,
+    required this.candidateId,
   });
 
-  final ExploreRun run;
-  final ExploreCandidate candidate;
+  final String runId;
+  final String candidateId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
+    final run = ref
+        .watch(exploreRunListNotifierProvider)
+        .valueOrNull
+        ?.runById(runId);
+    final candidate = run?.candidateById(candidateId);
+
+    if (run == null || candidate == null) {
+      return Dialog(
+        key: const Key('explore-candidate-detail'),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.styleExplore_candidateMissing,
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.common_close),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final generation = candidate.generation;
     final snapshot = run.paramsSnapshot;
     final roll = candidate.rollSnapshot;
@@ -527,7 +865,10 @@ class ExploreCandidateDetailDialog extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // 图:信息 = 7:3（静定）：图区给足，信息列窄排
-                  Expanded(flex: 7, child: _buildDetailImage(theme, l10n)),
+                  Expanded(
+                    flex: 7,
+                    child: _buildDetailImage(theme, l10n, candidate),
+                  ),
                   VerticalDivider(width: 1, color: theme.dividerColor),
                   Expanded(
                     flex: 3,
@@ -581,6 +922,15 @@ class ExploreCandidateDetailDialog extends StatelessWidget {
                             ),
                           ),
                         ],
+                        const SizedBox(height: 12),
+                        _buildExportActions(
+                          context,
+                          ref,
+                          theme,
+                          l10n,
+                          run,
+                          candidate,
+                        ),
                         const SizedBox(height: 12),
                         Row(
                           children: [
@@ -645,11 +995,76 @@ class ExploreCandidateDetailDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailImage(ThemeData theme, AppLocalizations l10n) {
+  /// 出口动作行：收编为块 / 固化为模板 / Reject 删图（仅 reject 且有副本）。
+  Widget _buildExportActions(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeData theme,
+    AppLocalizations l10n,
+    ExploreRun run,
+    ExploreCandidate candidate,
+  ) {
+    final roll = candidate.rollSnapshot;
+    final canDeleteImage =
+        ExploreCandidateActions.isRejected(candidate) &&
+        candidate.generation.filePath != null;
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: [
+        OutlinedButton.icon(
+          key: const Key('explore-candidate-adopt-block'),
+          onPressed: roll == null
+              ? null
+              : () => ExploreCandidateActions.adoptSingle(
+                  context,
+                  ref,
+                  run: run,
+                  candidate: candidate,
+                ),
+          icon: const Icon(Icons.inventory_2_outlined, size: 16),
+          label: Text(l10n.styleExplore_adoptAsBlock),
+        ),
+        OutlinedButton.icon(
+          key: const Key('explore-candidate-fixate'),
+          onPressed: roll == null
+              ? null
+              : () => ExploreCandidateActions.fixateAsTemplate(
+                  context,
+                  ref,
+                  candidate: candidate,
+                ),
+          icon: const Icon(Icons.push_pin_outlined, size: 16),
+          label: Text(l10n.styleExplore_fixateAsTemplate),
+        ),
+        if (canDeleteImage)
+          OutlinedButton.icon(
+            key: const Key('explore-candidate-delete-image'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: theme.colorScheme.error,
+            ),
+            onPressed: () => ExploreCandidateActions.deleteImage(
+              context,
+              ref,
+              runId: run.id,
+              candidate: candidate,
+            ),
+            icon: const Icon(Icons.delete_outline, size: 16),
+            label: Text(l10n.styleExplore_deleteImage),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDetailImage(
+    ThemeData theme,
+    AppLocalizations l10n,
+    ExploreCandidate candidate,
+  ) {
     final filePath = candidate.generation.filePath;
     if (filePath == null) {
       return _ThumbnailPlaceholder(
-        icon: Icons.hourglass_empty,
+        icon: Icons.broken_image_outlined,
         tooltip: l10n.styleExplore_candidateMissing,
       );
     }

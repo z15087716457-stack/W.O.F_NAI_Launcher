@@ -10325,7 +10325,74 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_formalReview => '正式筛选';
 
   @override
-  String get styleExplore_formalReviewNextStage => '正式筛选将在下一阶段开放';
+  String styleExplore_reviewProgress(int labeled, int total) {
+    return '已归类 $labeled/$total';
+  }
+
+  @override
+  String get styleExplore_reviewComplete => '完成筛选';
+
+  @override
+  String get styleExplore_reviewCompleted => '筛选完成';
+
+  @override
+  String get styleExplore_reviewUndo => '撤销上一张';
+
+  @override
+  String get styleExplore_reviewExit => '退出筛选';
+
+  @override
+  String get styleExplore_reviewUnlabeled => '未归类';
+
+  @override
+  String get styleExplore_viewGrid => '网格视图';
+
+  @override
+  String get styleExplore_viewDeck => '牌堆视图';
+
+  @override
+  String get styleExplore_adoptAsBlock => '收编为块';
+
+  @override
+  String get styleExplore_adoptBlockNameLabel => '块名称';
+
+  @override
+  String styleExplore_adoptBlockSaved(String name) {
+    return '已收编为块「$name」';
+  }
+
+  @override
+  String get styleExplore_adoptBlockEmpty => '所选候选没有可用的 Roll 串';
+
+  @override
+  String get styleExplore_fixateAsTemplate => '固化为模板';
+
+  @override
+  String get styleExplore_fixateDone => '已灌入正向提示词；可在顶栏另存为配方';
+
+  @override
+  String get styleExplore_deleteImage => '删除图片';
+
+  @override
+  String get styleExplore_deleteImageTitle => '删除候选图';
+
+  @override
+  String get styleExplore_deleteImageMessage =>
+      '将删除该候选在 Run 目录中的图片副本；候选记录保留，图库源图不受影响。';
+
+  @override
+  String get styleExplore_deleteImageDone => '已删除候选图副本';
+
+  @override
+  String get styleExplore_selectCandidates => '多选';
+
+  @override
+  String styleExplore_selectedCount(int count) {
+    return '已选 $count 张';
+  }
+
+  @override
+  String get styleExplore_mergeAdopt => '合并收编';
 
   @override
   String get styleExplore_noRunsYet => '还没有探索任务';

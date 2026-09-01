@@ -10474,7 +10474,74 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_formalReview => '正式選別';
 
   @override
-  String get styleExplore_formalReviewNextStage => '正式選別は次のフェーズで公開予定です';
+  String styleExplore_reviewProgress(int labeled, int total) {
+    return '分類済み $labeled/$total';
+  }
+
+  @override
+  String get styleExplore_reviewComplete => '選別を完了';
+
+  @override
+  String get styleExplore_reviewCompleted => '選別が完了しました';
+
+  @override
+  String get styleExplore_reviewUndo => '直前を取り消す';
+
+  @override
+  String get styleExplore_reviewExit => '選別を終了';
+
+  @override
+  String get styleExplore_reviewUnlabeled => '未分類';
+
+  @override
+  String get styleExplore_viewGrid => 'グリッド表示';
+
+  @override
+  String get styleExplore_viewDeck => 'デッキ表示';
+
+  @override
+  String get styleExplore_adoptAsBlock => 'ブロックに収録';
+
+  @override
+  String get styleExplore_adoptBlockNameLabel => 'ブロック名';
+
+  @override
+  String styleExplore_adoptBlockSaved(String name) {
+    return 'ブロック「$name」に収録しました';
+  }
+
+  @override
+  String get styleExplore_adoptBlockEmpty => '選択した候補に Roll 文字列がありません';
+
+  @override
+  String get styleExplore_fixateAsTemplate => 'テンプレートに固定';
+
+  @override
+  String get styleExplore_fixateDone => 'ポジティブプロンプトを置き換えました。上部バーからレシピとして保存できます';
+
+  @override
+  String get styleExplore_deleteImage => '画像を削除';
+
+  @override
+  String get styleExplore_deleteImageTitle => '候補画像を削除';
+
+  @override
+  String get styleExplore_deleteImageMessage =>
+      'ラン ディレクトリ内の候補画像コピーを削除します。候補レコードは残り、ギャラリーの元画像には影響しません。';
+
+  @override
+  String get styleExplore_deleteImageDone => '候補画像コピーを削除しました';
+
+  @override
+  String get styleExplore_selectCandidates => '複数選択';
+
+  @override
+  String styleExplore_selectedCount(int count) {
+    return '$count 枚選択中';
+  }
+
+  @override
+  String get styleExplore_mergeAdopt => 'まとめて収録';
 
   @override
   String get styleExplore_noRunsYet => '探索ランはまだありません';

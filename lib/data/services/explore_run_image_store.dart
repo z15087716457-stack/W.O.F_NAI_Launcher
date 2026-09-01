@@ -76,4 +76,22 @@ class ExploreRunImageStore {
       );
     }
   }
+
+  /// 删除单个候选图副本（Reject 候选出口；候选记录保留，仅清文件）。
+  /// 文件本就不存在视为成功（幂等），返回是否删成。
+  Future<bool> deleteCandidateImage(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+      return true;
+    } catch (error) {
+      AppLogger.w(
+        'Delete explore candidate image failed: $error',
+        'ExploreRunImageStore',
+      );
+      return false;
+    }
+  }
 }

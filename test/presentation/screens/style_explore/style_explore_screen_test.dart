@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -8,9 +9,11 @@ import 'package:nai_launcher/core/storage/style_explore_recipe_storage.dart';
 import 'package:nai_launcher/core/storage/style_explore_run_storage.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
+import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/data/models/style_explore/style_explore_recipe.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
+import 'package:nai_launcher/data/services/explore_run_image_store.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
@@ -171,6 +174,54 @@ class _FakeLibraryNotifier extends PromptBlockLibraryNotifier {
       PromptBlockLibraryState(blocks: const [], folders: const []);
 }
 
+/// 记录删除调用的假候选图存储（testWidgets 的 fakeAsync 区里真文件
+/// I/O 永不完成，删图落盘由 service 层测试覆盖）。
+class _FakeRunImageStore extends ExploreRunImageStore {
+  _FakeRunImageStore() : super(rootPathResolver: () async => null);
+
+  final List<String> deletedPaths = [];
+
+  @override
+  Future<bool> deleteCandidateImage(String filePath) async {
+    deletedPaths.add(filePath);
+    return true;
+  }
+}
+
+/// 记录 createBlock 调用参数的假块库（收编为块测试用）。
+class _RecordingLibraryNotifier extends PromptBlockLibraryNotifier {
+  final List<({String title, String content, String color, String? iconName})>
+  created = [];
+
+  @override
+  Future<PromptBlockLibraryState> build() async =>
+      PromptBlockLibraryState(blocks: const [], folders: const []);
+
+  @override
+  Future<PromptBlock> createBlock({
+    required String title,
+    required String content,
+    String? folderId,
+    String color = '#FF607D8B',
+    String? iconName,
+    int? sortOrder,
+  }) async {
+    created.add((
+      title: title,
+      content: content,
+      color: color,
+      iconName: iconName,
+    ));
+    return PromptBlock.create(
+      title: title,
+      content: content,
+      folderId: folderId,
+      color: color,
+      iconName: iconName,
+    );
+  }
+}
+
 /// 冷却永不生效的假实现（真实现会读 Hive 设置，widget 测试不准备）。
 class _FakeCooldownNotifier extends GenerationCooldownNotifier {
   @override
@@ -251,7 +302,7 @@ void main() {
     return run;
   }
 
-  Widget buildScreen() {
+  Widget buildScreen({List<Override> extraOverrides = const []}) {
     return ProviderScope(
       overrides: [
         localStorageServiceProvider.overrideWith(
@@ -281,6 +332,7 @@ void main() {
         ),
         estimatedCostProvider.overrideWith((ref) => 0),
         isFreeGenerationProvider.overrideWith((ref) => true),
+        ...extraOverrides,
       ],
       child: const MaterialApp(
         locale: Locale('zh'),
@@ -291,13 +343,16 @@ void main() {
     );
   }
 
-  Future<ProviderContainer> pumpScreen(WidgetTester tester) async {
+  Future<ProviderContainer> pumpScreen(
+    WidgetTester tester, {
+    List<Override> extraOverrides = const [],
+  }) async {
     // 宽窗：左栏 + 右栏画廊都展开（画廊默认断点 1100）。
     tester.view.physicalSize = const Size(1600, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(buildScreen());
+    await tester.pumpWidget(buildScreen(extraOverrides: extraOverrides));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     return ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
@@ -613,11 +668,11 @@ void main() {
     expect(find.byKey(const Key('explore-candidate-cand-t')), findsNothing);
     expect(find.byKey(const Key('explore-candidate-cand-p')), findsOneWidget);
 
-    // 正式筛选按钮置灰（阶段 C）。
+    // 正式筛选按钮：有可审查候选（done）时可用（阶段 C）。
     final formalChip = tester.widget<ActionChip>(
       find.byKey(const Key('explore-formal-review')),
     );
-    expect(formalChip.onPressed, isNull);
+    expect(formalChip.onPressed, isNotNull);
   });
 
   testWidgets('detail dialog shows seed, params and roll snapshot', (
@@ -746,5 +801,470 @@ void main() {
       container.read(styleExploreSessionNotifierProvider).activeRecipeId,
       isNull,
     );
+  });
+
+  // ==================== 阶段 C：正式筛选与出口 ====================
+
+  ExploreCandidate doneCandidate(
+    String id, {
+    ExploreRollSnapshot? roll,
+    ExploreReviewLabel? label,
+    ExploreReviewLabel? preliminaryLabel,
+    String? filePath,
+  }) {
+    return ExploreCandidate.shell(roundId: 'r-1', id: id).copyWith(
+      rollSnapshot: roll,
+      generation: ExploreCandidateGeneration(
+        status: ExploreCandidateGenerationStatus.done,
+        filePath: filePath,
+        seed: 42,
+      ),
+      review: ExploreCandidateReview(
+        label: label,
+        preliminaryLabel: preliminaryLabel,
+      ),
+    );
+  }
+
+  testWidgets('formal review overlay: keyboard T/S/R, undo, gated complete', (
+    tester,
+  ) async {
+    final run = await seedRun(
+      '键盘筛选任务',
+      status: ExploreRunStatus.generated,
+      candidates: [doneCandidate('cand-1'), doneCandidate('cand-2')],
+    );
+    final container = await pumpScreen(tester);
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // 进入正式筛选 → run 状态 reviewing，覆盖层打开。
+    await tester.tap(find.byKey(const Key('explore-formal-review')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(const Key('explore-review-complete')), findsOneWidget);
+    expect(runStorage._store[run.id]!.status, ExploreRunStatus.reviewing);
+    expect(find.text('第 1/2 张'), findsOneWidget);
+
+    // 未归类完：完成按钮禁用。
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.byKey(const Key('explore-review-complete')),
+          )
+          .onPressed,
+      isNull,
+    );
+
+    // T → 第一张珍宝 + 归类时间，自动前进到第 2/2 张。
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyT);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    var review = runStorage._store[run.id]!.candidateById('cand-1')!.review;
+    expect(review.label, ExploreReviewLabel.treasure);
+    expect(review.formalReviewedAt, isNotNull);
+    expect(find.text('第 2/2 张'), findsOneWidget);
+
+    // S → 第二张特殊；全部归类 → 完成可用。
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      runStorage._store[run.id]!.candidateById('cand-2')!.review.label,
+      ExploreReviewLabel.special,
+    );
+    expect(find.text('已归类 2/2'), findsOneWidget);
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.byKey(const Key('explore-review-complete')),
+          )
+          .onPressed,
+      isNotNull,
+    );
+
+    // Backspace 撤销：回到第二张并清标签，完成重新禁用。
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    review = runStorage._store[run.id]!.candidateById('cand-2')!.review;
+    expect(review.label, isNull);
+    expect(review.formalReviewedAt, isNull);
+    expect(find.text('第 2/2 张'), findsOneWidget);
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.byKey(const Key('explore-review-complete')),
+          )
+          .onPressed,
+      isNull,
+    );
+
+    // R → 拒绝，点完成 → 覆盖层关闭，run 状态 completed。
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyR);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byKey(const Key('explore-review-complete')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    // 完成 toast 自动关闭。
+    await tester.pump(const Duration(milliseconds: 3300));
+    expect(find.byKey(const Key('explore-review-complete')), findsNothing);
+    expect(runStorage._store[run.id]!.status, ExploreRunStatus.completed);
+  });
+
+  testWidgets('arrow keys and prev/next buttons navigate in review overlay', (
+    tester,
+  ) async {
+    final run = await seedRun(
+      '导航任务',
+      status: ExploreRunStatus.generated,
+      candidates: [doneCandidate('cand-1'), doneCandidate('cand-2')],
+    );
+    final container = await pumpScreen(tester);
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byKey(const Key('explore-formal-review')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('第 1/2 张'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(find.text('第 2/2 张'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(find.text('第 1/2 张'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('explore-review-next')));
+    await tester.pump();
+    expect(find.text('第 2/2 张'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('explore-review-prev')));
+    await tester.pump();
+    expect(find.text('第 1/2 张'), findsOneWidget);
+  });
+
+  testWidgets('Esc keeps labels and reviewing status; re-entry resumes at '
+      'first unlabeled', (tester) async {
+    final run = await seedRun(
+      '续筛任务',
+      status: ExploreRunStatus.generated,
+      candidates: [doneCandidate('cand-1'), doneCandidate('cand-2')],
+    );
+    final container = await pumpScreen(tester);
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byKey(const Key('explore-formal-review')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // 打第一张后 Esc 退出：标签保留、状态留 reviewing（对话框退出动画
+    // 150ms，等足再断言）。
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyT);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const Key('explore-review-complete')), findsNothing);
+    final stored = runStorage._store[run.id]!;
+    expect(stored.status, ExploreRunStatus.reviewing);
+    expect(
+      stored.candidateById('cand-1')!.review.label,
+      ExploreReviewLabel.treasure,
+    );
+
+    // 再进入续筛：定位到第一个未归类（第 2 张）。
+    await tester.tap(find.byKey(const Key('explore-formal-review')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('第 2/2 张'), findsOneWidget);
+
+    // 按钮与键盘等价：点 S 按钮给第二张打特殊。
+    await tester.tap(find.byKey(const Key('explore-review-label-special')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      runStorage._store[run.id]!.candidateById('cand-2')!.review.label,
+      ExploreReviewLabel.special,
+    );
+    expect(find.text('已归类 2/2'), findsOneWidget);
+  });
+
+  testWidgets('deck view groups candidates by formal label with counts', (
+    tester,
+  ) async {
+    final run = await seedRun(
+      '牌堆任务',
+      status: ExploreRunStatus.generated,
+      candidates: [
+        doneCandidate('cand-t', label: ExploreReviewLabel.treasure),
+        doneCandidate('cand-r', label: ExploreReviewLabel.reject),
+        doneCandidate('cand-p'),
+        // 预标记不转正：仍归未归类组。
+        doneCandidate('cand-pre', preliminaryLabel: ExploreReviewLabel.special),
+      ],
+    );
+    final container = await pumpScreen(tester);
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // 切到牌堆视图。
+    await tester.tap(find.byKey(const Key('explore-gallery-view-toggle')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('珍宝 · 1'), findsOneWidget);
+    expect(find.text('拒绝 · 1'), findsOneWidget);
+    expect(find.text('未归类 · 2'), findsOneWidget);
+    // 空组不显示。
+    expect(find.byKey(const Key('explore-deck-header-special')), findsNothing);
+    // 四张卡都在。
+    for (final id in const ['cand-t', 'cand-r', 'cand-p', 'cand-pre']) {
+      expect(find.byKey(Key('explore-candidate-$id')), findsOneWidget);
+    }
+
+    // 切回网格。
+    await tester.tap(find.byKey(const Key('explore-gallery-view-toggle')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('珍宝 · 1'), findsNothing);
+  });
+
+  testWidgets('detail dialog adopt-as-block passes roll positive to '
+      'createBlock', (tester) async {
+    final recording = _RecordingLibraryNotifier();
+    final run = await seedRun(
+      '收编任务',
+      status: ExploreRunStatus.generated,
+      candidates: [
+        doneCandidate(
+          'cand-1',
+          roll: const ExploreRollSnapshot(
+            positive: 'soft light, watercolor',
+            negative: 'lowres',
+          ),
+        ),
+      ],
+    );
+    final container = await pumpScreen(
+      tester,
+      extraOverrides: [
+        promptBlockLibraryNotifierProvider.overrideWith(() => recording),
+      ],
+    );
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byKey(const Key('explore-candidate-adopt-block')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // 默认名 = run 名 + 候选序号。
+    expect(find.byKey(const Key('explore-adopt-block-dialog')), findsOneWidget);
+    final nameField = tester.widget<TextField>(
+      find.descendant(
+        of: find.byKey(const Key('explore-adopt-block-dialog')),
+        matching: find.byType(TextField),
+      ),
+    );
+    expect(nameField.controller!.text, '收编任务 #1');
+
+    await tester.tap(find.byKey(const Key('explore-adopt-block-confirm')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 3300));
+
+    expect(recording.created, hasLength(1));
+    final created = recording.created.single;
+    expect(created.title, '收编任务 #1');
+    expect(created.content, 'soft light, watercolor');
+    expect(created.color, '#FF607D8B');
+    expect(created.iconName, isNull);
+  });
+
+  testWidgets('multi-select merge adopt combines roll positives with dedup', (
+    tester,
+  ) async {
+    final recording = _RecordingLibraryNotifier();
+    final run = await seedRun(
+      '合并任务',
+      status: ExploreRunStatus.generated,
+      candidates: [
+        doneCandidate(
+          'cand-1',
+          roll: const ExploreRollSnapshot(positive: 'a, b', negative: 'n'),
+        ),
+        doneCandidate(
+          'cand-2',
+          roll: const ExploreRollSnapshot(positive: 'b, c,', negative: 'n'),
+        ),
+      ],
+    );
+    final container = await pumpScreen(
+      tester,
+      extraOverrides: [
+        promptBlockLibraryNotifierProvider.overrideWith(() => recording),
+      ],
+    );
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // 进入多选并选两张。
+    await tester.tap(find.byKey(const Key('explore-gallery-select-toggle')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-2')));
+    await tester.pump();
+    expect(find.text('已选 2 张'), findsOneWidget);
+
+    // 合并收编 → 默认名 ×2 → 确认。
+    await tester.tap(find.byKey(const Key('explore-gallery-merge-adopt')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(const Key('explore-adopt-block-dialog')), findsOneWidget);
+    final nameField = tester.widget<TextField>(
+      find.descendant(
+        of: find.byKey(const Key('explore-adopt-block-dialog')),
+        matching: find.byType(TextField),
+      ),
+    );
+    expect(nameField.controller!.text, '合并任务 ×2');
+    await tester.tap(find.byKey(const Key('explore-adopt-block-confirm')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 3300));
+
+    expect(recording.created.single.content, 'a, b, c');
+    // 收编成功后退出多选。
+    expect(find.text('已选 2 张'), findsNothing);
+    expect(
+      find.byKey(const Key('explore-gallery-select-toggle')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('fixate as template overwrites main lane after confirm, '
+      'negative untouched', (tester) async {
+    final run = await seedRun(
+      '固化任务',
+      status: ExploreRunStatus.generated,
+      candidates: [
+        doneCandidate(
+          'cand-1',
+          roll: const ExploreRollSnapshot(
+            positive: 'fixed prompt, abc',
+            negative: 'neg-roll',
+          ),
+        ),
+      ],
+    );
+    final container = await pumpScreen(tester);
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // 主 lane 有未备份内容 → 覆盖前确认。
+    container
+        .read(pillWorkspaceProvider(PillScopes.main).notifier)
+        .setText('未备份内容');
+    container
+        .read(pillWorkspaceProvider(PillScopes.negative).notifier)
+        .setText('neg-keep');
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byKey(const Key('explore-candidate-fixate')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('放弃未保存的修改？'), findsOneWidget);
+
+    await tester.tap(find.text('继续并丢弃'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 3300));
+
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
+      'fixed prompt, abc',
+    );
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.negative)).document.text,
+      'neg-keep',
+      reason: '固化只动正向 lane',
+    );
+  });
+
+  testWidgets('reject candidate delete image removes copy and keeps record', (
+    tester,
+  ) async {
+    final imageStore = _FakeRunImageStore();
+    const rejectPath = '/tmp/style_explore_runs/run-1/cand-reject.png';
+
+    final run = await seedRun(
+      '删图任务',
+      status: ExploreRunStatus.generated,
+      candidates: [
+        doneCandidate('cand-keep', label: ExploreReviewLabel.treasure),
+        doneCandidate(
+          'cand-reject',
+          label: ExploreReviewLabel.reject,
+          filePath: rejectPath,
+        ),
+      ],
+    );
+    final container = await pumpScreen(
+      tester,
+      extraOverrides: [
+        exploreRunImageStoreProvider.overrideWithValue(imageStore),
+      ],
+    );
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // 非 reject 候选不提供删除图片。
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-keep')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      find.byKey(const Key('explore-candidate-delete-image')),
+      findsNothing,
+    );
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-detail')),
+        matching: find.byIcon(Icons.close),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // reject 候选：删除图片 → 确认 → 副本删除、记录保留（filePath 清空）。
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-reject')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byKey(const Key('explore-candidate-delete-image')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('删除候选图'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, '删除图片'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 3300));
+
+    expect(imageStore.deletedPaths, [rejectPath]);
+    final stored = runStorage._store[run.id]!.candidateById('cand-reject')!;
+    expect(stored.generation.filePath, isNull);
+    expect(stored.generation.status, ExploreCandidateGenerationStatus.done);
+    expect(stored.generation.seed, 42, reason: '记录保留，仅清副本路径');
   });
 }

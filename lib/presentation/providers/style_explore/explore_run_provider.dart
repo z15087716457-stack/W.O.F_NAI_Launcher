@@ -176,6 +176,9 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
   }
 
   /// 评审字段更新（心形/预标记/正式标签）。
+  ///
+  /// 写正式标签时传 [formalReviewedAt]（筛选会话打标=写当前时间）；
+  /// [clearLabel] 会一并清掉归类时间。
   Future<ExploreRun> updateReview(
     String runId,
     String candidateId, {
@@ -184,6 +187,7 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     bool clearPreliminaryLabel = false,
     ExploreReviewLabel? label,
     bool clearLabel = false,
+    DateTime? formalReviewedAt,
   }) {
     return updateCandidate(runId, candidateId, (candidate) {
       var review = candidate.review;
@@ -192,10 +196,41 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
         review = review.copyWith(preliminaryLabel: preliminaryLabel);
       }
       if (label != null || clearLabel) {
-        review = review.copyWith(label: label);
+        review = review.copyWith(
+          label: label,
+          formalReviewedAt: formalReviewedAt,
+        );
       }
       return candidate.copyWith(review: review);
     });
+  }
+
+  /// 进入正式筛选：run → reviewing。
+  ///
+  /// 允许从 draft（手动候选 run）/generated/reviewing（续筛）/completed
+  /// （复筛）进入；必须有可审查候选（done）。
+  Future<ExploreRun> beginReview(String runId) {
+    return _mutateRun(runId, (run) {
+      if (!exploreReviewableStatuses.contains(run.status)) {
+        throw StateError('Run $runId cannot enter review from ${run.status}');
+      }
+      if (run.reviewableCandidates.isEmpty) {
+        throw StateError('Run $runId has no reviewable candidates');
+      }
+      return run.copyWith(status: ExploreRunStatus.reviewing);
+    });
+  }
+
+  /// 完成正式筛选：全部可审查候选都有正式标签才允许 → completed。
+  /// 返回 false = 门禁拒绝（状态非 reviewing 或未归类完），不改动数据。
+  Future<bool> completeReview(String runId) async {
+    final repository = ref.read(styleExploreRunRepositoryProvider);
+    final run = await repository.getRun(runId);
+    if (run == null) return false;
+    if (run.status != ExploreRunStatus.reviewing) return false;
+    if (!run.isReviewComplete) return false;
+    await overwrite(run.copyWith(status: ExploreRunStatus.completed));
+    return true;
   }
 
   /// 生成结果字段更新。
@@ -300,4 +335,35 @@ bool exploreCandidateMatchesFilter(
 bool _hasLabel(ExploreCandidate candidate, ExploreReviewLabel label) {
   return candidate.review.preliminaryLabel == label ||
       candidate.review.label == label;
+}
+
+/// 允许进入正式筛选的 run 状态（generating/paused 有未跑完的生成，
+/// cancelled 是终态，均不放行）。
+const exploreReviewableStatuses = {
+  ExploreRunStatus.draft,
+  ExploreRunStatus.generated,
+  ExploreRunStatus.reviewing,
+  ExploreRunStatus.completed,
+};
+
+/// 候选画廊视图模式：网格 / 牌堆（按正式标签分组）。
+enum ExploreGalleryViewMode { grid, deck }
+
+final exploreGalleryViewModeProvider = StateProvider<ExploreGalleryViewMode>(
+  (ref) => ExploreGalleryViewMode.grid,
+);
+
+/// 多候选 roll 正向串合并：顶层逗号切原子、去重（保序）、`, ` 拼接
+/// （无尾部逗号）。单串输入等价于原子规范化。
+String mergeExploreRollPositives(Iterable<String> positives) {
+  final seen = <String>{};
+  final atoms = <String>[];
+  for (final positive in positives) {
+    for (final raw in positive.split(',')) {
+      final atom = raw.trim();
+      if (atom.isEmpty) continue;
+      if (seen.add(atom)) atoms.add(atom);
+    }
+  }
+  return atoms.join(', ');
 }

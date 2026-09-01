@@ -177,6 +177,9 @@ class ExploreCandidateReview with _$ExploreCandidateReview {
     @Default(false) bool heart,
     ExploreReviewLabel? preliminaryLabel,
     ExploreReviewLabel? label,
+
+    /// 正式筛选归类时间（随 label 写入/清除）。
+    DateTime? formalReviewedAt,
   }) = _ExploreCandidateReview;
 
   factory ExploreCandidateReview.fromJson(Map<String, dynamic> json) =>
@@ -435,4 +438,21 @@ class ExploreRun with _$ExploreRun {
         (c) => c.generation.status == ExploreCandidateGenerationStatus.failed,
       )
       .length;
+
+  /// 可审查候选（生成成功，正式筛选的归类目标）。
+  List<ExploreCandidate> get reviewableCandidates => [
+    for (final candidate in candidates)
+      if (candidate.generation.status == ExploreCandidateGenerationStatus.done)
+        candidate,
+  ];
+
+  /// 已正式归类的可审查候选数。
+  int get formallyReviewedCount => reviewableCandidates
+      .where((candidate) => candidate.review.label != null)
+      .length;
+
+  /// 全部可审查候选都已正式归类（完成筛选的判定）。
+  bool get isReviewComplete =>
+      reviewableCandidates.isNotEmpty &&
+      formallyReviewedCount == reviewableCandidates.length;
 }

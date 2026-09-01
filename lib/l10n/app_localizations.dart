@@ -18697,11 +18697,131 @@ abstract class AppLocalizations {
   /// **'Formal review'**
   String get styleExplore_formalReview;
 
-  /// No description provided for @styleExplore_formalReviewNextStage.
+  /// No description provided for @styleExplore_reviewProgress.
   ///
   /// In en, this message translates to:
-  /// **'Formal review will be available in the next phase'**
-  String get styleExplore_formalReviewNextStage;
+  /// **'Classified {labeled}/{total}'**
+  String styleExplore_reviewProgress(int labeled, int total);
+
+  /// No description provided for @styleExplore_reviewComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish review'**
+  String get styleExplore_reviewComplete;
+
+  /// No description provided for @styleExplore_reviewCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Review completed'**
+  String get styleExplore_reviewCompleted;
+
+  /// No description provided for @styleExplore_reviewUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo last'**
+  String get styleExplore_reviewUndo;
+
+  /// No description provided for @styleExplore_reviewExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit review'**
+  String get styleExplore_reviewExit;
+
+  /// No description provided for @styleExplore_reviewUnlabeled.
+  ///
+  /// In en, this message translates to:
+  /// **'Unclassified'**
+  String get styleExplore_reviewUnlabeled;
+
+  /// No description provided for @styleExplore_viewGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid view'**
+  String get styleExplore_viewGrid;
+
+  /// No description provided for @styleExplore_viewDeck.
+  ///
+  /// In en, this message translates to:
+  /// **'Deck view'**
+  String get styleExplore_viewDeck;
+
+  /// No description provided for @styleExplore_adoptAsBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Adopt as block'**
+  String get styleExplore_adoptAsBlock;
+
+  /// No description provided for @styleExplore_adoptBlockNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Block name'**
+  String get styleExplore_adoptBlockNameLabel;
+
+  /// No description provided for @styleExplore_adoptBlockSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Adopted as block \"{name}\"'**
+  String styleExplore_adoptBlockSaved(String name);
+
+  /// No description provided for @styleExplore_adoptBlockEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected candidates have no roll text'**
+  String get styleExplore_adoptBlockEmpty;
+
+  /// No description provided for @styleExplore_fixateAsTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix as template'**
+  String get styleExplore_fixateAsTemplate;
+
+  /// No description provided for @styleExplore_fixateDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Positive prompt replaced; save as a recipe from the top bar'**
+  String get styleExplore_fixateDone;
+
+  /// No description provided for @styleExplore_deleteImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete image'**
+  String get styleExplore_deleteImage;
+
+  /// No description provided for @styleExplore_deleteImageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete candidate image'**
+  String get styleExplore_deleteImageTitle;
+
+  /// No description provided for @styleExplore_deleteImageMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletes this candidate\'s image copy in the run directory. The candidate record is kept and the gallery source image is untouched.'**
+  String get styleExplore_deleteImageMessage;
+
+  /// No description provided for @styleExplore_deleteImageDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate image copy deleted'**
+  String get styleExplore_deleteImageDone;
+
+  /// No description provided for @styleExplore_selectCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get styleExplore_selectCandidates;
+
+  /// No description provided for @styleExplore_selectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String styleExplore_selectedCount(int count);
+
+  /// No description provided for @styleExplore_mergeAdopt.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge & adopt'**
+  String get styleExplore_mergeAdopt;
 
   /// No description provided for @styleExplore_noRunsYet.
   ///

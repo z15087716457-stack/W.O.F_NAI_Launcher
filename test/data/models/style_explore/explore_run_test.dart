@@ -291,5 +291,110 @@ void main() {
       expect(captured.steps, 23);
       expect(captured.decrisp, isTrue);
     });
+
+    test('review formalReviewedAt JSON roundtrip', () {
+      final reviewedAt = DateTime.utc(2026, 9, 1, 8, 30);
+      final review = ExploreCandidateReview(
+        heart: true,
+        label: ExploreReviewLabel.treasure,
+        formalReviewedAt: reviewedAt,
+      );
+      final decoded = ExploreCandidateReview.fromJson(
+        jsonDecode(jsonEncode(review)) as Map<String, dynamic>,
+      );
+      expect(decoded, review);
+      expect(decoded.formalReviewedAt, reviewedAt);
+
+      // 旧数据无该字段：缺省为 null。
+      final legacy = ExploreCandidateReview.fromJson(const {'heart': false});
+      expect(legacy.formalReviewedAt, isNull);
+      expect(legacy.label, isNull);
+    });
+
+    test('review progress getters only count done candidates with label', () {
+      final run = ExploreRun.create(
+        name: 'x',
+        recipeSnapshot: ExploreRecipeSnapshot(
+          positive: PillDocument.empty(),
+          negative: PillDocument.empty(),
+        ),
+        paramsSnapshot: const ExploreParamsSnapshot(
+          model: 'm',
+          width: 1,
+          height: 1,
+          steps: 1,
+          scale: 1,
+          sampler: 's',
+          seed: -1,
+          ucPreset: 0,
+          qualityToggle: true,
+          smea: false,
+          smeaDyn: false,
+          cfgRescale: 0,
+          noiseSchedule: 'karras',
+          varietyPlus: false,
+          decrisp: false,
+        ),
+        targetCount: 3,
+      );
+      expect(run.isReviewComplete, isFalse, reason: '无可审查候选不算完成');
+
+      ExploreCandidate doneCandidate(
+        String id, {
+        ExploreReviewLabel? label,
+        bool preliminary = false,
+      }) {
+        return ExploreCandidate.shell(roundId: 'r', id: id).copyWith(
+          generation: const ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.done,
+          ),
+          review: ExploreCandidateReview(
+            preliminaryLabel: preliminary ? label : null,
+            label: preliminary ? null : label,
+          ),
+        );
+      }
+
+      final filled = run.copyWith(
+        candidates: [
+          doneCandidate('a', label: ExploreReviewLabel.treasure),
+          doneCandidate('b'),
+          // 预标记不算正式归类。
+          doneCandidate(
+            'c',
+            label: ExploreReviewLabel.special,
+            preliminary: true,
+          ),
+          // 失败候选不进可审查集。
+          ExploreCandidate.shell(roundId: 'r', id: 'd').copyWith(
+            generation: const ExploreCandidateGeneration(
+              status: ExploreCandidateGenerationStatus.failed,
+              error: 'boom',
+            ),
+          ),
+        ],
+      );
+
+      expect(filled.reviewableCandidates.map((c) => c.id), ['a', 'b', 'c']);
+      expect(filled.formallyReviewedCount, 1);
+      expect(filled.isReviewComplete, isFalse);
+
+      final allLabeled = filled.copyWith(
+        candidates: [
+          for (final candidate in filled.candidates)
+            candidate.id == 'a'
+                ? candidate
+                : candidate.id == 'd'
+                ? candidate
+                : candidate.copyWith(
+                    review: candidate.review.copyWith(
+                      label: ExploreReviewLabel.reject,
+                    ),
+                  ),
+        ],
+      );
+      expect(allLabeled.formallyReviewedCount, 3);
+      expect(allLabeled.isReviewComplete, isTrue);
+    });
   });
 }

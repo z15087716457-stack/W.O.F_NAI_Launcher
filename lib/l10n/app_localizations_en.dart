@@ -10702,8 +10702,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_formalReview => 'Formal review';
 
   @override
-  String get styleExplore_formalReviewNextStage =>
-      'Formal review will be available in the next phase';
+  String styleExplore_reviewProgress(int labeled, int total) {
+    return 'Classified $labeled/$total';
+  }
+
+  @override
+  String get styleExplore_reviewComplete => 'Finish review';
+
+  @override
+  String get styleExplore_reviewCompleted => 'Review completed';
+
+  @override
+  String get styleExplore_reviewUndo => 'Undo last';
+
+  @override
+  String get styleExplore_reviewExit => 'Exit review';
+
+  @override
+  String get styleExplore_reviewUnlabeled => 'Unclassified';
+
+  @override
+  String get styleExplore_viewGrid => 'Grid view';
+
+  @override
+  String get styleExplore_viewDeck => 'Deck view';
+
+  @override
+  String get styleExplore_adoptAsBlock => 'Adopt as block';
+
+  @override
+  String get styleExplore_adoptBlockNameLabel => 'Block name';
+
+  @override
+  String styleExplore_adoptBlockSaved(String name) {
+    return 'Adopted as block \"$name\"';
+  }
+
+  @override
+  String get styleExplore_adoptBlockEmpty =>
+      'Selected candidates have no roll text';
+
+  @override
+  String get styleExplore_fixateAsTemplate => 'Fix as template';
+
+  @override
+  String get styleExplore_fixateDone =>
+      'Positive prompt replaced; save as a recipe from the top bar';
+
+  @override
+  String get styleExplore_deleteImage => 'Delete image';
+
+  @override
+  String get styleExplore_deleteImageTitle => 'Delete candidate image';
+
+  @override
+  String get styleExplore_deleteImageMessage =>
+      'Deletes this candidate\'s image copy in the run directory. The candidate record is kept and the gallery source image is untouched.';
+
+  @override
+  String get styleExplore_deleteImageDone => 'Candidate image copy deleted';
+
+  @override
+  String get styleExplore_selectCandidates => 'Select';
+
+  @override
+  String styleExplore_selectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get styleExplore_mergeAdopt => 'Merge & adopt';
 
   @override
   String get styleExplore_noRunsYet => 'No explore runs yet';
