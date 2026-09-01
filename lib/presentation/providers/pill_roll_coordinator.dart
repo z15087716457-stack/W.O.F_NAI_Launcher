@@ -24,9 +24,6 @@ class PillRollCoordinator {
     // 快照一份再遍历：推送过程可能触发 forgetScope 改动注册表
     final scopes = PillWorkspaceNotifier.activeScopes.toList();
     for (final scope in scopes) {
-      // 探索页 lane 与主生成无关：runner 自控 roll 节奏，这里无谓 roll
-      // 只会打乱用户正在编辑的随机实例。
-      if (scope.startsWith('explore:')) continue;
       final provider = pillWorkspaceProvider(scope);
       if (!_ref.exists(provider)) continue;
       final changed = _ref.read(provider.notifier).rollAllRandom();

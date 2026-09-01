@@ -10153,9 +10153,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_copiedToClipboard => '已复制';
 
   @override
-  String get styleExplore_positiveHint => '组合块与文本，探索画风';
-
-  @override
   String get styleExplore_runSectionTitle => '探索任务';
 
   @override
@@ -10260,10 +10257,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_targetCountLabel => '出图数';
 
   @override
-  String get styleExplore_syncParams => '同步自主生成页';
+  String get styleExplore_runAnotherRound => '再来一轮';
 
   @override
-  String get styleExplore_paramsSynced => '参数快照已更新';
+  String styleExplore_manualRunName(String time) {
+    return '手动候选 $time';
+  }
 
   @override
   String get styleExplore_runBusy => '生成进行中，稍后再试';

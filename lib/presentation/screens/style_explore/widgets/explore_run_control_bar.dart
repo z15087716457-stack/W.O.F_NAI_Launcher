@@ -6,17 +6,17 @@ import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../providers/generation/generation_params_notifier.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../providers/style_explore/explore_run_runner.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import 'explore_run_actions.dart';
 
-/// 中栏 Run 控制条 + 参数摘要条（activeRun 非空时显示在顶栏下方）。
+/// 中栏顶部 Run 控制条（activeRun 非空时显示）。
 ///
 /// 按钮按状态显隐：draft=开始 / generating=暂停+取消 / paused=继续+取消 /
-/// generated=重试失败（有失败时）。出图数与「同步自主生成页」仅草稿可编辑。
+/// generated=出图数+再来一轮（+有失败时重试失败）。
+/// 出图数在 draft 与 generated 两态可编辑（generated 时作用于追加的新轮）。
 class ExploreRunControlBar extends ConsumerStatefulWidget {
   const ExploreRunControlBar({super.key, required this.run});
 
@@ -59,7 +59,6 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
     final l10n = context.l10n;
     final run = widget.run;
     final runnerState = ref.watch(exploreRunRunnerProvider);
-    final isDraft = run.status == ExploreRunStatus.draft;
     final isRunningThis = runnerState.isRunning && runnerState.runId == run.id;
 
     return Container(
@@ -72,55 +71,88 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
           ),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.circle,
-                size: 10,
-                color: ExploreRunActions.statusColor(
-                  theme.colorScheme,
-                  run.status,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  run.displayName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                isRunningThis
-                    ? l10n.styleExplore_runGeneratingProgress(
-                        (runnerState.processedCount + 1).clamp(
-                          1,
-                          runnerState.totalCount,
-                        ),
-                        runnerState.totalCount,
-                      )
-                    : l10n.styleExplore_runProgress(
-                        run.generatedCount,
-                        run.targetCount,
-                      ),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(width: 8),
-              ..._buildActionButtons(context, l10n, run, isRunningThis),
-              _buildMoreMenu(context, l10n, run),
-            ],
+          Icon(
+            Icons.circle,
+            size: 10,
+            color: ExploreRunActions.statusColor(theme.colorScheme, run.status),
           ),
-          const SizedBox(height: 8),
-          _buildParamsSummary(theme, l10n, run, isDraft),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              run.displayName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleSmall,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            isRunningThis
+                ? l10n.styleExplore_runGeneratingProgress(
+                    (runnerState.processedCount + 1).clamp(
+                      1,
+                      runnerState.totalCount,
+                    ),
+                    runnerState.totalCount,
+                  )
+                : l10n.styleExplore_runProgress(
+                    run.generatedCount,
+                    run.targetCount,
+                  ),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (_showsTargetCountInput(run)) ...[
+            _buildTargetCountInput(theme, l10n),
+            const SizedBox(width: 8),
+          ],
+          ..._buildActionButtons(context, l10n, run, isRunningThis),
+          _buildMoreMenu(context, l10n, run),
         ],
       ),
+    );
+  }
+
+  /// 出图数输入在 draft（首轮）与 generated（追加轮）两态出现。
+  bool _showsTargetCountInput(ExploreRun run) {
+    return run.status == ExploreRunStatus.draft ||
+        run.status == ExploreRunStatus.generated;
+  }
+
+  Widget _buildTargetCountInput(ThemeData theme, AppLocalizations l10n) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '${l10n.styleExplore_targetCountLabel}:',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(width: 4),
+        SizedBox(
+          width: 56,
+          height: 32,
+          child: TextField(
+            key: const Key('explore-run-target-count'),
+            controller: _targetController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            style: theme.textTheme.bodySmall,
+            decoration: const InputDecoration(
+              isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: _submitTargetCount,
+            onTapOutside: (_) => _submitTargetCount(_targetController.text),
+          ),
+        ),
+      ],
     );
   }
 
@@ -175,14 +207,22 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
           ),
         ];
       case ExploreRunStatus.generated:
-        if (run.failedCount == 0) return const [];
         return [
           FilledButton.tonalIcon(
-            key: const Key('explore-run-retry'),
-            onPressed: () => _retryFailed(run.id),
-            icon: const Icon(Icons.refresh, size: 18),
-            label: Text(l10n.styleExplore_retryFailed(run.failedCount)),
+            key: const Key('explore-run-another-round'),
+            onPressed: () => _start(run.id),
+            icon: const Icon(Icons.play_arrow, size: 18),
+            label: Text(l10n.styleExplore_runAnotherRound),
           ),
+          if (run.failedCount > 0) ...[
+            const SizedBox(width: 8),
+            FilledButton.tonalIcon(
+              key: const Key('explore-run-retry'),
+              onPressed: () => _retryFailed(run.id),
+              icon: const Icon(Icons.refresh, size: 18),
+              label: Text(l10n.styleExplore_retryFailed(run.failedCount)),
+            ),
+          ],
         ];
       case ExploreRunStatus.reviewing:
       case ExploreRunStatus.completed:
@@ -230,62 +270,6 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
     );
   }
 
-  /// 参数摘要条：快照字段只读 chips；draft 加出图数编辑与重新捕获按钮。
-  Widget _buildParamsSummary(
-    ThemeData theme,
-    AppLocalizations l10n,
-    ExploreRun run,
-    bool isDraft,
-  ) {
-    final snapshot = run.paramsSnapshot;
-    final chipStyle = theme.textTheme.bodySmall?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
-    return Wrap(
-      spacing: 8,
-      runSpacing: 4,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Text(snapshot.model, style: chipStyle),
-        Text('${snapshot.width}×${snapshot.height}', style: chipStyle),
-        Text('steps ${snapshot.steps}', style: chipStyle),
-        Text('scale ${snapshot.scale}', style: chipStyle),
-        Text(snapshot.sampler, style: chipStyle),
-        if (isDraft) ...[
-          const SizedBox(width: 4),
-          Text('${l10n.styleExplore_targetCountLabel}:', style: chipStyle),
-          SizedBox(
-            width: 56,
-            height: 32,
-            child: TextField(
-              key: const Key('explore-run-target-count'),
-              controller: _targetController,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: theme.textTheme.bodySmall,
-              decoration: const InputDecoration(
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 6,
-                ),
-                border: OutlineInputBorder(),
-              ),
-              onSubmitted: _submitTargetCount,
-              onTapOutside: (_) => _submitTargetCount(_targetController.text),
-            ),
-          ),
-          TextButton.icon(
-            key: const Key('explore-run-sync-params'),
-            onPressed: _syncParams,
-            icon: const Icon(Icons.sync, size: 16),
-            label: Text(l10n.styleExplore_syncParams),
-          ),
-        ],
-      ],
-    );
-  }
-
   Future<void> _submitTargetCount(String raw) async {
     final value = int.tryParse(raw.trim());
     if (value == null) return;
@@ -297,24 +281,6 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
           .updateTargetCount(widget.run.id, clamped);
     } catch (error) {
       AppLogger.e('Update target count failed', error, null, 'StyleExplore');
-    }
-  }
-
-  Future<void> _syncParams() async {
-    final l10n = context.l10n;
-    try {
-      final snapshot = ExploreParamsSnapshot.fromImageParams(
-        ref.read(generationParamsNotifierProvider),
-      );
-      await ref
-          .read(exploreRunListNotifierProvider.notifier)
-          .syncParamsSnapshot(widget.run.id, snapshot);
-      if (mounted) AppToast.success(context, l10n.styleExplore_paramsSynced);
-    } catch (error) {
-      AppLogger.e('Sync params snapshot failed', error, null, 'StyleExplore');
-      if (mounted) {
-        AppToast.error(context, l10n.styleExplore_operationFailed);
-      }
     }
   }
 

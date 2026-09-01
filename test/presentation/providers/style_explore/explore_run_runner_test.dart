@@ -15,6 +15,7 @@ import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/data/services/explore_run_image_store.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_models.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
@@ -196,13 +197,16 @@ void main() {
         );
       }
 
-      // 每张独立随机种子 -1、单张、快照参数。
+      // 每张独立随机种子 -1、单张；参数=当前主参数（lane 合并后不再用快照）。
+      final liveParams = c.read(generationParamsNotifierProvider);
       for (final params in sentParams) {
         expect(params.nSamples, 1);
         expect(params.seed, -1);
-        expect(params.model, testSnapshot().model);
-        expect(params.steps, 28);
-        expect(params.scale, 5.5);
+        expect(params.model, liveParams.model);
+        expect(params.steps, liveParams.steps);
+        expect(params.scale, liveParams.scale);
+        expect(params.width, liveParams.width);
+        expect(params.height, liveParams.height);
       }
     });
 
@@ -401,7 +405,7 @@ void main() {
 
   group('roll snapshot capture', () {
     test(
-      'captures projections and per-instance rolls from explore lanes',
+      'captures projections and per-instance rolls from main lanes',
       () async {
         const marker = '';
         final block = PromptBlock(
@@ -426,7 +430,7 @@ void main() {
 
         PillWorkspaceNotifier.rng = _CyclicRandom();
         c
-            .read(pillWorkspaceProvider(PillScopes.explorePos).notifier)
+            .read(pillWorkspaceProvider(PillScopes.main).notifier)
             .restoreDocument(
               const PillDocument(
                 text: 'base, ',
@@ -439,7 +443,7 @@ void main() {
               ),
             );
         c
-            .read(pillWorkspaceProvider(PillScopes.exploreNeg).notifier)
+            .read(pillWorkspaceProvider(PillScopes.negative).notifier)
             .restoreDocument(
               const PillDocument(text: 'neg base', instances: {}),
             );

@@ -10527,10 +10527,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_copiedToClipboard => 'Copied';
 
   @override
-  String get styleExplore_positiveHint =>
-      'Compose blocks and text to explore styles';
-
-  @override
   String get styleExplore_runSectionTitle => 'Explore runs';
 
   @override
@@ -10637,10 +10633,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_targetCountLabel => 'Images';
 
   @override
-  String get styleExplore_syncParams => 'Sync from generator';
+  String get styleExplore_runAnotherRound => 'Another round';
 
   @override
-  String get styleExplore_paramsSynced => 'Parameter snapshot updated';
+  String styleExplore_manualRunName(String time) {
+    return 'Manual capture $time';
+  }
 
   @override
   String get styleExplore_runBusy => 'Generation busy, try again later';

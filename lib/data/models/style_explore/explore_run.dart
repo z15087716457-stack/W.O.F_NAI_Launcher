@@ -19,8 +19,8 @@ enum ExploreRunStatus {
   cancelled,
 }
 
-/// 轮次阶段：基础探索 / 深度迭代（阶段 D）。
-enum ExploreRoundPhase { basic, deep }
+/// 轮次阶段：基础探索 / 深度迭代（阶段 D）/ 手动登记（探索页单张生成）。
+enum ExploreRoundPhase { basic, deep, manual }
 
 enum ExploreRoundStatus { pending, generating, generated, cancelled }
 
@@ -88,26 +88,6 @@ class ExploreParamsSnapshot with _$ExploreParamsSnapshot {
       noiseSchedule: params.noiseSchedule,
       varietyPlus: params.varietyPlus,
       decrisp: params.decrisp,
-    );
-  }
-
-  /// 把快照字段覆盖到 [base] 上（提示词/数量/种子由调用方决定）。
-  ImageParams applyTo(ImageParams base) {
-    return base.copyWith(
-      model: model,
-      width: width,
-      height: height,
-      steps: steps,
-      scale: scale,
-      sampler: sampler,
-      ucPreset: ucPreset,
-      qualityToggle: qualityToggle,
-      smea: smea,
-      smeaDyn: smeaDyn,
-      cfgRescale: cfgRescale,
-      noiseSchedule: noiseSchedule,
-      varietyPlus: varietyPlus,
-      decrisp: decrisp,
     );
   }
 }

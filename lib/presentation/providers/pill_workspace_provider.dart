@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/storage/pill_workspace_storage.dart';
+import '../../core/utils/app_logger.dart';
 import '../../core/utils/pill_document_editor.dart';
 import '../../core/utils/pill_roll_engine.dart';
 import '../../data/models/prompt_block/pill_document.dart';
@@ -55,12 +56,6 @@ abstract final class PillScopes {
 
   /// 角色框负向：char:<characterId>:neg
   static String charNeg(String characterId) => 'char:$characterId:neg';
-
-  /// 画风探索页正向 lane。
-  static const String explorePos = 'explore:pos';
-
-  /// 画风探索页负向 lane。
-  static const String exploreNeg = 'explore:neg';
 }
 
 /// 药丸编辑器「活动插入目标」：最近一次 caret/焦点变化所在的
@@ -182,7 +177,13 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   /// 写设置；切到/更新随机模式时立即重 roll 一次。
   void updateInstanceSettings(String marker, PillInstanceSettings settings) {
     final instance = state.document.instances[marker];
-    if (instance == null) return;
+    if (instance == null) {
+      AppLogger.w(
+        'updateInstanceSettings: marker not found in lane "$arg", ignored',
+        'PillWorkspace',
+      );
+      return;
+    }
     var updated = instance.copyWith(settings: settings);
     if (settings.isRandom) {
       updated = updated.copyWith(currentRoll: _rollFor(updated));

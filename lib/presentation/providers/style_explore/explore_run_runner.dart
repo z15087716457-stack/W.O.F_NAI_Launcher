@@ -3,11 +3,10 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/image/image_params.dart';
-import '../../../data/models/prompt_block/pill_document.dart';
 import '../../../data/models/style_explore/explore_run.dart';
 import '../image_generation_provider.dart';
 import '../pill_workspace_provider.dart';
-import '../prompt_block_library_provider.dart';
+import 'explore_roll_capture.dart';
 import 'explore_run_provider.dart';
 
 /// 探索生成调用签名（runner 通过注入函数解耦生成链，测试传假函数）。
@@ -61,10 +60,14 @@ class ExploreRunRunnerState {
 
 /// 探索 Run 批量候选生成协调器。
 ///
-/// 每张循环：等冷却（每拍查暂停/取消）→ roll 探索双 lane → 抓 roll 快照
-/// 写候选 → 快照参数 + 投影构建单张参数（seed=-1 逐张随机）→ 注入的生成
+/// 每张循环：等冷却（每拍查暂停/取消）→ roll 主双 lane → 抓 roll 快照
+/// 写候选 → 当前主参数 + 投影构建单张参数（seed=-1 逐张随机）→ 注入的生成
 /// 函数 → 成功复制图到 run 目录并登记 / 失败记 error。生成状态全程落盘，
 /// 应用重启后 interrupted 的 generating run 恢复为 paused 可续跑。
+///
+/// lane 合并后 roll 的就是 main/negative lane（探索与主生成同源）；
+/// roll 后用 lane 投影直接重建参数，不读 generationParams 的提示词
+/// （updatePrompt 走 microtask，读完即生成等不到下一拍——红线）。
 class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
   bool _pauseRequested = false;
   bool _cancelRequested = false;
@@ -228,8 +231,6 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       state = const ExploreRunRunnerState();
       return;
     }
-    // 非空工作变量：循环内反复重赋值，提升类型不受 join 回退影响。
-    ExploreRun run = loaded;
 
     try {
       for (final candidateId in pendingIds) {
@@ -240,18 +241,22 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
 
         state = state.copyWith(currentCandidateId: candidateId);
 
-        // roll 探索双 lane（runner 自控节奏，不经 PillRollCoordinator）。
+        // roll 主双 lane（runner 自控节奏，不经 PillRollCoordinator——
+        // 协调器会顺带推 generationParams，runner 只需要 lane 投影现值）。
         ref
-            .read(pillWorkspaceProvider(PillScopes.explorePos).notifier)
+            .read(pillWorkspaceProvider(PillScopes.main).notifier)
             .rollAllRandom();
         ref
-            .read(pillWorkspaceProvider(PillScopes.exploreNeg).notifier)
+            .read(pillWorkspaceProvider(PillScopes.negative).notifier)
             .rollAllRandom();
-        final rollSnapshot = _captureRollSnapshot();
+        final rollSnapshot = captureExploreRollSnapshot(ref);
 
-        // 快照参数覆盖精简字段 + 本张投影；单张、逐张随机种子。
-        final tempParams = run.paramsSnapshot
-            .applyTo(ref.read(generationParamsNotifierProvider))
+        // 红线：roll 后立刻读 generationParams 的 prompt 是旧值
+        // （updatePrompt 走 microtask）——用 roll 后投影直接重建；
+        // 其余字段取当前主参数现值（characters 用现值，角色 roll 变化
+        // 下一张生效，接受）；单张、逐张随机种子。
+        final tempParams = ref
+            .read(generationParamsNotifierProvider)
             .copyWith(
               prompt: rollSnapshot.positive,
               negativePrompt: rollSnapshot.negative,
@@ -260,7 +265,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
             );
 
         // 生成前抓填 roll 快照（生成中状态由 runner state 表达）。
-        run = await listNotifier.updateCandidate(
+        await listNotifier.updateCandidate(
           runId,
           candidateId,
           (candidate) => candidate.copyWith(rollSnapshot: rollSnapshot),
@@ -278,7 +283,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
                 bytes: result.imageBytes,
                 sourceFilePath: result.filePath,
               );
-          run = await listNotifier.updateGeneration(
+          await listNotifier.updateGeneration(
             runId,
             candidateId,
             ExploreCandidateGeneration(
@@ -293,7 +298,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
               ? 'cancelled'
               : (ref.read(imageGenerationNotifierProvider).errorMessage ??
                     'generation failed');
-          run = await listNotifier.updateGeneration(
+          await listNotifier.updateGeneration(
             runId,
             candidateId,
             ExploreCandidateGeneration(
@@ -389,39 +394,6 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       if (_pauseRequested || _cancelRequested) return;
       await Future<void>.delayed(const Duration(milliseconds: 250));
     }
-  }
-
-  /// 抓双 lane 投影 + 启用随机实例的 roll 明细。
-  ExploreRollSnapshot _captureRollSnapshot() {
-    final library = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
-    final positive = ref.read(pillWorkspaceProvider(PillScopes.explorePos));
-    final negative = ref.read(pillWorkspaceProvider(PillScopes.exploreNeg));
-    return ExploreRollSnapshot(
-      positive: positive.projection,
-      negative: negative.projection,
-      instanceRolls: [
-        ..._laneInstanceRolls('pos', positive.document, library),
-        ..._laneInstanceRolls('neg', negative.document, library),
-      ],
-    );
-  }
-
-  List<ExploreInstanceRoll> _laneInstanceRolls(
-    String lane,
-    PillDocument document,
-    PromptBlockLibraryState? library,
-  ) {
-    return [
-      for (final entry in document.instances.entries)
-        if (entry.value.enabled && entry.value.settings.isRandom)
-          ExploreInstanceRoll(
-            lane: lane,
-            marker: entry.key,
-            blockId: entry.value.blockId,
-            blockTitle: library?.blockById(entry.value.blockId)?.title ?? '',
-            rolledText: entry.value.currentRoll ?? '',
-          ),
-    ];
   }
 }
 

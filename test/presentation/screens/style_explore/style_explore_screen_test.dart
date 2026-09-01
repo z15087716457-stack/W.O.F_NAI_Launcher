@@ -2,19 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/storage/style_explore_recipe_storage.dart';
 import 'package:nai_launcher/core/storage/style_explore_run_storage.dart';
+import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/data/models/style_explore/style_explore_recipe.dart';
+import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
+import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_cooldown_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
+import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 import 'package:nai_launcher/presentation/providers/style_explore_provider.dart';
+import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/screens/style_explore/style_explore_screen.dart';
 
 /// 内存版 Recipe 存储。
@@ -90,6 +99,12 @@ class _MemoryRunStorage extends StyleExploreRunStorage {
 
 class _TestLocalStorageService extends LocalStorageService {
   @override
+  T? getSetting<T>(String key, {T? defaultValue}) => defaultValue;
+
+  @override
+  Future<void> setSetting<T>(String key, T value) async {}
+
+  @override
   bool getEnablePromptWeightScroll() => false;
 
   @override
@@ -160,6 +175,21 @@ class _FakeLibraryNotifier extends PromptBlockLibraryNotifier {
 class _FakeCooldownNotifier extends GenerationCooldownNotifier {
   @override
   GenerationCooldownState build() => const GenerationCooldownState();
+}
+
+class _TestCharacterPromptNotifier extends CharacterPromptNotifier {
+  @override
+  CharacterPromptConfig build() => const CharacterPromptConfig();
+}
+
+class _TestKritaBridgeNotifier extends KritaBridgeNotifier {
+  @override
+  Future<void> close() async {}
+}
+
+class _TestSubscriptionNotifier extends SubscriptionNotifier {
+  @override
+  SubscriptionState build() => const SubscriptionState.initial();
 }
 
 void main() {
@@ -234,6 +264,23 @@ void main() {
         ),
         generationCooldownProvider.overrideWith(() => _FakeCooldownNotifier()),
         exploreGenerateFnProvider.overrideWithValue((params) async => null),
+        characterPromptNotifierProvider.overrideWith(
+          () => _TestCharacterPromptNotifier(),
+        ),
+        promptTokenUsageProvider(PromptTokenCountTarget.positive).overrideWith(
+          (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+        ),
+        promptTokenUsageProvider(PromptTokenCountTarget.negative).overrideWith(
+          (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+        ),
+        kritaBridgeNotifierProvider.overrideWith(
+          (ref) => _TestKritaBridgeNotifier(),
+        ),
+        subscriptionNotifierProvider.overrideWith(
+          () => _TestSubscriptionNotifier(),
+        ),
+        estimatedCostProvider.overrideWith((ref) => 0),
+        isFreeGenerationProvider.overrideWith((ref) => true),
       ],
       child: const MaterialApp(
         locale: Locale('zh'),
@@ -256,7 +303,7 @@ void main() {
     return ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
   }
 
-  testWidgets('renders sidebar placeholders, toolbar, and both lane editors', (
+  testWidgets('renders sidebar, toolbar, and shared main-lane center panel', (
     tester,
   ) async {
     await seedRecipe('柔和光影', 'soft lighting');
@@ -279,14 +326,15 @@ void main() {
       find.byKey(const Key('style-explore-gallery-toggle')),
       findsOneWidget,
     );
-    // 中栏两个药丸编辑器。
+    // 中栏 = 主生成页左栏整套面板（数据同源 main/negative lane）。
     expect(
-      find.byKey(const Key('style-explore-positive-editor')),
+      find.byKey(const Key('generation_prompt_positive_input')),
       findsOneWidget,
     );
+    // 旧的独立探索编辑器已退役。
     expect(
-      find.byKey(const Key('style-explore-negative-editor')),
-      findsOneWidget,
+      find.byKey(const Key('style-explore-positive-editor')),
+      findsNothing,
     );
     // 右栏候选画廊（宽窗默认展开）。
     expect(
@@ -301,7 +349,7 @@ void main() {
   });
 
   testWidgets(
-    'tapping a recipe in the sidebar preview loads it into the pill lanes',
+    'tapping a recipe in the sidebar preview loads it into the main lanes',
     (tester) async {
       final recipe = await seedRecipe('载入目标', 'loaded content');
       final container = await pumpScreen(tester);
@@ -312,10 +360,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 3300));
 
       expect(
-        container
-            .read(pillWorkspaceProvider(PillScopes.explorePos))
-            .document
-            .text,
+        container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
         'loaded content',
       );
       expect(
@@ -325,29 +370,25 @@ void main() {
     },
   );
 
-  testWidgets('editing in the explore page does not touch the main lane', (
+  testWidgets('editing in the explore page writes main lane and params', (
     tester,
   ) async {
     final container = await pumpScreen(tester);
 
     final textField = find.descendant(
-      of: find.byKey(const Key('style-explore-positive-editor')),
+      of: find.byKey(const Key('generation_prompt_positive_input')),
       matching: find.byType(TextField),
     );
     await tester.enterText(textField.first, '探索页输入');
     await tester.pump();
+    // updatePrompt 走 microtask，推进一拍让参数落位。
+    await tester.pump();
 
     expect(
-      container
-          .read(pillWorkspaceProvider(PillScopes.explorePos))
-          .document
-          .text,
+      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
       '探索页输入',
     );
-    expect(
-      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
-      '',
-    );
+    expect(container.read(generationParamsNotifierProvider).prompt, '探索页输入');
   });
 
   testWidgets('preview dialog shows pill projections without titles', (
@@ -401,10 +442,7 @@ void main() {
       isNotNull,
     );
     expect(
-      container
-          .read(pillWorkspaceProvider(PillScopes.explorePos))
-          .document
-          .text,
+      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
       'managed content',
     );
   });
@@ -452,7 +490,6 @@ void main() {
     expect(container.read(exploreActiveRunIdProvider), run.id);
     expect(find.byKey(const Key('explore-run-start')), findsOneWidget);
     expect(find.byKey(const Key('explore-run-target-count')), findsOneWidget);
-    expect(find.byKey(const Key('explore-run-sync-params')), findsOneWidget);
   });
 
   testWidgets('run card shows status dot, progress and selects on tap', (
@@ -470,10 +507,7 @@ void main() {
     await tester.pump();
     expect(container.read(exploreActiveRunIdProvider), run.id);
     expect(
-      container
-          .read(pillWorkspaceProvider(PillScopes.explorePos))
-          .document
-          .text,
+      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
       '',
       reason: '点选 run 不自动覆盖正在编辑的 lane',
     );
@@ -633,6 +667,84 @@ void main() {
     expect(
       find.byKey(const Key('explore-candidate-copy-snapshot')),
       findsOneWidget,
+    );
+  });
+
+  testWidgets('generated run shows target count input and another-round', (
+    tester,
+  ) async {
+    final run = await seedRun(
+      '追加轮任务',
+      targetCount: 6,
+      status: ExploreRunStatus.generated,
+    );
+    final container = await pumpScreen(tester);
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // B2：generated 态控制条给出图数输入 + 再来一轮。
+    expect(find.byKey(const Key('explore-run-target-count')), findsOneWidget);
+    expect(find.byKey(const Key('explore-run-another-round')), findsOneWidget);
+    // draft 专属的开始按钮不出现。
+    expect(find.byKey(const Key('explore-run-start')), findsNothing);
+  });
+
+  testWidgets('recipe load over non-empty main lane asks before overwrite', (
+    tester,
+  ) async {
+    await seedRecipe('覆盖目标', 'recipe content');
+    final container = await pumpScreen(tester);
+
+    // 主 lane 写入未备份内容。
+    container
+        .read(pillWorkspaceProvider(PillScopes.main).notifier)
+        .setText('未备份内容');
+    await tester.pump();
+
+    // 点 Recipe → 覆盖确认弹窗（不直接灌 lane）。
+    await tester.tap(find.text('覆盖目标'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('放弃未保存的修改？'), findsOneWidget);
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
+      '未备份内容',
+    );
+
+    // 确认后才灌入 main lane。
+    await tester.tap(find.text('继续并丢弃'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 3300));
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
+      'recipe content',
+    );
+  });
+
+  testWidgets('recipe load overwrite confirm can be cancelled', (tester) async {
+    await seedRecipe('取消目标', 'recipe content');
+    final container = await pumpScreen(tester);
+
+    container
+        .read(pillWorkspaceProvider(PillScopes.main).notifier)
+        .setText('未备份内容');
+    await tester.pump();
+
+    await tester.tap(find.text('取消目标'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.text('取消'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
+      '未备份内容',
+    );
+    expect(
+      container.read(styleExploreSessionNotifierProvider).activeRecipeId,
+      isNull,
     );
   });
 }

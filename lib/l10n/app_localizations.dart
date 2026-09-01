@@ -18397,12 +18397,6 @@ abstract class AppLocalizations {
   /// **'Copied'**
   String get styleExplore_copiedToClipboard;
 
-  /// No description provided for @styleExplore_positiveHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Compose blocks and text to explore styles'**
-  String get styleExplore_positiveHint;
-
   /// No description provided for @styleExplore_runSectionTitle.
   ///
   /// In en, this message translates to:
@@ -18583,17 +18577,17 @@ abstract class AppLocalizations {
   /// **'Images'**
   String get styleExplore_targetCountLabel;
 
-  /// No description provided for @styleExplore_syncParams.
+  /// No description provided for @styleExplore_runAnotherRound.
   ///
   /// In en, this message translates to:
-  /// **'Sync from generator'**
-  String get styleExplore_syncParams;
+  /// **'Another round'**
+  String get styleExplore_runAnotherRound;
 
-  /// No description provided for @styleExplore_paramsSynced.
+  /// No description provided for @styleExplore_manualRunName.
   ///
   /// In en, this message translates to:
-  /// **'Parameter snapshot updated'**
-  String get styleExplore_paramsSynced;
+  /// **'Manual capture {time}'**
+  String styleExplore_manualRunName(String time);
 
   /// No description provided for @styleExplore_runBusy.
   ///

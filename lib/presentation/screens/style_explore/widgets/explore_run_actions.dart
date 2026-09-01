@@ -55,15 +55,15 @@ abstract final class ExploreRunActions {
     }
   }
 
-  /// 把 Run 的提示词快照载入探索双 lane（档案快照覆盖当前编辑内容，
-  /// 有未保存修改时先确认）。
+  /// 把 Run 的提示词快照载入主双 lane（档案快照覆盖当前编辑内容，
+  /// 有未保存修改或无备份内容时先确认）。
   static Future<void> loadSnapshot(
     BuildContext context,
     WidgetRef ref,
     ExploreRun run,
   ) async {
     final l10n = context.l10n;
-    if (ref.read(styleExploreDirtyProvider)) {
+    if (ref.read(styleExploreNeedsOverwriteConfirmProvider)) {
       final confirmed = await ThemedConfirmDialog.show(
         context: context,
         title: l10n.styleExplore_discardChangesTitle,
@@ -74,10 +74,10 @@ abstract final class ExploreRunActions {
       if (!confirmed) return;
     }
     ref
-        .read(pillWorkspaceProvider(PillScopes.explorePos).notifier)
+        .read(pillWorkspaceProvider(PillScopes.main).notifier)
         .restoreDocument(run.recipeSnapshot.positive);
     ref
-        .read(pillWorkspaceProvider(PillScopes.exploreNeg).notifier)
+        .read(pillWorkspaceProvider(PillScopes.negative).notifier)
         .restoreDocument(run.recipeSnapshot.negative);
     if (context.mounted) {
       AppToast.success(

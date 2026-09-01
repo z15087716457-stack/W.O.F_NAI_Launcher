@@ -144,14 +144,20 @@ class PillInstanceCard extends ConsumerWidget {
     WidgetRef ref,
     PillInstance instance,
   ) async {
-    final result = await PillInstanceSettingsDialog.show(
+    // B1：浮卡条目压在路由条目之上，弹窗打开期间卡的全屏 barrier 会吃掉
+    // 弹窗内点击并把卡片销毁；确定后的异步续体再用已销毁的 ref 必抛
+    // StateError（静默吞），设置永远不写。故同步发起弹窗（showDialog 立即
+    // 解析 Navigator）并捕获存活于 ProviderContainer 的 notifier，随后
+    // 显式关卡，结果异步经 notifier 应用。
+    final dialogFuture = PillInstanceSettingsDialog.show(
       context,
       instance.settings,
     );
+    final notifier = ref.read(pillWorkspaceProvider(scope).notifier);
+    onDismiss();
+    final result = await dialogFuture;
     if (result == null) return;
-    ref
-        .read(pillWorkspaceProvider(scope).notifier)
-        .updateInstanceSettings(marker, result);
+    notifier.updateInstanceSettings(marker, result);
   }
 }
 

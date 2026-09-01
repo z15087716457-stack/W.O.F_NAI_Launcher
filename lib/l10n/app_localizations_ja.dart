@@ -10299,9 +10299,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_copiedToClipboard => 'コピーしました';
 
   @override
-  String get styleExplore_positiveHint => 'ブロックとテキストを組み合わせてスタイルを探索';
-
-  @override
   String get styleExplore_runSectionTitle => '探索ラン';
 
   @override
@@ -10408,10 +10405,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_targetCountLabel => '生成枚数';
 
   @override
-  String get styleExplore_syncParams => '生成ページから同期';
+  String get styleExplore_runAnotherRound => 'もう一周';
 
   @override
-  String get styleExplore_paramsSynced => 'パラメータスナップショットを更新しました';
+  String styleExplore_manualRunName(String time) {
+    return '手動キャプチャ $time';
+  }
 
   @override
   String get styleExplore_runBusy => '生成中です。しばらくしてからお試しください';

@@ -98,7 +98,7 @@ class ExploreRunSidebarSection extends ConsumerWidget {
     );
   }
 
-  /// 新建任务：从当前探索双 lane + 主生成参数捕获快照建 draft Run。
+  /// 新建任务：从当前 main/negative lane + 主生成参数捕获快照建 draft Run。
   Future<void> _createRun(BuildContext context, WidgetRef ref) async {
     final l10n = context.l10n;
     final name = await ThemedInputDialog.show(
@@ -111,11 +111,9 @@ class ExploreRunSidebarSection extends ConsumerWidget {
     );
     if (name == null || name.trim().isEmpty) return;
 
-    final positive = ref
-        .read(pillWorkspaceProvider(PillScopes.explorePos))
-        .document;
+    final positive = ref.read(pillWorkspaceProvider(PillScopes.main)).document;
     final negative = ref
-        .read(pillWorkspaceProvider(PillScopes.exploreNeg))
+        .read(pillWorkspaceProvider(PillScopes.negative))
         .document;
     final params = ref.read(generationParamsNotifierProvider);
 

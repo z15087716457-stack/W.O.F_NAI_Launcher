@@ -494,7 +494,11 @@ class ExploreCandidateDetailDialog extends StatelessWidget {
     return Dialog(
       key: const Key('explore-candidate-detail'),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 860, maxHeight: 640),
+        // 详情弹窗给足图区：窗口随屏取 85%×88%（E2 定稿，网格排版不动）。
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.sizeOf(context).width * 0.85,
+          maxHeight: MediaQuery.sizeOf(context).height * 0.88,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

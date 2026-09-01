@@ -120,33 +120,76 @@ void main() {
     expect(await Directory(dir).exists(), isFalse);
   });
 
-  test('targetCount and params snapshot only editable in draft', () async {
-    final c = container();
-    final notifier = c.read(exploreRunListNotifierProvider.notifier);
-    final created = await createRun(c);
+  test(
+    'targetCount editable in draft and generated, rejected elsewhere',
+    () async {
+      final c = container();
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final created = await createRun(c);
 
-    final updated = await notifier.updateTargetCount(created.id, 25);
-    expect(updated.targetCount, 25);
+      final updated = await notifier.updateTargetCount(created.id, 25);
+      expect(updated.targetCount, 25);
 
-    final synced = await notifier.syncParamsSnapshot(
-      created.id,
-      snapshot().copyWith(steps: 23, model: 'nai-diffusion-5-full'),
-    );
-    expect(synced.paramsSnapshot.steps, 23);
+      // generated 态仍可编辑（作用于追加的新一轮）。
+      await notifier.overwrite(
+        updated.copyWith(status: ExploreRunStatus.generated),
+      );
+      final again = await notifier.updateTargetCount(created.id, 8);
+      expect(again.targetCount, 8);
 
-    // 非草稿态拒绝修改。
-    await notifier.overwrite(
-      synced.copyWith(status: ExploreRunStatus.generated),
-    );
-    expect(
-      () => notifier.updateTargetCount(created.id, 50),
-      throwsA(isA<StateError>()),
-    );
-    expect(
-      () => notifier.syncParamsSnapshot(created.id, snapshot()),
-      throwsA(isA<StateError>()),
-    );
-  });
+      // 其他状态拒绝修改。
+      await notifier.overwrite(again.copyWith(status: ExploreRunStatus.paused));
+      expect(
+        () => notifier.updateTargetCount(created.id, 50),
+        throwsA(isA<StateError>()),
+      );
+    },
+  );
+
+  test(
+    'addManualCandidates reuses one manual round and links lineage',
+    () async {
+      final c = container();
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final created = await createRun(c);
+
+      const snapshot = ExploreRollSnapshot(positive: 'pos', negative: 'neg');
+      final first = await notifier.addManualCandidates(
+        created.id,
+        count: 2,
+        firstRollSnapshot: snapshot,
+      );
+      expect(first, hasLength(2));
+      // 首张带 roll 快照，其余为 null；谱系 operation=manual。
+      expect(first.first.rollSnapshot, snapshot);
+      expect(first[1].rollSnapshot, isNull);
+      for (final candidate in first) {
+        expect(candidate.lineage.operation, ExploreLineageOperation.manual);
+        expect(
+          candidate.generation.status,
+          ExploreCandidateGenerationStatus.pending,
+        );
+      }
+
+      var run = (await c.read(
+        exploreRunListNotifierProvider.future,
+      )).runById(created.id)!;
+      expect(run.rounds, hasLength(1));
+      expect(run.rounds.single.phase, ExploreRoundPhase.manual);
+      expect(run.rounds.single.status, ExploreRoundStatus.generated);
+      expect(run.rounds.single.candidateIds, hasLength(2));
+      expect(run.candidates, hasLength(2));
+
+      // 再次追加：复用同一手动轮，不新建轮次。
+      final second = await notifier.addManualCandidates(created.id, count: 1);
+      run = (await c.read(
+        exploreRunListNotifierProvider.future,
+      )).runById(created.id)!;
+      expect(run.rounds, hasLength(1));
+      expect(run.rounds.single.candidateIds, hasLength(3));
+      expect(second.single.roundId, run.rounds.single.id);
+    },
+  );
 
   test('updateReview writes heart and preliminary label with clear', () async {
     final c = container();

@@ -277,40 +277,19 @@ void main() {
       expect(filled.candidateById('nope'), isNull);
     });
 
-    test('params snapshot applyTo overrides only snapshot fields', () {
-      const snapshot = ExploreParamsSnapshot(
-        model: 'nai-diffusion-5-full',
-        width: 1024,
-        height: 1024,
+    test('params snapshot captures archive fields from image params', () {
+      const base = ImageParams(
+        prompt: 'keep me',
+        nSamples: 4,
         steps: 23,
-        scale: 6.5,
-        sampler: 'k_dpmpp_2s_ancestral',
-        seed: 777,
-        ucPreset: 2,
-        qualityToggle: false,
-        smea: true,
-        smeaDyn: false,
-        cfgRescale: 0.2,
-        noiseSchedule: 'exponential',
-        varietyPlus: true,
         decrisp: true,
       );
-      const base = ImageParams(prompt: 'keep me', nSamples: 4);
-
-      final applied = snapshot.applyTo(base);
-
-      expect(applied.model, 'nai-diffusion-5-full');
-      expect(applied.width, 1024);
-      expect(applied.noiseSchedule, 'exponential');
-      expect(applied.decrisp, isTrue);
-      // 非快照字段保持 base 原样。
-      expect(applied.prompt, 'keep me');
-      expect(applied.nSamples, 4);
-      expect(applied.seed, -1);
 
       final captured = ExploreParamsSnapshot.fromImageParams(base);
       expect(captured.model, base.model);
       expect(captured.seed, -1);
+      expect(captured.steps, 23);
+      expect(captured.decrisp, isTrue);
     });
   });
 }

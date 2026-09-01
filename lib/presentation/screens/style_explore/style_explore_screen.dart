@@ -1,24 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/constants/api_constants.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/style_explore/style_explore_recipe.dart';
-import '../../providers/generation/generation_params_notifier.dart';
-import '../../providers/generation/generation_settings_notifiers.dart';
+import '../../providers/image_generation_provider.dart';
 import '../../providers/layout_state_provider.dart';
 import '../../providers/pill_workspace_provider.dart';
+import '../../providers/style_explore/explore_manual_capture.dart';
 import '../../providers/style_explore/explore_run_provider.dart';
 import '../../providers/style_explore_provider.dart';
+import '../../widgets/character/inline_character_row.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
 import '../../widgets/common/themed_input_dialog.dart';
-import '../../widgets/autocomplete/autocomplete_config.dart';
 import '../../widgets/prompt/block_library_panel_toggle.dart';
-import '../../widgets/prompt/pills/prompt_pill_editor.dart';
-import '../../widgets/prompt/unified/unified_prompt_config.dart';
 import '../generation/widgets/block_library_panel_slot.dart';
+import '../generation/widgets/generation_controls/generation_controls.dart';
+import '../generation/widgets/parameter_panel.dart';
+import '../generation/widgets/prompt_input.dart';
 import '../generation/widgets/resize_handle.dart';
 import 'widgets/explore_candidate_gallery.dart';
 import 'widgets/explore_run_control_bar.dart';
@@ -26,12 +28,13 @@ import 'widgets/explore_run_sidebar.dart';
 import 'widgets/style_explore_prompt_preview_dialog.dart';
 import 'widgets/style_explore_recipe_list_panel.dart';
 
-/// 画风探索页（三栏骨架：探索任务/Recipe | 提示词编辑 | 候选画廊）。
+/// 画风探索页（三栏：Run/Recipe | 主生成左栏整套面板 | 候选画廊）。
 ///
-/// 工作区为药丸文档（`pillWorkspaceProvider(PillScopes.explorePos/exploreNeg)`
-/// 两条 lane），Recipe 保存/载入的是完整 PillDocument 快照；候选画廊与
-/// 探索任务（Run）本阶段为空态占位，后续阶段接真数据。本页不接生成参数链
-/// 与请求链。
+/// 中栏不再是独立编辑区，而是主生成页左栏整套面板（尺寸/种子/正·UC
+/// 提示词/角色/生成按钮全套）且**数据同源**：提示词=main/negative lane、
+/// 参数=generationParamsNotifierProvider，探索页与主生成页实时同一份。
+/// Recipe=主提示词模板库（载入/保存的都是主双 lane 的 PillDocument 快照）。
+/// 探索页点生成：主链 generate() + 完成登记为活跃 run 的手动候选。
 class StyleExploreScreen extends ConsumerStatefulWidget {
   const StyleExploreScreen({super.key});
 
@@ -62,7 +65,6 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final activeRecipe = ref.watch(styleExploreActiveRecipeProvider);
-    final activeRun = ref.watch(exploreActiveRunProvider);
     final isDirty = ref.watch(styleExploreDirtyProvider);
 
     return Scaffold(
@@ -75,7 +77,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (showSidebar) _buildSidebar(theme),
-              const BlockLibraryPanelSlot(fallbackScope: PillScopes.explorePos),
+              const BlockLibraryPanelSlot(),
               Expanded(
                 child: Column(
                   children: [
@@ -87,9 +89,8 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                       maxWidth,
                       galleryVisible,
                     ),
-                    if (activeRun != null) ExploreRunControlBar(run: activeRun),
                     if (!showSidebar) _buildCompactRecipeSelector(theme),
-                    Expanded(child: _buildEditorArea(context, theme)),
+                    Expanded(child: _buildCenterPanel(theme)),
                   ],
                 ),
               ),
@@ -457,66 +458,66 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
     );
   }
 
-  Widget _buildEditorArea(BuildContext context, ThemeData theme) {
-    final l10n = context.l10n;
-    final enableAutocomplete = ref.watch(autocompleteSettingsProvider);
-    final enableAutoFormat = ref.watch(autoFormatPromptSettingsProvider);
-    final enableHighlight = ref.watch(highlightEmphasisSettingsProvider);
-    final enableSdSyntaxAutoConvert = ref.watch(
-      sdSyntaxAutoConvertSettingsProvider,
-    );
-    final numericEmphasisEnabled = ImageModels.isV4Model(
-      ref.watch(generationParamsNotifierProvider.select((p) => p.model)),
-    );
-    final config = UnifiedPromptConfig(
-      enableSyntaxHighlight: enableHighlight,
-      numericEmphasisEnabled: numericEmphasisEnabled,
-      enableAutocomplete: enableAutocomplete,
-      enableAutoFormat: enableAutoFormat,
-      enableSdSyntaxAutoConvert: enableSdSyntaxAutoConvert,
-      enableComfyuiImport: false,
-      autocompleteConfig: const AutocompleteConfig(
-        showTranslation: true,
-        autoInsertComma: true,
-      ),
-    );
+  // ==================== 中栏：主生成页左栏整套面板（数据同源） ====================
 
-    return ListView(
-      padding: const EdgeInsets.all(12),
+  /// 提示词=main/negative lane、参数=generationParamsNotifierProvider，
+  /// 与主生成页实时同一份；run 控制条嵌中栏顶部；生成按钮走主链
+  /// generate()（探索页入口额外布防手动候选登记）。
+  Widget _buildCenterPanel(ThemeData theme) {
+    final activeRun = ref.watch(exploreActiveRunProvider);
+    return Column(
       children: [
-        _buildLaneLabel(theme, l10n.styleExplore_positive),
-        const SizedBox(height: 6),
-        PromptPillEditor(
-          key: const Key('style-explore-positive-editor'),
-          pillScope: PillScopes.explorePos,
-          config: config.copyWith(hintText: l10n.styleExplore_positiveHint),
-          minLines: 3,
-          autoGrow: true,
-          sessionId: 'style_explore_positive',
+        if (activeRun != null) ExploreRunControlBar(run: activeRun),
+        SizedBox(
+          height: 280,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+            child: const PromptInputWidget(showMaximizeButton: false),
+          ),
         ),
-        const SizedBox(height: 16),
-        _buildLaneLabel(theme, l10n.styleExplore_negative),
-        const SizedBox(height: 6),
-        PromptPillEditor(
-          key: const Key('style-explore-negative-editor'),
-          pillScope: PillScopes.exploreNeg,
-          config: config.copyWith(hintText: l10n.prompt_unwantedContent),
-          minLines: 2,
-          autoGrow: true,
-          sessionId: 'style_explore_negative',
+        const InlineCharacterRow(),
+        const Expanded(child: ParameterPanel()),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.5),
+            border: Border(
+              top: BorderSide(color: theme.dividerColor, width: 1),
+            ),
+          ),
+          child: GenerationControls(
+            onGenerateInvoked: _handleExploreGenerateInvoked,
+          ),
         ),
-        const SizedBox(height: 24),
       ],
     );
   }
 
-  Widget _buildLaneLabel(ThemeData theme, String text) {
-    return Text(
-      text,
-      style: theme.textTheme.titleSmall?.copyWith(
-        color: theme.colorScheme.onSurfaceVariant,
-      ),
+  /// 探索页生成按钮钩子（generate() 同步启动后触发，此刻 roll 尚未发生）：
+  /// 布防手动候选登记——点击瞬间抓 roll 快照+图 id 基线，完成后登记为
+  /// 活跃 run 的手动候选。冷却拦截未真正启动（isGenerating=false）时跳过，
+  /// 避免把下一张主页面生成的图误登记。
+  void _handleExploreGenerateInvoked() {
+    if (!ref.read(imageGenerationNotifierProvider).isGenerating) return;
+    final params = ref.read(generationParamsNotifierProvider);
+    final int expectedCount =
+        params.nSamples * ref.read(imagesPerRequestProvider);
+    unawaited(
+      ref
+          .read(exploreManualCaptureProvider.notifier)
+          .arm(
+            autoRunName: context.l10n.styleExplore_manualRunName(
+              _autoRunTimestamp(),
+            ),
+            expectedCount: expectedCount,
+          ),
     );
+  }
+
+  static String _autoRunTimestamp() {
+    final now = DateTime.now();
+    String two(int value) => value.toString().padLeft(2, '0');
+    return '${two(now.month)}-${two(now.day)} ${two(now.hour)}:${two(now.minute)}';
   }
 
   // ==================== 右栏：候选画廊（阶段 A 空态占位） ====================
@@ -611,7 +612,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
   // ==================== Recipe 会话动作 ====================
 
   Future<bool> _confirmDiscardChanges() async {
-    if (!ref.read(styleExploreDirtyProvider)) return true;
+    if (!ref.read(styleExploreNeedsOverwriteConfirmProvider)) return true;
     final l10n = context.l10n;
     return ThemedConfirmDialog.show(
       context: context,
@@ -768,10 +769,10 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
 
   void _showPreview() {
     final positive = ref
-        .read(pillWorkspaceProvider(PillScopes.explorePos))
+        .read(pillWorkspaceProvider(PillScopes.main))
         .projection;
     final negative = ref
-        .read(pillWorkspaceProvider(PillScopes.exploreNeg))
+        .read(pillWorkspaceProvider(PillScopes.negative))
         .projection;
     StyleExplorePromptPreviewDialog.show(
       context,

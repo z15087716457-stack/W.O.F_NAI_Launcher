@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/storage/style_explore_run_storage.dart';
 import '../../../data/models/style_explore/explore_run.dart';
@@ -83,27 +84,77 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     await ref.read(exploreRunImageStoreProvider).deleteRunDir(id);
   }
 
-  /// 出图数编辑（仅草稿态）。
+  /// 出图数编辑（草稿态 + generated 追加轮前可编辑）。
   Future<ExploreRun> updateTargetCount(String id, int targetCount) {
     return _mutateRun(id, (run) {
-      if (run.status != ExploreRunStatus.draft) {
-        throw StateError('Only draft runs can edit targetCount: $id');
+      const editable = {ExploreRunStatus.draft, ExploreRunStatus.generated};
+      if (!editable.contains(run.status)) {
+        throw StateError('Only draft/generated runs can edit targetCount: $id');
       }
       return run.copyWith(targetCount: targetCount);
     });
   }
 
-  /// 重新捕获参数快照（仅草稿态；快照内容来自主生成页当前参数）。
-  Future<ExploreRun> syncParamsSnapshot(
-    String id,
-    ExploreParamsSnapshot snapshot,
-  ) {
-    return _mutateRun(id, (run) {
-      if (run.status != ExploreRunStatus.draft) {
-        throw StateError('Only draft runs can sync params snapshot: $id');
+  /// 追加手动候选（探索页生成按钮登记）：复用最近的手动轮（无则新建，
+  /// 状态直接 generated 不经 runner），一次落盘追加 [count] 个 pending
+  /// 候选（lineage.operation=manual），首张带 [firstRollSnapshot]。
+  Future<List<ExploreCandidate>> addManualCandidates(
+    String runId, {
+    required int count,
+    ExploreRollSnapshot? firstRollSnapshot,
+  }) async {
+    final repository = ref.read(styleExploreRunRepositoryProvider);
+    final run = await repository.getRun(runId);
+    if (run == null) {
+      throw StateError('Style explore run does not exist: $runId');
+    }
+
+    ExploreRound? manualRound;
+    for (final round in run.rounds.reversed) {
+      if (round.phase == ExploreRoundPhase.manual) {
+        manualRound = round;
+        break;
       }
-      return run.copyWith(paramsSnapshot: snapshot);
-    });
+    }
+    final rounds = [...run.rounds];
+    if (manualRound == null) {
+      manualRound = ExploreRound(
+        id: const Uuid().v4(),
+        number: rounds.length + 1,
+        phase: ExploreRoundPhase.manual,
+        status: ExploreRoundStatus.generated,
+        createdAt: DateTime.now(),
+        targetCount: 0,
+      );
+      rounds.add(manualRound);
+    }
+    final roundId = manualRound.id;
+
+    final candidates = [
+      for (var i = 0; i < count; i++)
+        ExploreCandidate(
+          id: const Uuid().v4(),
+          roundId: roundId,
+          rollSnapshot: i == 0 ? firstRollSnapshot : null,
+          lineage: const ExploreLineage(
+            operation: ExploreLineageOperation.manual,
+          ),
+        ),
+    ];
+    final roundIndex = rounds.indexWhere((round) => round.id == roundId);
+    rounds[roundIndex] = rounds[roundIndex].copyWith(
+      candidateIds: [
+        ...rounds[roundIndex].candidateIds,
+        for (final candidate in candidates) candidate.id,
+      ],
+    );
+    await overwrite(
+      run.copyWith(
+        rounds: rounds,
+        candidates: [...run.candidates, ...candidates],
+      ),
+    );
+    return candidates;
   }
 
   /// 候选通用更新：读-改-写单个候选后落盘。

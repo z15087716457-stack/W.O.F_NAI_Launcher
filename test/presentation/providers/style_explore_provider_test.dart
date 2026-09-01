@@ -55,17 +55,17 @@ void main() {
   PillDocument doc(String text) =>
       PillDocument(text: text, instances: const {});
 
-  PillWorkspaceNotifier explorePos(ProviderContainer c) =>
-      c.read(pillWorkspaceProvider(PillScopes.explorePos).notifier);
+  PillWorkspaceNotifier mainLane(ProviderContainer c) =>
+      c.read(pillWorkspaceProvider(PillScopes.main).notifier);
 
-  PillWorkspaceNotifier exploreNeg(ProviderContainer c) =>
-      c.read(pillWorkspaceProvider(PillScopes.exploreNeg).notifier);
+  PillWorkspaceNotifier negativeLane(ProviderContainer c) =>
+      c.read(pillWorkspaceProvider(PillScopes.negative).notifier);
 
-  PillDocument explorePosDocument(ProviderContainer c) =>
-      c.read(pillWorkspaceProvider(PillScopes.explorePos)).document;
+  PillDocument mainLaneDocument(ProviderContainer c) =>
+      c.read(pillWorkspaceProvider(PillScopes.main)).document;
 
-  PillDocument exploreNegDocument(ProviderContainer c) =>
-      c.read(pillWorkspaceProvider(PillScopes.exploreNeg)).document;
+  PillDocument negativeLaneDocument(ProviderContainer c) =>
+      c.read(pillWorkspaceProvider(PillScopes.negative)).document;
 
   group('recipe list notifier', () {
     test('create / rename / duplicate / delete keep list consistent', () async {
@@ -104,7 +104,7 @@ void main() {
         final c = container();
         final session = c.read(styleExploreSessionNotifierProvider.notifier);
 
-        explorePos(c).setText('start');
+        mainLane(c).setText('start');
         expect(c.read(styleExploreDirtyProvider), isFalse);
 
         final created = await session.saveAsNew('配方A');
@@ -115,7 +115,7 @@ void main() {
         expect(c.read(styleExploreActiveRecipeProvider)?.name, '配方A');
         expect(c.read(styleExploreDirtyProvider), isFalse);
 
-        explorePos(c).setText('start, edited');
+        mainLane(c).setText('start, edited');
         expect(c.read(styleExploreDirtyProvider), isTrue);
 
         final saved = await session.saveActive();
@@ -139,16 +139,16 @@ void main() {
         negativeDocument: doc('loaded negative'),
       );
 
-      explorePos(c).setText('本地未保存');
+      mainLane(c).setText('本地未保存');
       final ok = await session.loadRecipe(created.id);
       expect(ok, isTrue);
-      expect(explorePosDocument(c), created.positiveDocument);
-      expect(exploreNegDocument(c).text, 'loaded negative');
+      expect(mainLaneDocument(c), created.positiveDocument);
+      expect(negativeLaneDocument(c).text, 'loaded negative');
       expect(c.read(styleExploreDirtyProvider), isFalse);
 
       final missing = await session.loadRecipe('no-such-id');
       expect(missing, isFalse);
-      expect(explorePosDocument(c), created.positiveDocument);
+      expect(mainLaneDocument(c), created.positiveDocument);
     });
 
     test('handleRecipeDeleted unlinks only the active recipe', () async {
@@ -176,45 +176,39 @@ void main() {
         isNull,
       );
       // 工作区内容保留，用户可另存。
-      expect(explorePosDocument(c).text, isNot(''));
+      expect(mainLaneDocument(c).text, isNot(''));
     });
   });
 
   group('workspace isolation and persistence', () {
-    test('main and explore lanes are fully isolated', () {
+    test('main and negative lanes are fully isolated', () {
       final c = container();
       final main = c.read(pillWorkspaceProvider(PillScopes.main).notifier);
-      final explore = explorePos(c);
+      final negative = negativeLane(c);
 
-      main.setText('生成页内容');
-      explore.setText('探索页内容');
+      main.setText('正向内容');
+      negative.setText('负向内容');
 
-      expect(
-        c.read(pillWorkspaceProvider(PillScopes.main)).document.text,
-        '生成页内容',
-      );
-      expect(explorePosDocument(c).text, '探索页内容');
+      expect(mainLaneDocument(c).text, '正向内容');
+      expect(negativeLaneDocument(c).text, '负向内容');
     });
 
     test(
-      'explore lane state survives provider rebuild via Hive snapshot',
+      'main lane state survives provider rebuild via Hive snapshot',
       () async {
         final c = container();
-        explorePos(c).setText('持久化 A');
-        exploreNeg(c).setText('持久化负向');
+        mainLane(c).setText('持久化 A');
+        negativeLane(c).setText('持久化负向');
         // 手动冲刷 fire-and-forget 的持久化。
         final storage = c.read(pillWorkspaceStorageProvider);
-        await storage.persist(PillScopes.explorePos, explorePosDocument(c));
-        await storage.persist(PillScopes.exploreNeg, exploreNegDocument(c));
+        await storage.persist(PillScopes.main, mainLaneDocument(c));
+        await storage.persist(PillScopes.negative, negativeLaneDocument(c));
 
         final rebuilt = container();
-        expect(explorePosDocument(rebuilt).text, '持久化 A');
-        expect(exploreNegDocument(rebuilt).text, '持久化负向');
-        // 主 lane 不受探索 lane 影响。
-        expect(
-          rebuilt.read(pillWorkspaceProvider(PillScopes.main)).document.text,
-          '',
-        );
+        expect(mainLaneDocument(rebuilt).text, '持久化 A');
+        expect(negativeLaneDocument(rebuilt).text, '持久化负向');
+        // 无关 lane 不受影响。
+        expect(rebuilt.read(pillWorkspaceProvider('other')).document.text, '');
       },
     );
   });
@@ -228,11 +222,11 @@ void main() {
         instances: {marker: PillInstance(blockId: 'block-1', enabled: false)},
       );
 
-      explorePos(c).restoreDocument(snapshot);
+      mainLane(c).restoreDocument(snapshot);
 
-      expect(explorePosDocument(c), snapshot);
+      expect(mainLaneDocument(c), snapshot);
       // 固定模式实例不触发 roll，enabled 原样保留。
-      final restored = explorePosDocument(c).instances[marker]!;
+      final restored = mainLaneDocument(c).instances[marker]!;
       expect(restored.enabled, isFalse);
       expect(restored.currentRoll, isNull);
     });
@@ -273,12 +267,12 @@ void main() {
           },
         );
 
-        explorePos(c).restoreDocument(snapshot);
+        mainLane(c).restoreDocument(snapshot);
 
-        final restored = explorePosDocument(c).instances[marker]!;
+        final restored = mainLaneDocument(c).instances[marker]!;
         expect(restored.currentRoll, isNotNull);
         expect(
-          c.read(pillWorkspaceProvider(PillScopes.explorePos)).projection,
+          c.read(pillWorkspaceProvider(PillScopes.main)).projection,
           restored.currentRoll,
         );
       },

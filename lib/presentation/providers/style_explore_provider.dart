@@ -115,24 +115,25 @@ class StyleExploreSessionState with _$StyleExploreSessionState {
       _StyleExploreSessionState;
 }
 
-/// 探索会话：药丸工作区（探索专用正负 lane）与 Recipe 快照之间的
+/// 探索会话：药丸工作区（main/negative lane）与 Recipe 快照之间的
 /// 载入/保存协调。
 ///
-/// 载入把 Recipe 文档快照恢复进探索 lane（[PillWorkspaceNotifier.restoreDocument]，
-/// 与 lane 启动恢复同一物化语义）；保存把 lane 当前文档写回 Recipe。
-/// 两者都只搬运不可变快照，不触碰公共块库。
+/// Recipe = 主提示词模板库：载入把 Recipe 文档快照灌进主双 lane
+/// （[PillWorkspaceNotifier.restoreDocument]，与 lane 启动恢复同一物化
+/// 语义）；保存把主 lane 当前文档写回 Recipe。两者都只搬运不可变快照，
+/// 不触碰公共块库。旧 Recipe 数据（PillDocument 快照）天然兼容。
 class StyleExploreSessionNotifier extends Notifier<StyleExploreSessionState> {
   @override
   StyleExploreSessionState build() =>
       const StyleExploreSessionState(activeRecipeId: null);
 
   PillWorkspaceNotifier get _positiveLane =>
-      ref.read(pillWorkspaceProvider(PillScopes.explorePos).notifier);
+      ref.read(pillWorkspaceProvider(PillScopes.main).notifier);
 
   PillWorkspaceNotifier get _negativeLane =>
-      ref.read(pillWorkspaceProvider(PillScopes.exploreNeg).notifier);
+      ref.read(pillWorkspaceProvider(PillScopes.negative).notifier);
 
-  /// 把 Recipe 快照载入探索工作区。
+  /// 把 Recipe 快照载入主双 lane。
   ///
   /// Recipe 不存在时返回 false 且不改动工作区。
   Future<bool> loadRecipe(String recipeId) async {
@@ -154,7 +155,7 @@ class StyleExploreSessionNotifier extends Notifier<StyleExploreSessionState> {
     state = const StyleExploreSessionState(activeRecipeId: null);
   }
 
-  /// 把工作区当前文档快照保存回关联的 Recipe。
+  /// 把主双 lane 当前文档快照保存回关联的 Recipe。
   ///
   /// 返回更新后的 Recipe；无关联或 Recipe 已被删除时返回 null。
   Future<StyleExploreRecipe?> saveActive() async {
@@ -170,26 +171,26 @@ class StyleExploreSessionNotifier extends Notifier<StyleExploreSessionState> {
         .overwrite(
           recipe.copyWith(
             positiveDocument: ref
-                .read(pillWorkspaceProvider(PillScopes.explorePos))
+                .read(pillWorkspaceProvider(PillScopes.main))
                 .document,
             negativeDocument: ref
-                .read(pillWorkspaceProvider(PillScopes.exploreNeg))
+                .read(pillWorkspaceProvider(PillScopes.negative))
                 .document,
           ),
         );
   }
 
-  /// 把工作区当前文档另存为新 Recipe 并切换关联。
+  /// 把主双 lane 当前文档另存为新 Recipe 并切换关联。
   Future<StyleExploreRecipe> saveAsNew(String name) async {
     final created = await ref
         .read(styleExploreRecipeListNotifierProvider.notifier)
         .create(
           name: name,
           positiveDocument: ref
-              .read(pillWorkspaceProvider(PillScopes.explorePos))
+              .read(pillWorkspaceProvider(PillScopes.main))
               .document,
           negativeDocument: ref
-              .read(pillWorkspaceProvider(PillScopes.exploreNeg))
+              .read(pillWorkspaceProvider(PillScopes.negative))
               .document,
         );
     state = StyleExploreSessionState(activeRecipeId: created.id);
@@ -224,10 +225,28 @@ final styleExploreDirtyProvider = Provider<bool>((ref) {
       ?.recipeById(activeId);
   if (recipe == null) return false;
 
-  final positive = ref.watch(pillWorkspaceProvider(PillScopes.explorePos));
-  final negative = ref.watch(pillWorkspaceProvider(PillScopes.exploreNeg));
+  final positive = ref.watch(pillWorkspaceProvider(PillScopes.main));
+  final negative = ref.watch(pillWorkspaceProvider(PillScopes.negative));
   return recipe.positiveDocument != positive.document ||
       recipe.negativeDocument != negative.document;
+});
+
+/// 载入 Recipe/快照前是否需要覆盖确认（Recipe 已升级为主提示词模板库，
+/// 载入即覆盖主双 lane）：
+/// - 有未保存修改（相对关联 Recipe）→ 确认；
+/// - 无关联 Recipe 且主/负 lane 任一非空（内容未备份，覆盖即丢）→ 确认。
+final styleExploreNeedsOverwriteConfirmProvider = Provider<bool>((ref) {
+  if (ref.watch(styleExploreDirtyProvider)) return true;
+  final activeId = ref.watch(
+    styleExploreSessionNotifierProvider.select((s) => s.activeRecipeId),
+  );
+  if (activeId != null) return false;
+  final positive = ref.watch(pillWorkspaceProvider(PillScopes.main));
+  final negative = ref.watch(pillWorkspaceProvider(PillScopes.negative));
+  return positive.document.text.isNotEmpty ||
+      positive.document.instances.isNotEmpty ||
+      negative.document.text.isNotEmpty ||
+      negative.document.instances.isNotEmpty;
 });
 
 /// 当前关联的 Recipe（可能为 null：未关联或列表未就绪）。

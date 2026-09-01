@@ -22,7 +22,16 @@ class GenerationControls extends ConsumerStatefulWidget {
   /// 强制窄排布、追加批次大小按钮、压低生成按钮高度。
   final bool compact;
 
-  const GenerationControls({super.key, this.compact = false});
+  /// generate() 同步启动后立即触发的钩子（此刻 isGenerating 已置位、
+  /// 随机块实例尚未重 roll）。探索页借此布防手动候选登记；
+  /// 冷却拦截导致未真正启动时 isGenerating 为 false，钩子自行判断跳过。
+  final void Function()? onGenerateInvoked;
+
+  const GenerationControls({
+    super.key,
+    this.compact = false,
+    this.onGenerateInvoked,
+  });
 
   @override
   ConsumerState<GenerationControls> createState() => _GenerationControlsState();
@@ -247,5 +256,8 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
 
     // 生成（抽卡模式逻辑在 generate 方法内部处理）
     ref.read(imageGenerationNotifierProvider.notifier).generate(params);
+    // 探索页手动候选登记钩子：同步启动后立刻触发，此刻 roll 尚未发生，
+    // 抓到的快照=本张实际发送的投影（冷却拦截时 isGenerating=false，跳过）。
+    widget.onGenerateInvoked?.call();
   }
 }
