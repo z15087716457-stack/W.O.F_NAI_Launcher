@@ -96,6 +96,29 @@ class GeneratedImage {
 /// 生成状态
 enum GenerationStatus { idle, generating, completed, error, cancelled }
 
+/// 探索任务专用单张生成结果（`ImageGenerationNotifier.generateForExplore`）。
+///
+/// 与主生成链的区别在于能把单张结果带回给调用方（主 `generate()` 返回
+/// void）。`filePath` 依赖自动保存开关；`imageBytes` 始终携带，
+/// 供探索 run 目录自包含副本直写兜底。
+class ExploreGenerationResult {
+  const ExploreGenerationResult({
+    required this.imageBytes,
+    required this.seed,
+    required this.elapsedMs,
+    required this.imageWidth,
+    required this.imageHeight,
+    this.filePath,
+  });
+
+  final Uint8List imageBytes;
+  final String? filePath;
+  final int seed;
+  final int elapsedMs;
+  final int imageWidth;
+  final int imageHeight;
+}
+
 /// 单个流式预览槽位。
 class StreamPreviewSlot {
   const StreamPreviewSlot({

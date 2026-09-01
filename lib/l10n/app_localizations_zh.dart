@@ -10165,9 +10165,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_newRun => '新建任务';
 
   @override
-  String get styleExplore_runNextStage => '探索任务将在下一阶段开放';
-
-  @override
   String get styleExplore_manageRecipes => '管理';
 
   @override
@@ -10179,7 +10176,160 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_galleryTitle => '候选画廊';
 
   @override
-  String get styleExplore_galleryEmptyHint => '候选画廊将在下一阶段开放';
+  String get styleExplore_galleryEmptyHint => '暂无候选。新建或选择一个探索任务，开始批量生成。';
+
+  @override
+  String get styleExplore_runNameLabel => '任务名称';
+
+  @override
+  String get styleExplore_runNameHint => '例如：柔光画风 ×30';
+
+  @override
+  String styleExplore_runCreated(String name) {
+    return '已创建任务「$name」';
+  }
+
+  @override
+  String styleExplore_runDeleted(String name) {
+    return '已删除任务「$name」';
+  }
+
+  @override
+  String styleExplore_runProgress(int done, int total) {
+    return '$done/$total';
+  }
+
+  @override
+  String styleExplore_runGeneratingProgress(int current, int total) {
+    return '第 $current/$total 张';
+  }
+
+  @override
+  String get styleExplore_runStatusDraft => '草稿';
+
+  @override
+  String get styleExplore_runStatusGenerating => '生成中';
+
+  @override
+  String get styleExplore_runStatusPaused => '已暂停';
+
+  @override
+  String get styleExplore_runStatusGenerated => '已生成';
+
+  @override
+  String get styleExplore_runStatusReviewing => '筛选中';
+
+  @override
+  String get styleExplore_runStatusCompleted => '已完成';
+
+  @override
+  String get styleExplore_runStatusCancelled => '已取消';
+
+  @override
+  String get styleExplore_archivedTag => '已归档';
+
+  @override
+  String get styleExplore_archive => '归档';
+
+  @override
+  String get styleExplore_unarchive => '取消归档';
+
+  @override
+  String get styleExplore_loadSnapshot => '载入快照到编辑器';
+
+  @override
+  String styleExplore_snapshotLoaded(String name) {
+    return '已载入「$name」的快照';
+  }
+
+  @override
+  String get styleExplore_startRun => '开始';
+
+  @override
+  String get styleExplore_pauseRun => '暂停';
+
+  @override
+  String get styleExplore_cancelRun => '取消任务';
+
+  @override
+  String styleExplore_retryFailed(int count) {
+    return '重试失败（$count）';
+  }
+
+  @override
+  String get styleExplore_targetCountLabel => '出图数';
+
+  @override
+  String get styleExplore_syncParams => '同步自主生成页';
+
+  @override
+  String get styleExplore_paramsSynced => '参数快照已更新';
+
+  @override
+  String get styleExplore_runBusy => '生成进行中，稍后再试';
+
+  @override
+  String get styleExplore_deleteRunTitle => '删除探索任务';
+
+  @override
+  String styleExplore_deleteRunMessage(String name) {
+    return '将删除「$name」及其候选图副本；图库中的源图不受影响。';
+  }
+
+  @override
+  String get styleExplore_cancelRunTitle => '取消探索任务';
+
+  @override
+  String get styleExplore_cancelRunMessage => '取消后不可再启动；剩余待生成候选将标记为已取消。';
+
+  @override
+  String get styleExplore_filterAll => '全部';
+
+  @override
+  String get styleExplore_filterHearted => '心选';
+
+  @override
+  String get styleExplore_filterPendingReview => '待审';
+
+  @override
+  String get styleExplore_filterFailed => '失败';
+
+  @override
+  String get styleExplore_markTreasure => '珍宝';
+
+  @override
+  String get styleExplore_markSpecial => '特殊';
+
+  @override
+  String get styleExplore_markReject => '拒绝';
+
+  @override
+  String get styleExplore_candidateMissing => '图片文件缺失';
+
+  @override
+  String get styleExplore_candidateDetailTitle => '候选详情';
+
+  @override
+  String get styleExplore_rollSnapshot => 'Roll 快照';
+
+  @override
+  String styleExplore_seedLabel(String seed) {
+    return 'Seed $seed';
+  }
+
+  @override
+  String styleExplore_roundNumber(int number) {
+    return '第 $number 轮';
+  }
+
+  @override
+  String get styleExplore_formalReview => '正式筛选';
+
+  @override
+  String get styleExplore_formalReviewNextStage => '正式筛选将在下一阶段开放';
+
+  @override
+  String get styleExplore_noRunsYet => '还没有探索任务';
 
   @override
   String get promptBlockEditor_library => '块库';

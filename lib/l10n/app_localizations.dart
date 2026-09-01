@@ -18421,12 +18421,6 @@ abstract class AppLocalizations {
   /// **'New run'**
   String get styleExplore_newRun;
 
-  /// No description provided for @styleExplore_runNextStage.
-  ///
-  /// In en, this message translates to:
-  /// **'Explore runs will be available in the next phase'**
-  String get styleExplore_runNextStage;
-
   /// No description provided for @styleExplore_manageRecipes.
   ///
   /// In en, this message translates to:
@@ -18448,8 +18442,278 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_galleryEmptyHint.
   ///
   /// In en, this message translates to:
-  /// **'The candidate gallery will be available in the next phase'**
+  /// **'No candidates yet. Create or select an explore run to start batch generation.'**
   String get styleExplore_galleryEmptyHint;
+
+  /// No description provided for @styleExplore_runNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Run name'**
+  String get styleExplore_runNameLabel;
+
+  /// No description provided for @styleExplore_runNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Soft light ×30'**
+  String get styleExplore_runNameHint;
+
+  /// No description provided for @styleExplore_runCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created \"{name}\"'**
+  String styleExplore_runCreated(String name);
+
+  /// No description provided for @styleExplore_runDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted \"{name}\"'**
+  String styleExplore_runDeleted(String name);
+
+  /// No description provided for @styleExplore_runProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total}'**
+  String styleExplore_runProgress(int done, int total);
+
+  /// No description provided for @styleExplore_runGeneratingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Image {current}/{total}'**
+  String styleExplore_runGeneratingProgress(int current, int total);
+
+  /// No description provided for @styleExplore_runStatusDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get styleExplore_runStatusDraft;
+
+  /// No description provided for @styleExplore_runStatusGenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating'**
+  String get styleExplore_runStatusGenerating;
+
+  /// No description provided for @styleExplore_runStatusPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get styleExplore_runStatusPaused;
+
+  /// No description provided for @styleExplore_runStatusGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated'**
+  String get styleExplore_runStatusGenerated;
+
+  /// No description provided for @styleExplore_runStatusReviewing.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewing'**
+  String get styleExplore_runStatusReviewing;
+
+  /// No description provided for @styleExplore_runStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get styleExplore_runStatusCompleted;
+
+  /// No description provided for @styleExplore_runStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get styleExplore_runStatusCancelled;
+
+  /// No description provided for @styleExplore_archivedTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get styleExplore_archivedTag;
+
+  /// No description provided for @styleExplore_archive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get styleExplore_archive;
+
+  /// No description provided for @styleExplore_unarchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Unarchive'**
+  String get styleExplore_unarchive;
+
+  /// No description provided for @styleExplore_loadSnapshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Load snapshot to editor'**
+  String get styleExplore_loadSnapshot;
+
+  /// No description provided for @styleExplore_snapshotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded snapshot of \"{name}\"'**
+  String styleExplore_snapshotLoaded(String name);
+
+  /// No description provided for @styleExplore_startRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get styleExplore_startRun;
+
+  /// No description provided for @styleExplore_pauseRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get styleExplore_pauseRun;
+
+  /// No description provided for @styleExplore_cancelRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel run'**
+  String get styleExplore_cancelRun;
+
+  /// No description provided for @styleExplore_retryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry failed ({count})'**
+  String styleExplore_retryFailed(int count);
+
+  /// No description provided for @styleExplore_targetCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get styleExplore_targetCountLabel;
+
+  /// No description provided for @styleExplore_syncParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync from generator'**
+  String get styleExplore_syncParams;
+
+  /// No description provided for @styleExplore_paramsSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Parameter snapshot updated'**
+  String get styleExplore_paramsSynced;
+
+  /// No description provided for @styleExplore_runBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation busy, try again later'**
+  String get styleExplore_runBusy;
+
+  /// No description provided for @styleExplore_deleteRunTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete explore run'**
+  String get styleExplore_deleteRunTitle;
+
+  /// No description provided for @styleExplore_deleteRunMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletes \"{name}\" and its candidate image copies; source images in the gallery are not affected.'**
+  String styleExplore_deleteRunMessage(String name);
+
+  /// No description provided for @styleExplore_cancelRunTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel explore run'**
+  String get styleExplore_cancelRunTitle;
+
+  /// No description provided for @styleExplore_cancelRunMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A cancelled run cannot be restarted; remaining pending candidates will be marked as cancelled.'**
+  String get styleExplore_cancelRunMessage;
+
+  /// No description provided for @styleExplore_filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get styleExplore_filterAll;
+
+  /// No description provided for @styleExplore_filterHearted.
+  ///
+  /// In en, this message translates to:
+  /// **'Hearted'**
+  String get styleExplore_filterHearted;
+
+  /// No description provided for @styleExplore_filterPendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Unreviewed'**
+  String get styleExplore_filterPendingReview;
+
+  /// No description provided for @styleExplore_filterFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get styleExplore_filterFailed;
+
+  /// No description provided for @styleExplore_markTreasure.
+  ///
+  /// In en, this message translates to:
+  /// **'Treasure'**
+  String get styleExplore_markTreasure;
+
+  /// No description provided for @styleExplore_markSpecial.
+  ///
+  /// In en, this message translates to:
+  /// **'Special'**
+  String get styleExplore_markSpecial;
+
+  /// No description provided for @styleExplore_markReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get styleExplore_markReject;
+
+  /// No description provided for @styleExplore_candidateMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Image file missing'**
+  String get styleExplore_candidateMissing;
+
+  /// No description provided for @styleExplore_candidateDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidate detail'**
+  String get styleExplore_candidateDetailTitle;
+
+  /// No description provided for @styleExplore_rollSnapshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll snapshot'**
+  String get styleExplore_rollSnapshot;
+
+  /// No description provided for @styleExplore_seedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed {seed}'**
+  String styleExplore_seedLabel(String seed);
+
+  /// No description provided for @styleExplore_roundNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {number}'**
+  String styleExplore_roundNumber(int number);
+
+  /// No description provided for @styleExplore_formalReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Formal review'**
+  String get styleExplore_formalReview;
+
+  /// No description provided for @styleExplore_formalReviewNextStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Formal review will be available in the next phase'**
+  String get styleExplore_formalReviewNextStage;
+
+  /// No description provided for @styleExplore_noRunsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No explore runs yet'**
+  String get styleExplore_noRunsYet;
 
   /// No description provided for @promptBlockEditor_library.
   ///

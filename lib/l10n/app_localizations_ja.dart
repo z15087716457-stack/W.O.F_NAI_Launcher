@@ -10312,9 +10312,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_newRun => '新規ラン';
 
   @override
-  String get styleExplore_runNextStage => '探索ランは次のフェーズで公開予定です';
-
-  @override
   String get styleExplore_manageRecipes => '管理';
 
   @override
@@ -10326,7 +10323,162 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_galleryTitle => '候補ギャラリー';
 
   @override
-  String get styleExplore_galleryEmptyHint => '候補ギャラリーは次のフェーズで公開予定です';
+  String get styleExplore_galleryEmptyHint =>
+      '候補はまだありません。探索ランを作成または選択して一括生成を開始してください。';
+
+  @override
+  String get styleExplore_runNameLabel => 'ラン名';
+
+  @override
+  String get styleExplore_runNameHint => '例：柔らかい光 ×30';
+
+  @override
+  String styleExplore_runCreated(String name) {
+    return '「$name」を作成しました';
+  }
+
+  @override
+  String styleExplore_runDeleted(String name) {
+    return '「$name」を削除しました';
+  }
+
+  @override
+  String styleExplore_runProgress(int done, int total) {
+    return '$done/$total';
+  }
+
+  @override
+  String styleExplore_runGeneratingProgress(int current, int total) {
+    return '$current/$total 枚目';
+  }
+
+  @override
+  String get styleExplore_runStatusDraft => '下書き';
+
+  @override
+  String get styleExplore_runStatusGenerating => '生成中';
+
+  @override
+  String get styleExplore_runStatusPaused => '一時停止';
+
+  @override
+  String get styleExplore_runStatusGenerated => '生成済み';
+
+  @override
+  String get styleExplore_runStatusReviewing => '選別中';
+
+  @override
+  String get styleExplore_runStatusCompleted => '完了';
+
+  @override
+  String get styleExplore_runStatusCancelled => 'キャンセル';
+
+  @override
+  String get styleExplore_archivedTag => 'アーカイブ済み';
+
+  @override
+  String get styleExplore_archive => 'アーカイブ';
+
+  @override
+  String get styleExplore_unarchive => 'アーカイブ解除';
+
+  @override
+  String get styleExplore_loadSnapshot => 'スナップショットをエディタに読み込む';
+
+  @override
+  String styleExplore_snapshotLoaded(String name) {
+    return '「$name」のスナップショットを読み込みました';
+  }
+
+  @override
+  String get styleExplore_startRun => '開始';
+
+  @override
+  String get styleExplore_pauseRun => '一時停止';
+
+  @override
+  String get styleExplore_cancelRun => 'ランをキャンセル';
+
+  @override
+  String styleExplore_retryFailed(int count) {
+    return '失敗を再試行（$count）';
+  }
+
+  @override
+  String get styleExplore_targetCountLabel => '生成枚数';
+
+  @override
+  String get styleExplore_syncParams => '生成ページから同期';
+
+  @override
+  String get styleExplore_paramsSynced => 'パラメータスナップショットを更新しました';
+
+  @override
+  String get styleExplore_runBusy => '生成中です。しばらくしてからお試しください';
+
+  @override
+  String get styleExplore_deleteRunTitle => '探索ランを削除';
+
+  @override
+  String styleExplore_deleteRunMessage(String name) {
+    return '「$name」とその候補画像コピーを削除します。ギャラリーの元画像には影響しません。';
+  }
+
+  @override
+  String get styleExplore_cancelRunTitle => '探索ランをキャンセル';
+
+  @override
+  String get styleExplore_cancelRunMessage =>
+      'キャンセル後は再開できません。残りの未生成候補はキャンセル済みとしてマークされます。';
+
+  @override
+  String get styleExplore_filterAll => 'すべて';
+
+  @override
+  String get styleExplore_filterHearted => 'ハート';
+
+  @override
+  String get styleExplore_filterPendingReview => '未マーク';
+
+  @override
+  String get styleExplore_filterFailed => '失敗';
+
+  @override
+  String get styleExplore_markTreasure => '宝物';
+
+  @override
+  String get styleExplore_markSpecial => '特殊';
+
+  @override
+  String get styleExplore_markReject => '却下';
+
+  @override
+  String get styleExplore_candidateMissing => '画像ファイルがありません';
+
+  @override
+  String get styleExplore_candidateDetailTitle => '候補詳細';
+
+  @override
+  String get styleExplore_rollSnapshot => 'Roll スナップショット';
+
+  @override
+  String styleExplore_seedLabel(String seed) {
+    return 'シード $seed';
+  }
+
+  @override
+  String styleExplore_roundNumber(int number) {
+    return 'ラウンド $number';
+  }
+
+  @override
+  String get styleExplore_formalReview => '正式選別';
+
+  @override
+  String get styleExplore_formalReviewNextStage => '正式選別は次のフェーズで公開予定です';
+
+  @override
+  String get styleExplore_noRunsYet => '探索ランはまだありません';
 
   @override
   String get promptBlockEditor_library => 'ブロックライブラリ';

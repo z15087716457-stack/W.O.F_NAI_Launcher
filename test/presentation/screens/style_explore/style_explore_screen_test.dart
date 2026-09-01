@@ -4,11 +4,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/storage/style_explore_recipe_storage.dart';
+import 'package:nai_launcher/core/storage/style_explore_run_storage.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
+import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/data/models/style_explore/style_explore_recipe.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_cooldown_provider.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
+import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
+import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 import 'package:nai_launcher/presentation/providers/style_explore_provider.dart';
 import 'package:nai_launcher/presentation/screens/style_explore/style_explore_screen.dart';
 
@@ -40,6 +45,40 @@ class _MemoryRecipeStorage extends StyleExploreRecipeStorage {
 
   @override
   Future<void> deleteRecipe(String id) async {
+    _store.remove(id);
+  }
+
+  @override
+  Future<void> clear() async {
+    _store.clear();
+  }
+}
+
+/// 内存版 Run 存储（同上，不落盘）。
+class _MemoryRunStorage extends StyleExploreRunStorage {
+  final Map<String, ExploreRun> _store = {};
+
+  @override
+  Future<List<ExploreRun>> getRuns() async {
+    final runs = _store.values.toList()
+      ..sort((a, b) {
+        final comparison = b.updatedAt.compareTo(a.updatedAt);
+        if (comparison != 0) return comparison;
+        return a.id.compareTo(b.id);
+      });
+    return runs;
+  }
+
+  @override
+  Future<ExploreRun?> getRun(String id) async => _store[id];
+
+  @override
+  Future<void> putRun(ExploreRun run) async {
+    _store[run.id] = run;
+  }
+
+  @override
+  Future<void> deleteRun(String id) async {
     _store.remove(id);
   }
 
@@ -117,15 +156,41 @@ class _FakeLibraryNotifier extends PromptBlockLibraryNotifier {
       PromptBlockLibraryState(blocks: const [], folders: const []);
 }
 
+/// 冷却永不生效的假实现（真实现会读 Hive 设置，widget 测试不准备）。
+class _FakeCooldownNotifier extends GenerationCooldownNotifier {
+  @override
+  GenerationCooldownState build() => const GenerationCooldownState();
+}
+
 void main() {
   late _MemoryRecipeStorage recipeStorage;
+  late _MemoryRunStorage runStorage;
 
   setUp(() {
     recipeStorage = _MemoryRecipeStorage();
+    runStorage = _MemoryRunStorage();
   });
 
   PillDocument doc(String text) =>
       PillDocument(text: text, instances: const {});
+
+  ExploreParamsSnapshot testSnapshot() => const ExploreParamsSnapshot(
+    model: 'nai-diffusion-4-5-full',
+    width: 832,
+    height: 1216,
+    steps: 28,
+    scale: 5.0,
+    sampler: 'k_euler_ancestral',
+    seed: -1,
+    ucPreset: 0,
+    qualityToggle: true,
+    smea: false,
+    smeaDyn: false,
+    cfgRescale: 0,
+    noiseSchedule: 'karras',
+    varietyPlus: false,
+    decrisp: false,
+  );
 
   Future<StyleExploreRecipe> seedRecipe(String name, String positive) async {
     final recipe = StyleExploreRecipe.create(
@@ -137,6 +202,25 @@ void main() {
     return recipe;
   }
 
+  Future<ExploreRun> seedRun(
+    String name, {
+    int targetCount = 10,
+    ExploreRunStatus status = ExploreRunStatus.draft,
+    List<ExploreCandidate> candidates = const [],
+  }) async {
+    final run = ExploreRun.create(
+      name: name,
+      recipeSnapshot: ExploreRecipeSnapshot(
+        positive: doc('pos'),
+        negative: doc('neg'),
+      ),
+      paramsSnapshot: testSnapshot(),
+      targetCount: targetCount,
+    ).copyWith(status: status, candidates: candidates);
+    await runStorage.putRun(run);
+    return run;
+  }
+
   Widget buildScreen() {
     return ProviderScope(
       overrides: [
@@ -144,9 +228,12 @@ void main() {
           (ref) => _TestLocalStorageService(),
         ),
         styleExploreRecipeStorageProvider.overrideWithValue(recipeStorage),
+        styleExploreRunStorageProvider.overrideWithValue(runStorage),
         promptBlockLibraryNotifierProvider.overrideWith(
           () => _FakeLibraryNotifier(),
         ),
+        generationCooldownProvider.overrideWith(() => _FakeCooldownNotifier()),
+        exploreGenerateFnProvider.overrideWithValue((params) async => null),
       ],
       child: const MaterialApp(
         locale: Locale('zh'),
@@ -176,7 +263,7 @@ void main() {
     await seedRecipe('厚重色彩', 'vivid colors');
     final container = await pumpScreen(tester);
 
-    // 左栏：探索任务占位 + Recipe 缩略列表。
+    // 左栏：探索任务列表（空态）+ Recipe 缩略列表。
     expect(find.text('柔和光影'), findsOneWidget);
     expect(find.text('厚重色彩'), findsOneWidget);
     expect(find.byKey(const Key('style-explore-new-run')), findsOneWidget);
@@ -201,7 +288,7 @@ void main() {
       find.byKey(const Key('style-explore-negative-editor')),
       findsOneWidget,
     );
-    // 右栏候选画廊空态占位（宽窗默认展开）。
+    // 右栏候选画廊（宽窗默认展开）。
     expect(
       find.byKey(const Key('style-explore-gallery-panel')),
       findsOneWidget,
@@ -322,17 +409,230 @@ void main() {
     );
   });
 
-  testWidgets('new-run placeholder reports next-stage availability', (
+  // ==================== 阶段 B：Run 数据层 + 候选画廊 ====================
+
+  testWidgets('new-run dialog creates a draft run and selects it', (
     tester,
   ) async {
-    await pumpScreen(tester);
+    final container = await pumpScreen(tester);
 
     await tester.tap(find.byKey(const Key('style-explore-new-run')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('探索任务将在下一阶段开放'), findsOneWidget);
-    // 信息 toast 有自动关闭定时器，推进到结束。
+    // 名称输入对话框。
+    expect(find.text('任务名称'), findsOneWidget);
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      ),
+      '新任务甲',
+    );
+    // 确认按钮的可用态随输入重建，先 pump 再点。
+    await tester.pump();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.widgetWithText(FilledButton, '确定'),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    // 成功 toast 自动关闭。
     await tester.pump(const Duration(milliseconds: 3300));
+
+    final list = await container.read(exploreRunListNotifierProvider.future);
+    expect(list.runs, hasLength(1));
+    final run = list.runs.single;
+    expect(run.name, '新任务甲');
+    expect(run.status, ExploreRunStatus.draft);
+    expect(run.recipeSnapshot.negative.text, isA<String>());
+    // 点选状态 = 新建的 run，控制条出现（draft 显示开始按钮与出图数）。
+    expect(container.read(exploreActiveRunIdProvider), run.id);
+    expect(find.byKey(const Key('explore-run-start')), findsOneWidget);
+    expect(find.byKey(const Key('explore-run-target-count')), findsOneWidget);
+    expect(find.byKey(const Key('explore-run-sync-params')), findsOneWidget);
+  });
+
+  testWidgets('run card shows status dot, progress and selects on tap', (
+    tester,
+  ) async {
+    final run = await seedRun('列表目标', targetCount: 10);
+    final container = await pumpScreen(tester);
+
+    expect(find.text('列表目标'), findsOneWidget);
+    expect(find.textContaining('0/10'), findsOneWidget);
+    expect(find.textContaining('草稿'), findsWidgets);
+
+    // 点选只切换 activeRun，不把快照载入编辑器（档案语义）。
+    await tester.tap(find.text('列表目标'));
+    await tester.pump();
+    expect(container.read(exploreActiveRunIdProvider), run.id);
+    expect(
+      container
+          .read(pillWorkspaceProvider(PillScopes.explorePos))
+          .document
+          .text,
+      '',
+      reason: '点选 run 不自动覆盖正在编辑的 lane',
+    );
+    // 控制条随 activeRun 出现。
+    expect(find.byKey(const Key('explore-run-start')), findsOneWidget);
+  });
+
+  testWidgets(
+    'candidate gallery grid renders and pre-mark buttons write review',
+    (tester) async {
+      final candidateA = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-a')
+          .copyWith(
+            generation: const ExploreCandidateGeneration(
+              status: ExploreCandidateGenerationStatus.done,
+              seed: 12345,
+            ),
+          );
+      final candidateB = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-b')
+          .copyWith(
+            generation: const ExploreCandidateGeneration(
+              status: ExploreCandidateGenerationStatus.failed,
+              error: 'boom',
+            ),
+          );
+      final run = await seedRun(
+        '画廊任务',
+        status: ExploreRunStatus.generated,
+        candidates: [candidateA, candidateB],
+      );
+      final container = await pumpScreen(tester);
+
+      // 无 activeRun 时是空态。
+      expect(find.textContaining('暂无候选'), findsOneWidget);
+
+      container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // 两张候选卡 + 序号文本。
+      expect(find.byKey(const Key('explore-candidate-cand-a')), findsOneWidget);
+      expect(find.byKey(const Key('explore-candidate-cand-b')), findsOneWidget);
+      expect(find.textContaining('#1'), findsOneWidget);
+      expect(find.textContaining('#2'), findsOneWidget);
+
+      // 心形 + T 预标记写 review 字段。
+      await tester.tap(find.byKey(const Key('explore-candidate-heart-cand-a')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(
+        find.byKey(const Key('explore-candidate-treasure-cand-a')),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final stored = runStorage._store[run.id]!;
+      final review = stored.candidateById('cand-a')!.review;
+      expect(review.heart, isTrue);
+      expect(review.preliminaryLabel, ExploreReviewLabel.treasure);
+      // 另一张不受影响。
+      expect(stored.candidateById('cand-b')!.review.heart, isFalse);
+    },
+  );
+
+  testWidgets('filter chips narrow the grid', (tester) async {
+    final treasure = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-t')
+        .copyWith(
+          generation: const ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.done,
+          ),
+          review: const ExploreCandidateReview(
+            preliminaryLabel: ExploreReviewLabel.treasure,
+          ),
+        );
+    final plain = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-p').copyWith(
+      generation: const ExploreCandidateGeneration(
+        status: ExploreCandidateGenerationStatus.done,
+      ),
+    );
+    final run = await seedRun(
+      '筛选任务',
+      status: ExploreRunStatus.generated,
+      candidates: [treasure, plain],
+    );
+    final container = await pumpScreen(tester);
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byKey(const Key('explore-candidate-cand-t')), findsOneWidget);
+    expect(find.byKey(const Key('explore-candidate-cand-p')), findsOneWidget);
+
+    // 珍宝筛选。
+    await tester.tap(find.byKey(const Key('explore-filter-treasure')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(const Key('explore-candidate-cand-t')), findsOneWidget);
+    expect(find.byKey(const Key('explore-candidate-cand-p')), findsNothing);
+
+    // 待审筛选：只有无标记候选。
+    await tester.tap(find.byKey(const Key('explore-filter-pendingReview')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(const Key('explore-candidate-cand-t')), findsNothing);
+    expect(find.byKey(const Key('explore-candidate-cand-p')), findsOneWidget);
+
+    // 正式筛选按钮置灰（阶段 C）。
+    final formalChip = tester.widget<ActionChip>(
+      find.byKey(const Key('explore-formal-review')),
+    );
+    expect(formalChip.onPressed, isNull);
+  });
+
+  testWidgets('detail dialog shows seed, params and roll snapshot', (
+    tester,
+  ) async {
+    final candidate = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-d')
+        .copyWith(
+          rollSnapshot: const ExploreRollSnapshot(
+            positive: 'soft light, watercolor',
+            negative: 'lowres',
+            instanceRolls: [
+              ExploreInstanceRoll(
+                lane: 'pos',
+                marker: '',
+                blockId: 'b-1',
+                blockTitle: '画风池',
+                rolledText: 'watercolor',
+              ),
+            ],
+          ),
+          generation: const ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.done,
+            seed: 987654,
+            elapsedMs: 4321,
+          ),
+        );
+    final run = await seedRun(
+      '详情任务',
+      status: ExploreRunStatus.generated,
+      candidates: [candidate],
+    );
+    final container = await pumpScreen(tester);
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-d')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byKey(const Key('explore-candidate-detail')), findsOneWidget);
+    expect(find.text('候选详情'), findsOneWidget);
+    expect(find.text('Seed 987654'), findsOneWidget);
+    expect(find.text('4321 ms'), findsOneWidget);
+    expect(find.text('soft light, watercolor'), findsOneWidget);
+    expect(find.text('[pos] 画风池: watercolor'), findsOneWidget);
+    expect(
+      find.byKey(const Key('explore-candidate-copy-snapshot')),
+      findsOneWidget,
+    );
   });
 }

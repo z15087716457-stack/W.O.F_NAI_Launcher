@@ -10541,10 +10541,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_newRun => 'New run';
 
   @override
-  String get styleExplore_runNextStage =>
-      'Explore runs will be available in the next phase';
-
-  @override
   String get styleExplore_manageRecipes => 'Manage';
 
   @override
@@ -10557,7 +10553,162 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_galleryEmptyHint =>
-      'The candidate gallery will be available in the next phase';
+      'No candidates yet. Create or select an explore run to start batch generation.';
+
+  @override
+  String get styleExplore_runNameLabel => 'Run name';
+
+  @override
+  String get styleExplore_runNameHint => 'e.g. Soft light ×30';
+
+  @override
+  String styleExplore_runCreated(String name) {
+    return 'Created \"$name\"';
+  }
+
+  @override
+  String styleExplore_runDeleted(String name) {
+    return 'Deleted \"$name\"';
+  }
+
+  @override
+  String styleExplore_runProgress(int done, int total) {
+    return '$done/$total';
+  }
+
+  @override
+  String styleExplore_runGeneratingProgress(int current, int total) {
+    return 'Image $current/$total';
+  }
+
+  @override
+  String get styleExplore_runStatusDraft => 'Draft';
+
+  @override
+  String get styleExplore_runStatusGenerating => 'Generating';
+
+  @override
+  String get styleExplore_runStatusPaused => 'Paused';
+
+  @override
+  String get styleExplore_runStatusGenerated => 'Generated';
+
+  @override
+  String get styleExplore_runStatusReviewing => 'Reviewing';
+
+  @override
+  String get styleExplore_runStatusCompleted => 'Completed';
+
+  @override
+  String get styleExplore_runStatusCancelled => 'Cancelled';
+
+  @override
+  String get styleExplore_archivedTag => 'Archived';
+
+  @override
+  String get styleExplore_archive => 'Archive';
+
+  @override
+  String get styleExplore_unarchive => 'Unarchive';
+
+  @override
+  String get styleExplore_loadSnapshot => 'Load snapshot to editor';
+
+  @override
+  String styleExplore_snapshotLoaded(String name) {
+    return 'Loaded snapshot of \"$name\"';
+  }
+
+  @override
+  String get styleExplore_startRun => 'Start';
+
+  @override
+  String get styleExplore_pauseRun => 'Pause';
+
+  @override
+  String get styleExplore_cancelRun => 'Cancel run';
+
+  @override
+  String styleExplore_retryFailed(int count) {
+    return 'Retry failed ($count)';
+  }
+
+  @override
+  String get styleExplore_targetCountLabel => 'Images';
+
+  @override
+  String get styleExplore_syncParams => 'Sync from generator';
+
+  @override
+  String get styleExplore_paramsSynced => 'Parameter snapshot updated';
+
+  @override
+  String get styleExplore_runBusy => 'Generation busy, try again later';
+
+  @override
+  String get styleExplore_deleteRunTitle => 'Delete explore run';
+
+  @override
+  String styleExplore_deleteRunMessage(String name) {
+    return 'Deletes \"$name\" and its candidate image copies; source images in the gallery are not affected.';
+  }
+
+  @override
+  String get styleExplore_cancelRunTitle => 'Cancel explore run';
+
+  @override
+  String get styleExplore_cancelRunMessage =>
+      'A cancelled run cannot be restarted; remaining pending candidates will be marked as cancelled.';
+
+  @override
+  String get styleExplore_filterAll => 'All';
+
+  @override
+  String get styleExplore_filterHearted => 'Hearted';
+
+  @override
+  String get styleExplore_filterPendingReview => 'Unreviewed';
+
+  @override
+  String get styleExplore_filterFailed => 'Failed';
+
+  @override
+  String get styleExplore_markTreasure => 'Treasure';
+
+  @override
+  String get styleExplore_markSpecial => 'Special';
+
+  @override
+  String get styleExplore_markReject => 'Reject';
+
+  @override
+  String get styleExplore_candidateMissing => 'Image file missing';
+
+  @override
+  String get styleExplore_candidateDetailTitle => 'Candidate detail';
+
+  @override
+  String get styleExplore_rollSnapshot => 'Roll snapshot';
+
+  @override
+  String styleExplore_seedLabel(String seed) {
+    return 'Seed $seed';
+  }
+
+  @override
+  String styleExplore_roundNumber(int number) {
+    return 'Round $number';
+  }
+
+  @override
+  String get styleExplore_formalReview => 'Formal review';
+
+  @override
+  String get styleExplore_formalReviewNextStage =>
+      'Formal review will be available in the next phase';
+
+  @override
+  String get styleExplore_noRunsYet => 'No explore runs yet';
 
   @override
   String get promptBlockEditor_library => 'Block library';

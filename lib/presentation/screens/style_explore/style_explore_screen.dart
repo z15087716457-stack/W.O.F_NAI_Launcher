@@ -9,6 +9,7 @@ import '../../providers/generation/generation_params_notifier.dart';
 import '../../providers/generation/generation_settings_notifiers.dart';
 import '../../providers/layout_state_provider.dart';
 import '../../providers/pill_workspace_provider.dart';
+import '../../providers/style_explore/explore_run_provider.dart';
 import '../../providers/style_explore_provider.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
@@ -19,6 +20,9 @@ import '../../widgets/prompt/pills/prompt_pill_editor.dart';
 import '../../widgets/prompt/unified/unified_prompt_config.dart';
 import '../generation/widgets/block_library_panel_slot.dart';
 import '../generation/widgets/resize_handle.dart';
+import 'widgets/explore_candidate_gallery.dart';
+import 'widgets/explore_run_control_bar.dart';
+import 'widgets/explore_run_sidebar.dart';
 import 'widgets/style_explore_prompt_preview_dialog.dart';
 import 'widgets/style_explore_recipe_list_panel.dart';
 
@@ -58,6 +62,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final activeRecipe = ref.watch(styleExploreActiveRecipeProvider);
+    final activeRun = ref.watch(exploreActiveRunProvider);
     final isDirty = ref.watch(styleExploreDirtyProvider);
 
     return Scaffold(
@@ -82,6 +87,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                       maxWidth,
                       galleryVisible,
                     ),
+                    if (activeRun != null) ExploreRunControlBar(run: activeRun),
                     if (!showSidebar) _buildCompactRecipeSelector(theme),
                     Expanded(child: _buildEditorArea(context, theme)),
                   ],
@@ -226,7 +232,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildRunSection(theme),
+              const Expanded(child: ExploreRunSidebarSection()),
               Divider(
                 height: 1,
                 color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
@@ -235,64 +241,6 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  /// 探索任务区：阶段 A 只有空态占位，Run 数据层在阶段 B 接入。
-  Widget _buildRunSection(ThemeData theme) {
-    final l10n = context.l10n;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            l10n.styleExplore_runSectionTitle,
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(
-                alpha: 0.5,
-              ),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Icon(
-                  Icons.rocket_launch_outlined,
-                  size: 28,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.styleExplore_runEmptyHint,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                FilledButton.tonalIcon(
-                  key: const Key('style-explore-new-run'),
-                  onPressed: () =>
-                      AppToast.info(context, l10n.styleExplore_runNextStage),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: Text(l10n.styleExplore_newRun),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -655,31 +603,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
           ),
         ),
         Divider(height: 1, color: theme.dividerColor),
-        Expanded(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.collections_outlined,
-                    size: 40,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    l10n.styleExplore_galleryEmptyHint,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+        const Expanded(child: ExploreCandidateGallery()),
       ],
     );
   }

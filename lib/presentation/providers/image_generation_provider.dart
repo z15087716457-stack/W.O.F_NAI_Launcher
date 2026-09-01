@@ -590,10 +590,28 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     );
   }
 
-  Future<void> generate(ImageParams params) {
-    // 个人点数记账（合租账本）：生成前捕获预估单价与图片列表，
-    // 仅当本次运行确实产出新图（completed 且列表已更新）才扣减，
-    // 避免冷却拦截/取消/失败造成误扣。
+  Future<void> generate(ImageParams params) =>
+      _withPersonalBilling(params, () => _generate(params));
+
+  /// 探索任务专用生成入口（画风探索阶段 B）：单张、强制 nSamples=1、
+  /// 随机种子实体化后把真实 seed 随结果带回；**不清空主 UI 当前图、
+  /// 不触发全局 roll**（探索 runner 自控 roll 节奏）。
+  /// 失败/取消返回 null，错误信息留在 `state.errorMessage`。
+  ///
+  /// 与 [generate] 共享冷却门禁、提示词管线、vibe 编码与个人点数记账；
+  /// 但绕开批次分支（批次循环按 imagesPerRequest 共享提示词，
+  /// 探索每张候选有独立 roll 快照，不能共用）。
+  Future<ExploreGenerationResult?> generateForExplore(ImageParams params) {
+    return _withPersonalBilling(params, () => _generateForExplore(params));
+  }
+
+  /// 个人点数记账包裹（合租账本）：生成前捕获预估单价与图片列表，
+  /// 仅当本次运行确实产出新图（completed 且列表已更新）才扣减，
+  /// 避免冷却拦截/取消/失败造成误扣。
+  Future<T> _withPersonalBilling<T>(
+    ImageParams params,
+    Future<T> Function() body,
+  ) {
     final imagesBefore = state.currentImages;
     // 独立测试/工具环境未启动订阅链路时，读取预估会连带构建 auth 链，
     // 其异步异常会污染 Zone——用 ref.exists 门禁 + try/catch 双保险。
@@ -613,7 +631,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       costToBill = 0;
       billedToOpusAllowance = false;
     }
-    return _generate(params).whenComplete(() {
+    return body().whenComplete(() {
       final produced =
           state.status == GenerationStatus.completed &&
           !identical(state.currentImages, imagesBefore);
@@ -634,6 +652,69 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
             .schedulePostBillingRefresh();
       }
     });
+  }
+
+  Future<ExploreGenerationResult?> _generateForExplore(
+    ImageParams params,
+  ) async {
+    final canStart = ref
+        .read(generationCooldownProvider.notifier)
+        .tryStartGeneration();
+    if (!canStart) {
+      return null;
+    }
+
+    final generationRunId = _startGenerationRun();
+
+    // 不清空 currentImages：探索生成不该打断主 UI 当前图的展示；
+    // 完成时 _generateSingle 会整体替换 currentImages（新列表实例），
+    // 记账的 identical 判定与失败快照语义均不受影响。
+    state = state.copyWith(
+      status: GenerationStatus.generating,
+      batchWidth: params.width,
+      batchHeight: params.height,
+    );
+
+    final idsBefore = <String>{
+      for (final image in state.currentImages) image.id,
+      for (final image in state.history) image.id,
+    };
+
+    final stopwatch = Stopwatch()..start();
+    final baseParams = _applyPromptPipeline(params.copyWith(nSamples: 1));
+    final preparedParams = await _prepareVibesForGeneration(baseParams);
+    if (_shouldAbortGenerationRun(generationRunId)) return null;
+
+    // 随机种子在进入请求前实体化，结果对象带回真实 seed（复现链）。
+    final materializedParams = _materializeRandomSeed(preparedParams);
+    await _generateSingle(materializedParams, 1, 1, generationRunId);
+    stopwatch.stop();
+
+    // 与生成前快照比 id 找新图：currentImages 优先，history 兜底。
+    final produced =
+        _findNewCompletedImage(state.currentImages, idsBefore) ??
+        _findNewCompletedImage(state.history, idsBefore);
+    if (produced == null) {
+      return null;
+    }
+    return ExploreGenerationResult(
+      imageBytes: produced.bytes,
+      filePath: produced.filePath,
+      seed: materializedParams.seed,
+      elapsedMs: stopwatch.elapsedMilliseconds,
+      imageWidth: produced.width,
+      imageHeight: produced.height,
+    );
+  }
+
+  GeneratedImage? _findNewCompletedImage(
+    List<GeneratedImage> images,
+    Set<String> idsBefore,
+  ) {
+    for (final image in images) {
+      if (!idsBefore.contains(image.id) && image.canSave) return image;
+    }
+    return null;
   }
 
   Future<void> _generate(ImageParams params) async {
