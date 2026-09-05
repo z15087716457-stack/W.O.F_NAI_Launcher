@@ -95,6 +95,9 @@ class ThumbnailTask {
     this.retryCount = 0,
   }) : createdAt = DateTime.now();
 
+  /// 获取完整任务键
+  ThumbnailTaskKey get key => ThumbnailTaskKey(originalPath, size);
+
   /// 获取有效优先级
   int get effectivePriority => isVisible ? basePriority - 2 : basePriority;
 
@@ -228,8 +231,8 @@ class ThumbnailService {
     (a, b) => a.effectivePriority.compareTo(b.effectivePriority),
   );
 
-  /// 活跃任务映射（路径 -> 任务）
-  final Map<String, ThumbnailTask> _activeTasks = {};
+  /// 活跃任务映射（完整任务键 -> 任务）
+  final Map<ThumbnailTaskKey, ThumbnailTask> _activeTasks = {};
 
   /// 活跃批次映射
   final Map<String, ThumbnailBatch> _activeBatches = {};
@@ -330,14 +333,24 @@ class ThumbnailService {
       return cachedPath;
     }
 
-    // 创建任务并等待完成
-    final task = _createTask(originalPath, size: size, priority: priority);
+    // 创建或复用任务，并在入队前注册等待回调
+    final key = ThumbnailTaskKey(originalPath, size);
+    final activeTask = _activeTasks[key];
+    final task =
+        activeTask != null &&
+            (activeTask.state == ThumbnailTaskState.pending ||
+                activeTask.state == ThumbnailTaskState.generating)
+        ? activeTask
+        : _createTask(originalPath, size: size, priority: priority);
 
-    _enqueueTask(task);
-
-    // 等待任务完成
     final completer = Completer<String?>();
-    task.onComplete((path) => completer.complete(path));
+    task.onComplete((path) {
+      if (!completer.isCompleted) completer.complete(path);
+    });
+
+    if (!identical(task, activeTask)) {
+      _enqueueTask(task);
+    }
 
     return completer.future.timeout(
       const Duration(seconds: 30),
@@ -370,8 +383,8 @@ class ThumbnailService {
       return; // 已存在，跳过
     }
 
-    // 检查是否已在队列中
-    if (_activeTasks.containsKey(originalPath)) {
+    // 检查是否已在队列中或生成中
+    if (_activeTasks.containsKey(ThumbnailTaskKey(originalPath, size))) {
       return; // 已在处理中
     }
 
@@ -508,13 +521,18 @@ class ThumbnailService {
   }
 
   void _enqueueTask(ThumbnailTask task) {
+    final existingTask = _activeTasks[task.key];
+    if (existingTask != null && !identical(existingTask, task)) {
+      return;
+    }
+
     // 队列大小限制
     if (_taskQueue.length >= maxQueueSize) {
       _evictLowestPriorityTask();
     }
 
     _taskQueue.add(task);
-    _activeTasks[task.originalPath] = task;
+    _activeTasks[task.key] = task;
 
     _taskController.add(task);
 
@@ -544,7 +562,7 @@ class ThumbnailService {
     // 标记为取消
     lowestPriorityTask.state = ThumbnailTaskState.cancelled;
     lowestPriorityTask.notifyComplete(null);
-    _activeTasks.remove(lowestPriorityTask.originalPath);
+    _activeTasks.remove(lowestPriorityTask.key);
 
     // AppLogger.d(
     //   'Evicted lowest priority task: ${lowestPriorityTask.originalPath}',
@@ -570,6 +588,7 @@ class ThumbnailService {
       final task = _taskQueue.removeFirst();
 
       if (task.state == ThumbnailTaskState.cancelled) {
+        _activeTasks.remove(task.key);
         continue;
       }
 
@@ -579,7 +598,14 @@ class ThumbnailService {
 
       _generateThumbnail(task).then((path) {
         _activeGenerationCount--;
-        _activeTasks.remove(task.originalPath);
+
+        if (task.state == ThumbnailTaskState.pending) {
+          _activeTasks.remove(task.key);
+          _enqueueTask(task);
+          return;
+        }
+
+        _activeTasks.remove(task.key);
 
         if (path != null) {
           task.state = ThumbnailTaskState.completed;
@@ -616,12 +642,8 @@ class ThumbnailService {
         if (task.retryCount < maxRetryAttempts) {
           task.retryCount++;
           task.state = ThumbnailTaskState.pending;
-          _enqueueTask(task);
-          // AppLogger.d(
-          //   'Retrying task ${task.id} (${task.retryCount}/$maxRetryAttempts)',
-          //   'ThumbnailService',
-          // );
-          return null; // 返回 null，等待重试完成
+          // 由队列完成回调重新入队，避免提前通知等待者失败。
+          return null;
         }
       }
 
@@ -686,7 +708,7 @@ class ThumbnailService {
 
         task.state = ThumbnailTaskState.cancelled;
         task.notifyComplete(null);
-        _activeTasks.remove(task.originalPath);
+        _activeTasks.remove(task.key);
 
         // AppLogger.d('Cancelled task: $taskId', 'ThumbnailService');
         return true;

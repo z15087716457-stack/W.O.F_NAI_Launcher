@@ -62,7 +62,7 @@ void main() {
     targetCount: 10,
   );
 
-  testWidgets('出图数输入框与「开始」按钮等高且顶部齐平', (tester) async {
+  testWidgets('基础轮入口不在 Run 控制条重复显示', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
@@ -75,23 +75,45 @@ void main() {
     );
     await tester.pump();
 
-    final inputFinder = find.byKey(const Key('explore-run-target-count'));
-    final buttonFinder = find.byKey(const Key('explore-run-start'));
-    expect(inputFinder, findsOneWidget);
-    expect(buttonFinder, findsOneWidget);
+    expect(find.byKey(const Key('explore-run-target-count')), findsNothing);
+    expect(find.byKey(const Key('explore-run-start')), findsNothing);
+    expect(find.text('共 0 张'), findsOneWidget);
+    expect(find.byKey(const Key('explore-run-actions')), findsOneWidget);
+  });
 
-    // 出图数是与底条 ×N 同款的 DraggableNumberInput 紧凑芯片，
-    // 不钉死高度（内在尺寸随主题走），只验证与按钮垂直居中对齐
-    expect(
-      tester.getCenter(inputFinder).dy,
-      tester.getCenter(buttonFinder).dy,
-      reason: '出图数芯片与按钮垂直居中对齐',
+  testWidgets('窄宽 Run 控制条会换行且不溢出', (tester) async {
+    tester.view.physicalSize = const Size(300, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final run = draftRun().copyWith(
+      status: ExploreRunStatus.generated,
+      candidates: [
+        ExploreCandidate.shell(roundId: 'r-1', id: 'failed').copyWith(
+          generation: const ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.failed,
+            error: 'boom',
+          ),
+        ),
+      ],
     );
-    // 且不比按钮高（静反馈满高框笨重）
-    expect(
-      tester.getSize(inputFinder).height <= tester.getSize(buttonFinder).height,
-      isTrue,
-      reason: '出图数芯片高度不超过同行按钮',
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
+          home: Scaffold(body: ExploreRunControlBar(run: run)),
+        ),
+      ),
     );
+    await tester.pump();
+
+    expect(
+      find.byKey(const Key('explore-run-control-bar-content')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('explore-run-retry')), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

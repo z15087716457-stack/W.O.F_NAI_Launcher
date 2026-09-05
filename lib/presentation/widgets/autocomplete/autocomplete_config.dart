@@ -23,6 +23,10 @@ class AutocompleteConfig {
   final Duration debounceDelay;
   final int minQueryLength;
   final bool autoInsertComma;
+
+  /// Legacy option retained for callers; prompt fields always insert spaces.
   final bool replaceUnderscoreWithSpace;
+
+  /// Search fields split on spaces and must insert canonical underscore tags.
   final bool treatSpacesAsSeparators;
 }

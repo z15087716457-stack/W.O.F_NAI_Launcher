@@ -42,6 +42,26 @@ void main() {
     expect(state.projection, 'artist:foo, artist:bar');
   });
 
+  testWidgets('stale post-frame projection callbacks are discarded', (
+    tester,
+  ) async {
+    final emissions = <String>[];
+    final container = await _pump(
+      tester,
+      onChanged: emissions.add,
+      libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+    );
+    emissions.clear();
+
+    final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+    notifier.setText('projection A');
+    notifier.setText('projection B');
+    await tester.pump();
+
+    expect(emissions, isNot(contains('projection A')));
+    expect(emissions, contains('projection B'));
+  });
+
   testWidgets('tapping a pill opens the L1 card; disable via card', (
     tester,
   ) async {
@@ -78,7 +98,7 @@ void main() {
   });
 
   testWidgets(
-    'evolution badge follows the dice badge and main card is read-only',
+    'evolution badge replaces the dice badge and main card is read-only',
     (tester) async {
       final container = await _pump(
         tester,
@@ -97,7 +117,7 @@ void main() {
       notifier.toggleEvolution(markerA);
       await tester.pump();
 
-      expect(find.byIcon(Icons.casino_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.casino_outlined), findsNothing);
       expect(find.byType(DnaIcon), findsOneWidget);
 
       await tester.tap(find.byType(PromptPill));

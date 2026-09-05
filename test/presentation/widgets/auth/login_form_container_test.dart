@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
+import 'package:nai_launcher/presentation/providers/guest_session_provider.dart';
 import 'package:nai_launcher/presentation/widgets/auth/auth_mode_switcher.dart';
 import 'package:nai_launcher/presentation/widgets/auth/login_form_container.dart';
 import 'package:nai_launcher/presentation/widgets/common/floating_label_input.dart';
@@ -32,6 +33,24 @@ void main() {
     _expectSingleRowInTokenFirstOrder(tester);
   });
 
+  testWidgets('guest entry changes only the in-memory guest session', (
+    tester,
+  ) async {
+    await _pumpLoginForm(tester, const Locale('zh'));
+
+    expect(find.byKey(const Key('auth_guest_entry')), findsOneWidget);
+    expect(tester.element(find.byType(LoginFormContainer)), isNotNull);
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(LoginFormContainer)),
+    );
+    expect(container.read(guestSessionNotifierProvider), isFalse);
+
+    await tester.tap(find.byKey(const Key('auth_guest_entry')));
+    await tester.pump();
+
+    expect(container.read(guestSessionNotifierProvider), isTrue);
+  });
   testWidgets('email and password mode is enabled and opens its form', (
     tester,
   ) async {

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import 'package:nai_launcher/core/cache/danbooru_image_cache_manager.dart';
 import 'package:nai_launcher/data/models/online_gallery/gallery_item.dart';
 import 'package:nai_launcher/data/models/online_gallery/gallery_source.dart';
 import 'package:nai_launcher/data/repositories/online_favorites_repository.dart';
@@ -99,6 +100,109 @@ void main() {
         ),
       );
     }
+
+    test('还原 AI TAG 收藏注册全部存量封面 host 且不依赖当前配置', () async {
+      const urls = [
+        'https://legacy-preview-favorite.example/image.webp',
+        'https://legacy-display-favorite.example/image.webp',
+        'http://legacy-download-favorite.example/image.webp',
+      ];
+      await repo.addFavorite(
+        makeItem(90).copyWith(
+          cover: GalleryMedia(
+            id: 'legacy',
+            previewUrl: urls[0],
+            displayUrl: urls[1],
+            downloadUrl: urls[2],
+          ),
+        ),
+      );
+      await repo.close();
+      repo = OnlineFavoritesRepository.forTesting(dbPath);
+      registerAiTagImageHost('https://current-favorite-assets.example/');
+      for (final url in urls) {
+        expect(onlineGalleryImageHeadersForUrl(url), isEmpty);
+      }
+      final entries = await repo.listFavorites(GallerySourceId.aiTag);
+      expect(entries.single.item.sourceId, GallerySourceId.aiTag);
+      for (final url in urls) {
+        expect(
+          onlineGalleryImageHeadersForUrl(url)['Referer'],
+          'https://aitag.win/',
+        );
+        expect(onlineGalleryImageCacheKeyForUrl(url), isNull);
+      }
+    });
+
+    test('非 AI TAG 或来源不一致的快照不会注册 AI TAG host', () async {
+      for (final (id, source) in [
+        (91, GallerySourceId.danbooru),
+        (92, GallerySourceId.aiTag),
+      ]) {
+        final url = 'https://untrusted-favorite-$id.example/image.webp';
+        await repo.addFavorite(
+          makeItem(id).copyWith(
+            sourceId: source,
+            cover: GalleryMedia(id: 'other', previewUrl: url),
+          ),
+        );
+      }
+      await repo.close();
+      final db = await databaseFactoryFfi.openDatabase(dbPath);
+      await db.update(
+        'online_favorites',
+        {
+          'snapshot': jsonEncode({
+            ...makeItem(92).toSnapshotJson(),
+            'source': 'unknown-source',
+            'cover': {
+              'id': 'mismatch',
+              'preview_url': 'https://untrusted-favorite-92.example/image.webp',
+            },
+          }),
+        },
+        where: 'work_id = ?',
+        whereArgs: [92],
+      );
+      await db.close();
+      repo = OnlineFavoritesRepository.forTesting(dbPath);
+      await repo.listFavorites(GallerySourceId.danbooru);
+      await repo.listFavorites(GallerySourceId.aiTag);
+      for (final id in [91, 92]) {
+        expect(
+          onlineGalleryImageHeadersForUrl(
+            'https://untrusted-favorite-$id.example/image.webp',
+          ),
+          isEmpty,
+        );
+      }
+    });
+
+    test('收藏快照中的非法资产 scheme 不注册 host', () async {
+      await repo.addFavorite(
+        makeItem(93).copyWith(
+          cover: const GalleryMedia(
+            id: 'invalid',
+            previewUrl: 'ftp://invalid-favorite.example/a.png',
+            displayUrl: 'https:///a.png',
+            downloadUrl: '//missing-scheme-favorite.example/a.png',
+          ),
+        ),
+      );
+      await repo.listFavorites(GallerySourceId.aiTag);
+      expect(
+        onlineGalleryImageHeadersForUrl(
+          'https://invalid-favorite.example/a.png',
+        ),
+        isEmpty,
+      );
+      expect(
+        onlineGalleryImageHeadersForUrl(
+          'https://missing-scheme-favorite.example/a.png',
+        ),
+        isEmpty,
+      );
+    });
 
     test('收藏/取消/已收藏查询，根收藏与子集过滤', () async {
       await repo.addFavorite(makeItem(1));

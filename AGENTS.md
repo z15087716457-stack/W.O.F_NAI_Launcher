@@ -59,3 +59,7 @@ Git 历史使用 Conventional Commits，例如 `fix(generation): cancel stale re
 ## 安全与配置
 
 不要提交 NovelAI API token、账号数据、本地日志、构建产物或个人工作流文件。调试认证逻辑时避免打印完整 bearer token；如需日志，只记录 token 类型、长度或脱敏前缀。
+
+## 本工作区自研补充
+
+涉及桥接参数、V5 功能、计费或本地/在线图库时，按需读取 `OPERATIONAL_NOTES.md`。该文档不是通用开发规范；一般构建、测试、代码风格和发布要求仍以本文件与 README 为准。

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/cache/danbooru_image_cache_manager.dart';
 import 'package:nai_launcher/data/datasources/remote/online_gallery/ai_tag_gallery_source_adapter.dart';
 import 'package:nai_launcher/data/datasources/remote/online_gallery/donmai_gallery_source_adapter.dart';
 import 'package:nai_launcher/data/datasources/remote/online_gallery/gallery_source_adapter.dart';
@@ -287,6 +288,247 @@ void main() {
       expect(detail.item.mediaCount, 4);
     });
 
+    test(
+      'prefers image_path, resolves relative paths, and registers hosts',
+      () async {
+        final http = _RecordingHttpAdapter((request) {
+          if (request.uri.path == '/api/config') return _configJsonNoSlash;
+          if (request.uri.path == '/api/work/502') {
+            return {
+              'work': _aiWork(502),
+              'images': [
+                _aiImageWithPath('502_p1', 'nested/502_p1.png'),
+                _aiImageWithPath(
+                  '502_p2',
+                  'https://External.Ai-Tag.example/files/502_p2.jpg',
+                ),
+              ],
+            };
+          }
+          throw StateError('Unexpected request ${request.uri}');
+        });
+        final adapter = AiTagGallerySourceAdapter(
+          dio: Dio()..httpClientAdapter = http,
+        );
+        const item = GalleryItem(
+          id: 502,
+          sourceId: GallerySourceId.aiTag,
+          createdAt: '',
+          cover: GalleryMedia(id: 'pending'),
+        );
+
+        final detail = await adapter.detail(item);
+
+        expect(
+          detail.media[0].displayUrl,
+          'https://cdn.example/assets/nested/502_p1.png',
+        );
+        expect(detail.media[0].extension, 'png');
+        expect(
+          detail.media[1].displayUrl,
+          'https://External.Ai-Tag.example/files/502_p2.jpg',
+        );
+        expect(detail.media[1].extension, 'jpg');
+        expect(
+          onlineGalleryImageHeadersForUrl(
+            'https://external.ai-tag.example/files/another.jpg',
+          )['Referer'],
+          'https://aitag.win/',
+        );
+      },
+    );
+
+    for (final (baseUrl, imagePath, expectedUrl) in [
+      (
+        'https://paths-ai-tag.example',
+        'nested/505_p0.PNG?size=full',
+        'https://paths-ai-tag.example/nested/505_p0.PNG?size=full',
+      ),
+      (
+        'https://paths-ai-tag.example/assets/',
+        '/root/505_p0.PNG',
+        'https://paths-ai-tag.example/root/505_p0.PNG',
+      ),
+      (
+        'https://paths-ai-tag.example/assets?token=test',
+        'nested/505_p0.PNG',
+        'https://paths-ai-tag.example/assets/nested/505_p0.PNG',
+      ),
+      (
+        'https://paths-ai-tag.example/assets',
+        'http://alternate-ai-tag.example/505_p0.PNG',
+        'http://alternate-ai-tag.example/505_p0.PNG',
+      ),
+    ]) {
+      test('resolves image_path without legacy fields: $imagePath', () async {
+        final http = _RecordingHttpAdapter((request) {
+          if (request.uri.path == '/api/config') {
+            return {..._configJson, 'asset_base_url': baseUrl};
+          }
+          return {
+            'work': _aiWork(505),
+            'images': [
+              {'image_path': imagePath},
+            ],
+          };
+        });
+        final adapter = AiTagGallerySourceAdapter(
+          dio: Dio()..httpClientAdapter = http,
+        );
+        final detail = await adapter.detail(
+          const GalleryItem(id: 505, sourceId: GallerySourceId.aiTag),
+        );
+        final media = detail.media.single;
+        expect(media.id, '505_p0.PNG');
+        expect(media.previewUrl, expectedUrl);
+        expect(media.displayUrl, expectedUrl);
+        expect(media.downloadUrl, expectedUrl);
+        expect(media.extension, 'png');
+        expect(
+          onlineGalleryImageHeadersForUrl(expectedUrl)['Referer'],
+          'https://aitag.win/',
+        );
+        expect(onlineGalleryImageCacheKeyForUrl(expectedUrl), isNull);
+      });
+    }
+
+    test('rejects invalid asset_base_url schemes and hosts', () async {
+      for (final value in [
+        null,
+        '',
+        '/assets',
+        '//cdn.example',
+        'ftp://invalid-config.example',
+        'https:///missing-host',
+        'https://[invalid',
+      ]) {
+        final http = _RecordingHttpAdapter((request) {
+          return {'asset_base_url': value};
+        });
+        final adapter = AiTagGallerySourceAdapter(
+          dio: Dio()..httpClientAdapter = http,
+        );
+
+        await expectLater(
+          adapter.getConfig(),
+          throwsA(
+            isA<GallerySourceException>().having(
+              (error) => error.code,
+              'code',
+              GallerySourceErrorCode.configurationUnavailable,
+            ),
+          ),
+        );
+      }
+      expect(
+        onlineGalleryImageHeadersForUrl('https://invalid-config.example/a.png'),
+        isEmpty,
+      );
+    });
+
+    test('registers hosts for fresh, cached, and refreshed config', () async {
+      var baseUrl = 'https://Config-Ai-Tag.example/assets';
+      final http = _RecordingHttpAdapter(
+        (_) => {..._configJson, 'asset_base_url': baseUrl},
+      );
+      final adapter = AiTagGallerySourceAdapter(
+        dio: Dio()..httpClientAdapter = http,
+      );
+      final first = await adapter.getConfig();
+      expect(
+        onlineGalleryImageHeadersForUrl(
+          'https://config-ai-tag.example/a.png',
+        )['Referer'],
+        'https://aitag.win/',
+      );
+      final cached = await adapter.getConfig();
+      expect(cached, same(first));
+      expect(http.requests, hasLength(1));
+      expect(
+        onlineGalleryImageCacheKeyForUrl('https://config-ai-tag.example/b.png'),
+        isNull,
+      );
+      baseUrl = 'http://refreshed-ai-tag.example';
+      await adapter.getConfig(forceRefresh: true);
+      expect(http.requests, hasLength(2));
+      expect(
+        onlineGalleryImageHeadersForUrl('$baseUrl/a.png')['Referer'],
+        'https://aitag.win/',
+      );
+    });
+
+    test(
+      'rejects invalid image_path without falling back to legacy fields',
+      () async {
+        for (final imagePath in [
+          'ftp://invalid-media.example/a.png',
+          'https:///a.png',
+          'https:a.png',
+          'data:image/png;base64,AAA',
+          'https://[invalid',
+        ]) {
+          final http = _RecordingHttpAdapter((request) {
+            if (request.uri.path == '/api/config') return _configJson;
+            return {
+              'work': _aiWork(504),
+              'images': [_aiImageWithPath('504_p0', imagePath)],
+            };
+          });
+          final adapter = AiTagGallerySourceAdapter(
+            dio: Dio()..httpClientAdapter = http,
+          );
+          await expectLater(
+            adapter.detail(
+              const GalleryItem(id: 504, sourceId: GallerySourceId.aiTag),
+            ),
+            throwsA(
+              isA<GallerySourceException>().having(
+                (error) => error.code,
+                'code',
+                GallerySourceErrorCode.imageUnavailable,
+              ),
+            ),
+          );
+        }
+        expect(
+          onlineGalleryImageHeadersForUrl(
+            'https://invalid-media.example/a.png',
+          ),
+          isEmpty,
+        );
+      },
+    );
+
+    test('uses legacy fields only when image_path is absent', () async {
+      final http = _RecordingHttpAdapter((request) {
+        if (request.uri.path == '/api/config') return _configJsonNoSlash;
+        if (request.uri.path == '/api/work/503') {
+          return {
+            'work': _aiWork(503),
+            'images': [_aiImage('503_p0')],
+          };
+        }
+        throw StateError('Unexpected request ${request.uri}');
+      });
+      final adapter = AiTagGallerySourceAdapter(
+        dio: Dio()..httpClientAdapter = http,
+      );
+      const item = GalleryItem(
+        id: 503,
+        sourceId: GallerySourceId.aiTag,
+        createdAt: '',
+        cover: GalleryMedia(id: 'pending'),
+      );
+
+      final detail = await adapter.detail(item);
+
+      expect(
+        detail.media.single.displayUrl,
+        'https://cdn.example/assets/SD/9/503_p0.webp',
+      );
+      expect(detail.media.single.extension, 'webp');
+    });
+
     test('builds pximg master1200 preview from original_urls', () async {
       final http = _RecordingHttpAdapter((request) {
         if (request.uri.path == '/api/config') return _configJson;
@@ -458,6 +700,13 @@ const _configJson = {
   'available_months': ['2026-07', '2026-06', '2023-10'],
 };
 
+const _configJsonNoSlash = {
+  'asset_base_url': 'https://cdn.example/assets',
+  'page_size': 60,
+  'available_years': [2026, 2025, 2024, 2023],
+  'available_months': ['2026-07', '2026-06', '2023-10'],
+};
+
 Map<String, Object?> _donmaiPost(int id) => {
   'id': id,
   'created_at': '2026-08-09T12:00:00Z',
@@ -532,6 +781,11 @@ Map<String, Object?> _aiImage(String fileName) => {
     'parameters':
         '1girl, solo\nNegative prompt: lowres, bad hands\nSteps: 24, Sampler: Euler a, CFG scale: 6, Seed: 42, Size: 768x1152',
   }),
+};
+
+Map<String, Object?> _aiImageWithPath(String fileName, String imagePath) => {
+  ..._aiImage(fileName),
+  'image_path': imagePath,
 };
 
 /// 经典 NAI 信封 ai_json（大写键 Description/Comment/Source），

@@ -7,10 +7,12 @@ import 'package:uuid/uuid.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/explore_mutation_engine.dart';
 import '../../../data/models/image/image_params.dart';
+import '../../../data/models/prompt_block/pill_document.dart';
 import '../../../data/models/style_explore/explore_run.dart';
 import '../image_generation_provider.dart';
 import '../pill_roll_coordinator.dart';
 import '../pill_workspace_provider.dart';
+import 'deep_round_roll_guard.dart';
 import 'explore_roll_capture.dart';
 import 'explore_run_provider.dart';
 
@@ -60,11 +62,7 @@ class ExploreRunRunnerState {
 
   final String? runId;
   final bool isRunning;
-
-  /// 本次启动已处理张数（含失败）。
   final int processedCount;
-
-  /// 本次启动时要处理的 pending 总数。
   final int totalCount;
   final String? currentCandidateId;
 
@@ -85,19 +83,34 @@ class ExploreRunRunnerState {
   }
 }
 
+class _ExploreRunSession {
+  _ExploreRunSession({required this.ownerId, required this.runId});
+
+  final String ownerId;
+  final String runId;
+  String? roundId;
+  bool persistedGenerating = false;
+}
+
+class _PreparedExploreRun {
+  const _PreparedExploreRun({required this.run, required this.pendingIds});
+
+  final ExploreRun run;
+  final List<String> pendingIds;
+}
+
 /// 探索 Run 批量候选生成协调器。
 ///
-/// 每张循环：等冷却（每拍查暂停/取消）→ roll 主双 lane → 抓 roll 快照
-/// 写候选 → 当前主参数 + 投影构建单张参数（seed=-1 逐张随机）→ 注入的生成
-/// 函数 → 成功复制图到 run 目录并登记 / 失败记 error。生成状态全程落盘，
-/// 应用重启后 interrupted 的 generating run 恢复为 paused 可续跑。
-///
-/// lane 合并后 roll 的就是 main/negative lane（探索与主生成同源）；
-/// roll 后用 lane 投影直接重建参数，不读 generationParams 的提示词
-/// （updatePrompt 走 microtask，读完即生成等不到下一拍——红线）。
+/// Runner 在 claim 时同步取得 session，并同步抑制外部 roll；准备、循环、
+/// finalize 与清理都由同一 session 包住。深度轮使用运行态 guard 投影子代串，
+/// 不把子代写回工作区的真实 currentRoll。
 class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
   bool _pauseRequested = false;
   bool _cancelRequested = false;
+  _ExploreRunSession? _session;
+  bool _suppressionHeld = false;
+  bool _recoveryClaimed = false;
+  bool _recoveryPending = false;
 
   /// 深度轮变异引擎的随机源（生产不可复现；测试换 seeded Random 锁确定性）。
   @visibleForTesting
@@ -105,27 +118,50 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
 
   @override
   ExploreRunRunnerState build() {
-    // 崩溃/退出遗留的 generating 是死状态（内存标志已丢），恢复为 paused。
-    Future<void>.microtask(_recoverInterruptedRuns);
+    _recoveryPending = true;
+    Future<void>.microtask(() async {
+      try {
+        await _recoverInterruptedRuns();
+      } finally {
+        _recoveryPending = false;
+      }
+    });
     return const ExploreRunRunnerState();
   }
 
   Future<void> _recoverInterruptedRuns() async {
+    // 恢复与立即 start 互斥：恢复在第一次 await 前占用 claim，start 只能等
+    // 本次恢复结束后再尝试，不会在检查和 overwrite 之间插入。
+    if (_session != null || state.isRunning || _recoveryClaimed) return;
+    _recoveryClaimed = true;
     try {
       final repository = ref.read(styleExploreRunRepositoryProvider);
       final runs = await repository.load();
-      // 加载期间 start 已接管：不恢复，避免把活跃 run 覆写成 paused。
-      if (state.isRunning) return;
+      if (_session != null || state.isRunning) return;
       var recovered = false;
       for (final run in runs) {
-        if (run.status == ExploreRunStatus.generating) {
-          await repository.overwrite(
-            run.copyWith(status: ExploreRunStatus.paused),
-          );
-          recovered = true;
-        }
+        if (_session != null || state.isRunning) return;
+        if (run.status != ExploreRunStatus.generating) continue;
+        final normalizedRounds = [
+          for (final round in run.rounds)
+            round.status == ExploreRoundStatus.generating
+                ? round.copyWith(
+                    status: _roundHasPending(run, round)
+                        ? ExploreRoundStatus.pending
+                        : ExploreRoundStatus.generated,
+                  )
+                : round,
+        ];
+        await repository.overwrite(
+          run.copyWith(
+            status: ExploreRunStatus.paused,
+            rounds: normalizedRounds,
+          ),
+        );
+        recovered = true;
+        if (_session != null || state.isRunning) return;
       }
-      if (recovered) {
+      if (recovered && _session == null && !state.isRunning) {
         await ref.read(exploreRunListNotifierProvider.notifier).refresh();
       }
     } catch (error) {
@@ -133,26 +169,151 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
         'Recover interrupted explore runs failed: $error',
         'ExploreRunRunner',
       );
+    } finally {
+      _recoveryClaimed = false;
     }
   }
 
   /// 启动/续跑。返回 false = 被门禁拒绝（重入/主生成在跑/状态不可启动）。
   Future<bool> start(String runId) async {
-    if (state.isRunning) return false; // 防重入：同时间只允许一个 run
-    if (ref.read(imageGenerationNotifierProvider).isGenerating) return false;
+    final session = _claim(runId);
+    if (session == null) return false;
+    return _executeSession(session, () => _prepareBasic(session));
+  }
+
+  /// 启动深度轮（阶段 D）。子代串和目标块 id 只登记在 lineage；生成时
+  /// 由运行态 guard 投影目标串，普通工作区文档不被改写。
+  Future<bool> startDeepRound(
+    String runId, {
+    required String familyId,
+    required String parentSetId,
+    required int count,
+  }) async {
+    final session = _claim(runId);
+    if (session == null) return false;
+    return _executeSession(
+      session,
+      () => _prepareDeep(
+        session,
+        familyId: familyId,
+        parentSetId: parentSetId,
+        count: count,
+      ),
+    );
+  }
+
+  /// 暂停：当前张完成后退出循环，run → paused，剩余 pending 保留可续跑。
+  void pause() {
+    if (!state.isRunning) return;
+    _pauseRequested = true;
+  }
+
+  /// 取消：中断在途生成，剩余 pending 标 failed(cancelled)，run → cancelled。
+  void cancel() {
+    if (!state.isRunning) return;
+    _cancelRequested = true;
+    if (ref.read(imageGenerationNotifierProvider).isGenerating) {
+      ref.read(imageGenerationNotifierProvider.notifier).cancel();
+    }
+  }
+
+  /// 失败重试：在同一 session 内把 failed 转 pending，再走公共准备和循环路径。
+  Future<bool> retryFailed(String runId) async {
+    final session = _claim(runId);
+    if (session == null) return false;
+    return _executeSession(
+      session,
+      () => _prepareBasic(session, resetFailed: true),
+    );
+  }
+
+  _ExploreRunSession? _claim(String runId) {
+    if (_session != null ||
+        state.isRunning ||
+        _recoveryClaimed ||
+        _recoveryPending) {
+      return null;
+    }
+    if (ref.read(imageGenerationNotifierProvider).isGenerating) return null;
+    final session = _ExploreRunSession(
+      ownerId: const Uuid().v4(),
+      runId: runId,
+    );
+    _session = session;
+    _pauseRequested = false;
+    _cancelRequested = false;
+    _suppressionHeld = true;
+    PillRollCoordinator.suppressRoll();
+    state = ExploreRunRunnerState(runId: runId, isRunning: true);
+    return session;
+  }
+
+  Future<bool> _executeSession(
+    _ExploreRunSession session,
+    Future<_PreparedExploreRun?> Function() prepare,
+  ) async {
+    var persistedGenerating = false;
+    try {
+      final prepared = await prepare();
+      if (prepared == null) return false;
+      persistedGenerating = true;
+      state = state.copyWith(totalCount: prepared.pendingIds.length);
+      await _runLoop(session, prepared);
+      return true;
+    } catch (error, stackTrace) {
+      AppLogger.e(
+        'Explore run session aborted',
+        error,
+        stackTrace,
+        'ExploreRunRunner',
+      );
+      final runWasPersisted =
+          persistedGenerating || session.persistedGenerating;
+      if (error is ExploreDeepRoundException && !runWasPersisted) {
+        rethrow;
+      }
+      if (runWasPersisted) {
+        await _normalizeAfterException(session.runId, error, stackTrace);
+      }
+      return true;
+    } finally {
+      await _cleanupSession(session);
+    }
+  }
+
+  Future<_PreparedExploreRun?> _prepareBasic(
+    _ExploreRunSession session, {
+    bool resetFailed = false,
+  }) async {
     final repository = ref.read(styleExploreRunRepositoryProvider);
-    var run = await repository.getRun(runId);
-    if (run == null) return false;
+    var run = await repository.getRun(session.runId);
+    if (run == null) return null;
+
     const startable = {
       ExploreRunStatus.draft,
       ExploreRunStatus.paused,
       ExploreRunStatus.generated,
     };
-    if (!startable.contains(run.status)) return false;
+    if (!startable.contains(run.status)) return null;
+    if (resetFailed) {
+      if (run.failedCount == 0) return null;
+      run = run.copyWith(
+        candidates: [
+          for (final candidate in run.candidates)
+            candidate.generation.status ==
+                    ExploreCandidateGenerationStatus.failed
+                ? candidate.copyWith(
+                    generation: const ExploreCandidateGeneration(
+                      status: ExploreCandidateGenerationStatus.pending,
+                    ),
+                  )
+                : candidate,
+        ],
+      );
+    }
 
     var pending = run.pendingCandidates;
     if (pending.isEmpty) {
-      // 新建基础轮 + pending 候选壳；roll 快照在每张生成前一刻才抓填。
       final round = ExploreRound(
         id: const Uuid().v4(),
         number: run.rounds.length + 1,
@@ -174,62 +335,46 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       );
       pending = shells;
     } else {
-      // 续跑：含 pending 候选的轮次标回 generating。
       final pendingRoundIds = pending.map((c) => c.roundId).toSet();
       run = run.copyWith(
         rounds: [
           for (final round in run.rounds)
-            pendingRoundIds.contains(round.id) &&
-                    round.status == ExploreRoundStatus.pending
+            pendingRoundIds.contains(round.id)
                 ? round.copyWith(status: ExploreRoundStatus.generating)
                 : round,
         ],
       );
     }
 
-    final listNotifier = ref.read(exploreRunListNotifierProvider.notifier);
-    run = await listNotifier.overwrite(
-      run.copyWith(status: ExploreRunStatus.generating),
-    );
-
-    _pauseRequested = false;
-    _cancelRequested = false;
-    state = ExploreRunRunnerState(
-      runId: runId,
-      isRunning: true,
-      totalCount: pending.length,
-    );
-
-    // 批量生成期间独占 roll 时机：抑制协调器的外部 roll（主生成/桥接
-    // 入队 roll），药丸显示始终=本张实际发送的 roll；循环任何出口
-    // （完成/暂停/取消/异常）都恢复，run 结束后 lane 停留最后一张用过的串。
-    PillRollCoordinator.suppressRoll();
-    try {
-      await _runLoop(runId, [for (final candidate in pending) candidate.id]);
-    } finally {
-      PillRollCoordinator.releaseRollSuppression();
+    final saved = await ref
+        .read(exploreRunListNotifierProvider.notifier)
+        .overwrite(run.copyWith(status: ExploreRunStatus.generating));
+    session.persistedGenerating = true;
+    if (pending.isNotEmpty) {
+      final firstPendingRound = saved.roundById(pending.first.roundId);
+      if (firstPendingRound?.phase == ExploreRoundPhase.deep) {
+        await _ensureDeepGuard(session, firstPendingRound!.id);
+      } else {
+        _clearGuardForSession(session);
+      }
+    } else {
+      _clearGuardForSession(session);
     }
-    return true;
+    return _PreparedExploreRun(
+      run: saved,
+      pendingIds: [for (final candidate in pending) candidate.id],
+    );
   }
 
-  /// 启动深度轮（阶段 D）：变异引擎按父本集出 N 个子代串 → 登记深度
-  /// 候选（lineage.operation=mutation/crossover/injection、generation+1、
-  /// mutatedText/targetBlockId 随候选持久化）→ 逐张生成（每张 roll 后把
-  /// 目标遗传实例的 currentRoll 覆盖为子代串再抓快照）。
-  ///
-  /// 返回 false = 门禁拒绝（重入/主生成在跑/run 状态不可启动）；
-  /// 数据或引擎校验失败抛 [ExploreDeepRoundException]（UI 捕获提示）。
-  Future<bool> startDeepRound(
-    String runId, {
+  Future<_PreparedExploreRun?> _prepareDeep(
+    _ExploreRunSession session, {
     required String familyId,
     required String parentSetId,
     required int count,
   }) async {
-    if (state.isRunning) return false; // 防重入：同时间只允许一个 run
-    if (ref.read(imageGenerationNotifierProvider).isGenerating) return false;
     final repository = ref.read(styleExploreRunRepositoryProvider);
-    final run = await repository.getRun(runId);
-    if (run == null) return false;
+    final loaded = await repository.getRun(session.runId);
+    if (loaded == null) return null;
     const startable = {
       ExploreRunStatus.draft,
       ExploreRunStatus.paused,
@@ -237,10 +382,13 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       ExploreRunStatus.reviewing,
       ExploreRunStatus.completed,
     };
-    if (!startable.contains(run.status)) return false;
+    if (!startable.contains(loaded.status) ||
+        loaded.pendingCandidates.isNotEmpty) {
+      return null;
+    }
 
-    final family = run.familyById(familyId);
-    final parentSet = run.parentSetById(parentSetId);
+    final family = loaded.familyById(familyId);
+    final parentSet = loaded.parentSetById(parentSetId);
     if (family == null ||
         parentSet == null ||
         parentSet.familyId != family.id ||
@@ -250,10 +398,13 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       );
     }
 
-    // 子代串的落点 = 与父本来源同 blockId 的 main lane 随机遗传实例
-    // （找不到回退第一个随机遗传实例）；完全没有则不允许深度轮。
-    final targetBlockId = exploreTargetBlockIdForParentSet(run, parentSet);
-    if (resolveExploreOverrideMarker(ref, blockId: targetBlockId) == null) {
+    final targetBlockId = exploreTargetBlockIdForParentSet(loaded, parentSet);
+    final initialMainDocument = _documentForGuard(PillScopes.main);
+    final targetMarker = resolveExploreOverrideMarkerInDocument(
+      initialMainDocument,
+      blockId: targetBlockId,
+    );
+    if (targetMarker == null) {
       throw const ExploreDeepRoundException(
         ExploreDeepRoundRejection.noRandomInstance,
       );
@@ -270,7 +421,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
           ),
       ],
       count: count,
-      injectionPool: buildExploreInjectionPool(ref, run),
+      injectionPool: buildExploreInjectionPool(ref, loaded),
       rng: deepRng,
     );
     if (children.isEmpty) {
@@ -282,7 +433,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
     final childGeneration = parentSet.generation + 1;
     final round = ExploreRound(
       id: const Uuid().v4(),
-      number: run.rounds.length + 1,
+      number: loaded.rounds.length + 1,
       phase: ExploreRoundPhase.deep,
       status: ExploreRoundStatus.generating,
       createdAt: DateTime.now(),
@@ -311,236 +462,265 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
         ),
     ];
 
-    final listNotifier = ref.read(exploreRunListNotifierProvider.notifier);
-    await listNotifier.overwrite(
-      run.copyWith(
-        status: ExploreRunStatus.generating,
-        rounds: [
-          ...run.rounds,
-          round.copyWith(candidateIds: [for (final c in candidates) c.id]),
-        ],
-        candidates: [...run.candidates, ...candidates],
-      ),
-    );
-
-    _pauseRequested = false;
-    _cancelRequested = false;
-    state = ExploreRunRunnerState(
-      runId: runId,
-      isRunning: true,
-      totalCount: candidates.length,
-    );
-
-    // 与 start 同理：深度轮期间同样独占 roll 时机。
-    PillRollCoordinator.suppressRoll();
-    try {
-      await _runLoop(runId, [for (final candidate in candidates) candidate.id]);
-    } finally {
-      PillRollCoordinator.releaseRollSuppression();
-    }
-    return true;
-  }
-
-  /// 暂停：当前张完成后退出循环，run → paused，剩余 pending 保留可续跑。
-  void pause() {
-    if (!state.isRunning) return;
-    _pauseRequested = true;
-  }
-
-  /// 取消：中断在途生成，剩余 pending 标 failed(cancelled)，
-  /// run → cancelled（终态不可再 start）。
-  void cancel() {
-    if (!state.isRunning) return;
-    _cancelRequested = true;
-    // 仅当生成确实在跑才调 cancel，避免无谓污染主生成状态。
-    if (ref.read(imageGenerationNotifierProvider).isGenerating) {
-      ref.read(imageGenerationNotifierProvider.notifier).cancel();
-    }
-  }
-
-  /// 失败重试：failed 重置 pending 后再 start。
-  Future<bool> retryFailed(String runId) async {
-    if (state.isRunning) return false;
-    final repository = ref.read(styleExploreRunRepositoryProvider);
-    final run = await repository.getRun(runId);
-    if (run == null || run.failedCount == 0) return false;
-    const startable = {
-      ExploreRunStatus.draft,
-      ExploreRunStatus.paused,
-      ExploreRunStatus.generated,
-    };
-    if (!startable.contains(run.status)) return false;
-
-    await ref
+    final saved = await ref
         .read(exploreRunListNotifierProvider.notifier)
         .overwrite(
-          run.copyWith(
-            candidates: [
-              for (final candidate in run.candidates)
-                candidate.generation.status ==
-                        ExploreCandidateGenerationStatus.failed
-                    ? candidate.copyWith(
-                        generation: const ExploreCandidateGeneration(
-                          status: ExploreCandidateGenerationStatus.pending,
-                        ),
-                      )
-                    : candidate,
+          loaded.copyWith(
+            status: ExploreRunStatus.generating,
+            rounds: [
+              ...loaded.rounds,
+              round.copyWith(candidateIds: [for (final c in candidates) c.id]),
             ],
+            candidates: [...loaded.candidates, ...candidates],
           ),
         );
-    return start(runId);
+    session.persistedGenerating = true;
+
+    // Capture raw/current documents before either lane is first built under the
+    // guard; otherwise a missing currentRoll could be materialized too early.
+    final guard = DeepRoundRollGuard.capture(
+      ownerId: session.ownerId,
+      runId: session.runId,
+      roundId: round.id,
+      documents: {
+        PillScopes.main: _documentForGuard(PillScopes.main),
+        PillScopes.negative: _documentForGuard(PillScopes.negative),
+      },
+    );
+    final installed = ref
+        .read(deepRoundRollGuardControllerProvider)
+        .install(guard);
+    if (!installed) {
+      throw StateError('Unable to install deep-round roll guard');
+    }
+    session.roundId = round.id;
+    return _PreparedExploreRun(
+      run: saved,
+      pendingIds: [for (final candidate in candidates) candidate.id],
+    );
   }
 
-  Future<void> _runLoop(String runId, List<String> pendingIds) async {
-    final repository = ref.read(styleExploreRunRepositoryProvider);
+  Future<void> _runLoop(
+    _ExploreRunSession session,
+    _PreparedExploreRun prepared,
+  ) async {
     final listNotifier = ref.read(exploreRunListNotifierProvider.notifier);
-    final loaded = await repository.getRun(runId);
-    if (loaded == null) {
-      state = const ExploreRunRunnerState();
-      return;
-    }
-    // 谱系在登记后不可变，循环内按 id 查（深度候选带 mutatedText 需 override）。
     final lineageByCandidateId = {
-      for (final candidate in loaded.candidates)
+      for (final candidate in prepared.run.candidates)
         candidate.id: candidate.lineage,
     };
 
-    try {
-      for (final candidateId in pendingIds) {
-        if (_cancelRequested || _pauseRequested) break;
+    for (final candidateId in prepared.pendingIds) {
+      if (_cancelRequested || _pauseRequested) break;
 
-        await _waitCooldownAvailable();
-        if (_cancelRequested || _pauseRequested) break;
+      await _waitCooldownAvailable();
+      if (_cancelRequested || _pauseRequested) break;
 
-        state = state.copyWith(currentCandidateId: candidateId);
-
-        // roll 主双 lane（runner 自控节奏，不经 PillRollCoordinator——
-        // 协调器会顺带推 generationParams，runner 只需要 lane 投影现值）。
-        ref
-            .read(pillWorkspaceProvider(PillScopes.main).notifier)
-            .rollAllRandom();
-        ref
-            .read(pillWorkspaceProvider(PillScopes.negative).notifier)
-            .rollAllRandom();
-
-        // 深度候选：把目标遗传实例的 currentRoll 覆盖为子代串（物化语义，
-        // 投影自然采用）。目标实例在生成间隙被删光时本张标失败跳过。
-        final lineage = lineageByCandidateId[candidateId];
-        final mutatedText = lineage?.mutatedText;
-        if (mutatedText != null) {
-          final marker = resolveExploreOverrideMarker(
-            ref,
-            blockId: lineage?.targetBlockId,
-          );
-          if (marker == null) {
-            await listNotifier.updateGeneration(
-              runId,
-              candidateId,
-              const ExploreCandidateGeneration(
-                status: ExploreCandidateGenerationStatus.failed,
-                error: 'no random instance for override',
-              ),
-            );
-            state = state.copyWith(processedCount: state.processedCount + 1);
-            if (_cancelRequested) break;
-            continue;
-          }
-          ref
-              .read(pillWorkspaceProvider(PillScopes.main).notifier)
-              .setInstanceRollOverride(marker, mutatedText);
-        }
-        final rollSnapshot = captureExploreRollSnapshot(ref);
-
-        // 红线：roll 后立刻读 generationParams 的 prompt 是旧值
-        // （updatePrompt 走 microtask）——用 roll 后投影直接重建；
-        // 其余字段取当前主参数现值（characters 用现值，角色 roll 变化
-        // 下一张生效，接受）；单张、逐张随机种子。
-        final tempParams = ref
-            .read(generationParamsNotifierProvider)
-            .copyWith(
-              prompt: rollSnapshot.positive,
-              negativePrompt: rollSnapshot.negative,
-              nSamples: 1,
-              seed: -1,
-            );
-
-        // 生成前抓填 roll 快照（生成中状态由 runner state 表达）。
-        await listNotifier.updateCandidate(
-          runId,
-          candidateId,
-          (candidate) => candidate.copyWith(rollSnapshot: rollSnapshot),
-        );
-
-        final generate = ref.read(exploreGenerateFnProvider);
-        final result = await generate(tempParams);
-
-        if (result != null) {
-          final storedPath = await ref
-              .read(exploreRunImageStoreProvider)
-              .storeCandidateImage(
-                runId: runId,
-                candidateId: candidateId,
-                bytes: result.imageBytes,
-                sourceFilePath: result.filePath,
-              );
-          await listNotifier.updateGeneration(
-            runId,
-            candidateId,
-            ExploreCandidateGeneration(
-              status: ExploreCandidateGenerationStatus.done,
-              filePath: storedPath ?? result.filePath,
-              seed: result.seed,
-              elapsedMs: result.elapsedMs,
-            ),
-          );
-        } else {
-          final errorText = _cancelRequested
-              ? 'cancelled'
-              : (ref.read(imageGenerationNotifierProvider).errorMessage ??
-                    'generation failed');
-          await listNotifier.updateGeneration(
-            runId,
-            candidateId,
-            ExploreCandidateGeneration(
-              status: ExploreCandidateGenerationStatus.failed,
-              error: errorText,
-            ),
-          );
-        }
-        state = state.copyWith(processedCount: state.processedCount + 1);
-        if (_cancelRequested) break;
+      final candidate = prepared.run.candidateById(candidateId);
+      final round = candidate == null
+          ? null
+          : prepared.run.roundById(candidate.roundId);
+      if (candidate == null || round == null) {
+        throw StateError('Candidate $candidateId is not in prepared run');
       }
-    } catch (error, stackTrace) {
-      // 中途异常（如 run 被删）：复位 runner，run 保持 generating，
-      // 由下次启动的恢复流程归位 paused。
-      AppLogger.e(
-        'Explore run loop aborted',
-        error,
-        stackTrace,
-        'ExploreRunRunner',
+      state = state.copyWith(currentCandidateId: candidateId);
+
+      String? targetMarker;
+      final lineage = lineageByCandidateId[candidateId];
+      if (round.phase == ExploreRoundPhase.deep) {
+        final mutatedText = lineage?.mutatedText;
+        if (mutatedText == null) {
+          await _markFailed(
+            session.runId,
+            candidateId,
+            'deep lineage missing mutatedText',
+          );
+          _incrementProcessed();
+          continue;
+        }
+        targetMarker = resolveExploreOverrideMarker(
+          ref,
+          blockId: lineage?.targetBlockId,
+        );
+        if (targetMarker == null) {
+          await _markFailed(
+            session.runId,
+            candidateId,
+            'no random instance for deep target',
+          );
+          _incrementProcessed();
+          continue;
+        }
+        await _ensureDeepGuard(session, round.id);
+        final controller = ref.read(deepRoundRollGuardControllerProvider);
+        final updated = controller.updateCandidate(
+          ownerId: session.ownerId,
+          runId: session.runId,
+          roundId: round.id,
+          targetScope: PillScopes.main,
+          targetMarker: targetMarker,
+          mutatedText: mutatedText,
+        );
+        final targetInstance = ref
+            .read(pillWorkspaceProvider(PillScopes.main))
+            .document
+            .instances[targetMarker];
+        if (!updated ||
+            targetInstance == null ||
+            controller.guard?.kindFor(PillScopes.main, targetMarker) !=
+                DeepRoundRollOverrideKind.explicitTarget ||
+            !controller.hasOverride(
+              PillScopes.main,
+              targetMarker,
+              instance: targetInstance,
+            )) {
+          await _markFailed(
+            session.runId,
+            candidateId,
+            'no random instance for deep target',
+          );
+          _incrementProcessed();
+          continue;
+        }
+      } else {
+        _clearGuardForSession(session);
+      }
+
+      // The runner owns roll timing. Guard entries are skipped before _rollFor,
+      // so automatic suppression and explicit target override consume no RNG.
+      ref.read(pillWorkspaceProvider(PillScopes.main).notifier).rollAllRandom();
+      ref
+          .read(pillWorkspaceProvider(PillScopes.negative).notifier)
+          .rollAllRandom();
+
+      final rollSnapshot = captureExploreRollSnapshot(ref);
+      final tempParams = ref
+          .read(generationParamsNotifierProvider)
+          .copyWith(
+            prompt: rollSnapshot.positive,
+            negativePrompt: rollSnapshot.negative,
+            nSamples: 1,
+            seed: -1,
+          );
+
+      await listNotifier.updateCandidate(
+        session.runId,
+        candidateId,
+        (current) => current.copyWith(rollSnapshot: rollSnapshot),
       );
-      state = const ExploreRunRunnerState();
-      return;
+
+      final result = await ref.read(exploreGenerateFnProvider)(tempParams);
+      if (result != null) {
+        final storedPath = await ref
+            .read(exploreRunImageStoreProvider)
+            .storeCandidateImage(
+              runId: session.runId,
+              candidateId: candidateId,
+              bytes: result.imageBytes,
+              sourceFilePath: result.filePath,
+            );
+        await listNotifier.updateGeneration(
+          session.runId,
+          candidateId,
+          ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.done,
+            filePath: storedPath ?? result.filePath,
+            seed: result.seed,
+            elapsedMs: result.elapsedMs,
+          ),
+        );
+      } else {
+        final errorText = _cancelRequested
+            ? 'cancelled'
+            : (ref.read(imageGenerationNotifierProvider).errorMessage ??
+                  'generation failed');
+        await listNotifier.updateGeneration(
+          session.runId,
+          candidateId,
+          ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.failed,
+            error: errorText,
+          ),
+        );
+      }
+      _incrementProcessed();
+      if (_cancelRequested) break;
     }
 
-    await _finalize(runId, pendingIds);
+    await _finalize(session);
   }
 
-  Future<void> _finalize(String runId, List<String> processedIds) async {
-    final repository = ref.read(styleExploreRunRepositoryProvider);
-    final listNotifier = ref.read(exploreRunListNotifierProvider.notifier);
-    final loaded = await repository.getRun(runId);
-    if (loaded == null) {
-      state = const ExploreRunRunnerState();
+  Future<void> _ensureDeepGuard(
+    _ExploreRunSession session,
+    String roundId,
+  ) async {
+    final controller = ref.read(deepRoundRollGuardControllerProvider);
+    if (controller.guard?.owns(
+          ownerId: session.ownerId,
+          runId: session.runId,
+          roundId: roundId,
+        ) ==
+        true) {
+      session.roundId = roundId;
       return;
     }
-    ExploreRun run = loaded;
+    _clearGuardForSession(session);
+    if (!controller.install(
+      DeepRoundRollGuard.capture(
+        ownerId: session.ownerId,
+        runId: session.runId,
+        roundId: roundId,
+        documents: {
+          PillScopes.main: _documentForGuard(PillScopes.main),
+          PillScopes.negative: _documentForGuard(PillScopes.negative),
+        },
+      ),
+    )) {
+      throw StateError('Unable to rebuild deep-round roll guard');
+    }
+    session.roundId = roundId;
+  }
+
+  PillDocument _documentForGuard(String scope) {
+    final provider = pillWorkspaceProvider(scope);
+    if (ref.exists(provider)) return ref.read(provider).document;
+    return ref.read(pillWorkspaceStorageProvider).tryLoadSync(scope) ??
+        PillDocument.empty();
+  }
+
+  Future<void> _markFailed(
+    String runId,
+    String candidateId,
+    String error,
+  ) async {
+    await ref
+        .read(exploreRunListNotifierProvider.notifier)
+        .updateGeneration(
+          runId,
+          candidateId,
+          ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.failed,
+            error: error,
+          ),
+        );
+  }
+
+  void _incrementProcessed() {
+    state = state.copyWith(processedCount: state.processedCount + 1);
+  }
+
+  Future<void> _finalize(_ExploreRunSession session) async {
+    final listNotifier = ref.read(exploreRunListNotifierProvider.notifier);
+    final run = await ref
+        .read(styleExploreRunRepositoryProvider)
+        .getRun(session.runId);
+    if (run == null) throw StateError('Run disappeared during finalize');
+    var currentRun = run;
 
     if (_cancelRequested) {
-      // 剩余 pending 全部标 failed(cancelled)。
-      for (final candidate in run.pendingCandidates) {
-        run = await listNotifier.updateGeneration(
-          runId,
+      for (final candidate in currentRun.pendingCandidates) {
+        currentRun = await listNotifier.updateGeneration(
+          session.runId,
           candidate.id,
           const ExploreCandidateGeneration(
             status: ExploreCandidateGenerationStatus.failed,
@@ -548,43 +728,118 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
           ),
         );
       }
-      run = run.copyWith(
+      currentRun = currentRun.copyWith(
         status: ExploreRunStatus.cancelled,
         rounds: [
-          for (final round in run.rounds)
-            round.status == ExploreRoundStatus.generating
+          for (final round in currentRun.rounds)
+            round.status == ExploreRoundStatus.generating ||
+                    round.status == ExploreRoundStatus.pending
                 ? round.copyWith(status: ExploreRoundStatus.cancelled)
                 : round,
         ],
       );
-      await listNotifier.overwrite(run);
-    } else if (_pauseRequested) {
-      // 轮次保持 generating，续跑接着处理剩余 pending。
-      await listNotifier.overwrite(
-        run.copyWith(status: ExploreRunStatus.paused),
-      );
-    } else {
-      // 处理完的轮次内无 pending → generated。
-      final processed = processedIds.toSet();
-      run = run.copyWith(
-        status: ExploreRunStatus.generated,
-        rounds: [
-          for (final round in run.rounds)
-            round.status == ExploreRoundStatus.generating &&
-                    round.candidateIds.any(processed.contains) &&
-                    !run.candidates.any(
-                      (c) =>
-                          c.roundId == round.id &&
-                          c.generation.status ==
-                              ExploreCandidateGenerationStatus.pending,
-                    )
-                ? round.copyWith(status: ExploreRoundStatus.generated)
-                : round,
-        ],
-      );
-      await listNotifier.overwrite(run);
+      await listNotifier.overwrite(currentRun);
+      return;
     }
+
+    final paused = _pauseRequested;
+    final rounds = [
+      for (final round in currentRun.rounds)
+        round.status == ExploreRoundStatus.generating
+            ? round.copyWith(
+                status: _roundHasPending(currentRun, round)
+                    ? ExploreRoundStatus.pending
+                    : ExploreRoundStatus.generated,
+              )
+            : round,
+    ];
+    final normalized = currentRun.copyWith(
+      status: paused && currentRun.pendingCandidates.isNotEmpty
+          ? ExploreRunStatus.paused
+          : ExploreRunStatus.generated,
+      rounds: rounds,
+    );
+    await listNotifier.overwrite(normalized);
+  }
+
+  Future<void> _normalizeAfterException(
+    String runId,
+    Object error,
+    StackTrace stackTrace,
+  ) async {
+    try {
+      final repository = ref.read(styleExploreRunRepositoryProvider);
+      final listNotifier = ref.read(exploreRunListNotifierProvider.notifier);
+      final run = await repository.getRun(runId);
+      if (run == null) return;
+      final rounds = [
+        for (final round in run.rounds)
+          round.status == ExploreRoundStatus.generating
+              ? round.copyWith(
+                  status: _roundHasPending(run, round)
+                      ? ExploreRoundStatus.pending
+                      : ExploreRoundStatus.generated,
+                )
+              : round,
+      ];
+      await listNotifier.overwrite(
+        run.copyWith(
+          status: run.pendingCandidates.isNotEmpty
+              ? ExploreRunStatus.paused
+              : ExploreRunStatus.generated,
+          rounds: rounds,
+        ),
+      );
+    } catch (normalizationError, normalizationStack) {
+      AppLogger.e(
+        'Normalize failed explore run state failed: $normalizationError',
+        normalizationError,
+        normalizationStack,
+        'ExploreRunRunner',
+      );
+      AppLogger.e(
+        'Original explore run error: $error',
+        error,
+        stackTrace,
+        'ExploreRunRunner',
+      );
+    }
+  }
+
+  Future<void> _cleanupSession(_ExploreRunSession session) async {
+    if (!identical(_session, session)) return;
+    _clearGuardForSession(session);
+    if (_suppressionHeld) {
+      PillRollCoordinator.releaseRollSuppression();
+      _suppressionHeld = false;
+    }
+    _session = null;
     state = const ExploreRunRunnerState();
+  }
+
+  void _clearGuardForSession(_ExploreRunSession session) {
+    final controller = ref.read(deepRoundRollGuardControllerProvider);
+    final guard = controller.guard;
+    if (guard == null ||
+        guard.ownerId != session.ownerId ||
+        guard.runId != session.runId) {
+      return;
+    }
+    controller.clear(
+      ownerId: guard.ownerId,
+      runId: guard.runId,
+      roundId: guard.roundId,
+    );
+  }
+
+  static bool _roundHasPending(ExploreRun run, ExploreRound round) {
+    final ids = round.candidateIds.toSet();
+    return run.candidates.any(
+      (candidate) =>
+          ids.contains(candidate.id) &&
+          candidate.generation.status ==
+              ExploreCandidateGenerationStatus.pending,
+    );
   }
 
   /// 与 GenerationCooldownNotifier.waitUntilAvailable 同节拍，

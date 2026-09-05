@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:uuid/uuid.dart';
@@ -95,6 +96,35 @@ class GeneratedImage {
 
 /// 生成状态
 enum GenerationStatus { idle, generating, completed, error, cancelled }
+
+enum GenerationBatchEventKind { start, complete }
+
+class GenerationBatchEvent {
+  const GenerationBatchEvent({
+    required this.kind,
+    this.generationRunId = -1,
+    required this.batchIndex,
+    required this.slotStart,
+    required this.slotCount,
+    required this.totalSlots,
+    this.images = const [],
+    this.error,
+    this.elapsedMs,
+  });
+
+  final GenerationBatchEventKind kind;
+  final int generationRunId;
+  final int batchIndex;
+  final int slotStart;
+  final int slotCount;
+  final int totalSlots;
+  final List<GeneratedImage> images;
+  final Object? error;
+  final int? elapsedMs;
+}
+
+typedef GenerationBatchCallback =
+    FutureOr<void> Function(GenerationBatchEvent event);
 
 /// 探索任务专用单张生成结果（`ImageGenerationNotifier.generateForExplore`）。
 ///

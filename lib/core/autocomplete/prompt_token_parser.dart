@@ -1,12 +1,15 @@
 import '../utils/alias_parser.dart';
+import '../utils/nai_weight_syntax.dart';
+import '../utils/tag_normalizer.dart';
 import 'completion_models.dart';
 
 class PromptTokenParser {
   const PromptTokenParser._();
 
-  static final RegExp _weightPrefix = RegExp(r'^[\s\{\[\(]+');
-  static final RegExp _weightSuffix = RegExp(r'[\s\}\]\)]+$');
-  static final RegExp _weightNumberSuffix = RegExp(r'(?::\s*-?\d+(?:\.\d+)?)$');
+  static final RegExp _weightNumberSuffix = RegExp(r':\s*-?\d+(?:\.\d+)?$');
+  static final RegExp _syntaxSuffix = RegExp(
+    r'^(?:(?:\s*::)|(?::\s*-?\d+(?:\.\d+)?)|[\}\]\)])*',
+  );
 
   static CompletionQuery parse({
     required String text,
@@ -18,7 +21,7 @@ class PromptTokenParser {
     final cursor = cursorPosition.clamp(0, text.length);
     final (isTypingAlias, partialAlias, aliasStart) =
         AliasParser.detectPartialAlias(text, cursor);
-    if (isTypingAlias) {
+    if (isTypingAlias && !splitOnSpaces) {
       var replacementEnd = cursor;
       final closingBracket = text.indexOf('>', cursor);
       final nextLineBreak = text.indexOf(RegExp(r'[\r\n]'), cursor);
@@ -41,66 +44,36 @@ class PromptTokenParser {
       );
     }
 
-    var start = cursor;
-    var end = cursor;
-
-    while (start > 0 &&
-        !_isSeparator(text.codeUnitAt(start - 1), splitOnSpaces)) {
-      start--;
-    }
-    while (end < text.length &&
-        !_isSeparator(text.codeUnitAt(end), splitOnSpaces)) {
-      end++;
-    }
-
-    final raw = text.substring(start, end);
-    final prefix = _weightPrefix.firstMatch(raw)?.group(0) ?? '';
-    final afterPrefix = raw.substring(prefix.length);
-    final suffixMatch = _weightSuffix.firstMatch(afterPrefix);
-    final suffixLength = suffixMatch?.group(0)?.length ?? 0;
-    final withoutSuffixEnd = raw.length - suffixLength;
-    final beforeSuffix = raw.substring(prefix.length, withoutSuffixEnd);
-    final weightNumber = _weightNumberSuffix.firstMatch(beforeSuffix);
-    final contentEnd = weightNumber == null
-        ? withoutSuffixEnd
-        : prefix.length + weightNumber.start;
-
-    final replacementStart = start + prefix.length;
-    final replacementEnd = start + contentEnd;
-    final token = text
-        .substring(replacementStart, replacementEnd)
-        .trim()
-        .replaceAll(' ', '_')
-        .toLowerCase();
-
+    final segments = _segments(text, splitOnSpaces);
+    final segment = segments.firstWhere(
+      (range) => range.start <= cursor && cursor <= range.end,
+    );
+    final range = _contentRange(text, segment, splitOnSpaces);
+    final token = TagNormalizer.normalize(
+      text.substring(range.start, range.end),
+    );
     final existingTags = <String>{};
-    final tagSeparator = splitOnSpaces ? RegExp(r'[,\n\s]+') : RegExp(r'[,\n]');
-    for (final segment in text.split(tagSeparator)) {
-      final normalized = _normalizeExistingTag(segment);
-      if (normalized.isNotEmpty && normalized != token) {
-        existingTags.add(normalized);
-      }
+    for (final other in segments) {
+      if (identical(segment, other)) continue;
+      final content = _contentRange(text, other, splitOnSpaces);
+      final value = text.substring(content.start, content.end);
+      if (!splitOnSpaces && value.contains('<')) continue;
+      final normalized = TagNormalizer.normalize(value);
+      if (normalized.isNotEmpty) existingTags.add(normalized);
     }
 
     return CompletionQuery(
       fullText: text,
       cursorPosition: cursor,
       token: token,
-      replacementRange: TextReplacementRange(
-        start: replacementStart,
-        end: replacementEnd,
-      ),
+      replacementRange: range,
       existingTags: existingTags,
       limit: limit.clamp(1, CompletionResultLimits.all),
       locale: locale,
     );
   }
 
-  /// Builds an insertion query for the complete tag under the caret.
-  ///
-  /// Unlike normal completion this never replaces the source tag. The result
-  /// is inserted after its segment, or after the following comma when one is
-  /// already present, so weighted NovelAI syntax remains untouched.
+  /// Inserts after the source tag and its closing syntax, without rewriting it.
   static CompletionQuery? parseRelated({
     required String text,
     required int cursorPosition,
@@ -120,26 +93,38 @@ class PromptTokenParser {
       final before = text
           .substring(0, parsed.replacementRange.start)
           .trimRight();
-      if (!before.endsWith(',')) return null;
-      final withoutComma = before.substring(0, before.length - 1);
-      final previous = withoutComma.split(RegExp(r'[,\n]')).last;
-      final normalized = _normalizeExistingTag(previous);
-      if (normalized.length < 2) return null;
-      return parsed.copyWith(relatedTag: normalized);
+      if (!before.endsWith(',') && !before.endsWith('，')) return null;
+      final previous = parse(
+        text: text,
+        cursorPosition: before.length - 1,
+        limit: limit,
+        locale: locale,
+        splitOnSpaces: splitOnSpaces,
+      );
+      if (previous.token.length < 2 ||
+          previous.kind == CompletionQueryKind.libraryAlias ||
+          previous.token.contains('<')) {
+        return null;
+      }
+      return parsed.copyWith(relatedTag: previous.token);
     }
-    if (parsed.token.length < 2) return null;
+    if (parsed.token.length < 2 || parsed.token.contains('<')) return null;
 
     var insertionPosition = parsed.replacementRange.end;
+    if (!splitOnSpaces) {
+      insertionPosition += _syntaxSuffix
+          .firstMatch(text.substring(insertionPosition))!
+          .end;
+    }
     while (insertionPosition < text.length &&
-        !_isSeparator(text.codeUnitAt(insertionPosition), splitOnSpaces)) {
+        _isHorizontalSpace(text[insertionPosition])) {
       insertionPosition++;
     }
     if (insertionPosition < text.length &&
-        text.codeUnitAt(insertionPosition) == 0x2c) {
+        (text[insertionPosition] == ',' || text[insertionPosition] == '，')) {
       insertionPosition++;
       while (insertionPosition < text.length &&
-          (text.codeUnitAt(insertionPosition) == 0x20 ||
-              text.codeUnitAt(insertionPosition) == 0x09)) {
+          _isHorizontalSpace(text[insertionPosition])) {
         insertionPosition++;
       }
     }
@@ -164,61 +149,185 @@ class PromptTokenParser {
     required CompletionQuery query,
     required String canonicalTag,
     required bool autoInsertComma,
-    required bool replaceUnderscores,
+    bool replaceUnderscores = true,
+    bool splitOnSpaces = false,
+    bool closeOpenWeight = false,
   }) {
     final tag = query.kind == CompletionQueryKind.libraryAlias
         ? '<$canonicalTag>'
-        : replaceUnderscores
-        ? canonicalTag.replaceAll('_', ' ')
-        : canonicalTag;
+        : splitOnSpaces
+        ? canonicalTag
+        : TagNormalizer.toDisplay(canonicalTag);
     final range = query.replacementRange;
     final before = text.substring(0, range.start);
     var after = text.substring(range.end);
 
     if (query.relatedTag != null && range.start == range.end) {
+      final trimmedBefore = before.trimRight();
       final alreadySeparated =
-          before.trimRight().endsWith(',') ||
-          before.trimRight().endsWith('\n') ||
-          before.trimRight().endsWith('\r');
-      final prefix = before.isEmpty || alreadySeparated ? '' : ', ';
+          trimmedBefore.endsWith(',') ||
+          trimmedBefore.endsWith('，') ||
+          before.endsWith('\n') ||
+          before.endsWith('\r') ||
+          (splitOnSpaces && before.endsWith(' '));
+      final separator = splitOnSpaces ? ' ' : ', ';
+      final prefix = before.isEmpty || alreadySeparated ? '' : separator;
+      final leadingSpace =
+          before.isNotEmpty &&
+              alreadySeparated &&
+              !RegExp(r'\s$').hasMatch(before)
+          ? ' '
+          : '';
+      var syntaxSuffix = splitOnSpaces
+          ? ''
+          : _syntaxSuffix.firstMatch(after)!.group(0)!;
+      after = after.substring(syntaxSuffix.length);
+      if (syntaxSuffix.startsWith('::')) {
+        syntaxSuffix =
+            '${NaiWeightSyntax.close(tag).substring(tag.length)}${syntaxSuffix.substring(2)}';
+      }
       final hasFollowingTag = after.trimLeft().isNotEmpty;
-      final suffix = autoInsertComma || hasFollowingTag ? ', ' : '';
-      final insertion = '$prefix$tag$suffix';
-      final result = '$before$insertion$after';
-      return (text: result, cursorPosition: before.length + insertion.length);
+      final suffix = autoInsertComma || hasFollowingTag ? separator : '';
+      final insertion = '$prefix$leadingSpace$tag$syntaxSuffix$suffix';
+      return (
+        text: '$before$insertion$after',
+        cursorPosition: before.length + insertion.length,
+      );
     }
 
-    var insertion = tag;
+    var syntaxSuffix = splitOnSpaces
+        ? ''
+        : _syntaxSuffix.firstMatch(after)!.group(0)!;
+    after = after.substring(syntaxSuffix.length);
+    if (closeOpenWeight && !splitOnSpaces && after.isEmpty) {
+      final segment = _segments(text, false).last;
+      final prefix = text.substring(segment.start, range.start);
+      syntaxSuffix = _closeOpenWeight(prefix, syntaxSuffix);
+    }
+    if (syntaxSuffix.startsWith('::')) {
+      syntaxSuffix =
+          '${NaiWeightSyntax.close(tag).substring(tag.length)}${syntaxSuffix.substring(2)}';
+    }
+
+    var insertion = '$tag$syntaxSuffix';
     if (autoInsertComma) {
-      final syntaxSuffix = RegExp(
-        r'^(?::\s*-?\d+(?:\.\d+)?)?[\}\]\)]*',
-      ).firstMatch(after)!.group(0)!;
-      final contentAfterSyntax = after.substring(syntaxSuffix.length);
-      final existingComma = RegExp(r'^\s*,\s*').firstMatch(contentAfterSyntax);
-      if (existingComma == null) {
-        insertion = '$insertion$syntaxSuffix, ';
-        after = contentAfterSyntax;
+      final existingSeparator =
+          (splitOnSpaces ? RegExp(r'^\s+') : RegExp(r'^\s*[,，][ \t]*'))
+              .firstMatch(after);
+      if (existingSeparator == null) {
+        insertion += splitOnSpaces ? ' ' : ', ';
       } else {
-        insertion = '$insertion$syntaxSuffix${existingComma.group(0)}';
-        after = contentAfterSyntax.substring(existingComma.end);
+        insertion += existingSeparator.group(0)!;
+        after = after.substring(existingSeparator.end);
       }
     }
-
-    final result = '$before$insertion$after';
-    return (text: result, cursorPosition: before.length + insertion.length);
+    return (
+      text: '$before$insertion$after',
+      cursorPosition: before.length + insertion.length,
+    );
   }
 
-  static bool _isSeparator(int codeUnit, bool splitOnSpaces) =>
-      codeUnit == 0x2c ||
-      codeUnit == 0x0a ||
-      codeUnit == 0x0d ||
-      (splitOnSpaces && (codeUnit == 0x20 || codeUnit == 0x09));
-
-  static String _normalizeExistingTag(String raw) {
-    var value = raw.trim();
-    value = value.replaceFirst(_weightPrefix, '');
-    value = value.replaceFirst(_weightSuffix, '');
-    value = value.replaceFirst(_weightNumberSuffix, '');
-    return value.trim().replaceAll(' ', '_').toLowerCase();
+  static List<TextReplacementRange> _segments(String text, bool splitOnSpaces) {
+    final result = <TextReplacementRange>[];
+    var start = 0;
+    var inAlias = false;
+    for (var i = 0; i < text.length; i++) {
+      final char = text[i];
+      if (!splitOnSpaces && char == '<') inAlias = true;
+      if (char == '\n' || char == '\r') inAlias = false;
+      final separator =
+          !inAlias &&
+          (char == ',' ||
+              char == '，' ||
+              char == '\n' ||
+              char == '\r' ||
+              (splitOnSpaces && _isHorizontalSpace(char)) ||
+              (char == '|' &&
+                  (i == 0 || text[i - 1] != '|') &&
+                  (i + 1 == text.length || text[i + 1] != '|')));
+      if (separator) {
+        result.add(TextReplacementRange(start: start, end: i));
+        start = i + 1;
+      }
+      if (char == '>') inAlias = false;
+    }
+    result.add(TextReplacementRange(start: start, end: text.length));
+    return result;
   }
+
+  static TextReplacementRange _contentRange(
+    String text,
+    TextReplacementRange segment,
+    bool splitOnSpaces,
+  ) {
+    var start = segment.start;
+    var end = segment.end;
+    while (start < end && text[start].trim().isEmpty) {
+      start++;
+    }
+    while (start < end && text[end - 1].trim().isEmpty) {
+      end--;
+    }
+    if (splitOnSpaces) return TextReplacementRange(start: start, end: end);
+
+    while (start < end) {
+      final weight = TagNormalizer.weightPrefixPattern.firstMatch(
+        text.substring(start, end),
+      );
+      if (weight != null) {
+        start += weight.end;
+      } else if ('{[('.contains(text[start]) || text[start].trim().isEmpty) {
+        start++;
+      } else {
+        break;
+      }
+    }
+    while (start < end) {
+      final content = text.substring(start, end);
+      if (text[end - 1].trim().isEmpty) {
+        end--;
+      } else if (content.endsWith('::')) {
+        end -= 2;
+      } else if (_isUnmatchedCloser(content)) {
+        end--;
+      } else {
+        final weight = _weightNumberSuffix.firstMatch(content);
+        if (weight == null) break;
+        end = start + weight.start;
+      }
+    }
+    return TextReplacementRange(start: start, end: end);
+  }
+
+  static bool _isUnmatchedCloser(String content) {
+    final index = '}])'.indexOf(content[content.length - 1]);
+    if (index < 0) return false;
+    final opener = '{[('[index];
+    final closer = '}])'[index];
+    var depth = 0;
+    for (var i = content.length - 1; i >= 0; i--) {
+      if (content[i] == closer) depth++;
+      if (content[i] == opener) depth--;
+      if (depth == 0) return false;
+    }
+    return true;
+  }
+
+  static String _closeOpenWeight(String prefix, String suffix) {
+    if (suffix.contains('::')) return suffix;
+    final weight = TagNormalizer.weightPattern.firstMatch(prefix);
+    if (weight == null) return suffix;
+    final outerBrackets = RegExp(
+      r'[\{\[\(]',
+    ).allMatches(prefix.substring(0, weight.start)).length;
+    var index = suffix.length;
+    var remaining = outerBrackets;
+    while (index > 0 && remaining > 0) {
+      index--;
+      if ('}])'.contains(suffix[index])) remaining--;
+    }
+    return '${suffix.substring(0, index)}::${suffix.substring(index)}';
+  }
+
+  static bool _isHorizontalSpace(String char) => char == ' ' || char == '\t';
 }

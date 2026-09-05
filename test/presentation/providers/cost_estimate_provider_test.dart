@@ -440,6 +440,33 @@ void main() {
       expect(container.read(estimatedCostProvider), 2);
     });
 
+    test('explore batch size override ignores global batch size', () {
+      final paramsNotifier = container.read(
+        generationParamsNotifierProvider.notifier,
+      );
+      paramsNotifier.updateSize(832, 1216, persist: false);
+      paramsNotifier.updateSteps(28);
+      paramsNotifier.updateNSamples(2);
+      container.read(imagesPerRequestProvider.notifier).set(4);
+
+      final mainCost = container.read(estimatedCostProvider);
+      final exploreCost = container.read(estimatedCostForBatchSizeProvider(1));
+      final expectedExploreCost = AnlasCalculator.calculateRequestCost(
+        width: 832,
+        height: 1216,
+        steps: 28,
+        batchCount: 2,
+        batchSize: 1,
+        model: paramsNotifier.state.model,
+        smea: paramsNotifier.state.effectiveSmea,
+        smeaDyn: paramsNotifier.state.effectiveSmeaDyn,
+        strength: 1.0,
+      );
+
+      expect(mainCost, greaterThan(exploreCost));
+      expect(exploreCost, expectedExploreCost);
+    });
+
     test('should include the per-request fee after four Vibes', () {
       final subscription = container.read(
         subscriptionNotifierProvider.notifier,

@@ -24,6 +24,41 @@ class PromptBlockLibraryState {
   List<PromptBlock> blocksInFolder(String? folderId) =>
       blocks.childrenOf(folderId);
 
+  /// 获取指定文件夹子树内的全部块（直属 + 各级后代文件夹）。
+  ///
+  /// 按文件夹树顺序排列：每个文件夹先列直属块，再按用户排序逐个下钻
+  /// 子文件夹，让点选父文件夹时能完整浏览整棵子树的内容。
+  List<PromptBlock> blocksInFolderTree(String? folderId) {
+    final result = <PromptBlock>[];
+
+    void visit(String? id) {
+      result.addAll(blocks.childrenOf(id));
+      for (final folder in folders.childrenOf(id)) {
+        visit(folder.id);
+      }
+    }
+
+    visit(folderId);
+    return result;
+  }
+
+  /// 全库文件夹树序映射（根目录为 0，之后按 DFS：先同级文件夹用户排序，
+  /// 再逐层下钻），供排序回退使用；不在映射里的文件夹 ID 视为排在最后。
+  Map<String?, int> folderTreeOrder() {
+    final order = <String?, int>{};
+    var next = 0;
+
+    void visit(String? id) {
+      order[id] = next++;
+      for (final folder in folders.childrenOf(id)) {
+        visit(folder.id);
+      }
+    }
+
+    visit(null);
+    return order;
+  }
+
   /// 获取已收藏的块。
   List<PromptBlock> get favoriteBlocks =>
       blocks.where((block) => block.isFavorite).toList();

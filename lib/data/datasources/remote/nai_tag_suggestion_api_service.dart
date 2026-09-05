@@ -6,6 +6,7 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/network/nai_api_endpoint_service.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/nai_prompt_segments.dart';
 import '../../models/tag/tag_suggestion.dart';
 
 part 'nai_tag_suggestion_api_service.g.dart';
@@ -60,10 +61,10 @@ class NAITagSuggestionApiService {
     String prompt, {
     String? model,
   }) async {
-    final parts = prompt.split(',');
-    if (parts.isEmpty) return [];
+    final parts = splitNaiPromptSegments(prompt);
+    if (parts.isEmpty || !prompt.trimRight().endsWith(parts.last)) return [];
 
-    final lastPart = parts.last.trim();
+    final lastPart = parts.last;
     if (lastPart.length < 2) return [];
 
     return suggestTags(lastPart, model: model);

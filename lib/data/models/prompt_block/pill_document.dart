@@ -6,7 +6,7 @@
 library;
 
 /// 实例随机模式（P2.5）：固定 = 投影恒为块内容；随机抽取 = 投影为物化的
-/// `currentRoll`（roll 时机：参数变更/手动骰子/生成入队后）。
+/// `currentRoll`（未锁定实例可在参数变更/手动骰子/生成入队后重抽）。
 enum PillRollMode { fixed, random }
 
 /// 随机抽取的输出顺序：抽中序 / 按原序（质量词类块用后者）。
@@ -182,11 +182,12 @@ class PillInstanceSettings {
   );
 }
 
-/// 单个块实例：引用库中的块 + 启用态 + 遗传开关 + 随机参数 + 物化 roll 结果。
+/// 单个块实例：引用库中的块 + 启用态 + 用户锁定 + 遗传开关 + 随机参数 + 物化 roll 结果。
 class PillInstance {
   const PillInstance({
     required this.blockId,
     this.enabled = true,
+    this.locked = false,
     this.evolutionEnabled = false,
     this.settings = PillInstanceSettings.fixedDefault,
     this.currentRoll,
@@ -195,18 +196,23 @@ class PillInstance {
   final String blockId;
   final bool enabled;
 
+  /// 随机实例是否冻结当前 `currentRoll`；固定实例不使用此字段。
+  /// 旧存档缺键时关闭。
+  final bool locked;
+
   /// 是否把该实例作为画风探索深度轮的遗传块。
   /// 这是实例级开关，不改变普通投影或 roll 语义；旧存档缺键时关闭。
   final bool evolutionEnabled;
   final PillInstanceSettings settings;
 
   /// 随机模式下的物化提示词串：L1 卡显示 = 生成发送 = token 计数三者同源。
-  /// null = 尚未 roll（投影前由工作区兜底物化）。
+  /// null = 尚未 roll（投影前由工作区兜底物化，锁定实例除外）。
   final String? currentRoll;
 
   PillInstance copyWith({
     String? blockId,
     bool? enabled,
+    bool? locked,
     bool? evolutionEnabled,
     PillInstanceSettings? settings,
     String? currentRoll,
@@ -214,6 +220,7 @@ class PillInstance {
     return PillInstance(
       blockId: blockId ?? this.blockId,
       enabled: enabled ?? this.enabled,
+      locked: locked ?? this.locked,
       evolutionEnabled: evolutionEnabled ?? this.evolutionEnabled,
       settings: settings ?? this.settings,
       currentRoll: currentRoll ?? this.currentRoll,
@@ -223,6 +230,7 @@ class PillInstance {
   Map<String, dynamic> toJson() => {
     'blockId': blockId,
     'enabled': enabled,
+    'locked': locked,
     'evolutionEnabled': evolutionEnabled,
     'settings': settings.toJson(),
     if (currentRoll != null) 'currentRoll': currentRoll,
@@ -233,6 +241,7 @@ class PillInstance {
     return PillInstance(
       blockId: json['blockId'] as String? ?? '',
       enabled: json['enabled'] as bool? ?? true,
+      locked: json['locked'] as bool? ?? false,
       evolutionEnabled: json['evolutionEnabled'] as bool? ?? false,
       settings: rawSettings is Map
           ? PillInstanceSettings.fromJson(
@@ -248,13 +257,20 @@ class PillInstance {
       other is PillInstance &&
       other.blockId == blockId &&
       other.enabled == enabled &&
+      other.locked == locked &&
       other.evolutionEnabled == evolutionEnabled &&
       other.settings == settings &&
       other.currentRoll == currentRoll;
 
   @override
-  int get hashCode =>
-      Object.hash(blockId, enabled, evolutionEnabled, settings, currentRoll);
+  int get hashCode => Object.hash(
+    blockId,
+    enabled,
+    locked,
+    evolutionEnabled,
+    settings,
+    currentRoll,
+  );
 }
 
 /// 药丸工作区文档：文本（含标记字符）+ 实例表。

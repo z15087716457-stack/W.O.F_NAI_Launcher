@@ -23,6 +23,7 @@ class PaginationBar extends StatefulWidget {
   final bool showItemsPerPage;
   final bool showTotalInfo;
   final bool compact;
+  final Widget? trailing;
 
   /// 逻辑列宽（px）：提供时在「每页 N 项」右侧显示列宽调节控件
   final double? columnWidth;
@@ -45,6 +46,7 @@ class PaginationBar extends StatefulWidget {
     this.showItemsPerPage = true,
     this.showTotalInfo = true,
     this.compact = false,
+    this.trailing,
     this.columnWidth,
     this.onColumnWidthChanged,
     this.onColumnWidthChangeEnd,
@@ -170,14 +172,26 @@ class _PaginationBarState extends State<PaginationBar> {
         // Column width control (本地画廊专用：提供回调时才显示)
         if (widget.onColumnWidthChanged != null && widget.columnWidth != null)
           _buildColumnWidthControl(theme, colorScheme),
+        if (widget.trailing != null) ...[
+          const SizedBox(width: 8),
+          widget.trailing!,
+        ],
       ],
     );
   }
 
   Widget _buildCompactLayout(ThemeData theme, ColorScheme colorScheme) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [_buildPageNavigation(theme, colorScheme)],
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      runSpacing: 4,
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: _buildPageNavigation(theme, colorScheme),
+        ),
+        if (widget.trailing != null) widget.trailing!,
+      ],
     );
   }
 

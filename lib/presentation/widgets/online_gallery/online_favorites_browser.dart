@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
+import '../../../core/cache/danbooru_image_cache_manager.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/online_gallery/gallery_item.dart';
 import '../../../data/models/online_gallery/gallery_source.dart';
@@ -381,7 +382,13 @@ class _OnlineFavoritesBrowserState
             if (url.isNotEmpty)
               AspectRatio(
                 aspectRatio: aspect.clamp(0.4, 3.0),
-                child: CachedNetworkImage(imageUrl: url, fit: BoxFit.cover),
+                child: CachedNetworkImage(
+                  imageUrl: url,
+                  httpHeaders: onlineGalleryImageHeadersForUrl(url),
+                  cacheKey: onlineGalleryImageCacheKeyForUrl(url),
+                  cacheManager: DanbooruImageCacheManager.instance,
+                  fit: BoxFit.cover,
+                ),
               ),
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 6, 4, 6),
@@ -548,7 +555,14 @@ class _AuthorCard extends StatelessWidget {
                         avatarColors[fallbackAvatarSeed % avatarColors.length],
                     foregroundImage: avatarUrl.isEmpty
                         ? null
-                        : CachedNetworkImageProvider(avatarUrl),
+                        : CachedNetworkImageProvider(
+                            avatarUrl,
+                            cacheManager: DanbooruImageCacheManager.instance,
+                            cacheKey: onlineGalleryImageCacheKeyForUrl(
+                              avatarUrl,
+                            ),
+                            headers: onlineGalleryImageHeadersForUrl(avatarUrl),
+                          ),
                     child: avatarUrl.isEmpty
                         ? Text(
                             authorName.isNotEmpty
@@ -602,6 +616,16 @@ class _AuthorCard extends StatelessWidget {
                                   ? DecorationImage(
                                       image: CachedNetworkImageProvider(
                                         sampleUrls[i],
+                                        cacheManager:
+                                            DanbooruImageCacheManager.instance,
+                                        cacheKey:
+                                            onlineGalleryImageCacheKeyForUrl(
+                                              sampleUrls[i],
+                                            ),
+                                        headers:
+                                            onlineGalleryImageHeadersForUrl(
+                                              sampleUrls[i],
+                                            ),
                                       ),
                                       fit: BoxFit.cover,
                                     )

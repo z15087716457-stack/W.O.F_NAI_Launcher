@@ -694,6 +694,12 @@ abstract class AppLocalizations {
   /// **'Sign in with your NovelAI account\nAll data is stored locally only'**
   String get auth_loginTip;
 
+  /// No description provided for @auth_guestEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip login and continue as guest'**
+  String get auth_guestEntry;
+
   /// No description provided for @auth_loggedIn.
   ///
   /// In en, this message translates to:
@@ -2034,7 +2040,7 @@ abstract class AppLocalizations {
   /// No description provided for @prompt_autoFormatSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Convert Chinese commas to English, auto-add underscores'**
+  /// **'Normalize commas and whitespace, preserve word spaces and safely close weights'**
   String get prompt_autoFormatSubtitle;
 
   /// No description provided for @prompt_highlightEmphasis.
@@ -2058,7 +2064,7 @@ abstract class AppLocalizations {
   /// No description provided for @prompt_sdSyntaxAutoConvertSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Convert SD weight syntax to NAI format on blur'**
+  /// **'Convert SD weights to NAI syntax on blur or generation'**
   String get prompt_sdSyntaxAutoConvertSubtitle;
 
   /// No description provided for @prompt_resolveAliasOnCopy.
@@ -7014,6 +7020,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Column width'**
   String get localGallery_columnWidth;
+
+  /// No description provided for @localGallery_thumbnailQualitySd.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get localGallery_thumbnailQualitySd;
+
+  /// No description provided for @localGallery_thumbnailQualityHd.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get localGallery_thumbnailQualityHd;
+
+  /// No description provided for @localGallery_thumbnailQualityTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose local gallery thumbnail quality'**
+  String get localGallery_thumbnailQualityTooltip;
 
   /// No description provided for @localGallery_naiOnly.
   ///
@@ -17266,12 +17290,6 @@ abstract class AppLocalizations {
   /// **'Add a comma after insertion'**
   String get autocomplete_autoComma;
 
-  /// No description provided for @autocomplete_replaceUnderscores.
-  ///
-  /// In en, this message translates to:
-  /// **'Replace underscores with spaces on insertion'**
-  String get autocomplete_replaceUnderscores;
-
   /// No description provided for @autocomplete_dataSourcesTitle.
   ///
   /// In en, this message translates to:
@@ -17637,6 +17655,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Re-roll'**
   String get pillCardReroll;
+
+  /// No description provided for @pillCardRerollLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked; re-roll unavailable'**
+  String get pillCardRerollLocked;
+
+  /// No description provided for @pillCardLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock current roll'**
+  String get pillCardLock;
+
+  /// No description provided for @pillCardUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get pillCardUnlock;
 
   /// No description provided for @pillCardSettings.
   ///
@@ -18229,6 +18265,54 @@ abstract class AppLocalizations {
   /// **'Grid view'**
   String get promptBlockLibrary_gridView;
 
+  /// No description provided for @promptBlockLibrary_sortBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get promptBlockLibrary_sortBy;
+
+  /// No description provided for @promptBlockLibrary_sortCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Default (manual order)'**
+  String get promptBlockLibrary_sortCustom;
+
+  /// No description provided for @promptBlockLibrary_sortUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last modified'**
+  String get promptBlockLibrary_sortUpdated;
+
+  /// No description provided for @promptBlockLibrary_sortTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get promptBlockLibrary_sortTitle;
+
+  /// No description provided for @promptBlockLibrary_sortColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get promptBlockLibrary_sortColor;
+
+  /// No description provided for @promptBlockLibrary_sortIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get promptBlockLibrary_sortIcon;
+
+  /// No description provided for @promptBlockLibrary_sortAscending.
+  ///
+  /// In en, this message translates to:
+  /// **'Ascending'**
+  String get promptBlockLibrary_sortAscending;
+
+  /// No description provided for @promptBlockLibrary_sortDescending.
+  ///
+  /// In en, this message translates to:
+  /// **'Descending'**
+  String get promptBlockLibrary_sortDescending;
+
   /// No description provided for @promptBlockLibrary_cardSize.
   ///
   /// In en, this message translates to:
@@ -18499,11 +18583,11 @@ abstract class AppLocalizations {
   /// **'Deleted \"{name}\"'**
   String styleExplore_runDeleted(String name);
 
-  /// No description provided for @styleExplore_runProgress.
+  /// No description provided for @styleExplore_runTotalCount.
   ///
   /// In en, this message translates to:
-  /// **'{done}/{total}'**
-  String styleExplore_runProgress(int done, int total);
+  /// **'Total {total} images'**
+  String styleExplore_runTotalCount(int total);
 
   /// No description provided for @styleExplore_runGeneratingProgress.
   ///
@@ -18583,12 +18667,6 @@ abstract class AppLocalizations {
   /// **'Loaded snapshot of \"{name}\"'**
   String styleExplore_snapshotLoaded(String name);
 
-  /// No description provided for @styleExplore_startRun.
-  ///
-  /// In en, this message translates to:
-  /// **'Start'**
-  String get styleExplore_startRun;
-
   /// No description provided for @styleExplore_pauseRun.
   ///
   /// In en, this message translates to:
@@ -18612,12 +18690,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Images'**
   String get styleExplore_targetCountLabel;
-
-  /// No description provided for @styleExplore_runAnotherRound.
-  ///
-  /// In en, this message translates to:
-  /// **'Another round'**
-  String get styleExplore_runAnotherRound;
 
   /// No description provided for @styleExplore_manualRunName.
   ///

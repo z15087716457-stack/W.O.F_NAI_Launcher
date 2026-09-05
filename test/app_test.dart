@@ -463,22 +463,22 @@ void main() {
         );
       }
 
-      expect(apply('{rai}', 4).$1, '{raiden_shogun}, ');
-      expect(apply('{rai}', 5).$1, '{raiden_shogun}, ');
-      expect(apply('[rai]', 4).$1, '[raiden_shogun], ');
-      expect(apply('[rai]', 5).$1, '[raiden_shogun], ');
-      expect(apply('(rai)', 4).$1, '(raiden_shogun), ');
-      expect(apply('(rai)', 5).$1, '(raiden_shogun), ');
-      expect(apply('{{rai}}', 5).$1, '{{raiden_shogun}}, ');
-      expect(apply('{{rai}}', 7).$1, '{{raiden_shogun}}, ');
-      expect(apply('{2::rai::}', 10).$1, '{2::raiden_shogun::}, ');
-      expect(apply('{2::rai}', 8).$1, '{2::raiden_shogun::}, ');
-      expect(apply('2::rai::', 6).$1, '2::raiden_shogun::, ');
-      expect(apply('2::rai ::', 6).$1, '2::raiden_shogun::, ');
-      expect(apply('2::rai', 6).$1, '2::raiden_shogun::, ');
-      expect(apply('rai::', 3).$1, 'raiden_shogun::, ');
-      expect(apply('2::{rai}::', 7).$1, '2::{raiden_shogun}::, ');
-      expect(apply('2::{rai}::', 10).$1, '2::{raiden_shogun}::, ');
+      expect(apply('{rai}', 4).$1, '{raiden shogun}, ');
+      expect(apply('{rai}', 5).$1, '{raiden shogun}, ');
+      expect(apply('[rai]', 4).$1, '[raiden shogun], ');
+      expect(apply('[rai]', 5).$1, '[raiden shogun], ');
+      expect(apply('(rai)', 4).$1, '(raiden shogun), ');
+      expect(apply('(rai)', 5).$1, '(raiden shogun), ');
+      expect(apply('{{rai}}', 5).$1, '{{raiden shogun}}, ');
+      expect(apply('{{rai}}', 7).$1, '{{raiden shogun}}, ');
+      expect(apply('{2::rai::}', 10).$1, '{2::raiden shogun::}, ');
+      expect(apply('{2::rai}', 8).$1, '{2::raiden shogun::}, ');
+      expect(apply('2::rai::', 6).$1, '2::raiden shogun::, ');
+      expect(apply('2::rai ::', 6).$1, '2::raiden shogun ::, ');
+      expect(apply('2::rai', 6).$1, '2::raiden shogun::, ');
+      expect(apply('rai::', 3).$1, 'raiden shogun::, ');
+      expect(apply('2::{rai}::', 7).$1, '2::{raiden shogun}::, ');
+      expect(apply('2::{rai}::', 10).$1, '2::{raiden shogun}::, ');
     });
 
     testWidgets('hides suggestions immediately after selecting an item', (
@@ -686,23 +686,23 @@ void main() {
 
       await pumpAutocompleteWrapper(tester, controller, focusNode, strategy);
       await selectWrappedTag(tester, controller, '{rai}');
-      expect(controller.text, '{raiden_shogun}, ');
+      expect(controller.text, '{raiden shogun}, ');
       expect(find.byType(GenericSuggestionTile), findsNothing);
 
       await selectWrappedTag(tester, controller, '[rai]');
-      expect(controller.text, '[raiden_shogun], ');
+      expect(controller.text, '[raiden shogun], ');
       expect(find.byType(GenericSuggestionTile), findsNothing);
 
       await selectWrappedTag(tester, controller, '(rai)');
-      expect(controller.text, '(raiden_shogun), ');
+      expect(controller.text, '(raiden shogun), ');
       expect(find.byType(GenericSuggestionTile), findsNothing);
 
       await selectWrappedTag(tester, controller, '{{rai}}');
-      expect(controller.text, '{{raiden_shogun}}, ');
+      expect(controller.text, '{{raiden shogun}}, ');
       expect(find.byType(GenericSuggestionTile), findsNothing);
 
       await selectWrappedTag(tester, controller, '2::{rai}::');
-      expect(controller.text, '2::{raiden_shogun}::, ');
+      expect(controller.text, '2::{raiden shogun}::, ');
       expect(find.byType(GenericSuggestionTile), findsNothing);
     });
 
@@ -777,7 +777,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 350));
 
-      expect(controller.text, '{raiden_shogun}, ');
+      expect(controller.text, '{raiden shogun}, ');
       expect(find.byType(GenericSuggestionTile), findsNothing);
     });
   });

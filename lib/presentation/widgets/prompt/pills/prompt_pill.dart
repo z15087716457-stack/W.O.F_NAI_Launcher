@@ -13,6 +13,7 @@ class PromptPill extends StatelessWidget {
     required this.color,
     this.enabled = true,
     this.icon,
+    this.locked = false,
     this.showRollBadge = false,
     this.evolutionEnabled = false,
     this.allowEvolutionToggle = false,
@@ -23,13 +24,17 @@ class PromptPill extends StatelessWidget {
   final Color color;
   final bool enabled;
 
+  /// 随机实例的用户锁定角标；固定、未知和失效块不显示。
+  final bool locked;
+
   /// 块自定义图标；null 时用默认模块图标（异常态图标不受此影响）。
   final IconData? icon;
 
-  /// 随机抽取实例的骰子角标（P2.5）：标题后加小号骰子，区分固定/随机实例。
+  /// 随机实例的右侧骰子角标；遗传开启时由 DNA 角标替换。
   final bool showRollBadge;
 
-  /// 画风探索深度轮使用的实例级遗传角标；只影响 UI，不进入提示词文本。
+  /// 画风探索深度轮使用的实例级遗传角标；只影响 UI，不进入提示词文本，
+  /// 并替换右侧骰子角标。
   final bool evolutionEnabled;
 
   /// 当前页面是否允许操作遗传开关；探索页彩色，主生成页灰色。
@@ -78,6 +83,10 @@ class PromptPill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 13, color: borderColor),
+          if (variant == PromptPillVariant.normal && locked) ...[
+            const SizedBox(width: 2),
+            Icon(Icons.lock_outline, size: 12, color: borderColor),
+          ],
           const SizedBox(width: 4),
           Flexible(
             child: Text(
@@ -91,13 +100,12 @@ class PromptPill extends StatelessWidget {
               ),
             ),
           ),
-          if (showRollBadge) ...[
-            const SizedBox(width: 2),
-            Icon(Icons.casino_outlined, size: 11, color: borderColor),
-          ],
-          if (evolutionEnabled) ...[
+          if (variant == PromptPillVariant.normal && evolutionEnabled) ...[
             const SizedBox(width: 2),
             DnaIcon(size: 12, color: evolutionColor),
+          ] else if (variant == PromptPillVariant.normal && showRollBadge) ...[
+            const SizedBox(width: 2),
+            Icon(Icons.casino_outlined, size: 11, color: borderColor),
           ],
         ],
       ),

@@ -34,15 +34,19 @@ class BlockLibraryPanel extends ConsumerStatefulWidget {
 }
 
 class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
+  static const double _verticalFixedHeight = 64;
+
   late final TextEditingController _searchController;
-  final GlobalKey _bodyKey = GlobalKey();
+  final GlobalKey _verticalBodyKey = GlobalKey();
+  final GlobalKey _blocksAreaKey = GlobalKey();
 
   /// 选中「全部块」为 true；否则 [_selectedFolderId] 为 null 表示根目录/未分类。
   bool _allSelected = true;
   String? _selectedFolderId;
 
-  /// 上部块区高度占比（0.3~0.78），分割条可拖。
-  double _blocksRatio = 0.62;
+  /// 异步加载或错误状态下的上部区域默认高度比例。
+  static const double _blocksRatio = 0.4;
+  double? _manualBlocksHeight;
 
   @override
   void initState() {
@@ -65,7 +69,6 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
     return Material(
       color: theme.colorScheme.surface,
       child: Column(
-        key: _bodyKey,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _buildHeader(context, theme),
@@ -75,21 +78,45 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
           ),
           Divider(height: 1, color: theme.dividerColor),
           Expanded(
-            flex: (_blocksRatio * 1000).round(),
-            child: library.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => _buildError(context, error),
-              data: (state) => _buildBlockArea(context, state),
-            ),
-          ),
-          _buildSplitHandle(theme),
-          _buildFolderSectionHeader(context, theme),
-          Expanded(
-            flex: 1000 - (_blocksRatio * 1000).round(),
-            child: library.when(
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
-              data: (state) => _buildFolderTree(context, state),
+            child: LayoutBuilder(
+              key: _verticalBodyKey,
+              builder: (context, constraints) {
+                final blocksHeight = _resolveBlocksHeight(
+                  library,
+                  constraints.maxHeight,
+                  constraints.maxWidth,
+                );
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      key: _blocksAreaKey,
+                      child: SizedBox(
+                        key: const Key('block-library-panel-block-area'),
+                        height: blocksHeight,
+                        child: library.when(
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
+                          error: (error, _) => _buildError(context, error),
+                          data: (state) => _buildBlockArea(context, state),
+                        ),
+                      ),
+                    ),
+                    _buildSplitHandle(theme),
+                    _buildFolderSectionHeader(context, theme),
+                    Expanded(
+                      child: KeyedSubtree(
+                        key: const Key('block-library-panel-folder-area'),
+                        child: library.when(
+                          loading: () => const SizedBox.shrink(),
+                          error: (_, __) => const SizedBox.shrink(),
+                          data: (state) => _buildFolderTree(context, state),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],
@@ -97,18 +124,78 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
     );
   }
 
+  double _resolveBlocksHeight(
+    AsyncValue<PromptBlockLibraryState> library,
+    double bodyHeight,
+    double panelWidth,
+  ) {
+    final availableHeight = (bodyHeight - _verticalFixedHeight)
+        .clamp(0.0, double.infinity)
+        .toDouble();
+    if (availableHeight <= 0) return 0;
+
+    final manualHeight = (availableHeight * _blocksRatio)
+        .clamp(0.0, availableHeight)
+        .toDouble();
+    if (_manualBlocksHeight != null) {
+      return _manualBlocksHeight!.clamp(0.0, availableHeight).toDouble();
+    }
+    final state = library.valueOrNull;
+    if (state == null) return manualHeight;
+
+    final blocks = _filteredBlocks(state);
+    if (blocks.isEmpty) return availableHeight.clamp(0.0, 96.0).toDouble();
+
+    final contentWidth = (panelWidth - 20)
+        .clamp(1.0, double.infinity)
+        .toDouble();
+    final columns = (contentWidth / 156).floor().clamp(1, 4).toInt();
+    final rows = (blocks.length + columns - 1) ~/ columns;
+    final estimatedHeight = 18.0 + rows * 39.0 + (rows - 1) * 6.0;
+    return estimatedHeight.clamp(72.0, availableHeight).toDouble();
+  }
+
+  List<PromptBlock> _filteredBlocks(PromptBlockLibraryState state) {
+    final query = _searchController.text.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      return state.blocks
+          .where(
+            (block) =>
+                block.title.toLowerCase().contains(query) ||
+                block.content.toLowerCase().contains(query),
+          )
+          .toList();
+    }
+    if (_allSelected) return state.blocks;
+    return state.blocksInFolder(_selectedFolderId);
+  }
+
   /// 上下两段的可拖分割条（视觉 1px 线，10px 热区）。
   Widget _buildSplitHandle(ThemeData theme) {
     return MouseRegion(
       cursor: SystemMouseCursors.resizeUpDown,
       child: GestureDetector(
+        key: const Key('block-library-panel-split-handle'),
         behavior: HitTestBehavior.opaque,
-        onVerticalDragUpdate: (details) {
-          final box = _bodyKey.currentContext?.findRenderObject();
+        onVerticalDragStart: (_) {
+          final box = _blocksAreaKey.currentContext?.findRenderObject();
           if (box is! RenderBox || box.size.height <= 0) return;
+          setState(() => _manualBlocksHeight = box.size.height);
+        },
+        onVerticalDragUpdate: (details) {
+          final body = _verticalBodyKey.currentContext?.findRenderObject();
+          final box = _blocksAreaKey.currentContext?.findRenderObject();
+          if (body is! RenderBox || box is! RenderBox) return;
+          final availableHeight = (body.size.height - _verticalFixedHeight)
+              .clamp(0.0, double.infinity)
+              .toDouble();
+          if (availableHeight <= 0) return;
+          final minHeight = availableHeight < 60 ? 0.0 : 60.0;
+          final currentHeight = _manualBlocksHeight ?? box.size.height;
           setState(() {
-            _blocksRatio = (_blocksRatio + details.delta.dy / box.size.height)
-                .clamp(0.3, 0.78);
+            _manualBlocksHeight = (currentHeight + details.delta.dy)
+                .clamp(minHeight, availableHeight)
+                .toDouble();
           });
         },
         child: Container(
@@ -196,20 +283,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
     }
 
     final query = _searchController.text.trim().toLowerCase();
-    final List<PromptBlock> blocks;
-    if (query.isNotEmpty) {
-      blocks = state.blocks
-          .where(
-            (block) =>
-                block.title.toLowerCase().contains(query) ||
-                block.content.toLowerCase().contains(query),
-          )
-          .toList();
-    } else if (_allSelected) {
-      blocks = state.blocks;
-    } else {
-      blocks = state.blocksInFolder(_selectedFolderId);
-    }
+    final blocks = _filteredBlocks(state);
 
     if (blocks.isEmpty) {
       return Center(

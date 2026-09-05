@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../core/shortcuts/default_shortcuts.dart';
 import '../providers/auth_provider.dart' show authNotifierProvider, AuthStatus;
+import '../providers/guest_session_provider.dart';
 import '../providers/update_provider.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/generation/generation_screen.dart';
@@ -70,6 +71,22 @@ class AppRoutes {
   static const String styleExplore = '/style-explore';
 }
 
+String? appAuthRedirect({
+  required AuthStatus authStatus,
+  required bool isAuthenticated,
+  required bool isGuest,
+  required String matchedLocation,
+}) {
+  final isLoading =
+      authStatus == AuthStatus.loading || authStatus == AuthStatus.initial;
+  final isLoggingIn = matchedLocation == AppRoutes.login;
+
+  if (isLoading) return null;
+  if ((isAuthenticated || isGuest) && isLoggingIn) return AppRoutes.home;
+  if (!isAuthenticated && !isGuest && !isLoggingIn) return AppRoutes.login;
+  return null;
+}
+
 /// 应用路由 Provider
 ///
 /// 使用 ref.listen 监听认证状态变化并通知 GoRouter
@@ -80,12 +97,14 @@ GoRouter appRouter(Ref ref) {
   // 初始值无关紧要，只要变化就会触发重定向
   final authStateNotifier = ValueNotifier<int>(0);
 
-  // 监听认证状态变化 (status 或 isAuthenticated)
+  // 监听认证和游客会话变化，触发 GoRouter 刷新
   ref.listen(authNotifierProvider.select((value) => value.status), (
     previous,
     next,
   ) {
-    // 触发 GoRouter 刷新
+    authStateNotifier.value++;
+  });
+  ref.listen(guestSessionNotifierProvider, (previous, next) {
     authStateNotifier.value++;
   });
 
@@ -103,30 +122,13 @@ GoRouter appRouter(Ref ref) {
 
     // 重定向逻辑
     redirect: (context, state) {
-      // 在 redirect 内部使用 ref.read 获取最新状态
       final authState = ref.read(authNotifierProvider);
-      final isLoading =
-          authState.status == AuthStatus.loading ||
-          authState.status == AuthStatus.initial;
-      final isLoggedIn = authState.isAuthenticated;
-      final isLoggingIn = state.matchedLocation == AppRoutes.login;
-
-      // 正在加载中（检查自动登录），不重定向，等待认证状态确定
-      if (isLoading) {
-        return null;
-      }
-
-      // 未登录且不在登录页，重定向到登录页
-      if (!isLoggedIn && !isLoggingIn) {
-        return AppRoutes.login;
-      }
-
-      // 已登录且在登录页，重定向到首页
-      if (isLoggedIn && isLoggingIn) {
-        return AppRoutes.home;
-      }
-
-      return null;
+      return appAuthRedirect(
+        authStatus: authState.status,
+        isAuthenticated: authState.isAuthenticated,
+        isGuest: ref.read(guestSessionNotifierProvider),
+        matchedLocation: state.matchedLocation,
+      );
     },
 
     // 路由配置

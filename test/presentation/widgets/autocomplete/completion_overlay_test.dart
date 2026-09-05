@@ -82,7 +82,7 @@ void main() {
 
       expect(find.byKey(const ValueKey('autocomplete-popup-header')), findsOne);
       expect(find.text('标签补全'), findsOne);
-      expect(find.text('blue_'), findsOne);
+      expect(find.text('blue '), findsOne);
       expect(find.text('2 个结果'), findsOne);
       expect(find.text('Enter/Tab'), findsOne);
       expect(find.text('Esc'), findsOne);
@@ -207,7 +207,7 @@ void main() {
       );
 
       expect(find.text('Related tags'), findsOneWidget);
-      expect(find.text('blue_archive'), findsOneWidget);
+      expect(find.text('blue archive'), findsOneWidget);
       expect(find.text('77%'), findsOneWidget);
       expect(find.text('REL'), findsOneWidget);
       expect(find.text('API'), findsOneWidget);
@@ -266,8 +266,8 @@ void main() {
       ),
     );
 
-    expect(find.text('blue_archive_0000'), findsOneWidget);
-    expect(find.text('blue_archive_0999'), findsNothing);
+    expect(find.text('blue archive 0000'), findsOneWidget);
+    expect(find.text('blue archive 0999'), findsNothing);
     expect(find.text('Not translated'), findsWidgets);
     expect(
       find.byKey(const ValueKey('autocomplete-popup-result-count')),
@@ -337,8 +337,8 @@ void main() {
     scrollController.jumpTo(scrollController.position.maxScrollExtent);
     await tester.pump();
 
-    expect(find.text('blue_archive_0000'), findsNothing);
-    expect(find.text('blue_archive_0999'), findsOneWidget);
+    expect(find.text('blue archive 0000'), findsNothing);
+    expect(find.text('blue archive 0999'), findsOneWidget);
   });
 
   testWidgets('shows live loading and failure states without hiding results', (

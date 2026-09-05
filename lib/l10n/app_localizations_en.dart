@@ -323,6 +323,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sign in with your NovelAI account\nAll data is stored locally only';
 
   @override
+  String get auth_guestEntry => 'Skip login and continue as guest';
+
+  @override
   String get auth_loggedIn => 'Logged in';
 
   @override
@@ -1076,7 +1079,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prompt_autoFormatSubtitle =>
-      'Convert Chinese commas to English, auto-add underscores';
+      'Normalize commas and whitespace, preserve word spaces and safely close weights';
 
   @override
   String get prompt_highlightEmphasis => 'Highlight Emphasis';
@@ -1090,7 +1093,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prompt_sdSyntaxAutoConvertSubtitle =>
-      'Convert SD weight syntax to NAI format on blur';
+      'Convert SD weights to NAI syntax on blur or generation';
 
   @override
   String get prompt_resolveAliasOnCopy => 'Expand Library On Copy';
@@ -3888,6 +3891,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localGallery_columnWidth => 'Column width';
+
+  @override
+  String get localGallery_thumbnailQualitySd => 'Standard';
+
+  @override
+  String get localGallery_thumbnailQualityHd => 'High';
+
+  @override
+  String get localGallery_thumbnailQualityTooltip =>
+      'Choose local gallery thumbnail quality';
 
   @override
   String get localGallery_naiOnly => 'NAI';
@@ -9888,10 +9901,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get autocomplete_autoComma => 'Add a comma after insertion';
 
   @override
-  String get autocomplete_replaceUnderscores =>
-      'Replace underscores with spaces on insertion';
-
-  @override
   String get autocomplete_dataSourcesTitle => 'Data Sources & Cache';
 
   @override
@@ -10098,6 +10107,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pillCardReroll => 'Re-roll';
+
+  @override
+  String get pillCardRerollLocked => 'Locked; re-roll unavailable';
+
+  @override
+  String get pillCardLock => 'Lock current roll';
+
+  @override
+  String get pillCardUnlock => 'Unlock';
 
   @override
   String get pillCardSettings => 'Random settings';
@@ -10433,6 +10451,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_gridView => 'Grid view';
 
   @override
+  String get promptBlockLibrary_sortBy => 'Sort by';
+
+  @override
+  String get promptBlockLibrary_sortCustom => 'Default (manual order)';
+
+  @override
+  String get promptBlockLibrary_sortUpdated => 'Last modified';
+
+  @override
+  String get promptBlockLibrary_sortTitle => 'Title';
+
+  @override
+  String get promptBlockLibrary_sortColor => 'Color';
+
+  @override
+  String get promptBlockLibrary_sortIcon => 'Icon';
+
+  @override
+  String get promptBlockLibrary_sortAscending => 'Ascending';
+
+  @override
+  String get promptBlockLibrary_sortDescending => 'Descending';
+
+  @override
   String get promptBlockLibrary_cardSize => 'Card size';
 
   @override
@@ -10588,8 +10630,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String styleExplore_runProgress(int done, int total) {
-    return '$done/$total';
+  String styleExplore_runTotalCount(int total) {
+    return 'Total $total images';
   }
 
   @override
@@ -10636,9 +10678,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_startRun => 'Start';
-
-  @override
   String get styleExplore_pauseRun => 'Pause';
 
   @override
@@ -10651,9 +10690,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_targetCountLabel => 'Images';
-
-  @override
-  String get styleExplore_runAnotherRound => 'Another round';
 
   @override
   String styleExplore_manualRunName(String time) {

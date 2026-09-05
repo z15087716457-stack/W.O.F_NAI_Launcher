@@ -264,7 +264,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
   // ==================== 药丸渲染 ====================
 
-  /// 药丸视觉签名：实例启用态、遗传态、页面操作权限与被引用块的
+  /// 药丸视觉签名：实例启用态、锁定态、遗传态、页面操作权限与被引用块的
   /// 标题/颜色/存亡都参与，文本本身的变化由 controller 文本缓存键覆盖。
   int _pillSignature(
     PillWorkspaceState workspace,
@@ -277,6 +277,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
         Object.hash(
           marker,
           instance.enabled,
+          instance.locked,
           instance.settings.isRandom,
           instance.evolutionEnabled,
           widget.allowEvolutionToggle,
@@ -350,6 +351,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       color: promptBlockColorFromString(block.color),
       enabled: instance.enabled,
       icon: promptBlockIconFromName(block.iconName),
+      locked: instance.locked,
       showRollBadge: instance.settings.isRandom,
       evolutionEnabled: instance.evolutionEnabled,
       allowEvolutionToggle: widget.allowEvolutionToggle,
@@ -492,8 +494,13 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     _lastEmittedProjection = workspace.projection;
     final onChanged = widget.onChanged;
     if (onChanged == null) return;
+    final capturedProjection = workspace.projection;
+    final capturedScope = widget.pillScope;
+    final capturedWorkspace = pillWorkspaceProvider(capturedScope);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) onChanged(workspace.projection);
+      if (!mounted || widget.pillScope != capturedScope) return;
+      if (ref.read(capturedWorkspace).projection != capturedProjection) return;
+      onChanged(capturedProjection);
     });
   }
 

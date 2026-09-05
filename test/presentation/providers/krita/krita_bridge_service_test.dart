@@ -1,6 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:io';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
+import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
+
+import '../../../helpers/prompt_normalization_fixture.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
@@ -11,8 +21,315 @@ import 'package:nai_launcher/core/utils/inpaint_mask_utils.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/image/image_stream_chunk.dart';
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_service.dart';
+import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  group('KritaBridgeService prompt freezing', () {
+    late Directory hiveDirectory;
+    late ProviderContainer container;
+
+    setUpAll(() async {
+      hiveDirectory = await Directory.systemTemp.createTemp(
+        'krita_prompt_normalization_',
+      );
+      Hive.init(hiveDirectory.path);
+      await Hive.openBox(StorageKeys.settingsBox);
+    });
+    setUp(() {
+      container = ProviderContainer();
+    });
+    tearDown(() async {
+      container.dispose();
+      await Hive.box(StorageKeys.settingsBox).clear();
+    });
+    tearDownAll(() async {
+      await Hive.close();
+      await hiveDirectory.delete(recursive: true);
+    });
+
+    for (final autoFormat in [false, true]) {
+      for (final sdAutoConvert in [false, true]) {
+        for (final fallback in [false, true]) {
+          test(
+            'freezes before enqueue: format=$autoFormat SD=$sdAutoConvert fallback=$fallback',
+            () async {
+              final base = await configurePromptNormalization(
+                container,
+                autoFormat: autoFormat,
+                sdAutoConvert: sdAutoConvert,
+              );
+              final lane = container.read(
+                pillWorkspaceProvider(PillScopes.main).notifier,
+              );
+              lane.syncFromPlainText(base.prompt);
+              final documentBefore = container
+                  .read(pillWorkspaceProvider(PillScopes.main))
+                  .document;
+              final sent = <Map<String, dynamic>>[];
+              final events = <String>[];
+              ImageParams? streamed;
+              ImageParams? fallbackParams;
+              ImageParams? registered;
+              final image = _solidPng(64, 64, 1, 2, 3);
+              final service = KritaBridgeService(
+                readBaseParams: () => base,
+                prepareParams: (params, overrides) {
+                  events.add('prepare');
+                  return container.read(kritaBridgePromptPreparerProvider)(
+                    params,
+                    overrides,
+                  );
+                },
+                onGenerationEnqueued: () {
+                  events.add('roll');
+                  container
+                      .read(autoFormatPromptSettingsProvider.notifier)
+                      .set(!autoFormat);
+                  container
+                      .read(sdSyntaxAutoConvertSettingsProvider.notifier)
+                      .set(!sdAutoConvert);
+                  final characters = container.read(
+                    characterPromptNotifierProvider,
+                  );
+                  container
+                      .read(characterPromptNotifierProvider.notifier)
+                      .updateCharacter(
+                        characters.characters.first.copyWith(
+                          prompt: 'next roll',
+                        ),
+                      );
+                },
+                send: sent.add,
+                isUiGenerating: () => false,
+                generateStream: (request) {
+                  events.add('stream');
+                  streamed = request.params;
+                  return Stream.fromIterable([
+                    if (fallback)
+                      ImageStreamChunk.error('streaming is not allowed')
+                    else
+                      ImageStreamChunk.complete(image),
+                  ]);
+                },
+                generateFallback: (request) async {
+                  events.add('fallback');
+                  fallbackParams = request.params;
+                  return [ImageGenerationArtifact(displayImageBytes: image)];
+                },
+                registerExternalImage:
+                    (_, {required params, addToDisplay}) async {
+                      registered = params;
+                      return null;
+                    },
+                cancelGeneration: () {},
+              );
+              await service.handle(
+                const KritaGenerateMessage(id: 'normalize', payload: {}),
+              );
+              expect(events, [
+                'prepare',
+                'roll',
+                'stream',
+                if (fallback) 'fallback',
+              ]);
+              expectNormalizedPromptParams(
+                streamed!,
+                autoFormat: autoFormat,
+                sdAutoConvert: sdAutoConvert,
+              );
+              if (fallback) expect(fallbackParams, same(streamed));
+              expect(registered, same(streamed));
+              expect(sent.last['type'], 'result');
+              expect(
+                container.read(generationParamsNotifierProvider).prompt,
+                normalizationPrompt,
+              );
+              expect(
+                container.read(generationParamsNotifierProvider).negativePrompt,
+                normalizationNegative,
+              );
+              expect(
+                container
+                    .read(characterPromptNotifierProvider)
+                    .characters
+                    .first
+                    .prompt,
+                'next roll',
+              );
+              expect(
+                container.read(pillWorkspaceProvider(PillScopes.main)).document,
+                documentBefore,
+              );
+            },
+          );
+        }
+      }
+    }
+
+    for (final mode in ['stream', 'fallback', 'direct fallback']) {
+      test(
+        '$mode preserves full launcher composition without duplicate presets',
+        () async {
+          final params = await configurePromptComposition(container);
+          final sent = <Map<String, dynamic>>[];
+          final image = _solidPng(64, 64, 1, 2, 3);
+          final requests = <ImageParams>[];
+          final service = KritaBridgeService(
+            readBaseParams: () => mode == 'direct fallback'
+                ? params.copyWith(action: ImageGenerationAction.infill)
+                : params,
+            prepareParams: container.read(kritaBridgePromptPreparerProvider),
+            onGenerationEnqueued: () {
+              final characters = container.read(
+                characterPromptNotifierProvider,
+              );
+              container
+                  .read(characterPromptNotifierProvider.notifier)
+                  .updateCharacter(
+                    characters.characters.first.copyWith(prompt: 'next roll'),
+                  );
+            },
+            send: sent.add,
+            isUiGenerating: () => false,
+            generateStream: (request) {
+              expect(mode, isNot('direct fallback'));
+              requests.add(request.params);
+              return Stream.fromIterable([
+                if (mode == 'stream')
+                  ImageStreamChunk.complete(image)
+                else
+                  ImageStreamChunk.error('streaming is not allowed'),
+              ]);
+            },
+            generateFallback: (request) async {
+              requests.add(request.params);
+              return [ImageGenerationArtifact(displayImageBytes: image)];
+            },
+            registerExternalImage: (_, {required params, addToDisplay}) async =>
+                null,
+            cancelGeneration: () {},
+          );
+          await service.handle(
+            const KritaGenerateMessage(id: 'composed', payload: {}),
+          );
+          expect(requests, hasLength(mode == 'fallback' ? 2 : 1));
+          for (final request in requests) {
+            expectComposedPromptParams(request);
+          }
+          if (mode == 'fallback') expect(requests.last, same(requests.first));
+          expect(sent.last['type'], 'result');
+        },
+      );
+    }
+
+    for (final clearCharacters in [false, true]) {
+      test(
+        'explicit bridge overrides stay request-local: clear=$clearCharacters',
+        () async {
+          final params = await configurePromptComposition(container);
+          final originalCharacters = container.read(
+            characterPromptNotifierProvider,
+          );
+          ImageParams? captured;
+          final sent = <Map<String, dynamic>>[];
+          final service = KritaBridgeService(
+            readBaseParams: () => params,
+            prepareParams: container.read(kritaBridgePromptPreparerProvider),
+            send: sent.add,
+            isUiGenerating: () => false,
+            generateStream: (request) {
+              captured = request.params;
+              return Stream.fromIterable([
+                ImageStreamChunk.complete(_solidPng(64, 64, 1, 2, 3)),
+              ]);
+            },
+            generateFallback: (_) async => [],
+            registerExternalImage: (_, {required params, addToDisplay}) async =>
+                null,
+            cancelGeneration: () {},
+          );
+          await service.handle(
+            KritaGenerateMessage(
+              id: 'overrides',
+              payload: {
+                'prompt': 'girl，blue dress',
+                'negative_prompt': 'low quality，lowres',
+                'quality_preset': 'none',
+                'uc_preset': 2,
+                'use_coords': true,
+                if (clearCharacters)
+                  'clear_characters': true
+                else
+                  'characters': [
+                    {
+                      'prompt': '<lighting>，red dress',
+                      'uc': '(bad hands:1.2)',
+                      'x': 0.8,
+                      'y': 0.3,
+                    },
+                  ],
+              },
+            ),
+          );
+          expect(sent.last['type'], 'result');
+          expect(
+            captured!.prompt,
+            '1.4::ralada747372 ::, girl, blue dress, red dress, blue hair',
+          );
+          expect(
+            captured!.negativePrompt,
+            '1.3::bad hands::, low quality, lowres',
+          );
+          expect(captured!.qualityToggle, isFalse);
+          expect(captured!.ucPreset, 2);
+          if (clearCharacters) {
+            expect(captured!.characters, isEmpty);
+          } else {
+            expect(captured!.characters, hasLength(1));
+            expect(
+              captured!.characters.single.prompt,
+              '1.3::cinematic lighting::, red dress',
+            );
+            expect(
+              captured!.characters.single.negativePrompt,
+              '1.2::bad hands::',
+            );
+            expect(captured!.characters.single.positionX, 0.8);
+            expect(captured!.characters.single.positionY, 0.3);
+          }
+          expect(
+            container.read(characterPromptNotifierProvider),
+            originalCharacters,
+          );
+          expect(
+            container.read(generationParamsNotifierProvider).prompt,
+            params.prompt,
+          );
+        },
+      );
+    }
+
+    test('busy requests do not prepare parameters or roll', () async {
+      final sent = <Map<String, dynamic>>[];
+      final service = KritaBridgeService(
+        readBaseParams: () => const ImageParams(),
+        prepareParams: (_, __) => fail('busy request prepared'),
+        onGenerationEnqueued: () => fail('busy request rolled'),
+        send: sent.add,
+        isUiGenerating: () => true,
+        generateStream: (_) => const Stream.empty(),
+        generateFallback: (_) async => [],
+        registerExternalImage: (_, {required params, addToDisplay}) async =>
+            null,
+        cancelGeneration: () {},
+      );
+      await service.handle(const KritaGenerateMessage(id: 'busy', payload: {}));
+      expect(sent.single['code'], KritaBridgeErrorCode.busy.value);
+    });
+  });
+
   group('KritaBridgeService', () {
     test('responds to get_params with current generation snapshot', () async {
       final sent = <Map<String, dynamic>>[];

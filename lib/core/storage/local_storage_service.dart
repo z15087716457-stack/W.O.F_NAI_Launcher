@@ -761,6 +761,19 @@ class LocalStorageService {
     await setSetting(StorageKeys.blockLibraryPanelWidth, width);
   }
 
+  /// 获取画风探索页 Run 侧栏宽度 (默认240)
+  double getStyleExploreRunSidebarWidth() {
+    final value = getSetting(StorageKeys.styleExploreRunSidebarWidth);
+    if (value is int) return value.toDouble();
+    if (value is double) return value;
+    return 240.0;
+  }
+
+  /// 保存画风探索页 Run 侧栏宽度
+  Future<void> setStyleExploreRunSidebarWidth(double width) async {
+    await setSetting(StorageKeys.styleExploreRunSidebarWidth, width);
+  }
+
   /// 获取画风探索页候选画廊宽度 (默认360)
   double getStyleExploreGalleryWidth() {
     final value = getSetting(StorageKeys.styleExploreGalleryWidth);

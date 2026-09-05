@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/storage/style_explore_run_storage.dart';
+import '../../../core/utils/nai_prompt_segments.dart';
+import '../../../core/utils/nai_prompt_syntax.dart';
 import '../../../data/models/style_explore/explore_run.dart';
 import '../../../data/repositories/style_explore_run_repository.dart';
 import '../../../data/services/explore_run_image_store.dart';
@@ -98,10 +100,12 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
 
   /// 追加手动候选（探索页生成按钮登记）：复用最近的手动轮（无则新建，
   /// 状态直接 generated 不经 runner），一次落盘追加 [count] 个 pending
-  /// 候选（lineage.operation=manual），首张带 [firstRollSnapshot]。
+  /// 候选（lineage.operation=manual）。[rollSnapshots] 按追加候选顺序写入；
+  /// [firstRollSnapshot] 仅保留给旧调用方兼容。
   Future<List<ExploreCandidate>> addManualCandidates(
     String runId, {
     required int count,
+    List<ExploreRollSnapshot?>? rollSnapshots,
     ExploreRollSnapshot? firstRollSnapshot,
   }) async {
     final repository = ref.read(styleExploreRunRepositoryProvider);
@@ -130,13 +134,20 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
       rounds.add(manualRound);
     }
     final roundId = manualRound.id;
+    final snapshots =
+        rollSnapshots ??
+        (firstRollSnapshot == null
+            ? null
+            : <ExploreRollSnapshot?>[firstRollSnapshot]);
 
     final candidates = [
       for (var i = 0; i < count; i++)
         ExploreCandidate(
           id: const Uuid().v4(),
           roundId: roundId,
-          rollSnapshot: i == 0 ? firstRollSnapshot : null,
+          rollSnapshot: snapshots != null && i < snapshots.length
+              ? snapshots[i]
+              : null,
           lineage: const ExploreLineage(
             operation: ExploreLineageOperation.manual,
           ),
@@ -586,11 +597,23 @@ String mergeExploreRollPositives(Iterable<String> positives) {
   final seen = <String>{};
   final atoms = <String>[];
   for (final positive in positives) {
-    for (final raw in positive.split(',')) {
-      final atom = raw.trim();
-      if (atom.isEmpty) continue;
-      if (seen.add(atom)) atoms.add(atom);
+    final pending = <String>[];
+    var weighted = false;
+    void appendPending() {
+      final atom = pending.join(', ');
+      if (atom.isNotEmpty && seen.add(atom)) atoms.add(atom);
+      pending.clear();
     }
+
+    for (final raw in splitNaiPromptSegments(positive)) {
+      pending.add(raw);
+      for (final token in NaiPromptSyntax.scan(raw)) {
+        if (token.kind == NaiPromptTokenKind.prefix) weighted = true;
+        if (token.kind == NaiPromptTokenKind.closure) weighted = false;
+      }
+      if (!weighted) appendPending();
+    }
+    appendPending();
   }
   return atoms.join(', ');
 }

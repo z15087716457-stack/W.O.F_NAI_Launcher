@@ -1,54 +1,78 @@
-import 'text_space_converter.dart';
+import 'nai_prompt_syntax.dart';
+import 'nai_weight_syntax.dart';
 
-/// NAI 提示词格式化工具
-/// 简化版：只做中文逗号转英文和空格转下划线
 class NaiPromptFormatter {
-  /// 格式化单个标签为 NAI 格式
-  /// 将空格转换为下划线
-  static String formatTag(String tag) {
-    return _normalizeWhitespace(tag).trim().replaceAll(' ', '_');
-  }
+  static final RegExp _horizontalWhitespace = RegExp(r'[ \t\u3000]+');
+  static final RegExp _leadingSpaces = RegExp(r'^ +');
+  static final RegExp _trailingSpaces = RegExp(r' +$');
 
-  /// 格式化整个提示词
-  /// - 将中文逗号转换为英文逗号
-  /// - 将标签中的空格转换为下划线（保留逗号后的空格和尖括号内的空格）
+  static String formatTag(String tag) => format(tag);
+
   static String format(String prompt) {
-    if (prompt.isEmpty) return prompt;
+    final tokens = NaiPromptSyntax.scan(prompt);
+    final buffer = StringBuffer();
+    final segment = <NaiPromptToken>[];
+    final lineBreaks = StringBuffer();
+    var hasSegment = false;
+    int? openWeight;
 
-    var result = prompt;
+    void appendSegment() {
+      final formatted = _formatSegment(prompt, segment, openWeight);
+      segment.clear();
+      if (formatted.trim().isEmpty) {
+        lineBreaks.write(formatted.replaceAll(_horizontalWhitespace, ''));
+        return;
+      }
+      if (hasSegment) {
+        buffer.write(',');
+        if (lineBreaks.isEmpty &&
+            !formatted.startsWith('\n') &&
+            !formatted.startsWith('\r')) {
+          buffer.write(' ');
+        }
+      }
+      buffer.write(lineBreaks);
+      lineBreaks.clear();
+      buffer.write(formatted);
+      hasSegment = true;
+    }
 
-    // 1. 统一空白字符：全角空格、连续空格 → 单个半角空格
-    result = _normalizeWhitespace(result);
-
-    // 2. 将中文逗号转换为英文逗号
-    result = result.replaceAll('，', ',');
-
-    // 3. 按逗号分割，对每个标签单独处理
-    final tags = result.split(',');
-    final formattedTags = tags
-        .map((tag) {
-          // 先 trim 去除首尾空格
-          final trimmed = tag.trim();
-          if (trimmed.isEmpty) return '';
-          // 对内部空格使用 TextSpaceConverter（保护尖括号内容）
-          return TextSpaceConverter.convert(
-            trimmed,
-            protectChars: TextSpaceConverter.naiFormat,
-          );
-        })
-        .where((tag) => tag.isNotEmpty);
-
-    return formattedTags.join(', ');
+    for (final token in tokens) {
+      if (token.kind == NaiPromptTokenKind.prefix) {
+        openWeight = token.start;
+      } else if (token.kind == NaiPromptTokenKind.closure) {
+        openWeight = null;
+      }
+      if (token.kind == NaiPromptTokenKind.comma && openWeight == null) {
+        appendSegment();
+      } else {
+        segment.add(token);
+      }
+    }
+    appendSegment();
+    buffer.write(lineBreaks);
+    return NaiWeightSyntax.guardClosures(buffer.toString());
   }
 
-  /// 统一空白字符
-  /// - 全角空格 → 半角空格
-  /// - 连续空白 → 单个空格
-  static String _normalizeWhitespace(String text) {
-    // 全角空格转半角
-    var result = text.replaceAll('　', ' ');
-    // 连续空白压缩为单个空格
-    result = result.replaceAll(RegExp(r'\s+'), ' ');
-    return result;
+  static String _formatSegment(
+    String prompt,
+    List<NaiPromptToken> tokens,
+    int? openWeight,
+  ) {
+    final buffer = StringBuffer();
+    for (var i = 0; i < tokens.length; i++) {
+      final token = tokens[i];
+      var source = token.source(prompt);
+      if (token.kind == NaiPromptTokenKind.text &&
+          (openWeight == null || token.start < openWeight)) {
+        source = source.replaceAll(_horizontalWhitespace, ' ');
+        if (i == 0) source = source.replaceFirst(_leadingSpaces, '');
+        if (i == tokens.length - 1) {
+          source = source.replaceFirst(_trailingSpaces, '');
+        }
+      }
+      buffer.write(source);
+    }
+    return buffer.toString();
   }
 }

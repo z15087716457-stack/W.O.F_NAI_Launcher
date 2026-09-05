@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/autocomplete/prompt_token_parser.dart';
 import '../../../../core/services/smart_tag_recommendation_service.dart';
 import '../../../../core/utils/app_logger.dart';
-import '../../../../core/utils/tag_normalizer.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../autocomplete_controller.dart';
 import '../autocomplete_strategy.dart';
@@ -154,155 +154,50 @@ class CooccurrenceStrategy extends AutocompleteStrategy<RecommendedTag> {
     String text,
     int cursorPosition,
   ) {
-    // 在光标位置插入标签
-    final beforeCursor = text.substring(0, cursorPosition);
-    final afterCursor = text.substring(cursorPosition);
-
-    // 检查前面是否需要添加空格
-    final needsLeadingSpace =
-        beforeCursor.isNotEmpty && !beforeCursor.endsWith(' ');
-    final leadingSpace = needsLeadingSpace ? ' ' : '';
-
-    // 添加标签和逗号
-    final tagWithComma = _config.autoInsertComma ? '${item.tag}, ' : item.tag;
-
-    final newText = '$beforeCursor$leadingSpace$tagWithComma$afterCursor';
-    final newCursorPosition =
-        beforeCursor.length + leadingSpace.length + tagWithComma.length;
-
-    return (newText, newCursorPosition);
+    if (cursorPosition < 0 || cursorPosition > text.length) {
+      return (text, cursorPosition);
+    }
+    final before = text.substring(0, cursorPosition);
+    final afterComma = RegExp(r'[,，]\s*$').hasMatch(before);
+    final query = PromptTokenParser.parseRelated(
+      text: afterComma ? before : text,
+      cursorPosition: cursorPosition,
+      limit: _config.maxSuggestions ?? 20,
+      locale: 'en',
+      splitOnSpaces: _config.treatSpacesAsSeparators,
+    );
+    if (query == null) return (text, cursorPosition);
+    final result = PromptTokenParser.apply(
+      text: text,
+      query: query,
+      canonicalTag: item.tag,
+      autoInsertComma: _config.autoInsertComma,
+      splitOnSpaces: _config.treatSpacesAsSeparators,
+    );
+    return (result.text, result.cursorPosition);
   }
 
-  /// 提取光标前的标签（如果满足 "tag," 模式）
-  /// 返回标签名，如果不满足条件返回 null
   String? _extractPreviousTag(String text, int cursorPosition) {
-    AppLogger.d(
-      () =>
-          '_extractPreviousTag: text="$text", cursorPosition=$cursorPosition, '
-          'text.length=${text.length}',
-      'CooccurrenceStrategy',
-    );
-
-    if (cursorPosition <= 0) {
-      return null;
-    }
-
-    // 确保光标位置有效
-    if (cursorPosition > text.length) {
-      return null;
-    }
-
-    // 获取光标前的文本
-    final beforeCursor = text.substring(0, cursorPosition);
-    AppLogger.d(
-      () => '_extractPreviousTag: beforeCursor="$beforeCursor"',
-      'CooccurrenceStrategy',
-    );
-
-    // 从光标前查找最后一个逗号
-    var lastCommaIndex = -1;
-    for (var i = beforeCursor.length - 1; i >= 0; i--) {
-      final char = beforeCursor[i];
-      if (char == ',' || char == '，') {
-        lastCommaIndex = i;
-        break;
-      }
-    }
-    AppLogger.d(
-      () => '_extractPreviousTag: lastCommaIndex=$lastCommaIndex',
-      'CooccurrenceStrategy',
-    );
-
-    // 重点：必须有逗号才触发共现推荐！没有逗号说明用户在输入第一个标签
-    if (lastCommaIndex < 0) {
-      return null;
-    }
-
-    // 关键检查：逗号后到光标前的内容必须为空（只有空白字符）
-    // 如果这段内容非空，说明用户正在输入新标签，不应该触发共现推荐
-    final afterComma = beforeCursor.substring(lastCommaIndex + 1);
-    AppLogger.d(
-      () =>
-          '_extractPreviousTag: afterComma="$afterComma", '
-          'trim="${afterComma.trim()}"',
-      'CooccurrenceStrategy',
-    );
-    if (afterComma.trim().isNotEmpty) {
-      AppLogger.d(
-        () => '_extractPreviousTag: afterComma is not empty, returning null',
-        'CooccurrenceStrategy',
-      );
-      return null;
-    }
-
-    // 提取逗号**前面**的标签（逗号和前一个分隔符之间的内容）
-    // 例如："tag1, tag2, " -> 提取 "tag2"
-    var prevSeparatorIndex = -1;
-    for (var i = lastCommaIndex - 1; i >= 0; i--) {
-      final char = beforeCursor[i];
-      if (char == ',' || char == '，' || char == '|') {
-        prevSeparatorIndex = i;
-        break;
-      }
-    }
-    AppLogger.d(
-      () => '_extractPreviousTag: prevSeparatorIndex=$prevSeparatorIndex',
-      'CooccurrenceStrategy',
-    );
-
-    final tagPart = beforeCursor.substring(
-      prevSeparatorIndex + 1,
-      lastCommaIndex,
-    );
-    AppLogger.d(
-      () => '_extractPreviousTag: tagPart="$tagPart"',
-      'CooccurrenceStrategy',
-    );
-
-    // 清理标签文本
-    var tag = tagPart.trim();
-
-    // 移除可能的权重语法前缀
-    tag = TagNormalizer.normalizeAutocompleteTag(tag);
-
-    // 标签不能太短
-    if (tag.length < 2) {
-      AppLogger.d(
-        () => '_extractPreviousTag: tag too short "$tag", returning null',
-        'CooccurrenceStrategy',
-      );
-      return null;
-    }
-
-    AppLogger.d(
-      () => '_extractPreviousTag: returning "$tag"',
-      'CooccurrenceStrategy',
-    );
-    return tag;
+    if (cursorPosition <= 0 || cursorPosition > text.length) return null;
+    final before = text.substring(0, cursorPosition).trimRight();
+    if (!before.endsWith(',') && !before.endsWith('，')) return null;
+    return PromptTokenParser.parseRelated(
+      text: text.substring(0, cursorPosition),
+      cursorPosition: cursorPosition,
+      limit: _config.maxSuggestions ?? 20,
+      locale: 'en',
+      splitOnSpaces: _config.treatSpacesAsSeparators,
+    )?.relatedTag;
   }
 
-  /// 提取文本中所有已有的标签（用于去重）
-  /// 返回小写规范化后的标签集合
   Set<String> _extractExistingTags(String text, int cursorPosition) {
-    final tags = <String>{};
-
-    // 简化处理：按逗号分割，提取所有标签
-    final parts = text.split(TagNormalizer.commaSeparatorPattern);
-
-    for (var part in parts) {
-      var tag = part.trim();
-
-      // 跳过当前正在输入的位置（光标后的内容）
-      // 这里简化处理，只提取光标前的标签
-
-      // 移除权重语法前缀
-      tag = TagNormalizer.normalizeAutocompleteTag(tag);
-
-      if (tag.length >= 2) {
-        tags.add(tag.toLowerCase());
-      }
-    }
-
-    return tags;
+    final query = PromptTokenParser.parse(
+      text: text,
+      cursorPosition: cursorPosition,
+      limit: _config.maxSuggestions ?? 20,
+      locale: 'en',
+      splitOnSpaces: _config.treatSpacesAsSeparators,
+    );
+    return {...query.existingTags, if (query.token.isNotEmpty) query.token};
   }
 }

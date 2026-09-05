@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/autocomplete/completion_models.dart';
+import '../../../../core/autocomplete/prompt_token_parser.dart';
+import '../../../../core/utils/tag_normalizer.dart';
 import '../../../../data/models/tag/tag_suggestion.dart';
 import '../../../providers/danbooru_suggestion_provider.dart';
 import '../autocomplete_strategy.dart';
@@ -7,23 +10,22 @@ import '../generic_suggestion_tile.dart';
 
 /// Danbooru 配置
 class DanbooruConfig {
-  /// 是否替换整个文本（false 则只替换最后一个词）
+  /// 是否替换整个搜索文本（false 则只替换光标处的词）
   final bool replaceAll;
 
-  /// 标签分隔符（默认为空格，可设置为逗号支持多标签输入）
   final String separator;
-
-  /// 是否在选中建议后追加分隔符
   final bool appendSeparator;
-
-  /// 最小触发字符数
   final int minQueryLength;
+
+  /// 提示词模式保留 NAI 结构并插入空格；搜索模式保留 canonical 标签。
+  final bool promptMode;
 
   const DanbooruConfig({
     this.replaceAll = false,
     this.separator = ' ',
     this.appendSeparator = true,
     this.minQueryLength = 2,
+    this.promptMode = false,
   });
 }
 
@@ -59,6 +61,7 @@ class DanbooruStrategy extends AutocompleteStrategy<TagSuggestion> {
     String separator = ' ',
     bool appendSeparator = true,
     int minQueryLength = 2,
+    bool promptMode = false,
   }) {
     return DanbooruStrategy._(
       ref: ref,
@@ -67,6 +70,7 @@ class DanbooruStrategy extends AutocompleteStrategy<TagSuggestion> {
         separator: separator,
         appendSeparator: appendSeparator,
         minQueryLength: minQueryLength,
+        promptMode: promptMode,
       ),
     );
   }
@@ -87,8 +91,10 @@ class DanbooruStrategy extends AutocompleteStrategy<TagSuggestion> {
     int cursorPosition, {
     bool immediate = false,
   }) async {
-    // 获取当前正在输入的词
-    final query = _config.replaceAll ? text.trim() : _getLastTag(text);
+    final parsed = _query(text, cursorPosition);
+    final query = parsed.kind == CompletionQueryKind.libraryAlias
+        ? ''
+        : parsed.token;
 
     // 检测是否为中文输入（中文1个字符即可触发搜索）
     final isChinese = RegExp(r'[\u4e00-\u9fa5]').hasMatch(query);
@@ -112,11 +118,41 @@ class DanbooruStrategy extends AutocompleteStrategy<TagSuggestion> {
         .search(query, immediate: immediate);
   }
 
-  /// 获取最后一个标签（根据分隔符分割）
-  String _getLastTag(String text) {
-    final separatorPattern = _separatorPattern;
-    final parts = text.split(separatorPattern);
-    return parts.isNotEmpty ? parts.last.trim() : '';
+  CompletionQuery _query(String text, int cursorPosition) {
+    if (_config.promptMode) {
+      return PromptTokenParser.parse(
+        text: text,
+        cursorPosition: cursorPosition,
+        limit: 20,
+        locale: 'en',
+      );
+    }
+    final cursor = cursorPosition.clamp(0, text.length);
+    var start = 0;
+    var end = text.length;
+    if (!_config.replaceAll) {
+      for (final separator in _separatorPattern.allMatches(text)) {
+        if (separator.start < cursor && cursor < separator.end) {
+          start = cursor;
+          end = cursor;
+          break;
+        }
+        if (separator.end <= cursor) start = separator.end;
+        if (separator.start >= cursor) {
+          end = separator.start;
+          break;
+        }
+      }
+    }
+    return CompletionQuery(
+      fullText: text,
+      cursorPosition: cursor,
+      token: TagNormalizer.normalize(text.substring(start, end)),
+      replacementRange: TextReplacementRange(start: start, end: end),
+      existingTags: const {},
+      limit: 20,
+      locale: 'en',
+    );
   }
 
   /// 逗号分隔模式同时接受空白，兼容 Danbooru 原生的空格分隔语法。
@@ -148,30 +184,34 @@ class DanbooruStrategy extends AutocompleteStrategy<TagSuggestion> {
     String text,
     int cursorPosition,
   ) {
-    String newText;
-
-    if (_config.replaceAll) {
-      // 替换整个文本
-      newText = item.tag;
-    } else {
-      // 只替换最后一个标签
-      final parts = text.split(_separatorPattern);
-      if (parts.isNotEmpty) {
-        parts[parts.length - 1] = item.tag;
-      } else {
-        parts.add(item.tag);
-      }
-      // 使用英文逗号连接（统一格式）
-      final joinSeparator = _config.separator == ',' ? ', ' : _config.separator;
-      newText = parts.join(joinSeparator);
+    final query = _query(text, cursorPosition);
+    if (query.kind == CompletionQueryKind.libraryAlias) {
+      return (text, cursorPosition);
     }
-
+    if (_config.promptMode) {
+      final result = PromptTokenParser.apply(
+        text: text,
+        query: query,
+        canonicalTag: item.tag,
+        autoInsertComma: _config.appendSeparator,
+        closeOpenWeight: true,
+      );
+      return (result.text, result.cursorPosition);
+    }
+    final range = query.replacementRange;
+    final before = text.substring(0, range.start);
+    var after = text.substring(range.end);
+    var insertion = item.tag;
     if (_config.appendSeparator) {
-      final appendStr = _config.separator == ',' ? ', ' : _config.separator;
-      newText = '$newText$appendStr';
+      final existingSeparator = _separatorPattern.matchAsPrefix(after);
+      if (existingSeparator != null) {
+        insertion += existingSeparator.group(0)!;
+        after = after.substring(existingSeparator.end);
+      } else {
+        insertion += _config.separator == ',' ? ', ' : _config.separator;
+      }
     }
-
-    return (newText, newText.length);
+    return ('$before$insertion$after', before.length + insertion.length);
   }
 
   @override

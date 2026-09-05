@@ -43,6 +43,40 @@ void _registerCleanup(
 }
 
 void main() {
+  for (final content in ['ralada747372', 'She looks away.']) {
+    testWidgets(
+      'weight toolbar safely closes $content and preserves selection',
+      (tester) async {
+        final prompt = TextEditingController(text: '$content, blue eyes');
+        final focus = FocusNode();
+        final page = ScrollController(initialScrollOffset: 100);
+        _registerCleanup(tester, prompt, focus, page);
+        await _pumpHarness(
+          tester,
+          prompt: prompt,
+          focus: focus,
+          page: page,
+          enableWheelAdjustment: true,
+        );
+        focus.requestFocus();
+        prompt.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: content.length,
+        );
+        await tester.pump();
+        await _sendWheel(tester);
+        final weighted = '0.95::$content ::';
+        expect(prompt.text, '$weighted, blue eyes');
+        expect(
+          prompt.selection,
+          TextSelection(baseOffset: 0, extentOffset: weighted.length),
+        );
+        await _sendWheel(tester);
+        expect(prompt.text, '0.90::$content ::, blue eyes');
+      },
+    );
+  }
+
   testWidgets('selected prompt adjusts weight without scrolling the page', (
     tester,
   ) async {

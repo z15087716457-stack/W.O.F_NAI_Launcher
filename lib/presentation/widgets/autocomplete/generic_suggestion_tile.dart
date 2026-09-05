@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
 import '../../../../core/utils/app_logger.dart';
+import '../../../core/utils/tag_normalizer.dart';
 import 'autocomplete_controller.dart';
 
 /// 通用补全建议项数据
@@ -170,7 +171,9 @@ class GenericSuggestionTile extends StatelessWidget {
                   TextSpan(
                     children: [
                       TextSpan(
-                        text: data.tag.replaceAll('_', ' '),
+                        text: data.isLibraryEntry
+                            ? data.tag
+                            : TagNormalizer.toDisplay(data.tag),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                           color: isSelected ? theme.colorScheme.primary : null,

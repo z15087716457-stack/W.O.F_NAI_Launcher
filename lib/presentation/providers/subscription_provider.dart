@@ -9,7 +9,6 @@ import '../../core/utils/app_logger.dart';
 import '../../data/datasources/remote/nai_user_info_api_service.dart';
 import '../../data/models/user/user_subscription.dart';
 import '../../data/services/anlas_statistics_service.dart';
-import '../../data/services/personal_anlas_counter_service.dart';
 import 'auth_provider.dart';
 
 part 'subscription_provider.g.dart';
@@ -298,8 +297,6 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
       _hasInitiallyLoaded = true;
       _startAutoRefresh();
 
-      _observeForPersonalCounter(subscription);
-
       AppLogger.i(
         'Subscription loaded: ${subscription.tierName}, '
             'Anlas: ${subscription.anlasBalance}',
@@ -413,7 +410,6 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
       final subscription = UserSubscription.fromJson(data);
       _updateState(SubscriptionState.loaded(subscription));
 
-      _observeForPersonalCounter(subscription);
       return true;
     } catch (e) {
       AppLogger.w('Failed to refresh balance: $e', 'Subscription');
@@ -429,28 +425,6 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
 
     final expectedAccountId = expected.accountId;
     return expectedAccountId != null && current.accountId == expectedAccountId;
-  }
-
-  /// 把订阅信息喂给个人账本（合租）：
-  /// 到期时间用于推断每月点数重置日；额度用量（百分比 + 回充倒计时）用于结算
-  /// 免费额度。
-  ///
-  /// 服务端 `percent` 是全账号共享池（含合租朋友的消耗），所以不直接覆盖本地
-  /// 份额。回充以服务端倒计时 `timeUntilNextPercent` 的节拍推算为主、涨幅分成
-  /// 为辅；跌幅只在「本机有生成在途时」记到我头上，单张单价无需估算。
-  void _observeForPersonalCounter(UserSubscription subscription) {
-    final counter = ref.read(personalAnlasCounterProvider.notifier);
-    unawaited(counter.observeSubscription(subscription.expiresAt));
-
-    final usage = subscription.usage;
-    if (usage != null) {
-      unawaited(
-        counter.observeOpusUsage(
-          poolPercent: usage.percent,
-          secondsToNextPercent: usage.timeUntilNextPercent,
-        ),
-      );
-    }
   }
 }
 

@@ -346,6 +346,329 @@ void main() {
         expect(subscriptionNotifier.refreshBalanceCallCount, 1);
       },
     );
+
+    test(
+      'generate emits awaitable per-batch events at actual request boundaries',
+      () async {
+        final mockApiService = MockNAIImageGenerationApiService();
+        final events =
+            <({GenerationBatchEventKind kind, int runId, int slot})>[];
+        final requestSampleCounts = <int>[];
+        when(
+          () => mockApiService.generateImage(
+            any(),
+            onProgress: any(named: 'onProgress'),
+            focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
+            minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
+            focusedSelectionRect: any(named: 'focusedSelectionRect'),
+          ),
+        ).thenAnswer((_) async => fail('non-stream fallback was not expected'));
+        when(
+          () => mockApiService.generateImageCancellable(
+            any(),
+            onProgress: any(named: 'onProgress'),
+            focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
+            minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
+            focusedSelectionRect: any(named: 'focusedSelectionRect'),
+          ),
+        ).thenAnswer(
+          (_) async => fail('cancellable fallback was not expected'),
+        );
+        when(
+          () => mockApiService.generateImageStream(
+            any(),
+            focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
+            minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
+            focusedSelectionRect: any(named: 'focusedSelectionRect'),
+          ),
+        ).thenAnswer((invocation) {
+          final requestParams =
+              invocation.positionalArguments.first as ImageParams;
+          requestSampleCounts.add(requestParams.nSamples);
+          return Stream<ImageStreamChunk>.value(
+            ImageStreamChunk.complete(
+              _validImageBytes(width: 512, height: 768),
+            ),
+          );
+        });
+
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            naiImageGenerationApiServiceProvider.overrideWithValue(
+              mockApiService,
+            ),
+            subscriptionNotifierProvider.overrideWith(
+              TestSubscriptionNotifier.new,
+            ),
+          ],
+        );
+        await container
+            .read(notificationSettingsNotifierProvider.notifier)
+            .setSoundEnabled(false);
+        await container
+            .read(imageSaveSettingsNotifierProvider.notifier)
+            .setAutoSave(false);
+
+        final params = container
+            .read(generationParamsNotifierProvider)
+            .copyWith(prompt: 'batch events', nSamples: 2);
+        await container
+            .read(imageGenerationNotifierProvider.notifier)
+            .generate(
+              params,
+              imagesPerRequestOverride: 1,
+              onBatchEvent: (event) async {
+                events.add((
+                  kind: event.kind,
+                  runId: event.generationRunId,
+                  slot: event.slotStart,
+                ));
+                throw StateError('callback failed');
+              },
+            );
+
+        expect(requestSampleCounts, [1, 1]);
+        expect(events.map((event) => (event.kind, event.slot)), [
+          (GenerationBatchEventKind.start, 1),
+          (GenerationBatchEventKind.complete, 1),
+          (GenerationBatchEventKind.start, 2),
+          (GenerationBatchEventKind.complete, 2),
+        ]);
+        expect(events.every((event) => event.runId > 0), isTrue);
+        expect(events.map((event) => event.runId).toSet(), hasLength(1));
+        expect(
+          container.read(imageGenerationNotifierProvider).currentImages,
+          hasLength(2),
+        );
+      },
+    );
+
+    test(
+      'cancellation emits terminal events for active and unstarted slots',
+      () async {
+        final mockApiService = MockNAIImageGenerationApiService();
+        final stream = StreamController<ImageStreamChunk>();
+        final events = <GenerationBatchEvent>[];
+        var requestStarted = false;
+        addTearDown(() async {
+          if (!stream.isClosed) await stream.close();
+        });
+
+        when(
+          () => mockApiService.generateImageStream(
+            any(),
+            focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
+            minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
+            focusedSelectionRect: any(named: 'focusedSelectionRect'),
+          ),
+        ).thenAnswer((_) {
+          requestStarted = true;
+          return stream.stream;
+        });
+        when(() => mockApiService.cancelGeneration()).thenReturn(null);
+
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            naiImageGenerationApiServiceProvider.overrideWithValue(
+              mockApiService,
+            ),
+            subscriptionNotifierProvider.overrideWith(
+              TestSubscriptionNotifier.new,
+            ),
+          ],
+        );
+        await container
+            .read(notificationSettingsNotifierProvider.notifier)
+            .setSoundEnabled(false);
+        await container
+            .read(imageSaveSettingsNotifierProvider.notifier)
+            .setAutoSave(false);
+
+        final notifier = container.read(
+          imageGenerationNotifierProvider.notifier,
+        );
+        final generation = notifier.generate(
+          container
+              .read(generationParamsNotifierProvider)
+              .copyWith(prompt: 'cancel event', nSamples: 2),
+          imagesPerRequestOverride: 1,
+          onBatchEvent: (event) {
+            events.add(event);
+          },
+        );
+        for (var i = 0; i < 100 && !requestStarted; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 1));
+        }
+        expect(requestStarted, isTrue);
+
+        notifier.cancel();
+        await stream.close();
+        await generation;
+
+        expect(events.map((event) => event.kind), [
+          GenerationBatchEventKind.start,
+          GenerationBatchEventKind.complete,
+          GenerationBatchEventKind.complete,
+        ]);
+        expect(events.map((event) => event.slotStart), [1, 1, 2]);
+        expect(
+          events.map((event) => event.generationRunId).toSet(),
+          hasLength(1),
+        );
+        expect(events[1].error, 'cancelled');
+        expect(events[2].error, 'cancelled');
+      },
+    );
+
+    test(
+      'cancellation completes current and unstarted batch slots once',
+      () async {
+        final mockApiService = MockNAIImageGenerationApiService();
+        final events = <GenerationBatchEvent>[];
+        final firstImage = _validImageBytes(width: 512, height: 768);
+        var requestCount = 0;
+        late ImageGenerationNotifier notifier;
+
+        when(
+          () => mockApiService.generateImageStream(
+            any(),
+            focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
+            minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
+            focusedSelectionRect: any(named: 'focusedSelectionRect'),
+          ),
+        ).thenAnswer((_) {
+          requestCount++;
+          if (requestCount == 1) {
+            return Stream<ImageStreamChunk>.value(
+              ImageStreamChunk.complete(firstImage),
+            );
+          }
+          notifier.cancel();
+          return const Stream<ImageStreamChunk>.empty();
+        });
+        when(() => mockApiService.cancelGeneration()).thenReturn(null);
+
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            naiImageGenerationApiServiceProvider.overrideWithValue(
+              mockApiService,
+            ),
+            subscriptionNotifierProvider.overrideWith(
+              TestSubscriptionNotifier.new,
+            ),
+          ],
+        );
+        await container
+            .read(notificationSettingsNotifierProvider.notifier)
+            .setSoundEnabled(false);
+        await container
+            .read(imageSaveSettingsNotifierProvider.notifier)
+            .setAutoSave(false);
+
+        notifier = container.read(imageGenerationNotifierProvider.notifier);
+        await notifier.generate(
+          container
+              .read(generationParamsNotifierProvider)
+              .copyWith(prompt: 'cancel remaining batches', nSamples: 3),
+          imagesPerRequestOverride: 1,
+          onBatchEvent: events.add,
+        );
+
+        expect(requestCount, 2);
+        expect(events.map((event) => event.kind), [
+          GenerationBatchEventKind.start,
+          GenerationBatchEventKind.complete,
+          GenerationBatchEventKind.start,
+          GenerationBatchEventKind.complete,
+          GenerationBatchEventKind.complete,
+        ]);
+        expect(events.map((event) => event.slotStart), [1, 1, 2, 2, 3]);
+        expect(events.map((event) => event.slotCount), [1, 1, 1, 1, 1]);
+        expect(events.map((event) => event.totalSlots), [3, 3, 3, 3, 3]);
+        expect(events[1].images, hasLength(1));
+        expect(events[1].error, isNull);
+        expect(events[3].error, 'cancelled');
+        expect(events[4].error, 'cancelled');
+        expect(
+          events.map((event) => event.generationRunId).toSet(),
+          hasLength(1),
+        );
+        expect(events.first.generationRunId, greaterThan(0));
+
+        final state = container.read(imageGenerationNotifierProvider);
+        expect(state.status, GenerationStatus.cancelled);
+        expect(state.currentImages, hasLength(1));
+        expect(state.currentImages.single.bytes, orderedEquals(firstImage));
+      },
+    );
+
+    test('429 retry emits one terminal event after retry completes', () async {
+      final mockApiService = MockNAIImageGenerationApiService();
+      final events = <GenerationBatchEvent>[];
+      var requestCount = 0;
+      when(
+        () => mockApiService.generateImageStream(
+          any(),
+          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
+          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
+          focusedSelectionRect: any(named: 'focusedSelectionRect'),
+        ),
+      ).thenAnswer((_) {
+        requestCount++;
+        return requestCount == 1
+            ? Stream<ImageStreamChunk>.value(
+                ImageStreamChunk.error('API_ERROR_429'),
+              )
+            : Stream<ImageStreamChunk>.value(
+                ImageStreamChunk.complete(
+                  _validImageBytes(width: 512, height: 768),
+                ),
+              );
+      });
+
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          naiImageGenerationApiServiceProvider.overrideWithValue(
+            mockApiService,
+          ),
+          subscriptionNotifierProvider.overrideWith(
+            TestSubscriptionNotifier.new,
+          ),
+        ],
+      );
+      await container
+          .read(notificationSettingsNotifierProvider.notifier)
+          .setSoundEnabled(false);
+      await container
+          .read(imageSaveSettingsNotifierProvider.notifier)
+          .setAutoSave(false);
+
+      await container
+          .read(imageGenerationNotifierProvider.notifier)
+          .generate(
+            container
+                .read(generationParamsNotifierProvider)
+                .copyWith(prompt: 'retry event'),
+            imagesPerRequestOverride: 1,
+            onBatchEvent: (event) => events.add(event),
+          );
+
+      expect(requestCount, 2);
+      expect(events.map((event) => event.kind), [
+        GenerationBatchEventKind.start,
+        GenerationBatchEventKind.complete,
+      ]);
+      expect(events.last.error, isNull);
+      expect(
+        events.map((event) => event.generationRunId).toSet(),
+        hasLength(1),
+      );
+    });
+
     test(
       'registerExternalImage should prepend external result to history',
       () async {

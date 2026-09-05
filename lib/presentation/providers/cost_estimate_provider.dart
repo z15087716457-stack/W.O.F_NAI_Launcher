@@ -122,18 +122,9 @@ FocusedInpaintGeometry? focusedInpaintMaskRequestSize(Ref ref) {
   );
 }
 
-/// 预估消耗 Provider
-///
-/// 根据当前参数实时计算预估的 Anlas 消耗
-///
-/// 计费逻辑：
-/// - nSamples（批次数量）：应用内循环，每次是独立请求，每次都可享受 Opus 免费
-/// - imagesPerRequest（批次大小）：单次请求生成多张，只有第一张免费
-@riverpod
-int estimatedCost(Ref ref) {
+int _calculateEstimatedCost(Ref ref, {required int batchSize}) {
   final params = ref.watch(generationParamsNotifierProvider);
   final workflow = ref.watch(imageWorkflowControllerProvider);
-  final imagesPerRequest = ref.watch(imagesPerRequestProvider);
   final subscription = ref.watch(
     subscriptionNotifierProvider.select((state) => state.subscription),
   );
@@ -157,7 +148,6 @@ int estimatedCost(Ref ref) {
   }
 
   final batchCount = params.nSamples;
-  final batchSize = imagesPerRequest;
   if (batchCount <= 0 || batchSize <= 0) {
     return 0;
   }
@@ -185,6 +175,23 @@ int estimatedCost(Ref ref) {
     oneTimeCost: AnlasCalculator.resolveVibeEncodingCost(params),
     opusUsageExhausted: subscription?.isOpusUsageExhausted ?? false,
   );
+}
+
+/// 预估消耗 Provider
+///
+/// 根据当前参数实时计算的主生成消耗。
+@riverpod
+int estimatedCost(Ref ref) {
+  return _calculateEstimatedCost(
+    ref,
+    batchSize: ref.watch(imagesPerRequestProvider),
+  );
+}
+
+/// 指定单次请求批次大小的消耗，用于探索页强制 N×1。
+@riverpod
+int estimatedCostForBatchSize(Ref ref, int batchSize) {
+  return _calculateEstimatedCost(ref, batchSize: batchSize);
 }
 
 /// 是否免费生成 Provider

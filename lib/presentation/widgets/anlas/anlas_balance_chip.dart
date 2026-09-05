@@ -13,13 +13,19 @@ import '../../providers/subscription_provider.dart';
 class AnlasBalanceChip extends ConsumerWidget {
   /// 紧凑模式（移动端使用）
   final bool compact;
+  final int? estimatedCostOverride;
 
-  const AnlasBalanceChip({super.key, this.compact = false});
+  const AnlasBalanceChip({
+    super.key,
+    this.compact = false,
+    this.estimatedCostOverride,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final subscriptionState = ref.watch(subscriptionNotifierProvider);
-    final estimatedCost = ref.watch(estimatedCostProvider);
+    final estimatedCost =
+        estimatedCostOverride ?? ref.watch(estimatedCostProvider) ?? 0;
     final theme = Theme.of(context);
 
     return subscriptionState.map(

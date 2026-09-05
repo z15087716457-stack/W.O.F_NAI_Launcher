@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
+import 'package:nai_launcher/core/utils/nai_weight_syntax.dart';
 
 /// 权重调整工具条包装器
 ///
@@ -342,7 +343,7 @@ class _WeightSelectionEditor {
     if (newWeight == 1.0) {
       newText = baseText;
     } else {
-      newText = '${newWeight.toStringAsFixed(2)}::$baseText::';
+      newText = NaiWeightSyntax.wrap(newWeight.toStringAsFixed(2), baseText);
     }
 
     final text = controller.text;

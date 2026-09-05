@@ -5,7 +5,7 @@ import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// L2 块实例随机设置弹窗（P2.5）：草稿式编辑——确定返回新设置
-/// （由调用方 `updateInstanceSettings`，内部自动重 roll 一次），取消返回 null。
+/// （由调用方 `updateInstanceSettings` 按实例锁定状态决定是否重 roll），取消返回 null。
 ///
 /// 控件全集覆盖五类典型场景（画师串探索/场景串/质量词组/彩蛋块/普通块），
 /// 无模式切换成本；离散预设只是左右离散的快捷写入。

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/auth_feature_flags.dart';
+import '../../../core/utils/localization_extension.dart';
 import '../../providers/auth_mode_provider.dart';
+import '../../providers/guest_session_provider.dart';
 import 'auth_mode_switcher.dart';
 import 'credentials_login_form.dart';
 import 'third_party_api_login_card.dart';
@@ -83,6 +85,15 @@ class LoginFormContainer extends ConsumerWidget {
                 ),
               },
             ),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            key: const Key('auth_guest_entry'),
+            onPressed: () {
+              ref.read(guestSessionNotifierProvider.notifier).enterGuest();
+            },
+            icon: const Icon(Icons.explore_outlined),
+            label: Text(context.l10n.auth_guestEntry),
           ),
         ],
       ),

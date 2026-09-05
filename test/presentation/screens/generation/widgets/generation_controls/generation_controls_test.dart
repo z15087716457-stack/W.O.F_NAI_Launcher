@@ -8,7 +8,9 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/generation_controls/batch_settings_button.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_controls/generation_controls.dart';
+import 'package:nai_launcher/presentation/widgets/common/draggable_number_input.dart';
 import 'package:nai_launcher/presentation/widgets/generation/auto_save_toggle_chip.dart';
 
 void main() {
@@ -49,6 +51,8 @@ void main() {
     await tester.pump();
 
     expect(find.byType(AutoSaveToggleChip), findsOneWidget);
+    expect(find.byType(DraggableNumberInput), findsOneWidget);
+    expect(find.byType(BatchSettingsButton), findsOneWidget);
     expect(
       tester
           .widget<AutoSaveToggleChip>(find.byType(AutoSaveToggleChip))
@@ -56,6 +60,92 @@ void main() {
       isTrue,
     );
     expect(find.text('自动保存'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('explore controls show nSamples and hide batch size', (
+    tester,
+  ) async {
+    final storage = _MemoryLocalStorageService({
+      StorageKeys.autoSaveImages: false,
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localStorageServiceProvider.overrideWith((ref) => storage),
+          kritaBridgeNotifierProvider.overrideWith(
+            (ref) => _TestKritaBridgeNotifier(),
+          ),
+          subscriptionNotifierProvider.overrideWith(
+            _TestSubscriptionNotifier.new,
+          ),
+          estimatedCostProvider.overrideWith((ref) => 0),
+          isFreeGenerationProvider.overrideWith((ref) => true),
+        ],
+        child: const MaterialApp(
+          locale: Locale('zh'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Scaffold(
+            body: SizedBox(
+              width: 400,
+              height: 60,
+              child: GenerationControls(compact: true, exploreMode: true),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(DraggableNumberInput), findsOneWidget);
+    expect(find.byType(BatchSettingsButton), findsNothing);
+    expect(find.byType(AutoSaveToggleChip), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('very narrow compact controls wrap instead of overflowing', (
+    tester,
+  ) async {
+    final storage = _MemoryLocalStorageService({
+      StorageKeys.autoSaveImages: false,
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localStorageServiceProvider.overrideWith((ref) => storage),
+          kritaBridgeNotifierProvider.overrideWith(
+            (ref) => _TestKritaBridgeNotifier(),
+          ),
+          subscriptionNotifierProvider.overrideWith(
+            _TestSubscriptionNotifier.new,
+          ),
+          estimatedCostProvider.overrideWith((ref) => 0),
+          isFreeGenerationProvider.overrideWith((ref) => true),
+        ],
+        child: const MaterialApp(
+          locale: Locale('zh'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Scaffold(
+            body: SizedBox(
+              width: 160,
+              height: 180,
+              child: GenerationControls(compact: true, exploreMode: true),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      find.byKey(const Key('generation-controls-compact-wrap')),
+      findsOneWidget,
+    );
+    expect(find.byType(AutoSaveToggleChip), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

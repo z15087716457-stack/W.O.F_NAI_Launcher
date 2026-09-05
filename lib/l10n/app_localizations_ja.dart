@@ -319,6 +319,9 @@ class AppLocalizationsJa extends AppLocalizations {
       'NovelAI アカウントでサインインしてください\nすべてのデータはローカルにのみ保存されます';
 
   @override
+  String get auth_guestEntry => 'ログインをスキップしてゲストとして続行';
+
+  @override
   String get auth_loggedIn => 'ログインしました';
 
   @override
@@ -1051,7 +1054,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get prompt_autoFormat => '自動フォーマット';
 
   @override
-  String get prompt_autoFormatSubtitle => '中国語カンマを英語カンマに変換し、アンダースコアを自動追加します';
+  String get prompt_autoFormatSubtitle => 'カンマと空白を整え、単語間の空白を保ち、重み構文を安全に閉じます';
 
   @override
   String get prompt_highlightEmphasis => 'ハイライトの強調';
@@ -1064,7 +1067,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get prompt_sdSyntaxAutoConvertSubtitle =>
-      'フォーカスが外れたときに SD ウェイト構文を NAI 形式に変換します';
+      'フォーカスが外れたとき、または生成時に SD の重み構文を NAI 形式に変換します';
 
   @override
   String get prompt_resolveAliasOnCopy => 'コピー時に単語ライブラリを展開';
@@ -3800,6 +3803,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localGallery_columnWidth => '列の幅';
+
+  @override
+  String get localGallery_thumbnailQualitySd => '標準';
+
+  @override
+  String get localGallery_thumbnailQualityHd => '高画質';
+
+  @override
+  String get localGallery_thumbnailQualityTooltip => 'ローカルギャラリーのサムネイル品質を選択';
 
   @override
   String get localGallery_naiOnly => 'NAI';
@@ -9672,9 +9684,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get autocomplete_autoComma => '挿入後にカンマを追加';
 
   @override
-  String get autocomplete_replaceUnderscores => '挿入時にアンダースコアを空白に置換';
-
-  @override
   String get autocomplete_dataSourcesTitle => 'データソースとキャッシュ';
 
   @override
@@ -9874,6 +9883,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pillCardReroll => '再抽選';
+
+  @override
+  String get pillCardRerollLocked => 'ロック中のため再抽選できません';
+
+  @override
+  String get pillCardLock => '現在の抽選結果をロック';
+
+  @override
+  String get pillCardUnlock => 'ロックを解除';
 
   @override
   String get pillCardSettings => 'ランダム設定';
@@ -10203,6 +10221,30 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_gridView => 'グリッド表示';
 
   @override
+  String get promptBlockLibrary_sortBy => '並べ替え';
+
+  @override
+  String get promptBlockLibrary_sortCustom => '既定（手動順）';
+
+  @override
+  String get promptBlockLibrary_sortUpdated => '更新日時';
+
+  @override
+  String get promptBlockLibrary_sortTitle => '名前';
+
+  @override
+  String get promptBlockLibrary_sortColor => '色';
+
+  @override
+  String get promptBlockLibrary_sortIcon => 'アイコン';
+
+  @override
+  String get promptBlockLibrary_sortAscending => '昇順';
+
+  @override
+  String get promptBlockLibrary_sortDescending => '降順';
+
+  @override
   String get promptBlockLibrary_cardSize => 'カードサイズ';
 
   @override
@@ -10358,8 +10400,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String styleExplore_runProgress(int done, int total) {
-    return '$done/$total';
+  String styleExplore_runTotalCount(int total) {
+    return '全 $total 枚';
   }
 
   @override
@@ -10406,9 +10448,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_startRun => '開始';
-
-  @override
   String get styleExplore_pauseRun => '一時停止';
 
   @override
@@ -10421,9 +10460,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_targetCountLabel => '生成枚数';
-
-  @override
-  String get styleExplore_runAnotherRound => 'もう一周';
 
   @override
   String styleExplore_manualRunName(String time) {

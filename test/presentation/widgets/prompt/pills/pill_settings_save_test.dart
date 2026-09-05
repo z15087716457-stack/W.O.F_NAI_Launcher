@@ -195,7 +195,7 @@ void main() {
     });
 
     test(
-      'updateInstanceSettings persists random mode; tryLoadSync reads it back',
+      'updateInstanceSettings persists random mode and locked currentRoll',
       () async {
         await Hive.box<String>(PillWorkspaceStorage.boxName).clear();
         final container = makeContainer();
@@ -208,6 +208,13 @@ void main() {
           markerA,
           const PillInstanceSettings(mode: PillRollMode.random),
         );
+        final currentRoll = container
+            .read(pillWorkspaceProvider(scope))
+            .document
+            .instances[markerA]!
+            .currentRoll;
+        expect(currentRoll, isNotNull);
+        notifier.toggleLocked(markerA);
         // persist 是 fire-and-forget：等一拍让 Box.put 落盘
         await Future<void>.delayed(const Duration(milliseconds: 50));
 
@@ -217,7 +224,8 @@ void main() {
           restored!.instances[markerA]?.settings.mode,
           PillRollMode.random,
         );
-        expect(restored.instances[markerA]!.currentRoll, isNotNull);
+        expect(restored.instances[markerA]!.locked, isTrue);
+        expect(restored.instances[markerA]!.currentRoll, currentRoll);
       },
     );
   });

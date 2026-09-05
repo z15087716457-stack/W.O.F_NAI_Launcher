@@ -162,6 +162,21 @@ void main() {
       expect(PillDocumentEditor.project(doc, (_) => null), '');
     });
 
+    test('marker-aware resolver receives each marker identity', () {
+      const doc = PillDocument(
+        text: '$markerA$markerB',
+        instances: {
+          markerA: PillInstance(blockId: 'a'),
+          markerB: PillInstance(blockId: 'b'),
+        },
+      );
+      final projection = PillDocumentEditor.projectWithMarker(
+        doc,
+        (marker, instance) => '$marker:${instance.blockId}',
+      );
+      expect(projection, '$markerA:a$markerB:b');
+    });
+
     test('stripMarkers removes every private-use marker', () {
       expect(PillDocumentEditor.stripMarkers('a$markerA\uE123b'), 'ab');
     });

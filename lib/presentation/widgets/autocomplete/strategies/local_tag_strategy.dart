@@ -61,7 +61,11 @@ class LocalTagStrategy extends AutocompleteStrategy<LocalTag> {
     _debounceTimer?.cancel();
 
     // 获取当前正在输入的标签
-    final currentTag = AutocompleteUtils.getCurrentTag(text, cursorPosition);
+    final currentTag = AutocompleteUtils.getCurrentTag(
+      text,
+      cursorPosition,
+      splitOnSpaces: _config.treatSpacesAsSeparators,
+    );
     final trimmedQuery = currentTag.trim();
 
     // 检测是否包含中文（中文1个字符即可触发搜索）

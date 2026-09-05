@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/cost_estimate_provider.dart';
+import '../../providers/subscription_provider.dart';
 
 /// Anlas 成本徽章
 ///
@@ -9,12 +10,18 @@ import '../../providers/cost_estimate_provider.dart';
 /// 根据余额状态显示不同颜色
 class AnlasCostBadge extends ConsumerWidget {
   final bool isGenerating;
+  final int? costOverride;
 
-  const AnlasCostBadge({super.key, required this.isGenerating});
+  const AnlasCostBadge({
+    super.key,
+    required this.isGenerating,
+    this.costOverride,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isFree = ref.watch(isFreeGenerationProvider);
+    final int cost = costOverride ?? ref.watch(estimatedCostProvider) ?? 0;
+    final isFree = cost == 0;
 
     // 生成中或免费时不显示
     if (isGenerating || isFree) {
@@ -22,8 +29,10 @@ class AnlasCostBadge extends ConsumerWidget {
     }
 
     final theme = Theme.of(context);
-    final cost = ref.watch(estimatedCostProvider);
-    final isInsufficient = ref.watch(isBalanceInsufficientProvider);
+    final balance = ref.watch(anlasBalanceProvider);
+    final isInsufficient = costOverride == null
+        ? ref.watch(isBalanceInsufficientProvider)
+        : balance != null && balance < cost;
 
     // 价格徽章颜色
     Color badgeColor;

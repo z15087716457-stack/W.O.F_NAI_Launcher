@@ -64,6 +64,8 @@ class StorageKeys {
   static const String blockLibraryPanelExpanded =
       'block_library_panel_expanded';
   static const String blockLibraryPanelWidth = 'block_library_panel_width';
+  static const String styleExploreRunSidebarWidth =
+      'style_explore_run_sidebar_width';
   static const String styleExploreGalleryWidth = 'style_explore_gallery_width';
 
   // Panel Expansion State Keys (面板展开状态)
@@ -161,6 +163,10 @@ class StorageKeys {
   /// 本地画廊逻辑列宽（px，140~480，默认 260）
   static const String localGalleryColumnWidth = 'local_gallery_column_width';
 
+  /// 本地画廊缩略图质量（GalleryThumbnailQuality.name，默认 hd）
+  static const String localGalleryThumbnailQuality =
+      'local_gallery_thumbnail_quality';
+
   /// 提示词块管理页视图模式：list 或 grid。
   static const String promptBlockLibraryViewMode =
       'prompt_block_library_view_mode';
@@ -172,6 +178,14 @@ class StorageKeys {
   /// 旧版详细/紧凑列表视图键，保留供旧数据读取兼容。
   static const String promptBlockLibraryCompactView =
       'prompt_block_library_compact_view';
+
+  /// 提示词块管理页内容排序字段（custom/updated/title/color/icon）。
+  static const String promptBlockLibrarySortField =
+      'prompt_block_library_sort_field';
+
+  /// 提示词块管理页内容排序是否倒序。
+  static const String promptBlockLibrarySortDescending =
+      'prompt_block_library_sort_descending';
 
   /// 在线画廊逻辑列宽（px，140~480，默认 200）
   static const String onlineGalleryColumnWidth = 'online_gallery_column_width';

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import '../../data/models/prompt_block/pill_document.dart';
 import '../../data/models/style_explore/explore_run.dart';
+import 'nai_weight_syntax.dart';
 import 'pill_roll_engine.dart';
 
 /// 深度迭代变异配置（阶段 D）。默认值偏向保守扰动：
@@ -300,7 +301,7 @@ abstract final class ExploreMutationEngine {
       rng,
     );
     final w = PillRollEngine.discretizeWeight(sampled, lo, hi);
-    return '${w.toStringAsFixed(1)}::$content::';
+    return NaiWeightSyntax.wrap(w.toStringAsFixed(1), content);
   }
 
   /// 给无权重原子赋随机权重（众数 = assignWeightMode）。
@@ -327,7 +328,7 @@ abstract final class ExploreMutationEngine {
       config.weightMin,
       config.weightMax,
     );
-    return '${w.toStringAsFixed(1)}::$atom::';
+    return NaiWeightSyntax.wrap(w.toStringAsFixed(1), atom);
   }
 
   /// 两父本交叉：随机切点原子段互换（头A+尾B 或 头B+尾A，方向随机）；

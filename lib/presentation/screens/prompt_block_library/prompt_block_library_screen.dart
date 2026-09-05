@@ -12,6 +12,7 @@ import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/prompt_block_exchange.dart';
 import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../../data/models/prompt_block/prompt_block_folder.dart';
+import '../../../data/models/prompt_block/prompt_block_sort.dart';
 import '../../../data/repositories/prompt_block_repository.dart';
 import '../../providers/prompt_block_library_provider.dart';
 import '../../widgets/common/app_toast.dart';
@@ -42,6 +43,8 @@ class _PromptBlockLibraryScreenState
   bool _allSelected = true;
   String? _selectedFolderId;
   _PromptBlockViewMode _viewMode = _PromptBlockViewMode.grid;
+  PromptBlockSortField _sortField = PromptBlockSortField.custom;
+  bool _sortDescending = false;
   double _cardWidth = 220;
   String? _selectedBlockId;
   bool _quickPanelExpanded = true;
@@ -66,12 +69,38 @@ class _PromptBlockLibraryScreenState
     final storedWidth = prefs.getDouble(
       StorageKeys.promptBlockLibraryCardWidth,
     );
+    final storedSortField = PromptBlockSortField.fromStorage(
+      prefs.getString(StorageKeys.promptBlockLibrarySortField),
+    );
+    final storedSortDescending = prefs.getBool(
+      StorageKeys.promptBlockLibrarySortDescending,
+    );
     setState(() {
       _viewMode = storedMode == 'list'
           ? _PromptBlockViewMode.list
           : _PromptBlockViewMode.grid;
       _cardWidth = _snapCardWidth(storedWidth ?? 220);
+      if (storedSortField != null) _sortField = storedSortField;
+      if (storedSortDescending != null) _sortDescending = storedSortDescending;
     });
+  }
+
+  Future<void> _setSortField(PromptBlockSortField field) async {
+    setState(() => _sortField = field);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      StorageKeys.promptBlockLibrarySortField,
+      field.storageValue,
+    );
+  }
+
+  Future<void> _toggleSortDirection() async {
+    setState(() => _sortDescending = !_sortDescending);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(
+      StorageKeys.promptBlockLibrarySortDescending,
+      _sortDescending,
+    );
   }
 
   Future<void> _setViewMode(_PromptBlockViewMode mode) async {
@@ -384,6 +413,7 @@ class _PromptBlockLibraryScreenState
                       ),
                     ],
                   ),
+                  _buildSortControls(context),
                   IconButton(
                     tooltip: context.l10n.common_refresh,
                     onPressed: () => ref
@@ -479,6 +509,69 @@ class _PromptBlockLibraryScreenState
         );
       },
     );
+  }
+
+  Widget _buildSortControls(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        PopupMenuButton<PromptBlockSortField>(
+          key: const Key('prompt-block-sort-field'),
+          tooltip: l10n.promptBlockLibrary_sortBy,
+          initialValue: _sortField,
+          position: PopupMenuPosition.under,
+          onSelected: _setSortField,
+          itemBuilder: (context) => [
+            for (final field in PromptBlockSortField.values)
+              PopupMenuItem(
+                value: field,
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      child:
+                          field == _sortField
+                              ? const Icon(Icons.check, size: 16)
+                              : null,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(_sortFieldLabel(context, field)),
+                  ],
+                ),
+              ),
+          ],
+        ),
+        IconButton(
+          key: const Key('prompt-block-sort-direction'),
+          tooltip: _sortDescending
+              ? l10n.promptBlockLibrary_sortDescending
+              : l10n.promptBlockLibrary_sortAscending,
+          onPressed: _sortField.overridesManualOrder
+              ? _toggleSortDirection
+              : null,
+          icon: Icon(
+            _sortDescending ? Icons.south : Icons.north,
+            size: 18,
+            color: _sortField.overridesManualOrder
+                ? theme.colorScheme.primary
+                : null,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _sortFieldLabel(BuildContext context, PromptBlockSortField field) {
+    final l10n = context.l10n;
+    return switch (field) {
+      PromptBlockSortField.custom => l10n.promptBlockLibrary_sortCustom,
+      PromptBlockSortField.updated => l10n.promptBlockLibrary_sortUpdated,
+      PromptBlockSortField.title => l10n.promptBlockLibrary_sortTitle,
+      PromptBlockSortField.color => l10n.promptBlockLibrary_sortColor,
+      PromptBlockSortField.icon => l10n.promptBlockLibrary_sortIcon,
+    };
   }
 
   Widget _buildSearchField(BuildContext context) {
@@ -596,8 +689,14 @@ class _PromptBlockLibraryScreenState
           return _buildGrid(context, blocks);
         }
 
+        // 聚合视图里混有后代文件夹的块，跨文件夹拖排没有意义；
+        // repository 的同级完整性校验也会拒绝这种重排，这里直接不提供把手。
+        // 自定义排序下顺序由字段决定，手动拖排同样没有意义。
         final reorderable =
-            !_allSelected && _searchController.text.trim().isEmpty;
+            !_allSelected &&
+            !_sortField.overridesManualOrder &&
+            _searchController.text.trim().isEmpty &&
+            blocks.every((block) => block.folderId == _selectedFolderId);
         if (reorderable) {
           return ReorderableListView.builder(
             key: const Key('prompt-block-list'),
@@ -902,7 +1001,7 @@ class _PromptBlockLibraryScreenState
   List<PromptBlock> _visibleBlocks(PromptBlockLibraryState state) {
     final blocks = _allSelected
         ? state.blocks.toList()
-        : state.blocksInFolder(_selectedFolderId);
+        : state.blocksInFolderTree(_selectedFolderId);
     final query = _searchController.text.trim().toLowerCase();
     if (query.isNotEmpty) {
       blocks.removeWhere(
@@ -917,7 +1016,12 @@ class _PromptBlockLibraryScreenState
         return title != 0 ? title : a.id.compareTo(b.id);
       });
     }
-    return blocks;
+    return sortPromptBlocks(
+      blocks,
+      _sortField,
+      descending: _sortDescending,
+      folderOrder: state.folderTreeOrder(),
+    );
   }
 
   Future<void> _importTxtFiles() async {
@@ -1377,7 +1481,9 @@ class _PromptBlockLibraryScreenState
   ) async {
     if (_viewMode != _PromptBlockViewMode.list ||
         _allSelected ||
-        _searchController.text.trim().isNotEmpty) {
+        _sortField.overridesManualOrder ||
+        _searchController.text.trim().isNotEmpty ||
+        blocks.any((block) => block.folderId != _selectedFolderId)) {
       return;
     }
     final orderedIds = blocks.map((block) => block.id).toList();

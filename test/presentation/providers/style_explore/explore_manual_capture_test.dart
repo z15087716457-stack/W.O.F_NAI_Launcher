@@ -10,21 +10,11 @@ import 'package:nai_launcher/core/storage/style_explore_run_storage.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/data/services/explore_run_image_store.dart';
-import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_models.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_manual_capture.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
-
-/// 直接驱动状态的假生成 notifier（不触发任何真实生成链）。
-class _FakeImageGenerationNotifier extends ImageGenerationNotifier {
-  @override
-  ImageGenerationState build() => const ImageGenerationState();
-
-  void emit(ImageGenerationState next) {
-    state = next;
-  }
-}
 
 class _FakeLibraryNotifier extends PromptBlockLibraryNotifier {
   @override
@@ -36,7 +26,6 @@ void main() {
   late Directory hiveDirectory;
   late Directory imageDirectory;
   late StyleExploreRunStorage runStorage;
-  late _FakeImageGenerationNotifier generationNotifier;
 
   setUpAll(() async {
     hiveDirectory = await Directory.systemTemp.createTemp(
@@ -56,7 +45,6 @@ void main() {
     await runStorage.clear();
     await Hive.box(StorageKeys.settingsBox).clear();
     await Hive.box<String>(StorageKeys.promptWorkspaceStateBox).clear();
-    generationNotifier = _FakeImageGenerationNotifier();
   });
 
   tearDownAll(() async {
@@ -82,7 +70,6 @@ void main() {
         promptBlockLibraryNotifierProvider.overrideWith(
           () => _FakeLibraryNotifier(),
         ),
-        imageGenerationNotifierProvider.overrideWith(() => generationNotifier),
       ],
     );
     addTearDown(c.dispose);
@@ -123,29 +110,70 @@ void main() {
       expect(run.candidates, hasLength(2));
       expect(run.candidates.first.rollSnapshot, isNotNull);
       expect(run.candidates[1].rollSnapshot, isNull);
+      expect(capture.rollSnapshots, hasLength(1));
       expect(
         run.candidates.first.lineage.operation,
         ExploreLineageOperation.manual,
       );
       expect(c.read(exploreActiveRunIdProvider), run.id);
 
-      // 完成：两张新图按序配对登记，副本落 run 目录。
-      generationNotifier.emit(
-        ImageGenerationState(
-          status: GenerationStatus.completed,
-          currentImages: [
+      const autoRunName = '手动候选 测试';
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.start,
+          batchIndex: 0,
+          slotStart: 1,
+          slotCount: 1,
+          totalSlots: 2,
+        ),
+        autoRunName: autoRunName,
+      );
+      await notifier.handleBatchEvent(
+        GenerationBatchEvent(
+          kind: GenerationBatchEventKind.complete,
+          batchIndex: 0,
+          slotStart: 1,
+          slotCount: 1,
+          totalSlots: 2,
+          images: [
             fakeImage([1]),
+          ],
+          elapsedMs: 10,
+        ),
+        autoRunName: autoRunName,
+      );
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.start,
+          batchIndex: 1,
+          slotStart: 2,
+          slotCount: 1,
+          totalSlots: 2,
+        ),
+        autoRunName: autoRunName,
+      );
+      await notifier.handleBatchEvent(
+        GenerationBatchEvent(
+          kind: GenerationBatchEventKind.complete,
+          batchIndex: 1,
+          slotStart: 2,
+          slotCount: 1,
+          totalSlots: 2,
+          images: [
             fakeImage([2]),
           ],
+          elapsedMs: 10,
         ),
+        autoRunName: autoRunName,
       );
-      // 等登记链跑完（listener → 异步 finalize）。
-      for (var i = 0; i < 100; i++) {
-        await Future<void>.delayed(const Duration(milliseconds: 10));
-        run = await reloadRun(c, capture.runId!);
-        if (run.generatedCount == 2) break;
-      }
+      run = await reloadRun(c, capture.runId!);
       expect(run.generatedCount, 2);
+      expect(run.candidates.first.rollSnapshot, isNotNull);
+      expect(run.candidates[1].rollSnapshot, isNotNull);
+      expect(
+        run.candidates.first.rollSnapshot,
+        isNot(same(run.candidates[1].rollSnapshot)),
+      );
       for (final candidate in run.candidates) {
         expect(
           candidate.generation.status,
@@ -167,18 +195,28 @@ void main() {
     await notifier.arm(autoRunName: '手动候选 失败', expectedCount: 1);
     final capture = c.read(exploreManualCaptureProvider);
 
-    generationNotifier.emit(
-      const ImageGenerationState(
-        status: GenerationStatus.error,
-        errorMessage: 'boom',
+    await notifier.handleBatchEvent(
+      const GenerationBatchEvent(
+        kind: GenerationBatchEventKind.start,
+        batchIndex: 0,
+        slotStart: 1,
+        slotCount: 1,
+        totalSlots: 1,
       ),
+      autoRunName: '手动候选 失败',
     );
-    ExploreRun run = await reloadRun(c, capture.runId!);
-    for (var i = 0; i < 100; i++) {
-      await Future<void>.delayed(const Duration(milliseconds: 10));
-      run = await reloadRun(c, capture.runId!);
-      if (run.failedCount == 1) break;
-    }
+    await notifier.handleBatchEvent(
+      const GenerationBatchEvent(
+        kind: GenerationBatchEventKind.complete,
+        batchIndex: 0,
+        slotStart: 1,
+        slotCount: 1,
+        totalSlots: 1,
+        error: 'boom',
+      ),
+      autoRunName: '手动候选 失败',
+    );
+    final run = await reloadRun(c, capture.runId!);
     expect(run.failedCount, 1);
     expect(run.candidates.single.generation.error, 'boom');
     expect(c.read(exploreManualCaptureProvider).armed, isFalse);
@@ -191,22 +229,383 @@ void main() {
     await notifier.arm(autoRunName: '手动候选 部分', expectedCount: 2);
     final capture = c.read(exploreManualCaptureProvider);
 
-    generationNotifier.emit(
-      ImageGenerationState(
-        status: GenerationStatus.completed,
-        currentImages: [
+    await notifier.handleBatchEvent(
+      const GenerationBatchEvent(
+        kind: GenerationBatchEventKind.start,
+        batchIndex: 0,
+        slotStart: 1,
+        slotCount: 1,
+        totalSlots: 2,
+      ),
+      autoRunName: '手动候选 部分',
+    );
+    await notifier.handleBatchEvent(
+      GenerationBatchEvent(
+        kind: GenerationBatchEventKind.complete,
+        batchIndex: 0,
+        slotStart: 1,
+        slotCount: 1,
+        totalSlots: 2,
+        images: [
           fakeImage([7]),
         ],
       ),
+      autoRunName: '手动候选 部分',
     );
-    ExploreRun run = await reloadRun(c, capture.runId!);
-    for (var i = 0; i < 100; i++) {
-      await Future<void>.delayed(const Duration(milliseconds: 10));
-      run = await reloadRun(c, capture.runId!);
-      if (run.generatedCount == 1 && run.failedCount == 1) break;
-    }
+    await notifier.handleBatchEvent(
+      const GenerationBatchEvent(
+        kind: GenerationBatchEventKind.start,
+        batchIndex: 1,
+        slotStart: 2,
+        slotCount: 1,
+        totalSlots: 2,
+      ),
+      autoRunName: '手动候选 部分',
+    );
+    await notifier.handleBatchEvent(
+      const GenerationBatchEvent(
+        kind: GenerationBatchEventKind.complete,
+        batchIndex: 1,
+        slotStart: 2,
+        slotCount: 1,
+        totalSlots: 2,
+        error: 'no image produced',
+      ),
+      autoRunName: '手动候选 部分',
+    );
+    final run = await reloadRun(c, capture.runId!);
     expect(run.generatedCount, 1);
     expect(run.failedCount, 1);
+  });
+
+  test(
+    'pairs failed first batch and successful second batch by slot range',
+    () async {
+      final c = container();
+      final notifier = c.read(exploreManualCaptureProvider.notifier);
+
+      await notifier.arm(autoRunName: '批次配对', expectedCount: 4);
+      final capture = c.read(exploreManualCaptureProvider);
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.start,
+          batchIndex: 0,
+          slotStart: 1,
+          slotCount: 2,
+          totalSlots: 4,
+        ),
+        autoRunName: '批次配对',
+      );
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.complete,
+          batchIndex: 0,
+          slotStart: 1,
+          slotCount: 2,
+          totalSlots: 4,
+          error: 'first batch failed',
+        ),
+        autoRunName: '批次配对',
+      );
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.start,
+          batchIndex: 1,
+          slotStart: 3,
+          slotCount: 2,
+          totalSlots: 4,
+        ),
+        autoRunName: '批次配对',
+      );
+      await notifier.handleBatchEvent(
+        GenerationBatchEvent(
+          kind: GenerationBatchEventKind.complete,
+          batchIndex: 1,
+          slotStart: 3,
+          slotCount: 2,
+          totalSlots: 4,
+          images: [
+            fakeImage([3]),
+            fakeImage([4]),
+          ],
+        ),
+        autoRunName: '批次配对',
+      );
+
+      final run = await reloadRun(c, capture.runId!);
+      expect(
+        run.candidates.map((candidate) => candidate.generation.status),
+        orderedEquals([
+          ExploreCandidateGenerationStatus.failed,
+          ExploreCandidateGenerationStatus.failed,
+          ExploreCandidateGenerationStatus.done,
+          ExploreCandidateGenerationStatus.done,
+        ]),
+      );
+      expect(run.candidates[0].generation.error, 'first batch failed');
+      expect(run.candidates[1].generation.error, 'first batch failed');
+      expect(run.candidates[2].generation.filePath, isNotNull);
+      expect(run.candidates[3].generation.filePath, isNotNull);
+      expect(
+        run.candidates.map((candidate) => candidate.rollSnapshot),
+        everyElement(isNotNull),
+      );
+    },
+  );
+
+  test(
+    'done candidate is not overwritten when a later batch is cancelled',
+    () async {
+      final c = container();
+      final notifier = c.read(exploreManualCaptureProvider.notifier);
+
+      await notifier.arm(autoRunName: '取消保护', expectedCount: 2);
+      final capture = c.read(exploreManualCaptureProvider);
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.start,
+          batchIndex: 0,
+          slotStart: 1,
+          slotCount: 1,
+          totalSlots: 2,
+        ),
+        autoRunName: '取消保护',
+      );
+      await notifier.handleBatchEvent(
+        GenerationBatchEvent(
+          kind: GenerationBatchEventKind.complete,
+          batchIndex: 0,
+          slotStart: 1,
+          slotCount: 1,
+          totalSlots: 2,
+          images: [
+            fakeImage([1]),
+          ],
+          elapsedMs: 10,
+        ),
+        autoRunName: '取消保护',
+      );
+      final doneRun = await reloadRun(c, capture.runId!);
+      final doneGeneration = doneRun.candidates.first.generation;
+
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.start,
+          batchIndex: 1,
+          slotStart: 2,
+          slotCount: 1,
+          totalSlots: 2,
+        ),
+        autoRunName: '取消保护',
+      );
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.complete,
+          batchIndex: 1,
+          slotStart: 2,
+          slotCount: 1,
+          totalSlots: 2,
+          error: 'cancelled',
+        ),
+        autoRunName: '取消保护',
+      );
+      final run = await reloadRun(c, capture.runId!);
+      expect(run.candidates.first.generation, doneGeneration);
+      expect(
+        run.candidates[1].generation.status,
+        ExploreCandidateGenerationStatus.failed,
+      );
+    },
+  );
+
+  test(
+    'cancelled current and unstarted slots leave no pending candidates',
+    () async {
+      final c = container();
+      final notifier = c.read(exploreManualCaptureProvider.notifier);
+
+      await notifier.arm(autoRunName: '取消剩余候选', expectedCount: 3);
+      final capture = c.read(exploreManualCaptureProvider);
+      const generationRunId = 42;
+
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.start,
+          generationRunId: generationRunId,
+          batchIndex: 0,
+          slotStart: 1,
+          slotCount: 1,
+          totalSlots: 3,
+        ),
+        autoRunName: '取消剩余候选',
+      );
+      await notifier.handleBatchEvent(
+        GenerationBatchEvent(
+          kind: GenerationBatchEventKind.complete,
+          generationRunId: generationRunId,
+          batchIndex: 0,
+          slotStart: 1,
+          slotCount: 1,
+          totalSlots: 3,
+          images: [
+            fakeImage([1]),
+          ],
+          elapsedMs: 10,
+        ),
+        autoRunName: '取消剩余候选',
+      );
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.start,
+          generationRunId: generationRunId,
+          batchIndex: 1,
+          slotStart: 2,
+          slotCount: 1,
+          totalSlots: 3,
+        ),
+        autoRunName: '取消剩余候选',
+      );
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.complete,
+          generationRunId: generationRunId,
+          batchIndex: 1,
+          slotStart: 2,
+          slotCount: 1,
+          totalSlots: 3,
+          error: 'cancelled',
+        ),
+        autoRunName: '取消剩余候选',
+      );
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.complete,
+          generationRunId: generationRunId,
+          batchIndex: 2,
+          slotStart: 3,
+          slotCount: 1,
+          totalSlots: 3,
+          error: 'cancelled',
+        ),
+        autoRunName: '取消剩余候选',
+      );
+
+      final run = await reloadRun(c, capture.runId!);
+      expect(
+        run.candidates.map((candidate) => candidate.generation.status),
+        orderedEquals([
+          ExploreCandidateGenerationStatus.done,
+          ExploreCandidateGenerationStatus.failed,
+          ExploreCandidateGenerationStatus.failed,
+        ]),
+      );
+      expect(run.candidates.first.generation.error, isNull);
+      expect(run.candidates[1].generation.error, 'cancelled');
+      expect(run.candidates[2].generation.error, 'cancelled');
+      expect(c.read(exploreManualCaptureProvider).armed, isFalse);
+    },
+  );
+
+  test('ignores a different generation session id', () async {
+    final c = container();
+    final notifier = c.read(exploreManualCaptureProvider.notifier);
+
+    const start = GenerationBatchEvent(
+      kind: GenerationBatchEventKind.start,
+      generationRunId: 11,
+      batchIndex: 0,
+      slotStart: 1,
+      slotCount: 1,
+      totalSlots: 2,
+    );
+    await notifier.handleBatchEvent(start, autoRunName: '会话隔离');
+    final capture = c.read(exploreManualCaptureProvider);
+    await notifier.handleBatchEvent(
+      const GenerationBatchEvent(
+        kind: GenerationBatchEventKind.complete,
+        generationRunId: 12,
+        batchIndex: 0,
+        slotStart: 1,
+        slotCount: 1,
+        totalSlots: 2,
+        error: 'stale',
+      ),
+      autoRunName: '会话隔离',
+    );
+    var run = await reloadRun(c, capture.runId!);
+    expect(
+      run.candidates.every(
+        (candidate) =>
+            candidate.generation.status ==
+            ExploreCandidateGenerationStatus.pending,
+      ),
+      isTrue,
+    );
+
+    await notifier.handleBatchEvent(
+      const GenerationBatchEvent(
+        kind: GenerationBatchEventKind.complete,
+        generationRunId: 11,
+        batchIndex: 0,
+        slotStart: 1,
+        slotCount: 1,
+        totalSlots: 2,
+        images: [],
+        error: 'failed',
+      ),
+      autoRunName: '会话隔离',
+    );
+    run = await reloadRun(c, capture.runId!);
+    expect(
+      run.candidates.first.generation.status,
+      ExploreCandidateGenerationStatus.failed,
+    );
+    expect(
+      run.candidates[1].generation.status,
+      ExploreCandidateGenerationStatus.pending,
+    );
+  });
+
+  test('cancelling arm leaves no pending shells', () async {
+    final c = container();
+    final notifier = c.read(exploreManualCaptureProvider.notifier);
+    final arm = notifier.arm(autoRunName: '中途取消', expectedCount: 2);
+    notifier.cancelSession();
+    await arm;
+
+    final runs = (await c.read(exploreRunListNotifierProvider.future)).runs;
+    expect(
+      runs
+          .expand((run) => run.candidates)
+          .where(
+            (candidate) =>
+                candidate.lineage.operation == ExploreLineageOperation.manual &&
+                candidate.generation.status ==
+                    ExploreCandidateGenerationStatus.pending,
+          ),
+      isEmpty,
+    );
+  });
+
+  test('cancelling arm leaves no pending shells', () async {
+    final c = container();
+    final notifier = c.read(exploreManualCaptureProvider.notifier);
+    final arm = notifier.arm(autoRunName: '中途取消', expectedCount: 2);
+    notifier.cancelSession();
+    await arm;
+
+    final runs = (await c.read(exploreRunListNotifierProvider.future)).runs;
+    expect(
+      runs
+          .expand((run) => run.candidates)
+          .where(
+            (candidate) =>
+                candidate.lineage.operation == ExploreLineageOperation.manual &&
+                candidate.generation.status ==
+                    ExploreCandidateGenerationStatus.pending,
+          ),
+      isEmpty,
+    );
   });
 
   test(

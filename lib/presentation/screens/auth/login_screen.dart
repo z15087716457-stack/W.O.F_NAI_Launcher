@@ -10,6 +10,7 @@ import '../../../data/models/auth/saved_account.dart';
 import '../../providers/account_manager_provider.dart';
 import '../../providers/auth_mode_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/guest_session_provider.dart';
 import '../../widgets/auth/account_avatar.dart';
 import '../../widgets/auth/login_form_container.dart';
 import '../../widgets/auth/network_troubleshooting_dialog.dart';
@@ -165,6 +166,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           _showAccountSelector(context, ref, accounts, current),
       onQuickLogin: (account) => _handleQuickLogin(context, ref, account),
       onAddAccount: () => _showAddAccountDialog(context),
+      onGuestEntry: () {
+        ref.read(guestSessionNotifierProvider.notifier).enterGuest();
+      },
     );
   }
 
@@ -686,6 +690,7 @@ class _QuickLoginView extends ConsumerWidget {
   final void Function(List<SavedAccount>, SavedAccount) onAccountSelectorTap;
   final void Function(SavedAccount) onQuickLogin;
   final VoidCallback onAddAccount;
+  final VoidCallback onGuestEntry;
 
   const _QuickLoginView({
     required this.theme,
@@ -695,6 +700,7 @@ class _QuickLoginView extends ConsumerWidget {
     required this.onAccountSelectorTap,
     required this.onQuickLogin,
     required this.onAddAccount,
+    required this.onGuestEntry,
   });
 
   @override
@@ -773,6 +779,12 @@ class _QuickLoginView extends ConsumerWidget {
                 icon: const Icon(Icons.add),
                 label: Text(context.l10n.auth_addAccount),
               ),
+              TextButton.icon(
+                key: const Key('auth_guest_entry_quick_login'),
+                onPressed: onGuestEntry,
+                icon: const Icon(Icons.explore_outlined),
+                label: Text(context.l10n.auth_guestEntry),
+              ),
             ],
           ),
         ),
@@ -818,6 +830,12 @@ class _QuickLoginView extends ConsumerWidget {
           onPressed: onAddAccount,
           icon: const Icon(Icons.add),
           label: Text(context.l10n.auth_addAccount),
+        ),
+        TextButton.icon(
+          key: const Key('auth_guest_entry_quick_login'),
+          onPressed: onGuestEntry,
+          icon: const Icon(Icons.explore_outlined),
+          label: Text(context.l10n.auth_guestEntry),
         ),
       ],
     );

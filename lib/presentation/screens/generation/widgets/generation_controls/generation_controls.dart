@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:nai_launcher/core/utils/localization_extension.dart';
+import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/utils/asset_protection_guard.dart';
@@ -12,25 +13,30 @@ import 'package:nai_launcher/presentation/widgets/common/draggable_number_input.
 import 'package:nai_launcher/presentation/widgets/generation/auto_save_toggle_chip.dart';
 import 'package:nai_launcher/presentation/widgets/anlas/anlas_balance_chip.dart';
 import 'package:nai_launcher/presentation/widgets/anlas/opus_usage_chip.dart';
-import 'package:nai_launcher/presentation/widgets/anlas/personal_anlas_chip.dart';
 import 'batch_settings_button.dart';
 import 'generate_button.dart';
 
 /// 生成控制按钮
 class GenerationControls extends ConsumerStatefulWidget {
   /// 紧凑模式：用于官网式布局的钉底控制条——
-  /// 强制窄排布、追加批次大小按钮、压低生成按钮高度。
+  /// 强制窄排布、可选批次大小按钮、压低生成按钮高度。
   final bool compact;
 
-  /// generate() 同步启动后立即触发的钩子（此刻 isGenerating 已置位、
-  /// 随机块实例尚未重 roll）。探索页借此布防手动候选登记；
-  /// 冷却拦截导致未真正启动时 isGenerating 为 false，钩子自行判断跳过。
+  /// 保留给已有调用方的生成调用钩子。
   final void Function()? onGenerateInvoked;
+
+  /// 真实生成入口发出的可等待批次事件。
+  final GenerationBatchCallback? onBatchEvent;
+
+  /// 探索页只允许逐张请求，隐藏通用批量控件。
+  final bool exploreMode;
 
   const GenerationControls({
     super.key,
     this.compact = false,
     this.onGenerateInvoked,
+    this.onBatchEvent,
+    this.exploreMode = false,
   });
 
   @override
@@ -43,9 +49,11 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
     final generationState = ref.watch(imageGenerationNotifierProvider);
     final cooldownState = ref.watch(generationCooldownProvider);
     final kritaBridgeState = ref.watch(kritaBridgeNotifierProvider);
-    final nSamples = ref.watch(
-      generationParamsNotifierProvider.select((params) => params.nSamples),
-    );
+    final params = ref.watch(generationParamsNotifierProvider);
+    final nSamples = params.nSamples;
+    final costOverride = widget.exploreMode
+        ? ref.watch(estimatedCostForBatchSizeProvider(1))
+        : null;
     final isLauncherGenerating = generationState.isGenerating;
     final isGenerating =
         isLauncherGenerating || kritaBridgeState.isBridgeGenerating;
@@ -67,6 +75,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
           showCancel: showCancel,
           generationState: generationState,
           cooldownRemainingSeconds: cooldownState.remainingSeconds,
+          costOverride: costOverride,
           onGenerate: () => unawaited(_handleGenerate(context, ref)),
           onCancel: () =>
               ref.read(imageGenerationNotifierProvider.notifier).cancel(),
@@ -91,21 +100,61 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                 },
               ),
             // 紧凑模式补上第二种批量控制：批次大小（每次请求张数）
-            if (widget.compact && !showCancel) ...[
+            if (widget.compact && !widget.exploreMode && !showCancel) ...[
               const SizedBox(width: 4),
               const BatchSettingsButton(),
             ],
           ];
 
           if (widget.compact) {
-            // 官网钉底条单行：自动保存放右侧空位，左组是 2×2 点数块。
-            // 额度两格（仅 V5 显示）+ 余额/我的点数两格合成一个整体，
-            // 四格同规格（图标 16/字号 14/行距 4）逐行严格对齐；
-            // 整体套 FittedBox 右对齐贴生成按钮：窄窗口整组等比缩小，
-            // 缩放同步所以对齐不破坏，点数块也不会被生成按钮挡住
+            if (constraints.maxWidth < 360) {
+              Widget fit(Widget child) => ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+                child: FittedBox(fit: BoxFit.scaleDown, child: child),
+              );
+
+              return Wrap(
+                key: const Key('generation-controls-compact-wrap'),
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 6,
+                children: [
+                  fit(
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const OpusUsageChip(
+                          compact: true,
+                          margin: EdgeInsets.only(right: 8),
+                        ),
+                        AnlasBalanceChip(
+                          estimatedCostOverride: costOverride,
+                        ),
+                      ],
+                    ),
+                  ),
+                  fit(generateButton),
+                  fit(
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ...rightGroup,
+                        const SizedBox(width: 8),
+                        const AutoSaveToggleChip(compact: true),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            // 官网钉底条：正常宽度保持单行，左右点数组与生成按钮对齐。
+            // 极窄宽度在上方分支中改为三组自动换行，避免控件横向溢出。
             return Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: FittedBox(
@@ -115,19 +164,13 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           // 隐藏（V4）时 shrink 不占位，
-                          // 与余额列的 8 间距随自己的 margin 一起消失
-                          OpusUsageChip(
+                          // 与余额芯片的 8 间距随自己的 margin 一起消失
+                          const OpusUsageChip(
                             compact: true,
                             margin: EdgeInsets.only(right: 8),
                           ),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              AnlasBalanceChip(),
-                              SizedBox(height: 4),
-                              PersonalAnlasChip(),
-                            ],
+                          AnlasBalanceChip(
+                            estimatedCostOverride: costOverride,
                           ),
                         ],
                       ),
@@ -181,11 +224,11 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
         // 左右组空间不足时内部等比缩小，避免溢出叠到生成按钮上
         return Row(
           children: [
-            const Expanded(
+            Expanded(
               child: Row(
                 children: [
-                  AutoSaveToggleChip(),
-                  SizedBox(width: 8),
+                  const AutoSaveToggleChip(),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
@@ -194,10 +237,12 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            AnlasBalanceChip(),
-                            SizedBox(width: 8),
-                            PersonalAnlasChip(),
-                            OpusUsageChip(margin: EdgeInsets.only(left: 8)),
+                            AnlasBalanceChip(
+                              estimatedCostOverride: costOverride,
+                            ),
+                            const OpusUsageChip(
+                              margin: EdgeInsets.only(left: 8),
+                            ),
                           ],
                         ),
                       ),
@@ -226,8 +271,10 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                               .updateNSamples(value);
                         },
                       ),
-                      const SizedBox(width: 16),
-                      const BatchSettingsButton(),
+                      if (!widget.exploreMode) ...[
+                        const SizedBox(width: 16),
+                        const BatchSettingsButton(),
+                      ],
                     ],
                   ),
                 ),
@@ -249,15 +296,22 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
     final confirmed = await AssetProtectionGuard.confirmHighAnlasCost(
       context: context,
       ref: ref,
+      cost: widget.exploreMode
+          ? ref.read(estimatedCostForBatchSizeProvider(1))
+          : null,
     );
     if (!confirmed || !context.mounted) {
       return;
     }
 
-    // 生成（抽卡模式逻辑在 generate 方法内部处理）
-    ref.read(imageGenerationNotifierProvider.notifier).generate(params);
-    // 探索页手动候选登记钩子：同步启动后立刻触发，此刻 roll 尚未发生，
-    // 抓到的快照=本张实际发送的投影（冷却拦截时 isGenerating=false，跳过）。
+    // 生成（探索模式在真实批次 start 前完成布防，并强制逐张请求）。
+    ref
+        .read(imageGenerationNotifierProvider.notifier)
+        .generate(
+          params,
+          onBatchEvent: widget.onBatchEvent,
+          imagesPerRequestOverride: widget.exploreMode ? 1 : null,
+        );
     widget.onGenerateInvoked?.call();
   }
 }

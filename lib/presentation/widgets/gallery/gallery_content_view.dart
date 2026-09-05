@@ -21,6 +21,7 @@ import '../../utils/image_detail_opener.dart';
 import '../../../data/services/gallery/gallery_filter_service.dart'
     show FilterCriteria;
 import 'local_image_card_3d.dart';
+import 'draggable_image_card.dart';
 import 'gallery_favorite_menu.dart';
 import '../common/image_detail/image_detail_viewer.dart';
 import '../common/image_detail/image_detail_data.dart';
@@ -423,6 +424,9 @@ class _GenericGalleryContentViewState<T>
                 ? (action) => widget.onSendAction!(record, action)
                 : null,
             isKritaConnected: widget.isKritaConnected,
+            dragWrapper: selectionState.isActive
+                ? null
+                : DraggableImageCard.createDragWrapper(record: record),
           ),
         );
       },
@@ -631,6 +635,9 @@ class _GenericGalleryContentViewState<T>
                       ? (action) => widget.onSendAction!(record, action)
                       : null,
                   isKritaConnected: widget.isKritaConnected,
+                  dragWrapper: selectionState.isActive
+                      ? null
+                      : DraggableImageCard.createDragWrapper(record: record),
                 ),
               ),
             );

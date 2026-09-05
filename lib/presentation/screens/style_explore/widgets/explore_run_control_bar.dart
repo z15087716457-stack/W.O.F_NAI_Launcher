@@ -1,24 +1,19 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../providers/style_explore/explore_run_runner.dart';
 import '../../../widgets/common/app_toast.dart';
-import '../../../widgets/common/draggable_number_input.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import 'explore_run_actions.dart';
 
 /// 中栏顶部 Run 控制条（activeRun 非空时显示）。
 ///
-/// 按钮按状态显隐：draft=开始 / generating=暂停+取消 / paused=继续+取消 /
-/// generated=出图数+再来一轮（+有失败时重试失败）。
-/// 出图数在 draft 与 generated 两态可编辑（generated 时作用于追加的新轮）。
+/// 按钮按状态显隐：generating=暂停+取消 / paused=继续+取消；
+/// 失败重试与 More 菜单保留。基础轮批量入口统一由底部主生成控制条承载。
 class ExploreRunControlBar extends ConsumerStatefulWidget {
   const ExploreRunControlBar({super.key, required this.run});
 
@@ -39,6 +34,7 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
     final isRunningThis = runnerState.isRunning && runnerState.runId == run.id;
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLow,
@@ -48,23 +44,37 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
           ),
         ),
       ),
-      child: Row(
+      child: Wrap(
+        key: const Key('explore-run-control-bar-content'),
+        spacing: 8,
+        runSpacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          Icon(
-            Icons.circle,
-            size: 10,
-            color: ExploreRunActions.statusColor(theme.colorScheme, run.status),
-          ),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              run.displayName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleSmall,
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 220),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.circle,
+                  size: 10,
+                  color: ExploreRunActions.statusColor(
+                    theme.colorScheme,
+                    run.status,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    run.displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 8),
           Text(
             isRunningThis
                 ? l10n.styleExplore_runGeneratingProgress(
@@ -74,54 +84,15 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
                     ),
                     runnerState.totalCount,
                   )
-                : l10n.styleExplore_runProgress(
-                    run.generatedCount,
-                    run.targetCount,
-                  ),
+                : l10n.styleExplore_runTotalCount(run.candidates.length),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(width: 8),
-          if (_showsTargetCountInput(run)) ...[
-            _buildTargetCountInput(theme, l10n),
-            const SizedBox(width: 8),
-          ],
           ..._buildActionButtons(context, l10n, run, isRunningThis),
           _buildMoreMenu(context, l10n, run),
         ],
       ),
-    );
-  }
-
-  /// 出图数输入在 draft（首轮）与 generated（追加轮）两态出现。
-  bool _showsTargetCountInput(ExploreRun run) {
-    return run.status == ExploreRunStatus.draft ||
-        run.status == ExploreRunStatus.generated;
-  }
-
-  Widget _buildTargetCountInput(ThemeData theme, AppLocalizations l10n) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          '${l10n.styleExplore_targetCountLabel}:',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(width: 4),
-        // 与底条 ×N 同款的紧凑数值芯片（点击编辑/拖拽/滚轮），
-        // 替换掉原先的大号描边输入框（静反馈满高框笨重、越调越高）。
-        DraggableNumberInput(
-          key: const Key('explore-run-target-count'),
-          value: widget.run.targetCount,
-          min: 1,
-          max: 200,
-          prefix: '',
-          onChanged: (value) => unawaited(_submitTargetCount('$value')),
-        ),
-      ],
     );
   }
 
@@ -133,14 +104,7 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
   ) {
     switch (run.status) {
       case ExploreRunStatus.draft:
-        return [
-          FilledButton.tonalIcon(
-            key: const Key('explore-run-start'),
-            onPressed: () => _start(run.id),
-            icon: const Icon(Icons.play_arrow, size: 18),
-            label: Text(l10n.styleExplore_startRun),
-          ),
-        ];
+        return const [];
       case ExploreRunStatus.generating:
         if (!isRunningThis) return const [];
         return [
@@ -176,23 +140,16 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
           ),
         ];
       case ExploreRunStatus.generated:
-        return [
-          FilledButton.tonalIcon(
-            key: const Key('explore-run-another-round'),
-            onPressed: () => _start(run.id),
-            icon: const Icon(Icons.play_arrow, size: 18),
-            label: Text(l10n.styleExplore_runAnotherRound),
-          ),
-          if (run.failedCount > 0) ...[
-            const SizedBox(width: 8),
-            FilledButton.tonalIcon(
-              key: const Key('explore-run-retry'),
-              onPressed: () => _retryFailed(run.id),
-              icon: const Icon(Icons.refresh, size: 18),
-              label: Text(l10n.styleExplore_retryFailed(run.failedCount)),
-            ),
-          ],
-        ];
+        return run.failedCount > 0
+            ? [
+                FilledButton.tonalIcon(
+                  key: const Key('explore-run-retry'),
+                  onPressed: () => _retryFailed(run.id),
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: Text(l10n.styleExplore_retryFailed(run.failedCount)),
+                ),
+              ]
+            : const [];
       case ExploreRunStatus.reviewing:
       case ExploreRunStatus.completed:
       case ExploreRunStatus.cancelled:
@@ -237,20 +194,6 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
         }
       },
     );
-  }
-
-  Future<void> _submitTargetCount(String raw) async {
-    final value = int.tryParse(raw.trim());
-    if (value == null) return;
-    final clamped = value.clamp(1, 200);
-    if (clamped == widget.run.targetCount) return;
-    try {
-      await ref
-          .read(exploreRunListNotifierProvider.notifier)
-          .updateTargetCount(widget.run.id, clamped);
-    } catch (error) {
-      AppLogger.e('Update target count failed', error, null, 'StyleExplore');
-    }
   }
 
   Future<void> _start(String runId) async {

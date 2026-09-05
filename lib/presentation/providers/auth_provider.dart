@@ -14,6 +14,7 @@ import '../../data/datasources/remote/nai_auth_api_service.dart';
 import '../../data/datasources/remote/nai_user_info_api_service.dart';
 import '../../data/models/auth/saved_account.dart';
 import 'account_manager_provider.dart';
+import 'guest_session_provider.dart';
 
 part 'auth_provider.g.dart';
 
@@ -512,6 +513,7 @@ class AuthNotifier extends _$AuthNotifier {
         subscriptionInfo: subscriptionInfo,
       );
 
+      ref.read(guestSessionNotifierProvider.notifier).clear();
       await _enableAutoLoginForSavedSession();
       return true;
     } catch (e) {
@@ -604,6 +606,7 @@ class AuthNotifier extends _$AuthNotifier {
         subscriptionInfo: subscriptionInfo,
       );
 
+      ref.read(guestSessionNotifierProvider.notifier).clear();
       await _enableAutoLoginForSavedSession();
       return true;
     } catch (e) {
@@ -724,6 +727,7 @@ class AuthNotifier extends _$AuthNotifier {
         subscriptionInfo: subscriptionInfo,
       );
 
+      ref.read(guestSessionNotifierProvider.notifier).clear();
       AppLogger.auth('Credentials account login successful');
       await _enableAutoLoginForSavedSession();
       return true;
@@ -828,6 +832,7 @@ class AuthNotifier extends _$AuthNotifier {
         subscriptionInfo: subscriptionInfo,
       );
 
+      ref.read(guestSessionNotifierProvider.notifier).clear();
       AppLogger.auth('Credentials login successful for: $email');
       await _enableAutoLoginForSavedSession();
       return true;
@@ -934,6 +939,7 @@ class AuthNotifier extends _$AuthNotifier {
         subscriptionInfo: subscriptionInfo,
       );
 
+      ref.read(guestSessionNotifierProvider.notifier).clear();
       await _enableAutoLoginForSavedSession();
       AppLogger.auth('tryAddAccount: Success for: $email');
       return AddAccountResult.ok();
@@ -961,6 +967,7 @@ class AuthNotifier extends _$AuthNotifier {
     final storage = ref.read(secureStorageServiceProvider);
     await storage.clearAuth();
     ref.read(naiApiEndpointServiceProvider).resetToOfficial();
+    ref.read(guestSessionNotifierProvider.notifier).clear();
 
     if (errorCode != null) {
       // 保留错误信息，让 UI 可以显示错误提示

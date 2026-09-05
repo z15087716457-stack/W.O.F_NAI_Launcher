@@ -6,20 +6,22 @@ import 'package:dio/dio.dart';
 const _userAgent =
     'Aaalice-NAI-Launcher/online-gallery-contract-check (+https://github.com/Aaalice-Team/Aaalice_NAI_Launcher)';
 
+Dio createLiveSourceDio() => Dio(
+  BaseOptions(
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 45),
+    sendTimeout: const Duration(seconds: 30),
+    headers: const {
+      'User-Agent': _userAgent,
+      'Accept': 'application/json',
+      // Several gallery CDNs negotiate zstd, which dart:io does not decode.
+      'Accept-Encoding': 'identity',
+    },
+  ),
+);
+
 Future<void> main() async {
-  final dio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 45),
-      sendTimeout: const Duration(seconds: 30),
-      headers: const {
-        'User-Agent': _userAgent,
-        'Accept': 'application/json',
-        // Several gallery CDNs negotiate zstd, which dart:io does not decode.
-        'Accept-Encoding': 'identity',
-      },
-    ),
-  );
+  final dio = createLiveSourceDio();
   final checks = <String, Future<void> Function(Dio)>{
     'Safebooru search, media, and rankings': _verifySafebooru,
     'AI TAG config, search, rankings, detail, and CDN': _verifyAiTag,
@@ -325,24 +327,100 @@ Future<Object?> _getJson(
 }
 
 Future<void> _verifyMedia(Dio dio, String url, String label) async {
-  _require(Uri.tryParse(url)?.isAbsolute == true, '$label URL is invalid');
-  final response = await dio.get<List<int>>(
-    url,
-    options: Options(
-      responseType: ResponseType.bytes,
-      headers: const {'Accept': 'image/avif,image/webp,image/*,*/*;q=0.8'},
-    ),
-  );
-  final bytes = response.data ?? const <int>[];
+  await verifyLiveMedia(dio, url, label);
+}
+
+Future<({int status, String contentType, int bytes, String format})>
+verifyLiveMedia(
+  Dio dio,
+  String url,
+  String label, {
+  Map<String, String> headers = const {
+    'Accept': 'image/avif,image/webp,image/*,*/*;q=0.8',
+  },
+  int? maxBytes,
+}) async {
+  final uri = Uri.tryParse(url);
   _require(
-    bytes.length >= 1024,
-    '$label response is too small (${bytes.length} bytes)',
+    uri != null &&
+        uri.host.isNotEmpty &&
+        (uri.scheme == 'http' || uri.scheme == 'https'),
+    '$label URL is invalid',
   );
-  final contentType = response.headers.value(Headers.contentTypeHeader) ?? '';
-  _require(
-    contentType.startsWith('image/'),
-    '$label is not an image ($contentType)',
-  );
+  final cancelToken = CancelToken();
+  try {
+    final response = await dio.get<ResponseBody>(
+      url,
+      options: Options(responseType: ResponseType.stream, headers: headers),
+      cancelToken: cancelToken,
+    );
+    final contentType = response.headers.value(Headers.contentTypeHeader) ?? '';
+    _require(
+      contentType.startsWith('image/'),
+      '$label is not an image ($contentType)',
+    );
+    final contentLength = int.tryParse(
+      response.headers.value(Headers.contentLengthHeader) ?? '',
+    );
+    _require(
+      maxBytes == null || contentLength == null || contentLength <= maxBytes,
+      '$label exceeds byte limit',
+    );
+    final bytes = <int>[];
+    await for (final chunk in response.data!.stream) {
+      _require(
+        maxBytes == null || bytes.length + chunk.length <= maxBytes,
+        '$label exceeds byte limit',
+      );
+      bytes.addAll(chunk);
+    }
+    _require(
+      bytes.length >= 1024,
+      '$label response is too small (${bytes.length} bytes)',
+    );
+    return (
+      status: response.statusCode!,
+      contentType: contentType,
+      bytes: bytes.length,
+      format: liveImageFormat(bytes),
+    );
+  } finally {
+    cancelToken.cancel();
+  }
+}
+
+String liveImageFormat(List<int> bytes) {
+  if (bytes.length >= 8 &&
+      bytes.take(8).join(',') == '137,80,78,71,13,10,26,10') {
+    return 'png';
+  }
+  if (bytes.length >= 3 &&
+      bytes[0] == 255 &&
+      bytes[1] == 216 &&
+      bytes[2] == 255) {
+    return 'jpeg';
+  }
+  if (bytes.length >= 12 &&
+      ascii.decode(bytes.sublist(0, 4), allowInvalid: true) == 'RIFF' &&
+      ascii.decode(bytes.sublist(8, 12), allowInvalid: true) == 'WEBP') {
+    return 'webp';
+  }
+  if (bytes.length >= 6 &&
+      [
+        'GIF87a',
+        'GIF89a',
+      ].contains(ascii.decode(bytes.take(6).toList(), allowInvalid: true))) {
+    return 'gif';
+  }
+  if (bytes.length >= 12 &&
+      ascii.decode(bytes.sublist(4, 8), allowInvalid: true) == 'ftyp' &&
+      [
+        'avif',
+        'avis',
+      ].contains(ascii.decode(bytes.sublist(8, 12), allowInvalid: true))) {
+    return 'avif';
+  }
+  return 'unknown';
 }
 
 void _requireNoOverlap(

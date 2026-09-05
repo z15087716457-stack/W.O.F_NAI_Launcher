@@ -1,6 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/utils/nai_weight_syntax.dart';
+
 part 'prompt_tag.freezed.dart';
 part 'prompt_tag.g.dart';
 
@@ -109,6 +111,17 @@ class PromptTag with _$PromptTag {
   String toSyntaxString() {
     if (!enabled) return '';
 
+    if (syntaxType == WeightSyntaxType.numeric && rawSyntax != null) {
+      final match = RegExp(
+        r'^([-+]?(?:\d+(?:\.\d*)?|\.\d+))::([\s\S]*?)(?:::)?$',
+      ).firstMatch(rawSyntax!);
+      if (match != null &&
+          double.tryParse(match.group(1)!) == weight &&
+          match.group(2)!.trim() == text) {
+        return NaiWeightSyntax.guardClosures(rawSyntax!);
+      }
+    }
+
     // 权重为 1.0 时，直接返回文本
     if ((weight - 1.0).abs() < 0.001) return text;
 
@@ -122,7 +135,7 @@ class PromptTag with _$PromptTag {
                   .toStringAsFixed(2)
                   .replaceAll(RegExp(r'0+$'), '')
                   .replaceAll(RegExp(r'\.$'), '');
-        return '$weightStr::$text::';
+        return NaiWeightSyntax.wrap(weightStr, text);
 
       case WeightSyntaxType.bracket:
       case WeightSyntaxType.none:

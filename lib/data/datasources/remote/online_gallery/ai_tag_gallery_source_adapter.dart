@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:html/parser.dart' as html_parser;
 
+import '../../../../core/cache/danbooru_image_cache_manager.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../models/gallery/nai_image_metadata.dart';
 import '../../../models/online_gallery/gallery_item.dart';
@@ -72,6 +73,7 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
     if (!forceRefresh &&
         cached != null &&
         DateTime.now().difference(cached.fetchedAt) < _configTtl) {
+      registerAiTagImageHost(cached.assetBaseUrl);
       return cached;
     }
 
@@ -90,18 +92,24 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
       }
       final json = Map<String, dynamic>.from(response.data as Map);
       final assetBaseUrl = json['asset_base_url']?.toString().trim() ?? '';
-      if (Uri.tryParse(assetBaseUrl)?.isAbsolute != true ||
-          assetBaseUrl.isEmpty) {
+      final baseUri = Uri.tryParse(assetBaseUrl);
+      if (baseUri == null || !_isValidHttpUrl(baseUri)) {
         throw const GallerySourceException(
           GallerySourceErrorCode.configurationUnavailable,
           source: GallerySourceId.aiTag,
           message: 'AI TAG asset_base_url is missing or invalid',
         );
       }
+      final normalizedAssetBaseUrl = baseUri
+          .replace(
+            path: baseUri.path.endsWith('/')
+                ? baseUri.path
+                : '${baseUri.path}/',
+          )
+          .toString();
+      registerAiTagImageHost(normalizedAssetBaseUrl);
       final config = AiTagSourceConfig(
-        assetBaseUrl: assetBaseUrl.endsWith('/')
-            ? assetBaseUrl
-            : '$assetBaseUrl/',
+        assetBaseUrl: normalizedAssetBaseUrl,
         pageSize: (_asInt(json['page_size']) ?? 60).clamp(60, 200),
         availableYears: _parseIntList(json['available_years']),
         availableMonths: _parseStringList(json['available_months'])
@@ -405,13 +413,40 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
   }
 
   GalleryMedia _parseMedia(Map<String, dynamic> json, String assetBaseUrl) {
-    final imageType = json['image_type']?.toString().trim() ?? '';
-    final authorId = json['author_id']?.toString().trim() ?? '';
+    final imagePath = json['image_path']?.toString().trim() ?? '';
     final fileName = json['file_name']?.toString().trim() ?? '';
-    if (imageType.isEmpty || authorId.isEmpty || fileName.isEmpty) {
-      throw const FormatException('AI TAG image path fields are incomplete');
+    final baseUri = Uri.parse(assetBaseUrl);
+    final String url;
+    if (imagePath.isNotEmpty) {
+      final imageUri = Uri.tryParse(imagePath);
+      if (imageUri == null ||
+          (imageUri.scheme.isEmpty && imageUri.host.isNotEmpty)) {
+        throw const FormatException('AI TAG image_path is invalid');
+      }
+      url = imageUri.scheme.isEmpty
+          ? baseUri.resolveUri(imageUri).toString()
+          : imagePath;
+    } else {
+      final imageType = json['image_type']?.toString().trim() ?? '';
+      final authorId = json['author_id']?.toString().trim() ?? '';
+      if (imageType.isEmpty || authorId.isEmpty || fileName.isEmpty) {
+        throw const FormatException('AI TAG image path fields are incomplete');
+      }
+      url = baseUri.resolve('$imageType/$authorId/$fileName.webp').toString();
     }
-    final url = '$assetBaseUrl$imageType/$authorId/$fileName.webp';
+    final mediaUri = Uri.parse(url);
+    if (!_isValidHttpUrl(mediaUri)) {
+      throw const FormatException('AI TAG image URL is invalid');
+    }
+    registerAiTagImageHost(url);
+    final mediaId = fileName.isNotEmpty
+        ? fileName
+        : mediaUri.pathSegments.isEmpty
+        ? ''
+        : mediaUri.pathSegments.last;
+    if (mediaId.isEmpty) {
+      throw const FormatException('AI TAG image path has no file name');
+    }
     final rawAiJson = _rawJsonString(json['ai_json']);
     final promptText = json['prompt_text']?.toString();
     final parsed = _parseMetadata(
@@ -420,13 +455,13 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
       sourceModelHint: json['model']?.toString(),
     );
     return GalleryMedia(
-      id: fileName,
+      id: mediaId,
       previewUrl: url,
       displayUrl: url,
       downloadUrl: url,
       width: parsed.metadata?.width ?? 0,
       height: parsed.metadata?.height ?? 0,
-      extension: 'webp',
+      extension: _extensionFromUri(mediaUri),
       mediaType: 'image',
       prompt: parsed.metadata?.prompt,
       negativePrompt: parsed.metadata?.negativePrompt,
@@ -541,6 +576,24 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
   int _mediaPageIndex(String value) {
     final match = RegExp(r'_p(\d+)(?:\D|$)').firstMatch(value);
     return int.tryParse(match?.group(1) ?? '') ?? 0;
+  }
+
+  static bool _isValidHttpUrl(Uri? uri) {
+    if (uri == null || uri.host.isEmpty) return false;
+    return _isHttpScheme(uri.scheme);
+  }
+
+  static bool _isHttpScheme(String scheme) {
+    final normalized = scheme.toLowerCase();
+    return normalized == 'http' || normalized == 'https';
+  }
+
+  static String? _extensionFromUri(Uri uri) {
+    if (uri.pathSegments.isEmpty) return null;
+    final fileName = uri.pathSegments.last;
+    final dot = fileName.lastIndexOf('.');
+    if (dot <= 0 || dot == fileName.length - 1) return null;
+    return fileName.substring(dot + 1).toLowerCase();
   }
 
   static int? _asInt(Object? value) {

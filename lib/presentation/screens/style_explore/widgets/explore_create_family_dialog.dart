@@ -9,8 +9,8 @@ typedef ExploreCreateFamilyResult = ({String name, List<String> customStrings});
 
 /// 建家族对话框（阶段 D）：命名 + 所选候选的父本串预览 + 可选自定义串。
 ///
-/// 候选父本串 = 候选 roll 快照第一个随机实例的 rolledText
-/// （无则回退正向全文，见 [exploreParentStringFor]）；自定义串可多条。
+/// 候选父本串 = 候选 roll 快照中全部遗传随机实例的 rolledText 合并串
+/// （无有效串则回退正向全文，见 [exploreParentStringFor]）；自定义串可多条。
 class ExploreCreateFamilyDialog extends StatefulWidget {
   const ExploreCreateFamilyDialog({super.key, required this.candidates});
 

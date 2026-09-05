@@ -47,7 +47,7 @@ void main() {
           autoInsertComma: true,
           replaceUnderscores: false,
         ).text,
-        '{{very_long_hair}}, ',
+        '{{very long hair}}, ',
       );
       expect(
         PromptTokenParser.apply(
@@ -57,7 +57,7 @@ void main() {
           autoInsertComma: true,
           replaceUnderscores: false,
         ).text,
-        '(very_long_hair:1.25), ',
+        '(very long hair:1.25), ',
       );
     });
 

@@ -198,9 +198,49 @@ void main() {
   }
 
   group('exploreParentStringFor（父本串提取）', () {
-    test('优先第一个随机实例 rolledText，空串回退正向全文', () {
-      const withRolls = ExploreCandidate(
+    test('按 pos→neg 和实例创建序合并全部遗传实例', () {
+      const candidate = ExploreCandidate(
         id: 'c',
+        roundId: 'r',
+        rollSnapshot: ExploreRollSnapshot(
+          positive: 'full positive',
+          negative: 'neg',
+          instanceRolls: [
+            ExploreInstanceRoll(
+              lane: 'pos',
+              marker: 'pos-1',
+              blockId: 'b-1',
+              blockTitle: '个人池',
+              rolledText: '  artist:a, artist:b  ',
+            ),
+            ExploreInstanceRoll(
+              lane: 'pos',
+              marker: 'pos-2',
+              blockId: 'b-2',
+              blockTitle: '精品池',
+              rolledText: 'artist:c',
+            ),
+            ExploreInstanceRoll(
+              lane: 'neg',
+              marker: 'neg-1',
+              blockId: 'b-3',
+              blockTitle: '负向池',
+              rolledText: 'artist:d',
+            ),
+          ],
+        ),
+        lineage: ExploreLineage(operation: ExploreLineageOperation.basicRoll),
+      );
+
+      expect(
+        exploreParentStringFor(candidate),
+        'artist:a, artist:b, artist:c, artist:d',
+      );
+    });
+
+    test('保留单实例旧输出并保护权重串内部逗号', () {
+      const single = ExploreCandidate(
+        id: 'single',
         roundId: 'r',
         rollSnapshot: ExploreRollSnapshot(
           positive: 'full positive',
@@ -217,10 +257,10 @@ void main() {
         ),
         lineage: ExploreLineage(operation: ExploreLineageOperation.basicRoll),
       );
-      expect(exploreParentStringFor(withRolls), 'rolled text');
+      expect(exploreParentStringFor(single), 'rolled text');
 
-      const emptyRoll = ExploreCandidate(
-        id: 'c',
+      const weighted = ExploreCandidate(
+        id: 'weighted',
         roundId: 'r',
         rollSnapshot: ExploreRollSnapshot(
           positive: 'full positive',
@@ -231,16 +271,62 @@ void main() {
               marker: 'm',
               blockId: 'b-1',
               blockTitle: '池',
-              rolledText: '  ',
+              rolledText: '0.7::artist:a, 1girl::',
+            ),
+            ExploreInstanceRoll(
+              lane: 'pos',
+              marker: 'm-2',
+              blockId: 'b-2',
+              blockTitle: '池 2',
+              rolledText: 'artist:b',
             ),
           ],
         ),
         lineage: ExploreLineage(operation: ExploreLineageOperation.basicRoll),
       );
-      expect(exploreParentStringFor(emptyRoll), 'full positive');
+      expect(
+        exploreParentStringFor(weighted),
+        '0.7::artist:a, 1girl::, artist:b',
+      );
+    });
+
+    test('过滤空实例和空原子，全部为空时回退正向全文', () {
+      const emptyRoll = ExploreCandidate(
+        id: 'empty',
+        roundId: 'r',
+        rollSnapshot: ExploreRollSnapshot(
+          positive: 'full positive',
+          negative: 'neg',
+          instanceRolls: [
+            ExploreInstanceRoll(
+              lane: 'pos',
+              marker: 'm-1',
+              blockId: 'b-1',
+              blockTitle: '池',
+              rolledText: '  ',
+            ),
+            ExploreInstanceRoll(
+              lane: 'pos',
+              marker: 'm-2',
+              blockId: 'b-2',
+              blockTitle: '池 2',
+              rolledText: ' ,  ',
+            ),
+            ExploreInstanceRoll(
+              lane: 'neg',
+              marker: 'm-3',
+              blockId: 'b-3',
+              blockTitle: '池 3',
+              rolledText: ' artist:a , ',
+            ),
+          ],
+        ),
+        lineage: ExploreLineage(operation: ExploreLineageOperation.basicRoll),
+      );
+      expect(exploreParentStringFor(emptyRoll), 'artist:a');
 
       const noRolls = ExploreCandidate(
-        id: 'c',
+        id: 'no-rolls',
         roundId: 'r',
         rollSnapshot: ExploreRollSnapshot(
           positive: 'full positive',
@@ -251,7 +337,7 @@ void main() {
       expect(exploreParentStringFor(noRolls), 'full positive');
 
       const noSnapshot = ExploreCandidate(
-        id: 'c',
+        id: 'no-snapshot',
         roundId: 'r',
         lineage: ExploreLineage(operation: ExploreLineageOperation.basicRoll),
       );
@@ -293,6 +379,53 @@ void main() {
       expect(set.parents[1].artistString, 'artist:x');
       expect(set.parents[1].sourceCandidateId, isNull);
       expect(set.parents[0].preference, 1.0);
+    });
+
+    test('建家族消费候选的完整多池父本串', () async {
+      final c = container();
+      final created = await createRun(c);
+      const candidate = ExploreCandidate(
+        id: 'source-candidate',
+        roundId: 'manual-round',
+        rollSnapshot: ExploreRollSnapshot(
+          positive: 'full positive',
+          negative: 'neg',
+          instanceRolls: [
+            ExploreInstanceRoll(
+              lane: 'pos',
+              marker: 'pos-1',
+              blockId: 'b-1',
+              blockTitle: '个人池',
+              rolledText: 'artist:personal',
+            ),
+            ExploreInstanceRoll(
+              lane: 'neg',
+              marker: 'neg-1',
+              blockId: 'b-2',
+              blockTitle: '精品池',
+              rolledText: 'artist:curated',
+            ),
+          ],
+        ),
+        lineage: ExploreLineage(operation: ExploreLineageOperation.manual),
+      );
+      final parentString = exploreParentStringFor(candidate);
+
+      final family = await c
+          .read(exploreRunListNotifierProvider.notifier)
+          .createFamily(
+            created.id,
+            name: '多池家族',
+            parents: [
+              (sourceCandidateId: candidate.id, artistString: parentString),
+            ],
+          );
+
+      final run = await reload(c, created.id);
+      expect(
+        run.parentSetById(family.rootParentSetId)!.parents.single.artistString,
+        'artist:personal, artist:curated',
+      );
     });
 
     test('全部空串抛 StateError；空名称回退默认名', () async {
@@ -359,6 +492,64 @@ void main() {
       );
       expect(after.familyById('fam-1')!.activeParentSetId, newSet.id);
       expect(after.familyById('fam-1')!.rootParentSetId, 'ps-1');
+    });
+
+    test('建分支在缺少 mutatedText 时消费完整多池父本串', () async {
+      final c = container();
+      const parentCandidate = ExploreCandidate(
+        id: 'c-1',
+        roundId: 'dr-1',
+        rollSnapshot: ExploreRollSnapshot(
+          positive: 'full positive',
+          negative: 'neg',
+          instanceRolls: [
+            ExploreInstanceRoll(
+              lane: 'pos',
+              marker: 'pos-1',
+              blockId: 'b-1',
+              blockTitle: '个人池',
+              rolledText: 'artist:personal',
+            ),
+            ExploreInstanceRoll(
+              lane: 'neg',
+              marker: 'neg-1',
+              blockId: 'b-2',
+              blockTitle: '精品池',
+              rolledText: 'artist:curated',
+            ),
+          ],
+        ),
+        generation: ExploreCandidateGeneration(
+          status: ExploreCandidateGenerationStatus.done,
+          filePath: '/tmp/parent.png',
+        ),
+        lineage: ExploreLineage(
+          operation: ExploreLineageOperation.mutation,
+          generation: 2,
+        ),
+      );
+      final run = await seedFamilyRun(
+        c,
+        deepCandidates: [
+          parentCandidate,
+          doneCandidate('c-2', 'dr-1', mutatedText: 'mut:b'),
+          doneCandidate('c-3', 'dr-1', mutatedText: 'mut:c'),
+        ],
+      );
+
+      final newSet = await c
+          .read(exploreRunListNotifierProvider.notifier)
+          .createBranch(
+            run.id,
+            familyId: 'fam-1',
+            selectedCandidateIds: const ['c-1'],
+          );
+
+      expect(
+        newSet.parents.first.artistString,
+        'artist:personal, artist:curated',
+      );
+      expect(newSet.parents.first.sourceCandidateId, 'c-1');
     });
 
     test('不变量：只能从最新代选', () async {

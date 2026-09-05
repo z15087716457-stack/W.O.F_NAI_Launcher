@@ -11,6 +11,7 @@ import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/cache/thumbnail_cache_service.dart';
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../core/utils/app_logger.dart';
@@ -24,6 +25,7 @@ import '../../../data/services/gallery/gallery_view_mode_store.dart';
 import '../../../data/services/gallery/gallery_column_width_store.dart';
 import '../../../data/services/gallery/gallery_nai_only_store.dart';
 import '../../../data/services/gallery/gallery_sort_store.dart';
+import '../../../data/services/gallery/gallery_thumbnail_quality_store.dart';
 import '../../../data/repositories/gallery_folder_repository.dart';
 import '../../providers/bulk_operation_provider.dart';
 import '../../providers/collection_provider.dart';
@@ -246,12 +248,85 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
                         showItemsPerPage: true,
                         showTotalInfo: true,
                         compact: contentWidth < 600,
+                        trailing: _buildThumbnailQualityControl(
+                          state,
+                          compact: contentWidth < 600,
+                        ),
                       ),
                   ],
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThumbnailQualityControl(
+    LocalGalleryState state, {
+    required bool compact,
+  }) {
+    final notifier = ref.read(localGalleryNotifierProvider.notifier);
+    final l10n = context.l10n;
+    if (compact) {
+      return PopupMenuButton<GalleryThumbnailQuality>(
+        tooltip: l10n.localGallery_thumbnailQualityTooltip,
+        icon: Icon(
+          state.thumbnailQuality == GalleryThumbnailQuality.hd
+              ? Icons.hd_outlined
+              : Icons.sd_outlined,
+          size: 24,
+        ),
+        onSelected: (quality) =>
+            unawaited(notifier.setThumbnailQuality(quality)),
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            value: GalleryThumbnailQuality.sd,
+            child: Text(l10n.localGallery_thumbnailQualitySd),
+          ),
+          PopupMenuItem(
+            value: GalleryThumbnailQuality.hd,
+            child: Text(l10n.localGallery_thumbnailQualityHd),
+          ),
+        ],
+      );
+    }
+
+    return SegmentedButton<GalleryThumbnailQuality>(
+      segments: [
+        ButtonSegment(
+          value: GalleryThumbnailQuality.sd,
+          icon: Tooltip(
+            message: l10n.localGallery_thumbnailQualitySd,
+            child: const SizedBox.square(
+              dimension: 24,
+              child: Center(child: Icon(Icons.sd_outlined, size: 22)),
+            ),
+          ),
+        ),
+        ButtonSegment(
+          value: GalleryThumbnailQuality.hd,
+          icon: Tooltip(
+            message: l10n.localGallery_thumbnailQualityHd,
+            child: const SizedBox.square(
+              dimension: 24,
+              child: Center(child: Icon(Icons.hd_outlined, size: 22)),
+            ),
+          ),
+        ),
+      ],
+      selected: {state.thumbnailQuality},
+      onSelectionChanged: (selection) {
+        if (selection.isNotEmpty) {
+          unawaited(notifier.setThumbnailQuality(selection.first));
+        }
+      },
+      showSelectedIcon: false,
+      style: ButtonStyle(
+        visualDensity: VisualDensity.compact,
+        textStyle: WidgetStatePropertyAll(
+          Theme.of(context).textTheme.labelSmall,
         ),
       ),
     );
@@ -1612,7 +1687,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     setState(() => _showCategoryPanel = !_showCategoryPanel);
   }
 
-  /// 恢复持久化的画廊偏好：视图模式 / 列宽 / 排序 / NAI-only 过滤
+  /// 恢复持久化的画廊偏好：视图模式 / 列宽 / 缩略图质量 / 排序 / NAI-only 过滤
   Future<void> _restoreGalleryPreferences() async {
     final notifier = ref.read(localGalleryNotifierProvider.notifier);
 
@@ -1620,10 +1695,12 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     final columnWidth = await const GalleryColumnWidthStore().load();
     final sort = await const GallerySortStore().load();
     final naiOnly = await const GalleryNaiOnlyStore().load();
+    final thumbnailQuality = await const GalleryThumbnailQualityStore().load();
     if (!mounted) return;
 
     notifier.setMasonryView(viewMode);
     notifier.setColumnWidth(columnWidth);
+    await notifier.setThumbnailQuality(thumbnailQuality);
     // 排序：持久化优先，无记录时保持默认（修改时间 新→旧）
     if (sort != null) {
       await notifier.setSort(sort.field, sort.direction);

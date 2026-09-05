@@ -21,6 +21,7 @@ class LayoutState {
   final bool webLeftPanelExpanded;
   final bool blockLibraryPanelExpanded;
   final double blockLibraryPanelWidth;
+  final double styleExploreRunSidebarWidth;
   final double styleExploreGalleryWidth;
 
   const LayoutState({
@@ -39,6 +40,7 @@ class LayoutState {
     this.webLeftPanelExpanded = true,
     this.blockLibraryPanelExpanded = false,
     this.blockLibraryPanelWidth = 320.0,
+    this.styleExploreRunSidebarWidth = 240.0,
     this.styleExploreGalleryWidth = 360.0,
   });
 
@@ -59,6 +61,7 @@ class LayoutState {
     bool? webLeftPanelExpanded,
     bool? blockLibraryPanelExpanded,
     double? blockLibraryPanelWidth,
+    double? styleExploreRunSidebarWidth,
     double? styleExploreGalleryWidth,
   }) {
     return LayoutState(
@@ -83,6 +86,8 @@ class LayoutState {
           blockLibraryPanelExpanded ?? this.blockLibraryPanelExpanded,
       blockLibraryPanelWidth:
           blockLibraryPanelWidth ?? this.blockLibraryPanelWidth,
+      styleExploreRunSidebarWidth:
+          styleExploreRunSidebarWidth ?? this.styleExploreRunSidebarWidth,
       styleExploreGalleryWidth:
           styleExploreGalleryWidth ?? this.styleExploreGalleryWidth,
     );
@@ -113,6 +118,7 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       webLeftPanelExpanded: storage.getWebLeftPanelExpanded(),
       blockLibraryPanelExpanded: storage.getBlockLibraryPanelExpanded(),
       blockLibraryPanelWidth: storage.getBlockLibraryPanelWidth(),
+      styleExploreRunSidebarWidth: storage.getStyleExploreRunSidebarWidth(),
       styleExploreGalleryWidth: storage.getStyleExploreGalleryWidth(),
     );
   }
@@ -266,19 +272,28 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
 
   /// 设置块库面板宽度
   Future<void> setBlockLibraryPanelWidth(double width) async {
-    final clamped = width.clamp(260.0, 480.0).toDouble();
-    state = state.copyWith(blockLibraryPanelWidth: clamped);
+    final normalized = width.clamp(0.0, double.infinity).toDouble();
+    state = state.copyWith(blockLibraryPanelWidth: normalized);
 
     final storage = ref.read(localStorageServiceProvider);
-    await storage.setBlockLibraryPanelWidth(clamped);
+    await storage.setBlockLibraryPanelWidth(normalized);
+  }
+
+  /// 设置画风探索页 Run 侧栏宽度
+  Future<void> setStyleExploreRunSidebarWidth(double width) async {
+    final normalized = width.clamp(0.0, double.infinity).toDouble();
+    state = state.copyWith(styleExploreRunSidebarWidth: normalized);
+
+    final storage = ref.read(localStorageServiceProvider);
+    await storage.setStyleExploreRunSidebarWidth(normalized);
   }
 
   /// 设置画风探索页候选画廊宽度
   Future<void> setStyleExploreGalleryWidth(double width) async {
-    final clamped = width.clamp(320.0, 560.0).toDouble();
-    state = state.copyWith(styleExploreGalleryWidth: clamped);
+    final normalized = width.clamp(0.0, double.infinity).toDouble();
+    state = state.copyWith(styleExploreGalleryWidth: normalized);
 
     final storage = ref.read(localStorageServiceProvider);
-    await storage.setStyleExploreGalleryWidth(clamped);
+    await storage.setStyleExploreGalleryWidth(normalized);
   }
 }

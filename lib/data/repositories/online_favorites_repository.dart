@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../../core/cache/danbooru_image_cache_manager.dart';
 import '../models/online_gallery/gallery_item.dart';
 import '../models/online_gallery/gallery_source.dart';
 
@@ -297,17 +298,31 @@ class OnlineFavoritesRepository {
     return [
       for (final row in rows)
         OnlineFavoriteEntry(
-          item: GalleryItem.fromSnapshotJson(
-            Map<String, dynamic>.from(
-              jsonDecode(row['snapshot']! as String) as Map,
-            ),
-          ),
+          item: _restoreFavoriteItem(row),
           collectionId: row['collection_id']?.toString(),
           savedAt: DateTime.fromMillisecondsSinceEpoch(
             (row['saved_at'] as num).toInt(),
           ),
         ),
     ];
+  }
+
+  GalleryItem _restoreFavoriteItem(Map<String, Object?> row) {
+    final item = GalleryItem.fromSnapshotJson(
+      Map<String, dynamic>.from(jsonDecode(row['snapshot']! as String) as Map),
+    );
+    if (row['source'] == GallerySourceId.aiTag.key &&
+        item.sourceId == GallerySourceId.aiTag) {
+      final cover = item.cover;
+      for (final url in {
+        cover.previewUrl,
+        cover.displayUrl,
+        cover.downloadUrl,
+      }) {
+        registerAiTagImageHost(url);
+      }
+    }
+    return item;
   }
 
   /// 按作者聚合当前源收藏：作者 → 作品数（用于作者区展示）

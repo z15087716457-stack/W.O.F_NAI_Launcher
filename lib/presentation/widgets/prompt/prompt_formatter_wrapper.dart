@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
-import '../../../core/utils/nai_prompt_formatter.dart';
-import '../../../core/utils/sd_to_nai_converter.dart';
+import '../../../core/utils/prompt_input_normalization.dart';
 import '../common/app_toast.dart';
 
 /// 提示词格式化包装器
@@ -95,37 +94,24 @@ class _PromptFormatterWrapperState extends State<PromptFormatterWrapper> {
 
   /// 失焦时格式化提示词
   void _formatOnBlur() {
-    var text = widget.controller.text;
+    final text = widget.controller.text;
     if (text.isEmpty) return;
 
-    var changed = false;
-    final messages = <String>[];
+    final result = PromptInputNormalization.normalize(
+      text,
+      autoFormat: widget.enableAutoFormat,
+      sdAutoConvert: widget.enableSdSyntaxAutoConvert,
+    );
+    final messages = <String>[
+      if (result.sdConverted)
+        'SD→NAI'
+      else if (result.formatted)
+        context.l10n.prompt_formatted,
+    ];
 
-    // SD 语法自动转换（优先于格式化，因为格式化可能会影响转换结果）
-    if (widget.enableSdSyntaxAutoConvert) {
-      final converted = SdToNaiConverter.convert(text);
-      if (converted != text) {
-        text = converted;
-        changed = true;
-        messages.add('SD→NAI');
-      }
-    }
-
-    // 自动格式化
-    if (widget.enableAutoFormat) {
-      final formatted = NaiPromptFormatter.format(text);
-      if (formatted != text) {
-        text = formatted;
-        changed = true;
-        if (!messages.contains('SD→NAI')) {
-          messages.add(context.l10n.prompt_formatted);
-        }
-      }
-    }
-
-    if (changed) {
-      widget.controller.text = text;
-      widget.onChanged?.call(text);
+    if (result.changed) {
+      widget.controller.text = result.text;
+      widget.onChanged?.call(result.text);
       if (mounted && messages.isNotEmpty) {
         AppToast.info(context, messages.join(' + '));
       }

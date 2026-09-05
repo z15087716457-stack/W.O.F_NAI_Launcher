@@ -88,11 +88,6 @@ class DataSourceCacheSettings extends ConsumerWidget {
                   value: settings.autoInsertComma,
                   onChanged: notifier.setAutoInsertComma,
                 ),
-                SwitchListTile.adaptive(
-                  title: Text(context.l10n.autocomplete_replaceUnderscores),
-                  value: settings.replaceUnderscores,
-                  onChanged: notifier.setReplaceUnderscores,
-                ),
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.storage_outlined),

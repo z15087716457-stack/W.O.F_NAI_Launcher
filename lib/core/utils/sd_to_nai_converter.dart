@@ -1,3 +1,5 @@
+import 'nai_prompt_syntax.dart';
+import 'nai_weight_syntax.dart';
 import 'tag_normalizer.dart';
 
 /// SD权重语法到NAI V4数值语法的转换工具
@@ -15,7 +17,9 @@ class SdToNaiConverter {
   ///
   /// 普通圆括号和方括号也可用于 NAI 提示词，因此不据此推断 SD 权重。
   static bool hasSDWeightSyntax(String text) {
-    return _hasExplicitWeightSyntax(text);
+    return _chunks(
+      text,
+    ).any((chunk) => chunk.convertible && _hasExplicitWeightSyntax(chunk.text));
   }
 
   /// 检测明确的权重语法：(text:weight) 或 [text:weight]
@@ -105,17 +109,61 @@ class SdToNaiConverter {
   /// - `[ugly]` → `[ugly]` (保留 NAI 弱化语法)
   /// - `\(text\)` → `(text)` (移除圆括号转义符)
   ///
-  /// 注意：只负责 SD 语法转换，不做通用空格转换
-  /// 是否将空格转换为下划线由 NaiPromptFormatter 统一负责
+  /// 仅转换明确的 SD 权重，保留其他文本的空格与语法作用域。
   static String convert(String text) {
-    // 只转换带数值的 SD 权重；普通括号属于合法 NAI 提示词内容。
-    if (hasSDWeightSyntax(text)) {
-      final parsed = _parsePromptAttention(text);
-      return _buildNaiV4(parsed);
-    }
+    return _chunks(text).map((chunk) {
+      if (!chunk.convertible) return chunk.text;
+      if (_hasExplicitWeightSyntax(chunk.text)) {
+        return _buildNaiV4(_parsePromptAttention(chunk.text));
+      }
+      return _processEscapedParentheses(chunk.text);
+    }).join();
+  }
 
-    // 其他情况不转换权重，但仍处理 SD 里用于表示字面括号的转义。
-    return _processEscapedParentheses(text);
+  static bool _protectedToken(NaiPromptToken token, String text) {
+    if (token.kind == NaiPromptTokenKind.opaque) return true;
+    final source = token.source(text);
+    if (token.kind == NaiPromptTokenKind.literal) {
+      return !source.startsWith(r'\');
+    }
+    if (token.kind == NaiPromptTokenKind.group) {
+      final inner = source.substring(1, source.length - 1);
+      return NaiPromptSyntax.scan(inner).any(
+        (token) =>
+            _protectedToken(token, inner) ||
+            token.kind == NaiPromptTokenKind.prefix ||
+            token.kind == NaiPromptTokenKind.closure,
+      );
+    }
+    return false;
+  }
+
+  static Iterable<({String text, bool convertible})> _chunks(
+    String text,
+  ) sync* {
+    final buffer = StringBuffer();
+    var weighted = false;
+    for (final token in NaiPromptSyntax.scan(text)) {
+      final source = token.source(text);
+      final protected =
+          weighted ||
+          _protectedToken(token, text) ||
+          token.kind == NaiPromptTokenKind.prefix;
+      if (token.kind == NaiPromptTokenKind.prefix) weighted = true;
+      if (token.kind == NaiPromptTokenKind.closure) weighted = false;
+      if (protected) {
+        if (buffer.isNotEmpty) {
+          yield (text: buffer.toString(), convertible: true);
+          buffer.clear();
+        }
+        yield (text: source, convertible: false);
+      } else {
+        buffer.write(source);
+      }
+    }
+    if (buffer.isNotEmpty) {
+      yield (text: buffer.toString(), convertible: true);
+    }
   }
 
   /// 解析SD权重语法
@@ -256,7 +304,7 @@ class SdToNaiConverter {
 
     // 检查冒号后面是否是有效的数字
     final weight = double.tryParse(afterColon);
-    if (weight == null) {
+    if (weight == null || !weight.isFinite) {
       return null;
     }
 
@@ -326,58 +374,42 @@ class SdToNaiConverter {
     final buffer = StringBuffer();
     var isOpen = false;
 
+    void closeWeight() {
+      final content = buffer.toString();
+      buffer.write(NaiWeightSyntax.close(content).substring(content.length));
+    }
+
     for (final item in parsed) {
       var s = item[0] as String;
       final w = item[1] as double;
 
-      // 格式化权重值
       var weightStr = w.toStringAsFixed(5);
-      // 移除末尾的0和小数点
       weightStr = weightStr.replaceAll(RegExp(r'0+$'), '');
       weightStr = weightStr.replaceAll(RegExp(r'\.$'), '');
-
       final hasWeight = weightStr != '1';
-
-      // 处理转义字符
       s = _processEscapes(s);
 
       if (hasWeight) {
-        // 有权重：使用 weight::text 格式
-        // 不在 SD→NAI 转换阶段改写空格；是否转下划线由自动格式化决定
         s = s.trim();
+        if (isOpen) closeWeight();
 
-        // 如果前面有打开的权重区域，先关闭它
-        if (isOpen) {
-          buffer.write('::');
-        }
-
-        // 检查是否需要添加分隔符（避免数字混淆）
         var sep = '';
         final combined = '$buffer$weightStr';
         final match = RegExp(r'-?\d*\.?\d*$').firstMatch(combined);
-        if (match != null && match.group(0) != weightStr) {
-          sep = ' ';
-        }
+        if (match != null && match.group(0) != weightStr) sep = ' ';
 
         buffer.write('$sep$weightStr::$s');
         isOpen = true;
       } else {
-        // 无权重：直接写入文本
-        // 如果前面有打开的权重区域，先关闭它
         if (isOpen) {
-          buffer.write('::');
+          closeWeight();
           isOpen = false;
         }
-        // 无权重的文本保持原始空格；是否转下划线由自动格式化决定
         buffer.write(s);
       }
     }
 
-    // 关闭最后的权重区域
-    if (isOpen) {
-      buffer.write('::');
-    }
-
+    if (isOpen) closeWeight();
     return buffer.toString();
   }
 }

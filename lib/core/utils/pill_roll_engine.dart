@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../data/models/prompt_block/pill_document.dart';
+import 'nai_weight_syntax.dart';
 
 /// 块实例随机引擎（P2.5）：纯函数、零 Flutter 依赖，seeded [Random] 可复现。
 ///
@@ -91,7 +92,9 @@ abstract final class PillRollEngine {
     if (settings.order == PillRollOrder.original) drawn.sort();
     final selected = [for (final index in drawn) atoms[index]];
 
-    if (!settings.weightEnabled) return selected.join(', ');
+    if (!settings.weightEnabled) {
+      return NaiWeightSyntax.guardClosures(selected.join(', '));
+    }
 
     final weights = [
       for (var k = 0; k < selected.length; k++)
@@ -112,9 +115,9 @@ abstract final class PillRollEngine {
         settings.weightMin,
         settings.weightMax,
       );
-      parts.add('${w.toStringAsFixed(1)}::$atom::');
+      parts.add(NaiWeightSyntax.wrap(w.toStringAsFixed(1), atom));
     }
-    return parts.join(', ');
+    return NaiWeightSyntax.guardClosures(parts.join(', '));
   }
 
   /// Split-Beta 连续采样（未软平衡/离散化）。防御性修正 min>max 与

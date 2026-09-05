@@ -13,6 +13,8 @@ import '../../../data/models/image/image_params.dart';
 import '../../../data/models/image/image_stream_chunk.dart';
 
 typedef KritaBridgeBaseParamsReader = ImageParams Function();
+typedef KritaBridgeParamsPreparer =
+    ImageParams Function(ImageParams params, Map<String, dynamic> overrides);
 typedef KritaBridgePromptSnapshot = ({String prompt, String negativePrompt});
 typedef KritaBridgePromptSnapshotReader =
     KritaBridgePromptSnapshot Function(ImageParams params);
@@ -48,9 +50,6 @@ typedef KritaBridgeCharactersReader = List<Map<String, dynamic>> Function();
 /// AI 接管扩展：读取提示词 token 用量（与 UI 计数器同源，异步）。
 typedef KritaBridgeTokensReader = Future<Map<String, dynamic>> Function();
 
-/// AI 接管扩展：桥接生成成功后的记账回调（个人点数计数器，合租账本）。
-typedef KritaBridgeGenerationBilled = void Function(ImageParams params);
-
 abstract class KritaBridgeMessageService {
   Future<void> handle(KritaBridgeMessage message);
 
@@ -84,8 +83,8 @@ class KritaBridgeService implements KritaBridgeMessageService {
     required KritaBridgeFallbackGenerator generateFallback,
     required KritaBridgeExternalImageRegistrar registerExternalImage,
     required KritaBridgeCancelGeneration cancelGeneration,
-    KritaBridgeGenerationBilled? onGenerationBilled,
     void Function()? onGenerationEnqueued,
+    KritaBridgeParamsPreparer? prepareParams,
     KritaBridgeParamsWriter? writeParams,
     KritaBridgeSeedLockReader? readSeedLock,
     KritaBridgeCharactersReader? readCharacters,
@@ -105,8 +104,8 @@ class KritaBridgeService implements KritaBridgeMessageService {
        _generateFallback = generateFallback,
        _registerExternalImage = registerExternalImage,
        _cancelGeneration = cancelGeneration,
-       _onGenerationBilled = onGenerationBilled,
        _onGenerationEnqueued = onGenerationEnqueued,
+       _prepareParams = prepareParams ?? ((params, _) => params),
        _writeParams = writeParams,
        _readSeedLock = readSeedLock,
        _readCharacters = readCharacters,
@@ -124,11 +123,11 @@ class KritaBridgeService implements KritaBridgeMessageService {
   final KritaBridgeFallbackGenerator _generateFallback;
   final KritaBridgeExternalImageRegistrar _registerExternalImage;
   final KritaBridgeCancelGeneration _cancelGeneration;
-  final KritaBridgeGenerationBilled? _onGenerationBilled;
 
   /// 请求参数冻结（mapping 已捕获）、确认受理后触发（P2.5 块实例随机：
   /// 本次请求用入队前的 roll，这里重 roll 让下一张/界面显示新内容）。
   final void Function()? _onGenerationEnqueued;
+  final KritaBridgeParamsPreparer _prepareParams;
   final KritaBridgeParamsWriter? _writeParams;
   final KritaBridgeSeedLockReader? _readSeedLock;
   final KritaBridgeCharactersReader? _readCharacters;
@@ -178,7 +177,11 @@ class KritaBridgeService implements KritaBridgeMessageService {
       case KritaSetParamsMessage():
         _setParams(message);
       case KritaGenerateMessage():
-        await _generate(message.id, message.toImageParams(_readBaseParams()));
+        await _generate(
+          message.id,
+          message.toImageParams(_readBaseParams()),
+          overrides: message.payload,
+        );
       case KritaPingMessage():
         break;
     }
@@ -291,7 +294,11 @@ class KritaBridgeService implements KritaBridgeMessageService {
     AppLogger.i('Cancelled Krita request: ${message.id}', _logTag);
   }
 
-  Future<void> _generate(String id, KritaImageParamsMapping mapping) async {
+  Future<void> _generate(
+    String id,
+    KritaImageParamsMapping mapping, {
+    Map<String, dynamic> overrides = const {},
+  }) async {
     if (_isUiGenerating() || _isBridgeGenerating) {
       AppLogger.w('Rejected Krita request as busy: $id', _logTag);
       _sendError(
@@ -316,17 +323,16 @@ class KritaBridgeService implements KritaBridgeMessageService {
       return;
     }
 
-    // P2.5：参数已在 handle() 的 mapping 里冻结，受理后重 roll 随机块实例，
-    // 下一次桥接生成（和 UI 显示）拿到新内容。
-    _onGenerationEnqueued?.call();
-
     final request = KritaBridgeGenerateRequest(
       id: id,
-      params: mapping.params.copyWith(nSamples: 1),
+      params: _prepareParams(mapping.params.copyWith(nSamples: 1), overrides),
       focusedInpaintEnabled: mapping.focusedInpaintEnabled,
       minimumContextPixels: mapping.minimumContextPixels.toDouble(),
       focusedSelectionRect: _resolveFocusedSelectionRect(mapping),
     );
+
+    // 角色、预设和规范化设置也已冻结，下一张的 roll 不影响流式或回退请求。
+    _onGenerationEnqueued?.call();
 
     _isBridgeGenerating = true;
     _activeRequestId = id;
@@ -351,9 +357,6 @@ class KritaBridgeService implements KritaBridgeMessageService {
         );
         return;
       }
-
-      // 个人点数记账：桥接生成成功，按请求参数预估单价扣减
-      _onGenerationBilled?.call(request.params);
 
       final savedPath = await _registerExternalImage(
         artifact.displayImageBytes,

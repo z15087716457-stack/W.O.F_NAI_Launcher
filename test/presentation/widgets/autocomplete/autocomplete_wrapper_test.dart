@@ -55,6 +55,91 @@ void main() {
     await Hive.deleteFromDisk();
   });
 
+  for (final search in [false, true]) {
+    for (final storedSetting in [false, true]) {
+      testWidgets('field semantics override stored underscore setting '
+          '$storedSetting, search=$search', (tester) async {
+        await tester.runAsync(
+          () => Hive.box(
+            StorageKeys.settingsBox,
+          ).put(StorageKeys.autocompleteReplaceUnderscores, storedSetting),
+        );
+        final initial = search
+            ? 'foot_focus blu -comic'
+            : '1.2::artist:a, 1girl::, blu, old_tag';
+        final cursor = initial.indexOf('blu') + 3;
+        final controller = TextEditingController(text: initial);
+        final focusNode = FocusNode();
+        final source = _RecordingBaseSource();
+        addTearDown(controller.dispose);
+        addTearDown(focusNode.dispose);
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              autocompleteServicesProvider.overrideWithValue(
+                AutocompleteServices(
+                  localSources: [source],
+                  dictionaryTranslations: const _NoTranslations(),
+                  llmTranslations: const _NoTranslations(),
+                  danbooru: _NoDanbooru(),
+                ),
+              ),
+            ],
+            child: MaterialApp(
+              locale: const Locale('en'),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: AutocompleteWrapper(
+                  controller: controller,
+                  focusNode: focusNode,
+                  config: AutocompleteConfig(
+                    autoInsertComma: false,
+                    treatSpacesAsSeparators: search,
+                    replaceUnderscoreWithSpace: !storedSetting,
+                  ),
+                  child: TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        focusNode.requestFocus();
+        await tester.pump();
+        controller.value = TextEditingValue(
+          text: initial.replaceFirst('blu', 'bl'),
+          selection: TextSelection.collapsed(offset: cursor - 1),
+        );
+        await tester.pump();
+        controller.value = TextEditingValue(
+          text: initial,
+          selection: TextSelection.collapsed(offset: cursor),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 30));
+        expect(source.tokens.last, 'blu');
+        expect(find.text('blue eyes'), findsOneWidget);
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        await tester.pump();
+        expect(
+          controller.text,
+          search
+              ? 'foot_focus blue_eyes -comic'
+              : '1.2::artist:a, 1girl::, blue eyes, old_tag',
+        );
+        expect(
+          Hive.box(
+            StorageKeys.settingsBox,
+          ).get(StorageKeys.autocompleteReplaceUnderscores),
+          storedSetting,
+        );
+      });
+    }
+  }
+
   testWidgets('shows local BASE results and inserts by keyboard', (
     tester,
   ) async {
@@ -97,14 +182,14 @@ void main() {
     await tester.pump();
     await _typeCurrentText(tester, controller);
 
-    expect(find.text('blue_eyes'), findsOneWidget);
+    expect(find.text('blue eyes'), findsOneWidget);
     expect(find.text('BASE'), findsOneWidget);
     expect(baseSource.lastLimit, CompletionResultLimits.all);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
 
-    expect(controller.text, 'blue_eyes, ');
+    expect(controller.text, 'blue eyes, ');
     expect(controller.selection.extentOffset, controller.text.length);
   });
 
@@ -230,7 +315,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 30));
 
-      expect(controller.text, 'masterpiece, blue_eyes');
+      expect(controller.text, 'masterpiece, blue eyes');
       expect(selectedText, controller.text);
       expect(source.tokens, hasLength(queryCountBeforeSelection));
     },
@@ -458,7 +543,7 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
-    expect(controller.text, 'tag_02, ');
+    expect(controller.text, 'tag 02, ');
   });
 
   testWidgets('positions multiline suggestions beside the caret line', (
@@ -734,14 +819,14 @@ void main() {
 
     expect(baseSource.lastLimit, isNull);
     expect(librarySource.queries, ['']);
-    expect(find.text('角色立绘'), findsOneWidget);
+    expect(find.text('角色_立绘'), findsOneWidget);
     expect(find.text('常用角色提示词'), findsOneWidget);
     expect(find.text('LIB'), findsOneWidget);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pump();
 
-    expect(controller.text, '<角色立绘>, ');
+    expect(controller.text, '<角色_立绘>, ');
     expect(controller.selection.extentOffset, controller.text.length);
   });
 
@@ -930,7 +1015,7 @@ class _LibrarySource implements CompletionSource {
     queries.add(query.token);
     return const [
       CompletionCandidate(
-        canonicalTag: '角色立绘',
+        canonicalTag: '角色_立绘',
         category: TagCategory.library,
         postCount: 7,
         translation: '常用角色提示词',

@@ -5,6 +5,7 @@ import '../../../core/autocomplete/autocomplete_settings.dart';
 import '../../../core/autocomplete/completion_models.dart';
 import '../../../core/autocomplete/zh_dictionary_service.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/tag_normalizer.dart';
 
 const double autocompleteCandidateExtent = 35;
 
@@ -165,8 +166,10 @@ class CompletionOverlay extends StatelessWidget {
 
   static String _displayQuery(CompletionQuery? query) {
     if (query == null) return '';
-    if (query.token.isNotEmpty) return query.token;
-    return query.relatedTag ?? '';
+    final value = query.token.isNotEmpty ? query.token : query.relatedTag ?? '';
+    return query.kind == CompletionQueryKind.libraryAlias
+        ? value
+        : TagNormalizer.toDisplay(value);
   }
 }
 
@@ -519,7 +522,9 @@ class _CompletionTile extends StatelessWidget {
                   Expanded(
                     flex: showTranslations ? 5 : 8,
                     child: Text(
-                      candidate.canonicalTag,
+                      candidate.category == TagCategory.library
+                          ? candidate.canonicalTag
+                          : TagNormalizer.toDisplay(candidate.canonicalTag),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(

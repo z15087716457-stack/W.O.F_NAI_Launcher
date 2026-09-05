@@ -20,6 +20,7 @@ import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart'
 import 'package:nai_launcher/presentation/providers/generation/generation_cooldown_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
+import 'package:nai_launcher/presentation/providers/layout_state_provider.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
@@ -27,6 +28,7 @@ import 'package:nai_launcher/presentation/providers/style_explore/explore_run_pr
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 import 'package:nai_launcher/presentation/providers/style_explore_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/block_library_panel_slot.dart';
 import 'package:nai_launcher/presentation/screens/style_explore/style_explore_screen.dart';
 
 /// 内存版 Recipe 存储。
@@ -345,10 +347,11 @@ void main() {
 
   Future<ProviderContainer> pumpScreen(
     WidgetTester tester, {
+    double width = 1600,
     List<Override> extraOverrides = const [],
   }) async {
     // 宽窗：左栏 + 右栏画廊都展开（画廊默认断点 1100）。
-    tester.view.physicalSize = const Size(1600, 900);
+    tester.view.physicalSize = Size(width, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
@@ -541,33 +544,314 @@ void main() {
     expect(run.name, '新任务甲');
     expect(run.status, ExploreRunStatus.draft);
     expect(run.recipeSnapshot.negative.text, isA<String>());
-    // 点选状态 = 新建的 run，控制条出现（draft 显示开始按钮与出图数）。
+    // 点选状态 = 新建的 run，控制条出现；基础轮入口统一由主生成控制条承载。
     expect(container.read(exploreActiveRunIdProvider), run.id);
-    expect(find.byKey(const Key('explore-run-start')), findsOneWidget);
-    expect(find.byKey(const Key('explore-run-target-count')), findsOneWidget);
+    expect(find.byKey(const Key('explore-run-start')), findsNothing);
+    expect(find.byKey(const Key('explore-run-target-count')), findsNothing);
+    expect(find.text('共 0 张'), findsOneWidget);
+
+    final topBar = tester.getRect(
+      find.byKey(const Key('style-explore-top-bar-content')),
+    );
+    final runBar = tester.getRect(
+      find.byKey(const Key('explore-run-control-bar-content')),
+    );
+    expect(runBar.width, closeTo(topBar.width, 0.1));
   });
 
-  testWidgets('run card shows status dot, progress and selects on tap', (
+  testWidgets(
+    'run card shows candidate total instead of target progress and selects on tap',
+    (tester) async {
+      final run = await seedRun(
+        '列表目标',
+        targetCount: 10,
+        candidates: [
+          ExploreCandidate.shell(roundId: 'r-1', id: 'cand-1'),
+          ExploreCandidate.shell(roundId: 'r-1', id: 'cand-2'),
+        ],
+      );
+      final container = await pumpScreen(tester);
+
+      expect(find.text('列表目标'), findsOneWidget);
+      expect(find.textContaining('共 2 张'), findsOneWidget);
+      expect(find.textContaining('草稿'), findsWidgets);
+
+      // 点选只切换 activeRun，不把快照载入编辑器（档案语义）。
+      await tester.tap(find.text('列表目标'));
+      await tester.pump();
+      expect(container.read(exploreActiveRunIdProvider), run.id);
+      expect(
+        container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
+        '',
+        reason: '点选 run 不自动覆盖正在编辑的 lane',
+      );
+      // 控制条随 activeRun 出现，但基础轮入口由主生成控制条承载。
+      expect(find.byKey(const Key('explore-run-start')), findsNothing);
+      expect(find.text('共 2 张'), findsOneWidget);
+    },
+  );
+
+  testWidgets('explore panes stay continuous without an artificial spacer', (
     tester,
   ) async {
-    final run = await seedRun('列表目标', targetCount: 10);
     final container = await pumpScreen(tester);
-
-    expect(find.text('列表目标'), findsOneWidget);
-    expect(find.textContaining('0/10'), findsOneWidget);
-    expect(find.textContaining('草稿'), findsWidgets);
-
-    // 点选只切换 activeRun，不把快照载入编辑器（档案语义）。
-    await tester.tap(find.text('列表目标'));
-    await tester.pump();
-    expect(container.read(exploreActiveRunIdProvider), run.id);
-    expect(
-      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
-      '',
-      reason: '点选 run 不自动覆盖正在编辑的 lane',
+    final main = tester.getRect(
+      find.byKey(const Key('style-explore-main-editor')),
     );
-    // 控制条随 activeRun 出现。
-    expect(find.byKey(const Key('explore-run-start')), findsOneWidget);
+    final sidebar = tester.getRect(
+      find.byKey(const Key('style-explore-run-sidebar')),
+    );
+    final galleryHandle = tester.getRect(
+      find.byKey(const Key('style-explore-gallery-resize-handle')),
+    );
+    final gallery = tester.getRect(
+      find.byKey(const Key('style-explore-gallery-panel')),
+    );
+
+    expect(
+      find.byKey(const Key('style-explore-main-editor-resize-handle')),
+      findsNothing,
+    );
+    expect(main.right, closeTo(sidebar.left, 0.1));
+    expect(sidebar.right, closeTo(galleryHandle.left, 1.1));
+    expect(galleryHandle.right, closeTo(gallery.left, 1.1));
+
+    await container
+        .read(layoutStateNotifierProvider.notifier)
+        .setBlockLibraryPanelExpanded(true);
+    await tester.pump();
+
+    final block = tester.getRect(find.byType(BlockLibraryPanelSlot));
+    final mainWithBlock = tester.getRect(
+      find.byKey(const Key('style-explore-main-editor')),
+    );
+    final sidebarWithBlock = tester.getRect(
+      find.byKey(const Key('style-explore-run-sidebar')),
+    );
+    final galleryHandleWithBlock = tester.getRect(
+      find.byKey(const Key('style-explore-gallery-resize-handle')),
+    );
+    final galleryWithBlock = tester.getRect(
+      find.byKey(const Key('style-explore-gallery-panel')),
+    );
+    expect(mainWithBlock.right, closeTo(block.left, 0.1));
+    expect(block.right, closeTo(sidebarWithBlock.left, 0.1));
+    expect(sidebarWithBlock.right, closeTo(galleryHandleWithBlock.left, 1.1));
+    expect(galleryHandleWithBlock.right, closeTo(galleryWithBlock.left, 1.1));
+  });
+
+  testWidgets('main prompt wraps within the actual editor pane width', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester, width: 1200);
+    final layoutNotifier = container.read(layoutStateNotifierProvider.notifier);
+    await layoutNotifier.setBlockLibraryPanelExpanded(true);
+    await layoutNotifier.setBlockLibraryPanelWidth(220);
+    await layoutNotifier.setStyleExploreRunSidebarWidth(260);
+    await layoutNotifier.setStyleExploreGalleryWidth(320);
+
+    final prompt = List.filled(
+      24,
+      'artist:example, soft lighting, cinematic composition',
+    ).join(', ');
+    container
+        .read(pillWorkspaceProvider(PillScopes.main).notifier)
+        .replaceWithPlainText(prompt);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final main = tester.getRect(
+      find.byKey(const Key('style-explore-main-editor')),
+    );
+    final editableFinder = find.descendant(
+      of: find.byKey(const Key('generation_prompt_positive_input')),
+      matching: find.byType(EditableText),
+    );
+    final editable = tester.getRect(editableFinder);
+    final renderEditable = tester
+        .state<EditableTextState>(editableFinder)
+        .renderEditable;
+    final lineTops = renderEditable
+        .getBoxesForSelection(
+          TextSelection(baseOffset: 0, extentOffset: prompt.length),
+        )
+        .map((box) => box.top.round())
+        .toSet();
+
+    expect(main.width, lessThan(500));
+    expect(editable.width, lessThan(500));
+    expect(lineTops.length, greaterThan(1));
+    expect(find.byType(BlockLibraryPanelSlot), findsOneWidget);
+    expect(find.byKey(const Key('style-explore-run-sidebar')), findsOneWidget);
+    expect(
+      find.byKey(const Key('style-explore-gallery-panel')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'expanded pane widths stay visible when the editor is exhausted',
+    (tester) async {
+      final container = await pumpScreen(tester, width: 1400);
+      final notifier = container.read(layoutStateNotifierProvider.notifier);
+      await notifier.setBlockLibraryPanelExpanded(true);
+      await notifier.setBlockLibraryPanelWidth(600);
+      await notifier.setStyleExploreRunSidebarWidth(500);
+      await notifier.setStyleExploreGalleryWidth(700);
+      await tester.pump(const Duration(milliseconds: 250));
+
+      expect(find.byType(BlockLibraryPanelSlot), findsOneWidget);
+      expect(
+        find.byKey(const Key('style-explore-run-sidebar')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('style-explore-gallery-panel')),
+        findsOneWidget,
+      );
+      expect(
+        tester.getSize(find.byType(BlockLibraryPanelSlot)).width,
+        greaterThan(480),
+      );
+      expect(
+        tester
+            .getSize(find.byKey(const Key('style-explore-run-sidebar')))
+            .width,
+        greaterThan(360),
+      );
+      expect(
+        tester
+            .getSize(find.byKey(const Key('style-explore-gallery-panel')))
+            .width,
+        greaterThan(560),
+      );
+      expect(
+        tester
+            .getSize(find.byKey(const Key('style-explore-main-editor')))
+            .width,
+        lessThan(160),
+      );
+    },
+  );
+
+  testWidgets('explicitly opened panes are not hidden by a narrow layout', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester, width: 720);
+
+    // 窄窗默认不展开画廊；用户明确打开后必须保持可见。
+    await tester.tap(find.byKey(const Key('style-explore-gallery-toggle')));
+    await tester.pump();
+    await container
+        .read(layoutStateNotifierProvider.notifier)
+        .setBlockLibraryPanelExpanded(true);
+    await tester.pump();
+
+    expect(find.byType(BlockLibraryPanelSlot), findsOneWidget);
+    expect(find.byKey(const Key('style-explore-run-sidebar')), findsOneWidget);
+    expect(
+      find.byKey(const Key('style-explore-gallery-panel')),
+      findsOneWidget,
+    );
+    expect(
+      tester.getSize(find.byKey(const Key('style-explore-main-editor'))).width,
+      lessThan(160),
+    );
+    expect(
+      container.read(layoutStateNotifierProvider).blockLibraryPanelExpanded,
+      isTrue,
+    );
+  });
+
+  testWidgets('explore pane resize handles update adjacent pane widths', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester);
+    final layoutNotifier = container.read(layoutStateNotifierProvider.notifier);
+
+    await tester.drag(
+      find.byKey(const Key('style-explore-run-sidebar-resize-handle')),
+      const Offset(-30, 0),
+    );
+    await tester.pump();
+    expect(
+      container.read(layoutStateNotifierProvider).styleExploreRunSidebarWidth,
+      270,
+    );
+
+    await tester.drag(
+      find.byKey(const Key('style-explore-gallery-resize-handle')),
+      const Offset(30, 0),
+    );
+    await tester.pump();
+    expect(
+      container.read(layoutStateNotifierProvider).styleExploreGalleryWidth,
+      330,
+    );
+
+    await layoutNotifier.setBlockLibraryPanelExpanded(true);
+    await tester.pump();
+    final blockWidth = container
+        .read(layoutStateNotifierProvider)
+        .blockLibraryPanelWidth;
+    await tester.drag(
+      find.byKey(const Key('block-library-panel-resize-handle')),
+      const Offset(-40, 0),
+    );
+    await tester.pump();
+    expect(
+      container.read(layoutStateNotifierProvider).blockLibraryPanelWidth,
+      blockWidth + 40,
+    );
+    await tester.drag(
+      find.byKey(const Key('block-library-panel-resize-handle')),
+      const Offset(20, 0),
+    );
+    await tester.pump();
+    expect(
+      container.read(layoutStateNotifierProvider).blockLibraryPanelWidth,
+      blockWidth + 20,
+    );
+  });
+
+  testWidgets('narrow explore layout keeps panes and wraps controls', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester, width: 420);
+
+    // 画廊默认收起，但用户开关优先于窄窗断点。
+    await tester.tap(find.byKey(const Key('style-explore-gallery-toggle')));
+    await tester.pump();
+    await container
+        .read(layoutStateNotifierProvider.notifier)
+        .setBlockLibraryPanelExpanded(true);
+    await tester.pump();
+
+    expect(
+      find.byKey(const Key('generation_prompt_positive_input')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('style-explore-main-editor')), findsOneWidget);
+    expect(find.byKey(const Key('style-explore-run-sidebar')), findsOneWidget);
+    expect(
+      find.byKey(const Key('style-explore-gallery-panel')),
+      findsOneWidget,
+    );
+    expect(
+      tester.getSize(find.byKey(const Key('style-explore-main-editor'))).width,
+      lessThan(160),
+    );
+    expect(
+      tester
+          .widget<Wrap>(find.byKey(const Key('style-explore-top-bar-content')))
+          .runSpacing,
+      greaterThan(0),
+    );
+    expect(
+      find.byKey(const Key('generation-controls-compact-wrap')),
+      findsOneWidget,
+    );
   });
 
   testWidgets(
@@ -725,9 +1009,7 @@ void main() {
     );
   });
 
-  testWidgets('generated run shows target count input and another-round', (
-    tester,
-  ) async {
+  testWidgets('generated run hides basic-round controls', (tester) async {
     final run = await seedRun(
       '追加轮任务',
       targetCount: 6,
@@ -738,11 +1020,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // B2：generated 态控制条给出图数输入 + 再来一轮。
-    expect(find.byKey(const Key('explore-run-target-count')), findsOneWidget);
-    expect(find.byKey(const Key('explore-run-another-round')), findsOneWidget);
-    // draft 专属的开始按钮不出现。
+    // 基础轮出图数、draft 开始和 generated 再来一轮均由主生成控制条承载。
+    expect(find.byKey(const Key('explore-run-target-count')), findsNothing);
+    expect(find.byKey(const Key('explore-run-another-round')), findsNothing);
     expect(find.byKey(const Key('explore-run-start')), findsNothing);
+    expect(find.text('共 0 张'), findsOneWidget);
   });
 
   testWidgets('recipe load over non-empty main lane asks before overwrite', (

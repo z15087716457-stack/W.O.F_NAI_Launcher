@@ -164,6 +164,82 @@ void main() {
       expect(storage.webWidth, 320.0);
     });
   });
+
+  group('LayoutState style explore widths', () {
+    test('defaults and copyWith preserve the Run sidebar width', () {
+      const state = LayoutState();
+
+      expect(state.styleExploreRunSidebarWidth, 240.0);
+      expect(state.styleExploreGalleryWidth, 360.0);
+
+      final updated = state.copyWith(styleExploreRunSidebarWidth: 300.0);
+      expect(updated.styleExploreRunSidebarWidth, 300.0);
+      expect(updated.styleExploreGalleryWidth, 360.0);
+    });
+
+    test('setters preserve widths outside the former bounds', () async {
+      final storage = _FakeLayoutStorage()
+        ..blockLibraryPanelWidth = 280.0
+        ..styleExploreRunSidebarWidth = 280.0
+        ..styleExploreGalleryWidth = 360.0;
+      final container = ProviderContainer(
+        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(layoutStateNotifierProvider.notifier);
+      final state = container.read(layoutStateNotifierProvider);
+      expect(state.blockLibraryPanelWidth, 280.0);
+      expect(state.styleExploreRunSidebarWidth, 280.0);
+      expect(state.styleExploreGalleryWidth, 360.0);
+
+      await notifier.setStyleExploreRunSidebarWidth(100.0);
+      expect(storage.styleExploreRunSidebarWidth, 100.0);
+      expect(
+        container.read(layoutStateNotifierProvider).styleExploreRunSidebarWidth,
+        100.0,
+      );
+      await notifier.setStyleExploreRunSidebarWidth(999.0);
+      expect(storage.styleExploreRunSidebarWidth, 999.0);
+      expect(
+        container.read(layoutStateNotifierProvider).styleExploreRunSidebarWidth,
+        999.0,
+      );
+
+      await notifier.setStyleExploreGalleryWidth(100.0);
+      expect(storage.styleExploreGalleryWidth, 100.0);
+      expect(
+        container.read(layoutStateNotifierProvider).styleExploreGalleryWidth,
+        100.0,
+      );
+      await notifier.setStyleExploreGalleryWidth(999.0);
+      expect(storage.styleExploreGalleryWidth, 999.0);
+      expect(
+        container.read(layoutStateNotifierProvider).styleExploreGalleryWidth,
+        999.0,
+      );
+
+      await notifier.setBlockLibraryPanelWidth(100.0);
+      expect(storage.blockLibraryPanelWidth, 100.0);
+      expect(
+        container.read(layoutStateNotifierProvider).blockLibraryPanelWidth,
+        100.0,
+      );
+      await notifier.setBlockLibraryPanelWidth(999.0);
+      expect(storage.blockLibraryPanelWidth, 999.0);
+      expect(
+        container.read(layoutStateNotifierProvider).blockLibraryPanelWidth,
+        999.0,
+      );
+
+      await notifier.setStyleExploreRunSidebarWidth(-1.0);
+      expect(storage.styleExploreRunSidebarWidth, 0.0);
+      expect(
+        container.read(layoutStateNotifierProvider).styleExploreRunSidebarWidth,
+        0.0,
+      );
+    });
+  });
 }
 
 class _FakeLayoutStorage extends LocalStorageService {
@@ -180,6 +256,9 @@ class _FakeLayoutStorage extends LocalStorageService {
   double negativeHeight = 180.0;
   double webWidth = 400.0;
   bool webExpanded = true;
+  double blockLibraryPanelWidth = 320.0;
+  double styleExploreRunSidebarWidth = 240.0;
+  double styleExploreGalleryWidth = 360.0;
 
   @override
   bool getLeftPanelExpanded() => leftExpanded;
@@ -253,5 +332,29 @@ class _FakeLayoutStorage extends LocalStorageService {
   @override
   Future<void> setWebLeftPanelExpanded(bool value) async {
     webExpanded = value;
+  }
+
+  @override
+  double getBlockLibraryPanelWidth() => blockLibraryPanelWidth;
+
+  @override
+  Future<void> setBlockLibraryPanelWidth(double value) async {
+    blockLibraryPanelWidth = value;
+  }
+
+  @override
+  double getStyleExploreRunSidebarWidth() => styleExploreRunSidebarWidth;
+
+  @override
+  Future<void> setStyleExploreRunSidebarWidth(double value) async {
+    styleExploreRunSidebarWidth = value;
+  }
+
+  @override
+  double getStyleExploreGalleryWidth() => styleExploreGalleryWidth;
+
+  @override
+  Future<void> setStyleExploreGalleryWidth(double value) async {
+    styleExploreGalleryWidth = value;
   }
 }

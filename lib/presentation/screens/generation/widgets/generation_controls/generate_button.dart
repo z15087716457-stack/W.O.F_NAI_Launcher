@@ -15,6 +15,7 @@ class GenerateButtonWithCost extends ConsumerWidget {
   final VoidCallback onGenerate;
   final VoidCallback onCancel;
   final VoidCallback onSkipCurrent;
+  final int? costOverride;
 
   /// 按钮高度（紧凑布局可压低）
   final double height;
@@ -28,6 +29,7 @@ class GenerateButtonWithCost extends ConsumerWidget {
     required this.onGenerate,
     required this.onCancel,
     required this.onSkipCurrent,
+    this.costOverride,
     this.height = 48,
   });
 
@@ -99,7 +101,10 @@ class GenerateButtonWithCost extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(_generateLabelText(context)),
-            AnlasCostBadge(isGenerating: isGenerating),
+            AnlasCostBadge(
+              isGenerating: isGenerating,
+              costOverride: costOverride,
+            ),
           ],
         ),
         style: ThemedButtonStyle.filled,

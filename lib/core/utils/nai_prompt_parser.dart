@@ -1,4 +1,6 @@
 import '../../data/models/prompt/prompt_tag.dart';
+import 'nai_prompt_segments.dart';
+import 'nai_prompt_syntax.dart';
 
 /// NAI 提示词解析器
 /// 将文本提示词解析为标签列表，支持权重语法
@@ -35,66 +37,8 @@ class NaiPromptParser {
     return _extractWeight(trimmed).text.trim();
   }
 
-  /// 按分隔符拆分提示词
-  /// 支持逗号分隔，同时保护特殊语法（如 || 随机选择）
-  static List<String> _splitByDelimiters(String prompt) {
-    final segments = <String>[];
-    final buffer = StringBuffer();
-    var braceDepth = 0;
-    var bracketDepth = 0;
-    var parenDepth = 0;
-    var inPipe = false;
-
-    for (var i = 0; i < prompt.length; i++) {
-      final char = prompt[i];
-
-      // 跟踪括号深度
-      if (char == '{') {
-        braceDepth++;
-      } else if (char == '}') {
-        braceDepth--;
-      } else if (char == '[') {
-        bracketDepth++;
-      } else if (char == ']') {
-        bracketDepth--;
-      } else if (char == '(') {
-        parenDepth++;
-      } else if (char == ')') {
-        parenDepth--;
-      }
-
-      // 检测双竖线语法 ||
-      if (char == '|' && i + 1 < prompt.length && prompt[i + 1] == '|') {
-        inPipe = !inPipe;
-        buffer.write('||');
-        i++; // 跳过下一个 |
-        continue;
-      }
-
-      // 在顶层遇到逗号时分割
-      if (char == ',' &&
-          braceDepth == 0 &&
-          bracketDepth == 0 &&
-          parenDepth == 0 &&
-          !inPipe) {
-        final segment = buffer.toString().trim();
-        if (segment.isNotEmpty) {
-          segments.add(segment);
-        }
-        buffer.clear();
-      } else {
-        buffer.write(char);
-      }
-    }
-
-    // 添加最后一个片段
-    final lastSegment = buffer.toString().trim();
-    if (lastSegment.isNotEmpty) {
-      segments.add(lastSegment);
-    }
-
-    return segments;
-  }
+  static List<String> _splitByDelimiters(String prompt) =>
+      splitNaiPromptSegments(prompt);
 
   /// 解析单个标签片段
   static PromptTag? _parseSegment(String segment) {
@@ -125,26 +69,31 @@ class NaiPromptParser {
     var processedText = text;
     var syntaxType = WeightSyntaxType.none;
 
-    // 1. 先处理 NAI 数值权重语法: weight::text::
-    // 匹配: 数字::内容:: 或 数字::内容
-    final naiWeightMatch = RegExp(
-      r'^(-?\d+\.?\d*)::(.+?)(?:::)?$',
-    ).firstMatch(text);
-    if (naiWeightMatch != null) {
-      final weightValue = double.tryParse(naiWeightMatch.group(1)!);
-      if (weightValue != null) {
-        weight = weightValue;
-        processedText = naiWeightMatch.group(2)!.trim();
-        return _WeightResult(processedText, weight, WeightSyntaxType.numeric);
-      }
+    final tokens = NaiPromptSyntax.scan(text);
+    if (tokens.any((token) => token.kind == NaiPromptTokenKind.opaque) ||
+        tokens
+                .where((token) => token.kind == NaiPromptTokenKind.prefix)
+                .length >
+            1 ||
+        tokens.any(
+          (token) =>
+              token.kind == NaiPromptTokenKind.closure &&
+              token.end != text.length,
+        )) {
+      return _WeightResult(text, weight, syntaxType);
     }
-
-    // 2. 处理无数字权重的结尾 :: (NAI格式残留)
-    // 例如: "ucupumar::" -> "ucupumar"
-    if (text.endsWith('::')) {
-      processedText = text.substring(0, text.length - 2).trim();
-      if (processedText.isNotEmpty) {
-        return _WeightResult(processedText, 1.0, WeightSyntaxType.none);
+    if (tokens.isNotEmpty && tokens.first.kind == NaiPromptTokenKind.prefix) {
+      final prefix = tokens.first;
+      final end = tokens.last.kind == NaiPromptTokenKind.closure
+          ? tokens.last.start
+          : text.length;
+      final content = text.substring(prefix.end, end).trim();
+      if (content.isNotEmpty) {
+        return _WeightResult(
+          content,
+          double.parse(text.substring(0, prefix.end - 2)),
+          WeightSyntaxType.numeric,
+        );
       }
     }
 

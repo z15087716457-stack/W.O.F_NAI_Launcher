@@ -24,6 +24,7 @@ import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_
 /// P2.5 块实例随机：工作区 roll / 协调器推送 / L1 卡 / L2 弹窗测试。
 void main() {
   const markerA = '\uE000';
+  const markerB = '\uE001';
 
   /// 交替返回 shuffle 下标的脚本化随机源：第一次 roll 取首原子，
   /// 第二次取末原子（count 抽取走 nextInt(1) 不消耗脚本步进）。
@@ -137,6 +138,124 @@ void main() {
         // 交替脚本源保证这次必然换边
         expect(after, isNot(before));
         expect(container.read(pillWorkspaceNotifierProvider).projection, after);
+      },
+    );
+
+    test(
+      'locked random instance filters manual, automatic, and settings rolls',
+      () async {
+        final container = makeContainer();
+        await container.read(promptBlockLibraryNotifierProvider.future);
+        await insertRandomBlock(container, PillScopes.main);
+        final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+
+        notifier.toggleLocked(markerA);
+        final before = container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!
+            .currentRoll;
+        expect(
+          container
+              .read(pillWorkspaceNotifierProvider)
+              .document
+              .instances[markerA]!
+              .locked,
+          isTrue,
+        );
+
+        notifier.rollMarker(markerA);
+        expect(
+          container
+              .read(pillWorkspaceNotifierProvider)
+              .document
+              .instances[markerA]!
+              .currentRoll,
+          before,
+        );
+        expect(notifier.rollAllRandom(), isFalse);
+
+        notifier.updateInstanceSettings(
+          markerA,
+          const PillInstanceSettings(mode: PillRollMode.random, countMax: 2),
+        );
+        final locked = container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!;
+        expect(locked.currentRoll, before);
+        expect(locked.settings.countMax, 2);
+
+        // 解锁后恢复正常的手动 roll。
+        notifier.toggleLocked(markerA);
+        notifier.rollMarker(markerA);
+        expect(
+          container
+              .read(pillWorkspaceNotifierProvider)
+              .document
+              .instances[markerA]!
+              .currentRoll,
+          isNot(before),
+        );
+      },
+    );
+
+    test(
+      'mixed locked and unlocked instances only re-roll unlocked ones',
+      () async {
+        final container = makeContainer();
+        await container.read(promptBlockLibraryNotifierProvider.future);
+        final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+        notifier.restoreDocument(
+          const PillDocument(
+            text: '$markerA $markerB',
+            instances: {
+              markerA: PillInstance(
+                blockId: 'style',
+                locked: true,
+                settings: randomSettings,
+                currentRoll: 'A',
+              ),
+              markerB: PillInstance(
+                blockId: 'style',
+                settings: randomSettings,
+                currentRoll: 'B',
+              ),
+            },
+          ),
+        );
+
+        expect(notifier.rollAllRandom(), isTrue);
+        final state = container.read(pillWorkspaceNotifierProvider);
+        expect(state.document.instances[markerA]!.currentRoll, 'A');
+        expect(state.document.instances[markerB]!.currentRoll, 'A');
+      },
+    );
+
+    test(
+      'locked random instance with missing roll is not materialized',
+      () async {
+        final container = makeContainer();
+        await container.read(promptBlockLibraryNotifierProvider.future);
+        final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+        notifier.restoreDocument(
+          const PillDocument(
+            text: markerA,
+            instances: {
+              markerA: PillInstance(
+                blockId: 'style',
+                locked: true,
+                settings: randomSettings,
+              ),
+            },
+          ),
+        );
+
+        final instance = container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!;
+        expect(instance.currentRoll, isNull);
       },
     );
 
@@ -282,7 +401,7 @@ void main() {
   });
 
   group('L1 instance card', () {
-    testWidgets('random pill shows dice badge; card dice re-rolls', (
+    testWidgets('evolution badge replaces dice; card dice re-rolls', (
       tester,
     ) async {
       final container = await _pumpEditor(tester);
@@ -293,8 +412,8 @@ void main() {
       notifier.toggleEvolution(markerA);
       await tester.pump();
 
-      // 药丸带骰子角标，遗传角标紧随其后
-      expect(find.byIcon(Icons.casino_outlined), findsOneWidget);
+      // 遗传角标替换骰子角标，不叠加
+      expect(find.byIcon(Icons.casino_outlined), findsNothing);
       expect(find.byType(DnaIcon), findsOneWidget);
 
       await tester.tap(find.byType(PromptPill));
@@ -311,8 +430,8 @@ void main() {
           .instances[markerA]!
           .currentRoll;
 
-      // 卡内骰子 = 重 roll（药丸角标 + 卡按钮共两个 casino 图标，取最后一个）
-      await tester.tap(find.byIcon(Icons.casino_outlined).last);
+      // 卡内骰子 = 重抽（按钮 key 与药丸角标相互独立）
+      await tester.tap(find.byKey(const Key('pill-reroll')));
       await tester.pump();
 
       final after = container
@@ -324,6 +443,87 @@ void main() {
       // 卡仍开着并显示新 roll
       expect(find.byType(PillInstanceCard), findsOneWidget);
       expect(find.text(after!), findsOneWidget);
+    });
+
+    testWidgets('lock toggle freezes re-roll and updates the pill badge', (
+      tester,
+    ) async {
+      final container = await _pumpEditor(tester);
+      await container.read(promptBlockLibraryNotifierProvider.future);
+      final notifier = container.read(pillWorkspaceNotifierProvider.notifier)
+        ..insertBlockAt(offset: 0, blockId: 'style');
+      notifier.updateInstanceSettings(markerA, randomSettings);
+      await tester.pump();
+
+      await tester.tap(find.byType(PromptPill));
+      await tester.pump();
+      await tester.pump();
+
+      final lockButton = tester.widget<IconButton>(
+        find.byKey(const Key('pill-lock-toggle')),
+      );
+      expect(lockButton.onPressed, isNotNull);
+      await tester.tap(find.byKey(const Key('pill-lock-toggle')));
+      await tester.pump();
+
+      expect(
+        container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!
+            .locked,
+        isTrue,
+      );
+      expect(tester.widget<PromptPill>(find.byType(PromptPill)).locked, isTrue);
+      expect(
+        tester
+            .widget<IconButton>(find.byKey(const Key('pill-reroll')))
+            .onPressed,
+        isNull,
+      );
+      expect(
+        tester
+            .widget<IconButton>(find.byKey(const Key('pill-lock-toggle')))
+            .icon,
+        isA<Icon>(),
+      );
+
+      await tester.tap(find.byKey(const Key('pill-lock-toggle')));
+      await tester.pump();
+      expect(
+        container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!
+            .locked,
+        isFalse,
+      );
+      expect(
+        tester
+            .widget<IconButton>(find.byKey(const Key('pill-reroll')))
+            .onPressed,
+        isNotNull,
+      );
+    });
+
+    testWidgets('fixed mode disables the lock button', (tester) async {
+      final container = await _pumpEditor(tester);
+      await container.read(promptBlockLibraryNotifierProvider.future);
+      container
+          .read(pillWorkspaceNotifierProvider.notifier)
+          .insertBlockAt(offset: 0, blockId: 'style');
+      await tester.pump();
+
+      await tester.tap(find.byType(PromptPill));
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        tester
+            .widget<IconButton>(find.byKey(const Key('pill-lock-toggle')))
+            .onPressed,
+        isNull,
+      );
     });
 
     testWidgets('tapping outside dismisses the card', (tester) async {

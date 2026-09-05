@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -447,7 +448,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // 顶栏：正面/负面切换 + 操作按钮
-        _buildTopBar(theme),
+        _buildFullLayoutTopBar(theme),
 
         const SizedBox(height: 8),
 
@@ -460,6 +461,24 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           topPadding: 6,
         ),
       ],
+    );
+  }
+
+  Widget _buildFullLayoutTopBar(ThemeData theme) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!constraints.maxWidth.isFinite || constraints.maxWidth >= 320) {
+          return _buildTopBar(theme);
+        }
+        return OverflowBox(
+          alignment: Alignment.topLeft,
+          minWidth: 320,
+          maxWidth: 320,
+          maxHeight: 320,
+          fit: OverflowBoxFit.deferToChild,
+          child: _buildTopBar(theme),
+        );
+      },
     );
   }
 

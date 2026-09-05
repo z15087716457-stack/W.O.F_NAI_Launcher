@@ -15,6 +15,7 @@ import '../../core/utils/image_share_sanitizer.dart';
 import '../../core/utils/inpaint_mask_utils.dart';
 import '../../core/utils/nai_resolution_adapter.dart';
 import '../../core/utils/pica_lanczos_resizer.dart';
+import '../../core/utils/prompt_input_normalization.dart';
 import '../../core/utils/prompt_preset_resolution.dart';
 import '../../core/services/character_conversion_service.dart';
 import '../../data/services/image_metadata_service.dart';
@@ -27,7 +28,6 @@ import '../../data/models/image/image_stream_chunk.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import '../../data/services/statistics_cache_service.dart';
 import '../../data/services/alias_resolver_service.dart';
-import '../../data/services/personal_anlas_counter_service.dart';
 import 'character_prompt_provider.dart';
 import 'fixed_tags_provider.dart';
 import 'image_save_settings_provider.dart';
@@ -36,7 +36,6 @@ import 'pill_roll_coordinator.dart';
 import 'pill_workspace_provider.dart';
 import 'quality_preset_provider.dart';
 import 'subscription_provider.dart';
-import 'cost_estimate_provider.dart';
 import 'uc_preset_provider.dart';
 
 import 'generation/generation_models.dart';
@@ -130,6 +129,76 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
   bool _shouldAbortGenerationRun(int generationRunId) =>
       _isCancelled || !_isCurrentGenerationRun(generationRunId);
+
+  Future<void> _emitBatchEvent(
+    GenerationBatchCallback? callback,
+    GenerationBatchEvent event,
+  ) async {
+    if (callback == null) return;
+    try {
+      await callback(event);
+    } catch (error, stackTrace) {
+      AppLogger.e(
+        'Generation batch callback failed',
+        error,
+        stackTrace,
+        'Generation',
+      );
+    }
+  }
+
+  Future<void> _emitBatchComplete({
+    required GenerationBatchCallback? callback,
+    required Set<int> completedBatches,
+    required int generationRunId,
+    required int batchIndex,
+    required int slotStart,
+    required int slotCount,
+    required int totalSlots,
+    List<GeneratedImage> images = const [],
+    Object? error,
+    int? elapsedMs,
+  }) async {
+    if (!completedBatches.add(batchIndex)) return;
+    await _emitBatchEvent(
+      callback,
+      GenerationBatchEvent(
+        kind: GenerationBatchEventKind.complete,
+        generationRunId: generationRunId,
+        batchIndex: batchIndex,
+        slotStart: slotStart,
+        slotCount: slotCount,
+        totalSlots: totalSlots,
+        images: images,
+        error: error,
+        elapsedMs: elapsedMs,
+      ),
+    );
+  }
+
+  Future<void> _emitCancelledBatchEvents({
+    required GenerationBatchCallback? callback,
+    required Set<int> completedBatches,
+    required int generationRunId,
+    required int firstBatch,
+    required int batchCount,
+    required int batchSize,
+    required int totalSlots,
+  }) async {
+    if (callback == null) return;
+    for (var batch = firstBatch; batch < batchCount; batch++) {
+      await _emitBatchComplete(
+        callback: callback,
+        completedBatches: completedBatches,
+        generationRunId: generationRunId,
+        batchIndex: batch,
+        slotStart: batch * batchSize + 1,
+        slotCount: batchSize,
+        totalSlots: totalSlots,
+        error: 'cancelled',
+      );
+    }
+  }
 
   ImageParams _materializeRandomSeed(ImageParams params) {
     if (params.seed != -1) return params;
@@ -526,10 +595,15 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     );
   }
 
-  /// 提示词管线（P2.5 抽出）：别名 → 固定词 → 预设 → 角色转换。
+  /// 请求副本管线：别名 → 固定词 → 预设 → 角色转换 → SD 转换 → 格式化。
   /// 批次循环每批重跑，让重 roll 的块实例投影逐张生效；
   /// vibes 编码（`_prepareVibesForGeneration`）不在其中，只跑一次。
-  ImageParams _applyPromptPipeline(ImageParams params) {
+  ImageParams preparePromptParams(
+    ImageParams params, {
+    bool useParamsCharacters = false,
+    bool useParamsQualityPreset = false,
+    bool useParamsUcPreset = false,
+  }) {
     var effectiveParams = params;
 
     // 解析别名（将 <词库名> 展开为实际内容）
@@ -571,81 +645,96 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
     final presetResolution = _resolvePromptPresets(effectiveParams);
     effectiveParams = effectiveParams.copyWith(
-      prompt: presetResolution.prompt,
-      negativePrompt: presetResolution.negativePrompt,
+      prompt: useParamsQualityPreset
+          ? effectiveParams.prompt
+          : presetResolution.prompt,
+      negativePrompt: useParamsUcPreset
+          ? effectiveParams.negativePrompt
+          : presetResolution.negativePrompt,
     );
 
-    // 读取多角色提示词配置并转换为 API 格式
     final characterConfig = ref.read(characterPromptNotifierProvider);
-    final apiCharacters = _convertCharactersToApiFormat(characterConfig);
+    final apiCharacters = useParamsCharacters
+        ? [
+            for (final character in effectiveParams.characters)
+              character.copyWith(
+                prompt: aliasResolver.resolveAliases(character.prompt),
+                negativePrompt: aliasResolver.resolveAliases(
+                  character.negativePrompt,
+                ),
+              ),
+          ]
+        : _convertCharactersToApiFormat(characterConfig);
+
+    final autoFormat = ref.read(autoFormatPromptSettingsProvider);
+    final sdAutoConvert = ref.read(sdSyntaxAutoConvertSettingsProvider);
+    String normalize(String text) => PromptInputNormalization.normalize(
+      text,
+      autoFormat: autoFormat,
+      sdAutoConvert: sdAutoConvert,
+    ).text;
 
     // NAI 官方预设保持为 API 开关；自定义预设展开成显式提示词，避免官方预设重复生效。
     return effectiveParams.copyWith(
-      qualityToggle: presetResolution.qualityToggle,
-      qualityTagPreset: presetResolution.qualityTagPreset,
-      ucPreset: presetResolution.ucPreset,
-      characters: apiCharacters,
-      // 如果有角色且使用自定义位置，启用坐标模式
-      useCoords: apiCharacters.isNotEmpty && !characterConfig.globalAiChoice,
+      prompt: normalize(effectiveParams.prompt),
+      negativePrompt: normalize(effectiveParams.negativePrompt),
+      qualityToggle: useParamsQualityPreset
+          ? effectiveParams.effectiveQualityToggle
+          : presetResolution.qualityToggle,
+      qualityTagPreset: useParamsQualityPreset
+          ? effectiveParams.effectiveQualityTagPreset
+          : presetResolution.qualityTagPreset,
+      ucPreset: useParamsUcPreset
+          ? effectiveParams.ucPreset
+          : presetResolution.ucPreset,
+      characters: [
+        for (final character in apiCharacters)
+          character.copyWith(
+            prompt: normalize(character.prompt),
+            negativePrompt: normalize(character.negativePrompt),
+          ),
+      ],
+      useCoords:
+          apiCharacters.isNotEmpty &&
+          (useParamsCharacters
+              ? effectiveParams.useCoords
+              : !characterConfig.globalAiChoice),
     );
   }
 
-  Future<void> generate(ImageParams params) =>
-      _withPersonalBilling(params, () => _generate(params));
+  ImageParams _applyPromptPipeline(ImageParams params) =>
+      preparePromptParams(params);
+
+  Future<void> generate(
+    ImageParams params, {
+    GenerationBatchCallback? onBatchEvent,
+    int? imagesPerRequestOverride,
+  }) => _withPostBillingRefresh(
+    () => _generate(
+      params,
+      onBatchEvent: onBatchEvent,
+      imagesPerRequestOverride: imagesPerRequestOverride,
+    ),
+  );
 
   /// 探索任务专用生成入口（画风探索阶段 B）：单张、强制 nSamples=1、
   /// 随机种子实体化后把真实 seed 随结果带回；**不清空主 UI 当前图、
   /// 不触发全局 roll**（探索 runner 自控 roll 节奏）。
   /// 失败/取消返回 null，错误信息留在 `state.errorMessage`。
   ///
-  /// 与 [generate] 共享冷却门禁、提示词管线、vibe 编码与个人点数记账；
+  /// 与 [generate] 共享冷却门禁、提示词管线与 vibe 编码；
   /// 但绕开批次分支（批次循环按 imagesPerRequest 共享提示词，
   /// 探索每张候选有独立 roll 快照，不能共用）。
   Future<ExploreGenerationResult?> generateForExplore(ImageParams params) {
-    return _withPersonalBilling(params, () => _generateForExplore(params));
+    return _withPostBillingRefresh(() => _generateForExplore(params));
   }
 
-  /// 个人点数记账包裹（合租账本）：生成前捕获预估单价与图片列表，
-  /// 仅当本次运行确实产出新图（completed 且列表已更新）才扣减，
-  /// 避免冷却拦截/取消/失败造成误扣。
-  Future<T> _withPersonalBilling<T>(
-    ImageParams params,
-    Future<T> Function() body,
-  ) {
-    final imagesBefore = state.currentImages;
-    // 独立测试/工具环境未启动订阅链路时，读取预估会连带构建 auth 链，
-    // 其异步异常会污染 Zone——用 ref.exists 门禁 + try/catch 双保险。
-    var costToBill = 0;
-    // 预估为 0 且模型受 Opus 额度约束时，这次生成花的是免费额度而非 Anlas，
-    // 需要记进额度账本（合租份额）而不是点数账本。
-    var billedToOpusAllowance = false;
-    try {
-      if (ref.exists(subscriptionNotifierProvider)) {
-        costToBill = ref.read(estimatedCostProvider);
-        billedToOpusAllowance =
-            costToBill <= 0 &&
-            ref.read(isOpusSubscriptionProvider) &&
-            params.modelSpec.opusUsageLimit;
-      }
-    } catch (_) {
-      costToBill = 0;
-      billedToOpusAllowance = false;
-    }
+  /// 生成结束后的余额刷新包裹：无论成败都调度一次余额刷新——
+  /// 失败/取消的请求服务端也可能已部分计费，刷新让余额尽快回到真实值。
+  Future<T> _withPostBillingRefresh<T>(Future<T> Function() body) {
     return body().whenComplete(() {
-      final produced =
-          state.status == GenerationStatus.completed &&
-          !identical(state.currentImages, imagesBefore);
-      if (produced) {
-        final counter = ref.read(personalAnlasCounterProvider.notifier);
-        if (costToBill > 0) {
-          unawaited(counter.recordCost(costToBill));
-        } else if (billedToOpusAllowance) {
-          // 预估 0 Anlas＝走了 Opus 免费额度，改记额度账本（合租份额）
-          unawaited(counter.recordOpusUsage(count: params.nSamples));
-        }
-      }
-      // App 根节点常驻监听该 provider。独立测试/工具未启动订阅链路时，
-      // 不应仅为记账刷新而触发认证和平台存储初始化。
+      // 独立测试/工具环境未启动订阅链路时，不应仅为刷新余额
+      // 而触发认证和平台存储初始化。
       if (ref.exists(subscriptionNotifierProvider)) {
         ref
             .read(subscriptionNotifierProvider.notifier)
@@ -717,7 +806,11 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     return null;
   }
 
-  Future<void> _generate(ImageParams params) async {
+  Future<void> _generate(
+    ImageParams params, {
+    GenerationBatchCallback? onBatchEvent,
+    int? imagesPerRequestOverride,
+  }) async {
     final canStart = ref
         .read(generationCooldownProvider.notifier)
         .tryStartGeneration();
@@ -740,7 +833,9 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     // nSamples = 批次数量（请求次数）
     // batchSize = 每次请求生成的图片数量
     final batchCount = effectiveParams.nSamples;
-    final batchSize = ref.read(imagesPerRequestProvider);
+    final configuredBatchSize =
+        imagesPerRequestOverride ?? ref.read(imagesPerRequestProvider) ?? 1;
+    final batchSize = configuredBatchSize.clamp(1, 4).toInt();
     final totalImages = batchCount * batchSize;
 
     final baseParams = _applyPromptPipeline(effectiveParams);
@@ -749,8 +844,37 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
     // 如果只生成 1 张，直接生成；随机种子在进入请求前实体化，便于失败快照保留真实 seed。
     if (batchCount == 1 && batchSize == 1) {
+      final materializedParams = _materializeRandomSeed(preparedParams);
+      await _emitBatchEvent(
+        onBatchEvent,
+        GenerationBatchEvent(
+          kind: GenerationBatchEventKind.start,
+          generationRunId: generationRunId,
+          batchIndex: 0,
+          slotStart: 1,
+          slotCount: 1,
+          totalSlots: 1,
+        ),
+      );
+      if (_shouldAbortGenerationRun(generationRunId)) {
+        await _emitBatchEvent(
+          onBatchEvent,
+          GenerationBatchEvent(
+            kind: GenerationBatchEventKind.complete,
+            generationRunId: generationRunId,
+            batchIndex: 0,
+            slotStart: 1,
+            slotCount: 1,
+            totalSlots: 1,
+            error: 'cancelled',
+          ),
+        );
+        return;
+      }
+
+      final stopwatch = Stopwatch()..start();
       final singleFuture = _generateSingle(
-        _materializeRandomSeed(preparedParams),
+        materializedParams,
         1,
         1,
         generationRunId,
@@ -759,6 +883,27 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       // UI 随即显示下一张的内容（roll 时机 4）。
       ref.read(pillRollCoordinatorProvider).rollAllLanesAndSync();
       await singleFuture;
+      stopwatch.stop();
+      await _emitBatchEvent(
+        onBatchEvent,
+        GenerationBatchEvent(
+          kind: GenerationBatchEventKind.complete,
+          generationRunId: generationRunId,
+          batchIndex: 0,
+          slotStart: 1,
+          slotCount: 1,
+          totalSlots: 1,
+          images: state.status == GenerationStatus.completed
+              ? state.currentImages
+              : const [],
+          error: state.status == GenerationStatus.error
+              ? state.errorMessage
+              : state.status == GenerationStatus.cancelled
+              ? 'cancelled'
+              : null,
+          elapsedMs: stopwatch.elapsedMilliseconds,
+        ),
+      );
       // 注意：生成完成音效由 GenerationCompletionWatcher 统一监听
       // 点数消耗由 AnlasBalanceWatcher 自动监听余额变化记录
       return;
@@ -781,12 +926,25 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     int generatedImages = 0;
     Object? lastBatchError;
     DateTime? concurrencyDeadline;
+    final startedBatches = <int>{};
+    final completedBatches = <int>{};
 
     // 当前使用的参数（P2.5：批次间重 roll 块实例后重跑提示词管线，逐张换内容）
     var currentParams = preparedParams;
 
     for (int batch = 0; batch < batchCount; batch++) {
-      if (_shouldAbortGenerationRun(generationRunId)) break;
+      if (_shouldAbortGenerationRun(generationRunId)) {
+        await _emitCancelledBatchEvents(
+          callback: onBatchEvent,
+          completedBatches: completedBatches,
+          generationRunId: generationRunId,
+          firstBatch: batch,
+          batchCount: batchCount,
+          batchSize: batchSize,
+          totalSlots: totalImages,
+        );
+        return;
+      }
 
       // 更新当前进度
       state = state.copyWith(
@@ -794,34 +952,73 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         progress: generatedImages / totalImages,
       );
 
+      final slotStart = batch * batchSize + 1;
+      if (startedBatches.add(batch)) {
+        await _emitBatchEvent(
+          onBatchEvent,
+          GenerationBatchEvent(
+            kind: GenerationBatchEventKind.start,
+            generationRunId: generationRunId,
+            batchIndex: batch,
+            slotStart: slotStart,
+            slotCount: batchSize,
+            totalSlots: totalImages,
+          ),
+        );
+      }
+      if (_shouldAbortGenerationRun(generationRunId)) {
+        await _emitCancelledBatchEvents(
+          callback: onBatchEvent,
+          completedBatches: completedBatches,
+          generationRunId: generationRunId,
+          firstBatch: batch,
+          batchCount: batchCount,
+          batchSize: batchSize,
+          totalSlots: totalImages,
+        );
+        return;
+      }
+
       // 每批使用不同的随机种子
       final batchParams = currentParams.copyWith(
         nSamples: batchSize,
         seed: random.nextInt(_randomSeedExclusiveUpperBound),
       );
+      final batchStopwatch = Stopwatch()..start();
 
       try {
         // 使用流式 API 生成，支持预览
         final imageBytes = await _generateBatchWithStream(
           batchParams,
-          generatedImages + 1,
+          slotStart,
           totalImages,
           generationRunId,
         );
-        if (_shouldAbortGenerationRun(generationRunId)) return;
-        if (imageBytes.isNotEmpty) {
+        if (_shouldAbortGenerationRun(generationRunId)) {
+          batchStopwatch.stop();
+          await _emitCancelledBatchEvents(
+            callback: onBatchEvent,
+            completedBatches: completedBatches,
+            generationRunId: generationRunId,
+            firstBatch: batch,
+            batchCount: batchCount,
+            batchSize: batchSize,
+            totalSlots: totalImages,
+          );
+          return;
+        }
+        final generatedList = imageBytes
+            .map(
+              (b) => GeneratedImage.create(
+                b,
+                width: batchParams.width,
+                height: batchParams.height,
+              ),
+            )
+            .toList();
+        if (generatedList.isNotEmpty) {
           // 将字节数据包装成带唯一ID的 GeneratedImage
-          final generatedList = imageBytes
-              .map(
-                (b) => GeneratedImage.create(
-                  b,
-                  width: batchParams.width,
-                  height: batchParams.height,
-                ),
-              )
-              .toList();
           allImages.addAll(generatedList);
-          generatedImages += imageBytes.length;
           // 立即更新显示和历史
           state = state.copyWith(
             currentImages: List.from(allImages),
@@ -829,11 +1026,33 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
             clearStreamPreview: true,
           );
           _retainSharePreparationCacheForCurrentHistory();
-        } else {
-          generatedImages += batchSize; // 即使失败也要跳过，避免死循环
         }
+        generatedImages += batchSize;
+        batchStopwatch.stop();
+        await _emitBatchComplete(
+          callback: onBatchEvent,
+          completedBatches: completedBatches,
+          generationRunId: generationRunId,
+          batchIndex: batch,
+          slotStart: slotStart,
+          slotCount: batchSize,
+          totalSlots: totalImages,
+          images: generatedList,
+          error: generatedList.isEmpty ? 'no image produced' : null,
+          elapsedMs: batchStopwatch.elapsedMilliseconds,
+        );
       } catch (e) {
         if (_isCancelledError(e, generationRunId)) {
+          batchStopwatch.stop();
+          await _emitCancelledBatchEvents(
+            callback: onBatchEvent,
+            completedBatches: completedBatches,
+            generationRunId: generationRunId,
+            firstBatch: batch,
+            batchCount: batchCount,
+            batchSize: batchSize,
+            totalSlots: totalImages,
+          );
           if (_isCurrentGenerationRun(generationRunId)) {
             _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
             state = state.copyWith(
@@ -856,7 +1075,18 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
               'Generation',
             );
             await Future.delayed(_concurrencyRetryInterval);
-            if (_shouldAbortGenerationRun(generationRunId)) return;
+            if (_shouldAbortGenerationRun(generationRunId)) {
+              await _emitCancelledBatchEvents(
+                callback: onBatchEvent,
+                completedBatches: completedBatches,
+                generationRunId: generationRunId,
+                firstBatch: batch,
+                batchCount: batchCount,
+                batchSize: batchSize,
+                totalSlots: totalImages,
+              );
+              return;
+            }
             batch--;
             continue;
           }
@@ -866,6 +1096,18 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         lastBatchError = e;
         AppLogger.e('生成第 ${batch + 1} 批失败: $e');
         generatedImages += batchSize;
+        batchStopwatch.stop();
+        await _emitBatchComplete(
+          callback: onBatchEvent,
+          completedBatches: completedBatches,
+          generationRunId: generationRunId,
+          batchIndex: batch,
+          slotStart: slotStart,
+          slotCount: batchSize,
+          totalSlots: totalImages,
+          error: e,
+          elapsedMs: batchStopwatch.elapsedMilliseconds,
+        );
       }
 
       // P2.5 逐张重抽：本批已结束（成功或失败），重 roll 随机块实例并把

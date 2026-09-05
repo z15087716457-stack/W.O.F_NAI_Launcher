@@ -333,19 +333,27 @@ void main() {
       expect(restored.countMin, 0);
     });
 
-    test('instance json round trip with settings and currentRoll', () {
+    test('instance defaults to unlocked', () {
+      const instance = PillInstance(blockId: 'b1');
+      expect(instance.locked, isFalse);
+      expect(instance.toJson()['locked'], isFalse);
+    });
+
+    test('instance json round trip with locked settings and currentRoll', () {
       const instance = PillInstance(
         blockId: 'b1',
         enabled: false,
+        locked: true,
         settings: PillInstanceSettings(mode: PillRollMode.random, countMax: 3),
         currentRoll: 'rolled text',
       );
       final restored = PillInstance.fromJson(instance.toJson());
       expect(restored, instance);
+      expect(restored.locked, isTrue);
     });
 
     test(
-      'legacy instance json without settings/currentRoll loads as fixed',
+      'legacy instance json without settings/currentRoll/locked loads as fixed',
       () {
         final restored = PillInstance.fromJson(const {
           'blockId': 'b1',
@@ -353,6 +361,7 @@ void main() {
         });
         expect(restored.settings, PillInstanceSettings.fixedDefault);
         expect(restored.currentRoll, isNull);
+        expect(restored.locked, isFalse);
       },
     );
   });

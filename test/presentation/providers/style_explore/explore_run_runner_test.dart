@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/storage/pill_workspace_storage.dart';
 import 'package:nai_launcher/core/storage/style_explore_run_storage.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
@@ -19,6 +20,7 @@ import 'package:nai_launcher/presentation/providers/generation/generation_params
 import 'package:nai_launcher/presentation/providers/pill_roll_coordinator.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
+import 'package:nai_launcher/presentation/providers/style_explore/deep_round_roll_guard.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 
@@ -236,6 +238,30 @@ void main() {
       expect(failed.generation.error, isNotEmpty);
     });
 
+    test(
+      'unexpected generation exception pauses with pending and cleans ownership',
+      () async {
+        final run = await seedRun(targetCount: 2);
+        final c = container(
+          generateFn: (params) async => throw StateError('network exploded'),
+        );
+        c.read(exploreRunRunnerProvider);
+        await Future<void>.delayed(Duration.zero);
+
+        final started = await c
+            .read(exploreRunRunnerProvider.notifier)
+            .start(run.id);
+        expect(started, isTrue);
+        final after = await reload(c, run.id);
+        expect(after.status, ExploreRunStatus.paused);
+        expect(after.pendingCandidates, hasLength(2));
+        expect(after.rounds.single.status, ExploreRoundStatus.pending);
+        expect(c.read(exploreRunRunnerProvider).isRunning, isFalse);
+        expect(PillRollCoordinator.isRollSuppressed, isFalse);
+        expect(c.read(deepRoundRollGuardControllerProvider).guard, isNull);
+      },
+    );
+
     test('pause exits after current image; resume finishes the rest', () async {
       final run = await seedRun(targetCount: 3);
       var call = 0;
@@ -268,8 +294,8 @@ void main() {
       expect(after.pendingCandidates, hasLength(1));
       expect(
         after.rounds.single.status,
-        ExploreRoundStatus.generating,
-        reason: '暂停时轮次保持 generating 待续跑',
+        ExploreRoundStatus.pending,
+        reason: '暂停时有 pending 候选，轮次应回到 pending',
       );
 
       // 续跑：从 pending 继续，不新建轮次。
@@ -279,6 +305,26 @@ void main() {
       expect(after.status, ExploreRunStatus.generated);
       expect(after.generatedCount, 3);
       expect(after.rounds, hasLength(1));
+    });
+
+    test('pause after the final candidate still lands on generated', () async {
+      final run = await seedRun(targetCount: 1);
+      late ExploreRunRunner runner;
+      final c = container(
+        generateFn: (params) async {
+          runner.pause();
+          return okResult(1);
+        },
+      );
+      c.read(exploreRunRunnerProvider);
+      await Future<void>.delayed(Duration.zero);
+      runner = c.read(exploreRunRunnerProvider.notifier);
+
+      expect(await runner.start(run.id), isTrue);
+      final after = await reload(c, run.id);
+      expect(after.status, ExploreRunStatus.generated);
+      expect(after.pendingCandidates, isEmpty);
+      expect(after.rounds.single.status, ExploreRoundStatus.generated);
     });
 
     test('cancel interrupts in-flight and marks remaining cancelled', () async {
@@ -372,6 +418,8 @@ void main() {
 
       final runner = c.read(exploreRunRunnerProvider.notifier);
       final first = runner.start(run.id);
+      final concurrent = runner.start(run.id);
+      expect(await concurrent, isFalse);
       await inFlight.future;
 
       expect(await runner.start(run.id), isFalse);
@@ -504,6 +552,83 @@ void main() {
         expect(after.status, ExploreRunStatus.paused);
       },
     );
+
+    test(
+      'immediate start yields to recovery without leaving generating',
+      () async {
+        final run = await seedRun(targetCount: 1);
+        await runStorage.putRun(
+          run.copyWith(status: ExploreRunStatus.generating),
+        );
+        final c = container(generateFn: (params) async => okResult(1));
+        final runner = c.read(exploreRunRunnerProvider.notifier);
+
+        expect(await runner.start(run.id), isFalse);
+        var after = await reload(c, run.id);
+        for (
+          var i = 0;
+          i < 50 && after.status == ExploreRunStatus.generating;
+          i++
+        ) {
+          await Future<void>.delayed(Duration.zero);
+          after = await reload(c, run.id);
+        }
+        expect(after.status, ExploreRunStatus.paused);
+        expect(c.read(exploreRunRunnerProvider).isRunning, isFalse);
+      },
+    );
+
+    test(
+      'recovery normalizes generating round to pending when candidates remain',
+      () async {
+        final run = await seedRun(targetCount: 2);
+        final round = ExploreRound(
+          id: 'recovery-round',
+          number: 1,
+          phase: ExploreRoundPhase.deep,
+          status: ExploreRoundStatus.generating,
+          createdAt: DateTime.utc(2026, 9, 1),
+          targetCount: 2,
+          candidateIds: ['recovery-done', 'recovery-pending'],
+        );
+        final done = ExploreCandidate(
+          id: 'recovery-done',
+          roundId: round.id,
+          generation: const ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.done,
+          ),
+          lineage: const ExploreLineage(
+            operation: ExploreLineageOperation.mutation,
+            mutatedText: 'done',
+          ),
+        );
+        final pending = ExploreCandidate.shell(
+          id: 'recovery-pending',
+          roundId: round.id,
+        );
+        await runStorage.putRun(
+          run.copyWith(
+            status: ExploreRunStatus.generating,
+            rounds: [round],
+            candidates: [done, pending],
+          ),
+        );
+        final c = container(generateFn: (params) async => okResult(1));
+        c.read(exploreRunRunnerProvider);
+        var after = await reload(c, run.id);
+        for (
+          var i = 0;
+          i < 50 && after.status == ExploreRunStatus.generating;
+          i++
+        ) {
+          await Future<void>.delayed(Duration.zero);
+          after = await reload(c, run.id);
+        }
+        expect(after.status, ExploreRunStatus.paused);
+        expect(after.rounds.single.status, ExploreRoundStatus.pending);
+        expect(c.read(deepRoundRollGuardControllerProvider).guard, isNull);
+      },
+    );
   });
 
   group('deep round（阶段 D）', () {
@@ -633,6 +758,274 @@ void main() {
         expect(snapshot.positive, 'base, ${lineage.mutatedText}');
         expect(sentPrompts[i], snapshot.positive);
       }
+    });
+
+    test('guard 在首次工作区物化前安装并保留缺失 currentRoll', () async {
+      final run = await seedRunWithFamily();
+      const document = PillDocument(
+        text: 'base, \uE000',
+        instances: {
+          '\uE000': PillInstance(
+            blockId: 'b-1',
+            evolutionEnabled: true,
+            settings: PillInstanceSettings(mode: PillRollMode.random),
+          ),
+        },
+      );
+      await PillWorkspaceStorage().persist(PillScopes.main, document);
+      await PillWorkspaceStorage().persist(
+        PillScopes.negative,
+        const PillDocument(
+          text: 'negative, \uE000',
+          instances: {
+            '\uE000': PillInstance(
+              blockId: 'b-1',
+              evolutionEnabled: true,
+              settings: PillInstanceSettings(mode: PillRollMode.random),
+            ),
+          },
+        ),
+      );
+      final sentPrompts = <String>[];
+      final c = container(
+        blocks: [poolBlock()],
+        generateFn: (params) async {
+          sentPrompts.add(params.prompt);
+          return okResult(sentPrompts.length);
+        },
+      );
+      c.read(exploreRunRunnerProvider);
+      await Future<void>.delayed(Duration.zero);
+      await c.read(promptBlockLibraryNotifierProvider.future);
+
+      await c
+          .read(exploreRunRunnerProvider.notifier)
+          .startDeepRound(
+            run.id,
+            familyId: 'fam-1',
+            parentSetId: 'ps-1',
+            count: 1,
+          );
+
+      expect(sentPrompts, hasLength(1));
+      expect(sentPrompts.single, isNot(contains('negative')));
+      final main = c.read(pillWorkspaceProvider(PillScopes.main));
+      final negative = c.read(pillWorkspaceProvider(PillScopes.negative));
+      expect(main.document.instances['\uE000']!.currentRoll, isNull);
+      expect(negative.document.instances['\uE000']!.currentRoll, isNull);
+      expect(PillWorkspaceStorage().tryLoadSync(PillScopes.main), document);
+      expect(
+        PillWorkspaceStorage().tryLoadSync(PillScopes.negative),
+        const PillDocument(
+          text: 'negative, \uE000',
+          instances: {
+            '\uE000': PillInstance(
+              blockId: 'b-1',
+              evolutionEnabled: true,
+              settings: PillInstanceSettings(mode: PillRollMode.random),
+            ),
+          },
+        ),
+      );
+    });
+
+    test('深度 guard 隔离两 lane、目标独占并保留用户后锁定值', () async {
+      final run = await seedRunWithFamily();
+      const target = '\uE000';
+      const other = '\uE001';
+      final b2 = PromptBlock(
+        id: 'b-2',
+        title: '其他池',
+        content: 'other-a, other-b',
+        createdAt: DateTime.utc(2026, 9, 1),
+        updatedAt: DateTime.utc(2026, 9, 1),
+      );
+      final sentPrompts = <String>[];
+      var calls = 0;
+      late ProviderContainer c;
+      c = container(
+        blocks: [poolBlock(), b2],
+        generateFn: (params) async {
+          calls++;
+          final controller = c.read(deepRoundRollGuardControllerProvider);
+          expect(controller.guard, isNotNull);
+          expect(
+            controller.guard!.overlay[PillScopes.main]![target],
+            isNotNull,
+          );
+          expect(controller.guard!.overlay[PillScopes.main]![other], isNull);
+          expect(
+            controller.guard!.overlay[PillScopes.negative]![target],
+            isNull,
+          );
+          sentPrompts.add(params.prompt);
+          if (calls == 1) {
+            c
+                .read(pillWorkspaceProvider(PillScopes.main).notifier)
+                .toggleLocked(other);
+          }
+          return okResult(calls);
+        },
+      );
+      c.read(exploreRunRunnerProvider);
+      await Future<void>.delayed(Duration.zero);
+      await c.read(promptBlockLibraryNotifierProvider.future);
+
+      c
+          .read(pillWorkspaceProvider(PillScopes.main).notifier)
+          .restoreDocument(
+            const PillDocument(
+              text: 'base, \uE000, \uE001',
+              instances: {
+                target: PillInstance(
+                  blockId: 'b-1',
+                  currentRoll: 'main-before',
+                  evolutionEnabled: true,
+                  settings: PillInstanceSettings(mode: PillRollMode.random),
+                ),
+                other: PillInstance(
+                  blockId: 'b-2',
+                  currentRoll: 'other-before',
+                  evolutionEnabled: true,
+                  settings: PillInstanceSettings(mode: PillRollMode.random),
+                ),
+              },
+            ),
+          );
+      c
+          .read(pillWorkspaceProvider(PillScopes.negative).notifier)
+          .restoreDocument(
+            const PillDocument(
+              text: 'neg, \uE000',
+              instances: {
+                target: PillInstance(
+                  blockId: 'b-1',
+                  currentRoll: 'negative-before',
+                  evolutionEnabled: true,
+                  settings: PillInstanceSettings(mode: PillRollMode.random),
+                ),
+              },
+            ),
+          );
+
+      await c
+          .read(exploreRunRunnerProvider.notifier)
+          .startDeepRound(
+            run.id,
+            familyId: 'fam-1',
+            parentSetId: 'ps-1',
+            count: 2,
+          );
+
+      final after = await reload(c, run.id);
+      expect(after.status, ExploreRunStatus.generated);
+      expect(after.candidates, hasLength(2));
+      final firstRolls = after.candidates.first.rollSnapshot!.instanceRolls;
+      expect(
+        firstRolls
+            .where((roll) => roll.lane == 'pos' && roll.marker == other)
+            .single
+            .rolledText,
+        '',
+      );
+      expect(
+        firstRolls
+            .where((roll) => roll.lane == 'neg' && roll.marker == target)
+            .single
+            .rolledText,
+        '',
+      );
+      final secondRolls = after.candidates.last.rollSnapshot!.instanceRolls;
+      expect(
+        secondRolls
+            .where((roll) => roll.lane == 'pos' && roll.marker == other)
+            .single
+            .rolledText,
+        'other-before',
+      );
+      expect(sentPrompts[0], isNot(contains('other-before')));
+      expect(sentPrompts[0], isNot(contains('negative-before')));
+      expect(sentPrompts[1], contains('other-before'));
+      expect(sentPrompts[1], isNot(contains('negative-before')));
+
+      final main = c.read(pillWorkspaceProvider(PillScopes.main));
+      final negative = c.read(pillWorkspaceProvider(PillScopes.negative));
+      expect(main.document.instances[target]!.currentRoll, 'main-before');
+      expect(main.document.instances[other]!.currentRoll, 'other-before');
+      expect(main.document.instances[other]!.locked, isTrue);
+      expect(
+        negative.document.instances[target]!.currentRoll,
+        'negative-before',
+      );
+      expect(c.read(deepRoundRollGuardControllerProvider).guard, isNull);
+    });
+
+    test('暂停深度轮后 round pending，续跑重建 guard 并沿用 lineage', () async {
+      final run = await seedRunWithFamily();
+      const marker = '\uE000';
+      final firstInFlight = Completer<void>();
+      final release = Completer<void>();
+      var calls = 0;
+      late ProviderContainer c;
+      c = container(
+        blocks: [poolBlock()],
+        generateFn: (params) async {
+          calls++;
+          if (calls == 1) {
+            firstInFlight.complete();
+            await release.future;
+          }
+          return okResult(calls);
+        },
+      );
+      c.read(exploreRunRunnerProvider);
+      await Future<void>.delayed(Duration.zero);
+      await c.read(promptBlockLibraryNotifierProvider.future);
+      c
+          .read(pillWorkspaceProvider(PillScopes.main).notifier)
+          .restoreDocument(
+            const PillDocument(
+              text: 'base, \uE000',
+              instances: {
+                marker: PillInstance(
+                  blockId: 'b-1',
+                  currentRoll: 'before',
+                  evolutionEnabled: true,
+                  settings: PillInstanceSettings(mode: PillRollMode.random),
+                ),
+              },
+            ),
+          );
+
+      final runner = c.read(exploreRunRunnerProvider.notifier);
+      final firstPass = runner.startDeepRound(
+        run.id,
+        familyId: 'fam-1',
+        parentSetId: 'ps-1',
+        count: 2,
+      );
+      await firstInFlight.future;
+      runner.pause();
+      release.complete();
+      expect(await firstPass, isTrue);
+
+      var after = await reload(c, run.id);
+      expect(after.status, ExploreRunStatus.paused);
+      expect(after.pendingCandidates, hasLength(1));
+      expect(after.rounds.single.status, ExploreRoundStatus.pending);
+      expect(c.read(deepRoundRollGuardControllerProvider).guard, isNull);
+
+      expect(await runner.start(run.id), isTrue);
+      after = await reload(c, run.id);
+      expect(after.status, ExploreRunStatus.generated);
+      expect(after.pendingCandidates, isEmpty);
+      for (final candidate in after.candidates) {
+        expect(
+          candidate.rollSnapshot!.instanceRolls.single.rolledText,
+          candidate.lineage.mutatedText,
+        );
+      }
+      expect(c.read(deepRoundRollGuardControllerProvider).guard, isNull);
     });
 
     test('main lane 无随机实例时拒绝深度轮（noRandomInstance）', () async {

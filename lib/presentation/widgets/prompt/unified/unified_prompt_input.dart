@@ -6,9 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
-import '../../../../core/utils/nai_prompt_formatter.dart';
+import '../../../../core/utils/prompt_input_normalization.dart';
 import '../../../../core/utils/prompt_regex_replacer.dart';
-import '../../../../core/utils/sd_to_nai_converter.dart';
 import '../../../../data/models/character/character_prompt.dart';
 import '../../../../data/services/alias_resolver_service.dart';
 import '../../../../presentation/utils/text_selection_utils.dart';
@@ -484,26 +483,17 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       }
     }
 
-    // SD 语法自动转换（优先于格式化，因为格式化可能会影响转换结果）
-    if (widget.config.enableSdSyntaxAutoConvert) {
-      final converted = SdToNaiConverter.convert(text);
-      if (converted != text) {
-        text = converted;
-        changed = true;
-        messages.add('SD→NAI');
-      }
-    }
-
-    // 自动格式化
-    if (widget.config.enableAutoFormat) {
-      final formatted = NaiPromptFormatter.format(text);
-      if (formatted != text) {
-        text = formatted;
-        changed = true;
-        if (!messages.contains('SD→NAI')) {
-          messages.add(context.l10n.prompt_formatted);
-        }
-      }
+    final result = PromptInputNormalization.normalize(
+      text,
+      autoFormat: widget.config.enableAutoFormat,
+      sdAutoConvert: widget.config.enableSdSyntaxAutoConvert,
+    );
+    text = result.text;
+    changed = changed || result.changed;
+    if (result.sdConverted) {
+      messages.add('SD→NAI');
+    } else if (result.formatted) {
+      messages.add(context.l10n.prompt_formatted);
     }
 
     if (changed) {

@@ -13,7 +13,7 @@ import 'pill_instance_settings_dialog.dart';
 ///
 /// 内容 = 实例当前提示词（随机模式显示物化的 currentRoll——即「L1 显示
 /// = 生成发送 = token 计数」三者同一份；固定模式显示块库实时内容）+
-/// 操作行：🎲 重 roll / ⚙ 进 L2 / 启停 / DNA 遗传 / 删除。
+/// 操作行：🎲 重抽 / ⚙ 进 L2 / 启停 / DNA 遗传 / 锁定 / 删除。
 ///
 /// 宿主编辑器用 [buildPillInstanceOverlayEntry] 生成 OverlayEntry 并自行
 /// 持有/关闭；实例消失（文本里标记被删）时卡片自动请求关闭。
@@ -38,6 +38,7 @@ class PillInstanceCard extends ConsumerWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final workspace = ref.watch(pillWorkspaceProvider(scope));
+    final workspaceNotifier = ref.read(pillWorkspaceProvider(scope).notifier);
     final library = ref.watch(promptBlockLibraryNotifierProvider).valueOrNull;
     final instance = workspace.document.instances[marker];
 
@@ -50,9 +51,8 @@ class PillInstanceCard extends ConsumerWidget {
     final block = library?.blockById(instance.blockId);
     final color = promptBlockColorFromString(block?.color ?? '#FF607D8B');
     final isRandom = instance.settings.isRandom;
-    final content = isRandom
-        ? (instance.currentRoll ?? '')
-        : (block?.content ?? '');
+    final effectiveRoll = workspaceNotifier.effectiveRollFor(marker);
+    final content = isRandom ? (effectiveRoll ?? '') : (block?.content ?? '');
 
     return Material(
       color: theme.colorScheme.surfaceContainerHigh,
@@ -80,13 +80,13 @@ class PillInstanceCard extends ConsumerWidget {
             ),
             const SizedBox(height: 6),
             ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 66),
-              child: Text(
-                content.trim().isEmpty ? l10n.pillCardEmptyRoll : content,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+              constraints: const BoxConstraints(maxHeight: 240),
+              child: SingleChildScrollView(
+                child: Text(
+                  content.trim().isEmpty ? l10n.pillCardEmptyRoll : content,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
@@ -94,20 +94,41 @@ class PillInstanceCard extends ConsumerWidget {
             Row(
               children: [
                 IconButton(
+                  constraints: const BoxConstraints.tightFor(
+                    width: 40,
+                    height: 40,
+                  ),
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                  key: const Key('pill-reroll'),
                   icon: const Icon(Icons.casino_outlined, size: 18),
-                  tooltip: l10n.pillCardReroll,
-                  onPressed: isRandom
+                  tooltip: instance.locked
+                      ? l10n.pillCardRerollLocked
+                      : l10n.pillCardReroll,
+                  onPressed: isRandom && !instance.locked
                       ? () => ref
                             .read(pillWorkspaceProvider(scope).notifier)
                             .rollMarker(marker)
                       : null,
                 ),
                 IconButton(
+                  constraints: const BoxConstraints.tightFor(
+                    width: 40,
+                    height: 40,
+                  ),
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
                   icon: const Icon(Icons.tune, size: 18),
                   tooltip: l10n.pillCardSettings,
                   onPressed: () => _openSettings(context, ref, instance),
                 ),
                 IconButton(
+                  constraints: const BoxConstraints.tightFor(
+                    width: 40,
+                    height: 40,
+                  ),
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
                   icon: Icon(
                     instance.enabled
                         ? Icons.visibility_outlined
@@ -135,6 +156,12 @@ class PillInstanceCard extends ConsumerWidget {
                         ? l10n.pillCardEvolutionDisable
                         : l10n.pillCardEvolutionEnable;
                     return IconButton(
+                      constraints: const BoxConstraints.tightFor(
+                        width: 40,
+                        height: 40,
+                      ),
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
                       key: const Key('pill-evolution-toggle'),
                       icon: DnaIcon(
                         size: 18,
@@ -155,6 +182,33 @@ class PillInstanceCard extends ConsumerWidget {
                 ),
                 const Spacer(),
                 IconButton(
+                  constraints: const BoxConstraints.tightFor(
+                    width: 40,
+                    height: 40,
+                  ),
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                  key: const Key('pill-lock-toggle'),
+                  icon: Icon(
+                    instance.locked
+                        ? Icons.lock_outline
+                        : Icons.lock_open_outlined,
+                    size: 18,
+                  ),
+                  tooltip: instance.locked
+                      ? l10n.pillCardUnlock
+                      : l10n.pillCardLock,
+                  onPressed: isRandom && effectiveRoll != null
+                      ? () => workspaceNotifier.toggleLocked(marker)
+                      : null,
+                ),
+                IconButton(
+                  constraints: const BoxConstraints.tightFor(
+                    width: 40,
+                    height: 40,
+                  ),
+                  padding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
                   icon: Icon(
                     Icons.delete_outline,
                     size: 18,
@@ -211,7 +265,7 @@ OverlayEntry buildPillInstanceOverlayEntry({
     builder: (overlayContext) {
       final screen = MediaQuery.of(overlayContext).size;
       const cardWidth = 300.0;
-      const estimatedHeight = 190.0;
+      const estimatedHeight = 360.0;
       final left = (globalPosition.dx - cardWidth / 2)
           .clamp(8.0, (screen.width - cardWidth - 8).clamp(8.0, screen.width))
           .toDouble();

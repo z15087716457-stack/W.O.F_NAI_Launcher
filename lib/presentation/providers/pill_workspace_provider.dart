@@ -9,6 +9,7 @@ import '../../core/utils/pill_document_editor.dart';
 import '../../core/utils/pill_roll_engine.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import 'prompt_block_library_provider.dart';
+import 'style_explore/deep_round_roll_guard.dart';
 
 /// 药丸工作区状态：文档 + 最近一次投影结果。
 ///
@@ -94,9 +95,13 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   @override
   PillWorkspaceState build(String scope) {
     activeScopes.add(scope);
+    final removeGuardListener = ref
+        .read(deepRoundRollGuardControllerProvider)
+        .addListener(refreshProjection);
+    ref.onDispose(removeGuardListener);
     final storage = ref.read(pillWorkspaceStorageProvider);
     final restored = storage.tryLoadSync(scope);
-    // 挂载即兜底物化：存档里的随机实例若缺 currentRoll 先 roll 再投影
+    // 挂载即兜底物化：未锁定存档里的随机实例若缺 currentRoll 先 roll 再投影
     final document = _materializeRolls(restored ?? PillDocument.empty());
     return PillWorkspaceState(
       document: document,
@@ -189,8 +194,24 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     _apply(state.document.copyWith(instances: instances));
   }
 
-  /// 更新实例随机参数（L2 弹窗确定，roll 时机 2）：
-  /// 写设置；切到/更新随机模式时立即重 roll 一次。
+  /// 切换用户锁定：只允许锁定已有物化结果的随机实例。
+  ///
+  /// 锁定只冻结 `currentRoll`，不改变启用态和触发概率；固定实例以及尚未
+  /// 物化的随机实例没有可锁定内容。
+  void toggleLocked(String marker) {
+    final instance = state.document.instances[marker];
+    if (instance == null ||
+        !instance.settings.isRandom ||
+        instance.currentRoll == null) {
+      return;
+    }
+    final instances = Map<String, PillInstance>.of(state.document.instances)
+      ..[marker] = instance.copyWith(locked: !instance.locked);
+    _apply(state.document.copyWith(instances: instances));
+  }
+
+  /// 更新实例随机参数（L2 弹窗确定，roll 时机 2）：写入设置；未锁定的
+  /// 实例切到/更新随机模式时立即重 roll 一次，锁定实例只更新设置。
   void updateInstanceSettings(String marker, PillInstanceSettings settings) {
     final instance = state.document.instances[marker];
     if (instance == null) {
@@ -201,7 +222,9 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
       return;
     }
     var updated = instance.copyWith(settings: settings);
-    if (settings.isRandom) {
+    if (settings.isRandom &&
+        !instance.locked &&
+        !_hasGuardOverride(marker, instance)) {
       updated = updated.copyWith(currentRoll: _rollFor(updated));
     }
     final instances = Map<String, PillInstance>.of(state.document.instances)
@@ -211,9 +234,9 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
 
   /// 深度迭代：把实例的物化 roll 覆盖为外部给定文本（变异子代串）。
   ///
-  /// 与随机 roll 同语义：写 `currentRoll` → `_apply` → 投影自然采用，
-  /// 不新增 roll 时机。仅对随机模式实例有意义（固定模式投影不读
-  /// `currentRoll`）；marker 不存在时告警并忽略。
+  /// 这是显式深度 override 入口：写 `currentRoll` → `_apply` → 投影自然
+  /// 采用，不新增普通 roll 时机，也不受用户锁定过滤。仅对随机模式实例
+  /// 有意义（固定模式投影不读 `currentRoll`）；marker 不存在时告警并忽略。
   void setInstanceRollOverride(String marker, String text) {
     final instance = state.document.instances[marker];
     if (instance == null) {
@@ -228,23 +251,32 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     _apply(state.document.copyWith(instances: instances));
   }
 
-  /// 手动重 roll（L1 骰子，roll 时机 3）；固定模式无操作。
+  /// 手动重 roll（L1 骰子，roll 时机 3）；固定或锁定模式无操作。
   void rollMarker(String marker) {
     final instance = state.document.instances[marker];
-    if (instance == null || !instance.settings.isRandom) return;
+    if (instance == null ||
+        !instance.settings.isRandom ||
+        instance.locked ||
+        _hasGuardOverride(marker, instance)) {
+      return;
+    }
     final instances = Map<String, PillInstance>.of(state.document.instances)
       ..[marker] = instance.copyWith(currentRoll: _rollFor(instance));
     _apply(state.document.copyWith(instances: instances));
   }
 
-  /// 本 lane 全部随机实例重 roll（roll 时机 4：每次生成入队后）。
+  /// 本 lane 全部未锁定的随机实例重 roll（roll 时机 4：每次生成入队后）。
   /// 返回是否有实例的 currentRoll 发生了变化（协调器据此推送投影）。
   bool rollAllRandom() {
     var changed = false;
     final instances = Map<String, PillInstance>.of(state.document.instances);
     for (final entry in instances.entries) {
       final instance = entry.value;
-      if (!instance.settings.isRandom) continue;
+      if (!instance.settings.isRandom ||
+          instance.locked ||
+          _hasGuardOverride(entry.key, instance)) {
+        continue;
+      }
       final rolled = _rollFor(instance);
       if (rolled != instance.currentRoll) {
         instances[entry.key] = instance.copyWith(currentRoll: rolled);
@@ -281,8 +313,8 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
 
   /// 用完整文档快照整体恢复（Recipe 载入等外部场景）。
   ///
-  /// 与 [build] 恢复同一路径：`_apply` 内部兜底物化缺失的 currentRoll
-  /// （不新增 roll 时机）、记录墓碑并重算投影、分键持久化。
+  /// 与 [build] 恢复同一路径：`_apply` 内部为未锁定实例兜底物化缺失的
+  /// currentRoll（不新增 roll 时机）、记录墓碑并重算投影、分键持久化。
   void restoreDocument(PillDocument document) {
     _apply(document);
   }
@@ -295,8 +327,26 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     }
   }
 
+  /// 当前 marker 的有效随机 roll。Guard 覆盖只存在于投影层，文档里的
+  /// `currentRoll` 保持为进入深度轮前的真实值。
+  String? effectiveRollFor(String marker) {
+    final instance = state.document.instances[marker];
+    if (instance == null || !instance.settings.isRandom) return null;
+    return _effectiveRollFor(marker, instance);
+  }
+
+  String? _effectiveRollFor(String marker, PillInstance instance) {
+    return ref
+        .read(deepRoundRollGuardControllerProvider)
+        .effectiveRoll(arg, marker, instance);
+  }
+
   String _project(PillDocument document) {
-    return PillDocumentEditor.project(document, _resolveInstance);
+    return PillDocumentEditor.project(
+      document,
+      _resolveInstance,
+      resolveMarker: _resolveMarkerInstance,
+    );
   }
 
   /// 实例内容解析（P2.5）：固定模式 = 块库实时内容；随机模式 =
@@ -304,6 +354,17 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   String? _resolveInstance(PillInstance instance) {
     if (instance.settings.isRandom) return instance.currentRoll;
     return _resolveBlockContent(instance.blockId);
+  }
+
+  String? _resolveMarkerInstance(String marker, PillInstance instance) {
+    if (instance.settings.isRandom) return _effectiveRollFor(marker, instance);
+    return _resolveBlockContent(instance.blockId);
+  }
+
+  bool _hasGuardOverride(String marker, PillInstance instance) {
+    return ref
+        .read(deepRoundRollGuardControllerProvider)
+        .hasOverride(arg, marker, instance: instance);
   }
 
   String? _resolveBlockContent(String blockId) {
@@ -314,14 +375,18 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         ?.content;
   }
 
-  /// 随机实例的兜底物化：`currentRoll == null` 时立即 roll 一次。
+  /// 未锁定随机实例的兜底物化：`currentRoll == null` 时立即 roll 一次。
+  /// 锁定实例保留缺失值，避免普通更新路径绕过用户锁定。
   /// 保证「L1 显示 = 生成发送 = token 计数」三者永远同一份。
   PillDocument _materializeRolls(PillDocument document) {
     var changed = false;
     final instances = Map<String, PillInstance>.of(document.instances);
     for (final entry in instances.entries) {
       final instance = entry.value;
-      if (instance.settings.isRandom && instance.currentRoll == null) {
+      if (instance.settings.isRandom &&
+          !instance.locked &&
+          instance.currentRoll == null &&
+          !_hasGuardOverride(entry.key, instance)) {
         instances[entry.key] = instance.copyWith(
           currentRoll: _rollFor(instance),
         );

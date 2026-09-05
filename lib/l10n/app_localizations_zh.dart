@@ -316,6 +316,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get auth_loginTip => '使用你的 NovelAI 账户登录\n所有数据仅存储在本地设备';
 
   @override
+  String get auth_guestEntry => '跳过登录，以游客身份进入';
+
+  @override
   String get auth_loggedIn => '已登录';
 
   @override
@@ -1035,7 +1038,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prompt_autoFormat => '自动格式化';
 
   @override
-  String get prompt_autoFormatSubtitle => '中文逗号转英文、空格自动转下划线';
+  String get prompt_autoFormatSubtitle => '规范逗号与空白，保留词间空格并保护权重闭合';
 
   @override
   String get prompt_highlightEmphasis => '高亮强调';
@@ -1047,7 +1050,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prompt_sdSyntaxAutoConvert => 'SD语法自动转换';
 
   @override
-  String get prompt_sdSyntaxAutoConvertSubtitle => '失焦时将SD权重语法转换为NAI格式';
+  String get prompt_sdSyntaxAutoConvertSubtitle => '失焦或生成时将 SD 权重语法转换为 NAI 格式';
 
   @override
   String get prompt_resolveAliasOnCopy => '复制时展开词库';
@@ -3744,6 +3747,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localGallery_columnWidth => '列宽';
+
+  @override
+  String get localGallery_thumbnailQualitySd => '标清';
+
+  @override
+  String get localGallery_thumbnailQualityHd => '高清';
+
+  @override
+  String get localGallery_thumbnailQualityTooltip => '选择本地画廊缩略图质量';
 
   @override
   String get localGallery_naiOnly => 'NAI';
@@ -9531,9 +9543,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autocomplete_autoComma => '插入后自动添加逗号';
 
   @override
-  String get autocomplete_replaceUnderscores => '插入时将下划线替换为空格';
-
-  @override
   String get autocomplete_dataSourcesTitle => '数据源与缓存';
 
   @override
@@ -9732,6 +9741,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pillCardReroll => '重抽';
+
+  @override
+  String get pillCardRerollLocked => '已锁定，无法重抽';
+
+  @override
+  String get pillCardLock => '锁定当前内容';
+
+  @override
+  String get pillCardUnlock => '解除锁定';
 
   @override
   String get pillCardSettings => '随机设置';
@@ -10059,6 +10077,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_gridView => '网格视图';
 
   @override
+  String get promptBlockLibrary_sortBy => '排序方式';
+
+  @override
+  String get promptBlockLibrary_sortCustom => '默认（手动顺序）';
+
+  @override
+  String get promptBlockLibrary_sortUpdated => '修改时间';
+
+  @override
+  String get promptBlockLibrary_sortTitle => '名称';
+
+  @override
+  String get promptBlockLibrary_sortColor => '颜色';
+
+  @override
+  String get promptBlockLibrary_sortIcon => '图标';
+
+  @override
+  String get promptBlockLibrary_sortAscending => '升序';
+
+  @override
+  String get promptBlockLibrary_sortDescending => '降序';
+
+  @override
   String get promptBlockLibrary_cardSize => '卡片大小';
 
   @override
@@ -10210,8 +10252,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String styleExplore_runProgress(int done, int total) {
-    return '$done/$total';
+  String styleExplore_runTotalCount(int total) {
+    return '共 $total 张';
   }
 
   @override
@@ -10258,9 +10300,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_startRun => '开始';
-
-  @override
   String get styleExplore_pauseRun => '暂停';
 
   @override
@@ -10273,9 +10312,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_targetCountLabel => '出图数';
-
-  @override
-  String get styleExplore_runAnotherRound => '再来一轮';
 
   @override
   String styleExplore_manualRunName(String time) {

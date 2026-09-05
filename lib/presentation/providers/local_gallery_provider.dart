@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -14,6 +15,7 @@ import '../../data/models/gallery/nai_image_metadata.dart';
 import '../../core/database/datasources/gallery_data_source.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import '../../data/services/gallery/gallery_filter_service.dart';
+import '../../data/services/gallery/gallery_thumbnail_quality_store.dart';
 import '../../data/services/gallery/gallery_sort.dart';
 import '../../data/services/gallery/gallery_stream_scanner.dart';
 import '../../data/services/gallery/scan_state_manager.dart';
@@ -70,6 +72,13 @@ class LocalGalleryError {
   }
 }
 
+typedef ThumbnailPreloadCallback =
+    void Function(
+      String originalPath, {
+      required ThumbnailSize size,
+      required int priority,
+    });
+
 /// 本地画廊状态
 @freezed
 class LocalGalleryState with _$LocalGalleryState {
@@ -97,6 +106,10 @@ class LocalGalleryState with _$LocalGalleryState {
 
     /// 逻辑列宽（px，140~480，默认 260；瀑布流按它算列数）
     @Default(260.0) double columnWidth,
+
+    /// 本地画廊缩略图质量（默认高清）
+    @Default(GalleryThumbnailQuality.hd)
+    GalleryThumbnailQuality thumbnailQuality,
 
     /// 分组视图
     @Default(false) bool isGroupedView,
@@ -196,6 +209,10 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   /// 预取缩略图档位与卡片同算法同 DPR，避免档位失配重复生成）
   double _lastKnownDpr = 1.0;
 
+  GalleryThumbnailQualityStore _thumbnailQualityStore =
+      const GalleryThumbnailQualityStore();
+  ThumbnailPreloadCallback? _thumbnailPreloadOverride;
+
   @override
   LocalGalleryState build() {
     if (_cachedState != null) return _cachedState!;
@@ -231,6 +248,18 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   void updateDevicePixelRatio(double devicePixelRatio) {
     if (devicePixelRatio <= 0) return;
     _lastKnownDpr = devicePixelRatio;
+  }
+
+  @visibleForTesting
+  void setThumbnailQualityStoreForTesting(GalleryThumbnailQualityStore store) {
+    _thumbnailQualityStore = store;
+  }
+
+  @visibleForTesting
+  void setThumbnailPreloadCallbackForTesting(
+    ThumbnailPreloadCallback? callback,
+  ) {
+    _thumbnailPreloadOverride = callback;
   }
 
   /// 获取服务实例
@@ -464,12 +493,10 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           isPageLoading: false,
         ),
       );
-      _preloadAdjacentPageThumbnails(
-        service,
-        normalizedPage,
-        state.pageSize,
-        totalPages,
-      );
+      _preloadPageThumbnails(service, {
+        if (normalizedPage + 1 < totalPages) normalizedPage + 1,
+        if (normalizedPage > 0) normalizedPage - 1,
+      }, state.pageSize);
     } on GalleryNotInitializedException {
       _setState(
         state.copyWith(
@@ -503,39 +530,47 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     }
   }
 
-  void _preloadAdjacentPageThumbnails(
+  void _preloadPageThumbnails(
     LocalGalleryService service,
-    int page,
-    int pageSize,
-    int totalPages,
-  ) {
-    final pagesToPreload = <int>{
-      if (page + 1 < totalPages) page + 1,
-      if (page > 0) page - 1,
-    };
-    if (pagesToPreload.isEmpty) return;
+    Set<int> pages,
+    int pageSize, {
+    GalleryThumbnailQuality? quality,
+  }) {
+    if (pages.isEmpty) return;
+    final resolvedQuality = quality ?? state.thumbnailQuality;
 
     unawaited(
       () async {
         final thumbnailService = ThumbnailService.instance;
         await thumbnailService.initialize();
+        final size = resolveThumbnailTier(
+          state.columnWidth,
+          _lastKnownDpr,
+          resolvedQuality,
+        );
 
-        // 预取档位与卡片同一算法：用页面层上报的真实 DPR，而非固定 1.25
-        final size = pickThumbnailSize(state.columnWidth, _lastKnownDpr);
-
-        for (final targetPage in pagesToPreload) {
+        for (final targetPage in pages) {
           final records = await service.getPage(targetPage, pageSize: pageSize);
           for (final record in records) {
-            thumbnailService.preloadThumbnail(
-              record.path,
-              size: size,
-              priority: ThumbnailPriority.low,
-            );
+            final callback = _thumbnailPreloadOverride;
+            if (callback != null) {
+              callback(
+                record.path,
+                size: size,
+                priority: ThumbnailPriority.low,
+              );
+            } else {
+              thumbnailService.preloadThumbnail(
+                record.path,
+                size: size,
+                priority: ThumbnailPriority.low,
+              );
+            }
           }
         }
       }().catchError((Object error, StackTrace stack) {
         AppLogger.w(
-          'Adjacent thumbnail preload failed: $error',
+          'Thumbnail page preload failed: $error',
           'LocalGalleryNotifier',
         );
       }),
@@ -814,6 +849,30 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   void setColumnWidth(double value) {
     if (state.columnWidth == value) return;
     _setState(state.copyWith(columnWidth: value));
+  }
+
+  /// 设置本地画廊缩略图质量：先更新画面状态，再持久化。
+  Future<void> setThumbnailQuality(GalleryThumbnailQuality quality) async {
+    if (state.thumbnailQuality == quality) return;
+    _setState(state.copyWith(thumbnailQuality: quality));
+    await _thumbnailQualityStore.save(quality);
+
+    if (!state.isInitialized) return;
+    try {
+      final service = await getService();
+      final totalPages = state.totalPages;
+      final pages = <int>{
+        if (totalPages > 0) state.currentPage,
+        if (state.currentPage > 0) state.currentPage - 1,
+        if (state.currentPage + 1 < totalPages) state.currentPage + 1,
+      };
+      _preloadPageThumbnails(service, pages, state.pageSize, quality: quality);
+    } catch (e) {
+      AppLogger.w(
+        'Thumbnail quality preload failed: $e',
+        'LocalGalleryNotifier',
+      );
+    }
   }
 
   /// 设置 NAI-only 过滤（进画廊时从持久化偏好恢复；切换时调用方负责持久化）

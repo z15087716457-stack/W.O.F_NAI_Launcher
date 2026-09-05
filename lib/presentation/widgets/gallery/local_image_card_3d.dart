@@ -11,6 +11,7 @@ import '../../../core/utils/image_share_sanitizer.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/gallery/local_image_record.dart';
 import '../../../data/services/thumbnail_service.dart';
+import '../../providers/local_gallery_provider.dart';
 import '../../providers/share_image_settings_provider.dart';
 import '../../themes/theme_extension.dart';
 import '../../utils/clipboard_image.dart';
@@ -76,8 +77,9 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
   bool _isLoadingThumbnail = false;
   double _devicePixelRatio = 1.0;
 
-  /// 最近一次请求的缩略图档位（用于检测列宽变化后是否需要换档重载）
+  /// 最近一次请求的缩略图档位（用于检测列宽/质量变化后是否需要换档重载）
   ThumbnailSize? _requestedSize;
+  GalleryThumbnailQuality? _requestedQuality;
 
   /// 列宽变化换档重载的防抖器：拖动列宽滑块期间只记目标档位，
   /// 停止 ~300ms 后才真正换档重载，避免拖动过程反复入队。
@@ -134,14 +136,19 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
     _reloadDebounceTimer?.cancel();
     _reloadDebounceTimer = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
-      if (_pickSizeForCurrentWidth() != _requestedSize) {
+      final quality = ref.read(localGalleryNotifierProvider).thumbnailQuality;
+      if (_pickSizeForCurrentWidth() != _requestedSize ||
+          quality != _requestedQuality) {
         _loadThumbnail();
       }
     });
   }
 
-  ThumbnailSize _pickSizeForCurrentWidth() =>
-      pickThumbnailSize(widget.width, _devicePixelRatio);
+  ThumbnailSize _pickSizeForCurrentWidth() => resolveThumbnailTier(
+    widget.width,
+    _devicePixelRatio,
+    ref.read(localGalleryNotifierProvider).thumbnailQuality,
+  );
 
   Future<void> _initAndLoadThumbnail() async {
     _thumbnailService = ThumbnailCacheService.instance;
@@ -155,6 +162,10 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
     _isLoadingThumbnail = true;
     final path = widget.record.path;
     final fileName = path.split(Platform.pathSeparator).last;
+    final quality = ref.read(localGalleryNotifierProvider).thumbnailQuality;
+    final size = resolveThumbnailTier(widget.width, _devicePixelRatio, quality);
+    _requestedSize = size;
+    _requestedQuality = quality;
 
     // 只在调试模式下记录日志，避免影响性能
     // AppLogger.i('[CardLoad] START: $fileName, priority=${widget.priority}', 'LocalImageCard3D');
@@ -176,11 +187,12 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
 
       final existingPath = await _thumbnailService?.getThumbnailPath(
         path,
-        size: _pickSizeForCurrentWidth(),
+        size: size,
       );
       if (existingPath != null && await File(existingPath).exists()) {
         // AppLogger.i('[CardLoad] Using existing thumbnail: $fileName', 'LocalImageCard3D');
-        _requestedSize = _pickSizeForCurrentWidth();
+        _requestedSize = size;
+        _requestedQuality = quality;
         if (mounted) {
           setState(() {
             _thumbnailPath = existingPath;
@@ -201,11 +213,12 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
 
       final generatedPath = await thumbnailService.getThumbnail(
         path,
-        size: _pickSizeForCurrentWidth(),
+        size: size,
         priority: widget.priority,
       );
 
-      _requestedSize = _pickSizeForCurrentWidth();
+      _requestedSize = size;
+      _requestedQuality = quality;
 
       if (!mounted || widget.record.path != path) return;
 
@@ -231,6 +244,15 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
       }
     } finally {
       _isLoadingThumbnail = false;
+      if (mounted) {
+        final currentQuality = ref
+            .read(localGalleryNotifierProvider)
+            .thumbnailQuality;
+        if (currentQuality != _requestedQuality ||
+            _pickSizeForCurrentWidth() != _requestedSize) {
+          _scheduleDebouncedReload();
+        }
+      }
     }
   }
 
@@ -302,6 +324,17 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<GalleryThumbnailQuality>(
+      localGalleryNotifierProvider.select((state) => state.thumbnailQuality),
+      (previous, next) {
+        if (previous == null || previous == next) return;
+        _scheduleDebouncedReload();
+      },
+    );
+
+    final quality = ref.watch(
+      localGalleryNotifierProvider.select((state) => state.thumbnailQuality),
+    );
     final theme = Theme.of(context);
     final cardHeight = widget.height ?? widget.width;
     final colorScheme = theme.colorScheme;
@@ -359,7 +392,7 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
             child: Stack(
               fit: StackFit.expand,
               children: [
-                _buildImageLayer(),
+                _buildImageLayer(quality),
                 if (_isHovered)
                   Positioned.fill(
                     child: TweenAnimationBuilder<double>(
@@ -430,13 +463,17 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
     );
   }
 
-  Widget _buildImageLayer() => switch (_loadState) {
-    _ImageLoadState.error => _buildErrorPlaceholder(),
-    _ImageLoadState.loading when _displayPath == null =>
-      _buildLoadingPlaceholder(),
-    _ when _displayPath != null => _buildOptimizedImage(_displayPath!),
-    _ => _buildLoadingPlaceholder(),
-  };
+  Widget _buildImageLayer(GalleryThumbnailQuality quality) =>
+      switch (_loadState) {
+        _ImageLoadState.error => _buildErrorPlaceholder(),
+        _ImageLoadState.loading when _displayPath == null =>
+          _buildLoadingPlaceholder(),
+        _ when _displayPath != null => _buildOptimizedImage(
+          _displayPath!,
+          quality,
+        ),
+        _ => _buildLoadingPlaceholder(),
+      };
 
   Widget _buildLoadingPlaceholder() {
     return Container(
@@ -497,11 +534,15 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
     );
   }
 
-  Widget _buildOptimizedImage(String imagePath) {
+  Widget _buildOptimizedImage(
+    String imagePath,
+    GalleryThumbnailQuality quality,
+  ) {
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
-    final cacheWidth = (widget.width * pixelRatio * 1.5).toInt();
-    final cacheHeight = ((widget.height ?? widget.width) * pixelRatio * 1.5)
-        .toInt();
+    final multiplier = quality == GalleryThumbnailQuality.hd ? 1.5 : 1.0;
+    final cacheWidth = (widget.width * pixelRatio * multiplier).toInt();
+    final cacheHeight =
+        ((widget.height ?? widget.width) * pixelRatio * multiplier).toInt();
 
     return Image.file(
       File(imagePath),

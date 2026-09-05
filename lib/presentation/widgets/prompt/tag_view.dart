@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/nai_prompt_parser.dart';
+import '../../../core/utils/nai_prompt_segments.dart';
 import '../../../data/models/prompt/prompt_tag.dart';
 import '../../providers/image_generation_provider.dart';
 import '../autocomplete/autocomplete.dart';
@@ -217,10 +218,7 @@ class _TagViewState extends ConsumerState<TagView>
       return;
     }
 
-    final parts = text
-        .split(',')
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty);
+    final parts = splitNaiPromptSegments(text);
     var newTags = List<PromptTag>.from(widget.tags);
 
     for (final part in parts) {

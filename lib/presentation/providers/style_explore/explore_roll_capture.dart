@@ -36,15 +36,18 @@ String? resolveExploreOverrideMarker(Ref ref, {String? blockId}) {
 }
 
 /// 提取候选的父本串（建家族/建分支用）：
-/// roll 快照中第一个遗传随机实例的 rolledText；无实例或空串回退正向全文。
+/// 按快照中的实例顺序合并全部遗传随机实例的 rolledText；无有效串回退正向全文。
 String exploreParentStringFor(ExploreCandidate candidate) {
   final snapshot = candidate.rollSnapshot;
   if (snapshot == null) return '';
-  if (snapshot.instanceRolls.isNotEmpty) {
-    final rolled = snapshot.instanceRolls.first.rolledText.trim();
-    if (rolled.isNotEmpty) return snapshot.instanceRolls.first.rolledText;
+
+  final atoms = <String>[];
+  for (final instanceRoll in snapshot.instanceRolls) {
+    final rolledText = instanceRoll.rolledText.trim();
+    if (rolledText.isEmpty) continue;
+    atoms.addAll(PillRollEngine.splitTopLevelAtoms(rolledText));
   }
-  return snapshot.positive;
+  return atoms.isEmpty ? snapshot.positive : atoms.join(', ');
 }
 
 /// 解析父本集深度轮 override 的目标块 id：
@@ -96,19 +99,30 @@ ExploreRollSnapshot captureExploreRollSnapshot(Ref ref) {
     positive: positive.projection,
     negative: negative.projection,
     instanceRolls: [
-      ..._laneInstanceRolls('pos', positive.document, library),
-      ..._laneInstanceRolls('neg', negative.document, library),
+      ..._laneInstanceRolls(
+        'pos',
+        positive,
+        ref.read(pillWorkspaceProvider(PillScopes.main).notifier),
+        library,
+      ),
+      ..._laneInstanceRolls(
+        'neg',
+        negative,
+        ref.read(pillWorkspaceProvider(PillScopes.negative).notifier),
+        library,
+      ),
     ],
   );
 }
 
 List<ExploreInstanceRoll> _laneInstanceRolls(
   String lane,
-  PillDocument document,
+  PillWorkspaceState workspace,
+  PillWorkspaceNotifier notifier,
   PromptBlockLibraryState? library,
 ) {
   return [
-    for (final entry in document.instances.entries)
+    for (final entry in workspace.document.instances.entries)
       if (entry.value.enabled &&
           entry.value.settings.isRandom &&
           entry.value.evolutionEnabled)
@@ -117,7 +131,7 @@ List<ExploreInstanceRoll> _laneInstanceRolls(
           marker: entry.key,
           blockId: entry.value.blockId,
           blockTitle: library?.blockById(entry.value.blockId)?.title ?? '',
-          rolledText: entry.value.currentRoll ?? '',
+          rolledText: notifier.effectiveRollFor(entry.key) ?? '',
         ),
   ];
 }

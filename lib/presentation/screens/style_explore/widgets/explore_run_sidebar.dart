@@ -145,7 +145,7 @@ class ExploreRunSidebarSection extends ConsumerWidget {
   }
 }
 
-/// Run 卡片：状态点 + 名称 + 进度 x/N + 更新时间 + 菜单。
+/// Run 卡片：状态点 + 名称 + 候选总数 + 更新时间 + 菜单。
 class _ExploreRunCard extends ConsumerWidget {
   const _ExploreRunCard({super.key, required this.run, required this.selected});
 
@@ -175,7 +175,7 @@ class _ExploreRunCard extends ConsumerWidget {
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
-          '${l10n.styleExplore_runProgress(run.generatedCount, run.targetCount)}'
+          '${l10n.styleExplore_runTotalCount(run.candidates.length)}'
           ' · ${ExploreRunActions.statusLabel(l10n, run.status)}'
           '${run.isArchived ? ' · ${l10n.styleExplore_archivedTag}' : ''}'
           ' · ${_formatTime(run.updatedAt)}',

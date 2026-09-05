@@ -8,6 +8,7 @@ import '../../utils/app_logger.dart';
 import '../../utils/inpaint_mask_utils.dart';
 import '../../utils/nai_resolution_adapter.dart';
 import '../../utils/nai_api_utils.dart';
+import '../../utils/nai_weight_syntax.dart';
 import '../../utils/prompt_semantics_utils.dart';
 import '../../../data/models/character/character_prompt.dart'
     show CharacterPositionLayout;
@@ -432,7 +433,7 @@ class NAIImageRequestBuilder {
         prompt.contains('upscaled, blurry')) {
       return prompt;
     }
-    const addition = ', -2::upscaled, blurry::,';
+    final addition = ', ${NaiWeightSyntax.wrap('-2', 'upscaled, blurry')},';
     final textBlock = RegExp(
       r'(?:^|\s|[,.:[\]{}、。])text:(?!:)',
       caseSensitive: false,

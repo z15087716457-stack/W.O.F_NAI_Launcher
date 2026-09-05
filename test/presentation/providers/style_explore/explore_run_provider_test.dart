@@ -154,15 +154,19 @@ void main() {
       final created = await createRun(c);
 
       const snapshot = ExploreRollSnapshot(positive: 'pos', negative: 'neg');
+      const secondSnapshot = ExploreRollSnapshot(
+        positive: 'pos 2',
+        negative: 'neg 2',
+      );
       final first = await notifier.addManualCandidates(
         created.id,
         count: 2,
-        firstRollSnapshot: snapshot,
+        rollSnapshots: [snapshot, secondSnapshot],
       );
       expect(first, hasLength(2));
-      // 首张带 roll 快照，其余为 null；谱系 operation=manual。
+      // 每个候选都带有对应槽位快照；谱系 operation=manual。
       expect(first.first.rollSnapshot, snapshot);
-      expect(first[1].rollSnapshot, isNull);
+      expect(first[1].rollSnapshot, secondSnapshot);
       for (final candidate in first) {
         expect(candidate.lineage.operation, ExploreLineageOperation.manual);
         expect(

@@ -99,8 +99,9 @@ abstract final class PillDocumentEditor {
   /// 随机模式读物化的 `currentRoll`——**投影永不 roll**（蓝图红线）。
   static String project(
     PillDocument document,
-    String? Function(PillInstance instance) resolveInstance,
-  ) {
+    String? Function(PillInstance instance) resolveInstance, {
+    String? Function(String marker, PillInstance instance)? resolveMarker,
+  }) {
     if (document.instances.isEmpty) return stripMarkers(document.text);
     final buffer = StringBuffer();
     final text = document.text;
@@ -110,11 +111,26 @@ abstract final class PillDocumentEditor {
         buffer.writeCharCode(codeUnit);
         continue;
       }
-      final instance = document.instances[String.fromCharCode(codeUnit)];
+      final marker = String.fromCharCode(codeUnit);
+      final instance = document.instances[marker];
       if (instance == null || !instance.enabled) continue;
-      buffer.write(resolveInstance(instance) ?? '');
+      buffer.write(
+        (resolveMarker == null
+                ? resolveInstance(instance)
+                : resolveMarker(marker, instance)) ??
+            '',
+      );
     }
     return buffer.toString();
+  }
+
+  /// Marker-aware projection convenience API. [project] remains the original
+  /// instance-only API for callers that do not need marker identity.
+  static String projectWithMarker(
+    PillDocument document,
+    String? Function(String marker, PillInstance instance) resolveMarker,
+  ) {
+    return project(document, (_) => null, resolveMarker: resolveMarker);
   }
 
   /// 剥掉全部药丸标记（含未知标记），用于外部纯文本摄入。
