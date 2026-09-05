@@ -23,7 +23,6 @@ class PromptBlockQuickSettingsPanel extends StatefulWidget {
     required this.onSave,
     required this.onDelete,
     required this.onCollapse,
-    required this.onClose,
   });
 
   final PromptBlock block;
@@ -34,7 +33,6 @@ class PromptBlockQuickSettingsPanel extends StatefulWidget {
   final Future<void> Function(PromptBlockEditResult result) onSave;
   final VoidCallback onDelete;
   final VoidCallback onCollapse;
-  final VoidCallback onClose;
 
   @override
   State<PromptBlockQuickSettingsPanel> createState() =>
@@ -132,13 +130,6 @@ class _PromptBlockQuickSettingsPanelState
                         visualDensity: VisualDensity.compact,
                         onPressed: widget.onCollapse,
                         icon: const Icon(Icons.keyboard_arrow_right),
-                      ),
-                      IconButton(
-                        key: const Key('prompt-block-quick-settings-close'),
-                        tooltip: l10n.common_close,
-                        visualDensity: VisualDensity.compact,
-                        onPressed: widget.onClose,
-                        icon: const Icon(Icons.close),
                       ),
                     ],
                   ),

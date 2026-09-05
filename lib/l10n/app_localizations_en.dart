@@ -10288,6 +10288,59 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_deleted => 'Deleted';
 
   @override
+  String get promptBlockLibrary_multiSelect => 'Multi-select';
+
+  @override
+  String get promptBlockLibrary_exitMultiSelect => 'Exit multi-select';
+
+  @override
+  String promptBlockLibrary_selectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get promptBlockLibrary_selectAllVisible => 'Select all';
+
+  @override
+  String get promptBlockLibrary_clearSelection => 'Clear selection';
+
+  @override
+  String get promptBlockLibrary_moveTo => 'Move to…';
+
+  @override
+  String get promptBlockLibrary_moveToFolderTitle => 'Move to folder';
+
+  @override
+  String promptBlockLibrary_deleteBlocksConfirm(int count) {
+    return 'Delete $count selected blocks? This cannot be undone.';
+  }
+
+  @override
+  String promptBlockLibrary_favoriteSelected(int count) {
+    return 'Favorite $count selected blocks';
+  }
+
+  @override
+  String promptBlockLibrary_unfavoriteSelected(int count) {
+    return 'Unfavorite $count selected blocks';
+  }
+
+  @override
+  String promptBlockLibrary_moveToSelected(int count) {
+    return 'Move $count blocks to…';
+  }
+
+  @override
+  String promptBlockLibrary_deleteSelected(int count) {
+    return 'Delete $count selected blocks';
+  }
+
+  @override
+  String promptBlockLibrary_blocksMoved(int count) {
+    return 'Moved $count blocks';
+  }
+
+  @override
   String get promptBlockLibrary_empty => 'No prompt blocks yet';
 
   @override

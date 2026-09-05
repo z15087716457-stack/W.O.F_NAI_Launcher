@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,6 +28,23 @@ import 'widgets/prompt_block_quick_settings_panel.dart';
 
 enum _PromptBlockViewMode { list, grid }
 
+/// 块右键菜单动作（单块语义 + 多选批量语义共用一个枚举）。
+enum _BlockContextAction {
+  edit,
+  copy,
+  favorite,
+  unfavorite,
+  moveTo,
+  export,
+  delete,
+  enterMultiSelect,
+  batchFavorite,
+  batchUnfavorite,
+  batchMoveTo,
+  batchDelete,
+  exitMultiSelect,
+}
+
 class PromptBlockLibraryScreen extends ConsumerStatefulWidget {
   const PromptBlockLibraryScreen({super.key});
 
@@ -48,6 +66,12 @@ class _PromptBlockLibraryScreenState
   double _cardWidth = 220;
   String? _selectedBlockId;
   bool _quickPanelExpanded = false;
+
+  // 屏幕级多选状态（与 [_selectedBlockId] 同层；本页消费者全在 screen 内，
+  // 不引 provider——画廊用 provider 是因为跨 widget 消费）。
+  bool _multiSelectMode = false;
+  final Set<String> _multiSelectedIds = <String>{};
+  String? _lastSelectedId;
 
   @override
   void initState() {
@@ -133,46 +157,57 @@ class _PromptBlockLibraryScreenState
   Widget build(BuildContext context) {
     final library = ref.watch(promptBlockLibraryNotifierProvider);
     return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final showSidebar = constraints.maxWidth >= 760;
-          final state = library.valueOrNull;
-          final visibleBlocks = state == null
-              ? const <PromptBlock>[]
-              : _visibleBlocks(state);
-          final selectedBlock = _selectedVisibleBlock(visibleBlocks);
-          if (_selectedBlockId != null && selectedBlock == null) {
-            final staleId = _selectedBlockId;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (!mounted || _selectedBlockId != staleId) return;
-              setState(() {
-                _selectedBlockId = null;
-              });
-            });
-          }
-          final showQuickPanel = constraints.maxWidth >= 720;
-          return Row(
-            children: [
-              if (showSidebar) _buildSidebar(context, library),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildToolbar(context, library),
-                    if (!showSidebar && library.valueOrNull != null)
-                      _buildCompactFolderSelector(library.requireValue),
-                    Expanded(child: _buildContent(context, library)),
-                  ],
-                ),
-              ),
-              if (showQuickPanel)
-                _buildQuickSettingsRail(
-                  selectedBlock,
-                  state?.folders ?? const <PromptBlockFolder>[],
-                ),
-            ],
-          );
+      body: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.escape): () {
+            if (_multiSelectMode) _exitMultiSelect();
+          },
         },
+        child: Focus(
+          autofocus: true,
+          skipTraversal: true,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final showSidebar = constraints.maxWidth >= 760;
+              final state = library.valueOrNull;
+              final visibleBlocks = state == null
+                  ? const <PromptBlock>[]
+                  : _visibleBlocks(state);
+              final selectedBlock = _selectedVisibleBlock(visibleBlocks);
+              if (_selectedBlockId != null && selectedBlock == null) {
+                final staleId = _selectedBlockId;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted || _selectedBlockId != staleId) return;
+                  setState(() {
+                    _selectedBlockId = null;
+                  });
+                });
+              }
+              final showQuickPanel = constraints.maxWidth >= 720;
+              return Row(
+                children: [
+                  if (showSidebar) _buildSidebar(context, library),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildToolbar(context, library),
+                        if (!showSidebar && library.valueOrNull != null)
+                          _buildCompactFolderSelector(library.requireValue),
+                        Expanded(child: _buildContent(context, library)),
+                      ],
+                    ),
+                  ),
+                  if (showQuickPanel)
+                    _buildQuickSettingsRail(
+                      selectedBlock,
+                      state?.folders ?? const <PromptBlockFolder>[],
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -205,6 +240,13 @@ class _PromptBlockLibraryScreenState
             ? PromptBlockQuickSettingsCollapsed(
                 onExpand: () => setState(() => _quickPanelExpanded = true),
               )
+            : _multiSelectMode
+            ? _buildEmptyQuickPanel(
+                icon: Icons.checklist,
+                message: context.l10n.promptBlockLibrary_selectedCount(
+                  _multiSelectedIds.length,
+                ),
+              )
             : block != null
             ? PromptBlockQuickSettingsPanel(
                 block: block,
@@ -218,17 +260,16 @@ class _PromptBlockLibraryScreenState
                 onSave: (result) => _saveBlockEdit(context, block, result),
                 onDelete: () => _deleteBlock(context, block),
                 onCollapse: () => setState(() => _quickPanelExpanded = false),
-                onClose: () => setState(() {
-                  _selectedBlockId = null;
-                  _quickPanelExpanded = false;
-                }),
               )
             : _buildEmptyQuickPanel(),
       ),
     );
   }
 
-  Widget _buildEmptyQuickPanel() {
+  Widget _buildEmptyQuickPanel({
+    IconData icon = Icons.touch_app_outlined,
+    String? message,
+  }) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     return LayoutBuilder(
@@ -272,16 +313,6 @@ class _PromptBlockLibraryScreenState
                             setState(() => _quickPanelExpanded = false),
                         icon: const Icon(Icons.keyboard_arrow_right),
                       ),
-                      IconButton(
-                        key: const Key('prompt-block-quick-settings-close'),
-                        tooltip: l10n.common_close,
-                        visualDensity: VisualDensity.compact,
-                        onPressed: () => setState(() {
-                          _selectedBlockId = null;
-                          _quickPanelExpanded = false;
-                        }),
-                        icon: const Icon(Icons.close),
-                      ),
                     ],
                   ),
                 ),
@@ -296,13 +327,13 @@ class _PromptBlockLibraryScreenState
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.touch_app_outlined,
+                        icon,
                         size: 28,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        l10n.promptBlockLibrary_noBlockSelected,
+                        message ?? l10n.promptBlockLibrary_noBlockSelected,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -433,103 +464,125 @@ class _PromptBlockLibraryScreenState
           child: LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxWidth < 760;
-              final actions = Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  PopupMenuButton<String>(
-                    tooltip: context.l10n.promptBlockLibrary_importExport,
-                    icon: const Icon(Icons.import_export),
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'importTxt',
-                        child: Text(
-                          context.l10n.promptBlockLibrary_importTxtFiles,
+              final actions = _multiSelectMode
+                  ? _buildMultiSelectActions(context, library)
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        PopupMenuButton<String>(
+                          tooltip: context.l10n.promptBlockLibrary_importExport,
+                          icon: const Icon(Icons.import_export),
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'importTxt',
+                              child: Text(
+                                context.l10n.promptBlockLibrary_importTxtFiles,
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: 'importFolder',
+                              child: Text(
+                                context
+                                    .l10n
+                                    .promptBlockLibrary_importFromFolder,
+                              ),
+                            ),
+                            const PopupMenuDivider(),
+                            PopupMenuItem(
+                              value: 'exportBackup',
+                              child: Text(
+                                context
+                                    .l10n
+                                    .promptBlockLibrary_exportLibraryBackup,
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: 'importBackup',
+                              child: Text(
+                                context
+                                    .l10n
+                                    .promptBlockLibrary_importLibraryBackup,
+                              ),
+                            ),
+                          ],
+                          onSelected: (value) {
+                            switch (value) {
+                              case 'importTxt':
+                                _importTxtFiles();
+                              case 'importFolder':
+                                _importFromFolder();
+                              case 'exportBackup':
+                                _exportLibraryBackup();
+                              case 'importBackup':
+                                _importLibraryBackup();
+                            }
+                          },
                         ),
-                      ),
-                      PopupMenuItem(
-                        value: 'importFolder',
-                        child: Text(
-                          context.l10n.promptBlockLibrary_importFromFolder,
+                        ToggleButtons(
+                          key: const Key('prompt-block-view-mode'),
+                          isSelected: [
+                            _viewMode == _PromptBlockViewMode.list,
+                            _viewMode == _PromptBlockViewMode.grid,
+                          ],
+                          onPressed: (index) => _setViewMode(
+                            index == 0
+                                ? _PromptBlockViewMode.list
+                                : _PromptBlockViewMode.grid,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                          constraints: const BoxConstraints(
+                            minWidth: 36,
+                            minHeight: 36,
+                          ),
+                          children: [
+                            Tooltip(
+                              message: context.l10n.promptBlockLibrary_listView,
+                              child: const Icon(
+                                Icons.view_agenda_outlined,
+                                size: 18,
+                              ),
+                            ),
+                            Tooltip(
+                              message: context.l10n.promptBlockLibrary_gridView,
+                              child: const Icon(
+                                Icons.grid_view_outlined,
+                                size: 18,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const PopupMenuDivider(),
-                      PopupMenuItem(
-                        value: 'exportBackup',
-                        child: Text(
-                          context.l10n.promptBlockLibrary_exportLibraryBackup,
+                        IconButton(
+                          key: const Key('prompt-block-multi-select-toggle'),
+                          tooltip: context.l10n.promptBlockLibrary_multiSelect,
+                          onPressed: () => _enterMultiSelectEmpty(),
+                          icon: const Icon(Icons.checklist, size: 20),
                         ),
-                      ),
-                      PopupMenuItem(
-                        value: 'importBackup',
-                        child: Text(
-                          context.l10n.promptBlockLibrary_importLibraryBackup,
+                        _buildSortControls(context),
+                        IconButton(
+                          tooltip: context.l10n.common_refresh,
+                          onPressed: () => ref
+                              .read(promptBlockLibraryNotifierProvider.notifier)
+                              .refresh(),
+                          icon: const Icon(Icons.refresh),
                         ),
-                      ),
-                    ],
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'importTxt':
-                          _importTxtFiles();
-                        case 'importFolder':
-                          _importFromFolder();
-                        case 'exportBackup':
-                          _exportLibraryBackup();
-                        case 'importBackup':
-                          _importLibraryBackup();
-                      }
-                    },
-                  ),
-                  ToggleButtons(
-                    key: const Key('prompt-block-view-mode'),
-                    isSelected: [
-                      _viewMode == _PromptBlockViewMode.list,
-                      _viewMode == _PromptBlockViewMode.grid,
-                    ],
-                    onPressed: (index) => _setViewMode(
-                      index == 0
-                          ? _PromptBlockViewMode.list
-                          : _PromptBlockViewMode.grid,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                    constraints: const BoxConstraints(
-                      minWidth: 36,
-                      minHeight: 36,
-                    ),
-                    children: [
-                      Tooltip(
-                        message: context.l10n.promptBlockLibrary_listView,
-                        child: const Icon(Icons.view_agenda_outlined, size: 18),
-                      ),
-                      Tooltip(
-                        message: context.l10n.promptBlockLibrary_gridView,
-                        child: const Icon(Icons.grid_view_outlined, size: 18),
-                      ),
-                    ],
-                  ),
-                  _buildSortControls(context),
-                  IconButton(
-                    tooltip: context.l10n.common_refresh,
-                    onPressed: () => ref
-                        .read(promptBlockLibraryNotifierProvider.notifier)
-                        .refresh(),
-                    icon: const Icon(Icons.refresh),
-                  ),
-                  FilledButton.icon(
-                    onPressed: () => _showFolderNameDialog(context),
-                    icon: const Icon(
-                      Icons.create_new_folder_outlined,
-                      size: 18,
-                    ),
-                    label: Text(context.l10n.promptBlockLibrary_newFolder),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton.icon(
-                    onPressed: () => _showCreateBlock(context),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: Text(context.l10n.promptBlockLibrary_newBlock),
-                  ),
-                ],
-              );
+                        FilledButton.icon(
+                          onPressed: () => _showFolderNameDialog(context),
+                          icon: const Icon(
+                            Icons.create_new_folder_outlined,
+                            size: 18,
+                          ),
+                          label: Text(
+                            context.l10n.promptBlockLibrary_newFolder,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton.icon(
+                          onPressed: () => _showCreateBlock(context),
+                          icon: const Icon(Icons.add, size: 18),
+                          label: Text(context.l10n.promptBlockLibrary_newBlock),
+                        ),
+                      ],
+                    );
 
               final heading = Row(
                 mainAxisSize: MainAxisSize.min,
@@ -602,6 +655,99 @@ class _PromptBlockLibraryScreenState
         );
       },
     );
+  }
+
+  /// 多选模式下工具栏右侧换出的批量操作行。
+  Widget _buildMultiSelectActions(
+    BuildContext context,
+    AsyncValue<PromptBlockLibraryState> library,
+  ) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final state = library.valueOrNull;
+    final visible = state == null
+        ? const <PromptBlock>[]
+        : _visibleBlocks(state);
+    final allSelected =
+        visible.isNotEmpty &&
+        visible.every((block) => _multiSelectedIds.contains(block.id));
+    final hasSelection = _multiSelectedIds.isNotEmpty;
+    return Row(
+      key: const Key('prompt-block-multi-select-actions'),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          l10n.promptBlockLibrary_selectedCount(_multiSelectedIds.length),
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          key: const Key('prompt-block-multi-select-all'),
+          tooltip: l10n.promptBlockLibrary_selectAllVisible,
+          onPressed: allSelected ? null : () => _selectAllVisible(visible),
+          icon: const Icon(Icons.select_all, size: 19),
+        ),
+        IconButton(
+          key: const Key('prompt-block-multi-select-clear'),
+          tooltip: l10n.promptBlockLibrary_clearSelection,
+          onPressed: hasSelection
+              ? () => setState(() => _multiSelectedIds.clear())
+              : null,
+          icon: const Icon(Icons.deselect, size: 19),
+        ),
+        const SizedBox(width: 4),
+        IconButton(
+          tooltip: l10n.common_favorite,
+          onPressed: hasSelection ? () => _setBlocksFavorite(true) : null,
+          icon: const Icon(Icons.star_border, size: 19),
+        ),
+        IconButton(
+          tooltip: l10n.common_unfavorite,
+          onPressed: hasSelection ? () => _setBlocksFavorite(false) : null,
+          icon: const Icon(Icons.star, size: 19),
+        ),
+        IconButton(
+          key: const Key('prompt-block-multi-select-move'),
+          tooltip: l10n.promptBlockLibrary_moveTo,
+          onPressed: hasSelection
+              ? () => _moveBlocksToFolderDialog(_multiSelectedIds.toList())
+              : null,
+          icon: const Icon(Icons.drive_file_move_outline, size: 19),
+        ),
+        IconButton(
+          key: const Key('prompt-block-multi-select-delete'),
+          tooltip: l10n.promptBlockLibrary_deleteSelected(
+            _multiSelectedIds.length,
+          ),
+          onPressed: hasSelection
+              ? () => _deleteBlocks(context, _multiSelectedIds.toList())
+              : null,
+          icon: Icon(
+            Icons.delete_outline,
+            size: 19,
+            color: theme.colorScheme.error,
+          ),
+        ),
+        const SizedBox(width: 4),
+        IconButton(
+          key: const Key('prompt-block-multi-select-exit'),
+          tooltip: l10n.promptBlockLibrary_exitMultiSelect,
+          onPressed: _exitMultiSelect,
+          icon: const Icon(Icons.close, size: 19),
+        ),
+      ],
+    );
+  }
+
+  void _selectAllVisible(List<PromptBlock> visible) {
+    if (visible.isEmpty) return;
+    setState(() {
+      _multiSelectedIds.addAll(visible.map((block) => block.id));
+      _lastSelectedId ??= visible.last.id;
+    });
   }
 
   Widget _buildSortControls(BuildContext context) {
@@ -770,46 +916,54 @@ class _PromptBlockLibraryScreenState
     BuildContext context,
     AsyncValue<PromptBlockLibraryState> library,
   ) {
-    return library.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => _buildRetryView(context, error),
-      data: (state) {
-        final blocks = _visibleBlocks(state);
-        if (blocks.isEmpty) return _buildEmptyState(context, state);
+    return GestureDetector(
+      // 点击空白区域退出多选；点在块上时子级 InkWell 消费事件，不会走到这里。
+      onTap: _multiSelectMode ? _exitMultiSelect : null,
+      child: library.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => _buildRetryView(context, error),
+        data: (state) {
+          final blocks = _visibleBlocks(state);
+          if (blocks.isEmpty) return _buildEmptyState(context, state);
 
-        if (_viewMode == _PromptBlockViewMode.grid) {
-          return _buildGrid(context, blocks);
-        }
+          if (_viewMode == _PromptBlockViewMode.grid) {
+            return _buildGrid(context, blocks);
+          }
 
-        // 聚合视图里混有后代文件夹的块，跨文件夹拖排没有意义；
-        // repository 的同级完整性校验也会拒绝这种重排，这里直接不提供把手。
-        // 自定义排序下顺序由字段决定，手动拖排同样没有意义。
-        final reorderable =
-            !_allSelected &&
-            !_sortField.overridesManualOrder &&
-            _searchController.text.trim().isEmpty &&
-            blocks.every((block) => block.folderId == _selectedFolderId);
-        if (reorderable) {
-          return ReorderableListView.builder(
+          // 聚合视图里混有后代文件夹的块，跨文件夹拖排没有意义；
+          // repository 的同级完整性校验也会拒绝这种重排，这里直接不提供把手。
+          // 自定义排序下顺序由字段决定，手动拖排同样没有意义。
+          final reorderable =
+              !_allSelected &&
+              !_sortField.overridesManualOrder &&
+              _searchController.text.trim().isEmpty &&
+              blocks.every((block) => block.folderId == _selectedFolderId);
+          if (reorderable) {
+            return ReorderableListView.builder(
+              key: const Key('prompt-block-list'),
+              padding: const EdgeInsets.all(16),
+              buildDefaultDragHandles: false,
+              itemCount: blocks.length,
+              onReorderItem: (oldIndex, newIndex) =>
+                  _reorderBlocks(state, blocks, oldIndex, newIndex),
+              itemBuilder: (context, index) => _buildBlockItem(
+                context,
+                blocks[index],
+                // 多选激活时禁用重排把手，避免选择态与拖排歧义。
+                reorderIndex: _multiSelectMode ? null : index,
+              ),
+            );
+          }
+
+          return ListView.builder(
             key: const Key('prompt-block-list'),
             padding: const EdgeInsets.all(16),
-            buildDefaultDragHandles: false,
             itemCount: blocks.length,
-            onReorderItem: (oldIndex, newIndex) =>
-                _reorderBlocks(state, blocks, oldIndex, newIndex),
             itemBuilder: (context, index) =>
-                _buildBlockItem(context, blocks[index], reorderIndex: index),
+                _buildBlockItem(context, blocks[index]),
           );
-        }
-
-        return ListView.builder(
-          key: const Key('prompt-block-list'),
-          padding: const EdgeInsets.all(16),
-          itemCount: blocks.length,
-          itemBuilder: (context, index) =>
-              _buildBlockItem(context, blocks[index]),
-        );
-      },
+        },
+      ),
     );
   }
 
@@ -901,8 +1055,11 @@ class _PromptBlockLibraryScreenState
       block: block,
       displayTitle: title,
       maxWidth: maxWidth,
-      selected: _selectedBlockId == block.id,
-      onTap: () => _selectBlock(block),
+      selected: _isBlockShownSelected(block.id),
+      multiSelected: _isBlockMultiSelected(block.id),
+      onSecondaryTap: (details) =>
+          _showBlockContextMenu(context, block, details.globalPosition),
+      onTap: () => _handleBlockTap(block),
     );
   }
 
@@ -962,9 +1119,12 @@ class _PromptBlockLibraryScreenState
       block: block,
       displayTitle: title,
       reorderIndex: reorderIndex,
-      selected: _selectedBlockId == block.id,
-      onTap: () => _selectBlock(block),
-      onEdit: () => _selectBlock(block),
+      selected: _isBlockShownSelected(block.id),
+      multiSelected: _isBlockMultiSelected(block.id),
+      onSecondaryTap: (details) =>
+          _showBlockContextMenu(context, block, details.globalPosition),
+      onTap: () => _handleBlockTap(block),
+      onEdit: () => _handleBlockEditButton(block),
       onCopy: () =>
           AppToast.success(context, context.l10n.promptBlockLibrary_copied),
       onExport: () => _exportBlockAsTxt(block),
@@ -986,9 +1146,12 @@ class _PromptBlockLibraryScreenState
       block: block,
       displayTitle: title,
       width: width,
-      selected: _selectedBlockId == block.id,
-      onTap: () => _selectBlock(block),
-      onEdit: () => _selectBlock(block),
+      selected: _isBlockShownSelected(block.id),
+      multiSelected: _isBlockMultiSelected(block.id),
+      onSecondaryTap: (details) =>
+          _showBlockContextMenu(context, block, details.globalPosition),
+      onTap: () => _handleBlockTap(block),
+      onEdit: () => _handleBlockEditButton(block),
       onCopy: () =>
           AppToast.success(context, context.l10n.promptBlockLibrary_copied),
       onExport: () => _exportBlockAsTxt(block),
@@ -1002,6 +1165,405 @@ class _PromptBlockLibraryScreenState
       _selectedBlockId = block.id;
       _quickPanelExpanded = true;
     });
+  }
+
+  // ---- 多选状态机（屏幕级，方案见蓝图 L1） ----
+
+  bool _isBlockShownSelected(String blockId) => _multiSelectMode
+      ? _multiSelectedIds.contains(blockId)
+      : _selectedBlockId == blockId;
+
+  bool _isBlockMultiSelected(String blockId) =>
+      _multiSelectMode && _multiSelectedIds.contains(blockId);
+
+  bool _isCtrlPressed() {
+    final keys = HardwareKeyboard.instance.logicalKeysPressed;
+    return keys.contains(LogicalKeyboardKey.controlLeft) ||
+        keys.contains(LogicalKeyboardKey.controlRight);
+  }
+
+  bool _isShiftPressed() {
+    final keys = HardwareKeyboard.instance.logicalKeysPressed;
+    return keys.contains(LogicalKeyboardKey.shiftLeft) ||
+        keys.contains(LogicalKeyboardKey.shiftRight);
+  }
+
+  /// 块表面点击路由：多选模式内 toggle/范围选；Ctrl+点击进入多选；
+  /// 其余走原有单选语义（打开右侧编辑栏）。
+  void _handleBlockTap(PromptBlock block) {
+    if (_multiSelectMode) {
+      if (_isShiftPressed()) {
+        _selectMultiRange(block);
+      } else {
+        _toggleMultiSelect(block.id);
+      }
+      return;
+    }
+    if (_isCtrlPressed()) {
+      _enterMultiSelect(block.id);
+      return;
+    }
+    _selectBlock(block);
+  }
+
+  /// 多选模式下点行尾/卡面「编辑」按钮：退出多选并按单选打开右侧编辑栏。
+  void _handleBlockEditButton(PromptBlock block) {
+    if (_multiSelectMode) _exitMultiSelect();
+    _selectBlock(block);
+  }
+
+  /// 工具栏「多选」开关:进入多选模式(空选集,再点块选择)。
+  void _enterMultiSelectEmpty() {
+    if (_multiSelectMode) return;
+    setState(() {
+      _multiSelectMode = true;
+      _multiSelectedIds.clear();
+      _lastSelectedId = null;
+    });
+  }
+
+  void _enterMultiSelect(String blockId) {
+    setState(() {
+      _multiSelectMode = true;
+      _multiSelectedIds
+        ..clear()
+        ..add(blockId);
+      _lastSelectedId = blockId;
+    });
+  }
+
+  void _toggleMultiSelect(String blockId) {
+    setState(() {
+      if (!_multiSelectedIds.remove(blockId)) {
+        _multiSelectedIds.add(blockId);
+      }
+      _lastSelectedId = blockId;
+    });
+  }
+
+  /// Shift+点击范围选：以 [_lastSelectedId] 为锚，沿当前可见序列框选
+  /// （逻辑照抄本地画廊 selection_mode_provider.selectRange）。
+  void _selectMultiRange(PromptBlock block) {
+    final state = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
+    if (state == null) return;
+    final allIds = _visibleBlocks(state).map((item) => item.id).toList();
+    final anchorIndex = _lastSelectedId != null
+        ? allIds.indexOf(_lastSelectedId!)
+        : -1;
+    final currentIndex = allIds.indexOf(block.id);
+    if (anchorIndex == -1 || currentIndex == -1) {
+      _toggleMultiSelect(block.id);
+      return;
+    }
+    final start = anchorIndex < currentIndex ? anchorIndex : currentIndex;
+    final end = anchorIndex < currentIndex ? currentIndex : anchorIndex;
+    setState(() {
+      _multiSelectedIds.addAll(allIds.sublist(start, end + 1));
+      _lastSelectedId = block.id;
+    });
+  }
+
+  void _exitMultiSelect() {
+    if (!_multiSelectMode) return;
+    setState(() {
+      _multiSelectMode = false;
+      _multiSelectedIds.clear();
+      _lastSelectedId = null;
+    });
+  }
+
+  // ---- 右键菜单 ----
+
+  Future<void> _showBlockContextMenu(
+    BuildContext context,
+    PromptBlock block,
+    Offset globalPosition,
+  ) async {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final overlay = Overlay.of(context).context.findRenderObject();
+    if (overlay is! RenderBox) return;
+    final position = RelativeRect.fromRect(
+      Rect.fromPoints(globalPosition, globalPosition),
+      Offset.zero & overlay.size,
+    );
+
+    // 桌面惯例：右键落在多选集合内出批量菜单；落在集合外则退出多选、
+    // 单选该块、出单块菜单。
+    final batch = _multiSelectMode && _multiSelectedIds.contains(block.id);
+    if (_multiSelectMode && !batch) {
+      setState(() {
+        _multiSelectMode = false;
+        _multiSelectedIds.clear();
+        _lastSelectedId = null;
+      });
+      _selectBlock(block);
+    }
+
+    final errorStyle = TextStyle(color: theme.colorScheme.error);
+    final count = _multiSelectedIds.length;
+    final state = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
+    final anyFavorite = _multiSelectedIds.any((id) {
+      final item = state?.blockById(id);
+      return item != null && item.isFavorite;
+    });
+    final anyUnfavorite = _multiSelectedIds.any((id) {
+      final item = state?.blockById(id);
+      return item == null || !item.isFavorite;
+    });
+
+    final action = await showMenu<_BlockContextAction>(
+      context: context,
+      position: position,
+      items: batch
+          ? [
+              if (anyUnfavorite)
+                PopupMenuItem(
+                  value: _BlockContextAction.batchFavorite,
+                  child: Text(l10n.promptBlockLibrary_favoriteSelected(count)),
+                ),
+              if (anyFavorite)
+                PopupMenuItem(
+                  value: _BlockContextAction.batchUnfavorite,
+                  child: Text(
+                    l10n.promptBlockLibrary_unfavoriteSelected(count),
+                  ),
+                ),
+              PopupMenuItem(
+                value: _BlockContextAction.batchMoveTo,
+                child: Text(l10n.promptBlockLibrary_moveToSelected(count)),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: _BlockContextAction.batchDelete,
+                child: Text(
+                  l10n.promptBlockLibrary_deleteSelected(count),
+                  style: errorStyle,
+                ),
+              ),
+              PopupMenuItem(
+                value: _BlockContextAction.exitMultiSelect,
+                child: Text(l10n.promptBlockLibrary_exitMultiSelect),
+              ),
+            ]
+          : [
+              PopupMenuItem(
+                value: _BlockContextAction.edit,
+                child: Text(l10n.common_edit),
+              ),
+              PopupMenuItem(
+                value: _BlockContextAction.copy,
+                child: Text(l10n.common_copy),
+              ),
+              PopupMenuItem(
+                value: block.isFavorite
+                    ? _BlockContextAction.unfavorite
+                    : _BlockContextAction.favorite,
+                child: Text(
+                  block.isFavorite
+                      ? l10n.common_unfavorite
+                      : l10n.common_favorite,
+                ),
+              ),
+              PopupMenuItem(
+                value: _BlockContextAction.moveTo,
+                child: Text(l10n.promptBlockLibrary_moveTo),
+              ),
+              PopupMenuItem(
+                value: _BlockContextAction.export,
+                child: Text(l10n.promptBlockLibrary_exportBlockAsTxt),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: _BlockContextAction.delete,
+                child: Text(l10n.common_delete, style: errorStyle),
+              ),
+              PopupMenuItem(
+                value: _BlockContextAction.enterMultiSelect,
+                child: Text(l10n.promptBlockLibrary_multiSelect),
+              ),
+            ],
+    );
+    if (action == null || !mounted) return;
+
+    switch (action) {
+      case _BlockContextAction.edit:
+        _selectBlock(block);
+      case _BlockContextAction.copy:
+        await Clipboard.setData(ClipboardData(text: block.content));
+        if (context.mounted) {
+          AppToast.success(context, l10n.promptBlockLibrary_copied);
+        }
+      case _BlockContextAction.favorite:
+      case _BlockContextAction.unfavorite:
+        await _toggleFavorite(block);
+      case _BlockContextAction.moveTo:
+        if (mounted) await _moveBlocksToFolderDialog([block.id]);
+      case _BlockContextAction.export:
+        await _exportBlockAsTxt(block);
+      case _BlockContextAction.delete:
+        if (context.mounted) await _deleteBlock(context, block);
+      case _BlockContextAction.enterMultiSelect:
+        _enterMultiSelect(block.id);
+      case _BlockContextAction.batchFavorite:
+        await _setBlocksFavorite(true);
+      case _BlockContextAction.batchUnfavorite:
+        await _setBlocksFavorite(false);
+      case _BlockContextAction.batchMoveTo:
+        if (mounted) {
+          await _moveBlocksToFolderDialog(_multiSelectedIds.toList());
+        }
+      case _BlockContextAction.batchDelete:
+        if (context.mounted) {
+          await _deleteBlocks(context, _multiSelectedIds.toList());
+        }
+      case _BlockContextAction.exitMultiSelect:
+        _exitMultiSelect();
+    }
+  }
+
+  // ---- 批量操作 ----
+
+  Future<void> _setBlocksFavorite(bool favorite) async {
+    final l10n = context.l10n;
+    final ids = _multiSelectedIds.toList();
+    if (ids.isEmpty) return;
+    try {
+      await ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .setFavorite(ids, favorite);
+      if (mounted) {
+        AppToast.success(context, l10n.promptBlockLibrary_saved);
+      }
+    } catch (error) {
+      if (mounted) AppToast.error(context, '$error');
+    }
+  }
+
+  Future<void> _deleteBlocks(BuildContext context, List<String> ids) async {
+    final l10n = context.l10n;
+    if (ids.isEmpty) return;
+    final confirmed = await ThemedConfirmDialog.showDelete(
+      context: context,
+      itemName: '',
+      content: l10n.promptBlockLibrary_deleteBlocksConfirm(ids.length),
+    );
+    if (!confirmed || !context.mounted) return;
+    try {
+      await ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .deleteBlocks(ids);
+      if (mounted) {
+        setState(() {
+          // 只清选中、保持右栏展开（009ea934 防跳动语义的批量版）。
+          if (_selectedBlockId != null && ids.contains(_selectedBlockId)) {
+            _selectedBlockId = null;
+          }
+          if (_multiSelectMode) {
+            _multiSelectedIds.removeAll(ids);
+          }
+        });
+      }
+      if (context.mounted) {
+        AppToast.success(context, l10n.promptBlockLibrary_deleted);
+      }
+    } catch (error) {
+      if (context.mounted) AppToast.error(context, '$error');
+    }
+  }
+
+  /// 「移动到…」：文件夹树平铺单选对话框（根目录 + DFS 顺序，层级缩进）。
+  Future<void> _moveBlocksToFolderDialog(List<String> ids) async {
+    final l10n = context.l10n;
+    final state = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
+    if (state == null || ids.isEmpty) return;
+
+    final flat = <(PromptBlockFolder, int)>[];
+    void visit(String? parentId, int depth) {
+      for (final folder in state.folders.childrenOf(parentId)) {
+        flat.add((folder, depth));
+        visit(folder.id, depth + 1);
+      }
+    }
+
+    visit(null, 0);
+
+    final initialFolderId = ids.length == 1
+        ? state.blockById(ids.first)?.folderId
+        : null;
+    var picked = initialFolderId;
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: Text(l10n.promptBlockLibrary_moveToFolderTitle),
+          content: SizedBox(
+            width: 360,
+            child: flat.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(l10n.promptBlockLibrary_rootFolder),
+                  )
+                : RadioGroup<String?>(
+                    groupValue: picked,
+                    onChanged: (value) => setDialogState(() => picked = value),
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: [
+                        RadioListTile<String?>(
+                          key: const Key('prompt-block-move-folder-root'),
+                          value: null,
+                          title: Text(l10n.promptBlockLibrary_rootFolder),
+                        ),
+                        for (final (folder, depth) in flat)
+                          RadioListTile<String?>(
+                            value: folder.id,
+                            title: Padding(
+                              padding: EdgeInsets.only(left: 12.0 * depth),
+                              child: Text(
+                                folder.name.isEmpty
+                                    ? l10n.promptBlockLibrary_unnamedFolder
+                                    : folder.name,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop('__cancelled__'),
+              child: Text(l10n.common_cancel),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(picked ?? '__root__'),
+              child: Text(l10n.common_confirm),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (result == null || result == '__cancelled__' || !mounted) {
+      return;
+    }
+    final folderId = result == '__root__' ? null : result;
+
+    try {
+      await ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .moveBlocks(ids, folderId);
+      if (mounted) {
+        AppToast.success(
+          context,
+          l10n.promptBlockLibrary_blocksMoved(ids.length),
+        );
+      }
+    } catch (error) {
+      if (mounted) AppToast.error(context, '$error');
+    }
   }
 
   Widget _buildEmptyState(BuildContext context, PromptBlockLibraryState state) {
@@ -1418,10 +1980,15 @@ class _PromptBlockLibraryScreenState
       await ref
           .read(promptBlockLibraryNotifierProvider.notifier)
           .deleteBlock(block.id);
-      if (_selectedBlockId == block.id && mounted) {
-        // 只清选中,保持右栏展开(显示未选择块),避免连续删除时布局跳动。
+      if (mounted) {
         setState(() {
-          _selectedBlockId = null;
+          // 只清选中,保持右栏展开(显示未选择块),避免连续删除时布局跳动。
+          if (_selectedBlockId == block.id) {
+            _selectedBlockId = null;
+          }
+          if (_multiSelectMode) {
+            _multiSelectedIds.remove(block.id);
+          }
         });
       }
       if (context.mounted) {

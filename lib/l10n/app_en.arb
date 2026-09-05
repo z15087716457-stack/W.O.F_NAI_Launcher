@@ -5819,6 +5819,68 @@
   "promptBlockLibrary_saved": "Saved",
   "promptBlockLibrary_copied": "Content copied",
   "promptBlockLibrary_deleted": "Deleted",
+  "promptBlockLibrary_multiSelect": "Multi-select",
+  "promptBlockLibrary_exitMultiSelect": "Exit multi-select",
+  "promptBlockLibrary_selectedCount": "{count} selected",
+  "@promptBlockLibrary_selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_selectAllVisible": "Select all",
+  "promptBlockLibrary_clearSelection": "Clear selection",
+  "promptBlockLibrary_moveTo": "Move to…",
+  "promptBlockLibrary_moveToFolderTitle": "Move to folder",
+  "promptBlockLibrary_deleteBlocksConfirm": "Delete {count} selected blocks? This cannot be undone.",
+  "@promptBlockLibrary_deleteBlocksConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_favoriteSelected": "Favorite {count} selected blocks",
+  "@promptBlockLibrary_favoriteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_unfavoriteSelected": "Unfavorite {count} selected blocks",
+  "@promptBlockLibrary_unfavoriteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_moveToSelected": "Move {count} blocks to…",
+  "@promptBlockLibrary_moveToSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_deleteSelected": "Delete {count} selected blocks",
+  "@promptBlockLibrary_deleteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_blocksMoved": "Moved {count} blocks",
+  "@promptBlockLibrary_blocksMoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "promptBlockLibrary_empty": "No prompt blocks yet",
   "promptBlockLibrary_emptyFolder": "This folder is empty",
   "promptBlockLibrary_noSearchResults": "No matching blocks",

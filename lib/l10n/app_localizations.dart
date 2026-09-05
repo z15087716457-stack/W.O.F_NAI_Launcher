@@ -18010,6 +18010,84 @@ abstract class AppLocalizations {
   /// **'Deleted'**
   String get promptBlockLibrary_deleted;
 
+  /// No description provided for @promptBlockLibrary_multiSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-select'**
+  String get promptBlockLibrary_multiSelect;
+
+  /// No description provided for @promptBlockLibrary_exitMultiSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit multi-select'**
+  String get promptBlockLibrary_exitMultiSelect;
+
+  /// No description provided for @promptBlockLibrary_selectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String promptBlockLibrary_selectedCount(int count);
+
+  /// No description provided for @promptBlockLibrary_selectAllVisible.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get promptBlockLibrary_selectAllVisible;
+
+  /// No description provided for @promptBlockLibrary_clearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get promptBlockLibrary_clearSelection;
+
+  /// No description provided for @promptBlockLibrary_moveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to…'**
+  String get promptBlockLibrary_moveTo;
+
+  /// No description provided for @promptBlockLibrary_moveToFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to folder'**
+  String get promptBlockLibrary_moveToFolderTitle;
+
+  /// No description provided for @promptBlockLibrary_deleteBlocksConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} selected blocks? This cannot be undone.'**
+  String promptBlockLibrary_deleteBlocksConfirm(int count);
+
+  /// No description provided for @promptBlockLibrary_favoriteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite {count} selected blocks'**
+  String promptBlockLibrary_favoriteSelected(int count);
+
+  /// No description provided for @promptBlockLibrary_unfavoriteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfavorite {count} selected blocks'**
+  String promptBlockLibrary_unfavoriteSelected(int count);
+
+  /// No description provided for @promptBlockLibrary_moveToSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {count} blocks to…'**
+  String promptBlockLibrary_moveToSelected(int count);
+
+  /// No description provided for @promptBlockLibrary_deleteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} selected blocks'**
+  String promptBlockLibrary_deleteSelected(int count);
+
+  /// No description provided for @promptBlockLibrary_blocksMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved {count} blocks'**
+  String promptBlockLibrary_blocksMoved(int count);
+
   /// No description provided for @promptBlockLibrary_empty.
   ///
   /// In en, this message translates to:

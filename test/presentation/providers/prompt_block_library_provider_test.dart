@@ -77,66 +77,74 @@ void main() {
     expect(state.favoriteBlocks.map((item) => item.id), [block.id]);
   });
 
-  test('blocksInFolderTree aggregates descendant blocks in tree order', () async {
-    final container = ProviderContainer(
-      overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
-    );
-    addTearDown(container.dispose);
-    final notifier = container.read(
-      promptBlockLibraryNotifierProvider.notifier,
-    );
+  test(
+    'blocksInFolderTree aggregates descendant blocks in tree order',
+    () async {
+      final container = ProviderContainer(
+        overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(
+        promptBlockLibraryNotifierProvider.notifier,
+      );
 
-    final blockRootA = await notifier.createBlock(title: 'root-a', content: 'a');
-    final blockRootB = await notifier.createBlock(title: 'root-b', content: 'b');
-    final folderA = await notifier.createFolder(name: 'A');
-    final blockA1 = await notifier.createBlock(
-      title: 'a-1',
-      content: 'a1',
-      folderId: folderA.id,
-    );
-    final blockA2 = await notifier.createBlock(
-      title: 'a-2',
-      content: 'a2',
-      folderId: folderA.id,
-    );
-    final folderB = await notifier.createFolder(
-      name: 'B',
-      parentId: folderA.id,
-    );
-    final blockB1 = await notifier.createBlock(
-      title: 'b-1',
-      content: 'b1',
-      folderId: folderB.id,
-    );
-    final folderC = await notifier.createFolder(
-      name: 'C',
-      parentId: folderA.id,
-    );
-    final blockC1 = await notifier.createBlock(
-      title: 'c-1',
-      content: 'c1',
-      folderId: folderC.id,
-    );
-    final folderD = await notifier.createFolder(name: 'D');
-    final blockD1 = await notifier.createBlock(
-      title: 'd-1',
-      content: 'd1',
-      folderId: folderD.id,
-    );
+      final blockRootA = await notifier.createBlock(
+        title: 'root-a',
+        content: 'a',
+      );
+      final blockRootB = await notifier.createBlock(
+        title: 'root-b',
+        content: 'b',
+      );
+      final folderA = await notifier.createFolder(name: 'A');
+      final blockA1 = await notifier.createBlock(
+        title: 'a-1',
+        content: 'a1',
+        folderId: folderA.id,
+      );
+      final blockA2 = await notifier.createBlock(
+        title: 'a-2',
+        content: 'a2',
+        folderId: folderA.id,
+      );
+      final folderB = await notifier.createFolder(
+        name: 'B',
+        parentId: folderA.id,
+      );
+      final blockB1 = await notifier.createBlock(
+        title: 'b-1',
+        content: 'b1',
+        folderId: folderB.id,
+      );
+      final folderC = await notifier.createFolder(
+        name: 'C',
+        parentId: folderA.id,
+      );
+      final blockC1 = await notifier.createBlock(
+        title: 'c-1',
+        content: 'c1',
+        folderId: folderC.id,
+      );
+      final folderD = await notifier.createFolder(name: 'D');
+      final blockD1 = await notifier.createBlock(
+        title: 'd-1',
+        content: 'd1',
+        folderId: folderD.id,
+      );
 
-    final state = await container.read(
-      promptBlockLibraryNotifierProvider.future,
-    );
+      final state = await container.read(
+        promptBlockLibraryNotifierProvider.future,
+      );
 
-    // 父文件夹聚合整棵子树：直属块在前，再按同级顺序下钻 B、C。
-    expect(
-      state.blocksInFolderTree(folderA.id).map((item) => item.id),
-      [blockA1.id, blockA2.id, blockB1.id, blockC1.id],
-    );
-    // 根目录聚合根直属块与全部根级文件夹子树。
-    expect(
-      state.blocksInFolderTree(null).map((item) => item.id),
-      [
+      // 父文件夹聚合整棵子树：直属块在前，再按同级顺序下钻 B、C。
+      expect(state.blocksInFolderTree(folderA.id).map((item) => item.id), [
+        blockA1.id,
+        blockA2.id,
+        blockB1.id,
+        blockC1.id,
+      ]);
+      // 根目录聚合根直属块与全部根级文件夹子树。
+      expect(state.blocksInFolderTree(null).map((item) => item.id), [
         blockRootA.id,
         blockRootB.id,
         blockA1.id,
@@ -144,23 +152,22 @@ void main() {
         blockB1.id,
         blockC1.id,
         blockD1.id,
-      ],
-    );
-    // 叶子文件夹仍只含直属块。
-    expect(
-      state.blocksInFolderTree(folderB.id).map((item) => item.id),
-      [blockB1.id],
-    );
-    expect(state.blocksInFolderTree('missing-folder'), isEmpty);
-    // 树序映射：根 0 → A 1 → B 2 → C 3 → D 4（同级按创建顺序）。
-    expect(state.folderTreeOrder(), {
-      null: 0,
-      folderA.id: 1,
-      folderB.id: 2,
-      folderC.id: 3,
-      folderD.id: 4,
-    });
-  });
+      ]);
+      // 叶子文件夹仍只含直属块。
+      expect(state.blocksInFolderTree(folderB.id).map((item) => item.id), [
+        blockB1.id,
+      ]);
+      expect(state.blocksInFolderTree('missing-folder'), isEmpty);
+      // 树序映射：根 0 → A 1 → B 2 → C 3 → D 4（同级按创建顺序）。
+      expect(state.folderTreeOrder(), {
+        null: 0,
+        folderA.id: 1,
+        folderB.id: 2,
+        folderC.id: 3,
+        folderD.id: 4,
+      });
+    },
+  );
 
   test(
     'importTxtFiles creates new blocks and skips existing sources',
@@ -349,5 +356,126 @@ void main() {
       () => notifier.importLibrary({'folders': []}),
       throwsA(isA<FormatException>()),
     );
+  });
+
+  test('deleteBlocks removes multiple blocks in one pass', () async {
+    final container = ProviderContainer(
+      overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(
+      promptBlockLibraryNotifierProvider.notifier,
+    );
+    final a = await notifier.createBlock(title: 'A', content: 'a');
+    final b = await notifier.createBlock(title: 'B', content: 'b');
+    final c = await notifier.createBlock(title: 'C', content: 'c');
+
+    await notifier.deleteBlocks([a.id, b.id]);
+
+    final state = await container.read(
+      promptBlockLibraryNotifierProvider.future,
+    );
+    expect(state.blockById(a.id), isNull);
+    expect(state.blockById(b.id), isNull);
+    expect(state.blockById(c.id)?.title, 'C');
+    expect(state.blocks.map((block) => block.id), [c.id]);
+  });
+
+  test('deleteBlocks with an empty list is a no-op', () async {
+    final container = ProviderContainer(
+      overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(
+      promptBlockLibraryNotifierProvider.notifier,
+    );
+    final a = await notifier.createBlock(title: 'A', content: 'a');
+
+    await notifier.deleteBlocks([]);
+
+    final state = await container.read(
+      promptBlockLibraryNotifierProvider.future,
+    );
+    expect(state.blockById(a.id)?.title, 'A');
+  });
+
+  test('moveBlocks moves blocks into a folder and back to root', () async {
+    final container = ProviderContainer(
+      overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(
+      promptBlockLibraryNotifierProvider.notifier,
+    );
+    final folder = await notifier.createFolder(name: 'F1');
+    final a = await notifier.createBlock(title: 'A', content: 'a');
+    final b = await notifier.createBlock(title: 'B', content: 'b');
+
+    await notifier.moveBlocks([a.id, b.id], folder.id);
+
+    var state = await container.read(promptBlockLibraryNotifierProvider.future);
+    expect(state.blockById(a.id)?.folderId, folder.id);
+    expect(state.blockById(b.id)?.folderId, folder.id);
+
+    await notifier.moveBlocks([a.id], null);
+
+    state = await container.read(promptBlockLibraryNotifierProvider.future);
+    expect(state.blockById(a.id)?.folderId, isNull);
+    expect(state.blockById(b.id)?.folderId, folder.id);
+  });
+
+  test('moveBlocks to a missing folder throws and keeps disk state', () async {
+    final container = ProviderContainer(
+      overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(
+      promptBlockLibraryNotifierProvider.notifier,
+    );
+    final a = await notifier.createBlock(title: 'A', content: 'a');
+
+    await expectLater(
+      notifier.moveBlocks([a.id], 'missing-folder'),
+      throwsA(isA<ArgumentError>()),
+    );
+
+    // 批量失败后 notifier 处于 AsyncError，先 refresh 恢复再断言落盘状态。
+    await notifier.refresh();
+    final state = await container.read(
+      promptBlockLibraryNotifierProvider.future,
+    );
+    expect(state.blockById(a.id)?.folderId, isNull);
+  });
+
+  test('setFavorite favorites, unfavorites and skips no-ops', () async {
+    final container = ProviderContainer(
+      overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(
+      promptBlockLibraryNotifierProvider.notifier,
+    );
+    final a = await notifier.createBlock(title: 'A', content: 'a');
+    final b = await notifier.createBlock(title: 'B', content: 'b');
+    final c = await notifier.createBlock(title: 'C', content: 'c');
+
+    await notifier.setFavorite([a.id, b.id], true);
+
+    var state = await container.read(promptBlockLibraryNotifierProvider.future);
+    expect(state.blockById(a.id)?.isFavorite, isTrue);
+    expect(state.blockById(b.id)?.isFavorite, isTrue);
+    expect(state.blockById(c.id)?.isFavorite, isFalse);
+
+    await notifier.setFavorite([a.id], false);
+
+    state = await container.read(promptBlockLibraryNotifierProvider.future);
+    expect(state.blockById(a.id)?.isFavorite, isFalse);
+    expect(state.blockById(b.id)?.isFavorite, isTrue);
+
+    // 目标态与当前态一致的空操作不应抛错。
+    await notifier.setFavorite([], true);
+
+    state = await container.read(promptBlockLibraryNotifierProvider.future);
+    expect(state.blockById(b.id)?.isFavorite, isTrue);
   });
 }

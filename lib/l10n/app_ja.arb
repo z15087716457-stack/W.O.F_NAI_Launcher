@@ -5757,6 +5757,7 @@
   "promptBlockLibrary_allBlocks": "すべてのブロック",
   "promptBlockLibrary_rootFolder": "ルート / 未分類",
   "promptBlockLibrary_unnamedBlock": "無題のブロック",
+  "promptBlockLibrary_noBlockSelected": "ブロックが選択されていません",
   "promptBlockPill_missing": "削除されたブロック",
   "promptBlockPill_unknown": "無効なブロック",
   "pillCardReroll": "再抽選",
@@ -5818,6 +5819,68 @@
   "promptBlockLibrary_saved": "保存しました",
   "promptBlockLibrary_copied": "内容をコピーしました",
   "promptBlockLibrary_deleted": "削除しました",
+  "promptBlockLibrary_multiSelect": "複数選択",
+  "promptBlockLibrary_exitMultiSelect": "複数選択を終了",
+  "promptBlockLibrary_selectedCount": "{count} 件選択中",
+  "@promptBlockLibrary_selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_selectAllVisible": "すべて選択",
+  "promptBlockLibrary_clearSelection": "選択をクリア",
+  "promptBlockLibrary_moveTo": "移動先…",
+  "promptBlockLibrary_moveToFolderTitle": "フォルダーへ移動",
+  "promptBlockLibrary_deleteBlocksConfirm": "選択した {count} 個のブロックを削除しますか？この操作は取り消せません。",
+  "@promptBlockLibrary_deleteBlocksConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_favoriteSelected": "選択した {count} 個のブロックをお気に入りに追加",
+  "@promptBlockLibrary_favoriteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_unfavoriteSelected": "選択した {count} 個のブロックのお気に入りを解除",
+  "@promptBlockLibrary_unfavoriteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_moveToSelected": "{count} 個のブロックを移動先…",
+  "@promptBlockLibrary_moveToSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_deleteSelected": "選択した {count} 個のブロックを削除",
+  "@promptBlockLibrary_deleteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_blocksMoved": "{count} 個のブロックを移動しました",
+  "@promptBlockLibrary_blocksMoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "promptBlockLibrary_empty": "プロンプトブロックはまだありません",
   "promptBlockLibrary_emptyFolder": "このフォルダーは空です",
   "promptBlockLibrary_noSearchResults": "一致するブロックがありません",

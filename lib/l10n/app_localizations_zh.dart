@@ -9920,6 +9920,59 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_deleted => '已删除';
 
   @override
+  String get promptBlockLibrary_multiSelect => '多选';
+
+  @override
+  String get promptBlockLibrary_exitMultiSelect => '退出多选';
+
+  @override
+  String promptBlockLibrary_selectedCount(int count) {
+    return '已选 $count 项';
+  }
+
+  @override
+  String get promptBlockLibrary_selectAllVisible => '全选';
+
+  @override
+  String get promptBlockLibrary_clearSelection => '清空选择';
+
+  @override
+  String get promptBlockLibrary_moveTo => '移动到…';
+
+  @override
+  String get promptBlockLibrary_moveToFolderTitle => '移动到文件夹';
+
+  @override
+  String promptBlockLibrary_deleteBlocksConfirm(int count) {
+    return '确定要删除选中的 $count 个块吗？此操作无法撤销。';
+  }
+
+  @override
+  String promptBlockLibrary_favoriteSelected(int count) {
+    return '收藏选中的 $count 个块';
+  }
+
+  @override
+  String promptBlockLibrary_unfavoriteSelected(int count) {
+    return '取消收藏选中的 $count 个块';
+  }
+
+  @override
+  String promptBlockLibrary_moveToSelected(int count) {
+    return '移动 $count 个块到…';
+  }
+
+  @override
+  String promptBlockLibrary_deleteSelected(int count) {
+    return '删除选中的 $count 个块';
+  }
+
+  @override
+  String promptBlockLibrary_blocksMoved(int count) {
+    return '已移动 $count 个块';
+  }
+
+  @override
   String get promptBlockLibrary_empty => '还没有提示词块';
 
   @override

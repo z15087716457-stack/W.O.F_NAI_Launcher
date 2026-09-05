@@ -5819,6 +5819,68 @@
   "promptBlockLibrary_saved": "已保存",
   "promptBlockLibrary_copied": "正文已复制",
   "promptBlockLibrary_deleted": "已删除",
+  "promptBlockLibrary_multiSelect": "多选",
+  "promptBlockLibrary_exitMultiSelect": "退出多选",
+  "promptBlockLibrary_selectedCount": "已选 {count} 项",
+  "@promptBlockLibrary_selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_selectAllVisible": "全选",
+  "promptBlockLibrary_clearSelection": "清空选择",
+  "promptBlockLibrary_moveTo": "移动到…",
+  "promptBlockLibrary_moveToFolderTitle": "移动到文件夹",
+  "promptBlockLibrary_deleteBlocksConfirm": "确定要删除选中的 {count} 个块吗？此操作无法撤销。",
+  "@promptBlockLibrary_deleteBlocksConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_favoriteSelected": "收藏选中的 {count} 个块",
+  "@promptBlockLibrary_favoriteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_unfavoriteSelected": "取消收藏选中的 {count} 个块",
+  "@promptBlockLibrary_unfavoriteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_moveToSelected": "移动 {count} 个块到…",
+  "@promptBlockLibrary_moveToSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_deleteSelected": "删除选中的 {count} 个块",
+  "@promptBlockLibrary_deleteSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "promptBlockLibrary_blocksMoved": "已移动 {count} 个块",
+  "@promptBlockLibrary_blocksMoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "promptBlockLibrary_empty": "还没有提示词块",
   "promptBlockLibrary_emptyFolder": "此文件夹为空",
   "promptBlockLibrary_noSearchResults": "没有匹配的块",

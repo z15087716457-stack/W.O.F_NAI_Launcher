@@ -143,6 +143,59 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
   Future<void> deleteBlock(String blockId) =>
       _mutate((repository) => repository.deleteBlock(blockId));
 
+  /// 批量删除块：循环单块删除，末尾单次整库 reload（不走 N 次 [_mutate]）。
+  /// 任一块失败即中断并进入 AsyncError，reload 后状态以落盘为准。
+  Future<void> deleteBlocks(List<String> blockIds) async {
+    if (blockIds.isEmpty) return;
+    final repository = ref.read(promptBlockRepositoryProvider);
+    try {
+      for (final blockId in blockIds) {
+        await repository.deleteBlock(blockId);
+      }
+      state = AsyncData(_toState(await repository.load()));
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 批量移动块到目标文件夹（null = 根目录），末尾单次整库 reload。
+  Future<void> moveBlocks(List<String> blockIds, String? folderId) async {
+    if (blockIds.isEmpty) return;
+    final repository = ref.read(promptBlockRepositoryProvider);
+    try {
+      for (final blockId in blockIds) {
+        await repository.moveBlock(blockId, folderId);
+      }
+      state = AsyncData(_toState(await repository.load()));
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 批量设置收藏状态：只对当前态与目标不一致的块调用 toggle，末尾单次 reload。
+  Future<void> setFavorite(List<String> blockIds, bool favorite) async {
+    if (blockIds.isEmpty) return;
+    final current = state.valueOrNull;
+    final toToggle = <String>[];
+    for (final blockId in blockIds) {
+      final block = current?.blockById(blockId);
+      if (block != null && block.isFavorite != favorite) toToggle.add(blockId);
+    }
+    if (toToggle.isEmpty) return;
+    final repository = ref.read(promptBlockRepositoryProvider);
+    try {
+      for (final blockId in toToggle) {
+        await repository.toggleFavorite(blockId);
+      }
+      state = AsyncData(_toState(await repository.load()));
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+      rethrow;
+    }
+  }
+
   Future<PromptBlockFolder> createFolder({
     required String name,
     String? parentId,

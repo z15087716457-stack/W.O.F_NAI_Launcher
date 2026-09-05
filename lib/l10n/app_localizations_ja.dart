@@ -9876,7 +9876,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_unnamedBlock => '無題のブロック';
 
   @override
-  String get promptBlockLibrary_noBlockSelected => 'No block selected';
+  String get promptBlockLibrary_noBlockSelected => 'ブロックが選択されていません';
 
   @override
   String get promptBlockPill_missing => '削除されたブロック';
@@ -10060,6 +10060,59 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_deleted => '削除しました';
+
+  @override
+  String get promptBlockLibrary_multiSelect => '複数選択';
+
+  @override
+  String get promptBlockLibrary_exitMultiSelect => '複数選択を終了';
+
+  @override
+  String promptBlockLibrary_selectedCount(int count) {
+    return '$count 件選択中';
+  }
+
+  @override
+  String get promptBlockLibrary_selectAllVisible => 'すべて選択';
+
+  @override
+  String get promptBlockLibrary_clearSelection => '選択をクリア';
+
+  @override
+  String get promptBlockLibrary_moveTo => '移動先…';
+
+  @override
+  String get promptBlockLibrary_moveToFolderTitle => 'フォルダーへ移動';
+
+  @override
+  String promptBlockLibrary_deleteBlocksConfirm(int count) {
+    return '選択した $count 個のブロックを削除しますか？この操作は取り消せません。';
+  }
+
+  @override
+  String promptBlockLibrary_favoriteSelected(int count) {
+    return '選択した $count 個のブロックをお気に入りに追加';
+  }
+
+  @override
+  String promptBlockLibrary_unfavoriteSelected(int count) {
+    return '選択した $count 個のブロックのお気に入りを解除';
+  }
+
+  @override
+  String promptBlockLibrary_moveToSelected(int count) {
+    return '$count 個のブロックを移動先…';
+  }
+
+  @override
+  String promptBlockLibrary_deleteSelected(int count) {
+    return '選択した $count 個のブロックを削除';
+  }
+
+  @override
+  String promptBlockLibrary_blocksMoved(int count) {
+    return '$count 個のブロックを移動しました';
+  }
 
   @override
   String get promptBlockLibrary_empty => 'プロンプトブロックはまだありません';

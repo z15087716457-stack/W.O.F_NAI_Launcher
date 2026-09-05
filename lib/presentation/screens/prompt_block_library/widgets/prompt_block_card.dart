@@ -21,6 +21,8 @@ class PromptBlockCard extends StatelessWidget {
     this.onExport,
     this.onToggleFavorite,
     this.selected = false,
+    this.multiSelected = false,
+    this.onSecondaryTap,
   });
 
   final PromptBlock block;
@@ -34,6 +36,12 @@ class PromptBlockCard extends StatelessWidget {
   final VoidCallback? onToggleFavorite;
   final bool selected;
 
+  /// 多选模式下属于选中集合（叠加勾选角标；描边复用 [selected]）。
+  final bool multiSelected;
+
+  /// 右键菜单入口（secondary tap）。
+  final void Function(TapUpDetails details)? onSecondaryTap;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -43,98 +51,115 @@ class PromptBlockCard extends StatelessWidget {
         ? context.l10n.detail_noContent
         : block.content.replaceAll(RegExp(r'\s+'), ' ').trim();
 
-    return Card(
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      elevation: selected ? 2 : 0,
-      color: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: selected
-              ? theme.colorScheme.primary
-              : blockColor.withValues(alpha: 0.55),
-          width: selected ? 1.5 : 1,
-        ),
-      ),
-      child: Column(
+    return GestureDetector(
+      onSecondaryTapUp: onSecondaryTap,
+      child: Stack(
         children: [
-          Expanded(
-            child: Material(
-              color: compact
-                  ? blockColor.withValues(alpha: 0.15)
-                  : theme.colorScheme.surface,
-              child: InkWell(
-                key: ValueKey('prompt-block-card-body-${block.id}'),
-                onTap: onTap,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    compact ? 10 : 12,
-                    compact ? 10 : 12,
-                    compact ? 10 : 12,
-                    8,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: compact ? 30 : 34,
-                            height: compact ? 30 : 34,
-                            decoration: BoxDecoration(
-                              color: blockColor.withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(9),
-                            ),
-                            child: Icon(
-                              promptBlockIconFromName(block.iconName),
-                              size: compact ? 18 : 20,
-                              color: blockColor,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              displayTitle,
-                              maxLines: compact ? 2 : 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          if (block.isFavorite && !compact)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 4),
-                              child: Icon(
-                                Icons.star,
-                                size: 17,
-                                color: blockColor,
-                              ),
-                            ),
-                        ],
-                      ),
-                      if (!compact) ...[
-                        const SizedBox(height: 10),
-                        Expanded(
-                          child: Text(
-                            preview,
-                            maxLines: width < 240 ? 2 : 4,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              height: 1.35,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+          Card(
+            margin: EdgeInsets.zero,
+            clipBehavior: Clip.antiAlias,
+            elevation: selected ? 2 : 0,
+            color: theme.colorScheme.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: selected
+                    ? theme.colorScheme.primary
+                    : blockColor.withValues(alpha: 0.55),
+                width: selected ? 1.5 : 1,
               ),
             ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Material(
+                    color: compact
+                        ? blockColor.withValues(alpha: 0.15)
+                        : theme.colorScheme.surface,
+                    child: InkWell(
+                      key: ValueKey('prompt-block-card-body-${block.id}'),
+                      onTap: onTap,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          compact ? 10 : 12,
+                          compact ? 10 : 12,
+                          compact ? 10 : 12,
+                          8,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: compact ? 30 : 34,
+                                  height: compact ? 30 : 34,
+                                  decoration: BoxDecoration(
+                                    color: blockColor.withValues(alpha: 0.18),
+                                    borderRadius: BorderRadius.circular(9),
+                                  ),
+                                  child: Icon(
+                                    promptBlockIconFromName(block.iconName),
+                                    size: compact ? 18 : 20,
+                                    color: blockColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    displayTitle,
+                                    maxLines: compact ? 2 : 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                if (block.isFavorite && !compact)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 4),
+                                    child: Icon(
+                                      Icons.star,
+                                      size: 17,
+                                      color: blockColor,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            if (!compact) ...[
+                              const SizedBox(height: 10),
+                              Expanded(
+                                child: Text(
+                                  preview,
+                                  maxLines: width < 240 ? 2 : 4,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    height: 1.35,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                _buildActions(context, theme),
+              ],
+            ),
           ),
-          _buildActions(context, theme),
+          if (multiSelected)
+            Positioned(
+              top: 6,
+              right: 6,
+              child: Icon(
+                Icons.check_circle,
+                size: 18,
+                color: theme.colorScheme.primary,
+              ),
+            ),
         ],
       ),
     );
@@ -275,6 +300,8 @@ class PromptBlockPill extends StatelessWidget {
     required this.maxWidth,
     required this.onTap,
     this.selected = false,
+    this.multiSelected = false,
+    this.onSecondaryTap,
   });
 
   final PromptBlock block;
@@ -283,49 +310,66 @@ class PromptBlockPill extends StatelessWidget {
   final VoidCallback onTap;
   final bool selected;
 
+  /// 多选模式下属于选中集合（叠加勾选角标；描边复用 [selected]）。
+  final bool multiSelected;
+
+  /// 右键菜单入口（secondary tap）。
+  final void Function(TapUpDetails details)? onSecondaryTap;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final blockColor = promptBlockColorFromString(block.color);
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: maxWidth),
-      child: Material(
-        color: blockColor.withValues(alpha: 0.16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: BorderSide(
-            color: selected
-                ? theme.colorScheme.primary
-                : blockColor.withValues(alpha: 0.65),
-            width: selected ? 1.4 : 1,
+    return GestureDetector(
+      onSecondaryTapUp: onSecondaryTap,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: Material(
+          color: blockColor.withValues(alpha: 0.16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: BorderSide(
+              color: selected
+                  ? theme.colorScheme.primary
+                  : blockColor.withValues(alpha: 0.65),
+              width: selected ? 1.4 : 1,
+            ),
           ),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          key: ValueKey('prompt-block-pill-body-${block.id}'),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  promptBlockIconFromName(block.iconName),
-                  size: 16,
-                  color: blockColor,
-                ),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    displayTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            key: ValueKey('prompt-block-pill-body-${block.id}'),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    promptBlockIconFromName(block.iconName),
+                    size: 16,
+                    color: blockColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      displayTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  if (multiSelected) ...[
+                    const SizedBox(width: 6),
+                    Icon(
+                      Icons.check_circle,
+                      size: 15,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ),
