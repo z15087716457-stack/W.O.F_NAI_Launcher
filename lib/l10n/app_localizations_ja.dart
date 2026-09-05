@@ -9876,6 +9876,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_unnamedBlock => '無題のブロック';
 
   @override
+  String get promptBlockLibrary_noBlockSelected => 'No block selected';
+
+  @override
   String get promptBlockPill_missing => '削除されたブロック';
 
   @override

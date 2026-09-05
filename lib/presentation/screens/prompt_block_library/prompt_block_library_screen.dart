@@ -47,7 +47,7 @@ class _PromptBlockLibraryScreenState
   bool _sortDescending = false;
   double _cardWidth = 220;
   String? _selectedBlockId;
-  bool _quickPanelExpanded = true;
+  bool _quickPanelExpanded = false;
 
   @override
   void initState() {
@@ -147,12 +147,10 @@ class _PromptBlockLibraryScreenState
               if (!mounted || _selectedBlockId != staleId) return;
               setState(() {
                 _selectedBlockId = null;
-                _quickPanelExpanded = false;
               });
             });
           }
-          final showQuickPanel =
-              constraints.maxWidth >= 720 && selectedBlock != null;
+          final showQuickPanel = constraints.maxWidth >= 720;
           return Row(
             children: [
               if (showSidebar) _buildSidebar(context, library),
@@ -168,7 +166,10 @@ class _PromptBlockLibraryScreenState
                 ),
               ),
               if (showQuickPanel)
-                _buildQuickSettingsRail(selectedBlock, state!.folders),
+                _buildQuickSettingsRail(
+                  selectedBlock,
+                  state?.folders ?? const <PromptBlockFolder>[],
+                ),
             ],
           );
         },
@@ -186,7 +187,7 @@ class _PromptBlockLibraryScreenState
   }
 
   Widget _buildQuickSettingsRail(
-    PromptBlock block,
+    PromptBlock? block,
     List<PromptBlockFolder> folders,
   ) {
     final theme = Theme.of(context);
@@ -200,7 +201,11 @@ class _PromptBlockLibraryScreenState
           color: theme.colorScheme.surface,
           border: Border(left: BorderSide(color: theme.dividerColor)),
         ),
-        child: _quickPanelExpanded
+        child: !_quickPanelExpanded
+            ? PromptBlockQuickSettingsCollapsed(
+                onExpand: () => setState(() => _quickPanelExpanded = true),
+              )
+            : block != null
             ? PromptBlockQuickSettingsPanel(
                 block: block,
                 folders: folders,
@@ -218,10 +223,98 @@ class _PromptBlockLibraryScreenState
                   _quickPanelExpanded = false;
                 }),
               )
-            : PromptBlockQuickSettingsCollapsed(
-                onExpand: () => setState(() => _quickPanelExpanded = true),
-              ),
+            : _buildEmptyQuickPanel(),
       ),
+    );
+  }
+
+  Widget _buildEmptyQuickPanel() {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 280) return const SizedBox.expand();
+        return Material(
+          key: const Key('prompt-block-quick-settings-empty'),
+          color: theme.colorScheme.surface,
+          child: Column(
+            children: [
+              SizedBox(
+                height: promptBlockLibraryWideHeaderHeight,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.tune,
+                        size: 19,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          l10n.common_edit,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        key: const Key('prompt-block-quick-settings-collapse'),
+                        tooltip: l10n.common_collapse,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () =>
+                            setState(() => _quickPanelExpanded = false),
+                        icon: const Icon(Icons.keyboard_arrow_right),
+                      ),
+                      IconButton(
+                        key: const Key('prompt-block-quick-settings-close'),
+                        tooltip: l10n.common_close,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () => setState(() {
+                          _selectedBlockId = null;
+                          _quickPanelExpanded = false;
+                        }),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Divider(
+                height: 1,
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+              ),
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.touch_app_outlined,
+                        size: 28,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        l10n.promptBlockLibrary_noBlockSelected,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -531,10 +624,9 @@ class _PromptBlockLibraryScreenState
                   children: [
                     SizedBox(
                       width: 20,
-                      child:
-                          field == _sortField
-                              ? const Icon(Icons.check, size: 16)
-                              : null,
+                      child: field == _sortField
+                          ? const Icon(Icons.check, size: 16)
+                          : null,
                     ),
                     const SizedBox(width: 6),
                     Text(_sortFieldLabel(context, field)),
@@ -1327,9 +1419,9 @@ class _PromptBlockLibraryScreenState
           .read(promptBlockLibraryNotifierProvider.notifier)
           .deleteBlock(block.id);
       if (_selectedBlockId == block.id && mounted) {
+        // 只清选中,保持右栏展开(显示未选择块),避免连续删除时布局跳动。
         setState(() {
           _selectedBlockId = null;
-          _quickPanelExpanded = false;
         });
       }
       if (context.mounted) {

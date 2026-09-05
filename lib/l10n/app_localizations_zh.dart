@@ -9734,6 +9734,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_unnamedBlock => '未命名块';
 
   @override
+  String get promptBlockLibrary_noBlockSelected => '未选择块';
+
+  @override
   String get promptBlockPill_missing => '块已删除';
 
   @override

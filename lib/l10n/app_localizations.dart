@@ -17638,6 +17638,12 @@ abstract class AppLocalizations {
   /// **'Untitled block'**
   String get promptBlockLibrary_unnamedBlock;
 
+  /// No description provided for @promptBlockLibrary_noBlockSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No block selected'**
+  String get promptBlockLibrary_noBlockSelected;
+
   /// No description provided for @promptBlockPill_missing.
   ///
   /// In en, this message translates to:

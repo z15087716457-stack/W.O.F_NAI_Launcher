@@ -10100,6 +10100,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_unnamedBlock => 'Untitled block';
 
   @override
+  String get promptBlockLibrary_noBlockSelected => 'No block selected';
+
+  @override
   String get promptBlockPill_missing => 'Block deleted';
 
   @override

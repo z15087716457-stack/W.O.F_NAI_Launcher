@@ -34,6 +34,17 @@ class _FakePromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
     );
     return block;
   }
+
+  @override
+  Future<void> deleteBlock(String blockId) async {
+    final current = state.valueOrNull ?? initialState;
+    state = AsyncData(
+      PromptBlockLibraryState(
+        blocks: current.blocks.where((item) => item.id != blockId).toList(),
+        folders: current.folders,
+      ),
+    );
+  }
 }
 
 void main() {
@@ -148,6 +159,7 @@ void main() {
         find.byKey(const ValueKey('prompt-block-card-body-first')),
       );
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
       expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
       expect(
         tester
@@ -173,6 +185,7 @@ void main() {
         find.byKey(const ValueKey('prompt-block-card-body-second')),
       );
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
       panel = tester.widget<PromptBlockQuickSettingsPanel>(
         find.byType(PromptBlockQuickSettingsPanel),
       );
@@ -195,6 +208,100 @@ void main() {
       expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
     },
   );
+
+  testWidgets('quick settings rail starts collapsed and expands to empty state without selection', (tester) async {
+    await pumpScreen(
+      tester,
+      buildScreen(blocks: [makeBlock('first', '第一个', 'one')]),
+    );
+
+    // 初始未选块:右栏常驻为折叠细条。
+    expect(
+      find.byKey(const Key('prompt-block-quick-settings-rail')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('prompt-block-quick-settings-collapsed')),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .getSize(find.byKey(const Key('prompt-block-quick-settings-rail')))
+          .width,
+      40,
+    );
+
+    // 手动点细条展开:显示"未选择块"空状态。
+    await tester.tap(
+      find.byKey(const Key('prompt-block-quick-settings-collapsed')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(
+      find.byKey(const Key('prompt-block-quick-settings-empty')),
+      findsOneWidget,
+    );
+    expect(find.text('未选择块'), findsOneWidget);
+    expect(find.byType(PromptBlockQuickSettingsPanel), findsNothing);
+    expect(
+      tester
+          .getSize(find.byKey(const Key('prompt-block-quick-settings-rail')))
+          .width,
+      320,
+    );
+  });
+
+  testWidgets('deleting the selected block keeps the rail expanded with empty state', (tester) async {
+    await pumpScreen(
+      tester,
+      buildScreen(
+        blocks: [makeBlock('first', '第一个', 'one')],
+      ),
+    );
+
+    await tester.tap(
+      find.byKey(const ValueKey('prompt-block-card-body-first')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
+
+    final deleteButton = find.descendant(
+      of: find.byType(PromptBlockQuickSettingsPanel),
+      matching: find.byIcon(Icons.delete_outline),
+    );
+    await tester.ensureVisible(deleteButton);
+    await tester.pump();
+    await tester.tap(deleteButton);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('删除').last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(
+      find.byKey(const Key('prompt-block-quick-settings-rail')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('prompt-block-quick-settings-empty')),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .getSize(find.byKey(const Key('prompt-block-quick-settings-rail')))
+          .width,
+      320,
+    );
+    expect(find.byType(PromptBlockQuickSettingsPanel), findsNothing);
+    expect(
+      find.byKey(const Key('prompt-block-quick-settings-collapsed')),
+      findsNothing,
+    );
+
+    // 消化删除成功 toast 的自动关闭定时器,避免测试结束时 timersPending。
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+  });
 
   testWidgets('card size slider updates immediately and persists on release', (
     tester,
@@ -301,6 +408,7 @@ void main() {
     await pumpScreen(tester, buildScreen(notifier: notifier));
     await tester.tap(find.byKey(const ValueKey('prompt-block-card-body-edit')));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
 
     final titleField = find.descendant(
       of: find.byKey(const Key('prompt-block-quick-title')),
@@ -343,6 +451,7 @@ void main() {
         find.byKey(const ValueKey('prompt-block-card-body-content-dialog')),
       );
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
 
       final contentField = find.descendant(
         of: find.byKey(const Key('prompt-block-quick-content')),
@@ -434,6 +543,7 @@ void main() {
       find.byKey(const ValueKey('prompt-block-card-body-picker')),
     );
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
 
     final colorOption = find.byKey(
       const ValueKey('prompt-block-color-option-#FFE53935'),

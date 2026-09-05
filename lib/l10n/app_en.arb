@@ -5757,6 +5757,7 @@
   "promptBlockLibrary_allBlocks": "All blocks",
   "promptBlockLibrary_rootFolder": "Root / Unfiled",
   "promptBlockLibrary_unnamedBlock": "Untitled block",
+  "promptBlockLibrary_noBlockSelected": "No block selected",
   "promptBlockPill_missing": "Block deleted",
   "promptBlockPill_unknown": "Invalid block",
   "pillCardReroll": "Re-roll",
