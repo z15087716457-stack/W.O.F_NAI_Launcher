@@ -11,7 +11,6 @@ class AutocompleteSettings {
     this.showAliases = true,
     this.showTranslations = true,
     this.autoInsertComma = true,
-    this.replaceUnderscores = false,
     this.danbooruEnabled = true,
     this.relatedTagsEnabled = true,
     this.llmTranslationEnabled = false,
@@ -23,7 +22,6 @@ class AutocompleteSettings {
   final bool showAliases;
   final bool showTranslations;
   final bool autoInsertComma;
-  final bool replaceUnderscores;
   final bool danbooruEnabled;
   final bool relatedTagsEnabled;
   final bool llmTranslationEnabled;
@@ -35,7 +33,6 @@ class AutocompleteSettings {
     bool? showAliases,
     bool? showTranslations,
     bool? autoInsertComma,
-    bool? replaceUnderscores,
     bool? danbooruEnabled,
     bool? relatedTagsEnabled,
     bool? llmTranslationEnabled,
@@ -47,7 +44,6 @@ class AutocompleteSettings {
       showAliases: showAliases ?? this.showAliases,
       showTranslations: showTranslations ?? this.showTranslations,
       autoInsertComma: autoInsertComma ?? this.autoInsertComma,
-      replaceUnderscores: replaceUnderscores ?? this.replaceUnderscores,
       danbooruEnabled: danbooruEnabled ?? this.danbooruEnabled,
       relatedTagsEnabled: relatedTagsEnabled ?? this.relatedTagsEnabled,
       llmTranslationEnabled:
@@ -106,12 +102,6 @@ class AutocompleteSettingsNotifier extends StateNotifier<AutocompleteSettings> {
               defaultValue: true,
             ) ??
             true,
-        replaceUnderscores:
-            storage.getSetting<bool>(
-              StorageKeys.autocompleteReplaceUnderscores,
-              defaultValue: false,
-            ) ??
-            false,
         danbooruEnabled:
             storage.getSetting<bool>(
               StorageKeys.autocompleteDanbooruEnabled,
@@ -177,12 +167,6 @@ class AutocompleteSettingsNotifier extends StateNotifier<AutocompleteSettings> {
   Future<void> setAutoInsertComma(bool value) => _set(
     state.copyWith(autoInsertComma: value),
     StorageKeys.autocompleteAutoComma,
-    value,
-  );
-
-  Future<void> setReplaceUnderscores(bool value) => _set(
-    state.copyWith(replaceUnderscores: value),
-    StorageKeys.autocompleteReplaceUnderscores,
     value,
   );
 

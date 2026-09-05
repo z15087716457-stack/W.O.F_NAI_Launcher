@@ -110,8 +110,6 @@ class StorageKeys {
   static const String autocompleteShowTranslations =
       'autocomplete_show_translations';
   static const String autocompleteAutoComma = 'autocomplete_auto_comma';
-  static const String autocompleteReplaceUnderscores =
-      'autocomplete_replace_underscores';
   static const String autocompleteDanbooruEnabled =
       'autocomplete_danbooru_enabled';
   static const String autocompleteLlmTranslationEnabled =

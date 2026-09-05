@@ -13,22 +13,19 @@ CompletionQuery _parse(String text, int cursor, {bool search = false}) =>
 
 void main() {
   group('prompt completion contract', () {
-    for (final oldSetting in [false, true]) {
-      test('inserts display tags with persisted setting $oldSetting', () {
-        const text = 'old_tag, lon, another_tag';
-        final query = _parse(text, text.indexOf('lon') + 3);
-        final applied = PromptTokenParser.apply(
-          text: text,
-          query: query,
-          canonicalTag: 'long_hair',
-          autoInsertComma: true,
-          replaceUnderscores: oldSetting,
-        );
-        expect(applied.text, 'old_tag, long hair, another_tag');
-        expect(applied.cursorPosition, 'old_tag, long hair, '.length);
-        expect(query.existingTags, {'old_tag', 'another_tag'});
-      });
-    }
+    test('inserts display tags', () {
+      const text = 'old_tag, lon, another_tag';
+      final query = _parse(text, text.indexOf('lon') + 3);
+      final applied = PromptTokenParser.apply(
+        text: text,
+        query: query,
+        canonicalTag: 'long_hair',
+        autoInsertComma: true,
+      );
+      expect(applied.text, 'old_tag, long hair, another_tag');
+      expect(applied.cursorPosition, 'old_tag, long hair, '.length);
+      expect(query.existingTags, {'old_tag', 'another_tag'});
+    });
 
     final replacements = <String, String>{
       '1.2::artist:a, 1girl::, blu': '1.2::artist:a, 1girl::, blue eyes, ',
@@ -58,7 +55,6 @@ void main() {
           query: query,
           canonicalTag: 'blue_eyes',
           autoInsertComma: true,
-          replaceUnderscores: false,
         );
         expect(applied.text, entry.value);
       });
@@ -165,22 +161,19 @@ void main() {
   });
 
   group('canonical external search', () {
-    for (final oldSetting in [false, true]) {
-      test('space separated search ignores display setting $oldSetting', () {
-        const text = 'rating:g  foot_focus\tlo  -comic';
-        final query = _parse(text, text.indexOf('lo') + 2, search: true);
-        expect(query.token, 'lo');
-        expect(query.existingTags, {'rating:g', 'foot_focus', '-comic'});
-        final applied = PromptTokenParser.apply(
-          text: text,
-          query: query,
-          canonicalTag: 'long_hair',
-          autoInsertComma: false,
-          replaceUnderscores: oldSetting,
-          splitOnSpaces: true,
-        );
-        expect(applied.text, 'rating:g  foot_focus\tlong_hair  -comic');
-      });
-    }
+    test('space separated search keeps canonical tags', () {
+      const text = 'rating:g  foot_focus\tlo  -comic';
+      final query = _parse(text, text.indexOf('lo') + 2, search: true);
+      expect(query.token, 'lo');
+      expect(query.existingTags, {'rating:g', 'foot_focus', '-comic'});
+      final applied = PromptTokenParser.apply(
+        text: text,
+        query: query,
+        canonicalTag: 'long_hair',
+        autoInsertComma: false,
+        splitOnSpaces: true,
+      );
+      expect(applied.text, 'rating:g  foot_focus\tlong_hair  -comic');
+    });
   });
 }

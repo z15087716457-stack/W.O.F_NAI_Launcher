@@ -87,7 +87,6 @@ void main() {
       const AutocompleteConfig(
         treatSpacesAsSeparators: true,
         autoInsertComma: false,
-        replaceUnderscoreWithSpace: true,
       ),
     );
     addTearDown(strategy.dispose);

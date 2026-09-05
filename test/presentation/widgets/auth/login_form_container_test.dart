@@ -51,6 +51,15 @@ void main() {
 
     expect(container.read(guestSessionNotifierProvider), isTrue);
   });
+
+  testWidgets('guest entry stays hidden in add-account reuse contexts', (
+    tester,
+  ) async {
+    // 添加账号对话框复用裸容器：不显示游客入口，已登录用户不该看到逃生门。
+    await _pumpLoginForm(tester, const Locale('zh'), showGuestEntry: false);
+
+    expect(find.byKey(const Key('auth_guest_entry')), findsNothing);
+  });
   testWidgets('email and password mode is enabled and opens its form', (
     tester,
   ) async {
@@ -91,7 +100,11 @@ void main() {
   }
 }
 
-Future<void> _pumpLoginForm(WidgetTester tester, Locale locale) async {
+Future<void> _pumpLoginForm(
+  WidgetTester tester,
+  Locale locale, {
+  bool showGuestEntry = true,
+}) async {
   await tester.binding.setSurfaceSize(const Size(450, 1000));
   addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -102,11 +115,13 @@ Future<void> _pumpLoginForm(WidgetTester tester, Locale locale) async {
         locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const Scaffold(
+        home: Scaffold(
           body: Center(
             child: SizedBox(
               width: 402,
-              child: SingleChildScrollView(child: LoginFormContainer()),
+              child: SingleChildScrollView(
+                child: LoginFormContainer(showGuestEntry: showGuestEntry),
+              ),
             ),
           ),
         ),

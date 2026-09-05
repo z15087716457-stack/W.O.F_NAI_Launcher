@@ -149,7 +149,6 @@ class PromptTokenParser {
     required CompletionQuery query,
     required String canonicalTag,
     required bool autoInsertComma,
-    bool replaceUnderscores = true,
     bool splitOnSpaces = false,
     bool closeOpenWeight = false,
   }) {

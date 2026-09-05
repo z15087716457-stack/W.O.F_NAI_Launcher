@@ -153,7 +153,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (accounts.isEmpty) {
       return ConstrainedBox(
         constraints: BoxConstraints(maxWidth: isWideScreen ? 550 : 420),
-        child: const LoginFormContainer(),
+        child: const LoginFormContainer(showGuestEntry: true),
       );
     }
 
@@ -408,6 +408,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 LoginFormContainer(
                   onLoginSuccess: () => Navigator.pop(dialogContext),
+                  showGuestEntry: true,
                 ),
               ],
             ),

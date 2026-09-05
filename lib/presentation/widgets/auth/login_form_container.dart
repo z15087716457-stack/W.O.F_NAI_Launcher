@@ -15,7 +15,15 @@ class LoginFormContainer extends ConsumerWidget {
   /// 登录成功回调
   final VoidCallback? onLoginSuccess;
 
-  const LoginFormContainer({super.key, this.onLoginSuccess});
+  /// 是否显示游客入口。仅登录页等未认证语境传 true；
+  /// 已登录的添加账号等复用场景默认不显示。
+  final bool showGuestEntry;
+
+  const LoginFormContainer({
+    super.key,
+    this.onLoginSuccess,
+    this.showGuestEntry = false,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -86,15 +94,17 @@ class LoginFormContainer extends ConsumerWidget {
               },
             ),
           ),
-          const SizedBox(height: 16),
-          OutlinedButton.icon(
-            key: const Key('auth_guest_entry'),
-            onPressed: () {
-              ref.read(guestSessionNotifierProvider.notifier).enterGuest();
-            },
-            icon: const Icon(Icons.explore_outlined),
-            label: Text(context.l10n.auth_guestEntry),
-          ),
+          if (showGuestEntry) ...[
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              key: const Key('auth_guest_entry'),
+              onPressed: () {
+                ref.read(guestSessionNotifierProvider.notifier).enterGuest();
+              },
+              icon: const Icon(Icons.explore_outlined),
+              label: Text(context.l10n.auth_guestEntry),
+            ),
+          ],
         ],
       ),
     );

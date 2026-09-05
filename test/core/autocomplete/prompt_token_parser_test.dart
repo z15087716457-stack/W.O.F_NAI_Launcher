@@ -45,7 +45,6 @@ void main() {
           query: braced,
           canonicalTag: 'very_long_hair',
           autoInsertComma: true,
-          replaceUnderscores: false,
         ).text,
         '{{very long hair}}, ',
       );
@@ -55,7 +54,6 @@ void main() {
           query: weighted,
           canonicalTag: 'very_long_hair',
           autoInsertComma: true,
-          replaceUnderscores: false,
         ).text,
         '(very long hair:1.25), ',
       );
@@ -125,7 +123,6 @@ void main() {
         query: query,
         canonicalTag: '角色立绘',
         autoInsertComma: true,
-        replaceUnderscores: true,
       );
       expect(result.text, 'masterpiece, <角色立绘>, ');
       expect(result.cursorPosition, result.text.length);
@@ -143,7 +140,6 @@ void main() {
         query: query,
         canonicalTag: 'character sheet',
         autoInsertComma: false,
-        replaceUnderscores: false,
       );
 
       expect(query.kind, CompletionQueryKind.libraryAlias);
@@ -162,7 +158,6 @@ void main() {
         query: query,
         canonicalTag: 'very_long_hair',
         autoInsertComma: true,
-        replaceUnderscores: true,
       );
 
       expect(result.text, '{{very long hair}}, next_tag');
@@ -188,7 +183,6 @@ void main() {
           query: query,
           canonicalTag: 'halo',
           autoInsertComma: true,
-          replaceUnderscores: false,
         );
         expect(result.text, '{{blue_archive:1.2}}, halo, solo');
       },
@@ -208,7 +202,6 @@ void main() {
           query: query,
           canonicalTag: 'halo',
           autoInsertComma: false,
-          replaceUnderscores: false,
         );
 
         expect(result.text, 'blue_archive, halo');

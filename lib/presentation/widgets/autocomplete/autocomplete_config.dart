@@ -10,7 +10,6 @@ class AutocompleteConfig {
     this.debounceDelay = const Duration(milliseconds: 150),
     this.minQueryLength = 2,
     this.autoInsertComma = true,
-    this.replaceUnderscoreWithSpace = false,
     this.treatSpacesAsSeparators = false,
   });
 
@@ -23,9 +22,6 @@ class AutocompleteConfig {
   final Duration debounceDelay;
   final int minQueryLength;
   final bool autoInsertComma;
-
-  /// Legacy option retained for callers; prompt fields always insert spaces.
-  final bool replaceUnderscoreWithSpace;
 
   /// Search fields split on spaces and must insert canonical underscore tags.
   final bool treatSpacesAsSeparators;

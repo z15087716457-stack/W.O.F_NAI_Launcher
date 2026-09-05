@@ -56,88 +56,75 @@ void main() {
   });
 
   for (final search in [false, true]) {
-    for (final storedSetting in [false, true]) {
-      testWidgets('field semantics override stored underscore setting '
-          '$storedSetting, search=$search', (tester) async {
-        await tester.runAsync(
-          () => Hive.box(
-            StorageKeys.settingsBox,
-          ).put(StorageKeys.autocompleteReplaceUnderscores, storedSetting),
-        );
-        final initial = search
-            ? 'foot_focus blu -comic'
-            : '1.2::artist:a, 1girl::, blu, old_tag';
-        final cursor = initial.indexOf('blu') + 3;
-        final controller = TextEditingController(text: initial);
-        final focusNode = FocusNode();
-        final source = _RecordingBaseSource();
-        addTearDown(controller.dispose);
-        addTearDown(focusNode.dispose);
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              autocompleteServicesProvider.overrideWithValue(
-                AutocompleteServices(
-                  localSources: [source],
-                  dictionaryTranslations: const _NoTranslations(),
-                  llmTranslations: const _NoTranslations(),
-                  danbooru: _NoDanbooru(),
-                ),
+    testWidgets('field semantics decide inserted tag form, search=$search', (
+      tester,
+    ) async {
+      final initial = search
+          ? 'foot_focus blu -comic'
+          : '1.2::artist:a, 1girl::, blu, old_tag';
+      final cursor = initial.indexOf('blu') + 3;
+      final controller = TextEditingController(text: initial);
+      final focusNode = FocusNode();
+      final source = _RecordingBaseSource();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            autocompleteServicesProvider.overrideWithValue(
+              AutocompleteServices(
+                localSources: [source],
+                dictionaryTranslations: const _NoTranslations(),
+                llmTranslations: const _NoTranslations(),
+                danbooru: _NoDanbooru(),
               ),
-            ],
-            child: MaterialApp(
-              locale: const Locale('en'),
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              home: Scaffold(
-                body: AutocompleteWrapper(
+            ),
+          ],
+          child: MaterialApp(
+            locale: const Locale('en'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: AutocompleteWrapper(
+                controller: controller,
+                focusNode: focusNode,
+                config: AutocompleteConfig(
+                  autoInsertComma: false,
+                  treatSpacesAsSeparators: search,
+                ),
+                child: TextField(
                   controller: controller,
                   focusNode: focusNode,
-                  config: AutocompleteConfig(
-                    autoInsertComma: false,
-                    treatSpacesAsSeparators: search,
-                    replaceUnderscoreWithSpace: !storedSetting,
-                  ),
-                  child: TextField(
-                    controller: controller,
-                    focusNode: focusNode,
-                  ),
                 ),
               ),
             ),
           ),
-        );
-        focusNode.requestFocus();
-        await tester.pump();
-        controller.value = TextEditingValue(
-          text: initial.replaceFirst('blu', 'bl'),
-          selection: TextSelection.collapsed(offset: cursor - 1),
-        );
-        await tester.pump();
-        controller.value = TextEditingValue(
-          text: initial,
-          selection: TextSelection.collapsed(offset: cursor),
-        );
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 30));
-        expect(source.tokens.last, 'blu');
-        expect(find.text('blue eyes'), findsOneWidget);
-        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-        await tester.pump();
-        expect(
-          controller.text,
-          search
-              ? 'foot_focus blue_eyes -comic'
-              : '1.2::artist:a, 1girl::, blue eyes, old_tag',
-        );
-        expect(
-          Hive.box(
-            StorageKeys.settingsBox,
-          ).get(StorageKeys.autocompleteReplaceUnderscores),
-          storedSetting,
-        );
-      });
-    }
+        ),
+      );
+      focusNode.requestFocus();
+      await tester.pump();
+      controller.value = TextEditingValue(
+        text: initial.replaceFirst('blu', 'bl'),
+        selection: TextSelection.collapsed(offset: cursor - 1),
+      );
+      await tester.pump();
+      controller.value = TextEditingValue(
+        text: initial,
+        selection: TextSelection.collapsed(offset: cursor),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 30));
+      expect(source.tokens.last, 'blu');
+      expect(find.text('blue eyes'), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(
+        controller.text,
+        search
+            ? 'foot_focus blue_eyes -comic'
+            : '1.2::artist:a, 1girl::, blue eyes, old_tag',
+      );
+    });
   }
 
   testWidgets('shows local BASE results and inserts by keyboard', (
@@ -358,7 +345,6 @@ void main() {
               config: const AutocompleteConfig(
                 showTranslation: true,
                 autoInsertComma: true,
-                replaceUnderscoreWithSpace: false,
               ),
               child: TextField(controller: controller, focusNode: focusNode),
             ),
@@ -1062,7 +1048,6 @@ class _FixedAutocompleteSettingsNotifier extends AutocompleteSettingsNotifier {
     state = const AutocompleteSettings(
       showTranslations: false,
       autoInsertComma: false,
-      replaceUnderscores: true,
       danbooruEnabled: false,
       zhInstallPromptDismissed: true,
     );
