@@ -1,4 +1,4 @@
-# NAI Launcher
+# W.O.F NAI Launcher
 
 <p align="center">
   简体中文 | <a href="README.en-US.md">English</a>
@@ -13,12 +13,15 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Aaalice233/Aaalice_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-1.0.0-blue" alt="Version"></a>
+  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-1.0.0-blue" alt="Version"></a>
   <img src="https://img.shields.io/badge/Flutter-3.44.2-blue?logo=flutter" alt="Flutter">
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS-lightgrey" alt="Platforms">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-  <a href="https://discord.gg/R48n6GwXzD"><img src="https://img.shields.io/badge/Discord-加入服务器-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
 </p>
+
+> **本仓库是 [Aaalice233/Aaalice_NAI_Launcher](https://github.com/Aaalice233/Aaalice_NAI_Launcher)（MIT）的个人分支（W.O.F 版）**，功能基线为上游 v1.5.3，版本号从 1.0.0 重新编排。本分支持续维护 V5 模型、桥接填参、画风探索遗传等扩展功能，与上游作者无关，问题反馈请提到本仓库的 Issues。
+>
+> 画风探索的遗传算法思路参考自 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)（GPL-3.0），本仓库中的实现为 Dart 重写，未复制其源码，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它把图像生成、图生图、局部重绘、Vibe / Precise Reference、本地图库、在线图库、生成队列、Krita 联动和统计工具整合在一个桌面应用里，适合日常生成、批量出图和长期管理本地作品。
 
@@ -42,6 +45,20 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
 - **Danbooru / Safebooru**：支持标签、日期搜索，以及指定日期的日榜、周榜和月榜；Danbooru 可登录并管理收藏，Safebooru 使用 `safebooru.donmai.us` 匿名只读访问。
 - **Gelbooru**：支持公开搜索；配置 API 凭据后可加速搜索并浏览只读网站收藏，不提供伪造的本地排行榜。
 - **AI TAG**：支持作品/作者/标题/标签/模型综合搜索和原样 Prompt 语法搜索（如 `::artist:`），时间范围由来源实时配置；支持实时月榜、历史月榜和旧月份归档。多图详情可切换、预取和逐图复用 NAI / Stable Diffusion / ComfyUI 元数据，并支持下载当前图片或作品全部图片。AI TAG 无需账号且仅提供只读访问。
+
+## 🔀 本分支与上游的差异
+
+相对上游 v1.5.3 基线，本分支（W.O.F 版）的主要区别：
+
+- **Krita 桥接扩展（AI 接管）**：新增 `set_params` / `generate` 全参数桥接写入，`get_params` 全量状态回读（角色框、坐标、noise_schedule、cfg_rescale、token 用量等），配套 `tool/nai_fill.py` 一键读图填入工具；应用内自动更新已在代码级禁用（防止更新覆盖桥接扩展）。
+- **NovelAI Diffusion V5（N5）**：注册 V5 Full / Curated 及能力位体系（无噪声调度、隐藏 Variety+、按能力显示 PR/Vibe 面板），V5 token 上限 1471 与计价（V4 系数 ×1.5）、透明背景开关、Enhance Max✨ 档、V5 质量词与 UC 预设。
+- **pill 提示词块系统**：单框药丸编辑器 + 页面级块库面板，块实例随机 roll（生成逐张重抽）、负向/角色框多 lane、块实例「顺序」模式、块管理页多选与右键菜单。
+- **画风探索模块（多池遗传）**：探索页三栏骨架、Run 数据层与批量候选、牌堆视图与正式筛选、深度迭代（变异/交叉/注入、家族与分支、偏好排序、谱系回溯）。算法思路参考 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)，为 Dart 重写实现。
+- **Opus 额度与计费**：生成页钉底条 Opus 免费额度芯片（官方 `usage.percent` 百分比 + 回充倒计时显示）；Opus 免费资格判定对齐官方实证，PR / img2img / 局部重绘不再误取消免费。
+- **图库大版本**：多图库源、瀑布流、高级筛选与版本过滤、收藏集（根-子集模型）、删除池、标签库瀑布流视图、在线画廊 NAI-only 过滤。
+- **角色卡编辑器**：官网式常驻布局，选中跟随焦点，输入框随内容自增高。
+
+详细变更见 [CHANGELOG.md](CHANGELOG.md) 的 `1.0.0` 段落。
 
 ## 🖥️ 界面预览
 
@@ -86,7 +103,7 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
 
 ## 📦 下载与安装
 
-前往 [Releases](https://github.com/Aaalice233/Aaalice_NAI_Launcher/releases) 下载最新版本。应用会在登录前后持续提示可用更新，并完整渲染 Release 中的 GitHub Flavored Markdown 更新日志（标题、列表、表格、引用、代码、链接与图片）。
+前往 [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases) 下载最新版本。本分支已禁用应用内自动更新，新版本请手动下载安装。
 
 | 平台 | 下载文件 | 使用方式 |
 | --- | --- | --- |
@@ -116,8 +133,8 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
 ### 通用步骤
 
 ```bash
-git clone https://github.com/Aaalice233/Aaalice_NAI_Launcher.git
-cd Aaalice_NAI_Launcher
+git clone https://github.com/z15087716457-stack/W.O.F_NAI_Launcher.git
+cd W.O.F_NAI_Launcher
 
 git lfs install
 git lfs pull --include="assets/databases/*.db"
@@ -248,6 +265,8 @@ type(scope): 中文描述
 
 ## 🙏 致谢
 
+- 感谢 [Aaalice233](https://github.com/Aaalice233/Aaalice_NAI_Launcher) 创作并开源上游项目（MIT），本分支在其 v1.5.3 基线上开发。
+- 画风探索的遗传算法思路参考自 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)（GPL-3.0），实现为 Dart 重写，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 - [NovelAI](https://novelai.net/) 提供图像生成服务。
 - [Flutter](https://flutter.dev/) 提供跨平台 UI 能力。
 - [Riverpod](https://riverpod.dev/) 提供状态管理能力。
@@ -255,4 +274,4 @@ type(scope): 中文描述
 
 ## 📄 许可证
 
-本项目基于 MIT License 开源，详见 [LICENSE](LICENSE)。
+本项目基于 MIT License 开源，详见 [LICENSE](LICENSE)。原版权归属上游 NAI Launcher Contributors，本分支新增部分的版权归 W.O.F (z15087716457-stack)。

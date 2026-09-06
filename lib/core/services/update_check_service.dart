@@ -204,10 +204,10 @@ class UpdateCheckService {
   final DateTime Function() _now;
 
   /// 默认仓库所有者
-  static const String defaultOwner = 'Aaalice233';
+  static const String defaultOwner = 'z15087716457-stack';
 
   /// 默认仓库名称
-  static const String defaultRepo = 'Aaalice_NAI_Launcher';
+  static const String defaultRepo = 'W.O.F_NAI_Launcher';
 
   /// 默认检查间隔（24小时）
   static const Duration defaultCheckInterval = Duration(hours: 24);

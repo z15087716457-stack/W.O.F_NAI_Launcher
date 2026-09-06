@@ -180,7 +180,7 @@ class MainNavRail extends ConsumerWidget {
 
             // GitHub 仓库
             _GitHubIcon(
-              url: 'https://github.com/Aaalice233/Aaalice_NAI_Launcher',
+              url: 'https://github.com/z15087716457-stack/W.O.F_NAI_Launcher',
               label: context.l10n.nav_githubRepo,
             ),
 

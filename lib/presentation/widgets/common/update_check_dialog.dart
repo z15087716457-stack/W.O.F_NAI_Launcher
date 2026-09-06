@@ -298,8 +298,8 @@ class UpdateCheckDialog extends ConsumerWidget {
         ? versionInfo.version
         : 'v${versionInfo.version}';
     final rawContentBase = Uri.parse(
-      'https://raw.githubusercontent.com/Aaalice233/'
-      'Aaalice_NAI_Launcher/$versionTag/',
+      'https://raw.githubusercontent.com/z15087716457-stack/'
+      'W.O.F_NAI_Launcher/$versionTag/',
     );
 
     return MarkdownBody(
@@ -385,7 +385,7 @@ class UpdateCheckDialog extends ConsumerWidget {
           : null;
     }
     return Uri.parse(
-      'https://github.com/Aaalice233/Aaalice_NAI_Launcher/blob/'
+      'https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/blob/'
       '$versionTag/',
     ).resolveUri(uri);
   }

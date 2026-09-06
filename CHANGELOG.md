@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.0.0] - 2026-09-06
+
+### ⚠️ 注意
+
+- 本仓库是 [Aaalice233/Aaalice_NAI_Launcher](https://github.com/Aaalice233/Aaalice_NAI_Launcher) 的个人分支（W.O.F 版），版本号从 1.0.0 重新编排，与上游版本号互不对应。功能基线为上游 v1.5.3，并合并了上游后续部分修复。
+- 应用内自动更新已在代码级禁用（防止更新覆盖桥接扩展），后续版本请前往 Releases 页面手动下载安装。
+
+### ✨ 新增
+
+- Krita 桥接扩展：`set_params` / `generate` 支持全参数外部接管；`get_params` 全量状态回读（含角色框、坐标、noise_schedule、cfg_rescale、token 用量等，可与 set 往返）；配套 `tool/nai_fill.py` 一键读图填入工具。
+- NovelAI Diffusion V5（N5）支持：V5 Full / Curated 模型注册与能力位体系（无噪声调度、隐藏 Variety+、按能力显示 PR/Vibe 面板）、V5 token 上限（1471）与计价、透明背景开关、Enhance Max✨ 档、V5 质量词与 UC 预设补全。
+- pill 提示词块系统：单框药丸编辑器、页面级块库面板、块实例随机 roll（生成时逐张重抽）、负向与角色框多 lane 接入、块实例「顺序」模式、块管理页多选与右键菜单。
+- 画风探索模块：三栏探索页、Run 数据层与批量候选生成、牌堆视图与正式筛选、多池遗传深度迭代（变异/交叉/注入、家族与分支、偏好排序、谱系回溯）；算法思路参考 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)（GPL-3.0，Dart 重写实现）。
+- 生成页钉底条 Opus 免费额度芯片：直接展示官方 `usage.percent` 额度百分比与回充倒计时，回充中带高光扫动效果，仅在支持 Opus 额度的模型下显示。
+- 画廊大版本：多图库源、瀑布流、高级筛选与版本过滤、收藏集（根-子集模型）、删除池；标签库新增瀑布流视图；在线画廊 NAI-only 过滤与版本下拉。
+- 角色卡编辑器改为官网式常驻布局，选中跟随焦点，输入框随内容自增高。
+
+### 🛠 改进
+
+- Opus 免费资格判定对齐官方实证：Precise Reference、img2img / 局部重绘不再误取消免费资格。
+
+### 🐛 修复
+
+- 修复画廊版本筛选漏筛（信封元数据嵌套解析）、V3 模型指纹误判、保存图像重复副本、右键菜单保存崩溃、滚动后悬停态丢失等问题。
+- 修复 Windows 托盘隐藏后标题栏按钮偶发丢失的问题。
+
 ## [1.5.3] - 2026-08-19
 
 ### 🛠 改进

@@ -1,4 +1,4 @@
-# NAI Launcher
+# W.O.F NAI Launcher
 
 <p align="center">
   <a href="README.md">简体中文</a> | English
@@ -13,12 +13,15 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Aaalice233/Aaalice_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-1.0.0-blue" alt="Version"></a>
+  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-1.0.0-blue" alt="Version"></a>
   <img src="https://img.shields.io/badge/Flutter-3.44.2-blue?logo=flutter" alt="Flutter">
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS-lightgrey" alt="Platforms">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-  <a href="https://discord.gg/R48n6GwXzD"><img src="https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
 </p>
+
+> **This repository is a personal fork (W.O.F edition) of [Aaalice233/Aaalice_NAI_Launcher](https://github.com/Aaalice233/Aaalice_NAI_Launcher) (MIT)**, based on upstream v1.5.3 with its own version numbering restarted at 1.0.0. It maintains extensions such as V5 model support, bridge parameter injection, and style-exploration genetics. It is not affiliated with the upstream author; please file issues in this repository.
+>
+> The genetic algorithm design of the style-exploration module is inspired by [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio) (GPL-3.0). The implementation here is a Dart rewrite that copies no source code; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 NAI Launcher is a third-party client for NovelAI built with Flutter. It integrates image generation, image-to-image, inpainting, Vibe / Precise Reference, local gallery, online gallery, generation queues, Krita integration, and statistical tools into a single desktop application, making it ideal for daily generation, batch processing, and long-term management of local artwork.
 
@@ -42,6 +45,20 @@ NAI Launcher is a third-party client for NovelAI built with Flutter. It integrat
 - **Danbooru / Safebooru**: Support tag and date searches plus native daily, weekly, and monthly rankings for a selected date. Danbooru supports login and writable favorites; Safebooru uses anonymous, read-only access to `safebooru.donmai.us`.
 - **Gelbooru**: Supports public search. Optional API credentials accelerate searches and enable read-only website favorites; no synthetic local ranking is presented.
 - **AI TAG**: Supports combined work/author/title/tag/model queries and verbatim Prompt syntax searches such as `::artist:`, with time ranges loaded from the live source configuration. Native live monthly, historical monthly, and older archives are available. Multi-image details support navigation, prefetching, and per-image NAI / Stable Diffusion / ComfyUI metadata reuse, plus current-image and whole-work downloads. AI TAG requires no account and is read-only.
+
+## 🔀 Differences from Upstream
+
+Compared to the upstream v1.5.3 baseline, this fork (W.O.F edition) mainly differs in:
+
+- **Krita bridge extensions (AI takeover)**: full-parameter bridge writes via `set_params` / `generate`, full state readback via `get_params` (character prompts, coordinates, noise_schedule, cfg_rescale, token usage, etc.), plus the `tool/nai_fill.py` one-shot image-to-parameters tool. In-app auto-update is disabled at the code level to prevent updates from overwriting bridge extensions.
+- **NovelAI Diffusion V5 (N5)**: V5 Full / Curated registration with a capability-flag system (no noise schedule, hidden Variety+, capability-driven PR/Vibe panels), V5 token limit (1471) and pricing (V4 coefficients ×1.5), transparent-background toggle, Enhance Max✨ tier, and V5 quality/UC presets.
+- **Pill prompt-block system**: single-box pill editor with a page-level block library panel, per-instance random rolls (re-rolled per image), multi-lane support for negative/character prompts, an "ordered" instance mode, and multi-select with context menus in the block manager.
+- **Style-exploration module (multi-pool genetics)**: three-column explorer, run data layer with batch candidates, deck view and formal screening, deep iteration (mutation/crossover/injection, families and branches, preference ranking, lineage tracing). Algorithm design inspired by [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio); reimplemented in Dart.
+- **Opus quota & billing**: an Opus free-quota chip in the generation page's pinned bar (official `usage.percent` plus refill countdown display); Opus free-eligibility rules aligned with observed official behavior, so PR / img2img / inpainting no longer wrongly cancel free generation.
+- **Gallery overhaul**: multi-source galleries, masonry layout, advanced and version filters, collections (root/subset model), trash pool, tag-library masonry view, and NAI-only filtering in the online gallery.
+- **Character prompt editor**: official-site-style persistent layout, selection follows focus, and fields auto-grow with content.
+
+See the `1.0.0` section of [CHANGELOG.md](CHANGELOG.md) for details.
 
 ## 🖥️ Interface Preview
 
@@ -86,7 +103,7 @@ NAI Launcher is a third-party client for NovelAI built with Flutter. It integrat
 
 ## 📦 Download & Install
 
-Download the latest version from [Releases](https://github.com/Aaalice233/Aaalice_NAI_Launcher/releases). The app persistently surfaces available updates before and after login and fully renders GitHub Flavored Markdown release notes, including headings, lists, tables, quotes, code, links, and images.
+Download the latest version from [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases). In-app auto-update is disabled in this fork; please download new versions manually.
 
 | Platform | Download File | Usage |
 | --- | --- | --- |
@@ -116,8 +133,8 @@ You can log in for the first time using your NovelAI account credentials or an A
 ### General Steps
 
 ```bash
-git clone https://github.com/Aaalice233/Aaalice_NAI_Launcher.git
-cd Aaalice_NAI_Launcher
+git clone https://github.com/z15087716457-stack/W.O.F_NAI_Launcher.git
+cd W.O.F_NAI_Launcher
 
 git lfs install
 git lfs pull --include="assets/databases/*.db"
@@ -248,6 +265,8 @@ Contributions via Issues and Pull Requests are welcome. Before submitting a PR, 
 
 ## 🙏 Acknowledgments
 
+- Thanks to [Aaalice233](https://github.com/Aaalice233/Aaalice_NAI_Launcher) for creating and open-sourcing the upstream project (MIT), on whose v1.5.3 baseline this fork is built.
+- The genetic algorithm design of the style-exploration module is inspired by [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio) (GPL-3.0), reimplemented in Dart; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 - [NovelAI](https://novelai.net/) for providing the image generation service.
 - [Flutter](https://flutter.dev/) for cross-platform UI capabilities.
 - [Riverpod](https://riverpod.dev/) for state management capabilities.
@@ -255,4 +274,4 @@ Contributions via Issues and Pull Requests are welcome. Before submitting a PR, 
 
 ## 📄 License
 
-This project is open-source under the MIT License. See [LICENSE](LICENSE) for details.
+This project is open-source under the MIT License. See [LICENSE](LICENSE) for details. Original copyright belongs to the upstream NAI Launcher Contributors; new work in this fork is copyrighted by W.O.F (z15087716457-stack).

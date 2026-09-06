@@ -1,7 +1,7 @@
 name: nai_launcher
-description: NovelAI Universal Launcher - 跨平台第三方客户端
+description: W.O.F NAI Launcher - NovelAI 跨平台第三方客户端（Aaalice_NAI_Launcher 分支）
 publish_to: "none"
-version: 1.6.0+27
+version: 1.0.0+1
 
 environment:
   sdk: ">=3.10.7 <4.0.0"

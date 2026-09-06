@@ -74,3 +74,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+## PromptCard-Studio (algorithm reference)
+
+The style-exploration deep-iteration mutation engine
+(`lib/core/utils/explore_mutation_engine.dart`) is a pure Dart
+reimplementation whose *algorithm design* is inspired by
+[monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)
+(`backend/app/style_explore_algorithm.py`, `generate_deep_candidates`).
+PromptCard-Studio is licensed under GPL-3.0. No source code from that
+project is copied into this application; the Dart implementation follows
+the same high-level semantics (per-parent fairness guarantee, random
+injection quota, weighted-parent crossover, dedup attempts) with
+intentional, documented deviations for this app's prompt-block model.
