@@ -88,9 +88,14 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
 
 能力位注册表驱动：V5 Full / Curated（含 inpainting 互转）、最多 32 个角色框、token 上限 1471、官网口径 ×1.5 计价、透明背景开关（straight_alpha）、Enhance Max✨ 服务端 e2e 放大、V5 质量词与 UC 预设。
 
-### 🔌 Krita 桥接 · AI 全参数接管
+### 🔌 开放桥接 · 任意 Agent 直接接管
 
-`set_params` / `generate` 全参数外部写入与静默生图（不改 UI）；`get_params` 全量状态对称回读（角色框与坐标、noise_schedule、cfg_rescale、PR/Vibe/img2img、token 实际用量），可 get→set 往返。配套 `tool/nai_bridge_client.py` CLI、`tool/nai_fill.py` 一键读图填入、`tool/bridge_selfcheck.py` 11 项端到端自检。应用内自动更新接入本仓库 Releases（v1.0.1 起）。
+启动器内置本地桥接协议，**任何外部 Agent 工具、脚本或工作流都能直接接入**——不设白名单、不限调用方，拿到桥接端口即可全权驾驶这台启动器：
+
+- **全参数写入**：`set_params` 批量写任意生成参数，`generate` 静默生图（不改 UI、直接回传图库路径），外部工具可以完全绕过界面跑整套生成流程。
+- **全量状态回读**：`get_params` 对称回读一切（角色框与坐标、noise_schedule、cfg_rescale、PR/Vibe/img2img、token 实际用量），get→set 往返无损。
+- **配套工具链**：`tool/nai_bridge_client.py` CLI（get / set / set-json / gen / ui-gen / cancel）、`tool/nai_fill.py` 一键读图填入、`tool/bridge_selfcheck.py` 11 项端到端自检——照着 CLI 的源码即可写出任意语言的接入方。
+- 应用内自动更新接入本仓库 Releases（v1.0.1 起），桥接扩展不会被上游更新覆盖。
 
 ### 🖼️ 画廊大版本
 

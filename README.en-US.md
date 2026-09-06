@@ -88,9 +88,14 @@ Generate candidates toward a style direction, then converge generation by genera
 
 Driven by a capability-flag registry: V5 Full / Curated (with inpainting mapping), up to 32 character prompts, 1471 token limit, official ×1.5 pricing, transparent-background toggle (straight_alpha), Enhance Max✨ server-side e2e upscale, and V5 quality/UC presets.
 
-### 🔌 Krita Bridge · Full AI Parameter Takeover
+### 🔌 Open Bridge · Any Agent Can Take the Wheel
 
-`set_params` / `generate` accept full external parameter writes and silent generation (no UI changes); `get_params` reads back complete state symmetrically (character prompts and coordinates, noise_schedule, cfg_rescale, PR/Vibe/img2img, actual token usage) for get→set round-trips. Ships with the `tool/nai_bridge_client.py` CLI, `tool/nai_fill.py` one-shot metadata fill, and `tool/bridge_selfcheck.py` 11-point end-to-end self-check. In-app auto-update is served from this repository's Releases (since v1.0.1).
+The launcher exposes a local bridge protocol that **any external agent tool, script, or workflow can plug into directly** — no whitelist, no caller restrictions. Get the bridge endpoint and you get full control of the launcher:
+
+- **Full-parameter writes**: `set_params` writes any generation parameter in batch; `generate` produces images silently (no UI changes, returns gallery paths) — external tools can drive the entire generation pipeline without touching the interface.
+- **Full-state readback**: `get_params` symmetrically reads back everything (character prompts and coordinates, noise_schedule, cfg_rescale, PR/Vibe/img2img, actual token usage) for lossless get→set round-trips.
+- **Companion toolchain**: `tool/nai_bridge_client.py` CLI (get / set / set-json / gen / ui-gen / cancel), `tool/nai_fill.py` one-shot metadata fill, and `tool/bridge_selfcheck.py` 11-point end-to-end self-check — the CLI source doubles as a reference implementation for writing a client in any language.
+- In-app auto-update is served from this repository's Releases (since v1.0.1), so bridge extensions are never clobbered by upstream updates.
 
 ### 🖼️ Gallery Overhaul
 
