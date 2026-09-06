@@ -193,7 +193,9 @@ $releaseLines = @(
 $releaseLines += $downloadRows
 $releaseLines += @(
   "",
-  "> **更新方式：** 本分支已禁用应用内自动更新（防止覆盖桥接扩展）。新版本请在本 Release 页面手动下载安装；Windows Setup 为普通用户的推荐版本，Portable 适合放在自定义目录，macOS 下载 ZIP 后手动替换应用。",
+  "> **应用内更新：** Windows 安装版用户无需手动下载。应用会自动选择 Setup x64，完成下载与 SHA256 校验后退出旧版本、静默安装并重新启动。Portable 版也支持应用内自动更新和失败回滚。更新源为本仓库 Releases。",
+  "",
+  "> **安装提示：** macOS 当前需下载 ZIP 后手动替换应用。Windows Setup 为普通用户的推荐版本，Portable 适合放在自定义目录。",
   "",
   "## 📝 更新内容",
   "",
@@ -201,7 +203,7 @@ $releaseLines += @(
   "",
   "## 🔐 文件校验",
   "",
-  '本次 Release 附带 `checksums.txt` 和 `release_manifest.json`，可手动校验文件大小与 SHA256。'
+  '本次 Release 附带 `checksums.txt` 和 `release_manifest.json`。应用内更新会同时校验文件大小与 SHA256，校验失败不会启动安装。'
 )
 
 $releaseNotes = $releaseLines -join [Environment]::NewLine

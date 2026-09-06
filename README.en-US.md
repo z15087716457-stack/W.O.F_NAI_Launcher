@@ -50,7 +50,7 @@ NAI Launcher is a third-party client for NovelAI built with Flutter. It integrat
 
 Compared to the upstream v1.5.3 baseline, this fork (W.O.F edition) reworked the prompt, exploration, gallery, and billing subsystems end to end:
 
-- **Krita bridge extensions (AI takeover)**: full-parameter external writes via `set_params` / `generate` with silent generation (no UI changes); symmetric full-state readback via `get_params` (character prompts and coordinates, noise_schedule, cfg_rescale, PR/Vibe/img2img blind spots, actual token usage) for get→set round-trips; companion `tool/nai_bridge_client.py` CLI, `tool/nai_fill.py` one-shot metadata fill, and `tool/bridge_selfcheck.py` 11-point end-to-end self-check. In-app auto-update is disabled at the code level to protect bridge extensions.
+- **Krita bridge extensions (AI takeover)**: full-parameter external writes via `set_params` / `generate` with silent generation (no UI changes); symmetric full-state readback via `get_params` (character prompts and coordinates, noise_schedule, cfg_rescale, PR/Vibe/img2img blind spots, actual token usage) for get→set round-trips; companion `tool/nai_bridge_client.py` CLI, `tool/nai_fill.py` one-shot metadata fill, and `tool/bridge_selfcheck.py` 11-point end-to-end self-check. In-app auto-update is wired to this repository's Releases (since v1.0.1; updates no longer point upstream).
 - **NovelAI Diffusion V5 (N5)**: capability-flag registry driving V5 Full / Curated (no noise schedule, hidden Variety+, capability-driven PR/Vibe panels, up to 32 character prompts), 1471 token limit with official ×1.5 pricing, transparent-background toggle (straight_alpha), Enhance Max✨ tier (server-side e2e upscale), and V5 quality/UC presets.
 - **Pill prompt-block system**: single-box inline pill editor with a page-level block library panel; per-instance fixed / sequential / random-draw modes (count range, Split-Beta weight distribution, trigger probability, per-image re-roll); multi-lane isolation for negative/character prompts; instance locking and an "evolution target" DNA badge; folder-tree aggregation; multi-select bulk operations in the block manager; built-in official NovelAI preset blocks.
 - **Style-exploration module (multi-pool genetics)**: three-column explorer, run data layer with batch candidates, grid/deck dual views, full-screen formal review (keyboard labeling, template solidification, adopt-as-block, Reject deletion), deep-iteration engine (mutation/crossover/injection, families and branches, pairwise preference ranking, lineage panel), per-image snapshots in basic rounds and draft protection in deep rounds. Algorithm design inspired by [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio); reimplemented in Dart.
@@ -99,12 +99,12 @@ See the `1.0.0` section of [CHANGELOG.md](CHANGELOG.md) for details.
 
 ## 📦 Download & Install
 
-Download the latest version from [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases). In-app auto-update is disabled in this fork; please download new versions manually.
+Download the latest version from [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases). The app persistently surfaces available updates before and after login (served from this repository) and fully renders GitHub Flavored Markdown release notes, including headings, lists, tables, quotes, code, links, and images.
 
 | Platform | Download File | Usage |
 | --- | --- | --- |
-| Windows | `NAI_Launcher_Windows_<version>_Setup.exe` | Installer version, recommended for general users; installs to the current user directory. Manual setup detects and closes an older version still running in the tray. |
-| Windows | `NAI_Launcher_Windows_<version>_Portable.zip` | Portable version. Extract and run `nai_launcher.exe`; to upgrade, download the new archive and replace in place — user files stay in the program directory. |
+| Windows | `NAI_Launcher_Windows_<version>_Setup.exe` | Installer version, recommended for general users. Supports resumable in-app downloads, verification, automatic installation, and restart. Manual setup also detects and closes an older version still running in the tray. |
+| Windows | `NAI_Launcher_Windows_<version>_Portable.zip` | Portable version. In-app updates stage the new version, preserve user files, atomically swap directories, and automatically roll back and restart the previous version on failure. |
 | macOS | `NAI_Launcher_macOS_<version>_Portable.zip` | Portable version. Extract and open `Aaalice NAI Launcher.app`. If an unnotarized build is blocked, you can allow it to open in System Settings > Privacy & Security. |
 
 You can log in for the first time using your NovelAI account credentials or an API Token. Account data is stored locally on the device only. The desktop app uses the system's secure storage for sensitive information.

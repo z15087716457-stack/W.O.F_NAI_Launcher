@@ -124,9 +124,6 @@ void main() {
       now = now.add(const Duration(minutes: 31));
       expect(await service.shouldCheck(), isTrue);
     },
-    // 魔改总开关 kDisableInAppUpdate（1187af30）禁用应用内更新，
-    // 检查链路被短路返回 null，这些用例只在开关恢复时有意义
-    skip: kDisableInAppUpdate(),
   );
 
   test(
@@ -147,7 +144,6 @@ void main() {
       now = now.add(const Duration(hours: 24));
       expect(await service.shouldCheck(), isTrue);
     },
-    skip: kDisableInAppUpdate(),
   );
 
   test(
@@ -169,7 +165,6 @@ void main() {
       now = now.add(const Duration(hours: 4));
       expect(await service.shouldCheck(), isTrue);
     },
-    skip: kDisableInAppUpdate(),
   );
 
   test(
@@ -187,6 +182,5 @@ void main() {
       expect(await service.checkForUpdates(), isNull);
       expect(await service.checkForUpdates(ignoreSkipped: true), isNotNull);
     },
-    skip: kDisableInAppUpdate(),
   );
 }

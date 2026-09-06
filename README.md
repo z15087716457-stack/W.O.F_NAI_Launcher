@@ -50,7 +50,7 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
 
 相对上游 v1.5.3 基线，本分支（W.O.F 版）从头改动了提示词、探索、图库与计费等多个子系统，主要区别：
 
-- **Krita 桥接扩展（AI 接管）**：新增 `set_params` / `generate` 全参数外部写入与静默生图（不改 UI）；`get_params` 全量状态对称回读（角色框与坐标、noise_schedule、cfg_rescale、PR/Vibe/img2img 盲区、token 实际用量），可 get→set 往返；配套 `tool/nai_bridge_client.py` CLI、`tool/nai_fill.py` 一键读图填入与 `tool/bridge_selfcheck.py` 11 项端到端自检；应用内自动更新已在代码级禁用（防止更新覆盖桥接扩展）。
+- **Krita 桥接扩展（AI 接管）**：新增 `set_params` / `generate` 全参数外部写入与静默生图（不改 UI）；`get_params` 全量状态对称回读（角色框与坐标、noise_schedule、cfg_rescale、PR/Vibe/img2img 盲区、token 实际用量），可 get→set 往返；配套 `tool/nai_bridge_client.py` CLI、`tool/nai_fill.py` 一键读图填入与 `tool/bridge_selfcheck.py` 11 项端到端自检；应用内自动更新接入本仓库 Releases（v1.0.1 起，更新不会再指向上游）。
 - **NovelAI Diffusion V5（N5）**：能力位注册表驱动 V5 Full / Curated（无噪声调度、隐藏 Variety+、按能力显示 PR/Vibe 面板、最多 32 个角色框），token 上限 1471 与官网口径 ×1.5 计价、透明背景开关（straight_alpha）、Enhance Max✨ 档（服务端 e2e 放大）、V5 质量词与 UC 预设。
 - **pill 提示词块系统**：单框药丸内联编辑器 + 页面级块库面板；块实例固定 / 顺序 / 随机抽取三种模式（数量范围、Split-Beta 权重分布、触发概率、生成逐张重抽）；负向 / 角色框多 lane 隔离；实例级锁定与「进化目标」DNA 角标；文件夹树递归聚合；块管理页多选批量操作；内置 NovelAI 官方预设块。
 - **画风探索模块（多池遗传）**：三栏探索页、Run 数据层与批量候选、网格 / 牌堆双视图、全屏正式筛选（键盘打标、固化模板、收编为块、Reject 删图）、深度迭代引擎（变异 / 交叉 / 注入、家族与分支、偏好两两排序、谱系回溯）、基础轮逐张快照与深度轮草稿保护。算法思路参考 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)，为 Dart 重写实现。
@@ -99,12 +99,12 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
 
 ## 📦 下载与安装
 
-前往 [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases) 下载最新版本。本分支已禁用应用内自动更新，新版本请手动下载安装。
+前往 [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases) 下载最新版本。应用会在登录前后持续提示可用更新（更新源指向本仓库），并完整渲染 Release 中的 GitHub Flavored Markdown 更新日志（标题、列表、表格、引用、代码、链接与图片）。
 
 | 平台 | 下载文件 | 使用方式 |
 | --- | --- | --- |
-| Windows | `NAI_Launcher_Windows_<version>_Setup.exe` | 安装版，推荐普通用户，安装到当前用户目录；手动运行安装包时会检测并关闭托盘中的旧版本。 |
-| Windows | `NAI_Launcher_Windows_<version>_Portable.zip` | 便携版，解压后运行 `nai_launcher.exe`；升级时下载新版解压替换即可，用户文件保留在程序目录。 |
+| Windows | `NAI_Launcher_Windows_<version>_Setup.exe` | 安装版，推荐普通用户，安装到当前用户目录；支持应用内断点下载、校验、自动安装并重启。手动运行安装包时也会检测并关闭托盘中的旧版本。 |
+| Windows | `NAI_Launcher_Windows_<version>_Portable.zip` | 便携版，解压后运行 `nai_launcher.exe`；应用内更新会暂存新版、保留用户文件、原子切换目录，失败时自动回滚并重启旧版。 |
 | macOS | `NAI_Launcher_macOS_<version>_Portable.zip` | 便携版，解压后打开 `Aaalice NAI Launcher.app`。未公证版本如被拦截，可在系统设置的隐私与安全中允许打开。 |
 
 首次登录可以使用 NovelAI 账号密码或 API Token。账号数据仅保存在本地设备，桌面端使用系统安全存储保存敏感信息。

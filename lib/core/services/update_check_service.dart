@@ -10,8 +10,6 @@ import 'app_installation_service.dart';
 part 'update_check_service.g.dart';
 
 /// 更新检查异常
-/// AI 接管魔改总开关：禁用应用内更新（函数形式，避免编译期折叠）。
-bool kDisableInAppUpdate() => true;
 
 class UpdateCheckException implements Exception {
   /// 错误消息
@@ -294,9 +292,6 @@ class UpdateCheckService {
   /// 返回 [VersionInfo] 如果有新版本，否则返回 null
   /// 如果版本被标记为跳过，则返回 null
   Future<VersionInfo?> checkForUpdates({bool ignoreSkipped = false}) async {
-    // AI 接管魔改：禁用应用内更新，防止覆盖桥接扩展。
-    // 更新走 git fork 流程（fetch upstream → merge → 重建），勿删此行。
-    if (kDisableInAppUpdate()) return null;
     final attemptTime = _now();
     await _storage.setLastUpdateCheckAttemptTime(attemptTime);
 
