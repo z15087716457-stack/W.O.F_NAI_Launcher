@@ -31,14 +31,14 @@ NAI Launcher is a third-party client for NovelAI built with Flutter. It integrat
 
 | Feature | Description |
 | --- | --- |
-| 🎨 Image Generation | Supports NovelAI Diffusion V1/V2/V3/V4/V4.5, Furry series, common samplers, size presets, multi-character parameters, and Anlas estimation. |
+| 🎨 Image Generation | Supports NovelAI Diffusion V1/V2/V3/V4/V4.5/V5 (Full / Curated), Furry series, common samplers, size presets, multi-character parameters, and Anlas estimation. |
 | 🖼️ Image-to-Image & Editing | Supports img2img, inpainting, Focused Inpaint, Outpaint, virtual canvas expansion, hard-edge masks, and click-to-fill region selection. |
 | 🌈 Reference & Style | Supports Vibe Transfer, Precise Reference, multi-image references, Vibe pack import/export, and PNG metadata embedding/export. |
-| ✍️ Prompt Tools | Includes the complete offline merged Danbooru/e621 tag and alias catalog plus Danbooru co-occurrence recommendations. Press `Ctrl/⌘+Shift+Space` for tags related to the tag before the cursor, pin the source tag for continuous insertion, and optionally merge Danbooru online relations, Chinese translations, and AI translations for missing entries. Also includes NAI/SD weight syntax assistance, token counting, in-box prompt search, and pinned words. |
-| 📚 Local Gallery | Supports recursive scanning, SQLite full-text search, categories/collections/favorites, metadata parsing, batch operations, and large image previews. |
+| ✍️ Prompt Tools | Includes the complete offline merged Danbooru/e621 tag and alias catalog plus Danbooru co-occurrence recommendations. Press `Ctrl/⌘+Shift+Space` for tags related to the tag before the cursor, pin the source tag for continuous insertion, and optionally merge Danbooru online relations, Chinese translations, and AI translations for missing entries. Also includes NAI/SD weight syntax assistance, token counting, in-box prompt search, and pinned words — plus the app-wide pill prompt-block system described in the highlights below. |
+| 📚 Local Gallery | Supports multi-source recursive scanning, default masonry layout, SQLite full-text search, categories/collections/trash pool, model-version filters, metadata parsing, batch operations, and large image previews. |
 | 🌐 Online Gallery | Supports Danbooru / Safebooru / Gelbooru / AI TAG search, native rankings, multi-image details, metadata reuse, and batch downloads. |
 | 📦 Generation Queue | Supports task sorting, batch generation, pause/resume, failure handling strategies, progress statistics, and queue import/export. |
-| 🔌 External Integration | Supports local Krita integration, local ComfyUI workflows, system proxy, cross-platform image copying, and file location. |
+| 🔌 External Integration | Supports full-parameter Krita bridging (AI takeover), local ComfyUI workflows, system proxy, cross-platform image copying, and file location. |
 
 ### Online Gallery Sources
 
@@ -46,23 +46,17 @@ NAI Launcher is a third-party client for NovelAI built with Flutter. It integrat
 - **Gelbooru**: Supports public search. Optional API credentials accelerate searches and enable read-only website favorites; no synthetic local ranking is presented.
 - **AI TAG**: Supports combined work/author/title/tag/model queries and verbatim Prompt syntax searches such as `::artist:`, with time ranges loaded from the live source configuration. Native live monthly, historical monthly, and older archives are available. Multi-image details support navigation, prefetching, and per-image NAI / Stable Diffusion / ComfyUI metadata reuse, plus current-image and whole-work downloads. AI TAG requires no account and is read-only.
 
-## 🔀 Differences from Upstream
+## 🚀 W.O.F Edition Highlights
 
-Compared to the upstream v1.5.3 baseline, this fork (W.O.F edition) reworked the prompt, exploration, gallery, and billing subsystems end to end:
+> This fork is based on upstream v1.5.3 and rebuilds several subsystems around "prompts as reusable assets + directed style exploration". Full changes in [CHANGELOG.md](CHANGELOG.md).
 
-- **Krita bridge extensions (AI takeover)**: full-parameter external writes via `set_params` / `generate` with silent generation (no UI changes); symmetric full-state readback via `get_params` (character prompts and coordinates, noise_schedule, cfg_rescale, PR/Vibe/img2img blind spots, actual token usage) for get→set round-trips; companion `tool/nai_bridge_client.py` CLI, `tool/nai_fill.py` one-shot metadata fill, and `tool/bridge_selfcheck.py` 11-point end-to-end self-check. In-app auto-update is wired to this repository's Releases (since v1.0.1; updates no longer point upstream).
-- **NovelAI Diffusion V5 (N5)**: capability-flag registry driving V5 Full / Curated (no noise schedule, hidden Variety+, capability-driven PR/Vibe panels, up to 32 character prompts), 1471 token limit with official ×1.5 pricing, transparent-background toggle (straight_alpha), Enhance Max✨ tier (server-side e2e upscale), and V5 quality/UC presets.
-- **Pill prompt-block system**: single-box inline pill editor with a page-level block library panel; per-instance fixed / sequential / random-draw modes (count range, Split-Beta weight distribution, trigger probability, per-image re-roll); multi-lane isolation for negative/character prompts; instance locking and an "evolution target" DNA badge; folder-tree aggregation; multi-select bulk operations in the block manager; built-in official NovelAI preset blocks.
-- **Style-exploration module (multi-pool genetics)**: three-column explorer, run data layer with batch candidates, grid/deck dual views, full-screen formal review (keyboard labeling, template solidification, adopt-as-block, Reject deletion), deep-iteration engine (mutation/crossover/injection, families and branches, pairwise preference ranking, lineage panel), per-image snapshots in basic rounds and draft protection in deep rounds. Algorithm design inspired by [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio); reimplemented in Dart.
-- **Gallery overhaul**: multi-source galleries, default masonry layout, advanced filters with precise local model-version filtering, collections (root/subset linking), trash pool (soft delete), three-channel NAI-only filtering, HD/SD thumbnail quality tiers, unified drag-out across all three views, tag-library masonry view, envelope-metadata backfill, and byte-level dedup on image save.
-- **Character prompt editor**: official-site-style persistent layout, selection follows focus, fields auto-grow with content (3–12 lines).
-- **Opus quota & billing**: an Opus free-quota chip in the pinned bar (official `usage.percent` plus refill countdown); free-eligibility rules aligned with observed official behavior, so PR / img2img / inpainting no longer wrongly cancel free generation.
-- **Guest mode**: skip login from the login screen and use all offline features (local gallery, tag catalogs, prompt blocks) with an in-memory session that never persists.
-- **Prompt-syntax & metadata toolchain**: unified NAI lexer with a numeric-weight tail guard (weight joins no longer misread by the server); removed the focus-loss space-to-underscore conversion; unified Magic Byte metadata parsing for PNG / WebP / JPEG; anti-hotlink header dispatch for the AI TAG online gallery.
+### 💊 Pill Prompt-Block System — the prompt hub across the app
 
-See the `1.0.0` section of [CHANGELOG.md](CHANGELOG.md) for details.
+Break prompts into reusable **blocks**: artist pools, quality tags, UC presets, and style strings are all blocks. A block library panel stays docked on the generation page — one tap inserts a block into the current prompt. Blocks render inline as highlighted pills, editable in place, and work identically in positive, negative, and character prompts.
 
-## 🖥️ Interface Preview
+- **Three instance modes**: fixed output; sequential rotation; random draw with count range, Split-Beta weight distribution, and trigger probability — re-rolled per image in batch generation.
+- **Block manager**: folder-tree aggregation, multi-select bulk operations, custom colors and icons, TXT export; ships with 12 official NovelAI preset blocks.
+- **Per-instance locking and an "evolution target" DNA badge**: marks which blocks participate in mutation — the entry point for style exploration below.
 
 <p align="center">
   <img src="screenshots/generation_pill_block_library.png" alt="Generation UI: pill editor and block library" width="80%">
@@ -70,23 +64,50 @@ See the `1.0.0` section of [CHANGELOG.md](CHANGELOG.md) for details.
   <em>Generation UI: pill editor (block highlighting) with the block library panel (official presets and artist pools)</em>
 </p>
 
-<p align="center">
-  <img src="screenshots/prompt_block_manager.png" alt="Prompt block manager" width="80%">
-  <br>
-  <em>Prompt block manager: folder tree, multi-select bulk operations, custom colors and icons</em>
-</p>
+<table align="center">
+  <tr>
+    <td width="62%"><img src="screenshots/prompt_block_manager.png" alt="Prompt block manager"></td>
+    <td width="38%"><img src="screenshots/block_instance_settings.png" alt="Block instance settings"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Block manager: folder tree and bulk operations</em></td>
+    <td align="center"><em>Instance settings: three modes and weight spread</em></td>
+  </tr>
+</table>
 
-<p align="center">
-  <img src="screenshots/block_instance_settings.png" alt="Block instance settings" width="40%">
-  <br>
-  <em>Block instance settings: fixed / sequential / random-draw modes with count range, weight distribution, and trigger probability</em>
-</p>
+### 🧬 Style Exploration · Multi-Pool Genetics
+
+Generate candidates toward a style direction, then converge generation by generation with a genetic loop: every basic-round candidate gets its own snapshot; pick favorites as parents, and deep rounds mutate / crossover / inject to produce the next generation. Pairwise comparisons build preference scores, and the lineage panel traces any candidate's full ancestry. A winning style string can be adopted as a block with one tap, flowing back into the pill system.
+
+- Three-column explorer with grid / deck dual views; panels are drag-resizable.
+- Full-screen formal review: T/S/R keyboard labeling, template solidification, Reject batch deletion.
+- Per-image snapshots in basic rounds; deep rounds never touch your current draft.
+- Algorithm design inspired by [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio) (GPL-3.0); reimplemented in Dart without copying its code.
+
+### 🎨 Full NovelAI Diffusion V5 (N5) Support
+
+Driven by a capability-flag registry: V5 Full / Curated (with inpainting mapping), up to 32 character prompts, 1471 token limit, official ×1.5 pricing, transparent-background toggle (straight_alpha), Enhance Max✨ server-side e2e upscale, and V5 quality/UC presets.
+
+### 🔌 Krita Bridge · Full AI Parameter Takeover
+
+`set_params` / `generate` accept full external parameter writes and silent generation (no UI changes); `get_params` reads back complete state symmetrically (character prompts and coordinates, noise_schedule, cfg_rescale, PR/Vibe/img2img, actual token usage) for get→set round-trips. Ships with the `tool/nai_bridge_client.py` CLI, `tool/nai_fill.py` one-shot metadata fill, and `tool/bridge_selfcheck.py` 11-point end-to-end self-check. In-app auto-update is served from this repository's Releases (since v1.0.1).
+
+### 🖼️ Gallery Overhaul
+
+Multi-source galleries, default masonry layout, collections (root/subset linking), soft-delete trash pool, three-channel NAI-only filtering, precise local model-version filters, HD/SD thumbnail quality tiers, unified drag-out across all three views, envelope-metadata backfill, and byte-level dedup on image save.
 
 <p align="center">
   <img src="screenshots/local_gallery_masonry.png" alt="Local gallery masonry" width="80%">
   <br>
   <em>Local gallery: masonry layout, category tree, NAI-only and model-version filters</em>
 </p>
+
+### ➕ More Improvements
+
+- Character prompt editor: official-site-style persistent layout, selection follows focus, fields auto-grow (3–12 lines).
+- Opus free-quota chip: official `usage.percent` plus refill countdown; free-eligibility rules match observed official behavior — PR / img2img / inpainting no longer wrongly cancel free generation.
+- Guest mode: skip login and use all offline features with a non-persistent in-memory session.
+- Unified NAI lexer with numeric-weight tail guard; removed focus-loss space-to-underscore conversion; Magic Byte metadata parsing for PNG / WebP / JPEG; anti-hotlink headers for the AI TAG online gallery.
 
 ## 🧩 Platform Support
 

@@ -31,14 +31,14 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
 
 | 能力 | 说明 |
 | --- | --- |
-| 🎨 图像生成 | 支持 NovelAI Diffusion V1/V2/V3/V4/V4.5、Furry 系列、常用采样器、尺寸预设、多角色参数和 Anlas 估算。 |
+| 🎨 图像生成 | 支持 NovelAI Diffusion V1/V2/V3/V4/V4.5/V5（Full / Curated）、Furry 系列、常用采样器、尺寸预设、多角色参数和 Anlas 估算。 |
 | 🖼️ 图生图与编辑 | 支持图生图、局部重绘、Focused Inpaint、Outpaint、虚拟画布扩图、硬边蒙版和点击式区域填充。 |
 | 🌈 参考与风格 | 支持 Vibe Transfer、Precise Reference、多图参考、Vibe 整包导入导出、PNG 元数据嵌入导出。 |
-| ✍️ Prompt 工具 | 内置完整离线 Danbooru/e621 合并标签、别名及 Danbooru 共现关系补全，支持 `Ctrl/⌘+Shift+Space` 查询光标前标签的相关词、固定来源标签后连续选词、Danbooru 在线相关标签补充、可选中文词库与 AI 缺失汉化，以及 NAI/SD 权重语法辅助、Token 统计、提示词框内搜索和固定词。 |
-| 📚 本地图库 | 支持递归扫描、SQLite 全文搜索、分类/收藏/集合、元数据解析、批量操作和大图预览。 |
+| ✍️ Prompt 工具 | 内置完整离线 Danbooru/e621 合并标签、别名及 Danbooru 共现关系补全，支持 `Ctrl/⌘+Shift+Space` 查询光标前标签的相关词、固定来源标签后连续选词、Danbooru 在线相关标签补充、可选中文词库与 AI 缺失汉化，以及 NAI/SD 权重语法辅助、Token 统计、提示词框内搜索和固定词；另有贯穿全器的 pill 提示词块系统，见下方特色介绍。 |
+| 📚 本地图库 | 支持多图库源递归扫描、默认瀑布流、SQLite 全文搜索、分类/收藏集/删除池、模型版本过滤、元数据解析、批量操作和大图预览。 |
 | 🌐 在线图库 | 支持 Danbooru / Safebooru / Gelbooru / AI TAG 搜索、真实排行榜、多图详情、元数据复用和批量下载。 |
 | 📦 生成队列 | 支持任务排序、批量生成、暂停/继续、失败策略、进度统计和队列导入导出。 |
-| 🔌 外部联动 | 支持 Krita 本地联动、ComfyUI 本地工作流、系统代理、跨平台图片复制和文件定位。 |
+| 🔌 外部联动 | 支持 Krita 全参数桥接（AI 接管）、ComfyUI 本地工作流、系统代理、跨平台图片复制和文件定位。 |
 
 ### 在线画廊来源
 
@@ -46,23 +46,17 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
 - **Gelbooru**：支持公开搜索；配置 API 凭据后可加速搜索并浏览只读网站收藏，不提供伪造的本地排行榜。
 - **AI TAG**：支持作品/作者/标题/标签/模型综合搜索和原样 Prompt 语法搜索（如 `::artist:`），时间范围由来源实时配置；支持实时月榜、历史月榜和旧月份归档。多图详情可切换、预取和逐图复用 NAI / Stable Diffusion / ComfyUI 元数据，并支持下载当前图片或作品全部图片。AI TAG 无需账号且仅提供只读访问。
 
-## 🔀 本分支与上游的差异
+## 🚀 W.O.F 版特色
 
-相对上游 v1.5.3 基线，本分支（W.O.F 版）从头改动了提示词、探索、图库与计费等多个子系统，主要区别：
+> 本分支基于上游 v1.5.3，围绕「提示词资产化 + 画风定向探索」重做了多个子系统。完整变更见 [CHANGELOG.md](CHANGELOG.md)。
 
-- **Krita 桥接扩展（AI 接管）**：新增 `set_params` / `generate` 全参数外部写入与静默生图（不改 UI）；`get_params` 全量状态对称回读（角色框与坐标、noise_schedule、cfg_rescale、PR/Vibe/img2img 盲区、token 实际用量），可 get→set 往返；配套 `tool/nai_bridge_client.py` CLI、`tool/nai_fill.py` 一键读图填入与 `tool/bridge_selfcheck.py` 11 项端到端自检；应用内自动更新接入本仓库 Releases（v1.0.1 起，更新不会再指向上游）。
-- **NovelAI Diffusion V5（N5）**：能力位注册表驱动 V5 Full / Curated（无噪声调度、隐藏 Variety+、按能力显示 PR/Vibe 面板、最多 32 个角色框），token 上限 1471 与官网口径 ×1.5 计价、透明背景开关（straight_alpha）、Enhance Max✨ 档（服务端 e2e 放大）、V5 质量词与 UC 预设。
-- **pill 提示词块系统**：单框药丸内联编辑器 + 页面级块库面板；块实例固定 / 顺序 / 随机抽取三种模式（数量范围、Split-Beta 权重分布、触发概率、生成逐张重抽）；负向 / 角色框多 lane 隔离；实例级锁定与「进化目标」DNA 角标；文件夹树递归聚合；块管理页多选批量操作；内置 NovelAI 官方预设块。
-- **画风探索模块（多池遗传）**：三栏探索页、Run 数据层与批量候选、网格 / 牌堆双视图、全屏正式筛选（键盘打标、固化模板、收编为块、Reject 删图）、深度迭代引擎（变异 / 交叉 / 注入、家族与分支、偏好两两排序、谱系回溯）、基础轮逐张快照与深度轮草稿保护。算法思路参考 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)，为 Dart 重写实现。
-- **图库大版本**：多图库源、默认瀑布流、高级筛选与本地模型版本精准过滤、收藏集（根-子集联动）、删除池（软删除）、三通道 NAI-only 过滤、HD / SD 缩略图质量档、三视图统一向外拖出、标签库瀑布流视图、信封嵌套元数据回填、保存图像字节级去重。
-- **角色卡编辑器**：官网式常驻布局，选中跟随焦点，输入框随内容自增高（3~12 行）。
-- **Opus 额度与计费**：钉底条 Opus 免费额度芯片（官方 `usage.percent` + 回充倒计时）；免费资格对齐官方实证，PR / img2img / 局部重绘不再误取消免费。
-- **游客模式**：登录页可跳过登录，离线使用本地画廊、词库、提示词块等全部本地功能，纯内存会话不驻留。
-- **提示词语法与元数据工具链**：统一 NAI 词法扫描器与数值权重尾部守卫（权重拼接不被服务端误识别）；移除失焦空格自动转下划线；统一按文件头 Magic Byte 解析 PNG / WebP / JPEG 元数据；AI TAG 在线画廊反防盗链请求头分发。
+### 💊 pill 提示词块系统 —— 贯穿全器的提示词中枢
 
-详细变更见 [CHANGELOG.md](CHANGELOG.md) 的 `1.0.0` 段落。
+把提示词拆成可复用的「块」：画师池、质量词、UC 预设、画风串都是块。生成页右侧常驻块库面板，点一下就把块插进当前提示词；块在正文里以药丸形态内联显示，分块高亮、即点即改，正向、负向、角色框全部通用。
 
-## 🖥️ 界面预览
+- **三种实例模式**：固定原样输出；顺序按序轮转；随机抽取支持数量范围、Split-Beta 权重分布、触发概率，一次生成多张时逐张重抽。
+- **块管理页**：文件夹树递归聚合、多选批量操作、颜色与图标自定义、导出 TXT；内置 12 个 NovelAI 官方预设块开箱即用。
+- **实例级锁定与「进化目标」DNA 角标**：标定哪些块参与变异——这是画风探索的接口。
 
 <p align="center">
   <img src="screenshots/generation_pill_block_library.png" alt="生成主界面：pill 药丸编辑器与块库面板" width="80%">
@@ -70,23 +64,50 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
   <em>生成主界面：pill 药丸编辑器（分块高亮）+ 右侧块库面板（官方预设与画师池）</em>
 </p>
 
-<p align="center">
-  <img src="screenshots/prompt_block_manager.png" alt="提示词块管理页" width="80%">
-  <br>
-  <em>提示词块管理页：文件夹树、多选批量操作、颜色 / 图标自定义</em>
-</p>
+<table align="center">
+  <tr>
+    <td width="62%"><img src="screenshots/prompt_block_manager.png" alt="提示词块管理页"></td>
+    <td width="38%"><img src="screenshots/block_instance_settings.png" alt="块实例设置"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>块管理页：文件夹树、多选批量操作</em></td>
+    <td align="center"><em>块实例设置：三种模式与权重分布</em></td>
+  </tr>
+</table>
 
-<p align="center">
-  <img src="screenshots/block_instance_settings.png" alt="块实例设置" width="40%">
-  <br>
-  <em>块实例设置：固定 / 顺序 / 随机抽取三模式，数量范围、权重分布与触发概率</em>
-</p>
+### 🧬 画风探索 · 多池遗传
+
+对着一个画风方向批量出候选，再用遗传算法逐代收敛：基础轮每张候选独立快照留档；挑中喜欢的设为父本，深度轮对父本做变异 / 交叉 / 随机注入产出下一代；两两比较打偏好分，谱系面板可回溯任意子代的完整祖先链。选定的画风串一键「收编为块」，回到 pill 系统直接参与生成。
+
+- 三栏探索页 + 网格 / 牌堆双视图，分区可拖拽调宽。
+- 全屏正式筛选：键盘 T/S/R 打标、固化模板、Reject 批量删图。
+- 基础轮逐张快照、深度轮不污染当前草稿。
+- 算法思路参考 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)（GPL-3.0），本仓库为 Dart 重写实现，未复制其源码。
+
+### 🎨 NovelAI Diffusion V5（N5）完整支持
+
+能力位注册表驱动：V5 Full / Curated（含 inpainting 互转）、最多 32 个角色框、token 上限 1471、官网口径 ×1.5 计价、透明背景开关（straight_alpha）、Enhance Max✨ 服务端 e2e 放大、V5 质量词与 UC 预设。
+
+### 🔌 Krita 桥接 · AI 全参数接管
+
+`set_params` / `generate` 全参数外部写入与静默生图（不改 UI）；`get_params` 全量状态对称回读（角色框与坐标、noise_schedule、cfg_rescale、PR/Vibe/img2img、token 实际用量），可 get→set 往返。配套 `tool/nai_bridge_client.py` CLI、`tool/nai_fill.py` 一键读图填入、`tool/bridge_selfcheck.py` 11 项端到端自检。应用内自动更新接入本仓库 Releases（v1.0.1 起）。
+
+### 🖼️ 画廊大版本
+
+多图库源、默认瀑布流、收藏集（根-子集联动）、删除池软删除、三通道 NAI-only 过滤、本地模型版本精准过滤、HD / SD 缩略图质量档、三视图统一向外拖出、信封嵌套元数据回填、保存图像字节级去重。
 
 <p align="center">
   <img src="screenshots/local_gallery_masonry.png" alt="本地画廊瀑布流" width="80%">
   <br>
   <em>本地画廊：瀑布流、分类树、NAI-only 与模型版本过滤</em>
 </p>
+
+### ➕ 更多改进
+
+- 角色卡官网式常驻编辑器：选中跟随焦点，输入框随内容自增高（3~12 行）。
+- Opus 免费额度芯片：官方 `usage.percent` + 回充倒计时；免费资格对齐官方实证，PR / img2img / 局部重绘不再误取消免费。
+- 游客模式：登录页可跳过登录，离线使用全部本地功能，纯内存会话不驻留。
+- 统一 NAI 词法扫描器与数值权重尾守卫；移除失焦空格自动转下划线；元数据按 Magic Byte 解析 PNG / WebP / JPEG；AI TAG 在线画廊反防盗链。
 
 ## 🧩 平台支持
 
