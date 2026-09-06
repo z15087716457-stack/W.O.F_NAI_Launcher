@@ -531,46 +531,118 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
     );
     final autoRunName = _manualAutoRunName ??= context.l10n
         .styleExplore_manualRunName(_autoRunTimestamp());
-    return Column(
-      children: [
-        if (activeRun != null) ExploreRunControlBar(run: activeRun),
-        SizedBox(
-          height: 280,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-            child: const PromptInputWidget(
-              showMaximizeButton: false,
-              allowEvolutionToggle: true,
-            ),
-          ),
-        ),
-        const InlineCharacterRow(),
-        Expanded(child: _buildParameterPanel()),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(alpha: 0.5),
-            border: Border(
-              top: BorderSide(color: theme.dividerColor, width: 1),
-            ),
-          ),
-          child: SizedBox(
-            width: availableWidth,
-            child: GenerationControls(
-              // 主编辑区宽度有限，用紧凑钉底条（与主生成页左面板同款 2×2
-              // 点数块布局），正常布局在此宽度会把点数 chips 压到重叠
-              compact: true,
-              exploreMode: true,
-              onBatchEvent: (event) => manualCaptureNotifier.handleBatchEvent(
-                event,
-                autoRunName: autoRunName,
-                activeRunId: activeRunId,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final heightCap = _resolvePromptAreaHeightCap(constraints.maxHeight);
+        final promptAreaHeight = ref
+            .watch(
+              layoutStateNotifierProvider.select(
+                (s) => s.styleExplorePromptAreaHeight,
+              ),
+            )
+            .clamp(_minPromptAreaHeight, heightCap)
+            .toDouble();
+        return Column(
+          children: [
+            if (activeRun != null) ExploreRunControlBar(run: activeRun),
+            SizedBox(
+              height: promptAreaHeight,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                child: const PromptInputWidget(
+                  showMaximizeButton: false,
+                  allowEvolutionToggle: true,
+                ),
               ),
             ),
-          ),
-        ),
-      ],
+            const InlineCharacterRow(),
+            VerticalResizeHandle(
+              key: const Key('style-explore-prompt-area-resize-handle'),
+              onDrag: (dy) {
+                final cap = _resolvePromptAreaHeightCap(constraints.maxHeight);
+                // 拖动以存储值为基准累加（与主生成页同款）；显示高度被
+                // cap 钳制时继续拖不产生跳变，窗口恢复后高度直接生效。
+                final storedHeight = ref
+                    .read(layoutStateNotifierProvider)
+                    .styleExplorePromptAreaHeight;
+                final newHeight = (storedHeight + dy)
+                    .clamp(_minPromptAreaHeight, cap)
+                    .toDouble();
+                ref
+                    .read(layoutStateNotifierProvider.notifier)
+                    .setStyleExplorePromptAreaHeight(newHeight);
+              },
+            ),
+            Expanded(child: _buildParameterPanel()),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withValues(alpha: 0.5),
+                border: Border(
+                  top: BorderSide(color: theme.dividerColor, width: 1),
+                ),
+              ),
+              child: SizedBox(
+                width: availableWidth,
+                child: GenerationControls(
+                  // 主编辑区宽度有限，用紧凑钉底条（与主生成页左面板同款 2×2
+                  // 点数块布局），正常布局在此宽度会把点数 chips 压到重叠
+                  compact: true,
+                  exploreMode: true,
+                  onBatchEvent: (event) =>
+                      manualCaptureNotifier.handleBatchEvent(
+                        event,
+                        autoRunName: autoRunName,
+                        activeRunId: activeRunId,
+                      ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  /// 提示词区高度下限（与主生成页一致）
+  static const double _minPromptAreaHeight = 100.0;
+
+  /// 提示词区默认高度（= 固定高度时代的 280，也是 cap 的下限：
+  /// 窄窗顶栏折行吃掉高度时退回默认高度，不硬压到 100 造成
+  /// PromptInputWidget 内部溢出）
+  static const double _defaultPromptAreaHeight = 280.0;
+
+  /// 手柄占位高度
+  static const double _resizeHandleHeight = 8.0;
+
+  /// 底部生成控制条（紧凑态）+ padding 的预留高度
+  static const double _generationControlsReservedHeight = 150.0;
+
+  /// 角色行预留高度
+  static const double _characterRowReservedHeight = 64.0;
+
+  /// Run 控制条（有活动 Run 时出现）预留高度
+  static const double _runBarReservedHeight = 64.0;
+
+  /// 参数面板最小可见高度（拖到上限时至少留出这些）
+  static const double _minParameterPanelHeight = 240.0;
+
+  /// 提示词区高度上限：总可用高度减去其余分段的预留，保证参数面板
+  /// 与底部控制条不被挤没。
+  double _resolvePromptAreaHeightCap(double availableHeight) {
+    if (!availableHeight.isFinite || availableHeight <= 0) {
+      return double.infinity;
+    }
+    final maxByPanelBudget =
+        availableHeight -
+        _resizeHandleHeight -
+        _generationControlsReservedHeight -
+        _characterRowReservedHeight -
+        _runBarReservedHeight -
+        _minParameterPanelHeight;
+    return maxByPanelBudget
+        .clamp(_defaultPromptAreaHeight, double.infinity)
+        .toDouble();
   }
 
   Widget _buildParameterPanel() {

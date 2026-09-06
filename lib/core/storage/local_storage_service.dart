@@ -787,6 +787,19 @@ class LocalStorageService {
     await setSetting(StorageKeys.styleExploreGalleryWidth, width);
   }
 
+  /// 获取画风探索页主提示词区高度 (默认280)
+  double getStyleExplorePromptAreaHeight() {
+    final value = getSetting(StorageKeys.styleExplorePromptAreaHeight);
+    if (value is int) return value.toDouble();
+    if (value is double) return value;
+    return 280.0;
+  }
+
+  /// 保存画风探索页主提示词区高度
+  Future<void> setStyleExplorePromptAreaHeight(double height) async {
+    await setSetting(StorageKeys.styleExplorePromptAreaHeight, height);
+  }
+
   /// 获取固定词侧边栏视图模式
   String getFixedTagsSidebarViewMode() {
     final mode = getSetting<String>(

@@ -23,6 +23,7 @@ class LayoutState {
   final double blockLibraryPanelWidth;
   final double styleExploreRunSidebarWidth;
   final double styleExploreGalleryWidth;
+  final double styleExplorePromptAreaHeight;
 
   const LayoutState({
     this.leftPanelExpanded = true,
@@ -42,6 +43,7 @@ class LayoutState {
     this.blockLibraryPanelWidth = 320.0,
     this.styleExploreRunSidebarWidth = 240.0,
     this.styleExploreGalleryWidth = 360.0,
+    this.styleExplorePromptAreaHeight = 280.0,
   });
 
   /// 复制并更新部分字段
@@ -63,6 +65,7 @@ class LayoutState {
     double? blockLibraryPanelWidth,
     double? styleExploreRunSidebarWidth,
     double? styleExploreGalleryWidth,
+    double? styleExplorePromptAreaHeight,
   }) {
     return LayoutState(
       leftPanelExpanded: leftPanelExpanded ?? this.leftPanelExpanded,
@@ -90,6 +93,8 @@ class LayoutState {
           styleExploreRunSidebarWidth ?? this.styleExploreRunSidebarWidth,
       styleExploreGalleryWidth:
           styleExploreGalleryWidth ?? this.styleExploreGalleryWidth,
+      styleExplorePromptAreaHeight:
+          styleExplorePromptAreaHeight ?? this.styleExplorePromptAreaHeight,
     );
   }
 }
@@ -120,6 +125,7 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       blockLibraryPanelWidth: storage.getBlockLibraryPanelWidth(),
       styleExploreRunSidebarWidth: storage.getStyleExploreRunSidebarWidth(),
       styleExploreGalleryWidth: storage.getStyleExploreGalleryWidth(),
+      styleExplorePromptAreaHeight: storage.getStyleExplorePromptAreaHeight(),
     );
   }
 
@@ -295,6 +301,18 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
 
     final storage = ref.read(localStorageServiceProvider);
     await storage.setStyleExploreGalleryWidth(normalized);
+  }
+
+  /// 设置画风探索页主提示词区高度
+  ///
+  /// 业务范围钳制（最小 100 / 按可用高度算上限）在探索页调用方做，
+  /// 这里只做 ≥0 防御（与主生成页 setPromptAreaHeight 同款分工）。
+  Future<void> setStyleExplorePromptAreaHeight(double height) async {
+    final normalized = height.clamp(0.0, double.infinity).toDouble();
+    state = state.copyWith(styleExplorePromptAreaHeight: normalized);
+
+    final storage = ref.read(localStorageServiceProvider);
+    await storage.setStyleExplorePromptAreaHeight(normalized);
   }
 
   /// 成对调整画风探索页分区宽度（手柄拖拽补偿专用）
