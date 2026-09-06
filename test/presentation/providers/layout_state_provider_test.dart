@@ -240,6 +240,79 @@ void main() {
       );
     });
   });
+
+  group('LayoutStateNotifier paired style explore pane widths', () {
+    test(
+      'paired setter updates both panes in one state and storage write',
+      () async {
+        final storage = _FakeLayoutStorage()
+          ..blockLibraryPanelWidth = 280.0
+          ..styleExploreRunSidebarWidth = 240.0
+          ..styleExploreGalleryWidth = 360.0;
+        final container = ProviderContainer(
+          overrides: [
+            localStorageServiceProvider.overrideWith((ref) => storage),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await container
+            .read(layoutStateNotifierProvider.notifier)
+            .setStyleExplorePaneWidths(sidebar: 180.0, gallery: 420.0);
+
+        final state = container.read(layoutStateNotifierProvider);
+        expect(state.styleExploreRunSidebarWidth, 180.0);
+        expect(state.styleExploreGalleryWidth, 420.0);
+        // 未传入的键必须原样保留。
+        expect(state.blockLibraryPanelWidth, 280.0);
+        expect(storage.styleExploreRunSidebarWidth, 180.0);
+        expect(storage.styleExploreGalleryWidth, 420.0);
+        expect(storage.blockLibraryPanelWidth, 280.0);
+      },
+    );
+
+    test(
+      'paired setter accepts block library without touching panes',
+      () async {
+        final storage = _FakeLayoutStorage();
+        final container = ProviderContainer(
+          overrides: [
+            localStorageServiceProvider.overrideWith((ref) => storage),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await container
+            .read(layoutStateNotifierProvider.notifier)
+            .setStyleExplorePaneWidths(blockLibrary: 260.0, sidebar: 300.0);
+
+        final state = container.read(layoutStateNotifierProvider);
+        expect(state.blockLibraryPanelWidth, 260.0);
+        expect(state.styleExploreRunSidebarWidth, 300.0);
+        expect(state.styleExploreGalleryWidth, 360.0);
+        expect(storage.blockLibraryPanelWidth, 260.0);
+        expect(storage.styleExploreGalleryWidth, 360.0);
+      },
+    );
+
+    test('paired setter clamps negative widths to zero', () async {
+      final storage = _FakeLayoutStorage();
+      final container = ProviderContainer(
+        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
+      );
+      addTearDown(container.dispose);
+
+      await container
+          .read(layoutStateNotifierProvider.notifier)
+          .setStyleExplorePaneWidths(sidebar: -40.0, gallery: -10.0);
+
+      final state = container.read(layoutStateNotifierProvider);
+      expect(state.styleExploreRunSidebarWidth, 0.0);
+      expect(state.styleExploreGalleryWidth, 0.0);
+      expect(storage.styleExploreRunSidebarWidth, 0.0);
+      expect(storage.styleExploreGalleryWidth, 0.0);
+    });
+  });
 }
 
 class _FakeLayoutStorage extends LocalStorageService {

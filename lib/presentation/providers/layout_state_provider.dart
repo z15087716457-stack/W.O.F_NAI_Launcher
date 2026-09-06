@@ -296,4 +296,37 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
     final storage = ref.read(localStorageServiceProvider);
     await storage.setStyleExploreGalleryWidth(normalized);
   }
+
+  /// 成对调整画风探索页分区宽度（手柄拖拽补偿专用）
+  ///
+  /// 拖拽分界时右邻 ∓Δ、左邻 ±Δ 同帧写回，被拖分界以外的分界位置不动；
+  /// 一次 copyWith、只持久化传入的键，避免每帧两次 state 更新。
+  /// 单键 setter 保留给其他调用方。
+  Future<void> setStyleExplorePaneWidths({
+    double? blockLibrary,
+    double? sidebar,
+    double? gallery,
+  }) async {
+    final blockLibraryWidth = blockLibrary
+        ?.clamp(0.0, double.infinity)
+        .toDouble();
+    final sidebarWidth = sidebar?.clamp(0.0, double.infinity).toDouble();
+    final galleryWidth = gallery?.clamp(0.0, double.infinity).toDouble();
+    state = state.copyWith(
+      blockLibraryPanelWidth: blockLibraryWidth,
+      styleExploreRunSidebarWidth: sidebarWidth,
+      styleExploreGalleryWidth: galleryWidth,
+    );
+
+    final storage = ref.read(localStorageServiceProvider);
+    if (blockLibraryWidth != null) {
+      await storage.setBlockLibraryPanelWidth(blockLibraryWidth);
+    }
+    if (sidebarWidth != null) {
+      await storage.setStyleExploreRunSidebarWidth(sidebarWidth);
+    }
+    if (galleryWidth != null) {
+      await storage.setStyleExploreGalleryWidth(galleryWidth);
+    }
+  }
 }

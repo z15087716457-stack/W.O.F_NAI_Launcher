@@ -323,13 +323,30 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
         ResizeHandle(
           key: const Key('style-explore-run-sidebar-resize-handle'),
           onDrag: (dx) {
-            final currentWidth = ref
-                .read(layoutStateNotifierProvider)
-                .styleExploreRunSidebarWidth;
-            final newWidth = currentWidth - dx;
+            // 读取最新布局，避免闭包捕获旧值导致不跟手。
+            final layout = ref.read(layoutStateNotifierProvider);
+            final currentSidebar = layout.styleExploreRunSidebarWidth;
+            // 成对补偿：侧栏 ∓Δ、左邻 ±Δ，被拖分界以外的分界不动。
+            // 块库收起时左邻是主编辑（Expanded 天然吸收），单写侧栏即可。
+            if (!layout.blockLibraryPanelExpanded) {
+              ref
+                  .read(layoutStateNotifierProvider.notifier)
+                  .setStyleExploreRunSidebarWidth(currentSidebar - dx);
+              return;
+            }
+            final currentBlockLibrary = layout.blockLibraryPanelWidth;
+            // 吸收方到 0 后本次拖拽 stall，不做级联吸收。
+            var effective = dx;
+            if (effective > currentSidebar) effective = currentSidebar;
+            if (effective < -currentBlockLibrary) {
+              effective = -currentBlockLibrary;
+            }
             ref
                 .read(layoutStateNotifierProvider.notifier)
-                .setStyleExploreRunSidebarWidth(newWidth);
+                .setStyleExplorePaneWidths(
+                  blockLibrary: currentBlockLibrary + effective,
+                  sidebar: currentSidebar - effective,
+                );
           },
         ),
         ClipRect(child: panel),
@@ -637,13 +654,20 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
           key: const Key('style-explore-gallery-resize-handle'),
           onDrag: (dx) {
             // 读取最新的宽度值，避免闭包捕获旧值导致不跟手
-            final currentWidth = ref
-                .read(layoutStateNotifierProvider)
-                .styleExploreGalleryWidth;
-            final newWidth = currentWidth - dx;
+            final layout = ref.read(layoutStateNotifierProvider);
+            final currentGallery = layout.styleExploreGalleryWidth;
+            final currentSidebar = layout.styleExploreRunSidebarWidth;
+            // 成对补偿：画廊 ∓Δ、侧栏 ±Δ，只有「侧栏|画廊」分界移动；
+            // 吸收方（侧栏）到 0 后本次拖拽 stall，不做级联吸收。
+            var effective = dx;
+            if (effective > currentGallery) effective = currentGallery;
+            if (effective < -currentSidebar) effective = -currentSidebar;
             ref
                 .read(layoutStateNotifierProvider.notifier)
-                .setStyleExploreGalleryWidth(newWidth);
+                .setStyleExplorePaneWidths(
+                  gallery: currentGallery - effective,
+                  sidebar: currentSidebar + effective,
+                );
           },
         ),
         ClipRect(child: panel),

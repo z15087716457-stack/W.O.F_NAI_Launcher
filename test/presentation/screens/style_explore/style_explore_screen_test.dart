@@ -815,6 +815,194 @@ void main() {
     );
   });
 
+  testWidgets('gallery handle drag compensates sidebar, other panes fixed', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester);
+    final notifier = container.read(layoutStateNotifierProvider.notifier);
+    await notifier.setBlockLibraryPanelExpanded(true);
+    await notifier.setBlockLibraryPanelWidth(280);
+    await tester.pump();
+
+    final mainBefore = tester.getRect(
+      find.byKey(const Key('style-explore-main-editor')),
+    );
+    final blockBefore = tester.getRect(find.byType(BlockLibraryPanelSlot));
+
+    // 左拖画廊手柄：画廊变宽、侧栏等量变窄，其余分区宽度与左缘不动。
+    await tester.drag(
+      find.byKey(const Key('style-explore-gallery-resize-handle')),
+      const Offset(-60, 0),
+    );
+    await tester.pump();
+
+    var state = container.read(layoutStateNotifierProvider);
+    expect(state.styleExploreGalleryWidth, 420);
+    expect(state.styleExploreRunSidebarWidth, 180);
+    expect(state.blockLibraryPanelWidth, 280);
+    expect(
+      tester.getRect(find.byKey(const Key('style-explore-main-editor'))),
+      mainBefore,
+    );
+    expect(tester.getRect(find.byType(BlockLibraryPanelSlot)), blockBefore);
+
+    // 右拖：反向等量补偿。
+    await tester.drag(
+      find.byKey(const Key('style-explore-gallery-resize-handle')),
+      const Offset(20, 0),
+    );
+    await tester.pump();
+
+    state = container.read(layoutStateNotifierProvider);
+    expect(state.styleExploreGalleryWidth, 400);
+    expect(state.styleExploreRunSidebarWidth, 200);
+    expect(
+      tester.getRect(find.byKey(const Key('style-explore-main-editor'))),
+      mainBefore,
+    );
+  });
+
+  testWidgets('gallery handle stalls once the sidebar is exhausted', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester);
+    final mainBefore = tester.getRect(
+      find.byKey(const Key('style-explore-main-editor')),
+    );
+
+    // 左拖远超侧栏余量：侧栏只让出到 0，超出部分丢弃，主编辑不动。
+    await tester.drag(
+      find.byKey(const Key('style-explore-gallery-resize-handle')),
+      const Offset(-400, 0),
+    );
+    await tester.pump();
+
+    var state = container.read(layoutStateNotifierProvider);
+    expect(state.styleExploreRunSidebarWidth, 0);
+    expect(state.styleExploreGalleryWidth, 600);
+    expect(
+      tester.getRect(find.byKey(const Key('style-explore-main-editor'))),
+      mainBefore,
+    );
+
+    // 侧栏已到 0：继续左拖整体 stall，不级联吸收主编辑。
+    await tester.drag(
+      find.byKey(const Key('style-explore-gallery-resize-handle')),
+      const Offset(-50, 0),
+    );
+    await tester.pump();
+
+    state = container.read(layoutStateNotifierProvider);
+    expect(state.styleExploreRunSidebarWidth, 0);
+    expect(state.styleExploreGalleryWidth, 600);
+    expect(
+      tester.getRect(find.byKey(const Key('style-explore-main-editor'))),
+      mainBefore,
+    );
+  });
+
+  testWidgets('run sidebar handle drags against the expanded block library', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester);
+    final notifier = container.read(layoutStateNotifierProvider.notifier);
+    await notifier.setBlockLibraryPanelExpanded(true);
+    await notifier.setBlockLibraryPanelWidth(280);
+    await tester.pump();
+
+    final mainBefore = tester.getRect(
+      find.byKey(const Key('style-explore-main-editor')),
+    );
+    final galleryHandleBefore = tester.getRect(
+      find.byKey(const Key('style-explore-gallery-resize-handle')),
+    );
+
+    // 左拖侧栏手柄：侧栏变宽、块库等量变窄，画廊与主编辑不动。
+    await tester.drag(
+      find.byKey(const Key('style-explore-run-sidebar-resize-handle')),
+      const Offset(-30, 0),
+    );
+    await tester.pump();
+
+    var state = container.read(layoutStateNotifierProvider);
+    expect(state.styleExploreRunSidebarWidth, 270);
+    expect(state.blockLibraryPanelWidth, 250);
+    expect(state.styleExploreGalleryWidth, 360);
+    expect(
+      tester.getRect(find.byKey(const Key('style-explore-main-editor'))),
+      mainBefore,
+    );
+    expect(
+      tester.getRect(
+        find.byKey(const Key('style-explore-gallery-resize-handle')),
+      ),
+      galleryHandleBefore,
+    );
+
+    // 右拖：反向等量补偿。
+    await tester.drag(
+      find.byKey(const Key('style-explore-run-sidebar-resize-handle')),
+      const Offset(20, 0),
+    );
+    await tester.pump();
+
+    state = container.read(layoutStateNotifierProvider);
+    expect(state.styleExploreRunSidebarWidth, 250);
+    expect(state.blockLibraryPanelWidth, 270);
+    expect(
+      tester.getRect(find.byKey(const Key('style-explore-main-editor'))),
+      mainBefore,
+    );
+  });
+
+  testWidgets(
+    'run sidebar handle keeps the single-write path while collapsed',
+    (tester) async {
+      final container = await pumpScreen(tester);
+
+      // 块库收起时左邻是主编辑（Expanded 吸收），只写侧栏。
+      await tester.drag(
+        find.byKey(const Key('style-explore-run-sidebar-resize-handle')),
+        const Offset(-30, 0),
+      );
+      await tester.pump();
+
+      final state = container.read(layoutStateNotifierProvider);
+      expect(state.styleExploreRunSidebarWidth, 270);
+      expect(state.blockLibraryPanelWidth, 320);
+      expect(state.styleExploreGalleryWidth, 360);
+    },
+  );
+
+  testWidgets('run sidebar handle stalls when the block library is exhausted', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester);
+    final notifier = container.read(layoutStateNotifierProvider.notifier);
+    await notifier.setBlockLibraryPanelExpanded(true);
+    await notifier.setBlockLibraryPanelWidth(280);
+    await tester.pump();
+
+    final mainBefore = tester.getRect(
+      find.byKey(const Key('style-explore-main-editor')),
+    );
+
+    // 左拖远超块库余量：块库只让出到 0，侧栏增量为剩余值，主编辑不动。
+    await tester.drag(
+      find.byKey(const Key('style-explore-run-sidebar-resize-handle')),
+      const Offset(-400, 0),
+    );
+    await tester.pump();
+
+    final state = container.read(layoutStateNotifierProvider);
+    expect(state.blockLibraryPanelWidth, 0);
+    expect(state.styleExploreRunSidebarWidth, 520);
+    expect(
+      tester.getRect(find.byKey(const Key('style-explore-main-editor'))),
+      mainBefore,
+    );
+  });
+
   testWidgets('narrow explore layout keeps panes and wraps controls', (
     tester,
   ) async {
