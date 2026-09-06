@@ -44,7 +44,7 @@ NAI Launcher is a third-party client for NovelAI built with Flutter. It integrat
 
 - **Danbooru / Safebooru**: Support tag and date searches plus native daily, weekly, and monthly rankings for a selected date. Danbooru supports login and writable favorites; Safebooru uses anonymous, read-only access to `safebooru.donmai.us`.
 - **Gelbooru**: Supports public search. Optional API credentials accelerate searches and enable read-only website favorites; no synthetic local ranking is presented.
-- **AI TAG**: Supports combined work/author/title/tag/model queries and verbatim Prompt syntax searches such as `::artist:`, with time ranges loaded from the live source configuration. Native live monthly, historical monthly, and older archives are available. Multi-image details support navigation, prefetching, and per-image NAI / Stable Diffusion / ComfyUI metadata reuse, plus current-image and whole-work downloads. AI TAG requires no account and is read-only.
+- **AI TAG**: Supports combined work/author/title/tag/model queries and verbatim Prompt syntax searches such as `::artist:`, with time ranges loaded from the live source configuration. Native live monthly, historical monthly, and older archives are available. Multi-image details support navigation, prefetching, and per-image NAI / Stable Diffusion / ComfyUI metadata reuse, plus current-image and whole-work downloads. This fork adds a **local favorites system**: work favorites (with subsets) and author favorites live in a local standalone database and are browsable offline — no site account needed. From the detail view you can favorite an author and view that author's works filtered right in the app (no external links); the search bar keeps a return entry so you can jump back to your exact browsing position.
 
 ## 🚀 W.O.F Edition Highlights
 
@@ -99,7 +99,7 @@ The launcher exposes a local bridge protocol that **any external agent tool, scr
 
 ### 🖼️ Gallery Overhaul
 
-Multi-source galleries, default masonry layout, collections (root/subset linking), soft-delete trash pool, three-channel NAI-only filtering, precise local model-version filters, HD/SD thumbnail quality tiers, unified drag-out across all three views, envelope-metadata backfill, and byte-level dedup on image save.
+Multi-source galleries, default masonry layout, collections (root/subset linking), soft-delete trash pool, three-channel NAI-only filtering, precise local model-version filters, HD/SD thumbnail quality tiers, unified drag-out across all three views, envelope-metadata backfill, and byte-level dedup on image save — plus local favorites (works + subsets + authors) for the online gallery, with in-app author-work browsing on AI TAG.
 
 <p align="center">
   <img src="screenshots/local_gallery_masonry.png" alt="Local gallery masonry" width="80%">
