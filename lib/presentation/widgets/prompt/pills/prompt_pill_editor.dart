@@ -278,7 +278,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
           marker,
           instance.enabled,
           instance.locked,
-          instance.settings.isRandom,
+          instance.settings.hasRoll,
           instance.evolutionEnabled,
           widget.allowEvolutionToggle,
           block?.title ?? '',
@@ -352,7 +352,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       enabled: instance.enabled,
       icon: promptBlockIconFromName(block.iconName),
       locked: instance.locked,
-      showRollBadge: instance.settings.isRandom,
+      showRollBadge: instance.settings.hasRoll,
       evolutionEnabled: instance.evolutionEnabled,
       allowEvolutionToggle: widget.allowEvolutionToggle,
     );

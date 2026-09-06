@@ -60,7 +60,7 @@ class DeepRoundRollGuard {
       for (final instanceEntry in entry.value.instances.entries) {
         final instance = instanceEntry.value;
         if (!instance.enabled ||
-            !instance.settings.isRandom ||
+            !instance.settings.hasRoll ||
             !instance.evolutionEnabled) {
           continue;
         }

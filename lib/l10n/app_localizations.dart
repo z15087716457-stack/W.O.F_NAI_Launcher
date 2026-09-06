@@ -17731,7 +17731,7 @@ abstract class AppLocalizations {
   /// No description provided for @pillCardEvolutionRequiresRandom.
   ///
   /// In en, this message translates to:
-  /// **'Set the instance to random first'**
+  /// **'Set the instance to random or sequential first'**
   String get pillCardEvolutionRequiresRandom;
 
   /// No description provided for @pillCardEvolutionRequiresEnabled.
@@ -17751,6 +17751,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fixed'**
   String get pillSettingsModeFixed;
+
+  /// No description provided for @pillSettingsModeSequential.
+  ///
+  /// In en, this message translates to:
+  /// **'Sequential'**
+  String get pillSettingsModeSequential;
 
   /// No description provided for @pillSettingsModeRandom.
   ///

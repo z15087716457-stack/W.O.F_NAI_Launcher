@@ -50,9 +50,9 @@ class PillInstanceCard extends ConsumerWidget {
 
     final block = library?.blockById(instance.blockId);
     final color = promptBlockColorFromString(block?.color ?? '#FF607D8B');
-    final isRandom = instance.settings.isRandom;
+    final hasRoll = instance.settings.hasRoll;
     final effectiveRoll = workspaceNotifier.effectiveRollFor(marker);
-    final content = isRandom ? (effectiveRoll ?? '') : (block?.content ?? '');
+    final content = hasRoll ? (effectiveRoll ?? '') : (block?.content ?? '');
 
     return Material(
       color: theme.colorScheme.surfaceContainerHigh,
@@ -105,7 +105,7 @@ class PillInstanceCard extends ConsumerWidget {
                   tooltip: instance.locked
                       ? l10n.pillCardRerollLocked
                       : l10n.pillCardReroll,
-                  onPressed: isRandom && !instance.locked
+                  onPressed: hasRoll && !instance.locked
                       ? () => ref
                             .read(pillWorkspaceProvider(scope).notifier)
                             .rollMarker(marker)
@@ -145,12 +145,12 @@ class PillInstanceCard extends ConsumerWidget {
                 Builder(
                   builder: (context) {
                     final canToggleEvolution =
-                        allowEvolutionToggle && instance.enabled && isRandom;
+                        allowEvolutionToggle && instance.enabled && hasRoll;
                     final evolutionTooltip = !allowEvolutionToggle
                         ? l10n.pillCardEvolutionExploreOnly
                         : !instance.enabled
                         ? l10n.pillCardEvolutionRequiresEnabled
-                        : !isRandom
+                        : !hasRoll
                         ? l10n.pillCardEvolutionRequiresRandom
                         : instance.evolutionEnabled
                         ? l10n.pillCardEvolutionDisable
@@ -198,7 +198,7 @@ class PillInstanceCard extends ConsumerWidget {
                   tooltip: instance.locked
                       ? l10n.pillCardUnlock
                       : l10n.pillCardLock,
-                  onPressed: isRandom && effectiveRoll != null
+                  onPressed: hasRoll && effectiveRoll != null
                       ? () => workspaceNotifier.toggleLocked(marker)
                       : null,
                 ),

@@ -92,6 +92,52 @@ abstract final class PillRollEngine {
     if (settings.order == PillRollOrder.original) drawn.sort();
     final selected = [for (final index in drawn) atoms[index]];
 
+    return _composeSelected(selected, settings, rng);
+  }
+
+  /// 顺序模式 roll（QoL-L2）：从 [cursor] 起取 N 个原子（N = min~max
+  /// 区间随机、截断到池长），池尾绕回，单次内不重复；按游标序输出。
+  ///
+  /// 返回 `(物化串, 下一游标)`。游标只在触发概率通过、实例实际出场时
+  /// 推进（推进量 = 实际抽取数，已按池长取模）；触发未中/数量 0/池空
+  /// 原样返回入参游标——序列 = 实际看到的内容流。权重段与随机模式共用
+  /// 同一配重管线（选择机制与权重正交）。[cursor] 越界（池内容编辑后
+  /// 原子数变化）按 `cursor % 池长` 收敛，不写回由调用方决定。
+  static (String, int) rollInstanceSequential({
+    required PillInstanceSettings settings,
+    required List<String> atoms,
+    required int cursor,
+    required Random rng,
+  }) {
+    if (settings.triggerProbability < 1.0 &&
+        rng.nextDouble() >= settings.triggerProbability) {
+      return ('', cursor);
+    }
+    if (atoms.isEmpty) return ('', cursor);
+
+    final lo = settings.countMin.clamp(0, atoms.length);
+    final hi = settings.countMax.clamp(0, atoms.length);
+    final lower = lo <= hi ? lo : hi;
+    final upper = lo <= hi ? hi : lo;
+    if (upper <= 0) return ('', cursor);
+    final count = lower + rng.nextInt(upper - lower + 1);
+    if (count <= 0) return ('', cursor);
+
+    final start = cursor % atoms.length;
+    final selected = [
+      for (var k = 0; k < count; k++) atoms[(start + k) % atoms.length],
+    ];
+    final text = _composeSelected(selected, settings, rng);
+    return (text, (start + count) % atoms.length);
+  }
+
+  /// 选中原子 → 输出串：权重段关闭直拼；开启则 Split-Beta 配重
+  /// （自带顶层权重前缀的原子尊重作者显式权重，不套第二层）。
+  static String _composeSelected(
+    List<String> selected,
+    PillInstanceSettings settings,
+    Random rng,
+  ) {
     if (!settings.weightEnabled) {
       return NaiWeightSyntax.guardClosures(selected.join(', '));
     }
@@ -107,7 +153,7 @@ abstract final class PillRollEngine {
     for (var k = 0; k < selected.length; k++) {
       final atom = selected[k];
       if (hasTopLevelWeightPrefix(atom)) {
-        parts.add(atom); // 尊重块作者的显式权重，不套第二层
+        parts.add(atom);
         continue;
       }
       final w = discretizeWeight(

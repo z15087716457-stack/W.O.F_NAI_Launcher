@@ -10147,7 +10147,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pillCardEvolutionRequiresRandom =>
-      'Set the instance to random first';
+      'Set the instance to random or sequential first';
 
   @override
   String get pillCardEvolutionRequiresEnabled => 'Enable the instance first';
@@ -10157,6 +10157,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pillSettingsModeFixed => 'Fixed';
+
+  @override
+  String get pillSettingsModeSequential => 'Sequential';
 
   @override
   String get pillSettingsModeRandom => 'Random draw';

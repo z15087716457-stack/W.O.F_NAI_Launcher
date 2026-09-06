@@ -7,8 +7,8 @@ import '../pill_workspace_provider.dart';
 import '../prompt_block_library_provider.dart';
 
 /// 解析深度轮 override 的目标遗传实例 marker（纯函数）：
-/// 优先文档中与 [blockId] 相同的启用随机遗传实例（父本来源实例），
-/// 找不到回退第一个启用随机遗传实例；都没有 → null（不允许深度轮）。
+/// 优先文档中与 [blockId] 相同的启用遗传实例（父本来源实例；随机/顺序
+/// 模式均可），找不到回退第一个启用遗传实例；都没有 → null（不允许深度轮）。
 String? resolveExploreOverrideMarkerInDocument(
   PillDocument document, {
   String? blockId,
@@ -17,7 +17,7 @@ String? resolveExploreOverrideMarkerInDocument(
   for (final entry in document.instances.entries) {
     final instance = entry.value;
     if (!instance.enabled ||
-        !instance.settings.isRandom ||
+        !instance.settings.hasRoll ||
         !instance.evolutionEnabled) {
       continue;
     }
@@ -65,15 +65,16 @@ String? exploreTargetBlockIdForParentSet(
   return null;
 }
 
-/// 组装深度轮注入池：run 快照正向文档中遗传随机实例的块内容原子
-/// （块内容按当前块库解析；池 = 顶层逗号切分后的原子集合，去重保序）。
+/// 组装深度轮注入池：run 快照正向文档中遗传实例（随机/顺序均可）的
+/// 块内容原子（块内容按当前块库解析；池 = 顶层逗号切分后的原子集合，
+/// 去重保序）。
 List<String> buildExploreInjectionPool(Ref ref, ExploreRun run) {
   final library = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
   final pool = <String>[];
   final seen = <String>{};
   for (final instance in run.recipeSnapshot.positive.instances.values) {
     if (!instance.enabled ||
-        !instance.settings.isRandom ||
+        !instance.settings.hasRoll ||
         !instance.evolutionEnabled) {
       continue;
     }
@@ -86,9 +87,10 @@ List<String> buildExploreInjectionPool(Ref ref, ExploreRun run) {
   return pool;
 }
 
-/// 抓 main/negative 双 lane 当前投影 + 启用随机遗传实例的 roll 明细。
+/// 抓 main/negative 双 lane 当前投影 + 启用遗传实例（随机/顺序均可）的
+/// roll 明细。
 ///
-/// lane 合并后探索变量就是主 lane 的随机遗传实例：runner 批量生成与
+/// lane 合并后探索变量就是主 lane的随机/顺序遗传实例：runner 批量生成与
 /// 探索页手动单张登记共用同一份抓取逻辑。投影是同步现值（roll 后
 /// 立即可读，不经 generationParams 的 microtask 回写——红线）。
 ExploreRollSnapshot captureExploreRollSnapshot(Ref ref) {
@@ -124,7 +126,7 @@ List<ExploreInstanceRoll> _laneInstanceRolls(
   return [
     for (final entry in workspace.document.instances.entries)
       if (entry.value.enabled &&
-          entry.value.settings.isRandom &&
+          entry.value.settings.hasRoll &&
           entry.value.evolutionEnabled)
         ExploreInstanceRoll(
           lane: lane,

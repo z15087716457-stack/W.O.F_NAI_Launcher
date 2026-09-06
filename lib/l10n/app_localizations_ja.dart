@@ -9921,7 +9921,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pillCardEvolutionExploreOnly => '遺伝はスタイル探索でのみ使用できます';
 
   @override
-  String get pillCardEvolutionRequiresRandom => '先にランダム抽出に設定してください';
+  String get pillCardEvolutionRequiresRandom => '先にランダム抽出または順番に設定してください';
 
   @override
   String get pillCardEvolutionRequiresEnabled => '先にインスタンスを有効化してください';
@@ -9931,6 +9931,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get pillSettingsModeFixed => '固定';
+
+  @override
+  String get pillSettingsModeSequential => '順番';
 
   @override
   String get pillSettingsModeRandom => 'ランダム抽出';

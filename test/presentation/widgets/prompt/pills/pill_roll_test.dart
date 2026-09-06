@@ -73,6 +73,13 @@ void main() {
     countMax: 1,
   );
 
+  /// 顺序模式、数量固定 1：脚本源下输出完全确定（A → B → 绕回 A）。
+  const sequentialSettings = PillInstanceSettings(
+    mode: PillRollMode.sequential,
+    countMin: 1,
+    countMax: 1,
+  );
+
   Future<void> insertRandomBlock(
     ProviderContainer container,
     String scope,
@@ -311,6 +318,207 @@ void main() {
             .instances[markerA]!
             .evolutionEnabled,
         isTrue,
+      );
+    });
+  });
+
+  group('sequential mode (QoL-L2)', () {
+    test(
+      'switching to sequential materializes first batch and advances cursor',
+      () async {
+        final container = makeContainer();
+        await container.read(promptBlockLibraryNotifierProvider.future);
+
+        final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+        notifier.setText('');
+        notifier.insertBlockAt(offset: 0, blockId: 'style');
+        notifier.updateInstanceSettings(markerA, sequentialSettings);
+
+        final state = container.read(pillWorkspaceNotifierProvider);
+        final instance = state.document.instances[markerA]!;
+        expect(instance.currentRoll, 'A');
+        expect(instance.sequenceCursor, 1);
+        // 投影 = 物化结果（三源同源对顺序模式同样成立）
+        expect(state.projection, 'A');
+      },
+    );
+
+    test(
+      'scene-act flow: lock freezes content and cursor, unlock + dice advances',
+      () async {
+        final container = makeContainer();
+        await container.read(promptBlockLibraryNotifierProvider.future);
+        final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+        notifier.setText('');
+        notifier.insertBlockAt(offset: 0, blockId: 'style');
+        notifier.updateInstanceSettings(markerA, sequentialSettings);
+
+        PillInstance read() => container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!;
+
+        // 第一幕 roll 到满意内容 → 锁定：内容与游标双冻结
+        notifier.toggleLocked(markerA);
+        expect(read().currentRoll, 'A');
+        expect(read().sequenceCursor, 1);
+        expect(notifier.rollAllRandom(), isFalse);
+        notifier.rollMarker(markerA);
+        expect(read().currentRoll, 'A');
+        expect(read().sequenceCursor, 1);
+
+        // 需要下一幕 → 解锁 → 骰子 = 下一批
+        notifier.toggleLocked(markerA);
+        notifier.rollMarker(markerA);
+        expect(read().currentRoll, 'B');
+        expect(read().sequenceCursor, 0, reason: '池长 2，游标绕回');
+
+        // 满意再锁
+        notifier.toggleLocked(markerA);
+        expect(read().locked, isTrue);
+        expect(read().currentRoll, 'B');
+      },
+    );
+
+    test('rollAllRandom advances each sequential instance per batch', () async {
+      final container = makeContainer();
+      await container.read(promptBlockLibraryNotifierProvider.future);
+      final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+      notifier.setText('');
+      notifier.insertBlockAt(offset: 0, blockId: 'style');
+      notifier.updateInstanceSettings(markerA, sequentialSettings);
+
+      PillInstance read() => container
+          .read(pillWorkspaceNotifierProvider)
+          .document
+          .instances[markerA]!;
+
+      expect(notifier.rollAllRandom(), isTrue);
+      expect(read().currentRoll, 'B');
+      expect(read().sequenceCursor, 0);
+      // 再 roll：绕回池头
+      expect(notifier.rollAllRandom(), isTrue);
+      expect(read().currentRoll, 'A');
+      expect(read().sequenceCursor, 1);
+    });
+
+    test('trigger miss yields empty roll and keeps cursor', () async {
+      final container = makeContainer();
+      await container.read(promptBlockLibraryNotifierProvider.future);
+      final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+      notifier.setText('');
+      notifier.insertBlockAt(offset: 0, blockId: 'style');
+      // 脚本源 nextDouble()=0.5：trigger 0.4 → 未中；0.6 → 命中
+      notifier.updateInstanceSettings(
+        markerA,
+        const PillInstanceSettings(
+          mode: PillRollMode.sequential,
+          countMin: 1,
+          countMax: 1,
+          triggerProbability: 0.4,
+        ),
+      );
+
+      final instance = container
+          .read(pillWorkspaceNotifierProvider)
+          .document
+          .instances[markerA]!;
+      expect(instance.currentRoll, '');
+      expect(instance.sequenceCursor, 0, reason: '未触发=不出场且游标不动');
+
+      notifier.updateInstanceSettings(
+        markerA,
+        const PillInstanceSettings(
+          mode: PillRollMode.sequential,
+          countMin: 1,
+          countMax: 1,
+          triggerProbability: 0.6,
+        ),
+      );
+      final hit = container
+          .read(pillWorkspaceNotifierProvider)
+          .document
+          .instances[markerA]!;
+      expect(hit.currentRoll, 'A');
+      expect(hit.sequenceCursor, 1);
+    });
+
+    test(
+      'legacy document without cursor materializes from pool head',
+      () async {
+        final container = makeContainer();
+        await container.read(promptBlockLibraryNotifierProvider.future);
+        final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+        // 旧存档：settings.mode=sequential 但无 sequenceCursor/currentRoll 键
+        notifier.restoreDocument(
+          PillDocument.fromJson(const {
+            'text': markerA,
+            'instances': {
+              markerA: {
+                'blockId': 'style',
+                'settings': {
+                  'mode': 'sequential',
+                  'countMin': 1,
+                  'countMax': 1,
+                },
+              },
+            },
+          }),
+        );
+
+        final instance = container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!;
+        // fromJson 缺键落 0（引擎单测覆盖），恢复路径兜底物化从池头取并推进
+        expect(instance.currentRoll, 'A');
+        expect(instance.sequenceCursor, 1);
+      },
+    );
+
+    test('settings update re-rolls from current cursor position', () async {
+      final container = makeContainer();
+      await container.read(promptBlockLibraryNotifierProvider.future);
+      final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+      notifier.setText('');
+      notifier.insertBlockAt(offset: 0, blockId: 'style');
+      notifier.updateInstanceSettings(markerA, sequentialSettings);
+
+      // 参数更新（开权重段）：从当前位置继续取下一批，不重置游标
+      notifier.updateInstanceSettings(
+        markerA,
+        const PillInstanceSettings(
+          mode: PillRollMode.sequential,
+          countMin: 1,
+          countMax: 1,
+          weightEnabled: true,
+        ),
+      );
+      final instance = container
+          .read(pillWorkspaceNotifierProvider)
+          .document
+          .instances[markerA]!;
+      expect(instance.currentRoll, contains('B'));
+      expect(instance.sequenceCursor, 0);
+    });
+
+    test('evolution toggle accepts sequential instances', () async {
+      final container = makeContainer();
+      await container.read(promptBlockLibraryNotifierProvider.future);
+      final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+      notifier.setText('');
+      notifier.insertBlockAt(offset: 0, blockId: 'style');
+      notifier.updateInstanceSettings(markerA, sequentialSettings);
+
+      notifier.toggleEvolution(markerA);
+      expect(
+        container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!
+            .evolutionEnabled,
+        isTrue,
+        reason: '顺序实例与随机同权参与探索遗传',
       );
     });
   });
@@ -616,6 +824,92 @@ void main() {
 
       expect(result, isNotNull);
       expect(result!.mode, PillRollMode.random);
+    });
+
+    testWidgets(
+      'switching to sequential shows trigger/weight, hides order row',
+      (tester) async {
+        PillInstanceSettings? result;
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: const Locale('zh'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () async {
+                    result = await PillInstanceSettingsDialog.show(
+                      context,
+                      PillInstanceSettings.fixedDefault,
+                    );
+                  },
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('open'));
+        await tester.pump();
+        await tester.pump();
+
+        await tester.tap(find.text('顺序'));
+        await tester.pump();
+        await tester.pump();
+
+        // 顺序模式：数量/权重/触发行可见
+        expect(find.textContaining('触发概率'), findsOneWidget);
+        expect(find.textContaining('抽取数量'), findsOneWidget);
+        expect(find.text('随机权重'), findsOneWidget);
+        // 输出顺序行是随机模式专属，顺序模式天然按池序输出
+        expect(find.text('输出顺序'), findsNothing);
+        expect(find.text('按抽中顺序'), findsNothing);
+        expect(find.text('按池原序'), findsNothing);
+
+        await tester.tap(find.text('确定'));
+        await tester.pump();
+        await tester.pump();
+
+        expect(result, isNotNull);
+        expect(result!.mode, PillRollMode.sequential);
+      },
+    );
+
+    testWidgets('random mode still shows the order row (回归)', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () async {
+                  await PillInstanceSettingsDialog.show(
+                    context,
+                    PillInstanceSettings.fixedDefault,
+                  );
+                },
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pump();
+      await tester.pump();
+      await tester.tap(find.text('随机抽取'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('输出顺序'), findsOneWidget);
+      // Dropdown 未展开时只渲染当前选中项（默认按抽中顺序）
+      expect(find.text('按抽中顺序'), findsOneWidget);
+      expect(find.byType(DropdownButton<PillRollOrder>), findsOneWidget);
     });
 
     testWidgets('cancel returns null', (tester) async {

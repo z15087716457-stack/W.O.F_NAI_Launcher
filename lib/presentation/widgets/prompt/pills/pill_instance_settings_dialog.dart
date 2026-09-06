@@ -49,6 +49,9 @@ class _PillInstanceSettingsDialogState
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final isRandom = _draft.mode == PillRollMode.random;
+    // 顺序与随机同走 roll 链路（数量/权重/触发）；输出顺序行是随机模式
+    // 专属（顺序天然按池序输出），由 [isRandom] 单独控制。
+    final hasRoll = _draft.mode != PillRollMode.fixed;
 
     return AlertDialog(
       title: Text(l10n.pillSettingsTitle),
@@ -66,6 +69,10 @@ class _PillInstanceSettingsDialogState
                     label: Text(l10n.pillSettingsModeFixed),
                   ),
                   ButtonSegment(
+                    value: PillRollMode.sequential,
+                    label: Text(l10n.pillSettingsModeSequential),
+                  ),
+                  ButtonSegment(
                     value: PillRollMode.random,
                     label: Text(l10n.pillSettingsModeRandom),
                   ),
@@ -74,11 +81,11 @@ class _PillInstanceSettingsDialogState
                 onSelectionChanged: (selection) =>
                     _update((d) => d.copyWith(mode: selection.first)),
               ),
-              if (isRandom) ...[
+              if (hasRoll) ...[
                 const SizedBox(height: 12),
                 _buildCountRow(theme, l10n),
                 const SizedBox(height: 8),
-                _buildOrderRow(l10n),
+                if (isRandom) _buildOrderRow(l10n),
                 const Divider(height: 24),
                 _buildWeightSection(theme, l10n),
                 const Divider(height: 24),

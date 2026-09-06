@@ -6,10 +6,13 @@
 library;
 
 /// 实例随机模式（P2.5）：固定 = 投影恒为块内容；随机抽取 = 投影为物化的
-/// `currentRoll`（未锁定实例可在参数变更/手动骰子/生成入队后重抽）。
-enum PillRollMode { fixed, random }
+/// `currentRoll`（未锁定实例可在参数变更/手动骰子/生成入队后重抽）；
+/// 顺序 = 同样物化 `currentRoll`，但从池头起按池序逐批推进（游标见
+/// [PillInstance.sequenceCursor]），走完绕回——选择机制与随机正交。
+enum PillRollMode { fixed, sequential, random }
 
 /// 随机抽取的输出顺序：抽中序 / 按原序（质量词类块用后者）。
+/// 仅随机模式消费；顺序模式天然按池序输出，不读此值。
 enum PillRollOrder { drawn, original }
 
 /// 块实例的随机参数集（P2.5，挂实例不挂块定义——同一块两实例可不同设置）。
@@ -56,6 +59,10 @@ class PillInstanceSettings {
   final double triggerProbability;
 
   bool get isRandom => mode == PillRollMode.random;
+
+  /// 是否参与 roll 链路（骰子/锁定/自动重 roll/快照/guard/角标）。
+  /// 顺序与随机两种抽取机制同走此门；固定模式除外。
+  bool get hasRoll => mode != PillRollMode.fixed;
 
   PillInstanceSettings copyWith({
     PillRollMode? mode,
@@ -191,13 +198,14 @@ class PillInstance {
     this.evolutionEnabled = false,
     this.settings = PillInstanceSettings.fixedDefault,
     this.currentRoll,
+    this.sequenceCursor = 0,
   });
 
   final String blockId;
   final bool enabled;
 
   /// 随机实例是否冻结当前 `currentRoll`；固定实例不使用此字段。
-  /// 旧存档缺键时关闭。
+  /// 旧存档缺键时关闭。锁定对顺序模式同时冻结游标（内容与游标双冻结）。
   final bool locked;
 
   /// 是否把该实例作为画风探索深度轮的遗传块。
@@ -209,6 +217,12 @@ class PillInstance {
   /// null = 尚未 roll（投影前由工作区兜底物化，锁定实例除外）。
   final String? currentRoll;
 
+  /// 顺序模式游标：下一次 roll 的起始原子下标（roll 时按 `cursor % 池长`
+  /// 收敛，不提前写回）。只在触发概率通过、实例实际出场时推进，推进量
+  /// = 实际抽取数；未触发/锁定/guard 期间不动——序列 = 实际看到的内容流。
+  /// 固定与随机模式不读此值；旧存档缺键落 0。
+  final int sequenceCursor;
+
   PillInstance copyWith({
     String? blockId,
     bool? enabled,
@@ -216,6 +230,7 @@ class PillInstance {
     bool? evolutionEnabled,
     PillInstanceSettings? settings,
     String? currentRoll,
+    int? sequenceCursor,
   }) {
     return PillInstance(
       blockId: blockId ?? this.blockId,
@@ -224,6 +239,7 @@ class PillInstance {
       evolutionEnabled: evolutionEnabled ?? this.evolutionEnabled,
       settings: settings ?? this.settings,
       currentRoll: currentRoll ?? this.currentRoll,
+      sequenceCursor: sequenceCursor ?? this.sequenceCursor,
     );
   }
 
@@ -233,11 +249,13 @@ class PillInstance {
     'locked': locked,
     'evolutionEnabled': evolutionEnabled,
     'settings': settings.toJson(),
+    'sequenceCursor': sequenceCursor,
     if (currentRoll != null) 'currentRoll': currentRoll,
   };
 
   factory PillInstance.fromJson(Map<String, dynamic> json) {
     final rawSettings = json['settings'];
+    final rawCursor = json['sequenceCursor'];
     return PillInstance(
       blockId: json['blockId'] as String? ?? '',
       enabled: json['enabled'] as bool? ?? true,
@@ -249,6 +267,9 @@ class PillInstance {
             )
           : PillInstanceSettings.fixedDefault,
       currentRoll: json['currentRoll'] as String?,
+      sequenceCursor: rawCursor is num && rawCursor.toInt() > 0
+          ? rawCursor.toInt()
+          : 0,
     );
   }
 
@@ -260,7 +281,8 @@ class PillInstance {
       other.locked == locked &&
       other.evolutionEnabled == evolutionEnabled &&
       other.settings == settings &&
-      other.currentRoll == currentRoll;
+      other.currentRoll == currentRoll &&
+      other.sequenceCursor == sequenceCursor;
 
   @override
   int get hashCode => Object.hash(
@@ -270,6 +292,7 @@ class PillInstance {
     evolutionEnabled,
     settings,
     currentRoll,
+    sequenceCursor,
   );
 }
 

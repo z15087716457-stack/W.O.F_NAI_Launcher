@@ -9779,7 +9779,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pillCardEvolutionExploreOnly => '遗传开关仅在画风探索页可用';
 
   @override
-  String get pillCardEvolutionRequiresRandom => '需先设为随机抽取';
+  String get pillCardEvolutionRequiresRandom => '需先设为随机或顺序抽取';
 
   @override
   String get pillCardEvolutionRequiresEnabled => '需先启用实例';
@@ -9791,6 +9791,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pillSettingsModeFixed => '固定';
 
   @override
+  String get pillSettingsModeSequential => '顺序';
+
+  @override
   String get pillSettingsModeRandom => '随机抽取';
 
   @override
@@ -9800,10 +9803,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pillSettingsOrder => '输出顺序';
 
   @override
-  String get pillSettingsOrderDrawn => '抽中序';
+  String get pillSettingsOrderDrawn => '按抽中顺序';
 
   @override
-  String get pillSettingsOrderOriginal => '按原序';
+  String get pillSettingsOrderOriginal => '按池原序';
 
   @override
   String get pillSettingsWeight => '随机权重';

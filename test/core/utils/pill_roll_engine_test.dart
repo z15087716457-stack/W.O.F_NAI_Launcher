@@ -156,6 +156,141 @@ void main() {
     });
   });
 
+  group('rollInstanceSequential', () {
+    const atoms = ['a', 'b', 'c', 'd', 'e'];
+
+    PillInstanceSettings settings({
+      int countMin = 1,
+      int countMax = 1,
+      bool weightEnabled = false,
+      double triggerProbability = 1.0,
+      PillRollOrder order = PillRollOrder.drawn,
+    }) {
+      return PillInstanceSettings(
+        mode: PillRollMode.sequential,
+        countMin: countMin,
+        countMax: countMax,
+        order: order,
+        weightEnabled: weightEnabled,
+        triggerProbability: triggerProbability,
+      );
+    }
+
+    (String, int) roll({
+      int cursor = 0,
+      int countMin = 1,
+      int countMax = 1,
+      bool weightEnabled = false,
+      double triggerProbability = 1.0,
+      PillRollOrder order = PillRollOrder.drawn,
+      int seed = 1,
+      List<String> pool = atoms,
+    }) {
+      return PillRollEngine.rollInstanceSequential(
+        settings: settings(
+          countMin: countMin,
+          countMax: countMax,
+          weightEnabled: weightEnabled,
+          triggerProbability: triggerProbability,
+          order: order,
+        ),
+        atoms: pool,
+        cursor: cursor,
+        rng: Random(seed),
+      );
+    }
+
+    test('advances cursor by drawn count from pool head', () {
+      expect(roll(cursor: 0), ('a', 1));
+      expect(roll(cursor: 1), ('b', 2));
+      expect(roll(cursor: 2), ('c', 3));
+    });
+
+    test('wraps around at pool tail', () {
+      expect(roll(cursor: 4), ('e', 0));
+      expect(roll(cursor: 3, countMin: 2, countMax: 2), ('d, e', 0));
+    });
+
+    test('batch may wrap without repeating an atom in one roll', () {
+      // 池 3、游标 2、N=2 → c, a（绕回但不重复）
+      expect(roll(cursor: 2, countMin: 2, countMax: 2, pool: ['a', 'b', 'c']), (
+        'c, a',
+        1,
+      ));
+    });
+
+    test('count clamps to pool size and cursor returns to start', () {
+      final (text, cursor) = roll(
+        cursor: 1,
+        countMin: 8,
+        countMax: 10,
+        pool: ['a', 'b', 'c'],
+      );
+      expect(text.split(', '), hasLength(3));
+      expect(text.split(', ').toSet().length, 3, reason: '整池各一次');
+      expect(cursor, 1);
+    });
+
+    test('cursor beyond pool length converges via modulo', () {
+      // 池编辑缩到 3 后旧游标 7 收敛到 1
+      expect(roll(cursor: 7, pool: ['a', 'b', 'c']), ('b', 2));
+    });
+
+    test('trigger miss keeps cursor untouched and yields empty', () {
+      expect(roll(cursor: 2, triggerProbability: 0.0), ('', 2));
+    });
+
+    test('count 0~0 keeps cursor untouched and yields empty', () {
+      expect(roll(cursor: 2, countMin: 0, countMax: 0), ('', 2));
+    });
+
+    test('empty pool yields empty and keeps cursor', () {
+      expect(roll(cursor: 2, pool: const []), ('', 2));
+    });
+
+    test('output order is cursor order regardless of order setting', () {
+      // 输出顺序是随机模式专属；顺序模式 order 设置不影响输出
+      expect(
+        roll(
+          cursor: 1,
+          countMin: 2,
+          countMax: 2,
+          order: PillRollOrder.original,
+        ),
+        ('b, c', 3),
+      );
+    });
+
+    test('weight pipeline wraps drawn atoms (选择机制与权重正交)', () {
+      final (text, cursor) = roll(
+        cursor: 0,
+        countMin: 2,
+        countMax: 2,
+        weightEnabled: true,
+      );
+      expect(cursor, 2);
+      final parts = text.split(', ');
+      expect(parts, hasLength(2));
+      for (final part in parts) {
+        final match = RegExp(r'^(-?\d\.\d)::(.+)::$').firstMatch(part);
+        expect(match, isNotNull, reason: part);
+        expect(['a', 'b'], contains(match!.group(2)));
+      }
+    });
+
+    test('sequential batches walk the whole pool in order (分幕用例)', () {
+      // 连续场景分幕：数量 1 逐批推进，走完绕回
+      var cursor = 0;
+      final seen = <String>[];
+      for (var i = 0; i < atoms.length * 2; i++) {
+        final (text, next) = roll(cursor: cursor);
+        seen.add(text);
+        cursor = next;
+      }
+      expect(seen, [...atoms, ...atoms]);
+    });
+  });
+
   group('weights', () {
     const atoms = ['alpha', 'beta'];
 
@@ -350,6 +485,40 @@ void main() {
       final restored = PillInstance.fromJson(instance.toJson());
       expect(restored, instance);
       expect(restored.locked, isTrue);
+    });
+
+    test('instance json round trip keeps sequenceCursor', () {
+      const instance = PillInstance(
+        blockId: 'b1',
+        settings: PillInstanceSettings(mode: PillRollMode.sequential),
+        sequenceCursor: 4,
+      );
+      final restored = PillInstance.fromJson(instance.toJson());
+      expect(restored.sequenceCursor, 4);
+      expect(restored, instance);
+    });
+
+    test('legacy instance json without sequenceCursor falls back to 0', () {
+      final restored = PillInstance.fromJson(const {
+        'blockId': 'b1',
+        'settings': {'mode': 'sequential', 'countMin': 1, 'countMax': 1},
+        'currentRoll': 'a',
+      });
+      expect(restored.sequenceCursor, 0);
+      expect(restored.settings.mode, PillRollMode.sequential);
+    });
+
+    test('mode name mapping covers sequential; unknown names degrade', () {
+      // 新存档的 sequential 正确解析；未知 mode 名（未来枚举）落 fixed，
+      // 与旧版本读新存档时的容错路径一致。
+      expect(
+        PillInstanceSettings.fromJson(const {'mode': 'sequential'}).mode,
+        PillRollMode.sequential,
+      );
+      expect(
+        PillInstanceSettings.fromJson(const {'mode': 'shuffle'}).mode,
+        PillRollMode.fixed,
+      );
     });
 
     test(

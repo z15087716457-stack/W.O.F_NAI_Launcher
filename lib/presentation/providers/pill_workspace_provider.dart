@@ -180,11 +180,11 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
 
   /// 切换实例遗传开关。
   ///
-  /// 只有启用中的随机实例允许参与切换；开关本身不触发 roll，普通投影
+  /// 只有启用中的随机/顺序实例允许参与切换；开关本身不触发 roll，普通投影
   /// 与 roll 语义保持不变。
   void toggleEvolution(String marker) {
     final instance = state.document.instances[marker];
-    if (instance == null || !instance.enabled || !instance.settings.isRandom) {
+    if (instance == null || !instance.enabled || !instance.settings.hasRoll) {
       return;
     }
     final instances = Map<String, PillInstance>.of(state.document.instances)
@@ -194,14 +194,14 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     _apply(state.document.copyWith(instances: instances));
   }
 
-  /// 切换用户锁定：只允许锁定已有物化结果的随机实例。
+  /// 切换用户锁定：只允许锁定已有物化结果的随机/顺序实例。
   ///
-  /// 锁定只冻结 `currentRoll`，不改变启用态和触发概率；固定实例以及尚未
-  /// 物化的随机实例没有可锁定内容。
+  /// 锁定冻结 `currentRoll`（顺序模式同时冻结游标），不改变启用态和
+  /// 触发概率；固定实例以及尚未物化的随机/顺序实例没有可锁定内容。
   void toggleLocked(String marker) {
     final instance = state.document.instances[marker];
     if (instance == null ||
-        !instance.settings.isRandom ||
+        !instance.settings.hasRoll ||
         instance.currentRoll == null) {
       return;
     }
@@ -211,7 +211,8 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   }
 
   /// 更新实例随机参数（L2 弹窗确定，roll 时机 2）：写入设置；未锁定的
-  /// 实例切到/更新随机模式时立即重 roll 一次，锁定实例只更新设置。
+  /// 实例切到/更新随机或顺序模式时立即重 roll 一次（顺序模式游标从
+  /// 当前位置继续取下一批），锁定实例只更新设置、内容与游标双冻结。
   void updateInstanceSettings(String marker, PillInstanceSettings settings) {
     final instance = state.document.instances[marker];
     if (instance == null) {
@@ -222,10 +223,11 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
       return;
     }
     var updated = instance.copyWith(settings: settings);
-    if (settings.isRandom &&
+    if (settings.hasRoll &&
         !instance.locked &&
         !_hasGuardOverride(marker, instance)) {
-      updated = updated.copyWith(currentRoll: _rollFor(updated));
+      final (text, nextCursor) = _rollFor(updated);
+      updated = updated.copyWith(currentRoll: text, sequenceCursor: nextCursor);
     }
     final instances = Map<String, PillInstance>.of(state.document.instances)
       ..[marker] = updated;
@@ -251,35 +253,45 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     _apply(state.document.copyWith(instances: instances));
   }
 
-  /// 手动重 roll（L1 骰子，roll 时机 3）；固定或锁定模式无操作。
+  /// 手动重 roll（L1 骰子，roll 时机 3）：顺序模式 = 走到下一批；
+  /// 固定或锁定模式无操作。
   void rollMarker(String marker) {
     final instance = state.document.instances[marker];
     if (instance == null ||
-        !instance.settings.isRandom ||
+        !instance.settings.hasRoll ||
         instance.locked ||
         _hasGuardOverride(marker, instance)) {
       return;
     }
+    final (text, nextCursor) = _rollFor(instance);
     final instances = Map<String, PillInstance>.of(state.document.instances)
-      ..[marker] = instance.copyWith(currentRoll: _rollFor(instance));
+      ..[marker] = instance.copyWith(
+        currentRoll: text,
+        sequenceCursor: nextCursor,
+      );
     _apply(state.document.copyWith(instances: instances));
   }
 
-  /// 本 lane 全部未锁定的随机实例重 roll（roll 时机 4：每次生成入队后）。
-  /// 返回是否有实例的 currentRoll 发生了变化（协调器据此推送投影）。
+  /// 本 lane 全部未锁定的随机/顺序实例重 roll（roll 时机 4：每次生成
+  /// 入队后；顺序模式各自推进游标）。返回是否有实例的 currentRoll 或
+  /// 游标发生了变化（协调器据此推送投影）。
   bool rollAllRandom() {
     var changed = false;
     final instances = Map<String, PillInstance>.of(state.document.instances);
     for (final entry in instances.entries) {
       final instance = entry.value;
-      if (!instance.settings.isRandom ||
+      if (!instance.settings.hasRoll ||
           instance.locked ||
           _hasGuardOverride(entry.key, instance)) {
         continue;
       }
-      final rolled = _rollFor(instance);
-      if (rolled != instance.currentRoll) {
-        instances[entry.key] = instance.copyWith(currentRoll: rolled);
+      final (rolled, nextCursor) = _rollFor(instance);
+      if (rolled != instance.currentRoll ||
+          nextCursor != instance.sequenceCursor) {
+        instances[entry.key] = instance.copyWith(
+          currentRoll: rolled,
+          sequenceCursor: nextCursor,
+        );
         changed = true;
       }
     }
@@ -331,7 +343,7 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   /// `currentRoll` 保持为进入深度轮前的真实值。
   String? effectiveRollFor(String marker) {
     final instance = state.document.instances[marker];
-    if (instance == null || !instance.settings.isRandom) return null;
+    if (instance == null || !instance.settings.hasRoll) return null;
     return _effectiveRollFor(marker, instance);
   }
 
@@ -349,15 +361,15 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     );
   }
 
-  /// 实例内容解析（P2.5）：固定模式 = 块库实时内容；随机模式 =
+  /// 实例内容解析（P2.5）：固定模式 = 块库实时内容；随机/顺序模式 =
   /// 物化的 `currentRoll`（投影永不 roll，物化只在文档变更点发生）。
   String? _resolveInstance(PillInstance instance) {
-    if (instance.settings.isRandom) return instance.currentRoll;
+    if (instance.settings.hasRoll) return instance.currentRoll;
     return _resolveBlockContent(instance.blockId);
   }
 
   String? _resolveMarkerInstance(String marker, PillInstance instance) {
-    if (instance.settings.isRandom) return _effectiveRollFor(marker, instance);
+    if (instance.settings.hasRoll) return _effectiveRollFor(marker, instance);
     return _resolveBlockContent(instance.blockId);
   }
 
@@ -375,20 +387,23 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         ?.content;
   }
 
-  /// 未锁定随机实例的兜底物化：`currentRoll == null` 时立即 roll 一次。
-  /// 锁定实例保留缺失值，避免普通更新路径绕过用户锁定。
-  /// 保证「L1 显示 = 生成发送 = token 计数」三者永远同一份。
+  /// 未锁定随机/顺序实例的兜底物化：`currentRoll == null` 时立即 roll 一次
+  /// （顺序模式从当前游标取第一批并推进）。锁定实例保留缺失值，避免普通
+  /// 更新路径绕过用户锁定。保证「L1 显示 = 生成发送 = token 计数」三者
+  /// 永远同一份。
   PillDocument _materializeRolls(PillDocument document) {
     var changed = false;
     final instances = Map<String, PillInstance>.of(document.instances);
     for (final entry in instances.entries) {
       final instance = entry.value;
-      if (instance.settings.isRandom &&
+      if (instance.settings.hasRoll &&
           !instance.locked &&
           instance.currentRoll == null &&
           !_hasGuardOverride(entry.key, instance)) {
+        final (text, nextCursor) = _rollFor(instance);
         instances[entry.key] = instance.copyWith(
-          currentRoll: _rollFor(instance),
+          currentRoll: text,
+          sequenceCursor: nextCursor,
         );
         changed = true;
       }
@@ -396,13 +411,27 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     return changed ? document.copyWith(instances: instances) : document;
   }
 
-  /// 对单个实例执行 roll：块内容切原子 → 随机引擎。
-  String _rollFor(PillInstance instance) {
+  /// 对单个实例执行 roll：块内容切原子 → 随机引擎。顺序模式走
+  /// [PillRollEngine.rollInstanceSequential]（游标入出参），其余模式游标
+  /// 原样带回（固定/随机实例不读该值）。
+  (String, int) _rollFor(PillInstance instance) {
     final content = _resolveBlockContent(instance.blockId) ?? '';
-    return PillRollEngine.rollInstance(
-      settings: instance.settings,
-      atoms: PillRollEngine.splitTopLevelAtoms(content),
-      rng: rng,
+    final atoms = PillRollEngine.splitTopLevelAtoms(content);
+    if (instance.settings.mode == PillRollMode.sequential) {
+      return PillRollEngine.rollInstanceSequential(
+        settings: instance.settings,
+        atoms: atoms,
+        cursor: instance.sequenceCursor,
+        rng: rng,
+      );
+    }
+    return (
+      PillRollEngine.rollInstance(
+        settings: instance.settings,
+        atoms: atoms,
+        rng: rng,
+      ),
+      instance.sequenceCursor,
     );
   }
 
