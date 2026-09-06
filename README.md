@@ -60,7 +60,9 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
 - **游客模式**：登录页可跳过登录，离线使用本地画廊、词库、提示词块等全部本地功能，纯内存会话不驻留。
 - **提示词语法与元数据工具链**：统一 NAI 词法扫描器与数值权重尾部守卫（权重拼接不被服务端误识别）；移除失焦空格自动转下划线；统一按文件头 Magic Byte 解析 PNG / WebP / JPEG 元数据；AI TAG 在线画廊反防盗链请求头分发。
 
-### 本分支特色界面
+详细变更见 [CHANGELOG.md](CHANGELOG.md) 的 `1.0.0` 段落。
+
+## 🖥️ 界面预览
 
 <p align="center">
   <img src="screenshots/generation_pill_block_library.png" alt="生成主界面：pill 药丸编辑器与块库面板" width="80%">
@@ -86,40 +88,6 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
   <em>本地画廊：瀑布流、分类树、NAI-only 与模型版本过滤</em>
 </p>
 
-详细变更见 [CHANGELOG.md](CHANGELOG.md) 的 `1.0.0` 段落。
-
-## 🖥️ 界面预览
-
-<p align="center">
-  <img src="assets/images/1.png" alt="图像生成界面" width="80%">
-  <br>
-  <em>图像生成主界面</em>
-</p>
-
-<p align="center">
-  <img src="assets/images/2.png" alt="本地画廊" width="80%">
-  <br>
-  <em>本地画廊与瀑布流浏览</em>
-</p>
-
-<p align="center">
-  <img src="assets/images/4.png" alt="图片详情" width="80%">
-  <br>
-  <em>图片详情、元数据和参数复用</em>
-</p>
-
-<p align="center">
-  <img src="assets/images/5.png" alt="Danbooru 在线画廊" width="80%">
-  <br>
-  <em>Danbooru 在线画廊</em>
-</p>
-
-<p align="center">
-  <img src="assets/images/7.png" alt="统计仪表盘" width="80%">
-  <br>
-  <em>统计仪表盘</em>
-</p>
-
 ## 🧩 平台支持
 
 | 平台 | 状态 | 说明 |
@@ -135,8 +103,8 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
 
 | 平台 | 下载文件 | 使用方式 |
 | --- | --- | --- |
-| Windows | `NAI_Launcher_Windows_<version>_Setup.exe` | 安装版，推荐普通用户，安装到当前用户目录；支持应用内断点下载、校验、自动安装并重启。手动运行安装包时也会检测并关闭托盘中的旧版本。 |
-| Windows | `NAI_Launcher_Windows_<version>_Portable.zip` | 便携版，解压后运行 `nai_launcher.exe`；应用内更新会暂存新版、保留用户文件、原子切换目录，失败时自动回滚并重启旧版。 |
+| Windows | `NAI_Launcher_Windows_<version>_Setup.exe` | 安装版，推荐普通用户，安装到当前用户目录；手动运行安装包时会检测并关闭托盘中的旧版本。 |
+| Windows | `NAI_Launcher_Windows_<version>_Portable.zip` | 便携版，解压后运行 `nai_launcher.exe`；升级时下载新版解压替换即可，用户文件保留在程序目录。 |
 | macOS | `NAI_Launcher_macOS_<version>_Portable.zip` | 便携版，解压后打开 `Aaalice NAI Launcher.app`。未公证版本如被拦截，可在系统设置的隐私与安全中允许打开。 |
 
 首次登录可以使用 NovelAI 账号密码或 API Token。账号数据仅保存在本地设备，桌面端使用系统安全存储保存敏感信息。

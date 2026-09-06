@@ -60,7 +60,9 @@ Compared to the upstream v1.5.3 baseline, this fork (W.O.F edition) reworked the
 - **Guest mode**: skip login from the login screen and use all offline features (local gallery, tag catalogs, prompt blocks) with an in-memory session that never persists.
 - **Prompt-syntax & metadata toolchain**: unified NAI lexer with a numeric-weight tail guard (weight joins no longer misread by the server); removed the focus-loss space-to-underscore conversion; unified Magic Byte metadata parsing for PNG / WebP / JPEG; anti-hotlink header dispatch for the AI TAG online gallery.
 
-### Fork Highlights
+See the `1.0.0` section of [CHANGELOG.md](CHANGELOG.md) for details.
+
+## 🖥️ Interface Preview
 
 <p align="center">
   <img src="screenshots/generation_pill_block_library.png" alt="Generation UI: pill editor and block library" width="80%">
@@ -86,40 +88,6 @@ Compared to the upstream v1.5.3 baseline, this fork (W.O.F edition) reworked the
   <em>Local gallery: masonry layout, category tree, NAI-only and model-version filters</em>
 </p>
 
-See the `1.0.0` section of [CHANGELOG.md](CHANGELOG.md) for details.
-
-## 🖥️ Interface Preview
-
-<p align="center">
-  <img src="assets/images/1.png" alt="Image Generation Interface" width="80%">
-  <br>
-  <em>Main image generation interface</em>
-</p>
-
-<p align="center">
-  <img src="assets/images/2.png" alt="Local Gallery" width="80%">
-  <br>
-  <em>Local gallery and waterfall layout browsing</em>
-</p>
-
-<p align="center">
-  <img src="assets/images/4.png" alt="Image Details" width="80%">
-  <br>
-  <em>Image details, metadata, and parameter reuse</em>
-</p>
-
-<p align="center">
-  <img src="assets/images/5.png" alt="Danbooru Online Gallery" width="80%">
-  <br>
-  <em>Danbooru Online Gallery</em>
-</p>
-
-<p align="center">
-  <img src="assets/images/7.png" alt="Statistics Dashboard" width="80%">
-  <br>
-  <em>Statistics Dashboard</em>
-</p>
-
 ## 🧩 Platform Support
 
 | Platform | Status | Description |
@@ -135,8 +103,8 @@ Download the latest version from [Releases](https://github.com/z15087716457-stac
 
 | Platform | Download File | Usage |
 | --- | --- | --- |
-| Windows | `NAI_Launcher_Windows_<version>_Setup.exe` | Installer version, recommended for general users. Supports resumable in-app downloads, verification, automatic installation, and restart. Manual setup also detects and closes an older version still running in the tray. |
-| Windows | `NAI_Launcher_Windows_<version>_Portable.zip` | Portable version. In-app updates stage the new version, preserve user files, atomically swap directories, and automatically roll back and restart the previous version on failure. |
+| Windows | `NAI_Launcher_Windows_<version>_Setup.exe` | Installer version, recommended for general users; installs to the current user directory. Manual setup detects and closes an older version still running in the tray. |
+| Windows | `NAI_Launcher_Windows_<version>_Portable.zip` | Portable version. Extract and run `nai_launcher.exe`; to upgrade, download the new archive and replace in place — user files stay in the program directory. |
 | macOS | `NAI_Launcher_macOS_<version>_Portable.zip` | Portable version. Extract and open `Aaalice NAI Launcher.app`. If an unnotarized build is blocked, you can allow it to open in System Settings > Privacy & Security. |
 
 You can log in for the first time using your NovelAI account credentials or an API Token. Account data is stored locally on the device only. The desktop app uses the system's secure storage for sensitive information.
