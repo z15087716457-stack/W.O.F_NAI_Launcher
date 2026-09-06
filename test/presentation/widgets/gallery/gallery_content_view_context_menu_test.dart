@@ -6,6 +6,7 @@ import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart'
     show FilterCriteria;
+import 'package:nai_launcher/data/services/gallery/gallery_sort.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/gallery_content_view.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_card_3d.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_context_menu.dart';
@@ -142,6 +143,12 @@ class _GroupedGalleryState implements GalleryState<LocalImageRecord> {
 
   @override
   FilterCriteria get filterCriteria => const FilterCriteria();
+
+  @override
+  GallerySortField get sortField => GallerySortField.modifiedAt;
+
+  @override
+  GallerySortDirection get sortDirection => GallerySortDirection.descending;
 }
 
 class _InactiveSelectionState implements SelectionState {

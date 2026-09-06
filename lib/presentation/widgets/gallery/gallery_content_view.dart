@@ -20,6 +20,8 @@ import '../../widgets/grouped_grid_view.dart';
 import '../../utils/image_detail_opener.dart';
 import '../../../data/services/gallery/gallery_filter_service.dart'
     show FilterCriteria;
+import '../../../data/services/gallery/gallery_sort.dart'
+    show GallerySortDirection, GallerySortField;
 import 'local_image_card_3d.dart';
 import 'draggable_image_card.dart';
 import 'gallery_favorite_menu.dart';
@@ -75,6 +77,10 @@ abstract class GalleryState<T> {
 
   /// 当前过滤条件（数据集重挂判定用：条件内容变化=新数据集）
   FilterCriteria get filterCriteria;
+
+  /// 当前排序（滚动复位判定用：排序变化=新数据集）
+  GallerySortField get sortField;
+  GallerySortDirection get sortDirection;
 }
 
 /// 通用选择状态接口
@@ -116,7 +122,8 @@ GalleryContentEmptyKind? galleryContentEmptyKind({
 /// 时，瀑布流/网格需要整体重挂载——条目增减若只靠 itemBuilder 的
 /// diff 链，渲染层旧卡片可能残留（实测：删除后卡片钉在屏上，
 /// 直到切换文件夹/全量刷新才消失；物理文件已删仍显示）。
-/// 翻页/切换筛选是全新数据集（现状行为正确），不触发，滚动位置保持不变。
+/// 翻页/切换筛选/切换排序是全新数据集，不重挂；滚动复位见
+/// [galleryShouldResetScroll]。
 bool galleryNeedsRemount({
   required int oldLength,
   required int newLength,
@@ -124,6 +131,19 @@ bool galleryNeedsRemount({
   required bool sameFilters,
 }) {
   return samePage && sameFilters && oldLength != newLength;
+}
+
+/// 滚动复位判定：页码/过滤/排序任一变化都是全新数据集，滚动位置应弹回
+/// 顶部——瀑布流与固定网格共用持久 ScrollController 且不重挂，旧数据集
+/// 的滚动偏移会原样带进新数据集（典型症状：滚到中途点下一页，新页不从
+/// 顶部开始，停在上一页滚到的位置）。同页同过滤同排序（删除/恢复走重挂
+/// 的偏移保存恢复，元数据原地刷新不动偏移）不复位。
+bool galleryShouldResetScroll({
+  required bool samePage,
+  required bool sameFilters,
+  required bool sameSort,
+}) {
+  return !(samePage && sameFilters && sameSort);
 }
 
 /// 画廊内容视图（含分组/3D/瀑布流切换）- 泛型版本
@@ -263,6 +283,24 @@ class _GenericGalleryContentViewState<T>
           controller.jumpTo(
             _savedScrollOffset.clamp(0, controller.position.maxScrollExtent),
           );
+        }
+      });
+    } else if (galleryShouldResetScroll(
+      samePage: oldWidget.state.currentPage == widget.state.currentPage,
+      sameFilters:
+          oldWidget.state.filterCriteria == widget.state.filterCriteria,
+      sameSort:
+          oldWidget.state.sortField == widget.state.sortField &&
+          oldWidget.state.sortDirection == widget.state.sortDirection,
+    )) {
+      // 全新数据集（翻页/换筛选/换排序）：滚动弹回顶部，不带旧偏移。
+      // 跳帧执行：didUpdateWidget 阶段内容仍是旧数据集，直接 jumpTo
+      // 可能撞上同帧布局；等本帧落地后再复位。
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final controller = _masonryScrollController;
+        if (controller != null && controller.hasClients && controller.offset != 0) {
+          controller.jumpTo(0);
         }
       });
     }
@@ -752,6 +790,12 @@ class _LocalGalleryStateAdapter implements GalleryState<LocalImageRecord> {
 
   @override
   FilterCriteria get filterCriteria => _state.filterCriteria;
+
+  @override
+  GallerySortField get sortField => _state.sortField;
+
+  @override
+  GallerySortDirection get sortDirection => _state.sortDirection;
 
   @override
   bool get hasFilters => _state.hasFilters;

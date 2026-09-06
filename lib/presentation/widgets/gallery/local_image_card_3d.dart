@@ -153,6 +153,9 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
   Future<void> _initAndLoadThumbnail() async {
     _thumbnailService = ThumbnailCacheService.instance;
     await _thumbnailService!.init();
+    // 翻页/滚动会成批卸载卡片：init() 等待期间卡片可能已卸载，
+    // 继续走 _loadThumbnail 会对已 dispose 的 ref 读取
+    if (!mounted) return;
     await _loadThumbnail();
   }
 

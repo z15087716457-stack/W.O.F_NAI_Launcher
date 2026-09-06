@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart'
     show FilterCriteria;
+import 'package:nai_launcher/data/services/gallery/gallery_sort.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/gallery_content_view.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
@@ -112,6 +113,12 @@ class _TestGalleryState implements GalleryState<LocalImageRecord> {
 
   @override
   FilterCriteria get filterCriteria => const FilterCriteria();
+
+  @override
+  GallerySortField get sortField => GallerySortField.modifiedAt;
+
+  @override
+  GallerySortDirection get sortDirection => GallerySortDirection.descending;
 }
 
 class _TestSelectionState implements SelectionState {
