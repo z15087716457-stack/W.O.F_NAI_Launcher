@@ -9,17 +9,22 @@
 
 ### ✨ 新增
 
-- Krita 桥接扩展：`set_params` / `generate` 支持全参数外部接管；`get_params` 全量状态回读（含角色框、坐标、noise_schedule、cfg_rescale、token 用量等，可与 set 往返）；配套 `tool/nai_fill.py` 一键读图填入工具。
-- NovelAI Diffusion V5（N5）支持：V5 Full / Curated 模型注册与能力位体系（无噪声调度、隐藏 Variety+、按能力显示 PR/Vibe 面板）、V5 token 上限（1471）与计价、透明背景开关、Enhance Max✨ 档、V5 质量词与 UC 预设补全。
-- pill 提示词块系统：单框药丸编辑器、页面级块库面板、块实例随机 roll（生成时逐张重抽）、负向与角色框多 lane 接入、块实例「顺序」模式、块管理页多选与右键菜单。
-- 画风探索模块：三栏探索页、Run 数据层与批量候选生成、牌堆视图与正式筛选、多池遗传深度迭代（变异/交叉/注入、家族与分支、偏好排序、谱系回溯）；算法思路参考 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)（GPL-3.0，Dart 重写实现）。
+- Krita 桥接扩展（AI 接管）：`set_params` / `generate` 支持全参数外部写入与静默生图（不改 UI）；`get_params` 全量状态对称回读（角色框与坐标、noise_schedule、cfg_rescale、PR/Vibe/img2img 盲区三件套、token 实际用量）；配套 `tool/nai_bridge_client.py` CLI 与 `tool/nai_fill.py` 一键读图填入工具，附 `tool/bridge_selfcheck.py` 11 项端到端自检。
+- NovelAI Diffusion V5（N5）支持：能力位注册表驱动 V5 Full / Curated（无噪声调度、隐藏 Variety+、按能力显示 PR/Vibe 面板、最多 32 个角色框）、透明背景开关（straight_alpha）、Enhance Max✨ 档（服务端 e2e 放大）、V5 质量词与 UC 预设、token 上限 1471、按官网口径 ×1.5 计价。
+- pill 提示词块系统：单框药丸内联编辑器 + 页面级块库面板；块实例固定 / 顺序 / 随机抽取三种模式（抽取数量范围、Split-Beta 权重分布、触发概率、生成逐张重抽）；负向与角色框多 lane 隔离；实例级锁定与「进化目标」DNA 角标；文件夹树递归聚合；块管理页多选批量操作；内置 NovelAI 官方预设块。
+- 画风探索模块（多池遗传）：三栏探索页、Run 数据层与批量候选、网格 / 牌堆双视图、全屏正式筛选（键盘打标、固化模板、收编为块、Reject 删图）、深度迭代引擎（变异 / 交叉 / 注入、家族与分支、偏好两两排序、谱系回溯面板）；基础轮逐张独立快照与深度轮草稿保护。算法思路参考 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)（GPL-3.0，Dart 重写实现）。
+- 画廊大版本：多图库源、默认瀑布流、高级筛选与本地模型版本精准过滤、收藏集（根-子集联动模型）、删除池（软删除）、三通道 NAI-only 过滤、HD / SD 缩略图质量档、三视图统一向外拖出图片、标签库瀑布流视图、信封嵌套元数据回填迁移、保存图像字节级去重。
+- 角色卡编辑器改为官网式常驻布局，选中跟随焦点，输入框随内容自增高（3~12 行）。
 - 生成页钉底条 Opus 免费额度芯片：直接展示官方 `usage.percent` 额度百分比与回充倒计时，回充中带高光扫动效果，仅在支持 Opus 额度的模型下显示。
-- 画廊大版本：多图库源、瀑布流、高级筛选与版本过滤、收藏集（根-子集模型）、删除池；标签库新增瀑布流视图；在线画廊 NAI-only 过滤与版本下拉。
-- 角色卡编辑器改为官网式常驻布局，选中跟随焦点，输入框随内容自增高。
+- 游客模式：登录页可跳过登录进入，离线使用本地画廊、词库、提示词块等全部本地功能；纯内存会话，不驻留。
+- 统一图像元数据解析：按文件头 Magic Byte 派发 PNG / WebP（RIFF EXIF + alpha 隐写回退）/ JPEG（APP1 EXIF），V5 params 信封归一化，接通编辑、拖放、历史提取入口。
 
 ### 🛠 改进
 
 - Opus 免费资格判定对齐官方实证：Precise Reference、img2img / 局部重绘不再误取消免费资格。
+- 统一 NAI 语法词法扫描与数值权重尾部守卫，权重拼接不再被服务端误识别；移除输入框失焦时空格自动转下划线，保留自然空格。
+- AI TAG 在线画廊统一 Referer / UA 请求头分发，修复 Pixiv 系图片 403 防盗链；列表 pximg 预览防抖与宽高比缓存。
+- 画廊卡片悬浮操作条改为默认关闭（操作均由右键菜单覆盖），切图不再误触。
 
 ### 🐛 修复
 

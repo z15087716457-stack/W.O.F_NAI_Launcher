@@ -48,15 +48,43 @@ NAI Launcher is a third-party client for NovelAI built with Flutter. It integrat
 
 ## 🔀 Differences from Upstream
 
-Compared to the upstream v1.5.3 baseline, this fork (W.O.F edition) mainly differs in:
+Compared to the upstream v1.5.3 baseline, this fork (W.O.F edition) reworked the prompt, exploration, gallery, and billing subsystems end to end:
 
-- **Krita bridge extensions (AI takeover)**: full-parameter bridge writes via `set_params` / `generate`, full state readback via `get_params` (character prompts, coordinates, noise_schedule, cfg_rescale, token usage, etc.), plus the `tool/nai_fill.py` one-shot image-to-parameters tool. In-app auto-update is disabled at the code level to prevent updates from overwriting bridge extensions.
-- **NovelAI Diffusion V5 (N5)**: V5 Full / Curated registration with a capability-flag system (no noise schedule, hidden Variety+, capability-driven PR/Vibe panels), V5 token limit (1471) and pricing (V4 coefficients ×1.5), transparent-background toggle, Enhance Max✨ tier, and V5 quality/UC presets.
-- **Pill prompt-block system**: single-box pill editor with a page-level block library panel, per-instance random rolls (re-rolled per image), multi-lane support for negative/character prompts, an "ordered" instance mode, and multi-select with context menus in the block manager.
-- **Style-exploration module (multi-pool genetics)**: three-column explorer, run data layer with batch candidates, deck view and formal screening, deep iteration (mutation/crossover/injection, families and branches, preference ranking, lineage tracing). Algorithm design inspired by [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio); reimplemented in Dart.
-- **Opus quota & billing**: an Opus free-quota chip in the generation page's pinned bar (official `usage.percent` plus refill countdown display); Opus free-eligibility rules aligned with observed official behavior, so PR / img2img / inpainting no longer wrongly cancel free generation.
-- **Gallery overhaul**: multi-source galleries, masonry layout, advanced and version filters, collections (root/subset model), trash pool, tag-library masonry view, and NAI-only filtering in the online gallery.
-- **Character prompt editor**: official-site-style persistent layout, selection follows focus, and fields auto-grow with content.
+- **Krita bridge extensions (AI takeover)**: full-parameter external writes via `set_params` / `generate` with silent generation (no UI changes); symmetric full-state readback via `get_params` (character prompts and coordinates, noise_schedule, cfg_rescale, PR/Vibe/img2img blind spots, actual token usage) for get→set round-trips; companion `tool/nai_bridge_client.py` CLI, `tool/nai_fill.py` one-shot metadata fill, and `tool/bridge_selfcheck.py` 11-point end-to-end self-check. In-app auto-update is disabled at the code level to protect bridge extensions.
+- **NovelAI Diffusion V5 (N5)**: capability-flag registry driving V5 Full / Curated (no noise schedule, hidden Variety+, capability-driven PR/Vibe panels, up to 32 character prompts), 1471 token limit with official ×1.5 pricing, transparent-background toggle (straight_alpha), Enhance Max✨ tier (server-side e2e upscale), and V5 quality/UC presets.
+- **Pill prompt-block system**: single-box inline pill editor with a page-level block library panel; per-instance fixed / sequential / random-draw modes (count range, Split-Beta weight distribution, trigger probability, per-image re-roll); multi-lane isolation for negative/character prompts; instance locking and an "evolution target" DNA badge; folder-tree aggregation; multi-select bulk operations in the block manager; built-in official NovelAI preset blocks.
+- **Style-exploration module (multi-pool genetics)**: three-column explorer, run data layer with batch candidates, grid/deck dual views, full-screen formal review (keyboard labeling, template solidification, adopt-as-block, Reject deletion), deep-iteration engine (mutation/crossover/injection, families and branches, pairwise preference ranking, lineage panel), per-image snapshots in basic rounds and draft protection in deep rounds. Algorithm design inspired by [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio); reimplemented in Dart.
+- **Gallery overhaul**: multi-source galleries, default masonry layout, advanced filters with precise local model-version filtering, collections (root/subset linking), trash pool (soft delete), three-channel NAI-only filtering, HD/SD thumbnail quality tiers, unified drag-out across all three views, tag-library masonry view, envelope-metadata backfill, and byte-level dedup on image save.
+- **Character prompt editor**: official-site-style persistent layout, selection follows focus, fields auto-grow with content (3–12 lines).
+- **Opus quota & billing**: an Opus free-quota chip in the pinned bar (official `usage.percent` plus refill countdown); free-eligibility rules aligned with observed official behavior, so PR / img2img / inpainting no longer wrongly cancel free generation.
+- **Guest mode**: skip login from the login screen and use all offline features (local gallery, tag catalogs, prompt blocks) with an in-memory session that never persists.
+- **Prompt-syntax & metadata toolchain**: unified NAI lexer with a numeric-weight tail guard (weight joins no longer misread by the server); removed the focus-loss space-to-underscore conversion; unified Magic Byte metadata parsing for PNG / WebP / JPEG; anti-hotlink header dispatch for the AI TAG online gallery.
+
+### Fork Highlights
+
+<p align="center">
+  <img src="screenshots/generation_pill_block_library.png" alt="Generation UI: pill editor and block library" width="80%">
+  <br>
+  <em>Generation UI: pill editor (block highlighting) with the block library panel (official presets and artist pools)</em>
+</p>
+
+<p align="center">
+  <img src="screenshots/prompt_block_manager.png" alt="Prompt block manager" width="80%">
+  <br>
+  <em>Prompt block manager: folder tree, multi-select bulk operations, custom colors and icons</em>
+</p>
+
+<p align="center">
+  <img src="screenshots/block_instance_settings.png" alt="Block instance settings" width="40%">
+  <br>
+  <em>Block instance settings: fixed / sequential / random-draw modes with count range, weight distribution, and trigger probability</em>
+</p>
+
+<p align="center">
+  <img src="screenshots/local_gallery_masonry.png" alt="Local gallery masonry" width="80%">
+  <br>
+  <em>Local gallery: masonry layout, category tree, NAI-only and model-version filters</em>
+</p>
 
 See the `1.0.0` section of [CHANGELOG.md](CHANGELOG.md) for details.
 

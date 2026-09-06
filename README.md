@@ -48,15 +48,43 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
 
 ## 🔀 本分支与上游的差异
 
-相对上游 v1.5.3 基线，本分支（W.O.F 版）的主要区别：
+相对上游 v1.5.3 基线，本分支（W.O.F 版）从头改动了提示词、探索、图库与计费等多个子系统，主要区别：
 
-- **Krita 桥接扩展（AI 接管）**：新增 `set_params` / `generate` 全参数桥接写入，`get_params` 全量状态回读（角色框、坐标、noise_schedule、cfg_rescale、token 用量等），配套 `tool/nai_fill.py` 一键读图填入工具；应用内自动更新已在代码级禁用（防止更新覆盖桥接扩展）。
-- **NovelAI Diffusion V5（N5）**：注册 V5 Full / Curated 及能力位体系（无噪声调度、隐藏 Variety+、按能力显示 PR/Vibe 面板），V5 token 上限 1471 与计价（V4 系数 ×1.5）、透明背景开关、Enhance Max✨ 档、V5 质量词与 UC 预设。
-- **pill 提示词块系统**：单框药丸编辑器 + 页面级块库面板，块实例随机 roll（生成逐张重抽）、负向/角色框多 lane、块实例「顺序」模式、块管理页多选与右键菜单。
-- **画风探索模块（多池遗传）**：探索页三栏骨架、Run 数据层与批量候选、牌堆视图与正式筛选、深度迭代（变异/交叉/注入、家族与分支、偏好排序、谱系回溯）。算法思路参考 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)，为 Dart 重写实现。
-- **Opus 额度与计费**：生成页钉底条 Opus 免费额度芯片（官方 `usage.percent` 百分比 + 回充倒计时显示）；Opus 免费资格判定对齐官方实证，PR / img2img / 局部重绘不再误取消免费。
-- **图库大版本**：多图库源、瀑布流、高级筛选与版本过滤、收藏集（根-子集模型）、删除池、标签库瀑布流视图、在线画廊 NAI-only 过滤。
-- **角色卡编辑器**：官网式常驻布局，选中跟随焦点，输入框随内容自增高。
+- **Krita 桥接扩展（AI 接管）**：新增 `set_params` / `generate` 全参数外部写入与静默生图（不改 UI）；`get_params` 全量状态对称回读（角色框与坐标、noise_schedule、cfg_rescale、PR/Vibe/img2img 盲区、token 实际用量），可 get→set 往返；配套 `tool/nai_bridge_client.py` CLI、`tool/nai_fill.py` 一键读图填入与 `tool/bridge_selfcheck.py` 11 项端到端自检；应用内自动更新已在代码级禁用（防止更新覆盖桥接扩展）。
+- **NovelAI Diffusion V5（N5）**：能力位注册表驱动 V5 Full / Curated（无噪声调度、隐藏 Variety+、按能力显示 PR/Vibe 面板、最多 32 个角色框），token 上限 1471 与官网口径 ×1.5 计价、透明背景开关（straight_alpha）、Enhance Max✨ 档（服务端 e2e 放大）、V5 质量词与 UC 预设。
+- **pill 提示词块系统**：单框药丸内联编辑器 + 页面级块库面板；块实例固定 / 顺序 / 随机抽取三种模式（数量范围、Split-Beta 权重分布、触发概率、生成逐张重抽）；负向 / 角色框多 lane 隔离；实例级锁定与「进化目标」DNA 角标；文件夹树递归聚合；块管理页多选批量操作；内置 NovelAI 官方预设块。
+- **画风探索模块（多池遗传）**：三栏探索页、Run 数据层与批量候选、网格 / 牌堆双视图、全屏正式筛选（键盘打标、固化模板、收编为块、Reject 删图）、深度迭代引擎（变异 / 交叉 / 注入、家族与分支、偏好两两排序、谱系回溯）、基础轮逐张快照与深度轮草稿保护。算法思路参考 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)，为 Dart 重写实现。
+- **图库大版本**：多图库源、默认瀑布流、高级筛选与本地模型版本精准过滤、收藏集（根-子集联动）、删除池（软删除）、三通道 NAI-only 过滤、HD / SD 缩略图质量档、三视图统一向外拖出、标签库瀑布流视图、信封嵌套元数据回填、保存图像字节级去重。
+- **角色卡编辑器**：官网式常驻布局，选中跟随焦点，输入框随内容自增高（3~12 行）。
+- **Opus 额度与计费**：钉底条 Opus 免费额度芯片（官方 `usage.percent` + 回充倒计时）；免费资格对齐官方实证，PR / img2img / 局部重绘不再误取消免费。
+- **游客模式**：登录页可跳过登录，离线使用本地画廊、词库、提示词块等全部本地功能，纯内存会话不驻留。
+- **提示词语法与元数据工具链**：统一 NAI 词法扫描器与数值权重尾部守卫（权重拼接不被服务端误识别）；移除失焦空格自动转下划线；统一按文件头 Magic Byte 解析 PNG / WebP / JPEG 元数据；AI TAG 在线画廊反防盗链请求头分发。
+
+### 本分支特色界面
+
+<p align="center">
+  <img src="screenshots/generation_pill_block_library.png" alt="生成主界面：pill 药丸编辑器与块库面板" width="80%">
+  <br>
+  <em>生成主界面：pill 药丸编辑器（分块高亮）+ 右侧块库面板（官方预设与画师池）</em>
+</p>
+
+<p align="center">
+  <img src="screenshots/prompt_block_manager.png" alt="提示词块管理页" width="80%">
+  <br>
+  <em>提示词块管理页：文件夹树、多选批量操作、颜色 / 图标自定义</em>
+</p>
+
+<p align="center">
+  <img src="screenshots/block_instance_settings.png" alt="块实例设置" width="40%">
+  <br>
+  <em>块实例设置：固定 / 顺序 / 随机抽取三模式，数量范围、权重分布与触发概率</em>
+</p>
+
+<p align="center">
+  <img src="screenshots/local_gallery_masonry.png" alt="本地画廊瀑布流" width="80%">
+  <br>
+  <em>本地画廊：瀑布流、分类树、NAI-only 与模型版本过滤</em>
+</p>
 
 详细变更见 [CHANGELOG.md](CHANGELOG.md) 的 `1.0.0` 段落。
 
