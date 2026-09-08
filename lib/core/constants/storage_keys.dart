@@ -158,7 +158,11 @@ class StorageKeys {
   static const String hasSeenLocalGalleryTip = 'has_seen_local_gallery_tip';
 
   /// 本地画廊视图模式：true=瀑布流（默认），false=网格
+  /// （旧布尔键，V2 起只读迁移，保留不删供旧版本降级读取）
   static const String localGalleryViewMode = 'local_gallery_view_mode';
+
+  /// 本地画廊视图模式 V2（GalleryViewMode.name，默认 masonry）
+  static const String localGalleryViewModeV2 = 'local_gallery_view_mode_v2';
 
   /// 本地画廊逻辑列宽（px，140~480，默认 260）
   static const String localGalleryColumnWidth = 'local_gallery_column_width';

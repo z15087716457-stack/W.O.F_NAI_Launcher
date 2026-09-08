@@ -7033,12 +7033,6 @@ abstract class AppLocalizations {
   /// **'High'**
   String get localGallery_thumbnailQualityHd;
 
-  /// No description provided for @localGallery_thumbnailQualityTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose local gallery thumbnail quality'**
-  String get localGallery_thumbnailQualityTooltip;
-
   /// No description provided for @localGallery_naiOnly.
   ///
   /// In en, this message translates to:
@@ -7080,6 +7074,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Switch to grid view'**
   String get localGallery_switchToGridLayout;
+
+  /// No description provided for @localGallery_justifiedViewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Justified'**
+  String get localGallery_justifiedViewLabel;
+
+  /// No description provided for @localGallery_switchToJustifiedView.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to justified view'**
+  String get localGallery_switchToJustifiedView;
 
   /// No description provided for @localGallery_dateRangeYearMonth.
   ///

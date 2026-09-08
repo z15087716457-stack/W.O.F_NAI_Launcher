@@ -452,8 +452,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
           // ignore: use_build_context_synchronously
           context: context,
           title: context.l10n.localGallery_deleteCollectionFolderNonEmptyTitle,
-          content: context
-              .l10n
+          content: context.l10n
               .localGallery_deleteCollectionFolderNonEmptyContent(name),
           confirmText: context.l10n.common_confirm,
           cancelText: context.l10n.common_cancel,
@@ -1688,7 +1687,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     final thumbnailQuality = await const GalleryThumbnailQualityStore().load();
     if (!mounted) return;
 
-    notifier.setMasonryView(viewMode);
+    notifier.setViewMode(viewMode);
     notifier.setColumnWidth(columnWidth);
     await notifier.setThumbnailQuality(thumbnailQuality);
     // 排序：持久化优先，无记录时保持默认（修改时间 新→旧）

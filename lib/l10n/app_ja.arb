@@ -1927,7 +1927,6 @@
   "localGallery_columnWidth": "列の幅",
   "localGallery_thumbnailQualitySd": "標準",
   "localGallery_thumbnailQualityHd": "高画質",
-  "localGallery_thumbnailQualityTooltip": "ローカルギャラリーのサムネイル品質を選択",
   "localGallery_naiOnly": "NAI",
   "localGallery_naiOnlyTooltip": "NAI 生成画像のみ表示",
   "localGallery_naiVersionFilterLabel": "バージョン",
@@ -1935,6 +1934,8 @@
   "localGallery_masonryViewLabel": "ウォーターフォール",
   "localGallery_switchToMasonryView": "ウォーターフォール ビューに切り替える",
   "localGallery_switchToGridLayout": "グリッド ビューに切り替える",
+  "localGallery_justifiedViewLabel": "ジャスティファイ",
+  "localGallery_switchToJustifiedView": "ジャスティファイ ビューに切り替える",
   "localGallery_dateRangeYearMonth": "{year}年{month}月",
   "@localGallery_dateRangeYearMonth": {
     "placeholders": {

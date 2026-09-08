@@ -3755,9 +3755,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_thumbnailQualityHd => '高清';
 
   @override
-  String get localGallery_thumbnailQualityTooltip => '选择本地画廊缩略图质量';
-
-  @override
   String get localGallery_naiOnly => 'NAI';
 
   @override
@@ -3777,6 +3774,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localGallery_switchToGridLayout => '切换到网格视图';
+
+  @override
+  String get localGallery_justifiedViewLabel => '火车流';
+
+  @override
+  String get localGallery_switchToJustifiedView => '切换到火车流视图';
 
   @override
   String localGallery_dateRangeYearMonth(Object year, Object month) {

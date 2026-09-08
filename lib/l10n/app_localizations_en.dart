@@ -3899,10 +3899,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_thumbnailQualityHd => 'High';
 
   @override
-  String get localGallery_thumbnailQualityTooltip =>
-      'Choose local gallery thumbnail quality';
-
-  @override
   String get localGallery_naiOnly => 'NAI';
 
   @override
@@ -3923,6 +3919,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localGallery_switchToGridLayout => 'Switch to grid view';
+
+  @override
+  String get localGallery_justifiedViewLabel => 'Justified';
+
+  @override
+  String get localGallery_switchToJustifiedView => 'Switch to justified view';
 
   @override
   String localGallery_dateRangeYearMonth(Object year, Object month) {

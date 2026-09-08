@@ -1,14 +1,17 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/justified_layout.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/gallery/local_image_record.dart';
+import '../../../data/services/gallery/gallery_view_mode.dart';
 import '../../providers/krita/krita_bridge_notifier.dart';
 import '../../providers/local_gallery_provider.dart';
 import '../../providers/reverse_prompt_provider.dart';
@@ -152,6 +155,9 @@ class GenericGalleryContentView<T> extends ConsumerStatefulWidget {
 
   /// true=瀑布流（Masonry，卡片按真实宽高比），false=固定网格
   final bool useMasonryView;
+
+  /// 视图模式枚举（可空）：justified 时走火车流；null 时沿用 useMasonryView
+  final GalleryViewMode? galleryViewMode;
   final int columns;
   final double itemWidth;
 
@@ -188,6 +194,7 @@ class GenericGalleryContentView<T> extends ConsumerStatefulWidget {
     super.key,
     this.use3DCardView = true,
     this.useMasonryView = false,
+    this.galleryViewMode,
     required this.columns,
     required this.itemWidth,
     this.columnWidth = 200.0,
@@ -299,7 +306,9 @@ class _GenericGalleryContentViewState<T>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final controller = _masonryScrollController;
-        if (controller != null && controller.hasClients && controller.offset != 0) {
+        if (controller != null &&
+            controller.hasClients &&
+            controller.offset != 0) {
           controller.jumpTo(0);
         }
       });
@@ -363,6 +372,10 @@ class _GenericGalleryContentViewState<T>
     }
     if (emptyKind == GalleryContentEmptyKind.emptyLibrary) {
       return _buildAnimatedEmptyState(const GalleryEmptyView());
+    }
+
+    if (widget.galleryViewMode == GalleryViewMode.justified) {
+      return _buildJustifiedView(widget.state, widget.selectionState);
     }
 
     if (widget.useMasonryView) {
@@ -685,6 +698,210 @@ class _GenericGalleryContentViewState<T>
     );
   }
 
+  /// 火车流视图：justified 等高行（顶格行撑满整行，欠填行左对齐留空）。
+  /// 结构与瀑布流一致，宽高比探测到位触发 setState 时 build 内实时重排。
+  Widget _buildJustifiedView(
+    GalleryState<T> state,
+    SelectionState selectionState,
+  ) {
+    final records = _convertToLocalImageRecords(state.currentImages);
+    final selectedIndices = <int>{};
+    for (int i = 0; i < records.length; i++) {
+      if (selectionState.selectedIds.contains(
+        widget.idExtractor(state.currentImages[i]),
+      )) {
+        selectedIndices.add(i);
+      }
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 12.0;
+        const padding = 16.0;
+        final availableWidth = constraints.maxWidth - padding * 2;
+        // 目标行高 = 逻辑列宽，行高容忍区间 [×0.8, ×1.8]
+        final targetHeight = widget.columnWidth;
+        final aspectRatios = [
+          for (final record in records) _getCachedAspectRatio(record),
+        ];
+        final rows = computeJustifiedRows(
+          aspectRatios: aspectRatios,
+          availableWidth: availableWidth,
+          targetHeight: targetHeight,
+          minHeight: targetHeight * 0.8,
+          maxHeight: targetHeight * 1.8,
+          spacing: spacing,
+        );
+
+        return ListView.builder(
+          key: PageStorageKey<String>('gallery_justified_$_gridRemountCounter'),
+          controller: _masonryScrollController ??= ScrollController(),
+          // 与瀑布流对齐放大 cacheExtent：减少卡片回收重建
+          scrollCacheExtent: ScrollCacheExtent.pixels(
+            constraints.maxHeight * 1.5,
+          ),
+          padding: const EdgeInsets.all(padding),
+          itemCount: rows.length,
+          itemBuilder: (context, rowIndex) {
+            final row = rows[rowIndex];
+            final count = row.endIndex - row.startIndex + 1;
+            final List<Widget> children;
+            if (row.isUnderfilled) {
+              // 欠填行：图按行高×aspect 取自然宽、左对齐、右侧留空；
+              // clamp 抬高的极端行（如单张全景）按比例收窄防溢出
+              final widths = [
+                for (var i = row.startIndex; i <= row.endIndex; i++)
+                  row.height * aspectRatios[i],
+              ];
+              final contentWidth =
+                  widths.fold<double>(0, (a, b) => a + b) +
+                  spacing * (count - 1);
+              final shrink = contentWidth > availableWidth && contentWidth > 0
+                  ? ((availableWidth - spacing * (count - 1)) / contentWidth)
+                        .clamp(0.0, 1.0)
+                  : 1.0;
+              children = [
+                for (var k = 0; k < count; k++) ...[
+                  if (k > 0) const SizedBox(width: spacing),
+                  SizedBox(
+                    width: widths[k] * shrink,
+                    height: row.height,
+                    child: _buildJustifiedCard(
+                      state,
+                      selectionState,
+                      records,
+                      selectedIndices,
+                      row.startIndex + k,
+                      widths[k] * shrink,
+                      row.height,
+                    ),
+                  ),
+                ],
+              ];
+            } else {
+              // 顶格行：按宽高比 flex 分宽，正好撑满整行
+              children = [
+                for (var k = 0; k < count; k++) ...[
+                  if (k > 0) const SizedBox(width: spacing),
+                  Expanded(
+                    flex: (aspectRatios[row.startIndex + k] * 1000).round(),
+                    child: _buildJustifiedCard(
+                      state,
+                      selectionState,
+                      records,
+                      selectedIndices,
+                      row.startIndex + k,
+                      row.height * aspectRatios[row.startIndex + k],
+                      row.height,
+                    ),
+                  ),
+                ],
+              ];
+            }
+            return Padding(
+              padding: const EdgeInsets.only(bottom: spacing),
+              child: SizedBox(
+                height: row.height,
+                child: Row(children: children),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// 火车流单卡：完整镜像瀑布流 itemBuilder，仅 key 前缀与给定宽高不同
+  Widget _buildJustifiedCard(
+    GalleryState<T> state,
+    SelectionState selectionState,
+    List<LocalImageRecord> records,
+    Set<int> selectedIndices,
+    int index,
+    double width,
+    double height,
+  ) {
+    final record = records[index];
+    final isSelected = selectedIndices.contains(index);
+    final isVisible = _visibleIndices.contains(index);
+
+    return VisibilityDetector(
+      key: ValueKey('justified_v_${record.path}'),
+      onVisibilityChanged: (info) {
+        if (!mounted) return;
+        final isNowVisible = info.visibleFraction > 0.05;
+        final wasVisible = _visibleIndices.contains(index);
+        if (isNowVisible != wasVisible) {
+          setState(() {
+            if (isNowVisible) {
+              _visibleIndices.add(index);
+            } else {
+              _visibleIndices.remove(index);
+            }
+          });
+        }
+      },
+      // 与瀑布流对齐补 RepaintBoundary：重绘只刷本卡片
+      child: RepaintBoundary(
+        child: LocalImageCard3D(
+          record: record,
+          width: width,
+          height: height,
+          isSelected: isSelected,
+          isVisible: isVisible,
+          priority: isVisible ? 1 : 5,
+          onTap: () {
+            if (selectionState.isActive) {
+              widget.onSelectionToggle?.call(state.currentImages[index]);
+              return;
+            }
+            if (widget.onTap != null) {
+              widget.onTap!(state.currentImages[index], index);
+            } else if (widget.view3DConfig != null) {
+              widget.view3DConfig!.showDetailViewer(
+                widget.view3DConfig!.images,
+                index,
+              );
+            }
+          },
+          onDoubleTap: () {
+            if (widget.onDoubleTap != null) {
+              widget.onDoubleTap!(state.currentImages[index], index);
+            } else if (widget.view3DConfig != null) {
+              widget.view3DConfig!.showDetailViewer(
+                widget.view3DConfig!.images,
+                index,
+              );
+            }
+          },
+          onLongPress: () {
+            if (!selectionState.isActive) {
+              widget.onEnterSelection?.call(state.currentImages[index]);
+            } else {
+              widget.onLongPress?.call(state.currentImages[index], index);
+            }
+          },
+          onSecondaryTapDown: (details) {
+            widget.onContextMenu?.call(
+              state.currentImages[index],
+              details.globalPosition,
+            );
+          },
+          onFavoriteToggle: (anchor) {
+            widget.onFavoriteToggle?.call(state.currentImages[index], anchor);
+          },
+          onSendAction: widget.onSendAction != null
+              ? (action) => widget.onSendAction!(record, action)
+              : null,
+          isKritaConnected: widget.isKritaConnected,
+          dragWrapper: selectionState.isActive
+              ? null
+              : DraggableImageCard.createDragWrapper(record: record),
+        ),
+      ),
+    );
+  }
+
   Widget _buildGalleryGrid(
     GalleryState<T> state,
     SelectionState selectionState,
@@ -938,7 +1155,8 @@ class LocalGalleryContentView extends ConsumerWidget {
 
     return GenericGalleryContentView<LocalImageRecord>(
       use3DCardView: use3DCardView,
-      useMasonryView: state.isMasonryView,
+      useMasonryView: state.viewMode == GalleryViewMode.masonry,
+      galleryViewMode: state.viewMode,
       columns: columns,
       itemWidth: itemWidth,
       columnWidth: columnWidth,

@@ -3811,9 +3811,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_thumbnailQualityHd => '高画質';
 
   @override
-  String get localGallery_thumbnailQualityTooltip => 'ローカルギャラリーのサムネイル品質を選択';
-
-  @override
   String get localGallery_naiOnly => 'NAI';
 
   @override
@@ -3833,6 +3830,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localGallery_switchToGridLayout => 'グリッド ビューに切り替える';
+
+  @override
+  String get localGallery_justifiedViewLabel => 'ジャスティファイ';
+
+  @override
+  String get localGallery_switchToJustifiedView => 'ジャスティファイ ビューに切り替える';
 
   @override
   String localGallery_dateRangeYearMonth(Object year, Object month) {

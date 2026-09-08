@@ -15,6 +15,7 @@ import '../../../data/models/gallery/gallery_category.dart';
 import '../../../data/services/gallery/gallery_nai_only_store.dart';
 import '../../../data/services/gallery/gallery_sort.dart';
 import '../../../data/services/gallery/gallery_sort_store.dart';
+import '../../../data/services/gallery/gallery_view_mode.dart';
 import '../../../data/services/gallery/gallery_view_mode_store.dart';
 import '../../providers/collection_provider.dart';
 import '../../providers/gallery_category_provider.dart';
@@ -415,25 +416,54 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                                 showLabel: showStateLabels,
                               ),
                               const SizedBox(width: 6),
-                              // 视图切换：瀑布流 / 网格
+                              // 视图切换：网格 → 瀑布流 → 火车流 三档循环
+                              // （mosaic 预留，不进循环）
                               CompactIconButton(
-                                icon: state.isMasonryView
-                                    ? Icons.grid_view
-                                    : Icons.view_quilt,
-                                label: state.isMasonryView
-                                    ? l10n.common_grid
-                                    : l10n.localGallery_masonryViewLabel,
-                                tooltip: state.isMasonryView
-                                    ? l10n.localGallery_switchToGridLayout
-                                    : l10n.localGallery_switchToMasonryView,
-                                isActive: state.isMasonryView,
+                                icon: switch (state.viewMode) {
+                                  GalleryViewMode.grid => Icons.grid_view,
+                                  GalleryViewMode.masonry => Icons.view_quilt,
+                                  GalleryViewMode.justified =>
+                                    Icons.view_stream,
+                                  GalleryViewMode.mosaic => Icons.dashboard,
+                                },
+                                label: switch (state.viewMode) {
+                                  GalleryViewMode.grid => l10n.common_grid,
+                                  GalleryViewMode.masonry =>
+                                    l10n.localGallery_masonryViewLabel,
+                                  GalleryViewMode.justified =>
+                                    l10n.localGallery_justifiedViewLabel,
+                                  GalleryViewMode.mosaic =>
+                                    l10n.localGallery_masonryViewLabel,
+                                },
+                                // tooltip 指向「下一档」
+                                tooltip: switch (state.viewMode) {
+                                  GalleryViewMode.grid =>
+                                    l10n.localGallery_switchToMasonryView,
+                                  GalleryViewMode.masonry =>
+                                    l10n.localGallery_switchToJustifiedView,
+                                  GalleryViewMode.justified =>
+                                    l10n.localGallery_switchToGridLayout,
+                                  GalleryViewMode.mosaic =>
+                                    l10n.localGallery_switchToGridLayout,
+                                },
+                                isActive:
+                                    state.viewMode != GalleryViewMode.grid,
                                 showLabel: showLabels,
                                 onPressed: () {
                                   final notifier = ref.read(
                                     localGalleryNotifierProvider.notifier,
                                   );
-                                  final next = !state.isMasonryView;
-                                  notifier.setMasonryView(next);
+                                  final next = switch (state.viewMode) {
+                                    GalleryViewMode.grid =>
+                                      GalleryViewMode.masonry,
+                                    GalleryViewMode.masonry =>
+                                      GalleryViewMode.justified,
+                                    GalleryViewMode.justified =>
+                                      GalleryViewMode.grid,
+                                    GalleryViewMode.mosaic =>
+                                      GalleryViewMode.grid,
+                                  };
+                                  notifier.setViewMode(next);
                                   unawaited(
                                     const GalleryViewModeStore().save(next),
                                   );

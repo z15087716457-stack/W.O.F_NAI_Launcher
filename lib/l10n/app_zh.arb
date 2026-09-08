@@ -1838,7 +1838,6 @@
   "localGallery_columnWidth": "列宽",
   "localGallery_thumbnailQualitySd": "标清",
   "localGallery_thumbnailQualityHd": "高清",
-  "localGallery_thumbnailQualityTooltip": "选择本地画廊缩略图质量",
   "localGallery_naiOnly": "NAI",
   "localGallery_naiOnlyTooltip": "仅显示 NAI 生成的图片",
   "localGallery_naiVersionFilterLabel": "版本",
@@ -1846,6 +1845,8 @@
   "localGallery_masonryViewLabel": "瀑布流",
   "localGallery_switchToMasonryView": "切换到瀑布流视图",
   "localGallery_switchToGridLayout": "切换到网格视图",
+  "localGallery_justifiedViewLabel": "火车流",
+  "localGallery_switchToJustifiedView": "切换到火车流视图",
   "localGallery_dateRangeYearMonth": "{year}年{month}月",
   "@localGallery_dateRangeYearMonth": {
     "placeholders": {

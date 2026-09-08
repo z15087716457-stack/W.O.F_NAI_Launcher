@@ -1927,7 +1927,6 @@
   "localGallery_columnWidth": "Column width",
   "localGallery_thumbnailQualitySd": "Standard",
   "localGallery_thumbnailQualityHd": "High",
-  "localGallery_thumbnailQualityTooltip": "Choose local gallery thumbnail quality",
   "localGallery_naiOnly": "NAI",
   "localGallery_naiOnlyTooltip": "Only show NAI-generated images",
   "localGallery_naiVersionFilterLabel": "Version",
@@ -1935,6 +1934,8 @@
   "localGallery_masonryViewLabel": "Waterfall",
   "localGallery_switchToMasonryView": "Switch to waterfall view",
   "localGallery_switchToGridLayout": "Switch to grid view",
+  "localGallery_justifiedViewLabel": "Justified",
+  "localGallery_switchToJustifiedView": "Switch to justified view",
   "localGallery_dateRangeYearMonth": "{year}/{month}",
   "@localGallery_dateRangeYearMonth": {
     "placeholders": {

@@ -18,6 +18,7 @@ import '../../data/services/gallery/gallery_filter_service.dart';
 import '../../data/services/gallery/gallery_thumbnail_quality_store.dart';
 import '../../data/services/gallery/gallery_sort.dart';
 import '../../data/services/gallery/gallery_stream_scanner.dart';
+import '../../data/services/gallery/gallery_view_mode.dart';
 import '../../data/services/gallery/scan_state_manager.dart';
 import '../../data/services/gallery/unified_gallery_service.dart';
 import '../../data/services/thumbnail_service.dart';
@@ -101,8 +102,8 @@ class LocalGalleryState with _$LocalGalleryState {
     @Default(GallerySortDirection.descending)
     GallerySortDirection sortDirection,
 
-    /// 视图模式：true=瀑布流（默认），false=网格
-    @Default(true) bool isMasonryView,
+    /// 视图模式（默认瀑布流）
+    @Default(GalleryViewMode.masonry) GalleryViewMode viewMode,
 
     /// 逻辑列宽（px，140~480，默认 260；瀑布流按它算列数）
     @Default(260.0) double columnWidth,
@@ -839,10 +840,10 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     await loadPage(0);
   }
 
-  /// 设置视图模式（true=瀑布流 / false=网格），纯会话态，持久化由调用方负责
-  void setMasonryView(bool value) {
-    if (state.isMasonryView == value) return;
-    _setState(state.copyWith(isMasonryView: value));
+  /// 设置视图模式（grid/masonry/justified），纯会话态，持久化由调用方负责
+  void setViewMode(GalleryViewMode mode) {
+    if (state.viewMode == mode) return;
+    _setState(state.copyWith(viewMode: mode));
   }
 
   /// 设置逻辑列宽（实时生效于瀑布流列数；持久化由调用方负责）
