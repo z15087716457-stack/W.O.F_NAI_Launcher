@@ -84,6 +84,8 @@ Generate candidates toward a style direction, then converge generation by genera
 - Per-image snapshots in basic rounds; deep rounds never touch your current draft.
 - Algorithm design inspired by [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio) (GPL-3.0); reimplemented in Dart without copying its code.
 
+> 📖 New here? Read the illustrated tutorial: [docs/style-exploration.en-US.md](docs/style-exploration.en-US.md) — from enabling genetics to families, deep iterations, and adopting blocks.
+
 ### 🎨 Full NovelAI Diffusion V5 (N5) Support
 
 Driven by a capability-flag registry: V5 Full / Curated (with inpainting mapping), up to 32 character prompts, 1471 token limit, official ×1.5 pricing, transparent-background toggle (straight_alpha), Enhance Max✨ server-side e2e upscale, and V5 quality/UC presets.

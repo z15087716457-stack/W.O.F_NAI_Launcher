@@ -84,6 +84,8 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它�
 - 基础轮逐张快照、深度轮不污染当前草稿。
 - 算法思路参考 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)（GPL-3.0），本仓库为 Dart 重写实现，未复制其源码。
 
+> 📖 不会用？看图文教程：[docs/style-exploration.md](docs/style-exploration.md)（从开遗传到建家族、深度迭代、收编为块全流程）。
+
 ### 🎨 NovelAI Diffusion V5（N5）完整支持
 
 能力位注册表驱动：V5 Full / Curated（含 inpainting 互转）、最多 32 个角色框、token 上限 1471、官网口径 ×1.5 计价、透明背景开关（straight_alpha）、Enhance Max✨ 服务端 e2e 放大、V5 质量词与 UC 预设。
