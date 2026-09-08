@@ -47,6 +47,7 @@ import '../../providers/selection_mode_provider.dart';
 import '../../widgets/bulk_metadata_edit_dialog.dart';
 import '../../widgets/collection_select_dialog.dart';
 import '../../widgets/common/app_toast.dart';
+import '../../widgets/common/compact_icon_button.dart';
 import '../../widgets/common/pagination_bar.dart';
 import '../../utils/precise_ref_library_import_helper.dart';
 import '../../widgets/common/precise_reference_type_dialog.dart';
@@ -248,10 +249,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
                         showItemsPerPage: true,
                         showTotalInfo: true,
                         compact: contentWidth < 600,
-                        trailing: _buildThumbnailQualityControl(
-                          state,
-                          compact: contentWidth < 600,
-                        ),
+                        trailing: _buildThumbnailQualityControl(state),
                       ),
                   ],
                 ),
@@ -263,70 +261,19 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     );
   }
 
-  Widget _buildThumbnailQualityControl(
-    LocalGalleryState state, {
-    required bool compact,
-  }) {
+  Widget _buildThumbnailQualityControl(LocalGalleryState state) {
     final notifier = ref.read(localGalleryNotifierProvider.notifier);
     final l10n = context.l10n;
-    if (compact) {
-      return PopupMenuButton<GalleryThumbnailQuality>(
-        tooltip: l10n.localGallery_thumbnailQualityTooltip,
-        icon: Icon(
-          state.thumbnailQuality == GalleryThumbnailQuality.hd
-              ? Icons.hd_outlined
-              : Icons.sd_outlined,
-          size: 24,
-        ),
-        onSelected: (quality) =>
-            unawaited(notifier.setThumbnailQuality(quality)),
-        itemBuilder: (context) => [
-          PopupMenuItem(
-            value: GalleryThumbnailQuality.sd,
-            child: Text(l10n.localGallery_thumbnailQualitySd),
-          ),
-          PopupMenuItem(
-            value: GalleryThumbnailQuality.hd,
-            child: Text(l10n.localGallery_thumbnailQualityHd),
-          ),
-        ],
-      );
-    }
-
-    return SegmentedButton<GalleryThumbnailQuality>(
-      segments: [
-        ButtonSegment(
-          value: GalleryThumbnailQuality.sd,
-          icon: Tooltip(
-            message: l10n.localGallery_thumbnailQualitySd,
-            child: const SizedBox.square(
-              dimension: 24,
-              child: Center(child: Icon(Icons.sd_outlined, size: 22)),
-            ),
-          ),
-        ),
-        ButtonSegment(
-          value: GalleryThumbnailQuality.hd,
-          icon: Tooltip(
-            message: l10n.localGallery_thumbnailQualityHd,
-            child: const SizedBox.square(
-              dimension: 24,
-              child: Center(child: Icon(Icons.hd_outlined, size: 22)),
-            ),
-          ),
-        ),
-      ],
-      selected: {state.thumbnailQuality},
-      onSelectionChanged: (selection) {
-        if (selection.isNotEmpty) {
-          unawaited(notifier.setThumbnailQuality(selection.first));
-        }
-      },
-      showSelectedIcon: false,
-      style: ButtonStyle(
-        visualDensity: VisualDensity.compact,
-        textStyle: WidgetStatePropertyAll(
-          Theme.of(context).textTheme.labelSmall,
+    final isHd = state.thumbnailQuality == GalleryThumbnailQuality.hd;
+    return CompactIconButton(
+      icon: isHd ? Icons.hd_outlined : Icons.sd_outlined,
+      tooltip: isHd
+          ? l10n.localGallery_thumbnailQualityHd
+          : l10n.localGallery_thumbnailQualitySd,
+      isActive: isHd,
+      onPressed: () => unawaited(
+        notifier.setThumbnailQuality(
+          isHd ? GalleryThumbnailQuality.sd : GalleryThumbnailQuality.hd,
         ),
       ),
     );
