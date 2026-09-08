@@ -3855,8 +3855,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_createCollectionConfirm => '创建';
 
   @override
+  String get localGallery_createCollectionFolderTitle => '新建收藏文件夹';
+
+  @override
+  String get localGallery_createCollectionFolderHint => '输入收藏文件夹名称';
+
+  @override
+  String get localGallery_createCollectionFolderConfirm => '创建';
+
+  @override
   String localGallery_deleteCollectionContent(Object name) {
     return '确定删除收藏集「$name」？仅移除收藏集条目，不会删除任何图片文件。';
+  }
+
+  @override
+  String localGallery_deleteCollectionFolderContent(Object name) {
+    return '确定删除收藏文件夹「$name」？文件夹内没有子项，仅移除文件夹本身。';
+  }
+
+  @override
+  String get localGallery_deleteCollectionFolderNonEmptyTitle => '文件夹不为空';
+
+  @override
+  String localGallery_deleteCollectionFolderNonEmptyContent(Object name) {
+    return '收藏文件夹「$name」内还有收藏集或子文件夹，请先移出或删除其中的子项。';
   }
 
   @override

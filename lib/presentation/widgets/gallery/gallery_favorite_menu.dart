@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../data/models/gallery/image_collection.dart';
 import '../../../data/models/gallery/local_image_record.dart';
 import '../../providers/collection_provider.dart';
 import '../../providers/local_gallery_provider.dart';
@@ -47,6 +48,9 @@ class _FavoriteMenuPanel extends ConsumerStatefulWidget {
 class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
   /// 该图所在收藏集 ID 集合；null 表示正在异步拉取或拉取失败
   Set<String>? _memberCollectionIds;
+
+  /// 菜单内折叠的收藏文件夹 ID
+  final Set<String> _collapsedFolderIds = {};
   late bool _isFavorite;
   bool _busy = false;
 
@@ -205,20 +209,7 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
                         ),
                       )
                     else
-                      ...collections.map(
-                        (collection) => _MenuRow(
-                          icon: Icons.collections_bookmark,
-                          iconColor: Colors.amber.shade700,
-                          label: collection.name,
-                          count: collection.imageCount,
-                          checked: _memberCollectionIds!.contains(
-                            collection.id,
-                          ),
-                          onTap: _busy
-                              ? null
-                              : () => _toggleCollection(collection.id),
-                        ),
-                      ),
+                      ..._buildCollectionMenuRows(collections, null, 0),
                   ],
                 ),
               ),
@@ -228,15 +219,68 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
       ],
     );
   }
+
+  /// 收藏集菜单行（树形：文件夹分组可折叠，仅收藏集可勾选成员）
+  List<Widget> _buildCollectionMenuRows(
+    List<ImageCollection> collections,
+    String? parentId,
+    int depth,
+  ) {
+    final rows = <Widget>[];
+    for (final node in collections.where((c) => c.parentId == parentId)) {
+      if (node.isFolder) {
+        final expanded = !_collapsedFolderIds.contains(node.id);
+        rows.add(
+          _MenuRow(
+            icon: expanded ? Icons.folder_open : Icons.folder,
+            iconColor: Colors.amber.shade700,
+            label: node.name,
+            count: node.imageCount,
+            depth: depth,
+            isExpanded: expanded,
+            onTap: () => setState(() {
+              if (expanded) {
+                _collapsedFolderIds.add(node.id);
+              } else {
+                _collapsedFolderIds.remove(node.id);
+              }
+            }),
+          ),
+        );
+        if (expanded) {
+          rows.addAll(
+            _buildCollectionMenuRows(collections, node.id, depth + 1),
+          );
+        }
+      } else {
+        rows.add(
+          _MenuRow(
+            icon: Icons.collections_bookmark,
+            iconColor: Colors.amber.shade700,
+            label: node.name,
+            count: node.imageCount,
+            depth: depth,
+            checked: _memberCollectionIds!.contains(node.id),
+            onTap: _busy ? null : () => _toggleCollection(node.id),
+          ),
+        );
+      }
+    }
+    return rows;
+  }
 }
 
-/// 菜单行：图标 + 名称（+ 计数）+ 勾选态
+/// 菜单行：图标 + 名称（+ 计数）+ 勾选态/文件夹展开箭头（+ 层级缩进）
 class _MenuRow extends StatelessWidget {
   final IconData icon;
   final Color? iconColor;
   final String label;
   final int? count;
-  final bool checked;
+
+  /// null = 文件夹行（不显示勾选框，改用展开箭头）
+  final bool? checked;
+  final bool? isExpanded;
+  final int depth;
   final VoidCallback? onTap;
 
   const _MenuRow({
@@ -244,7 +288,9 @@ class _MenuRow extends StatelessWidget {
     this.iconColor,
     required this.label,
     this.count,
-    this.checked = false,
+    this.checked,
+    this.isExpanded,
+    this.depth = 0,
     this.onTap,
   });
 
@@ -254,7 +300,12 @@ class _MenuRow extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: EdgeInsets.only(
+          left: 12 + depth * 12.0,
+          right: 12,
+          top: 10,
+          bottom: 10,
+        ),
         child: Row(
           children: [
             Icon(icon, size: 17, color: iconColor ?? theme.colorScheme.primary),
@@ -277,13 +328,20 @@ class _MenuRow extends StatelessWidget {
               ),
             ],
             const SizedBox(width: 6),
-            Icon(
-              checked ? Icons.check : Icons.check_box_outline_blank,
-              size: 16,
-              color: checked
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.outlineVariant,
-            ),
+            if (checked != null)
+              Icon(
+                checked! ? Icons.check : Icons.check_box_outline_blank,
+                size: 16,
+                color: checked!
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.outlineVariant,
+              )
+            else if (isExpanded != null)
+              Icon(
+                isExpanded! ? Icons.expand_more : Icons.chevron_right,
+                size: 16,
+                color: theme.colorScheme.outline,
+              ),
           ],
         ),
       ),

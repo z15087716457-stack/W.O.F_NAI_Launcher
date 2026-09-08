@@ -4002,8 +4002,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_createCollectionConfirm => 'Create';
 
   @override
+  String get localGallery_createCollectionFolderTitle =>
+      'New Collection Folder';
+
+  @override
+  String get localGallery_createCollectionFolderHint => 'Enter folder name';
+
+  @override
+  String get localGallery_createCollectionFolderConfirm => 'Create';
+
+  @override
   String localGallery_deleteCollectionContent(Object name) {
     return 'Delete collection \"$name\"? Only the collection entry is removed; no image files are deleted.';
+  }
+
+  @override
+  String localGallery_deleteCollectionFolderContent(Object name) {
+    return 'Delete collection folder \"$name\"? The folder is empty; only the folder itself is removed.';
+  }
+
+  @override
+  String get localGallery_deleteCollectionFolderNonEmptyTitle =>
+      'Folder Not Empty';
+
+  @override
+  String localGallery_deleteCollectionFolderNonEmptyContent(Object name) {
+    return 'Collection folder \"$name\" still contains collections or subfolders. Move or delete its children first.';
   }
 
   @override

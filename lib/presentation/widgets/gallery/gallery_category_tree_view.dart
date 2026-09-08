@@ -43,12 +43,17 @@ class GalleryCategoryTreeView extends StatefulWidget {
   final void Function(String imagePath, String? categoryId)? onImageDrop;
   final VoidCallback? onSyncWithFileSystem;
 
-  /// 收藏集（渲染在「收藏」下方，'collection:<id>' 选中态）
+  /// 收藏集（渲染在「收藏」下方，'collection:<id>' 选中态；支持文件夹
+  /// 无限嵌套，isFolder 节点为纯组织容器）
   final List<ImageCollection> collections;
-  final VoidCallback? onCreateCollection;
+
+  /// 新建收藏集/收藏文件夹（parentId=null 为收藏根级；isFolder 区分类型）
+  final void Function(String? parentId, bool isFolder)? onCreateCollection;
   final void Function(String id, String newName)? onRenameCollection;
   final ValueChanged<String>? onDeleteCollection;
-  final void Function(int oldIndex, int newIndex)? onCollectionReorder;
+  final void Function(String? parentId, int oldIndex, int newIndex)?
+  onCollectionReorder;
+  final void Function(String id, String? newParentId)? onMoveCollection;
 
   const GalleryCategoryTreeView({
     super.key,
@@ -69,6 +74,7 @@ class GalleryCategoryTreeView extends StatefulWidget {
     this.onRenameCollection,
     this.onDeleteCollection,
     this.onCollectionReorder,
+    this.onMoveCollection,
   });
 
   @override
@@ -133,7 +139,9 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
                   count: widget.favoriteCount,
                   isSelected: widget.selectedCategoryId == 'favorites',
                   onTap: () => widget.onCategorySelected('favorites'),
-                  onHoverAction: widget.onCreateCollection,
+                  onHoverAction: widget.onCreateCollection != null
+                      ? () => _showCreateCollectionMenu(context, null)
+                      : null,
                 ),
                 // 收藏集（「收藏」下方的缩进子条目，链接式成员）
                 ..._buildCollectionItems(theme),
@@ -297,18 +305,32 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     return entries;
   }
 
-  /// 收藏集条目（缩进子条目 + 拖拽排序插入条）
+  /// 收藏区条目（树形：文件夹可无限嵌套，同父级内插入条排序）
   List<Widget> _buildCollectionItems(ThemeData theme) {
-    final collections = widget.collections;
+    return _buildCollectionChildren(theme, null, 1);
+  }
+
+  /// 渲染某父级（null=收藏根级平铺）下的收藏子树
+  List<Widget> _buildCollectionChildren(
+    ThemeData theme,
+    String? parentId,
+    int depth,
+  ) {
+    final siblings = widget.collections
+        .where((c) => c.parentId == parentId)
+        .toList();
     final items = <Widget>[];
 
-    for (var i = 0; i < collections.length; i++) {
+    for (var i = 0; i < siblings.length; i++) {
+      final node = siblings[i];
       if (widget.onCollectionReorder != null) {
         items.add(
           _buildInsertStrip<ImageCollection>(
-            canAccept: (dragged) => dragged.id != collections[i].id,
+            canAccept: (dragged) =>
+                dragged.parentId == parentId && dragged.id != node.id,
             onAccept: (dragged) => _handleCollectionReorder(
-              collections,
+              parentId,
+              siblings,
               dragged,
               i,
               insertAfter: false,
@@ -316,17 +338,23 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
           ),
         );
       }
-      items.add(_buildCollectionRow(theme, collections[i]));
+      items.add(
+        node.isFolder
+            ? _buildCollectionFolderNode(theme, node, depth)
+            : _buildCollectionRow(theme, node, depth),
+      );
     }
 
-    if (widget.onCollectionReorder != null && collections.isNotEmpty) {
+    // 末尾插入条：允许拖到该父级列表最后
+    if (widget.onCollectionReorder != null && siblings.isNotEmpty) {
       items.add(
         _buildInsertStrip<ImageCollection>(
-          canAccept: (_) => true,
+          canAccept: (dragged) => dragged.parentId == parentId,
           onAccept: (dragged) => _handleCollectionReorder(
-            collections,
+            parentId,
+            siblings,
             dragged,
-            collections.length - 1,
+            siblings.length - 1,
             insertAfter: true,
           ),
         ),
@@ -336,7 +364,78 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     return items;
   }
 
-  Widget _buildCollectionRow(ThemeData theme, ImageCollection collection) {
+  /// 收藏文件夹节点（展开/收起子树 + 拖入移入 + 递归并集计数）
+  Widget _buildCollectionFolderNode(
+    ThemeData theme,
+    ImageCollection folder,
+    int depth,
+  ) {
+    final selectedId = '$collectionSelectedIdPrefix${folder.id}';
+    final hasChildren = widget.collections.any(
+      (c) => c.parentId == folder.id,
+    );
+    final isExpanded = _expandedIds.contains(folder.id);
+
+    Widget row = _CategoryItem(
+      icon: hasChildren
+          ? (isExpanded ? Icons.folder_open : Icons.folder)
+          : Icons.folder_outlined,
+      iconColor: Colors.amber.shade700,
+      label: folder.name,
+      count: folder.imageCount,
+      depth: depth,
+      hasChildren: hasChildren,
+      isExpanded: isExpanded,
+      isSelected: widget.selectedCategoryId == selectedId,
+      onTap: () => widget.onCategorySelected(selectedId),
+      onExpand: hasChildren
+          ? () => setState(() {
+              if (isExpanded) {
+                _expandedIds.remove(folder.id);
+              } else {
+                _expandedIds.add(folder.id);
+              }
+            })
+          : null,
+      onRename: widget.onRenameCollection != null
+          ? (newName) => widget.onRenameCollection!(folder.id, newName)
+          : null,
+      onAddSubCollection: widget.onCreateCollection != null
+          ? () => widget.onCreateCollection!(folder.id, false)
+          : null,
+      onAddSubFolder: widget.onCreateCollection != null
+          ? () => widget.onCreateCollection!(folder.id, true)
+          : null,
+      onMoveToRoot:
+          folder.parentId != null && widget.onMoveCollection != null
+          ? () => widget.onMoveCollection!(folder.id, null)
+          : null,
+      onDelete: widget.onDeleteCollection != null
+          ? () => widget.onDeleteCollection!(folder.id)
+          : null,
+      showDragHandle:
+          widget.onCollectionReorder != null ||
+          widget.onMoveCollection != null,
+    );
+
+    row = _buildDraggableCollection(theme, folder, row);
+    row = _buildCollectionFolderDragTarget(theme, folder, row);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        row,
+        if (hasChildren && isExpanded)
+          ..._buildCollectionChildren(theme, folder.id, depth + 1),
+      ],
+    );
+  }
+
+  Widget _buildCollectionRow(
+    ThemeData theme,
+    ImageCollection collection,
+    int depth,
+  ) {
     final selectedId = '$collectionSelectedIdPrefix${collection.id}';
 
     final row = _CategoryItem(
@@ -344,11 +443,15 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       iconColor: Colors.amber.shade700,
       label: collection.name,
       count: collection.imageCount,
-      depth: 1,
+      depth: depth,
       isSelected: widget.selectedCategoryId == selectedId,
       onTap: () => widget.onCategorySelected(selectedId),
       onRename: widget.onRenameCollection != null
           ? (newName) => widget.onRenameCollection!(collection.id, newName)
+          : null,
+      onMoveToRoot:
+          collection.parentId != null && widget.onMoveCollection != null
+          ? () => widget.onMoveCollection!(collection.id, null)
           : null,
       onDelete: widget.onDeleteCollection != null
           ? () => widget.onDeleteCollection!(collection.id)
@@ -356,20 +459,111 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       showDragHandle: widget.onCollectionReorder != null,
     );
 
-    if (widget.onCollectionReorder == null) return row;
+    return _buildDraggableCollection(theme, collection, row);
+  }
 
+  /// 收藏集/文件夹的拖拽包装（拖出本体）
+  Widget _buildDraggableCollection(
+    ThemeData theme,
+    ImageCollection node,
+    Widget child,
+  ) {
     return Draggable<ImageCollection>(
-      data: collection,
+      data: node,
       feedback: _buildDragFeedback(
         theme,
-        icon: Icons.collections_bookmark,
-        label: collection.name,
+        icon: node.isFolder ? Icons.folder : Icons.collections_bookmark,
+        label: node.name,
       ),
-      childWhenDragging: Opacity(opacity: 0.4, child: row),
+      childWhenDragging: Opacity(opacity: 0.4, child: child),
       onDragStarted: () => HapticFeedback.mediumImpact(),
-      onDragEnd: (_) => setState(() => _hoveredCategoryId = null),
-      child: row,
+      onDragEnd: (_) {
+        _autoExpandTimer?.cancel();
+        setState(() => _hoveredCategoryId = null);
+      },
+      child: child,
     );
+  }
+
+  /// 文件夹节点作为拖入目标（接收收藏集/文件夹移入）
+  ///
+  /// 拒绝自身、已是直接子项的节点、以及会造成环的移动。
+  Widget _buildCollectionFolderDragTarget(
+    ThemeData theme,
+    ImageCollection folder,
+    Widget child,
+  ) {
+    return DragTarget<ImageCollection>(
+      onWillAcceptWithDetails: (details) {
+        final dragged = details.data;
+        if (dragged.id == folder.id) return false;
+        if (dragged.parentId == folder.id) return false;
+        if (_wouldCreateCollectionCycle(dragged.id, folder.id)) return false;
+        return true;
+      },
+      onAcceptWithDetails: (details) {
+        HapticFeedback.heavyImpact();
+        widget.onMoveCollection?.call(details.data.id, folder.id);
+        setState(() {
+          _expandedIds.add(folder.id);
+          _hoveredCategoryId = null;
+        });
+        _autoExpandTimer?.cancel();
+      },
+      onMove: (details) {
+        if (_hoveredCategoryId != folder.id) {
+          setState(() => _hoveredCategoryId = folder.id);
+          final hasChildren = widget.collections.any(
+            (c) => c.parentId == folder.id,
+          );
+          if (hasChildren && !_expandedIds.contains(folder.id)) {
+            _startAutoExpandTimer(folder.id);
+          }
+        }
+      },
+      onLeave: (_) {
+        if (_hoveredCategoryId == folder.id) {
+          setState(() => _hoveredCategoryId = null);
+          _autoExpandTimer?.cancel();
+        }
+      },
+      builder: (context, candidateData, rejectedData) {
+        final isAccepting = candidateData.isNotEmpty;
+        final isRejected = rejectedData.isNotEmpty;
+
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            color: isAccepting
+                ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                : Colors.transparent,
+            border: isAccepting
+                ? Border.all(color: theme.colorScheme.primary, width: 2)
+                : isRejected
+                ? Border.all(
+                    color: theme.colorScheme.error.withValues(alpha: 0.5),
+                    width: 1,
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: child,
+        );
+      },
+    );
+  }
+
+  /// 把节点移到 [newParentId] 下是否会成环（新父的祖先链含被移节点）
+  bool _wouldCreateCollectionCycle(String draggedId, String newParentId) {
+    final byId = {
+      for (final c in widget.collections) c.id: c,
+    };
+    var current = byId[newParentId];
+    while (current != null) {
+      if (current.id == draggedId) return true;
+      current = byId[current.parentId];
+    }
+    return false;
   }
 
   void _handleRootReorder(
@@ -392,12 +586,13 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
   }
 
   void _handleCollectionReorder(
-    List<ImageCollection> collections,
+    String? parentId,
+    List<ImageCollection> siblings,
     ImageCollection dragged,
     int targetIndex, {
     required bool insertAfter,
   }) {
-    final oldIndex = collections.indexWhere((c) => c.id == dragged.id);
+    final oldIndex = siblings.indexWhere((c) => c.id == dragged.id);
     if (oldIndex < 0) return;
 
     final newIndex = computeReorderInsertIndex(
@@ -407,7 +602,42 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     );
     if (newIndex == oldIndex) return;
 
-    widget.onCollectionReorder?.call(oldIndex, newIndex);
+    widget.onCollectionReorder?.call(parentId, oldIndex, newIndex);
+  }
+
+  /// 「收藏」行 + 按钮弹出菜单：新建收藏集 / 新建收藏文件夹
+  void _showCreateCollectionMenu(BuildContext context, String? parentId) {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        200,
+        120,
+        MediaQuery.of(context).size.width - 200,
+        MediaQuery.of(context).size.height - 120,
+      ),
+      items: [
+        PopupMenuItem(
+          onTap: () => widget.onCreateCollection?.call(parentId, false),
+          child: Row(
+            children: [
+              const Icon(Icons.add, size: 18),
+              const SizedBox(width: 8),
+              Text(context.l10n.localGallery_createCollectionTitle),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          onTap: () => widget.onCreateCollection?.call(parentId, true),
+          child: Row(
+            children: [
+              const Icon(Icons.create_new_folder, size: 18),
+              const SizedBox(width: 8),
+              Text(context.l10n.localGallery_createCollectionFolderTitle),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   /// 条目间插入条：悬停显示主题色细线，松开完成同级插入
@@ -727,6 +957,8 @@ class _CategoryItem extends StatefulWidget {
   final void Function(String)? onRename;
   final VoidCallback? onDelete;
   final VoidCallback? onAddSubCategory;
+  final VoidCallback? onAddSubCollection;
+  final VoidCallback? onAddSubFolder;
   final VoidCallback? onMoveToRoot;
 
   /// 是否显示拖拽小点（悬停时；与 onRename 解耦，外部图源根级排序也显示）
@@ -749,6 +981,8 @@ class _CategoryItem extends StatefulWidget {
     this.onRename,
     this.onDelete,
     this.onAddSubCategory,
+    this.onAddSubCollection,
+    this.onAddSubFolder,
     this.onMoveToRoot,
     this.showDragHandle = false,
     this.onHoverAction,
@@ -947,6 +1181,28 @@ class _CategoryItemState extends State<_CategoryItem> {
                 const Icon(Icons.create_new_folder, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.localGallery_createSubCategoryTitle),
+              ],
+            ),
+          ),
+        if (widget.onAddSubCollection != null)
+          PopupMenuItem(
+            onTap: widget.onAddSubCollection,
+            child: Row(
+              children: [
+                const Icon(Icons.add, size: 18),
+                const SizedBox(width: 8),
+                Text(context.l10n.localGallery_createCollectionTitle),
+              ],
+            ),
+          ),
+        if (widget.onAddSubFolder != null)
+          PopupMenuItem(
+            onTap: widget.onAddSubFolder,
+            child: Row(
+              children: [
+                const Icon(Icons.create_new_folder, size: 18),
+                const SizedBox(width: 8),
+                Text(context.l10n.localGallery_createCollectionFolderTitle),
               ],
             ),
           ),

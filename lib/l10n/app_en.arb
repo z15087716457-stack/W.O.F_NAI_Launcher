@@ -1970,7 +1970,23 @@
   "localGallery_createCollectionTitle": "New Collection",
   "localGallery_createCollectionHint": "Enter collection name",
   "localGallery_createCollectionConfirm": "Create",
+  "localGallery_createCollectionFolderTitle": "New Collection Folder",
+  "localGallery_createCollectionFolderHint": "Enter folder name",
+  "localGallery_createCollectionFolderConfirm": "Create",
   "localGallery_deleteCollectionContent": "Delete collection \"{name}\"? Only the collection entry is removed; no image files are deleted.",
+  "localGallery_deleteCollectionFolderContent": "Delete collection folder \"{name}\"? The folder is empty; only the folder itself is removed.",
+  "@localGallery_deleteCollectionFolderContent": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "localGallery_deleteCollectionFolderNonEmptyTitle": "Folder Not Empty",
+  "localGallery_deleteCollectionFolderNonEmptyContent": "Collection folder \"{name}\" still contains collections or subfolders. Move or delete its children first.",
+  "@localGallery_deleteCollectionFolderNonEmptyContent": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "@localGallery_deleteCollectionContent": {
     "placeholders": {
       "name": {}

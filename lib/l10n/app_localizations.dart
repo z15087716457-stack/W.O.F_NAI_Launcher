@@ -7225,11 +7225,47 @@ abstract class AppLocalizations {
   /// **'Create'**
   String get localGallery_createCollectionConfirm;
 
+  /// No description provided for @localGallery_createCollectionFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Collection Folder'**
+  String get localGallery_createCollectionFolderTitle;
+
+  /// No description provided for @localGallery_createCollectionFolderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter folder name'**
+  String get localGallery_createCollectionFolderHint;
+
+  /// No description provided for @localGallery_createCollectionFolderConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get localGallery_createCollectionFolderConfirm;
+
   /// No description provided for @localGallery_deleteCollectionContent.
   ///
   /// In en, this message translates to:
   /// **'Delete collection \"{name}\"? Only the collection entry is removed; no image files are deleted.'**
   String localGallery_deleteCollectionContent(Object name);
+
+  /// No description provided for @localGallery_deleteCollectionFolderContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete collection folder \"{name}\"? The folder is empty; only the folder itself is removed.'**
+  String localGallery_deleteCollectionFolderContent(Object name);
+
+  /// No description provided for @localGallery_deleteCollectionFolderNonEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder Not Empty'**
+  String get localGallery_deleteCollectionFolderNonEmptyTitle;
+
+  /// No description provided for @localGallery_deleteCollectionFolderNonEmptyContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection folder \"{name}\" still contains collections or subfolders. Move or delete its children first.'**
+  String localGallery_deleteCollectionFolderNonEmptyContent(Object name);
 
   /// No description provided for @localGallery_unfavorite.
   ///

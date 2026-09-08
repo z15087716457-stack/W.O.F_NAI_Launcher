@@ -93,10 +93,14 @@ class CollectionNotifier extends _$CollectionNotifier {
   ///
   /// [name] 集合名称
   /// [description] 集合描述（可选）
+  /// [parentId] 父文件夹 ID（null=收藏根级平铺）
+  /// [isFolder] 创建收藏文件夹（纯组织节点）
   /// 返回创建的集合，失败返回 null
   Future<ImageCollection?> createCollection(
     String name, {
     String? description,
+    String? parentId,
+    bool isFolder = false,
   }) async {
     try {
       // 清除之前的错误
@@ -105,6 +109,8 @@ class CollectionNotifier extends _$CollectionNotifier {
       final collection = await _repository.createCollection(
         name,
         description: description,
+        parentId: parentId,
+        isFolder: isFolder,
       );
 
       // 重新加载集合列表
@@ -305,22 +311,29 @@ class CollectionNotifier extends _$CollectionNotifier {
     }
   }
 
-  /// 重新排序集合（同级内拖拽排序）
-  Future<bool> reorder(int oldIndex, int newIndex) async {
-    final collections = state.collections;
+  /// 重新排序集合（同一父级内拖拽排序）
+  Future<bool> reorder(String? parentId, int oldIndex, int newIndex) async {
+    // state.collections 保持 DB 返回顺序（sort_order, created_at），
+    // 过滤同一 parent 后相对顺序即兄弟序
+    final siblings = state.collections
+        .where((c) => c.parentId == parentId)
+        .toList();
     if (oldIndex < 0 ||
-        oldIndex >= collections.length ||
+        oldIndex >= siblings.length ||
         newIndex < 0 ||
-        newIndex >= collections.length) {
+        newIndex >= siblings.length) {
       return false;
     }
 
     try {
-      final orderedIds = collections.map((c) => c.id).toList();
+      final orderedIds = siblings.map((c) => c.id).toList();
       final id = orderedIds.removeAt(oldIndex);
       orderedIds.insert(newIndex, id);
 
-      final success = await _repository.reorderCollections(orderedIds);
+      final success = await _repository.reorderCollections(
+        orderedIds,
+        parentId: parentId,
+      );
       if (success) {
         await _loadCollections();
       }
@@ -329,6 +342,31 @@ class CollectionNotifier extends _$CollectionNotifier {
       state = state.copyWith(error: e.toString());
       AppLogger.e(
         'Failed to reorder collections',
+        e,
+        null,
+        'CollectionNotifier',
+      );
+      return false;
+    }
+  }
+
+  /// 移动集合/文件夹到新父级（null=移到收藏根级）
+  Future<bool> moveCollection(String id, String? newParentId) async {
+    try {
+      state = state.copyWith(error: null);
+      final success = await _repository.moveCollection(id, newParentId);
+      if (success) {
+        await _loadCollections();
+        AppLogger.i(
+          'Moved collection $id -> ${newParentId ?? "root"}',
+          'CollectionNotifier',
+        );
+      }
+      return success;
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      AppLogger.e(
+        'Failed to move collection: $id',
         e,
         null,
         'CollectionNotifier',

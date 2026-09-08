@@ -1881,7 +1881,23 @@
   "localGallery_createCollectionTitle": "新建收藏集",
   "localGallery_createCollectionHint": "输入收藏集名称",
   "localGallery_createCollectionConfirm": "创建",
+  "localGallery_createCollectionFolderTitle": "新建收藏文件夹",
+  "localGallery_createCollectionFolderHint": "输入收藏文件夹名称",
+  "localGallery_createCollectionFolderConfirm": "创建",
   "localGallery_deleteCollectionContent": "确定删除收藏集「{name}」？仅移除收藏集条目，不会删除任何图片文件。",
+  "localGallery_deleteCollectionFolderContent": "确定删除收藏文件夹「{name}」？文件夹内没有子项，仅移除文件夹本身。",
+  "@localGallery_deleteCollectionFolderContent": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "localGallery_deleteCollectionFolderNonEmptyTitle": "文件夹不为空",
+  "localGallery_deleteCollectionFolderNonEmptyContent": "收藏文件夹「{name}」内还有收藏集或子文件夹，请先移出或删除其中的子项。",
+  "@localGallery_deleteCollectionFolderNonEmptyContent": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "@localGallery_deleteCollectionContent": {
     "placeholders": {
       "name": {}

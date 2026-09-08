@@ -81,11 +81,20 @@ class CollectionRepository {
   }
 
   /// 创建新集合
+  ///
+  /// [parentId] 父文件夹 ID（null=收藏根级平铺）；[isFolder] 创建收藏
+  /// 文件夹（纯组织节点，不装图，只有文件夹可拥有子节点）。
   Future<ImageCollection> createCollection(
     String name, {
     String? description,
+    String? parentId,
+    bool isFolder = false,
   }) async {
-    final id = await _dataSource.createCollection(name);
+    final id = await _dataSource.createCollection(
+      name,
+      parentId: parentId,
+      isFolder: isFolder,
+    );
     final info = (await _dataSource.listCollectionsWithCounts())
         .where((c) => c.id == id)
         .firstOrNull;
@@ -99,8 +108,32 @@ class CollectionRepository {
             id: id,
             name: name.trim(),
             createdAt: DateTime.now(),
+            parentId: parentId,
+            isFolder: isFolder,
           ),
     );
+  }
+
+  /// 移动集合/文件夹到新父级（null=移到收藏根级）
+  ///
+  /// 数据源层做目标校验（必须是文件夹）与防环；失败返回 false。
+  Future<bool> moveCollection(String id, String? newParentId) async {
+    try {
+      final ok = await _dataSource.moveCollection(id, newParentId);
+      if (ok) {
+        AppLogger.i('Moved collection $id -> ${newParentId ?? 'root'}',
+            'CollectionRepo');
+      }
+      return ok;
+    } catch (e) {
+      AppLogger.e(
+        'Failed to move collection: $id',
+        e,
+        null,
+        'CollectionRepo',
+      );
+      return false;
+    }
   }
 
   /// 重命名集合
@@ -143,10 +176,13 @@ class CollectionRepository {
     }
   }
 
-  /// 按新顺序持久化集合排序
-  Future<bool> reorderCollections(List<String> orderedIds) async {
+  /// 按新顺序持久化集合排序（同一父级内的全部子项）
+  Future<bool> reorderCollections(
+    List<String> orderedIds, {
+    String? parentId,
+  }) async {
     try {
-      return await _dataSource.reorderCollections(orderedIds);
+      return await _dataSource.reorderCollections(orderedIds, parentId: parentId);
     } catch (e) {
       AppLogger.e('Failed to reorder collections', e, null, 'CollectionRepo');
       return false;
@@ -312,10 +348,27 @@ class CollectionRepository {
     return _dataSource.getCollectionImageIds(collectionId);
   }
 
-  /// 清空所有集合
+  /// 清空所有集合（文件夹按深度从深到浅删，先清子再清父）
   Future<void> clearAllCollections() async {
     final infos = await _dataSource.listCollectionsWithCounts();
-    for (final info in infos) {
+    final parentById = <String, String?>{
+      for (final info in infos) info.id: info.parentId,
+    };
+    int depthOf(String id) {
+      var depth = 0;
+      var current = parentById[id];
+      // 上限防御：parent 链异常成环时不无限迭代
+      while (current != null && depth < infos.length) {
+        depth++;
+        current = parentById[current];
+      }
+      return depth;
+    }
+
+    final ordered = [...infos]..sort(
+        (a, b) => depthOf(b.id).compareTo(depthOf(a.id)),
+      );
+    for (final info in ordered) {
       await _dataSource.deleteCollection(info.id);
     }
     AppLogger.i('Cleared all collections', 'CollectionRepo');
@@ -327,6 +380,8 @@ class CollectionRepository {
       name: info.name,
       imageCount: info.imageCount,
       createdAt: info.createdAt,
+      parentId: info.parentId,
+      isFolder: info.isFolder,
     );
   }
 }

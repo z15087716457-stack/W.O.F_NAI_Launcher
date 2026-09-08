@@ -81,6 +81,9 @@ class _CollectionSelectDialogState
   /// 各集合包含的选中图片张数；null=尚未加载完成（不标注）
   Map<String, int>? _memberCounts;
 
+  /// 对话框内折叠的收藏文件夹 ID
+  final Set<String> _collapsedFolderIds = {};
+
   @override
   void initState() {
     super.initState();
@@ -124,19 +127,30 @@ class _CollectionSelectDialogState
     );
   }
 
-  /// 获取过滤后的集合列表
-  List<ImageCollection> _getFilteredCollections(
-    List<ImageCollection> collections,
-  ) {
-    if (_filterQuery.isEmpty) {
-      return collections;
-    }
-    return collections.where((collection) {
-      final nameMatch = collection.name.toLowerCase().contains(_filterQuery);
+  /// 计算搜索过滤的保留 ID 集（匹配节点 + 其祖先文件夹链；null=不过滤）
+  Set<String>? _computeRetainedIds(List<ImageCollection> collections) {
+    if (_filterQuery.isEmpty) return null;
+
+    final byId = {for (final c in collections) c.id: c};
+    bool matches(ImageCollection c) {
+      final nameMatch = c.name.toLowerCase().contains(_filterQuery);
       final descMatch =
-          collection.description?.toLowerCase().contains(_filterQuery) ?? false;
+          c.description?.toLowerCase().contains(_filterQuery) ?? false;
       return nameMatch || descMatch;
-    }).toList();
+    }
+
+    final retain = {
+      for (final c in collections)
+        if (matches(c)) c.id,
+    };
+    for (final id in retain.toList()) {
+      var parent = byId[id]?.parentId;
+      while (parent != null) {
+        retain.add(parent);
+        parent = byId[parent]?.parentId;
+      }
+    }
+    return retain;
   }
 
   @override
@@ -220,10 +234,18 @@ class _CollectionSelectDialogState
       return const Center(child: CircularProgressIndicator());
     }
 
-    final filteredCollections = _getFilteredCollections(collections);
+    final retainedIds = _computeRetainedIds(collections);
     // 移除模式：顶部始终提供「收藏」根条目（根=总收藏，子集=根的细分）
     final rootVisible = widget.isRemoveMode && _rootMatchesFilter(l10n);
-    final hasAnyEntry = filteredCollections.isNotEmpty || rootVisible;
+    final treeRows = _buildCollectionTreeRows(
+      theme,
+      l10n,
+      collections,
+      retainedIds,
+      null,
+      0,
+    );
+    final hasAnyEntry = treeRows.isNotEmpty || rootVisible;
 
     if (!hasAnyEntry && collections.isEmpty) {
       return Center(
@@ -278,15 +300,89 @@ class _CollectionSelectDialogState
       );
     }
 
-    return ListView.builder(
-      itemCount: filteredCollections.length + (rootVisible ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (rootVisible && index == 0) {
-          return _buildFavoriteRootTile(theme, l10n);
+    return ListView(
+      children: [
+        if (rootVisible) _buildFavoriteRootTile(theme, l10n),
+        ...treeRows,
+      ],
+    );
+  }
+
+  /// 收藏区树行（文件夹分组可折叠、仅收藏集可选；搜索时保留祖先链）
+  List<Widget> _buildCollectionTreeRows(
+    ThemeData theme,
+    AppLocalizations l10n,
+    List<ImageCollection> collections,
+    Set<String>? retainedIds,
+    String? parentId,
+    int depth,
+  ) {
+    final rows = <Widget>[];
+    for (final node in collections.where((c) => c.parentId == parentId)) {
+      if (retainedIds != null && !retainedIds.contains(node.id)) continue;
+      if (node.isFolder) {
+        final expanded = !_collapsedFolderIds.contains(node.id);
+        rows.add(_buildFolderTile(theme, node, depth, expanded));
+        if (expanded) {
+          rows.addAll(
+            _buildCollectionTreeRows(
+              theme,
+              l10n,
+              collections,
+              retainedIds,
+              node.id,
+              depth + 1,
+            ),
+          );
         }
-        final collection = filteredCollections[index - (rootVisible ? 1 : 0)];
-        return _buildCollectionTile(theme, l10n, collection);
-      },
+      } else {
+        rows.add(_buildCollectionTile(theme, l10n, node, depth));
+      }
+    }
+    return rows;
+  }
+
+  /// 文件夹分组行（不可选为目标，点击仅展开/收起）
+  Widget _buildFolderTile(
+    ThemeData theme,
+    ImageCollection folder,
+    int depth,
+    bool expanded,
+  ) {
+    return ListTile(
+      contentPadding: EdgeInsets.only(
+        left: 16 + depth * 20.0,
+        right: 16,
+      ),
+      dense: true,
+      leading: Icon(
+        expanded ? Icons.folder_open : Icons.folder,
+        color: Colors.amber.shade700,
+      ),
+      title: Text(
+        folder.name,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+      subtitle: Text(
+        context.l10n.collectionSelect_imageCount(folder.imageCount),
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.outline,
+        ),
+      ),
+      trailing: Icon(
+        expanded ? Icons.expand_less : Icons.chevron_right,
+        color: theme.colorScheme.outline,
+      ),
+      onTap: () => setState(() {
+        if (expanded) {
+          _collapsedFolderIds.add(folder.id);
+        } else {
+          _collapsedFolderIds.remove(folder.id);
+        }
+      }),
     );
   }
 
@@ -329,6 +425,7 @@ class _CollectionSelectDialogState
     ThemeData theme,
     AppLocalizations l10n,
     ImageCollection collection,
+    int depth,
   ) {
     // 移除模式：标注该集合包含几张选中图片，无交集的集合淡化
     final isRemove = widget.isRemoveMode;
@@ -338,6 +435,10 @@ class _CollectionSelectDialogState
     return Opacity(
       opacity: hasNone ? 0.45 : 1.0,
       child: ListTile(
+        contentPadding: EdgeInsets.only(
+          left: 16 + depth * 20.0,
+          right: 16,
+        ),
         leading: Icon(Icons.folder_outlined, color: theme.colorScheme.primary),
         title: Text(
           collection.name,

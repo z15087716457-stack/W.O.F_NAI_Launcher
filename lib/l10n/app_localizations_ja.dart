@@ -3912,8 +3912,31 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_createCollectionConfirm => '作成';
 
   @override
+  String get localGallery_createCollectionFolderTitle => '新しいコレクションフォルダ';
+
+  @override
+  String get localGallery_createCollectionFolderHint => 'フォルダ名を入力';
+
+  @override
+  String get localGallery_createCollectionFolderConfirm => '作成';
+
+  @override
   String localGallery_deleteCollectionContent(Object name) {
     return 'コレクション「$name」を削除しますか？コレクションのエントリのみ削除され、画像ファイルは削除されません。';
+  }
+
+  @override
+  String localGallery_deleteCollectionFolderContent(Object name) {
+    return 'コレクションフォルダ「$name」を削除しますか？フォルダ内は空のため、フォルダ自体のみ削除されます。';
+  }
+
+  @override
+  String get localGallery_deleteCollectionFolderNonEmptyTitle =>
+      'フォルダが空ではありません';
+
+  @override
+  String localGallery_deleteCollectionFolderNonEmptyContent(Object name) {
+    return 'コレクションフォルダ「$name」にはコレクションまたはサブフォルダが残っています。先に移動または削除してください。';
   }
 
   @override

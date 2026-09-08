@@ -390,6 +390,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
                   onRenameCollection: _handleRenameCollection,
                   onDeleteCollection: _handleDeleteCollection,
                   onCollectionReorder: _handleCollectionReorder,
+                  onMoveCollection: _handleMoveCollection,
                 );
               },
             ),
@@ -452,18 +453,25 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     }
   }
 
-  Future<void> _createCollection() async {
+  /// 新建收藏集/收藏文件夹（parentId=null 为收藏根级）
+  Future<void> _createCollection(String? parentId, bool isFolder) async {
     final name = await ThemedInputDialog.show(
       context: context,
-      title: context.l10n.localGallery_createCollectionTitle,
-      hintText: context.l10n.localGallery_createCollectionHint,
-      confirmText: context.l10n.localGallery_createCollectionConfirm,
+      title: isFolder
+          ? context.l10n.localGallery_createCollectionFolderTitle
+          : context.l10n.localGallery_createCollectionTitle,
+      hintText: isFolder
+          ? context.l10n.localGallery_createCollectionFolderHint
+          : context.l10n.localGallery_createCollectionHint,
+      confirmText: isFolder
+          ? context.l10n.localGallery_createCollectionFolderConfirm
+          : context.l10n.localGallery_createCollectionConfirm,
       cancelText: context.l10n.common_cancel,
     );
     if (name == null || name.trim().isEmpty || !mounted) return;
     await ref
         .read(collectionNotifierProvider.notifier)
-        .createCollection(name.trim());
+        .createCollection(name.trim(), parentId: parentId, isFolder: isFolder);
   }
 
   Future<void> _handleRenameCollection(String id, String newName) async {
@@ -473,6 +481,12 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         .renameCollection(id, newName.trim());
   }
 
+  Future<void> _handleMoveCollection(String id, String? newParentId) async {
+    await ref
+        .read(collectionNotifierProvider.notifier)
+        .moveCollection(id, newParentId);
+  }
+
   Future<void> _handleDeleteCollection(String id) async {
     final collectionState = ref.read(collectionNotifierProvider);
     final collection = collectionState.collections
@@ -480,11 +494,36 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         .firstOrNull;
     final name = collection?.name ?? id;
 
+    // 非空文件夹禁止删除：提示先清空子项
+    if (collection != null && collection.isFolder) {
+      final hasChildren = collectionState.collections.any(
+        (c) => c.parentId == id,
+      );
+      if (hasChildren) {
+        if (!mounted) return;
+        await ThemedConfirmDialog.show(
+          // ignore: use_build_context_synchronously
+          context: context,
+          title: context.l10n.localGallery_deleteCollectionFolderNonEmptyTitle,
+          content: context
+              .l10n
+              .localGallery_deleteCollectionFolderNonEmptyContent(name),
+          confirmText: context.l10n.common_confirm,
+          cancelText: context.l10n.common_cancel,
+          type: ThemedConfirmDialogType.warning,
+          icon: Icons.folder_off_outlined,
+        );
+        return;
+      }
+    }
+
     final confirmed = await ThemedConfirmDialog.show(
       // ignore: use_build_context_synchronously
       context: context,
       title: context.l10n.common_confirmDelete,
-      content: context.l10n.localGallery_deleteCollectionContent(name),
+      content: collection != null && collection.isFolder
+          ? context.l10n.localGallery_deleteCollectionFolderContent(name)
+          : context.l10n.localGallery_deleteCollectionContent(name),
       confirmText: context.l10n.common_delete,
       cancelText: context.l10n.common_cancel,
       type: ThemedConfirmDialogType.danger,
@@ -494,7 +533,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
 
     await ref.read(collectionNotifierProvider.notifier).deleteCollection(id);
 
-    // 若画廊正按该收藏集过滤，回到「全部」
+    // 若画廊正按该收藏集/文件夹过滤，回到「全部」
     final filterState = ref.read(localGalleryNotifierProvider);
     if (filterState.filterCriteria.collectionId == id ||
         ref.read(galleryCategoryNotifierProvider).selectedCategoryId ==
@@ -503,10 +542,14 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     }
   }
 
-  Future<void> _handleCollectionReorder(int oldIndex, int newIndex) async {
+  Future<void> _handleCollectionReorder(
+    String? parentId,
+    int oldIndex,
+    int newIndex,
+  ) async {
     await ref
         .read(collectionNotifierProvider.notifier)
-        .reorder(oldIndex, newIndex);
+        .reorder(parentId, oldIndex, newIndex);
   }
 
   void _handleCategorySelected(String? id) {

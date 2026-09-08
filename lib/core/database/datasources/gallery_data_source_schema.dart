@@ -13,6 +13,9 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       await _createFtsIndexTable(db);
       await _createCollectionsTables(db);
 
+      // 迁移：收藏集层级列（如果缺失）
+      await _migrateAddCollectionHierarchy(db);
+
       // 迁移：添加 last_scanned_at 列（如果缺失）
       await _migrateAddLastScannedAt(db);
 
@@ -470,13 +473,19 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
   }
 
   /// 收藏集表（链接式：只存 image_id 成员关系，不复制文件）
+  ///
+  /// 层级模型：parent_id 指向父节点（NULL=收藏根级平铺，与历史行为一致）；
+  /// is_folder=1 为纯组织节点，不参与成员关系。老库两列缺失由
+  /// [_migrateAddCollectionHierarchy] 幂等补齐，既有行全部留在根级。
   Future<void> _createCollectionsTables(Database db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS ${GalleryDataSource._collectionsTable} (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         sort_order INTEGER NOT NULL DEFAULT 0,
-        created_at INTEGER NOT NULL
+        created_at INTEGER NOT NULL,
+        parent_id TEXT,
+        is_folder INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
@@ -498,6 +507,53 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       CREATE INDEX IF NOT EXISTS idx_gallery_collection_items_image_id
       ON ${GalleryDataSource._collectionItemsTable}(image_id)
     ''');
+  }
+
+  /// 迁移：收藏集表补 parent_id / is_folder 列（如果缺失）
+  ///
+  /// ALTER TABLE ADD COLUMN 幂等；既有行 parent_id=NULL（收藏根级平铺，
+  /// 行为与升级前一致）、is_folder=0（普通收藏集）。
+  Future<void> _migrateAddCollectionHierarchy(Database db) async {
+    try {
+      final tableInfo = await db.rawQuery(
+        'PRAGMA table_info(${GalleryDataSource._collectionsTable})',
+      );
+      final columnNames = tableInfo
+          .map((col) => col['name'] as String?)
+          .whereType<String>()
+          .toSet();
+
+      if (!columnNames.contains('parent_id')) {
+        await db.execute(
+          'ALTER TABLE ${GalleryDataSource._collectionsTable} '
+          'ADD COLUMN parent_id TEXT',
+        );
+        AppLogger.i(
+          '[Migration] Added parent_id column to '
+          '${GalleryDataSource._collectionsTable}',
+          'GalleryDS',
+        );
+      }
+      if (!columnNames.contains('is_folder')) {
+        await db.execute(
+          'ALTER TABLE ${GalleryDataSource._collectionsTable} '
+          'ADD COLUMN is_folder INTEGER NOT NULL DEFAULT 0',
+        );
+        AppLogger.i(
+          '[Migration] Added is_folder column to '
+          '${GalleryDataSource._collectionsTable}',
+          'GalleryDS',
+        );
+      }
+    } catch (e, stack) {
+      // 迁移失败不阻止应用启动
+      AppLogger.e(
+        '[Migration] Failed to add collection hierarchy columns',
+        e,
+        stack,
+        'GalleryDS',
+      );
+    }
   }
 
   @override
