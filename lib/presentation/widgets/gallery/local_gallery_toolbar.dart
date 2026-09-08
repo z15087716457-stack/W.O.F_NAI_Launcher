@@ -416,15 +416,16 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                                 showLabel: showStateLabels,
                               ),
                               const SizedBox(width: 6),
-                              // 视图切换：网格 → 瀑布流 → 火车流 三档循环
-                              // （mosaic 预留，不进循环）
+                              // 视图切换：网格 → 瀑布流 → 火车流 → 混排
+                              // 四档循环
                               CompactIconButton(
                                 icon: switch (state.viewMode) {
                                   GalleryViewMode.grid => Icons.grid_view,
                                   GalleryViewMode.masonry => Icons.view_quilt,
                                   GalleryViewMode.justified =>
                                     Icons.view_stream,
-                                  GalleryViewMode.mosaic => Icons.dashboard,
+                                  GalleryViewMode.mosaic =>
+                                    Icons.auto_awesome_mosaic,
                                 },
                                 label: switch (state.viewMode) {
                                   GalleryViewMode.grid => l10n.common_grid,
@@ -433,7 +434,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                                   GalleryViewMode.justified =>
                                     l10n.localGallery_justifiedViewLabel,
                                   GalleryViewMode.mosaic =>
-                                    l10n.localGallery_masonryViewLabel,
+                                    l10n.localGallery_mosaicViewLabel,
                                 },
                                 // tooltip 指向「下一档」
                                 tooltip: switch (state.viewMode) {
@@ -442,7 +443,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                                   GalleryViewMode.masonry =>
                                     l10n.localGallery_switchToJustifiedView,
                                   GalleryViewMode.justified =>
-                                    l10n.localGallery_switchToGridLayout,
+                                    l10n.localGallery_switchToMosaicView,
                                   GalleryViewMode.mosaic =>
                                     l10n.localGallery_switchToGridLayout,
                                 },
@@ -459,7 +460,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                                     GalleryViewMode.masonry =>
                                       GalleryViewMode.justified,
                                     GalleryViewMode.justified =>
-                                      GalleryViewMode.grid,
+                                      GalleryViewMode.mosaic,
                                     GalleryViewMode.mosaic =>
                                       GalleryViewMode.grid,
                                   };

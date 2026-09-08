@@ -3838,6 +3838,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_switchToJustifiedView => 'ジャスティファイ ビューに切り替える';
 
   @override
+  String get localGallery_mosaicViewLabel => 'モザイク';
+
+  @override
+  String get localGallery_switchToMosaicView => 'モザイク ビューに切り替える';
+
+  @override
   String localGallery_dateRangeYearMonth(Object year, Object month) {
     return '$year年$month月';
   }

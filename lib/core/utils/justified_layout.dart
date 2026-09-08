@@ -35,8 +35,16 @@ class JustifiedRow {
 /// 欠填容忍：从 i 出发没有任何 j 使 h 落区间（典型 = 连续竖图，h 全高于
 /// maxHeight）时允许欠填行——取 h 最接近 maxHeight 的 j，行高 clamp 进
 /// 区间、isUnderfilled=true；成本是显著大于任何纯顶格路径的大罚分，
-/// 保证 DP 只在无路可走时才选欠填。末行恒按欠填处理（左对齐、高度
-/// clamp 自然行高、不顶格拉伸）。空列表返回空，极端输入只 clamp 不抛异常。
+/// 保证 DP 只在无路可走时才选欠填。空列表返回空，极端输入只 clamp 不抛异常。
+///
+/// 末行规则：末行恒按欠填处理（左对齐、高度 clamp 自然行高、不顶格拉伸）。
+/// 防压扁拆分：末行自然 h < minHeight 且图数 ≥2 时，从末行尾部逐张吐出
+/// 图片组成新末行——每吐一张旧末行 Σaspect 减小、h 升高，直到旧末行
+/// h ≥ minHeight 或仅剩 1 张；旧末行按常规行定 height 与 isUnderfilled
+/// （h 落区间=顶格，否则欠填 clamp），新末行恒欠填 height=clamp(自然h)；
+/// 新末行若仍 h < minHeight 且图数 ≥2 则递归同样处理。若不拆分，欠填行
+/// height 被 clamp 抬高到 minHeight 时行内图总宽会超出行宽，渲染层只能
+/// 缩宽防溢出，竖图被横向压扁。总图数守恒、索引连续。
 List<JustifiedRow> computeJustifiedRows({
   required List<double> aspectRatios,
   required double availableWidth,
@@ -132,14 +140,44 @@ List<JustifiedRow> computeJustifiedRows({
     i = end + 1;
   }
 
-  // 末行恒欠填：左对齐、高度 clamp 自然行高，不顶格拉伸
-  if (rows.isNotEmpty) {
+  // 末行处理：恒欠填（左对齐、高度 clamp 自然行高、不顶格拉伸）+
+  // 防压扁拆分（自然 h 低于下限且图数 ≥2 时尾部逐张吐出新末行，可递归）
+  while (rows.isNotEmpty) {
     final last = rows.last;
+    // 逐张吐出：每吐一张旧末行 Σaspect 减小、h 升高，
+    // 直到旧末行 h ≥ minHeight 或仅剩 1 张
+    var headEnd = last.endIndex;
+    while (headEnd > last.startIndex &&
+        naturalHeight(last.startIndex, headEnd) < minHeight) {
+      headEnd--;
+    }
+    if (headEnd == last.endIndex) {
+      // 无需拆分：末行恒欠填 clamp
+      rows[rows.length - 1] = JustifiedRow(
+        startIndex: last.startIndex,
+        endIndex: last.endIndex,
+        height: clampHeight(naturalHeight(last.startIndex, last.endIndex)),
+        isUnderfilled: true,
+      );
+      break;
+    }
+    // 旧末行按常规行处理：h 落区间 = 顶格，否则欠填 clamp
+    final headNatural = naturalHeight(last.startIndex, headEnd);
+    final headFit = headNatural >= minHeight && headNatural <= maxHeight;
     rows[rows.length - 1] = JustifiedRow(
       startIndex: last.startIndex,
-      endIndex: last.endIndex,
-      height: clampHeight(naturalHeight(last.startIndex, last.endIndex)),
-      isUnderfilled: true,
+      endIndex: headEnd,
+      height: headFit ? headNatural : clampHeight(headNatural),
+      isUnderfilled: !headFit,
+    );
+    // 吐出段成为新末行，下轮循环同样检查拆分
+    rows.add(
+      JustifiedRow(
+        startIndex: headEnd + 1,
+        endIndex: last.endIndex,
+        height: clampHeight(naturalHeight(headEnd + 1, last.endIndex)),
+        isUnderfilled: true,
+      ),
     );
   }
   return rows;

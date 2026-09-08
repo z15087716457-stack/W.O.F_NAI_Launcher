@@ -1936,6 +1936,8 @@
   "localGallery_switchToGridLayout": "Switch to grid view",
   "localGallery_justifiedViewLabel": "Justified",
   "localGallery_switchToJustifiedView": "Switch to justified view",
+  "localGallery_mosaicViewLabel": "Mosaic",
+  "localGallery_switchToMosaicView": "Switch to mosaic view",
   "localGallery_dateRangeYearMonth": "{year}/{month}",
   "@localGallery_dateRangeYearMonth": {
     "placeholders": {

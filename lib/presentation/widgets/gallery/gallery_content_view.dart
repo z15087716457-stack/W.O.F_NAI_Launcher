@@ -9,6 +9,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/justified_layout.dart';
+import '../../../core/utils/mosaic_layout.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/gallery/local_image_record.dart';
 import '../../../data/services/gallery/gallery_view_mode.dart';
@@ -149,6 +150,42 @@ bool galleryShouldResetScroll({
   return !(samePage && sameFilters && sameSort);
 }
 
+/// 等高行渲染参数的公共接口：火车流 JustifiedRow 与混排 MosaicRow
+/// 共用单行渲染（顶格/欠填两分支一一对应；justified_layout.dart 不动，
+/// 故用适配器而非在源文件加 implements）
+abstract class _EqualHeightRow {
+  int get startIndex;
+  int get endIndex;
+  double get height;
+  bool get isUnderfilled;
+}
+
+class _JustifiedRowView extends _EqualHeightRow {
+  final JustifiedRow row;
+  _JustifiedRowView(this.row);
+  @override
+  int get startIndex => row.startIndex;
+  @override
+  int get endIndex => row.endIndex;
+  @override
+  double get height => row.height;
+  @override
+  bool get isUnderfilled => row.isUnderfilled;
+}
+
+class _MosaicRowView extends _EqualHeightRow {
+  final MosaicRow row;
+  _MosaicRowView(this.row);
+  @override
+  int get startIndex => row.startIndex;
+  @override
+  int get endIndex => row.endIndex;
+  @override
+  double get height => row.height;
+  @override
+  bool get isUnderfilled => !row.isJustified;
+}
+
 /// 画廊内容视图（含分组/3D/瀑布流切换）- 泛型版本
 class GenericGalleryContentView<T> extends ConsumerStatefulWidget {
   final bool use3DCardView;
@@ -156,7 +193,8 @@ class GenericGalleryContentView<T> extends ConsumerStatefulWidget {
   /// true=瀑布流（Masonry，卡片按真实宽高比），false=固定网格
   final bool useMasonryView;
 
-  /// 视图模式枚举（可空）：justified 时走火车流；null 时沿用 useMasonryView
+  /// 视图模式枚举（可空）：justified 走火车流、mosaic 走混排拼块墙；
+  /// null 时沿用 useMasonryView
   final GalleryViewMode? galleryViewMode;
   final int columns;
   final double itemWidth;
@@ -376,6 +414,10 @@ class _GenericGalleryContentViewState<T>
 
     if (widget.galleryViewMode == GalleryViewMode.justified) {
       return _buildJustifiedView(widget.state, widget.selectionState);
+    }
+
+    if (widget.galleryViewMode == GalleryViewMode.mosaic) {
+      return _buildMosaicView(widget.state, widget.selectionState);
     }
 
     if (widget.useMasonryView) {
@@ -742,72 +784,94 @@ class _GenericGalleryContentViewState<T>
           ),
           padding: const EdgeInsets.all(padding),
           itemCount: rows.length,
-          itemBuilder: (context, rowIndex) {
-            final row = rows[rowIndex];
-            final count = row.endIndex - row.startIndex + 1;
-            final List<Widget> children;
-            if (row.isUnderfilled) {
-              // 欠填行：图按行高×aspect 取自然宽、左对齐、右侧留空；
-              // clamp 抬高的极端行（如单张全景）按比例收窄防溢出
-              final widths = [
-                for (var i = row.startIndex; i <= row.endIndex; i++)
-                  row.height * aspectRatios[i],
-              ];
-              final contentWidth =
-                  widths.fold<double>(0, (a, b) => a + b) +
-                  spacing * (count - 1);
-              final shrink = contentWidth > availableWidth && contentWidth > 0
-                  ? ((availableWidth - spacing * (count - 1)) / contentWidth)
-                        .clamp(0.0, 1.0)
-                  : 1.0;
-              children = [
-                for (var k = 0; k < count; k++) ...[
-                  if (k > 0) const SizedBox(width: spacing),
-                  SizedBox(
-                    width: widths[k] * shrink,
-                    height: row.height,
-                    child: _buildJustifiedCard(
-                      state,
-                      selectionState,
-                      records,
-                      selectedIndices,
-                      row.startIndex + k,
-                      widths[k] * shrink,
-                      row.height,
-                    ),
-                  ),
-                ],
-              ];
-            } else {
-              // 顶格行：按宽高比 flex 分宽，正好撑满整行
-              children = [
-                for (var k = 0; k < count; k++) ...[
-                  if (k > 0) const SizedBox(width: spacing),
-                  Expanded(
-                    flex: (aspectRatios[row.startIndex + k] * 1000).round(),
-                    child: _buildJustifiedCard(
-                      state,
-                      selectionState,
-                      records,
-                      selectedIndices,
-                      row.startIndex + k,
-                      row.height * aspectRatios[row.startIndex + k],
-                      row.height,
-                    ),
-                  ),
-                ],
-              ];
-            }
-            return Padding(
-              padding: const EdgeInsets.only(bottom: spacing),
-              child: SizedBox(
-                height: row.height,
-                child: Row(children: children),
-              ),
-            );
-          },
+          itemBuilder: (context, rowIndex) => _buildJustifiedRowWidget(
+            aspectRatios,
+            _JustifiedRowView(rows[rowIndex]),
+            availableWidth,
+            spacing,
+            cardBuilder: (index, width, height) => _buildJustifiedCard(
+              state,
+              selectionState,
+              records,
+              selectedIndices,
+              index,
+              width,
+              height,
+            ),
+          ),
         );
       },
+    );
+  }
+
+  /// 等高行单行渲染：顶格行撑满整行 / 欠填行左对齐留空两分支。
+  /// 火车流（JustifiedRow）与混排（MosaicRow）共用，卡片由 cardBuilder
+  /// 注入（两视图各自的全交互单卡）。
+  Widget _buildJustifiedRowWidget(
+    List<double> aspectRatios,
+    _EqualHeightRow row,
+    double availableWidth,
+    double spacing, {
+    required Widget Function(int index, double width, double height)
+    cardBuilder,
+  }) {
+    final count = row.endIndex - row.startIndex + 1;
+    final List<Widget> children;
+    // 欠填行防溢出的等比缩率（1 = 不缩）；缩放行高同步收窄
+    var rowHeight = row.height;
+    if (row.isUnderfilled) {
+      // 欠填行：图按行高×aspect 取自然宽、左对齐、右侧留空；
+      // clamp 抬高的极端行（如单张全景）按 shrink 等比收窄防溢出——
+      // 宽高必须同乘 shrink，只缩宽会把竖图横向压扁
+      final widths = [
+        for (var i = row.startIndex; i <= row.endIndex; i++)
+          row.height * aspectRatios[i],
+      ];
+      final contentWidth =
+          widths.fold<double>(0, (a, b) => a + b) + spacing * (count - 1);
+      final shrink = contentWidth > availableWidth && contentWidth > 0
+          ? ((availableWidth - spacing * (count - 1)) / contentWidth).clamp(
+              0.0,
+              1.0,
+            )
+          : 1.0;
+      rowHeight = row.height * shrink;
+      children = [
+        for (var k = 0; k < count; k++) ...[
+          if (k > 0) SizedBox(width: spacing),
+          SizedBox(
+            width: widths[k] * shrink,
+            height: rowHeight,
+            child: cardBuilder(
+              row.startIndex + k,
+              widths[k] * shrink,
+              rowHeight,
+            ),
+          ),
+        ],
+      ];
+    } else {
+      // 顶格行：按宽高比 flex 分宽，正好撑满整行
+      children = [
+        for (var k = 0; k < count; k++) ...[
+          if (k > 0) SizedBox(width: spacing),
+          Expanded(
+            flex: (aspectRatios[row.startIndex + k] * 1000).round(),
+            child: cardBuilder(
+              row.startIndex + k,
+              row.height * aspectRatios[row.startIndex + k],
+              row.height,
+            ),
+          ),
+        ],
+      ];
+    }
+    return Padding(
+      padding: EdgeInsets.only(bottom: spacing),
+      child: SizedBox(
+        height: rowHeight,
+        child: Row(children: children),
+      ),
     );
   }
 
@@ -827,6 +891,160 @@ class _GenericGalleryContentViewState<T>
 
     return VisibilityDetector(
       key: ValueKey('justified_v_${record.path}'),
+      onVisibilityChanged: (info) {
+        if (!mounted) return;
+        final isNowVisible = info.visibleFraction > 0.05;
+        final wasVisible = _visibleIndices.contains(index);
+        if (isNowVisible != wasVisible) {
+          setState(() {
+            if (isNowVisible) {
+              _visibleIndices.add(index);
+            } else {
+              _visibleIndices.remove(index);
+            }
+          });
+        }
+      },
+      // 与瀑布流对齐补 RepaintBoundary：重绘只刷本卡片
+      child: RepaintBoundary(
+        child: LocalImageCard3D(
+          record: record,
+          width: width,
+          height: height,
+          isSelected: isSelected,
+          isVisible: isVisible,
+          priority: isVisible ? 1 : 5,
+          onTap: () {
+            if (selectionState.isActive) {
+              widget.onSelectionToggle?.call(state.currentImages[index]);
+              return;
+            }
+            if (widget.onTap != null) {
+              widget.onTap!(state.currentImages[index], index);
+            } else if (widget.view3DConfig != null) {
+              widget.view3DConfig!.showDetailViewer(
+                widget.view3DConfig!.images,
+                index,
+              );
+            }
+          },
+          onDoubleTap: () {
+            if (widget.onDoubleTap != null) {
+              widget.onDoubleTap!(state.currentImages[index], index);
+            } else if (widget.view3DConfig != null) {
+              widget.view3DConfig!.showDetailViewer(
+                widget.view3DConfig!.images,
+                index,
+              );
+            }
+          },
+          onLongPress: () {
+            if (!selectionState.isActive) {
+              widget.onEnterSelection?.call(state.currentImages[index]);
+            } else {
+              widget.onLongPress?.call(state.currentImages[index], index);
+            }
+          },
+          onSecondaryTapDown: (details) {
+            widget.onContextMenu?.call(
+              state.currentImages[index],
+              details.globalPosition,
+            );
+          },
+          onFavoriteToggle: (anchor) {
+            widget.onFavoriteToggle?.call(state.currentImages[index], anchor);
+          },
+          onSendAction: widget.onSendAction != null
+              ? (action) => widget.onSendAction!(record, action)
+              : null,
+          isKritaConnected: widget.isKritaConnected,
+          dragWrapper: selectionState.isActive
+              ? null
+              : DraggableImageCard.createDragWrapper(record: record),
+        ),
+      ),
+    );
+  }
+
+  /// 混排视图：面积均衡等高行（行高以目标面积 t² 为锚、与窗宽无关，
+  /// 顶格/欠填两分支与火车流共用单行渲染）。
+  /// 结构与火车流一致，宽高比探测到位触发 setState 时 build 内实时重排。
+  Widget _buildMosaicView(
+    GalleryState<T> state,
+    SelectionState selectionState,
+  ) {
+    final records = _convertToLocalImageRecords(state.currentImages);
+    final selectedIndices = <int>{};
+    for (int i = 0; i < records.length; i++) {
+      if (selectionState.selectedIds.contains(
+        widget.idExtractor(state.currentImages[i]),
+      )) {
+        selectedIndices.add(i);
+      }
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 12.0;
+        const padding = 16.0;
+        final availableWidth = constraints.maxWidth - padding * 2;
+        // 目标边长 t = 逻辑列宽（目标面积 t² 的边长）
+        final targetHeight = widget.columnWidth;
+        final aspectRatios = [
+          for (final record in records) _getCachedAspectRatio(record),
+        ];
+        final rows = computeMosaicRows(
+          aspectRatios: aspectRatios,
+          availableWidth: availableWidth,
+          targetHeight: targetHeight,
+          spacing: spacing,
+        );
+
+        return ListView.builder(
+          key: PageStorageKey<String>('gallery_mosaic_$_gridRemountCounter'),
+          controller: _masonryScrollController ??= ScrollController(),
+          // 与瀑布流对齐放大 cacheExtent：减少卡片回收重建
+          scrollCacheExtent: ScrollCacheExtent.pixels(
+            constraints.maxHeight * 1.5,
+          ),
+          padding: const EdgeInsets.all(padding),
+          itemCount: rows.length,
+          itemBuilder: (context, rowIndex) => _buildJustifiedRowWidget(
+            aspectRatios,
+            _MosaicRowView(rows[rowIndex]),
+            availableWidth,
+            spacing,
+            cardBuilder: (index, width, height) => _buildMosaicCard(
+              state,
+              selectionState,
+              records,
+              selectedIndices,
+              index,
+              width,
+              height,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 混排单卡：完整镜像火车流单卡，仅 key 前缀与给定宽高不同
+  Widget _buildMosaicCard(
+    GalleryState<T> state,
+    SelectionState selectionState,
+    List<LocalImageRecord> records,
+    Set<int> selectedIndices,
+    int index,
+    double width,
+    double height,
+  ) {
+    final record = records[index];
+    final isSelected = selectedIndices.contains(index);
+    final isVisible = _visibleIndices.contains(index);
+
+    return VisibilityDetector(
+      key: ValueKey('mosaic_v_${record.path}'),
       onVisibilityChanged: (info) {
         if (!mounted) return;
         final isNowVisible = info.visibleFraction > 0.05;

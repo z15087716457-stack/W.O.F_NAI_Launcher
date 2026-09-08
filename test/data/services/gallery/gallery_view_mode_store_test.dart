@@ -8,11 +8,11 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('GalleryViewModeStore', () {
-    test('无记录时默认瀑布流', () async {
+    test('无记录时默认混排', () async {
       SharedPreferences.setMockInitialValues({});
       const store = GalleryViewModeStore();
 
-      expect(await store.load(), GalleryViewMode.masonry);
+      expect(await store.load(), GalleryViewMode.mosaic);
     });
 
     test('枚举往返：保存后读回，且只写在新键', () async {
@@ -65,13 +65,13 @@ void main() {
       expect(await store.load(), GalleryViewMode.justified);
     });
 
-    test('新键为未知字符串时落默认瀑布流', () async {
+    test('新键为未知字符串时落默认混排', () async {
       SharedPreferences.setMockInitialValues({
         StorageKeys.localGalleryViewModeV2: 'not_a_mode',
       });
       const store = GalleryViewModeStore();
 
-      expect(await store.load(), GalleryViewMode.masonry);
+      expect(await store.load(), GalleryViewMode.mosaic);
     });
   });
 }

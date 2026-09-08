@@ -187,6 +187,59 @@ void main() {
     });
   });
 
+  group('末行防压扁', () {
+    test('9 张竖图：行高落区间且每行图总宽 ≤ 可用宽（渲染 shrink 恒 =1）', () {
+      // 实库验收场景：可用宽 852、t=240、生产高带 [0.85t, 1.35t]=[204, 324]
+      const w = 852.0;
+      const t = 240.0;
+      const min = t * 0.85;
+      const max = t * 1.35;
+      final rows = computeJustifiedRows(
+        aspectRatios: List<double>.filled(9, 0.7),
+        availableWidth: w,
+        targetHeight: t,
+        minHeight: min,
+        maxHeight: max,
+        spacing: spacing,
+      );
+      // 图数守恒 + 索引连续
+      expect(rows.first.startIndex, 0);
+      expect(rows.last.endIndex, 8);
+      for (var k = 1; k < rows.length; k++) {
+        expect(rows[k].startIndex, rows[k - 1].endIndex + 1);
+      }
+      for (final row in rows) {
+        expect(row.height, inInclusiveRange(min, max));
+        // 欠填行按 height×aspect 取自然宽：总宽不超可用宽即不会被
+        // 渲染层 shrink 压扁（等比缩放前）。单张全景 clamp 抬高行除外
+        final count = row.endIndex - row.startIndex + 1;
+        final totalWidth = row.height * 0.7 * count + spacing * (count - 1);
+        expect(totalWidth, lessThanOrEqualTo(w + 1));
+      }
+    });
+
+    test('末行拆分递归后仍守恒（构造末行多图自然高低于下限的输入）', () {
+      // 连续竖图 + 尾部长竖图段：验证拆分路径不丢图、索引连续、
+      // 所有行高 clamp 进区间（拆不拆由 DP 决定，本用例守不变量）
+      final rows = computeJustifiedRows(
+        aspectRatios: [1.5, 1.5, ...List<double>.filled(9, 0.7)],
+        availableWidth: 852,
+        targetHeight: 240,
+        minHeight: 240 * 0.85,
+        maxHeight: 240 * 1.35,
+        spacing: spacing,
+      );
+      expect(rows.first.startIndex, 0);
+      expect(rows.last.endIndex, 10);
+      for (var k = 1; k < rows.length; k++) {
+        expect(rows[k].startIndex, rows[k - 1].endIndex + 1);
+      }
+      for (final row in rows) {
+        expect(row.height, inInclusiveRange(240 * 0.85, 240 * 1.35));
+      }
+    });
+  });
+
   group('极端边界不抛异常', () {
     test('空列表返回空', () {
       expect(layout(const []), isEmpty);

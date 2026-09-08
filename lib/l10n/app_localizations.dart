@@ -7087,6 +7087,18 @@ abstract class AppLocalizations {
   /// **'Switch to justified view'**
   String get localGallery_switchToJustifiedView;
 
+  /// No description provided for @localGallery_mosaicViewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mosaic'**
+  String get localGallery_mosaicViewLabel;
+
+  /// No description provided for @localGallery_switchToMosaicView.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to mosaic view'**
+  String get localGallery_switchToMosaicView;
+
   /// No description provided for @localGallery_dateRangeYearMonth.
   ///
   /// In en, this message translates to:
