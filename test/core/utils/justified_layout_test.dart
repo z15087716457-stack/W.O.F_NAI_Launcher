@@ -286,15 +286,17 @@ void main() {
     });
   });
 
-  group('单图全景 contain', () {
-    test('a=16：height=Wa/a 不裁不填满、contain 标记', () {
+  group('单图全景满宽条带（原 contain 收编进 exact）', () {
+    test('a=16：height=Wa/a 满宽不裁、走 Expanded 侧（非欠填归并）', () {
       final rows = layout([16.0]);
-      expect(rows.single.fill, JustifiedFill.contain);
+      expect(rows.single.fill, JustifiedFill.exact);
+      expect(rows.single.isUnderfilled, isFalse);
       expect(rows.single.height, closeTo(width / 16, 0.01));
     });
 
     test('带内全景 height = Wa/a（a=8, t=260 → 125）', () {
       final rows = layout([8.0], t: 260);
+      expect(rows.single.fill, JustifiedFill.exact);
       expect(rows.single.height, closeTo(width / 8, 0.01));
     });
 
@@ -302,6 +304,55 @@ void main() {
       final rows = layout([0.05]);
       expect(rows.single.fill, JustifiedFill.underfilled);
       expect(rows.single.height, closeTo(target * 3.5, 0.01));
+    });
+  });
+
+  group('单图行长图满宽分派（留洞修复）', () {
+    test('中宽长图（a=2）：h0 < hFull ≤ maxH → 满宽放大零裁剪', () {
+      // 修复前病灶：h0 = t/√2 ≈ 141，锚高下行宽 ≈283 仅为窗宽 28%，
+      // r ≈ 3.5 远超 upscaleCap → 欠填左对齐留大空洞；
+      // 修复后 hFull = Wa/a = 500 ≤ 700=3.5t → 满宽放大、height = Wa/a
+      final rows = layout([2.0]);
+      final row = rows.single;
+      expect(row.fill, JustifiedFill.exact);
+      expect(row.isUnderfilled, isFalse, reason: '满宽行必须走 Expanded 顶格侧');
+      expect(row.height, closeTo(width / 2.0, 0.01));
+      expect(row.height * 2.0, closeTo(width, 0.01), reason: '零裁剪精确填满');
+      expect(row.height, greaterThan(h0Of([2.0], row, target)));
+    });
+
+    test('hFull 略超 maxH（a=1.3）：满宽 cover 裁上下，height 钉 maxH', () {
+      // hFull = 1000/1.3 ≈ 769 > 700=3.5t，裁量 1−700/769 ≈ 9% ≤ cap(12%)
+      final rows = layout([1.3]);
+      final row = rows.single;
+      expect(row.fill, JustifiedFill.crop);
+      expect(row.isUnderfilled, isFalse);
+      expect(row.height, closeTo(target * justifiedMaxHeightFactor, 0.01));
+      final cropRatio = 1 - row.height / (width / 1.3);
+      expect(cropRatio, lessThanOrEqualTo(justifiedCropCap + 1e-9));
+      expect(cropRatio, greaterThan(0));
+    });
+
+    test('回归：超宽全景（a=35）仍是满宽条带，height = Wa/a', () {
+      final rows = layout([35.0]);
+      final row = rows.single;
+      expect(row.fill, JustifiedFill.exact);
+      expect(row.isUnderfilled, isFalse);
+      expect(row.height, closeTo(width / 35.0, 0.01));
+    });
+
+    test('回归：方图单行（a=1）仍欠填——满宽裁量超预算', () {
+      // hFull = 1000 > 700=3.5t 且 700/1000 = 0.7 < 1−cap → 不裁，欠填 h0
+      final rows = layout([1.0]);
+      final row = rows.single;
+      expect(row.fill, JustifiedFill.underfilled);
+      expect(row.height, closeTo(target, 0.01));
+    });
+
+    test('回归：竖图单行（a=0.7）仍欠填', () {
+      final rows = layout([0.7]);
+      expect(rows.single.fill, JustifiedFill.underfilled);
+      expect(rows.single.height, closeTo(target / math.sqrt(0.7), 0.01));
     });
   });
 

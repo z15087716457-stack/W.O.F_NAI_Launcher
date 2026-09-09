@@ -150,8 +150,7 @@ bool galleryShouldResetScroll({
 }
 
 /// 等高行渲染参数的公共接口：火车流 JustifiedRow 单行渲染用
-/// （顶格/欠填两分支；justified_layout.dart 不动，故用适配器而非
-/// 在源文件加 implements）
+/// （顶格/欠填两分支；用适配器而非在源文件加 implements）
 abstract class _EqualHeightRow {
   int get startIndex;
   int get endIndex;
@@ -800,8 +799,9 @@ class _GenericGalleryContentViewState<T>
     var rowHeight = row.height;
     if (row.isUnderfilled) {
       // 欠填行：图按行高×aspect 取自然宽、左对齐、右侧留空；
-      // clamp 抬高的极端行（如单张全景）按 shrink 等比收窄防溢出——
-      // 宽高必须同乘 shrink，只缩宽会把竖图横向压扁
+      // clamp 抬高的极端行（如单张超高竖图带顶 3.5t）按 shrink 等比收窄
+      // 防溢出——宽高必须同乘 shrink，只缩宽会把竖图横向压扁。
+      // （单张全景/长图已收编进单图满宽分派走 Expanded 顶格，不再落这里）
       final widths = [
         for (var i = row.startIndex; i <= row.endIndex; i++)
           row.height * aspectRatios[i],

@@ -47,11 +47,19 @@ import 'dart:math' as math;
 /// - 其余 → 欠填行：h0 左对齐不裁（V2 现状，竖图行高自动 ~1.2t）。
 ///   无挤压守卫：欠填自然内容宽 h0·Σa+spacing×(k−1) > W×(1+tol) 的
 ///   多图行不可行——多图横排纸条行结构性不可能；
-/// - 单图全景（锚高下行宽 h0·a > Wa）：contain 不裁（height = Wa/a）；
-///   带内全景走 justify（height = Wa/a 同形）。
+/// - 单图行独立分派（hFull = Wa/a = 单图填满整行宽所需高度，≡ r·h0；
+///   静拍板原则：放大优先于缩小、填满优先于留空、不丢内容优先）：
+///   hFull ≤ 3.5t → 满宽零裁剪（exact，height = hFull，fillCost = 0
+///   与旧 contain 一致）——收编旧 contain 分支（hFull < h0 的超宽全景，
+///   渲染同为满宽条带）与中宽长图（h0 < hFull，原 r≫cap 只能欠填、
+///   右侧留大空洞）；hFull > 3.5t 且 3.5t/hFull ≥ 1−cap → 满宽 cover
+///   裁上下（crop，height 钉 3.5t，裁量 ≤ cap 与 crop 行同预算、同
+///   双倍缩小罚——单图中横图放大到满宽只超高一点时宁裁不留空）；
+///   其余（方图/竖图落单行，满宽裁量超预算）维持欠填 h0 左对齐。
 ///
 /// 调参口清单：权重 [justifiedVarianceWeight] / [justifiedUnderfillWeight]
-/// / 裁量上限 [justifiedCropCap] / 放大上限 [justifiedUpscaleCap]
+/// / 裁量上限 [justifiedCropCap]（兼作单图满宽 cover 的裁量预算）
+/// / 放大上限 [justifiedUpscaleCap]
 /// （兼为同名可选参数的默认值）；[justifiedUpscaleWeight] /
 /// [justifiedDownscaleWeight] / [justifiedUnderfillBasePenalty] /
 /// [justifiedSingleImagePenalty] / 落差硬上限 [justifiedAspectSpreadCap] /
@@ -60,7 +68,8 @@ import 'dart:math' as math;
 ///
 /// 不变量：所有行 imageCount 之和 == 图数、索引连续不重叠；空列表返回空；
 /// 非法宽高比（0/负/NaN）占位 1.0 不抛异常；欠填行渲染宽 ≤ W×1.08
-/// （渲染层无 shrink 压扁）。无末行特殊逻辑。
+/// （渲染层无 shrink 压扁）；单图满宽行高 = Wa/a 可低于高带下限 0.5t
+/// （超宽全景条带，旧 contain 同此）。无末行特殊逻辑。
 
 /// 行内比方差罚权重（软偏好：同宽高比聚行 → 行内面积更均衡）。
 /// 2.0 → 1.0：混行的阻拦职责移交硬上限 [justifiedAspectSpreadCap]，
@@ -121,10 +130,12 @@ const double justifiedMaxHeightFactor = 3.5;
 
 /// 行填充模式
 enum JustifiedFill {
-  /// justify 行：h = Wa/Σa，零裁剪精确填满
+  /// justify 行：h = Wa/Σa，零裁剪精确填满；
+  /// 单图满宽行（hFull = Wa/a ≤ 3.5t，含原 contain 全景）同归此
   exact,
 
-  /// crop 行（仅 r<1 过满侧）：行高钉 h0，Expanded 分格 + 卡片 cover 微裁
+  /// crop 行（仅 r<1 过满侧）：行高钉 h0，Expanded 分格 + 卡片 cover 微裁；
+  /// 单图 hFull 略超 3.5t 时行高钉 3.5t、满宽 cover 裁上下（同 cap 预算）
   crop,
 
   /// upscale 行：h = r·h0 整行等比放大，自然宽 contain、零裁剪精确填满
@@ -134,7 +145,9 @@ enum JustifiedFill {
   /// 欠填左对齐不裁剪（height = 面积锚 h0 或放大钳制后的带顶，自然宽留空）
   underfilled,
 
-  /// 单图全景 contain（height = Wa/a，不裁不填满）
+  /// 单图全景 contain（height = Wa/a，不裁不填满）——已退役：单图满宽
+  /// 分派收编后不再产出（渲染效果同为满宽条带），枚举值保留不动
+  /// [JustifiedRow.isUnderfilled] 的归并结构
   contain,
 }
 
@@ -146,7 +159,8 @@ class JustifiedRow {
   /// 结束图索引（含）
   final int endIndex;
 
-  /// 渲染行高：exact = Wa/Σa；crop/underfilled = 面积锚 h0；contain = Wa/a
+  /// 渲染行高：exact = Wa/Σa（单图满宽 = Wa/a）；crop = 面积锚 h0
+  /// （单图满宽 cover = 3.5t）；underfilled = h0 或放大钳制后的带顶
   final double height;
 
   /// 填充模式（渲染分支判定用）
@@ -159,8 +173,8 @@ class JustifiedRow {
     required this.fill,
   });
 
-  /// 渲染层欠填分支判定：欠填/全景 contain 走自然宽左对齐，
-  /// justify/crop 走 Expanded 顶格（crop 的裁剪由卡片内部 cover 完成）
+  /// 渲染层欠填分支判定：欠填（及已退役的全景 contain）走自然宽左对齐，
+  /// justify/crop/upscale 走 Expanded 顶格（crop 的裁剪由卡片内部 cover 完成）
   bool get isUnderfilled =>
       fill == JustifiedFill.underfilled || fill == JustifiedFill.contain;
 }
@@ -248,11 +262,36 @@ List<JustifiedRow> computeJustifiedRows({
     final JustifiedFill fill;
     final double height;
     final double fillCost;
-    if (count == 1 && h0 * aspects[i] > imageW) {
-      // 单图全景：锚高下行宽已超可用宽 → contain 不裁不填满
-      fill = JustifiedFill.contain;
-      height = imageW / aspects[i];
-      fillCost = 0;
+    if (count == 1) {
+      // 单图行独立分派（放大优先于缩小、填满优先于留空、不丢内容优先）。
+      // hFull = 单图填满整行宽所需高度（≡ r·h0）；单图行的 r 常态 ≫
+      // upscaleCap（长图锚高下行宽只有窗宽三四成），通用带分派对它失灵，
+      // 故绕开 r 带直接按 hFull 三派
+      final hFull = imageW / aspects[i];
+      if (hFull <= maxH) {
+        // 满宽零裁剪：收编旧 contain（hFull < h0 的超宽全景，渲染同为
+        // 满宽条带）与中宽长图（h0 < hFull 的放大满宽）。fill 取 exact
+        // 走 Expanded 顶格（underfilled/contain 才会自然宽左对齐）；
+        // fillCost = 0 与旧 contain 一致，单图行罚照旧叠加
+        fill = JustifiedFill.exact;
+        height = hFull;
+        fillCost = 0;
+      } else if (maxH / hFull >= 1 - cap) {
+        // 满宽 cover 裁上下：hFull 略超 3.5t（单图中横图放大到满宽只
+        // 超高一点）→ 行高钉 3.5t，裁量 1−3.5t/hFull ≤ cap，与 crop 行
+        // 同预算、同双倍缩小罚（缩小永远是最后手段的结构不变）
+        final coverR = maxH / hFull;
+        fill = JustifiedFill.crop;
+        height = maxH;
+        fillCost = (1 - coverR) * (1 - coverR) * downWeight;
+      } else {
+        // 其余单图（方图/竖图落单行，满宽裁量超预算）：维持欠填
+        final settled = asUnderfilled(h0);
+        if (settled == null) return null;
+        fill = settled.$2;
+        height = settled.$1;
+        fillCost = settled.$3;
+      }
     } else if (r >= 1 - justifiedJustifyTolerance &&
         r <= 1 + justifiedJustifyTolerance) {
       // justify 行：h = Wa/Σa，零裁剪精确填满。
