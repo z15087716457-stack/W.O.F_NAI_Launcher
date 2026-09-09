@@ -91,11 +91,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(
-        scrollable.position.pixels,
-        0,
-        reason: '翻页是新数据集，滚动位置应弹回顶部，不带旧页偏移',
-      );
+      expect(scrollable.position.pixels, 0, reason: '翻页是新数据集，滚动位置应弹回顶部，不带旧页偏移');
     });
 
     testWidgets('同页原地刷新（页码/过滤/排序不变）→ 保持滚动位置', (tester) async {
@@ -219,4 +215,7 @@ class _InactiveSelectionState implements SelectionState {
 
   @override
   Set<String> get selectedIds => const {};
+
+  @override
+  String? get lastSelectedId => null;
 }

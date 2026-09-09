@@ -4230,6 +4230,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_dragToShare => 'Drag to share';
 
   @override
+  String galleryDragCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count images',
+      one: '1 image',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get localGallery_moveToRoot => 'Move to Root';
 
   @override

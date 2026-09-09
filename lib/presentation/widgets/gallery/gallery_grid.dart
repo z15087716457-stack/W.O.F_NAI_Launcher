@@ -62,6 +62,9 @@ class GalleryGrid extends StatefulWidget {
   final double preloadScreens;
   final bool enableDrag;
 
+  /// 多选态下的完整选中路径集
+  final List<String>? selectedPaths;
+
   const GalleryGrid({
     super.key,
     required this.images,
@@ -79,6 +82,7 @@ class GalleryGrid extends StatefulWidget {
     this.selectedIndices,
     this.preloadScreens = 2.0,
     this.enableDrag = true,
+    this.selectedPaths,
   });
 
   @override
@@ -228,6 +232,7 @@ class _GalleryGridState extends State<GalleryGrid> {
                   isVisible: isVisible,
                   priority: priority,
                   enableDrag: widget.enableDrag,
+                  selectedPaths: isSelected ? widget.selectedPaths : null,
                   onTap: () => widget.onTap?.call(record, index),
                   onDoubleTap: () => widget.onDoubleTap?.call(record, index),
                   onLongPress: () => widget.onLongPress?.call(record, index),
@@ -297,6 +302,7 @@ class _GalleryImageCard extends StatefulWidget {
   final bool isVisible;
   final int priority;
   final bool enableDrag;
+  final List<String>? selectedPaths;
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
   final VoidCallback? onLongPress;
@@ -314,6 +320,7 @@ class _GalleryImageCard extends StatefulWidget {
     this.isVisible = false,
     this.priority = 5,
     this.enableDrag = true,
+    this.selectedPaths,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
@@ -347,7 +354,10 @@ class _GalleryImageCardState extends State<_GalleryImageCard> {
       // 使用 dragWrapper 将拖拽功能注入到卡片内部
       // 解决 GestureDetector 与拖拽手势的冲突问题
       dragWrapper: widget.enableDrag
-          ? DraggableImageCard.createDragWrapper(record: widget.record)
+          ? DraggableImageCard.createDragWrapper(
+              record: widget.record,
+              selectedPaths: widget.selectedPaths,
+            )
           : null,
     );
   }

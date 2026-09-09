@@ -2116,6 +2116,14 @@
   "localGallery_copyPrompt": "Copy Prompt",
   "localGallery_copySeed": "Copy Seed",
   "localGallery_dragToShare": "Drag to share",
+  "galleryDragCount": "{count, plural, =1{1 image} other{{count} images}}",
+  "@galleryDragCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "localGallery_moveToRoot": "Move to Root",
   "localGallery_folderName": "Folder Name",
   "localGallery_newFolderName": "New Name",

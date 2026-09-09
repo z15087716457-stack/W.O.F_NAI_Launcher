@@ -7585,6 +7585,12 @@ abstract class AppLocalizations {
   /// **'Drag to share'**
   String get localGallery_dragToShare;
 
+  /// No description provided for @galleryDragCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 image} other{{count} images}}'**
+  String galleryDragCount(int count);
+
   /// No description provided for @localGallery_moveToRoot.
   ///
   /// In en, this message translates to:

@@ -4135,6 +4135,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_dragToShare => 'ドラッグして共有';
 
   @override
+  String galleryDragCount(int count) {
+    return '$count 枚';
+  }
+
+  @override
   String get localGallery_moveToRoot => 'ルートに移動';
 
   @override

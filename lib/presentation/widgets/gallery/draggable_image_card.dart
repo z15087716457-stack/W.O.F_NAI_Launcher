@@ -22,27 +22,72 @@ Widget _buildGalleryDragFeedback({
   required String hintText,
   required bool enableFeedback,
   required Widget fallbackChild,
+  int? selectedCount,
 }) {
   final stripMetadata = ref
       .read(shareImageSettingsProvider)
       .effectiveStripMetadataForCopyAndDrag;
+  final effectiveHintText = selectedCount != null && selectedCount > 1
+      ? context.l10n.galleryDragCount(selectedCount)
+      : hintText;
+
+  final Widget baseFeedback;
   if (stripMetadata) {
-    return buildProtectedImageDragFeedback(
+    baseFeedback = buildProtectedImageDragFeedback(
       Theme.of(context),
       width: width,
-      hintText: hintText,
+      hintText: effectiveHintText,
+    );
+  } else if (!enableFeedback) {
+    baseFeedback = fallbackChild;
+  } else {
+    baseFeedback = buildImageDragFeedback(
+      Theme.of(context),
+      ImageDragData.fromRecord(record, previewBytes: previewBytes),
+      width: width,
+      hintText: effectiveHintText,
+      previewProvider: previewProvider,
     );
   }
 
-  if (!enableFeedback) return fallbackChild;
+  if (selectedCount != null && selectedCount > 1) {
+    final theme = Theme.of(context);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        baseFeedback,
+        Positioned(
+          top: -6,
+          right: -6,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Text(
+              context.l10n.galleryDragCount(selectedCount),
+              style: TextStyle(
+                color: theme.colorScheme.onPrimary,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                height: 1.1,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
-  return buildImageDragFeedback(
-    Theme.of(context),
-    ImageDragData.fromRecord(record, previewBytes: previewBytes),
-    width: width,
-    hintText: hintText,
-    previewProvider: previewProvider,
-  );
+  return baseFeedback;
 }
 
 /// 可拖拽图像卡片组件
@@ -74,6 +119,9 @@ class DraggableImageCard extends ConsumerStatefulWidget {
   /// 拖拽时原位置组件的透明度
   final double dragOpacity;
 
+  /// 多选态下的完整选中路径集（若本卡片处于多选集合中）
+  final List<String>? selectedPaths;
+
   const DraggableImageCard({
     super.key,
     required this.record,
@@ -84,6 +132,7 @@ class DraggableImageCard extends ConsumerStatefulWidget {
     this.feedbackWidth = 280,
     this.feedbackHint,
     this.dragOpacity = 0.3,
+    this.selectedPaths,
   });
 
   @override
@@ -92,6 +141,7 @@ class DraggableImageCard extends ConsumerStatefulWidget {
   /// 创建拖拽包装器函数
   static Widget Function(Widget child) createDragWrapper({
     required LocalImageRecord record,
+    List<String>? selectedPaths,
     Uint8List? previewBytes,
     bool enableFeedback = true,
     double feedbackWidth = 280,
@@ -101,6 +151,7 @@ class DraggableImageCard extends ConsumerStatefulWidget {
     return (Widget child) {
       return _DragWrapper(
         record: record,
+        selectedPaths: selectedPaths,
         previewBytes: previewBytes,
         feedbackWidth: feedbackWidth,
         feedbackHint: feedbackHint,
@@ -189,6 +240,7 @@ class _DraggableImageCardState extends ConsumerState<DraggableImageCard> {
               widget.feedbackHint ?? context.l10n.localGallery_dragToShare,
           enableFeedback: widget.enableFeedback,
           fallbackChild: child,
+          selectedCount: widget.selectedPaths?.length,
         ),
         dragBuilder: (context, child) => _buildGalleryDragFeedback(
           context: context,
@@ -201,6 +253,7 @@ class _DraggableImageCardState extends ConsumerState<DraggableImageCard> {
               widget.feedbackHint ?? context.l10n.localGallery_dragToShare,
           enableFeedback: widget.enableFeedback,
           fallbackChild: child,
+          selectedCount: widget.selectedPaths?.length,
         ),
         child: DraggableWidget(
           child: Opacity(
@@ -224,6 +277,8 @@ class _DraggableImageCardState extends ConsumerState<DraggableImageCard> {
       localData: {
         'source': 'gallery_internal',
         'path': filePath,
+        if (widget.selectedPaths != null && widget.selectedPaths!.isNotEmpty)
+          'paths': widget.selectedPaths!,
         if (stripMetadata) 'externalPayload': 'gallery_sanitized',
       },
     );
@@ -268,6 +323,7 @@ class _DraggableImageCardState extends ConsumerState<DraggableImageCard> {
 /// 内部拖拽包装组件
 class _DragWrapper extends ConsumerStatefulWidget {
   final LocalImageRecord record;
+  final List<String>? selectedPaths;
   final Uint8List? previewBytes;
   final double feedbackWidth;
   final String? feedbackHint;
@@ -277,6 +333,7 @@ class _DragWrapper extends ConsumerStatefulWidget {
 
   const _DragWrapper({
     required this.record,
+    this.selectedPaths,
     required this.previewBytes,
     required this.feedbackWidth,
     required this.feedbackHint,
@@ -347,6 +404,8 @@ class _DragWrapperState extends ConsumerState<_DragWrapper> {
       localData: {
         'source': 'gallery_internal',
         'path': filePath,
+        if (widget.selectedPaths != null && widget.selectedPaths!.isNotEmpty)
+          'paths': widget.selectedPaths!,
         if (stripMetadata) 'externalPayload': 'gallery_sanitized',
       },
     );
@@ -414,6 +473,7 @@ class _DragWrapperState extends ConsumerState<_DragWrapper> {
               widget.feedbackHint ?? context.l10n.localGallery_dragToShare,
           enableFeedback: widget.enableFeedback,
           fallbackChild: child,
+          selectedCount: widget.selectedPaths?.length,
         ),
         dragBuilder: (context, child) => _buildGalleryDragFeedback(
           context: context,
@@ -426,6 +486,7 @@ class _DragWrapperState extends ConsumerState<_DragWrapper> {
               widget.feedbackHint ?? context.l10n.localGallery_dragToShare,
           enableFeedback: widget.enableFeedback,
           fallbackChild: child,
+          selectedCount: widget.selectedPaths?.length,
         ),
         child: DraggableWidget(
           child: Opacity(

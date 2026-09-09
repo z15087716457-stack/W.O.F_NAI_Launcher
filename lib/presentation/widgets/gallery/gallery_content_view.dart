@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
@@ -90,6 +91,7 @@ abstract class GalleryState<T> {
 abstract class SelectionState {
   bool get isActive;
   Set<String> get selectedIds;
+  String? get lastSelectedId => null;
 }
 
 /// 画廊内容空态类型
@@ -196,6 +198,7 @@ class GenericGalleryContentView<T> extends ConsumerStatefulWidget {
   final void Function(T item, Offset anchor)? onFavoriteToggle;
   final void Function(T item)? onSelectionToggle;
   final void Function(T item)? onEnterSelection;
+  final void Function(T item)? onSelectRange;
   final VoidCallback? onDeleted;
   final VoidCallback? onClearFilters;
   final VoidCallback? onRefresh;
@@ -231,6 +234,7 @@ class GenericGalleryContentView<T> extends ConsumerStatefulWidget {
     this.onFavoriteToggle,
     this.onSelectionToggle,
     this.onEnterSelection,
+    this.onSelectRange,
     this.onDeleted,
     this.onClearFilters,
     this.onRefresh,
@@ -367,6 +371,65 @@ class _GenericGalleryContentViewState<T>
     }
   }
 
+  void _handleCardTap(T item, int index) {
+    final selectionState = widget.selectionState;
+    final keyboard = HardwareKeyboard.instance;
+    final isCtrl = keyboard.isControlPressed || keyboard.isMetaPressed;
+    final isShift = keyboard.isShiftPressed;
+
+    if (selectionState.isActive) {
+      if (isShift) {
+        if (widget.onSelectRange != null) {
+          widget.onSelectRange!(item);
+        } else {
+          widget.onSelectionToggle?.call(item);
+        }
+        return;
+      }
+      if (isCtrl) {
+        widget.onSelectionToggle?.call(item);
+        return;
+      }
+      // 多选态且无修饰键：维持原行为（toggleSelection）
+      widget.onSelectionToggle?.call(item);
+      return;
+    }
+
+    // 非多选态
+    if (isCtrl) {
+      widget.onEnterSelection?.call(item);
+      return;
+    }
+    if (isShift) {
+      if (selectionState.lastSelectedId != null &&
+          widget.onSelectRange != null) {
+        widget.onSelectRange!(item);
+      } else {
+        widget.onEnterSelection?.call(item);
+      }
+      return;
+    }
+
+    // 无修饰键且非多选态：维持原行为（普通点击）
+    if (widget.onTap != null) {
+      widget.onTap!(item, index);
+    } else if (widget.view3DConfig != null) {
+      widget.view3DConfig!.showDetailViewer(widget.view3DConfig!.images, index);
+    }
+  }
+
+  Widget Function(Widget child)? _buildDragWrapper(LocalImageRecord record) {
+    final selectionState = widget.selectionState;
+    if (selectionState.isActive &&
+        selectionState.selectedIds.contains(record.path)) {
+      return DraggableImageCard.createDragWrapper(
+        record: record,
+        selectedPaths: selectionState.selectedIds.toList(),
+      );
+    }
+    return DraggableImageCard.createDragWrapper(record: record);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -476,11 +539,7 @@ class _GenericGalleryContentViewState<T>
             isSelected: isSelected,
             isVisible: isVisible,
             priority: isVisible ? 1 : 5,
-            onTap: () {
-              if (selectionState.isActive) {
-                widget.onSelectionToggle?.call(record as T);
-              }
-            },
+            onTap: () => _handleCardTap(record as T, index),
             onLongPress: () {
               if (!selectionState.isActive) {
                 widget.onEnterSelection?.call(record as T);
@@ -497,9 +556,7 @@ class _GenericGalleryContentViewState<T>
                 ? (action) => widget.onSendAction!(record, action)
                 : null,
             isKritaConnected: widget.isKritaConnected,
-            dragWrapper: selectionState.isActive
-                ? null
-                : DraggableImageCard.createDragWrapper(record: record),
+            dragWrapper: _buildDragWrapper(record),
           ),
         );
       },
@@ -656,22 +713,8 @@ class _GenericGalleryContentViewState<T>
                   isSelected: isSelected,
                   isVisible: isVisible,
                   priority: isVisible ? 1 : 5,
-                  onTap: () {
-                    if (selectionState.isActive) {
-                      widget.onSelectionToggle?.call(
-                        state.currentImages[index],
-                      );
-                      return;
-                    }
-                    if (widget.onTap != null) {
-                      widget.onTap!(state.currentImages[index], index);
-                    } else if (widget.view3DConfig != null) {
-                      widget.view3DConfig!.showDetailViewer(
-                        widget.view3DConfig!.images,
-                        index,
-                      );
-                    }
-                  },
+                  onTap: () =>
+                      _handleCardTap(state.currentImages[index], index),
                   onDoubleTap: () {
                     if (widget.onDoubleTap != null) {
                       widget.onDoubleTap!(state.currentImages[index], index);
@@ -708,9 +751,7 @@ class _GenericGalleryContentViewState<T>
                       ? (action) => widget.onSendAction!(record, action)
                       : null,
                   isKritaConnected: widget.isKritaConnected,
-                  dragWrapper: selectionState.isActive
-                      ? null
-                      : DraggableImageCard.createDragWrapper(record: record),
+                  dragWrapper: _buildDragWrapper(record),
                 ),
               ),
             );
@@ -893,20 +934,7 @@ class _GenericGalleryContentViewState<T>
           isSelected: isSelected,
           isVisible: isVisible,
           priority: isVisible ? 1 : 5,
-          onTap: () {
-            if (selectionState.isActive) {
-              widget.onSelectionToggle?.call(state.currentImages[index]);
-              return;
-            }
-            if (widget.onTap != null) {
-              widget.onTap!(state.currentImages[index], index);
-            } else if (widget.view3DConfig != null) {
-              widget.view3DConfig!.showDetailViewer(
-                widget.view3DConfig!.images,
-                index,
-              );
-            }
-          },
+          onTap: () => _handleCardTap(state.currentImages[index], index),
           onDoubleTap: () {
             if (widget.onDoubleTap != null) {
               widget.onDoubleTap!(state.currentImages[index], index);
@@ -937,9 +965,7 @@ class _GenericGalleryContentViewState<T>
               ? (action) => widget.onSendAction!(record, action)
               : null,
           isKritaConnected: widget.isKritaConnected,
-          dragWrapper: selectionState.isActive
-              ? null
-              : DraggableImageCard.createDragWrapper(record: record),
+          dragWrapper: _buildDragWrapper(record),
         ),
       ),
     );
@@ -966,21 +992,12 @@ class _GenericGalleryContentViewState<T>
       spacing: 12,
       padding: const EdgeInsets.all(16),
       selectedIndices: selectionState.isActive ? selectedIndices : null,
-      enableDrag: !selectionState.isActive,
-      onTap: (record, index) {
-        if (selectionState.isActive) {
-          widget.onSelectionToggle?.call(state.currentImages[index]);
-          return;
-        }
-        if (widget.onTap != null) {
-          widget.onTap!(state.currentImages[index], index);
-        } else if (widget.view3DConfig != null) {
-          widget.view3DConfig!.showDetailViewer(
-            widget.view3DConfig!.images,
-            index,
-          );
-        }
-      },
+      enableDrag: true,
+      selectedPaths: selectionState.isActive
+          ? selectionState.selectedIds.toList()
+          : null,
+      onTap: (record, index) =>
+          _handleCardTap(state.currentImages[index], index),
       onDoubleTap: (record, index) {
         if (widget.onDoubleTap != null) {
           widget.onDoubleTap!(state.currentImages[index], index);
@@ -1076,6 +1093,9 @@ class _LocalSelectionStateAdapter implements SelectionState {
 
   @override
   Set<String> get selectedIds => _state.selectedIds;
+
+  @override
+  String? get lastSelectedId => _state.lastSelectedId;
 }
 
 /// 向后兼容的画廊内容视图
@@ -1232,6 +1252,12 @@ class LocalGalleryContentView extends ConsumerWidget {
       onEnterSelection: (record) => ref
           .read(localGallerySelectionNotifierProvider.notifier)
           .enterAndSelect(record.path),
+      onSelectRange: (record) {
+        final allIds = state.currentImages.map((r) => r.path).toList();
+        ref
+            .read(localGallerySelectionNotifierProvider.notifier)
+            .selectRange(record.path, allIds);
+      },
       onFavoriteToggle: (record, anchor) => showGalleryFavoriteMenu(
         context,
         ref: ref,

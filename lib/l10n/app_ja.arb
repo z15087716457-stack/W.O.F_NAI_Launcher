@@ -2116,6 +2116,14 @@
   "localGallery_copyPrompt": "プロンプトのコピー",
   "localGallery_copySeed": "シードをコピー",
   "localGallery_dragToShare": "ドラッグして共有",
+  "galleryDragCount": "{count} 枚",
+  "@galleryDragCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "localGallery_moveToRoot": "ルートに移動",
   "localGallery_folderName": "フォルダー名",
   "localGallery_newFolderName": "新しい名前",

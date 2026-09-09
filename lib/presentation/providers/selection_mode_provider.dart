@@ -154,7 +154,13 @@ class LocalGallerySelectionNotifier extends _$LocalGallerySelectionNotifier {
     final currentIndex = allIds.indexOf(currentId);
 
     if (anchorIndex == -1 || currentIndex == -1) {
-      select(currentId);
+      _update(
+        state.copyWith(
+          isActive: true,
+          selectedIds: {...state.selectedIds, currentId},
+          lastSelectedId: currentId,
+        ),
+      );
       return;
     }
 
@@ -165,6 +171,7 @@ class LocalGallerySelectionNotifier extends _$LocalGallerySelectionNotifier {
 
     _update(
       state.copyWith(
+        isActive: true,
         selectedIds: {...state.selectedIds, ...rangeIds},
         lastSelectedId: currentId,
       ),

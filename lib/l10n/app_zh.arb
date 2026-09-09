@@ -2027,6 +2027,14 @@
   "localGallery_copyPrompt": "复制 Prompt",
   "localGallery_copySeed": "复制 Seed",
   "localGallery_dragToShare": "拖拽以分享",
+  "galleryDragCount": "{count} 张",
+  "@galleryDragCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "localGallery_moveToRoot": "移至根目录",
   "localGallery_folderName": "文件夹名称",
   "localGallery_newFolderName": "新名称",

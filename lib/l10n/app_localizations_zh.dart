@@ -4073,6 +4073,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_dragToShare => '拖拽以分享';
 
   @override
+  String galleryDragCount(int count) {
+    return '$count 张';
+  }
+
+  @override
   String get localGallery_moveToRoot => '移至根目录';
 
   @override

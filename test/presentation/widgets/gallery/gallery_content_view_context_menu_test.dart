@@ -159,4 +159,7 @@ class _InactiveSelectionState implements SelectionState {
 
   @override
   Set<String> get selectedIds => const {};
+
+  @override
+  String? get lastSelectedId => null;
 }

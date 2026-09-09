@@ -332,6 +332,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
                       .read(galleryCategoryNotifierProvider.notifier)
                       .reorderCategories(parentId, oldIndex, newIndex),
                   onImageDrop: _handleImageDrop,
+                  onBatchImageDrop: _handleBatchImageDrop,
                   onSyncWithFileSystem: _handleSyncWithFileSystem,
                   collections: collectionState.collections,
                   onCreateCollection: _createCollection,
@@ -1123,6 +1124,85 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     return confirmed ?? false;
   }
 
+  Future<void> _executeMoveToCategory(
+    List<String> paths, {
+    GalleryCategory? targetCategory,
+    String? categoryId,
+  }) async {
+    if (paths.isEmpty) return;
+    if (!mounted) return;
+
+    final l10n = context.l10n;
+    final resolvedTargetCategory =
+        targetCategory ??
+        (categoryId != null
+            ? ref
+                  .read(galleryCategoryNotifierProvider)
+                  .categories
+                  .findById(categoryId)
+            : null);
+
+    // 1. （需要时）强制确认（双向外部源移动风险）
+    int extraRootCount = 0;
+    for (final path in paths) {
+      if (await GalleryFolderRepository.instance.isExtraRootPath(path)) {
+        extraRootCount++;
+      }
+    }
+    final sourceExternal = extraRootCount > 0;
+    final targetExternal = resolvedTargetCategory?.isExternal ?? false;
+
+    if (sourceExternal || targetExternal) {
+      if (!mounted) return;
+      final confirmed = await _confirmExternalMoveRisk(
+        count: paths.length,
+        sourceExternal: sourceExternal,
+        targetExternal: targetExternal,
+        targetName: resolvedTargetCategory?.displayName,
+      );
+      if (!confirmed || !mounted) return;
+    }
+
+    // 2. 普通保护确认
+    if (!mounted) return;
+    final protected = await AssetProtectionGuard.confirmDangerousAction(
+      context: context,
+      ref: ref,
+      title: l10n.localGallery_protectedBulkMoveTitle,
+      content: l10n.localGallery_protectedBulkMoveContent(paths.length),
+      confirmText: l10n.localGallery_confirmMove,
+      icon: Icons.drive_file_move_outline,
+    );
+    if (!protected || !mounted) return;
+
+    // 3. 执行批量移动
+    final movedCount = await GalleryCategoryRepository.instance
+        .moveImagesToCategory(paths, resolvedTargetCategory);
+
+    if (mounted) {
+      if (movedCount > 0) {
+        AppToast.info(
+          context,
+          context.l10n.localGallery_movedImages(movedCount),
+        );
+        ref.read(localGallerySelectionNotifierProvider.notifier).exit();
+        await ref
+            .read(localGalleryNotifierProvider.notifier)
+            .refresh(scan: false);
+        await ref.read(galleryCategoryNotifierProvider.notifier).refresh();
+      } else {
+        AppToast.info(context, context.l10n.localGallery_moveImagesFailed);
+      }
+    }
+  }
+
+  Future<void> _handleBatchImageDrop(
+    List<String> paths,
+    String? categoryId,
+  ) async {
+    await _executeMoveToCategory(paths, categoryId: categoryId);
+  }
+
   Future<void> _moveSelectedToCategory() async {
     final selectionState = ref.read(localGallerySelectionNotifierProvider);
     final l10n = context.l10n;
@@ -1144,63 +1224,12 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       title: l10n.localGallery_moveTo,
     );
     if (pickResult == null || !mounted) return;
-    final targetCategory = pickResult.category;
 
-    // 2. （需要时）强制确认（双向外部源移动风险）
-    int extraRootCount = 0;
-    for (final image in selectedImages) {
-      if (await GalleryFolderRepository.instance.isExtraRootPath(image.path)) {
-        extraRootCount++;
-      }
-    }
-    final sourceExternal = extraRootCount > 0;
-    final targetExternal = targetCategory?.isExternal ?? false;
-
-    if (sourceExternal || targetExternal) {
-      if (!mounted) return;
-      final confirmed = await _confirmExternalMoveRisk(
-        count: selectedImages.length,
-        sourceExternal: sourceExternal,
-        targetExternal: targetExternal,
-        targetName: targetCategory?.displayName,
-      );
-      if (!confirmed || !mounted) return;
-    }
-
-    // 3. 普通保护确认
-    if (!mounted) return;
-    final protected = await AssetProtectionGuard.confirmDangerousAction(
-      context: context,
-      ref: ref,
-      title: l10n.localGallery_protectedBulkMoveTitle,
-      content: l10n.localGallery_protectedBulkMoveContent(
-        selectedImages.length,
-      ),
-      confirmText: l10n.localGallery_confirmMove,
-      icon: Icons.drive_file_move_outline,
-    );
-    if (!protected || !mounted) return;
-
-    // 4. 执行批量移动
     final imagePaths = selectedImages.map((img) => img.path).toList();
-    final movedCount = await GalleryCategoryRepository.instance
-        .moveImagesToCategory(imagePaths, targetCategory);
-
-    if (mounted) {
-      if (movedCount > 0) {
-        AppToast.info(
-          context,
-          context.l10n.localGallery_movedImages(movedCount),
-        );
-        ref.read(localGallerySelectionNotifierProvider.notifier).exit();
-        await ref
-            .read(localGalleryNotifierProvider.notifier)
-            .refresh(scan: false);
-        await ref.read(galleryCategoryNotifierProvider.notifier).refresh();
-      } else {
-        AppToast.info(context, context.l10n.localGallery_moveImagesFailed);
-      }
-    }
+    await _executeMoveToCategory(
+      imagePaths,
+      targetCategory: pickResult.category,
+    );
   }
 
   Future<void> _copySelectedToCategory() async {

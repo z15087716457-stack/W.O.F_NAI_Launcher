@@ -23,5 +23,55 @@ void main() {
         isNull,
       );
     });
+
+    test(
+      'galleryInternalDragPathsFromLocalData prioritizes paths over path',
+      () {
+        expect(
+          galleryInternalDragPathsFromLocalData({
+            'source': 'gallery_internal',
+            'path': r'C:\gallery\single.png',
+            'paths': [r'C:\gallery\1.png', r'C:\gallery\2.png'],
+          }),
+          [r'C:\gallery\1.png', r'C:\gallery\2.png'],
+        );
+      },
+    );
+
+    test('galleryInternalDragPathsFromLocalData falls back to single path', () {
+      expect(
+        galleryInternalDragPathsFromLocalData({
+          'source': 'gallery_internal',
+          'path': r'C:\gallery\single.png',
+        }),
+        [r'C:\gallery\single.png'],
+      );
+    });
+
+    test(
+      'galleryInternalDragPathsFromLocalData returns null for non-gallery or invalid data',
+      () {
+        expect(
+          galleryInternalDragPathsFromLocalData({
+            'source': 'other_source',
+            'paths': [r'C:\gallery\1.png'],
+          }),
+          isNull,
+        );
+        expect(galleryInternalDragPathsFromLocalData(null), isNull);
+        expect(galleryInternalDragPathsFromLocalData('invalid'), isNull);
+        expect(
+          galleryInternalDragPathsFromLocalData({'source': 'gallery_internal'}),
+          isNull,
+        );
+        expect(
+          galleryInternalDragPathsFromLocalData({
+            'source': 'gallery_internal',
+            'paths': <String>[],
+          }),
+          isNull,
+        );
+      },
+    );
   });
 }

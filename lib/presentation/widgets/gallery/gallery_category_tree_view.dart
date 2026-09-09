@@ -28,6 +28,26 @@ String? galleryInternalDragPathFromLocalData(Object? localData) {
   return null;
 }
 
+List<String>? galleryInternalDragPathsFromLocalData(Object? localData) {
+  if (localData is! Map) return null;
+
+  final source = localData['source'];
+  if (source != 'gallery_internal') return null;
+
+  final paths = localData['paths'];
+  if (paths is List) {
+    final list = paths.whereType<String>().where((p) => p.isNotEmpty).toList();
+    if (list.isNotEmpty) return list;
+  }
+
+  final path = localData['path'];
+  if (path is String && path.isNotEmpty) {
+    return [path];
+  }
+
+  return null;
+}
+
 /// Gallery category tree view with drag-drop support
 class GalleryCategoryTreeView extends StatefulWidget {
   final List<GalleryCategory> categories;
@@ -42,6 +62,7 @@ class GalleryCategoryTreeView extends StatefulWidget {
   final void Function(String? parentId, int oldIndex, int newIndex)?
   onCategoryReorder;
   final void Function(String imagePath, String? categoryId)? onImageDrop;
+  final void Function(List<String> paths, String? categoryId)? onBatchImageDrop;
   final VoidCallback? onSyncWithFileSystem;
 
   /// 收藏集（渲染在「收藏」下方，'collection:<id>' 选中态；支持文件夹
@@ -69,6 +90,7 @@ class GalleryCategoryTreeView extends StatefulWidget {
     this.onCategoryMove,
     this.onCategoryReorder,
     this.onImageDrop,
+    this.onBatchImageDrop,
     this.onSyncWithFileSystem,
     this.collections = const [],
     this.onCreateCollection,
@@ -103,6 +125,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       _expandedIds.toList(),
     );
   }
+
   final Set<String> _superDraggingCategoryIds = {};
 
   @override
@@ -892,12 +915,18 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
 
         // 处理拖拽的文件
         for (final item in event.session.items) {
-          final internalPath = galleryInternalDragPathFromLocalData(
+          final internalPaths = galleryInternalDragPathsFromLocalData(
             item.localData,
           );
-          if (internalPath != null) {
+          if (internalPaths != null && internalPaths.isNotEmpty) {
             HapticFeedback.heavyImpact();
-            widget.onImageDrop?.call(internalPath, categoryId);
+            if (internalPaths.length > 1 && widget.onBatchImageDrop != null) {
+              widget.onBatchImageDrop!(internalPaths, categoryId);
+            } else {
+              for (final path in internalPaths) {
+                widget.onImageDrop?.call(path, categoryId);
+              }
+            }
             continue;
           }
 
