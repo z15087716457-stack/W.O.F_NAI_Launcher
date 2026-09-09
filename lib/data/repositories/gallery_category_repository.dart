@@ -6,8 +6,10 @@ import 'package:collection/collection.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/database/datasources/gallery_data_source.dart';
 import '../../core/storage/local_storage_service.dart';
 import '../../core/utils/app_logger.dart';
+import '../../core/utils/file_transfer_utils.dart';
 import '../../core/utils/gallery_path_utils.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import '../models/gallery/gallery_category.dart';
@@ -19,6 +21,7 @@ class GalleryCategoryRepository {
       GalleryCategoryRepository._();
 
   final _localStorage = LocalStorageService();
+  GalleryDataSource get _dataSource => GalleryDataSource();
 
   static const _categoriesFileName = '.gallery_categories.json';
   static const _suppressedCategoriesFileName =
@@ -524,17 +527,12 @@ class GalleryCategoryRepository {
 
   /// 移动图片到分类
   ///
-  /// 额外图库源文件只读（源文件）；目标分类属于外部图库源时同样拒绝
+  /// 源/目标均不再拦截外部源，确认由 UI 层负责；
+  /// 使用跨卷移动，成功后即时跟进更新 DB 记录
   Future<String?> moveImageToCategory(
     String imagePath,
     GalleryCategory? targetCategory,
   ) async {
-    // 源文件位于额外图库源 → 只读
-    if (await GalleryFolderRepository.instance.isExtraRootPath(imagePath)) {
-      AppLogger.w('额外图库源文件为只读，禁止移动: $imagePath');
-      return null;
-    }
-
     final rootPath = await getRootPath();
     if (rootPath == null) return null;
 
@@ -542,16 +540,10 @@ class GalleryCategoryRepository {
       final file = File(imagePath);
       if (!await file.exists()) return null;
 
-      // 目标分类属于外部图库源 → 只读
-      if (targetCategory != null && targetCategory.isExternal) {
-        AppLogger.w('外部图库源分类为只读，禁止移入: ${targetCategory.name}');
-        return null;
-      }
-
       final fileName = p.basename(imagePath);
       final targetDir = targetCategory == null
           ? rootPath
-          : p.join(rootPath, targetCategory.folderPath);
+          : await _absoluteCategoryPath(rootPath, targetCategory);
 
       final dir = Directory(targetDir);
       if (!await dir.exists()) await dir.create(recursive: true);
@@ -567,12 +559,93 @@ class GalleryCategoryRepository {
         );
       }
 
-      await file.rename(targetPath);
-      return targetPath;
+      final movedPath = await moveFileCrossVolume(imagePath, targetPath);
+      if (movedPath == null) {
+        AppLogger.e('移动图片失败: $imagePath -> $targetPath');
+        return null;
+      }
+
+      // 即时 DB 跟进（不等扫描）
+      if (_dataSource.isInitialized) {
+        try {
+          final idsMap = await _dataSource.getImageIdsByPaths([imagePath]);
+          final id = idsMap[imagePath];
+          if (id != null) {
+            await _dataSource.updateFilePath(
+              id,
+              movedPath,
+              newFileName: p.basename(movedPath),
+            );
+          }
+        } catch (dbError) {
+          AppLogger.w('移动后即时更新DB失败: $imagePath -> $movedPath ($dbError)');
+        }
+      }
+
+      return movedPath;
     } catch (e) {
       AppLogger.e('移动图片失败: $imagePath', e);
       return null;
     }
+  }
+
+  /// 复制图片到分类
+  ///
+  /// 源/目标均不再拦截外部源，确认由 UI 层负责；同款重名后缀；使用 copyFileWithFreshMtime；不碰 DB
+  Future<String?> copyImageToCategory(
+    String imagePath,
+    GalleryCategory? targetCategory,
+  ) async {
+    final rootPath = await getRootPath();
+    if (rootPath == null) return null;
+
+    try {
+      final file = File(imagePath);
+      if (!await file.exists()) return null;
+
+      final fileName = p.basename(imagePath);
+      final targetDir = targetCategory == null
+          ? rootPath
+          : await _absoluteCategoryPath(rootPath, targetCategory);
+
+      final dir = Directory(targetDir);
+      if (!await dir.exists()) await dir.create(recursive: true);
+
+      var targetPath = p.join(targetDir, fileName);
+
+      if (await File(targetPath).exists()) {
+        final baseName = p.basenameWithoutExtension(fileName);
+        final ext = p.extension(fileName);
+        targetPath = p.join(
+          targetDir,
+          '${baseName}_${DateTime.now().millisecondsSinceEpoch}$ext',
+        );
+      }
+
+      final copiedPath = await copyFileWithFreshMtime(imagePath, targetPath);
+      if (copiedPath == null) {
+        AppLogger.e('复制图片失败: $imagePath -> $targetPath');
+        return null;
+      }
+
+      return copiedPath;
+    } catch (e) {
+      AppLogger.e('复制图片失败: $imagePath', e);
+      return null;
+    }
+  }
+
+  /// 批量复制图片到分类
+  Future<int> copyImagesToCategory(
+    List<String> imagePaths,
+    GalleryCategory? targetCategory,
+  ) async {
+    int successCount = 0;
+    for (final imagePath in imagePaths) {
+      final result = await copyImageToCategory(imagePath, targetCategory);
+      if (result != null) successCount++;
+    }
+    return successCount;
   }
 
   /// 批量移动图片到分类

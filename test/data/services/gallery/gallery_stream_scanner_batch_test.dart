@@ -207,6 +207,43 @@ void main() {
       expect(movedId, imageId);
     });
 
+    test('防劫持：同签名副本入库不抢原 id（原记录路径/id 不变、副本成新记录）', () async {
+      final fileA = await _createWrappedNovelAiPng(
+        tempDir,
+        'original.png',
+        prompt: 'artist:original, 1girl',
+      );
+
+      GalleryStreamScanner.resetInstance();
+      var scanner = GalleryStreamScanner(dataSource: dataSource);
+      await scanner.startScanning([tempDir]);
+
+      final originalId = await dataSource.getImageIdByPath(fileA.path);
+      expect(originalId, isNotNull);
+
+      // 复制一个同签名副本（保持相同的 size 和 mtime，且原文件仍然存在）
+      final copyPath = p.join(tempDir.path, 'copy.png');
+      final copyFile = await fileA.copy(copyPath);
+      final mtime = await fileA.lastModified();
+      await copyFile.setLastModified(mtime);
+
+      // 再次扫描：由于原文件仍然存在，不应判定为移动，而是作为新文件入库
+      scanner = GalleryStreamScanner(dataSource: dataSource);
+      await scanner.startScanning([tempDir]);
+
+      // 原图依然存在，id 不变
+      final afterOriginalId = await dataSource.getImageIdByPath(fileA.path);
+      expect(afterOriginalId, equals(originalId));
+
+      // 副本作为新记录入库，拥有不同的 id
+      final copyId = await dataSource.getImageIdByPath(copyPath);
+      expect(copyId, isNotNull);
+      expect(copyId, isNot(equals(originalId)));
+
+      // 总记录数为 2
+      expect(await dataSource.countImages(), 2);
+    });
+
     test('导入进行中扫描器拒绝启动（导入先行保护）', () async {
       await _createWrappedNovelAiPng(
         tempDir,

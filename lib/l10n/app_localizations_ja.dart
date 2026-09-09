@@ -610,7 +610,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_extraRootsHint =>
-      '追加のギャラリーソース: 任意のフォルダをギャラリーで閲覧・検索できます（読み取り専用、自動保存の対象外）。追加後、ギャラリーまたはこのページ下部で再スキャンしてください。';
+      '追加のギャラリーソース: 閲覧・検索が可能で、画像をカテゴリへ移動/コピーできます（自動保存の対象外）。追加後、ギャラリーまたはこのページ下部で再スキャンしてください。';
 
   @override
   String get settings_extraRootsEmpty => '追加のギャラリーソースはありません';
@@ -3955,8 +3955,55 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get localGallery_externalReadonly =>
-      '外部ギャラリーソースは読み取り専用です。この操作は利用できません';
+  String get localGallery_moveTo => '移動先…';
+
+  @override
+  String get localGallery_copyTo => 'コピー先…';
+
+  @override
+  String get localGallery_externalSourceMoveConfirmTitle => '外部ギャラリーソースファイルの移動';
+
+  @override
+  String localGallery_externalSourceMoveConfirmContent(Object count) {
+    return '画像 $count 枚を移動します。ファイルは元のフォルダーから移動され、元の場所には残りません。続行しますか？';
+  }
+
+  @override
+  String localGallery_externalTargetMoveConfirmContent(
+    Object count,
+    Object targetName,
+  ) {
+    return '画像 $count 枚を外部ギャラリーソースカテゴリー「$targetName」に移動します。ファイルは外部ソースフォルダーに書き込まれます。続行しますか？';
+  }
+
+  @override
+  String localGallery_externalBothMoveConfirmContent(
+    Object count,
+    Object targetName,
+  ) {
+    return '画像 $count 枚を外部ギャラリーソースカテゴリー「$targetName」に移動します。ファイルは元の外部ソースフォルダーから移動され（元の場所には残りません）、外部ソースフォルダーに書き込まれます。続行しますか？';
+  }
+
+  @override
+  String get localGallery_uncategorizedRoot => '未分類（ギャラリールート）';
+
+  @override
+  String get localGallery_externalSourceChip => '外部';
+
+  @override
+  String get localGallery_categoryFilterHint => 'カテゴリーを検索…';
+
+  @override
+  String localGallery_copySuccess(Object count) {
+    return '$count 枚の画像をコピーしました';
+  }
+
+  @override
+  String get localGallery_copyFailed => '画像のコピーに失敗しました';
+
+  @override
+  String get localGallery_confirmCopyContent =>
+      '画像をターゲットフォルダーにコピーします。確認してください。';
 
   @override
   String get localGallery_categoryDeleteContent =>
@@ -4538,18 +4585,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localGallery_trashFileMissing => 'ファイルはディスク上にありません';
-
-  @override
-  String get localGallery_noFoldersAvailable =>
-      '使用可能なフォルダーがありません。最初にフォルダーを作成してください。';
-
-  @override
-  String get localGallery_moveToFolder => 'フォルダーに移動';
-
-  @override
-  String localGallery_imageCount(Object count) {
-    return '$count 画像';
-  }
 
   @override
   String localGallery_movedImages(Object count) {

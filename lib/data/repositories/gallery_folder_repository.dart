@@ -7,9 +7,11 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../core/constants/storage_keys.dart';
+import '../../core/database/datasources/gallery_data_source.dart';
 import '../../core/storage/local_storage_service.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/file_name_sanitizer.dart';
+import '../../core/utils/file_transfer_utils.dart';
 import '../../core/utils/gallery_path_utils.dart';
 import '../models/gallery/gallery_folder.dart';
 
@@ -19,6 +21,7 @@ class GalleryFolderRepository {
   static final GalleryFolderRepository instance = GalleryFolderRepository._();
 
   final _localStorage = LocalStorageService();
+  GalleryDataSource get _dataSource => GalleryDataSource();
   StreamSubscription<FileSystemEvent>? _watchSubscription;
   void Function()? _onFoldersChanged;
 
@@ -290,14 +293,12 @@ class GalleryFolderRepository {
 
   /// 移动图片到文件夹
   ///
-  /// 额外图库源中的文件为只读，禁止移动
+  /// 源文件不再拦截额外图库源；使用跨卷移动并即时更新 DB 记录
   Future<bool> moveImageToFolder(
     String imagePath,
     String targetFolderPath,
   ) async {
     try {
-      if (await isExtraRootPath(imagePath)) return false;
-
       final file = File(imagePath);
       if (!await file.exists()) return false;
 
@@ -313,7 +314,29 @@ class GalleryFolderRepository {
         );
       }
 
-      await file.rename(newPath);
+      final movedPath = await moveFileCrossVolume(imagePath, newPath);
+      if (movedPath == null) {
+        AppLogger.e('移动图片失败: $imagePath -> $newPath');
+        return false;
+      }
+
+      // 即时 DB 跟进（不等扫描）
+      if (_dataSource.isInitialized) {
+        try {
+          final idsMap = await _dataSource.getImageIdsByPaths([imagePath]);
+          final id = idsMap[imagePath];
+          if (id != null) {
+            await _dataSource.updateFilePath(
+              id,
+              movedPath,
+              newFileName: p.basename(movedPath),
+            );
+          }
+        } catch (dbError) {
+          AppLogger.w('移动后即时更新DB失败: $imagePath -> $movedPath ($dbError)');
+        }
+      }
+
       return true;
     } catch (e) {
       AppLogger.e('移动图片失败: $imagePath -> $targetFolderPath', e);
@@ -329,6 +352,54 @@ class GalleryFolderRepository {
     int successCount = 0;
     for (final imagePath in imagePaths) {
       if (await moveImageToFolder(imagePath, targetFolderPath)) successCount++;
+    }
+    return successCount;
+  }
+
+  /// 复制图片到文件夹
+  ///
+  /// 不做源只读拦截；同款重名后缀；使用 copyFileWithFreshMtime；不碰 DB
+  Future<bool> copyImageToFolder(
+    String imagePath,
+    String targetFolderPath,
+  ) async {
+    try {
+      final file = File(imagePath);
+      if (!await file.exists()) return false;
+
+      final fileName = p.basename(imagePath);
+      var newPath = p.join(targetFolderPath, fileName);
+
+      if (await File(newPath).exists()) {
+        final baseName = p.basenameWithoutExtension(fileName);
+        final ext = p.extension(fileName);
+        newPath = p.join(
+          targetFolderPath,
+          '${baseName}_${DateTime.now().millisecondsSinceEpoch}$ext',
+        );
+      }
+
+      final copiedPath = await copyFileWithFreshMtime(imagePath, newPath);
+      if (copiedPath == null) {
+        AppLogger.e('复制图片失败: $imagePath -> $newPath');
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      AppLogger.e('复制图片失败: $imagePath -> $targetFolderPath', e);
+      return false;
+    }
+  }
+
+  /// 批量复制图片到文件夹
+  Future<int> copyImagesToFolder(
+    List<String> imagePaths,
+    String targetFolderPath,
+  ) async {
+    int successCount = 0;
+    for (final imagePath in imagePaths) {
+      if (await copyImageToFolder(imagePath, targetFolderPath)) successCount++;
     }
     return successCount;
   }

@@ -620,7 +620,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_extraRootsHint =>
-      'Extra gallery sources: add any folder to browse and search in the gallery (read-only, not used for auto-save). After adding, run a rescan in the gallery or at the bottom of this page.';
+      'Extra gallery sources: browse and search available, images can be moved/copied to categories; not used for auto-save. After adding, run a rescan in the gallery or at the bottom of this page.';
 
   @override
   String get settings_extraRootsEmpty => 'No extra gallery sources added';
@@ -4045,8 +4045,56 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get localGallery_externalReadonly =>
-      'External gallery sources are read-only; this action is unavailable';
+  String get localGallery_moveTo => 'Move to…';
+
+  @override
+  String get localGallery_copyTo => 'Copy to…';
+
+  @override
+  String get localGallery_externalSourceMoveConfirmTitle =>
+      'Move External Gallery File';
+
+  @override
+  String localGallery_externalSourceMoveConfirmContent(Object count) {
+    return 'This will move $count image(s). Files will be removed from their source folder and will no longer remain in their original location. Continue?';
+  }
+
+  @override
+  String localGallery_externalTargetMoveConfirmContent(
+    Object count,
+    Object targetName,
+  ) {
+    return 'This will move $count image(s) to the external gallery source category \"$targetName\". Files will be written to the external source folder. Continue?';
+  }
+
+  @override
+  String localGallery_externalBothMoveConfirmContent(
+    Object count,
+    Object targetName,
+  ) {
+    return 'This will move $count image(s) to the external gallery source category \"$targetName\". Files will be removed from the original external source folder (will not remain in the original location) and written to the external source folder. Continue?';
+  }
+
+  @override
+  String get localGallery_uncategorizedRoot => 'Uncategorized (Gallery Root)';
+
+  @override
+  String get localGallery_externalSourceChip => 'External';
+
+  @override
+  String get localGallery_categoryFilterHint => 'Search categories…';
+
+  @override
+  String localGallery_copySuccess(Object count) {
+    return 'Copied $count image(s)';
+  }
+
+  @override
+  String get localGallery_copyFailed => 'Failed to copy image';
+
+  @override
+  String get localGallery_confirmCopyContent =>
+      'This will copy the image(s) to the target folder. Please confirm.';
 
   @override
   String get localGallery_categoryDeleteContent =>
@@ -4637,18 +4685,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localGallery_trashFileMissing => 'File no longer on disk';
-
-  @override
-  String get localGallery_noFoldersAvailable =>
-      'No folders available, please create a folder first';
-
-  @override
-  String get localGallery_moveToFolder => 'Move to Folder';
-
-  @override
-  String localGallery_imageCount(Object count) {
-    return '$count images';
-  }
 
   @override
   String localGallery_movedImages(Object count) {

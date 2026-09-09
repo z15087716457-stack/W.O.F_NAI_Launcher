@@ -238,7 +238,7 @@
   "settings_autoSave": "Auto Save",
   "settings_autoSaveSubtitle": "Automatically save images after generation",
   "settings_extraRootsTitle": "Gallery Sources",
-  "settings_extraRootsHint": "Extra gallery sources: add any folder to browse and search in the gallery (read-only, not used for auto-save). After adding, run a rescan in the gallery or at the bottom of this page.",
+  "settings_extraRootsHint": "Extra gallery sources: browse and search available, images can be moved/copied to categories; not used for auto-save. After adding, run a rescan in the gallery or at the bottom of this page.",
   "settings_extraRootsEmpty": "No extra gallery sources added",
   "settings_extraRootsAdd": "Add Folder",
   "settings_extraRootsAddTitle": "Select a folder to add as a gallery source",
@@ -2001,7 +2001,40 @@
       "name": {}
     }
   },
-  "localGallery_externalReadonly": "External gallery sources are read-only; this action is unavailable",
+  "localGallery_moveTo": "Move to…",
+  "localGallery_copyTo": "Copy to…",
+  "localGallery_externalSourceMoveConfirmTitle": "Move External Gallery File",
+  "localGallery_externalSourceMoveConfirmContent": "This will move {count} image(s). Files will be removed from their source folder and will no longer remain in their original location. Continue?",
+  "@localGallery_externalSourceMoveConfirmContent": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_externalTargetMoveConfirmContent": "This will move {count} image(s) to the external gallery source category \"{targetName}\". Files will be written to the external source folder. Continue?",
+  "@localGallery_externalTargetMoveConfirmContent": {
+    "placeholders": {
+      "count": {},
+      "targetName": {}
+    }
+  },
+  "localGallery_externalBothMoveConfirmContent": "This will move {count} image(s) to the external gallery source category \"{targetName}\". Files will be removed from the original external source folder (will not remain in the original location) and written to the external source folder. Continue?",
+  "@localGallery_externalBothMoveConfirmContent": {
+    "placeholders": {
+      "count": {},
+      "targetName": {}
+    }
+  },
+  "localGallery_uncategorizedRoot": "Uncategorized (Gallery Root)",
+  "localGallery_externalSourceChip": "External",
+  "localGallery_categoryFilterHint": "Search categories…",
+  "localGallery_copySuccess": "Copied {count} image(s)",
+  "@localGallery_copySuccess": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_copyFailed": "Failed to copy image",
+  "localGallery_confirmCopyContent": "This will copy the image(s) to the target folder. Please confirm.",
   "localGallery_categoryDeleteContent": "Delete this category? The folder and its contents will be kept.",
   "localGallery_protectedDeleteCategoryTitle": "Protected Mode: Confirm Category Deletion",
   "localGallery_protectedDeleteCategoryContent": "This will delete the category record. The folder and its contents will be kept. Confirm again.",
@@ -2298,14 +2331,6 @@
     }
   },
   "localGallery_trashFileMissing": "File no longer on disk",
-  "localGallery_noFoldersAvailable": "No folders available, please create a folder first",
-  "localGallery_moveToFolder": "Move to Folder",
-  "localGallery_imageCount": "{count} images",
-  "@localGallery_imageCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_movedImages": "Moved {count} images",
   "@localGallery_movedImages": {
     "placeholders": {

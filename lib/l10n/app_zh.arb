@@ -228,7 +228,7 @@
   "settings_autoSave": "自动保存",
   "settings_autoSaveSubtitle": "生成后自动保存图片",
   "settings_extraRootsTitle": "图库源管理",
-  "settings_extraRootsHint": "额外图库源：将任意文件夹加入画廊浏览与搜索（只读，不参与自动保存）。添加后请在画廊页或本页底部执行重新扫描。",
+  "settings_extraRootsHint": "额外图库源：可浏览可搜索，图片可移动/复制到分类；不参与自动保存。添加后请在画廊页或本页底部执行重新扫描。",
   "settings_extraRootsEmpty": "尚未添加额外图库源",
   "settings_extraRootsAdd": "添加文件夹",
   "settings_extraRootsAddTitle": "选择要添加的图库源文件夹",
@@ -1912,7 +1912,40 @@
       "name": {}
     }
   },
-  "localGallery_externalReadonly": "外部图库源为只读，此操作不可用",
+  "localGallery_moveTo": "移动到…",
+  "localGallery_copyTo": "复制到…",
+  "localGallery_externalSourceMoveConfirmTitle": "移动外部图库源文件",
+  "localGallery_externalSourceMoveConfirmContent": "将移动 {count} 张图片。文件将从源文件夹移走，原位置不再保留。是否继续？",
+  "@localGallery_externalSourceMoveConfirmContent": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_externalTargetMoveConfirmContent": "将移动 {count} 张图片到外部图库源分类「{targetName}」。文件将写入外部源文件夹。是否继续？",
+  "@localGallery_externalTargetMoveConfirmContent": {
+    "placeholders": {
+      "count": {},
+      "targetName": {}
+    }
+  },
+  "localGallery_externalBothMoveConfirmContent": "将移动 {count} 张图片到外部图库源分类「{targetName}」。文件将从原文件夹移走（原位置不再保留），并写入外部源文件夹。是否继续？",
+  "@localGallery_externalBothMoveConfirmContent": {
+    "placeholders": {
+      "count": {},
+      "targetName": {}
+    }
+  },
+  "localGallery_uncategorizedRoot": "未分类（图库根）",
+  "localGallery_externalSourceChip": "外部",
+  "localGallery_categoryFilterHint": "搜索分类…",
+  "localGallery_copySuccess": "已复制 {count} 张图片",
+  "@localGallery_copySuccess": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_copyFailed": "复制图片失败",
+  "localGallery_confirmCopyContent": "将把图片复制到目标文件夹。请确认操作。",
   "localGallery_categoryDeleteContent": "确定要删除此分类吗？文件夹及其内容将被保留。",
   "localGallery_protectedDeleteCategoryTitle": "保护模式：确认删除分类",
   "localGallery_protectedDeleteCategoryContent": "将删除此分类记录，文件夹及内容会保留。请再次确认。",
@@ -2292,14 +2325,6 @@
     }
   },
   "localGallery_trashFileMissing": "文件已不在磁盘上",
-  "localGallery_noFoldersAvailable": "暂无可用文件夹，请先创建文件夹",
-  "localGallery_moveToFolder": "移动到文件夹",
-  "localGallery_imageCount": "{count} 张图片",
-  "@localGallery_imageCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_movedImages": "已移动 {count} 张图片",
   "@localGallery_movedImages": {
     "placeholders": {

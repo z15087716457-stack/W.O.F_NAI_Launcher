@@ -15,6 +15,7 @@ import '../../providers/gallery_category_provider.dart'
 import '../common/themed_divider.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'gallery_scan_progress_panel.dart';
+import '../../../core/storage/local_storage_service.dart';
 
 String? galleryInternalDragPathFromLocalData(Object? localData) {
   if (localData is! Map) return null;
@@ -86,6 +87,22 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
   final Set<String> _expandedIds = {};
   String? _hoveredCategoryId;
   Timer? _autoExpandTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // 恢复上次关闭时的展开状态（持久化记忆）
+    _expandedIds.addAll(
+      LocalStorageService().getGalleryCategoryTreeExpandedIds(),
+    );
+  }
+
+  /// 展开状态持久化（分类与收藏集文件夹混存，id 命名空间不冲突）
+  void _persistExpandedIds() {
+    LocalStorageService().setGalleryCategoryTreeExpandedIds(
+      _expandedIds.toList(),
+    );
+  }
   final Set<String> _superDraggingCategoryIds = {};
 
   @override
@@ -99,6 +116,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     _autoExpandTimer = Timer(const Duration(milliseconds: 800), () {
       if (_hoveredCategoryId == categoryId && mounted) {
         setState(() => _expandedIds.add(categoryId));
+        _persistExpandedIds();
       }
     });
   }
@@ -205,13 +223,16 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       isExpanded: isExpanded,
       onTap: () => widget.onCategorySelected(category.id),
       onExpand: hasChildren
-          ? () => setState(() {
-              if (isExpanded) {
-                _expandedIds.remove(category.id);
-              } else {
-                _expandedIds.add(category.id);
-              }
-            })
+          ? () {
+              setState(() {
+                if (isExpanded) {
+                  _expandedIds.remove(category.id);
+                } else {
+                  _expandedIds.add(category.id);
+                }
+              });
+              _persistExpandedIds();
+            }
           : null,
       onRename: !isReadOnly && widget.onCategoryRename != null
           ? (newName) => widget.onCategoryRename!(category.id, newName)
@@ -240,13 +261,11 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       categoryItem = _buildCategoryDragTarget(theme, category, categoryItem);
     }
 
-    // 只读分类不接收图片移入
-    if (!isReadOnly) {
-      categoryItem = _buildImageDropTarget(
-        categoryId: category.id,
-        child: categoryItem,
-      );
-    }
+    // 外部分类也接收图片移入（反向放开）
+    categoryItem = _buildImageDropTarget(
+      categoryId: category.id,
+      child: categoryItem,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,9 +390,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     int depth,
   ) {
     final selectedId = '$collectionSelectedIdPrefix${folder.id}';
-    final hasChildren = widget.collections.any(
-      (c) => c.parentId == folder.id,
-    );
+    final hasChildren = widget.collections.any((c) => c.parentId == folder.id);
     final isExpanded = _expandedIds.contains(folder.id);
 
     Widget row = _CategoryItem(
@@ -389,13 +406,16 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       isSelected: widget.selectedCategoryId == selectedId,
       onTap: () => widget.onCategorySelected(selectedId),
       onExpand: hasChildren
-          ? () => setState(() {
-              if (isExpanded) {
-                _expandedIds.remove(folder.id);
-              } else {
-                _expandedIds.add(folder.id);
-              }
-            })
+          ? () {
+              setState(() {
+                if (isExpanded) {
+                  _expandedIds.remove(folder.id);
+                } else {
+                  _expandedIds.add(folder.id);
+                }
+              });
+              _persistExpandedIds();
+            }
           : null,
       onRename: widget.onRenameCollection != null
           ? (newName) => widget.onRenameCollection!(folder.id, newName)
@@ -406,16 +426,14 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       onAddSubFolder: widget.onCreateCollection != null
           ? () => widget.onCreateCollection!(folder.id, true)
           : null,
-      onMoveToRoot:
-          folder.parentId != null && widget.onMoveCollection != null
+      onMoveToRoot: folder.parentId != null && widget.onMoveCollection != null
           ? () => widget.onMoveCollection!(folder.id, null)
           : null,
       onDelete: widget.onDeleteCollection != null
           ? () => widget.onDeleteCollection!(folder.id)
           : null,
       showDragHandle:
-          widget.onCollectionReorder != null ||
-          widget.onMoveCollection != null,
+          widget.onCollectionReorder != null || widget.onMoveCollection != null,
     );
 
     row = _buildDraggableCollection(theme, folder, row);
@@ -508,6 +526,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
           _expandedIds.add(folder.id);
           _hoveredCategoryId = null;
         });
+        _persistExpandedIds();
         _autoExpandTimer?.cancel();
       },
       onMove: (details) {
@@ -555,9 +574,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
 
   /// 把节点移到 [newParentId] 下是否会成环（新父的祖先链含被移节点）
   bool _wouldCreateCollectionCycle(String draggedId, String newParentId) {
-    final byId = {
-      for (final c in widget.collections) c.id: c,
-    };
+    final byId = {for (final c in widget.collections) c.id: c};
     var current = byId[newParentId];
     while (current != null) {
       if (current.id == draggedId) return true;
@@ -759,6 +776,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
           _expandedIds.add(targetCategory.id);
           _hoveredCategoryId = null;
         });
+        _persistExpandedIds();
         _autoExpandTimer?.cancel();
       },
       onMove: (details) {

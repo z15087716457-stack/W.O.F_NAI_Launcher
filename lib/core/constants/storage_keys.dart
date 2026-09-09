@@ -164,6 +164,10 @@ class StorageKeys {
   /// 本地画廊视图模式 V2（GalleryViewMode.name，默认 masonry）
   static const String localGalleryViewModeV2 = 'local_gallery_view_mode_v2';
 
+  /// 本地画廊分类树已展开的分类/收藏集文件夹 id 列表（持久化，重启保留）
+  static const String galleryCategoryTreeExpandedIds =
+      'gallery_category_tree_expanded_ids';
+
   /// 本地画廊逻辑列宽（px，140~480，默认 260）
   static const String localGalleryColumnWidth = 'local_gallery_column_width';
 

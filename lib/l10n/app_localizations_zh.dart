@@ -601,7 +601,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_extraRootsHint =>
-      '额外图库源：将任意文件夹加入画廊浏览与搜索（只读，不参与自动保存）。添加后请在画廊页或本页底部执行重新扫描。';
+      '额外图库源：可浏览可搜索，图片可移动/复制到分类；不参与自动保存。添加后请在画廊页或本页底部执行重新扫描。';
 
   @override
   String get settings_extraRootsEmpty => '尚未添加额外图库源';
@@ -3896,7 +3896,54 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get localGallery_externalReadonly => '外部图库源为只读，此操作不可用';
+  String get localGallery_moveTo => '移动到…';
+
+  @override
+  String get localGallery_copyTo => '复制到…';
+
+  @override
+  String get localGallery_externalSourceMoveConfirmTitle => '移动外部图库源文件';
+
+  @override
+  String localGallery_externalSourceMoveConfirmContent(Object count) {
+    return '将移动 $count 张图片。文件将从源文件夹移走，原位置不再保留。是否继续？';
+  }
+
+  @override
+  String localGallery_externalTargetMoveConfirmContent(
+    Object count,
+    Object targetName,
+  ) {
+    return '将移动 $count 张图片到外部图库源分类「$targetName」。文件将写入外部源文件夹。是否继续？';
+  }
+
+  @override
+  String localGallery_externalBothMoveConfirmContent(
+    Object count,
+    Object targetName,
+  ) {
+    return '将移动 $count 张图片到外部图库源分类「$targetName」。文件将从原文件夹移走（原位置不再保留），并写入外部源文件夹。是否继续？';
+  }
+
+  @override
+  String get localGallery_uncategorizedRoot => '未分类（图库根）';
+
+  @override
+  String get localGallery_externalSourceChip => '外部';
+
+  @override
+  String get localGallery_categoryFilterHint => '搜索分类…';
+
+  @override
+  String localGallery_copySuccess(Object count) {
+    return '已复制 $count 张图片';
+  }
+
+  @override
+  String get localGallery_copyFailed => '复制图片失败';
+
+  @override
+  String get localGallery_confirmCopyContent => '将把图片复制到目标文件夹。请确认操作。';
 
   @override
   String get localGallery_categoryDeleteContent => '确定要删除此分类吗？文件夹及其内容将被保留。';
@@ -4473,17 +4520,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localGallery_trashFileMissing => '文件已不在磁盘上';
-
-  @override
-  String get localGallery_noFoldersAvailable => '暂无可用文件夹，请先创建文件夹';
-
-  @override
-  String get localGallery_moveToFolder => '移动到文件夹';
-
-  @override
-  String localGallery_imageCount(Object count) {
-    return '$count 张图片';
-  }
 
   @override
   String localGallery_movedImages(Object count) {

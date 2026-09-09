@@ -81,6 +81,7 @@ class LocalGalleryToolbar extends ConsumerStatefulWidget {
   final VoidCallback? onPackSelected;
   final VoidCallback? onEditMetadata;
   final VoidCallback? onMoveToFolder;
+  final VoidCallback? onCopyToFolder;
 
   /// Whether category panel is visible
   /// 是否显示分类面板
@@ -112,6 +113,7 @@ class LocalGalleryToolbar extends ConsumerStatefulWidget {
     this.onPackSelected,
     this.onEditMetadata,
     this.onMoveToFolder,
+    this.onCopyToFolder,
     this.showCategoryPanel = true,
     this.onToggleCategoryPanel,
     this.enableSearchAutocomplete = true,
@@ -275,6 +277,12 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
             icon: Icons.drive_file_move_outline,
             label: l10n.localGallery_moveSelected,
             onPressed: widget.onMoveToFolder,
+            color: theme.colorScheme.secondary,
+          ),
+          BulkActionItem(
+            icon: Icons.file_copy_outlined,
+            label: l10n.localGallery_copyTo,
+            onPressed: widget.onCopyToFolder,
             color: theme.colorScheme.secondary,
           ),
           BulkActionItem(

@@ -237,7 +237,7 @@
   "settings_autoSave": "自動保存",
   "settings_autoSaveSubtitle": "生成後に画像を自動的に保存します",
   "settings_extraRootsTitle": "ギャラリーソース",
-  "settings_extraRootsHint": "追加のギャラリーソース: 任意のフォルダをギャラリーで閲覧・検索できます（読み取り専用、自動保存の対象外）。追加後、ギャラリーまたはこのページ下部で再スキャンしてください。",
+  "settings_extraRootsHint": "追加のギャラリーソース: 閲覧・検索が可能で、画像をカテゴリへ移動/コピーできます（自動保存の対象外）。追加後、ギャラリーまたはこのページ下部で再スキャンしてください。",
   "settings_extraRootsEmpty": "追加のギャラリーソースはありません",
   "settings_extraRootsAdd": "フォルダを追加",
   "settings_extraRootsAddTitle": "ギャラリーソースとして追加するフォルダを選択",
@@ -2001,7 +2001,40 @@
       "name": {}
     }
   },
-  "localGallery_externalReadonly": "外部ギャラリーソースは読み取り専用です。この操作は利用できません",
+  "localGallery_moveTo": "移動先…",
+  "localGallery_copyTo": "コピー先…",
+  "localGallery_externalSourceMoveConfirmTitle": "外部ギャラリーソースファイルの移動",
+  "localGallery_externalSourceMoveConfirmContent": "画像 {count} 枚を移動します。ファイルは元のフォルダーから移動され、元の場所には残りません。続行しますか？",
+  "@localGallery_externalSourceMoveConfirmContent": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_externalTargetMoveConfirmContent": "画像 {count} 枚を外部ギャラリーソースカテゴリー「{targetName}」に移動します。ファイルは外部ソースフォルダーに書き込まれます。続行しますか？",
+  "@localGallery_externalTargetMoveConfirmContent": {
+    "placeholders": {
+      "count": {},
+      "targetName": {}
+    }
+  },
+  "localGallery_externalBothMoveConfirmContent": "画像 {count} 枚を外部ギャラリーソースカテゴリー「{targetName}」に移動します。ファイルは元の外部ソースフォルダーから移動され（元の場所には残りません）、外部ソースフォルダーに書き込まれます。続行しますか？",
+  "@localGallery_externalBothMoveConfirmContent": {
+    "placeholders": {
+      "count": {},
+      "targetName": {}
+    }
+  },
+  "localGallery_uncategorizedRoot": "未分類（ギャラリールート）",
+  "localGallery_externalSourceChip": "外部",
+  "localGallery_categoryFilterHint": "カテゴリーを検索…",
+  "localGallery_copySuccess": "{count} 枚の画像をコピーしました",
+  "@localGallery_copySuccess": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "localGallery_copyFailed": "画像のコピーに失敗しました",
+  "localGallery_confirmCopyContent": "画像をターゲットフォルダーにコピーします。確認してください。",
   "localGallery_categoryDeleteContent": "このカテゴリを削除しますか?フォルダーとその内容は保持されます。",
   "localGallery_protectedDeleteCategoryTitle": "保護モード: カテゴリの削除の確認",
   "localGallery_protectedDeleteCategoryContent": "これにより、カテゴリ レコードが削除されます。フォルダーとその内容は保持されます。もう一度確認してください。",
@@ -2298,14 +2331,6 @@
     }
   },
   "localGallery_trashFileMissing": "ファイルはディスク上にありません",
-  "localGallery_noFoldersAvailable": "使用可能なフォルダーがありません。最初にフォルダーを作成してください。",
-  "localGallery_moveToFolder": "フォルダーに移動",
-  "localGallery_imageCount": "{count} 画像",
-  "@localGallery_imageCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_movedImages": "{count} 個の画像を移動しました",
   "@localGallery_movedImages": {
     "placeholders": {

@@ -1243,7 +1243,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_extraRootsHint.
   ///
   /// In en, this message translates to:
-  /// **'Extra gallery sources: add any folder to browse and search in the gallery (read-only, not used for auto-save). After adding, run a rescan in the gallery or at the bottom of this page.'**
+  /// **'Extra gallery sources: browse and search available, images can be moved/copied to categories; not used for auto-save. After adding, run a rescan in the gallery or at the bottom of this page.'**
   String get settings_extraRootsHint;
 
   /// No description provided for @settings_extraRootsEmpty.
@@ -7291,11 +7291,83 @@ abstract class AppLocalizations {
   /// **'Delete image \"{name}\"?\n\nThe image will disappear from the gallery immediately; the file will be removed permanently on the next launch (can be undone in this session).'**
   String localGallery_confirmDeleteImageContent(Object name);
 
-  /// No description provided for @localGallery_externalReadonly.
+  /// No description provided for @localGallery_moveTo.
   ///
   /// In en, this message translates to:
-  /// **'External gallery sources are read-only; this action is unavailable'**
-  String get localGallery_externalReadonly;
+  /// **'Move to…'**
+  String get localGallery_moveTo;
+
+  /// No description provided for @localGallery_copyTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy to…'**
+  String get localGallery_copyTo;
+
+  /// No description provided for @localGallery_externalSourceMoveConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move External Gallery File'**
+  String get localGallery_externalSourceMoveConfirmTitle;
+
+  /// No description provided for @localGallery_externalSourceMoveConfirmContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This will move {count} image(s). Files will be removed from their source folder and will no longer remain in their original location. Continue?'**
+  String localGallery_externalSourceMoveConfirmContent(Object count);
+
+  /// No description provided for @localGallery_externalTargetMoveConfirmContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This will move {count} image(s) to the external gallery source category \"{targetName}\". Files will be written to the external source folder. Continue?'**
+  String localGallery_externalTargetMoveConfirmContent(
+    Object count,
+    Object targetName,
+  );
+
+  /// No description provided for @localGallery_externalBothMoveConfirmContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This will move {count} image(s) to the external gallery source category \"{targetName}\". Files will be removed from the original external source folder (will not remain in the original location) and written to the external source folder. Continue?'**
+  String localGallery_externalBothMoveConfirmContent(
+    Object count,
+    Object targetName,
+  );
+
+  /// No description provided for @localGallery_uncategorizedRoot.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized (Gallery Root)'**
+  String get localGallery_uncategorizedRoot;
+
+  /// No description provided for @localGallery_externalSourceChip.
+  ///
+  /// In en, this message translates to:
+  /// **'External'**
+  String get localGallery_externalSourceChip;
+
+  /// No description provided for @localGallery_categoryFilterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search categories…'**
+  String get localGallery_categoryFilterHint;
+
+  /// No description provided for @localGallery_copySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied {count} image(s)'**
+  String localGallery_copySuccess(Object count);
+
+  /// No description provided for @localGallery_copyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to copy image'**
+  String get localGallery_copyFailed;
+
+  /// No description provided for @localGallery_confirmCopyContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This will copy the image(s) to the target folder. Please confirm.'**
+  String get localGallery_confirmCopyContent;
 
   /// No description provided for @localGallery_categoryDeleteContent.
   ///
@@ -8346,24 +8418,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'File no longer on disk'**
   String get localGallery_trashFileMissing;
-
-  /// No description provided for @localGallery_noFoldersAvailable.
-  ///
-  /// In en, this message translates to:
-  /// **'No folders available, please create a folder first'**
-  String get localGallery_noFoldersAvailable;
-
-  /// No description provided for @localGallery_moveToFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'Move to Folder'**
-  String get localGallery_moveToFolder;
-
-  /// No description provided for @localGallery_imageCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} images'**
-  String localGallery_imageCount(Object count);
 
   /// No description provided for @localGallery_movedImages.
   ///

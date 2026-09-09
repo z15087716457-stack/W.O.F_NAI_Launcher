@@ -55,6 +55,141 @@ void main() {
     });
     expect(find.byTooltip('取消全部'), findsOneWidget);
   });
+
+  testWidgets(
+    'bulk action bar shows move and copy to actions and triggers callbacks',
+    (tester) async {
+      var moveCalled = false;
+      var copyCalled = false;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localGalleryNotifierProvider.overrideWith(
+              () => _ToolbarGalleryNotifier(
+                LocalGalleryState(
+                  currentImages: [_record(r'C:\gallery\page-1.png')],
+                  filteredCount: 1,
+                  totalCount: 1,
+                  totalPages: 1,
+                  isInitialized: true,
+                ),
+                filteredPaths: const [r'C:\gallery\page-1.png'],
+              ),
+            ),
+            localGallerySelectionNotifierProvider.overrideWith(
+              () => _ActiveSelectionNotifier({r'C:\gallery\page-1.png'}),
+            ),
+          ],
+          child: MaterialApp(
+            locale: const Locale('zh'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: LocalGalleryToolbar(
+                onMoveToFolder: () => moveCalled = true,
+                onCopyToFolder: () => copyCalled = true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byTooltip('移动'), findsOneWidget);
+      expect(find.byTooltip('复制到…'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('移动'));
+      expect(moveCalled, isTrue);
+
+      await tester.tap(find.byTooltip('复制到…'));
+      expect(copyCalled, isTrue);
+    },
+  );
+
+  testWidgets(
+    'bulk action bar disables remove from collection when onRemoveFromCollection is null',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localGalleryNotifierProvider.overrideWith(
+              () => _ToolbarGalleryNotifier(
+                LocalGalleryState(
+                  currentImages: [_record(r'C:\gallery\page-1.png')],
+                  filteredCount: 1,
+                  totalCount: 1,
+                  totalPages: 1,
+                  isInitialized: true,
+                ),
+                filteredPaths: const [r'C:\gallery\page-1.png'],
+              ),
+            ),
+            localGallerySelectionNotifierProvider.overrideWith(
+              () => _ActiveSelectionNotifier({r'C:\gallery\page-1.png'}),
+            ),
+          ],
+          child: const MaterialApp(
+            locale: Locale('zh'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: LocalGalleryToolbar(onRemoveFromCollection: null),
+            ),
+          ),
+        ),
+      );
+
+      final removeBtnFinder = find.byTooltip('移出集合');
+      expect(removeBtnFinder, findsOneWidget);
+
+      await tester.tap(removeBtnFinder);
+      await tester.pump();
+    },
+  );
+
+  testWidgets(
+    'bulk action bar enables remove from collection when onRemoveFromCollection is provided',
+    (tester) async {
+      var removeCalled = false;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localGalleryNotifierProvider.overrideWith(
+              () => _ToolbarGalleryNotifier(
+                LocalGalleryState(
+                  currentImages: [_record(r'C:\gallery\page-1.png')],
+                  filteredCount: 1,
+                  totalCount: 1,
+                  totalPages: 1,
+                  isInitialized: true,
+                ),
+                filteredPaths: const [r'C:\gallery\page-1.png'],
+              ),
+            ),
+            localGallerySelectionNotifierProvider.overrideWith(
+              () => _ActiveSelectionNotifier({r'C:\gallery\page-1.png'}),
+            ),
+          ],
+          child: MaterialApp(
+            locale: const Locale('zh'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: LocalGalleryToolbar(
+                onRemoveFromCollection: () => removeCalled = true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final removeBtnFinder = find.byTooltip('移出集合');
+      expect(removeBtnFinder, findsOneWidget);
+
+      await tester.tap(removeBtnFinder);
+      expect(removeCalled, isTrue);
+    },
+  );
 }
 
 Future<ProviderContainer> _pumpToolbar(

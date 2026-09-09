@@ -287,6 +287,21 @@ class LocalStorageService {
     await setSetting(StorageKeys.ucPresetCustomIds, ids);
   }
 
+  /// 获取本地画廊分类树已展开的分类/收藏集文件夹 id 列表
+  List<String> getGalleryCategoryTreeExpandedIds() {
+    final data = getSetting<List<dynamic>>(
+      StorageKeys.galleryCategoryTreeExpandedIds,
+    );
+    return data?.cast<String>() ?? [];
+  }
+
+  /// 保存本地画廊分类树已展开的分类/收藏集文件夹 id 列表
+  Future<void> setGalleryCategoryTreeExpandedIds(List<String> ids) async {
+    // 与 getSetting 同款守卫：box 未打开（如 widget 测试环境）直接跳过
+    if (!Hive.isBoxOpen(StorageKeys.settingsBox)) return;
+    await setSetting(StorageKeys.galleryCategoryTreeExpandedIds, ids);
+  }
+
   // ==================== Quality Preset (新版) ====================
 
   /// 获取质量词预设模式 (默认 0 = naiDefault)

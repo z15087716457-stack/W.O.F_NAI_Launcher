@@ -14,6 +14,8 @@ enum LocalImageContextAction {
   importMetadata,
   copyPrompt,
   copySeed,
+  moveTo,
+  copyTo,
   showInFolder,
   delete,
 }
@@ -100,6 +102,18 @@ class LocalImageContextMenu {
           label: context.l10n.localGallery_copySeed,
         ),
       const PopupMenuDivider(),
+      _item(
+        context,
+        value: LocalImageContextAction.moveTo,
+        icon: Icons.drive_file_move_outline,
+        label: context.l10n.localGallery_moveTo,
+      ),
+      _item(
+        context,
+        value: LocalImageContextAction.copyTo,
+        icon: Icons.file_copy_outlined,
+        label: context.l10n.localGallery_copyTo,
+      ),
       _item(
         context,
         value: LocalImageContextAction.showInFolder,

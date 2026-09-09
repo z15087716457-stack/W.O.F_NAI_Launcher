@@ -37,6 +37,8 @@ void main() {
       LocalImageContextAction.importMetadata,
       LocalImageContextAction.copyPrompt,
       LocalImageContextAction.copySeed,
+      LocalImageContextAction.moveTo,
+      LocalImageContextAction.copyTo,
       LocalImageContextAction.showInFolder,
       LocalImageContextAction.delete,
     ]);
@@ -48,6 +50,8 @@ void main() {
     expect(find.text('Send to Precise Reference'), findsOneWidget);
     expect(find.text('Upscale'), findsOneWidget);
     expect(find.text('Import Image Metadata'), findsOneWidget);
+    expect(find.text('Move to…'), findsOneWidget);
+    expect(find.text('Copy to…'), findsOneWidget);
 
     final kritaItem = items.singleWhere(
       (item) => item.value == LocalImageContextAction.sendToKrita,

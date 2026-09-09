@@ -26,11 +26,11 @@ import '../../../data/services/gallery/gallery_column_width_store.dart';
 import '../../../data/services/gallery/gallery_nai_only_store.dart';
 import '../../../data/services/gallery/gallery_sort_store.dart';
 import '../../../data/services/gallery/gallery_thumbnail_quality_store.dart';
+import '../../../data/repositories/gallery_category_repository.dart';
 import '../../../data/repositories/gallery_folder_repository.dart';
 import '../../providers/bulk_operation_provider.dart';
 import '../../providers/collection_provider.dart';
 import '../../providers/gallery_category_provider.dart';
-import '../../providers/gallery_folder_provider.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/krita/krita_bridge_notifier.dart';
 import '../../providers/local_gallery_provider.dart';
@@ -46,6 +46,7 @@ import '../../utils/metadata_import_coordinator.dart';
 import '../../providers/selection_mode_provider.dart';
 import '../../widgets/bulk_metadata_edit_dialog.dart';
 import '../../widgets/collection_select_dialog.dart';
+import '../../widgets/gallery/category_picker_dialog.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/compact_icon_button.dart';
 import '../../widgets/common/pagination_bar.dart';
@@ -602,12 +603,27 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
   Future<void> _handleImageDrop(String imagePath, String? categoryId) async {
     final l10n = context.l10n;
 
-    // 额外图库源文件只读，禁止移动到分类
-    if (await GalleryFolderRepository.instance.isExtraRootPath(imagePath)) {
-      if (mounted) {
-        AppToast.warning(context, l10n.localGallery_externalReadonly);
-      }
-      return;
+    final targetCategory = categoryId != null
+        ? ref
+              .read(galleryCategoryNotifierProvider)
+              .categories
+              .findById(categoryId)
+        : null;
+
+    final sourceExternal = await GalleryFolderRepository.instance
+        .isExtraRootPath(imagePath);
+    final targetExternal = targetCategory?.isExternal ?? false;
+
+    // 外部图库源文件移动：弹出不受保护模式开关影响的强制确认（双向风险）
+    if (sourceExternal || targetExternal) {
+      if (!mounted) return;
+      final confirmed = await _confirmExternalMoveRisk(
+        count: 1,
+        sourceExternal: sourceExternal,
+        targetExternal: targetExternal,
+        targetName: targetCategory?.displayName,
+      );
+      if (!confirmed || !mounted) return;
     }
     if (!mounted) return;
 
@@ -621,15 +637,19 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     );
     if (!protected || !mounted) return;
 
-    final newPath = await ref
-        .read(galleryCategoryNotifierProvider.notifier)
-        .moveImageToCategory(imagePath, categoryId);
+    final newPath = await GalleryCategoryRepository.instance
+        .moveImageToCategory(imagePath, targetCategory);
     if (newPath != null) {
       await ref
           .read(localGalleryNotifierProvider.notifier)
           .refresh(scan: false);
+      await ref.read(galleryCategoryNotifierProvider.notifier).refresh();
       if (mounted) {
         AppToast.success(context, l10n.localGallery_imageMovedToCategory);
+      }
+    } else {
+      if (mounted) {
+        AppToast.error(context, l10n.localGallery_moveImagesFailed);
       }
     }
   }
@@ -718,11 +738,14 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
           : null,
       groupedGridViewKey: _groupedGridViewKey,
       onAddToCollection: _addSelectedToCollection,
-      onRemoveFromCollection: _removeSelectedFromCollection,
+      onRemoveFromCollection: state.filterCriteria.collectionId != null
+          ? _removeSelectedFromCollection
+          : null,
       onDeleteSelected: _deleteSelectedImages,
       onPackSelected: _packSelectedImages,
       onEditMetadata: _editSelectedMetadata,
-      onMoveToFolder: _moveSelectedToFolder,
+      onMoveToFolder: _moveSelectedToCategory,
+      onCopyToFolder: _copySelectedToCategory,
       showCategoryPanel: _showCategoryPanel,
       onOpenFolder: () => _openGalleryFolder(),
     );
@@ -1039,10 +1062,69 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     showBulkMetadataEditDialog(context);
   }
 
-  Future<void> _moveSelectedToFolder() async {
+  /// 外部源移动强制确认对话框（不受保护模式开关影响，每次都弹）
+  ///
+  /// 支持三种情形：
+  /// - 源在外部（移出）：文案提示文件将从源文件夹移走；
+  /// - 目标在外部（写入）：文案提示文件将写入外部源文件夹；
+  /// - 源+目标都在外部：合并文案（两段都列）。
+  Future<bool> _confirmExternalMoveRisk({
+    required int count,
+    required bool sourceExternal,
+    required bool targetExternal,
+    String? targetName,
+  }) async {
+    if (!sourceExternal && !targetExternal) return true;
+
+    final l10n = context.l10n;
+    final String contentText;
+    final safeTargetName = targetName ?? '';
+
+    if (sourceExternal && targetExternal) {
+      contentText = l10n.localGallery_externalBothMoveConfirmContent(
+        count,
+        safeTargetName,
+      );
+    } else if (sourceExternal) {
+      contentText = l10n.localGallery_externalSourceMoveConfirmContent(count);
+    } else {
+      contentText = l10n.localGallery_externalTargetMoveConfirmContent(
+        count,
+        safeTargetName,
+      );
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(width: 8),
+            Text(l10n.localGallery_externalSourceMoveConfirmTitle),
+          ],
+        ),
+        content: Text(contentText),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.localGallery_confirmMove),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
+
+  Future<void> _moveSelectedToCategory() async {
     final selectionState = ref.read(localGallerySelectionNotifierProvider);
-    final folderState = ref.read(galleryFolderNotifierProvider);
-    // 保存 context 相关数据（必须在任何 await 之前）
     final l10n = context.l10n;
 
     // 从数据库获取所有选中项的完整记录（支持跨页）
@@ -1054,57 +1136,39 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     );
 
     if (selectedImages.isEmpty) return;
+    if (!mounted) return;
 
-    // 额外图库源文件只读，禁止移动
+    // 1. 先弹分类选择
+    final pickResult = await CategoryPickerDialog.show(
+      context,
+      title: l10n.localGallery_moveTo,
+    );
+    if (pickResult == null || !mounted) return;
+    final targetCategory = pickResult.category;
+
+    // 2. （需要时）强制确认（双向外部源移动风险）
+    int extraRootCount = 0;
     for (final image in selectedImages) {
       if (await GalleryFolderRepository.instance.isExtraRootPath(image.path)) {
-        if (mounted) {
-          AppToast.warning(context, l10n.localGallery_externalReadonly);
-        }
-        return;
+        extraRootCount++;
       }
     }
+    final sourceExternal = extraRootCount > 0;
+    final targetExternal = targetCategory?.isExternal ?? false;
 
-    final folders = folderState.folders;
-
-    if (folders.isEmpty) {
-      // ignore: use_build_context_synchronously
-      if (mounted) AppToast.info(context, l10n.localGallery_noFoldersAvailable);
-      return;
+    if (sourceExternal || targetExternal) {
+      if (!mounted) return;
+      final confirmed = await _confirmExternalMoveRisk(
+        count: selectedImages.length,
+        sourceExternal: sourceExternal,
+        targetExternal: targetExternal,
+        targetName: targetCategory?.displayName,
+      );
+      if (!confirmed || !mounted) return;
     }
 
-    final selectedFolder = await showDialog<String>(
-      // ignore: use_build_context_synchronously
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.localGallery_moveToFolder),
-        content: SizedBox(
-          width: 300,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: folders.length,
-            itemBuilder: (context, index) {
-              final folder = folders[index];
-              return ListTile(
-                leading: const Icon(Icons.folder),
-                title: Text(folder.name),
-                subtitle: Text(l10n.localGallery_imageCount(folder.imageCount)),
-                onTap: () => Navigator.of(context).pop(folder.path),
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.common_cancel),
-          ),
-        ],
-      ),
-    );
-
-    if (selectedFolder == null || !mounted) return;
-
+    // 3. 普通保护确认
+    if (!mounted) return;
     final protected = await AssetProtectionGuard.confirmDangerousAction(
       context: context,
       ref: ref,
@@ -1117,9 +1181,10 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     );
     if (!protected || !mounted) return;
 
+    // 4. 执行批量移动
     final imagePaths = selectedImages.map((img) => img.path).toList();
-    final movedCount = await GalleryFolderRepository.instance
-        .moveImagesToFolder(imagePaths, selectedFolder);
+    final movedCount = await GalleryCategoryRepository.instance
+        .moveImagesToCategory(imagePaths, targetCategory);
 
     if (mounted) {
       if (movedCount > 0) {
@@ -1128,10 +1193,68 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
           context.l10n.localGallery_movedImages(movedCount),
         );
         ref.read(localGallerySelectionNotifierProvider.notifier).exit();
-        ref.read(localGalleryNotifierProvider.notifier).refresh();
-        ref.read(galleryFolderNotifierProvider.notifier).refresh();
+        await ref
+            .read(localGalleryNotifierProvider.notifier)
+            .refresh(scan: false);
+        await ref.read(galleryCategoryNotifierProvider.notifier).refresh();
       } else {
         AppToast.info(context, context.l10n.localGallery_moveImagesFailed);
+      }
+    }
+  }
+
+  Future<void> _copySelectedToCategory() async {
+    final selectionState = ref.read(localGallerySelectionNotifierProvider);
+    final l10n = context.l10n;
+
+    final service = await ref
+        .read(localGalleryNotifierProvider.notifier)
+        .getService();
+    final selectedImages = await service.getRecordsByPaths(
+      selectionState.selectedIds.toList(),
+    );
+
+    if (selectedImages.isEmpty) return;
+    if (!mounted) return;
+
+    // 1. 先弹分类选择
+    final pickResult = await CategoryPickerDialog.show(
+      context,
+      title: l10n.localGallery_copyTo,
+    );
+    if (pickResult == null || !mounted) return;
+    final targetCategory = pickResult.category;
+
+    // 2. 复制路径不弹强制确认（非破坏）
+
+    // 3. 普通保护确认
+    if (!mounted) return;
+    final protected = await AssetProtectionGuard.confirmDangerousAction(
+      context: context,
+      ref: ref,
+      title: l10n.localGallery_copyTo,
+      content: l10n.localGallery_confirmCopyContent,
+      confirmText: l10n.common_confirm,
+      icon: Icons.file_copy_outlined,
+    );
+    if (!protected || !mounted) return;
+
+    // 4. 执行批量复制
+    final imagePaths = selectedImages.map((img) => img.path).toList();
+    final copiedCount = await GalleryCategoryRepository.instance
+        .copyImagesToCategory(imagePaths, targetCategory);
+
+    if (mounted) {
+      if (copiedCount > 0) {
+        AppToast.success(
+          context,
+          context.l10n.localGallery_copySuccess(copiedCount),
+        );
+        ref.read(localGallerySelectionNotifierProvider.notifier).exit();
+        await ref.read(localGalleryNotifierProvider.notifier).refresh();
+        await ref.read(galleryCategoryNotifierProvider.notifier).refresh();
+      } else {
+        AppToast.error(context, context.l10n.localGallery_copyFailed);
       }
     }
   }
@@ -1585,8 +1708,113 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         }
       case LocalImageContextAction.showInFolder:
         await _openFileInFolder(record.path);
+      case LocalImageContextAction.moveTo:
+        await _moveSingleImage(record);
+      case LocalImageContextAction.copyTo:
+        await _copySingleImage(record);
       case LocalImageContextAction.delete:
         await _confirmDeleteImage(record);
+    }
+  }
+
+  Future<void> _moveSingleImage(LocalImageRecord record) async {
+    final l10n = context.l10n;
+    final imagePath = record.path;
+
+    // 1. 先弹分类选择
+    final pickResult = await CategoryPickerDialog.show(
+      context,
+      title: l10n.localGallery_moveTo,
+    );
+    if (pickResult == null || !mounted) return;
+    final targetCategory = pickResult.category;
+
+    // 2. （需要时）强制确认（双向外部源移动风险）
+    final sourceExternal = await GalleryFolderRepository.instance
+        .isExtraRootPath(imagePath);
+    final targetExternal = targetCategory?.isExternal ?? false;
+
+    if (sourceExternal || targetExternal) {
+      if (!mounted) return;
+      final confirmed = await _confirmExternalMoveRisk(
+        count: 1,
+        sourceExternal: sourceExternal,
+        targetExternal: targetExternal,
+        targetName: targetCategory?.displayName,
+      );
+      if (!confirmed || !mounted) return;
+    }
+
+    // 3. 走普通保护确认（与拖拽移动同款参数）
+    if (!mounted) return;
+    final protected = await AssetProtectionGuard.confirmDangerousAction(
+      context: context,
+      ref: ref,
+      title: l10n.localGallery_confirmMoveImageTitle,
+      content: l10n.localGallery_confirmMoveImageContent,
+      confirmText: l10n.localGallery_confirmMove,
+      icon: Icons.drive_file_move_outline,
+    );
+    if (!protected || !mounted) return;
+
+    // 4. 执行移动
+    final movedPath = await GalleryCategoryRepository.instance
+        .moveImageToCategory(imagePath, targetCategory);
+    if (movedPath != null) {
+      await ref
+          .read(localGalleryNotifierProvider.notifier)
+          .refresh(scan: false);
+      await ref.read(galleryCategoryNotifierProvider.notifier).refresh();
+      if (mounted) {
+        AppToast.success(context, l10n.localGallery_imageMovedToCategory);
+      }
+    } else {
+      if (mounted) {
+        AppToast.error(context, l10n.localGallery_moveImagesFailed);
+      }
+    }
+  }
+
+  Future<void> _copySingleImage(LocalImageRecord record) async {
+    final l10n = context.l10n;
+    final imagePath = record.path;
+
+    // 1. 先弹分类选择
+    final pickResult = await CategoryPickerDialog.show(
+      context,
+      title: l10n.localGallery_copyTo,
+    );
+    if (pickResult == null || !mounted) return;
+    final targetCategory = pickResult.category;
+
+    // 2. 复制路径不弹强制确认（非破坏）
+
+    // 3. 只走普通保护确认
+    if (!mounted) return;
+    final protected = await AssetProtectionGuard.confirmDangerousAction(
+      context: context,
+      ref: ref,
+      title: l10n.localGallery_copyTo,
+      content: l10n.localGallery_confirmCopyContent,
+      confirmText: l10n.common_confirm,
+      icon: Icons.file_copy_outlined,
+    );
+    if (!protected || !mounted) return;
+
+    // 4. 执行复制
+    final copiedPath = await GalleryCategoryRepository.instance
+        .copyImageToCategory(imagePath, targetCategory);
+    if (copiedPath != null) {
+      // 成功后 refresh() 让新副本入扫描视野
+      await ref.read(localGalleryNotifierProvider.notifier).refresh();
+      await ref.read(galleryCategoryNotifierProvider.notifier).refresh();
+      if (mounted) {
+        AppToast.success(context, l10n.localGallery_copySuccess(1));
+      }
+    } else {
+      if (mounted) {
+        AppToast.error(context, l10n.localGallery_copyFailed);
+      }
     }
   }
 

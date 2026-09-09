@@ -602,9 +602,13 @@ class GalleryStreamScanner {
       }
 
       // 【新增】检测移动/重命名：检查是否有相同签名（size+mtime）的旧记录
+      // 加固防劫持：仅当原路径文件已不存在时，才判定为移动；原文件仍在磁盘则按新文件入库
       final signature = '${stat.size}:${stat.modified.millisecondsSinceEpoch}';
       final movedFromPath = _signatureToPath[signature];
-      final bool isMoved = movedFromPath != null && movedFromPath != path;
+      final bool isMoved =
+          movedFromPath != null &&
+          movedFromPath != path &&
+          !await File(movedFromPath).exists();
 
       final bool needsUpdate;
       if (existing == null && !isMoved) {
