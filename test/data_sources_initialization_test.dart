@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/utils/app_logger.dart';
 
+import 'helpers/app_logger_test_isolation.dart';
+
 /// 三个数据源初始化验证
 ///
 /// 验证三个数据源在首次启动时的初始化流程：
@@ -13,12 +15,16 @@ import 'package:nai_launcher/core/utils/app_logger.dart';
 void main() {
   group('三个数据源初始化验证', () {
     setUpAll(() async {
+      // 套件级唯一日志目录（override 必须先于 initialize），
+      // 隔离并发套件的共享秒级日志文件
+      AppLoggerTestIsolation.setUp();
       await AppLogger.initialize(isTestEnvironment: true);
       AppLogger.i('=== 首次启动数据源初始化验证开始 ===', 'DataSourceTest');
     });
 
-    tearDownAll(() {
+    tearDownAll(() async {
       AppLogger.i('=== 首次启动数据源初始化验证结束 ===', 'DataSourceTest');
+      await AppLoggerTestIsolation.tearDown();
     });
 
     test('数据源 1: 翻译数据服务初始化流程', () async {
@@ -194,8 +200,8 @@ void main() {
     });
 
     test('验证日志文件记录', () async {
-      // 等待所有日志写入
-      await Future.delayed(const Duration(milliseconds: 200));
+      // 显式 flush 落盘（固定延迟在并发负载下不可靠）
+      await AppLogger.flush();
 
       // 读取日志文件
       final logFile = File(AppLogger.currentLogFile!);

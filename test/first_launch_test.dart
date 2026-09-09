@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/utils/app_logger.dart';
 
+import 'helpers/app_logger_test_isolation.dart';
+
 /// 首次启动流程验证
 ///
 /// 验证点：
@@ -13,9 +15,13 @@ import 'package:nai_launcher/core/utils/app_logger.dart';
 void main() {
   group('首次启动流程验证', () {
     setUpAll(() async {
-      // 测试开始前初始化日志
+      // 套件级唯一日志目录（override 必须先于 initialize），
+      // 隔离并发套件的共享秒级日志文件
+      AppLoggerTestIsolation.setUp();
       await AppLogger.initialize(isTestEnvironment: true);
     });
+
+    tearDownAll(AppLoggerTestIsolation.tearDown);
 
     test('1. 日志系统成功初始化', () async {
       // 验证日志文件已创建
@@ -58,8 +64,8 @@ void main() {
       AppLogger.d('调试信息');
       AppLogger.w('警告信息');
 
-      // 等待写入
-      await Future.delayed(const Duration(milliseconds: 100));
+      // 显式 flush 落盘（固定延迟在并发负载下不可靠）
+      await AppLogger.flush();
 
       // 验证文件非空
       final logFile = File(AppLogger.currentLogFile!);
@@ -90,7 +96,7 @@ void main() {
       AppLogger.i('初始化共现数据', 'Warmup');
       AppLogger.i('Danbooru标签数据加载', 'Warmup');
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await AppLogger.flush();
 
       // 验证日志文件
       final logFile = File(AppLogger.currentLogFile!);

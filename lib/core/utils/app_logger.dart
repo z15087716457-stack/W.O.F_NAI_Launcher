@@ -109,6 +109,15 @@ class AppLogger {
     }
   }
 
+  /// 测试用日志目录覆盖：设置后 [_setupLogDirectory] 直接使用它。
+  ///
+  /// 根因：无 path_provider 绑定的测试里日志目录回退 systemTemp，
+  /// 文件名只到秒级（test_YYYYMMDD_HHMMSS.log）——并发测试套件同秒
+  /// 初始化会写同一文件（追加交错），初始化时的轮换清理还会删对方的
+  /// 活文件。每套件唯一目录注入后结构性隔离。
+  @visibleForTesting
+  static String? debugLogDirectoryOverride;
+
   static Future<bool> _enableFileOutput() async {
     try {
       await _setupLogDirectory();
@@ -189,6 +198,16 @@ class AppLogger {
   ///
   /// 日志目录：Documents/NAI_Launcher/logs/ (与 images/ 平级)
   static Future<void> _setupLogDirectory() async {
+    // 测试注入点：每套件唯一目录（见 debugLogDirectoryOverride）
+    final override = debugLogDirectoryOverride;
+    if (override != null) {
+      _logDirectory = override;
+      final dir = Directory(override);
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+      return;
+    }
     try {
       // 使用 Documents/NAI_Launcher/logs/ 路径，与 images/ 平级
       final appDir = await getApplicationDocumentsDirectory();

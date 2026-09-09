@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/utils/app_logger.dart';
 
+import '../../helpers/app_logger_test_isolation.dart';
+
 /// 日志系统全面测试
 ///
 /// 测试内容：
@@ -13,6 +15,10 @@ import 'package:nai_launcher/core/utils/app_logger.dart';
 void main() {
   group('日志系统测试', () {
     late Directory tempDir;
+
+    // 套件级唯一日志目录：隔离并发套件的共享秒级日志文件（详见辅助类）
+    setUpAll(AppLoggerTestIsolation.setUp);
+    tearDownAll(AppLoggerTestIsolation.tearDown);
 
     setUp(() async {
       // 创建临时目录用于测试
@@ -70,8 +76,8 @@ void main() {
       AppLogger.w('警告信息', 'TestTag');
       AppLogger.e('错误信息', Exception('测试异常'), StackTrace.current, 'TestTag');
 
-      // 等待写入完成
-      await Future.delayed(const Duration(milliseconds: 100));
+      // 显式 flush 落盘（固定延迟在并发负载下不可靠）
+      await AppLogger.flush();
 
       // 读取日志文件内容
       final logFile = AppLogger.currentLogFile;
@@ -95,7 +101,7 @@ void main() {
         data: {'key': 'value'},
       );
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await AppLogger.flush();
 
       final logFile = AppLogger.currentLogFile;
       final content = await File(logFile!).readAsString();
@@ -109,7 +115,7 @@ void main() {
       // 记录认证日志（包含敏感信息）
       AppLogger.auth('用户登录', email: 'test@example.com', success: true);
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await AppLogger.flush();
 
       final logFile = AppLogger.currentLogFile;
       final content = await File(logFile!).readAsString();
@@ -129,7 +135,7 @@ void main() {
         success: true,
       );
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await AppLogger.flush();
 
       final logFile = AppLogger.currentLogFile;
       final content = await File(logFile!).readAsString();
@@ -224,7 +230,7 @@ void main() {
         response: longText,
       );
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await AppLogger.flush();
 
       final logFile = AppLogger.currentLogFile;
       final content = await File(logFile!).readAsString();
