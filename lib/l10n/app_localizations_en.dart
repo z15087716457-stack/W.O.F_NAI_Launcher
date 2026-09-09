@@ -3927,12 +3927,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_switchToJustifiedView => 'Switch to justified view';
 
   @override
-  String get localGallery_mosaicViewLabel => 'Mosaic';
-
-  @override
-  String get localGallery_switchToMosaicView => 'Switch to mosaic view';
-
-  @override
   String localGallery_dateRangeYearMonth(Object year, Object month) {
     return '$year/$month';
   }

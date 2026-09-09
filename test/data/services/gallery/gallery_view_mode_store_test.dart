@@ -8,11 +8,11 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('GalleryViewModeStore', () {
-    test('无记录时默认混排', () async {
+    test('无记录时默认火车流', () async {
       SharedPreferences.setMockInitialValues({});
       const store = GalleryViewModeStore();
 
-      expect(await store.load(), GalleryViewMode.mosaic);
+      expect(await store.load(), GalleryViewMode.justified);
     });
 
     test('枚举往返：保存后读回，且只写在新键', () async {
@@ -65,13 +65,24 @@ void main() {
       expect(await store.load(), GalleryViewMode.justified);
     });
 
-    test('新键为未知字符串时落默认混排', () async {
+    test('新键为未知字符串时落默认火车流', () async {
       SharedPreferences.setMockInitialValues({
         StorageKeys.localGalleryViewModeV2: 'not_a_mode',
       });
       const store = GalleryViewModeStore();
 
-      expect(await store.load(), GalleryViewMode.mosaic);
+      expect(await store.load(), GalleryViewMode.justified);
+    });
+
+    test('遗留 mosaic 字符串静默迁移为火车流', () async {
+      // V2 曾持久化 'mosaic'；V3 删除该视图后枚举反序列化不到，
+      // 落默认 justified，不崩不丢档
+      SharedPreferences.setMockInitialValues({
+        StorageKeys.localGalleryViewModeV2: 'mosaic',
+      });
+      const store = GalleryViewModeStore();
+
+      expect(await store.load(), GalleryViewMode.justified);
     });
   });
 }

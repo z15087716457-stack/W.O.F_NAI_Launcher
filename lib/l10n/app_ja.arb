@@ -1936,8 +1936,6 @@
   "localGallery_switchToGridLayout": "グリッド ビューに切り替える",
   "localGallery_justifiedViewLabel": "ジャスティファイ",
   "localGallery_switchToJustifiedView": "ジャスティファイ ビューに切り替える",
-  "localGallery_mosaicViewLabel": "モザイク",
-  "localGallery_switchToMosaicView": "モザイク ビューに切り替える",
   "localGallery_dateRangeYearMonth": "{year}年{month}月",
   "@localGallery_dateRangeYearMonth": {
     "placeholders": {

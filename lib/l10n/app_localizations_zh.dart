@@ -3782,12 +3782,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_switchToJustifiedView => '切换到火车流视图';
 
   @override
-  String get localGallery_mosaicViewLabel => '混排';
-
-  @override
-  String get localGallery_switchToMosaicView => '切换到混排视图';
-
-  @override
   String localGallery_dateRangeYearMonth(Object year, Object month) {
     return '$year年$month月';
   }

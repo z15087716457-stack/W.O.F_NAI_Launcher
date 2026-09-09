@@ -10,10 +10,11 @@ import 'gallery_view_mode.dart';
 class GalleryViewModeStore {
   const GalleryViewModeStore();
 
-  /// 读取持久化的视图模式；无记录时返回默认值（V2 起新装默认混排）。
+  /// 读取持久化的视图模式；无记录时返回默认值（V3 起新装默认火车流）。
   ///
-  /// 优先级：新字符串键（未知值落默认）→ 旧布尔键迁移
-  /// （true=masonry / false=grid，并回写新键）→ 默认 mosaic。
+  /// 优先级：新字符串键（未知值落默认；遗留 'mosaic' 同样落默认
+  /// justified，静默兼容）→ 旧布尔键迁移（true=masonry / false=grid，
+  /// 并回写新键）→ 默认 justified。
   Future<GalleryViewMode> load() async {
     final prefs = await SharedPreferences.getInstance();
     String? raw;
@@ -23,7 +24,7 @@ class GalleryViewModeStore {
       raw = null;
     }
     if (raw != null) {
-      return GalleryViewMode.tryParse(raw) ?? GalleryViewMode.mosaic;
+      return GalleryViewMode.tryParse(raw) ?? GalleryViewMode.justified;
     }
     final legacy = prefs.getBool(StorageKeys.localGalleryViewMode);
     if (legacy != null) {
@@ -31,7 +32,7 @@ class GalleryViewModeStore {
       await save(mode);
       return mode;
     }
-    return GalleryViewMode.mosaic;
+    return GalleryViewMode.justified;
   }
 
   /// 保存视图模式（只写新键；旧布尔键不动）。

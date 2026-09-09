@@ -1847,8 +1847,6 @@
   "localGallery_switchToGridLayout": "切换到网格视图",
   "localGallery_justifiedViewLabel": "火车流",
   "localGallery_switchToJustifiedView": "切换到火车流视图",
-  "localGallery_mosaicViewLabel": "混排",
-  "localGallery_switchToMosaicView": "切换到混排视图",
   "localGallery_dateRangeYearMonth": "{year}年{month}月",
   "@localGallery_dateRangeYearMonth": {
     "placeholders": {
