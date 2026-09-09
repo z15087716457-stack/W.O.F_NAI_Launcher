@@ -46,12 +46,12 @@
 
 ## 本地与在线图库
 
-- 本地图库支持多个根目录；发现根目录下 `_索引/index.jsonl` 时可幂等导入 tag 和元数据，扫描期间拒绝导入。移动/拖拽仍只读，目录计数递归聚合。
+- 本地图库支持多个根目录；发现根目录下 `_索引/index.jsonl` 时可幂等导入 tag 和元数据，扫描期间拒绝导入。**外部源图片级移动/复制已放开（QoL-L5，2026-09-09）**：右键菜单「移动到…/复制到…」与批量栏同款，目标是分类树（`CategoryPickerDialog`，含外部分类）；源或目标任一为外部源时移动弹专用强制确认（不受保护模式开关影响，移出/写入/双向三情形文案），复制只走普通保护确认；分类树的外部分类只读保留范围=重命名/删除/加子分类/分类排序，图片拖入已双向放开。移动底层 `moveFileCrossVolume`（rename 优先，跨卷回退 copy+字节校验+保 mtime+删源，校验失败不删源），复制强制新 mtime 防扫描器签名撞车；移动成功当场按旧路径查 id 直更 DB（不等扫描）。目录计数递归聚合。
 - 本地图库默认瀑布流，可切网格；列宽、视图、排序和 NAI-only 偏好持久化。删除采用删除池：先软删并从当前 state 摘除，DB 的 `is_deleted` 是权威；同一会话不得因重扫复活，恢复和彻底删除走删除池面板。
 - 本地画廊固定网格、分组和瀑布流的 `LocalImageCard3D` 均沿用 `DraggableImageCard` wrapper；选择模式禁用外拖，拖出格式继续由脱敏设置和可用文件路径决定。
 - 本地 NAI-only 判定为三通道任一命中：`gallery_metadata` 的 software/source 含 NovelAI 指纹、model 为 `nai-diffusion-*`，或 raw_json 含 NAI 参数特征键。版本筛选按 model 精确匹配；历史空 model 由启动迁移按元数据指纹回填。数据库位于 `%APPDATA%/com.example/nai_launcher/databases/danbooru.db`。
 - 收藏是根-子集关系：心形根集包含全部收藏；加入子集自动加入根集，取消根集会清掉所有子集关系，从子集移出不影响根集。
-- 收藏集支持文件夹无限嵌套（`gallery_collections.parent_id` + `is_folder`）：文件夹是纯组织节点不参与成员关系，只有文件夹可拥有子节点；老数据 parent_id=NULL 留在收藏根级平铺。选中文件夹浏览=全部子孙收藏集成员的去重并集（`getCollectionImageIds` 递归语义，按各图最早加入时间排序）；文件夹计数同为递归并集去重（一图多集不重复计）。`moveCollection` 拒绝非文件夹目标与成环移动（UI 层和 DB 层双校验）；非空文件夹禁止删除；`reorderCollections` 按同父级分组重排并写回 parent_id。收藏操作只动链接表（image_id 锚定），不触碰文件路径；磁盘文件移动靠扫描器 size+mtime 签名匹配保 image_id 改路径，签名失配则旧行软删、收藏跟丢。
+- 收藏集支持文件夹无限嵌套（`gallery_collections.parent_id` + `is_folder`）：文件夹是纯组织节点不参与成员关系，只有文件夹可拥有子节点；老数据 parent_id=NULL 留在收藏根级平铺。选中文件夹浏览=全部子孙收藏集成员的去重并集（`getCollectionImageIds` 递归语义，按各图最早加入时间排序）；文件夹计数同为递归并集去重（一图多集不重复计）。`moveCollection` 拒绝非文件夹目标与成环移动（UI 层和 DB 层双校验）；非空文件夹禁止删除；`reorderCollections` 按同父级分组重排并写回 parent_id。收藏操作只动链接表（image_id 锚定），不触碰文件路径；磁盘文件移动=前端移动当场 `updateFilePath` 直更 DB + 扫描器 size+mtime 签名匹配兜底（签名命中还要求原路径文件已不存在才判移动，同签名副本按新文件入库不抢 id）；签名失配则旧行软删、收藏跟丢。分类树展开状态持久化于 `gallery_category_tree_expanded_ids`（重启恢复）；「移动到…」对话框展开状态为会话级（重启重置）。
 - 在线 AItag 列表走 `/api/ai_works_search`，详情走 `/api/work/{id}`；列表图使用 pximg 缩略图并带 Pixiv Referer。详情元数据优先读取 `images[].ai_json`，顶层 `model` 可作为 Source 兜底。作者搜索有一级返回快照，晚到请求不得覆盖原页面。
 - 元数据解析按文件签名和统一读取链执行，细节见 `.kimi-code/skills/nai/refs/metadata.md`；不要按扩展名判断 PNG/WebP/JPEG 或 NAI 版本。
 
