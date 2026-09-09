@@ -173,6 +173,14 @@ GallerySourceException mapGalleryDioException(
     );
   }
   final status = error.response?.statusCode;
+  if (status == 401) {
+    return GallerySourceException(
+      GallerySourceErrorCode.credentialsInvalid,
+      source: source,
+      statusCode: status,
+      cause: error,
+    );
+  }
   if (status == 404) {
     return GallerySourceException(
       GallerySourceErrorCode.detailNotFound,

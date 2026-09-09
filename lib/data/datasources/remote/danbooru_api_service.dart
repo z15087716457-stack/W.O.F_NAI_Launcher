@@ -256,7 +256,14 @@ class DanbooruApiService {
 
   // ==================== 收藏夹 ====================
 
-  Future<List<DanbooruPost>> getFavorites({
+  /// 获取当前用户的收藏帖子。
+  ///
+  /// `/favorites.json` 默认只返回扁平的 `id/user_id/post_id`（不嵌套 post），
+  /// 需按 `id:` 元标签分批回填帖子（Danbooru 单次最多查 100 个 id，已删除
+  /// 帖不返回，与浏览口径一致）；若响应嵌入了完整 post 则直接采用，不再
+  /// 发回填请求。`rawCount` 为收藏条目数（含已删除帖），供调用方判断分页
+  /// 是否还有下一页。
+  Future<({List<DanbooruPost> posts, int rawCount})> getFavorites({
     int? userId,
     dynamic page = 1,
     int limit = 40,
@@ -277,16 +284,76 @@ class DanbooruApiService {
       ),
     );
 
+    if (response.data is! List) {
+      return (posts: const <DanbooruPost>[], rawCount: 0);
+    }
+    final entries = (response.data as List)
+        .whereType<Map<String, dynamic>>()
+        .toList();
+
+    final resolved = List<DanbooruPost?>.filled(entries.length, null);
+    final pendingIndexes = <int>[];
+    final pendingIds = <int>[];
+    for (var i = 0; i < entries.length; i++) {
+      final post = entries[i]['post'];
+      if (post is Map<String, dynamic>) {
+        resolved[i] = DanbooruPost.fromJson(post);
+        continue;
+      }
+      final postId = _coercePostId(entries[i]['post_id']);
+      if (postId == null) continue;
+      pendingIndexes.add(i);
+      pendingIds.add(postId);
+    }
+    if (pendingIds.isNotEmpty) {
+      final byId = <int, DanbooruPost>{};
+      for (var start = 0; start < pendingIds.length; start += _idBatchSize) {
+        final chunk = pendingIds.skip(start).take(_idBatchSize).toList();
+        for (final post in await _fetchPostsByIds(chunk)) {
+          byId[post.id] = post;
+        }
+      }
+      for (var k = 0; k < pendingIndexes.length; k++) {
+        resolved[pendingIndexes[k]] = byId[pendingIds[k]];
+      }
+    }
+    return (
+      posts: resolved.whereType<DanbooruPost>().toList(),
+      rawCount: entries.length,
+    );
+  }
+
+  /// Danbooru `id:` 元标签单次查询的 id 数量上限
+  static const int _idBatchSize = 100;
+
+  int? _coercePostId(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  Future<List<DanbooruPost>> _fetchPostsByIds(List<int> ids) async {
+    if (ids.isEmpty) return const <DanbooruPost>[];
+    final response = await _dio.get(
+      '$_baseUrl$_postsEndpoint',
+      queryParameters: {
+        'tags': 'id:${ids.join(',')}',
+        'limit': ids.length.clamp(1, _maxLimit),
+      },
+      options: Options(
+        receiveTimeout: _timeout,
+        sendTimeout: _timeout,
+        headers: _getHeaders(),
+      ),
+    );
+
     if (response.data is List) {
       return (response.data as List)
-          .whereType<Map<String, dynamic>>()
-          .where((fav) => fav['post'] != null)
-          .map(
-            (fav) => DanbooruPost.fromJson(fav['post'] as Map<String, dynamic>),
-          )
+          .map((item) => DanbooruPost.fromJson(item as Map<String, dynamic>))
           .toList();
     }
-    return [];
+    return const <DanbooruPost>[];
   }
 
   Future<bool> addFavorite(int postId) async {
