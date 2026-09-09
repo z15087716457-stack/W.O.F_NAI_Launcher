@@ -168,6 +168,10 @@ class StorageKeys {
   static const String galleryCategoryTreeExpandedIds =
       'gallery_category_tree_expanded_ids';
 
+  /// 本地画廊分类树收藏区与分类区的高度分割比例（0.2~0.8，默认 0.45）
+  static const String gallerySidebarCollectionSplit =
+      'gallery_sidebar_collection_split';
+
   /// 本地画廊逻辑列宽（px，140~480，默认 260）
   static const String localGalleryColumnWidth = 'local_gallery_column_width';
 

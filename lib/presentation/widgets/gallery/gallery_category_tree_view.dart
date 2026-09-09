@@ -13,6 +13,7 @@ import '../../../data/models/gallery/local_image_record.dart';
 import '../../providers/gallery_category_provider.dart'
     show collectionSelectedIdPrefix;
 import '../common/themed_divider.dart';
+import '../../themes/theme_extension.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'gallery_scan_progress_panel.dart';
 import '../../../core/storage/local_storage_service.dart';
@@ -109,6 +110,9 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
   final Set<String> _expandedIds = {};
   String? _hoveredCategoryId;
   Timer? _autoExpandTimer;
+  double _splitRatio = 0.45;
+  double _dragStartRatio = 0.45;
+  double _dragStartGlobalY = 0.0;
 
   @override
   void initState() {
@@ -117,6 +121,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     _expandedIds.addAll(
       LocalStorageService().getGalleryCategoryTreeExpandedIds(),
     );
+    _splitRatio = LocalStorageService().getGallerySidebarCollectionSplit();
   }
 
   /// 展开状态持久化（分类与收藏集文件夹混存，id 命名空间不冲突）
@@ -124,6 +129,11 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     LocalStorageService().setGalleryCategoryTreeExpandedIds(
       _expandedIds.toList(),
     );
+  }
+
+  /// 收藏区与分类区高度分割比例持久化
+  void _persistSplitRatio() {
+    LocalStorageService().setGallerySidebarCollectionSplit(_splitRatio);
   }
 
   final Set<String> _superDraggingCategoryIds = {};
@@ -144,6 +154,36 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     });
   }
 
+  List<Widget> _buildCollectionSectionEntries(ThemeData theme) {
+    return [
+      _buildImageDropTarget(
+        categoryId: null,
+        child: _CategoryItem(
+          icon: Icons.photo_library_outlined,
+          label: context.l10n.localGallery_allImages,
+          count: widget.totalImageCount,
+          isSelected: widget.selectedCategoryId == null,
+          onTap: () => widget.onCategorySelected(null),
+        ),
+      ),
+      _CategoryItem(
+        icon: widget.selectedCategoryId == 'favorites'
+            ? Icons.favorite
+            : Icons.favorite_border,
+        iconColor: Colors.red.shade400,
+        label: context.l10n.common_favorite,
+        count: widget.favoriteCount,
+        isSelected: widget.selectedCategoryId == 'favorites',
+        onTap: () => widget.onCategorySelected('favorites'),
+        onHoverAction: widget.onCreateCollection != null
+            ? () => _showCreateCollectionMenu(context, null)
+            : null,
+      ),
+      // 收藏集（「收藏」下方的缩进子条目，链接式成员）
+      ..._buildCollectionItems(theme),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -154,47 +194,74 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
                 _showEmptyAreaContextMenu(context, details.globalPosition)
           : null,
       behavior: HitTestBehavior.translucent,
-      child: Column(
-        children: [
-          // 分类树列表
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              children: [
-                _buildImageDropTarget(
-                  categoryId: null,
-                  child: _CategoryItem(
-                    icon: Icons.photo_library_outlined,
-                    label: context.l10n.localGallery_allImages,
-                    count: widget.totalImageCount,
-                    isSelected: widget.selectedCategoryId == null,
-                    onTap: () => widget.onCategorySelected(null),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final totalHeight = constraints.maxHeight;
+          final topFlex = (_splitRatio * 1000).round().clamp(1, 999);
+          final bottomFlex = ((1.0 - _splitRatio) * 1000).round().clamp(1, 999);
+
+          return Column(
+            children: [
+              if (widget.categories.isEmpty)
+                // 退化规则：分类为空时保持单 ListView 结构，不拆区、不显示手柄
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    children: [
+                      ..._buildCollectionSectionEntries(theme),
+                      if (widget.categories.isNotEmpty)
+                        const ThemedDivider(
+                          height: 16,
+                          indent: 12,
+                          endIndent: 12,
+                        ),
+                      ..._buildRootCategoryEntries(theme),
+                    ],
+                  ),
+                )
+              else ...[
+                // 上区：全部图片 + 收藏 + 收藏集（独立滚动）
+                Expanded(
+                  flex: topFlex,
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    children: _buildCollectionSectionEntries(theme),
                   ),
                 ),
-                _CategoryItem(
-                  icon: widget.selectedCategoryId == 'favorites'
-                      ? Icons.favorite
-                      : Icons.favorite_border,
-                  iconColor: Colors.red.shade400,
-                  label: context.l10n.common_favorite,
-                  count: widget.favoriteCount,
-                  isSelected: widget.selectedCategoryId == 'favorites',
-                  onTap: () => widget.onCategorySelected('favorites'),
-                  onHoverAction: widget.onCreateCollection != null
-                      ? () => _showCreateCollectionMenu(context, null)
-                      : null,
+                // 拖拽手柄（替代原 ThemedDivider 位置）
+                _GallerySidebarResizeHandle(
+                  key: const Key('gallery-sidebar-resize-handle'),
+                  onVerticalDragStart: (details) {
+                    _dragStartRatio = _splitRatio;
+                    _dragStartGlobalY = details.globalPosition.dy;
+                  },
+                  onVerticalDragUpdate: (details) {
+                    if (totalHeight > 0 && !totalHeight.isInfinite) {
+                      final dy = details.globalPosition.dy - _dragStartGlobalY;
+                      final newRatio = (_dragStartRatio + dy / totalHeight)
+                          .clamp(0.2, 0.8);
+                      if (newRatio != _splitRatio) {
+                        setState(() => _splitRatio = newRatio);
+                      }
+                    }
+                  },
+                  onVerticalDragEnd: (_) => _persistSplitRatio(),
+                  onVerticalDragCancel: () => _persistSplitRatio(),
                 ),
-                // 收藏集（「收藏」下方的缩进子条目，链接式成员）
-                ..._buildCollectionItems(theme),
-                if (widget.categories.isNotEmpty)
-                  const ThemedDivider(height: 16, indent: 12, endIndent: 12),
-                ..._buildRootCategoryEntries(theme),
+                // 下区：分类树（独立滚动）
+                Expanded(
+                  flex: bottomFlex,
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    children: _buildRootCategoryEntries(theme),
+                  ),
+                ),
               ],
-            ),
-          ),
-          // 扫描进度面板（底部）
-          const GalleryScanProgressPanel(),
-        ],
+              // 扫描进度面板（底部）
+              const GalleryScanProgressPanel(),
+            ],
+          );
+        },
       ),
     );
   }
@@ -1283,6 +1350,86 @@ class _CategoryItemState extends State<_CategoryItem> {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// 本地画廊左侧栏收藏区与分类区之间的水平拖拽手柄
+class _GallerySidebarResizeHandle extends StatefulWidget {
+  final GestureDragStartCallback onVerticalDragStart;
+  final GestureDragUpdateCallback onVerticalDragUpdate;
+  final GestureDragEndCallback onVerticalDragEnd;
+  final GestureDragCancelCallback? onVerticalDragCancel;
+
+  const _GallerySidebarResizeHandle({
+    super.key,
+    required this.onVerticalDragStart,
+    required this.onVerticalDragUpdate,
+    required this.onVerticalDragEnd,
+    this.onVerticalDragCancel,
+  });
+
+  @override
+  State<_GallerySidebarResizeHandle> createState() =>
+      _GallerySidebarResizeHandleState();
+}
+
+class _GallerySidebarResizeHandleState
+    extends State<_GallerySidebarResizeHandle> {
+  bool _hovered = false;
+  bool _dragging = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final extension = theme.extension<AppThemeExtension>();
+    final isDark = theme.brightness == Brightness.dark;
+
+    final normalDividerColor =
+        extension?.dividerColor ??
+        (isDark
+            ? Colors.white.withValues(alpha: 0.1)
+            : Colors.black.withValues(alpha: 0.1));
+    final highlightColor = theme.colorScheme.primary;
+    final isActive = _hovered || _dragging;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.resizeUpDown,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onVerticalDragStart: (details) {
+          setState(() => _dragging = true);
+          widget.onVerticalDragStart(details);
+        },
+        onVerticalDragUpdate: widget.onVerticalDragUpdate,
+        onVerticalDragEnd: (details) {
+          setState(() => _dragging = false);
+          widget.onVerticalDragEnd(details);
+        },
+        onVerticalDragCancel: () {
+          setState(() => _dragging = false);
+          widget.onVerticalDragCancel?.call();
+        },
+        child: Container(
+          height: 10.0,
+          color: Colors.transparent,
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              height: isActive ? 2.0 : 1.0,
+              margin: const EdgeInsets.symmetric(horizontal: 12.0),
+              decoration: BoxDecoration(
+                color: isActive
+                    ? highlightColor.withValues(alpha: 0.8)
+                    : normalDividerColor,
+                borderRadius: BorderRadius.circular(1.0),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

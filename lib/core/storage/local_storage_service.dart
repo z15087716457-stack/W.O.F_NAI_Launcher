@@ -302,6 +302,25 @@ class LocalStorageService {
     await setSetting(StorageKeys.galleryCategoryTreeExpandedIds, ids);
   }
 
+  /// 获取本地画廊分类树收藏区与分类区的高度分割比例 (0.2~0.8，默认 0.45)
+  double getGallerySidebarCollectionSplit() {
+    final value = getSetting(StorageKeys.gallerySidebarCollectionSplit);
+    if (value is num) {
+      return value.toDouble().clamp(0.2, 0.8);
+    }
+    return 0.45;
+  }
+
+  /// 保存本地画廊分类树收藏区与分类区的高度分割比例
+  Future<void> setGallerySidebarCollectionSplit(double ratio) async {
+    // 与 getSetting 同款守卫：box 未打开（如 widget 测试环境）直接跳过
+    if (!Hive.isBoxOpen(StorageKeys.settingsBox)) return;
+    await setSetting(
+      StorageKeys.gallerySidebarCollectionSplit,
+      ratio.clamp(0.2, 0.8),
+    );
+  }
+
   // ==================== Quality Preset (新版) ====================
 
   /// 获取质量词预设模式 (默认 0 = naiDefault)
