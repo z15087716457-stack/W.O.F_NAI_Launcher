@@ -1477,6 +1477,26 @@ class GalleryDataSource extends EnhancedBaseDataSource
     );
   }
 
+  /// 获取所有收藏图片的路径（轻量查询，仅拉取 file_path 列，用于侧栏计数等价过滤）
+  Future<List<String>> getFavoriteFilePaths() async {
+    return await execute(
+      'getFavoriteFilePaths',
+      (db) async {
+        final results = await db.rawQuery('''
+          SELECT i.file_path FROM $_favoritesTable f
+          INNER JOIN $_imagesTable i ON i.id = f.image_id
+          WHERE i.is_deleted = 0
+        ''');
+        return results
+            .map((row) => row['file_path'] as String?)
+            .whereType<String>()
+            .toList(growable: false);
+      },
+      timeout: const Duration(seconds: 10),
+      maxRetries: 3,
+    );
+  }
+
   Future<List<int>> getFavoriteImageIds() async {
     await loadFavoritesCache();
     return _favoriteCache.toList();
@@ -2163,8 +2183,12 @@ class GalleryDataSource extends EnhancedBaseDataSource
         return await execute(
           'getAllImages',
           (db) async {
+            // L8 性能优化：将全量 SELECT * 收窄为扫描器预载签名所需的核心字段
+            // （id, file_path, file_size, modified_at, metadata_status, last_scanned_at, is_deleted），
+            // 未选取的列（width/height/resolution/created_at 等）在 GalleryImageRecord.fromMap 中自动使用默认值填充。
             final results = await db.rawQuery('''
-                SELECT * FROM $_imagesTable
+                SELECT id, file_path, file_size, modified_at, metadata_status, last_scanned_at, is_deleted
+                FROM $_imagesTable
                 WHERE is_deleted = 0
                 ORDER BY modified_at DESC
                 ''');

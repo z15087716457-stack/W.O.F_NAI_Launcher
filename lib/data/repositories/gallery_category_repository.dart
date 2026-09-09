@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -17,6 +18,8 @@ import '../models/gallery/gallery_category.dart';
 /// 画廊分类仓库
 class GalleryCategoryRepository {
   GalleryCategoryRepository._();
+  @visibleForTesting
+  GalleryCategoryRepository.forTesting();
   static final GalleryCategoryRepository instance =
       GalleryCategoryRepository._();
 
@@ -54,6 +57,27 @@ class GalleryCategoryRepository {
     return rootPath != null
         ? p.join(rootPath, _suppressedCategoriesFileName)
         : null;
+  }
+
+  /// 检查分类配置文件是否存在（用于区分新安装与空分类配置）
+  Future<bool> hasCategoriesConfigFile() async {
+    final filePath = await _getCategoriesFilePath();
+    if (filePath == null) return false;
+    return await File(filePath).exists();
+  }
+
+  /// 检查分类配置文件是否真正为空（不存在、空文本或空数组 `[]`）
+  Future<bool> isCategoriesConfigGenuinelyEmpty() async {
+    try {
+      final filePath = await _getCategoriesFilePath();
+      if (filePath == null) return true;
+      final file = File(filePath);
+      if (!await file.exists()) return true;
+      final content = (await file.readAsString()).trim();
+      return content.isEmpty || content == '[]';
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<List<GalleryCategory>> loadCategories() async {

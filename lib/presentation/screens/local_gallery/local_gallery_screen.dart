@@ -111,7 +111,6 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       await _restoreGalleryPreferences();
       await _checkPermissionsAndScan();
       await _showFirstTimeTip();
-      await _autoRefresh();
     });
 
     _lifecycleListener = AppLifecycleListener(
@@ -761,7 +760,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       );
     }
 
-    if (state.isLoading && state.allFiles.isEmpty) {
+    if ((!state.isInitialized || state.isLoading) && state.allFiles.isEmpty) {
       return const GalleryLoadingView();
     }
 

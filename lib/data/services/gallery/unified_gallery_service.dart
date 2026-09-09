@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -267,6 +268,9 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
 
   @override
   int get totalCount => _allFiles.length;
+
+  @visibleForTesting
+  List<File> get allFilesForTesting => List.unmodifiable(_allFiles);
 
   @override
   FilterCriteria get currentFilter => _currentFilter;
@@ -1242,20 +1246,14 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
 
     if (_allFiles.isEmpty) return 0;
 
-    final totalFavorites = await _dataSource.getFavoriteCount();
-    if (totalFavorites == 0) return 0;
+    final favoritePaths = await _dataSource.getFavoriteFilePaths();
+    if (favoritePaths.isEmpty) return 0;
 
-    final favoriteRecords = await _dataSource.queryFavoriteImages(
-      limit: totalFavorites,
-    );
     final visiblePaths = {
       for (final file in _allFiles) galleryFilePathKey(file.path),
     };
-    return favoriteRecords
-        .where(
-          (record) =>
-              visiblePaths.contains(galleryFilePathKey(record.filePath)),
-        )
+    return favoritePaths
+        .where((path) => visiblePaths.contains(galleryFilePathKey(path)))
         .length;
   }
 

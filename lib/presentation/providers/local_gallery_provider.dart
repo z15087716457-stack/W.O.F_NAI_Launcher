@@ -343,6 +343,19 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     try {
       final service = await getService();
 
+      // 一次性应用初始化前恢复的排序偏好
+      if (state.sortField != GallerySortField.modifiedAt ||
+          state.sortDirection != GallerySortDirection.descending) {
+        await service.setSort(
+          GallerySort(field: state.sortField, direction: state.sortDirection),
+        );
+      }
+
+      // 一次性应用初始化前恢复的过滤偏好（如 NAI-only 等）
+      if (state.filterCriteria.hasFilters) {
+        await service.applyFilter(state.filterCriteria);
+      }
+
       // 检测是否为首次大量索引
       final totalCount = service.totalCount;
       final filteredCount = service.filteredCount;
@@ -830,6 +843,9 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
 
     _setState(state.copyWith(sortField: field, sortDirection: direction));
 
+    // 未初始化时不触发底层服务查询与分页，由 initialize() 一次性应用
+    if (!state.isInitialized) return;
+
     try {
       final service = await getService();
       await service.setSort(GallerySort(field: field, direction: direction));
@@ -884,6 +900,9 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     _setState(
       state.copyWith(filterCriteria: criteria.copyWith(naiOnly: value)),
     );
+
+    // 未初始化时不触发底层过滤查询，由 initialize() 一次性应用
+    if (!state.isInitialized) return;
 
     await _applyFilters();
   }
@@ -1057,7 +1076,11 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       }
 
       _setState(
-        state.copyWith(groupedImages: allRecords, isGroupedLoading: false),
+        state.copyWith(
+          groupedImages: allRecords,
+          isGroupedLoading: false,
+          isLoading: false,
+        ),
       );
     } catch (e) {
       AppLogger.e(
@@ -1066,7 +1089,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
         null,
         'LocalGalleryNotifier',
       );
-      _setState(state.copyWith(isGroupedLoading: false));
+      _setState(state.copyWith(isGroupedLoading: false, isLoading: false));
     }
   }
 
@@ -1174,8 +1197,10 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   /// 状态的隐式约定）。收藏增删等「内容变更」不走本方法，
   /// 见 [_reloadCurrentView]（保持页码）。
   Future<void> _applyFilters() async {
+    if (!state.isInitialized) return;
+
     // 回第一页是条件变更的固定语义，统一在此收敛。
-    _setState(state.copyWith(currentPage: 0));
+    _setState(state.copyWith(currentPage: 0, isLoading: true));
     try {
       final service = await getService();
       final criteria = state.filterCriteria;
@@ -1202,6 +1227,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           'Ignoring stale filter result: search="${criteria.searchQuery}", tags=${criteria.selectedTags}',
           'LocalGalleryNotifier',
         );
+        _setState(state.copyWith(isLoading: false));
         return;
       }
 
@@ -1229,6 +1255,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       AppLogger.e('Filter failed', e, null, 'LocalGalleryNotifier');
       _setState(
         state.copyWith(
+          isLoading: false,
           error: LocalGalleryError(
             LocalGalleryErrorCode.filterFailed,
             details: e.message,
@@ -1237,6 +1264,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       );
     } catch (e) {
       AppLogger.e('Failed to apply filters', e, null, 'LocalGalleryNotifier');
+      _setState(state.copyWith(isLoading: false));
     }
   }
 

@@ -65,7 +65,14 @@ class GalleryCategoryState with _$GalleryCategoryState {
 /// 画廊分类状态管理
 @riverpod
 class GalleryCategoryNotifier extends _$GalleryCategoryNotifier {
-  final _repository = GalleryCategoryRepository.instance;
+  @visibleForTesting
+  static GalleryCategoryRepository? testRepositoryOverride;
+
+  GalleryCategoryRepository get _repository =>
+      testRepositoryOverride ?? GalleryCategoryRepository.instance;
+
+  Future<void>? _loadInFlight;
+  Future<void>? _syncInFlight;
 
   @override
   GalleryCategoryState build() {
@@ -76,10 +83,38 @@ class GalleryCategoryNotifier extends _$GalleryCategoryNotifier {
 
   /// 加载分类列表
   Future<void> _loadCategories() async {
+    if (_loadInFlight != null) {
+      return _loadInFlight!;
+    }
+
+    final future = _doLoadCategories();
+    _loadInFlight = future;
+    bool needsInitialSync = false;
+    try {
+      needsInitialSync = await future;
+    } finally {
+      if (_loadInFlight == future) {
+        _loadInFlight = null;
+      }
+    }
+
+    if (needsInitialSync) {
+      await syncWithFileSystem();
+    }
+  }
+
+  Future<bool> _doLoadCategories() async {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       final categories = await _repository.loadCategories();
+
+      // 新安装首次启动检查：若无分类配置文件且未读出分类，标记需要在加载完成后触发首次同步
+      final hasConfigFile = await _repository.hasCategoriesConfigFile();
+      if (!hasConfigFile && categories.isEmpty) {
+        state = state.copyWith(isLoading: false);
+        return true;
+      }
 
       // 更新每个分类的图片数量
       final updatedCategories = <GalleryCategory>[];
@@ -89,6 +124,7 @@ class GalleryCategoryNotifier extends _$GalleryCategoryNotifier {
       }
 
       state = state.copyWith(categories: updatedCategories, isLoading: false);
+      return false;
     } catch (e) {
       AppLogger.e('加载分类失败', e);
       state = state.copyWith(
@@ -98,6 +134,7 @@ class GalleryCategoryNotifier extends _$GalleryCategoryNotifier {
           details: e.toString(),
         ),
       );
+      return false;
     }
   }
 
@@ -108,11 +145,72 @@ class GalleryCategoryNotifier extends _$GalleryCategoryNotifier {
 
   /// 与文件系统同步
   Future<void> syncWithFileSystem() async {
+    if (_syncInFlight != null) {
+      return _syncInFlight!;
+    }
+
+    final future = _doSyncWithFileSystem();
+    _syncInFlight = future;
+    try {
+      await future;
+    } finally {
+      if (_syncInFlight == future) {
+        _syncInFlight = null;
+      }
+    }
+  }
+
+  Future<void> _doSyncWithFileSystem() async {
+    // 1. 若 _loadCategories 在途或 state.isLoading，等待其完成（有界等待，最多 10s）
+    if (_loadInFlight != null) {
+      try {
+        await _loadInFlight!.timeout(const Duration(seconds: 10));
+      } catch (e) {
+        AppLogger.w('等待分类加载完成超时: $e', 'GalleryCategoryNotifier');
+      }
+    }
+
+    var baseCategories = state.categories;
+
+    // 2. 若 state.categories 仍为空（首次/加载异常），先从 repository 兜底重读
+    if (baseCategories.isEmpty) {
+      try {
+        baseCategories = await _repository.loadCategories();
+      } catch (e) {
+        AppLogger.w('兜底读取分类失败: $e', 'GalleryCategoryNotifier');
+      }
+    }
+
+    // 3. 守卫：如果存在配置文件但读出的分类仍为空（如 I/O 或解析异常），
+    // 绝不能把空集当全量分类送入 sync，否则会导致所有目录被当成新目录重分配 UUID 覆写配置。
+    final hasConfigFile = await _repository.hasCategoriesConfigFile();
+    if (hasConfigFile && baseCategories.isEmpty) {
+      final isGenuinelyEmpty = await _repository
+          .isCategoriesConfigGenuinelyEmpty();
+      if (!isGenuinelyEmpty) {
+        AppLogger.e(
+          '分类配置文件存在且非空，但读取结果为空，中止 syncWithFileSystem 以防止 UUID 重写破坏分类树',
+          null,
+          null,
+          'GalleryCategoryNotifier',
+        );
+        state = state.copyWith(
+          isSyncing: false,
+          error: const CategoryOperationError(
+            CategoryOperationErrorCode.syncFailed,
+            details:
+                'Categories config unreadable; sync aborted to protect category IDs',
+          ),
+        );
+        return;
+      }
+    }
+
     state = state.copyWith(isSyncing: true, error: null);
 
     try {
       final syncedCategories = await _repository.syncWithFileSystem(
-        state.categories,
+        baseCategories,
       );
 
       // 保存同步后的分类

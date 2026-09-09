@@ -399,14 +399,14 @@ class WarmupNotifier extends _$WarmupNotifier {
     // 不需要额外的后台导入任务
   }
 
-  /// 启动全局画廊扫描（预热结束后自动调用，不绑定页面）
+  /// 启动全局画廊扫描（预热结束后推迟启动，把 I/O 让给首屏渲染）
   ///
   /// 这会触发 galleryServiceProvider 的初始化，从而启动后台索引扫描
   void _startGlobalGalleryScan() {
-    AppLogger.i('[Warmup] 预热完成，启动全局画廊扫描...', 'Warmup');
+    AppLogger.i('[Warmup] 预热完成，推迟启动全局画廊扫描以优先保障首屏渲染...', 'Warmup');
 
-    // 使用 Future.microtask 延迟到当前帧完成后执行，避免阻塞 UI
-    Future.microtask(() async {
+    // L8 性能优化：推迟 2.5 秒启动全局扫描，避免与首屏页面加载争夺磁盘 I/O 和数据库连接
+    Future.delayed(const Duration(milliseconds: 2500), () async {
       try {
         // 【修复】读取 provider 会触发 GalleryService 的创建和初始化
         // 但需要等待真正的初始化完成，扫描才会开始
