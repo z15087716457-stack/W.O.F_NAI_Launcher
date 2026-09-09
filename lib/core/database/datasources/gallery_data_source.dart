@@ -343,7 +343,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
 
               final dbResult = await db.rawQuery('''
                   SELECT id, file_path FROM $_imagesTable
-                  WHERE file_path IN ($placeholders) AND is_deleted = 0
+                  WHERE file_path IN ($placeholders) AND +is_deleted = 0
                   ''', chunk);
 
               for (final row in dbResult) {
@@ -440,7 +440,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
 
                 final dbResults = await db.rawQuery('''
                     SELECT * FROM $_imagesTable
-                    WHERE id IN ($placeholders) AND is_deleted = 0
+                    WHERE id IN ($placeholders) AND +is_deleted = 0
                     ''', batch);
 
                 for (final row in dbResults) {

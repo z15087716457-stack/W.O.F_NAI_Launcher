@@ -28,6 +28,9 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       // 迁移：收藏集成员补写进收藏表（一次性，gallery_meta 记完成标记）
       await _migrateCollectionMembersToFavorites(db);
 
+      // 迁移：清理冗余毒瘤索引并执行一次 ANALYZE（一次性，gallery_meta 记完成标记）
+      await _migrateDropRedundantIndexesAndAnalyze(db);
+
       AppLogger.i('Gallery tables initialized', 'GalleryDS');
     });
   }
@@ -170,6 +173,51 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
     }
   }
 
+  /// 迁移：清理冗余毒瘤索引并执行一次 ANALYZE（按版本一次性）。
+  ///
+  /// 旧索引 `idx_gallery_images_composite` 与 `idx_gallery_images_is_deleted`
+  /// 前导列为区分度极差的 `is_deleted`，导致 SQLite 优化器在 IN 查询时
+  /// 放弃主键与唯一索引转为全扫 4.8 万行。
+  /// 删除后其能力由部分索引 `idx_gallery_images_favorite` 与 `idx_gallery_images_modified_at`
+  /// 覆盖。DROP 后执行一次 `ANALYZE` 刷新统计信息（写入 gallery_meta 避免重复执行）。
+  Future<void> _migrateDropRedundantIndexesAndAnalyze(Database db) async {
+    try {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ${GalleryDataSource._galleryMetaTable} (
+          key TEXT PRIMARY KEY,
+          value TEXT
+        )
+      ''');
+      final done = await db.rawQuery(
+        "SELECT value FROM ${GalleryDataSource._galleryMetaTable} "
+        "WHERE key = 'drop_redundant_indexes_analyze_v1'",
+      );
+      if (done.isNotEmpty) return;
+
+      await db.execute('DROP INDEX IF EXISTS idx_gallery_images_composite');
+      await db.execute('DROP INDEX IF EXISTS idx_gallery_images_is_deleted');
+      await db.execute('ANALYZE');
+
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await db.insert(GalleryDataSource._galleryMetaTable, {
+        'key': 'drop_redundant_indexes_analyze_v1',
+        'value': '$now',
+      });
+      AppLogger.i(
+        '[Migration] Dropped redundant gallery indexes and executed ANALYZE',
+        'GalleryDS',
+      );
+    } catch (e, stack) {
+      // 迁移失败不阻止应用启动（不落标记：下次启动重试）
+      AppLogger.e(
+        '[Migration] Failed to drop redundant indexes or execute ANALYZE',
+        e,
+        stack,
+        'GalleryDS',
+      );
+    }
+  }
+
   Future<void> _createImagesTable(Database db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS ${GalleryDataSource._imagesTable} (
@@ -228,22 +276,10 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       ON ${GalleryDataSource._imagesTable}(metadata_status) WHERE is_deleted = 0
     ''');
 
-    // 核心索引：is_deleted 过滤（软删除）
-    await db.execute('''
-      CREATE INDEX IF NOT EXISTS idx_gallery_images_is_deleted
-      ON ${GalleryDataSource._imagesTable}(is_deleted, modified_at DESC)
-    ''');
-
     // 核心索引：画廊扫描性能优化 - 文件路径
     await db.execute('''
       CREATE INDEX IF NOT EXISTS idx_gallery_images_file_path
       ON ${GalleryDataSource._imagesTable}(file_path) WHERE is_deleted = 0
-    ''');
-
-    // 复合索引：多条件查询优化
-    await db.execute('''
-      CREATE INDEX IF NOT EXISTS idx_gallery_images_composite
-      ON ${GalleryDataSource._imagesTable}(is_deleted, is_favorite, modified_at DESC)
     ''');
   }
 
@@ -530,7 +566,7 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
         );
         AppLogger.i(
           '[Migration] Added parent_id column to '
-          '${GalleryDataSource._collectionsTable}',
+              '${GalleryDataSource._collectionsTable}',
           'GalleryDS',
         );
       }
@@ -541,7 +577,7 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
         );
         AppLogger.i(
           '[Migration] Added is_folder column to '
-          '${GalleryDataSource._collectionsTable}',
+              '${GalleryDataSource._collectionsTable}',
           'GalleryDS',
         );
       }

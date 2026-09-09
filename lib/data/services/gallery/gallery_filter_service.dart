@@ -515,7 +515,7 @@ class GalleryFilterService {
     try {
       // 使用高级搜索
       // dateEnd 与本地过滤路径（_filterByDateRange）保持一致：end 当天含入
-      final imageIds = await _dataSource.advancedSearch(
+      final searchResult = await _dataSource.advancedSearchResult(
         textQuery: criteria.searchQuery.toLowerCase().trim(),
         favoritesOnly: criteria.showFavoritesOnly,
         dateStart: criteria.dateStart,
@@ -554,9 +554,8 @@ class GalleryFilterService {
 
       if (cancelToken.isCancelled) return [];
 
-      // 获取图片记录
-      final images = await _dataSource.getImagesByIds(imageIds);
-      final validPaths = images.map((img) => img.filePath).toSet();
+      // 558 冗余 getImagesByIds 已消除：advancedSearchResult 直接返回 filePaths
+      final validPaths = searchResult.filePaths.toSet();
 
       // 只返回存在于 allFiles 中的文件
       return allFiles.where((file) => validPaths.contains(file.path)).toList();

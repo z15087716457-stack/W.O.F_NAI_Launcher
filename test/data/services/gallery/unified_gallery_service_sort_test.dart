@@ -248,6 +248,76 @@ void main() {
         ]);
       },
     );
+
+    test(
+      'non-dimension sort skips dimension query and sentinel prevents repeated query for null/zero dimensions',
+      () async {
+        await Future<void>.delayed(const Duration(milliseconds: 600));
+
+        // fileA: 300x300=90000; fileB: null 尺寸; fileC: 0 尺寸
+        await dataSource.upsertImage(
+          filePath: fileA.path,
+          fileName: 'a.png',
+          fileSize: 200,
+          width: 300,
+          height: 300,
+          createdAt: DateTime(2026, 8, 3, 10),
+          modifiedAt: DateTime(2026, 8, 3, 10),
+        );
+        await dataSource.upsertImage(
+          filePath: fileB.path,
+          fileName: 'b.png',
+          fileSize: 100,
+          width: null,
+          height: null,
+          createdAt: DateTime(2026, 8, 1, 10),
+          modifiedAt: DateTime(2026, 8, 1, 10),
+        );
+        await dataSource.upsertImage(
+          filePath: fileC.path,
+          fileName: 'c.png',
+          fileSize: 50,
+          width: 0,
+          height: 0,
+          createdAt: DateTime(2026, 8, 2, 10),
+          modifiedAt: DateTime(2026, 8, 2, 10),
+        );
+
+        // 1. 非尺寸排序（修改时间）：跳过尺寸补齐
+        await service.setSort(
+          const GallerySort(
+            field: GallerySortField.modifiedAt,
+            direction: GallerySortDirection.descending,
+          ),
+        );
+        var records = await service.getPage(0, pageSize: 10);
+        expect(records.map((r) => p.basename(r.path)), [
+          'a.png',
+          'c.png',
+          'b.png',
+        ]);
+
+        // 2. 切换至尺寸排序：面积 90000 的 a.png 排最前，b 和 c 记为哨兵（视同 0）
+        await service.setSort(
+          const GallerySort(
+            field: GallerySortField.imageDimensions,
+            direction: GallerySortDirection.descending,
+          ),
+        );
+        records = await service.getPage(0, pageSize: 10);
+        expect(p.basename(records.first.path), 'a.png');
+
+        // 3. 升序排序：a.png 应排最后，哨兵 b 和 c 仍视同 0 面积排在前面
+        await service.setSort(
+          const GallerySort(
+            field: GallerySortField.imageDimensions,
+            direction: GallerySortDirection.ascending,
+          ),
+        );
+        records = await service.getPage(0, pageSize: 10);
+        expect(p.basename(records.last.path), 'a.png');
+      },
+    );
   });
 }
 

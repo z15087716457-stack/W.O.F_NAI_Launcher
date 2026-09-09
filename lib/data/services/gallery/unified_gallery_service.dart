@@ -297,20 +297,22 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   /// 初始化（[_getAllImageFiles]）时所有条目都以 area: 0 入缓存，
   /// 因此这里对「无条目」和「有条目但 area==0」都要走 DB 补齐，
   /// 否则按图像尺寸排序永远拿到 0 面积而退化成文件名序。
-  Future<void> _ensureFileStats(List<File> files) async {
-    final needArea = files.where((file) {
-      final entry = _fileStats[file.path];
-      return entry == null || entry.area == 0;
-    }).toList();
-    if (needArea.isEmpty) return;
+  /// 面积缺失或无尺寸的哨兵标记（避免重复向 DB 发起无意义的尺寸查询）
+  static const int _sentinelArea = -1;
 
-    // stat 只补完全缺失的条目；已有条目（area==0）保留原 stat
-    final needStat = needArea
+  /// 补齐缺失的 stat 缓存（排序需要）；面积需要 DB 尺寸，仅在尺寸排序时补齐。
+  ///
+  /// 初始化（[_getAllImageFiles]）时所有条目都以 area: 0 入缓存。
+  /// 仅当当前排序字段为 [GallerySortField.imageDimensions] 时才发起 DB 尺寸补齐；
+  /// 查过 DB 但无尺寸（宽/高为空或 0）的文件标记为 [_sentinelArea] 哨兵，避免死循环补查。
+  Future<void> _ensureFileStats(List<File> files) async {
+    // 1. stat 只补完全缺失的条目（所有排序都依赖 modified/size 等基础属性）
+    final missingStatFiles = files
         .where((file) => !_fileStats.containsKey(file.path))
         .toList();
-    if (needStat.isNotEmpty) {
+    if (missingStatFiles.isNotEmpty) {
       await Future.wait(
-        needStat.map((file) async {
+        missingStatFiles.map((file) async {
           try {
             final stat = await file.stat();
             // created 与 DB created_at 口径一致：扫描路径写入的就是文件 mtime
@@ -327,24 +329,40 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       );
     }
 
-    // 面积：从 gallery_images 的 width×height 补齐（无尺寸文件保持 0）
+    // 2. 仅当按尺寸排序时才执行 DB 面积补齐；其他排序直接跳过
+    if (_sort.field != GallerySortField.imageDimensions) return;
+
+    // 3. 面积过滤：仅查未补齐过的条目（entry.area == 0 表示尚未查过；_sentinelArea 表示已查过确认无尺寸）
+    final needArea = files.where((file) {
+      final entry = _fileStats[file.path];
+      return entry == null || entry.area == 0;
+    }).toList();
+    if (needArea.isEmpty) return;
+
+    // 面积：从 gallery_images 的 width×height 补齐（无尺寸文件置为哨兵）
     final paths = needArea.map((file) => file.path).toList();
     try {
       final pathToIdMap = await _dataSource.getImageIdsByPaths(paths);
       final imageIds = pathToIdMap.values.whereType<int>().toList();
-      if (imageIds.isEmpty) return;
-      final records = await _dataSource.getImagesByIds(imageIds);
-      for (final record in records) {
-        final width = record.width;
-        final height = record.height;
-        if (width == null || height == null) continue;
-        final entry = _fileStats[record.filePath];
+      final records = imageIds.isNotEmpty
+          ? await _dataSource.getImagesByIds(imageIds)
+          : <GalleryImageRecord>[];
+      final recordByPath = {for (final r in records) r.filePath: r};
+
+      for (final file in needArea) {
+        final entry = _fileStats[file.path];
         if (entry == null) continue;
-        _fileStats[record.filePath] = (
+        final record = recordByPath[file.path];
+        final width = record?.width;
+        final height = record?.height;
+        final hasDimensions =
+            width != null && height != null && width > 0 && height > 0;
+
+        _fileStats[file.path] = (
           modified: entry.modified,
           created: entry.created,
           size: entry.size,
-          area: width * height,
+          area: hasDimensions ? width * height : _sentinelArea,
         );
       }
     } catch (e) {
@@ -372,8 +390,8 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
         fileNameB: p.basename(b.path),
         createdAtA: keyA.created,
         createdAtB: keyB.created,
-        imageAreaA: keyA.area,
-        imageAreaB: keyB.area,
+        imageAreaA: keyA.area > 0 ? keyA.area : 0,
+        imageAreaB: keyB.area > 0 ? keyB.area : 0,
       );
     });
   }
