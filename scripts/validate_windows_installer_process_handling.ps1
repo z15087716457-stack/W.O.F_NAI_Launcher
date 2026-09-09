@@ -92,12 +92,18 @@ function Start-HiddenProcess {
 function Invoke-SilentExecutable {
   param(
     [Parameter(Mandatory)]
-    [string]$Path
+    [string]$Path,
+    [string]$InstallDir
   )
 
+  $arguments = @('/S')
+  if (-not [string]::IsNullOrWhiteSpace($InstallDir)) {
+    # NSIS 约定：/D= 必须是最后一个参数且路径不带引号（测试用 TEMP 路径无空格）
+    $arguments += "/D=$InstallDir"
+  }
   $process = Start-Process `
     -FilePath $Path `
-    -ArgumentList '/S' `
+    -ArgumentList $arguments `
     -WindowStyle Hidden `
     -Wait `
     -PassThru
@@ -213,8 +219,54 @@ try {
   if (Test-Path -LiteralPath (Join-Path $installDir 'source-version.txt')) {
     throw 'The fail-closed installer copied files after process inspection failed.'
   }
+  if (-not (Test-Path -LiteralPath (Join-Path $installDir 'install_diagnostics.log'))) {
+    throw 'The blocked installer did not write install_diagnostics.log.'
+  }
 
-  Write-Host 'Windows installer process isolation and fail-closed checks passed.'
+  # 场景 C：查询失败但目标 exe 无进程占用（他目录实例在跑）→ 探锁放行 + 落诊断
+  $idleDir = Join-Path $tempRoot 'idle'
+  [void](New-Item -ItemType Directory -Path $idleDir -Force)
+  Copy-Item -LiteralPath $ping -Destination (Join-Path $idleDir $appName)
+  $idleExit = Invoke-SilentExecutable -Path $blockedInstaller -InstallDir $idleDir
+  if ($idleExit -ne 0) {
+    throw "Softened installer exited with code $idleExit instead of 0 while the target exe was idle."
+  }
+  if (-not (Test-Path -LiteralPath (Join-Path $idleDir 'source-version.txt'))) {
+    throw 'The softened installer did not copy its payload while the target exe was idle.'
+  }
+  if (-not (Test-Path -LiteralPath (Join-Path $idleDir 'install_diagnostics.log'))) {
+    throw 'The softened installer did not write install_diagnostics.log when proceeding.'
+  }
+  Assert-ProcessState `
+    -Process $otherProcess `
+    -HasExited $false `
+    -Message 'The softened installer stopped a same-named executable from another directory.'
+
+  $idleUninstallExit = Invoke-SilentExecutable -Path (Join-Path $idleDir 'Uninstall.exe')
+  if ($idleUninstallExit -ne 0) {
+    throw "Softened silent uninstaller exited with code $idleUninstallExit instead of 0."
+  }
+  Assert-ProcessState `
+    -Process $otherProcess `
+    -HasExited $false `
+    -Message 'The softened uninstaller stopped a same-named executable from another directory.'
+
+  # 场景 D：全新目录（目标 exe 不存在）→ 无锁放行
+  $freshDir = Join-Path $tempRoot 'fresh'
+  $freshExit = Invoke-SilentExecutable -Path $blockedInstaller -InstallDir $freshDir
+  if ($freshExit -ne 0) {
+    throw "Softened installer exited with code $freshExit instead of 0 on a fresh directory."
+  }
+  if (-not (Test-Path -LiteralPath (Join-Path $freshDir 'source-version.txt'))) {
+    throw 'The softened installer did not copy its payload into a fresh directory.'
+  }
+
+  $freshUninstallExit = Invoke-SilentExecutable -Path (Join-Path $freshDir 'Uninstall.exe')
+  if ($freshUninstallExit -ne 0) {
+    throw "Fresh-directory silent uninstaller exited with code $freshUninstallExit instead of 0."
+  }
+
+  Write-Host 'Windows installer process isolation, fail-closed and lock-probe softening checks passed.'
 } finally {
   foreach ($process in $script:StartedProcesses) {
     try {
@@ -230,6 +282,18 @@ try {
   $registryPath = "HKCU:\$uninstallKey"
   if (Test-Path -LiteralPath $registryPath) {
     Remove-Item -LiteralPath $registryPath -Recurse -Force
+  }
+
+  # 兜底清理测试安装器创建的快捷方式（正常路径由场景内卸载器回收）
+  $testMenuDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Aaalice NAI Launcher Process Test'
+  if (Test-Path -LiteralPath $testMenuDir) {
+    Remove-Item -LiteralPath $testMenuDir -Recurse -Force
+  }
+  $testDesktopLink = Join-Path `
+    ([Environment]::GetFolderPath('Desktop')) `
+    'Aaalice NAI Launcher Process Test.lnk'
+  if (Test-Path -LiteralPath $testDesktopLink) {
+    Remove-Item -LiteralPath $testDesktopLink -Force
   }
 
   if (Test-Path -LiteralPath $tempRoot) {

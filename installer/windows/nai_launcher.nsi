@@ -64,13 +64,18 @@ LangString AppRunningPrompt ${LANG_SIMPCHINESE} "检测到 ${APP_NAME} 仍在运
 LangString AppRunningPrompt ${LANG_ENGLISH} "${APP_NAME} is still running (closing its window may only hide it to the tray). Close it and continue setup?"
 LangString AppCloseFailed ${LANG_SIMPCHINESE} "无法关闭正在运行的 ${APP_NAME}。请从系统托盘退出应用后重试。"
 LangString AppCloseFailed ${LANG_ENGLISH} "Unable to close ${APP_NAME}. Exit it from the system tray and try again."
-LangString AppInspectionFailed ${LANG_SIMPCHINESE} "无法确认正在运行的 ${APP_NAME} 是否来自当前安装目录。为避免覆盖占用中的文件，请从系统托盘手动退出应用后重试。"
-LangString AppInspectionFailed ${LANG_ENGLISH} "Setup could not verify whether a running ${APP_NAME} belongs to this installation. Exit the app from the system tray and try again to avoid overwriting files in use."
+LangString AppInspectionFailed ${LANG_SIMPCHINESE} "无法确认正在运行的 ${APP_NAME} 是否来自当前安装目录，且安装目录内的 ${APP_EXE} 当前被占用。请从系统托盘退出应用后重试；若仍失败，可右键「开始」按钮以管理员身份运行终端，执行 taskkill /IM ${APP_EXE} /T /F 后重试。详情见安装目录下 install_diagnostics.log。"
+LangString AppInspectionFailed ${LANG_ENGLISH} "Setup could not verify whether a running ${APP_NAME} belongs to this installation, and ${APP_EXE} in the installation folder is currently locked. Exit the app from the system tray and try again; if it still fails, run $\"taskkill /IM ${APP_EXE} /T /F$\" in a terminal opened as administrator and retry. See install_diagnostics.log in the installation folder for details."
 
 Var TargetProcessId
 Var ProcessInspectionFailed
+Var ProcessInspectionStage
+Var ProcessInspectionLastError
+Var InspectionSuspectPid
+Var ProbeAllowsInstall
+Var ProbeLastError
 
-!macro DefineProcessFunctions Prefix
+!macro DefineProcessFunctions Prefix Mode
 Function ${Prefix}FindInstalledAppProcess
   Push $R0
   Push $R1
@@ -85,6 +90,9 @@ Function ${Prefix}FindInstalledAppProcess
 
   StrCpy $TargetProcessId "0"
   StrCpy $ProcessInspectionFailed "0"
+  StrCpy $ProcessInspectionStage ""
+  StrCpy $ProcessInspectionLastError ""
+  StrCpy $InspectionSuspectPid ""
   ClearErrors
   GetFullPathName $R9 "$INSTDIR\${APP_EXE}"
   IfErrors find_process_snapshot_failed
@@ -104,13 +112,16 @@ find_process_loop:
   System::Call 'kernel32::lstrcmpiW(w R8, w "${APP_EXE}") i .R3'
   StrCmp $R3 "0" 0 find_process_next
 
-  System::Call 'kernel32::OpenProcess(i ${PROCESS_QUERY_ACCESS}, i 0, i R4) p .R5'
+  System::Call 'kernel32::OpenProcess(i ${PROCESS_QUERY_ACCESS}, i 0, i R4) p .R5 ?e'
+  Pop $ProcessInspectionLastError
+  StrCpy $InspectionSuspectPid $R4
   StrCmp $R5 "0" find_process_inspection_failed
   System::Alloc ${PROCESS_PATH_BUFFER_BYTES}
   Pop $R6
   StrCmp $R6 "0" find_process_close_failed_handle
   StrCpy $R7 ${NSIS_MAX_STRLEN}
-  System::Call 'kernel32::QueryFullProcessImageNameW(p R5, i 0, p R6, *i R7) i .R8'
+  System::Call 'kernel32::QueryFullProcessImageNameW(p R5, i 0, p R6, *i R7) i .R8 ?e'
+  Pop $ProcessInspectionLastError
   System::Call 'kernel32::CloseHandle(p R5)'
   StrCmp $R8 "0" find_process_free_path_failed
   System::Call '*$R6(&w${NSIS_MAX_STRLEN} .R7)'
@@ -142,6 +153,7 @@ find_process_close_failed_handle:
 
 find_process_inspection_failed:
   StrCpy $ProcessInspectionFailed "1"
+  StrCpy $ProcessInspectionStage "query"
 
 find_process_cleanup:
   System::Free $R1
@@ -150,11 +162,13 @@ find_process_cleanup:
 
 find_process_enumeration_failed:
   StrCpy $ProcessInspectionFailed "1"
+  StrCpy $ProcessInspectionStage "enumeration"
   System::Call 'kernel32::CloseHandle(p R0)'
   Goto find_process_done
 
 find_process_snapshot_failed:
   StrCpy $ProcessInspectionFailed "1"
+  StrCpy $ProcessInspectionStage "snapshot"
 
 find_process_done:
   Pop $R9
@@ -193,6 +207,12 @@ silent_close_failed:
   Quit
 
 process_inspection_failed:
+  ; 进程查询失败不再直接阻断：先探目标 exe 文件锁并落诊断，
+  ; 能证明无占用（文件可写打开或不存在）则放行，真被锁住才阻断。
+  Call ${Prefix}HandleInspectionFailure
+  StrCmp $ProbeAllowsInstall "1" app_closed process_inspection_blocked
+
+process_inspection_blocked:
   IfSilent silent_inspection_failed 0
   MessageBox MB_ICONSTOP|MB_OK "$(AppInspectionFailed)"
   Abort
@@ -206,10 +226,102 @@ cancel_install:
 
 app_closed:
 FunctionEnd
+
+; 探测 $INSTDIR\${APP_EXE} 是否被占用：
+; 以 GENERIC_WRITE、共享模式 0、OPEN_EXISTING 打开——
+; 打开成功=无进程占用映像，可安全覆盖；ERROR_FILE_NOT_FOUND=全新安装目录；
+; ERROR_SHARING_VIOLATION/ERROR_ACCESS_DENIED=文件真被占用，仍阻断；
+; 其余错误保守阻断（维持 fail-closed 语义，仅放开「证明无占用」场景）。
+Function ${Prefix}HandleInspectionFailure
+  Push $R0
+  StrCpy $ProbeAllowsInstall "0"
+
+  ; 全新安装目录可能尚不存在（SetOutPath 在 Section 后段才建目录），
+  ; 先建目录再探锁，缺目录才不会误报 ERROR_PATH_NOT_FOUND
+  CreateDirectory "$INSTDIR"
+
+  System::Call 'kernel32::CreateFileW(w "$INSTDIR\${APP_EXE}", i 0x40000000, i 0, p 0, i 3, i 0x80, p 0) p .R0 ?e'
+  Pop $ProbeLastError
+  StrCmp $R0 "-1" 0 probe_unlocked
+  StrCmp $ProbeLastError "2" probe_allow
+  Goto probe_finish
+
+probe_unlocked:
+  System::Call 'kernel32::CloseHandle(p R0)'
+probe_allow:
+  StrCpy $ProbeAllowsInstall "1"
+
+probe_finish:
+  Call ${Prefix}WriteInspectionDiagnostic
+  Pop $R0
+FunctionEnd
+
+; 把进程检查失败详情落到 $INSTDIR\install_diagnostics.log（追加，UTF-16），
+; 供用户排查与上报：失败阶段、GetLastError、疑似 PID、探锁结果与最终裁决。
+Function ${Prefix}WriteInspectionDiagnostic
+  Push $R0
+  Push $R1
+  Push $0
+  Push $1
+  Push $2
+  Push $3
+  Push $4
+  Push $5
+  Push $6
+  Push $7
+
+  CreateDirectory "$INSTDIR"
+  ClearErrors
+  FileOpen $R0 "$INSTDIR\install_diagnostics.log" a
+  IfErrors diag_done
+
+  System::Alloc 16
+  Pop $R1
+  StrCmp $R1 "0" diag_no_time
+  System::Call 'kernel32::GetLocalTime(p R1)'
+  System::Call '*$R1(&i2 .r0, &i2 .r1, &i2 .r2, &i2 .r3, &i2 .r4, &i2 .r5, &i2 .r6, &i2 .r7)'
+  System::Free $R1
+  FileWrite $R0 "=== ${APP_NAME} ${VERSION} process check diagnostic ===$\r$\n"
+  FileWrite $R0 "Time: $0-$1-$3 $4:$5:$6.$7$\r$\n"
+  Goto diag_body
+
+diag_no_time:
+  FileWrite $R0 "=== ${APP_NAME} ${VERSION} process check diagnostic ===$\r$\n"
+  FileWrite $R0 "Time: unavailable$\r$\n"
+
+diag_body:
+  FileWrite $R0 "Phase: ${Mode}$\r$\n"
+  FileWrite $R0 "Stage: $ProcessInspectionStage$\r$\n"
+  FileWrite $R0 "InspectionLastError: $ProcessInspectionLastError$\r$\n"
+  FileWrite $R0 "SuspectPid: $InspectionSuspectPid$\r$\n"
+  FileWrite $R0 "Probe: CreateFileW(GENERIC_WRITE, share=0, OPEN_EXISTING) on $INSTDIR\${APP_EXE}$\r$\n"
+  FileWrite $R0 "ProbeLastError: $ProbeLastError$\r$\n"
+  StrCmp $ProbeAllowsInstall "1" 0 diag_blocked
+  FileWrite $R0 "Decision: proceed (target file not locked)$\r$\n"
+  Goto diag_close
+
+diag_blocked:
+  FileWrite $R0 "Decision: blocked (target file locked or probe failed)$\r$\n"
+
+diag_close:
+  FileClose $R0
+
+diag_done:
+  Pop $7
+  Pop $6
+  Pop $5
+  Pop $4
+  Pop $3
+  Pop $2
+  Pop $1
+  Pop $0
+  Pop $R1
+  Pop $R0
+FunctionEnd
 !macroend
 
-!insertmacro DefineProcessFunctions ""
-!insertmacro DefineProcessFunctions "un."
+!insertmacro DefineProcessFunctions "" "install"
+!insertmacro DefineProcessFunctions "un." "uninstall"
 
 Section "${APP_NAME}" SecMain
   SectionIn RO
