@@ -42,6 +42,9 @@ class SavedAccount with _$SavedAccount {
 
     /// 账号类型
     @Default(AccountType.token) AccountType accountType,
+
+    /// 订阅到期时间（Unix 时间戳秒，可空，无默认值）
+    int? subscriptionExpiresAt,
   }) = _SavedAccount;
 
   factory SavedAccount.fromJson(Map<String, dynamic> json) =>
@@ -54,6 +57,7 @@ class SavedAccount with _$SavedAccount {
     String? avatarPath,
     bool isDefault = false,
     AccountType accountType = AccountType.token,
+    int? subscriptionExpiresAt,
   }) {
     return SavedAccount(
       id: const Uuid().v4(),
@@ -63,6 +67,7 @@ class SavedAccount with _$SavedAccount {
       createdAt: DateTime.now(),
       isDefault: isDefault,
       accountType: accountType,
+      subscriptionExpiresAt: subscriptionExpiresAt,
     );
   }
 

@@ -299,6 +299,29 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
     state = state.copyWith(accounts: newAccounts);
   }
 
+  /// 更新账号订阅到期时间（Unix 时间戳秒）
+  ///
+  /// 若账号不存在或到期时间未发生变化，则直接返回（幂等防抖，避免频繁写盘）。
+  Future<void> updateSubscriptionExpiry(
+    String accountId,
+    int? expiresAt,
+  ) async {
+    final index = state.accounts.indexWhere((a) => a.id == accountId);
+    if (index < 0) return;
+
+    final current = state.accounts[index];
+    if (current.subscriptionExpiresAt == expiresAt) {
+      return;
+    }
+
+    final updated = current.copyWith(subscriptionExpiresAt: expiresAt);
+    final newAccounts = List<SavedAccount>.from(state.accounts);
+    newAccounts[index] = updated;
+
+    await _saveAccounts(newAccounts);
+    state = state.copyWith(accounts: newAccounts);
+  }
+
   /// 根据邮箱查找账号
   SavedAccount? findByEmail(String email) {
     return state.accounts.where((a) => a.email == email).firstOrNull;

@@ -740,6 +740,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_accountType => 'アカウントの種類';
 
   @override
+  String get settings_subscriptionExpiry => 'サブスク期限';
+
+  @override
   String get settings_thirdPartyApiAccount => 'サードパーティのサイト API';
 
   @override
@@ -10871,4 +10874,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_pileEmpty => '深層候補はまだありません。「候補ラウンド作成」から始めてください';
+
+  @override
+  String subscriptionExpiresOn(String date) {
+    return '期限 $date';
+  }
+
+  @override
+  String subscriptionDaysLeft(int days) {
+    return '残り $days 日';
+  }
+
+  @override
+  String get subscriptionExpired => '期限切れ';
+
+  @override
+  String get subscriptionGracePeriod => '猶予期間';
 }

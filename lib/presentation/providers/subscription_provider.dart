@@ -9,6 +9,7 @@ import '../../core/utils/app_logger.dart';
 import '../../data/datasources/remote/nai_user_info_api_service.dart';
 import '../../data/models/user/user_subscription.dart';
 import '../../data/services/anlas_statistics_service.dart';
+import 'account_manager_provider.dart';
 import 'auth_provider.dart';
 
 part 'subscription_provider.g.dart';
@@ -125,6 +126,16 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
       _networkFailureCount = 0;
       _startAutoRefresh();
       Future.microtask(() => unawaited(refreshBalance()));
+
+      final accountId = authState.accountId;
+      if (accountId != null) {
+        unawaited(
+          ref
+              .read(accountManagerNotifierProvider.notifier)
+              .updateSubscriptionExpiry(accountId, subscription.expiresAt),
+        );
+      }
+
       return SubscriptionState.loaded(subscription);
     } catch (e) {
       AppLogger.w(
@@ -297,6 +308,15 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
       _hasInitiallyLoaded = true;
       _startAutoRefresh();
 
+      final accountId = authSession.accountId;
+      if (accountId != null) {
+        unawaited(
+          ref
+              .read(accountManagerNotifierProvider.notifier)
+              .updateSubscriptionExpiry(accountId, subscription.expiresAt),
+        );
+      }
+
       AppLogger.i(
         'Subscription loaded: ${subscription.tierName}, '
             'Anlas: ${subscription.anlasBalance}',
@@ -409,6 +429,15 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
 
       final subscription = UserSubscription.fromJson(data);
       _updateState(SubscriptionState.loaded(subscription));
+
+      final accountId = authSession.accountId;
+      if (accountId != null) {
+        unawaited(
+          ref
+              .read(accountManagerNotifierProvider.notifier)
+              .updateSubscriptionExpiry(accountId, subscription.expiresAt),
+        );
+      }
 
       return true;
     } catch (e) {

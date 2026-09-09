@@ -319,6 +319,7 @@
   "settings_selectHiveFolder": "データ保存フォルダーの選択",
   "settings_pathSavedRestartRequired": "パスが更新されました。変更を適用するには再起動してください",
   "settings_accountType": "アカウントの種類",
+  "settings_subscriptionExpiry": "サブスク期限",
   "settings_thirdPartyApiAccount": "サードパーティのサイト API",
   "settings_apiSite": "API サイト",
   "settings_notLoggedIn": "ログインしてアバターとニックネームを設定してください",
@@ -6248,5 +6249,23 @@
   "@styleExplore_preferenceValue": {"placeholders": {"value": {"type": "String"}}},
   "styleExplore_roundsSummary": "{count} ラウンド",
   "@styleExplore_roundsSummary": {"placeholders": {"count": {"type": "int"}}},
-  "styleExplore_pileEmpty": "深層候補はまだありません。「候補ラウンド作成」から始めてください"
+  "styleExplore_pileEmpty": "深層候補はまだありません。「候補ラウンド作成」から始めてください",
+  "subscriptionExpiresOn": "期限 {date}",
+  "@subscriptionExpiresOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDaysLeft": "残り {days} 日",
+  "@subscriptionDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionExpired": "期限切れ",
+  "subscriptionGracePeriod": "猶予期間"
 }

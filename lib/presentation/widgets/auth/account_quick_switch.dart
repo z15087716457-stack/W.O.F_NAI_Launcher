@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/account_manager_provider.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../../data/models/auth/saved_account.dart';
+import 'subscription_expiry_text.dart';
 
 /// 账号快速切换组件
 class AccountQuickSwitch extends ConsumerWidget {
@@ -173,15 +174,25 @@ class AccountQuickSwitch extends ConsumerWidget {
             fontWeight: isCurrent ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
-        subtitle: Text(
-          isThirdParty
-              ? context.l10n.auth_thirdPartyLogin
-              : account.accountType == AccountType.credentials
-              ? context.l10n.auth_credentialsLogin
-              : context.l10n.auth_tokenLogin,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              isThirdParty
+                  ? context.l10n.auth_thirdPartyLogin
+                  : account.accountType == AccountType.credentials
+                  ? context.l10n.auth_credentialsLogin
+                  : context.l10n.auth_tokenLogin,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            if (account.subscriptionExpiresAt != null) ...[
+              const SizedBox(height: 2),
+              SubscriptionExpiryText(expiresAt: account.subscriptionExpiresAt!),
+            ],
+          ],
         ),
         trailing: isCurrent
             ? Icon(

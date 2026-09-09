@@ -1467,6 +1467,12 @@ abstract class AppLocalizations {
   /// **'Account Type'**
   String get settings_accountType;
 
+  /// No description provided for @settings_subscriptionExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription Expires'**
+  String get settings_subscriptionExpiry;
+
   /// No description provided for @settings_thirdPartyApiAccount.
   ///
   /// In en, this message translates to:
@@ -19380,6 +19386,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No deep candidates yet — start with \"Create round\"'**
   String get styleExplore_pileEmpty;
+
+  /// No description provided for @subscriptionExpiresOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires {date}'**
+  String subscriptionExpiresOn(String date);
+
+  /// No description provided for @subscriptionDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days left'**
+  String subscriptionDaysLeft(int days);
+
+  /// No description provided for @subscriptionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get subscriptionExpired;
+
+  /// No description provided for @subscriptionGracePeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Grace period'**
+  String get subscriptionGracePeriod;
 }
 
 class _AppLocalizationsDelegate

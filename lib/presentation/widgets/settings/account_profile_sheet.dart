@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
 import '../../../core/services/avatar_service.dart';
+import '../../../core/utils/subscription_expiry_utils.dart';
 import '../../../data/models/auth/saved_account.dart';
 import '../../providers/account_manager_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/account_avatar.dart';
+import '../auth/subscription_expiry_text.dart';
 import '../common/app_toast.dart';
 import '../common/themed_divider.dart';
 import 'nickname_edit_dialog.dart';
@@ -418,6 +420,28 @@ class _AccountProfileBottomSheetState
               ? context.l10n.settings_emailAccount
               : context.l10n.settings_tokenAccount,
         ),
+        // 订阅到期（档案中上次已知值）
+        if (currentAccount.subscriptionExpiresAt != null) ...[
+          const SizedBox(height: 8),
+          Builder(
+            builder: (context) {
+              final info = getSubscriptionExpiryInfo(
+                currentAccount.subscriptionExpiresAt!,
+              );
+              return _buildDetailRow(
+                context,
+                icon: Icons.event_outlined,
+                label: context.l10n.settings_subscriptionExpiry,
+                value:
+                    '${info.formattedDate} · ${SubscriptionExpiryText.statusTextOf(context, info)}',
+                valueColor: SubscriptionExpiryText.statusColor(
+                  context,
+                  info.status,
+                ),
+              );
+            },
+          ),
+        ],
         if (isThirdParty && endpoint != null) ...[
           const SizedBox(height: 8),
           _buildDetailRow(
@@ -437,6 +461,7 @@ class _AccountProfileBottomSheetState
     required IconData icon,
     required String label,
     required String value,
+    Color? valueColor,
   }) {
     final theme = Theme.of(context);
 
@@ -453,7 +478,10 @@ class _AccountProfileBottomSheetState
             ),
           ),
           const Spacer(),
-          Text(value, style: theme.textTheme.bodyMedium),
+          Text(
+            value,
+            style: theme.textTheme.bodyMedium?.copyWith(color: valueColor),
+          ),
         ],
       ),
     );
@@ -663,6 +691,10 @@ class _AccountProfileBottomSheetState
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (account.subscriptionExpiresAt != null)
+                      SubscriptionExpiryText(
+                        expiresAt: account.subscriptionExpiresAt!,
+                      ),
                   ],
                 ),
               ),

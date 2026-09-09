@@ -305,6 +305,7 @@
   "settings_selectHiveFolder": "选择数据存储文件夹",
   "settings_pathSavedRestartRequired": "路径已更新，重启后生效",
   "settings_accountType": "账号类型",
+  "settings_subscriptionExpiry": "订阅到期",
   "settings_thirdPartyApiAccount": "第三方站点 API",
   "settings_apiSite": "API 站点",
   "settings_notLoggedIn": "登录后可设置头像和昵称",
@@ -6248,5 +6249,23 @@
   "@styleExplore_preferenceValue": {"placeholders": {"value": {"type": "String"}}},
   "styleExplore_roundsSummary": "{count} 轮",
   "@styleExplore_roundsSummary": {"placeholders": {"count": {"type": "int"}}},
-  "styleExplore_pileEmpty": "尚无深度候选，点「创建候选轮」开始"
+  "styleExplore_pileEmpty": "尚无深度候选，点「创建候选轮」开始",
+  "subscriptionExpiresOn": "到期 {date}",
+  "@subscriptionExpiresOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDaysLeft": "剩 {days} 天",
+  "@subscriptionDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionExpired": "已过期",
+  "subscriptionGracePeriod": "宽限期"
 }

@@ -728,6 +728,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_accountType => '账号类型';
 
   @override
+  String get settings_subscriptionExpiry => '订阅到期';
+
+  @override
   String get settings_thirdPartyApiAccount => '第三方站点 API';
 
   @override
@@ -10721,4 +10724,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_pileEmpty => '尚无深度候选，点「创建候选轮」开始';
+
+  @override
+  String subscriptionExpiresOn(String date) {
+    return '到期 $date';
+  }
+
+  @override
+  String subscriptionDaysLeft(int days) {
+    return '剩 $days 天';
+  }
+
+  @override
+  String get subscriptionExpired => '已过期';
+
+  @override
+  String get subscriptionGracePeriod => '宽限期';
 }

@@ -14,6 +14,7 @@ import '../../providers/update_provider.dart';
 import '../../router/app_branch.dart';
 import '../auth/account_avatar.dart';
 import '../auth/login_form_container.dart';
+import '../auth/subscription_expiry_text.dart';
 
 import '../common/app_toast.dart';
 
@@ -1021,14 +1022,25 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
         ...accounts.map(
           (account) => PopupMenuItem<String>(
             value: 'switch_${account.id}',
+            height: account.subscriptionExpiresAt != null ? 56 : 48,
             child: Row(
               children: [
                 AccountAvatarSmall(account: account, size: 32),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    account.displayName,
-                    overflow: TextOverflow.ellipsis,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        account.displayName,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (account.subscriptionExpiresAt != null)
+                        SubscriptionExpiryText(
+                          expiresAt: account.subscriptionExpiresAt!,
+                        ),
+                    ],
                   ),
                 ),
                 if (account.id == authState.accountId)

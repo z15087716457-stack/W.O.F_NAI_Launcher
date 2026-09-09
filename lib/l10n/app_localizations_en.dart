@@ -757,6 +757,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_accountType => 'Account Type';
 
   @override
+  String get settings_subscriptionExpiry => 'Subscription Expires';
+
+  @override
   String get settings_thirdPartyApiAccount => 'Third-party Site API';
 
   @override
@@ -11118,4 +11121,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get styleExplore_pileEmpty =>
       'No deep candidates yet — start with \"Create round\"';
+
+  @override
+  String subscriptionExpiresOn(String date) {
+    return 'Expires $date';
+  }
+
+  @override
+  String subscriptionDaysLeft(int days) {
+    return '$days days left';
+  }
+
+  @override
+  String get subscriptionExpired => 'Expired';
+
+  @override
+  String get subscriptionGracePeriod => 'Grace period';
 }

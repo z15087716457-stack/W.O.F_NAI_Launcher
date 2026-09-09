@@ -7,6 +7,7 @@ import '../../providers/account_manager_provider.dart';
 import '../../providers/auth_provider.dart';
 
 import '../common/app_toast.dart';
+import 'subscription_expiry_text.dart';
 
 /// 账号头像下拉菜单组件（Google 风格）
 class AccountAvatarDropdown extends ConsumerWidget {
@@ -268,6 +269,10 @@ class _AccountListTile extends StatelessWidget {
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.primary,
                       ),
+                    ),
+                  if (account.subscriptionExpiresAt != null)
+                    SubscriptionExpiryText(
+                      expiresAt: account.subscriptionExpiresAt!,
                     ),
                 ],
               ),

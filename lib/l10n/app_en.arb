@@ -320,6 +320,7 @@
   "settings_selectHiveFolder": "Select Data Storage Folder",
   "settings_pathSavedRestartRequired": "Path updated, restart to apply changes",
   "settings_accountType": "Account Type",
+  "settings_subscriptionExpiry": "Subscription Expires",
   "settings_thirdPartyApiAccount": "Third-party Site API",
   "settings_apiSite": "API Site",
   "settings_notLoggedIn": "Log in to set avatar and nickname",
@@ -6248,5 +6249,23 @@
   "@styleExplore_preferenceValue": {"placeholders": {"value": {"type": "String"}}},
   "styleExplore_roundsSummary": "{count} rounds",
   "@styleExplore_roundsSummary": {"placeholders": {"count": {"type": "int"}}},
-  "styleExplore_pileEmpty": "No deep candidates yet — start with \"Create round\""
+  "styleExplore_pileEmpty": "No deep candidates yet — start with \"Create round\"",
+  "subscriptionExpiresOn": "Expires {date}",
+  "@subscriptionExpiresOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subscriptionDaysLeft": "{days} days left",
+  "@subscriptionDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "subscriptionExpired": "Expired",
+  "subscriptionGracePeriod": "Grace period"
 }

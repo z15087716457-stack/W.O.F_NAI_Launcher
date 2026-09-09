@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
+import '../../../core/utils/subscription_expiry_utils.dart';
 import '../../../data/models/user/user_subscription.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/account_manager_provider.dart';
@@ -162,6 +163,10 @@ class AccountDetailTile extends ConsumerWidget {
                 ),
               ),
             ),
+            if (subscription.expiresAt != null && subscription.tier > 0) ...[
+              const SizedBox(width: 6),
+              _buildExpiryBadge(context, subscription),
+            ],
             const SizedBox(width: 6),
             // Anlas
             Container(
@@ -195,6 +200,62 @@ class AccountDetailTile extends ConsumerWidget {
       },
       error: (_) =>
           Icon(Icons.error_outline, size: 16, color: theme.colorScheme.error),
+    );
+  }
+
+  /// 构建订阅到期徽章
+  Widget _buildExpiryBadge(
+    BuildContext context,
+    UserSubscription subscription,
+  ) {
+    final theme = Theme.of(context);
+    final expiresAt = subscription.expiresAt;
+    if (expiresAt == null || subscription.tier <= 0) {
+      return const SizedBox.shrink();
+    }
+
+    final expiryInfo = getSubscriptionExpiryInfo(expiresAt);
+
+    final String text;
+    final Color badgeColor;
+
+    if (subscription.isGracePeriod) {
+      text = context.l10n.subscriptionGracePeriod;
+      badgeColor = Colors.orange;
+    } else {
+      switch (expiryInfo.status) {
+        case SubscriptionExpiryStatus.expired:
+          text = context.l10n.subscriptionExpired;
+          badgeColor = theme.colorScheme.error;
+          break;
+        case SubscriptionExpiryStatus.expiringSoon:
+          text = context.l10n.subscriptionDaysLeft(expiryInfo.daysLeft);
+          badgeColor = Colors.orange;
+          break;
+        case SubscriptionExpiryStatus.normal:
+          text = context.l10n.subscriptionDaysLeft(expiryInfo.daysLeft);
+          badgeColor = theme.colorScheme.onSurfaceVariant;
+          break;
+      }
+    }
+
+    return Tooltip(
+      message: context.l10n.subscriptionExpiresOn(expiryInfo.formattedDate),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: badgeColor.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: badgeColor,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 

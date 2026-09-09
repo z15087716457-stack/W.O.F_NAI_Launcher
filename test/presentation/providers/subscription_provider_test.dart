@@ -5,8 +5,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_user_info_api_service.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
+import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
+
+class _FakeAccountManagerNotifier extends AccountManagerNotifier {
+  final List<(String, int?)> expiryUpdates = [];
+
+  @override
+  AccountManagerState build() {
+    return const AccountManagerState(isLoading: false);
+  }
+
+  @override
+  Future<void> updateSubscriptionExpiry(
+    String accountId,
+    int? expiresAt,
+  ) async {
+    expiryUpdates.add((accountId, expiresAt));
+  }
+}
 
 class _MockNAIUserInfoApiService extends Mock
     implements NAIUserInfoApiService {}
@@ -74,6 +92,9 @@ void main() {
         overrides: [
           authNotifierProvider.overrideWith(_AuthenticatedAuthNotifier.new),
           naiUserInfoApiServiceProvider.overrideWithValue(apiService),
+          accountManagerNotifierProvider.overrideWith(
+            _FakeAccountManagerNotifier.new,
+          ),
           subscriptionNotifierProvider.overrideWith(
             _TestableSubscriptionNotifier.new,
           ),
@@ -108,6 +129,9 @@ void main() {
       overrides: [
         authNotifierProvider.overrideWith(_AuthenticatedAuthNotifier.new),
         naiUserInfoApiServiceProvider.overrideWithValue(apiService),
+        accountManagerNotifierProvider.overrideWith(
+          _FakeAccountManagerNotifier.new,
+        ),
         subscriptionNotifierProvider.overrideWith(
           _TestableSubscriptionNotifier.new,
         ),
@@ -142,6 +166,9 @@ void main() {
       overrides: [
         authNotifierProvider.overrideWith(_AuthenticatedAuthNotifier.new),
         naiUserInfoApiServiceProvider.overrideWithValue(apiService),
+        accountManagerNotifierProvider.overrideWith(
+          _FakeAccountManagerNotifier.new,
+        ),
         subscriptionNotifierProvider.overrideWith(
           _TestableSubscriptionNotifier.new,
         ),
@@ -183,6 +210,9 @@ void main() {
         overrides: [
           authNotifierProvider.overrideWith(_AuthenticatedAuthNotifier.new),
           naiUserInfoApiServiceProvider.overrideWithValue(apiService),
+          accountManagerNotifierProvider.overrideWith(
+            _FakeAccountManagerNotifier.new,
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -222,6 +252,9 @@ void main() {
         overrides: [
           authNotifierProvider.overrideWith(_AuthenticatedAuthNotifier.new),
           naiUserInfoApiServiceProvider.overrideWithValue(apiService),
+          accountManagerNotifierProvider.overrideWith(
+            _FakeAccountManagerNotifier.new,
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -255,6 +288,9 @@ void main() {
       overrides: [
         authNotifierProvider.overrideWith(_AuthenticatedAuthNotifier.new),
         naiUserInfoApiServiceProvider.overrideWithValue(apiService),
+        accountManagerNotifierProvider.overrideWith(
+          _FakeAccountManagerNotifier.new,
+        ),
         subscriptionNotifierProvider.overrideWith(
           _TestableSubscriptionNotifier.new,
         ),
@@ -275,6 +311,46 @@ void main() {
     expect(requestCount, 1);
     expect(container.read(subscriptionNotifierProvider).balance, 70);
   });
+
+  test(
+    'writes back subscription expiresAt to account manager on successful fetch',
+    () async {
+      final apiService = _MockNAIUserInfoApiService();
+      final fakeAccountManager = _FakeAccountManagerNotifier();
+      when(
+        () => apiService.getUserSubscription(
+          receiveTimeout: any(named: 'receiveTimeout'),
+        ),
+      ).thenAnswer(
+        (_) async => {
+          'tier': 2,
+          'active': true,
+          'expiresAt': 1788888888,
+          'trainingStepsLeft': {
+            'fixedTrainingStepsLeft': 100,
+            'purchasedTrainingSteps': 0,
+          },
+        },
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          authNotifierProvider.overrideWith(_AuthenticatedAuthNotifier.new),
+          naiUserInfoApiServiceProvider.overrideWithValue(apiService),
+          accountManagerNotifierProvider.overrideWith(() => fakeAccountManager),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(subscriptionNotifierProvider.notifier);
+      await notifier.fetchSubscription();
+
+      expect(
+        fakeAccountManager.expiryUpdates,
+        contains(('test-account', 1788888888)),
+      );
+    },
+  );
 }
 
 Map<String, dynamic> _subscriptionJson({required int balance}) {
