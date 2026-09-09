@@ -155,6 +155,75 @@ void main() {
 
       // 单 ListView
       expect(find.byType(ListView), findsOneWidget);
+
+      // 固定头不随滚动列表移动（退化分支同样固定）
+      expect(
+        find.descendant(of: find.byType(ListView), matching: find.text('全部图片')),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: find.byType(ListView), matching: find.text('收藏')),
+        findsNothing,
+      );
+    });
+  });
+
+  testWidgets('收藏集超长时全部图片/收藏固定不动，滚动只发生在收藏集列表', (tester) async {
+    tester.view.physicalSize = const Size(800, 1000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final manyCollections = List.generate(
+      40,
+      (i) => ImageCollection(
+        id: 'col-$i',
+        name: 'Collection $i',
+        createdAt: now,
+        imageCount: 1,
+      ),
+    );
+
+    await withHive(tester, () async {
+      await tester.pumpWidget(
+        buildTree(cats: categories, cols: manyCollections, height: 1000.0),
+      );
+      await settle(tester);
+
+      final listFinder = find.byKey(
+        const Key('gallery-sidebar-collection-list'),
+      );
+
+      // 固定头不在收藏集滚动列表内
+      expect(
+        find.descendant(of: listFinder, matching: find.text('全部图片')),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: listFinder, matching: find.text('收藏')),
+        findsNothing,
+      );
+
+      // 末尾收藏集初始不可见（列表内容超出视口）
+      expect(find.text('Collection 39').hitTestable(), findsNothing);
+
+      final allImagesTop = tester.getRect(find.text('全部图片')).top;
+      final favoriteTop = tester.getRect(find.text('收藏')).top;
+
+      // 触摸拖动会被收藏集条目的 Draggable（拖拽重排）抢占手势，无法驱动
+      // 列表滚动，直接把收藏集列表滚到底部
+      final scrollable = tester.state<ScrollableState>(
+        find.descendant(of: listFinder, matching: find.byType(Scrollable)),
+      );
+      expect(scrollable.position.maxScrollExtent, greaterThan(0));
+      scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
+      await tester.pump();
+
+      // 固定头原位不动
+      expect(tester.getRect(find.text('全部图片')).top, allImagesTop);
+      expect(tester.getRect(find.text('收藏')).top, favoriteTop);
+      // 末尾收藏集滚入可见（滚动确实发生在收藏集列表内）
+      expect(find.text('Collection 39').hitTestable(), findsOneWidget);
     });
   });
 
@@ -245,19 +314,21 @@ void main() {
       );
       await settle(tester);
 
-      // 验证两个 Expanded 的 flex 符合 650 : 350
-      final expandedWidgets = tester
-          .widgetList<Expanded>(find.byType(Expanded))
-          .toList();
-      // 上区 ListView 外层 Expanded
-      final topExpanded = expandedWidgets.firstWhere(
-        (e) => e.child is ListView && e.flex == 650,
+      // 验证两个分区的 Expanded flex 符合 650 : 350
+      // 上区外层 Expanded 经 pane Key 定位（child 已非 ListView）
+      final topExpanded = tester.widget<Expanded>(
+        find
+            .ancestor(
+              of: find.byKey(const Key('gallery-sidebar-collection-pane')),
+              matching: find.byType(Expanded),
+            )
+            .first,
       );
       expect(topExpanded.flex, 650);
 
-      final bottomExpanded = expandedWidgets.firstWhere(
-        (e) => e.child is ListView && e.flex == 350,
-      );
+      final bottomExpanded = tester
+          .widgetList<Expanded>(find.byType(Expanded))
+          .firstWhere((e) => e.child is ListView && e.flex == 350);
       expect(bottomExpanded.flex, 350);
     });
   });

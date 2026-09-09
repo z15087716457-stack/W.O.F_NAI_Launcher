@@ -12,7 +12,6 @@ import '../../../data/models/gallery/image_collection.dart';
 import '../../../data/models/gallery/local_image_record.dart';
 import '../../providers/gallery_category_provider.dart'
     show collectionSelectedIdPrefix;
-import '../common/themed_divider.dart';
 import '../../themes/theme_extension.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'gallery_scan_progress_panel.dart';
@@ -154,7 +153,28 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     });
   }
 
-  List<Widget> _buildCollectionSectionEntries(ThemeData theme) {
+  /// 上区容器：「全部图片」「收藏」固定不随滚动，收藏集列表独立滚动
+  Widget _buildCollectionPane(ThemeData theme) {
+    return Padding(
+      key: const Key('gallery-sidebar-collection-pane'),
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        children: [
+          ..._buildFixedCollectionHeaderEntries(),
+          Expanded(
+            child: ListView(
+              key: const Key('gallery-sidebar-collection-list'),
+              padding: const EdgeInsets.only(bottom: 8),
+              children: _buildCollectionItems(theme),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 固定头部（不随收藏集列表滚动）：全部图片 + 收藏
+  List<Widget> _buildFixedCollectionHeaderEntries() {
     return [
       _buildImageDropTarget(
         categoryId: null,
@@ -179,8 +199,6 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
             ? () => _showCreateCollectionMenu(context, null)
             : null,
       ),
-      // 收藏集（「收藏」下方的缩进子条目，链接式成员）
-      ..._buildCollectionItems(theme),
     ];
   }
 
@@ -203,31 +221,11 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
           return Column(
             children: [
               if (widget.categories.isEmpty)
-                // 退化规则：分类为空时保持单 ListView 结构，不拆区、不显示手柄
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    children: [
-                      ..._buildCollectionSectionEntries(theme),
-                      if (widget.categories.isNotEmpty)
-                        const ThemedDivider(
-                          height: 16,
-                          indent: 12,
-                          endIndent: 12,
-                        ),
-                      ..._buildRootCategoryEntries(theme),
-                    ],
-                  ),
-                )
+                // 退化规则：分类为空时不拆区、不显示手柄，固定头语义与双区一致
+                Expanded(child: _buildCollectionPane(theme))
               else ...[
-                // 上区：全部图片 + 收藏 + 收藏集（独立滚动）
-                Expanded(
-                  flex: topFlex,
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    children: _buildCollectionSectionEntries(theme),
-                  ),
-                ),
+                // 上区：全部图片 + 收藏 固定不滚，收藏集独立滚动
+                Expanded(flex: topFlex, child: _buildCollectionPane(theme)),
                 // 拖拽手柄（替代原 ThemedDivider 位置）
                 _GallerySidebarResizeHandle(
                   key: const Key('gallery-sidebar-resize-handle'),
