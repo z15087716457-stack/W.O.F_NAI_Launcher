@@ -36,17 +36,25 @@ import 'dart:math' as math;
 /// - r ∈ [1−tol, 1+tol]（tol = [justifiedJustifyTolerance] = 0.08）
 ///   → justify 行：h = Wa/Σa，零裁剪精确填满（渲染 Expanded 分格，
 ///   格宽 = Wa×a_i/Σa 与图比精确一致）；
-/// - r ∈ (1+tol, [justifiedUpscaleCap]]（默认 1.4）→ upscale 行（新增）：
+/// - r ∈ (1+tol, [justifiedUpscaleCap]]（默认 1.4）→ upscale 行：
 ///   h = r·h0 整行等比放大、自然宽 contain、零裁剪精确填满
-///   （r·h0 ≡ Wa/Σa，与 justify 行同构）；放大不丢内容，r>1 侧的原
-///   crop 层由此退役。若 r·h0 超高带上限 3.5t，放大率钳到 3.5t/h0，
-///   钳后保持带顶高度左对齐（= 带顶欠填，不裁）；
+///   （r·h0 ≡ Wa/Σa，与 justify 行同构）；放大不丢内容。若 r·h0 超高带上限 3.5t，
+///   放大率钳到 3.5t/h0，钳后保持带顶高度左对齐（= 带顶欠填，不裁）；
+/// - r ∈ (1.4, [justifiedUpscaleMaxRatio]]（默认 2.0）且 r·h0 ≤ [justifiedUpscaleHeightGateT]×t（默认 2.0t）
+///   → 双门控放大带（方案 B+C 尾带）：h = r·h0 整行等比放大零裁剪填满，
+///   罚分沿用 cap 点连续的线性尾 (1.4−1)²×0.9 + (r−1.4)×0.3；高度门控拦竖图高行
+///   （4×a=0.6 需 2.2t>2t 拦截），比率门控拦宽窗面积巨兽（2×a=2 @1920 r=2.38>2 拦截）；
+///   若超高度门控（r·h0 > 2.0t），则退回欠填左对齐（不硬放大）；
+/// - r ∈ (2.0, 2.0/(1−cap)≈2.27]（默认 cap=0.12）→ 竖裁兜底带（方案 B+C 竖裁）：
+///   双门控放不下但差一点的行，高度钉 min(2t, 3.5t)，满宽 cover 裁上下补齐；
+///   若 cover 裁量 1−2t/(r·h0) ≤ cap，救活为 crop 行（Expanded 分格 + cover 裁上下），
+///   罚分 = 门控内放大罚 + 裁量²×w_down；若裁量超预算或反向溢出则退回欠填；
 /// - r ∈ [1−cap, 1−tol)（cap = [justifiedCropCap] = 0.12，仅 r<1 过满侧）
 ///   → crop 行：行高钉 h0，Expanded 分格 + 卡片 BoxFit.cover 微裁填满
 ///   （锚点居中；隐含裁量 = 1−r ≤ cap）；
-/// - 其余 → 欠填行：h0 左对齐不裁（V2 现状，竖图行高自动 ~1.2t）。
-///   无挤压守卫：欠填自然内容宽 h0·Σa+spacing×(k−1) > W×(1+tol) 的
-///   多图行不可行——多图横排纸条行结构性不可能；
+/// - 其余（r > 2.27、竖裁超预算、或 r < 1−cap）→ 欠填行：h0 左对齐不裁
+///   （V2 现状，竖图行高自动 ~1.2t）。无挤压守卫：欠填自然内容宽
+///   h0·Σa+spacing×(k−1) > W×(1+tol) 的多图行不可行——多图横排纸条行结构性不可能；
 /// - 单图行独立分派（hFull = Wa/a = 单图填满整行宽所需高度，≡ r·h0；
 ///   静拍板原则：放大优先于缩小、填满优先于留空、不丢内容优先）：
 ///   hFull ≤ 3.5t → 满宽零裁剪（exact，height = hFull，fillCost = 0
@@ -58,13 +66,18 @@ import 'dart:math' as math;
 ///   其余（方图/竖图落单行，满宽裁量超预算）维持欠填 h0 左对齐。
 ///
 /// 调参口清单：权重 [justifiedVarianceWeight] / [justifiedUnderfillWeight]
-/// / 裁量上限 [justifiedCropCap]（兼作单图满宽 cover 的裁量预算）
-/// / 放大上限 [justifiedUpscaleCap]
-/// （兼为同名可选参数的默认值）；[justifiedUpscaleWeight] /
+/// / 裁量上限 [justifiedCropCap]（兼作单图满宽 cover 与竖裁兜底的裁量预算）
+/// / 放大上限 [justifiedUpscaleCap] / 双门控高度门控 [justifiedUpscaleHeightGateT]
+/// / 双门控比率门控 [justifiedUpscaleMaxRatio] / 线性尾斜率 [justifiedUpscaleTailSlope]
+/// （以上兼为同名可选参数的默认值）；[justifiedUpscaleWeight] /
 /// [justifiedDownscaleWeight] / [justifiedUnderfillBasePenalty] /
 /// [justifiedSingleImagePenalty] / 落差硬上限 [justifiedAspectSpreadCap] /
 /// 高带系数 [justifiedMinHeightFactor] / [justifiedMaxHeightFactor] /
 /// 顶格容差 [justifiedJustifyTolerance] 为顶层常量。
+///
+/// 特别注明：rMax 是锚相对量，t 变小时间一物理行 r 变大可能被拦
+/// （如 t 从 283 降到 200 时，物理行锚高变小导致同窗宽下 r 上浮，可能触发
+/// 门控拦截退回欠填；面积锚语义与目标边长联动，属预期行为）。
 ///
 /// 不变量：所有行 imageCount 之和 == 图数、索引连续不重叠；空列表返回空；
 /// 非法宽高比（0/负/NaN）占位 1.0 不抛异常；欠填行渲染宽 ≤ W×1.08
@@ -103,6 +116,21 @@ const double justifiedUpscaleCap = 1.4;
 /// cap 内（含 1.4）放大结构性恒优于欠填重新成立
 const double justifiedUpscaleWeight = 0.9;
 
+/// 双门控放大之高度门控系数（×t）：拦竖图高行。
+/// 4×a=0.6 等竖图行填满需放大到 2.2t 以上，面积与行高均过大（多滚页面
+/// 严重变形）；门控钉 2.0t，超门控行不再硬放大（维持欠填）
+const double justifiedUpscaleHeightGateT = 2.0;
+
+/// 双门控放大之比率门控上限：拦宽窗横图面积巨兽。
+/// 2×a=2 横长图宽窗 r=2.38 放大后单图面积达 5.7t²（超 4t² 面积上限）；
+/// 门控钉 2.0，超过它说明图太稀疏，不应硬拉满
+const double justifiedUpscaleMaxRatio = 2.0;
+
+/// 超 cap 放大罚线性尾斜率（cap 点连续：(cap−1)²·w_up + (r−cap)·tailSlope）。
+/// 取 0.3：已推导交叉点 r*=3.47 > 门控可达最大 r≈2.4，门控内「放大恒优于欠填」
+/// 结构性成立，且平滑衔接避免二次罚陡增压制 DP 选放大
+const double justifiedUpscaleTailSlope = 0.3;
+
 /// 缩小罚权重（(1−r)² 的系数，r<1 侧：crop 行与 justify 带内微调缩小行）。
 /// = 2×[justifiedUpscaleWeight]——填充罚分不对称化（静的设计法则：
 /// 「放大是优先策略，画幅大了页面滚乱要多滚一点也可以接受，但是小了
@@ -134,8 +162,12 @@ enum JustifiedFill {
   /// 单图满宽行（hFull = Wa/a ≤ 3.5t，含原 contain 全景）同归此
   exact,
 
-  /// crop 行（仅 r<1 过满侧）：行高钉 h0，Expanded 分格 + 卡片 cover 微裁；
-  /// 单图 hFull 略超 3.5t 时行高钉 3.5t、满宽 cover 裁上下（同 cap 预算）
+  /// crop 行：行高钉 h0（或门控高度），Expanded 分格 + 卡片 cover 微裁。
+  /// 来源覆盖三处：
+  /// 1. r<1 过满侧微裁：行高钉 h0，裁量 1−r ≤ cap；
+  /// 2. 单图 hFull 略超 3.5t 时行高钉 3.5t、满宽 cover 裁上下（同 cap 预算）；
+  /// 3. r>1 尾带竖裁兜底：双门控放不下（r ∈ (2.0, 2.27]）但差一点的行，
+  ///    行高钉 min(2t, 3.5t)，满宽 cover 裁上下，裁量 ≤ cap
   crop,
 
   /// upscale 行：h = r·h0 整行等比放大，自然宽 contain、零裁剪精确填满
@@ -200,6 +232,15 @@ List<JustifiedRow> computeJustifiedRows({
 
   /// 放大上限覆盖；null = [justifiedUpscaleCap]
   double? upscaleCap,
+
+  /// 放大高度门控覆盖；null = [justifiedUpscaleHeightGateT]
+  double? upscaleHeightGateT,
+
+  /// 放大比率门控覆盖；null = [justifiedUpscaleMaxRatio]
+  double? upscaleMaxRatio,
+
+  /// 放大线性尾斜率覆盖；null = [justifiedUpscaleTailSlope]
+  double? upscaleTailSlope,
 }) {
   final n = aspectRatios.length;
   if (n == 0) return const [];
@@ -209,6 +250,9 @@ List<JustifiedRow> computeJustifiedRows({
   const upscaleWeight = justifiedUpscaleWeight;
   const downWeight = justifiedDownscaleWeight;
   final upCap = upscaleCap ?? justifiedUpscaleCap;
+  final upGateT = upscaleHeightGateT ?? justifiedUpscaleHeightGateT;
+  final upMaxRatio = upscaleMaxRatio ?? justifiedUpscaleMaxRatio;
+  final upTailSlope = upscaleTailSlope ?? justifiedUpscaleTailSlope;
 
   final t = targetHeight;
   final minH = t * justifiedMinHeightFactor;
@@ -257,6 +301,16 @@ List<JustifiedRow> computeJustifiedRows({
         JustifiedFill.underfilled,
         gap * gap * fillWeight + justifiedUnderfillBasePenalty,
       );
+    }
+
+    // 放大罚成本计算（超 cap 线性尾，保持 cap 点连续）
+    double upscaleCost(double ratio) {
+      if (ratio <= 1.0) return 0.0;
+      if (ratio <= upCap) {
+        return (ratio - 1) * (ratio - 1) * upscaleWeight;
+      }
+      return (upCap - 1) * (upCap - 1) * upscaleWeight +
+          (ratio - upCap) * upTailSlope;
     }
 
     final JustifiedFill fill;
@@ -309,16 +363,15 @@ List<JustifiedRow> computeJustifiedRows({
       fill = JustifiedFill.crop;
       height = h0;
       fillCost = (1 - r) * (1 - r) * downWeight;
-    } else if (r > 1 + justifiedJustifyTolerance && r <= upCap) {
-      // upscale 行（新增）：h = r·h0，整行等比放大、自然宽 contain、
-      // 零裁剪精确填满（r·h0 ≡ Wa/Σa，与 justify 行同构）
+    } else if (r > 1 + justifiedJustifyTolerance &&
+        (r <= upCap ||
+            (r <= upMaxRatio && r * h0 <= upGateT * t && r * h0 <= maxH))) {
+      // 放大带：cap 内二次罚（r ≤ 1.4）；超 cap 走双门控（r ≤ 2.0 且 r·h0 ≤ 2.0t）+ 线性尾
       final upscaledH = r * h0;
       if (upscaledH <= maxH) {
         fill = JustifiedFill.upscale;
         height = upscaledH;
-        // 放大罚超线性：(r−1)²——小空洞放大优于欠填留空，
-        // 大放大率受罚陡增，DP 自动偏好重排细分
-        fillCost = (r - 1) * (r - 1) * upscaleWeight;
+        fillCost = upscaleCost(r);
       } else {
         // 放大率钳 3.5t/h0：钳后带顶欠填（保持放大后宽度左对齐）；
         // 带顶内容宽仍超守卫 → 退普通 h0 欠填
@@ -329,8 +382,25 @@ List<JustifiedRow> computeJustifiedRows({
         height = settled.$1;
         fillCost = settled.$3;
       }
+    } else if (r > upMaxRatio && r <= upMaxRatio / (1 - cap)) {
+      // 竖裁兜底带：双门控放不下但「差一点」的行（r ∈ (2.0, 2.0/0.88≈2.27]），
+      // 放大到高度门控钉 h = min(2.0t, maxH) 后，剩余缺口用 cover 裁上下补
+      final gateH = math.min(upGateT * t, maxH);
+      final cropFrac = 1 - gateH / (r * h0);
+      if (cropFrac >= 0 && cropFrac <= cap) {
+        fill = JustifiedFill.crop;
+        height = gateH;
+        fillCost = upscaleCost(gateH / h0) + cropFrac * cropFrac * downWeight;
+      } else {
+        // 竖裁超预算（cropFrac > cap）或反向溢出 → 维持欠填
+        final settled = asUnderfilled(h0);
+        if (settled == null) return null;
+        fill = settled.$2;
+        height = settled.$1;
+        fillCost = settled.$3;
+      }
     } else {
-      // 欠填行：h0 左对齐不裁（r < 1−cap 或 r > upscaleCap）
+      // 欠填行：h0 左对齐不裁（r < 1−cap、高度门控拦截 r·h0 > 2t、或超 2.27）
       final settled = asUnderfilled(h0);
       if (settled == null) return null;
       fill = settled.$2;

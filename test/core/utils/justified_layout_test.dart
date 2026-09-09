@@ -70,17 +70,17 @@ void main() {
   group('行高锚定（V2 验收性质回归：行高与窗宽解耦）', () {
     test('同一序列不同 W：纯竖图行行高偏差 <5%，且 ≈ t/√0.7', () {
       final aspects = List<double>.filled(6, 0.7);
-      final rowsNarrow = layout(aspects, w: 1000, t: 260);
+      // w=1150 下 3 张/行 r·h0=2.06t > 2t 高度门控拦截落欠填 h0；
+      // w=1400 下 6 张/行 justify 微调到 319；实测偏差 ≈2.7%
+      final rowsNarrow = layout(aspects, w: 1150, t: 260);
       final rowsWide = layout(aspects, w: 1400, t: 260);
       final hNarrow = rowsNarrow.firstWhere((r) => r.endIndex <= 5).height;
       final hWide = rowsWide.firstWhere((r) => r.endIndex <= 5).height;
       final expected = 260 / math.sqrt(0.7); // ≈310.7
-      // 实测偏差 ≈2.7%（窄窗欠填 h0 / 宽窗 justify 微调到 319）；
-      // 放大层不破坏本断言：两窗下 r 分别落欠填/justify，未进 upscale 带
       final drift = (hWide - hNarrow).abs() / hNarrow;
       // ignore: avoid_print
       print(
-        'justified anchor: w=1000 h=$hNarrow, w=1400 h=$hWide, '
+        'justified anchor: w=1150 h=$hNarrow, w=1400 h=$hWide, '
         'drift=${(drift * 100).toStringAsFixed(2)}%',
       );
       expect(drift, lessThan(0.05));
@@ -131,7 +131,7 @@ void main() {
       );
     });
 
-    test('upscale cap 两侧：r=1.229 → upscale / r=1.452 → 超 cap 欠填', () {
+    test('upscale 分派：r=1.229 → upscale / r=1.452 → 高度门控拦截欠填', () {
       final upscale = layout(List<double>.filled(5, 0.6));
       expect(upscale.single.fill, JustifiedFill.upscale);
       expect(
@@ -139,7 +139,8 @@ void main() {
         inInclusiveRange(1.08, justifiedUpscaleCap),
       );
 
-      // 真稀疏区超 cap（1.4）：不再放大，欠填左对齐
+      // 5 张 0.43 竖图：r=1.452 虽然 ≤ 2.0，但 r·h0 = 2.214t > 2.0t
+      // → 被高度门控拦截（拦截原因从 cap 变高度门控），断言不变，维持欠填左对齐
       final underfilled = layout(List<double>.filled(5, 0.43));
       expect(underfilled.single.fill, JustifiedFill.underfilled);
       expect(
@@ -229,13 +230,13 @@ void main() {
       }
     });
 
-    test('DP 仲裁场景 3：真稀疏区 cap 内硬放大、超 cap 才欠填', () {
+    test('DP 仲裁场景 3：真稀疏区 cap 内硬放大、超门控才欠填', () {
       // 页尾无可拉之图：r=1.229 ≤ cap → 硬放大填满（非欠填）
       expect(
         layout(List<double>.filled(5, 0.6)).single.fill,
         JustifiedFill.upscale,
       );
-      // r=1.452 > cap(1.4) → 才退回欠填
+      // 5 张 0.43：r=1.452 拦截原因从 cap 变高度门控（r·h0=2.21t > 2.0t）→ 退回欠填
       expect(
         layout(List<double>.filled(5, 0.43)).single.fill,
         JustifiedFill.underfilled,
@@ -276,13 +277,95 @@ void main() {
       expect(area, closeTo(target * target, target * target * 0.05));
     });
 
-    test('多图超 upscale cap 退回欠填（r=1.427 > 1.4）', () {
+    test('多图 r=1.427 > 1.4 在双门控内放大填满（r·h0=1.25t ≤ 2t）', () {
       final rows = layout([1.3, 1.3, 1.3]);
-      expect(rows.single.fill, JustifiedFill.underfilled);
+      expect(rows, hasLength(1));
+      final row = rows.single;
+      expect(row.fill, JustifiedFill.upscale);
+      final r = ratioOf([1.3, 1.3, 1.3], row, target);
       expect(
-        ratioOf([1.3, 1.3, 1.3], rows.single, target),
-        greaterThan(justifiedUpscaleCap),
+        r,
+        inInclusiveRange(justifiedUpscaleCap, justifiedUpscaleMaxRatio),
       );
+      expect(row.height, closeTo(r * h0Of([1.3, 1.3, 1.3], row, target), 0.01));
+      expect(
+        row.height,
+        lessThanOrEqualTo(target * justifiedUpscaleHeightGateT),
+      );
+    });
+  });
+
+  group('双门控放大与竖裁兜底（方案 B+C）', () {
+    test('双门控内放大：2×a=2 @1200/1600 填满、行高 ≤1.41t', () {
+      const t = 283.0;
+      // @1200: r≈1.484 ∈ (1.4, 2.0], r·h0≈1.05t ≤ 2t → 满宽放大填满
+      final rows1200 = layout([2.0, 2.0], w: 1200, t: t);
+      expect(rows1200, hasLength(1));
+      expect(rows1200.single.fill, JustifiedFill.upscale);
+      expect(rows1200.single.height, lessThanOrEqualTo(t * 1.41));
+      expect(rows1200.single.isUnderfilled, isFalse);
+
+      // @1600: r≈1.984 ∈ (1.4, 2.0], r·h0≈1.40t ≤ 2t → 满宽放大填满
+      final rows1600 = layout([2.0, 2.0], w: 1600, t: t);
+      expect(rows1600, hasLength(1));
+      expect(rows1600.single.fill, JustifiedFill.upscale);
+      expect(rows1600.single.height, lessThanOrEqualTo(t * 1.41));
+      expect(rows1600.single.isUnderfilled, isFalse);
+    });
+
+    test('高度门控拦截：4×a=0.6 @1600 需放大到 2.31t > 2t，仍欠填', () {
+      const t = 283.0;
+      final rows = layout([0.6, 0.6, 0.6, 0.6], w: 1600, t: t);
+      expect(rows, hasLength(1));
+      final row = rows.single;
+      expect(row.fill, JustifiedFill.underfilled);
+      expect(row.isUnderfilled, isTrue);
+      final r = ratioOf([0.6, 0.6, 0.6, 0.6], row, t, w: 1600);
+      expect(r, lessThanOrEqualTo(justifiedUpscaleMaxRatio)); // r≈1.78 比率未超
+      final h0 = h0Of([0.6, 0.6, 0.6, 0.6], row, t);
+      expect(
+        r * h0,
+        greaterThan(t * justifiedUpscaleHeightGateT),
+      ); // 高度超 2.0t 门控
+    });
+
+    test('比率门控拦截：2×a=2 @1920 r=2.38 > 2.0 且超 2.27，仍欠填', () {
+      const t = 283.0;
+      final rows = layout([2.0, 2.0], w: 1920, t: t);
+      expect(rows, hasLength(1));
+      final row = rows.single;
+      expect(row.fill, JustifiedFill.underfilled);
+      expect(row.isUnderfilled, isTrue);
+      final r = ratioOf([2.0, 2.0], row, t, w: 1920);
+      expect(r, greaterThan(justifiedUpscaleMaxRatio));
+      expect(r, greaterThan(justifiedUpscaleMaxRatio / (1 - justifiedCropCap)));
+    });
+
+    test('竖裁兜底救活：构造 r≈2.1 且裁量 ≤12% 的行 → 满宽 cover、height=2t', () {
+      // 4 张方图 a=1.0 @W=1716, t=200: Wa=1680, h0=200, r=2.10 ∈ (2.0, 2.27]
+      // 等比高度 r·h0=420=2.1t > 2t，钉 gateH=2t 后 cropFrac=4.76% ≤ 12%
+      final aspects = [1.0, 1.0, 1.0, 1.0];
+      final rows = layout(aspects, w: 1716, t: 200);
+      expect(rows, hasLength(1));
+      final row = rows.single;
+      expect(row.fill, JustifiedFill.crop);
+      expect(row.isUnderfilled, isFalse);
+      expect(row.height, closeTo(200.0 * justifiedUpscaleHeightGateT, 0.01));
+    });
+
+    test('竖裁超预算退回欠填：r·h0=2.415t 钉 2t 裁量 17.2% > 12% → 维持欠填', () {
+      // 4 张 a=0.756 竖图 @t=200: h0≈230=1.15t
+      // 构造 r≈2.10: Wa = 2.10 * (230 * 4 * 0.756) ≈ 2.10 * 695.5 = 1460.5
+      // W = 1460.5 + 36 = 1496.5
+      // r·h0 = 2.10 * 230 = 483 = 2.415t，cropFrac = 1 - 400/483 ≈ 17.2% > 12%
+      const a = 1.0 / (1.15 * 1.15); // ≈ 0.75614
+      final aspects = [a, a, a, a];
+      const w = 1496.5;
+      final rows = layout(aspects, w: w, t: 200);
+      expect(rows, hasLength(1));
+      final row = rows.single;
+      expect(row.fill, JustifiedFill.underfilled);
+      expect(row.isUnderfilled, isTrue);
     });
   });
 
@@ -477,11 +560,11 @@ void main() {
                 expect(row.height * sumA, closeTo(imageW(row), 0.01));
               case JustifiedFill.upscale:
                 // upscale 零裁剪：行高×Σa == 图片可用宽（r·h0 ≡ Wa/Σa），
-                // 且放大率在 cap 内
+                // 且放大率在门控比率内
                 expect(row.height * sumA, closeTo(imageW(row), 0.01));
                 expect(
                   ratioOf(aspects, row, target),
-                  inInclusiveRange(1.0, justifiedUpscaleCap + 1e-9),
+                  inInclusiveRange(1.0, justifiedUpscaleMaxRatio + 1e-9),
                 );
               case JustifiedFill.crop:
                 // 裁量 1−r ≤ cap（仅 r<1 过满侧），行高 = 面积锚
