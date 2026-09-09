@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -31,6 +33,12 @@ class ResponsiveLayout {
 }
 
 enum _ScrollDirection { idle, up, down }
+
+/// 可见性 setState 的合并窗口：卡片进出视口只改集合、推迟到窗口末尾
+/// 一次重建。visibility_detector 按帧发回调，滚动期间若逐帧 setState，
+/// 已挂载的全部卡片每帧都会重建。isVisible/priority 只影响缩略图队列
+/// 优先级，无视觉用途，延迟一个窗口无感知。
+const Duration galleryVisibilityFlushInterval = Duration(milliseconds: 120);
 
 class GalleryGrid extends StatefulWidget {
   final List<LocalImageRecord> images;
@@ -92,6 +100,7 @@ class GalleryGrid extends StatefulWidget {
 class _GalleryGridState extends State<GalleryGrid> {
   final Set<int> _visibleIndices = {};
   final Set<int> _preloadIndices = {};
+  Timer? _visibilityFlushTimer;
   late final ScrollController _scrollController;
   _ScrollDirection _scrollDirection = _ScrollDirection.idle;
   double _lastScrollOffset = 0;
@@ -114,11 +123,15 @@ class _GalleryGridState extends State<GalleryGrid> {
             oldWidget.images.first.path != widget.images.first.path)) {
       _visibleIndices.clear();
       _preloadIndices.clear();
+      // 数据集已换，挂起的 flush 只会对新列表做一次无意义重建
+      _visibilityFlushTimer?.cancel();
+      _visibilityFlushTimer = null;
     }
   }
 
   @override
   void dispose() {
+    _visibilityFlushTimer?.cancel();
     _scrollController.removeListener(_onScroll);
     if (widget.scrollController == null) {
       _scrollController.dispose();
@@ -142,6 +155,20 @@ class _GalleryGridState extends State<GalleryGrid> {
     if (_visibleIndices.contains(index)) return 1;
     if (_preloadIndices.contains(index)) return 3;
     return 10;
+  }
+
+  /// 立即更新可见集合，setState 推迟到 flush 窗口末尾合并执行：
+  /// 窗口内任意其他原因触发的 rebuild 都能读到最新集合。
+  void _setCardVisible(int index, bool isNowVisible) {
+    if (isNowVisible) {
+      _visibleIndices.add(index);
+    } else {
+      _visibleIndices.remove(index);
+    }
+    _visibilityFlushTimer ??= Timer(galleryVisibilityFlushInterval, () {
+      _visibilityFlushTimer = null;
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -212,13 +239,7 @@ class _GalleryGridState extends State<GalleryGrid> {
                 final wasVisible = _visibleIndices.contains(index);
 
                 if (isNowVisible != wasVisible) {
-                  setState(() {
-                    if (isNowVisible) {
-                      _visibleIndices.add(index);
-                    } else {
-                      _visibleIndices.remove(index);
-                    }
-                  });
+                  _setCardVisible(index, isNowVisible);
                   if (isNowVisible) _updatePreloadRange(index);
                 }
               },
@@ -283,13 +304,11 @@ class _GalleryGridState extends State<GalleryGrid> {
     }
 
     if ((_preloadIndices.difference(newPreloadIndices).isNotEmpty ||
-            newPreloadIndices.difference(_preloadIndices).isNotEmpty) &&
-        mounted) {
-      setState(() {
-        _preloadIndices
-          ..clear()
-          ..addAll(newPreloadIndices);
-      });
+            newPreloadIndices.difference(_preloadIndices).isNotEmpty)) {
+      // 只赋值不 setState：重建统一由 _setCardVisible 调度的 flush 合并触发
+      _preloadIndices
+        ..clear()
+        ..addAll(newPreloadIndices);
     }
   }
 }

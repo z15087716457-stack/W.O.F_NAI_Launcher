@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -270,6 +271,7 @@ class _GenericGalleryContentViewState<T>
   final Map<String, double> _aspectRatioCache = {};
   bool _showSkeleton = false;
   final Set<int> _visibleIndices = {};
+  Timer? _visibilityFlushTimer;
 
   /// 数据集重挂计数：同页条目增减时 ++，掺进瀑布流/网格 key 强制重挂载
   int _gridRemountCounter = 0;
@@ -343,6 +345,7 @@ class _GenericGalleryContentViewState<T>
 
   @override
   void dispose() {
+    _visibilityFlushTimer?.cancel();
     _masonryScrollController?.dispose();
     _emptyStateController.dispose();
     super.dispose();
@@ -521,16 +524,8 @@ class _GenericGalleryContentViewState<T>
           onVisibilityChanged: (visibilityInfo) {
             final isNowVisible = visibilityInfo.visibleFraction > 0.05;
             final wasVisible = _visibleIndices.contains(index);
-
-            if (isNowVisible != wasVisible && mounted) {
-              setState(() {
-                if (isNowVisible) {
-                  _visibleIndices.add(index);
-                } else {
-                  _visibleIndices.remove(index);
-                }
-              });
-            }
+            if (!mounted) return;
+            _handleCardVisibility(index, isNowVisible, wasVisible);
           },
           child: LocalImageCard3D(
             record: record,
@@ -561,6 +556,21 @@ class _GenericGalleryContentViewState<T>
         );
       },
     );
+  }
+
+  /// 可见性回调统一入口：立即更新集合，setState 推迟到 flush 窗口末尾
+  /// 合并执行（与 GalleryGrid._setCardVisible 同语义，详见常量处注释）。
+  void _handleCardVisibility(int index, bool isNowVisible, bool wasVisible) {
+    if (isNowVisible == wasVisible) return;
+    if (isNowVisible) {
+      _visibleIndices.add(index);
+    } else {
+      _visibleIndices.remove(index);
+    }
+    _visibilityFlushTimer ??= Timer(galleryVisibilityFlushInterval, () {
+      _visibilityFlushTimer = null;
+      if (mounted) setState(() {});
+    });
   }
 
   double _getCachedAspectRatio(LocalImageRecord record) {
@@ -693,15 +703,7 @@ class _GenericGalleryContentViewState<T>
                 if (!mounted) return;
                 final isNowVisible = info.visibleFraction > 0.05;
                 final wasVisible = _visibleIndices.contains(index);
-                if (isNowVisible != wasVisible) {
-                  setState(() {
-                    if (isNowVisible) {
-                      _visibleIndices.add(index);
-                    } else {
-                      _visibleIndices.remove(index);
-                    }
-                  });
-                }
+                _handleCardVisibility(index, isNowVisible, wasVisible);
               },
               // 与固定网格对齐补 RepaintBoundary：悬停光泽/解码完成的重绘
               // 只刷本卡片，不再整片网格重绘
@@ -915,15 +917,7 @@ class _GenericGalleryContentViewState<T>
         if (!mounted) return;
         final isNowVisible = info.visibleFraction > 0.05;
         final wasVisible = _visibleIndices.contains(index);
-        if (isNowVisible != wasVisible) {
-          setState(() {
-            if (isNowVisible) {
-              _visibleIndices.add(index);
-            } else {
-              _visibleIndices.remove(index);
-            }
-          });
-        }
+        _handleCardVisibility(index, isNowVisible, wasVisible);
       },
       // 与瀑布流对齐补 RepaintBoundary：重绘只刷本卡片
       child: RepaintBoundary(
