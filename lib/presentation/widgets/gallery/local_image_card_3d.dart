@@ -377,110 +377,124 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
     final colorScheme = theme.colorScheme;
     final (intensity, glowColor) = _getEffectConfig(context);
 
-    Widget cardContent = GestureDetector(
-      onTap: widget.onTap,
-      onDoubleTap: widget.onDoubleTap,
-      onLongPress: widget.onLongPress,
-      onSecondaryTapDown: widget.onSecondaryTapDown,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeOut,
-        transform: Matrix4.identity()
-          ..scaleByDouble(
-            _isHovered ? 1.03 : 1.0,
-            _isHovered ? 1.03 : 1.0,
-            _isHovered ? 1.03 : 1.0,
-            1,
-          ),
-        transformAlignment: Alignment.center,
-        child: Container(
-          width: widget.width,
-          height: cardHeight,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: widget.isSelected
-                ? Border.all(color: colorScheme.primary, width: 3)
-                : _isHovered
-                ? Border.all(
-                    color: colorScheme.primary.withValues(alpha: 0.3),
-                    width: 2,
-                  )
-                : null,
-            boxShadow: [
-              BoxShadow(
-                color: _isHovered
-                    ? Colors.black.withValues(alpha: 0.35)
-                    : Colors.black.withValues(alpha: 0.12),
-                blurRadius: _isHovered ? 28 : 10,
-                offset: Offset(0, _isHovered ? 14 : 4),
-                spreadRadius: _isHovered ? 2 : 0,
-              ),
-              if (_isHovered)
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 40,
-                  offset: const Offset(0, 20),
-                  spreadRadius: -4,
-                ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                _buildImageLayer(quality),
-                if (_isHovered)
-                  Positioned.fill(
-                    child: TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.0, end: 1.0),
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                      builder: (context, value, child) => _EdgeGlowOverlay(
-                        glowColor: glowColor,
-                        intensity: value * intensity.edgeGlow,
-                      ),
-                    ),
-                  ),
-                if (_isHovered)
-                  Positioned.fill(
-                    child: RepaintBoundary(
-                      child: AnimatedBuilder(
-                        animation: _glossAnimation,
-                        builder: (context, child) => _GlossOverlay(
-                          progress: _glossAnimation.value,
-                          intensity: intensity.gloss,
-                        ),
-                      ),
-                    ),
-                  ),
-                Positioned(top: 8, right: 8, child: _buildActionButtons()),
-                if (widget.isSelected)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: _buildSelectionIndicator(colorScheme),
-                  ),
-                if (widget.isSelected)
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: colorScheme.primary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                if (_isHovered && widget.record.metadata != null)
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: _buildMetadataPreview(theme),
-                  ),
-              ],
+    // 手势层只包图像与覆盖层，三个悬浮按钮是它的兄弟节点：按钮若留在手势
+    // 子树里，卡片的双击识别器会在首次抬手后 hold 整个手势竞技场直到双击
+    // 窗口（约 300ms）结束——按钮点下去要等约 300ms 才响应，窗口内连点还会
+    // 被判成双击、按钮回调整轮丢失。
+    Widget cardContent = AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOut,
+      transform: Matrix4.identity()
+        ..scaleByDouble(
+          _isHovered ? 1.03 : 1.0,
+          _isHovered ? 1.03 : 1.0,
+          _isHovered ? 1.03 : 1.0,
+          1,
+        ),
+      transformAlignment: Alignment.center,
+      child: Container(
+        width: widget.width,
+        height: cardHeight,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: widget.isSelected
+              ? Border.all(color: colorScheme.primary, width: 3)
+              : _isHovered
+              ? Border.all(
+                  color: colorScheme.primary.withValues(alpha: 0.3),
+                  width: 2,
+                )
+              : null,
+          boxShadow: [
+            BoxShadow(
+              color: _isHovered
+                  ? Colors.black.withValues(alpha: 0.35)
+                  : Colors.black.withValues(alpha: 0.12),
+              blurRadius: _isHovered ? 28 : 10,
+              offset: Offset(0, _isHovered ? 14 : 4),
+              spreadRadius: _isHovered ? 2 : 0,
             ),
+            if (_isHovered)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 40,
+                offset: const Offset(0, 20),
+                spreadRadius: -4,
+              ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: widget.onTap,
+                  onDoubleTap: widget.onDoubleTap,
+                  onLongPress: widget.onLongPress,
+                  onSecondaryTapDown: widget.onSecondaryTapDown,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _buildImageLayer(quality),
+                      if (_isHovered)
+                        Positioned.fill(
+                          child: TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.0, end: 1.0),
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeOut,
+                            builder: (context, value, child) =>
+                                _EdgeGlowOverlay(
+                                  glowColor: glowColor,
+                                  intensity: value * intensity.edgeGlow,
+                                ),
+                          ),
+                        ),
+                      if (_isHovered)
+                        Positioned.fill(
+                          child: RepaintBoundary(
+                            child: AnimatedBuilder(
+                              animation: _glossAnimation,
+                              builder: (context, child) => _GlossOverlay(
+                                progress: _glossAnimation.value,
+                                intensity: intensity.gloss,
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (widget.isSelected)
+                        Positioned(
+                          top: 8,
+                          left: 8,
+                          child: _buildSelectionIndicator(colorScheme),
+                        ),
+                      if (widget.isSelected)
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: colorScheme.primary.withValues(
+                                  alpha: 0.15,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (_isHovered && widget.record.metadata != null)
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: _buildMetadataPreview(theme),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(top: 8, right: 8, child: _buildActionButtons()),
+            ],
           ),
         ),
       ),

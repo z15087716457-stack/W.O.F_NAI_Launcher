@@ -54,6 +54,10 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
   late bool _isFavorite;
   bool _busy = false;
 
+  /// 收藏切换的请求序号：连点时只让最后一次落库结果回写 UI，
+  /// 避免先发请求的旧结果覆盖后发请求的新状态。
+  int _favoriteRequestSeq = 0;
+
   @override
   void initState() {
     super.initState();
@@ -74,22 +78,36 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
     setState(() => _memberCollectionIds = ids ?? const {});
   }
 
+  /// 切换收藏：先就地翻转红心给即时反馈，落库结果回来再以服务端口径校准。
+  ///
+  /// 旧实现等 `toggleFavorite` 整个返回（落库 + 取消收藏时的集合刷新 +
+  /// 过滤视图重载）才 `setState`，菜单里点一下要愣一拍才见红心变化。
   Future<void> _toggleFavorite() async {
-    if (_busy) return;
-    setState(() => _busy = true);
+    final seq = ++_favoriteRequestSeq;
+    final optimistic = !_isFavorite;
+    setState(() => _isFavorite = optimistic);
+
     final nowFavorite = await ref
         .read(localGalleryNotifierProvider.notifier)
         .toggleFavorite(widget.record.path);
-    if (!mounted) return;
-    setState(() {
-      _isFavorite = nowFavorite;
-      _busy = false;
-    });
+    if (!mounted || seq != _favoriteRequestSeq) return;
+    setState(() => _isFavorite = nowFavorite);
   }
 
   Future<void> _toggleCollection(String collectionId) async {
     if (_busy) return;
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      // 先就地翻转勾选给即时反馈，落库回来后以真实成员关系校准
+      final ids = _memberCollectionIds;
+      if (ids != null) {
+        if (ids.contains(collectionId)) {
+          ids.remove(collectionId);
+        } else {
+          ids.add(collectionId);
+        }
+      }
+    });
     final nowMember = await ref
         .read(collectionNotifierProvider.notifier)
         .toggleImageInCollection(collectionId, widget.record.path);
@@ -161,7 +179,7 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
                           ? l10n.localGallery_unfavorite
                           : l10n.common_favorite,
                       checked: _isFavorite,
-                      onTap: _busy ? null : _toggleFavorite,
+                      onTap: _toggleFavorite,
                     ),
                     Divider(
                       height: 1,

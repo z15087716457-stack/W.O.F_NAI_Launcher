@@ -255,7 +255,11 @@ class _GalleryGridState extends State<GalleryGrid> {
                   enableDrag: widget.enableDrag,
                   selectedPaths: isSelected ? widget.selectedPaths : null,
                   onTap: () => widget.onTap?.call(record, index),
-                  onDoubleTap: () => widget.onDoubleTap?.call(record, index),
+                  // 无双击行为时传 null：双击识别器会在首次抬手后 hold 手势
+                  // 竞技场到双击窗口（约 300ms）结束，卡片内点击都得排队等它
+                  onDoubleTap: widget.onDoubleTap == null
+                      ? null
+                      : () => widget.onDoubleTap!(record, index),
                   onLongPress: () => widget.onLongPress?.call(record, index),
                   onSecondaryTapDown: (details) =>
                       widget.onSecondaryTapDown?.call(record, index, details),

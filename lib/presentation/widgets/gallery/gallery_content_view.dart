@@ -421,6 +421,26 @@ class _GenericGalleryContentViewState<T>
     }
   }
 
+  /// 卡片双击回调工厂：只在「双击与单击语义不同」时才返回非空。
+  ///
+  /// 非多选态下双击与单击同义（都开大图），此时不挂双击——双击识别器会在
+  /// 首次抬手后 hold 手势竞技场到双击窗口（约 300ms）结束，卡片内所有点击
+  /// 都得排队等它，窗口内的连点还会被判成双击、按钮回调整轮丢失。
+  void Function(int index)? _cardDoubleTapHandler(
+    GalleryState<T> state,
+    SelectionState selectionState,
+  ) {
+    final images = state.currentImages;
+    final onDoubleTap = widget.onDoubleTap;
+    if (onDoubleTap != null) {
+      return (index) => onDoubleTap(images[index], index);
+    }
+    if (!selectionState.isActive) return null;
+    final config = widget.view3DConfig;
+    if (config == null) return null;
+    return (index) => config.showDetailViewer(config.images, index);
+  }
+
   Widget Function(Widget child)? _buildDragWrapper(LocalImageRecord record) {
     final selectionState = widget.selectionState;
     if (selectionState.isActive &&
@@ -696,6 +716,7 @@ class _GenericGalleryContentViewState<T>
             final isSelected = selectedIndices.contains(index);
             final aspectRatio = _getCachedAspectRatio(record);
             final isVisible = _visibleIndices.contains(index);
+            final onDoubleTap = _cardDoubleTapHandler(state, selectionState);
 
             return VisibilityDetector(
               key: ValueKey('masonry_v_${record.path}'),
@@ -717,16 +738,9 @@ class _GenericGalleryContentViewState<T>
                   priority: isVisible ? 1 : 5,
                   onTap: () =>
                       _handleCardTap(state.currentImages[index], index),
-                  onDoubleTap: () {
-                    if (widget.onDoubleTap != null) {
-                      widget.onDoubleTap!(state.currentImages[index], index);
-                    } else if (widget.view3DConfig != null) {
-                      widget.view3DConfig!.showDetailViewer(
-                        widget.view3DConfig!.images,
-                        index,
-                      );
-                    }
-                  },
+                  onDoubleTap: onDoubleTap == null
+                      ? null
+                      : () => onDoubleTap(index),
                   onLongPress: () {
                     if (!selectionState.isActive) {
                       widget.onEnterSelection?.call(state.currentImages[index]);
@@ -910,6 +924,7 @@ class _GenericGalleryContentViewState<T>
     final record = records[index];
     final isSelected = selectedIndices.contains(index);
     final isVisible = _visibleIndices.contains(index);
+    final onDoubleTap = _cardDoubleTapHandler(state, selectionState);
 
     return VisibilityDetector(
       key: ValueKey('justified_v_${record.path}'),
@@ -929,16 +944,7 @@ class _GenericGalleryContentViewState<T>
           isVisible: isVisible,
           priority: isVisible ? 1 : 5,
           onTap: () => _handleCardTap(state.currentImages[index], index),
-          onDoubleTap: () {
-            if (widget.onDoubleTap != null) {
-              widget.onDoubleTap!(state.currentImages[index], index);
-            } else if (widget.view3DConfig != null) {
-              widget.view3DConfig!.showDetailViewer(
-                widget.view3DConfig!.images,
-                index,
-              );
-            }
-          },
+          onDoubleTap: onDoubleTap == null ? null : () => onDoubleTap(index),
           onLongPress: () {
             if (!selectionState.isActive) {
               widget.onEnterSelection?.call(state.currentImages[index]);
@@ -978,6 +984,8 @@ class _GenericGalleryContentViewState<T>
       }
     }
 
+    final onDoubleTap = _cardDoubleTapHandler(state, selectionState);
+
     return GalleryGrid(
       key: PageStorageKey<String>('gallery_grid_$_gridRemountCounter'),
       scrollController: _masonryScrollController ??= ScrollController(),
@@ -992,16 +1000,9 @@ class _GenericGalleryContentViewState<T>
           : null,
       onTap: (record, index) =>
           _handleCardTap(state.currentImages[index], index),
-      onDoubleTap: (record, index) {
-        if (widget.onDoubleTap != null) {
-          widget.onDoubleTap!(state.currentImages[index], index);
-        } else if (widget.view3DConfig != null) {
-          widget.view3DConfig!.showDetailViewer(
-            widget.view3DConfig!.images,
-            index,
-          );
-        }
-      },
+      onDoubleTap: onDoubleTap == null
+          ? null
+          : (record, index) => onDoubleTap(index),
       onLongPress: (record, index) {
         if (!selectionState.isActive) {
           widget.onEnterSelection?.call(state.currentImages[index]);
