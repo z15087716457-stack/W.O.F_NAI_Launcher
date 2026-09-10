@@ -183,6 +183,10 @@ class ThumbnailService {
   /// 活跃任务映射（完整任务键 -> 任务）
   final Map<ThumbnailTaskKey, ThumbnailTask> _activeTasks = {};
 
+  /// 等待重新入队的重试定时器（任务键 -> Timer），
+  /// 服务暂停/销毁或任务取消时一并清理，避免悬挂定时器。
+  final Map<ThumbnailTaskKey, Timer> _retryTimers = {};
+
   /// 当前正在进行的生成任务数
   int _activeGenerationCount = 0;
 
@@ -472,8 +476,9 @@ class ThumbnailService {
         _activeGenerationCount--;
 
         if (task.state == ThumbnailTaskState.pending) {
-          _activeTasks.remove(task.key);
-          _enqueueTask(task);
+          // 重试已由 _scheduleRetry 延迟安排（等失败冷却结束再入队）：
+          // 这里不删活跃映射、也不立即重入队，避免重试在冷却期内被弹回、
+          // 次数被毫秒级烧完。
           return;
         }
 
@@ -509,11 +514,14 @@ class ThumbnailService {
       );
 
       if (path == null) {
-        // 尝试重试
+        // 尝试重试：本回合失败立即告知等待者（调用方转轻量占位并自挂
+        // 延迟重试），后台重试入队延迟到失败冷却截止之后——避免重试在
+        // 冷却期内被直接弹回、3 次机会被毫秒级烧完。
         if (task.retryCount < maxRetryAttempts) {
           task.retryCount++;
           task.state = ThumbnailTaskState.pending;
-          // 由队列完成回调重新入队，避免提前通知等待者失败。
+          task.notifyComplete(null);
+          _scheduleRetry(task);
           return null;
         }
       }
@@ -529,6 +537,44 @@ class ThumbnailService {
       task.error = e.toString();
       return null;
     }
+  }
+
+  /// 重试延迟余量：保证重试排队时间落在冷却截止之后。
+  static const Duration _retryCooldownMargin = Duration(milliseconds: 50);
+
+  /// 把重试任务延迟到失败冷却截止后重新入队。
+  void _scheduleRetry(ThumbnailTask task) {
+    final remaining =
+        _cacheService?.failureCooldownRemaining(
+          task.originalPath,
+          size: task.size,
+        ) ??
+        Duration.zero;
+    final delay = remaining <= Duration.zero
+        ? Duration.zero
+        : remaining + _retryCooldownMargin;
+
+    _retryTimers[task.key]?.cancel();
+    _retryTimers[task.key] = Timer(delay, () {
+      _retryTimers.remove(task.key);
+      if (_state != ThumbnailServiceState.running) {
+        // 服务已暂停/销毁：终止任务，避免等待者悬挂到超时。
+        _activeTasks.remove(task.key);
+        task.state = ThumbnailTaskState.failed;
+        task.notifyComplete(null);
+        return;
+      }
+      _activeTasks.remove(task.key);
+      _enqueueTask(task);
+    });
+  }
+
+  /// 取消所有待触发的重试定时器。
+  void _cancelRetryTimers() {
+    for (final timer in _retryTimers.values) {
+      timer.cancel();
+    }
+    _retryTimers.clear();
   }
 
   // ==================== 控制方法 ====================
@@ -564,6 +610,7 @@ class ThumbnailService {
         task.state = ThumbnailTaskState.cancelled;
         task.notifyComplete(null);
         _activeTasks.remove(task.key);
+        _retryTimers.remove(task.key)?.cancel();
 
         // AppLogger.d('Cancelled task: $taskId', 'ThumbnailService');
         return true;
@@ -583,6 +630,7 @@ class ThumbnailService {
     }
 
     _activeTasks.clear();
+    _cancelRetryTimers();
 
     // AppLogger.i('All tasks cancelled', 'ThumbnailService');
   }

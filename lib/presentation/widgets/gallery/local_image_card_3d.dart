@@ -19,7 +19,14 @@ import '../common/app_toast.dart';
 import '../common/floating_action_buttons.dart';
 import 'local_image_context_menu.dart';
 
-enum _ImageLoadState { idle, loading, loaded, error }
+/// 缩略图失败后的自动重试延迟（蓝图 P5：失败不再永久回退解码原图）。
+const Duration _thumbnailFailureRetryDelay = Duration(seconds: 30);
+
+/// 失败重试延迟的可覆写值（仅测试用；生产恒为 [_thumbnailFailureRetryDelay]）。
+@visibleForTesting
+Duration thumbnailFailureRetryDelayForTesting = _thumbnailFailureRetryDelay;
+
+enum _ImageLoadState { idle, loading, loaded, error, failed }
 
 /// Steam风格本地图片卡片，包含边缘发光、光泽扫过、悬停动画效果
 class LocalImageCard3D extends ConsumerStatefulWidget {
@@ -84,6 +91,12 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
   /// 列宽变化换档重载的防抖器：拖动列宽滑块期间只记目标档位，
   /// 停止 ~300ms 后才真正换档重载，避免拖动过程反复入队。
   Timer? _reloadDebounceTimer;
+
+  /// 缩略图失败后的延迟重试器（30s 后重新走一次完整加载）。
+  Timer? _failureRetryTimer;
+
+  /// 本次挂载是否已安排过自动重试（保证失败文件不会形成无界重试循环）。
+  bool _failureRetryScheduled = false;
 
   @override
   void initState() {
@@ -198,6 +211,8 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
         // AppLogger.i('[CardLoad] Using existing thumbnail: $fileName', 'LocalImageCard3D');
         _requestedSize = size;
         _requestedQuality = quality;
+        _failureRetryTimer?.cancel();
+        _failureRetryScheduled = false;
         if (mounted) {
           setState(() {
             _thumbnailPath = existingPath;
@@ -228,25 +243,21 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
       if (!mounted || widget.record.path != path) return;
 
       if (generatedPath != null) {
+        _failureRetryTimer?.cancel();
+        _failureRetryScheduled = false;
         setState(() {
           _thumbnailPath = generatedPath;
           _displayPath = generatedPath;
           _loadState = _ImageLoadState.loaded;
         });
       } else {
-        setState(() {
-          _displayPath = path;
-          _loadState = _ImageLoadState.loaded;
-        });
+        // 生成失败/超时不再回退解码原图（数 MB 内存尖峰），
+        // 保持轻量占位并挂一次延迟重试。
+        _markThumbnailFailed();
       }
     } catch (e, stack) {
       AppLogger.e('[CardLoad] ERROR: $fileName', e, stack, 'LocalImageCard3D');
-      if (mounted) {
-        setState(() {
-          _displayPath = path;
-          _loadState = _ImageLoadState.loaded;
-        });
-      }
+      _markThumbnailFailed();
     } finally {
       _isLoadingThumbnail = false;
       if (mounted) {
@@ -259,6 +270,27 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
         }
       }
     }
+  }
+
+  /// 缩略图失败：保持轻量占位态（不回退解码原图），挂一次延迟重试。
+  ///
+  /// 每次挂载只自动重试一次，避免失败文件形成无界重试循环；翻页/滚动
+  /// 重新挂载会再走一次完整加载。延迟后重试先走 `getThumbnailPath` 快速
+  /// 路径——若首次任务超时后底层已完成落盘，直接吃晚到结果。
+  void _markThumbnailFailed() {
+    if (!mounted) return;
+    setState(() => _loadState = _ImageLoadState.failed);
+    _scheduleFailureRetry();
+  }
+
+  void _scheduleFailureRetry() {
+    if (_failureRetryScheduled) return;
+    _failureRetryScheduled = true;
+    _failureRetryTimer?.cancel();
+    _failureRetryTimer = Timer(thumbnailFailureRetryDelayForTesting, () {
+      if (!mounted) return;
+      _loadThumbnail();
+    });
   }
 
   void _onHoverEnter(PointerEvent event) {
@@ -471,6 +503,7 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
   Widget _buildImageLayer(GalleryThumbnailQuality quality) =>
       switch (_loadState) {
         _ImageLoadState.error => _buildErrorPlaceholder(),
+        _ImageLoadState.failed => _buildFailedPlaceholder(),
         _ImageLoadState.loading when _displayPath == null =>
           _buildLoadingPlaceholder(),
         _ when _displayPath != null => _buildOptimizedImage(
@@ -479,6 +512,30 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
         ),
         _ => _buildLoadingPlaceholder(),
       };
+
+  /// 缩略图生成失败时的轻量占位（灰块 + 图标，自动延迟重试，不弹 toast）。
+  Widget _buildFailedPlaceholder() {
+    return Container(
+      color: Colors.grey[850],
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.image_not_supported_outlined,
+              color: Colors.grey[600],
+              size: 32,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.l10n.onlineGallery_loadFailed,
+              style: TextStyle(color: Colors.grey[600], fontSize: 11),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildLoadingPlaceholder() {
     return Container(
@@ -742,6 +799,7 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
   @override
   void dispose() {
     _reloadDebounceTimer?.cancel();
+    _failureRetryTimer?.cancel();
     _glossController.dispose();
     super.dispose();
   }

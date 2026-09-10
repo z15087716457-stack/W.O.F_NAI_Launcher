@@ -109,4 +109,54 @@ void main() {
       expect(service.getStats()['generatedCount'], before + 1);
     });
   });
+
+  group('ThumbnailCacheService 失败冷却剩余时间', () {
+    test('无失败记录时剩余时间为零', () {
+      final service = ThumbnailCacheService.instance;
+      expect(service.failureCooldownRemaining(r'C:\nope\a.png'), Duration.zero);
+    });
+
+    test('失败后剩余时间从冷却时长递减、过期后归零并清除记录', () {
+      final service = ThumbnailCacheService.instance;
+      service.setFailureRetryCooldownForTesting(const Duration(seconds: 5));
+      addTearDown(
+        () => service.setFailureRetryCooldownForTesting(
+          const Duration(seconds: 10),
+        ),
+      );
+
+      const path = r'C:\nope\cooldown.png';
+      service.seedFailureRecordForTesting(
+        path,
+        failedAt: DateTime.now().subtract(const Duration(seconds: 2)),
+      );
+
+      final remaining = service.failureCooldownRemaining(path);
+      expect(remaining, greaterThan(Duration.zero));
+      expect(remaining, lessThanOrEqualTo(const Duration(seconds: 3)));
+
+      // 过期记录在查询时被清除：下一次查询直接为零
+      service.seedFailureRecordForTesting(
+        path,
+        failedAt: DateTime.now().subtract(const Duration(seconds: 30)),
+      );
+      expect(service.failureCooldownRemaining(path), Duration.zero);
+      expect(service.failureCooldownRemaining(path), Duration.zero);
+    });
+
+    test('不同档位的冷却记录互不影响', () {
+      final service = ThumbnailCacheService.instance;
+      const path = r'C:\nope\tier.png';
+      service.seedFailureRecordForTesting(path, failedAt: DateTime.now());
+
+      expect(
+        service.failureCooldownRemaining(path, size: ThumbnailSize.small),
+        greaterThan(Duration.zero),
+      );
+      expect(
+        service.failureCooldownRemaining(path, size: ThumbnailSize.medium),
+        Duration.zero,
+      );
+    });
+  });
 }

@@ -225,7 +225,7 @@ class ThumbnailCacheService {
 
   /// 最近失败记录，避免同一任务在短时间内疯狂重试。
   final Map<ThumbnailTaskKey, DateTime> _recentFailureTimes = {};
-  static const Duration _failureRetryCooldown = Duration(seconds: 10);
+  Duration _failureRetryCooldown = const Duration(seconds: 10);
 
   /// 缓存限制配置
   static const int defaultMaxCacheSizeMB = 500;
@@ -1265,6 +1265,54 @@ class ThumbnailCacheService {
     }
 
     return true;
+  }
+
+  /// 距离该任务失败冷却结束还剩多久；不在冷却中（含已过期）返回 [Duration.zero]。
+  ///
+  /// 供上层重试调度使用：重试入队延迟到冷却截止之后再执行，
+  /// 避免重试在冷却期内被直接弹回、次数被瞬间烧完。
+  Duration failureCooldownRemaining(
+    String originalPath, {
+    ThumbnailSize size = defaultSize,
+  }) {
+    final key = _failureKey(originalPath, size: size);
+    final lastFailureAt = _recentFailureTimes[key];
+    if (lastFailureAt == null) {
+      return Duration.zero;
+    }
+
+    final elapsed = DateTime.now().difference(lastFailureAt);
+    if (elapsed >= _failureRetryCooldown) {
+      _recentFailureTimes.remove(key);
+      return Duration.zero;
+    }
+
+    return _failureRetryCooldown - elapsed;
+  }
+
+  /// 覆写失败重试冷却时长（仅测试用；生产默认 10s 不变）。
+  @visibleForTesting
+  void setFailureRetryCooldownForTesting(Duration cooldown) {
+    _failureRetryCooldown = cooldown;
+  }
+
+  /// 注入一条失败记录（仅测试用，用于验证冷却过期/剩余时间语义）。
+  @visibleForTesting
+  void seedFailureRecordForTesting(
+    String originalPath, {
+    required DateTime failedAt,
+    ThumbnailSize size = defaultSize,
+  }) {
+    _recentFailureTimes[_failureKey(originalPath, size: size)] = failedAt;
+  }
+
+  /// 清除一条失败记录（仅测试用，收尾防跨用例污染）。
+  @visibleForTesting
+  void clearFailureRecordForTesting(
+    String originalPath, {
+    ThumbnailSize size = defaultSize,
+  }) {
+    _recentFailureTimes.remove(_failureKey(originalPath, size: size));
   }
 
   static String _buildThumbnailFileName(

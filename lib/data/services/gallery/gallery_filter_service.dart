@@ -754,10 +754,13 @@ class GalleryFilterService {
         files.map((f) => f.path).toList(),
       );
 
-      // 获取所有图片的标签
+      // 获取所有图片的标签；元数据只取参与匹配的完整提示词一列
+      // （全库约 4.9 万行：拉全行约 518MB 文本 → 84MB）
       final imageIds = pathToIdMap.values.whereType<int>().toList();
       final tagsMap = await _dataSource.getTagsByImageIds(imageIds);
-      final metadataMap = await _dataSource.getMetadataByImageIds(imageIds);
+      final promptTextsMap = await _dataSource.getFullPromptTextsByImageIds(
+        imageIds,
+      );
 
       return files.where((file) {
         if (cancelToken.isCancelled) return false;
@@ -770,7 +773,7 @@ class GalleryFilterService {
             .where((tag) => tag.isNotEmpty)
             .toSet();
         final metadataText = TagNormalizer.normalizeTagForMatch(
-          metadataMap[imageId]?.fullPromptText ?? '',
+          promptTextsMap[imageId] ?? '',
         );
 
         return requiredTags.every(

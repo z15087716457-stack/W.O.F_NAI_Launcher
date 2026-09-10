@@ -1267,9 +1267,15 @@ class GalleryDataSource extends EnhancedBaseDataSource
     }
   }
 
+  /// 批量读取元数据记录。
+  ///
+  /// [includeFullPromptText] 为 false 时跳过 `full_prompt_text` 列（全库约
+  /// 100MB 文本）：网格页路径只消费 prompt/参数/raw_json，不读该列，
+  /// 页内查询不再把它搬进 Dart。
   Future<Map<int, GalleryMetadataRecord?>> getMetadataByImageIds(
-    List<int> imageIds,
-  ) async {
+    List<int> imageIds, {
+    bool includeFullPromptText = true,
+  }) async {
     if (imageIds.isEmpty) return {};
 
     return _trackQuery('getMetadataByImageIds', () async {
@@ -1286,10 +1292,12 @@ class GalleryDataSource extends EnhancedBaseDataSource
             (db) async {
               final placeholders = List.filled(batch.length, '?').join(',');
 
-              final dbResults = await db.rawQuery('''
-                  SELECT * FROM $_metadataTable
-                  WHERE image_id IN ($placeholders)
-                  ''', batch);
+              final dbResults = await db.rawQuery(
+                'SELECT ${includeFullPromptText ? '*' : _metadataColumnsWithoutFullPromptText} '
+                'FROM $_metadataTable '
+                'WHERE image_id IN ($placeholders)',
+                batch,
+              );
 
               for (final id in batch) {
                 results[id] = null;
@@ -1314,6 +1322,62 @@ class GalleryDataSource extends EnhancedBaseDataSource
         for (final id in imageIds) {
           results.putIfAbsent(id, () => null);
         }
+      }
+
+      return results;
+    }, details: '${imageIds.length} IDs');
+  }
+
+  /// 除 `full_prompt_text` 外的元数据列集（网格页路径用）。
+  ///
+  /// 与 [GalleryMetadataRecord.fromMap] 的消费列一一对应（缺列走各自默认值）；
+  /// 不含 `has_metadata`/`is_nsfw`/`vibe_*` 等 fromMap 不消费的列。
+  static const String _metadataColumnsWithoutFullPromptText =
+      'image_id, prompt, negative_prompt, seed, sampler, steps, cfg_scale, '
+      'width, height, model, smea, smea_dyn, noise_schedule, cfg_rescale, '
+      'uc_preset, quality_toggle, is_img2img, strength, noise, software, '
+      'source, version, raw_json';
+
+  /// 批量读取完整提示词文本（标签过滤用）。
+  ///
+  /// 全库标签过滤只需要这一列参与匹配，避免把 raw_json 等大列搬进 Dart
+  /// （全库 4.9 万行约 518MB → 84MB）。
+  Future<Map<int, String>> getFullPromptTextsByImageIds(
+    List<int> imageIds,
+  ) async {
+    if (imageIds.isEmpty) return {};
+
+    return _trackQuery('getFullPromptTextsByImageIds', () async {
+      final results = <int, String>{};
+
+      try {
+        const batchSize = 900;
+        for (final batch in chunk(imageIds, batchSize)) {
+          await execute(
+            'getFullPromptTextsByImageIds',
+            (db) async {
+              final placeholders = List.filled(batch.length, '?').join(',');
+              final dbResults = await db.rawQuery(
+                'SELECT image_id, full_prompt_text FROM $_metadataTable '
+                'WHERE image_id IN ($placeholders)',
+                batch,
+              );
+              for (final row in dbResults) {
+                results[row['image_id'] as int] =
+                    row['full_prompt_text'] as String? ?? '';
+              }
+            },
+            timeout: const Duration(seconds: 30),
+            maxRetries: 3,
+          );
+        }
+      } catch (e, stack) {
+        AppLogger.e(
+          'Failed to get full prompt texts: ${imageIds.length} IDs',
+          e,
+          stack,
+          'GalleryDS',
+        );
       }
 
       return results;

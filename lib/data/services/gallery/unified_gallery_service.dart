@@ -1006,6 +1006,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     final imageIds = pathToIdMap.values.whereType<int>().toList();
 
     // 并行获取收藏、标签、元数据
+    // 页路径不消费 full_prompt_text（约 100MB 全库文本），查询时跳过该列
     final results = await Future.wait([
       if (imageIds.isNotEmpty)
         _dataSource.getFavoritesByImageIds(imageIds)
@@ -1016,7 +1017,10 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       else
         Future.value(<int, List<String>>{}),
       if (imageIds.isNotEmpty)
-        _dataSource.getMetadataByImageIds(imageIds)
+        _dataSource.getMetadataByImageIds(
+          imageIds,
+          includeFullPromptText: false,
+        )
       else
         Future.value(<int, GalleryMetadataRecord?>{}),
     ]);
