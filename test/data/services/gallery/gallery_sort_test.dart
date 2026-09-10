@@ -261,5 +261,64 @@ void main() {
       const sort = GallerySort.modifiedAtDesc();
       expect(compare(sort, nameA: 'a.png', nameB: 'a.png'), 0);
     });
+
+    test('precomputed fileNameKey matches raw fileName comparison', () {
+      // 排序器分配消除的等价性锚点：预小写键（大列表热路径）与原始文件名
+      // 现算（旧调用方）必须给出完全相同的比较结果。
+      const sorts = [
+        byName,
+        bySize,
+        GallerySort.modifiedAtDesc(),
+        GallerySort(
+          field: GallerySortField.fileSize,
+          direction: GallerySortDirection.ascending,
+        ),
+      ];
+      const namePairs = [
+        ('b.png', 'A.png'),
+        ('A.png', 'a.png'),
+        ('same.png', 'same.png'),
+      ];
+
+      for (final sort in sorts) {
+        for (final (nameA, nameB) in namePairs) {
+          final raw = sort.compareFiles(
+            modifiedAtA: dt(1),
+            modifiedAtB: dt(1),
+            fileSizeA: 100,
+            fileSizeB: 100,
+            fileNameA: nameA,
+            fileNameB: nameB,
+          );
+          final keyed = sort.compareFiles(
+            modifiedAtA: dt(1),
+            modifiedAtB: dt(1),
+            fileSizeA: 100,
+            fileSizeB: 100,
+            fileNameKeyA: nameA.toLowerCase(),
+            fileNameKeyB: nameB.toLowerCase(),
+          );
+          final mixed = sort.compareFiles(
+            modifiedAtA: dt(1),
+            modifiedAtB: dt(1),
+            fileSizeA: 100,
+            fileSizeB: 100,
+            fileNameKeyA: nameA.toLowerCase(),
+            fileNameB: nameB,
+          );
+
+          expect(
+            keyed,
+            raw,
+            reason: '${sort.field}/${sort.direction} $nameA vs $nameB',
+          );
+          expect(
+            mixed,
+            raw,
+            reason: '${sort.field}/${sort.direction} $nameA vs $nameB',
+          );
+        }
+      }
+    });
   });
 }

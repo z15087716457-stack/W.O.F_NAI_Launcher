@@ -78,13 +78,18 @@ class GallerySort {
   ///
   /// [createdAtA]/[createdAtB]：创建时间（缺省按最小时间处理，不影响旧调用方）。
   /// [imageAreaA]/[imageAreaB]：图像面积 width×height（缺省按 0 处理）。
+  /// [fileNameKeyA]/[fileNameKeyB]：预小写化的文件名键（见 [fileNameKey]）。
+  /// 大列表排序时预先算好传入，可省掉每次比较的 `toLowerCase()` 分配；
+  /// 提供键时可省略 [fileNameA]/[fileNameB]，缺键时由原始文件名现算（结果一致）。
   int compareFiles({
     required DateTime modifiedAtA,
     required DateTime modifiedAtB,
     required int fileSizeA,
     required int fileSizeB,
-    required String fileNameA,
-    required String fileNameB,
+    String? fileNameA,
+    String? fileNameB,
+    String? fileNameKeyA,
+    String? fileNameKeyB,
     DateTime? createdAtA,
     DateTime? createdAtB,
     int? imageAreaA,
@@ -95,9 +100,10 @@ class GallerySort {
       GallerySortField.createdAt => (createdAtA ?? DateTime(0)).compareTo(
         createdAtB ?? DateTime(0),
       ),
-      GallerySortField.fileName => fileNameA.toLowerCase().compareTo(
-        fileNameB.toLowerCase(),
-      ),
+      GallerySortField.fileName => fileNameKey(
+        fileNameKeyA,
+        fileNameA,
+      ).compareTo(fileNameKey(fileNameKeyB, fileNameB)),
       GallerySortField.fileSize => fileSizeA.compareTo(fileSizeB),
       GallerySortField.imageDimensions => (imageAreaA ?? 0).compareTo(
         imageAreaB ?? 0,
@@ -105,9 +111,18 @@ class GallerySort {
     };
     if (primary != 0) return _withDirection(primary);
 
-    final tie = fileNameA.toLowerCase().compareTo(fileNameB.toLowerCase());
+    final tie = fileNameKey(
+      fileNameKeyA,
+      fileNameA,
+    ).compareTo(fileNameKey(fileNameKeyB, fileNameB));
     return tie;
   }
+
+  /// 文件名比较键：优先用调用方预小写化的键，缺省由原始文件名现算。
+  ///
+  /// 大小写不敏感比较的规范入口（排序热路径与 [compareFiles] 同源）。
+  static String fileNameKey(String? precomputed, String? fileName) =>
+      precomputed ?? (fileName ?? '').toLowerCase();
 
   @override
   bool operator ==(Object other) =>

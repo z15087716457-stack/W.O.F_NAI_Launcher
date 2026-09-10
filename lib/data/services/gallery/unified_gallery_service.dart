@@ -281,6 +281,35 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   final Map<String, ({DateTime modified, DateTime created, int size, int area})>
   _fileStats = {};
 
+  /// 排序用小写文件名键缓存（path → 小写 basename）。
+  ///
+  /// 文件名既是「按文件名排序」的主键，也是其他排序键并列时的兜底键；
+  /// 原先在比较器里 `p.basename(...).toLowerCase()` 每次比较都分配字符串
+  /// （4.9 万张图全量排序约 80 万次比较）。这里在排序前一次性预处理
+  /// （每个路径只算一次），比较器只读缓存。
+  final Map<String, String> _lowerBaseNames = {};
+
+  /// 缺省排序键（stat 缓存缺失时按最小键处理，与历史行为一致）
+  static final ({DateTime modified, DateTime created, int size, int area})
+  _missingSortStats = (
+    modified: DateTime(0),
+    created: DateTime(0),
+    size: 0,
+    area: 0,
+  );
+
+  /// `_allFiles` 是否需要在下次收藏变更时全量重排。
+  ///
+  /// [refresh] 重建的文件列表只按「修改时间/大小/文件名」有序；排序字段是
+  /// 创建时间/图像尺寸时与当前排序不一致。历史上这种不一致由「收藏变更触发
+  /// 全量重排」顺带修正，这里保留同样的可观察序列——只把常规收藏变更
+  /// （列表本就有序）降为单点归位。
+  bool _allFilesNeedsResort = false;
+
+  /// 排序比较次数累计（仅测试断言「收藏变更不再触发全量重排」用）
+  @visibleForTesting
+  int sortComparisonsForTesting = 0;
+
   LocalGalleryServiceImpl({
     required GalleryDataSource dataSource,
     required GalleryFilterService filterService,
@@ -322,9 +351,13 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     return _allFiles.any((file) => galleryFilePathKey(file.path) == targetKey);
   }
 
-  void _trackFileIfMissing(File file) {
-    if (_isTrackedFilePath(file.path)) return;
+  /// 文件尚未跟踪时插入列表头部（未按排序归位，由调用方决定如何安放）。
+  ///
+  /// 返回是否发生了插入。
+  bool _trackFileIfMissing(File file) {
+    if (_isTrackedFilePath(file.path)) return false;
     _allFiles.insert(0, file);
+    return true;
   }
 
   /// 补齐缺失的 stat 缓存（排序需要）；面积需要 DB 尺寸，一并补上。
@@ -408,27 +441,65 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     }
   }
 
+  /// 预计算排序用的小写文件名键（每个路径只算一次；比较器只读缓存）
+  void _precomputeLowerBaseNames(Iterable<File> files) {
+    for (final file in files) {
+      final path = file.path;
+      if (!_lowerBaseNames.containsKey(path)) {
+        _lowerBaseNames[path] = p.basename(path).toLowerCase();
+      }
+    }
+  }
+
+  /// 小写文件名键：优先读预处理缓存，缓存缺失时现算并回填（与旧比较器同口径）
+  String _lowerBaseNameOf(String path) =>
+      _lowerBaseNames[path] ??= p.basename(path).toLowerCase();
+
+  /// 当前排序下的比较（与旧 [_sortFileListByCache] 内联比较器逐项同义）
+  int _compareBySortKey(File a, File b) {
+    sortComparisonsForTesting++;
+    final keyA = _fileStats[a.path] ?? _missingSortStats;
+    final keyB = _fileStats[b.path] ?? _missingSortStats;
+    return _sort.compareFiles(
+      modifiedAtA: keyA.modified,
+      modifiedAtB: keyB.modified,
+      fileSizeA: keyA.size,
+      fileSizeB: keyB.size,
+      fileNameKeyA: _lowerBaseNameOf(a.path),
+      fileNameKeyB: _lowerBaseNameOf(b.path),
+      createdAtA: keyA.created,
+      createdAtB: keyB.created,
+      imageAreaA: keyA.area > 0 ? keyA.area : 0,
+      imageAreaB: keyB.area > 0 ? keyB.area : 0,
+    );
+  }
+
   void _sortFileListByCache(List<File> files) {
-    files.sort((a, b) {
-      final keyA =
-          _fileStats[a.path] ??
-          (modified: DateTime(0), created: DateTime(0), size: 0, area: 0);
-      final keyB =
-          _fileStats[b.path] ??
-          (modified: DateTime(0), created: DateTime(0), size: 0, area: 0);
-      return _sort.compareFiles(
-        modifiedAtA: keyA.modified,
-        modifiedAtB: keyB.modified,
-        fileSizeA: keyA.size,
-        fileSizeB: keyB.size,
-        fileNameA: p.basename(a.path),
-        fileNameB: p.basename(b.path),
-        createdAtA: keyA.created,
-        createdAtB: keyB.created,
-        imageAreaA: keyA.area > 0 ? keyA.area : 0,
-        imageAreaB: keyB.area > 0 ? keyB.area : 0,
-      );
-    });
+    _precomputeLowerBaseNames(files);
+    files.sort(_compareBySortKey);
+  }
+
+  /// 把 [file] 移到当前排序下的正确位置（二分查找插入点 + O(N) 位移）。
+  ///
+  /// 前置：列表中其余元素已按当前排序有序。排序字段不含收藏维度，收藏变更
+  /// 不改变其他文件的排序键，因此无需全量重排。List.sort 不稳定，键完全
+  /// 相同的并列元素与全量重排可能出现次序差异；键互异时结果一致。
+  void _moveFileToSortedPosition(File file) {
+    final currentIndex = _allFiles.indexOf(file);
+    if (currentIndex < 0) return;
+    _allFiles.removeAt(currentIndex);
+
+    var low = 0;
+    var high = _allFiles.length;
+    while (low < high) {
+      final mid = (low + high) >> 1;
+      if (_compareBySortKey(_allFiles[mid], file) <= 0) {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+    _allFiles.insert(low, file);
   }
 
   /// 按当前排序重排文件列表（先补 stat 缓存再排序）
@@ -437,9 +508,22 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     _sortFileListByCache(files);
   }
 
+  /// 收藏变更后的列表同步。
+  ///
+  /// 排序字段不含收藏维度，收藏切换不改变任何文件的排序键；旧实现每次都对
+  /// 全部 `_allFiles`（约 4.9 万张）重排，只为安放 [_trackFileIfMissing]
+  /// 新插入的文件。这里改为：已跟踪 → 零移动；新跟踪 → 单点二分归位；
+  /// 仅当列表刚被 [refresh] 重建（可能与当前排序不一致）时才走全量重排。
   Future<void> _syncFileListsAfterFavoriteChange(File file) async {
-    _trackFileIfMissing(file);
-    await _sortFileList(_allFiles);
+    final inserted = _trackFileIfMissing(file);
+    // 与旧路径同口径补齐排序键（stat；尺寸排序时含 DB 面积补齐）
+    await _ensureFileStats(_allFiles);
+    if (_allFilesNeedsResort) {
+      _allFilesNeedsResort = false;
+      _sortFileListByCache(_allFiles);
+    } else if (inserted) {
+      _moveFileToSortedPosition(file);
+    }
     if (_currentFilter.hasFilters) {
       await applyFilter(_currentFilter);
     } else {
@@ -576,14 +660,15 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       final validStats = fileStats
           .whereType<({File file, FileStat stat})>()
           .toList();
+      _precomputeLowerBaseNames(validStats.map((entry) => entry.file));
       validStats.sort(
         (a, b) => _sort.compareFiles(
           modifiedAtA: a.stat.modified,
           modifiedAtB: b.stat.modified,
           fileSizeA: a.stat.size,
           fileSizeB: b.stat.size,
-          fileNameA: p.basename(a.file.path),
-          fileNameB: p.basename(b.file.path),
+          fileNameKeyA: _lowerBaseNameOf(a.file.path),
+          fileNameKeyB: _lowerBaseNameOf(b.file.path),
         ),
       );
 
@@ -1037,6 +1122,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     );
     for (final path in paths) {
       _fileStats.remove(path);
+      _lowerBaseNames.remove(path);
     }
     // 过滤缓存键含文件数与 DB revision，批量软删已 bump revision，
     // 无需手动清缓存；这里再清一次兜底（防 revision 竞态）。
@@ -1252,6 +1338,8 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     _filterService.setSort(sort);
 
     await _sortFileList(_allFiles);
+    // 全量重排后列表与当前排序一致，无需再做收藏变更时的兜底重排
+    _allFilesNeedsResort = false;
     if (_currentFilter.hasFilters) {
       await _sortFileList(_filteredFiles);
     }
@@ -1476,6 +1564,8 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       );
       _allFiles.add(file);
       await _sortFileList(_allFiles);
+      // 全量重排后列表与当前排序一致，无需再做收藏变更时的兜底重排
+      _allFilesNeedsResort = false;
 
       // 4. 重新应用过滤（如果有过滤条件）
       if (_currentFilter.hasFilters) {
@@ -1514,6 +1604,10 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       final previousCount = _allFiles.length;
       final countChanged = files.length != previousCount;
       _allFiles = files;
+      // refresh 重建的列表只按「修改时间/大小/文件名」有序：与当前排序可能
+      // 不一致时，沿用旧的「下次收藏变更触发全量重排」可观察序列
+      // （见 _allFilesNeedsResort 注释）。
+      _allFilesNeedsResort = true;
 
       // 重新应用当前过滤
       await applyFilter(_currentFilter);
