@@ -96,11 +96,46 @@ void main() {
     expect(find.textContaining(futureInfo.formattedDate), findsOneWidget);
     expect(find.textContaining('剩 ${futureInfo.daysLeft} 天'), findsOneWidget);
 
-    // 验证 PastUser 显示到期日期和已过期
+    // 验证 PastUser 日期有效，过期仍显示到期日期和已过期
     expect(find.textContaining(pastInfo.formattedDate), findsOneWidget);
     expect(find.textContaining('已过期'), findsOneWidget);
 
     // 验证整个界面中只有 2 个包含到期提示的 Text
     expect(find.textContaining('到期 '), findsNWidgets(2));
+  });
+
+  testWidgets('账号切换器行：服务端哨兵到期时间只显示已过期，不带 1-01-01', (tester) async {
+    // 没有有效订阅的账号，服务端下发 -62135596800（0001-01-01T00:00:00Z）
+    final expiredAccount = SavedAccount.create(
+      email: 'expired@example.com',
+      nickname: 'ExpiredUser',
+      subscriptionExpiresAt: -62135596800,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authNotifierProvider.overrideWith(
+            () => _MockAuthNotifier(expiredAccount.id),
+          ),
+          accountManagerNotifierProvider.overrideWith(
+            () => _MockAccountManagerNotifier([expiredAccount]),
+          ),
+        ],
+        child: const MaterialApp(
+          locale: Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(body: AccountQuickSwitch()),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(ExpansionTile));
+    await tester.pumpAndSettle();
+
+    expect(find.text('已过期'), findsOneWidget);
+    expect(find.textContaining('到期 '), findsNothing);
+    expect(find.textContaining('01-01'), findsNothing);
   });
 }

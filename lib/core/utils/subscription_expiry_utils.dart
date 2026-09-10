@@ -36,6 +36,19 @@ class SubscriptionExpiryInfo {
 
   /// 是否临期（≤ 7 天）
   bool get isExpiringSoon => status == SubscriptionExpiryStatus.expiringSoon;
+
+  /// 到期时间是否是可信的真实日期。
+  ///
+  /// 没有有效订阅的账号，服务端会下发哨兵时间戳（-62135596800，即 Go 零值时间
+  /// 0001-01-01T00:00:00Z）；非正时间戳同样落在 1970 年及以前。这两类值都不可能是
+  /// 真实订阅到期时间。
+  bool get hasValidDate => expiryDate.millisecondsSinceEpoch > 0;
+
+  /// 展示用到期日期 (yyyy-MM-dd)；时间戳不可信（服务端哨兵值）时为 null。
+  ///
+  /// 哨兵值直接格式化会显示成 1-01-01 这类无效日期，故不展示日期；
+  /// 日期有效时无论是否已过期都照常展示。
+  String? get displayDate => hasValidDate ? formattedDate : null;
 }
 
 /// 计算并返回订阅到期信息。

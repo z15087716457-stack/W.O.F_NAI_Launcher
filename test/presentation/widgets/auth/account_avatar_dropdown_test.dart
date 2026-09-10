@@ -91,7 +91,7 @@ void main() {
     expect(find.textContaining(futureInfo.formattedDate), findsOneWidget);
     expect(find.textContaining('剩 ${futureInfo.daysLeft} 天'), findsOneWidget);
 
-    // 已过期账号：到期日期 + 已过期
+    // 已过期账号：日期有效，仍显示到期日期 + 已过期
     expect(find.textContaining(pastInfo.formattedDate), findsOneWidget);
     expect(find.textContaining('已过期'), findsOneWidget);
 

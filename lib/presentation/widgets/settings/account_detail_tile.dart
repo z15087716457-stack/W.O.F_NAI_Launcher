@@ -239,8 +239,12 @@ class AccountDetailTile extends ConsumerWidget {
       }
     }
 
+    final date = expiryInfo.displayDate;
+
     return Tooltip(
-      message: context.l10n.subscriptionExpiresOn(expiryInfo.formattedDate),
+      message: date == null
+          ? context.l10n.subscriptionExpired
+          : context.l10n.subscriptionExpiresOn(date),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(

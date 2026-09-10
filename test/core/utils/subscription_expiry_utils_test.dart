@@ -56,6 +56,7 @@ void main() {
       expect(info.isExpiringSoon, isTrue);
       expect(info.daysLeft, 0);
       expect(info.formattedDate, '2026-09-09');
+      expect(info.displayDate, '2026-09-09');
     });
 
     test('已过期：达到或超过到期时刻 (expired, daysLeft == 0)', () {
@@ -69,6 +70,9 @@ void main() {
       expect(infoEarlier.isExpired, isTrue);
       expect(infoEarlier.daysLeft, 0);
       expect(infoEarlier.formattedDate, '2026-09-09');
+      // 日期有效，过期也照常展示
+      expect(infoEarlier.hasValidDate, isTrue);
+      expect(infoEarlier.displayDate, '2026-09-09');
 
       // 2. 昨天到期
       final yesterday = DateTime(2026, 9, 8, 12, 0, 0);
@@ -80,6 +84,27 @@ void main() {
       expect(infoYesterday.isExpired, isTrue);
       expect(infoYesterday.daysLeft, 0);
       expect(infoYesterday.formattedDate, '2026-09-08');
+      expect(infoYesterday.displayDate, '2026-09-08');
+    });
+
+    test('服务端哨兵到期时间（Go 零值时间）不产生可展示日期', () {
+      // 没有有效订阅的账号，服务端下发 -62135596800（0001-01-01T00:00:00Z），
+      // 直接格式化会得到 1-01-01（东八区）这类无效日期
+      final info = getSubscriptionExpiryInfo(-62135596800, now: baseline);
+
+      expect(info.status, SubscriptionExpiryStatus.expired);
+      expect(info.hasValidDate, isFalse);
+      expect(info.displayDate, isNull);
+    });
+
+    test('非正时间戳（1970 年及以前）不产生可展示日期', () {
+      for (final sentinel in [0, -1, -86400]) {
+        final info = getSubscriptionExpiryInfo(sentinel, now: baseline);
+
+        expect(info.status, SubscriptionExpiryStatus.expired);
+        expect(info.hasValidDate, isFalse);
+        expect(info.displayDate, isNull);
+      }
     });
 
     test('日期格式化补零正确 (yyyy-MM-dd)', () {

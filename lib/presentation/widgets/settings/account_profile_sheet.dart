@@ -432,8 +432,7 @@ class _AccountProfileBottomSheetState
                 context,
                 icon: Icons.event_outlined,
                 label: context.l10n.settings_subscriptionExpiry,
-                value:
-                    '${info.formattedDate} · ${SubscriptionExpiryText.statusTextOf(context, info)}',
+                value: SubscriptionExpiryText.dateStatusTextOf(context, info),
                 valueColor: SubscriptionExpiryText.statusColor(
                   context,
                   info.status,
