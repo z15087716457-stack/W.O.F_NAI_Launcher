@@ -14,6 +14,7 @@ class ShareImageSettings {
     this.highAnlasCostThreshold = 50,
     this.limitGenerationInterval = false,
     this.generationIntervalSeconds = 5,
+    this.generationIntervalJitterPercent = 0,
   });
 
   final bool protectionMode;
@@ -25,6 +26,12 @@ class ShareImageSettings {
   final int highAnlasCostThreshold;
   final bool limitGenerationInterval;
   final int generationIntervalSeconds;
+
+  /// 生图间隔随机抖动幅度（百分比，0–50）。
+  ///
+  /// 每次冷却开始时，实际间隔在「基础间隔 ± 该百分比」内均匀随机取值；
+  /// 0 表示关闭抖动，间隔保持固定。
+  final int generationIntervalJitterPercent;
 
   bool get effectiveStripMetadataForCopyAndDrag =>
       protectionMode && stripMetadataForCopyAndDrag;
@@ -43,6 +50,11 @@ class ShareImageSettings {
   int get effectiveGenerationIntervalSeconds =>
       protectionMode && limitGenerationInterval ? generationIntervalSeconds : 0;
 
+  int get effectiveGenerationIntervalJitterPercent =>
+      effectiveGenerationIntervalSeconds > 0
+      ? generationIntervalJitterPercent
+      : 0;
+
   @Deprecated('Use protectionMode instead.')
   bool get assetProtectionMode => protectionMode;
 
@@ -56,6 +68,7 @@ class ShareImageSettings {
     int? highAnlasCostThreshold,
     bool? limitGenerationInterval,
     int? generationIntervalSeconds,
+    int? generationIntervalJitterPercent,
   }) {
     return ShareImageSettings(
       protectionMode: protectionMode ?? this.protectionMode,
@@ -73,6 +86,8 @@ class ShareImageSettings {
           limitGenerationInterval ?? this.limitGenerationInterval,
       generationIntervalSeconds:
           generationIntervalSeconds ?? this.generationIntervalSeconds,
+      generationIntervalJitterPercent:
+          generationIntervalJitterPercent ?? this.generationIntervalJitterPercent,
     );
   }
 }
@@ -101,6 +116,14 @@ class ShareImageSettingsNotifier extends Notifier<ShareImageSettings> {
                 ) ??
                 5)
             .clamp(1, 3600)
+            .toInt();
+    final generationIntervalJitterPercent =
+        (_storage.getSetting<int>(
+                  StorageKeys.protectionGenerationIntervalJitterPercent,
+                  defaultValue: 0,
+                ) ??
+                0)
+            .clamp(0, 50)
             .toInt();
 
     return ShareImageSettings(
@@ -148,6 +171,7 @@ class ShareImageSettingsNotifier extends Notifier<ShareImageSettings> {
           ) ??
           false,
       generationIntervalSeconds: generationIntervalSeconds,
+      generationIntervalJitterPercent: generationIntervalJitterPercent,
     );
   }
 
@@ -210,6 +234,15 @@ class ShareImageSettingsNotifier extends Notifier<ShareImageSettings> {
     state = state.copyWith(generationIntervalSeconds: clamped);
     await _storage.setSetting(
       StorageKeys.protectionGenerationIntervalSeconds,
+      clamped,
+    );
+  }
+
+  Future<void> setGenerationIntervalJitterPercent(int value) async {
+    final clamped = value.clamp(0, 50).toInt();
+    state = state.copyWith(generationIntervalJitterPercent: clamped);
+    await _storage.setSetting(
+      StorageKeys.protectionGenerationIntervalJitterPercent,
       clamped,
     );
   }

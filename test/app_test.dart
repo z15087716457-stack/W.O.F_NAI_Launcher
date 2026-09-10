@@ -1277,6 +1277,7 @@ void main() {
         highAnlasCostThreshold: 50,
         limitGenerationInterval: true,
         generationIntervalSeconds: 15,
+        generationIntervalJitterPercent: 30,
       );
 
       expect(disabled.effectiveStripMetadataForCopyAndDrag, isFalse);
@@ -1285,6 +1286,7 @@ void main() {
       expect(disabled.effectivePreventOverwrite, isFalse);
       expect(disabled.effectiveWarnHighAnlasCost, isFalse);
       expect(disabled.effectiveGenerationIntervalSeconds, 0);
+      expect(disabled.effectiveGenerationIntervalJitterPercent, 0);
 
       final enabled = disabled.copyWith(protectionMode: true);
       expect(enabled.effectiveStripMetadataForCopyAndDrag, isTrue);
@@ -1293,6 +1295,7 @@ void main() {
       expect(enabled.effectivePreventOverwrite, isTrue);
       expect(enabled.effectiveWarnHighAnlasCost, isTrue);
       expect(enabled.effectiveGenerationIntervalSeconds, 15);
+      expect(enabled.effectiveGenerationIntervalJitterPercent, 30);
     });
 
     test('allows each protection feature to be disabled independently', () {
@@ -1306,6 +1309,7 @@ void main() {
         highAnlasCostThreshold: 50,
         limitGenerationInterval: false,
         generationIntervalSeconds: 15,
+        generationIntervalJitterPercent: 30,
       );
 
       expect(settings.effectiveStripMetadataForCopyAndDrag, isFalse);
@@ -1314,6 +1318,7 @@ void main() {
       expect(settings.effectivePreventOverwrite, isFalse);
       expect(settings.effectiveWarnHighAnlasCost, isFalse);
       expect(settings.effectiveGenerationIntervalSeconds, 0);
+      expect(settings.effectiveGenerationIntervalJitterPercent, 0);
     });
   });
 

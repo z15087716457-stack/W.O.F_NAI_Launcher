@@ -375,6 +375,8 @@ class StorageKeys {
       'protection_limit_generation_interval';
   static const String protectionGenerationIntervalSeconds =
       'protection_generation_interval_seconds';
+  static const String protectionGenerationIntervalJitterPercent =
+      'protection_generation_interval_jitter_percent';
   static const String protectionLastGenerationStartedAt =
       'protection_last_generation_started_at';
 

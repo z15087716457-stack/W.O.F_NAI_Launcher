@@ -8232,6 +8232,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter 1–3600 seconds. The cooldown starts when generation begins.';
 
   @override
+  String get settings_generationIntervalJitterTitle => 'Interval jitter';
+
+  @override
+  String settings_generationIntervalJitterValue(Object percent) {
+    return '±$percent%';
+  }
+
+  @override
+  String get settings_setGenerationIntervalJitterTitle => 'Set Interval Jitter';
+
+  @override
+  String get settings_generationIntervalJitterHelper =>
+      'Each cooldown is drawn at random from base interval ± this percentage, so the pacing is less mechanical. Enter 0–50; 0 disables jitter.';
+
+  @override
   String get settings_selectLocalOnnxTaggerFolder =>
       'Select ONNX tagger model folder';
 

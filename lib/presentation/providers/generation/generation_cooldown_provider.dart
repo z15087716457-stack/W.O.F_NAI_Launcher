@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,6 +21,11 @@ final generationCooldownClockProvider = Provider<DateTime Function()>(
   (ref) => DateTime.now,
 );
 
+/// 冷却抖动的随机源，返回 [0, 1)。独立成 provider 便于测试注入定值。
+final generationCooldownJitterRandomProvider = Provider<double Function()>(
+  (ref) => Random().nextDouble,
+);
+
 final generationCooldownProvider =
     NotifierProvider<GenerationCooldownNotifier, GenerationCooldownState>(
       GenerationCooldownNotifier.new,
@@ -30,6 +36,13 @@ class GenerationCooldownNotifier extends Notifier<GenerationCooldownState> {
 
   Timer? _ticker;
   DateTime? _lastGenerationStartedAt;
+
+  /// 本次冷却已抽取的实际间隔（毫秒）。
+  ///
+  /// 每次开始生图时按「基础间隔 ± 抖动百分比」重新抽取并锁定，
+  /// 保证倒计时展示与真实解锁时刻一致；跨重启恢复时该值丢失，
+  /// 回退按固定基础间隔计算（仍在抖动取值范围内，无需持久化）。
+  int? _activeIntervalMs;
 
   LocalStorageService get _storage => ref.read(localStorageServiceProvider);
   DateTime get _now => ref.read(generationCooldownClockProvider)();
@@ -71,9 +84,28 @@ class GenerationCooldownNotifier extends Notifier<GenerationCooldownState> {
     }
 
     _lastGenerationStartedAt = _now;
+    _activeIntervalMs = _drawIntervalMs();
     _refresh();
     unawaited(_persistLastGenerationStartedAt());
     return true;
+  }
+
+  /// 在「基础间隔 ± 抖动百分比」内均匀抽取本次冷却的实际间隔。
+  ///
+  /// 抖动为 0 时返回固定基础间隔。抖动上限 50%（设置层钳制）保证
+  /// 实际间隔恒为正且不低于基础间隔的一半。
+  int _drawIntervalMs() {
+    final baseMs = _intervalSeconds * 1000;
+    final jitterPercent = ref
+        .read(shareImageSettingsProvider)
+        .effectiveGenerationIntervalJitterPercent;
+    if (jitterPercent <= 0) {
+      return baseMs;
+    }
+
+    final unit = ref.read(generationCooldownJitterRandomProvider)();
+    final factor = 1 + (unit * 2 - 1) * jitterPercent / 100;
+    return (baseMs * factor).round();
   }
 
   Future<void> _persistLastGenerationStartedAt() async {
@@ -107,7 +139,8 @@ class GenerationCooldownNotifier extends Notifier<GenerationCooldownState> {
       return const GenerationCooldownState();
     }
 
-    final availableAt = startedAt.add(Duration(seconds: intervalSeconds));
+    final intervalMs = _activeIntervalMs ?? intervalSeconds * 1000;
+    final availableAt = startedAt.add(Duration(milliseconds: intervalMs));
     final remainingMilliseconds = availableAt.difference(_now).inMilliseconds;
     if (remainingMilliseconds <= 0) {
       return const GenerationCooldownState();

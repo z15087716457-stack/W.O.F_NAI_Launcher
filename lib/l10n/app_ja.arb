@@ -4464,6 +4464,15 @@
   },
   "settings_setGenerationIntervalTitle": "画像生成の間隔を設定",
   "settings_generationIntervalHelper": "1～3600 秒で設定できます。画像生成の開始時から計測します。",
+  "settings_generationIntervalJitterTitle": "間隔ランダムジッター",
+  "settings_generationIntervalJitterValue": "±{percent}%",
+  "@settings_generationIntervalJitterValue": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "settings_setGenerationIntervalJitterTitle": "間隔ジッターを設定",
+  "settings_generationIntervalJitterHelper": "各クールダウンは「基準間隔 ± この割合」の範囲でランダムに決まり、生成ペースが機械的になりにくくなります。0～50 で設定、0 で無効になります。",
   "settings_selectLocalOnnxTaggerFolder": "ONNX タガー モデル フォルダーを選択してください",
   "settings_localOnnxTaggerFolderSaved": "ONNX タガー モデル フォルダーが保存されました",
   "settings_localOnnxTaggerFolder": "ローカル ONNX タガー モデル フォルダー",

@@ -4464,6 +4464,15 @@
   },
   "settings_setGenerationIntervalTitle": "Set Generation Interval",
   "settings_generationIntervalHelper": "Enter 1–3600 seconds. The cooldown starts when generation begins.",
+  "settings_generationIntervalJitterTitle": "Interval jitter",
+  "settings_generationIntervalJitterValue": "±{percent}%",
+  "@settings_generationIntervalJitterValue": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "settings_setGenerationIntervalJitterTitle": "Set Interval Jitter",
+  "settings_generationIntervalJitterHelper": "Each cooldown is drawn at random from base interval ± this percentage, so the pacing is less mechanical. Enter 0–50; 0 disables jitter.",
   "settings_selectLocalOnnxTaggerFolder": "Select ONNX tagger model folder",
   "settings_localOnnxTaggerFolderSaved": "ONNX tagger model folder saved",
   "settings_localOnnxTaggerFolder": "Local ONNX tagger model folder",

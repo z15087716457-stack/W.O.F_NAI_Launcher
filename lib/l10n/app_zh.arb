@@ -4213,6 +4213,15 @@
   },
   "settings_setGenerationIntervalTitle": "设置生图间隔",
   "settings_generationIntervalHelper": "可设置 1–3600 秒，从开始执行生图时计时。",
+  "settings_generationIntervalJitterTitle": "间隔随机抖动",
+  "settings_generationIntervalJitterValue": "±{percent}%",
+  "@settings_generationIntervalJitterValue": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "settings_setGenerationIntervalJitterTitle": "设置间隔随机抖动",
+  "settings_generationIntervalJitterHelper": "每次冷却在「基础间隔 ± 该百分比」内均匀随机取值，让生图节奏不那么机械。可设 0–50，0 为关闭。",
   "settings_selectLocalOnnxTaggerFolder": "选择 ONNX tagger 模型文件夹",
   "settings_localOnnxTaggerFolderSaved": "ONNX tagger 模型文件夹已保存",
   "settings_localOnnxTaggerFolder": "本地 ONNX tagger 模型文件夹",

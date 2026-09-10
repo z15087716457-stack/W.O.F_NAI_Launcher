@@ -14464,6 +14464,30 @@ abstract class AppLocalizations {
   /// **'Enter 1–3600 seconds. The cooldown starts when generation begins.'**
   String get settings_generationIntervalHelper;
 
+  /// No description provided for @settings_generationIntervalJitterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval jitter'**
+  String get settings_generationIntervalJitterTitle;
+
+  /// No description provided for @settings_generationIntervalJitterValue.
+  ///
+  /// In en, this message translates to:
+  /// **'±{percent}%'**
+  String settings_generationIntervalJitterValue(Object percent);
+
+  /// No description provided for @settings_setGenerationIntervalJitterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Interval Jitter'**
+  String get settings_setGenerationIntervalJitterTitle;
+
+  /// No description provided for @settings_generationIntervalJitterHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Each cooldown is drawn at random from base interval ± this percentage, so the pacing is less mechanical. Enter 0–50; 0 disables jitter.'**
+  String get settings_generationIntervalJitterHelper;
+
   /// No description provided for @settings_selectLocalOnnxTaggerFolder.
   ///
   /// In en, this message translates to:

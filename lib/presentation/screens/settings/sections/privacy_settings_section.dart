@@ -115,6 +115,53 @@ class _PrivacySettingsSectionState
         .setGenerationIntervalSeconds(result);
   }
 
+  Future<void> _editGenerationIntervalJitter() async {
+    final settings = ref.read(shareImageSettingsProvider);
+    final controller = TextEditingController(
+      text: settings.generationIntervalJitterPercent.toString(),
+    );
+    final result = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.settings_setGenerationIntervalJitterTitle),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: context.l10n.settings_generationIntervalJitterTitle,
+            suffixText: '%',
+            helperText: context.l10n.settings_generationIntervalJitterHelper,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(context.l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              final value = int.tryParse(controller.text.trim());
+              if (value != null && value >= 0 && value <= 50) {
+                Navigator.of(dialogContext).pop(value);
+              }
+            },
+            child: Text(context.l10n.common_save),
+          ),
+        ],
+      ),
+    );
+
+    controller.dispose();
+    if (result == null) {
+      return;
+    }
+    await ref
+        .read(shareImageSettingsProvider.notifier)
+        .setGenerationIntervalJitterPercent(result);
+  }
+
   @override
   Widget build(BuildContext context) {
     final shareSettings = ref.watch(shareImageSettingsProvider);
@@ -257,6 +304,24 @@ class _PrivacySettingsSectionState
                     shareSettings.protectionMode &&
                         shareSettings.limitGenerationInterval
                     ? _editGenerationInterval
+                    : null,
+              ),
+              ListTile(
+                enabled:
+                    shareSettings.protectionMode &&
+                    shareSettings.limitGenerationInterval,
+                leading: const Icon(Icons.shuffle_outlined),
+                title: Text(context.l10n.settings_generationIntervalJitterTitle),
+                subtitle: Text(
+                  context.l10n.settings_generationIntervalJitterValue(
+                    shareSettings.generationIntervalJitterPercent,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap:
+                    shareSettings.protectionMode &&
+                        shareSettings.limitGenerationInterval
+                    ? _editGenerationIntervalJitter
                     : null,
               ),
             ],

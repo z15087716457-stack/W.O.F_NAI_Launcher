@@ -8048,6 +8048,21 @@ class AppLocalizationsJa extends AppLocalizations {
       '1～3600 秒で設定できます。画像生成の開始時から計測します。';
 
   @override
+  String get settings_generationIntervalJitterTitle => '間隔ランダムジッター';
+
+  @override
+  String settings_generationIntervalJitterValue(Object percent) {
+    return '±$percent%';
+  }
+
+  @override
+  String get settings_setGenerationIntervalJitterTitle => '間隔ジッターを設定';
+
+  @override
+  String get settings_generationIntervalJitterHelper =>
+      '各クールダウンは「基準間隔 ± この割合」の範囲でランダムに決まり、生成ペースが機械的になりにくくなります。0～50 で設定、0 で無効になります。';
+
+  @override
   String get settings_selectLocalOnnxTaggerFolder =>
       'ONNX タガー モデル フォルダーを選択してください';
 

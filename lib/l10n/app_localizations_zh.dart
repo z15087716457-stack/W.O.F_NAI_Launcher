@@ -7936,6 +7936,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_generationIntervalHelper => '可设置 1–3600 秒，从开始执行生图时计时。';
 
   @override
+  String get settings_generationIntervalJitterTitle => '间隔随机抖动';
+
+  @override
+  String settings_generationIntervalJitterValue(Object percent) {
+    return '±$percent%';
+  }
+
+  @override
+  String get settings_setGenerationIntervalJitterTitle => '设置间隔随机抖动';
+
+  @override
+  String get settings_generationIntervalJitterHelper =>
+      '每次冷却在「基础间隔 ± 该百分比」内均匀随机取值，让生图节奏不那么机械。可设 0–50，0 为关闭。';
+
+  @override
   String get settings_selectLocalOnnxTaggerFolder => '选择 ONNX tagger 模型文件夹';
 
   @override
