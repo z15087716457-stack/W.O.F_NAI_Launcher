@@ -648,23 +648,6 @@ class ThumbnailCacheService {
     }
   }
 
-  /// 批量更新可见性
-  void batchUpdateVisibility(List<String> visiblePaths, {int priority = 1}) {
-    // 重置所有可见性
-    for (final entry in _visibilityInfo.entries) {
-      entry.value.isVisible = false;
-      entry.value.priority = 5;
-    }
-
-    // 设置新的可见性
-    for (final path in visiblePaths) {
-      updateThumbnailVisibility(path, isVisible: true, priority: priority);
-    }
-
-    // 重新排序队列
-    _sortQueueByPriority();
-  }
-
   /// 删除缩略图
   ///
   /// [originalPath] 原始图片路径

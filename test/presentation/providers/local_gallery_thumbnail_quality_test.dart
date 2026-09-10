@@ -53,6 +53,25 @@ class _FakeLocalGalleryService implements LocalGalleryService {
   }
 
   @override
+  Future<List<GalleryPagePreloadItem>> getPagePreloadItems(
+    int page, {
+    int? pageSize,
+  }) async {
+    final size = pageSize ?? this.pageSize;
+    final start = page * size;
+    if (start >= records.length) return [];
+    final end = (start + size).clamp(0, records.length);
+    return [
+      for (final record in records.sublist(start, end))
+        GalleryPagePreloadItem(
+          path: record.path,
+          width: record.metadata?.width,
+          height: record.metadata?.height,
+        ),
+    ];
+  }
+
+  @override
   Future<void> applyFilter(FilterCriteria criteria) async {
     filter = criteria;
   }

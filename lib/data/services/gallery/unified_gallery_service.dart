@@ -23,6 +23,27 @@ import 'scan_config.dart' show ScanConfig;
 
 part 'unified_gallery_service.g.dart';
 
+/// 相邻页缩略图预取所需的轻量条目（[LocalGalleryService.getPagePreloadItems]）。
+///
+/// 只带路径与可选的图像宽高（火车流视图按「列宽×宽高比」估卡片宽用），
+/// 不做 stat / 收藏 / 标签 / 完整元数据构建。
+class GalleryPagePreloadItem {
+  final String path;
+  final int? width;
+  final int? height;
+
+  const GalleryPagePreloadItem({required this.path, this.width, this.height});
+
+  /// 宽高比（宽/高）；无尺寸或非法时为 null（调用方按 1.0 处理）
+  double? get aspectRatio {
+    final w = width;
+    final h = height;
+    if (w == null || h == null || w <= 0 || h <= 0) return null;
+    final ratio = w / h;
+    return ratio.isFinite ? ratio : null;
+  }
+}
+
 enum GalleryStartupIndexAction { none, fullScan }
 
 GalleryStartupIndexAction chooseStartupIndexAction({
@@ -107,6 +128,16 @@ abstract class LocalGalleryService {
   /// - [GalleryNotInitializedException] 服务未初始化
   /// - [GalleryDatabaseException] 数据库错误
   Future<List<LocalImageRecord>> getPage(int page, {int? pageSize});
+
+  /// 获取指定页面的预取条目（轻量：路径 + 宽高）
+  ///
+  /// 供相邻页缩略图预取用：与 [getPage] 同一分页源（排序过滤后 sublist），
+  /// 但只查 gallery_images 的宽高，不做 stat / 收藏 / 标签 / 完整元数据。
+  /// DB 失败时退化为无尺寸条目（宽高比按 1.0 处理），不抛异常。
+  Future<List<GalleryPagePreloadItem>> getPagePreloadItems(
+    int page, {
+    int? pageSize,
+  });
 
   /// 应用过滤条件
   ///
@@ -780,6 +811,62 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   }
 
   @override
+  Future<List<GalleryPagePreloadItem>> getPagePreloadItems(
+    int page, {
+    int? pageSize,
+  }) async {
+    _ensureInitialized();
+
+    final effectivePageSize = pageSize ?? _pageSize;
+    final totalPages = (_effectiveFiles.length / effectivePageSize).ceil();
+
+    if (page < 0 || (totalPages > 0 && page >= totalPages)) {
+      return [];
+    }
+
+    final start = page * effectivePageSize;
+    final end = min(start + effectivePageSize, _effectiveFiles.length);
+    final batch = _effectiveFiles.sublist(start, end);
+    if (batch.isEmpty) return [];
+
+    final fallback = [
+      for (final file in batch) GalleryPagePreloadItem(path: file.path),
+    ];
+
+    // 宽高来自 gallery_images（新图/未入库条目为 null，调用方按 1.0 宽高比处理）
+    try {
+      final paths = batch.map((file) => file.path).toList();
+      final pathToIdMap = await _dataSource.getImageIdsByPaths(paths);
+      final imageIds = pathToIdMap.values.whereType<int>().toList();
+      if (imageIds.isEmpty) return fallback;
+
+      final records = await _dataSource.getImagesByIds(imageIds);
+      if (records.isEmpty) return fallback;
+
+      final dimsByPath = <String, (int?, int?)>{
+        for (final record in records)
+          record.filePath: (record.width, record.height),
+      };
+
+      return [
+        for (final file in batch)
+          GalleryPagePreloadItem(
+            path: file.path,
+            width: dimsByPath[file.path]?.$1,
+            height: dimsByPath[file.path]?.$2,
+          ),
+      ];
+    } catch (e) {
+      // 预取是纯优化路径：DB 失败不抛出，退化为无尺寸条目
+      AppLogger.w(
+        'getPagePreloadItems fallback to size-less items: $e',
+        'LocalGalleryService',
+      );
+      return fallback;
+    }
+  }
+
+  @override
   Future<List<String>> getFilteredImagePaths() async {
     _ensureInitialized();
 
@@ -790,17 +877,40 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   Future<List<LocalImageRecord>> _loadRecords(List<File> files) async {
     if (files.isEmpty) return [];
 
-    // 预加载元数据到缓存（后台）
-    _preloadMetadataBatch(files);
-
-    // 获取文件状态信息
-    final fileStats = <File, FileStat>{};
+    // 获取文件状态信息：优先复用排序 stat 缓存（初始化/扫描时已 stat 过），
+    // 缓存 miss 才真正 stat 且用 Future.wait 并行。
+    // 显示用途允许缓存值略旧于磁盘当下值（扫描器签名自持 stat，不受影响）。
+    final fileStats = <String, ({DateTime modified, int size})>{};
+    final missingStatFiles = <File>[];
     for (final file in files) {
-      try {
-        fileStats[file] = await file.stat();
-      } catch (e) {
-        AppLogger.w('Failed to stat file: ${file.path}', 'LocalGalleryService');
+      final cached = _fileStats[file.path];
+      if (cached != null) {
+        fileStats[file.path] = (modified: cached.modified, size: cached.size);
+      } else {
+        missingStatFiles.add(file);
       }
+    }
+    if (missingStatFiles.isNotEmpty) {
+      await Future.wait(
+        missingStatFiles.map((file) async {
+          try {
+            final stat = await file.stat();
+            fileStats[file.path] = (modified: stat.modified, size: stat.size);
+            // 回填排序缓存（与 _ensureFileStats 同口径：created=modified、area=0）
+            _fileStats[file.path] = (
+              modified: stat.modified,
+              created: stat.modified,
+              size: stat.size,
+              area: 0,
+            );
+          } catch (e) {
+            AppLogger.w(
+              'Failed to stat file: ${file.path}',
+              'LocalGalleryService',
+            );
+          }
+        }),
+      );
     }
 
     // 批量获取数据库信息
@@ -835,7 +945,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
 
     for (final file in files) {
       try {
-        final stat = fileStats[file];
+        final stat = fileStats[file.path];
         if (stat == null) continue;
 
         final imageId = pathToIdMap[file.path];
@@ -884,28 +994,6 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     }
 
     return records;
-  }
-
-  /// 批量预加载元数据
-  void _preloadMetadataBatch(List<File> files) {
-    final pngFiles = files
-        .where((f) => f.path.toLowerCase().endsWith('.png'))
-        .toList();
-    if (pngFiles.isEmpty) return;
-
-    Future.microtask(() {
-      try {
-        final images = pngFiles
-            .map((f) => GeneratedImageInfo(id: f.path, filePath: f.path))
-            .toList();
-        ImageMetadataService().preloadBatch(images);
-      } catch (e) {
-        AppLogger.w(
-          'Failed to preload metadata batch: $e',
-          'LocalGalleryService',
-        );
-      }
-    });
   }
 
   /// 从数据库记录构建元数据
@@ -1604,6 +1692,12 @@ class ErrorGalleryService implements LocalGalleryService {
       _throwError();
 
   @override
+  Future<List<GalleryPagePreloadItem>> getPagePreloadItems(
+    int page, {
+    int? pageSize,
+  }) => _throwError();
+
+  @override
   Future<void> applyFilter(FilterCriteria criteria) => _throwError();
 
   @override
@@ -1690,6 +1784,12 @@ class _PlaceholderGalleryService implements LocalGalleryService {
   @override
   Future<List<LocalImageRecord>> getPage(int page, {int? pageSize}) =>
       _throwNotInitialized();
+
+  @override
+  Future<List<GalleryPagePreloadItem>> getPagePreloadItems(
+    int page, {
+    int? pageSize,
+  }) => _throwNotInitialized();
 
   @override
   Future<void> applyFilter(FilterCriteria criteria) => _throwNotInitialized();

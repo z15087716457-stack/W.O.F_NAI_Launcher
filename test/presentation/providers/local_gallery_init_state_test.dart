@@ -33,6 +33,7 @@ class _TrackingLocalGalleryService implements LocalGalleryService {
   int applyFilterCount = 0;
   int setSortCount = 0;
   int getPageCount = 0;
+  int getPagePreloadItemsCount = 0;
 
   @override
   bool get isInitialized => true;
@@ -52,6 +53,15 @@ class _TrackingLocalGalleryService implements LocalGalleryService {
   @override
   Future<List<LocalImageRecord>> getPage(int page, {int? pageSize}) async {
     getPageCount++;
+    return [];
+  }
+
+  @override
+  Future<List<GalleryPagePreloadItem>> getPagePreloadItems(
+    int page, {
+    int? pageSize,
+  }) async {
+    getPagePreloadItemsCount++;
     return [];
   }
 

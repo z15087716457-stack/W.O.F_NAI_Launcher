@@ -192,7 +192,9 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
         path,
         size: size,
       );
-      if (existingPath != null && await File(existingPath).exists()) {
+      // getThumbnailPath 非空即保证文件存在（内部已做异步 exists 校验），
+      // 外层不再重复 exists——每卡省一次文件系统调用
+      if (existingPath != null) {
         // AppLogger.i('[CardLoad] Using existing thumbnail: $fileName', 'LocalImageCard3D');
         _requestedSize = size;
         _requestedQuality = quality;

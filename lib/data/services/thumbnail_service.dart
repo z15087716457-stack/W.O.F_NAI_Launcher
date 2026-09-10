@@ -123,57 +123,6 @@ class ThumbnailTask {
       'ThumbnailTask($id: $originalPath, size=$size, priority=$effectivePriority, state=$state)';
 }
 
-/// 缩略图批次
-class ThumbnailBatch {
-  /// 批次ID
-  final String id;
-
-  /// 批次描述
-  final String description;
-
-  /// 批次任务
-  final List<ThumbnailTask> tasks;
-
-  /// 批次优先级
-  final int priority;
-
-  /// 创建时间
-  final DateTime createdAt;
-
-  /// 是否已取消
-  bool isCancelled;
-
-  ThumbnailBatch({
-    required this.id,
-    required this.description,
-    required this.tasks,
-    required this.priority,
-  }) : createdAt = DateTime.now(),
-       isCancelled = false;
-
-  /// 获取总任务数
-  int get totalCount => tasks.length;
-
-  /// 获取已完成任务数
-  int get completedCount =>
-      tasks.where((t) => t.state == ThumbnailTaskState.completed).length;
-
-  /// 获取失败任务数
-  int get failedCount =>
-      tasks.where((t) => t.state == ThumbnailTaskState.failed).length;
-
-  /// 获取进度（0.0 - 1.0）
-  double get progress =>
-      totalCount > 0 ? (completedCount + failedCount) / totalCount : 0.0;
-
-  /// 检查是否已完成
-  bool get isCompleted => completedCount + failedCount >= totalCount;
-
-  @override
-  String toString() =>
-      'ThumbnailBatch($id: $description, $completedCount/$totalCount, ${(progress * 100).toStringAsFixed(1)}%)';
-}
-
 /// 缩略图服务状态
 enum ThumbnailServiceState {
   /// 未初始化
@@ -234,9 +183,6 @@ class ThumbnailService {
   /// 活跃任务映射（完整任务键 -> 任务）
   final Map<ThumbnailTaskKey, ThumbnailTask> _activeTasks = {};
 
-  /// 活跃批次映射
-  final Map<String, ThumbnailBatch> _activeBatches = {};
-
   /// 当前正在进行的生成任务数
   int _activeGenerationCount = 0;
 
@@ -258,10 +204,6 @@ class ThumbnailService {
   /// 任务流
   final _taskController = StreamController<ThumbnailTask>.broadcast();
   Stream<ThumbnailTask> get taskStream => _taskController.stream;
-
-  /// 批次进度流
-  final _batchController = StreamController<ThumbnailBatch>.broadcast();
-  Stream<ThumbnailBatch> get batchStream => _batchController.stream;
 
   // ==================== 统计 ====================
 
@@ -371,15 +313,16 @@ class ThumbnailService {
   /// [originalPath] 原始图片路径
   /// [size] 缩略图尺寸
   /// [priority] 生成优先级
-  void preloadThumbnail(
+  Future<void> preloadThumbnail(
     String originalPath, {
     ThumbnailSize size = ThumbnailSize.small,
     int priority = ThumbnailPriority.low,
-  }) {
+  }) async {
     _ensureInitialized();
 
-    // 检查缓存
-    if (_cacheService!.thumbnailExists(originalPath, size: size)) {
+    // 检查缓存（异步检查：同步 existsSync 会阻塞主 isolate，
+    // 一次翻页预取约 100 次；重复入队由 _enqueueTask 的键去重兜底）
+    if (await _cacheService!.thumbnailExistsAsync(originalPath, size: size)) {
       return; // 已存在，跳过
     }
 
@@ -391,46 +334,6 @@ class ThumbnailService {
     final task = _createTask(originalPath, size: size, priority: priority);
 
     _enqueueTask(task);
-  }
-
-  /// 批量获取缩略图
-  ///
-  /// 返回批次ID，可通过批次流监听进度
-  Future<String> getThumbnailsBatch(
-    List<String> originalPaths, {
-    ThumbnailSize size = ThumbnailSize.small,
-    int priority = ThumbnailPriority.normal,
-    String description = 'Batch',
-  }) async {
-    _ensureInitialized();
-
-    final batchId =
-        'batch_${DateTime.now().millisecondsSinceEpoch}_${_activeBatches.length}';
-
-    final tasks = originalPaths.map((path) {
-      return _createTask(path, size: size, priority: priority);
-    }).toList();
-
-    final batch = ThumbnailBatch(
-      id: batchId,
-      description: description,
-      tasks: tasks,
-      priority: priority,
-    );
-
-    _activeBatches[batchId] = batch;
-
-    // 批量入队
-    for (final task in tasks) {
-      _enqueueTask(task);
-    }
-
-    // AppLogger.i(
-    //   'Created batch $batchId: ${tasks.length} tasks, priority=$priority',
-    //   'ThumbnailService',
-    // );
-
-    return batchId;
   }
 
   // ==================== 可见性感知 API ====================
@@ -470,37 +373,6 @@ class ThumbnailService {
 
     // 如果变为可见且正在运行，可能触发队列处理
     if (isVisible && _state == ThumbnailServiceState.running) {
-      _processQueue();
-    }
-  }
-
-  /// 批量更新可见性
-  ///
-  /// [visiblePaths] 当前可见的图片路径列表
-  /// [priority] 可见项的优先级
-  void batchUpdateVisibility(
-    List<String> visiblePaths, {
-    int priority = ThumbnailPriority.highest,
-  }) {
-    if (_cacheService == null) return;
-
-    _cacheService!.batchUpdateVisibility(visiblePaths, priority: priority);
-
-    // 更新队列
-    final visibleSet = visiblePaths.toSet();
-    bool needsReorder = false;
-
-    for (final task in _taskQueue.toList()) {
-      final wasVisible = task.isVisible;
-      task.isVisible = visibleSet.contains(task.originalPath);
-
-      if (wasVisible != task.isVisible) {
-        needsReorder = true;
-      }
-    }
-
-    if (needsReorder) {
-      _resortQueue();
       _processQueue();
     }
   }
@@ -619,7 +491,6 @@ class ThumbnailService {
         task.notifyComplete(path);
         _taskController.add(task);
 
-        _updateBatchStatus(task, path != null);
         _processQueue();
       });
     }
@@ -657,22 +528,6 @@ class ThumbnailService {
       );
       task.error = e.toString();
       return null;
-    }
-  }
-
-  void _updateBatchStatus(ThumbnailTask task, bool success) {
-    for (final batch in _activeBatches.values) {
-      if (batch.tasks.any((t) => t.id == task.id)) {
-        _batchController.add(batch);
-
-        // if (batch.isCompleted) {
-        //   AppLogger.i(
-        //     'Batch ${batch.id} completed: ${batch.completedCount} success, ${batch.failedCount} failed',
-        //     'ThumbnailService',
-        //   );
-        // }
-        break;
-      }
     }
   }
 
@@ -718,31 +573,6 @@ class ThumbnailService {
     return false;
   }
 
-  /// 取消批次
-  int cancelBatch(String batchId) {
-    final batch = _activeBatches[batchId];
-    if (batch == null) return 0;
-
-    batch.isCancelled = true;
-    int cancelledCount = 0;
-
-    // 取消批次中所有待处理任务
-    for (final task in batch.tasks) {
-      if (task.state == ThumbnailTaskState.pending) {
-        if (cancelTask(task.id)) {
-          cancelledCount++;
-        }
-      }
-    }
-
-    // AppLogger.i(
-    //   'Cancelled batch $batchId: $cancelledCount tasks',
-    //   'ThumbnailService',
-    // );
-
-    return cancelledCount;
-  }
-
   /// 取消所有任务
   void cancelAll() {
     // 取消队列中所有任务
@@ -753,11 +583,6 @@ class ThumbnailService {
     }
 
     _activeTasks.clear();
-
-    // 标记所有批次为已取消
-    for (final batch in _activeBatches.values) {
-      batch.isCancelled = true;
-    }
 
     // AppLogger.i('All tasks cancelled', 'ThumbnailService');
   }
@@ -770,41 +595,6 @@ class ThumbnailService {
   /// 获取活跃任务数
   int get activeTaskCount => _activeGenerationCount;
 
-  /// 获取活跃批次数量
-  int get activeBatchCount => _activeBatches.length;
-
-  /// 获取批次信息
-  ThumbnailBatch? getBatch(String batchId) => _activeBatches[batchId];
-
-  /// 获取所有活跃批次
-  List<ThumbnailBatch> getActiveBatches() => _activeBatches.values.toList();
-
-  /// 清理已完成的批次
-  int cleanupCompletedBatches({Duration? maxAge}) {
-    final age = maxAge ?? const Duration(hours: 1);
-    final now = DateTime.now();
-    final toRemove = <String>[];
-
-    _activeBatches.forEach((id, batch) {
-      if (batch.isCompleted && now.difference(batch.createdAt) > age) {
-        toRemove.add(id);
-      }
-    });
-
-    for (final id in toRemove) {
-      _activeBatches.remove(id);
-    }
-
-    // if (toRemove.isNotEmpty) {
-    //   AppLogger.d(
-    //     'Cleaned up ${toRemove.length} completed batches',
-    //     'ThumbnailService',
-    //   );
-    // }
-
-    return toRemove.length;
-  }
-
   // ==================== 统计 ====================
 
   /// 获取统计信息
@@ -813,7 +603,6 @@ class ThumbnailService {
       'state': _state.toString(),
       'queueLength': queueLength,
       'activeTasks': activeTaskCount,
-      'activeBatches': activeBatchCount,
       ..._stats.toMap(),
     };
   }
@@ -873,7 +662,6 @@ class ThumbnailService {
     _setState(ThumbnailServiceState.disposed);
     _stateController.close();
     _taskController.close();
-    _batchController.close();
   }
 }
 

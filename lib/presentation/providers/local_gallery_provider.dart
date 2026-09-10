@@ -24,6 +24,7 @@ import '../../data/services/gallery/unified_gallery_service.dart';
 import '../../data/services/thumbnail_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'collection_provider.dart';
+import '../widgets/gallery/gallery_preload_tier.dart';
 
 part 'local_gallery_provider.freezed.dart';
 part 'local_gallery_provider.g.dart';
@@ -557,25 +558,30 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       () async {
         final thumbnailService = ThumbnailService.instance;
         await thumbnailService.initialize();
-        final size = resolveThumbnailTier(
-          state.columnWidth,
-          _lastKnownDpr,
-          resolvedQuality,
-        );
 
         for (final targetPage in pages) {
-          final records = await service.getPage(targetPage, pageSize: pageSize);
-          for (final record in records) {
+          // 轻量预取：只取路径+宽高（不做 stat/收藏/标签/完整元数据构建）
+          final items = await service.getPagePreloadItems(
+            targetPage,
+            pageSize: pageSize,
+          );
+          for (final item in items) {
+            // 选档宽度与各视图卡片实际请求同源（网格=180、瀑布流/分组
+            // =列宽、火车流=列宽×宽高比），保证预取档位能被卡片命中
+            final size = galleryPreloadThumbnailSize(
+              viewMode: state.viewMode,
+              columnWidth: state.columnWidth,
+              devicePixelRatio: _lastKnownDpr,
+              quality: resolvedQuality,
+              isGroupedView: state.isGroupedView,
+              aspectRatio: item.aspectRatio,
+            );
             final callback = _thumbnailPreloadOverride;
             if (callback != null) {
-              callback(
-                record.path,
-                size: size,
-                priority: ThumbnailPriority.low,
-              );
+              callback(item.path, size: size, priority: ThumbnailPriority.low);
             } else {
               thumbnailService.preloadThumbnail(
-                record.path,
+                item.path,
                 size: size,
                 priority: ThumbnailPriority.low,
               );
