@@ -269,27 +269,31 @@ class GalleryStreamScanner {
         // 1. 预加载数据库记录（只加载一次），获取已有元数据数量
         final existingMetadataCount = await _preloadExistingRecords();
 
-        // 2. 【新增】检查数据一致性：删除数据库中不存在于文件系统的记录
-        //    只处理位于当前已配置图库源内的记录，源被移除后其记录不受影响
+        // 2. 【关键修改】先遍历一遍统计总数（让用户看到固定的总进度），
+        //    同时收集磁盘文件全集，供一致性检查的孤儿差集使用
+        AppLogger.i(
+          '[StreamScan] Counting total files...',
+          'GalleryStreamScanner',
+        );
+        final diskFileKeys = await _countTotalFiles(rootDirs);
+        final totalFiles = diskFileKeys.length;
+        AppLogger.i(
+          '[StreamScan] Total files to scan: $totalFiles',
+          'GalleryStreamScanner',
+        );
+
+        // 3. 【P4】检查数据一致性：删除数据库中不存在于文件系统的记录
+        //    改为「磁盘文件全集 − DB 路径集」差集 + 候选逐个 exists 确认，
+        //    健康库上零 exists；只处理位于当前已配置图库源内的记录，
+        //    源被移除后其记录不受影响
         if (checkConsistency) {
-          await _fixDataConsistency(rootDirs);
+          await _fixDataConsistency(rootDirs, diskFileKeys);
         }
 
         final retryPriorityPaths = buildRetryPriorityPaths(
           _existingMap,
           retryMissingMetadata: retryMissingMetadata,
           retryFailedMetadata: retryFailedMetadata,
-        );
-
-        // 3. 【关键修改】先遍历一遍统计总数（让用户看到固定的总进度）
-        AppLogger.i(
-          '[StreamScan] Counting total files...',
-          'GalleryStreamScanner',
-        );
-        final totalFiles = await _countTotalFiles(rootDirs);
-        AppLogger.i(
-          '[StreamScan] Total files to scan: $totalFiles',
-          'GalleryStreamScanner',
         );
 
         // 4. 启动扫描状态管理器（使用固定的总文件数）
@@ -506,11 +510,18 @@ class GalleryStreamScanner {
 
   /// 修复数据一致性
   ///
+  /// 以「本次目录遍历产出的磁盘文件全集 − 数据库记录路径集」得到候选，
+  /// 仅对候选逐个 [File.exists] 确认（防遍历被权限/深度截断造成误判），
+  /// 再批量标删。健康库上候选为空 → 全库 4.9 万条逐一 exists 降为 0 次。
+  ///
   /// 检查数据库中所有未删除的记录，如果文件不存在则标记为已删除
   /// 只处理位于当前已配置图库源内的记录——不在任何已配置源下的记录
   /// 一律不动（防止源被移除后记录被清）
   /// 返回被标记为删除的记录数量
-  Future<int> _fixDataConsistency(List<Directory> rootDirs) async {
+  Future<int> _fixDataConsistency(
+    List<Directory> rootDirs,
+    Set<String> diskFileKeys,
+  ) async {
     AppLogger.i(
       '[StreamScan] Checking data consistency...',
       'GalleryStreamScanner',
@@ -532,6 +543,13 @@ class GalleryStreamScanner {
           '[StreamScan] Skip orphan check (outside configured roots): $path',
           'GalleryStreamScanner',
         );
+        continue;
+      }
+
+      // 目录遍历已见到的文件不可能是孤儿（同一库遍历期间文件存在即有效）；
+      // 仅对「遍历未见」的少数候选做存在性确认——遍历截断时文件实际仍在
+      // 盘上，此处 exists 命中即排除，不误标
+      if (diskFileKeys.contains(galleryFilePathKey(path))) {
         continue;
       }
 
@@ -945,13 +963,13 @@ class GalleryStreamScanner {
     }
   }
 
-  /// 统计总文件数（预扫描，多源累计）
+  /// 预扫描目录：收集磁盘图片文件全集（多源累计，去重）
   ///
-  /// 在开始处理前先遍历一遍目录，统计总文件数
-  /// 这样可以让用户看到固定的进度（如 0/8751 → 8751/8751）
-  Future<int> _countTotalFiles(List<Directory> rootDirs) async {
+  /// 在开始处理前先遍历一遍目录，返回规范化路径键全集。
+  /// 其长度即总文件数——让用户看到固定的进度（如 0/8751 → 8751/8751）；
+  /// 全集同时供一致性检查做孤儿差集（磁盘全集 − DB 路径集）。
+  Future<Set<String>> _countTotalFiles(List<Directory> rootDirs) async {
     const supportedExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
-    var count = 0;
     final countedKeys = <String>{};
 
     for (final rootDir in rootDirs) {
@@ -973,15 +991,14 @@ class GalleryStreamScanner {
           }
 
           final ext = p.extension(entity.path).toLowerCase();
-          if (supportedExtensions.contains(ext) &&
-              countedKeys.add(galleryFilePathKey(entity.path))) {
-            count++;
+          if (supportedExtensions.contains(ext)) {
+            countedKeys.add(galleryFilePathKey(entity.path));
           }
         }
       }
     }
 
-    return count;
+    return countedKeys;
   }
 
   /// 转换阶段到 ScanPhase

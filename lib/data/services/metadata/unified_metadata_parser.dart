@@ -287,6 +287,66 @@ class UnifiedMetadataParser {
     }
   }
 
+  /// 从内存字节按渐进式读取策略提取元数据（[parseFromFile] 的内存字节等价版）
+  ///
+  /// 读取序列与 [parseFromFile] 的渐进式路径逐字节一致：依次尝试前
+  /// 100KB / 500KB / 2MB 前缀切片，全部失败后回退完整字节。
+  /// 供已持有完整文件字节的调用方（如扫描路径需同时计算 SHA256）复用，
+  /// 避免渐进读取再次访问磁盘。
+  static MetadataParseResult parseFromBytesGradual(
+    Uint8List bytes, {
+    String? filePathForLog,
+    bool useCache = false,
+  }) {
+    final stopwatch = Stopwatch()..start();
+    _statistics.totalAttempts++;
+
+    final fileSize = bytes.length;
+    if (fileSize < 8) {
+      final error = 'File too small: $fileSize bytes';
+      PortableLogger.w(error, _tag);
+      return MetadataParseResult.failed(
+        [],
+        error,
+        parseTime: stopwatch.elapsed,
+      );
+    }
+
+    _statistics.gradualReadAttempts++;
+
+    MetadataParseResult? result;
+
+    // 文件大于第一档阈值：按阈值从前缀切片尝试（与原版 _extractWithLimit 等价）
+    if (fileSize > _gradualReadThresholds.first) {
+      for (final threshold in _gradualReadThresholds) {
+        // 文件小于当前阈值：不再切片，交由下方完整解析
+        if (fileSize <= threshold) break;
+
+        final slice = Uint8List.sublistView(bytes, 0, threshold);
+        final attempt = parseFromImageBytes(
+          slice,
+          filePathForLog: filePathForLog,
+        );
+        if (attempt.success) {
+          _statistics.gradualReadSuccesses++;
+          result = attempt;
+          break;
+        }
+      }
+    }
+
+    // 所有阈值未命中（或文件很小）：完整字节解析
+    result ??= parseFromImageBytes(bytes, filePathForLog: filePathForLog);
+
+    // 缓存结果（与 parseFromFile 的文件级缓存语义一致）
+    if (useCache && result.success && result.metadata != null) {
+      _cacheResult(filePathForLog ?? '', fileSize, result);
+    }
+
+    _updateStatistics(result, stopwatch.elapsed);
+    return result;
+  }
+
   /// 从 PNG 字节中提取元数据
   ///
   /// [bytes] PNG 字节数据

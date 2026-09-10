@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/data/services/metadata/unified_metadata_parser.dart';
 
@@ -135,6 +136,60 @@ void main() {
       expect(metadata.sampler, 'k_euler_ancestral');
     });
   });
+
+  group('UnifiedMetadataParser parseFromBytesGradual（P4 内存字节等价版）', () {
+    /// 对拍：文件渐进读取 vs 已读字节渐进解析，返回结果逐字段一致
+    void expectSameAsFile(String path) {
+      final fileResult = UnifiedMetadataParser.parseFromFile(path);
+      final bytesResult = UnifiedMetadataParser.parseFromBytesGradual(
+        File(path).readAsBytesSync(),
+        filePathForLog: path,
+      );
+
+      expect(
+        bytesResult.success,
+        fileResult.success,
+        reason: 'success 不一致: ${bytesResult.errorMessage}',
+      );
+      expect(bytesResult.sourceFormat, fileResult.sourceFormat);
+      expect(bytesResult.metadata, isNotNull);
+      // 逐字段对拍（含嵌套 characterPrompts 等），不依赖自反相等假设
+      expect(
+        jsonEncode(bytesResult.metadata!.toJson()),
+        jsonEncode(fileResult.metadata!.toJson()),
+      );
+    }
+
+    test('V45 PNG（1.7MB，跨 100KB/500KB 档）与文件路径结果逐字段一致', () {
+      expectSameAsFile(_v45Png);
+    });
+
+    test('V5 PNG（1.3MB，alpha 隐写）与文件路径结果逐字段一致', () {
+      expectSameAsFile(_v5Png);
+    });
+
+    test('V4 WebP（183KB，EXIF 通道）与文件路径结果逐字段一致', () {
+      expectSameAsFile(_v4Webp);
+    });
+
+    test('小文件（≤100KB，直接完整解析）与文件路径结果一致', () {
+      final tempDir = Directory.systemTemp.createTempSync('bytes_gradual_');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+      final smallFile = File('${tempDir.path}/small.png')
+        ..writeAsBytesSync(_buildSmallNovelAiPng('small-prompt'));
+
+      expectSameAsFile(smallFile.path);
+    });
+
+    test('未知格式字节返回失败而非抛异常', () {
+      final result = UnifiedMetadataParser.parseFromBytesGradual(
+        Uint8List.fromList(utf8.encode('not an image at all')),
+      );
+
+      expect(result.success, isFalse);
+      expect(result.errorMessage, contains('Not a valid'));
+    });
+  });
 }
 
 /// 从 webp 字节中移除 EXIF chunk 并修正 RIFF 长度
@@ -213,3 +268,34 @@ List<int> _be32(int value) => [
   (value >> 8) & 0xFF,
   value & 0xFF,
 ];
+
+/// 构造带 NAI tEXt 元数据的小 PNG（4x4，远小于 100KB 首档阈值）
+Uint8List _buildSmallNovelAiPng(String prompt) {
+  final innerComment = jsonEncode({
+    'prompt': prompt,
+    'uc': 'lowres, blurry',
+    'seed': 7,
+    'sampler': 'k_euler',
+    'steps': 28,
+    'scale': 6.5,
+    'width': 4,
+    'height': 4,
+    'version': 1,
+  });
+  final outerComment = jsonEncode({
+    'Description': prompt,
+    'Software': 'NovelAI',
+    'Source': 'NovelAI Diffusion V4.5 4BDE2A90',
+    'Comment': innerComment,
+  });
+
+  final image = img.Image(width: 4, height: 4);
+  img.fill(image, color: img.ColorRgba8(255, 255, 255, 255));
+  var bytes = Uint8List.fromList(img.encodePng(image));
+  bytes = UnifiedMetadataParser.embedTextChunkOnly(
+    bytes,
+    'Comment',
+    outerComment,
+  );
+  return bytes;
+}

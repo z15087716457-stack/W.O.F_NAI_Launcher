@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 
@@ -196,6 +197,99 @@ void main() {
 
       expect(result.success, isFalse);
       expect(result.error, contains('File not found'));
+    });
+
+    test('两阶段：先回传哈希，继续解析结果与单阶段一致', () async {
+      final file = File('${tempDir.path}/two_phase.png');
+      final bytes = await _pngWithNovelAiMetadata(prompt: 'two-phase-prompt');
+      await file.writeAsBytes(bytes);
+
+      final single = await service.parseMetadata(
+        file.path,
+        config: const IsolateParseConfig(
+          timeout: Duration(seconds: 10),
+          useCache: false,
+        ),
+      );
+
+      final deciderCalls = <String>[];
+      final twoPhase = await service.parseMetadataWithHash(
+        file.path,
+        config: const IsolateParseConfig(
+          timeout: Duration(seconds: 10),
+          useCache: false,
+        ),
+        shouldParseWithHash: (hash) {
+          deciderCalls.add(hash);
+          return true;
+        },
+      );
+
+      // 哈希先行：决策器被调用一次，且哈希 == 文件字节的 SHA256
+      expect(deciderCalls, hasLength(1));
+      expect(
+        deciderCalls.single,
+        sha256.convert(bytes).toString(),
+        reason: '回传哈希应为文件字节 SHA256',
+      );
+      expect(twoPhase.fileHash, deciderCalls.single);
+      expect(twoPhase.wasSkipped, isFalse);
+
+      // 继续解析的结果与单阶段逐字段一致
+      expect(twoPhase.success, isTrue, reason: twoPhase.error);
+      expect(
+        jsonEncode(twoPhase.metadata!.toJson()),
+        jsonEncode(single.metadata!.toJson()),
+      );
+    });
+
+    test('两阶段：决策器返回 false 时跳过解析且字节不进入解析', () async {
+      final file = File('${tempDir.path}/two_phase_skip.png');
+      final bytes = await _pngWithNovelAiMetadata(prompt: 'skip-prompt');
+      await file.writeAsBytes(bytes);
+
+      final skipped = await service.parseMetadataWithHash(
+        file.path,
+        config: const IsolateParseConfig(
+          timeout: Duration(seconds: 10),
+          useCache: false,
+        ),
+        shouldParseWithHash: (_) => false,
+      );
+
+      expect(skipped.wasSkipped, isTrue);
+      expect(skipped.success, isFalse);
+      expect(skipped.metadata, isNull);
+      expect(skipped.fileHash, sha256.convert(bytes).toString());
+
+      // 跳过后服务仍可正常处理后续任务（worker 未被卡死）
+      final after = await service.parseMetadata(
+        file.path,
+        config: const IsolateParseConfig(
+          timeout: Duration(seconds: 10),
+          useCache: false,
+        ),
+      );
+      expect(after.success, isTrue, reason: after.error);
+    });
+
+    test('两阶段：决策器抛异常时按继续解析处理', () async {
+      final file = File('${tempDir.path}/two_phase_throw.png');
+      await file.writeAsBytes(
+        await _pngWithNovelAiMetadata(prompt: 'throw-prompt'),
+      );
+
+      final result = await service.parseMetadataWithHash(
+        file.path,
+        config: const IsolateParseConfig(
+          timeout: Duration(seconds: 10),
+          useCache: false,
+        ),
+        shouldParseWithHash: (_) => throw StateError('decider boom'),
+      );
+
+      expect(result.success, isTrue, reason: result.error);
+      expect(result.metadata?.prompt, 'throw-prompt');
     });
   });
 }

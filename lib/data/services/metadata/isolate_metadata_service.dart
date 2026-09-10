@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
+
 import '../../../core/utils/app_logger.dart';
 import '../../models/gallery/nai_image_metadata.dart';
 import 'unified_metadata_parser.dart';
@@ -39,6 +41,13 @@ class IsolateParseResult {
   final String? error;
   final Duration parseTime;
   final int? bytesRead;
+
+  /// worker 在同次文件读取中顺带算出的 SHA256（未请求或读取失败时为 null）
+  final String? fileHash;
+
+  /// 哈希算好后按调用方决策跳过解析（缓存命中场景），metadata 为 null 属预期
+  final bool wasSkipped;
+
   final bool wasCancelled;
   final bool wasTimeout;
 
@@ -47,6 +56,8 @@ class IsolateParseResult {
     this.error,
     required this.parseTime,
     this.bytesRead,
+    this.fileHash,
+    this.wasSkipped = false,
     this.wasCancelled = false,
     this.wasTimeout = false,
   });
@@ -57,11 +68,13 @@ class IsolateParseResult {
     NaiImageMetadata metadata, {
     required Duration parseTime,
     int? bytesRead,
+    String? fileHash,
   }) {
     return IsolateParseResult(
       metadata: metadata,
       parseTime: parseTime,
       bytesRead: bytesRead,
+      fileHash: fileHash,
     );
   }
 
@@ -70,12 +83,23 @@ class IsolateParseResult {
     required Duration parseTime,
     bool wasCancelled = false,
     bool wasTimeout = false,
+    String? fileHash,
   }) {
     return IsolateParseResult(
       error: error,
       parseTime: parseTime,
+      fileHash: fileHash,
       wasCancelled: wasCancelled,
       wasTimeout: wasTimeout,
+    );
+  }
+
+  /// 哈希已算出但按调用方决策跳过解析（缓存命中）
+  factory IsolateParseResult.skipped(String fileHash) {
+    return IsolateParseResult(
+      fileHash: fileHash,
+      wasSkipped: true,
+      parseTime: Duration.zero,
     );
   }
 }
@@ -90,6 +114,8 @@ class IsolateParseResult {
 /// - 支持任务取消
 /// - 详细的错误信息
 /// - 性能统计
+/// - 哈希先行两阶段模式（[parseMetadataWithHash]）：worker 单次读取文件
+///   先算 SHA256 回传，调用方按哈希查缓存后再决定是否继续解析
 class IsolateMetadataService {
   static IsolateMetadataService? _instance;
   static IsolateMetadataService get instance =>
@@ -188,6 +214,33 @@ class IsolateMetadataService {
   Future<IsolateParseResult> parseMetadata(
     String filePath, {
     IsolateParseConfig config = const IsolateParseConfig(),
+  }) {
+    return _dispatch(filePath, config: config, hashDecider: null);
+  }
+
+  /// 哈希先行解析：worker 单次读取文件先算 SHA256，再由调用方决策是否继续
+  ///
+  /// 与 [parseMetadata] 的区别：worker 先只读一次文件算 SHA256 并回传
+  /// （结果见 [IsolateParseResult.fileHash]），[shouldParseWithHash] 在主
+  /// isolate 上同步调用——返回 false 时 worker 丢弃已读取的字节不再解析
+  /// （缓存命中场景，结果 [IsolateParseResult.wasSkipped] 为 true）；返回
+  /// true 时复用同次读取的字节继续解析，全程只读一次文件。
+  Future<IsolateParseResult> parseMetadataWithHash(
+    String filePath, {
+    IsolateParseConfig config = const IsolateParseConfig(),
+    required bool Function(String hash) shouldParseWithHash,
+  }) {
+    return _dispatch(
+      filePath,
+      config: config,
+      hashDecider: shouldParseWithHash,
+    );
+  }
+
+  Future<IsolateParseResult> _dispatch(
+    String filePath, {
+    required IsolateParseConfig config,
+    required bool Function(String hash)? hashDecider,
   }) async {
     await initialize();
 
@@ -195,7 +248,12 @@ class IsolateMetadataService {
     _totalTasks++;
 
     if (_fallbackToInlineParsing || _workers.isEmpty) {
-      return _parseInline(filePath, config, stopwatch);
+      return _parseInline(
+        filePath,
+        config,
+        stopwatch,
+        hashDecider: hashDecider,
+      );
     }
 
     final task = _ParseTask(
@@ -203,6 +261,7 @@ class IsolateMetadataService {
       filePath: filePath,
       config: config,
       startTime: DateTime.now(),
+      hashDecider: hashDecider,
     );
 
     // 寻找空闲工作线程
@@ -393,9 +452,74 @@ class IsolateMetadataService {
   Future<IsolateParseResult> _parseInline(
     String filePath,
     IsolateParseConfig config,
-    Stopwatch stopwatch,
-  ) async {
+    Stopwatch stopwatch, {
+    bool Function(String hash)? hashDecider,
+  }) async {
     try {
+      if (hashDecider != null) {
+        // 与 worker 路径同语义：单次读取，先算哈希交调用方决策
+        final file = File(filePath);
+        if (!await file.exists()) {
+          stopwatch.stop();
+          _failedTasks++;
+          return IsolateParseResult.error(
+            'File not found: $filePath',
+            parseTime: stopwatch.elapsed,
+          );
+        }
+        final bytes = await file.readAsBytes();
+        final fileHash = sha256.convert(bytes).toString();
+
+        bool shouldParse;
+        try {
+          shouldParse = hashDecider(fileHash);
+        } catch (_) {
+          shouldParse = true;
+        }
+        if (!shouldParse) {
+          stopwatch.stop();
+          return IsolateParseResult.skipped(fileHash);
+        }
+
+        final metadataResult = await Future<MetadataParseResult>.sync(
+          () => config.useGradualRead
+              ? UnifiedMetadataParser.parseFromBytesGradual(
+                  bytes,
+                  filePathForLog: filePath,
+                  useCache: config.useCache,
+                )
+              : UnifiedMetadataParser.parseFromImageBytes(
+                  bytes,
+                  filePathForLog: filePath,
+                  useCache: config.useCache,
+                ),
+        );
+
+        stopwatch.stop();
+
+        final hashResult =
+            metadataResult.success && metadataResult.metadata != null
+            ? IsolateParseResult.success(
+                metadataResult.metadata!,
+                parseTime: metadataResult.parseTime ?? stopwatch.elapsed,
+                bytesRead: metadataResult.bytesRead,
+                fileHash: fileHash,
+              )
+            : IsolateParseResult.error(
+                metadataResult.errorMessage ?? 'Failed to parse metadata',
+                parseTime: metadataResult.parseTime ?? stopwatch.elapsed,
+                fileHash: fileHash,
+              );
+
+        if (hashResult.success) {
+          _successfulTasks++;
+        } else {
+          _failedTasks++;
+        }
+
+        return hashResult;
+      }
+
       final metadataResult = await Future<MetadataParseResult>.sync(
         () => UnifiedMetadataParser.parseFromFile(
           filePath,
@@ -447,11 +571,14 @@ class IsolateMetadataService {
   ) async {
     try {
       final result = await worker
-          .execute(task)
+          .execute(task, hashDecider: task.hashDecider)
           .timeout(
             task.config.timeout,
             onTimeout: () {
               _timeoutTasks++;
+              // 两阶段任务超时后解除 worker 侧挂起态：完成等待中的
+              // completer 并通知 worker 丢弃保留的字节，避免永久卡死
+              worker.abandonPending(task.requestId);
               AppLogger.w(
                 '[IsolateMetadata] Task timeout: ${task.filePath}',
                 'IsolateMetadataService',
@@ -470,7 +597,7 @@ class IsolateMetadataService {
         _successfulTasks++;
       } else if (result.wasCancelled) {
         _cancelledTasks++;
-      } else {
+      } else if (!result.wasSkipped) {
         _failedTasks++;
       }
 
@@ -554,6 +681,10 @@ class _ParseTask {
   final String filePath;
   final IsolateParseConfig config;
   final DateTime startTime;
+
+  /// 非 null 时走哈希先行两阶段：先算 SHA256，回调决策后才解析
+  final bool Function(String hash)? hashDecider;
+
   final Completer<IsolateParseResult> completer;
 
   _ParseTask({
@@ -561,6 +692,7 @@ class _ParseTask {
     required this.filePath,
     required this.config,
     required this.startTime,
+    this.hashDecider,
   }) : completer = Completer<IsolateParseResult>();
 }
 
@@ -574,6 +706,8 @@ class _ParseWorker {
   bool _isBusy = false;
   int? _currentRequestId;
   Completer<IsolateParseResult>? _currentCompleter;
+  Completer<String?>? _hashCompleter;
+  bool _wasAbandoned = false;
   StreamSubscription? _subscription;
 
   _ParseWorker({required this.id, this.onBecameIdle});
@@ -599,14 +733,28 @@ class _ParseWorker {
   }
 
   /// 执行解析任务
-  Future<IsolateParseResult> execute(_ParseTask task) async {
+  ///
+  /// [hashDecider] 为 null 时走原有单阶段流程；否则走两阶段：worker 先
+  /// 单次读取算出 SHA256 回传，[hashDecider] 同步决策后再继续解析或丢弃。
+  Future<IsolateParseResult> execute(
+    _ParseTask task, {
+    bool Function(String hash)? hashDecider,
+  }) async {
     if (_isBusy) {
       throw StateError('Worker $id is busy');
     }
 
     _isBusy = true;
     _currentRequestId = task.requestId;
-    _currentCompleter = Completer<IsolateParseResult>();
+    _currentCompleter = null;
+    _hashCompleter = null;
+    _wasAbandoned = false;
+
+    // 单阶段任务与原实现一致：进函数即建立 completer，取消可即时命中
+    final bool twoPhase = hashDecider != null;
+    if (!twoPhase) {
+      _currentCompleter = Completer<IsolateParseResult>();
+    }
 
     try {
       // 读取文件字节
@@ -616,7 +764,6 @@ class _ParseWorker {
           '[IsolateMetadata] File not found: ${task.filePath}',
           'IsolateMetadataService',
         );
-        _isBusy = false;
         return IsolateParseResult.error(
           'File not found: ${task.filePath}',
           parseTime: Duration.zero,
@@ -628,7 +775,87 @@ class _ParseWorker {
       final bool readInIsolate =
           task.config.useGradualRead && task.filePath.isNotEmpty;
 
-      // 发送任务到 Isolate
+      if (twoPhase) {
+        // ===== 两阶段：哈希先行 =====
+        final hashCompleter = Completer<String?>();
+        _hashCompleter = hashCompleter;
+        _sendPort!.send(
+          _ParseRequest(
+            requestId: task.requestId,
+            bytes: readInIsolate ? Uint8List(0) : await file.readAsBytes(),
+            filePath: task.filePath,
+            config: task.config,
+            hashOnly: true,
+          ),
+        );
+
+        // 等待超时/取消可能在文件检查与请求送达之间发生
+        if (_wasAbandoned) {
+          _sendPort!.send(
+            _ParseContinueRequest(requestId: task.requestId, proceed: false),
+          );
+          return IsolateParseResult.error(
+            'Abandoned',
+            parseTime: Duration.zero,
+            wasCancelled: true,
+          );
+        }
+
+        final hash = await hashCompleter.future;
+        _hashCompleter = null;
+
+        if (_wasAbandoned) {
+          return IsolateParseResult.error(
+            'Abandoned',
+            parseTime: Duration.zero,
+            wasCancelled: true,
+          );
+        }
+
+        if (hash == null) {
+          // 哈希失败同样要通知 worker 丢弃保留的字节
+          _sendPort!.send(
+            _ParseContinueRequest(requestId: task.requestId, proceed: false),
+          );
+          return IsolateParseResult.error(
+            'Hash calculation failed: ${task.filePath}',
+            parseTime: Duration.zero,
+          );
+        }
+
+        bool shouldParse;
+        try {
+          shouldParse = hashDecider(hash);
+        } catch (_) {
+          shouldParse = true;
+        }
+
+        if (!shouldParse) {
+          _sendPort!.send(
+            _ParseContinueRequest(requestId: task.requestId, proceed: false),
+          );
+          return IsolateParseResult.skipped(hash);
+        }
+
+        final parseCompleter = Completer<IsolateParseResult>();
+        _currentCompleter = parseCompleter;
+        _sendPort!.send(
+          _ParseContinueRequest(requestId: task.requestId, proceed: true),
+        );
+        final parseResult = await parseCompleter.future;
+        // 补挂哈希：调用方需要用它与缓存键对齐
+        return IsolateParseResult(
+          metadata: parseResult.metadata,
+          error: parseResult.error,
+          parseTime: parseResult.parseTime,
+          bytesRead: parseResult.bytesRead,
+          fileHash: hash,
+          wasCancelled: parseResult.wasCancelled,
+          wasTimeout: parseResult.wasTimeout,
+        );
+      }
+
+      // ===== 单阶段（原有流程）=====
       _sendPort!.send(
         _ParseRequest(
           requestId: task.requestId,
@@ -639,20 +866,28 @@ class _ParseWorker {
       );
 
       // 等待结果
-      final result = await _currentCompleter!.future;
-      return result;
+      return await _currentCompleter!.future;
     } finally {
       _isBusy = false;
       _currentRequestId = null;
       _currentCompleter = null;
+      _hashCompleter = null;
+      _wasAbandoned = false;
       if (onBecameIdle != null) {
         scheduleMicrotask(onBecameIdle!);
       }
     }
   }
 
-  /// 取消当前任务
-  void cancelCurrent() {
+  /// 放弃挂起任务（超时/取消时调用）
+  ///
+  /// 完成等待中的 completer 并通知 worker 丢弃两阶段保留的字节，防止
+  /// 任务卡在"等哈希决策"或"等解析结果"状态导致 worker 永久占用。
+  void abandonPending(int requestId) {
+    _wasAbandoned = true;
+    if (_hashCompleter != null && !_hashCompleter!.isCompleted) {
+      _hashCompleter!.complete(null);
+    }
     if (_currentCompleter != null && !_currentCompleter!.isCompleted) {
       _currentCompleter!.complete(
         IsolateParseResult.error(
@@ -661,6 +896,17 @@ class _ParseWorker {
           wasCancelled: true,
         ),
       );
+    }
+    _sendPort?.send(
+      _ParseContinueRequest(requestId: requestId, proceed: false),
+    );
+  }
+
+  /// 取消当前任务
+  void cancelCurrent() {
+    final requestId = _currentRequestId;
+    if (requestId != null) {
+      abandonPending(requestId);
     }
   }
 
@@ -675,6 +921,27 @@ class _ParseWorker {
   }
 
   void _handleResponse(dynamic message) {
+    if (message is _HashReadyResponse) {
+      final completer = _hashCompleter;
+      if (completer != null &&
+          !completer.isCompleted &&
+          metadataResponseMatchesActiveRequest(
+            activeRequestId: _currentRequestId,
+            responseRequestId: message.requestId,
+          )) {
+        if (message.error != null) {
+          AppLogger.d(
+            '[IsolateMetadata] Hash phase error for request ${message.requestId}: ${message.error}',
+            'IsolateMetadataService',
+          );
+          completer.complete(null);
+        } else {
+          completer.complete(message.hash);
+        }
+      }
+      return;
+    }
+
     if (message is _ParseResponse &&
         _currentCompleter != null &&
         metadataResponseMatchesActiveRequest(
@@ -716,6 +983,25 @@ class _ParseWorker {
   }
 }
 
+/// 两阶段保留的待解析上下文（worker isolate 内）
+class _RetainedParseContext {
+  final Uint8List bytes;
+  final bool useGradualRead;
+  final String filePath;
+
+  const _RetainedParseContext({
+    required this.bytes,
+    required this.useGradualRead,
+    required this.filePath,
+  });
+}
+
+/// worker isolate 内两阶段挂起任务的字节保留表
+///
+/// 每个 worker 同一时刻只处理一个任务，正常情况下至多一条记录；
+/// 超时/取消由主 isolate 发 [_ParseContinueRequest]（proceed=false）清理。
+final _retainedParseContexts = <int, _RetainedParseContext>{};
+
 /// Isolate 入口点
 void _isolateEntryPoint(_WorkerInitMessage initMsg) {
   final receivePort = ReceivePort();
@@ -724,13 +1010,47 @@ void _isolateEntryPoint(_WorkerInitMessage initMsg) {
   receivePort.listen((message) {
     if (message is _ParseRequest) {
       _handleParseRequest(message, initMsg.sendPort);
+    } else if (message is _ParseContinueRequest) {
+      _handleParseContinue(message, initMsg.sendPort);
     }
   });
 }
 
 /// 处理解析请求
+///
+/// [request.hashOnly] 为 true 时只完成"读文件 + 算 SHA256 + 保留字节"，
+/// 回传 [_HashReadyResponse] 后等待 [_ParseContinueRequest] 指令；否则走
+/// 原有单阶段流程。
 void _handleParseRequest(_ParseRequest request, SendPort sendPort) {
   final stopwatch = Stopwatch()..start();
+
+  if (request.hashOnly) {
+    try {
+      final bool readInIsolate =
+          request.config.useGradualRead && request.filePath.isNotEmpty;
+      final bytes = readInIsolate
+          ? File(request.filePath).readAsBytesSync()
+          : request.bytes;
+      final fileHash = sha256.convert(bytes).toString();
+      _retainedParseContexts[request.requestId] = _RetainedParseContext(
+        bytes: bytes,
+        useGradualRead: request.config.useGradualRead,
+        filePath: request.filePath,
+      );
+      sendPort.send(
+        _HashReadyResponse(requestId: request.requestId, hash: fileHash),
+      );
+    } catch (e) {
+      stopwatch.stop();
+      sendPort.send(
+        _HashReadyResponse(
+          requestId: request.requestId,
+          error: 'Hash calculation error: $e',
+        ),
+      );
+    }
+    return;
+  }
 
   try {
     // 渐进式读取场景：在 Isolate 内直接读文件解析（读文件 + 解码全部卸载到
@@ -784,6 +1104,73 @@ void _handleParseRequest(_ParseRequest request, SendPort sendPort) {
   }
 }
 
+/// 处理两阶段第二步：按指令继续解析或丢弃保留的字节
+void _handleParseContinue(_ParseContinueRequest request, SendPort sendPort) {
+  final retained = _retainedParseContexts.remove(request.requestId);
+  if (!request.proceed) {
+    // 丢弃：缓存命中或任务被放弃，直接释放字节
+    return;
+  }
+  if (retained == null) {
+    // 上下文缺失（超时清理后的迟到指令），无法继续
+    sendPort.send(
+      _ParseResponse(
+        requestId: request.requestId,
+        error: 'Parse context lost',
+        parseTime: Duration.zero,
+        wasCancelled: false,
+      ),
+    );
+    return;
+  }
+
+  final stopwatch = Stopwatch()..start();
+  try {
+    final result = retained.useGradualRead
+        ? UnifiedMetadataParser.parseFromBytesGradual(
+            retained.bytes,
+            filePathForLog: retained.filePath,
+          )
+        : UnifiedMetadataParser.parseFromImageBytes(
+            retained.bytes,
+            filePathForLog: retained.filePath,
+          );
+
+    stopwatch.stop();
+
+    if (result.success && result.metadata != null) {
+      sendPort.send(
+        _ParseResponse(
+          requestId: request.requestId,
+          metadata: result.metadata,
+          parseTime: stopwatch.elapsed,
+          bytesRead: retained.useGradualRead ? null : retained.bytes.length,
+          wasCancelled: false,
+        ),
+      );
+    } else {
+      sendPort.send(
+        _ParseResponse(
+          requestId: request.requestId,
+          error: result.errorMessage ?? 'Failed to parse metadata',
+          parseTime: stopwatch.elapsed,
+          wasCancelled: false,
+        ),
+      );
+    }
+  } catch (e) {
+    stopwatch.stop();
+    sendPort.send(
+      _ParseResponse(
+        requestId: request.requestId,
+        error: 'Isolate parse error: $e',
+        parseTime: stopwatch.elapsed,
+        wasCancelled: false,
+      ),
+    );
+  }
+}
+
 /// 工作线程初始化消息
 class _WorkerInitMessage {
   final SendPort sendPort;
@@ -799,12 +1186,34 @@ class _ParseRequest {
   final String filePath;
   final IsolateParseConfig config;
 
+  /// true = 两阶段第一步：只算哈希并保留字节
+  final bool hashOnly;
+
   _ParseRequest({
     required this.requestId,
     required this.bytes,
     required this.filePath,
     required this.config,
+    this.hashOnly = false,
   });
+}
+
+/// 两阶段第二步指令（proceed=false 时通知 worker 丢弃保留字节）
+class _ParseContinueRequest {
+  final int requestId;
+  final bool proceed;
+
+  _ParseContinueRequest({required this.requestId, required this.proceed});
+}
+
+/// 两阶段第一步响应（哈希就绪）
+class _HashReadyResponse {
+  final int requestId;
+  final String? hash;
+  final String? error;
+
+  // ignore: unused_element
+  _HashReadyResponse({required this.requestId, this.hash, this.error});
 }
 
 /// 解析响应

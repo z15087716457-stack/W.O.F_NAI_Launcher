@@ -272,40 +272,97 @@ class ImageMetadataService {
   ///
   /// 与 [getMetadataImmediate] 的区别：
   /// - L1/L2 缓存命中走快速路径（同 [getMetadataImmediate]，不进 isolate）
-  /// - 未命中时解析交给 [IsolateMetadataService] 的常驻 worker 池
-  ///   （读文件 + PNG 解码 + stealth LSB 提取全部在 worker 内完成），
-  ///   避免扫描上万张剥 tEXt 的 PNG 时 UI isolate 连续阻塞
+  /// - 未命中时解析交给 [IsolateMetadataService] 的常驻 worker 池：
+  ///   worker **单次读取文件**，先算 SHA256 回传，主 isolate 依哈希查缓存；
+  ///   未命中才复用同次读取继续解析（PNG 解码 + stealth LSB 提取全部在
+  ///   worker 内完成）。主 isolate 不再整文件读入 + 同步哈希，worker 也不再
+  ///   二次读盘；避免扫描上万张剥 tEXt 的 PNG 时 UI isolate 连续阻塞
+  ///
+  /// 裁决点留痕（P4）：L1（内存 LRU）与 L2（Hive Box）都无法下沉 worker——
+  /// Hive Box 绑定主 isolate，L1 是与统计共享的可变缓存。故采用「哈希先行、
+  /// 主 isolate 决策」的两阶段形态：文件读取次数由旧实现的两次（主 isolate
+  /// 哈希一次 + worker 解析一次）降为一次，SHA256 CPU 从主 isolate 移入
+  /// worker；哈希已知且缓存命中的场景仍零文件读取直接返回。
   ///
   /// [path] 文件路径
   Future<NaiImageMetadata?> getMetadataForScan(String path) async {
     final stopwatch = Stopwatch()..start();
 
-    final hash = await _hashCalculator.calculate(path);
+    // 快速路径：路径哈希已知且缓存命中时不进 isolate、不做任何文件读取
+    final knownHash = _hashCalculator.lookupCachedHash(path);
+    if (knownHash != null) {
+      final memoryCached = _cacheManager.getFromMemory(knownHash);
+      if (memoryCached != null) {
+        stopwatch.stop();
+        _statistics.recordCacheHit();
+        return memoryCached;
+      }
 
-    // 快速路径：缓存命中不进 isolate
-    final memoryCached = _cacheManager.getFromMemory(hash);
-    if (memoryCached != null) {
-      stopwatch.stop();
-      _statistics.recordCacheHit();
-      return memoryCached;
+      final persistentCached = _cacheManager.getFromPersistent(knownHash);
+      if (persistentCached != null) {
+        stopwatch.stop();
+        _statistics.recordCacheHit();
+        return persistentCached;
+      }
     }
 
-    final persistentCached = _cacheManager.getFromPersistent(hash);
-    if (persistentCached != null) {
-      stopwatch.stop();
-      _statistics.recordCacheHit();
-      return persistentCached;
-    }
-
-    // 慢路径：Isolate worker 池解析
-    final result = await IsolateMetadataService.instance.parseMetadata(
+    // 慢路径：worker 单次读取文件 → SHA256 +（按缓存决策）解析
+    NaiImageMetadata? cachedCandidate;
+    final result = await IsolateMetadataService.instance.parseMetadataWithHash(
       path,
       config: const IsolateParseConfig(
         timeout: Duration(seconds: 10),
         useGradualRead: true,
         useCache: false,
       ),
+      shouldParseWithHash: (hash) {
+        // 已知哈希的缓存未命中在快速路径已查过同一份缓存，无需重复计数
+        if (hash == knownHash) return true;
+
+        final memoryCached = _cacheManager.getFromMemory(hash);
+        if (memoryCached != null) {
+          cachedCandidate = memoryCached;
+          return false;
+        }
+
+        final persistentCached = _cacheManager.getFromPersistent(hash);
+        if (persistentCached != null) {
+          cachedCandidate = persistentCached;
+          return false;
+        }
+        return true;
+      },
     );
+
+    final hash = result.fileHash;
+    if (hash == null) {
+      // worker 未读回文件字节（文件在扫描间隙消失/被锁，或任务被取消）。
+      // 保持与旧实现一致的失败语义：沿旧哈希路径取得同样的文件异常
+      stopwatch.stop();
+      if (!result.wasTimeout && !result.wasCancelled) {
+        await _hashCalculator.calculate(path);
+      }
+      _statistics.recordFailure(
+        result.error ?? 'no_metadata',
+        stopwatch.elapsed,
+      );
+      return null;
+    }
+
+    // 哈希回填路径映射，语义等同旧实现 calculate() 的缓存写入
+    _hashCalculator.registerComputedHash(path, hash);
+
+    if (result.wasSkipped) {
+      // 决策阶段已确认缓存命中，worker 丢弃了字节，直接返回缓存值
+      stopwatch.stop();
+      final cached = cachedCandidate;
+      if (cached != null) {
+        _statistics.recordCacheHit();
+        return cached;
+      }
+      _statistics.recordFailure('cache_skip_without_value', stopwatch.elapsed);
+      return null;
+    }
 
     stopwatch.stop();
 

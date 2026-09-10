@@ -66,6 +66,24 @@ class FileHashCalculator {
     _hashToPathsMap.putIfAbsent(hash, () => {}).add(filePath);
   }
 
+  /// 登记由 isolate worker 完成计算的哈希，语义等同一次真实计算
+  ///
+  /// 与 [calculate] 的 miss 路径保持一致：建立双向映射并计入计算次数。
+  void registerComputedHash(String filePath, String hash) {
+    _pathToHashMap[filePath] = hash;
+    _hashToPathsMap.putIfAbsent(hash, () => {}).add(filePath);
+    _hashComputeCount++;
+  }
+
+  /// 查询路径哈希并计入缓存命中统计（不含任何文件 IO）
+  String? lookupCachedHash(String filePath) {
+    final hash = _pathToHashMap[filePath];
+    if (hash != null) {
+      _hashCacheHitCount++;
+    }
+    return hash;
+  }
+
   /// 通知路径变更（文件重命名）
   void notifyPathChanged(String oldPath, String newPath) {
     final hash = _pathToHashMap[oldPath];
