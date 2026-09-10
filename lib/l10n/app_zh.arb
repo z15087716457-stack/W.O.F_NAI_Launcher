@@ -4397,6 +4397,29 @@
   "galleryCache_rescanSubtitle": "检查数据一致性、查漏补缺、提取元数据",
   "galleryCache_scanning": "正在扫描...",
   "galleryCache_scanAction": "扫描",
+  "galleryCache_evictThumbnailsTitle": "清理缩略图缓存",
+  "galleryCache_evictThumbnailsSubtitle": "按最近使用淘汰超限的 .thumbs 缩略图（不影响原图）",
+  "galleryCache_evictThumbnailsContent": "将按最近使用时间淘汰超出上限的缩略图磁盘缓存。\n\n只删除 .thumbs 目录内的 .thumb.jpg 缩略图文件，不会删除或修改任何原图；被清理的缩略图会在下次浏览时按需重新生成。",
+  "galleryCache_evictThumbnailsStart": "开始清理",
+  "galleryCache_evictThumbnailsRunning": "正在清理缩略图缓存...",
+  "galleryCache_evictThumbnailsDone": "已清理 {count} 个缩略图，释放 {size} MB",
+  "@galleryCache_evictThumbnailsDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "galleryCache_evictThumbnailsNone": "缩略图缓存未超限，无需清理",
+  "galleryCache_evictThumbnailsFailed": "清理缩略图缓存失败: {error}",
+  "@galleryCache_evictThumbnailsFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "workflowImport_title": "导入 ComfyUI 工作流",
   "workflowImport_step": "步骤 {current}/4: {title}",
   "@workflowImport_step": {

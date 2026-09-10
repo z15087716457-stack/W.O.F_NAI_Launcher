@@ -61,7 +61,7 @@
 - 质量偏好保存在 SharedPreferences 的 `local_gallery_thumbnail_quality`，非法或缺失值回退 `hd`；本地画廊分页条的完整和 compact 布局都提供质量控制。
 - 质量切换会立即更新画廊状态，并主动预取当前页、上一页和下一页；分页预取与卡片统一使用 `resolveThumbnailTier`。
 - 缩略图生成的去重身份必须是「原图路径 + `ThumbnailSize`」；CacheService 的生成集合/Completer/队列和 ThumbnailService 的活跃任务都不能只按路径去重，否则切换质量或列宽换档会串档。
-- 该设置只影响本地画廊卡片缩略图；详情大图、详情轮播、复制、发送、打包和拖拽仍使用原图路径。旧 `.thumbs` 文件暂留，不把 `evictLRU()` 描述为已接入的自动清档机制。
+- 该设置只影响本地画廊卡片缩略图；详情大图、详情轮播、复制、发送、打包和拖拽仍使用原图路径。`.thumbs` 磁盘缓存已接入 LRU 清档（P7）：启动后台按「最久未使用」淘汰超限缓存，设置页「清理缩略图缓存」提供手动入口；默认上限 2048MB / 50000 个文件（每个图库源独立，`setCacheLimits` 可调），只删除 `.thumbs` 目录内的 `.thumb.jpg`，不触碰原图。
 - 缩略图生成失败或 30s 超时**不再回退解码原图**（原实现会让卡片永久顶着数 MB 原图跑）：卡片保持灰块占位图标，并在 30s 后自动重试一次（每次挂载至多一次，翻页重新挂载会再走完整加载）。失败的**重试入队时间被安排到缓存层 10s 失败冷却截止之后**，不再出现「冷却期内被弹回、3 次重试毫秒级烧完判 failed」的失效路径；重试执行前先走 `getThumbnailPath` 快速路径，首次任务超时后晚到落盘的缩略图会被直接吃掉。冷却时长与重试延迟均为可覆写常量（`setFailureRetryCooldownForTesting` / `thumbnailFailureRetryDelayForTesting`），生产值 10s / 30s 不变。
 
 ## Q5：AI TAG 图片请求

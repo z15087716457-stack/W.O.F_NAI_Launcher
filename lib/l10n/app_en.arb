@@ -4648,6 +4648,29 @@
   "galleryCache_rescanSubtitle": "Check data consistency, find missing files, and extract metadata",
   "galleryCache_scanning": "Scanning...",
   "galleryCache_scanAction": "Scan",
+  "galleryCache_evictThumbnailsTitle": "Clean Thumbnail Cache",
+  "galleryCache_evictThumbnailsSubtitle": "Evict least-recently-used .thumbs files over the limit (originals untouched)",
+  "galleryCache_evictThumbnailsContent": "Evicts the on-disk thumbnail cache over its limit, least recently used first.\n\nOnly .thumb.jpg files inside .thumbs directories are deleted; original images are never removed or modified. Removed thumbnails will be regenerated on demand the next time you browse.",
+  "galleryCache_evictThumbnailsStart": "Clean Now",
+  "galleryCache_evictThumbnailsRunning": "Cleaning thumbnail cache...",
+  "galleryCache_evictThumbnailsDone": "Removed {count} thumbnails, freed {size} MB",
+  "@galleryCache_evictThumbnailsDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "galleryCache_evictThumbnailsNone": "Thumbnail cache is under the limit; nothing to clean",
+  "galleryCache_evictThumbnailsFailed": "Failed to clean thumbnail cache: {error}",
+  "@galleryCache_evictThumbnailsFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "workflowImport_title": "Import ComfyUI Workflow",
   "workflowImport_step": "Step {current}/4: {title}",
   "@workflowImport_step": {

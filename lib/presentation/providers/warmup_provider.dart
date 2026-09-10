@@ -16,6 +16,7 @@ import 'data_source_cache_provider.dart';
 import '../../core/utils/app_logger.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import '../../data/services/gallery/unified_gallery_service.dart';
+import '../../data/services/thumbnail_service.dart';
 import 'auth_provider.dart';
 import 'font_provider.dart';
 import 'subscription_provider.dart';
@@ -434,6 +435,41 @@ class WarmupNotifier extends _$WarmupNotifier {
     });
   }
 
+  /// 启动后台缩略图磁盘缓存清理（P7）
+  ///
+  /// 超过上限的 `.thumbs` 缩略图按最久未使用淘汰（只删 `.thumbs` 内的
+  /// `.thumb.jpg`，不触碰原图）。推迟到全局扫描推迟点（2.5s）之后再等 10s
+  /// 执行，把启动期磁盘 IO 让给首屏渲染；失败不影响主流程。
+  void _trimThumbnailCacheInBackground() {
+    Future.delayed(const Duration(seconds: 10), () async {
+      try {
+        final service = ThumbnailService.instance;
+        if (service.state != ThumbnailServiceState.running) {
+          return;
+        }
+
+        final roots = await GalleryFolderRepository.instance.getAllRootDirs();
+        var evictedCount = 0;
+        var evictedBytes = 0;
+        for (final dir in roots) {
+          final result = await service.evictThumbnailCache(dir.path);
+          evictedCount += result.evictedCount;
+          evictedBytes += result.evictedBytes;
+        }
+
+        if (evictedCount > 0) {
+          AppLogger.i(
+            '[Warmup] 缩略图缓存 LRU 清理完成: 淘汰 $evictedCount 个文件, '
+                '释放 ${(evictedBytes / 1024 / 1024).toStringAsFixed(1)}MB',
+            'Warmup',
+          );
+        }
+      } catch (e) {
+        AppLogger.w('[Warmup] 缩略图缓存清理失败（非关键）: $e', 'Warmup');
+      }
+    });
+  }
+
   /// 开始预热流程
   Future<void> _startWarmup() async {
     try {
@@ -465,6 +501,9 @@ class WarmupNotifier extends _$WarmupNotifier {
 
       // 【关键】预热完成后，自动启动全局画廊扫描（不绑定页面）
       _startGlobalGalleryScan();
+
+      // P7：再启动后台缩略图缓存清理（低优先，避免与首屏渲染争抢磁盘 IO）
+      _trimThumbnailCacheInBackground();
     } catch (e, stack) {
       AppLogger.e('Warmup failed', e, stack, 'Warmup');
       state = state.copyWith(

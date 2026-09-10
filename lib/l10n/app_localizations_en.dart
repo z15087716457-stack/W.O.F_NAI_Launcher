@@ -8596,6 +8596,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get galleryCache_scanAction => 'Scan';
 
   @override
+  String get galleryCache_evictThumbnailsTitle => 'Clean Thumbnail Cache';
+
+  @override
+  String get galleryCache_evictThumbnailsSubtitle =>
+      'Evict least-recently-used .thumbs files over the limit (originals untouched)';
+
+  @override
+  String get galleryCache_evictThumbnailsContent =>
+      'Evicts the on-disk thumbnail cache over its limit, least recently used first.\n\nOnly .thumb.jpg files inside .thumbs directories are deleted; original images are never removed or modified. Removed thumbnails will be regenerated on demand the next time you browse.';
+
+  @override
+  String get galleryCache_evictThumbnailsStart => 'Clean Now';
+
+  @override
+  String get galleryCache_evictThumbnailsRunning =>
+      'Cleaning thumbnail cache...';
+
+  @override
+  String galleryCache_evictThumbnailsDone(int count, String size) {
+    return 'Removed $count thumbnails, freed $size MB';
+  }
+
+  @override
+  String get galleryCache_evictThumbnailsNone =>
+      'Thumbnail cache is under the limit; nothing to clean';
+
+  @override
+  String galleryCache_evictThumbnailsFailed(Object error) {
+    return 'Failed to clean thumbnail cache: $error';
+  }
+
+  @override
   String get workflowImport_title => 'Import ComfyUI Workflow';
 
   @override

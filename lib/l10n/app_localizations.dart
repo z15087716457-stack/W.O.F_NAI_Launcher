@@ -15088,6 +15088,54 @@ abstract class AppLocalizations {
   /// **'Scan'**
   String get galleryCache_scanAction;
 
+  /// No description provided for @galleryCache_evictThumbnailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean Thumbnail Cache'**
+  String get galleryCache_evictThumbnailsTitle;
+
+  /// No description provided for @galleryCache_evictThumbnailsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Evict least-recently-used .thumbs files over the limit (originals untouched)'**
+  String get galleryCache_evictThumbnailsSubtitle;
+
+  /// No description provided for @galleryCache_evictThumbnailsContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Evicts the on-disk thumbnail cache over its limit, least recently used first.\n\nOnly .thumb.jpg files inside .thumbs directories are deleted; original images are never removed or modified. Removed thumbnails will be regenerated on demand the next time you browse.'**
+  String get galleryCache_evictThumbnailsContent;
+
+  /// No description provided for @galleryCache_evictThumbnailsStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean Now'**
+  String get galleryCache_evictThumbnailsStart;
+
+  /// No description provided for @galleryCache_evictThumbnailsRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaning thumbnail cache...'**
+  String get galleryCache_evictThumbnailsRunning;
+
+  /// No description provided for @galleryCache_evictThumbnailsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {count} thumbnails, freed {size} MB'**
+  String galleryCache_evictThumbnailsDone(int count, String size);
+
+  /// No description provided for @galleryCache_evictThumbnailsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumbnail cache is under the limit; nothing to clean'**
+  String get galleryCache_evictThumbnailsNone;
+
+  /// No description provided for @galleryCache_evictThumbnailsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to clean thumbnail cache: {error}'**
+  String galleryCache_evictThumbnailsFailed(Object error);
+
   /// No description provided for @workflowImport_title.
   ///
   /// In en, this message translates to:

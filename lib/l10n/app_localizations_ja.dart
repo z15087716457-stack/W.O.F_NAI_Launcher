@@ -8407,6 +8407,36 @@ class AppLocalizationsJa extends AppLocalizations {
   String get galleryCache_scanAction => 'スキャン';
 
   @override
+  String get galleryCache_evictThumbnailsTitle => 'サムネイルキャッシュを整理';
+
+  @override
+  String get galleryCache_evictThumbnailsSubtitle =>
+      '上限を超えた .thumbs を最終使用順に削除（元画像は対象外）';
+
+  @override
+  String get galleryCache_evictThumbnailsContent =>
+      '上限を超えたディスク上のサムネイルキャッシュを、最後に使用された順に削除します。\n\n削除するのは .thumbs ディレクトリ内の .thumb.jpg のみで、元画像には一切触れません。削除されたサムネイルは次回閲覧時に再生成されます。';
+
+  @override
+  String get galleryCache_evictThumbnailsStart => '整理を開始';
+
+  @override
+  String get galleryCache_evictThumbnailsRunning => 'サムネイルキャッシュを整理しています...';
+
+  @override
+  String galleryCache_evictThumbnailsDone(int count, String size) {
+    return '$count 件のサムネイルを削除し、$size MB を解放しました';
+  }
+
+  @override
+  String get galleryCache_evictThumbnailsNone => 'サムネイルキャッシュは上限以内です。整理は不要です';
+
+  @override
+  String galleryCache_evictThumbnailsFailed(Object error) {
+    return 'サムネイルキャッシュの整理に失敗しました: $error';
+  }
+
+  @override
   String get workflowImport_title => 'ComfyUI ワークフローのインポート';
 
   @override

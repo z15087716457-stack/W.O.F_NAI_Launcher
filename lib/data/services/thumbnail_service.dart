@@ -686,6 +686,24 @@ class ThumbnailService {
     return await _cacheService!.getCacheSize(rootPath);
   }
 
+  /// 按 LRU 淘汰超限的缩略图磁盘缓存
+  ///
+  /// [rootPath] 图库源根目录；[targetSizeMB] / [targetFileCount] 省略时
+  /// 使用缓存服务默认上限。只删除 `.thumbs` 目录内的 `.thumb.jpg` 文件，
+  /// 不触碰原图。
+  Future<ThumbnailEvictionResult> evictThumbnailCache(
+    String rootPath, {
+    int? targetSizeMB,
+    int? targetFileCount,
+  }) async {
+    _ensureInitialized();
+    return await _cacheService!.evictLRU(
+      rootPath,
+      targetSizeMB: targetSizeMB,
+      targetFileCount: targetFileCount,
+    );
+  }
+
   /// 清理嵌套的缩略图目录
   ///
   /// 修复缩略图递归生成bug遗留的嵌套目录问题

@@ -4648,6 +4648,29 @@
   "galleryCache_rescanSubtitle": "データの整合性をチェックし、欠落しているファイルを見つけて、メタデータを抽出します",
   "galleryCache_scanning": "スキャン中...",
   "galleryCache_scanAction": "スキャン",
+  "galleryCache_evictThumbnailsTitle": "サムネイルキャッシュを整理",
+  "galleryCache_evictThumbnailsSubtitle": "上限を超えた .thumbs を最終使用順に削除（元画像は対象外）",
+  "galleryCache_evictThumbnailsContent": "上限を超えたディスク上のサムネイルキャッシュを、最後に使用された順に削除します。\n\n削除するのは .thumbs ディレクトリ内の .thumb.jpg のみで、元画像には一切触れません。削除されたサムネイルは次回閲覧時に再生成されます。",
+  "galleryCache_evictThumbnailsStart": "整理を開始",
+  "galleryCache_evictThumbnailsRunning": "サムネイルキャッシュを整理しています...",
+  "galleryCache_evictThumbnailsDone": "{count} 件のサムネイルを削除し、{size} MB を解放しました",
+  "@galleryCache_evictThumbnailsDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "galleryCache_evictThumbnailsNone": "サムネイルキャッシュは上限以内です。整理は不要です",
+  "galleryCache_evictThumbnailsFailed": "サムネイルキャッシュの整理に失敗しました: {error}",
+  "@galleryCache_evictThumbnailsFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "workflowImport_title": "ComfyUI ワークフローのインポート",
   "workflowImport_step": "ステップ {current}/4: {title}",
   "@workflowImport_step": {

@@ -8289,6 +8289,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get galleryCache_scanAction => '扫描';
 
   @override
+  String get galleryCache_evictThumbnailsTitle => '清理缩略图缓存';
+
+  @override
+  String get galleryCache_evictThumbnailsSubtitle =>
+      '按最近使用淘汰超限的 .thumbs 缩略图（不影响原图）';
+
+  @override
+  String get galleryCache_evictThumbnailsContent =>
+      '将按最近使用时间淘汰超出上限的缩略图磁盘缓存。\n\n只删除 .thumbs 目录内的 .thumb.jpg 缩略图文件，不会删除或修改任何原图；被清理的缩略图会在下次浏览时按需重新生成。';
+
+  @override
+  String get galleryCache_evictThumbnailsStart => '开始清理';
+
+  @override
+  String get galleryCache_evictThumbnailsRunning => '正在清理缩略图缓存...';
+
+  @override
+  String galleryCache_evictThumbnailsDone(int count, String size) {
+    return '已清理 $count 个缩略图，释放 $size MB';
+  }
+
+  @override
+  String get galleryCache_evictThumbnailsNone => '缩略图缓存未超限，无需清理';
+
+  @override
+  String galleryCache_evictThumbnailsFailed(Object error) {
+    return '清理缩略图缓存失败: $error';
+  }
+
+  @override
   String get workflowImport_title => '导入 ComfyUI 工作流';
 
   @override

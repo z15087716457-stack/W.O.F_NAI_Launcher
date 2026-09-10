@@ -8,6 +8,7 @@ import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/repositories/gallery_folder_repository.dart';
 import '../../../../data/services/gallery/index.dart';
+import '../../../../data/services/thumbnail_service.dart';
 import '../../../providers/local_gallery_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 import 'cache_statistics_tile.dart';
@@ -39,6 +40,9 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
   String? _scanPhase;
   int _processedCount = 0;
   int _totalCount = 0;
+
+  // 缩略图缓存清理进行中标志（防重入）
+  bool _isEvictingThumbnails = false;
 
   @override
   void initState() {
@@ -172,6 +176,81 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
     }
   }
 
+  /// 清理缩略图缓存（P7）
+  ///
+  /// 对每个图库源按 LRU 淘汰超限的 `.thumbs` 缩略图缓存（只删 `.thumbs`
+  /// 内的 `.thumb.jpg`，不触碰原图），完成后提示清理数量与释放空间。
+  Future<void> _evictThumbnailCache() async {
+    if (_isEvictingThumbnails) return;
+
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        icon: const Icon(
+          Icons.cleaning_services_rounded,
+          color: Colors.blue,
+          size: 48,
+        ),
+        title: Text(l10n.galleryCache_evictThumbnailsTitle),
+        content: Text(l10n.galleryCache_evictThumbnailsContent),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            icon: const Icon(Icons.cleaning_services_rounded),
+            label: Text(l10n.galleryCache_evictThumbnailsStart),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isEvictingThumbnails = true);
+    final progress = AppToast.showProgress(
+      context,
+      l10n.galleryCache_evictThumbnailsRunning,
+    );
+
+    try {
+      final service = ref.read(thumbnailServiceProvider);
+      final roots = await GalleryFolderRepository.instance.getAllRootDirs();
+
+      var evictedCount = 0;
+      var evictedBytes = 0;
+      for (final dir in roots) {
+        final result = await service.evictThumbnailCache(dir.path);
+        evictedCount += result.evictedCount;
+        evictedBytes += result.evictedBytes;
+      }
+
+      if (evictedCount > 0) {
+        final freedMB = (evictedBytes / 1024 / 1024).toStringAsFixed(1);
+        progress.complete(
+          message: l10n.galleryCache_evictThumbnailsDone(evictedCount, freedMB),
+        );
+      } else {
+        progress.complete(message: l10n.galleryCache_evictThumbnailsNone);
+      }
+    } catch (e, stack) {
+      AppLogger.e(
+        'Evict thumbnail cache failed',
+        e,
+        stack,
+        'GalleryCacheActions',
+      );
+      progress.fail(message: l10n.galleryCache_evictThumbnailsFailed('$e'));
+    } finally {
+      if (mounted) {
+        setState(() => _isEvictingThumbnails = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -301,6 +380,98 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
                   ),
                 ),
           onTap: _isScanning ? null : _rescanGallery,
+        ),
+        const Divider(height: 24),
+        // 缩略图缓存清理（P7：按 LRU 淘汰超限的 .thumbs 缓存）
+        ListTile(
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.blue.withValues(alpha: 0.2),
+                  Colors.lightBlue.withValues(alpha: 0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _isEvictingThumbnails
+                    ? Colors.blue
+                    : Colors.blue.withValues(alpha: 0.3),
+                width: _isEvictingThumbnails ? 2 : 1,
+              ),
+            ),
+            child: Icon(
+              Icons.cleaning_services_rounded,
+              color: _isEvictingThumbnails
+                  ? Colors.blue
+                  : Colors.blue.withValues(alpha: 0.8),
+              size: 22,
+            ),
+          ),
+          title: Text(
+            context.l10n.galleryCache_evictThumbnailsTitle,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          subtitle: Text(
+            _isEvictingThumbnails
+                ? context.l10n.galleryCache_evictThumbnailsRunning
+                : context.l10n.galleryCache_evictThumbnailsSubtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+          trailing: _isEvictingThumbnails
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                  ),
+                )
+              : Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        colorScheme.tertiary.withValues(alpha: 0.1),
+                        colorScheme.tertiary.withValues(alpha: 0.05),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: colorScheme.tertiary.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.cleaning_services_rounded,
+                        size: 16,
+                        color: colorScheme.tertiary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        context.l10n.galleryCache_evictThumbnailsStart,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.tertiary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+          onTap: _isEvictingThumbnails ? null : _evictThumbnailCache,
         ),
       ],
     );

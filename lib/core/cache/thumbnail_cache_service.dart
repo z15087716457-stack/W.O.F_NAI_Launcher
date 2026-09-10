@@ -161,6 +161,26 @@ class ThumbnailInfo {
   }
 }
 
+/// LRU 淘汰结果
+class ThumbnailEvictionResult {
+  /// 被淘汰的文件数量
+  final int evictedCount;
+
+  /// 释放的字节数
+  final int evictedBytes;
+
+  const ThumbnailEvictionResult({
+    required this.evictedCount,
+    required this.evictedBytes,
+  });
+
+  /// 无淘汰（未超限或无可删文件）
+  static const ThumbnailEvictionResult empty = ThumbnailEvictionResult(
+    evictedCount: 0,
+    evictedBytes: 0,
+  );
+}
+
 /// 缩略图缓存服务
 ///
 /// 负责缩略图的生成、缓存和检索
@@ -228,8 +248,12 @@ class ThumbnailCacheService {
   Duration _failureRetryCooldown = const Duration(seconds: 10);
 
   /// 缓存限制配置
-  static const int defaultMaxCacheSizeMB = 500;
-  static const int defaultMaxFileCount = 10000;
+  ///
+  /// P7 接入 LRU 清档时定的保守默认：大库（约 5 万图 × 多档位）实测可达
+  /// 2GB+ / 5 万+ 文件，取「约一图一档」的量级把缓存增长压住，
+  /// 超限部分按最久未使用淘汰。
+  static const int defaultMaxCacheSizeMB = 2048;
+  static const int defaultMaxFileCount = 50000;
 
   /// LRU 追踪：缩略图路径 -> 最后访问时间
   final Map<String, DateTime> _lastAccessTimes = {};
@@ -1014,50 +1038,63 @@ class ThumbnailCacheService {
     return await File(thumbnailPath).exists();
   }
 
+  /// 判断路径是否是可安全删除的缩略图缓存文件（目录名 + 扩展名双重校验）
+  ///
+  /// 只有位于 `.thumbs` 目录内、且以 `.thumb.jpg` 结尾的文件才允许删除；
+  /// 原图与目录外的同名扩展名文件一律返回 false。
+  @visibleForTesting
+  static bool isDeletableThumbnailFile(String path) {
+    if (!p.basename(path).endsWith(thumbnailExt)) {
+      return false;
+    }
+    return p.split(path).contains(thumbsDirName);
+  }
+
   /// 执行 LRU 淘汰
   ///
-  /// [rootPath] 画廊根目录路径
+  /// [rootPath] 图库源根目录路径
   /// [targetSizeMB] 目标缓存大小（MB），默认使用 _maxCacheSizeMB 的 80%
   /// [targetFileCount] 目标文件数，默认使用 _maxFileCount 的 80%
-  /// 返回被淘汰的文件数量
-  Future<int> evictLRU(
+  ///
+  /// 按「最久未使用」优先淘汰，达到任一目标即停；只删除 `.thumbs` 目录内的
+  /// `.thumb.jpg` 文件，原图与目录外文件不受影响。
+  /// 返回本次淘汰的数量与释放字节数。
+  Future<ThumbnailEvictionResult> evictLRU(
     String rootPath, {
     int? targetSizeMB,
     int? targetFileCount,
   }) async {
     try {
-      final targetSize = (targetSizeMB ?? (_maxCacheSizeMB * 0.8)).toInt();
+      const bytesPerMB = 1024 * 1024;
+      final targetBytes =
+          (targetSizeMB ?? (_maxCacheSizeMB * 0.8)).toInt() * bytesPerMB;
       final targetFiles = targetFileCount ?? (_maxFileCount * 0.8).toInt();
 
       // 获取所有缩略图文件信息
       final allThumbnails = await _getAllThumbnails(rootPath);
 
       if (allThumbnails.isEmpty) {
-        return 0;
+        return ThumbnailEvictionResult.empty;
       }
 
-      // 计算当前缓存状态
-      int currentSizeMB = 0;
+      // 计算当前缓存状态（按字节累计，避免逐文件按 MB 截断导致多删）
+      var currentBytes = 0;
       for (final info in allThumbnails) {
         try {
-          final file = File(info.path);
-          if (await file.exists()) {
-            currentSizeMB += await file.length();
-          }
+          currentBytes += await File(info.path).length();
         } catch (_) {
           // 忽略无法访问的文件
         }
       }
-      currentSizeMB = currentSizeMB ~/ (1024 * 1024);
 
       // 检查是否需要淘汰
-      if (currentSizeMB <= targetSize && allThumbnails.length <= targetFiles) {
+      if (currentBytes <= targetBytes && allThumbnails.length <= targetFiles) {
         AppLogger.d(
-          'LRU eviction skipped: size=$currentSizeMB/${targetSize}MB, '
+          'LRU eviction skipped: size=${currentBytes ~/ bytesPerMB}/${targetBytes ~/ bytesPerMB}MB, '
               'files=${allThumbnails.length}/$targetFiles',
           'ThumbnailCache',
         );
-        return 0;
+        return ThumbnailEvictionResult.empty;
       }
 
       // 按优先级排序（可见性 > 最后访问时间）
@@ -1078,26 +1115,29 @@ class ThumbnailCacheService {
         return aTime.compareTo(bTime);
       });
 
-      int evictedCount = 0;
-      int evictedSizeMB = 0;
+      var evictedCount = 0;
+      var evictedBytes = 0;
 
       // 淘汰直到满足限制
       for (final info in allThumbnails) {
-        if (currentSizeMB - evictedSizeMB <= targetSize &&
+        if (currentBytes - evictedBytes <= targetBytes &&
             allThumbnails.length - evictedCount <= targetFiles) {
           break;
         }
 
+        // 双重校验：只删 .thumbs 内的 .thumb.jpg，绝不触碰原图
+        if (!isDeletableThumbnailFile(info.path)) {
+          continue;
+        }
+
         try {
           final file = File(info.path);
-          if (await file.exists()) {
-            final fileSize = await file.length();
-            await file.delete();
-            evictedSizeMB += fileSize ~/ (1024 * 1024);
-            evictedCount++;
-            _lastAccessTimes.remove(info.path);
-            _visibilityInfo.remove(info.path);
-          }
+          final fileSize = await file.length();
+          await file.delete();
+          evictedBytes += fileSize;
+          evictedCount++;
+          _lastAccessTimes.remove(info.path);
+          _visibilityInfo.remove(info.path);
         } catch (e) {
           // AppLogger.w('Failed to evict thumbnail: ${info.path}', 'ThumbnailCache');
         }
@@ -1105,17 +1145,13 @@ class ThumbnailCacheService {
 
       _stats.recordEvicted(evictedCount);
 
-      // AppLogger.i(
-      //   'LRU eviction completed: $evictedCount files, ${evictedSizeMB}MB freed, '
-      //   'remaining: ${allThumbnails.length - evictedCount} files, '
-      //   '${currentSizeMB - evictedSizeMB}MB',
-      //   'ThumbnailCache',
-      // );
-
-      return evictedCount;
+      return ThumbnailEvictionResult(
+        evictedCount: evictedCount,
+        evictedBytes: evictedBytes,
+      );
     } catch (e, stack) {
       AppLogger.e('LRU eviction failed: $e', e, stack, 'ThumbnailCache');
-      return 0;
+      return ThumbnailEvictionResult.empty;
     }
   }
 
@@ -1137,7 +1173,7 @@ class ThumbnailCacheService {
           final dirName = entity.path.split(Platform.pathSeparator).last;
           if (dirName == thumbsDirName) {
             await for (final file in entity.list(recursive: true)) {
-              if (file is File && file.path.endsWith(thumbnailExt)) {
+              if (file is File && isDeletableThumbnailFile(file.path)) {
                 try {
                   final stat = await file.stat();
 
