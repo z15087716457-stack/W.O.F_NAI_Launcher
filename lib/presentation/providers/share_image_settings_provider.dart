@@ -6,7 +6,7 @@ import '../../core/storage/local_storage_service.dart';
 class ShareImageSettings {
   const ShareImageSettings({
     this.protectionMode = false,
-    this.stripMetadataForCopyAndDrag = true,
+    this.stripMetadataForCopyAndDrag = false,
     this.confirmDangerousActions = true,
     this.warnExternalImageSend = true,
     this.preventOverwrite = true,
@@ -131,9 +131,9 @@ class ShareImageSettingsNotifier extends Notifier<ShareImageSettings> {
       stripMetadataForCopyAndDrag:
           _storage.getSetting<bool>(
             StorageKeys.shareStripMetadata,
-            defaultValue: true,
+            defaultValue: false,
           ) ??
-          true,
+          false,
       confirmDangerousActions:
           _storage.getSetting<bool>(
             StorageKeys.protectionConfirmDangerousActions,

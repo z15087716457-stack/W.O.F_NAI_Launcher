@@ -1298,6 +1298,12 @@ void main() {
       expect(enabled.effectiveGenerationIntervalJitterPercent, 30);
     });
 
+    test('strip metadata for copy and drag defaults to off', () {
+      const settings = ShareImageSettings();
+      expect(settings.stripMetadataForCopyAndDrag, isFalse);
+      expect(settings.effectiveStripMetadataForCopyAndDrag, isFalse);
+    });
+
     test('allows each protection feature to be disabled independently', () {
       const settings = ShareImageSettings(
         protectionMode: true,

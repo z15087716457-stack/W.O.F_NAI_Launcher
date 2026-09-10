@@ -97,7 +97,10 @@ void main() {
   ) async {
     await tester.pumpWidget(
       _app(
-        settings: const ShareImageSettings(protectionMode: true),
+        settings: const ShareImageSettings(
+          protectionMode: true,
+          stripMetadataForCopyAndDrag: true,
+        ),
         child: DraggableImageCard(
           record: _record,
           enableFeedback: false,
@@ -118,7 +121,10 @@ void main() {
     );
     await tester.pumpWidget(
       _app(
-        settings: const ShareImageSettings(protectionMode: true),
+        settings: const ShareImageSettings(
+          protectionMode: true,
+          stripMetadataForCopyAndDrag: true,
+        ),
         child: wrapper(const SizedBox(width: 100, height: 100)),
       ),
     );
@@ -159,7 +165,10 @@ void main() {
 
       await tester.pumpWidget(
         _app(
-          settings: const ShareImageSettings(protectionMode: true),
+          settings: const ShareImageSettings(
+            protectionMode: true,
+            stripMetadataForCopyAndDrag: true,
+          ),
           child: entry.value(record, _validPreviewBytes),
         ),
       );

@@ -100,6 +100,18 @@ void main() {
     expect(jitterTile.onTap, isNull);
   });
 
+  testWidgets('复制/拖拽移除元数据默认关闭（空存储走默认值）', (tester) async {
+    await pumpSection(tester);
+
+    final stripTile = tester.widget<SwitchListTile>(
+      find.ancestor(
+        of: find.text('复制/拖拽时移除全部元数据'),
+        matching: find.byType(SwitchListTile),
+      ),
+    );
+    expect(stripTile.value, isFalse);
+  });
+
   testWidgets('在线画廊黑名单与主设置卡片宽度一致', (tester) async {
     await pumpSection(tester);
 
