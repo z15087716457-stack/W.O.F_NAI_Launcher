@@ -55,6 +55,12 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
   static const _baseUrl = 'https://aitag.win';
   static const _configTtl = Duration(minutes: 30);
 
+  /// aitag.win 的 Cloudflare 规则要求 API 请求必须带本站 Referer，否则一律 403。
+  static const _apiHeaders = <String, String>{
+    'Accept': 'application/json',
+    'Referer': 'https://aitag.win/',
+  };
+
   final Dio _dio;
   AiTagSourceConfig? _cachedConfig;
 
@@ -80,7 +86,7 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
     try {
       final response = await _dio.get(
         '$_baseUrl/api/config',
-        options: Options(headers: const {'Accept': 'application/json'}),
+        options: Options(headers: _apiHeaders),
         cancelToken: cancelToken,
       );
       if (response.data is! Map) {
@@ -207,7 +213,7 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
       final response = await _dio.get(
         url,
         queryParameters: queryParameters,
-        options: Options(headers: const {'Accept': 'application/json'}),
+        options: Options(headers: _apiHeaders),
         cancelToken: cancelToken,
       );
       if (response.data is! Map) {
@@ -296,7 +302,7 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
     try {
       final response = await _dio.get(
         '$_baseUrl/api/work/${item.id}',
-        options: Options(headers: const {'Accept': 'application/json'}),
+        options: Options(headers: _apiHeaders),
         cancelToken: cancelToken,
       );
       if (response.data is! Map) {

@@ -307,6 +307,10 @@ Future<Object?> _getJson(
     queryParameters: query,
     options: Options(
       responseType: ResponseType.plain,
+      // aitag.win 的 Cloudflare 规则要求 API 请求带本站 Referer，否则一律 403。
+      headers: Uri.parse(url).host == 'aitag.win'
+          ? const {'Referer': 'https://aitag.win/'}
+          : null,
       validateStatus: (status) =>
           status != null && (status >= 200 && status < 300 || acceptErrorJson),
     ),
