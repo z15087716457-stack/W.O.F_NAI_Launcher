@@ -195,7 +195,7 @@ void main() {
     },
   );
 
-  test('updateReview writes heart and preliminary label with clear', () async {
+  test('updateReview toggles heart and rejects unknown candidate', () async {
     final c = container();
     final notifier = c.read(exploreRunListNotifierProvider.notifier);
     final created = await createRun(c);
@@ -211,32 +211,11 @@ void main() {
     )).runById(created.id)!;
     expect(run.candidateById('cand-1')!.review.heart, isTrue);
 
-    await notifier.updateReview(
-      created.id,
-      'cand-1',
-      preliminaryLabel: ExploreReviewLabel.treasure,
-    );
+    await notifier.updateReview(created.id, 'cand-1', heart: false);
     run = (await c.read(
       exploreRunListNotifierProvider.future,
     )).runById(created.id)!;
-    expect(
-      run.candidateById('cand-1')!.review.preliminaryLabel,
-      ExploreReviewLabel.treasure,
-    );
-
-    // 再点同一标签 = 清除。
-    await notifier.updateReview(
-      created.id,
-      'cand-1',
-      preliminaryLabel: null,
-      clearPreliminaryLabel: true,
-    );
-    run = (await c.read(
-      exploreRunListNotifierProvider.future,
-    )).runById(created.id)!;
-    final review = run.candidateById('cand-1')!.review;
-    expect(review.preliminaryLabel, isNull);
-    expect(review.heart, isTrue, reason: '清预标记不动心形');
+    expect(run.candidateById('cand-1')!.review.heart, isFalse);
 
     expect(
       () => notifier.updateReview(created.id, 'no-such', heart: true),
@@ -260,27 +239,26 @@ void main() {
   group('gallery filter matcher', () {
     ExploreCandidate candidate({
       bool heart = false,
-      ExploreReviewLabel? preliminary,
       ExploreCandidateGenerationStatus status =
           ExploreCandidateGenerationStatus.done,
     }) {
       return ExploreCandidate.shell(roundId: 'r').copyWith(
         generation: ExploreCandidateGeneration(status: status),
-        review: ExploreCandidateReview(
-          heart: heart,
-          preliminaryLabel: preliminary,
-        ),
+        review: ExploreCandidateReview(heart: heart),
       );
     }
 
     test('each filter matches its semantics', () {
       final plain = candidate();
       final hearted = candidate(heart: true);
-      final treasure = candidate(preliminary: ExploreReviewLabel.treasure);
       final failed = candidate(status: ExploreCandidateGenerationStatus.failed);
 
       expect(
         exploreCandidateMatchesFilter(plain, ExploreGalleryFilter.all),
+        isTrue,
+      );
+      expect(
+        exploreCandidateMatchesFilter(hearted, ExploreGalleryFilter.all),
         isTrue,
       );
       expect(
@@ -292,35 +270,6 @@ void main() {
         isFalse,
       );
       expect(
-        exploreCandidateMatchesFilter(
-          plain,
-          ExploreGalleryFilter.pendingReview,
-        ),
-        isTrue,
-      );
-      expect(
-        exploreCandidateMatchesFilter(
-          hearted,
-          ExploreGalleryFilter.pendingReview,
-        ),
-        isFalse,
-      );
-      expect(
-        exploreCandidateMatchesFilter(
-          treasure,
-          ExploreGalleryFilter.pendingReview,
-        ),
-        isFalse,
-      );
-      expect(
-        exploreCandidateMatchesFilter(treasure, ExploreGalleryFilter.treasure),
-        isTrue,
-      );
-      expect(
-        exploreCandidateMatchesFilter(treasure, ExploreGalleryFilter.special),
-        isFalse,
-      );
-      expect(
         exploreCandidateMatchesFilter(failed, ExploreGalleryFilter.failed),
         isTrue,
       );
@@ -328,22 +277,26 @@ void main() {
         exploreCandidateMatchesFilter(plain, ExploreGalleryFilter.failed),
         isFalse,
       );
+      expect(
+        ExploreGalleryFilter.values.map((filter) => filter.name),
+        ['all', 'hearted', 'failed'],
+        reason: '筛选层只保留 全部/收藏/失败 三枚',
+      );
     });
   });
 
-  group('phase C: formal review lifecycle', () {
-    ExploreCandidate doneCandidate(String id, {ExploreReviewLabel? label}) {
+  group('candidate folders', () {
+    ExploreCandidate doneCandidate(String id) {
       return ExploreCandidate.shell(roundId: 'r-1', id: id).copyWith(
         generation: const ExploreCandidateGeneration(
           status: ExploreCandidateGenerationStatus.done,
           filePath: '/tmp/x.png',
           seed: 1,
         ),
-        review: ExploreCandidateReview(label: label),
       );
     }
 
-    Future<ExploreRun> seedGeneratedRun(
+    Future<ExploreRun> seedRun(
       ProviderContainer c,
       List<ExploreCandidate> candidates,
     ) {
@@ -358,107 +311,121 @@ void main() {
       );
     }
 
-    test(
-      'updateReview writes formal label with timestamp and clears both',
-      () async {
-        final c = container();
-        final notifier = c.read(exploreRunListNotifierProvider.notifier);
-        final run = await seedGeneratedRun(c, [doneCandidate('cand-1')]);
-        final reviewedAt = DateTime.utc(2026, 9, 1, 9);
+    Future<ExploreRun> reload(ProviderContainer c, String runId) async {
+      return (await c.read(
+        exploreRunListNotifierProvider.future,
+      )).runById(runId)!;
+    }
 
-        await notifier.updateReview(
-          run.id,
-          'cand-1',
-          label: ExploreReviewLabel.treasure,
-          formalReviewedAt: reviewedAt,
-        );
-        var stored = (await c.read(
-          exploreRunListNotifierProvider.future,
-        )).runById(run.id)!;
-        var review = stored.candidateById('cand-1')!.review;
-        expect(review.label, ExploreReviewLabel.treasure);
-        expect(review.formalReviewedAt, reviewedAt);
-
-        await notifier.updateReview(run.id, 'cand-1', clearLabel: true);
-        stored = (await c.read(
-          exploreRunListNotifierProvider.future,
-        )).runById(run.id)!;
-        review = stored.candidateById('cand-1')!.review;
-        expect(review.label, isNull);
-        expect(review.formalReviewedAt, isNull, reason: '清标签一并清归类时间');
-      },
-    );
-
-    test(
-      'beginReview: generated/draft enter reviewing, guards reject',
-      () async {
-        final c = container();
-        final notifier = c.read(exploreRunListNotifierProvider.notifier);
-        final run = await seedGeneratedRun(c, [doneCandidate('cand-1')]);
-
-        final reviewing = await notifier.beginReview(run.id);
-        expect(reviewing.status, ExploreRunStatus.reviewing);
-
-        // 续筛：reviewing 幂等。
-        final again = await notifier.beginReview(run.id);
-        expect(again.status, ExploreRunStatus.reviewing);
-
-        // 手动候选 run（draft + done 候选）可进入。
-        await notifier.overwrite(
-          again.copyWith(status: ExploreRunStatus.draft),
-        );
-        final fromDraft = await notifier.beginReview(run.id);
-        expect(fromDraft.status, ExploreRunStatus.reviewing);
-
-        // 无可审查候选拒绝。
-        final empty = await createRun(c, name: '空任务');
-        expect(
-          () => notifier.beginReview(empty.id),
-          throwsA(isA<StateError>()),
-        );
-
-        // generating/paused/cancelled 不放行。
-        await notifier.overwrite(
-          fromDraft.copyWith(status: ExploreRunStatus.generating),
-        );
-        expect(() => notifier.beginReview(run.id), throwsA(isA<StateError>()));
-        await notifier.overwrite(
-          fromDraft.copyWith(status: ExploreRunStatus.paused),
-        );
-        expect(() => notifier.beginReview(run.id), throwsA(isA<StateError>()));
-      },
-    );
-
-    test('completeReview requires reviewing status and all labeled', () async {
+    test('create/rename/delete folder keeps members and images', () async {
       final c = container();
       final notifier = c.read(exploreRunListNotifierProvider.notifier);
-      final run = await seedGeneratedRun(c, [
-        doneCandidate('cand-1', label: ExploreReviewLabel.treasure),
-        doneCandidate('cand-2'),
-      ]);
+      final run = await seedRun(c, [doneCandidate('cand-1')]);
 
-      // 未进筛选态：拒绝。
-      expect(await notifier.completeReview(run.id), isFalse);
+      final folder = await notifier.createFolder(run.id, '  暖光  ');
+      expect(folder.name, '暖光', reason: '名称去首尾空白');
+      var stored = await reload(c, run.id);
+      expect(stored.folders.single, folder);
 
-      await notifier.beginReview(run.id);
-      // 还有一张未归类：拒绝且状态不变。
-      expect(await notifier.completeReview(run.id), isFalse);
-      var stored = (await c.read(
+      await notifier.assignCandidateFolder(run.id, 'cand-1', folder.id);
+      stored = await reload(c, run.id);
+      expect(stored.candidateById('cand-1')!.folderId, folder.id);
+
+      await notifier.renameFolder(run.id, folder.id, '冷光');
+      stored = await reload(c, run.id);
+      expect(stored.folders.single.name, '冷光');
+
+      await notifier.deleteFolder(run.id, folder.id);
+      stored = await reload(c, run.id);
+      expect(stored.folders, isEmpty);
+      final orphan = stored.candidateById('cand-1')!;
+      expect(orphan.folderId, isNull, reason: '删文件夹后成员回未分类');
+      expect(orphan.generation.filePath, '/tmp/x.png', reason: '不删图');
+    });
+
+    test(
+      'assign is single/batch, supports clearing, rejects bad ids',
+      () async {
+        final c = container();
+        final notifier = c.read(exploreRunListNotifierProvider.notifier);
+        final run = await seedRun(c, [
+          doneCandidate('cand-1'),
+          doneCandidate('cand-2'),
+          doneCandidate('cand-3'),
+        ]);
+        final folder = await notifier.createFolder(run.id, 'A');
+
+        await notifier.assignCandidatesFolder(run.id, [
+          'cand-1',
+          'cand-2',
+        ], folder.id);
+        var stored = await reload(c, run.id);
+        expect(stored.candidateById('cand-1')!.folderId, folder.id);
+        expect(stored.candidateById('cand-2')!.folderId, folder.id);
+        expect(stored.candidateById('cand-3')!.folderId, isNull);
+
+        // folderId = null：移回未分类。
+        await notifier.assignCandidateFolder(run.id, 'cand-1', null);
+        stored = await reload(c, run.id);
+        expect(stored.candidateById('cand-1')!.folderId, isNull);
+
+        expect(
+          () => notifier.assignCandidateFolder(run.id, 'cand-1', 'no-folder'),
+          throwsA(isA<StateError>()),
+        );
+        expect(
+          () => notifier.assignCandidateFolder(run.id, 'no-cand', folder.id),
+          throwsA(isA<StateError>()),
+        );
+        expect(
+          () => notifier.assignCandidatesFolder(run.id, const [], folder.id),
+          throwsA(isA<StateError>()),
+        );
+        expect(
+          () => notifier.createFolder(run.id, '   '),
+          throwsA(isA<StateError>()),
+        );
+        expect(
+          () => notifier.renameFolder(run.id, 'no-folder', 'x'),
+          throwsA(isA<StateError>()),
+        );
+        expect(
+          () => notifier.deleteFolder(run.id, 'no-folder'),
+          throwsA(isA<StateError>()),
+        );
+      },
+    );
+  });
+
+  group('legacy reviewing status', () {
+    test('decodes and round-trips for stored runs', () async {
+      final c = container();
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final run = await createRun(c);
+      final candidate = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-1')
+          .copyWith(
+            generation: const ExploreCandidateGeneration(
+              status: ExploreCandidateGenerationStatus.done,
+              filePath: '/tmp/x.png',
+              seed: 1,
+            ),
+          );
+      final generated = await notifier.overwrite(
+        run.copyWith(
+          status: ExploreRunStatus.generated,
+          candidates: [candidate],
+        ),
+      );
+
+      // 评审体系拆除后无路径可再写入 reviewing；存量值只作反序列化兼容。
+      final legacy = await notifier.overwrite(
+        generated.copyWith(status: ExploreRunStatus.reviewing),
+      );
+      expect(legacy.status, ExploreRunStatus.reviewing);
+      final stored = (await c.read(
         exploreRunListNotifierProvider.future,
       )).runById(run.id)!;
       expect(stored.status, ExploreRunStatus.reviewing);
-
-      await notifier.updateReview(
-        run.id,
-        'cand-2',
-        label: ExploreReviewLabel.reject,
-        formalReviewedAt: DateTime.utc(2026, 9, 1),
-      );
-      expect(await notifier.completeReview(run.id), isTrue);
-      stored = (await c.read(
-        exploreRunListNotifierProvider.future,
-      )).runById(run.id)!;
-      expect(stored.status, ExploreRunStatus.completed);
     });
   });
 

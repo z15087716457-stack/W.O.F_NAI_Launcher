@@ -140,6 +140,8 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
           ),
         ];
       case ExploreRunStatus.generated:
+      // 存量 reviewing run 按 generated 处理（评审体系已拆除）。
+      case ExploreRunStatus.reviewing:
         return run.failedCount > 0
             ? [
                 FilledButton.tonalIcon(
@@ -150,7 +152,6 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
                 ),
               ]
             : const [];
-      case ExploreRunStatus.reviewing:
       case ExploreRunStatus.completed:
       case ExploreRunStatus.cancelled:
         return const [];

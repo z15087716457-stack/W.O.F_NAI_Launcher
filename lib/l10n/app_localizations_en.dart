@@ -10834,9 +10834,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_runStatusGenerated => 'Generated';
 
   @override
-  String get styleExplore_runStatusReviewing => 'Reviewing';
-
-  @override
   String get styleExplore_runStatusCompleted => 'Completed';
 
   @override
@@ -10900,28 +10897,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_filterAll => 'All';
 
   @override
-  String get styleExplore_filterHearted => 'Hearted';
-
-  @override
-  String get styleExplore_filterPendingReview => 'Unreviewed';
+  String get styleExplore_filterHearted => 'Favorites';
 
   @override
   String get styleExplore_filterFailed => 'Failed';
 
   @override
-  String get styleExplore_markTreasure => 'Treasure';
+  String get styleExplore_newFolder => 'New folder';
 
   @override
-  String get styleExplore_markSpecial => 'Special';
+  String get styleExplore_renameFolder => 'Rename folder';
 
   @override
-  String get styleExplore_markReject => 'Reject';
+  String get styleExplore_deleteFolder => 'Delete folder';
+
+  @override
+  String styleExplore_deleteFolderMessage(String name) {
+    return 'Deletes the folder \"$name\". Its candidates go back to Uncategorized; images are kept.';
+  }
+
+  @override
+  String get styleExplore_folderNameLabel => 'Folder name';
+
+  @override
+  String get styleExplore_folderUncategorized => 'Uncategorized';
+
+  @override
+  String styleExplore_folderCreated(String name) {
+    return 'Folder \"$name\" created';
+  }
+
+  @override
+  String get styleExplore_assignToFolder => 'Move to';
 
   @override
   String get styleExplore_candidateMissing => 'Image file missing';
 
   @override
   String get styleExplore_candidateDetailTitle => 'Candidate detail';
+
+  @override
+  String styleExplore_candidatePosition(int current, int total) {
+    return 'Image $current/$total';
+  }
+
+  @override
+  String get styleExplore_prevCandidate => 'Previous';
+
+  @override
+  String get styleExplore_nextCandidate => 'Next';
 
   @override
   String get styleExplore_rollSnapshot => 'Roll snapshot';
@@ -10935,29 +10959,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String styleExplore_roundNumber(int number) {
     return 'Round $number';
   }
-
-  @override
-  String get styleExplore_formalReview => 'Formal review';
-
-  @override
-  String styleExplore_reviewProgress(int labeled, int total) {
-    return 'Classified $labeled/$total';
-  }
-
-  @override
-  String get styleExplore_reviewComplete => 'Finish review';
-
-  @override
-  String get styleExplore_reviewCompleted => 'Review completed';
-
-  @override
-  String get styleExplore_reviewUndo => 'Undo last';
-
-  @override
-  String get styleExplore_reviewExit => 'Exit review';
-
-  @override
-  String get styleExplore_reviewUnlabeled => 'Unclassified';
 
   @override
   String get styleExplore_viewGrid => 'Grid view';

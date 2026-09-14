@@ -379,7 +379,6 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       ExploreRunStatus.draft,
       ExploreRunStatus.paused,
       ExploreRunStatus.generated,
-      ExploreRunStatus.reviewing,
       ExploreRunStatus.completed,
     };
     if (!startable.contains(loaded.status) ||

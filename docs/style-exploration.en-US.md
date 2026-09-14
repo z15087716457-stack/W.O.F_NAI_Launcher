@@ -10,10 +10,10 @@ Entry: the "Style Exploration" icon in the left navigation rail.
 
 1. **Prepare**: turn artist pools / style strings into blocks, set them to random draw and enable genetics (DNA badge).
 2. **Basic round**: create an exploration task, batch-generate dozens of candidates.
-3. **Review**: full-screen formal review, label with T / S / R keys.
+3. **Favorites & folders**: page through candidates in the detail dialog, ♡ to favorite, click a folder to file it.
 4. **Deep rounds**: multi-select favorites → "Create Family" → "Create Candidate Round"; offspring mutate automatically.
 5. **Iterate**: multi-select the best offspring → "Create Branch"; parents backcross into the next generation.
-6. **Harvest**: "Adopt as Block" or "Fixate as Template" — the string flows back into the pill system.
+6. **Harvest**: "Adopt as Block" or "Import metadata" — the string flows back into the pill system.
 
 ## Interface overview
 
@@ -25,7 +25,7 @@ The page is a three-pane layout with draggable dividers:
 - **Middle · Block library**: the shared block panel; tap a block to insert it into the current prompt.
 - **Right · Runs + candidate gallery**: the run list and every candidate of the selected run.
 
-An **exploration task (Run)** freezes the prompt and parameter snapshot, batch-generates candidates, and records each image's roll result. Run lifecycle: draft → generating → generated → reviewing → completed; pause, retry-failed, and cancel are supported (**cancel is irreversible** — remaining pending candidates are marked cancelled).
+An **exploration task (Run)** freezes the prompt and parameter snapshot, batch-generates candidates, and records each image's roll result. Run lifecycle: draft → generating → generated → completed; pause, retry-failed, and cancel are supported (**cancel is irreversible** — remaining pending candidates are marked cancelled).
 
 ## Step 0: Make blocks heritable
 
@@ -48,23 +48,20 @@ In the right pane, tap **+** under "Exploration Tasks", name the run, set the **
 
 The candidate gallery offers:
 
-- **Grid / deck** views;
+- **Grid / deck** views; the deck groups by your **own folders** ("New folder" in the toolbar; rename / delete from the group header — deleted folders return their members to "Uncategorized", which is always last);
 - **Multi-select** (for creating families and batch actions);
-- Label filters: All / Hearted / Pending / Treasure / Special / Rejected / Failed;
-- Per-card **♡ (heart)** and **T / S / R** pre-label buttons;
+- Label filters: All / Favorites / Failed;
+- A **♡ favorite** button at each candidate's top-right (also toggleable inside the detail dialog);
 - A **roll snapshot** per candidate: exactly which strings every random block drew for that image — archived per card, with copy-positive / copy-negative.
 
-## Step 2: Formal review
+## Step 2: Favorites & folders
 
-Tap "**Formal Review**" at the top right of the gallery to enter full-screen labeling:
+The **candidate detail dialog** (click any candidate or pile thumbnail) is where you classify:
 
-![Full-screen formal review](../screenshots/style_explore_screening.png)
-
-- Keyboard: **T = Treasure**, **S = Special**, **R = Reject** (buttons at the bottom too);
-- "Undo last" fixes mistakes;
-- Progress at the top (labeled x / total); "**Complete Review**" is gated until **every candidate is labeled** — every image gets an explicit verdict;
-- Completed runs can be re-entered for a **re-review** later;
-- Rejected images can be batch-deleted: only the candidate copies inside the Run directory are removed — **source images in your gallery are untouched**.
+- `<` `>` arrows beside the image and **← / → (numpad too)** page through candidates; the order is the gallery's filter snapshot at open time, and paging **stops at both ends** (no wrap-around);
+- The "**Move to**" section at the bottom of the info column lists your folders: click one to file the candidate (the current one is highlighted). After filing, the dialog **jumps to the next uncategorized** candidate so you can keep going; clicking the current folder again returns it to Uncategorized;
+- A "+" button creates a folder right there;
+- **Delete image**: available for any candidate that still has a copy (with confirmation) — only the candidate copy inside the Run directory is removed, the candidate record stays as "no copy", and **source images in your gallery are untouched**.
 
 ## Step 3: Deep iteration — lineage & genetics
 
@@ -129,7 +126,7 @@ From a candidate's detail view or the multi-select menu:
 - **"Deep round not possible"**: no enabled random/sequential genetics block in the main prompt. Set at least one block to random draw and light up its DNA icon in the left pane.
 - **Branch creation refused**: make sure you selected offspring from the latest-generation pile, all rounds of the current generation are finished, and the offspring strings don't exactly duplicate the backcross parents.
 - **Cancelling a run** is permanent; use "Pause" if you just need a break.
-- **Deleting candidate images** only removes copies inside the Run directory — gallery sources and favorites stay intact.
+- **Deleting candidate images** is available for any candidate with a copy; only Run-directory copies are removed — gallery sources and candidate records stay intact.
 - **No DNA icon on the generation page**: the genetics toggle is exclusive to the Style Exploration page, by design.
 
 ---

@@ -7,8 +7,11 @@ import '../prompt_block/pill_document.dart';
 part 'explore_run.freezed.dart';
 part 'explore_run.g.dart';
 
-/// 探索任务（Run）生命周期：草稿 → 生成中 ⇄ 暂停 → 已生成 → 筛选/完成；
+/// 探索任务（Run）生命周期：草稿 → 生成中 ⇄ 暂停 → 已生成 → 完成；
 /// 取消为终态（不可再启动）。
+///
+/// `reviewing` 已废弃（评审体系整层拆除），仅保留枚举值作存量数据
+/// 反序列化兼容：无任何代码路径可再写入该状态，读到即按 `generated` 处理。
 enum ExploreRunStatus {
   draft,
   generating,
@@ -25,9 +28,6 @@ enum ExploreRoundPhase { basic, deep, manual }
 enum ExploreRoundStatus { pending, generating, generated, cancelled }
 
 enum ExploreCandidateGenerationStatus { pending, done, failed }
-
-/// 候选评审标签：珍宝 / 特殊 / 拒绝（预标记与正式筛选共用）。
-enum ExploreReviewLabel { treasure, special, reject }
 
 /// 候选谱系操作：基础 roll / 变异 / 交叉 / 注入 / 手动。
 enum ExploreLineageOperation {
@@ -172,21 +172,27 @@ class ExploreCandidateGeneration with _$ExploreCandidateGeneration {
       _$ExploreCandidateGenerationFromJson(json);
 }
 
-/// 候选评审：心形 + 轻预标记（T/S/R）+ 正式筛选标签（阶段 C）。
-/// 全部纯数据标记，任何时刻不移动图库文件。
+/// 候选收藏标记（纯数据注释，任何时刻不移动图库文件）。
 @freezed
 class ExploreCandidateReview with _$ExploreCandidateReview {
-  const factory ExploreCandidateReview({
-    @Default(false) bool heart,
-    ExploreReviewLabel? preliminaryLabel,
-    ExploreReviewLabel? label,
-
-    /// 正式筛选归类时间（随 label 写入/清除）。
-    DateTime? formalReviewedAt,
-  }) = _ExploreCandidateReview;
+  const factory ExploreCandidateReview({@Default(false) bool heart}) =
+      _ExploreCandidateReview;
 
   factory ExploreCandidateReview.fromJson(Map<String, dynamic> json) =>
       _$ExploreCandidateReviewFromJson(json);
+}
+
+/// 用户自建候选文件夹（单层平铺，与谱系 pile 的遗传血缘完全平行解耦）。
+@freezed
+class ExploreCandidateFolder with _$ExploreCandidateFolder {
+  const factory ExploreCandidateFolder({
+    required String id,
+    required String name,
+    required DateTime createdAt,
+  }) = _ExploreCandidateFolder;
+
+  factory ExploreCandidateFolder.fromJson(Map<String, dynamic> json) =>
+      _$ExploreCandidateFolderFromJson(json);
 }
 
 /// 候选谱系：父本 + 产生方式 + 代际。
@@ -233,6 +239,9 @@ class ExploreCandidate with _$ExploreCandidate {
     @JsonSerializable(explicitToJson: true)
     @Default(ExploreCandidateReview())
     ExploreCandidateReview review,
+
+    /// 所属用户文件夹 id；null = 未分类（与谱系归组无关）。
+    String? folderId,
 
     @JsonSerializable(explicitToJson: true) required ExploreLineage lineage,
   }) = _ExploreCandidate;
@@ -393,6 +402,11 @@ class ExploreRun with _$ExploreRun {
     @Default([])
     List<ExploreCandidate> candidates,
 
+    /// 用户自建候选文件夹（单层平铺，删除文件夹时成员回未分类）。
+    @JsonSerializable(explicitToJson: true)
+    @Default([])
+    List<ExploreCandidateFolder> folders,
+
     /// 父本集平铺存储（阶段 D），家族按 id 引用。
     @JsonSerializable(explicitToJson: true)
     @Default([])
@@ -461,6 +475,13 @@ class ExploreRun with _$ExploreRun {
     return null;
   }
 
+  ExploreCandidateFolder? folderById(String folderId) {
+    for (final folder in folders) {
+      if (folder.id == folderId) return folder;
+    }
+    return null;
+  }
+
   /// 待生成候选（按列表顺序）。
   List<ExploreCandidate> get pendingCandidates => [
     for (final candidate in candidates)
@@ -482,21 +503,4 @@ class ExploreRun with _$ExploreRun {
         (c) => c.generation.status == ExploreCandidateGenerationStatus.failed,
       )
       .length;
-
-  /// 可审查候选（生成成功，正式筛选的归类目标）。
-  List<ExploreCandidate> get reviewableCandidates => [
-    for (final candidate in candidates)
-      if (candidate.generation.status == ExploreCandidateGenerationStatus.done)
-        candidate,
-  ];
-
-  /// 已正式归类的可审查候选数。
-  int get formallyReviewedCount => reviewableCandidates
-      .where((candidate) => candidate.review.label != null)
-      .length;
-
-  /// 全部可审查候选都已正式归类（完成筛选的判定）。
-  bool get isReviewComplete =>
-      reviewableCandidates.isNotEmpty &&
-      formallyReviewedCount == reviewableCandidates.length;
 }

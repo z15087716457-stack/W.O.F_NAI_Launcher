@@ -18889,12 +18889,6 @@ abstract class AppLocalizations {
   /// **'Generated'**
   String get styleExplore_runStatusGenerated;
 
-  /// No description provided for @styleExplore_runStatusReviewing.
-  ///
-  /// In en, this message translates to:
-  /// **'Reviewing'**
-  String get styleExplore_runStatusReviewing;
-
   /// No description provided for @styleExplore_runStatusCompleted.
   ///
   /// In en, this message translates to:
@@ -19006,14 +19000,8 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_filterHearted.
   ///
   /// In en, this message translates to:
-  /// **'Hearted'**
+  /// **'Favorites'**
   String get styleExplore_filterHearted;
-
-  /// No description provided for @styleExplore_filterPendingReview.
-  ///
-  /// In en, this message translates to:
-  /// **'Unreviewed'**
-  String get styleExplore_filterPendingReview;
 
   /// No description provided for @styleExplore_filterFailed.
   ///
@@ -19021,23 +19009,53 @@ abstract class AppLocalizations {
   /// **'Failed'**
   String get styleExplore_filterFailed;
 
-  /// No description provided for @styleExplore_markTreasure.
+  /// No description provided for @styleExplore_newFolder.
   ///
   /// In en, this message translates to:
-  /// **'Treasure'**
-  String get styleExplore_markTreasure;
+  /// **'New folder'**
+  String get styleExplore_newFolder;
 
-  /// No description provided for @styleExplore_markSpecial.
+  /// No description provided for @styleExplore_renameFolder.
   ///
   /// In en, this message translates to:
-  /// **'Special'**
-  String get styleExplore_markSpecial;
+  /// **'Rename folder'**
+  String get styleExplore_renameFolder;
 
-  /// No description provided for @styleExplore_markReject.
+  /// No description provided for @styleExplore_deleteFolder.
   ///
   /// In en, this message translates to:
-  /// **'Reject'**
-  String get styleExplore_markReject;
+  /// **'Delete folder'**
+  String get styleExplore_deleteFolder;
+
+  /// No description provided for @styleExplore_deleteFolderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletes the folder \"{name}\". Its candidates go back to Uncategorized; images are kept.'**
+  String styleExplore_deleteFolderMessage(String name);
+
+  /// No description provided for @styleExplore_folderNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder name'**
+  String get styleExplore_folderNameLabel;
+
+  /// No description provided for @styleExplore_folderUncategorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized'**
+  String get styleExplore_folderUncategorized;
+
+  /// No description provided for @styleExplore_folderCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder \"{name}\" created'**
+  String styleExplore_folderCreated(String name);
+
+  /// No description provided for @styleExplore_assignToFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to'**
+  String get styleExplore_assignToFolder;
 
   /// No description provided for @styleExplore_candidateMissing.
   ///
@@ -19050,6 +19068,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Candidate detail'**
   String get styleExplore_candidateDetailTitle;
+
+  /// No description provided for @styleExplore_candidatePosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Image {current}/{total}'**
+  String styleExplore_candidatePosition(int current, int total);
+
+  /// No description provided for @styleExplore_prevCandidate.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get styleExplore_prevCandidate;
+
+  /// No description provided for @styleExplore_nextCandidate.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get styleExplore_nextCandidate;
 
   /// No description provided for @styleExplore_rollSnapshot.
   ///
@@ -19068,48 +19104,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Round {number}'**
   String styleExplore_roundNumber(int number);
-
-  /// No description provided for @styleExplore_formalReview.
-  ///
-  /// In en, this message translates to:
-  /// **'Formal review'**
-  String get styleExplore_formalReview;
-
-  /// No description provided for @styleExplore_reviewProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'Classified {labeled}/{total}'**
-  String styleExplore_reviewProgress(int labeled, int total);
-
-  /// No description provided for @styleExplore_reviewComplete.
-  ///
-  /// In en, this message translates to:
-  /// **'Finish review'**
-  String get styleExplore_reviewComplete;
-
-  /// No description provided for @styleExplore_reviewCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Review completed'**
-  String get styleExplore_reviewCompleted;
-
-  /// No description provided for @styleExplore_reviewUndo.
-  ///
-  /// In en, this message translates to:
-  /// **'Undo last'**
-  String get styleExplore_reviewUndo;
-
-  /// No description provided for @styleExplore_reviewExit.
-  ///
-  /// In en, this message translates to:
-  /// **'Exit review'**
-  String get styleExplore_reviewExit;
-
-  /// No description provided for @styleExplore_reviewUnlabeled.
-  ///
-  /// In en, this message translates to:
-  /// **'Unclassified'**
-  String get styleExplore_reviewUnlabeled;
 
   /// No description provided for @styleExplore_viewGrid.
   ///

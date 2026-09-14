@@ -16,7 +16,7 @@ import '../../../widgets/common/themed_input_dialog.dart';
 /// 探索 Run 的共享界面动作（左栏卡片菜单与中栏控制条菜单共用）。
 abstract final class ExploreRunActions {
   /// 状态点颜色（draft 灰/generating 蓝/paused 橙/generated 绿/
-  /// reviewing 紫/completed 青/cancelled 红）。
+  /// completed 青/cancelled 红）；存量 `reviewing` 按 generated 处理。
   static Color statusColor(ColorScheme scheme, ExploreRunStatus status) {
     switch (status) {
       case ExploreRunStatus.draft:
@@ -26,9 +26,8 @@ abstract final class ExploreRunActions {
       case ExploreRunStatus.paused:
         return Colors.orange;
       case ExploreRunStatus.generated:
-        return Colors.green;
       case ExploreRunStatus.reviewing:
-        return Colors.purple;
+        return Colors.green;
       case ExploreRunStatus.completed:
         return Colors.teal;
       case ExploreRunStatus.cancelled:
@@ -45,9 +44,8 @@ abstract final class ExploreRunActions {
       case ExploreRunStatus.paused:
         return l10n.styleExplore_runStatusPaused;
       case ExploreRunStatus.generated:
-        return l10n.styleExplore_runStatusGenerated;
       case ExploreRunStatus.reviewing:
-        return l10n.styleExplore_runStatusReviewing;
+        return l10n.styleExplore_runStatusGenerated;
       case ExploreRunStatus.completed:
         return l10n.styleExplore_runStatusCompleted;
       case ExploreRunStatus.cancelled:

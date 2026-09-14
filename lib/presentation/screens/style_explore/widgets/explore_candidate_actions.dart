@@ -12,17 +12,9 @@ import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import 'explore_adopt_block_dialog.dart';
 
-/// 探索候选的出口动作（收编为块 / 导入元数据 / Reject 删图），
+/// 探索候选的出口动作（收编为块 / 导入元数据 / 删除候选图），
 /// 候选详情弹窗与画廊多选条共用。
 abstract final class ExploreCandidateActions {
-  /// Reject 语义与画廊筛选一致：预标记或正式标签命中即算。
-  static bool isRejected(ExploreCandidate candidate) {
-    return exploreCandidateMatchesFilter(
-      candidate,
-      ExploreGalleryFilter.reject,
-    );
-  }
-
   /// 单候选收编为块：内容 = `rollSnapshot.positive` 原文，
   /// 默认名 = run 名 + 候选序号。返回是否实际建块。
   static Future<bool> adoptSingle(

@@ -10447,9 +10447,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_runStatusGenerated => '已生成';
 
   @override
-  String get styleExplore_runStatusReviewing => '筛选中';
-
-  @override
   String get styleExplore_runStatusCompleted => '已完成';
 
   @override
@@ -10512,28 +10509,55 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_filterAll => '全部';
 
   @override
-  String get styleExplore_filterHearted => '心选';
-
-  @override
-  String get styleExplore_filterPendingReview => '待审';
+  String get styleExplore_filterHearted => '收藏';
 
   @override
   String get styleExplore_filterFailed => '失败';
 
   @override
-  String get styleExplore_markTreasure => '珍宝';
+  String get styleExplore_newFolder => '新建文件夹';
 
   @override
-  String get styleExplore_markSpecial => '特殊';
+  String get styleExplore_renameFolder => '重命名文件夹';
 
   @override
-  String get styleExplore_markReject => '拒绝';
+  String get styleExplore_deleteFolder => '删除文件夹';
+
+  @override
+  String styleExplore_deleteFolderMessage(String name) {
+    return '将删除文件夹「$name」；其中的候选回到未分类，图片不会被删除。';
+  }
+
+  @override
+  String get styleExplore_folderNameLabel => '文件夹名称';
+
+  @override
+  String get styleExplore_folderUncategorized => '未分类';
+
+  @override
+  String styleExplore_folderCreated(String name) {
+    return '已创建文件夹「$name」';
+  }
+
+  @override
+  String get styleExplore_assignToFolder => '归类到';
 
   @override
   String get styleExplore_candidateMissing => '图片文件缺失';
 
   @override
   String get styleExplore_candidateDetailTitle => '候选详情';
+
+  @override
+  String styleExplore_candidatePosition(int current, int total) {
+    return '第 $current/$total 张';
+  }
+
+  @override
+  String get styleExplore_prevCandidate => '上一张';
+
+  @override
+  String get styleExplore_nextCandidate => '下一张';
 
   @override
   String get styleExplore_rollSnapshot => 'Roll 快照';
@@ -10547,29 +10571,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String styleExplore_roundNumber(int number) {
     return '第 $number 轮';
   }
-
-  @override
-  String get styleExplore_formalReview => '正式筛选';
-
-  @override
-  String styleExplore_reviewProgress(int labeled, int total) {
-    return '已归类 $labeled/$total';
-  }
-
-  @override
-  String get styleExplore_reviewComplete => '完成筛选';
-
-  @override
-  String get styleExplore_reviewCompleted => '筛选完成';
-
-  @override
-  String get styleExplore_reviewUndo => '撤销上一张';
-
-  @override
-  String get styleExplore_reviewExit => '退出筛选';
-
-  @override
-  String get styleExplore_reviewUnlabeled => '未归类';
 
   @override
   String get styleExplore_viewGrid => '网格视图';

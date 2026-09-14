@@ -101,11 +101,8 @@ void main() {
               anlas: 5,
               elapsedMs: 12345,
             ),
-            review: ExploreCandidateReview(
-              heart: true,
-              preliminaryLabel: ExploreReviewLabel.treasure,
-              label: ExploreReviewLabel.special,
-            ),
+            review: ExploreCandidateReview(heart: true),
+            folderId: 'folder-1',
             lineage: ExploreLineage(
               parentCandidateIds: ['cand-0'],
               operation: ExploreLineageOperation.basicRoll,
@@ -115,6 +112,13 @@ void main() {
             ),
           ),
           ExploreCandidate.shell(roundId: 'round-2', id: 'cand-2'),
+        ],
+        folders: [
+          ExploreCandidateFolder(
+            id: 'folder-1',
+            name: '暖光',
+            createdAt: DateTime.utc(2026, 8, 31, 13),
+          ),
         ],
         parentSets: [
           ExploreParentSet(
@@ -170,10 +174,9 @@ void main() {
         'watercolor',
       );
       expect(decoded.rounds[1].phase, ExploreRoundPhase.deep);
-      expect(
-        decoded.candidates[0].review.preliminaryLabel,
-        ExploreReviewLabel.treasure,
-      );
+      expect(decoded.candidates[0].review.heart, isTrue);
+      expect(decoded.candidates[0].folderId, 'folder-1');
+      expect(decoded.folders.single.name, '暖光');
       expect(
         decoded.candidates[0].lineage.operation,
         ExploreLineageOperation.basicRoll,
@@ -329,109 +332,82 @@ void main() {
       expect(captured.decrisp, isTrue);
     });
 
-    test('review formalReviewedAt JSON roundtrip', () {
-      final reviewedAt = DateTime.utc(2026, 9, 1, 8, 30);
-      final review = ExploreCandidateReview(
-        heart: true,
-        label: ExploreReviewLabel.treasure,
-        formalReviewedAt: reviewedAt,
-      );
+    test('review legacy keys are dropped on decode; heart survives', () {
+      const review = ExploreCandidateReview(heart: true);
       final decoded = ExploreCandidateReview.fromJson(
         jsonDecode(jsonEncode(review)) as Map<String, dynamic>,
       );
       expect(decoded, review);
-      expect(decoded.formalReviewedAt, reviewedAt);
+      expect(decoded.heart, isTrue);
 
-      // 旧数据无该字段：缺省为 null。
-      final legacy = ExploreCandidateReview.fromJson(const {'heart': false});
-      expect(legacy.formalReviewedAt, isNull);
-      expect(legacy.label, isNull);
+      // 存量数据（评审体系拆除前写入）的旧键静默丢弃，不抛错、不迁移。
+      final legacy = ExploreCandidateReview.fromJson(const {
+        'heart': false,
+        'preliminaryLabel': 'treasure',
+        'label': 'special',
+        'formalReviewedAt': '2026-09-01T08:30:00.000Z',
+      });
+      expect(legacy.heart, isFalse);
+      expect(ExploreCandidateReview.fromJson(const {'heart': true}).toJson(), {
+        'heart': true,
+      });
     });
 
-    test('review progress getters only count done candidates with label', () {
-      final run = ExploreRun.create(
-        name: 'x',
-        recipeSnapshot: ExploreRecipeSnapshot(
-          positive: PillDocument.empty(),
-          negative: PillDocument.empty(),
-        ),
-        paramsSnapshot: const ExploreParamsSnapshot(
-          model: 'm',
-          width: 1,
-          height: 1,
-          steps: 1,
-          scale: 1,
-          sampler: 's',
-          seed: -1,
-          ucPreset: 0,
-          qualityToggle: true,
-          smea: false,
-          smeaDyn: false,
-          cfgRescale: 0,
-          noiseSchedule: 'karras',
-          varietyPlus: false,
-          decrisp: false,
-        ),
-        targetCount: 3,
-      );
-      expect(run.isReviewComplete, isFalse, reason: '无可审查候选不算完成');
-
-      ExploreCandidate doneCandidate(
-        String id, {
-        ExploreReviewLabel? label,
-        bool preliminary = false,
-      }) {
-        return ExploreCandidate.shell(roundId: 'r', id: id).copyWith(
-          generation: const ExploreCandidateGeneration(
-            status: ExploreCandidateGenerationStatus.done,
+    test(
+      'legacy run without folders decodes to empty list; folderById works',
+      () {
+        final run = ExploreRun.create(
+          name: 'x',
+          recipeSnapshot: ExploreRecipeSnapshot(
+            positive: PillDocument.empty(),
+            negative: PillDocument.empty(),
           ),
-          review: ExploreCandidateReview(
-            preliminaryLabel: preliminary ? label : null,
-            label: preliminary ? null : label,
+          paramsSnapshot: const ExploreParamsSnapshot(
+            model: 'm',
+            width: 1,
+            height: 1,
+            steps: 1,
+            scale: 1,
+            sampler: 's',
+            seed: -1,
+            ucPreset: 0,
+            qualityToggle: true,
+            smea: false,
+            smeaDyn: false,
+            cfgRescale: 0,
+            noiseSchedule: 'karras',
+            varietyPlus: false,
+            decrisp: false,
           ),
+          targetCount: 3,
         );
-      }
 
-      final filled = run.copyWith(
-        candidates: [
-          doneCandidate('a', label: ExploreReviewLabel.treasure),
-          doneCandidate('b'),
-          // 预标记不算正式归类。
-          doneCandidate(
-            'c',
-            label: ExploreReviewLabel.special,
-            preliminary: true,
-          ),
-          // 失败候选不进可审查集。
-          ExploreCandidate.shell(roundId: 'r', id: 'd').copyWith(
-            generation: const ExploreCandidateGeneration(
-              status: ExploreCandidateGenerationStatus.failed,
-              error: 'boom',
-            ),
-          ),
-        ],
-      );
+        // 旧数据无 folders 键：缺省空表，零迁移兼容。
+        final legacyJson = jsonDecode(jsonEncode(run)) as Map<String, dynamic>;
+        legacyJson.remove('folders');
+        final legacy = ExploreRun.fromJson(legacyJson);
+        expect(legacy.folders, isEmpty);
+        expect(legacy.folderById('nope'), isNull);
 
-      expect(filled.reviewableCandidates.map((c) => c.id), ['a', 'b', 'c']);
-      expect(filled.formallyReviewedCount, 1);
-      expect(filled.isReviewComplete, isFalse);
-
-      final allLabeled = filled.copyWith(
-        candidates: [
-          for (final candidate in filled.candidates)
-            candidate.id == 'a'
-                ? candidate
-                : candidate.id == 'd'
-                ? candidate
-                : candidate.copyWith(
-                    review: candidate.review.copyWith(
-                      label: ExploreReviewLabel.reject,
-                    ),
-                  ),
-        ],
-      );
-      expect(allLabeled.formallyReviewedCount, 3);
-      expect(allLabeled.isReviewComplete, isTrue);
-    });
+        final folder = ExploreCandidateFolder(
+          id: 'f-1',
+          name: '暖光',
+          createdAt: DateTime.utc(2026, 9, 14),
+        );
+        final filled = run.copyWith(
+          folders: [folder],
+          candidates: [
+            ExploreCandidate.shell(
+              roundId: 'r',
+              id: 'a',
+            ).copyWith(folderId: folder.id),
+            ExploreCandidate.shell(roundId: 'r', id: 'b'),
+          ],
+        );
+        expect(filled.folderById('f-1'), folder);
+        expect(filled.candidateById('a')!.folderId, 'f-1');
+        expect(filled.candidateById('b')!.folderId, isNull);
+      },
+    );
   });
 }

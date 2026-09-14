@@ -1161,81 +1161,100 @@ void main() {
     );
   });
 
-  testWidgets(
-    'candidate gallery grid renders and pre-mark buttons write review',
-    (tester) async {
-      final candidateA = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-a')
-          .copyWith(
-            generation: const ExploreCandidateGeneration(
-              status: ExploreCandidateGenerationStatus.done,
-              seed: 12345,
-            ),
-          );
-      final candidateB = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-b')
-          .copyWith(
-            generation: const ExploreCandidateGeneration(
-              status: ExploreCandidateGenerationStatus.failed,
-              error: 'boom',
-            ),
-          );
-      final run = await seedRun(
-        '画廊任务',
-        status: ExploreRunStatus.generated,
-        candidates: [candidateA, candidateB],
-      );
-      final container = await pumpScreen(tester);
+  testWidgets('candidate gallery cards toggle heart from the overlay button', (
+    tester,
+  ) async {
+    final candidateA = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-a')
+        .copyWith(
+          generation: const ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.done,
+            seed: 12345,
+          ),
+        );
+    final candidateB = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-b')
+        .copyWith(
+          generation: const ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.failed,
+            error: 'boom',
+          ),
+        );
+    final run = await seedRun(
+      '画廊任务',
+      status: ExploreRunStatus.generated,
+      candidates: [candidateA, candidateB],
+    );
+    final container = await pumpScreen(tester);
 
-      // 无 activeRun 时是空态。
-      expect(find.textContaining('暂无候选'), findsOneWidget);
+    // 无 activeRun 时是空态。
+    expect(find.textContaining('暂无候选'), findsOneWidget);
 
-      container.read(exploreActiveRunIdProvider.notifier).state = run.id;
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
-      // 两张候选卡 + 序号文本。
-      expect(find.byKey(const Key('explore-candidate-cand-a')), findsOneWidget);
-      expect(find.byKey(const Key('explore-candidate-cand-b')), findsOneWidget);
-      expect(find.textContaining('#1'), findsOneWidget);
-      expect(find.textContaining('#2'), findsOneWidget);
+    // 两张候选卡 + 序号文本。
+    expect(find.byKey(const Key('explore-candidate-cand-a')), findsOneWidget);
+    expect(find.byKey(const Key('explore-candidate-cand-b')), findsOneWidget);
+    expect(find.textContaining('#1'), findsOneWidget);
+    expect(find.textContaining('#2'), findsOneWidget);
+    // 卡片内嵌标记钮（T/S/R）整行已拆除。
+    expect(
+      find.byKey(const Key('explore-candidate-treasure-cand-a')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('explore-candidate-special-cand-a')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('explore-candidate-reject-cand-a')),
+      findsNothing,
+    );
 
-      // 心形 + T 预标记写 review 字段。
-      await tester.tap(find.byKey(const Key('explore-candidate-heart-cand-a')));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.tap(
-        find.byKey(const Key('explore-candidate-treasure-cand-a')),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+    // 右上角收藏钮写 heart 字段（不改状态、不动文件）。
+    await tester.tap(find.byKey(const Key('explore-candidate-heart-cand-a')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
-      final stored = runStorage._store[run.id]!;
-      final review = stored.candidateById('cand-a')!.review;
-      expect(review.heart, isTrue);
-      expect(review.preliminaryLabel, ExploreReviewLabel.treasure);
-      // 另一张不受影响。
-      expect(stored.candidateById('cand-b')!.review.heart, isFalse);
-    },
-  );
+    final stored = runStorage._store[run.id]!;
+    expect(stored.candidateById('cand-a')!.review.heart, isTrue);
+    // 另一张不受影响。
+    expect(stored.candidateById('cand-b')!.review.heart, isFalse);
+
+    // 再点一次取消收藏。
+    await tester.tap(find.byKey(const Key('explore-candidate-heart-cand-a')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      runStorage._store[run.id]!.candidateById('cand-a')!.review.heart,
+      isFalse,
+    );
+  });
 
   testWidgets('filter chips narrow the grid', (tester) async {
-    final treasure = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-t')
+    final hearted = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-t')
         .copyWith(
           generation: const ExploreCandidateGeneration(
             status: ExploreCandidateGenerationStatus.done,
           ),
-          review: const ExploreCandidateReview(
-            preliminaryLabel: ExploreReviewLabel.treasure,
-          ),
+          review: const ExploreCandidateReview(heart: true),
         );
     final plain = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-p').copyWith(
       generation: const ExploreCandidateGeneration(
         status: ExploreCandidateGenerationStatus.done,
       ),
     );
+    final failed = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-f')
+        .copyWith(
+          generation: const ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.failed,
+            error: 'boom',
+          ),
+        );
     final run = await seedRun(
       '筛选任务',
       status: ExploreRunStatus.generated,
-      candidates: [treasure, plain],
+      candidates: [hearted, plain, failed],
     );
     final container = await pumpScreen(tester);
     container.read(exploreActiveRunIdProvider.notifier).state = run.id;
@@ -1244,26 +1263,28 @@ void main() {
 
     expect(find.byKey(const Key('explore-candidate-cand-t')), findsOneWidget);
     expect(find.byKey(const Key('explore-candidate-cand-p')), findsOneWidget);
+    expect(find.byKey(const Key('explore-candidate-cand-f')), findsOneWidget);
 
-    // 珍宝筛选。
-    await tester.tap(find.byKey(const Key('explore-filter-treasure')));
+    // 收藏筛选。
+    await tester.tap(find.byKey(const Key('explore-filter-hearted')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byKey(const Key('explore-candidate-cand-t')), findsOneWidget);
     expect(find.byKey(const Key('explore-candidate-cand-p')), findsNothing);
+    expect(find.byKey(const Key('explore-candidate-cand-f')), findsNothing);
 
-    // 待审筛选：只有无标记候选。
-    await tester.tap(find.byKey(const Key('explore-filter-pendingReview')));
+    // 失败筛选。
+    await tester.tap(find.byKey(const Key('explore-filter-failed')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(const Key('explore-candidate-cand-f')), findsOneWidget);
     expect(find.byKey(const Key('explore-candidate-cand-t')), findsNothing);
-    expect(find.byKey(const Key('explore-candidate-cand-p')), findsOneWidget);
 
-    // 正式筛选按钮：有可审查候选（done）时可用（阶段 C）。
-    final formalChip = tester.widget<ActionChip>(
-      find.byKey(const Key('explore-formal-review')),
-    );
-    expect(formalChip.onPressed, isNotNull);
+    // 回到全部。
+    await tester.tap(find.byKey(const Key('explore-filter-all')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(const Key('explore-candidate-cand-p')), findsOneWidget);
   });
 
   testWidgets('detail dialog shows seed, params and roll snapshot', (
@@ -1392,208 +1413,35 @@ void main() {
     );
   });
 
-  // ==================== 阶段 C：正式筛选与出口 ====================
+  // ==================== 候选详情：翻页与归类 ====================
 
   ExploreCandidate doneCandidate(
     String id, {
     ExploreRollSnapshot? roll,
-    ExploreReviewLabel? label,
-    ExploreReviewLabel? preliminaryLabel,
+    String? folderId,
     String? filePath,
   }) {
     return ExploreCandidate.shell(roundId: 'r-1', id: id).copyWith(
       rollSnapshot: roll,
+      folderId: folderId,
       generation: ExploreCandidateGeneration(
         status: ExploreCandidateGenerationStatus.done,
         filePath: filePath,
         seed: 42,
       ),
-      review: ExploreCandidateReview(
-        label: label,
-        preliminaryLabel: preliminaryLabel,
-      ),
     );
   }
 
-  testWidgets('formal review overlay: keyboard T/S/R, undo, gated complete', (
+  testWidgets('detail dialog pages with arrows and keyboard, stops at ends', (
     tester,
   ) async {
     final run = await seedRun(
-      '键盘筛选任务',
-      status: ExploreRunStatus.generated,
-      candidates: [doneCandidate('cand-1'), doneCandidate('cand-2')],
-    );
-    final container = await pumpScreen(tester);
-    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-
-    // 进入正式筛选 → run 状态 reviewing，覆盖层打开。
-    await tester.tap(find.byKey(const Key('explore-formal-review')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(find.byKey(const Key('explore-review-complete')), findsOneWidget);
-    expect(runStorage._store[run.id]!.status, ExploreRunStatus.reviewing);
-    expect(find.text('第 1/2 张'), findsOneWidget);
-
-    // 未归类完：完成按钮禁用。
-    expect(
-      tester
-          .widget<FilledButton>(
-            find.byKey(const Key('explore-review-complete')),
-          )
-          .onPressed,
-      isNull,
-    );
-
-    // T → 第一张珍宝 + 归类时间，自动前进到第 2/2 张。
-    await tester.sendKeyEvent(LogicalKeyboardKey.keyT);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    var review = runStorage._store[run.id]!.candidateById('cand-1')!.review;
-    expect(review.label, ExploreReviewLabel.treasure);
-    expect(review.formalReviewedAt, isNotNull);
-    expect(find.text('第 2/2 张'), findsOneWidget);
-
-    // S → 第二张特殊；全部归类 → 完成可用。
-    await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(
-      runStorage._store[run.id]!.candidateById('cand-2')!.review.label,
-      ExploreReviewLabel.special,
-    );
-    expect(find.text('已归类 2/2'), findsOneWidget);
-    expect(
-      tester
-          .widget<FilledButton>(
-            find.byKey(const Key('explore-review-complete')),
-          )
-          .onPressed,
-      isNotNull,
-    );
-
-    // Backspace 撤销：回到第二张并清标签，完成重新禁用。
-    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    review = runStorage._store[run.id]!.candidateById('cand-2')!.review;
-    expect(review.label, isNull);
-    expect(review.formalReviewedAt, isNull);
-    expect(find.text('第 2/2 张'), findsOneWidget);
-    expect(
-      tester
-          .widget<FilledButton>(
-            find.byKey(const Key('explore-review-complete')),
-          )
-          .onPressed,
-      isNull,
-    );
-
-    // R → 拒绝，点完成 → 覆盖层关闭，run 状态 completed。
-    await tester.sendKeyEvent(LogicalKeyboardKey.keyR);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(find.byKey(const Key('explore-review-complete')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    // 完成 toast 自动关闭。
-    await tester.pump(const Duration(milliseconds: 3300));
-    expect(find.byKey(const Key('explore-review-complete')), findsNothing);
-    expect(runStorage._store[run.id]!.status, ExploreRunStatus.completed);
-  });
-
-  testWidgets('arrow keys and prev/next buttons navigate in review overlay', (
-    tester,
-  ) async {
-    final run = await seedRun(
-      '导航任务',
-      status: ExploreRunStatus.generated,
-      candidates: [doneCandidate('cand-1'), doneCandidate('cand-2')],
-    );
-    final container = await pumpScreen(tester);
-    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(find.byKey(const Key('explore-formal-review')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(find.text('第 1/2 张'), findsOneWidget);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pump();
-    expect(find.text('第 2/2 张'), findsOneWidget);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pump();
-    expect(find.text('第 1/2 张'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('explore-review-next')));
-    await tester.pump();
-    expect(find.text('第 2/2 张'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('explore-review-prev')));
-    await tester.pump();
-    expect(find.text('第 1/2 张'), findsOneWidget);
-  });
-
-  testWidgets('Esc keeps labels and reviewing status; re-entry resumes at '
-      'first unlabeled', (tester) async {
-    final run = await seedRun(
-      '续筛任务',
-      status: ExploreRunStatus.generated,
-      candidates: [doneCandidate('cand-1'), doneCandidate('cand-2')],
-    );
-    final container = await pumpScreen(tester);
-    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(find.byKey(const Key('explore-formal-review')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-
-    // 打第一张后 Esc 退出：标签保留、状态留 reviewing（对话框退出动画
-    // 150ms，等足再断言）。
-    await tester.sendKeyEvent(LogicalKeyboardKey.keyT);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byKey(const Key('explore-review-complete')), findsNothing);
-    final stored = runStorage._store[run.id]!;
-    expect(stored.status, ExploreRunStatus.reviewing);
-    expect(
-      stored.candidateById('cand-1')!.review.label,
-      ExploreReviewLabel.treasure,
-    );
-
-    // 再进入续筛：定位到第一个未归类（第 2 张）。
-    await tester.tap(find.byKey(const Key('explore-formal-review')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('第 2/2 张'), findsOneWidget);
-
-    // 按钮与键盘等价：点 S 按钮给第二张打特殊。
-    await tester.tap(find.byKey(const Key('explore-review-label-special')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(
-      runStorage._store[run.id]!.candidateById('cand-2')!.review.label,
-      ExploreReviewLabel.special,
-    );
-    expect(find.text('已归类 2/2'), findsOneWidget);
-  });
-
-  testWidgets('deck view groups candidates by formal label with counts', (
-    tester,
-  ) async {
-    final run = await seedRun(
-      '牌堆任务',
+      '翻页任务',
       status: ExploreRunStatus.generated,
       candidates: [
-        doneCandidate('cand-t', label: ExploreReviewLabel.treasure),
-        doneCandidate('cand-r', label: ExploreReviewLabel.reject),
-        doneCandidate('cand-p'),
-        // 预标记不转正：仍归未归类组。
-        doneCandidate('cand-pre', preliminaryLabel: ExploreReviewLabel.special),
+        doneCandidate('cand-1'),
+        doneCandidate('cand-2'),
+        doneCandidate('cand-3'),
       ],
     );
     final container = await pumpScreen(tester);
@@ -1601,26 +1449,213 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // 切到牌堆视图。
+    // 打开第二张：翻页序 = 打开瞬间的筛选快照。
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-2')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(const Key('explore-candidate-detail')), findsOneWidget);
+    expect(find.text('第 2/3 张'), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(find.text('第 1/3 张'), findsOneWidget);
+    // 已到首张：左箭头按钮消失且再按 ← 原地不动（不循环）。
+    expect(find.byKey(const Key('explore-candidate-prev')), findsNothing);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(find.text('第 1/3 张'), findsOneWidget);
+
+    // 小键盘 → 与普通 → 等价。
+    await tester.sendKeyEvent(LogicalKeyboardKey.numpad6);
+    await tester.pump();
+    expect(find.text('第 2/3 张'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('explore-candidate-next')));
+    await tester.pump();
+    expect(find.text('第 3/3 张'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(find.text('第 3/3 张'), findsOneWidget);
+    expect(find.byKey(const Key('explore-candidate-next')), findsNothing);
+  });
+
+  testWidgets('detail dialog assigns folder, persists and jumps to next '
+      'uncategorized', (tester) async {
+    final folder = ExploreCandidateFolder(
+      id: 'folder-a',
+      name: '暖光',
+      createdAt: DateTime.utc(2026, 9, 14),
+    );
+    final run = await seedRun(
+      '归类任务',
+      status: ExploreRunStatus.generated,
+      candidates: [
+        doneCandidate('cand-1'),
+        doneCandidate('cand-2'),
+        doneCandidate('cand-3'),
+      ],
+    );
+    await runStorage.putRun(run.copyWith(folders: [folder]));
+    final container = await pumpScreen(tester);
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    final assignChip = find.byKey(const Key('explore-assign-folder-folder-a'));
+    expect(assignChip, findsOneWidget);
+    expect(tester.widget<FilterChip>(assignChip).selected, isFalse);
+
+    // 点文件夹即归档落盘 + 自动跳下一张未分类。
+    await tester.tap(assignChip);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      runStorage._store[run.id]!.candidateById('cand-1')!.folderId,
+      'folder-a',
+    );
+    expect(find.text('第 2/3 张'), findsOneWidget);
+
+    // 再归档第二张 → 跳到第三张。
+    await tester.tap(assignChip);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      runStorage._store[run.id]!.candidateById('cand-2')!.folderId,
+      'folder-a',
+    );
+    expect(find.text('第 3/3 张'), findsOneWidget);
+
+    // 回看第二张：归属态在弹窗内高亮。
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(find.text('第 2/3 张'), findsOneWidget);
+    expect(tester.widget<FilterChip>(assignChip).selected, isTrue);
+
+    // 再点当前文件夹 = 移回未分类（不删图、不跳页）。
+    await tester.tap(assignChip);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      runStorage._store[run.id]!.candidateById('cand-2')!.folderId,
+      isNull,
+    );
+    expect(find.text('第 2/3 张'), findsOneWidget);
+  });
+
+  testWidgets('toolbar creates a folder that groups the deck', (tester) async {
+    final run = await seedRun(
+      '牌堆任务',
+      status: ExploreRunStatus.generated,
+      candidates: [
+        doneCandidate('cand-1', folderId: 'folder-a'),
+        doneCandidate('cand-2'),
+      ],
+    );
+    final folder = ExploreCandidateFolder(
+      id: 'folder-a',
+      name: '暖光',
+      createdAt: DateTime.utc(2026, 9, 14),
+    );
+    await runStorage.putRun(run.copyWith(folders: [folder]));
+    final container = await pumpScreen(tester);
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // 工具条不新建文件夹时只有 全部/收藏/失败 三枚筛选。
+    expect(find.byKey(const Key('explore-filter-all')), findsOneWidget);
+    expect(find.byKey(const Key('explore-filter-hearted')), findsOneWidget);
+    expect(find.byKey(const Key('explore-filter-failed')), findsOneWidget);
+    expect(find.byKey(const Key('explore-formal-review')), findsNothing);
+
+    // 切到牌堆视图：按文件夹 + 未分类分组。
     await tester.tap(find.byKey(const Key('explore-gallery-view-toggle')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('珍宝 · 1'), findsOneWidget);
-    expect(find.text('拒绝 · 1'), findsOneWidget);
-    expect(find.text('未归类 · 2'), findsOneWidget);
-    // 空组不显示。
-    expect(find.byKey(const Key('explore-deck-header-special')), findsNothing);
-    // 四张卡都在。
-    for (final id in const ['cand-t', 'cand-r', 'cand-p', 'cand-pre']) {
+    expect(find.text('暖光 · 1'), findsOneWidget);
+    expect(find.text('未分类 · 1'), findsOneWidget);
+    expect(
+      find.byKey(const Key('explore-deck-header-uncategorized')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('explore-folder-rename-folder-a')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('explore-folder-delete-folder-a')),
+      findsOneWidget,
+    );
+    for (final id in const ['cand-1', 'cand-2']) {
       expect(find.byKey(Key('explore-candidate-$id')), findsOneWidget);
     }
 
-    // 切回网格。
+    // 工具条新建文件夹：命名框 → 牌堆出现新组。
+    await tester.tap(find.byKey(const Key('explore-gallery-new-folder')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      ),
+      '冷光',
+    );
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, '确定'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 3300));
+    expect(find.text('冷光 · 0'), findsNothing, reason: '空组不渲染');
+    expect(
+      find.byKey(const Key('explore-deck-header-uncategorized')),
+      findsOneWidget,
+    );
+    expect(runStorage._store[run.id]!.folders.map((f) => f.name), ['暖光', '冷光']);
+  });
+
+  testWidgets('deleting a folder returns its candidates to uncategorized', (
+    tester,
+  ) async {
+    final folder = ExploreCandidateFolder(
+      id: 'folder-a',
+      name: '暖光',
+      createdAt: DateTime.utc(2026, 9, 14),
+    );
+    final run = await seedRun(
+      '删组任务',
+      status: ExploreRunStatus.generated,
+      candidates: [doneCandidate('cand-1', folderId: 'folder-a')],
+    );
+    await runStorage.putRun(run.copyWith(folders: [folder]));
+    final container = await pumpScreen(tester);
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.byKey(const Key('explore-gallery-view-toggle')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('珍宝 · 1'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('explore-folder-delete-folder-a')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('删除文件夹'), findsWidgets);
+    await tester.tap(find.widgetWithText(FilledButton, '删除'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 3300));
+
+    final stored = runStorage._store[run.id]!;
+    expect(stored.folders, isEmpty);
+    expect(stored.candidateById('cand-1')!.folderId, isNull);
+    expect(stored.candidateById('cand-1')!.generation.filePath, isNull);
+    expect(find.byKey(const Key('explore-candidate-cand-1')), findsOneWidget);
+    expect(
+      find.byKey(const Key('explore-deck-header-uncategorized')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('detail dialog adopt-as-block passes roll positive to '
@@ -1792,22 +1827,17 @@ void main() {
     );
   });
 
-  testWidgets('reject candidate delete image removes copy and keeps record', (
-    tester,
-  ) async {
+  testWidgets('any candidate with a copy can delete its image', (tester) async {
     final imageStore = _FakeRunImageStore();
-    const rejectPath = '/tmp/style_explore_runs/run-1/cand-reject.png';
+    const copyPath = '/tmp/style_explore_runs/run-1/cand-1.png';
 
     final run = await seedRun(
       '删图任务',
       status: ExploreRunStatus.generated,
       candidates: [
-        doneCandidate('cand-keep', label: ExploreReviewLabel.treasure),
-        doneCandidate(
-          'cand-reject',
-          label: ExploreReviewLabel.reject,
-          filePath: rejectPath,
-        ),
+        // 无副本：不提供删除图片。
+        doneCandidate('cand-no-copy'),
+        doneCandidate('cand-1', filePath: copyPath),
       ],
     );
     final container = await pumpScreen(
@@ -1820,8 +1850,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // 非 reject 候选不提供删除图片。
-    await tester.tap(find.byKey(const Key('explore-candidate-cand-keep')));
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-no-copy')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(
@@ -1837,8 +1866,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // reject 候选：删除图片 → 确认 → 副本删除、记录保留（filePath 清空）。
-    await tester.tap(find.byKey(const Key('explore-candidate-cand-reject')));
+    // 有副本候选（non-reject）：删除图片 → 确认 → 副本删除、记录保留。
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.byKey(const Key('explore-candidate-delete-image')));
@@ -1850,8 +1879,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 3300));
 
-    expect(imageStore.deletedPaths, [rejectPath]);
-    final stored = runStorage._store[run.id]!.candidateById('cand-reject')!;
+    expect(imageStore.deletedPaths, [copyPath]);
+    final stored = runStorage._store[run.id]!.candidateById('cand-1')!;
     expect(stored.generation.filePath, isNull);
     expect(stored.generation.status, ExploreCandidateGenerationStatus.done);
     expect(stored.generation.seed, 42, reason: '记录保留，仅清副本路径');

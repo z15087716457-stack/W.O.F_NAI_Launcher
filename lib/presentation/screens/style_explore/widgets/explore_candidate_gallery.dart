@@ -10,15 +10,18 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../providers/style_explore/explore_roll_capture.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../widgets/common/app_toast.dart';
+import '../../../widgets/common/themed_confirm_dialog.dart';
+import '../../../widgets/common/themed_input_dialog.dart';
 import 'explore_candidate_actions.dart';
 import 'explore_create_family_dialog.dart';
-import 'explore_formal_review_overlay.dart';
+import 'explore_folder_assign_bar.dart';
 import 'explore_lineage_panel.dart';
 
-/// 右栏候选画廊：筛选 chips + 正式筛选入口 + 网格/牌堆视图 + 大图详情弹窗。
+/// 右栏候选画廊：筛选 chips + 新建文件夹 + 网格/牌堆视图 + 大图详情弹窗。
 ///
-/// 牌堆语义：心形与 T/S/R 预标记全部是纯数据注释（review 字段），
-/// 任何时刻不移动/改名图库文件；run 目录副本随 run 删除。
+/// 牌堆分组 = 用户自建文件夹 + 未分类（与谱系 pile 的遗传血缘完全平行解耦）；
+/// 收藏（heart 字段）是纯数据注释，任何时刻不移动/改名图库文件，
+/// run 目录副本随 run 删除。
 class ExploreCandidateGallery extends ConsumerStatefulWidget {
   const ExploreCandidateGallery({super.key});
 
@@ -93,9 +96,6 @@ class _ExploreCandidateGalleryState
     ExploreGalleryFilter filter,
     ExploreGalleryViewMode viewMode,
   ) {
-    final canReview =
-        exploreReviewableStatuses.contains(run.status) &&
-        run.reviewableCandidates.isNotEmpty;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
       child: Wrap(
@@ -113,12 +113,14 @@ class _ExploreCandidateGalleryState
                   ref.read(exploreGalleryFilterProvider.notifier).state =
                       entry.value,
             ),
-          // 正式筛选入口：有可审查候选（done）且状态允许时可用。
-          ActionChip(
-            key: const Key('explore-formal-review'),
-            avatar: const Icon(Icons.rate_review_outlined, size: 16),
-            label: Text(l10n.styleExplore_formalReview),
-            onPressed: canReview ? () => _enterFormalReview(run) : null,
+          // 新建文件夹：牌堆分组即文件夹，未分类组恒在最后。
+          IconButton(
+            key: const Key('explore-gallery-new-folder'),
+            iconSize: 18,
+            visualDensity: VisualDensity.compact,
+            tooltip: l10n.styleExplore_newFolder,
+            onPressed: () => promptCreateExploreFolder(context, ref, run.id),
+            icon: const Icon(Icons.create_new_folder_outlined),
           ),
           // 网格/牌堆视图切换。
           IconButton(
@@ -215,38 +217,21 @@ class _ExploreCandidateGalleryState
     );
   }
 
-  /// 牌堆视图：按正式标签分组（珍宝/特殊/拒绝/未归类），组头计数，
-  /// 组内复用候选卡；预标记仍作角标留在卡上。
+  /// 牌堆视图：按用户自建文件夹分组（未分类恒在最后），组头计数，
+  /// 组内复用候选卡；筛选 chips 在其上叠加过滤。
   Widget _buildDeck(
     ThemeData theme,
     AppLocalizations l10n,
     ExploreRun run,
     List<ExploreCandidate> filtered,
   ) {
-    final groups = <(ExploreReviewLabel?, String, IconData, Color)>[
+    final groups = <({String? folderId, String title, IconData icon})>[
+      for (final folder in run.folders)
+        (folderId: folder.id, title: folder.name, icon: Icons.folder_outlined),
       (
-        ExploreReviewLabel.treasure,
-        l10n.styleExplore_markTreasure,
-        Icons.diamond_outlined,
-        Colors.amber.shade700,
-      ),
-      (
-        ExploreReviewLabel.special,
-        l10n.styleExplore_markSpecial,
-        Icons.star_outline,
-        Colors.deepPurple,
-      ),
-      (
-        ExploreReviewLabel.reject,
-        l10n.styleExplore_markReject,
-        Icons.block,
-        theme.colorScheme.error,
-      ),
-      (
-        null,
-        l10n.styleExplore_reviewUnlabeled,
-        Icons.inbox_outlined,
-        theme.colorScheme.onSurfaceVariant,
+        folderId: null,
+        title: l10n.styleExplore_folderUncategorized,
+        icon: Icons.inbox_outlined,
       ),
     ];
 
@@ -256,15 +241,14 @@ class _ExploreCandidateGalleryState
         return ListView(
           padding: const EdgeInsets.all(8),
           children: [
-            for (final (label, title, icon, color) in groups)
+            for (final group in groups)
               ..._deckSection(
                 theme,
                 run,
                 filtered,
-                label: label,
-                title: title,
-                icon: icon,
-                color: color,
+                folderId: group.folderId,
+                title: group.title,
+                icon: group.icon,
                 crossAxisCount: crossAxisCount,
               ),
           ],
@@ -277,20 +261,22 @@ class _ExploreCandidateGalleryState
     ThemeData theme,
     ExploreRun run,
     List<ExploreCandidate> filtered, {
-    required ExploreReviewLabel? label,
+    required String? folderId,
     required String title,
     required IconData icon,
-    required Color color,
     required int crossAxisCount,
   }) {
     final members = [
       for (final candidate in filtered)
-        if (candidate.review.label == label) candidate,
+        if (candidate.folderId == folderId) candidate,
     ];
     if (members.isEmpty) return const [];
+    final color = folderId == null
+        ? theme.colorScheme.onSurfaceVariant
+        : theme.colorScheme.primary;
     return [
       Padding(
-        key: Key('explore-deck-header-${label?.name ?? 'unlabeled'}'),
+        key: Key('explore-deck-header-${folderId ?? 'uncategorized'}'),
         padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
         child: Row(
           children: [
@@ -300,6 +286,25 @@ class _ExploreCandidateGalleryState
               '$title · ${members.length}',
               style: theme.textTheme.titleSmall?.copyWith(color: color),
             ),
+            const Spacer(),
+            if (folderId != null) ...[
+              IconButton(
+                key: Key('explore-folder-rename-$folderId'),
+                iconSize: 16,
+                visualDensity: VisualDensity.compact,
+                tooltip: context.l10n.styleExplore_renameFolder,
+                onPressed: () => _renameFolder(run, folderId),
+                icon: const Icon(Icons.drive_file_rename_outline),
+              ),
+              IconButton(
+                key: Key('explore-folder-delete-$folderId'),
+                iconSize: 16,
+                visualDensity: VisualDensity.compact,
+                tooltip: context.l10n.styleExplore_deleteFolder,
+                onPressed: () => _deleteFolder(run, folderId),
+                icon: const Icon(Icons.delete_outline),
+              ),
+            ],
           ],
         ),
       ),
@@ -318,6 +323,42 @@ class _ExploreCandidateGalleryState
     ];
   }
 
+  Future<void> _renameFolder(ExploreRun run, String folderId) async {
+    final l10n = context.l10n;
+    final folder = run.folderById(folderId);
+    if (folder == null) return;
+    final name = await ThemedInputDialog.show(
+      context: context,
+      title: l10n.styleExplore_renameFolder,
+      labelText: l10n.styleExplore_folderNameLabel,
+      initialValue: folder.name,
+      validator: (value) =>
+          value.trim().isEmpty ? l10n.styleExplore_nameRequired : null,
+    );
+    if (name == null || name.trim().isEmpty) return;
+    await ref
+        .read(exploreRunListNotifierProvider.notifier)
+        .renameFolder(run.id, folderId, name);
+  }
+
+  Future<void> _deleteFolder(ExploreRun run, String folderId) async {
+    final l10n = context.l10n;
+    final folder = run.folderById(folderId);
+    if (folder == null) return;
+    final confirmed = await ThemedConfirmDialog.show(
+      context: context,
+      title: l10n.styleExplore_deleteFolder,
+      content: l10n.styleExplore_deleteFolderMessage(folder.name),
+      confirmText: l10n.common_delete,
+      type: ThemedConfirmDialogType.danger,
+      icon: Icons.delete_outline,
+    );
+    if (!confirmed) return;
+    await ref
+        .read(exploreRunListNotifierProvider.notifier)
+        .deleteFolder(run.id, folderId);
+  }
+
   Widget _buildCandidateCard(ExploreRun run, ExploreCandidate candidate) {
     return _CandidateCard(
       key: ValueKey('explore-candidate-${candidate.id}'),
@@ -328,6 +369,7 @@ class _ExploreCandidateGalleryState
       selected: _selectedIds.contains(candidate.id),
       onToggleSelect: () => _toggleSelect(candidate.id),
       onEnterSelection: () => _enterSelection(candidate.id),
+      onOpenDetail: () => _openCandidateDetail(run, candidate),
     );
   }
 
@@ -371,13 +413,29 @@ class _ExploreCandidateGalleryState
     if (created && mounted) _exitSelection();
   }
 
-  /// 候选详情弹窗（谱系区候选堆缩略图点击共用）。
+  /// 候选详情弹窗（画廊卡片与谱系区候选堆缩略图点击共用）。
+  ///
+  /// 翻页序 = 打开瞬间的筛选快照；点开的候选不在快照内（谱系区旁路）
+  /// 时退化为单张序列。
   void _openCandidateDetail(ExploreRun run, ExploreCandidate candidate) {
+    final filter = ref.read(exploreGalleryFilterProvider);
+    final candidateIds = [
+      for (final item in run.candidates)
+        if (exploreCandidateMatchesFilter(item, filter)) item.id,
+    ];
+    var index = candidateIds.indexOf(candidate.id);
+    if (index < 0) {
+      candidateIds
+        ..clear()
+        ..add(candidate.id);
+      index = 0;
+    }
     showDialog<void>(
       context: context,
       builder: (dialogContext) => ExploreCandidateDetailDialog(
         runId: run.id,
-        candidateId: candidate.id,
+        candidateIds: candidateIds,
+        initialIndex: index,
       ),
     );
   }
@@ -422,37 +480,12 @@ class _ExploreCandidateGalleryState
     }
   }
 
-  Future<void> _enterFormalReview(ExploreRun run) async {
-    try {
-      await ref
-          .read(exploreRunListNotifierProvider.notifier)
-          .beginReview(run.id);
-    } catch (_) {
-      return;
-    }
-    if (!mounted) return;
-    final completed = await ExploreFormalReviewOverlay.show(
-      context,
-      runId: run.id,
-    );
-    if (completed && mounted) {
-      AppToast.success(context, context.l10n.styleExplore_reviewCompleted);
-    }
-  }
-
   static List<MapEntry<String, ExploreGalleryFilter>> _filterEntries(
     AppLocalizations l10n,
   ) {
     return [
       MapEntry(l10n.styleExplore_filterAll, ExploreGalleryFilter.all),
       MapEntry(l10n.styleExplore_filterHearted, ExploreGalleryFilter.hearted),
-      MapEntry(
-        l10n.styleExplore_filterPendingReview,
-        ExploreGalleryFilter.pendingReview,
-      ),
-      MapEntry(l10n.styleExplore_markTreasure, ExploreGalleryFilter.treasure),
-      MapEntry(l10n.styleExplore_markSpecial, ExploreGalleryFilter.special),
-      MapEntry(l10n.styleExplore_markReject, ExploreGalleryFilter.reject),
       MapEntry(l10n.styleExplore_filterFailed, ExploreGalleryFilter.failed),
     ];
   }
@@ -489,7 +522,7 @@ class _EmptyHint extends StatelessWidget {
   }
 }
 
-/// 候选卡：缩略图 + #序号 + 轮次号 + 状态图标 + 心形 + T/S/R 预标记。
+/// 候选卡：缩略图 + #序号 + 轮次号 + 状态图标 + 右上角收藏钮。
 /// 多选模式下点按切换选择、角标换勾选圈；普通模式长按进入多选。
 class _CandidateCard extends ConsumerWidget {
   const _CandidateCard({
@@ -501,6 +534,7 @@ class _CandidateCard extends ConsumerWidget {
     required this.selected,
     required this.onToggleSelect,
     required this.onEnterSelection,
+    required this.onOpenDetail,
   });
 
   final ExploreRun run;
@@ -510,6 +544,7 @@ class _CandidateCard extends ConsumerWidget {
   final bool selected;
   final VoidCallback onToggleSelect;
   final VoidCallback onEnterSelection;
+  final VoidCallback onOpenDetail;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -522,97 +557,52 @@ class _CandidateCard extends ConsumerWidget {
       borderRadius: BorderRadius.circular(8),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: selectionMode ? onToggleSelect : () => _showDetail(context),
+        onTap: selectionMode ? onToggleSelect : onOpenDetail,
         onLongPress: selectionMode ? null : onEnterSelection,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  _buildThumbnail(theme, l10n),
-                  if (selected)
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: theme.colorScheme.primary,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
+            _buildThumbnail(theme, l10n),
+            if (selected)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: theme.colorScheme.primary,
+                        width: 2,
                       ),
-                    ),
-                  Positioned(
-                    left: 4,
-                    top: 4,
-                    child: _OverlayChip(
-                      text:
-                          '#$sequenceNumber'
-                          '${roundNumber != null ? ' · ${l10n.styleExplore_roundNumber(roundNumber)}' : ''}',
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  Positioned(
-                    right: 4,
-                    top: 4,
-                    child: selectionMode
-                        ? _buildSelectionIndicator(theme)
-                        : _buildStatusIcon(theme, l10n),
-                  ),
-                ],
+                ),
+              ),
+            Positioned(
+              left: 4,
+              top: 4,
+              child: _OverlayChip(
+                text:
+                    '#$sequenceNumber'
+                    '${roundNumber != null ? ' · ${l10n.styleExplore_roundNumber(roundNumber)}' : ''}',
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _SmallActionButton(
-                    key: Key('explore-candidate-heart-${candidate.id}'),
-                    icon: candidate.review.heart
-                        ? Icons.favorite
-                        : Icons.favorite_border,
-                    color: candidate.review.heart
-                        ? theme.colorScheme.error
-                        : theme.colorScheme.onSurfaceVariant,
-                    tooltip: l10n.styleExplore_filterHearted,
-                    onPressed: () => _toggleHeart(ref),
-                  ),
-                  _SmallLabelButton(
-                    key: Key('explore-candidate-treasure-${candidate.id}'),
-                    label: 'T',
-                    selected:
-                        candidate.review.preliminaryLabel ==
-                        ExploreReviewLabel.treasure,
-                    tooltip: l10n.styleExplore_markTreasure,
-                    onPressed: () =>
-                        _toggleLabel(ref, ExploreReviewLabel.treasure),
-                  ),
-                  _SmallLabelButton(
-                    key: Key('explore-candidate-special-${candidate.id}'),
-                    label: 'S',
-                    selected:
-                        candidate.review.preliminaryLabel ==
-                        ExploreReviewLabel.special,
-                    tooltip: l10n.styleExplore_markSpecial,
-                    onPressed: () =>
-                        _toggleLabel(ref, ExploreReviewLabel.special),
-                  ),
-                  _SmallLabelButton(
-                    key: Key('explore-candidate-reject-${candidate.id}'),
-                    label: 'R',
-                    selected:
-                        candidate.review.preliminaryLabel ==
-                        ExploreReviewLabel.reject,
-                    tooltip: l10n.styleExplore_markReject,
-                    onPressed: () =>
-                        _toggleLabel(ref, ExploreReviewLabel.reject),
-                  ),
-                ],
-              ),
+            Positioned(
+              right: 4,
+              top: 4,
+              child: selectionMode
+                  ? _buildSelectionIndicator(theme)
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // 待生成/失败态保留状态徽标，与收藏钮并存。
+                        if (candidate.generation.status !=
+                            ExploreCandidateGenerationStatus.done) ...[
+                          _buildStatusIcon(theme),
+                          const SizedBox(width: 4),
+                        ],
+                        _buildHeartButton(theme, ref),
+                      ],
+                    ),
             ),
           ],
         ),
@@ -664,7 +654,7 @@ class _CandidateCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusIcon(ThemeData theme, AppLocalizations l10n) {
+  Widget _buildStatusIcon(ThemeData theme) {
     switch (candidate.generation.status) {
       case ExploreCandidateGenerationStatus.pending:
         return const _OverlayIcon(icon: Icons.schedule);
@@ -674,42 +664,38 @@ class _CandidateCard extends ConsumerWidget {
           color: theme.colorScheme.error,
         );
       case ExploreCandidateGenerationStatus.done:
-        if (candidate.review.heart) {
-          return _OverlayIcon(
-            icon: Icons.favorite,
-            color: theme.colorScheme.error,
-          );
-        }
         return const SizedBox.shrink();
     }
+  }
+
+  /// 收藏钮（原心形角标原位改造）：点即切换 heart 字段。
+  Widget _buildHeartButton(ThemeData theme, WidgetRef ref) {
+    final hearted = candidate.review.heart;
+    return InkWell(
+      key: Key('explore-candidate-heart-${candidate.id}'),
+      customBorder: const CircleBorder(),
+      onTap: () => _toggleHeart(ref),
+      child: Container(
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withValues(alpha: 0.75),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          hearted ? Icons.favorite : Icons.favorite_border,
+          size: 14,
+          color: hearted
+              ? theme.colorScheme.error
+              : theme.colorScheme.onSurface,
+        ),
+      ),
+    );
   }
 
   void _toggleHeart(WidgetRef ref) {
     ref
         .read(exploreRunListNotifierProvider.notifier)
         .updateReview(run.id, candidate.id, heart: !candidate.review.heart);
-  }
-
-  void _toggleLabel(WidgetRef ref, ExploreReviewLabel label) {
-    final selected = candidate.review.preliminaryLabel == label;
-    ref
-        .read(exploreRunListNotifierProvider.notifier)
-        .updateReview(
-          run.id,
-          candidate.id,
-          preliminaryLabel: selected ? null : label,
-          clearPreliminaryLabel: selected,
-        );
-  }
-
-  void _showDetail(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => ExploreCandidateDetailDialog(
-        runId: run.id,
-        candidateId: candidate.id,
-      ),
-    );
   }
 }
 
@@ -770,107 +756,47 @@ class _OverlayIcon extends StatelessWidget {
   }
 }
 
-class _SmallActionButton extends StatelessWidget {
-  const _SmallActionButton({
-    super.key,
-    required this.icon,
-    required this.onPressed,
-    this.color,
-    this.tooltip,
-  });
-
-  final IconData icon;
-  final VoidCallback onPressed;
-  final Color? color;
-  final String? tooltip;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return IconButton(
-      iconSize: 18,
-      visualDensity: VisualDensity.compact,
-      tooltip: tooltip,
-      onPressed: onPressed,
-      icon: Icon(icon, color: color ?? theme.colorScheme.onSurfaceVariant),
-    );
-  }
-}
-
-class _SmallLabelButton extends StatelessWidget {
-  const _SmallLabelButton({
-    super.key,
-    required this.label,
-    required this.selected,
-    required this.onPressed,
-    this.tooltip,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onPressed;
-  final String? tooltip;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Tooltip(
-      message: tooltip ?? '',
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(4),
-        child: Container(
-          width: 24,
-          height: 24,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: selected ? scheme.primaryContainer : Colors.transparent,
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(
-              color: selected
-                  ? scheme.primary
-                  : scheme.outlineVariant.withValues(alpha: 0.6),
-            ),
-          ),
-          child: Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: selected
-                  ? scheme.onPrimaryContainer
-                  : scheme.onSurfaceVariant,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 候选详情弹窗：大图 + Roll 快照全文（可复制）+ seed + 参数快照 + 出口动作
-/// （收编为块 / 导入元数据 / Reject 删图）。
+/// 候选详情弹窗：大图 + Roll 快照全文（可复制）+ seed + 参数快照 + 归类区
+/// + 出口动作（收编为块 / 导入元数据 / 删除候选图）。
 ///
-/// 按 id 实时解析 run 与候选，评审/删图等写操作后内容自动刷新。
-class ExploreCandidateDetailDialog extends ConsumerWidget {
+/// 按 id 实时解析 run 与候选，收藏/归类/删图等写操作后内容自动刷新。
+/// 翻页（左右箭头 + ←/→/小键盘）走打开瞬间传入的快照序列，边界停住不循环。
+class ExploreCandidateDetailDialog extends ConsumerStatefulWidget {
   const ExploreCandidateDetailDialog({
     super.key,
     required this.runId,
-    required this.candidateId,
+    required this.candidateIds,
+    this.initialIndex = 0,
   });
 
   final String runId;
-  final String candidateId;
+
+  /// 翻页序（打开瞬间的筛选快照，按顺序）。
+  final List<String> candidateIds;
+
+  final int initialIndex;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ExploreCandidateDetailDialog> createState() =>
+      _ExploreCandidateDetailDialogState();
+}
+
+class _ExploreCandidateDetailDialogState
+    extends ConsumerState<ExploreCandidateDetailDialog> {
+  late int _index = widget.initialIndex.clamp(
+    0,
+    widget.candidateIds.isEmpty ? 0 : widget.candidateIds.length - 1,
+  );
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final run = ref
         .watch(exploreRunListNotifierProvider)
         .valueOrNull
-        ?.runById(runId);
-    final candidate = run?.candidateById(candidateId);
+        ?.runById(widget.runId);
+    final candidate = _resolve(run);
 
     if (run == null || candidate == null) {
       return Dialog(
@@ -899,173 +825,307 @@ class ExploreCandidateDetailDialog extends ConsumerWidget {
     final snapshot = run.paramsSnapshot;
     final roll = candidate.rollSnapshot;
 
-    return Dialog(
-      key: const Key('explore-candidate-detail'),
-      child: ConstrainedBox(
-        // 详情弹窗给足图区：窗口随屏取 85%×88%（E2 定稿，网格排版不动）。
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.sizeOf(context).width * 0.85,
-          maxHeight: MediaQuery.sizeOf(context).height * 0.88,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 8, 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.styleExplore_candidateDetailTitle,
-                      style: theme.textTheme.titleMedium,
+    return Focus(
+      autofocus: true,
+      onKeyEvent: _handleKeyEvent,
+      child: Dialog(
+        key: const Key('explore-candidate-detail'),
+        child: ConstrainedBox(
+          // 详情弹窗给足图区：窗口随屏取 85%×88%（E2 定稿，网格排版不动）。
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.sizeOf(context).width * 0.85,
+            maxHeight: MediaQuery.sizeOf(context).height * 0.88,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 8, 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.styleExplore_candidateDetailTitle,
+                        style: theme.textTheme.titleMedium,
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    tooltip: l10n.common_close,
-                    iconSize: 18,
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
+                    if (widget.candidateIds.length > 1)
+                      Text(
+                        l10n.styleExplore_candidatePosition(
+                          _index + 1,
+                          widget.candidateIds.length,
+                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    IconButton(
+                      tooltip: l10n.common_close,
+                      iconSize: 18,
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Divider(height: 1, color: theme.dividerColor),
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // 图:信息 = 7:3（静定）：图区给足，信息列窄排
-                  Expanded(
-                    flex: 7,
-                    child: _buildDetailImage(theme, l10n, candidate),
-                  ),
-                  VerticalDivider(width: 1, color: theme.dividerColor),
-                  Expanded(
-                    flex: 3,
-                    child: ListView(
-                      padding: const EdgeInsets.all(12),
-                      children: [
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
-                          children: [
-                            Text(
-                              snapshot.model,
-                              style: theme.textTheme.bodySmall,
-                            ),
-                            Text(
-                              '${snapshot.width}×${snapshot.height}',
-                              style: theme.textTheme.bodySmall,
-                            ),
-                            Text(
-                              'steps ${snapshot.steps}',
-                              style: theme.textTheme.bodySmall,
-                            ),
-                            Text(
-                              'scale ${snapshot.scale}',
-                              style: theme.textTheme.bodySmall,
-                            ),
-                            Text(
-                              snapshot.sampler,
-                              style: theme.textTheme.bodySmall,
-                            ),
-                            if (generation.seed != null)
-                              Text(
-                                l10n.styleExplore_seedLabel(
-                                  generation.seed.toString(),
+              Divider(height: 1, color: theme.dividerColor),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // 图:信息 = 7:3（静定）：图区给足，信息列窄排
+                    Expanded(
+                      flex: 7,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: _buildDetailImage(theme, l10n, candidate),
+                          ),
+                          if (_canMove(run, -1))
+                            Positioned(
+                              left: 4,
+                              top: 0,
+                              bottom: 0,
+                              child: Center(
+                                child: _buildPagerButton(
+                                  key: const Key('explore-candidate-prev'),
+                                  icon: Icons.chevron_left,
+                                  tooltip: l10n.styleExplore_prevCandidate,
+                                  onPressed: () => _move(run, -1),
                                 ),
-                                style: theme.textTheme.bodySmall,
                               ),
-                            if (generation.elapsedMs != null)
-                              Text(
-                                '${generation.elapsedMs} ms',
-                                style: theme.textTheme.bodySmall,
-                              ),
-                          ],
-                        ),
-                        if (generation.error != null) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            generation.error!,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.error,
                             ),
-                          ),
+                          if (_canMove(run, 1))
+                            Positioned(
+                              right: 4,
+                              top: 0,
+                              bottom: 0,
+                              child: Center(
+                                child: _buildPagerButton(
+                                  key: const Key('explore-candidate-next'),
+                                  icon: Icons.chevron_right,
+                                  tooltip: l10n.styleExplore_nextCandidate,
+                                  onPressed: () => _move(run, 1),
+                                ),
+                              ),
+                            ),
                         ],
-                        const SizedBox(height: 12),
-                        _buildExportActions(
-                          context,
-                          ref,
-                          theme,
-                          l10n,
-                          run,
-                          candidate,
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Text(
-                              l10n.styleExplore_rollSnapshot,
-                              style: theme.textTheme.titleSmall,
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              key: const Key('explore-candidate-copy-snapshot'),
-                              tooltip: l10n.common_copy,
-                              iconSize: 18,
-                              onPressed: roll == null
-                                  ? null
-                                  : () => _copySnapshot(context, roll),
-                              icon: const Icon(Icons.copy_outlined),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        if (roll != null) ...[
-                          SelectableText(
-                            roll.positive,
-                            style: theme.textTheme.bodySmall,
-                          ),
-                          const SizedBox(height: 8),
-                          SelectableText(
-                            roll.negative,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          if (roll.instanceRolls.isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            for (final instance in roll.instanceRolls)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 4),
-                                child: SelectableText(
-                                  '[${instance.lane}] '
-                                  '${instance.blockTitle}: '
-                                  '${instance.rolledText}',
+                      ),
+                    ),
+                    VerticalDivider(width: 1, color: theme.dividerColor),
+                    Expanded(
+                      flex: 3,
+                      child: ListView(
+                        padding: const EdgeInsets.all(12),
+                        children: [
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: [
+                              Text(
+                                snapshot.model,
+                                style: theme.textTheme.bodySmall,
+                              ),
+                              Text(
+                                '${snapshot.width}×${snapshot.height}',
+                                style: theme.textTheme.bodySmall,
+                              ),
+                              Text(
+                                'steps ${snapshot.steps}',
+                                style: theme.textTheme.bodySmall,
+                              ),
+                              Text(
+                                'scale ${snapshot.scale}',
+                                style: theme.textTheme.bodySmall,
+                              ),
+                              Text(
+                                snapshot.sampler,
+                                style: theme.textTheme.bodySmall,
+                              ),
+                              if (generation.seed != null)
+                                Text(
+                                  l10n.styleExplore_seedLabel(
+                                    generation.seed.toString(),
+                                  ),
                                   style: theme.textTheme.bodySmall,
                                 ),
-                              ),
-                          ],
-                        ] else
-                          Text(
-                            l10n.styleExplore_previewEmpty,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
+                              if (generation.elapsedMs != null)
+                                Text(
+                                  '${generation.elapsedMs} ms',
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                            ],
                           ),
-                      ],
+                          if (generation.error != null) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              generation.error!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.error,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 12),
+                          _buildExportActions(
+                            context,
+                            ref,
+                            theme,
+                            l10n,
+                            run,
+                            candidate,
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Text(
+                                l10n.styleExplore_rollSnapshot,
+                                style: theme.textTheme.titleSmall,
+                              ),
+                              const Spacer(),
+                              IconButton(
+                                key: const Key(
+                                  'explore-candidate-copy-snapshot',
+                                ),
+                                tooltip: l10n.common_copy,
+                                iconSize: 18,
+                                onPressed: roll == null
+                                    ? null
+                                    : () => _copySnapshot(context, roll),
+                                icon: const Icon(Icons.copy_outlined),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          if (roll != null) ...[
+                            SelectableText(
+                              roll.positive,
+                              style: theme.textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: 8),
+                            SelectableText(
+                              roll.negative,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            if (roll.instanceRolls.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              for (final instance in roll.instanceRolls)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
+                                  child: SelectableText(
+                                    '[${instance.lane}] '
+                                    '${instance.blockTitle}: '
+                                    '${instance.rolledText}',
+                                    style: theme.textTheme.bodySmall,
+                                  ),
+                                ),
+                            ],
+                          ] else
+                            Text(
+                              l10n.styleExplore_previewEmpty,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          const SizedBox(height: 16),
+                          ExploreFolderAssignBar(
+                            run: run,
+                            candidate: candidate,
+                            onAssigned: (folderId) =>
+                                _advanceAfterAssign(run, folderId),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// 出口动作行：收编为块 / 导入元数据 / Reject 删图（仅 reject 且有副本）。
+  /// 当前位候选；记录已删（详情打开期间）返回 null。
+  ExploreCandidate? _resolve(ExploreRun? run) {
+    if (run == null || widget.candidateIds.isEmpty) return null;
+    return run.candidateById(widget.candidateIds[_index]);
+  }
+
+  /// 该方向是否还有可翻的候选（跳过已删记录；边界停住不循环）。
+  bool _canMove(ExploreRun run, int delta) {
+    var next = _index + delta;
+    while (next >= 0 && next < widget.candidateIds.length) {
+      if (run.candidateById(widget.candidateIds[next]) != null) return true;
+      next += delta;
+    }
+    return false;
+  }
+
+  void _move(ExploreRun run, int delta) {
+    var next = _index + delta;
+    while (next >= 0 && next < widget.candidateIds.length) {
+      if (run.candidateById(widget.candidateIds[next]) != null) {
+        setState(() => _index = next);
+        return;
+      }
+      next += delta;
+    }
+  }
+
+  /// 归档后自动跳到下一张未分类候选（连续归档不打断）；已无则留在原地。
+  void _advanceAfterAssign(ExploreRun run, String? folderId) {
+    if (folderId == null || !mounted) return;
+    for (var next = _index + 1; next < widget.candidateIds.length; next++) {
+      final candidate = run.candidateById(widget.candidateIds[next]);
+      if (candidate == null) continue;
+      if (candidate.folderId == null) {
+        setState(() => _index = next);
+        return;
+      }
+    }
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    final run = ref
+        .read(exploreRunListNotifierProvider)
+        .valueOrNull
+        ?.runById(widget.runId);
+    if (run == null) return KeyEventResult.ignored;
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.arrowLeft ||
+        key == LogicalKeyboardKey.numpad4) {
+      if (_canMove(run, -1)) _move(run, -1);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.arrowRight ||
+        key == LogicalKeyboardKey.numpad6) {
+      if (_canMove(run, 1)) _move(run, 1);
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  Widget _buildPagerButton({
+    required Key key,
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      key: key,
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: Icon(icon),
+    );
+  }
+
+  /// 出口动作行：收编为块 / 导入元数据 / 删除候选图（有副本即可删）。
   Widget _buildExportActions(
     BuildContext context,
     WidgetRef ref,
@@ -1075,9 +1135,7 @@ class ExploreCandidateDetailDialog extends ConsumerWidget {
     ExploreCandidate candidate,
   ) {
     final roll = candidate.rollSnapshot;
-    final canDeleteImage =
-        ExploreCandidateActions.isRejected(candidate) &&
-        candidate.generation.filePath != null;
+    final canDeleteImage = candidate.generation.filePath != null;
     return Wrap(
       spacing: 8,
       runSpacing: 4,

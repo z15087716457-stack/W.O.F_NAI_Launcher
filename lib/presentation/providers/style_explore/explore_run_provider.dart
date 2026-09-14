@@ -187,62 +187,112 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     });
   }
 
-  /// 评审字段更新（心形/预标记/正式标签）。
-  ///
-  /// 写正式标签时传 [formalReviewedAt]（筛选会话打标=写当前时间）；
-  /// [clearLabel] 会一并清掉归类时间。
+  /// 收藏标记更新。
   Future<ExploreRun> updateReview(
     String runId,
     String candidateId, {
     bool? heart,
-    ExploreReviewLabel? preliminaryLabel,
-    bool clearPreliminaryLabel = false,
-    ExploreReviewLabel? label,
-    bool clearLabel = false,
-    DateTime? formalReviewedAt,
   }) {
     return updateCandidate(runId, candidateId, (candidate) {
       var review = candidate.review;
       if (heart != null) review = review.copyWith(heart: heart);
-      if (preliminaryLabel != null || clearPreliminaryLabel) {
-        review = review.copyWith(preliminaryLabel: preliminaryLabel);
-      }
-      if (label != null || clearLabel) {
-        review = review.copyWith(
-          label: label,
-          formalReviewedAt: formalReviewedAt,
-        );
-      }
       return candidate.copyWith(review: review);
     });
   }
 
-  /// 进入正式筛选：run → reviewing。
-  ///
-  /// 允许从 draft（手动候选 run）/generated/reviewing（续筛）/completed
-  /// （复筛）进入；必须有可审查候选（done）。
-  Future<ExploreRun> beginReview(String runId) {
+  /// 新建用户文件夹（名称去首尾空白；空名抛 [StateError]）。
+  Future<ExploreCandidateFolder> createFolder(String runId, String name) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) {
+      throw StateError('文件夹名称不能为空');
+    }
+    final folder = ExploreCandidateFolder(
+      id: const Uuid().v4(),
+      name: trimmed,
+      createdAt: DateTime.now(),
+    );
     return _mutateRun(runId, (run) {
-      if (!exploreReviewableStatuses.contains(run.status)) {
-        throw StateError('Run $runId cannot enter review from ${run.status}');
+      return run.copyWith(folders: [...run.folders, folder]);
+    }).then((_) => folder);
+  }
+
+  /// 重命名用户文件夹。
+  Future<ExploreRun> renameFolder(String runId, String folderId, String name) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) {
+      throw StateError('文件夹名称不能为空');
+    }
+    return _mutateRun(runId, (run) {
+      if (run.folderById(folderId) == null) {
+        throw StateError('文件夹不存在: $folderId');
       }
-      if (run.reviewableCandidates.isEmpty) {
-        throw StateError('Run $runId has no reviewable candidates');
-      }
-      return run.copyWith(status: ExploreRunStatus.reviewing);
+      return run.copyWith(
+        folders: [
+          for (final folder in run.folders)
+            folder.id == folderId ? folder.copyWith(name: trimmed) : folder,
+        ],
+      );
     });
   }
 
-  /// 完成正式筛选：全部可审查候选都有正式标签才允许 → completed。
-  /// 返回 false = 门禁拒绝（状态非 reviewing 或未归类完），不改动数据。
-  Future<bool> completeReview(String runId) async {
-    final repository = ref.read(styleExploreRunRepositoryProvider);
-    final run = await repository.getRun(runId);
-    if (run == null) return false;
-    if (run.status != ExploreRunStatus.reviewing) return false;
-    if (!run.isReviewComplete) return false;
-    await overwrite(run.copyWith(status: ExploreRunStatus.completed));
-    return true;
+  /// 删除用户文件夹：成员回未分类，候选图与记录不动。
+  Future<ExploreRun> deleteFolder(String runId, String folderId) {
+    return _mutateRun(runId, (run) {
+      if (run.folderById(folderId) == null) {
+        throw StateError('文件夹不存在: $folderId');
+      }
+      return run.copyWith(
+        folders: [
+          for (final folder in run.folders)
+            if (folder.id != folderId) folder,
+        ],
+        candidates: [
+          for (final candidate in run.candidates)
+            candidate.folderId == folderId
+                ? candidate.copyWith(folderId: null)
+                : candidate,
+        ],
+      );
+    });
+  }
+
+  /// 单候选归类：`folderId` 为 null = 移回未分类。
+  Future<ExploreRun> assignCandidateFolder(
+    String runId,
+    String candidateId,
+    String? folderId,
+  ) {
+    return assignCandidatesFolder(runId, [candidateId], folderId);
+  }
+
+  /// 批量归类（多选归档与批量动作共用）。
+  Future<ExploreRun> assignCandidatesFolder(
+    String runId,
+    List<String> candidateIds,
+    String? folderId,
+  ) {
+    final target = candidateIds.toSet();
+    if (target.isEmpty) {
+      throw StateError('请选择至少一张候选');
+    }
+    return _mutateRun(runId, (run) {
+      if (folderId != null && run.folderById(folderId) == null) {
+        throw StateError('文件夹不存在: $folderId');
+      }
+      for (final id in target) {
+        if (run.candidateById(id) == null) {
+          throw StateError('Candidate $id not in run $runId');
+        }
+      }
+      return run.copyWith(
+        candidates: [
+          for (final candidate in run.candidates)
+            target.contains(candidate.id)
+                ? candidate.copyWith(folderId: folderId)
+                : candidate,
+        ],
+      );
+    });
   }
 
   /// 生成结果字段更新。
@@ -529,16 +579,8 @@ final exploreActiveRunProvider = Provider<ExploreRun?>((ref) {
       ?.runById(activeId);
 });
 
-/// 候选画廊筛选（牌堆语义：全部/心形/待审/T/S/R/失败）。
-enum ExploreGalleryFilter {
-  all,
-  hearted,
-  pendingReview,
-  treasure,
-  special,
-  reject,
-  failed,
-}
+/// 候选画廊筛选（全部/收藏/失败；文件夹分组由牌堆视图承担）。
+enum ExploreGalleryFilter { all, hearted, failed }
 
 final exploreGalleryFilterProvider = StateProvider<ExploreGalleryFilter>(
   (ref) => ExploreGalleryFilter.all,
@@ -554,37 +596,13 @@ bool exploreCandidateMatchesFilter(
       return true;
     case ExploreGalleryFilter.hearted:
       return candidate.review.heart;
-    case ExploreGalleryFilter.pendingReview:
-      return !candidate.review.heart &&
-          candidate.review.preliminaryLabel == null &&
-          candidate.review.label == null;
-    case ExploreGalleryFilter.treasure:
-      return _hasLabel(candidate, ExploreReviewLabel.treasure);
-    case ExploreGalleryFilter.special:
-      return _hasLabel(candidate, ExploreReviewLabel.special);
-    case ExploreGalleryFilter.reject:
-      return _hasLabel(candidate, ExploreReviewLabel.reject);
     case ExploreGalleryFilter.failed:
       return candidate.generation.status ==
           ExploreCandidateGenerationStatus.failed;
   }
 }
 
-bool _hasLabel(ExploreCandidate candidate, ExploreReviewLabel label) {
-  return candidate.review.preliminaryLabel == label ||
-      candidate.review.label == label;
-}
-
-/// 允许进入正式筛选的 run 状态（generating/paused 有未跑完的生成，
-/// cancelled 是终态，均不放行）。
-const exploreReviewableStatuses = {
-  ExploreRunStatus.draft,
-  ExploreRunStatus.generated,
-  ExploreRunStatus.reviewing,
-  ExploreRunStatus.completed,
-};
-
-/// 候选画廊视图模式：网格 / 牌堆（按正式标签分组）。
+/// 候选画廊视图模式：网格 / 牌堆（牌堆按用户自建文件夹分组）。
 enum ExploreGalleryViewMode { grid, deck }
 
 final exploreGalleryViewModeProvider = StateProvider<ExploreGalleryViewMode>(

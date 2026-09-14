@@ -10595,9 +10595,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_runStatusGenerated => '生成済み';
 
   @override
-  String get styleExplore_runStatusReviewing => '選別中';
-
-  @override
   String get styleExplore_runStatusCompleted => '完了';
 
   @override
@@ -10661,28 +10658,55 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_filterAll => 'すべて';
 
   @override
-  String get styleExplore_filterHearted => 'ハート';
-
-  @override
-  String get styleExplore_filterPendingReview => '未マーク';
+  String get styleExplore_filterHearted => 'お気に入り';
 
   @override
   String get styleExplore_filterFailed => '失敗';
 
   @override
-  String get styleExplore_markTreasure => '宝物';
+  String get styleExplore_newFolder => '新しいフォルダ';
 
   @override
-  String get styleExplore_markSpecial => '特殊';
+  String get styleExplore_renameFolder => 'フォルダ名を変更';
 
   @override
-  String get styleExplore_markReject => '却下';
+  String get styleExplore_deleteFolder => 'フォルダを削除';
+
+  @override
+  String styleExplore_deleteFolderMessage(String name) {
+    return 'フォルダ「$name」を削除します。中の候補は未分類に戻り、画像は削除されません。';
+  }
+
+  @override
+  String get styleExplore_folderNameLabel => 'フォルダ名';
+
+  @override
+  String get styleExplore_folderUncategorized => '未分類';
+
+  @override
+  String styleExplore_folderCreated(String name) {
+    return 'フォルダ「$name」を作成しました';
+  }
+
+  @override
+  String get styleExplore_assignToFolder => '分類先';
 
   @override
   String get styleExplore_candidateMissing => '画像ファイルがありません';
 
   @override
   String get styleExplore_candidateDetailTitle => '候補詳細';
+
+  @override
+  String styleExplore_candidatePosition(int current, int total) {
+    return '$current/$total 枚目';
+  }
+
+  @override
+  String get styleExplore_prevCandidate => '前へ';
+
+  @override
+  String get styleExplore_nextCandidate => '次へ';
 
   @override
   String get styleExplore_rollSnapshot => 'Roll スナップショット';
@@ -10696,29 +10720,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String styleExplore_roundNumber(int number) {
     return 'ラウンド $number';
   }
-
-  @override
-  String get styleExplore_formalReview => '正式選別';
-
-  @override
-  String styleExplore_reviewProgress(int labeled, int total) {
-    return '分類済み $labeled/$total';
-  }
-
-  @override
-  String get styleExplore_reviewComplete => '選別を完了';
-
-  @override
-  String get styleExplore_reviewCompleted => '選別が完了しました';
-
-  @override
-  String get styleExplore_reviewUndo => '直前を取り消す';
-
-  @override
-  String get styleExplore_reviewExit => '選別を終了';
-
-  @override
-  String get styleExplore_reviewUnlabeled => '未分類';
 
   @override
   String get styleExplore_viewGrid => 'グリッド表示';
