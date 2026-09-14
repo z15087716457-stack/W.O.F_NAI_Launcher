@@ -121,6 +121,7 @@ void main() {
   ProviderContainer container({
     required ExploreGenerateFn generateFn,
     List<PromptBlock> blocks = const [],
+    ExploreRunImageStore? imageStore,
     List<Override> overrides = const [],
   }) {
     final c = ProviderContainer(
@@ -128,9 +129,10 @@ void main() {
         styleExploreRunStorageProvider.overrideWithValue(runStorage),
         exploreGenerateFnProvider.overrideWithValue(generateFn),
         exploreRunImageStoreProvider.overrideWithValue(
-          ExploreRunImageStore(
-            rootPathResolver: () async => imageDirectory.path,
-          ),
+          imageStore ??
+              ExploreRunImageStore(
+                rootPathResolver: () async => imageDirectory.path,
+              ),
         ),
         promptBlockLibraryNotifierProvider.overrideWith(
           () => _FakeLibraryNotifier(blocks),
@@ -214,6 +216,39 @@ void main() {
         expect(params.height, liveParams.height);
       }
     });
+
+    test(
+      'store failure keeps candidate done without source path fallback',
+      () async {
+        final run = await seedRun(targetCount: 1);
+        const sourcePath = 'gallery/source_should_never_leak.png';
+        final c = container(
+          generateFn: (params) async => ExploreGenerationResult(
+            imageBytes: Uint8List.fromList(const [1, 2, 3]),
+            seed: 7,
+            elapsedMs: 5,
+            imageWidth: 832,
+            imageHeight: 1216,
+            filePath: sourcePath,
+          ),
+          // 图库根不可用 → storeCandidateImage 返回 null。
+          imageStore: ExploreRunImageStore(rootPathResolver: () async => null),
+        );
+        c.read(exploreRunRunnerProvider);
+        await Future<void>.delayed(Duration.zero);
+
+        await c.read(exploreRunRunnerProvider.notifier).start(run.id);
+
+        final after = await reload(c, run.id);
+        final candidate = after.candidates.single;
+        expect(
+          candidate.generation.status,
+          ExploreCandidateGenerationStatus.done,
+        );
+        // 铁律：filePath 只可能是 run 目录副本路径，绝不回退到源图路径。
+        expect(candidate.generation.filePath, isNull);
+      },
+    );
 
     test('mid-run failure marks candidate failed and continues', () async {
       final run = await seedRun(targetCount: 3);
@@ -530,7 +565,7 @@ void main() {
 
   group('interrupted run recovery', () {
     test(
-      'generating runs left over are recovered to paused on build',
+      'generating runs without pending settle to generated on build',
       () async {
         final run = await seedRun(targetCount: 2);
         await runStorage.putRun(
@@ -549,7 +584,8 @@ void main() {
           await Future<void>.delayed(Duration.zero);
           after = await reload(c, run.id);
         }
-        expect(after.status, ExploreRunStatus.paused);
+        // 无 pending 候选：无工作可续，落 generated 而非 paused。
+        expect(after.status, ExploreRunStatus.generated);
       },
     );
 
@@ -573,7 +609,7 @@ void main() {
           await Future<void>.delayed(Duration.zero);
           after = await reload(c, run.id);
         }
-        expect(after.status, ExploreRunStatus.paused);
+        expect(after.status, ExploreRunStatus.generated);
         expect(c.read(exploreRunRunnerProvider).isRunning, isFalse);
       },
     );

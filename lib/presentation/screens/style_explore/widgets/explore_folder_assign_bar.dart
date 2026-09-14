@@ -19,8 +19,19 @@ Future<ExploreCandidateFolder?> promptCreateExploreFolder(
     context: context,
     title: l10n.styleExplore_newFolder,
     labelText: l10n.styleExplore_folderNameLabel,
-    validator: (value) =>
-        value.trim().isEmpty ? l10n.styleExplore_nameRequired : null,
+    validator: (value) {
+      final trimmed = value.trim();
+      if (trimmed.isEmpty) return l10n.styleExplore_nameRequired;
+      // 重名预检（provider 层同名硬校验兜底）。
+      final run = ref
+          .read(exploreRunListNotifierProvider)
+          .valueOrNull
+          ?.runById(runId);
+      if (run != null && run.folders.any((f) => f.name == trimmed)) {
+        return l10n.toast_renameNameConflict;
+      }
+      return null;
+    },
   );
   if (name == null || name.trim().isEmpty) return null;
   try {

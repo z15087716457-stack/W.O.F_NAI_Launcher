@@ -7,6 +7,7 @@ import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
+import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 import 'package:nai_launcher/presentation/utils/asset_protection_guard.dart';
 import 'package:nai_launcher/presentation/widgets/common/app_toast.dart';
 import 'package:nai_launcher/presentation/widgets/common/draggable_number_input.dart';
@@ -55,8 +56,15 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
         ? ref.watch(estimatedCostForBatchSizeProvider(1))
         : null;
     final isLauncherGenerating = generationState.isGenerating;
+    // 探索页：runner 会话期间手动生成会与逐张生成互相抢占批次 id、
+    // 且 roll 快照与工作区投影分叉——runner 在跑即视为生成中，禁用按钮。
+    final exploreRunnerBusy = widget.exploreMode
+        ? ref.watch(exploreRunRunnerProvider).isRunning
+        : false;
     final isGenerating =
-        isLauncherGenerating || kritaBridgeState.isBridgeGenerating;
+        isLauncherGenerating ||
+        kritaBridgeState.isBridgeGenerating ||
+        exploreRunnerBusy;
 
     // 生成中常驻显示取消入口（与移动端一致）
     final showCancel = isLauncherGenerating;
@@ -129,9 +137,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                           compact: true,
                           margin: EdgeInsets.only(right: 8),
                         ),
-                        AnlasBalanceChip(
-                          estimatedCostOverride: costOverride,
-                        ),
+                        AnlasBalanceChip(estimatedCostOverride: costOverride),
                       ],
                     ),
                   ),
@@ -169,9 +175,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                             compact: true,
                             margin: EdgeInsets.only(right: 8),
                           ),
-                          AnlasBalanceChip(
-                            estimatedCostOverride: costOverride,
-                          ),
+                          AnlasBalanceChip(estimatedCostOverride: costOverride),
                         ],
                       ),
                     ),

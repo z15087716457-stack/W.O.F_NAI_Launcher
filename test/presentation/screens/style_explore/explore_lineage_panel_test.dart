@@ -380,7 +380,8 @@ void main() {
     await tester.tap(pileThumbs(1, 3).at(0));
     await tester.pump();
 
-    expect(opened.map((candidate) => candidate.id), ['c-1']);
+    // 候选堆展示序为「最新在前」：位置 0 = 登记序最后的 c-3。
+    expect(opened.map((candidate) => candidate.id), ['c-3']);
     expect(find.text('${l10n.styleExplore_createBranch} (0)'), findsOneWidget);
     expect(
       find.descendant(
@@ -452,11 +453,12 @@ void main() {
         .toList();
     expect(newSets, hasLength(1));
     expect(newSets.single.branchName, '甲分支');
-    // 选中 2 张子代 + 第一代 2 个父本回交。
+    // 选中 2 张子代 + 第一代 2 个父本回交（堆展示序新在前：
+    // 位置 0/1 = mut:c/mut:b）。
     expect(newSets.single.parents, hasLength(4));
     expect(
       newSets.single.parents.map((parent) => parent.artistString),
-      containsAll(<String>['mut:a', 'mut:b', 'root:a', 'root:b']),
+      containsAll(<String>['mut:c', 'mut:b', 'root:a', 'root:b']),
     );
     expect(stored.familyById('fam-1')!.activeParentSetId, newSets.single.id);
     expect(stored.parentSetById('ps-2')!.status, ExploreParentSetStatus.used);
@@ -572,5 +574,96 @@ void main() {
     expect(sort.dy, closeTo(generate.dy, 1));
     expect(generate.dx, lessThan(field.dx));
     expect(field.dx, lessThan(sort.dx));
+  });
+
+  /// 活跃集父本数可调的夹具（ps-2 换指定数量的父本）。
+  ExploreRun runWithActiveParents(int parentCount) {
+    final base = twoGenerationRun();
+    final parents = [
+      for (var i = 0; i < parentCount; i++)
+        ExploreParent(id: 'mp-$i', artistString: 'p:$i'),
+    ];
+    return base.copyWith(
+      parentSets: [
+        for (final set in base.parentSets)
+          set.id == 'ps-2' ? set.copyWith(parents: parents) : set,
+      ],
+    );
+  }
+
+  testWidgets('偏好排序入口：父本不足两个时置灰不可点', (tester) async {
+    await pumpPanel(tester, twoGenerationRun(), []);
+
+    final sortButton = tester.widget<OutlinedButton>(
+      find.byKey(const Key('explore-sort-parents-ps-2')),
+    );
+    expect(sortButton.onPressed, isNull);
+  });
+
+  testWidgets('父本数超 50：深度轮 clamp 上下界不倒置、不抛异常', (tester) async {
+    final runner = _RecordingRunner();
+    await pumpPanel(tester, runWithActiveParents(55), [], runner: runner);
+
+    expect(countText(tester, 'ps-2'), '56');
+    await tester.tap(generateButton('ps-2'));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    // 父本数 >50 时上下界都收拢到父本数：出图数锁定=55，不抛 clamp 倒置。
+    expect(runner.calls, [(familyId: 'fam-1', parentSetId: 'ps-2', count: 55)]);
+
+    // 超限值同样按 55 夹取而非抛错。
+    await tester.enterText(countField('ps-2'), '99');
+    await tester.tap(generateButton('ps-2'));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(runner.calls.last.count, 55);
+  });
+
+  testWidgets('偏好排序双击连点不重计分', (tester) async {
+    await pumpPanel(tester, runWithActiveParents(2), []);
+    await tester.tap(find.byKey(const Key('explore-sort-parents-ps-2')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('explore-preference-sort-dialog')),
+      findsOneWidget,
+    );
+    // 单配对场景连续两击：第二击在作答在飞期间被吞。
+    await tester.tap(find.byKey(const Key('explore-sort-left')));
+    await tester.tap(find.byKey(const Key('explore-sort-left')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final stored = (await storage.getRun('run-1'))!;
+    final comparisons = stored.parentSetById('ps-2')!.comparisons;
+    expect(comparisons, hasLength(1));
+    expect(comparisons.single.result, ExploreComparisonResult.left);
+
+    // AppToast.success 的 3 秒自动关闭定时器。
+    await tester.pump(const Duration(milliseconds: 3300));
+  });
+
+  testWidgets('开窗期间 run 被删：作答提示失败并收窗，不推进配对', (tester) async {
+    await pumpPanel(tester, runWithActiveParents(3), []);
+    await tester.tap(find.byKey(const Key('explore-sort-parents-ps-2')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await storage.deleteRun('run-1');
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('explore-sort-left')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('explore-preference-sort-dialog')),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+
+    // AppToast.error 的 3 秒自动关闭定时器。
+    await tester.pump(const Duration(milliseconds: 3300));
   });
 }

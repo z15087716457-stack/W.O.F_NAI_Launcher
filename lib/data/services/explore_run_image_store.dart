@@ -77,10 +77,22 @@ class ExploreRunImageStore {
     }
   }
 
-  /// 删除单个候选图副本（Reject 候选出口；候选记录保留，仅清文件）。
+  /// 删除单个候选图副本（候选记录保留，仅清文件）。
+  /// 仅允许删 `style_explore_runs/` 目录内的文件——历史数据里 filePath
+  /// 可能回退写过源图路径，目录外一律拒删，防误删用户原图。
   /// 文件本就不存在视为成功（幂等），返回是否删成。
   Future<bool> deleteCandidateImage(String filePath) async {
     try {
+      final root = await _rootPathResolver();
+      if (root == null || root.isEmpty) return false;
+      final runsDir = p.normalize(p.join(root, runsDirectoryName));
+      if (!p.isWithin(runsDir, p.normalize(filePath))) {
+        AppLogger.w(
+          'Refuse to delete file outside explore runs dir: $filePath',
+          'ExploreRunImageStore',
+        );
+        return false;
+      }
       final file = File(filePath);
       if (await file.exists()) {
         await file.delete();

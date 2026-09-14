@@ -121,32 +121,6 @@ void main() {
   });
 
   test(
-    'targetCount editable in draft and generated, rejected elsewhere',
-    () async {
-      final c = container();
-      final notifier = c.read(exploreRunListNotifierProvider.notifier);
-      final created = await createRun(c);
-
-      final updated = await notifier.updateTargetCount(created.id, 25);
-      expect(updated.targetCount, 25);
-
-      // generated 态仍可编辑（作用于追加的新一轮）。
-      await notifier.overwrite(
-        updated.copyWith(status: ExploreRunStatus.generated),
-      );
-      final again = await notifier.updateTargetCount(created.id, 8);
-      expect(again.targetCount, 8);
-
-      // 其他状态拒绝修改。
-      await notifier.overwrite(again.copyWith(status: ExploreRunStatus.paused));
-      expect(
-        () => notifier.updateTargetCount(created.id, 50),
-        throwsA(isA<StateError>()),
-      );
-    },
-  );
-
-  test(
     'addManualCandidates reuses one manual round and links lineage',
     () async {
       final c = container();
@@ -398,7 +372,7 @@ void main() {
   });
 
   group('legacy reviewing status', () {
-    test('decodes and round-trips for stored runs', () async {
+    test('decodes and normalizes to generated on storage read', () async {
       final c = container();
       final notifier = c.read(exploreRunListNotifierProvider.notifier);
       final run = await createRun(c);
@@ -417,7 +391,8 @@ void main() {
         ),
       );
 
-      // 评审体系拆除后无路径可再写入 reviewing；存量值只作反序列化兼容。
+      // 评审体系拆除后无路径可再写入 reviewing；存量值只作反序列化兼容，
+      // 存储层读入即归一化为 generated（下次落盘自愈）。
       final legacy = await notifier.overwrite(
         generated.copyWith(status: ExploreRunStatus.reviewing),
       );
@@ -425,7 +400,7 @@ void main() {
       final stored = (await c.read(
         exploreRunListNotifierProvider.future,
       )).runById(run.id)!;
-      expect(stored.status, ExploreRunStatus.reviewing);
+      expect(stored.status, ExploreRunStatus.generated);
     });
   });
 

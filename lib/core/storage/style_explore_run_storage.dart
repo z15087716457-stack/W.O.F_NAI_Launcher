@@ -129,7 +129,7 @@ class StyleExploreRunStorage {
     final runs = <ExploreRun>[];
     for (final key in _keysWithPrefix(box, _runPrefix)) {
       final run = await _readEntity(box, key, ExploreRun.fromJson);
-      if (run != null) runs.add(run);
+      if (run != null) runs.add(_normalizeLegacyStatus(run));
     }
     runs.sort((a, b) {
       final comparison = b.updatedAt.compareTo(a.updatedAt);
@@ -142,8 +142,16 @@ class StyleExploreRunStorage {
   /// 读取单个 Run。
   Future<ExploreRun?> getRun(String id) async {
     final box = await _getBox();
-    return _readEntity(box, runKey(id), ExploreRun.fromJson);
+    final run = await _readEntity(box, runKey(id), ExploreRun.fromJson);
+    return run == null ? null : _normalizeLegacyStatus(run);
   }
+
+  /// 存量 `reviewing` 归一化为 `generated`（评审体系已整层拆除，
+  /// 枚举值仅为反序列化兼容保留；读到即转，下次落盘自愈）。
+  static ExploreRun _normalizeLegacyStatus(ExploreRun run) =>
+      run.status == ExploreRunStatus.reviewing
+      ? run.copyWith(status: ExploreRunStatus.generated)
+      : run;
 
   /// 保存或覆盖单个 Run。
   Future<void> putRun(ExploreRun run) async {

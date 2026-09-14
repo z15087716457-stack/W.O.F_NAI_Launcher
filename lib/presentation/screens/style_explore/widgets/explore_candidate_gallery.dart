@@ -36,6 +36,10 @@ class _ExploreCandidateGalleryState
   bool _selectionMode = false;
   final Set<String> _selectedIds = {};
 
+  /// 最近一次渲染的 run id：切 run 时多选态随之清空（选择集只对
+  /// 旧 run 的候选有意义）。
+  String? _lastRunId;
+
   /// 候选堆缩略图悬停预览会话（FEAT-41）：谱系区全部堆卡共享。
   final ExploreCandidateHoverSession _hoverSession =
       ExploreCandidateHoverSession();
@@ -61,6 +65,11 @@ class _ExploreCandidateGalleryState
     }
 
     final candidates = run.candidates;
+    if (run.id != _lastRunId) {
+      _lastRunId = run.id;
+      _selectionMode = false;
+      _selectedIds.clear();
+    }
     // 候选集合变化后清掉失效的选择项（删 run/重选 run 等）。
     final existingIds = candidates.map((c) => c.id).toSet();
     _selectedIds.removeWhere((id) => !existingIds.contains(id));
@@ -302,8 +311,15 @@ class _ExploreCandidateGalleryState
       title: l10n.styleExplore_renameFolder,
       labelText: l10n.styleExplore_folderNameLabel,
       initialValue: folder.name,
-      validator: (value) =>
-          value.trim().isEmpty ? l10n.styleExplore_nameRequired : null,
+      validator: (value) {
+        final trimmed = value.trim();
+        if (trimmed.isEmpty) return l10n.styleExplore_nameRequired;
+        // 重名预检（provider 层同名硬校验兜底）。
+        if (run.folders.any((f) => f.id != folderId && f.name == trimmed)) {
+          return l10n.toast_renameNameConflict;
+        }
+        return null;
+      },
     );
     if (name == null || name.trim().isEmpty) return;
     await ref
@@ -334,7 +350,8 @@ class _ExploreCandidateGalleryState
       key: ValueKey('explore-candidate-${candidate.id}'),
       run: run,
       candidate: candidate,
-      sequenceNumber: run.candidates.indexOf(candidate) + 1,
+      sequenceNumber:
+          run.candidates.indexWhere((c) => c.id == candidate.id) + 1,
       selectionMode: _selectionMode,
       selected: _selectedIds.contains(candidate.id),
       onToggleSelect: () => _toggleSelect(candidate.id),
@@ -1172,6 +1189,8 @@ class _ExploreCandidateDetailDialogState
       child: Image.file(
         File(filePath),
         fit: BoxFit.contain,
+        // 详情大图按图区尺寸解码（原图全尺寸解码是内存尖峰）。
+        cacheWidth: 1600,
         errorBuilder: (context, error, stackTrace) => _ThumbnailPlaceholder(
           icon: Icons.broken_image_outlined,
           tooltip: l10n.styleExplore_candidateMissing,

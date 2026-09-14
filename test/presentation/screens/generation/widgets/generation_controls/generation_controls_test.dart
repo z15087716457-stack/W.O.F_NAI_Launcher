@@ -7,6 +7,7 @@ import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
+import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_controls/batch_settings_button.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_controls/generation_controls.dart';
@@ -80,6 +81,8 @@ void main() {
           subscriptionNotifierProvider.overrideWith(
             _TestSubscriptionNotifier.new,
           ),
+          // explore 分支会 watch runner：替身跳过恢复任务对真 Hive 的依赖。
+          exploreRunRunnerProvider.overrideWith(() => _TestExploreRunner()),
           estimatedCostProvider.overrideWith((ref) => 0),
           isFreeGenerationProvider.overrideWith((ref) => true),
         ],
@@ -122,6 +125,7 @@ void main() {
           subscriptionNotifierProvider.overrideWith(
             _TestSubscriptionNotifier.new,
           ),
+          exploreRunRunnerProvider.overrideWith(() => _TestExploreRunner()),
           estimatedCostProvider.overrideWith((ref) => 0),
           isFreeGenerationProvider.overrideWith((ref) => true),
         ],
@@ -174,4 +178,10 @@ class _TestKritaBridgeNotifier extends KritaBridgeNotifier {
 class _TestSubscriptionNotifier extends SubscriptionNotifier {
   @override
   SubscriptionState build() => const SubscriptionState.initial();
+}
+
+/// Runner 替身：build 不触发 _recoverInterruptedRuns（真 Hive 未初始化）。
+class _TestExploreRunner extends ExploreRunRunner {
+  @override
+  ExploreRunRunnerState build() => const ExploreRunRunnerState();
 }

@@ -445,12 +445,6 @@ Future<void> _bootstrapApplication() async {
     StorageKeys.promptWorkspaceStateBox,
     hivePath: hivePath,
   );
-  // 画风探索 Recipe（独立版本化 Box）
-  await _openHiveBoxIfNeeded<String>(
-    StorageKeys.styleExploreRecipesBox,
-    hivePath: hivePath,
-  );
-
   // 初始化图像元数据服务（包含持久化缓存，用于详情页快速加载）
   await _runNonFatalStartupStep(
     'Image metadata service initialization',

@@ -87,86 +87,72 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     await ref.read(exploreRunImageStoreProvider).deleteRunDir(id);
   }
 
-  /// 出图数编辑（草稿态 + generated 追加轮前可编辑）。
-  Future<ExploreRun> updateTargetCount(String id, int targetCount) {
-    return _mutateRun(id, (run) {
-      const editable = {ExploreRunStatus.draft, ExploreRunStatus.generated};
-      if (!editable.contains(run.status)) {
-        throw StateError('Only draft/generated runs can edit targetCount: $id');
-      }
-      return run.copyWith(targetCount: targetCount);
-    });
-  }
-
   /// 追加手动候选（探索页生成按钮登记）：复用最近的手动轮（无则新建，
   /// 状态直接 generated 不经 runner），一次落盘追加 [count] 个 pending
-  /// 候选（lineage.operation=manual）。[rollSnapshots] 按追加候选顺序写入；
-  /// [firstRollSnapshot] 仅保留给旧调用方兼容。
+  /// 候选（lineage.operation=manual）。[rollSnapshots] 按追加候选顺序写入。
   Future<List<ExploreCandidate>> addManualCandidates(
     String runId, {
     required int count,
     List<ExploreRollSnapshot?>? rollSnapshots,
-    ExploreRollSnapshot? firstRollSnapshot,
-  }) async {
-    final repository = ref.read(styleExploreRunRepositoryProvider);
-    final run = await repository.getRun(runId);
-    if (run == null) {
-      throw StateError('Style explore run does not exist: $runId');
-    }
+  }) {
+    return _serializeMutation(
+      () => _performMutation((repository) async {
+        final run = await repository.getRun(runId);
+        if (run == null) {
+          throw StateError('Style explore run does not exist: $runId');
+        }
 
-    ExploreRound? manualRound;
-    for (final round in run.rounds.reversed) {
-      if (round.phase == ExploreRoundPhase.manual) {
-        manualRound = round;
-        break;
-      }
-    }
-    final rounds = [...run.rounds];
-    if (manualRound == null) {
-      manualRound = ExploreRound(
-        id: const Uuid().v4(),
-        number: rounds.length + 1,
-        phase: ExploreRoundPhase.manual,
-        status: ExploreRoundStatus.generated,
-        createdAt: DateTime.now(),
-        targetCount: 0,
-      );
-      rounds.add(manualRound);
-    }
-    final roundId = manualRound.id;
-    final snapshots =
-        rollSnapshots ??
-        (firstRollSnapshot == null
-            ? null
-            : <ExploreRollSnapshot?>[firstRollSnapshot]);
+        ExploreRound? manualRound;
+        for (final round in run.rounds.reversed) {
+          if (round.phase == ExploreRoundPhase.manual) {
+            manualRound = round;
+            break;
+          }
+        }
+        final rounds = [...run.rounds];
+        if (manualRound == null) {
+          manualRound = ExploreRound(
+            id: const Uuid().v4(),
+            number: rounds.length + 1,
+            phase: ExploreRoundPhase.manual,
+            status: ExploreRoundStatus.generated,
+            createdAt: DateTime.now(),
+            targetCount: 0,
+          );
+          rounds.add(manualRound);
+        }
+        final roundId = manualRound.id;
+        final snapshots = rollSnapshots;
 
-    final candidates = [
-      for (var i = 0; i < count; i++)
-        ExploreCandidate(
-          id: const Uuid().v4(),
-          roundId: roundId,
-          rollSnapshot: snapshots != null && i < snapshots.length
-              ? snapshots[i]
-              : null,
-          lineage: const ExploreLineage(
-            operation: ExploreLineageOperation.manual,
+        final candidates = [
+          for (var i = 0; i < count; i++)
+            ExploreCandidate(
+              id: const Uuid().v4(),
+              roundId: roundId,
+              rollSnapshot: snapshots != null && i < snapshots.length
+                  ? snapshots[i]
+                  : null,
+              lineage: const ExploreLineage(
+                operation: ExploreLineageOperation.manual,
+              ),
+            ),
+        ];
+        final roundIndex = rounds.indexWhere((round) => round.id == roundId);
+        rounds[roundIndex] = rounds[roundIndex].copyWith(
+          candidateIds: [
+            ...rounds[roundIndex].candidateIds,
+            for (final candidate in candidates) candidate.id,
+          ],
+        );
+        await repository.overwrite(
+          run.copyWith(
+            rounds: rounds,
+            candidates: [...run.candidates, ...candidates],
           ),
-        ),
-    ];
-    final roundIndex = rounds.indexWhere((round) => round.id == roundId);
-    rounds[roundIndex] = rounds[roundIndex].copyWith(
-      candidateIds: [
-        ...rounds[roundIndex].candidateIds,
-        for (final candidate in candidates) candidate.id,
-      ],
+        );
+        return candidates;
+      }),
     );
-    await overwrite(
-      run.copyWith(
-        rounds: rounds,
-        candidates: [...run.candidates, ...candidates],
-      ),
-    );
-    return candidates;
   }
 
   /// 候选通用更新：读-改-写单个候选后落盘。
@@ -212,6 +198,9 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
       createdAt: DateTime.now(),
     );
     return _mutateRun(runId, (run) {
+      if (run.folders.any((entry) => entry.name == trimmed)) {
+        throw StateError('文件夹名称已存在: $trimmed');
+      }
       return run.copyWith(folders: [...run.folders, folder]);
     }).then((_) => folder);
   }
@@ -225,6 +214,11 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     return _mutateRun(runId, (run) {
       if (run.folderById(folderId) == null) {
         throw StateError('文件夹不存在: $folderId');
+      }
+      if (run.folders.any(
+        (entry) => entry.id != folderId && entry.name == trimmed,
+      )) {
+        throw StateError('文件夹名称已存在: $trimmed');
       }
       return run.copyWith(
         folders: [
@@ -493,6 +487,9 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     return _mutateRun(runId, (run) {
       final set = run.parentSetById(parentSetId);
       if (set == null) throw StateError('父本集不存在: $parentSetId');
+      if (leftParentId == rightParentId) {
+        throw StateError('比较双方不能是同一父本: $parentSetId');
+      }
       final ids = {for (final parent in set.parents) parent.id};
       if (!ids.contains(leftParentId) || !ids.contains(rightParentId)) {
         throw StateError('比较目标父本不在父本集中: $parentSetId');
@@ -534,19 +531,41 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     });
   }
 
+  /// 变更尾链：读-改-写跨 await，并发变更若无序交错会读同一旧快照
+  /// 互相覆盖（lost update）。所有变更（_mutate/_mutateRun/
+  /// addManualCandidates）都经同一尾链串行。
+  Future<void> _mutationTail = Future<void>.value();
+
+  Future<T> _serializeMutation<T>(Future<T> Function() action) {
+    final result = _mutationTail.then((_) => action());
+    // 尾链自身不携带错误（错误经 result 传给调用方），保证后续变更
+    // 不被前一次失败卡死。
+    _mutationTail = result.then<void>((_) {}, onError: (_) {});
+    return result;
+  }
+
   Future<ExploreRun> _mutateRun(
     String runId,
     ExploreRun Function(ExploreRun run) update,
-  ) async {
-    final repository = ref.read(styleExploreRunRepositoryProvider);
-    final run = await repository.getRun(runId);
-    if (run == null) {
-      throw StateError('Style explore run does not exist: $runId');
-    }
-    return overwrite(update(run));
+  ) {
+    // 整段读-改-写纳入串行；直接打 repository，不绕道 overwrite()
+    // （会二次进 _serializeMutation 自我死锁）。
+    return _serializeMutation(
+      () => _performMutation((repository) async {
+        final run = await repository.getRun(runId);
+        if (run == null) {
+          throw StateError('Style explore run does not exist: $runId');
+        }
+        return repository.overwrite(update(run));
+      }),
+    );
   }
 
   Future<T> _mutate<T>(
+    Future<T> Function(StyleExploreRunRepository repository) action,
+  ) => _serializeMutation(() => _performMutation(action));
+
+  Future<T> _performMutation<T>(
     Future<T> Function(StyleExploreRunRepository repository) action,
   ) async {
     final repository = ref.read(styleExploreRunRepositoryProvider);
@@ -555,7 +574,14 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
       state = AsyncData(ExploreRunListState(runs: await repository.load()));
       return result;
     } catch (error, stackTrace) {
-      state = AsyncError(error, stackTrace);
+      // 单次变更失败不污染列表：保留既有数据快照让 UI 继续可用（错误
+      // 由调用方 toast），仅在还没有任何数据时才落 AsyncError。
+      final previous = state.valueOrNull;
+      if (previous != null) {
+        state = AsyncData(previous);
+      } else {
+        state = AsyncError(error, stackTrace);
+      }
       rethrow;
     }
   }

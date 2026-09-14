@@ -6,6 +6,7 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../providers/pill_workspace_provider.dart';
+import '../../../providers/style_explore/explore_manual_capture.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../providers/style_explore/explore_run_runner.dart';
 import '../../../providers/style_explore_provider.dart';
@@ -61,6 +62,12 @@ abstract final class ExploreRunActions {
     ExploreRun run,
   ) async {
     final l10n = context.l10n;
+    // runner 会话逐张读主工作区投影；载入快照会覆写双 lane，
+    // 使后续候选脱离 run 快照语义——运行中禁止。
+    if (ref.read(exploreRunRunnerProvider).isRunning) {
+      AppToast.info(context, l10n.styleExplore_runBusy);
+      return;
+    }
     if (ref.read(styleExploreNeedsOverwriteConfirmProvider)) {
       final confirmed = await ThemedConfirmDialog.show(
         context: context,
@@ -126,10 +133,22 @@ abstract final class ExploreRunActions {
     );
     if (!confirmed) return;
 
-    // 正在跑的 run 先取消（终态化），再删记录。
+    // 正在跑的 run 先取消（终态化），并等会话 finalize 收尾再删目录——
+    // 在途写盘落进已删目录会变孤儿文件。
     final runner = ref.read(exploreRunRunnerProvider);
     if (runner.isRunning && runner.runId == run.id) {
       ref.read(exploreRunRunnerProvider.notifier).cancel();
+      for (var i = 0; i < 100; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        if (!context.mounted || !ref.read(exploreRunRunnerProvider).isRunning) {
+          break;
+        }
+      }
+    }
+    // 手动登记会话挂在本 run 上时一并解除（其候选壳随 run 删除消失）。
+    final capture = ref.read(exploreManualCaptureProvider);
+    if (capture.armed && capture.runId == run.id) {
+      ref.read(exploreManualCaptureProvider.notifier).cancelSession();
     }
     try {
       await ref.read(exploreRunListNotifierProvider.notifier).delete(run.id);

@@ -37,10 +37,6 @@ class ExploreManualCaptureState {
   /// 各生成槽位发送前抓取的 roll 快照，列表下标对应 0-based 槽位。
   final List<ExploreRollSnapshot?> rollSnapshots;
 
-  /// 兼容旧调用方的首张快照访问器。
-  ExploreRollSnapshot? get rollSnapshot =>
-      rollSnapshots.isEmpty ? null : rollSnapshots.first;
-
   final DateTime? armedAt;
 
   ExploreManualCaptureState copyWith({
@@ -94,7 +90,18 @@ class ExploreManualCaptureNotifier extends Notifier<ExploreManualCaptureState> {
     int? generationRunId,
     String? activeRunId,
   }) async {
-    if (state.armed) return;
+    if (state.armed) {
+      // 直接调用方撞上异 id 旧会话同样先收尸（事件路径已在
+      // _handleBatchEvent 顶部处理；id 不可判定时维持忽略语义）。
+      final staleId = state.generationRunId;
+      final incomingId = generationRunId != null && generationRunId >= 0
+          ? generationRunId
+          : null;
+      if (staleId == null || incomingId == null || staleId == incomingId) {
+        return;
+      }
+      cancelSession(generationRunId: staleId);
+    }
     final rollSnapshot = captureExploreRollSnapshot(ref);
     final sessionId = ++_sessionCounter;
     state = ExploreManualCaptureState(
@@ -209,6 +216,17 @@ class ExploreManualCaptureNotifier extends Notifier<ExploreManualCaptureState> {
     required String autoRunName,
     String? activeRunId,
   }) async {
+    // 上一会话批次链中断遗留 armed（其 complete 永不达）：它的
+    // generationRunId 过滤器会吞掉新批次的全部事件、arm 又直接早退，
+    // 登记器永久卡死——新批次 start 撞上异 id 旧会话时先按取消收尸
+    // （清壳+复位），再走正常布防。
+    if (event.kind == GenerationBatchEventKind.start &&
+        state.armed &&
+        state.generationRunId != null &&
+        event.generationRunId >= 0 &&
+        state.generationRunId != event.generationRunId) {
+      cancelSession(generationRunId: state.generationRunId);
+    }
     final currentGenerationRunId = state.generationRunId;
     if (event.generationRunId >= 0 &&
         currentGenerationRunId != null &&
@@ -381,7 +399,7 @@ class ExploreManualCaptureNotifier extends Notifier<ExploreManualCaptureState> {
               ? current.copyWith(
                   generation: ExploreCandidateGeneration(
                     status: ExploreCandidateGenerationStatus.done,
-                    filePath: storedPath ?? image.filePath,
+                    filePath: storedPath,
                     seed: image.metadata?.seed,
                     elapsedMs: event.elapsedMs,
                   ),

@@ -30,7 +30,6 @@ class StorageKeys {
   static const String collectionsBox = 'collections';
   static const String promptBlockLibraryBox = 'prompt_block_library_v1';
   static const String promptWorkspaceStateBox = 'prompt_workspace_state_v1';
-  static const String styleExploreRecipesBox = 'style_explore_recipes_v1';
   static const String styleExploreRunsBox = 'style_explore_runs_v1';
 
   // Settings Keys

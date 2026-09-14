@@ -48,6 +48,9 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
   bool _branchSelecting = false;
   final Set<String> _branchSelected = {};
 
+  /// 建分支在飞（命名对话框敞开期间连点确认不重入）。
+  var _branchSubmitting = false;
+
   @override
   void didUpdateWidget(covariant ExploreLineagePanel oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -119,11 +122,13 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                       label: Text(entry.name),
                       selected: entry.id == family.id,
                       visualDensity: VisualDensity.compact,
-                      onSelected: (_) => setState(() {
+                      onSelected: (_) {
+                        // 重按当前家族 chip 早退：不清掉进行中的分支选择。
+                        if (entry.id == family.id) return;
                         _exitBranchSelection();
                         ref.read(exploreActiveFamilyIdProvider.notifier).state =
                             entry.id;
-                      }),
+                      },
                     ),
                   ),
               ],
@@ -156,6 +161,7 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                             run,
                             family,
                             generation,
+                            isActive: generation.parentSet.id == activeSet?.id,
                           ),
                           _buildPileCard(
                             theme,
@@ -199,10 +205,12 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
     AppLocalizations l10n,
     ExploreRun run,
     ExploreFamily family,
-    ExploreLineageGeneration generation,
-  ) {
+    ExploreLineageGeneration generation, {
+    required bool isActive,
+  }) {
     final parentSet = generation.parentSet;
-    final isActive = parentSet.status == ExploreParentSetStatus.active;
+    // 「活跃」口径统一取家族 activeParentSetId 指针（深度轮/分支/对照
+    // 都按它走），不另看 parentSet.status，避免两源不一致时 UI 分裂。
     return Card(
       margin: const EdgeInsets.fromLTRB(8, 4, 8, 2),
       child: Padding(
@@ -289,12 +297,20 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
     required bool isActive,
   }) {
     final parentSet = generation.parentSet;
-    final pile = generation.pile;
+    // 展示层反转：与画廊/详情翻页同为「最新在前」（登记序与 #N 序号不动）。
+    final pile = generation.pile.reversed.toList();
     // 分支选择只对活跃（最新代）候选堆有效（provider `createBranch` 硬校验
     // 只能从最新代选）：失效清理只由活跃堆执行，非活跃堆各清一遍会跨代误删
     // 活跃堆的选择。切家族的选择清空由家族 chip 的 _exitBranchSelection 负责。
     final pileIds = pile.map((c) => c.id).toSet();
     if (isActive) _branchSelected.removeWhere((id) => !pileIds.contains(id));
+    // 已被收编为父本的候选（任一父本集的 sourceCandidateId）——堆内
+    // 缩略图给角标，避免重复收编/误选。
+    final adoptedIds = {
+      for (final set in run.parentSets)
+        for (final parent in set.parents)
+          if (parent.sourceCandidateId case final id?) id,
+    };
 
     return Card(
       margin: const EdgeInsets.fromLTRB(8, 2, 8, 4),
@@ -347,6 +363,7 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                       // provider 校验，点了也只落 StateError。
                       selecting: _branchSelecting && isActive,
                       selected: _branchSelected.contains(candidate.id),
+                      adopted: adoptedIds.contains(candidate.id),
                       onTap: () {
                         if (_branchSelecting && isActive) {
                           setState(() {
@@ -377,7 +394,7 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                       candidateId: candidate.id,
                       filePath: filePath,
                       badgeText:
-                          '#${run.candidates.indexOf(candidate) + 1}'
+                          '#${run.candidates.indexWhere((c) => c.id == candidate.id) + 1}'
                           '${roundNumber != null ? ' · ${l10n.styleExplore_roundNumber(roundNumber)}' : ''}',
                       child: thumb,
                     );
@@ -449,43 +466,53 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
     ExploreFamily family,
     ExploreParentSet parentSet,
   ) async {
-    final l10n = context.l10n;
-    final name = await ThemedInputDialog.show(
-      context: context,
-      title: l10n.styleExplore_createBranch,
-      labelText: l10n.styleExplore_branchNameLabel,
-    );
-    if (name == null || !mounted) return;
-
+    if (_branchSubmitting) return;
+    _branchSubmitting = true;
     try {
-      final newSet = await ref
-          .read(exploreRunListNotifierProvider.notifier)
-          .createBranch(
-            widget.run.id,
-            familyId: family.id,
-            selectedCandidateIds: _branchSelected.toList(),
-            branchName: name.trim().isEmpty ? null : name.trim(),
+      // 进对话框前快照目标 run 与选择集：开窗期间切 run 会让
+      // _branchSelected 被 didUpdateWidget 清掉，快照保住本次意图。
+      final runId = widget.run.id;
+      final selectedIds = _branchSelected.toList();
+      final l10n = context.l10n;
+      final name = await ThemedInputDialog.show(
+        context: context,
+        title: l10n.styleExplore_createBranch,
+        labelText: l10n.styleExplore_branchNameLabel,
+      );
+      if (name == null || !mounted) return;
+
+      try {
+        final newSet = await ref
+            .read(exploreRunListNotifierProvider.notifier)
+            .createBranch(
+              runId,
+              familyId: family.id,
+              selectedCandidateIds: selectedIds,
+              branchName: name.trim().isEmpty ? null : name.trim(),
+            );
+        if (mounted) {
+          AppToast.success(
+            context,
+            l10n.styleExplore_branchCreated(newSet.parents.length),
           );
-      if (mounted) {
-        AppToast.success(
-          context,
-          l10n.styleExplore_branchCreated(newSet.parents.length),
-        );
-        _exitBranchSelection();
+          _exitBranchSelection();
+        }
+      } on StateError catch (error) {
+        if (!mounted) return;
+        final reason = error.message;
+        final message = reason.contains('未完成')
+            ? l10n.styleExplore_branchRoundsIncomplete
+            : reason.contains('最新代')
+            ? l10n.styleExplore_branchNeedLatest
+            : reason.contains('完全重复')
+            ? l10n.styleExplore_branchDuplicate
+            : reason.contains('至少')
+            ? l10n.styleExplore_branchEmpty
+            : l10n.styleExplore_operationFailed;
+        AppToast.error(context, message);
       }
-    } on StateError catch (error) {
-      if (!mounted) return;
-      final reason = error.message;
-      final message = reason.contains('未完成')
-          ? l10n.styleExplore_branchRoundsIncomplete
-          : reason.contains('最新代')
-          ? l10n.styleExplore_branchNeedLatest
-          : reason.contains('完全重复')
-          ? l10n.styleExplore_branchDuplicate
-          : reason.contains('至少')
-          ? l10n.styleExplore_branchEmpty
-          : l10n.styleExplore_operationFailed;
-      AppToast.error(context, message);
+    } finally {
+      _branchSubmitting = false;
     }
   }
 }
@@ -542,7 +569,9 @@ class _DeepRoundControlState extends ConsumerState<_DeepRoundControl> {
             widget.run.id,
             familyId: widget.family.id,
             parentSetId: widget.parentSet.id,
-            count: value.clamp(_minCount, 50),
+            // 父本数 >50 时 _minCount 已超上限，上界抬到 _minCount
+            // 防止 clamp 上下界倒置抛 ArgumentError。
+            count: value.clamp(_minCount, _minCount > 50 ? _minCount : 50),
           );
       if (!started && mounted) {
         AppToast.info(context, l10n.styleExplore_runBusy);
@@ -614,7 +643,8 @@ class _DeepRoundControlState extends ConsumerState<_DeepRoundControl> {
   }
 }
 
-/// 父本来源候选的小缩略图（无来源/无图时显示文本图标）。
+/// 父本来源候选的小缩略图：无来源（自定义串）显示文本图标，有来源但
+/// 图缺失/加载失败显示破图图标；悬停 tooltip 给完整父本串。
 class _ParentThumb extends StatelessWidget {
   const _ParentThumb({required this.run, required this.parent});
 
@@ -627,49 +657,59 @@ class _ParentThumb extends StatelessWidget {
     final filePath = parent.sourceCandidateId == null
         ? null
         : run.candidateById(parent.sourceCandidateId!)?.generation.filePath;
+    // 图标区分两类占位：自定义串（无来源候选）vs 有来源但图缺失。
     final placeholder = Icon(
-      Icons.text_snippet_outlined,
+      parent.sourceCandidateId == null
+          ? Icons.text_snippet_outlined
+          : Icons.broken_image_outlined,
       size: 14,
       color: theme.colorScheme.onSurfaceVariant,
     );
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(4),
-      child: SizedBox(
-        width: 24,
-        height: 24,
-        child: filePath == null
-            ? ColoredBox(
-                color: theme.colorScheme.surfaceContainerHighest,
-                child: placeholder,
-              )
-            : Image.file(
-                File(filePath),
-                fit: BoxFit.cover,
-                cacheWidth: 96,
-                errorBuilder: (context, error, stackTrace) => ColoredBox(
+    return Tooltip(
+      message: parent.artistString,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: filePath == null
+              ? ColoredBox(
                   color: theme.colorScheme.surfaceContainerHighest,
                   child: placeholder,
+                )
+              : Image.file(
+                  File(filePath),
+                  fit: BoxFit.cover,
+                  cacheWidth: 96,
+                  errorBuilder: (context, error, stackTrace) => ColoredBox(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    child: placeholder,
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }
 }
 
-/// 候选堆缩略图：完成态显示图，pending/failed 显示状态图标；
-/// 分支选择模式叠勾选圈。
+/// 候选堆缩略图：完成态显示图，pending/failed 显示状态图标（failed 悬停
+/// 给错误原因）；已收编为父本的候选左下角叠谱系角标；分支选择模式叠勾选圈。
 class _PileThumb extends StatelessWidget {
   const _PileThumb({
     required this.candidate,
     required this.selecting,
     required this.selected,
     required this.onTap,
+    this.adopted = false,
   });
 
   final ExploreCandidate candidate;
   final bool selecting;
   final bool selected;
   final VoidCallback onTap;
+
+  /// 已被收编为任一父本集的父本（sourceCandidateId 命中）。
+  final bool adopted;
 
   @override
   Widget build(BuildContext context) {
@@ -692,6 +732,14 @@ class _PileThumb extends StatelessWidget {
         ExploreCandidateGenerationStatus.done => Icons.broken_image_outlined,
       });
     }
+    // 失败态悬停给错误原因（无图可预览时 tooltip 是唯一信息出口）。
+    final errorText =
+        candidate.generation.status == ExploreCandidateGenerationStatus.failed
+        ? candidate.generation.error
+        : null;
+    final Widget tailed = errorText == null || errorText.isEmpty
+        ? content
+        : Tooltip(message: errorText, child: content);
 
     return GestureDetector(
       onTap: onTap,
@@ -703,7 +751,9 @@ class _PileThumb extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              content,
+              tailed,
+              if (adopted)
+                const Positioned(left: 2, bottom: 2, child: _AdoptedBadge()),
               if (selected)
                 IgnorePointer(
                   child: DecoratedBox(
@@ -742,6 +792,28 @@ class _PileThumb extends StatelessWidget {
       color: theme.colorScheme.surfaceContainerHighest,
       child: Center(
         child: Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
+      ),
+    );
+  }
+}
+
+/// 「已收编为父本」角标：候选堆缩略图左下角的谱系小标。
+class _AdoptedBadge extends StatelessWidget {
+  const _AdoptedBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.75),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: Icon(
+        Icons.account_tree_outlined,
+        size: 12,
+        color: theme.colorScheme.tertiary,
       ),
     );
   }

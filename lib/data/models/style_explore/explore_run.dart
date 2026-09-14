@@ -11,7 +11,8 @@ part 'explore_run.g.dart';
 /// 取消为终态（不可再启动）。
 ///
 /// `reviewing` 已废弃（评审体系整层拆除），仅保留枚举值作存量数据
-/// 反序列化兼容：无任何代码路径可再写入该状态，读到即按 `generated` 处理。
+/// 反序列化兼容：无任何代码路径可再写入该状态；存储层读入时归一化为
+/// `generated`（StyleExploreRunStorage._normalizeLegacyStatus）。
 enum ExploreRunStatus {
   draft,
   generating,

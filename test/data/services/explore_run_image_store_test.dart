@@ -25,7 +25,9 @@ void main() {
 
   test('deleteCandidateImage removes the copy and is idempotent', () async {
     final imageStore = store();
-    final file = File('${rootDirectory.path}/cand-1.png');
+    final runDir = '${rootDirectory.path}/style_explore_runs/run-x';
+    await Directory(runDir).create(recursive: true);
+    final file = File('$runDir/cand-1.png');
     await file.writeAsBytes(const [1, 2, 3]);
     expect(await file.exists(), isTrue);
 
@@ -34,6 +36,17 @@ void main() {
 
     // 文件本就不存在视为成功（幂等）。
     expect(await imageStore.deleteCandidateImage(file.path), isTrue);
+  });
+
+  test('deleteCandidateImage refuses paths outside the runs dir', () async {
+    final imageStore = store();
+    // 源图在 runs 目录之外：历史回退可能把源路径写进 filePath，
+    // 守卫必须拒删保住用户原图。
+    final source = File('${rootDirectory.path}/source.png');
+    await source.writeAsBytes(const [9, 9, 9]);
+
+    expect(await imageStore.deleteCandidateImage(source.path), isFalse);
+    expect(await source.exists(), isTrue);
   });
 
   test(

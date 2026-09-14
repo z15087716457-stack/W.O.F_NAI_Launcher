@@ -76,7 +76,9 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
             ),
           ),
           Text(
-            isRunningThis
+            // claim→prepare 窗口内 totalCount 仍为 0，此时回退总候选数，
+            // 避免 clamp(1, 0) 上下界倒置抛 ArgumentError。
+            isRunningThis && runnerState.totalCount > 0
                 ? l10n.styleExplore_runGeneratingProgress(
                     (runnerState.processedCount + 1).clamp(
                       1,
@@ -227,7 +229,8 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
       cancelText: l10n.common_cancel,
     );
     if (!confirmed) return;
-    if (ref.read(exploreRunRunnerProvider).isRunning) {
+    final runnerState = ref.read(exploreRunRunnerProvider);
+    if (runnerState.isRunning && runnerState.runId == run.id) {
       ref.read(exploreRunRunnerProvider.notifier).cancel();
     } else {
       // 暂停态直接终态化：剩余 pending 标记为已取消。
@@ -253,7 +256,8 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
         status: ExploreRunStatus.cancelled,
         rounds: [
           for (final round in current.rounds)
-            round.status == ExploreRoundStatus.generating
+            round.status == ExploreRoundStatus.generating ||
+                    round.status == ExploreRoundStatus.pending
                 ? round.copyWith(status: ExploreRoundStatus.cancelled)
                 : round,
         ],

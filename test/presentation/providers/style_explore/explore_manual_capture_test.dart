@@ -100,7 +100,7 @@ void main() {
       expect(capture.armed, isTrue);
       expect(capture.runId, isNotNull);
       expect(capture.candidateIds, hasLength(2));
-      expect(capture.rollSnapshot!.positive, 'girl');
+      expect(capture.rollSnapshots.single!.positive, 'girl');
 
       // 自动建 draft run 并选中；手动轮 + 两个 pending 壳（首张带快照）。
       var run = await reloadRun(c, capture.runId!);
@@ -587,26 +587,74 @@ void main() {
     );
   });
 
-  test('cancelling arm leaves no pending shells', () async {
-    final c = container();
-    final notifier = c.read(exploreManualCaptureProvider.notifier);
-    final arm = notifier.arm(autoRunName: '中途取消', expectedCount: 2);
-    notifier.cancelSession();
-    await arm;
+  test(
+    'stale armed session is reaped when a new generation run starts',
+    () async {
+      final c = container();
+      final notifier = c.read(exploreManualCaptureProvider.notifier);
 
-    final runs = (await c.read(exploreRunListNotifierProvider.future)).runs;
-    expect(
-      runs
-          .expand((run) => run.candidates)
-          .where(
-            (candidate) =>
-                candidate.lineage.operation == ExploreLineageOperation.manual &&
-                candidate.generation.status ==
-                    ExploreCandidateGenerationStatus.pending,
-          ),
-      isEmpty,
-    );
-  });
+      // 会话 11 布防后批次链中断（complete 永不达），armed 残留。
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.start,
+          generationRunId: 11,
+          batchIndex: 0,
+          slotStart: 1,
+          slotCount: 1,
+          totalSlots: 2,
+        ),
+        autoRunName: '旧会话',
+      );
+      var capture = c.read(exploreManualCaptureProvider);
+      expect(capture.armed, isTrue);
+      final staleRunId = capture.runId!;
+
+      // 新会话 22 的 start 撞上旧 armed：先收尸旧会话再正常布防。
+      await notifier.handleBatchEvent(
+        const GenerationBatchEvent(
+          kind: GenerationBatchEventKind.start,
+          generationRunId: 22,
+          batchIndex: 0,
+          slotStart: 1,
+          slotCount: 1,
+          totalSlots: 1,
+        ),
+        autoRunName: '新会话',
+      );
+      capture = c.read(exploreManualCaptureProvider);
+      expect(capture.armed, isTrue);
+      expect(capture.generationRunId, 22);
+      expect(capture.runId, isNot(staleRunId));
+
+      // 新会话能正常完成登记（旧 id 过滤器不再吞事件）。
+      await notifier.handleBatchEvent(
+        GenerationBatchEvent(
+          kind: GenerationBatchEventKind.complete,
+          generationRunId: 22,
+          batchIndex: 0,
+          slotStart: 1,
+          slotCount: 1,
+          totalSlots: 1,
+          images: [
+            fakeImage([5]),
+          ],
+          elapsedMs: 5,
+        ),
+        autoRunName: '新会话',
+      );
+      final newRun = await reloadRun(c, capture.runId!);
+      expect(newRun.generatedCount, 1);
+      expect(c.read(exploreManualCaptureProvider).armed, isFalse);
+
+      // 旧会话遗留壳被收尸为 cancelled。
+      final staleRun = await reloadRun(c, staleRunId);
+      expect(
+        staleRun.candidates.map((candidate) => candidate.generation.status),
+        everyElement(ExploreCandidateGenerationStatus.failed),
+      );
+      expect(staleRun.candidates.first.generation.error, 'cancelled');
+    },
+  );
 
   test(
     'pending manual shells left over are swept to failed on build',

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -29,6 +30,8 @@ class ExplorePreferenceSortDialog extends ConsumerStatefulWidget {
     required String runId,
     required ExploreParentSet parentSet,
   }) {
+    // 少于两个父本无可配对（调用方已置灰，双保险防直接调用）。
+    if (parentSet.parents.length < 2) return Future<void>.value();
     return showDialog<void>(
       context: context,
       builder: (context) =>
@@ -45,6 +48,10 @@ class _ExplorePreferenceSortDialogState
     extends ConsumerState<ExplorePreferenceSortDialog> {
   late final List<(ExploreParent, ExploreParent)> _pairs;
   var _index = 0;
+
+  /// 一次作答在飞期间吞掉后续点按（双击连点不重计分、不在已关闭的
+  /// context 上二次 pop）。
+  var _submitting = false;
 
   @override
   void initState() {
@@ -76,16 +83,29 @@ class _ExplorePreferenceSortDialogState
   }
 
   Future<void> _answer(ExploreComparisonResult result) async {
-    final (left, right) = _pairs[_index];
-    await ref
-        .read(exploreRunListNotifierProvider.notifier)
-        .recordComparison(
-          widget.runId,
-          widget.parentSet.id,
-          leftParentId: left.id,
-          rightParentId: right.id,
-          result: result,
-        );
+    if (_submitting || _index >= _pairs.length) return;
+    _submitting = true;
+    try {
+      final (left, right) = _pairs[_index];
+      await ref
+          .read(exploreRunListNotifierProvider.notifier)
+          .recordComparison(
+            widget.runId,
+            widget.parentSet.id,
+            leftParentId: left.id,
+            rightParentId: right.id,
+            result: result,
+          );
+    } catch (error) {
+      AppLogger.w('Record explore comparison failed: $error', 'StyleExplore');
+      if (!mounted) return;
+      // 开窗期间 run/父本集被删或落盘失败：提示后收窗，不再推进配对。
+      AppToast.error(context, context.l10n.styleExplore_operationFailed);
+      Navigator.of(context).pop();
+      return;
+    } finally {
+      _submitting = false;
+    }
     if (!mounted) return;
     if (_index + 1 >= _pairs.length) {
       Navigator.of(context).pop();
@@ -99,6 +119,11 @@ class _ExplorePreferenceSortDialogState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
+    if (_pairs.isEmpty || _index >= _pairs.length) {
+      // 防御：父本 <2（show 已拦截）或索引越界时渲染可关闭空壳，
+      // 绝不触 _pairs[_index]。
+      return const Dialog(child: SizedBox(width: 240, height: 120));
+    }
     final (left, right) = _pairs[_index];
     final run = ref
         .watch(exploreRunListNotifierProvider)

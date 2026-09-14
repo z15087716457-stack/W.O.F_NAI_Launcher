@@ -7,6 +7,7 @@ import '../../../../data/models/style_explore/explore_run.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
+import '../../../providers/style_explore/explore_run_runner.dart';
 import '../../../providers/style_explore_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
@@ -114,6 +115,13 @@ abstract final class ExploreCandidateActions {
     final positive = candidate.rollSnapshot?.positive;
     if (positive == null) return;
     final l10n = context.l10n;
+    // runner 会话逐张读主工作区投影；导入元数据会覆写 main lane，
+    // 使后续候选脱离 run 快照语义（深度轮还会丢 override marker）——
+    // 运行中禁止。
+    if (ref.read(exploreRunRunnerProvider).isRunning) {
+      AppToast.info(context, l10n.styleExplore_runBusy);
+      return;
+    }
     if (ref.read(styleExploreNeedsOverwriteConfirmProvider)) {
       final confirmed = await ThemedConfirmDialog.show(
         context: context,
@@ -152,9 +160,15 @@ abstract final class ExploreCandidateActions {
     );
     if (!confirmed) return;
     try {
-      await ref
+      final deleted = await ref
           .read(exploreRunImageStoreProvider)
           .deleteCandidateImage(filePath);
+      if (!deleted) {
+        if (context.mounted) {
+          AppToast.error(context, context.l10n.styleExplore_operationFailed);
+        }
+        return;
+      }
       await ref
           .read(exploreRunListNotifierProvider.notifier)
           .updateCandidate(

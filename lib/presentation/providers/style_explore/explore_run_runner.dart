@@ -57,28 +57,24 @@ class ExploreRunRunnerState {
     this.isRunning = false,
     this.processedCount = 0,
     this.totalCount = 0,
-    this.currentCandidateId,
   });
 
   final String? runId;
   final bool isRunning;
   final int processedCount;
   final int totalCount;
-  final String? currentCandidateId;
 
   ExploreRunRunnerState copyWith({
     String? runId,
     bool? isRunning,
     int? processedCount,
     int? totalCount,
-    String? currentCandidateId,
   }) {
     return ExploreRunRunnerState(
       runId: runId ?? this.runId,
       isRunning: isRunning ?? this.isRunning,
       processedCount: processedCount ?? this.processedCount,
       totalCount: totalCount ?? this.totalCount,
-      currentCandidateId: currentCandidateId ?? this.currentCandidateId,
     );
   }
 }
@@ -152,9 +148,13 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
                   )
                 : round,
         ];
+        // 无 pending 候选的 run 已无工作可续：落 generated 而非 paused，
+        // 避免点「继续」白白新建一轮多出一批图。
         await repository.overwrite(
           run.copyWith(
-            status: ExploreRunStatus.paused,
+            status: run.pendingCandidates.isNotEmpty
+                ? ExploreRunStatus.paused
+                : ExploreRunStatus.generated,
             rounds: normalizedRounds,
           ),
         );
@@ -522,8 +522,6 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       if (candidate == null || round == null) {
         throw StateError('Candidate $candidateId is not in prepared run');
       }
-      state = state.copyWith(currentCandidateId: candidateId);
-
       String? targetMarker;
       final lineage = lineageByCandidateId[candidateId];
       if (round.phase == ExploreRoundPhase.deep) {
@@ -623,7 +621,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
           candidateId,
           ExploreCandidateGeneration(
             status: ExploreCandidateGenerationStatus.done,
-            filePath: storedPath ?? result.filePath,
+            filePath: storedPath,
             seed: result.seed,
             elapsedMs: result.elapsedMs,
           ),
