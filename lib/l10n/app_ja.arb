@@ -6254,6 +6254,12 @@
   "styleExplore_roundsSummary": "{count} ラウンド",
   "@styleExplore_roundsSummary": {"placeholders": {"count": {"type": "int"}}},
   "styleExplore_pileEmpty": "候補はまだありません。上の「候補を生成」から始めてください",
+  "styleExplore_managePile": "管理",
+  "styleExplore_pileManageDeleteTitle": "選択した候補画像を削除",
+  "styleExplore_pileManageDeleteMessage": "{count} 件の候補の Run ディレクトリ内コピーを削除します。レコードは残り、ギャラリーの元画像には影響しません。",
+  "@styleExplore_pileManageDeleteMessage": {"placeholders": {"count": {"type": "int"}}},
+  "styleExplore_pileManageDeleteDone": "{count} 件の候補画像コピーを削除しました",
+  "@styleExplore_pileManageDeleteDone": {"placeholders": {"count": {"type": "int"}}},
   "subscriptionExpiresOn": "期限 {date}",
   "@subscriptionExpiresOn": {
     "placeholders": {

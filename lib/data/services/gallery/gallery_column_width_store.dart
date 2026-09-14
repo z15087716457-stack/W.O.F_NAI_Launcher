@@ -7,7 +7,12 @@ import '../../../core/constants/storage_keys.dart';
 /// 独立小类以便单元测试（测试用 `SharedPreferences.setMockInitialValues`）。
 /// 范围与 UI 滑块一致：140~480，步进 20，默认 260。
 class GalleryColumnWidthStore {
-  const GalleryColumnWidthStore();
+  const GalleryColumnWidthStore({
+    this.storageKey = StorageKeys.localGalleryColumnWidth,
+  });
+
+  /// 持久化键；默认本地画廊，其它消费面（如候选堆管理弹窗）传入自己的键。
+  final String storageKey;
 
   /// 列宽最小值
   static const double minColumnWidth = 140;
@@ -30,7 +35,7 @@ class GalleryColumnWidthStore {
   /// 读取持久化的列宽；无记录或越界时返回默认值（260）。
   Future<double> load() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getDouble(StorageKeys.localGalleryColumnWidth);
+    final raw = prefs.getDouble(storageKey);
     if (raw == null) return defaultColumnWidth;
     return clampColumnWidth(raw);
   }
@@ -38,9 +43,6 @@ class GalleryColumnWidthStore {
   /// 保存列宽（写入前钳制到合法区间）。
   Future<void> save(double columnWidth) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble(
-      StorageKeys.localGalleryColumnWidth,
-      clampColumnWidth(columnWidth),
-    );
+    await prefs.setDouble(storageKey, clampColumnWidth(columnWidth));
   }
 }

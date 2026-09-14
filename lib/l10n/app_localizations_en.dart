@@ -11088,6 +11088,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'No candidates yet — start with \"Generate candidates\" above';
 
   @override
+  String get styleExplore_managePile => 'Manage';
+
+  @override
+  String get styleExplore_pileManageDeleteTitle =>
+      'Delete selected candidate images';
+
+  @override
+  String styleExplore_pileManageDeleteMessage(int count) {
+    return 'Deletes the run-directory image copies of $count candidates; records are kept and gallery source images are not affected.';
+  }
+
+  @override
+  String styleExplore_pileManageDeleteDone(int count) {
+    return 'Deleted $count candidate image copies';
+  }
+
+  @override
   String subscriptionExpiresOn(String date) {
     return 'Expires $date';
   }

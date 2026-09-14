@@ -14,6 +14,7 @@ import '../../../widgets/common/themed_input_dialog.dart';
 import '../../generation/widgets/resize_handle.dart';
 import 'explore_candidate_hover_preview.dart';
 import 'explore_parent_list.dart';
+import 'explore_pile_manage_dialog.dart';
 import 'explore_preference_sort_dialog.dart';
 
 /// 谱系区（阶段 D）：候选画廊顶部可折叠区。
@@ -401,49 +402,63 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                   },
                 ),
               ),
-            if (isActive) ...[
+            // 按钮行：管理入口每个堆都有（含非活跃集）；分支组仅活跃集。
+            if (pile.isNotEmpty) ...[
               const SizedBox(height: 4),
               Row(
                 children: [
-                  if (!_branchSelecting)
-                    Tooltip(
-                      // 轮次未完成/空堆时禁用并说明原因。
-                      message: exploreParentSetRoundsComplete(run, parentSet)
-                          ? ''
-                          : l10n.styleExplore_branchRoundsIncomplete,
-                      child: OutlinedButton.icon(
-                        key: const Key('explore-branch-select'),
-                        onPressed:
-                            pile.isEmpty ||
-                                !exploreParentSetRoundsComplete(run, parentSet)
+                  if (isActive)
+                    if (!_branchSelecting)
+                      Tooltip(
+                        // 轮次未完成/空堆时禁用并说明原因。
+                        message: exploreParentSetRoundsComplete(run, parentSet)
+                            ? ''
+                            : l10n.styleExplore_branchRoundsIncomplete,
+                        child: OutlinedButton.icon(
+                          key: const Key('explore-branch-select'),
+                          onPressed:
+                              !exploreParentSetRoundsComplete(run, parentSet)
+                              ? null
+                              : () => setState(() => _branchSelecting = true),
+                          icon: const Icon(Icons.call_split, size: 16),
+                          label: Text(l10n.styleExplore_branchSelect),
+                        ),
+                      )
+                    else ...[
+                      FilledButton.tonalIcon(
+                        key: const Key('explore-branch-confirm'),
+                        onPressed: _branchSelected.isEmpty
                             ? null
-                            : () => setState(() => _branchSelecting = true),
+                            : () => _createBranch(family, parentSet),
                         icon: const Icon(Icons.call_split, size: 16),
-                        label: Text(l10n.styleExplore_branchSelect),
+                        label: Text(
+                          '${l10n.styleExplore_createBranch}'
+                          ' (${_branchSelected.length})',
+                        ),
                       ),
-                    )
-                  else ...[
-                    FilledButton.tonalIcon(
-                      key: const Key('explore-branch-confirm'),
-                      onPressed: _branchSelected.isEmpty
-                          ? null
-                          : () => _createBranch(family, parentSet),
-                      icon: const Icon(Icons.call_split, size: 16),
-                      label: Text(
-                        '${l10n.styleExplore_createBranch}'
-                        ' (${_branchSelected.length})',
+                      const SizedBox(width: 4),
+                      IconButton(
+                        key: const Key('explore-branch-cancel'),
+                        tooltip: l10n.common_cancel,
+                        iconSize: 18,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: _exitBranchSelection,
+                        icon: const Icon(Icons.close),
                       ),
+                    ],
+                  const SizedBox(width: 4),
+                  // 管理弹窗（FEAT-42）：大图网格/瀑布流 + 多选批量动作。
+                  OutlinedButton.icon(
+                    key: Key('explore-pile-manage-${parentSet.id}'),
+                    onPressed: () => ExplorePileManageDialog.show(
+                      context,
+                      runId: run.id,
+                      familyId: family.id,
+                      parentSetId: parentSet.id,
                     ),
-                    const SizedBox(width: 4),
-                    IconButton(
-                      key: const Key('explore-branch-cancel'),
-                      tooltip: l10n.common_cancel,
-                      iconSize: 18,
-                      visualDensity: VisualDensity.compact,
-                      onPressed: _exitBranchSelection,
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
+                    icon: const Icon(Icons.photo_library_outlined, size: 16),
+                    label: Text(l10n.styleExplore_managePile),
+                  ),
                 ],
               ),
             ],

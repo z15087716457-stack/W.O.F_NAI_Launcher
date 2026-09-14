@@ -10840,6 +10840,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_pileEmpty => '候補はまだありません。上の「候補を生成」から始めてください';
 
   @override
+  String get styleExplore_managePile => '管理';
+
+  @override
+  String get styleExplore_pileManageDeleteTitle => '選択した候補画像を削除';
+
+  @override
+  String styleExplore_pileManageDeleteMessage(int count) {
+    return '$count 件の候補の Run ディレクトリ内コピーを削除します。レコードは残り、ギャラリーの元画像には影響しません。';
+  }
+
+  @override
+  String styleExplore_pileManageDeleteDone(int count) {
+    return '$count 件の候補画像コピーを削除しました';
+  }
+
+  @override
   String subscriptionExpiresOn(String date) {
     return '期限 $date';
   }

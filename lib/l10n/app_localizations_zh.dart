@@ -10691,6 +10691,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_pileEmpty => '尚无候选图，点上方「生成候选图」开始';
 
   @override
+  String get styleExplore_managePile => '管理';
+
+  @override
+  String get styleExplore_pileManageDeleteTitle => '删除所选候选图';
+
+  @override
+  String styleExplore_pileManageDeleteMessage(int count) {
+    return '将删除 $count 张候选在 Run 目录中的图片副本；候选记录保留，图库源图不受影响。';
+  }
+
+  @override
+  String styleExplore_pileManageDeleteDone(int count) {
+    return '已删除 $count 张候选图副本';
+  }
+
+  @override
   String subscriptionExpiresOn(String date) {
     return '到期 $date';
   }

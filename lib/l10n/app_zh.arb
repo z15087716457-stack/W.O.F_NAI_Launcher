@@ -6254,6 +6254,12 @@
   "styleExplore_roundsSummary": "{count} 轮",
   "@styleExplore_roundsSummary": {"placeholders": {"count": {"type": "int"}}},
   "styleExplore_pileEmpty": "尚无候选图，点上方「生成候选图」开始",
+  "styleExplore_managePile": "管理",
+  "styleExplore_pileManageDeleteTitle": "删除所选候选图",
+  "styleExplore_pileManageDeleteMessage": "将删除 {count} 张候选在 Run 目录中的图片副本；候选记录保留，图库源图不受影响。",
+  "@styleExplore_pileManageDeleteMessage": {"placeholders": {"count": {"type": "int"}}},
+  "styleExplore_pileManageDeleteDone": "已删除 {count} 张候选图副本",
+  "@styleExplore_pileManageDeleteDone": {"placeholders": {"count": {"type": "int"}}},
   "subscriptionExpiresOn": "到期 {date}",
   "@subscriptionExpiresOn": {
     "placeholders": {

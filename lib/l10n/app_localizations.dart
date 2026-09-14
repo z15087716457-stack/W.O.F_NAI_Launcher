@@ -19315,6 +19315,30 @@ abstract class AppLocalizations {
   /// **'No candidates yet — start with \"Generate candidates\" above'**
   String get styleExplore_pileEmpty;
 
+  /// No description provided for @styleExplore_managePile.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get styleExplore_managePile;
+
+  /// No description provided for @styleExplore_pileManageDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected candidate images'**
+  String get styleExplore_pileManageDeleteTitle;
+
+  /// No description provided for @styleExplore_pileManageDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletes the run-directory image copies of {count} candidates; records are kept and gallery source images are not affected.'**
+  String styleExplore_pileManageDeleteMessage(int count);
+
+  /// No description provided for @styleExplore_pileManageDeleteDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted {count} candidate image copies'**
+  String styleExplore_pileManageDeleteDone(int count);
+
   /// No description provided for @subscriptionExpiresOn.
   ///
   /// In en, this message translates to:

@@ -6254,6 +6254,12 @@
   "styleExplore_roundsSummary": "{count} rounds",
   "@styleExplore_roundsSummary": {"placeholders": {"count": {"type": "int"}}},
   "styleExplore_pileEmpty": "No candidates yet — start with \"Generate candidates\" above",
+  "styleExplore_managePile": "Manage",
+  "styleExplore_pileManageDeleteTitle": "Delete selected candidate images",
+  "styleExplore_pileManageDeleteMessage": "Deletes the run-directory image copies of {count} candidates; records are kept and gallery source images are not affected.",
+  "@styleExplore_pileManageDeleteMessage": {"placeholders": {"count": {"type": "int"}}},
+  "styleExplore_pileManageDeleteDone": "Deleted {count} candidate image copies",
+  "@styleExplore_pileManageDeleteDone": {"placeholders": {"count": {"type": "int"}}},
   "subscriptionExpiresOn": "Expires {date}",
   "@subscriptionExpiresOn": {
     "placeholders": {

@@ -70,6 +70,8 @@ class StorageKeys {
   static const String styleExploreGalleryWidth = 'style_explore_gallery_width';
   static const String styleExplorePromptAreaHeight =
       'style_explore_prompt_area_height';
+  static const String styleExplorePileColumnWidth =
+      'style_explore_pile_column_width';
 
   // Panel Expansion State Keys (面板展开状态)
   static const String advancedOptionsExpanded = 'advanced_options_expanded';

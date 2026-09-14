@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
+import 'package:nai_launcher/presentation/widgets/common/column_width_menu_panel.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 
 /// Enhanced pagination bar with complete navigation features
@@ -508,102 +509,12 @@ class _PaginationBarState extends State<PaginationBar> {
 
   /// 列宽调节控件：图标按钮点开小弹层，Slider 实时生效、松手持久化
   Widget _buildColumnWidthControl(ThemeData theme, ColorScheme colorScheme) {
-    final l10n = context.l10n;
-
     return Padding(
       padding: const EdgeInsets.only(left: 12),
-      child: MenuAnchor(
-        builder: (context, controller, child) => Tooltip(
-          message: l10n.localGallery_columnWidth,
-          child: IconButton(
-            icon: Icon(
-              Icons.view_column_outlined,
-              size: 18,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            tooltip: l10n.localGallery_columnWidth,
-            visualDensity: VisualDensity.compact,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            padding: const EdgeInsets.all(6),
-            onPressed: () {
-              if (controller.isOpen) {
-                controller.close();
-              } else {
-                controller.open();
-              }
-            },
-          ),
-        ),
-        style: const MenuStyle(
-          padding: WidgetStatePropertyAll(EdgeInsets.zero),
-        ),
-        menuChildren: [
-          _ColumnWidthMenuPanel(
-            width: widget.columnWidth ?? 260,
-            onChanged: widget.onColumnWidthChanged,
-            onChangeEnd: widget.onColumnWidthChangeEnd,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 列宽设置弹层：Slider（140~480，步进 20）+ 实时「约 N 列」
-class _ColumnWidthMenuPanel extends StatelessWidget {
-  final double width;
-  final ValueChanged<double>? onChanged;
-  final ValueChanged<double>? onChangeEnd;
-
-  const _ColumnWidthMenuPanel({
-    required this.width,
-    this.onChanged,
-    this.onChangeEnd,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-    // 「约 N 列」按屏幕宽度估算（列宽越窄列数越多）
-    final approxColumns = (MediaQuery.of(context).size.width / width)
-        .round()
-        .clamp(1, 99);
-
-    return Container(
-      width: 280,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                l10n.localGallery_columnWidth,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                l10n.localGallery_aboutColumns(approxColumns),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-          Slider(
-            value: width,
-            min: 140,
-            max: 480,
-            divisions: 17,
-            label: '${width.round()}',
-            onChanged: onChanged,
-            onChangeEnd: onChangeEnd,
-          ),
-        ],
+      child: ColumnWidthMenuButton(
+        width: widget.columnWidth ?? 260,
+        onChanged: widget.onColumnWidthChanged,
+        onChangeEnd: widget.onColumnWidthChangeEnd,
       ),
     );
   }
