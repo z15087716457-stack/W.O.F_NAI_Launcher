@@ -13,6 +13,7 @@ import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import '../../../widgets/common/themed_input_dialog.dart';
 import 'explore_candidate_actions.dart';
+import 'explore_candidate_hover_preview.dart';
 import 'explore_create_family_dialog.dart';
 import 'explore_folder_assign_bar.dart';
 import 'explore_lineage_panel.dart';
@@ -34,6 +35,16 @@ class _ExploreCandidateGalleryState
     extends ConsumerState<ExploreCandidateGallery> {
   bool _selectionMode = false;
   final Set<String> _selectedIds = {};
+
+  /// 候选堆缩略图悬停预览会话（FEAT-41）：谱系区全部堆卡共享。
+  final ExploreCandidateHoverSession _hoverSession =
+      ExploreCandidateHoverSession();
+
+  @override
+  void dispose() {
+    _hoverSession.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +83,7 @@ class _ExploreCandidateGalleryState
         ExploreLineagePanel(
           run: run,
           onOpenCandidate: (candidate) => _openCandidateDetail(run, candidate),
+          hoverSession: _hoverSession,
         ),
         Expanded(
           child: filtered.isEmpty

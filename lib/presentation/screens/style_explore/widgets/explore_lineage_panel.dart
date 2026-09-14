@@ -12,6 +12,7 @@ import '../../../providers/style_explore/explore_run_runner.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_input_dialog.dart';
 import '../../generation/widgets/resize_handle.dart';
+import 'explore_candidate_hover_preview.dart';
 import 'explore_parent_list.dart';
 import 'explore_preference_sort_dialog.dart';
 
@@ -25,12 +26,17 @@ class ExploreLineagePanel extends ConsumerStatefulWidget {
     super.key,
     required this.run,
     required this.onOpenCandidate,
+    this.hoverSession,
   });
 
   final ExploreRun run;
 
   /// 点击候选缩略图打开详情（由画廊注入，复用候选详情弹窗）。
   final void Function(ExploreCandidate candidate) onOpenCandidate;
+
+  /// 候选堆缩略图悬停预览会话（FEAT-41）；null = 不启用预览
+  /// （组件级测试与复用场景可不传）。
+  final ExploreCandidateHoverSession? hoverSession;
 
   @override
   ConsumerState<ExploreLineagePanel> createState() =>
@@ -335,7 +341,7 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                       const SizedBox(width: 6),
                   itemBuilder: (context, index) {
                     final candidate = pile[index];
-                    return _PileThumb(
+                    final thumb = _PileThumb(
                       candidate: candidate,
                       // 勾选圈与点选只在活跃堆开放：非活跃堆的候选进不了
                       // provider 校验，点了也只落 StateError。
@@ -352,6 +358,28 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                           widget.onOpenCandidate(candidate);
                         }
                       },
+                    );
+                    // 悬停大图预览（FEAT-41）：外包一层，不改缩略图尺寸、
+                    // 横排列表与点按/选择态；ValueKey 绑定候选防元素复用串位。
+                    final session = widget.hoverSession;
+                    if (session == null) return thumb;
+                    final filePath =
+                        candidate.generation.status ==
+                            ExploreCandidateGenerationStatus.done
+                        ? candidate.generation.filePath
+                        : null;
+                    final roundNumber = run
+                        .roundById(candidate.roundId)
+                        ?.number;
+                    return ExploreCandidateHoverThumb(
+                      key: ValueKey('pile-hover-${candidate.id}'),
+                      session: session,
+                      candidateId: candidate.id,
+                      filePath: filePath,
+                      badgeText:
+                          '#${run.candidates.indexOf(candidate) + 1}'
+                          '${roundNumber != null ? ' · ${l10n.styleExplore_roundNumber(roundNumber)}' : ''}',
+                      child: thumb,
                     );
                   },
                 ),
