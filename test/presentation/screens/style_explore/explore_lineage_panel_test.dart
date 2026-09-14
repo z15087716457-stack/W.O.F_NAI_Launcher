@@ -7,6 +7,7 @@ import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
+import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_lineage_panel.dart';
 
 /// 内存版 Run 存储（testWidgets 的 fakeAsync 区里 Hive 异步写盘不落定）。
@@ -32,6 +33,26 @@ class _MemoryRunStorage extends StyleExploreRunStorage {
   @override
   Future<void> clear() async {
     _store.clear();
+  }
+}
+
+/// 记录深度轮调用参数的 runner 替身（不跑真实生成链）。
+class _RecordingRunner extends ExploreRunRunner {
+  final List<({String familyId, String parentSetId, int count})> calls = [];
+
+  @override
+  Future<bool> startDeepRound(
+    String runId, {
+    required String familyId,
+    required String parentSetId,
+    required int count,
+  }) async {
+    calls.add((familyId: familyId, parentSetId: parentSetId, count: count));
+    return true;
+  }
+
+  void setRunning({String? runId, required bool isRunning}) {
+    state = ExploreRunRunnerState(runId: runId, isRunning: isRunning);
   }
 }
 
@@ -231,8 +252,10 @@ void main() {
   Future<void> pumpPanel(
     WidgetTester tester,
     ExploreRun run,
-    List<ExploreCandidate> opened,
-  ) async {
+    List<ExploreCandidate> opened, {
+    _RecordingRunner? runner,
+    double? width,
+  }) async {
     await storage.putRun(run);
     // 谱系区高度上限为窗口高的 0.6：拉高窗口让两代卡片全部落在视口内。
     tester.view.physicalSize = const Size(1400, 1600);
@@ -244,13 +267,23 @@ void main() {
         overrides: [
           styleExploreRunStorageProvider.overrideWithValue(storage),
           exploreLineagePanelHeightProvider.overrideWith((ref) => 600.0),
+          if (runner != null)
+            exploreRunRunnerProvider.overrideWith(() => runner),
         ],
         child: MaterialApp(
           locale: const Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
-            body: _PanelHost(runId: run.id, opened: opened),
+            body: width == null
+                ? _PanelHost(runId: run.id, opened: opened)
+                : Align(
+                    alignment: Alignment.topLeft,
+                    child: SizedBox(
+                      width: width,
+                      child: _PanelHost(runId: run.id, opened: opened),
+                    ),
+                  ),
           ),
         ),
       ),
@@ -289,8 +322,11 @@ void main() {
 
     // 建分支入口只在活跃（最新代）堆卡；非活跃堆没有。
     expect(find.byKey(const Key('explore-branch-select')), findsOneWidget);
+    // FEAT-44：堆卡的「新增一轮」已删除，生成入口只在活跃父本集卡的按钮行。
     expect(find.byKey(const Key('explore-pile-another-ps-1')), findsNothing);
-    expect(find.byKey(const Key('explore-pile-another-ps-2')), findsOneWidget);
+    expect(find.byKey(const Key('explore-pile-another-ps-2')), findsNothing);
+    expect(find.byKey(const Key('explore-deep-round-ps-2')), findsOneWidget);
+    expect(find.byKey(const Key('explore-deep-round-ps-1')), findsNothing);
 
     await enterBranchSelection(tester);
     expect(find.text('${l10n.styleExplore_createBranch} (0)'), findsOneWidget);
@@ -397,7 +433,14 @@ void main() {
     await tester.tap(find.byKey(const Key('explore-branch-confirm')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    await tester.enterText(find.byType(TextField), '甲分支');
+    // 卡内已有出图数输入框：分支名输入框按弹窗内定位。
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      ),
+      '甲分支',
+    );
     await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, l10n.common_confirm));
     await tester.pump();
@@ -437,5 +480,97 @@ void main() {
 
     // AppToast.success 内部有 3 秒自动关闭定时器，推进到它结束。
     await tester.pump(const Duration(milliseconds: 3300));
+  });
+
+  // ==================== FEAT-44：生成候选图 ====================
+
+  Finder countField(String parentSetId) =>
+      find.byKey(Key('explore-deep-round-count-$parentSetId'));
+
+  Finder generateButton(String parentSetId) =>
+      find.byKey(Key('explore-deep-round-$parentSetId'));
+
+  String countText(WidgetTester tester, String parentSetId) =>
+      tester.widget<TextField>(countField(parentSetId)).controller!.text;
+
+  testWidgets('活跃父本卡：出图数默认父本数+1，非活跃集无该行', (tester) async {
+    await pumpPanel(tester, twoGenerationRun(), []);
+
+    // 活跃集 ps-2 有 1 个父本 → 默认 2；已用集 ps-1 无生成控件。
+    expect(countText(tester, 'ps-2'), '2');
+    expect(generateButton('ps-1'), findsNothing);
+    expect(countField('ps-1'), findsNothing);
+  });
+
+  testWidgets('生成候选图：有效数字直调 startDeepRound，超 50 被 clamp', (tester) async {
+    final runner = _RecordingRunner();
+    await pumpPanel(tester, twoGenerationRun(), [], runner: runner);
+
+    await tester.enterText(countField('ps-2'), '9');
+    await tester.tap(generateButton('ps-2'));
+    await tester.pump();
+
+    expect(runner.calls, [(familyId: 'fam-1', parentSetId: 'ps-2', count: 9)]);
+
+    await tester.enterText(countField('ps-2'), '99');
+    await tester.tap(generateButton('ps-2'));
+    await tester.pump();
+
+    expect(runner.calls.last.count, 50);
+  });
+
+  testWidgets('低于父本数：弹「出图数至少 N」且不启动生成', (tester) async {
+    final runner = _RecordingRunner();
+    await pumpPanel(tester, twoGenerationRun(), [], runner: runner);
+
+    await tester.enterText(countField('ps-2'), '0');
+    await tester.tap(generateButton('ps-2'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(runner.calls, isEmpty);
+    expect(find.text(l10n.styleExplore_deepRoundCountHint(1)), findsOneWidget);
+
+    // AppToast.warning 的 3 秒自动关闭定时器。
+    await tester.pump(const Duration(milliseconds: 3300));
+  });
+
+  testWidgets('生成中按钮禁用：只认当前 run 的运行态', (tester) async {
+    final runner = _RecordingRunner();
+    await pumpPanel(tester, twoGenerationRun(), [], runner: runner);
+
+    FilledButton button() =>
+        tester.widget<FilledButton>(generateButton('ps-2'));
+
+    expect(button().onPressed, isNotNull);
+
+    // 别的 run 在跑：不误伤。
+    runner.setRunning(runId: 'run-other', isRunning: true);
+    await tester.pump();
+    expect(button().onPressed, isNotNull);
+
+    runner.setRunning(runId: 'run-1', isRunning: true);
+    await tester.pump();
+    expect(button().onPressed, isNull);
+
+    // 跑完即复位（不做点击后的局部禁用）。
+    runner.setRunning(runId: 'run-1', isRunning: false);
+    await tester.pump();
+    expect(button().onPressed, isNotNull);
+  });
+
+  testWidgets('默认画廊宽 360px：生成钮 + 数字框 + A/B 组对照同排不折行', (tester) async {
+    await pumpPanel(tester, twoGenerationRun(), [], width: 360);
+
+    final generate = tester.getCenter(generateButton('ps-2'));
+    final field = tester.getCenter(countField('ps-2'));
+    final sort = tester.getCenter(
+      find.byKey(const Key('explore-sort-parents-ps-2')),
+    );
+
+    expect(field.dy, closeTo(generate.dy, 1));
+    expect(sort.dy, closeTo(generate.dy, 1));
+    expect(generate.dx, lessThan(field.dx));
+    expect(field.dx, lessThan(sort.dx));
   });
 }

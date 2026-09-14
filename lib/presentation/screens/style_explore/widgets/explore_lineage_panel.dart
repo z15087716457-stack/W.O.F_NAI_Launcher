@@ -12,12 +12,13 @@ import '../../../providers/style_explore/explore_run_runner.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_input_dialog.dart';
 import '../../generation/widgets/resize_handle.dart';
+import 'explore_parent_list.dart';
 import 'explore_preference_sort_dialog.dart';
 
 /// 谱系区（阶段 D）：候选画廊顶部可折叠区。
 ///
-/// 家族 chips 横排 + 选中家族的代际卡片列（父本集卡：串列表+缩略图+
-/// 「创建候选轮」「排序」；候选堆卡：缩略图横排+「多选建分支」「新增一轮」）。
+/// 家族 chips 横排 + 选中家族的代际卡片列（父本集卡：父本两列限高列表+
+/// 「生成候选图」+出图数框+「A/B 组对照」；候选堆卡：缩略图横排+「多选建分支」）。
 /// 无家族时整个面板不渲染（入口 = 画廊多选「建家族」）。
 class ExploreLineagePanel extends ConsumerStatefulWidget {
   const ExploreLineagePanel({
@@ -229,45 +230,23 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
               ],
             ),
             const SizedBox(height: 6),
-            for (final parent in parentSet.parents)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _ParentThumb(run: run, parent: parent),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        parent.artistString,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ),
-                    if (parent.preference != 1.0)
-                      Text(
-                        l10n.styleExplore_preferenceValue(
-                          parent.preference.toStringAsFixed(2),
-                        ),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
+            ExploreParentList(
+              parents: parentSet.parents,
+              thumbBuilder: (parent) => _ParentThumb(run: run, parent: parent),
+            ),
             if (isActive) ...[
               const SizedBox(height: 2),
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  FilledButton.tonalIcon(
-                    key: Key('explore-deep-round-${parentSet.id}'),
-                    onPressed: () => _showDeepRoundDialog(family, parentSet),
-                    icon: const Icon(Icons.play_arrow, size: 16),
-                    label: Text(l10n.styleExplore_createDeepRound),
+                  _DeepRoundControl(
+                    key: ValueKey('explore-deep-round-control-${parentSet.id}'),
+                    run: run,
+                    family: family,
+                    parentSet: parentSet,
                   ),
-                  const SizedBox(width: 8),
                   OutlinedButton.icon(
                     key: Key('explore-sort-parents-${parentSet.id}'),
                     onPressed: parentSet.parents.length >= 2
@@ -277,6 +256,10 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                             parentSet: parentSet,
                           )
                         : null,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      visualDensity: VisualDensity.compact,
+                    ),
                     icon: const Icon(Icons.sort, size: 16),
                     label: Text(l10n.styleExplore_sortParents),
                   ),
@@ -416,13 +399,6 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                       icon: const Icon(Icons.close),
                     ),
                   ],
-                  const Spacer(),
-                  TextButton.icon(
-                    key: Key('explore-pile-another-${parentSet.id}'),
-                    onPressed: () => _showDeepRoundDialog(family, parentSet),
-                    icon: const Icon(Icons.add, size: 16),
-                    label: Text(l10n.styleExplore_anotherDeepRound),
-                  ),
                 ],
               ),
             ],
@@ -437,97 +413,6 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
       _branchSelecting = false;
       _branchSelected.clear();
     });
-  }
-
-  // ==================== 深度轮 ====================
-
-  Future<void> _showDeepRoundDialog(
-    ExploreFamily family,
-    ExploreParentSet parentSet,
-  ) async {
-    final l10n = context.l10n;
-    final minCount = parentSet.parents.length;
-    final controller = TextEditingController(text: '${minCount + 1}');
-    final count = await showDialog<int>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          key: const Key('explore-deep-round-dialog'),
-          title: Text(l10n.styleExplore_deepRoundTitle),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l10n.styleExplore_deepRoundCountHint(minCount),
-                style: Theme.of(dialogContext).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                key: const Key('explore-deep-round-count'),
-                controller: controller,
-                autofocus: true,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: InputDecoration(
-                  labelText: l10n.styleExplore_targetCountLabel,
-                  isDense: true,
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(l10n.common_cancel),
-            ),
-            FilledButton(
-              key: const Key('explore-deep-round-confirm'),
-              onPressed: () {
-                final value = int.tryParse(controller.text.trim());
-                if (value == null || value < minCount) {
-                  AppToast.warning(
-                    dialogContext,
-                    l10n.styleExplore_deepRoundCountHint(minCount),
-                  );
-                  return;
-                }
-                Navigator.of(dialogContext).pop(value.clamp(minCount, 50));
-              },
-              child: Text(l10n.styleExplore_createDeepRound),
-            ),
-          ],
-        );
-      },
-    );
-    controller.dispose();
-    if (count == null || !mounted) return;
-
-    try {
-      final started = await ref
-          .read(exploreRunRunnerProvider.notifier)
-          .startDeepRound(
-            widget.run.id,
-            familyId: family.id,
-            parentSetId: parentSet.id,
-            count: count,
-          );
-      if (!started && mounted) {
-        AppToast.info(context, l10n.styleExplore_runBusy);
-      }
-    } on ExploreDeepRoundException catch (error) {
-      if (!mounted) return;
-      final message = switch (error.reason) {
-        ExploreDeepRoundRejection.noRandomInstance =>
-          l10n.styleExplore_deepRoundNoInstance,
-        ExploreDeepRoundRejection.mutationEmpty =>
-          l10n.styleExplore_deepRoundEmpty,
-        ExploreDeepRoundRejection.invalidParentSet =>
-          l10n.styleExplore_operationFailed,
-      };
-      AppToast.error(context, message);
-    }
   }
 
   // ==================== 建分支 ====================
@@ -574,6 +459,130 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
           : l10n.styleExplore_operationFailed;
       AppToast.error(context, message);
     }
+  }
+}
+
+/// 活跃父本集的生成入口：「生成候选图」+ 出图数小框（一步出图）。
+///
+/// 数字框自持 controller（`ValueKey(parentSet.id)` 保证切父本集重置默认值）；
+/// 生成中按 runner 运行态禁用（`isRunning` 且 `runId` 匹配当前 run，跨 run
+/// 不误伤），失败/完成由 runner 状态复位，不做点击后的局部禁用。
+class _DeepRoundControl extends ConsumerStatefulWidget {
+  const _DeepRoundControl({
+    super.key,
+    required this.run,
+    required this.family,
+    required this.parentSet,
+  });
+
+  final ExploreRun run;
+  final ExploreFamily family;
+  final ExploreParentSet parentSet;
+
+  @override
+  ConsumerState<_DeepRoundControl> createState() => _DeepRoundControlState();
+}
+
+class _DeepRoundControlState extends ConsumerState<_DeepRoundControl> {
+  /// 出图数下限：每个父本保底一张（引擎约束）。
+  int get _minCount => widget.parentSet.parents.length;
+
+  late final TextEditingController _controller = TextEditingController(
+    text: '${_minCount + 1}',
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _generate() async {
+    final l10n = context.l10n;
+    final value = int.tryParse(_controller.text.trim());
+    if (value == null || value < _minCount) {
+      AppToast.warning(
+        context,
+        l10n.styleExplore_deepRoundCountHint(_minCount),
+      );
+      return;
+    }
+    try {
+      final started = await ref
+          .read(exploreRunRunnerProvider.notifier)
+          .startDeepRound(
+            widget.run.id,
+            familyId: widget.family.id,
+            parentSetId: widget.parentSet.id,
+            count: value.clamp(_minCount, 50),
+          );
+      if (!started && mounted) {
+        AppToast.info(context, l10n.styleExplore_runBusy);
+      }
+    } on ExploreDeepRoundException catch (error) {
+      if (!mounted) return;
+      final message = switch (error.reason) {
+        ExploreDeepRoundRejection.noRandomInstance =>
+          l10n.styleExplore_deepRoundNoInstance,
+        ExploreDeepRoundRejection.mutationEmpty =>
+          l10n.styleExplore_deepRoundEmpty,
+        ExploreDeepRoundRejection.invalidParentSet =>
+          l10n.styleExplore_operationFailed,
+      };
+      AppToast.error(context, message);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final runner = ref.watch(exploreRunRunnerProvider);
+    final busy = runner.isRunning && runner.runId == widget.run.id;
+
+    return Wrap(
+      // 默认画廊宽下（卡内容区 ~328px）三件同排：改名后的「A/B 组对照」
+      // 比原「排序」宽 ~30px，靠收紧按钮内边距 + 数字框让位（实测量得）。
+      spacing: 6,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        FilledButton.tonalIcon(
+          key: Key('explore-deep-round-${widget.parentSet.id}'),
+          onPressed: busy ? null : _generate,
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            visualDensity: VisualDensity.compact,
+          ),
+          icon: const Icon(Icons.play_arrow, size: 16),
+          label: Text(l10n.styleExplore_createDeepRound),
+        ),
+        Tooltip(
+          // 下限口径与点按校验同源（每个父本保底一张）。
+          message: l10n.styleExplore_deepRoundCountHint(_minCount),
+          child: SizedBox(
+            width: 56,
+            child: TextField(
+              key: Key('explore-deep-round-count-${widget.parentSet.id}'),
+              controller: _controller,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                labelText: l10n.styleExplore_targetCountLabel,
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 12,
+                ),
+                border: const OutlineInputBorder(),
+              ),
+              onSubmitted: (_) {
+                if (!busy) _generate();
+              },
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
