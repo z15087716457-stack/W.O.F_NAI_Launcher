@@ -112,7 +112,7 @@ class MainNavRail extends ConsumerWidget {
 
                     // 画风探索
                     _NavIcon(
-                      icon: Icons.travel_explore, // Style Explore
+                      icon: Icons.biotech, // Style Explore
                       label: context.l10n.nav_styleExplore,
                       isSelected: selectedIndex == 3,
                       onTap: () => navigationShell.goBranch(
