@@ -48,7 +48,7 @@ In the right pane, tap **+** under "Exploration Tasks", name the run, set the **
 
 The candidate gallery offers:
 
-- **Grid / deck** views; the deck groups by your **own folders** ("New folder" in the toolbar; rename / delete from the group header — deleted folders return their members to "Uncategorized", which is always last);
+- **Deck grouping**, always on: grouped by your **own folders** ("New folder" in the toolbar; rename / delete from the group header — deleted folders return their members to "Uncategorized", which is always last); the newest candidates come first;
 - **Multi-select** (for creating families and batch actions);
 - Label filters: All / Favorites / Failed;
 - A **♡ favorite** button at each candidate's top-right (also toggleable inside the detail dialog);

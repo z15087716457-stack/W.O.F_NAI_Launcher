@@ -17,7 +17,7 @@ import 'explore_create_family_dialog.dart';
 import 'explore_folder_assign_bar.dart';
 import 'explore_lineage_panel.dart';
 
-/// 右栏候选画廊：筛选 chips + 新建文件夹 + 网格/牌堆视图 + 大图详情弹窗。
+/// 右栏候选画廊：筛选 chips + 新建文件夹 + 牌堆分组 + 大图详情弹窗。
 ///
 /// 牌堆分组 = 用户自建文件夹 + 未分类（与谱系 pile 的遗传血缘完全平行解耦）；
 /// 收藏（heart 字段）是纯数据注释，任何时刻不移动/改名图库文件，
@@ -41,7 +41,6 @@ class _ExploreCandidateGalleryState
     final l10n = context.l10n;
     final run = ref.watch(exploreActiveRunProvider);
     final filter = ref.watch(exploreGalleryFilterProvider);
-    final viewMode = ref.watch(exploreGalleryViewModeProvider);
 
     if (run == null) {
       return _EmptyHint(
@@ -55,10 +54,11 @@ class _ExploreCandidateGalleryState
     final existingIds = candidates.map((c) => c.id).toSet();
     _selectedIds.removeWhere((id) => !existingIds.contains(id));
 
+    // 展示层反转：新生成图排最前（存储序与 #N 序号不动，牌堆组内同样最新在前）。
     final filtered = [
       for (final candidate in candidates)
         if (exploreCandidateMatchesFilter(candidate, filter)) candidate,
-    ];
+    ].reversed.toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -66,9 +66,9 @@ class _ExploreCandidateGalleryState
         if (_selectionMode)
           _buildSelectionBar(l10n, run)
         else
-          _buildToolbar(theme, l10n, run, filter, viewMode),
+          _buildToolbar(theme, l10n, run, filter),
         Divider(height: 1, color: theme.dividerColor),
-        // 谱系区（阶段 D）：无家族时不渲染，只留工具条+候选网格。
+        // 谱系区（阶段 D）：无家族时不渲染，只留工具条+候选牌堆。
         ExploreLineagePanel(
           run: run,
           onOpenCandidate: (candidate) => _openCandidateDetail(run, candidate),
@@ -79,8 +79,6 @@ class _ExploreCandidateGalleryState
                   icon: Icons.filter_alt_off_outlined,
                   text: l10n.styleExplore_galleryEmptyHint,
                 )
-              : _selectionMode || viewMode == ExploreGalleryViewMode.grid
-              ? _buildGrid(run, filtered)
               : _buildDeck(theme, l10n, run, filtered),
         ),
       ],
@@ -94,7 +92,6 @@ class _ExploreCandidateGalleryState
     AppLocalizations l10n,
     ExploreRun run,
     ExploreGalleryFilter filter,
-    ExploreGalleryViewMode viewMode,
   ) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
@@ -121,26 +118,6 @@ class _ExploreCandidateGalleryState
             tooltip: l10n.styleExplore_newFolder,
             onPressed: () => promptCreateExploreFolder(context, ref, run.id),
             icon: const Icon(Icons.create_new_folder_outlined),
-          ),
-          // 网格/牌堆视图切换。
-          IconButton(
-            key: const Key('explore-gallery-view-toggle'),
-            iconSize: 18,
-            visualDensity: VisualDensity.compact,
-            tooltip: viewMode == ExploreGalleryViewMode.grid
-                ? l10n.styleExplore_viewDeck
-                : l10n.styleExplore_viewGrid,
-            onPressed: () =>
-                ref
-                    .read(exploreGalleryViewModeProvider.notifier)
-                    .state = viewMode == ExploreGalleryViewMode.grid
-                ? ExploreGalleryViewMode.deck
-                : ExploreGalleryViewMode.grid,
-            icon: Icon(
-              viewMode == ExploreGalleryViewMode.grid
-                  ? Icons.view_agenda_outlined
-                  : Icons.grid_view_outlined,
-            ),
           ),
           // 多选模式。
           IconButton(
@@ -196,28 +173,9 @@ class _ExploreCandidateGalleryState
     );
   }
 
-  // ==================== 网格 / 牌堆 ====================
+  // ==================== 牌堆（分组） ====================
 
-  Widget _buildGrid(ExploreRun run, List<ExploreCandidate> filtered) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = (constraints.maxWidth / 160).floor().clamp(2, 3);
-        return GridView.builder(
-          padding: const EdgeInsets.all(8),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-          ),
-          itemCount: filtered.length,
-          itemBuilder: (context, index) =>
-              _buildCandidateCard(run, filtered[index]),
-        );
-      },
-    );
-  }
-
-  /// 牌堆视图：按用户自建文件夹分组（未分类恒在最后），组头计数，
+  /// 牌堆：按用户自建文件夹分组（未分类恒在最后），组头计数，
   /// 组内复用候选卡；筛选 chips 在其上叠加过滤。
   Widget _buildDeck(
     ThemeData theme,

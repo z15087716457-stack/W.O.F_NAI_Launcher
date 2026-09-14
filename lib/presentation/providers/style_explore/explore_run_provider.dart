@@ -579,7 +579,7 @@ final exploreActiveRunProvider = Provider<ExploreRun?>((ref) {
       ?.runById(activeId);
 });
 
-/// 候选画廊筛选（全部/收藏/失败；文件夹分组由牌堆视图承担）。
+/// 候选画廊筛选（全部/收藏/失败；文件夹分组由牌堆承担）。
 enum ExploreGalleryFilter { all, hearted, failed }
 
 final exploreGalleryFilterProvider = StateProvider<ExploreGalleryFilter>(
@@ -601,13 +601,6 @@ bool exploreCandidateMatchesFilter(
           ExploreCandidateGenerationStatus.failed;
   }
 }
-
-/// 候选画廊视图模式：网格 / 牌堆（牌堆按用户自建文件夹分组）。
-enum ExploreGalleryViewMode { grid, deck }
-
-final exploreGalleryViewModeProvider = StateProvider<ExploreGalleryViewMode>(
-  (ref) => ExploreGalleryViewMode.grid,
-);
 
 /// 多候选 roll 正向串合并：顶层逗号切原子、去重（保序）、`, ` 拼接
 /// （无尾部逗号）。单串输入等价于原子规范化。
