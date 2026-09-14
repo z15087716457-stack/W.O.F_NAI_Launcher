@@ -25,6 +25,9 @@ class LayoutState {
   final double styleExploreGalleryWidth;
   final double styleExplorePromptAreaHeight;
 
+  /// 探索页 Run 侧栏展开态；null = 从未设置过（首次访问由页面按默认展开处理）。
+  final bool? styleExploreRunSidebarVisible;
+
   const LayoutState({
     this.leftPanelExpanded = true,
     this.rightPanelExpanded = true,
@@ -44,6 +47,7 @@ class LayoutState {
     this.styleExploreRunSidebarWidth = 240.0,
     this.styleExploreGalleryWidth = 360.0,
     this.styleExplorePromptAreaHeight = 280.0,
+    this.styleExploreRunSidebarVisible,
   });
 
   /// 复制并更新部分字段
@@ -66,6 +70,7 @@ class LayoutState {
     double? styleExploreRunSidebarWidth,
     double? styleExploreGalleryWidth,
     double? styleExplorePromptAreaHeight,
+    bool? styleExploreRunSidebarVisible,
   }) {
     return LayoutState(
       leftPanelExpanded: leftPanelExpanded ?? this.leftPanelExpanded,
@@ -95,6 +100,8 @@ class LayoutState {
           styleExploreGalleryWidth ?? this.styleExploreGalleryWidth,
       styleExplorePromptAreaHeight:
           styleExplorePromptAreaHeight ?? this.styleExplorePromptAreaHeight,
+      styleExploreRunSidebarVisible:
+          styleExploreRunSidebarVisible ?? this.styleExploreRunSidebarVisible,
     );
   }
 }
@@ -126,6 +133,7 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       styleExploreRunSidebarWidth: storage.getStyleExploreRunSidebarWidth(),
       styleExploreGalleryWidth: storage.getStyleExploreGalleryWidth(),
       styleExplorePromptAreaHeight: storage.getStyleExplorePromptAreaHeight(),
+      styleExploreRunSidebarVisible: storage.getStyleExploreRunSidebarVisible(),
     );
   }
 
@@ -301,6 +309,17 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
 
     final storage = ref.read(localStorageServiceProvider);
     await storage.setStyleExploreGalleryWidth(normalized);
+  }
+
+  /// 设置画风探索页 Run 侧栏展开状态
+  ///
+  /// 首次访问由探索页按默认展开处理；用户手动开关过一次即落盘，
+  /// 此后按存值恢复（与块库/画廊 toggle 同款持久化语义）。
+  Future<void> setStyleExploreRunSidebarVisible(bool visible) async {
+    state = state.copyWith(styleExploreRunSidebarVisible: visible);
+
+    final storage = ref.read(localStorageServiceProvider);
+    await storage.setStyleExploreRunSidebarVisible(visible);
   }
 
   /// 设置画风探索页主提示词区高度

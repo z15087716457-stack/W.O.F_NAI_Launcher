@@ -188,7 +188,7 @@ class _ExploreRunCard extends ConsumerWidget {
         trailing: PopupMenuButton<String>(
           key: Key('explore-run-menu-${run.id}'),
           iconSize: 18,
-          tooltip: l10n.styleExplore_manageRecipes,
+          tooltip: run.displayName,
           itemBuilder: (context) => [
             PopupMenuItem(
               value: 'load',

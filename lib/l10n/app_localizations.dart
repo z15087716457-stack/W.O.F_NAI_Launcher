@@ -18601,42 +18601,6 @@ abstract class AppLocalizations {
   /// **'Style Explore'**
   String get nav_styleExplore;
 
-  /// No description provided for @styleExplore_recipeListTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipes'**
-  String get styleExplore_recipeListTitle;
-
-  /// No description provided for @styleExplore_recipesEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No recipes yet. Start a new one, or compose in the editor and \"Save as\".'**
-  String get styleExplore_recipesEmpty;
-
-  /// No description provided for @styleExplore_noActiveRecipe.
-  ///
-  /// In en, this message translates to:
-  /// **'No recipe linked'**
-  String get styleExplore_noActiveRecipe;
-
-  /// No description provided for @styleExplore_unsavedChanges.
-  ///
-  /// In en, this message translates to:
-  /// **'Unsaved changes'**
-  String get styleExplore_unsavedChanges;
-
-  /// No description provided for @styleExplore_save.
-  ///
-  /// In en, this message translates to:
-  /// **'Save'**
-  String get styleExplore_save;
-
-  /// No description provided for @styleExplore_saveAs.
-  ///
-  /// In en, this message translates to:
-  /// **'Save as'**
-  String get styleExplore_saveAs;
-
   /// No description provided for @styleExplore_preview.
   ///
   /// In en, this message translates to:
@@ -18655,83 +18619,17 @@ abstract class AppLocalizations {
   /// **'Negative'**
   String get styleExplore_negative;
 
-  /// No description provided for @styleExplore_newRecipe.
-  ///
-  /// In en, this message translates to:
-  /// **'New'**
-  String get styleExplore_newRecipe;
-
-  /// No description provided for @styleExplore_load.
-  ///
-  /// In en, this message translates to:
-  /// **'Load'**
-  String get styleExplore_load;
-
   /// No description provided for @styleExplore_rename.
   ///
   /// In en, this message translates to:
   /// **'Rename'**
   String get styleExplore_rename;
 
-  /// No description provided for @styleExplore_duplicate.
-  ///
-  /// In en, this message translates to:
-  /// **'Duplicate recipe'**
-  String get styleExplore_duplicate;
-
-  /// No description provided for @styleExplore_deleteRecipe.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get styleExplore_deleteRecipe;
-
-  /// No description provided for @styleExplore_recipeNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipe name'**
-  String get styleExplore_recipeNameLabel;
-
-  /// No description provided for @styleExplore_recipeNameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. soft lighting study'**
-  String get styleExplore_recipeNameHint;
-
   /// No description provided for @styleExplore_nameRequired.
   ///
   /// In en, this message translates to:
   /// **'Name cannot be empty'**
   String get styleExplore_nameRequired;
-
-  /// No description provided for @styleExplore_recipeSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved \"{name}\"'**
-  String styleExplore_recipeSaved(String name);
-
-  /// No description provided for @styleExplore_recipeCreated.
-  ///
-  /// In en, this message translates to:
-  /// **'Created \"{name}\"'**
-  String styleExplore_recipeCreated(String name);
-
-  /// No description provided for @styleExplore_recipeLoaded.
-  ///
-  /// In en, this message translates to:
-  /// **'Loaded \"{name}\"'**
-  String styleExplore_recipeLoaded(String name);
-
-  /// No description provided for @styleExplore_recipeDuplicated.
-  ///
-  /// In en, this message translates to:
-  /// **'Duplicated \"{name}\"'**
-  String styleExplore_recipeDuplicated(String name);
-
-  /// No description provided for @styleExplore_recipeDeleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Deleted \"{name}\"'**
-  String styleExplore_recipeDeleted(String name);
 
   /// No description provided for @styleExplore_operationFailed.
   ///
@@ -18804,18 +18702,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New run'**
   String get styleExplore_newRun;
-
-  /// No description provided for @styleExplore_manageRecipes.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage'**
-  String get styleExplore_manageRecipes;
-
-  /// No description provided for @styleExplore_recipeMoreCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} more…'**
-  String styleExplore_recipeMoreCount(int count);
 
   /// No description provided for @styleExplore_galleryTitle.
   ///
@@ -19300,20 +19186,8 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_createDeepRound.
   ///
   /// In en, this message translates to:
-  /// **'Create round'**
+  /// **'Generate candidates'**
   String get styleExplore_createDeepRound;
-
-  /// No description provided for @styleExplore_anotherDeepRound.
-  ///
-  /// In en, this message translates to:
-  /// **'New round'**
-  String get styleExplore_anotherDeepRound;
-
-  /// No description provided for @styleExplore_deepRoundTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Deep candidate round'**
-  String get styleExplore_deepRoundTitle;
 
   /// No description provided for @styleExplore_deepRoundCountHint.
   ///
@@ -19336,19 +19210,19 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_sortParents.
   ///
   /// In en, this message translates to:
-  /// **'Rank'**
+  /// **'A/B comparison'**
   String get styleExplore_sortParents;
 
   /// No description provided for @styleExplore_sortTitle.
   ///
   /// In en, this message translates to:
-  /// **'Pairwise parent ranking'**
+  /// **'Parent A/B comparison'**
   String get styleExplore_sortTitle;
 
   /// No description provided for @styleExplore_sortPrompt.
   ///
   /// In en, this message translates to:
-  /// **'Which string is closer to the desired result?'**
+  /// **'Which image is closer to the style you want?'**
   String get styleExplore_sortPrompt;
 
   /// No description provided for @styleExplore_sortLeft.
@@ -19450,7 +19324,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_pileEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No deep candidates yet — start with \"Create round\"'**
+  /// **'No candidates yet — start with \"Generate candidates\" above'**
   String get styleExplore_pileEmpty;
 
   /// No description provided for @subscriptionExpiresOn.

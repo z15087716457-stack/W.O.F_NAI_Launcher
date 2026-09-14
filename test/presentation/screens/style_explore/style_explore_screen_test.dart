@@ -5,13 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
-import 'package:nai_launcher/core/storage/style_explore_recipe_storage.dart';
 import 'package:nai_launcher/core/storage/style_explore_run_storage.dart';
+import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
-import 'package:nai_launcher/data/models/style_explore/style_explore_recipe.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_library_entry.dart';
 import 'package:nai_launcher/data/services/explore_run_image_store.dart';
@@ -28,50 +27,13 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
-import 'package:nai_launcher/presentation/providers/style_explore_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/block_library_panel_slot.dart';
 import 'package:nai_launcher/presentation/screens/style_explore/style_explore_screen.dart';
 
-/// 内存版 Recipe 存储。
-///
-/// testWidgets 的 fakeAsync 区里 Hive 的异步写盘永不完成，
-/// 因此 widget 测试不落盘，只验证 UI 与 provider 协作。
-class _MemoryRecipeStorage extends StyleExploreRecipeStorage {
-  final Map<String, StyleExploreRecipe> _store = {};
-
-  @override
-  Future<List<StyleExploreRecipe>> getRecipes() async {
-    final recipes = _store.values.toList()
-      ..sort((a, b) {
-        final comparison = b.updatedAt.compareTo(a.updatedAt);
-        if (comparison != 0) return comparison;
-        return a.id.compareTo(b.id);
-      });
-    return recipes;
-  }
-
-  @override
-  Future<StyleExploreRecipe?> getRecipe(String id) async => _store[id];
-
-  @override
-  Future<void> putRecipe(StyleExploreRecipe recipe) async {
-    _store[recipe.id] = recipe;
-  }
-
-  @override
-  Future<void> deleteRecipe(String id) async {
-    _store.remove(id);
-  }
-
-  @override
-  Future<void> clear() async {
-    _store.clear();
-  }
-}
-
-/// 内存版 Run 存储（同上，不落盘）。
+/// 内存版 Run 存储（testWidgets 的 fakeAsync 区里 Hive 的异步写盘永不完成，
+/// 因此 widget 测试不落盘，只验证 UI 与 provider 协作）。
 class _MemoryRunStorage extends StyleExploreRunStorage {
   final Map<String, ExploreRun> _store = {};
 
@@ -106,11 +68,24 @@ class _MemoryRunStorage extends StyleExploreRunStorage {
 }
 
 class _TestLocalStorageService extends LocalStorageService {
-  @override
-  T? getSetting<T>(String key, {T? defaultValue}) => defaultValue;
+  _TestLocalStorageService({Map<String, Object?>? initial}) {
+    if (initial != null) settings.addAll(initial);
+  }
+
+  /// 已写入的设置值（含布局 provider 落盘的 toggle 状态）。
+  final Map<String, Object?> settings = {};
 
   @override
-  Future<void> setSetting<T>(String key, T value) async {}
+  T? getSetting<T>(String key, {T? defaultValue}) {
+    final value = settings[key];
+    if (value is T) return value;
+    return defaultValue;
+  }
+
+  @override
+  Future<void> setSetting<T>(String key, T value) async {
+    settings[key] = value;
+  }
 
   @override
   bool getEnablePromptWeightScroll() => false;
@@ -261,12 +236,12 @@ class _TestSubscriptionNotifier extends SubscriptionNotifier {
 }
 
 void main() {
-  late _MemoryRecipeStorage recipeStorage;
   late _MemoryRunStorage runStorage;
+  late _TestLocalStorageService localStorage;
 
   setUp(() {
-    recipeStorage = _MemoryRecipeStorage();
     runStorage = _MemoryRunStorage();
+    localStorage = _TestLocalStorageService();
   });
 
   PillDocument doc(String text) =>
@@ -290,16 +265,6 @@ void main() {
     decrisp: false,
   );
 
-  Future<StyleExploreRecipe> seedRecipe(String name, String positive) async {
-    final recipe = StyleExploreRecipe.create(
-      name: name,
-      positiveDocument: doc(positive),
-      negativeDocument: doc('lowres'),
-    );
-    await recipeStorage.putRecipe(recipe);
-    return recipe;
-  }
-
   Future<ExploreRun> seedRun(
     String name, {
     int targetCount = 10,
@@ -322,16 +287,13 @@ void main() {
   Widget buildScreen({List<Override> extraOverrides = const []}) {
     return ProviderScope(
       overrides: [
-        localStorageServiceProvider.overrideWith(
-          (ref) => _TestLocalStorageService(),
-        ),
+        localStorageServiceProvider.overrideWith((ref) => localStorage),
         // 提示词区可拖矮后参数面板视口变大，Vibe 参考面板会进入视口；
         // 其 initState 直读真 Hive/计时器，测试环境必须断掉这两条链。
         vibeLibraryNotifierProvider.overrideWith(_TestVibeLibraryNotifier.new),
         vibeLibraryStorageServiceProvider.overrideWithValue(
           _TestVibeStorageService(),
         ),
-        styleExploreRecipeStorageProvider.overrideWithValue(recipeStorage),
         styleExploreRunStorageProvider.overrideWithValue(runStorage),
         promptBlockLibraryNotifierProvider.overrideWith(
           () => _FakeLibraryNotifier(),
@@ -382,24 +344,24 @@ void main() {
     return ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
   }
 
-  testWidgets('renders sidebar, toolbar, and shared main-lane center panel', (
+  testWidgets('renders the run sidebar, toolbar, and center panel', (
     tester,
   ) async {
-    await seedRecipe('柔和光影', 'soft lighting');
-    await seedRecipe('厚重色彩', 'vivid colors');
-    final container = await pumpScreen(tester);
+    await pumpScreen(tester);
 
-    // 左栏：探索任务列表（空态）+ Recipe 缩略列表。
-    expect(find.text('柔和光影'), findsOneWidget);
-    expect(find.text('厚重色彩'), findsOneWidget);
+    // 左栏：探索任务列表（键未设 → 首访默认展开，露新建引导）。
+    expect(find.byKey(const Key('style-explore-run-sidebar')), findsOneWidget);
     expect(find.byKey(const Key('style-explore-new-run')), findsOneWidget);
+    expect(find.text('还没有探索任务'), findsOneWidget);
+    // 配方区整段已删。
+    expect(find.text('未关联配方'), findsNothing);
+    expect(find.byKey(const Key('style-explore-save')), findsNothing);
+    expect(find.byKey(const Key('style-explore-save-as')), findsNothing);
+    // 顶栏按钮。
     expect(
-      find.byKey(const Key('style-explore-recipe-manager')),
+      find.byKey(const Key('style-explore-run-sidebar-toggle')),
       findsOneWidget,
     );
-    // 顶栏按钮。
-    expect(find.byKey(const Key('style-explore-save')), findsOneWidget);
-    expect(find.byKey(const Key('style-explore-save-as')), findsOneWidget);
     expect(find.byKey(const Key('style-explore-preview')), findsOneWidget);
     expect(
       find.byKey(const Key('style-explore-gallery-toggle')),
@@ -420,34 +382,88 @@ void main() {
       find.byKey(const Key('style-explore-gallery-panel')),
       findsOneWidget,
     );
-    expect(find.text('未关联配方'), findsOneWidget);
+  });
+
+  testWidgets('top bar toggle hides and shows the run sidebar', (tester) async {
+    await pumpScreen(tester);
+    final toggle = find.byKey(const Key('style-explore-run-sidebar-toggle'));
+
+    await tester.tap(toggle);
+    await tester.pump();
+
+    expect(find.byKey(const Key('style-explore-run-sidebar')), findsNothing);
     expect(
-      container.read(styleExploreSessionNotifierProvider).activeRecipeId,
-      isNull,
+      find.byKey(const Key('style-explore-run-sidebar-resize-handle')),
+      findsNothing,
+    );
+    expect(
+      localStorage.settings[StorageKeys.styleExploreRunSidebarVisible],
+      isFalse,
+    );
+    // 收起后主编辑区吃满宽度：画廊拖拽手柄直接贴住主编辑区右缘。
+    final main = tester.getRect(
+      find.byKey(const Key('style-explore-main-editor')),
+    );
+    final galleryHandle = tester.getRect(
+      find.byKey(const Key('style-explore-gallery-resize-handle')),
+    );
+    expect(main.right, closeTo(galleryHandle.left, 1.1));
+
+    await tester.tap(toggle);
+    await tester.pump();
+
+    expect(find.byKey(const Key('style-explore-run-sidebar')), findsOneWidget);
+    expect(
+      localStorage.settings[StorageKeys.styleExploreRunSidebarVisible],
+      isTrue,
     );
   });
 
-  testWidgets(
-    'tapping a recipe in the sidebar preview loads it into the main lanes',
-    (tester) async {
-      final recipe = await seedRecipe('载入目标', 'loaded content');
-      final container = await pumpScreen(tester);
+  testWidgets('a hidden run sidebar stays collapsed across a restart', (
+    tester,
+  ) async {
+    // 键已设 false = 用户手动关过：重开不回到默认展开。
+    localStorage.settings[StorageKeys.styleExploreRunSidebarVisible] = false;
+    await pumpScreen(tester);
 
-      await tester.tap(find.text('载入目标'));
-      await tester.pump();
-      // AppToast.success 内部有 3 秒自动关闭定时器，推进到它结束。
-      await tester.pump(const Duration(milliseconds: 3300));
+    expect(find.byKey(const Key('style-explore-run-sidebar')), findsNothing);
+    expect(
+      find.byKey(const Key('style-explore-run-sidebar-resize-handle')),
+      findsNothing,
+    );
+    // 开关本身仍在顶栏，可随时重新展开。
+    expect(
+      find.byKey(const Key('style-explore-run-sidebar-toggle')),
+      findsOneWidget,
+    );
+    // 收起态下画廊手柄直接贴住主编辑区右缘。
+    final main = tester.getRect(
+      find.byKey(const Key('style-explore-main-editor')),
+    );
+    final galleryHandle = tester.getRect(
+      find.byKey(const Key('style-explore-gallery-resize-handle')),
+    );
+    expect(main.right, closeTo(galleryHandle.left, 1.1));
+  });
 
-      expect(
-        container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
-        'loaded content',
-      );
-      expect(
-        container.read(styleExploreSessionNotifierProvider).activeRecipeId,
-        recipe.id,
-      );
-    },
-  );
+  testWidgets('preview dialog shows pill projections without titles', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+
+    await tester.tap(find.byKey(const Key('style-explore-preview')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Prompt 预览'), findsOneWidget);
+    expect(find.text('负向'), findsWidgets);
+    // 正负两路均为空文档，各显示一个占位。
+    expect(find.text('（空）'), findsNWidgets(2));
+    expect(
+      find.byKey(const Key('style-explore-preview-copy-positive')),
+      findsOneWidget,
+    );
+  });
 
   testWidgets('editing in the explore page writes main lane and params', (
     tester,
@@ -468,62 +484,6 @@ void main() {
       '探索页输入',
     );
     expect(container.read(generationParamsNotifierProvider).prompt, '探索页输入');
-  });
-
-  testWidgets('preview dialog shows pill projections without titles', (
-    tester,
-  ) async {
-    await seedRecipe('预览配方', 'preview, content');
-    await pumpScreen(tester);
-
-    await tester.tap(find.byKey(const Key('style-explore-preview')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(find.text('Prompt 预览'), findsOneWidget);
-    expect(find.text('负向'), findsWidgets);
-    // 正负两路均为空文档，各显示一个占位。
-    expect(find.text('（空）'), findsNWidgets(2));
-    expect(
-      find.byKey(const Key('style-explore-preview-copy-positive')),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('recipe manager dialog reuses the full list panel', (
-    tester,
-  ) async {
-    await seedRecipe('管理目标', 'managed content');
-    final container = await pumpScreen(tester);
-
-    await tester.tap(find.byKey(const Key('style-explore-recipe-manager')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(
-      find.byKey(const Key('style-explore-recipe-dialog')),
-      findsOneWidget,
-    );
-    // 弹窗内完整列表交互：点击载入后弹窗关闭、会话关联。
-    // （侧栏缩略列表有同名条目，必须限定在弹窗内查找。）
-    await tester.tap(
-      find.descendant(
-        of: find.byKey(const Key('style-explore-recipe-dialog')),
-        matching: find.text('管理目标'),
-      ),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 3300));
-
-    expect(find.byKey(const Key('style-explore-recipe-dialog')), findsNothing);
-    expect(
-      container.read(styleExploreSessionNotifierProvider).activeRecipeId,
-      isNotNull,
-    );
-    expect(
-      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
-      'managed content',
-    );
   });
 
   // ==================== 阶段 B：Run 数据层 + 候选画廊 ====================
@@ -1231,7 +1191,7 @@ void main() {
     );
   });
 
-  testWidgets('filter chips narrow the grid', (tester) async {
+  testWidgets('filter chips narrow the deck', (tester) async {
     final hearted = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-t')
         .copyWith(
           generation: const ExploreCandidateGeneration(
@@ -1279,6 +1239,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byKey(const Key('explore-candidate-cand-f')), findsOneWidget);
     expect(find.byKey(const Key('explore-candidate-cand-t')), findsNothing);
+    // 筛选叠加在牌堆分组之上（牌堆常驻，无视图切换）。
+    expect(
+      find.byKey(const Key('explore-deck-header-uncategorized')),
+      findsOneWidget,
+    );
 
     // 回到全部。
     await tester.tap(find.byKey(const Key('explore-filter-all')));
@@ -1353,64 +1318,6 @@ void main() {
     expect(find.byKey(const Key('explore-run-another-round')), findsNothing);
     expect(find.byKey(const Key('explore-run-start')), findsNothing);
     expect(find.text('共 0 张'), findsOneWidget);
-  });
-
-  testWidgets('recipe load over non-empty main lane asks before overwrite', (
-    tester,
-  ) async {
-    await seedRecipe('覆盖目标', 'recipe content');
-    final container = await pumpScreen(tester);
-
-    // 主 lane 写入未备份内容。
-    container
-        .read(pillWorkspaceProvider(PillScopes.main).notifier)
-        .setText('未备份内容');
-    await tester.pump();
-
-    // 点 Recipe → 覆盖确认弹窗（不直接灌 lane）。
-    await tester.tap(find.text('覆盖目标'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('放弃未保存的修改？'), findsOneWidget);
-    expect(
-      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
-      '未备份内容',
-    );
-
-    // 确认后才灌入 main lane。
-    await tester.tap(find.text('继续并丢弃'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 3300));
-    expect(
-      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
-      'recipe content',
-    );
-  });
-
-  testWidgets('recipe load overwrite confirm can be cancelled', (tester) async {
-    await seedRecipe('取消目标', 'recipe content');
-    final container = await pumpScreen(tester);
-
-    container
-        .read(pillWorkspaceProvider(PillScopes.main).notifier)
-        .setText('未备份内容');
-    await tester.pump();
-
-    await tester.tap(find.text('取消目标'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(find.text('取消'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(
-      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
-      '未备份内容',
-    );
-    expect(
-      container.read(styleExploreSessionNotifierProvider).activeRecipeId,
-      isNull,
-    );
   });
 
   // ==================== 候选详情：翻页与归类 ====================
@@ -1545,6 +1452,53 @@ void main() {
     expect(find.text('第 2/3 张'), findsOneWidget);
   });
 
+  testWidgets('newest candidate renders first with storage-bound numbering', (
+    tester,
+  ) async {
+    final run = await seedRun(
+      '排序任务',
+      status: ExploreRunStatus.generated,
+      candidates: [
+        doneCandidate('cand-1'),
+        doneCandidate('cand-2'),
+        doneCandidate('cand-3'),
+      ],
+    );
+    final container = await pumpScreen(tester);
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // 展示层反转：最后追加的候选排最前（组内同序）。
+    final newest = tester.getTopLeft(
+      find.byKey(const Key('explore-candidate-cand-3')),
+    );
+    final oldest = tester.getTopLeft(
+      find.byKey(const Key('explore-candidate-cand-1')),
+    );
+    expect(
+      newest.dy < oldest.dy ||
+          (newest.dy == oldest.dy && newest.dx < oldest.dx),
+      isTrue,
+      reason: '首张卡 = 最后追加的候选',
+    );
+    // #N 绑存储序：最新那张拿最大序号，最早那张仍是 #1。
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-cand-3')),
+        matching: find.text('#3'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-cand-1')),
+        matching: find.text('#1'),
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('toolbar creates a folder that groups the deck', (tester) async {
     final run = await seedRun(
       '牌堆任务',
@@ -1570,11 +1524,8 @@ void main() {
     expect(find.byKey(const Key('explore-filter-hearted')), findsOneWidget);
     expect(find.byKey(const Key('explore-filter-failed')), findsOneWidget);
     expect(find.byKey(const Key('explore-formal-review')), findsNothing);
-
-    // 切到牌堆视图：按文件夹 + 未分类分组。
-    await tester.tap(find.byKey(const Key('explore-gallery-view-toggle')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    // 视图切换已删：牌堆常驻，无切换钮。
+    expect(find.byKey(const Key('explore-gallery-view-toggle')), findsNothing);
 
     expect(find.text('暖光 · 1'), findsOneWidget);
     expect(find.text('未分类 · 1'), findsOneWidget);
@@ -1633,9 +1584,6 @@ void main() {
     await runStorage.putRun(run.copyWith(folders: [folder]));
     final container = await pumpScreen(tester);
     container.read(exploreActiveRunIdProvider.notifier).state = run.id;
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(find.byKey(const Key('explore-gallery-view-toggle')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
@@ -1749,6 +1697,11 @@ void main() {
     await tester.tap(find.byKey(const Key('explore-candidate-cand-2')));
     await tester.pump();
     expect(find.text('已选 2 张'), findsOneWidget);
+    // 多选模式同走牌堆分组（无视图切换）。
+    expect(
+      find.byKey(const Key('explore-deck-header-uncategorized')),
+      findsOneWidget,
+    );
 
     // 合并收编 → 默认名 ×2 → 确认。
     await tester.tap(find.byKey(const Key('explore-gallery-merge-adopt')));

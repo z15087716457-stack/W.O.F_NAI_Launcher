@@ -808,6 +808,16 @@ class LocalStorageService {
     await setSetting(StorageKeys.styleExploreRunSidebarWidth, width);
   }
 
+  /// 获取画风探索页 Run 侧栏展开状态（未设置过 = null，调用方按首次访问处理）
+  bool? getStyleExploreRunSidebarVisible() {
+    return getSetting<bool?>(StorageKeys.styleExploreRunSidebarVisible);
+  }
+
+  /// 保存画风探索页 Run 侧栏展开状态
+  Future<void> setStyleExploreRunSidebarVisible(bool visible) async {
+    await setSetting(StorageKeys.styleExploreRunSidebarVisible, visible);
+  }
+
   /// 获取画风探索页候选画廊宽度 (默认360)
   double getStyleExploreGalleryWidth() {
     final value = getSetting(StorageKeys.styleExploreGalleryWidth);

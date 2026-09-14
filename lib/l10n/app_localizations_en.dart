@@ -10666,25 +10666,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nav_styleExplore => 'Style Explore';
 
   @override
-  String get styleExplore_recipeListTitle => 'Recipes';
-
-  @override
-  String get styleExplore_recipesEmpty =>
-      'No recipes yet. Start a new one, or compose in the editor and \"Save as\".';
-
-  @override
-  String get styleExplore_noActiveRecipe => 'No recipe linked';
-
-  @override
-  String get styleExplore_unsavedChanges => 'Unsaved changes';
-
-  @override
-  String get styleExplore_save => 'Save';
-
-  @override
-  String get styleExplore_saveAs => 'Save as';
-
-  @override
   String get styleExplore_preview => 'Preview';
 
   @override
@@ -10694,53 +10675,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_negative => 'Negative';
 
   @override
-  String get styleExplore_newRecipe => 'New';
-
-  @override
-  String get styleExplore_load => 'Load';
-
-  @override
   String get styleExplore_rename => 'Rename';
 
   @override
-  String get styleExplore_duplicate => 'Duplicate recipe';
-
-  @override
-  String get styleExplore_deleteRecipe => 'Delete';
-
-  @override
-  String get styleExplore_recipeNameLabel => 'Recipe name';
-
-  @override
-  String get styleExplore_recipeNameHint => 'e.g. soft lighting study';
-
-  @override
   String get styleExplore_nameRequired => 'Name cannot be empty';
-
-  @override
-  String styleExplore_recipeSaved(String name) {
-    return 'Saved \"$name\"';
-  }
-
-  @override
-  String styleExplore_recipeCreated(String name) {
-    return 'Created \"$name\"';
-  }
-
-  @override
-  String styleExplore_recipeLoaded(String name) {
-    return 'Loaded \"$name\"';
-  }
-
-  @override
-  String styleExplore_recipeDuplicated(String name) {
-    return 'Duplicated \"$name\"';
-  }
-
-  @override
-  String styleExplore_recipeDeleted(String name) {
-    return 'Deleted \"$name\"';
-  }
 
   @override
   String get styleExplore_operationFailed => 'Operation failed';
@@ -10779,14 +10717,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_newRun => 'New run';
-
-  @override
-  String get styleExplore_manageRecipes => 'Manage';
-
-  @override
-  String styleExplore_recipeMoreCount(int count) {
-    return '$count more…';
-  }
 
   @override
   String get styleExplore_galleryTitle => 'Candidate gallery';
@@ -11075,13 +11005,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_createDeepRound => 'Create round';
-
-  @override
-  String get styleExplore_anotherDeepRound => 'New round';
-
-  @override
-  String get styleExplore_deepRoundTitle => 'Deep candidate round';
+  String get styleExplore_createDeepRound => 'Generate candidates';
 
   @override
   String styleExplore_deepRoundCountHint(int min) {
@@ -11097,14 +11021,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Mutation engine could not produce enough distinct children';
 
   @override
-  String get styleExplore_sortParents => 'Rank';
+  String get styleExplore_sortParents => 'A/B comparison';
 
   @override
-  String get styleExplore_sortTitle => 'Pairwise parent ranking';
+  String get styleExplore_sortTitle => 'Parent A/B comparison';
 
   @override
   String get styleExplore_sortPrompt =>
-      'Which string is closer to the desired result?';
+      'Which image is closer to the style you want?';
 
   @override
   String get styleExplore_sortLeft => 'Left is better';
@@ -11167,7 +11091,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_pileEmpty =>
-      'No deep candidates yet — start with \"Create round\"';
+      'No candidates yet — start with \"Generate candidates\" above';
 
   @override
   String subscriptionExpiresOn(String date) {

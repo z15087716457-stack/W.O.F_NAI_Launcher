@@ -10283,24 +10283,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nav_styleExplore => '画风探索';
 
   @override
-  String get styleExplore_recipeListTitle => '配方';
-
-  @override
-  String get styleExplore_recipesEmpty => '还没有配方。新建一个开始探索，或在编辑区组合后「另存为」。';
-
-  @override
-  String get styleExplore_noActiveRecipe => '未关联配方';
-
-  @override
-  String get styleExplore_unsavedChanges => '有未保存的修改';
-
-  @override
-  String get styleExplore_save => '保存';
-
-  @override
-  String get styleExplore_saveAs => '另存为';
-
-  @override
   String get styleExplore_preview => '预览';
 
   @override
@@ -10310,53 +10292,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_negative => '负向';
 
   @override
-  String get styleExplore_newRecipe => '新建';
-
-  @override
-  String get styleExplore_load => '载入';
-
-  @override
   String get styleExplore_rename => '重命名';
 
   @override
-  String get styleExplore_duplicate => '复制配方';
-
-  @override
-  String get styleExplore_deleteRecipe => '删除';
-
-  @override
-  String get styleExplore_recipeNameLabel => '配方名称';
-
-  @override
-  String get styleExplore_recipeNameHint => '例如：柔和光影试验';
-
-  @override
   String get styleExplore_nameRequired => '名称不能为空';
-
-  @override
-  String styleExplore_recipeSaved(String name) {
-    return '已保存「$name」';
-  }
-
-  @override
-  String styleExplore_recipeCreated(String name) {
-    return '已创建「$name」';
-  }
-
-  @override
-  String styleExplore_recipeLoaded(String name) {
-    return '已载入「$name」';
-  }
-
-  @override
-  String styleExplore_recipeDuplicated(String name) {
-    return '已复制「$name」';
-  }
-
-  @override
-  String styleExplore_recipeDeleted(String name) {
-    return '已删除「$name」';
-  }
 
   @override
   String get styleExplore_operationFailed => '操作失败';
@@ -10393,14 +10332,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_newRun => '新建任务';
-
-  @override
-  String get styleExplore_manageRecipes => '管理';
-
-  @override
-  String styleExplore_recipeMoreCount(int count) {
-    return '还有 $count 个配方…';
-  }
 
   @override
   String get styleExplore_galleryTitle => '候选画廊';
@@ -10684,13 +10615,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_createDeepRound => '创建候选轮';
-
-  @override
-  String get styleExplore_anotherDeepRound => '新增一轮';
-
-  @override
-  String get styleExplore_deepRoundTitle => '深度候选轮';
+  String get styleExplore_createDeepRound => '生成候选图';
 
   @override
   String styleExplore_deepRoundCountHint(int min) {
@@ -10704,13 +10629,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_deepRoundEmpty => '变异引擎无法产出足够不同的子代串';
 
   @override
-  String get styleExplore_sortParents => '排序';
+  String get styleExplore_sortParents => 'A/B 组对照';
 
   @override
-  String get styleExplore_sortTitle => '父本两两排序';
+  String get styleExplore_sortTitle => '父本A/B组对照';
 
   @override
-  String get styleExplore_sortPrompt => '哪一串更贴近想要的效果？';
+  String get styleExplore_sortPrompt => '哪张图更接近你想要的画风效果？';
 
   @override
   String get styleExplore_sortLeft => '左边好';
@@ -10769,7 +10694,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_pileEmpty => '尚无深度候选，点「创建候选轮」开始';
+  String get styleExplore_pileEmpty => '尚无候选图，点上方「生成候选图」开始';
 
   @override
   String subscriptionExpiresOn(String date) {

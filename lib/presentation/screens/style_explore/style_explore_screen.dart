@@ -3,20 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/localization_extension.dart';
-import '../../../data/models/style_explore/style_explore_recipe.dart';
 import '../../providers/character_position_canvas_provider.dart';
 import '../../providers/layout_state_provider.dart';
 import '../../providers/pill_workspace_provider.dart';
 import '../../providers/style_explore/explore_manual_capture.dart';
 import '../../providers/style_explore/explore_run_provider.dart';
-import '../../providers/style_explore_provider.dart';
 import '../../widgets/character/character_position_canvas.dart';
 import '../../widgets/character/inline_character_row.dart';
-import '../../widgets/common/app_toast.dart';
-import '../../widgets/common/themed_confirm_dialog.dart';
-import '../../widgets/common/themed_input_dialog.dart';
 import '../../widgets/prompt/block_library_panel_toggle.dart';
 import '../generation/widgets/block_library_panel_slot.dart';
 import '../generation/widgets/generation_controls/generation_controls.dart';
@@ -27,14 +21,12 @@ import 'widgets/explore_candidate_gallery.dart';
 import 'widgets/explore_run_control_bar.dart';
 import 'widgets/explore_run_sidebar.dart';
 import 'widgets/style_explore_prompt_preview_dialog.dart';
-import 'widgets/style_explore_recipe_list_panel.dart';
 
-/// 画风探索页（主编辑 | 块库插槽 | Run/Recipe | 候选画廊）。
+/// 画风探索页（主编辑 | 块库插槽 | 探索任务侧栏 | 候选画廊）。
 ///
 /// 主编辑区复用主生成页左栏整套面板（尺寸/种子/正·UC 提示词/角色/
 /// 生成按钮全套）且**数据同源**：提示词=main/negative lane、
 /// 参数=generationParamsNotifierProvider，探索页与主生成页实时同一份。
-/// Recipe=主提示词模板库（载入/保存的都是主双 lane 的 PillDocument 快照）。
 /// 探索页点生成：主链 generate() + 按批次事件登记为活跃 run 的手动候选。
 class StyleExploreScreen extends ConsumerStatefulWidget {
   const StyleExploreScreen({super.key});
@@ -58,11 +50,19 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
     setState(() => _galleryExpandedOverride = !_galleryVisible(maxWidth));
   }
 
+  /// 探索任务侧栏展开态；null = 从未设置过（首次访问默认展开，露新建任务引导）。
+  bool _runSidebarVisible(LayoutState layout) =>
+      layout.styleExploreRunSidebarVisible ?? true;
+
+  void _toggleRunSidebar(LayoutState layout) {
+    ref
+        .read(layoutStateNotifierProvider.notifier)
+        .setStyleExploreRunSidebarVisible(!_runSidebarVisible(layout));
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final activeRecipe = ref.watch(styleExploreActiveRecipeProvider);
-    final isDirty = ref.watch(styleExploreDirtyProvider);
 
     // 探索页没有画布宿主（主页画布占图像预览区）：✥ 入口改走轻量弹窗。
     // 弹窗打开后 provider 再关（画布自带关闭按钮/再次点 ✥）由弹窗内
@@ -81,17 +81,19 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
           const resizeHandleWidth = 8.0;
           final galleryVisible = _galleryVisible(constraints.maxWidth);
           final layoutState = ref.watch(layoutStateNotifierProvider);
+          final runSidebarVisible = _runSidebarVisible(layoutState);
           final blockLibraryWidth = layoutState.blockLibraryPanelExpanded
               ? layoutState.blockLibraryPanelWidth
                         .clamp(0.0, double.infinity)
                         .toDouble() +
                     resizeHandleWidth
               : 0.0;
-          final sidebarWidth =
-              layoutState.styleExploreRunSidebarWidth
-                  .clamp(0.0, double.infinity)
-                  .toDouble() +
-              resizeHandleWidth;
+          final sidebarWidth = runSidebarVisible
+              ? layoutState.styleExploreRunSidebarWidth
+                        .clamp(0.0, double.infinity)
+                        .toDouble() +
+                    resizeHandleWidth
+              : 0.0;
           final galleryWidth = galleryVisible
               ? layoutState.styleExploreGalleryWidth
                         .clamp(0.0, double.infinity)
@@ -123,12 +125,11 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                         child: Column(
                           children: [
                             _buildTopBar(
-                              context,
                               theme,
-                              activeRecipe,
-                              isDirty,
                               constraints.maxWidth,
                               galleryVisible,
+                              runSidebarVisible,
+                              layoutState,
                             ),
                             Expanded(
                               child: _buildCenterPanel(
@@ -142,7 +143,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                     ),
                     if (layoutState.blockLibraryPanelExpanded)
                       const BlockLibraryPanelSlot(rightDock: true),
-                    _buildSidebar(theme),
+                    if (runSidebarVisible) _buildSidebar(theme),
                     if (galleryVisible) _buildGalleryPanel(theme),
                   ],
                 ),
@@ -157,15 +158,13 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
   // ==================== 顶栏 ====================
 
   Widget _buildTopBar(
-    BuildContext context,
     ThemeData theme,
-    StyleExploreRecipe? activeRecipe,
-    bool isDirty,
     double maxWidth,
     bool galleryVisible,
+    bool runSidebarVisible,
+    LayoutState layoutState,
   ) {
     final l10n = context.l10n;
-    final name = activeRecipe?.displayName ?? l10n.styleExplore_noActiveRecipe;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -183,53 +182,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
         runSpacing: 6,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: maxWidth.isFinite ? maxWidth : double.infinity,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.explore_outlined,
-                  size: 18,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                ),
-                if (isDirty) ...[
-                  const SizedBox(width: 6),
-                  Tooltip(
-                    message: l10n.styleExplore_unsavedChanges,
-                    child: Icon(
-                      Icons.circle,
-                      size: 8,
-                      color: theme.colorScheme.tertiary,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          FilledButton.tonalIcon(
-            key: const Key('style-explore-save'),
-            onPressed: activeRecipe != null && isDirty ? _saveActive : null,
-            icon: const Icon(Icons.save_outlined, size: 18),
-            label: Text(l10n.styleExplore_save),
-          ),
-          FilledButton.tonalIcon(
-            key: const Key('style-explore-save-as'),
-            onPressed: _saveAsNew,
-            icon: const Icon(Icons.save_as_outlined, size: 18),
-            label: Text(l10n.styleExplore_saveAs),
-          ),
+          _buildRunSidebarToggle(theme, runSidebarVisible, layoutState),
           OutlinedButton.icon(
             key: const Key('style-explore-preview'),
             onPressed: _showPreview,
@@ -239,6 +192,33 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
           _buildGalleryToggle(theme, maxWidth, galleryVisible),
           const BlockLibraryPanelToggleButton(),
         ],
+      ),
+    );
+  }
+
+  /// 探索任务侧栏开关（首次访问默认展开，用户切换后按存值恢复）。
+  Widget _buildRunSidebarToggle(
+    ThemeData theme,
+    bool runSidebarVisible,
+    LayoutState layoutState,
+  ) {
+    return Tooltip(
+      message: context.l10n.styleExplore_runSectionTitle,
+      waitDuration: const Duration(milliseconds: 300),
+      child: IconButton(
+        key: const Key('style-explore-run-sidebar-toggle'),
+        iconSize: 18,
+        visualDensity: VisualDensity.compact,
+        style: IconButton.styleFrom(
+          backgroundColor: runSidebarVisible
+              ? theme.colorScheme.primaryContainer
+              : Colors.transparent,
+          foregroundColor: runSidebarVisible
+              ? theme.colorScheme.onPrimaryContainer
+              : theme.colorScheme.onSurfaceVariant,
+        ),
+        onPressed: () => _toggleRunSidebar(layoutState),
+        icon: const Icon(Icons.explore),
       ),
     );
   }
@@ -296,20 +276,8 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
         // Material 上，直接用 DecoratedBox 背景会将其遮挡。
         child: Material(
           color: theme.colorScheme.surfaceContainerLow,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Expanded(
-                child: ExploreRunSidebarSection(
-                  key: Key('style-explore-run-sidebar-section'),
-                ),
-              ),
-              Divider(
-                height: 1,
-                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
-              ),
-              Expanded(child: _buildRecipeSection(theme)),
-            ],
+          child: const ExploreRunSidebarSection(
+            key: Key('style-explore-run-sidebar-section'),
           ),
         ),
       ),
@@ -351,170 +319,6 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
         ),
         ClipRect(child: panel),
       ],
-    );
-  }
-
-  /// Recipe 区：标题 + 列表缩略（最多 3 条，点击载入）+ 管理弹窗入口。
-  Widget _buildRecipeSection(ThemeData theme) {
-    final l10n = context.l10n;
-    final listAsync = ref.watch(styleExploreRecipeListNotifierProvider);
-    final activeRecipeId = ref.watch(
-      styleExploreSessionNotifierProvider.select((s) => s.activeRecipeId),
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 4, 4),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.styleExplore_recipeListTitle,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              IconButton(
-                key: const Key('style-explore-recipe-manager'),
-                tooltip: l10n.styleExplore_manageRecipes,
-                iconSize: 18,
-                onPressed: _showRecipeManagerDialog,
-                icon: const Icon(Icons.tune),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: listAsync.maybeWhen(
-            data: (list) {
-              final recipes = list.recipes;
-              if (recipes.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      l10n.styleExplore_recipesEmpty,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                );
-              }
-              const previewCount = 3;
-              return ListView(
-                padding: const EdgeInsets.only(bottom: 8),
-                children: [
-                  for (final recipe in recipes.take(previewCount))
-                    ListTile(
-                      key: ValueKey('style-explore-recipe-${recipe.id}'),
-                      selected: recipe.id == activeRecipeId,
-                      dense: true,
-                      title: Text(
-                        recipe.displayName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      onTap: () => _loadRecipe(recipe),
-                    ),
-                  if (recipes.length > previewCount)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-                      child: Text(
-                        l10n.styleExplore_recipeMoreCount(
-                          recipes.length - previewCount,
-                        ),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
-            orElse: () => const Center(child: CircularProgressIndicator()),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Recipe 管理弹窗：复用现有列表面板的全部交互（载入/新建/重命名/
-  /// 复制/删除）；载入或新建成功后关闭弹窗。
-  Future<void> _showRecipeManagerDialog() async {
-    final l10n = context.l10n;
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        void closeIfMounted() {
-          if (dialogContext.mounted) Navigator.of(dialogContext).pop();
-        }
-
-        return Consumer(
-          builder: (context, ref, _) {
-            final theme = Theme.of(context);
-            final listAsync = ref.watch(styleExploreRecipeListNotifierProvider);
-            final session = ref.watch(styleExploreSessionNotifierProvider);
-            final isDirty = ref.watch(styleExploreDirtyProvider);
-            return Dialog(
-              key: const Key('style-explore-recipe-dialog'),
-              child: SizedBox(
-                width: 440,
-                height: 520,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 8, 4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              l10n.styleExplore_recipeListTitle,
-                              style: theme.textTheme.titleMedium,
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: l10n.common_close,
-                            iconSize: 18,
-                            onPressed: closeIfMounted,
-                            icon: const Icon(Icons.close),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Divider(height: 1, color: theme.dividerColor),
-                    Expanded(
-                      child: listAsync.maybeWhen(
-                        data: (list) => StyleExploreRecipeListPanel(
-                          recipes: list.recipes,
-                          activeRecipeId: session.activeRecipeId,
-                          isDirty: isDirty,
-                          onLoadRecipe: (recipe) async {
-                            if (await _loadRecipe(recipe)) closeIfMounted();
-                          },
-                          onStartNew: () async {
-                            if (await _startNew()) closeIfMounted();
-                          },
-                          onRenameRecipe: _renameRecipe,
-                          onDuplicateRecipe: _duplicateRecipe,
-                          onDeleteRecipe: _deleteRecipe,
-                        ),
-                        orElse: () =>
-                            const Center(child: CircularProgressIndicator()),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
     );
   }
 
@@ -788,164 +592,6 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
         const Expanded(child: ExploreCandidateGallery()),
       ],
     );
-  }
-
-  // ==================== Recipe 会话动作 ====================
-
-  Future<bool> _confirmDiscardChanges() async {
-    if (!ref.read(styleExploreNeedsOverwriteConfirmProvider)) return true;
-    final l10n = context.l10n;
-    return ThemedConfirmDialog.show(
-      context: context,
-      title: l10n.styleExplore_discardChangesTitle,
-      content: l10n.styleExplore_discardChangesMessage,
-      confirmText: l10n.styleExplore_discardChangesConfirm,
-      cancelText: MaterialLocalizations.of(context).cancelButtonLabel,
-    );
-  }
-
-  Future<bool> _loadRecipe(StyleExploreRecipe recipe) async {
-    if (!await _confirmDiscardChanges()) return false;
-    final ok = await ref
-        .read(styleExploreSessionNotifierProvider.notifier)
-        .loadRecipe(recipe.id);
-    if (!mounted) return false;
-    if (ok) {
-      AppToast.success(
-        context,
-        context.l10n.styleExplore_recipeLoaded(recipe.displayName),
-      );
-    }
-    return ok;
-  }
-
-  Future<bool> _startNew() async {
-    if (!await _confirmDiscardChanges()) return false;
-    ref.read(styleExploreSessionNotifierProvider.notifier).startNew();
-    return true;
-  }
-
-  Future<void> _saveActive() async {
-    final l10n = context.l10n;
-    try {
-      final saved = await ref
-          .read(styleExploreSessionNotifierProvider.notifier)
-          .saveActive();
-      if (!mounted) return;
-      if (saved == null) {
-        AppToast.error(context, l10n.styleExplore_operationFailed);
-      } else {
-        AppToast.success(
-          context,
-          l10n.styleExplore_recipeSaved(saved.displayName),
-        );
-      }
-    } catch (error) {
-      AppLogger.e(
-        'Save style explore recipe failed',
-        error,
-        null,
-        'StyleExplore',
-      );
-      if (mounted) AppToast.error(context, l10n.styleExplore_operationFailed);
-    }
-  }
-
-  Future<void> _saveAsNew() async {
-    final l10n = context.l10n;
-    final activeRecipe = ref.read(styleExploreActiveRecipeProvider);
-    final name = await _promptForName(initial: activeRecipe?.name);
-    if (name == null || name.trim().isEmpty) return;
-
-    try {
-      final created = await ref
-          .read(styleExploreSessionNotifierProvider.notifier)
-          .saveAsNew(name.trim());
-      if (mounted) {
-        AppToast.success(
-          context,
-          l10n.styleExplore_recipeCreated(created.displayName),
-        );
-      }
-    } catch (error) {
-      AppLogger.e('Save as new recipe failed', error, null, 'StyleExplore');
-      if (mounted) AppToast.error(context, l10n.styleExplore_operationFailed);
-    }
-  }
-
-  Future<String?> _promptForName({String? initial}) {
-    final l10n = context.l10n;
-    return ThemedInputDialog.show(
-      context: context,
-      title: l10n.styleExplore_saveAs,
-      labelText: l10n.styleExplore_recipeNameLabel,
-      hintText: l10n.styleExplore_recipeNameHint,
-      initialValue: initial,
-      validator: (value) =>
-          value.trim().isEmpty ? l10n.styleExplore_nameRequired : null,
-    );
-  }
-
-  Future<void> _renameRecipe(StyleExploreRecipe recipe) async {
-    final l10n = context.l10n;
-    final name = await ThemedInputDialog.show(
-      context: context,
-      title: l10n.styleExplore_rename,
-      labelText: l10n.styleExplore_recipeNameLabel,
-      initialValue: recipe.displayName,
-      validator: (value) =>
-          value.trim().isEmpty ? l10n.styleExplore_nameRequired : null,
-    );
-    if (name == null || name.trim().isEmpty) return;
-    await ref
-        .read(styleExploreRecipeListNotifierProvider.notifier)
-        .rename(recipe.id, name.trim());
-  }
-
-  Future<void> _duplicateRecipe(StyleExploreRecipe recipe) async {
-    final l10n = context.l10n;
-    try {
-      final copy = await ref
-          .read(styleExploreRecipeListNotifierProvider.notifier)
-          .duplicate(recipe.id);
-      if (mounted) {
-        AppToast.success(
-          context,
-          l10n.styleExplore_recipeDuplicated(copy.displayName),
-        );
-      }
-    } catch (error) {
-      AppLogger.e('Duplicate recipe failed', error, null, 'StyleExplore');
-      if (mounted) AppToast.error(context, l10n.styleExplore_operationFailed);
-    }
-  }
-
-  Future<void> _deleteRecipe(StyleExploreRecipe recipe) async {
-    final l10n = context.l10n;
-    final confirmed = await ThemedConfirmDialog.showDelete(
-      context: context,
-      itemName: recipe.displayName,
-    );
-    if (!confirmed) return;
-
-    final id = recipe.id;
-    try {
-      await ref
-          .read(styleExploreRecipeListNotifierProvider.notifier)
-          .delete(id);
-      ref
-          .read(styleExploreSessionNotifierProvider.notifier)
-          .handleRecipeDeleted(id);
-      if (mounted) {
-        AppToast.success(
-          context,
-          l10n.styleExplore_recipeDeleted(recipe.displayName),
-        );
-      }
-    } catch (error) {
-      AppLogger.e('Delete recipe failed', error, null, 'StyleExplore');
-      if (mounted) AppToast.error(context, l10n.styleExplore_operationFailed);
-    }
   }
 
   void _showPreview() {

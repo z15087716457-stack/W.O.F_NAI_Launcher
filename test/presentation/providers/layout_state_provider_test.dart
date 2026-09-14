@@ -314,6 +314,67 @@ void main() {
     });
   });
 
+  group('LayoutState style explore run sidebar visibility', () {
+    test(
+      'defaults to null so the screen can treat the first visit as open',
+      () {
+        const state = LayoutState();
+
+        expect(state.styleExploreRunSidebarVisible, isNull);
+
+        final updated = state.copyWith(styleExploreRunSidebarVisible: false);
+        expect(updated.styleExploreRunSidebarVisible, isFalse);
+        // 不影响同页其他布局字段。
+        expect(updated.styleExploreRunSidebarWidth, 240.0);
+        expect(updated.styleExploreGalleryWidth, 360.0);
+      },
+    );
+
+    test('build reads the stored flag and the setter writes it back', () async {
+      final storage = _FakeLayoutStorage()
+        ..styleExploreRunSidebarVisible = false;
+      final container = ProviderContainer(
+        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
+      );
+      addTearDown(container.dispose);
+
+      expect(
+        container
+            .read(layoutStateNotifierProvider)
+            .styleExploreRunSidebarVisible,
+        isFalse,
+      );
+
+      await container
+          .read(layoutStateNotifierProvider.notifier)
+          .setStyleExploreRunSidebarVisible(true);
+
+      expect(storage.styleExploreRunSidebarVisible, isTrue);
+      expect(
+        container
+            .read(layoutStateNotifierProvider)
+            .styleExploreRunSidebarVisible,
+        isTrue,
+      );
+    });
+
+    test('a never touched key stays null (no write on first visit)', () {
+      final storage = _FakeLayoutStorage();
+      final container = ProviderContainer(
+        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
+      );
+      addTearDown(container.dispose);
+
+      expect(
+        container
+            .read(layoutStateNotifierProvider)
+            .styleExploreRunSidebarVisible,
+        isNull,
+      );
+      expect(storage.styleExploreRunSidebarVisible, isNull);
+    });
+  });
+
   group('LayoutState style explore prompt area height', () {
     test('defaults to 280 and copyWith preserves other fields', () {
       const state = LayoutState();
@@ -379,6 +440,7 @@ class _FakeLayoutStorage extends LocalStorageService {
   double styleExploreRunSidebarWidth = 240.0;
   double styleExploreGalleryWidth = 360.0;
   double styleExplorePromptAreaHeight = 280.0;
+  bool? styleExploreRunSidebarVisible;
 
   @override
   bool getLeftPanelExpanded() => leftExpanded;
@@ -468,6 +530,14 @@ class _FakeLayoutStorage extends LocalStorageService {
   @override
   Future<void> setStyleExploreRunSidebarWidth(double value) async {
     styleExploreRunSidebarWidth = value;
+  }
+
+  @override
+  bool? getStyleExploreRunSidebarVisible() => styleExploreRunSidebarVisible;
+
+  @override
+  Future<void> setStyleExploreRunSidebarVisible(bool value) async {
+    styleExploreRunSidebarVisible = value;
   }
 
   @override

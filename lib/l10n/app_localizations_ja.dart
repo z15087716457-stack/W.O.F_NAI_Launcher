@@ -10427,25 +10427,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get nav_styleExplore => 'スタイル探索';
 
   @override
-  String get styleExplore_recipeListTitle => 'レシピ';
-
-  @override
-  String get styleExplore_recipesEmpty =>
-      'まだレシピがありません。新規作成するか、エディタで組み合わせて「別名保存」してください。';
-
-  @override
-  String get styleExplore_noActiveRecipe => 'レシピ未関連';
-
-  @override
-  String get styleExplore_unsavedChanges => '未保存の変更があります';
-
-  @override
-  String get styleExplore_save => '保存';
-
-  @override
-  String get styleExplore_saveAs => '別名保存';
-
-  @override
   String get styleExplore_preview => 'プレビュー';
 
   @override
@@ -10455,53 +10436,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_negative => 'ネガティブ';
 
   @override
-  String get styleExplore_newRecipe => '新規';
-
-  @override
-  String get styleExplore_load => '読み込み';
-
-  @override
   String get styleExplore_rename => '名前変更';
 
   @override
-  String get styleExplore_duplicate => 'レシピを複製';
-
-  @override
-  String get styleExplore_deleteRecipe => '削除';
-
-  @override
-  String get styleExplore_recipeNameLabel => 'レシピ名';
-
-  @override
-  String get styleExplore_recipeNameHint => '例：柔らかい光の実験';
-
-  @override
   String get styleExplore_nameRequired => '名前を入力してください';
-
-  @override
-  String styleExplore_recipeSaved(String name) {
-    return '「$name」を保存しました';
-  }
-
-  @override
-  String styleExplore_recipeCreated(String name) {
-    return '「$name」を作成しました';
-  }
-
-  @override
-  String styleExplore_recipeLoaded(String name) {
-    return '「$name」を読み込みました';
-  }
-
-  @override
-  String styleExplore_recipeDuplicated(String name) {
-    return '「$name」を複製しました';
-  }
-
-  @override
-  String styleExplore_recipeDeleted(String name) {
-    return '「$name」を削除しました';
-  }
 
   @override
   String get styleExplore_operationFailed => '操作に失敗しました';
@@ -10540,14 +10478,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_newRun => '新規ラン';
-
-  @override
-  String get styleExplore_manageRecipes => '管理';
-
-  @override
-  String styleExplore_recipeMoreCount(int count) {
-    return 'あと $count 件…';
-  }
 
   @override
   String get styleExplore_galleryTitle => '候補ギャラリー';
@@ -10833,13 +10763,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_createDeepRound => '候補ラウンド作成';
-
-  @override
-  String get styleExplore_anotherDeepRound => 'もう一ラウンド';
-
-  @override
-  String get styleExplore_deepRoundTitle => '深層候補ラウンド';
+  String get styleExplore_createDeepRound => '候補を生成';
 
   @override
   String styleExplore_deepRoundCountHint(int min) {
@@ -10854,13 +10778,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_deepRoundEmpty => '変異エンジンが十分に異なる子代を生成できませんでした';
 
   @override
-  String get styleExplore_sortParents => 'ランク付け';
+  String get styleExplore_sortParents => 'A/B比較';
 
   @override
-  String get styleExplore_sortTitle => '親のペアワイズランク付け';
+  String get styleExplore_sortTitle => '親のA/B比較';
 
   @override
-  String get styleExplore_sortPrompt => 'どちらの文字列が狙いに近いですか？';
+  String get styleExplore_sortPrompt => 'どちらの画像が狙いの画風に近いですか？';
 
   @override
   String get styleExplore_sortLeft => '左が良い';
@@ -10919,7 +10843,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_pileEmpty => '深層候補はまだありません。「候補ラウンド作成」から始めてください';
+  String get styleExplore_pileEmpty => '候補はまだありません。上の「候補を生成」から始めてください';
 
   @override
   String subscriptionExpiresOn(String date) {
