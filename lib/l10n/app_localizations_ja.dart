@@ -10652,12 +10652,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_viewGrid => 'グリッド表示';
-
-  @override
-  String get styleExplore_viewDeck => 'デッキ表示';
-
-  @override
   String get styleExplore_adoptAsBlock => 'ブロックに収録';
 
   @override

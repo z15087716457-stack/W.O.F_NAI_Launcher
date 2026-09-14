@@ -10891,12 +10891,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_viewGrid => 'Grid view';
-
-  @override
-  String get styleExplore_viewDeck => 'Deck view';
-
-  @override
   String get styleExplore_adoptAsBlock => 'Adopt as block';
 
   @override

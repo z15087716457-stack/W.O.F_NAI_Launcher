@@ -18991,18 +18991,6 @@ abstract class AppLocalizations {
   /// **'Round {number}'**
   String styleExplore_roundNumber(int number);
 
-  /// No description provided for @styleExplore_viewGrid.
-  ///
-  /// In en, this message translates to:
-  /// **'Grid view'**
-  String get styleExplore_viewGrid;
-
-  /// No description provided for @styleExplore_viewDeck.
-  ///
-  /// In en, this message translates to:
-  /// **'Deck view'**
-  String get styleExplore_viewDeck;
-
   /// No description provided for @styleExplore_adoptAsBlock.
   ///
   /// In en, this message translates to:

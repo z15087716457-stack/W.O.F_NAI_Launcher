@@ -10504,12 +10504,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_viewGrid => '网格视图';
-
-  @override
-  String get styleExplore_viewDeck => '牌堆视图';
-
-  @override
   String get styleExplore_adoptAsBlock => '收编为块';
 
   @override

@@ -6188,8 +6188,6 @@
   "@styleExplore_seedLabel": {"placeholders": {"seed": {"type": "String"}}},
   "styleExplore_roundNumber": "第 {number} 轮",
   "@styleExplore_roundNumber": {"placeholders": {"number": {"type": "int"}}},
-  "styleExplore_viewGrid": "网格视图",
-  "styleExplore_viewDeck": "牌堆视图",
   "styleExplore_adoptAsBlock": "收编为块",
   "styleExplore_adoptBlockNameLabel": "块名称",
   "styleExplore_adoptBlockSaved": "已收编为块「{name}」",

@@ -6188,8 +6188,6 @@
   "@styleExplore_seedLabel": {"placeholders": {"seed": {"type": "String"}}},
   "styleExplore_roundNumber": "Round {number}",
   "@styleExplore_roundNumber": {"placeholders": {"number": {"type": "int"}}},
-  "styleExplore_viewGrid": "Grid view",
-  "styleExplore_viewDeck": "Deck view",
   "styleExplore_adoptAsBlock": "Adopt as block",
   "styleExplore_adoptBlockNameLabel": "Block name",
   "styleExplore_adoptBlockSaved": "Adopted as block \"{name}\"",

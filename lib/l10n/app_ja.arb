@@ -6188,8 +6188,6 @@
   "@styleExplore_seedLabel": {"placeholders": {"seed": {"type": "String"}}},
   "styleExplore_roundNumber": "ラウンド {number}",
   "@styleExplore_roundNumber": {"placeholders": {"number": {"type": "int"}}},
-  "styleExplore_viewGrid": "グリッド表示",
-  "styleExplore_viewDeck": "デッキ表示",
   "styleExplore_adoptAsBlock": "ブロックに収録",
   "styleExplore_adoptBlockNameLabel": "ブロック名",
   "styleExplore_adoptBlockSaved": "ブロック「{name}」に収録しました",
