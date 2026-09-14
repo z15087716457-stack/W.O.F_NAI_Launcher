@@ -19150,13 +19150,13 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_fixateAsTemplate.
   ///
   /// In en, this message translates to:
-  /// **'Fix as template'**
+  /// **'Import metadata'**
   String get styleExplore_fixateAsTemplate;
 
   /// No description provided for @styleExplore_fixateDone.
   ///
   /// In en, this message translates to:
-  /// **'Positive prompt replaced; save as a recipe from the top bar'**
+  /// **'Metadata imported to editor'**
   String get styleExplore_fixateDone;
 
   /// No description provided for @styleExplore_deleteImage.

@@ -12,7 +12,7 @@ import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import 'explore_adopt_block_dialog.dart';
 
-/// 探索候选的出口动作（收编为块 / 固化为模板 / Reject 删图），
+/// 探索候选的出口动作（收编为块 / 导入元数据 / Reject 删图），
 /// 候选详情弹窗与画廊多选条共用。
 abstract final class ExploreCandidateActions {
   /// Reject 语义与画廊筛选一致：预标记或正式标签命中即算。
@@ -112,7 +112,7 @@ abstract final class ExploreCandidateActions {
     }
   }
 
-  /// 固化为模板：roll 正向串灌进 main lane（纯文本重建，负向不动）。
+  /// 导入元数据：roll 正向串灌进 main lane（纯文本重建，负向不动）。
   /// main/negative lane 有未备份内容时先覆盖确认（与 Recipe 载入同款）。
   static Future<void> fixateAsTemplate(
     BuildContext context,

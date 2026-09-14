@@ -10741,10 +10741,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_adoptBlockEmpty => '選択した候補に Roll 文字列がありません';
 
   @override
-  String get styleExplore_fixateAsTemplate => 'テンプレートに固定';
+  String get styleExplore_fixateAsTemplate => 'メタデータを導入';
 
   @override
-  String get styleExplore_fixateDone => 'ポジティブプロンプトを置き換えました。上部バーからレシピとして保存できます';
+  String get styleExplore_fixateDone => 'メタデータをエディタに導入しました';
 
   @override
   String get styleExplore_deleteImage => '画像を削除';

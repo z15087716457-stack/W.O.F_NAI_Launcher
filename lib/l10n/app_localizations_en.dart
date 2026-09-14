@@ -10981,11 +10981,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Selected candidates have no roll text';
 
   @override
-  String get styleExplore_fixateAsTemplate => 'Fix as template';
+  String get styleExplore_fixateAsTemplate => 'Import metadata';
 
   @override
-  String get styleExplore_fixateDone =>
-      'Positive prompt replaced; save as a recipe from the top bar';
+  String get styleExplore_fixateDone => 'Metadata imported to editor';
 
   @override
   String get styleExplore_deleteImage => 'Delete image';

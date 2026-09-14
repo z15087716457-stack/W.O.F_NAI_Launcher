@@ -10592,10 +10592,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_adoptBlockEmpty => '所选候选没有可用的 Roll 串';
 
   @override
-  String get styleExplore_fixateAsTemplate => '固化为模板';
+  String get styleExplore_fixateAsTemplate => '导入元数据';
 
   @override
-  String get styleExplore_fixateDone => '已灌入正向提示词；可在顶栏另存为配方';
+  String get styleExplore_fixateDone => '已导入元数据到编辑区';
 
   @override
   String get styleExplore_deleteImage => '删除图片';

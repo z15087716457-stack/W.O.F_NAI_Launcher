@@ -849,7 +849,7 @@ class _SmallLabelButton extends StatelessWidget {
 }
 
 /// 候选详情弹窗：大图 + Roll 快照全文（可复制）+ seed + 参数快照 + 出口动作
-/// （收编为块 / 固化为模板 / Reject 删图）。
+/// （收编为块 / 导入元数据 / Reject 删图）。
 ///
 /// 按 id 实时解析 run 与候选，评审/删图等写操作后内容自动刷新。
 class ExploreCandidateDetailDialog extends ConsumerWidget {
@@ -1065,7 +1065,7 @@ class ExploreCandidateDetailDialog extends ConsumerWidget {
     );
   }
 
-  /// 出口动作行：收编为块 / 固化为模板 / Reject 删图（仅 reject 且有副本）。
+  /// 出口动作行：收编为块 / 导入元数据 / Reject 删图（仅 reject 且有副本）。
   Widget _buildExportActions(
     BuildContext context,
     WidgetRef ref,
@@ -1104,7 +1104,7 @@ class ExploreCandidateDetailDialog extends ConsumerWidget {
                   ref,
                   candidate: candidate,
                 ),
-          icon: const Icon(Icons.push_pin_outlined, size: 16),
+          icon: const Icon(Icons.input_outlined, size: 16),
           label: Text(l10n.styleExplore_fixateAsTemplate),
         ),
         if (canDeleteImage)
