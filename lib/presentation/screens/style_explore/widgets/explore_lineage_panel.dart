@@ -301,9 +301,11 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
   }) {
     final parentSet = generation.parentSet;
     final pile = generation.pile;
-    // 分支选择状态只对活跃集的候选堆有效；切家族/卡片重建时清失效项。
+    // 分支选择只对活跃（最新代）候选堆有效（provider `createBranch` 硬校验
+    // 只能从最新代选）：失效清理只由活跃堆执行，非活跃堆各清一遍会跨代误删
+    // 活跃堆的选择。切家族的选择清空由家族 chip 的 _exitBranchSelection 负责。
     final pileIds = pile.map((c) => c.id).toSet();
-    _branchSelected.removeWhere((id) => !pileIds.contains(id));
+    if (isActive) _branchSelected.removeWhere((id) => !pileIds.contains(id));
 
     return Card(
       margin: const EdgeInsets.fromLTRB(8, 2, 8, 4),
@@ -352,10 +354,12 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                     final candidate = pile[index];
                     return _PileThumb(
                       candidate: candidate,
-                      selecting: _branchSelecting,
+                      // 勾选圈与点选只在活跃堆开放：非活跃堆的候选进不了
+                      // provider 校验，点了也只落 StateError。
+                      selecting: _branchSelecting && isActive,
                       selected: _branchSelected.contains(candidate.id),
                       onTap: () {
-                        if (_branchSelecting) {
+                        if (_branchSelecting && isActive) {
                           setState(() {
                             if (!_branchSelected.remove(candidate.id)) {
                               _branchSelected.add(candidate.id);
