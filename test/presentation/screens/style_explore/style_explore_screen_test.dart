@@ -1342,13 +1342,23 @@ void main() {
   testWidgets('detail dialog pages with arrows and keyboard, stops at ends', (
     tester,
   ) async {
+    // 各配独立 roll 串，用详情弹窗的正向快照文本做「当前显示哪张」的探针。
     final run = await seedRun(
       '翻页任务',
       status: ExploreRunStatus.generated,
       candidates: [
-        doneCandidate('cand-1'),
-        doneCandidate('cand-2'),
-        doneCandidate('cand-3'),
+        doneCandidate(
+          'cand-1',
+          roll: const ExploreRollSnapshot(positive: 'pos-1', negative: 'neg'),
+        ),
+        doneCandidate(
+          'cand-2',
+          roll: const ExploreRollSnapshot(positive: 'pos-2', negative: 'neg'),
+        ),
+        doneCandidate(
+          'cand-3',
+          roll: const ExploreRollSnapshot(positive: 'pos-3', negative: 'neg'),
+        ),
       ],
     );
     final container = await pumpScreen(tester);
@@ -1356,30 +1366,37 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // 打开第二张：翻页序 = 打开瞬间的筛选快照。
+    // 打开 cand-2：翻页序 = 打开瞬间的筛选快照，按展示序（最新在前，
+    // 与画廊 .reversed 对齐）→ 序列 [cand-3, cand-2, cand-1]，
+    // cand-2 在 index 1 = 第 2/3 张；← 到 cand-3、→ 到 cand-1。
     await tester.tap(find.byKey(const Key('explore-candidate-cand-2')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byKey(const Key('explore-candidate-detail')), findsOneWidget);
     expect(find.text('第 2/3 张'), findsOneWidget);
+    expect(find.text('pos-2'), findsOneWidget);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
     expect(find.text('第 1/3 张'), findsOneWidget);
+    expect(find.text('pos-3'), findsOneWidget);
     // 已到首张：左箭头按钮消失且再按 ← 原地不动（不循环）。
     expect(find.byKey(const Key('explore-candidate-prev')), findsNothing);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
     expect(find.text('第 1/3 张'), findsOneWidget);
+    expect(find.text('pos-3'), findsOneWidget);
 
     // 小键盘 → 与普通 → 等价。
     await tester.sendKeyEvent(LogicalKeyboardKey.numpad6);
     await tester.pump();
     expect(find.text('第 2/3 张'), findsOneWidget);
+    expect(find.text('pos-2'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('explore-candidate-next')));
     await tester.pump();
     expect(find.text('第 3/3 张'), findsOneWidget);
+    expect(find.text('pos-1'), findsOneWidget);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(find.text('第 3/3 张'), findsOneWidget);
@@ -1393,13 +1410,24 @@ void main() {
       name: '暖光',
       createdAt: DateTime.utc(2026, 9, 14),
     );
+    // 各配独立 roll 串作探针：翻页序 = 展示序（最新在前）→
+    // 序列 [cand-3, cand-2, cand-1]，「下一张未分类」沿序列向更旧方向推进。
     final run = await seedRun(
       '归类任务',
       status: ExploreRunStatus.generated,
       candidates: [
-        doneCandidate('cand-1'),
-        doneCandidate('cand-2'),
-        doneCandidate('cand-3'),
+        doneCandidate(
+          'cand-1',
+          roll: const ExploreRollSnapshot(positive: 'pos-1', negative: 'neg'),
+        ),
+        doneCandidate(
+          'cand-2',
+          roll: const ExploreRollSnapshot(positive: 'pos-2', negative: 'neg'),
+        ),
+        doneCandidate(
+          'cand-3',
+          roll: const ExploreRollSnapshot(positive: 'pos-3', negative: 'neg'),
+        ),
       ],
     );
     await runStorage.putRun(run.copyWith(folders: [folder]));
@@ -1408,24 +1436,28 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
+    // 从最新的 cand-3（序列 index 0）开始连续归档。
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-3')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     final assignChip = find.byKey(const Key('explore-assign-folder-folder-a'));
     expect(assignChip, findsOneWidget);
     expect(tester.widget<FilterChip>(assignChip).selected, isFalse);
+    expect(find.text('第 1/3 张'), findsOneWidget);
+    expect(find.text('pos-3'), findsOneWidget);
 
-    // 点文件夹即归档落盘 + 自动跳下一张未分类。
+    // 点文件夹即归档落盘 + 自动跳序列下一张未分类（更旧方向）。
     await tester.tap(assignChip);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(
-      runStorage._store[run.id]!.candidateById('cand-1')!.folderId,
+      runStorage._store[run.id]!.candidateById('cand-3')!.folderId,
       'folder-a',
     );
     expect(find.text('第 2/3 张'), findsOneWidget);
+    expect(find.text('pos-2'), findsOneWidget);
 
-    // 再归档第二张 → 跳到第三张。
+    // 再归档第二张 → 跳到第三张（最旧的 cand-1）。
     await tester.tap(assignChip);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -1434,11 +1466,13 @@ void main() {
       'folder-a',
     );
     expect(find.text('第 3/3 张'), findsOneWidget);
+    expect(find.text('pos-1'), findsOneWidget);
 
     // 回看第二张：归属态在弹窗内高亮。
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
     expect(find.text('第 2/3 张'), findsOneWidget);
+    expect(find.text('pos-2'), findsOneWidget);
     expect(tester.widget<FilterChip>(assignChip).selected, isTrue);
 
     // 再点当前文件夹 = 移回未分类（不删图、不跳页）。

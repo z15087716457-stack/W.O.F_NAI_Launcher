@@ -377,10 +377,11 @@ class _ExploreCandidateGalleryState
   /// 时退化为单张序列。
   void _openCandidateDetail(ExploreRun run, ExploreCandidate candidate) {
     final filter = ref.read(exploreGalleryFilterProvider);
+    // 翻页序 = 展示序（最新在前），与画廊反转对齐——向右箭头 = 下一张更新的图。
     final candidateIds = [
       for (final item in run.candidates)
         if (exploreCandidateMatchesFilter(item, filter)) item.id,
-    ];
+    ].reversed.toList();
     var index = candidateIds.indexOf(candidate.id);
     if (index < 0) {
       candidateIds
