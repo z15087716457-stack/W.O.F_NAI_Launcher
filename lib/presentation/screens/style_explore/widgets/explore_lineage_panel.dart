@@ -250,7 +250,8 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
               thumbBuilder: (parent) => _ParentThumb(run: run, parent: parent),
             ),
             if (isActive) ...[
-              const SizedBox(height: 2),
+              // 与上方父本串留足呼吸位：2px 时按钮行贴着文字。
+              const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 runSpacing: 4,
@@ -631,7 +632,7 @@ class _DeepRoundControlState extends ConsumerState<_DeepRoundControl> {
           // 下限口径与点按校验同源（每个父本保底一张）。
           message: l10n.styleExplore_deepRoundCountHint(_minCount),
           child: SizedBox(
-            width: 56,
+            width: 64,
             child: TextField(
               key: Key('explore-deep-round-count-${widget.parentSet.id}'),
               controller: _controller,
@@ -640,6 +641,8 @@ class _DeepRoundControlState extends ConsumerState<_DeepRoundControl> {
               textAlign: TextAlign.center,
               decoration: InputDecoration(
                 labelText: l10n.styleExplore_targetCountLabel,
+                // 标签常驻边框顶：窄框内联放不下「出图数」会截成「出…」。
+                floatingLabelBehavior: FloatingLabelBehavior.always,
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 8,
