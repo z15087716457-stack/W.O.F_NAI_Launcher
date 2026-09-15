@@ -532,18 +532,41 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
             // 读取最新的宽度值，避免闭包捕获旧值导致不跟手
             final layout = ref.read(layoutStateNotifierProvider);
             final currentGallery = layout.styleExploreGalleryWidth;
-            final currentSidebar = layout.styleExploreRunSidebarWidth;
-            // 成对补偿：画廊 ∓Δ、侧栏 ±Δ，只有「侧栏|画廊」分界移动；
-            // 吸收方（侧栏）到 0 后本次拖拽 stall，不做级联吸收。
-            var effective = dx;
-            if (effective > currentGallery) effective = currentGallery;
-            if (effective < -currentSidebar) effective = -currentSidebar;
-            ref
-                .read(layoutStateNotifierProvider.notifier)
-                .setStyleExplorePaneWidths(
-                  gallery: currentGallery - effective,
-                  sidebar: currentSidebar + effective,
-                );
+            // 成对补偿：画廊 ∓Δ、最近可见左邻 ±Δ，被拖分界以外的分界
+            // 不动；吸收方到 0 后本次拖拽 stall，不做级联吸收。
+            // 侧栏隐藏时它不算左邻——否则不可见面板的存宽被静默改写
+            // （且其存宽耗尽后画廊向左拖永久 stall），此时吸收方顺延
+            // 为块库；块库也收起则由主编辑区（Expanded 天然吸收）承担，
+            // 单写画廊即可。
+            if (_runSidebarVisible(layout)) {
+              final currentSidebar = layout.styleExploreRunSidebarWidth;
+              var effective = dx;
+              if (effective > currentGallery) effective = currentGallery;
+              if (effective < -currentSidebar) effective = -currentSidebar;
+              ref
+                  .read(layoutStateNotifierProvider.notifier)
+                  .setStyleExplorePaneWidths(
+                    gallery: currentGallery - effective,
+                    sidebar: currentSidebar + effective,
+                  );
+            } else if (layout.blockLibraryPanelExpanded) {
+              final currentBlockLibrary = layout.blockLibraryPanelWidth;
+              var effective = dx;
+              if (effective > currentGallery) effective = currentGallery;
+              if (effective < -currentBlockLibrary) {
+                effective = -currentBlockLibrary;
+              }
+              ref
+                  .read(layoutStateNotifierProvider.notifier)
+                  .setStyleExplorePaneWidths(
+                    gallery: currentGallery - effective,
+                    blockLibrary: currentBlockLibrary + effective,
+                  );
+            } else {
+              ref
+                  .read(layoutStateNotifierProvider.notifier)
+                  .setStyleExploreGalleryWidth(currentGallery - dx);
+            }
           },
         ),
         ClipRect(child: panel),

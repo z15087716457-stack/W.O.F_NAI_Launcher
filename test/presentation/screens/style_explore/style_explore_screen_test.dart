@@ -984,6 +984,121 @@ void main() {
     );
   });
 
+  testWidgets(
+    'gallery handle compensates block library when the sidebar is hidden',
+    (tester) async {
+      final container = await pumpScreen(tester);
+      final notifier = container.read(layoutStateNotifierProvider.notifier);
+      await notifier.setBlockLibraryPanelExpanded(true);
+      await notifier.setBlockLibraryPanelWidth(280);
+      await notifier.setStyleExploreRunSidebarVisible(false);
+      await tester.pump();
+
+      final mainBefore = tester.getRect(
+        find.byKey(const Key('style-explore-main-editor')),
+      );
+
+      // 侧栏隐藏时左邻是块库：画廊变宽、块库等量变窄，隐藏侧栏的存宽
+      // 不被改写，主编辑不动。
+      await tester.drag(
+        find.byKey(const Key('style-explore-gallery-resize-handle')),
+        const Offset(-60, 0),
+      );
+      await tester.pump();
+
+      var state = container.read(layoutStateNotifierProvider);
+      expect(state.styleExploreGalleryWidth, 420);
+      expect(state.blockLibraryPanelWidth, 220);
+      expect(state.styleExploreRunSidebarWidth, 240);
+      expect(
+        tester.getRect(find.byKey(const Key('style-explore-main-editor'))),
+        mainBefore,
+      );
+
+      // 右拖：反向等量补偿，侧栏存宽依旧不动。
+      await tester.drag(
+        find.byKey(const Key('style-explore-gallery-resize-handle')),
+        const Offset(20, 0),
+      );
+      await tester.pump();
+
+      state = container.read(layoutStateNotifierProvider);
+      expect(state.styleExploreGalleryWidth, 400);
+      expect(state.blockLibraryPanelWidth, 240);
+      expect(state.styleExploreRunSidebarWidth, 240);
+    },
+  );
+
+  testWidgets(
+    'gallery handle never stalls on a hidden sidebar and falls back to '
+    'single-write when no pane neighbor remains',
+    (tester) async {
+      final container = await pumpScreen(tester);
+      final notifier = container.read(layoutStateNotifierProvider.notifier);
+      await notifier.setStyleExploreRunSidebarVisible(false);
+      await tester.pump();
+
+      final mainBefore = tester.getRect(
+        find.byKey(const Key('style-explore-main-editor')),
+      );
+
+      // 块库默认收起、侧栏隐藏：左邻只剩主编辑（Expanded 吸收），
+      // 单写画廊且不受隐藏侧栏存宽上限钳制。
+      await tester.drag(
+        find.byKey(const Key('style-explore-gallery-resize-handle')),
+        const Offset(-400, 0),
+      );
+      await tester.pump();
+
+      final state = container.read(layoutStateNotifierProvider);
+      expect(state.styleExploreGalleryWidth, 760);
+      expect(state.styleExploreRunSidebarWidth, 240);
+      expect(state.blockLibraryPanelWidth, 320);
+      final mainAfter = tester.getRect(
+        find.byKey(const Key('style-explore-main-editor')),
+      );
+      expect(mainAfter.left, mainBefore.left);
+      expect(mainAfter.width, mainBefore.width - 400);
+    },
+  );
+
+  testWidgets(
+    'gallery handle stalls on exhausted block library while the sidebar '
+    'is hidden',
+    (tester) async {
+      final container = await pumpScreen(tester);
+      final notifier = container.read(layoutStateNotifierProvider.notifier);
+      await notifier.setBlockLibraryPanelExpanded(true);
+      await notifier.setBlockLibraryPanelWidth(280);
+      await notifier.setStyleExploreRunSidebarVisible(false);
+      await tester.pump();
+
+      // 左拖远超块库余量：块库只让出到 0，隐藏侧栏存宽不受牵连。
+      await tester.drag(
+        find.byKey(const Key('style-explore-gallery-resize-handle')),
+        const Offset(-400, 0),
+      );
+      await tester.pump();
+
+      var state = container.read(layoutStateNotifierProvider);
+      expect(state.blockLibraryPanelWidth, 0);
+      expect(state.styleExploreGalleryWidth, 640);
+      expect(state.styleExploreRunSidebarWidth, 240);
+
+      // 块库到 0 后继续左拖整体 stall，不级联吸收隐藏侧栏。
+      await tester.drag(
+        find.byKey(const Key('style-explore-gallery-resize-handle')),
+        const Offset(-50, 0),
+      );
+      await tester.pump();
+
+      state = container.read(layoutStateNotifierProvider);
+      expect(state.blockLibraryPanelWidth, 0);
+      expect(state.styleExploreGalleryWidth, 640);
+      expect(state.styleExploreRunSidebarWidth, 240);
+    },
+  );
+
   testWidgets('prompt area resize handle grows and shrinks the prompt box', (
     tester,
   ) async {
