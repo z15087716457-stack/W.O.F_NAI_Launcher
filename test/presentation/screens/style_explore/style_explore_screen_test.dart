@@ -2050,4 +2050,97 @@ void main() {
     expect(stored.generation.status, ExploreCandidateGenerationStatus.done);
     expect(stored.generation.seed, 42, reason: '记录保留，仅清副本路径');
   });
+
+  testWidgets('multi-select bar delete button batch-deletes copies '
+      'and exits selection (FEAT-56)', (tester) async {
+    final imageStore = _FakeRunImageStore();
+    const copyPath1 = '/tmp/style_explore_runs/run-1/cand-1.png';
+    const copyPath2 = '/tmp/style_explore_runs/run-1/cand-2.png';
+
+    final run = await seedRun(
+      '多选删图',
+      status: ExploreRunStatus.generated,
+      candidates: [
+        doneCandidate('cand-1', filePath: copyPath1),
+        doneCandidate('cand-2', filePath: copyPath2),
+        // 无副本：不参与删除、不计数。
+        doneCandidate('cand-no-copy'),
+      ],
+    );
+    final container = await pumpScreen(
+      tester,
+      extraOverrides: [
+        exploreRunImageStoreProvider.overrideWithValue(imageStore),
+      ],
+    );
+    container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    const deleteKey = Key('explore-gallery-delete');
+    // 多选未开 → 无删除钮。
+    expect(find.byKey(deleteKey), findsNothing);
+
+    await tester.tap(find.byKey(const Key('explore-gallery-select-toggle')));
+    await tester.pump();
+    // 无底色形制 = TextButton（key 挂在钮本体）+ error 前景。
+    expect(find.byKey(deleteKey), findsOneWidget);
+    expect(
+      tester.widget(find.byKey(deleteKey)),
+      isA<TextButton>(),
+    );
+
+    // 空选择 → 钮禁用；选无副本项 → 仍禁用；选有副本项 → 启用。
+    expect(tester.widget<TextButton>(find.byKey(deleteKey)).onPressed, isNull);
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-no-copy')));
+    await tester.pump();
+    expect(tester.widget<TextButton>(find.byKey(deleteKey)).onPressed, isNull);
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-2')));
+    await tester.pump();
+    expect(
+      tester.widget<TextButton>(find.byKey(deleteKey)).onPressed,
+      isNotNull,
+    );
+
+    // 取消流：确认框计数只含有副本张数（2），取消不动。
+    await tester.tap(find.byKey(deleteKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('删除所选候选图'), findsOneWidget);
+    expect(
+      find.text('将删除 2 张候选在 Run 目录中的图片副本；候选记录保留，图库源图不受影响。'),
+      findsOneWidget,
+    );
+    await tester.tap(find.widgetWithText(TextButton, '取消'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(imageStore.deletedPaths, isEmpty);
+    expect(find.text('已选 3 张'), findsOneWidget, reason: '取消保留多选');
+
+    // 确认流：逐张删副本 + 清 filePath + 成功退多选。
+    await tester.tap(find.byKey(deleteKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.widgetWithText(FilledButton, '删除图片'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 3300));
+
+    expect(imageStore.deletedPaths, [copyPath1, copyPath2]);
+    final stored = runStorage._store[run.id]!;
+    expect(stored.candidateById('cand-1')!.generation.filePath, isNull);
+    expect(stored.candidateById('cand-2')!.generation.filePath, isNull);
+    expect(
+      stored.candidateById('cand-1')!.generation.status,
+      ExploreCandidateGenerationStatus.done,
+      reason: '记录保留',
+    );
+    expect(
+      find.byKey(const Key('explore-gallery-select-toggle')),
+      findsOneWidget,
+      reason: '删成功退多选（照合并收编先例）',
+    );
+  });
 }

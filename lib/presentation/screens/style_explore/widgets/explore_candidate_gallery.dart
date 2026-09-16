@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -295,6 +296,23 @@ class _ExploreCandidateGalleryState
             icon: const Icon(Icons.inventory_2_outlined, size: 16),
             label: Text(l10n.styleExplore_mergeAdopt),
           ),
+          // FEAT-56：无底色删除钮——批量删图（FEAT-42 同链路），
+          // 仅当选择集里有已落副本的候选时启用。
+          TextButton.icon(
+            key: const Key('explore-gallery-delete'),
+            onPressed: run.candidates.any(
+                  (candidate) =>
+                      _selectedIds.contains(candidate.id) &&
+                      candidate.generation.filePath != null,
+                )
+                ? () => _deleteSelected(run)
+                : null,
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            icon: const Icon(Icons.delete_outline, size: 16),
+            label: Text(l10n.styleExplore_deleteImage),
+          ),
         ],
       ),
     );
@@ -504,6 +522,56 @@ class _ExploreCandidateGalleryState
       candidates: selected,
     );
     if (created && mounted) _exitSelection();
+  }
+
+  /// 多选批量删图（FEAT-56）：一次确认 → 逐张删副本文件 + 清 filePath
+  /// （候选记录保留），与 FEAT-42 管理弹窗 `_deleteSelected` 同链路；
+  /// 无副本项不参与（确认框计数只含有副本张数），成功后退出多选。
+  Future<void> _deleteSelected(ExploreRun run) async {
+    final targets = [
+      for (final candidate in run.candidates)
+        if (_selectedIds.contains(candidate.id) &&
+            candidate.generation.filePath != null)
+          candidate,
+    ];
+    if (targets.isEmpty) return;
+    final l10n = context.l10n;
+    final confirmed = await ThemedConfirmDialog.show(
+      context: context,
+      title: l10n.styleExplore_pileManageDeleteTitle,
+      content: l10n.styleExplore_pileManageDeleteMessage(targets.length),
+      confirmText: l10n.styleExplore_deleteImage,
+      type: ThemedConfirmDialogType.danger,
+      icon: Icons.delete_outline,
+    );
+    if (!confirmed || !mounted) return;
+    var deleted = 0;
+    try {
+      final store = ref.read(exploreRunImageStoreProvider);
+      final notifier = ref.read(exploreRunListNotifierProvider.notifier);
+      for (final candidate in targets) {
+        final filePath = candidate.generation.filePath!;
+        if (!await store.deleteCandidateImage(filePath)) continue;
+        await notifier.updateGeneration(
+          run.id,
+          candidate.id,
+          candidate.generation.copyWith(filePath: null),
+        );
+        deleted++;
+      }
+      if (mounted) {
+        AppToast.success(
+          context,
+          l10n.styleExplore_pileManageDeleteDone(deleted),
+        );
+        _exitSelection();
+      }
+    } catch (error) {
+      AppLogger.e('Batch delete images failed', error, null, 'StyleExplore');
+      if (mounted) {
+        AppToast.error(context, l10n.styleExplore_operationFailed);
+      }
+    }
   }
 
   /// 候选详情弹窗（画廊卡片与谱系区候选堆缩略图点击共用）。
