@@ -9,6 +9,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_lineage_panel.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/widgets/horizontal_edge_fade.dart';
 
 /// 内存版 Run 存储（testWidgets 的 fakeAsync 区里 Hive 异步写盘不落定）。
 class _MemoryRunStorage extends StyleExploreRunStorage {
@@ -665,5 +666,150 @@ void main() {
 
     // AppToast.error 的 3 秒自动关闭定时器。
     await tester.pump(const Duration(milliseconds: 3300));
+  });
+
+  // ==================== FEAT-59：家族 chips 行横滚边缘虚化 ====================
+
+  /// 八家族 run（窄面板必溢出）：每家一个活跃父本集，无轮次/候选。
+  ExploreRun manyFamiliesRun() {
+    final base = twoGenerationRun();
+    final createdAt = DateTime.utc(2026, 9, 3);
+    return base.copyWith(
+      parentSets: [
+        ...base.parentSets,
+        for (var i = 2; i <= 8; i++)
+          ExploreParentSet(
+            id: 'ps-f$i',
+            familyId: 'fam-$i',
+            generation: 1,
+            status: ExploreParentSetStatus.active,
+            parents: [
+              ExploreParent(id: 'rp-f$i', artistString: 'f$i:root'),
+            ],
+          ),
+      ],
+      families: [
+        ...base.families,
+        for (var i = 2; i <= 8; i++)
+          ExploreFamily(
+            id: 'fam-$i',
+            name: '家族$i',
+            createdAt: createdAt,
+            rootParentSetId: 'ps-f$i',
+            activeParentSetId: 'ps-f$i',
+          ),
+      ],
+    );
+  }
+
+  testWidgets('家族 chips 溢出时边缘虚化显影，切家族照常（FEAT-59）', (
+    tester,
+  ) async {
+    await pumpPanel(tester, manyFamiliesRun(), [], width: 360);
+
+    // chips 行套了虚化包装件；溢出 → 右缘有余量 → ShaderMask 上场。
+    expect(find.byType(HorizontalEdgeFade), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(HorizontalEdgeFade),
+        matching: find.byType(ShaderMask),
+      ),
+      findsOneWidget,
+    );
+
+    // 选中态/切换照常：点可见的 fam-1 chip（默认选中末位家族）。
+    await tester.tap(find.byKey(const Key('explore-family-chip-fam-1')));
+    await tester.pump();
+    expect(find.text(l10n.styleExplore_parentSetTitle(1)), findsWidgets);
+  });
+
+  // ==================== FEAT-57：缩略图三排折行 + 内部纵滚 ====================
+
+  /// 活跃堆（ps-2）塞 15 张：宽 360 下内容宽 ~328、每排 4 张 → 4 排溢出。
+  ExploreRun bigPileRun() {
+    final base = twoGenerationRun();
+    return base.copyWith(
+      candidates: [
+        ...base.candidates,
+        for (var i = 9; i <= 20; i++)
+          doneCandidate('c-$i', 'dr-2', generation: 3, mutatedText: 'mut:$i'),
+      ],
+    );
+  }
+
+  testWidgets('缩略图超三排：容器截高三排、▼箭头显影且点按滚动（FEAT-57）', (
+    tester,
+  ) async {
+    final opened = <ExploreCandidate>[];
+    await pumpPanel(tester, bigPileRun(), opened, width: 360);
+
+    const downKey = Key('explore-pile-ps-2-scroll-down');
+    const upKey = Key('explore-pile-ps-2-scroll-up');
+
+    // 容器 = 三排高（64*3+6*2），向下有余量 → 仅 ▼。
+    final listView = find.descendant(
+      of: pileCard(2, 15),
+      matching: find.byType(ListView),
+    );
+    expect(tester.getSize(listView).height, 204);
+    expect(find.byKey(downKey), findsOneWidget);
+    expect(find.byKey(upKey), findsNothing);
+
+    // 滚轮路径：ListView 是纵向 Scrollable 且有余量（取自身 state，
+    // Scrollable.of 只查祖先会误中谱系区外层滚动）。
+    final scrollableState = tester.state<ScrollableState>(
+      find.descendant(
+        of: pileCard(2, 15),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    expect(scrollableState.position.maxScrollExtent, greaterThan(0));
+    expect(scrollableState.position.pixels, 0);
+
+    // 点 ▼ 也滚动（行步进），滚后 ▲ 显影；点 ▲ 滚回顶部。
+    // 第一帧 pump 让 animateTo 起步，再补时长帧走完动画。
+    await tester.tap(find.byKey(downKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(scrollableState.position.pixels, greaterThan(0));
+    expect(find.byKey(upKey), findsOneWidget);
+    await tester.tap(find.byKey(upKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(scrollableState.position.pixels, 0);
+
+    // 点按详情语义不动：堆内最新在前，at(0) = c-20。
+    await tester.tap(pileThumbs(2, 15).at(0));
+    await tester.pump();
+    expect(opened.map((candidate) => candidate.id), ['c-20']);
+  });
+
+  testWidgets('缩略图不足三排：容器随内容收缩、无箭头（FEAT-57）', (
+    tester,
+  ) async {
+    // ps-2 堆 6 张 / 每排 4 → 2 排。
+    final run = twoGenerationRun().copyWith(
+      candidates: [
+        ...twoGenerationRun().candidates,
+        for (var i = 9; i <= 11; i++)
+          doneCandidate('c-$i', 'dr-2', generation: 3, mutatedText: 'mut:$i'),
+      ],
+    );
+    await pumpPanel(tester, run, [], width: 360);
+
+    // 高度 = 64*2+6 随内容收缩（不硬撑三排），无滚动余量 → 双箭头都不在。
+    final listView = find.descendant(
+      of: pileCard(2, 6),
+      matching: find.byType(ListView),
+    );
+    expect(tester.getSize(listView).height, 134);
+    expect(
+      find.byKey(const Key('explore-pile-ps-2-scroll-down')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('explore-pile-ps-2-scroll-up')),
+      findsNothing,
+    );
   });
 }

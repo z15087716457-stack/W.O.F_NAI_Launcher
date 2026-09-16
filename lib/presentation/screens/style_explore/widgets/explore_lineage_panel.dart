@@ -14,6 +14,7 @@ import '../../../widgets/common/themed_input_dialog.dart';
 import '../../generation/widgets/resize_handle.dart';
 import 'explore_candidate_hover_preview.dart';
 import 'explore_parent_list.dart';
+import 'horizontal_edge_fade.dart';
 import 'explore_pile_manage_dialog.dart';
 import 'explore_preference_sort_dialog.dart';
 
@@ -111,28 +112,32 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
         if (_expanded) ...[
           SizedBox(
             height: 40,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              children: [
-                for (final entry in families)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: ChoiceChip(
-                      key: Key('explore-family-chip-${entry.id}'),
-                      label: Text(entry.name),
-                      selected: entry.id == family.id,
-                      visualDensity: VisualDensity.compact,
-                      onSelected: (_) {
-                        // 重按当前家族 chip 早退：不清掉进行中的分支选择。
-                        if (entry.id == family.id) return;
-                        _exitBranchSelection();
-                        ref.read(exploreActiveFamilyIdProvider.notifier).state =
-                            entry.id;
-                      },
+            child: HorizontalEdgeFade(
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                children: [
+                  for (final entry in families)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: ChoiceChip(
+                        key: Key('explore-family-chip-${entry.id}'),
+                        label: Text(entry.name),
+                        selected: entry.id == family.id,
+                        visualDensity: VisualDensity.compact,
+                        onSelected: (_) {
+                          // 重按当前家族 chip 早退：不清掉进行中的分支选择。
+                          if (entry.id == family.id) return;
+                          _exitBranchSelection();
+                          ref
+                                  .read(exploreActiveFamilyIdProvider.notifier)
+                                  .state =
+                              entry.id;
+                        },
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
           // 代际卡片列：内容高度 session 可调（底部拖拽手柄），上限随
@@ -350,58 +355,57 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                 ),
               )
             else
-              SizedBox(
-                height: 64,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: pile.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(width: 6),
-                  itemBuilder: (context, index) {
-                    final candidate = pile[index];
-                    final thumb = _PileThumb(
-                      candidate: candidate,
-                      // 勾选圈与点选只在活跃堆开放：非活跃堆的候选进不了
-                      // provider 校验，点了也只落 StateError。
-                      selecting: _branchSelecting && isActive,
-                      selected: _branchSelected.contains(candidate.id),
-                      adopted: adoptedIds.contains(candidate.id),
-                      onTap: () {
-                        if (_branchSelecting && isActive) {
-                          setState(() {
-                            if (!_branchSelected.remove(candidate.id)) {
-                              _branchSelected.add(candidate.id);
-                            }
-                          });
-                        } else {
-                          widget.onOpenCandidate(candidate);
-                        }
-                      },
-                    );
-                    // 悬停大图预览（FEAT-41）：外包一层，不改缩略图尺寸、
-                    // 横排列表与点按/选择态；ValueKey 绑定候选防元素复用串位。
-                    final session = widget.hoverSession;
-                    if (session == null) return thumb;
-                    final filePath =
-                        candidate.generation.status ==
-                            ExploreCandidateGenerationStatus.done
-                        ? candidate.generation.filePath
-                        : null;
-                    final roundNumber = run
-                        .roundById(candidate.roundId)
-                        ?.number;
-                    return ExploreCandidateHoverThumb(
-                      key: ValueKey('pile-hover-${candidate.id}'),
-                      session: session,
-                      candidateId: candidate.id,
-                      filePath: filePath,
-                      badgeText:
-                          '#${run.candidates.indexWhere((c) => c.id == candidate.id) + 1}'
-                          '${roundNumber != null ? ' · ${l10n.styleExplore_roundNumber(roundNumber)}' : ''}',
-                      child: thumb,
-                    );
-                  },
-                ),
+              // FEAT-57：单行横滚 → 最多三排折行 + 内部纵滚（无滚动条）+
+              // ▲▼余量箭头；缩略图 64px、悬停/点按/分支勾选语义全不动。
+              _PileThumbFlow(
+                keyPrefix: 'explore-pile-${parentSet.id}',
+                children: [
+                  for (var index = 0; index < pile.length; index++)
+                    () {
+                      final candidate = pile[index];
+                      final thumb = _PileThumb(
+                        candidate: candidate,
+                        // 勾选圈与点选只在活跃堆开放：非活跃堆的候选进不了
+                        // provider 校验，点了也只落 StateError。
+                        selecting: _branchSelecting && isActive,
+                        selected: _branchSelected.contains(candidate.id),
+                        adopted: adoptedIds.contains(candidate.id),
+                        onTap: () {
+                          if (_branchSelecting && isActive) {
+                            setState(() {
+                              if (!_branchSelected.remove(candidate.id)) {
+                                _branchSelected.add(candidate.id);
+                              }
+                            });
+                          } else {
+                            widget.onOpenCandidate(candidate);
+                          }
+                        },
+                      );
+                      // 悬停大图预览（FEAT-41）：外包一层，不改缩略图尺寸、
+                      // 折行排布与点按/选择态；ValueKey 绑定候选防元素复用串位。
+                      final session = widget.hoverSession;
+                      if (session == null) return thumb;
+                      final filePath =
+                          candidate.generation.status ==
+                              ExploreCandidateGenerationStatus.done
+                          ? candidate.generation.filePath
+                          : null;
+                      final roundNumber = run
+                          .roundById(candidate.roundId)
+                          ?.number;
+                      return ExploreCandidateHoverThumb(
+                        key: ValueKey('pile-hover-${candidate.id}'),
+                        session: session,
+                        candidateId: candidate.id,
+                        filePath: filePath,
+                        badgeText:
+                            '#${run.candidates.indexWhere((c) => c.id == candidate.id) + 1}'
+                            '${roundNumber != null ? ' · ${l10n.styleExplore_roundNumber(roundNumber)}' : ''}',
+                        child: thumb,
+                      );
+                    }(),
+                ],
               ),
             // 按钮行：管理入口每个堆都有（含非活跃集）；分支组仅活跃集。
             if (pile.isNotEmpty) ...[
@@ -810,6 +814,169 @@ class _PileThumb extends StatelessWidget {
       color: theme.colorScheme.surfaceContainerHighest,
       child: Center(
         child: Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
+      ),
+    );
+  }
+}
+
+/// 候选堆缩略图容器（FEAT-57）：64px 缩略图按可用宽折行、最多渲染三排，
+/// 第 4 排起内部纵滚（不渲染滚动条）；右上/下缘各浮一枚小箭头提示该方向
+/// 还有余量、点按平滑滚一行；不足三排时容器随内容收缩。
+class _PileThumbFlow extends StatefulWidget {
+  const _PileThumbFlow({required this.keyPrefix, required this.children});
+
+  /// 箭头 key 前缀（一张谱系页有多张堆卡，按父本集 id 区分）。
+  final String keyPrefix;
+  final List<Widget> children;
+
+  static const double thumbSize = 64;
+  static const double gap = 6;
+  static const double maxHeight = thumbSize * 3 + gap * 2;
+
+  @override
+  State<_PileThumbFlow> createState() => _PileThumbFlowState();
+}
+
+class _PileThumbFlowState extends State<_PileThumbFlow> {
+  final ScrollController _controller = ScrollController();
+  bool _canScrollUp = false;
+  bool _canScrollDown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_syncArrows);
+    // 首帧布局后才有 maxScrollExtent。
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncArrows());
+  }
+
+  @override
+  void didUpdateWidget(covariant _PileThumbFlow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.children.length != widget.children.length) {
+      // 堆内容变化后滚动范围变化，下一帧再同步箭头。
+      WidgetsBinding.instance.addPostFrameCallback((_) => _syncArrows());
+    }
+  }
+
+  void _syncArrows() {
+    if (!mounted || !_controller.hasClients) return;
+    final pos = _controller.position;
+    final canUp = pos.pixels > pos.minScrollExtent + 0.5;
+    final canDown = pos.pixels < pos.maxScrollExtent - 0.5;
+    if (canUp != _canScrollUp || canDown != _canScrollDown) {
+      setState(() {
+        _canScrollUp = canUp;
+        _canScrollDown = canDown;
+      });
+    }
+  }
+
+  void _scrollBy(double delta) {
+    final pos = _controller.position;
+    _controller.animateTo(
+      (pos.pixels + delta).clamp(pos.minScrollExtent, pos.maxScrollExtent),
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    // 外层 Column 是 crossAxisAlignment.start（松约束）：不锁满宽的话
+    // shrinkWrap 列表按内容宽排成单行，永远只有一排。满宽后 Wrap 按
+    // 可用宽折行，才是「最多三排」。
+    return SizedBox(
+      width: double.infinity,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: _PileThumbFlow.maxHeight),
+        child: Stack(
+          children: [
+            ScrollConfiguration(
+              behavior: ScrollConfiguration.of(
+                context,
+              ).copyWith(scrollbars: false),
+              child: ListView(
+                controller: _controller,
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                children: [
+                  Wrap(
+                    spacing: _PileThumbFlow.gap,
+                    runSpacing: _PileThumbFlow.gap,
+                    children: widget.children,
+                  ),
+                ],
+              ),
+            ),
+            if (_canScrollUp)
+              Positioned(
+                top: 2,
+                right: 2,
+                child: _ScrollArrow(
+                  key: Key('${widget.keyPrefix}-scroll-up'),
+                  icon: Icons.keyboard_arrow_up,
+                  color: theme.colorScheme.surface.withValues(alpha: 0.85),
+                  iconColor: theme.colorScheme.onSurfaceVariant,
+                  onTap: () => _scrollBy(
+                    -(_PileThumbFlow.thumbSize + _PileThumbFlow.gap),
+                  ),
+                ),
+              ),
+            if (_canScrollDown)
+              Positioned(
+                bottom: 2,
+                right: 2,
+                child: _ScrollArrow(
+                  key: Key('${widget.keyPrefix}-scroll-down'),
+                  icon: Icons.keyboard_arrow_down,
+                  color: theme.colorScheme.surface.withValues(alpha: 0.85),
+                  iconColor: theme.colorScheme.onSurfaceVariant,
+                  onTap: () =>
+                      _scrollBy(_PileThumbFlow.thumbSize + _PileThumbFlow.gap),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ScrollArrow extends StatelessWidget {
+  const _ScrollArrow({
+    super.key,
+    required this.icon,
+    required this.color,
+    required this.iconColor,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color color;
+  final Color iconColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(4),
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: Icon(icon, size: 14, color: iconColor),
+        ),
       ),
     );
   }
