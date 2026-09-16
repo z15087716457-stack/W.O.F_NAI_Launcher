@@ -9851,6 +9851,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_noBlockSelected => '未选择块';
 
   @override
+  String get promptBlockLibrary_details => '详情';
+
+  @override
+  String promptBlockLibrary_useCount(int count) {
+    return '使用 $count 次';
+  }
+
+  @override
   String get promptBlockPill_missing => '块已删除';
 
   @override

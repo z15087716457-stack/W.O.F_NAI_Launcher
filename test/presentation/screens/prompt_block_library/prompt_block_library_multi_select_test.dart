@@ -430,19 +430,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
-    expect(
-      find.byKey(const Key('prompt-block-quick-settings-close')),
-      findsNothing,
-    );
-    final collapse = find.byKey(
-      const Key('prompt-block-quick-settings-collapse'),
-    );
+    expect(find.byKey(const Key('prompt-block-detail-close')), findsNothing);
+    final collapse = find.byKey(const Key('prompt-block-detail-collapse'));
     expect(collapse, findsOneWidget);
 
     await tester.tap(collapse);
     await tester.pump(const Duration(milliseconds: 250));
     expect(
-      find.byKey(const Key('prompt-block-quick-settings-collapsed')),
+      find.byKey(const Key('prompt-block-detail-collapsed')),
       findsOneWidget,
     );
   });

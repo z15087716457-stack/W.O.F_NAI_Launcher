@@ -9993,6 +9993,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_noBlockSelected => 'ブロックが選択されていません';
 
   @override
+  String get promptBlockLibrary_details => '詳細';
+
+  @override
+  String promptBlockLibrary_useCount(int count) {
+    return '$count 回使用されました';
+  }
+
+  @override
   String get promptBlockPill_missing => '削除されたブロック';
 
   @override

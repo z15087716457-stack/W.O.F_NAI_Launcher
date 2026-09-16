@@ -10226,6 +10226,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_noBlockSelected => 'No block selected';
 
   @override
+  String get promptBlockLibrary_details => 'Details';
+
+  @override
+  String promptBlockLibrary_useCount(int count) {
+    return 'Used $count times';
+  }
+
+  @override
   String get promptBlockPill_missing => 'Block deleted';
 
   @override

@@ -5841,6 +5841,15 @@
   "promptBlockLibrary_rootFolder": "根目录 / 未分类",
   "promptBlockLibrary_unnamedBlock": "未命名块",
   "promptBlockLibrary_noBlockSelected": "未选择块",
+  "promptBlockLibrary_details": "详情",
+  "promptBlockLibrary_useCount": "使用 {count} 次",
+  "@promptBlockLibrary_useCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "promptBlockPill_missing": "块已删除",
   "promptBlockPill_unknown": "失效块",
   "pillCardReroll": "重抽",

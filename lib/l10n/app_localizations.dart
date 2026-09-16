@@ -17824,6 +17824,18 @@ abstract class AppLocalizations {
   /// **'No block selected'**
   String get promptBlockLibrary_noBlockSelected;
 
+  /// No description provided for @promptBlockLibrary_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get promptBlockLibrary_details;
+
+  /// No description provided for @promptBlockLibrary_useCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Used {count} times'**
+  String promptBlockLibrary_useCount(int count);
+
   /// No description provided for @promptBlockPill_missing.
   ///
   /// In en, this message translates to:

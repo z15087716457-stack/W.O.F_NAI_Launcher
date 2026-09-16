@@ -1,3 +1,5 @@
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +14,8 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/screens/prompt_block_library/prompt_block_library_screen.dart';
 import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_card.dart';
 import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_folder_delete_dialog.dart';
-import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_quick_settings_panel.dart';
+import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_detail.dart';
+import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_icons.dart';
 
 class _FakePromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
@@ -96,6 +99,54 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
   }
 
+  testWidgets('card hover 800ms shows pure preview; tap opens detail panel', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      buildScreen(blocks: [makeBlock('hover', '悬停块', 'hover content')]),
+    );
+
+    final card = find.byKey(const ValueKey('prompt-block-card-body-hover'));
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(card));
+    // 未到 800ms 不出预览
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byKey(const Key('prompt-block-preview-overlay')), findsNothing);
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(
+      find.byKey(const Key('prompt-block-preview-overlay')),
+      findsOneWidget,
+    );
+    // 预览四段齐全、无操作按钮
+    expect(find.text('悬停块'), findsWidgets);
+    expect(find.text('使用 0 次'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('prompt-block-preview-overlay')),
+        matching: find.byType(FilledButton),
+      ),
+      findsNothing,
+    );
+
+    // 移开即收
+    await gesture.moveTo(const Offset(4, 4));
+    await tester.pump();
+    expect(find.byKey(const Key('prompt-block-preview-overlay')), findsNothing);
+
+    // 点击开详情面板
+    await tester.tap(card);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.byType(PromptBlockDetailPanel), findsOneWidget);
+    expect(
+      find.byKey(const Key('prompt-block-detail-action-edit')),
+      findsOneWidget,
+    );
+    await gesture.removePointer();
+  });
+
   testWidgets('loads blocks and searches by title or content', (tester) async {
     await pumpScreen(
       tester,
@@ -160,24 +211,22 @@ void main() {
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 250));
-      expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
+      expect(find.byType(PromptBlockDetailPanel), findsOneWidget);
       expect(
         tester
-            .getSize(
-              find.byKey(const Key('prompt-block-quick-settings-header')),
-            )
+            .getSize(find.byKey(const Key('prompt-block-detail-header')))
             .height,
         64,
       );
       expect(
         find.descendant(
-          of: find.byKey(const Key('prompt-block-quick-settings-header')),
-          matching: find.text('编辑'),
+          of: find.byKey(const Key('prompt-block-detail-header')),
+          matching: find.text('详情'),
         ),
         findsOneWidget,
       );
-      var panel = tester.widget<PromptBlockQuickSettingsPanel>(
-        find.byType(PromptBlockQuickSettingsPanel),
+      var panel = tester.widget<PromptBlockDetailPanel>(
+        find.byType(PromptBlockDetailPanel),
       );
       expect(panel.block.id, 'first');
 
@@ -186,26 +235,22 @@ void main() {
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 250));
-      panel = tester.widget<PromptBlockQuickSettingsPanel>(
-        find.byType(PromptBlockQuickSettingsPanel),
+      panel = tester.widget<PromptBlockDetailPanel>(
+        find.byType(PromptBlockDetailPanel),
       );
       expect(panel.block.id, 'second');
 
-      await tester.tap(
-        find.byKey(const Key('prompt-block-quick-settings-collapse')),
-      );
+      await tester.tap(find.byKey(const Key('prompt-block-detail-collapse')));
       await tester.pump(const Duration(milliseconds: 250));
       expect(
-        find.byKey(const Key('prompt-block-quick-settings-collapsed')),
+        find.byKey(const Key('prompt-block-detail-collapsed')),
         findsOneWidget,
       );
-      expect(find.byType(PromptBlockQuickSettingsPanel), findsNothing);
+      expect(find.byType(PromptBlockDetailPanel), findsNothing);
 
-      await tester.tap(
-        find.byKey(const Key('prompt-block-quick-settings-collapsed')),
-      );
+      await tester.tap(find.byKey(const Key('prompt-block-detail-collapsed')));
       await tester.pump(const Duration(milliseconds: 250));
-      expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
+      expect(find.byType(PromptBlockDetailPanel), findsOneWidget);
     },
   );
 
@@ -218,37 +263,28 @@ void main() {
       );
 
       // 初始未选块:右栏常驻为折叠细条。
+      expect(find.byKey(const Key('prompt-block-detail-rail')), findsOneWidget);
       expect(
-        find.byKey(const Key('prompt-block-quick-settings-rail')),
+        find.byKey(const Key('prompt-block-detail-collapsed')),
         findsOneWidget,
       );
       expect(
-        find.byKey(const Key('prompt-block-quick-settings-collapsed')),
-        findsOneWidget,
-      );
-      expect(
-        tester
-            .getSize(find.byKey(const Key('prompt-block-quick-settings-rail')))
-            .width,
+        tester.getSize(find.byKey(const Key('prompt-block-detail-rail'))).width,
         40,
       );
 
       // 手动点细条展开:显示"未选择块"空状态。
-      await tester.tap(
-        find.byKey(const Key('prompt-block-quick-settings-collapsed')),
-      );
+      await tester.tap(find.byKey(const Key('prompt-block-detail-collapsed')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 250));
       expect(
-        find.byKey(const Key('prompt-block-quick-settings-empty')),
+        find.byKey(const Key('prompt-block-detail-empty')),
         findsOneWidget,
       );
       expect(find.text('未选择块'), findsOneWidget);
-      expect(find.byType(PromptBlockQuickSettingsPanel), findsNothing);
+      expect(find.byType(PromptBlockDetailPanel), findsNothing);
       expect(
-        tester
-            .getSize(find.byKey(const Key('prompt-block-quick-settings-rail')))
-            .width,
+        tester.getSize(find.byKey(const Key('prompt-block-detail-rail'))).width,
         320,
       );
     },
@@ -267,10 +303,10 @@ void main() {
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 250));
-      expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
+      expect(find.byType(PromptBlockDetailPanel), findsOneWidget);
 
       final deleteButton = find.descendant(
-        of: find.byType(PromptBlockQuickSettingsPanel),
+        of: find.byType(PromptBlockDetailPanel),
         matching: find.byIcon(Icons.delete_outline),
       );
       await tester.ensureVisible(deleteButton);
@@ -281,23 +317,18 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 250));
 
+      expect(find.byKey(const Key('prompt-block-detail-rail')), findsOneWidget);
       expect(
-        find.byKey(const Key('prompt-block-quick-settings-rail')),
+        find.byKey(const Key('prompt-block-detail-empty')),
         findsOneWidget,
       );
       expect(
-        find.byKey(const Key('prompt-block-quick-settings-empty')),
-        findsOneWidget,
-      );
-      expect(
-        tester
-            .getSize(find.byKey(const Key('prompt-block-quick-settings-rail')))
-            .width,
+        tester.getSize(find.byKey(const Key('prompt-block-detail-rail'))).width,
         320,
       );
-      expect(find.byType(PromptBlockQuickSettingsPanel), findsNothing);
+      expect(find.byType(PromptBlockDetailPanel), findsNothing);
       expect(
-        find.byKey(const Key('prompt-block-quick-settings-collapsed')),
+        find.byKey(const Key('prompt-block-detail-collapsed')),
         findsNothing,
       );
 
@@ -381,7 +412,7 @@ void main() {
       find.byKey(const ValueKey('prompt-block-pill-body-pill-one')),
     );
     await tester.pump();
-    expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
+    expect(find.byType(PromptBlockDetailPanel), findsOneWidget);
   });
 
   testWidgets('quick settings stays within a narrow layout', (tester) async {
@@ -397,11 +428,11 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 250));
 
-    expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
+    expect(find.byType(PromptBlockDetailPanel), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('direct editing saves and keeps the block in the quick rail', (
+  testWidgets('editing via detail panel dialog saves and keeps the rail', (
     tester,
   ) async {
     final block = makeBlock('edit', '待编辑', 'before');
@@ -413,113 +444,69 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('prompt-block-card-body-edit')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
+    expect(find.byType(PromptBlockDetailPanel), findsOneWidget);
 
-    final titleField = find.descendant(
-      of: find.byKey(const Key('prompt-block-quick-title')),
-      matching: find.byType(TextField),
+    // 详情面板只读；「编辑」进完整编辑弹窗。
+    await tester.ensureVisible(
+      find.byKey(const Key('prompt-block-detail-action-edit')),
     );
-    final contentField = find.descendant(
-      of: find.byKey(const Key('prompt-block-quick-content')),
-      matching: find.byType(TextField),
-    );
-    expect(titleField, findsOneWidget);
-    expect(contentField, findsOneWidget);
-
-    await tester.enterText(titleField, '已编辑');
-    await tester.enterText(contentField, '  first line\nsecond line  ');
-    await tester.tap(find.byKey(const Key('prompt-block-quick-save')));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byKey(const Key('prompt-block-detail-action-edit')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(PromptBlockEditDialog), findsOneWidget);
+
+    final fields = find.descendant(
+      of: find.byType(PromptBlockEditDialog),
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(fields.first, '已编辑');
+    await tester.enterText(fields.at(1), '  first line\nsecond line  ');
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.pump(const Duration(seconds: 3));
 
     final saved = notifier.state.valueOrNull?.blockById(block.id);
     expect(saved?.title, '已编辑');
     expect(saved?.content, '  first line\nsecond line  ');
-    expect(find.byType(PromptBlockQuickSettingsPanel), findsOneWidget);
-    expect(tester.widget<TextField>(titleField).controller?.text, '已编辑');
+    expect(find.byType(PromptBlockEditDialog), findsNothing);
+    expect(find.byType(PromptBlockDetailPanel), findsOneWidget);
   });
 
-  testWidgets(
-    'content expand editor saves or cancels without early persistence',
-    (tester) async {
-      final block = makeBlock('content-dialog', '正文编辑', 'before');
-      final notifier = _FakePromptBlockLibraryNotifier(
-        initialState: PromptBlockLibraryState(
-          blocks: [block],
-          folders: const [],
-        ),
-      );
+  testWidgets('edit dialog cancel persists nothing', (tester) async {
+    final block = makeBlock('cancel-edit', '取消编辑', 'before');
+    final notifier = _FakePromptBlockLibraryNotifier(
+      initialState: PromptBlockLibraryState(blocks: [block], folders: const []),
+    );
 
-      await pumpScreen(tester, buildScreen(notifier: notifier));
-      await tester.tap(
-        find.byKey(const ValueKey('prompt-block-card-body-content-dialog')),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 250));
+    await pumpScreen(tester, buildScreen(notifier: notifier));
+    await tester.tap(
+      find.byKey(const ValueKey('prompt-block-card-body-cancel-edit')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
 
-      final contentField = find.descendant(
-        of: find.byKey(const Key('prompt-block-quick-content')),
-        matching: find.byType(TextField),
-      );
-      final expandButton = find.byKey(
-        const Key('prompt-block-quick-content-expand'),
-      );
-      await tester.ensureVisible(expandButton);
-      await tester.tap(expandButton);
-      await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(const Key('prompt-block-detail-action-edit')),
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('prompt-block-detail-action-edit')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
-      final dialog = find.byKey(const Key('prompt-block-quick-content-dialog'));
-      final dialogField = find.byKey(
-        const Key('prompt-block-quick-content-dialog-field'),
-      );
-      expect(dialog, findsOneWidget);
-      expect(dialogField, findsOneWidget);
-      await tester.enterText(
-        find.descendant(of: dialogField, matching: find.byType(TextField)),
-        '  cancelled line\nkeep original  ',
-      );
-      await tester.tap(
-        find.byKey(const Key('prompt-block-quick-content-dialog-cancel')),
-      );
-      await tester.pumpAndSettle();
-      expect(dialog, findsNothing);
-      expect(tester.widget<TextField>(contentField).controller?.text, 'before');
-      expect(
-        notifier.state.valueOrNull?.blockById(block.id)?.content,
-        'before',
-      );
+    final fields = find.descendant(
+      of: find.byType(PromptBlockEditDialog),
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(fields.first, '不应保存');
+    await tester.tap(find.widgetWithText(TextButton, '取消'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
-      await tester.ensureVisible(expandButton);
-      await tester.tap(expandButton);
-      await tester.pumpAndSettle();
-      await tester.enterText(
-        find.descendant(of: dialogField, matching: find.byType(TextField)),
-        '  expanded line\nkeep spaces  ',
-      );
-      await tester.tap(
-        find.byKey(const Key('prompt-block-quick-content-dialog-save')),
-      );
-      await tester.pumpAndSettle();
-
-      expect(
-        tester.widget<TextField>(contentField).controller?.text,
-        '  expanded line\nkeep spaces  ',
-      );
-      expect(
-        notifier.state.valueOrNull?.blockById(block.id)?.content,
-        'before',
-      );
-
-      await tester.tap(find.byKey(const Key('prompt-block-quick-save')));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump(const Duration(seconds: 3));
-      expect(
-        notifier.state.valueOrNull?.blockById(block.id)?.content,
-        '  expanded line\nkeep spaces  ',
-      );
-    },
-  );
+    expect(find.byType(PromptBlockEditDialog), findsNothing);
+    expect(notifier.state.valueOrNull?.blockById(block.id)?.title, '取消编辑');
+  });
 
   testWidgets('wide toolbar uses the shared header height', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1100, 600));
@@ -548,6 +535,17 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
+
+    // 选择器收在详情面板的「编辑」弹窗里。
+    await tester.ensureVisible(
+      find.byKey(const Key('prompt-block-detail-action-edit')),
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('prompt-block-detail-action-edit')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    final dialog = find.byType(PromptBlockEditDialog);
+    expect(dialog, findsOneWidget);
 
     final colorOption = find.byKey(
       const ValueKey('prompt-block-color-option-#FFE53935'),

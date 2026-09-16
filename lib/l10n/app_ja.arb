@@ -5841,6 +5841,15 @@
   "promptBlockLibrary_rootFolder": "ルート / 未分類",
   "promptBlockLibrary_unnamedBlock": "無題のブロック",
   "promptBlockLibrary_noBlockSelected": "ブロックが選択されていません",
+  "promptBlockLibrary_details": "詳細",
+  "promptBlockLibrary_useCount": "{count} 回使用されました",
+  "@promptBlockLibrary_useCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "promptBlockPill_missing": "削除されたブロック",
   "promptBlockPill_unknown": "無効なブロック",
   "pillCardReroll": "再抽選",

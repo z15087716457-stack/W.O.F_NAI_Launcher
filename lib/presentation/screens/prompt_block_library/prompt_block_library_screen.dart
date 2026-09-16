@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -20,11 +21,11 @@ import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
 import 'widgets/curation_import_preview_dialog.dart';
 import 'widgets/prompt_block_card.dart';
+import 'widgets/prompt_block_detail.dart';
 import 'widgets/prompt_block_edit_dialog.dart';
 import 'widgets/prompt_block_folder_delete_dialog.dart';
 import 'widgets/prompt_block_folder_tree.dart';
 import 'widgets/prompt_block_list_item.dart';
-import 'widgets/prompt_block_quick_settings_panel.dart';
 
 enum _PromptBlockViewMode { list, grid }
 
@@ -65,7 +66,7 @@ class _PromptBlockLibraryScreenState
   bool _sortDescending = false;
   double _cardWidth = 220;
   String? _selectedBlockId;
-  bool _quickPanelExpanded = false;
+  bool _detailPanelExpanded = false;
 
   // 屏幕级多选状态（与 [_selectedBlockId] 同层；本页消费者全在 screen 内，
   // 不引 provider——画廊用 provider 是因为跨 widget 消费）。
@@ -183,7 +184,7 @@ class _PromptBlockLibraryScreenState
                   });
                 });
               }
-              final showQuickPanel = constraints.maxWidth >= 720;
+              final showDetailPanel = constraints.maxWidth >= 720;
               return Row(
                 children: [
                   if (showSidebar) _buildSidebar(context, library),
@@ -198,8 +199,8 @@ class _PromptBlockLibraryScreenState
                       ],
                     ),
                   ),
-                  if (showQuickPanel)
-                    _buildQuickSettingsRail(
+                  if (showDetailPanel)
+                    _buildDetailRail(
                       selectedBlock,
                       state?.folders ?? const <PromptBlockFolder>[],
                     ),
@@ -221,52 +222,49 @@ class _PromptBlockLibraryScreenState
     return null;
   }
 
-  Widget _buildQuickSettingsRail(
-    PromptBlock? block,
-    List<PromptBlockFolder> folders,
-  ) {
+  Widget _buildDetailRail(PromptBlock? block, List<PromptBlockFolder> folders) {
     final theme = Theme.of(context);
-    final width = _quickPanelExpanded ? 320.0 : 40.0;
+    final width = _detailPanelExpanded ? 320.0 : 40.0;
     return ClipRect(
       child: AnimatedContainer(
-        key: const Key('prompt-block-quick-settings-rail'),
+        key: const Key('prompt-block-detail-rail'),
         duration: const Duration(milliseconds: 200),
         width: width,
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           border: Border(left: BorderSide(color: theme.dividerColor)),
         ),
-        child: !_quickPanelExpanded
-            ? PromptBlockQuickSettingsCollapsed(
-                onExpand: () => setState(() => _quickPanelExpanded = true),
+        child: !_detailPanelExpanded
+            ? PromptBlockDetailRailCollapsed(
+                onExpand: () => setState(() => _detailPanelExpanded = true),
               )
             : _multiSelectMode
-            ? _buildEmptyQuickPanel(
+            ? _buildEmptyDetailPanel(
                 icon: Icons.checklist,
                 message: context.l10n.promptBlockLibrary_selectedCount(
                   _multiSelectedIds.length,
                 ),
               )
             : block != null
-            ? PromptBlockQuickSettingsPanel(
+            ? PromptBlockDetailPanel(
                 block: block,
                 folders: folders,
+                onEdit: () => _openBlockEdit(block),
                 onToggleFavorite: () => _toggleFavorite(block),
                 onCopy: () => AppToast.success(
                   context,
                   context.l10n.promptBlockLibrary_copied,
                 ),
                 onExport: () => _exportBlockAsTxt(block),
-                onSave: (result) => _saveBlockEdit(context, block, result),
                 onDelete: () => _deleteBlock(context, block),
-                onCollapse: () => setState(() => _quickPanelExpanded = false),
+                onCollapse: () => setState(() => _detailPanelExpanded = false),
               )
-            : _buildEmptyQuickPanel(),
+            : _buildEmptyDetailPanel(),
       ),
     );
   }
 
-  Widget _buildEmptyQuickPanel({
+  Widget _buildEmptyDetailPanel({
     IconData icon = Icons.touch_app_outlined,
     String? message,
   }) {
@@ -276,7 +274,7 @@ class _PromptBlockLibraryScreenState
       builder: (context, constraints) {
         if (constraints.maxWidth < 280) return const SizedBox.expand();
         return Material(
-          key: const Key('prompt-block-quick-settings-empty'),
+          key: const Key('prompt-block-detail-empty'),
           color: theme.colorScheme.surface,
           child: Column(
             children: [
@@ -290,14 +288,14 @@ class _PromptBlockLibraryScreenState
                   child: Row(
                     children: [
                       Icon(
-                        Icons.tune,
+                        Icons.info_outline,
                         size: 19,
                         color: theme.colorScheme.primary,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          l10n.common_edit,
+                          l10n.promptBlockLibrary_details,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.titleSmall?.copyWith(
@@ -306,11 +304,11 @@ class _PromptBlockLibraryScreenState
                         ),
                       ),
                       IconButton(
-                        key: const Key('prompt-block-quick-settings-collapse'),
+                        key: const Key('prompt-block-detail-collapse'),
                         tooltip: l10n.common_collapse,
                         visualDensity: VisualDensity.compact,
                         onPressed: () =>
-                            setState(() => _quickPanelExpanded = false),
+                            setState(() => _detailPanelExpanded = false),
                         icon: const Icon(Icons.keyboard_arrow_right),
                       ),
                     ],
@@ -927,7 +925,7 @@ class _PromptBlockLibraryScreenState
           if (blocks.isEmpty) return _buildEmptyState(context, state);
 
           if (_viewMode == _PromptBlockViewMode.grid) {
-            return _buildGrid(context, blocks);
+            return _buildGrid(context, blocks, state.folders);
           }
 
           // 聚合视图里混有后代文件夹的块，跨文件夹拖排没有意义；
@@ -949,6 +947,7 @@ class _PromptBlockLibraryScreenState
               itemBuilder: (context, index) => _buildBlockItem(
                 context,
                 blocks[index],
+                folders: state.folders,
                 // 多选激活时禁用重排把手，避免选择态与拖排歧义。
                 reorderIndex: _multiSelectMode ? null : index,
               ),
@@ -960,15 +959,19 @@ class _PromptBlockLibraryScreenState
             padding: const EdgeInsets.all(16),
             itemCount: blocks.length,
             itemBuilder: (context, index) =>
-                _buildBlockItem(context, blocks[index]),
+                _buildBlockItem(context, blocks[index], folders: state.folders),
           );
         },
       ),
     );
   }
 
-  Widget _buildGrid(BuildContext context, List<PromptBlock> blocks) {
-    if (_cardWidth <= 160) return _buildPillGrid(context, blocks);
+  Widget _buildGrid(
+    BuildContext context,
+    List<PromptBlock> blocks,
+    List<PromptBlockFolder> folders,
+  ) {
+    if (_cardWidth <= 160) return _buildPillGrid(context, blocks, folders);
 
     final cardHeight = _cardWidth < 240 ? 174.0 : 208.0;
     return LayoutBuilder(
@@ -990,8 +993,12 @@ class _PromptBlockLibraryScreenState
                   mainAxisSpacing: 12,
                 ),
                 itemCount: blocks.length,
-                itemBuilder: (context, index) =>
-                    _buildBlockCard(context, blocks[index], width: _cardWidth),
+                itemBuilder: (context, index) => _buildBlockCard(
+                  context,
+                  blocks[index],
+                  width: _cardWidth,
+                  folders: folders,
+                ),
               ),
             ),
             Positioned(
@@ -1005,7 +1012,11 @@ class _PromptBlockLibraryScreenState
     );
   }
 
-  Widget _buildPillGrid(BuildContext context, List<PromptBlock> blocks) {
+  Widget _buildPillGrid(
+    BuildContext context,
+    List<PromptBlock> blocks,
+    List<PromptBlockFolder> folders,
+  ) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final sliderWidth = (constraints.maxWidth - 74)
@@ -1026,7 +1037,12 @@ class _PromptBlockLibraryScreenState
                   runSpacing: 8,
                   children: [
                     for (final block in blocks)
-                      _buildBlockPill(context, block, maxWidth: _cardWidth),
+                      _buildBlockPill(
+                        context,
+                        block,
+                        maxWidth: _cardWidth,
+                        folders: folders,
+                      ),
                   ],
                 ),
               ),
@@ -1046,20 +1062,26 @@ class _PromptBlockLibraryScreenState
     BuildContext context,
     PromptBlock block, {
     required double maxWidth,
+    required List<PromptBlockFolder> folders,
   }) {
     final title = block.title.isEmpty
         ? context.l10n.promptBlockLibrary_unnamedBlock
         : block.title;
-    return PromptBlockPill(
+    return PromptBlockHoverPreview(
       key: ValueKey(block.id),
       block: block,
-      displayTitle: title,
-      maxWidth: maxWidth,
-      selected: _isBlockShownSelected(block.id),
-      multiSelected: _isBlockMultiSelected(block.id),
-      onSecondaryTap: (details) =>
-          _showBlockContextMenu(context, block, details.globalPosition),
-      onTap: () => _handleBlockTap(block),
+      folders: folders,
+      enabled: !_multiSelectMode,
+      child: PromptBlockPill(
+        block: block,
+        displayTitle: title,
+        maxWidth: maxWidth,
+        selected: _isBlockShownSelected(block.id),
+        multiSelected: _isBlockMultiSelected(block.id),
+        onSecondaryTap: (details) =>
+            _showBlockContextMenu(context, block, details.globalPosition),
+        onTap: () => _handleBlockTap(block),
+      ),
     );
   }
 
@@ -1109,27 +1131,33 @@ class _PromptBlockLibraryScreenState
   Widget _buildBlockItem(
     BuildContext context,
     PromptBlock block, {
+    required List<PromptBlockFolder> folders,
     int? reorderIndex,
   }) {
     final title = block.title.isEmpty
         ? context.l10n.promptBlockLibrary_unnamedBlock
         : block.title;
-    return PromptBlockListItem(
+    return PromptBlockHoverPreview(
       key: ValueKey(block.id),
       block: block,
-      displayTitle: title,
-      reorderIndex: reorderIndex,
-      selected: _isBlockShownSelected(block.id),
-      multiSelected: _isBlockMultiSelected(block.id),
-      onSecondaryTap: (details) =>
-          _showBlockContextMenu(context, block, details.globalPosition),
-      onTap: () => _handleBlockTap(block),
-      onEdit: () => _handleBlockEditButton(block),
-      onCopy: () =>
-          AppToast.success(context, context.l10n.promptBlockLibrary_copied),
-      onExport: () => _exportBlockAsTxt(block),
-      onToggleFavorite: () => _toggleFavorite(block),
-      onDelete: () => _deleteBlock(context, block),
+      folders: folders,
+      enabled: !_multiSelectMode,
+      child: PromptBlockListItem(
+        block: block,
+        displayTitle: title,
+        reorderIndex: reorderIndex,
+        selected: _isBlockShownSelected(block.id),
+        multiSelected: _isBlockMultiSelected(block.id),
+        onSecondaryTap: (details) =>
+            _showBlockContextMenu(context, block, details.globalPosition),
+        onTap: () => _handleBlockTap(block),
+        onEdit: () => _handleBlockEditButton(block),
+        onCopy: () =>
+            AppToast.success(context, context.l10n.promptBlockLibrary_copied),
+        onExport: () => _exportBlockAsTxt(block),
+        onToggleFavorite: () => _toggleFavorite(block),
+        onDelete: () => _deleteBlock(context, block),
+      ),
     );
   }
 
@@ -1137,33 +1165,39 @@ class _PromptBlockLibraryScreenState
     BuildContext context,
     PromptBlock block, {
     required double width,
+    required List<PromptBlockFolder> folders,
   }) {
     final title = block.title.isEmpty
         ? context.l10n.promptBlockLibrary_unnamedBlock
         : block.title;
-    return PromptBlockCard(
+    return PromptBlockHoverPreview(
       key: ValueKey(block.id),
       block: block,
-      displayTitle: title,
-      width: width,
-      selected: _isBlockShownSelected(block.id),
-      multiSelected: _isBlockMultiSelected(block.id),
-      onSecondaryTap: (details) =>
-          _showBlockContextMenu(context, block, details.globalPosition),
-      onTap: () => _handleBlockTap(block),
-      onEdit: () => _handleBlockEditButton(block),
-      onCopy: () =>
-          AppToast.success(context, context.l10n.promptBlockLibrary_copied),
-      onExport: () => _exportBlockAsTxt(block),
-      onToggleFavorite: () => _toggleFavorite(block),
-      onDelete: () => _deleteBlock(context, block),
+      folders: folders,
+      enabled: !_multiSelectMode,
+      child: PromptBlockCard(
+        block: block,
+        displayTitle: title,
+        width: width,
+        selected: _isBlockShownSelected(block.id),
+        multiSelected: _isBlockMultiSelected(block.id),
+        onSecondaryTap: (details) =>
+            _showBlockContextMenu(context, block, details.globalPosition),
+        onTap: () => _handleBlockTap(block),
+        onEdit: () => _handleBlockEditButton(block),
+        onCopy: () =>
+            AppToast.success(context, context.l10n.promptBlockLibrary_copied),
+        onExport: () => _exportBlockAsTxt(block),
+        onToggleFavorite: () => _toggleFavorite(block),
+        onDelete: () => _deleteBlock(context, block),
+      ),
     );
   }
 
   void _selectBlock(PromptBlock block) {
     setState(() {
       _selectedBlockId = block.id;
-      _quickPanelExpanded = true;
+      _detailPanelExpanded = true;
     });
   }
 
@@ -1206,10 +1240,24 @@ class _PromptBlockLibraryScreenState
     _selectBlock(block);
   }
 
-  /// 多选模式下点行尾/卡面「编辑」按钮：退出多选并按单选打开右侧编辑栏。
+  /// 多选模式下点行尾/卡面「编辑」按钮：退出多选并打开完整编辑弹窗。
   void _handleBlockEditButton(PromptBlock block) {
     if (_multiSelectMode) _exitMultiSelect();
     _selectBlock(block);
+    unawaited(_openBlockEdit(block));
+  }
+
+  /// 打开完整编辑弹窗并保存（详情面板的「编辑」入口）。
+  Future<void> _openBlockEdit(PromptBlock block) async {
+    final state = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
+    if (state == null || !mounted) return;
+    final result = await PromptBlockEditDialog.show(
+      context: context,
+      block: block,
+      folders: state.folders,
+    );
+    if (result == null || !mounted) return;
+    await _saveBlockEdit(context, block, result);
   }
 
   /// 工具栏「多选」开关:进入多选模式(空选集,再点块选择)。
@@ -1389,6 +1437,7 @@ class _PromptBlockLibraryScreenState
     switch (action) {
       case _BlockContextAction.edit:
         _selectBlock(block);
+        unawaited(_openBlockEdit(block));
       case _BlockContextAction.copy:
         await Clipboard.setData(ClipboardData(text: block.content));
         if (context.mounted) {

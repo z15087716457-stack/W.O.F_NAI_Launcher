@@ -5841,6 +5841,15 @@
   "promptBlockLibrary_rootFolder": "Root / Unfiled",
   "promptBlockLibrary_unnamedBlock": "Untitled block",
   "promptBlockLibrary_noBlockSelected": "No block selected",
+  "promptBlockLibrary_details": "Details",
+  "promptBlockLibrary_useCount": "Used {count} times",
+  "@promptBlockLibrary_useCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "promptBlockPill_missing": "Block deleted",
   "promptBlockPill_unknown": "Invalid block",
   "pillCardReroll": "Re-roll",
