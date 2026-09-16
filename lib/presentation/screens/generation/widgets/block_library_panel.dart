@@ -48,6 +48,10 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
   static const double _blocksRatio = 0.4;
   double? _manualBlocksHeight;
 
+  /// BUG-4：未拖拽时首次估算高度算一次即锁定，此后切文件夹/搜索不再
+  /// 重算；读取时与手动值同款 clamp（窗口 resize 随 availableHeight 收敛）。
+  double? _lockedBlocksHeight;
+
   @override
   void initState() {
     super.initState();
@@ -137,22 +141,27 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
     final manualHeight = (availableHeight * _blocksRatio)
         .clamp(0.0, availableHeight)
         .toDouble();
-    if (_manualBlocksHeight != null) {
-      return _manualBlocksHeight!.clamp(0.0, availableHeight).toDouble();
+    final fixedHeight = _manualBlocksHeight ?? _lockedBlocksHeight;
+    if (fixedHeight != null) {
+      return fixedHeight.clamp(0.0, availableHeight).toDouble();
     }
     final state = library.valueOrNull;
     if (state == null) return manualHeight;
 
     final blocks = _filteredBlocks(state);
-    if (blocks.isEmpty) return availableHeight.clamp(0.0, 96.0).toDouble();
-
-    final contentWidth = (panelWidth - 20)
-        .clamp(1.0, double.infinity)
-        .toDouble();
-    final columns = (contentWidth / 156).floor().clamp(1, 4).toInt();
-    final rows = (blocks.length + columns - 1) ~/ columns;
-    final estimatedHeight = 18.0 + rows * 39.0 + (rows - 1) * 6.0;
-    return estimatedHeight.clamp(72.0, availableHeight).toDouble();
+    final double resolved;
+    if (blocks.isEmpty) {
+      resolved = availableHeight.clamp(0.0, 96.0).toDouble();
+    } else {
+      final contentWidth = (panelWidth - 20)
+          .clamp(1.0, double.infinity)
+          .toDouble();
+      final columns = (contentWidth / 156).floor().clamp(1, 4).toInt();
+      final rows = (blocks.length + columns - 1) ~/ columns;
+      final estimatedHeight = 18.0 + rows * 39.0 + (rows - 1) * 6.0;
+      resolved = estimatedHeight.clamp(72.0, availableHeight).toDouble();
+    }
+    return _lockedBlocksHeight = resolved;
   }
 
   List<PromptBlock> _filteredBlocks(PromptBlockLibraryState state) {
