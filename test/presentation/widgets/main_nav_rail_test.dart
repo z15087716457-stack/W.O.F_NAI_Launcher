@@ -8,6 +8,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/main_nav_rail.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/pills/dna_icon.dart';
 
 class _MockNavigationShell extends Mock implements StatefulNavigationShell {
   @override
@@ -67,6 +68,9 @@ void main() {
 
     expect(find.byKey(const Key('main-nav-primary-scroll')), findsOneWidget);
     expect(find.byIcon(Icons.settings), findsOneWidget);
+    // BUG-6：画风探索入口为自绘 DNA 双螺旋（Icons.biotech 是显微镜字形）。
+    expect(find.byType(DnaIcon), findsOneWidget);
+    expect(find.byIcon(Icons.biotech), findsNothing);
     expect(find.byIcon(Icons.keyboard_double_arrow_right), findsOneWidget);
     expect(
       tester.getCenter(find.byKey(const Key('main-nav-toggle'))).dy,

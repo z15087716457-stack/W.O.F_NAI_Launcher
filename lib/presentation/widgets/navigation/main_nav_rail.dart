@@ -15,6 +15,7 @@ import '../../router/app_branch.dart';
 import '../auth/account_avatar.dart';
 import '../auth/login_form_container.dart';
 import '../auth/subscription_expiry_text.dart';
+import '../prompt/pills/dna_icon.dart';
 
 import '../common/app_toast.dart';
 
@@ -112,7 +113,9 @@ class MainNavRail extends ConsumerWidget {
 
                     // 画风探索
                     _NavIcon(
-                      icon: Icons.biotech, // Style Explore
+                      // Material 图标集没有 DNA 字形（biotech 实为显微镜），
+                      // 复用药丸角标同款自绘双螺旋。
+                      customIcon: (color) => DnaIcon(size: 24, color: color),
                       label: context.l10n.nav_styleExplore,
                       isSelected: selectedIndex == 3,
                       onTap: () => navigationShell.goBranch(
@@ -720,19 +723,24 @@ class _RailLinkItem extends StatelessWidget {
 }
 
 class _NavIcon extends StatefulWidget {
-  final IconData icon;
+  final IconData? icon;
+  final Widget Function(Color color)? customIcon;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
   final bool showBadge;
 
   const _NavIcon({
-    required this.icon,
+    this.icon,
+    this.customIcon,
     required this.label,
     required this.isSelected,
     required this.onTap,
     this.showBadge = false,
-  });
+  }) : assert(
+         icon != null || customIcon != null,
+         '_NavIcon requires either icon or customIcon',
+       );
 
   @override
   State<_NavIcon> createState() => _NavIconState();
@@ -749,6 +757,11 @@ class _NavIconState extends State<_NavIcon> {
     final color = widget.isSelected
         ? theme.colorScheme.primary
         : theme.iconTheme.color?.withValues(alpha: 0.7);
+    // 自绘图标吃非空色：与 Icon(color: null) 的 IconTheme 兜底同口径解出实色。
+    final resolvedColor =
+        color ??
+        IconTheme.of(context).color ??
+        theme.colorScheme.onSurface;
 
     // 计算背景色：选中状态优先，其次是 Hover 状态
     Color backgroundColor = Colors.transparent;
@@ -807,7 +820,13 @@ class _NavIconState extends State<_NavIcon> {
                             child: Badge(
                               isLabelVisible: widget.showBadge,
                               smallSize: 7,
-                              child: Icon(widget.icon, color: color, size: 24),
+                              child: widget.customIcon != null
+                                  ? widget.customIcon!(resolvedColor)
+                                  : Icon(
+                                      widget.icon,
+                                      color: color,
+                                      size: 24,
+                                    ),
                             ),
                           ),
                         ),
