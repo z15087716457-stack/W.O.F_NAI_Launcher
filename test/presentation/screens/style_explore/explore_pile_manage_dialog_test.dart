@@ -360,7 +360,7 @@ void main() {
     expect(candidateOf('c-4').folderId, isNull);
   });
 
-  testWidgets('批量删图：确认后删副本路径并清 filePath，取消不动', (tester) async {
+  testWidgets('批量删图：确认后删副本路径并连记录删，取消不动', (tester) async {
     const pathC5 = r'C:\runs\style_explore_runs\run-1\c-5.png';
     final run = baseRun().copyWith(
       candidates: [
@@ -385,7 +385,7 @@ void main() {
     expect(imageStore.deleted, isEmpty);
     expect(candidateOf('c-5').generation.filePath, pathC5);
 
-    // 再确认：文件删、filePath 清空、候选记录保留。
+    // 再确认：文件删 + 候选记录连删（FEAT-55 拍板方向）。
     await tester.tap(find.byKey(const Key('explore-pile-manage-delete')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -400,10 +400,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(imageStore.deleted, [pathC5]);
-    expect(candidateOf('c-5').generation.filePath, isNull);
+    // 记录整条移除：candidateById 返回 null、轮次引用已清。
+    expect(currentRun().candidateById('c-5'), isNull);
     expect(
-      candidateOf('c-5').generation.status,
-      ExploreCandidateGenerationStatus.done,
+      currentRun().rounds
+          .firstWhere((round) => round.id == 'dr-2')
+          .candidateIds,
+      isNot(contains('c-5')),
     );
     // 泵过成功 toast 的自动消失计时（3s），避免测试结束时挂起 Timer。
     await tester.pump(const Duration(seconds: 4));

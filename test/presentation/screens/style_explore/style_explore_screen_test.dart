@@ -2031,7 +2031,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // 有副本候选（non-reject）：删除图片 → 确认 → 副本删除、记录保留。
+    // 有副本候选：删除图片 → 确认 → 副本删除 + 记录连删（FEAT-55）。
     await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -2045,10 +2045,22 @@ void main() {
     await tester.pump(const Duration(milliseconds: 3300));
 
     expect(imageStore.deletedPaths, [copyPath]);
-    final stored = runStorage._store[run.id]!.candidateById('cand-1')!;
-    expect(stored.generation.filePath, isNull);
-    expect(stored.generation.status, ExploreCandidateGenerationStatus.done);
-    expect(stored.generation.seed, 42, reason: '记录保留，仅清副本路径');
+    final storedRun = runStorage._store[run.id]!;
+    expect(
+      storedRun.candidateById('cand-1'),
+      isNull,
+      reason: 'FEAT-55 拍板 = 连记录删，候选整条移除',
+    );
+    expect(
+      storedRun.candidateById('cand-no-copy'),
+      isNotNull,
+      reason: '未删的候选不受影响',
+    );
+    // 画廊卡消失（不再留破图占位）。
+    expect(
+      find.byKey(const Key('explore-candidate-cand-1')),
+      findsNothing,
+    );
   });
 
   testWidgets('multi-select bar delete button batch-deletes copies '
@@ -2110,7 +2122,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('删除所选候选图'), findsOneWidget);
     expect(
-      find.text('将删除 2 张候选在 Run 目录中的图片副本；候选记录保留，图库源图不受影响。'),
+      find.text('将删除 2 张候选在 Run 目录中的图片副本与候选记录；图库源图不受影响。'),
       findsOneWidget,
     );
     await tester.tap(find.widgetWithText(TextButton, '取消'));
@@ -2130,12 +2142,13 @@ void main() {
 
     expect(imageStore.deletedPaths, [copyPath1, copyPath2]);
     final stored = runStorage._store[run.id]!;
-    expect(stored.candidateById('cand-1')!.generation.filePath, isNull);
-    expect(stored.candidateById('cand-2')!.generation.filePath, isNull);
+    // FEAT-55：连记录删——候选整条移除，画廊卡消失。
+    expect(stored.candidateById('cand-1'), isNull);
+    expect(stored.candidateById('cand-2'), isNull);
+    expect(stored.candidateById('cand-no-copy'), isNotNull);
     expect(
-      stored.candidateById('cand-1')!.generation.status,
-      ExploreCandidateGenerationStatus.done,
-      reason: '记录保留',
+      find.byKey(const Key('explore-candidate-cand-1')),
+      findsNothing,
     );
     expect(
       find.byKey(const Key('explore-gallery-select-toggle')),

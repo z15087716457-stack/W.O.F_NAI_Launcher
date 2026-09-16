@@ -10528,10 +10528,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_deleteImageMessage =>
-      '将删除该候选在 Run 目录中的图片副本；候选记录保留，图库源图不受影响。';
+      '将删除该候选在 Run 目录中的图片副本与候选记录；图库源图不受影响。';
 
   @override
-  String get styleExplore_deleteImageDone => '已删除候选图副本';
+  String get styleExplore_deleteImageDone => '已删除候选图与记录';
 
   @override
   String get styleExplore_selectCandidates => '多选';
@@ -10695,12 +10695,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String styleExplore_pileManageDeleteMessage(int count) {
-    return '将删除 $count 张候选在 Run 目录中的图片副本；候选记录保留，图库源图不受影响。';
+    return '将删除 $count 张候选在 Run 目录中的图片副本与候选记录；图库源图不受影响。';
   }
 
   @override
   String styleExplore_pileManageDeleteDone(int count) {
-    return '已删除 $count 张候选图副本';
+    return '已删除 $count 张候选图与记录';
   }
 
   @override

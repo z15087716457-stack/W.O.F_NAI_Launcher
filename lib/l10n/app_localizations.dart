@@ -19036,13 +19036,13 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_deleteImageMessage.
   ///
   /// In en, this message translates to:
-  /// **'Deletes this candidate\'s image copy in the run directory. The candidate record is kept and the gallery source image is untouched.'**
+  /// **'Deletes this candidate\'s image copy in the run directory and removes its record. The gallery source image is untouched.'**
   String get styleExplore_deleteImageMessage;
 
   /// No description provided for @styleExplore_deleteImageDone.
   ///
   /// In en, this message translates to:
-  /// **'Candidate image copy deleted'**
+  /// **'Candidate image and record deleted'**
   String get styleExplore_deleteImageDone;
 
   /// No description provided for @styleExplore_selectCandidates.
@@ -19324,13 +19324,13 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_pileManageDeleteMessage.
   ///
   /// In en, this message translates to:
-  /// **'Deletes the run-directory image copies of {count} candidates; records are kept and gallery source images are not affected.'**
+  /// **'Deletes the run-directory image copies and records of {count} candidates; gallery source images are not affected.'**
   String styleExplore_pileManageDeleteMessage(int count);
 
   /// No description provided for @styleExplore_pileManageDeleteDone.
   ///
   /// In en, this message translates to:
-  /// **'Deleted {count} candidate image copies'**
+  /// **'Deleted {count} candidates and their image copies'**
   String styleExplore_pileManageDeleteDone(int count);
 
   /// No description provided for @subscriptionExpiresOn.

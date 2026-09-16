@@ -10916,10 +10916,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_deleteImageMessage =>
-      'Deletes this candidate\'s image copy in the run directory. The candidate record is kept and the gallery source image is untouched.';
+      'Deletes this candidate\'s image copy in the run directory and removes its record. The gallery source image is untouched.';
 
   @override
-  String get styleExplore_deleteImageDone => 'Candidate image copy deleted';
+  String get styleExplore_deleteImageDone =>
+      'Candidate image and record deleted';
 
   @override
   String get styleExplore_selectCandidates => 'Select';
@@ -11093,12 +11094,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String styleExplore_pileManageDeleteMessage(int count) {
-    return 'Deletes the run-directory image copies of $count candidates; records are kept and gallery source images are not affected.';
+    return 'Deletes the run-directory image copies and records of $count candidates; gallery source images are not affected.';
   }
 
   @override
   String styleExplore_pileManageDeleteDone(int count) {
-    return 'Deleted $count candidate image copies';
+    return 'Deleted $count candidates and their image copies';
   }
 
   @override

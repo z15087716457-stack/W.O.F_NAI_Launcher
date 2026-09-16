@@ -140,7 +140,7 @@ abstract final class ExploreCandidateActions {
     }
   }
 
-  /// Reject 候选删图：删 run 目录副本文件，候选记录保留（filePath 清空）。
+  /// 删图 = 连记录删（FEAT-55）：删 run 目录副本文件 + 移除候选记录。
   static Future<void> deleteImage(
     BuildContext context,
     WidgetRef ref, {
@@ -169,15 +169,11 @@ abstract final class ExploreCandidateActions {
         }
         return;
       }
+      // FEAT-55 拍板 = 连记录删：副本删成功后整条候选记录移除
+      // （清 rounds.candidateIds / lineage.parentCandidateIds 引用）。
       await ref
           .read(exploreRunListNotifierProvider.notifier)
-          .updateCandidate(
-            runId,
-            candidate.id,
-            (current) => current.copyWith(
-              generation: current.generation.copyWith(filePath: null),
-            ),
-          );
+          .removeCandidates(runId, [candidate.id]);
       if (context.mounted) {
         AppToast.success(context, context.l10n.styleExplore_deleteImageDone);
       }

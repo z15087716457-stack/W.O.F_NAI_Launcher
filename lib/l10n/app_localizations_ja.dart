@@ -10676,10 +10676,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_deleteImageMessage =>
-      'ラン ディレクトリ内の候補画像コピーを削除します。候補レコードは残り、ギャラリーの元画像には影響しません。';
+      'ラン ディレクトリ内の候補画像コピーと候補レコードを削除します。ギャラリーの元画像には影響しません。';
 
   @override
-  String get styleExplore_deleteImageDone => '候補画像コピーを削除しました';
+  String get styleExplore_deleteImageDone => '候補画像とレコードを削除しました';
 
   @override
   String get styleExplore_selectCandidates => '複数選択';
@@ -10844,12 +10844,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String styleExplore_pileManageDeleteMessage(int count) {
-    return '$count 件の候補の Run ディレクトリ内コピーを削除します。レコードは残り、ギャラリーの元画像には影響しません。';
+    return '$count 件の候補の Run ディレクトリ内コピーとレコードを削除します。ギャラリーの元画像には影響しません。';
   }
 
   @override
   String styleExplore_pileManageDeleteDone(int count) {
-    return '$count 件の候補画像コピーを削除しました';
+    return '$count 件の候補と画像コピーを削除しました';
   }
 
   @override

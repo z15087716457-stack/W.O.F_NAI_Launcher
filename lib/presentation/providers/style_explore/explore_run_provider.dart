@@ -324,6 +324,52 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     );
   }
 
+  /// 连记录删除候选（FEAT-55 拍板方向 = 连记录删）：从 `run.candidates`
+  /// 移除 + 清 `rounds.candidateIds` 与其余候选 `lineage.parentCandidateIds`
+  /// 的引用；父本集 `sourceCandidateId` 溯源标记留作留痕（查不到候选自然
+  /// 不显示角标）。图片副本由调用方先经 imageStore 删，本方法只动记录。
+  Future<ExploreRun> removeCandidates(String runId, List<String> candidateIds) {
+    final target = candidateIds.toSet();
+    if (target.isEmpty) {
+      throw StateError('请选择至少一张候选');
+    }
+    return _mutateRun(runId, (run) {
+      for (final id in target) {
+        if (run.candidateById(id) == null) {
+          throw StateError('Candidate $id not in run $runId');
+        }
+      }
+      return run.copyWith(
+        candidates: [
+          for (final candidate in run.candidates)
+            if (!target.contains(candidate.id))
+              candidate.lineage.parentCandidateIds.any(target.contains)
+                  ? candidate.copyWith(
+                      lineage: candidate.lineage.copyWith(
+                        parentCandidateIds: [
+                          for (final pid
+                              in candidate.lineage.parentCandidateIds)
+                            if (!target.contains(pid)) pid,
+                        ],
+                      ),
+                    )
+                  : candidate,
+        ],
+        rounds: [
+          for (final round in run.rounds)
+            round.candidateIds.any(target.contains)
+                ? round.copyWith(
+                    candidateIds: [
+                      for (final id in round.candidateIds)
+                        if (!target.contains(id)) id,
+                    ],
+                  )
+                : round,
+        ],
+      );
+    });
+  }
+
   /// 建家族（阶段 D）：父本串列表 → 家族 + 第一代父本集（active）。
   ///
   /// 父本串去首尾空白、去空、按串去重（保序）；至少需要一个有效串，

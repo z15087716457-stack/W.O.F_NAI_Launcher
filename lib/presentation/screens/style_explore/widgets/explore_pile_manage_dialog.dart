@@ -600,7 +600,8 @@ class _ExplorePileManageDialogState
     }
   }
 
-  /// 批量删图：一次确认 → 逐张删副本文件 + 清 filePath（候选记录保留）。
+  /// 批量删图（FEAT-55 拍板 = 连记录删）：一次确认 → 逐张删副本文件 +
+  /// 移除候选记录。
   Future<void> _deleteSelected(
     ExploreRun run,
     List<ExploreCandidate> selected,
@@ -625,15 +626,15 @@ class _ExplorePileManageDialogState
     try {
       final store = ref.read(exploreRunImageStoreProvider);
       final notifier = ref.read(exploreRunListNotifierProvider.notifier);
+      final deletedIds = <String>[];
       for (final candidate in targets) {
         final filePath = candidate.generation.filePath!;
         if (!await store.deleteCandidateImage(filePath)) continue;
-        await notifier.updateGeneration(
-          run.id,
-          candidate.id,
-          candidate.generation.copyWith(filePath: null),
-        );
+        deletedIds.add(candidate.id);
         deleted++;
+      }
+      if (deletedIds.isNotEmpty) {
+        await notifier.removeCandidates(run.id, deletedIds);
       }
       if (mounted) {
         AppToast.success(

@@ -451,6 +451,97 @@ void main() {
     });
   });
 
+  group('removeCandidates (FEAT-55 连记录删)', () {
+    ExploreCandidate doneCandidate(String id, {String roundId = 'r-1'}) {
+      return ExploreCandidate.shell(roundId: roundId, id: id).copyWith(
+        generation: const ExploreCandidateGeneration(
+          status: ExploreCandidateGenerationStatus.done,
+          filePath: '/tmp/x.png',
+        ),
+      );
+    }
+
+    test('removes records and cleans round/lineage references', () async {
+      final c = container();
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final created = await createRun(c);
+      final run = await notifier.overwrite(
+        created.copyWith(
+          status: ExploreRunStatus.generated,
+          candidates: [
+            doneCandidate('cand-1'),
+            doneCandidate('cand-2'),
+            // 子代血缘引用 cand-1：删后引用应被清掉。
+            doneCandidate('cand-3', roundId: 'r-2').copyWith(
+              lineage: const ExploreLineage(
+                operation: ExploreLineageOperation.mutation,
+                generation: 2,
+                parentCandidateIds: ['cand-1', 'cand-x'],
+              ),
+            ),
+          ],
+          rounds: [
+            ExploreRound(
+              id: 'r-1',
+              number: 1,
+              phase: ExploreRoundPhase.basic,
+              status: ExploreRoundStatus.generated,
+              createdAt: DateTime.utc(2026, 9, 1),
+              targetCount: 2,
+              candidateIds: const ['cand-1', 'cand-2'],
+            ),
+            ExploreRound(
+              id: 'r-2',
+              number: 2,
+              phase: ExploreRoundPhase.deep,
+              status: ExploreRoundStatus.generated,
+              createdAt: DateTime.utc(2026, 9, 1),
+              targetCount: 1,
+              candidateIds: const ['cand-3'],
+            ),
+          ],
+        ),
+      );
+
+      await notifier.removeCandidates(run.id, ['cand-1', 'cand-2']);
+      final stored = (await c.read(
+        exploreRunListNotifierProvider.future,
+      )).runById(run.id)!;
+
+      expect(
+        stored.candidates.map((candidate) => candidate.id),
+        ['cand-3'],
+      );
+      expect(
+        stored.rounds.firstWhere((round) => round.id == 'r-1').candidateIds,
+        isEmpty,
+      );
+      expect(
+        stored.rounds.firstWhere((round) => round.id == 'r-2').candidateIds,
+        ['cand-3'],
+      );
+      // 血缘引用只清已删项，外部悬空引用（cand-x）原样保留。
+      expect(
+        stored.candidateById('cand-3')!.lineage.parentCandidateIds,
+        ['cand-x'],
+      );
+    });
+
+    test('rejects empty ids and missing candidates', () async {
+      final c = container();
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final run = await createRun(c);
+      expect(
+        () => notifier.removeCandidates(run.id, const []),
+        throwsStateError,
+      );
+      expect(
+        () => notifier.removeCandidates(run.id, const ['ghost']),
+        throwsStateError,
+      );
+    });
+  });
+
   group('legacy reviewing status', () {
     test('decodes and normalizes to generated on storage read', () async {
       final c = container();

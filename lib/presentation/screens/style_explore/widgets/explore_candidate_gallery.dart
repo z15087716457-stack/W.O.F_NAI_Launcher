@@ -524,9 +524,9 @@ class _ExploreCandidateGalleryState
     if (created && mounted) _exitSelection();
   }
 
-  /// 多选批量删图（FEAT-56）：一次确认 → 逐张删副本文件 + 清 filePath
-  /// （候选记录保留），与 FEAT-42 管理弹窗 `_deleteSelected` 同链路；
-  /// 无副本项不参与（确认框计数只含有副本张数），成功后退出多选。
+  /// 多选批量删图（FEAT-56，FEAT-55 拍板 = 连记录删）：一次确认 → 逐张
+  /// 删副本文件 + 移除候选记录，与 FEAT-42 管理弹窗 `_deleteSelected`
+  /// 同链路；无副本项不参与（确认框计数只含有副本张数），成功后退出多选。
   Future<void> _deleteSelected(ExploreRun run) async {
     final targets = [
       for (final candidate in run.candidates)
@@ -549,15 +549,16 @@ class _ExploreCandidateGalleryState
     try {
       final store = ref.read(exploreRunImageStoreProvider);
       final notifier = ref.read(exploreRunListNotifierProvider.notifier);
+      // FEAT-55 拍板 = 连记录删：副本删成功的候选整条记录移除。
+      final deletedIds = <String>[];
       for (final candidate in targets) {
         final filePath = candidate.generation.filePath!;
         if (!await store.deleteCandidateImage(filePath)) continue;
-        await notifier.updateGeneration(
-          run.id,
-          candidate.id,
-          candidate.generation.copyWith(filePath: null),
-        );
+        deletedIds.add(candidate.id);
         deleted++;
+      }
+      if (deletedIds.isNotEmpty) {
+        await notifier.removeCandidates(run.id, deletedIds);
       }
       if (mounted) {
         AppToast.success(
