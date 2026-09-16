@@ -383,6 +383,35 @@ void main() {
       find.byKey(const Key('style-explore-run-sidebar-toggle')),
       findsOneWidget,
     );
+    // FEAT-54：指南针方块化 = 与「预览」同款 OutlinedButton.icon、
+    // 图标+「探索任务」文字，激活态（侧栏默认开）填主题主色。
+    expect(
+      tester.widget(
+        find.byKey(const Key('style-explore-run-sidebar-toggle')),
+      ),
+      isA<OutlinedButton>(),
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('style-explore-run-sidebar-toggle')),
+        matching: find.text('探索任务'),
+      ),
+      findsOneWidget,
+    );
+    final toggleElement = tester.element(
+      find.byKey(const Key('style-explore-run-sidebar-toggle')),
+    );
+    expect(
+      tester
+          .widget<OutlinedButton>(
+            find.byKey(const Key('style-explore-run-sidebar-toggle')),
+          )
+          .style!
+          .backgroundColor!
+          .resolve(const <WidgetState>{}),
+      Theme.of(toggleElement).colorScheme.primary,
+      reason: '激活态底 = colorScheme.primary',
+    );
     expect(find.byKey(const Key('style-explore-preview')), findsOneWidget);
     expect(
       find.byKey(const Key('style-explore-gallery-toggle')),

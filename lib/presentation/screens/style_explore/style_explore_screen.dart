@@ -197,6 +197,8 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
   }
 
   /// 探索任务侧栏开关（首次访问默认展开，用户切换后按存值恢复）。
+  /// FEAT-54 形制统一：图标+文字长方块（与「预览」同形制同高），
+  /// 激活态填主题主色（静当前主题 = 红）。
   Widget _buildRunSidebarToggle(
     ThemeData theme,
     bool runSidebarVisible,
@@ -205,20 +207,18 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
     return Tooltip(
       message: context.l10n.styleExplore_runSectionTitle,
       waitDuration: const Duration(milliseconds: 300),
-      child: IconButton(
+      child: OutlinedButton.icon(
         key: const Key('style-explore-run-sidebar-toggle'),
-        iconSize: 18,
-        visualDensity: VisualDensity.compact,
-        style: IconButton.styleFrom(
-          backgroundColor: runSidebarVisible
-              ? theme.colorScheme.primaryContainer
-              : Colors.transparent,
-          foregroundColor: runSidebarVisible
-              ? theme.colorScheme.onPrimaryContainer
-              : theme.colorScheme.onSurfaceVariant,
-        ),
+        style: runSidebarVisible
+            ? OutlinedButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+                side: BorderSide(color: theme.colorScheme.primary),
+              )
+            : null,
         onPressed: () => _toggleRunSidebar(layoutState),
-        icon: const Icon(Icons.explore),
+        icon: const Icon(Icons.explore, size: 18),
+        label: Text(context.l10n.styleExplore_runSectionTitle),
       ),
     );
   }
