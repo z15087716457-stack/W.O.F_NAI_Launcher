@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../data/models/character/character_prompt.dart' as char;
-import '../../data/models/fixed_tag/fixed_tag_entry.dart';
-import '../../data/models/fixed_tag/fixed_tag_prompt_type.dart';
+
 import '../../data/models/gallery/nai_image_metadata.dart';
 import '../../data/models/metadata/metadata_import_options.dart';
 import '../../l10n/app_localizations.dart';
 import '../providers/character_prompt_provider.dart';
-import '../providers/fixed_tags_provider.dart';
 import '../providers/image_generation_provider.dart';
 import 'metadata_import_applier.dart';
 import 'prompt_preset_import_utils.dart';
@@ -41,7 +39,6 @@ class MetadataImportCoordinator {
     }
 
     appliedCount += _applyReferenceParams(read, metadata, options);
-    appliedCount += await _applyFixedTags(read, metadata, options, l10n);
 
     return appliedCount;
   }
@@ -58,9 +55,6 @@ class MetadataImportCoordinator {
     final generationOptions = MetadataImportOptions(
       importPrompt: false,
       importNegativePrompt: false,
-      importFixedTags: false,
-      importFixedPrefix: false,
-      importFixedSuffix: false,
       importQualityTags: false,
       importCharacterPrompts: false,
       importVibeReferences: false,
@@ -99,7 +93,6 @@ class MetadataImportCoordinator {
     if (selection.importPrompt) {
       notifier.updatePrompt(metadata.prompt);
       if (metadata.prompt.isNotEmpty) appliedCount++;
-      await read(fixedTagsNotifierProvider.notifier).clearAll();
     }
     if (selection.importNegativePrompt) {
       // Keep the existing UC preset resolver, while allowing an empty source
@@ -213,74 +206,6 @@ class MetadataImportCoordinator {
         ],
       ),
     );
-  }
-
-  static Future<int> _applyFixedTags(
-    ProviderReader read,
-    NaiImageMetadata metadata,
-    MetadataImportOptions options,
-    AppLocalizations l10n,
-  ) async {
-    if (!options.importFixedTags) {
-      return 0;
-    }
-
-    final fixedTagsNotifier = read(fixedTagsNotifierProvider.notifier);
-    var added = 0;
-
-    Future<void> addTags(
-      List<String> tags, {
-      required FixedTagPosition position,
-      required FixedTagPromptType promptType,
-      required String Function(String content) buildName,
-    }) async {
-      for (final tag in tags) {
-        final content = tag.trim();
-        if (content.isEmpty) {
-          continue;
-        }
-        await fixedTagsNotifier.addEntry(
-          name: buildName(content),
-          content: content,
-          position: position,
-          promptType: promptType,
-          enabled: true,
-        );
-        added++;
-      }
-    }
-
-    if (options.importFixedPrefix) {
-      await addTags(
-        metadata.fixedPrefixTags,
-        position: FixedTagPosition.prefix,
-        promptType: FixedTagPromptType.positive,
-        buildName: l10n.metadataImport_fixedPrefix,
-      );
-      await addTags(
-        metadata.fixedNegativePrefixTags,
-        position: FixedTagPosition.prefix,
-        promptType: FixedTagPromptType.negative,
-        buildName: l10n.metadataImport_negativeFixedPrefix,
-      );
-    }
-
-    if (options.importFixedSuffix) {
-      await addTags(
-        metadata.fixedSuffixTags,
-        position: FixedTagPosition.suffix,
-        promptType: FixedTagPromptType.positive,
-        buildName: l10n.metadataImport_fixedSuffix,
-      );
-      await addTags(
-        metadata.fixedNegativeSuffixTags,
-        position: FixedTagPosition.suffix,
-        promptType: FixedTagPromptType.negative,
-        buildName: l10n.metadataImport_negativeFixedSuffix,
-      );
-    }
-
-    return added > 0 ? 1 : 0;
   }
 
   static List<char.CharacterPrompt> _buildCharacterPrompts(
@@ -474,22 +399,6 @@ class MetadataImportCoordinator {
         options.importNegativePrompt && negativePrompt.isNotEmpty,
         l10n.metadataImport_negativePrompt,
         negativePrompt,
-        2,
-      ),
-      (
-        options.importFixedTags &&
-            (options.importFixedPrefix || options.importFixedSuffix) &&
-            (metadata.fixedPrefixTags.isNotEmpty ||
-                metadata.fixedSuffixTags.isNotEmpty ||
-                metadata.fixedNegativePrefixTags.isNotEmpty ||
-                metadata.fixedNegativeSuffixTags.isNotEmpty),
-        l10n.metadataImport_fixedTags,
-        [
-          if (options.importFixedPrefix) ...metadata.fixedPrefixTags,
-          if (options.importFixedSuffix) ...metadata.fixedSuffixTags,
-          if (options.importFixedPrefix) ...metadata.fixedNegativePrefixTags,
-          if (options.importFixedSuffix) ...metadata.fixedNegativeSuffixTags,
-        ].join(', '),
         2,
       ),
       (

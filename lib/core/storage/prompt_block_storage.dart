@@ -20,6 +20,8 @@ class PromptBlockStorage {
 
   static const String _blockPrefix = 'block:';
   static const String _folderPrefix = 'folder:';
+  static const String _metaPrefix = 'meta:';
+  static const String _paletteKey = 'palette:order';
 
   PromptBlockStorage({String? hivePath}) : _hivePath = hivePath;
 
@@ -227,6 +229,47 @@ class PromptBlockStorage {
     final box = await _getBox();
     await box.clear();
     await _writeSchema(box);
+  }
+
+  /// 读取颜料版块 ID 列表（用户排序序）。
+  Future<List<String>> getPaletteBlockIds() async {
+    final box = await _getBox();
+    final raw = box.get(_paletteKey);
+    if (raw is! String || raw.isEmpty) return const [];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map && decoded['blockIds'] is List) {
+        return (decoded['blockIds'] as List).whereType<String>().toList();
+      }
+    } catch (_) {
+      // 损坏记录按空板处理，下次写入自愈。
+    }
+    return const [];
+  }
+
+  /// 覆盖写入颜料版块 ID 列表。
+  Future<void> putPaletteBlockIds(List<String> ids) async {
+    final box = await _getBox();
+    await box.put(
+      _paletteKey,
+      jsonEncode({
+        'blockIds': ids,
+        'updatedAt': DateTime.now().toIso8601String(),
+      }),
+    );
+  }
+
+  /// 读取块库级 meta 键（迁移标记等一次性旗标）。
+  Future<String?> getMeta(String name) async {
+    final box = await _getBox();
+    final raw = box.get('$_metaPrefix$name');
+    return raw is String ? raw : null;
+  }
+
+  /// 写入块库级 meta 键。
+  Future<void> putMeta(String name, String value) async {
+    final box = await _getBox();
+    await box.put('$_metaPrefix$name', value);
   }
 
   /// 关闭本存储使用的 Box。

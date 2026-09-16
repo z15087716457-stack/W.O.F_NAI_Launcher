@@ -274,14 +274,9 @@ void main() {
             ),
           );
           expect(sent.last['type'], 'result');
-          expect(
-            captured!.prompt,
-            '1.4::ralada747372 ::, girl, blue dress, red dress, blue hair',
-          );
-          expect(
-            captured!.negativePrompt,
-            '1.3::bad hands::, low quality, lowres',
-          );
+          // 固定词系统已退役：请求 prompt 不再拼接固定词前/后缀。
+          expect(captured!.prompt, 'girl, blue dress');
+          expect(captured!.negativePrompt, 'low quality, lowres');
           expect(captured!.qualityToggle, isFalse);
           expect(captured!.ucPreset, 2);
           if (clearCharacters) {

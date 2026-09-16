@@ -1023,12 +1023,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get kritaBridge_busyGenerating => 'Krita Bridge 正在生成，请等待当前任务结束';
 
   @override
-  String get prompt_negativeFixedTagPrefix => '负向固定词前缀';
-
-  @override
-  String get prompt_negativeFixedTagSuffix => '负向固定词后缀';
-
-  @override
   String get prompt_unwantedContent => '不想出现在图像中的内容...';
 
   @override
@@ -4797,284 +4791,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get statistics_saturday => '周六';
 
   @override
-  String get fixedTags_label => '固定词';
-
-  @override
-  String get fixedTags_enabled => '已启用';
-
-  @override
-  String get fixedTags_empty => '暂无固定词';
-
-  @override
-  String get fixedTags_emptyHint => '点击下方按钮添加固定词，它们会自动应用到你的提示词中';
-
-  @override
-  String get fixedTags_manage => '管理固定词';
-
-  @override
-  String get fixedTags_add => '添加';
-
-  @override
-  String get fixedTags_edit => '编辑固定词';
-
-  @override
-  String get fixedTags_openLibrary => '打开词库';
-
-  @override
-  String get fixedTags_prefix => '前缀';
-
-  @override
-  String get fixedTags_suffix => '后缀';
-
-  @override
-  String get fixedTags_disabled => '已禁用';
-
-  @override
-  String get fixedTags_weight => '权重';
-
-  @override
-  String get fixedTags_position => '位置';
-
-  @override
-  String get fixedTags_name => '名称';
-
-  @override
-  String get fixedTags_nameHint => '输入备注名称（可选）';
-
-  @override
-  String get fixedTags_content => '内容';
-
-  @override
-  String get fixedTags_contentHint => '输入提示词内容，支持 NAI 语法';
-
-  @override
   String get fixedTags_syntaxHelp => '支持 NAI 语法增强/减弱权重、标签交替等';
 
   @override
-  String get fixedTags_linkedFromLibrary => '关联自词库（双向同步）';
-
-  @override
-  String get fixedTags_scope => '作用范围';
-
-  @override
-  String get fixedTags_positive => '正向';
-
-  @override
-  String get fixedTags_negative => '负向';
-
-  @override
-  String get fixedTags_resetWeight => '重置为 1.0';
-
-  @override
-  String get fixedTags_weightPreview => '权重预览:';
-
-  @override
-  String get fixedTags_deleteTitle => '删除固定词';
-
-  @override
-  String fixedTags_deleteConfirm(Object name) {
-    return '确定要删除固定词 \"$name\" 吗？';
-  }
-
-  @override
-  String fixedTags_enabledCount(Object enabled, Object total) {
-    return '$enabled/$total 已启用';
-  }
-
-  @override
-  String get fixedTags_saveToLibrary => '同时保存到词库';
-
-  @override
-  String get fixedTags_saveToLibraryHint => '方便日后在词库中重复使用';
-
-  @override
-  String get fixedTags_saveToCategory => '保存到类别';
-
-  @override
-  String get fixedTags_clearAll => '清空';
-
-  @override
-  String get fixedTags_clearAllTitle => '清空所有固定词';
-
-  @override
-  String fixedTags_clearAllConfirm(Object count) {
-    return '确定要清空所有 $count 个固定词吗？此操作不可撤销。';
-  }
-
-  @override
-  String get fixedTags_clearedSuccess => '已清空所有固定词';
-
-  @override
-  String get fixedTags_sidebarTitle => '固定词侧栏';
-
-  @override
-  String get fixedTags_switchGridView => '切换网格视图';
-
-  @override
-  String get fixedTags_switchListView => '切换列表视图';
-
-  @override
-  String get fixedTags_addPositive => '新增正向固定词';
-
-  @override
-  String get fixedTags_addNegative => '新增负向固定词';
-
-  @override
-  String get fixedTags_addPositiveFromLibrary => '从词库添加正向';
-
-  @override
-  String get fixedTags_addNegativeFromLibrary => '从词库添加负向';
-
-  @override
-  String get fixedTags_searchNameOrContent => '搜索名称或内容';
-
-  @override
-  String get fixedTags_clearSearch => '清空搜索';
-
-  @override
-  String get fixedTags_enabledPositive => '已启用正向';
-
-  @override
-  String get fixedTags_emptyEnabledPositive => '暂无启用的正向固定词';
-
-  @override
-  String get fixedTags_noMatchingEnabled => '没有匹配的启用固定词';
-
-  @override
   String get fixedTags_negativeTitle => '负向固定词';
-
-  @override
-  String get fixedTags_emptyNegative => '暂无负向固定词';
-
-  @override
-  String get fixedTags_noMatchingNegative => '没有匹配的负向固定词';
-
-  @override
-  String get fixedTags_addedToSidebar => '已添加到固定词侧栏';
-
-  @override
-  String get fixedTags_unknownCategory => '未知分类';
-
-  @override
-  String get fixedTags_uncategorized => '未分类';
-
-  @override
-  String get fixedTags_clickManageLongPressSidebar => '点击管理，长按打开侧栏';
-
-  @override
-  String get fixedTags_clickManageLongPressCompact => '点击管理，长按侧栏';
-
-  @override
-  String get fixedTags_linked => '联动';
-
-  @override
-  String fixedTags_linkCount(Object count) {
-    return '$count 个联动';
-  }
-
-  @override
-  String get fixedTags_expandNegative => '展开负向';
-
-  @override
-  String get fixedTags_collapseNegative => '收起负向';
-
-  @override
-  String get fixedTags_undoTooltip => '撤销固定词操作';
-
-  @override
-  String get fixedTags_redoTooltip => '重做固定词操作';
-
-  @override
-  String get fixedTags_positiveTitle => '正向固定词';
-
-  @override
-  String fixedTags_columnCount(Object enabled, Object total) {
-    return '$enabled/$total';
-  }
-
-  @override
-  String fixedTags_columnFilteredCount(
-    Object enabled,
-    Object total,
-    Object shown,
-  ) {
-    return '$enabled/$total · 显示 $shown';
-  }
-
-  @override
-  String get fixedTags_new => '新建';
-
-  @override
-  String fixedTags_newTarget(Object target) {
-    return '新建$target';
-  }
-
-  @override
-  String get fixedTags_library => '词库';
-
-  @override
-  String fixedTags_addFromLibraryToTarget(Object target) {
-    return '从词库添加到$target';
-  }
-
-  @override
-  String get fixedTags_enableAll => '全开';
-
-  @override
-  String get fixedTags_disableAll => '全关';
-
-  @override
-  String fixedTags_searchTarget(Object target) {
-    return '搜索 $target...';
-  }
-
-  @override
-  String get fixedTags_noMatching => '无匹配固定词';
-
-  @override
-  String fixedTags_emptyTarget(Object target) {
-    return '暂无$target';
-  }
-
-  @override
-  String get fixedTags_dragToLink => '拖拽创建联动';
-
-  @override
-  String fixedTags_linkedToNames(Object names) {
-    return '已联动：$names';
-  }
-
-  @override
-  String get fixedTags_linkInstruction => '拖拽正向固定词的关联图标到负向固定词即可创建联动';
-
-  @override
-  String get fixedTags_manageLinks => '管理联动';
-
-  @override
-  String fixedTags_removeLink(Object name) {
-    return '取消联动：$name';
-  }
-
-  @override
-  String get fixedTags_footerExpandedHint => '在各列顶部新建或从词库添加';
-
-  @override
-  String get fixedTags_newPositive => '新建正向';
-
-  @override
-  String get fixedTags_addPositiveFromLibraryShort => '词库添加正向';
-
-  @override
-  String get fixedTags_libraryEmpty => '词库为空，请先添加条目';
-
-  @override
-  String get fixedTags_addFromLibrary => '从词库添加';
-
-  @override
-  String get fixedTags_searchLibraryEntries => '搜索词库条目...';
-
-  @override
-  String get fixedTags_noMatchingResults => '无匹配结果';
 
   @override
   String get reversePrompt_title => '反推';
@@ -5479,9 +5199,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptToken_prompt => '提示词';
 
   @override
-  String get promptToken_fixedTags => '固定词';
-
-  @override
   String get promptToken_qualityPreset => '质量预设';
 
   @override
@@ -5489,9 +5206,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptToken_negativePrompt => '负面提示词';
-
-  @override
-  String get promptToken_negativeFixedTags => '负面固定词';
 
   @override
   String get promptToken_negativePreset => '负面预设';
@@ -5812,9 +5526,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tagLibraryPicker_allCategories => '全部分类';
 
   @override
-  String get tagLibrary_addedToFixed => '已添加到固定词';
-
-  @override
   String get tagLibrary_entryMoved => '条目已移动到目标分类';
 
   @override
@@ -6040,12 +5751,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sendToHome_appendCharacterSubtitle => '保留现有角色，追加新角色';
 
   @override
-  String get sendToHome_fixedTags => '发送到固定词';
-
-  @override
-  String get sendToHome_fixedTagsSubtitle => '追加到固定词列表';
-
-  @override
   String get sendToHome_sendAsAlias => '作为别名发送';
 
   @override
@@ -6110,26 +5815,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get metadataImport_fixedTags => '固定词';
-
-  @override
-  String metadataImport_fixedPrefix(Object text) {
-    return '前缀: $text';
-  }
-
-  @override
-  String metadataImport_fixedSuffix(Object text) {
-    return '后缀: $text';
-  }
-
-  @override
-  String metadataImport_negativeFixedPrefix(Object text) {
-    return '负向前缀: $text';
-  }
-
-  @override
-  String metadataImport_negativeFixedSuffix(Object text) {
-    return '负向后缀: $text';
-  }
 
   @override
   String metadataImport_qualityTagsCount(int count) {
@@ -8711,9 +8396,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get toast_smartDecomposeSent => '已智能分解并发送';
 
   @override
-  String get toast_addedToFixedTags => '已添加到固定词';
-
-  @override
   String get toast_renameNameRequired => '名称不能为空';
 
   @override
@@ -9438,12 +9120,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get common_swap => '交换';
-
-  @override
-  String get common_prefix => '前缀';
-
-  @override
-  String get common_suffix => '后缀';
 
   @override
   String get common_minimum => '最小值';
@@ -10259,6 +9935,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_waterfallView => '瀑布流视图';
+
+  @override
+  String get promptBlockPalette_tooltip => '颜料版';
+
+  @override
+  String get promptBlockPalette_emptyHint =>
+      '把常用的块拖进来收纳；用的时候点一下插到光标处，或直接拖进提示词框';
+
+  @override
+  String get promptBlockPalette_remove => '从颜料版移除';
 
   @override
   String get promptBlockLibrary_sortBy => '排序方式';

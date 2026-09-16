@@ -2,12 +2,14 @@ import 'package:collection/collection.dart';
 import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../core/storage/local_storage_service.dart';
 import '../../core/storage/prompt_block_storage.dart';
 import '../../core/utils/prompt_block_exchange.dart';
 import '../../core/utils/prompt_block_thumbnails.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
 import '../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../data/repositories/prompt_block_repository.dart';
+import '../../data/services/fixed_tag_migration_service.dart';
 
 part 'prompt_block_library_provider.g.dart';
 
@@ -97,6 +99,11 @@ final promptBlockRepositoryProvider = Provider<PromptBlockRepository>(
 class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
   @override
   Future<PromptBlockLibraryState> build() async {
+    // 旧固定词 → 块库/颜料版的一次性迁移（幂等，meta 旗标短路）。
+    await FixedTagMigrationService(
+      blockStorage: ref.watch(promptBlockStorageProvider),
+      localStorage: ref.watch(localStorageServiceProvider),
+    ).run();
     final data = await ref.watch(promptBlockRepositoryProvider).load();
     return PromptBlockLibraryState(blocks: data.blocks, folders: data.folders);
   }
@@ -194,7 +201,8 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
     if (blockIds.isEmpty) return;
     final repository = ref.read(promptBlockRepositoryProvider);
     final thumbnails = {
-      for (final id in blockIds) ?state.valueOrNull?.blockById(id)?.thumbnail,
+      for (final id in blockIds)
+        if (state.valueOrNull?.blockById(id)?.thumbnail case final path?) path,
     };
     try {
       for (final blockId in blockIds) {
@@ -284,7 +292,7 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
             for (final block
                 in state.valueOrNull?.blocksInFolderTree(folderId) ??
                     const <PromptBlock>[])
-              ?block.thumbnail,
+              if (block.thumbnail case final path?) path,
           }
         : const <String>{};
     await _mutate(

@@ -10,7 +10,6 @@ import '../../data/models/character/character_prompt.dart' as ui_character;
 import '../../data/models/prompt/prompt_preset_mode.dart';
 import '../../data/services/alias_resolver_service.dart';
 import 'character_prompt_provider.dart';
-import 'fixed_tags_provider.dart';
 import 'generation/generation_params_notifier.dart';
 import 'quality_preset_provider.dart';
 import 'uc_preset_provider.dart';
@@ -60,7 +59,6 @@ final promptTokenUsageProvider =
         ),
       );
       final characterConfig = ref.watch(characterPromptNotifierProvider);
-      final fixedTagsState = ref.watch(fixedTagsNotifierProvider);
       final qualityPresetState = ref.watch(qualityPresetNotifierProvider);
       final ucPresetState = ref.watch(ucPresetNotifierProvider);
       final currentQualityEntry = ref.watch(currentQualityEntryProvider);
@@ -90,7 +88,6 @@ final promptTokenUsageProvider =
         prompt: promptState.prompt,
         negativePrompt: promptState.negativePrompt,
         model: promptState.model,
-        fixedTagsState: fixedTagsState,
         qualityToggle: qualityPresetState.usesNativePreset,
         qualityTagPreset: qualityPresetState.nativePreset,
         transparentBackground: promptState.transparentBackground,
@@ -134,7 +131,6 @@ PromptTokenCountPayload buildPromptTokenCountPayload({
   required String prompt,
   required String negativePrompt,
   required String model,
-  required FixedTagsState fixedTagsState,
   required bool qualityToggle,
   QualityTagPreset qualityTagPreset = QualityTagPreset.standard,
   required int ucPreset,
@@ -152,7 +148,6 @@ PromptTokenCountPayload buildPromptTokenCountPayload({
       prompt: prompt,
       negativePrompt: negativePrompt,
       model: model,
-      fixedTagsState: fixedTagsState,
       qualityToggle: qualityToggle,
       qualityTagPreset: qualityTagPreset,
       ucPreset: ucPreset,
@@ -169,7 +164,6 @@ PromptTokenCountPayload buildPromptTokenCountPayload({
       prompt: prompt,
       negativePrompt: negativePrompt,
       model: model,
-      fixedTagsState: fixedTagsState,
       qualityToggle: qualityToggle,
       qualityTagPreset: qualityTagPreset,
       ucPreset: ucPreset,
@@ -189,7 +183,6 @@ PromptTokenCountPayload _buildPositiveTokenCountPayload({
   required String prompt,
   required String negativePrompt,
   required String model,
-  required FixedTagsState fixedTagsState,
   required bool qualityToggle,
   required QualityTagPreset qualityTagPreset,
   required int ucPreset,
@@ -204,9 +197,6 @@ PromptTokenCountPayload _buildPositiveTokenCountPayload({
 }) {
   final resolvedPrompt = resolveAliases(prompt).trim();
   final resolvedNegativePrompt = resolveAliases(negativePrompt).trim();
-  final promptWithFixedTags = fixedTagsState
-      .applyToPrompt(resolvedPrompt)
-      .trim();
   final resolvedQualityMode =
       qualityMode ??
       _qualityModeFromLegacyFields(qualityToggle, qualityTagPreset);
@@ -218,7 +208,7 @@ PromptTokenCountPayload _buildPositiveTokenCountPayload({
       ucPresetContent ??
       UcPresets.getPresetContent(model, resolvedUcPresetType);
   final presetResolution = resolvePromptPresetSettings(
-    prompt: promptWithFixedTags,
+    prompt: resolvedPrompt,
     negativePrompt: resolvedNegativePrompt,
     qualityMode: resolvedQualityMode,
     qualityContent: resolvedQualityContent,
@@ -248,14 +238,6 @@ PromptTokenCountPayload _buildPositiveTokenCountPayload({
       .whereType<String>()
       .where((text) => text.isNotEmpty)
       .toList(growable: false);
-  final fixedTagTexts = [
-    ...fixedTagsState.enabledPrefixes
-        .map((entry) => entry.weightedContent.trim())
-        .where((text) => text.isNotEmpty),
-    ...fixedTagsState.enabledSuffixes
-        .map((entry) => entry.weightedContent.trim())
-        .where((text) => text.isNotEmpty),
-  ];
   final qualityTags = _qualityPresetContent(
     model,
     resolvedQualityMode,
@@ -267,7 +249,6 @@ PromptTokenCountPayload _buildPositiveTokenCountPayload({
     extraTexts: extraTexts,
     breakdown: [
       PromptTokenCountBreakdownGroup(label: '提示词', texts: [resolvedPrompt]),
-      PromptTokenCountBreakdownGroup(label: '固定词', texts: fixedTagTexts),
       PromptTokenCountBreakdownGroup(label: '质量预设', texts: [qualityTags]),
       PromptTokenCountBreakdownGroup(label: '角色', texts: extraTexts),
     ],
@@ -278,7 +259,6 @@ PromptTokenCountPayload _buildNegativeTokenCountPayload({
   required String prompt,
   required String negativePrompt,
   required String model,
-  required FixedTagsState fixedTagsState,
   required bool qualityToggle,
   required QualityTagPreset qualityTagPreset,
   required int ucPreset,
@@ -293,12 +273,6 @@ PromptTokenCountPayload _buildNegativeTokenCountPayload({
 }) {
   final resolvedPrompt = resolveAliases(prompt).trim();
   final resolvedNegativePrompt = resolveAliases(negativePrompt).trim();
-  final promptWithFixedTags = fixedTagsState
-      .applyToPrompt(resolvedPrompt)
-      .trim();
-  final negativePromptWithFixedTags = fixedTagsState
-      .applyToNegativePrompt(resolvedNegativePrompt)
-      .trim();
   final resolvedQualityMode =
       qualityMode ??
       _qualityModeFromLegacyFields(qualityToggle, qualityTagPreset);
@@ -310,8 +284,8 @@ PromptTokenCountPayload _buildNegativeTokenCountPayload({
       ucPresetContent ??
       UcPresets.getPresetContent(model, resolvedUcPresetType);
   final presetResolution = resolvePromptPresetSettings(
-    prompt: promptWithFixedTags,
-    negativePrompt: negativePromptWithFixedTags,
+    prompt: resolvedPrompt,
+    negativePrompt: resolvedNegativePrompt,
     qualityMode: resolvedQualityMode,
     qualityContent: resolvedQualityContent,
     ucPresetType: resolvedUcPresetType,
@@ -333,14 +307,6 @@ PromptTokenCountPayload _buildNegativeTokenCountPayload({
       .map((character) => resolveAliases(character.negativePrompt).trim())
       .where((text) => text.isNotEmpty)
       .toList(growable: false);
-  final negativeFixedTagTexts = [
-    ...fixedTagsState.negativeEnabledPrefixes
-        .map((entry) => entry.weightedContent.trim())
-        .where((text) => text.isNotEmpty),
-    ...fixedTagsState.negativeEnabledSuffixes
-        .map((entry) => entry.weightedContent.trim())
-        .where((text) => text.isNotEmpty),
-  ];
 
   return PromptTokenCountPayload(
     mainText: promptSemantics.effectiveNegativePrompt,
@@ -349,10 +315,6 @@ PromptTokenCountPayload _buildNegativeTokenCountPayload({
       PromptTokenCountBreakdownGroup(
         label: '负面提示词',
         texts: [resolvedNegativePrompt],
-      ),
-      PromptTokenCountBreakdownGroup(
-        label: '负面固定词',
-        texts: negativeFixedTagTexts,
       ),
       PromptTokenCountBreakdownGroup(
         label: '负面预设',

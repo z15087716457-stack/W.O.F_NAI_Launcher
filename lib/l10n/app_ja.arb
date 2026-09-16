@@ -474,8 +474,6 @@
   "promptAssistant_enableAssistant": "Prompt Assistant を有効にする",
   "promptAssistant_desktopOverlay": "デスクトップ右下のオーバーレイ",
   "kritaBridge_busyGenerating": "Krita Bridge で生成中です。現在のタスクが完了するまで待ってください。",
-  "prompt_negativeFixedTagPrefix": "除外したい要素固定タグプレフィックス",
-  "prompt_negativeFixedTagSuffix": "除外したい要素固定タグサフィックス",
   "prompt_unwantedContent": "画像に含めたくないコンテンツ...",
   "prompt_smartAutocomplete": "スマート オートコンプリート",
   "prompt_smartAutocompleteSubtitle": "入力中にタグの候補を表示します",
@@ -2540,154 +2538,8 @@
   "statistics_thursday": "木",
   "statistics_friday": "金",
   "statistics_saturday": "土",
-  "fixedTags_label": "固定タグ",
-  "fixedTags_enabled": "有効",
-  "fixedTags_empty": "固定タグなし",
-  "fixedTags_emptyHint": "下のボタンをクリックして固定タグを追加すると、プロンプトに自動的に適用されます",
-  "fixedTags_manage": "固定タグの管理",
-  "fixedTags_add": "追加",
-  "fixedTags_edit": "固定タグの編集",
-  "fixedTags_openLibrary": "ライブラリを開く",
-  "fixedTags_prefix": "プレフィックス",
-  "fixedTags_suffix": "サフィックス",
-  "fixedTags_disabled": "無効",
-  "fixedTags_weight": "ウェイト",
-  "fixedTags_position": "位置",
-  "fixedTags_name": "名前",
-  "fixedTags_nameHint": "表示名を入力してください (オプション)",
-  "fixedTags_content": "コンテンツ",
-  "fixedTags_contentHint": "プロンプトの内容を入力してください。NAI 構文がサポートされています",
   "fixedTags_syntaxHelp": "重みの強化/削減およびタグの代替のための NAI 構文をサポートします",
-  "fixedTags_linkedFromLibrary": "ライブラリからリンクされました (双方向同期)",
-  "fixedTags_scope": "範囲",
-  "fixedTags_positive": "プロンプト",
-  "fixedTags_negative": "除外したい要素",
-  "fixedTags_resetWeight": "1.0 にリセット",
-  "fixedTags_weightPreview": "ウェイトプレビュー:",
-  "fixedTags_deleteTitle": "固定タグを削除",
-  "fixedTags_deleteConfirm": "「{name}」を削除してもよろしいですか?",
-  "@fixedTags_deleteConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "fixedTags_enabledCount": "{enabled}/{total} が有効になりました",
-  "@fixedTags_enabledCount": {
-    "placeholders": {
-      "enabled": {},
-      "total": {}
-    }
-  },
-  "fixedTags_saveToLibrary": "ライブラリにも保存します",
-  "fixedTags_saveToLibraryHint": "後でタグ ライブラリで再利用するため",
-  "fixedTags_saveToCategory": "カテゴリに保存",
-  "fixedTags_clearAll": "すべてクリア",
-  "fixedTags_clearAllTitle": "すべての固定タグをクリア",
-  "fixedTags_clearAllConfirm": "すべての {count} 固定タグをクリアしてもよろしいですか?この操作は元に戻すことができません。",
-  "@fixedTags_clearAllConfirm": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "fixedTags_clearedSuccess": "すべての固定タグがクリアされました",
-  "fixedTags_sidebarTitle": "固定タグサイドバー",
-  "fixedTags_switchGridView": "グリッド ビューに切り替える",
-  "fixedTags_switchListView": "リストビューに切り替える",
-  "fixedTags_addPositive": "プロンプト固定タグを追加",
-  "fixedTags_addNegative": "除外したい要素固定タグを追加",
-  "fixedTags_addPositiveFromLibrary": "ライブラリからプロンプト固定タグを追加",
-  "fixedTags_addNegativeFromLibrary": "ライブラリから除外したい要素固定タグを追加",
-  "fixedTags_searchNameOrContent": "名前または内容を検索します",
-  "fixedTags_clearSearch": "検索をクリア",
-  "fixedTags_enabledPositive": "有効なプロンプト",
-  "fixedTags_emptyEnabledPositive": "有効なプロンプト固定タグがありません",
-  "fixedTags_noMatchingEnabled": "一致する有効な固定タグがありません",
   "fixedTags_negativeTitle": "除外したい要素固定タグ",
-  "fixedTags_emptyNegative": "除外したい要素固定タグはありません",
-  "fixedTags_noMatchingNegative": "一致する除外したい要素固定タグがありません",
-  "fixedTags_addedToSidebar": "固定タグのサイドバーに追加されました",
-  "fixedTags_unknownCategory": "不明なカテゴリ",
-  "fixedTags_uncategorized": "未分類",
-  "fixedTags_clickManageLongPressSidebar": "クリックして管理し、長押ししてサイドバーを開きます",
-  "fixedTags_clickManageLongPressCompact": "クリックしてサイドバーを長押しして管理します",
-  "fixedTags_linked": "リンクされました",
-  "fixedTags_linkCount": "{count} リンクされました",
-  "@fixedTags_linkCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "fixedTags_expandNegative": "除外したい要素を展開",
-  "fixedTags_collapseNegative": "除外したい要素を折りたたむ",
-  "fixedTags_undoTooltip": "固定タグ操作を元に戻す",
-  "fixedTags_redoTooltip": "固定タグ操作をやり直す",
-  "fixedTags_positiveTitle": "プロンプト固定タグ",
-  "fixedTags_columnCount": "{enabled}/{total}",
-  "@fixedTags_columnCount": {
-    "placeholders": {
-      "enabled": {},
-      "total": {}
-    }
-  },
-  "fixedTags_columnFilteredCount": "{enabled}/{total} · {shown} を表示中",
-  "@fixedTags_columnFilteredCount": {
-    "placeholders": {
-      "enabled": {},
-      "total": {},
-      "shown": {}
-    }
-  },
-  "fixedTags_new": "新規",
-  "fixedTags_newTarget": "新しい {target}",
-  "@fixedTags_newTarget": {
-    "placeholders": {
-      "target": {}
-    }
-  },
-  "fixedTags_library": "ライブラリ",
-  "fixedTags_addFromLibraryToTarget": "ライブラリから {target} に追加します",
-  "@fixedTags_addFromLibraryToTarget": {
-    "placeholders": {
-      "target": {}
-    }
-  },
-  "fixedTags_enableAll": "すべて有効にする",
-  "fixedTags_disableAll": "すべて無効にする",
-  "fixedTags_searchTarget": "{target} を検索...",
-  "@fixedTags_searchTarget": {
-    "placeholders": {
-      "target": {}
-    }
-  },
-  "fixedTags_noMatching": "一致する固定タグがありません",
-  "fixedTags_emptyTarget": "{target} はありません",
-  "@fixedTags_emptyTarget": {
-    "placeholders": {
-      "target": {}
-    }
-  },
-  "fixedTags_dragToLink": "ドラッグしてリンクを作成します",
-  "fixedTags_linkedToNames": "リンク済み: {names}",
-  "@fixedTags_linkedToNames": {
-    "placeholders": {
-      "names": {}
-    }
-  },
-  "fixedTags_linkInstruction": "リンク アイコンをプロンプト固定タグから除外したい要素固定タグにドラッグしてリンクを作成します",
-  "fixedTags_manageLinks": "リンクの管理",
-  "fixedTags_removeLink": "リンクを削除: {name}",
-  "@fixedTags_removeLink": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "fixedTags_footerExpandedHint": "各列の先頭にあるライブラリから作成または追加します",
-  "fixedTags_newPositive": "新規プロンプト",
-  "fixedTags_addPositiveFromLibraryShort": "ライブラリからプロンプト固定タグを追加",
-  "fixedTags_libraryEmpty": "ライブラリが空です。最初にエントリを追加します",
-  "fixedTags_addFromLibrary": "ライブラリから追加",
-  "fixedTags_searchLibraryEntries": "ライブラリ エントリを検索します...",
-  "fixedTags_noMatchingResults": "一致する結果はありません",
   "reversePrompt_title": "逆プロンプト",
   "reversePrompt_pending": "保留中",
   "reversePrompt_imageCount": "{count} 画像",
@@ -2854,11 +2706,9 @@
   "autocomplete_categoryGeneral": "一般",
   "promptToken_webCalibration": "Web キャリブレーション",
   "promptToken_prompt": "プロンプト",
-  "promptToken_fixedTags": "固定タグ",
   "promptToken_qualityPreset": "品質プリセット",
   "promptToken_character": "キャラクター",
   "promptToken_negativePrompt": "除外したい要素",
-  "promptToken_negativeFixedTags": "除外したい要素固定タグ",
   "promptToken_negativePreset": "除外したい要素プリセット",
   "promptToken_characterNegative": "キャラクター除外要素",
   "common_rename": "名前の変更",
@@ -3070,7 +2920,6 @@
   "tagLibraryPicker_title": "エントリの選択",
   "tagLibraryPicker_searchHint": "エントリを検索...",
   "tagLibraryPicker_allCategories": "すべてのカテゴリ",
-  "tagLibrary_addedToFixed": "固定タグに追加",
   "tagLibrary_entryMoved": "エントリがターゲット カテゴリに移動されました",
   "tagLibrary_useCount": "{count} 回使用されました",
   "@tagLibrary_useCount": {
@@ -3165,8 +3014,6 @@
   "sendToHome_replaceCharacterSubtitle": "既存のキャラクターをクリアして新規として追加",
   "sendToHome_appendCharacter": "キャラクタープロンプトを追加",
   "sendToHome_appendCharacterSubtitle": "既存のキャラクターを保持し、新しいキャラクターを追加します",
-  "sendToHome_fixedTags": "固定タグに送信",
-  "sendToHome_fixedTagsSubtitle": "固定タグリストに追加",
   "sendToHome_sendAsAlias": "エイリアスとして送信",
   "sendToHome_sendAsAliasSubtitle": "自宅に送信する場合は <{name}> としてラップします",
   "@sendToHome_sendAsAliasSubtitle": {
@@ -3202,30 +3049,6 @@
   "metadataImport_prompt": "プロンプト",
   "metadataImport_mainPrompt": "メイン プロンプト",
   "metadataImport_fixedTags": "固定タグ",
-  "metadataImport_fixedPrefix": "プレフィックス: {text}",
-  "@metadataImport_fixedPrefix": {
-    "placeholders": {
-      "text": {}
-    }
-  },
-  "metadataImport_fixedSuffix": "サフィックス: {text}",
-  "@metadataImport_fixedSuffix": {
-    "placeholders": {
-      "text": {}
-    }
-  },
-  "metadataImport_negativeFixedPrefix": "除外したい要素プレフィックス: {text}",
-  "@metadataImport_negativeFixedPrefix": {
-    "placeholders": {
-      "text": {}
-    }
-  },
-  "metadataImport_negativeFixedSuffix": "除外したい要素サフィックス: {text}",
-  "@metadataImport_negativeFixedSuffix": {
-    "placeholders": {
-      "text": {}
-    }
-  },
   "metadataImport_qualityTagsCount": "品質タグ ({count})",
   "@metadataImport_qualityTagsCount": {
     "placeholders": {
@@ -4921,7 +4744,6 @@
     }
   },
   "toast_smartDecomposeSent": "スマートに分解して送信",
-  "toast_addedToFixedTags": "固定タグに追加しました",
   "toast_renameNameRequired": "名前は必須です",
   "toast_renameNameConflict": "名前はすでに存在します。別の名前を使用してください。",
   "toast_renameEntryNotFound": "エントリはもう存在しないため、削除された可能性があります",
@@ -5516,8 +5338,6 @@
   "common_clickToRetry": "クリックして再試行",
   "common_opening": "開いています...",
   "common_swap": "入れ替え",
-  "common_prefix": "プレフィックス",
-  "common_suffix": "サフィックス",
   "common_minimum": "最小",
   "common_maximum": "最大",
   "addToLibrary_displayNameHint": "この項目を識別する名前を入力",
@@ -6009,47 +5829,47 @@
   "promptBlockLibrary_exportTxtFailed": "エクスポートに失敗しました：{error}",
   "@promptBlockLibrary_exportTxtFailed": {
     "placeholders": {
-        "error": {
-          "type": "String"
-        }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "promptBlockLibrary_importTxtTitle": "TXT ファイルを選択",
   "promptBlockLibrary_txtImportDone": "{created} 個のブロックをインポート、{skipped} 個の既存ソースをスキップ",
   "@promptBlockLibrary_txtImportDone": {
     "placeholders": {
-        "created": {
-          "type": "int"
-        },
-        "skipped": {
-          "type": "int"
-        }
+      "created": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_curationTitle": "フォルダからインポート",
   "promptBlockLibrary_curationSummary": "TXT {total} 件：新規 {created} · 変更なし {skipped} · 変更あり {changed}",
   "@promptBlockLibrary_curationSummary": {
     "placeholders": {
-        "total": {
-          "type": "int"
-        },
-        "created": {
-          "type": "int"
-        },
-        "skipped": {
-          "type": "int"
-        },
-        "changed": {
-          "type": "int"
-        }
+      "total": {
+        "type": "int"
+      },
+      "created": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "changed": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_curationLocalModifiedHint": "うち {count} 件はインポート後に手動編集されています。更新するとローカル編集が上書きされます",
   "@promptBlockLibrary_curationLocalModifiedHint": {
     "placeholders": {
-        "count": {
-          "type": "int"
-        }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_curationUpdateChanged": "変更されたブロックをファイル内容で更新",
@@ -6057,15 +5877,15 @@
   "promptBlockLibrary_curationDone": "完了：新規 {created} · 更新 {updated} · スキップ {skipped}",
   "@promptBlockLibrary_curationDone": {
     "placeholders": {
-        "created": {
-          "type": "int"
-        },
-        "updated": {
-          "type": "int"
-        },
-        "skipped": {
-          "type": "int"
-        }
+      "created": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_curationNew": "新規",
@@ -6075,9 +5895,9 @@
   "promptBlockLibrary_libraryBackupDone": "{count} 個のブロックのバックアップをエクスポートしました",
   "@promptBlockLibrary_libraryBackupDone": {
     "placeholders": {
-        "count": {
-          "type": "int"
-        }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_libraryImportTitle": "ライブラリバックアップを選択",
@@ -6085,23 +5905,23 @@
   "promptBlockLibrary_libraryImportDone": "ブロック {blocks} 個・フォルダ {folders} 個をインポート、{skipped} 個の既存をスキップ",
   "@promptBlockLibrary_libraryImportDone": {
     "placeholders": {
-        "blocks": {
-          "type": "int"
-        },
-        "folders": {
-          "type": "int"
-        },
-        "skipped": {
-          "type": "int"
-        }
+      "blocks": {
+        "type": "int"
+      },
+      "folders": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_importFailed": "インポートに失敗しました：{error}",
   "@promptBlockLibrary_importFailed": {
     "placeholders": {
-        "error": {
-          "type": "String"
-        }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "promptBlockLibrary_sourceFile": "ソースファイル",
@@ -6109,6 +5929,9 @@
   "promptBlockLibrary_listView": "リスト表示",
   "promptBlockLibrary_gridView": "グリッド表示",
   "promptBlockLibrary_waterfallView": "ウォーターフォール表示",
+  "promptBlockPalette_tooltip": "パレット",
+  "promptBlockPalette_emptyHint": "よく使うブロックをここにドラッグして収納。使う時はクリックでカーソル位置に挿入、またはプロンプトへドラッグ",
+  "promptBlockPalette_remove": "パレットから削除",
   "promptBlockLibrary_sortBy": "並べ替え",
   "promptBlockLibrary_sortCustom": "既定（手動順）",
   "promptBlockLibrary_sortUpdated": "更新日時",
@@ -6142,13 +5965,40 @@
   "styleExplore_runNameLabel": "ラン名",
   "styleExplore_runNameHint": "例：柔らかい光 ×30",
   "styleExplore_runCreated": "「{name}」を作成しました",
-  "@styleExplore_runCreated": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_runCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_runDeleted": "「{name}」を削除しました",
-  "@styleExplore_runDeleted": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_runDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_runTotalCount": "全 {total} 枚",
-  "@styleExplore_runTotalCount": {"placeholders": {"total": {"type": "int"}}},
+  "@styleExplore_runTotalCount": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_runGeneratingProgress": "{current}/{total} 枚目",
-  "@styleExplore_runGeneratingProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@styleExplore_runGeneratingProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_runStatusDraft": "下書き",
   "styleExplore_runStatusGenerating": "生成中",
   "styleExplore_runStatusPaused": "一時停止",
@@ -6160,18 +6010,42 @@
   "styleExplore_unarchive": "アーカイブ解除",
   "styleExplore_loadSnapshot": "スナップショットをエディタに読み込む",
   "styleExplore_snapshotLoaded": "「{name}」のスナップショットを読み込みました",
-  "@styleExplore_snapshotLoaded": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_snapshotLoaded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_pauseRun": "一時停止",
   "styleExplore_cancelRun": "ランをキャンセル",
   "styleExplore_retryFailed": "失敗を再試行（{count}）",
-  "@styleExplore_retryFailed": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_retryFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_targetCountLabel": "生成枚数",
   "styleExplore_manualRunName": "手動キャプチャ {time}",
-  "@styleExplore_manualRunName": {"placeholders": {"time": {"type": "String"}}},
+  "@styleExplore_manualRunName": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_runBusy": "生成中です。しばらくしてからお試しください",
   "styleExplore_deleteRunTitle": "探索ランを削除",
   "styleExplore_deleteRunMessage": "「{name}」とその候補画像コピーを削除します。ギャラリーの元画像には影響しません。",
-  "@styleExplore_deleteRunMessage": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_deleteRunMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_cancelRunTitle": "探索ランをキャンセル",
   "styleExplore_cancelRunMessage": "キャンセル後は再開できません。残りの未生成候補はキャンセル済みとしてマークされます。",
   "styleExplore_filterAll": "すべて",
@@ -6180,27 +6054,66 @@
   "styleExplore_renameFolder": "フォルダ名を変更",
   "styleExplore_deleteFolder": "フォルダを削除",
   "styleExplore_deleteFolderMessage": "フォルダ「{name}」を削除します。中の候補は未分類に戻り、画像は削除されません。",
-  "@styleExplore_deleteFolderMessage": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_deleteFolderMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_folderNameLabel": "フォルダ名",
   "styleExplore_folderUncategorized": "未分類",
   "styleExplore_folderCreated": "フォルダ「{name}」を作成しました",
-  "@styleExplore_folderCreated": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_folderCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_assignToFolder": "分類先",
   "styleExplore_candidateMissing": "画像ファイルがありません",
   "styleExplore_candidateDetailTitle": "候補詳細",
   "styleExplore_candidatePosition": "{current}/{total} 枚目",
-  "@styleExplore_candidatePosition": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@styleExplore_candidatePosition": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_prevCandidate": "前へ",
   "styleExplore_nextCandidate": "次へ",
   "styleExplore_rollSnapshot": "Roll スナップショット",
   "styleExplore_seedLabel": "シード {seed}",
-  "@styleExplore_seedLabel": {"placeholders": {"seed": {"type": "String"}}},
+  "@styleExplore_seedLabel": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_roundNumber": "ラウンド {number}",
-  "@styleExplore_roundNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@styleExplore_roundNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_adoptAsBlock": "ブロックに収録",
   "styleExplore_adoptBlockNameLabel": "ブロック名",
   "styleExplore_adoptBlockSaved": "ブロック「{name}」に収録しました",
-  "@styleExplore_adoptBlockSaved": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_adoptBlockSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_adoptBlockEmpty": "選択した候補に Roll 文字列がありません",
   "styleExplore_fixateAsTemplate": "メタデータを導入",
   "styleExplore_fixateDone": "メタデータをエディタに導入しました",
@@ -6210,33 +6123,78 @@
   "styleExplore_deleteImageDone": "候補画像とレコードを削除しました",
   "styleExplore_selectCandidates": "複数選択",
   "styleExplore_selectedCount": "{count} 枚選択中",
-  "@styleExplore_selectedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_mergeAdopt": "まとめて収録",
   "styleExplore_noRunsYet": "探索ランはまだありません",
   "promptBlockEditor_library": "ブロックライブラリ",
   "styleExplore_lineageTitle": "系譜",
   "styleExplore_createFamily": "ファミリー作成",
   "styleExplore_familyCreated": "ファミリー「{name}」を作成しました",
-  "@styleExplore_familyCreated": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_familyCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_familyNameLabel": "ファミリー名",
   "styleExplore_familyNameHint": "例：柔らかい光の本線",
   "styleExplore_familyParentsTitle": "親（{count}）",
-  "@styleExplore_familyParentsTitle": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_familyParentsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_customParentLabel": "カスタム親文字列",
   "styleExplore_customParentHint": "プロンプト文字列を親として入力",
   "styleExplore_addCustomParent": "カスタム文字列を追加",
   "styleExplore_createFamilyEmpty": "有効な親文字列を少なくとも 1 つ残してください",
   "styleExplore_parentSetTitle": "第 {generation} 世代の親セット",
-  "@styleExplore_parentSetTitle": {"placeholders": {"generation": {"type": "int"}}},
+  "@styleExplore_parentSetTitle": {
+    "placeholders": {
+      "generation": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_candidatePileTitle": "第 {generation} 世代の候補パイル · {count} 枚",
-  "@styleExplore_candidatePileTitle": {"placeholders": {"generation": {"type": "int"}, "count": {"type": "int"}}},
+  "@styleExplore_candidatePileTitle": {
+    "placeholders": {
+      "generation": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_parentSetActive": "アクティブ",
   "styleExplore_parentSetUsed": "バッククロス済み",
   "styleExplore_branchLabel": "ブランチ：{name}",
-  "@styleExplore_branchLabel": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_branchLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_createDeepRound": "候補を生成",
   "styleExplore_deepRoundCountHint": "枚数は最低 {min}（各親につき 1 枚保証）",
-  "@styleExplore_deepRoundCountHint": {"placeholders": {"min": {"type": "int"}}},
+  "@styleExplore_deepRoundCountHint": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_deepRoundNoInstance": "メインプロンプトに有効なランダム遺伝ブロックがないため、深層ラウンドを開始できません",
   "styleExplore_deepRoundEmpty": "変異エンジンが十分に異なる子代を生成できませんでした",
   "styleExplore_sortParents": "A/B比較",
@@ -6247,28 +6205,67 @@
   "styleExplore_sortNeither": "どちらも良くない",
   "styleExplore_sortSkip": "スキップ",
   "styleExplore_sortProgress": "{current}/{total} 組目",
-  "@styleExplore_sortProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@styleExplore_sortProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_sortDone": "ランク付け完了",
   "styleExplore_branchSelect": "複数選択でブランチ",
   "styleExplore_createBranch": "ブランチ作成",
   "styleExplore_branchNameLabel": "ブランチ名（任意）",
   "styleExplore_branchCreated": "ブランチを作成しました（{count} 親）",
-  "@styleExplore_branchCreated": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_branchCreated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_branchNeedLatest": "ブランチは最新世代の候補パイルからのみ作成できます",
   "styleExplore_branchRoundsIncomplete": "現世代に未完了のラウンドがあります",
   "styleExplore_branchDuplicate": "選択した子代が第一世代の親文字列と完全に重複しています",
   "styleExplore_branchEmpty": "子代候補を少なくとも 1 枚選択してください",
   "styleExplore_preferenceValue": "選好 {value}",
-  "@styleExplore_preferenceValue": {"placeholders": {"value": {"type": "String"}}},
+  "@styleExplore_preferenceValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_roundsSummary": "{count} ラウンド",
-  "@styleExplore_roundsSummary": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_roundsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_pileEmpty": "候補はまだありません。上の「候補を生成」から始めてください",
   "styleExplore_managePile": "管理",
   "styleExplore_pileManageDeleteTitle": "選択した候補画像を削除",
   "styleExplore_pileManageDeleteMessage": "{count} 件の候補の Run ディレクトリ内コピーとレコードを削除します。ギャラリーの元画像には影響しません。",
-  "@styleExplore_pileManageDeleteMessage": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_pileManageDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_pileManageDeleteDone": "{count} 件の候補と画像コピーを削除しました",
-  "@styleExplore_pileManageDeleteDone": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_pileManageDeleteDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "subscriptionExpiresOn": "期限 {date}",
   "@subscriptionExpiresOn": {
     "placeholders": {

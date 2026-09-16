@@ -9,12 +9,8 @@ import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
-import 'package:nai_launcher/data/models/fixed_tag/fixed_tag_entry.dart';
-import 'package:nai_launcher/data/models/fixed_tag/fixed_tag_link.dart';
-import 'package:nai_launcher/data/models/fixed_tag/fixed_tag_prompt_type.dart';
 import 'package:nai_launcher/data/models/prompt/prompt_preset_mode.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
-import 'package:nai_launcher/presentation/providers/fixed_tags_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
 import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart';
@@ -32,7 +28,6 @@ void main() {
     );
     Hive.init(hiveTempDir.path);
     await Hive.openBox(StorageKeys.settingsBox);
-    await Hive.openBox(StorageKeys.fixedTagsBox);
   });
 
   tearDownAll(() async {
@@ -44,7 +39,6 @@ void main() {
 
   tearDown(() async {
     await Hive.box(StorageKeys.settingsBox).clear();
-    await Hive.box(StorageKeys.fixedTagsBox).clear();
     _FakePromptTokenEncoder.callCount = 0;
   });
 
@@ -57,22 +51,6 @@ void main() {
           prompt: '<hero>',
           negativePrompt: '<bad>',
           model: 'nai-diffusion-4-5-full',
-          fixedTagsState: FixedTagsState(
-            entries: [
-              FixedTagEntry.create(
-                name: 'prefix',
-                content: 'year 2025',
-                position: FixedTagPosition.prefix,
-                sortOrder: 0,
-              ),
-              FixedTagEntry.create(
-                name: 'suffix',
-                content: 'cinematic lighting',
-                position: FixedTagPosition.suffix,
-                sortOrder: 1,
-              ),
-            ],
-          ),
           qualityToggle: true,
           ucPreset: api.UcPresets.toApiValue(api.UcPresetType.heavy),
           characters: [
@@ -95,14 +73,12 @@ void main() {
 
         expect(
           payload.mainText,
-          equals(
-            'year 2025, 1girl, cinematic lighting, location, very aesthetic, masterpiece, no text',
-          ),
+          equals('1girl, location, very aesthetic, masterpiece, no text'),
         );
         expect(payload.extraTexts, equals(['blue dress', 'red cape']));
         expect(
           payload.breakdown.map((item) => item.label).toList(),
-          equals(['提示词', '固定词', '质量预设', '角色']),
+          equals(['提示词', '质量预设', '角色']),
         );
       },
     );
@@ -113,7 +89,6 @@ void main() {
         prompt: '1girl',
         negativePrompt: '',
         model: api.ImageModels.animeDiffusionV5Full,
-        fixedTagsState: const FixedTagsState(),
         qualityToggle: true,
         qualityTagPreset: QualityTagPreset.light,
         ucPreset: api.UcPresets.noneApiValue,
@@ -141,24 +116,6 @@ void main() {
           prompt: '<hero>',
           negativePrompt: '<bad>',
           model: 'nai-diffusion-4-5-full',
-          fixedTagsState: FixedTagsState(
-            entries: [
-              FixedTagEntry.create(
-                name: 'negative-prefix',
-                content: 'bad anatomy',
-                position: FixedTagPosition.prefix,
-                promptType: FixedTagPromptType.negative,
-                sortOrder: 0,
-              ),
-              FixedTagEntry.create(
-                name: 'negative-suffix',
-                content: 'text',
-                position: FixedTagPosition.suffix,
-                promptType: FixedTagPromptType.negative,
-                sortOrder: 1,
-              ),
-            ],
-          ),
           qualityToggle: true,
           ucPreset: api.UcPresets.toApiValue(api.UcPresetType.light),
           characters: [
@@ -179,13 +136,13 @@ void main() {
         expect(
           payload.mainText,
           equals(
-            'lowres, artistic error, scan artifacts, worst quality, bad quality, jpeg artifacts, multiple views, very displeasing, too many watermarks, negative space, blank page, bad anatomy, bad hands, text',
+            'lowres, artistic error, scan artifacts, worst quality, bad quality, jpeg artifacts, multiple views, very displeasing, too many watermarks, negative space, blank page, bad hands',
           ),
         );
         expect(payload.extraTexts, equals(['extra fingers']));
         expect(
           payload.breakdown.map((item) => item.label).toList(),
-          equals(['负面提示词', '负面固定词', '负面预设', '角色负面']),
+          equals(['负面提示词', '负面预设', '角色负面']),
         );
       },
     );
@@ -222,65 +179,6 @@ void main() {
         container.read(ucPresetNotifierProvider).presetType,
         api.UcPresetType.furryFocus,
       );
-    });
-  });
-
-  group('FixedTagsState link helpers', () {
-    test('should resolve linked endpoints and mismatched enabled state', () {
-      final positive = FixedTagEntry.create(
-        name: 'character',
-        content: '1girl',
-      );
-      final negative = FixedTagEntry.create(
-        name: 'character-negative',
-        content: 'bad anatomy',
-        enabled: false,
-        promptType: FixedTagPromptType.negative,
-      );
-      final link = FixedTagLink.create(
-        positiveEntryId: positive.id,
-        negativeEntryId: negative.id,
-      );
-      final state = FixedTagsState(
-        entries: [positive, negative],
-        links: [link],
-      );
-
-      expect(state.linkedNegativesOf(positive.id), equals([negative]));
-      expect(state.linkedPositivesOf(negative.id), equals([positive]));
-      expect(state.isMismatched(link), isTrue);
-      expect(
-        FixedTagLink.fromJson(link.toJson()).negativeEntryId,
-        equals(negative.id),
-      );
-    });
-
-    test('notifier should undo and redo link creation', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      final notifier = container.read(fixedTagsNotifierProvider.notifier);
-
-      final positive = await notifier.addEntry(
-        name: 'character',
-        content: '1girl',
-      );
-      final negative = await notifier.addEntry(
-        name: 'character-negative',
-        content: 'bad anatomy',
-        promptType: FixedTagPromptType.negative,
-      );
-
-      await notifier.createLink(
-        positiveEntryId: positive.id,
-        negativeEntryId: negative.id,
-      );
-      expect(container.read(fixedTagsNotifierProvider).links, hasLength(1));
-
-      await notifier.undo();
-      expect(container.read(fixedTagsNotifierProvider).links, isEmpty);
-
-      await notifier.redo();
-      expect(container.read(fixedTagsNotifierProvider).links, hasLength(1));
     });
   });
 

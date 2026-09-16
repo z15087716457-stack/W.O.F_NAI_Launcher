@@ -232,118 +232,42 @@ class _MetadataImportDialogState extends State<MetadataImportDialog> {
           onChanged: (v) =>
               setState(() => _options = _options.copyWith(importPrompt: v)),
         ),
-        // 固定词（带子选项）
+        // 质量词（带子选项）
         if (metadata.hasSeparatedFields) ...[
-          _buildParentCheckboxTile(
-            title: l10n.metadataImport_fixedTags,
-            value: _options.importFixedTags,
-            hasData:
-                metadata.fixedPrefixTags.isNotEmpty ||
-                metadata.fixedSuffixTags.isNotEmpty ||
-                metadata.fixedNegativePrefixTags.isNotEmpty ||
-                metadata.fixedNegativeSuffixTags.isNotEmpty,
-            onChanged: (v) => setState(
-              () => _options = _options.copyWith(importFixedTags: v),
-            ),
-            children: [
-              if (metadata.fixedPrefixTags.isNotEmpty)
-                _buildChildCheckboxTile(
-                  title: l10n.metadataImport_fixedPrefix(
-                    _truncateText(metadata.fixedPrefixTags.join(', '), 40),
-                  ),
-                  value: _options.importFixedPrefix,
-                  onChanged: _options.importFixedTags
-                      ? (v) => setState(
-                          () => _options = _options.copyWith(
-                            importFixedPrefix: v,
-                          ),
-                        )
-                      : null,
-                ),
-              if (metadata.fixedSuffixTags.isNotEmpty)
-                _buildChildCheckboxTile(
-                  title: l10n.metadataImport_fixedSuffix(
-                    _truncateText(metadata.fixedSuffixTags.join(', '), 40),
-                  ),
-                  value: _options.importFixedSuffix,
-                  onChanged: _options.importFixedTags
-                      ? (v) => setState(
-                          () => _options = _options.copyWith(
-                            importFixedSuffix: v,
-                          ),
-                        )
-                      : null,
-                ),
-              if (metadata.fixedNegativePrefixTags.isNotEmpty)
-                _buildChildCheckboxTile(
-                  title: l10n.metadataImport_negativeFixedPrefix(
-                    _truncateText(
-                      metadata.fixedNegativePrefixTags.join(', '),
-                      40,
-                    ),
-                  ),
-                  value: _options.importFixedPrefix,
-                  onChanged: _options.importFixedTags
-                      ? (v) => setState(
-                          () => _options = _options.copyWith(
-                            importFixedPrefix: v,
-                          ),
-                        )
-                      : null,
-                ),
-              if (metadata.fixedNegativeSuffixTags.isNotEmpty)
-                _buildChildCheckboxTile(
-                  title: l10n.metadataImport_negativeFixedSuffix(
-                    _truncateText(
-                      metadata.fixedNegativeSuffixTags.join(', '),
-                      40,
-                    ),
-                  ),
-                  value: _options.importFixedSuffix,
-                  onChanged: _options.importFixedTags
-                      ? (v) => setState(
-                          () => _options = _options.copyWith(
-                            importFixedSuffix: v,
-                          ),
-                        )
-                      : null,
-                ),
-            ],
-          ),
-          // 质量词（带子选项）
           if (metadata.qualityTags.isNotEmpty)
-            _buildParentCheckboxTile(
-              title: l10n.metadataImport_qualityTagsCount(
-                metadata.qualityTags.length,
+            if (metadata.qualityTags.isNotEmpty)
+              _buildParentCheckboxTile(
+                title: l10n.metadataImport_qualityTagsCount(
+                  metadata.qualityTags.length,
+                ),
+                value: _options.importQualityTags,
+                hasData: true,
+                onChanged: (v) => setState(
+                  () => _options = _options.copyWith(importQualityTags: v),
+                ),
+                children: metadata.qualityTags.asMap().entries.map((entry) {
+                  final tag = entry.value;
+                  return _buildChildCheckboxTile(
+                    title: tag,
+                    value: _options.selectedQualityTags.contains(tag),
+                    onChanged: _options.importQualityTags
+                        ? (v) => setState(() {
+                            final selected = List<String>.from(
+                              _options.selectedQualityTags,
+                            );
+                            if (v) {
+                              if (!selected.contains(tag)) selected.add(tag);
+                            } else {
+                              selected.remove(tag);
+                            }
+                            _options = _options.copyWith(
+                              selectedQualityTags: selected,
+                            );
+                          })
+                        : null,
+                  );
+                }).toList(),
               ),
-              value: _options.importQualityTags,
-              hasData: true,
-              onChanged: (v) => setState(
-                () => _options = _options.copyWith(importQualityTags: v),
-              ),
-              children: metadata.qualityTags.asMap().entries.map((entry) {
-                final tag = entry.value;
-                return _buildChildCheckboxTile(
-                  title: tag,
-                  value: _options.selectedQualityTags.contains(tag),
-                  onChanged: _options.importQualityTags
-                      ? (v) => setState(() {
-                          final selected = List<String>.from(
-                            _options.selectedQualityTags,
-                          );
-                          if (v) {
-                            if (!selected.contains(tag)) selected.add(tag);
-                          } else {
-                            selected.remove(tag);
-                          }
-                          _options = _options.copyWith(
-                            selectedQualityTags: selected,
-                          );
-                        })
-                      : null,
-                );
-              }).toList(),
-            ),
           // 角色提示词（带子选项）
           if (metadata.characterInfos.isNotEmpty)
             _buildParentCheckboxTile(

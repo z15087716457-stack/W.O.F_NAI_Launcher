@@ -24,7 +24,6 @@ import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/utils/file_explorer_utils.dart';
 import 'package:nai_launcher/core/utils/nai_resolution_adapter.dart';
-import 'package:nai_launcher/data/models/fixed_tag/fixed_tag_entry.dart';
 import 'package:nai_launcher/data/models/gallery/gallery_statistics.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
@@ -34,7 +33,6 @@ import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/data/services/local_onnx_tagger_service.dart';
 import 'package:nai_launcher/data/services/statistics_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
-import 'package:nai_launcher/presentation/providers/fixed_tags_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
 import 'package:nai_launcher/presentation/providers/online_gallery_provider.dart';
@@ -2381,46 +2379,6 @@ void main() {
         ),
       );
     });
-  });
-
-  group('Prompt assistant fixed tag scope', () {
-    test(
-      'strips enabled fixed prefixes and suffixes before assistant tasks',
-      () {
-        final state = FixedTagsState(
-          entries: [
-            FixedTagEntry.create(
-              name: 'quality',
-              content: 'masterpiece, best quality',
-              position: FixedTagPosition.prefix,
-            ),
-            FixedTagEntry.create(
-              name: 'suffix',
-              content: 'highres',
-              position: FixedTagPosition.suffix,
-            ),
-            FixedTagEntry.create(
-              name: 'disabled',
-              content: 'keep_me',
-              enabled: false,
-              position: FixedTagPosition.prefix,
-            ),
-          ],
-        );
-
-        expect(
-          state.stripFromPrompt(
-            'masterpiece, best quality, 1girl, smile, highres',
-          ),
-          '1girl, smile',
-        );
-        expect(state.stripFromPrompt('1girl, smile'), '1girl, smile');
-        expect(
-          state.stripFromPrompt('keep_me, 1girl, highres'),
-          'keep_me, 1girl',
-        );
-      },
-    );
   });
 
   group('ONNX tagger categories', () {

@@ -64,12 +64,8 @@ class PromptTokenCountBar extends StatelessWidget {
       );
       final adjustment = usage.usedTokens - breakdownTotal;
       if (adjustment != 0) {
-        final fixedTagIndex = displayBreakdown.indexWhere(
-          (entry) => entry.label == '固定词',
-        );
-        final targetIndex = fixedTagIndex >= 0 ? fixedTagIndex : 0;
-        final targetEntry = displayBreakdown[targetIndex];
-        displayBreakdown[targetIndex] = PromptTokenBreakdownEntry(
+        final targetEntry = displayBreakdown[0];
+        displayBreakdown[0] = PromptTokenBreakdownEntry(
           label: targetEntry.label,
           tokens: targetEntry.tokens + adjustment,
         );
@@ -87,11 +83,9 @@ class PromptTokenCountBar extends StatelessWidget {
     return switch (label) {
       '网页端校准' => context.l10n.promptToken_webCalibration,
       '提示词' => context.l10n.promptToken_prompt,
-      '固定词' => context.l10n.promptToken_fixedTags,
       '质量预设' => context.l10n.promptToken_qualityPreset,
       '角色' => context.l10n.promptToken_character,
       '负面提示词' => context.l10n.promptToken_negativePrompt,
-      '负面固定词' => context.l10n.promptToken_negativeFixedTags,
       '负面预设' => context.l10n.promptToken_negativePreset,
       '角色负面' => context.l10n.promptToken_characterNegative,
       _ => label,

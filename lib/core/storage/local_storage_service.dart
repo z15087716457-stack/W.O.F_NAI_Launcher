@@ -741,33 +741,6 @@ class LocalStorageService {
     await setSetting(StorageKeys.webLeftPanelExpanded, expanded);
   }
 
-  /// 获取固定词侧边栏展开状态 (默认收起)
-  bool getFixedTagsSidebarExpanded() {
-    return getSetting<bool>(
-          StorageKeys.fixedTagsSidebarExpanded,
-          defaultValue: false,
-        ) ??
-        false;
-  }
-
-  /// 保存固定词侧边栏展开状态
-  Future<void> setFixedTagsSidebarExpanded(bool expanded) async {
-    await setSetting(StorageKeys.fixedTagsSidebarExpanded, expanded);
-  }
-
-  /// 获取固定词侧边栏宽度 (默认280)
-  double getFixedTagsSidebarWidth() {
-    final value = getSetting(StorageKeys.fixedTagsSidebarWidth);
-    if (value is int) return value.toDouble();
-    if (value is double) return value;
-    return 280.0;
-  }
-
-  /// 保存固定词侧边栏宽度
-  Future<void> setFixedTagsSidebarWidth(double width) async {
-    await setSetting(StorageKeys.fixedTagsSidebarWidth, width);
-  }
-
   /// 获取块库面板展开状态 (默认收起)
   bool getBlockLibraryPanelExpanded() {
     return getSetting<bool>(
@@ -844,88 +817,12 @@ class LocalStorageService {
     await setSetting(StorageKeys.styleExplorePromptAreaHeight, height);
   }
 
-  /// 获取固定词侧边栏视图模式
-  String getFixedTagsSidebarViewMode() {
-    final mode = getSetting<String>(
-      StorageKeys.fixedTagsSidebarViewMode,
-      defaultValue: 'list',
-    );
-    return mode == 'grid' ? 'grid' : 'list';
-  }
-
-  /// 保存固定词侧边栏视图模式
-  Future<void> setFixedTagsSidebarViewMode(String mode) async {
-    await setSetting(
-      StorageKeys.fixedTagsSidebarViewMode,
-      mode == 'grid' ? 'grid' : 'list',
-    );
-  }
-
-  /// 获取负向固定词区域高度 (默认180)
-  double getFixedTagsNegativeHeight() {
-    final value = getSetting(StorageKeys.fixedTagsNegativeHeight);
-    if (value is int) return value.toDouble();
-    if (value is double) return value;
-    return 180.0;
-  }
-
-  /// 保存负向固定词区域高度
-  Future<void> setFixedTagsNegativeHeight(double height) async {
-    await setSetting(StorageKeys.fixedTagsNegativeHeight, height);
-  }
-
   // ==================== Lifecycle ====================
 
   /// 关闭存储
   Future<void> close() async {
     await _settingsBox.close();
     await _historyBox.close();
-  }
-
-  // ==================== Fixed Tags ====================
-
-  /// 获取固定词列表 JSON
-  String? getFixedTagsJson() {
-    return getSetting<String>(StorageKeys.fixedTagsData);
-  }
-
-  /// 保存固定词列表 JSON
-  Future<void> setFixedTagsJson(String json) async {
-    await setSetting(StorageKeys.fixedTagsData, json);
-  }
-
-  /// 获取固定词联动关系 JSON
-  String? getFixedTagLinksJson() {
-    return getSetting<String>(StorageKeys.fixedTagLinksData);
-  }
-
-  /// 保存固定词联动关系 JSON
-  Future<void> setFixedTagLinksJson(String json) async {
-    await setSetting(StorageKeys.fixedTagLinksData, json);
-  }
-
-  /// 获取负向固定词面板展开状态
-  bool getFixedTagsNegativePanelExpanded() {
-    return getSetting<bool>(
-          StorageKeys.fixedTagsNegativePanelExpanded,
-          defaultValue: true,
-        ) ??
-        true;
-  }
-
-  /// 保存负向固定词面板展开状态
-  Future<void> setFixedTagsNegativePanelExpanded(bool expanded) async {
-    await setSetting(StorageKeys.fixedTagsNegativePanelExpanded, expanded);
-  }
-
-  /// 获取固定词分类列表 JSON
-  String? getFixedTagCategoriesJson() {
-    return getSetting<String>(StorageKeys.fixedTagCategoriesData);
-  }
-
-  /// 保存固定词分类列表 JSON
-  Future<void> setFixedTagCategoriesJson(String json) async {
-    await setSetting(StorageKeys.fixedTagCategoriesData, json);
   }
 
   // ==================== Tag Library (User) ====================

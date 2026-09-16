@@ -23,7 +23,6 @@ import '../../../prompt_assistant/providers/prompt_assistant_history_provider.da
 import '../../../prompt_assistant/providers/prompt_assistant_state_provider.dart';
 import '../../../prompt_assistant/services/prompt_assistant_service.dart';
 import '../../../prompt_assistant/widgets/prompt_assistant_overlay.dart';
-import '../../../providers/fixed_tags_provider.dart';
 import '../../../providers/prompt_regex_rules_provider.dart';
 import '../comfyui_import_wrapper.dart';
 import '../nai_syntax_controller.dart';
@@ -432,11 +431,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     );
   }
 
-  String _assistantInputText() {
-    return ref
-        .read(fixedTagsNotifierProvider)
-        .stripFromPrompt(_effectiveController.text);
-  }
+  String _assistantInputText() => _effectiveController.text;
 
   /// 焦点变化回调
   void _onFocusChanged() {

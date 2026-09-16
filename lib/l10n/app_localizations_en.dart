@@ -1059,14 +1059,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Krita Bridge is generating. Wait for the current task to finish.';
 
   @override
-  String get prompt_negativeFixedTagPrefix =>
-      'Undesired Content Fixed Tag Prefix';
-
-  @override
-  String get prompt_negativeFixedTagSuffix =>
-      'Undesired Content Fixed Tag Suffix';
-
-  @override
   String get prompt_unwantedContent =>
       'Content you don\'t want in the image...';
 
@@ -4977,295 +4969,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statistics_saturday => 'Sat';
 
   @override
-  String get fixedTags_label => 'Fixed Tags';
-
-  @override
-  String get fixedTags_enabled => 'Enabled';
-
-  @override
-  String get fixedTags_empty => 'No fixed tags';
-
-  @override
-  String get fixedTags_emptyHint =>
-      'Click the button below to add fixed tags, they will be automatically applied to your prompts';
-
-  @override
-  String get fixedTags_manage => 'Manage Fixed Tags';
-
-  @override
-  String get fixedTags_add => 'Add';
-
-  @override
-  String get fixedTags_edit => 'Edit Fixed Tag';
-
-  @override
-  String get fixedTags_openLibrary => 'Open Library';
-
-  @override
-  String get fixedTags_prefix => 'Prefix';
-
-  @override
-  String get fixedTags_suffix => 'Suffix';
-
-  @override
-  String get fixedTags_disabled => 'Disabled';
-
-  @override
-  String get fixedTags_weight => 'Weight';
-
-  @override
-  String get fixedTags_position => 'Position';
-
-  @override
-  String get fixedTags_name => 'Name';
-
-  @override
-  String get fixedTags_nameHint => 'Enter a display name (optional)';
-
-  @override
-  String get fixedTags_content => 'Content';
-
-  @override
-  String get fixedTags_contentHint =>
-      'Enter prompt content, NAI syntax supported';
-
-  @override
   String get fixedTags_syntaxHelp =>
       'Supports NAI syntax for weight enhancement/reduction and tag alternation';
 
   @override
-  String get fixedTags_linkedFromLibrary =>
-      'Linked from library (two-way sync)';
-
-  @override
-  String get fixedTags_scope => 'Scope';
-
-  @override
-  String get fixedTags_positive => 'Prompt';
-
-  @override
-  String get fixedTags_negative => 'Undesired Content';
-
-  @override
-  String get fixedTags_resetWeight => 'Reset to 1.0';
-
-  @override
-  String get fixedTags_weightPreview => 'Weight preview:';
-
-  @override
-  String get fixedTags_deleteTitle => 'Delete Fixed Tag';
-
-  @override
-  String fixedTags_deleteConfirm(Object name) {
-    return 'Are you sure you want to delete \"$name\"?';
-  }
-
-  @override
-  String fixedTags_enabledCount(Object enabled, Object total) {
-    return '$enabled/$total enabled';
-  }
-
-  @override
-  String get fixedTags_saveToLibrary => 'Also save to library';
-
-  @override
-  String get fixedTags_saveToLibraryHint =>
-      'For reuse in the tag library later';
-
-  @override
-  String get fixedTags_saveToCategory => 'Save to category';
-
-  @override
-  String get fixedTags_clearAll => 'Clear All';
-
-  @override
-  String get fixedTags_clearAllTitle => 'Clear All Fixed Tags';
-
-  @override
-  String fixedTags_clearAllConfirm(Object count) {
-    return 'Are you sure you want to clear all $count fixed tags? This action cannot be undone.';
-  }
-
-  @override
-  String get fixedTags_clearedSuccess => 'All fixed tags cleared';
-
-  @override
-  String get fixedTags_sidebarTitle => 'Fixed Tags Sidebar';
-
-  @override
-  String get fixedTags_switchGridView => 'Switch to Grid View';
-
-  @override
-  String get fixedTags_switchListView => 'Switch to List View';
-
-  @override
-  String get fixedTags_addPositive => 'Add Prompt Fixed Tag';
-
-  @override
-  String get fixedTags_addNegative => 'Add Undesired Content Fixed Tag';
-
-  @override
-  String get fixedTags_addPositiveFromLibrary => 'Add Prompt from Library';
-
-  @override
-  String get fixedTags_addNegativeFromLibrary =>
-      'Add Undesired Content from Library';
-
-  @override
-  String get fixedTags_searchNameOrContent => 'Search name or content';
-
-  @override
-  String get fixedTags_clearSearch => 'Clear Search';
-
-  @override
-  String get fixedTags_enabledPositive => 'Enabled Prompt';
-
-  @override
-  String get fixedTags_emptyEnabledPositive => 'No enabled prompt fixed tags';
-
-  @override
-  String get fixedTags_noMatchingEnabled => 'No matching enabled fixed tags';
-
-  @override
   String get fixedTags_negativeTitle => 'Undesired Content Fixed Tags';
-
-  @override
-  String get fixedTags_emptyNegative => 'No Undesired Content fixed tags';
-
-  @override
-  String get fixedTags_noMatchingNegative =>
-      'No matching Undesired Content fixed tags';
-
-  @override
-  String get fixedTags_addedToSidebar => 'Added to fixed tags sidebar';
-
-  @override
-  String get fixedTags_unknownCategory => 'Unknown Category';
-
-  @override
-  String get fixedTags_uncategorized => 'Uncategorized';
-
-  @override
-  String get fixedTags_clickManageLongPressSidebar =>
-      'Click to manage, long-press to open sidebar';
-
-  @override
-  String get fixedTags_clickManageLongPressCompact =>
-      'Click to manage, long-press sidebar';
-
-  @override
-  String get fixedTags_linked => 'Linked';
-
-  @override
-  String fixedTags_linkCount(Object count) {
-    return '$count linked';
-  }
-
-  @override
-  String get fixedTags_expandNegative => 'Expand Undesired Content';
-
-  @override
-  String get fixedTags_collapseNegative => 'Collapse Undesired Content';
-
-  @override
-  String get fixedTags_undoTooltip => 'Undo fixed tag operation';
-
-  @override
-  String get fixedTags_redoTooltip => 'Redo fixed tag operation';
-
-  @override
-  String get fixedTags_positiveTitle => 'Prompt Fixed Tags';
-
-  @override
-  String fixedTags_columnCount(Object enabled, Object total) {
-    return '$enabled/$total';
-  }
-
-  @override
-  String fixedTags_columnFilteredCount(
-    Object enabled,
-    Object total,
-    Object shown,
-  ) {
-    return '$enabled/$total · showing $shown';
-  }
-
-  @override
-  String get fixedTags_new => 'New';
-
-  @override
-  String fixedTags_newTarget(Object target) {
-    return 'New $target';
-  }
-
-  @override
-  String get fixedTags_library => 'Library';
-
-  @override
-  String fixedTags_addFromLibraryToTarget(Object target) {
-    return 'Add from library to $target';
-  }
-
-  @override
-  String get fixedTags_enableAll => 'Enable All';
-
-  @override
-  String get fixedTags_disableAll => 'Disable All';
-
-  @override
-  String fixedTags_searchTarget(Object target) {
-    return 'Search $target...';
-  }
-
-  @override
-  String get fixedTags_noMatching => 'No matching fixed tags';
-
-  @override
-  String fixedTags_emptyTarget(Object target) {
-    return 'No $target';
-  }
-
-  @override
-  String get fixedTags_dragToLink => 'Drag to create link';
-
-  @override
-  String fixedTags_linkedToNames(Object names) {
-    return 'Linked: $names';
-  }
-
-  @override
-  String get fixedTags_linkInstruction =>
-      'Drag the link icon from a prompt fixed tag to an Undesired Content fixed tag to create a link';
-
-  @override
-  String get fixedTags_manageLinks => 'Manage Links';
-
-  @override
-  String fixedTags_removeLink(Object name) {
-    return 'Remove link: $name';
-  }
-
-  @override
-  String get fixedTags_footerExpandedHint =>
-      'Create or add from the library at the top of each column';
-
-  @override
-  String get fixedTags_newPositive => 'New Prompt';
-
-  @override
-  String get fixedTags_addPositiveFromLibraryShort => 'Add Prompt from Library';
-
-  @override
-  String get fixedTags_libraryEmpty => 'Library is empty. Add entries first';
-
-  @override
-  String get fixedTags_addFromLibrary => 'Add from Library';
-
-  @override
-  String get fixedTags_searchLibraryEntries => 'Search library entries...';
-
-  @override
-  String get fixedTags_noMatchingResults => 'No matching results';
 
   @override
   String get reversePrompt_title => 'Reverse Prompt';
@@ -5691,9 +5399,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptToken_prompt => 'Prompt';
 
   @override
-  String get promptToken_fixedTags => 'Fixed Tags';
-
-  @override
   String get promptToken_qualityPreset => 'Quality Preset';
 
   @override
@@ -5701,9 +5406,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptToken_negativePrompt => 'Undesired Content';
-
-  @override
-  String get promptToken_negativeFixedTags => 'Undesired Content Fixed Tags';
 
   @override
   String get promptToken_negativePreset => 'Undesired Content Preset';
@@ -6032,9 +5734,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tagLibraryPicker_allCategories => 'All Categories';
 
   @override
-  String get tagLibrary_addedToFixed => 'Added to Fixed Tags';
-
-  @override
   String get tagLibrary_entryMoved => 'Entry moved to target category';
 
   @override
@@ -6271,12 +5970,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Keep existing characters and append new';
 
   @override
-  String get sendToHome_fixedTags => 'Send to Fixed Tags';
-
-  @override
-  String get sendToHome_fixedTagsSubtitle => 'Append to the fixed tag list';
-
-  @override
   String get sendToHome_sendAsAlias => 'Send as Alias';
 
   @override
@@ -6341,26 +6034,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get metadataImport_fixedTags => 'Fixed Tags';
-
-  @override
-  String metadataImport_fixedPrefix(Object text) {
-    return 'Prefix: $text';
-  }
-
-  @override
-  String metadataImport_fixedSuffix(Object text) {
-    return 'Suffix: $text';
-  }
-
-  @override
-  String metadataImport_negativeFixedPrefix(Object text) {
-    return 'Undesired Content Prefix: $text';
-  }
-
-  @override
-  String metadataImport_negativeFixedSuffix(Object text) {
-    return 'Undesired Content Suffix: $text';
-  }
 
   @override
   String metadataImport_qualityTagsCount(int count) {
@@ -9036,9 +8709,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toast_smartDecomposeSent => 'Smart decomposed and sent';
 
   @override
-  String get toast_addedToFixedTags => 'Added to fixed tags';
-
-  @override
   String get toast_renameNameRequired => 'Name is required';
 
   @override
@@ -9797,12 +9467,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_swap => 'Swap';
-
-  @override
-  String get common_prefix => 'Prefix';
-
-  @override
-  String get common_suffix => 'Suffix';
 
   @override
   String get common_minimum => 'Minimum';
@@ -10642,6 +10306,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_waterfallView => 'Waterfall view';
+
+  @override
+  String get promptBlockPalette_tooltip => 'Palette';
+
+  @override
+  String get promptBlockPalette_emptyHint =>
+      'Drag blocks here to keep them handy; tap to insert at the caret, or drag into the prompt box';
+
+  @override
+  String get promptBlockPalette_remove => 'Remove from palette';
 
   @override
   String get promptBlockLibrary_sortBy => 'Sort by';

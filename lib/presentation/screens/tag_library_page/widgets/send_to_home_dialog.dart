@@ -225,17 +225,6 @@ class _SendToHomeDialogState extends ConsumerState<SendToHomeDialog> {
           onTap: () =>
               setState(() => _selectedTarget = SendTargetType.appendCharacter),
         ),
-        // 固定词选项
-        const SizedBox(height: 8),
-        _TargetOptionTile(
-          icon: Icons.push_pin,
-          iconColor: Colors.orange,
-          title: context.l10n.sendToHome_fixedTags,
-          subtitle: context.l10n.sendToHome_fixedTagsSubtitle,
-          isSelected: _selectedTarget == SendTargetType.fixedTag,
-          onTap: () =>
-              setState(() => _selectedTarget = SendTargetType.fixedTag),
-        ),
       ],
     );
   }
@@ -350,11 +339,6 @@ class _SendToHomeDialogState extends ConsumerState<SendToHomeDialog> {
       ),
       SendTargetType.replaceCharacter ||
       SendTargetType.appendCharacter => _buildCharacterPreview(parsed),
-      SendTargetType.fixedTag => _PreviewItem(
-        label: context.l10n.fixedTags_label,
-        content: _processedContent,
-        color: Colors.orange,
-      ),
     };
   }
 
@@ -373,7 +357,6 @@ class _SendToHomeDialogState extends ConsumerState<SendToHomeDialog> {
         context.l10n.sendToHome_characterPrompt,
         theme.colorScheme.tertiary,
       ),
-      SendTargetType.fixedTag => (context.l10n.fixedTags_label, Colors.orange),
     };
     return _PreviewItem(label: label, content: _processedContent, color: color);
   }

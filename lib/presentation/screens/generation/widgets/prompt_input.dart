@@ -12,11 +12,9 @@ import '../../../../core/utils/comfyui_prompt_parser/pipe_parser.dart';
 import '../../../../core/utils/nai_prompt_formatter.dart';
 import '../../../../core/utils/sd_to_nai_converter.dart';
 import '../../../../data/models/character/character_prompt.dart';
-import '../../../../data/models/fixed_tag/fixed_tag_entry.dart';
 import '../../../../data/models/prompt/prompt_preset_mode.dart';
 import '../../../../data/services/alias_resolver_service.dart';
 import '../../../providers/character_prompt_provider.dart';
-import '../../../providers/fixed_tags_provider.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/prompt_maximize_provider.dart';
 import '../../../providers/pill_workspace_provider.dart';
@@ -37,7 +35,7 @@ import '../../../widgets/prompt/regex_rules_dialog.dart';
 import '../../../widgets/prompt/toolbar/toolbar.dart';
 import '../../../widgets/prompt/uc_preset_selector.dart';
 import '../../../widgets/character/character_prompt_button.dart';
-import '../../../widgets/prompt/fixed_tags_button.dart';
+import '../../../widgets/prompt/blocks/prompt_block_palette.dart';
 import '../../../providers/pending_prompt_provider.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_history_provider.dart';
@@ -525,7 +523,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           children: [
             typeSwitch,
             const SizedBox(width: 10),
-            const FixedTagsButton(),
+            const PromptBlockPaletteButton(),
             const SizedBox(width: 6),
             QualityTagsSelector(model: model),
             const SizedBox(width: 6),
@@ -554,8 +552,8 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           runSpacing: 6,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            // 固定词按钮
-            const FixedTagsButton(),
+            // 颜料版按钮（原固定词位置）
+            const PromptBlockPaletteButton(),
 
             // 质量词选择器
             QualityTagsSelector(model: model),
@@ -658,13 +656,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   }
 
   Widget _buildPromptTypeSwitch(ThemeData theme) {
-    // 获取固定词数据
-    final fixedTagsState = ref.watch(fixedTagsNotifierProvider);
-    final enabledPrefixes = fixedTagsState.enabledPrefixes;
-    final enabledSuffixes = fixedTagsState.enabledSuffixes;
-    final negativeEnabledPrefixes = fixedTagsState.negativeEnabledPrefixes;
-    final negativeEnabledSuffixes = fixedTagsState.negativeEnabledSuffixes;
-
     // 获取质量词数据
     final qualityState = ref.watch(qualityPresetNotifierProvider);
     final model = ref.watch(
@@ -700,8 +691,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           tooltipBuilder: (theme) => _PositivePromptTooltip(
             theme: theme,
             userPrompt: _promptController.text,
-            prefixes: enabledPrefixes,
-            suffixes: enabledSuffixes,
             qualityMode: qualityState.mode,
             qualityContent: qualityContent,
             characters: characterConfig.characters,
@@ -720,8 +709,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           tooltipBuilder: (theme) => _NegativePromptTooltip(
             theme: theme,
             userNegativePrompt: _negativeController.text,
-            prefixes: negativeEnabledPrefixes,
-            suffixes: negativeEnabledSuffixes,
             ucPresetContent: ucPresetContent,
             l10n: context.l10n,
             aliasResolver: aliasResolver,
@@ -1037,8 +1024,6 @@ class _PromptTokenCountFooter extends ConsumerWidget {
 class _PositivePromptTooltip extends StatelessWidget {
   final ThemeData theme;
   final String userPrompt;
-  final List<FixedTagEntry> prefixes;
-  final List<FixedTagEntry> suffixes;
   final PromptPresetMode qualityMode;
   final String? qualityContent;
   final List<CharacterPrompt> characters;
@@ -1049,8 +1034,6 @@ class _PositivePromptTooltip extends StatelessWidget {
   const _PositivePromptTooltip({
     required this.theme,
     required this.userPrompt,
-    required this.prefixes,
-    required this.suffixes,
     required this.qualityMode,
     required this.qualityContent,
     required this.characters,
@@ -1062,8 +1045,6 @@ class _PositivePromptTooltip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = theme.brightness == Brightness.dark;
-    final hasPrefixes = prefixes.isNotEmpty;
-    final hasSuffixes = suffixes.isNotEmpty;
     final hasQuality = qualityContent != null && qualityContent!.isNotEmpty;
     final enabledCharacters = characters
         .where((c) => c.enabled && c.prompt.isNotEmpty)
@@ -1081,20 +1062,6 @@ class _PositivePromptTooltip extends StatelessWidget {
         _buildHeader(isDark),
 
         const SizedBox(height: 10),
-
-        // 固定词（前缀）- 解析别名
-        if (hasPrefixes) ...[
-          _buildSection(
-            icon: Icons.arrow_forward_rounded,
-            label: l10n.fixedTags_prefix,
-            color: theme.colorScheme.primary,
-            content: prefixes
-                .map((e) => aliasResolver.resolveAliases(e.content))
-                .join(', '),
-            isDark: isDark,
-          ),
-          const SizedBox(height: 8),
-        ],
 
         // 用户输入 - 解析别名
         if (userPrompt.trim().isNotEmpty) ...[
@@ -1123,20 +1090,6 @@ class _PositivePromptTooltip extends StatelessWidget {
         // 多角色提示词
         if (hasCharacters) ...[
           _buildCharacterSection(enabledCharacters, isDark),
-          const SizedBox(height: 8),
-        ],
-
-        // 固定词（后缀）- 解析别名
-        if (hasSuffixes) ...[
-          _buildSection(
-            icon: Icons.arrow_back_rounded,
-            label: l10n.fixedTags_suffix,
-            color: theme.colorScheme.tertiary,
-            content: suffixes
-                .map((e) => aliasResolver.resolveAliases(e.content))
-                .join(', '),
-            isDark: isDark,
-          ),
           const SizedBox(height: 8),
         ],
 
@@ -1342,13 +1295,6 @@ class _PositivePromptTooltip extends StatelessWidget {
   String _buildEffectivePrompt() {
     final parts = <String>[];
 
-    // 前缀
-    for (final p in prefixes) {
-      if (p.content.trim().isNotEmpty) {
-        parts.add(aliasResolver.resolveAliases(p.content.trim()));
-      }
-    }
-
     // 用户输入（解析别名）
     if (userPrompt.trim().isNotEmpty) {
       parts.add(aliasResolver.resolveAliases(userPrompt.trim()));
@@ -1365,13 +1311,6 @@ class _PositivePromptTooltip extends StatelessWidget {
     );
     for (final character in enabledCharacters) {
       parts.add(character.toNaiPrompt(useAiPosition: globalAiChoice));
-    }
-
-    // 后缀
-    for (final s in suffixes) {
-      if (s.content.trim().isNotEmpty) {
-        parts.add(aliasResolver.resolveAliases(s.content.trim()));
-      }
     }
 
     return parts.join(', ');
@@ -1489,8 +1428,6 @@ class _PositivePromptTooltip extends StatelessWidget {
 class _NegativePromptTooltip extends StatelessWidget {
   final ThemeData theme;
   final String userNegativePrompt;
-  final List<FixedTagEntry> prefixes;
-  final List<FixedTagEntry> suffixes;
   final String ucPresetContent;
   final AppLocalizations l10n;
   final AliasResolverService aliasResolver;
@@ -1498,8 +1435,6 @@ class _NegativePromptTooltip extends StatelessWidget {
   const _NegativePromptTooltip({
     required this.theme,
     required this.userNegativePrompt,
-    required this.prefixes,
-    required this.suffixes,
     required this.ucPresetContent,
     required this.l10n,
     required this.aliasResolver,
@@ -1509,8 +1444,6 @@ class _NegativePromptTooltip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = theme.brightness == Brightness.dark;
     final hasUserInput = userNegativePrompt.trim().isNotEmpty;
-    final hasPrefixes = prefixes.isNotEmpty;
-    final hasSuffixes = suffixes.isNotEmpty;
     final hasPreset = ucPresetContent.isNotEmpty;
 
     // 构建最终生效的完整负面提示词
@@ -1537,20 +1470,6 @@ class _NegativePromptTooltip extends StatelessWidget {
           const SizedBox(height: 8),
         ],
 
-        // 负向固定词（前缀）- 解析别名
-        if (hasPrefixes) ...[
-          _buildSection(
-            icon: Icons.arrow_forward_rounded,
-            label: l10n.prompt_negativeFixedTagPrefix,
-            color: theme.colorScheme.error,
-            content: prefixes
-                .map((entry) => aliasResolver.resolveAliases(entry.content))
-                .join(', '),
-            isDark: isDark,
-          ),
-          const SizedBox(height: 8),
-        ],
-
         // 用户输入 - 解析别名
         if (hasUserInput) ...[
           _buildSection(
@@ -1558,20 +1477,6 @@ class _NegativePromptTooltip extends StatelessWidget {
             label: l10n.prompt_mainNegative,
             color: theme.colorScheme.tertiary,
             content: aliasResolver.resolveAliases(userNegativePrompt.trim()),
-            isDark: isDark,
-          ),
-          const SizedBox(height: 8),
-        ],
-
-        // 负向固定词（后缀）- 解析别名
-        if (hasSuffixes) ...[
-          _buildSection(
-            icon: Icons.arrow_back_rounded,
-            label: l10n.prompt_negativeFixedTagSuffix,
-            color: theme.colorScheme.tertiary,
-            content: suffixes
-                .map((entry) => aliasResolver.resolveAliases(entry.content))
-                .join(', '),
             isDark: isDark,
           ),
           const SizedBox(height: 8),
@@ -1785,21 +1690,8 @@ class _NegativePromptTooltip extends StatelessWidget {
       parts.add(ucPresetContent);
     }
 
-    // 用户输入（解析别名）
-    for (final prefix in prefixes) {
-      if (prefix.content.trim().isNotEmpty) {
-        parts.add(aliasResolver.resolveAliases(prefix.content.trim()));
-      }
-    }
-
     if (userNegativePrompt.trim().isNotEmpty) {
       parts.add(aliasResolver.resolveAliases(userNegativePrompt.trim()));
-    }
-
-    for (final suffix in suffixes) {
-      if (suffix.content.trim().isNotEmpty) {
-        parts.add(aliasResolver.resolveAliases(suffix.content.trim()));
-      }
     }
 
     return parts.join(', ');

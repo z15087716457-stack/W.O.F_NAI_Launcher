@@ -27,7 +27,6 @@ import '../../../providers/generation/preview_selection_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
 import '../../../providers/character_position_canvas_provider.dart';
 import '../../../providers/character_prompt_provider.dart';
-import '../../../providers/fixed_tags_provider.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/local_gallery_provider.dart';
 import '../../../providers/quality_preset_provider.dart';
@@ -1042,7 +1041,6 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
         finalBytes = imageBytes;
       } else {
         final characterConfig = ref.read(characterPromptNotifierProvider);
-        final fixedTagsState = ref.read(fixedTagsNotifierProvider);
 
         // 解析别名
         final aliasResolver = ref.read(aliasResolverServiceProvider.notifier);
@@ -1050,11 +1048,6 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
         final resolvedNegative = aliasResolver.resolveAliases(
           params.negativePrompt,
         );
-        final promptWithFixedTags = fixedTagsState.applyToPrompt(
-          resolvedPrompt,
-        );
-        final negativePromptWithFixedTags = fixedTagsState
-            .applyToNegativePrompt(resolvedNegative);
         final qualityState = ref.read(qualityPresetNotifierProvider);
         final qualityContent = ref
             .read(qualityPresetNotifierProvider.notifier)
@@ -1064,8 +1057,8 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
             .read(ucPresetNotifierProvider.notifier)
             .getEffectiveContent(params.model);
         final presetResolution = resolvePromptPresetSettings(
-          prompt: promptWithFixedTags,
-          negativePrompt: negativePromptWithFixedTags,
+          prompt: resolvedPrompt,
+          negativePrompt: resolvedNegative,
           qualityMode: qualityState.mode,
           qualityContent: qualityContent,
           ucPresetType: ucState.presetType,
@@ -1108,22 +1101,6 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
           imageBytes: imageBytes,
           params: paramsForSave,
           actualSeed: actualSeed,
-          fixedPrefixTags: fixedTagsState.enabledPrefixes
-              .map((entry) => entry.weightedContent)
-              .where((content) => content.isNotEmpty)
-              .toList(growable: false),
-          fixedSuffixTags: fixedTagsState.enabledSuffixes
-              .map((entry) => entry.weightedContent)
-              .where((content) => content.isNotEmpty)
-              .toList(growable: false),
-          fixedNegativePrefixTags: fixedTagsState.negativeEnabledPrefixes
-              .map((entry) => entry.weightedContent)
-              .where((content) => content.isNotEmpty)
-              .toList(growable: false),
-          fixedNegativeSuffixTags: fixedTagsState.negativeEnabledSuffixes
-              .map((entry) => entry.weightedContent)
-              .where((content) => content.isNotEmpty)
-              .toList(growable: false),
           charCaptions: charCaptions,
           charNegCaptions: charNegCaptions,
           useCoords: !characterConfig.globalAiChoice,

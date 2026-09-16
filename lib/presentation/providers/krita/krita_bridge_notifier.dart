@@ -10,7 +10,6 @@ import '../../../core/enums/quality_tag_preset.dart';
 import '../../../core/krita/krita_bridge_server.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/datasources/remote/nai_image_generation_api_service.dart';
-import '../fixed_tags_provider.dart';
 import '../generation/image_workflow_controller.dart';
 import '../image_generation_provider.dart';
 import '../image_save_settings_provider.dart';
@@ -306,15 +305,8 @@ final kritaBridgeNotifierProvider =
           // P2.5：桥接生成受理后重 roll 随机块实例（逐张重抽）
           onGenerationEnqueued: () =>
               ref.read(pillRollCoordinatorProvider).rollAllLanesAndSync(),
-          readPromptSnapshot: (params) {
-            final fixedTags = ref.read(fixedTagsNotifierProvider);
-            return (
-              prompt: fixedTags.applyToPrompt(params.prompt),
-              negativePrompt: fixedTags.applyToNegativePrompt(
-                params.negativePrompt,
-              ),
-            );
-          },
+          readPromptSnapshot: (params) =>
+              (prompt: params.prompt, negativePrompt: params.negativePrompt),
           readMinimumContextPixels: () => ref
               .read(imageWorkflowControllerProvider)
               .minimumContextMegaPixels

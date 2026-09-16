@@ -8,13 +8,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/enums/precise_ref_type.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
-import 'package:nai_launcher/data/models/fixed_tag/fixed_tag_entry.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/models/metadata/metadata_import_options.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/l10n/app_localizations_en.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
-import 'package:nai_launcher/presentation/providers/fixed_tags_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/utils/metadata_import_coordinator.dart';
 
@@ -78,7 +76,6 @@ void main() {
       );
       const options = MetadataImportOptions(
         importNegativePrompt: false,
-        importFixedTags: false,
         importQualityTags: false,
         selectedCharacterIndices: [0],
         selectedVibeIndices: [0],
@@ -144,7 +141,6 @@ void main() {
         options: const MetadataImportOptions(
           importPrompt: false,
           importNegativePrompt: false,
-          importFixedTags: false,
           importQualityTags: false,
           selectedCharacterIndices: [0],
         ),
@@ -181,15 +177,6 @@ void main() {
     );
     paramsNotifier.updateNegativePrompt('old negative');
 
-    final fixedTagsNotifier = container.read(
-      fixedTagsNotifierProvider.notifier,
-    );
-    await fixedTagsNotifier.addEntry(
-      name: 'old fixed',
-      content: 'old fixed',
-      position: FixedTagPosition.prefix,
-    );
-
     const metadata = NaiImageMetadata(
       prompt: '1girl, best quality, masterpiece',
       characterPrompts: ['1girl, silver hair'],
@@ -211,15 +198,12 @@ void main() {
 
     final params = container.read(generationParamsNotifierProvider);
     final characters = container.read(characterPromptNotifierProvider);
-    final fixedTags = container.read(fixedTagsNotifierProvider);
     expect(params.prompt, metadata.prompt);
     expect(params.negativePrompt, isEmpty);
     expect(params.vibeReferencesV4, isEmpty);
     expect(params.preciseReferences, isEmpty);
     expect(characters.characters, hasLength(1));
     expect(characters.characters.single.prompt, '1girl, silver hair');
-    expect(fixedTags.entries, isEmpty);
-    expect(fixedTags.links, isEmpty);
   });
 
   test(

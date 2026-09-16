@@ -440,8 +440,6 @@
   "promptAssistant_enableAssistant": "启用提示词助手",
   "promptAssistant_desktopOverlay": "桌面右下角浮层",
   "kritaBridge_busyGenerating": "Krita Bridge 正在生成，请等待当前任务结束",
-  "prompt_negativeFixedTagPrefix": "负向固定词前缀",
-  "prompt_negativeFixedTagSuffix": "负向固定词后缀",
   "prompt_unwantedContent": "不想出现在图像中的内容...",
   "prompt_smartAutocomplete": "智能补全",
   "prompt_smartAutocompleteSubtitle": "输入时显示标签建议",
@@ -2534,154 +2532,8 @@
   "statistics_thursday": "周四",
   "statistics_friday": "周五",
   "statistics_saturday": "周六",
-  "fixedTags_label": "固定词",
-  "fixedTags_enabled": "已启用",
-  "fixedTags_empty": "暂无固定词",
-  "fixedTags_emptyHint": "点击下方按钮添加固定词，它们会自动应用到你的提示词中",
-  "fixedTags_manage": "管理固定词",
-  "fixedTags_add": "添加",
-  "fixedTags_edit": "编辑固定词",
-  "fixedTags_openLibrary": "打开词库",
-  "fixedTags_prefix": "前缀",
-  "fixedTags_suffix": "后缀",
-  "fixedTags_disabled": "已禁用",
-  "fixedTags_weight": "权重",
-  "fixedTags_position": "位置",
-  "fixedTags_name": "名称",
-  "fixedTags_nameHint": "输入备注名称（可选）",
-  "fixedTags_content": "内容",
-  "fixedTags_contentHint": "输入提示词内容，支持 NAI 语法",
   "fixedTags_syntaxHelp": "支持 NAI 语法增强/减弱权重、标签交替等",
-  "fixedTags_linkedFromLibrary": "关联自词库（双向同步）",
-  "fixedTags_scope": "作用范围",
-  "fixedTags_positive": "正向",
-  "fixedTags_negative": "负向",
-  "fixedTags_resetWeight": "重置为 1.0",
-  "fixedTags_weightPreview": "权重预览:",
-  "fixedTags_deleteTitle": "删除固定词",
-  "fixedTags_deleteConfirm": "确定要删除固定词 \"{name}\" 吗？",
-  "@fixedTags_deleteConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "fixedTags_enabledCount": "{enabled}/{total} 已启用",
-  "@fixedTags_enabledCount": {
-    "placeholders": {
-      "enabled": {},
-      "total": {}
-    }
-  },
-  "fixedTags_saveToLibrary": "同时保存到词库",
-  "fixedTags_saveToLibraryHint": "方便日后在词库中重复使用",
-  "fixedTags_saveToCategory": "保存到类别",
-  "fixedTags_clearAll": "清空",
-  "fixedTags_clearAllTitle": "清空所有固定词",
-  "fixedTags_clearAllConfirm": "确定要清空所有 {count} 个固定词吗？此操作不可撤销。",
-  "@fixedTags_clearAllConfirm": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "fixedTags_clearedSuccess": "已清空所有固定词",
-  "fixedTags_sidebarTitle": "固定词侧栏",
-  "fixedTags_switchGridView": "切换网格视图",
-  "fixedTags_switchListView": "切换列表视图",
-  "fixedTags_addPositive": "新增正向固定词",
-  "fixedTags_addNegative": "新增负向固定词",
-  "fixedTags_addPositiveFromLibrary": "从词库添加正向",
-  "fixedTags_addNegativeFromLibrary": "从词库添加负向",
-  "fixedTags_searchNameOrContent": "搜索名称或内容",
-  "fixedTags_clearSearch": "清空搜索",
-  "fixedTags_enabledPositive": "已启用正向",
-  "fixedTags_emptyEnabledPositive": "暂无启用的正向固定词",
-  "fixedTags_noMatchingEnabled": "没有匹配的启用固定词",
   "fixedTags_negativeTitle": "负向固定词",
-  "fixedTags_emptyNegative": "暂无负向固定词",
-  "fixedTags_noMatchingNegative": "没有匹配的负向固定词",
-  "fixedTags_addedToSidebar": "已添加到固定词侧栏",
-  "fixedTags_unknownCategory": "未知分类",
-  "fixedTags_uncategorized": "未分类",
-  "fixedTags_clickManageLongPressSidebar": "点击管理，长按打开侧栏",
-  "fixedTags_clickManageLongPressCompact": "点击管理，长按侧栏",
-  "fixedTags_linked": "联动",
-  "fixedTags_linkCount": "{count} 个联动",
-  "@fixedTags_linkCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "fixedTags_expandNegative": "展开负向",
-  "fixedTags_collapseNegative": "收起负向",
-  "fixedTags_undoTooltip": "撤销固定词操作",
-  "fixedTags_redoTooltip": "重做固定词操作",
-  "fixedTags_positiveTitle": "正向固定词",
-  "fixedTags_columnCount": "{enabled}/{total}",
-  "@fixedTags_columnCount": {
-    "placeholders": {
-      "enabled": {},
-      "total": {}
-    }
-  },
-  "fixedTags_columnFilteredCount": "{enabled}/{total} · 显示 {shown}",
-  "@fixedTags_columnFilteredCount": {
-    "placeholders": {
-      "enabled": {},
-      "total": {},
-      "shown": {}
-    }
-  },
-  "fixedTags_new": "新建",
-  "fixedTags_newTarget": "新建{target}",
-  "@fixedTags_newTarget": {
-    "placeholders": {
-      "target": {}
-    }
-  },
-  "fixedTags_library": "词库",
-  "fixedTags_addFromLibraryToTarget": "从词库添加到{target}",
-  "@fixedTags_addFromLibraryToTarget": {
-    "placeholders": {
-      "target": {}
-    }
-  },
-  "fixedTags_enableAll": "全开",
-  "fixedTags_disableAll": "全关",
-  "fixedTags_searchTarget": "搜索 {target}...",
-  "@fixedTags_searchTarget": {
-    "placeholders": {
-      "target": {}
-    }
-  },
-  "fixedTags_noMatching": "无匹配固定词",
-  "fixedTags_emptyTarget": "暂无{target}",
-  "@fixedTags_emptyTarget": {
-    "placeholders": {
-      "target": {}
-    }
-  },
-  "fixedTags_dragToLink": "拖拽创建联动",
-  "fixedTags_linkedToNames": "已联动：{names}",
-  "@fixedTags_linkedToNames": {
-    "placeholders": {
-      "names": {}
-    }
-  },
-  "fixedTags_linkInstruction": "拖拽正向固定词的关联图标到负向固定词即可创建联动",
-  "fixedTags_manageLinks": "管理联动",
-  "fixedTags_removeLink": "取消联动：{name}",
-  "@fixedTags_removeLink": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "fixedTags_footerExpandedHint": "在各列顶部新建或从词库添加",
-  "fixedTags_newPositive": "新建正向",
-  "fixedTags_addPositiveFromLibraryShort": "词库添加正向",
-  "fixedTags_libraryEmpty": "词库为空，请先添加条目",
-  "fixedTags_addFromLibrary": "从词库添加",
-  "fixedTags_searchLibraryEntries": "搜索词库条目...",
-  "fixedTags_noMatchingResults": "无匹配结果",
   "reversePrompt_title": "反推",
   "reversePrompt_pending": "待添加",
   "reversePrompt_imageCount": "{count} 张",
@@ -2848,11 +2700,9 @@
   "autocomplete_categoryGeneral": "通用",
   "promptToken_webCalibration": "网页端校准",
   "promptToken_prompt": "提示词",
-  "promptToken_fixedTags": "固定词",
   "promptToken_qualityPreset": "质量预设",
   "promptToken_character": "角色",
   "promptToken_negativePrompt": "负面提示词",
-  "promptToken_negativeFixedTags": "负面固定词",
   "promptToken_negativePreset": "负面预设",
   "promptToken_characterNegative": "角色负面",
   "common_rename": "重命名",
@@ -3064,7 +2914,6 @@
   "tagLibraryPicker_title": "选择词条",
   "tagLibraryPicker_searchHint": "搜索词条...",
   "tagLibraryPicker_allCategories": "全部分类",
-  "tagLibrary_addedToFixed": "已添加到固定词",
   "tagLibrary_entryMoved": "条目已移动到目标分类",
   "tagLibrary_useCount": "使用 {count} 次",
   "@tagLibrary_useCount": {
@@ -3161,8 +3010,6 @@
   "sendToHome_replaceCharacterSubtitle": "清空现有角色，添加为新角色",
   "sendToHome_appendCharacter": "追加角色提示词",
   "sendToHome_appendCharacterSubtitle": "保留现有角色，追加新角色",
-  "sendToHome_fixedTags": "发送到固定词",
-  "sendToHome_fixedTagsSubtitle": "追加到固定词列表",
   "sendToHome_sendAsAlias": "作为别名发送",
   "sendToHome_sendAsAliasSubtitle": "发送到主页时包装为 <{name}>",
   "@sendToHome_sendAsAliasSubtitle": {
@@ -3198,30 +3045,6 @@
   "metadataImport_prompt": "正向提示词",
   "metadataImport_mainPrompt": "主提示词",
   "metadataImport_fixedTags": "固定词",
-  "metadataImport_fixedPrefix": "前缀: {text}",
-  "@metadataImport_fixedPrefix": {
-    "placeholders": {
-      "text": {}
-    }
-  },
-  "metadataImport_fixedSuffix": "后缀: {text}",
-  "@metadataImport_fixedSuffix": {
-    "placeholders": {
-      "text": {}
-    }
-  },
-  "metadataImport_negativeFixedPrefix": "负向前缀: {text}",
-  "@metadataImport_negativeFixedPrefix": {
-    "placeholders": {
-      "text": {}
-    }
-  },
-  "metadataImport_negativeFixedSuffix": "负向后缀: {text}",
-  "@metadataImport_negativeFixedSuffix": {
-    "placeholders": {
-      "text": {}
-    }
-  },
   "metadataImport_qualityTagsCount": "质量词 ({count}个)",
   "@metadataImport_qualityTagsCount": {
     "placeholders": {
@@ -4670,7 +4493,6 @@
     }
   },
   "toast_smartDecomposeSent": "已智能分解并发送",
-  "toast_addedToFixedTags": "已添加到固定词",
   "toast_renameNameRequired": "名称不能为空",
   "toast_renameNameConflict": "名称已存在，请使用其他名称",
   "toast_renameEntryNotFound": "条目不存在，可能已被删除",
@@ -5516,8 +5338,6 @@
   "common_clickToRetry": "点击重试",
   "common_opening": "正在打开...",
   "common_swap": "交换",
-  "common_prefix": "前缀",
-  "common_suffix": "后缀",
   "common_minimum": "最小值",
   "common_maximum": "最大值",
   "addToLibrary_displayNameHint": "输入便于识别此条目的名称",
@@ -6009,47 +5829,47 @@
   "promptBlockLibrary_exportTxtFailed": "导出失败：{error}",
   "@promptBlockLibrary_exportTxtFailed": {
     "placeholders": {
-        "error": {
-          "type": "String"
-        }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "promptBlockLibrary_importTxtTitle": "选择 TXT 文件",
   "promptBlockLibrary_txtImportDone": "导入 {created} 个块，跳过 {skipped} 个已有来源",
   "@promptBlockLibrary_txtImportDone": {
     "placeholders": {
-        "created": {
-          "type": "int"
-        },
-        "skipped": {
-          "type": "int"
-        }
+      "created": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_curationTitle": "从文件夹导入",
   "promptBlockLibrary_curationSummary": "共 {total} 个 TXT：新增 {created} · 未变更 {skipped} · 已变更 {changed}",
   "@promptBlockLibrary_curationSummary": {
     "placeholders": {
-        "total": {
-          "type": "int"
-        },
-        "created": {
-          "type": "int"
-        },
-        "skipped": {
-          "type": "int"
-        },
-        "changed": {
-          "type": "int"
-        }
+      "total": {
+        "type": "int"
+      },
+      "created": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "changed": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_curationLocalModifiedHint": "其中 {count} 个块导入后手动修改过，更新会覆盖本地修改",
   "@promptBlockLibrary_curationLocalModifiedHint": {
     "placeholders": {
-        "count": {
-          "type": "int"
-        }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_curationUpdateChanged": "用文件内容更新已变更的块",
@@ -6057,15 +5877,15 @@
   "promptBlockLibrary_curationDone": "导入完成：新增 {created} · 更新 {updated} · 跳过 {skipped}",
   "@promptBlockLibrary_curationDone": {
     "placeholders": {
-        "created": {
-          "type": "int"
-        },
-        "updated": {
-          "type": "int"
-        },
-        "skipped": {
-          "type": "int"
-        }
+      "created": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_curationNew": "新增",
@@ -6075,9 +5895,9 @@
   "promptBlockLibrary_libraryBackupDone": "已导出 {count} 个块的库备份",
   "@promptBlockLibrary_libraryBackupDone": {
     "placeholders": {
-        "count": {
-          "type": "int"
-        }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_libraryImportTitle": "选择库备份文件",
@@ -6085,23 +5905,23 @@
   "promptBlockLibrary_libraryImportDone": "导入 {blocks} 个块、{folders} 个文件夹，跳过 {skipped} 个已存在",
   "@promptBlockLibrary_libraryImportDone": {
     "placeholders": {
-        "blocks": {
-          "type": "int"
-        },
-        "folders": {
-          "type": "int"
-        },
-        "skipped": {
-          "type": "int"
-        }
+      "blocks": {
+        "type": "int"
+      },
+      "folders": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_importFailed": "导入失败：{error}",
   "@promptBlockLibrary_importFailed": {
     "placeholders": {
-        "error": {
-          "type": "String"
-        }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "promptBlockLibrary_sourceFile": "来源文件",
@@ -6109,6 +5929,9 @@
   "promptBlockLibrary_listView": "列表视图",
   "promptBlockLibrary_gridView": "网格视图",
   "promptBlockLibrary_waterfallView": "瀑布流视图",
+  "promptBlockPalette_tooltip": "颜料版",
+  "promptBlockPalette_emptyHint": "把常用的块拖进来收纳；用的时候点一下插到光标处，或直接拖进提示词框",
+  "promptBlockPalette_remove": "从颜料版移除",
   "promptBlockLibrary_sortBy": "排序方式",
   "promptBlockLibrary_sortCustom": "默认（手动顺序）",
   "promptBlockLibrary_sortUpdated": "修改时间",
@@ -6142,13 +5965,40 @@
   "styleExplore_runNameLabel": "任务名称",
   "styleExplore_runNameHint": "例如：柔光画风 ×30",
   "styleExplore_runCreated": "已创建任务「{name}」",
-  "@styleExplore_runCreated": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_runCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_runDeleted": "已删除任务「{name}」",
-  "@styleExplore_runDeleted": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_runDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_runTotalCount": "共 {total} 张",
-  "@styleExplore_runTotalCount": {"placeholders": {"total": {"type": "int"}}},
+  "@styleExplore_runTotalCount": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_runGeneratingProgress": "第 {current}/{total} 张",
-  "@styleExplore_runGeneratingProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@styleExplore_runGeneratingProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_runStatusDraft": "草稿",
   "styleExplore_runStatusGenerating": "生成中",
   "styleExplore_runStatusPaused": "已暂停",
@@ -6160,18 +6010,42 @@
   "styleExplore_unarchive": "取消归档",
   "styleExplore_loadSnapshot": "载入快照到编辑器",
   "styleExplore_snapshotLoaded": "已载入「{name}」的快照",
-  "@styleExplore_snapshotLoaded": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_snapshotLoaded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_pauseRun": "暂停",
   "styleExplore_cancelRun": "取消任务",
   "styleExplore_retryFailed": "重试失败（{count}）",
-  "@styleExplore_retryFailed": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_retryFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_targetCountLabel": "出图数",
   "styleExplore_manualRunName": "手动候选 {time}",
-  "@styleExplore_manualRunName": {"placeholders": {"time": {"type": "String"}}},
+  "@styleExplore_manualRunName": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_runBusy": "生成进行中，稍后再试",
   "styleExplore_deleteRunTitle": "删除探索任务",
   "styleExplore_deleteRunMessage": "将删除「{name}」及其候选图副本；图库中的源图不受影响。",
-  "@styleExplore_deleteRunMessage": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_deleteRunMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_cancelRunTitle": "取消探索任务",
   "styleExplore_cancelRunMessage": "取消后不可再启动；剩余待生成候选将标记为已取消。",
   "styleExplore_filterAll": "全部",
@@ -6180,27 +6054,66 @@
   "styleExplore_renameFolder": "重命名文件夹",
   "styleExplore_deleteFolder": "删除文件夹",
   "styleExplore_deleteFolderMessage": "将删除文件夹「{name}」；其中的候选回到未分类，图片不会被删除。",
-  "@styleExplore_deleteFolderMessage": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_deleteFolderMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_folderNameLabel": "文件夹名称",
   "styleExplore_folderUncategorized": "未分类",
   "styleExplore_folderCreated": "已创建文件夹「{name}」",
-  "@styleExplore_folderCreated": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_folderCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_assignToFolder": "归类到",
   "styleExplore_candidateMissing": "图片文件缺失",
   "styleExplore_candidateDetailTitle": "候选详情",
   "styleExplore_candidatePosition": "第 {current}/{total} 张",
-  "@styleExplore_candidatePosition": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@styleExplore_candidatePosition": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_prevCandidate": "上一张",
   "styleExplore_nextCandidate": "下一张",
   "styleExplore_rollSnapshot": "Roll 快照",
   "styleExplore_seedLabel": "Seed {seed}",
-  "@styleExplore_seedLabel": {"placeholders": {"seed": {"type": "String"}}},
+  "@styleExplore_seedLabel": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_roundNumber": "第 {number} 轮",
-  "@styleExplore_roundNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@styleExplore_roundNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_adoptAsBlock": "收编为块",
   "styleExplore_adoptBlockNameLabel": "块名称",
   "styleExplore_adoptBlockSaved": "已收编为块「{name}」",
-  "@styleExplore_adoptBlockSaved": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_adoptBlockSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_adoptBlockEmpty": "所选候选没有可用的 Roll 串",
   "styleExplore_fixateAsTemplate": "导入元数据",
   "styleExplore_fixateDone": "已导入元数据到编辑区",
@@ -6210,33 +6123,78 @@
   "styleExplore_deleteImageDone": "已删除候选图与记录",
   "styleExplore_selectCandidates": "多选",
   "styleExplore_selectedCount": "已选 {count} 张",
-  "@styleExplore_selectedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_mergeAdopt": "合并收编",
   "styleExplore_noRunsYet": "还没有探索任务",
   "promptBlockEditor_library": "块库",
   "styleExplore_lineageTitle": "谱系",
   "styleExplore_createFamily": "建家族",
   "styleExplore_familyCreated": "已创建家族「{name}」",
-  "@styleExplore_familyCreated": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_familyCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_familyNameLabel": "家族名称",
   "styleExplore_familyNameHint": "例如：柔光主线",
   "styleExplore_familyParentsTitle": "父本（{count}）",
-  "@styleExplore_familyParentsTitle": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_familyParentsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_customParentLabel": "自定义父本串",
   "styleExplore_customParentHint": "输入一段提示词串作为父本",
   "styleExplore_addCustomParent": "添加自定义串",
   "styleExplore_createFamilyEmpty": "请至少保留一个有效父本串",
   "styleExplore_parentSetTitle": "第 {generation} 代父本集",
-  "@styleExplore_parentSetTitle": {"placeholders": {"generation": {"type": "int"}}},
+  "@styleExplore_parentSetTitle": {
+    "placeholders": {
+      "generation": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_candidatePileTitle": "第 {generation} 代候选堆 · {count} 张",
-  "@styleExplore_candidatePileTitle": {"placeholders": {"generation": {"type": "int"}, "count": {"type": "int"}}},
+  "@styleExplore_candidatePileTitle": {
+    "placeholders": {
+      "generation": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_parentSetActive": "活跃",
   "styleExplore_parentSetUsed": "已回交",
   "styleExplore_branchLabel": "分支：{name}",
-  "@styleExplore_branchLabel": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_branchLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_createDeepRound": "生成候选图",
   "styleExplore_deepRoundCountHint": "出图数至少 {min}（每个父本保底一张）",
-  "@styleExplore_deepRoundCountHint": {"placeholders": {"min": {"type": "int"}}},
+  "@styleExplore_deepRoundCountHint": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_deepRoundNoInstance": "主提示词中没有启用的随机遗传块，无法进行深度轮",
   "styleExplore_deepRoundEmpty": "变异引擎无法产出足够不同的子代串",
   "styleExplore_sortParents": "A/B 组对照",
@@ -6247,28 +6205,67 @@
   "styleExplore_sortNeither": "都不好",
   "styleExplore_sortSkip": "跳过",
   "styleExplore_sortProgress": "第 {current}/{total} 对",
-  "@styleExplore_sortProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@styleExplore_sortProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_sortDone": "排序完成",
   "styleExplore_branchSelect": "多选建分支",
   "styleExplore_createBranch": "建分支",
   "styleExplore_branchNameLabel": "分支名称（可选）",
   "styleExplore_branchCreated": "已创建分支（{count} 个父本）",
-  "@styleExplore_branchCreated": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_branchCreated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_branchNeedLatest": "只能从最新代候选堆建分支",
   "styleExplore_branchRoundsIncomplete": "当前代还有未完成的候选轮",
   "styleExplore_branchDuplicate": "所选子代与第一代父本串完全重复",
   "styleExplore_branchEmpty": "请至少选择一张子代候选",
   "styleExplore_preferenceValue": "偏好 {value}",
-  "@styleExplore_preferenceValue": {"placeholders": {"value": {"type": "String"}}},
+  "@styleExplore_preferenceValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_roundsSummary": "{count} 轮",
-  "@styleExplore_roundsSummary": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_roundsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_pileEmpty": "尚无候选图，点上方「生成候选图」开始",
   "styleExplore_managePile": "管理",
   "styleExplore_pileManageDeleteTitle": "删除所选候选图",
   "styleExplore_pileManageDeleteMessage": "将删除 {count} 张候选在 Run 目录中的图片副本与候选记录；图库源图不受影响。",
-  "@styleExplore_pileManageDeleteMessage": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_pileManageDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_pileManageDeleteDone": "已删除 {count} 张候选图与记录",
-  "@styleExplore_pileManageDeleteDone": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_pileManageDeleteDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "subscriptionExpiresOn": "到期 {date}",
   "@subscriptionExpiresOn": {
     "placeholders": {

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -13,8 +12,6 @@ import 'package:nai_launcher/core/utils/image_save_utils.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_service.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_generation_api_service.dart';
-import 'package:nai_launcher/data/models/fixed_tag/fixed_tag_entry.dart';
-import 'package:nai_launcher/data/models/fixed_tag/fixed_tag_prompt_type.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/services/metadata/unified_metadata_parser.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
@@ -158,7 +155,7 @@ void main() {
     });
 
     test(
-      'generate applies positive and negative fixed tags before request',
+      'generate sends prompts unchanged without hidden composition',
       () async {
         final mockApiService = MockNAIImageGenerationApiService();
         ImageParams? capturedParams;
@@ -184,39 +181,6 @@ void main() {
           ),
         ).thenAnswer((_) => const Stream.empty());
 
-        final fixedEntries = [
-          FixedTagEntry.create(
-            name: 'positive-prefix',
-            content: 'masterpiece',
-            position: FixedTagPosition.prefix,
-            sortOrder: 0,
-          ),
-          FixedTagEntry.create(
-            name: 'positive-suffix',
-            content: 'cinematic lighting',
-            position: FixedTagPosition.suffix,
-            sortOrder: 1,
-          ),
-          FixedTagEntry.create(
-            name: 'negative-prefix',
-            content: 'bad anatomy',
-            position: FixedTagPosition.prefix,
-            promptType: FixedTagPromptType.negative,
-            sortOrder: 2,
-          ),
-          FixedTagEntry.create(
-            name: 'negative-suffix',
-            content: 'text',
-            position: FixedTagPosition.suffix,
-            promptType: FixedTagPromptType.negative,
-            sortOrder: 3,
-          ),
-        ];
-        await Hive.box(StorageKeys.settingsBox).put(
-          StorageKeys.fixedTagsData,
-          jsonEncode(fixedEntries.map((entry) => entry.toJson()).toList()),
-        );
-
         container.dispose();
         container = ProviderContainer(
           overrides: [
@@ -241,14 +205,8 @@ void main() {
             .generate(params);
 
         expect(capturedParams, isNotNull);
-        expect(
-          capturedParams!.prompt,
-          equals('masterpiece, 1girl, cinematic lighting'),
-        );
-        expect(
-          capturedParams!.negativePrompt,
-          equals('bad anatomy, bad hands, text'),
-        );
+        expect(capturedParams!.prompt, equals('1girl'));
+        expect(capturedParams!.negativePrompt, equals('bad hands'));
         final subscriptionNotifier =
             container.read(subscriptionNotifierProvider.notifier)
                 as TestSubscriptionNotifier;

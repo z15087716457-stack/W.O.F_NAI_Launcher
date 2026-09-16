@@ -2,13 +2,21 @@
 ///
 /// 正文和标题必须从当前块库读取，避免拖拽快照与库状态分叉。
 class PromptBlockDragData {
-  const PromptBlockDragData({required this.blockId, this.instanceMarker});
+  const PromptBlockDragData({
+    required this.blockId,
+    this.instanceMarker,
+    this.paletteIndex,
+  });
 
   final String blockId;
 
   /// 药丸编辑器专用：文内拖动时已存在实例的定位信息。
   /// null 表示从块库拖入的新块。
   final PillInstanceDragRef? instanceMarker;
+
+  /// 颜料版内部拖序用：该块在板上的当前下标；null = 非颜料版来源。
+  /// 药丸编辑器不读此字段。
+  final int? paletteIndex;
 }
 
 /// 文内拖动药丸的定位信息：标记字符 + 第几次出现

@@ -98,7 +98,7 @@ void main() {
       );
 
       final tooltip = tester.widget<Tooltip>(find.byType(Tooltip));
-      expect(tooltip.message, equals('提示词 100\n固定词 28\n网页端校准 1'));
+      expect(tooltip.message, equals('提示词 108\n固定词 20\n网页端校准 1'));
     });
 
     testWidgets('keeps previous token usage while reloading', (tester) async {

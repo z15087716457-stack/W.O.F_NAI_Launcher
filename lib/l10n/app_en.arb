@@ -475,8 +475,6 @@
   "promptAssistant_enableAssistant": "Enable Prompt Assistant",
   "promptAssistant_desktopOverlay": "Desktop bottom-right overlay",
   "kritaBridge_busyGenerating": "Krita Bridge is generating. Wait for the current task to finish.",
-  "prompt_negativeFixedTagPrefix": "Undesired Content Fixed Tag Prefix",
-  "prompt_negativeFixedTagSuffix": "Undesired Content Fixed Tag Suffix",
   "prompt_unwantedContent": "Content you don't want in the image...",
   "prompt_smartAutocomplete": "Smart Autocomplete",
   "prompt_smartAutocompleteSubtitle": "Show tag suggestions while typing",
@@ -2540,154 +2538,8 @@
   "statistics_thursday": "Thu",
   "statistics_friday": "Fri",
   "statistics_saturday": "Sat",
-  "fixedTags_label": "Fixed Tags",
-  "fixedTags_enabled": "Enabled",
-  "fixedTags_empty": "No fixed tags",
-  "fixedTags_emptyHint": "Click the button below to add fixed tags, they will be automatically applied to your prompts",
-  "fixedTags_manage": "Manage Fixed Tags",
-  "fixedTags_add": "Add",
-  "fixedTags_edit": "Edit Fixed Tag",
-  "fixedTags_openLibrary": "Open Library",
-  "fixedTags_prefix": "Prefix",
-  "fixedTags_suffix": "Suffix",
-  "fixedTags_disabled": "Disabled",
-  "fixedTags_weight": "Weight",
-  "fixedTags_position": "Position",
-  "fixedTags_name": "Name",
-  "fixedTags_nameHint": "Enter a display name (optional)",
-  "fixedTags_content": "Content",
-  "fixedTags_contentHint": "Enter prompt content, NAI syntax supported",
   "fixedTags_syntaxHelp": "Supports NAI syntax for weight enhancement/reduction and tag alternation",
-  "fixedTags_linkedFromLibrary": "Linked from library (two-way sync)",
-  "fixedTags_scope": "Scope",
-  "fixedTags_positive": "Prompt",
-  "fixedTags_negative": "Undesired Content",
-  "fixedTags_resetWeight": "Reset to 1.0",
-  "fixedTags_weightPreview": "Weight preview:",
-  "fixedTags_deleteTitle": "Delete Fixed Tag",
-  "fixedTags_deleteConfirm": "Are you sure you want to delete \"{name}\"?",
-  "@fixedTags_deleteConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "fixedTags_enabledCount": "{enabled}/{total} enabled",
-  "@fixedTags_enabledCount": {
-    "placeholders": {
-      "enabled": {},
-      "total": {}
-    }
-  },
-  "fixedTags_saveToLibrary": "Also save to library",
-  "fixedTags_saveToLibraryHint": "For reuse in the tag library later",
-  "fixedTags_saveToCategory": "Save to category",
-  "fixedTags_clearAll": "Clear All",
-  "fixedTags_clearAllTitle": "Clear All Fixed Tags",
-  "fixedTags_clearAllConfirm": "Are you sure you want to clear all {count} fixed tags? This action cannot be undone.",
-  "@fixedTags_clearAllConfirm": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "fixedTags_clearedSuccess": "All fixed tags cleared",
-  "fixedTags_sidebarTitle": "Fixed Tags Sidebar",
-  "fixedTags_switchGridView": "Switch to Grid View",
-  "fixedTags_switchListView": "Switch to List View",
-  "fixedTags_addPositive": "Add Prompt Fixed Tag",
-  "fixedTags_addNegative": "Add Undesired Content Fixed Tag",
-  "fixedTags_addPositiveFromLibrary": "Add Prompt from Library",
-  "fixedTags_addNegativeFromLibrary": "Add Undesired Content from Library",
-  "fixedTags_searchNameOrContent": "Search name or content",
-  "fixedTags_clearSearch": "Clear Search",
-  "fixedTags_enabledPositive": "Enabled Prompt",
-  "fixedTags_emptyEnabledPositive": "No enabled prompt fixed tags",
-  "fixedTags_noMatchingEnabled": "No matching enabled fixed tags",
   "fixedTags_negativeTitle": "Undesired Content Fixed Tags",
-  "fixedTags_emptyNegative": "No Undesired Content fixed tags",
-  "fixedTags_noMatchingNegative": "No matching Undesired Content fixed tags",
-  "fixedTags_addedToSidebar": "Added to fixed tags sidebar",
-  "fixedTags_unknownCategory": "Unknown Category",
-  "fixedTags_uncategorized": "Uncategorized",
-  "fixedTags_clickManageLongPressSidebar": "Click to manage, long-press to open sidebar",
-  "fixedTags_clickManageLongPressCompact": "Click to manage, long-press sidebar",
-  "fixedTags_linked": "Linked",
-  "fixedTags_linkCount": "{count} linked",
-  "@fixedTags_linkCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "fixedTags_expandNegative": "Expand Undesired Content",
-  "fixedTags_collapseNegative": "Collapse Undesired Content",
-  "fixedTags_undoTooltip": "Undo fixed tag operation",
-  "fixedTags_redoTooltip": "Redo fixed tag operation",
-  "fixedTags_positiveTitle": "Prompt Fixed Tags",
-  "fixedTags_columnCount": "{enabled}/{total}",
-  "@fixedTags_columnCount": {
-    "placeholders": {
-      "enabled": {},
-      "total": {}
-    }
-  },
-  "fixedTags_columnFilteredCount": "{enabled}/{total} · showing {shown}",
-  "@fixedTags_columnFilteredCount": {
-    "placeholders": {
-      "enabled": {},
-      "total": {},
-      "shown": {}
-    }
-  },
-  "fixedTags_new": "New",
-  "fixedTags_newTarget": "New {target}",
-  "@fixedTags_newTarget": {
-    "placeholders": {
-      "target": {}
-    }
-  },
-  "fixedTags_library": "Library",
-  "fixedTags_addFromLibraryToTarget": "Add from library to {target}",
-  "@fixedTags_addFromLibraryToTarget": {
-    "placeholders": {
-      "target": {}
-    }
-  },
-  "fixedTags_enableAll": "Enable All",
-  "fixedTags_disableAll": "Disable All",
-  "fixedTags_searchTarget": "Search {target}...",
-  "@fixedTags_searchTarget": {
-    "placeholders": {
-      "target": {}
-    }
-  },
-  "fixedTags_noMatching": "No matching fixed tags",
-  "fixedTags_emptyTarget": "No {target}",
-  "@fixedTags_emptyTarget": {
-    "placeholders": {
-      "target": {}
-    }
-  },
-  "fixedTags_dragToLink": "Drag to create link",
-  "fixedTags_linkedToNames": "Linked: {names}",
-  "@fixedTags_linkedToNames": {
-    "placeholders": {
-      "names": {}
-    }
-  },
-  "fixedTags_linkInstruction": "Drag the link icon from a prompt fixed tag to an Undesired Content fixed tag to create a link",
-  "fixedTags_manageLinks": "Manage Links",
-  "fixedTags_removeLink": "Remove link: {name}",
-  "@fixedTags_removeLink": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "fixedTags_footerExpandedHint": "Create or add from the library at the top of each column",
-  "fixedTags_newPositive": "New Prompt",
-  "fixedTags_addPositiveFromLibraryShort": "Add Prompt from Library",
-  "fixedTags_libraryEmpty": "Library is empty. Add entries first",
-  "fixedTags_addFromLibrary": "Add from Library",
-  "fixedTags_searchLibraryEntries": "Search library entries...",
-  "fixedTags_noMatchingResults": "No matching results",
   "reversePrompt_title": "Reverse Prompt",
   "reversePrompt_pending": "Pending",
   "reversePrompt_imageCount": "{count} image(s)",
@@ -2854,11 +2706,9 @@
   "autocomplete_categoryGeneral": "General",
   "promptToken_webCalibration": "Web calibration",
   "promptToken_prompt": "Prompt",
-  "promptToken_fixedTags": "Fixed Tags",
   "promptToken_qualityPreset": "Quality Preset",
   "promptToken_character": "Character",
   "promptToken_negativePrompt": "Undesired Content",
-  "promptToken_negativeFixedTags": "Undesired Content Fixed Tags",
   "promptToken_negativePreset": "Undesired Content Preset",
   "promptToken_characterNegative": "Character Undesired Content",
   "common_rename": "Rename",
@@ -3070,7 +2920,6 @@
   "tagLibraryPicker_title": "Select Entry",
   "tagLibraryPicker_searchHint": "Search entries...",
   "tagLibraryPicker_allCategories": "All Categories",
-  "tagLibrary_addedToFixed": "Added to Fixed Tags",
   "tagLibrary_entryMoved": "Entry moved to target category",
   "tagLibrary_useCount": "Used {count} times",
   "@tagLibrary_useCount": {
@@ -3167,8 +3016,6 @@
   "sendToHome_replaceCharacterSubtitle": "Clear existing characters and add as new",
   "sendToHome_appendCharacter": "Append Character Prompt",
   "sendToHome_appendCharacterSubtitle": "Keep existing characters and append new",
-  "sendToHome_fixedTags": "Send to Fixed Tags",
-  "sendToHome_fixedTagsSubtitle": "Append to the fixed tag list",
   "sendToHome_sendAsAlias": "Send as Alias",
   "sendToHome_sendAsAliasSubtitle": "Wrap as <{name}> when sending to home",
   "@sendToHome_sendAsAliasSubtitle": {
@@ -3204,30 +3051,6 @@
   "metadataImport_prompt": "Prompt",
   "metadataImport_mainPrompt": "Main Prompt",
   "metadataImport_fixedTags": "Fixed Tags",
-  "metadataImport_fixedPrefix": "Prefix: {text}",
-  "@metadataImport_fixedPrefix": {
-    "placeholders": {
-      "text": {}
-    }
-  },
-  "metadataImport_fixedSuffix": "Suffix: {text}",
-  "@metadataImport_fixedSuffix": {
-    "placeholders": {
-      "text": {}
-    }
-  },
-  "metadataImport_negativeFixedPrefix": "Undesired Content Prefix: {text}",
-  "@metadataImport_negativeFixedPrefix": {
-    "placeholders": {
-      "text": {}
-    }
-  },
-  "metadataImport_negativeFixedSuffix": "Undesired Content Suffix: {text}",
-  "@metadataImport_negativeFixedSuffix": {
-    "placeholders": {
-      "text": {}
-    }
-  },
   "metadataImport_qualityTagsCount": "Quality Tags ({count})",
   "@metadataImport_qualityTagsCount": {
     "placeholders": {
@@ -4921,7 +4744,6 @@
     }
   },
   "toast_smartDecomposeSent": "Smart decomposed and sent",
-  "toast_addedToFixedTags": "Added to fixed tags",
   "toast_renameNameRequired": "Name is required",
   "toast_renameNameConflict": "Name already exists. Use another name.",
   "toast_renameEntryNotFound": "The entry no longer exists and may have been deleted",
@@ -5516,8 +5338,6 @@
   "common_clickToRetry": "Click to retry",
   "common_opening": "Opening...",
   "common_swap": "Swap",
-  "common_prefix": "Prefix",
-  "common_suffix": "Suffix",
   "common_minimum": "Minimum",
   "common_maximum": "Maximum",
   "addToLibrary_displayNameHint": "Enter a name to identify this entry",
@@ -6009,47 +5829,47 @@
   "promptBlockLibrary_exportTxtFailed": "Export failed: {error}",
   "@promptBlockLibrary_exportTxtFailed": {
     "placeholders": {
-        "error": {
-          "type": "String"
-        }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "promptBlockLibrary_importTxtTitle": "Select TXT files",
   "promptBlockLibrary_txtImportDone": "Imported {created} blocks, skipped {skipped} existing sources",
   "@promptBlockLibrary_txtImportDone": {
     "placeholders": {
-        "created": {
-          "type": "int"
-        },
-        "skipped": {
-          "type": "int"
-        }
+      "created": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_curationTitle": "Import from folder",
   "promptBlockLibrary_curationSummary": "{total} TXT files: {created} new · {skipped} unchanged · {changed} changed",
   "@promptBlockLibrary_curationSummary": {
     "placeholders": {
-        "total": {
-          "type": "int"
-        },
-        "created": {
-          "type": "int"
-        },
-        "skipped": {
-          "type": "int"
-        },
-        "changed": {
-          "type": "int"
-        }
+      "total": {
+        "type": "int"
+      },
+      "created": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "changed": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_curationLocalModifiedHint": "{count} blocks were manually edited after import; updating overwrites local edits",
   "@promptBlockLibrary_curationLocalModifiedHint": {
     "placeholders": {
-        "count": {
-          "type": "int"
-        }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_curationUpdateChanged": "Update changed blocks with file content",
@@ -6057,15 +5877,15 @@
   "promptBlockLibrary_curationDone": "Done: {created} created · {updated} updated · {skipped} skipped",
   "@promptBlockLibrary_curationDone": {
     "placeholders": {
-        "created": {
-          "type": "int"
-        },
-        "updated": {
-          "type": "int"
-        },
-        "skipped": {
-          "type": "int"
-        }
+      "created": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_curationNew": "New",
@@ -6075,9 +5895,9 @@
   "promptBlockLibrary_libraryBackupDone": "Exported backup with {count} blocks",
   "@promptBlockLibrary_libraryBackupDone": {
     "placeholders": {
-        "count": {
-          "type": "int"
-        }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_libraryImportTitle": "Select library backup",
@@ -6085,23 +5905,23 @@
   "promptBlockLibrary_libraryImportDone": "Imported {blocks} blocks and {folders} folders, skipped {skipped} existing",
   "@promptBlockLibrary_libraryImportDone": {
     "placeholders": {
-        "blocks": {
-          "type": "int"
-        },
-        "folders": {
-          "type": "int"
-        },
-        "skipped": {
-          "type": "int"
-        }
+      "blocks": {
+        "type": "int"
+      },
+      "folders": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
     }
   },
   "promptBlockLibrary_importFailed": "Import failed: {error}",
   "@promptBlockLibrary_importFailed": {
     "placeholders": {
-        "error": {
-          "type": "String"
-        }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "promptBlockLibrary_sourceFile": "Source file",
@@ -6109,6 +5929,9 @@
   "promptBlockLibrary_listView": "List view",
   "promptBlockLibrary_gridView": "Grid view",
   "promptBlockLibrary_waterfallView": "Waterfall view",
+  "promptBlockPalette_tooltip": "Palette",
+  "promptBlockPalette_emptyHint": "Drag blocks here to keep them handy; tap to insert at the caret, or drag into the prompt box",
+  "promptBlockPalette_remove": "Remove from palette",
   "promptBlockLibrary_sortBy": "Sort by",
   "promptBlockLibrary_sortCustom": "Default (manual order)",
   "promptBlockLibrary_sortUpdated": "Last modified",
@@ -6142,13 +5965,40 @@
   "styleExplore_runNameLabel": "Run name",
   "styleExplore_runNameHint": "e.g. Soft light ×30",
   "styleExplore_runCreated": "Created \"{name}\"",
-  "@styleExplore_runCreated": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_runCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_runDeleted": "Deleted \"{name}\"",
-  "@styleExplore_runDeleted": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_runDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_runTotalCount": "Total {total} images",
-  "@styleExplore_runTotalCount": {"placeholders": {"total": {"type": "int"}}},
+  "@styleExplore_runTotalCount": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_runGeneratingProgress": "Image {current}/{total}",
-  "@styleExplore_runGeneratingProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@styleExplore_runGeneratingProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_runStatusDraft": "Draft",
   "styleExplore_runStatusGenerating": "Generating",
   "styleExplore_runStatusPaused": "Paused",
@@ -6160,18 +6010,42 @@
   "styleExplore_unarchive": "Unarchive",
   "styleExplore_loadSnapshot": "Load snapshot to editor",
   "styleExplore_snapshotLoaded": "Loaded snapshot of \"{name}\"",
-  "@styleExplore_snapshotLoaded": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_snapshotLoaded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_pauseRun": "Pause",
   "styleExplore_cancelRun": "Cancel run",
   "styleExplore_retryFailed": "Retry failed ({count})",
-  "@styleExplore_retryFailed": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_retryFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_targetCountLabel": "Images",
   "styleExplore_manualRunName": "Manual capture {time}",
-  "@styleExplore_manualRunName": {"placeholders": {"time": {"type": "String"}}},
+  "@styleExplore_manualRunName": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_runBusy": "Generation busy, try again later",
   "styleExplore_deleteRunTitle": "Delete explore run",
   "styleExplore_deleteRunMessage": "Deletes \"{name}\" and its candidate image copies; source images in the gallery are not affected.",
-  "@styleExplore_deleteRunMessage": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_deleteRunMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_cancelRunTitle": "Cancel explore run",
   "styleExplore_cancelRunMessage": "A cancelled run cannot be restarted; remaining pending candidates will be marked as cancelled.",
   "styleExplore_filterAll": "All",
@@ -6180,27 +6054,66 @@
   "styleExplore_renameFolder": "Rename folder",
   "styleExplore_deleteFolder": "Delete folder",
   "styleExplore_deleteFolderMessage": "Deletes the folder \"{name}\". Its candidates go back to Uncategorized; images are kept.",
-  "@styleExplore_deleteFolderMessage": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_deleteFolderMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_folderNameLabel": "Folder name",
   "styleExplore_folderUncategorized": "Uncategorized",
   "styleExplore_folderCreated": "Folder \"{name}\" created",
-  "@styleExplore_folderCreated": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_folderCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_assignToFolder": "Move to",
   "styleExplore_candidateMissing": "Image file missing",
   "styleExplore_candidateDetailTitle": "Candidate detail",
   "styleExplore_candidatePosition": "Image {current}/{total}",
-  "@styleExplore_candidatePosition": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@styleExplore_candidatePosition": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_prevCandidate": "Previous",
   "styleExplore_nextCandidate": "Next",
   "styleExplore_rollSnapshot": "Roll snapshot",
   "styleExplore_seedLabel": "Seed {seed}",
-  "@styleExplore_seedLabel": {"placeholders": {"seed": {"type": "String"}}},
+  "@styleExplore_seedLabel": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_roundNumber": "Round {number}",
-  "@styleExplore_roundNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@styleExplore_roundNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_adoptAsBlock": "Adopt as block",
   "styleExplore_adoptBlockNameLabel": "Block name",
   "styleExplore_adoptBlockSaved": "Adopted as block \"{name}\"",
-  "@styleExplore_adoptBlockSaved": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_adoptBlockSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_adoptBlockEmpty": "Selected candidates have no roll text",
   "styleExplore_fixateAsTemplate": "Import metadata",
   "styleExplore_fixateDone": "Metadata imported to editor",
@@ -6210,33 +6123,78 @@
   "styleExplore_deleteImageDone": "Candidate image and record deleted",
   "styleExplore_selectCandidates": "Select",
   "styleExplore_selectedCount": "{count} selected",
-  "@styleExplore_selectedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_mergeAdopt": "Merge & adopt",
   "styleExplore_noRunsYet": "No explore runs yet",
   "promptBlockEditor_library": "Block library",
   "styleExplore_lineageTitle": "Lineage",
   "styleExplore_createFamily": "Create family",
   "styleExplore_familyCreated": "Family \"{name}\" created",
-  "@styleExplore_familyCreated": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_familyCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_familyNameLabel": "Family name",
   "styleExplore_familyNameHint": "e.g. Soft light main line",
   "styleExplore_familyParentsTitle": "Parents ({count})",
-  "@styleExplore_familyParentsTitle": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_familyParentsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_customParentLabel": "Custom parent string",
   "styleExplore_customParentHint": "Enter a prompt string as a parent",
   "styleExplore_addCustomParent": "Add custom string",
   "styleExplore_createFamilyEmpty": "Keep at least one valid parent string",
   "styleExplore_parentSetTitle": "Gen {generation} parent set",
-  "@styleExplore_parentSetTitle": {"placeholders": {"generation": {"type": "int"}}},
+  "@styleExplore_parentSetTitle": {
+    "placeholders": {
+      "generation": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_candidatePileTitle": "Gen {generation} pile · {count}",
-  "@styleExplore_candidatePileTitle": {"placeholders": {"generation": {"type": "int"}, "count": {"type": "int"}}},
+  "@styleExplore_candidatePileTitle": {
+    "placeholders": {
+      "generation": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_parentSetActive": "Active",
   "styleExplore_parentSetUsed": "Backcrossed",
   "styleExplore_branchLabel": "Branch: {name}",
-  "@styleExplore_branchLabel": {"placeholders": {"name": {"type": "String"}}},
+  "@styleExplore_branchLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_createDeepRound": "Generate candidates",
   "styleExplore_deepRoundCountHint": "Count must be at least {min} (one per parent)",
-  "@styleExplore_deepRoundCountHint": {"placeholders": {"min": {"type": "int"}}},
+  "@styleExplore_deepRoundCountHint": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_deepRoundNoInstance": "No enabled random evolution block in the main prompt; deep round unavailable",
   "styleExplore_deepRoundEmpty": "Mutation engine could not produce enough distinct children",
   "styleExplore_sortParents": "A/B comparison",
@@ -6247,28 +6205,67 @@
   "styleExplore_sortNeither": "Neither",
   "styleExplore_sortSkip": "Skip",
   "styleExplore_sortProgress": "Pair {current}/{total}",
-  "@styleExplore_sortProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@styleExplore_sortProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_sortDone": "Ranking finished",
   "styleExplore_branchSelect": "Select for branch",
   "styleExplore_createBranch": "Create branch",
   "styleExplore_branchNameLabel": "Branch name (optional)",
   "styleExplore_branchCreated": "Branch created ({count} parents)",
-  "@styleExplore_branchCreated": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_branchCreated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_branchNeedLatest": "Branches can only be created from the latest generation pile",
   "styleExplore_branchRoundsIncomplete": "The current generation still has unfinished rounds",
   "styleExplore_branchDuplicate": "A selected child duplicates a first-generation parent string",
   "styleExplore_branchEmpty": "Select at least one child candidate",
   "styleExplore_preferenceValue": "Pref {value}",
-  "@styleExplore_preferenceValue": {"placeholders": {"value": {"type": "String"}}},
+  "@styleExplore_preferenceValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "styleExplore_roundsSummary": "{count} rounds",
-  "@styleExplore_roundsSummary": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_roundsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_pileEmpty": "No candidates yet — start with \"Generate candidates\" above",
   "styleExplore_managePile": "Manage",
   "styleExplore_pileManageDeleteTitle": "Delete selected candidate images",
   "styleExplore_pileManageDeleteMessage": "Deletes the run-directory image copies and records of {count} candidates; gallery source images are not affected.",
-  "@styleExplore_pileManageDeleteMessage": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_pileManageDeleteMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "styleExplore_pileManageDeleteDone": "Deleted {count} candidates and their image copies",
-  "@styleExplore_pileManageDeleteDone": {"placeholders": {"count": {"type": "int"}}},
+  "@styleExplore_pileManageDeleteDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "subscriptionExpiresOn": "Expires {date}",
   "@subscriptionExpiresOn": {
     "placeholders": {

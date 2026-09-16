@@ -2,9 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
-import 'package:nai_launcher/data/models/fixed_tag/fixed_tag_entry.dart';
-import 'package:nai_launcher/data/models/fixed_tag/fixed_tag_prompt_type.dart';
-import 'package:nai_launcher/presentation/providers/fixed_tags_provider.dart';
 import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart';
 import 'package:nai_launcher/presentation/providers/uc_preset_provider.dart';
 import 'package:nai_launcher/presentation/providers/tag_library_page_provider.dart';
@@ -113,18 +110,6 @@ Future<ImageParams> configurePromptComposition(
       .read(qualityPresetNotifierProvider.notifier)
       .setCustomEntry(quality.id);
   container.read(ucPresetNotifierProvider.notifier).setCustomEntry(uc.id);
-  final fixed = container.read(fixedTagsNotifierProvider.notifier);
-  await fixed.addEntry(name: 'prefix', content: '(ralada747372:1.4)');
-  await fixed.addEntry(
-    name: 'suffix',
-    content: 'red dress，blue hair',
-    position: FixedTagPosition.suffix,
-  );
-  await fixed.addEntry(
-    name: 'negative',
-    content: '(bad hands:1.3)',
-    promptType: FixedTagPromptType.negative,
-  );
   final params = container.read(generationParamsNotifierProvider.notifier);
   params.updatePrompt('<lighting>，blue eyes');
   params.updateNegativePrompt('<negative>，lowres');
@@ -144,11 +129,11 @@ Future<ImageParams> configurePromptComposition(
 void expectComposedPromptParams(ImageParams params) {
   expect(
     params.prompt,
-    '1.4::ralada747372 ::, 1.3::cinematic lighting::, blue eyes, red dress, blue hair, 1.2::soft light::',
+    '1.3::cinematic lighting::, blue eyes, 1.2::soft light::',
   );
   expect(
     params.negativePrompt,
-    'custom negative, low quality, 1.3::bad hands::, 1.1::bad anatomy::, lowres',
+    'custom negative, low quality, 1.1::bad anatomy::, lowres',
   );
   expect(params.qualityToggle, isFalse);
   expect(params.qualityTagPreset, QualityTagPreset.none);

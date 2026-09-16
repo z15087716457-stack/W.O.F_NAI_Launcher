@@ -19,7 +19,6 @@ import '../../services/image_workflow_launcher.dart';
 import 'handlers/generation_action_handlers.dart';
 import 'widgets/resize_handle.dart';
 import 'widgets/left_panel.dart';
-import 'widgets/fixed_tags_sidebar_slot.dart';
 import 'widgets/block_library_panel_slot.dart';
 import 'widgets/main_workspace.dart';
 import 'widgets/right_panel.dart';
@@ -134,8 +133,6 @@ class _DesktopGenerationLayoutState
                   .setLeftPanelWidth(newWidth);
             },
           ),
-
-        const FixedTagsSidebarSlot(),
 
         // 块库面板（页面级非模态 dock，顶栏按钮切换）
         const BlockLibraryPanelSlot(),

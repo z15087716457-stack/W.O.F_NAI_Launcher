@@ -5,10 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/comfyui_prompt_parser/pipe_parser.dart';
-import '../../../core/utils/sd_to_nai_converter.dart';
 import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../data/models/tag_library/tag_library_entry.dart';
-import '../../providers/fixed_tags_provider.dart';
 import '../../providers/pending_prompt_provider.dart';
 import '../../providers/tag_library_page_provider.dart';
 import '../../providers/tag_library_selection_provider.dart';
@@ -772,38 +770,8 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
     final sendOptions = await SendToHomeDialog.show(context, entry: entry);
     if (sendOptions == null || !mounted) return;
 
-    // 处理发送到固定词的情况
-    if (sendOptions.targetType == SendTargetType.fixedTag) {
-      await _handleSendToFixedTag(entry, sendOptions.sendAsAlias);
-      return;
-    }
-
     // 处理发送到主页的情况
     await _handleSendToHome(entry, sendOptions);
-  }
-
-  /// 处理发送到固定词
-  ///
-  /// 【新增】传入 sourceEntryId 建立双向同步关联
-  Future<void> _handleSendToFixedTag(
-    TagLibraryEntry entry,
-    bool sendAsAlias,
-  ) async {
-    final content = sendAsAlias
-        ? '<${entry.name}>'
-        : SdToNaiConverter.convert(entry.content);
-
-    await ref
-        .read(fixedTagsNotifierProvider.notifier)
-        .addEntry(
-          name: entry.name,
-          content: content,
-          sourceEntryId: entry.id, // 【新增】建立关联，用于双向同步
-          categoryId: entry.categoryId,
-        );
-
-    if (!mounted) return;
-    AppToast.success(context, context.l10n.tagLibrary_addedToFixed);
   }
 
   /// 处理发送到主页
@@ -865,7 +833,6 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
         context.l10n.sendToHome_successReplaceCharacter,
       SendTargetType.appendCharacter =>
         context.l10n.sendToHome_successAppendCharacter,
-      SendTargetType.fixedTag => context.l10n.toast_addedToFixedTags,
     };
   }
 

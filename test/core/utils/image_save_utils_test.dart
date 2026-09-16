@@ -299,31 +299,6 @@ void main() {
         expect(result.metadata!.characterNegativePrompts, isEmpty);
       },
     );
-
-    test(
-      'should include structured positive and negative fixed tag metadata',
-      () {
-        const params = ImageParams(
-          prompt: '1girl',
-          negativePrompt: 'bad hands',
-          model: ImageModels.animeDiffusionV45Full,
-        );
-
-        final commentJson = ImageSaveUtils.buildCommentJson(
-          params: params,
-          actualSeed: 123,
-          fixedPrefixTags: const ['masterpiece'],
-          fixedSuffixTags: const ['cinematic lighting'],
-          fixedNegativePrefixTags: const ['lowres'],
-          fixedNegativeSuffixTags: const ['text'],
-        );
-
-        expect(commentJson['fixed_prefix'], equals(['masterpiece']));
-        expect(commentJson['fixed_suffix'], equals(['cinematic lighting']));
-        expect(commentJson['fixed_negative_prefix'], equals(['lowres']));
-        expect(commentJson['fixed_negative_suffix'], equals(['text']));
-      },
-    );
   });
 
   group('FilePickerUtils', () {

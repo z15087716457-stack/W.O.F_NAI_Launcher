@@ -21,7 +21,7 @@ import '../../core/services/character_conversion_service.dart';
 import '../../data/services/image_metadata_service.dart';
 import '../../data/datasources/remote/nai_image_generation_api_service.dart';
 import '../../data/models/character/character_prompt.dart' as ui_character;
-import '../../data/models/fixed_tag/fixed_tag_entry.dart';
+
 import '../../data/models/gallery/nai_image_metadata.dart';
 import '../../data/models/image/image_params.dart';
 import '../../data/models/image/image_stream_chunk.dart';
@@ -29,7 +29,6 @@ import '../../data/repositories/gallery_folder_repository.dart';
 import '../../data/services/statistics_cache_service.dart';
 import '../../data/services/alias_resolver_service.dart';
 import 'character_prompt_provider.dart';
-import 'fixed_tags_provider.dart';
 import 'image_save_settings_provider.dart';
 import 'local_gallery_provider.dart';
 import 'pill_roll_coordinator.dart';
@@ -620,26 +619,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       effectiveParams = effectiveParams.copyWith(
         prompt: promptWithAliases,
         negativePrompt: negativeWithAliases,
-      );
-    }
-
-    // 应用固定词到提示词
-    final fixedTagsState = ref.read(fixedTagsNotifierProvider);
-    final promptWithFixedTags = fixedTagsState.applyToPrompt(
-      effectiveParams.prompt,
-    );
-    final negativePromptWithFixedTags = fixedTagsState.applyToNegativePrompt(
-      effectiveParams.negativePrompt,
-    );
-    if (promptWithFixedTags != effectiveParams.prompt ||
-        negativePromptWithFixedTags != effectiveParams.negativePrompt) {
-      AppLogger.d(
-        'Applied fixed tags: positive=${fixedTagsState.enabledCount}, negative=${fixedTagsState.negativeEnabledCount}',
-        'FixedTags',
-      );
-      effectiveParams = effectiveParams.copyWith(
-        prompt: promptWithFixedTags,
-        negativePrompt: negativePromptWithFixedTags,
       );
     }
 
@@ -1297,34 +1276,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       // 使用已解析别名的角色提示词（来自 params.characters）
       final characterConfig = ref.read(characterPromptNotifierProvider);
 
-      // 获取固定词信息
-      final fixedTagsState = ref.read(fixedTagsNotifierProvider);
-      final fixedPrefixTags = fixedTagsState.enabledPrefixes
-          .sortedByOrder()
-          .map((e) => e.weightedContent)
-          .where((c) => c.isNotEmpty)
-          .toList();
-      final fixedSuffixTags = fixedTagsState.enabledSuffixes
-          .sortedByOrder()
-          .map((e) => e.weightedContent)
-          .where((c) => c.isNotEmpty)
-          .toList();
-      final fixedNegativePrefixTags = fixedTagsState.negativeEnabledPrefixes
-          .sortedByOrder()
-          .map((e) => e.weightedContent)
-          .where((c) => c.isNotEmpty)
-          .toList();
-      final fixedNegativeSuffixTags = fixedTagsState.negativeEnabledSuffixes
-          .sortedByOrder()
-          .map((e) => e.weightedContent)
-          .where((c) => c.isNotEmpty)
-          .toList();
-
-      AppLogger.i(
-        '[ImageGeneration] Fixed tags for save: positive=${fixedTagsState.enabledCount}, negative=${fixedTagsState.negativeEnabledCount}, prefix=$fixedPrefixTags, suffix=$fixedSuffixTags, negativePrefix=$fixedNegativePrefixTags, negativeSuffix=$fixedNegativeSuffixTags',
-        'ImageGeneration',
-      );
-
       // 构建 V4 多角色提示词结构（直接使用已解析的 params.characters）
       final charCaptions = <Map<String, dynamic>>[];
       final charNegCaptions = <Map<String, dynamic>>[];
@@ -1367,13 +1318,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
             }
           }
 
-          if (!hasEmbeddedMetadata) {
-            AppLogger.i(
-              '[ImageGeneration] Saving image with fixed_prefix=$fixedPrefixTags, fixed_suffix=$fixedSuffixTags, fixed_negative_prefix=$fixedNegativePrefixTags, fixed_negative_suffix=$fixedNegativeSuffixTags',
-              'ImageGeneration',
-            );
-          }
-
           // 原子保存：日期分类路径 + 独占防冲突 + 失败清理，全部在工具内完成
           final filePath = await ImageSaveUtils.saveBytesToDatedPath(
             rootPath: saveDirPath,
@@ -1386,10 +1330,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
                       height: image.height,
                     ),
                     actualSeed: actualSeed,
-                    fixedPrefixTags: fixedPrefixTags,
-                    fixedSuffixTags: fixedSuffixTags,
-                    fixedNegativePrefixTags: fixedNegativePrefixTags,
-                    fixedNegativeSuffixTags: fixedNegativeSuffixTags,
                     charCaptions: charCaptions,
                     charNegCaptions: charNegCaptions,
                     useCoords: !characterConfig.globalAiChoice,

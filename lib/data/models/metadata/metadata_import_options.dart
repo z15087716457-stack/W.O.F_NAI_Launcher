@@ -14,11 +14,6 @@ class MetadataImportOptions with _$MetadataImportOptions {
     @Default(true) bool importPrompt,
     @Default(true) bool importNegativePrompt,
 
-    // 固定词
-    @Default(true) bool importFixedTags,
-    @Default(true) bool importFixedPrefix,
-    @Default(true) bool importFixedSuffix,
-
     // 质量词
     @Default(true) bool importQualityTags,
     @Default([]) List<String> selectedQualityTags,
@@ -74,9 +69,6 @@ class MetadataImportOptions with _$MetadataImportOptions {
   factory MetadataImportOptions.promptsOnly() => const MetadataImportOptions(
     importPrompt: true,
     importNegativePrompt: true,
-    importFixedTags: true,
-    importFixedPrefix: true,
-    importFixedSuffix: true,
     importQualityTags: true,
     importCharacterPrompts: true,
     importVibeReferences: false,
@@ -100,9 +92,6 @@ class MetadataImportOptions with _$MetadataImportOptions {
   factory MetadataImportOptions.generationOnly() => const MetadataImportOptions(
     importPrompt: false,
     importNegativePrompt: false,
-    importFixedTags: false,
-    importFixedPrefix: false,
-    importFixedSuffix: false,
     importQualityTags: false,
     importCharacterPrompts: false,
     importVibeReferences: true,
@@ -126,9 +115,6 @@ class MetadataImportOptions with _$MetadataImportOptions {
   factory MetadataImportOptions.none() => const MetadataImportOptions(
     importPrompt: false,
     importNegativePrompt: false,
-    importFixedTags: false,
-    importFixedPrefix: false,
-    importFixedSuffix: false,
     importQualityTags: false,
     importCharacterPrompts: false,
     importVibeReferences: false,
@@ -151,24 +137,12 @@ class MetadataImportOptions with _$MetadataImportOptions {
   /// 获取已选中的可用参数数量。
   ///
   /// 与 [selectedCount] 不同，这里只统计当前图片元数据里实际存在的数据，
-  /// 避免“仅提示词”把空的固定词/质量词开关也计入数量。
+  /// 避免“仅提示词”把空的质量词等开关也计入数量。
   int selectedCountFor(NaiImageMetadata metadata) {
     var count = 0;
 
     if (importPrompt && metadata.prompt.isNotEmpty) count++;
     if (importNegativePrompt && metadata.negativePrompt.isNotEmpty) count++;
-
-    final hasSelectedFixedPrefix =
-        importFixedPrefix &&
-        (metadata.fixedPrefixTags.isNotEmpty ||
-            metadata.fixedNegativePrefixTags.isNotEmpty);
-    final hasSelectedFixedSuffix =
-        importFixedSuffix &&
-        (metadata.fixedSuffixTags.isNotEmpty ||
-            metadata.fixedNegativeSuffixTags.isNotEmpty);
-    if (importFixedTags && (hasSelectedFixedPrefix || hasSelectedFixedSuffix)) {
-      count++;
-    }
 
     if (importQualityTags &&
         selectedQualityTags.any(metadata.qualityTags.contains)) {
@@ -228,7 +202,6 @@ class MetadataImportOptions with _$MetadataImportOptions {
     var count = 0;
     if (importPrompt) count++;
     if (importNegativePrompt) count++;
-    if (importFixedTags && (importFixedPrefix || importFixedSuffix)) count++;
     if (importQualityTags && selectedQualityTags.isNotEmpty) count++;
     if (importCharacterPrompts && selectedCharacterIndices.isNotEmpty) count++;
     if (importVibeReferences && selectedVibeIndices.isNotEmpty) count++;
@@ -252,7 +225,7 @@ class MetadataImportOptions with _$MetadataImportOptions {
   }
 
   /// 是否全部选中
-  bool get isAllSelected => selectedCount == 19;
+  bool get isAllSelected => selectedCount == 18;
 
   /// 是否全部未选中
   bool get isNoneSelected => selectedCount == 0;
@@ -261,7 +234,6 @@ class MetadataImportOptions with _$MetadataImportOptions {
   bool get isImportingAnyPrompt =>
       importPrompt ||
       importNegativePrompt ||
-      (importFixedTags && (importFixedPrefix || importFixedSuffix)) ||
       (importQualityTags && selectedQualityTags.isNotEmpty) ||
       (importCharacterPrompts && selectedCharacterIndices.isNotEmpty);
 

@@ -26,20 +26,12 @@ class ImageSaveUtils {
   ///
   /// [params] - 图像生成参数
   /// [actualSeed] - 实际使用的种子
-  /// [fixedPrefixTags] - 固定前缀标签列表
-  /// [fixedSuffixTags] - 固定后缀标签列表
-  /// [fixedNegativePrefixTags] - 负向固定前缀标签列表
-  /// [fixedNegativeSuffixTags] - 负向固定后缀标签列表
   /// [charCaptions] - 角色提示词列表（V4多角色）
   /// [charNegCaptions] - 角色负面提示词列表
   /// [useCoords] - 是否使用坐标模式
   static Map<String, dynamic> buildCommentJson({
     required ImageParams params,
     required int actualSeed,
-    List<String>? fixedPrefixTags,
-    List<String>? fixedSuffixTags,
-    List<String>? fixedNegativePrefixTags,
-    List<String>? fixedNegativeSuffixTags,
     List<Map<String, dynamic>>? charCaptions,
     List<Map<String, dynamic>>? charNegCaptions,
     bool useCoords = false,
@@ -75,19 +67,6 @@ class ImageSaveUtils {
         'noise': params.noise,
       },
     };
-
-    if (fixedPrefixTags?.isNotEmpty == true) {
-      commentJson['fixed_prefix'] = fixedPrefixTags;
-    }
-    if (fixedSuffixTags?.isNotEmpty == true) {
-      commentJson['fixed_suffix'] = fixedSuffixTags;
-    }
-    if (fixedNegativePrefixTags?.isNotEmpty == true) {
-      commentJson['fixed_negative_prefix'] = fixedNegativePrefixTags;
-    }
-    if (fixedNegativeSuffixTags?.isNotEmpty == true) {
-      commentJson['fixed_negative_suffix'] = fixedNegativeSuffixTags;
-    }
 
     // V4多角色提示词
     if (params.isV4Model) {
@@ -172,10 +151,6 @@ class ImageSaveUtils {
     required Uint8List imageBytes,
     required ImageParams params,
     int? actualSeed,
-    List<String>? fixedPrefixTags,
-    List<String>? fixedSuffixTags,
-    List<String>? fixedNegativePrefixTags,
-    List<String>? fixedNegativeSuffixTags,
     List<Map<String, dynamic>>? charCaptions,
     List<Map<String, dynamic>>? charNegCaptions,
     bool useCoords = false,
@@ -203,10 +178,6 @@ class ImageSaveUtils {
     final rebuiltCommentJson = buildCommentJson(
       params: params,
       actualSeed: normalizedSeed,
-      fixedPrefixTags: fixedPrefixTags,
-      fixedSuffixTags: fixedSuffixTags,
-      fixedNegativePrefixTags: fixedNegativePrefixTags,
-      fixedNegativeSuffixTags: fixedNegativeSuffixTags,
       charCaptions: charCaptions,
       charNegCaptions: charNegCaptions,
       useCoords: useCoords,
@@ -241,10 +212,6 @@ class ImageSaveUtils {
   /// [filePath] - 目标文件路径
   /// [params] - 图像生成参数
   /// [actualSeed] - 实际使用的种子
-  /// [fixedPrefixTags] - 固定前缀标签
-  /// [fixedSuffixTags] - 固定后缀标签
-  /// [fixedNegativePrefixTags] - 负向固定前缀标签
-  /// [fixedNegativeSuffixTags] - 负向固定后缀标签
   /// [charCaptions] - 角色提示词列表
   /// [charNegCaptions] - 角色负面提示词列表
   /// [useStealth] - 是否使用stealth编码（默认false）
@@ -256,10 +223,6 @@ class ImageSaveUtils {
     required String filePath,
     required ImageParams params,
     required int actualSeed,
-    List<String>? fixedPrefixTags,
-    List<String>? fixedSuffixTags,
-    List<String>? fixedNegativePrefixTags,
-    List<String>? fixedNegativeSuffixTags,
     List<Map<String, dynamic>>? charCaptions,
     List<Map<String, dynamic>>? charNegCaptions,
     bool useCoords = false,
@@ -270,10 +233,6 @@ class ImageSaveUtils {
       imageBytes: imageBytes,
       params: params,
       actualSeed: actualSeed,
-      fixedPrefixTags: fixedPrefixTags,
-      fixedSuffixTags: fixedSuffixTags,
-      fixedNegativePrefixTags: fixedNegativePrefixTags,
-      fixedNegativeSuffixTags: fixedNegativeSuffixTags,
       charCaptions: charCaptions,
       charNegCaptions: charNegCaptions,
       useCoords: useCoords,

@@ -9,7 +9,6 @@ import '../../widgets/common/app_toast.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/character/character_prompt.dart';
 import '../../../data/models/tag_library/tag_library_entry.dart';
-import '../../providers/fixed_tags_provider.dart';
 import '../../providers/reverse_prompt_provider.dart';
 import '../../providers/tag_library_page_provider.dart';
 import '../../widgets/tag_library/tag_library_picker_dialog.dart';
@@ -325,11 +324,7 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
         );
   }
 
-  String _assistantInputText() {
-    return ref
-        .read(fixedTagsNotifierProvider)
-        .stripFromPrompt(widget.controller.text);
-  }
+  String _assistantInputText() => widget.controller.text;
 
   void _undo() {
     final value = ref

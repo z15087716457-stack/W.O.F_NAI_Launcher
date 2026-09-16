@@ -1039,12 +1039,6 @@ class AppLocalizationsJa extends AppLocalizations {
       'Krita Bridge で生成中です。現在のタスクが完了するまで待ってください。';
 
   @override
-  String get prompt_negativeFixedTagPrefix => '除外したい要素固定タグプレフィックス';
-
-  @override
-  String get prompt_negativeFixedTagSuffix => '除外したい要素固定タグサフィックス';
-
-  @override
   String get prompt_unwantedContent => '画像に含めたくないコンテンツ...';
 
   @override
@@ -4862,286 +4856,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get statistics_saturday => '土';
 
   @override
-  String get fixedTags_label => '固定タグ';
-
-  @override
-  String get fixedTags_enabled => '有効';
-
-  @override
-  String get fixedTags_empty => '固定タグなし';
-
-  @override
-  String get fixedTags_emptyHint => '下のボタンをクリックして固定タグを追加すると、プロンプトに自動的に適用されます';
-
-  @override
-  String get fixedTags_manage => '固定タグの管理';
-
-  @override
-  String get fixedTags_add => '追加';
-
-  @override
-  String get fixedTags_edit => '固定タグの編集';
-
-  @override
-  String get fixedTags_openLibrary => 'ライブラリを開く';
-
-  @override
-  String get fixedTags_prefix => 'プレフィックス';
-
-  @override
-  String get fixedTags_suffix => 'サフィックス';
-
-  @override
-  String get fixedTags_disabled => '無効';
-
-  @override
-  String get fixedTags_weight => 'ウェイト';
-
-  @override
-  String get fixedTags_position => '位置';
-
-  @override
-  String get fixedTags_name => '名前';
-
-  @override
-  String get fixedTags_nameHint => '表示名を入力してください (オプション)';
-
-  @override
-  String get fixedTags_content => 'コンテンツ';
-
-  @override
-  String get fixedTags_contentHint => 'プロンプトの内容を入力してください。NAI 構文がサポートされています';
-
-  @override
   String get fixedTags_syntaxHelp => '重みの強化/削減およびタグの代替のための NAI 構文をサポートします';
 
   @override
-  String get fixedTags_linkedFromLibrary => 'ライブラリからリンクされました (双方向同期)';
-
-  @override
-  String get fixedTags_scope => '範囲';
-
-  @override
-  String get fixedTags_positive => 'プロンプト';
-
-  @override
-  String get fixedTags_negative => '除外したい要素';
-
-  @override
-  String get fixedTags_resetWeight => '1.0 にリセット';
-
-  @override
-  String get fixedTags_weightPreview => 'ウェイトプレビュー:';
-
-  @override
-  String get fixedTags_deleteTitle => '固定タグを削除';
-
-  @override
-  String fixedTags_deleteConfirm(Object name) {
-    return '「$name」を削除してもよろしいですか?';
-  }
-
-  @override
-  String fixedTags_enabledCount(Object enabled, Object total) {
-    return '$enabled/$total が有効になりました';
-  }
-
-  @override
-  String get fixedTags_saveToLibrary => 'ライブラリにも保存します';
-
-  @override
-  String get fixedTags_saveToLibraryHint => '後でタグ ライブラリで再利用するため';
-
-  @override
-  String get fixedTags_saveToCategory => 'カテゴリに保存';
-
-  @override
-  String get fixedTags_clearAll => 'すべてクリア';
-
-  @override
-  String get fixedTags_clearAllTitle => 'すべての固定タグをクリア';
-
-  @override
-  String fixedTags_clearAllConfirm(Object count) {
-    return 'すべての $count 固定タグをクリアしてもよろしいですか?この操作は元に戻すことができません。';
-  }
-
-  @override
-  String get fixedTags_clearedSuccess => 'すべての固定タグがクリアされました';
-
-  @override
-  String get fixedTags_sidebarTitle => '固定タグサイドバー';
-
-  @override
-  String get fixedTags_switchGridView => 'グリッド ビューに切り替える';
-
-  @override
-  String get fixedTags_switchListView => 'リストビューに切り替える';
-
-  @override
-  String get fixedTags_addPositive => 'プロンプト固定タグを追加';
-
-  @override
-  String get fixedTags_addNegative => '除外したい要素固定タグを追加';
-
-  @override
-  String get fixedTags_addPositiveFromLibrary => 'ライブラリからプロンプト固定タグを追加';
-
-  @override
-  String get fixedTags_addNegativeFromLibrary => 'ライブラリから除外したい要素固定タグを追加';
-
-  @override
-  String get fixedTags_searchNameOrContent => '名前または内容を検索します';
-
-  @override
-  String get fixedTags_clearSearch => '検索をクリア';
-
-  @override
-  String get fixedTags_enabledPositive => '有効なプロンプト';
-
-  @override
-  String get fixedTags_emptyEnabledPositive => '有効なプロンプト固定タグがありません';
-
-  @override
-  String get fixedTags_noMatchingEnabled => '一致する有効な固定タグがありません';
-
-  @override
   String get fixedTags_negativeTitle => '除外したい要素固定タグ';
-
-  @override
-  String get fixedTags_emptyNegative => '除外したい要素固定タグはありません';
-
-  @override
-  String get fixedTags_noMatchingNegative => '一致する除外したい要素固定タグがありません';
-
-  @override
-  String get fixedTags_addedToSidebar => '固定タグのサイドバーに追加されました';
-
-  @override
-  String get fixedTags_unknownCategory => '不明なカテゴリ';
-
-  @override
-  String get fixedTags_uncategorized => '未分類';
-
-  @override
-  String get fixedTags_clickManageLongPressSidebar =>
-      'クリックして管理し、長押ししてサイドバーを開きます';
-
-  @override
-  String get fixedTags_clickManageLongPressCompact => 'クリックしてサイドバーを長押しして管理します';
-
-  @override
-  String get fixedTags_linked => 'リンクされました';
-
-  @override
-  String fixedTags_linkCount(Object count) {
-    return '$count リンクされました';
-  }
-
-  @override
-  String get fixedTags_expandNegative => '除外したい要素を展開';
-
-  @override
-  String get fixedTags_collapseNegative => '除外したい要素を折りたたむ';
-
-  @override
-  String get fixedTags_undoTooltip => '固定タグ操作を元に戻す';
-
-  @override
-  String get fixedTags_redoTooltip => '固定タグ操作をやり直す';
-
-  @override
-  String get fixedTags_positiveTitle => 'プロンプト固定タグ';
-
-  @override
-  String fixedTags_columnCount(Object enabled, Object total) {
-    return '$enabled/$total';
-  }
-
-  @override
-  String fixedTags_columnFilteredCount(
-    Object enabled,
-    Object total,
-    Object shown,
-  ) {
-    return '$enabled/$total · $shown を表示中';
-  }
-
-  @override
-  String get fixedTags_new => '新規';
-
-  @override
-  String fixedTags_newTarget(Object target) {
-    return '新しい $target';
-  }
-
-  @override
-  String get fixedTags_library => 'ライブラリ';
-
-  @override
-  String fixedTags_addFromLibraryToTarget(Object target) {
-    return 'ライブラリから $target に追加します';
-  }
-
-  @override
-  String get fixedTags_enableAll => 'すべて有効にする';
-
-  @override
-  String get fixedTags_disableAll => 'すべて無効にする';
-
-  @override
-  String fixedTags_searchTarget(Object target) {
-    return '$target を検索...';
-  }
-
-  @override
-  String get fixedTags_noMatching => '一致する固定タグがありません';
-
-  @override
-  String fixedTags_emptyTarget(Object target) {
-    return '$target はありません';
-  }
-
-  @override
-  String get fixedTags_dragToLink => 'ドラッグしてリンクを作成します';
-
-  @override
-  String fixedTags_linkedToNames(Object names) {
-    return 'リンク済み: $names';
-  }
-
-  @override
-  String get fixedTags_linkInstruction =>
-      'リンク アイコンをプロンプト固定タグから除外したい要素固定タグにドラッグしてリンクを作成します';
-
-  @override
-  String get fixedTags_manageLinks => 'リンクの管理';
-
-  @override
-  String fixedTags_removeLink(Object name) {
-    return 'リンクを削除: $name';
-  }
-
-  @override
-  String get fixedTags_footerExpandedHint => '各列の先頭にあるライブラリから作成または追加します';
-
-  @override
-  String get fixedTags_newPositive => '新規プロンプト';
-
-  @override
-  String get fixedTags_addPositiveFromLibraryShort => 'ライブラリからプロンプト固定タグを追加';
-
-  @override
-  String get fixedTags_libraryEmpty => 'ライブラリが空です。最初にエントリを追加します';
-
-  @override
-  String get fixedTags_addFromLibrary => 'ライブラリから追加';
-
-  @override
-  String get fixedTags_searchLibraryEntries => 'ライブラリ エントリを検索します...';
-
-  @override
-  String get fixedTags_noMatchingResults => '一致する結果はありません';
 
   @override
   String get reversePrompt_title => '逆プロンプト';
@@ -5559,9 +5277,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptToken_prompt => 'プロンプト';
 
   @override
-  String get promptToken_fixedTags => '固定タグ';
-
-  @override
   String get promptToken_qualityPreset => '品質プリセット';
 
   @override
@@ -5569,9 +5284,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get promptToken_negativePrompt => '除外したい要素';
-
-  @override
-  String get promptToken_negativeFixedTags => '除外したい要素固定タグ';
 
   @override
   String get promptToken_negativePreset => '除外したい要素プリセット';
@@ -5893,9 +5605,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tagLibraryPicker_allCategories => 'すべてのカテゴリ';
 
   @override
-  String get tagLibrary_addedToFixed => '固定タグに追加';
-
-  @override
   String get tagLibrary_entryMoved => 'エントリがターゲット カテゴリに移動されました';
 
   @override
@@ -6123,12 +5832,6 @@ class AppLocalizationsJa extends AppLocalizations {
       '既存のキャラクターを保持し、新しいキャラクターを追加します';
 
   @override
-  String get sendToHome_fixedTags => '固定タグに送信';
-
-  @override
-  String get sendToHome_fixedTagsSubtitle => '固定タグリストに追加';
-
-  @override
   String get sendToHome_sendAsAlias => 'エイリアスとして送信';
 
   @override
@@ -6193,26 +5896,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get metadataImport_fixedTags => '固定タグ';
-
-  @override
-  String metadataImport_fixedPrefix(Object text) {
-    return 'プレフィックス: $text';
-  }
-
-  @override
-  String metadataImport_fixedSuffix(Object text) {
-    return 'サフィックス: $text';
-  }
-
-  @override
-  String metadataImport_negativeFixedPrefix(Object text) {
-    return '除外したい要素プレフィックス: $text';
-  }
-
-  @override
-  String metadataImport_negativeFixedSuffix(Object text) {
-    return '除外したい要素サフィックス: $text';
-  }
 
   @override
   String metadataImport_qualityTagsCount(int count) {
@@ -8840,9 +8523,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get toast_smartDecomposeSent => 'スマートに分解して送信';
 
   @override
-  String get toast_addedToFixedTags => '固定タグに追加しました';
-
-  @override
   String get toast_renameNameRequired => '名前は必須です';
 
   @override
@@ -9577,12 +9257,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get common_swap => '入れ替え';
-
-  @override
-  String get common_prefix => 'プレフィックス';
-
-  @override
-  String get common_suffix => 'サフィックス';
 
   @override
   String get common_minimum => '最小';
@@ -10403,6 +10077,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_waterfallView => 'ウォーターフォール表示';
+
+  @override
+  String get promptBlockPalette_tooltip => 'パレット';
+
+  @override
+  String get promptBlockPalette_emptyHint =>
+      'よく使うブロックをここにドラッグして収納。使う時はクリックでカーソル位置に挿入、またはプロンプトへドラッグ';
+
+  @override
+  String get promptBlockPalette_remove => 'パレットから削除';
 
   @override
   String get promptBlockLibrary_sortBy => '並べ替え';

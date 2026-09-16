@@ -2007,18 +2007,6 @@ abstract class AppLocalizations {
   /// **'Krita Bridge is generating. Wait for the current task to finish.'**
   String get kritaBridge_busyGenerating;
 
-  /// No description provided for @prompt_negativeFixedTagPrefix.
-  ///
-  /// In en, this message translates to:
-  /// **'Undesired Content Fixed Tag Prefix'**
-  String get prompt_negativeFixedTagPrefix;
-
-  /// No description provided for @prompt_negativeFixedTagSuffix.
-  ///
-  /// In en, this message translates to:
-  /// **'Undesired Content Fixed Tag Suffix'**
-  String get prompt_negativeFixedTagSuffix;
-
   /// No description provided for @prompt_unwantedContent.
   ///
   /// In en, this message translates to:
@@ -8881,513 +8869,17 @@ abstract class AppLocalizations {
   /// **'Sat'**
   String get statistics_saturday;
 
-  /// No description provided for @fixedTags_label.
-  ///
-  /// In en, this message translates to:
-  /// **'Fixed Tags'**
-  String get fixedTags_label;
-
-  /// No description provided for @fixedTags_enabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Enabled'**
-  String get fixedTags_enabled;
-
-  /// No description provided for @fixedTags_empty.
-  ///
-  /// In en, this message translates to:
-  /// **'No fixed tags'**
-  String get fixedTags_empty;
-
-  /// No description provided for @fixedTags_emptyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Click the button below to add fixed tags, they will be automatically applied to your prompts'**
-  String get fixedTags_emptyHint;
-
-  /// No description provided for @fixedTags_manage.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage Fixed Tags'**
-  String get fixedTags_manage;
-
-  /// No description provided for @fixedTags_add.
-  ///
-  /// In en, this message translates to:
-  /// **'Add'**
-  String get fixedTags_add;
-
-  /// No description provided for @fixedTags_edit.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Fixed Tag'**
-  String get fixedTags_edit;
-
-  /// No description provided for @fixedTags_openLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Open Library'**
-  String get fixedTags_openLibrary;
-
-  /// No description provided for @fixedTags_prefix.
-  ///
-  /// In en, this message translates to:
-  /// **'Prefix'**
-  String get fixedTags_prefix;
-
-  /// No description provided for @fixedTags_suffix.
-  ///
-  /// In en, this message translates to:
-  /// **'Suffix'**
-  String get fixedTags_suffix;
-
-  /// No description provided for @fixedTags_disabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Disabled'**
-  String get fixedTags_disabled;
-
-  /// No description provided for @fixedTags_weight.
-  ///
-  /// In en, this message translates to:
-  /// **'Weight'**
-  String get fixedTags_weight;
-
-  /// No description provided for @fixedTags_position.
-  ///
-  /// In en, this message translates to:
-  /// **'Position'**
-  String get fixedTags_position;
-
-  /// No description provided for @fixedTags_name.
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get fixedTags_name;
-
-  /// No description provided for @fixedTags_nameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a display name (optional)'**
-  String get fixedTags_nameHint;
-
-  /// No description provided for @fixedTags_content.
-  ///
-  /// In en, this message translates to:
-  /// **'Content'**
-  String get fixedTags_content;
-
-  /// No description provided for @fixedTags_contentHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter prompt content, NAI syntax supported'**
-  String get fixedTags_contentHint;
-
   /// No description provided for @fixedTags_syntaxHelp.
   ///
   /// In en, this message translates to:
   /// **'Supports NAI syntax for weight enhancement/reduction and tag alternation'**
   String get fixedTags_syntaxHelp;
 
-  /// No description provided for @fixedTags_linkedFromLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Linked from library (two-way sync)'**
-  String get fixedTags_linkedFromLibrary;
-
-  /// No description provided for @fixedTags_scope.
-  ///
-  /// In en, this message translates to:
-  /// **'Scope'**
-  String get fixedTags_scope;
-
-  /// No description provided for @fixedTags_positive.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt'**
-  String get fixedTags_positive;
-
-  /// No description provided for @fixedTags_negative.
-  ///
-  /// In en, this message translates to:
-  /// **'Undesired Content'**
-  String get fixedTags_negative;
-
-  /// No description provided for @fixedTags_resetWeight.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset to 1.0'**
-  String get fixedTags_resetWeight;
-
-  /// No description provided for @fixedTags_weightPreview.
-  ///
-  /// In en, this message translates to:
-  /// **'Weight preview:'**
-  String get fixedTags_weightPreview;
-
-  /// No description provided for @fixedTags_deleteTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Fixed Tag'**
-  String get fixedTags_deleteTitle;
-
-  /// No description provided for @fixedTags_deleteConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to delete \"{name}\"?'**
-  String fixedTags_deleteConfirm(Object name);
-
-  /// No description provided for @fixedTags_enabledCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{enabled}/{total} enabled'**
-  String fixedTags_enabledCount(Object enabled, Object total);
-
-  /// No description provided for @fixedTags_saveToLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Also save to library'**
-  String get fixedTags_saveToLibrary;
-
-  /// No description provided for @fixedTags_saveToLibraryHint.
-  ///
-  /// In en, this message translates to:
-  /// **'For reuse in the tag library later'**
-  String get fixedTags_saveToLibraryHint;
-
-  /// No description provided for @fixedTags_saveToCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Save to category'**
-  String get fixedTags_saveToCategory;
-
-  /// No description provided for @fixedTags_clearAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear All'**
-  String get fixedTags_clearAll;
-
-  /// No description provided for @fixedTags_clearAllTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear All Fixed Tags'**
-  String get fixedTags_clearAllTitle;
-
-  /// No description provided for @fixedTags_clearAllConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to clear all {count} fixed tags? This action cannot be undone.'**
-  String fixedTags_clearAllConfirm(Object count);
-
-  /// No description provided for @fixedTags_clearedSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'All fixed tags cleared'**
-  String get fixedTags_clearedSuccess;
-
-  /// No description provided for @fixedTags_sidebarTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Fixed Tags Sidebar'**
-  String get fixedTags_sidebarTitle;
-
-  /// No description provided for @fixedTags_switchGridView.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to Grid View'**
-  String get fixedTags_switchGridView;
-
-  /// No description provided for @fixedTags_switchListView.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to List View'**
-  String get fixedTags_switchListView;
-
-  /// No description provided for @fixedTags_addPositive.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Prompt Fixed Tag'**
-  String get fixedTags_addPositive;
-
-  /// No description provided for @fixedTags_addNegative.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Undesired Content Fixed Tag'**
-  String get fixedTags_addNegative;
-
-  /// No description provided for @fixedTags_addPositiveFromLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Prompt from Library'**
-  String get fixedTags_addPositiveFromLibrary;
-
-  /// No description provided for @fixedTags_addNegativeFromLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Undesired Content from Library'**
-  String get fixedTags_addNegativeFromLibrary;
-
-  /// No description provided for @fixedTags_searchNameOrContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Search name or content'**
-  String get fixedTags_searchNameOrContent;
-
-  /// No description provided for @fixedTags_clearSearch.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear Search'**
-  String get fixedTags_clearSearch;
-
-  /// No description provided for @fixedTags_enabledPositive.
-  ///
-  /// In en, this message translates to:
-  /// **'Enabled Prompt'**
-  String get fixedTags_enabledPositive;
-
-  /// No description provided for @fixedTags_emptyEnabledPositive.
-  ///
-  /// In en, this message translates to:
-  /// **'No enabled prompt fixed tags'**
-  String get fixedTags_emptyEnabledPositive;
-
-  /// No description provided for @fixedTags_noMatchingEnabled.
-  ///
-  /// In en, this message translates to:
-  /// **'No matching enabled fixed tags'**
-  String get fixedTags_noMatchingEnabled;
-
   /// No description provided for @fixedTags_negativeTitle.
   ///
   /// In en, this message translates to:
   /// **'Undesired Content Fixed Tags'**
   String get fixedTags_negativeTitle;
-
-  /// No description provided for @fixedTags_emptyNegative.
-  ///
-  /// In en, this message translates to:
-  /// **'No Undesired Content fixed tags'**
-  String get fixedTags_emptyNegative;
-
-  /// No description provided for @fixedTags_noMatchingNegative.
-  ///
-  /// In en, this message translates to:
-  /// **'No matching Undesired Content fixed tags'**
-  String get fixedTags_noMatchingNegative;
-
-  /// No description provided for @fixedTags_addedToSidebar.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to fixed tags sidebar'**
-  String get fixedTags_addedToSidebar;
-
-  /// No description provided for @fixedTags_unknownCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Unknown Category'**
-  String get fixedTags_unknownCategory;
-
-  /// No description provided for @fixedTags_uncategorized.
-  ///
-  /// In en, this message translates to:
-  /// **'Uncategorized'**
-  String get fixedTags_uncategorized;
-
-  /// No description provided for @fixedTags_clickManageLongPressSidebar.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to manage, long-press to open sidebar'**
-  String get fixedTags_clickManageLongPressSidebar;
-
-  /// No description provided for @fixedTags_clickManageLongPressCompact.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to manage, long-press sidebar'**
-  String get fixedTags_clickManageLongPressCompact;
-
-  /// No description provided for @fixedTags_linked.
-  ///
-  /// In en, this message translates to:
-  /// **'Linked'**
-  String get fixedTags_linked;
-
-  /// No description provided for @fixedTags_linkCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} linked'**
-  String fixedTags_linkCount(Object count);
-
-  /// No description provided for @fixedTags_expandNegative.
-  ///
-  /// In en, this message translates to:
-  /// **'Expand Undesired Content'**
-  String get fixedTags_expandNegative;
-
-  /// No description provided for @fixedTags_collapseNegative.
-  ///
-  /// In en, this message translates to:
-  /// **'Collapse Undesired Content'**
-  String get fixedTags_collapseNegative;
-
-  /// No description provided for @fixedTags_undoTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Undo fixed tag operation'**
-  String get fixedTags_undoTooltip;
-
-  /// No description provided for @fixedTags_redoTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Redo fixed tag operation'**
-  String get fixedTags_redoTooltip;
-
-  /// No description provided for @fixedTags_positiveTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt Fixed Tags'**
-  String get fixedTags_positiveTitle;
-
-  /// No description provided for @fixedTags_columnCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{enabled}/{total}'**
-  String fixedTags_columnCount(Object enabled, Object total);
-
-  /// No description provided for @fixedTags_columnFilteredCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{enabled}/{total} · showing {shown}'**
-  String fixedTags_columnFilteredCount(
-    Object enabled,
-    Object total,
-    Object shown,
-  );
-
-  /// No description provided for @fixedTags_new.
-  ///
-  /// In en, this message translates to:
-  /// **'New'**
-  String get fixedTags_new;
-
-  /// No description provided for @fixedTags_newTarget.
-  ///
-  /// In en, this message translates to:
-  /// **'New {target}'**
-  String fixedTags_newTarget(Object target);
-
-  /// No description provided for @fixedTags_library.
-  ///
-  /// In en, this message translates to:
-  /// **'Library'**
-  String get fixedTags_library;
-
-  /// No description provided for @fixedTags_addFromLibraryToTarget.
-  ///
-  /// In en, this message translates to:
-  /// **'Add from library to {target}'**
-  String fixedTags_addFromLibraryToTarget(Object target);
-
-  /// No description provided for @fixedTags_enableAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable All'**
-  String get fixedTags_enableAll;
-
-  /// No description provided for @fixedTags_disableAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Disable All'**
-  String get fixedTags_disableAll;
-
-  /// No description provided for @fixedTags_searchTarget.
-  ///
-  /// In en, this message translates to:
-  /// **'Search {target}...'**
-  String fixedTags_searchTarget(Object target);
-
-  /// No description provided for @fixedTags_noMatching.
-  ///
-  /// In en, this message translates to:
-  /// **'No matching fixed tags'**
-  String get fixedTags_noMatching;
-
-  /// No description provided for @fixedTags_emptyTarget.
-  ///
-  /// In en, this message translates to:
-  /// **'No {target}'**
-  String fixedTags_emptyTarget(Object target);
-
-  /// No description provided for @fixedTags_dragToLink.
-  ///
-  /// In en, this message translates to:
-  /// **'Drag to create link'**
-  String get fixedTags_dragToLink;
-
-  /// No description provided for @fixedTags_linkedToNames.
-  ///
-  /// In en, this message translates to:
-  /// **'Linked: {names}'**
-  String fixedTags_linkedToNames(Object names);
-
-  /// No description provided for @fixedTags_linkInstruction.
-  ///
-  /// In en, this message translates to:
-  /// **'Drag the link icon from a prompt fixed tag to an Undesired Content fixed tag to create a link'**
-  String get fixedTags_linkInstruction;
-
-  /// No description provided for @fixedTags_manageLinks.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage Links'**
-  String get fixedTags_manageLinks;
-
-  /// No description provided for @fixedTags_removeLink.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove link: {name}'**
-  String fixedTags_removeLink(Object name);
-
-  /// No description provided for @fixedTags_footerExpandedHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Create or add from the library at the top of each column'**
-  String get fixedTags_footerExpandedHint;
-
-  /// No description provided for @fixedTags_newPositive.
-  ///
-  /// In en, this message translates to:
-  /// **'New Prompt'**
-  String get fixedTags_newPositive;
-
-  /// No description provided for @fixedTags_addPositiveFromLibraryShort.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Prompt from Library'**
-  String get fixedTags_addPositiveFromLibraryShort;
-
-  /// No description provided for @fixedTags_libraryEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Library is empty. Add entries first'**
-  String get fixedTags_libraryEmpty;
-
-  /// No description provided for @fixedTags_addFromLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Add from Library'**
-  String get fixedTags_addFromLibrary;
-
-  /// No description provided for @fixedTags_searchLibraryEntries.
-  ///
-  /// In en, this message translates to:
-  /// **'Search library entries...'**
-  String get fixedTags_searchLibraryEntries;
-
-  /// No description provided for @fixedTags_noMatchingResults.
-  ///
-  /// In en, this message translates to:
-  /// **'No matching results'**
-  String get fixedTags_noMatchingResults;
 
   /// No description provided for @reversePrompt_title.
   ///
@@ -10145,12 +9637,6 @@ abstract class AppLocalizations {
   /// **'Prompt'**
   String get promptToken_prompt;
 
-  /// No description provided for @promptToken_fixedTags.
-  ///
-  /// In en, this message translates to:
-  /// **'Fixed Tags'**
-  String get promptToken_fixedTags;
-
   /// No description provided for @promptToken_qualityPreset.
   ///
   /// In en, this message translates to:
@@ -10168,12 +9654,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Undesired Content'**
   String get promptToken_negativePrompt;
-
-  /// No description provided for @promptToken_negativeFixedTags.
-  ///
-  /// In en, this message translates to:
-  /// **'Undesired Content Fixed Tags'**
-  String get promptToken_negativeFixedTags;
 
   /// No description provided for @promptToken_negativePreset.
   ///
@@ -10715,12 +10195,6 @@ abstract class AppLocalizations {
   /// **'All Categories'**
   String get tagLibraryPicker_allCategories;
 
-  /// No description provided for @tagLibrary_addedToFixed.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to Fixed Tags'**
-  String get tagLibrary_addedToFixed;
-
   /// No description provided for @tagLibrary_entryMoved.
   ///
   /// In en, this message translates to:
@@ -11147,18 +10621,6 @@ abstract class AppLocalizations {
   /// **'Keep existing characters and append new'**
   String get sendToHome_appendCharacterSubtitle;
 
-  /// No description provided for @sendToHome_fixedTags.
-  ///
-  /// In en, this message translates to:
-  /// **'Send to Fixed Tags'**
-  String get sendToHome_fixedTags;
-
-  /// No description provided for @sendToHome_fixedTagsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Append to the fixed tag list'**
-  String get sendToHome_fixedTagsSubtitle;
-
   /// No description provided for @sendToHome_sendAsAlias.
   ///
   /// In en, this message translates to:
@@ -11278,30 +10740,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fixed Tags'**
   String get metadataImport_fixedTags;
-
-  /// No description provided for @metadataImport_fixedPrefix.
-  ///
-  /// In en, this message translates to:
-  /// **'Prefix: {text}'**
-  String metadataImport_fixedPrefix(Object text);
-
-  /// No description provided for @metadataImport_fixedSuffix.
-  ///
-  /// In en, this message translates to:
-  /// **'Suffix: {text}'**
-  String metadataImport_fixedSuffix(Object text);
-
-  /// No description provided for @metadataImport_negativeFixedPrefix.
-  ///
-  /// In en, this message translates to:
-  /// **'Undesired Content Prefix: {text}'**
-  String metadataImport_negativeFixedPrefix(Object text);
-
-  /// No description provided for @metadataImport_negativeFixedSuffix.
-  ///
-  /// In en, this message translates to:
-  /// **'Undesired Content Suffix: {text}'**
-  String metadataImport_negativeFixedSuffix(Object text);
 
   /// No description provided for @metadataImport_qualityTagsCount.
   ///
@@ -15802,12 +15240,6 @@ abstract class AppLocalizations {
   /// **'Smart decomposed and sent'**
   String get toast_smartDecomposeSent;
 
-  /// No description provided for @toast_addedToFixedTags.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to fixed tags'**
-  String get toast_addedToFixedTags;
-
   /// No description provided for @toast_renameNameRequired.
   ///
   /// In en, this message translates to:
@@ -17103,18 +16535,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Swap'**
   String get common_swap;
-
-  /// No description provided for @common_prefix.
-  ///
-  /// In en, this message translates to:
-  /// **'Prefix'**
-  String get common_prefix;
-
-  /// No description provided for @common_suffix.
-  ///
-  /// In en, this message translates to:
-  /// **'Suffix'**
-  String get common_suffix;
 
   /// No description provided for @common_minimum.
   ///
@@ -18552,6 +17972,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Waterfall view'**
   String get promptBlockLibrary_waterfallView;
+
+  /// No description provided for @promptBlockPalette_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Palette'**
+  String get promptBlockPalette_tooltip;
+
+  /// No description provided for @promptBlockPalette_emptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag blocks here to keep them handy; tap to insert at the caret, or drag into the prompt box'**
+  String get promptBlockPalette_emptyHint;
+
+  /// No description provided for @promptBlockPalette_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from palette'**
+  String get promptBlockPalette_remove;
 
   /// No description provided for @promptBlockLibrary_sortBy.
   ///
