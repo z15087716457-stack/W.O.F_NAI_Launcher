@@ -39,7 +39,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(authModeNotifierProvider.notifier).reset();
+    Future(() => ref.read(authModeNotifierProvider.notifier).reset());
   }
 
   @override
