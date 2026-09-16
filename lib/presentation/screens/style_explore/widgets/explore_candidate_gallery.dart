@@ -17,6 +17,7 @@ import 'explore_candidate_hover_preview.dart';
 import 'explore_create_family_dialog.dart';
 import 'explore_folder_assign_bar.dart';
 import 'explore_lineage_panel.dart';
+import 'horizontal_edge_fade.dart';
 
 /// 右栏候选画廊：筛选 chips + 新建文件夹 + 牌堆分组 + 大图详情弹窗。
 ///
@@ -55,7 +56,14 @@ class _ExploreCandidateGalleryState
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final run = ref.watch(exploreActiveRunProvider);
-    final filter = ref.watch(exploreGalleryFilterProvider);
+    // 文件夹筛选指向已删/跨 run 的悬空 id 时回落「全部」（deleteFolder
+    // 本侧已同步回落，这里再兜一层防跨 run 残留）。
+    final filter = run == null
+        ? ref.watch(exploreGalleryFilterProvider)
+        : effectiveExploreGalleryFilter(
+            run,
+            ref.watch(exploreGalleryFilterProvider),
+          );
 
     if (run == null) {
       return _EmptyHint(
@@ -114,24 +122,68 @@ class _ExploreCandidateGalleryState
     ExploreRun run,
     ExploreGalleryFilter filter,
   ) {
+    // 锁定 chip 数：全部/收藏 两枚钉死在筛选排最前，文件夹 chips 才可拖。
+    const lockedChipCount = 2;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-      child: Wrap(
-        spacing: 6,
-        runSpacing: 4,
-        crossAxisAlignment: WrapCrossAlignment.center,
+      child: Row(
         children: [
-          for (final entry in _filterEntries(l10n))
-            FilterChip(
-              key: Key('explore-filter-${entry.value.name}'),
-              label: Text(entry.key),
-              selected: filter == entry.value,
-              visualDensity: VisualDensity.compact,
-              onSelected: (_) =>
-                  ref.read(exploreGalleryFilterProvider.notifier).state =
-                      entry.value,
+          Expanded(
+            child: SizedBox(
+              height: 40,
+              child: HorizontalEdgeFade(
+                child: ReorderableListView(
+                  scrollDirection: Axis.horizontal,
+                  buildDefaultDragHandles: false,
+                  onReorderItem: (oldIndex, newIndex) =>
+                      _reorderFolderChips(run, oldIndex, newIndex),
+                  children: [
+                    _filterChip(
+                      key: const Key('explore-filter-all'),
+                      label: l10n.styleExplore_filterAll,
+                      selected: filter is ExploreGalleryFilterAll,
+                      onTap: () => _setFilter(const ExploreGalleryFilterAll()),
+                    ),
+                    _filterChip(
+                      key: const Key('explore-filter-hearted'),
+                      label: l10n.styleExplore_filterHearted,
+                      selected: filter is ExploreGalleryFilterHearted,
+                      onTap: () =>
+                          _setFilter(const ExploreGalleryFilterHearted()),
+                    ),
+                    for (final entry in run.folders.indexed)
+                      ReorderableDragStartListener(
+                        key: ValueKey(
+                          'explore-filter-folder-${entry.$2.id}',
+                        ),
+                        index: lockedChipCount + entry.$1,
+                        child: _filterChip(
+                          label: entry.$2.name,
+                          icon: Icons.folder_outlined,
+                          selected:
+                              filter is ExploreGalleryFilterFolder &&
+                              filter.folderId == entry.$2.id,
+                          onTap: () => _setFilter(
+                            ExploreGalleryFilterFolder(entry.$2.id),
+                          ),
+                        ),
+                      ),
+                    _filterChip(
+                      key: const Key('explore-filter-uncategorized'),
+                      label: l10n.styleExplore_folderUncategorized,
+                      icon: Icons.inbox_outlined,
+                      selected:
+                          filter is ExploreGalleryFilterFolder &&
+                          filter.folderId == null,
+                      onTap: () =>
+                          _setFilter(const ExploreGalleryFilterFolder(null)),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          // 新建文件夹：牌堆分组即文件夹，未分类组恒在最后。
+          ),
+          // 钉右两钮：chips 溢出横滚时常显不挤没。
           IconButton(
             key: const Key('explore-gallery-new-folder'),
             iconSize: 18,
@@ -150,6 +202,60 @@ class _ExploreCandidateGalleryState
             icon: const Icon(Icons.checklist),
           ),
         ],
+      ),
+    );
+  }
+
+  void _setFilter(ExploreGalleryFilter filter) {
+    ref.read(exploreGalleryFilterProvider.notifier).state = filter;
+  }
+
+  /// 文件夹 chip 拖动落序：全部/收藏在前、未分类在尾均锁定，
+  /// 拖入落点夹回文件夹区间，写回 run.folders 顺序（牌堆分组同源）。
+  /// onReorderItem 的 newIndex 已按移除项调整（= 最终插入位）。
+  void _reorderFolderChips(ExploreRun run, int oldIndex, int newIndex) {
+    const locked = 2;
+    final folderCount = run.folders.length;
+    if (oldIndex < locked || oldIndex >= locked + folderCount) return;
+    final target = newIndex.clamp(locked, locked + folderCount - 1);
+    final ordered = [for (final folder in run.folders) folder.id];
+    ordered.insert(target - locked, ordered.removeAt(oldIndex - locked));
+    ref
+        .read(exploreRunListNotifierProvider.notifier)
+        .reorderFolders(run.id, ordered);
+  }
+
+  Widget _filterChip({
+    Key? key,
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+    IconData? icon,
+  }) {
+    return Padding(
+      key: key,
+      padding: const EdgeInsets.only(right: 6),
+      child: FilterChip(
+        label: icon == null
+            ? Text(label)
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, size: 14),
+                  const SizedBox(width: 4),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 120),
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+        selected: selected,
+        visualDensity: VisualDensity.compact,
+        onSelected: (_) => onTap(),
       ),
     );
   }
@@ -405,7 +511,10 @@ class _ExploreCandidateGalleryState
   /// 翻页序 = 打开瞬间的筛选快照；点开的候选不在快照内（谱系区旁路）
   /// 时退化为单张序列。
   void _openCandidateDetail(ExploreRun run, ExploreCandidate candidate) {
-    final filter = ref.read(exploreGalleryFilterProvider);
+    final filter = effectiveExploreGalleryFilter(
+      run,
+      ref.read(exploreGalleryFilterProvider),
+    );
     // 翻页序 = 展示序（最新在前），与画廊反转对齐——向右箭头 = 下一张更新的图。
     final candidateIds = [
       for (final item in run.candidates)
@@ -468,15 +577,6 @@ class _ExploreCandidateGalleryState
     }
   }
 
-  static List<MapEntry<String, ExploreGalleryFilter>> _filterEntries(
-    AppLocalizations l10n,
-  ) {
-    return [
-      MapEntry(l10n.styleExplore_filterAll, ExploreGalleryFilter.all),
-      MapEntry(l10n.styleExplore_filterHearted, ExploreGalleryFilter.hearted),
-      MapEntry(l10n.styleExplore_filterFailed, ExploreGalleryFilter.failed),
-    ];
-  }
 }
 
 class _EmptyHint extends StatelessWidget {

@@ -18889,12 +18889,6 @@ abstract class AppLocalizations {
   /// **'Favorites'**
   String get styleExplore_filterHearted;
 
-  /// No description provided for @styleExplore_filterFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed'**
-  String get styleExplore_filterFailed;
-
   /// No description provided for @styleExplore_newFolder.
   ///
   /// In en, this message translates to:

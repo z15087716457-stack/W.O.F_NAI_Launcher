@@ -344,6 +344,27 @@ void main() {
     return ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
   }
 
+  /// 把画廊筛选排滚到端点：chip 溢出时被懒加载回收，
+  /// ensureVisible/scrollUntilVisible 找不到元素，须直接驱动 position。
+  Future<void> scrollChipRowToEnd(
+    WidgetTester tester, {
+    bool toEnd = true,
+  }) async {
+    final scrollable = tester.state<ScrollableState>(
+      find.descendant(
+        of: find.byType(ReorderableListView),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    scrollable.position.jumpTo(
+      toEnd
+          ? scrollable.position.maxScrollExtent
+          : scrollable.position.minScrollExtent,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+
   testWidgets('renders the run sidebar, toolbar, and center panel', (
     tester,
   ) async {
@@ -1326,10 +1347,28 @@ void main() {
             error: 'boom',
           ),
         );
+    final inFolder = ExploreCandidate.shell(roundId: 'r-1', id: 'cand-d')
+        .copyWith(
+          generation: const ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.done,
+          ),
+          folderId: 'folder-a',
+        );
     final run = await seedRun(
       '筛选任务',
       status: ExploreRunStatus.generated,
-      candidates: [hearted, plain, failed],
+      candidates: [hearted, plain, failed, inFolder],
+    );
+    await runStorage.putRun(
+      run.copyWith(
+        folders: [
+          ExploreCandidateFolder(
+            id: 'folder-a',
+            name: '暖光',
+            createdAt: DateTime.utc(2026, 9, 16),
+          ),
+        ],
+      ),
     );
     final container = await pumpScreen(tester);
     container.read(exploreActiveRunIdProvider.notifier).state = run.id;
@@ -1339,6 +1378,9 @@ void main() {
     expect(find.byKey(const Key('explore-candidate-cand-t')), findsOneWidget);
     expect(find.byKey(const Key('explore-candidate-cand-p')), findsOneWidget);
     expect(find.byKey(const Key('explore-candidate-cand-f')), findsOneWidget);
+    expect(find.byKey(const Key('explore-candidate-cand-d')), findsOneWidget);
+    // 「失败」chip 已退役（FEAT-58），失败候选只在「全部」可见。
+    expect(find.byKey(const Key('explore-filter-failed')), findsNothing);
 
     // 收藏筛选。
     await tester.tap(find.byKey(const Key('explore-filter-hearted')));
@@ -1348,19 +1390,32 @@ void main() {
     expect(find.byKey(const Key('explore-candidate-cand-p')), findsNothing);
     expect(find.byKey(const Key('explore-candidate-cand-f')), findsNothing);
 
-    // 失败筛选。
-    await tester.tap(find.byKey(const Key('explore-filter-failed')));
+    // 文件夹筛选：自建文件夹 chip 出现在收藏之后。
+    await tester.tap(find.byKey(const Key('explore-filter-folder-folder-a')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(find.byKey(const Key('explore-candidate-cand-f')), findsOneWidget);
+    expect(find.byKey(const Key('explore-candidate-cand-d')), findsOneWidget);
     expect(find.byKey(const Key('explore-candidate-cand-t')), findsNothing);
+    expect(find.byKey(const Key('explore-candidate-cand-p')), findsNothing);
+
+    // 未分类筛选：folderId 为空的候选（含失败占位）。chip 排在文件夹区
+    // 末尾，窄面板下被横滚推出可视区，先把筛选排滚到底再点。
+    await scrollChipRowToEnd(tester);
+    await tester.tap(find.byKey(const Key('explore-filter-uncategorized')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(const Key('explore-candidate-cand-t')), findsOneWidget);
+    expect(find.byKey(const Key('explore-candidate-cand-p')), findsOneWidget);
+    expect(find.byKey(const Key('explore-candidate-cand-f')), findsOneWidget);
+    expect(find.byKey(const Key('explore-candidate-cand-d')), findsNothing);
     // 筛选叠加在牌堆分组之上（牌堆常驻，无视图切换）。
     expect(
       find.byKey(const Key('explore-deck-header-uncategorized')),
       findsOneWidget,
     );
 
-    // 回到全部。
+    // 回到全部（先滚回筛选排最左，「全部」chip 已被懒回收）。
+    await scrollChipRowToEnd(tester, toEnd: false);
     await tester.tap(find.byKey(const Key('explore-filter-all')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -1668,10 +1723,18 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // 工具条不新建文件夹时只有 全部/收藏/失败 三枚筛选。
+    // 筛选排 = 全部/收藏 + 自建文件夹 chips + 末尾未分类；「失败」已退役。
     expect(find.byKey(const Key('explore-filter-all')), findsOneWidget);
     expect(find.byKey(const Key('explore-filter-hearted')), findsOneWidget);
-    expect(find.byKey(const Key('explore-filter-failed')), findsOneWidget);
+    expect(find.byKey(const Key('explore-filter-failed')), findsNothing);
+    expect(
+      find.byKey(const Key('explore-filter-folder-folder-a')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('explore-filter-uncategorized')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('explore-formal-review')), findsNothing);
     // 视图切换已删：牌堆常驻，无切换钮。
     expect(find.byKey(const Key('explore-gallery-view-toggle')), findsNothing);

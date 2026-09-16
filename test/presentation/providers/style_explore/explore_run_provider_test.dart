@@ -213,48 +213,78 @@ void main() {
   group('gallery filter matcher', () {
     ExploreCandidate candidate({
       bool heart = false,
+      String? folderId,
       ExploreCandidateGenerationStatus status =
           ExploreCandidateGenerationStatus.done,
     }) {
       return ExploreCandidate.shell(roundId: 'r').copyWith(
         generation: ExploreCandidateGeneration(status: status),
         review: ExploreCandidateReview(heart: heart),
+        folderId: folderId,
       );
     }
 
     test('each filter matches its semantics', () {
       final plain = candidate();
       final hearted = candidate(heart: true);
-      final failed = candidate(status: ExploreCandidateGenerationStatus.failed);
+      final inFolder = candidate(folderId: 'folder-a');
 
       expect(
-        exploreCandidateMatchesFilter(plain, ExploreGalleryFilter.all),
+        exploreCandidateMatchesFilter(
+          plain,
+          const ExploreGalleryFilterAll(),
+        ),
         isTrue,
       );
       expect(
-        exploreCandidateMatchesFilter(hearted, ExploreGalleryFilter.all),
+        exploreCandidateMatchesFilter(
+          hearted,
+          const ExploreGalleryFilterAll(),
+        ),
         isTrue,
       );
       expect(
-        exploreCandidateMatchesFilter(hearted, ExploreGalleryFilter.hearted),
+        exploreCandidateMatchesFilter(
+          hearted,
+          const ExploreGalleryFilterHearted(),
+        ),
         isTrue,
       );
       expect(
-        exploreCandidateMatchesFilter(plain, ExploreGalleryFilter.hearted),
+        exploreCandidateMatchesFilter(
+          plain,
+          const ExploreGalleryFilterHearted(),
+        ),
+        isFalse,
+      );
+      // 文件夹筛选：folderId 精确匹配；null = 未分类。
+      expect(
+        exploreCandidateMatchesFilter(
+          inFolder,
+          const ExploreGalleryFilterFolder('folder-a'),
+        ),
+        isTrue,
+      );
+      expect(
+        exploreCandidateMatchesFilter(
+          plain,
+          const ExploreGalleryFilterFolder('folder-a'),
+        ),
         isFalse,
       );
       expect(
-        exploreCandidateMatchesFilter(failed, ExploreGalleryFilter.failed),
+        exploreCandidateMatchesFilter(
+          plain,
+          const ExploreGalleryFilterFolder(null),
+        ),
         isTrue,
       );
       expect(
-        exploreCandidateMatchesFilter(plain, ExploreGalleryFilter.failed),
+        exploreCandidateMatchesFilter(
+          inFolder,
+          const ExploreGalleryFilterFolder(null),
+        ),
         isFalse,
-      );
-      expect(
-        ExploreGalleryFilter.values.map((filter) => filter.name),
-        ['all', 'hearted', 'failed'],
-        reason: '筛选层只保留 全部/收藏/失败 三枚',
       );
     });
   });
@@ -369,6 +399,56 @@ void main() {
         );
       },
     );
+
+    test('reorderFolders persists new order and rejects stale lists', () async {
+      final c = container();
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final run = await seedRun(c, []);
+      final a = await notifier.createFolder(run.id, 'A');
+      final b = await notifier.createFolder(run.id, 'B');
+      final d = await notifier.createFolder(run.id, 'D');
+
+      await notifier.reorderFolders(run.id, [d.id, a.id, b.id]);
+      var stored = await reload(c, run.id);
+      expect(stored.folders.map((f) => f.name), ['D', 'A', 'B']);
+
+      // 非同集合（漏项/外项）拒绝且不污染现状。
+      expect(
+        () => notifier.reorderFolders(run.id, [a.id, b.id]),
+        throwsA(isA<StateError>()),
+      );
+      expect(
+        () => notifier.reorderFolders(run.id, [a.id, b.id, 'ghost']),
+        throwsA(isA<StateError>()),
+      );
+      stored = await reload(c, run.id);
+      expect(stored.folders.map((f) => f.name), ['D', 'A', 'B']);
+    });
+
+    test('deleting the filtered folder resets gallery filter to all', () async {
+      final c = container();
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final run = await seedRun(c, []);
+      final folder = await notifier.createFolder(run.id, '暖光');
+
+      c.read(exploreGalleryFilterProvider.notifier).state =
+          ExploreGalleryFilterFolder(folder.id);
+      await notifier.deleteFolder(run.id, folder.id);
+      expect(
+        c.read(exploreGalleryFilterProvider),
+        isA<ExploreGalleryFilterAll>(),
+      );
+
+      // 指着别处的筛选不受影响。
+      final other = await notifier.createFolder(run.id, '冷光');
+      c.read(exploreGalleryFilterProvider.notifier).state =
+          ExploreGalleryFilterFolder(other.id);
+      final gone = await notifier.createFolder(run.id, '无关');
+      await notifier.deleteFolder(run.id, gone.id);
+      final filter = c.read(exploreGalleryFilterProvider);
+      expect(filter, isA<ExploreGalleryFilterFolder>());
+      expect((filter as ExploreGalleryFilterFolder).folderId, other.id);
+    });
   });
 
   group('legacy reviewing status', () {

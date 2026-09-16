@@ -6166,7 +6166,6 @@
   "styleExplore_cancelRunMessage": "取消后不可再启动；剩余待生成候选将标记为已取消。",
   "styleExplore_filterAll": "全部",
   "styleExplore_filterHearted": "收藏",
-  "styleExplore_filterFailed": "失败",
   "styleExplore_newFolder": "新建文件夹",
   "styleExplore_renameFolder": "重命名文件夹",
   "styleExplore_deleteFolder": "删除文件夹",

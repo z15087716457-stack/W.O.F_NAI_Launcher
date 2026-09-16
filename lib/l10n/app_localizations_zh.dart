@@ -10443,9 +10443,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_filterHearted => '收藏';
 
   @override
-  String get styleExplore_filterFailed => '失败';
-
-  @override
   String get styleExplore_newFolder => '新建文件夹';
 
   @override

@@ -6166,7 +6166,6 @@
   "styleExplore_cancelRunMessage": "A cancelled run cannot be restarted; remaining pending candidates will be marked as cancelled.",
   "styleExplore_filterAll": "All",
   "styleExplore_filterHearted": "Favorites",
-  "styleExplore_filterFailed": "Failed",
   "styleExplore_newFolder": "New folder",
   "styleExplore_renameFolder": "Rename folder",
   "styleExplore_deleteFolder": "Delete folder",

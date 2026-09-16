@@ -10591,9 +10591,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_filterHearted => 'お気に入り';
 
   @override
-  String get styleExplore_filterFailed => '失敗';
-
-  @override
   String get styleExplore_newFolder => '新しいフォルダ';
 
   @override

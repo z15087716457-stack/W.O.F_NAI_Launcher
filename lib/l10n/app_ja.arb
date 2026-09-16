@@ -6166,7 +6166,6 @@
   "styleExplore_cancelRunMessage": "キャンセル後は再開できません。残りの未生成候補はキャンセル済みとしてマークされます。",
   "styleExplore_filterAll": "すべて",
   "styleExplore_filterHearted": "お気に入り",
-  "styleExplore_filterFailed": "失敗",
   "styleExplore_newFolder": "新しいフォルダ",
   "styleExplore_renameFolder": "フォルダ名を変更",
   "styleExplore_deleteFolder": "フォルダを削除",

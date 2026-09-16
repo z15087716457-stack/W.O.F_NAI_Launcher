@@ -10830,9 +10830,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_filterHearted => 'Favorites';
 
   @override
-  String get styleExplore_filterFailed => 'Failed';
-
-  @override
   String get styleExplore_newFolder => 'New folder';
 
   @override

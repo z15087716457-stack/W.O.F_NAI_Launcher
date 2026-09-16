@@ -247,6 +247,28 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
                 : candidate,
         ],
       );
+    }).then((updated) {
+      // 画廊筛选正指着被删文件夹时回落「全部」。
+      final filter = ref.read(exploreGalleryFilterProvider);
+      if (filter is ExploreGalleryFilterFolder &&
+          filter.folderId == folderId) {
+        ref.read(exploreGalleryFilterProvider.notifier).state =
+            const ExploreGalleryFilterAll();
+      }
+      return updated;
+    });
+  }
+
+  /// 调整文件夹顺序（画廊筛选排拖动落序）：orderedIds 必须与现状
+  /// 同集合同长度，否则抛 [StateError]。牌堆分组顺序同源跟随。
+  Future<ExploreRun> reorderFolders(String runId, List<String> orderedIds) {
+    return _mutateRun(runId, (run) {
+      final byId = {for (final folder in run.folders) folder.id: folder};
+      if (orderedIds.length != run.folders.length ||
+          orderedIds.any((id) => !byId.containsKey(id))) {
+        throw StateError('文件夹顺序与现状不一致');
+      }
+      return run.copyWith(folders: [for (final id in orderedIds) byId[id]!]);
     });
   }
 
@@ -605,27 +627,63 @@ final exploreActiveRunProvider = Provider<ExploreRun?>((ref) {
       ?.runById(activeId);
 });
 
-/// 候选画廊筛选（全部/收藏/失败；文件夹分组由牌堆承担）。
-enum ExploreGalleryFilter { all, hearted, failed }
+/// 候选画廊筛选：全部 / 收藏 / 文件夹（folderId 为 null 即未分类）。
+/// 「失败」chip 已退役——失败候选只在「全部」可见（卡片状态徽标照旧），
+/// 垃圾清理走「自建文件夹 + 全选删除」工作流。
+sealed class ExploreGalleryFilter {
+  const ExploreGalleryFilter();
+}
+
+final class ExploreGalleryFilterAll extends ExploreGalleryFilter {
+  const ExploreGalleryFilterAll();
+}
+
+final class ExploreGalleryFilterHearted extends ExploreGalleryFilter {
+  const ExploreGalleryFilterHearted();
+}
+
+final class ExploreGalleryFilterFolder extends ExploreGalleryFilter {
+  const ExploreGalleryFilterFolder(this.folderId);
+
+  /// null = 未分类分组。
+  final String? folderId;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ExploreGalleryFilterFolder && other.folderId == folderId;
+
+  @override
+  int get hashCode => folderId.hashCode;
+}
 
 final exploreGalleryFilterProvider = StateProvider<ExploreGalleryFilter>(
-  (ref) => ExploreGalleryFilter.all,
+  (ref) => const ExploreGalleryFilterAll(),
 );
+
+/// 文件夹筛选指向不存在的文件夹（已删/切 run 的悬空指针）时回落「全部」。
+ExploreGalleryFilter effectiveExploreGalleryFilter(
+  ExploreRun run,
+  ExploreGalleryFilter filter,
+) {
+  if (filter is ExploreGalleryFilterFolder &&
+      filter.folderId != null &&
+      run.folderById(filter.folderId!) == null) {
+    return const ExploreGalleryFilterAll();
+  }
+  return filter;
+}
 
 /// 筛选匹配（纯函数，widget 测试可直接断言）。
 bool exploreCandidateMatchesFilter(
   ExploreCandidate candidate,
   ExploreGalleryFilter filter,
 ) {
-  switch (filter) {
-    case ExploreGalleryFilter.all:
-      return true;
-    case ExploreGalleryFilter.hearted:
-      return candidate.review.heart;
-    case ExploreGalleryFilter.failed:
-      return candidate.generation.status ==
-          ExploreCandidateGenerationStatus.failed;
-  }
+  return switch (filter) {
+    ExploreGalleryFilterAll() => true,
+    ExploreGalleryFilterHearted() => candidate.review.heart,
+    ExploreGalleryFilterFolder(:final folderId) =>
+      candidate.folderId == folderId,
+  };
 }
 
 /// 多候选 roll 正向串合并：顶层逗号切原子、去重（保序）、`, ` 拼接
