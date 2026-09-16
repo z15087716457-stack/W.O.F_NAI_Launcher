@@ -30,7 +30,7 @@ class PillInstanceCard extends ConsumerWidget {
   final String marker;
   final VoidCallback onDismiss;
 
-  /// 探索页才允许切换实例遗传开关；主生成页仅展示灰色状态。
+  /// 探索页才渲染遗传开关钮；主生成页不渲染（FEAT-47）。
   final bool allowEvolutionToggle;
 
   @override
@@ -142,44 +142,44 @@ class PillInstanceCard extends ConsumerWidget {
                       .read(pillWorkspaceProvider(scope).notifier)
                       .toggleEnabled(marker),
                 ),
-                Builder(
-                  builder: (context) {
-                    final canToggleEvolution =
-                        allowEvolutionToggle && instance.enabled && hasRoll;
-                    final evolutionTooltip = !allowEvolutionToggle
-                        ? l10n.pillCardEvolutionExploreOnly
-                        : !instance.enabled
-                        ? l10n.pillCardEvolutionRequiresEnabled
-                        : !hasRoll
-                        ? l10n.pillCardEvolutionRequiresRandom
-                        : instance.evolutionEnabled
-                        ? l10n.pillCardEvolutionDisable
-                        : l10n.pillCardEvolutionEnable;
-                    return IconButton(
-                      constraints: const BoxConstraints.tightFor(
-                        width: 40,
-                        height: 40,
-                      ),
-                      padding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                      key: const Key('pill-evolution-toggle'),
-                      icon: DnaIcon(
-                        size: 18,
-                        color: canToggleEvolution
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurfaceVariant.withValues(
-                                alpha: 0.45,
-                              ),
-                      ),
-                      tooltip: evolutionTooltip,
-                      onPressed: canToggleEvolution
-                          ? () => ref
-                                .read(pillWorkspaceProvider(scope).notifier)
-                                .toggleEvolution(marker)
-                          : null,
-                    );
-                  },
-                ),
+                // FEAT-47：遗传开关为画风探索页专属；主生成页不渲染该钮。
+                if (allowEvolutionToggle)
+                  Builder(
+                    builder: (context) {
+                      final canToggleEvolution =
+                          instance.enabled && hasRoll;
+                      final evolutionTooltip = !instance.enabled
+                          ? l10n.pillCardEvolutionRequiresEnabled
+                          : !hasRoll
+                          ? l10n.pillCardEvolutionRequiresRandom
+                          : instance.evolutionEnabled
+                          ? l10n.pillCardEvolutionDisable
+                          : l10n.pillCardEvolutionEnable;
+                      return IconButton(
+                        constraints: const BoxConstraints.tightFor(
+                          width: 40,
+                          height: 40,
+                        ),
+                        padding: EdgeInsets.zero,
+                        visualDensity: VisualDensity.compact,
+                        key: const Key('pill-evolution-toggle'),
+                        icon: DnaIcon(
+                          size: 18,
+                          color: canToggleEvolution
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurfaceVariant.withValues(
+                                  alpha: 0.45,
+                                ),
+                        ),
+                        tooltip: evolutionTooltip,
+                        onPressed: canToggleEvolution
+                            ? () => ref
+                                  .read(pillWorkspaceProvider(scope).notifier)
+                                  .toggleEvolution(marker)
+                            : null,
+                      );
+                    },
+                  ),
                 const Spacer(),
                 IconButton(
                   constraints: const BoxConstraints.tightFor(

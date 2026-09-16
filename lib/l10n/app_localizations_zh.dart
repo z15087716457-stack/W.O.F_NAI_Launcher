@@ -9574,9 +9574,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pillCardEvolutionDisable => '关闭遗传';
 
   @override
-  String get pillCardEvolutionExploreOnly => '遗传开关仅在画风探索页可用';
-
-  @override
   String get pillCardEvolutionRequiresRandom => '需先设为随机或顺序抽取';
 
   @override

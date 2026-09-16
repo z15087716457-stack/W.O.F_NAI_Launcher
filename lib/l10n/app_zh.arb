@@ -5683,7 +5683,6 @@
   "pillCardEmptyRoll": "（本次为空）",
   "pillCardEvolutionEnable": "开启遗传",
   "pillCardEvolutionDisable": "关闭遗传",
-  "pillCardEvolutionExploreOnly": "遗传开关仅在画风探索页可用",
   "pillCardEvolutionRequiresRandom": "需先设为随机或顺序抽取",
   "pillCardEvolutionRequiresEnabled": "需先启用实例",
   "pillSettingsTitle": "块实例设置",

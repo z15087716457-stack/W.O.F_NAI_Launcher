@@ -5683,7 +5683,6 @@
   "pillCardEmptyRoll": "(empty roll this time)",
   "pillCardEvolutionEnable": "Enable evolution",
   "pillCardEvolutionDisable": "Disable evolution",
-  "pillCardEvolutionExploreOnly": "Evolution is available only in Style Explore",
   "pillCardEvolutionRequiresRandom": "Set the instance to random or sequential first",
   "pillCardEvolutionRequiresEnabled": "Enable the instance first",
   "pillSettingsTitle": "Block instance settings",

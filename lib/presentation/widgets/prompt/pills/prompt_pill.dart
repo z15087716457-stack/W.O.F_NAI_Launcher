@@ -37,7 +37,7 @@ class PromptPill extends StatelessWidget {
   /// 并替换右侧骰子角标。
   final bool evolutionEnabled;
 
-  /// 当前页面是否允许操作遗传开关；探索页彩色，主生成页灰色。
+  /// 当前页面是否允许操作遗传开关；仅探索页渲染 DNA 角标。
   final bool allowEvolutionToggle;
   final PromptPillVariant variant;
 
@@ -67,9 +67,8 @@ class PromptPill extends StatelessWidget {
       ),
     };
 
-    final evolutionColor = allowEvolutionToggle
-        ? color
-        : theme.colorScheme.onSurfaceVariant;
+    // FEAT-47：DNA 角标为探索页专属；主生成页不渲染（开着遗传的实例
+    // 回退显示骰子角标）。
 
     // 尺寸对齐主提示词正文（bodyMedium）：药丸曾用 labelSmall 明显小于正文字号
     return Container(
@@ -100,9 +99,11 @@ class PromptPill extends StatelessWidget {
               ),
             ),
           ),
-          if (variant == PromptPillVariant.normal && evolutionEnabled) ...[
+          if (variant == PromptPillVariant.normal &&
+              evolutionEnabled &&
+              allowEvolutionToggle) ...[
             const SizedBox(width: 2),
-            DnaIcon(size: 12, color: evolutionColor),
+            DnaIcon(size: 12, color: color),
           ] else if (variant == PromptPillVariant.normal && showRollBadge) ...[
             const SizedBox(width: 2),
             Icon(Icons.casino_outlined, size: 11, color: borderColor),

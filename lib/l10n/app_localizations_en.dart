@@ -9937,10 +9937,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pillCardEvolutionDisable => 'Disable evolution';
 
   @override
-  String get pillCardEvolutionExploreOnly =>
-      'Evolution is available only in Style Explore';
-
-  @override
   String get pillCardEvolutionRequiresRandom =>
       'Set the instance to random or sequential first';
 

@@ -612,7 +612,7 @@ void main() {
     testWidgets('evolution badge replaces dice; card dice re-rolls', (
       tester,
     ) async {
-      final container = await _pumpEditor(tester);
+      final container = await _pumpEditor(tester, allowEvolutionToggle: true);
       await container.read(promptBlockLibraryNotifierProvider.future);
       final notifier = container.read(pillWorkspaceNotifierProvider.notifier)
         ..insertBlockAt(offset: 0, blockId: 'style');
@@ -970,7 +970,10 @@ class _AlternatingRandom implements Random {
   bool nextBool() => true;
 }
 
-Future<ProviderContainer> _pumpEditor(WidgetTester tester) async {
+Future<ProviderContainer> _pumpEditor(
+  WidgetTester tester, {
+  bool allowEvolutionToggle = false,
+}) async {
   tester.view.physicalSize = const Size(1200, 800);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -987,8 +990,8 @@ Future<ProviderContainer> _pumpEditor(WidgetTester tester) async {
           ),
         ),
       ],
-      child: const MaterialApp(
-        locale: Locale('zh'),
+      child: MaterialApp(
+        locale: const Locale('zh'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
@@ -996,7 +999,8 @@ Future<ProviderContainer> _pumpEditor(WidgetTester tester) async {
             width: 960,
             height: 360,
             child: PromptPillEditor(
-              config: UnifiedPromptConfig(
+              allowEvolutionToggle: allowEvolutionToggle,
+              config: const UnifiedPromptConfig(
                 enableAutocomplete: false,
                 enableSyntaxHighlight: false,
                 enableAutoFormat: false,

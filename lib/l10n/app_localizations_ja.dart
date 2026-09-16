@@ -9714,9 +9714,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pillCardEvolutionDisable => '遺伝を無効化';
 
   @override
-  String get pillCardEvolutionExploreOnly => '遺伝はスタイル探索でのみ使用できます';
-
-  @override
   String get pillCardEvolutionRequiresRandom => '先にランダム抽出または順番に設定してください';
 
   @override

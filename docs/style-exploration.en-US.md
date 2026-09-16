@@ -41,7 +41,7 @@ Then a **DNA icon** appears on the pill, toggling "genetics on / off":
 
 ![Genetics toggle on a pill](../screenshots/style_explore_pill_genetics.png)
 
-> Note: the genetics toggle is **only available on the Style Exploration page** — on the generation page the DNA icon renders grey and is not clickable, so daily prompting can't accidentally change your genetics setup.
+> Note: the genetics toggle is **only available on the Style Exploration page** — on the generation page no DNA elements are rendered at all, so daily prompting can't accidentally change your genetics setup.
 
 The most common setup: set pool blocks like "Favorite Artist Pool" or "400 Curated Artists" to random draw and enable genetics — they become the engine's gene pool.
 
@@ -131,7 +131,7 @@ From a candidate's detail view or the multi-select menu:
 - **Branch creation refused**: make sure you selected offspring from the latest-generation pile, all rounds of the current generation are finished, and the offspring strings don't exactly duplicate the backcross parents.
 - **Cancelling a run** is permanent; use "Pause" if you just need a break.
 - **Deleting candidate images** is available for any candidate with a copy; only Run-directory copies are removed — gallery sources and candidate records stay intact.
-- **The DNA icon is grey and unclickable on the generation page**: the genetics toggle is exclusive to the Style Exploration page — greyed out by design to prevent accidental changes.
+- **No DNA icon on the generation page**: the genetics toggle is exclusive to the Style Exploration page — hidden there by design to prevent accidental changes.
 - **Why are "Import metadata" / "Load snapshot" disabled while a run is generating?** Both overwrite the workspace, which conflicts with the prompt projection the run reads image by image — so they are temporarily blocked with a "run busy" toast.
 
 ---

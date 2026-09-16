@@ -5683,7 +5683,6 @@
   "pillCardEmptyRoll": "（今回は空）",
   "pillCardEvolutionEnable": "遺伝を有効化",
   "pillCardEvolutionDisable": "遺伝を無効化",
-  "pillCardEvolutionExploreOnly": "遺伝はスタイル探索でのみ使用できます",
   "pillCardEvolutionRequiresRandom": "先にランダム抽出または順番に設定してください",
   "pillCardEvolutionRequiresEnabled": "先にインスタンスを有効化してください",
   "pillSettingsTitle": "ブロックインスタンス設定",

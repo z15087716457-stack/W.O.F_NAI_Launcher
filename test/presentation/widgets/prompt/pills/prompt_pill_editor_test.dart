@@ -98,7 +98,8 @@ void main() {
   });
 
   testWidgets(
-    'evolution badge replaces the dice badge and main card is read-only',
+    'main page hides evolution entirely: dice badge stays, card has no '
+    'DNA button',
     (tester) async {
       final container = await _pump(
         tester,
@@ -117,16 +118,17 @@ void main() {
       notifier.toggleEvolution(markerA);
       await tester.pump();
 
-      expect(find.byIcon(Icons.casino_outlined), findsNothing);
-      expect(find.byType(DnaIcon), findsOneWidget);
+      // FEAT-47：开着遗传的实例在主页面不渲染 DNA 角标，回退骰子角标。
+      expect(find.byIcon(Icons.casino_outlined), findsOneWidget);
+      expect(find.byType(DnaIcon), findsNothing);
 
       await tester.tap(find.byType(PromptPill));
       await tester.pump();
       await tester.pump();
-      final evolutionButton = tester.widget<IconButton>(
+      expect(
         find.byKey(const Key('pill-evolution-toggle')),
+        findsNothing,
       );
-      expect(evolutionButton.onPressed, isNull);
     },
   );
 

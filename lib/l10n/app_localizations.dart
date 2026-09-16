@@ -17334,12 +17334,6 @@ abstract class AppLocalizations {
   /// **'Disable evolution'**
   String get pillCardEvolutionDisable;
 
-  /// No description provided for @pillCardEvolutionExploreOnly.
-  ///
-  /// In en, this message translates to:
-  /// **'Evolution is available only in Style Explore'**
-  String get pillCardEvolutionExploreOnly;
-
   /// No description provided for @pillCardEvolutionRequiresRandom.
   ///
   /// In en, this message translates to:
