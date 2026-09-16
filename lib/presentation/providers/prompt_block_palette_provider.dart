@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/models/prompt_block/prompt_block.dart';
+import '../../core/storage/prompt_block_storage.dart';
 import 'prompt_block_library_provider.dart';
 
 part 'prompt_block_palette_provider.g.dart';
@@ -26,11 +27,13 @@ class PromptBlockPaletteState {
 /// 用时点击插到光标处或拖进提示词框。不做任何自动拼装。
 @Riverpod(keepAlive: true)
 class PromptBlockPaletteNotifier extends _$PromptBlockPaletteNotifier {
+  late PromptBlockStorage _storage;
+
   @override
   Future<PromptBlockPaletteState> build() async {
     final library = await ref.watch(promptBlockLibraryNotifierProvider.future);
-    final storage = ref.watch(promptBlockStorageProvider);
-    final ids = await storage.getPaletteBlockIds();
+    _storage = ref.watch(promptBlockStorageProvider);
+    final ids = await _storage.getPaletteBlockIds();
 
     final resolved = <PromptBlock>[];
     final liveIds = <String>[];
@@ -43,7 +46,7 @@ class PromptBlockPaletteNotifier extends _$PromptBlockPaletteNotifier {
     }
     // 库删块 → 板上引用同步消失，回写清理后的 id 表。
     if (liveIds.length != ids.length) {
-      unawaited(storage.putPaletteBlockIds(liveIds));
+      unawaited(_storage.putPaletteBlockIds(liveIds));
     }
     return PromptBlockPaletteState(blocks: resolved);
   }
@@ -86,22 +89,14 @@ class PromptBlockPaletteNotifier extends _$PromptBlockPaletteNotifier {
     List<String>? Function(List<String> ids) transform,
   ) async {
     // 按钮在 provider 尚未完成初始 build 时也可能收拖放——先等 build
-    // 落定再写 state，否则完成后返回的 build 结果会盖掉本次变更。
+    // 落定再写，否则完成后返回的 build 结果会盖掉本次变更。await 之后
+    // 不能再碰 ref（依赖可能恰在期间变更而触发 outdated 断言），所以
+    // storage 走 build 期缓存的字段，写完统一 invalidateSelf 让重建
+    // 按库最新状态重新解析。
     await future;
-    final storage = ref.read(promptBlockStorageProvider);
-    final next = transform(await storage.getPaletteBlockIds());
+    final next = transform(await _storage.getPaletteBlockIds());
     if (next == null) return;
-    await storage.putPaletteBlockIds(next);
-
-    final library = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
-    if (library == null) {
-      ref.invalidateSelf();
-      return;
-    }
-    state = AsyncData(
-      PromptBlockPaletteState(
-        blocks: next.map(library.blockById).nonNulls.toList(),
-      ),
-    );
+    await _storage.putPaletteBlockIds(next);
+    ref.invalidateSelf();
   }
 }
