@@ -186,7 +186,7 @@ void main() {
       int seed = 1,
       List<String> pool = atoms,
     }) {
-      return PillRollEngine.rollInstanceSequential(
+      final (text, nextCursor, _) = PillRollEngine.rollInstanceSequential(
         settings: settings(
           countMin: countMin,
           countMax: countMax,
@@ -198,12 +198,37 @@ void main() {
         cursor: cursor,
         rng: Random(seed),
       );
+      return (text, nextCursor);
     }
 
     test('advances cursor by drawn count from pool head', () {
       expect(roll(cursor: 0), ('a', 1));
       expect(roll(cursor: 1), ('b', 2));
       expect(roll(cursor: 2), ('c', 3));
+    });
+
+    test('countOverride fixes window size and reports drawn count', () {
+      // FEAT-46 逐幕步进：滑窗尺寸 = 当前批抽取数，不重新随机。
+      final (text, nextCursor, drawn) = PillRollEngine.rollInstanceSequential(
+        settings: settings(countMin: 1, countMax: 3),
+        atoms: atoms,
+        cursor: 1,
+        rng: Random(1),
+        countOverride: 2,
+      );
+      expect(text, 'b, c');
+      expect(nextCursor, 3);
+      expect(drawn, 2);
+
+      // 负数游标（步进越过池头）按取模收敛。
+      final (wrapped, wrappedCursor, _) = PillRollEngine.rollInstanceSequential(
+        settings: settings(),
+        atoms: atoms,
+        cursor: -1,
+        rng: Random(1),
+      );
+      expect(wrapped, 'e');
+      expect(wrappedCursor, 0);
     });
 
     test('wraps around at pool tail', () {

@@ -9714,10 +9714,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pillCardEvolutionDisable => '遺伝を無効化';
 
   @override
-  String get pillCardEvolutionRequiresRandom => '先にランダム抽出または順番に設定してください';
+  String get pillCardEvolutionRequiresEnabled => '先にインスタンスを有効化してください';
 
   @override
-  String get pillCardEvolutionRequiresEnabled => '先にインスタンスを有効化してください';
+  String get pillCardStepBack => '一幕戻る';
+
+  @override
+  String get pillCardStepForward => '一幕進む';
 
   @override
   String get pillSettingsTitle => 'ブロックインスタンス設定';

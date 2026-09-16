@@ -17334,17 +17334,23 @@ abstract class AppLocalizations {
   /// **'Disable evolution'**
   String get pillCardEvolutionDisable;
 
-  /// No description provided for @pillCardEvolutionRequiresRandom.
-  ///
-  /// In en, this message translates to:
-  /// **'Set the instance to random or sequential first'**
-  String get pillCardEvolutionRequiresRandom;
-
   /// No description provided for @pillCardEvolutionRequiresEnabled.
   ///
   /// In en, this message translates to:
   /// **'Enable the instance first'**
   String get pillCardEvolutionRequiresEnabled;
+
+  /// No description provided for @pillCardStepBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Step back one scene'**
+  String get pillCardStepBack;
+
+  /// No description provided for @pillCardStepForward.
+  ///
+  /// In en, this message translates to:
+  /// **'Step forward one scene'**
+  String get pillCardStepForward;
 
   /// No description provided for @pillSettingsTitle.
   ///

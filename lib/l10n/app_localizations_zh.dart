@@ -9574,10 +9574,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pillCardEvolutionDisable => '关闭遗传';
 
   @override
-  String get pillCardEvolutionRequiresRandom => '需先设为随机或顺序抽取';
+  String get pillCardEvolutionRequiresEnabled => '需先启用实例';
 
   @override
-  String get pillCardEvolutionRequiresEnabled => '需先启用实例';
+  String get pillCardStepBack => '退回一幕';
+
+  @override
+  String get pillCardStepForward => '前进一幕';
 
   @override
   String get pillSettingsTitle => '块实例设置';

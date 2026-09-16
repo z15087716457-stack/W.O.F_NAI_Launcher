@@ -125,10 +125,7 @@ void main() {
       await tester.tap(find.byType(PromptPill));
       await tester.pump();
       await tester.pump();
-      expect(
-        find.byKey(const Key('pill-evolution-toggle')),
-        findsNothing,
-      );
+      expect(find.byKey(const Key('pill-evolution-toggle')), findsNothing);
     },
   );
 

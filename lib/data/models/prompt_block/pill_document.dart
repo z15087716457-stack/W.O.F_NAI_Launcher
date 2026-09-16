@@ -199,6 +199,7 @@ class PillInstance {
     this.settings = PillInstanceSettings.fixedDefault,
     this.currentRoll,
     this.sequenceCursor = 0,
+    this.lastRollCount,
   });
 
   final String blockId;
@@ -223,6 +224,12 @@ class PillInstance {
   /// 固定与随机模式不读此值；旧存档缺键落 0。
   final int sequenceCursor;
 
+  /// 顺序模式最近一次实际抽取的原子数（FEAT-46 步进用：当前批起点 =
+  /// `sequenceCursor − lastRollCount`，由此 ← → 能以当前批为基准精确
+  /// 回退/前进一个原子）。null = 尚未 roll 过或旧存档缺键，读取处兜底
+  /// `settings.countMin`。仅顺序模式消费。
+  final int? lastRollCount;
+
   PillInstance copyWith({
     String? blockId,
     bool? enabled,
@@ -231,6 +238,7 @@ class PillInstance {
     PillInstanceSettings? settings,
     String? currentRoll,
     int? sequenceCursor,
+    int? lastRollCount,
   }) {
     return PillInstance(
       blockId: blockId ?? this.blockId,
@@ -240,6 +248,7 @@ class PillInstance {
       settings: settings ?? this.settings,
       currentRoll: currentRoll ?? this.currentRoll,
       sequenceCursor: sequenceCursor ?? this.sequenceCursor,
+      lastRollCount: lastRollCount ?? this.lastRollCount,
     );
   }
 
@@ -251,6 +260,7 @@ class PillInstance {
     'settings': settings.toJson(),
     'sequenceCursor': sequenceCursor,
     if (currentRoll != null) 'currentRoll': currentRoll,
+    if (lastRollCount != null) 'lastRollCount': lastRollCount,
   };
 
   factory PillInstance.fromJson(Map<String, dynamic> json) {
@@ -270,6 +280,11 @@ class PillInstance {
       sequenceCursor: rawCursor is num && rawCursor.toInt() > 0
           ? rawCursor.toInt()
           : 0,
+      lastRollCount:
+          json['lastRollCount'] is num &&
+              (json['lastRollCount'] as num).toInt() > 0
+          ? (json['lastRollCount'] as num).toInt()
+          : null,
     );
   }
 
@@ -282,7 +297,8 @@ class PillInstance {
       other.evolutionEnabled == evolutionEnabled &&
       other.settings == settings &&
       other.currentRoll == currentRoll &&
-      other.sequenceCursor == sequenceCursor;
+      other.sequenceCursor == sequenceCursor &&
+      other.lastRollCount == lastRollCount;
 
   @override
   int get hashCode => Object.hash(
@@ -293,6 +309,7 @@ class PillInstance {
     settings,
     currentRoll,
     sequenceCursor,
+    lastRollCount,
   );
 }
 

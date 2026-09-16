@@ -236,8 +236,12 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     if (settings.hasRoll &&
         !instance.locked &&
         !_hasGuardOverride(marker, instance)) {
-      final (text, nextCursor) = _rollFor(updated);
-      updated = updated.copyWith(currentRoll: text, sequenceCursor: nextCursor);
+      final (text, nextCursor, drawn) = _rollFor(updated);
+      updated = updated.copyWith(
+        currentRoll: text,
+        sequenceCursor: nextCursor,
+        lastRollCount: drawn > 0 ? drawn : null,
+      );
     }
     final instances = Map<String, PillInstance>.of(state.document.instances)
       ..[marker] = updated;
@@ -273,11 +277,51 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         _hasGuardOverride(marker, instance)) {
       return;
     }
-    final (text, nextCursor) = _rollFor(instance);
+    final (text, nextCursor, drawn) = _rollFor(instance);
     final instances = Map<String, PillInstance>.of(state.document.instances)
       ..[marker] = instance.copyWith(
         currentRoll: text,
         sequenceCursor: nextCursor,
+        lastRollCount: drawn > 0 ? drawn : null,
+      );
+    _apply(state.document.copyWith(instances: instances));
+  }
+
+  /// 顺序实例逐幕步进（L1 卡 ← → 箭头，FEAT-46）：一「幕」= 一个原子，
+  /// 以当前批起点为基准 ±1（取模绕回），再按实例设置物化。当前批起点 =
+  /// `sequenceCursor − lastRollCount`（缺键兜底 countMin），故步进精确
+  /// 可逆、无需历史栈；滑窗尺寸沿用当前批的抽取数。
+  /// 仅顺序模式生效；锁定/Guard 覆盖/空池一律不动。
+  void stepSequence(String marker, int direction) {
+    final instance = state.document.instances[marker];
+    if (instance == null ||
+        instance.settings.mode != PillRollMode.sequential ||
+        instance.locked ||
+        direction == 0 ||
+        _hasGuardOverride(marker, instance)) {
+      return;
+    }
+    final atoms = PillRollEngine.splitTopLevelAtoms(
+      _resolveBlockContent(instance.blockId) ?? '',
+    );
+    if (atoms.isEmpty) return;
+
+    final windowSize = (instance.lastRollCount ?? instance.settings.countMin)
+        .clamp(1, atoms.length);
+    final batchStart = instance.sequenceCursor - windowSize;
+    final newStart = (batchStart + direction.sign) % atoms.length;
+    final (text, nextCursor, drawn) = PillRollEngine.rollInstanceSequential(
+      settings: instance.settings,
+      atoms: atoms,
+      cursor: newStart,
+      rng: rng,
+      countOverride: windowSize,
+    );
+    final instances = Map<String, PillInstance>.of(state.document.instances)
+      ..[marker] = instance.copyWith(
+        currentRoll: text,
+        sequenceCursor: nextCursor,
+        lastRollCount: drawn > 0 ? drawn : windowSize,
       );
     _apply(state.document.copyWith(instances: instances));
   }
@@ -295,12 +339,13 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
           _hasGuardOverride(entry.key, instance)) {
         continue;
       }
-      final (rolled, nextCursor) = _rollFor(instance);
+      final (rolled, nextCursor, drawn) = _rollFor(instance);
       if (rolled != instance.currentRoll ||
           nextCursor != instance.sequenceCursor) {
         instances[entry.key] = instance.copyWith(
           currentRoll: rolled,
           sequenceCursor: nextCursor,
+          lastRollCount: drawn > 0 ? drawn : null,
         );
         changed = true;
       }
@@ -410,10 +455,11 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
           !instance.locked &&
           instance.currentRoll == null &&
           !_hasGuardOverride(entry.key, instance)) {
-        final (text, nextCursor) = _rollFor(instance);
+        final (text, nextCursor, drawn) = _rollFor(instance);
         instances[entry.key] = instance.copyWith(
           currentRoll: text,
           sequenceCursor: nextCursor,
+          lastRollCount: drawn > 0 ? drawn : null,
         );
         changed = true;
       }
@@ -422,9 +468,10 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   }
 
   /// 对单个实例执行 roll：块内容切原子 → 随机引擎。顺序模式走
-  /// [PillRollEngine.rollInstanceSequential]（游标入出参），其余模式游标
-  /// 原样带回（固定/随机实例不读该值）。
-  (String, int) _rollFor(PillInstance instance) {
+  /// [PillRollEngine.rollInstanceSequential]（游标入出参 + 实际抽取数
+  /// 供 `lastRollCount` 记账），其余模式游标与计数原样带回（固定/随机
+  /// 实例不读这两个值）。
+  (String, int, int) _rollFor(PillInstance instance) {
     final content = _resolveBlockContent(instance.blockId) ?? '';
     final atoms = PillRollEngine.splitTopLevelAtoms(content);
     if (instance.settings.mode == PillRollMode.sequential) {
@@ -442,6 +489,7 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         rng: rng,
       ),
       instance.sequenceCursor,
+      0,
     );
   }
 

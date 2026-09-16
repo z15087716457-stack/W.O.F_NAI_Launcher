@@ -9937,11 +9937,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pillCardEvolutionDisable => 'Disable evolution';
 
   @override
-  String get pillCardEvolutionRequiresRandom =>
-      'Set the instance to random or sequential first';
+  String get pillCardEvolutionRequiresEnabled => 'Enable the instance first';
 
   @override
-  String get pillCardEvolutionRequiresEnabled => 'Enable the instance first';
+  String get pillCardStepBack => 'Step back one scene';
+
+  @override
+  String get pillCardStepForward => 'Step forward one scene';
 
   @override
   String get pillSettingsTitle => 'Block instance settings';

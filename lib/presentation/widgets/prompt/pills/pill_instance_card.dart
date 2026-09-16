@@ -11,9 +11,10 @@ import 'pill_instance_settings_dialog.dart';
 
 /// L1 块实例卡（P2.5）：点药丸弹出的点击位置浮卡。
 ///
-/// 内容 = 实例当前提示词（随机模式显示物化的 currentRoll——即「L1 显示
-/// = 生成发送 = token 计数」三者同一份；固定模式显示块库实时内容）+
-/// 操作行：🎲 重抽 / ⚙ 进 L2 / 启停 / DNA 遗传 / 锁定 / 删除。
+/// 内容 = 实例当前提示词（随机/顺序模式显示物化的 currentRoll——即
+/// 「L1 显示 = 生成发送 = token 计数」三者同一份；固定模式显示块库实时
+/// 内容）+ 按模式分化的操作行（FEAT-46）：固定=设置/启停/删除；
+/// 顺序=←→ 逐幕步进/锁定/删除；随机=重抽/设置/启停/遗传/锁定/删除。
 ///
 /// 宿主编辑器用 [buildPillInstanceOverlayEntry] 生成 OverlayEntry 并自行
 /// 持有/关闭；实例消失（文本里标记被删）时卡片自动请求关闭。
@@ -50,6 +51,7 @@ class PillInstanceCard extends ConsumerWidget {
 
     final block = library?.blockById(instance.blockId);
     final color = promptBlockColorFromString(block?.color ?? '#FF607D8B');
+    final mode = instance.settings.mode;
     final hasRoll = instance.settings.hasRoll;
     final effectiveRoll = workspaceNotifier.effectiveRollFor(marker);
     final content = hasRoll ? (effectiveRoll ?? '') : (block?.content ?? '');
@@ -93,65 +95,63 @@ class PillInstanceCard extends ConsumerWidget {
             const SizedBox(height: 4),
             Row(
               children: [
-                IconButton(
-                  constraints: const BoxConstraints.tightFor(
-                    width: 40,
-                    height: 40,
+                // FEAT-46：按钮组按模式分化——固定=设置/开关/删除；
+                // 顺序=←→ 逐幕步进/锁定/删除；随机=六钮全开。
+                if (mode == PillRollMode.random)
+                  _cardButton(
+                    key: const Key('pill-reroll'),
+                    icon: const Icon(Icons.casino_outlined, size: 18),
+                    tooltip: instance.locked
+                        ? l10n.pillCardRerollLocked
+                        : l10n.pillCardReroll,
+                    onPressed: !instance.locked
+                        ? () => workspaceNotifier.rollMarker(marker)
+                        : null,
                   ),
-                  padding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                  key: const Key('pill-reroll'),
-                  icon: const Icon(Icons.casino_outlined, size: 18),
-                  tooltip: instance.locked
-                      ? l10n.pillCardRerollLocked
-                      : l10n.pillCardReroll,
-                  onPressed: hasRoll && !instance.locked
-                      ? () => ref
-                            .read(pillWorkspaceProvider(scope).notifier)
-                            .rollMarker(marker)
-                      : null,
-                ),
-                IconButton(
-                  constraints: const BoxConstraints.tightFor(
-                    width: 40,
-                    height: 40,
+                if (mode == PillRollMode.sequential) ...[
+                  _cardButton(
+                    key: const Key('pill-step-back'),
+                    icon: const Icon(Icons.arrow_back, size: 18),
+                    tooltip: l10n.pillCardStepBack,
+                    onPressed: !instance.locked
+                        ? () => workspaceNotifier.stepSequence(marker, -1)
+                        : null,
                   ),
-                  padding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.tune, size: 18),
-                  tooltip: l10n.pillCardSettings,
-                  onPressed: () => _openSettings(context, ref, instance),
-                ),
-                IconButton(
-                  constraints: const BoxConstraints.tightFor(
-                    width: 40,
-                    height: 40,
+                  _cardButton(
+                    key: const Key('pill-step-forward'),
+                    icon: const Icon(Icons.arrow_forward, size: 18),
+                    tooltip: l10n.pillCardStepForward,
+                    onPressed: !instance.locked
+                        ? () => workspaceNotifier.stepSequence(marker, 1)
+                        : null,
                   ),
-                  padding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                  icon: Icon(
-                    instance.enabled
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
-                    size: 18,
+                ],
+                if (mode != PillRollMode.sequential) ...[
+                  _cardButton(
+                    icon: const Icon(Icons.tune, size: 18),
+                    tooltip: l10n.pillCardSettings,
+                    onPressed: () => _openSettings(context, ref, instance),
                   ),
-                  tooltip: instance.enabled
-                      ? l10n.pillCardDisable
-                      : l10n.pillCardEnable,
-                  onPressed: () => ref
-                      .read(pillWorkspaceProvider(scope).notifier)
-                      .toggleEnabled(marker),
-                ),
-                // FEAT-47：遗传开关为画风探索页专属；主生成页不渲染该钮。
-                if (allowEvolutionToggle)
+                  _cardButton(
+                    icon: Icon(
+                      instance.enabled
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      size: 18,
+                    ),
+                    tooltip: instance.enabled
+                        ? l10n.pillCardDisable
+                        : l10n.pillCardEnable,
+                    onPressed: () => workspaceNotifier.toggleEnabled(marker),
+                  ),
+                ],
+                // FEAT-46/47：遗传钮只出现在探索页的随机块上（顺序块已失
+                // 去遗传入口，固定块本无可遗传内容）。
+                if (mode == PillRollMode.random && allowEvolutionToggle)
                   Builder(
                     builder: (context) {
-                      final canToggleEvolution =
-                          instance.enabled && hasRoll;
                       final evolutionTooltip = !instance.enabled
                           ? l10n.pillCardEvolutionRequiresEnabled
-                          : !hasRoll
-                          ? l10n.pillCardEvolutionRequiresRandom
                           : instance.evolutionEnabled
                           ? l10n.pillCardEvolutionDisable
                           : l10n.pillCardEvolutionEnable;
@@ -165,50 +165,37 @@ class PillInstanceCard extends ConsumerWidget {
                         key: const Key('pill-evolution-toggle'),
                         icon: DnaIcon(
                           size: 18,
-                          color: canToggleEvolution
+                          color: instance.enabled
                               ? theme.colorScheme.primary
                               : theme.colorScheme.onSurfaceVariant.withValues(
                                   alpha: 0.45,
                                 ),
                         ),
                         tooltip: evolutionTooltip,
-                        onPressed: canToggleEvolution
-                            ? () => ref
-                                  .read(pillWorkspaceProvider(scope).notifier)
-                                  .toggleEvolution(marker)
+                        onPressed: instance.enabled
+                            ? () => workspaceNotifier.toggleEvolution(marker)
                             : null,
                       );
                     },
                   ),
                 const Spacer(),
-                IconButton(
-                  constraints: const BoxConstraints.tightFor(
-                    width: 40,
-                    height: 40,
+                if (hasRoll)
+                  _cardButton(
+                    key: const Key('pill-lock-toggle'),
+                    icon: Icon(
+                      instance.locked
+                          ? Icons.lock_outline
+                          : Icons.lock_open_outlined,
+                      size: 18,
+                    ),
+                    tooltip: instance.locked
+                        ? l10n.pillCardUnlock
+                        : l10n.pillCardLock,
+                    onPressed: effectiveRoll != null
+                        ? () => workspaceNotifier.toggleLocked(marker)
+                        : null,
                   ),
-                  padding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                  key: const Key('pill-lock-toggle'),
-                  icon: Icon(
-                    instance.locked
-                        ? Icons.lock_outline
-                        : Icons.lock_open_outlined,
-                    size: 18,
-                  ),
-                  tooltip: instance.locked
-                      ? l10n.pillCardUnlock
-                      : l10n.pillCardLock,
-                  onPressed: hasRoll && effectiveRoll != null
-                      ? () => workspaceNotifier.toggleLocked(marker)
-                      : null,
-                ),
-                IconButton(
-                  constraints: const BoxConstraints.tightFor(
-                    width: 40,
-                    height: 40,
-                  ),
-                  padding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
+                _cardButton(
                   icon: Icon(
                     Icons.delete_outline,
                     size: 18,
@@ -216,9 +203,7 @@ class PillInstanceCard extends ConsumerWidget {
                   ),
                   tooltip: l10n.pillCardDeleteInstance,
                   onPressed: () {
-                    ref
-                        .read(pillWorkspaceProvider(scope).notifier)
-                        .removeMarker(marker);
+                    workspaceNotifier.removeMarker(marker);
                     onDismiss();
                   },
                 ),
@@ -227,6 +212,24 @@ class PillInstanceCard extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// 卡内 40×40 紧凑钮的统一外形。
+  Widget _cardButton({
+    Key? key,
+    required Widget icon,
+    required String tooltip,
+    VoidCallback? onPressed,
+  }) {
+    return IconButton(
+      constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+      padding: EdgeInsets.zero,
+      visualDensity: VisualDensity.compact,
+      key: key,
+      icon: icon,
+      tooltip: tooltip,
+      onPressed: onPressed,
     );
   }
 

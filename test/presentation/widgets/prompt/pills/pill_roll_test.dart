@@ -521,6 +521,156 @@ void main() {
         reason: '顺序实例与随机同权参与探索遗传',
       );
     });
+
+    group('stepSequence (FEAT-46)', () {
+      test('forward/back steps one atom and is precisely reversible', () async {
+        final container = makeContainer();
+        await container.read(promptBlockLibraryNotifierProvider.future);
+        final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+        notifier.setText('');
+        notifier.insertBlockAt(offset: 0, blockId: 'style');
+        notifier.updateInstanceSettings(markerA, sequentialSettings);
+
+        PillInstance read() => container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!;
+
+        // 首幕 roll 落 'A'（游标 1、批大小 1）。
+        expect(read().currentRoll, 'A');
+        expect(read().lastRollCount, 1);
+
+        // → 一幕：以当前批起点 +1 物化。
+        notifier.stepSequence(markerA, 1);
+        expect(read().currentRoll, 'B');
+        expect(read().sequenceCursor, 0, reason: '池长 2，游标绕回');
+
+        // ← 一幕：精确回到上一幕。
+        notifier.stepSequence(markerA, -1);
+        expect(read().currentRoll, 'A');
+        expect(read().sequenceCursor, 1);
+      });
+
+      test('stepping wraps around pool head and tail', () async {
+        final container = makeContainer();
+        await container.read(promptBlockLibraryNotifierProvider.future);
+        final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+        notifier.setText('');
+        notifier.insertBlockAt(offset: 0, blockId: 'style');
+        notifier.updateInstanceSettings(markerA, sequentialSettings);
+
+        PillInstance read() => container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!;
+
+        // 池头 ← 绕到池尾。
+        notifier.stepSequence(markerA, -1);
+        expect(read().currentRoll, 'B');
+        expect(read().sequenceCursor, 0);
+
+        // 池尾 → 绕回池头。
+        notifier.stepSequence(markerA, 1);
+        expect(read().currentRoll, 'A');
+        expect(read().sequenceCursor, 1);
+      });
+
+      test('multi-atom batches slide by one atom per step', () async {
+        final container = makeContainer(blockContent: 'A, B, C, D');
+        await container.read(promptBlockLibraryNotifierProvider.future);
+        final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+        notifier.setText('');
+        notifier.insertBlockAt(offset: 0, blockId: 'style');
+        notifier.updateInstanceSettings(
+          markerA,
+          const PillInstanceSettings(
+            mode: PillRollMode.sequential,
+            countMin: 2,
+            countMax: 2,
+          ),
+        );
+
+        PillInstance read() => container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!;
+
+        expect(read().currentRoll, 'A, B');
+        expect(read().lastRollCount, 2);
+
+        // → 一幕 = 滑窗 +1 原子（尺寸沿用当前批）。
+        notifier.stepSequence(markerA, 1);
+        expect(read().currentRoll, 'B, C');
+        expect(read().sequenceCursor, 3);
+        expect(read().lastRollCount, 2);
+
+        // ← 精确还原整个批。
+        notifier.stepSequence(markerA, -1);
+        expect(read().currentRoll, 'A, B');
+        expect(read().sequenceCursor, 2);
+      });
+
+      test('locked, non-sequential and missing markers are no-ops', () async {
+        final container = makeContainer();
+        await container.read(promptBlockLibraryNotifierProvider.future);
+        final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+        notifier.setText('');
+        notifier.insertBlockAt(offset: 0, blockId: 'style');
+        notifier.updateInstanceSettings(markerA, sequentialSettings);
+
+        PillInstance read() => container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!;
+
+        // 锁定：箭头守卫同源，内容与游标不动。
+        notifier.toggleLocked(markerA);
+        notifier.stepSequence(markerA, 1);
+        expect(read().currentRoll, 'A');
+        expect(read().sequenceCursor, 1);
+        notifier.toggleLocked(markerA);
+
+        // 随机/固定实例与未知 marker 一律不动。
+        notifier.stepSequence('missing', 1);
+        notifier.updateInstanceSettings(markerA, randomSettings);
+        notifier.stepSequence(markerA, 1);
+        expect(read().settings.mode, PillRollMode.random);
+      });
+
+      test('lastRollCount persists through JSON round trip', () async {
+        final container = makeContainer(blockContent: 'A, B, C');
+        await container.read(promptBlockLibraryNotifierProvider.future);
+        final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+        notifier.setText('');
+        notifier.insertBlockAt(offset: 0, blockId: 'style');
+        notifier.updateInstanceSettings(
+          markerA,
+          const PillInstanceSettings(
+            mode: PillRollMode.sequential,
+            countMin: 2,
+            countMax: 2,
+          ),
+        );
+
+        final instance = container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!;
+        expect(instance.lastRollCount, 2);
+
+        final restored = PillInstance.fromJson(instance.toJson());
+        expect(restored.lastRollCount, 2);
+        expect(restored, instance);
+
+        // 旧存档缺键：lastRollCount=null，步进时兜底 countMin。
+        final legacy = PillInstance.fromJson(const {
+          'blockId': 'style',
+          'settings': {'mode': 'sequential', 'countMin': 2, 'countMax': 2},
+          'sequenceCursor': 2,
+        });
+        expect(legacy.lastRollCount, isNull);
+      });
+    });
   });
 
   group('roll coordinator', () {
@@ -714,7 +864,7 @@ void main() {
       );
     });
 
-    testWidgets('fixed mode disables the lock button', (tester) async {
+    testWidgets('fixed mode renders no lock button', (tester) async {
       final container = await _pumpEditor(tester);
       await container.read(promptBlockLibraryNotifierProvider.future);
       container
@@ -726,12 +876,8 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      expect(
-        tester
-            .widget<IconButton>(find.byKey(const Key('pill-lock-toggle')))
-            .onPressed,
-        isNull,
-      );
+      // FEAT-46：固定块不渲染锁定钮（原置灰）。
+      expect(find.byKey(const Key('pill-lock-toggle')), findsNothing);
     });
 
     testWidgets('tapping outside dismisses the card', (tester) async {
@@ -775,6 +921,112 @@ void main() {
         isEmpty,
       );
       expect(container.read(pillWorkspaceNotifierProvider).document.text, '');
+    });
+
+    group('mode-differentiated button rows (FEAT-46)', () {
+      const rerollKey = Key('pill-reroll');
+      const stepBackKey = Key('pill-step-back');
+      const stepForwardKey = Key('pill-step-forward');
+      const lockKey = Key('pill-lock-toggle');
+      const evolutionKey = Key('pill-evolution-toggle');
+
+      Future<ProviderContainer> openCard(
+        WidgetTester tester,
+        PillInstanceSettings settings,
+      ) async {
+        final container = await _pumpEditor(tester);
+        await container.read(promptBlockLibraryNotifierProvider.future);
+        final notifier = container.read(pillWorkspaceNotifierProvider.notifier)
+          ..insertBlockAt(offset: 0, blockId: 'style');
+        if (settings.mode != PillRollMode.fixed) {
+          notifier.updateInstanceSettings(markerA, settings);
+        }
+        await tester.pump();
+        await tester.tap(find.byType(PromptPill));
+        await tester.pump();
+        await tester.pump();
+        expect(find.byType(PillInstanceCard), findsOneWidget);
+        return container;
+      }
+
+      testWidgets('fixed card shows only settings/enable/delete', (
+        tester,
+      ) async {
+        await openCard(tester, PillInstanceSettings.fixedDefault);
+
+        expect(find.byIcon(Icons.tune), findsOneWidget);
+        expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+        expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+        for (final key in [
+          rerollKey,
+          stepBackKey,
+          stepForwardKey,
+          lockKey,
+          evolutionKey,
+        ]) {
+          expect(find.byKey(key), findsNothing, reason: '$key 不应渲染');
+        }
+      });
+
+      testWidgets(
+        'sequential card shows step arrows/lock/delete; arrows step scenes',
+        (tester) async {
+          final container = await openCard(tester, sequentialSettings);
+
+          expect(find.byKey(stepBackKey), findsOneWidget);
+          expect(find.byKey(stepForwardKey), findsOneWidget);
+          expect(find.byKey(lockKey), findsOneWidget);
+          expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+          expect(find.byKey(rerollKey), findsNothing);
+          expect(find.byIcon(Icons.tune), findsNothing);
+          expect(find.byIcon(Icons.visibility_outlined), findsNothing);
+          expect(find.byKey(evolutionKey), findsNothing);
+
+          PillInstance read() => container
+              .read(pillWorkspaceNotifierProvider)
+              .document
+              .instances[markerA]!;
+
+          expect(read().currentRoll, 'A');
+          await tester.tap(find.byKey(stepForwardKey));
+          await tester.pump();
+          expect(read().currentRoll, 'B');
+          await tester.tap(find.byKey(stepBackKey));
+          await tester.pump();
+          expect(read().currentRoll, 'A');
+        },
+      );
+
+      testWidgets('sequential arrows disable while locked', (tester) async {
+        await openCard(tester, sequentialSettings);
+
+        await tester.tap(find.byKey(lockKey));
+        await tester.pump();
+
+        for (final key in [stepBackKey, stepForwardKey]) {
+          expect(
+            tester.widget<IconButton>(find.byKey(key)).onPressed,
+            isNull,
+            reason: '锁定态步进钮禁用',
+          );
+        }
+      });
+
+      testWidgets('random card keeps the full main-page button set', (
+        tester,
+      ) async {
+        await openCard(tester, randomSettings);
+
+        expect(find.byKey(rerollKey), findsOneWidget);
+        expect(find.byIcon(Icons.tune), findsOneWidget);
+        expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+        expect(find.byKey(lockKey), findsOneWidget);
+        expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+        expect(find.byKey(stepBackKey), findsNothing);
+        expect(find.byKey(stepForwardKey), findsNothing);
+        // 主页面不渲染遗传钮（FEAT-47）。
+        expect(find.byKey(evolutionKey), findsNothing);
+      });
     });
   });
 

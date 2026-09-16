@@ -96,39 +96,45 @@ abstract final class PillRollEngine {
   }
 
   /// 顺序模式 roll（QoL-L2）：从 [cursor] 起取 N 个原子（N = min~max
-  /// 区间随机、截断到池长），池尾绕回，单次内不重复；按游标序输出。
+  /// 区间随机、截断到池长；[countOverride] 非空时改用该值——FEAT-46
+  /// 逐幕步进需要滑窗尺寸与当前批一致），池尾绕回，单次内不重复；
+  /// 按游标序输出。
   ///
-  /// 返回 `(物化串, 下一游标)`。游标只在触发概率通过、实例实际出场时
-  /// 推进（推进量 = 实际抽取数，已按池长取模）；触发未中/数量 0/池空
-  /// 原样返回入参游标——序列 = 实际看到的内容流。权重段与随机模式共用
-  /// 同一配重管线（选择机制与权重正交）。[cursor] 越界（池内容编辑后
-  /// 原子数变化）按 `cursor % 池长` 收敛，不写回由调用方决定。
-  static (String, int) rollInstanceSequential({
+  /// 返回 `(物化串, 下一游标, 实际抽取数)`。游标只在触发概率通过、实例
+  /// 实际出场时推进（推进量 = 实际抽取数，已按池长取模）；触发未中/
+  /// 数量 0/池空原样返回入参游标且抽取数为 0——序列 = 实际看到的内容流。
+  /// 权重段与随机模式共用同一配重管线（选择机制与权重正交）。[cursor]
+  /// 越界（池内容编辑后原子数变化）按 `cursor % 池长` 收敛，不写回由
+  /// 调用方决定。
+  static (String, int, int) rollInstanceSequential({
     required PillInstanceSettings settings,
     required List<String> atoms,
     required int cursor,
     required Random rng,
+    int? countOverride,
   }) {
     if (settings.triggerProbability < 1.0 &&
         rng.nextDouble() >= settings.triggerProbability) {
-      return ('', cursor);
+      return ('', cursor, 0);
     }
-    if (atoms.isEmpty) return ('', cursor);
+    if (atoms.isEmpty) return ('', cursor, 0);
 
     final lo = settings.countMin.clamp(0, atoms.length);
     final hi = settings.countMax.clamp(0, atoms.length);
     final lower = lo <= hi ? lo : hi;
     final upper = lo <= hi ? hi : lo;
-    if (upper <= 0) return ('', cursor);
-    final count = lower + rng.nextInt(upper - lower + 1);
-    if (count <= 0) return ('', cursor);
+    if (upper <= 0) return ('', cursor, 0);
+    final count = countOverride != null
+        ? countOverride.clamp(1, atoms.length)
+        : lower + rng.nextInt(upper - lower + 1);
+    if (count <= 0) return ('', cursor, 0);
 
     final start = cursor % atoms.length;
     final selected = [
       for (var k = 0; k < count; k++) atoms[(start + k) % atoms.length],
     ];
     final text = _composeSelected(selected, settings, rng);
-    return (text, (start + count) % atoms.length);
+    return (text, (start + count) % atoms.length, count);
   }
 
   /// 选中原子 → 输出串：权重段关闭直拼；开启则 Split-Beta 配重
