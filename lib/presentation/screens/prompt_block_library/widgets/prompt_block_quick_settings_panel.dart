@@ -393,6 +393,11 @@ class _PromptBlockQuickSettingsPanelState
           folderId: _folderId,
           color: promptBlockColorToHex(_selectedColor),
           iconName: _selectedIconName,
+          // 快捷面板不动预览图：原样带回，避免覆盖清空已有缩略图。
+          thumbnail: widget.block.thumbnail,
+          thumbnailOffsetX: widget.block.thumbnailOffsetX,
+          thumbnailOffsetY: widget.block.thumbnailOffsetY,
+          thumbnailScale: widget.block.thumbnailScale,
         ),
       );
     } finally {

@@ -652,6 +652,10 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
               content: result.content,
               color: result.color,
               iconName: result.iconName,
+              thumbnail: result.thumbnail,
+              thumbnailOffsetX: result.thumbnailOffsetX,
+              thumbnailOffsetY: result.thumbnailOffsetY,
+              thumbnailScale: result.thumbnailScale,
             ),
           );
       if (updated.folderId != result.folderId) {

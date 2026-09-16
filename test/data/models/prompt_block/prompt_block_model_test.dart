@@ -105,4 +105,48 @@ void main() {
     );
     expect(manual.toJson().containsKey('sourcePath'), isFalse);
   });
+
+  test('PromptBlock thumbnail/useCount round trip; legacy JSON falls back '
+      'to defaults', () {
+    final block = PromptBlock.create(
+      id: 'block-img',
+      title: '带图块',
+      content: 'c',
+      thumbnail: 'C:/app/prompt_block_thumbnails/a.png',
+      thumbnailOffsetX: 0.25,
+      thumbnailOffsetY: -0.5,
+      thumbnailScale: 1.6,
+      useCount: 12,
+      createdAt: DateTime.utc(2026, 9, 16),
+      updatedAt: DateTime.utc(2026, 9, 16),
+    );
+
+    final restored = PromptBlock.fromJson(block.toJson());
+    expect(restored, block);
+    expect(restored.thumbnail, 'C:/app/prompt_block_thumbnails/a.png');
+    expect(restored.thumbnailOffsetX, 0.25);
+    expect(restored.thumbnailOffsetY, -0.5);
+    expect(restored.thumbnailScale, 1.6);
+    expect(restored.useCount, 12);
+
+    // FEAT-2 之前的存档不含新键：全部落默认值，不报错。
+    final legacy = PromptBlock.fromJson({
+      'id': 'block-old',
+      'title': '旧块',
+      'content': 'legacy',
+      'color': '#FF607D8B',
+      'sortOrder': 0,
+      'createdAt': '2026-08-01T00:00:00.000Z',
+      'updatedAt': '2026-08-01T00:00:00.000Z',
+    });
+    expect(legacy.thumbnail, isNull);
+    expect(legacy.thumbnailOffsetX, 0.0);
+    expect(legacy.thumbnailOffsetY, 0.0);
+    expect(legacy.thumbnailScale, 1.0);
+    expect(legacy.useCount, 0);
+
+    // 无图块的 JSON 不携带 thumbnail 键（nullable 省略输出）。
+    final noImage = PromptBlock.create(id: 'b', title: 't', content: 'c');
+    expect(noImage.toJson().containsKey('thumbnail'), isFalse);
+  });
 }

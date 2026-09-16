@@ -30,6 +30,21 @@ class PromptBlock with _$PromptBlock {
     /// 自定义图标名（预设表键，见 prompt_block_icons.dart）；null 用默认图标。
     @JsonKey(includeIfNull: false) String? iconName,
 
+    /// 预览图路径（应用文档目录 prompt_block_thumbnails/ 内的 PNG）；null 无图。
+    @JsonKey(includeIfNull: false) String? thumbnail,
+
+    /// 预览图水平偏移（-1.0 ~ 1.0），与词库条目同坐标系。
+    @Default(0.0) double thumbnailOffsetX,
+
+    /// 预览图垂直偏移（-1.0 ~ 1.0）。
+    @Default(0.0) double thumbnailOffsetY,
+
+    /// 预览图缩放比例（1.0 ~ 3.0）。
+    @Default(1.0) double thumbnailScale,
+
+    /// 成功插入提示词的次数（点击/拖拽同一汇点计数）。
+    @Default(0) int useCount,
+
     /// 是否加入收藏。
     @Default(false) bool isFavorite,
 
@@ -64,6 +79,11 @@ class PromptBlock with _$PromptBlock {
     String? folderId,
     String color = '#FF607D8B',
     String? iconName,
+    String? thumbnail,
+    double thumbnailOffsetX = 0.0,
+    double thumbnailOffsetY = 0.0,
+    double thumbnailScale = 1.0,
+    int useCount = 0,
     bool isFavorite = false,
     int sortOrder = 0,
     String? id,
@@ -81,6 +101,11 @@ class PromptBlock with _$PromptBlock {
       folderId: folderId,
       color: color,
       iconName: iconName,
+      thumbnail: thumbnail,
+      thumbnailOffsetX: thumbnailOffsetX,
+      thumbnailOffsetY: thumbnailOffsetY,
+      thumbnailScale: thumbnailScale,
+      useCount: useCount,
       isFavorite: isFavorite,
       sortOrder: sortOrder,
       createdAt: created,
@@ -93,6 +118,9 @@ class PromptBlock with _$PromptBlock {
 
   /// 用于空标题块的界面兜底名称。
   String get displayTitle => title.isNotEmpty ? title : '未命名块';
+
+  /// 是否已挂预览图。
+  bool get hasThumbnail => thumbnail != null && thumbnail!.isNotEmpty;
 
   /// 返回更新时间已刷新的副本，不改变其他字段。
   PromptBlock touched({DateTime? at}) =>

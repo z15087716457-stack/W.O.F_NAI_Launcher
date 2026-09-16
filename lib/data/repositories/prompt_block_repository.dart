@@ -66,12 +66,19 @@ class PromptBlockRepository {
   Future<PromptBlockFolder?> getFolder(String id) => _storage.getFolder(id);
 
   /// 创建块，并自动取得目标文件夹内的下一个排序值。
+  ///
+  /// [thumbnail] 必须已是应用块缩略图目录内的路径（调用方负责落盘；
+  /// 见 `savePromptBlockThumbnail`），本层不做文件搬移。
   Future<PromptBlock> createBlock({
     required String title,
     required String content,
     String? folderId,
     String color = '#FF607D8B',
     String? iconName,
+    String? thumbnail,
+    double thumbnailOffsetX = 0.0,
+    double thumbnailOffsetY = 0.0,
+    double thumbnailScale = 1.0,
     int? sortOrder,
   }) async {
     await _ensureFolderExists(folderId);
@@ -82,6 +89,10 @@ class PromptBlockRepository {
       folderId: folderId,
       color: color,
       iconName: iconName,
+      thumbnail: thumbnail,
+      thumbnailOffsetX: thumbnailOffsetX,
+      thumbnailOffsetY: thumbnailOffsetY,
+      thumbnailScale: thumbnailScale,
       sortOrder: sortOrder ?? _nextSortOrder(blocks, folderId),
     );
     await _storage.putBlock(block);

@@ -196,6 +196,10 @@ class _RecordingLibraryNotifier extends PromptBlockLibraryNotifier {
     String? folderId,
     String color = '#FF607D8B',
     String? iconName,
+    String? thumbnail,
+    double thumbnailOffsetX = 0.0,
+    double thumbnailOffsetY = 0.0,
+    double thumbnailScale = 1.0,
     int? sortOrder,
   }) async {
     created.add((
@@ -386,9 +390,7 @@ void main() {
     // FEAT-54：指南针方块化 = 与「预览」同款 OutlinedButton.icon、
     // 图标+「探索任务」文字，激活态（侧栏默认开）填主题主色。
     expect(
-      tester.widget(
-        find.byKey(const Key('style-explore-run-sidebar-toggle')),
-      ),
+      tester.widget(find.byKey(const Key('style-explore-run-sidebar-toggle'))),
       isA<OutlinedButton>(),
     );
     expect(
@@ -2086,10 +2088,7 @@ void main() {
       reason: '未删的候选不受影响',
     );
     // 画廊卡消失（不再留破图占位）。
-    expect(
-      find.byKey(const Key('explore-candidate-cand-1')),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('explore-candidate-cand-1')), findsNothing);
   });
 
   testWidgets('multi-select bar delete button batch-deletes copies '
@@ -2126,10 +2125,7 @@ void main() {
     await tester.pump();
     // 无底色形制 = TextButton（key 挂在钮本体）+ error 前景。
     expect(find.byKey(deleteKey), findsOneWidget);
-    expect(
-      tester.widget(find.byKey(deleteKey)),
-      isA<TextButton>(),
-    );
+    expect(tester.widget(find.byKey(deleteKey)), isA<TextButton>());
 
     // 空选择 → 钮禁用；选无副本项 → 仍禁用；选有副本项 → 启用。
     expect(tester.widget<TextButton>(find.byKey(deleteKey)).onPressed, isNull);
@@ -2150,10 +2146,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('删除所选候选图'), findsOneWidget);
-    expect(
-      find.text('将删除 2 张候选在 Run 目录中的图片副本与候选记录；图库源图不受影响。'),
-      findsOneWidget,
-    );
+    expect(find.text('将删除 2 张候选在 Run 目录中的图片副本与候选记录；图库源图不受影响。'), findsOneWidget);
     await tester.tap(find.widgetWithText(TextButton, '取消'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -2175,10 +2168,7 @@ void main() {
     expect(stored.candidateById('cand-1'), isNull);
     expect(stored.candidateById('cand-2'), isNull);
     expect(stored.candidateById('cand-no-copy'), isNotNull);
-    expect(
-      find.byKey(const Key('explore-candidate-cand-1')),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('explore-candidate-cand-1')), findsNothing);
     expect(
       find.byKey(const Key('explore-gallery-select-toggle')),
       findsOneWidget,

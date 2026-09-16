@@ -1,8 +1,10 @@
 import 'package:collection/collection.dart';
+import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/storage/prompt_block_storage.dart';
 import '../../core/utils/prompt_block_exchange.dart';
+import '../../core/utils/prompt_block_thumbnails.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
 import '../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../data/repositories/prompt_block_repository.dart';
@@ -117,6 +119,10 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
     String? folderId,
     String color = '#FF607D8B',
     String? iconName,
+    String? thumbnail,
+    double thumbnailOffsetX = 0.0,
+    double thumbnailOffsetY = 0.0,
+    double thumbnailScale = 1.0,
     int? sortOrder,
   }) {
     return _mutate(
@@ -126,6 +132,10 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
         folderId: folderId,
         color: color,
         iconName: iconName,
+        thumbnail: thumbnail,
+        thumbnailOffsetX: thumbnailOffsetX,
+        thumbnailOffsetY: thumbnailOffsetY,
+        thumbnailScale: thumbnailScale,
         sortOrder: sortOrder,
       ),
     );
@@ -134,20 +144,58 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
   Future<PromptBlock> updateBlock(PromptBlock block) =>
       _mutate((repository) => repository.updateBlock(block));
 
+  /// 使用次数 +1：块被插入提示词（点击/拖拽同一汇点）时调用。
+  ///
+  /// 轻量路径——只回写单条块记录、原位替换 state 中该条，不走整库
+  /// reload，避免每次插入都触发块库面板重建；失败静默，不阻断插入。
+  Future<void> incrementUseCount(String blockId) async {
+    // 块库 Box 未初始化（纯内存测试等）时直接短路：不触发 lazy 初始化，
+    // 也就不会产生存储层异常。
+    if (!Hive.isBoxOpen(PromptBlockStorage.boxName)) return;
+    try {
+      final repository = ref.read(promptBlockRepositoryProvider);
+      final existing = await repository.getBlock(blockId);
+      if (existing == null) return;
+      final updated = await repository.updateBlock(
+        existing.copyWith(useCount: existing.useCount + 1),
+      );
+      final current = state.valueOrNull;
+      if (current == null) return;
+      state = AsyncData(
+        PromptBlockLibraryState(
+          blocks: [
+            for (final block in current.blocks)
+              block.id == blockId ? updated : block,
+          ],
+          folders: current.folders,
+        ),
+      );
+    } catch (_) {
+      // 统计失败不阻断主流程
+    }
+  }
+
   Future<PromptBlock> toggleFavorite(String blockId) =>
       _mutate((repository) => repository.toggleFavorite(blockId));
 
   Future<PromptBlock> moveBlock(String blockId, String? folderId) =>
       _mutate((repository) => repository.moveBlock(blockId, folderId));
 
-  Future<void> deleteBlock(String blockId) =>
-      _mutate((repository) => repository.deleteBlock(blockId));
+  Future<void> deleteBlock(String blockId) async {
+    final thumbnail = state.valueOrNull?.blockById(blockId)?.thumbnail;
+    await _mutate((repository) => repository.deleteBlock(blockId));
+    await deletePromptBlockThumbnail(thumbnail);
+  }
 
   /// 批量删除块：循环单块删除，末尾单次整库 reload（不走 N 次 [_mutate]）。
   /// 任一块失败即中断并进入 AsyncError，reload 后状态以落盘为准。
+  /// 成功删除的块其缩略图文件一并回收。
   Future<void> deleteBlocks(List<String> blockIds) async {
     if (blockIds.isEmpty) return;
     final repository = ref.read(promptBlockRepositoryProvider);
+    final thumbnails = {
+      for (final id in blockIds) ?state.valueOrNull?.blockById(id)?.thumbnail,
+    };
     try {
       for (final blockId in blockIds) {
         await repository.deleteBlock(blockId);
@@ -156,6 +204,9 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
       rethrow;
+    }
+    for (final path in thumbnails.nonNulls) {
+      await deletePromptBlockThumbnail(path);
     }
   }
 
@@ -226,13 +277,27 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
     String folderId, {
     required PromptBlockFolderDeleteMode mode,
     String? destinationFolderId,
-  }) => _mutate(
-    (repository) => repository.deleteFolder(
-      folderId,
-      mode: mode,
-      destinationFolderId: destinationFolderId,
-    ),
-  );
+  }) async {
+    // 连删模式：先记下整棵子树内块的缩略图，删除成功后回收文件。
+    final thumbnails = mode == PromptBlockFolderDeleteMode.deleteContents
+        ? {
+            for (final block
+                in state.valueOrNull?.blocksInFolderTree(folderId) ??
+                    const <PromptBlock>[])
+              ?block.thumbnail,
+          }
+        : const <String>{};
+    await _mutate(
+      (repository) => repository.deleteFolder(
+        folderId,
+        mode: mode,
+        destinationFolderId: destinationFolderId,
+      ),
+    );
+    for (final path in thumbnails) {
+      await deletePromptBlockThumbnail(path);
+    }
+  }
 
   /// TXT 单文件导入：只新增，同来源已存在的文件跳过，不覆盖任何块。
   Future<PromptBlockExchangeResult> importTxtFiles({

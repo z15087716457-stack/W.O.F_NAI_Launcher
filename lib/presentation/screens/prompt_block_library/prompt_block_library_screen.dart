@@ -1917,6 +1917,10 @@ class _PromptBlockLibraryScreenState
             folderId: result.folderId,
             color: result.color,
             iconName: result.iconName,
+            thumbnail: result.thumbnail,
+            thumbnailOffsetX: result.thumbnailOffsetX,
+            thumbnailOffsetY: result.thumbnailOffsetY,
+            thumbnailScale: result.thumbnailScale,
           );
       if (context.mounted) {
         AppToast.success(context, l10n.promptBlockLibrary_saved);
@@ -1941,6 +1945,10 @@ class _PromptBlockLibraryScreenState
               content: result.content,
               color: result.color,
               iconName: result.iconName,
+              thumbnail: result.thumbnail,
+              thumbnailOffsetX: result.thumbnailOffsetX,
+              thumbnailOffsetY: result.thumbnailOffsetY,
+              thumbnailScale: result.thumbnailScale,
             ),
           );
       if (updated.folderId != result.folderId) {

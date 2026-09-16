@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -139,6 +140,9 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   }
 
   /// 在 [offset] 处插入库块新实例。
+  ///
+  /// 点击插入与拖入插入共用此入口：成功插入即给块 `useCount` +1
+  /// （fire-and-forget，统计失败不阻断编辑）。
   void insertBlockAt({required int offset, required String blockId}) {
     _apply(
       PillDocumentEditor.insertBlock(
@@ -146,6 +150,12 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         offset: offset,
         blockId: blockId,
       ),
+    );
+    unawaited(
+      ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .incrementUseCount(blockId)
+          .onError((_, __) {}),
     );
   }
 

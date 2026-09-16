@@ -300,7 +300,7 @@ class _DetailMetadataPanelState extends State<DetailMetadataPanel> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const ThemedDivider(height: 1),
-              _ActionButtons(metadata: metadata),
+              _ActionButtons(metadata: metadata, image: widget.currentImage),
             ],
           ),
       ],
@@ -901,7 +901,10 @@ class _InfoRow extends StatelessWidget {
 class _ActionButtons extends StatelessWidget {
   final NaiImageMetadata metadata;
 
-  const _ActionButtons({required this.metadata});
+  /// 当前详情图片：存为块时顺带作为块预览图（可为 null）。
+  final ImageDetailData? image;
+
+  const _ActionButtons({required this.metadata, this.image});
 
   @override
   Widget build(BuildContext context) {
@@ -955,8 +958,11 @@ class _ActionButtons extends StatelessWidget {
                 child: _ActionButton(
                   icon: Icons.bookmark_add,
                   label: context.l10n.detail_saveBlock,
-                  onPressed: () =>
-                      SaveAsBlockDialog.show(context, metadata: metadata),
+                  onPressed: () => SaveAsBlockDialog.show(
+                    context,
+                    metadata: metadata,
+                    image: image,
+                  ),
                 ),
               ),
             ],

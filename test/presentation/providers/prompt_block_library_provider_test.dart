@@ -7,6 +7,7 @@ import 'package:hive/hive.dart';
 import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
 import 'package:nai_launcher/core/utils/prompt_block_exchange.dart';
 import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
+import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 
 void main() {
@@ -445,6 +446,92 @@ void main() {
       promptBlockLibraryNotifierProvider.future,
     );
     expect(state.blockById(a.id)?.folderId, isNull);
+  });
+
+  test('createBlock persists thumbnail fields across reload', () async {
+    final container = ProviderContainer(
+      overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(
+      promptBlockLibraryNotifierProvider.notifier,
+    );
+
+    final block = await notifier.createBlock(
+      title: '带图块',
+      content: 'c',
+      thumbnail: 'C:/app/prompt_block_thumbnails/a.png',
+      thumbnailOffsetX: 0.2,
+      thumbnailOffsetY: -0.3,
+      thumbnailScale: 1.4,
+    );
+
+    await notifier.refresh();
+    final reloaded = container
+        .read(promptBlockLibraryNotifierProvider)
+        .valueOrNull
+        ?.blockById(block.id);
+    expect(reloaded?.thumbnail, 'C:/app/prompt_block_thumbnails/a.png');
+    expect(reloaded?.thumbnailOffsetX, 0.2);
+    expect(reloaded?.thumbnailOffsetY, -0.3);
+    expect(reloaded?.thumbnailScale, 1.4);
+    expect(reloaded?.useCount, 0);
+  });
+
+  test('incrementUseCount bumps count in state and on disk; unknown id is '
+      'a no-op', () async {
+    final container = ProviderContainer(
+      overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(
+      promptBlockLibraryNotifierProvider.notifier,
+    );
+    final block = await notifier.createBlock(title: 'B', content: 'x');
+
+    await notifier.incrementUseCount(block.id);
+    await notifier.incrementUseCount(block.id);
+    await notifier.incrementUseCount('missing-block');
+
+    var current = container
+        .read(promptBlockLibraryNotifierProvider)
+        .valueOrNull;
+    expect(current?.blockById(block.id)?.useCount, 2);
+
+    // 落盘核对：整库 reload 后计数仍在。
+    await notifier.refresh();
+    current = container.read(promptBlockLibraryNotifierProvider).valueOrNull;
+    expect(current?.blockById(block.id)?.useCount, 2);
+  });
+
+  test('pill lane insertBlockAt increments block useCount once', () async {
+    final container = ProviderContainer(
+      overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(
+      promptBlockLibraryNotifierProvider.notifier,
+    );
+    final block = await notifier.createBlock(title: 'B', content: 'x');
+    await container.read(promptBlockLibraryNotifierProvider.future);
+
+    container
+        .read(pillWorkspaceProvider('test-scope').notifier)
+        .insertBlockAt(offset: 0, blockId: block.id);
+
+    // useCount 是 fire-and-forget 异步回写：轮询直至落账（超时则断言失败）。
+    var count = 0;
+    for (var attempt = 0; attempt < 100 && count == 0; attempt++) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      count =
+          container
+              .read(promptBlockLibraryNotifierProvider)
+              .valueOrNull
+              ?.blockById(block.id)
+              ?.useCount ??
+          0;
+    }
+    expect(count, 1);
   });
 
   test('setFavorite favorites, unfavorites and skips no-ops', () async {
