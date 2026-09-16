@@ -17,6 +17,11 @@ Future<Directory> _thumbnailDirectory() async {
   return Directory(p.join(appDir.path, 'prompt_block_thumbnails'));
 }
 
+/// 块预览图托管目录（`prompt_block_thumbnails/`）。
+///
+/// 供词库迁移等批量导入方复用同一路径约定；调用方自行负责落盘。
+Future<Directory> promptBlockThumbnailDirectory() => _thumbnailDirectory();
+
 /// 归一化并保存块预览图，返回应用目录内绝对路径。
 Future<String> savePromptBlockThumbnail(Uint8List bytes) async {
   final png = normalizeThumbnailImageToPng(bytes);

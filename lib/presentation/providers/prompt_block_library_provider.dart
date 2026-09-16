@@ -10,6 +10,7 @@ import '../../data/models/prompt_block/prompt_block.dart';
 import '../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../data/repositories/prompt_block_repository.dart';
 import '../../data/services/fixed_tag_migration_service.dart';
+import '../../data/services/tag_library_migration_service.dart';
 
 part 'prompt_block_library_provider.g.dart';
 
@@ -101,6 +102,11 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
   Future<PromptBlockLibraryState> build() async {
     // 旧固定词 → 块库/颜料版的一次性迁移（幂等，meta 旗标短路）。
     await FixedTagMigrationService(
+      blockStorage: ref.watch(promptBlockStorageProvider),
+      localStorage: ref.watch(localStorageServiceProvider),
+    ).run();
+    // 旧本地词库 → 块库的一次性迁移（复制不搬移；退役确认后旧键才清理）。
+    await TagLibraryMigrationService(
       blockStorage: ref.watch(promptBlockStorageProvider),
       localStorage: ref.watch(localStorageServiceProvider),
     ).run();
