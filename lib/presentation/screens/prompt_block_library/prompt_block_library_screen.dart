@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/storage_keys.dart';
@@ -26,8 +27,9 @@ import 'widgets/prompt_block_edit_dialog.dart';
 import 'widgets/prompt_block_folder_delete_dialog.dart';
 import 'widgets/prompt_block_folder_tree.dart';
 import 'widgets/prompt_block_list_item.dart';
+import 'widgets/prompt_block_waterfall_card.dart';
 
-enum _PromptBlockViewMode { list, grid }
+enum _PromptBlockViewMode { list, grid, waterfall }
 
 /// 块右键菜单动作（单块语义 + 多选批量语义共用一个枚举）。
 enum _BlockContextAction {
@@ -101,9 +103,11 @@ class _PromptBlockLibraryScreenState
       StorageKeys.promptBlockLibrarySortDescending,
     );
     setState(() {
-      _viewMode = storedMode == 'list'
-          ? _PromptBlockViewMode.list
-          : _PromptBlockViewMode.grid;
+      _viewMode = switch (storedMode) {
+        'list' => _PromptBlockViewMode.list,
+        'waterfall' => _PromptBlockViewMode.waterfall,
+        _ => _PromptBlockViewMode.grid,
+      };
       _cardWidth = _snapCardWidth(storedWidth ?? 220);
       if (storedSortField != null) _sortField = storedSortField;
       if (storedSortDescending != null) _sortDescending = storedSortDescending;
@@ -133,7 +137,11 @@ class _PromptBlockLibraryScreenState
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
       StorageKeys.promptBlockLibraryViewMode,
-      mode == _PromptBlockViewMode.list ? 'list' : 'grid',
+      switch (mode) {
+        _PromptBlockViewMode.list => 'list',
+        _PromptBlockViewMode.waterfall => 'waterfall',
+        _PromptBlockViewMode.grid => 'grid',
+      },
     );
   }
 
@@ -521,12 +529,13 @@ class _PromptBlockLibraryScreenState
                           isSelected: [
                             _viewMode == _PromptBlockViewMode.list,
                             _viewMode == _PromptBlockViewMode.grid,
+                            _viewMode == _PromptBlockViewMode.waterfall,
                           ],
-                          onPressed: (index) => _setViewMode(
-                            index == 0
-                                ? _PromptBlockViewMode.list
-                                : _PromptBlockViewMode.grid,
-                          ),
+                          onPressed: (index) => _setViewMode(switch (index) {
+                            0 => _PromptBlockViewMode.list,
+                            2 => _PromptBlockViewMode.waterfall,
+                            _ => _PromptBlockViewMode.grid,
+                          }),
                           borderRadius: BorderRadius.circular(8),
                           constraints: const BoxConstraints(
                             minWidth: 36,
@@ -544,6 +553,14 @@ class _PromptBlockLibraryScreenState
                               message: context.l10n.promptBlockLibrary_gridView,
                               child: const Icon(
                                 Icons.grid_view_outlined,
+                                size: 18,
+                              ),
+                            ),
+                            Tooltip(
+                              message:
+                                  context.l10n.promptBlockLibrary_waterfallView,
+                              child: const Icon(
+                                Icons.view_quilt_outlined,
                                 size: 18,
                               ),
                             ),
@@ -927,6 +944,9 @@ class _PromptBlockLibraryScreenState
           if (_viewMode == _PromptBlockViewMode.grid) {
             return _buildGrid(context, blocks, state.folders);
           }
+          if (_viewMode == _PromptBlockViewMode.waterfall) {
+            return _buildWaterfall(context, blocks, state.folders);
+          }
 
           // 聚合视图里混有后代文件夹的块，跨文件夹拖排没有意义；
           // repository 的同级完整性校验也会拒绝这种重排，这里直接不提供把手。
@@ -1068,7 +1088,9 @@ class _PromptBlockLibraryScreenState
         ? context.l10n.promptBlockLibrary_unnamedBlock
         : block.title;
     return PromptBlockHoverPreview(
-      key: ValueKey(block.id),
+      // 按表面类型分 key：切视图/卡片尺寸跨档时旧 hover state 销毁，
+      // 预览浮层随旧表面移除，不会钉到新表面上。
+      key: ValueKey('pill-${block.id}'),
       block: block,
       folders: folders,
       enabled: !_multiSelectMode,
@@ -1128,6 +1150,76 @@ class _PromptBlockLibraryScreenState
     );
   }
 
+  /// 瀑布流视图（FEAT-1）：有图块按真实宽高比排列，无图块呈老样式长条。
+  /// 列数沿用卡片尺寸滑杆（逻辑列宽 = _cardWidth），与 grid 共用。
+  Widget _buildWaterfall(
+    BuildContext context,
+    List<PromptBlock> blocks,
+    List<PromptBlockFolder> folders,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final sliderWidth = (constraints.maxWidth - 74)
+            .clamp(80.0, 164.0)
+            .toDouble();
+        final columnCount = (constraints.maxWidth / _cardWidth).floor().clamp(
+          1,
+          10,
+        );
+        return Stack(
+          key: const Key('prompt-block-waterfall-stack'),
+          children: [
+            Positioned.fill(
+              child: MasonryGridView.count(
+                key: const Key('prompt-block-waterfall'),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 82),
+                crossAxisCount: columnCount,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                itemCount: blocks.length,
+                itemBuilder: (context, index) => _buildWaterfallCard(
+                  context,
+                  blocks[index],
+                  folders: folders,
+                ),
+              ),
+            ),
+            Positioned(
+              right: 16,
+              bottom: 12,
+              child: _buildCardSizeControl(context, sliderWidth),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildWaterfallCard(
+    BuildContext context,
+    PromptBlock block, {
+    required List<PromptBlockFolder> folders,
+  }) {
+    final title = block.title.isEmpty
+        ? context.l10n.promptBlockLibrary_unnamedBlock
+        : block.title;
+    return PromptBlockHoverPreview(
+      key: ValueKey('waterfall-${block.id}'),
+      block: block,
+      folders: folders,
+      enabled: !_multiSelectMode,
+      child: PromptBlockWaterfallCard(
+        block: block,
+        displayTitle: title,
+        selected: _isBlockShownSelected(block.id),
+        multiSelected: _isBlockMultiSelected(block.id),
+        onSecondaryTap: (details) =>
+            _showBlockContextMenu(context, block, details.globalPosition),
+        onTap: () => _handleBlockTap(block),
+      ),
+    );
+  }
+
   Widget _buildBlockItem(
     BuildContext context,
     PromptBlock block, {
@@ -1138,7 +1230,7 @@ class _PromptBlockLibraryScreenState
         ? context.l10n.promptBlockLibrary_unnamedBlock
         : block.title;
     return PromptBlockHoverPreview(
-      key: ValueKey(block.id),
+      key: ValueKey('item-${block.id}'),
       block: block,
       folders: folders,
       enabled: !_multiSelectMode,
@@ -1171,7 +1263,7 @@ class _PromptBlockLibraryScreenState
         ? context.l10n.promptBlockLibrary_unnamedBlock
         : block.title;
     return PromptBlockHoverPreview(
-      key: ValueKey(block.id),
+      key: ValueKey('card-${block.id}'),
       block: block,
       folders: folders,
       enabled: !_multiSelectMode,

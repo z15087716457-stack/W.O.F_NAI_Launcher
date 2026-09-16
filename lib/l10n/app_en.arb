@@ -6108,6 +6108,7 @@
   "promptBlockLibrary_importedAt": "Imported at",
   "promptBlockLibrary_listView": "List view",
   "promptBlockLibrary_gridView": "Grid view",
+  "promptBlockLibrary_waterfallView": "Waterfall view",
   "promptBlockLibrary_sortBy": "Sort by",
   "promptBlockLibrary_sortCustom": "Default (manual order)",
   "promptBlockLibrary_sortUpdated": "Last modified",

@@ -3,6 +3,7 @@ import 'dart:ui' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
@@ -144,6 +145,98 @@ void main() {
       find.byKey(const Key('prompt-block-detail-action-edit')),
       findsOneWidget,
     );
+    await gesture.removePointer();
+  });
+
+  testWidgets('waterfall view: switch renders masonry, tap opens detail', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      buildScreen(
+        blocks: [makeBlock('w1', '瀑布块一', 'a'), makeBlock('w2', '瀑布块二', 'b')],
+      ),
+    );
+
+    // 切到瀑布流（ToggleButtons 第三位）
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('prompt-block-view-mode')),
+        matching: find.byIcon(Icons.view_quilt_outlined),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.byType(MasonryGridView), findsOneWidget);
+    expect(find.text('瀑布块一'), findsOneWidget);
+    expect(find.text('瀑布块二'), findsOneWidget);
+    // 无图块 = 老样子长条
+    expect(
+      find.byKey(const Key('prompt-block-waterfall-plain-w1')),
+      findsOneWidget,
+    );
+
+    // 点击开详情面板
+    await tester.tap(find.byKey(const Key('prompt-block-waterfall-body-w1')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.byType(PromptBlockDetailPanel), findsOneWidget);
+
+    // 视图持久化
+    final prefs = await SharedPreferences.getInstance();
+    expect(
+      prefs.getString(StorageKeys.promptBlockLibraryViewMode),
+      'waterfall',
+    );
+  });
+
+  testWidgets('waterfall view restores from stored preference', (tester) async {
+    SharedPreferences.setMockInitialValues({
+      StorageKeys.promptBlockLibraryViewMode: 'waterfall',
+    });
+    await pumpScreen(
+      tester,
+      buildScreen(blocks: [makeBlock('w1', '瀑布块', 'a')]),
+    );
+
+    expect(find.byType(MasonryGridView), findsOneWidget);
+    expect(
+      find.byKey(const Key('prompt-block-waterfall-plain-w1')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('switching view mode dismisses an open hover preview', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      buildScreen(blocks: [makeBlock('v1', '切换块', 'a')]),
+    );
+
+    // 悬停出预览
+    final card = find.byKey(const ValueKey('prompt-block-card-body-v1'));
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(card));
+    await tester.pump(const Duration(milliseconds: 900));
+    expect(
+      find.byKey(const Key('prompt-block-preview-overlay')),
+      findsOneWidget,
+    );
+
+    // 切视图 → 旧 hover state 销毁，预览随之移除
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('prompt-block-view-mode')),
+        matching: find.byIcon(Icons.view_quilt_outlined),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.byKey(const Key('prompt-block-preview-overlay')), findsNothing);
+    expect(find.byType(MasonryGridView), findsOneWidget);
     await gesture.removePointer();
   });
 

@@ -10641,6 +10641,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_gridView => 'Grid view';
 
   @override
+  String get promptBlockLibrary_waterfallView => 'Waterfall view';
+
+  @override
   String get promptBlockLibrary_sortBy => 'Sort by';
 
   @override

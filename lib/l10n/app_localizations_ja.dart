@@ -10402,6 +10402,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_gridView => 'グリッド表示';
 
   @override
+  String get promptBlockLibrary_waterfallView => 'ウォーターフォール表示';
+
+  @override
   String get promptBlockLibrary_sortBy => '並べ替え';
 
   @override

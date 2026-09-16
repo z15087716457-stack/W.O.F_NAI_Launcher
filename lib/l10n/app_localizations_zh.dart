@@ -10258,6 +10258,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_gridView => '网格视图';
 
   @override
+  String get promptBlockLibrary_waterfallView => '瀑布流视图';
+
+  @override
   String get promptBlockLibrary_sortBy => '排序方式';
 
   @override

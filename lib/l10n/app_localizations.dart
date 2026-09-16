@@ -18547,6 +18547,12 @@ abstract class AppLocalizations {
   /// **'Grid view'**
   String get promptBlockLibrary_gridView;
 
+  /// No description provided for @promptBlockLibrary_waterfallView.
+  ///
+  /// In en, this message translates to:
+  /// **'Waterfall view'**
+  String get promptBlockLibrary_waterfallView;
+
   /// No description provided for @promptBlockLibrary_sortBy.
   ///
   /// In en, this message translates to:

@@ -6108,6 +6108,7 @@
   "promptBlockLibrary_importedAt": "インポート日時",
   "promptBlockLibrary_listView": "リスト表示",
   "promptBlockLibrary_gridView": "グリッド表示",
+  "promptBlockLibrary_waterfallView": "ウォーターフォール表示",
   "promptBlockLibrary_sortBy": "並べ替え",
   "promptBlockLibrary_sortCustom": "既定（手動順）",
   "promptBlockLibrary_sortUpdated": "更新日時",
