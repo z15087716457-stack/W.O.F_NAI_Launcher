@@ -222,20 +222,62 @@ class _AutoSaveToggleChipState extends ConsumerState<AutoSaveToggleChip>
   String _buildTooltipMessage(
     BuildContext context,
     ImageSaveSettings settings,
-  ) {
-    final statusText = settings.autoSave
-        ? context.l10n.common_enabled
-        : context.l10n.common_disabled;
-
-    if (settings.autoSave && settings.hasCustomPath) {
-      return '${context.l10n.settings_autoSaveSubtitle}\n$statusText\n${context.l10n.settings_imageSavePath}: ${settings.customPath}';
-    }
-
-    return '${context.l10n.settings_autoSaveSubtitle}\n$statusText';
-  }
+  ) => buildAutoSaveTooltip(context, settings);
 
   void _handleTap() {
     HapticFeedback.lightImpact();
     ref.read(imageSaveSettingsNotifierProvider.notifier).toggleAutoSave();
+  }
+}
+
+/// 自动保存提示文案（芯片与图标按钮共用）
+String buildAutoSaveTooltip(BuildContext context, ImageSaveSettings settings) {
+  final statusText = settings.autoSave
+      ? context.l10n.common_enabled
+      : context.l10n.common_disabled;
+
+  if (settings.autoSave && settings.hasCustomPath) {
+    return '${context.l10n.settings_autoSaveSubtitle}\n$statusText\n${context.l10n.settings_imageSavePath}: ${settings.customPath}';
+  }
+
+  return '${context.l10n.settings_autoSaveSubtitle}\n$statusText';
+}
+
+/// 自动保存图标切换按钮（历史面板标题栏用）
+///
+/// 开启时实心橙色 save 图标，关闭时灰色描边 save 图标；
+/// 点击即切换，视觉密度与标题栏其它 IconButton 一致。
+class AutoSaveToggleIcon extends ConsumerWidget {
+  const AutoSaveToggleIcon({super.key});
+
+  static const _cuteOrange = Color(0xFFFF9F6B);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final settings = ref.watch(imageSaveSettingsNotifierProvider);
+    final isEnabled = settings.autoSave;
+
+    return IconButton(
+      onPressed: () {
+        HapticFeedback.lightImpact();
+        ref
+            .read(imageSaveSettingsNotifierProvider.notifier)
+            .toggleAutoSave();
+      },
+      icon: Icon(
+        isEnabled ? Icons.save_rounded : Icons.save_outlined,
+        size: 20,
+      ),
+      tooltip: buildAutoSaveTooltip(context, settings),
+      style: IconButton.styleFrom(
+        foregroundColor: isEnabled
+            ? _cuteOrange
+            : theme.colorScheme.onSurface.withValues(alpha: 0.55),
+      ),
+      visualDensity: VisualDensity.compact,
+      constraints: const BoxConstraints(),
+      padding: const EdgeInsets.all(8),
+    );
   }
 }

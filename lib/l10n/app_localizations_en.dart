@@ -3121,27 +3121,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ucPreset_selectFromLibrary => 'Select UC Entry';
 
   @override
-  String get batchSize_title => 'Batch Size';
+  String get generation_imageCount => 'Number of Images';
 
   @override
-  String batchSize_tooltip(int count) {
-    return '$count images per request';
+  String get generation_requestCountTooltip =>
+      'Requests: each click sends N generation requests';
+
+  @override
+  String generation_imageCountTotal(int requests, int perRequest, int total) {
+    return '$requests requests × $perRequest images = $total total';
   }
-
-  @override
-  String get batchSize_description => 'Number of images per API request';
-
-  @override
-  String batchSize_formula(int batchCount, int batchSize, int total) {
-    return 'Total images = $batchCount × $batchSize = $total';
-  }
-
-  @override
-  String get batchSize_hint =>
-      'Larger batch = fewer requests, but longer wait per request';
-
-  @override
-  String get batchSize_costWarning => '⚠️ Batch size > 1 costs extra Anlas';
 
   @override
   String get warmup_networkCheck => 'Checking network connection...';

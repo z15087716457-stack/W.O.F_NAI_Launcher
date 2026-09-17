@@ -1435,23 +1435,15 @@
   "ucPreset_nsfwHint": "💡 To generate adult content, add nsfw to your prompt. The nsfw tag will be auto-removed from Undesired Content",
   "ucPreset_addFromLibrary": "Add from Library",
   "ucPreset_selectFromLibrary": "Select UC Entry",
-  "batchSize_title": "Batch Size",
-  "batchSize_tooltip": "{count} images per request",
-  "@batchSize_tooltip": {
+  "generation_imageCount": "Number of Images",
+  "generation_requestCountTooltip": "Requests: each click sends N generation requests",
+  "generation_imageCountTotal": "{requests} requests × {perRequest} images = {total} total",
+  "@generation_imageCountTotal": {
     "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "batchSize_description": "Number of images per API request",
-  "batchSize_formula": "Total images = {batchCount} × {batchSize} = {total}",
-  "@batchSize_formula": {
-    "placeholders": {
-      "batchCount": {
+      "requests": {
         "type": "int"
       },
-      "batchSize": {
+      "perRequest": {
         "type": "int"
       },
       "total": {
@@ -1459,8 +1451,6 @@
       }
     }
   },
-  "batchSize_hint": "Larger batch = fewer requests, but longer wait per request",
-  "batchSize_costWarning": "⚠️ Batch size > 1 costs extra Anlas",
   "warmup_networkCheck": "Checking network connection...",
   "warmup_networkCheck_noProxy": "Cannot connect to NovelAI, please enable VPN or proxy settings",
   "warmup_networkCheck_noSystemProxy": "Proxy enabled but no system proxy detected, please enable VPN",

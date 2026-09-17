@@ -3051,26 +3051,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ucPreset_selectFromLibrary => '除外したい要素エントリを選択';
 
   @override
-  String get batchSize_title => 'バッチサイズ';
+  String get generation_imageCount => '生成枚数';
 
   @override
-  String batchSize_tooltip(int count) {
-    return 'リクエストごとに $count 個の画像';
+  String get generation_requestCountTooltip =>
+      'リクエスト回数：1 回のクリックで N 回の生成リクエストを送信';
+
+  @override
+  String generation_imageCountTotal(int requests, int perRequest, int total) {
+    return '$requests 回 × $perRequest 枚 = 合計 $total 枚';
   }
-
-  @override
-  String get batchSize_description => 'API リクエストごとの画像の数';
-
-  @override
-  String batchSize_formula(int batchCount, int batchSize, int total) {
-    return '画像総数 = $batchCount × $batchSize = $total';
-  }
-
-  @override
-  String get batchSize_hint => 'バッチが大きい = リクエストは少なくなりますが、リクエストあたりの待ち時間が長くなります';
-
-  @override
-  String get batchSize_costWarning => '⚠️ バッチサイズ > 1 には追加の Anlas 費用がかかります';
 
   @override
   String get warmup_networkCheck => 'ネットワーク接続を確認しています...';

@@ -34,6 +34,7 @@ import '../../../widgets/common/image_detail/image_detail_data.dart';
 import '../../../widgets/common/image_detail/image_detail_viewer.dart';
 import '../../../widgets/common/draggable_memory_image.dart';
 import '../../../widgets/common/selectable_image_card.dart';
+import '../../../widgets/generation/auto_save_toggle_chip.dart';
 import '../../../widgets/image_editor/image_editor_screen.dart';
 import '../../../utils/image_detail_opener.dart';
 import '../../../utils/krita_send_helper.dart';
@@ -189,6 +190,9 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                 ),
               ],
               const Spacer(),
+              // 自动保存开关（原底栏芯片，改为标题栏图标切换）
+              const AutoSaveToggleIcon(),
+              const SizedBox(width: 4),
               // 全选按钮
               if (state.history.isNotEmpty || state.currentImages.isNotEmpty)
                 IconButton(

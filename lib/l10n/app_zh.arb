@@ -1350,23 +1350,15 @@
   "ucPreset_nsfwHint": "💡 如需生成成人内容，请在正面提示词中添加 nsfw，负面提示词中的 nsfw 将自动移除",
   "ucPreset_addFromLibrary": "从词库添加",
   "ucPreset_selectFromLibrary": "选择负面词条目",
-  "batchSize_title": "批次大小",
-  "batchSize_tooltip": "每次请求生成 {count} 张",
-  "@batchSize_tooltip": {
+  "generation_imageCount": "生成数量",
+  "generation_requestCountTooltip": "请求次数：每次点击发起 N 次生成请求",
+  "generation_imageCountTotal": "{requests} 次 × {perRequest} 张 = 共 {total} 张",
+  "@generation_imageCountTotal": {
     "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "batchSize_description": "每次 API 请求生成的图片数量",
-  "batchSize_formula": "总图像数 = {batchCount} × {batchSize} = {total} 张",
-  "@batchSize_formula": {
-    "placeholders": {
-      "batchCount": {
+      "requests": {
         "type": "int"
       },
-      "batchSize": {
+      "perRequest": {
         "type": "int"
       },
       "total": {
@@ -1374,8 +1366,6 @@
       }
     }
   },
-  "batchSize_hint": "较大的批次可减少请求次数，但单次等待时间更长",
-  "batchSize_costWarning": "⚠️ 批次大小 > 1 时会额外消耗 Anlas 点数",
   "warmup_networkCheck": "检测网络连接...",
   "warmup_networkCheck_noProxy": "无法连接到 NovelAI，请开启VPN或启用代理设置",
   "warmup_networkCheck_noSystemProxy": "已启用代理但未检测到系统代理，请开启VPN",

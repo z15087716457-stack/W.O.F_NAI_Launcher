@@ -214,6 +214,11 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
 
                         // 尺寸设置：低频控件下沉至滚动列末尾（官网 Layout A）
                         const SizeSection(),
+                        const SizedBox(height: 12),
+
+                        // 生成数量：请求次数步进 + 每次张数分段（官网 Image
+                        // Settings 式），与钉底生成按钮文案实时联动
+                        const ImageCountSection(),
                       ],
                     ),
                   ),
@@ -325,6 +330,8 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
             compact: true,
             // Opus/Anlas 芯片已上移到头部条，底栏不再渲染
             showBalanceChips: false,
+            // 自动保存开关挪到了历史面板标题栏
+            showAutoSaveChip: false,
           ),
         ),
       ],

@@ -3004,26 +3004,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ucPreset_selectFromLibrary => '选择负面词条目';
 
   @override
-  String get batchSize_title => '批次大小';
+  String get generation_imageCount => '生成数量';
 
   @override
-  String batchSize_tooltip(int count) {
-    return '每次请求生成 $count 张';
+  String get generation_requestCountTooltip => '请求次数：每次点击发起 N 次生成请求';
+
+  @override
+  String generation_imageCountTotal(int requests, int perRequest, int total) {
+    return '$requests 次 × $perRequest 张 = 共 $total 张';
   }
-
-  @override
-  String get batchSize_description => '每次 API 请求生成的图片数量';
-
-  @override
-  String batchSize_formula(int batchCount, int batchSize, int total) {
-    return '总图像数 = $batchCount × $batchSize = $total 张';
-  }
-
-  @override
-  String get batchSize_hint => '较大的批次可减少请求次数，但单次等待时间更长';
-
-  @override
-  String get batchSize_costWarning => '⚠️ 批次大小 > 1 时会额外消耗 Anlas 点数';
 
   @override
   String get warmup_networkCheck => '检测网络连接...';

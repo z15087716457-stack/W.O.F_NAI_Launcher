@@ -5641,41 +5641,23 @@ abstract class AppLocalizations {
   /// **'Select UC Entry'**
   String get ucPreset_selectFromLibrary;
 
-  /// No description provided for @batchSize_title.
+  /// No description provided for @generation_imageCount.
   ///
   /// In en, this message translates to:
-  /// **'Batch Size'**
-  String get batchSize_title;
+  /// **'Number of Images'**
+  String get generation_imageCount;
 
-  /// No description provided for @batchSize_tooltip.
+  /// No description provided for @generation_requestCountTooltip.
   ///
   /// In en, this message translates to:
-  /// **'{count} images per request'**
-  String batchSize_tooltip(int count);
+  /// **'Requests: each click sends N generation requests'**
+  String get generation_requestCountTooltip;
 
-  /// No description provided for @batchSize_description.
+  /// No description provided for @generation_imageCountTotal.
   ///
   /// In en, this message translates to:
-  /// **'Number of images per API request'**
-  String get batchSize_description;
-
-  /// No description provided for @batchSize_formula.
-  ///
-  /// In en, this message translates to:
-  /// **'Total images = {batchCount} × {batchSize} = {total}'**
-  String batchSize_formula(int batchCount, int batchSize, int total);
-
-  /// No description provided for @batchSize_hint.
-  ///
-  /// In en, this message translates to:
-  /// **'Larger batch = fewer requests, but longer wait per request'**
-  String get batchSize_hint;
-
-  /// No description provided for @batchSize_costWarning.
-  ///
-  /// In en, this message translates to:
-  /// **'⚠️ Batch size > 1 costs extra Anlas'**
-  String get batchSize_costWarning;
+  /// **'{requests} requests × {perRequest} images = {total} total'**
+  String generation_imageCountTotal(int requests, int perRequest, int total);
 
   /// No description provided for @warmup_networkCheck.
   ///

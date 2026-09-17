@@ -5,6 +5,7 @@ import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_button.dart';
 import 'package:nai_launcher/presentation/widgets/common/anlas_cost_badge.dart';
+import 'generate_button_copy.dart';
 
 /// 集成价格徽章的生成按钮
 class GenerateButtonWithCost extends ConsumerWidget {
@@ -20,6 +21,12 @@ class GenerateButtonWithCost extends ConsumerWidget {
   /// 按钮高度（紧凑布局可压低）
   final double height;
 
+  /// 本次点击生成的总张数（请求次数 × 每次张数），用于文案池选句
+  final int imageCount;
+
+  /// 文案种子：由外层在总数变化 / 一次生成结束时推进
+  final int copySeed;
+
   const GenerateButtonWithCost({
     super.key,
     required this.isGenerating,
@@ -31,6 +38,8 @@ class GenerateButtonWithCost extends ConsumerWidget {
     required this.onSkipCurrent,
     this.costOverride,
     this.height = 48,
+    this.imageCount = 1,
+    this.copySeed = 0,
   });
 
   bool get _canSkipCurrentBatch =>
@@ -52,7 +61,11 @@ class GenerateButtonWithCost extends ConsumerWidget {
         cooldownRemainingSeconds,
       );
     }
-    return context.l10n.generation_generate;
+    return GenerateButtonCopy.pick(
+      seed: copySeed,
+      count: imageCount,
+      languageCode: Localizations.localeOf(context).languageCode,
+    );
   }
 
   @override
@@ -61,7 +74,7 @@ class GenerateButtonWithCost extends ConsumerWidget {
       return SizedBox(
         height: height,
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (_canSkipCurrentBatch) ...[
               ThemedButton(
@@ -95,17 +108,25 @@ class GenerateButtonWithCost extends ConsumerWidget {
             ? null
             : cooldownRemainingSeconds > 0
             ? const Icon(Icons.hourglass_bottom_outlined)
-            : const Icon(Icons.auto_awesome),
+            : null,
         isLoading: isGenerating,
-        label: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(_generateLabelText(context)),
-            AnlasCostBadge(
-              isGenerating: isGenerating,
-              costOverride: costOverride,
-            ),
-          ],
+        label: Flexible(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  _generateLabelText(context),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              AnlasCostBadge(
+                isGenerating: isGenerating,
+                costOverride: costOverride,
+              ),
+            ],
+          ),
         ),
         style: ThemedButtonStyle.filled,
       ),

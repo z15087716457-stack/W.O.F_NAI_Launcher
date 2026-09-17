@@ -10,17 +10,14 @@ import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 import 'package:nai_launcher/presentation/utils/asset_protection_guard.dart';
 import 'package:nai_launcher/presentation/widgets/common/app_toast.dart';
-import 'package:nai_launcher/presentation/widgets/common/draggable_number_input.dart';
 import 'package:nai_launcher/presentation/widgets/generation/auto_save_toggle_chip.dart';
 import 'package:nai_launcher/presentation/widgets/anlas/anlas_balance_chip.dart';
 import 'package:nai_launcher/presentation/widgets/anlas/opus_usage_chip.dart';
-import 'batch_settings_button.dart';
 import 'generate_button.dart';
 
 /// 生成控制按钮
 class GenerationControls extends ConsumerStatefulWidget {
-  /// 紧凑模式：用于官网式布局的钉底控制条——
-  /// 强制窄排布、可选批次大小按钮、压低生成按钮高度。
+  /// 紧凑模式：用于官网式布局的钉底控制条——压低生成按钮高度。
   final bool compact;
 
   /// 保留给已有调用方的生成调用钩子。
@@ -37,6 +34,10 @@ class GenerationControls extends ConsumerStatefulWidget {
   /// 画风探索页等其它调用方保持默认 true。
   final bool showBalanceChips;
 
+  /// 是否显示自动保存开关芯片。
+  /// 生成页左栏把它挪到了历史面板标题栏，传 false 关闭底栏渲染。
+  final bool showAutoSaveChip;
+
   const GenerationControls({
     super.key,
     this.compact = false,
@@ -44,6 +45,7 @@ class GenerationControls extends ConsumerStatefulWidget {
     this.onBatchEvent,
     this.exploreMode = false,
     this.showBalanceChips = true,
+    this.showAutoSaveChip = true,
   });
 
   @override
@@ -51,13 +53,18 @@ class GenerationControls extends ConsumerStatefulWidget {
 }
 
 class _GenerationControlsState extends ConsumerState<GenerationControls> {
+  /// 生成按钮文案种子：总数变化 / 一次生成结束时推进，按钮换上新文案
+  int _copySeed = 0;
+  int _lastImageCount = -1;
+  bool _wasGenerating = false;
+
   @override
   Widget build(BuildContext context) {
     final generationState = ref.watch(imageGenerationNotifierProvider);
     final cooldownState = ref.watch(generationCooldownProvider);
     final kritaBridgeState = ref.watch(kritaBridgeNotifierProvider);
     final params = ref.watch(generationParamsNotifierProvider);
-    final nSamples = params.nSamples;
+    final perRequest = ref.watch(imagesPerRequestProvider);
     final costOverride = widget.exploreMode
         ? ref.watch(estimatedCostForBatchSizeProvider(1))
         : null;
@@ -75,230 +82,89 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
     // 生成中常驻显示取消入口（与移动端一致）
     final showCancel = isLauncherGenerating;
 
+    // 探索页强制逐张请求：文案张数只反映请求次数
+    final imageCount =
+        widget.exploreMode ? params.nSamples : params.nSamples * perRequest;
+    if (imageCount != _lastImageCount) {
+      _lastImageCount = imageCount;
+      _copySeed++;
+    }
+    if (_wasGenerating && !isGenerating) {
+      _copySeed++;
+    }
+    _wasGenerating = isGenerating;
+
     // 快捷键已由父级 WebStyleGenerationLayout 统一处理
     // 这里只负责布局
+    final generateButton = GenerateButtonWithCost(
+      height: widget.compact ? 40 : 48,
+      isGenerating: isGenerating,
+      showCancel: showCancel,
+      generationState: generationState,
+      cooldownRemainingSeconds: cooldownState.remainingSeconds,
+      costOverride: costOverride,
+      imageCount: imageCount,
+      copySeed: _copySeed,
+      onGenerate: () => unawaited(_handleGenerate(context, ref)),
+      onCancel: () =>
+          ref.read(imageGenerationNotifierProvider.notifier).cancel(),
+      onSkipCurrent: () => ref
+          .read(imageGenerationNotifierProvider.notifier)
+          .skipCurrentRequest(),
+    );
+
+    final autoSaveChip = widget.showAutoSaveChip
+        ? AutoSaveToggleChip(compact: widget.compact)
+        : null;
+
+    // 整条官网式单排：可选点数芯片靠左，生成按钮撑满剩余宽度，
+    // 可选自动保存芯片靠右；外层 LayoutBuilder 让极窄场景整组等比缩小
+    final balanceChips = widget.showBalanceChips
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const OpusUsageChip(
+                compact: true,
+                margin: EdgeInsets.only(right: 8),
+              ),
+              AnlasBalanceChip(estimatedCostOverride: costOverride),
+            ],
+          )
+        : null;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow = widget.compact || constraints.maxWidth < 500;
-
-        // 生成按钮几何居中：左右两个等宽弹性区吸收其余控件，
-        // 按钮位置不随左侧点数块显隐漂移
-        final generateButton = GenerateButtonWithCost(
-          height: widget.compact ? 40 : 48,
-          isGenerating: isGenerating,
-          showCancel: showCancel,
-          generationState: generationState,
-          cooldownRemainingSeconds: cooldownState.remainingSeconds,
-          costOverride: costOverride,
-          onGenerate: () => unawaited(_handleGenerate(context, ref)),
-          onCancel: () =>
-              ref.read(imageGenerationNotifierProvider.notifier).cancel(),
-          onSkipCurrent: () => ref
-              .read(imageGenerationNotifierProvider.notifier)
-              .skipCurrentRequest(),
+        final inner = Row(
+          children: [
+            if (balanceChips != null) ...[
+              balanceChips,
+              const SizedBox(width: 8),
+            ],
+            Expanded(child: generateButton),
+            if (autoSaveChip != null) ...[
+              const SizedBox(width: 8),
+              autoSaveChip,
+            ],
+          ],
         );
 
-        if (isNarrow) {
-          final rightGroup = <Widget>[
-            // 紧凑模式生成中隐藏批量调节（此时批量参数不可变更），
-            // 为跳过/停止按钮腾出宽度
-            if (!(widget.compact && showCancel))
-              DraggableNumberInput(
-                value: nSamples,
-                min: 1,
-                prefix: '×',
-                onChanged: (value) {
-                  ref
-                      .read(generationParamsNotifierProvider.notifier)
-                      .updateNSamples(value);
-                },
-              ),
-            // 紧凑模式补上第二种批量控制：批次大小（每次请求张数）
-            if (widget.compact && !widget.exploreMode && !showCancel) ...[
-              const SizedBox(width: 4),
-              const BatchSettingsButton(),
-            ],
-          ];
-
-          if (widget.compact) {
-            if (constraints.maxWidth < 360) {
-              Widget fit(Widget child) => ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: constraints.maxWidth),
-                child: FittedBox(fit: BoxFit.scaleDown, child: child),
-              );
-
-              return Wrap(
-                key: const Key('generation-controls-compact-wrap'),
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 8,
-                runSpacing: 6,
-                children: [
-                  fit(
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        if (widget.showBalanceChips) ...[
-                          const OpusUsageChip(
-                            compact: true,
-                            margin: EdgeInsets.only(right: 8),
-                          ),
-                          AnlasBalanceChip(estimatedCostOverride: costOverride),
-                        ],
-                      ],
-                    ),
-                  ),
-                  fit(generateButton),
-                  fit(
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ...rightGroup,
-                        const SizedBox(width: 8),
-                        const AutoSaveToggleChip(compact: true),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            }
-
-            // 官网钉底条：正常宽度保持单行，左右点数组与生成按钮对齐。
-            // 极窄宽度在上方分支中改为三组自动换行，避免控件横向溢出。
-            return Row(
-              children: [
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: widget.showBalanceChips
-                          ? Row(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // 隐藏（V4）时 shrink 不占位，
-                                // 与余额芯片的 8 间距随自己的 margin 一起消失
-                                const OpusUsageChip(
-                                  compact: true,
-                                  margin: EdgeInsets.only(right: 8),
-                                ),
-                                AnlasBalanceChip(
-                                  estimatedCostOverride: costOverride,
-                                ),
-                              ],
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                generateButton,
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ...rightGroup,
-                          const SizedBox(width: 8),
-                          const AutoSaveToggleChip(compact: true),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }
-
-          // 窄宽：单行三段，生成按钮居中
-          return Row(
-            children: [
-              const SizedBox(width: 8),
-              generateButton,
-              const SizedBox(width: 8),
-              Expanded(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: rightGroup,
-                  ),
-                ),
-              ),
-            ],
-          );
+        // 极窄场景（探索页多栏挤压下主编辑可压到近 0）：整组等比缩小
+        // 而不溢出——按钮文案本身还有 Flexible+省略号兜底。
+        const minNaturalWidth = 220.0;
+        if (constraints.maxWidth >= minNaturalWidth ||
+            !constraints.hasBoundedWidth) {
+          return inner;
         }
-
-        // 正常布局 - 自动保存锚最左，点数贴按钮左，批量控件贴按钮右；
-        // 左右组空间不足时内部等比缩小，避免溢出叠到生成按钮上
-        return Row(
-          children: [
-            Expanded(
-              child: Row(
-                children: [
-                  const AutoSaveToggleChip(),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: widget.showBalanceChips
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  AnlasBalanceChip(
-                                    estimatedCostOverride: costOverride,
-                                  ),
-                                  const OpusUsageChip(
-                                    margin: EdgeInsets.only(left: 8),
-                                  ),
-                                ],
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+        return ClipRect(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: minNaturalWidth,
+              child: inner,
             ),
-            generateButton,
-            Expanded(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(width: 12),
-                      DraggableNumberInput(
-                        value: nSamples,
-                        min: 1,
-                        prefix: '×',
-                        onChanged: (value) {
-                          ref
-                              .read(generationParamsNotifierProvider.notifier)
-                              .updateNSamples(value);
-                        },
-                      ),
-                      if (!widget.exploreMode) ...[
-                        const SizedBox(width: 16),
-                        const BatchSettingsButton(),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         );
       },
     );

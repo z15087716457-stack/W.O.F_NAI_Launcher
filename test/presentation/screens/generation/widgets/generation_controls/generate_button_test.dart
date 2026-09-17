@@ -5,6 +5,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_controls/generate_button.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/generation_controls/generate_button_copy.dart';
 
 void main() {
   late AppLocalizations l10n;
@@ -64,8 +65,14 @@ void main() {
       onCancel: () => cancelCalled = true,
     );
 
-    expect(find.text(l10n.generation_generate), findsOneWidget);
-    expect(find.byIcon(Icons.auto_awesome), findsOneWidget);
+    // 待机文案来自三语文案池（种子决定句型），左侧不再带图标
+    final expectedLabel = GenerateButtonCopy.pick(
+      seed: 0,
+      count: 1,
+      languageCode: 'zh',
+    );
+    expect(find.text(expectedLabel), findsOneWidget);
+    expect(find.byIcon(Icons.auto_awesome), findsNothing);
     expect(find.byIcon(Icons.stop_circle_outlined), findsNothing);
 
     await tester.tap(find.byType(FilledButton));

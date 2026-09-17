@@ -8,6 +8,7 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/image/image_params.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../widgets/common/app_toast.dart';
+import '../../../widgets/common/draggable_number_input.dart';
 import '../../../widgets/common/themed_dropdown.dart';
 import '../../../widgets/common/themed_input.dart';
 import '../../../widgets/common/themed_slider.dart';
@@ -94,6 +95,178 @@ class SizeSection extends ConsumerWidget {
             .read(generationParamsNotifierProvider.notifier)
             .updateSize(width, height);
       },
+    );
+  }
+}
+
+/// 生成数量分节（官网 Image Settings 式）
+///
+/// 标题行右端是请求次数步进器（‹ ×n ›，最小 1）；
+/// 下方一整条 1–4 分段选择 = 每次请求张数（imagesPerRequest）。
+/// 总数 = 请求次数 × 每次张数，与底部生成按钮文案实时联动。
+class ImageCountSection extends ConsumerWidget {
+  const ImageCountSection({super.key});
+
+  /// 请求次数上限（与步进器输入框三位数一致）
+  static const int maxRequests = 999;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final requests = ref.watch(
+      generationParamsNotifierProvider.select((params) => params.nSamples),
+    );
+    final perRequest = ref.watch(imagesPerRequestProvider);
+    final total = requests * perRequest;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(child: ParamSectionTitle(l10n.generation_imageCount)),
+            _RequestStepper(
+              value: requests,
+              onChanged: (value) => ref
+                  .read(generationParamsNotifierProvider.notifier)
+                  .updateNSamples(value),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            for (var i = 1; i <= 4; i++) ...[
+              if (i > 1) const SizedBox(width: 6),
+              Expanded(
+                child: _CountPill(
+                  value: i,
+                  selected: i == perRequest,
+                  onTap: () =>
+                      ref.read(imagesPerRequestProvider.notifier).set(i),
+                ),
+              ),
+            ],
+          ],
+        ),
+        if (total > 1) ...[
+          const SizedBox(height: 6),
+          Text(
+            l10n.generation_imageCountTotal(requests, perRequest, total),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// 请求次数步进器：左右箭头 + 可点按/拖拽/滚轮的数值框
+class _RequestStepper extends StatelessWidget {
+  final int value;
+  final ValueChanged<int> onChanged;
+
+  const _RequestStepper({required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    Widget arrow(IconData icon, bool enabled, VoidCallback onTap) {
+      return MouseRegion(
+        cursor: enabled
+            ? SystemMouseCursors.click
+            : SystemMouseCursors.basic,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: enabled ? onTap : null,
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: Icon(
+              icon,
+              size: 18,
+              color: theme.colorScheme.onSurface.withValues(
+                alpha: enabled ? 0.7 : 0.25,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Tooltip(
+      message: context.l10n.generation_requestCountTooltip,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          arrow(
+            Icons.chevron_left,
+            value > 1,
+            () => onChanged(value - 1),
+          ),
+          DraggableNumberInput(
+            value: value,
+            min: 1,
+            max: ImageCountSection.maxRequests,
+            prefix: '×',
+            dragSensitivity: 30,
+            onChanged: onChanged,
+          ),
+          arrow(
+            Icons.chevron_right,
+            value < ImageCountSection.maxRequests,
+            () => onChanged(value + 1),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 每次请求张数的分段选项（官网 Number of Images 式填充胶囊）
+class _CountPill extends StatelessWidget {
+  final int value;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _CountPill({
+    required this.value,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          height: 32,
+          decoration: BoxDecoration(
+            color: selected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Center(
+            child: Text(
+              '$value',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: selected
+                    ? theme.colorScheme.onPrimary
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.75),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

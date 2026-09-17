@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -58,7 +59,7 @@ void main() {
       findsOneWidget,
     );
     // 默认随机种子：种子列显示循环图标而非数值
-    expect(find.byIcon(Icons.autorenew), findsOneWidget);
+    expect(find.byType(SvgPicture), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -77,13 +78,13 @@ void main() {
     final pinnedSeed = container.read(generationParamsNotifierProvider).seed;
     expect(pinnedSeed, isNot(-1));
     expect(find.text(pinnedSeed.toString()), findsOneWidget);
-    expect(find.byIcon(Icons.autorenew), findsNothing);
+    expect(find.byType(SvgPicture), findsNothing);
 
     // 固定态 → 回到随机（seed = -1），图标恢复
     await tester.tap(find.text('种子'));
     await tester.pump();
     expect(container.read(generationParamsNotifierProvider).seed, -1);
-    expect(find.byIcon(Icons.autorenew), findsOneWidget);
+    expect(find.byType(SvgPicture), findsOneWidget);
   });
 
   testWidgets('steps/guidance columns are non-interactive', (tester) async {

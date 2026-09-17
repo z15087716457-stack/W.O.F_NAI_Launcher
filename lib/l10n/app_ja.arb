@@ -1434,23 +1434,15 @@
   "ucPreset_nsfwHint": "💡 アダルト コンテンツを生成するには、プロンプトに nsfw を追加します。nsfw タグは除外したい要素から自動的に削除されます",
   "ucPreset_addFromLibrary": "ライブラリから追加",
   "ucPreset_selectFromLibrary": "除外したい要素エントリを選択",
-  "batchSize_title": "バッチサイズ",
-  "batchSize_tooltip": "リクエストごとに {count} 個の画像",
-  "@batchSize_tooltip": {
+  "generation_imageCount": "生成枚数",
+  "generation_requestCountTooltip": "リクエスト回数：1 回のクリックで N 回の生成リクエストを送信",
+  "generation_imageCountTotal": "{requests} 回 × {perRequest} 枚 = 合計 {total} 枚",
+  "@generation_imageCountTotal": {
     "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "batchSize_description": "API リクエストごとの画像の数",
-  "batchSize_formula": "画像総数 = {batchCount} × {batchSize} = {total}",
-  "@batchSize_formula": {
-    "placeholders": {
-      "batchCount": {
+      "requests": {
         "type": "int"
       },
-      "batchSize": {
+      "perRequest": {
         "type": "int"
       },
       "total": {
@@ -1458,8 +1450,6 @@
       }
     }
   },
-  "batchSize_hint": "バッチが大きい = リクエストは少なくなりますが、リクエストあたりの待ち時間が長くなります",
-  "batchSize_costWarning": "⚠️ バッチサイズ > 1 には追加の Anlas 費用がかかります",
   "warmup_networkCheck": "ネットワーク接続を確認しています...",
   "warmup_networkCheck_noProxy": "NovelAI に接続できません。VPN またはプロキシ設定を有効にしてください",
   "warmup_networkCheck_noSystemProxy": "プロキシは有効ですが、システム プロキシが検出されませんでした。VPN を有効にしてください。",

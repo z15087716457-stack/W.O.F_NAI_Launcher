@@ -30,6 +30,7 @@ import 'package:nai_launcher/presentation/providers/style_explore/explore_run_ru
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/block_library_panel_slot.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/generation_controls/generate_button.dart';
 import 'package:nai_launcher/presentation/screens/style_explore/style_explore_screen.dart';
 
 /// 内存版 Run 存储（testWidgets 的 fakeAsync 区里 Hive 的异步写盘永不完成，
@@ -1277,10 +1278,9 @@ void main() {
           .runSpacing,
       greaterThan(0),
     );
-    expect(
-      find.byKey(const Key('generation-controls-compact-wrap')),
-      findsOneWidget,
-    );
+    // 生成控制条已改整条单排：极窄下整组等比缩小而不是换行。
+    expect(find.byType(GenerateButtonWithCost), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('candidate gallery cards toggle heart from the overlay button', (

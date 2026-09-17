@@ -9,13 +9,12 @@ import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart'
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
-import 'package:nai_launcher/presentation/screens/generation/widgets/generation_controls/batch_settings_button.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/generation_controls/generate_button.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_controls/generation_controls.dart';
-import 'package:nai_launcher/presentation/widgets/common/draggable_number_input.dart';
 import 'package:nai_launcher/presentation/widgets/generation/auto_save_toggle_chip.dart';
 
 void main() {
-  testWidgets('compact controls keep the auto-save toggle visible', (
+  testWidgets('compact web controls show only the full-width button', (
     tester,
   ) async {
     final storage = _MemoryLocalStorageService({
@@ -43,7 +42,11 @@ void main() {
             body: SizedBox(
               width: 400,
               height: 60,
-              child: GenerationControls(compact: true),
+              child: GenerationControls(
+                compact: true,
+                showBalanceChips: false,
+                showAutoSaveChip: false,
+              ),
             ),
           ),
         ),
@@ -51,20 +54,12 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byType(AutoSaveToggleChip), findsOneWidget);
-    expect(find.byType(DraggableNumberInput), findsOneWidget);
-    expect(find.byType(BatchSettingsButton), findsOneWidget);
-    expect(
-      tester
-          .widget<AutoSaveToggleChip>(find.byType(AutoSaveToggleChip))
-          .compact,
-      isTrue,
-    );
-    expect(find.text('自动保存'), findsOneWidget);
+    expect(find.byType(GenerateButtonWithCost), findsOneWidget);
+    expect(find.byType(AutoSaveToggleChip), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('explore controls show nSamples and hide batch size', (
+  testWidgets('explore controls keep the auto-save toggle visible', (
     tester,
   ) async {
     final storage = _MemoryLocalStorageService({
@@ -102,13 +97,19 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byType(DraggableNumberInput), findsOneWidget);
-    expect(find.byType(BatchSettingsButton), findsNothing);
+    expect(find.byType(GenerateButtonWithCost), findsOneWidget);
     expect(find.byType(AutoSaveToggleChip), findsOneWidget);
+    expect(
+      tester
+          .widget<AutoSaveToggleChip>(find.byType(AutoSaveToggleChip))
+          .compact,
+      isTrue,
+    );
+    expect(find.text('自动保存'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('very narrow compact controls wrap instead of overflowing', (
+  testWidgets('very narrow compact controls stay in a single row', (
     tester,
   ) async {
     final storage = _MemoryLocalStorageService({
@@ -145,11 +146,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(
-      find.byKey(const Key('generation-controls-compact-wrap')),
-      findsOneWidget,
-    );
-    expect(find.byType(AutoSaveToggleChip), findsOneWidget);
+    expect(find.byType(GenerateButtonWithCost), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
