@@ -177,15 +177,7 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // 尺寸设置置顶：不会被长提示词推走
-                        const SizeSection(),
-                        const SizedBox(height: 10),
-
-                        // 种子：位于尺寸与提示词之间
-                        const SeedSection(),
-                        const SizedBox(height: 10),
-
-                        // 提示词：随内容自由增高（官网式）
+                        // 提示词：随内容自由增高（官网式，视觉锚点置顶）
                         PromptInputWidget(
                           autoGrow: true,
                           showMaximizeButton: false,
@@ -205,6 +197,10 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                         const UnifiedReferencePanel(),
                         const SizedBox(height: 8),
                         const PreciseReferencePanel(),
+                        const SizedBox(height: 10),
+
+                        // 尺寸设置：低频控件下沉至滚动列末尾（官网 Layout A）
+                        const SizeSection(),
                       ],
                     ),
                   ),
@@ -260,7 +256,16 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.stretch,
                                     children: [
-                                      SamplerSection(),
+                                      // 种子与采样器同行（官网 AI Settings 式）
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(child: SeedSection()),
+                                          SizedBox(width: 10),
+                                          Expanded(child: SamplerSection()),
+                                        ],
+                                      ),
                                       SizedBox(height: 10),
                                       NoiseScheduleSection(),
                                       SizedBox(height: 10),
