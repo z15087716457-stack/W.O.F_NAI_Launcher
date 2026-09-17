@@ -54,8 +54,9 @@ NAI Launcher is a third-party client for NovelAI built with Flutter. It integrat
 
 Break prompts into reusable **blocks**: artist pools, quality tags, UC presets, and style strings are all blocks. A block library panel stays docked on the generation page — one tap inserts a block into the current prompt. Blocks render inline as highlighted pills, editable in place, and work identically in positive, negative, and character prompts.
 
-- **Three instance modes**: fixed output; sequential rotation; random draw with count range, Split-Beta weight distribution, and trigger probability — re-rolled per image in batch generation.
-- **Block manager**: folder-tree aggregation, multi-select bulk operations, custom colors and icons, TXT export; ships with 12 official NovelAI preset blocks.
+- **Three instance modes**: fixed output; sequential rotation (→ badge, in-card ←→ scene stepping); random draw with count range, Split-Beta weight distribution, and trigger probability — re-rolled per image in batch generation.
+- **Block manager**: dual-pane sidebar with folder tree + ⭐ favorite collections (draggable, persisted split), grid/list/masonry views grouped under sticky per-folder section headers, multi-select bulk operations, block thumbnails with crop framing, custom colors and icons, hover preview + detail panel, TXT export; ships with 12 official NovelAI preset blocks.
+- **Floating palette + docked block-library panel**: drag favorite blocks onto the 🎨 palette for one-tap insertion; the generation-page panel filters by folder subtree and keeps a draggable, persisted split.
 - **Per-instance locking and an "evolution target" DNA badge**: marks which blocks participate in mutation — the entry point for style exploration below.
 
 <p align="center">
