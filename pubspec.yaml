@@ -126,6 +126,7 @@ dependencies:
   flutter_inappwebview: ^6.1.5
   markdown: ^7.3.1
   flutter_markdown_plus: ^1.0.12
+  flutter_svg: ^2.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

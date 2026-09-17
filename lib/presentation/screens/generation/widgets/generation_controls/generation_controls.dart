@@ -32,12 +32,18 @@ class GenerationControls extends ConsumerStatefulWidget {
   /// 探索页只允许逐张请求，隐藏通用批量控件。
   final bool exploreMode;
 
+  /// 是否显示 Opus 额度 / Anlas 余额芯片。
+  /// 生成页左栏把这两个芯片挪到了头部条，传 false 关闭底栏渲染；
+  /// 画风探索页等其它调用方保持默认 true。
+  final bool showBalanceChips;
+
   const GenerationControls({
     super.key,
     this.compact = false,
     this.onGenerateInvoked,
     this.onBatchEvent,
     this.exploreMode = false,
+    this.showBalanceChips = true,
   });
 
   @override
@@ -133,11 +139,13 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const OpusUsageChip(
-                          compact: true,
-                          margin: EdgeInsets.only(right: 8),
-                        ),
-                        AnlasBalanceChip(estimatedCostOverride: costOverride),
+                        if (widget.showBalanceChips) ...[
+                          const OpusUsageChip(
+                            compact: true,
+                            margin: EdgeInsets.only(right: 8),
+                          ),
+                          AnlasBalanceChip(estimatedCostOverride: costOverride),
+                        ],
                       ],
                     ),
                   ),
@@ -165,19 +173,23 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                     alignment: Alignment.centerRight,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // 隐藏（V4）时 shrink 不占位，
-                          // 与余额芯片的 8 间距随自己的 margin 一起消失
-                          const OpusUsageChip(
-                            compact: true,
-                            margin: EdgeInsets.only(right: 8),
-                          ),
-                          AnlasBalanceChip(estimatedCostOverride: costOverride),
-                        ],
-                      ),
+                      child: widget.showBalanceChips
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // 隐藏（V4）时 shrink 不占位，
+                                // 与余额芯片的 8 间距随自己的 margin 一起消失
+                                const OpusUsageChip(
+                                  compact: true,
+                                  margin: EdgeInsets.only(right: 8),
+                                ),
+                                AnlasBalanceChip(
+                                  estimatedCostOverride: costOverride,
+                                ),
+                              ],
+                            )
+                          : const SizedBox.shrink(),
                     ),
                   ),
                 ),
@@ -238,17 +250,19 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
                       alignment: Alignment.centerRight,
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            AnlasBalanceChip(
-                              estimatedCostOverride: costOverride,
-                            ),
-                            const OpusUsageChip(
-                              margin: EdgeInsets.only(left: 8),
-                            ),
-                          ],
-                        ),
+                        child: widget.showBalanceChips
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  AnlasBalanceChip(
+                                    estimatedCostOverride: costOverride,
+                                  ),
+                                  const OpusUsageChip(
+                                    margin: EdgeInsets.only(left: 8),
+                                  ),
+                                ],
+                              )
+                            : const SizedBox.shrink(),
                       ),
                     ),
                   ),

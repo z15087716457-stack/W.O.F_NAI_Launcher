@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/utils/localization_extension.dart';
@@ -177,12 +178,13 @@ class AnlasBalanceChip extends ConsumerWidget {
   }
 
   Widget _buildIcon(ThemeData theme, bool? isWarning) {
-    return Icon(
-      Icons.diamond_outlined,
-      size: compact ? 15 : 16,
-      color: isWarning == true
-          ? theme.colorScheme.error
-          : theme.colorScheme.primary,
+    // 官方 Anlas 图标（SVG 素材自带金色填充）；余额不足时按警示色重着色
+    return SvgPicture.asset(
+      'assets/icons/nai-icon-anlas.svg',
+      height: compact ? 13 : 14,
+      colorFilter: isWarning == true
+          ? ColorFilter.mode(theme.colorScheme.error, BlendMode.srcIn)
+          : null,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -7,6 +8,8 @@ import '../../../../core/constants/api_constants.dart';
 import '../../../../data/models/image/image_params.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/layout_state_provider.dart';
+import '../../../widgets/anlas/anlas_balance_chip.dart';
+import '../../../widgets/anlas/opus_usage_chip.dart';
 import '../../../widgets/character/inline_character_section.dart';
 import 'collapsed_panel.dart';
 import 'generation_controls/generation_controls.dart';
@@ -139,15 +142,29 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
           ),
           child: Row(
             children: [
-              const SizedBox(width: 12),
-              Icon(
-                Icons.edit_note,
-                size: 18,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
               const SizedBox(width: 8),
-              // 模型选择常驻面板头部（官网式）：点击弹菜单切换
-              const Expanded(child: _ModelMenuButton()),
+              // 模型选择常驻面板头部（官网式）：点击弹菜单切换；
+              // Opus 额度 + Anlas 余额芯片随其后（自底栏上移，官网式）
+              const Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _ModelMenuButton(),
+                        OpusUsageChip(
+                          compact: true,
+                          margin: EdgeInsets.only(left: 8),
+                        ),
+                        SizedBox(width: 6),
+                        AnlasBalanceChip(compact: true),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               CollapseButton(
                 icon: Icons.chevron_left,
                 onTap: () => ref
@@ -304,7 +321,11 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
               top: BorderSide(color: theme.dividerColor, width: 1),
             ),
           ),
-          child: const GenerationControls(compact: true),
+          child: const GenerationControls(
+            compact: true,
+            // Opus/Anlas 芯片已上移到头部条，底栏不再渲染
+            showBalanceChips: false,
+          ),
         ),
       ],
     );
@@ -470,10 +491,13 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
               l10n.generation_seed,
               params.seed != -1
                   ? Text(params.seed.toString())
-                  : Icon(
-                      Icons.autorenew,
-                      size: 16,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  : SvgPicture.asset(
+                      'assets/icons/nai-icon-seed.svg',
+                      height: 14,
+                      colorFilter: ColorFilter.mode(
+                        theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        BlendMode.srcIn,
+                      ),
                     ),
               () {
                 final notifier =
@@ -502,12 +526,16 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
               ),
             ),
             const Spacer(),
-            // 右端箭头同样开合抽屉（与官网一致）
-            InkWell(
-              onTap: onToggleDrawer,
-              child: Padding(
-                padding: const EdgeInsets.all(6),
-                child: arrow,
+            // 右端箭头同样开合抽屉（与官网一致）；GestureDetector 无 hover/涟漪装饰
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onToggleDrawer,
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: arrow,
+                ),
               ),
             ),
             const SizedBox(width: 4),

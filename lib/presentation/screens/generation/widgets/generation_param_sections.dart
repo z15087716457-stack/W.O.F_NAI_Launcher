@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/utils/localization_extension.dart';
@@ -441,10 +442,13 @@ class _SeedSectionState extends ConsumerState<SeedSection> {
             if (seed == -1)
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Icon(
-                  Icons.autorenew,
-                  size: 18,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                child: SvgPicture.asset(
+                  'assets/icons/nai-icon-seed.svg',
+                  height: 16,
+                  colorFilter: ColorFilter.mode(
+                    theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                    BlendMode.srcIn,
+                  ),
                 ),
               )
             else
