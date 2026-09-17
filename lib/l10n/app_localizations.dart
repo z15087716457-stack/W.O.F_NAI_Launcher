@@ -17556,6 +17556,120 @@ abstract class AppLocalizations {
   /// **'Move to folder'**
   String get promptBlockLibrary_moveToFolder;
 
+  /// No description provided for @promptBlockLibrary_favorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get promptBlockLibrary_favorites;
+
+  /// No description provided for @promptBlockLibrary_unclassified.
+  ///
+  /// In en, this message translates to:
+  /// **'Unclassified'**
+  String get promptBlockLibrary_unclassified;
+
+  /// No description provided for @promptBlockLibrary_newCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'New collection'**
+  String get promptBlockLibrary_newCollection;
+
+  /// No description provided for @promptBlockLibrary_newSubcollection.
+  ///
+  /// In en, this message translates to:
+  /// **'New sub-collection'**
+  String get promptBlockLibrary_newSubcollection;
+
+  /// No description provided for @promptBlockLibrary_newCollectionFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'New collection folder'**
+  String get promptBlockLibrary_newCollectionFolder;
+
+  /// No description provided for @promptBlockLibrary_renameCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename collection'**
+  String get promptBlockLibrary_renameCollection;
+
+  /// No description provided for @promptBlockLibrary_renameCollectionFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename collection folder'**
+  String get promptBlockLibrary_renameCollectionFolder;
+
+  /// No description provided for @promptBlockLibrary_moveToFavoritesRoot.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to favorites root'**
+  String get promptBlockLibrary_moveToFavoritesRoot;
+
+  /// No description provided for @promptBlockLibrary_unnamedCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed collection'**
+  String get promptBlockLibrary_unnamedCollection;
+
+  /// No description provided for @promptBlockLibrary_unnamedCollectionFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed collection folder'**
+  String get promptBlockLibrary_unnamedCollectionFolder;
+
+  /// No description provided for @promptBlockLibrary_collectionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection name'**
+  String get promptBlockLibrary_collectionName;
+
+  /// No description provided for @promptBlockLibrary_collectionNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection name'**
+  String get promptBlockLibrary_collectionNameHint;
+
+  /// No description provided for @promptBlockLibrary_noCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'No collections yet — use the + next to Favorites, or drag a block onto a collection'**
+  String get promptBlockLibrary_noCollections;
+
+  /// No description provided for @promptBlockLibrary_noFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'No folders yet'**
+  String get promptBlockLibrary_noFolders;
+
+  /// No description provided for @promptBlockLibrary_favoriteMenuEmptyCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'No collections yet — create one next to Favorites in the sidebar'**
+  String get promptBlockLibrary_favoriteMenuEmptyCollections;
+
+  /// No description provided for @promptBlockLibrary_emptyFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorite blocks yet — tap the ★ on a block to favorite it'**
+  String get promptBlockLibrary_emptyFavorites;
+
+  /// No description provided for @promptBlockLibrary_emptyCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'This collection is empty'**
+  String get promptBlockLibrary_emptyCollection;
+
+  /// No description provided for @promptBlockLibrary_deleteCollectionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete collection \"{name}\"? Blocks inside are not deleted, only unlinked from the collection.'**
+  String promptBlockLibrary_deleteCollectionConfirm(String name);
+
+  /// No description provided for @promptBlockLibrary_deleteCollectionFolderConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete collection folder \"{name}\"? Its collections and sub-folders are deleted too; the blocks themselves are unaffected.'**
+  String promptBlockLibrary_deleteCollectionFolderConfirm(String name);
+
   /// No description provided for @promptBlockLibrary_blockTitle.
   ///
   /// In en, this message translates to:

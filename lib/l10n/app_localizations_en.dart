@@ -10048,6 +10048,72 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_moveToFolder => 'Move to folder';
 
   @override
+  String get promptBlockLibrary_favorites => 'Favorites';
+
+  @override
+  String get promptBlockLibrary_unclassified => 'Unclassified';
+
+  @override
+  String get promptBlockLibrary_newCollection => 'New collection';
+
+  @override
+  String get promptBlockLibrary_newSubcollection => 'New sub-collection';
+
+  @override
+  String get promptBlockLibrary_newCollectionFolder => 'New collection folder';
+
+  @override
+  String get promptBlockLibrary_renameCollection => 'Rename collection';
+
+  @override
+  String get promptBlockLibrary_renameCollectionFolder =>
+      'Rename collection folder';
+
+  @override
+  String get promptBlockLibrary_moveToFavoritesRoot => 'Move to favorites root';
+
+  @override
+  String get promptBlockLibrary_unnamedCollection => 'Unnamed collection';
+
+  @override
+  String get promptBlockLibrary_unnamedCollectionFolder =>
+      'Unnamed collection folder';
+
+  @override
+  String get promptBlockLibrary_collectionName => 'Collection name';
+
+  @override
+  String get promptBlockLibrary_collectionNameHint => 'Collection name';
+
+  @override
+  String get promptBlockLibrary_noCollections =>
+      'No collections yet — use the + next to Favorites, or drag a block onto a collection';
+
+  @override
+  String get promptBlockLibrary_noFolders => 'No folders yet';
+
+  @override
+  String get promptBlockLibrary_favoriteMenuEmptyCollections =>
+      'No collections yet — create one next to Favorites in the sidebar';
+
+  @override
+  String get promptBlockLibrary_emptyFavorites =>
+      'No favorite blocks yet — tap the ★ on a block to favorite it';
+
+  @override
+  String get promptBlockLibrary_emptyCollection => 'This collection is empty';
+
+  @override
+  String promptBlockLibrary_deleteCollectionConfirm(String name) {
+    return 'Delete collection \"$name\"? Blocks inside are not deleted, only unlinked from the collection.';
+  }
+
+  @override
+  String promptBlockLibrary_deleteCollectionFolderConfirm(String name) {
+    return 'Delete collection folder \"$name\"? Its collections and sub-folders are deleted too; the blocks themselves are unaffected.';
+  }
+
+  @override
   String get promptBlockLibrary_blockTitle => 'Title';
 
   @override

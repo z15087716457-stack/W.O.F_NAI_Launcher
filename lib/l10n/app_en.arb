@@ -5720,6 +5720,39 @@
   "promptBlockLibrary_renameFolder": "Rename folder",
   "promptBlockLibrary_moveToRoot": "Move to root",
   "promptBlockLibrary_moveToFolder": "Move to folder",
+  "promptBlockLibrary_favorites": "Favorites",
+  "promptBlockLibrary_unclassified": "Unclassified",
+  "promptBlockLibrary_newCollection": "New collection",
+  "promptBlockLibrary_newSubcollection": "New sub-collection",
+  "promptBlockLibrary_newCollectionFolder": "New collection folder",
+  "promptBlockLibrary_renameCollection": "Rename collection",
+  "promptBlockLibrary_renameCollectionFolder": "Rename collection folder",
+  "promptBlockLibrary_moveToFavoritesRoot": "Move to favorites root",
+  "promptBlockLibrary_unnamedCollection": "Unnamed collection",
+  "promptBlockLibrary_unnamedCollectionFolder": "Unnamed collection folder",
+  "promptBlockLibrary_collectionName": "Collection name",
+  "promptBlockLibrary_collectionNameHint": "Collection name",
+  "promptBlockLibrary_noCollections": "No collections yet — use the + next to Favorites, or drag a block onto a collection",
+  "promptBlockLibrary_noFolders": "No folders yet",
+  "promptBlockLibrary_favoriteMenuEmptyCollections": "No collections yet — create one next to Favorites in the sidebar",
+  "promptBlockLibrary_emptyFavorites": "No favorite blocks yet — tap the ★ on a block to favorite it",
+  "promptBlockLibrary_emptyCollection": "This collection is empty",
+  "promptBlockLibrary_deleteCollectionConfirm": "Delete collection \"{name}\"? Blocks inside are not deleted, only unlinked from the collection.",
+  "@promptBlockLibrary_deleteCollectionConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "promptBlockLibrary_deleteCollectionFolderConfirm": "Delete collection folder \"{name}\"? Its collections and sub-folders are deleted too; the blocks themselves are unaffected.",
+  "@promptBlockLibrary_deleteCollectionFolderConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "promptBlockLibrary_blockTitle": "Title",
   "promptBlockLibrary_titleHint": "Block title",
   "promptBlockLibrary_folder": "Folder",

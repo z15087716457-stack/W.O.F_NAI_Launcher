@@ -59,6 +59,8 @@ class StorageKeys {
   static const String blockLibraryPanelExpanded =
       'block_library_panel_expanded';
   static const String blockLibraryPanelWidth = 'block_library_panel_width';
+  static const String blockLibraryPanelBlocksSplit =
+      'block_library_panel_blocks_split';
   static const String styleExploreRunSidebarWidth =
       'style_explore_run_sidebar_width';
   static const String styleExploreRunSidebarVisible =
@@ -197,6 +199,10 @@ class StorageKeys {
   /// 提示词块管理页内容排序是否倒序。
   static const String promptBlockLibrarySortDescending =
       'prompt_block_library_sort_descending';
+
+  /// 块库侧栏收藏区与文件夹区的高度分割比例（0.2~0.8，默认 0.4）
+  static const String promptBlockSidebarFavoritesSplit =
+      'prompt_block_sidebar_favorites_split';
 
   /// 在线画廊逻辑列宽（px，140~480，默认 200）
   static const String onlineGalleryColumnWidth = 'online_gallery_column_width';

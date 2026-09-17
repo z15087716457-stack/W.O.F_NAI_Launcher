@@ -3,20 +3,28 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/models/prompt_block/prompt_block.dart';
+import '../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../core/storage/prompt_block_storage.dart';
 import 'prompt_block_library_provider.dart';
 
 part 'prompt_block_palette_provider.g.dart';
 
-/// 颜料版状态：按用户排序解析后的块列表。
+/// 颜料版状态：按用户排序解析后的块列表 + 库文件夹快照
+/// （供悬停预览显示块所在路径，复用现有 library 依赖边）。
 ///
 /// 板上只存块 ID 引用（不拷贝内容），解析时对库做一次 join——库里
 /// 改块内容后板上自动跟随；指向已删块的 ID 在解析时被修剪并回写。
 class PromptBlockPaletteState {
-  PromptBlockPaletteState({required List<PromptBlock> blocks})
-    : blocks = List.unmodifiable(blocks);
+  PromptBlockPaletteState({
+    required List<PromptBlock> blocks,
+    List<PromptBlockFolder> folders = const [],
+  }) : blocks = List.unmodifiable(blocks),
+       folders = List.unmodifiable(folders);
 
   final List<PromptBlock> blocks;
+
+  /// 库文件夹快照（随库 provider 重建同步刷新）。
+  final List<PromptBlockFolder> folders;
 
   bool get isEmpty => blocks.isEmpty;
 
@@ -48,7 +56,7 @@ class PromptBlockPaletteNotifier extends _$PromptBlockPaletteNotifier {
     if (liveIds.length != ids.length) {
       unawaited(_storage.putPaletteBlockIds(liveIds));
     }
-    return PromptBlockPaletteState(blocks: resolved);
+    return PromptBlockPaletteState(blocks: resolved, folders: library.folders);
   }
 
   /// 收纳一个块（幂等：同块只收一次）。

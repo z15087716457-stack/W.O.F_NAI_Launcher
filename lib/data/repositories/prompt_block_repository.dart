@@ -1,4 +1,5 @@
 import '../models/prompt_block/prompt_block.dart';
+import '../models/prompt_block/prompt_block_collection.dart';
 import '../models/prompt_block/prompt_block_folder.dart';
 import '../../core/storage/prompt_block_storage.dart';
 
@@ -10,11 +11,14 @@ class PromptBlockLibraryData {
   PromptBlockLibraryData({
     required List<PromptBlock> blocks,
     required List<PromptBlockFolder> folders,
+    List<PromptBlockCollection>? collections,
   }) : blocks = List.unmodifiable(blocks),
-       folders = List.unmodifiable(folders);
+       folders = List.unmodifiable(folders),
+       collections = List.unmodifiable(collections ?? const []);
 
   final List<PromptBlock> blocks;
   final List<PromptBlockFolder> folders;
+  final List<PromptBlockCollection> collections;
 
   PromptBlock? getBlock(String id) {
     for (final block in blocks) {
@@ -26,6 +30,13 @@ class PromptBlockLibraryData {
   PromptBlockFolder? getFolder(String id) {
     for (final folder in folders) {
       if (folder.id == id) return folder;
+    }
+    return null;
+  }
+
+  PromptBlockCollection? getCollection(String id) {
+    for (final collection in collections) {
+      if (collection.id == id) return collection;
     }
     return null;
   }
@@ -49,15 +60,17 @@ class PromptBlockRepository {
 
   final PromptBlockStorage _storage;
 
-  /// 读取块和文件夹的当前快照。
+  /// 读取块、文件夹和收藏集树的当前快照。
   Future<PromptBlockLibraryData> load() async {
     final results = await Future.wait([
       _storage.getBlocks(),
       _storage.getFolders(),
+      _storage.getCollections(),
     ]);
     return PromptBlockLibraryData(
       blocks: results[0] as List<PromptBlock>,
       folders: results[1] as List<PromptBlockFolder>,
+      collections: results[2] as List<PromptBlockCollection>,
     );
   }
 
@@ -136,8 +149,11 @@ class PromptBlockRepository {
     );
   }
 
-  /// 删除块；不存在时保持幂等。
-  Future<void> deleteBlock(String blockId) => _storage.deleteBlock(blockId);
+  /// 删除块；不存在时保持幂等。顺带从所有收藏集成员列表中修剪该 ID。
+  Future<void> deleteBlock(String blockId) async {
+    await _storage.deleteBlock(blockId);
+    await _pruneBlocksFromCollections({blockId});
+  }
 
   /// 批量写入导入的块，保留给定实体的 ID、时间戳和来源字段。
   ///
@@ -285,6 +301,9 @@ class PromptBlockRepository {
     switch (mode) {
       case PromptBlockFolderDeleteMode.deleteContents:
         await _storage.deleteBlocks(affectedBlocks.map((block) => block.id));
+        await _pruneBlocksFromCollections(
+          affectedBlocks.map((block) => block.id).toSet(),
+        );
       case PromptBlockFolderDeleteMode.moveContentsToRoot:
       case PromptBlockFolderDeleteMode.moveContentsToFolder:
         final destinationSiblings = blocks
@@ -309,6 +328,189 @@ class PromptBlockRepository {
     }
 
     await _storage.deleteFolders(folderIds);
+  }
+
+  // ==================== 收藏集 / 收藏文件夹 ====================
+
+  /// 创建收藏集（[isFolder]=false）或收藏文件夹（=true），自动取同级
+  /// 下一个排序值。[parentId] 非空时必须指向一个收藏文件夹。
+  Future<PromptBlockCollection> createCollection({
+    required String name,
+    String? parentId,
+    bool isFolder = false,
+    int? sortOrder,
+  }) async {
+    await _ensureCollectionParentExists(parentId);
+    final collections = await _storage.getCollections();
+    final collection = PromptBlockCollection.create(
+      name: name,
+      parentId: parentId,
+      isFolder: isFolder,
+      sortOrder: sortOrder ?? _nextCollectionSortOrder(collections, parentId),
+    );
+    await _storage.putCollection(collection);
+    return collection;
+  }
+
+  /// 更新收藏集 / 收藏文件夹；父级变更会检查存在性与循环引用。
+  Future<PromptBlockCollection> updateCollection(
+    PromptBlockCollection collection,
+  ) async {
+    final existing = await _storage.getCollection(collection.id);
+    if (existing == null) {
+      throw StateError(
+        'Prompt block collection does not exist: ${collection.id}',
+      );
+    }
+    if (collection.parentId != existing.parentId) {
+      await _ensureCollectionParentExists(collection.parentId);
+      final collections = await _storage.getCollections();
+      if (collections.wouldCreateCycle(collection.id, collection.parentId)) {
+        throw ArgumentError(
+          'Moving a Prompt block collection would create a cycle',
+        );
+      }
+    }
+
+    final updated = collection.copyWith(
+      name: collection.name.trim(),
+      updatedAt: DateTime.now(),
+    );
+    await _storage.putCollection(updated);
+    return updated;
+  }
+
+  /// 移动收藏集 / 收藏文件夹到新父级（null=收藏区根级）；
+  /// 禁止移动到自身或后代。
+  Future<PromptBlockCollection> moveCollection(
+    String collectionId,
+    String? newParentId,
+  ) async {
+    final collection = await _storage.getCollection(collectionId);
+    if (collection == null) {
+      throw StateError('Prompt block collection does not exist: $collectionId');
+    }
+    return updateCollection(collection.copyWith(parentId: newParentId));
+  }
+
+  /// 同级重排收藏集 / 收藏文件夹（混合排序）。传入的 ID 必须完整覆盖
+  /// 该层级的直属节点。
+  Future<void> reorderCollections(
+    String? parentId,
+    List<String> orderedIds,
+  ) async {
+    final collections = await _storage.getCollections();
+    final siblings = collections.childrenOf(parentId);
+    _validateCompleteOrder(
+      expectedIds: siblings.map((node) => node.id),
+      actualIds: orderedIds,
+      kind: 'Prompt block collection',
+    );
+
+    final byId = <String, PromptBlockCollection>{
+      for (final node in siblings) node.id: node,
+    };
+    final now = DateTime.now();
+    await _storage.putCollections(
+      orderedIds.asMap().entries.map(
+        (entry) =>
+            byId[entry.value]!.copyWith(sortOrder: entry.key, updatedAt: now),
+      ),
+    );
+  }
+
+  /// 删除收藏集或收藏文件夹。删除文件夹会连带删除整棵子树
+  /// （子文件夹 + 其中收藏集）；成员块本体不受影响，仅解除成员关系。
+  Future<void> deleteCollection(String collectionId) async {
+    final collections = await _storage.getCollections();
+    final target = collections
+        .where((node) => node.id == collectionId)
+        .firstOrNull;
+    if (target == null) return;
+
+    final ids = <String>{
+      collectionId,
+      ...collections.getDescendantIds(collectionId),
+    };
+    await _storage.deleteCollections(ids);
+  }
+
+  /// 切换块在收藏集中的成员关系，返回切换后的成员状态。
+  /// 加入收藏集时顺带把块标记为已收藏（入集即收藏）；
+  /// 移出收藏集不动收藏旗标。
+  Future<bool> toggleBlockInCollection(
+    String collectionId,
+    String blockId,
+  ) async {
+    final collection = await _storage.getCollection(collectionId);
+    if (collection == null || collection.isFolder) {
+      throw StateError('Prompt block collection does not exist: $collectionId');
+    }
+    final block = await _storage.getBlock(blockId);
+    if (block == null) {
+      throw StateError('Prompt block does not exist: $blockId');
+    }
+
+    final members = [...collection.blockIds];
+    final nowMember = !members.remove(blockId);
+    if (nowMember) members.add(blockId);
+    await _storage.putCollection(
+      collection.copyWith(blockIds: members, updatedAt: DateTime.now()),
+    );
+    if (nowMember && !block.isFavorite) {
+      await updateBlock(block.copyWith(isFavorite: true));
+    }
+    return nowMember;
+  }
+
+  /// 块当前所在的收藏集 ID 集合（不含收藏文件夹）。
+  Set<String> collectionIdsOfBlock(
+    String blockId,
+    List<PromptBlockCollection> collections,
+  ) {
+    return {
+      for (final node in collections)
+        if (!node.isFolder && node.blockIds.contains(blockId)) node.id,
+    };
+  }
+
+  /// 从所有收藏集成员列表中修剪给定块 ID。
+  Future<void> _pruneBlocksFromCollections(Set<String> blockIds) async {
+    if (blockIds.isEmpty) return;
+    final collections = await _storage.getCollections();
+    final dirty = <PromptBlockCollection>[];
+    final now = DateTime.now();
+    for (final node in collections) {
+      if (node.isFolder || node.blockIds.isEmpty) continue;
+      final remaining = node.blockIds
+          .where((id) => !blockIds.contains(id))
+          .toList();
+      if (remaining.length != node.blockIds.length) {
+        dirty.add(node.copyWith(blockIds: remaining, updatedAt: now));
+      }
+    }
+    if (dirty.isNotEmpty) await _storage.putCollections(dirty);
+  }
+
+  Future<void> _ensureCollectionParentExists(String? parentId) async {
+    if (parentId == null) return;
+    final parent = await _storage.getCollection(parentId);
+    if (parent == null || !parent.isFolder) {
+      throw ArgumentError(
+        'Prompt block collection folder does not exist: $parentId',
+      );
+    }
+  }
+
+  int _nextCollectionSortOrder(
+    List<PromptBlockCollection> collections,
+    String? parentId,
+  ) {
+    var maximum = -1;
+    for (final node in collections.where((node) => node.parentId == parentId)) {
+      if (node.sortOrder > maximum) maximum = node.sortOrder;
+    }
+    return maximum + 1;
   }
 
   Future<void> _ensureFolderExists(String? folderId) async {

@@ -5720,6 +5720,39 @@
   "promptBlockLibrary_renameFolder": "重命名文件夹",
   "promptBlockLibrary_moveToRoot": "移到根目录",
   "promptBlockLibrary_moveToFolder": "移动到文件夹",
+  "promptBlockLibrary_favorites": "收藏",
+  "promptBlockLibrary_unclassified": "未分类",
+  "promptBlockLibrary_newCollection": "新建收藏集",
+  "promptBlockLibrary_newSubcollection": "新建子收藏集",
+  "promptBlockLibrary_newCollectionFolder": "新建收藏文件夹",
+  "promptBlockLibrary_renameCollection": "重命名收藏集",
+  "promptBlockLibrary_renameCollectionFolder": "重命名收藏文件夹",
+  "promptBlockLibrary_moveToFavoritesRoot": "移到收藏区根级",
+  "promptBlockLibrary_unnamedCollection": "未命名收藏集",
+  "promptBlockLibrary_unnamedCollectionFolder": "未命名收藏文件夹",
+  "promptBlockLibrary_collectionName": "收藏集名称",
+  "promptBlockLibrary_collectionNameHint": "收藏集名称",
+  "promptBlockLibrary_noCollections": "还没有收藏集 —— 点「收藏」行旁的 + 新建，或把块拖到收藏集上",
+  "promptBlockLibrary_noFolders": "还没有文件夹",
+  "promptBlockLibrary_favoriteMenuEmptyCollections": "还没有收藏集，可在侧栏「收藏」旁新建",
+  "promptBlockLibrary_emptyFavorites": "还没有收藏的块，点块上的 ★ 即可收藏",
+  "promptBlockLibrary_emptyCollection": "该收藏集为空",
+  "promptBlockLibrary_deleteCollectionConfirm": "确定要删除收藏集「{name}」吗？其中的块不会被删除，只会移出该收藏集。",
+  "@promptBlockLibrary_deleteCollectionConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "promptBlockLibrary_deleteCollectionFolderConfirm": "确定要删除收藏文件夹「{name}」吗？其中的收藏集与子文件夹会一并删除，块本体不受影响。",
+  "@promptBlockLibrary_deleteCollectionFolderConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "promptBlockLibrary_blockTitle": "标题",
   "promptBlockLibrary_titleHint": "块标题",
   "promptBlockLibrary_folder": "文件夹",

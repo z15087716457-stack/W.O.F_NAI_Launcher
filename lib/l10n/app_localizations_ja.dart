@@ -9825,6 +9825,70 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_moveToFolder => 'フォルダーへ移動';
 
   @override
+  String get promptBlockLibrary_favorites => 'お気に入り';
+
+  @override
+  String get promptBlockLibrary_unclassified => '未分類';
+
+  @override
+  String get promptBlockLibrary_newCollection => 'コレクションを作成';
+
+  @override
+  String get promptBlockLibrary_newSubcollection => 'サブコレクションを作成';
+
+  @override
+  String get promptBlockLibrary_newCollectionFolder => 'コレクションフォルダーを作成';
+
+  @override
+  String get promptBlockLibrary_renameCollection => 'コレクション名を変更';
+
+  @override
+  String get promptBlockLibrary_renameCollectionFolder => 'コレクションフォルダー名を変更';
+
+  @override
+  String get promptBlockLibrary_moveToFavoritesRoot => 'コレクションのルートへ移動';
+
+  @override
+  String get promptBlockLibrary_unnamedCollection => '無題のコレクション';
+
+  @override
+  String get promptBlockLibrary_unnamedCollectionFolder => '無題のコレクションフォルダー';
+
+  @override
+  String get promptBlockLibrary_collectionName => 'コレクション名';
+
+  @override
+  String get promptBlockLibrary_collectionNameHint => 'コレクション名';
+
+  @override
+  String get promptBlockLibrary_noCollections =>
+      'コレクションはまだありません —「お気に入り」行の + から作成するか、ブロックをコレクションへドラッグしてください';
+
+  @override
+  String get promptBlockLibrary_noFolders => 'フォルダーはまだありません';
+
+  @override
+  String get promptBlockLibrary_favoriteMenuEmptyCollections =>
+      'コレクションはまだありません。サイドバーの「お気に入り」から作成できます';
+
+  @override
+  String get promptBlockLibrary_emptyFavorites =>
+      'お気に入りのブロックはまだありません。ブロックの ★ で登録できます';
+
+  @override
+  String get promptBlockLibrary_emptyCollection => 'このコレクションは空です';
+
+  @override
+  String promptBlockLibrary_deleteCollectionConfirm(String name) {
+    return 'コレクション「$name」を削除しますか？中のブロックは削除されず、コレクションから外れるだけです。';
+  }
+
+  @override
+  String promptBlockLibrary_deleteCollectionFolderConfirm(String name) {
+    return 'コレクションフォルダー「$name」を削除しますか？中のコレクションとサブフォルダーも削除されますが、ブロック本体には影響しません。';
+  }
+
+  @override
   String get promptBlockLibrary_blockTitle => 'タイトル';
 
   @override

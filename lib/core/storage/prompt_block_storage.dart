@@ -7,6 +7,7 @@ import 'base_hive_storage.dart';
 import '../utils/app_logger.dart';
 import '../utils/hive_startup_box_opener.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
+import '../../data/models/prompt_block/prompt_block_collection.dart';
 import '../../data/models/prompt_block/prompt_block_folder.dart';
 
 /// 全局 Prompt 块库的 Hive 存储层。
@@ -20,6 +21,7 @@ class PromptBlockStorage {
 
   static const String _blockPrefix = 'block:';
   static const String _folderPrefix = 'folder:';
+  static const String _collectionPrefix = 'collection:';
   static const String _metaPrefix = 'meta:';
   static const String _paletteKey = 'palette:order';
 
@@ -224,6 +226,62 @@ class PromptBlockStorage {
     if (keys.isNotEmpty) await box.deleteAll(keys);
   }
 
+  /// 读取全部收藏集 / 收藏文件夹；单条损坏记录会被跳过。
+  Future<List<PromptBlockCollection>> getCollections() async {
+    final box = await _getBox();
+    final collections = <PromptBlockCollection>[];
+    for (final key in _keysWithPrefix(box, _collectionPrefix)) {
+      final collection = await _readEntity(
+        box,
+        key,
+        PromptBlockCollection.fromJson,
+      );
+      if (collection != null) collections.add(collection);
+    }
+    collections.sort(_comparePromptBlockCollections);
+    return collections;
+  }
+
+  /// 读取单个收藏集 / 收藏文件夹。
+  Future<PromptBlockCollection?> getCollection(String id) async {
+    final box = await _getBox();
+    return _readEntity(box, collectionKey(id), PromptBlockCollection.fromJson);
+  }
+
+  /// 保存或覆盖单个收藏集 / 收藏文件夹。
+  Future<void> putCollection(PromptBlockCollection collection) async {
+    final box = await _getBox();
+    await box.put(
+      collectionKey(collection.id),
+      jsonEncode(collection.toJson()),
+    );
+  }
+
+  /// 批量保存收藏集 / 收藏文件夹。
+  Future<void> putCollections(
+    Iterable<PromptBlockCollection> collections,
+  ) async {
+    final box = await _getBox();
+    final values = <String, String>{
+      for (final collection in collections)
+        collectionKey(collection.id): jsonEncode(collection.toJson()),
+    };
+    if (values.isNotEmpty) await box.putAll(values);
+  }
+
+  /// 删除单个收藏集 / 收藏文件夹；不存在时保持幂等。
+  Future<void> deleteCollection(String id) async {
+    final box = await _getBox();
+    await box.delete(collectionKey(id));
+  }
+
+  /// 批量删除收藏集 / 收藏文件夹。
+  Future<void> deleteCollections(Iterable<String> ids) async {
+    final box = await _getBox();
+    final keys = ids.map(collectionKey).toList();
+    if (keys.isNotEmpty) await box.deleteAll(keys);
+  }
+
   /// 清空块库并重新写入 schema。仅供明确的库级清理或测试使用。
   Future<void> clear() async {
     final box = await _getBox();
@@ -281,6 +339,7 @@ class PromptBlockStorage {
 
   static String blockKey(String id) => '$_blockPrefix$id';
   static String folderKey(String id) => '$_folderPrefix$id';
+  static String collectionKey(String id) => '$_collectionPrefix$id';
 
   Iterable<String> _keysWithPrefix(Box<String> box, String prefix) {
     return box.keys.whereType<String>().where((key) => key.startsWith(prefix));
@@ -321,6 +380,18 @@ int _comparePromptBlocks(PromptBlock a, PromptBlock b) {
 }
 
 int _comparePromptBlockFolders(PromptBlockFolder a, PromptBlockFolder b) {
+  final parentComparison = _compareNullableStrings(a.parentId, b.parentId);
+  if (parentComparison != 0) return parentComparison;
+
+  final orderComparison = a.sortOrder.compareTo(b.sortOrder);
+  if (orderComparison != 0) return orderComparison;
+  return a.id.compareTo(b.id);
+}
+
+int _comparePromptBlockCollections(
+  PromptBlockCollection a,
+  PromptBlockCollection b,
+) {
   final parentComparison = _compareNullableStrings(a.parentId, b.parentId);
   if (parentComparison != 0) return parentComparison;
 

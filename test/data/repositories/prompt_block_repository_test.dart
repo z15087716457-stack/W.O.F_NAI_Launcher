@@ -212,4 +212,139 @@ void main() {
       expect(blocks.map((block) => block.id), [valid.id]);
     },
   );
+
+  group('collections', () {
+    test('create assigns sibling sort order and requires folder parent', () async {
+      final first = await repository.createCollection(name: '集一');
+      final second = await repository.createCollection(name: '集二');
+      // 收藏文件夹与收藏集在根级混合排序
+      final folder = await repository.createCollection(
+        name: '收藏夹',
+        isFolder: true,
+      );
+      final child = await repository.createCollection(
+        name: '子集',
+        parentId: folder.id,
+      );
+
+      expect(first.sortOrder, 0);
+      expect(second.sortOrder, 1);
+      expect(folder.sortOrder, 2);
+      expect(child.sortOrder, 0);
+      expect(child.parentId, folder.id);
+      expect(
+        () => repository.createCollection(name: 'x', parentId: first.id),
+        throwsArgumentError,
+      );
+    });
+
+    test('moveCollection rejects cycles', () async {
+      final outer = await repository.createCollection(
+        name: '外',
+        isFolder: true,
+      );
+      final inner = await repository.createCollection(
+        name: '内',
+        parentId: outer.id,
+        isFolder: true,
+      );
+
+      expect(
+        () => repository.moveCollection(outer.id, inner.id),
+        throwsArgumentError,
+      );
+      final moved = await repository.moveCollection(inner.id, null);
+      expect(moved.parentId, isNull);
+    });
+
+    test('reorderCollections renumbers only the requested layer', () async {
+      final folder = await repository.createCollection(
+        name: '夹',
+        isFolder: true,
+      );
+      final a = await repository.createCollection(name: 'a');
+      final b = await repository.createCollection(name: 'b');
+      final inside = await repository.createCollection(
+        name: 'inside',
+        parentId: folder.id,
+      );
+
+      // 重排需完整覆盖该层全部同级（含收藏文件夹）
+      await repository.reorderCollections(null, [b.id, a.id, folder.id]);
+
+      final data = await repository.load();
+      expect(data.getCollection(b.id)?.sortOrder, 0);
+      expect(data.getCollection(a.id)?.sortOrder, 1);
+      expect(data.getCollection(folder.id)?.sortOrder, 2);
+      // 其他层级不受影响
+      expect(data.getCollection(inside.id)?.sortOrder, 0);
+      expect(
+        () => repository.reorderCollections(null, [a.id]),
+        throwsArgumentError,
+      );
+    });
+
+    test('toggleBlockInCollection adds membership and auto-favorites', () async {
+      final collection = await repository.createCollection(name: '集');
+      final block = await repository.createBlock(title: 'b', content: 'c');
+
+      expect(await repository.toggleBlockInCollection(collection.id, block.id), isTrue);
+      var data = await repository.load();
+      expect(data.getCollection(collection.id)?.blockIds, [block.id]);
+      expect(data.getBlock(block.id)?.isFavorite, isTrue);
+
+      // 移出收藏集不动收藏旗标
+      expect(await repository.toggleBlockInCollection(collection.id, block.id), isFalse);
+      data = await repository.load();
+      expect(data.getCollection(collection.id)?.blockIds, isEmpty);
+      expect(data.getBlock(block.id)?.isFavorite, isTrue);
+
+      // 收藏文件夹不能装成员
+      final folder = await repository.createCollection(
+        name: '夹',
+        isFolder: true,
+      );
+      expect(
+        () => repository.toggleBlockInCollection(folder.id, block.id),
+        throwsStateError,
+      );
+    });
+
+    test('deleteCollection removes subtree but keeps member blocks', () async {
+      final folder = await repository.createCollection(
+        name: '夹',
+        isFolder: true,
+      );
+      final child = await repository.createCollection(
+        name: '子集',
+        parentId: folder.id,
+      );
+      final block = await repository.createBlock(title: 'b', content: 'c');
+      await repository.toggleBlockInCollection(child.id, block.id);
+
+      await repository.deleteCollection(folder.id);
+
+      final data = await repository.load();
+      expect(data.getCollection(folder.id), isNull);
+      expect(data.getCollection(child.id), isNull);
+      // 块本体不动
+      expect(data.getBlock(block.id), isNotNull);
+      // 删不存在的节点幂等
+      await repository.deleteCollection('missing');
+    });
+
+    test('deleteBlock prunes membership from every collection', () async {
+      final a = await repository.createCollection(name: 'a');
+      final b = await repository.createCollection(name: 'b');
+      final block = await repository.createBlock(title: 'x', content: 'y');
+      await repository.toggleBlockInCollection(a.id, block.id);
+      await repository.toggleBlockInCollection(b.id, block.id);
+
+      await repository.deleteBlock(block.id);
+
+      final data = await repository.load();
+      expect(data.getCollection(a.id)?.blockIds, isEmpty);
+      expect(data.getCollection(b.id)?.blockIds, isEmpty);
+    });
+  });
 }

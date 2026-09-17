@@ -7,6 +7,7 @@ import '../../core/storage/prompt_block_storage.dart';
 import '../../core/utils/prompt_block_exchange.dart';
 import '../../core/utils/prompt_block_thumbnails.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
+import '../../data/models/prompt_block/prompt_block_collection.dart';
 import '../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../data/repositories/prompt_block_repository.dart';
 import '../../data/services/fixed_tag_migration_service.dart';
@@ -19,11 +20,16 @@ class PromptBlockLibraryState {
   PromptBlockLibraryState({
     required List<PromptBlock> blocks,
     required List<PromptBlockFolder> folders,
+    List<PromptBlockCollection>? collections,
   }) : blocks = List.unmodifiable(blocks),
-       folders = List.unmodifiable(folders);
+       folders = List.unmodifiable(folders),
+       collections = List.unmodifiable(collections ?? const []);
 
   final List<PromptBlock> blocks;
   final List<PromptBlockFolder> folders;
+
+  /// 收藏集树（收藏集 + 收藏文件夹混合，parentId 挂接成树）。
+  final List<PromptBlockCollection> collections;
 
   /// 获取指定文件夹内的直属块。
   List<PromptBlock> blocksInFolder(String? folderId) =>
@@ -72,6 +78,88 @@ class PromptBlockLibraryState {
   List<PromptBlockFolder> foldersIn(String? parentId) =>
       folders.childrenOf(parentId);
 
+  /// 获取指定父级（null=收藏区根级）的直属收藏节点。
+  List<PromptBlockCollection> collectionsIn(String? parentId) =>
+      collections.childrenOf(parentId);
+
+  PromptBlockCollection? collectionById(String id) {
+    for (final node in collections) {
+      if (node.id == id) return node;
+    }
+    return null;
+  }
+
+  /// 块当前所在的收藏集 ID 集合（不含收藏文件夹）。
+  Set<String> collectionIdsOfBlock(String blockId) {
+    return {
+      for (final node in collections)
+        if (!node.isFolder && node.blockIds.contains(blockId)) node.id,
+    };
+  }
+
+  /// 收藏节点的可见块：收藏集 = 成员列表序（过滤已删除块）；
+  /// 收藏文件夹 = 子树内全部收藏集成员的并集（按库内文件夹序排列）。
+  List<PromptBlock> blocksInCollectionTree(String nodeId) {
+    final node = collectionById(nodeId);
+    if (node == null) return const [];
+    if (!node.isFolder) {
+      final byId = {for (final block in blocks) block.id: block};
+      return [
+        for (final blockId in node.blockIds)
+          if (byId[blockId] case final block?) block,
+      ];
+    }
+    final memberIds = <String>{};
+    final subtreeIds = <String>{
+      nodeId,
+      ...collections.getDescendantIds(nodeId),
+    };
+    for (final child in collections) {
+      if (child.isFolder || !subtreeIds.contains(child.id)) continue;
+      memberIds.addAll(child.blockIds);
+    }
+    return blocks.where((block) => memberIds.contains(block.id)).toList();
+  }
+
+  /// 收藏文件夹的子树成员数（子孙收藏集成员的并集去重），供侧栏计数。
+  int collectionTreeBlockCount(String nodeId) {
+    return blocksInCollectionTree(nodeId).length;
+  }
+
+  /// 收藏集树的 DFS 顺序 id 列表（同级按用户排序，逐层下钻），
+  /// 供扁平化展示（窄布局下拉框等）使用。
+  List<String> collectionTreeOrder() {
+    final order = <String>[];
+
+    void visit(String? parentId) {
+      for (final node in collections.childrenOf(parentId)) {
+        order.add(node.id);
+        visit(node.id);
+      }
+    }
+
+    visit(null);
+    return order;
+  }
+
+  /// 文件夹的根→当前路径名（`A / B / C`），用于分段标题与扁平展示。
+  String folderPath(String folderId) {
+    try {
+      return folders.getPath(folderId).map((folder) => folder.name).join(' / ');
+    } on Object {
+      return folderId;
+    }
+  }
+
+  /// 收藏节点的根→节点路径名（`A / B / C`），用于扁平展示。
+  String collectionPath(String nodeId) {
+    try {
+      return collections.getPath(nodeId).map((node) => node.name).join(' / ');
+    } on Object {
+      return nodeId;
+    }
+  }
+
   PromptBlock? blockById(String id) {
     for (final block in blocks) {
       if (block.id == id) return block;
@@ -111,7 +199,11 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
       localStorage: ref.watch(localStorageServiceProvider),
     ).run();
     final data = await ref.watch(promptBlockRepositoryProvider).load();
-    return PromptBlockLibraryState(blocks: data.blocks, folders: data.folders);
+    return PromptBlockLibraryState(
+      blocks: data.blocks,
+      folders: data.folders,
+      collections: data.collections,
+    );
   }
 
   /// 重新从 Hive 读取块库。
@@ -181,6 +273,7 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
               block.id == blockId ? updated : block,
           ],
           folders: current.folders,
+          collections: current.collections,
         ),
       );
     } catch (_) {
@@ -286,6 +379,65 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
 
   Future<void> reorderFolders(String? parentId, List<String> orderedIds) =>
       _mutate((repository) => repository.reorderFolders(parentId, orderedIds));
+
+  // ==================== 收藏集 ====================
+
+  /// 创建收藏集（[isFolder]=false）或收藏文件夹（=true）。
+  /// [parentId] 非空时必须指向一个收藏文件夹。
+  Future<PromptBlockCollection> createCollection({
+    required String name,
+    String? parentId,
+    bool isFolder = false,
+  }) {
+    return _mutate(
+      (repository) => repository.createCollection(
+        name: name,
+        parentId: parentId,
+        isFolder: isFolder,
+      ),
+    );
+  }
+
+  /// 重命名收藏集 / 收藏文件夹。
+  Future<PromptBlockCollection> renameCollection(
+    String collectionId,
+    String name,
+  ) async {
+    final existing = state.valueOrNull?.collectionById(collectionId);
+    if (existing == null) {
+      throw StateError('Prompt block collection does not exist: $collectionId');
+    }
+    return _mutate(
+      (repository) =>
+          repository.updateCollection(existing.copyWith(name: name)),
+    );
+  }
+
+  /// 移动收藏集 / 收藏文件夹到新父级（null=收藏区根级）。
+  Future<PromptBlockCollection> moveCollection(
+    String collectionId,
+    String? newParentId,
+  ) => _mutate(
+    (repository) => repository.moveCollection(collectionId, newParentId),
+  );
+
+  /// 同级重排收藏集 / 收藏文件夹。
+  Future<void> reorderCollections(String? parentId, List<String> orderedIds) =>
+      _mutate(
+        (repository) => repository.reorderCollections(parentId, orderedIds),
+      );
+
+  /// 删除收藏集 / 收藏文件夹（连带子树）；块本体不受影响。
+  Future<void> deleteCollection(String collectionId) =>
+      _mutate((repository) => repository.deleteCollection(collectionId));
+
+  /// 切换块在收藏集中的成员关系，返回切换后的成员状态。
+  /// 加入收藏集时顺带把块标记为已收藏（入集即收藏）。
+  Future<bool> toggleBlockInCollection(String collectionId, String blockId) =>
+      _mutate(
+        (repository) =>
+            repository.toggleBlockInCollection(collectionId, blockId),
+      );
 
   Future<void> deleteFolder(
     String folderId, {
@@ -510,7 +662,11 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
   }
 
   PromptBlockLibraryState _toState(PromptBlockLibraryData data) {
-    return PromptBlockLibraryState(blocks: data.blocks, folders: data.folders);
+    return PromptBlockLibraryState(
+      blocks: data.blocks,
+      folders: data.folders,
+      collections: data.collections,
+    );
   }
 }
 

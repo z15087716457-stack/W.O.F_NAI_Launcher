@@ -9685,6 +9685,69 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_moveToFolder => '移动到文件夹';
 
   @override
+  String get promptBlockLibrary_favorites => '收藏';
+
+  @override
+  String get promptBlockLibrary_unclassified => '未分类';
+
+  @override
+  String get promptBlockLibrary_newCollection => '新建收藏集';
+
+  @override
+  String get promptBlockLibrary_newSubcollection => '新建子收藏集';
+
+  @override
+  String get promptBlockLibrary_newCollectionFolder => '新建收藏文件夹';
+
+  @override
+  String get promptBlockLibrary_renameCollection => '重命名收藏集';
+
+  @override
+  String get promptBlockLibrary_renameCollectionFolder => '重命名收藏文件夹';
+
+  @override
+  String get promptBlockLibrary_moveToFavoritesRoot => '移到收藏区根级';
+
+  @override
+  String get promptBlockLibrary_unnamedCollection => '未命名收藏集';
+
+  @override
+  String get promptBlockLibrary_unnamedCollectionFolder => '未命名收藏文件夹';
+
+  @override
+  String get promptBlockLibrary_collectionName => '收藏集名称';
+
+  @override
+  String get promptBlockLibrary_collectionNameHint => '收藏集名称';
+
+  @override
+  String get promptBlockLibrary_noCollections =>
+      '还没有收藏集 —— 点「收藏」行旁的 + 新建，或把块拖到收藏集上';
+
+  @override
+  String get promptBlockLibrary_noFolders => '还没有文件夹';
+
+  @override
+  String get promptBlockLibrary_favoriteMenuEmptyCollections =>
+      '还没有收藏集，可在侧栏「收藏」旁新建';
+
+  @override
+  String get promptBlockLibrary_emptyFavorites => '还没有收藏的块，点块上的 ★ 即可收藏';
+
+  @override
+  String get promptBlockLibrary_emptyCollection => '该收藏集为空';
+
+  @override
+  String promptBlockLibrary_deleteCollectionConfirm(String name) {
+    return '确定要删除收藏集「$name」吗？其中的块不会被删除，只会移出该收藏集。';
+  }
+
+  @override
+  String promptBlockLibrary_deleteCollectionFolderConfirm(String name) {
+    return '确定要删除收藏文件夹「$name」吗？其中的收藏集与子文件夹会一并删除，块本体不受影响。';
+  }
+
+  @override
   String get promptBlockLibrary_blockTitle => '标题';
 
   @override

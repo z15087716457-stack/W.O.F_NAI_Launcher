@@ -39,7 +39,9 @@ class PromptBlockListItem extends StatelessWidget {
 
   /// 导出为 TXT；null 时不显示导出按钮。
   final VoidCallback? onExport;
-  final VoidCallback? onToggleFavorite;
+
+  /// ★ 收藏入口：回调收到按钮的全局锚点，宿主据此弹出收藏菜单。
+  final ValueChanged<Offset>? onToggleFavorite;
   final int? reorderIndex;
   final bool compact;
 
@@ -132,17 +134,25 @@ class PromptBlockListItem extends StatelessWidget {
                   ),
                 ),
               if (onToggleFavorite != null)
-                IconButton(
-                  tooltip: block.isFavorite
-                      ? context.l10n.common_unfavorite
-                      : context.l10n.common_favorite,
-                  onPressed: onToggleFavorite,
-                  icon: Icon(
-                    block.isFavorite ? Icons.star : Icons.star_border,
-                    size: 19,
-                    color: block.isFavorite
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurfaceVariant,
+                Builder(
+                  builder: (buttonContext) => IconButton(
+                    tooltip: block.isFavorite
+                        ? context.l10n.common_unfavorite
+                        : context.l10n.common_favorite,
+                    onPressed: () {
+                      final box = buttonContext.findRenderObject();
+                      final anchor = box is RenderBox
+                          ? box.localToGlobal(Offset.zero)
+                          : Offset.zero;
+                      onToggleFavorite?.call(anchor);
+                    },
+                    icon: Icon(
+                      block.isFavorite ? Icons.star : Icons.star_border,
+                      size: 19,
+                      color: block.isFavorite
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               if (onExport != null)

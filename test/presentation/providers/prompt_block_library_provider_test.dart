@@ -565,4 +565,131 @@ void main() {
     state = await container.read(promptBlockLibraryNotifierProvider.future);
     expect(state.blockById(b.id)?.isFavorite, isTrue);
   });
+
+  group('collections', () {
+    ProviderContainer makeContainer() {
+      final container = ProviderContainer(
+        overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+      );
+      addTearDown(container.dispose);
+      return container;
+    }
+
+    test(
+      'create/rename/move/reorder/delete collection round-trips state',
+      () async {
+        final container = makeContainer();
+        final notifier = container.read(
+          promptBlockLibraryNotifierProvider.notifier,
+        );
+        await container.read(promptBlockLibraryNotifierProvider.future);
+
+        final folder = await notifier.createCollection(
+          name: '夹',
+          isFolder: true,
+        );
+        final a = await notifier.createCollection(name: 'a');
+        final b = await notifier.createCollection(
+          name: 'b',
+          parentId: folder.id,
+        );
+
+        var state = await container.read(
+          promptBlockLibraryNotifierProvider.future,
+        );
+        expect(state.collectionById(folder.id)?.isFolder, isTrue);
+        expect(state.collectionById(b.id)?.parentId, folder.id);
+        expect(state.collectionTreeOrder(), [folder.id, b.id, a.id]);
+        expect(state.collectionPath(b.id), '夹 / b');
+
+        await notifier.renameCollection(a.id, 'A+');
+        await notifier.moveCollection(a.id, folder.id);
+        state = await container.read(
+          promptBlockLibraryNotifierProvider.future,
+        );
+        expect(state.collectionById(a.id)?.name, 'A+');
+        expect(state.collectionById(a.id)?.parentId, folder.id);
+        expect(state.collectionPath(a.id), '夹 / A+');
+
+        await notifier.reorderCollections(folder.id, [a.id, b.id]);
+        state = await container.read(
+          promptBlockLibraryNotifierProvider.future,
+        );
+        expect(state.collectionsIn(folder.id).map((n) => n.id), [a.id, b.id]);
+
+        await notifier.deleteCollection(folder.id);
+        state = await container.read(
+          promptBlockLibraryNotifierProvider.future,
+        );
+        expect(state.collectionById(folder.id), isNull);
+        expect(state.collectionById(a.id), isNull);
+        expect(state.collectionById(b.id), isNull);
+      },
+    );
+
+    test(
+      'toggleBlockInCollection auto-favorites and tracks membership',
+      () async {
+        final container = makeContainer();
+        final notifier = container.read(
+          promptBlockLibraryNotifierProvider.notifier,
+        );
+        await container.read(promptBlockLibraryNotifierProvider.future);
+
+        final folder = await notifier.createCollection(
+          name: '夹',
+          isFolder: true,
+        );
+        final inner = await notifier.createCollection(
+          name: '内集',
+          parentId: folder.id,
+        );
+        final outer = await notifier.createCollection(name: '外集');
+        final block = await notifier.createBlock(title: 'b', content: 'c');
+
+        await notifier.toggleBlockInCollection(inner.id, block.id);
+        await notifier.toggleBlockInCollection(outer.id, block.id);
+
+        var state = await container.read(
+          promptBlockLibraryNotifierProvider.future,
+        );
+        // 入集即收藏
+        expect(state.blockById(block.id)?.isFavorite, isTrue);
+        expect(state.collectionIdsOfBlock(block.id), {inner.id, outer.id});
+        // 收藏文件夹视图 = 子树成员并集
+        expect(
+          state.blocksInCollectionTree(folder.id).map((x) => x.id),
+          [block.id],
+        );
+        expect(state.collectionTreeBlockCount(folder.id), 1);
+
+        // 移出后旗标保留、成员关系解除
+        await notifier.toggleBlockInCollection(inner.id, block.id);
+        state = await container.read(
+          promptBlockLibraryNotifierProvider.future,
+        );
+        expect(state.blockById(block.id)?.isFavorite, isTrue);
+        expect(state.collectionIdsOfBlock(block.id), {outer.id});
+        expect(state.blocksInCollectionTree(folder.id), isEmpty);
+      },
+    );
+
+    test('deleteBlock prunes collection membership in state', () async {
+      final container = makeContainer();
+      final notifier = container.read(
+        promptBlockLibraryNotifierProvider.notifier,
+      );
+      await container.read(promptBlockLibraryNotifierProvider.future);
+
+      final collection = await notifier.createCollection(name: '集');
+      final block = await notifier.createBlock(title: 'b', content: 'c');
+      await notifier.toggleBlockInCollection(collection.id, block.id);
+
+      await notifier.deleteBlock(block.id);
+      final state = await container.read(
+        promptBlockLibraryNotifierProvider.future,
+      );
+      expect(state.collectionById(collection.id)?.blockIds, isEmpty);
+    });
+  });
 }

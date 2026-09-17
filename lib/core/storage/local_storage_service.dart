@@ -321,6 +321,25 @@ class LocalStorageService {
     );
   }
 
+  /// 获取块库侧栏收藏区与文件夹区的高度分割比例 (0.0~1.0，默认 0.4)
+  double getPromptBlockSidebarFavoritesSplit() {
+    final value = getSetting(StorageKeys.promptBlockSidebarFavoritesSplit);
+    if (value is num) {
+      return value.toDouble().clamp(0.0, 1.0);
+    }
+    return 0.4;
+  }
+
+  /// 保存块库侧栏收藏区与文件夹区的高度分割比例
+  Future<void> setPromptBlockSidebarFavoritesSplit(double ratio) async {
+    // 与 getSetting 同款守卫：box 未打开（如 widget 测试环境）直接跳过
+    if (!Hive.isBoxOpen(StorageKeys.settingsBox)) return;
+    await setSetting(
+      StorageKeys.promptBlockSidebarFavoritesSplit,
+      ratio.clamp(0.0, 1.0),
+    );
+  }
+
   // ==================== Quality Preset (新版) ====================
 
   /// 获取质量词预设模式 (默认 0 = naiDefault)
@@ -766,6 +785,23 @@ class LocalStorageService {
   /// 保存块库面板宽度
   Future<void> setBlockLibraryPanelWidth(double width) async {
     await setSetting(StorageKeys.blockLibraryPanelWidth, width);
+  }
+
+  /// 获取块库面板上部块区的分割比例 (0.0~1.0；null = 未拖动过，走默认估算)
+  double? getBlockLibraryPanelBlocksSplit() {
+    final value = getSetting(StorageKeys.blockLibraryPanelBlocksSplit);
+    if (value is num) return value.toDouble().clamp(0.0, 1.0);
+    return null;
+  }
+
+  /// 保存块库面板上部块区的分割比例
+  Future<void> setBlockLibraryPanelBlocksSplit(double ratio) async {
+    // 与 getSetting 同款守卫：box 未打开（如 widget 测试环境）直接跳过
+    if (!Hive.isBoxOpen(StorageKeys.settingsBox)) return;
+    await setSetting(
+      StorageKeys.blockLibraryPanelBlocksSplit,
+      ratio.clamp(0.0, 1.0),
+    );
   }
 
   /// 获取画风探索页 Run 侧栏宽度 (默认240)

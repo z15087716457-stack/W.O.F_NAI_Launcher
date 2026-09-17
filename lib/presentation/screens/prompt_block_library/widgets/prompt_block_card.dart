@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -33,7 +35,9 @@ class PromptBlockCard extends StatelessWidget {
   final VoidCallback onCopy;
   final VoidCallback onDelete;
   final VoidCallback? onExport;
-  final VoidCallback? onToggleFavorite;
+
+  /// ★ 收藏入口：回调收到按钮的全局锚点，宿主据此弹出收藏菜单。
+  final ValueChanged<Offset>? onToggleFavorite;
   final bool selected;
 
   /// 多选模式下属于选中集合（叠加勾选角标；描边复用 [selected]）。
@@ -180,18 +184,20 @@ class PromptBlockCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         if (onToggleFavorite != null)
-          IconButton(
-            tooltip: block.isFavorite
-                ? context.l10n.common_unfavorite
-                : context.l10n.common_favorite,
-            visualDensity: VisualDensity.compact,
-            onPressed: onToggleFavorite,
-            icon: Icon(
-              block.isFavorite ? Icons.star : Icons.star_border,
-              size: 18,
-              color: block.isFavorite
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurfaceVariant,
+          Builder(
+            builder: (buttonContext) => IconButton(
+              tooltip: block.isFavorite
+                  ? context.l10n.common_unfavorite
+                  : context.l10n.common_favorite,
+              visualDensity: VisualDensity.compact,
+              onPressed: () => onToggleFavorite?.call(_anchorOf(buttonContext)),
+              icon: Icon(
+                block.isFavorite ? Icons.star : Icons.star_border,
+                size: 18,
+                color: block.isFavorite
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         if (onExport != null)
@@ -236,53 +242,61 @@ class PromptBlockCard extends StatelessWidget {
     );
   }
 
+  /// 按钮自身在全局坐标系中的左上角，供收藏菜单锚定。
+  static Offset _anchorOf(BuildContext buttonContext) {
+    final box = buttonContext.findRenderObject();
+    return box is RenderBox ? box.localToGlobal(Offset.zero) : Offset.zero;
+  }
+
   Widget _buildActionMenu(BuildContext context) {
-    return PopupMenuButton<_PromptBlockCardAction>(
-      key: ValueKey('prompt-block-card-actions-${block.id}'),
-      tooltip: context.l10n.common_edit,
-      icon: const Icon(Icons.more_horiz, size: 20),
-      onSelected: (action) {
-        switch (action) {
-          case _PromptBlockCardAction.favorite:
-            onToggleFavorite?.call();
-          case _PromptBlockCardAction.copy:
-            _copyContent();
-          case _PromptBlockCardAction.export:
-            onExport?.call();
-          case _PromptBlockCardAction.edit:
-            onEdit();
-          case _PromptBlockCardAction.delete:
-            onDelete();
-        }
-      },
-      itemBuilder: (context) => [
-        if (onToggleFavorite != null)
-          PopupMenuItem(
-            value: _PromptBlockCardAction.favorite,
-            child: Text(
-              block.isFavorite
-                  ? context.l10n.common_unfavorite
-                  : context.l10n.common_favorite,
+    return Builder(
+      builder: (menuContext) => PopupMenuButton<_PromptBlockCardAction>(
+        key: ValueKey('prompt-block-card-actions-${block.id}'),
+        tooltip: context.l10n.common_edit,
+        icon: const Icon(Icons.more_horiz, size: 20),
+        onSelected: (action) {
+          switch (action) {
+            case _PromptBlockCardAction.favorite:
+              onToggleFavorite?.call(_anchorOf(menuContext));
+            case _PromptBlockCardAction.copy:
+              _copyContent();
+            case _PromptBlockCardAction.export:
+              onExport?.call();
+            case _PromptBlockCardAction.edit:
+              onEdit();
+            case _PromptBlockCardAction.delete:
+              onDelete();
+          }
+        },
+        itemBuilder: (context) => [
+          if (onToggleFavorite != null)
+            PopupMenuItem(
+              value: _PromptBlockCardAction.favorite,
+              child: Text(
+                block.isFavorite
+                    ? context.l10n.common_unfavorite
+                    : context.l10n.common_favorite,
+              ),
             ),
-          ),
-        PopupMenuItem(
-          value: _PromptBlockCardAction.copy,
-          child: Text(context.l10n.common_copy),
-        ),
-        if (onExport != null)
           PopupMenuItem(
-            value: _PromptBlockCardAction.export,
-            child: Text(context.l10n.promptBlockLibrary_exportBlockAsTxt),
+            value: _PromptBlockCardAction.copy,
+            child: Text(context.l10n.common_copy),
           ),
-        PopupMenuItem(
-          value: _PromptBlockCardAction.edit,
-          child: Text(context.l10n.common_edit),
-        ),
-        PopupMenuItem(
-          value: _PromptBlockCardAction.delete,
-          child: Text(context.l10n.common_delete),
-        ),
-      ],
+          if (onExport != null)
+            PopupMenuItem(
+              value: _PromptBlockCardAction.export,
+              child: Text(context.l10n.promptBlockLibrary_exportBlockAsTxt),
+            ),
+          PopupMenuItem(
+            value: _PromptBlockCardAction.edit,
+            child: Text(context.l10n.common_edit),
+          ),
+          PopupMenuItem(
+            value: _PromptBlockCardAction.delete,
+            child: Text(context.l10n.common_delete),
+          ),
+        ],
+      ),
     );
   }
 
@@ -302,6 +316,7 @@ class PromptBlockPill extends StatelessWidget {
     this.selected = false,
     this.multiSelected = false,
     this.onSecondaryTap,
+    this.showThumbnail = true,
   });
 
   final PromptBlock block;
@@ -316,10 +331,14 @@ class PromptBlockPill extends StatelessWidget {
   /// 右键菜单入口（secondary tap）。
   final void Function(TapUpDetails details)? onSecondaryTap;
 
+  /// 有缩略图时以 22px 圆角头像替换前导图标；无图块仍显示图标。
+  final bool showThumbnail;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final blockColor = promptBlockColorFromString(block.color);
+    final thumbnail = block.thumbnail;
     return GestureDetector(
       onSecondaryTapUp: onSecondaryTap,
       child: ConstrainedBox(
@@ -344,11 +363,33 @@ class PromptBlockPill extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    promptBlockIconFromName(block.iconName),
-                    size: 16,
-                    color: blockColor,
-                  ),
+                  if (showThumbnail && thumbnail != null)
+                    ClipRRect(
+                      key: ValueKey('prompt-block-pill-thumb-${block.id}'),
+                      borderRadius: BorderRadius.circular(5),
+                      child: Image.file(
+                        File(thumbnail),
+                        width: 22,
+                        height: 22,
+                        fit: BoxFit.cover,
+                        alignment: Alignment(
+                          block.thumbnailOffsetX.clamp(-1.0, 1.0),
+                          block.thumbnailOffsetY.clamp(-1.0, 1.0),
+                        ),
+                        filterQuality: FilterQuality.medium,
+                        errorBuilder: (_, __, ___) => Icon(
+                          promptBlockIconFromName(block.iconName),
+                          size: 16,
+                          color: blockColor,
+                        ),
+                      ),
+                    )
+                  else
+                    Icon(
+                      promptBlockIconFromName(block.iconName),
+                      size: 16,
+                      color: blockColor,
+                    ),
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(

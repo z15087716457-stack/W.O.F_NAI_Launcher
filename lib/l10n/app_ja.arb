@@ -5720,6 +5720,39 @@
   "promptBlockLibrary_renameFolder": "フォルダー名を変更",
   "promptBlockLibrary_moveToRoot": "ルートへ移動",
   "promptBlockLibrary_moveToFolder": "フォルダーへ移動",
+  "promptBlockLibrary_favorites": "お気に入り",
+  "promptBlockLibrary_unclassified": "未分類",
+  "promptBlockLibrary_newCollection": "コレクションを作成",
+  "promptBlockLibrary_newSubcollection": "サブコレクションを作成",
+  "promptBlockLibrary_newCollectionFolder": "コレクションフォルダーを作成",
+  "promptBlockLibrary_renameCollection": "コレクション名を変更",
+  "promptBlockLibrary_renameCollectionFolder": "コレクションフォルダー名を変更",
+  "promptBlockLibrary_moveToFavoritesRoot": "コレクションのルートへ移動",
+  "promptBlockLibrary_unnamedCollection": "無題のコレクション",
+  "promptBlockLibrary_unnamedCollectionFolder": "無題のコレクションフォルダー",
+  "promptBlockLibrary_collectionName": "コレクション名",
+  "promptBlockLibrary_collectionNameHint": "コレクション名",
+  "promptBlockLibrary_noCollections": "コレクションはまだありません —「お気に入り」行の + から作成するか、ブロックをコレクションへドラッグしてください",
+  "promptBlockLibrary_noFolders": "フォルダーはまだありません",
+  "promptBlockLibrary_favoriteMenuEmptyCollections": "コレクションはまだありません。サイドバーの「お気に入り」から作成できます",
+  "promptBlockLibrary_emptyFavorites": "お気に入りのブロックはまだありません。ブロックの ★ で登録できます",
+  "promptBlockLibrary_emptyCollection": "このコレクションは空です",
+  "promptBlockLibrary_deleteCollectionConfirm": "コレクション「{name}」を削除しますか？中のブロックは削除されず、コレクションから外れるだけです。",
+  "@promptBlockLibrary_deleteCollectionConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "promptBlockLibrary_deleteCollectionFolderConfirm": "コレクションフォルダー「{name}」を削除しますか？中のコレクションとサブフォルダーも削除されますが、ブロック本体には影響しません。",
+  "@promptBlockLibrary_deleteCollectionFolderConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "promptBlockLibrary_blockTitle": "タイトル",
   "promptBlockLibrary_titleHint": "ブロックのタイトル",
   "promptBlockLibrary_folder": "フォルダー",
