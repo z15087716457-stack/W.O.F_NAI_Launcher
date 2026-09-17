@@ -4,6 +4,8 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -14,6 +16,7 @@ import '../../../core/utils/file_picker_utils.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/prompt_block_exchange.dart';
 import '../../../data/models/prompt_block/prompt_block.dart';
+import '../../../data/models/prompt_block/prompt_block_collection.dart';
 import '../../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../../data/models/prompt_block/prompt_block_sort.dart';
 import '../../../data/repositories/prompt_block_repository.dart';
@@ -24,6 +27,7 @@ import 'widgets/curation_import_preview_dialog.dart';
 import 'widgets/prompt_block_card.dart';
 import 'widgets/prompt_block_detail.dart';
 import 'widgets/prompt_block_edit_dialog.dart';
+import 'widgets/prompt_block_favorite_menu.dart';
 import 'widgets/prompt_block_folder_delete_dialog.dart';
 import 'widgets/prompt_block_folder_tree.dart';
 import 'widgets/prompt_block_list_item.dart';
@@ -62,6 +66,13 @@ class _PromptBlockLibraryScreenState
   final FocusNode _searchFocusNode = FocusNode();
 
   bool _allSelected = true;
+
+  /// ⭐收藏过滤激活；与 [_selectedCollectionId] 互斥。
+  bool _favoritesSelected = false;
+
+  /// 选中的收藏集/收藏文件夹 id（非空时 [_favoritesSelected] 为 false，
+  /// 主区显示该收藏集成员或该文件夹子树成员并集）。
+  String? _selectedCollectionId;
   String? _selectedFolderId;
   _PromptBlockViewMode _viewMode = _PromptBlockViewMode.grid;
   PromptBlockSortField _sortField = PromptBlockSortField.custom;
@@ -75,6 +86,15 @@ class _PromptBlockLibraryScreenState
   bool _multiSelectMode = false;
   final Set<String> _multiSelectedIds = <String>{};
   String? _lastSelectedId;
+
+  // ---- 详情栏开合的滚动锚定 ----
+  // 详情栏展开/收起挤压主区宽度会重排网格，像素位置对应的内容漂移
+  // （视图跳走）。切换前记录视口顶部可见卡的滚动偏移，在 200ms
+  // 宽度动画的每一帧把该卡钉回原位置。
+  final GlobalKey _contentAreaKey = GlobalKey();
+  List<_CardAnchor>? _pendingAnchors;
+  double _pendingAnchorRatio = 0;
+  int _anchorFramesLeft = 0;
 
   @override
   void initState() {
@@ -183,6 +203,16 @@ class _PromptBlockLibraryScreenState
                   ? const <PromptBlock>[]
                   : _visibleBlocks(state);
               final selectedBlock = _selectedVisibleBlock(visibleBlocks);
+              if (_selectedCollectionId != null &&
+                  state != null &&
+                  state.collectionById(_selectedCollectionId!) == null) {
+                // 选中收藏集/收藏文件夹被删 → 回退到「收藏」视图。
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted && _selectedCollectionId != null) {
+                    _selectScope(favorites: true);
+                  }
+                });
+              }
               if (_selectedBlockId != null && selectedBlock == null) {
                 final staleId = _selectedBlockId;
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -203,7 +233,12 @@ class _PromptBlockLibraryScreenState
                         _buildToolbar(context, library),
                         if (!showSidebar && library.valueOrNull != null)
                           _buildCompactFolderSelector(library.requireValue),
-                        Expanded(child: _buildContent(context, library)),
+                        Expanded(
+                          child: KeyedSubtree(
+                            key: _contentAreaKey,
+                            child: _buildContent(context, library),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -244,7 +279,7 @@ class _PromptBlockLibraryScreenState
         ),
         child: !_detailPanelExpanded
             ? PromptBlockDetailRailCollapsed(
-                onExpand: () => setState(() => _detailPanelExpanded = true),
+                onExpand: () => _setDetailPanelExpanded(true),
               )
             : _multiSelectMode
             ? _buildEmptyDetailPanel(
@@ -258,14 +293,14 @@ class _PromptBlockLibraryScreenState
                 block: block,
                 folders: folders,
                 onEdit: () => _openBlockEdit(block),
-                onToggleFavorite: () => _toggleFavorite(block),
+                onToggleFavorite: (anchor) => _showFavoriteMenu(block, anchor),
                 onCopy: () => AppToast.success(
                   context,
                   context.l10n.promptBlockLibrary_copied,
                 ),
                 onExport: () => _exportBlockAsTxt(block),
                 onDelete: () => _deleteBlock(context, block),
-                onCollapse: () => setState(() => _detailPanelExpanded = false),
+                onCollapse: () => _setDetailPanelExpanded(false),
               )
             : _buildEmptyDetailPanel(),
       ),
@@ -315,8 +350,7 @@ class _PromptBlockLibraryScreenState
                         key: const Key('prompt-block-detail-collapse'),
                         tooltip: l10n.common_collapse,
                         visualDensity: VisualDensity.compact,
-                        onPressed: () =>
-                            setState(() => _detailPanelExpanded = false),
+                        onPressed: () => _setDetailPanelExpanded(false),
                         icon: const Icon(Icons.keyboard_arrow_right),
                       ),
                     ],
@@ -373,33 +407,37 @@ class _PromptBlockLibraryScreenState
         ),
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 12, 12),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.folder_copy_outlined,
-                    size: 20,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      context.l10n.promptBlockLibrary_folders,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+            SizedBox(
+              // 与主工具栏同高（64）垂直居中，两边分隔线/基线对齐。
+              height: promptBlockLibraryWideHeaderHeight,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.folder_copy_outlined,
+                      size: 20,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        context.l10n.promptBlockLibrary_folders,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    tooltip: context.l10n.promptBlockLibrary_newFolder,
-                    onPressed: () => _showFolderNameDialog(context),
-                    icon: const Icon(
-                      Icons.create_new_folder_outlined,
-                      size: 19,
+                    IconButton(
+                      tooltip: context.l10n.promptBlockLibrary_newFolder,
+                      onPressed: () => _showFolderNameDialog(context),
+                      icon: const Icon(
+                        Icons.create_new_folder_outlined,
+                        size: 19,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             Divider(
@@ -413,27 +451,42 @@ class _PromptBlockLibraryScreenState
                 data: (state) => PromptBlockFolderTree(
                   blocks: state.blocks,
                   folders: state.folders,
+                  collections: state.collections,
                   allSelected: _allSelected,
-                  rootSelected: !_allSelected && _selectedFolderId == null,
+                  rootSelected:
+                      !_allSelected &&
+                      !_favoritesSelected &&
+                      _selectedCollectionId == null &&
+                      _selectedFolderId == null,
+                  favoritesSelected: _favoritesSelected,
                   selectedFolderId: _selectedFolderId,
-                  onSelectAll: () => setState(() {
-                    _allSelected = true;
-                    _selectedFolderId = null;
-                  }),
-                  onSelectRoot: () => setState(() {
-                    _allSelected = false;
-                    _selectedFolderId = null;
-                  }),
-                  onSelectFolder: (id) => setState(() {
-                    _allSelected = false;
-                    _selectedFolderId = id;
-                  }),
+                  selectedCollectionId: _selectedCollectionId,
+                  onSelectAll: () => _selectScope(all: true),
+                  onSelectRoot: () => _selectScope(),
+                  onSelectFavorites: () => _selectScope(favorites: true),
+                  onSelectFolder: (id) => _selectScope(folderId: id),
+                  onSelectCollection: (id) => _selectScope(collectionId: id),
                   onCreateFolder: (parentId) =>
                       _showFolderNameDialog(context, parentId: parentId),
                   onRenameFolder: (id) => _renameFolder(context, state, id),
                   onMoveFolderToRoot: (id) => _moveFolderToRoot(context, id),
                   onDeleteFolder: (id) => _deleteFolder(context, state, id),
                   onReorderFolders: _reorderFolders,
+                  onCreateCollection: (parentId, isFolder) =>
+                      _showCollectionNameDialog(
+                        context,
+                        parentId: parentId,
+                        isFolder: isFolder,
+                      ),
+                  onRenameCollection: (id) =>
+                      _renameCollection(context, state, id),
+                  onMoveCollection: (id, newParentId) =>
+                      _moveCollection(context, id, newParentId),
+                  onDeleteCollection: (id) =>
+                      _deleteCollection(context, state, id),
+                  onReorderCollections: _reorderCollections,
+                  onAddBlockToCollection: _addBlockToCollection,
+                  onDropBlockOnFavorites: _favoriteBlockFromDrop,
                 ),
               ),
             ),
@@ -866,9 +919,20 @@ class _PromptBlockLibraryScreenState
     );
   }
 
+  /// 窄布局备用：范围选择退化为下拉框。
+  /// 编码约定：`__all__` 全部块 / `__fav__` 收藏 / `coll:<id>` 收藏集节点 /
+  /// `__root__` 根目录 / 其余为文件夹 id。
   Widget _buildCompactFolderSelector(PromptBlockLibraryState state) {
+    const favoritesValue = '__fav__';
+    const collectionPrefix = 'coll:';
     final l10n = context.l10n;
-    final value = _allSelected ? '__all__' : (_selectedFolderId ?? '__root__');
+    final value = _allSelected
+        ? '__all__'
+        : _favoritesSelected
+        ? favoritesValue
+        : _selectedCollectionId != null
+        ? '$collectionPrefix$_selectedCollectionId'
+        : (_selectedFolderId ?? '__root__');
     final folders = state.folders.toList()
       ..sort(
         (a, b) => a.sortOrder == b.sortOrder
@@ -890,6 +954,21 @@ class _PromptBlockLibraryScreenState
             child: Text(l10n.promptBlockLibrary_allBlocks),
           ),
           DropdownMenuItem(
+            value: favoritesValue,
+            child: Text(
+              '${l10n.promptBlockLibrary_favorites} · ${state.favoriteBlocks.length}',
+            ),
+          ),
+          ...state.collectionTreeOrder().map(
+            (id) => DropdownMenuItem(
+              value: '$collectionPrefix$id',
+              child: Text(
+                state.collectionPath(id),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          DropdownMenuItem(
             value: '__root__',
             child: Text(l10n.promptBlockLibrary_rootFolder),
           ),
@@ -907,20 +986,17 @@ class _PromptBlockLibraryScreenState
         ],
         onChanged: (value) {
           if (value == '__all__') {
-            setState(() {
-              _allSelected = true;
-              _selectedFolderId = null;
-            });
+            _selectScope(all: true);
+          } else if (value == favoritesValue) {
+            _selectScope(favorites: true);
+          } else if (value != null && value.startsWith(collectionPrefix)) {
+            _selectScope(
+              collectionId: value.substring(collectionPrefix.length),
+            );
           } else if (value == '__root__') {
-            setState(() {
-              _allSelected = false;
-              _selectedFolderId = null;
-            });
+            _selectScope();
           } else if (value != null) {
-            setState(() {
-              _allSelected = false;
-              _selectedFolderId = value;
-            });
+            _selectScope(folderId: value);
           }
         },
       ),
@@ -941,6 +1017,13 @@ class _PromptBlockLibraryScreenState
           final blocks = _visibleBlocks(state);
           if (blocks.isEmpty) return _buildEmptyState(context, state);
 
+          // 文件夹/根目录范围且子树跨多个有直属块的文件夹 → 分段 + sticky 标题；
+          // 搜索/自定义排序/全部块/收藏/收藏集范围保持平铺。
+          final sections = _folderSections(state);
+          if (sections != null) {
+            return _buildGroupedContent(context, sections, state.folders);
+          }
+
           if (_viewMode == _PromptBlockViewMode.grid) {
             return _buildGrid(context, blocks, state.folders);
           }
@@ -953,6 +1036,8 @@ class _PromptBlockLibraryScreenState
           // 自定义排序下顺序由字段决定，手动拖排同样没有意义。
           final reorderable =
               !_allSelected &&
+              !_favoritesSelected &&
+              _selectedCollectionId == null &&
               !_sortField.overridesManualOrder &&
               _searchController.text.trim().isEmpty &&
               blocks.every((block) => block.folderId == _selectedFolderId);
@@ -983,6 +1068,181 @@ class _PromptBlockLibraryScreenState
           );
         },
       ),
+    );
+  }
+
+  /// 分段判定：仅文件夹/根目录范围 + 无搜索 + custom 排序时分组；
+  /// 返回 null 走平铺。DFS 序遍历子树，每个有直属块的文件夹成一段；
+  /// 根目录范围先出「未分类」段，再按文件夹树逐段展开。
+  List<_FolderSection>? _folderSections(PromptBlockLibraryState state) {
+    if (_allSelected || _favoritesSelected || _selectedCollectionId != null) {
+      return null;
+    }
+    if (_searchController.text.trim().isNotEmpty) return null;
+    if (_sortField.overridesManualOrder) return null;
+    if (_selectedFolderId != null &&
+        state.folderById(_selectedFolderId!) == null) {
+      return null;
+    }
+
+    final sections = <_FolderSection>[];
+
+    void collect(String? folderId) {
+      final direct = state.blocksInFolder(folderId);
+      if (direct.isNotEmpty) {
+        sections.add(
+          _FolderSection(
+            title: folderId == null
+                ? context.l10n.promptBlockLibrary_unclassified
+                : state.folderPath(folderId),
+            blocks: direct,
+          ),
+        );
+      }
+      for (final folder in state.foldersIn(folderId)) {
+        collect(folder.id);
+      }
+    }
+
+    collect(_selectedFolderId);
+    // 单段时标题栏是纯装饰，保持平铺。
+    return sections.length > 1 ? sections : null;
+  }
+
+  /// 分段视图：统一 CustomScrollView，各段包在 SliverMainAxisGroup 里
+  /// （pinned sticky 标题 + 段体 sliver；grid=SliverGrid / list=SliverList /
+  /// 瀑布流=SliverToBoxAdapter(shrinkWrap MasonryGridView，原因见段内注释) /
+  /// 药丸=SliverToBoxAdapter(Wrap)）。
+  Widget _buildGroupedContent(
+    BuildContext context,
+    List<_FolderSection> sections,
+    List<PromptBlockFolder> folders,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final sliderWidth = (constraints.maxWidth - 74)
+            .clamp(80.0, 164.0)
+            .toDouble();
+        final columnCount = (constraints.maxWidth / _cardWidth).floor().clamp(
+          1,
+          10,
+        );
+        final pillMode =
+            _viewMode == _PromptBlockViewMode.grid && _cardWidth <= 160;
+        final cardHeight = _cardWidth < 240 ? 174.0 : 208.0;
+
+        Widget sectionSliver(_FolderSection section) {
+          if (_viewMode == _PromptBlockViewMode.list) {
+            return SliverList.builder(
+              itemCount: section.blocks.length,
+              itemBuilder: (context, index) => _buildBlockItem(
+                context,
+                section.blocks[index],
+                folders: folders,
+              ),
+            );
+          }
+          if (_viewMode == _PromptBlockViewMode.waterfall) {
+            // 分段里的瀑布流必须是盒式子树：SliverMasonryGrid 被整体滚出
+            // 视口后 collectGarbage 只留末尾子节点，回插 leading child 时
+            // 给出的 scrollOffsetCorrection 会把滚动位置弹回段首。
+            return SliverToBoxAdapter(
+              child: MasonryGridView.count(
+                shrinkWrap: true,
+                primary: false,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                crossAxisCount: columnCount,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                itemBuilder: (context, index) => _buildWaterfallCard(
+                  context,
+                  section.blocks[index],
+                  folders: folders,
+                ),
+                itemCount: section.blocks.length,
+              ),
+            );
+          }
+          if (pillMode) {
+            return SliverToBoxAdapter(
+              child: Wrap(
+                alignment: WrapAlignment.start,
+                runAlignment: WrapAlignment.start,
+                crossAxisAlignment: WrapCrossAlignment.start,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final block in section.blocks)
+                    _buildBlockPill(
+                      context,
+                      block,
+                      maxWidth: _cardWidth,
+                      folders: folders,
+                    ),
+                ],
+              ),
+            );
+          }
+          return SliverGrid(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: _cardWidth,
+              mainAxisExtent: cardHeight,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => _buildBlockCard(
+                context,
+                section.blocks[index],
+                width: _cardWidth,
+                folders: folders,
+              ),
+              childCount: section.blocks.length,
+            ),
+          );
+        }
+
+        return Stack(
+          key: const Key('prompt-block-grouped-stack'),
+          children: [
+            Positioned.fill(
+              child: CustomScrollView(
+                key: const Key('prompt-block-grouped-scroll'),
+                slivers: [
+                  // 每段包一层 SliverMainAxisGroup：本机 SDK 的 pinned 头按
+                  // constraints.overlap 堆叠而不互推，分组才能把「顶走上一
+                  // 段标题」的语义找回来。
+                  for (final section in sections)
+                    SliverMainAxisGroup(
+                      slivers: [
+                        SliverPersistentHeader(
+                          pinned: true,
+                          delegate: _FolderSectionHeaderDelegate(
+                            title: section.title,
+                            count: section.blocks.length,
+                          ),
+                        ),
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                          sliver: sectionSliver(section),
+                        ),
+                      ],
+                    ),
+                  // 底部留白避开悬浮滑杆。
+                  const SliverToBoxAdapter(child: SizedBox(height: 70)),
+                ],
+              ),
+            ),
+            if (_viewMode != _PromptBlockViewMode.list)
+              Positioned(
+                right: 16,
+                bottom: 12,
+                child: _buildCardSizeControl(context, sliderWidth),
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -1247,7 +1507,7 @@ class _PromptBlockLibraryScreenState
         onCopy: () =>
             AppToast.success(context, context.l10n.promptBlockLibrary_copied),
         onExport: () => _exportBlockAsTxt(block),
-        onToggleFavorite: () => _toggleFavorite(block),
+        onToggleFavorite: (anchor) => _showFavoriteMenu(block, anchor),
         onDelete: () => _deleteBlock(context, block),
       ),
     );
@@ -1280,17 +1540,184 @@ class _PromptBlockLibraryScreenState
         onCopy: () =>
             AppToast.success(context, context.l10n.promptBlockLibrary_copied),
         onExport: () => _exportBlockAsTxt(block),
-        onToggleFavorite: () => _toggleFavorite(block),
+        onToggleFavorite: (anchor) => _showFavoriteMenu(block, anchor),
         onDelete: () => _deleteBlock(context, block),
       ),
     );
   }
 
+  /// 详情栏开合统一入口：宽度动画期间把视口锚卡钉住，防止重排跳走。
+  void _setDetailPanelExpanded(bool expanded) {
+    if (_detailPanelExpanded == expanded) return;
+    final anchors = _captureCardAnchors();
+    setState(() => _detailPanelExpanded = expanded);
+    _scheduleAnchorRestore(anchors);
+  }
+
+  /// 主区当前主滚动组件（分段视图外层 CustomScrollView / 平铺视图的
+  /// GridView·MasonryGridView·ListView）；DFS 先命中外层。
+  ScrollableState? _contentScrollable() {
+    final ctx = _contentAreaKey.currentContext;
+    if (ctx == null) return null;
+    ScrollableState? result;
+    void visit(Element element) {
+      if (result != null) return;
+      if (element.widget is Scrollable) {
+        result = (element as StatefulElement).state as ScrollableState;
+        return;
+      }
+      element.visitChildElements(visit);
+    }
+
+    ctx.visitChildElements(visit);
+    return result;
+  }
+
+  /// 主滚动组件的外层 Viewport 渲染对象。嵌套 shrinkWrap 滚动组件
+  /// 自带内层 viewport，锚定必须统一用外层坐标系。
+  RenderAbstractViewport? _contentViewport(ScrollableState scrollable) {
+    RenderAbstractViewport? result;
+    void visit(Element element) {
+      if (result != null) return;
+      final ro = element.findRenderObject();
+      if (ro is RenderAbstractViewport) {
+        result = ro;
+        return;
+      }
+      element.visitChildElements(visit);
+    }
+
+    scrollable.context.visitChildElements(visit);
+    return result;
+  }
+
+  /// 记录视口顶部附近若干可见卡的锚点（多备几张：懒构建视图在
+  /// 重排后锚卡可能被卸载，恢复时顺延到下一张仍挂载的）。
+  List<_CardAnchor> _captureCardAnchors() {
+    final scrollable = _contentScrollable();
+    final position = scrollable?.position;
+    if (scrollable == null ||
+        position == null ||
+        !position.hasPixels ||
+        position.maxScrollExtent <= 0) {
+      return const [];
+    }
+    final viewport = _contentViewport(scrollable);
+    if (viewport == null) return const [];
+
+    final anchors = <_CardAnchor>[];
+    void visit(Element element) {
+      if (element.widget is PromptBlockHoverPreview) {
+        final key = element.widget.key;
+        final ro = element.findRenderObject();
+        if (key is ValueKey<String> && ro != null && ro.attached) {
+          anchors.add(
+            _CardAnchor(
+              key.value,
+              viewport.getOffsetToReveal(ro, 0).offset - position.pixels,
+            ),
+          );
+        }
+        return;
+      }
+      element.visitChildElements(visit);
+    }
+
+    scrollable.context.visitChildElements(visit);
+    anchors.sort((a, b) => a.dy.compareTo(b.dy));
+    // 视口顶上沿半张以内的卡也保留（部分可见卡同样可作锚点）。
+    return anchors.where((a) => a.dy > -400).take(6).toList();
+  }
+
+  void _scheduleAnchorRestore(List<_CardAnchor> anchors) {
+    final position = _contentScrollable()?.position;
+    if (position == null || !position.hasPixels) return;
+    _pendingAnchors = anchors;
+    _pendingAnchorRatio = position.maxScrollExtent > 0
+        ? position.pixels / position.maxScrollExtent
+        : 0;
+    if (_anchorFramesLeft == 0) {
+      // 瞬时回调先于当帧 build/layout 执行，jumpTo 与宽度动画同帧
+      // 生效，观感上是连续钉住而不是事后拉回。
+      SchedulerBinding.instance.scheduleFrameCallback(_anchorFrame);
+    }
+    _anchorFramesLeft = 24; // ≈400ms @60fps，覆盖 200ms 动画余量
+  }
+
+  void _anchorFrame(Duration _) {
+    if (!mounted) {
+      _anchorFramesLeft = 0;
+      _pendingAnchors = null;
+      return;
+    }
+    _restoreCardAnchor();
+    if (--_anchorFramesLeft > 0) {
+      SchedulerBinding.instance.scheduleFrameCallback(_anchorFrame);
+    } else {
+      _pendingAnchors = null;
+    }
+  }
+
+  void _restoreCardAnchor() {
+    final scrollable = _contentScrollable();
+    final position = scrollable?.position;
+    if (scrollable == null ||
+        position == null ||
+        !position.hasContentDimensions) {
+      return;
+    }
+    final viewport = _contentViewport(scrollable);
+    if (viewport == null) return;
+
+    final anchors = _pendingAnchors;
+    if (anchors != null) {
+      for (final anchor in anchors) {
+        final ro = _findCardRenderObject(scrollable, anchor.cardKey);
+        if (ro == null || !ro.attached) continue;
+        final target =
+            (viewport.getOffsetToReveal(ro, 0).offset - anchor.dy).clamp(
+              position.minScrollExtent,
+              position.maxScrollExtent,
+            );
+        if ((target - position.pixels).abs() > 0.5) position.jumpTo(target);
+        return;
+      }
+    }
+    // 锚卡全部被卸载（懒构建滚出缓存）→ 按滚动比例兜底。
+    final target = (_pendingAnchorRatio * position.maxScrollExtent).clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+    if ((target - position.pixels).abs() > 0.5) position.jumpTo(target);
+  }
+
+  RenderObject? _findCardRenderObject(
+    ScrollableState scrollable,
+    String cardKey,
+  ) {
+    RenderObject? found;
+    void visit(Element element) {
+      if (found != null) return;
+      final w = element.widget;
+      if (w is PromptBlockHoverPreview && w.key == ValueKey<String>(cardKey)) {
+        found = element.findRenderObject();
+        return;
+      }
+      element.visitChildElements(visit);
+    }
+
+    scrollable.context.visitChildElements(visit);
+    return found;
+  }
+
   void _selectBlock(PromptBlock block) {
+    final expanding = !_detailPanelExpanded;
+    final anchors = expanding ? _captureCardAnchors() : const <_CardAnchor>[];
     setState(() {
       _selectedBlockId = block.id;
       _detailPanelExpanded = true;
     });
+    if (expanding) _scheduleAnchorRestore(anchors);
   }
 
   // ---- 多选状态机（屏幕级，方案见蓝图 L1） ----
@@ -1537,7 +1964,7 @@ class _PromptBlockLibraryScreenState
         }
       case _BlockContextAction.favorite:
       case _BlockContextAction.unfavorite:
-        await _toggleFavorite(block);
+        if (context.mounted) await _showFavoriteMenu(block, globalPosition);
       case _BlockContextAction.moveTo:
         if (mounted) await _moveBlocksToFolderDialog([block.id]);
       case _BlockContextAction.export:
@@ -1715,6 +2142,10 @@ class _PromptBlockLibraryScreenState
         ? context.l10n.promptBlockLibrary_noSearchResults
         : (isEntireLibraryEmpty
               ? context.l10n.promptBlockLibrary_empty
+              : _favoritesSelected
+              ? context.l10n.promptBlockLibrary_emptyFavorites
+              : _selectedCollectionId != null
+              ? context.l10n.promptBlockLibrary_emptyCollection
               : context.l10n.promptBlockLibrary_emptyFolder);
     final icon = hasSearch ? Icons.search_off : Icons.view_module_outlined;
 
@@ -1793,9 +2224,28 @@ class _PromptBlockLibraryScreenState
     );
   }
 
+  /// 侧栏选中语义的统一收口：四类范围互斥（全部/收藏/收藏节点/文件夹）。
+  void _selectScope({
+    bool all = false,
+    bool favorites = false,
+    String? collectionId,
+    String? folderId,
+  }) {
+    setState(() {
+      _allSelected = all;
+      _favoritesSelected = favorites;
+      _selectedCollectionId = collectionId;
+      _selectedFolderId = folderId;
+    });
+  }
+
   List<PromptBlock> _visibleBlocks(PromptBlockLibraryState state) {
     final blocks = _allSelected
         ? state.blocks.toList()
+        : _favoritesSelected
+        ? state.favoriteBlocks
+        : _selectedCollectionId != null
+        ? state.blocksInCollectionTree(_selectedCollectionId!)
         : state.blocksInFolderTree(_selectedFolderId);
     final query = _searchController.text.trim().toLowerCase();
     if (query.isNotEmpty) {
@@ -2105,14 +2555,15 @@ class _PromptBlockLibraryScreenState
     }
   }
 
-  Future<void> _toggleFavorite(PromptBlock block) async {
-    try {
-      await ref
-          .read(promptBlockLibraryNotifierProvider.notifier)
-          .toggleFavorite(block.id);
-    } catch (error) {
-      if (mounted) AppToast.error(context, '$error');
-    }
+  /// 单块 ★ 入口：弹出收藏菜单（收藏开关 + 收藏集勾选），
+  /// 交互模型照抄本地画廊心形菜单。
+  Future<void> _showFavoriteMenu(PromptBlock block, Offset anchor) {
+    return showBlockFavoriteMenu(
+      context,
+      ref: ref,
+      block: block,
+      anchor: anchor,
+    );
   }
 
   Future<void> _deleteBlock(BuildContext context, PromptBlock block) async {
@@ -2255,10 +2706,7 @@ class _PromptBlockLibraryScreenState
             destinationFolderId: decision.destinationFolderId,
           );
       if (_selectedFolderId != null && blockedIds.contains(_selectedFolderId)) {
-        setState(() {
-          _allSelected = false;
-          _selectedFolderId = null;
-        });
+        _selectScope();
       }
       if (context.mounted) {
         AppToast.success(context, l10n.promptBlockLibrary_deleted);
@@ -2305,4 +2753,277 @@ class _PromptBlockLibraryScreenState
       if (mounted) AppToast.error(context, '$error');
     }
   }
+
+  // ---- 收藏集 / 收藏文件夹 ----
+
+  /// 新建或重命名收藏集 / 收藏文件夹的名称对话框。
+  Future<void> _showCollectionNameDialog(
+    BuildContext context, {
+    String? parentId,
+    required bool isFolder,
+    PromptBlockCollection? collection,
+  }) async {
+    final l10n = context.l10n;
+    final controller = TextEditingController(text: collection?.name ?? '');
+    final title = collection != null
+        ? (collection.isFolder
+              ? l10n.promptBlockLibrary_renameCollectionFolder
+              : l10n.promptBlockLibrary_renameCollection)
+        : (isFolder
+              ? l10n.promptBlockLibrary_newCollectionFolder
+              : l10n.promptBlockLibrary_newCollection);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: l10n.promptBlockLibrary_collectionName,
+            hintText: l10n.promptBlockLibrary_collectionNameHint,
+          ),
+          onSubmitted: (_) =>
+              Navigator.of(dialogContext).pop(controller.text.trim()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(controller.text.trim()),
+            child: Text(l10n.common_save),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (name == null || name.isEmpty || !context.mounted) return;
+
+    try {
+      final notifier = ref.read(promptBlockLibraryNotifierProvider.notifier);
+      if (collection == null) {
+        await notifier.createCollection(
+          name: name,
+          parentId: parentId,
+          isFolder: isFolder,
+        );
+      } else {
+        await notifier.renameCollection(collection.id, name);
+      }
+      if (context.mounted) {
+        AppToast.success(context, l10n.promptBlockLibrary_saved);
+      }
+    } catch (error) {
+      if (context.mounted) AppToast.error(context, '$error');
+    }
+  }
+
+  Future<void> _renameCollection(
+    BuildContext context,
+    PromptBlockLibraryState state,
+    String id,
+  ) async {
+    final collection = state.collectionById(id);
+    if (collection != null) {
+      await _showCollectionNameDialog(
+        context,
+        isFolder: collection.isFolder,
+        collection: collection,
+      );
+    }
+  }
+
+  Future<void> _moveCollection(
+    BuildContext context,
+    String id,
+    String? newParentId,
+  ) async {
+    try {
+      await ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .moveCollection(id, newParentId);
+      if (context.mounted) {
+        AppToast.success(context, context.l10n.promptBlockLibrary_saved);
+      }
+    } catch (error) {
+      if (context.mounted) AppToast.error(context, '$error');
+    }
+  }
+
+  /// 删除收藏集/收藏文件夹：确认后连带子树删除，成员块本体不动。
+  Future<void> _deleteCollection(
+    BuildContext context,
+    PromptBlockLibraryState state,
+    String id,
+  ) async {
+    final l10n = context.l10n;
+    final node = state.collectionById(id);
+    if (node == null) return;
+    final label = node.name.isEmpty
+        ? (node.isFolder
+              ? l10n.promptBlockLibrary_unnamedCollectionFolder
+              : l10n.promptBlockLibrary_unnamedCollection)
+        : node.name;
+    final confirmed = await ThemedConfirmDialog.showDelete(
+      context: context,
+      itemName: '',
+      content: node.isFolder
+          ? l10n.promptBlockLibrary_deleteCollectionFolderConfirm(label)
+          : l10n.promptBlockLibrary_deleteCollectionConfirm(label),
+    );
+    if (!confirmed || !context.mounted) return;
+    try {
+      await ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .deleteCollection(id);
+      if (context.mounted) {
+        AppToast.success(context, l10n.promptBlockLibrary_deleted);
+      }
+    } catch (error) {
+      if (context.mounted) AppToast.error(context, '$error');
+    }
+  }
+
+  Future<void> _reorderCollections(
+    String? parentId,
+    List<String> orderedIds,
+  ) async {
+    try {
+      await ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .reorderCollections(parentId, orderedIds);
+    } catch (error) {
+      if (mounted) AppToast.error(context, '$error');
+    }
+  }
+
+  /// 块拖到收藏集行上：已在集内跳过，否则追加成员（入集即收藏）。
+  Future<void> _addBlockToCollection(
+    String collectionId,
+    String blockId,
+  ) async {
+    final state = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
+    final node = state?.collectionById(collectionId);
+    if (node == null || node.isFolder || node.blockIds.contains(blockId)) {
+      return;
+    }
+    try {
+      await ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .toggleBlockInCollection(collectionId, blockId);
+    } catch (error) {
+      if (mounted) AppToast.error(context, '$error');
+    }
+  }
+
+  /// 块拖到「收藏」行上：仅在未收藏时置收藏旗标。
+  Future<void> _favoriteBlockFromDrop(String blockId) async {
+    final block = ref
+        .read(promptBlockLibraryNotifierProvider)
+        .valueOrNull
+        ?.blockById(blockId);
+    if (block == null || block.isFavorite) return;
+    try {
+      await ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .toggleFavorite(blockId);
+    } catch (error) {
+      if (mounted) AppToast.error(context, '$error');
+    }
+  }
+}
+
+/// 文件夹分段：标题 + 该段直属块列表。
+class _FolderSection {
+  const _FolderSection({required this.title, required this.blocks});
+
+  final String title;
+  final List<PromptBlock> blocks;
+}
+
+/// 分段 sticky 标题（pinned SliverPersistentHeader）：滚动时当前段的
+/// 文件夹路径钉在顶部，被下一段标题顶走。
+class _FolderSectionHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const _FolderSectionHeaderDelegate({
+    required this.title,
+    required this.count,
+  });
+
+  final String title;
+  final int count;
+
+  static const double height = 40;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    final theme = Theme.of(context);
+    return Container(
+      // 不透明底色：后续段内容上滚时被标题遮住，形成「顶走」效果。
+      color: theme.colorScheme.surface,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Icon(
+                  Icons.folder_outlined,
+                  size: 16,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '$count',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: theme.dividerColor),
+        ],
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _FolderSectionHeaderDelegate oldDelegate) =>
+      title != oldDelegate.title || count != oldDelegate.count;
+}
+
+/// 滚动锚点：详情栏开合前记录的可见卡位置。
+class _CardAnchor {
+  const _CardAnchor(this.cardKey, this.dy);
+
+  /// 卡片 [ValueKey] 的完整字符串（含视图前缀，如 `waterfall-xxx`）。
+  final String cardKey;
+
+  /// 卡顶在主滚动空间中距视口顶部的偏移（负值 = 顶在视口上沿外）。
+  final double dy;
 }

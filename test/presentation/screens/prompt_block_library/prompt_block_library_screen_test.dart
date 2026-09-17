@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
+import 'package:nai_launcher/data/models/prompt_block/prompt_block_collection.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block_folder.dart';
 import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -34,9 +35,66 @@ class _FakePromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
         .map((item) => item.id == block.id ? block : item)
         .toList();
     state = AsyncData(
-      PromptBlockLibraryState(blocks: updatedBlocks, folders: current.folders),
+      PromptBlockLibraryState(
+        blocks: updatedBlocks,
+        folders: current.folders,
+        collections: current.collections,
+      ),
     );
     return block;
+  }
+
+  @override
+  Future<PromptBlock> toggleFavorite(String blockId) async {
+    final current = state.valueOrNull ?? initialState;
+    final block = current.blockById(blockId);
+    if (block == null) {
+      throw StateError('Prompt block does not exist: $blockId');
+    }
+    final updated = block.copyWith(isFavorite: !block.isFavorite);
+    state = AsyncData(
+      PromptBlockLibraryState(
+        blocks: [
+          for (final item in current.blocks)
+            item.id == blockId ? updated : item,
+        ],
+        folders: current.folders,
+        collections: current.collections,
+      ),
+    );
+    return updated;
+  }
+
+  @override
+  Future<bool> toggleBlockInCollection(
+    String collectionId,
+    String blockId,
+  ) async {
+    final current = state.valueOrNull ?? initialState;
+    final target = current.collectionById(collectionId);
+    if (target == null || target.isFolder) {
+      throw StateError('Prompt block collection does not exist: $collectionId');
+    }
+    final members = [...target.blockIds];
+    final nowMember = !members.remove(blockId);
+    if (nowMember) members.add(blockId);
+    final block = current.blockById(blockId);
+    state = AsyncData(
+      PromptBlockLibraryState(
+        blocks: [
+          for (final item in current.blocks)
+            item.id == blockId && nowMember && !(block?.isFavorite ?? true)
+                ? item.copyWith(isFavorite: true)
+                : item,
+        ],
+        folders: current.folders,
+        collections: [
+          for (final node in current.collections)
+            node.id == collectionId ? node.copyWith(blockIds: members) : node,
+        ],
+      ),
+    );
+    return nowMember;
   }
 
   @override
@@ -46,6 +104,7 @@ class _FakePromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
       PromptBlockLibraryState(
         blocks: current.blocks.where((item) => item.id != blockId).toList(),
         folders: current.folders,
+        collections: current.collections,
       ),
     );
   }
@@ -69,6 +128,7 @@ void main() {
   Widget buildScreen({
     List<PromptBlock> blocks = const [],
     List<PromptBlockFolder> folders = const [],
+    List<PromptBlockCollection> collections = const [],
     _FakePromptBlockLibraryNotifier? notifier,
   }) {
     final effectiveNotifier =
@@ -77,6 +137,7 @@ void main() {
           initialState: PromptBlockLibraryState(
             blocks: blocks,
             folders: folders,
+            collections: collections,
           ),
         );
     return ProviderScope(
@@ -752,5 +813,307 @@ void main() {
 
     // 单块导出按钮随列表项渲染(点击会拉起原生保存对话框,测试只验存在)。
     expect(find.byIcon(Icons.file_upload_outlined), findsOneWidget);
+  });
+
+  PromptBlockFolder makeFolder(
+    String id,
+    String name, {
+    String? parentId,
+    int sortOrder = 0,
+  }) {
+    return PromptBlockFolder.create(
+      id: id,
+      name: name,
+      parentId: parentId,
+      sortOrder: sortOrder,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+  }
+
+  PromptBlockCollection makeCollection(
+    String id,
+    String name, {
+    String? parentId,
+    bool isFolder = false,
+    List<String> blockIds = const [],
+  }) {
+    return PromptBlockCollection.create(
+      id: id,
+      name: name,
+      parentId: parentId,
+      isFolder: isFolder,
+      blockIds: blockIds,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+  }
+
+  PromptBlock blockIn(String id, String title, String? folderId) {
+    return PromptBlock.create(
+      id: id,
+      title: title,
+      content: 'c-$id',
+      folderId: folderId,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+  }
+
+  testWidgets('favorites row filters main area to favorite blocks', (
+    tester,
+  ) async {
+    final fav = PromptBlock.create(
+      id: 'fav',
+      title: '已收藏',
+      content: 'c',
+      isFavorite: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+    await pumpScreen(
+      tester,
+      buildScreen(blocks: [fav, makeBlock('plain', '未收藏', 'c')]),
+    );
+
+    await tester.tap(find.text('收藏'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.text('已收藏'), findsWidgets);
+    expect(find.text('未收藏'), findsNothing);
+  });
+
+  testWidgets('collection row filters main area to member blocks', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      buildScreen(
+        blocks: [
+          makeBlock('member', '成员块', 'c'),
+          makeBlock('other', '路人块', 'c'),
+        ],
+        collections: [makeCollection('col1', '画师集', blockIds: ['member'])],
+      ),
+    );
+
+    await tester.tap(find.text('画师集'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.text('成员块'), findsOneWidget);
+    expect(find.text('路人块'), findsNothing);
+  });
+
+  testWidgets('folder scope groups blocks under sticky folder headers', (
+    tester,
+  ) async {
+    final folders = [
+      makeFolder('p', '功能'),
+      makeFolder('c', '子层', parentId: 'p'),
+    ];
+    final blocks = [
+      blockIn('b1', '父直块', 'p'),
+      blockIn('b2', '子层块', 'c'),
+      blockIn('b3', '库外块', null),
+    ];
+    await pumpScreen(tester, buildScreen(blocks: blocks, folders: folders));
+
+    // 选中父文件夹 → 分段视图
+    await tester.tap(find.text('功能'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.byKey(const Key('prompt-block-grouped-scroll')), findsOneWidget);
+    // 两个分段标题：选中文件夹自身 + 子层（带路径）
+    expect(find.text('功能'), findsWidgets);
+    expect(find.text('功能 / 子层'), findsOneWidget);
+    expect(find.text('父直块'), findsOneWidget);
+    expect(find.text('子层块'), findsOneWidget);
+    // 库外（未分类）块不属于该范围
+    expect(find.text('库外块'), findsNothing);
+  });
+
+  testWidgets('root scope groups unclassified + per-folder sections', (
+    tester,
+  ) async {
+    // 三段全部进视口，否则 sliver 懒构建不生成第三段标题
+    await tester.binding.setSurfaceSize(const Size(1200, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final folders = [
+      makeFolder('p', '功能'),
+      makeFolder('c', '子层', parentId: 'p'),
+    ];
+    final blocks = [
+      blockIn('b1', '父直块', 'p'),
+      blockIn('b2', '子层块', 'c'),
+      blockIn('b3', '未分类块', null),
+    ];
+    await pumpScreen(tester, buildScreen(blocks: blocks, folders: folders));
+
+    await tester.tap(find.text('根目录 / 未分类'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.byKey(const Key('prompt-block-grouped-scroll')), findsOneWidget);
+    expect(find.text('未分类'), findsWidgets);
+    expect(find.text('功能 / 子层'), findsOneWidget);
+    expect(find.text('未分类块'), findsOneWidget);
+    expect(find.text('子层块'), findsOneWidget);
+  });
+
+  testWidgets('waterfall grouped view keeps scroll offset at the end', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      StorageKeys.promptBlockLibraryViewMode: 'waterfall',
+    });
+    final folders = [
+      makeFolder('p', '功能'),
+      makeFolder('c', '子层', parentId: 'p'),
+    ];
+    final blocks = [
+      for (var i = 0; i < 6; i++) blockIn('p$i', '父直块$i', 'p'),
+      for (var i = 0; i < 30; i++) blockIn('c$i', '子层块$i', 'c'),
+    ];
+    await pumpScreen(tester, buildScreen(blocks: blocks, folders: folders));
+
+    // 选中父文件夹 → 分段瀑布流（功能 + 功能/子层 两段）
+    await tester.tap(find.text('功能'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    final groupedScroll = find.byKey(const Key('prompt-block-grouped-scroll'));
+    // 键打在 CustomScrollView（Stateless）上，ScrollableState 在其内部第一个
+    // Scrollable 子孙处；段体内的嵌套滚动组件排在其后。
+    final scrollable = tester.state<ScrollableState>(
+      find.descendant(of: groupedScroll, matching: find.byType(Scrollable)).first,
+    );
+    scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
+    // 弹回发生在随后若干帧的 scrollOffsetCorrection，多 pump 几帧放大差异
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      scrollable.position.pixels,
+      moreOrLessEquals(scrollable.position.maxScrollExtent, epsilon: 1),
+    );
+    expect(find.text('功能 / 子层'), findsOneWidget);
+  });
+
+  testWidgets('grid grouped view pushes first header out when scrolled', (
+    tester,
+  ) async {
+    final folders = [
+      makeFolder('p', '功能'),
+      makeFolder('c', '子层', parentId: 'p'),
+    ];
+    final blocks = [
+      for (var i = 0; i < 6; i++) blockIn('p$i', '父直块$i', 'p'),
+      for (var i = 0; i < 30; i++) blockIn('c$i', '子层块$i', 'c'),
+    ];
+    await pumpScreen(tester, buildScreen(blocks: blocks, folders: folders));
+
+    await tester.tap(find.text('功能'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    final groupedScroll = find.byKey(const Key('prompt-block-grouped-scroll'));
+    final scrollable = tester.state<ScrollableState>(
+      find.descendant(of: groupedScroll, matching: find.byType(Scrollable)).first,
+    );
+    scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
+    await tester.pump();
+    await tester.pump();
+
+    // 首段 pinned 头应被顶出视口（侧栏同名文件夹行需限定在滚动子树内排除）
+    expect(
+      find.descendant(of: groupedScroll, matching: find.text('功能')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('detail panel expansion keeps the top card anchored', (
+    tester,
+  ) async {
+    final blocks = [
+      for (var i = 0; i < 60; i++) blockIn('b$i', '块$i', null),
+    ];
+    await pumpScreen(tester, buildScreen(blocks: blocks));
+
+    // 平铺 grid（默认「全部块」范围）滚到中部
+    final grid = find.byKey(const Key('prompt-block-grid'));
+    final scrollable = tester.state<ScrollableState>(
+      find.descendant(of: grid, matching: find.byType(Scrollable)).first,
+    );
+    scrollable.position.jumpTo(1200);
+    await tester.pump();
+
+    // 视口内最靠上的可见卡（卡片都带 ValueKey('card-<id>')）
+    final cardFinder = find.byWidgetPredicate(
+      (w) =>
+          w.key is ValueKey<String> &&
+          (w.key! as ValueKey<String>).value.startsWith('card-'),
+    );
+    String? anchorKey;
+    var anchorDy = double.infinity;
+    for (final element in cardFinder.evaluate()) {
+      final dy = tester.getTopLeft(find.byKey(element.widget.key!)).dy;
+      // 60 = 工具栏以下才算视口内
+      if (dy > 60 && dy < anchorDy) {
+        anchorDy = dy;
+        anchorKey = (element.widget.key! as ValueKey<String>).value;
+      }
+    }
+    expect(anchorKey, isNotNull);
+
+    // 展开详情栏：宽度动画把主区压窄重排，锚卡应被钉回原位置
+    await tester.tap(find.byKey(const Key('prompt-block-detail-collapsed')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('详情'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.byKey(ValueKey(anchorKey!))).dy,
+      moreOrLessEquals(anchorDy, epsilon: 40),
+    );
+  });
+
+  testWidgets('star button on card opens the favorite menu', (tester) async {
+    await pumpScreen(
+      tester,
+      buildScreen(
+        blocks: [makeBlock('star', '星标块', 'c')],
+        collections: [makeCollection('col1', '画师集')],
+      ),
+    );
+
+    // 卡片操作行 ★ 钮（宽卡才有独立按钮行；侧栏「收藏」行也是星图标，限定在卡片子树内找）
+    await tester.tap(
+      find.descendant(
+        of: find.byType(PromptBlockCard),
+        matching: find.byIcon(Icons.star_border),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    final menu = find.byKey(const Key('prompt-block-favorite-menu'));
+    // 菜单含收藏开关行 + 收藏集勾选行（侧栏同名行需排除）
+    expect(find.descendant(of: menu, matching: find.text('收藏')), findsOneWidget);
+    expect(
+      find.descendant(of: menu, matching: find.text('画师集')),
+      findsOneWidget,
+    );
+
+    // 勾选收藏集 → 成员关系落库（fake notifier 同步 state）
+    await tester.tap(find.descendant(of: menu, matching: find.text('画师集')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
   });
 }
