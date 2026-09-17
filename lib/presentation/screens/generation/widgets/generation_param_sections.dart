@@ -83,21 +83,16 @@ class SizeSection extends ConsumerWidget {
         (params) => (width: params.width, height: params.height),
       ),
     );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ParamSectionTitle(context.l10n.generation_imageSize),
-        const SizedBox(height: 8),
-        SizeSelector(
-          width: size.width,
-          height: size.height,
-          onChanged: (width, height) {
-            ref
-                .read(generationParamsNotifierProvider.notifier)
-                .updateSize(width, height);
-          },
-        ),
-      ],
+    // 标题行内嵌在 SizeSelector 顶部，右端显示当前分辨率徽标
+    return SizeSelector(
+      width: size.width,
+      height: size.height,
+      title: ParamSectionTitle(context.l10n.generation_imageSize),
+      onChanged: (width, height) {
+        ref
+            .read(generationParamsNotifierProvider.notifier)
+            .updateSize(width, height);
+      },
     );
   }
 }
