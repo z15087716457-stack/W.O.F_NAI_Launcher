@@ -17,11 +17,11 @@ import 'unified_reference_panel.dart';
 
 /// 官网式布局左栏
 ///
-/// 一体式滚动列，自上而下：尺寸 → 种子 → 提示词（随内容自由增高）→
-/// 反推/图生图/风格迁移/精准参考。
-/// 参数（模型/采样器/噪声调度/步数/CFG/CFG Rescale）是独立的二级菜单：
-/// 触发条固定在钉底生成控制条上方，点击后面板向上弹出、
-/// 悬浮于滚动内容之上（官网式，不与提示词等模块同层）。
+/// 一体式滚动列，自上而下：提示词（随内容自由增高）→ 角色 →
+/// 反推/图生图/风格迁移/精准参考 → 尺寸。
+/// 模型选择常驻头部条（官网式）；AI 参数（种子/采样器/噪声调度/步数/CFG/
+/// CFG Rescale）是独立的二级菜单：触发条固定在钉底生成控制条上方，
+/// 点击后面板向上弹出、悬浮于滚动内容之上（官网式，不与提示词等模块同层）。
 class WebLeftPanel extends ConsumerStatefulWidget {
   final ValueNotifier<bool> negativeModeNotifier;
   final bool isResizing;
@@ -112,7 +112,7 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                 .setWebLeftPanelExpanded(true),
           );
 
-    // 拖拽时不使用动画，避免粘滞感（与经典布局 LeftPanel 一致）
+    // 拖拽时不使用动画，避免粘滞感
     if (widget.isResizing) {
       return Container(width: width, decoration: decoration, child: child);
     }
@@ -149,7 +149,9 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                 size: 18,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
+              // 模型选择常驻面板头部（官网式）：点击弹菜单切换
+              const Expanded(child: _ModelMenuButton()),
               CollapseButton(
                 icon: Icons.chevron_left,
                 onTap: () => ref
@@ -258,8 +260,6 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.stretch,
                                     children: [
-                                      ModelSection(),
-                                      SizedBox(height: 10),
                                       SamplerSection(),
                                       SizedBox(height: 10),
                                       NoiseScheduleSection(),
@@ -339,6 +339,87 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
           child: const GenerationControls(compact: true),
         ),
       ],
+    );
+  }
+}
+
+/// 头部条模型选择器：紧凑胶囊，点击弹菜单切换模型
+class _ModelMenuButton extends ConsumerWidget {
+  const _ModelMenuButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final model = ref.watch(
+      generationParamsNotifierProvider.select((params) => params.model),
+    );
+    final modelName = ImageModels.modelDisplayNames[model] ?? model;
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: PopupMenuButton<String>(
+        tooltip: modelName,
+        offset: const Offset(0, 32),
+        position: PopupMenuPosition.under,
+        itemBuilder: (context) => [
+          for (final m in ImageModels.allModels)
+            PopupMenuItem<String>(
+              value: m,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.check,
+                    size: 16,
+                    color: m == model
+                        ? theme.colorScheme.primary
+                        : Colors.transparent,
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      ImageModels.modelDisplayNames[m] ?? m,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+        onSelected: (value) {
+          ref.read(generationParamsNotifierProvider.notifier).updateModel(value);
+        },
+        child: Container(
+          height: 28,
+          constraints: const BoxConstraints(maxWidth: 230),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  modelName,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.keyboard_arrow_down,
+                size: 16,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
