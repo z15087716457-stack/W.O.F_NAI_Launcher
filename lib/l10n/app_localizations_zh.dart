@@ -2255,7 +2255,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vibe_shiftReplaceHint => 'Shift+点击 替换';
 
   @override
-  String get character_buttonLabel => '角色';
+  String get character_buttonLabel => '角色/定位';
 
   @override
   String get character_addCharacter => '添加角色';
@@ -6992,22 +6992,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_fontScale_done => '完成';
-
-  @override
-  String get settings_generationLayout => '生成页布局';
-
-  @override
-  String get settings_generationLayout_classic => '经典布局';
-
-  @override
-  String get settings_generationLayout_classicDescription => '参数在左侧，提示词位于预览区上方';
-
-  @override
-  String get settings_generationLayout_webStyle => '官网式布局';
-
-  @override
-  String get settings_generationLayout_webStyleDescription =>
-      '提示词与设置固定在最左栏，类似 NovelAI 官网';
 
   @override
   String get settings_historyClickBehavior => '历史记录点击行为';

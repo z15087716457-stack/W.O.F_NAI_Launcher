@@ -2288,7 +2288,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get vibe_shiftReplaceHint => 'Shift+クリックして置換';
 
   @override
-  String get character_buttonLabel => 'キャラクター';
+  String get character_buttonLabel => 'キャラ/位置';
 
   @override
   String get character_addCharacter => 'キャラクターを追加';
@@ -7094,23 +7094,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_fontScale_done => '完了';
-
-  @override
-  String get settings_generationLayout => '生成ページのレイアウト';
-
-  @override
-  String get settings_generationLayout_classic => 'クラシック';
-
-  @override
-  String get settings_generationLayout_classicDescription =>
-      'パラメータは左側、プロンプトはプレビューの上';
-
-  @override
-  String get settings_generationLayout_webStyle => '公式サイト風';
-
-  @override
-  String get settings_generationLayout_webStyleDescription =>
-      'プロンプトと設定を左端に固定、NovelAI 公式サイト風';
 
   @override
   String get settings_historyClickBehavior => '履歴クリックの動作';

@@ -69,7 +69,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
     // 生成中常驻显示取消入口（与移动端一致）
     final showCancel = isLauncherGenerating;
 
-    // 快捷键已由父级 DesktopGenerationLayout 统一处理
+    // 快捷键已由父级 WebStyleGenerationLayout 统一处理
     // 这里只负责布局
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -204,7 +204,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
             );
           }
 
-          // 经典布局窄宽：单行三段，生成按钮居中
+          // 窄宽：单行三段，生成按钮居中
           return Row(
             children: [
               const SizedBox(width: 8),

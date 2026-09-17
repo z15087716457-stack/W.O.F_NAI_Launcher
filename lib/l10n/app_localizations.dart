@@ -4246,7 +4246,7 @@ abstract class AppLocalizations {
   /// No description provided for @character_buttonLabel.
   ///
   /// In en, this message translates to:
-  /// **'Characters'**
+  /// **'Char/Position'**
   String get character_buttonLabel;
 
   /// No description provided for @character_addCharacter.
@@ -12791,36 +12791,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Done'**
   String get settings_fontScale_done;
-
-  /// No description provided for @settings_generationLayout.
-  ///
-  /// In en, this message translates to:
-  /// **'Generation page layout'**
-  String get settings_generationLayout;
-
-  /// No description provided for @settings_generationLayout_classic.
-  ///
-  /// In en, this message translates to:
-  /// **'Classic'**
-  String get settings_generationLayout_classic;
-
-  /// No description provided for @settings_generationLayout_classicDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Parameters on the left, prompt above the preview'**
-  String get settings_generationLayout_classicDescription;
-
-  /// No description provided for @settings_generationLayout_webStyle.
-  ///
-  /// In en, this message translates to:
-  /// **'Web style'**
-  String get settings_generationLayout_webStyle;
-
-  /// No description provided for @settings_generationLayout_webStyleDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt and settings docked on the far left, like the NovelAI website'**
-  String get settings_generationLayout_webStyleDescription;
 
   /// No description provided for @settings_historyClickBehavior.
   ///

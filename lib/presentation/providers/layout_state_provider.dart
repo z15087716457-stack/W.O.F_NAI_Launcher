@@ -6,12 +6,8 @@ part 'layout_state_provider.g.dart';
 
 /// UI布局状态数据类
 class LayoutState {
-  final bool leftPanelExpanded;
   final bool rightPanelExpanded;
-  final double leftPanelWidth;
   final double rightPanelWidth;
-  final double promptAreaHeight;
-  final bool promptMaximized;
   final bool mainNavRailExpanded;
   final double webLeftPanelWidth;
   final bool webLeftPanelExpanded;
@@ -25,12 +21,8 @@ class LayoutState {
   final bool? styleExploreRunSidebarVisible;
 
   const LayoutState({
-    this.leftPanelExpanded = true,
     this.rightPanelExpanded = true,
-    this.leftPanelWidth = 300.0,
     this.rightPanelWidth = 280.0,
-    this.promptAreaHeight = 200.0,
-    this.promptMaximized = false,
     this.mainNavRailExpanded = false,
     this.webLeftPanelWidth = 400.0,
     this.webLeftPanelExpanded = true,
@@ -44,12 +36,8 @@ class LayoutState {
 
   /// 复制并更新部分字段
   LayoutState copyWith({
-    bool? leftPanelExpanded,
     bool? rightPanelExpanded,
-    double? leftPanelWidth,
     double? rightPanelWidth,
-    double? promptAreaHeight,
-    bool? promptMaximized,
     bool? mainNavRailExpanded,
     double? webLeftPanelWidth,
     bool? webLeftPanelExpanded,
@@ -61,12 +49,8 @@ class LayoutState {
     bool? styleExploreRunSidebarVisible,
   }) {
     return LayoutState(
-      leftPanelExpanded: leftPanelExpanded ?? this.leftPanelExpanded,
       rightPanelExpanded: rightPanelExpanded ?? this.rightPanelExpanded,
-      leftPanelWidth: leftPanelWidth ?? this.leftPanelWidth,
       rightPanelWidth: rightPanelWidth ?? this.rightPanelWidth,
-      promptAreaHeight: promptAreaHeight ?? this.promptAreaHeight,
-      promptMaximized: promptMaximized ?? this.promptMaximized,
       mainNavRailExpanded: mainNavRailExpanded ?? this.mainNavRailExpanded,
       webLeftPanelWidth: webLeftPanelWidth ?? this.webLeftPanelWidth,
       webLeftPanelExpanded: webLeftPanelExpanded ?? this.webLeftPanelExpanded,
@@ -95,12 +79,8 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
     final storage = ref.read(localStorageServiceProvider);
 
     return LayoutState(
-      leftPanelExpanded: storage.getLeftPanelExpanded(),
       rightPanelExpanded: storage.getRightPanelExpanded(),
-      leftPanelWidth: storage.getLeftPanelWidth(),
       rightPanelWidth: storage.getRightPanelWidth(),
-      promptAreaHeight: storage.getPromptAreaHeight(),
-      promptMaximized: storage.getPromptMaximized(),
       mainNavRailExpanded: storage.getMainNavRailExpanded(),
       webLeftPanelWidth: storage.getWebLeftPanelWidth(),
       webLeftPanelExpanded: storage.getWebLeftPanelExpanded(),
@@ -111,20 +91,6 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       styleExplorePromptAreaHeight: storage.getStyleExplorePromptAreaHeight(),
       styleExploreRunSidebarVisible: storage.getStyleExploreRunSidebarVisible(),
     );
-  }
-
-  /// 设置左侧面板展开状态
-  Future<void> setLeftPanelExpanded(bool expanded) async {
-    state = state.copyWith(leftPanelExpanded: expanded);
-
-    // 保存到本地存储
-    final storage = ref.read(localStorageServiceProvider);
-    await storage.setLeftPanelExpanded(expanded);
-  }
-
-  /// 切换左侧面板展开状态
-  Future<void> toggleLeftPanel() async {
-    await setLeftPanelExpanded(!state.leftPanelExpanded);
   }
 
   /// 设置右侧面板展开状态
@@ -141,15 +107,6 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
     await setRightPanelExpanded(!state.rightPanelExpanded);
   }
 
-  /// 设置左侧面板宽度
-  Future<void> setLeftPanelWidth(double width) async {
-    state = state.copyWith(leftPanelWidth: width);
-
-    // 保存到本地存储
-    final storage = ref.read(localStorageServiceProvider);
-    await storage.setLeftPanelWidth(width);
-  }
-
   /// 设置右侧面板宽度
   Future<void> setRightPanelWidth(double width) async {
     state = state.copyWith(rightPanelWidth: width);
@@ -157,24 +114,6 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
     // 保存到本地存储
     final storage = ref.read(localStorageServiceProvider);
     await storage.setRightPanelWidth(width);
-  }
-
-  /// 设置提示区域高度
-  Future<void> setPromptAreaHeight(double height) async {
-    state = state.copyWith(promptAreaHeight: height);
-
-    // 保存到本地存储
-    final storage = ref.read(localStorageServiceProvider);
-    await storage.setPromptAreaHeight(height);
-  }
-
-  /// 设置提示区域最大化状态
-  Future<void> setPromptMaximized(bool maximized) async {
-    state = state.copyWith(promptMaximized: maximized);
-
-    // 保存到本地存储
-    final storage = ref.read(localStorageServiceProvider);
-    await storage.setPromptMaximized(maximized);
   }
 
   /// 设置桌面主导航栏展开状态
@@ -261,7 +200,7 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
   /// 设置画风探索页主提示词区高度
   ///
   /// 业务范围钳制（最小 100 / 按可用高度算上限）在探索页调用方做，
-  /// 这里只做 ≥0 防御（与主生成页 setPromptAreaHeight 同款分工）。
+  /// 这里只做 ≥0 防御。
   Future<void> setStyleExplorePromptAreaHeight(double height) async {
     final normalized = height.clamp(0.0, double.infinity).toDouble();
     state = state.copyWith(styleExplorePromptAreaHeight: normalized);

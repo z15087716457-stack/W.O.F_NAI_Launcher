@@ -12,10 +12,10 @@ void main() {
 
       final updated = state.copyWith(
         mainNavRailExpanded: true,
-        leftPanelWidth: 360.0,
+        rightPanelWidth: 360.0,
       );
       expect(updated.mainNavRailExpanded, isTrue);
-      expect(updated.leftPanelWidth, 360.0);
+      expect(updated.rightPanelWidth, 360.0);
     });
 
     test('build reads and setter writes expansion state', () async {
@@ -47,13 +47,13 @@ void main() {
     });
 
     test('copyWith 更新 web 字段且不影响其他字段', () {
-      final state = const LayoutState().copyWith(leftPanelWidth: 350.0);
+      final state = const LayoutState().copyWith(rightPanelWidth: 350.0);
       final updated = state.copyWith(
         webLeftPanelWidth: 480.0,
         webLeftPanelExpanded: false,
       );
 
-      expect(updated.leftPanelWidth, 350.0);
+      expect(updated.rightPanelWidth, 350.0);
       expect(updated.webLeftPanelWidth, 480.0);
       expect(updated.webLeftPanelExpanded, isFalse);
     });
@@ -313,10 +313,10 @@ void main() {
 
       final updated = state.copyWith(
         styleExplorePromptAreaHeight: 420.0,
-        leftPanelWidth: 360.0,
+        rightPanelWidth: 360.0,
       );
       expect(updated.styleExplorePromptAreaHeight, 420.0);
-      expect(updated.leftPanelWidth, 360.0);
+      expect(updated.rightPanelWidth, 360.0);
     });
 
     test('build reads and setter writes back with defensive clamp', () async {
@@ -345,7 +345,7 @@ void main() {
       );
 
       // 业务范围钳制（最小 100 / 按可用高度的 cap）在探索页调用方做，
-      // setter 只做 ≥0 防御（与主生成页 setPromptAreaHeight 同款分工）。
+      // setter 只做 ≥0 防御。
       await notifier.setStyleExplorePromptAreaHeight(-1.0);
       expect(storage.styleExplorePromptAreaHeight, 0.0);
     });
@@ -353,12 +353,8 @@ void main() {
 }
 
 class _FakeLayoutStorage extends LocalStorageService {
-  bool leftExpanded = true;
   bool rightExpanded = true;
-  double leftWidth = 300.0;
   double rightWidth = 280.0;
-  double promptHeight = 200.0;
-  bool promptMaximized = false;
   bool mainNavExpanded = false;
   double webWidth = 400.0;
   bool webExpanded = true;
@@ -369,22 +365,10 @@ class _FakeLayoutStorage extends LocalStorageService {
   bool? styleExploreRunSidebarVisible;
 
   @override
-  bool getLeftPanelExpanded() => leftExpanded;
-
-  @override
   bool getRightPanelExpanded() => rightExpanded;
 
   @override
-  double getLeftPanelWidth() => leftWidth;
-
-  @override
   double getRightPanelWidth() => rightWidth;
-
-  @override
-  double getPromptAreaHeight() => promptHeight;
-
-  @override
-  bool getPromptMaximized() => promptMaximized;
 
   @override
   bool getMainNavRailExpanded() => mainNavExpanded;

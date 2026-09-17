@@ -30,27 +30,6 @@ void main() {
     }
   });
 
-  testWidgets('外观分类包含生成页布局设置', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(1000, 1600));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
-          locale: Locale('zh'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: SingleChildScrollView(child: AppearanceSettingsSection()),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('生成页布局'), findsOneWidget);
-  });
-
   testWidgets('历史点击行为默认经典并可从外观设置切换和持久化', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));

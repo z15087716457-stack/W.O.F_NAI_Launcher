@@ -56,33 +56,8 @@ void main() {
   });
 
   group('CharacterPositionCanvas', () {
-    test('web style keeps the persisted classic maximize preference', () async {
-      final storage = _FakeCanvasStorage(
-        generationLayoutMode: 'web_style',
-        promptMaximized: true,
-      );
-      final container = _buildContainer(storage);
-      addTearDown(container.dispose);
-      final subscription = container.listen<bool>(
-        characterPositionCanvasProvider,
-        (_, __) {},
-        fireImmediately: true,
-      );
-      addTearDown(subscription.close);
-
-      container.read(characterPositionCanvasProvider.notifier).open();
-      await Future<void>.delayed(Duration.zero);
-
-      expect(container.read(characterPositionCanvasProvider), isTrue);
-      expect(container.read(promptMaximizeNotifierProvider), isTrue);
-      expect(storage.promptMaximized, isTrue);
-    });
-
-    test('classic style exits maximize before opening the canvas', () async {
-      final storage = _FakeCanvasStorage(
-        generationLayoutMode: 'classic',
-        promptMaximized: true,
-      );
+    test('opening the canvas exits maximized prompt editing', () async {
+      final storage = _FakeCanvasStorage(promptMaximized: true);
       final container = _buildContainer(storage);
       addTearDown(container.dispose);
       final subscription = container.listen<bool>(
@@ -98,6 +73,29 @@ void main() {
       expect(container.read(characterPositionCanvasProvider), isTrue);
       expect(container.read(promptMaximizeNotifierProvider), isFalse);
       expect(storage.promptMaximized, isFalse);
+    });
+
+    test('closing the canvas restores the previous maximize state', () async {
+      final storage = _FakeCanvasStorage(promptMaximized: true);
+      final container = _buildContainer(storage);
+      addTearDown(container.dispose);
+      final subscription = container.listen<bool>(
+        characterPositionCanvasProvider,
+        (_, __) {},
+        fireImmediately: true,
+      );
+      addTearDown(subscription.close);
+
+      container.read(characterPositionCanvasProvider.notifier).open();
+      await Future<void>.delayed(Duration.zero);
+      expect(container.read(promptMaximizeNotifierProvider), isFalse);
+
+      container.read(characterPositionCanvasProvider.notifier).close();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(container.read(characterPositionCanvasProvider), isFalse);
+      expect(container.read(promptMaximizeNotifierProvider), isTrue);
+      expect(storage.promptMaximized, isTrue);
     });
 
     test('becoming unavailable closes an open canvas', () async {
@@ -143,16 +141,9 @@ ProviderContainer _buildContainer(_FakeCanvasStorage storage) {
 }
 
 class _FakeCanvasStorage extends LocalStorageService {
-  _FakeCanvasStorage({
-    this.generationLayoutMode = 'web_style',
-    this.promptMaximized = false,
-  });
+  _FakeCanvasStorage({this.promptMaximized = false});
 
-  String generationLayoutMode;
   bool promptMaximized;
-
-  @override
-  String getGenerationLayoutMode() => generationLayoutMode;
 
   @override
   bool getPromptMaximized() => promptMaximized;

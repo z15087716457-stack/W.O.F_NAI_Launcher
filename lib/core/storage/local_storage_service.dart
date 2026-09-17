@@ -622,20 +622,6 @@ class LocalStorageService {
 
   // ==================== UI Layout State ====================
 
-  /// 获取左侧面板展开状态 (默认展开)
-  bool getLeftPanelExpanded() {
-    return getSetting<bool>(
-          StorageKeys.leftPanelExpanded,
-          defaultValue: true,
-        ) ??
-        true;
-  }
-
-  /// 保存左侧面板展开状态
-  Future<void> setLeftPanelExpanded(bool expanded) async {
-    await setSetting(StorageKeys.leftPanelExpanded, expanded);
-  }
-
   /// 获取右侧面板展开状态 (默认展开)
   bool getRightPanelExpanded() {
     return getSetting<bool>(
@@ -648,20 +634,6 @@ class LocalStorageService {
   /// 保存右侧面板展开状态
   Future<void> setRightPanelExpanded(bool expanded) async {
     await setSetting(StorageKeys.rightPanelExpanded, expanded);
-  }
-
-  /// 获取左侧面板宽度 (默认300)
-  double getLeftPanelWidth() {
-    return getSetting<double>(
-          StorageKeys.leftPanelWidth,
-          defaultValue: 300.0,
-        ) ??
-        300.0;
-  }
-
-  /// 保存左侧面板宽度
-  Future<void> setLeftPanelWidth(double width) async {
-    await setSetting(StorageKeys.leftPanelWidth, width);
   }
 
   /// 获取右侧面板宽度 (默认280, 使用 historyPanelWidth key)
@@ -678,20 +650,6 @@ class LocalStorageService {
     await setSetting(StorageKeys.historyPanelWidth, width);
   }
 
-  /// 获取提示区域高度 (默认200)
-  double getPromptAreaHeight() {
-    return getSetting<double>(
-          StorageKeys.promptAreaHeight,
-          defaultValue: 200.0,
-        ) ??
-        200.0;
-  }
-
-  /// 保存提示区域高度
-  Future<void> setPromptAreaHeight(double height) async {
-    await setSetting(StorageKeys.promptAreaHeight, height);
-  }
-
   /// 获取提示区域最大化状态 (默认关闭)
   bool getPromptMaximized() {
     return getSetting<bool>(StorageKeys.promptMaximized, defaultValue: false) ??
@@ -701,21 +659,6 @@ class LocalStorageService {
   /// 保存提示区域最大化状态
   Future<void> setPromptMaximized(bool maximized) async {
     await setSetting(StorageKeys.promptMaximized, maximized);
-  }
-
-  /// 获取生成页布局模式 (默认 'web_style')
-  String getGenerationLayoutMode() {
-    // 官网式布局体验更好，未主动设置过的用户默认使用官网式
-    return getSetting<String>(
-          StorageKeys.generationLayoutMode,
-          defaultValue: 'web_style',
-        ) ??
-        'web_style';
-  }
-
-  /// 保存生成页布局模式
-  Future<void> setGenerationLayoutMode(String mode) async {
-    await setSetting(StorageKeys.generationLayoutMode, mode);
   }
 
   /// 获取历史记录点击行为 (默认经典行为)

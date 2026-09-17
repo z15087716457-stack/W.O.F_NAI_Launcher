@@ -19,7 +19,7 @@ import '../../../widgets/common/image_detail/image_detail_viewer.dart';
 /// 图像保存服务类
 ///
 /// 负责处理图像保存、全屏预览等功能
-/// 从 desktop_layout.dart 中提取，减少文件职责
+/// 从生成页桌面布局中提取，减少文件职责
 class GenerationSaveService {
   GenerationSaveService._();
 

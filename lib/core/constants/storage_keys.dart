@@ -46,12 +46,8 @@ class StorageKeys {
   static const String windowY = 'window_y';
 
   // UI Layout State Keys (UI布局状态)
-  static const String leftPanelExpanded = 'left_panel_expanded';
   static const String rightPanelExpanded = 'right_panel_expanded';
-  static const String leftPanelWidth = 'left_panel_width';
-  static const String promptAreaHeight = 'prompt_area_height';
   static const String promptMaximized = 'prompt_maximized';
-  static const String generationLayoutMode = 'generation_layout_mode';
   static const String historyClickBehavior = 'history_click_behavior';
   static const String mainNavRailExpanded = 'main_nav_rail_expanded';
   static const String webLeftPanelWidth = 'web_left_panel_width';
