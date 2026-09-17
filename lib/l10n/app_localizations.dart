@@ -1755,17 +1755,17 @@ abstract class AppLocalizations {
   /// **'Random'**
   String get generation_seedRandom;
 
-  /// No description provided for @generation_seedLock.
+  /// No description provided for @generation_samplerRecommended.
   ///
   /// In en, this message translates to:
-  /// **'Lock Seed'**
-  String get generation_seedLock;
+  /// **'RECOMMENDED'**
+  String get generation_samplerRecommended;
 
-  /// No description provided for @generation_seedUnlock.
+  /// No description provided for @generation_samplerOther.
   ///
   /// In en, this message translates to:
-  /// **'Unlock Seed'**
-  String get generation_seedUnlock;
+  /// **'OTHER'**
+  String get generation_samplerOther;
 
   /// No description provided for @generation_advancedOptions.
   ///

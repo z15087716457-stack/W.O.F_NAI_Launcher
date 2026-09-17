@@ -294,9 +294,4 @@ class _TestLocalStorageService extends LocalStorageService {
   @override
   String getLastNoiseSchedule() => 'native';
 
-  @override
-  bool getSeedLocked() => false;
-
-  @override
-  int? getLockedSeedValue() => null;
 }

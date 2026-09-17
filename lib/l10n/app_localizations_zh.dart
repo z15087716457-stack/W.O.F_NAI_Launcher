@@ -883,10 +883,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_seedRandom => '随机';
 
   @override
-  String get generation_seedLock => '固定种子';
+  String get generation_samplerRecommended => '推荐';
 
   @override
-  String get generation_seedUnlock => '解锁种子';
+  String get generation_samplerOther => '其他';
 
   @override
   String get generation_advancedOptions => '高级选项';

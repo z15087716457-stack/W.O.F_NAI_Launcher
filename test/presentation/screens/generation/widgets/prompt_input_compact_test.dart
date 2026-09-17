@@ -103,11 +103,6 @@ class _TestLocalStorageService extends LocalStorageService {
   @override
   String getLastNoiseSchedule() => 'native';
 
-  @override
-  bool getSeedLocked() => false;
-
-  @override
-  int? getLockedSeedValue() => null;
 }
 
 /// 药丸编辑器（正向主提示词）依赖块库；无 Hive 的测试环境用空库替代。

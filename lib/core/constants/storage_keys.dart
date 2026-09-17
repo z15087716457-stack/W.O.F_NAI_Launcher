@@ -124,10 +124,6 @@ class StorageKeys {
   static const String enablePromptWeightScroll = 'enable_prompt_weight_scroll';
   static const String promptRegexRules = 'prompt_regex_rules'; // 规则JSON字符串列表
 
-  // Seed Lock Keys (种子锁定相关)
-  static const String seedLocked = 'seed_locked';
-  static const String lockedSeedValue = 'locked_seed_value';
-
   // Last Generation Params Keys (持久化上次使用的参数)
   static const String lastPrompt = 'last_prompt';
   static const String lastNegativePrompt = 'last_negative_prompt';

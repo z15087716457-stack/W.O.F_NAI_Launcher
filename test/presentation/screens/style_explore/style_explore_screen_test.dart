@@ -141,11 +141,6 @@ class _TestLocalStorageService extends LocalStorageService {
   @override
   bool getLastVarietyPlus() => false;
 
-  @override
-  bool getSeedLocked() => false;
-
-  @override
-  int? getLockedSeedValue() => null;
 }
 
 class _TestVibeLibraryNotifier extends VibeLibraryNotifier {

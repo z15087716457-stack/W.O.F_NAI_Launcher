@@ -896,10 +896,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_seedRandom => 'ランダム';
 
   @override
-  String get generation_seedLock => 'ロックシード';
+  String get generation_samplerRecommended => 'おすすめ';
 
   @override
-  String get generation_seedUnlock => 'シードのロックを解除する';
+  String get generation_samplerOther => 'その他';
 
   @override
   String get generation_advancedOptions => '詳細オプション';

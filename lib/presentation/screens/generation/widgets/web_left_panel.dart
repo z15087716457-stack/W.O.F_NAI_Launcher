@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:nai_launcher/core/utils/localization_extension.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../data/models/image/image_params.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/layout_state_provider.dart';
 import '../../../widgets/character/inline_character_section.dart';
@@ -282,13 +284,14 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
           ),
         ),
 
-        // 参数摘要条（官网式）：Steps/Guidance/Seed/Sampler 四列常驻，
-        // 点列可交互，右端箭头随抽屉开合旋转
+        // 参数摘要条（官网式）：Steps/Guidance/Seed/Sampler 四列靠左常驻，
+        // 右端右指箭头随抽屉开合旋转（收起朝右，展开朝上）
         GenerationParamsSummaryBar(
           onToggleDrawer: _toggleParamsMenu,
           arrow: RotationTransition(
-            turns: Tween<double>(begin: 0, end: 0.5).animate(_menuAnimation),
-            child: const Icon(Icons.keyboard_arrow_up, size: 20),
+            turns: Tween<double>(begin: 0, end: -0.25)
+                .animate(_menuAnimation),
+            child: const Icon(Icons.play_arrow, size: 20),
           ),
         ),
 
@@ -389,9 +392,9 @@ class _ModelMenuButton extends ConsumerWidget {
   }
 }
 
-/// 参数摘要条（官网式）：Steps / Guidance / Seed / Sampler 四列等宽常驻，
-/// 上小标签下参数值；Seed 列点击固定↔随机切换，Sampler 列点击弹采样器菜单，
-/// 其余区域点击展开/收起参数抽屉。
+/// 参数摘要条（官网式）：Steps / Guidance / Seed / Sampler 四列靠左常驻，
+/// 上小标签下参数值；Steps/Guidance 纯展示，Seed 列点击 pin/unpin 随机种子，
+/// Sampler 列点击从列上方弹出分组菜单，右端箭头点击展开/收起参数抽屉。
 class GenerationParamsSummaryBar extends ConsumerWidget {
   final VoidCallback onToggleDrawer;
   final Widget arrow;
@@ -402,54 +405,39 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
     required this.arrow,
   });
 
+  // 菜单项高度固定，锚定计算才有确定性
+  static const double _menuItemHeight = 40;
+  static const double _menuHeaderHeight = 26;
+  static const double _menuVerticalPadding = 8;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    // 锁标志在 storage 不在 state，select 元组在「锁定同值种子」时不重建会滞后；
-    // 改 watch 整个 params——toggleSeedLock 每条路径都写新 state 实例，必重建。
     final params = ref.watch(generationParamsNotifierProvider);
-    final isSeedLocked = ref
-        .read(generationParamsNotifierProvider.notifier)
-        .isSeedLocked;
 
-    Widget buildColumn({
-      required String label,
-      required Widget value,
+    // 纯展示列（不可点）
+    Widget column(String label, Widget value) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+          child: _columnContent(theme, label, value),
+        );
+
+    // 可点列
+    Widget tappableColumn(
+      String label,
+      Widget value,
       VoidCallback? onTap,
-    }) {
-      return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                DefaultTextStyle(
-                  style: theme.textTheme.bodySmall!.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  child: value,
-                ),
-              ],
+    ) =>
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+              child: _columnContent(theme, label, value),
             ),
           ),
-        ),
-      );
-    }
+        );
 
     return Material(
       color: theme.colorScheme.surface,
@@ -461,118 +449,190 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            Expanded(
-              child: buildColumn(
-                label: l10n.generation_stepsLabel,
-                value: Text(params.steps.toString()),
-                onTap: onToggleDrawer,
-              ),
+            column(
+              l10n.generation_stepsLabel,
+              Text(params.steps.toString()),
             ),
-            Expanded(
-              child: buildColumn(
-                label: l10n.generation_guidance,
-                value: Text(params.scale.toStringAsFixed(1)),
-                onTap: onToggleDrawer,
-              ),
+            column(
+              l10n.generation_guidance,
+              Text(params.scale.toStringAsFixed(1)),
             ),
-            Expanded(
-              child: buildColumn(
-                label: l10n.generation_seed,
-                value: isSeedLocked && params.seed != -1
-                    ? Text(params.seed.toString())
-                    : Icon(
-                        Icons.autorenew,
-                        size: 16,
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.7,
-                        ),
-                      ),
-                onTap: () {
-                  ref
-                      .read(generationParamsNotifierProvider.notifier)
-                      .toggleSeedLock();
-                },
-              ),
-            ),
-            Expanded(
-              child: PopupMenuButton<String>(
-                tooltip: Samplers.samplerDisplayNames[params.sampler] ??
-                    params.sampler,
-                offset: const Offset(0, -8),
-                itemBuilder: (context) => [
-                  for (final s in Samplers.allSamplers)
-                    PopupMenuItem<String>(
-                      value: s,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.check,
-                            size: 16,
-                            color: s == params.sampler
-                                ? theme.colorScheme.primary
-                                : Colors.transparent,
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              Samplers.samplerDisplayNames[s] ?? s,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
+            tappableColumn(
+              l10n.generation_seed,
+              params.seed != -1
+                  ? Text(params.seed.toString())
+                  : Icon(
+                      Icons.autorenew,
+                      size: 16,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
-                ],
-                onSelected: (value) {
-                  ref
-                      .read(generationParamsNotifierProvider.notifier)
-                      .updateSampler(value);
-                },
-                child: _buildPopupColumn(
-                  context,
-                  theme,
-                  label: l10n.generation_sampler,
-                  value: Samplers.samplerDisplayNames[params.sampler] ??
+              () {
+                final notifier =
+                    ref.read(generationParamsNotifierProvider.notifier);
+                if (params.seed != -1) {
+                  notifier.randomizeSeed();
+                } else {
+                  notifier.pinRandomSeed();
+                }
+              },
+            ),
+            Builder(
+              builder: (buttonContext) => tappableColumn(
+                l10n.generation_sampler,
+                Text(
+                  Samplers.samplerDisplayNames[params.sampler] ??
                       params.sampler,
+                ),
+                () => _showSamplerMenu(
+                  buttonContext,
+                  ref,
+                  theme,
+                  l10n,
+                  params,
                 ),
               ),
             ),
-            arrow,
+            const Spacer(),
+            // 右端箭头同样开合抽屉（与官网一致）
+            InkWell(
+              onTap: onToggleDrawer,
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: arrow,
+              ),
+            ),
+            const SizedBox(width: 4),
           ],
         ),
       ),
     );
   }
 
-  /// PopupMenuButton 的 child 不吃 InkWell，单独用同版式渲染
-  Widget _buildPopupColumn(
-    BuildContext context,
-    ThemeData theme, {
-    required String label,
-    required String value,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+  Widget _columnContent(ThemeData theme, String label, Widget value) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
           ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: theme.textTheme.bodySmall!.copyWith(
-              fontWeight: FontWeight.w600,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 2),
+        DefaultTextStyle(
+          style: theme.textTheme.bodySmall!.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          child: value,
+        ),
+      ],
+    );
+  }
+
+  /// 从采样器列上方弹出分组菜单（官网式：RECOMMENDED / OTHER）
+  ///
+  /// Flutter 的 showMenu 把菜单顶边对齐 position.top；把锚点顶边算成
+  /// 「触发器顶 − 菜单高」，菜单即整体向上展开。
+  void _showSamplerMenu(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeData theme,
+    AppLocalizations l10n,
+    ImageParams params,
+  ) {
+    final overlayBox =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final box = context.findRenderObject() as RenderBox;
+    final triggerRect = box.localToGlobal(Offset.zero) & box.size;
+
+    final samplers = Samplers.samplersForModel(params.model);
+    final recommended = samplers
+        .where((s) => Samplers.recommendedSamplers.contains(s))
+        .toList();
+    final others = samplers
+        .where((s) => !Samplers.recommendedSamplers.contains(s))
+        .toList();
+
+    final menuHeight = _menuVerticalPadding * 2 +
+        (recommended.isNotEmpty ? _menuHeaderHeight : 0) +
+        (others.isNotEmpty ? _menuHeaderHeight : 0) +
+        samplers.length * _menuItemHeight;
+    // 菜单底边贴触发器顶边，向上展开；顶到屏幕边缘时由 _fitInsideScreen 兜底
+    final menuTop = triggerRect.top - menuHeight - 2;
+
+    showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        triggerRect.left,
+        menuTop,
+        overlayBox.size.width - triggerRect.right,
+        0,
+      ),
+      constraints: const BoxConstraints(minWidth: 180, maxWidth: 320),
+      items: [
+        if (recommended.isNotEmpty) ...[
+          _menuHeader(theme, l10n.generation_samplerRecommended),
+          for (final s in recommended) _menuItem(theme, s, params.sampler),
+        ],
+        if (others.isNotEmpty) ...[
+          _menuHeader(theme, l10n.generation_samplerOther),
+          for (final s in others) _menuItem(theme, s, params.sampler),
+        ],
+      ],
+    ).then((value) {
+      if (value != null) {
+        ref
+            .read(generationParamsNotifierProvider.notifier)
+            .updateSampler(value);
+      }
+    });
+  }
+
+  PopupMenuEntry<String> _menuHeader(ThemeData theme, String label) {
+    return PopupMenuItem<String>(
+      enabled: false,
+      height: _menuHeaderHeight,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Text(
+        label,
+        style: theme.textTheme.labelSmall?.copyWith(
+          fontSize: 10,
+          letterSpacing: 0.8,
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+        ),
+      ),
+    );
+  }
+
+  PopupMenuEntry<String> _menuItem(
+    ThemeData theme,
+    String sampler,
+    String current,
+  ) {
+    return PopupMenuItem<String>(
+      value: sampler,
+      height: _menuItemHeight,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          Icon(
+            Icons.check,
+            size: 16,
+            color: sampler == current
+                ? theme.colorScheme.primary
+                : Colors.transparent,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              Samplers.samplerDisplayNames[sampler] ?? sampler,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

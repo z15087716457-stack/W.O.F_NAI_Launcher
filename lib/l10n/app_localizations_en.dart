@@ -913,10 +913,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_seedRandom => 'Random';
 
   @override
-  String get generation_seedLock => 'Lock Seed';
+  String get generation_samplerRecommended => 'RECOMMENDED';
 
   @override
-  String get generation_seedUnlock => 'Unlock Seed';
+  String get generation_samplerOther => 'OTHER';
 
   @override
   String get generation_advancedOptions => 'Advanced Options';

@@ -25,7 +25,7 @@
 - Krita 桥接：`ws://127.0.0.1:<port>/krita`；端口和 secret 从 `%APPDATA%/nai-launcher/krita-bridge.json` 发现，每次启动会重生成。
 - 常用客户端入口：`get`、`set k=v`、`set-json <JSON 或文件>`、`ui-gen`、`gen`、`cancel`。`gen` 强制单张；批量由客户端循环，失败间隔至少 2 秒。
 - `/user/*` 与生图请求都走 `image.novelai.net`，不要把用户接口改回 `api.novelai.net`。
-- `get`/`set` 参数应保持对称。可写项包括 prompt、negative_prompt、尺寸、seed/seed_lock、steps、CFG、sampler、质量词档、UC 预设、SMEA、模型、透明背景和 characters 等。
+- `get`/`set` 参数应保持对称。可写项包括 prompt、negative_prompt、尺寸、seed/seed_lock、steps、CFG、sampler、质量词档、UC 预设、SMEA、模型、透明背景和 characters 等。`seed_lock` 是协议兼容派生值：无独立锁标志，`seed != -1` 即视为锁定；`set seed_lock=false` 等价于 `set seed=-1`，`seed_lock=true` 在随机态下钉一个新随机种子。
 - `set` 是部分更新；`characters` 传数组表示整表替换，空数组表示清空。角色框必须同时维护 UI 的 `characterPromptNotifier` 和桥接使用的 `ImageParams.characters`，不能只改其中一套。
 - `prompt`/`negative_prompt` 的读数是应用 fixedTags 后的生效版。vibe、precise reference、img2img 目前可读但不可由桥接写入；UI 中设定后，后续 generate 会继承。
 - `uc_preset` 的权威源是 UI 下拉值，桥接读数只是副本，不能根据返回的 `0` 反推 UI 状态；桥接设置该项时会同步 UI。

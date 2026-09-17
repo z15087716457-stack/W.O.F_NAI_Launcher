@@ -208,6 +208,7 @@ class Samplers {
   static const String naiSmea = 'nai_smea';
   static const String naiSmeaDyn = 'nai_smea_dyn';
 
+  /// V3 及更早模型的完整采样器清单（含 DDIM 系）
   static const List<String> allSamplers = [
     kEuler,
     kEulerAncestral,
@@ -218,6 +219,37 @@ class Samplers {
     ddim,
     ddimV3,
   ];
+
+  /// V4/V4.5 采样器清单：DDIM 系在 V4+ 不被原生支持
+  ///（请求层会静默回退 Euler Ancestral），UI 不再暴露
+  static const List<String> v4Samplers = [
+    kEuler,
+    kEulerAncestral,
+    kDpmpp2m,
+    kDpmpp2mSde,
+    kDpmpp2sAncestral,
+    kDpmppSde,
+  ];
+
+  /// V5 采样器清单：严格镜像官网（无 DPM++ SDE、无 DDIM）。
+  /// 顺序即官网 OTHER 分组顺序（推荐项在 UI 层被前置，不影响本顺序）。
+  static const List<String> v5Samplers = [
+    kEulerAncestral,
+    kEuler,
+    kDpmpp2sAncestral,
+    kDpmpp2mSde,
+    kDpmpp2m,
+  ];
+
+  /// 官网「推荐」分组（选择器置顶展示）
+  static const List<String> recommendedSamplers = [kEulerAncestral];
+
+  /// 按模型族返回可用采样器列表
+  static List<String> samplersForModel(String model) {
+    if (ModelSpecs.of(model).isV5) return v5Samplers;
+    if (ModelSpecs.of(model).isV4OrLater) return v4Samplers;
+    return allSamplers;
+  }
 
   static const Map<String, String> samplerDisplayNames = {
     kEuler: 'Euler',

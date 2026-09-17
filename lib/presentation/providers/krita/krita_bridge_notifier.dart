@@ -313,9 +313,10 @@ final kritaBridgeNotifierProvider =
               .round()
               .clamp(16, 192)
               .toInt(),
-          // AI 接管扩展：set_params → GenerationParamsNotifier setters
+          // AI 接管扩展：set_params → GenerationParamsNotifier setters。
+          // seed_lock 是协议兼容派生值：有值即固定，无独立锁标志
           readSeedLock: () =>
-              ref.read(generationParamsNotifierProvider.notifier).isSeedLocked,
+              ref.read(generationParamsNotifierProvider).seed != -1,
           // AI 接管扩展：get_params 回读 UI 角色框系统（界面可见的那套）
           readCharacters: () {
             final config = ref.read(characterPromptNotifierProvider);
@@ -379,9 +380,16 @@ final kritaBridgeNotifierProvider =
             apply<double>('cfg_scale', dbl('cfg_scale'), notifier.updateScale);
             apply<String>('sampler', str('sampler'), notifier.updateSampler);
             apply<int>('seed', integer('seed'), notifier.updateSeed);
+            // 协议兼容：seed_lock 派生自 seed（有值即固定）。
+            // true 且当前为随机 → 钉一个随机种子；false → 回随机
             final seedLock = flag('seed_lock');
-            if (seedLock != null && seedLock != notifier.isSeedLocked) {
-              notifier.toggleSeedLock();
+            if (seedLock != null) {
+              if (seedLock &&
+                  ref.read(generationParamsNotifierProvider).seed == -1) {
+                notifier.pinRandomSeed();
+              } else if (!seedLock) {
+                notifier.updateSeed(-1);
+              }
               applied.add('seed_lock');
             }
             apply<int>(

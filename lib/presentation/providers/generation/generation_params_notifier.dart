@@ -143,12 +143,18 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     // 从本地存储加载默认参数和上次使用的参数
     final storage = ref.read(localStorageServiceProvider);
     final qualityPresetState = ref.read(qualityPresetNotifierProvider);
+    final storedModel = storage.getDefaultModel();
+    final storedSampler = storage.getDefaultSampler();
 
     return ImageParams(
       prompt: storage.getLastPrompt(),
       negativePrompt: storage.getLastNegativePrompt(),
-      model: storage.getDefaultModel(),
-      sampler: storage.getDefaultSampler(),
+      model: storedModel,
+      // 存储的采样器可能不被当前模型族支持（如 V5 下残留的 DDIM），
+      // 归位到推荐采样器
+      sampler: Samplers.samplersForModel(storedModel).contains(storedSampler)
+          ? storedSampler
+          : Samplers.kEulerAncestral,
       steps: storage.getDefaultSteps(),
       scale: storage.getDefaultScale(),
       width: storage.getDefaultWidth(),
@@ -160,38 +166,9 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       varietyPlus: storage.getLastVarietyPlus(),
       qualityToggle: qualityPresetState.usesNativePreset,
       qualityTagPreset: qualityPresetState.nativePreset,
-      // 从存储加载种子锁定状态
-      seed: storage.getSeedLocked() && storage.getLockedSeedValue() != null
-          ? storage.getLockedSeedValue()!
-          : -1,
+      // 种子恒为会话态：-1 随机，有值即固定（无独立锁标志）
+      seed: -1,
     );
-  }
-
-  // ==================== 种子锁定 ====================
-
-  /// 获取种子是否锁定
-  bool get isSeedLocked => _storage.getSeedLocked();
-
-  /// 切换种子锁定状态
-  void toggleSeedLock() {
-    final wasLocked = _storage.getSeedLocked();
-    final newLocked = !wasLocked;
-
-    if (newLocked) {
-      // 锁定：优先恢复上次记住的锁定值，否则实体化当前值/新随机数
-      final currentSeed = state.seed;
-      final seedToLock = currentSeed == -1
-          ? (_storage.getLockedSeedValue() ?? Random().nextInt(4294967295))
-          : currentSeed;
-      _storage.setLockedSeedValue(seedToLock);
-      _storage.setSeedLocked(true);
-      state = state.copyWith(seed: seedToLock);
-    } else {
-      // 解锁：回到真随机（种子归 -1）。锁定值留在存储槽中不清理，
-      // 供再次锁定或下次启动恢复，与官网 pin/unpin 语义对齐。
-      _storage.setSeedLocked(false);
-      state = state.copyWith(seed: -1);
-    }
   }
 
   /// 更新提示词
@@ -226,9 +203,15 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
   /// 更新模型
   void updateModel(String model, {bool persist = true}) {
-    state = state.copyWith(model: model);
+    // 当前采样器不被新模型族支持时归位到推荐采样器
+    // （如切到 V5 时残留的 DDIM/DPM++ SDE）
+    final sampler = Samplers.samplersForModel(model).contains(state.sampler)
+        ? state.sampler
+        : Samplers.kEulerAncestral;
+    state = state.copyWith(model: model, sampler: sampler);
     if (persist) {
       _storage.setDefaultModel(model);
+      _storage.setDefaultSampler(sampler);
     }
   }
 
@@ -267,6 +250,11 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
   /// 随机种子
   void randomizeSeed() {
     state = state.copyWith(seed: -1);
+  }
+
+  /// 钉住一个新随机种子（有值即固定，无独立锁标志）
+  void pinRandomSeed() {
+    state = state.copyWith(seed: Random().nextInt(4294967295));
   }
 
   /// 更新 SMEA Auto (V3 模型)

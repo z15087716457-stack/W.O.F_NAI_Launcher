@@ -11,6 +11,7 @@ void main() {
   Widget buildSubject({
     required _MemoryLocalStorageService storage,
     required VoidCallback onToggleDrawer,
+    Widget arrow = const Icon(Icons.play_arrow),
   }) {
     return ProviderScope(
       overrides: [
@@ -23,7 +24,7 @@ void main() {
         home: Scaffold(
           body: GenerationParamsSummaryBar(
             onToggleDrawer: onToggleDrawer,
-            arrow: const Icon(Icons.keyboard_arrow_up, size: 20),
+            arrow: arrow,
           ),
         ),
       ),
@@ -61,9 +62,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('tapping seed column toggles lock: value -> random -> value', (
-    tester,
-  ) async {
+  testWidgets('tapping seed column pins/unpins a random seed', (tester) async {
     final storage = _MemoryLocalStorageService();
     await tester.pumpWidget(
       buildSubject(storage: storage, onToggleDrawer: () {}),
@@ -71,34 +70,53 @@ void main() {
     await tester.pump();
 
     final container = containerOf(tester);
-    final notifier = container.read(generationParamsNotifierProvider.notifier);
 
-    // 随机态 → 锁定：实体化一个具体种子并显示
+    // 随机态 → pin 一个具体种子并显示
     await tester.tap(find.text('种子'));
     await tester.pump();
-    final lockedSeed = container.read(generationParamsNotifierProvider).seed;
-    expect(notifier.isSeedLocked, isTrue);
-    expect(lockedSeed, isNot(-1));
-    expect(find.text(lockedSeed.toString()), findsOneWidget);
+    final pinnedSeed = container.read(generationParamsNotifierProvider).seed;
+    expect(pinnedSeed, isNot(-1));
+    expect(find.text(pinnedSeed.toString()), findsOneWidget);
     expect(find.byIcon(Icons.autorenew), findsNothing);
 
-    // 锁定态 → 解锁：回到随机（seed = -1），图标恢复
+    // 固定态 → 回到随机（seed = -1），图标恢复
     await tester.tap(find.text('种子'));
     await tester.pump();
-    expect(notifier.isSeedLocked, isFalse);
     expect(container.read(generationParamsNotifierProvider).seed, -1);
     expect(find.byIcon(Icons.autorenew), findsOneWidget);
-
-    // 再锁定：恢复之前记住的锁定值
-    await tester.tap(find.text('种子'));
-    await tester.pump();
-    expect(
-      container.read(generationParamsNotifierProvider).seed,
-      lockedSeed,
-    );
   });
 
-  testWidgets('tapping sampler column opens menu and switches sampler', (
+  testWidgets('steps/guidance columns are non-interactive', (tester) async {
+    final storage = _MemoryLocalStorageService();
+    var toggleCount = 0;
+    await tester.pumpWidget(
+      buildSubject(storage: storage, onToggleDrawer: () => toggleCount++),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('步数'));
+    await tester.pump();
+    expect(toggleCount, 0);
+
+    await tester.tap(find.text('Guidance'));
+    await tester.pump();
+    expect(toggleCount, 0);
+  });
+
+  testWidgets('tapping arrow toggles the params drawer', (tester) async {
+    final storage = _MemoryLocalStorageService();
+    var toggleCount = 0;
+    await tester.pumpWidget(
+      buildSubject(storage: storage, onToggleDrawer: () => toggleCount++),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.play_arrow));
+    await tester.pump();
+    expect(toggleCount, 1);
+  });
+
+  testWidgets('sampler column opens grouped menu above and switches sampler', (
     tester,
   ) async {
     final storage = _MemoryLocalStorageService();
@@ -112,7 +130,11 @@ void main() {
     await tester.tap(find.text('采样器'));
     await tester.pumpAndSettle();
 
-    // 菜单展开，选中另一采样器
+    // 分组头与可用采样器（默认模型族不含 DDIM）
+    expect(find.text('推荐'), findsOneWidget);
+    expect(find.text('其他'), findsOneWidget);
+    expect(find.text('DDIM'), findsNothing);
+
     final target = Samplers.samplerDisplayNames[Samplers.kDpmpp2m]!;
     await tester.tap(find.text(target).last);
     await tester.pumpAndSettle();
@@ -122,25 +144,6 @@ void main() {
       Samplers.kDpmpp2m,
     );
     expect(find.text(target), findsOneWidget);
-  });
-
-  testWidgets('tapping steps/guidance columns toggles the params drawer', (
-    tester,
-  ) async {
-    final storage = _MemoryLocalStorageService();
-    var toggleCount = 0;
-    await tester.pumpWidget(
-      buildSubject(storage: storage, onToggleDrawer: () => toggleCount++),
-    );
-    await tester.pump();
-
-    await tester.tap(find.text('步数'));
-    await tester.pump();
-    expect(toggleCount, 1);
-
-    await tester.tap(find.text('Guidance'));
-    await tester.pump();
-    expect(toggleCount, 2);
   });
 }
 

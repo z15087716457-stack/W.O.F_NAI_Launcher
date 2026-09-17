@@ -103,25 +103,73 @@ class SamplerSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sampler = ref.watch(
-      generationParamsNotifierProvider.select((params) => params.sampler),
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final data = ref.watch(
+      generationParamsNotifierProvider.select(
+        (params) => (sampler: params.sampler, model: params.model),
+      ),
     );
+
+    // 按模型族过滤采样器（V5 无 DDIM/DPM++ SDE），并按官网分 RECOMMENDED/OTHER
+    final samplers = Samplers.samplersForModel(data.model);
+    final recommended = samplers
+        .where((s) => Samplers.recommendedSamplers.contains(s))
+        .toList();
+    final others = samplers
+        .where((s) => !Samplers.recommendedSamplers.contains(s))
+        .toList();
+
+    DropdownMenuItem<String> headerItem(String label) =>
+        DropdownMenuItem<String>(
+          enabled: false,
+          child: Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontSize: 10,
+              letterSpacing: 0.8,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+            ),
+          ),
+        );
+
+    DropdownMenuItem<String> valueItem(String s) => DropdownMenuItem<String>(
+          value: s,
+          child: Text(
+            Samplers.samplerDisplayNames[s] ?? s,
+            style: const TextStyle(fontSize: 13),
+          ),
+        );
+
+    final items = <DropdownMenuItem<String>>[
+      if (recommended.isNotEmpty) ...[
+        headerItem(l10n.generation_samplerRecommended),
+        for (final s in recommended) valueItem(s),
+      ],
+      if (others.isNotEmpty) ...[
+        headerItem(l10n.generation_samplerOther),
+        for (final s in others) valueItem(s),
+      ],
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ParamSectionTitle(context.l10n.generation_sampler),
+        ParamSectionTitle(l10n.generation_sampler),
         const SizedBox(height: 8),
         ThemedDropdown<String>(
-          value: sampler,
-          items: Samplers.allSamplers.map((sampler) {
-            return DropdownMenuItem(
-              value: sampler,
-              child: Text(
-                Samplers.samplerDisplayNames[sampler] ?? sampler,
-                style: const TextStyle(fontSize: 13),
-              ),
-            );
-          }).toList(),
+          value: data.sampler,
+          items: items,
+          // selectedItemBuilder 需与 items 等长：分组头占位为空
+          selectedItemBuilder: (context) => [
+            for (final item in items)
+              item.value == null
+                  ? const SizedBox.shrink()
+                  : Text(
+                      Samplers.samplerDisplayNames[item.value] ?? item.value!,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+          ],
           onChanged: (value) {
             if (value != null) {
               ref
@@ -372,93 +420,44 @@ class _SeedSectionState extends ConsumerState<SeedSection> {
                 },
                 suffixIcon: seed == -1
                     ? null
-                    : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // 复制按钮
-                          _SeedIconButton(
-                            icon: Icons.copy_rounded,
-                            tooltip: context.l10n.common_copy,
-                            onPressed: () {
-                              Clipboard.setData(
-                                ClipboardData(text: seed.toString()),
-                              );
-                              AppToast.success(
-                                context,
-                                context.l10n.common_copied,
-                              );
-                            },
-                          ),
-                          // 清空按钮
-                          _SeedIconButton(
-                            icon: Icons.clear_rounded,
-                            tooltip: context.l10n.common_clear,
-                            onPressed: () {
-                              _seedController.clear();
-                              ref
-                                  .read(
-                                    generationParamsNotifierProvider.notifier,
-                                  )
-                                  .updateSeed(-1);
-                            },
-                          ),
-                          const SizedBox(width: 4),
-                        ],
+                    : _SeedIconButton(
+                        icon: Icons.copy_rounded,
+                        tooltip: context.l10n.common_copy,
+                        onPressed: () {
+                          Clipboard.setData(
+                            ClipboardData(text: seed.toString()),
+                          );
+                          AppToast.success(
+                            context,
+                            context.l10n.common_copied,
+                          );
+                        },
                       ),
               ),
             ),
             const SizedBox(width: 8),
-            // 种子锁定按钮
-            IconButton(
-              icon: Icon(
-                ref
-                        .watch(generationParamsNotifierProvider.notifier)
-                        .isSeedLocked
-                    ? Icons.lock
-                    : Icons.lock_open,
-                size: 20,
-              ),
-              onPressed: () {
-                // 先同步输入框的值到 state（防止用户输入后 state 未更新）
-                final inputText = _seedController.text.trim();
-                final inputSeed = inputText.isEmpty
-                    ? -1
-                    : (int.tryParse(inputText) ?? -1);
-                if (inputSeed !=
-                    ref.read(generationParamsNotifierProvider).seed) {
+            // 尾部指示：随机态显示装饰性种子图标（不可点），
+            // 有值态变为 ✕，点击清空回随机
+            if (seed == -1)
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Icon(
+                  Icons.autorenew,
+                  size: 18,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                ),
+              )
+            else
+              _SeedIconButton(
+                icon: Icons.clear_rounded,
+                tooltip: context.l10n.common_clear,
+                onPressed: () {
+                  _seedController.clear();
                   ref
                       .read(generationParamsNotifierProvider.notifier)
-                      .updateSeed(inputSeed);
-                }
-
-                ref
-                    .read(generationParamsNotifierProvider.notifier)
-                    .toggleSeedLock();
-                // 更新输入框显示
-                final newSeed = ref.read(generationParamsNotifierProvider).seed;
-                _seedController.text = newSeed == -1 ? '' : newSeed.toString();
-                // 锁定状态存于 notifier 而非 state，同值种子不会触发
-                // select 重建，需手动刷新图标/背景
-                setState(() {});
-              },
-              tooltip:
-                  ref
-                      .watch(generationParamsNotifierProvider.notifier)
-                      .isSeedLocked
-                  ? context.l10n.generation_seedUnlock
-                  : context.l10n.generation_seedLock,
-              style: IconButton.styleFrom(
-                backgroundColor:
-                    ref
-                        .watch(generationParamsNotifierProvider.notifier)
-                        .isSeedLocked
-                    ? theme.colorScheme.primary.withValues(alpha: 0.15)
-                    : theme.colorScheme.surfaceContainerHighest,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                      .updateSeed(-1);
+                },
               ),
-            ),
           ],
         ),
       ],
