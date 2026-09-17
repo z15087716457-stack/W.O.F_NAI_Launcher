@@ -83,7 +83,9 @@ void main() {
       expect(decoration.color, equals(Colors.red));
     });
 
-    testWidgets('shows dark chip when balance sufficient', (tester) async {
+    testWidgets('shows dark chip regardless of theme when balance sufficient', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -91,20 +93,16 @@ void main() {
             estimatedCostProvider.overrideWith((ref) => 5),
             isBalanceInsufficientProvider.overrideWith((ref) => false),
           ],
-          child: MaterialApp(
-            theme: ThemeData(
-              colorScheme: const ColorScheme.light(
-                inverseSurface: Colors.black87,
-              ),
-            ),
-            home: const Scaffold(body: AnlasCostBadge(isGenerating: false)),
+          child: const MaterialApp(
+            home: Scaffold(body: AnlasCostBadge(isGenerating: false)),
           ),
         ),
       );
 
       final container = tester.widget<Container>(find.byType(Container));
       final decoration = container.decoration as BoxDecoration;
-      expect(decoration.color, equals(Colors.black87));
+      // 官网式固定深灰底，不随主题 inverseSurface 浮动
+      expect(decoration.color, equals(const Color(0xFF2B2B33)));
     });
   });
 }

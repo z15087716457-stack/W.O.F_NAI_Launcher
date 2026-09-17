@@ -34,11 +34,13 @@ class AnlasCostBadge extends ConsumerWidget {
         ? ref.watch(isBalanceInsufficientProvider)
         : balance != null && balance < cost;
 
-    // 常态为深色框反色字；余额不足时整框换 error
+    // 官网式固定深灰底白字（不跟主题色——奶油色主题下
+    // inverseSurface 也是浅色）；余额不足时整框换 error
     final Color badgeColor =
-        isInsufficient ? theme.colorScheme.error : theme.colorScheme.inverseSurface;
-    final Color badgeTextColor =
-        isInsufficient ? theme.colorScheme.onError : theme.colorScheme.onInverseSurface;
+        isInsufficient ? theme.colorScheme.error : const Color(0xFF2B2B33);
+    const Color badgeTextColor = Colors.white;
+    final Color iconColor =
+        isInsufficient ? theme.colorScheme.onError : badgeTextColor;
 
     return Container(
       margin: const EdgeInsets.only(left: 8),
@@ -52,7 +54,7 @@ class AnlasCostBadge extends ConsumerWidget {
         children: [
           Text(
             '$cost',
-            style: TextStyle(
+            style: const TextStyle(
               color: badgeTextColor,
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -62,9 +64,9 @@ class AnlasCostBadge extends ConsumerWidget {
           SvgPicture.asset(
             'assets/icons/nai-icon-anlas.svg',
             height: 12,
-            // 不足时金钻随文字一起换警示色，保持单框整体一致
+            // 常态保留金钻原色；不足时随文字一起换警示色保持整体一致
             colorFilter: isInsufficient
-                ? ColorFilter.mode(badgeTextColor, BlendMode.srcIn)
+                ? ColorFilter.mode(iconColor, BlendMode.srcIn)
                 : null,
           ),
         ],
