@@ -8,11 +8,18 @@ import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
 
+/// 图区宽高比钳制范围：竖图封顶 4:5（高≈1.25×列宽），超宽图裁到
+/// 16:9；区间内保持真实比例不裁。
+const double _kWaterfallMinImageAspectRatio = 4 / 5;
+const double _kWaterfallMaxImageAspectRatio = 16 / 9;
+
 /// 块库瀑布流卡片（FEAT-1）。
 ///
-/// - 有图块：缩略图按真实宽高比撑高（尺寸先入静态缓存，首帧即给正确
-///   占位比例，不出现 0 高闪烁——BUG-3 教训）+ 素色标题条（图标+名称+
-///   块颜色小圆点，标题区不被块颜色染色）。
+/// - 有图块：缩略图按真实宽高比撑高，但钳制在 [4:5, 16:9]——竖图封顶
+///   4:5（高度≈1.25×列宽，仍比横图高但不压没标题条），超宽全景轻微裁
+///   边；框内 cover 裁剪并按块的 offsetX/Y 平移取景（scale 是 2.5:1 横幅
+///   参数，瀑布流不套用）。尺寸先入静态缓存，首帧即给正确占位比例，不
+///   出现 0 高闪烁——BUG-3 教训。
 /// - 无图块：老样子长条（块颜色底+图标+标题），宽度撑满列宽。
 class PromptBlockWaterfallCard extends StatefulWidget {
   const PromptBlockWaterfallCard({
@@ -167,20 +174,33 @@ class _PromptBlockWaterfallCardState extends State<PromptBlockWaterfallCard> {
     );
   }
 
-  /// 有图卡：缩略图按真实宽高比（未读出时 4:3 占位）+ 素色标题条。
+  /// 有图卡：缩略图按钳制后的宽高比（未读出时 4:3 占位）+ 素色标题条。
   Widget _buildImageCard(ThemeData theme) {
     final size = _imageSize;
+    final block = widget.block;
+    final ratio = size == null
+        ? 4 / 3
+        : (size.width / size.height).clamp(
+            _kWaterfallMinImageAspectRatio,
+            _kWaterfallMaxImageAspectRatio,
+          );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AspectRatio(
-          key: ValueKey('prompt-block-waterfall-image-${widget.block.id}'),
-          aspectRatio: size == null ? 4 / 3 : size.width / size.height,
+          key: ValueKey('prompt-block-waterfall-image-${block.id}'),
+          aspectRatio: ratio,
           child: size == null
               ? _buildPlaceholder(theme)
               : Image.file(
-                  File(widget.block.thumbnail!),
-                  fit: BoxFit.fitWidth,
+                  File(block.thumbnail!),
+                  // 框比真实比例窄时 cover 裁掉溢出边；offset 参数把取景窗
+                  // 平移到用户在横幅裁剪里选定的位置（-1..1 → Alignment）。
+                  fit: BoxFit.cover,
+                  alignment: Alignment(
+                    block.thumbnailOffsetX.clamp(-1.0, 1.0),
+                    block.thumbnailOffsetY.clamp(-1.0, 1.0),
+                  ),
                   filterQuality: FilterQuality.medium,
                   gaplessPlayback: true,
                   cacheWidth: (320 * MediaQuery.devicePixelRatioOf(context))

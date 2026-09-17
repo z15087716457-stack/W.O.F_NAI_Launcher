@@ -5,6 +5,7 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
+import '../../common/thumbnail_display.dart';
 import '../blocks/prompt_block_colors.dart';
 import 'dna_icon.dart';
 import 'pill_instance_settings_dialog.dart';
@@ -14,7 +15,9 @@ import 'pill_instance_settings_dialog.dart';
 /// 内容 = 实例当前提示词（随机/顺序模式显示物化的 currentRoll——即
 /// 「L1 显示 = 生成发送 = token 计数」三者同一份；固定模式显示块库实时
 /// 内容）+ 按模式分化的操作行（FEAT-46）：固定=设置/启停/删除；
-/// 顺序=←→ 逐幕步进/锁定/删除；随机=重抽/设置/启停/遗传/锁定/删除。
+/// 顺序=←→ 逐幕步进/设置/启停/锁定/删除；随机=重抽/设置/启停/遗传/锁定/删除。
+/// 设置钮为全模式共有——L2 弹窗的 SegmentedButton 是唯一模式切换入口，
+/// 任一模式缺它都会堵死回不去。
 ///
 /// 宿主编辑器用 [buildPillInstanceOverlayEntry] 生成 OverlayEntry 并自行
 /// 持有/关闭；实例消失（文本里标记被删）时卡片自动请求关闭。
@@ -80,6 +83,24 @@ class PillInstanceCard extends ConsumerWidget {
                 ),
               ],
             ),
+            // 有图块：横图 280×120、竖图 280×200，坐标系与块库详情一致
+            // （offset/scale 全保真）。
+            if (block?.thumbnail != null) ...[
+              const SizedBox(height: 6),
+              ClipRRect(
+                key: ValueKey('pill-instance-thumbnail-${block!.id}'),
+                borderRadius: BorderRadius.circular(8),
+                child: ThumbnailDisplay(
+                  imagePath: block.thumbnail!,
+                  offsetX: block.thumbnailOffsetX,
+                  offsetY: block.thumbnailOffsetY,
+                  scale: block.thumbnailScale,
+                  width: 280,
+                  height: 120,
+                  portraitHeight: 200,
+                ),
+              ),
+            ],
             const SizedBox(height: 6),
             ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 240),
@@ -95,8 +116,8 @@ class PillInstanceCard extends ConsumerWidget {
             const SizedBox(height: 4),
             Row(
               children: [
-                // FEAT-46：按钮组按模式分化——固定=设置/开关/删除；
-                // 顺序=←→ 逐幕步进/锁定/删除；随机=六钮全开。
+                // FEAT-46：模式专属钮分化——随机=重抽、顺序=←→ 步进；
+                // 设置/启停为全模式共有（设置弹窗是唯一模式切换入口）。
                 if (mode == PillRollMode.random)
                   _cardButton(
                     key: const Key('pill-reroll'),
@@ -126,25 +147,23 @@ class PillInstanceCard extends ConsumerWidget {
                         : null,
                   ),
                 ],
-                if (mode != PillRollMode.sequential) ...[
-                  _cardButton(
-                    icon: const Icon(Icons.tune, size: 18),
-                    tooltip: l10n.pillCardSettings,
-                    onPressed: () => _openSettings(context, ref, instance),
+                _cardButton(
+                  icon: const Icon(Icons.tune, size: 18),
+                  tooltip: l10n.pillCardSettings,
+                  onPressed: () => _openSettings(context, ref, instance),
+                ),
+                _cardButton(
+                  icon: Icon(
+                    instance.enabled
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    size: 18,
                   ),
-                  _cardButton(
-                    icon: Icon(
-                      instance.enabled
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      size: 18,
-                    ),
-                    tooltip: instance.enabled
-                        ? l10n.pillCardDisable
-                        : l10n.pillCardEnable,
-                    onPressed: () => workspaceNotifier.toggleEnabled(marker),
-                  ),
-                ],
+                  tooltip: instance.enabled
+                      ? l10n.pillCardDisable
+                      : l10n.pillCardEnable,
+                  onPressed: () => workspaceNotifier.toggleEnabled(marker),
+                ),
                 // FEAT-46/47：遗传钮只出现在探索页的随机块上（顺序块已失
                 // 去遗传入口，固定块本无可遗传内容）。
                 if (mode == PillRollMode.random && allowEvolutionToggle)
@@ -268,7 +287,8 @@ OverlayEntry buildPillInstanceOverlayEntry({
     builder: (overlayContext) {
       final screen = MediaQuery.of(overlayContext).size;
       const cardWidth = 300.0;
-      const estimatedHeight = 360.0;
+      // 含缩略图条时的估高（无图卡稍高估只会影响贴底翻转阈值，无害）。
+      const estimatedHeight = 570.0;
       final left = (globalPosition.dx - cardWidth / 2)
           .clamp(8.0, (screen.width - cardWidth - 8).clamp(8.0, screen.width))
           .toDouble();

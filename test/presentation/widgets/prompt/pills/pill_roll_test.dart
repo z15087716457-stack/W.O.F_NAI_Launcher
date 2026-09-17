@@ -969,7 +969,8 @@ void main() {
       });
 
       testWidgets(
-        'sequential card shows step arrows/lock/delete; arrows step scenes',
+        'sequential card shows step arrows + shared settings/enable/'
+        'lock/delete; arrows step scenes',
         (tester) async {
           final container = await openCard(tester, sequentialSettings);
 
@@ -978,8 +979,10 @@ void main() {
           expect(find.byKey(lockKey), findsOneWidget);
           expect(find.byIcon(Icons.delete_outline), findsOneWidget);
           expect(find.byKey(rerollKey), findsNothing);
-          expect(find.byIcon(Icons.tune), findsNothing);
-          expect(find.byIcon(Icons.visibility_outlined), findsNothing);
+          // 设置/启停为全模式共有：设置弹窗是唯一模式切换入口，
+          // 顺序块缺它会堵死回不去。
+          expect(find.byIcon(Icons.tune), findsOneWidget);
+          expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
           expect(find.byKey(evolutionKey), findsNothing);
 
           PillInstance read() => container

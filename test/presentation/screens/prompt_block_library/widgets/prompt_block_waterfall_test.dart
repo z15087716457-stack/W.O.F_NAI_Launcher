@@ -102,7 +102,8 @@ void main() {
   testWidgets('image block: real aspect ratio + plain title bar + color dot', (
     tester,
   ) async {
-    final image = makeImageFile('wide', width: 80, height: 40);
+    // 80×50=1.6，落在 [4:5, 16:9] 未钳制区间内
+    final image = makeImageFile('wide', width: 80, height: 50);
     await tester.runAsync(() async {
       await tester.pumpWidget(
         wrap(
@@ -124,7 +125,7 @@ void main() {
     final ratio = tester.widget<AspectRatio>(
       find.byKey(const Key('prompt-block-waterfall-image-b1')),
     );
-    expect(ratio.aspectRatio, closeTo(2.0, 0.001));
+    expect(ratio.aspectRatio, closeTo(1.6, 0.001));
     // 素色标题条 + 颜色小圆点
     expect(
       find.byKey(const Key('prompt-block-waterfall-title-b1')),
@@ -136,6 +137,68 @@ void main() {
     );
     expect(find.text('横图块'), findsOneWidget);
     expect(find.byType(Image), findsOneWidget);
+  });
+
+  testWidgets('portrait image is capped at 4:5 (cover + offset alignment)', (
+    tester,
+  ) async {
+    final image = makeImageFile('tall', width: 60, height: 120);
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 300,
+            child: PromptBlockWaterfallCard(
+              block: makeBlock(thumbnail: image.path),
+              displayTitle: '竖图块',
+              onTap: () {},
+            ),
+          ),
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      await tester.pump();
+    });
+    await tester.pump();
+
+    // 真实比例 0.5 → 钳制到 4:5（0.8），标题条仍占底部
+    final ratio = tester.widget<AspectRatio>(
+      find.byKey(const Key('prompt-block-waterfall-image-b1')),
+    );
+    expect(ratio.aspectRatio, closeTo(0.8, 0.001));
+    final imageWidget = tester.widget<Image>(find.byType(Image));
+    expect(imageWidget.fit, BoxFit.cover);
+    expect(
+      find.byKey(const Key('prompt-block-waterfall-title-b1')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('ultra-wide panorama is clamped to 16:9', (tester) async {
+    final image = makeImageFile('pano', width: 240, height: 50);
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 300,
+            child: PromptBlockWaterfallCard(
+              block: makeBlock(thumbnail: image.path),
+              displayTitle: '全景块',
+              onTap: () {},
+            ),
+          ),
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      await tester.pump();
+    });
+    await tester.pump();
+
+    // 真实比例 4.8 → 钳制到 16:9（≈1.78）
+    final ratio = tester.widget<AspectRatio>(
+      find.byKey(const Key('prompt-block-waterfall-image-b1')),
+    );
+    expect(ratio.aspectRatio, closeTo(16 / 9, 0.001));
   });
 
   testWidgets('unreadable thumbnail falls back to plain bar', (tester) async {

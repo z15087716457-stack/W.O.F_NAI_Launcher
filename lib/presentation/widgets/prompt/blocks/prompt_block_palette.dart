@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/prompt_block/prompt_block.dart';
+import '../../../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_block_palette_provider.dart';
 import '../../../screens/prompt_block_library/widgets/prompt_block_card.dart';
+import '../../../screens/prompt_block_library/widgets/prompt_block_detail.dart';
 import 'prompt_block_drag_data.dart';
 
 /// 颜料版按钮（生成页提示词顶栏，原位替换旧固定词 📌）。
@@ -194,6 +196,7 @@ class _PromptBlockPaletteCard extends ConsumerWidget {
     final l10n = context.l10n;
     final palette = ref.watch(promptBlockPaletteNotifierProvider).valueOrNull;
     final blocks = palette?.blocks ?? const <PromptBlock>[];
+    final folders = palette?.folders ?? const <PromptBlockFolder>[];
     final maxHeight = math.min(420.0, MediaQuery.sizeOf(context).height * 0.6);
 
     return Material(
@@ -282,7 +285,11 @@ class _PromptBlockPaletteCard extends ConsumerWidget {
                       for (var i = 0; i < blocks.length; i++)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 6),
-                          child: _PaletteChipRow(block: blocks[i], index: i),
+                          child: _PaletteChipRow(
+                            block: blocks[i],
+                            index: i,
+                            folders: folders,
+                          ),
                         ),
                       if (blocks.isEmpty)
                         Padding(
@@ -311,10 +318,15 @@ class _PromptBlockPaletteCard extends ConsumerWidget {
 /// 板内一行：可拖出插入提示词、点击插到光标处、拖到另一行上换位、
 /// 悬停浮现 X 移除（非常驻）。
 class _PaletteChipRow extends ConsumerStatefulWidget {
-  const _PaletteChipRow({required this.block, required this.index});
+  const _PaletteChipRow({
+    required this.block,
+    required this.index,
+    required this.folders,
+  });
 
   final PromptBlock block;
   final int index;
+  final List<PromptBlockFolder> folders;
 
   @override
   ConsumerState<_PaletteChipRow> createState() => _PaletteChipRowState();
@@ -378,7 +390,11 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
       builder: (context, _, _) => MouseRegion(
         onEnter: (_) => setState(() => _hovering = true),
         onExit: (_) => setState(() => _hovering = false),
-        child: AnimatedContainer(
+        child: PromptBlockHoverPreview(
+          key: ValueKey('palette-preview-${block.id}'),
+          block: block,
+          folders: widget.folders,
+          child: AnimatedContainer(
           duration: const Duration(milliseconds: 120),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
@@ -436,6 +452,7 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
                   ),
                 ),
             ],
+          ),
           ),
         ),
       ),

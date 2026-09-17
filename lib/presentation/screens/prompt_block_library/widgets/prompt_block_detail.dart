@@ -39,9 +39,12 @@ String promptBlockLocationLabel(
   return [l10n.promptBlockLibrary_allBlocks, ...names].join(' / ');
 }
 
-/// 块详情两态共用版式：图片区 → 标题 → 内容 → 使用次数 → 位置路径 → 操作行。
+/// 块详情两态共用版式：图片区 → 标题(带块图标) → 内容 → 操作行 →
+/// 使用次数 → 位置路径。
 ///
 /// 悬停预览与点击详情面板共用同一份布局；[actions] 为空即为纯预览态。
+/// [compactImage] = 预览态：图片紧凑、正文按剩余高度弹性截断、
+/// 次要元信息省略，整体必须在有界高度内使用。
 class PromptBlockDetailView extends StatelessWidget {
   const PromptBlockDetailView({
     super.key,
@@ -50,6 +53,7 @@ class PromptBlockDetailView extends StatelessWidget {
     required this.locationLabel,
     this.contentMaxLines = 8,
     this.actions = const <Widget>[],
+    this.compactImage = false,
   });
 
   final PromptBlock block;
@@ -57,8 +61,13 @@ class PromptBlockDetailView extends StatelessWidget {
   final String locationLabel;
 
   /// 内容行数上限；null = 完整展示（点击态），预览态由调用方给 8。
+  /// 紧凑模式下作为行数上限，实际行数按剩余高度折算（可能更小）。
   final int? contentMaxLines;
   final List<Widget> actions;
+
+  /// 预览态紧凑版式：竖图封顶 0.8×宽并按裁剪偏移 cover；正文弹性
+  /// 截断、标题与页脚元信息保持刚性，保证浮层底部不被顶出。
+  final bool compactImage;
 
   @override
   Widget build(BuildContext context) {
@@ -68,81 +77,120 @@ class PromptBlockDetailView extends StatelessWidget {
     final content = block.content.isEmpty
         ? l10n.detail_noContent
         : block.content;
+    final contentStyle = theme.textTheme.bodySmall?.copyWith(
+      fontFamily: 'monospace',
+      color: theme.colorScheme.onSurfaceVariant,
+      height: 1.4,
+    );
+
+    // 紧凑模式：正文在剩余高度内按行截断；不足一行时整段省略，
+    // 标题/页脚始终可见。
+    final Widget contentWidget = compactImage
+        ? Flexible(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final cap = contentMaxLines ?? 8;
+                final lineHeight =
+                    (contentStyle?.fontSize ?? 12) *
+                    (contentStyle?.height ?? 1.4);
+                final lines = constraints.maxHeight.isFinite
+                    ? (constraints.maxHeight / lineHeight).floor()
+                    : cap;
+                if (lines < 1) return const SizedBox.shrink();
+                return Text(
+                  content,
+                  style: contentStyle,
+                  maxLines: lines.clamp(1, cap),
+                  overflow: TextOverflow.ellipsis,
+                );
+              },
+            ),
+          )
+        : Text(
+            content,
+            style: contentStyle,
+            maxLines: contentMaxLines,
+            overflow: contentMaxLines == null ? null : TextOverflow.ellipsis,
+          );
+
+    final body = Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                promptBlockIconFromName(block.iconName),
+                size: 20,
+                color: blockColor,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  displayTitle,
+                  maxLines: compactImage ? 2 : null,
+                  overflow: compactImage ? TextOverflow.ellipsis : null,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              if (block.isFavorite)
+                Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Icon(Icons.star, size: 18, color: blockColor),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const ThemedDivider(height: 1),
+          const SizedBox(height: 8),
+          contentWidget,
+          // 操作行紧跟提示词内容（操作对象是块内容）；使用次数/位置
+          // 等元信息沉底当 footer。
+          if (actions.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(spacing: 8, runSpacing: 8, children: actions),
+          ],
+          const SizedBox(height: 12),
+          _MetaRow(
+            icon: Icons.repeat,
+            label: l10n.promptBlockLibrary_useCount(block.useCount),
+          ),
+          const SizedBox(height: 6),
+          _MetaRow(icon: Icons.folder_outlined, label: locationLabel),
+          // 紧凑预览只留核心元信息；源文件/导入时间属次要，省略以
+          // 保底页脚不被顶出浮层。
+          if (!compactImage && block.sourcePath != null) ...[
+            const SizedBox(height: 6),
+            _MetaRow(
+              icon: Icons.insert_drive_file_outlined,
+              label:
+                  '${l10n.promptBlockLibrary_sourceFile}: '
+                  '${_sourceFileName(block.sourcePath!)}',
+            ),
+            if (block.importedAt != null) ...[
+              const SizedBox(height: 6),
+              _MetaRow(
+                icon: Icons.access_time,
+                label:
+                    '${l10n.promptBlockLibrary_importedAt}: '
+                    '${_formatDateTime(block.importedAt!)}',
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _BlockDetailImage(block: block),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      displayTitle,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  if (block.isFavorite)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 6),
-                      child: Icon(Icons.star, size: 18, color: blockColor),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              const ThemedDivider(height: 1),
-              const SizedBox(height: 8),
-              Text(
-                content,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontFamily: 'monospace',
-                  color: theme.colorScheme.onSurfaceVariant,
-                  height: 1.4,
-                ),
-                maxLines: contentMaxLines,
-                overflow: contentMaxLines == null
-                    ? null
-                    : TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 12),
-              _MetaRow(
-                icon: Icons.repeat,
-                label: l10n.promptBlockLibrary_useCount(block.useCount),
-              ),
-              const SizedBox(height: 6),
-              _MetaRow(icon: Icons.folder_outlined, label: locationLabel),
-              if (block.sourcePath != null) ...[
-                const SizedBox(height: 6),
-                _MetaRow(
-                  icon: Icons.insert_drive_file_outlined,
-                  label:
-                      '${l10n.promptBlockLibrary_sourceFile}: '
-                      '${_sourceFileName(block.sourcePath!)}',
-                ),
-                if (block.importedAt != null) ...[
-                  const SizedBox(height: 6),
-                  _MetaRow(
-                    icon: Icons.access_time,
-                    label:
-                        '${l10n.promptBlockLibrary_importedAt}: '
-                        '${_formatDateTime(block.importedAt!)}',
-                  ),
-                ],
-              ],
-              if (actions.isNotEmpty) ...[
-                const SizedBox(height: 14),
-                Wrap(spacing: 8, runSpacing: 8, children: actions),
-              ],
-            ],
-          ),
-        ),
+        _BlockDetailImage(block: block, compact: compactImage),
+        if (compactImage) Flexible(child: body) else body,
       ],
     );
   }
@@ -192,9 +240,13 @@ class _MetaRow extends StatelessWidget {
 /// 详情版式图片区：横图按裁剪参数横幅显示；竖图 letterbox 两侧留空；
 /// 无图块 = 老样子（块图标 + 块颜色）。
 class _BlockDetailImage extends StatefulWidget {
-  const _BlockDetailImage({required this.block});
+  const _BlockDetailImage({required this.block, this.compact = false});
 
   final PromptBlock block;
+
+  /// 紧凑模式（悬停预览）：竖图封顶 0.8×宽、按裁剪偏移 cover；
+  /// false = 竖图等比 letterbox（右侧详情面板）。
+  final bool compact;
 
   static const double landscapeHeight = 180;
 
@@ -305,9 +357,39 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
         }
 
         if (size.height > size.width) {
+          final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+          if (widget.compact) {
+            // 预览态竖图：封顶 0.8×宽、按裁剪偏移 cover，保证下方
+            // 标题/内容在 460 高浮层里仍然可见。
+            final height = width * 0.8;
+            return ClipRRect(
+              key: const Key('prompt-block-detail-image-portrait-compact'),
+              borderRadius: radius,
+              child: SizedBox(
+                width: width,
+                height: height,
+                child: Image.file(
+                  File(thumbnail),
+                  width: width,
+                  height: height,
+                  fit: BoxFit.cover,
+                  alignment: Alignment(
+                    block.thumbnailOffsetX.clamp(-1.0, 1.0),
+                    block.thumbnailOffsetY.clamp(-1.0, 1.0),
+                  ),
+                  cacheWidth: (width * devicePixelRatio).ceil(),
+                  errorBuilder: (_, __, ___) => Center(
+                    child: Icon(
+                      Icons.broken_image_outlined,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
           // 竖图：纵向更长、等比 letterbox，两侧留空不硬裁。
           final height = width * 1.25;
-          final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
           return ClipRRect(
             key: const Key('prompt-block-detail-image-portrait'),
             borderRadius: radius,
@@ -404,18 +486,18 @@ class PromptBlockPreviewOverlay extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: SingleChildScrollView(
-                  child: PromptBlockDetailView(
-                    key: const Key('prompt-block-preview-view'),
-                    block: block,
-                    displayTitle: block.title.isEmpty
-                        ? l10n.promptBlockLibrary_unnamedBlock
-                        : block.title,
-                    locationLabel: promptBlockLocationLabel(
-                      block,
-                      folders,
-                      l10n,
-                    ),
+                // 紧凑版式正文弹性截断，天然不超 460，无需内部滚动。
+                child: PromptBlockDetailView(
+                  key: const Key('prompt-block-preview-view'),
+                  block: block,
+                  compactImage: true,
+                  displayTitle: block.title.isEmpty
+                      ? l10n.promptBlockLibrary_unnamedBlock
+                      : block.title,
+                  locationLabel: promptBlockLocationLabel(
+                    block,
+                    folders,
+                    l10n,
                   ),
                 ),
               ),
@@ -546,7 +628,9 @@ class PromptBlockDetailPanel extends StatelessWidget {
   final PromptBlock block;
   final List<PromptBlockFolder> folders;
   final VoidCallback onEdit;
-  final VoidCallback onToggleFavorite;
+
+  /// ★ 收藏入口：回调收到按钮的全局锚点，宿主据此弹出收藏菜单。
+  final ValueChanged<Offset> onToggleFavorite;
   final VoidCallback onCopy;
   final VoidCallback onExport;
   final VoidCallback onDelete;
@@ -642,18 +726,26 @@ class PromptBlockDetailPanel extends StatelessWidget {
                               icon: const Icon(Icons.edit_outlined, size: 18),
                               label: Text(l10n.common_edit),
                             ),
-                            OutlinedButton.icon(
-                              onPressed: onToggleFavorite,
-                              icon: Icon(
-                                block.isFavorite
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                size: 18,
-                              ),
-                              label: Text(
-                                block.isFavorite
-                                    ? l10n.common_unfavorite
-                                    : l10n.common_favorite,
+                            Builder(
+                              builder: (buttonContext) => OutlinedButton.icon(
+                                onPressed: () {
+                                  final box = buttonContext.findRenderObject();
+                                  final anchor = box is RenderBox
+                                      ? box.localToGlobal(Offset.zero)
+                                      : Offset.zero;
+                                  onToggleFavorite(anchor);
+                                },
+                                icon: Icon(
+                                  block.isFavorite
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  size: 18,
+                                ),
+                                label: Text(
+                                  block.isFavorite
+                                      ? l10n.common_unfavorite
+                                      : l10n.common_favorite,
+                                ),
                               ),
                             ),
                             OutlinedButton.icon(

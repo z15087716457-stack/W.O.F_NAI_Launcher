@@ -279,6 +279,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
           instance.enabled,
           instance.locked,
           instance.settings.hasRoll,
+          instance.settings.mode,
           instance.evolutionEnabled,
           widget.allowEvolutionToggle,
           block?.title ?? '',
@@ -353,6 +354,9 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       icon: promptBlockIconFromName(block.iconName),
       locked: instance.locked,
       showRollBadge: instance.settings.hasRoll,
+      rollBadgeIcon: instance.settings.mode == PillRollMode.sequential
+          ? Icons.arrow_right_alt
+          : Icons.casino_outlined,
       evolutionEnabled: instance.evolutionEnabled,
       allowEvolutionToggle: widget.allowEvolutionToggle,
     );

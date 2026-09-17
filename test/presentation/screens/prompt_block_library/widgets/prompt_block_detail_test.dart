@@ -195,6 +195,96 @@ void main() {
         greaterThan(180),
       );
     });
+
+    testWidgets('compact mode crops portrait thumbnail to 0.8x width', (
+      tester,
+    ) async {
+      final image = makeImageFile('tall-compact', width: 40, height: 80);
+      await tester.runAsync(() async {
+        await tester.pumpWidget(
+          wrap(
+            SizedBox(
+              width: 320,
+              child: PromptBlockDetailView(
+                block: makeBlock(thumbnail: image.path),
+                displayTitle: '竖图块',
+                locationLabel: '全部块',
+                compactImage: true,
+              ),
+            ),
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        await tester.pump();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await tester.pump();
+      });
+      await tester.pump();
+
+      final compact = find.byKey(
+        const Key('prompt-block-detail-image-portrait-compact'),
+      );
+      expect(compact, findsOneWidget);
+      // 非紧凑 letterbox 分支不应出现
+      expect(
+        find.byKey(const Key('prompt-block-detail-image-portrait')),
+        findsNothing,
+      );
+      // 320 宽 → 0.8×宽 = 256 高，cover 裁切而非 letterbox
+      expect(
+        tester.getSize(compact).height,
+        moreOrLessEquals(256, epsilon: 1),
+      );
+      final image_ = tester.widget<Image>(find.byType(Image));
+      expect(image_.fit, BoxFit.cover);
+    });
+
+    testWidgets('compact long content keeps footer inside bound', (
+      tester,
+    ) async {
+      final image = makeImageFile('tall-long', width: 40, height: 80);
+      final longContent = List.generate(
+        40,
+        (i) => 'artist:long_tag_name_$i',
+      ).join(', ');
+      await tester.runAsync(() async {
+        await tester.pumpWidget(
+          wrap(
+            // 模拟预览浮层 460 高有界约束
+            SizedBox(
+              width: 320,
+              height: 460,
+              child: PromptBlockDetailView(
+                block: makeBlock(
+                  thumbnail: image.path,
+                  content: longContent,
+                  useCount: 3,
+                ),
+                displayTitle: '竖图长文块',
+                locationLabel: '全部块',
+                compactImage: true,
+              ),
+            ),
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        await tester.pump();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await tester.pump();
+      });
+      await tester.pump();
+
+      final view = find.byType(PromptBlockDetailView);
+      final viewBottom = tester.getRect(view).bottom;
+      // 页脚「使用次数」仍在视图边界内（未被正文顶出）
+      final useCount = find.text('使用 3 次');
+      expect(useCount, findsOneWidget);
+      expect(tester.getBottomLeft(useCount).dy, lessThanOrEqualTo(viewBottom));
+      // 正文被弹性收窄：实际行数 < 上限 8
+      final contentText = tester.widget<Text>(find.text(longContent));
+      expect(contentText.maxLines, isNotNull);
+      expect(contentText.maxLines!, lessThan(8));
+    });
   });
 
   group('PromptBlockHoverPreview', () {
@@ -344,7 +434,7 @@ void main() {
               block: makeBlock(useCount: 5, folderId: 'a'),
               folders: [makeFolder('a', '风格')],
               onEdit: () => edited = true,
-              onToggleFavorite: () => favorited = true,
+              onToggleFavorite: (_) => favorited = true,
               onCopy: () => copied = true,
               onExport: () => exported = true,
               onDelete: () => deleted = true,
@@ -402,7 +492,7 @@ void main() {
               block: makeBlock(),
               folders: const [],
               onEdit: () {},
-              onToggleFavorite: () {},
+              onToggleFavorite: (_) {},
               onCopy: () {},
               onExport: () {},
               onDelete: () {},

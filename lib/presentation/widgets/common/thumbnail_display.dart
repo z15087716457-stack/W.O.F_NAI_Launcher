@@ -20,6 +20,9 @@ class ThumbnailDisplay extends StatefulWidget {
   /// 显示区域的高度
   final double height;
 
+  /// 竖图（高>宽）时改用的显示高度；null = 与 [height] 相同。
+  final double? portraitHeight;
+
   final BorderRadius? borderRadius;
 
   const ThumbnailDisplay({
@@ -30,6 +33,7 @@ class ThumbnailDisplay extends StatefulWidget {
     this.scale = 1.0,
     this.width = 200,
     this.height = 80,
+    this.portraitHeight,
     this.borderRadius,
   });
 
@@ -97,7 +101,9 @@ class _ThumbnailDisplayState extends State<ThumbnailDisplay> {
 
     // 容器尺寸
     final containerWidth = widget.width;
-    final containerHeight = widget.height;
+    final containerHeight =
+        (_imageSize!.height > _imageSize!.width ? widget.portraitHeight : null) ??
+        widget.height;
     const containerAspectRatio = 2.5; // 与 EntryCard 一致
 
     // 计算图像相对于容器的缩放（模拟 BoxFit.cover 或类似效果）

@@ -15,6 +15,7 @@ class PromptPill extends StatelessWidget {
     this.icon,
     this.locked = false,
     this.showRollBadge = false,
+    this.rollBadgeIcon = Icons.casino_outlined,
     this.evolutionEnabled = false,
     this.allowEvolutionToggle = false,
     this.variant = PromptPillVariant.normal,
@@ -30,8 +31,11 @@ class PromptPill extends StatelessWidget {
   /// 块自定义图标；null 时用默认模块图标（异常态图标不受此影响）。
   final IconData? icon;
 
-  /// 随机实例的右侧骰子角标；遗传开启时由 DNA 角标替换。
+  /// 随机/顺序实例的右侧模式角标；遗传开启时由 DNA 角标替换。
   final bool showRollBadge;
+
+  /// 模式角标图标：随机=骰子（默认），顺序=右箭头（逐幕步进）。
+  final IconData rollBadgeIcon;
 
   /// 画风探索深度轮使用的实例级遗传角标；只影响 UI，不进入提示词文本，
   /// 并替换右侧骰子角标。
@@ -106,7 +110,7 @@ class PromptPill extends StatelessWidget {
             DnaIcon(size: 12, color: color),
           ] else if (variant == PromptPillVariant.normal && showRollBadge) ...[
             const SizedBox(width: 2),
-            Icon(Icons.casino_outlined, size: 11, color: borderColor),
+            Icon(rollBadgeIcon, size: 11, color: borderColor),
           ],
         ],
       ),
