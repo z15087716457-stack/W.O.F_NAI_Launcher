@@ -896,6 +896,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get generation_stepsLabel => 'Steps';
+
+  @override
+  String get generation_guidance => 'Guidance';
+
+  @override
   String generation_cfgScale(Object scale) {
     return 'CFG Scale: $scale';
   }

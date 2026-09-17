@@ -178,20 +178,19 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     final newLocked = !wasLocked;
 
     if (newLocked) {
-      // 锁定：保存当前种子值（如果是-1则生成新种子）
+      // 锁定：优先恢复上次记住的锁定值，否则实体化当前值/新随机数
       final currentSeed = state.seed;
       final seedToLock = currentSeed == -1
-          ? Random().nextInt(4294967295)
+          ? (_storage.getLockedSeedValue() ?? Random().nextInt(4294967295))
           : currentSeed;
       _storage.setLockedSeedValue(seedToLock);
       _storage.setSeedLocked(true);
       state = state.copyWith(seed: seedToLock);
     } else {
-      // 解锁：保留当前种子值，只取消锁定状态
+      // 解锁：回到真随机（种子归 -1）。锁定值留在存储槽中不清理，
+      // 供再次锁定或下次启动恢复，与官网 pin/unpin 语义对齐。
       _storage.setSeedLocked(false);
-      _storage.setLockedSeedValue(null);
-      // 触发 state 变化以刷新 UI（保持种子值不变）
-      state = state.copyWith();
+      state = state.copyWith(seed: -1);
     }
   }
 

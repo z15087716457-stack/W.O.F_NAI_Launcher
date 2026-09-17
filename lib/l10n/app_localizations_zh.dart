@@ -866,6 +866,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get generation_stepsLabel => '步数';
+
+  @override
+  String get generation_guidance => 'Guidance';
+
+  @override
   String generation_cfgScale(Object scale) {
     return 'CFG 强度：$scale';
   }

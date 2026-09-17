@@ -125,12 +125,6 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
   }
 
   Widget _buildExpanded(BuildContext context, ThemeData theme) {
-    final modelName = ref.watch(
-      generationParamsNotifierProvider.select(
-        (params) => ImageModels.modelDisplayNames[params.model] ?? params.model,
-      ),
-    );
-
     return Column(
       children: [
         // 头部条：折叠按钮不悬浮，避免遮挡提示词工具栏
@@ -288,47 +282,13 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
           ),
         ),
 
-        // 参数二级菜单触发条：固定在钉底控制条上方，永远一步可达
-        Material(
-          color: theme.colorScheme.surface,
-          child: InkWell(
-            onTap: _toggleParamsMenu,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: theme.dividerColor, width: 1),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    context.l10n.generation_params,
-                    style: theme.textTheme.titleSmall,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      modelName,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.end,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  // 箭头随抽屉开合旋转（收起朝上提示拉出方向）
-                  RotationTransition(
-                    turns: Tween<double>(
-                      begin: 0,
-                      end: 0.5,
-                    ).animate(_menuAnimation),
-                    child: const Icon(Icons.keyboard_arrow_up, size: 20),
-                  ),
-                ],
-              ),
-            ),
+        // 参数摘要条（官网式）：Steps/Guidance/Seed/Sampler 四列常驻，
+        // 点列可交互，右端箭头随抽屉开合旋转
+        GenerationParamsSummaryBar(
+          onToggleDrawer: _toggleParamsMenu,
+          arrow: RotationTransition(
+            turns: Tween<double>(begin: 0, end: 0.5).animate(_menuAnimation),
+            child: const Icon(Icons.keyboard_arrow_up, size: 20),
           ),
         ),
 
@@ -424,6 +384,197 @@ class _ModelMenuButton extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// 参数摘要条（官网式）：Steps / Guidance / Seed / Sampler 四列等宽常驻，
+/// 上小标签下参数值；Seed 列点击固定↔随机切换，Sampler 列点击弹采样器菜单，
+/// 其余区域点击展开/收起参数抽屉。
+class GenerationParamsSummaryBar extends ConsumerWidget {
+  final VoidCallback onToggleDrawer;
+  final Widget arrow;
+
+  const GenerationParamsSummaryBar({
+    super.key,
+    required this.onToggleDrawer,
+    required this.arrow,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    // 锁标志在 storage 不在 state，select 元组在「锁定同值种子」时不重建会滞后；
+    // 改 watch 整个 params——toggleSeedLock 每条路径都写新 state 实例，必重建。
+    final params = ref.watch(generationParamsNotifierProvider);
+    final isSeedLocked = ref
+        .read(generationParamsNotifierProvider.notifier)
+        .isSeedLocked;
+
+    Widget buildColumn({
+      required String label,
+      required Widget value,
+      VoidCallback? onTap,
+    }) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                DefaultTextStyle(
+                  style: theme.textTheme.bodySmall!.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  child: value,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Material(
+      color: theme.colorScheme.surface,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(color: theme.dividerColor, width: 1),
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: buildColumn(
+                label: l10n.generation_stepsLabel,
+                value: Text(params.steps.toString()),
+                onTap: onToggleDrawer,
+              ),
+            ),
+            Expanded(
+              child: buildColumn(
+                label: l10n.generation_guidance,
+                value: Text(params.scale.toStringAsFixed(1)),
+                onTap: onToggleDrawer,
+              ),
+            ),
+            Expanded(
+              child: buildColumn(
+                label: l10n.generation_seed,
+                value: isSeedLocked && params.seed != -1
+                    ? Text(params.seed.toString())
+                    : Icon(
+                        Icons.autorenew,
+                        size: 16,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
+                      ),
+                onTap: () {
+                  ref
+                      .read(generationParamsNotifierProvider.notifier)
+                      .toggleSeedLock();
+                },
+              ),
+            ),
+            Expanded(
+              child: PopupMenuButton<String>(
+                tooltip: Samplers.samplerDisplayNames[params.sampler] ??
+                    params.sampler,
+                offset: const Offset(0, -8),
+                itemBuilder: (context) => [
+                  for (final s in Samplers.allSamplers)
+                    PopupMenuItem<String>(
+                      value: s,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check,
+                            size: 16,
+                            color: s == params.sampler
+                                ? theme.colorScheme.primary
+                                : Colors.transparent,
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              Samplers.samplerDisplayNames[s] ?? s,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+                onSelected: (value) {
+                  ref
+                      .read(generationParamsNotifierProvider.notifier)
+                      .updateSampler(value);
+                },
+                child: _buildPopupColumn(
+                  context,
+                  theme,
+                  label: l10n.generation_sampler,
+                  value: Samplers.samplerDisplayNames[params.sampler] ??
+                      params.sampler,
+                ),
+              ),
+            ),
+            arrow,
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// PopupMenuButton 的 child 不吃 InkWell，单独用同版式渲染
+  Widget _buildPopupColumn(
+    BuildContext context,
+    ThemeData theme, {
+    required String label,
+    required String value,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: theme.textTheme.bodySmall!.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }

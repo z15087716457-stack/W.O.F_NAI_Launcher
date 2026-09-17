@@ -384,6 +384,8 @@
       "steps": {}
     }
   },
+  "generation_stepsLabel": "ステップ",
+  "generation_guidance": "Guidance",
   "generation_cfgScale": "CFG スケール: {scale}",
   "@generation_cfgScale": {
     "placeholders": {

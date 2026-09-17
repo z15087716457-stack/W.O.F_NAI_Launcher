@@ -1725,6 +1725,18 @@ abstract class AppLocalizations {
   /// **'Steps: {steps}'**
   String generation_steps(Object steps);
 
+  /// No description provided for @generation_stepsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps'**
+  String get generation_stepsLabel;
+
+  /// No description provided for @generation_guidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Guidance'**
+  String get generation_guidance;
+
   /// No description provided for @generation_cfgScale.
   ///
   /// In en, this message translates to:

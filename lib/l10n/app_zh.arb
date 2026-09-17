@@ -360,6 +360,8 @@
   "generation_imageSize": "图像尺寸",
   "generation_sampler": "采样器",
   "generation_steps": "步数: {steps}",
+  "generation_stepsLabel": "步数",
+  "generation_guidance": "Guidance",
   "generation_cfgScale": "CFG 强度：{scale}",
   "generation_seed": "种子",
   "generation_seedRandom": "随机",
