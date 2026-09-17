@@ -93,13 +93,14 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
         Row(
           children: [
             _EditorTab(
-              label: l10n.prompt_positivePrompt,
+              label: l10n.prompt_positive,
               selected: _tabIndex == 0,
               onTap: () => setState(() => _tabIndex = 0),
             ),
             const SizedBox(width: 6),
+            // 负向提示词 tab（标签用 NAI 通用术语 UC，静定）
             _EditorTab(
-              label: l10n.prompt_negativePrompt,
+              label: 'UC',
               selected: _tabIndex == 1,
               onTap: () => setState(() => _tabIndex = 1),
             ),

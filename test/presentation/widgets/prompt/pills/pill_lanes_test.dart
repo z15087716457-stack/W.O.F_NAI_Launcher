@@ -232,7 +232,7 @@ void main() {
       await tester.pump();
 
       // 切到负向 tab 并插入块
-      await tester.tap(find.text('负向提示词'));
+      await tester.tap(find.text('UC'));
       await tester.pump();
       await tester.pump();
       container
