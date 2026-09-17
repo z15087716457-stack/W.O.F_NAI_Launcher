@@ -24,7 +24,7 @@ void main() {
       expect(find.text('10'), findsNothing);
     });
 
-    testWidgets('hides when free', (tester) async {
+    testWidgets('shows 0 when free', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -38,8 +38,9 @@ void main() {
         ),
       );
 
-      expect(find.byType(Container), findsNothing);
-      expect(find.text('0'), findsNothing);
+      // 官网风格：消耗为 0 也照常显示深色小框
+      expect(find.byType(Container), findsOneWidget);
+      expect(find.text('0'), findsOneWidget);
     });
 
     testWidgets('shows cost when not generating and not free', (tester) async {
@@ -79,15 +80,10 @@ void main() {
 
       final container = tester.widget<Container>(find.byType(Container));
       final decoration = container.decoration as BoxDecoration;
-      expect(
-        (decoration.color as Color).toARGB32(),
-        equals(Colors.red.withValues(alpha: 0.9).toARGB32()),
-      );
+      expect(decoration.color, equals(Colors.red));
     });
 
-    testWidgets('shows primary container color when balance sufficient', (
-      tester,
-    ) async {
+    testWidgets('shows dark chip when balance sufficient', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -98,7 +94,7 @@ void main() {
           child: MaterialApp(
             theme: ThemeData(
               colorScheme: const ColorScheme.light(
-                primaryContainer: Colors.blue,
+                inverseSurface: Colors.black87,
               ),
             ),
             home: const Scaffold(body: AnlasCostBadge(isGenerating: false)),
@@ -108,10 +104,7 @@ void main() {
 
       final container = tester.widget<Container>(find.byType(Container));
       final decoration = container.decoration as BoxDecoration;
-      expect(
-        (decoration.color as Color).toARGB32(),
-        equals(Colors.blue.withValues(alpha: 0.9).toARGB32()),
-      );
+      expect(decoration.color, equals(Colors.black87));
     });
   });
 }

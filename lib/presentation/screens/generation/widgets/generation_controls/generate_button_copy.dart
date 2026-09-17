@@ -2,11 +2,15 @@
 ///
 /// 文案由 [pick] 用确定性种子选取：数量变化或一次生成结束时
 /// 外层推进种子，按钮即换上新文案；同一种子在 build 间结果稳定。
-/// 稀有池有约 5% 概率覆盖常规池（含特殊数字彩蛋）。
+/// 约 80% 种子回退 [normal] 官方式文案；约 20% 进彩蛋池，
+/// 其中 seed % 20 == 0（约 5%）进稀有池，其余先特殊数字再分档池。
 class GenerateButtonCopy {
   GenerateButtonCopy._();
 
-  /// 稀有池命中步长：seed % 20 == 0 → 约 5%
+  /// 彩蛋池命中步长：seed % 5 == 0 → 约 20%
+  static const int _funnyModulo = 5;
+
+  /// 稀有池命中步长：seed % 20 == 0 → 约 5%（彩蛋档内的四分之一）
   static const int _rareModulo = 20;
 
   /// 按种子与总张数挑选一条文案。
@@ -19,6 +23,9 @@ class GenerateButtonCopy {
     required String languageCode,
   }) {
     final lang = _normalize(languageCode);
+    if (seed % _funnyModulo != 0) {
+      return normal(count: count, languageCode: lang);
+    }
     final rare = _rarePool[lang]!;
     if (seed % _rareModulo == 0) {
       return _format(rare[(seed ~/ _rareModulo) % rare.length], count);
@@ -29,6 +36,19 @@ class GenerateButtonCopy {
     }
     final pool = _bucketPool(lang, count);
     return _format(pool[seed % pool.length], count);
+  }
+
+  /// 官方式默认文案（约 80% 显示）：英文随数量切换单复数，
+  /// 中/日无复数变化。
+  static String normal({required int count, required String languageCode}) {
+    switch (_normalize(languageCode)) {
+      case 'zh':
+        return '生成 $count 张图片';
+      case 'ja':
+        return '$count 枚生成';
+      default:
+        return count == 1 ? 'Generate 1 Image' : 'Generate $count Images';
+    }
   }
 
   static String _normalize(String languageCode) {

@@ -110,11 +110,12 @@ class GenerateButtonWithCost extends ConsumerWidget {
             ? const Icon(Icons.hourglass_bottom_outlined)
             : null,
         isLoading: isGenerating,
+        // Flexible 使 label Row 成为 ThemedButton 内容 Row 的 flex 子项，
+        // 从而拿到有界宽度；内部 Expanded 文本才能左对齐撑满。
         label: Flexible(
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Flexible(
+              Expanded(
                 child: Text(
                   _generateLabelText(context),
                   maxLines: 1,
