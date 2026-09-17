@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/storage/local_storage_service.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/prompt_block/prompt_block.dart';
+import '../../../../data/models/prompt_block/prompt_block_collection.dart';
 import '../../../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../../../data/repositories/prompt_block_repository.dart';
 import '../../../providers/layout_state_provider.dart';
@@ -13,7 +15,9 @@ import '../../../widgets/common/themed_confirm_dialog.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../../../widgets/prompt/blocks/prompt_block_drag_data.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
+import '../../prompt_block_library/widgets/prompt_block_detail.dart';
 import '../../prompt_block_library/widgets/prompt_block_edit_dialog.dart';
+import '../../prompt_block_library/widgets/prompt_block_favorite_menu.dart';
 import '../../prompt_block_library/widgets/prompt_block_folder_tree.dart';
 
 /// 生成页右侧块库面板（页面级非模态 dock）。
@@ -42,11 +46,24 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
 
   /// 选中「全部块」为 true；否则 [_selectedFolderId] 为 null 表示根目录/未分类。
   bool _allSelected = true;
+
+  /// ⭐收藏过滤激活；与 [_selectedCollectionId] 互斥。
+  bool _favoritesSelected = false;
+
+  /// 选中的收藏集/收藏文件夹 id（非空时 [_favoritesSelected] 为 false）。
+  String? _selectedCollectionId;
   String? _selectedFolderId;
 
   /// 异步加载或错误状态下的上部区域默认高度比例。
   static const double _blocksRatio = 0.4;
+
+  /// 未拖拽时上部区域默认估算的可用高度占比上限：块多时给下方
+  /// 文件夹区留位，手动拖动/持久化比例不受此约束。
+  static const double _defaultBlocksMaxRatio = 0.6;
   double? _manualBlocksHeight;
+
+  /// 上次拖动持久化的分割比例（跨页面切换/重启恢复）。
+  double? _persistedBlocksRatio;
 
   /// BUG-4：未拖拽时首次估算高度算一次即锁定，此后切文件夹/搜索不再
   /// 重算；读取时与手动值同款 clamp（窗口 resize 随 availableHeight 收敛）。
@@ -57,6 +74,9 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
     super.initState();
     _searchController = TextEditingController()
       ..addListener(() => setState(() {}));
+    _persistedBlocksRatio = ref
+        .read(localStorageServiceProvider)
+        .getBlockLibraryPanelBlocksSplit();
   }
 
   @override
@@ -141,7 +161,10 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
     final manualHeight = (availableHeight * _blocksRatio)
         .clamp(0.0, availableHeight)
         .toDouble();
-    final fixedHeight = _manualBlocksHeight ?? _lockedBlocksHeight;
+    final fixedHeight = _manualBlocksHeight ??
+        (_persistedBlocksRatio != null
+            ? _persistedBlocksRatio! * availableHeight
+            : _lockedBlocksHeight);
     if (fixedHeight != null) {
       return fixedHeight.clamp(0.0, availableHeight).toDouble();
     }
@@ -159,7 +182,10 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
       final columns = (contentWidth / 156).floor().clamp(1, 4).toInt();
       final rows = (blocks.length + columns - 1) ~/ columns;
       final estimatedHeight = 18.0 + rows * 39.0 + (rows - 1) * 6.0;
-      resolved = estimatedHeight.clamp(72.0, availableHeight).toDouble();
+      // 默认估算封顶 60% 可用高：块多时下方文件夹区仍需可见。
+      final maxEstimate = availableHeight * _defaultBlocksMaxRatio;
+      final minEstimate = maxEstimate < 72 ? maxEstimate : 72.0;
+      resolved = estimatedHeight.clamp(minEstimate, maxEstimate).toDouble();
     }
     return _lockedBlocksHeight = resolved;
   }
@@ -176,7 +202,13 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
           .toList();
     }
     if (_allSelected) return state.blocks;
-    return state.blocksInFolder(_selectedFolderId);
+    if (_favoritesSelected) return state.favoriteBlocks;
+    if (_selectedCollectionId != null) {
+      return state.blocksInCollectionTree(_selectedCollectionId!);
+    }
+    // 与管理页同口径：文件夹范围 = 子树并集（直属 + 各后代文件夹），
+    // 否则「块全在子文件夹里」的父文件夹会显示为空。
+    return state.blocksInFolderTree(_selectedFolderId);
   }
 
   /// 上下两段的可拖分割条（视觉 1px 线，10px 热区）。
@@ -207,6 +239,8 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
                 .toDouble();
           });
         },
+        onVerticalDragEnd: (_) => _persistBlocksSplit(),
+        onVerticalDragCancel: _persistBlocksSplit,
         child: Container(
           height: 10,
           alignment: Alignment.center,
@@ -214,6 +248,22 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
         ),
       ),
     );
+  }
+
+  /// 拖动结束把上区高度按可用高度比例持久化（跨页面切换/重启恢复）。
+  void _persistBlocksSplit() {
+    final body = _verticalBodyKey.currentContext?.findRenderObject();
+    if (body is! RenderBox) return;
+    final availableHeight = (body.size.height - _verticalFixedHeight)
+        .clamp(0.0, double.infinity)
+        .toDouble();
+    final height = _manualBlocksHeight;
+    if (availableHeight <= 0 || height == null) return;
+    final ratio = (height / availableHeight).clamp(0.0, 1.0).toDouble();
+    _persistedBlocksRatio = ratio;
+    ref
+        .read(localStorageServiceProvider)
+        .setBlockLibraryPanelBlocksSplit(ratio);
   }
 
   // ==================== 头部 ====================
@@ -279,14 +329,20 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
   Widget _buildBlockArea(BuildContext context, PromptBlockLibraryState state) {
     // 选中文件夹被删除时回退到「全部块」
     if (!_allSelected &&
+        !_favoritesSelected &&
+        _selectedCollectionId == null &&
         _selectedFolderId != null &&
         state.folderById(_selectedFolderId!) == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _allSelected = true;
-            _selectedFolderId = null;
-          });
+        if (mounted) _selectScope(all: true);
+      });
+    }
+    // 选中收藏集/收藏文件夹被删 → 回退到「收藏」视图。
+    if (_selectedCollectionId != null &&
+        state.collectionById(_selectedCollectionId!) == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _selectedCollectionId != null) {
+          _selectScope(favorites: true);
         }
       });
     }
@@ -301,6 +357,10 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
           child: Text(
             query.isNotEmpty
                 ? context.l10n.promptBlockLibrary_noSearchResults
+                : _favoritesSelected
+                ? context.l10n.promptBlockLibrary_emptyFavorites
+                : _selectedCollectionId != null
+                ? context.l10n.promptBlockLibrary_emptyCollection
                 : context.l10n.promptBlockLibrary_emptyFolder,
             textAlign: TextAlign.center,
             style: TextStyle(color: Theme.of(context).colorScheme.outline),
@@ -315,12 +375,18 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
       child: Wrap(
         spacing: 6,
         runSpacing: 6,
-        children: [for (final block in blocks) _buildBlockChip(block)],
+        children: [
+          for (final block in blocks)
+            _buildBlockChip(block, folders: state.folders),
+        ],
       ),
     );
   }
 
-  Widget _buildBlockChip(PromptBlock block) {
+  Widget _buildBlockChip(
+    PromptBlock block, {
+    required List<PromptBlockFolder> folders,
+  }) {
     final theme = Theme.of(context);
     final color = promptBlockColorFromString(block.color);
     final title = block.title.trim().isEmpty
@@ -366,23 +432,11 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
       ),
     );
 
-    return Tooltip(
+    // 悬停 800ms 出块库同款详情预览卡（含缩略图），取代旧纯文本 Tooltip。
+    return PromptBlockHoverPreview(
       key: ValueKey('block-library-chip-${block.id}'),
-      waitDuration: const Duration(milliseconds: 800),
-      preferBelow: true,
-      richMessage: TextSpan(
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-        children: [
-          TextSpan(
-            text: title,
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
-          if (block.content.trim().isNotEmpty)
-            TextSpan(text: '\n${_previewOf(block.content)}'),
-        ],
-      ),
+      block: block,
+      folders: folders,
       child: Draggable<PromptBlockDragData>(
         data: PromptBlockDragData(blockId: block.id),
         rootOverlay: true,
@@ -405,14 +459,6 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
         ),
       ),
     );
-  }
-
-  /// 悬停预览：整块内容截断约 3 行。
-  String _previewOf(String content) {
-    final trimmed = content.trim();
-    const limit = 150;
-    if (trimmed.length <= limit) return trimmed;
-    return '${trimmed.substring(0, limit)}…';
   }
 
   // ==================== 下部：文件夹树 ====================
@@ -449,13 +495,21 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
     return PromptBlockFolderTree(
       blocks: state.blocks,
       folders: state.folders,
+      collections: state.collections,
       allSelected: _allSelected,
-      rootSelected: !_allSelected && _selectedFolderId == null,
+      rootSelected:
+          !_allSelected &&
+          !_favoritesSelected &&
+          _selectedCollectionId == null &&
+          _selectedFolderId == null,
+      favoritesSelected: _favoritesSelected,
       selectedFolderId: _allSelected ? null : _selectedFolderId,
+      selectedCollectionId: _selectedCollectionId,
       onSelectAll: () => _selectScope(all: true),
-      onSelectRoot: () => _selectScope(all: false, folderId: null),
-      onSelectFolder: (folderId) =>
-          _selectScope(all: false, folderId: folderId),
+      onSelectRoot: () => _selectScope(),
+      onSelectFavorites: () => _selectScope(favorites: true),
+      onSelectFolder: (folderId) => _selectScope(folderId: folderId),
+      onSelectCollection: (id) => _selectScope(collectionId: id),
       onCreateFolder: (parentId) => _showFolderNameDialog(parentId: parentId),
       onRenameFolder: (folderId) {
         final folder = state.folderById(folderId);
@@ -468,14 +522,42 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
       onReorderFolders: (parentId, orderedIds) => ref
           .read(promptBlockLibraryNotifierProvider.notifier)
           .reorderFolders(parentId, orderedIds),
+      onCreateCollection: (parentId, isFolder) =>
+          _showCollectionNameDialog(parentId: parentId, isFolder: isFolder),
+      onRenameCollection: (id) {
+        final collection = state.collectionById(id);
+        if (collection != null) {
+          _showCollectionNameDialog(
+            isFolder: collection.isFolder,
+            collection: collection,
+          );
+        }
+      },
+      onMoveCollection: (id, newParentId) => ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .moveCollection(id, newParentId),
+      onDeleteCollection: (id) => _deleteCollection(state, id),
+      onReorderCollections: (parentId, orderedIds) => ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .reorderCollections(parentId, orderedIds),
+      onAddBlockToCollection: _addBlockToCollection,
+      onDropBlockOnFavorites: _favoriteBlockFromDrop,
     );
   }
 
-  void _selectScope({required bool all, String? folderId}) {
+  /// 侧栏选中语义的统一收口：四类范围互斥（全部/收藏/收藏节点/文件夹）。
+  void _selectScope({
+    bool all = false,
+    bool favorites = false,
+    String? collectionId,
+    String? folderId,
+  }) {
     // 搜索中点击文件夹：清空搜索并切换范围，否则块区内容不会变
     if (_searchController.text.isNotEmpty) _searchController.clear();
     setState(() {
       _allSelected = all;
+      _favoritesSelected = favorites;
+      _selectedCollectionId = collectionId;
       _selectedFolderId = folderId;
     });
   }
@@ -569,7 +651,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
         case 'edit':
           _editBlock(block);
         case 'favorite':
-          _toggleFavorite(block);
+          _showFavoriteMenu(block, globalPosition);
         case 'delete':
           _deleteBlock(block);
         default:
@@ -671,22 +753,15 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
     }
   }
 
-  Future<void> _toggleFavorite(PromptBlock block) async {
-    try {
-      await ref
-          .read(promptBlockLibraryNotifierProvider.notifier)
-          .toggleFavorite(block.id);
-      if (mounted) {
-        AppToast.success(
-          context,
-          block.isFavorite
-              ? context.l10n.toast_unfavorited
-              : context.l10n.toast_favorited,
-        );
-      }
-    } catch (error) {
-      if (mounted) AppToast.error(context, '$error');
-    }
+  /// 单块 ★ 入口：弹出收藏菜单（收藏开关 + 收藏集勾选），
+  /// 交互模型照抄本地画廊心形菜单。
+  Future<void> _showFavoriteMenu(PromptBlock block, Offset anchor) {
+    return showBlockFavoriteMenu(
+      context,
+      ref: ref,
+      block: block,
+      anchor: anchor,
+    );
   }
 
   Future<void> _deleteBlock(PromptBlock block) async {
@@ -786,6 +861,140 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
             folderId,
             mode: PromptBlockFolderDeleteMode.moveContentsToRoot,
           );
+    } catch (error) {
+      if (mounted) AppToast.error(context, '$error');
+    }
+  }
+
+  // ==================== 收藏集 ====================
+
+  /// 新建或重命名收藏集 / 收藏文件夹的名称对话框。
+  Future<void> _showCollectionNameDialog({
+    String? parentId,
+    required bool isFolder,
+    PromptBlockCollection? collection,
+  }) async {
+    final l10n = context.l10n;
+    final controller = TextEditingController(text: collection?.name ?? '');
+    final title = collection != null
+        ? (collection.isFolder
+              ? l10n.promptBlockLibrary_renameCollectionFolder
+              : l10n.promptBlockLibrary_renameCollection)
+        : (isFolder
+              ? l10n.promptBlockLibrary_newCollectionFolder
+              : l10n.promptBlockLibrary_newCollection);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: l10n.promptBlockLibrary_collectionNameHint,
+          ),
+          onSubmitted: (value) => Navigator.of(dialogContext).pop(value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
+            child: Text(l10n.common_confirm),
+          ),
+        ],
+      ),
+    );
+    final trimmed = name?.trim();
+    if (trimmed == null || trimmed.isEmpty || !mounted) return;
+    try {
+      final notifier = ref.read(promptBlockLibraryNotifierProvider.notifier);
+      if (collection == null) {
+        await notifier.createCollection(
+          name: trimmed,
+          parentId: parentId,
+          isFolder: isFolder,
+        );
+      } else {
+        await notifier.renameCollection(collection.id, trimmed);
+      }
+      if (mounted) {
+        AppToast.success(context, l10n.promptBlockLibrary_saved);
+      }
+    } catch (error) {
+      if (mounted) AppToast.error(context, '$error');
+    }
+  }
+
+  /// 删除收藏集/收藏文件夹：连带子树删除，成员块本体不动。
+  Future<void> _deleteCollection(
+    PromptBlockLibraryState state,
+    String id,
+  ) async {
+    final l10n = context.l10n;
+    final node = state.collectionById(id);
+    if (node == null) return;
+    final label = node.name.isEmpty
+        ? (node.isFolder
+              ? l10n.promptBlockLibrary_unnamedCollectionFolder
+              : l10n.promptBlockLibrary_unnamedCollection)
+        : node.name;
+    final confirmed = await ThemedConfirmDialog.show(
+      context: context,
+      title: l10n.common_delete,
+      content: node.isFolder
+          ? l10n.promptBlockLibrary_deleteCollectionFolderConfirm(label)
+          : l10n.promptBlockLibrary_deleteCollectionConfirm(label),
+      confirmText: l10n.common_delete,
+      type: ThemedConfirmDialogType.danger,
+    );
+    if (!confirmed || !mounted) return;
+    try {
+      await ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .deleteCollection(id);
+      if (mounted) {
+        AppToast.success(context, l10n.promptBlockLibrary_deleted);
+      }
+    } catch (error) {
+      if (mounted) AppToast.error(context, '$error');
+    }
+  }
+
+  /// 块拖到收藏集行上：已在集内跳过，否则追加成员（入集即收藏）。
+  Future<void> _addBlockToCollection(
+    String collectionId,
+    String blockId,
+  ) async {
+    final node = ref
+        .read(promptBlockLibraryNotifierProvider)
+        .valueOrNull
+        ?.collectionById(collectionId);
+    if (node == null || node.isFolder || node.blockIds.contains(blockId)) {
+      return;
+    }
+    try {
+      await ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .toggleBlockInCollection(collectionId, blockId);
+    } catch (error) {
+      if (mounted) AppToast.error(context, '$error');
+    }
+  }
+
+  /// 块拖到「收藏」行上：仅在未收藏时置收藏旗标。
+  Future<void> _favoriteBlockFromDrop(String blockId) async {
+    final block = ref
+        .read(promptBlockLibraryNotifierProvider)
+        .valueOrNull
+        ?.blockById(blockId);
+    if (block == null || block.isFavorite) return;
+    try {
+      await ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .toggleFavorite(blockId);
     } catch (error) {
       if (mounted) AppToast.error(context, '$error');
     }

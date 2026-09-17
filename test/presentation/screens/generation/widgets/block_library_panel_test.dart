@@ -19,11 +19,16 @@ class _FakePromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
 }
 
 class _TestLocalStorageService extends LocalStorageService {
-  @override
-  T? getSetting<T>(String key, {T? defaultValue}) => defaultValue;
+  final values = <String, Object?>{};
 
   @override
-  Future<void> setSetting<T>(String key, T value) async {}
+  T? getSetting<T>(String key, {T? defaultValue}) =>
+      (values[key] as T?) ?? defaultValue;
+
+  @override
+  Future<void> setSetting<T>(String key, T value) async {
+    values[key] = value;
+  }
 }
 
 void main() {
@@ -38,11 +43,12 @@ void main() {
   Widget buildPanel(
     List<PromptBlock> blocks, {
     List<PromptBlockFolder> folders = const [],
+    LocalStorageService? storage,
   }) {
     return ProviderScope(
       overrides: [
         localStorageServiceProvider.overrideWith(
-          (ref) => _TestLocalStorageService(),
+          (ref) => storage ?? _TestLocalStorageService(),
         ),
         promptBlockLibraryNotifierProvider.overrideWith(
           () => _FakePromptBlockLibraryNotifier(
@@ -65,8 +71,11 @@ void main() {
     WidgetTester tester,
     List<PromptBlock> blocks, {
     List<PromptBlockFolder> folders = const [],
+    LocalStorageService? storage,
   }) async {
-    await tester.pumpWidget(buildPanel(blocks, folders: folders));
+    await tester.pumpWidget(
+      buildPanel(blocks, folders: folders, storage: storage),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
   }
@@ -97,7 +106,8 @@ void main() {
         .getSize(find.byKey(const Key('block-library-panel-block-area')))
         .height;
 
-    expect(blocksHeight, greaterThan(300));
+    // 默认估算封顶 60% 可用高（约 251），仍足够高且内部可滚动
+    expect(blocksHeight, greaterThan(200));
     expect(find.byKey(const Key('block-library-panel-blocks')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -172,5 +182,62 @@ void main() {
     );
     await tester.pump();
     expect(blockAreaHeight(tester), greaterThan(locked));
+  });
+
+  testWidgets('selecting a folder shows subtree blocks, not just direct', (
+    tester,
+  ) async {
+    final parent = PromptBlockFolder.create(id: 'pf', name: '父夹');
+    final child = PromptBlockFolder.create(
+      id: 'cf',
+      name: '子夹',
+      parentId: 'pf',
+    );
+    // 父夹零直属块，块全在子夹里
+    final blocks = [makeBlock(1).copyWith(folderId: 'cf')];
+    await pumpPanel(tester, blocks, folders: [parent, child]);
+
+    await tester.tap(find.byKey(const Key('prompt-block-folder-item-pf')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // 与管理页同口径：文件夹范围 = 子树并集，而不是「此文件夹为空」
+    expect(find.text('块 1'), findsOneWidget);
+    expect(find.textContaining('此文件夹为空'), findsNothing);
+  });
+
+  testWidgets('many blocks cap the default upper area so folders stay usable', (
+    tester,
+  ) async {
+    // 300 块估算远超可用高：默认应封顶 ~60%，文件夹区不被挤没
+    await pumpPanel(tester, [for (var i = 0; i < 300; i++) makeBlock(i)]);
+
+    final blocksHeight = blockAreaHeight(tester);
+    final foldersHeight = tester
+        .getSize(find.byKey(const Key('block-library-panel-folder-area')))
+        .height;
+    final available = blocksHeight + foldersHeight;
+
+    expect(blocksHeight, lessThanOrEqualTo(available * 0.6 + 0.5));
+    expect(foldersHeight, greaterThan(0));
+  });
+
+  testWidgets('dragged split ratio persists across panel rebuilds', (
+    tester,
+  ) async {
+    final storage = _TestLocalStorageService();
+    await pumpPanel(tester, [makeBlock(1), makeBlock(2)], storage: storage);
+
+    await tester.drag(
+      find.byKey(const Key('block-library-panel-split-handle')),
+      const Offset(0, 100),
+    );
+    await tester.pump();
+    final dragged = blockAreaHeight(tester);
+    expect(dragged, greaterThan(160));
+
+    // 页面切换/重开面板 = 新 State；应从持久化比例恢复而不是重新估算
+    await pumpPanel(tester, [makeBlock(1), makeBlock(2)], storage: storage);
+    expect(blockAreaHeight(tester), closeTo(dragged, 1.0));
   });
 }
