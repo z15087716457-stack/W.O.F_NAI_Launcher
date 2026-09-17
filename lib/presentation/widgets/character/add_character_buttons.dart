@@ -3,14 +3,11 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/character/character_prompt.dart';
-import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../providers/character_prompt_provider.dart';
-import '../../providers/prompt_block_library_provider.dart';
-import '../common/prompt_block_picker_dialog.dart';
 
 /// 添加角色按钮组件
 ///
-/// 包含性别按钮（女/男/其他）和词库按钮，横向布局
+/// 包含性别按钮（女/男/其他），横向布局
 /// 采用无边框+色差的简洁风格
 class AddCharacterButtons extends ConsumerWidget {
   const AddCharacterButtons({super.key});
@@ -44,38 +41,12 @@ class AddCharacterButtons extends ConsumerWidget {
           color: const Color(0xFF8B5CF6), // violet-500
           onTap: () => _addCharacter(ref, CharacterGender.other),
         ),
-        // 词库按钮
-        _LibraryButton(onTap: () => _addFromLibrary(context, ref)),
       ],
     );
   }
 
   void _addCharacter(WidgetRef ref, CharacterGender gender) {
     ref.read(characterPromptNotifierProvider.notifier).addCharacter(gender);
-  }
-
-  Future<void> _addFromLibrary(BuildContext context, WidgetRef ref) async {
-    final block = await showDialog<PromptBlock>(
-      context: context,
-      builder: (context) => const PromptBlockPickerDialog(),
-    );
-
-    if (block != null) {
-      // 记录使用
-      ref
-          .read(promptBlockLibraryNotifierProvider.notifier)
-          .incrementUseCount(block.id);
-
-      // 创建新角色
-      ref
-          .read(characterPromptNotifierProvider.notifier)
-          .addCharacter(
-            CharacterGender.female, // 默认女性
-            name: block.displayTitle,
-            prompt: block.content,
-            thumbnailPath: block.thumbnail,
-          );
-    }
   }
 }
 
@@ -139,68 +110,6 @@ class _GenderButtonState extends State<_GenderButton> {
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: _isHovered
                       ? widget.color
-                      : colorScheme.onSurfaceVariant,
-                  fontWeight: _isHovered ? FontWeight.w600 : FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 词库按钮组件（无边框+色差风格）
-class _LibraryButton extends StatefulWidget {
-  final VoidCallback onTap;
-
-  const _LibraryButton({required this.onTap});
-
-  @override
-  State<_LibraryButton> createState() => _LibraryButtonState();
-}
-
-class _LibraryButtonState extends State<_LibraryButton> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final l10n = AppLocalizations.of(context)!;
-    final accentColor = colorScheme.tertiary;
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          decoration: BoxDecoration(
-            // 无边框，常态淡背景，悬停时加深
-            color: _isHovered
-                ? accentColor.withValues(alpha: 0.18)
-                : accentColor.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.library_books_outlined,
-                size: 17,
-                color: _isHovered ? accentColor : colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 5),
-              Text(
-                l10n.characterEditor_addFromLibrary,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: _isHovered
-                      ? accentColor
                       : colorScheme.onSurfaceVariant,
                   fontWeight: _isHovered ? FontWeight.w600 : FontWeight.w500,
                 ),

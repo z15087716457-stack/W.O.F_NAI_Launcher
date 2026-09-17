@@ -50,12 +50,11 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
     if (oldWidget.character.id != widget.character.id) {
       return;
     }
-    // 外部状态变化（随机生成、词库导入、桥接写入等）：投影不等时重建。
+    // 外部状态变化（随机生成、桥接写入等）：投影不等时重建。
     // 本框自身 onChanged 回写时投影与文本相等 → syncFromPlainText 天然
     // no-op，不打断输入连接。
     // 注意 didUpdateWidget 处于构建期，写 provider 必须延后到帧末。
-    final promptChanged =
-        widget.character.prompt != oldWidget.character.prompt;
+    final promptChanged = widget.character.prompt != oldWidget.character.prompt;
     final negativeChanged =
         widget.character.negativePrompt != oldWidget.character.negativePrompt;
     if (promptChanged || negativeChanged) {
@@ -290,7 +289,7 @@ class _CharacterNameFieldState extends ConsumerState<CharacterNameField> {
       _controller.text = widget.character.name;
       return;
     }
-    // 外部改名（如词库导入覆盖）时同步；编辑中（持有焦点）不覆盖用户输入
+    // 外部改名时同步；编辑中（持有焦点）不覆盖用户输入
     if (!_focusNode.hasFocus && widget.character.name != _controller.text) {
       _controller.text = widget.character.name;
     }

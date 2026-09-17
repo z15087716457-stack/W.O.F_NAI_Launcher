@@ -3441,9 +3441,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get characterEditor_addOther => 'Other';
 
   @override
-  String get characterEditor_addFromLibrary => 'Library';
-
-  @override
   String get characterEditor_moveUp => 'Move Up';
 
   @override

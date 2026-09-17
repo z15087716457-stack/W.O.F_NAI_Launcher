@@ -3305,9 +3305,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get characterEditor_addOther => '其他';
 
   @override
-  String get characterEditor_addFromLibrary => '词库';
-
-  @override
   String get characterEditor_moveUp => '上移';
 
   @override

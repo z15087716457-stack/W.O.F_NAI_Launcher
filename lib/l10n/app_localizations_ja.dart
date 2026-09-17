@@ -3361,9 +3361,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get characterEditor_addOther => 'その他';
 
   @override
-  String get characterEditor_addFromLibrary => 'ライブラリ';
-
-  @override
   String get characterEditor_moveUp => '上に移動';
 
   @override

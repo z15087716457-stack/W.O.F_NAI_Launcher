@@ -311,7 +311,7 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
                         },
                       ),
                     ),
-                    // 操作全部平铺一排（两种布局一致：上移/下移/收藏词库），
+                    // 操作全部平铺一排（两种布局一致：上移/下移/收藏块库），
                     // 名字用 Expanded 省略号吸收宽度，窄卡不会溢出
                     ..._buildFullActions(context, l10n, onHeader),
                     _HeaderIconButton(

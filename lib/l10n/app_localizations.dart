@@ -6223,12 +6223,6 @@ abstract class AppLocalizations {
   /// **'Other'**
   String get characterEditor_addOther;
 
-  /// No description provided for @characterEditor_addFromLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Library'**
-  String get characterEditor_addFromLibrary;
-
   /// No description provided for @characterEditor_moveUp.
   ///
   /// In en, this message translates to:

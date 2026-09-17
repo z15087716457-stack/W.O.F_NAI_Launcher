@@ -4,12 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/api_constants.dart';
 import '../../../data/models/character/character_prompt.dart';
-import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../providers/character_position_canvas_provider.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/image_generation_provider.dart';
-import '../../providers/prompt_block_library_provider.dart';
-import '../common/prompt_block_picker_dialog.dart';
 import 'add_to_library_dialog.dart';
 import 'character_position_canvas.dart';
 import 'inline_character_card.dart';
@@ -18,12 +15,11 @@ import 'inline_character_editor.dart';
 enum _CharacterAddAction {
   female(CharacterGender.female),
   male(CharacterGender.male),
-  other(CharacterGender.other),
-  library(null);
+  other(CharacterGender.other);
 
   const _CharacterAddAction(this.gender);
 
-  final CharacterGender? gender;
+  final CharacterGender gender;
 }
 
 /// 内联角色行（经典布局用，横排）
@@ -31,7 +27,7 @@ enum _CharacterAddAction {
 /// 位于提示词横条正下方，与主提示词同屏相邻：
 /// - 角色卡固定宽度横排（Wrap 换行），网格始终整齐
 /// - 选中的角色在网格下方展开全宽编辑面板，不打乱卡片排版
-/// - 行尾「+」按钮弹出添加菜单（女/男/其他/词库）
+/// - 行尾「+」按钮弹出添加菜单（女/男/其他）
 /// - 无角色或非 V4 模型时整行隐藏，零高度成本
 ///
 /// 全屏编辑与非全屏共用此组件，始终紧贴提示词区下方。
@@ -384,7 +380,7 @@ class _PanelIconButton extends StatelessWidget {
   }
 }
 
-/// 行尾添加芯片（弹出 女/男/其他/词库 菜单）
+/// 行尾添加芯片（弹出 女/男/其他 菜单）
 class _AddCharacterChip extends ConsumerWidget {
   const _AddCharacterChip();
 
@@ -396,7 +392,7 @@ class _AddCharacterChip extends ConsumerWidget {
     return PopupMenuButton<_CharacterAddAction>(
       tooltip: l10n.character_addCharacter,
       padding: EdgeInsets.zero,
-      onSelected: (action) => _handleAdd(context, ref, action),
+      onSelected: (action) => _handleAdd(ref, action),
       itemBuilder: (context) => [
         PopupMenuItem(
           value: _CharacterAddAction.female,
@@ -420,14 +416,6 @@ class _AddCharacterChip extends ConsumerWidget {
             Icons.transgender,
             l10n.characterEditor_addOther,
             const Color(0xFF8B5CF6),
-          ),
-        ),
-        PopupMenuItem(
-          value: _CharacterAddAction.library,
-          child: _menuRow(
-            Icons.library_books_outlined,
-            l10n.characterEditor_addFromLibrary,
-            theme.colorScheme.tertiary,
           ),
         ),
       ],
@@ -461,37 +449,11 @@ class _AddCharacterChip extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleAdd(
-    BuildContext context,
-    WidgetRef ref,
-    _CharacterAddAction action,
-  ) async {
-    final notifier = ref.read(characterPromptNotifierProvider.notifier);
-    final gender = action.gender;
-
-    if (gender != null) {
-      notifier.addCharacter(gender);
-      _selectLast(ref);
-      return;
-    }
-
-    // 词库导入
-    final block = await showDialog<PromptBlock>(
-      context: context,
-      builder: (context) => const PromptBlockPickerDialog(),
-    );
-    if (block != null) {
-      ref
-          .read(promptBlockLibraryNotifierProvider.notifier)
-          .incrementUseCount(block.id);
-      notifier.addCharacter(
-        CharacterGender.female,
-        name: block.displayTitle,
-        prompt: block.content,
-        thumbnailPath: block.thumbnail,
-      );
-      _selectLast(ref);
-    }
+  void _handleAdd(WidgetRef ref, _CharacterAddAction action) {
+    ref
+        .read(characterPromptNotifierProvider.notifier)
+        .addCharacter(action.gender);
+    _selectLast(ref);
   }
 
   /// 新增后直接选中进入编辑，省一次点击

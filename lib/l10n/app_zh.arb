@@ -1554,7 +1554,6 @@
   "characterEditor_addFemale": "女",
   "characterEditor_addMale": "男",
   "characterEditor_addOther": "其他",
-  "characterEditor_addFromLibrary": "词库",
   "characterEditor_moveUp": "上移",
   "characterEditor_moveDown": "下移",
   "toolbar_fullscreenEdit": "全屏编辑",

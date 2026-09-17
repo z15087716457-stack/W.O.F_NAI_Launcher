@@ -1568,7 +1568,6 @@
   "characterEditor_addFemale": "F",
   "characterEditor_addMale": "M",
   "characterEditor_addOther": "その他",
-  "characterEditor_addFromLibrary": "ライブラリ",
   "characterEditor_moveUp": "上に移動",
   "characterEditor_moveDown": "下に移動",
   "toolbar_fullscreenEdit": "フルスクリーン編集",

@@ -15,7 +15,7 @@ import 'inline_character_editor.dart';
 /// 位于主提示词正下方，与主提示词同屏对照编辑：
 /// - 标题行：图标 + 数量徽章 + 清空菜单
 /// - 角色卡竖排（内容常显，点击即编辑）
-/// - 底部添加按钮行（女/男/其他/词库）
+/// - 底部添加按钮行（女/男/其他）
 ///
 /// 仅 V4+ 模型显示（多角色为 V4 专属能力）。
 class InlineCharacterSection extends ConsumerWidget {

@@ -3,28 +3,24 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/character/character_prompt.dart';
-import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../providers/character_prompt_provider.dart';
-import '../../providers/prompt_block_library_provider.dart';
-import '../common/prompt_block_picker_dialog.dart';
 import 'character_tooltip_content.dart';
 
 enum _CharacterAddAction {
   female(CharacterGender.female),
   male(CharacterGender.male),
-  other(CharacterGender.other),
-  library(null);
+  other(CharacterGender.other);
 
   const _CharacterAddAction(this.gender);
 
-  final CharacterGender? gender;
+  final CharacterGender gender;
 }
 
 /// 多人角色提示词触发按钮
 ///
 /// 显示在提示词区域工具栏中，作为内联角色区的状态指示器：
 /// - 有角色时点击选中第一个角色进入编辑（角色区常显于布局中）
-/// - 无角色时点击弹出添加菜单（女/男/其他/词库）
+/// - 无角色时点击弹出添加菜单（女/男/其他）
 /// - 当存在角色时，显示角色数量徽章
 class CharacterPromptButton extends ConsumerWidget {
   const CharacterPromptButton({super.key});
@@ -106,13 +102,12 @@ class _AddCharacterMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
     return PopupMenuButton<_CharacterAddAction>(
       tooltip: '',
       padding: EdgeInsets.zero,
-      onSelected: (action) => _handleAdd(context, ref, action),
+      onSelected: (action) => _handleAdd(ref, action),
       itemBuilder: (context) => [
         PopupMenuItem(
           value: _CharacterAddAction.female,
@@ -138,14 +133,6 @@ class _AddCharacterMenu extends ConsumerWidget {
             const Color(0xFF8B5CF6),
           ),
         ),
-        PopupMenuItem(
-          value: _CharacterAddAction.library,
-          child: _menuRow(
-            Icons.library_books_outlined,
-            l10n.characterEditor_addFromLibrary,
-            theme.colorScheme.tertiary,
-          ),
-        ),
       ],
       child: child,
     );
@@ -161,36 +148,11 @@ class _AddCharacterMenu extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleAdd(
-    BuildContext context,
-    WidgetRef ref,
-    _CharacterAddAction action,
-  ) async {
-    final notifier = ref.read(characterPromptNotifierProvider.notifier);
-    final gender = action.gender;
-
-    if (gender != null) {
-      notifier.addCharacter(gender);
-      _selectLast(ref);
-      return;
-    }
-
-    final block = await showDialog<PromptBlock>(
-      context: context,
-      builder: (context) => const PromptBlockPickerDialog(),
-    );
-    if (block != null) {
-      ref
-          .read(promptBlockLibraryNotifierProvider.notifier)
-          .incrementUseCount(block.id);
-      notifier.addCharacter(
-        CharacterGender.female,
-        name: block.displayTitle,
-        prompt: block.content,
-        thumbnailPath: block.thumbnail,
-      );
-      _selectLast(ref);
-    }
+  void _handleAdd(WidgetRef ref, _CharacterAddAction action) {
+    ref
+        .read(characterPromptNotifierProvider.notifier)
+        .addCharacter(action.gender);
+    _selectLast(ref);
   }
 
   /// 新增后直接选中进入编辑，省一次点击
