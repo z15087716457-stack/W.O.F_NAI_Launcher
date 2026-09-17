@@ -368,6 +368,15 @@ class _ModelMenuButton extends ConsumerWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Image.asset(
+                'assets/icons/novelai-icon.png',
+                width: 15,
+                height: 15,
+                // 素材是纯黑剪影，srcIn 着色后深浅主题自适应
+                color: theme.colorScheme.onSurface,
+                filterQuality: FilterQuality.medium,
+              ),
+              const SizedBox(width: 6),
               Flexible(
                 child: Text(
                   modelName,
