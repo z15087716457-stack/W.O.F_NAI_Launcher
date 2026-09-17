@@ -119,6 +119,14 @@ class PromptBlock with _$PromptBlock {
   /// 用于空标题块的界面兜底名称。
   String get displayTitle => title.isNotEmpty ? title : '未命名块';
 
+  /// 内容预览（截取前 100 个字符），供补全建议与选择器列表展示。
+  String get contentPreview {
+    if (content.length > 100) {
+      return '${content.substring(0, 100)}...';
+    }
+    return content;
+  }
+
   /// 是否已挂预览图。
   bool get hasThumbnail => thumbnail != null && thumbnail!.isNotEmpty;
 

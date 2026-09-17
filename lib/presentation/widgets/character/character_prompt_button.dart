@@ -3,9 +3,10 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/character/character_prompt.dart';
+import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../providers/character_prompt_provider.dart';
-import '../../providers/tag_library_page_provider.dart';
-import '../tag_library/tag_library_picker_dialog.dart';
+import '../../providers/prompt_block_library_provider.dart';
+import '../common/prompt_block_picker_dialog.dart';
 import 'character_tooltip_content.dart';
 
 enum _CharacterAddAction {
@@ -174,17 +175,19 @@ class _AddCharacterMenu extends ConsumerWidget {
       return;
     }
 
-    final entry = await showDialog(
+    final block = await showDialog<PromptBlock>(
       context: context,
-      builder: (context) => const TagLibraryPickerDialog(),
+      builder: (context) => const PromptBlockPickerDialog(),
     );
-    if (entry != null) {
-      ref.read(tagLibraryPageNotifierProvider.notifier).recordUsage(entry.id);
+    if (block != null) {
+      ref
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .incrementUseCount(block.id);
       notifier.addCharacter(
         CharacterGender.female,
-        name: entry.displayName,
-        prompt: entry.content,
-        thumbnailPath: entry.thumbnail,
+        name: block.displayTitle,
+        prompt: block.content,
+        thumbnailPath: block.thumbnail,
       );
       _selectLast(ref);
     }

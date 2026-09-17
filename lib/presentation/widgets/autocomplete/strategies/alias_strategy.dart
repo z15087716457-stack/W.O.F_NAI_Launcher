@@ -1,16 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/alias_parser.dart';
-import '../../../../data/models/tag_library/tag_library_entry.dart';
+import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../alias_autocomplete_provider.dart';
 import '../autocomplete_strategy.dart';
 import '../generic_suggestion_tile.dart';
 
 /// 别名补全策略
 ///
-/// 使用词库条目进行别名补全
-/// 通过 `<` 触发补全，完成后插入 `<词库名称>`
-class AliasStrategy extends AutocompleteStrategy<TagLibraryEntry> {
+/// 使用块库条目进行别名补全
+/// 通过 `<` 触发补全，完成后插入 `<块标题>`
+class AliasStrategy extends AutocompleteStrategy<PromptBlock> {
   final WidgetRef _ref;
   final bool _autoInsertComma;
 
@@ -41,7 +41,7 @@ class AliasStrategy extends AutocompleteStrategy<TagLibraryEntry> {
   int get aliasStartPosition => _aliasStartPosition;
 
   @override
-  List<TagLibraryEntry> get suggestions =>
+  List<PromptBlock> get suggestions =>
       _ref.read(aliasAutocompleteNotifierProvider).suggestions;
 
   @override
@@ -93,9 +93,9 @@ class AliasStrategy extends AutocompleteStrategy<TagLibraryEntry> {
   }
 
   @override
-  SuggestionData toSuggestionData(TagLibraryEntry item) {
+  SuggestionData toSuggestionData(PromptBlock item) {
     return SuggestionData(
-      tag: item.name,
+      tag: item.title,
       category: SuggestionData.categoryLibrary,
       count: item.useCount,
       translation: item.contentPreview,
@@ -105,7 +105,7 @@ class AliasStrategy extends AutocompleteStrategy<TagLibraryEntry> {
 
   @override
   (String, int) applySuggestion(
-    TagLibraryEntry item,
+    PromptBlock item,
     String text,
     int cursorPosition,
   ) {
@@ -113,8 +113,8 @@ class AliasStrategy extends AutocompleteStrategy<TagLibraryEntry> {
       return (text, cursorPosition);
     }
 
-    // 替换 < 到当前光标位置的内容为 <词库名称>
-    final aliasText = '<${item.name}>';
+    // 替换 < 到当前光标位置的内容为 <块标题>
+    final aliasText = '<${item.title}>';
     final suffix = text.substring(cursorPosition);
 
     // 添加逗号和空格（如果配置了自动插入且后面没有逗号）

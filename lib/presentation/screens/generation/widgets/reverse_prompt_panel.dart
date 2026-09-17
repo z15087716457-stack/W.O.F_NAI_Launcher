@@ -7,11 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 import '../../../../data/models/character/character_prompt.dart';
-import '../../../../data/models/tag_library/tag_library_entry.dart';
+import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../../data/services/local_onnx_model_service.dart';
 import '../../../providers/generation/generation_params_notifier.dart';
+import '../../../providers/prompt_block_library_provider.dart';
 import '../../../providers/reverse_prompt_provider.dart';
-import '../../../providers/tag_library_page_provider.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_history_provider.dart';
 import '../../../utils/asset_protection_guard.dart';
 import '../../../utils/dropped_file_reader.dart';
@@ -19,8 +19,8 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/collapsible_image_panel.dart';
 import '../../../widgets/common/decoded_memory_image.dart';
+import '../../../widgets/common/prompt_block_picker_dialog.dart';
 import '../../../widgets/common/themed_divider.dart';
-import '../../../widgets/tag_library/tag_library_picker_dialog.dart';
 
 class ReversePromptPanel extends ConsumerStatefulWidget {
   const ReversePromptPanel({super.key});
@@ -426,25 +426,27 @@ class _ReversePromptPanelState extends ConsumerState<ReversePromptPanel> {
   }
 
   Future<void> _selectReverseCharacterFromLibrary() async {
-    final entry = await showDialog<TagLibraryEntry>(
+    final block = await showDialog<PromptBlock>(
       context: context,
-      builder: (context) => TagLibraryPickerDialog(
+      builder: (context) => PromptBlockPickerDialog(
         title: context.l10n.reversePrompt_selectReplacementTargetTitle,
       ),
     );
 
-    if (entry == null) {
+    if (block == null) {
       return;
     }
 
-    ref.read(tagLibraryPageNotifierProvider.notifier).recordUsage(entry.id);
+    ref
+        .read(promptBlockLibraryNotifierProvider.notifier)
+        .incrementUseCount(block.id);
     ref
         .read(reversePromptCharacterProvider.notifier)
         .setReplacementCharacter(
           CharacterPrompt.create(
-            name: entry.displayName,
-            prompt: entry.content,
-            thumbnailPath: entry.thumbnail,
+            name: block.displayTitle,
+            prompt: block.content,
+            thumbnailPath: block.thumbnail,
           ),
         );
   }

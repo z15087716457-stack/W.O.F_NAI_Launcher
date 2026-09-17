@@ -147,9 +147,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get common_clearInputConfirm => '入力内容をクリアしますか?';
 
   @override
-  String get common_today => '今日';
-
-  @override
   String get common_yesterday => '昨日';
 
   @override
@@ -183,12 +180,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get common_ok => 'OK';
-
-  @override
-  String get common_replace => '置換';
-
-  @override
-  String get common_skip => 'スキップ';
 
   @override
   String get common_exit => '終了';
@@ -280,9 +271,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get nav_onlineGallery => 'オンライン ギャラリー';
-
-  @override
-  String get nav_dictionary => '辞書 (WIP)';
 
   @override
   String get nav_discordCommunity => 'Discord コミュニティ';
@@ -3432,9 +3420,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get characterTooltip_viewFullConfig => 'クリックすると完全な構成が表示されます';
 
   @override
-  String get naiAlgorithm_mainPrompt => 'メイン プロンプト';
-
-  @override
   String get addGroup_displayNameLabel => '表示名 (オプション)';
 
   @override
@@ -4856,9 +4841,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get statistics_saturday => '土';
 
   @override
-  String get fixedTags_syntaxHelp => '重みの強化/削減およびタグの代替のための NAI 構文をサポートします';
-
-  @override
   String get fixedTags_negativeTitle => '除外したい要素固定タグ';
 
   @override
@@ -5298,358 +5280,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get common_create => '作成';
 
   @override
-  String get tagLibrary_categories => 'カテゴリ';
-
-  @override
   String get tagLibrary_newCategory => '新しいカテゴリ';
 
   @override
-  String get tagLibrary_addEntry => 'エントリの追加';
-
-  @override
-  String get tagLibrary_editEntry => 'エントリーの編集';
-
-  @override
-  String get tagLibrary_searchHint => 'エントリを検索...';
-
-  @override
-  String get tagLibrary_import => 'インポート';
-
-  @override
-  String get tagLibrary_export => 'エクスポート';
-
-  @override
-  String get tagLibrary_sortCustom => 'カスタム並べ替え';
-
-  @override
-  String get tagLibrary_sortName => '名前';
-
-  @override
-  String get tagLibrary_sortUseCount => '使用回数';
-
-  @override
-  String get tagLibrary_sortUpdatedAt => '更新日時';
-
-  @override
-  String get tagLibrary_transferCategory => 'カテゴリを移動';
-
-  @override
-  String get tagLibrary_copyContent => 'コンテンツをコピー';
-
-  @override
-  String get tagLibrary_moveToCategoryTitle => 'カテゴリに移動';
-
-  @override
-  String get tagLibrary_selectTargetCategory => 'ターゲット カテゴリを選択してください:';
-
-  @override
-  String get tagLibrary_includeThumbnails => 'サムネイルを含める';
-
-  @override
-  String get tagLibrary_includeThumbnailsSubtitle => 'ファイルサイズが増加します';
-
-  @override
-  String tagLibrary_selectedExportCount(Object count) {
-    return 'エクスポート ($count アイテム)';
-  }
-
-  @override
-  String tagLibrary_selectedImportCount(Object count) {
-    return 'インポート ($count アイテム)';
-  }
-
-  @override
-  String get tagLibrary_entriesLabel => 'エントリ';
-
-  @override
-  String get tagLibrary_categoriesLabel => 'カテゴリ';
-
-  @override
-  String get tagLibrary_selectExportContent => 'エクスポートするコンテンツを選択してください';
-
-  @override
-  String get tagLibrary_selectImportContent => 'インポートするコンテンツを選択してください';
-
-  @override
-  String get tagLibrary_selectSaveLocation => '保存場所を選択してください';
-
-  @override
-  String get tagLibrary_preparingExport => 'エクスポートを準備しています...';
-
-  @override
-  String get tagLibrary_exportSuccess => 'エクスポートが成功しました';
-
-  @override
-  String tagLibrary_exportFailedWithError(Object error) {
-    return 'エクスポートに失敗しました: $error';
-  }
-
-  @override
-  String get tagLibrary_selectZipFile => 'クリックして ZIP ファイルを選択してください';
-
-  @override
-  String get tagLibrary_zipFileHint => 'このアプリからエクスポートされたライブラリ ファイルをサポートします';
-
-  @override
-  String get tagLibrary_reselect => 'もう一度選択してください';
-
-  @override
-  String get tagLibrary_fileInfo => 'ファイル情報';
-
-  @override
-  String get tagLibrary_entryCountLabel => 'エントリ';
-
-  @override
-  String get tagLibrary_categoryCountLabel => 'カテゴリ';
-
-  @override
-  String get tagLibrary_exportDateLabel => 'エクスポート日';
-
-  @override
-  String tagLibrary_importConflictsHint(Object count) {
-    return '$count の競合が見つかりました。以下の競合する項目をクリックして、その処理方法を選択します。';
-  }
-
-  @override
-  String tagLibrary_categoriesSection(Object count) {
-    return 'カテゴリ ($count)';
-  }
-
-  @override
-  String tagLibrary_entriesSection(Object count) {
-    return 'エントリ ($count)';
-  }
-
-  @override
-  String get tagLibrary_conflictResolutionTooltip => '競合処理を選択してください';
-
-  @override
-  String get tagLibrary_conflictSkip => '競合 - スキップします';
-
-  @override
-  String get tagLibrary_conflictRename => '競合 - 名前を変更してインポートします';
-
-  @override
-  String get tagLibrary_conflictOverwrite => '競合 - 既存のものを置き換えます';
-
-  @override
-  String tagLibrary_parseFileFailed(Object error) {
-    return 'ファイルを解析できません: $error';
-  }
-
-  @override
-  String get tagLibrary_preparingImport => 'インポートを準備しています...';
-
-  @override
-  String get tagLibrary_importCompleted => 'インポートが完了しました';
-
-  @override
-  String tagLibrary_importSuccessSummary(Object summary) {
-    return 'インポートが成功しました: $summary';
-  }
-
-  @override
-  String tagLibrary_importFailedWithError(Object error) {
-    return 'インポートに失敗しました: $error';
-  }
-
-  @override
-  String tagLibrary_importedEntriesCount(Object count) {
-    return '$count エントリ';
-  }
-
-  @override
-  String tagLibrary_importedCategoriesCount(Object count) {
-    return '$count カテゴリ';
-  }
-
-  @override
-  String tagLibrary_renamedCount(Object count) {
-    return '$count の名前が変更されました';
-  }
-
-  @override
-  String tagLibrary_overwrittenCount(Object count) {
-    return '$count が置き換えられました';
-  }
-
-  @override
-  String tagLibrary_skippedCount(Object count) {
-    return '$count はスキップされました';
-  }
-
-  @override
-  String get tagLibrary_dragToCategoryHint => 'カテゴリ パネルにドラッグしてファイルします';
-
-  @override
-  String get tagLibrary_unknownCategory => '不明なカテゴリ';
-
-  @override
-  String get tagLibrary_selectEntryToUpdate => '更新するエントリを選択してください';
-
-  @override
-  String get tagLibrary_updatePreview => 'プレビューを更新';
-
-  @override
-  String get tagLibrary_replaceThumbnailHint => '既存のサムネイルを置き換えます';
-
-  @override
-  String tagLibrary_sentEntriesToMainPrompt(Object count) {
-    return '$count エントリをメイン プロンプトに送信しました';
-  }
-
-  @override
-  String tagLibrary_confirmDeleteSelectedEntries(Object count) {
-    return '$count 選択したエントリを削除しますか?この操作は元に戻すことができません。';
-  }
-
-  @override
-  String tagLibrary_deletedEntries(Object count) {
-    return '$count エントリを削除しました';
-  }
-
-  @override
-  String tagLibrary_movedEntries(Object count) {
-    return '$count エントリを移動しました';
-  }
-
-  @override
-  String tagLibrary_favoritedEntries(Object count) {
-    return '$count 件のエントリをお気に入りに追加しました';
-  }
-
-  @override
-  String tagLibrary_unfavoritedEntries(Object count) {
-    return '$count 件のエントリをお気に入りから削除しました';
-  }
-
-  @override
-  String tagLibrary_copiedEntriesContent(Object count) {
-    return '$count エントリからコンテンツをコピーしました';
-  }
-
-  @override
-  String get tagLibrary_droppedImage => 'ドロップされた画像';
-
-  @override
-  String get tagLibrary_createEntryFromImage => '新しいエントリの作成';
-
-  @override
-  String tagLibrary_promptExtracted(Object prompt) {
-    return '抽出されたプロンプト: \"$prompt\"';
-  }
-
-  @override
-  String get tagLibrary_createEntryFromImageSubtitle => 'この画像から新しいエントリを作成します';
-
-  @override
-  String get tagLibrary_updateExistingThumbnail => '既存のエントリのサムネイルを更新';
-
-  @override
-  String get tagLibrary_updateExistingThumbnailSubtitle =>
-      'エントリを選択し、そのサムネイルを置き換えます';
-
-  @override
-  String get tagLibrary_allEntries => 'すべて';
-
-  @override
-  String get tagLibrary_favorites => 'お気に入り';
-
-  @override
-  String get tagLibrary_addSubCategory => 'サブカテゴリを追加';
-
-  @override
-  String get tagLibrary_moveToRoot => 'ルートに移動';
-
-  @override
-  String get tagLibrary_categoryNameHint => 'カテゴリ名を入力してください';
-
-  @override
-  String get tagLibrary_deleteCategoryTitle => 'カテゴリを削除';
-
-  @override
-  String tagLibrary_deleteCategoryConfirm(Object name, Object count) {
-    return 'カテゴリ「$name」を削除してもよろしいですか? $count エントリはルートに移動されます。';
-  }
-
-  @override
-  String get tagLibrary_deleteEntryTitle => 'エントリの削除';
-
-  @override
-  String tagLibrary_deleteEntryConfirm(Object name) {
-    return 'エントリ「$name」を削除してもよろしいですか?';
-  }
-
-  @override
-  String get tagLibrary_noSearchResults => '一致するエントリが見つかりませんでした';
-
-  @override
-  String get tagLibrary_tryDifferentSearch => '別のキーワードを試してください';
-
-  @override
-  String get tagLibrary_categoryEmpty => 'このカテゴリは空です';
-
-  @override
-  String get tagLibrary_empty => 'ライブラリが空です';
-
-  @override
-  String get tagLibrary_addFirstEntry => '上のボタンをクリックして最初のエントリを追加してください';
-
-  @override
-  String get tagLibraryPicker_title => 'エントリの選択';
-
-  @override
-  String get tagLibraryPicker_searchHint => 'エントリを検索...';
-
-  @override
-  String get tagLibraryPicker_allCategories => 'すべてのカテゴリ';
-
-  @override
-  String get tagLibrary_entryMoved => 'エントリがターゲット カテゴリに移動されました';
-
-  @override
-  String tagLibrary_useCount(Object count) {
-    return '$count 回使用されました';
-  }
-
-  @override
-  String get tagLibrary_addFavorite => 'お気に入りに追加';
-
-  @override
-  String get tagLibrary_thumbnail => 'サムネイル';
-
-  @override
-  String get tagLibrary_selectImage => '画像を選択してください';
-
-  @override
-  String get tagLibrary_thumbnailHint => 'PNG、JPG、WEBP、GIF、BMP、TIFF などをサポート';
-
-  @override
-  String get tagLibrary_name => '名前';
-
-  @override
-  String get tagLibrary_nameHint => 'エントリ名を入力してください';
-
-  @override
-  String get tagLibrary_category => 'カテゴリ';
-
-  @override
-  String get tagLibrary_rootCategory => 'ルート';
-
-  @override
   String get tagLibrary_tags => 'タグ';
-
-  @override
-  String get tagLibrary_tagsHint => 'タグをカンマで区切って入力します';
-
-  @override
-  String get tagLibrary_tagsHelper => 'タグはフィルタリングと検索に使用されます';
-
-  @override
-  String get tagLibrary_content => 'プロンプトの内容';
-
-  @override
-  String get tagLibrary_contentHint => 'プロンプトの内容を入力し、オートコンプリートをサポートします';
 
   @override
   String get settings_network => 'ネットワーク';
@@ -5711,46 +5345,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_proxyRestartHint => 'プロキシ設定が変更されました。再起動をお勧めします';
 
   @override
-  String get tagLibrary_categoryNameExists => 'カテゴリ名はすでに存在します';
-
-  @override
   String get tagLibrary_addToLibrary => 'ライブラリに追加';
-
-  @override
-  String get tagLibrary_saveToLibrary => 'ライブラリに保存';
-
-  @override
-  String get tagLibrary_entrySaved => 'ライブラリに保存されました';
-
-  @override
-  String get tagLibrary_entryUpdated => 'エントリが更新されました';
 
   @override
   String get tagLibrary_uncategorized => '未分類';
 
   @override
   String get tagLibrary_contentPreview => 'コンテンツのプレビュー';
-
-  @override
-  String get tagLibrary_confirmAdd => '確認';
-
-  @override
-  String get tagLibrary_entryName => '名前';
-
-  @override
-  String get tagLibrary_entryNameHint => 'エントリ名を入力してください';
-
-  @override
-  String get tagLibrary_selectNewImage => '新しい画像を選択してください';
-
-  @override
-  String get tagLibrary_adjustDisplayRange => '表示範囲の調整';
-
-  @override
-  String get tagLibrary_adjustThumbnailTitle => 'サムネイル表示範囲の調整';
-
-  @override
-  String get tagLibrary_dragToMove => 'ドラッグして移動、スクロールまたはピンチしてズームします';
 
   @override
   String get settings_enablePromptWeightScroll => 'マウスホイールでプロンプトの重みを調整';
@@ -5793,79 +5394,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get statistics_heatmapNoActivity => 'アクティビティはありません';
-
-  @override
-  String get sendToHome_dialogTitle => 'ホームに送信';
-
-  @override
-  String get sendToHome_send => '送信';
-
-  @override
-  String get sendToHome_mainPrompt => 'メイン プロンプトに送信';
-
-  @override
-  String get sendToHome_mainPromptSubtitle => 'メイン プロンプト入力フィールドに入力します';
-
-  @override
-  String get sendToHome_mainPromptPipeSubtitle =>
-      '完全なコンテンツをメイン プロンプトに送信します (パイプを含む)';
-
-  @override
-  String get sendToHome_smartDecompose => 'スマート分解';
-
-  @override
-  String sendToHome_smartDecomposeSubtitle(Object count) {
-    return 'メインプロンプト + $count キャラクター';
-  }
-
-  @override
-  String get sendToHome_replaceCharacter => 'キャラクタープロンプトを置換';
-
-  @override
-  String get sendToHome_replaceCharacterSubtitle => '既存のキャラクターをクリアして新規として追加';
-
-  @override
-  String get sendToHome_appendCharacter => 'キャラクタープロンプトを追加';
-
-  @override
-  String get sendToHome_appendCharacterSubtitle =>
-      '既存のキャラクターを保持し、新しいキャラクターを追加します';
-
-  @override
-  String get sendToHome_sendAsAlias => 'エイリアスとして送信';
-
-  @override
-  String sendToHome_sendAsAliasSubtitle(Object name) {
-    return '自宅に送信する場合は <$name> としてラップします';
-  }
-
-  @override
-  String get sendToHome_preview => 'プレビューを送信';
-
-  @override
-  String get sendToHome_characterPrompt => 'キャラクタープロンプト';
-
-  @override
-  String sendToHome_characterPromptCount(Object count) {
-    return 'キャラクタープロンプト ($count)';
-  }
-
-  @override
-  String sendToHome_characterIndex(Object index) {
-    return 'キャラクター $index';
-  }
-
-  @override
-  String get sendToHome_recommended => '推奨';
-
-  @override
-  String get sendToHome_successMainPrompt => 'メイン プロンプトに送信されます';
-
-  @override
-  String get sendToHome_successReplaceCharacter => 'キャラクタープロンプトを置換しました';
-
-  @override
-  String get sendToHome_successAppendCharacter => 'キャラクタープロンプトを追加しました';
 
   @override
   String get metadataImport_title => 'インポートするパラメータを選択してください';
@@ -6020,9 +5548,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shortcut_context_viewer => '画像ビューア';
 
   @override
-  String get shortcut_context_tag_library => 'タグ ライブラリ';
-
-  @override
   String get shortcut_context_settings => '設定';
 
   @override
@@ -6038,7 +5563,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shortcut_action_navigate_to_online_gallery => 'オンライン ギャラリー';
 
   @override
-  String get shortcut_action_navigate_to_tag_library => 'タグ ライブラリ';
+  String get shortcut_action_navigate_to_tag_library => 'プロンプトブロック';
 
   @override
   String get shortcut_action_navigate_to_statistics => '統計';
@@ -6065,7 +5590,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shortcut_action_toggle_prompt_mode => 'プロンプトモードの切り替え';
 
   @override
-  String get shortcut_action_open_tag_library => 'タグ ライブラリを開く';
+  String get shortcut_action_open_tag_library => 'ブロックライブラリを開く';
 
   @override
   String get shortcut_action_save_image => '画像を保存';
@@ -6150,33 +5675,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get shortcut_action_open_folder => 'フォルダーを開く';
-
-  @override
-  String get shortcut_action_select_all_tags => 'すべてのタグを選択';
-
-  @override
-  String get shortcut_action_deselect_all_tags => 'すべてのタグの選択を解除';
-
-  @override
-  String get shortcut_action_new_category => '新しいカテゴリ';
-
-  @override
-  String get shortcut_action_new_tag => '新しいタグ';
-
-  @override
-  String get shortcut_action_search_tags => 'タグを検索';
-
-  @override
-  String get shortcut_action_batch_delete_tags => 'タグの一括削除';
-
-  @override
-  String get shortcut_action_batch_copy_tags => 'タグのバッチコピー';
-
-  @override
-  String get shortcut_action_send_to_home => 'ホームに送信';
-
-  @override
-  String get shortcut_action_exit_selection_mode => '選択モードを終了します';
 
   @override
   String get shortcut_action_minimize_to_tray => 'トレイに最小化';
@@ -8520,9 +8018,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get toast_smartDecomposeSent => 'スマートに分解して送信';
-
-  @override
   String get toast_renameNameRequired => '名前は必須です';
 
   @override
@@ -10456,6 +9951,61 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get promptBlockEditor_library => 'ブロックライブラリ';
+
+  @override
+  String get promptBlockPicker_title => 'ブロックを選択';
+
+  @override
+  String get promptBlockLibrary_thumbnail => 'サムネイル';
+
+  @override
+  String get promptBlockLibrary_selectNewImage => '新しい画像を選択';
+
+  @override
+  String get promptBlockLibrary_selectImage => '画像を選択';
+
+  @override
+  String get promptBlockLibrary_adjustDisplayRange => '表示範囲を調整';
+
+  @override
+  String get promptBlockLibrary_adjustThumbnailTitle => 'サムネイル表示範囲の調整';
+
+  @override
+  String get promptBlockLibrary_dragToMove => 'ドラッグして移動、スクロールまたはピンチしてズームします';
+
+  @override
+  String get promptBlockLibrary_addToLibrary => 'ブロックライブラリに追加';
+
+  @override
+  String get promptBlockLibrary_contentPreview => '内容プレビュー';
+
+  @override
+  String get promptBlockLibrary_confirmAdd => '確認';
+
+  @override
+  String get promptBlockLibrary_saveToLibrary => 'ブロックライブラリに保存';
+
+  @override
+  String get promptBlockLibrary_droppedImage => 'ドロップされた画像';
+
+  @override
+  String get promptBlockLibrary_createBlockFromImage => '新しいブロックを作成';
+
+  @override
+  String get promptBlockLibrary_createBlockFromImageSubtitle =>
+      'この画像から新しいブロックを作成します';
+
+  @override
+  String promptBlockLibrary_promptExtracted(Object prompt) {
+    return '抽出されたプロンプト: \"$prompt\"';
+  }
+
+  @override
+  String get promptBlockLibrary_updateExistingThumbnail => '既存ブロックのサムネイルを更新';
+
+  @override
+  String get promptBlockLibrary_updateExistingThumbnailSubtitle =>
+      'ブロックを選択し、そのサムネイルを置き換えます';
 
   @override
   String get styleExplore_lineageTitle => '系譜';

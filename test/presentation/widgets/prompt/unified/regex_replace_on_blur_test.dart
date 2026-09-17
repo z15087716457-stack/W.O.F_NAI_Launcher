@@ -224,13 +224,4 @@ class _TestLocalStorageService extends LocalStorageService {
 
   @override
   bool getEnableCooccurrenceRecommendation() => false;
-
-  @override
-  String? getTagLibraryEntriesJson() => null;
-
-  @override
-  String? getTagLibraryCategoriesJson() => null;
-
-  @override
-  int getTagLibraryViewMode() => 0;
 }

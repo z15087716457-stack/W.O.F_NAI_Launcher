@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -10,12 +12,13 @@ import '../../../../core/utils/prompt_block_thumbnails.dart';
 import '../../../../core/utils/thumbnail_image_normalizer.dart';
 import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../../data/models/prompt_block/prompt_block_folder.dart';
+import '../../../providers/prompt_block_library_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_input.dart';
 import '../../../widgets/common/thumbnail_display.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
-import '../../tag_library_page/widgets/thumbnail_crop_dialog.dart';
+import '../../../widgets/common/thumbnail_crop_dialog.dart';
 import 'prompt_block_color_picker.dart';
 
 class PromptBlockEditResult {
@@ -50,17 +53,32 @@ class PromptBlockEditDialog extends StatefulWidget {
     required this.block,
     required this.folders,
     this.initialFolderId,
+    this.initialTitle,
+    this.initialContent,
+    this.initialImageBytes,
   });
 
   final PromptBlock? block;
   final List<PromptBlockFolder> folders;
   final String? initialFolderId;
 
+  /// 新建模式下的初始标题（「存为块」入口预填名称）。
+  final String? initialTitle;
+
+  /// 新建模式下的初始正文（「存为块」入口预填提示词）。
+  final String? initialContent;
+
+  /// 新建模式下的初始预览图字节；打开弹窗时落盘为块缩略图。
+  final Uint8List? initialImageBytes;
+
   static Future<PromptBlockEditResult?> show({
     required BuildContext context,
     PromptBlock? block,
     required List<PromptBlockFolder> folders,
     String? initialFolderId,
+    String? initialTitle,
+    String? initialContent,
+    Uint8List? initialImageBytes,
   }) {
     return showDialog<PromptBlockEditResult>(
       context: context,
@@ -68,8 +86,53 @@ class PromptBlockEditDialog extends StatefulWidget {
         block: block,
         folders: folders,
         initialFolderId: initialFolderId,
+        initialTitle: initialTitle,
+        initialContent: initialContent,
+        initialImageBytes: initialImageBytes,
       ),
     );
+  }
+
+  /// 「存为块」统一入口：等块库就绪 → 打开编辑弹窗 → 确认后落库。
+  ///
+  /// 返回新建的块；用户取消返回 null。取代旧词库 EntryAddDialog 的
+  /// 自选文本/图片/角色提示词入库路径。
+  static Future<PromptBlock?> createWithDialog(
+    BuildContext context,
+    WidgetRef ref, {
+    String? initialTitle,
+    String? initialContent,
+    Uint8List? initialImageBytes,
+    String? initialFolderId,
+  }) async {
+    final library = await ref.read(promptBlockLibraryNotifierProvider.future);
+    if (!context.mounted) return null;
+    final result = await show(
+      context: context,
+      folders: library.folders,
+      initialFolderId: initialFolderId,
+      initialTitle: initialTitle,
+      initialContent: initialContent,
+      initialImageBytes: initialImageBytes,
+    );
+    if (result == null) return null;
+    final block = await ref
+        .read(promptBlockLibraryNotifierProvider.notifier)
+        .createBlock(
+          title: result.title,
+          content: result.content,
+          folderId: result.folderId,
+          color: result.color,
+          iconName: result.iconName,
+          thumbnail: result.thumbnail,
+          thumbnailOffsetX: result.thumbnailOffsetX,
+          thumbnailOffsetY: result.thumbnailOffsetY,
+          thumbnailScale: result.thumbnailScale,
+        );
+    if (context.mounted) {
+      AppToast.success(context, context.l10n.saveBlock_saved);
+    }
+    return block;
   }
 
   @override
@@ -102,9 +165,11 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.block?.title ?? '');
+    _titleController = TextEditingController(
+      text: widget.block?.title ?? widget.initialTitle ?? '',
+    );
     _contentController = TextEditingController(
-      text: widget.block?.content ?? '',
+      text: widget.block?.content ?? widget.initialContent ?? '',
     );
     _folderId = widget.block?.folderId ?? widget.initialFolderId;
     _selectedColor = promptBlockColorFromString(
@@ -115,6 +180,27 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
     _thumbnailOffsetX = widget.block?.thumbnailOffsetX ?? 0.0;
     _thumbnailOffsetY = widget.block?.thumbnailOffsetY ?? 0.0;
     _thumbnailScale = widget.block?.thumbnailScale ?? 1.0;
+    _persistInitialImageBytes();
+  }
+
+  /// 新建模式 + 外部传入图：先落盘为块缩略图并纳入 pending 回收表，
+  /// 取消弹窗时由 [dispose] 清理，避免孤儿文件。
+  void _persistInitialImageBytes() {
+    final bytes = widget.initialImageBytes;
+    if (widget.block != null || bytes == null || bytes.isEmpty) return;
+    unawaited(() async {
+      try {
+        final savedPath = await savePromptBlockThumbnail(bytes);
+        if (!mounted) {
+          unawaited(deletePromptBlockThumbnail(savedPath));
+          return;
+        }
+        _pendingThumbnailPaths.add(savedPath);
+        setState(() => _thumbnailPath = savedPath);
+      } catch (_) {
+        // 预览图落盘失败不阻断正文编辑。
+      }
+    }());
   }
 
   @override
@@ -274,7 +360,10 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.tagLibrary_thumbnail, style: theme.textTheme.labelLarge),
+        Text(
+          l10n.promptBlockLibrary_thumbnail,
+          style: theme.textTheme.labelLarge,
+        ),
         const SizedBox(height: 8),
         GestureDetector(
           onTap: _isSaving
@@ -398,7 +487,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
           children: [
             ListTile(
               leading: const Icon(Icons.image),
-              title: Text(context.l10n.tagLibrary_selectNewImage),
+              title: Text(context.l10n.promptBlockLibrary_selectNewImage),
               onTap: () {
                 Navigator.pop(sheetContext);
                 _selectThumbnail();
@@ -406,7 +495,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
             ),
             ListTile(
               leading: const Icon(Icons.crop_free),
-              title: Text(context.l10n.tagLibrary_adjustDisplayRange),
+              title: Text(context.l10n.promptBlockLibrary_adjustDisplayRange),
               onTap: () {
                 Navigator.pop(sheetContext);
                 _openCropDialog();

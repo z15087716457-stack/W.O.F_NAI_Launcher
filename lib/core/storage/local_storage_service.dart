@@ -861,38 +861,6 @@ class LocalStorageService {
     await _historyBox.close();
   }
 
-  // ==================== Tag Library (User) ====================
-
-  /// 获取用户词库条目列表 JSON
-  String? getTagLibraryEntriesJson() {
-    return getSetting<String>(StorageKeys.tagLibraryEntriesData);
-  }
-
-  /// 保存用户词库条目列表 JSON
-  Future<void> setTagLibraryEntriesJson(String json) async {
-    await setSetting(StorageKeys.tagLibraryEntriesData, json);
-  }
-
-  /// 获取用户词库分类列表 JSON
-  String? getTagLibraryCategoriesJson() {
-    return getSetting<String>(StorageKeys.tagLibraryCategoriesData);
-  }
-
-  /// 保存用户词库分类列表 JSON
-  Future<void> setTagLibraryCategoriesJson(String json) async {
-    await setSetting(StorageKeys.tagLibraryCategoriesData, json);
-  }
-
-  /// 获取词库视图模式 (0=card, 1=list)
-  int getTagLibraryViewMode() {
-    return getSetting<int>(StorageKeys.tagLibraryViewMode) ?? 0;
-  }
-
-  /// 保存词库视图模式
-  Future<void> setTagLibraryViewMode(int mode) async {
-    await setSetting(StorageKeys.tagLibraryViewMode, mode);
-  }
-
   // ==================== Update Check (更新检查相关) ====================
 
   /// 获取上次更新检查时间

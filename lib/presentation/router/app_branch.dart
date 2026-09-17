@@ -7,7 +7,6 @@ enum AppBranch {
   onlineGallery,
   settings,
   statistics,
-  tagLibrary,
   vibeLibrary,
   preciseRefLibrary,
   promptBlockLibrary,
@@ -21,7 +20,7 @@ const Map<String, AppBranch> globalNavigationShortcutBranches = {
   ShortcutIds.navigateToOnlineGallery: AppBranch.onlineGallery,
   ShortcutIds.navigateToSettings: AppBranch.settings,
   ShortcutIds.navigateToStatistics: AppBranch.statistics,
-  ShortcutIds.navigateToTagLibrary: AppBranch.tagLibrary,
+  ShortcutIds.navigateToTagLibrary: AppBranch.promptBlockLibrary,
   ShortcutIds.navigateToVibeLibrary: AppBranch.vibeLibrary,
 };
 

@@ -147,9 +147,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_clearInputConfirm => '确定要清空输入内容吗？';
 
   @override
-  String get common_today => '今天';
-
-  @override
   String get common_yesterday => '昨天';
 
   @override
@@ -183,12 +180,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get common_ok => '确定';
-
-  @override
-  String get common_replace => '替换';
-
-  @override
-  String get common_skip => '跳过';
 
   @override
   String get common_exit => '退出';
@@ -278,9 +269,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get nav_onlineGallery => '画廊';
-
-  @override
-  String get nav_dictionary => '词库 (WIP)';
 
   @override
   String get nav_discordCommunity => 'Discord 社群';
@@ -3376,9 +3364,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get characterTooltip_viewFullConfig => '点击查看完整配置';
 
   @override
-  String get naiAlgorithm_mainPrompt => '主提示词';
-
-  @override
   String get addGroup_displayNameLabel => '显示名称（可选）';
 
   @override
@@ -4791,9 +4776,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get statistics_saturday => '周六';
 
   @override
-  String get fixedTags_syntaxHelp => '支持 NAI 语法增强/减弱权重、标签交替等';
-
-  @override
   String get fixedTags_negativeTitle => '负向固定词';
 
   @override
@@ -5220,357 +5202,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_create => '创建';
 
   @override
-  String get tagLibrary_categories => '分类';
-
-  @override
   String get tagLibrary_newCategory => '新建分类';
 
   @override
-  String get tagLibrary_addEntry => '添加条目';
-
-  @override
-  String get tagLibrary_editEntry => '编辑条目';
-
-  @override
-  String get tagLibrary_searchHint => '搜索条目...';
-
-  @override
-  String get tagLibrary_import => '导入';
-
-  @override
-  String get tagLibrary_export => '导出';
-
-  @override
-  String get tagLibrary_sortCustom => '自定义排序';
-
-  @override
-  String get tagLibrary_sortName => '名称';
-
-  @override
-  String get tagLibrary_sortUseCount => '使用频率';
-
-  @override
-  String get tagLibrary_sortUpdatedAt => '更新时间';
-
-  @override
-  String get tagLibrary_transferCategory => '转移分类';
-
-  @override
-  String get tagLibrary_copyContent => '复制内容';
-
-  @override
-  String get tagLibrary_moveToCategoryTitle => '移动到分类';
-
-  @override
-  String get tagLibrary_selectTargetCategory => '选择目标分类：';
-
-  @override
-  String get tagLibrary_includeThumbnails => '包含预览图';
-
-  @override
-  String get tagLibrary_includeThumbnailsSubtitle => '将增加文件大小';
-
-  @override
-  String tagLibrary_selectedExportCount(Object count) {
-    return '导出 ($count 项)';
-  }
-
-  @override
-  String tagLibrary_selectedImportCount(Object count) {
-    return '导入 ($count 项)';
-  }
-
-  @override
-  String get tagLibrary_entriesLabel => '条目';
-
-  @override
-  String get tagLibrary_categoriesLabel => '分类';
-
-  @override
-  String get tagLibrary_selectExportContent => '选择要导出的内容';
-
-  @override
-  String get tagLibrary_selectImportContent => '选择要导入的内容';
-
-  @override
-  String get tagLibrary_selectSaveLocation => '选择保存位置';
-
-  @override
-  String get tagLibrary_preparingExport => '准备导出...';
-
-  @override
-  String get tagLibrary_exportSuccess => '导出成功';
-
-  @override
-  String tagLibrary_exportFailedWithError(Object error) {
-    return '导出失败: $error';
-  }
-
-  @override
-  String get tagLibrary_selectZipFile => '点击选择 ZIP 文件';
-
-  @override
-  String get tagLibrary_zipFileHint => '支持从本应用导出的词库文件';
-
-  @override
-  String get tagLibrary_reselect => '重新选择';
-
-  @override
-  String get tagLibrary_fileInfo => '文件信息';
-
-  @override
-  String get tagLibrary_entryCountLabel => '条目数';
-
-  @override
-  String get tagLibrary_categoryCountLabel => '分类数';
-
-  @override
-  String get tagLibrary_exportDateLabel => '导出时间';
-
-  @override
-  String tagLibrary_importConflictsHint(Object count) {
-    return '发现 $count 个冲突项，请点击下方冲突项选择处理方式';
-  }
-
-  @override
-  String tagLibrary_categoriesSection(Object count) {
-    return '分类 ($count)';
-  }
-
-  @override
-  String tagLibrary_entriesSection(Object count) {
-    return '条目 ($count)';
-  }
-
-  @override
-  String get tagLibrary_conflictResolutionTooltip => '选择冲突处理方式';
-
-  @override
-  String get tagLibrary_conflictSkip => '冲突 - 将跳过';
-
-  @override
-  String get tagLibrary_conflictRename => '冲突 - 将重命名导入';
-
-  @override
-  String get tagLibrary_conflictOverwrite => '冲突 - 将替换现有';
-
-  @override
-  String tagLibrary_parseFileFailed(Object error) {
-    return '无法解析文件: $error';
-  }
-
-  @override
-  String get tagLibrary_preparingImport => '准备导入...';
-
-  @override
-  String get tagLibrary_importCompleted => '导入完成';
-
-  @override
-  String tagLibrary_importSuccessSummary(Object summary) {
-    return '导入成功: $summary';
-  }
-
-  @override
-  String tagLibrary_importFailedWithError(Object error) {
-    return '导入失败: $error';
-  }
-
-  @override
-  String tagLibrary_importedEntriesCount(Object count) {
-    return '$count 条目';
-  }
-
-  @override
-  String tagLibrary_importedCategoriesCount(Object count) {
-    return '$count 分类';
-  }
-
-  @override
-  String tagLibrary_renamedCount(Object count) {
-    return '$count 重命名';
-  }
-
-  @override
-  String tagLibrary_overwrittenCount(Object count) {
-    return '$count 替换';
-  }
-
-  @override
-  String tagLibrary_skippedCount(Object count) {
-    return '$count 跳过';
-  }
-
-  @override
-  String get tagLibrary_dragToCategoryHint => '拖到左侧分类归档';
-
-  @override
-  String get tagLibrary_unknownCategory => '未知分类';
-
-  @override
-  String get tagLibrary_selectEntryToUpdate => '选择要更新的词条';
-
-  @override
-  String get tagLibrary_updatePreview => '更新预览图';
-
-  @override
-  String get tagLibrary_replaceThumbnailHint => '将替换现有预览图';
-
-  @override
-  String tagLibrary_sentEntriesToMainPrompt(Object count) {
-    return '已发送 $count 个词条到主提示词';
-  }
-
-  @override
-  String tagLibrary_confirmDeleteSelectedEntries(Object count) {
-    return '确定要删除选中的 $count 个词条吗？此操作不可撤销。';
-  }
-
-  @override
-  String tagLibrary_deletedEntries(Object count) {
-    return '已删除 $count 个词条';
-  }
-
-  @override
-  String tagLibrary_movedEntries(Object count) {
-    return '已移动 $count 个词条';
-  }
-
-  @override
-  String tagLibrary_favoritedEntries(Object count) {
-    return '已收藏 $count 个词条';
-  }
-
-  @override
-  String tagLibrary_unfavoritedEntries(Object count) {
-    return '已取消收藏 $count 个词条';
-  }
-
-  @override
-  String tagLibrary_copiedEntriesContent(Object count) {
-    return '已复制 $count 个词条的内容';
-  }
-
-  @override
-  String get tagLibrary_droppedImage => '拖入图片';
-
-  @override
-  String get tagLibrary_createEntryFromImage => '创建新词条';
-
-  @override
-  String tagLibrary_promptExtracted(Object prompt) {
-    return '提示词已提取: \"$prompt\"';
-  }
-
-  @override
-  String get tagLibrary_createEntryFromImageSubtitle => '从图片创建新词条';
-
-  @override
-  String get tagLibrary_updateExistingThumbnail => '更新现有词条预览图';
-
-  @override
-  String get tagLibrary_updateExistingThumbnailSubtitle => '选择词条并替换其预览图';
-
-  @override
-  String get tagLibrary_allEntries => '全部';
-
-  @override
-  String get tagLibrary_favorites => '收藏';
-
-  @override
-  String get tagLibrary_addSubCategory => '添加子分类';
-
-  @override
-  String get tagLibrary_moveToRoot => '移动到根目录';
-
-  @override
-  String get tagLibrary_categoryNameHint => '输入分类名称';
-
-  @override
-  String get tagLibrary_deleteCategoryTitle => '删除分类';
-
-  @override
-  String tagLibrary_deleteCategoryConfirm(Object name, Object count) {
-    return '确定要删除分类 \"$name\" 吗？该分类下的 $count 个条目将移至根目录。';
-  }
-
-  @override
-  String get tagLibrary_deleteEntryTitle => '删除条目';
-
-  @override
-  String tagLibrary_deleteEntryConfirm(Object name) {
-    return '确定要删除条目 \"$name\" 吗？';
-  }
-
-  @override
-  String get tagLibrary_noSearchResults => '没有找到匹配的条目';
-
-  @override
-  String get tagLibrary_tryDifferentSearch => '尝试使用其他关键词搜索';
-
-  @override
-  String get tagLibrary_categoryEmpty => '该分类暂无条目';
-
-  @override
-  String get tagLibrary_empty => '词库为空';
-
-  @override
-  String get tagLibrary_addFirstEntry => '点击上方按钮添加第一个条目';
-
-  @override
-  String get tagLibraryPicker_title => '选择词条';
-
-  @override
-  String get tagLibraryPicker_searchHint => '搜索词条...';
-
-  @override
-  String get tagLibraryPicker_allCategories => '全部分类';
-
-  @override
-  String get tagLibrary_entryMoved => '条目已移动到目标分类';
-
-  @override
-  String tagLibrary_useCount(Object count) {
-    return '使用 $count 次';
-  }
-
-  @override
-  String get tagLibrary_addFavorite => '添加收藏';
-
-  @override
-  String get tagLibrary_thumbnail => '预览图';
-
-  @override
-  String get tagLibrary_selectImage => '选择图片';
-
-  @override
-  String get tagLibrary_thumbnailHint => '支持 PNG、JPG、WEBP、GIF、BMP、TIFF 等格式';
-
-  @override
-  String get tagLibrary_name => '名称';
-
-  @override
-  String get tagLibrary_nameHint => '输入条目名称';
-
-  @override
-  String get tagLibrary_category => '分类';
-
-  @override
-  String get tagLibrary_rootCategory => '根目录';
-
-  @override
   String get tagLibrary_tags => '标签';
-
-  @override
-  String get tagLibrary_tagsHint => '输入标签，用逗号分隔';
-
-  @override
-  String get tagLibrary_tagsHelper => '标签用于筛选和搜索';
-
-  @override
-  String get tagLibrary_content => '提示词内容';
-
-  @override
-  String get tagLibrary_contentHint => '输入提示词内容，支持智能补全';
 
   @override
   String get settings_network => '网络';
@@ -5632,46 +5267,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_proxyRestartHint => '代理设置已更改，建议重启应用';
 
   @override
-  String get tagLibrary_categoryNameExists => '该分类名称已存在';
-
-  @override
   String get tagLibrary_addToLibrary => '收藏到词库';
-
-  @override
-  String get tagLibrary_saveToLibrary => '保存到词库';
-
-  @override
-  String get tagLibrary_entrySaved => '收藏成功';
-
-  @override
-  String get tagLibrary_entryUpdated => '条目已更新';
 
   @override
   String get tagLibrary_uncategorized => '未分类';
 
   @override
   String get tagLibrary_contentPreview => '内容预览';
-
-  @override
-  String get tagLibrary_confirmAdd => '确认收藏';
-
-  @override
-  String get tagLibrary_entryName => '名称';
-
-  @override
-  String get tagLibrary_entryNameHint => '输入条目名称';
-
-  @override
-  String get tagLibrary_selectNewImage => '选择新图片';
-
-  @override
-  String get tagLibrary_adjustDisplayRange => '调整显示范围';
-
-  @override
-  String get tagLibrary_adjustThumbnailTitle => '调整预览图显示范围';
-
-  @override
-  String get tagLibrary_dragToMove => '拖拽移动，滚轮或双指缩放';
 
   @override
   String get settings_enablePromptWeightScroll => '滚轮调整提示词权重';
@@ -5714,77 +5316,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get statistics_heatmapNoActivity => '无活动';
-
-  @override
-  String get sendToHome_dialogTitle => '发送到主页';
-
-  @override
-  String get sendToHome_send => '发送';
-
-  @override
-  String get sendToHome_mainPrompt => '发送到主提示词';
-
-  @override
-  String get sendToHome_mainPromptSubtitle => '填充到主页的正向提示词输入框';
-
-  @override
-  String get sendToHome_mainPromptPipeSubtitle => '发送完整内容到主提示词（包含竖线）';
-
-  @override
-  String get sendToHome_smartDecompose => '智能分解';
-
-  @override
-  String sendToHome_smartDecomposeSubtitle(Object count) {
-    return '主提示词 + $count个角色';
-  }
-
-  @override
-  String get sendToHome_replaceCharacter => '替换角色提示词';
-
-  @override
-  String get sendToHome_replaceCharacterSubtitle => '清空现有角色，添加为新角色';
-
-  @override
-  String get sendToHome_appendCharacter => '追加角色提示词';
-
-  @override
-  String get sendToHome_appendCharacterSubtitle => '保留现有角色，追加新角色';
-
-  @override
-  String get sendToHome_sendAsAlias => '作为别名发送';
-
-  @override
-  String sendToHome_sendAsAliasSubtitle(Object name) {
-    return '发送到主页时包装为 <$name>';
-  }
-
-  @override
-  String get sendToHome_preview => '发送预览';
-
-  @override
-  String get sendToHome_characterPrompt => '角色提示词';
-
-  @override
-  String sendToHome_characterPromptCount(Object count) {
-    return '角色提示词 ($count个)';
-  }
-
-  @override
-  String sendToHome_characterIndex(Object index) {
-    return '角色 $index';
-  }
-
-  @override
-  String get sendToHome_recommended => '推荐';
-
-  @override
-  String get sendToHome_successMainPrompt => '已发送到主提示词';
-
-  @override
-  String get sendToHome_successReplaceCharacter => '已替换角色提示词';
-
-  @override
-  String get sendToHome_successAppendCharacter => '已追加角色提示词';
 
   @override
   String get metadataImport_title => '选择要套用的参数';
@@ -5939,9 +5470,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcut_context_viewer => '图片查看器';
 
   @override
-  String get shortcut_context_tag_library => '词库';
-
-  @override
   String get shortcut_context_settings => '设置';
 
   @override
@@ -5957,7 +5485,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcut_action_navigate_to_online_gallery => '在线画廊';
 
   @override
-  String get shortcut_action_navigate_to_tag_library => '词库页面';
+  String get shortcut_action_navigate_to_tag_library => '块库页面';
 
   @override
   String get shortcut_action_navigate_to_statistics => '统计页面';
@@ -5984,7 +5512,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcut_action_toggle_prompt_mode => '切换正/负面模式';
 
   @override
-  String get shortcut_action_open_tag_library => '打开词库';
+  String get shortcut_action_open_tag_library => '打开块库';
 
   @override
   String get shortcut_action_save_image => '保存图像';
@@ -6069,33 +5597,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortcut_action_open_folder => '打开文件夹';
-
-  @override
-  String get shortcut_action_select_all_tags => '全选标签';
-
-  @override
-  String get shortcut_action_deselect_all_tags => '取消全选';
-
-  @override
-  String get shortcut_action_new_category => '新建分类';
-
-  @override
-  String get shortcut_action_new_tag => '新建标签';
-
-  @override
-  String get shortcut_action_search_tags => '搜索标签';
-
-  @override
-  String get shortcut_action_batch_delete_tags => '批量删除标签';
-
-  @override
-  String get shortcut_action_batch_copy_tags => '批量复制标签';
-
-  @override
-  String get shortcut_action_send_to_home => '发送到首页';
-
-  @override
-  String get shortcut_action_exit_selection_mode => '退出选择模式';
 
   @override
   String get shortcut_action_minimize_to_tray => '最小化到托盘';
@@ -8393,9 +7894,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get toast_smartDecomposeSent => '已智能分解并发送';
-
-  @override
   String get toast_renameNameRequired => '名称不能为空';
 
   @override
@@ -10309,6 +9807,59 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptBlockEditor_library => '块库';
+
+  @override
+  String get promptBlockPicker_title => '选择块';
+
+  @override
+  String get promptBlockLibrary_thumbnail => '预览图';
+
+  @override
+  String get promptBlockLibrary_selectNewImage => '选择新图片';
+
+  @override
+  String get promptBlockLibrary_selectImage => '选择图片';
+
+  @override
+  String get promptBlockLibrary_adjustDisplayRange => '调整显示范围';
+
+  @override
+  String get promptBlockLibrary_adjustThumbnailTitle => '调整预览图显示范围';
+
+  @override
+  String get promptBlockLibrary_dragToMove => '拖拽移动，滚轮或双指缩放';
+
+  @override
+  String get promptBlockLibrary_addToLibrary => '收藏到块库';
+
+  @override
+  String get promptBlockLibrary_contentPreview => '内容预览';
+
+  @override
+  String get promptBlockLibrary_confirmAdd => '确认收藏';
+
+  @override
+  String get promptBlockLibrary_saveToLibrary => '保存到块库';
+
+  @override
+  String get promptBlockLibrary_droppedImage => '拖入图片';
+
+  @override
+  String get promptBlockLibrary_createBlockFromImage => '创建新块';
+
+  @override
+  String get promptBlockLibrary_createBlockFromImageSubtitle => '从图片创建新块';
+
+  @override
+  String promptBlockLibrary_promptExtracted(Object prompt) {
+    return '提示词已提取: \"$prompt\"';
+  }
+
+  @override
+  String get promptBlockLibrary_updateExistingThumbnail => '更新现有块预览图';
+
+  @override
+  String get promptBlockLibrary_updateExistingThumbnailSubtitle => '选择块并替换其预览图';
 
   @override
   String get styleExplore_lineageTitle => '谱系';

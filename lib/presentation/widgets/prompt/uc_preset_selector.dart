@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/api_constants.dart';
 import '../../../core/utils/localization_extension.dart';
-import '../../../data/models/tag_library/tag_library_entry.dart';
+import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../providers/uc_preset_provider.dart';
-import '../tag_library/tag_library_picker_dialog.dart';
+import '../common/prompt_block_picker_dialog.dart';
 import 'components/library_entry_menu_item.dart';
 
 /// UC 预设选择器组件
@@ -146,7 +146,7 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
   Future<void> _showMenu(
     BuildContext context,
     UcPresetState presetState,
-    List<TagLibraryEntry> customEntries,
+    List<PromptBlock> customEntries,
   ) async {
     final RenderBox button =
         _buttonKey.currentContext!.findRenderObject() as RenderBox;
@@ -178,10 +178,10 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
   String _getDisplayLabel(
     BuildContext context,
     UcPresetState state,
-    TagLibraryEntry? customEntry,
+    PromptBlock? customEntry,
   ) {
     if (state.isCustom && customEntry != null) {
-      final name = customEntry.displayName;
+      final name = customEntry.displayTitle;
       return name.length > 8 ? '${name.substring(0, 8)}...' : name;
     }
     return _getPresetDisplayName(context, state.presetType);
@@ -190,7 +190,7 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
   List<PopupMenuEntry<String>> _buildMenuItems(
     BuildContext context,
     UcPresetState state,
-    List<TagLibraryEntry> customEntries,
+    List<PromptBlock> customEntries,
   ) {
     final theme = Theme.of(context);
     final items = <PopupMenuEntry<String>>[];
@@ -273,17 +273,17 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
             .setPresetType(UcPresetType.values[index]);
       }
     } else if (value == 'add_from_library') {
-      _showTagLibraryPicker();
+      _showPromptBlockPicker();
     } else if (value.startsWith('custom_')) {
       final entryId = value.substring(7);
       ref.read(ucPresetNotifierProvider.notifier).setCustomEntry(entryId);
     }
   }
 
-  Future<void> _showTagLibraryPicker() async {
-    final entry = await showDialog<TagLibraryEntry>(
+  Future<void> _showPromptBlockPicker() async {
+    final entry = await showDialog<PromptBlock>(
       context: context,
-      builder: (context) => TagLibraryPickerDialog(
+      builder: (context) => PromptBlockPickerDialog(
         title: context.l10n.ucPreset_selectFromLibrary,
       ),
     );
@@ -297,7 +297,7 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
     String? presetContent,
     bool isEnabled,
     bool isCustom,
-    TagLibraryEntry? customEntry,
+    PromptBlock? customEntry,
   ) {
     if (!isEnabled && !isCustom) {
       return Text(

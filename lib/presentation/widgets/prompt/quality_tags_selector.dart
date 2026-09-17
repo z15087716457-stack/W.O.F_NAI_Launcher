@@ -5,10 +5,10 @@ import 'package:nai_launcher/core/utils/localization_extension.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/enums/quality_tag_preset.dart';
 import '../../../data/models/prompt/prompt_preset_mode.dart';
-import '../../../data/models/tag_library/tag_library_entry.dart';
+import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../providers/generation/generation_params_notifier.dart';
 import '../../providers/quality_preset_provider.dart';
-import '../tag_library/tag_library_picker_dialog.dart';
+import '../common/prompt_block_picker_dialog.dart';
 import 'components/library_entry_menu_item.dart';
 
 /// 当前模型在质量词菜单中公开的原生档位。
@@ -158,7 +158,7 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
   Future<void> _showMenu(
     BuildContext context,
     QualityPresetState presetState,
-    List<TagLibraryEntry> customEntries,
+    List<PromptBlock> customEntries,
   ) async {
     final RenderBox button =
         _buttonKey.currentContext!.findRenderObject() as RenderBox;
@@ -190,7 +190,7 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
   String _getDisplayLabel(
     BuildContext context,
     QualityPresetState state,
-    List<TagLibraryEntry> customEntries,
+    List<PromptBlock> customEntries,
   ) {
     final visibleMode = qualityVisibleModeForModel(widget.model, state.mode);
     switch (visibleMode) {
@@ -203,12 +203,12 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
       case PromptPresetMode.none:
         return context.l10n.qualityTags_none;
       case PromptPresetMode.custom:
-        final currentEntry = customEntries.cast<TagLibraryEntry?>().firstWhere(
+        final currentEntry = customEntries.cast<PromptBlock?>().firstWhere(
           (e) => e?.id == state.customEntryId,
           orElse: () => null,
         );
         if (currentEntry != null) {
-          final name = currentEntry.displayName;
+          final name = currentEntry.displayTitle;
           return name.length > 8 ? '${name.substring(0, 8)}...' : name;
         }
         return context.l10n.qualityTags_label;
@@ -218,7 +218,7 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
   List<PopupMenuEntry<String>> _buildMenuItems(
     BuildContext context,
     QualityPresetState state,
-    List<TagLibraryEntry> customEntries,
+    List<PromptBlock> customEntries,
   ) {
     final theme = Theme.of(context);
     final items = <PopupMenuEntry<String>>[];
@@ -325,7 +325,7 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
         notifier.updateQualityPreset(QualityTagPreset.none);
         break;
       case 'add_from_library':
-        _showTagLibraryPicker();
+        _showPromptBlockPicker();
         break;
       default:
         if (value.startsWith('custom_')) {
@@ -334,10 +334,10 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
     }
   }
 
-  Future<void> _showTagLibraryPicker() async {
-    final entry = await showDialog<TagLibraryEntry>(
+  Future<void> _showPromptBlockPicker() async {
+    final entry = await showDialog<PromptBlock>(
       context: context,
-      builder: (context) => TagLibraryPickerDialog(
+      builder: (context) => PromptBlockPickerDialog(
         title: context.l10n.qualityTags_selectFromLibrary,
       ),
     );
@@ -351,7 +351,7 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
   Widget _buildTooltipContent(
     ThemeData theme,
     QualityPresetState state,
-    List<TagLibraryEntry> customEntries,
+    List<PromptBlock> customEntries,
   ) {
     if (state.mode == PromptPresetMode.none) {
       return Text(

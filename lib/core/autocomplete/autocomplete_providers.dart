@@ -13,7 +13,7 @@ import 'completion_orchestrator.dart';
 import 'danbooru_completion_source.dart';
 import 'llm_translation_resolver.dart';
 import 'tag_catalog_repository.dart';
-import 'tag_library_completion_source.dart';
+import 'prompt_block_completion_source.dart';
 import 'zh_dictionary_service.dart';
 
 final autocompleteCacheDatabaseProvider = Provider<AutocompleteCacheDatabase>((
@@ -104,21 +104,22 @@ final autocompleteLocalSourcesProvider = Provider<List<CompletionSource>>((
   ];
 });
 
-final tagLibraryCompletionSourceProvider = Provider<TagLibraryCompletionSource>(
-  (ref) => TagLibraryCompletionSource(
-    searchEntries: (query, limit) => ref
-        .read(aliasResolverServiceProvider.notifier)
-        .searchEntries(query, limit: limit)
-        .map(
-          (entry) => LibraryCompletionEntry(
-            name: entry.name,
-            contentPreview: entry.contentPreview,
-            useCount: entry.useCount,
-          ),
-        )
-        .toList(growable: false),
-  ),
-);
+final promptBlockCompletionSourceProvider =
+    Provider<PromptBlockCompletionSource>(
+      (ref) => PromptBlockCompletionSource(
+        searchEntries: (query, limit) => ref
+            .read(aliasResolverServiceProvider.notifier)
+            .searchEntries(query, limit: limit)
+            .map(
+              (entry) => LibraryCompletionEntry(
+                name: entry.title,
+                contentPreview: entry.contentPreview,
+                useCount: entry.useCount,
+              ),
+            )
+            .toList(growable: false),
+      ),
+    );
 
 final autocompleteServicesProvider = Provider<AutocompleteServices>((ref) {
   final zhDictionary = ref.watch(zhDictionaryServiceProvider);
@@ -127,6 +128,6 @@ final autocompleteServicesProvider = Provider<AutocompleteServices>((ref) {
     dictionaryTranslations: zhDictionary,
     llmTranslations: ref.watch(llmTranslationResolverProvider),
     danbooru: ref.watch(danbooruCompletionSourceProvider),
-    libraryAliases: ref.watch(tagLibraryCompletionSourceProvider),
+    libraryAliases: ref.watch(promptBlockCompletionSourceProvider),
   );
 });

@@ -17,7 +17,6 @@ import '../../../../core/utils/vibe_file_parser.dart';
 import '../../../../core/utils/zip_utils.dart';
 import '../../../../data/services/alias_resolver_service.dart';
 import '../../../providers/layout_state_provider.dart';
-import '../../../providers/tag_library_page_provider.dart';
 
 import '../../../../data/services/image_metadata_service.dart';
 import '../../../../data/repositories/gallery_folder_repository.dart';
@@ -42,7 +41,7 @@ import '../../../utils/precise_ref_library_import_helper.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import '../services/generation_save_service.dart';
 import '../../../widgets/common/themed_divider.dart';
-import '../../tag_library_page/widgets/entry_add_dialog.dart';
+import '../../prompt_block_library/widgets/prompt_block_edit_dialog.dart';
 
 double resolveHistoryPreviewAspectRatio(
   double aspectRatio, {
@@ -1717,7 +1716,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     );
   }
 
-  /// 显示保存到词库对话框
+  /// 显示保存到块库对话框
   Future<void> _showSaveToLibraryDialog(
     BuildContext context,
     Uint8List bytes,
@@ -1736,17 +1735,15 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
       debugPrint('解析图像元数据失败: $e');
     }
 
-    // 解析别名引用，保存实际内容到词库
+    // 解析别名引用，保存实际内容到块库
     final aliasResolver = ref.read(aliasResolverServiceProvider.notifier);
     final resolvedPrompt = aliasResolver.resolveAliases(prompt);
 
-    final tagLibraryState = ref.read(tagLibraryPageNotifierProvider);
-
     if (!context.mounted) return;
 
-    await EntryAddDialog.show(
+    await PromptBlockEditDialog.createWithDialog(
       context,
-      categories: tagLibraryState.categories,
+      ref,
       initialContent: resolvedPrompt,
       initialImageBytes: bytes,
     );

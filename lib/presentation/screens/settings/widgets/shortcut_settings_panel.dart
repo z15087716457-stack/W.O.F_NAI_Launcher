@@ -549,24 +549,6 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
         return l10n.shortcut_action_jump_to_date;
       case 'shortcut_action_open_folder':
         return l10n.shortcut_action_open_folder;
-      case 'shortcut_action_select_all_tags':
-        return l10n.shortcut_action_select_all_tags;
-      case 'shortcut_action_deselect_all_tags':
-        return l10n.shortcut_action_deselect_all_tags;
-      case 'shortcut_action_new_category':
-        return l10n.shortcut_action_new_category;
-      case 'shortcut_action_new_tag':
-        return l10n.shortcut_action_new_tag;
-      case 'shortcut_action_search_tags':
-        return l10n.shortcut_action_search_tags;
-      case 'shortcut_action_batch_delete_tags':
-        return l10n.shortcut_action_batch_delete_tags;
-      case 'shortcut_action_batch_copy_tags':
-        return l10n.shortcut_action_batch_copy_tags;
-      case 'shortcut_action_send_to_home':
-        return l10n.shortcut_action_send_to_home;
-      case 'shortcut_action_exit_selection_mode':
-        return l10n.shortcut_action_exit_selection_mode;
       case 'shortcut_action_show_shortcut_help':
         return l10n.shortcut_action_show_shortcut_help;
       case 'shortcut_action_minimize_to_tray':
@@ -592,8 +574,6 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
         return l10n.shortcut_context_gallery;
       case ShortcutContext.viewer:
         return l10n.shortcut_context_viewer;
-      case ShortcutContext.tagLibrary:
-        return l10n.shortcut_context_tag_library;
       case ShortcutContext.settings:
         return l10n.shortcut_context_settings;
       case ShortcutContext.input:

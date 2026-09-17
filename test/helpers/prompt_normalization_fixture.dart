@@ -4,7 +4,7 @@ import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart';
 import 'package:nai_launcher/presentation/providers/uc_preset_provider.dart';
-import 'package:nai_launcher/presentation/providers/tag_library_page_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart' as ui;
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
@@ -95,15 +95,19 @@ Future<ImageParams> configurePromptComposition(
     autoFormat: true,
     sdAutoConvert: true,
   );
-  final library = container.read(tagLibraryPageNotifierProvider.notifier);
-  await library.addEntry(name: 'lighting', content: '(cinematic lighting:1.3)');
-  await library.addEntry(name: 'negative', content: '(bad anatomy:1.1)');
-  final quality = await library.addEntry(
-    name: 'quality',
+  await container.read(promptBlockLibraryNotifierProvider.future);
+  final library = container.read(promptBlockLibraryNotifierProvider.notifier);
+  await library.createBlock(
+    title: 'lighting',
+    content: '(cinematic lighting:1.3)',
+  );
+  await library.createBlock(title: 'negative', content: '(bad anatomy:1.1)');
+  final quality = await library.createBlock(
+    title: 'quality',
     content: '(soft light:1.2)',
   );
-  final uc = await library.addEntry(
-    name: 'uc',
+  final uc = await library.createBlock(
+    title: 'uc',
     content: 'custom negative，low quality',
   );
   container

@@ -12,6 +12,7 @@ import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/data/models/prompt/prompt_preset_mode.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
 import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart';
 import 'package:nai_launcher/presentation/providers/uc_preset_provider.dart';
@@ -193,10 +194,19 @@ void main() {
           return _TestLocalStorageService();
         }),
         promptTokenCounterServiceProvider.overrideWith((ref) async => service),
+        // token 计数现在 watch 块库（别名展开跟随块库变化）；
+        // 用 fake 挡住真实 Hive box，避免异步开 box 与 tearDown 删目录竞争。
+        promptBlockLibraryNotifierProvider.overrideWith(
+          () => _FakePromptBlockLibraryNotifier(
+            PromptBlockLibraryState(blocks: const [], folders: const []),
+          ),
+        ),
       ],
     );
     addTearDown(container.dispose);
 
+    // 先等块库就绪，避免 usage provider 在计算途中被依赖重建打断。
+    await container.read(promptBlockLibraryNotifierProvider.future);
     await container.read(
       promptTokenUsageProvider(PromptTokenCountTarget.positive).future,
     );
@@ -226,6 +236,15 @@ String _resolveAliases(String text) {
       .replaceAll('<cape>', 'red cape')
       .replaceAll('<bad>', 'bad hands')
       .replaceAll('<charBad>', 'extra fingers');
+}
+
+class _FakePromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
+  _FakePromptBlockLibraryNotifier(this.initialState);
+
+  final PromptBlockLibraryState initialState;
+
+  @override
+  Future<PromptBlockLibraryState> build() async => initialState;
 }
 
 class _FakePromptTokenEncoder implements PromptTokenEncoder {

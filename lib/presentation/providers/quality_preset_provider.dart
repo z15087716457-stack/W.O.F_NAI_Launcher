@@ -5,8 +5,8 @@ import '../../core/constants/api_constants.dart';
 import '../../core/enums/quality_tag_preset.dart';
 import '../../core/storage/local_storage_service.dart';
 import '../../data/models/prompt/prompt_preset_mode.dart';
-import '../../data/models/tag_library/tag_library_entry.dart';
-import 'tag_library_page_provider.dart';
+import '../../data/models/prompt_block/prompt_block.dart';
+import 'prompt_block_library_provider.dart';
 
 part 'quality_preset_provider.g.dart';
 
@@ -131,7 +131,9 @@ class QualityPresetNotifier extends _$QualityPresetNotifier {
     );
     _save();
 
-    ref.read(tagLibraryPageNotifierProvider.notifier).recordUsage(entryId);
+    ref
+        .read(promptBlockLibraryNotifierProvider.notifier)
+        .incrementUseCount(entryId);
   }
 
   /// 切换到已添加的自定义条目
@@ -186,42 +188,36 @@ class QualityPresetNotifier extends _$QualityPresetNotifier {
         return null;
       case PromptPresetMode.custom:
         if (state.customEntryId == null) return null;
-        final entries = ref.read(tagLibraryPageNotifierProvider).entries;
-        final entry = entries.cast<TagLibraryEntry?>().firstWhere(
-          (e) => e?.id == state.customEntryId,
-          orElse: () => null,
-        );
-        return entry?.content;
+        return ref
+            .read(promptBlockLibraryNotifierProvider)
+            .valueOrNull
+            ?.blockById(state.customEntryId!)
+            ?.content;
     }
   }
 }
 
-/// 当前选择的质量词自定义条目
+/// 当前选择的质量词自定义条目（块库中的对应块；旧词库条目带原 ID 迁入）
 @riverpod
-TagLibraryEntry? currentQualityEntry(Ref ref) {
+PromptBlock? currentQualityEntry(Ref ref) {
   final config = ref.watch(qualityPresetNotifierProvider);
   if (!config.isCustom) return null;
 
-  final entries = ref.watch(tagLibraryPageNotifierProvider).entries;
-  return entries.cast<TagLibraryEntry?>().firstWhere(
-    (e) => e?.id == config.customEntryId,
-    orElse: () => null,
-  );
+  return ref
+      .watch(promptBlockLibraryNotifierProvider)
+      .valueOrNull
+      ?.blockById(config.customEntryId!);
 }
 
 /// 所有已添加的质量词自定义条目列表
 @riverpod
-List<TagLibraryEntry> qualityCustomEntries(Ref ref) {
+List<PromptBlock> qualityCustomEntries(Ref ref) {
   final config = ref.watch(qualityPresetNotifierProvider);
-  final allEntries = ref.watch(tagLibraryPageNotifierProvider).entries;
+  final library = ref.watch(promptBlockLibraryNotifierProvider).valueOrNull;
+  if (library == null) return const [];
 
   return config.customEntryIds
-      .map(
-        (id) => allEntries.cast<TagLibraryEntry?>().firstWhere(
-          (e) => e?.id == id,
-          orElse: () => null,
-        ),
-      )
-      .whereType<TagLibraryEntry>()
+      .map(library.blockById)
+      .whereType<PromptBlock>()
       .toList();
 }

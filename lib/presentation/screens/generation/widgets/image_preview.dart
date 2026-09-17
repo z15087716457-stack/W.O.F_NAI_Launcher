@@ -31,7 +31,6 @@ import '../../../providers/image_generation_provider.dart';
 import '../../../providers/local_gallery_provider.dart';
 import '../../../providers/quality_preset_provider.dart';
 import '../../../providers/reverse_prompt_provider.dart';
-import '../../../providers/tag_library_page_provider.dart';
 import '../../../providers/shortcuts_provider.dart';
 import '../../../providers/uc_preset_provider.dart';
 import '../../../services/image_workflow_launcher.dart';
@@ -46,7 +45,7 @@ import '../../../widgets/image_editor/image_editor_screen.dart';
 import '../../../utils/image_detail_opener.dart';
 import '../../../utils/krita_send_helper.dart';
 import '../../../utils/precise_ref_library_import_helper.dart';
-import '../../tag_library_page/widgets/entry_add_dialog.dart';
+import '../../prompt_block_library/widgets/prompt_block_edit_dialog.dart';
 
 class PreviewNavShortcuts extends ConsumerWidget {
   const PreviewNavShortcuts({required this.child, super.key});
@@ -928,17 +927,15 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
       combinedPrompt = buffer.toString();
     }
 
-    // 解析别名引用，保存实际内容到词库
+    // 解析别名引用，保存实际内容到块库
     final aliasResolver = ref.read(aliasResolverServiceProvider.notifier);
     final resolvedPrompt = aliasResolver.resolveAliases(combinedPrompt);
 
-    final tagLibraryState = ref.read(tagLibraryPageNotifierProvider);
-
     if (!context.mounted) return;
 
-    await EntryAddDialog.show(
+    await PromptBlockEditDialog.createWithDialog(
       context,
-      categories: tagLibraryState.categories,
+      ref,
       initialContent: resolvedPrompt,
       initialImageBytes: bytes,
     );

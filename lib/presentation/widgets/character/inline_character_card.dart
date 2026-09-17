@@ -364,7 +364,7 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
       _HeaderIconButton(
         icon: Icons.library_add_outlined,
         color: onHeader,
-        tooltip: l10n.tagLibrary_addToLibrary,
+        tooltip: l10n.promptBlockLibrary_addToLibrary,
         onTap: () => _openModal(
           () => AddToLibraryDialog.show(
             context,

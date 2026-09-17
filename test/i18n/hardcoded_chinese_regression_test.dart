@@ -70,7 +70,7 @@ void main() {
       'lib/presentation/widgets/common/hover_preview_card.dart',
       'lib/presentation/widgets/anlas/anlas_balance_chip.dart',
       'lib/presentation/widgets/character/add_to_library_dialog.dart',
-      'lib/presentation/screens/tag_library_page/widgets/send_to_home_dialog.dart',
+      'lib/presentation/widgets/drop/prompt_block_drop_menu.dart',
       'lib/presentation/screens/vibe_library/widgets/vibe_detail/bundle_gallery_strip.dart',
       'lib/presentation/screens/vibe_library/widgets/vibe_detail/vibe_preview_drop_zone.dart',
       'lib/presentation/screens/generation/widgets/prompt_tooltip_components.dart',

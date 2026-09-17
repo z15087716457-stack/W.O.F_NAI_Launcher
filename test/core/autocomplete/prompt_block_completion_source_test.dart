@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
-import 'package:nai_launcher/core/autocomplete/tag_library_completion_source.dart';
+import 'package:nai_launcher/core/autocomplete/prompt_block_completion_source.dart';
 
 void main() {
   test('returns library candidates only for alias queries', () async {
     var calls = 0;
     late int requestedLimit;
-    final source = TagLibraryCompletionSource(
+    final source = PromptBlockCompletionSource(
       searchEntries: (query, limit) {
         calls++;
         requestedLimit = limit;
@@ -28,7 +28,7 @@ void main() {
 
     expect(normal, isEmpty);
     expect(calls, 1);
-    expect(requestedLimit, TagLibraryCompletionSource.maxResults);
+    expect(requestedLimit, PromptBlockCompletionSource.maxResults);
     expect(aliases.single.canonicalTag, '角色立绘');
     expect(aliases.single.translation, '角色提示词内容');
     expect(aliases.single.postCount, 12);

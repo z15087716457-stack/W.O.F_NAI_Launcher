@@ -2,15 +2,18 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/utils/alias_parser.dart';
 import '../../core/utils/app_logger.dart';
-import '../../presentation/providers/tag_library_page_provider.dart';
-import '../models/tag_library/tag_library_entry.dart';
+import '../../presentation/providers/prompt_block_library_provider.dart';
+import '../models/prompt_block/prompt_block.dart';
 
 part 'alias_resolver_service.g.dart';
 
 /// 别名解析服务
 ///
-/// 负责将别名引用解析为实际的提示词内容
-/// 依赖 TagLibraryPageNotifier 获取词库数据
+/// 负责将别名引用（`<块标题>` 及随机/权重语法）解析为实际的提示词内容。
+/// 数据源自全局 Prompt 块库；旧本地词库条目带原 ID 迁入后按标题命中。
+///
+/// 块库状态是异步加载的：启动侧由 `AppBootstrapEffects` 预热点 provider，
+/// 这里按已加载快照同步读取；快照未就绪时按空库处理（别名原样保留）。
 @Riverpod(keepAlive: true)
 class AliasResolverService extends _$AliasResolverService {
   @override
@@ -18,9 +21,10 @@ class AliasResolverService extends _$AliasResolverService {
     // 初始化时不需要特殊操作
   }
 
-  /// 获取所有词库条目
-  List<TagLibraryEntry> get _entries {
-    return ref.read(tagLibraryPageNotifierProvider).entries;
+  /// 已加载的块快照；块库加载中/失败时为空表。
+  List<PromptBlock> get _blocks {
+    return ref.read(promptBlockLibraryNotifierProvider).valueOrNull?.blocks ??
+        const [];
   }
 
   /// 解析文本中的所有别名引用
@@ -44,7 +48,7 @@ class AliasResolverService extends _$AliasResolverService {
         result = result.replaceRange(ref.start, ref.end, resolvedContent);
       } else {
         // 别名未找到，记录警告
-        AppLogger.w('别名未找到: ${ref.rawText}，请检查词库中是否存在该条目', 'AliasResolver');
+        AppLogger.w('别名未找到: ${ref.rawText}，请检查块库中是否存在该块', 'AliasResolver');
       }
     }
 
@@ -53,49 +57,48 @@ class AliasResolverService extends _$AliasResolverService {
 
   /// 获取别名的详细信息（用于悬停浮窗）
   ///
-  /// 返回词库条目，若别名无效则返回 null
-  TagLibraryEntry? getAliasEntry(AliasReference reference) {
+  /// 返回对应的块，若别名无效则返回 null
+  PromptBlock? getAliasEntry(AliasReference reference) {
     if (reference.type != AliasReferenceType.simple) {
       return null;
     }
 
-    final entryName = reference.primaryName;
-    return findEntryByName(entryName);
+    return findEntryByName(reference.primaryName);
   }
 
-  /// 根据名称查找词库条目（不区分大小写）
-  TagLibraryEntry? findEntryByName(String name) {
+  /// 根据标题查找块（不区分大小写）
+  PromptBlock? findEntryByName(String name) {
     if (name.isEmpty) return null;
 
     final lowerName = name.toLowerCase();
-    for (final entry in _entries) {
-      if (entry.name.toLowerCase() == lowerName) {
-        return entry;
+    for (final block in _blocks) {
+      if (block.title.toLowerCase() == lowerName) {
+        return block;
       }
     }
     return null;
   }
 
-  /// 检查别名是否有效（对应的词库条目存在）
+  /// 检查别名是否有效（对应的块存在）
   bool isAliasValid(AliasReference reference) {
     return getAliasEntry(reference) != null;
   }
 
-  /// 检查名称对应的词库条目是否存在
+  /// 检查名称对应的块是否存在
   bool isEntryNameValid(String name) {
     return findEntryByName(name) != null;
   }
 
-  /// 搜索词库条目（用于智能补全）
+  /// 搜索块（用于智能补全）
   ///
   /// [query] 搜索关键词
   /// [limit] 最大返回数量
-  List<TagLibraryEntry> searchEntries(String query, {int limit = 15}) {
-    final entries = _entries;
+  List<PromptBlock> searchEntries(String query, {int limit = 15}) {
+    final blocks = _blocks;
 
     if (query.isEmpty) {
-      // 返回最近使用的条目
-      final sorted = entries.toList()
+      // 返回最近使用的块
+      final sorted = blocks.toList()
         ..sort((a, b) {
           // 先按收藏排序
           if (a.isFavorite != b.isFavorite) {
@@ -109,44 +112,35 @@ class AliasResolverService extends _$AliasResolverService {
 
     final lowerQuery = query.toLowerCase();
 
-    // 搜索名称匹配的条目
-    final matches = <(TagLibraryEntry, int)>[];
-    for (final entry in entries) {
-      final lowerName = entry.name.toLowerCase();
+    // 搜索标题匹配的块
+    final matches = <(PromptBlock, int)>[];
+    for (final block in blocks) {
+      final lowerTitle = block.title.toLowerCase();
 
       // 计算匹配分数
       int score = 0;
 
       // 完全匹配
-      if (lowerName == lowerQuery) {
+      if (lowerTitle == lowerQuery) {
         score = 100;
       }
       // 前缀匹配
-      else if (lowerName.startsWith(lowerQuery)) {
+      else if (lowerTitle.startsWith(lowerQuery)) {
         score = 80;
       }
       // 包含匹配
-      else if (lowerName.contains(lowerQuery)) {
+      else if (lowerTitle.contains(lowerQuery)) {
         score = 60;
       }
       // 内容匹配
-      else if (entry.content.toLowerCase().contains(lowerQuery)) {
+      else if (block.content.toLowerCase().contains(lowerQuery)) {
         score = 40;
-      }
-      // 标签匹配
-      else {
-        for (final tag in entry.tags) {
-          if (tag.toLowerCase().contains(lowerQuery)) {
-            score = 30;
-            break;
-          }
-        }
       }
 
       if (score > 0) {
-        // 收藏条目加分
-        if (entry.isFavorite) score += 10;
-        matches.add((entry, score));
+        // 收藏块加分
+        if (block.isFavorite) score += 10;
+        matches.add((block, score));
       }
     }
 
@@ -156,12 +150,12 @@ class AliasResolverService extends _$AliasResolverService {
     return matches.take(limit).map((m) => m.$1).toList();
   }
 
-  /// 记录词库条目使用（当别名被解析时调用）
+  /// 记录块使用（当别名被解析时调用）
   Future<void> recordEntryUsage(String entryName) async {
-    final entry = findEntryByName(entryName);
-    if (entry != null) {
-      final notifier = ref.read(tagLibraryPageNotifierProvider.notifier);
-      await notifier.recordUsage(entry.id);
+    final block = findEntryByName(entryName);
+    if (block != null) {
+      final notifier = ref.read(promptBlockLibraryNotifierProvider.notifier);
+      await notifier.incrementUseCount(block.id);
     }
   }
 
@@ -171,7 +165,7 @@ class AliasResolverService extends _$AliasResolverService {
       case AliasReferenceType.simple:
         return _resolveSimpleReference(ref.primaryName);
       case AliasReferenceType.random:
-        // 预留：随机选择一个词库
+        // 预留：随机选择一个块
         return _resolveRandomReference(ref.entryNames);
       case AliasReferenceType.weighted:
         // 预留：按权重随机选择
@@ -181,26 +175,26 @@ class AliasResolverService extends _$AliasResolverService {
 
   /// 解析简单引用
   String? _resolveSimpleReference(String entryName) {
-    final entry = findEntryByName(entryName);
-    return entry?.content;
+    final block = findEntryByName(entryName);
+    return block?.content;
   }
 
   /// 解析随机引用（预留）
   String? _resolveRandomReference(List<String> entryNames) {
-    // 随机选择一个有效的词库
-    final validEntries = <TagLibraryEntry>[];
+    // 随机选择一个有效的块
+    final validBlocks = <PromptBlock>[];
     for (final name in entryNames) {
-      final entry = findEntryByName(name);
-      if (entry != null) {
-        validEntries.add(entry);
+      final block = findEntryByName(name);
+      if (block != null) {
+        validBlocks.add(block);
       }
     }
 
-    if (validEntries.isEmpty) return null;
+    if (validBlocks.isEmpty) return null;
 
     // 随机选择
-    final random = DateTime.now().microsecondsSinceEpoch % validEntries.length;
-    return validEntries[random].content;
+    final random = DateTime.now().microsecondsSinceEpoch % validBlocks.length;
+    return validBlocks[random].content;
   }
 
   /// 解析带权重的随机引用（预留）
@@ -212,34 +206,34 @@ class AliasResolverService extends _$AliasResolverService {
       return _resolveRandomReference(entryNames);
     }
 
-    // 收集有效条目和权重
-    final validEntries = <(TagLibraryEntry, double)>[];
+    // 收集有效块和权重
+    final validBlocks = <(PromptBlock, double)>[];
     double totalWeight = 0;
 
     for (final name in entryNames) {
-      final entry = findEntryByName(name);
-      if (entry != null) {
+      final block = findEntryByName(name);
+      if (block != null) {
         final weight = weights[name] ?? 1.0;
-        validEntries.add((entry, weight));
+        validBlocks.add((block, weight));
         totalWeight += weight;
       }
     }
 
-    if (validEntries.isEmpty || totalWeight <= 0) return null;
+    if (validBlocks.isEmpty || totalWeight <= 0) return null;
 
     // 按权重随机选择
     final randomValue =
         (DateTime.now().microsecondsSinceEpoch % 10000) / 10000 * totalWeight;
     double cumulative = 0;
 
-    for (final (entry, weight) in validEntries) {
+    for (final (block, weight) in validBlocks) {
       cumulative += weight;
       if (randomValue < cumulative) {
-        return entry.content;
+        return block.content;
       }
     }
 
     // 兜底返回最后一个
-    return validEntries.last.$1.content;
+    return validBlocks.last.$1.content;
   }
 }

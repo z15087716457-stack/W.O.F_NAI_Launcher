@@ -11,6 +11,7 @@ import '../../data/models/prompt/prompt_preset_mode.dart';
 import '../../data/services/alias_resolver_service.dart';
 import 'character_prompt_provider.dart';
 import 'generation/generation_params_notifier.dart';
+import 'prompt_block_library_provider.dart';
 import 'quality_preset_provider.dart';
 import 'uc_preset_provider.dart';
 
@@ -63,6 +64,8 @@ final promptTokenUsageProvider =
       final ucPresetState = ref.watch(ucPresetNotifierProvider);
       final currentQualityEntry = ref.watch(currentQualityEntryProvider);
       final currentUcEntry = ref.watch(currentUcEntryProvider);
+      // 块库异步加载完成后重建，让别名展开计入 token 统计。
+      ref.watch(promptBlockLibraryNotifierProvider);
       final aliasResolver = ref.read(aliasResolverServiceProvider.notifier);
       final service = await ref.watch(promptTokenCounterServiceProvider.future);
       final qualityContent = switch (qualityPresetState.mode) {

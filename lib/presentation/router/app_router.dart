@@ -19,7 +19,6 @@ import '../screens/statistics/statistics_screen.dart';
 import '../screens/style_explore/style_explore_screen.dart';
 import '../screens/precise_ref_library/precise_ref_library_screen.dart';
 import '../screens/prompt_block_library/prompt_block_library_screen.dart';
-import '../screens/tag_library_page/tag_library_page_screen.dart';
 import '../screens/vibe_library/vibe_library_screen.dart';
 import '../widgets/common/update_notice_banner.dart';
 import '../widgets/drop/global_drop_handler.dart';
@@ -39,9 +38,6 @@ final _onlineGalleryKey = GlobalKey<NavigatorState>(
 );
 final _settingsKey = GlobalKey<NavigatorState>(debugLabel: 'settings');
 final _statisticsKey = GlobalKey<NavigatorState>(debugLabel: 'statistics');
-final _tagLibraryPageKey = GlobalKey<NavigatorState>(
-  debugLabel: 'tagLibraryPage',
-);
 final _vibeLibraryKey = GlobalKey<NavigatorState>(debugLabel: 'vibeLibrary');
 final _preciseRefLibraryKey = GlobalKey<NavigatorState>(
   debugLabel: 'preciseRefLibrary',
@@ -142,6 +138,12 @@ GoRouter appRouter(Ref ref) {
           child: const LoginScreen(),
           slideOffset: const Offset(0.0, 0.05),
         ),
+      ),
+
+      // 旧词库页路由：重定向到 Prompt 块库（保留深链/旧快捷键目标兼容）
+      GoRoute(
+        path: AppRoutes.tagLibraryPage,
+        redirect: (context, state) => AppRoutes.promptBlockLibrary,
       ),
 
       // 主页 Shell - 使用 StatefulShellRoute 实现混合保活
@@ -262,19 +264,7 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
 
-          // Branch 5: 词库页 - 保活
-          StatefulShellBranch(
-            navigatorKey: _tagLibraryPageKey,
-            routes: [
-              GoRoute(
-                path: AppRoutes.tagLibraryPage,
-                name: 'tagLibraryPage',
-                builder: (context, state) => const TagLibraryPageScreen(),
-              ),
-            ],
-          ),
-
-          // Branch 6: Vibe库页 - 保活
+          // Branch 5: Vibe库页 - 保活
           StatefulShellBranch(
             navigatorKey: _vibeLibraryKey,
             routes: [
@@ -286,7 +276,7 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
 
-          // Branch 7: 精准参考库页 - 保活
+          // Branch 6: 精准参考库页 - 保活
           StatefulShellBranch(
             navigatorKey: _preciseRefLibraryKey,
             routes: [
@@ -298,7 +288,7 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
 
-          // Branch 8: 全局 Prompt 块库 - 保活
+          // Branch 7: 全局 Prompt 块库 - 保活
           StatefulShellBranch(
             navigatorKey: _promptBlockLibraryKey,
             routes: [
@@ -310,7 +300,7 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
 
-          // Branch 9: 画风探索页 - 不保活（工作区状态在 provider 层保持）
+          // Branch 8: 画风探索页 - 不保活（工作区状态在 provider 层保持）
           StatefulShellBranch(
             navigatorKey: _styleExploreKey,
             routes: [
@@ -337,9 +327,8 @@ GoRouter appRouter(Ref ref) {
 /// 主布局 Shell - 包含导航 (StatefulShellRoute 版本)
 ///
 /// 使用混合保活策略：
-/// - 画廊页面（索引 1, 2）使用 Offstage 保活
-/// - Vibe库页面（索引 7）和精准参考库（索引 8）使用 Offstage 保活
-/// - Prompt 块库（索引 9）使用 Offstage 保活；画风探索（索引 10）不保活
+/// - 画廊页面（本地/在线）使用 Offstage 保活
+/// - Vibe库、精准参考库和 Prompt 块库使用 Offstage 保活
 /// - 其他页面不保活
 class MainShell extends ConsumerStatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -375,10 +364,16 @@ class _MainShellState extends ConsumerState<MainShell> {
     final currentIndex = widget.navigationShell.currentIndex;
 
     // 构建混合保活内容栈
-    // - 索引 1 (localGallery) 和 2 (onlineGallery) 使用 Offstage 保活
-    // - 索引 7 (vibeLibrary)、8 (preciseRefLibrary) 和 9 (promptBlockLibrary)
-    //   使用 Offstage 保活
+    // - 画廊、Vibe 库、精准参考库和块库使用 Offstage 保活
     // - 其他索引不保活，切换时销毁重建
+    // 索引随 AppBranch 枚举顺序联动，插入/删除分支时无需改字面量
+    const keepAliveBranches = {
+      AppBranch.localGallery,
+      AppBranch.onlineGallery,
+      AppBranch.vibeLibrary,
+      AppBranch.preciseRefLibrary,
+      AppBranch.promptBlockLibrary,
+    };
     final contentStack = IndexedStack(
       index: currentIndex,
       children: widget.children.asMap().entries.map((entry) {
@@ -386,13 +381,8 @@ class _MainShellState extends ConsumerState<MainShell> {
         final child = entry.value;
         final isActive = index == currentIndex;
 
-        // 保活页面：画廊（1, 2）、Vibe 库（7）、精准参考库（8）和块库（9）
-        // 始终保持在树中，通过 TickerMode 控制动画
-        if (index == 1 ||
-            index == 2 ||
-            index == 7 ||
-            index == 8 ||
-            index == 9) {
+        // 保活页面始终保持在树中，通过 TickerMode 控制动画
+        if (keepAliveBranches.any((branch) => branch.index == index)) {
           return TickerMode(enabled: isActive, child: child);
         }
 

@@ -204,6 +204,10 @@ class StorageKeys {
   static const String promptBlockSidebarFavoritesSplit =
       'prompt_block_sidebar_favorites_split';
 
+  /// 块选择器对话框最近选择的文件夹 ID。
+  static const String promptBlockPickerFolderId =
+      'prompt_block_picker_folder_id';
+
   /// 在线画廊逻辑列宽（px，140~480，默认 200）
   static const String onlineGalleryColumnWidth = 'online_gallery_column_width';
 
@@ -233,13 +237,8 @@ class StorageKeys {
   // Fixed Tags 已随 FEAT-5 退役；旧设置键字面量保留在
   // FixedTagMigrationService._legacySettingKeys 中供一次性迁移清理。
 
-  // Tag Library (词库相关)
-  static const String tagLibraryUserBox = 'tag_library_user';
-  static const String tagLibraryEntriesData = 'tag_library_entries_data';
-  static const String tagLibraryCategoriesData = 'tag_library_categories_data';
-  static const String tagLibraryViewMode = 'tag_library_view_mode';
-  static const String tagLibraryPickerCategoryId =
-      'tag_library_picker_category_id';
+  // Tag Library 已随 B7b 退役；旧设置键字面量保留在
+  // TagLibraryMigrationService 中供一次性迁移读取。
 
   // Statistics Cache (统计数据缓存)
   static const String statisticsCacheBox = 'statistics_cache';

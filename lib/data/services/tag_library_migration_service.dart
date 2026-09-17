@@ -9,8 +9,6 @@ import '../../core/utils/app_logger.dart';
 import '../../core/utils/prompt_block_thumbnails.dart';
 import '../models/prompt_block/prompt_block.dart';
 import '../models/prompt_block/prompt_block_folder.dart';
-import '../models/tag_library/tag_library_category.dart';
-import '../models/tag_library/tag_library_entry.dart';
 import '../repositories/prompt_block_repository.dart';
 
 /// 旧「本地词库」→ 块库的一次性迁移（EVAL-1 退役路径）。
@@ -27,6 +25,9 @@ import '../repositories/prompt_block_repository.dart';
 /// **复制而非搬移**：试用确认前旧存储键一律不动；确认退役后由后续
 /// 批次统一清理键与代码。旗标仅成功才落盘——失败留待下次启动重试，
 /// 同 id 覆盖使重试收敛。
+///
+/// 旧存储解码自包含：不依赖已退役的词库模型/IO 服务，按字面键名与
+/// JSON 字段名直接解析（字段名对齐旧 freezed 序列化格式）。
 class TagLibraryMigrationService {
   TagLibraryMigrationService({
     required PromptBlockStorage blockStorage,
@@ -45,6 +46,10 @@ class TagLibraryMigrationService {
   _thumbnailImporter;
 
   static const String _doneFlag = 'tagLibraryMigrationDone';
+
+  /// 旧词库存储键（字面量；旧 StorageKeys 常量随退役批次删除）。
+  static const String _legacyEntriesKey = 'tag_library_entries_data';
+  static const String _legacyCategoriesKey = 'tag_library_categories_data';
 
   /// 执行迁移（幂等）：成功才落旗标；失败不阻塞启动、下次重试。
   Future<void> run() async {
@@ -82,8 +87,10 @@ class TagLibraryMigrationService {
     var nextRootFolderOrder = _maxFolderOrder(existing.folders, null) + 1;
     var nextRootBlockOrder = _maxBlockOrder(existing.blocks, null) + 1;
 
+    final sortedCategories = [...categories]
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
     final folders = <PromptBlockFolder>[];
-    for (final category in categories.sortedByOrder()) {
+    for (final category in sortedCategories) {
       final isRoot =
           category.parentId == null || !categoryIds.contains(category.parentId);
       folders.add(
@@ -97,14 +104,16 @@ class TagLibraryMigrationService {
       );
     }
 
+    final sortedEntries = [...entries]
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
     final blocks = <PromptBlock>[];
-    for (final entry in entries.sortedByOrder()) {
+    for (final entry in sortedEntries) {
       final folderId =
           entry.categoryId != null && categoryIds.contains(entry.categoryId)
           ? entry.categoryId
           : null;
       String? thumbnail;
-      if (entry.hasThumbnail) {
+      if (entry.thumbnail != null && entry.thumbnail!.isNotEmpty) {
         thumbnail = await _thumbnailImporter(entry.thumbnail!, entry.id);
       }
       blocks.add(
@@ -135,12 +144,14 @@ class TagLibraryMigrationService {
         '${blocks.where((b) => b.hasThumbnail).length} thumbnails';
   }
 
-  List<TagLibraryEntry> _decodeEntries() {
-    final raw = _localStorage.getTagLibraryEntriesJson();
+  List<_LegacyEntry> _decodeEntries() {
+    final raw = _localStorage.getSetting<String>(_legacyEntriesKey);
     if (raw == null || raw.isEmpty) return const [];
     try {
       return (jsonDecode(raw) as List)
-          .map((e) => TagLibraryEntry.fromJson(Map<String, dynamic>.from(e)))
+          .map(
+            (e) => _LegacyEntry.fromJson(Map<String, dynamic>.from(e as Map)),
+          )
           .toList();
     } catch (error, stackTrace) {
       AppLogger.e(
@@ -153,12 +164,15 @@ class TagLibraryMigrationService {
     }
   }
 
-  List<TagLibraryCategory> _decodeCategories() {
-    final raw = _localStorage.getTagLibraryCategoriesJson();
+  List<_LegacyCategory> _decodeCategories() {
+    final raw = _localStorage.getSetting<String>(_legacyCategoriesKey);
     if (raw == null || raw.isEmpty) return const [];
     try {
       return (jsonDecode(raw) as List)
-          .map((e) => TagLibraryCategory.fromJson(Map<String, dynamic>.from(e)))
+          .map(
+            (e) =>
+                _LegacyCategory.fromJson(Map<String, dynamic>.from(e as Map)),
+          )
           .toList();
     } catch (error, stackTrace) {
       AppLogger.e(
@@ -220,4 +234,83 @@ class TagLibraryMigrationService {
     if (content.length > 20) return '${content.substring(0, 20)}...';
     return content.isEmpty ? '未命名' : content;
   }
+}
+
+/// 旧词库条目解码记录（仅迁移所需字段；`tags`/`lastUsedAt` 按口径丢弃）。
+class _LegacyEntry {
+  const _LegacyEntry({
+    required this.id,
+    required this.name,
+    required this.content,
+    required this.thumbnail,
+    required this.thumbnailOffsetX,
+    required this.thumbnailOffsetY,
+    required this.thumbnailScale,
+    required this.categoryId,
+    required this.sortOrder,
+    required this.useCount,
+    required this.isFavorite,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  final String id;
+  final String name;
+  final String content;
+  final String? thumbnail;
+  final double thumbnailOffsetX;
+  final double thumbnailOffsetY;
+  final double thumbnailScale;
+  final String? categoryId;
+  final int sortOrder;
+  final int useCount;
+  final bool isFavorite;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  factory _LegacyEntry.fromJson(Map<String, dynamic> json) => _LegacyEntry(
+    id: json['id'] as String,
+    name: json['name'] as String? ?? '',
+    content: json['content'] as String? ?? '',
+    thumbnail: json['thumbnail'] as String?,
+    thumbnailOffsetX: (json['thumbnailOffsetX'] as num?)?.toDouble() ?? 0.0,
+    thumbnailOffsetY: (json['thumbnailOffsetY'] as num?)?.toDouble() ?? 0.0,
+    thumbnailScale: (json['thumbnailScale'] as num?)?.toDouble() ?? 1.0,
+    categoryId: json['categoryId'] as String?,
+    sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
+    useCount: (json['useCount'] as num?)?.toInt() ?? 0,
+    isFavorite: json['isFavorite'] as bool? ?? false,
+    createdAt:
+        DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+    updatedAt:
+        DateTime.tryParse(json['updatedAt'] as String? ?? '') ?? DateTime.now(),
+  );
+}
+
+/// 旧词库分类解码记录（仅迁移所需字段）。
+class _LegacyCategory {
+  const _LegacyCategory({
+    required this.id,
+    required this.name,
+    required this.parentId,
+    required this.sortOrder,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String name;
+  final String? parentId;
+  final int sortOrder;
+  final DateTime createdAt;
+
+  factory _LegacyCategory.fromJson(Map<String, dynamic> json) =>
+      _LegacyCategory(
+        id: json['id'] as String,
+        name: json['name'] as String? ?? '',
+        parentId: json['parentId'] as String?,
+        sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
+        createdAt:
+            DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+            DateTime.now(),
+      );
 }

@@ -84,7 +84,7 @@ class _WebStyleGenerationLayoutState
         _negativeModeNotifier.value = !_negativeModeNotifier.value;
       },
       ShortcutIds.openTagLibrary: () {
-        context.go(AppRoutes.tagLibraryPage);
+        context.go(AppRoutes.promptBlockLibrary);
       },
       ShortcutIds.upscaleImage: () {
         if (generationState.displayImages.isNotEmpty) {

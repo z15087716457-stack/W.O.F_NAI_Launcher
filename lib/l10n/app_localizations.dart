@@ -364,12 +364,6 @@ abstract class AppLocalizations {
   /// **'Clear the input content?'**
   String get common_clearInputConfirm;
 
-  /// No description provided for @common_today.
-  ///
-  /// In en, this message translates to:
-  /// **'Today'**
-  String get common_today;
-
   /// No description provided for @common_yesterday.
   ///
   /// In en, this message translates to:
@@ -435,18 +429,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OK'**
   String get common_ok;
-
-  /// No description provided for @common_replace.
-  ///
-  /// In en, this message translates to:
-  /// **'Replace'**
-  String get common_replace;
-
-  /// No description provided for @common_skip.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get common_skip;
 
   /// No description provided for @common_exit.
   ///
@@ -621,12 +603,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Online Gallery'**
   String get nav_onlineGallery;
-
-  /// No description provided for @nav_dictionary.
-  ///
-  /// In en, this message translates to:
-  /// **'Dictionary (WIP)'**
-  String get nav_dictionary;
 
   /// No description provided for @nav_discordCommunity.
   ///
@@ -6361,12 +6337,6 @@ abstract class AppLocalizations {
   /// **'Click for full configuration'**
   String get characterTooltip_viewFullConfig;
 
-  /// No description provided for @naiAlgorithm_mainPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Main Prompt'**
-  String get naiAlgorithm_mainPrompt;
-
   /// No description provided for @addGroup_displayNameLabel.
   ///
   /// In en, this message translates to:
@@ -8869,12 +8839,6 @@ abstract class AppLocalizations {
   /// **'Sat'**
   String get statistics_saturday;
 
-  /// No description provided for @fixedTags_syntaxHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Supports NAI syntax for weight enhancement/reduction and tag alternation'**
-  String get fixedTags_syntaxHelp;
-
   /// No description provided for @fixedTags_negativeTitle.
   ///
   /// In en, this message translates to:
@@ -9679,611 +9643,17 @@ abstract class AppLocalizations {
   /// **'Create'**
   String get common_create;
 
-  /// No description provided for @tagLibrary_categories.
-  ///
-  /// In en, this message translates to:
-  /// **'Categories'**
-  String get tagLibrary_categories;
-
   /// No description provided for @tagLibrary_newCategory.
   ///
   /// In en, this message translates to:
   /// **'New Category'**
   String get tagLibrary_newCategory;
 
-  /// No description provided for @tagLibrary_addEntry.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Entry'**
-  String get tagLibrary_addEntry;
-
-  /// No description provided for @tagLibrary_editEntry.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Entry'**
-  String get tagLibrary_editEntry;
-
-  /// No description provided for @tagLibrary_searchHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Search entries...'**
-  String get tagLibrary_searchHint;
-
-  /// No description provided for @tagLibrary_import.
-  ///
-  /// In en, this message translates to:
-  /// **'Import'**
-  String get tagLibrary_import;
-
-  /// No description provided for @tagLibrary_export.
-  ///
-  /// In en, this message translates to:
-  /// **'Export'**
-  String get tagLibrary_export;
-
-  /// No description provided for @tagLibrary_sortCustom.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom Sort'**
-  String get tagLibrary_sortCustom;
-
-  /// No description provided for @tagLibrary_sortName.
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get tagLibrary_sortName;
-
-  /// No description provided for @tagLibrary_sortUseCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Usage'**
-  String get tagLibrary_sortUseCount;
-
-  /// No description provided for @tagLibrary_sortUpdatedAt.
-  ///
-  /// In en, this message translates to:
-  /// **'Updated'**
-  String get tagLibrary_sortUpdatedAt;
-
-  /// No description provided for @tagLibrary_transferCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Move Category'**
-  String get tagLibrary_transferCategory;
-
-  /// No description provided for @tagLibrary_copyContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy Content'**
-  String get tagLibrary_copyContent;
-
-  /// No description provided for @tagLibrary_moveToCategoryTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Move to Category'**
-  String get tagLibrary_moveToCategoryTitle;
-
-  /// No description provided for @tagLibrary_selectTargetCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Select target category:'**
-  String get tagLibrary_selectTargetCategory;
-
-  /// No description provided for @tagLibrary_includeThumbnails.
-  ///
-  /// In en, this message translates to:
-  /// **'Include thumbnails'**
-  String get tagLibrary_includeThumbnails;
-
-  /// No description provided for @tagLibrary_includeThumbnailsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Increases file size'**
-  String get tagLibrary_includeThumbnailsSubtitle;
-
-  /// No description provided for @tagLibrary_selectedExportCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Export ({count} items)'**
-  String tagLibrary_selectedExportCount(Object count);
-
-  /// No description provided for @tagLibrary_selectedImportCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Import ({count} items)'**
-  String tagLibrary_selectedImportCount(Object count);
-
-  /// No description provided for @tagLibrary_entriesLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Entries'**
-  String get tagLibrary_entriesLabel;
-
-  /// No description provided for @tagLibrary_categoriesLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Categories'**
-  String get tagLibrary_categoriesLabel;
-
-  /// No description provided for @tagLibrary_selectExportContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Select content to export'**
-  String get tagLibrary_selectExportContent;
-
-  /// No description provided for @tagLibrary_selectImportContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Select content to import'**
-  String get tagLibrary_selectImportContent;
-
-  /// No description provided for @tagLibrary_selectSaveLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'Select save location'**
-  String get tagLibrary_selectSaveLocation;
-
-  /// No description provided for @tagLibrary_preparingExport.
-  ///
-  /// In en, this message translates to:
-  /// **'Preparing export...'**
-  String get tagLibrary_preparingExport;
-
-  /// No description provided for @tagLibrary_exportSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Export successful'**
-  String get tagLibrary_exportSuccess;
-
-  /// No description provided for @tagLibrary_exportFailedWithError.
-  ///
-  /// In en, this message translates to:
-  /// **'Export failed: {error}'**
-  String tagLibrary_exportFailedWithError(Object error);
-
-  /// No description provided for @tagLibrary_selectZipFile.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to select ZIP file'**
-  String get tagLibrary_selectZipFile;
-
-  /// No description provided for @tagLibrary_zipFileHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Supports library files exported from this app'**
-  String get tagLibrary_zipFileHint;
-
-  /// No description provided for @tagLibrary_reselect.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Again'**
-  String get tagLibrary_reselect;
-
-  /// No description provided for @tagLibrary_fileInfo.
-  ///
-  /// In en, this message translates to:
-  /// **'File Info'**
-  String get tagLibrary_fileInfo;
-
-  /// No description provided for @tagLibrary_entryCountLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Entries'**
-  String get tagLibrary_entryCountLabel;
-
-  /// No description provided for @tagLibrary_categoryCountLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Categories'**
-  String get tagLibrary_categoryCountLabel;
-
-  /// No description provided for @tagLibrary_exportDateLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Export Date'**
-  String get tagLibrary_exportDateLabel;
-
-  /// No description provided for @tagLibrary_importConflictsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} conflicts found. Click a conflicted item below to choose how to handle it.'**
-  String tagLibrary_importConflictsHint(Object count);
-
-  /// No description provided for @tagLibrary_categoriesSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Categories ({count})'**
-  String tagLibrary_categoriesSection(Object count);
-
-  /// No description provided for @tagLibrary_entriesSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Entries ({count})'**
-  String tagLibrary_entriesSection(Object count);
-
-  /// No description provided for @tagLibrary_conflictResolutionTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose conflict handling'**
-  String get tagLibrary_conflictResolutionTooltip;
-
-  /// No description provided for @tagLibrary_conflictSkip.
-  ///
-  /// In en, this message translates to:
-  /// **'Conflict - will skip'**
-  String get tagLibrary_conflictSkip;
-
-  /// No description provided for @tagLibrary_conflictRename.
-  ///
-  /// In en, this message translates to:
-  /// **'Conflict - will import with renamed name'**
-  String get tagLibrary_conflictRename;
-
-  /// No description provided for @tagLibrary_conflictOverwrite.
-  ///
-  /// In en, this message translates to:
-  /// **'Conflict - will replace existing'**
-  String get tagLibrary_conflictOverwrite;
-
-  /// No description provided for @tagLibrary_parseFileFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Unable to parse file: {error}'**
-  String tagLibrary_parseFileFailed(Object error);
-
-  /// No description provided for @tagLibrary_preparingImport.
-  ///
-  /// In en, this message translates to:
-  /// **'Preparing import...'**
-  String get tagLibrary_preparingImport;
-
-  /// No description provided for @tagLibrary_importCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Import complete'**
-  String get tagLibrary_importCompleted;
-
-  /// No description provided for @tagLibrary_importSuccessSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'Import successful: {summary}'**
-  String tagLibrary_importSuccessSummary(Object summary);
-
-  /// No description provided for @tagLibrary_importFailedWithError.
-  ///
-  /// In en, this message translates to:
-  /// **'Import failed: {error}'**
-  String tagLibrary_importFailedWithError(Object error);
-
-  /// No description provided for @tagLibrary_importedEntriesCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} entries'**
-  String tagLibrary_importedEntriesCount(Object count);
-
-  /// No description provided for @tagLibrary_importedCategoriesCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} categories'**
-  String tagLibrary_importedCategoriesCount(Object count);
-
-  /// No description provided for @tagLibrary_renamedCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} renamed'**
-  String tagLibrary_renamedCount(Object count);
-
-  /// No description provided for @tagLibrary_overwrittenCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} replaced'**
-  String tagLibrary_overwrittenCount(Object count);
-
-  /// No description provided for @tagLibrary_skippedCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} skipped'**
-  String tagLibrary_skippedCount(Object count);
-
-  /// No description provided for @tagLibrary_dragToCategoryHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Drag to the category panel to file'**
-  String get tagLibrary_dragToCategoryHint;
-
-  /// No description provided for @tagLibrary_unknownCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Unknown Category'**
-  String get tagLibrary_unknownCategory;
-
-  /// No description provided for @tagLibrary_selectEntryToUpdate.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Entry to Update'**
-  String get tagLibrary_selectEntryToUpdate;
-
-  /// No description provided for @tagLibrary_updatePreview.
-  ///
-  /// In en, this message translates to:
-  /// **'Update Preview'**
-  String get tagLibrary_updatePreview;
-
-  /// No description provided for @tagLibrary_replaceThumbnailHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Will replace existing thumbnail'**
-  String get tagLibrary_replaceThumbnailHint;
-
-  /// No description provided for @tagLibrary_sentEntriesToMainPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Sent {count} entries to main prompt'**
-  String tagLibrary_sentEntriesToMainPrompt(Object count);
-
-  /// No description provided for @tagLibrary_confirmDeleteSelectedEntries.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete {count} selected entries? This action cannot be undone.'**
-  String tagLibrary_confirmDeleteSelectedEntries(Object count);
-
-  /// No description provided for @tagLibrary_deletedEntries.
-  ///
-  /// In en, this message translates to:
-  /// **'Deleted {count} entries'**
-  String tagLibrary_deletedEntries(Object count);
-
-  /// No description provided for @tagLibrary_movedEntries.
-  ///
-  /// In en, this message translates to:
-  /// **'Moved {count} entries'**
-  String tagLibrary_movedEntries(Object count);
-
-  /// No description provided for @tagLibrary_favoritedEntries.
-  ///
-  /// In en, this message translates to:
-  /// **'Favorited {count} entries'**
-  String tagLibrary_favoritedEntries(Object count);
-
-  /// No description provided for @tagLibrary_unfavoritedEntries.
-  ///
-  /// In en, this message translates to:
-  /// **'Unfavorited {count} entries'**
-  String tagLibrary_unfavoritedEntries(Object count);
-
-  /// No description provided for @tagLibrary_copiedEntriesContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Copied content from {count} entries'**
-  String tagLibrary_copiedEntriesContent(Object count);
-
-  /// No description provided for @tagLibrary_droppedImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Dropped Image'**
-  String get tagLibrary_droppedImage;
-
-  /// No description provided for @tagLibrary_createEntryFromImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Create New Entry'**
-  String get tagLibrary_createEntryFromImage;
-
-  /// No description provided for @tagLibrary_promptExtracted.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt extracted: \"{prompt}\"'**
-  String tagLibrary_promptExtracted(Object prompt);
-
-  /// No description provided for @tagLibrary_createEntryFromImageSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Create a new entry from this image'**
-  String get tagLibrary_createEntryFromImageSubtitle;
-
-  /// No description provided for @tagLibrary_updateExistingThumbnail.
-  ///
-  /// In en, this message translates to:
-  /// **'Update Existing Entry Thumbnail'**
-  String get tagLibrary_updateExistingThumbnail;
-
-  /// No description provided for @tagLibrary_updateExistingThumbnailSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Select an entry and replace its thumbnail'**
-  String get tagLibrary_updateExistingThumbnailSubtitle;
-
-  /// No description provided for @tagLibrary_allEntries.
-  ///
-  /// In en, this message translates to:
-  /// **'All'**
-  String get tagLibrary_allEntries;
-
-  /// No description provided for @tagLibrary_favorites.
-  ///
-  /// In en, this message translates to:
-  /// **'Favorites'**
-  String get tagLibrary_favorites;
-
-  /// No description provided for @tagLibrary_addSubCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Subcategory'**
-  String get tagLibrary_addSubCategory;
-
-  /// No description provided for @tagLibrary_moveToRoot.
-  ///
-  /// In en, this message translates to:
-  /// **'Move to Root'**
-  String get tagLibrary_moveToRoot;
-
-  /// No description provided for @tagLibrary_categoryNameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter category name'**
-  String get tagLibrary_categoryNameHint;
-
-  /// No description provided for @tagLibrary_deleteCategoryTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Category'**
-  String get tagLibrary_deleteCategoryTitle;
-
-  /// No description provided for @tagLibrary_deleteCategoryConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to delete category \"{name}\"? {count} entries will be moved to root.'**
-  String tagLibrary_deleteCategoryConfirm(Object name, Object count);
-
-  /// No description provided for @tagLibrary_deleteEntryTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Entry'**
-  String get tagLibrary_deleteEntryTitle;
-
-  /// No description provided for @tagLibrary_deleteEntryConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to delete entry \"{name}\"?'**
-  String tagLibrary_deleteEntryConfirm(Object name);
-
-  /// No description provided for @tagLibrary_noSearchResults.
-  ///
-  /// In en, this message translates to:
-  /// **'No matching entries found'**
-  String get tagLibrary_noSearchResults;
-
-  /// No description provided for @tagLibrary_tryDifferentSearch.
-  ///
-  /// In en, this message translates to:
-  /// **'Try different keywords'**
-  String get tagLibrary_tryDifferentSearch;
-
-  /// No description provided for @tagLibrary_categoryEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'This category is empty'**
-  String get tagLibrary_categoryEmpty;
-
-  /// No description provided for @tagLibrary_empty.
-  ///
-  /// In en, this message translates to:
-  /// **'Library is empty'**
-  String get tagLibrary_empty;
-
-  /// No description provided for @tagLibrary_addFirstEntry.
-  ///
-  /// In en, this message translates to:
-  /// **'Click the button above to add your first entry'**
-  String get tagLibrary_addFirstEntry;
-
-  /// No description provided for @tagLibraryPicker_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Entry'**
-  String get tagLibraryPicker_title;
-
-  /// No description provided for @tagLibraryPicker_searchHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Search entries...'**
-  String get tagLibraryPicker_searchHint;
-
-  /// No description provided for @tagLibraryPicker_allCategories.
-  ///
-  /// In en, this message translates to:
-  /// **'All Categories'**
-  String get tagLibraryPicker_allCategories;
-
-  /// No description provided for @tagLibrary_entryMoved.
-  ///
-  /// In en, this message translates to:
-  /// **'Entry moved to target category'**
-  String get tagLibrary_entryMoved;
-
-  /// No description provided for @tagLibrary_useCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Used {count} times'**
-  String tagLibrary_useCount(Object count);
-
-  /// No description provided for @tagLibrary_addFavorite.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to Favorites'**
-  String get tagLibrary_addFavorite;
-
-  /// No description provided for @tagLibrary_thumbnail.
-  ///
-  /// In en, this message translates to:
-  /// **'Thumbnail'**
-  String get tagLibrary_thumbnail;
-
-  /// No description provided for @tagLibrary_selectImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Image'**
-  String get tagLibrary_selectImage;
-
-  /// No description provided for @tagLibrary_thumbnailHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Supports PNG, JPG, WEBP, GIF, BMP, TIFF, and more'**
-  String get tagLibrary_thumbnailHint;
-
-  /// No description provided for @tagLibrary_name.
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get tagLibrary_name;
-
-  /// No description provided for @tagLibrary_nameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter entry name'**
-  String get tagLibrary_nameHint;
-
-  /// No description provided for @tagLibrary_category.
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get tagLibrary_category;
-
-  /// No description provided for @tagLibrary_rootCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Root'**
-  String get tagLibrary_rootCategory;
-
   /// No description provided for @tagLibrary_tags.
   ///
   /// In en, this message translates to:
   /// **'Tags'**
   String get tagLibrary_tags;
-
-  /// No description provided for @tagLibrary_tagsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter tags, separated by commas'**
-  String get tagLibrary_tagsHint;
-
-  /// No description provided for @tagLibrary_tagsHelper.
-  ///
-  /// In en, this message translates to:
-  /// **'Tags are used for filtering and searching'**
-  String get tagLibrary_tagsHelper;
-
-  /// No description provided for @tagLibrary_content.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt Content'**
-  String get tagLibrary_content;
-
-  /// No description provided for @tagLibrary_contentHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter prompt content, supports autocomplete'**
-  String get tagLibrary_contentHint;
 
   /// No description provided for @settings_network.
   ///
@@ -10393,35 +9763,11 @@ abstract class AppLocalizations {
   /// **'Proxy settings changed, restart recommended'**
   String get settings_proxyRestartHint;
 
-  /// No description provided for @tagLibrary_categoryNameExists.
-  ///
-  /// In en, this message translates to:
-  /// **'Category name already exists'**
-  String get tagLibrary_categoryNameExists;
-
   /// No description provided for @tagLibrary_addToLibrary.
   ///
   /// In en, this message translates to:
   /// **'Add to Library'**
   String get tagLibrary_addToLibrary;
-
-  /// No description provided for @tagLibrary_saveToLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Save to Library'**
-  String get tagLibrary_saveToLibrary;
-
-  /// No description provided for @tagLibrary_entrySaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved to library'**
-  String get tagLibrary_entrySaved;
-
-  /// No description provided for @tagLibrary_entryUpdated.
-  ///
-  /// In en, this message translates to:
-  /// **'Entry updated'**
-  String get tagLibrary_entryUpdated;
 
   /// No description provided for @tagLibrary_uncategorized.
   ///
@@ -10434,48 +9780,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Content Preview'**
   String get tagLibrary_contentPreview;
-
-  /// No description provided for @tagLibrary_confirmAdd.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm'**
-  String get tagLibrary_confirmAdd;
-
-  /// No description provided for @tagLibrary_entryName.
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get tagLibrary_entryName;
-
-  /// No description provided for @tagLibrary_entryNameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter entry name'**
-  String get tagLibrary_entryNameHint;
-
-  /// No description provided for @tagLibrary_selectNewImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Select New Image'**
-  String get tagLibrary_selectNewImage;
-
-  /// No description provided for @tagLibrary_adjustDisplayRange.
-  ///
-  /// In en, this message translates to:
-  /// **'Adjust Display Range'**
-  String get tagLibrary_adjustDisplayRange;
-
-  /// No description provided for @tagLibrary_adjustThumbnailTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Adjust Thumbnail Display Range'**
-  String get tagLibrary_adjustThumbnailTitle;
-
-  /// No description provided for @tagLibrary_dragToMove.
-  ///
-  /// In en, this message translates to:
-  /// **'Drag to move, scroll or pinch to zoom'**
-  String get tagLibrary_dragToMove;
 
   /// No description provided for @settings_enablePromptWeightScroll.
   ///
@@ -10554,132 +9858,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No activity'**
   String get statistics_heatmapNoActivity;
-
-  /// No description provided for @sendToHome_dialogTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Send to Home'**
-  String get sendToHome_dialogTitle;
-
-  /// No description provided for @sendToHome_send.
-  ///
-  /// In en, this message translates to:
-  /// **'Send'**
-  String get sendToHome_send;
-
-  /// No description provided for @sendToHome_mainPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Send to Main Prompt'**
-  String get sendToHome_mainPrompt;
-
-  /// No description provided for @sendToHome_mainPromptSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Fill into the main prompt input field'**
-  String get sendToHome_mainPromptSubtitle;
-
-  /// No description provided for @sendToHome_mainPromptPipeSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Send the full content to the main prompt (including pipes)'**
-  String get sendToHome_mainPromptPipeSubtitle;
-
-  /// No description provided for @sendToHome_smartDecompose.
-  ///
-  /// In en, this message translates to:
-  /// **'Smart Decompose'**
-  String get sendToHome_smartDecompose;
-
-  /// No description provided for @sendToHome_smartDecomposeSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Main prompt + {count} characters'**
-  String sendToHome_smartDecomposeSubtitle(Object count);
-
-  /// No description provided for @sendToHome_replaceCharacter.
-  ///
-  /// In en, this message translates to:
-  /// **'Replace Character Prompt'**
-  String get sendToHome_replaceCharacter;
-
-  /// No description provided for @sendToHome_replaceCharacterSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear existing characters and add as new'**
-  String get sendToHome_replaceCharacterSubtitle;
-
-  /// No description provided for @sendToHome_appendCharacter.
-  ///
-  /// In en, this message translates to:
-  /// **'Append Character Prompt'**
-  String get sendToHome_appendCharacter;
-
-  /// No description provided for @sendToHome_appendCharacterSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep existing characters and append new'**
-  String get sendToHome_appendCharacterSubtitle;
-
-  /// No description provided for @sendToHome_sendAsAlias.
-  ///
-  /// In en, this message translates to:
-  /// **'Send as Alias'**
-  String get sendToHome_sendAsAlias;
-
-  /// No description provided for @sendToHome_sendAsAliasSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Wrap as <{name}> when sending to home'**
-  String sendToHome_sendAsAliasSubtitle(Object name);
-
-  /// No description provided for @sendToHome_preview.
-  ///
-  /// In en, this message translates to:
-  /// **'Send Preview'**
-  String get sendToHome_preview;
-
-  /// No description provided for @sendToHome_characterPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Character Prompt'**
-  String get sendToHome_characterPrompt;
-
-  /// No description provided for @sendToHome_characterPromptCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Character Prompt ({count})'**
-  String sendToHome_characterPromptCount(Object count);
-
-  /// No description provided for @sendToHome_characterIndex.
-  ///
-  /// In en, this message translates to:
-  /// **'Character {index}'**
-  String sendToHome_characterIndex(Object index);
-
-  /// No description provided for @sendToHome_recommended.
-  ///
-  /// In en, this message translates to:
-  /// **'Recommended'**
-  String get sendToHome_recommended;
-
-  /// No description provided for @sendToHome_successMainPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Sent to main prompt'**
-  String get sendToHome_successMainPrompt;
-
-  /// No description provided for @sendToHome_successReplaceCharacter.
-  ///
-  /// In en, this message translates to:
-  /// **'Character prompt replaced'**
-  String get sendToHome_successReplaceCharacter;
-
-  /// No description provided for @sendToHome_successAppendCharacter.
-  ///
-  /// In en, this message translates to:
-  /// **'Character prompt appended'**
-  String get sendToHome_successAppendCharacter;
 
   /// No description provided for @metadataImport_title.
   ///
@@ -10944,12 +10122,6 @@ abstract class AppLocalizations {
   /// **'Image Viewer'**
   String get shortcut_context_viewer;
 
-  /// No description provided for @shortcut_context_tag_library.
-  ///
-  /// In en, this message translates to:
-  /// **'Tag Library'**
-  String get shortcut_context_tag_library;
-
   /// No description provided for @shortcut_context_settings.
   ///
   /// In en, this message translates to:
@@ -10983,7 +10155,7 @@ abstract class AppLocalizations {
   /// No description provided for @shortcut_action_navigate_to_tag_library.
   ///
   /// In en, this message translates to:
-  /// **'Tag Library'**
+  /// **'Prompt Block Library'**
   String get shortcut_action_navigate_to_tag_library;
 
   /// No description provided for @shortcut_action_navigate_to_statistics.
@@ -11037,7 +10209,7 @@ abstract class AppLocalizations {
   /// No description provided for @shortcut_action_open_tag_library.
   ///
   /// In en, this message translates to:
-  /// **'Open Tag Library'**
+  /// **'Open Prompt Block Library'**
   String get shortcut_action_open_tag_library;
 
   /// No description provided for @shortcut_action_save_image.
@@ -11207,60 +10379,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open Folder'**
   String get shortcut_action_open_folder;
-
-  /// No description provided for @shortcut_action_select_all_tags.
-  ///
-  /// In en, this message translates to:
-  /// **'Select All Tags'**
-  String get shortcut_action_select_all_tags;
-
-  /// No description provided for @shortcut_action_deselect_all_tags.
-  ///
-  /// In en, this message translates to:
-  /// **'Deselect All Tags'**
-  String get shortcut_action_deselect_all_tags;
-
-  /// No description provided for @shortcut_action_new_category.
-  ///
-  /// In en, this message translates to:
-  /// **'New Category'**
-  String get shortcut_action_new_category;
-
-  /// No description provided for @shortcut_action_new_tag.
-  ///
-  /// In en, this message translates to:
-  /// **'New Tag'**
-  String get shortcut_action_new_tag;
-
-  /// No description provided for @shortcut_action_search_tags.
-  ///
-  /// In en, this message translates to:
-  /// **'Search Tags'**
-  String get shortcut_action_search_tags;
-
-  /// No description provided for @shortcut_action_batch_delete_tags.
-  ///
-  /// In en, this message translates to:
-  /// **'Batch Delete Tags'**
-  String get shortcut_action_batch_delete_tags;
-
-  /// No description provided for @shortcut_action_batch_copy_tags.
-  ///
-  /// In en, this message translates to:
-  /// **'Batch Copy Tags'**
-  String get shortcut_action_batch_copy_tags;
-
-  /// No description provided for @shortcut_action_send_to_home.
-  ///
-  /// In en, this message translates to:
-  /// **'Send to Home'**
-  String get shortcut_action_send_to_home;
-
-  /// No description provided for @shortcut_action_exit_selection_mode.
-  ///
-  /// In en, this message translates to:
-  /// **'Exit Selection Mode'**
-  String get shortcut_action_exit_selection_mode;
 
   /// No description provided for @shortcut_action_minimize_to_tray.
   ///
@@ -15234,12 +14352,6 @@ abstract class AppLocalizations {
   /// **'Failed to extract metadata: {error}'**
   String toast_extractMetadataFailed(Object error);
 
-  /// No description provided for @toast_smartDecomposeSent.
-  ///
-  /// In en, this message translates to:
-  /// **'Smart decomposed and sent'**
-  String get toast_smartDecomposeSent;
-
   /// No description provided for @toast_renameNameRequired.
   ///
   /// In en, this message translates to:
@@ -18644,6 +17756,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Block library'**
   String get promptBlockEditor_library;
+
+  /// No description provided for @promptBlockPicker_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Block'**
+  String get promptBlockPicker_title;
+
+  /// No description provided for @promptBlockLibrary_thumbnail.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumbnail'**
+  String get promptBlockLibrary_thumbnail;
+
+  /// No description provided for @promptBlockLibrary_selectNewImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select New Image'**
+  String get promptBlockLibrary_selectNewImage;
+
+  /// No description provided for @promptBlockLibrary_selectImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Image'**
+  String get promptBlockLibrary_selectImage;
+
+  /// No description provided for @promptBlockLibrary_adjustDisplayRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust Display Range'**
+  String get promptBlockLibrary_adjustDisplayRange;
+
+  /// No description provided for @promptBlockLibrary_adjustThumbnailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust Thumbnail Display Range'**
+  String get promptBlockLibrary_adjustThumbnailTitle;
+
+  /// No description provided for @promptBlockLibrary_dragToMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to move, scroll or pinch to zoom'**
+  String get promptBlockLibrary_dragToMove;
+
+  /// No description provided for @promptBlockLibrary_addToLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Block Library'**
+  String get promptBlockLibrary_addToLibrary;
+
+  /// No description provided for @promptBlockLibrary_contentPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Content Preview'**
+  String get promptBlockLibrary_contentPreview;
+
+  /// No description provided for @promptBlockLibrary_confirmAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get promptBlockLibrary_confirmAdd;
+
+  /// No description provided for @promptBlockLibrary_saveToLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Block Library'**
+  String get promptBlockLibrary_saveToLibrary;
+
+  /// No description provided for @promptBlockLibrary_droppedImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropped Image'**
+  String get promptBlockLibrary_droppedImage;
+
+  /// No description provided for @promptBlockLibrary_createBlockFromImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Block'**
+  String get promptBlockLibrary_createBlockFromImage;
+
+  /// No description provided for @promptBlockLibrary_createBlockFromImageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new block from this image'**
+  String get promptBlockLibrary_createBlockFromImageSubtitle;
+
+  /// No description provided for @promptBlockLibrary_promptExtracted.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt extracted: \"{prompt}\"'**
+  String promptBlockLibrary_promptExtracted(Object prompt);
+
+  /// No description provided for @promptBlockLibrary_updateExistingThumbnail.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Existing Block Thumbnail'**
+  String get promptBlockLibrary_updateExistingThumbnail;
+
+  /// No description provided for @promptBlockLibrary_updateExistingThumbnailSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a block and replace its thumbnail'**
+  String get promptBlockLibrary_updateExistingThumbnailSubtitle;
 
   /// No description provided for @styleExplore_lineageTitle.
   ///

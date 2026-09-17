@@ -147,9 +147,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_clearInputConfirm => 'Clear the input content?';
 
   @override
-  String get common_today => 'Today';
-
-  @override
   String get common_yesterday => 'Yesterday';
 
   @override
@@ -183,12 +180,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_ok => 'OK';
-
-  @override
-  String get common_replace => 'Replace';
-
-  @override
-  String get common_skip => 'Skip';
 
   @override
   String get common_exit => 'Exit';
@@ -284,9 +275,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nav_onlineGallery => 'Online Gallery';
-
-  @override
-  String get nav_dictionary => 'Dictionary (WIP)';
 
   @override
   String get nav_discordCommunity => 'Discord Community';
@@ -3513,9 +3501,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get characterTooltip_viewFullConfig => 'Click for full configuration';
 
   @override
-  String get naiAlgorithm_mainPrompt => 'Main Prompt';
-
-  @override
   String get addGroup_displayNameLabel => 'Display Name (Optional)';
 
   @override
@@ -4969,10 +4954,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statistics_saturday => 'Sat';
 
   @override
-  String get fixedTags_syntaxHelp =>
-      'Supports NAI syntax for weight enhancement/reduction and tag alternation';
-
-  @override
   String get fixedTags_negativeTitle => 'Undesired Content Fixed Tags';
 
   @override
@@ -5420,368 +5401,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_create => 'Create';
 
   @override
-  String get tagLibrary_categories => 'Categories';
-
-  @override
   String get tagLibrary_newCategory => 'New Category';
 
   @override
-  String get tagLibrary_addEntry => 'Add Entry';
-
-  @override
-  String get tagLibrary_editEntry => 'Edit Entry';
-
-  @override
-  String get tagLibrary_searchHint => 'Search entries...';
-
-  @override
-  String get tagLibrary_import => 'Import';
-
-  @override
-  String get tagLibrary_export => 'Export';
-
-  @override
-  String get tagLibrary_sortCustom => 'Custom Sort';
-
-  @override
-  String get tagLibrary_sortName => 'Name';
-
-  @override
-  String get tagLibrary_sortUseCount => 'Usage';
-
-  @override
-  String get tagLibrary_sortUpdatedAt => 'Updated';
-
-  @override
-  String get tagLibrary_transferCategory => 'Move Category';
-
-  @override
-  String get tagLibrary_copyContent => 'Copy Content';
-
-  @override
-  String get tagLibrary_moveToCategoryTitle => 'Move to Category';
-
-  @override
-  String get tagLibrary_selectTargetCategory => 'Select target category:';
-
-  @override
-  String get tagLibrary_includeThumbnails => 'Include thumbnails';
-
-  @override
-  String get tagLibrary_includeThumbnailsSubtitle => 'Increases file size';
-
-  @override
-  String tagLibrary_selectedExportCount(Object count) {
-    return 'Export ($count items)';
-  }
-
-  @override
-  String tagLibrary_selectedImportCount(Object count) {
-    return 'Import ($count items)';
-  }
-
-  @override
-  String get tagLibrary_entriesLabel => 'Entries';
-
-  @override
-  String get tagLibrary_categoriesLabel => 'Categories';
-
-  @override
-  String get tagLibrary_selectExportContent => 'Select content to export';
-
-  @override
-  String get tagLibrary_selectImportContent => 'Select content to import';
-
-  @override
-  String get tagLibrary_selectSaveLocation => 'Select save location';
-
-  @override
-  String get tagLibrary_preparingExport => 'Preparing export...';
-
-  @override
-  String get tagLibrary_exportSuccess => 'Export successful';
-
-  @override
-  String tagLibrary_exportFailedWithError(Object error) {
-    return 'Export failed: $error';
-  }
-
-  @override
-  String get tagLibrary_selectZipFile => 'Click to select ZIP file';
-
-  @override
-  String get tagLibrary_zipFileHint =>
-      'Supports library files exported from this app';
-
-  @override
-  String get tagLibrary_reselect => 'Select Again';
-
-  @override
-  String get tagLibrary_fileInfo => 'File Info';
-
-  @override
-  String get tagLibrary_entryCountLabel => 'Entries';
-
-  @override
-  String get tagLibrary_categoryCountLabel => 'Categories';
-
-  @override
-  String get tagLibrary_exportDateLabel => 'Export Date';
-
-  @override
-  String tagLibrary_importConflictsHint(Object count) {
-    return '$count conflicts found. Click a conflicted item below to choose how to handle it.';
-  }
-
-  @override
-  String tagLibrary_categoriesSection(Object count) {
-    return 'Categories ($count)';
-  }
-
-  @override
-  String tagLibrary_entriesSection(Object count) {
-    return 'Entries ($count)';
-  }
-
-  @override
-  String get tagLibrary_conflictResolutionTooltip => 'Choose conflict handling';
-
-  @override
-  String get tagLibrary_conflictSkip => 'Conflict - will skip';
-
-  @override
-  String get tagLibrary_conflictRename =>
-      'Conflict - will import with renamed name';
-
-  @override
-  String get tagLibrary_conflictOverwrite => 'Conflict - will replace existing';
-
-  @override
-  String tagLibrary_parseFileFailed(Object error) {
-    return 'Unable to parse file: $error';
-  }
-
-  @override
-  String get tagLibrary_preparingImport => 'Preparing import...';
-
-  @override
-  String get tagLibrary_importCompleted => 'Import complete';
-
-  @override
-  String tagLibrary_importSuccessSummary(Object summary) {
-    return 'Import successful: $summary';
-  }
-
-  @override
-  String tagLibrary_importFailedWithError(Object error) {
-    return 'Import failed: $error';
-  }
-
-  @override
-  String tagLibrary_importedEntriesCount(Object count) {
-    return '$count entries';
-  }
-
-  @override
-  String tagLibrary_importedCategoriesCount(Object count) {
-    return '$count categories';
-  }
-
-  @override
-  String tagLibrary_renamedCount(Object count) {
-    return '$count renamed';
-  }
-
-  @override
-  String tagLibrary_overwrittenCount(Object count) {
-    return '$count replaced';
-  }
-
-  @override
-  String tagLibrary_skippedCount(Object count) {
-    return '$count skipped';
-  }
-
-  @override
-  String get tagLibrary_dragToCategoryHint =>
-      'Drag to the category panel to file';
-
-  @override
-  String get tagLibrary_unknownCategory => 'Unknown Category';
-
-  @override
-  String get tagLibrary_selectEntryToUpdate => 'Select Entry to Update';
-
-  @override
-  String get tagLibrary_updatePreview => 'Update Preview';
-
-  @override
-  String get tagLibrary_replaceThumbnailHint =>
-      'Will replace existing thumbnail';
-
-  @override
-  String tagLibrary_sentEntriesToMainPrompt(Object count) {
-    return 'Sent $count entries to main prompt';
-  }
-
-  @override
-  String tagLibrary_confirmDeleteSelectedEntries(Object count) {
-    return 'Delete $count selected entries? This action cannot be undone.';
-  }
-
-  @override
-  String tagLibrary_deletedEntries(Object count) {
-    return 'Deleted $count entries';
-  }
-
-  @override
-  String tagLibrary_movedEntries(Object count) {
-    return 'Moved $count entries';
-  }
-
-  @override
-  String tagLibrary_favoritedEntries(Object count) {
-    return 'Favorited $count entries';
-  }
-
-  @override
-  String tagLibrary_unfavoritedEntries(Object count) {
-    return 'Unfavorited $count entries';
-  }
-
-  @override
-  String tagLibrary_copiedEntriesContent(Object count) {
-    return 'Copied content from $count entries';
-  }
-
-  @override
-  String get tagLibrary_droppedImage => 'Dropped Image';
-
-  @override
-  String get tagLibrary_createEntryFromImage => 'Create New Entry';
-
-  @override
-  String tagLibrary_promptExtracted(Object prompt) {
-    return 'Prompt extracted: \"$prompt\"';
-  }
-
-  @override
-  String get tagLibrary_createEntryFromImageSubtitle =>
-      'Create a new entry from this image';
-
-  @override
-  String get tagLibrary_updateExistingThumbnail =>
-      'Update Existing Entry Thumbnail';
-
-  @override
-  String get tagLibrary_updateExistingThumbnailSubtitle =>
-      'Select an entry and replace its thumbnail';
-
-  @override
-  String get tagLibrary_allEntries => 'All';
-
-  @override
-  String get tagLibrary_favorites => 'Favorites';
-
-  @override
-  String get tagLibrary_addSubCategory => 'Add Subcategory';
-
-  @override
-  String get tagLibrary_moveToRoot => 'Move to Root';
-
-  @override
-  String get tagLibrary_categoryNameHint => 'Enter category name';
-
-  @override
-  String get tagLibrary_deleteCategoryTitle => 'Delete Category';
-
-  @override
-  String tagLibrary_deleteCategoryConfirm(Object name, Object count) {
-    return 'Are you sure you want to delete category \"$name\"? $count entries will be moved to root.';
-  }
-
-  @override
-  String get tagLibrary_deleteEntryTitle => 'Delete Entry';
-
-  @override
-  String tagLibrary_deleteEntryConfirm(Object name) {
-    return 'Are you sure you want to delete entry \"$name\"?';
-  }
-
-  @override
-  String get tagLibrary_noSearchResults => 'No matching entries found';
-
-  @override
-  String get tagLibrary_tryDifferentSearch => 'Try different keywords';
-
-  @override
-  String get tagLibrary_categoryEmpty => 'This category is empty';
-
-  @override
-  String get tagLibrary_empty => 'Library is empty';
-
-  @override
-  String get tagLibrary_addFirstEntry =>
-      'Click the button above to add your first entry';
-
-  @override
-  String get tagLibraryPicker_title => 'Select Entry';
-
-  @override
-  String get tagLibraryPicker_searchHint => 'Search entries...';
-
-  @override
-  String get tagLibraryPicker_allCategories => 'All Categories';
-
-  @override
-  String get tagLibrary_entryMoved => 'Entry moved to target category';
-
-  @override
-  String tagLibrary_useCount(Object count) {
-    return 'Used $count times';
-  }
-
-  @override
-  String get tagLibrary_addFavorite => 'Add to Favorites';
-
-  @override
-  String get tagLibrary_thumbnail => 'Thumbnail';
-
-  @override
-  String get tagLibrary_selectImage => 'Select Image';
-
-  @override
-  String get tagLibrary_thumbnailHint =>
-      'Supports PNG, JPG, WEBP, GIF, BMP, TIFF, and more';
-
-  @override
-  String get tagLibrary_name => 'Name';
-
-  @override
-  String get tagLibrary_nameHint => 'Enter entry name';
-
-  @override
-  String get tagLibrary_category => 'Category';
-
-  @override
-  String get tagLibrary_rootCategory => 'Root';
-
-  @override
   String get tagLibrary_tags => 'Tags';
-
-  @override
-  String get tagLibrary_tagsHint => 'Enter tags, separated by commas';
-
-  @override
-  String get tagLibrary_tagsHelper =>
-      'Tags are used for filtering and searching';
-
-  @override
-  String get tagLibrary_content => 'Prompt Content';
-
-  @override
-  String get tagLibrary_contentHint =>
-      'Enter prompt content, supports autocomplete';
 
   @override
   String get settings_network => 'Network';
@@ -5844,47 +5467,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Proxy settings changed, restart recommended';
 
   @override
-  String get tagLibrary_categoryNameExists => 'Category name already exists';
-
-  @override
   String get tagLibrary_addToLibrary => 'Add to Library';
-
-  @override
-  String get tagLibrary_saveToLibrary => 'Save to Library';
-
-  @override
-  String get tagLibrary_entrySaved => 'Saved to library';
-
-  @override
-  String get tagLibrary_entryUpdated => 'Entry updated';
 
   @override
   String get tagLibrary_uncategorized => 'Uncategorized';
 
   @override
   String get tagLibrary_contentPreview => 'Content Preview';
-
-  @override
-  String get tagLibrary_confirmAdd => 'Confirm';
-
-  @override
-  String get tagLibrary_entryName => 'Name';
-
-  @override
-  String get tagLibrary_entryNameHint => 'Enter entry name';
-
-  @override
-  String get tagLibrary_selectNewImage => 'Select New Image';
-
-  @override
-  String get tagLibrary_adjustDisplayRange => 'Adjust Display Range';
-
-  @override
-  String get tagLibrary_adjustThumbnailTitle =>
-      'Adjust Thumbnail Display Range';
-
-  @override
-  String get tagLibrary_dragToMove => 'Drag to move, scroll or pinch to zoom';
 
   @override
   String get settings_enablePromptWeightScroll =>
@@ -5929,81 +5518,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statistics_heatmapNoActivity => 'No activity';
-
-  @override
-  String get sendToHome_dialogTitle => 'Send to Home';
-
-  @override
-  String get sendToHome_send => 'Send';
-
-  @override
-  String get sendToHome_mainPrompt => 'Send to Main Prompt';
-
-  @override
-  String get sendToHome_mainPromptSubtitle =>
-      'Fill into the main prompt input field';
-
-  @override
-  String get sendToHome_mainPromptPipeSubtitle =>
-      'Send the full content to the main prompt (including pipes)';
-
-  @override
-  String get sendToHome_smartDecompose => 'Smart Decompose';
-
-  @override
-  String sendToHome_smartDecomposeSubtitle(Object count) {
-    return 'Main prompt + $count characters';
-  }
-
-  @override
-  String get sendToHome_replaceCharacter => 'Replace Character Prompt';
-
-  @override
-  String get sendToHome_replaceCharacterSubtitle =>
-      'Clear existing characters and add as new';
-
-  @override
-  String get sendToHome_appendCharacter => 'Append Character Prompt';
-
-  @override
-  String get sendToHome_appendCharacterSubtitle =>
-      'Keep existing characters and append new';
-
-  @override
-  String get sendToHome_sendAsAlias => 'Send as Alias';
-
-  @override
-  String sendToHome_sendAsAliasSubtitle(Object name) {
-    return 'Wrap as <$name> when sending to home';
-  }
-
-  @override
-  String get sendToHome_preview => 'Send Preview';
-
-  @override
-  String get sendToHome_characterPrompt => 'Character Prompt';
-
-  @override
-  String sendToHome_characterPromptCount(Object count) {
-    return 'Character Prompt ($count)';
-  }
-
-  @override
-  String sendToHome_characterIndex(Object index) {
-    return 'Character $index';
-  }
-
-  @override
-  String get sendToHome_recommended => 'Recommended';
-
-  @override
-  String get sendToHome_successMainPrompt => 'Sent to main prompt';
-
-  @override
-  String get sendToHome_successReplaceCharacter => 'Character prompt replaced';
-
-  @override
-  String get sendToHome_successAppendCharacter => 'Character prompt appended';
 
   @override
   String get metadataImport_title => 'Select Parameters to Import';
@@ -6159,9 +5673,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcut_context_viewer => 'Image Viewer';
 
   @override
-  String get shortcut_context_tag_library => 'Tag Library';
-
-  @override
   String get shortcut_context_settings => 'Settings';
 
   @override
@@ -6177,7 +5688,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcut_action_navigate_to_online_gallery => 'Online Gallery';
 
   @override
-  String get shortcut_action_navigate_to_tag_library => 'Tag Library';
+  String get shortcut_action_navigate_to_tag_library => 'Prompt Block Library';
 
   @override
   String get shortcut_action_navigate_to_statistics => 'Statistics';
@@ -6206,7 +5717,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcut_action_toggle_prompt_mode => 'Toggle Prompt Mode';
 
   @override
-  String get shortcut_action_open_tag_library => 'Open Tag Library';
+  String get shortcut_action_open_tag_library => 'Open Prompt Block Library';
 
   @override
   String get shortcut_action_save_image => 'Save Image';
@@ -6291,33 +5802,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortcut_action_open_folder => 'Open Folder';
-
-  @override
-  String get shortcut_action_select_all_tags => 'Select All Tags';
-
-  @override
-  String get shortcut_action_deselect_all_tags => 'Deselect All Tags';
-
-  @override
-  String get shortcut_action_new_category => 'New Category';
-
-  @override
-  String get shortcut_action_new_tag => 'New Tag';
-
-  @override
-  String get shortcut_action_search_tags => 'Search Tags';
-
-  @override
-  String get shortcut_action_batch_delete_tags => 'Batch Delete Tags';
-
-  @override
-  String get shortcut_action_batch_copy_tags => 'Batch Copy Tags';
-
-  @override
-  String get shortcut_action_send_to_home => 'Send to Home';
-
-  @override
-  String get shortcut_action_exit_selection_mode => 'Exit Selection Mode';
 
   @override
   String get shortcut_action_minimize_to_tray => 'Minimize to Tray';
@@ -8706,9 +8190,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get toast_smartDecomposeSent => 'Smart decomposed and sent';
-
-  @override
   String get toast_renameNameRequired => 'Name is required';
 
   @override
@@ -10687,6 +10168,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptBlockEditor_library => 'Block library';
+
+  @override
+  String get promptBlockPicker_title => 'Select Block';
+
+  @override
+  String get promptBlockLibrary_thumbnail => 'Thumbnail';
+
+  @override
+  String get promptBlockLibrary_selectNewImage => 'Select New Image';
+
+  @override
+  String get promptBlockLibrary_selectImage => 'Select Image';
+
+  @override
+  String get promptBlockLibrary_adjustDisplayRange => 'Adjust Display Range';
+
+  @override
+  String get promptBlockLibrary_adjustThumbnailTitle =>
+      'Adjust Thumbnail Display Range';
+
+  @override
+  String get promptBlockLibrary_dragToMove =>
+      'Drag to move, scroll or pinch to zoom';
+
+  @override
+  String get promptBlockLibrary_addToLibrary => 'Add to Block Library';
+
+  @override
+  String get promptBlockLibrary_contentPreview => 'Content Preview';
+
+  @override
+  String get promptBlockLibrary_confirmAdd => 'Confirm';
+
+  @override
+  String get promptBlockLibrary_saveToLibrary => 'Save to Block Library';
+
+  @override
+  String get promptBlockLibrary_droppedImage => 'Dropped Image';
+
+  @override
+  String get promptBlockLibrary_createBlockFromImage => 'Create New Block';
+
+  @override
+  String get promptBlockLibrary_createBlockFromImageSubtitle =>
+      'Create a new block from this image';
+
+  @override
+  String promptBlockLibrary_promptExtracted(Object prompt) {
+    return 'Prompt extracted: \"$prompt\"';
+  }
+
+  @override
+  String get promptBlockLibrary_updateExistingThumbnail =>
+      'Update Existing Block Thumbnail';
+
+  @override
+  String get promptBlockLibrary_updateExistingThumbnailSubtitle =>
+      'Select a block and replace its thumbnail';
 
   @override
   String get styleExplore_lineageTitle => 'Lineage';

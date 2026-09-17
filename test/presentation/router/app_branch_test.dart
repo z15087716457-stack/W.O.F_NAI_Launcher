@@ -10,15 +10,15 @@ void main() {
       ShortcutIds.navigateToOnlineGallery: AppBranch.onlineGallery,
       ShortcutIds.navigateToSettings: AppBranch.settings,
       ShortcutIds.navigateToStatistics: AppBranch.statistics,
-      ShortcutIds.navigateToTagLibrary: AppBranch.tagLibrary,
+      ShortcutIds.navigateToTagLibrary: AppBranch.promptBlockLibrary,
       ShortcutIds.navigateToVibeLibrary: AppBranch.vibeLibrary,
     });
   });
 
-  test('prompt block branch keeps its ordinal after random config removal', () {
-    // 旧随机配置 Branch 删除后，块库 ordinal 从 9 收缩到 8；
+  test('prompt block branch keeps its ordinal after tag library removal', () {
+    // 旧词库页 Branch 删除后，块库 ordinal 从 8 收缩到 7；
     // 侧栏显示顺序与 enum 无关（MainNavRail._railBranches 自行排列）。
-    expect(AppBranch.promptBlockLibrary.index, 8);
+    expect(AppBranch.promptBlockLibrary.index, 7);
     expect(mobileNavigationBranches, const [
       AppBranch.generation,
       AppBranch.localGallery,

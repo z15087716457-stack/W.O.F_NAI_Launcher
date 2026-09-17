@@ -8,10 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/character/character_prompt.dart';
-import '../../../data/models/tag_library/tag_library_entry.dart';
+import '../../../data/models/prompt_block/prompt_block.dart';
+import '../../providers/prompt_block_library_provider.dart';
 import '../../providers/reverse_prompt_provider.dart';
-import '../../providers/tag_library_page_provider.dart';
-import '../../widgets/tag_library/tag_library_picker_dialog.dart';
+import '../../widgets/common/prompt_block_picker_dialog.dart';
 import '../models/prompt_assistant_models.dart';
 import '../providers/prompt_assistant_config_provider.dart';
 import '../providers/prompt_assistant_history_provider.dart';
@@ -165,24 +165,26 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
   }
 
   Future<CharacterPrompt?> _pickReplacementCharacterFromLibrary() async {
-    final entry = await showDialog<TagLibraryEntry>(
+    final block = await showDialog<PromptBlock>(
       context: context,
-      builder: (context) => TagLibraryPickerDialog(
+      builder: (context) => PromptBlockPickerDialog(
         title: context.l10n.reversePrompt_selectReplacementTargetTitle,
       ),
     );
-    if (entry == null) {
+    if (block == null) {
       if (mounted) {
         AppToast.warning(context, context.l10n.promptAssistant_needCharacter);
       }
       return null;
     }
 
-    ref.read(tagLibraryPageNotifierProvider.notifier).recordUsage(entry.id);
+    ref
+        .read(promptBlockLibraryNotifierProvider.notifier)
+        .incrementUseCount(block.id);
     final character = CharacterPrompt.create(
-      name: entry.displayName,
-      prompt: entry.content,
-      thumbnailPath: entry.thumbnail,
+      name: block.displayTitle,
+      prompt: block.content,
+      thumbnailPath: block.thumbnail,
     );
     ref
         .read(reversePromptCharacterProvider.notifier)

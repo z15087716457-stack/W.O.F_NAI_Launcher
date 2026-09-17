@@ -12,8 +12,8 @@ class LibraryCompletionEntry {
   final int useCount;
 }
 
-class TagLibraryCompletionSource implements CompletionSource {
-  const TagLibraryCompletionSource({required this.searchEntries});
+class PromptBlockCompletionSource implements CompletionSource {
+  const PromptBlockCompletionSource({required this.searchEntries});
 
   static const int maxResults = 15;
 

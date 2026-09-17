@@ -39,7 +39,6 @@ import 'package:nai_launcher/presentation/providers/online_gallery_provider.dart
 import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart';
 import 'package:nai_launcher/presentation/providers/share_image_settings_provider.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
-import 'package:nai_launcher/presentation/providers/tag_library_page_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_history_provider.dart';
@@ -47,7 +46,6 @@ import 'package:nai_launcher/presentation/prompt_assistant/services/provider_ada
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_api_client.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_service.dart';
 import 'package:nai_launcher/presentation/screens/statistics/widgets/dashboard/aspect_ratio_card.dart';
-import 'package:nai_launcher/presentation/screens/tag_library_page/widgets/tag_library_toolbar.dart';
 import 'package:nai_launcher/presentation/screens/vibe_library/widgets/vibe_export_dialog.dart';
 import 'package:nai_launcher/presentation/screens/vibe_library/widgets/vibe_export_dialog_advanced.dart';
 import 'package:nai_launcher/presentation/utils/dropped_file_reader.dart';
@@ -113,6 +111,7 @@ void main() {
       final anlasWatcherProvider = StateProvider<int>((ref) => 0);
       final backgroundRefreshProvider = StateProvider<int>((ref) => 0);
       final kritaBridgeProvider = StateProvider<int>((ref) => 0);
+      final promptBlockLibraryProvider = StateProvider<int>((ref) => 0);
       var buildCount = 0;
 
       await tester.pumpWidget(
@@ -122,6 +121,7 @@ void main() {
               anlasWatcher: anlasWatcherProvider,
               backgroundRefresh: backgroundRefreshProvider,
               kritaBridge: kritaBridgeProvider,
+              promptBlockLibrary: promptBlockLibraryProvider,
               child: Builder(
                 builder: (context) {
                   buildCount++;
@@ -242,76 +242,6 @@ void main() {
       expect(find.text('收藏'), findsOneWidget);
       expect(find.text('42'), findsOneWidget);
       expect(find.text('17'), findsOneWidget);
-    });
-
-    testWidgets('词库工具栏重建时搜索框应显示当前搜索条件', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            tagLibraryPageNotifierProvider.overrideWith(
-              _FakeTagLibraryPageNotifier.new,
-            ),
-          ],
-          child: const MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(body: TagLibraryToolbar()),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      final editable = tester.widget<EditableText>(find.byType(EditableText));
-      expect(editable.controller.text, 'rabbit');
-    });
-
-    testWidgets('词库搜索框 Ctrl+A 应选择文本而不是触发词条全选', (tester) async {
-      var selectedAllTags = false;
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            tagLibraryPageNotifierProvider.overrideWith(
-              _FakeTagLibraryPageNotifier.new,
-            ),
-            shortcutConfigNotifierProvider.overrideWith(
-              _FakeShortcutConfigNotifier.new,
-            ),
-          ],
-          child: MaterialApp(
-            locale: const Locale('zh'),
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(
-              body: PageShortcuts(
-                contextType: ShortcutContext.tagLibrary,
-                shortcuts: {
-                  ShortcutIds.selectAllTags: () {
-                    selectedAllTags = true;
-                  },
-                },
-                child: const TagLibraryToolbar(),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-      final textField = find.byType(TextField);
-      await tester.tap(textField);
-      await tester.pump();
-
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-      await tester.pump();
-
-      final editable = tester.widget<EditableText>(find.byType(EditableText));
-      expect(editable.controller.selection.baseOffset, 0);
-      expect(editable.controller.selection.extentOffset, 'rabbit'.length);
-      expect(selectedAllTags, isFalse);
     });
 
     testWidgets('批量 Vibe 导出不显示嵌入 PNG 入口', (tester) async {
@@ -2578,12 +2508,6 @@ class _FakeLocalGalleryNotifier extends LocalGalleryNotifier {
 class _FakeShortcutConfigNotifier extends ShortcutConfigNotifier {
   @override
   Future<ShortcutConfig> build() async => ShortcutConfig.createDefault();
-}
-
-class _FakeTagLibraryPageNotifier extends TagLibraryPageNotifier {
-  @override
-  TagLibraryPageState build() =>
-      const TagLibraryPageState(searchQuery: 'rabbit');
 }
 
 VibeLibraryEntry _buildVibeEntry({

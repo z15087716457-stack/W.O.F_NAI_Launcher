@@ -1,13 +1,12 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
-import 'package:nai_launcher/data/models/tag_library/tag_library_entry.dart';
+import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_input.dart';
 
@@ -89,6 +88,16 @@ void main() {
               resolveAliasOnCopy: resolveAliasOnCopy,
             ),
           ),
+          promptBlockLibraryNotifierProvider.overrideWith(
+            () => _FakePromptBlockLibraryNotifier(
+              PromptBlockLibraryState(
+                blocks: [
+                  PromptBlock.create(title: _entryName, content: _entryContent),
+                ],
+                folders: const [],
+              ),
+            ),
+          ),
         ],
         child: const MaterialApp(
           supportedLocales: AppLocalizations.supportedLocales,
@@ -112,6 +121,13 @@ void main() {
         ),
       ),
     );
+    await tester.pump();
+    // 同步别名解析只读 valueOrNull 快照：先等异步块库就绪，
+    // 对齐生产环境 AppBootstrapEffects 预热后的状态。
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(UnifiedPromptInput)),
+    );
+    await container.read(promptBlockLibraryNotifierProvider.future);
     await tester.pump();
   }
 
@@ -258,19 +274,13 @@ class _TestLocalStorageService extends LocalStorageService {
 
   @override
   bool getEnableCooccurrenceRecommendation() => false;
+}
+
+class _FakePromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
+  _FakePromptBlockLibraryNotifier(this.initialState);
+
+  final PromptBlockLibraryState initialState;
 
   @override
-  String? getTagLibraryEntriesJson() {
-    final entry = TagLibraryEntry.create(
-      name: _entryName,
-      content: _entryContent,
-    );
-    return jsonEncode([entry.toJson()]);
-  }
-
-  @override
-  String? getTagLibraryCategoriesJson() => null;
-
-  @override
-  int getTagLibraryViewMode() => 0;
+  Future<PromptBlockLibraryState> build() async => initialState;
 }

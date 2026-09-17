@@ -8,9 +8,10 @@ import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/widgets/character/character_prompt_button.dart';
 import 'package:nai_launcher/presentation/widgets/character/inline_character_row.dart';
-import 'package:nai_launcher/presentation/widgets/tag_library/tag_library_picker_dialog.dart';
+import 'package:nai_launcher/presentation/widgets/common/prompt_block_picker_dialog.dart';
 
 void main() {
   late Directory hiveTempDir;
@@ -41,6 +42,13 @@ void main() {
 
   Widget buildTestApp(Widget child) {
     return ProviderScope(
+      overrides: [
+        promptBlockLibraryNotifierProvider.overrideWith(
+          () => _FakePromptBlockLibraryNotifier(
+            PromptBlockLibraryState(blocks: const [], folders: const []),
+          ),
+        ),
+      ],
       child: MaterialApp(
         locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -72,7 +80,7 @@ void main() {
 
     await openLibraryMenuItem(tester);
 
-    expect(find.byType(TagLibraryPickerDialog), findsOneWidget);
+    expect(find.byType(PromptBlockPickerDialog), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
   });
@@ -106,8 +114,17 @@ void main() {
 
     await openLibraryMenuItem(tester);
 
-    expect(find.byType(TagLibraryPickerDialog), findsOneWidget);
+    expect(find.byType(PromptBlockPickerDialog), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
   });
+}
+
+class _FakePromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
+  _FakePromptBlockLibraryNotifier(this.initialState);
+
+  final PromptBlockLibraryState initialState;
+
+  @override
+  Future<PromptBlockLibraryState> build() async => initialState;
 }

@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 
-import '../../../../data/models/tag_library/tag_library_entry.dart';
+import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../common/thumbnail_display.dart';
 
-/// 词库条目菜单项组件
+/// 块库条目菜单项组件
 ///
 /// 用于 QualityTagsSelector 和 UcPresetSelector 的自定义条目菜单
 class LibraryEntryMenuItem extends PopupMenuEntry<String> {
-  final TagLibraryEntry entry;
+  final PromptBlock entry;
   final bool isSelected;
   final VoidCallback onDelete;
 
@@ -76,7 +76,7 @@ class _LibraryEntryMenuItemState extends State<LibraryEntryMenuItem> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      widget.entry.displayName,
+                      widget.entry.displayTitle,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: widget.isSelected

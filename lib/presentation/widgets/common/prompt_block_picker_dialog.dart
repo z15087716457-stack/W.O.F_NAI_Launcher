@@ -6,45 +6,53 @@ import 'package:nai_launcher/core/utils/localization_extension.dart';
 
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/storage/local_storage_service.dart';
-import '../../../data/models/tag_library/tag_library_category.dart';
-import '../../../data/models/tag_library/tag_library_entry.dart';
-import '../../providers/tag_library_page_provider.dart';
-import '../common/thumbnail_display.dart';
+import '../../../data/models/prompt_block/prompt_block.dart';
+import '../../providers/prompt_block_library_provider.dart';
+import 'thumbnail_display.dart';
 
-/// 词库条目选择对话框
+/// 块库条目选择对话框
 ///
-/// 用于从词库中选择一个条目，返回选中的 [TagLibraryEntry]
-class TagLibraryPickerDialog extends ConsumerStatefulWidget {
+/// 用于从全局 Prompt 块库中选择一个块，返回选中的 [PromptBlock]。
+/// 旧本地词库的选择场景（预设自定义词、角色导入等）统一改走这里。
+class PromptBlockPickerDialog extends ConsumerStatefulWidget {
   /// 对话框标题
   final String? title;
 
-  const TagLibraryPickerDialog({super.key, this.title});
+  const PromptBlockPickerDialog({super.key, this.title});
+
+  /// 显示块选择对话框，返回用户选中的块（取消返回 null）。
+  static Future<PromptBlock?> show(BuildContext context, {String? title}) {
+    return showDialog<PromptBlock>(
+      context: context,
+      builder: (context) => PromptBlockPickerDialog(title: title),
+    );
+  }
 
   @override
-  ConsumerState<TagLibraryPickerDialog> createState() =>
-      _TagLibraryPickerDialogState();
+  ConsumerState<PromptBlockPickerDialog> createState() =>
+      _PromptBlockPickerDialogState();
 }
 
-class _TagLibraryPickerDialogState
-    extends ConsumerState<TagLibraryPickerDialog> {
+class _PromptBlockPickerDialogState
+    extends ConsumerState<PromptBlockPickerDialog> {
   String _searchQuery = '';
-  String? _selectedCategoryId;
+  String? _selectedFolderId;
 
   @override
   void initState() {
     super.initState();
-    final savedCategoryId = ref
+    final savedFolderId = ref
         .read(localStorageServiceProvider)
-        .getSetting<String>(StorageKeys.tagLibraryPickerCategoryId);
-    if (savedCategoryId != null && savedCategoryId.isNotEmpty) {
-      _selectedCategoryId = savedCategoryId;
+        .getSetting<String>(StorageKeys.promptBlockPickerFolderId);
+    if (savedFolderId != null && savedFolderId.isNotEmpty) {
+      _selectedFolderId = savedFolderId;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final state = ref.watch(tagLibraryPageNotifierProvider);
+    final asyncState = ref.watch(promptBlockLibraryNotifierProvider);
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
@@ -60,11 +68,26 @@ class _TagLibraryPickerDialogState
             const SizedBox(height: 16),
 
             // 搜索和筛选栏
-            _buildFilterBar(theme, state),
+            asyncState.when(
+              data: (state) => _buildFilterBar(theme, state),
+              loading: () => const SizedBox(height: 48),
+              error: (_, _) => const SizedBox(height: 48),
+            ),
             const SizedBox(height: 16),
 
-            // 条目网格
-            Expanded(child: _buildEntryGrid(theme, state)),
+            // 块网格
+            Expanded(
+              child: asyncState.when(
+                data: (state) => _buildBlockGrid(theme, state),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) => Center(
+                  child: Text(
+                    '$error',
+                    style: TextStyle(color: theme.colorScheme.error),
+                  ),
+                ),
+              ),
+            ),
 
             const SizedBox(height: 16),
 
@@ -86,7 +109,7 @@ class _TagLibraryPickerDialogState
         ),
         const SizedBox(width: 12),
         Text(
-          widget.title ?? context.l10n.tagLibraryPicker_title,
+          widget.title ?? context.l10n.promptBlockPicker_title,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -101,8 +124,15 @@ class _TagLibraryPickerDialogState
     );
   }
 
-  Widget _buildFilterBar(ThemeData theme, TagLibraryPageState state) {
-    final selectedCategoryId = _effectiveSelectedCategoryId(state);
+  Widget _buildFilterBar(ThemeData theme, PromptBlockLibraryState state) {
+    final selectedFolderId = _effectiveSelectedFolderId(state);
+    // 文件夹下拉按 DFS 树序展开，显示根→当前路径名以区分同名子文件夹。
+    final treeOrder = state.folderTreeOrder();
+    final orderedFolders = state.folders.toList()
+      ..sort(
+        (a, b) =>
+            (treeOrder[a.id] ?? 1 << 30).compareTo(treeOrder[b.id] ?? 1 << 30),
+      );
     return Row(
       children: [
         // 搜索框
@@ -110,7 +140,7 @@ class _TagLibraryPickerDialogState
           flex: 2,
           child: TextField(
             decoration: InputDecoration(
-              hintText: context.l10n.tagLibraryPicker_searchHint,
+              hintText: context.l10n.promptBlockLibrary_searchHint,
               prefixIcon: const Icon(Icons.search, size: 20),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -128,11 +158,11 @@ class _TagLibraryPickerDialogState
         ),
         const SizedBox(width: 12),
 
-        // 分类筛选
+        // 文件夹筛选
         Expanded(
           flex: 1,
           child: DropdownButtonFormField<String?>(
-            initialValue: selectedCategoryId,
+            initialValue: selectedFolderId,
             isExpanded: true,
             decoration: InputDecoration(
               border: OutlineInputBorder(
@@ -144,49 +174,50 @@ class _TagLibraryPickerDialogState
               ),
               isDense: true,
             ),
-            hint: Text(context.l10n.tagLibraryPicker_allCategories),
+            hint: Text(context.l10n.promptBlockLibrary_allBlocks),
             items: [
               DropdownMenuItem<String?>(
                 value: null,
-                child: Text(context.l10n.tagLibraryPicker_allCategories),
+                child: Text(context.l10n.promptBlockLibrary_allBlocks),
               ),
-              ...state.categories.map(
-                (category) => DropdownMenuItem<String?>(
-                  value: category.id,
-                  child: Text(category.name, overflow: TextOverflow.ellipsis),
+              ...orderedFolders.map(
+                (folder) => DropdownMenuItem<String?>(
+                  value: folder.id,
+                  child: Text(
+                    state.folderPath(folder.id),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
             ],
-            onChanged: _setSelectedCategory,
+            onChanged: _setSelectedFolder,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildEntryGrid(ThemeData theme, TagLibraryPageState state) {
-    // 过滤条目
-    var entries = state.entries.toList();
-    final selectedCategoryId = _effectiveSelectedCategoryId(state);
+  Widget _buildBlockGrid(ThemeData theme, PromptBlockLibraryState state) {
+    // 按文件夹子树过滤
+    final selectedFolderId = _effectiveSelectedFolderId(state);
+    var blocks = selectedFolderId == null
+        ? state.blocks.toList()
+        : state.blocksInFolderTree(selectedFolderId);
 
-    // 按分类筛选
-    if (selectedCategoryId != null) {
-      final categoryIds = {
-        selectedCategoryId,
-        ...state.categories.getDescendantIds(selectedCategoryId),
-      };
-      entries = entries
-          .where((e) => categoryIds.contains(e.categoryId))
+    // 搜索过滤（标题 + 内容）
+    if (_searchQuery.isNotEmpty) {
+      final lowerQuery = _searchQuery.toLowerCase();
+      blocks = blocks
+          .where(
+            (block) =>
+                block.title.toLowerCase().contains(lowerQuery) ||
+                block.content.toLowerCase().contains(lowerQuery),
+          )
           .toList();
     }
+    blocks = _sortFavoritesFirst(blocks);
 
-    // 搜索过滤
-    if (_searchQuery.isNotEmpty) {
-      entries = entries.search(_searchQuery);
-    }
-    entries = _sortFavoritesFirst(entries);
-
-    if (entries.isEmpty) {
+    if (blocks.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -199,8 +230,8 @@ class _TagLibraryPickerDialogState
             const SizedBox(height: 16),
             Text(
               _searchQuery.isNotEmpty
-                  ? context.l10n.tagLibrary_noSearchResults
-                  : context.l10n.tagLibrary_empty,
+                  ? context.l10n.promptBlockLibrary_noSearchResults
+                  : context.l10n.promptBlockLibrary_empty,
               style: TextStyle(color: theme.colorScheme.outline, fontSize: 14),
             ),
           ],
@@ -215,12 +246,12 @@ class _TagLibraryPickerDialogState
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
       ),
-      itemCount: entries.length,
+      itemCount: blocks.length,
       itemBuilder: (context, index) {
-        final entry = entries[index];
-        return _EntrySelectCard(
-          entry: entry,
-          onTap: () => Navigator.of(context).pop(entry),
+        final block = blocks[index];
+        return _BlockSelectCard(
+          block: block,
+          onTap: () => Navigator.of(context).pop(block),
         );
       },
     );
@@ -238,61 +269,61 @@ class _TagLibraryPickerDialogState
     );
   }
 
-  String? _effectiveSelectedCategoryId(TagLibraryPageState state) {
-    final selected = _selectedCategoryId;
+  String? _effectiveSelectedFolderId(PromptBlockLibraryState state) {
+    final selected = _selectedFolderId;
     if (selected == null) return null;
-    return state.categories.any((category) => category.id == selected)
+    return state.folders.any((folder) => folder.id == selected)
         ? selected
         : null;
   }
 
-  void _setSelectedCategory(String? value) {
-    setState(() => _selectedCategoryId = value);
+  void _setSelectedFolder(String? value) {
+    setState(() => _selectedFolderId = value);
     final storage = ref.read(localStorageServiceProvider);
     if (value == null) {
-      unawaited(storage.deleteSetting(StorageKeys.tagLibraryPickerCategoryId));
+      unawaited(storage.deleteSetting(StorageKeys.promptBlockPickerFolderId));
     } else {
       unawaited(
-        storage.setSetting(StorageKeys.tagLibraryPickerCategoryId, value),
+        storage.setSetting(StorageKeys.promptBlockPickerFolderId, value),
       );
     }
   }
 
-  List<TagLibraryEntry> _sortFavoritesFirst(List<TagLibraryEntry> entries) {
-    if (!entries.any((entry) => entry.isFavorite)) {
-      return entries;
+  List<PromptBlock> _sortFavoritesFirst(List<PromptBlock> blocks) {
+    if (!blocks.any((block) => block.isFavorite)) {
+      return blocks;
     }
-    final favorites = <TagLibraryEntry>[];
-    final others = <TagLibraryEntry>[];
-    for (final entry in entries) {
-      if (entry.isFavorite) {
-        favorites.add(entry);
+    final favorites = <PromptBlock>[];
+    final others = <PromptBlock>[];
+    for (final block in blocks) {
+      if (block.isFavorite) {
+        favorites.add(block);
       } else {
-        others.add(entry);
+        others.add(block);
       }
     }
     return [...favorites, ...others];
   }
 }
 
-/// 条目选择卡片
-class _EntrySelectCard extends StatefulWidget {
-  final TagLibraryEntry entry;
+/// 块选择卡片
+class _BlockSelectCard extends StatefulWidget {
+  final PromptBlock block;
   final VoidCallback onTap;
 
-  const _EntrySelectCard({required this.entry, required this.onTap});
+  const _BlockSelectCard({required this.block, required this.onTap});
 
   @override
-  State<_EntrySelectCard> createState() => _EntrySelectCardState();
+  State<_BlockSelectCard> createState() => _BlockSelectCardState();
 }
 
-class _EntrySelectCardState extends State<_EntrySelectCard> {
+class _BlockSelectCardState extends State<_BlockSelectCard> {
   bool _isHovering = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final entry = widget.entry;
+    final block = widget.block;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -325,10 +356,10 @@ class _EntrySelectCardState extends State<_EntrySelectCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 预览图区域
-              Expanded(flex: 3, child: _buildThumbnail(theme, entry)),
+              Expanded(flex: 3, child: _buildThumbnail(theme, block)),
 
               // 信息区域
-              Expanded(flex: 2, child: _buildInfo(theme, entry)),
+              Expanded(flex: 2, child: _buildInfo(theme, block)),
             ],
           ),
         ),
@@ -336,20 +367,18 @@ class _EntrySelectCardState extends State<_EntrySelectCard> {
     );
   }
 
-  Widget _buildThumbnail(ThemeData theme, TagLibraryEntry entry) {
+  Widget _buildThumbnail(ThemeData theme, PromptBlock block) {
     return Stack(
       fit: StackFit.expand,
       children: [
-        if (entry.hasThumbnail && entry.thumbnail != null)
+        if (block.hasThumbnail && block.thumbnail != null)
           LayoutBuilder(
             builder: (context, constraints) {
-              // 使用 LayoutBuilder 获取实际尺寸
-              // 参考尺寸保持 200x80 以确保与裁剪对话框一致
               return ThumbnailDisplay(
-                imagePath: entry.thumbnail!,
-                offsetX: entry.thumbnailOffsetX,
-                offsetY: entry.thumbnailOffsetY,
-                scale: entry.thumbnailScale,
+                imagePath: block.thumbnail!,
+                offsetX: block.thumbnailOffsetX,
+                offsetY: block.thumbnailOffsetY,
+                scale: block.thumbnailScale,
                 width: constraints.maxWidth,
                 height: constraints.maxHeight,
                 borderRadius: const BorderRadius.vertical(
@@ -402,7 +431,7 @@ class _EntrySelectCardState extends State<_EntrySelectCard> {
           ),
 
         // 收藏标识
-        if (entry.isFavorite)
+        if (block.isFavorite)
           Positioned(
             top: 6,
             right: 6,
@@ -432,15 +461,15 @@ class _EntrySelectCardState extends State<_EntrySelectCard> {
     );
   }
 
-  Widget _buildInfo(ThemeData theme, TagLibraryEntry entry) {
+  Widget _buildInfo(ThemeData theme, PromptBlock block) {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 名称
+          // 标题
           Text(
-            entry.displayName,
+            block.displayTitle,
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -452,7 +481,7 @@ class _EntrySelectCardState extends State<_EntrySelectCard> {
           // 内容预览
           Expanded(
             child: Text(
-              entry.contentPreview,
+              block.contentPreview,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

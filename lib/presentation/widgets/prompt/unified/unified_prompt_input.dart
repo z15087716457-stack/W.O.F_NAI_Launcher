@@ -12,8 +12,7 @@ import '../../../../data/models/character/character_prompt.dart';
 import '../../../../data/services/alias_resolver_service.dart';
 import '../../../../presentation/utils/text_selection_utils.dart';
 import '../../../providers/generation/generation_settings_notifiers.dart';
-import '../../../providers/tag_library_page_provider.dart';
-import '../../../screens/tag_library_page/widgets/entry_add_dialog.dart';
+import '../../../screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
 import '../../autocomplete/autocomplete_wrapper.dart';
 import '../../common/app_toast.dart';
 import '../../common/weight_adjust_toolbar.dart';
@@ -999,7 +998,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       );
     }
 
-    // 如果有选中文本，添加"保存到词库"选项
+    // 如果有选中文本，添加"保存到块库"选项
     if (hasSelection) {
       buttonItems.insert(
         0,
@@ -1008,7 +1007,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
             editableTextState.hideToolbar();
             _showSaveToLibraryDialog(context, selectedText);
           },
-          label: context.l10n.tagLibrary_saveToLibrary,
+          label: context.l10n.promptBlockLibrary_saveToLibrary,
         ),
       );
     }
@@ -1020,23 +1019,17 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     );
   }
 
-  /// 显示保存到词库对话框
+  /// 显示保存到块库对话框
   Future<void> _showSaveToLibraryDialog(
     BuildContext context,
     String selectedText,
   ) async {
-    final categories = ref.read(tagLibraryPageCategoriesProvider);
-
-    await showDialog<void>(
-      context: context,
-      builder: (context) => EntryAddDialog(
-        categories: categories,
-        entry: null,
-        initialContent: selectedText,
-      ),
+    // createWithDialog 自带落库与成功 toast
+    await PromptBlockEditDialog.createWithDialog(
+      context,
+      ref,
+      initialContent: selectedText,
     );
-
-    // 注意：EntryAddDialog 会自己处理保存逻辑并显示 toast
   }
 
   @override

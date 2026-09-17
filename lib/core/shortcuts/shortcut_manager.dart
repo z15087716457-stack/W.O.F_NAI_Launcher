@@ -221,8 +221,8 @@ class NavigateToRandomConfigIntent extends AppShortcutIntent {
   const NavigateToRandomConfigIntent();
 }
 
-class NavigateToTagLibraryIntent extends AppShortcutIntent {
-  const NavigateToTagLibraryIntent();
+class NavigateToPromptBlockLibraryIntent extends AppShortcutIntent {
+  const NavigateToPromptBlockLibraryIntent();
 }
 
 class NavigateToStatisticsIntent extends AppShortcutIntent {
@@ -254,8 +254,8 @@ class TogglePromptModeIntent extends AppShortcutIntent {
   const TogglePromptModeIntent();
 }
 
-class OpenTagLibraryIntent extends AppShortcutIntent {
-  const OpenTagLibraryIntent();
+class OpenPromptBlockLibraryIntent extends AppShortcutIntent {
+  const OpenPromptBlockLibraryIntent();
 }
 
 class SaveImageIntent extends AppShortcutIntent {

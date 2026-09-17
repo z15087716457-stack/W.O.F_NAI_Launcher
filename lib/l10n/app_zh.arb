@@ -60,7 +60,6 @@
     }
   },
   "common_clearInputConfirm": "确定要清空输入内容吗？",
-  "common_today": "今天",
   "common_yesterday": "昨天",
   "common_daysAgo": "{days}天前",
   "@common_daysAgo": {
@@ -77,8 +76,6 @@
   "common_favorite": "收藏",
   "common_unfavorite": "取消收藏",
   "common_ok": "确定",
-  "common_replace": "替换",
-  "common_skip": "跳过",
   "common_exit": "退出",
   "common_folder": "文件夹",
   "common_filter": "筛选",
@@ -115,7 +112,6 @@
   },
   "nav_canvas": "画布",
   "nav_onlineGallery": "画廊",
-  "nav_dictionary": "词库 (WIP)",
   "nav_discordCommunity": "Discord 社群",
   "nav_githubRepo": "GitHub 仓库",
   "nav_expandSidebar": "展开侧边栏",
@@ -1583,17 +1579,6 @@
     }
   },
   "characterTooltip_viewFullConfig": "点击查看完整配置",
-  "@tagLibrary_generatedCharacters": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@tagLibrary_generateFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "naiAlgorithm_mainPrompt": "主提示词",
   "@tagGroup_tagCount": {
     "placeholders": {
       "count": {}
@@ -2532,7 +2517,6 @@
   "statistics_thursday": "周四",
   "statistics_friday": "周五",
   "statistics_saturday": "周六",
-  "fixedTags_syntaxHelp": "支持 NAI 语法增强/减弱权重、标签交替等",
   "fixedTags_negativeTitle": "负向固定词",
   "reversePrompt_title": "反推",
   "reversePrompt_pending": "待添加",
@@ -2707,233 +2691,8 @@
   "promptToken_characterNegative": "角色负面",
   "common_rename": "重命名",
   "common_create": "创建",
-  "tagLibrary_categories": "分类",
   "tagLibrary_newCategory": "新建分类",
-  "tagLibrary_addEntry": "添加条目",
-  "tagLibrary_editEntry": "编辑条目",
-  "tagLibrary_searchHint": "搜索条目...",
-  "tagLibrary_import": "导入",
-  "tagLibrary_export": "导出",
-  "tagLibrary_sortCustom": "自定义排序",
-  "tagLibrary_sortName": "名称",
-  "tagLibrary_sortUseCount": "使用频率",
-  "tagLibrary_sortUpdatedAt": "更新时间",
-  "tagLibrary_transferCategory": "转移分类",
-  "tagLibrary_copyContent": "复制内容",
-  "tagLibrary_moveToCategoryTitle": "移动到分类",
-  "tagLibrary_selectTargetCategory": "选择目标分类：",
-  "tagLibrary_includeThumbnails": "包含预览图",
-  "tagLibrary_includeThumbnailsSubtitle": "将增加文件大小",
-  "tagLibrary_selectedExportCount": "导出 ({count} 项)",
-  "@tagLibrary_selectedExportCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_selectedImportCount": "导入 ({count} 项)",
-  "@tagLibrary_selectedImportCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_entriesLabel": "条目",
-  "tagLibrary_categoriesLabel": "分类",
-  "tagLibrary_selectExportContent": "选择要导出的内容",
-  "tagLibrary_selectImportContent": "选择要导入的内容",
-  "tagLibrary_selectSaveLocation": "选择保存位置",
-  "tagLibrary_preparingExport": "准备导出...",
-  "tagLibrary_exportSuccess": "导出成功",
-  "tagLibrary_exportFailedWithError": "导出失败: {error}",
-  "@tagLibrary_exportFailedWithError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "tagLibrary_selectZipFile": "点击选择 ZIP 文件",
-  "tagLibrary_zipFileHint": "支持从本应用导出的词库文件",
-  "tagLibrary_reselect": "重新选择",
-  "tagLibrary_fileInfo": "文件信息",
-  "tagLibrary_entryCountLabel": "条目数",
-  "tagLibrary_categoryCountLabel": "分类数",
-  "tagLibrary_exportDateLabel": "导出时间",
-  "tagLibrary_importConflictsHint": "发现 {count} 个冲突项，请点击下方冲突项选择处理方式",
-  "@tagLibrary_importConflictsHint": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_categoriesSection": "分类 ({count})",
-  "@tagLibrary_categoriesSection": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_entriesSection": "条目 ({count})",
-  "@tagLibrary_entriesSection": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_conflictResolutionTooltip": "选择冲突处理方式",
-  "tagLibrary_conflictSkip": "冲突 - 将跳过",
-  "tagLibrary_conflictRename": "冲突 - 将重命名导入",
-  "tagLibrary_conflictOverwrite": "冲突 - 将替换现有",
-  "tagLibrary_parseFileFailed": "无法解析文件: {error}",
-  "@tagLibrary_parseFileFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "tagLibrary_preparingImport": "准备导入...",
-  "tagLibrary_importCompleted": "导入完成",
-  "tagLibrary_importSuccessSummary": "导入成功: {summary}",
-  "@tagLibrary_importSuccessSummary": {
-    "placeholders": {
-      "summary": {}
-    }
-  },
-  "tagLibrary_importFailedWithError": "导入失败: {error}",
-  "@tagLibrary_importFailedWithError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "tagLibrary_importedEntriesCount": "{count} 条目",
-  "@tagLibrary_importedEntriesCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_importedCategoriesCount": "{count} 分类",
-  "@tagLibrary_importedCategoriesCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_renamedCount": "{count} 重命名",
-  "@tagLibrary_renamedCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_overwrittenCount": "{count} 替换",
-  "@tagLibrary_overwrittenCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_skippedCount": "{count} 跳过",
-  "@tagLibrary_skippedCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_dragToCategoryHint": "拖到左侧分类归档",
-  "tagLibrary_unknownCategory": "未知分类",
-  "tagLibrary_selectEntryToUpdate": "选择要更新的词条",
-  "tagLibrary_updatePreview": "更新预览图",
-  "tagLibrary_replaceThumbnailHint": "将替换现有预览图",
-  "tagLibrary_sentEntriesToMainPrompt": "已发送 {count} 个词条到主提示词",
-  "@tagLibrary_sentEntriesToMainPrompt": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_confirmDeleteSelectedEntries": "确定要删除选中的 {count} 个词条吗？此操作不可撤销。",
-  "@tagLibrary_confirmDeleteSelectedEntries": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_deletedEntries": "已删除 {count} 个词条",
-  "@tagLibrary_deletedEntries": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_movedEntries": "已移动 {count} 个词条",
-  "@tagLibrary_movedEntries": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_favoritedEntries": "已收藏 {count} 个词条",
-  "@tagLibrary_favoritedEntries": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_unfavoritedEntries": "已取消收藏 {count} 个词条",
-  "@tagLibrary_unfavoritedEntries": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_copiedEntriesContent": "已复制 {count} 个词条的内容",
-  "@tagLibrary_copiedEntriesContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_droppedImage": "拖入图片",
-  "tagLibrary_createEntryFromImage": "创建新词条",
-  "tagLibrary_promptExtracted": "提示词已提取: \"{prompt}\"",
-  "@tagLibrary_promptExtracted": {
-    "placeholders": {
-      "prompt": {}
-    }
-  },
-  "tagLibrary_createEntryFromImageSubtitle": "从图片创建新词条",
-  "tagLibrary_updateExistingThumbnail": "更新现有词条预览图",
-  "tagLibrary_updateExistingThumbnailSubtitle": "选择词条并替换其预览图",
-  "tagLibrary_allEntries": "全部",
-  "tagLibrary_favorites": "收藏",
-  "tagLibrary_addSubCategory": "添加子分类",
-  "tagLibrary_moveToRoot": "移动到根目录",
-  "tagLibrary_categoryNameHint": "输入分类名称",
-  "tagLibrary_deleteCategoryTitle": "删除分类",
-  "tagLibrary_deleteCategoryConfirm": "确定要删除分类 \"{name}\" 吗？该分类下的 {count} 个条目将移至根目录。",
-  "@tagLibrary_deleteCategoryConfirm": {
-    "placeholders": {
-      "name": {},
-      "count": {}
-    }
-  },
-  "tagLibrary_deleteEntryTitle": "删除条目",
-  "tagLibrary_deleteEntryConfirm": "确定要删除条目 \"{name}\" 吗？",
-  "@tagLibrary_deleteEntryConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "tagLibrary_noSearchResults": "没有找到匹配的条目",
-  "tagLibrary_tryDifferentSearch": "尝试使用其他关键词搜索",
-  "tagLibrary_categoryEmpty": "该分类暂无条目",
-  "tagLibrary_empty": "词库为空",
-  "tagLibrary_addFirstEntry": "点击上方按钮添加第一个条目",
-  "tagLibraryPicker_title": "选择词条",
-  "tagLibraryPicker_searchHint": "搜索词条...",
-  "tagLibraryPicker_allCategories": "全部分类",
-  "tagLibrary_entryMoved": "条目已移动到目标分类",
-  "tagLibrary_useCount": "使用 {count} 次",
-  "@tagLibrary_useCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_addFavorite": "添加收藏",
-  "tagLibrary_thumbnail": "预览图",
-  "tagLibrary_selectImage": "选择图片",
-  "tagLibrary_thumbnailHint": "支持 PNG、JPG、WEBP、GIF、BMP、TIFF 等格式",
-  "tagLibrary_name": "名称",
-  "tagLibrary_nameHint": "输入条目名称",
-  "tagLibrary_category": "分类",
-  "tagLibrary_rootCategory": "根目录",
   "tagLibrary_tags": "标签",
-  "tagLibrary_tagsHint": "输入标签，用逗号分隔",
-  "tagLibrary_tagsHelper": "标签用于筛选和搜索",
-  "tagLibrary_content": "提示词内容",
-  "tagLibrary_contentHint": "输入提示词内容，支持智能补全",
   "settings_network": "网络",
   "settings_enableProxy": "启用代理",
   "settings_proxyEnabled": "已启用",
@@ -2962,20 +2721,9 @@
     }
   },
   "settings_proxyRestartHint": "代理设置已更改，建议重启应用",
-  "tagLibrary_categoryNameExists": "该分类名称已存在",
   "tagLibrary_addToLibrary": "收藏到词库",
-  "tagLibrary_saveToLibrary": "保存到词库",
-  "tagLibrary_entrySaved": "收藏成功",
-  "tagLibrary_entryUpdated": "条目已更新",
   "tagLibrary_uncategorized": "未分类",
   "tagLibrary_contentPreview": "内容预览",
-  "tagLibrary_confirmAdd": "确认收藏",
-  "tagLibrary_entryName": "名称",
-  "tagLibrary_entryNameHint": "输入条目名称",
-  "tagLibrary_selectNewImage": "选择新图片",
-  "tagLibrary_adjustDisplayRange": "调整显示范围",
-  "tagLibrary_adjustThumbnailTitle": "调整预览图显示范围",
-  "tagLibrary_dragToMove": "拖拽移动，滚轮或双指缩放",
   "settings_enablePromptWeightScroll": "滚轮调整提示词权重",
   "settings_enablePromptWeightScrollSubtitle": "选中提示词时，滚轮仅调整权重，不再触发页面滚动等其他滚轮操作",
   "unit_seconds": "秒",
@@ -2994,47 +2742,6 @@
     }
   },
   "statistics_heatmapNoActivity": "无活动",
-  "sendToHome_dialogTitle": "发送到主页",
-  "sendToHome_send": "发送",
-  "sendToHome_mainPrompt": "发送到主提示词",
-  "sendToHome_mainPromptSubtitle": "填充到主页的正向提示词输入框",
-  "sendToHome_mainPromptPipeSubtitle": "发送完整内容到主提示词（包含竖线）",
-  "sendToHome_smartDecompose": "智能分解",
-  "sendToHome_smartDecomposeSubtitle": "主提示词 + {count}个角色",
-  "@sendToHome_smartDecomposeSubtitle": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "sendToHome_replaceCharacter": "替换角色提示词",
-  "sendToHome_replaceCharacterSubtitle": "清空现有角色，添加为新角色",
-  "sendToHome_appendCharacter": "追加角色提示词",
-  "sendToHome_appendCharacterSubtitle": "保留现有角色，追加新角色",
-  "sendToHome_sendAsAlias": "作为别名发送",
-  "sendToHome_sendAsAliasSubtitle": "发送到主页时包装为 <{name}>",
-  "@sendToHome_sendAsAliasSubtitle": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "sendToHome_preview": "发送预览",
-  "sendToHome_characterPrompt": "角色提示词",
-  "sendToHome_characterPromptCount": "角色提示词 ({count}个)",
-  "@sendToHome_characterPromptCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "sendToHome_characterIndex": "角色 {index}",
-  "@sendToHome_characterIndex": {
-    "placeholders": {
-      "index": {}
-    }
-  },
-  "sendToHome_recommended": "推荐",
-  "sendToHome_successMainPrompt": "已发送到主提示词",
-  "sendToHome_successReplaceCharacter": "已替换角色提示词",
-  "sendToHome_successAppendCharacter": "已追加角色提示词",
   "metadataImport_title": "选择要套用的参数",
   "metadataImport_promptsSection": "提示词",
   "metadataImport_generationSection": "生成参数",
@@ -3145,13 +2852,12 @@
   "shortcut_context_generation": "生成页面",
   "shortcut_context_gallery": "画廊列表",
   "shortcut_context_viewer": "图片查看器",
-  "shortcut_context_tag_library": "词库",
   "shortcut_context_settings": "设置",
   "shortcut_context_input": "输入框",
   "shortcut_action_navigate_to_generation": "生成页面",
   "shortcut_action_navigate_to_local_gallery": "本地画廊",
   "shortcut_action_navigate_to_online_gallery": "在线画廊",
-  "shortcut_action_navigate_to_tag_library": "词库页面",
+  "shortcut_action_navigate_to_tag_library": "块库页面",
   "shortcut_action_navigate_to_statistics": "统计页面",
   "shortcut_action_navigate_to_settings": "设置页面",
   "shortcut_action_generate_image": "生成图像",
@@ -3160,7 +2866,7 @@
   "shortcut_action_cancel_generation": "取消生成",
   "shortcut_action_clear_prompt": "清空提示词",
   "shortcut_action_toggle_prompt_mode": "切换正/负面模式",
-  "shortcut_action_open_tag_library": "打开词库",
+  "shortcut_action_open_tag_library": "打开块库",
   "shortcut_action_save_image": "保存图像",
   "shortcut_action_upscale_image": "放大图像",
   "shortcut_action_copy_image": "复制图像",
@@ -3189,15 +2895,6 @@
   "shortcut_action_toggle_category_panel": "切换分类面板",
   "shortcut_action_jump_to_date": "跳转到日期",
   "shortcut_action_open_folder": "打开文件夹",
-  "shortcut_action_select_all_tags": "全选标签",
-  "shortcut_action_deselect_all_tags": "取消全选",
-  "shortcut_action_new_category": "新建分类",
-  "shortcut_action_new_tag": "新建标签",
-  "shortcut_action_search_tags": "搜索标签",
-  "shortcut_action_batch_delete_tags": "批量删除标签",
-  "shortcut_action_batch_copy_tags": "批量复制标签",
-  "shortcut_action_send_to_home": "发送到首页",
-  "shortcut_action_exit_selection_mode": "退出选择模式",
   "shortcut_action_minimize_to_tray": "最小化到托盘",
   "shortcut_action_quit_app": "退出应用",
   "shortcut_action_show_shortcut_help": "显示快捷键帮助",
@@ -4492,7 +4189,6 @@
       "error": {}
     }
   },
-  "toast_smartDecomposeSent": "已智能分解并发送",
   "toast_renameNameRequired": "名称不能为空",
   "toast_renameNameConflict": "名称已存在，请使用其他名称",
   "toast_renameEntryNotFound": "条目不存在，可能已被删除",
@@ -6166,6 +5862,28 @@
   "styleExplore_mergeAdopt": "合并收编",
   "styleExplore_noRunsYet": "还没有探索任务",
   "promptBlockEditor_library": "块库",
+  "promptBlockPicker_title": "选择块",
+  "promptBlockLibrary_thumbnail": "预览图",
+  "promptBlockLibrary_selectNewImage": "选择新图片",
+  "promptBlockLibrary_selectImage": "选择图片",
+  "promptBlockLibrary_adjustDisplayRange": "调整显示范围",
+  "promptBlockLibrary_adjustThumbnailTitle": "调整预览图显示范围",
+  "promptBlockLibrary_dragToMove": "拖拽移动，滚轮或双指缩放",
+  "promptBlockLibrary_addToLibrary": "收藏到块库",
+  "promptBlockLibrary_contentPreview": "内容预览",
+  "promptBlockLibrary_confirmAdd": "确认收藏",
+  "promptBlockLibrary_saveToLibrary": "保存到块库",
+  "promptBlockLibrary_droppedImage": "拖入图片",
+  "promptBlockLibrary_createBlockFromImage": "创建新块",
+  "promptBlockLibrary_createBlockFromImageSubtitle": "从图片创建新块",
+  "promptBlockLibrary_promptExtracted": "提示词已提取: \"{prompt}\"",
+  "@promptBlockLibrary_promptExtracted": {
+    "placeholders": {
+      "prompt": {}
+    }
+  },
+  "promptBlockLibrary_updateExistingThumbnail": "更新现有块预览图",
+  "promptBlockLibrary_updateExistingThumbnailSubtitle": "选择块并替换其预览图",
   "styleExplore_lineageTitle": "谱系",
   "styleExplore_createFamily": "建家族",
   "styleExplore_familyCreated": "已创建家族「{name}」",

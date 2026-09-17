@@ -32,7 +32,6 @@ class MainNavRail extends ConsumerWidget {
     AppBranch.onlineGallery,
     AppBranch.vibeLibrary,
     AppBranch.preciseRefLibrary,
-    AppBranch.tagLibrary,
     AppBranch.statistics,
     AppBranch.settings,
   ];
@@ -152,20 +151,11 @@ class MainNavRail extends ConsumerWidget {
                       ),
                     ),
 
-                    // 词库
-                    _NavIcon(
-                      icon: Icons.book,
-                      label: context.l10n.nav_dictionary,
-                      isSelected: selectedIndex == 7,
-                      onTap: () =>
-                          navigationShell.goBranch(AppBranch.tagLibrary.index),
-                    ),
-
                     // 画廊统计
                     _NavIcon(
                       icon: Icons.bar_chart, // Gallery Statistics
                       label: context.l10n.statistics_title,
-                      isSelected: selectedIndex == 8,
+                      isSelected: selectedIndex == 7,
                       onTap: () =>
                           navigationShell.goBranch(AppBranch.statistics.index),
                     ),
@@ -192,7 +182,7 @@ class MainNavRail extends ConsumerWidget {
             _NavIcon(
               icon: Icons.settings,
               label: context.l10n.nav_settings,
-              isSelected: selectedIndex == 9,
+              isSelected: selectedIndex == 8,
               showBadge: showUpdateBadge,
               onTap: () => navigationShell.goBranch(AppBranch.settings.index),
             ),
@@ -759,9 +749,7 @@ class _NavIconState extends State<_NavIcon> {
         : theme.iconTheme.color?.withValues(alpha: 0.7);
     // 自绘图标吃非空色：与 Icon(color: null) 的 IconTheme 兜底同口径解出实色。
     final resolvedColor =
-        color ??
-        IconTheme.of(context).color ??
-        theme.colorScheme.onSurface;
+        color ?? IconTheme.of(context).color ?? theme.colorScheme.onSurface;
 
     // 计算背景色：选中状态优先，其次是 Hover 状态
     Color backgroundColor = Colors.transparent;
@@ -822,11 +810,7 @@ class _NavIconState extends State<_NavIcon> {
                               smallSize: 7,
                               child: widget.customIcon != null
                                   ? widget.customIcon!(resolvedColor)
-                                  : Icon(
-                                      widget.icon,
-                                      color: color,
-                                      size: 24,
-                                    ),
+                                  : Icon(widget.icon, color: color, size: 24),
                             ),
                           ),
                         ),

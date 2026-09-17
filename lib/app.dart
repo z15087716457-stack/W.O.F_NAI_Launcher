@@ -12,6 +12,7 @@ import 'presentation/providers/locale_provider.dart';
 import 'presentation/providers/background_refresh_provider.dart';
 import 'presentation/providers/krita/krita_bridge_notifier.dart';
 import 'presentation/providers/notification_settings_provider.dart';
+import 'presentation/providers/prompt_block_library_provider.dart';
 import 'presentation/providers/subscription_provider.dart'
     hide anlasBalanceProvider;
 import 'presentation/themes/app_theme.dart';
@@ -27,6 +28,7 @@ class AppBootstrapEffects extends ConsumerStatefulWidget {
   final ProviderListenable<dynamic>? backgroundRefresh;
   final ProviderListenable<dynamic>? kritaBridge;
   final ProviderListenable<dynamic>? generationCompletionWatcher;
+  final ProviderListenable<dynamic>? promptBlockLibrary;
 
   const AppBootstrapEffects({
     super.key,
@@ -35,6 +37,7 @@ class AppBootstrapEffects extends ConsumerStatefulWidget {
     this.backgroundRefresh,
     this.kritaBridge,
     this.generationCompletionWatcher,
+    this.promptBlockLibrary,
   });
 
   @override
@@ -47,6 +50,7 @@ class _AppBootstrapEffectsState extends ConsumerState<AppBootstrapEffects> {
   ProviderSubscription<dynamic>? _backgroundRefreshSubscription;
   ProviderSubscription<dynamic>? _kritaBridgeSubscription;
   ProviderSubscription<dynamic>? _generationCompletionSubscription;
+  ProviderSubscription<dynamic>? _promptBlockLibrarySubscription;
 
   @override
   void initState() {
@@ -67,6 +71,12 @@ class _AppBootstrapEffectsState extends ConsumerState<AppBootstrapEffects> {
       widget.generationCompletionWatcher ?? generationCompletionWatcherProvider,
       (_, __) {},
     );
+    // 启动即加载块库（含旧词库迁移），保证别名解析、预设查找等
+    // 同步路径拿到已加载快照而不是空表。
+    _promptBlockLibrarySubscription = ref.listenManual(
+      widget.promptBlockLibrary ?? promptBlockLibraryNotifierProvider,
+      (_, __) {},
+    );
   }
 
   @override
@@ -75,6 +85,7 @@ class _AppBootstrapEffectsState extends ConsumerState<AppBootstrapEffects> {
     _backgroundRefreshSubscription?.close();
     _kritaBridgeSubscription?.close();
     _generationCompletionSubscription?.close();
+    _promptBlockLibrarySubscription?.close();
     super.dispose();
   }
 
@@ -108,7 +119,7 @@ class NAILauncherApp extends ConsumerWidget {
         router.go(AppRoutes.onlineGallery);
       },
       ShortcutIds.navigateToTagLibrary: () {
-        router.go(AppRoutes.tagLibraryPage);
+        router.go(AppRoutes.promptBlockLibrary);
       },
       ShortcutIds.navigateToStatistics: () {
         router.go(AppRoutes.statistics);

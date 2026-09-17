@@ -4,15 +4,16 @@ import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../data/models/tag_library/tag_library_category.dart';
-import '../../providers/tag_library_page_provider.dart';
+import '../../../core/utils/prompt_block_thumbnails.dart';
+import '../../../data/models/prompt_block/prompt_block_folder.dart';
+import '../../providers/prompt_block_library_provider.dart';
 import '../common/app_toast.dart';
 import '../common/image_picker_card/image_picker_card.dart';
 import '../common/themed_input.dart';
 
-/// 收藏到词库弹窗
+/// 收藏到块库弹窗
 ///
-/// 用于将角色的提示词快速收藏到词库
+/// 用于将角色的提示词快速收藏为块库块（入块即收藏）。
 class AddToLibraryDialog extends ConsumerStatefulWidget {
   /// 默认名称
   final String defaultName;
@@ -45,8 +46,7 @@ class AddToLibraryDialog extends ConsumerStatefulWidget {
 
 class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
   late TextEditingController _nameController;
-  String? _selectedCategoryId;
-  String? _thumbnailPath;
+  String? _selectedFolderId;
   Uint8List? _thumbnailBytes;
   bool _isSaving = false;
 
@@ -68,16 +68,24 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
 
     setState(() => _isSaving = true);
 
+    String? thumbnailPath;
     try {
-      await ref
-          .read(tagLibraryPageNotifierProvider.notifier)
-          .addEntry(
-            name: name,
-            content: widget.content,
-            thumbnail: _thumbnailPath,
-            categoryId: _selectedCategoryId,
-            isFavorite: true,
-          );
+      // 选中的预览图先归一化落进块缩略图目录。
+      final bytes = _thumbnailBytes;
+      if (bytes != null) {
+        thumbnailPath = await savePromptBlockThumbnail(bytes);
+      }
+
+      final notifier = ref.read(promptBlockLibraryNotifierProvider.notifier);
+      final block = await notifier.createBlock(
+        title: name,
+        content: widget.content,
+        thumbnail: thumbnailPath,
+        folderId: _selectedFolderId,
+      );
+      // 沿用旧「收藏到词库」语义：入库即收藏。
+      await notifier.toggleFavorite(block.id);
+      thumbnailPath = null;
 
       HapticFeedback.lightImpact();
 
@@ -85,6 +93,8 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
         Navigator.of(context).pop(true);
       }
     } catch (e) {
+      // 失败时回收未归属任何块的预览图。
+      await deletePromptBlockThumbnail(thumbnailPath);
       if (mounted) {
         setState(() => _isSaving = false);
         AppToast.error(context, context.l10n.image_saveFailed(e.toString()));
@@ -97,7 +107,8 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
-    final categories = ref.watch(tagLibraryPageCategoriesProvider);
+    final library = ref.watch(promptBlockLibraryNotifierProvider).valueOrNull;
+    final folders = library?.folders ?? const <PromptBlockFolder>[];
 
     return Dialog(
       clipBehavior: Clip.antiAlias,
@@ -117,7 +128,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 预览图 + 名称/分类 横向布局
+                    // 预览图 + 名称/文件夹 横向布局
                     IntrinsicHeight(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -133,12 +144,13 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
                                 // 名称输入
                                 _buildNameField(theme, colorScheme, l10n),
                                 const SizedBox(height: 12),
-                                // 分类选择
-                                _buildCategoryField(
+                                // 文件夹选择
+                                _buildFolderField(
                                   theme,
                                   colorScheme,
                                   l10n,
-                                  categories,
+                                  library,
+                                  folders,
                                 ),
                               ],
                             ),
@@ -191,7 +203,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              l10n.tagLibrary_addToLibrary,
+              l10n.promptBlockLibrary_addToLibrary,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -219,22 +231,15 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
       width: 100,
       child: ImagePickerCard(
         icon: Icons.add_photo_alternate_outlined,
-        label: l10n.tagLibrary_selectImage,
+        label: l10n.promptBlockLibrary_selectImage,
         hintText: '(${l10n.common_optional})',
         height: 100,
         selectedImage: _thumbnailBytes,
-        selectedPath: _thumbnailPath,
         onImageSelected: (bytes, fileName, path) {
-          setState(() {
-            _thumbnailBytes = bytes;
-            _thumbnailPath = path;
-          });
+          setState(() => _thumbnailBytes = bytes);
         },
         onClear: () {
-          setState(() {
-            _thumbnailBytes = null;
-            _thumbnailPath = null;
-          });
+          setState(() => _thumbnailBytes = null);
         },
       ),
     );
@@ -249,7 +254,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n.tagLibrary_entryName,
+          l10n.promptBlockLibrary_blockTitle,
           style: theme.textTheme.labelMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w500,
@@ -260,7 +265,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
           controller: _nameController,
           maxLength: 100,
           decoration: InputDecoration(
-            hintText: l10n.tagLibrary_entryNameHint,
+            hintText: l10n.promptBlockLibrary_titleHint,
             counterText: '',
             isDense: true,
             contentPadding: const EdgeInsets.symmetric(
@@ -273,17 +278,18 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
     );
   }
 
-  Widget _buildCategoryField(
+  Widget _buildFolderField(
     ThemeData theme,
     ColorScheme colorScheme,
     AppLocalizations l10n,
-    List<TagLibraryCategory> categories,
+    PromptBlockLibraryState? library,
+    List<PromptBlockFolder> folders,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n.tagLibrary_category,
+          l10n.promptBlockLibrary_folder,
           style: theme.textTheme.labelMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w500,
@@ -299,12 +305,12 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String?>(
-              value: _selectedCategoryId,
+              value: _selectedFolderId,
               isExpanded: true,
               borderRadius: BorderRadius.zero,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               hint: Text(
-                l10n.tagLibrary_rootCategory,
+                l10n.promptBlockLibrary_rootFolder,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -312,17 +318,20 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
               items: [
                 DropdownMenuItem<String?>(
                   value: null,
-                  child: Text(l10n.tagLibrary_rootCategory),
+                  child: Text(l10n.promptBlockLibrary_rootFolder),
                 ),
-                ...categories.rootCategories.sortedByOrder().map(
-                  (category) => DropdownMenuItem<String?>(
-                    value: category.id,
-                    child: Text(category.name),
+                ...folders.map(
+                  (folder) => DropdownMenuItem<String?>(
+                    value: folder.id,
+                    child: Text(
+                      library?.folderPath(folder.id) ?? folder.name,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
               ],
               onChanged: (value) {
-                setState(() => _selectedCategoryId = value);
+                setState(() => _selectedFolderId = value);
               },
             ),
           ),
@@ -340,7 +349,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n.tagLibrary_contentPreview,
+          l10n.promptBlockLibrary_contentPreview,
           style: theme.textTheme.labelMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w500,
@@ -412,7 +421,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
                     ),
                   )
                 : const Icon(Icons.favorite, size: 18),
-            label: Text(l10n.tagLibrary_confirmAdd),
+            label: Text(l10n.promptBlockLibrary_confirmAdd),
           ),
         ],
       ),

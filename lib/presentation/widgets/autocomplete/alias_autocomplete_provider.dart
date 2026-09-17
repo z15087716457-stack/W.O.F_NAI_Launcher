@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../data/models/tag_library/tag_library_entry.dart';
+import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../../data/services/alias_resolver_service.dart';
 
 part 'alias_autocomplete_provider.g.dart';
@@ -11,7 +11,7 @@ part 'alias_autocomplete_provider.g.dart';
 /// 别名自动补全状态
 class AliasAutocompleteState {
   /// 建议列表
-  final List<TagLibraryEntry> suggestions;
+  final List<PromptBlock> suggestions;
 
   /// 是否正在加载
   final bool isLoading;
@@ -25,7 +25,7 @@ class AliasAutocompleteState {
   });
 
   AliasAutocompleteState copyWith({
-    List<TagLibraryEntry>? suggestions,
+    List<PromptBlock>? suggestions,
     bool? isLoading,
   }) {
     return AliasAutocompleteState(
@@ -37,7 +37,7 @@ class AliasAutocompleteState {
 
 /// 别名自动补全 Provider
 ///
-/// 用于词库条目的智能补全
+/// 用于块库条目的智能补全
 @riverpod
 class AliasAutocompleteNotifier extends _$AliasAutocompleteNotifier {
   Timer? _debounceTimer;
@@ -53,7 +53,7 @@ class AliasAutocompleteNotifier extends _$AliasAutocompleteNotifier {
     return const AliasAutocompleteState();
   }
 
-  /// 搜索词库条目
+  /// 搜索块库条目
   ///
   /// [query] 搜索关键词
   /// [immediate] 是否立即执行（跳过防抖）

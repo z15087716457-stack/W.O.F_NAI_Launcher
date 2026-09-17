@@ -13,6 +13,7 @@ import 'package:image/image.dart' as img;
 import 'package:mocktail/mocktail.dart';
 
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_generation_api_service.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/image/image_stream_chunk.dart';
@@ -167,6 +168,9 @@ void main() {
     tearDown(() async {
       container.dispose();
       await Hive.box(StorageKeys.settingsBox).clear();
+      if (Hive.isBoxOpen(PromptBlockStorage.boxName)) {
+        await Hive.box<String>(PromptBlockStorage.boxName).clear();
+      }
     });
 
     for (final autoFormat in [false, true]) {

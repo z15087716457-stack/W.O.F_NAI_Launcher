@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
@@ -43,6 +44,9 @@ void main() {
     tearDown(() async {
       container.dispose();
       await Hive.box(StorageKeys.settingsBox).clear();
+      if (Hive.isBoxOpen(PromptBlockStorage.boxName)) {
+        await Hive.box<String>(PromptBlockStorage.boxName).clear();
+      }
     });
     tearDownAll(() async {
       await Hive.close();

@@ -51,17 +51,6 @@ class ShortcutIds {
   static const String jumpToDate = 'jump_to_date';
   static const String openFolder = 'open_folder';
 
-  // 词库页面快捷键
-  static const String selectAllTags = 'select_all_tags';
-  static const String deselectAllTags = 'deselect_all_tags';
-  static const String newCategory = 'new_category';
-  static const String newTag = 'new_tag';
-  static const String searchTags = 'search_tags';
-  static const String batchDeleteTags = 'batch_delete_tags';
-  static const String batchCopyTags = 'batch_copy_tags';
-  static const String sendToHome = 'send_to_home';
-  static const String exitSelectionMode = 'exit_selection_mode';
-
   // 随机配置页面快捷键
 
   // 全局应用快捷键
@@ -91,7 +80,6 @@ enum ShortcutContext {
   generation, // 生成页
   gallery, // 画廊列表
   viewer, // 图片查看器
-  tagLibrary, // 词库
   settings, // 设置
   input, // 输入框（编辑状态）
   vibeDetail, // Vibe 详情页
@@ -145,17 +133,6 @@ class DefaultShortcuts {
     ShortcutIds.toggleCategoryPanel: 'ctrl+b',
     ShortcutIds.jumpToDate: 'ctrl+g',
     ShortcutIds.openFolder: 'ctrl+o',
-
-    // 词库
-    ShortcutIds.selectAllTags: 'ctrl+a',
-    ShortcutIds.deselectAllTags: 'ctrl+shift+a',
-    ShortcutIds.newCategory: 'ctrl+shift+n',
-    ShortcutIds.newTag: 'ctrl+n',
-    ShortcutIds.searchTags: 'ctrl+f',
-    ShortcutIds.batchDeleteTags: 'delete',
-    ShortcutIds.batchCopyTags: 'ctrl+c',
-    ShortcutIds.sendToHome: 'enter',
-    ShortcutIds.exitSelectionMode: 'escape',
 
     // 全局
     ShortcutIds.minimizeToTray: 'ctrl+m',
@@ -232,18 +209,6 @@ class DefaultShortcuts {
       case ShortcutIds.jumpToDate:
       case ShortcutIds.openFolder:
         return ShortcutContext.gallery;
-
-      // 词库
-      case ShortcutIds.selectAllTags:
-      case ShortcutIds.deselectAllTags:
-      case ShortcutIds.newCategory:
-      case ShortcutIds.newTag:
-      case ShortcutIds.searchTags:
-      case ShortcutIds.batchDeleteTags:
-      case ShortcutIds.batchCopyTags:
-      case ShortcutIds.sendToHome:
-      case ShortcutIds.exitSelectionMode:
-        return ShortcutContext.tagLibrary;
 
       // Vibe库
       case ShortcutIds.vibeImport:

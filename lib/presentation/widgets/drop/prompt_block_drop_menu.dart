@@ -1,41 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
-/// 词库拖拽操作类型
-enum TagLibraryDropAction {
-  /// 创建新词条
+/// 块库拖拽操作类型
+enum PromptBlockDropAction {
+  /// 创建新块
   create,
 
-  /// 更新现有词条预览图
+  /// 更新现有块预览图
   updateThumbnail,
 
   /// 取消
   cancel,
 }
 
-/// 词库拖拽操作选择菜单
+/// 块库拖拽操作选择菜单
 ///
-/// 当用户拖拽图片到词库页面时弹出，让用户选择操作
-class TagLibraryDropMenu extends StatelessWidget {
+/// 当用户拖拽图片到 Prompt 块库页面时弹出，让用户选择操作
+class PromptBlockDropMenu extends StatelessWidget {
   /// 拖入的文件名
   final String fileName;
 
   /// 提取的提示词（如果有）
   final String? prompt;
 
-  const TagLibraryDropMenu({super.key, required this.fileName, this.prompt});
+  const PromptBlockDropMenu({super.key, required this.fileName, this.prompt});
 
   /// 显示对话框
-  static Future<TagLibraryDropAction?> show(
+  static Future<PromptBlockDropAction?> show(
     BuildContext context, {
     required String fileName,
     String? prompt,
   }) {
-    return showDialog<TagLibraryDropAction>(
+    return showDialog<PromptBlockDropAction>(
       context: context,
       barrierColor: Colors.black54,
       builder: (context) =>
-          TagLibraryDropMenu(fileName: fileName, prompt: prompt),
+          PromptBlockDropMenu(fileName: fileName, prompt: prompt),
     );
   }
 
@@ -78,7 +78,7 @@ class TagLibraryDropMenu extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          l10n.tagLibrary_droppedImage,
+                          l10n.promptBlockLibrary_droppedImage,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -103,23 +103,24 @@ class TagLibraryDropMenu extends StatelessWidget {
               // 操作选项
               _ActionButton(
                 icon: Icons.add_box_outlined,
-                title: l10n.tagLibrary_createEntryFromImage,
+                title: l10n.promptBlockLibrary_createBlockFromImage,
                 subtitle: promptPreview != null
-                    ? l10n.tagLibrary_promptExtracted(promptPreview)
-                    : l10n.tagLibrary_createEntryFromImageSubtitle,
+                    ? l10n.promptBlockLibrary_promptExtracted(promptPreview)
+                    : l10n.promptBlockLibrary_createBlockFromImageSubtitle,
                 onTap: () =>
-                    Navigator.of(context).pop(TagLibraryDropAction.create),
+                    Navigator.of(context).pop(PromptBlockDropAction.create),
               ),
 
               const SizedBox(height: 12),
 
               _ActionButton(
                 icon: Icons.image_search_outlined,
-                title: l10n.tagLibrary_updateExistingThumbnail,
-                subtitle: l10n.tagLibrary_updateExistingThumbnailSubtitle,
+                title: l10n.promptBlockLibrary_updateExistingThumbnail,
+                subtitle:
+                    l10n.promptBlockLibrary_updateExistingThumbnailSubtitle,
                 onTap: () => Navigator.of(
                   context,
-                ).pop(TagLibraryDropAction.updateThumbnail),
+                ).pop(PromptBlockDropAction.updateThumbnail),
               ),
 
               const SizedBox(height: 20),
@@ -127,7 +128,7 @@ class TagLibraryDropMenu extends StatelessWidget {
               // 取消按钮
               OutlinedButton.icon(
                 onPressed: () =>
-                    Navigator.of(context).pop(TagLibraryDropAction.cancel),
+                    Navigator.of(context).pop(PromptBlockDropAction.cancel),
                 icon: const Icon(Icons.close, size: 18),
                 label: Text(l10n.common_cancel),
                 style: OutlinedButton.styleFrom(

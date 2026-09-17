@@ -33,7 +33,7 @@ import '../../utils/precise_ref_library_import_helper.dart';
 import '../common/app_toast.dart';
 import '../metadata/metadata_import_dialog.dart';
 import 'image_destination_dialog.dart';
-import 'tag_library_drop_handler.dart';
+import 'prompt_block_drop_handler.dart';
 
 Future<void> appendDroppedCharacterReference({
   required GenerationParamsNotifier notifier,
@@ -408,15 +408,16 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
       return;
     }
 
-    // 检测当前是否为词库页面
+    // 检测当前是否为 Prompt 块库页面
     final currentPath = GoRouter.of(
       context,
     ).routeInformationProvider.value.uri.path;
-    final isTagLibraryPage = currentPath == AppRoutes.tagLibraryPage;
+    final isPromptBlockLibraryPage =
+        currentPath == AppRoutes.promptBlockLibrary;
 
-    // 如果是词库页面，使用词库专属拖拽处理
-    if (isTagLibraryPage) {
-      await TagLibraryDropHandler.handle(
+    // 如果是块库页面，使用块库专属拖拽处理
+    if (isPromptBlockLibraryPage) {
+      await PromptBlockDropHandler.handle(
         context: context,
         ref: ref,
         fileName: fileName,

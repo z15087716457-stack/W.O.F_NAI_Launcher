@@ -94,7 +94,7 @@ class _DesktopGenerationLayoutState
       },
       // 打开词库
       ShortcutIds.openTagLibrary: () {
-        context.go(AppRoutes.tagLibraryPage);
+        context.go(AppRoutes.promptBlockLibrary);
       },
       // 放大图像
       ShortcutIds.upscaleImage: () {

@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
-import '../../../../core/utils/localization_extension.dart';
-import '../../../../l10n/app_localizations.dart';
+import '../../../core/utils/localization_extension.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// 缩略图裁剪调整结果
 class ThumbnailCropResult {
@@ -235,7 +235,7 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
           Icon(Icons.crop_free, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
           Text(
-            l10n.tagLibrary_adjustThumbnailTitle,
+            l10n.promptBlockLibrary_adjustThumbnailTitle,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -259,7 +259,7 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            l10n.tagLibrary_dragToMove,
+            l10n.promptBlockLibrary_dragToMove,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.outline,
             ),

@@ -60,7 +60,6 @@
     }
   },
   "common_clearInputConfirm": "Clear the input content?",
-  "common_today": "Today",
   "common_yesterday": "Yesterday",
   "common_daysAgo": "{days} days ago",
   "@common_daysAgo": {
@@ -77,8 +76,6 @@
   "common_favorite": "Favorite",
   "common_unfavorite": "Unfavorite",
   "common_ok": "OK",
-  "common_replace": "Replace",
-  "common_skip": "Skip",
   "common_exit": "Exit",
   "common_folder": "Folder",
   "common_filter": "Filter",
@@ -115,7 +112,6 @@
   },
   "nav_canvas": "Canvas",
   "nav_onlineGallery": "Online Gallery",
-  "nav_dictionary": "Dictionary (WIP)",
   "nav_discordCommunity": "Discord Community",
   "nav_githubRepo": "GitHub Repository",
   "nav_expandSidebar": "Expand sidebar",
@@ -1597,17 +1593,6 @@
     }
   },
   "characterTooltip_viewFullConfig": "Click for full configuration",
-  "@tagLibrary_generatedCharacters": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@tagLibrary_generateFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "naiAlgorithm_mainPrompt": "Main Prompt",
   "@tagGroup_tagCount": {
     "placeholders": {
       "count": {}
@@ -2538,7 +2523,6 @@
   "statistics_thursday": "Thu",
   "statistics_friday": "Fri",
   "statistics_saturday": "Sat",
-  "fixedTags_syntaxHelp": "Supports NAI syntax for weight enhancement/reduction and tag alternation",
   "fixedTags_negativeTitle": "Undesired Content Fixed Tags",
   "reversePrompt_title": "Reverse Prompt",
   "reversePrompt_pending": "Pending",
@@ -2713,233 +2697,8 @@
   "promptToken_characterNegative": "Character Undesired Content",
   "common_rename": "Rename",
   "common_create": "Create",
-  "tagLibrary_categories": "Categories",
   "tagLibrary_newCategory": "New Category",
-  "tagLibrary_addEntry": "Add Entry",
-  "tagLibrary_editEntry": "Edit Entry",
-  "tagLibrary_searchHint": "Search entries...",
-  "tagLibrary_import": "Import",
-  "tagLibrary_export": "Export",
-  "tagLibrary_sortCustom": "Custom Sort",
-  "tagLibrary_sortName": "Name",
-  "tagLibrary_sortUseCount": "Usage",
-  "tagLibrary_sortUpdatedAt": "Updated",
-  "tagLibrary_transferCategory": "Move Category",
-  "tagLibrary_copyContent": "Copy Content",
-  "tagLibrary_moveToCategoryTitle": "Move to Category",
-  "tagLibrary_selectTargetCategory": "Select target category:",
-  "tagLibrary_includeThumbnails": "Include thumbnails",
-  "tagLibrary_includeThumbnailsSubtitle": "Increases file size",
-  "tagLibrary_selectedExportCount": "Export ({count} items)",
-  "@tagLibrary_selectedExportCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_selectedImportCount": "Import ({count} items)",
-  "@tagLibrary_selectedImportCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_entriesLabel": "Entries",
-  "tagLibrary_categoriesLabel": "Categories",
-  "tagLibrary_selectExportContent": "Select content to export",
-  "tagLibrary_selectImportContent": "Select content to import",
-  "tagLibrary_selectSaveLocation": "Select save location",
-  "tagLibrary_preparingExport": "Preparing export...",
-  "tagLibrary_exportSuccess": "Export successful",
-  "tagLibrary_exportFailedWithError": "Export failed: {error}",
-  "@tagLibrary_exportFailedWithError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "tagLibrary_selectZipFile": "Click to select ZIP file",
-  "tagLibrary_zipFileHint": "Supports library files exported from this app",
-  "tagLibrary_reselect": "Select Again",
-  "tagLibrary_fileInfo": "File Info",
-  "tagLibrary_entryCountLabel": "Entries",
-  "tagLibrary_categoryCountLabel": "Categories",
-  "tagLibrary_exportDateLabel": "Export Date",
-  "tagLibrary_importConflictsHint": "{count} conflicts found. Click a conflicted item below to choose how to handle it.",
-  "@tagLibrary_importConflictsHint": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_categoriesSection": "Categories ({count})",
-  "@tagLibrary_categoriesSection": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_entriesSection": "Entries ({count})",
-  "@tagLibrary_entriesSection": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_conflictResolutionTooltip": "Choose conflict handling",
-  "tagLibrary_conflictSkip": "Conflict - will skip",
-  "tagLibrary_conflictRename": "Conflict - will import with renamed name",
-  "tagLibrary_conflictOverwrite": "Conflict - will replace existing",
-  "tagLibrary_parseFileFailed": "Unable to parse file: {error}",
-  "@tagLibrary_parseFileFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "tagLibrary_preparingImport": "Preparing import...",
-  "tagLibrary_importCompleted": "Import complete",
-  "tagLibrary_importSuccessSummary": "Import successful: {summary}",
-  "@tagLibrary_importSuccessSummary": {
-    "placeholders": {
-      "summary": {}
-    }
-  },
-  "tagLibrary_importFailedWithError": "Import failed: {error}",
-  "@tagLibrary_importFailedWithError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "tagLibrary_importedEntriesCount": "{count} entries",
-  "@tagLibrary_importedEntriesCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_importedCategoriesCount": "{count} categories",
-  "@tagLibrary_importedCategoriesCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_renamedCount": "{count} renamed",
-  "@tagLibrary_renamedCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_overwrittenCount": "{count} replaced",
-  "@tagLibrary_overwrittenCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_skippedCount": "{count} skipped",
-  "@tagLibrary_skippedCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_dragToCategoryHint": "Drag to the category panel to file",
-  "tagLibrary_unknownCategory": "Unknown Category",
-  "tagLibrary_selectEntryToUpdate": "Select Entry to Update",
-  "tagLibrary_updatePreview": "Update Preview",
-  "tagLibrary_replaceThumbnailHint": "Will replace existing thumbnail",
-  "tagLibrary_sentEntriesToMainPrompt": "Sent {count} entries to main prompt",
-  "@tagLibrary_sentEntriesToMainPrompt": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_confirmDeleteSelectedEntries": "Delete {count} selected entries? This action cannot be undone.",
-  "@tagLibrary_confirmDeleteSelectedEntries": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_deletedEntries": "Deleted {count} entries",
-  "@tagLibrary_deletedEntries": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_movedEntries": "Moved {count} entries",
-  "@tagLibrary_movedEntries": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_favoritedEntries": "Favorited {count} entries",
-  "@tagLibrary_favoritedEntries": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_unfavoritedEntries": "Unfavorited {count} entries",
-  "@tagLibrary_unfavoritedEntries": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_copiedEntriesContent": "Copied content from {count} entries",
-  "@tagLibrary_copiedEntriesContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_droppedImage": "Dropped Image",
-  "tagLibrary_createEntryFromImage": "Create New Entry",
-  "tagLibrary_promptExtracted": "Prompt extracted: \"{prompt}\"",
-  "@tagLibrary_promptExtracted": {
-    "placeholders": {
-      "prompt": {}
-    }
-  },
-  "tagLibrary_createEntryFromImageSubtitle": "Create a new entry from this image",
-  "tagLibrary_updateExistingThumbnail": "Update Existing Entry Thumbnail",
-  "tagLibrary_updateExistingThumbnailSubtitle": "Select an entry and replace its thumbnail",
-  "tagLibrary_allEntries": "All",
-  "tagLibrary_favorites": "Favorites",
-  "tagLibrary_addSubCategory": "Add Subcategory",
-  "tagLibrary_moveToRoot": "Move to Root",
-  "tagLibrary_categoryNameHint": "Enter category name",
-  "tagLibrary_deleteCategoryTitle": "Delete Category",
-  "tagLibrary_deleteCategoryConfirm": "Are you sure you want to delete category \"{name}\"? {count} entries will be moved to root.",
-  "@tagLibrary_deleteCategoryConfirm": {
-    "placeholders": {
-      "name": {},
-      "count": {}
-    }
-  },
-  "tagLibrary_deleteEntryTitle": "Delete Entry",
-  "tagLibrary_deleteEntryConfirm": "Are you sure you want to delete entry \"{name}\"?",
-  "@tagLibrary_deleteEntryConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "tagLibrary_noSearchResults": "No matching entries found",
-  "tagLibrary_tryDifferentSearch": "Try different keywords",
-  "tagLibrary_categoryEmpty": "This category is empty",
-  "tagLibrary_empty": "Library is empty",
-  "tagLibrary_addFirstEntry": "Click the button above to add your first entry",
-  "tagLibraryPicker_title": "Select Entry",
-  "tagLibraryPicker_searchHint": "Search entries...",
-  "tagLibraryPicker_allCategories": "All Categories",
-  "tagLibrary_entryMoved": "Entry moved to target category",
-  "tagLibrary_useCount": "Used {count} times",
-  "@tagLibrary_useCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagLibrary_addFavorite": "Add to Favorites",
-  "tagLibrary_thumbnail": "Thumbnail",
-  "tagLibrary_selectImage": "Select Image",
-  "tagLibrary_thumbnailHint": "Supports PNG, JPG, WEBP, GIF, BMP, TIFF, and more",
-  "tagLibrary_name": "Name",
-  "tagLibrary_nameHint": "Enter entry name",
-  "tagLibrary_category": "Category",
-  "tagLibrary_rootCategory": "Root",
   "tagLibrary_tags": "Tags",
-  "tagLibrary_tagsHint": "Enter tags, separated by commas",
-  "tagLibrary_tagsHelper": "Tags are used for filtering and searching",
-  "tagLibrary_content": "Prompt Content",
-  "tagLibrary_contentHint": "Enter prompt content, supports autocomplete",
   "settings_network": "Network",
   "settings_enableProxy": "Enable Proxy",
   "settings_proxyEnabled": "Enabled",
@@ -2968,20 +2727,9 @@
     }
   },
   "settings_proxyRestartHint": "Proxy settings changed, restart recommended",
-  "tagLibrary_categoryNameExists": "Category name already exists",
   "tagLibrary_addToLibrary": "Add to Library",
-  "tagLibrary_saveToLibrary": "Save to Library",
-  "tagLibrary_entrySaved": "Saved to library",
-  "tagLibrary_entryUpdated": "Entry updated",
   "tagLibrary_uncategorized": "Uncategorized",
   "tagLibrary_contentPreview": "Content Preview",
-  "tagLibrary_confirmAdd": "Confirm",
-  "tagLibrary_entryName": "Name",
-  "tagLibrary_entryNameHint": "Enter entry name",
-  "tagLibrary_selectNewImage": "Select New Image",
-  "tagLibrary_adjustDisplayRange": "Adjust Display Range",
-  "tagLibrary_adjustThumbnailTitle": "Adjust Thumbnail Display Range",
-  "tagLibrary_dragToMove": "Drag to move, scroll or pinch to zoom",
   "settings_enablePromptWeightScroll": "Adjust prompt weight with mouse wheel",
   "settings_enablePromptWeightScrollSubtitle": "When prompt text is selected, use the wheel only to adjust its weight and suppress other scroll actions.",
   "unit_seconds": "seconds",
@@ -3000,47 +2748,6 @@
     }
   },
   "statistics_heatmapNoActivity": "No activity",
-  "sendToHome_dialogTitle": "Send to Home",
-  "sendToHome_send": "Send",
-  "sendToHome_mainPrompt": "Send to Main Prompt",
-  "sendToHome_mainPromptSubtitle": "Fill into the main prompt input field",
-  "sendToHome_mainPromptPipeSubtitle": "Send the full content to the main prompt (including pipes)",
-  "sendToHome_smartDecompose": "Smart Decompose",
-  "sendToHome_smartDecomposeSubtitle": "Main prompt + {count} characters",
-  "@sendToHome_smartDecomposeSubtitle": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "sendToHome_replaceCharacter": "Replace Character Prompt",
-  "sendToHome_replaceCharacterSubtitle": "Clear existing characters and add as new",
-  "sendToHome_appendCharacter": "Append Character Prompt",
-  "sendToHome_appendCharacterSubtitle": "Keep existing characters and append new",
-  "sendToHome_sendAsAlias": "Send as Alias",
-  "sendToHome_sendAsAliasSubtitle": "Wrap as <{name}> when sending to home",
-  "@sendToHome_sendAsAliasSubtitle": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "sendToHome_preview": "Send Preview",
-  "sendToHome_characterPrompt": "Character Prompt",
-  "sendToHome_characterPromptCount": "Character Prompt ({count})",
-  "@sendToHome_characterPromptCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "sendToHome_characterIndex": "Character {index}",
-  "@sendToHome_characterIndex": {
-    "placeholders": {
-      "index": {}
-    }
-  },
-  "sendToHome_recommended": "Recommended",
-  "sendToHome_successMainPrompt": "Sent to main prompt",
-  "sendToHome_successReplaceCharacter": "Character prompt replaced",
-  "sendToHome_successAppendCharacter": "Character prompt appended",
   "metadataImport_title": "Select Parameters to Import",
   "metadataImport_promptsSection": "Prompts",
   "metadataImport_generationSection": "Generation Parameters",
@@ -3151,13 +2858,12 @@
   "shortcut_context_generation": "Generation",
   "shortcut_context_gallery": "Gallery List",
   "shortcut_context_viewer": "Image Viewer",
-  "shortcut_context_tag_library": "Tag Library",
   "shortcut_context_settings": "Settings",
   "shortcut_context_input": "Input Field",
   "shortcut_action_navigate_to_generation": "Generation Page",
   "shortcut_action_navigate_to_local_gallery": "Local Gallery",
   "shortcut_action_navigate_to_online_gallery": "Online Gallery",
-  "shortcut_action_navigate_to_tag_library": "Tag Library",
+  "shortcut_action_navigate_to_tag_library": "Prompt Block Library",
   "shortcut_action_navigate_to_statistics": "Statistics",
   "shortcut_action_navigate_to_settings": "Settings",
   "shortcut_action_generate_image": "Generate Image",
@@ -3166,7 +2872,7 @@
   "shortcut_action_cancel_generation": "Cancel Generation",
   "shortcut_action_clear_prompt": "Clear Prompt",
   "shortcut_action_toggle_prompt_mode": "Toggle Prompt Mode",
-  "shortcut_action_open_tag_library": "Open Tag Library",
+  "shortcut_action_open_tag_library": "Open Prompt Block Library",
   "shortcut_action_save_image": "Save Image",
   "shortcut_action_upscale_image": "Upscale Image",
   "shortcut_action_copy_image": "Copy Image",
@@ -3195,15 +2901,6 @@
   "shortcut_action_toggle_category_panel": "Toggle Category Panel",
   "shortcut_action_jump_to_date": "Jump to Date",
   "shortcut_action_open_folder": "Open Folder",
-  "shortcut_action_select_all_tags": "Select All Tags",
-  "shortcut_action_deselect_all_tags": "Deselect All Tags",
-  "shortcut_action_new_category": "New Category",
-  "shortcut_action_new_tag": "New Tag",
-  "shortcut_action_search_tags": "Search Tags",
-  "shortcut_action_batch_delete_tags": "Batch Delete Tags",
-  "shortcut_action_batch_copy_tags": "Batch Copy Tags",
-  "shortcut_action_send_to_home": "Send to Home",
-  "shortcut_action_exit_selection_mode": "Exit Selection Mode",
   "shortcut_action_minimize_to_tray": "Minimize to Tray",
   "shortcut_action_quit_app": "Quit Application",
   "shortcut_action_show_shortcut_help": "Show Shortcut Help",
@@ -4743,7 +4440,6 @@
       "error": {}
     }
   },
-  "toast_smartDecomposeSent": "Smart decomposed and sent",
   "toast_renameNameRequired": "Name is required",
   "toast_renameNameConflict": "Name already exists. Use another name.",
   "toast_renameEntryNotFound": "The entry no longer exists and may have been deleted",
@@ -6166,6 +5862,28 @@
   "styleExplore_mergeAdopt": "Merge & adopt",
   "styleExplore_noRunsYet": "No explore runs yet",
   "promptBlockEditor_library": "Block library",
+  "promptBlockPicker_title": "Select Block",
+  "promptBlockLibrary_thumbnail": "Thumbnail",
+  "promptBlockLibrary_selectNewImage": "Select New Image",
+  "promptBlockLibrary_selectImage": "Select Image",
+  "promptBlockLibrary_adjustDisplayRange": "Adjust Display Range",
+  "promptBlockLibrary_adjustThumbnailTitle": "Adjust Thumbnail Display Range",
+  "promptBlockLibrary_dragToMove": "Drag to move, scroll or pinch to zoom",
+  "promptBlockLibrary_addToLibrary": "Add to Block Library",
+  "promptBlockLibrary_contentPreview": "Content Preview",
+  "promptBlockLibrary_confirmAdd": "Confirm",
+  "promptBlockLibrary_saveToLibrary": "Save to Block Library",
+  "promptBlockLibrary_droppedImage": "Dropped Image",
+  "promptBlockLibrary_createBlockFromImage": "Create New Block",
+  "promptBlockLibrary_createBlockFromImageSubtitle": "Create a new block from this image",
+  "promptBlockLibrary_promptExtracted": "Prompt extracted: \"{prompt}\"",
+  "@promptBlockLibrary_promptExtracted": {
+    "placeholders": {
+      "prompt": {}
+    }
+  },
+  "promptBlockLibrary_updateExistingThumbnail": "Update Existing Block Thumbnail",
+  "promptBlockLibrary_updateExistingThumbnailSubtitle": "Select a block and replace its thumbnail",
   "styleExplore_lineageTitle": "Lineage",
   "styleExplore_createFamily": "Create family",
   "styleExplore_familyCreated": "Family \"{name}\" created",
