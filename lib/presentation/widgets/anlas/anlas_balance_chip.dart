@@ -15,11 +15,16 @@ import '../../providers/subscription_provider.dart';
 class AnlasBalanceChip extends ConsumerWidget {
   /// 紧凑模式（移动端使用）
   final bool compact;
+
+  /// 裸文本模式（官网式头部条使用）：去掉容器底色与内边距，只留
+  /// 图标+数字，配合 [compact] 使用
+  final bool inline;
   final int? estimatedCostOverride;
 
   const AnlasBalanceChip({
     super.key,
     this.compact = false,
+    this.inline = false,
     this.estimatedCostOverride,
   });
 
@@ -40,14 +45,16 @@ class AnlasBalanceChip extends ConsumerWidget {
         state.subscription,
         estimatedCost,
         compact,
+        inline,
       ),
-      error: (state) => _buildError(context, ref, theme, compact),
+      error: (state) => _buildError(context, ref, theme, compact, inline),
     );
   }
 
   Widget _buildPlaceholder(ThemeData theme, bool compact) {
     return _ChipContainer(
       compact: compact,
+      inline: inline,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -69,6 +76,7 @@ class AnlasBalanceChip extends ConsumerWidget {
   Widget _buildLoading(ThemeData theme, bool compact) {
     return _ChipContainer(
       compact: compact,
+      inline: inline,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -92,6 +100,7 @@ class AnlasBalanceChip extends ConsumerWidget {
     UserSubscription subscription,
     int estimatedCost,
     bool compact,
+    bool inline,
   ) {
     final balance = subscription.anlasBalance;
     final isInsufficient = balance < estimatedCost;
@@ -118,6 +127,7 @@ class AnlasBalanceChip extends ConsumerWidget {
       borderRadius: BorderRadius.circular(8),
       child: _ChipContainer(
         compact: compact,
+        inline: inline,
         backgroundColor: backgroundColor,
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -153,6 +163,7 @@ class AnlasBalanceChip extends ConsumerWidget {
     WidgetRef ref,
     ThemeData theme,
     bool compact,
+    bool inline,
   ) {
     return InkWell(
       onTap: () {
@@ -164,6 +175,7 @@ class AnlasBalanceChip extends ConsumerWidget {
         message: context.l10n.common_clickToRetry,
         child: _ChipContainer(
           compact: compact,
+          inline: inline,
           backgroundColor: theme.colorScheme.errorContainer.withValues(
             alpha: 0.3,
           ),
@@ -206,11 +218,13 @@ class AnlasBalanceChip extends ConsumerWidget {
 class _ChipContainer extends StatelessWidget {
   final Widget child;
   final bool compact;
+  final bool inline;
   final Color? backgroundColor;
 
   const _ChipContainer({
     required this.child,
     required this.compact,
+    this.inline = false,
     this.backgroundColor,
   });
 
@@ -219,14 +233,18 @@ class _ChipContainer extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 8 : 12,
-        vertical: compact ? 4 : 6,
-      ),
-      decoration: BoxDecoration(
-        color: backgroundColor ?? theme.colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(8),
-      ),
+      padding: inline
+          ? const EdgeInsets.symmetric(horizontal: 4, vertical: 6)
+          : EdgeInsets.symmetric(
+              horizontal: compact ? 8 : 12,
+              vertical: compact ? 4 : 6,
+            ),
+      decoration: inline
+          ? null
+          : BoxDecoration(
+              color: backgroundColor ?? theme.colorScheme.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(8),
+            ),
       child: child,
     );
   }

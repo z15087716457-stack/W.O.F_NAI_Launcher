@@ -131,7 +131,8 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
 
   /// 设置官网式布局左栏宽度
   Future<void> setWebLeftPanelWidth(double width) async {
-    final clamped = width.clamp(320.0, 560.0).toDouble();
+    // 下限 = 头部条 Model/Mode 两胶囊 + 折叠按钮能放下的最小宽度
+    final clamped = width.clamp(352.0, 560.0).toDouble();
     state = state.copyWith(webLeftPanelWidth: clamped);
 
     final storage = ref.read(localStorageServiceProvider);

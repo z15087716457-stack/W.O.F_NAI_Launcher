@@ -33,7 +33,8 @@ class WebStyleGenerationLayout extends ConsumerStatefulWidget {
 
 class _WebStyleGenerationLayoutState
     extends ConsumerState<WebStyleGenerationLayout> {
-  static const double _leftPanelMinWidth = 320;
+  // 下限 = 头部条 Model/Mode 两胶囊 + 折叠按钮能放下的最小宽度
+  static const double _leftPanelMinWidth = 352;
   static const double _leftPanelMaxWidth = 560;
   static const double _rightPanelMinWidth = 200;
   static const double _rightPanelMaxWidth = 400;

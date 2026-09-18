@@ -22,10 +22,19 @@ class OpusUsageChip extends ConsumerWidget {
   /// 紧凑模式（移动端 / 钉底条使用）
   final bool compact;
 
+  /// 裸文本模式（官网式头部条使用）：去掉容器底色与内边距，只留
+  /// 图标+数字，配合 [compact] 使用
+  final bool inline;
+
   /// 外边距。芯片隐藏时不生效，避免在不支持额度的模型下留下空隙。
   final EdgeInsetsGeometry? margin;
 
-  const OpusUsageChip({super.key, this.compact = false, this.margin});
+  const OpusUsageChip({
+    super.key,
+    this.compact = false,
+    this.inline = false,
+    this.margin,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -62,6 +71,7 @@ class OpusUsageChip extends ConsumerWidget {
                     ? '0%'
                     : '${_fmtPercent(usage.percent)}%',
                 warning: isLow,
+                inline: inline,
               )
             : Container(
                 padding: const EdgeInsets.symmetric(
@@ -108,20 +118,26 @@ class OpusUsageChip extends ConsumerWidget {
   }
 
   /// 紧凑模式的单格：与 AnlasBalanceChip 完全同规格
-  /// （内边距 12/6、图标 16、字号 14、圆角 8），保证并排逐行对齐
+  /// （内边距 12/6、图标 16、字号 14、圆角 8），保证并排逐行对齐；
+  /// [inline] 为真时去掉底色与内边距，只留图标+数字（官网式）
   Widget _buildQuotaCell(
     ColorScheme scheme, {
     required String text,
     required bool warning,
+    bool inline = false,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: warning
-            ? scheme.errorContainer.withValues(alpha: 0.3)
-            : scheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(8),
-      ),
+      padding: inline
+          ? const EdgeInsets.symmetric(horizontal: 4, vertical: 6)
+          : const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: inline
+          ? null
+          : BoxDecoration(
+              color: warning
+                  ? scheme.errorContainer.withValues(alpha: 0.3)
+                  : scheme.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(8),
+            ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

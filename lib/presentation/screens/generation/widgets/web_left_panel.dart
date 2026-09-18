@@ -135,47 +135,76 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
   Widget _buildExpanded(BuildContext context, ThemeData theme) {
     return Column(
       children: [
-        // 头部条：折叠按钮不悬浮，避免遮挡提示词工具栏
+        // 头部条：折叠按钮不悬浮，避免遮挡提示词工具栏。
+        // Model/Mode 胶囊一组随内容收紧，额度/余额一组：
+        // 宽度够时全部放同一行（胶囊居左、chips 贴右，官网式）；
+        // 面板拖窄放不下时 chips 自动整体换到第二行
         Container(
-          height: 36,
+          constraints: const BoxConstraints(minHeight: 36),
+          padding: const EdgeInsets.symmetric(vertical: 4),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(color: theme.dividerColor, width: 1),
             ),
           ),
-          child: Row(
-            children: [
-              const SizedBox(width: 8),
-              // 模型选择 + 模式胶囊常驻面板头部（官网式）：模型与模式一组，
-              // Opus 额度与 Anlas 余额一组，组间拉开间隙（静定排版）
-              const Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _ModelMenuButton(),
-                        SizedBox(width: 6),
-                        _ModeCapsule(),
-                        SizedBox(width: 16),
-                        OpusUsageChip(compact: true),
-                        SizedBox(width: 6),
-                        AnlasBalanceChip(compact: true),
-                      ],
-                    ),
-                  ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              const chips = [
+                OpusUsageChip(
+                  compact: true,
+                  inline: true,
+                  margin: EdgeInsets.only(right: 8),
                 ),
-              ),
-              CollapseButton(
+                AnlasBalanceChip(compact: true, inline: true),
+              ];
+              final collapse = CollapseButton(
                 icon: Icons.chevron_left,
                 onTap: () => ref
                     .read(layoutStateNotifierProvider.notifier)
                     .setWebLeftPanelExpanded(false),
-              ),
-              const SizedBox(width: 4),
-            ],
+              );
+
+              // 一行能放下时（胶囊组 ~250 + chips ~110 + 折叠 ~40）：
+              // 胶囊居左、折叠按钮固定最右（官网式），chips 挤在折叠左侧
+              if (constraints.maxWidth >= 400) {
+                return Row(
+                  children: [
+                    const SizedBox(width: 8),
+                    const _ModelMenuButton(),
+                    const SizedBox(width: 6),
+                    const _ModeCapsule(),
+                    const Spacer(),
+                    ...chips,
+                    const SizedBox(width: 4),
+                    collapse,
+                    const SizedBox(width: 4),
+                  ],
+                );
+              }
+              return Column(
+                children: [
+                  Row(
+                    children: [
+                      const SizedBox(width: 8),
+                      const _ModelMenuButton(),
+                      const SizedBox(width: 6),
+                      const _ModeCapsule(),
+                      const Spacer(),
+                      collapse,
+                      const SizedBox(width: 4),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  const Row(
+                    children: [
+                      SizedBox(width: 8),
+                      OpusUsageChip(compact: true, inline: true),
+                      AnlasBalanceChip(compact: true, inline: true),
+                    ],
+                  ),
+                ],
+              );
+            },
           ),
         ),
 
@@ -208,8 +237,7 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                         // 功能面板：反推 / 图生图 / 风格迁移 / 精准参考
                         // （官网 Reference Images 小节）
                         SectionHeader(
-                          title: context
-                              .l10n.generation_sectionReferenceImages,
+                          title: context.l10n.generation_sectionReferenceImages,
                         ),
                         const SizedBox(height: 6),
                         const ReversePromptPanel(),
@@ -325,8 +353,7 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
         GenerationParamsSummaryBar(
           onToggleDrawer: _toggleParamsMenu,
           arrow: RotationTransition(
-            turns: Tween<double>(begin: 0, end: -0.25)
-                .animate(_menuAnimation),
+            turns: Tween<double>(begin: 0, end: -0.25).animate(_menuAnimation),
             child: const Icon(Icons.play_arrow, size: 20),
           ),
         ),
@@ -368,78 +395,84 @@ class _ModelMenuButton extends ConsumerWidget {
     final shortName = ModelDisplay.shortNameOf(model);
     final fullName = ImageModels.modelDisplayNames[model] ?? model;
 
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: PopupMenuButton<String>(
-        tooltip: fullName,
-        offset: const Offset(0, 4),
-        position: PopupMenuPosition.under,
-        constraints: const BoxConstraints(minWidth: 220, maxWidth: 300),
-        itemBuilder: (context) => [
-          _modelGroupHeader(theme, l10n.generation_modelGroupNew),
-          for (final m in ImageModels.allModels.where(
-            (m) => ModelDisplay.groupOf(m) == ModelListGroup.newer,
-          ))
-            _modelMenuItem(context, l10n, theme, m, model),
-          _modelGroupHeader(theme, l10n.generation_modelGroupLegacy),
-          for (final m in ImageModels.allModels.where(
-            (m) => ModelDisplay.groupOf(m) == ModelListGroup.legacy,
-          ))
-            _modelMenuItem(context, l10n, theme, m, model),
-        ],
-        onSelected: (value) {
-          ref.read(generationParamsNotifierProvider.notifier).updateModel(value);
-        },
-        child: Container(
-          height: 28,
-          constraints: const BoxConstraints(maxWidth: 230),
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
-            // 官网式描边胶囊
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.4),
+    return PopupMenuButton<String>(
+      tooltip: fullName,
+      offset: const Offset(0, 4),
+      position: PopupMenuPosition.under,
+      constraints: const BoxConstraints(minWidth: 220, maxWidth: 300),
+      itemBuilder: (context) => [
+        _modelGroupHeader(theme, l10n.generation_modelGroupNew),
+        for (final m in ImageModels.allModels.where(
+          (m) => ModelDisplay.groupOf(m) == ModelListGroup.newer,
+        ))
+          _modelMenuItem(context, l10n, theme, m, model),
+        _modelGroupHeader(theme, l10n.generation_modelGroupLegacy),
+        for (final m in ImageModels.allModels.where(
+          (m) => ModelDisplay.groupOf(m) == ModelListGroup.legacy,
+        ))
+          _modelMenuItem(context, l10n, theme, m, model),
+      ],
+      onSelected: (value) {
+        ref.read(generationParamsNotifierProvider.notifier).updateModel(value);
+      },
+      child: Container(
+        // 官网式「胶囊套胶囊」：外框描边+深色底，左侧灰标签，
+        // 右嵌一颗明显更亮的内胆（图标+短名+▾）作为点击热区视觉锚点；
+        // 随内容收紧
+        height: 28,
+        padding: const EdgeInsets.only(left: 10, right: 3),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: theme.colorScheme.outline.withValues(alpha: 0.4),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Model',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+              ),
             ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // 官网胶囊带 Model 前缀标签
-              Text(
-                'Model',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
-                ),
+            const SizedBox(width: 6),
+            Container(
+              height: 22,
+              padding: const EdgeInsets.symmetric(horizontal: 7),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(6),
               ),
-              const SizedBox(width: 6),
-              Image.asset(
-                'assets/icons/novelai-icon.png',
-                width: 15,
-                height: 15,
-                // 素材是纯黑剪影，srcIn 着色后深浅主题自适应
-                color: theme.colorScheme.onSurface,
-                filterQuality: FilterQuality.medium,
-              ),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  shortName,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/icons/novelai-icon.png',
+                    width: 14,
+                    height: 14,
+                    // 素材是纯黑剪影，srcIn 着色后深浅主题自适应
+                    color: theme.colorScheme.onSurface,
+                    filterQuality: FilterQuality.medium,
                   ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
+                  const SizedBox(width: 5),
+                  Text(
+                    shortName,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                  ),
+                  Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 15,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ],
               ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.keyboard_arrow_down,
-                size: 16,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -550,13 +583,13 @@ class _ModeCapsule extends ConsumerWidget {
             .read(generationParamsNotifierProvider.notifier)
             .updateModelMode(!furryMode),
         borderRadius: BorderRadius.circular(8),
+        // 与 Model 同构的「胶囊套胶囊」：外框标签 Mode + 内胆图标/文本
         child: Container(
           height: 28,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.only(left: 10, right: 3),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
+            color: theme.colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(8),
-            // 官网式描边胶囊
             border: Border.all(
               color: theme.colorScheme.outline.withValues(alpha: 0.4),
             ),
@@ -572,23 +605,37 @@ class _ModeCapsule extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              // 官网同款图标：anime=sakura 樱花 / furry=爪印
-              SvgPicture.asset(
-                furryMode
-                    ? 'assets/icons/nai-icon-furry.svg'
-                    : 'assets/icons/nai-icon-sakura.svg',
-                width: 15,
-                height: 15,
-                colorFilter: ColorFilter.mode(
-                  theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                  BlendMode.srcIn,
+              Container(
+                height: 22,
+                padding: const EdgeInsets.symmetric(horizontal: 7),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(6),
                 ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                furryMode ? 'Furry' : 'Anime',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 官网同款图标：anime=sakura 樱花 / furry=爪印
+                    SvgPicture.asset(
+                      furryMode
+                          ? 'assets/icons/nai-icon-furry.svg'
+                          : 'assets/icons/nai-icon-sakura.svg',
+                      width: 14,
+                      height: 14,
+                      colorFilter: ColorFilter.mode(
+                        theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      furryMode ? 'Furry' : 'Anime',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -625,16 +672,12 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
 
     // 纯展示列（不可点）
     Widget column(String label, Widget value) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-          child: _columnContent(theme, label, value),
-        );
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+      child: _columnContent(theme, label, value),
+    );
 
     // 可点列
-    Widget tappableColumn(
-      String label,
-      Widget value,
-      VoidCallback? onTap,
-    ) =>
+    Widget tappableColumn(String label, Widget value, VoidCallback? onTap) =>
         Material(
           color: Colors.transparent,
           child: InkWell(
@@ -650,16 +693,11 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
       color: theme.colorScheme.surface,
       child: Container(
         decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(color: theme.dividerColor, width: 1),
-          ),
+          border: Border(top: BorderSide(color: theme.dividerColor, width: 1)),
         ),
         child: Row(
           children: [
-            column(
-              l10n.generation_stepsLabel,
-              Text(params.steps.toString()),
-            ),
+            column(l10n.generation_stepsLabel, Text(params.steps.toString())),
             column(
               l10n.generation_guidance,
               Text(params.scale.toStringAsFixed(1)),
@@ -677,8 +715,9 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
                       ),
                     ),
               () {
-                final notifier =
-                    ref.read(generationParamsNotifierProvider.notifier);
+                final notifier = ref.read(
+                  generationParamsNotifierProvider.notifier,
+                );
                 if (params.seed != -1) {
                   notifier.randomizeSeed();
                 } else {
@@ -693,13 +732,7 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
                   Samplers.samplerDisplayNames[params.sampler] ??
                       params.sampler,
                 ),
-                () => _showSamplerMenu(
-                  buttonContext,
-                  ref,
-                  theme,
-                  l10n,
-                  params,
-                ),
+                () => _showSamplerMenu(buttonContext, ref, theme, l10n, params),
               ),
             ),
             const Spacer(),
@@ -709,10 +742,7 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: onToggleDrawer,
-                child: Padding(
-                  padding: const EdgeInsets.all(6),
-                  child: arrow,
-                ),
+                child: Padding(padding: const EdgeInsets.all(6), child: arrow),
               ),
             ),
             const SizedBox(width: 4),
@@ -772,7 +802,8 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
         .where((s) => !Samplers.recommendedSamplers.contains(s))
         .toList();
 
-    final menuHeight = _menuVerticalPadding * 2 +
+    final menuHeight =
+        _menuVerticalPadding * 2 +
         (recommended.isNotEmpty ? _menuHeaderHeight : 0) +
         (others.isNotEmpty ? _menuHeaderHeight : 0) +
         samplers.length * _menuItemHeight;

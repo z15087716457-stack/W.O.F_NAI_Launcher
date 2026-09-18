@@ -91,7 +91,7 @@ void main() {
 
       await notifier.setWebLeftPanelWidth(100.0);
 
-      expect(storage.webWidth, 320.0);
+      expect(storage.webWidth, 352.0);
     });
   });
 
