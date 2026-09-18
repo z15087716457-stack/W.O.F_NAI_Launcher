@@ -1007,6 +1007,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prompt_negativeTab => 'Undesired Content';
 
   @override
+  String get prompt_transparentBg => 'Transparent BG';
+
+  @override
+  String get prompt_chunksMenu => 'Prompt chunks & settings';
+
+  @override
+  String get qualityTags_presetChip => 'Quality Tags';
+
+  @override
+  String get ucPreset_presetChip => 'Undesired Content Preset';
+
+  @override
   String get prompt_positivePrompt => 'Prompt';
 
   @override

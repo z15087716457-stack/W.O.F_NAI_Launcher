@@ -1929,6 +1929,30 @@ abstract class AppLocalizations {
   /// **'Undesired Content'**
   String get prompt_negativeTab;
 
+  /// No description provided for @prompt_transparentBg.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent BG'**
+  String get prompt_transparentBg;
+
+  /// No description provided for @prompt_chunksMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt chunks & settings'**
+  String get prompt_chunksMenu;
+
+  /// No description provided for @qualityTags_presetChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality Tags'**
+  String get qualityTags_presetChip;
+
+  /// No description provided for @ucPreset_presetChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Undesired Content Preset'**
+  String get ucPreset_presetChip;
+
   /// No description provided for @prompt_positivePrompt.
   ///
   /// In en, this message translates to:

@@ -98,9 +98,9 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
               onTap: () => setState(() => _tabIndex = 0),
             ),
             const SizedBox(width: 6),
-            // 负向提示词 tab（标签用 NAI 通用术语 UC，静定）
+            // 负向提示词 tab（官网 Undesired Content 页签，与主提示词卡同键）
             _EditorTab(
-              label: 'UC',
+              label: l10n.prompt_negativeTab,
               selected: _tabIndex == 1,
               onTap: () => setState(() => _tabIndex = 1),
             ),

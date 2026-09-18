@@ -65,8 +65,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    // 顶栏瘦容后负面切换为纯文字「UC」按钮
-    await tester.tap(find.text('UC').first);
+    // 官网式卡内页签：负面 = Undesired Content
+    await tester.tap(find.text('Undesired Content').first);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
@@ -133,8 +133,8 @@ void main() {
       ),
     );
 
-    // 切到 UC：负向药丸编辑器挂载
-    await tester.tap(find.text('UC').first);
+    // 切到负面页签：负向药丸编辑器挂载
+    await tester.tap(find.text('Undesired Content').first);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(

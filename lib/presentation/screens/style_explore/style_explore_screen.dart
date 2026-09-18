@@ -408,8 +408,9 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
     );
   }
 
-  /// 提示词区高度下限（与主生成页一致）
-  static const double _minPromptAreaHeight = 100.0;
+  /// 提示词区高度下限：卡头 + 底行 + token 条 + 最小两行编辑区，
+  /// 低于此值 PromptInputWidget 内部必然溢出
+  static const double _minPromptAreaHeight = 160.0;
 
   /// 提示词区默认高度（= 固定高度时代的 280，也是 cap 的下限：
   /// 窄窗顶栏折行吃掉高度时退回默认高度，不硬压到 100 造成

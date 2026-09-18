@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +17,7 @@ import '../../../../data/models/prompt/prompt_preset_mode.dart';
 import '../../../../data/services/alias_resolver_service.dart';
 import '../../../providers/character_prompt_provider.dart';
 import '../../../providers/image_generation_provider.dart';
+import '../../../providers/layout_state_provider.dart';
 import '../../../providers/prompt_maximize_provider.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_regex_rules_provider.dart';
@@ -30,12 +32,9 @@ import '../../../widgets/prompt/nai_syntax_controller.dart';
 import '../../../widgets/prompt/prompt_token_count_bar.dart';
 import '../../../widgets/prompt/quality_tags_selector.dart';
 import '../../../widgets/prompt/transparent_background_chip.dart';
-import '../../../widgets/prompt/block_library_panel_toggle.dart';
 import '../../../widgets/prompt/regex_rules_dialog.dart';
-import '../../../widgets/prompt/toolbar/toolbar.dart';
 import '../../../widgets/prompt/uc_preset_selector.dart';
 import '../../../widgets/character/character_prompt_button.dart';
-import '../../../widgets/prompt/blocks/prompt_block_palette.dart';
 import '../../../providers/pending_prompt_provider.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_history_provider.dart';
@@ -81,6 +80,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
 
   // 正面/负面切换
   bool _isNegativeMode = false;
+
+  // 块库/设置弹层开启态（官网 prompt-chunks 钮开合高亮）
+  bool _chunksMenuOpen = false;
 
   @override
   void initState() {
@@ -438,170 +440,167 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   }
 
   Widget _buildFullLayout(ThemeData theme, bool numericEmphasisEnabled) {
+    final model = ref.watch(
+      generationParamsNotifierProvider.select((params) => params.model),
+    );
     final editor = _isNegativeMode
         ? _buildTextNegativeInput(theme, numericEmphasisEnabled)
         : _buildTextPromptInput(theme, numericEmphasisEnabled);
-    return Column(
-      mainAxisSize: widget.autoGrow ? MainAxisSize.min : MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // 顶栏：正面/负面切换 + 操作按钮
-        _buildFullLayoutTopBar(theme),
 
-        const SizedBox(height: 8),
+    // 官网式单卡：页签+配件在框内头部，预设片在框内底行，
+    // token 用量长条压在最底边。
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: theme.dividerColor),
+      ),
+      child: Column(
+        mainAxisSize: widget.autoGrow ? MainAxisSize.min : MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildCardHeader(theme),
 
-        // 提示词编辑区域（autoGrow 时随内容自增高，否则填充可用高度）
-        if (widget.autoGrow) editor else Expanded(child: editor),
-        _PromptTokenCountFooter(
-          target: _isNegativeMode
-              ? PromptTokenCountTarget.negative
-              : PromptTokenCountTarget.positive,
-          topPadding: 6,
-        ),
-      ],
+          // 提示词编辑区域（autoGrow 时随内容自增高，否则填充可用高度）
+          if (widget.autoGrow) editor else Expanded(child: editor),
+
+          // 框内底部条：左 透明通道片 ｜ 右 质量词/UC 预设片
+          Container(
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: theme.dividerColor)),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: _widthGuardedRow(
+              Row(
+                children: [
+                  const TransparentBackgroundChip(),
+                  const Spacer(),
+                  if (_isNegativeMode)
+                    UcPresetSelector(model: model)
+                  else
+                    QualityTagsSelector(model: model),
+                ],
+              ),
+            ),
+          ),
+
+          // 最底：token 用量长条
+          _PromptTokenCountFooter(
+            target: _isNegativeMode
+                ? PromptTokenCountTarget.negative
+                : PromptTokenCountTarget.positive,
+            topPadding: 0,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildFullLayoutTopBar(ThemeData theme) {
+  /// 卡内头部（官网式）：左 = 正面/负面页签，右 = 扩展槽 + 块库/设置 + 全屏。
+  Widget _buildCardHeader(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(6, 4, 6, 0),
+      child: _widthGuardedRow(
+        Row(
+          children: [
+            _buildPromptTypeSwitch(theme),
+            const Spacer(),
+            // 非 autoGrow 布局（移动端最大化/探索页）保留角色入口：
+            // 一体式布局角色区常驻提示词下方，官网式头部不带角色钮
+            if (!widget.autoGrow) ...[
+              const CharacterPromptButton(),
+              const SizedBox(width: 2),
+            ],
+            // 块库左侧预留扩展槽（翻译/Agent 动态提示扩展位）
+            const SizedBox.shrink(),
+            _buildChunksMenuButton(theme),
+            if (widget.showMaximizeButton)
+              IconButton(
+                iconSize: 18,
+                visualDensity: VisualDensity.compact,
+                tooltip: context.l10n.toolbar_fullscreenEdit,
+                onPressed:
+                    widget.onToggleMaximize ??
+                    () => ref
+                        .read(promptMaximizeNotifierProvider.notifier)
+                        .toggle(),
+                icon: Icon(
+                  Icons.fullscreen,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 窄宽兜底：行内容不足 ~320 逻辑宽时按 320 铺排，视觉溢出交给上层裁剪，
+  /// 与旧顶栏 `_buildFullLayoutTopBar` 同款 OverflowBox 策略。
+  Widget _widthGuardedRow(Widget child) {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (!constraints.maxWidth.isFinite || constraints.maxWidth >= 320) {
-          return _buildTopBar(theme);
+          return child;
         }
         return OverflowBox(
           alignment: Alignment.topLeft,
           minWidth: 320,
           maxWidth: 320,
-          maxHeight: 320,
           fit: OverflowBoxFit.deferToChild,
-          child: _buildTopBar(theme),
+          child: child,
         );
       },
     );
   }
 
-  Widget _buildTopBar(ThemeData theme) {
-    // 获取模型
-    final model = ref.watch(
-      generationParamsNotifierProvider.select((params) => params.model),
+  /// 块库/设置弹层钮（官网 prompt-chunks 钮）：官方 prompt_chunk 图标，
+  /// 弹层首项 = 块库面板开关（勾选态随面板展开），其后为提示词设置项。
+  Widget _buildChunksMenuButton(ThemeData theme) {
+    final panelExpanded = ref.watch(
+      layoutStateNotifierProvider.select((s) => s.blockLibraryPanelExpanded),
     );
-    final typeSwitch = _buildPromptTypeSwitch(theme);
-
-    // 工具栏（全屏、清空、设置）
-    final toolbar = PromptEditorToolbar(
-      config: PromptEditorToolbarConfig.mainEditor.copyWith(
-        showFullscreenButton: widget.showMaximizeButton,
-      ),
-      // 使用传入的回调或 Provider 切换最大化
-      onFullscreenPressed:
-          widget.onToggleMaximize ??
-          () => ref.read(promptMaximizeNotifierProvider.notifier).toggle(),
-      onClearPressed: _isNegativeMode ? _clearNegative : _clearPrompt,
-      onSettingsPressed: () => _showSettingsMenu(context, theme),
-    );
-
-    if (widget.autoGrow) {
-      // 官网布局工具栏不放「角色」按钮：角色区常驻提示词下方；
-      // 行更短后 FittedBox 缩放更小，其余按钮字号更大
-      final webToolbar = PromptEditorToolbar(
-        config: PromptEditorToolbarConfig.mainEditor.copyWith(
-          showFullscreenButton: widget.showMaximizeButton,
-        ),
-        onFullscreenPressed:
-            widget.onToggleMaximize ??
-            () => ref.read(promptMaximizeNotifierProvider.notifier).toggle(),
-        onClearPressed: _isNegativeMode ? _clearNegative : _clearPrompt,
-        onSettingsPressed: () => _showSettingsMenu(context, theme),
-      );
-
-      // 一体式布局：顶栏压成单行，宽度不足时整行等比缩小而非换行
-      return FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.centerLeft,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            typeSwitch,
-            const SizedBox(width: 10),
-            const PromptBlockPaletteButton(),
-            const SizedBox(width: 6),
-            QualityTagsSelector(model: model),
-            const SizedBox(width: 6),
-            UcPresetSelector(model: model),
-            const SizedBox(width: 2),
-            const TransparentBackgroundChip(),
-            const BlockLibraryPanelToggleButton(),
-            webToolbar,
-          ],
-        ),
-      );
-    }
-
-    return Wrap(
-      spacing: 8, // 水平间距
-      runSpacing: 8, // 换行后的垂直间距
-      alignment: WrapAlignment.spaceBetween, // 两端对齐
-      crossAxisAlignment: WrapCrossAlignment.center, // 垂直居中
-      children: [
-        // 正面/负面切换标签 - 左侧
-        typeSwitch,
-
-        // 右侧工具按钮组（也用 Wrap 支持极端情况换行）
-        Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            // 颜料版按钮（原固定词位置）
-            const PromptBlockPaletteButton(),
-
-            // 质量词选择器
-            QualityTagsSelector(model: model),
-
-            // UC 预设选择器
-            UcPresetSelector(model: model),
-
-            // V5 透明背景开关
-            const TransparentBackgroundChip(),
-
-            // 块库面板开关
-            const BlockLibraryPanelToggleButton(),
-
-            // 多人角色编辑器按钮
-            const CharacterPromptButton(),
-
-            toolbar,
-          ],
-        ),
-      ],
-    );
-  }
-
-  /// 显示设置菜单
-  void _showSettingsMenu(BuildContext context, ThemeData theme) {
-    final enableAutocomplete = ref.read(autocompleteSettingsProvider);
-    final enableAutoFormat = ref.read(autoFormatPromptSettingsProvider);
-    final enableHighlight = ref.read(highlightEmphasisSettingsProvider);
-    final enableSdSyntaxAutoConvert = ref.read(
+    final enableAutocomplete = ref.watch(autocompleteSettingsProvider);
+    final enableAutoFormat = ref.watch(autoFormatPromptSettingsProvider);
+    final enableHighlight = ref.watch(highlightEmphasisSettingsProvider);
+    final enableSdSyntaxAutoConvert = ref.watch(
       sdSyntaxAutoConvertSettingsProvider,
     );
-    final enableResolveAliasOnCopy = ref.read(
+    final enableResolveAliasOnCopy = ref.watch(
       resolveAliasOnCopySettingsProvider,
     );
-    final enableCooccurrence = ref
-        .read(completion_settings.autocompleteSettingsProvider)
-        .relatedTagsEnabled;
-    final regexRuleCount = ref.read(promptRegexRulesProvider).length;
+    final enableCooccurrence = ref.watch(
+      completion_settings.autocompleteSettingsProvider.select(
+        (s) => s.relatedTagsEnabled,
+      ),
+    );
+    final regexRuleCount = ref.watch(
+      promptRegexRulesProvider.select((rules) => rules.length),
+    );
 
-    // 使用工具栏提供的按钮位置
-    final position = PromptEditorToolbar.getSettingsButtonPosition(context);
-    if (position == null) return;
+    final highlighted = panelExpanded || _chunksMenuOpen;
 
-    showMenu<String>(
-      context: context,
-      position: position,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      items: [
+    return PopupMenuButton<String>(
+      tooltip: context.l10n.prompt_chunksMenu,
+      iconSize: 18,
+      offset: const Offset(0, 32),
+      position: PopupMenuPosition.under,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      onOpened: () => setState(() => _chunksMenuOpen = true),
+      onCanceled: () => setState(() => _chunksMenuOpen = false),
+      onSelected: (value) {
+        setState(() => _chunksMenuOpen = false);
+        _handleSettingsMenuResult(value);
+      },
+      itemBuilder: (context) => [
+        _buildSettingsMenuItem(
+          value: 'block_library',
+          isEnabled: panelExpanded,
+          title: context.l10n.promptBlockEditor_library,
+          subtitle: '',
+          theme: theme,
+        ),
+        const PopupMenuDivider(),
         _buildSettingsMenuItem(
           value: 'autocomplete',
           isEnabled: enableAutocomplete,
@@ -652,7 +651,18 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           theme: theme,
         ),
       ],
-    ).then(_handleSettingsMenuResult);
+      icon: SvgPicture.asset(
+        'assets/icons/nai-icon-prompt-chunk.svg',
+        width: 16,
+        height: 16,
+        colorFilter: ColorFilter.mode(
+          highlighted
+              ? theme.colorScheme.onSurface
+              : theme.colorScheme.onSurfaceVariant,
+          BlendMode.srcIn,
+        ),
+      ),
+    );
   }
 
   Widget _buildPromptTypeSwitch(ThemeData theme) {
@@ -679,14 +689,18 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     // 预先获取别名解析器，避免在子组件 build 中访问 provider
     final aliasResolver = ref.read(aliasResolverServiceProvider.notifier);
 
+    // 官网式：有角色提示词时首页签改名 Base Prompt
+    final positiveLabel = characterConfig.characters.isNotEmpty
+        ? context.l10n.prompt_baseTab
+        : context.l10n.prompt_positive;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 正面提示词按钮
+        // 正面提示词页签
         _PromptTypeButton(
-          label: context.l10n.prompt_positive,
+          label: positiveLabel,
           isSelected: !_isNegativeMode,
-          color: theme.colorScheme.primary,
           onTap: () => _setNegativeMode(false),
           tooltipBuilder: (theme) => _PositivePromptTooltip(
             theme: theme,
@@ -699,12 +713,11 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             aliasResolver: aliasResolver,
           ),
         ),
-        const SizedBox(width: 8),
-        // 负面提示词按钮（顶栏瘦容：标签用 NAI 通用术语 UC，静定）
+        const SizedBox(width: 4),
+        // 负面提示词页签（官网 Undesired Content）
         _PromptTypeButton(
-          label: 'UC',
+          label: context.l10n.prompt_negativeTab,
           isSelected: _isNegativeMode,
-          color: theme.colorScheme.error,
           onTap: () => _setNegativeMode(true),
           tooltipBuilder: (theme) => _NegativePromptTooltip(
             theme: theme,
@@ -716,13 +729,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         ),
       ],
     );
-  }
-
-  void _clearNegative() {
-    _setProxyText(_negativeController, '');
-    ref
-        .read(generationParamsNotifierProvider.notifier)
-        .updateNegativePrompt('');
   }
 
   Widget _buildTextPromptInput(ThemeData theme, bool numericEmphasisEnabled) {
@@ -757,6 +763,8 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         hintText: enableAutocomplete
             ? context.l10n.prompt_describeImageWithHint
             : context.l10n.prompt_describeImage,
+        // 官网式：框内右上小 ✕ 清空本文本（不再连带清角色卡）
+        showClearButton: true,
       ),
       decoration: const InputDecoration(contentPadding: EdgeInsets.all(12)),
       onComfyuiImport: (globalPrompt, characters) {
@@ -802,12 +810,13 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.outline,
+                if (subtitle.isNotEmpty)
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -852,6 +861,10 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
 
   void _handleSettingsMenuResult(String? value) {
     switch (value) {
+      case 'block_library':
+        ref
+            .read(layoutStateNotifierProvider.notifier)
+            .toggleBlockLibraryPanel();
       case 'autocomplete':
         ref.read(autocompleteSettingsProvider.notifier).toggle();
       case 'auto_format':
@@ -906,6 +919,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           autoInsertComma: true,
         ),
         hintText: context.l10n.prompt_unwantedContent,
+        showClearButton: true,
       ),
       decoration: const InputDecoration(contentPadding: EdgeInsets.all(12)),
       onChanged: (value) {
@@ -1700,18 +1714,16 @@ class _NegativePromptTooltip extends StatelessWidget {
   }
 }
 
-/// 提示词类型切换按钮
+/// 提示词类型切换页签（官网式：中性色，选中项底色高亮，无主题色）
 class _PromptTypeButton extends StatefulWidget {
   final String label;
   final bool isSelected;
-  final Color color;
   final VoidCallback onTap;
   final Widget Function(ThemeData theme)? tooltipBuilder;
 
   const _PromptTypeButton({
     required this.label,
     required this.isSelected,
-    required this.color,
     required this.onTap,
     this.tooltipBuilder,
   });
@@ -1767,56 +1779,28 @@ class _PromptTypeButtonState extends State<_PromptTypeButton>
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOutCubic,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              // 选中时使用渐变背景
-              gradient: widget.isSelected
-                  ? LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        widget.color.withValues(alpha: 0.2),
-                        widget.color.withValues(alpha: 0.1),
-                      ],
-                    )
-                  : null,
+              // 官网式：选中项中性底色高亮，未选中悬停才出底
               color: widget.isSelected
-                  ? null
+                  ? theme.colorScheme.surfaceContainerHighest
                   : (_isHovering
-                        ? theme.colorScheme.surfaceContainerHighest
-                        : theme.colorScheme.surfaceContainerHigh),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: widget.isSelected
-                    ? widget.color.withValues(alpha: 0.5)
-                    : (_isHovering
-                          ? theme.colorScheme.outline.withValues(alpha: 0.3)
-                          : Colors.transparent),
-                width: widget.isSelected ? 1.5 : 1,
-              ),
-              boxShadow: widget.isSelected
-                  ? [
-                      BoxShadow(
-                        color: widget.color.withValues(alpha: 0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
+                        ? theme.colorScheme.surfaceContainerHighest.withValues(
+                            alpha: 0.5,
+                          )
+                        : Colors.transparent),
+              borderRadius: BorderRadius.circular(6),
             ),
-            // 顶栏瘦容：纯文字按钮，图标与逗号分隔计数徽章已去（静定——
-            // 计数口径意义不明，token 用量看底部 token 计数器）
             child: Text(
               widget.label,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: widget.isSelected
                     ? FontWeight.w600
                     : FontWeight.w500,
                 color: widget.isSelected
-                    ? widget.color
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                letterSpacing: 0.3,
+                    ? theme.colorScheme.onSurface
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.55),
               ),
             ),
           ),

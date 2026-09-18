@@ -101,50 +101,33 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
               duration: const Duration(milliseconds: 150),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: isEnabled
-                    ? (_isHovering
-                          ? Colors.green.withValues(alpha: 0.2)
-                          : Colors.green.withValues(alpha: 0.1))
-                    : (_isHovering
-                          ? theme.colorScheme.surfaceContainerHighest
-                          : Colors.transparent),
+                color: _isHovering
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: isEnabled
-                      ? Colors.green.withValues(alpha: 0.3)
-                      : Colors.transparent,
-                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    isEnabled
-                        ? Icons.auto_awesome
-                        : Icons.auto_awesome_outlined,
-                    size: 14,
-                    color: isEnabled
-                        ? Colors.green.shade700
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
-                  const SizedBox(width: 4),
+                  // 官网式中性片：「Quality Tags: <预设名> ▾」，无预设时 0.55 淡显
                   Text(
-                    _getDisplayLabel(context, presetState, customEntries),
+                    '${context.l10n.qualityTags_presetChip}: '
+                    '${_getDisplayLabel(context, presetState, customEntries)}',
                     style: TextStyle(
                       fontSize: 11,
-                      fontWeight: isEnabled ? FontWeight.w600 : FontWeight.w500,
+                      fontWeight: FontWeight.w500,
                       color: isEnabled
-                          ? Colors.green.shade700
-                          : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          ? theme.colorScheme.onSurface.withValues(alpha: 0.85)
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.45),
                     ),
                   ),
                   const SizedBox(width: 2),
                   Icon(
                     Icons.arrow_drop_down,
                     size: 14,
-                    color: isEnabled
-                        ? Colors.green.shade700
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    color: theme.colorScheme.onSurface.withValues(
+                      alpha: isEnabled ? 0.7 : 0.4,
+                    ),
                   ),
                 ],
               ),

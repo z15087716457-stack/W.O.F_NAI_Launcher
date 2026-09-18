@@ -1,29 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/constants/model_spec.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../providers/generation/generation_params_notifier.dart';
 
-/// V5 透明背景开关（官方 Transparent BG）
+/// V5 透明背景片（官方 Transparent BG）
 ///
 /// 仅 transparency 能力位开启的模型显示；点击切换
 /// [ImageParams.transparentBackground]，开启后等效提示词追加
 /// `transparent background` 并随请求发送 `tag_hint_transparent_background`。
-class TransparentBackgroundChip extends ConsumerStatefulWidget {
+/// 官网式双态片：棋盘格图标 + ✕(关/暗)/✓(开/亮) + 文案。
+class TransparentBackgroundChip extends ConsumerWidget {
   const TransparentBackgroundChip({super.key});
 
   @override
-  ConsumerState<TransparentBackgroundChip> createState() =>
-      _TransparentBackgroundChipState();
-}
-
-class _TransparentBackgroundChipState
-    extends ConsumerState<TransparentBackgroundChip> {
-  bool _isHovering = false;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final model = ref.watch(
       generationParamsNotifierProvider.select((params) => params.model),
@@ -36,47 +29,61 @@ class _TransparentBackgroundChipState
         (params) => params.transparentBackground,
       ),
     );
-    const accent = Colors.teal;
+    final isDark = theme.brightness == Brightness.dark;
+    final contentColor = enabled
+        ? theme.colorScheme.onSurface
+        : theme.colorScheme.onSurface.withValues(alpha: 0.45);
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovering = true),
-      onExit: (_) => setState(() => _isHovering = false),
-      cursor: SystemMouseCursors.click,
-      child: Tooltip(
-        message: context.l10n.transparentBackground_tooltip,
-        preferBelow: true,
-        verticalOffset: 20,
-        waitDuration: const Duration(milliseconds: 300),
-        child: GestureDetector(
-          onTap: () => ref
-              .read(generationParamsNotifierProvider.notifier)
-              .updateTransparentBackground(!enabled),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: enabled
-                  ? (_isHovering
-                        ? accent.withValues(alpha: 0.25)
-                        : accent.withValues(alpha: 0.12))
-                  : (_isHovering
-                        ? theme.colorScheme.surfaceContainerHighest
-                        : Colors.transparent),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: enabled
-                    ? accent.withValues(alpha: 0.4)
-                    : Colors.transparent,
+    return Tooltip(
+      message: context.l10n.transparentBackground_tooltip,
+      preferBelow: true,
+      verticalOffset: 20,
+      waitDuration: const Duration(milliseconds: 300),
+      child: InkWell(
+        onTap: () => ref
+            .read(generationParamsNotifierProvider.notifier)
+            .updateTransparentBackground(!enabled),
+        borderRadius: BorderRadius.circular(6),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(
+                alpha: enabled ? 0.5 : 0.25,
               ),
             ),
-            // 纯图标：文字占宽且 tooltip 已说明含义
-            child: Icon(
-              Icons.opacity,
-              size: 14,
-              color: enabled
-                  ? accent.shade700
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 官方棋盘格（深浅主题各一版，自带配色不再着色）
+              ClipRRect(
+                borderRadius: BorderRadius.circular(3),
+                child: SvgPicture.asset(
+                  isDark
+                      ? 'assets/icons/nai-icon-checkerboard-dark.svg'
+                      : 'assets/icons/nai-icon-checkerboard-light.svg',
+                  width: 14,
+                  height: 14,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                enabled ? Icons.check : Icons.close,
+                size: 12,
+                color: contentColor,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                context.l10n.prompt_transparentBg,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: contentColor,
+                ),
+              ),
+            ],
           ),
         ),
       ),

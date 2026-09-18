@@ -1210,7 +1210,7 @@ void main() {
 
     expect(
       container.read(layoutStateNotifierProvider).styleExplorePromptAreaHeight,
-      100,
+      160,
     );
     await tester.pump(const Duration(milliseconds: 200));
   });

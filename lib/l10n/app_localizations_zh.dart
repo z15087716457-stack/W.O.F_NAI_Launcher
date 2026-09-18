@@ -972,6 +972,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prompt_negativeTab => '负面';
 
   @override
+  String get prompt_transparentBg => '透明通道';
+
+  @override
+  String get prompt_chunksMenu => '提示词块与设置';
+
+  @override
+  String get qualityTags_presetChip => '质量词预设';
+
+  @override
+  String get ucPreset_presetChip => '负面词预设';
+
+  @override
   String get prompt_positivePrompt => '正向提示词';
 
   @override
