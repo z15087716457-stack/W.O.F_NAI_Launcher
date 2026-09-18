@@ -1156,12 +1156,6 @@ abstract class AppLocalizations {
   /// **'Completion Alert'**
   String get settings_generationFeedbackSection;
 
-  /// No description provided for @settings_promptAssistant.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt Assistant'**
-  String get settings_promptAssistant;
-
   /// No description provided for @settings_selectStyle.
   ///
   /// In en, this message translates to:
@@ -2090,30 +2084,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Replaced {count} matches'**
   String prompt_replaceAllDone(Object count);
-
-  /// No description provided for @promptAssistant_needPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a prompt before using the assistant'**
-  String get promptAssistant_needPrompt;
-
-  /// No description provided for @promptAssistant_requestFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Assistant request failed: {error}'**
-  String promptAssistant_requestFailed(Object error);
-
-  /// No description provided for @promptAssistant_enableAssistant.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable Prompt Assistant'**
-  String get promptAssistant_enableAssistant;
-
-  /// No description provided for @promptAssistant_desktopOverlay.
-  ///
-  /// In en, this message translates to:
-  /// **'Desktop bottom-right overlay'**
-  String get promptAssistant_desktopOverlay;
 
   /// No description provided for @kritaBridge_busyGenerating.
   ///
@@ -8935,240 +8905,6 @@ abstract class AppLocalizations {
   /// **'Undesired Content Fixed Tags'**
   String get fixedTags_negativeTitle;
 
-  /// No description provided for @promptAssistant_translateProcessing.
-  ///
-  /// In en, this message translates to:
-  /// **'Translating'**
-  String get promptAssistant_translateProcessing;
-
-  /// No description provided for @promptAssistant_optimizeProcessing.
-  ///
-  /// In en, this message translates to:
-  /// **'Optimizing'**
-  String get promptAssistant_optimizeProcessing;
-
-  /// No description provided for @promptAssistant_customProcessing.
-  ///
-  /// In en, this message translates to:
-  /// **'Processing custom request'**
-  String get promptAssistant_customProcessing;
-
-  /// No description provided for @promptAssistant_imageInputDisabled.
-  ///
-  /// In en, this message translates to:
-  /// **'The current custom-task provider does not have image input enabled'**
-  String get promptAssistant_imageInputDisabled;
-
-  /// No description provided for @promptAssistant_assistantSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Assistant Settings'**
-  String get promptAssistant_assistantSettings;
-
-  /// No description provided for @promptAssistant_serviceSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Service Settings'**
-  String get promptAssistant_serviceSettings;
-
-  /// No description provided for @promptAssistant_ruleSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Rule Settings'**
-  String get promptAssistant_ruleSettings;
-
-  /// No description provided for @promptAssistant_cancelCurrentTask.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel Current Task'**
-  String get promptAssistant_cancelCurrentTask;
-
-  /// No description provided for @promptAssistant_collapseAssistant.
-  ///
-  /// In en, this message translates to:
-  /// **'Collapse Assistant'**
-  String get promptAssistant_collapseAssistant;
-
-  /// No description provided for @promptAssistant_expandAssistant.
-  ///
-  /// In en, this message translates to:
-  /// **'Expand Assistant'**
-  String get promptAssistant_expandAssistant;
-
-  /// No description provided for @promptAssistant_history.
-  ///
-  /// In en, this message translates to:
-  /// **'History'**
-  String get promptAssistant_history;
-
-  /// No description provided for @promptAssistant_undo.
-  ///
-  /// In en, this message translates to:
-  /// **'Undo'**
-  String get promptAssistant_undo;
-
-  /// No description provided for @promptAssistant_redo.
-  ///
-  /// In en, this message translates to:
-  /// **'Redo'**
-  String get promptAssistant_redo;
-
-  /// No description provided for @promptAssistant_translate.
-  ///
-  /// In en, this message translates to:
-  /// **'Translate'**
-  String get promptAssistant_translate;
-
-  /// No description provided for @promptAssistant_optimize.
-  ///
-  /// In en, this message translates to:
-  /// **'Optimize'**
-  String get promptAssistant_optimize;
-
-  /// No description provided for @promptAssistant_custom.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get promptAssistant_custom;
-
-  /// No description provided for @promptAssistant_cancelTask.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel Task'**
-  String get promptAssistant_cancelTask;
-
-  /// No description provided for @promptAssistant_menu.
-  ///
-  /// In en, this message translates to:
-  /// **'Menu'**
-  String get promptAssistant_menu;
-
-  /// No description provided for @promptAssistant_customDialogTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom Prompt Assistant'**
-  String get promptAssistant_customDialogTitle;
-
-  /// No description provided for @promptAssistant_currentPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Current Prompt'**
-  String get promptAssistant_currentPrompt;
-
-  /// No description provided for @promptAssistant_currentPromptEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'(current prompt is empty)'**
-  String get promptAssistant_currentPromptEmpty;
-
-  /// No description provided for @promptAssistant_customRequestLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Your modification request'**
-  String get promptAssistant_customRequestLabel;
-
-  /// No description provided for @promptAssistant_customRequestHint.
-  ///
-  /// In en, this message translates to:
-  /// **'For example: make it more ominous, add a rainy night street background, make the action more dynamic, return only the final prompt'**
-  String get promptAssistant_customRequestHint;
-
-  /// No description provided for @promptAssistant_addReferenceImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Reference Image'**
-  String get promptAssistant_addReferenceImage;
-
-  /// No description provided for @promptAssistant_execute.
-  ///
-  /// In en, this message translates to:
-  /// **'Run'**
-  String get promptAssistant_execute;
-
-  /// No description provided for @promptAssistant_maxReferenceImages.
-  ///
-  /// In en, this message translates to:
-  /// **'Add up to {count} reference images'**
-  String promptAssistant_maxReferenceImages(Object count);
-
-  /// No description provided for @promptAssistant_unsupportedImageFormat.
-  ///
-  /// In en, this message translates to:
-  /// **'Unsupported image format: {fileName}'**
-  String promptAssistant_unsupportedImageFormat(Object fileName);
-
-  /// No description provided for @promptAssistant_needCustomRequestOrImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a custom request or add a reference image'**
-  String get promptAssistant_needCustomRequestOrImage;
-
-  /// No description provided for @promptAssistant_taskOptimize.
-  ///
-  /// In en, this message translates to:
-  /// **'Optimize'**
-  String get promptAssistant_taskOptimize;
-
-  /// No description provided for @promptAssistant_taskTranslate.
-  ///
-  /// In en, this message translates to:
-  /// **'Translate'**
-  String get promptAssistant_taskTranslate;
-
-  /// No description provided for @promptAssistant_taskReverse.
-  ///
-  /// In en, this message translates to:
-  /// **'Reverse Prompt'**
-  String get promptAssistant_taskReverse;
-
-  /// No description provided for @promptAssistant_taskCharacterReplace.
-  ///
-  /// In en, this message translates to:
-  /// **'Character Replace'**
-  String get promptAssistant_taskCharacterReplace;
-
-  /// No description provided for @promptAssistant_taskCustom.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get promptAssistant_taskCustom;
-
-  /// No description provided for @promptAssistant_settingsInputSwitchSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Assistant switch in the bottom-right of the prompt input'**
-  String get promptAssistant_settingsInputSwitchSubtitle;
-
-  /// No description provided for @promptAssistant_desktopOverlayTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Desktop Overlay Interaction'**
-  String get promptAssistant_desktopOverlayTitle;
-
-  /// No description provided for @promptAssistant_desktopOverlaySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable hover, right-click, and shortcut behavior'**
-  String get promptAssistant_desktopOverlaySubtitle;
-
-  /// No description provided for @promptAssistant_taskRouting.
-  ///
-  /// In en, this message translates to:
-  /// **'Task Routing'**
-  String get promptAssistant_taskRouting;
-
-  /// No description provided for @promptAssistant_taskRoutingSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Bind optimize, translate, reverse prompt, and character replacement to different providers and models'**
-  String get promptAssistant_taskRoutingSubtitle;
-
-  /// No description provided for @promptAssistant_taskRouteTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{title} Task'**
-  String promptAssistant_taskRouteTitle(Object title);
-
   /// No description provided for @promptAssistant_provider.
   ///
   /// In en, this message translates to:
@@ -9271,24 +9007,6 @@ abstract class AppLocalizations {
   /// **'Failed to pull models: {error}'**
   String promptAssistant_pullModelsFailed(Object error);
 
-  /// No description provided for @promptAssistant_ruleTemplates.
-  ///
-  /// In en, this message translates to:
-  /// **'Rule Templates'**
-  String get promptAssistant_ruleTemplates;
-
-  /// No description provided for @promptAssistant_ruleTemplatesSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'System prompts are assembled as rules + user input + task parameters'**
-  String get promptAssistant_ruleTemplatesSubtitle;
-
-  /// No description provided for @promptAssistant_addRule.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Rule'**
-  String get promptAssistant_addRule;
-
   /// No description provided for @promptAssistant_addProvider.
   ///
   /// In en, this message translates to:
@@ -9360,36 +9078,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The current protocol is text-only by default; enabling this may still be rejected by the server'**
   String get promptAssistant_protocolTextOnlyWarning;
-
-  /// No description provided for @promptAssistant_addRuleTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Rule'**
-  String get promptAssistant_addRuleTitle;
-
-  /// No description provided for @promptAssistant_editRuleTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Rule'**
-  String get promptAssistant_editRuleTitle;
-
-  /// No description provided for @promptAssistant_taskType.
-  ///
-  /// In en, this message translates to:
-  /// **'Task Type'**
-  String get promptAssistant_taskType;
-
-  /// No description provided for @promptAssistant_ruleContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Rule Content'**
-  String get promptAssistant_ruleContent;
-
-  /// No description provided for @promptAssistant_newRule.
-  ///
-  /// In en, this message translates to:
-  /// **'New Rule'**
-  String get promptAssistant_newRule;
 
   /// No description provided for @autocomplete_resultsCount.
   ///
@@ -13289,66 +12977,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} images'**
   String comfyWorkflow_imageCount(Object count);
-
-  /// No description provided for @promptAssistant_defaultOptimizeRuleName.
-  ///
-  /// In en, this message translates to:
-  /// **'Default Optimize Rule'**
-  String get promptAssistant_defaultOptimizeRuleName;
-
-  /// No description provided for @promptAssistant_defaultOptimizeRuleContent.
-  ///
-  /// In en, this message translates to:
-  /// **'You are a prompt optimization assistant. Preserve the user intent, add actionable visual details, and output a single comma-separated prompt line.'**
-  String get promptAssistant_defaultOptimizeRuleContent;
-
-  /// No description provided for @promptAssistant_defaultTranslateRuleName.
-  ///
-  /// In en, this message translates to:
-  /// **'Default Translate Rule'**
-  String get promptAssistant_defaultTranslateRuleName;
-
-  /// No description provided for @promptAssistant_defaultTranslateRuleContent.
-  ///
-  /// In en, this message translates to:
-  /// **'You are a translation assistant. Detect the source language, translate between Chinese and English automatically, and return only the translation without explanation.'**
-  String get promptAssistant_defaultTranslateRuleContent;
-
-  /// No description provided for @promptAssistant_defaultReverseRuleName.
-  ///
-  /// In en, this message translates to:
-  /// **'Default Reverse Prompt Rule'**
-  String get promptAssistant_defaultReverseRuleName;
-
-  /// No description provided for @promptAssistant_defaultReverseRuleContent.
-  ///
-  /// In en, this message translates to:
-  /// **'You are an image reverse-prompt assistant. Based on the image and optional tagger results, output English comma-separated prompts suitable for NovelAI. Preserve subject, character, style, clothing, action, composition, lighting, and background. Do not explain.'**
-  String get promptAssistant_defaultReverseRuleContent;
-
-  /// No description provided for @promptAssistant_defaultCharacterReplaceRuleName.
-  ///
-  /// In en, this message translates to:
-  /// **'Default Character Replace Rule'**
-  String get promptAssistant_defaultCharacterReplaceRuleName;
-
-  /// No description provided for @promptAssistant_defaultCharacterReplaceRuleContent.
-  ///
-  /// In en, this message translates to:
-  /// **'You are a character replacement assistant. Replace the original character identity, hairstyle, outfit, and appearance in the input prompt with the target character while preserving action, composition, background, style, camera, and quality tags. Output only the replaced single-line prompt.'**
-  String get promptAssistant_defaultCharacterReplaceRuleContent;
-
-  /// No description provided for @promptAssistant_defaultCustomRuleName.
-  ///
-  /// In en, this message translates to:
-  /// **'Default Custom Rule'**
-  String get promptAssistant_defaultCustomRuleName;
-
-  /// No description provided for @promptAssistant_defaultCustomRuleContent.
-  ///
-  /// In en, this message translates to:
-  /// **'You are a prompt rewriting assistant. Modify the prompt according to the current prompt, the user request, and optional reference images. Output only the final single-line prompt that can be used directly, without explanation.'**
-  String get promptAssistant_defaultCustomRuleContent;
 
   /// No description provided for @cacheStats_title.
   ///
@@ -17966,6 +17594,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grace period'**
   String get subscriptionGracePeriod;
+
+  /// No description provided for @settings_modelsAndInterfaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Models & APIs'**
+  String get settings_modelsAndInterfaces;
+
+  /// No description provided for @promptAssistant_launcherInterfaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Launcher Interfaces'**
+  String get promptAssistant_launcherInterfaces;
+
+  /// No description provided for @promptAssistant_launcherInterfacesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind providers and models for the prompt and tag translators; unconfigured slots fall back to the first enabled provider'**
+  String get promptAssistant_launcherInterfacesSubtitle;
+
+  /// No description provided for @promptAssistant_interfaceTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt Translation'**
+  String get promptAssistant_interfaceTranslate;
+
+  /// No description provided for @promptAssistant_interfaceTagTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag Translation'**
+  String get promptAssistant_interfaceTagTranslate;
+
+  /// No description provided for @promptAssistant_noEnabledProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'No enabled providers. Add and enable one below first.'**
+  String get promptAssistant_noEnabledProviders;
 }
 
 class _AppLocalizationsDelegate

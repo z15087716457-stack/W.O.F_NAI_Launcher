@@ -218,7 +218,6 @@
   "settings_integrations": "連携",
   "settings_generationInputSection": "入力",
   "settings_generationFeedbackSection": "完了通知",
-  "settings_promptAssistant": "プロンプトアシスタント",
   "settings_selectStyle": "スタイルの選択",
   "settings_defaultPreset": "デフォルト",
   "settings_selectFont": "フォントの選択",
@@ -483,15 +482,6 @@
       "count": {}
     }
   },
-  "promptAssistant_needPrompt": "アシスタントを使用する前にプロンプトを入力してください",
-  "promptAssistant_requestFailed": "アシスタントのリクエストが失敗しました: {error}",
-  "@promptAssistant_requestFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "promptAssistant_enableAssistant": "Prompt Assistant を有効にする",
-  "promptAssistant_desktopOverlay": "デスクトップ右下のオーバーレイ",
   "kritaBridge_busyGenerating": "Krita Bridge で生成中です。現在のタスクが完了するまで待ってください。",
   "prompt_unwantedContent": "画像に含めたくないコンテンツ...",
   "prompt_smartAutocomplete": "スマート オートコンプリート",
@@ -2527,60 +2517,6 @@
   "statistics_friday": "金",
   "statistics_saturday": "土",
   "fixedTags_negativeTitle": "除外したい要素固定タグ",
-  "promptAssistant_translateProcessing": "翻訳中",
-  "promptAssistant_optimizeProcessing": "最適化中",
-  "promptAssistant_customProcessing": "カスタムリクエストを処理しています",
-  "promptAssistant_imageInputDisabled": "現在のカスタム タスク プロバイダーでは画像入力が有効になっていません",
-  "promptAssistant_assistantSettings": "アシスタントの設定",
-  "promptAssistant_serviceSettings": "サービス設定",
-  "promptAssistant_ruleSettings": "ルール設定",
-  "promptAssistant_cancelCurrentTask": "現在のタスクをキャンセル",
-  "promptAssistant_collapseAssistant": "アシスタントを折りたたむ",
-  "promptAssistant_expandAssistant": "アシスタントを展開",
-  "promptAssistant_history": "履歴",
-  "promptAssistant_undo": "元に戻す",
-  "promptAssistant_redo": "やり直し",
-  "promptAssistant_translate": "翻訳",
-  "promptAssistant_optimize": "最適化",
-  "promptAssistant_custom": "カスタム",
-  "promptAssistant_cancelTask": "タスクのキャンセル",
-  "promptAssistant_menu": "メニュー",
-  "promptAssistant_customDialogTitle": "カスタム Prompt Assistant",
-  "promptAssistant_currentPrompt": "現在のプロンプト",
-  "promptAssistant_currentPromptEmpty": "(現在のプロンプトは空です)",
-  "promptAssistant_customRequestLabel": "変更リクエスト",
-  "promptAssistant_customRequestHint": "例: より不気味にする、雨の夜の街の背景を追加する、アクションをよりダイナミックにする、最後のプロンプトのみを返す",
-  "promptAssistant_addReferenceImage": "参照画像を追加",
-  "promptAssistant_execute": "実行",
-  "promptAssistant_maxReferenceImages": "最大 {count} 個の参照画像を追加します",
-  "@promptAssistant_maxReferenceImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "promptAssistant_unsupportedImageFormat": "サポートされていない画像形式: {fileName}",
-  "@promptAssistant_unsupportedImageFormat": {
-    "placeholders": {
-      "fileName": {}
-    }
-  },
-  "promptAssistant_needCustomRequestOrImage": "カスタムリクエストを入力するか、参照画像を追加してください",
-  "promptAssistant_taskOptimize": "最適化",
-  "promptAssistant_taskTranslate": "翻訳",
-  "promptAssistant_taskReverse": "リバースプロンプト",
-  "promptAssistant_taskCharacterReplace": "キャラクター置換",
-  "promptAssistant_taskCustom": "カスタム",
-  "promptAssistant_settingsInputSwitchSubtitle": "プロンプト入力の右下にあるアシスタント スイッチ",
-  "promptAssistant_desktopOverlayTitle": "デスクトップ オーバーレイ インタラクション",
-  "promptAssistant_desktopOverlaySubtitle": "ホバー、右クリック、およびショートカットの動作を有効にする",
-  "promptAssistant_taskRouting": "タスク ルーティング",
-  "promptAssistant_taskRoutingSubtitle": "最適化、翻訳、リバースプロンプト、キャラクター置換をさまざまなプロバイダーとモデルに割り当てます",
-  "promptAssistant_taskRouteTitle": "{title} タスク",
-  "@promptAssistant_taskRouteTitle": {
-    "placeholders": {
-      "title": {}
-    }
-  },
   "promptAssistant_provider": "プロバイダー",
   "promptAssistant_model": "モデル",
   "promptAssistant_noModelsPullFirst": "モデルはまだありません。まずモデルリストを取得します",
@@ -2608,9 +2544,6 @@
       "error": {}
     }
   },
-  "promptAssistant_ruleTemplates": "ルール テンプレート",
-  "promptAssistant_ruleTemplatesSubtitle": "システム プロンプトはルール + ユーザー入力 + タスク パラメーターとして組み立てられます",
-  "promptAssistant_addRule": "ルールの追加",
   "promptAssistant_addProvider": "プロバイダーの追加",
   "promptAssistant_editProviderTitle": "プロバイダーの編集",
   "promptAssistant_name": "名前",
@@ -2628,11 +2561,6 @@
   "promptAssistant_clearCurrentApiKey": "現在の API キーをクリアします",
   "promptAssistant_protocolSupportsImagePayload": "現在のプロトコルは画像ペイロードをサポートしています。モデル自体は引き続きビジョン入力をサポートする必要があります",
   "promptAssistant_protocolTextOnlyWarning": "現在のプロトコルはデフォルトではテキストのみです。これを有効にしてもサーバーによって拒否される可能性があります",
-  "promptAssistant_addRuleTitle": "ルールの追加",
-  "promptAssistant_editRuleTitle": "ルールの編集",
-  "promptAssistant_taskType": "タスクの種類",
-  "promptAssistant_ruleContent": "ルールの内容",
-  "promptAssistant_newRule": "新しいルール",
   "autocomplete_resultsCount": "{count} 結果",
   "@autocomplete_resultsCount": {
     "placeholders": {
@@ -4065,16 +3993,6 @@
       "count": {}
     }
   },
-  "promptAssistant_defaultOptimizeRuleName": "デフォルトの最適化ルール",
-  "promptAssistant_defaultOptimizeRuleContent": "あなたはプロンプト最適化アシスタントです。ユーザーの意図を保持し、実用的な視覚的な詳細を追加し、カンマで区切られた単一のプロンプト行を出力します。",
-  "promptAssistant_defaultTranslateRuleName": "デフォルトの翻訳ルール",
-  "promptAssistant_defaultTranslateRuleContent": "あなたは翻訳アシスタントです。ソース言語を検出し、中国語と英語を自動的に翻訳し、説明なしで翻訳のみを返します。",
-  "promptAssistant_defaultReverseRuleName": "デフォルトのリバースプロンプトルール",
-  "promptAssistant_defaultReverseRuleContent": "あなたは画像のリバースプロンプトアシスタントです。画像と任意のタガー結果に基づいて、NovelAI に適した英語のカンマ区切りプロンプトを出力します。主題、キャラクター、スタイル、服装、アクション、構図、照明、背景を保持します。説明は不要です。",
-  "promptAssistant_defaultCharacterReplaceRuleName": "デフォルトのキャラクター置換ルール",
-  "promptAssistant_defaultCharacterReplaceRuleContent": "あなたはキャラクター置換アシスタントです。アクション、構成、背景、スタイル、カメラ、および品質タグを保持しながら、入力プロンプト内の元のキャラクターのアイデンティティ、髪型、衣装、外観をターゲット キャラクターに置き換えます。置換された単一行プロンプトのみを出力します。",
-  "promptAssistant_defaultCustomRuleName": "デフォルトのカスタム ルール",
-  "promptAssistant_defaultCustomRuleContent": "あなたはプロンプト書き換えアシスタントです。現在のプロンプト、ユーザー要求、およびオプションの参照イメージに従ってプロンプトを変更します。直接使用できる最後の 1 行プロンプトのみを説明なしで出力します。",
   "cacheStats_title": "キャッシュ統計",
   "cacheStats_autoRefreshUpdated": "自動更新 · 最終更新日: {time}",
   "@cacheStats_autoRefreshUpdated": {
@@ -5988,5 +5906,11 @@
     }
   },
   "subscriptionExpired": "期限切れ",
-  "subscriptionGracePeriod": "猶予期間"
+  "subscriptionGracePeriod": "猶予期間",
+  "settings_modelsAndInterfaces": "モデルとAPI",
+  "promptAssistant_launcherInterfaces": "ランチャーインターフェース",
+  "promptAssistant_launcherInterfacesSubtitle": "プロンプト翻訳とタグ翻訳にプロバイダーとモデルを個別に割り当てます。未設定の場合は最初の有効なプロバイダーを使用します",
+  "promptAssistant_interfaceTranslate": "プロンプト翻訳",
+  "promptAssistant_interfaceTagTranslate": "タグ翻訳",
+  "promptAssistant_noEnabledProviders": "有効なプロバイダーがありません。下で追加して有効にしてください。"
 }

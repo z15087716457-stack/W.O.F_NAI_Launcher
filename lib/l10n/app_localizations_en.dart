@@ -574,9 +574,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_generationFeedbackSection => 'Completion Alert';
 
   @override
-  String get settings_promptAssistant => 'Prompt Assistant';
-
-  @override
   String get settings_selectStyle => 'Select Style';
 
   @override
@@ -1099,21 +1096,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String prompt_replaceAllDone(Object count) {
     return 'Replaced $count matches';
   }
-
-  @override
-  String get promptAssistant_needPrompt =>
-      'Enter a prompt before using the assistant';
-
-  @override
-  String promptAssistant_requestFailed(Object error) {
-    return 'Assistant request failed: $error';
-  }
-
-  @override
-  String get promptAssistant_enableAssistant => 'Enable Prompt Assistant';
-
-  @override
-  String get promptAssistant_desktopOverlay => 'Desktop bottom-right overlay';
 
   @override
   String get kritaBridge_busyGenerating =>
@@ -5000,136 +4982,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fixedTags_negativeTitle => 'Undesired Content Fixed Tags';
 
   @override
-  String get promptAssistant_translateProcessing => 'Translating';
-
-  @override
-  String get promptAssistant_optimizeProcessing => 'Optimizing';
-
-  @override
-  String get promptAssistant_customProcessing => 'Processing custom request';
-
-  @override
-  String get promptAssistant_imageInputDisabled =>
-      'The current custom-task provider does not have image input enabled';
-
-  @override
-  String get promptAssistant_assistantSettings => 'Assistant Settings';
-
-  @override
-  String get promptAssistant_serviceSettings => 'Service Settings';
-
-  @override
-  String get promptAssistant_ruleSettings => 'Rule Settings';
-
-  @override
-  String get promptAssistant_cancelCurrentTask => 'Cancel Current Task';
-
-  @override
-  String get promptAssistant_collapseAssistant => 'Collapse Assistant';
-
-  @override
-  String get promptAssistant_expandAssistant => 'Expand Assistant';
-
-  @override
-  String get promptAssistant_history => 'History';
-
-  @override
-  String get promptAssistant_undo => 'Undo';
-
-  @override
-  String get promptAssistant_redo => 'Redo';
-
-  @override
-  String get promptAssistant_translate => 'Translate';
-
-  @override
-  String get promptAssistant_optimize => 'Optimize';
-
-  @override
-  String get promptAssistant_custom => 'Custom';
-
-  @override
-  String get promptAssistant_cancelTask => 'Cancel Task';
-
-  @override
-  String get promptAssistant_menu => 'Menu';
-
-  @override
-  String get promptAssistant_customDialogTitle => 'Custom Prompt Assistant';
-
-  @override
-  String get promptAssistant_currentPrompt => 'Current Prompt';
-
-  @override
-  String get promptAssistant_currentPromptEmpty => '(current prompt is empty)';
-
-  @override
-  String get promptAssistant_customRequestLabel => 'Your modification request';
-
-  @override
-  String get promptAssistant_customRequestHint =>
-      'For example: make it more ominous, add a rainy night street background, make the action more dynamic, return only the final prompt';
-
-  @override
-  String get promptAssistant_addReferenceImage => 'Add Reference Image';
-
-  @override
-  String get promptAssistant_execute => 'Run';
-
-  @override
-  String promptAssistant_maxReferenceImages(Object count) {
-    return 'Add up to $count reference images';
-  }
-
-  @override
-  String promptAssistant_unsupportedImageFormat(Object fileName) {
-    return 'Unsupported image format: $fileName';
-  }
-
-  @override
-  String get promptAssistant_needCustomRequestOrImage =>
-      'Enter a custom request or add a reference image';
-
-  @override
-  String get promptAssistant_taskOptimize => 'Optimize';
-
-  @override
-  String get promptAssistant_taskTranslate => 'Translate';
-
-  @override
-  String get promptAssistant_taskReverse => 'Reverse Prompt';
-
-  @override
-  String get promptAssistant_taskCharacterReplace => 'Character Replace';
-
-  @override
-  String get promptAssistant_taskCustom => 'Custom';
-
-  @override
-  String get promptAssistant_settingsInputSwitchSubtitle =>
-      'Assistant switch in the bottom-right of the prompt input';
-
-  @override
-  String get promptAssistant_desktopOverlayTitle =>
-      'Desktop Overlay Interaction';
-
-  @override
-  String get promptAssistant_desktopOverlaySubtitle =>
-      'Enable hover, right-click, and shortcut behavior';
-
-  @override
-  String get promptAssistant_taskRouting => 'Task Routing';
-
-  @override
-  String get promptAssistant_taskRoutingSubtitle =>
-      'Bind optimize, translate, reverse prompt, and character replacement to different providers and models';
-
-  @override
-  String promptAssistant_taskRouteTitle(Object title) {
-    return '$title Task';
-  }
-
-  @override
   String get promptAssistant_provider => 'Provider';
 
   @override
@@ -5188,16 +5040,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get promptAssistant_ruleTemplates => 'Rule Templates';
-
-  @override
-  String get promptAssistant_ruleTemplatesSubtitle =>
-      'System prompts are assembled as rules + user input + task parameters';
-
-  @override
-  String get promptAssistant_addRule => 'Add Rule';
-
-  @override
   String get promptAssistant_addProvider => 'Add Provider';
 
   @override
@@ -5239,21 +5081,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get promptAssistant_protocolTextOnlyWarning =>
       'The current protocol is text-only by default; enabling this may still be rejected by the server';
-
-  @override
-  String get promptAssistant_addRuleTitle => 'Add Rule';
-
-  @override
-  String get promptAssistant_editRuleTitle => 'Edit Rule';
-
-  @override
-  String get promptAssistant_taskType => 'Task Type';
-
-  @override
-  String get promptAssistant_ruleContent => 'Rule Content';
-
-  @override
-  String get promptAssistant_newRule => 'New Rule';
 
   @override
   String autocomplete_resultsCount(Object count) {
@@ -7534,44 +7361,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String comfyWorkflow_imageCount(Object count) {
     return '$count images';
   }
-
-  @override
-  String get promptAssistant_defaultOptimizeRuleName => 'Default Optimize Rule';
-
-  @override
-  String get promptAssistant_defaultOptimizeRuleContent =>
-      'You are a prompt optimization assistant. Preserve the user intent, add actionable visual details, and output a single comma-separated prompt line.';
-
-  @override
-  String get promptAssistant_defaultTranslateRuleName =>
-      'Default Translate Rule';
-
-  @override
-  String get promptAssistant_defaultTranslateRuleContent =>
-      'You are a translation assistant. Detect the source language, translate between Chinese and English automatically, and return only the translation without explanation.';
-
-  @override
-  String get promptAssistant_defaultReverseRuleName =>
-      'Default Reverse Prompt Rule';
-
-  @override
-  String get promptAssistant_defaultReverseRuleContent =>
-      'You are an image reverse-prompt assistant. Based on the image and optional tagger results, output English comma-separated prompts suitable for NovelAI. Preserve subject, character, style, clothing, action, composition, lighting, and background. Do not explain.';
-
-  @override
-  String get promptAssistant_defaultCharacterReplaceRuleName =>
-      'Default Character Replace Rule';
-
-  @override
-  String get promptAssistant_defaultCharacterReplaceRuleContent =>
-      'You are a character replacement assistant. Replace the original character identity, hairstyle, outfit, and appearance in the input prompt with the target character while preserving action, composition, background, style, camera, and quality tags. Output only the replaced single-line prompt.';
-
-  @override
-  String get promptAssistant_defaultCustomRuleName => 'Default Custom Rule';
-
-  @override
-  String get promptAssistant_defaultCustomRuleContent =>
-      'You are a prompt rewriting assistant. Modify the prompt according to the current prompt, the user request, and optional reference images. Output only the final single-line prompt that can be used directly, without explanation.';
 
   @override
   String get cacheStats_title => 'Cache Statistics';
@@ -10298,4 +10087,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionGracePeriod => 'Grace period';
+
+  @override
+  String get settings_modelsAndInterfaces => 'Models & APIs';
+
+  @override
+  String get promptAssistant_launcherInterfaces => 'Launcher Interfaces';
+
+  @override
+  String get promptAssistant_launcherInterfacesSubtitle =>
+      'Bind providers and models for the prompt and tag translators; unconfigured slots fall back to the first enabled provider';
+
+  @override
+  String get promptAssistant_interfaceTranslate => 'Prompt Translation';
+
+  @override
+  String get promptAssistant_interfaceTagTranslate => 'Tag Translation';
+
+  @override
+  String get promptAssistant_noEnabledProviders =>
+      'No enabled providers. Add and enable one below first.';
 }

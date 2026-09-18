@@ -36,8 +36,6 @@ import '../../../widgets/prompt/regex_rules_dialog.dart';
 import '../../../widgets/prompt/uc_preset_selector.dart';
 import '../../../widgets/character/character_prompt_button.dart';
 import '../../../providers/pending_prompt_provider.dart';
-import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
-import '../../../prompt_assistant/providers/prompt_assistant_history_provider.dart';
 
 bool usesRichPromptTypeTooltip(TargetPlatform platform) =>
     platform != TargetPlatform.windows;
@@ -355,38 +353,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     ref.read(generationParamsNotifierProvider.notifier).updatePrompt('');
     // 同时清空角色提示词
     ref.read(characterPromptNotifierProvider.notifier).clearAllCharacters();
-  }
-
-  void _openAssistantQuickSettings() {
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) {
-        return Consumer(
-          builder: (context, ref, _) {
-            final config = ref.watch(promptAssistantConfigProvider);
-            final notifier = ref.read(promptAssistantConfigProvider.notifier);
-            return SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SwitchListTile(
-                    title: Text(context.l10n.promptAssistant_enableAssistant),
-                    value: config.enabled,
-                    onChanged: notifier.setEnabled,
-                  ),
-                  SwitchListTile(
-                    title: Text(context.l10n.promptAssistant_desktopOverlay),
-                    value: config.desktopOverlayEnabled,
-                    onChanged: notifier.setDesktopOverlayEnabled,
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
   }
 
   @override
@@ -744,9 +710,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       autoGrow: widget.autoGrow,
       // 官网式：主提示词框 9 行起步，随内容继续增高（探索页 autoGrow=false 不动）
       minLines: widget.autoGrow ? 9 : null,
-      sessionId: PromptHistorySessionIds.generationPrompt,
       allowEvolutionToggle: widget.allowEvolutionToggle,
-      onOpenAssistantSettings: _openAssistantQuickSettings,
       config: UnifiedPromptConfig(
         enableSyntaxHighlight: enableHighlight,
         numericEmphasisEnabled: numericEmphasisEnabled,
@@ -903,9 +867,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       autoGrow: widget.autoGrow,
       // 同主提示词框：9 行起步（官网式）
       minLines: widget.autoGrow ? 9 : null,
-      sessionId: PromptHistorySessionIds.generationNegative,
       allowEvolutionToggle: false,
-      onOpenAssistantSettings: _openAssistantQuickSettings,
       config: UnifiedPromptConfig(
         enableSyntaxHighlight: enableHighlight,
         numericEmphasisEnabled: numericEmphasisEnabled,
@@ -945,9 +907,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             key: const ValueKey('generation_prompt_positive_input'),
             compact: true,
             minLines: 1,
-            sessionId: PromptHistorySessionIds.generationPrompt,
             allowEvolutionToggle: widget.allowEvolutionToggle,
-            onOpenAssistantSettings: _openAssistantQuickSettings,
             config: UnifiedPromptConfig(
               enableSyntaxHighlight: enableHighlight,
               numericEmphasisEnabled: numericEmphasisEnabled,

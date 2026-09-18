@@ -36,10 +36,8 @@ class PromptPillEditor extends ConsumerStatefulWidget {
     this.autoGrow = false,
     this.minLines,
     this.maxLines,
-    this.sessionId,
     this.allowEvolutionToggle = false,
     this.onChanged,
-    this.onOpenAssistantSettings,
     this.onComfyuiImport,
   });
 
@@ -62,14 +60,12 @@ class PromptPillEditor extends ConsumerStatefulWidget {
 
   /// 最大行数（角色框 3~12 自增高封顶用）；null = 随 compact 默认。
   final int? maxLines;
-  final String? sessionId;
 
   /// 是否允许在实例卡中切换遗传开关（仅画风探索页开启）。
   final bool allowEvolutionToggle;
 
   /// 投影（块已展开的完整提示词）变化回调，接旧生成参数链路。
   final ValueChanged<String>? onChanged;
-  final VoidCallback? onOpenAssistantSettings;
   final void Function(String globalPrompt, List<CharacterPrompt> characters)?
   onComfyuiImport;
 
@@ -243,11 +239,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
             child: UnifiedPromptInput(
               controller: _controller,
               focusNode: _focusNode,
-              sessionId: widget.sessionId,
               config: effectiveConfig,
               decoration: widget.decoration,
-              enableAssistant: true,
-              onOpenAssistantSettings: widget.onOpenAssistantSettings,
               onComfyuiImport: widget.onComfyuiImport == null
                   ? null
                   : _handleComfyuiImport,

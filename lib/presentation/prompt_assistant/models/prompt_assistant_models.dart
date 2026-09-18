@@ -1,24 +1,5 @@
 import 'dart:convert';
 
-enum AssistantTaskType { llm, translate, reverse, characterReplace, custom }
-
-extension AssistantTaskTypeLabel on AssistantTaskType {
-  String get label {
-    switch (this) {
-      case AssistantTaskType.llm:
-        return 'Optimize';
-      case AssistantTaskType.translate:
-        return 'Translate';
-      case AssistantTaskType.reverse:
-        return 'Reverse Prompt';
-      case AssistantTaskType.characterReplace:
-        return 'Character Replace';
-      case AssistantTaskType.custom:
-        return 'Custom';
-    }
-  }
-}
-
 // Legacy storage/UI type. New code should prefer ProviderProtocol and
 // ProviderPreset, but this remains to decode existing saved configs.
 enum ProviderType { pollinations, openaiCompatible, ollama }
@@ -467,7 +448,6 @@ class ModelConfig {
   final String providerId;
   final String name;
   final String displayName;
-  final AssistantTaskType forTask;
   final bool isDefault;
 
   /// 该模型是自动拉取（[ModelSource.api]）还是手动/默认（[ModelSource.manual]）。
@@ -479,7 +459,6 @@ class ModelConfig {
     required this.providerId,
     required this.name,
     required this.displayName,
-    required this.forTask,
     this.isDefault = false,
     this.source = ModelSource.manual,
   });
@@ -491,7 +470,6 @@ class ModelConfig {
     String? providerId,
     String? name,
     String? displayName,
-    AssistantTaskType? forTask,
     bool? isDefault,
     ModelSource? source,
   }) {
@@ -499,7 +477,6 @@ class ModelConfig {
       providerId: providerId ?? this.providerId,
       name: name ?? this.name,
       displayName: displayName ?? this.displayName,
-      forTask: forTask ?? this.forTask,
       isDefault: isDefault ?? this.isDefault,
       source: source ?? this.source,
     );
@@ -509,7 +486,6 @@ class ModelConfig {
     'providerId': providerId,
     'name': name,
     'displayName': displayName,
-    'forTask': forTask.name,
     'isDefault': isDefault,
     'source': source.name,
   };
@@ -519,10 +495,6 @@ class ModelConfig {
       providerId: json['providerId'] as String,
       name: json['name'] as String,
       displayName: json['displayName'] as String? ?? (json['name'] as String),
-      forTask: AssistantTaskType.values.firstWhere(
-        (t) => t.name == json['forTask'],
-        orElse: () => AssistantTaskType.llm,
-      ),
       isDefault: json['isDefault'] as bool? ?? false,
       // 来源迁移（关键决策点）：
       // - 新数据带有 'source' 键 → 直接采用。
@@ -538,232 +510,45 @@ class ModelConfig {
   }
 }
 
-class TaskRoutingConfig {
-  final String llmProviderId;
-  final String llmModel;
-  final String translateProviderId;
-  final String translateModel;
-  final String reverseProviderId;
-  final String reverseModel;
-  final String characterReplaceProviderId;
-  final String characterReplaceModel;
-  final String customProviderId;
-  final String customModel;
+/// 启动器级 LLM 接口槽。每个槽独立选择服务商与模型，
+/// 未配置时执行端回落到第一个启用的服务商及其首个模型。
+enum LauncherInterface {
+  /// 提示词翻译接口（FEAT-18/19 消费，当前仅持久化配置）。
+  translate,
 
-  const TaskRoutingConfig({
-    required this.llmProviderId,
-    required this.llmModel,
-    required this.translateProviderId,
-    required this.translateModel,
-    required this.reverseProviderId,
-    required this.reverseModel,
-    required this.characterReplaceProviderId,
-    required this.characterReplaceModel,
-    this.customProviderId = '',
-    this.customModel = '',
-  });
+  /// 词库标签翻译接口（自动补全的 LLM 翻译消费）。
+  tagTranslate;
 
-  TaskRoutingConfig copyWith({
-    String? llmProviderId,
-    String? llmModel,
-    String? translateProviderId,
-    String? translateModel,
-    String? reverseProviderId,
-    String? reverseModel,
-    String? characterReplaceProviderId,
-    String? characterReplaceModel,
-    String? customProviderId,
-    String? customModel,
-  }) {
-    return TaskRoutingConfig(
-      llmProviderId: llmProviderId ?? this.llmProviderId,
-      llmModel: llmModel ?? this.llmModel,
-      translateProviderId: translateProviderId ?? this.translateProviderId,
-      translateModel: translateModel ?? this.translateModel,
-      reverseProviderId: reverseProviderId ?? this.reverseProviderId,
-      reverseModel: reverseModel ?? this.reverseModel,
-      characterReplaceProviderId:
-          characterReplaceProviderId ?? this.characterReplaceProviderId,
-      characterReplaceModel:
-          characterReplaceModel ?? this.characterReplaceModel,
-      customProviderId: customProviderId ?? this.customProviderId,
-      customModel: customModel ?? this.customModel,
-    );
-  }
-
-  String providerIdFor(AssistantTaskType taskType) {
-    switch (taskType) {
-      case AssistantTaskType.llm:
-        return llmProviderId;
-      case AssistantTaskType.translate:
-        return translateProviderId;
-      case AssistantTaskType.reverse:
-        return reverseProviderId;
-      case AssistantTaskType.characterReplace:
-        return characterReplaceProviderId;
-      case AssistantTaskType.custom:
-        return customProviderId;
-    }
-  }
-
-  String modelFor(AssistantTaskType taskType) {
-    switch (taskType) {
-      case AssistantTaskType.llm:
-        return llmModel;
-      case AssistantTaskType.translate:
-        return translateModel;
-      case AssistantTaskType.reverse:
-        return reverseModel;
-      case AssistantTaskType.characterReplace:
-        return characterReplaceModel;
-      case AssistantTaskType.custom:
-        return customModel;
-    }
-  }
-
-  TaskRoutingConfig copyWithTask({
-    required AssistantTaskType taskType,
-    required String providerId,
-    required String model,
-  }) {
-    switch (taskType) {
-      case AssistantTaskType.llm:
-        return copyWith(llmProviderId: providerId, llmModel: model);
-      case AssistantTaskType.translate:
-        return copyWith(translateProviderId: providerId, translateModel: model);
-      case AssistantTaskType.reverse:
-        return copyWith(reverseProviderId: providerId, reverseModel: model);
-      case AssistantTaskType.characterReplace:
-        return copyWith(
-          characterReplaceProviderId: providerId,
-          characterReplaceModel: model,
-        );
-      case AssistantTaskType.custom:
-        return copyWith(customProviderId: providerId, customModel: model);
-    }
-  }
-
-  Map<String, dynamic> toJson() => {
-    'llmProviderId': llmProviderId,
-    'llmModel': llmModel,
-    'translateProviderId': translateProviderId,
-    'translateModel': translateModel,
-    'reverseProviderId': reverseProviderId,
-    'reverseModel': reverseModel,
-    'characterReplaceProviderId': characterReplaceProviderId,
-    'characterReplaceModel': characterReplaceModel,
-    'customProviderId': customProviderId,
-    'customModel': customModel,
-  };
-
-  factory TaskRoutingConfig.fromJson(Map<String, dynamic> json) {
-    final llmProviderId = _routingString(json, 'llmProviderId');
-    final llmModel = _routingString(json, 'llmModel');
-    return TaskRoutingConfig(
-      llmProviderId: llmProviderId,
-      llmModel: llmModel,
-      translateProviderId: _routingString(json, 'translateProviderId'),
-      translateModel: _routingString(json, 'translateModel'),
-      reverseProviderId: _routingString(
-        json,
-        'reverseProviderId',
-        fallback: llmProviderId,
-      ),
-      reverseModel: _routingString(json, 'reverseModel', fallback: llmModel),
-      characterReplaceProviderId: _routingString(
-        json,
-        'characterReplaceProviderId',
-        fallback: llmProviderId,
-      ),
-      characterReplaceModel: _routingString(
-        json,
-        'characterReplaceModel',
-        fallback: llmModel,
-      ),
-      customProviderId: _routingString(
-        json,
-        'customProviderId',
-        fallback: llmProviderId,
-      ),
-      customModel: _routingString(json, 'customModel', fallback: llmModel),
-    );
-  }
+  static LauncherInterface fromName(String? value) =>
+      LauncherInterface.values.firstWhere(
+        (interface) => interface.name == value,
+        orElse: () => LauncherInterface.translate,
+      );
 }
 
-String _routingString(
-  Map<String, dynamic> json,
-  String key, {
-  String fallback = '',
-}) {
-  final value = json[key] as String?;
-  if (value == null) {
-    return fallback;
-  }
-  final trimmed = value.trim();
-  return trimmed.isEmpty ? fallback : trimmed;
-}
+class InterfaceSlotConfig {
+  final String providerId;
 
-class PromptRuleTemplate {
-  final String id;
-  final String name;
-  final AssistantTaskType taskType;
-  final String content;
-  final bool enabled;
-  final bool isDefault;
-  final int order;
+  /// 选中的模型名；空串 = 使用该服务商的首个模型。
+  final String model;
 
-  const PromptRuleTemplate({
-    required this.id,
-    required this.name,
-    required this.taskType,
-    required this.content,
-    this.enabled = true,
-    this.isDefault = false,
-    this.order = 0,
-  });
+  const InterfaceSlotConfig({this.providerId = '', this.model = ''});
 
-  PromptRuleTemplate copyWith({
-    String? id,
-    String? name,
-    AssistantTaskType? taskType,
-    String? content,
-    bool? enabled,
-    bool? isDefault,
-    int? order,
-  }) {
-    return PromptRuleTemplate(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      taskType: taskType ?? this.taskType,
-      content: content ?? this.content,
-      enabled: enabled ?? this.enabled,
-      isDefault: isDefault ?? this.isDefault,
-      order: order ?? this.order,
+  bool get isConfigured => providerId.trim().isNotEmpty;
+
+  InterfaceSlotConfig copyWith({String? providerId, String? model}) {
+    return InterfaceSlotConfig(
+      providerId: providerId ?? this.providerId,
+      model: model ?? this.model,
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'taskType': taskType.name,
-    'content': content,
-    'enabled': enabled,
-    'isDefault': isDefault,
-    'order': order,
-  };
+  Map<String, dynamic> toJson() => {'providerId': providerId, 'model': model};
 
-  factory PromptRuleTemplate.fromJson(Map<String, dynamic> json) {
-    return PromptRuleTemplate(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      taskType: AssistantTaskType.values.firstWhere(
-        (t) => t.name == json['taskType'],
-        orElse: () => AssistantTaskType.llm,
-      ),
-      content: json['content'] as String,
-      enabled: json['enabled'] as bool? ?? true,
-      isDefault: json['isDefault'] as bool? ?? false,
-      order: (json['order'] as num?)?.toInt() ?? 0,
+  factory InterfaceSlotConfig.fromJson(Map<String, dynamic> json) {
+    return InterfaceSlotConfig(
+      providerId: (json['providerId'] as String? ?? '').trim(),
+      model: (json['model'] as String? ?? '').trim(),
     );
   }
 }
@@ -775,149 +560,75 @@ class StreamingChunk {
   const StreamingChunk({required this.delta, this.done = false});
 }
 
-class AssistantOperationResult {
-  final bool success;
-  final String content;
-  final String? error;
-
-  const AssistantOperationResult({
-    required this.success,
-    required this.content,
-    this.error,
-  });
-}
-
 class PromptAssistantConfigState {
-  final bool enabled;
-  final bool desktopOverlayEnabled;
-  final bool streamOutput;
   final List<ProviderConfig> providers;
   final List<ModelConfig> models;
-  final TaskRoutingConfig routing;
-  final List<PromptRuleTemplate> rules;
+  final Map<LauncherInterface, InterfaceSlotConfig> interfaces;
   final Map<String, bool> providerHasApiKey;
 
   const PromptAssistantConfigState({
-    required this.enabled,
-    required this.desktopOverlayEnabled,
-    required this.streamOutput,
     required this.providers,
     required this.models,
-    required this.routing,
-    required this.rules,
+    required this.interfaces,
     required this.providerHasApiKey,
   });
 
   factory PromptAssistantConfigState.defaults() {
     return const PromptAssistantConfigState(
-      enabled: true,
-      desktopOverlayEnabled: true,
-      streamOutput: false,
       providers: [],
       models: [],
-      routing: TaskRoutingConfig(
-        llmProviderId: '',
-        llmModel: '',
-        translateProviderId: '',
-        translateModel: '',
-        reverseProviderId: '',
-        reverseModel: '',
-        characterReplaceProviderId: '',
-        characterReplaceModel: '',
-        customProviderId: '',
-        customModel: '',
-      ),
-      rules: [
-        PromptRuleTemplate(
-          id: 'opt_default',
-          name: 'Default Optimize Rule',
-          taskType: AssistantTaskType.llm,
-          content:
-              'You are a prompt optimization assistant. Preserve the user intent, add actionable visual details, and output a single comma-separated prompt line.',
-          isDefault: true,
-        ),
-        PromptRuleTemplate(
-          id: 'translate_default',
-          name: 'Default Translate Rule',
-          taskType: AssistantTaskType.translate,
-          content:
-              'You are a translation assistant. Detect the source language, translate between Chinese and English automatically, and return only the translation without explanation.',
-          isDefault: true,
-        ),
-        PromptRuleTemplate(
-          id: 'reverse_default',
-          name: 'Default Reverse Prompt Rule',
-          taskType: AssistantTaskType.reverse,
-          content:
-              'You are an image reverse-prompt assistant. Based on the image and optional tagger results, output English comma-separated prompts suitable for NovelAI. Preserve subject, character, style, clothing, action, composition, lighting, and background. Do not explain.',
-          isDefault: true,
-        ),
-        PromptRuleTemplate(
-          id: 'character_replace_default',
-          name: 'Default Character Replace Rule',
-          taskType: AssistantTaskType.characterReplace,
-          content:
-              'You are a character replacement assistant. Replace the original character identity, hairstyle, outfit, and appearance in the input prompt with the target character while preserving action, composition, background, style, camera, and quality tags. Output only the replaced single-line prompt.',
-          isDefault: true,
-        ),
-        PromptRuleTemplate(
-          id: 'custom_default',
-          name: 'Default Custom Rule',
-          taskType: AssistantTaskType.custom,
-          content:
-              'You are a prompt rewriting assistant. Modify the prompt according to the current prompt, the user request, and optional reference images. Output only the final single-line prompt that can be used directly, without explanation.',
-          isDefault: true,
-        ),
-      ],
+      interfaces: {},
       providerHasApiKey: {},
     );
   }
 
+  InterfaceSlotConfig interfaceFor(LauncherInterface interface) {
+    return interfaces[interface] ?? const InterfaceSlotConfig();
+  }
+
   PromptAssistantConfigState copyWith({
-    bool? enabled,
-    bool? desktopOverlayEnabled,
-    bool? streamOutput,
     List<ProviderConfig>? providers,
     List<ModelConfig>? models,
-    TaskRoutingConfig? routing,
-    List<PromptRuleTemplate>? rules,
+    Map<LauncherInterface, InterfaceSlotConfig>? interfaces,
     Map<String, bool>? providerHasApiKey,
   }) {
     return PromptAssistantConfigState(
-      enabled: enabled ?? this.enabled,
-      desktopOverlayEnabled:
-          desktopOverlayEnabled ?? this.desktopOverlayEnabled,
-      streamOutput: false,
       providers: providers ?? this.providers,
       models: models ?? this.models,
-      routing: routing ?? this.routing,
-      rules: rules ?? this.rules,
+      interfaces: interfaces ?? this.interfaces,
       providerHasApiKey: providerHasApiKey ?? this.providerHasApiKey,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'schemaVersion': 2,
-    'enabled': enabled,
-    'desktopOverlayEnabled': desktopOverlayEnabled,
-    'streamOutput': false,
     'providers': providers.map((e) => e.toJson()).toList(),
     'models': models.map((e) => e.toJson()).toList(),
-    'routing': routing.toJson(),
-    'rules': rules.map((e) => e.toJson()).toList(),
+    'interfaces': {
+      for (final entry in interfaces.entries)
+        if (entry.value.isConfigured) entry.key.name: entry.value.toJson(),
+    },
   };
 
   String encode() => jsonEncode(toJson());
 
-  List<ModelConfig> modelsForProviderTask({
-    required String providerId,
-    required AssistantTaskType taskType,
-  }) {
-    return _modelsForProviderTask(
-      models,
-      providerId: providerId,
-      taskType: taskType,
-    );
+  List<ModelConfig> modelsForProvider({required String providerId}) {
+    final candidates = <ModelConfig>[];
+    final names = <String>{};
+    for (final model in models) {
+      if (model.providerId != providerId) continue;
+      if (!names.add(model.name)) continue;
+      candidates.add(model);
+    }
+    candidates.sort((a, b) {
+      final aPlaceholder = a.isPlaceholder;
+      final bPlaceholder = b.isPlaceholder;
+      if (aPlaceholder != bPlaceholder) {
+        return aPlaceholder ? 1 : -1;
+      }
+      return a.displayName.compareTo(b.displayName);
+    });
+    return candidates;
   }
 
   factory PromptAssistantConfigState.decode(String raw) {
@@ -932,75 +643,87 @@ class PromptAssistantConfigState {
         : defaults.providers;
 
     final modelsRaw = json['models'];
-    var decodedModels = modelsRaw is List && modelsRaw.isNotEmpty
-        ? modelsRaw
-              .map((e) => ModelConfig.fromJson(e as Map<String, dynamic>))
-              .toList()
+    var models = modelsRaw is List && modelsRaw.isNotEmpty
+        ? _dedupeModels(
+            modelsRaw
+                .map((e) => ModelConfig.fromJson(e as Map<String, dynamic>))
+                .toList(),
+          )
         : defaults.models;
-
-    var routing = TaskRoutingConfig.fromJson(
-      (json['routing'] as Map?)?.cast<String, dynamic>() ??
-          defaults.routing.toJson(),
-    );
 
     if (_isUntouchedLegacyPollinationsDefault(
       providers: providers,
-      models: decodedModels,
-      routing: routing,
+      models: models,
       schemaVersion: json['schemaVersion'] as int?,
     )) {
       providers = const [];
-      decodedModels = const [];
-      routing = defaults.routing;
+      models = const [];
     }
 
-    final models = _expandProviderModelsToAllTasks(
-      _mergeDefaultModels(decodedModels, defaults.models),
-    );
-
-    for (final taskType in AssistantTaskType.values) {
-      final providerId = routing.providerIdFor(taskType);
-      if (providerId.isNotEmpty &&
-          !providers.any((provider) => provider.id == providerId)) {
-        routing = routing.copyWithTask(
-          taskType: taskType,
-          providerId: '',
-          model: '',
-        );
-      }
-    }
-    routing = _normalizeRoutingModels(
-      routing: routing,
-      providers: providers,
-      models: models,
-    );
-
-    final rulesRaw = json['rules'];
-    final decodedRules = rulesRaw is List && rulesRaw.isNotEmpty
-        ? rulesRaw
-              .map(
-                (e) => PromptRuleTemplate.fromJson(e as Map<String, dynamic>),
-              )
-              .toList()
-        : defaults.rules;
-    final rules = _mergeDefaultRules(decodedRules, defaults.rules);
+    final interfaces = _decodeInterfaces(json, providers: providers);
 
     return PromptAssistantConfigState(
-      enabled: json['enabled'] as bool? ?? true,
-      desktopOverlayEnabled: json['desktopOverlayEnabled'] as bool? ?? true,
-      streamOutput: false,
       providers: providers,
       models: models,
-      routing: routing,
-      rules: rules,
+      interfaces: interfaces,
       providerHasApiKey: const {},
     );
+  }
+
+  /// 老版本按任务类型把同一模型复制多份（forTask 已废弃），
+  /// 解析后按 (providerId, name) 去重，只保留第一份。
+  static List<ModelConfig> _dedupeModels(List<ModelConfig> models) {
+    final seen = <String>{};
+    final result = <ModelConfig>[];
+    for (final model in models) {
+      if (seen.add('${model.providerId}\x00${model.name}')) {
+        result.add(model);
+      }
+    }
+    return result;
+  }
+
+  /// 接口槽读取：优先新的 'interfaces' 段；老配置的
+  /// 'routing.translateProviderId/translateModel' 迁移为两个接口槽的种子值；
+  /// 已删除服务商的槽位被清空，由执行端回落逻辑兜底。
+  static Map<LauncherInterface, InterfaceSlotConfig> _decodeInterfaces(
+    Map<String, dynamic> json, {
+    required List<ProviderConfig> providers,
+  }) {
+    final interfaces = <LauncherInterface, InterfaceSlotConfig>{};
+    final interfacesRaw = json['interfaces'];
+    if (interfacesRaw is Map) {
+      for (final entry in interfacesRaw.entries) {
+        if (entry.value is! Map) continue;
+        final slot = InterfaceSlotConfig.fromJson(
+          (entry.value as Map).cast<String, dynamic>(),
+        );
+        interfaces[LauncherInterface.fromName(entry.key as String?)] = slot;
+      }
+    } else {
+      final routing = json['routing'];
+      if (routing is Map) {
+        final migrated = InterfaceSlotConfig(
+          providerId: (routing['translateProviderId'] as String? ?? '').trim(),
+          model: (routing['translateModel'] as String? ?? '').trim(),
+        );
+        if (migrated.isConfigured) {
+          interfaces[LauncherInterface.translate] = migrated;
+          interfaces[LauncherInterface.tagTranslate] = migrated;
+        }
+      }
+    }
+
+    final providerIds = providers.map((provider) => provider.id).toSet();
+    interfaces.removeWhere(
+      (_, slot) => slot.isConfigured && !providerIds.contains(slot.providerId),
+    );
+    return interfaces;
   }
 
   static bool _isUntouchedLegacyPollinationsDefault({
     required List<ProviderConfig> providers,
     required List<ModelConfig> models,
-    required TaskRoutingConfig routing,
     required int? schemaVersion,
   }) {
     if (schemaVersion != null) return false;
@@ -1039,168 +762,11 @@ class PromptAssistantConfigState {
     if (models.isEmpty) {
       return false;
     }
-    for (final taskType in AssistantTaskType.values) {
-      if (taskType == AssistantTaskType.custom) continue;
-      if (routing.providerIdFor(taskType) != 'pollinations' ||
-          routing.modelFor(taskType) != 'openai-large') {
-        return false;
-      }
-    }
     return models.every(
       (model) =>
           model.providerId == 'pollinations' &&
           model.name == 'openai-large' &&
           model.isDefault,
     );
-  }
-
-  static List<ModelConfig> _mergeDefaultModels(
-    List<ModelConfig> models,
-    List<ModelConfig> defaults,
-  ) {
-    final result = [...models];
-    for (final fallback in defaults) {
-      final exists = result.any(
-        (m) =>
-            m.providerId == fallback.providerId &&
-            m.name == fallback.name &&
-            m.forTask == fallback.forTask,
-      );
-      if (!exists) {
-        result.add(fallback);
-      }
-    }
-    return result;
-  }
-
-  static List<ModelConfig> _expandProviderModelsToAllTasks(
-    List<ModelConfig> models,
-  ) {
-    final result = [...models];
-    final namesByProvider = <String, Map<String, ModelConfig>>{};
-
-    for (final model in result) {
-      namesByProvider.putIfAbsent(model.providerId, () => {})[model.name] =
-          model;
-    }
-
-    for (final entry in namesByProvider.entries) {
-      for (final model in entry.value.values) {
-        for (final taskType in AssistantTaskType.values) {
-          final exists = result.any(
-            (candidate) =>
-                candidate.providerId == model.providerId &&
-                candidate.name == model.name &&
-                candidate.forTask == taskType,
-          );
-          if (!exists) {
-            result.add(model.copyWith(forTask: taskType));
-          }
-        }
-      }
-    }
-
-    return result;
-  }
-
-  static TaskRoutingConfig _normalizeRoutingModels({
-    required TaskRoutingConfig routing,
-    required List<ProviderConfig> providers,
-    required List<ModelConfig> models,
-  }) {
-    var next = routing;
-
-    for (final taskType in AssistantTaskType.values) {
-      final providerId = next.providerIdFor(taskType);
-      if (providerId.isEmpty ||
-          !providers.any((provider) => provider.id == providerId)) {
-        continue;
-      }
-
-      final candidates = _modelsForProviderTask(
-        models,
-        providerId: providerId,
-        taskType: taskType,
-      );
-      if (candidates.isEmpty) {
-        continue;
-      }
-
-      final routedModel = next.modelFor(taskType);
-      final hasRoutedModel = candidates.any(
-        (candidate) => candidate.name == routedModel,
-      );
-      final isPlaceholderRoute =
-          routedModel.trim().isEmpty || routedModel.trim() == 'default-model';
-      final shouldReplacePlaceholder =
-          isPlaceholderRoute &&
-          candidates.any((candidate) => !candidate.isPlaceholder);
-
-      if (!hasRoutedModel || shouldReplacePlaceholder) {
-        next = next.copyWithTask(
-          taskType: taskType,
-          providerId: providerId,
-          model: candidates.first.name,
-        );
-      }
-    }
-
-    return next;
-  }
-
-  static List<ModelConfig> _modelsForProviderTask(
-    List<ModelConfig> source, {
-    required String providerId,
-    required AssistantTaskType taskType,
-  }) {
-    final candidates = <ModelConfig>[];
-    final names = <String>{};
-
-    void addCandidate(ModelConfig model) {
-      if (!names.add(model.name)) {
-        return;
-      }
-      candidates.add(model.copyWith(forTask: taskType));
-    }
-
-    for (final model in source) {
-      if (model.providerId == providerId && model.forTask == taskType) {
-        addCandidate(model);
-      }
-    }
-
-    for (final model in source) {
-      if (model.providerId == providerId) {
-        addCandidate(model);
-      }
-    }
-
-    candidates.sort((a, b) {
-      final aPlaceholder = a.isPlaceholder;
-      final bPlaceholder = b.isPlaceholder;
-      if (aPlaceholder != bPlaceholder) {
-        return aPlaceholder ? 1 : -1;
-      }
-      return a.displayName.compareTo(b.displayName);
-    });
-
-    return candidates;
-  }
-
-  static List<PromptRuleTemplate> _mergeDefaultRules(
-    List<PromptRuleTemplate> rules,
-    List<PromptRuleTemplate> defaults,
-  ) {
-    final result = [...rules];
-    for (final fallback in defaults) {
-      final index = result.indexWhere((r) => r.id == fallback.id);
-      if (index >= 0) {
-        result[index] = result[index].copyWith(isDefault: true);
-      } else {
-        result.add(fallback);
-      }
-    }
-    result.sort((a, b) => a.order.compareTo(b.order));
-    return result;
   }
 }

@@ -16,12 +16,6 @@ import '../../../screens/prompt_block_library/widgets/prompt_block_edit_dialog.d
 import '../../autocomplete/autocomplete_wrapper.dart';
 import '../../common/app_toast.dart';
 import '../../common/weight_adjust_toolbar.dart';
-import '../../../prompt_assistant/models/prompt_assistant_models.dart';
-import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
-import '../../../prompt_assistant/providers/prompt_assistant_history_provider.dart';
-import '../../../prompt_assistant/providers/prompt_assistant_state_provider.dart';
-import '../../../prompt_assistant/services/prompt_assistant_service.dart';
-import '../../../prompt_assistant/widgets/prompt_assistant_overlay.dart';
 import '../../../providers/prompt_regex_rules_provider.dart';
 import '../comfyui_import_wrapper.dart';
 import '../nai_syntax_controller.dart';
@@ -79,15 +73,6 @@ class UnifiedPromptInput extends ConsumerStatefulWidget {
   /// 父级高度无界时必须为 true，否则 StackFit.expand 会得到无穷高度约束。
   final bool fitContent;
 
-  /// 输入框会话标识（用于历史栈隔离）
-  final String? sessionId;
-
-  /// 是否显示右下角助手
-  final bool enableAssistant;
-
-  /// 打开助手设置回调
-  final VoidCallback? onOpenAssistantSettings;
-
   /// ComfyUI 多角色导入回调
   ///
   /// 当用户确认导入 ComfyUI 格式的多角色提示词时触发。
@@ -108,9 +93,6 @@ class UnifiedPromptInput extends ConsumerStatefulWidget {
     this.minLines,
     this.expands = false,
     this.fitContent = false,
-    this.sessionId,
-    this.enableAssistant = true,
-    this.onOpenAssistantSettings,
     this.onComfyuiImport,
   });
 
@@ -131,8 +113,6 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
   /// 焦点节点
   FocusNode? _internalFocusNode;
 
-  StreamSubscription<StreamingChunk>? _assistantStreamSub;
-  late String _sessionId;
   late final TextEditingController _searchController;
   late final FocusNode _searchFocusNode;
   late final TextEditingController _replaceController;
@@ -222,28 +202,6 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       }
     }
 
-    if (!promptFocused || searchFocused || replaceFocused) {
-      return false;
-    }
-
-    if (!widget.enableAssistant) {
-      return false;
-    }
-
-    final assistantConfig = ref.read(promptAssistantConfigProvider);
-    if (!assistantConfig.enabled || !assistantConfig.desktopOverlayEnabled) {
-      return false;
-    }
-
-    if (isCtrl && isShift && logicalKey == LogicalKeyboardKey.keyE) {
-      unawaited(_runAssistantAction(AssistantTaskType.llm));
-      return true;
-    }
-    if (isCtrl && isShift && logicalKey == LogicalKeyboardKey.keyT) {
-      unawaited(_runAssistantAction(AssistantTaskType.translate));
-      return true;
-    }
-
     return false;
   }
 
@@ -255,19 +213,10 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     return widget.focusNode ?? _internalFocusNode!;
   }
 
-  String _resolveSessionId(String? sessionId) {
-    final providedSessionId = sessionId?.trim();
-    if (providedSessionId != null && providedSessionId.isNotEmpty) {
-      return providedSessionId;
-    }
-    return 'prompt_${identityHashCode(this)}';
-  }
-
   @override
   void initState() {
     super.initState();
     _effectiveControllerProvider = () => _effectiveController;
-    _sessionId = _resolveSessionId(widget.sessionId);
 
     // 官网的竖线装饰独立于强调开关，因此始终使用语法控制器。
     final initialText = widget.controller?.text ?? '';
@@ -315,10 +264,6 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       newEffectiveFocusNode.addListener(_onFocusChanged);
     }
 
-    if (widget.sessionId != oldWidget.sessionId) {
-      _sessionId = _resolveSessionId(widget.sessionId);
-    }
-
     // 外部控制器变化
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_syncFromExternalController);
@@ -346,7 +291,6 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
 
   @override
   void dispose() {
-    _assistantStreamSub?.cancel();
     _searchController.removeListener(_onSearchQueryChanged);
     _clearSearchHighlights();
     HardwareKeyboard.instance.removeHandler(_handleHardwareKeyEvent);
@@ -362,83 +306,10 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     super.dispose();
   }
 
-  Future<void> _runAssistantAction(AssistantTaskType taskType) async {
-    final text = _assistantInputText().trim();
-    if (text.isEmpty) {
-      if (mounted) {
-        AppToast.warning(context, context.l10n.promptAssistant_needPrompt);
-      }
-      return;
-    }
-
-    final beforeText = _effectiveController.text;
-    ref
-        .read(promptAssistantHistoryProvider.notifier)
-        .push(_sessionId, beforeText);
-
-    final stateNotifier = ref.read(promptAssistantStateProvider.notifier);
-    final label = taskType == AssistantTaskType.llm
-        ? context.l10n.promptAssistant_optimizeProcessing
-        : context.l10n.promptAssistant_translateProcessing;
-    stateNotifier.startProcessing(_sessionId, label);
-
-    final service = ref.read(promptAssistantServiceProvider);
-    final buffer = StringBuffer();
-
-    await _assistantStreamSub?.cancel();
-    final stream = taskType == AssistantTaskType.llm
-        ? service.optimizePrompt(text, sessionId: _sessionId)
-        : service.translatePrompt(text, sessionId: _sessionId);
-
-    _assistantStreamSub = stream.listen(
-      (chunk) {
-        if (chunk.done) return;
-        if (chunk.delta.isEmpty) return;
-        buffer.write(chunk.delta);
-      },
-      onError: (e) {
-        stateNotifier.setError(_sessionId, e.toString());
-        if (mounted) {
-          AppToast.error(
-            context,
-            context.l10n.promptAssistant_requestFailed(e),
-          );
-        }
-      },
-      onDone: () {
-        if (buffer.isNotEmpty) {
-          final finalText = buffer.toString();
-          _effectiveController.text = finalText;
-          _effectiveController.selection = TextSelection.collapsed(
-            offset: _effectiveController.text.length,
-          );
-        }
-        stateNotifier.finishProcessing(_sessionId);
-        final afterText = _effectiveController.text;
-        ref
-            .read(promptAssistantHistoryProvider.notifier)
-            .recordExternalChange(
-              _sessionId,
-              before: beforeText,
-              after: afterText,
-            );
-        ref
-            .read(promptAssistantHistoryProvider.notifier)
-            .push(_sessionId, afterText);
-      },
-      cancelOnError: true,
-    );
-  }
-
-  String _assistantInputText() => _effectiveController.text;
-
   /// 焦点变化回调
   void _onFocusChanged() {
     if (!_effectiveFocusNode.hasFocus) {
       _formatOnBlur();
-      ref
-          .read(promptAssistantHistoryProvider.notifier)
-          .push(_sessionId, _effectiveController.text);
     }
   }
 
@@ -837,8 +708,6 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       newText,
       caretOffset: caretOffset,
       selectNextMatch: false,
-      // 全部替换是一次性的批量改写，纳入外部历史栈后可用助手浮层撤销。
-      recordHistory: true,
     );
 
     if (mounted) {
@@ -861,7 +730,6 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     String newText, {
     required int caretOffset,
     required bool selectNextMatch,
-    bool recordHistory = false,
   }) {
     final beforeText = _effectiveController.text;
     if (newText == beforeText) {
@@ -883,12 +751,6 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
 
     // 程序化改写不会触发 TextField.onChanged，需要手动通知外部。
     widget.onChanged?.call(newText);
-
-    if (recordHistory) {
-      ref
-          .read(promptAssistantHistoryProvider.notifier)
-          .recordExternalChange(_sessionId, before: beforeText, after: newText);
-    }
 
     _refreshSearchMatches(
       preserveActive: false,
@@ -1048,15 +910,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
 
     final inputStack = Stack(
       fit: widget.fitContent ? StackFit.loose : StackFit.expand,
-      children: [
-        result,
-        if (widget.enableAssistant)
-          PromptAssistantOverlay(
-            sessionId: _sessionId,
-            controller: _effectiveController,
-            onOpenSettings: widget.onOpenAssistantSettings,
-          ),
-      ],
+      children: [result],
     );
 
     if (!_searchVisible) {
@@ -1284,20 +1138,9 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
   /// 构建文本输入框
   Widget _buildTextField() {
     final enableWheelAdjustment = ref.watch(promptWeightScrollSettingsProvider);
-    final assistantConfig = widget.enableAssistant
-        ? ref.watch(promptAssistantConfigProvider)
-        : null;
-    final shouldReserveAssistantSpace =
-        assistantConfig != null &&
-        assistantConfig.enabled &&
-        (!_isDesktop || assistantConfig.desktopOverlayEnabled);
-    final requestedContentPadding =
+    final effectiveContentPadding =
         widget.decoration?.contentPadding ??
         const EdgeInsets.symmetric(horizontal: 12, vertical: 10);
-    final effectiveContentPadding = _withAssistantBottomClearance(
-      requestedContentPadding,
-      reserveSpace: shouldReserveAssistantSpace,
-    );
 
     // 合并 decoration：优先使用传入的 decoration，但保留 config 中的 hintText
     final effectiveDecoration =
@@ -1397,23 +1240,6 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     }
 
     return result;
-  }
-
-  EdgeInsetsGeometry _withAssistantBottomClearance(
-    EdgeInsetsGeometry contentPadding, {
-    required bool reserveSpace,
-  }) {
-    if (!reserveSpace) {
-      return contentPadding;
-    }
-
-    final resolved = contentPadding.resolve(Directionality.of(context));
-    if (resolved.bottom >= PromptAssistantOverlay.contentBottomClearance) {
-      return resolved;
-    }
-    return resolved.copyWith(
-      bottom: PromptAssistantOverlay.contentBottomClearance,
-    );
   }
 }
 

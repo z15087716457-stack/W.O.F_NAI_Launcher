@@ -7,8 +7,6 @@ import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
-import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_state_provider.dart';
-import 'package:nai_launcher/presentation/prompt_assistant/widgets/prompt_assistant_overlay.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
@@ -19,8 +17,6 @@ import 'package:nai_launcher/presentation/screens/generation/widgets/prompt_inpu
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'package:nai_launcher/presentation/widgets/common/weight_adjust_toolbar.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_input.dart';
 
 void main() {
   test('Windows 下提示词切换按钮不使用富文本 Tooltip', () {
@@ -452,81 +448,6 @@ void main() {
     expect(input.scrollPhysics, isNull);
   });
 
-  testWidgets('expanded prompt assistant does not cover editable prompt text', (
-    tester,
-  ) async {
-    const sessionId = 'assistant_clearance_test';
-    final controller = TextEditingController(
-      text: List.filled(12, 'long prompt tag').join(', '),
-    );
-    addTearDown(controller.dispose);
-    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
-
-    try {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            promptBlockLibraryNotifierProvider.overrideWith(
-              _EmptyPromptBlockLibraryNotifier.new,
-            ),
-            localStorageServiceProvider.overrideWith(
-              (ref) => _TestLocalStorageService(),
-            ),
-          ],
-          child: MaterialApp(
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            home: Scaffold(
-              body: SizedBox(
-                width: 720,
-                height: 72,
-                child: UnifiedPromptInput(
-                  controller: controller,
-                  sessionId: sessionId,
-                  config: const UnifiedPromptConfig(
-                    enableAutocomplete: false,
-                    enableSyntaxHighlight: false,
-                  ),
-                  decoration: const InputDecoration(
-                    contentPadding: EdgeInsets.all(12),
-                  ),
-                  maxLines: null,
-                  expands: true,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(UnifiedPromptInput)),
-      );
-      container
-          .read(promptAssistantStateProvider.notifier)
-          .setExpanded(sessionId, true);
-      await tester.pump();
-
-      final textField = tester.widget<TextField>(find.byType(TextField));
-      final padding = textField.decoration!.contentPadding!.resolve(
-        TextDirection.ltr,
-      );
-      final toolbar = find.byKey(
-        const ValueKey<String>('prompt_assistant_toolbar_$sessionId'),
-      );
-      final editableRect = tester.getRect(find.byType(EditableText));
-      final toolbarRect = tester.getRect(toolbar);
-
-      expect(padding.bottom, PromptAssistantOverlay.contentBottomClearance);
-      expect(toolbar, findsOneWidget);
-      expect(editableRect.height, greaterThanOrEqualTo(18));
-      expect(editableRect.bottom, lessThanOrEqualTo(toolbarRect.top));
-      expect(tester.takeException(), isNull);
-    } finally {
-      debugDefaultTargetPlatformOverride = null;
-    }
-  });
-
   testWidgets('外部 provider 写入后编辑器同步显示新文本（协调器不依赖组件兜底）', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -726,7 +647,6 @@ class _TestLocalStorageService extends LocalStorageService {
 
   @override
   String getLastNoiseSchedule() => 'native';
-
 }
 
 class _TestCharacterPromptNotifier extends CharacterPromptNotifier {

@@ -556,9 +556,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_generationFeedbackSection => '完成提醒';
 
   @override
-  String get settings_promptAssistant => '提示词助手';
-
-  @override
   String get settings_selectStyle => '选择风格';
 
   @override
@@ -1061,20 +1058,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String prompt_replaceAllDone(Object count) {
     return '已替换 $count 处';
   }
-
-  @override
-  String get promptAssistant_needPrompt => '请输入提示词后再操作';
-
-  @override
-  String promptAssistant_requestFailed(Object error) {
-    return '助手请求失败: $error';
-  }
-
-  @override
-  String get promptAssistant_enableAssistant => '启用提示词助手';
-
-  @override
-  String get promptAssistant_desktopOverlay => '桌面右下角浮层';
 
   @override
   String get kritaBridge_busyGenerating => 'Krita Bridge 正在生成，请等待当前任务结束';
@@ -4820,130 +4803,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fixedTags_negativeTitle => '负向固定词';
 
   @override
-  String get promptAssistant_translateProcessing => '翻译中';
-
-  @override
-  String get promptAssistant_optimizeProcessing => '优化中';
-
-  @override
-  String get promptAssistant_customProcessing => '自定义处理中';
-
-  @override
-  String get promptAssistant_imageInputDisabled => '当前自定义任务服务商未启用图片输入';
-
-  @override
-  String get promptAssistant_assistantSettings => '助手设置';
-
-  @override
-  String get promptAssistant_serviceSettings => '服务设置';
-
-  @override
-  String get promptAssistant_ruleSettings => '规则设置';
-
-  @override
-  String get promptAssistant_cancelCurrentTask => '取消当前任务';
-
-  @override
-  String get promptAssistant_collapseAssistant => '收起助手';
-
-  @override
-  String get promptAssistant_expandAssistant => '展开助手';
-
-  @override
-  String get promptAssistant_history => '历史';
-
-  @override
-  String get promptAssistant_undo => '撤销';
-
-  @override
-  String get promptAssistant_redo => '重做';
-
-  @override
-  String get promptAssistant_translate => '翻译';
-
-  @override
-  String get promptAssistant_optimize => '优化';
-
-  @override
-  String get promptAssistant_custom => '自定义';
-
-  @override
-  String get promptAssistant_cancelTask => '取消任务';
-
-  @override
-  String get promptAssistant_menu => '菜单';
-
-  @override
-  String get promptAssistant_customDialogTitle => '自定义提示词助手';
-
-  @override
-  String get promptAssistant_currentPrompt => '当前提示词';
-
-  @override
-  String get promptAssistant_currentPromptEmpty => '（当前提示词为空）';
-
-  @override
-  String get promptAssistant_customRequestLabel => '你的修改需求';
-
-  @override
-  String get promptAssistant_customRequestHint =>
-      '例如：更阴森、增加雨夜街道背景、让动作更有张力，只返回最终提示词';
-
-  @override
-  String get promptAssistant_addReferenceImage => '添加参考图';
-
-  @override
-  String get promptAssistant_execute => '执行';
-
-  @override
-  String promptAssistant_maxReferenceImages(Object count) {
-    return '最多添加 $count 张参考图片';
-  }
-
-  @override
-  String promptAssistant_unsupportedImageFormat(Object fileName) {
-    return '不支持的图片格式: $fileName';
-  }
-
-  @override
-  String get promptAssistant_needCustomRequestOrImage => '请输入自定义需求或添加参考图片';
-
-  @override
-  String get promptAssistant_taskOptimize => '优化';
-
-  @override
-  String get promptAssistant_taskTranslate => '翻译';
-
-  @override
-  String get promptAssistant_taskReverse => '反推';
-
-  @override
-  String get promptAssistant_taskCharacterReplace => '角色替换';
-
-  @override
-  String get promptAssistant_taskCustom => '自定义';
-
-  @override
-  String get promptAssistant_settingsInputSwitchSubtitle => '输入框右下角助手开关';
-
-  @override
-  String get promptAssistant_desktopOverlayTitle => '桌面浮层交互';
-
-  @override
-  String get promptAssistant_desktopOverlaySubtitle => '启用 hover / 右键 / 快捷键行为';
-
-  @override
-  String get promptAssistant_taskRouting => '任务路由';
-
-  @override
-  String get promptAssistant_taskRoutingSubtitle => '优化、翻译、反推、角色替换可绑定不同服务商和模型';
-
-  @override
-  String promptAssistant_taskRouteTitle(Object title) {
-    return '$title任务';
-  }
-
-  @override
   String get promptAssistant_provider => '服务商';
 
   @override
@@ -5000,16 +4859,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get promptAssistant_ruleTemplates => '规则模板';
-
-  @override
-  String get promptAssistant_ruleTemplatesSubtitle =>
-      '系统提示词按“规则 + 用户输入 + 任务参数”组装';
-
-  @override
-  String get promptAssistant_addRule => '新增规则';
-
-  @override
   String get promptAssistant_addProvider => '新增服务商';
 
   @override
@@ -5048,21 +4897,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get promptAssistant_protocolTextOnlyWarning =>
       '当前协议默认仅文本，开启后也可能被服务端拒绝';
-
-  @override
-  String get promptAssistant_addRuleTitle => '新增规则';
-
-  @override
-  String get promptAssistant_editRuleTitle => '编辑规则';
-
-  @override
-  String get promptAssistant_taskType => '任务类型';
-
-  @override
-  String get promptAssistant_ruleContent => '规则内容';
-
-  @override
-  String get promptAssistant_newRule => '新规则';
 
   @override
   String autocomplete_resultsCount(Object count) {
@@ -7271,41 +7105,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String comfyWorkflow_imageCount(Object count) {
     return '$count 张图像';
   }
-
-  @override
-  String get promptAssistant_defaultOptimizeRuleName => '默认优化规则';
-
-  @override
-  String get promptAssistant_defaultOptimizeRuleContent =>
-      '你是提示词优化助手。保留用户意图，补充可执行的视觉细节，并只输出一行可直接使用的逗号分隔提示词。';
-
-  @override
-  String get promptAssistant_defaultTranslateRuleName => '默认翻译规则';
-
-  @override
-  String get promptAssistant_defaultTranslateRuleContent =>
-      '你是翻译助手。自动识别源语言，在中文和英文之间翻译，并只返回译文，不要解释。';
-
-  @override
-  String get promptAssistant_defaultReverseRuleName => '默认反推规则';
-
-  @override
-  String get promptAssistant_defaultReverseRuleContent =>
-      '你是图像反推提示词助手。根据图像和可选 tagger 结果，输出适用于 NovelAI 的英文逗号分隔提示词。保留主体、角色、风格、服装、动作、构图、光照和背景。不要解释。';
-
-  @override
-  String get promptAssistant_defaultCharacterReplaceRuleName => '默认角色替换规则';
-
-  @override
-  String get promptAssistant_defaultCharacterReplaceRuleContent =>
-      '你是角色替换助手。将输入提示词中的原角色身份、发型、服装和外观替换为目标角色，同时保留动作、构图、背景、风格、镜头和质量标签。只输出替换后的一行提示词。';
-
-  @override
-  String get promptAssistant_defaultCustomRuleName => '默认自定义规则';
-
-  @override
-  String get promptAssistant_defaultCustomRuleContent =>
-      '你是提示词改写助手。根据当前提示词、用户需求和可选参考图修改提示词。只输出最终可直接使用的一行提示词，不要解释。';
 
   @override
   String get cacheStats_title => '缓存统计';
@@ -9932,4 +9731,23 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get subscriptionGracePeriod => '宽限期';
+
+  @override
+  String get settings_modelsAndInterfaces => '模型与接口';
+
+  @override
+  String get promptAssistant_launcherInterfaces => '启动器接口';
+
+  @override
+  String get promptAssistant_launcherInterfacesSubtitle =>
+      '提示词翻译与词库标签翻译可分别绑定服务商与模型；未配置时使用第一个启用的服务商';
+
+  @override
+  String get promptAssistant_interfaceTranslate => '提示词翻译';
+
+  @override
+  String get promptAssistant_interfaceTagTranslate => '词库标签翻译';
+
+  @override
+  String get promptAssistant_noEnabledProviders => '暂无启用的服务商，请先在下方添加并启用';
 }

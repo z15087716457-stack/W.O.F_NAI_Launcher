@@ -66,16 +66,6 @@ class PromptAssistantConfigNotifier
     state = state.copyWith(providerHasApiKey: next);
   }
 
-  Future<void> setEnabled(bool enabled) async {
-    state = state.copyWith(enabled: enabled);
-    await _save();
-  }
-
-  Future<void> setDesktopOverlayEnabled(bool value) async {
-    state = state.copyWith(desktopOverlayEnabled: value);
-    await _save();
-  }
-
   Future<void> upsertProvider(ProviderConfig provider) async {
     final providers = [...state.providers];
     final idx = providers.indexWhere((p) => p.id == provider.id);
@@ -93,66 +83,25 @@ class PromptAssistantConfigNotifier
     final models = state.models
         .where((m) => m.providerId != providerId)
         .toList();
-    var routing = state.routing;
-    for (final taskType in AssistantTaskType.values) {
-      if (routing.providerIdFor(taskType) == providerId) {
-        final fallback = _firstAvailableRoute(
-          providers: providers,
-          models: models,
-          taskType: taskType,
-        );
-        routing = routing.copyWithTask(
-          taskType: taskType,
-          providerId: fallback.providerId,
-          model: fallback.model,
-        );
-      }
-    }
+    final interfaces = Map<LauncherInterface, InterfaceSlotConfig>.from(
+      state.interfaces,
+    )..removeWhere((_, slot) => slot.providerId == providerId);
     final keys = Map<String, bool>.from(state.providerHasApiKey)
       ..remove(providerId);
     state = state.copyWith(
       providers: providers,
       models: models,
-      routing: routing,
+      interfaces: interfaces,
       providerHasApiKey: keys,
     );
     await _secure.deletePromptAssistantApiKey(providerId);
     await _save();
   }
 
-  ({String providerId, String model}) _firstAvailableRoute({
-    required List<ProviderConfig> providers,
-    required List<ModelConfig> models,
-    required AssistantTaskType taskType,
-  }) {
-    for (final provider in providers) {
-      if (!provider.enabled) continue;
-      final providerModels = models
-          .where((m) => m.providerId == provider.id && m.forTask == taskType)
-          .toList();
-      final realModel = providerModels.cast<ModelConfig?>().firstWhere(
-        (model) => model != null && !model.isPlaceholder,
-        orElse: () => null,
-      );
-      if (realModel != null) {
-        return (providerId: provider.id, model: realModel.name);
-      }
-      final presetModels = provider.preset?.defaultModelNames ?? const [];
-      final presetModel = presetModels.isEmpty ? '' : presetModels.first;
-      if (presetModel.isNotEmpty) {
-        return (providerId: provider.id, model: presetModel);
-      }
-    }
-    return (providerId: '', model: '');
-  }
-
   Future<void> upsertModel(ModelConfig model) async {
     final models = [...state.models];
     final idx = models.indexWhere(
-      (m) =>
-          m.providerId == model.providerId &&
-          m.name == model.name &&
-          m.forTask == model.forTask,
+      (m) => m.providerId == model.providerId && m.name == model.name,
     );
     if (idx >= 0) {
       models[idx] = model;
@@ -167,7 +116,7 @@ class PromptAssistantConfigNotifier
   /// - 新增接口里出现、但本地缺失的模型（标记为 [ModelSource.api]）；
   /// - 删除本地 [ModelSource.api] 来源、但已不在接口列表里的“弃用”模型；
   /// - 保留所有 [ModelSource.manual]（手动/默认/占位）模型；
-  /// - 若某任务路由指向被清理的模型，自动迁移到最新列表的首个模型。
+  /// - 指向被清理模型的接口槽恢复为“使用该服务商首个模型”。
   ///
   /// 返回被清理掉的弃用模型名（去重），便于 UI 反馈。
   Future<List<String>> syncProviderModels(
@@ -199,46 +148,37 @@ class PromptAssistantConfigNotifier
       models.add(model);
     }
 
-    for (final task in AssistantTaskType.values) {
-      for (final name in incoming) {
-        final exists = models.any(
-          (m) =>
-              m.providerId == providerId && m.forTask == task && m.name == name,
+    for (final name in incoming) {
+      final exists = models.any(
+        (m) => m.providerId == providerId && m.name == name,
+      );
+      if (!exists) {
+        models.add(
+          ModelConfig(
+            providerId: providerId,
+            name: name,
+            displayName: name,
+            source: ModelSource.api,
+          ),
         );
-        if (!exists) {
-          models.add(
-            ModelConfig(
-              providerId: providerId,
-              name: name,
-              displayName: name,
-              forTask: task,
-              source: ModelSource.api,
-            ),
-          );
-        }
       }
     }
 
-    var routing = state.routing;
-    for (final taskType in AssistantTaskType.values) {
-      if (routing.providerIdFor(taskType) != providerId) continue;
-      final current = routing.modelFor(taskType);
+    final interfaces = Map<LauncherInterface, InterfaceSlotConfig>.from(
+      state.interfaces,
+    );
+    for (final entry in interfaces.entries.toList()) {
+      final slot = entry.value;
+      if (slot.providerId != providerId || slot.model.isEmpty) continue;
       final stillExists = models.any(
-        (m) =>
-            m.providerId == providerId &&
-            m.forTask == taskType &&
-            m.name == current,
+        (m) => m.providerId == providerId && m.name == slot.model,
       );
       if (!stillExists) {
-        routing = routing.copyWithTask(
-          taskType: taskType,
-          providerId: providerId,
-          model: incoming.first,
-        );
+        interfaces[entry.key] = slot.copyWith(model: '');
       }
     }
 
-    state = state.copyWith(models: models, routing: routing);
+    state = state.copyWith(models: models, interfaces: interfaces);
     await _save();
     return removed.toList();
   }
@@ -246,53 +186,54 @@ class PromptAssistantConfigNotifier
   Future<void> deleteModel(ModelConfig model) async {
     final models = [...state.models]
       ..removeWhere(
-        (m) =>
-            m.providerId == model.providerId &&
-            m.name == model.name &&
-            m.forTask == model.forTask,
+        (m) => m.providerId == model.providerId && m.name == model.name,
       );
     state = state.copyWith(models: models);
     await _save();
   }
 
-  Future<void> setRouting(TaskRoutingConfig routing) async {
-    state = state.copyWith(routing: routing);
-    await _save();
-  }
-
-  Future<void> upsertRule(PromptRuleTemplate rule) async {
-    final rules = [...state.rules];
-    final idx = rules.indexWhere((r) => r.id == rule.id);
-    if (idx >= 0) {
-      rules[idx] = rule;
-    } else {
-      rules.add(rule);
-    }
-    state = state.copyWith(rules: rules);
-    await _save();
-  }
-
-  Future<void> removeRule(String ruleId) async {
-    final matchingRules = state.rules.where((r) => r.id == ruleId);
-    if (matchingRules.isNotEmpty && matchingRules.first.isDefault) {
-      return;
-    }
-    state = state.copyWith(
-      rules: state.rules.where((r) => r.id != ruleId).toList(),
+  /// 设置接口槽的服务商；模型自动落到该服务商的首个可用模型
+  /// （无可用模型时记空串 = 执行端按“首个模型”语义回落）。
+  Future<void> setInterfaceProvider(
+    LauncherInterface interface,
+    String providerId,
+  ) async {
+    final models = state.modelsForProvider(providerId: providerId);
+    final firstReal = models.cast<ModelConfig?>().firstWhere(
+      (model) => model != null && !model.isPlaceholder,
+      orElse: () => null,
+    );
+    _setInterfaceSlot(
+      interface,
+      InterfaceSlotConfig(providerId: providerId, model: firstReal?.name ?? ''),
     );
     await _save();
   }
 
-  Future<void> reorderRules(List<String> orderedIds) async {
-    final orderMap = <String, int>{
-      for (var i = 0; i < orderedIds.length; i++) orderedIds[i]: i,
-    };
-    final updated =
-        state.rules
-            .map((r) => r.copyWith(order: orderMap[r.id] ?? r.order))
-            .toList()
-          ..sort((a, b) => a.order.compareTo(b.order));
-    state = state.copyWith(rules: updated);
+  Future<void> setInterfaceModel(
+    LauncherInterface interface,
+    String providerId,
+    String model,
+  ) async {
+    _setInterfaceSlot(
+      interface,
+      InterfaceSlotConfig(providerId: providerId, model: model),
+    );
     await _save();
+  }
+
+  void _setInterfaceSlot(
+    LauncherInterface interface,
+    InterfaceSlotConfig slot,
+  ) {
+    final interfaces = Map<LauncherInterface, InterfaceSlotConfig>.from(
+      state.interfaces,
+    );
+    if (slot.isConfigured) {
+      interfaces[interface] = slot;
+    } else {
+      interfaces.remove(interface);
+    }
+    state = state.copyWith(interfaces: interfaces);
   }
 }

@@ -40,10 +40,8 @@ import 'package:nai_launcher/presentation/providers/share_image_settings_provide
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
-import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_history_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/provider_adapters/prompt_assistant_adapter.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_api_client.dart';
-import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_service.dart';
 import 'package:nai_launcher/presentation/screens/statistics/widgets/dashboard/aspect_ratio_card.dart';
 import 'package:nai_launcher/presentation/screens/vibe_library/widgets/vibe_export_dialog.dart';
 import 'package:nai_launcher/presentation/screens/vibe_library/widgets/vibe_export_dialog_advanced.dart';
@@ -674,7 +672,6 @@ void main() {
                 child: UnifiedPromptInput(
                   controller: controller,
                   focusNode: focusNode,
-                  enableAssistant: false,
                   config: const UnifiedPromptConfig(
                     enableAutocomplete: true,
                     enableSyntaxHighlight: true,
@@ -1256,22 +1253,19 @@ void main() {
   });
 
   group('Prompt assistant defaults', () {
-    test('contains immutable defaults for all assistant task types', () {
+    test('defaults carry no providers, models, or interface slots', () {
       final defaults = PromptAssistantConfigState.defaults();
-      expect(defaults.streamOutput, isFalse);
       expect(defaults.providers, isEmpty);
       expect(defaults.models, isEmpty);
-
-      for (final taskType in AssistantTaskType.values) {
-        expect(
-          defaults.rules.any(
-            (rule) => rule.taskType == taskType && rule.isDefault,
-          ),
-          isTrue,
-        );
-        expect(defaults.routing.providerIdFor(taskType), isEmpty);
-        expect(defaults.routing.modelFor(taskType), isEmpty);
-      }
+      expect(defaults.interfaces, isEmpty);
+      expect(
+        defaults.interfaceFor(LauncherInterface.translate).isConfigured,
+        isFalse,
+      );
+      expect(
+        defaults.interfaceFor(LauncherInterface.tagTranslate).isConfigured,
+        isFalse,
+      );
     });
 
     test('pollinations is available as a normal provider preset', () {
@@ -1311,33 +1305,25 @@ void main() {
           },
         ],
         'models': [
-          for (final taskType in [
-            AssistantTaskType.llm,
-            AssistantTaskType.translate,
-            AssistantTaskType.reverse,
-            AssistantTaskType.characterReplace,
-          ])
+          for (final taskType in ['llm', 'translate', 'reverse', 'custom'])
             {
               'providerId': 'pollinations',
               'name': 'openai-large',
               'displayName': 'openai-large',
-              'forTask': taskType.name,
+              'forTask': taskType,
               'isDefault': true,
             },
         ],
-        'routing': const TaskRoutingConfig(
-          llmProviderId: 'pollinations',
-          llmModel: 'openai-large',
-          translateProviderId: 'pollinations',
-          translateModel: 'openai-large',
-          reverseProviderId: 'pollinations',
-          reverseModel: 'openai-large',
-          characterReplaceProviderId: 'pollinations',
-          characterReplaceModel: 'openai-large',
-        ).toJson(),
-        'rules': PromptAssistantConfigState.defaults().rules
-            .map((rule) => rule.toJson())
-            .toList(),
+        'routing': const {
+          'llmProviderId': 'pollinations',
+          'llmModel': 'openai-large',
+          'translateProviderId': 'pollinations',
+          'translateModel': 'openai-large',
+          'reverseProviderId': 'pollinations',
+          'reverseModel': 'openai-large',
+          'characterReplaceProviderId': 'pollinations',
+          'characterReplaceModel': 'openai-large',
+        },
       };
 
       final decoded = PromptAssistantConfigState.decode(jsonEncode(oldJson));
@@ -1346,192 +1332,113 @@ void main() {
         decoded.providers.any((provider) => provider.id == 'pollinations'),
         isFalse,
       );
-      for (final taskType in AssistantTaskType.values) {
-        expect(decoded.routing.providerIdFor(taskType), isEmpty);
-        expect(decoded.routing.modelFor(taskType), isEmpty);
+      expect(decoded.models, isEmpty);
+      expect(decoded.interfaces, isEmpty);
+    });
+
+    test('migrates legacy translate routing into both interface slots', () {
+      final oldJson = <String, dynamic>{
+        'schemaVersion': 2,
+        'providers': [
+          {
+            'id': 'openai_custom',
+            'name': 'OpenAI Compatible',
+            'type': 'openaiCompatible',
+            'baseUrl': 'https://example.invalid/v1',
+            'enabled': true,
+          },
+        ],
+        'models': [
+          {
+            'providerId': 'openai_custom',
+            'name': 'model-a',
+            'displayName': 'model-a',
+            'source': 'manual',
+          },
+        ],
+        'routing': const {
+          'translateProviderId': 'openai_custom',
+          'translateModel': 'model-a',
+        },
+      };
+
+      final decoded = PromptAssistantConfigState.decode(jsonEncode(oldJson));
+
+      for (final interface in LauncherInterface.values) {
+        final slot = decoded.interfaceFor(interface);
+        expect(slot.providerId, 'openai_custom');
+        expect(slot.model, 'model-a');
       }
     });
 
-    test(
-      'hydrates reverse and character replacement routing from old config',
-      () {
-        final oldConfig =
-            PromptAssistantConfigState.defaults()
-                .copyWith(
-                  providers: const [
-                    ProviderConfig(
-                      id: 'openai_custom',
-                      name: 'OpenAI Compatible',
-                      type: ProviderType.openaiCompatible,
-                      baseUrl: 'https://example.invalid/v1',
-                      enabled: true,
-                    ),
-                  ],
-                  models: const [
-                    ModelConfig(
-                      providerId: 'openai_custom',
-                      name: 'model-a',
-                      displayName: 'model-a',
-                      forTask: AssistantTaskType.llm,
-                    ),
-                    ModelConfig(
-                      providerId: 'openai_custom',
-                      name: 'model-a',
-                      displayName: 'model-a',
-                      forTask: AssistantTaskType.translate,
-                    ),
-                  ],
-                  rules: PromptAssistantConfigState.defaults().rules
-                      .where(
-                        (rule) =>
-                            rule.taskType == AssistantTaskType.llm ||
-                            rule.taskType == AssistantTaskType.translate,
-                      )
-                      .toList(),
-                )
-                .toJson()
-              ..['routing'] = const TaskRoutingConfig(
-                llmProviderId: 'openai_custom',
-                llmModel: 'model-a',
-                translateProviderId: 'openai_custom',
-                translateModel: 'model-a',
-                reverseProviderId: '',
-                reverseModel: '',
-                characterReplaceProviderId: '',
-                characterReplaceModel: '',
-              ).toJson();
+    test('clears interface slots that point at deleted providers', () {
+      final json = <String, dynamic>{
+        'schemaVersion': 2,
+        'providers': [
+          {
+            'id': 'openai_custom',
+            'name': 'OpenAI Compatible',
+            'type': 'openaiCompatible',
+            'baseUrl': 'https://example.invalid/v1',
+            'enabled': true,
+          },
+        ],
+        'models': const [],
+        'interfaces': const {
+          'translate': {'providerId': 'openai_custom', 'model': 'model-a'},
+          'tagTranslate': {'providerId': 'ghost', 'model': 'model-x'},
+        },
+      };
 
-        final decoded = PromptAssistantConfigState.decode(
-          PromptAssistantConfigState(
-            enabled: oldConfig['enabled'] as bool,
-            desktopOverlayEnabled: oldConfig['desktopOverlayEnabled'] as bool,
-            streamOutput: oldConfig['streamOutput'] as bool,
-            providers: (oldConfig['providers'] as List)
-                .cast<Map<String, dynamic>>()
-                .map(ProviderConfig.fromJson)
-                .toList(),
-            models: (oldConfig['models'] as List)
-                .cast<Map<String, dynamic>>()
-                .map(ModelConfig.fromJson)
-                .toList(),
-            routing: TaskRoutingConfig.fromJson(
-              (oldConfig['routing'] as Map).cast<String, dynamic>(),
-            ),
-            rules: (oldConfig['rules'] as List)
-                .cast<Map<String, dynamic>>()
-                .map(PromptRuleTemplate.fromJson)
-                .toList(),
-            providerHasApiKey: const {},
-          ).encode(),
-        );
+      final decoded = PromptAssistantConfigState.decode(jsonEncode(json));
 
-        expect(decoded.streamOutput, isFalse);
-        expect(
-          decoded.models.any(
-            (model) => model.forTask == AssistantTaskType.reverse,
-          ),
-          isTrue,
-        );
-        expect(
-          decoded.models.any(
-            (model) => model.forTask == AssistantTaskType.characterReplace,
-          ),
-          isTrue,
-        );
-        expect(
-          decoded.rules.any(
-            (rule) => rule.taskType == AssistantTaskType.reverse,
-          ),
-          isTrue,
-        );
-        expect(
-          decoded.rules.any(
-            (rule) => rule.taskType == AssistantTaskType.characterReplace,
-          ),
-          isTrue,
-        );
-        expect(
-          decoded.routing.providerIdFor(AssistantTaskType.reverse),
-          'openai_custom',
-        );
-        expect(
-          decoded.routing.providerIdFor(AssistantTaskType.characterReplace),
-          'openai_custom',
-        );
-      },
-    );
+      expect(
+        decoded.interfaceFor(LauncherInterface.translate).providerId,
+        'openai_custom',
+      );
+      expect(
+        decoded.interfaceFor(LauncherInterface.tagTranslate).isConfigured,
+        isFalse,
+      );
+    });
 
-    test('reuses pulled provider models for reverse and character tasks', () {
-      const providerId = 'openai_custom';
-      const modelName = '[PAY]gemini-3.1-pro-preview';
-      final defaults = PromptAssistantConfigState.defaults();
-
+    test('dedupes per-task model copies and keeps placeholders last', () {
       final decoded = PromptAssistantConfigState.decode(
-        defaults
-            .copyWith(
-              providers: const [
-                ProviderConfig(
-                  id: providerId,
-                  name: 'OpenAI Compatible',
-                  type: ProviderType.openaiCompatible,
-                  baseUrl: 'https://example.invalid/v1',
-                  enabled: true,
-                ),
-              ],
-              models: const [
-                ModelConfig(
-                  providerId: providerId,
-                  name: modelName,
-                  displayName: modelName,
-                  forTask: AssistantTaskType.llm,
-                ),
-                ModelConfig(
-                  providerId: providerId,
-                  name: modelName,
-                  displayName: modelName,
-                  forTask: AssistantTaskType.translate,
-                ),
-                ModelConfig(
-                  providerId: providerId,
-                  name: 'default-model',
-                  displayName: 'default-model',
-                  forTask: AssistantTaskType.reverse,
-                  isDefault: true,
-                ),
-                ModelConfig(
-                  providerId: providerId,
-                  name: 'default-model',
-                  displayName: 'default-model',
-                  forTask: AssistantTaskType.characterReplace,
-                  isDefault: true,
-                ),
-              ],
-              routing: const TaskRoutingConfig(
-                llmProviderId: providerId,
-                llmModel: modelName,
-                translateProviderId: providerId,
-                translateModel: modelName,
-                reverseProviderId: providerId,
-                reverseModel: 'default-model',
-                characterReplaceProviderId: providerId,
-                characterReplaceModel: 'default-model',
-              ),
-            )
-            .encode(),
+        jsonEncode(<String, dynamic>{
+          'schemaVersion': 2,
+          'providers': [
+            {
+              'id': 'openai_custom',
+              'name': 'OpenAI Compatible',
+              'type': 'openaiCompatible',
+              'baseUrl': 'https://example.invalid/v1',
+              'enabled': true,
+            },
+          ],
+          'models': [
+            for (final taskType in ['llm', 'translate', 'reverse'])
+              {
+                'providerId': 'openai_custom',
+                'name': 'model-a',
+                'displayName': 'model-a',
+                'forTask': taskType,
+                'isDefault': true,
+              },
+            {
+              'providerId': 'openai_custom',
+              'name': 'default-model',
+              'displayName': 'default-model',
+              'forTask': 'custom',
+              'isDefault': true,
+            },
+          ],
+        }),
       );
 
-      for (final taskType in [
-        AssistantTaskType.reverse,
-        AssistantTaskType.characterReplace,
-      ]) {
-        final models = decoded.modelsForProviderTask(
-          providerId: providerId,
-          taskType: taskType,
-        );
-        expect(models.map((model) => model.name), contains(modelName));
-        expect(models.first.name, modelName);
-        expect(decoded.routing.modelFor(taskType), modelName);
-      }
+      final models = decoded.modelsForProvider(providerId: 'openai_custom');
+      expect(models.length, 2);
+      expect(models.first.name, 'model-a');
+      expect(models.last.isPlaceholder, isTrue);
     });
 
     test('migrates legacy model sources without deleting default models', () {
@@ -1539,14 +1446,14 @@ void main() {
         'providerId': 'openai_custom',
         'name': 'old-api-model',
         'displayName': 'old-api-model',
-        'forTask': AssistantTaskType.llm.name,
+        'forTask': 'llm',
         'isDefault': false,
       });
       final defaultModel = ModelConfig.fromJson({
         'providerId': 'openai_custom',
         'name': 'default-model',
         'displayName': 'default-model',
-        'forTask': AssistantTaskType.llm.name,
+        'forTask': 'llm',
         'isDefault': true,
       });
 
@@ -1591,7 +1498,6 @@ void main() {
           providerId: providerId,
           name: 'old-api-model',
           displayName: 'old-api-model',
-          forTask: AssistantTaskType.llm,
           source: ModelSource.api,
         ),
       );
@@ -1600,18 +1506,12 @@ void main() {
           providerId: providerId,
           name: 'manual-model',
           displayName: 'manual-model',
-          forTask: AssistantTaskType.llm,
         ),
       );
-      await notifier.setRouting(
-        container
-            .read(promptAssistantConfigProvider)
-            .routing
-            .copyWithTask(
-              taskType: AssistantTaskType.llm,
-              providerId: providerId,
-              model: 'old-api-model',
-            ),
+      await notifier.setInterfaceModel(
+        LauncherInterface.tagTranslate,
+        providerId,
+        'old-api-model',
       );
 
       final removed = await notifier.syncProviderModels(providerId, const [
@@ -1625,52 +1525,144 @@ void main() {
         isFalse,
       );
       expect(state.models.any((model) => model.name == 'manual-model'), isTrue);
-      for (final taskType in AssistantTaskType.values) {
-        expect(
-          state.models.any(
-            (model) =>
-                model.providerId == providerId &&
-                model.forTask == taskType &&
-                model.name == 'new-api-model' &&
-                model.source == ModelSource.api,
+      expect(
+        state.models.any(
+          (model) =>
+              model.providerId == providerId &&
+              model.name == 'new-api-model' &&
+              model.source == ModelSource.api,
+        ),
+        isTrue,
+      );
+      // 接口槽指向被清理的模型时回落为“使用该服务商首个模型”（空串语义）
+      expect(state.interfaceFor(LauncherInterface.tagTranslate).model, isEmpty);
+    });
+
+    test('interface slots persist provider and model choices', () async {
+      final localStorage = _MockLocalStorageService();
+      when(
+        () => localStorage.getSetting<String>(
+          StorageKeys.promptAssistantConfigJson,
+        ),
+      ).thenReturn(null);
+      when(
+        () => localStorage.setSetting<String>(
+          StorageKeys.promptAssistantConfigJson,
+          any(),
+        ),
+      ).thenAnswer((_) async {});
+
+      final container = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWithValue(localStorage),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(promptAssistantConfigProvider.notifier);
+      await notifier.upsertProvider(
+        const ProviderConfig(
+          id: 'openai_custom',
+          name: 'OpenAI Compatible',
+          type: ProviderType.openaiCompatible,
+          baseUrl: 'https://example.invalid/v1',
+          enabled: true,
+        ),
+      );
+      await notifier.upsertModel(
+        const ModelConfig(
+          providerId: 'openai_custom',
+          name: 'model-a',
+          displayName: 'model-a',
+        ),
+      );
+      await notifier.upsertModel(
+        const ModelConfig(
+          providerId: 'openai_custom',
+          name: 'model-b',
+          displayName: 'model-b',
+        ),
+      );
+
+      await notifier.setInterfaceProvider(
+        LauncherInterface.translate,
+        'openai_custom',
+      );
+      var state = container.read(promptAssistantConfigProvider);
+      var slot = state.interfaceFor(LauncherInterface.translate);
+      expect(slot.providerId, 'openai_custom');
+      expect(slot.model, 'model-a');
+      expect(
+        state.interfaceFor(LauncherInterface.tagTranslate).isConfigured,
+        isFalse,
+      );
+
+      await notifier.setInterfaceModel(
+        LauncherInterface.translate,
+        'openai_custom',
+        'model-b',
+      );
+      state = container.read(promptAssistantConfigProvider);
+      slot = state.interfaceFor(LauncherInterface.translate);
+      expect(slot.model, 'model-b');
+    });
+
+    test(
+      'deleting a provider clears the interface slots bound to it',
+      () async {
+        final localStorage = _MockLocalStorageService();
+        when(
+          () => localStorage.getSetting<String>(
+            StorageKeys.promptAssistantConfigJson,
           ),
+        ).thenReturn(null);
+        when(
+          () => localStorage.setSetting<String>(
+            StorageKeys.promptAssistantConfigJson,
+            any(),
+          ),
+        ).thenAnswer((_) async {});
+
+        final container = ProviderContainer(
+          overrides: [
+            localStorageServiceProvider.overrideWithValue(localStorage),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        final notifier = container.read(promptAssistantConfigProvider.notifier);
+        await notifier.upsertProvider(
+          const ProviderConfig(
+            id: 'openai_custom',
+            name: 'OpenAI Compatible',
+            type: ProviderType.openaiCompatible,
+            baseUrl: 'https://example.invalid/v1',
+            enabled: true,
+          ),
+        );
+        await notifier.setInterfaceProvider(
+          LauncherInterface.tagTranslate,
+          'openai_custom',
+        );
+        expect(
+          container
+              .read(promptAssistantConfigProvider)
+              .interfaceFor(LauncherInterface.tagTranslate)
+              .isConfigured,
           isTrue,
         );
-      }
-      expect(state.routing.modelFor(AssistantTaskType.llm), 'new-api-model');
-    });
-  });
 
-  group('Prompt assistant API client', () {
-    test(
-      'character replacement payload keeps source prompt as primary input',
-      () {
-        final payload =
-            PromptAssistantService.buildCharacterReplacementUserContent(
-              sourcePrompt: '1girl, sitting, classroom, looking at viewer',
-              characterName: 'target',
-              characterPrompt: 'target girl, silver hair, blue dress',
-            );
-
-        expect(payload, contains('Source prompt to replace'));
+        await notifier.deleteProvider('openai_custom');
+        final state = container.read(promptAssistantConfigProvider);
         expect(
-          payload,
-          contains('1girl, sitting, classroom, looking at viewer'),
-        );
-        expect(payload, isNot(contains('源语境标签')));
-        expect(payload, contains('Target character prompt'));
-        expect(payload, contains('target girl, silver hair, blue dress'));
-        expect(
-          payload.indexOf('1girl, sitting, classroom'),
-          lessThan(payload.indexOf('target girl, silver hair')),
-        );
-        expect(
-          PromptAssistantService.characterReplacementInstruction,
-          contains('Do not output analysis'),
+          state.interfaceFor(LauncherInterface.tagTranslate).isConfigured,
+          isFalse,
         );
       },
     );
+  });
 
+  group('Prompt assistant API client', () {
     test('sends chat requests as non-streaming JSON', () async {
       final dio = _MockDio();
       final client = PromptAssistantApiClient(dio: dio);
@@ -2306,39 +2298,6 @@ void main() {
                 isNot(contains('secret')),
               ),
         ),
-      );
-    });
-  });
-
-  group('Prompt injected history', () {
-    test('supports external undo and redo for injected prompts', () {
-      final history = PromptAssistantHistoryNotifier();
-      history.recordExternalChange(
-        PromptHistorySessionIds.generationPrompt,
-        before: 'old prompt',
-        after: 'reverse prompt',
-      );
-
-      expect(
-        history.undoExternal(
-          PromptHistorySessionIds.generationPrompt,
-          'reverse prompt',
-        ),
-        'old prompt',
-      );
-      expect(
-        history.redoExternal(
-          PromptHistorySessionIds.generationPrompt,
-          'old prompt',
-        ),
-        'reverse prompt',
-      );
-      expect(
-        history.undoExternal(
-          PromptHistorySessionIds.generationPrompt,
-          'manual edit after injection',
-        ),
-        isNull,
       );
     });
   });

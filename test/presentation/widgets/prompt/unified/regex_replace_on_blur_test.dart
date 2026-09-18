@@ -51,7 +51,6 @@ void main() {
               child: UnifiedPromptInput(
                 controller: controller,
                 focusNode: focusNode,
-                enableAssistant: false,
                 config: UnifiedPromptConfig(
                   enableAutocomplete: false,
                   enableSyntaxHighlight: false,

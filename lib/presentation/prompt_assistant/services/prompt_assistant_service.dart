@@ -1,10 +1,9 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 
-import '../../../core/utils/app_logger.dart';
 import '../models/prompt_assistant_models.dart';
 import '../providers/prompt_assistant_config_provider.dart';
 import 'provider_adapters/prompt_assistant_adapter.dart';
@@ -65,35 +64,6 @@ class PromptAssistantService {
     return _apiClient.fetchModels(provider: provider, apiKey: apiKey);
   }
 
-  Stream<StreamingChunk> optimizePrompt(
-    String input, {
-    required String sessionId,
-  }) async* {
-    yield* _runTask(
-      sessionId: sessionId,
-      taskType: AssistantTaskType.llm,
-      userContent: input,
-      userInstruction:
-          'Optimize this image-generation prompt. Preserve the original intent, enhance details, and output a single-line result.',
-    );
-  }
-
-  Stream<StreamingChunk> translatePrompt(
-    String input, {
-    required String sessionId,
-    String? targetLanguage,
-  }) async* {
-    final instruction = targetLanguage == null || targetLanguage.isEmpty
-        ? 'Automatically detect the source language and translate between Chinese and English. Return only the translation.'
-        : 'Translate the text into $targetLanguage. Return only the translation.';
-    yield* _runTask(
-      sessionId: sessionId,
-      taskType: AssistantTaskType.translate,
-      userContent: input,
-      userInstruction: instruction,
-    );
-  }
-
   static const int tagTranslationPromptVersion = 1;
 
   Future<TagTranslationBatchResult> translateTags(
@@ -113,7 +83,9 @@ class PromptAssistantService {
       );
     }
 
-    final execution = await _resolveTaskExecution(AssistantTaskType.translate);
+    final execution = await _resolveInterfaceExecution(
+      LauncherInterface.tagTranslate,
+    );
     final systemPrompt =
         '''
 You translate Danbooru image-generation tags into concise Simplified Chinese labels.
@@ -127,7 +99,7 @@ Prompt version: $tagTranslationPromptVersion
       request: PromptAssistantRequest(
         sessionId: sessionId,
         provider: execution.provider,
-        model: execution.model.name,
+        model: execution.model,
         systemPrompt: systemPrompt,
         userParts: [PromptAssistantContentPart.text(jsonEncode(tags))],
         apiKey: execution.apiKey,
@@ -143,7 +115,7 @@ Prompt version: $tagTranslationPromptVersion
     return TagTranslationBatchResult(
       translations: translations,
       routeFingerprint:
-          '${execution.provider.id}/${execution.model.name}/${execution.provider.protocol.name}',
+          '${execution.provider.id}/${execution.model}/${execution.provider.protocol.name}',
     );
   }
 
@@ -179,322 +151,89 @@ Prompt version: $tagTranslationPromptVersion
     return translations;
   }
 
+  /// 词库翻译当前生效的路由指纹。未配置槽位时回落到第一个启用服务商，
+  /// 与执行端 `_resolveInterfaceExecution` 保持一致，保证缓存键同向失效。
   String translateRouteFingerprint() {
     final config = _ref.read(promptAssistantConfigProvider);
-    final providerId = config.routing.providerIdFor(
-      AssistantTaskType.translate,
+    final route = _resolveInterfaceRoute(
+      config,
+      LauncherInterface.tagTranslate,
     );
-    final model = config.routing.modelFor(AssistantTaskType.translate).trim();
-    final provider = config.providers.cast<ProviderConfig?>().firstWhere(
-      (value) => value?.id == providerId && value?.enabled == true,
-      orElse: () => null,
-    );
-    if (provider == null || model.isEmpty) return '';
-    return '${provider.id}/$model/${provider.protocol.name}/${provider.baseUrl}';
+    if (route == null) return '';
+    return '${route.provider.id}/${route.model}/${route.provider.protocol.name}/${route.provider.baseUrl}';
   }
 
+  /// 词库翻译当前生效的路由标签，供设置页展示；无启用服务商时返回空串。
   String translateRouteLabel() {
     final config = _ref.read(promptAssistantConfigProvider);
-    final providerId = config.routing.providerIdFor(
-      AssistantTaskType.translate,
+    final route = _resolveInterfaceRoute(
+      config,
+      LauncherInterface.tagTranslate,
     );
-    final model = config.routing.modelFor(AssistantTaskType.translate);
-    final provider = config.providers.cast<ProviderConfig?>().firstWhere(
-      (value) => value?.id == providerId && value?.enabled == true,
-      orElse: () => null,
-    );
-    if (provider == null || model.trim().isEmpty) return '';
-    return '${provider.name} / $model';
+    if (route == null) return '';
+    return '${route.provider.name} / ${route.model}';
   }
 
-  Stream<StreamingChunk> reverseImagePrompt(
-    Uint8List imageBytes, {
-    required String sessionId,
-    String? taggerPrompt,
-  }) async* {
-    final text = StringBuffer(
-      'Reverse prompt this image and output English comma-separated prompts that can be used directly in NovelAI.',
-    );
-    final trimmedTags = taggerPrompt?.trim();
-    if (trimmedTags != null && trimmedTags.isNotEmpty) {
-      text
-        ..write(
-          '\n\nLocal ONNX tagger preliminary results are below. Use the image to decide what to keep or discard:\n',
-        )
-        ..write(trimmedTags);
+  /// 接口槽路由解析：槽位指向的启用服务商优先，否则回落到第一个启用服务商；
+  /// 没有任何启用服务商时返回 null。模型为空串表示“该服务商首个模型”。
+  static ({ProviderConfig provider, String model})? _resolveInterfaceRoute(
+    PromptAssistantConfigState config,
+    LauncherInterface interface,
+  ) {
+    final enabledProviders = config.providers
+        .where((provider) => provider.enabled)
+        .toList();
+    if (enabledProviders.isEmpty) return null;
+
+    final slot = config.interfaces[interface];
+    var provider = enabledProviders.first;
+    if (slot != null && slot.isConfigured) {
+      final configured = enabledProviders
+          .where((candidate) => candidate.id == slot.providerId)
+          .firstOrNull;
+      if (configured != null) {
+        provider = configured;
+      }
     }
 
-    yield* _runTask(
-      sessionId: sessionId,
-      taskType: AssistantTaskType.reverse,
-      userContent: [
-        PromptAssistantContentPart.text(text.toString()),
-        PromptAssistantContentPart.image(
-          bytes: imageBytes,
-          mimeType: _detectImageMime(imageBytes),
-        ),
-      ],
-      userInstruction:
-          'Strictly output one single-line English prompt. Do not use Markdown or explanations. Prioritize visible elements and avoid inventing unseen character information.',
-    );
-  }
-
-  Stream<StreamingChunk> customPrompt(
-    String currentPrompt, {
-    required String sessionId,
-    required String userRequest,
-    List<PromptAssistantImageInput> images = const [],
-  }) async* {
-    final text = [
-      'Current prompt:',
-      currentPrompt.trim(),
-      '',
-      'User request:',
-      userRequest.trim(),
-    ].join('\n');
-
-    yield* _runTask(
-      sessionId: sessionId,
-      taskType: AssistantTaskType.custom,
-      userContent: [
-        PromptAssistantContentPart.text(text),
-        for (final image in images)
-          PromptAssistantContentPart.image(
-            bytes: image.bytes,
-            mimeType: image.mimeType,
-          ),
-      ],
-      userInstruction:
-          'Modify the current image-generation prompt according to the user request. Output only the final single-line prompt that can be used directly.',
-    );
-  }
-
-  Stream<StreamingChunk> replaceCharacterPrompt(
-    String input, {
-    required String sessionId,
-    required String characterName,
-    required String characterPrompt,
-  }) async* {
-    final sourcePrompt = input.trim();
-    final targetCharacterPrompt = characterPrompt.trim();
-    AppLogger.d(
-      'character replace input sourceLen=${sourcePrompt.length} targetLen=${targetCharacterPrompt.length} '
-          'source="${_previewForLog(sourcePrompt)}" target="${_previewForLog(targetCharacterPrompt)}"',
-      'PromptAssistant',
-    );
-
-    yield* _runTask(
-      sessionId: sessionId,
-      taskType: AssistantTaskType.characterReplace,
-      userContent: buildCharacterReplacementUserContent(
-        sourcePrompt: sourcePrompt,
-        characterName: characterName,
-        characterPrompt: targetCharacterPrompt,
-      ),
-      userInstruction: characterReplacementInstruction,
-    );
-  }
-
-  static const String characterReplacementInstruction =
-      'Output only the complete replaced single-line English comma-separated prompt. Do not output analysis, explanations, remove/keep lists, or Markdown.';
-
-  static String buildCharacterReplacementUserContent({
-    required String sourcePrompt,
-    required String characterName,
-    required String characterPrompt,
-  }) {
-    return [
-      'Source prompt to replace (use this as the main input and preserve non-character content):',
-      sourcePrompt.trim(),
-      '',
-      'Target character name:',
-      characterName.trim(),
-      '',
-      'Target character prompt (use only as the replacement character block):',
-      characterPrompt.trim(),
-    ].join('\n');
-  }
-
-  static String _previewForLog(String value) {
-    final normalized = value.replaceAll(RegExp(r'\s+'), ' ').trim();
-    if (normalized.length <= 240) {
-      return normalized;
+    final models = config.modelsForProvider(providerId: provider.id);
+    final routedModel = slot != null && slot.providerId == provider.id
+        ? slot.model.trim()
+        : '';
+    String model;
+    if (routedModel.isNotEmpty &&
+        routedModel != 'default-model' &&
+        models.any((m) => m.name == routedModel)) {
+      model = routedModel;
+    } else {
+      final firstReal = models.where((m) => !m.isPlaceholder).firstOrNull;
+      model = firstReal?.name ?? _fallbackModelName(provider);
     }
-    return '${normalized.substring(0, 240)}...';
+    return (provider: provider, model: model);
   }
 
-  Stream<StreamingChunk> _runTask({
-    required String sessionId,
-    required AssistantTaskType taskType,
-    required Object userContent,
-    required String userInstruction,
-  }) async* {
-    final config = _ref.read(promptAssistantConfigProvider);
-    final execution = await _resolveTaskExecution(taskType);
-
-    final activeRules =
-        config.rules.where((r) => r.taskType == taskType && r.enabled).toList()
-          ..sort((a, b) => a.order.compareTo(b.order));
-
-    final systemPrompt = [
-      ...activeRules.map((e) => e.content.trim()).where((e) => e.isNotEmpty),
-      userInstruction,
-    ].join('\n\n');
-
-    yield* _apiClient.complete(
-      request: PromptAssistantRequest(
-        sessionId: sessionId,
-        provider: execution.provider,
-        model: execution.model.name,
-        systemPrompt: systemPrompt,
-        userParts: _toContentParts(userContent),
-        apiKey: execution.apiKey,
-      ),
-    );
-  }
-
-  Future<({ProviderConfig provider, ModelConfig model, String? apiKey})>
-  _resolveTaskExecution(AssistantTaskType taskType) async {
-    final config = _ref.read(promptAssistantConfigProvider);
-    final routingProviderId = config.routing.providerIdFor(taskType);
-    final routingModel = config.routing.modelFor(taskType);
-    final enabledProviders = config.providers.where((p) => p.enabled).toList();
-    if (enabledProviders.isEmpty) {
-      throw StateError(
-        'No prompt assistant provider is available. Add and enable OpenAI, Anthropic, Gemini, DeepSeek, LM Studio, or another compatible provider in Settings first.',
-      );
-    }
-    final provider = enabledProviders.firstWhere(
-      (p) => p.id == routingProviderId,
-      orElse: () => enabledProviders.first,
-    );
-    final taskModels = config.modelsForProviderTask(
-      providerId: provider.id,
-      taskType: taskType,
-    );
-    final hasRealModel = taskModels.any((m) => !m.isPlaceholder);
-    final shouldIgnoreRoutedPlaceholder =
-        (routingModel.trim().isEmpty ||
-            routingModel.trim() == 'default-model') &&
-        hasRealModel;
-    final model = shouldIgnoreRoutedPlaceholder
-        ? taskModels.firstWhere((m) => !m.isPlaceholder)
-        : taskModels.firstWhere(
-            (m) => m.name == routingModel,
-            orElse: () => taskModels.isNotEmpty
-                ? taskModels.first
-                : _fallbackModelForProvider(
-                    provider: provider,
-                    routingModel: routingModel,
-                    taskType: taskType,
-                  ),
-          );
-    final apiKey = await _ref
-        .read(promptAssistantConfigProvider.notifier)
-        .getProviderApiKey(provider.id);
-    return (provider: provider, model: model, apiKey: apiKey);
-  }
-
-  ModelConfig _fallbackModelForProvider({
-    required ProviderConfig provider,
-    required String routingModel,
-    required AssistantTaskType taskType,
-  }) {
-    final trimmed = routingModel.trim();
-    if (trimmed.isNotEmpty) {
-      return ModelConfig(
-        providerId: provider.id,
-        name: trimmed,
-        displayName: trimmed,
-        forTask: taskType,
-        isDefault: true,
-      );
-    }
+  static String _fallbackModelName(ProviderConfig provider) {
     final presetModels = provider.preset?.defaultModelNames ?? const [];
     if (presetModels.isNotEmpty) {
-      return ModelConfig(
-        providerId: provider.id,
-        name: presetModels.first,
-        displayName: presetModels.first,
-        forTask: taskType,
-        isDefault: true,
-      );
+      return presetModels.first;
     }
     throw StateError(
       'Provider ${provider.name} has no configured model. Pull the model list or add a model manually first.',
     );
   }
 
-  List<PromptAssistantContentPart> _toContentParts(Object userContent) {
-    if (userContent is String) {
-      return [PromptAssistantContentPart.text(userContent)];
+  Future<({ProviderConfig provider, String model, String? apiKey})>
+  _resolveInterfaceExecution(LauncherInterface interface) async {
+    final config = _ref.read(promptAssistantConfigProvider);
+    final route = _resolveInterfaceRoute(config, interface);
+    if (route == null) {
+      throw StateError(
+        'No prompt assistant provider is available. Add and enable OpenAI, Anthropic, Gemini, DeepSeek, LM Studio, or another compatible provider in Settings first.',
+      );
     }
-    if (userContent is List<PromptAssistantContentPart>) {
-      return userContent;
-    }
-    if (userContent is List) {
-      final parts = <PromptAssistantContentPart>[];
-      for (final item in userContent) {
-        if (item is PromptAssistantContentPart) {
-          parts.add(item);
-        } else if (item is Map<String, dynamic>) {
-          final type = item['type'];
-          if (type == 'text') {
-            parts.add(PromptAssistantContentPart.text('${item['text'] ?? ''}'));
-          } else if (type == 'image_url') {
-            final imageUrl = item['image_url'];
-            final url = imageUrl is Map ? imageUrl['url'] : null;
-            if (url is String) {
-              final parsed = parseDataUriImage(url);
-              if (parsed != null) {
-                parts.add(
-                  PromptAssistantContentPart.image(
-                    bytes: parsed.bytes,
-                    mimeType: parsed.mimeType,
-                  ),
-                );
-              }
-            }
-          }
-        } else {
-          final text = item.toString();
-          if (text.trim().isNotEmpty) {
-            parts.add(PromptAssistantContentPart.text(text));
-          }
-        }
-      }
-      return parts;
-    }
-    return [PromptAssistantContentPart.text(userContent.toString())];
-  }
-
-  String _detectImageMime(Uint8List bytes) {
-    final detected = detectImageMime(bytes);
-    if (detected != null) return detected;
-    if (bytes.length >= 8 &&
-        bytes[0] == 0x89 &&
-        bytes[1] == 0x50 &&
-        bytes[2] == 0x4E &&
-        bytes[3] == 0x47) {
-      return 'image/png';
-    }
-    if (bytes.length >= 3 &&
-        bytes[0] == 0xFF &&
-        bytes[1] == 0xD8 &&
-        bytes[2] == 0xFF) {
-      return 'image/jpeg';
-    }
-    if (bytes.length >= 12 &&
-        bytes[0] == 0x52 &&
-        bytes[1] == 0x49 &&
-        bytes[2] == 0x46 &&
-        bytes[3] == 0x46 &&
-        bytes[8] == 0x57 &&
-        bytes[9] == 0x45 &&
-        bytes[10] == 0x42 &&
-        bytes[11] == 0x50) {
-      return 'image/webp';
-    }
-    return 'image/png';
+    final apiKey = await _ref
+        .read(promptAssistantConfigProvider.notifier)
+        .getProviderApiKey(route.provider.id);
+    return (provider: route.provider, model: route.model, apiKey: apiKey);
   }
 }

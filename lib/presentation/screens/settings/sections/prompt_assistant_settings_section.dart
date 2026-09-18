@@ -18,42 +18,25 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
     final notifier = ref.read(promptAssistantConfigProvider.notifier);
 
     return SettingsCard(
-      title: context.l10n.settings_promptAssistant,
+      title: context.l10n.settings_modelsAndInterfaces,
       icon: Icons.auto_awesome,
       child: Column(
         children: [
-          SwitchListTile(
-            value: state.enabled,
-            title: Text(context.l10n.promptAssistant_enableAssistant),
-            subtitle: Text(
-              context.l10n.promptAssistant_settingsInputSwitchSubtitle,
-            ),
-            onChanged: notifier.setEnabled,
-          ),
-          SwitchListTile(
-            value: state.desktopOverlayEnabled,
-            title: Text(context.l10n.promptAssistant_desktopOverlayTitle),
-            subtitle: Text(context.l10n.promptAssistant_desktopOverlaySubtitle),
-            onChanged: notifier.setDesktopOverlayEnabled,
-          ),
-          const Divider(),
-          _buildRouting(context, state, notifier),
+          _buildInterfaces(context, state, notifier),
           const Divider(),
           _buildProviders(context, ref, state, notifier),
-          const Divider(),
-          _buildRules(context, state, notifier),
         ],
       ),
     );
   }
 
-  Widget _buildRouting(
+  Widget _buildInterfaces(
     BuildContext context,
     PromptAssistantConfigState state,
     PromptAssistantConfigNotifier notifier,
   ) {
-    final providerItems = state.providers
-        .map((p) => DropdownMenuItem(value: p.id, child: Text(p.name)))
+    final enabledProviders = state.providers
+        .where((provider) => provider.enabled)
         .toList();
 
     return Column(
@@ -61,130 +44,129 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
       children: [
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-          title: Text(context.l10n.promptAssistant_taskRouting),
-          subtitle: Text(context.l10n.promptAssistant_taskRoutingSubtitle),
+          title: Text(context.l10n.promptAssistant_launcherInterfaces),
+          subtitle: Text(
+            context.l10n.promptAssistant_launcherInterfacesSubtitle,
+          ),
         ),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final twoCols = constraints.maxWidth > 860;
-            final cards = AssistantTaskType.values
-                .map(
-                  (taskType) => _buildTaskRouteCardForTask(
-                    context: context,
-                    state: state,
-                    notifier: notifier,
-                    taskType: taskType,
-                    providerItems: providerItems,
-                  ),
-                )
-                .toList();
+        if (enabledProviders.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Text(
+              context.l10n.promptAssistant_noEnabledProviders,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          )
+        else
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final twoCols = constraints.maxWidth > 860;
+              final cards = LauncherInterface.values
+                  .map(
+                    (interface) => _buildInterfaceCard(
+                      context: context,
+                      state: state,
+                      notifier: notifier,
+                      interface: interface,
+                    ),
+                  )
+                  .toList();
 
-            if (twoCols) {
-              return Wrap(
-                spacing: 12,
-                runSpacing: 10,
-                children: cards
-                    .map(
-                      (card) => SizedBox(
-                        width: (constraints.maxWidth - 12) / 2,
-                        child: card,
-                      ),
-                    )
-                    .toList(),
-              );
-            }
+              if (twoCols) {
+                return Wrap(
+                  spacing: 12,
+                  runSpacing: 10,
+                  children: cards
+                      .map(
+                        (card) => SizedBox(
+                          width: (constraints.maxWidth - 12) / 2,
+                          child: card,
+                        ),
+                      )
+                      .toList(),
+                );
+              }
 
-            return Column(
-              children: [
-                for (var i = 0; i < cards.length; i++) ...[
-                  if (i > 0) const SizedBox(height: 10),
-                  cards[i],
+              return Column(
+                children: [
+                  for (var i = 0; i < cards.length; i++) ...[
+                    if (i > 0) const SizedBox(height: 10),
+                    cards[i],
+                  ],
                 ],
-              ],
-            );
-          },
-        ),
+              );
+            },
+          ),
       ],
     );
   }
 
-  Widget _buildTaskRouteCardForTask({
+  Widget _buildInterfaceCard({
     required BuildContext context,
     required PromptAssistantConfigState state,
     required PromptAssistantConfigNotifier notifier,
-    required AssistantTaskType taskType,
-    required List<DropdownMenuItem<String>> providerItems,
+    required LauncherInterface interface,
   }) {
-    final providerId = state.routing.providerIdFor(taskType);
-    final modelName = state.routing.modelFor(taskType);
-    final models = state.modelsForProviderTask(
-      providerId: providerId,
-      taskType: taskType,
-    );
-    final modelItems = models
-        .map((m) => DropdownMenuItem(value: m.name, child: Text(m.displayName)))
+    final slot = state.interfaceFor(interface);
+    final enabledProviders = state.providers
+        .where((provider) => provider.enabled)
         .toList();
-    final hasRealModel = models.any(
-      (m) => m.name.trim().isNotEmpty && m.name.trim() != 'default-model',
-    );
-    final useCurrentModel =
-        models.any((m) => m.name == modelName) &&
-        !(modelName.trim() == 'default-model' && hasRealModel);
-    final modelValue = useCurrentModel
-        ? modelName
-        : models.isNotEmpty
-        ? models.first.name
+    final providerItems = enabledProviders
+        .map(
+          (provider) =>
+              DropdownMenuItem(value: provider.id, child: Text(provider.name)),
+        )
+        .toList();
+    final providerValue =
+        enabledProviders.any((provider) => provider.id == slot.providerId)
+        ? slot.providerId
+        : null;
+    final models = providerValue == null
+        ? const <ModelConfig>[]
+        : state.modelsForProvider(providerId: providerValue);
+    final modelItems = models
+        .map(
+          (model) => DropdownMenuItem(
+            value: model.name,
+            child: Text(model.displayName),
+          ),
+        )
+        .toList();
+    final modelValue = models.any((model) => model.name == slot.model)
+        ? slot.model
         : null;
 
     return _buildTaskRouteCard(
       context: context,
-      title: _assistantTaskLabel(context, taskType),
-      providerValue: providerItems.any((item) => item.value == providerId)
-          ? providerId
-          : null,
+      title: _interfaceLabel(context, interface),
+      providerValue: providerValue,
       providerItems: providerItems,
       onProviderChanged: (value) {
         if (value == null) return;
-        final providerModels = state.modelsForProviderTask(
-          providerId: value,
-          taskType: taskType,
-        );
-        final firstModel = providerModels.isNotEmpty
-            ? providerModels.first
-            : ModelConfig(
-                providerId: value,
-                name: 'default-model',
-                displayName: 'default-model',
-                forTask: taskType,
-              );
-        unawaited(notifier.upsertModel(firstModel.copyWith(forTask: taskType)));
-        notifier.setRouting(
-          state.routing.copyWithTask(
-            taskType: taskType,
-            providerId: value,
-            model: firstModel.name,
-          ),
-        );
+        unawaited(notifier.setInterfaceProvider(interface, value));
       },
       modelValue: modelValue,
       modelItems: modelItems,
-      onModelChanged: modelItems.isEmpty
+      onModelChanged: modelItems.isEmpty || providerValue == null
           ? null
           : (value) {
               if (value == null) return;
-              final selectedModel = models.firstWhere(
-                (model) => model.name == value,
-              );
-              unawaited(notifier.upsertModel(selectedModel));
-              notifier.setRouting(
-                state.routing.copyWithTask(
-                  taskType: taskType,
-                  providerId: providerId,
-                  model: value,
-                ),
+              unawaited(
+                notifier.setInterfaceModel(interface, providerValue, value),
               );
             },
     );
+  }
+
+  String _interfaceLabel(BuildContext context, LauncherInterface interface) {
+    switch (interface) {
+      case LauncherInterface.translate:
+        return context.l10n.promptAssistant_interfaceTranslate;
+      case LauncherInterface.tagTranslate:
+        return context.l10n.promptAssistant_interfaceTagTranslate;
+    }
   }
 
   Widget _buildTaskRouteCard({
@@ -205,10 +187,7 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              context.l10n.promptAssistant_taskRouteTitle(title),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               initialValue: providerValue,
@@ -386,7 +365,7 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
       }
 
       // 以接口返回的最新列表为准同步：新增缺失模型、清理已弃用的 API 模型、
-      // 保留手动/默认模型，并在需要时迁移受影响的任务路由。
+      // 保留手动/默认模型，并把失效的接口槽模型回落为“首个模型”。
       await notifier.syncProviderModels(providerId, modelNames);
 
       messenger?.showSnackBar(
@@ -399,50 +378,6 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
         SnackBar(content: Text(l10n.promptAssistant_pullModelsFailed('$e'))),
       );
     }
-  }
-
-  Widget _buildRules(
-    BuildContext context,
-    PromptAssistantConfigState state,
-    PromptAssistantConfigNotifier notifier,
-  ) {
-    final rules = [...state.rules]..sort((a, b) => a.order.compareTo(b.order));
-    return Column(
-      children: [
-        ListTile(
-          title: Text(context.l10n.promptAssistant_ruleTemplates),
-          subtitle: Text(context.l10n.promptAssistant_ruleTemplatesSubtitle),
-        ),
-        ...rules.map(
-          (rule) => ListTile(
-            title: Text(_displayRuleName(context, rule)),
-            subtitle: Text(
-              _displayRuleContent(context, rule),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            leading: Switch(
-              value: rule.enabled,
-              onChanged: (value) {
-                notifier.upsertRule(rule.copyWith(enabled: value));
-              },
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => _showRuleDialog(context, notifier, rule: rule),
-            ),
-          ),
-        ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            onPressed: () => _showRuleDialog(context, notifier),
-            icon: const Icon(Icons.add),
-            label: Text(context.l10n.promptAssistant_addRule),
-          ),
-        ),
-      ],
-    );
   }
 
   Future<void> _showProviderDialog(
@@ -598,25 +533,22 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
       await notifier.setProviderApiKey(resolvedId, keyController.text);
     }
 
-    for (final taskType in AssistantTaskType.values) {
-      final hasModel = state.models.any(
-        (m) => m.providerId == resolvedId && m.forTask == taskType,
+    final hasModel = state.models.any(
+      (model) => model.providerId == resolvedId,
+    );
+    if (!hasModel) {
+      final defaultModels = next.preset?.defaultModelNames ?? const [];
+      final modelName = defaultModels.isNotEmpty
+          ? defaultModels.first
+          : 'default-model';
+      await notifier.upsertModel(
+        ModelConfig(
+          providerId: resolvedId,
+          name: modelName,
+          displayName: modelName,
+          isDefault: true,
+        ),
       );
-      if (!hasModel) {
-        final defaultModels = next.preset?.defaultModelNames ?? const [];
-        final modelName = defaultModels.isNotEmpty
-            ? defaultModels.first
-            : 'default-model';
-        await notifier.upsertModel(
-          ModelConfig(
-            providerId: resolvedId,
-            name: modelName,
-            displayName: modelName,
-            forTask: taskType,
-            isDefault: true,
-          ),
-        );
-      }
     }
   }
 
@@ -746,161 +678,5 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
     if (keyController.text.trim().isNotEmpty) {
       await notifier.setProviderApiKey(provider.id, keyController.text);
     }
-  }
-
-  Future<void> _showRuleDialog(
-    BuildContext context,
-    PromptAssistantConfigNotifier notifier, {
-    PromptRuleTemplate? rule,
-  }) async {
-    final nameController = TextEditingController(text: rule?.name ?? '');
-    final contentController = TextEditingController(text: rule?.content ?? '');
-    final newRuleName = context.l10n.promptAssistant_newRule;
-    var taskType = rule?.taskType ?? AssistantTaskType.llm;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(
-                rule == null
-                    ? context.l10n.promptAssistant_addRuleTitle
-                    : context.l10n.promptAssistant_editRuleTitle,
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: nameController,
-                      decoration: InputDecoration(
-                        labelText: context.l10n.promptAssistant_name,
-                      ),
-                    ),
-                    DropdownButtonFormField<AssistantTaskType>(
-                      initialValue: taskType,
-                      items: AssistantTaskType.values
-                          .map(
-                            (e) => DropdownMenuItem(
-                              value: e,
-                              child: Text(_assistantTaskLabel(context, e)),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) setState(() => taskType = value);
-                      },
-                      decoration: InputDecoration(
-                        labelText: context.l10n.promptAssistant_taskType,
-                      ),
-                    ),
-                    TextField(
-                      controller: contentController,
-                      maxLines: 6,
-                      decoration: InputDecoration(
-                        labelText: context.l10n.promptAssistant_ruleContent,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                if (rule != null && !rule.isDefault)
-                  TextButton(
-                    onPressed: () async {
-                      await notifier.removeRule(rule.id);
-                      if (context.mounted) Navigator.pop(context, false);
-                    },
-                    child: Text(context.l10n.common_delete),
-                  ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text(context.l10n.common_cancel),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text(context.l10n.common_save),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    if (confirmed != true) return;
-
-    final next = PromptRuleTemplate(
-      id: rule?.id ?? 'rule_${DateTime.now().millisecondsSinceEpoch}',
-      name: nameController.text.trim().isEmpty
-          ? newRuleName
-          : nameController.text.trim(),
-      taskType: taskType,
-      content: contentController.text.trim(),
-      enabled: rule?.enabled ?? true,
-      isDefault: rule?.isDefault ?? false,
-      order: rule?.order ?? 100,
-    );
-
-    await notifier.upsertRule(next);
-  }
-
-  String _assistantTaskLabel(BuildContext context, AssistantTaskType taskType) {
-    switch (taskType) {
-      case AssistantTaskType.llm:
-        return context.l10n.promptAssistant_taskOptimize;
-      case AssistantTaskType.translate:
-        return context.l10n.promptAssistant_taskTranslate;
-      case AssistantTaskType.reverse:
-        return context.l10n.promptAssistant_taskReverse;
-      case AssistantTaskType.characterReplace:
-        return context.l10n.promptAssistant_taskCharacterReplace;
-      case AssistantTaskType.custom:
-        return context.l10n.promptAssistant_taskCustom;
-    }
-  }
-
-  String _displayRuleName(BuildContext context, PromptRuleTemplate rule) {
-    if (!rule.isDefault) return rule.name;
-    final l10n = context.l10n;
-    return switch (rule.id) {
-      'opt_default' => l10n.promptAssistant_defaultOptimizeRuleName,
-      'translate_default' => l10n.promptAssistant_defaultTranslateRuleName,
-      'reverse_default' => l10n.promptAssistant_defaultReverseRuleName,
-      'character_replace_default' =>
-        l10n.promptAssistant_defaultCharacterReplaceRuleName,
-      'custom_default' => l10n.promptAssistant_defaultCustomRuleName,
-      _ => rule.name,
-    };
-  }
-
-  String _displayRuleContent(BuildContext context, PromptRuleTemplate rule) {
-    if (!rule.isDefault || !_usesBuiltinDefaultContent(rule)) {
-      return rule.content;
-    }
-    final l10n = context.l10n;
-    return switch (rule.id) {
-      'opt_default' => l10n.promptAssistant_defaultOptimizeRuleContent,
-      'translate_default' => l10n.promptAssistant_defaultTranslateRuleContent,
-      'reverse_default' => l10n.promptAssistant_defaultReverseRuleContent,
-      'character_replace_default' =>
-        l10n.promptAssistant_defaultCharacterReplaceRuleContent,
-      'custom_default' => l10n.promptAssistant_defaultCustomRuleContent,
-      _ => rule.content,
-    };
-  }
-
-  bool _usesBuiltinDefaultContent(PromptRuleTemplate rule) {
-    PromptRuleTemplate? defaultRule;
-    for (final candidate in PromptAssistantConfigState.defaults().rules) {
-      if (candidate.id == rule.id) {
-        defaultRule = candidate;
-        break;
-      }
-    }
-    if (defaultRule == null) return false;
-    return rule.content.trim() == defaultRule.content.trim();
   }
 }

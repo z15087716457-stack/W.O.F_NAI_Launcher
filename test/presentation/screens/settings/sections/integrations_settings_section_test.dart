@@ -106,7 +106,7 @@ void main() {
     await pumpSection(tester, disposedPanels);
 
     // 三段子导航
-    expect(find.text('提示词助手'), findsOneWidget);
+    expect(find.text('模型与接口'), findsOneWidget);
     expect(find.text('ComfyUI'), findsOneWidget);
     expect(find.text('Krita'), findsOneWidget);
 
@@ -150,9 +150,9 @@ void main() {
   });
 
   const expectedLabels = <String, List<String>>{
-    'en': ['Prompt Assistant', 'ComfyUI', 'Krita'],
-    'zh': ['提示词助手', 'ComfyUI', 'Krita'],
-    'ja': ['プロンプトアシスタント', 'ComfyUI', 'Krita'],
+    'en': ['Models & APIs', 'ComfyUI', 'Krita'],
+    'zh': ['模型与接口', 'ComfyUI', 'Krita'],
+    'ja': ['モデルとAPI', 'ComfyUI', 'Krita'],
   };
 
   for (final entry in expectedLabels.entries) {

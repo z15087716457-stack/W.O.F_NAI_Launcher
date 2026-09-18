@@ -360,7 +360,6 @@ void main() {
                                   enableSyntaxHighlight: false,
                                   enableAutoFormat: false,
                                 ),
-                                enableAssistant: false,
                                 maxLines: null,
                               ),
                             ),

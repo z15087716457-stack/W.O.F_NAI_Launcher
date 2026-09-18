@@ -214,7 +214,6 @@
   "settings_integrations": "集成",
   "settings_generationInputSection": "输入",
   "settings_generationFeedbackSection": "完成提醒",
-  "settings_promptAssistant": "提示词助手",
   "settings_selectStyle": "选择风格",
   "settings_defaultPreset": "默认",
   "settings_selectFont": "选择字体",
@@ -449,15 +448,6 @@
       "count": {}
     }
   },
-  "promptAssistant_needPrompt": "请输入提示词后再操作",
-  "promptAssistant_requestFailed": "助手请求失败: {error}",
-  "@promptAssistant_requestFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "promptAssistant_enableAssistant": "启用提示词助手",
-  "promptAssistant_desktopOverlay": "桌面右下角浮层",
   "kritaBridge_busyGenerating": "Krita Bridge 正在生成，请等待当前任务结束",
   "prompt_unwantedContent": "不想出现在图像中的内容...",
   "prompt_smartAutocomplete": "智能补全",
@@ -2520,60 +2510,6 @@
   "statistics_friday": "周五",
   "statistics_saturday": "周六",
   "fixedTags_negativeTitle": "负向固定词",
-  "promptAssistant_translateProcessing": "翻译中",
-  "promptAssistant_optimizeProcessing": "优化中",
-  "promptAssistant_customProcessing": "自定义处理中",
-  "promptAssistant_imageInputDisabled": "当前自定义任务服务商未启用图片输入",
-  "promptAssistant_assistantSettings": "助手设置",
-  "promptAssistant_serviceSettings": "服务设置",
-  "promptAssistant_ruleSettings": "规则设置",
-  "promptAssistant_cancelCurrentTask": "取消当前任务",
-  "promptAssistant_collapseAssistant": "收起助手",
-  "promptAssistant_expandAssistant": "展开助手",
-  "promptAssistant_history": "历史",
-  "promptAssistant_undo": "撤销",
-  "promptAssistant_redo": "重做",
-  "promptAssistant_translate": "翻译",
-  "promptAssistant_optimize": "优化",
-  "promptAssistant_custom": "自定义",
-  "promptAssistant_cancelTask": "取消任务",
-  "promptAssistant_menu": "菜单",
-  "promptAssistant_customDialogTitle": "自定义提示词助手",
-  "promptAssistant_currentPrompt": "当前提示词",
-  "promptAssistant_currentPromptEmpty": "（当前提示词为空）",
-  "promptAssistant_customRequestLabel": "你的修改需求",
-  "promptAssistant_customRequestHint": "例如：更阴森、增加雨夜街道背景、让动作更有张力，只返回最终提示词",
-  "promptAssistant_addReferenceImage": "添加参考图",
-  "promptAssistant_execute": "执行",
-  "promptAssistant_maxReferenceImages": "最多添加 {count} 张参考图片",
-  "@promptAssistant_maxReferenceImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "promptAssistant_unsupportedImageFormat": "不支持的图片格式: {fileName}",
-  "@promptAssistant_unsupportedImageFormat": {
-    "placeholders": {
-      "fileName": {}
-    }
-  },
-  "promptAssistant_needCustomRequestOrImage": "请输入自定义需求或添加参考图片",
-  "promptAssistant_taskOptimize": "优化",
-  "promptAssistant_taskTranslate": "翻译",
-  "promptAssistant_taskReverse": "反推",
-  "promptAssistant_taskCharacterReplace": "角色替换",
-  "promptAssistant_taskCustom": "自定义",
-  "promptAssistant_settingsInputSwitchSubtitle": "输入框右下角助手开关",
-  "promptAssistant_desktopOverlayTitle": "桌面浮层交互",
-  "promptAssistant_desktopOverlaySubtitle": "启用 hover / 右键 / 快捷键行为",
-  "promptAssistant_taskRouting": "任务路由",
-  "promptAssistant_taskRoutingSubtitle": "优化、翻译、反推、角色替换可绑定不同服务商和模型",
-  "promptAssistant_taskRouteTitle": "{title}任务",
-  "@promptAssistant_taskRouteTitle": {
-    "placeholders": {
-      "title": {}
-    }
-  },
   "promptAssistant_provider": "服务商",
   "promptAssistant_model": "模型",
   "promptAssistant_noModelsPullFirst": "暂无模型，请先拉取",
@@ -2601,9 +2537,6 @@
       "error": {}
     }
   },
-  "promptAssistant_ruleTemplates": "规则模板",
-  "promptAssistant_ruleTemplatesSubtitle": "系统提示词按“规则 + 用户输入 + 任务参数”组装",
-  "promptAssistant_addRule": "新增规则",
   "promptAssistant_addProvider": "新增服务商",
   "promptAssistant_editProviderTitle": "编辑服务商",
   "promptAssistant_name": "名称",
@@ -2621,11 +2554,6 @@
   "promptAssistant_clearCurrentApiKey": "清空当前 API Key",
   "promptAssistant_protocolSupportsImagePayload": "当前协议支持图片载荷，仍需模型本身支持视觉输入",
   "promptAssistant_protocolTextOnlyWarning": "当前协议默认仅文本，开启后也可能被服务端拒绝",
-  "promptAssistant_addRuleTitle": "新增规则",
-  "promptAssistant_editRuleTitle": "编辑规则",
-  "promptAssistant_taskType": "任务类型",
-  "promptAssistant_ruleContent": "规则内容",
-  "promptAssistant_newRule": "新规则",
   "autocomplete_resultsCount": "{count} 个结果",
   "@autocomplete_resultsCount": {
     "placeholders": {
@@ -3814,16 +3742,6 @@
       "count": {}
     }
   },
-  "promptAssistant_defaultOptimizeRuleName": "默认优化规则",
-  "promptAssistant_defaultOptimizeRuleContent": "你是提示词优化助手。保留用户意图，补充可执行的视觉细节，并只输出一行可直接使用的逗号分隔提示词。",
-  "promptAssistant_defaultTranslateRuleName": "默认翻译规则",
-  "promptAssistant_defaultTranslateRuleContent": "你是翻译助手。自动识别源语言，在中文和英文之间翻译，并只返回译文，不要解释。",
-  "promptAssistant_defaultReverseRuleName": "默认反推规则",
-  "promptAssistant_defaultReverseRuleContent": "你是图像反推提示词助手。根据图像和可选 tagger 结果，输出适用于 NovelAI 的英文逗号分隔提示词。保留主体、角色、风格、服装、动作、构图、光照和背景。不要解释。",
-  "promptAssistant_defaultCharacterReplaceRuleName": "默认角色替换规则",
-  "promptAssistant_defaultCharacterReplaceRuleContent": "你是角色替换助手。将输入提示词中的原角色身份、发型、服装和外观替换为目标角色，同时保留动作、构图、背景、风格、镜头和质量标签。只输出替换后的一行提示词。",
-  "promptAssistant_defaultCustomRuleName": "默认自定义规则",
-  "promptAssistant_defaultCustomRuleContent": "你是提示词改写助手。根据当前提示词、用户需求和可选参考图修改提示词。只输出最终可直接使用的一行提示词，不要解释。",
   "cacheStats_title": "缓存统计",
   "cacheStats_autoRefreshUpdated": "自动刷新 · 上次更新: {time}",
   "@cacheStats_autoRefreshUpdated": {
@@ -5988,5 +5906,11 @@
     }
   },
   "subscriptionExpired": "已过期",
-  "subscriptionGracePeriod": "宽限期"
+  "subscriptionGracePeriod": "宽限期",
+  "settings_modelsAndInterfaces": "模型与接口",
+  "promptAssistant_launcherInterfaces": "启动器接口",
+  "promptAssistant_launcherInterfacesSubtitle": "提示词翻译与词库标签翻译可分别绑定服务商与模型；未配置时使用第一个启用的服务商",
+  "promptAssistant_interfaceTranslate": "提示词翻译",
+  "promptAssistant_interfaceTagTranslate": "词库标签翻译",
+  "promptAssistant_noEnabledProviders": "暂无启用的服务商，请先在下方添加并启用"
 }

@@ -565,9 +565,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_generationFeedbackSection => '完了通知';
 
   @override
-  String get settings_promptAssistant => 'プロンプトアシスタント';
-
-  @override
   String get settings_selectStyle => 'スタイルの選択';
 
   @override
@@ -1078,20 +1075,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String prompt_replaceAllDone(Object count) {
     return '$count 件を置換しました';
   }
-
-  @override
-  String get promptAssistant_needPrompt => 'アシスタントを使用する前にプロンプトを入力してください';
-
-  @override
-  String promptAssistant_requestFailed(Object error) {
-    return 'アシスタントのリクエストが失敗しました: $error';
-  }
-
-  @override
-  String get promptAssistant_enableAssistant => 'Prompt Assistant を有効にする';
-
-  @override
-  String get promptAssistant_desktopOverlay => 'デスクトップ右下のオーバーレイ';
 
   @override
   String get kritaBridge_busyGenerating =>
@@ -4888,135 +4871,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get fixedTags_negativeTitle => '除外したい要素固定タグ';
 
   @override
-  String get promptAssistant_translateProcessing => '翻訳中';
-
-  @override
-  String get promptAssistant_optimizeProcessing => '最適化中';
-
-  @override
-  String get promptAssistant_customProcessing => 'カスタムリクエストを処理しています';
-
-  @override
-  String get promptAssistant_imageInputDisabled =>
-      '現在のカスタム タスク プロバイダーでは画像入力が有効になっていません';
-
-  @override
-  String get promptAssistant_assistantSettings => 'アシスタントの設定';
-
-  @override
-  String get promptAssistant_serviceSettings => 'サービス設定';
-
-  @override
-  String get promptAssistant_ruleSettings => 'ルール設定';
-
-  @override
-  String get promptAssistant_cancelCurrentTask => '現在のタスクをキャンセル';
-
-  @override
-  String get promptAssistant_collapseAssistant => 'アシスタントを折りたたむ';
-
-  @override
-  String get promptAssistant_expandAssistant => 'アシスタントを展開';
-
-  @override
-  String get promptAssistant_history => '履歴';
-
-  @override
-  String get promptAssistant_undo => '元に戻す';
-
-  @override
-  String get promptAssistant_redo => 'やり直し';
-
-  @override
-  String get promptAssistant_translate => '翻訳';
-
-  @override
-  String get promptAssistant_optimize => '最適化';
-
-  @override
-  String get promptAssistant_custom => 'カスタム';
-
-  @override
-  String get promptAssistant_cancelTask => 'タスクのキャンセル';
-
-  @override
-  String get promptAssistant_menu => 'メニュー';
-
-  @override
-  String get promptAssistant_customDialogTitle => 'カスタム Prompt Assistant';
-
-  @override
-  String get promptAssistant_currentPrompt => '現在のプロンプト';
-
-  @override
-  String get promptAssistant_currentPromptEmpty => '(現在のプロンプトは空です)';
-
-  @override
-  String get promptAssistant_customRequestLabel => '変更リクエスト';
-
-  @override
-  String get promptAssistant_customRequestHint =>
-      '例: より不気味にする、雨の夜の街の背景を追加する、アクションをよりダイナミックにする、最後のプロンプトのみを返す';
-
-  @override
-  String get promptAssistant_addReferenceImage => '参照画像を追加';
-
-  @override
-  String get promptAssistant_execute => '実行';
-
-  @override
-  String promptAssistant_maxReferenceImages(Object count) {
-    return '最大 $count 個の参照画像を追加します';
-  }
-
-  @override
-  String promptAssistant_unsupportedImageFormat(Object fileName) {
-    return 'サポートされていない画像形式: $fileName';
-  }
-
-  @override
-  String get promptAssistant_needCustomRequestOrImage =>
-      'カスタムリクエストを入力するか、参照画像を追加してください';
-
-  @override
-  String get promptAssistant_taskOptimize => '最適化';
-
-  @override
-  String get promptAssistant_taskTranslate => '翻訳';
-
-  @override
-  String get promptAssistant_taskReverse => 'リバースプロンプト';
-
-  @override
-  String get promptAssistant_taskCharacterReplace => 'キャラクター置換';
-
-  @override
-  String get promptAssistant_taskCustom => 'カスタム';
-
-  @override
-  String get promptAssistant_settingsInputSwitchSubtitle =>
-      'プロンプト入力の右下にあるアシスタント スイッチ';
-
-  @override
-  String get promptAssistant_desktopOverlayTitle => 'デスクトップ オーバーレイ インタラクション';
-
-  @override
-  String get promptAssistant_desktopOverlaySubtitle =>
-      'ホバー、右クリック、およびショートカットの動作を有効にする';
-
-  @override
-  String get promptAssistant_taskRouting => 'タスク ルーティング';
-
-  @override
-  String get promptAssistant_taskRoutingSubtitle =>
-      '最適化、翻訳、リバースプロンプト、キャラクター置換をさまざまなプロバイダーとモデルに割り当てます';
-
-  @override
-  String promptAssistant_taskRouteTitle(Object title) {
-    return '$title タスク';
-  }
-
-  @override
   String get promptAssistant_provider => 'プロバイダー';
 
   @override
@@ -5073,16 +4927,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get promptAssistant_ruleTemplates => 'ルール テンプレート';
-
-  @override
-  String get promptAssistant_ruleTemplatesSubtitle =>
-      'システム プロンプトはルール + ユーザー入力 + タスク パラメーターとして組み立てられます';
-
-  @override
-  String get promptAssistant_addRule => 'ルールの追加';
-
-  @override
   String get promptAssistant_addProvider => 'プロバイダーの追加';
 
   @override
@@ -5122,21 +4966,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get promptAssistant_protocolTextOnlyWarning =>
       '現在のプロトコルはデフォルトではテキストのみです。これを有効にしてもサーバーによって拒否される可能性があります';
-
-  @override
-  String get promptAssistant_addRuleTitle => 'ルールの追加';
-
-  @override
-  String get promptAssistant_editRuleTitle => 'ルールの編集';
-
-  @override
-  String get promptAssistant_taskType => 'タスクの種類';
-
-  @override
-  String get promptAssistant_ruleContent => 'ルールの内容';
-
-  @override
-  String get promptAssistant_newRule => '新しいルール';
 
   @override
   String autocomplete_resultsCount(Object count) {
@@ -7374,42 +7203,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String comfyWorkflow_imageCount(Object count) {
     return '$count 画像';
   }
-
-  @override
-  String get promptAssistant_defaultOptimizeRuleName => 'デフォルトの最適化ルール';
-
-  @override
-  String get promptAssistant_defaultOptimizeRuleContent =>
-      'あなたはプロンプト最適化アシスタントです。ユーザーの意図を保持し、実用的な視覚的な詳細を追加し、カンマで区切られた単一のプロンプト行を出力します。';
-
-  @override
-  String get promptAssistant_defaultTranslateRuleName => 'デフォルトの翻訳ルール';
-
-  @override
-  String get promptAssistant_defaultTranslateRuleContent =>
-      'あなたは翻訳アシスタントです。ソース言語を検出し、中国語と英語を自動的に翻訳し、説明なしで翻訳のみを返します。';
-
-  @override
-  String get promptAssistant_defaultReverseRuleName => 'デフォルトのリバースプロンプトルール';
-
-  @override
-  String get promptAssistant_defaultReverseRuleContent =>
-      'あなたは画像のリバースプロンプトアシスタントです。画像と任意のタガー結果に基づいて、NovelAI に適した英語のカンマ区切りプロンプトを出力します。主題、キャラクター、スタイル、服装、アクション、構図、照明、背景を保持します。説明は不要です。';
-
-  @override
-  String get promptAssistant_defaultCharacterReplaceRuleName =>
-      'デフォルトのキャラクター置換ルール';
-
-  @override
-  String get promptAssistant_defaultCharacterReplaceRuleContent =>
-      'あなたはキャラクター置換アシスタントです。アクション、構成、背景、スタイル、カメラ、および品質タグを保持しながら、入力プロンプト内の元のキャラクターのアイデンティティ、髪型、衣装、外観をターゲット キャラクターに置き換えます。置換された単一行プロンプトのみを出力します。';
-
-  @override
-  String get promptAssistant_defaultCustomRuleName => 'デフォルトのカスタム ルール';
-
-  @override
-  String get promptAssistant_defaultCustomRuleContent =>
-      'あなたはプロンプト書き換えアシスタントです。現在のプロンプト、ユーザー要求、およびオプションの参照イメージに従ってプロンプトを変更します。直接使用できる最後の 1 行プロンプトのみを説明なしで出力します。';
 
   @override
   String get cacheStats_title => 'キャッシュ統計';
@@ -10072,4 +9865,24 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get subscriptionGracePeriod => '猶予期間';
+
+  @override
+  String get settings_modelsAndInterfaces => 'モデルとAPI';
+
+  @override
+  String get promptAssistant_launcherInterfaces => 'ランチャーインターフェース';
+
+  @override
+  String get promptAssistant_launcherInterfacesSubtitle =>
+      'プロンプト翻訳とタグ翻訳にプロバイダーとモデルを個別に割り当てます。未設定の場合は最初の有効なプロバイダーを使用します';
+
+  @override
+  String get promptAssistant_interfaceTranslate => 'プロンプト翻訳';
+
+  @override
+  String get promptAssistant_interfaceTagTranslate => 'タグ翻訳';
+
+  @override
+  String get promptAssistant_noEnabledProviders =>
+      '有効なプロバイダーがありません。下で追加して有効にしてください。';
 }

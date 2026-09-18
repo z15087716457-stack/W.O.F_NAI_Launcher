@@ -41,7 +41,11 @@ class _IntegrationsSettingsSectionState
 
   @override
   Widget build(BuildContext context) {
-    final labels = [context.l10n.settings_promptAssistant, 'ComfyUI', 'Krita'];
+    final labels = [
+      context.l10n.settings_modelsAndInterfaces,
+      'ComfyUI',
+      'Krita',
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

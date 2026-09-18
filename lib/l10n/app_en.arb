@@ -219,7 +219,6 @@
   "settings_integrations": "Integrations",
   "settings_generationInputSection": "Input",
   "settings_generationFeedbackSection": "Completion Alert",
-  "settings_promptAssistant": "Prompt Assistant",
   "settings_selectStyle": "Select Style",
   "settings_defaultPreset": "Default",
   "settings_selectFont": "Select Font",
@@ -484,15 +483,6 @@
       "count": {}
     }
   },
-  "promptAssistant_needPrompt": "Enter a prompt before using the assistant",
-  "promptAssistant_requestFailed": "Assistant request failed: {error}",
-  "@promptAssistant_requestFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "promptAssistant_enableAssistant": "Enable Prompt Assistant",
-  "promptAssistant_desktopOverlay": "Desktop bottom-right overlay",
   "kritaBridge_busyGenerating": "Krita Bridge is generating. Wait for the current task to finish.",
   "prompt_unwantedContent": "Content you don't want in the image...",
   "prompt_smartAutocomplete": "Smart Autocomplete",
@@ -2527,60 +2517,6 @@
   "statistics_friday": "Fri",
   "statistics_saturday": "Sat",
   "fixedTags_negativeTitle": "Undesired Content Fixed Tags",
-  "promptAssistant_translateProcessing": "Translating",
-  "promptAssistant_optimizeProcessing": "Optimizing",
-  "promptAssistant_customProcessing": "Processing custom request",
-  "promptAssistant_imageInputDisabled": "The current custom-task provider does not have image input enabled",
-  "promptAssistant_assistantSettings": "Assistant Settings",
-  "promptAssistant_serviceSettings": "Service Settings",
-  "promptAssistant_ruleSettings": "Rule Settings",
-  "promptAssistant_cancelCurrentTask": "Cancel Current Task",
-  "promptAssistant_collapseAssistant": "Collapse Assistant",
-  "promptAssistant_expandAssistant": "Expand Assistant",
-  "promptAssistant_history": "History",
-  "promptAssistant_undo": "Undo",
-  "promptAssistant_redo": "Redo",
-  "promptAssistant_translate": "Translate",
-  "promptAssistant_optimize": "Optimize",
-  "promptAssistant_custom": "Custom",
-  "promptAssistant_cancelTask": "Cancel Task",
-  "promptAssistant_menu": "Menu",
-  "promptAssistant_customDialogTitle": "Custom Prompt Assistant",
-  "promptAssistant_currentPrompt": "Current Prompt",
-  "promptAssistant_currentPromptEmpty": "(current prompt is empty)",
-  "promptAssistant_customRequestLabel": "Your modification request",
-  "promptAssistant_customRequestHint": "For example: make it more ominous, add a rainy night street background, make the action more dynamic, return only the final prompt",
-  "promptAssistant_addReferenceImage": "Add Reference Image",
-  "promptAssistant_execute": "Run",
-  "promptAssistant_maxReferenceImages": "Add up to {count} reference images",
-  "@promptAssistant_maxReferenceImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "promptAssistant_unsupportedImageFormat": "Unsupported image format: {fileName}",
-  "@promptAssistant_unsupportedImageFormat": {
-    "placeholders": {
-      "fileName": {}
-    }
-  },
-  "promptAssistant_needCustomRequestOrImage": "Enter a custom request or add a reference image",
-  "promptAssistant_taskOptimize": "Optimize",
-  "promptAssistant_taskTranslate": "Translate",
-  "promptAssistant_taskReverse": "Reverse Prompt",
-  "promptAssistant_taskCharacterReplace": "Character Replace",
-  "promptAssistant_taskCustom": "Custom",
-  "promptAssistant_settingsInputSwitchSubtitle": "Assistant switch in the bottom-right of the prompt input",
-  "promptAssistant_desktopOverlayTitle": "Desktop Overlay Interaction",
-  "promptAssistant_desktopOverlaySubtitle": "Enable hover, right-click, and shortcut behavior",
-  "promptAssistant_taskRouting": "Task Routing",
-  "promptAssistant_taskRoutingSubtitle": "Bind optimize, translate, reverse prompt, and character replacement to different providers and models",
-  "promptAssistant_taskRouteTitle": "{title} Task",
-  "@promptAssistant_taskRouteTitle": {
-    "placeholders": {
-      "title": {}
-    }
-  },
   "promptAssistant_provider": "Provider",
   "promptAssistant_model": "Model",
   "promptAssistant_noModelsPullFirst": "No models yet. Pull the model list first",
@@ -2608,9 +2544,6 @@
       "error": {}
     }
   },
-  "promptAssistant_ruleTemplates": "Rule Templates",
-  "promptAssistant_ruleTemplatesSubtitle": "System prompts are assembled as rules + user input + task parameters",
-  "promptAssistant_addRule": "Add Rule",
   "promptAssistant_addProvider": "Add Provider",
   "promptAssistant_editProviderTitle": "Edit Provider",
   "promptAssistant_name": "Name",
@@ -2628,11 +2561,6 @@
   "promptAssistant_clearCurrentApiKey": "Clear current API Key",
   "promptAssistant_protocolSupportsImagePayload": "The current protocol supports image payloads; the model itself must still support vision input",
   "promptAssistant_protocolTextOnlyWarning": "The current protocol is text-only by default; enabling this may still be rejected by the server",
-  "promptAssistant_addRuleTitle": "Add Rule",
-  "promptAssistant_editRuleTitle": "Edit Rule",
-  "promptAssistant_taskType": "Task Type",
-  "promptAssistant_ruleContent": "Rule Content",
-  "promptAssistant_newRule": "New Rule",
   "autocomplete_resultsCount": "{count} results",
   "@autocomplete_resultsCount": {
     "placeholders": {
@@ -4065,16 +3993,6 @@
       "count": {}
     }
   },
-  "promptAssistant_defaultOptimizeRuleName": "Default Optimize Rule",
-  "promptAssistant_defaultOptimizeRuleContent": "You are a prompt optimization assistant. Preserve the user intent, add actionable visual details, and output a single comma-separated prompt line.",
-  "promptAssistant_defaultTranslateRuleName": "Default Translate Rule",
-  "promptAssistant_defaultTranslateRuleContent": "You are a translation assistant. Detect the source language, translate between Chinese and English automatically, and return only the translation without explanation.",
-  "promptAssistant_defaultReverseRuleName": "Default Reverse Prompt Rule",
-  "promptAssistant_defaultReverseRuleContent": "You are an image reverse-prompt assistant. Based on the image and optional tagger results, output English comma-separated prompts suitable for NovelAI. Preserve subject, character, style, clothing, action, composition, lighting, and background. Do not explain.",
-  "promptAssistant_defaultCharacterReplaceRuleName": "Default Character Replace Rule",
-  "promptAssistant_defaultCharacterReplaceRuleContent": "You are a character replacement assistant. Replace the original character identity, hairstyle, outfit, and appearance in the input prompt with the target character while preserving action, composition, background, style, camera, and quality tags. Output only the replaced single-line prompt.",
-  "promptAssistant_defaultCustomRuleName": "Default Custom Rule",
-  "promptAssistant_defaultCustomRuleContent": "You are a prompt rewriting assistant. Modify the prompt according to the current prompt, the user request, and optional reference images. Output only the final single-line prompt that can be used directly, without explanation.",
   "cacheStats_title": "Cache Statistics",
   "cacheStats_autoRefreshUpdated": "Auto refresh · Last updated: {time}",
   "@cacheStats_autoRefreshUpdated": {
@@ -5988,5 +5906,11 @@
     }
   },
   "subscriptionExpired": "Expired",
-  "subscriptionGracePeriod": "Grace period"
+  "subscriptionGracePeriod": "Grace period",
+  "settings_modelsAndInterfaces": "Models & APIs",
+  "promptAssistant_launcherInterfaces": "Launcher Interfaces",
+  "promptAssistant_launcherInterfacesSubtitle": "Bind providers and models for the prompt and tag translators; unconfigured slots fall back to the first enabled provider",
+  "promptAssistant_interfaceTranslate": "Prompt Translation",
+  "promptAssistant_interfaceTagTranslate": "Tag Translation",
+  "promptAssistant_noEnabledProviders": "No enabled providers. Add and enable one below first."
 }

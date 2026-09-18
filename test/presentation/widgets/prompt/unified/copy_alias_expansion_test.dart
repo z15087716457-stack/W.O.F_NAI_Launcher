@@ -107,7 +107,6 @@ void main() {
               width: 720,
               height: 120,
               child: UnifiedPromptInput(
-                enableAssistant: false,
                 config: UnifiedPromptConfig(
                   enableAutocomplete: false,
                   enableSyntaxHighlight: false,

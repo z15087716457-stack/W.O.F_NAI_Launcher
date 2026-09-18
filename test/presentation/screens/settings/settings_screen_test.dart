@@ -150,9 +150,9 @@ void main() {
     final promptAssistantSection = find.byType(PromptAssistantSettingsSection);
     expect(promptAssistantSection, findsOneWidget);
     expect(
-      find.descendant(of: promptAssistantSection, matching: find.text('提示词助手')),
+      find.descendant(of: promptAssistantSection, matching: find.text('模型与接口')),
       findsOneWidget,
     );
-    expect(segmentLabels, const ['提示词助手', 'ComfyUI', 'Krita']);
+    expect(segmentLabels, const ['模型与接口', 'ComfyUI', 'Krita']);
   });
 }
