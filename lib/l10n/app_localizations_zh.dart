@@ -9793,6 +9793,35 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tips_explore_fun_5 => '自然选择，加速版';
 
   @override
+  String get tips_gallerySearch_teach_1 => '逗号分隔 = 交集搜索';
+
+  @override
+  String get tips_gallerySearch_teach_2 => '文字搜索已排除负面提示词——结果更干净';
+
+  @override
+  String get tips_gallerySearch_teach_3 => '搜索会命中模型、采样器、来源、版本字段';
+
+  @override
+  String get tips_gallerySearch_teach_4 => '按钮放不下时会横向滚动';
+
+  @override
+  String get tips_gallerySearch_teach_5 => '每页最多 500 张——给一口气翻到底的人';
+
+  @override
+  String get tips_gallerySearch_fun_1 => '下面看上去有不少好东西呢~~~打算找点什么吗？';
+
+  @override
+  String get tips_gallerySearch_fun_2 => '收藏在长，文件夹在假装跟得上';
+
+  @override
+  String get tips_gallerySearch_fun_3 => '专业建议：自己的提示词就是最好的搜索词';
+
+  @override
+  String get tips_gallerySearch_fun_4 => '滚动也算运动';
+
+  @override
+  String get tips_gallerySearch_fun_5 => '这堆里某个角落藏着今晚的神作';
+
   @override
   String get tips_gallerySearch_start_1 => '搜文件名或提示词正文——回车或点补全项都行';
 
@@ -9822,36 +9851,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tips_gallerySearch_start_10 => '先搜一搜再考虑重新生成——多半已经有了';
-
-  @override
-  String get tips_gallerySearch_teach_1 => '逗号分隔 = 交集搜索';
-
-  @override
-  String get tips_gallerySearch_teach_2 => '文字搜索已排除负面提示词——结果更干净';
-
-  @override
-  String get tips_gallerySearch_teach_3 => '搜索会命中模型、采样器、来源、版本字段';
-
-  @override
-  String get tips_gallerySearch_teach_4 => '按钮放不下时会横向滚动';
-
-  @override
-  String get tips_gallerySearch_teach_5 => '每页最多 500 张——给一口气翻到底的人';
-
-  @override
-  String get tips_gallerySearch_fun_1 => '下面看上去有不少好东西呢~~~打算找点什么吗？';
-
-  @override
-  String get tips_gallerySearch_fun_2 => '收藏在长，文件夹在假装跟得上';
-
-  @override
-  String get tips_gallerySearch_fun_3 => '专业建议：自己的提示词就是最好的搜索词';
-
-  @override
-  String get tips_gallerySearch_fun_4 => '滚动也算运动';
-
-  @override
-  String get tips_gallerySearch_fun_5 => '这堆里某个角落藏着今晚的神作';
 
   @override
   String get tips_blocklib_teach_1 => '块可以带缩略图——编辑弹窗里设置';

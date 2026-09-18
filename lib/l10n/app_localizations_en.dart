@@ -10160,37 +10160,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tips_explore_fun_5 => 'Natural selection, fast-forwarded';
 
   @override
-  @override
-  String get tips_gallerySearch_start_1 => 'Search filename or prompt text — press Enter or pick a suggestion';
-
-  @override
-  String get tips_gallerySearch_start_2 => 'Separate terms with commas to require all of them';
-
-  @override
-  String get tips_gallerySearch_start_3 => 'Positive prompts only — negative prompts are already excluded from hits';
-
-  @override
-  String get tips_gallerySearch_start_4 => 'It also matches model, sampler, source, and version metadata';
-
-  @override
-  String get tips_gallerySearch_start_5 => 'Type a tag like masterpiece, or a filename fragment';
-
-  @override
-  String get tips_gallerySearch_start_6 => 'Found the one? Click the card for details, right-click for actions';
-
-  @override
-  String get tips_gallerySearch_start_7 => 'Combine text with the version chip on the right to narrow down';
-
-  @override
-  String get tips_gallerySearch_start_8 => 'Empty query = browse all; type anything to filter instantly';
-
-  @override
-  String get tips_gallerySearch_start_9 => 'Search updates as you type — no submit needed';
-
-  @override
-  String get tips_gallerySearch_start_10 => 'Resist the urge to re-generate it — search first, it\'s probably here';
-
-  @override
   String get tips_gallerySearch_teach_1 =>
       'Comma-separated terms = intersection search';
 
@@ -10228,6 +10197,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tips_gallerySearch_fun_5 =>
       'Somewhere in this pile hides tonight\'s masterpiece';
+
+  @override
+  String get tips_gallerySearch_start_1 =>
+      'Search filename or prompt text — press Enter or pick a suggestion';
+
+  @override
+  String get tips_gallerySearch_start_2 =>
+      'Separate terms with commas to require all of them';
+
+  @override
+  String get tips_gallerySearch_start_3 =>
+      'Positive prompts only — negative prompts are already excluded from hits';
+
+  @override
+  String get tips_gallerySearch_start_4 =>
+      'It also matches model, sampler, source, and version metadata';
+
+  @override
+  String get tips_gallerySearch_start_5 =>
+      'Type a tag like masterpiece, or a filename fragment';
+
+  @override
+  String get tips_gallerySearch_start_6 =>
+      'Found the one? Click the card for details, right-click for actions';
+
+  @override
+  String get tips_gallerySearch_start_7 =>
+      'Combine text with the version chip on the right to narrow down';
+
+  @override
+  String get tips_gallerySearch_start_8 =>
+      'Empty query = browse all; type anything to filter instantly';
+
+  @override
+  String get tips_gallerySearch_start_9 =>
+      'Search updates as you type — no submit needed';
+
+  @override
+  String get tips_gallerySearch_start_10 =>
+      'Resist the urge to re-generate it — search first, it\'s probably here';
 
   @override
   String get tips_blocklib_teach_1 =>

@@ -17719,6 +17719,61 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Comma-separated terms = intersection search'**
+  String get tips_gallerySearch_teach_1;
+
+  /// No description provided for @tips_gallerySearch_teach_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Text search excludes negative prompts — hits stay clean'**
+  String get tips_gallerySearch_teach_2;
+
+  /// No description provided for @tips_gallerySearch_teach_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Search matches model, sampler, source, and version fields'**
+  String get tips_gallerySearch_teach_3;
+
+  /// No description provided for @tips_gallerySearch_teach_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of room for buttons? They scroll horizontally'**
+  String get tips_gallerySearch_teach_4;
+
+  /// No description provided for @tips_gallerySearch_teach_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Page size goes up to 500 — for the browse-everything type'**
+  String get tips_gallerySearch_teach_5;
+
+  /// No description provided for @tips_gallerySearch_fun_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks like there\'s good stuff down there~~~ what are we hunting?'**
+  String get tips_gallerySearch_fun_1;
+
+  /// No description provided for @tips_gallerySearch_fun_2.
+  ///
+  /// In en, this message translates to:
+  /// **'The collection grows; the folders pretend to keep up'**
+  String get tips_gallerySearch_fun_2;
+
+  /// No description provided for @tips_gallerySearch_fun_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro tip: your own prompts are the best search keywords'**
+  String get tips_gallerySearch_fun_3;
+
+  /// No description provided for @tips_gallerySearch_fun_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Scrolling is cardio'**
+  String get tips_gallerySearch_fun_4;
+
+  /// No description provided for @tips_gallerySearch_fun_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Somewhere in this pile hides tonight\'s masterpiece'**
+  String get tips_gallerySearch_fun_5;
 
   /// No description provided for @tips_gallerySearch_start_1.
   ///
@@ -17777,64 +17832,8 @@ abstract class AppLocalizations {
   /// No description provided for @tips_gallerySearch_start_10.
   ///
   /// In en, this message translates to:
-  /// **'Resist the urge to re-generate it — search first, it's probably here'**
+  /// **'Resist the urge to re-generate it — search first, it\'s probably here'**
   String get tips_gallerySearch_start_10;
-
-  String get tips_gallerySearch_teach_1;
-
-  /// No description provided for @tips_gallerySearch_teach_2.
-  ///
-  /// In en, this message translates to:
-  /// **'Text search excludes negative prompts — hits stay clean'**
-  String get tips_gallerySearch_teach_2;
-
-  /// No description provided for @tips_gallerySearch_teach_3.
-  ///
-  /// In en, this message translates to:
-  /// **'Search matches model, sampler, source, and version fields'**
-  String get tips_gallerySearch_teach_3;
-
-  /// No description provided for @tips_gallerySearch_teach_4.
-  ///
-  /// In en, this message translates to:
-  /// **'Out of room for buttons? They scroll horizontally'**
-  String get tips_gallerySearch_teach_4;
-
-  /// No description provided for @tips_gallerySearch_teach_5.
-  ///
-  /// In en, this message translates to:
-  /// **'Page size goes up to 500 — for the browse-everything type'**
-  String get tips_gallerySearch_teach_5;
-
-  /// No description provided for @tips_gallerySearch_fun_1.
-  ///
-  /// In en, this message translates to:
-  /// **'Looks like there\'s good stuff down there~~~ what are we hunting?'**
-  String get tips_gallerySearch_fun_1;
-
-  /// No description provided for @tips_gallerySearch_fun_2.
-  ///
-  /// In en, this message translates to:
-  /// **'The collection grows; the folders pretend to keep up'**
-  String get tips_gallerySearch_fun_2;
-
-  /// No description provided for @tips_gallerySearch_fun_3.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro tip: your own prompts are the best search keywords'**
-  String get tips_gallerySearch_fun_3;
-
-  /// No description provided for @tips_gallerySearch_fun_4.
-  ///
-  /// In en, this message translates to:
-  /// **'Scrolling is cardio'**
-  String get tips_gallerySearch_fun_4;
-
-  /// No description provided for @tips_gallerySearch_fun_5.
-  ///
-  /// In en, this message translates to:
-  /// **'Somewhere in this pile hides tonight\'s masterpiece'**
-  String get tips_gallerySearch_fun_5;
 
   /// No description provided for @tips_blocklib_teach_1.
   ///

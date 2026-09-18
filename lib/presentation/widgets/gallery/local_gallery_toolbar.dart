@@ -131,7 +131,8 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
   Timer? _debounceTimer;
 
   /// 挂载时的 tip 轮次：首轮固定出使用说明句（FEAT-60）。
-  late final int _tipMountEpoch;
+  /// 懒初始化而非 initState 赋值——热重载不重跑 initState。
+  int? _tipMountEpoch;
 
   /// NAI 模型版本过滤 chips 的展示顺序与 label。
   static const List<String> _naiVersionLabels = ['3', '4', '4.5', '5'];
@@ -175,7 +176,6 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
   @override
   void initState() {
     super.initState();
-    _tipMountEpoch = currentTipEpoch();
     _searchFocusNode = FocusNode(onKeyEvent: _handleSearchKeyEvent);
   }
 
@@ -677,7 +677,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                   context.l10n,
                   TipModule.gallerySearch,
                   epoch: watchTipEpoch(ref),
-                  firstEpoch: _tipMountEpoch,
+                  firstEpoch: _tipMountEpoch ??= currentTipEpoch(),
                 ),
           hintStyle: TextStyle(
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),

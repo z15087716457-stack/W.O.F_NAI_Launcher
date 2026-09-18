@@ -9928,6 +9928,35 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tips_explore_fun_5 => '自然選択、早回し版';
 
   @override
+  String get tips_gallerySearch_teach_1 => 'カンマ区切り＝AND 検索';
+
+  @override
+  String get tips_gallerySearch_teach_2 => 'テキスト検索はネガティブプロンプトを除外済み——結果がクリーン';
+
+  @override
+  String get tips_gallerySearch_teach_3 => '検索はモデル・サンプラー・ソース・バージョンにもヒットします';
+
+  @override
+  String get tips_gallerySearch_teach_4 => 'ボタンが収まらない時は横スクロールできます';
+
+  @override
+  String get tips_gallerySearch_teach_5 => '1 ページ最大 500 枚——一気に眺めたい人向け';
+
+  @override
+  String get tips_gallerySearch_fun_1 => '下にいい物がたくさんありそう~~~何を探しましょうか？';
+
+  @override
+  String get tips_gallerySearch_fun_2 => 'コレクションは増える、フォルダは追いつくフリ';
+
+  @override
+  String get tips_gallerySearch_fun_3 => 'プロのコツ：自分のプロンプトが一番の検索キーワード';
+
+  @override
+  String get tips_gallerySearch_fun_4 => 'スクロールは立派な運動';
+
+  @override
+  String get tips_gallerySearch_fun_5 => 'この山のどこかに今夜の傑作が隠れています';
+
   @override
   String get tips_gallerySearch_start_1 => 'ファイル名やプロンプト本文で検索——Enter または候補をクリック';
 
@@ -9957,36 +9986,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get tips_gallerySearch_start_10 => '再生成する前にまず検索——たぶんもうあります';
-
-  @override
-  String get tips_gallerySearch_teach_1 => 'カンマ区切り＝AND 検索';
-
-  @override
-  String get tips_gallerySearch_teach_2 => 'テキスト検索はネガティブプロンプトを除外済み——結果がクリーン';
-
-  @override
-  String get tips_gallerySearch_teach_3 => '検索はモデル・サンプラー・ソース・バージョンにもヒットします';
-
-  @override
-  String get tips_gallerySearch_teach_4 => 'ボタンが収まらない時は横スクロールできます';
-
-  @override
-  String get tips_gallerySearch_teach_5 => '1 ページ最大 500 枚——一気に眺めたい人向け';
-
-  @override
-  String get tips_gallerySearch_fun_1 => '下にいい物がたくさんありそう~~~何を探しましょうか？';
-
-  @override
-  String get tips_gallerySearch_fun_2 => 'コレクションは増える、フォルダは追いつくフリ';
-
-  @override
-  String get tips_gallerySearch_fun_3 => 'プロのコツ：自分のプロンプトが一番の検索キーワード';
-
-  @override
-  String get tips_gallerySearch_fun_4 => 'スクロールは立派な運動';
-
-  @override
-  String get tips_gallerySearch_fun_5 => 'この山のどこかに今夜の傑作が隠れています';
 
   @override
   String get tips_blocklib_teach_1 => 'ブロックはサムネイル付きにできます——編集ダイアログで設定';
