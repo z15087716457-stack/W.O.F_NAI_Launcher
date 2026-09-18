@@ -44,6 +44,7 @@ void main() {
     String? folderId,
     int useCount = 0,
     bool isFavorite = false,
+    List<String>? atoms,
   }) {
     return PromptBlock.create(
       id: id,
@@ -55,6 +56,7 @@ void main() {
       isFavorite: isFavorite,
       createdAt: DateTime(2026),
       updatedAt: DateTime(2026),
+      atoms: atoms,
     );
   }
 
@@ -111,7 +113,10 @@ void main() {
       await tester.pump();
 
       expect(find.text('测试块'), findsOneWidget);
-      expect(find.text('masterpiece, best quality'), findsOneWidget);
+      // FEAT-79：点击态正文原子化成描边 chip，逗号段各成一枚
+      expect(find.text('masterpiece'), findsOneWidget);
+      expect(find.text('best quality'), findsOneWidget);
+      expect(find.text('masterpiece, best quality'), findsNothing);
       expect(find.text('使用 3 次'), findsOneWidget);
       expect(find.text('全部块 / 风格'), findsOneWidget);
       expect(find.byIcon(Icons.star), findsOneWidget);
@@ -123,6 +128,32 @@ void main() {
       // 纯预览无按钮
       expect(find.byType(FilledButton), findsNothing);
       expect(find.byType(OutlinedButton), findsNothing);
+    });
+
+    testWidgets('explicit atoms render as single chips over comma split', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 320,
+            child: PromptBlockDetailView(
+              block: makeBlock(
+                content: 'one scene, with comma, tail',
+                atoms: ['one scene, with comma', 'tail'],
+              ),
+              displayTitle: '原子块',
+              locationLabel: '全部块',
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // 显式 atoms 覆盖逗号切：含逗号的一幕整体成一枚 chip
+      expect(find.text('one scene, with comma'), findsOneWidget);
+      expect(find.text('tail'), findsOneWidget);
+      expect(find.text('with comma'), findsNothing);
     });
 
     testWidgets('landscape thumbnail uses ThumbnailDisplay', (tester) async {
@@ -450,8 +481,9 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('详情'), findsOneWidget);
-      // 完整内容无截断（contentMaxLines: null）
-      expect(find.text('masterpiece, best quality'), findsOneWidget);
+      // 完整内容无截断（contentMaxLines: null）：原子 chip 逐枚呈现
+      expect(find.text('masterpiece'), findsOneWidget);
+      expect(find.text('best quality'), findsOneWidget);
       expect(find.text('使用 5 次'), findsOneWidget);
       expect(find.text('全部块 / 风格'), findsOneWidget);
 

@@ -125,7 +125,7 @@ class _AtomListEditorState extends State<AtomListEditor> {
         child: GestureDetector(
           key: Key('atom-editor-orphan-$occurrence'),
           onTap: () => widget.controller.removeOrphanMarker(marker),
-          child: _AtomChip(
+          child: AtomChip(
             text: context.l10n.promptBlockLibrary_atomOrphan,
             theme: theme,
             borderColor: theme.colorScheme.error,
@@ -141,7 +141,7 @@ class _AtomListEditorState extends State<AtomListEditor> {
         child: GestureDetector(
           key: Key('atom-editor-atom-${marker.codeUnitAt(0)}-$occurrence'),
           onTap: () => widget.controller.unAtom(marker, occurrence),
-          child: _AtomChip(text: atomText, theme: theme),
+          child: AtomChip(text: atomText, theme: theme),
         ),
       ),
     );
@@ -149,12 +149,22 @@ class _AtomListEditorState extends State<AtomListEditor> {
 }
 
 /// 紧凑描边 chip：无图标、无内部填充色，描边跟主题色。
-class _AtomChip extends StatelessWidget {
-  const _AtomChip({required this.text, required this.theme, this.borderColor});
+/// 编辑器内联使用；详情面板正文原子化渲染同件复用。
+class AtomChip extends StatelessWidget {
+  const AtomChip({
+    super.key,
+    required this.text,
+    required this.theme,
+    this.borderColor,
+    this.textStyle,
+  });
 
   final String text;
   final ThemeData theme;
   final Color? borderColor;
+
+  /// 缺省 = bodyMedium/1.1（编辑器内联度量）；展示场景可传更小样式。
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +179,7 @@ class _AtomChip extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: theme.textTheme.bodyMedium?.copyWith(height: 1.1),
+        style: textStyle ?? theme.textTheme.bodyMedium?.copyWith(height: 1.1),
       ),
     );
   }

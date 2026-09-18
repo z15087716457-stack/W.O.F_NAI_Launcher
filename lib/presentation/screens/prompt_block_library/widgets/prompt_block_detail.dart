@@ -13,6 +13,7 @@ import '../../../widgets/common/themed_divider.dart';
 import '../../../widgets/common/thumbnail_display.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
+import 'atom_list_editor.dart';
 
 const promptBlockLibraryWideHeaderHeight = 64.0;
 
@@ -106,12 +107,38 @@ class PromptBlockDetailView extends StatelessWidget {
               },
             ),
           )
-        : Text(
-            content,
-            style: contentStyle,
-            maxLines: contentMaxLines,
-            overflow: contentMaxLines == null ? null : TextOverflow.ellipsis,
-          );
+        : block.content.isEmpty
+            ? Text(
+                content,
+                style: contentStyle,
+                maxLines: contentMaxLines,
+                overflow:
+                    contentMaxLines == null ? null : TextOverflow.ellipsis,
+              )
+            // FEAT-79 点击态：正文按原子切分成描边 chip（与编辑器同件），
+            // runSpacing 给比编辑器更宽的行距。
+            : LayoutBuilder(
+                builder: (context, constraints) {
+                  final atomStyle = contentStyle?.copyWith(height: 1.2);
+                  return Wrap(
+                    spacing: 4,
+                    runSpacing: 8,
+                    children: [
+                      for (final atom in block.atomsOrSplit)
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: constraints.maxWidth,
+                          ),
+                          child: AtomChip(
+                            text: atom,
+                            theme: theme,
+                            textStyle: atomStyle,
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              );
 
     final body = Padding(
       padding: const EdgeInsets.all(16),
