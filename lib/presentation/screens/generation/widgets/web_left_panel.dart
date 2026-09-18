@@ -135,76 +135,68 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
   Widget _buildExpanded(BuildContext context, ThemeData theme) {
     return Column(
       children: [
-        // 头部条：折叠按钮不悬浮，避免遮挡提示词工具栏。
-        // Model/Mode 胶囊一组随内容收紧，额度/余额一组：
-        // 宽度够时全部放同一行（胶囊居左、chips 贴右，官网式）；
-        // 面板拖窄放不下时 chips 自动整体换到第二行
+        // 头部条：折叠按钮钉右上角不移动；chips 宽时贴折叠按钮左侧，
+        // 拖侧边收窄随折叠栏实时左移，放不下整条换到第二行靠左，
+        // 底部分隔线始终横向贯通
         Container(
           constraints: const BoxConstraints(minHeight: 36),
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.only(left: 8, top: 4, bottom: 4),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(color: theme.dividerColor, width: 1),
             ),
           ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              const chips = [
-                OpusUsageChip(
-                  compact: true,
-                  inline: true,
-                  margin: EdgeInsets.only(right: 8),
-                ),
-                AnlasBalanceChip(compact: true, inline: true),
-              ];
-              final collapse = CollapseButton(
-                icon: Icons.chevron_left,
-                onTap: () => ref
-                    .read(layoutStateNotifierProvider.notifier)
-                    .setWebLeftPanelExpanded(false),
-              );
-
-              // 一行能放下时（胶囊组 ~250 + chips ~110 + 折叠 ~40）：
-              // 胶囊居左、折叠按钮固定最右（官网式），chips 挤在折叠左侧
-              if (constraints.maxWidth >= 400) {
-                return Row(
+          // Stack 两行语义合一：
+          //  - Wrap(spaceBetween) 两块原子换行：放得下时胶囊组钉最左、
+          //    chips 推最右贴折叠按钮左缘，收窄随动；放不下 chips 整块
+          //    落第二行靠左（无中间态）
+          //  - 折叠按钮作为覆盖层永远钉右上角，不占任何一行
+          child: Stack(
+            children: [
+              // SizedBox 撑满 Stack 宽 → Wrap 吃满面板宽，底部分隔线横向贯通
+              const SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  runSpacing: 2,
                   children: [
-                    const SizedBox(width: 8),
-                    const _ModelMenuButton(),
-                    const SizedBox(width: 6),
-                    const _ModeCapsule(),
-                    const Spacer(),
-                    ...chips,
-                    const SizedBox(width: 4),
-                    collapse,
-                    const SizedBox(width: 4),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _ModelMenuButton(),
+                        SizedBox(width: 6),
+                        _ModeCapsule(),
+                      ],
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(right: 36),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          OpusUsageChip(
+                            compact: true,
+                            inline: true,
+                            margin: EdgeInsets.only(right: 8),
+                          ),
+                          AnlasBalanceChip(compact: true, inline: true),
+                        ],
+                      ),
+                    ),
                   ],
-                );
-              }
-              return Column(
-                children: [
-                  Row(
-                    children: [
-                      const SizedBox(width: 8),
-                      const _ModelMenuButton(),
-                      const SizedBox(width: 6),
-                      const _ModeCapsule(),
-                      const Spacer(),
-                      collapse,
-                      const SizedBox(width: 4),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  const Row(
-                    children: [
-                      SizedBox(width: 8),
-                      OpusUsageChip(compact: true, inline: true),
-                      AnlasBalanceChip(compact: true, inline: true),
-                    ],
-                  ),
-                ],
-              );
-            },
+                ),
+              ),
+              Positioned(
+                top: 4,
+                right: 4,
+                child: CollapseButton(
+                  icon: Icons.chevron_left,
+                  onTap: () => ref
+                      .read(layoutStateNotifierProvider.notifier)
+                      .setWebLeftPanelExpanded(false),
+                ),
+              ),
+            ],
           ),
         ),
 
@@ -442,7 +434,9 @@ class _ModelMenuButton extends ConsumerWidget {
               height: 22,
               padding: const EdgeInsets.symmetric(horizontal: 7),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
+                // 官网式反色内胆：浅色底 + 深色内容（onSurface/surface
+                // 互反，深浅主题自动镜像）
+                color: theme.colorScheme.onSurface,
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Row(
@@ -452,22 +446,26 @@ class _ModelMenuButton extends ConsumerWidget {
                     'assets/icons/novelai-icon.png',
                     width: 14,
                     height: 14,
-                    // 素材是纯黑剪影，srcIn 着色后深浅主题自适应
-                    color: theme.colorScheme.onSurface,
+                    // 素材是纯黑剪影，srcIn 着色随内胆底色取反
+                    color: theme.colorScheme.surface,
                     filterQuality: FilterQuality.medium,
                   ),
                   const SizedBox(width: 5),
-                  Text(
-                    shortName,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
+                  Flexible(
+                    child: Text(
+                      shortName,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.surface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
                   ),
                   Icon(
                     Icons.keyboard_arrow_down,
                     size: 15,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: theme.colorScheme.surface,
                   ),
                 ],
               ),
@@ -609,7 +607,8 @@ class _ModeCapsule extends ConsumerWidget {
                 height: 22,
                 padding: const EdgeInsets.symmetric(horizontal: 7),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
+                  // 与 Model 同款的反色内胆
+                  color: theme.colorScheme.onSurface,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
@@ -623,17 +622,21 @@ class _ModeCapsule extends ConsumerWidget {
                       width: 14,
                       height: 14,
                       colorFilter: ColorFilter.mode(
-                        theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                        theme.colorScheme.surface,
                         BlendMode.srcIn,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      furryMode ? 'Furry' : 'Anime',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                    Flexible(
+                      child: Text(
+                        furryMode ? 'Furry' : 'Anime',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.surface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
                     ),
                   ],
                 ),
