@@ -7084,7 +7084,7 @@ abstract class AppLocalizations {
   /// No description provided for @localGallery_naiVersionFilterLabel.
   ///
   /// In en, this message translates to:
-  /// **'Version'**
+  /// **'Ver'**
   String get localGallery_naiVersionFilterLabel;
 
   /// No description provided for @localGallery_naiVersionFilterTooltip.

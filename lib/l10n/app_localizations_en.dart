@@ -3916,7 +3916,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_naiOnlyTooltip => 'Only show NAI-generated images';
 
   @override
-  String get localGallery_naiVersionFilterLabel => 'Version';
+  String get localGallery_naiVersionFilterLabel => 'Ver';
 
   @override
   String get localGallery_naiVersionFilterTooltip =>

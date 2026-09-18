@@ -855,25 +855,12 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
             activeSourceId == GallerySourceId.aiTag)
           _buildAiTagTimeRangeDropdown(state),
         // NAI-only 在 provider 层对 aiTag 的 search/popular 都生效，
-        // UI 也得两处都给开关，否则热门榜被静默过滤、无入口可关
+        // UI 也得两处都给开关，否则热门榜被静默过滤、无入口可关。
+        // 与本地画廊同款合并胶囊（左 NAI / 右 Ver 版本，版本仅搜索模式）
         if (activeSourceId == GallerySourceId.aiTag &&
             (state.viewMode == GalleryViewMode.search ||
                 state.viewMode == GalleryViewMode.popular))
-          FilterChip(
-            selected: state.aiTagNaiOnly,
-            showCheckmark: false,
-            label: Text(
-              context.l10n.onlineGallery_aiTagNaiOnly,
-              style: const TextStyle(fontSize: 12),
-            ),
-            tooltip: context.l10n.onlineGallery_aiTagNaiOnly,
-            onSelected: _galleryNotifier.setAiTagNaiOnly,
-            visualDensity: VisualDensity.compact,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-        if (state.viewMode == GalleryViewMode.search &&
-            activeSourceId == GallerySourceId.aiTag)
-          _buildAiTagModelVersionDropdown(state),
+          _buildAiTagNaiVersionSegment(theme, state),
         IconButton(
           icon: const Icon(Icons.block),
           tooltip: context.l10n.onlineGallery_blacklistTags,
@@ -944,31 +931,187 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
     );
   }
 
-  /// AiTag 模型版本过滤下拉（单选，点已选项清除；版本词注入 q 检索）
-  Widget _buildAiTagModelVersionDropdown(OnlineGalleryState state) {
-    final selected = state.aiTagModelVersion;
-    return Tooltip(
-      message: context.l10n.onlineGallery_aiTagModelVersion,
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: selected,
-          isDense: true,
-          borderRadius: BorderRadius.circular(12),
-          hint: Text(
-            context.l10n.onlineGallery_aiTagModelVersion,
-            style: const TextStyle(fontSize: 12),
+  /// 合并的「NAI + 版本」过滤胶囊（AI TAG 源专用，与本地画廊同款）。
+  ///
+  /// 交互契约（与本地一致）：
+  /// - 右半选中版本 → 版本词注入 q 检索，并自动点亮 NAI；点已勾版本清除
+  /// - 左半点按 toggle NAI；关闭 NAI 时连带清除版本
+  /// - 右半仅搜索模式显示（热门榜不支持版本词注入），此时胶囊只有左半
+  ///
+  /// 视觉契约：NAI 激活 → 左半反色内胆（onSurface 底 + surface 内容）；
+  /// 版本激活 → 外框底色/描边走 primary。
+  Widget _buildAiTagNaiVersionSegment(
+    ThemeData theme,
+    OnlineGalleryState state,
+  ) {
+    final colorScheme = theme.colorScheme;
+    final naiOnly = state.aiTagNaiOnly;
+    final selectedVersion = state.aiTagModelVersion;
+    final versionActive = selectedVersion != null;
+    final showVersion = state.viewMode == GalleryViewMode.search;
+
+    final activeColor = colorScheme.primary;
+    final inactiveColor = colorScheme.onSurfaceVariant;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(7),
+      child: Container(
+        height: 32,
+        decoration: BoxDecoration(
+          color: versionActive
+              ? activeColor.withValues(alpha: 0.12)
+              : Colors.transparent,
+          border: Border.all(
+            color: versionActive
+                ? activeColor.withValues(alpha: 0.6)
+                : colorScheme.outlineVariant.withValues(alpha: 0.5),
           ),
-          items: aiTagModelVersionQueries.keys
-              .map(
-                (version) =>
-                    DropdownMenuItem(value: version, child: Text('V$version')),
-              )
-              .toList(growable: false),
-          onChanged: (value) {
-            _galleryNotifier.setAiTagModelVersion(
-              value == selected ? null : value,
-            );
-          },
+          borderRadius: BorderRadius.circular(7),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 左半：NAI 开关（novelai 图标 + 文字；激活时套反色内胆）
+            Tooltip(
+              message: context.l10n.onlineGallery_aiTagNaiOnly,
+              child: InkWell(
+                onTap: () {
+                  final next = !naiOnly;
+                  _galleryNotifier.setAiTagNaiOnly(next);
+                  if (!next && versionActive) {
+                    _galleryNotifier.setAiTagModelVersion(null);
+                  }
+                },
+                borderRadius: const BorderRadius.horizontal(
+                  left: Radius.circular(7),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: SizedBox(
+                    height: 22,
+                    child: naiOnly
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.onSurface,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Image.asset(
+                                  'assets/icons/novelai-icon.png',
+                                  width: 12,
+                                  height: 12,
+                                  color: colorScheme.surface,
+                                  filterQuality: FilterQuality.medium,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  context.l10n.onlineGallery_aiTagNaiOnly,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.surface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                'assets/icons/novelai-icon.png',
+                                width: 13,
+                                height: 13,
+                                color: inactiveColor,
+                                filterQuality: FilterQuality.medium,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                context.l10n.onlineGallery_aiTagNaiOnly,
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+              ),
+            ),
+            // 右半：Ver 版本菜单（仅搜索模式；紧贴胶囊下缘展开）
+            if (showVersion) ...[
+              Container(
+                width: 1,
+                height: 16,
+                color: versionActive
+                    ? activeColor.withValues(alpha: 0.35)
+                    : colorScheme.outlineVariant.withValues(alpha: 0.5),
+              ),
+              PopupMenuButton<String>(
+                tooltip: context.l10n.onlineGallery_aiTagModelVersion,
+                position: PopupMenuPosition.under,
+                offset: const Offset(0, 2),
+                padding: EdgeInsets.zero,
+                onSelected: (version) {
+                  _galleryNotifier.setAiTagModelVersion(
+                    version == selectedVersion ? null : version,
+                  );
+                  // 选中版本自动点亮 NAI
+                  if (!naiOnly && version != selectedVersion) {
+                    _galleryNotifier.setAiTagNaiOnly(true);
+                  }
+                },
+                itemBuilder: (context) => [
+                  for (final version in aiTagModelVersionQueries.keys)
+                    PopupMenuItem(
+                      value: version,
+                      child: Row(
+                        children: [
+                          Expanded(child: Text('NAI $version')),
+                          if (version == selectedVersion)
+                            Icon(
+                              Icons.check,
+                              size: 16,
+                              color: colorScheme.primary,
+                            ),
+                        ],
+                      ),
+                    ),
+                ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: SizedBox(
+                    height: 32,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          versionActive
+                              ? 'Ver $selectedVersion'
+                              : 'Ver',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: versionActive
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            color: versionActive ? activeColor : null,
+                          ),
+                        ),
+                        Icon(
+                          Icons.keyboard_arrow_down,
+                          size: 15,
+                          color: versionActive ? activeColor : inactiveColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

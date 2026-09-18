@@ -132,6 +132,12 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
   /// NAI 模型版本过滤 chips 的展示顺序与 label。
   static const List<String> _naiVersionLabels = ['3', '4', '4.5', '5'];
 
+  /// 标题 + 计数徽标的预留宽度（按中英日三语最长标题估算，略宽松）。
+  static const double _kTitleBadgeReserve = 240;
+
+  /// 搜索框的最小宽度：按钮簇宽度上限据此留出，防止被挤没。
+  static const double _kSearchMinWidth = 160;
+
   /// NAI 版本 → 该版本包含的模型 ID 集（单击该 chip 时作为 filterModels 写入）。
   /// 以 [ImageModels] 中实际存在的常量名为准；版本 4/4.5/5 含对应的
   /// inpainting 变体，版本 3 按需求只列基础模型。
@@ -351,6 +357,17 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                   // 图标（tooltip 保留）；更窄=排序/日期这类带状态按钮也压成图标。
                   final showLabels = available >= 1740;
                   final showStateLabels = available >= 1170;
+                  // 右侧按钮簇的宽度上限：给标题/徽标和搜索框最小宽度留位。
+                  // 横向 SingleChildScrollView 在松散约束下收缩到内容宽度
+                  // （size = constraints.constrain(child.size)），配合
+                  // Expanded 搜索框，按钮簇自然贴到工具栏最右端；超出
+                  // clusterMax 时退回横向滚动而不是溢出。
+                  final clusterMax =
+                      (available -
+                              _kTitleBadgeReserve -
+                              20 - // SizedBox(12) + SizedBox(8) 间距
+                              _kSearchMinWidth)
+                          .clamp(0.0, double.infinity);
                   return Row(
                     children: [
                       // Title
@@ -391,24 +408,22 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                           ),
                         ),
                       const SizedBox(width: 12),
-                      // Search field（弹性占位；剩余空间主要让给右侧控件簇，
-                      // 否则 50/50 均分时控件簇被压缩到横向滚动）
-                      Flexible(flex: 1, child: _buildSearchField(theme, state)),
+                      // Search field：占满中间全部剩余空间，窗口宽窄时随之
+                      // 伸缩，把右侧按钮簇自然推到工具栏右端
+                      Expanded(child: _buildSearchField(theme, state)),
                       const SizedBox(width: 8),
-                      // 右侧控件簇：窄窗口下横向滚动，避免溢出
-                      Flexible(
-                        flex: 2,
+                      // 右侧控件簇：松散约束下收缩到按钮自然宽度并贴右；
+                      // 超过 clusterMax（极窄窗口）时横向滚动兜底
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: clusterMax),
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // NAI-only 过滤 chip（默认开，持久化偏好）
-                              _buildNaiOnlyChip(theme, state),
-                              const SizedBox(width: 6),
-                              // NAI 模型版本过滤（下拉菜单：单选 3/4/4.5/5，
-                              // 点已勾选项清除）
-                              _buildNaiVersionMenu(theme, state),
+                              // NAI + 版本过滤合并胶囊（左 NAI 开关 / 右 Ver 菜单，
+                              // 版本选中自动点亮 NAI，关 NAI 连带清版本）
+                              _buildNaiVersionSegment(theme, state),
                               const SizedBox(width: 6),
                               // 排序（字段菜单 + 方向切换）
                               _buildSortButton(
@@ -641,7 +656,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     final scopeLabel = _searchScopeLabel(state, categoryState);
     final searchField = Container(
       height: 36,
-      constraints: const BoxConstraints(maxWidth: 300),
+      constraints: const BoxConstraints(minWidth: _kSearchMinWidth),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(18),
@@ -767,44 +782,211 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     );
   }
 
-  /// Build NAI-only filter chip
-  /// NAI-only 过滤切换 chip：点按切换并持久化偏好
-  Widget _buildNaiOnlyChip(ThemeData theme, LocalGalleryState state) {
+  /// 合并的「NAI + 版本」过滤胶囊：左半 NAI 开关、右半 Ver 版本菜单，
+  /// 中间竖线分隔。
+  ///
+  /// 交互契约：
+  /// - 右半选中版本 → 写入该版本模型 ID 集，并自动点亮 NAI（版本过滤
+  ///   本就是 NAI 子集）；点已勾版本 = 清除版本，NAI 保持开
+  /// - 左半点按 toggle NAI；关闭 NAI 时连带清除版本（NAI 都关了，
+  ///   版本还留着没意义）
+  ///
+  /// 视觉契约：
+  /// - NAI 激活 → 左半套「官网式反色内胆」：onSurface 实心底 + surface
+  ///   反色图标文字（深浅主题自动镜像，与生图页模型胶囊同款）
+  /// - 版本激活 → 外框底色/描边/竖线走 primary 高亮
+  /// - 只开 NAI 不选版本 → 外框保持中性，仅靠左半反色胶囊表达
+  Widget _buildNaiVersionSegment(ThemeData theme, LocalGalleryState state) {
     final l10n = context.l10n;
-    final naiOnly = state.filterCriteria.naiOnly;
     final colorScheme = theme.colorScheme;
+    final naiOnly = state.filterCriteria.naiOnly;
+
+    String? activeVersion;
+    for (final version in _naiVersionLabels) {
+      if (_isNaiVersionActive(state, version)) {
+        activeVersion = version;
+        break;
+      }
+    }
+    final versionActive = activeVersion != null;
+
+    final activeColor = colorScheme.primary;
+    final inactiveColor = colorScheme.onSurfaceVariant;
 
     return Tooltip(
       message: l10n.localGallery_naiOnlyTooltip,
-      child: FilterChip(
-        avatar: Icon(
-          Icons.auto_awesome,
-          size: 14,
-          color: naiOnly ? colorScheme.primary : colorScheme.onSurfaceVariant,
-        ),
-        label: Text(
-          l10n.localGallery_naiOnly,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: naiOnly ? FontWeight.w600 : FontWeight.w400,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(7),
+        child: Container(
+          height: 32,
+          decoration: BoxDecoration(
+            color: versionActive
+                ? activeColor.withValues(alpha: 0.12)
+                : Colors.transparent,
+            border: Border.all(
+              color: versionActive
+                  ? activeColor.withValues(alpha: 0.6)
+                  : colorScheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+            borderRadius: BorderRadius.circular(7),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 左半：NAI 开关（novelai 图标 + NAI 文字；激活时套反色内胆）
+              InkWell(
+                onTap: () {
+                  final notifier = ref.read(
+                    localGalleryNotifierProvider.notifier,
+                  );
+                  final next = !naiOnly;
+                  notifier.setNaiOnly(next);
+                  unawaited(const GalleryNaiOnlyStore().save(next));
+                  if (!next && versionActive) {
+                    notifier.setFilterModels(const <String>[]);
+                  }
+                },
+                borderRadius: const BorderRadius.horizontal(
+                  left: Radius.circular(7),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: SizedBox(
+                    height: 22,
+                    child: naiOnly
+                        // 激活：官网式反色内胆（浅色底↔深色内容随主题镜像）
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.onSurface,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Image.asset(
+                                  'assets/icons/novelai-icon.png',
+                                  width: 12,
+                                  height: 12,
+                                  color: colorScheme.surface,
+                                  filterQuality: FilterQuality.medium,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  l10n.localGallery_naiOnly,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.surface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        // 未激活：纯文字形态
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(
+                                'assets/icons/novelai-icon.png',
+                                width: 13,
+                                height: 13,
+                                color: inactiveColor,
+                                filterQuality: FilterQuality.medium,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                l10n.localGallery_naiOnly,
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+              ),
+              // 竖线分隔
+              Container(
+                width: 1,
+                height: 16,
+                color: versionActive
+                    ? activeColor.withValues(alpha: 0.35)
+                    : colorScheme.outlineVariant.withValues(alpha: 0.5),
+              ),
+              // 右半：Ver 版本菜单（无图标；未选显示 Ver，选中显示 Ver N）
+              // PopupMenuPosition.under：菜单紧贴胶囊下缘展开（默认 over
+              // 是从按钮中间弹出盖住胶囊）。child 撑满 32px 高让按钮下缘
+              // 与胶囊下缘对齐，offset 留 2px 呼吸缝。
+              PopupMenuButton<String>(
+                tooltip: l10n.localGallery_naiVersionFilterTooltip,
+                position: PopupMenuPosition.under,
+                offset: const Offset(0, 2),
+                padding: EdgeInsets.zero,
+                onSelected: (version) {
+                  final notifier = ref.read(
+                    localGalleryNotifierProvider.notifier,
+                  );
+                  notifier.setFilterModels(
+                    version == activeVersion
+                        ? const <String>[]
+                        : (_naiVersionModelIds[version] ?? const []),
+                  );
+                  // 选中版本自动点亮 NAI（版本过滤是 NAI 子集）
+                  if (!naiOnly && version != activeVersion) {
+                    notifier.setNaiOnly(true);
+                    unawaited(const GalleryNaiOnlyStore().save(true));
+                  }
+                },
+                itemBuilder: (context) => [
+                  for (final version in _naiVersionLabels)
+                    PopupMenuItem(
+                      value: version,
+                      child: Row(
+                        children: [
+                          Expanded(child: Text('NAI $version')),
+                          if (version == activeVersion)
+                            Icon(
+                              Icons.check,
+                              size: 16,
+                              color: colorScheme.primary,
+                            ),
+                        ],
+                      ),
+                    ),
+                ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: SizedBox(
+                    height: 32,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          versionActive
+                              ? 'Ver $activeVersion'
+                              : l10n.localGallery_naiVersionFilterLabel,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: versionActive
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                          color: versionActive ? activeColor : null,
+                        ),
+                      ),
+                      Icon(
+                        Icons.keyboard_arrow_down,
+                        size: 15,
+                        color: versionActive ? activeColor : inactiveColor,
+                      ),
+                    ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        selected: naiOnly,
-        onSelected: (value) {
-          ref.read(localGalleryNotifierProvider.notifier).setNaiOnly(value);
-          unawaited(const GalleryNaiOnlyStore().save(value));
-        },
-        visualDensity: VisualDensity.compact,
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        showCheckmark: false,
-        side: BorderSide(
-          color: naiOnly
-              ? colorScheme.primary.withValues(alpha: 0.6)
-              : colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-        selectedColor: colorScheme.primaryContainer.withValues(alpha: 0.5),
-        backgroundColor: Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 6),
       ),
     );
   }
@@ -815,77 +997,6 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     final ids = _naiVersionModelIds[version] ?? const <String>[];
     if (current.length != ids.length) return false;
     return setEquals(current.toSet(), ids.toSet());
-  }
-
-  /// Build NAI model version filter dropdown menu
-  /// NAI 模型版本过滤下拉：按钮显示当前选中版本（未选显示通用标签），点击
-  /// 向下展开 3/4/4.5/5；点未勾选项=写入该版本 ID 集，点已勾选项=清空
-  /// （setFilterModels 整表替换天然满足单选）。
-  /// 视觉壳套路同 [_buildSortButton]：IgnorePointer 让 PopupMenuButton 自己
-  /// 收手势。
-  Widget _buildNaiVersionMenu(ThemeData theme, LocalGalleryState state) {
-    final l10n = context.l10n;
-    final colorScheme = theme.colorScheme;
-
-    String? activeVersion;
-    for (final version in _naiVersionLabels) {
-      if (_isNaiVersionActive(state, version)) {
-        activeVersion = version;
-        break;
-      }
-    }
-    final active = activeVersion != null;
-
-    return PopupMenuButton<String>(
-      tooltip: l10n.localGallery_naiVersionFilterTooltip,
-      onSelected: (version) {
-        final notifier = ref.read(localGalleryNotifierProvider.notifier);
-        notifier.setFilterModels(
-          version == activeVersion
-              ? const <String>[]
-              : (_naiVersionModelIds[version] ?? const []),
-        );
-      },
-      itemBuilder: (context) => [
-        for (final version in _naiVersionLabels)
-          PopupMenuItem(
-            value: version,
-            child: Row(
-              children: [
-                const Icon(Icons.memory, size: 16),
-                const SizedBox(width: 8),
-                Expanded(child: Text('NAI $version')),
-                if (version == activeVersion)
-                  Icon(Icons.check, size: 16, color: colorScheme.primary),
-              ],
-            ),
-          ),
-      ],
-      child: IgnorePointer(
-        child: OutlinedButton.icon(
-          onPressed: () {},
-          icon: Icon(
-            Icons.memory,
-            size: 16,
-            color: active ? colorScheme.primary : null,
-          ),
-          label: Text(
-            active
-                ? 'NAI $activeVersion'
-                : l10n.localGallery_naiVersionFilterLabel,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-              color: active ? colorScheme.primary : null,
-            ),
-          ),
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            visualDensity: VisualDensity.compact,
-          ),
-        ),
-      ),
-    );
   }
 
   /// Build sort control: field menu (left) + direction toggle (right)

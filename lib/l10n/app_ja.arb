@@ -1908,7 +1908,7 @@
   "localGallery_thumbnailQualityHd": "高画質",
   "localGallery_naiOnly": "NAI",
   "localGallery_naiOnlyTooltip": "NAI 生成画像のみ表示",
-  "localGallery_naiVersionFilterLabel": "バージョン",
+  "localGallery_naiVersionFilterLabel": "Ver",
   "localGallery_naiVersionFilterTooltip": "NAI モデルのバージョンで絞り込み",
   "localGallery_masonryViewLabel": "ウォーターフォール",
   "localGallery_switchToMasonryView": "ウォーターフォール ビューに切り替える",

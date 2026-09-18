@@ -3773,7 +3773,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_naiOnlyTooltip => '仅显示 NAI 生成的图片';
 
   @override
-  String get localGallery_naiVersionFilterLabel => '版本';
+  String get localGallery_naiVersionFilterLabel => 'Ver';
 
   @override
   String get localGallery_naiVersionFilterTooltip => '按 NAI 模型版本过滤';

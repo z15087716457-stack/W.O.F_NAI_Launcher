@@ -1908,7 +1908,7 @@
   "localGallery_thumbnailQualityHd": "High",
   "localGallery_naiOnly": "NAI",
   "localGallery_naiOnlyTooltip": "Only show NAI-generated images",
-  "localGallery_naiVersionFilterLabel": "Version",
+  "localGallery_naiVersionFilterLabel": "Ver",
   "localGallery_naiVersionFilterTooltip": "Filter by NAI model version",
   "localGallery_masonryViewLabel": "Waterfall",
   "localGallery_switchToMasonryView": "Switch to waterfall view",

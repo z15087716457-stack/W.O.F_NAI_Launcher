@@ -3832,7 +3832,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_naiOnlyTooltip => 'NAI 生成画像のみ表示';
 
   @override
-  String get localGallery_naiVersionFilterLabel => 'バージョン';
+  String get localGallery_naiVersionFilterLabel => 'Ver';
 
   @override
   String get localGallery_naiVersionFilterTooltip => 'NAI モデルのバージョンで絞り込み';
