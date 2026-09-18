@@ -967,6 +967,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_sectionCharacters => 'キャラクタープロンプト';
 
   @override
+  String get generation_sectionCharactersSub => 'シーン内のキャラクターに個別のプロンプトを作成します。';
+
+  @override
+  String get character_positionLabel => '位置';
+
+  @override
   String get generation_sectionReferenceImages => '参照画像';
 
   @override

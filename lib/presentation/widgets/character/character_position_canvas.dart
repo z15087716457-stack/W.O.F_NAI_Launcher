@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -387,7 +388,7 @@ class CharacterPositionModeSegments extends ConsumerWidget {
             style: _segmentTextStyle(context, !globalAiChoice),
           ),
         ),
-        // 位置画布入口
+        // 位置画布入口（官网网格图标）
         Tooltip(
           message: l10n.characterCanvas_title,
           waitDuration: const Duration(milliseconds: 500),
@@ -396,12 +397,16 @@ class CharacterPositionModeSegments extends ConsumerWidget {
             radius: const BorderRadius.horizontal(right: Radius.circular(6)),
             onTap: () =>
                 ref.read(characterPositionCanvasProvider.notifier).toggle(),
-            child: Icon(
-              Icons.control_camera,
-              size: 15,
-              color: canvasOpen
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            child: SvgPicture.asset(
+              'assets/icons/nai-icon-characterpositions.svg',
+              width: 15,
+              height: 15,
+              colorFilter: ColorFilter.mode(
+                canvasOpen
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                BlendMode.srcIn,
+              ),
             ),
           ),
         ),

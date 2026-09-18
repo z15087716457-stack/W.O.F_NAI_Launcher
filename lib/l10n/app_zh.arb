@@ -387,6 +387,8 @@
   "generation_modelDesc_v4Curated": "基于精选图像子集训练的 V4 模型。",
   "generation_modelDesc_v4Full": "我们的 V4 全量模型。",
   "generation_sectionCharacters": "角色/定位",
+  "generation_sectionCharactersSub": "为场景中的角色创建独立提示词。",
+  "character_positionLabel": "定位",
   "generation_sectionReferenceImages": "参考图",
   "generation_sectionImageSettings": "图像设置",
   "anlas_subscription": "订阅赠送",

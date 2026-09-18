@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -265,17 +266,8 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
                   children: [
-                    if (!hasThumbnail) ...[
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: _genderColor(character.effectiveGender),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                    ],
+                    _genderIcon(character.effectiveGender, onHeader),
+                    const SizedBox(width: 6),
                     Expanded(
                       child: Builder(
                         builder: (context) {
@@ -311,26 +303,9 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
                         },
                       ),
                     ),
-                    // 操作全部平铺一排（两种布局一致：上移/下移/收藏块库），
-                    // 名字用 Expanded 省略号吸收宽度，窄卡不会溢出
-                    ..._buildFullActions(context, l10n, onHeader),
-                    _HeaderIconButton(
-                      icon: character.enabled
-                          ? Icons.check_circle
-                          : Icons.circle_outlined,
-                      color: character.enabled
-                          ? (hasThumbnail ? Colors.white : colorScheme.primary)
-                          : onHeader,
-                      tooltip: l10n.characterEditor_enabled,
-                      onTap: () =>
-                          _notifier.toggleCharacterEnabled(character.id),
-                    ),
-                    _HeaderIconButton(
-                      icon: Icons.delete_outline,
-                      color: hasThumbnail ? Colors.white : colorScheme.error,
-                      tooltip: l10n.common_delete,
-                      onTap: _deleteCharacter,
-                    ),
+                    // 官网式动作列：▲ ▼ │ ✓ │ 入库 │ 🗑 │ 位置画布，
+                    // 竖线分隔，纯图标。名字用 Expanded 省略号吸收宽度。
+                    ..._buildFullActions(context, ref, l10n, onHeader),
                   ],
                 ),
               ),
@@ -343,24 +318,37 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
 
   List<Widget> _buildFullActions(
     BuildContext context,
+    WidgetRef ref,
     AppLocalizations l10n,
     Color onHeader,
   ) {
+    final character = widget.character;
+    final canvasOpen = ref.watch(characterPositionCanvasProvider);
     return [
       _HeaderIconButton(
-        icon: Icons.arrow_upward,
+        asset: 'assets/icons/nai-icon-dir-arrow-up.svg',
         color: onHeader,
         tooltip: l10n.characterEditor_moveUp,
         enabled: widget.index > 0,
         onTap: () => _notifier.moveCharacterUp(widget.index),
       ),
       _HeaderIconButton(
-        icon: Icons.arrow_downward,
+        asset: 'assets/icons/nai-icon-dir-arrow-down.svg',
         color: onHeader,
         tooltip: l10n.characterEditor_moveDown,
         enabled: widget.index < widget.total - 1,
         onTap: () => _notifier.moveCharacterDown(widget.index),
       ),
+      const _HeaderDivider(),
+      _HeaderIconButton(
+        asset: 'assets/icons/nai-icon-check.svg',
+        color: character.enabled
+            ? Theme.of(context).colorScheme.primary
+            : onHeader,
+        tooltip: l10n.characterEditor_enabled,
+        onTap: () => _notifier.toggleCharacterEnabled(character.id),
+      ),
+      const _HeaderDivider(),
       _HeaderIconButton(
         icon: Icons.library_add_outlined,
         color: onHeader,
@@ -373,18 +361,38 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
           ),
         ),
       ),
+      const _HeaderDivider(),
+      _HeaderIconButton(
+        asset: 'assets/icons/nai-icon-trash.svg',
+        color: Theme.of(context).colorScheme.error,
+        tooltip: l10n.common_delete,
+        onTap: _deleteCharacter,
+      ),
+      const _HeaderDivider(),
+      _HeaderIconButton(
+        asset: 'assets/icons/nai-icon-swap.svg',
+        color: canvasOpen ? Theme.of(context).colorScheme.primary : onHeader,
+        tooltip: l10n.characterCanvas_title,
+        onTap: () =>
+            ref.read(characterPositionCanvasProvider.notifier).toggle(),
+      ),
     ];
   }
 
-  static Color _genderColor(CharacterGender gender) {
-    switch (gender) {
-      case CharacterGender.female:
-        return const Color(0xFFEC4899);
-      case CharacterGender.male:
-        return const Color(0xFF3B82F6);
-      case CharacterGender.other:
-        return const Color(0xFF8B5CF6);
-    }
+  /// 官网式性别符号图标（♀/♂/⚥），单色。
+  static Widget _genderIcon(CharacterGender gender, Color onHeader) {
+    final asset = switch (gender) {
+      CharacterGender.female => 'assets/icons/nai-icon-gender-female.svg',
+      CharacterGender.male => 'assets/icons/nai-icon-gender-male.svg',
+      // TODO(official-icon): gender-other ⚥ glyph not yet exported; reuse female glyph
+      CharacterGender.other => 'assets/icons/nai-icon-gender-female.svg',
+    };
+    return SvgPicture.asset(
+      asset,
+      width: 13,
+      height: 13,
+      colorFilter: ColorFilter.mode(onHeader, BlendMode.srcIn),
+    );
   }
 
   // ==================== 只读预览 ====================
@@ -458,39 +466,58 @@ class _HeaderThumbnail extends StatelessWidget {
   }
 }
 
-/// 头部条小图标按钮
+/// 头部条小图标按钮（支持官方 SVG asset 或 Material IconData）
 class _HeaderIconButton extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final String? asset;
   final Color color;
   final String tooltip;
   final VoidCallback onTap;
   final bool enabled;
 
   const _HeaderIconButton({
-    required this.icon,
+    this.icon,
+    this.asset,
     required this.color,
     required this.tooltip,
     required this.onTap,
     this.enabled = true,
-  });
+  }) : assert(icon != null || asset != null, 'icon or asset required');
 
   @override
   Widget build(BuildContext context) {
+    final tint = enabled ? color : color.withValues(alpha: 0.3);
+    final glyph = asset != null
+        ? SvgPicture.asset(
+            asset!,
+            width: 14,
+            height: 14,
+            colorFilter: ColorFilter.mode(tint, BlendMode.srcIn),
+          )
+        : Icon(icon, size: 15, color: tint);
     return Tooltip(
       message: tooltip,
       waitDuration: const Duration(milliseconds: 500),
       child: InkWell(
         onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(4),
-        child: Padding(
-          padding: const EdgeInsets.all(4),
-          child: Icon(
-            icon,
-            size: 15,
-            color: enabled ? color : color.withValues(alpha: 0.3),
-          ),
-        ),
+        child: Padding(padding: const EdgeInsets.all(4), child: glyph),
       ),
+    );
+  }
+}
+
+/// 动作列竖线分隔（官网式）
+class _HeaderDivider extends StatelessWidget {
+  const _HeaderDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 14,
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
     );
   }
 }

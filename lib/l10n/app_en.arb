@@ -422,6 +422,8 @@
   "generation_modelDesc_v4Curated": "Our V4 model trained on a curated subset of images.",
   "generation_modelDesc_v4Full": "Our V4 full model.",
   "generation_sectionCharacters": "Character Prompts",
+  "generation_sectionCharactersSub": "Create a separate prompt for characters in your scene.",
+  "character_positionLabel": "Position",
   "generation_sectionReferenceImages": "Reference Images",
   "generation_sectionImageSettings": "Image Settings",
   "anlas_subscription": "Subscription",

@@ -986,6 +986,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_sectionCharacters => 'Character Prompts';
 
   @override
+  String get generation_sectionCharactersSub =>
+      'Create a separate prompt for characters in your scene.';
+
+  @override
+  String get character_positionLabel => 'Position';
+
+  @override
   String get generation_sectionReferenceImages => 'Reference Images';
 
   @override

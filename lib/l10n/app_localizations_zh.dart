@@ -951,6 +951,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_sectionCharacters => '角色/定位';
 
   @override
+  String get generation_sectionCharactersSub => '为场景中的角色创建独立提示词。';
+
+  @override
+  String get character_positionLabel => '定位';
+
+  @override
   String get generation_sectionReferenceImages => '参考图';
 
   @override

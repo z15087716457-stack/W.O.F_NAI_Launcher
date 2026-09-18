@@ -421,6 +421,8 @@
   "generation_modelDesc_v4Curated": "厳選画像サブセットで学習した V4 モデルです。",
   "generation_modelDesc_v4Full": "V4 フルモデルです。",
   "generation_sectionCharacters": "キャラクタープロンプト",
+  "generation_sectionCharactersSub": "シーン内のキャラクターに個別のプロンプトを作成します。",
+  "character_positionLabel": "位置",
   "generation_sectionReferenceImages": "参照画像",
   "generation_sectionImageSettings": "画像設定",
   "anlas_subscription": "サブスク",

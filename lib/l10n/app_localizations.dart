@@ -1887,6 +1887,18 @@ abstract class AppLocalizations {
   /// **'Character Prompts'**
   String get generation_sectionCharacters;
 
+  /// No description provided for @generation_sectionCharactersSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a separate prompt for characters in your scene.'**
+  String get generation_sectionCharactersSub;
+
+  /// No description provided for @character_positionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get character_positionLabel;
+
   /// No description provided for @generation_sectionReferenceImages.
   ///
   /// In en, this message translates to:
