@@ -16236,11 +16236,23 @@ abstract class AppLocalizations {
   /// **'Content'**
   String get promptBlockLibrary_blockContent;
 
-  /// No description provided for @promptBlockLibrary_contentHint.
+  /// No description provided for @promptBlockLibrary_atomInputHint.
   ///
   /// In en, this message translates to:
-  /// **'Plain text content'**
-  String get promptBlockLibrary_contentHint;
+  /// **'Type text, press Enter to make an atom'**
+  String get promptBlockLibrary_atomInputHint;
+
+  /// No description provided for @promptBlockLibrary_atomRestoreHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to restore as editable text'**
+  String get promptBlockLibrary_atomRestoreHint;
+
+  /// No description provided for @promptBlockLibrary_atomEditorTutorial.
+  ///
+  /// In en, this message translates to:
+  /// **'Each line is one atom: press Enter to block it, click a block to edit it back; leftover text becomes atoms on save, and atoms are joined with commas when drawn.'**
+  String get promptBlockLibrary_atomEditorTutorial;
 
   /// No description provided for @promptBlockLibrary_color.
   ///

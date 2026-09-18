@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/utils/pill_roll_engine.dart';
 import '../../../../core/utils/prompt_block_thumbnails.dart';
 import '../../../../core/utils/thumbnail_image_normalizer.dart';
 import '../../../../data/models/prompt_block/prompt_block.dart';
@@ -19,12 +20,14 @@ import '../../../widgets/common/thumbnail_display.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
 import '../../../widgets/common/thumbnail_crop_dialog.dart';
+import 'atom_list_editor.dart';
 import 'prompt_block_color_picker.dart';
 
 class PromptBlockEditResult {
   const PromptBlockEditResult({
     required this.title,
     required this.content,
+    required this.atoms,
     required this.folderId,
     required this.color,
     required this.iconName,
@@ -36,6 +39,10 @@ class PromptBlockEditResult {
 
   final String title;
   final String content;
+
+  /// 显式原子列表（FEAT-79）：编辑器保存口径，空白段已剔除；
+  /// [content] 恒等于 `atoms.join(', ')`。
+  final List<String> atoms;
   final String? folderId;
   final String color;
   final String? iconName;
@@ -121,6 +128,7 @@ class PromptBlockEditDialog extends StatefulWidget {
         .createBlock(
           title: result.title,
           content: result.content,
+          atoms: result.atoms,
           folderId: result.folderId,
           color: result.color,
           iconName: result.iconName,
@@ -141,7 +149,7 @@ class PromptBlockEditDialog extends StatefulWidget {
 
 class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
   late final TextEditingController _titleController;
-  late final TextEditingController _contentController;
+  late final AtomListEditorController _atomController;
   late String? _folderId;
   late Color _selectedColor;
   late String? _selectedIconName;
@@ -168,8 +176,11 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
     _titleController = TextEditingController(
       text: widget.block?.title ?? widget.initialTitle ?? '',
     );
-    _contentController = TextEditingController(
-      text: widget.block?.content ?? widget.initialContent ?? '',
+    // FEAT-79：正文进原子编辑器——旧块读显式 atoms、其余按顶层
+    // 逗号预切（拍板②），保存时未块化文本自动收尾成原子。
+    _atomController = AtomListEditorController(
+      widget.block?.atomsOrSplit ??
+          PillRollEngine.splitTopLevelAtoms(widget.initialContent ?? ''),
     );
     _folderId = widget.block?.folderId ?? widget.initialFolderId;
     _selectedColor = promptBlockColorFromString(
@@ -212,7 +223,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
       }
     }
     _titleController.dispose();
-    _contentController.dispose();
+    _atomController.dispose();
     super.dispose();
   }
 
@@ -278,12 +289,17 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
                 style: theme.textTheme.labelLarge,
               ),
               const SizedBox(height: 6),
-              ThemedInput.multiline(
-                controller: _contentController,
-                minLines: 9,
-                maxLines: 14,
-                hintText: l10n.promptBlockLibrary_contentHint,
-                contentPadding: const EdgeInsets.all(12),
+              AtomListEditor(controller: _atomController, height: 260),
+              const SizedBox(height: 6),
+              Text(
+                l10n.promptBlockLibrary_atomEditorTutorial,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.7,
+                  ),
+                  fontSize: 11,
+                  height: 1.4,
+                ),
               ),
               const SizedBox(height: 16),
               Text(
@@ -546,11 +562,14 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
       }
       _committedThumbnailPath = _thumbnailPath;
       if (!mounted) return;
+      final atoms = _atomController.atoms;
       Navigator.of(context).pop(
         PromptBlockEditResult(
           title: _titleController.text.trim(),
-          // Keep the original text exactly as entered, including whitespace.
-          content: _contentController.text,
+          // FEAT-79：content 恒为 atoms 的 `, ` 拼接——插入/搜索/预览
+          // 路径全部只读 content，抽取路径读显式 atoms。
+          content: atoms.join(', '),
+          atoms: atoms,
           folderId: _folderId,
           color: promptBlockColorToHex(_selectedColor),
           iconName: _selectedIconName,

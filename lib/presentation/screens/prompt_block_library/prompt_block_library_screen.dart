@@ -2515,6 +2515,7 @@ class _PromptBlockLibraryScreenState
           .createBlock(
             title: result.title,
             content: result.content,
+            atoms: result.atoms,
             folderId: result.folderId,
             color: result.color,
             iconName: result.iconName,
@@ -2544,6 +2545,7 @@ class _PromptBlockLibraryScreenState
             block.copyWith(
               title: result.title,
               content: result.content,
+              atoms: result.atoms,
               color: result.color,
               iconName: result.iconName,
               thumbnail: result.thumbnail,

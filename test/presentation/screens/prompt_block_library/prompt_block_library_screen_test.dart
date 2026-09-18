@@ -615,7 +615,21 @@ void main() {
       matching: find.byType(TextField),
     );
     await tester.enterText(fields.first, '已编辑');
-    await tester.enterText(fields.at(1), '  first line\nsecond line  ');
+
+    // FEAT-79：正文是原子编辑器——预切原子 'before' 先解开清空删掉，
+    // 再在尾部输入行贴多行文本（换行切成原子）。
+    await tester.tap(find.byKey(const Key('atom-editor-atom-0')));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('atom-editor-raw-0')), '');
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    await tester.enterText(
+      find.byKey(const Key('atom-editor-raw-0')),
+      'first line\nsecond line',
+    );
+    await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, '保存'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -623,7 +637,8 @@ void main() {
 
     final saved = notifier.state.valueOrNull?.blockById(block.id);
     expect(saved?.title, '已编辑');
-    expect(saved?.content, '  first line\nsecond line  ');
+    expect(saved?.atoms, ['first line', 'second line']);
+    expect(saved?.content, 'first line, second line');
     expect(find.byType(PromptBlockEditDialog), findsNothing);
     expect(find.byType(PromptBlockDetailPanel), findsOneWidget);
   });

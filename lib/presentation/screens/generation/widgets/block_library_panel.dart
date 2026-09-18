@@ -756,6 +756,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
             block.copyWith(
               title: result.title,
               content: result.content,
+              atoms: result.atoms,
               color: result.color,
               iconName: result.iconName,
               thumbnail: result.thumbnail,

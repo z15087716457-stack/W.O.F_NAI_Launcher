@@ -9071,7 +9071,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_blockContent => '内容';
 
   @override
-  String get promptBlockLibrary_contentHint => 'プレーンテキストの内容';
+  String get promptBlockLibrary_atomInputHint => 'テキストを入力し、Enterで原子ブロック化';
+
+  @override
+  String get promptBlockLibrary_atomRestoreHint => 'クリックでテキストに戻して再編集';
+
+  @override
+  String get promptBlockLibrary_atomEditorTutorial =>
+      '1行＝1原子：入力後Enterでブロック化、ブロックをクリックでテキストに戻す。ブロック化されなかったテキストは保存時に自動で原子化され、抽出時はカンマで連結されます。';
 
   @override
   String get promptBlockLibrary_color => '色';

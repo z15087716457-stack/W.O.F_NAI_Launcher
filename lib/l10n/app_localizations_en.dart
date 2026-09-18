@@ -9274,7 +9274,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_blockContent => 'Content';
 
   @override
-  String get promptBlockLibrary_contentHint => 'Plain text content';
+  String get promptBlockLibrary_atomInputHint =>
+      'Type text, press Enter to make an atom';
+
+  @override
+  String get promptBlockLibrary_atomRestoreHint =>
+      'Click to restore as editable text';
+
+  @override
+  String get promptBlockLibrary_atomEditorTutorial =>
+      'Each line is one atom: press Enter to block it, click a block to edit it back; leftover text becomes atoms on save, and atoms are joined with commas when drawn.';
 
   @override
   String get promptBlockLibrary_color => 'Color';
