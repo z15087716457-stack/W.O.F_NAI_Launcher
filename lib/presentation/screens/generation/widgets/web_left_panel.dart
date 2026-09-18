@@ -566,12 +566,17 @@ class _ModeCapsule extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              // TODO(official-icon): Anime=rdB / Furry=O21（官网图标字形，
-              // 素材到手后替换此 Material 近似形）
-              Icon(
-                furryMode ? Icons.pets : Icons.face,
-                size: 15,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+              // 官网同款图标：anime=sakura 樱花 / furry=爪印
+              SvgPicture.asset(
+                furryMode
+                    ? 'assets/icons/nai-icon-furry.svg'
+                    : 'assets/icons/nai-icon-sakura.svg',
+                width: 15,
+                height: 15,
+                colorFilter: ColorFilter.mode(
+                  theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                  BlendMode.srcIn,
+                ),
               ),
               const SizedBox(width: 4),
               Text(
