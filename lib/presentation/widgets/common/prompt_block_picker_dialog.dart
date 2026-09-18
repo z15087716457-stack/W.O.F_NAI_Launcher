@@ -8,6 +8,7 @@ import '../../../core/constants/storage_keys.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../providers/prompt_block_library_provider.dart';
+import '../../providers/tips_provider.dart';
 import 'thumbnail_display.dart';
 
 /// 块库条目选择对话框
@@ -140,7 +141,11 @@ class _PromptBlockPickerDialogState
           flex: 2,
           child: TextField(
             decoration: InputDecoration(
-              hintText: context.l10n.promptBlockLibrary_searchHint,
+              hintText: tipHint(
+                context.l10n,
+                TipModule.blockLibrary,
+                epoch: watchTipEpoch(ref),
+              ),
               prefixIcon: const Icon(Icons.search, size: 20),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),

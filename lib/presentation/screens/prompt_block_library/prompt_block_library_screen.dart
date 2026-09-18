@@ -21,6 +21,7 @@ import '../../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../../data/models/prompt_block/prompt_block_sort.dart';
 import '../../../data/repositories/prompt_block_repository.dart';
 import '../../providers/prompt_block_library_provider.dart';
+import '../../providers/tips_provider.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
 import 'widgets/curation_import_preview_dialog.dart';
@@ -891,7 +892,11 @@ class _PromptBlockLibraryScreenState
           focusNode: _searchFocusNode,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
-            hintText: context.l10n.promptBlockLibrary_searchHint,
+            hintText: tipHint(
+              context.l10n,
+              TipModule.blockLibrary,
+              epoch: watchTipEpoch(ref),
+            ),
             prefixIcon: const Icon(Icons.search, size: 18),
             suffixIcon: _searchController.text.isEmpty
                 ? null

@@ -1053,17 +1053,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prompt_appliedToMainPrompt => 'Applied to main prompt';
 
   @override
-  String get prompt_inputPrompt => 'Enter prompt...';
-
-  @override
-  String get prompt_describeImage =>
-      'Describe the image you want to generate...';
-
-  @override
-  String get prompt_describeImageWithHint =>
-      'Enter prompt to describe image, type < to reference library, supports tag autocomplete';
-
-  @override
   String get prompt_searchHint => 'Search prompt';
 
   @override
@@ -2487,9 +2476,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onlineGallery_favorites => 'Favorites';
 
   @override
-  String get onlineGallery_searchTags => 'Search tags...';
-
-  @override
   String get onlineGallery_refresh => 'Refresh';
 
   @override
@@ -3845,10 +3831,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localGallery_categoryPanelTitle => 'Categories';
-
-  @override
-  String get localGallery_searchFilenamePromptPlaceholder =>
-      'Search filename/Prompt; comma-separated terms are matched together...';
 
   @override
   String get localGallery_selectCurrentPage => 'Select Page';
@@ -9187,9 +9169,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_scope => 'Browse';
 
   @override
-  String get promptBlockLibrary_searchHint => 'Search blocks...';
-
-  @override
   String get promptBlockLibrary_newBlock => 'New block';
 
   @override
@@ -10107,4 +10086,187 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get promptAssistant_noEnabledProviders =>
       'No enabled providers. Add and enable one below first.';
+
+  @override
+  String get tips_gen_teach_1 =>
+      'Type < in the prompt box to pull in block-library blocks';
+
+  @override
+  String get tips_gen_teach_2 =>
+      'Click Seed on the summary bar to pin or re-randomize; the sampler has a menu too';
+
+  @override
+  String get tips_gen_teach_3 =>
+      'The number box beside Generate sets batch count; the right chip shows Anlas cost';
+
+  @override
+  String get tips_gen_teach_4 =>
+      'The chunks menu at top-right tucks away blocks, presets, and regex rules';
+
+  @override
+  String get tips_gen_teach_5 =>
+      'Transparent BG exports the alpha channel — with character references enabled, it disables';
+
+  @override
+  String get tips_gen_fun_1 => 'Feeding the AI digital treats…';
+
+  @override
+  String get tips_gen_fun_2 => 'Every generation is a tiny gacha pull — go on';
+
+  @override
+  String get tips_gen_fun_3 =>
+      'Anlas balance and model name live up top — worth a glance before you burn';
+
+  @override
+  String get tips_gen_fun_4 =>
+      'The prompt box grew taller so your ambitions can sprawl';
+
+  @override
+  String get tips_gen_fun_5 =>
+      'Seed -1 means fate decides; fate likes round numbers (allegedly)';
+
+  @override
+  String get tips_explore_teach_1 =>
+      'Heart + folder triage feeds the next generation';
+
+  @override
+  String get tips_explore_teach_2 =>
+      'The A/B compare view judges parent images — pick a winner and move on';
+
+  @override
+  String get tips_explore_teach_3 =>
+      'The number box next to Generate sets the batch size for this round';
+
+  @override
+  String get tips_explore_teach_4 => 'Hover a pile thumbnail to preview it big';
+
+  @override
+  String get tips_explore_teach_5 =>
+      'Drag the divider to widen the gallery column';
+
+  @override
+  String get tips_explore_fun_1 => 'Survival of the fittest, but for paintings';
+
+  @override
+  String get tips_explore_fun_2 => 'Every generation is an audition';
+
+  @override
+  String get tips_explore_fun_3 => 'Good genes come from good parents';
+
+  @override
+  String get tips_explore_fun_4 => 'Never underestimate mutation';
+
+  @override
+  String get tips_explore_fun_5 => 'Natural selection, fast-forwarded';
+
+  @override
+  String get tips_gallerySearch_teach_1 =>
+      'Comma-separated terms = intersection search';
+
+  @override
+  String get tips_gallerySearch_teach_2 =>
+      'Text search excludes negative prompts — hits stay clean';
+
+  @override
+  String get tips_gallerySearch_teach_3 =>
+      'Search matches model, sampler, source, and version fields';
+
+  @override
+  String get tips_gallerySearch_teach_4 =>
+      'Out of room for buttons? They scroll horizontally';
+
+  @override
+  String get tips_gallerySearch_teach_5 =>
+      'Page size goes up to 500 — for the browse-everything type';
+
+  @override
+  String get tips_gallerySearch_fun_1 =>
+      'Looks like there\'s good stuff down there~~~ what are we hunting?';
+
+  @override
+  String get tips_gallerySearch_fun_2 =>
+      'The collection grows; the folders pretend to keep up';
+
+  @override
+  String get tips_gallerySearch_fun_3 =>
+      'Pro tip: your own prompts are the best search keywords';
+
+  @override
+  String get tips_gallerySearch_fun_4 => 'Scrolling is cardio';
+
+  @override
+  String get tips_gallerySearch_fun_5 =>
+      'Somewhere in this pile hides tonight\'s masterpiece';
+
+  @override
+  String get tips_blocklib_teach_1 =>
+      'Blocks take thumbnails — set one in the edit dialog';
+
+  @override
+  String get tips_blocklib_teach_2 =>
+      'Click a block to open details; hover it for a quick preview';
+
+  @override
+  String get tips_blocklib_teach_3 =>
+      'Star a block into a collection; the favorites lane sits up top';
+
+  @override
+  String get tips_blocklib_teach_4 =>
+      'Waterfall view shows the image blocks properly';
+
+  @override
+  String get tips_blocklib_teach_5 =>
+      'Drag the divider to resize blocks vs folders';
+
+  @override
+  String get tips_blocklib_fun_1 => 'Every block dreams of being summoned';
+
+  @override
+  String get tips_blocklib_fun_2 =>
+      'Folders within folders — we\'re organized now';
+
+  @override
+  String get tips_blocklib_fun_3 => 'A use count is a block\'s CV';
+
+  @override
+  String get tips_blocklib_fun_4 =>
+      'The palette board is for the greatest hits';
+
+  @override
+  String get tips_blocklib_fun_5 => 'If in doubt, make it a block';
+
+  @override
+  String get tips_gen_1 =>
+      'Ctrl+Z works in the text fields — fear not the typo';
+
+  @override
+  String get tips_gen_2 =>
+      'The Settings → Prompt chunk menu hides more toggles than you\'d guess';
+
+  @override
+  String get tips_gen_3 => 'Drag any thin divider — most panes resize';
+
+  @override
+  String get tips_gen_4 =>
+      'The history lane recalls past generations with their settings';
+
+  @override
+  String get tips_gen_5 => 'Right-click is a menu; hover is a preview';
+
+  @override
+  String get tips_fun_1 => 'Loading today\'s dose of mysticism…';
+
+  @override
+  String get tips_fun_2 => 'The seed was random; the taste wasn\'t';
+
+  @override
+  String get tips_fun_3 => 'Somewhere, a GPU hums in anticipation';
+
+  @override
+  String get tips_fun_4 =>
+      'The most expensive button here is Generate — it eats Anlas';
+
+  @override
+  String get tips_fun_5 =>
+      'This box has seen thousands of masterpieces (and a few regrets)';
 }

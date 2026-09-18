@@ -9,6 +9,7 @@ import '../../providers/layout_state_provider.dart';
 import '../../providers/pill_workspace_provider.dart';
 import '../../providers/style_explore/explore_manual_capture.dart';
 import '../../providers/style_explore/explore_run_provider.dart';
+import '../../providers/tips_provider.dart';
 import '../../widgets/character/character_position_canvas.dart';
 import '../../widgets/character/inline_character_row.dart';
 import '../../widgets/prompt/block_library_panel_toggle.dart';
@@ -356,6 +357,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                 child: const PromptInputWidget(
                   showMaximizeButton: false,
                   allowEvolutionToggle: true,
+                  tipModule: TipModule.explore,
                 ),
               ),
             ),

@@ -1033,16 +1033,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get prompt_appliedToMainPrompt => 'メイン プロンプトに適用されます';
 
   @override
-  String get prompt_inputPrompt => 'プロンプトを入力してください...';
-
-  @override
-  String get prompt_describeImage => '生成したい画像を説明してください...';
-
-  @override
-  String get prompt_describeImageWithHint =>
-      '画像を説明するプロンプトを入力し、< と入力してライブラリを参照し、タグのオートコンプリートをサポートします';
-
-  @override
   String get prompt_searchHint => '検索プロンプト';
 
   @override
@@ -2434,9 +2424,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onlineGallery_favorites => 'お気に入り';
 
   @override
-  String get onlineGallery_searchTags => 'タグを検索...';
-
-  @override
   String get onlineGallery_refresh => '更新';
 
   @override
@@ -3761,10 +3748,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localGallery_categoryPanelTitle => 'カテゴリ';
-
-  @override
-  String get localGallery_searchFilenamePromptPlaceholder =>
-      'ファイル名/プロンプトを検索します。カンマで区切られた用語は一緒に照合されます...';
 
   @override
   String get localGallery_selectCurrentPage => 'ページを選択';
@@ -8985,9 +8968,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_scope => '表示範囲';
 
   @override
-  String get promptBlockLibrary_searchHint => 'ブロックを検索...';
-
-  @override
   String get promptBlockLibrary_newBlock => '新しいブロック';
 
   @override
@@ -9885,4 +9865,155 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get promptAssistant_noEnabledProviders =>
       '有効なプロバイダーがありません。下で追加して有効にしてください。';
+
+  @override
+  String get tips_gen_teach_1 => 'プロンプト欄で < と入力するとブロックライブラリのブロックを挿入できます';
+
+  @override
+  String get tips_gen_teach_2 =>
+      'サマリーバーの Seed をクリックで固定/再抽選、Sampler をクリックで切り替えられます';
+
+  @override
+  String get tips_gen_teach_3 => '生成ボタン横の数字ボックスがバッチ枚数、右のダーク枠が Anlas 消費です';
+
+  @override
+  String get tips_gen_teach_4 => '右上の chunks メニューにブロック・プリセット・正規表現ルールがまとまっています';
+
+  @override
+  String get tips_gen_teach_5 => '透明 BG はアルファチャンネル付きで出力。キャラ参照使用中は無効です';
+
+  @override
+  String get tips_gen_fun_1 => 'AI に電子おやつを給仕中…';
+
+  @override
+  String get tips_gen_fun_2 => '生成 1 回は小さなガチャ——引いちゃいましょう';
+
+  @override
+  String get tips_gen_fun_3 => 'Anlas 残高とモデル名は上に表示中——燃やす前に一瞥を';
+
+  @override
+  String get tips_gen_fun_4 => 'プロンプト欄が背を伸ばしました。野望を広げて書けます';
+
+  @override
+  String get tips_gen_fun_5 => 'シード -1 は運任せ。運は丸い数字がお好き（らしい）';
+
+  @override
+  String get tips_explore_teach_1 => 'ハート＋フォルダ仕分けが次世代への一票です';
+
+  @override
+  String get tips_explore_teach_2 => 'A/B 対照は親の原画を見て判定——勝者を選んだら次へ';
+
+  @override
+  String get tips_explore_teach_3 => '「候補生成」横の数字ボックスがこのラウンドのバッチ数です';
+
+  @override
+  String get tips_explore_teach_4 => 'パイルのサムネイルにホバーで大きくプレビュー';
+
+  @override
+  String get tips_explore_teach_5 => '区切りバーをドラッグするとギャラリー欄を広げられます';
+
+  @override
+  String get tips_explore_fun_1 => '適者生存、絵もまた然り';
+
+  @override
+  String get tips_explore_fun_2 => '毎ラウンドはオーディション会場';
+
+  @override
+  String get tips_explore_fun_3 => '良い遺伝子は良い親から';
+
+  @override
+  String get tips_explore_fun_4 => '突然変異を侮るなかれ';
+
+  @override
+  String get tips_explore_fun_5 => '自然選択、早回し版';
+
+  @override
+  String get tips_gallerySearch_teach_1 => 'カンマ区切り＝AND 検索';
+
+  @override
+  String get tips_gallerySearch_teach_2 => 'テキスト検索はネガティブプロンプトを除外済み——結果がクリーン';
+
+  @override
+  String get tips_gallerySearch_teach_3 => '検索はモデル・サンプラー・ソース・バージョンにもヒットします';
+
+  @override
+  String get tips_gallerySearch_teach_4 => 'ボタンが収まらない時は横スクロールできます';
+
+  @override
+  String get tips_gallerySearch_teach_5 => '1 ページ最大 500 枚——一気に眺めたい人向け';
+
+  @override
+  String get tips_gallerySearch_fun_1 => '下にいい物がたくさんありそう~~~何を探しましょうか？';
+
+  @override
+  String get tips_gallerySearch_fun_2 => 'コレクションは増える、フォルダは追いつくフリ';
+
+  @override
+  String get tips_gallerySearch_fun_3 => 'プロのコツ：自分のプロンプトが一番の検索キーワード';
+
+  @override
+  String get tips_gallerySearch_fun_4 => 'スクロールは立派な運動';
+
+  @override
+  String get tips_gallerySearch_fun_5 => 'この山のどこかに今夜の傑作が隠れています';
+
+  @override
+  String get tips_blocklib_teach_1 => 'ブロックはサムネイル付きにできます——編集ダイアログで設定';
+
+  @override
+  String get tips_blocklib_teach_2 => 'クリックで詳細、ホバーで大きめプレビュー';
+
+  @override
+  String get tips_blocklib_teach_3 => '⭐ でコレクションに入れて、お気に入りは上段に集約';
+
+  @override
+  String get tips_blocklib_teach_4 => 'ウォーターフォール表示だと画像ブロックが見やすい';
+
+  @override
+  String get tips_blocklib_teach_5 => '分割バーをドラッグしてブロック/フォルダの比率を調整';
+
+  @override
+  String get tips_blocklib_fun_1 => 'すべてのブロックは指名される夢を見る';
+
+  @override
+  String get tips_blocklib_fun_2 => 'フォルダの中にフォルダ——いつの間にか整理されてます';
+
+  @override
+  String get tips_blocklib_fun_3 => '使用回数はブロックの履歴書';
+
+  @override
+  String get tips_blocklib_fun_4 => 'パレットは常連さん専用席';
+
+  @override
+  String get tips_blocklib_fun_5 => '迷ったらブロック化';
+
+  @override
+  String get tips_gen_1 => 'テキスト欄で Ctrl+Z が効きます——タイポは怖くない';
+
+  @override
+  String get tips_gen_2 => '設定→プロンプトの chunks メニューには意外なスイッチが';
+
+  @override
+  String get tips_gen_3 => '細い区切りバーを見つけたらドラッグ——多くのパネルは伸縮します';
+
+  @override
+  String get tips_gen_4 => '履歴欄から過去の画像と当時の設定を呼び戻せます';
+
+  @override
+  String get tips_gen_5 => '右クリックでメニュー、ホバーでプレビュー';
+
+  @override
+  String get tips_fun_1 => '本日分のオカルトを読み込み中…';
+
+  @override
+  String get tips_fun_2 => 'シードはランダム、センスは非ランダム';
+
+  @override
+  String get tips_fun_3 => 'どこかの GPU が今か今かと唸っています';
+
+  @override
+  String get tips_fun_4 => 'ここで一番高いボタンは生成——Anlas を食べます';
+
+  @override
+  String get tips_fun_5 => 'この欄は何千もの傑作（と数枚の黒歴史）を見てきました';
 }

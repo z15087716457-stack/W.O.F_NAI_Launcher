@@ -1017,15 +1017,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prompt_appliedToMainPrompt => '已应用到主提示词';
 
   @override
-  String get prompt_inputPrompt => '输入提示词...';
-
-  @override
-  String get prompt_describeImage => '描述你想要生成的图像...';
-
-  @override
-  String get prompt_describeImageWithHint => '输入提示词描述画面，输入 < 引用词库，支持自动补全标签';
-
-  @override
   String get prompt_searchHint => '搜索提示词';
 
   @override
@@ -2399,9 +2390,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onlineGallery_favorites => '收藏';
 
   @override
-  String get onlineGallery_searchTags => '搜索标签...';
-
-  @override
   String get onlineGallery_refresh => '刷新';
 
   @override
@@ -3702,10 +3690,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localGallery_categoryPanelTitle => '分类';
-
-  @override
-  String get localGallery_searchFilenamePromptPlaceholder =>
-      '搜索文件名/Prompt，逗号分隔交集搜索...';
 
   @override
   String get localGallery_selectCurrentPage => '选择本页';
@@ -8861,9 +8845,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_scope => '浏览范围';
 
   @override
-  String get promptBlockLibrary_searchHint => '搜索块……';
-
-  @override
   String get promptBlockLibrary_newBlock => '新建块';
 
   @override
@@ -9750,4 +9731,154 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptAssistant_noEnabledProviders => '暂无启用的服务商，请先在下方添加并启用';
+
+  @override
+  String get tips_gen_teach_1 => '在提示词框输入 < 可以拉进块库里的块';
+
+  @override
+  String get tips_gen_teach_2 => '摘要条点 Seed 可锁定/重抽，点 Sampler 可直接换采样器';
+
+  @override
+  String get tips_gen_teach_3 => '生成键旁边的数字小框定本批张数，右端深色框是 Anlas 消耗';
+
+  @override
+  String get tips_gen_teach_4 => '右上角 chunks 菜单里收纳了块库、预设和正则规则';
+
+  @override
+  String get tips_gen_teach_5 => '透明通道导出 Alpha 通道；启用角色参考时不可用';
+
+  @override
+  String get tips_gen_fun_1 => '正在给 AI 喂电子小鱼干…';
+
+  @override
+  String get tips_gen_fun_2 => '每张图都是一次小型抽卡——抽吧';
+
+  @override
+  String get tips_gen_fun_3 => 'Anlas 余额和模型名都在头顶上——烧钱前瞄一眼';
+
+  @override
+  String get tips_gen_fun_4 => '提示词框长高了，方便野心摊开写';
+
+  @override
+  String get tips_gen_fun_5 => '种子 -1 交给命运；据说命运喜欢整数';
+
+  @override
+  String get tips_explore_teach_1 => '点红心+归文件夹，就是给下一代投票';
+
+  @override
+  String get tips_explore_teach_2 => 'A/B 对照组看的是父本原图——选出胜者就翻篇';
+
+  @override
+  String get tips_explore_teach_3 => '「生成候选图」旁边的数字框定本轮批量';
+
+  @override
+  String get tips_explore_teach_4 => '悬停候选堆缩略图能看大图';
+
+  @override
+  String get tips_explore_teach_5 => '拖分隔条可以拉宽画廊栏';
+
+  @override
+  String get tips_explore_fun_1 => '适者生存，画也一样';
+
+  @override
+  String get tips_explore_fun_2 => '每一轮生图都是海选现场';
+
+  @override
+  String get tips_explore_fun_3 => '好基因来自好父本';
+
+  @override
+  String get tips_explore_fun_4 => '永远不要小看变异';
+
+  @override
+  String get tips_explore_fun_5 => '自然选择，加速版';
+
+  @override
+  String get tips_gallerySearch_teach_1 => '逗号分隔 = 交集搜索';
+
+  @override
+  String get tips_gallerySearch_teach_2 => '文字搜索已排除负面提示词——结果更干净';
+
+  @override
+  String get tips_gallerySearch_teach_3 => '搜索会命中模型、采样器、来源、版本字段';
+
+  @override
+  String get tips_gallerySearch_teach_4 => '按钮放不下时会横向滚动';
+
+  @override
+  String get tips_gallerySearch_teach_5 => '每页最多 500 张——给一口气翻到底的人';
+
+  @override
+  String get tips_gallerySearch_fun_1 => '下面看上去有不少好东西呢~~~打算找点什么吗？';
+
+  @override
+  String get tips_gallerySearch_fun_2 => '收藏在长，文件夹在假装跟得上';
+
+  @override
+  String get tips_gallerySearch_fun_3 => '专业建议：自己的提示词就是最好的搜索词';
+
+  @override
+  String get tips_gallerySearch_fun_4 => '滚动也算运动';
+
+  @override
+  String get tips_gallerySearch_fun_5 => '这堆里某个角落藏着今晚的神作';
+
+  @override
+  String get tips_blocklib_teach_1 => '块可以带缩略图——编辑弹窗里设置';
+
+  @override
+  String get tips_blocklib_teach_2 => '点击块开详情，悬停先看大图';
+
+  @override
+  String get tips_blocklib_teach_3 => '⭐ 收进收藏集，常用块置顶集中';
+
+  @override
+  String get tips_blocklib_teach_4 => '瀑布流视图能看清图块';
+
+  @override
+  String get tips_blocklib_teach_5 => '拖分割条可以调整块区/文件夹区比例';
+
+  @override
+  String get tips_blocklib_fun_1 => '每个块都梦想着被点名';
+
+  @override
+  String get tips_blocklib_fun_2 => '文件夹里套文件夹——现在算是有条理了';
+
+  @override
+  String get tips_blocklib_fun_3 => '使用次数就是块的履历表';
+
+  @override
+  String get tips_blocklib_fun_4 => '颜料版留给钉子户';
+
+  @override
+  String get tips_blocklib_fun_5 => '犹豫就做成块';
+
+  @override
+  String get tips_gen_1 => '文本框里 Ctrl+Z 管用——错别字不可怕';
+
+  @override
+  String get tips_gen_2 => '设置→提示词的 chunks 菜单里藏着不少开关';
+
+  @override
+  String get tips_gen_3 => '看见细分隔条就拖拖看——多数面板能调宽';
+
+  @override
+  String get tips_gen_4 => '历史栏可以调回旧图和当时的参数';
+
+  @override
+  String get tips_gen_5 => '右键出菜单，悬停出预览';
+
+  @override
+  String get tips_fun_1 => '正在加载今日份的玄学…';
+
+  @override
+  String get tips_fun_2 => '种子是随机的，品味不是';
+
+  @override
+  String get tips_fun_3 => '某处有一块显卡正在摩拳擦掌';
+
+  @override
+  String get tips_fun_4 => '这里最贵的按钮是生成——它吃 Anlas';
+
+  @override
+  String get tips_fun_5 => '这个框见证过上千张神作（和几张黑历史）';
 }

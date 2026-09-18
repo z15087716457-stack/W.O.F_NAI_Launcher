@@ -21,6 +21,7 @@ import '../../providers/collection_provider.dart';
 import '../../providers/gallery_category_provider.dart';
 import '../../providers/local_gallery_provider.dart';
 import '../../providers/selection_mode_provider.dart';
+import '../../providers/tips_provider.dart';
 import '../bulk_action_bar.dart';
 import '../common/compact_icon_button.dart';
 import 'gallery_trash_panel.dart';
@@ -668,7 +669,11 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
         decoration: InputDecoration(
           hintText: scopeLabel != null
               ? context.l10n.localGallery_searchInScope(scopeLabel)
-              : context.l10n.localGallery_searchFilenamePromptPlaceholder,
+              : tipHint(
+                  context.l10n,
+                  TipModule.gallerySearch,
+                  epoch: watchTipEpoch(ref),
+                ),
           hintStyle: TextStyle(
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             fontSize: 13,

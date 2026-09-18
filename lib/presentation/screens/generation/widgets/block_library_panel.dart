@@ -10,6 +10,7 @@ import '../../../../data/repositories/prompt_block_repository.dart';
 import '../../../providers/layout_state_provider.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
+import '../../../providers/tips_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
@@ -308,7 +309,11 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
       key: const Key('block-library-panel-search'),
       controller: _searchController,
       decoration: InputDecoration(
-        hintText: context.l10n.promptBlockLibrary_searchHint,
+        hintText: tipHint(
+          context.l10n,
+          TipModule.blockLibrary,
+          epoch: watchTipEpoch(ref),
+        ),
         prefixIcon: const Icon(Icons.search, size: 18),
         suffixIcon: _searchController.text.isEmpty
             ? null

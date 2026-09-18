@@ -20,6 +20,7 @@ import '../../../data/services/gelbooru_auth_service.dart';
 
 import '../../providers/online_gallery_provider.dart';
 import '../../providers/selection_mode_provider.dart';
+import '../../providers/tips_provider.dart';
 import '../../widgets/danbooru_login_dialog.dart';
 import '../../widgets/danbooru_post_card.dart';
 import '../../widgets/gelbooru_credentials_dialog.dart';
@@ -740,7 +741,11 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
           focusNode: _searchFocusNode,
           style: theme.textTheme.bodyMedium,
           decoration: InputDecoration(
-            hintText: context.l10n.onlineGallery_searchTags,
+            hintText: tipHint(
+              context.l10n,
+              TipModule.gallerySearch,
+              epoch: watchTipEpoch(ref),
+            ),
             hintStyle: TextStyle(
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
               fontSize: 13,

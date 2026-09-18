@@ -2007,24 +2007,6 @@ abstract class AppLocalizations {
   /// **'Applied to main prompt'**
   String get prompt_appliedToMainPrompt;
 
-  /// No description provided for @prompt_inputPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter prompt...'**
-  String get prompt_inputPrompt;
-
-  /// No description provided for @prompt_describeImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Describe the image you want to generate...'**
-  String get prompt_describeImage;
-
-  /// No description provided for @prompt_describeImageWithHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter prompt to describe image, type < to reference library, supports tag autocomplete'**
-  String get prompt_describeImageWithHint;
-
   /// No description provided for @prompt_searchHint.
   ///
   /// In en, this message translates to:
@@ -4519,12 +4501,6 @@ abstract class AppLocalizations {
   /// **'Favorites'**
   String get onlineGallery_favorites;
 
-  /// No description provided for @onlineGallery_searchTags.
-  ///
-  /// In en, this message translates to:
-  /// **'Search tags...'**
-  String get onlineGallery_searchTags;
-
   /// No description provided for @onlineGallery_refresh.
   ///
   /// In en, this message translates to:
@@ -6948,12 +6924,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Categories'**
   String get localGallery_categoryPanelTitle;
-
-  /// No description provided for @localGallery_searchFilenamePromptPlaceholder.
-  ///
-  /// In en, this message translates to:
-  /// **'Search filename/Prompt; comma-separated terms are matched together...'**
-  String get localGallery_searchFilenamePromptPlaceholder;
 
   /// No description provided for @localGallery_selectCurrentPage.
   ///
@@ -16074,12 +16044,6 @@ abstract class AppLocalizations {
   /// **'Browse'**
   String get promptBlockLibrary_scope;
 
-  /// No description provided for @promptBlockLibrary_searchHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Search blocks...'**
-  String get promptBlockLibrary_searchHint;
-
   /// No description provided for @promptBlockLibrary_newBlock.
   ///
   /// In en, this message translates to:
@@ -17630,6 +17594,306 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No enabled providers. Add and enable one below first.'**
   String get promptAssistant_noEnabledProviders;
+
+  /// No description provided for @tips_gen_teach_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Type < in the prompt box to pull in block-library blocks'**
+  String get tips_gen_teach_1;
+
+  /// No description provided for @tips_gen_teach_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Click Seed on the summary bar to pin or re-randomize; the sampler has a menu too'**
+  String get tips_gen_teach_2;
+
+  /// No description provided for @tips_gen_teach_3.
+  ///
+  /// In en, this message translates to:
+  /// **'The number box beside Generate sets batch count; the right chip shows Anlas cost'**
+  String get tips_gen_teach_3;
+
+  /// No description provided for @tips_gen_teach_4.
+  ///
+  /// In en, this message translates to:
+  /// **'The chunks menu at top-right tucks away blocks, presets, and regex rules'**
+  String get tips_gen_teach_4;
+
+  /// No description provided for @tips_gen_teach_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent BG exports the alpha channel — with character references enabled, it disables'**
+  String get tips_gen_teach_5;
+
+  /// No description provided for @tips_gen_fun_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Feeding the AI digital treats…'**
+  String get tips_gen_fun_1;
+
+  /// No description provided for @tips_gen_fun_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Every generation is a tiny gacha pull — go on'**
+  String get tips_gen_fun_2;
+
+  /// No description provided for @tips_gen_fun_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Anlas balance and model name live up top — worth a glance before you burn'**
+  String get tips_gen_fun_3;
+
+  /// No description provided for @tips_gen_fun_4.
+  ///
+  /// In en, this message translates to:
+  /// **'The prompt box grew taller so your ambitions can sprawl'**
+  String get tips_gen_fun_4;
+
+  /// No description provided for @tips_gen_fun_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed -1 means fate decides; fate likes round numbers (allegedly)'**
+  String get tips_gen_fun_5;
+
+  /// No description provided for @tips_explore_teach_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Heart + folder triage feeds the next generation'**
+  String get tips_explore_teach_1;
+
+  /// No description provided for @tips_explore_teach_2.
+  ///
+  /// In en, this message translates to:
+  /// **'The A/B compare view judges parent images — pick a winner and move on'**
+  String get tips_explore_teach_2;
+
+  /// No description provided for @tips_explore_teach_3.
+  ///
+  /// In en, this message translates to:
+  /// **'The number box next to Generate sets the batch size for this round'**
+  String get tips_explore_teach_3;
+
+  /// No description provided for @tips_explore_teach_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Hover a pile thumbnail to preview it big'**
+  String get tips_explore_teach_4;
+
+  /// No description provided for @tips_explore_teach_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the divider to widen the gallery column'**
+  String get tips_explore_teach_5;
+
+  /// No description provided for @tips_explore_fun_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Survival of the fittest, but for paintings'**
+  String get tips_explore_fun_1;
+
+  /// No description provided for @tips_explore_fun_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Every generation is an audition'**
+  String get tips_explore_fun_2;
+
+  /// No description provided for @tips_explore_fun_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Good genes come from good parents'**
+  String get tips_explore_fun_3;
+
+  /// No description provided for @tips_explore_fun_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Never underestimate mutation'**
+  String get tips_explore_fun_4;
+
+  /// No description provided for @tips_explore_fun_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Natural selection, fast-forwarded'**
+  String get tips_explore_fun_5;
+
+  /// No description provided for @tips_gallerySearch_teach_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Comma-separated terms = intersection search'**
+  String get tips_gallerySearch_teach_1;
+
+  /// No description provided for @tips_gallerySearch_teach_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Text search excludes negative prompts — hits stay clean'**
+  String get tips_gallerySearch_teach_2;
+
+  /// No description provided for @tips_gallerySearch_teach_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Search matches model, sampler, source, and version fields'**
+  String get tips_gallerySearch_teach_3;
+
+  /// No description provided for @tips_gallerySearch_teach_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of room for buttons? They scroll horizontally'**
+  String get tips_gallerySearch_teach_4;
+
+  /// No description provided for @tips_gallerySearch_teach_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Page size goes up to 500 — for the browse-everything type'**
+  String get tips_gallerySearch_teach_5;
+
+  /// No description provided for @tips_gallerySearch_fun_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks like there\'s good stuff down there~~~ what are we hunting?'**
+  String get tips_gallerySearch_fun_1;
+
+  /// No description provided for @tips_gallerySearch_fun_2.
+  ///
+  /// In en, this message translates to:
+  /// **'The collection grows; the folders pretend to keep up'**
+  String get tips_gallerySearch_fun_2;
+
+  /// No description provided for @tips_gallerySearch_fun_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro tip: your own prompts are the best search keywords'**
+  String get tips_gallerySearch_fun_3;
+
+  /// No description provided for @tips_gallerySearch_fun_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Scrolling is cardio'**
+  String get tips_gallerySearch_fun_4;
+
+  /// No description provided for @tips_gallerySearch_fun_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Somewhere in this pile hides tonight\'s masterpiece'**
+  String get tips_gallerySearch_fun_5;
+
+  /// No description provided for @tips_blocklib_teach_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocks take thumbnails — set one in the edit dialog'**
+  String get tips_blocklib_teach_1;
+
+  /// No description provided for @tips_blocklib_teach_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Click a block to open details; hover it for a quick preview'**
+  String get tips_blocklib_teach_2;
+
+  /// No description provided for @tips_blocklib_teach_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Star a block into a collection; the favorites lane sits up top'**
+  String get tips_blocklib_teach_3;
+
+  /// No description provided for @tips_blocklib_teach_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Waterfall view shows the image blocks properly'**
+  String get tips_blocklib_teach_4;
+
+  /// No description provided for @tips_blocklib_teach_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the divider to resize blocks vs folders'**
+  String get tips_blocklib_teach_5;
+
+  /// No description provided for @tips_blocklib_fun_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Every block dreams of being summoned'**
+  String get tips_blocklib_fun_1;
+
+  /// No description provided for @tips_blocklib_fun_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Folders within folders — we\'re organized now'**
+  String get tips_blocklib_fun_2;
+
+  /// No description provided for @tips_blocklib_fun_3.
+  ///
+  /// In en, this message translates to:
+  /// **'A use count is a block\'s CV'**
+  String get tips_blocklib_fun_3;
+
+  /// No description provided for @tips_blocklib_fun_4.
+  ///
+  /// In en, this message translates to:
+  /// **'The palette board is for the greatest hits'**
+  String get tips_blocklib_fun_4;
+
+  /// No description provided for @tips_blocklib_fun_5.
+  ///
+  /// In en, this message translates to:
+  /// **'If in doubt, make it a block'**
+  String get tips_blocklib_fun_5;
+
+  /// No description provided for @tips_gen_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl+Z works in the text fields — fear not the typo'**
+  String get tips_gen_1;
+
+  /// No description provided for @tips_gen_2.
+  ///
+  /// In en, this message translates to:
+  /// **'The Settings → Prompt chunk menu hides more toggles than you\'d guess'**
+  String get tips_gen_2;
+
+  /// No description provided for @tips_gen_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag any thin divider — most panes resize'**
+  String get tips_gen_3;
+
+  /// No description provided for @tips_gen_4.
+  ///
+  /// In en, this message translates to:
+  /// **'The history lane recalls past generations with their settings'**
+  String get tips_gen_4;
+
+  /// No description provided for @tips_gen_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Right-click is a menu; hover is a preview'**
+  String get tips_gen_5;
+
+  /// No description provided for @tips_fun_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading today\'s dose of mysticism…'**
+  String get tips_fun_1;
+
+  /// No description provided for @tips_fun_2.
+  ///
+  /// In en, this message translates to:
+  /// **'The seed was random; the taste wasn\'t'**
+  String get tips_fun_2;
+
+  /// No description provided for @tips_fun_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Somewhere, a GPU hums in anticipation'**
+  String get tips_fun_3;
+
+  /// No description provided for @tips_fun_4.
+  ///
+  /// In en, this message translates to:
+  /// **'The most expensive button here is Generate — it eats Anlas'**
+  String get tips_fun_4;
+
+  /// No description provided for @tips_fun_5.
+  ///
+  /// In en, this message translates to:
+  /// **'This box has seen thousands of masterpieces (and a few regrets)'**
+  String get tips_fun_5;
 }
 
 class _AppLocalizationsDelegate

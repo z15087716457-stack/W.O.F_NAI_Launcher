@@ -23,6 +23,7 @@ import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_regex_rules_provider.dart';
 import '../../../providers/prompt_token_counter_provider.dart';
 import '../../../providers/quality_preset_provider.dart';
+import '../../../providers/tips_provider.dart';
 import '../../../providers/uc_preset_provider.dart';
 import '../../../widgets/autocomplete/autocomplete.dart';
 import '../../../widgets/common/app_toast.dart';
@@ -55,6 +56,9 @@ class PromptInputWidget extends ConsumerStatefulWidget {
   /// 关闭时编辑器填充父级给定的高度并内部滚动。
   final bool autoGrow;
 
+  /// 空态 hint 使用的 tip 模块池（FEAT-60）。
+  final TipModule tipModule;
+
   const PromptInputWidget({
     super.key,
     this.compact = false,
@@ -64,6 +68,7 @@ class PromptInputWidget extends ConsumerStatefulWidget {
     this.negativeModeNotifier,
     this.allowEvolutionToggle = false,
     this.autoGrow = false,
+    this.tipModule = TipModule.gen,
   });
 
   @override
@@ -724,9 +729,11 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           showCount: true,
           autoInsertComma: true,
         ),
-        hintText: enableAutocomplete
-            ? context.l10n.prompt_describeImageWithHint
-            : context.l10n.prompt_describeImage,
+        hintText: tipHint(
+          context.l10n,
+          widget.tipModule,
+          epoch: watchTipEpoch(ref),
+        ),
         // 官网式：框内右上小 ✕ 清空本文本（不再连带清角色卡）
         showClearButton: true,
       ),
@@ -917,7 +924,11 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
                 showTranslation: true,
                 autoInsertComma: true,
               ),
-              hintText: context.l10n.prompt_inputPrompt,
+              hintText: tipHint(
+                context.l10n,
+                widget.tipModule,
+                epoch: watchTipEpoch(ref),
+              ),
             ),
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.symmetric(
