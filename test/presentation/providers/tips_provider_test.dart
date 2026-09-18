@@ -84,6 +84,55 @@ void main() {
       expect(sawModuleSpecific, isTrue);
     });
 
+    test('gallerySearch start pool wins on mount epoch only', () {
+      final l10n = localizations['en']!;
+      final startTips = {
+        for (final getter in [
+          l10n.tips_gallerySearch_start_1,
+          l10n.tips_gallerySearch_start_2,
+          l10n.tips_gallerySearch_start_3,
+          l10n.tips_gallerySearch_start_4,
+          l10n.tips_gallerySearch_start_5,
+          l10n.tips_gallerySearch_start_6,
+          l10n.tips_gallerySearch_start_7,
+          l10n.tips_gallerySearch_start_8,
+          l10n.tips_gallerySearch_start_9,
+          l10n.tips_gallerySearch_start_10,
+        ])
+          getter,
+      };
+
+      // 挂载轮次内：必然来自启动池。
+      for (var seed = 0; seed < 50; seed++) {
+        expect(
+          startTips.contains(
+            pickTip(
+              l10n,
+              TipModule.gallerySearch,
+              epoch: 7,
+              firstEpoch: 7,
+              random: Random(seed),
+            ),
+          ),
+          isTrue,
+        );
+      }
+      // 进入下一轮：恢复常规配比，不再命中启动池文案。
+      var sawNonStart = false;
+      for (var seed = 0; seed < 400; seed++) {
+        final tip = pickTip(
+          l10n,
+          TipModule.gallerySearch,
+          epoch: 8,
+          firstEpoch: 7,
+          random: Random(seed),
+        );
+        expect(startTips.contains(tip), isFalse, reason: tip);
+        if (tip.isNotEmpty) sawNonStart = true;
+      }
+      expect(sawNonStart, isTrue);
+    });
+
     test('explore module can draw generic pool (50% share)', () {
       final l10n = localizations['en']!;
       final genericTips = {

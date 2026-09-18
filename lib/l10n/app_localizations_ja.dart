@@ -9928,6 +9928,37 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tips_explore_fun_5 => '自然選択、早回し版';
 
   @override
+  @override
+  String get tips_gallerySearch_start_1 => 'ファイル名やプロンプト本文で検索——Enter または候補をクリック';
+
+  @override
+  String get tips_gallerySearch_start_2 => '複数語はカンマ区切り＝すべてヒットしたものだけ';
+
+  @override
+  String get tips_gallerySearch_start_3 => '検索対象はポジティブプロンプトのみ。ネガティブは除外済み';
+
+  @override
+  String get tips_gallerySearch_start_4 => 'モデル・サンプラー・ソース・バージョンもヒットします';
+
+  @override
+  String get tips_gallerySearch_start_5 => 'タグ（例：masterpiece）やファイル名の一部を入力';
+
+  @override
+  String get tips_gallerySearch_start_6 => '見つけたらカードをクリックで詳細、右クリックで操作';
+
+  @override
+  String get tips_gallerySearch_start_7 => '右のバージョンチップと併用でさらに絞り込めます';
+
+  @override
+  String get tips_gallerySearch_start_8 => '空欄なら全件表示。入力すれば即絞り込み';
+
+  @override
+  String get tips_gallerySearch_start_9 => '入力するたびに検索——送信不要';
+
+  @override
+  String get tips_gallerySearch_start_10 => '再生成する前にまず検索——たぶんもうあります';
+
+  @override
   String get tips_gallerySearch_teach_1 => 'カンマ区切り＝AND 検索';
 
   @override

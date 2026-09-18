@@ -17719,6 +17719,67 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Comma-separated terms = intersection search'**
+
+  /// No description provided for @tips_gallerySearch_start_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Search filename or prompt text — press Enter or pick a suggestion'**
+  String get tips_gallerySearch_start_1;
+
+  /// No description provided for @tips_gallerySearch_start_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Separate terms with commas to require all of them'**
+  String get tips_gallerySearch_start_2;
+
+  /// No description provided for @tips_gallerySearch_start_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Positive prompts only — negative prompts are already excluded from hits'**
+  String get tips_gallerySearch_start_3;
+
+  /// No description provided for @tips_gallerySearch_start_4.
+  ///
+  /// In en, this message translates to:
+  /// **'It also matches model, sampler, source, and version metadata'**
+  String get tips_gallerySearch_start_4;
+
+  /// No description provided for @tips_gallerySearch_start_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a tag like masterpiece, or a filename fragment'**
+  String get tips_gallerySearch_start_5;
+
+  /// No description provided for @tips_gallerySearch_start_6.
+  ///
+  /// In en, this message translates to:
+  /// **'Found the one? Click the card for details, right-click for actions'**
+  String get tips_gallerySearch_start_6;
+
+  /// No description provided for @tips_gallerySearch_start_7.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine text with the version chip on the right to narrow down'**
+  String get tips_gallerySearch_start_7;
+
+  /// No description provided for @tips_gallerySearch_start_8.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty query = browse all; type anything to filter instantly'**
+  String get tips_gallerySearch_start_8;
+
+  /// No description provided for @tips_gallerySearch_start_9.
+  ///
+  /// In en, this message translates to:
+  /// **'Search updates as you type — no submit needed'**
+  String get tips_gallerySearch_start_9;
+
+  /// No description provided for @tips_gallerySearch_start_10.
+  ///
+  /// In en, this message translates to:
+  /// **'Resist the urge to re-generate it — search first, it's probably here'**
+  String get tips_gallerySearch_start_10;
+
   String get tips_gallerySearch_teach_1;
 
   /// No description provided for @tips_gallerySearch_teach_2.

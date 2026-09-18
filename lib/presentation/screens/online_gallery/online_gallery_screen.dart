@@ -85,9 +85,13 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
   OnlineGallerySelectionNotifier get _selectionNotifier =>
       ref.read(onlineGallerySelectionNotifierProvider.notifier);
 
+  /// 挂载时的 tip 轮次：首轮固定出使用说明句（FEAT-60）。
+  late final int _tipMountEpoch;
+
   @override
   void initState() {
     super.initState();
+    _tipMountEpoch = currentTipEpoch();
     // 添加滚动监听 - 无限滚动
     _scrollController.addListener(_onScroll);
     // 添加页码焦点监听
@@ -745,6 +749,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
               context.l10n,
               TipModule.gallerySearch,
               epoch: watchTipEpoch(ref),
+              firstEpoch: _tipMountEpoch,
             ),
             hintStyle: TextStyle(
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),

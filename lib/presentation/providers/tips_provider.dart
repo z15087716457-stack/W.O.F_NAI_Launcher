@@ -57,10 +57,15 @@ class _ModulePools {
   const _ModulePools({
     required this.teach,
     required this.fun,
+    this.start,
   });
 
   final List<String> Function(AppLocalizations) teach;
   final List<String> Function(AppLocalizations) fun;
+
+  /// 首次打开启动池：非空时第一轮固定从这里抽
+  /// （静定：画廊搜索首条永远是使用说明）。
+  final List<String> Function(AppLocalizations)? start;
 }
 
 final Map<TipModule, _ModulePools> _modulePools = {
@@ -97,6 +102,18 @@ final Map<TipModule, _ModulePools> _modulePools = {
     ],
   ),
   TipModule.gallerySearch: _ModulePools(
+    start: (l10n) => [
+      l10n.tips_gallerySearch_start_1,
+      l10n.tips_gallerySearch_start_2,
+      l10n.tips_gallerySearch_start_3,
+      l10n.tips_gallerySearch_start_4,
+      l10n.tips_gallerySearch_start_5,
+      l10n.tips_gallerySearch_start_6,
+      l10n.tips_gallerySearch_start_7,
+      l10n.tips_gallerySearch_start_8,
+      l10n.tips_gallerySearch_start_9,
+      l10n.tips_gallerySearch_start_10,
+    ],
     teach: (l10n) => [
       l10n.tips_gallerySearch_teach_1,
       l10n.tips_gallerySearch_teach_2,
@@ -147,19 +164,31 @@ List<String> _genericPool(AppLocalizations l10n) => [
 ///
 /// [epoch] 传入轮次号使同轮内结果稳定；同一 epoch 内
 /// 不同模块通过 [module] 掺入种子错开抽取。
+/// [firstEpoch] 传入绑定框的挂载轮次：`epoch == firstEpoch` 且模块
+/// 有启动池时固定抽使用说明句（静定：首句永远是用法）。
 String pickTip(
   AppLocalizations l10n,
   TipModule module, {
   int? epoch,
+  int? firstEpoch,
   Random? random,
 }) {
   final pools = _modulePools[module]!;
+  final resolvedEpoch = epoch ?? currentTipEpoch();
+
+  final rng = random ?? Random(resolvedEpoch * 31 + module.index * 7919);
+
+  // 挂载首轮：有启动池的模块固定从使用说明句抽（静定）。
+  if (firstEpoch != null &&
+      resolvedEpoch == firstEpoch &&
+      pools.start != null) {
+    final start = pools.start!(l10n).where((e) => e.isNotEmpty).toList();
+    if (start.isNotEmpty) return start[rng.nextInt(start.length)];
+  }
+
   final teach = pools.teach(l10n).where((e) => e.isNotEmpty).toList();
   final fun = pools.fun(l10n).where((e) => e.isNotEmpty).toList();
   final generic = _genericPool(l10n).where((e) => e.isNotEmpty).toList();
-
-  final rng = random ??
-      Random((epoch ?? currentTipEpoch()) * 31 + module.index * 7919);
 
   final candidates = <List<String>, double>{};
   if (teach.isNotEmpty) candidates[teach] = module.teachRatio;
@@ -186,9 +215,16 @@ String tipHint(
   AppLocalizations l10n,
   TipModule module, {
   int? epoch,
+  int? firstEpoch,
   Random? random,
 }) {
-  final tip = pickTip(l10n, module, epoch: epoch, random: random);
+  final tip = pickTip(
+    l10n,
+    module,
+    epoch: epoch,
+    firstEpoch: firstEpoch,
+    random: random,
+  );
   return tip.isEmpty ? tip : 'Tip: $tip';
 }
 

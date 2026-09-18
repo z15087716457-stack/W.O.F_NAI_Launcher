@@ -9793,6 +9793,37 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tips_explore_fun_5 => '自然选择，加速版';
 
   @override
+  @override
+  String get tips_gallerySearch_start_1 => '搜文件名或提示词正文——回车或点补全项都行';
+
+  @override
+  String get tips_gallerySearch_start_2 => '多个词用逗号分隔 = 全部命中才算数';
+
+  @override
+  String get tips_gallerySearch_start_3 => '搜索只看正向提示词，负面词不会误中';
+
+  @override
+  String get tips_gallerySearch_start_4 => '模型、采样器、来源、版本字段也能被搜到';
+
+  @override
+  String get tips_gallerySearch_start_5 => '输入标签（比如 masterpiece）或文件名片段即可';
+
+  @override
+  String get tips_gallerySearch_start_6 => '找到了点卡片看详情，右键有更多操作';
+
+  @override
+  String get tips_gallerySearch_start_7 => '配合右侧版本 chip 可以进一步收窄范围';
+
+  @override
+  String get tips_gallerySearch_start_8 => '空着就是浏览全部；输入即筛不用等';
+
+  @override
+  String get tips_gallerySearch_start_9 => '边输边搜，不用按回车';
+
+  @override
+  String get tips_gallerySearch_start_10 => '先搜一搜再考虑重新生成——多半已经有了';
+
+  @override
   String get tips_gallerySearch_teach_1 => '逗号分隔 = 交集搜索';
 
   @override
