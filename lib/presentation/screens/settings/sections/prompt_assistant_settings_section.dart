@@ -22,9 +22,9 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
       icon: Icons.auto_awesome,
       child: Column(
         children: [
-          _buildInterfaces(context, state, notifier),
-          const Divider(),
           _buildProviders(context, ref, state, notifier),
+          const Divider(),
+          _buildInterfaces(context, state, notifier),
         ],
       ),
     );
