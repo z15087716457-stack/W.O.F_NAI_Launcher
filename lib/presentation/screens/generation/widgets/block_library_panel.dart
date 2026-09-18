@@ -98,7 +98,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
         children: [
           _buildHeader(context, theme),
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
             child: _buildSearchField(context),
           ),
           Divider(height: 1, color: theme.dividerColor),
@@ -305,26 +305,45 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
   }
 
   Widget _buildSearchField(BuildContext context) {
-    return TextField(
-      key: const Key('block-library-panel-search'),
-      controller: _searchController,
-      decoration: InputDecoration(
-        hintText: tipHint(
-          context.l10n,
-          TipModule.blockLibrary,
-          epoch: watchTipEpoch(ref),
+    final theme = Theme.of(context);
+    return SizedBox(
+      height: 36,
+      child: TextField(
+        key: const Key('block-library-panel-search'),
+        controller: _searchController,
+        style: theme.textTheme.bodyMedium,
+        decoration: InputDecoration(
+          hintText: tipHint(
+            context.l10n,
+            TipModule.blockLibrary,
+            epoch: watchTipEpoch(ref),
+          ),
+          hintStyle: TextStyle(
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+            fontSize: 13,
+          ),
+          prefixIcon: const Icon(Icons.search, size: 18),
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 36,
+            minHeight: 30,
+          ),
+          suffixIcon: _searchController.text.isEmpty
+              ? null
+              : IconButton(
+                  tooltip: context.l10n.common_clear,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: _searchController.clear,
+                  icon: const Icon(Icons.close, size: 16),
+                ),
+          suffixIconConstraints: const BoxConstraints(
+            minWidth: 32,
+            minHeight: 30,
+          ),
+          isDense: true,
+          filled: true,
+          border: const OutlineInputBorder(),
+          contentPadding: const EdgeInsets.symmetric(vertical: 8),
         ),
-        prefixIcon: const Icon(Icons.search, size: 18),
-        suffixIcon: _searchController.text.isEmpty
-            ? null
-            : IconButton(
-                tooltip: context.l10n.common_clear,
-                onPressed: _searchController.clear,
-                icon: const Icon(Icons.close, size: 16),
-              ),
-        isDense: true,
-        filled: true,
-        border: const OutlineInputBorder(),
       ),
     );
   }

@@ -122,6 +122,7 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
                 _buildEmptyPaneHint(
                   theme,
                   context.l10n.promptBlockLibrary_noCollections,
+                  indent: 1,
                 )
               else
                 _buildCollectionList(
@@ -129,7 +130,7 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
                   theme,
                   parentId: null,
                   nodes: widget.collections.childrenOf(null),
-                  depth: 0,
+                  depth: 1,
                   key: const Key('prompt-block-collection-root-reorder'),
                 ),
               if (widget.folders.isEmpty)
@@ -246,6 +247,7 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
       return _buildEmptyPaneHint(
         theme,
         context.l10n.promptBlockLibrary_noCollections,
+        indent: 1,
       );
     }
     return ListView(
@@ -257,7 +259,7 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
           theme,
           parentId: null,
           nodes: widget.collections.childrenOf(null),
-          depth: 0,
+          depth: 1,
           key: const Key('prompt-block-collection-root-reorder'),
         ),
       ],
@@ -310,9 +312,14 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
   /// 空区提示：收藏区/文件夹区无内容时给一句引导。
   /// 分区内垂直居中（内容超高时仍可滚动）；降级单列表高度无界，
   /// 直接按内容排版交给外层 ListView 滚动。
-  Widget _buildEmptyPaneHint(ThemeData theme, String message) {
+  Widget _buildEmptyPaneHint(ThemeData theme, String message, {int indent = 0}) {
     final text = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      padding: EdgeInsets.only(
+        left: 20.0 + indent * 16,
+        right: 20,
+        top: 14,
+        bottom: 14,
+      ),
       child: Text(
         message,
         style: theme.textTheme.bodySmall?.copyWith(
