@@ -66,8 +66,8 @@ String? exploreTargetBlockIdForParentSet(
 }
 
 /// 组装深度轮注入池：run 快照正向文档中遗传实例（随机/顺序均可）的
-/// 块内容原子（块内容按当前块库解析；池 = 顶层逗号切分后的原子集合，
-/// 去重保序）。
+/// 块内容原子（块内容按当前块库解析；池 = 显式 atoms 或顶层逗号切分
+/// 的原子集合，去重保序——见 `PromptBlock.atomsOrSplit`）。
 List<String> buildExploreInjectionPool(Ref ref, ExploreRun run) {
   final library = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
   final pool = <String>[];
@@ -78,9 +78,9 @@ List<String> buildExploreInjectionPool(Ref ref, ExploreRun run) {
         !instance.evolutionEnabled) {
       continue;
     }
-    final content = library?.blockById(instance.blockId)?.content;
-    if (content == null) continue;
-    for (final atom in PillRollEngine.splitTopLevelAtoms(content)) {
+    final block = library?.blockById(instance.blockId);
+    if (block == null) continue;
+    for (final atom in block.atomsOrSplit) {
       if (seen.add(atom)) pool.add(atom);
     }
   }

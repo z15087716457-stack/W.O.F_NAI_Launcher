@@ -149,4 +149,49 @@ void main() {
     final noImage = PromptBlock.create(id: 'b', title: 't', content: 'c');
     expect(noImage.toJson().containsKey('thumbnail'), isFalse);
   });
+
+  group('atomsOrSplit (FEAT-79)', () {
+    test('explicit atoms win over comma splitting and round trip', () {
+      final block = PromptBlock.create(
+        id: 'block-atoms',
+        title: '幕块',
+        content: 'a scene, with commas, second atom',
+        atoms: ['a scene, with commas', 'second atom'],
+      );
+
+      expect(block.atomsOrSplit, ['a scene, with commas', 'second atom']);
+      expect(PromptBlock.fromJson(block.toJson()).atomsOrSplit, [
+        'a scene, with commas',
+        'second atom',
+      ]);
+    });
+
+    test('null atoms falls back to top-level comma split', () {
+      final legacy = PromptBlock.create(
+        id: 'block-legacy',
+        title: '旧块',
+        content: '0.5::artist:a, 1girl::, solo, blue eyes',
+      );
+
+      expect(legacy.atoms, isNull);
+      expect(legacy.atomsOrSplit, [
+        '0.5::artist:a, 1girl::',
+        'solo',
+        'blue eyes',
+      ]);
+      // atoms=null 不写键，旧版本读存档不受影响。
+      expect(legacy.toJson().containsKey('atoms'), isFalse);
+    });
+
+    test('empty atoms list stays empty (no fallback)', () {
+      final block = PromptBlock.create(
+        id: 'block-empty',
+        title: '空块',
+        content: '',
+        atoms: const [],
+      );
+
+      expect(block.atomsOrSplit, isEmpty);
+    });
+  });
 }

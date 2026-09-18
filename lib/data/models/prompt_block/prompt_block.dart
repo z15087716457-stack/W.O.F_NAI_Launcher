@@ -1,6 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/utils/pill_roll_engine.dart';
+
 part 'prompt_block.freezed.dart';
 part 'prompt_block.g.dart';
 
@@ -20,6 +22,12 @@ class PromptBlock with _$PromptBlock {
 
     /// 供 Prompt 展开的完整纯文本正文。
     required String content,
+
+    /// 显式原子列表（FEAT-79）：非 null 时随机池/顺序幕/注入池抽取
+    /// 直接按它切，原子内逗号自由；null = 旧块或纯文本新建，
+    /// 回退顶层逗号切分（见 [atomsOrSplit]）。保存时与 [content]
+    /// 保持 `atoms.join(', ')` 同步，插入/搜索/预览全部只读 content。
+    @JsonKey(includeIfNull: false) List<String>? atoms,
 
     /// 所属文件夹；null 表示根目录。
     String? folderId,
@@ -92,9 +100,11 @@ class PromptBlock with _$PromptBlock {
     String? sourcePath,
     String? sourceHash,
     DateTime? importedAt,
+    List<String>? atoms,
   }) {
     final created = createdAt ?? DateTime.now();
     return PromptBlock(
+      atoms: atoms,
       id: id ?? const Uuid().v4(),
       title: title.trim(),
       content: content,
@@ -129,6 +139,12 @@ class PromptBlock with _$PromptBlock {
 
   /// 是否已挂预览图。
   bool get hasThumbnail => thumbnail != null && thumbnail!.isNotEmpty;
+
+  /// 抽取用原子列表（FEAT-79）：显式 [atoms] 非 null 时原样返回
+  /// （含空列表=无原子，不再 fallback）；null 回退顶层逗号切分——
+  /// 随机池/顺序幕/注入池统一从这取原子集合。
+  List<String> get atomsOrSplit =>
+      atoms ?? PillRollEngine.splitTopLevelAtoms(content);
 
   /// 返回更新时间已刷新的副本，不改变其他字段。
   PromptBlock touched({DateTime? at}) =>

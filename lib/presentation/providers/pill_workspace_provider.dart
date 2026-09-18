@@ -301,9 +301,7 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         _hasGuardOverride(marker, instance)) {
       return;
     }
-    final atoms = PillRollEngine.splitTopLevelAtoms(
-      _resolveBlockContent(instance.blockId) ?? '',
-    );
+    final atoms = _resolveBlockAtoms(instance.blockId);
     if (atoms.isEmpty) return;
 
     final windowSize = (instance.lastRollCount ?? instance.settings.countMin)
@@ -442,6 +440,15 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         ?.content;
   }
 
+  /// 抽取用原子集合（FEAT-79）：显式 atoms 优先，否则顶层逗号切分。
+  List<String> _resolveBlockAtoms(String blockId) {
+    final block = ref
+        .read(promptBlockLibraryNotifierProvider)
+        .valueOrNull
+        ?.blockById(blockId);
+    return block?.atomsOrSplit ?? const [];
+  }
+
   /// 未锁定随机/顺序实例的兜底物化：`currentRoll == null` 时立即 roll 一次
   /// （顺序模式从当前游标取第一批并推进）。锁定实例保留缺失值，避免普通
   /// 更新路径绕过用户锁定。保证「L1 显示 = 生成发送 = token 计数」三者
@@ -472,8 +479,7 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   /// 供 `lastRollCount` 记账），其余模式游标与计数原样带回（固定/随机
   /// 实例不读这两个值）。
   (String, int, int) _rollFor(PillInstance instance) {
-    final content = _resolveBlockContent(instance.blockId) ?? '';
-    final atoms = PillRollEngine.splitTopLevelAtoms(content);
+    final atoms = _resolveBlockAtoms(instance.blockId);
     if (instance.settings.mode == PillRollMode.sequential) {
       return PillRollEngine.rollInstanceSequential(
         settings: instance.settings,
