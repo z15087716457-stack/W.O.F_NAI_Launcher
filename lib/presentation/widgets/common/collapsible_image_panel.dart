@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// A common collapsible panel with optional background image support.
 ///
 /// Used for Precise Reference, Vibe Transfer, and Img2Img panels.
 class CollapsibleImagePanel extends StatelessWidget {
   final String title;
-  final IconData icon;
+  final String? subtitle;
+  final IconData? icon;
+  final String? iconAsset;
   final bool isExpanded;
   final VoidCallback onToggle;
   final Widget? backgroundImage;
@@ -18,7 +21,9 @@ class CollapsibleImagePanel extends StatelessWidget {
   const CollapsibleImagePanel({
     super.key,
     required this.title,
-    required this.icon,
+    this.subtitle,
+    this.icon,
+    this.iconAsset,
     required this.isExpanded,
     required this.onToggle,
     this.backgroundImage,
@@ -76,28 +81,38 @@ class CollapsibleImagePanel extends StatelessWidget {
                   padding: const EdgeInsets.all(12),
                   child: Row(
                     children: [
-                      Icon(
-                        icon,
-                        size: 20,
-                        color: showBackground
-                            ? Colors.white
-                            : hasData
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface.withValues(
-                                alpha: 0.6,
-                              ),
-                      ),
+                      _buildHeaderIcon(theme, showBackground),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          title,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: showBackground
-                                ? Colors.white
-                                : hasData
-                                ? theme.colorScheme.primary
-                                : null,
-                          ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                color: showBackground
+                                    ? Colors.white
+                                    : hasData
+                                    ? theme.colorScheme.primary
+                                    : null,
+                              ),
+                            ),
+                            if (subtitle != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                subtitle!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontSize: 11,
+                                  color: showBackground
+                                      ? Colors.white.withValues(alpha: 0.8)
+                                      : theme.colorScheme.onSurfaceVariant,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                       // Header actions (e.g. export button)
@@ -105,6 +120,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                           headerActions!.isNotEmpty) ...[
                         Row(
                           mainAxisSize: MainAxisSize.min,
+                          spacing: 4,
                           children: headerActions!,
                         ),
                         const SizedBox(width: 8),
@@ -141,6 +157,106 @@ class CollapsibleImagePanel extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderIcon(ThemeData theme, bool showBackground) {
+    final color = showBackground
+        ? Colors.white
+        : hasData
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurface.withValues(alpha: 0.6);
+
+    final asset = iconAsset;
+    if (asset != null) {
+      return SvgPicture.asset(
+        asset,
+        width: 20,
+        height: 20,
+        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+      );
+    }
+
+    return Icon(icon, size: 20, color: color);
+  }
+}
+
+/// 官网式行内方形小图标按钮：用于 [CollapsibleImagePanel] 的 headerActions。
+/// 支持 Material 图标或 `assets/icons/` 下的官方 SVG（`iconAsset`）。
+class PanelHeaderIconButton extends StatelessWidget {
+  const PanelHeaderIconButton({
+    super.key,
+    this.icon,
+    this.iconAsset,
+    required this.tooltip,
+    this.onPressed,
+    this.selected = false,
+    this.highlighted = false,
+    this.color,
+  });
+
+  final IconData? icon;
+  final String? iconAsset;
+  final String tooltip;
+  final VoidCallback? onPressed;
+
+  /// 选中态（如当前工作流模式已激活）显示 primary 容器底色。
+  final bool selected;
+
+  /// 高亮态（如文件拖入悬停）显示 primary 描边。
+  final bool highlighted;
+
+  /// 前景色；未指定时按 selected 取主题槽位。
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final foreground = selected
+        ? theme.colorScheme.onPrimaryContainer
+        : (color ?? theme.colorScheme.onSurfaceVariant);
+    final background = selected
+        ? theme.colorScheme.primaryContainer
+        : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6);
+
+    Widget iconWidget;
+    final asset = iconAsset;
+    if (asset != null) {
+      iconWidget = SvgPicture.asset(
+        asset,
+        width: 14,
+        height: 14,
+        colorFilter: ColorFilter.mode(foreground, BlendMode.srcIn),
+      );
+    } else {
+      iconWidget = Icon(icon, size: 15, color: foreground);
+    }
+
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: background,
+        borderRadius: BorderRadius.circular(6),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(6),
+          child: Container(
+            width: 28,
+            height: 28,
+            decoration: highlighted
+                ? BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: theme.colorScheme.primary,
+                      width: 1.5,
+                    ),
+                  )
+                : null,
+            alignment: Alignment.center,
+            child: iconWidget,
+          ),
+        ),
       ),
     );
   }

@@ -343,7 +343,9 @@ class _UnifiedReferencePanelState extends ConsumerState<UnifiedReferencePanel> {
 
     return CollapsibleImagePanel(
       title: context.l10n.vibe_title,
+      subtitle: context.l10n.vibe_description,
       icon: Icons.auto_fix_high,
+      iconAsset: 'assets/icons/nai-icon-vibe-transfer.svg',
       isExpanded: _isExpanded,
       onToggle: () => setState(() => _isExpanded = !_isExpanded),
       hasData: hasVibes,

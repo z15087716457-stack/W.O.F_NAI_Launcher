@@ -1307,6 +1307,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_title => 'Image2Image';
 
   @override
+  String get img2img_subtitle => 'Generate variations from a source image';
+
+  @override
   String get img2img_enabled => 'Enabled';
 
   @override
@@ -1348,6 +1351,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get img2img_uploadImage => 'Upload Image';
+
+  @override
+  String get img2img_dropToAdd => 'Release to set as source image';
+
+  @override
+  String get img2img_moreActions => 'More actions';
 
   @override
   String get img2img_drawSketch => 'Draw Sketch';
@@ -5031,6 +5040,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reversePrompt_title => 'Reverse Prompt';
 
   @override
+  String get reversePrompt_subtitle => 'Extract tags or prompts from an image';
+
+  @override
   String get reversePrompt_pending => 'Pending';
 
   @override
@@ -6013,6 +6025,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get preciseRef_title => 'Precise Reference';
+
+  @override
+  String get preciseRef_subtitle =>
+      'Tie generation to a character or style reference';
 
   @override
   String get preciseRef_description =>

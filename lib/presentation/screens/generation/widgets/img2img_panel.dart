@@ -6,7 +6,9 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image/image.dart' as img;
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 import '../../../../core/comfyui/comfyui_models.dart';
 import '../../../../core/comfyui/workflow_template.dart';
@@ -27,6 +29,7 @@ import '../../../providers/precise_ref_library_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/image_workflow_launcher.dart';
 import '../../../utils/comfyui_workflow_l10n.dart';
+import '../../../utils/dropped_file_reader.dart';
 import '../../../utils/precise_ref_library_import_helper.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/collapsible_image_panel.dart';
@@ -99,6 +102,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
   static const String _upscaleLogTag = 'Img2Img-Upscale';
 
   bool _naiUpscaling = false;
+  bool _isFileDraggingOver = false;
 
   @override
   Widget build(BuildContext context) {
@@ -109,15 +113,57 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     final workflow = ref.watch(imageWorkflowControllerProvider);
     final hasSourceImage = params.sourceImage != null;
     final showBackground = hasSourceImage && !workflow.isPanelExpanded;
+    final supportsInpaint = ref.watch(
+      generationParamsNotifierProvider.select(
+        (params) => params.modelSpec.img2imgInpainting,
+      ),
+    );
 
     return CollapsibleImagePanel(
       title: context.l10n.img2img_title,
+      subtitle: context.l10n.img2img_subtitle,
       icon: Icons.image,
+      iconAsset: 'assets/icons/nai-icon-img2img.svg',
       isExpanded: workflow.isPanelExpanded,
       onToggle: () => ref
           .read(imageWorkflowControllerProvider.notifier)
           .setPanelExpanded(!workflow.isPanelExpanded),
       hasData: hasSourceImage,
+      headerActions: hasSourceImage
+          ? _buildLoadedHeaderActions(
+              params: params,
+              workflow: workflow,
+              supportsInpaint: supportsInpaint,
+              showBackground: showBackground,
+            )
+          : [
+              _buildImportDropTarget(
+                child: TextButton.icon(
+                  onPressed: _pickImage,
+                  icon: SvgPicture.asset(
+                    'assets/icons/nai-icon-import.svg',
+                    width: 12,
+                    height: 12,
+                    colorFilter: ColorFilter.mode(
+                      theme.colorScheme.primary,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  label: Text(
+                    _isFileDraggingOver
+                        ? context.l10n.img2img_dropToAdd
+                        : context.l10n.img2img_uploadImage,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.primary,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: const Size(0, 30),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+              ),
+            ],
       backgroundImage: hasSourceImage
           ? DecodedMemoryImage(
               bytes: params.sourceImage!,
@@ -194,34 +240,6 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Text(
-              context.l10n.img2img_sourceImage,
-              style: theme.textTheme.bodyMedium,
-            ),
-            const Spacer(),
-            _IconButton(
-              key: const Key('img2img-save-source-to-library'),
-              icon: Icons.bookmark_add_outlined,
-              onPressed: _saveSourceToPreciseRefLibrary,
-              tooltip: context.l10n.preciseRefLib_saveCurrentToLibrary,
-            ),
-            const SizedBox(width: 8),
-            _IconButton(
-              icon: Icons.refresh,
-              onPressed: _pickImage,
-              tooltip: context.l10n.img2img_changeImage,
-            ),
-            const SizedBox(width: 8),
-            _IconButton(
-              icon: Icons.close,
-              onPressed: _removeSourceImage,
-              tooltip: context.l10n.img2img_removeImage,
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: SizedBox(
@@ -238,75 +256,275 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _OperationChip(
-              icon: Icons.edit_outlined,
-              label: context.l10n.img2img_editImage,
-              onPressed: () => ImageWorkflowLauncher.openEditor(
-                context,
-                ref,
-                params.sourceImage!,
-                mode: ImageEditorMode.edit,
-              ),
-            ),
-            _OperationChip(
-              icon: isInpaintReady ? Icons.check_circle : Icons.draw_outlined,
-              label: context.l10n.img2img_inpaint,
-              selected: workflow.isInpaint,
-              onPressed: () => ImageWorkflowLauncher.openEditor(
-                context,
-                ref,
-                params.sourceImage!,
-                mode: ImageEditorMode.inpaint,
-              ),
-            ),
-            _OperationChip(
-              icon: Icons.auto_awesome_motion_outlined,
-              label: context.l10n.img2img_generateVariations,
-              onPressed: () => ImageWorkflowLauncher.generateVariations(
-                context,
-                ref,
-                params.sourceImage!,
-              ),
-            ),
-            _OperationChip(
-              icon: Icons.auto_fix_high_outlined,
-              label: context.l10n.img2img_directorTools,
-              onPressed: () => ImageWorkflowLauncher.openDirectorTools(
-                context,
-                ref,
-                params.sourceImage!,
-              ),
-            ),
-            _OperationChip(
-              icon: workflow.isEnhance
-                  ? Icons.auto_awesome
-                  : Icons.auto_awesome_outlined,
-              label: context.l10n.img2img_enhance,
-              selected: workflow.isEnhance,
-              onPressed: () => _toggleEnhance(workflow),
-            ),
-            _OperationChip(
-              icon: workflow.isUpscale
-                  ? Icons.zoom_out_map
-                  : Icons.zoom_out_map_rounded,
-              label: context.l10n.image_upscale,
-              selected: workflow.isUpscale,
-              onPressed: () => _toggleUpscale(workflow),
-            ),
-            ..._buildComfyUIChips(params),
-          ],
-        ),
         if (workflow.isInpaint) ...[
           const SizedBox(height: 10),
           _buildInpaintStatus(theme, isInpaintReady),
         ],
       ],
     );
+  }
+
+  /// 已载入底图时的头部操作列（官网式）：
+  /// 微倾斜缩略图 + 重绘 / 编辑 / 换图 / 清除 四个图标 + 更多操作菜单。
+  List<Widget> _buildLoadedHeaderActions({
+    required Img2ImgPanelViewData params,
+    required ImageWorkflowState workflow,
+    required bool supportsInpaint,
+    required bool showBackground,
+  }) {
+    final sourceImage = params.sourceImage!;
+    final foreground = showBackground ? Colors.white : null;
+
+    return [
+      _buildTiltedThumbnail(sourceImage),
+      const SizedBox(width: 4),
+      if (supportsInpaint)
+        PanelHeaderIconButton(
+          key: const Key('img2img-action-inpaint'),
+          iconAsset: 'assets/icons/nai-icon-inpaint.svg',
+          tooltip: context.l10n.img2img_inpaint,
+          selected: workflow.isInpaint,
+          color: foreground,
+          onPressed: () => ImageWorkflowLauncher.openEditor(
+            context,
+            ref,
+            sourceImage,
+            mode: ImageEditorMode.inpaint,
+          ),
+        ),
+      PanelHeaderIconButton(
+        key: const Key('img2img-action-edit'),
+        icon: Icons.edit_outlined,
+        tooltip: context.l10n.img2img_editImage,
+        color: foreground,
+        onPressed: () => ImageWorkflowLauncher.openEditor(
+          context,
+          ref,
+          sourceImage,
+          mode: ImageEditorMode.edit,
+        ),
+      ),
+      PanelHeaderIconButton(
+        key: const Key('img2img-action-replace'),
+        iconAsset: 'assets/icons/nai-icon-swap.svg',
+        tooltip: context.l10n.img2img_changeImage,
+        color: foreground,
+        onPressed: _pickImage,
+      ),
+      PanelHeaderIconButton(
+        key: const Key('img2img-action-clear'),
+        icon: Icons.close,
+        tooltip: context.l10n.img2img_removeImage,
+        color: foreground,
+        onPressed: _removeSourceImage,
+      ),
+      Builder(
+        builder: (buttonContext) => PanelHeaderIconButton(
+          key: const Key('img2img-overflow-menu'),
+          icon: Icons.more_vert,
+          tooltip: context.l10n.img2img_moreActions,
+          color: foreground,
+          onPressed: () => _showOverflowMenu(
+            buttonContext,
+            params: params,
+            workflow: workflow,
+          ),
+        ),
+      ),
+    ];
+  }
+
+  /// 官网式微倾斜缩略图：角度由图片内容散列导出，落在 ±2° 内。
+  Widget _buildTiltedThumbnail(Uint8List sourceImage) {
+    final tiltRadians =
+        ((sourceImage.hashCode % 41) - 20) / 10 * (math.pi / 180);
+    return Transform.rotate(
+      angle: tiltRadians,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: SizedBox(
+          width: 28,
+          height: 28,
+          child: DecodedMemoryImage(
+            bytes: sourceImage,
+            fit: BoxFit.cover,
+            maxLogicalWidth: 28,
+            maxLogicalHeight: 28,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// “更多”溢出菜单：低频操作（变体/导演工具/增强/放大/存库/ComfyUI 工作流）
+  /// 收进弹出菜单，保持行内只剩四个图标（官网式）。
+  void _showOverflowMenu(
+    BuildContext buttonContext, {
+    required Img2ImgPanelViewData params,
+    required ImageWorkflowState workflow,
+  }) {
+    final sourceImage = params.sourceImage!;
+    final comfyItems = _buildComfyUIMenuItems(params);
+    final overlayBox =
+        Overlay.of(buttonContext).context.findRenderObject() as RenderBox;
+    final box = buttonContext.findRenderObject() as RenderBox;
+    final triggerRect = box.localToGlobal(Offset.zero) & box.size;
+
+    showMenu<String>(
+      context: buttonContext,
+      position: RelativeRect.fromLTRB(
+        triggerRect.left,
+        triggerRect.bottom + 4,
+        overlayBox.size.width - triggerRect.right,
+        0,
+      ),
+      items: [
+        _overflowItem(
+          value: 'variations',
+          icon: Icons.auto_awesome_motion_outlined,
+          label: context.l10n.img2img_generateVariations,
+        ),
+        _overflowItem(
+          value: 'director',
+          icon: Icons.auto_fix_high_outlined,
+          label: context.l10n.img2img_directorTools,
+        ),
+        CheckedPopupMenuItem<String>(
+          value: 'enhance',
+          checked: workflow.isEnhance,
+          height: 40,
+          child: _overflowItemChild(
+            icon: workflow.isEnhance
+                ? Icons.auto_awesome
+                : Icons.auto_awesome_outlined,
+            label: context.l10n.img2img_enhance,
+          ),
+        ),
+        CheckedPopupMenuItem<String>(
+          value: 'upscale',
+          checked: workflow.isUpscale,
+          height: 40,
+          child: _overflowItemChild(
+            icon: workflow.isUpscale
+                ? Icons.zoom_out_map
+                : Icons.zoom_out_map_rounded,
+            label: context.l10n.image_upscale,
+          ),
+        ),
+        const PopupMenuDivider(),
+        _overflowItem(
+          key: const Key('img2img-save-source-to-library'),
+          value: 'saveToLibrary',
+          icon: Icons.bookmark_add_outlined,
+          label: context.l10n.preciseRefLib_saveCurrentToLibrary,
+        ),
+        if (comfyItems.isNotEmpty) ...[
+          const PopupMenuDivider(),
+          ...comfyItems,
+        ],
+      ],
+    ).then((value) {
+      if (value == null || !mounted) return;
+      _handleOverflowSelection(
+        value,
+        sourceImage: sourceImage,
+        workflow: workflow,
+      );
+    });
+  }
+
+  PopupMenuItem<String> _overflowItem({
+    Key? key,
+    required String value,
+    required IconData icon,
+    required String label,
+  }) {
+    return PopupMenuItem<String>(
+      key: key,
+      value: value,
+      height: 40,
+      child: _overflowItemChild(icon: icon, label: label),
+    );
+  }
+
+  Widget _overflowItemChild({required IconData icon, required String label}) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+        const SizedBox(width: 8),
+        Text(label),
+      ],
+    );
+  }
+
+  void _handleOverflowSelection(
+    String value, {
+    required Uint8List sourceImage,
+    required ImageWorkflowState workflow,
+  }) {
+    switch (value) {
+      case 'variations':
+        ImageWorkflowLauncher.generateVariations(context, ref, sourceImage);
+      case 'director':
+        ImageWorkflowLauncher.openDirectorTools(context, ref, sourceImage);
+      case 'enhance':
+        _toggleEnhance(workflow);
+      case 'upscale':
+        _toggleUpscale(workflow);
+      case 'saveToLibrary':
+        _saveSourceToPreciseRefLibrary();
+      case final String comfyId when comfyId.startsWith('comfy:'):
+        _openComfyWorkflow(comfyId.substring(6), sourceImage);
+    }
+  }
+
+  /// 行内“导入图片”落点：拖入图片即设为底图（官网式）。
+  Widget _buildImportDropTarget({required Widget child}) {
+    return DropRegion(
+      formats: Formats.standardFormats,
+      hitTestBehavior: HitTestBehavior.opaque,
+      onDropOver: (event) {
+        if (event.session.allowedOperations.contains(DropOperation.copy)) {
+          if (!_isFileDraggingOver) {
+            setState(() => _isFileDraggingOver = true);
+          }
+          return DropOperation.copy;
+        }
+        return DropOperation.none;
+      },
+      onDropLeave: (_) {
+        if (_isFileDraggingOver) {
+          setState(() => _isFileDraggingOver = false);
+        }
+      },
+      onPerformDrop: (event) async {
+        setState(() => _isFileDraggingOver = false);
+        unawaited(_handleDroppedSource(event));
+      },
+      child: child,
+    );
+  }
+
+  Future<void> _handleDroppedSource(PerformDropEvent event) async {
+    for (final item in event.session.items) {
+      final reader = item.dataReader;
+      if (reader == null) {
+        continue;
+      }
+      final file = await DroppedFileReader.read(
+        reader,
+        logTag: 'Img2ImgDrop',
+      );
+      if (file != null && mounted) {
+        unawaited(
+          ref
+              .read(imageWorkflowControllerProvider.notifier)
+              .replaceSourceImageAsync(file.bytes),
+        );
+        return;
+      }
+    }
   }
 
   Widget _buildEmptySourceSection(ThemeData theme) {
@@ -1866,7 +2084,9 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     _removeSourceImage();
   }
 
-  List<Widget> _buildComfyUIChips(Img2ImgPanelViewData params) {
+  List<PopupMenuEntry<String>> _buildComfyUIMenuItems(
+    Img2ImgPanelViewData params,
+  ) {
     final bool comfyEnabled;
     try {
       comfyEnabled = ref.watch(
@@ -1896,23 +2116,46 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
 
     if (eligibleWorkflows.isEmpty) return [];
 
-    return eligibleWorkflows.map<Widget>((template) {
+    return eligibleWorkflows.map<PopupMenuEntry<String>>((template) {
       final icon = switch (template.category) {
         WorkflowCategory.img2img => Icons.image_outlined,
         WorkflowCategory.inpaint => Icons.draw_outlined,
         WorkflowCategory.enhance => Icons.auto_fix_high_outlined,
         _ => Icons.account_tree_outlined,
       };
-      return _OperationChip(
-        icon: icon,
-        label: template.localizedName(context),
-        onPressed: () => ComfyUIWorkflowDialog.show(
-          context,
-          template: template,
-          image: params.sourceImage,
+      return PopupMenuItem<String>(
+        value: 'comfy:${template.id}',
+        height: 40,
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 8),
+            Text(template.localizedName(context)),
+          ],
         ),
       );
     }).toList();
+  }
+
+  void _openComfyWorkflow(String templateId, Uint8List sourceImage) {
+    final List<WorkflowTemplate> workflows;
+    try {
+      workflows = ref.read(comfyUIWorkflowsProvider);
+    } catch (_) {
+      return;
+    }
+    final template = workflows.where((t) => t.id == templateId).firstOrNull;
+    if (template == null) return;
+
+    ComfyUIWorkflowDialog.show(
+      context,
+      template: template,
+      image: sourceImage,
+    );
   }
 
   void _toggleEnhance(ImageWorkflowState workflow) {
@@ -1950,55 +2193,6 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
           .replaceSourceImage(result.modifiedImage!);
       ref.read(imageWorkflowControllerProvider.notifier).setPanelExpanded(true);
     }
-  }
-}
-
-class _OperationChip extends StatelessWidget {
-  const _OperationChip({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-    this.selected = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onPressed;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final foreground = selected
-        ? theme.colorScheme.onPrimaryContainer
-        : theme.colorScheme.onSurface;
-
-    return Material(
-      color: selected
-          ? theme.colorScheme.primaryContainer
-          : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 16, color: foreground),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelLarge?.copyWith(color: foreground),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 
@@ -2188,40 +2382,3 @@ class _FocusedCropOverlayPainter extends CustomPainter {
   }
 }
 
-/// 小型图标按钮
-class _IconButton extends StatelessWidget {
-  const _IconButton({
-    super.key,
-    required this.icon,
-    required this.onPressed,
-    required this.tooltip,
-  });
-
-  final IconData icon;
-  final VoidCallback onPressed;
-  final String tooltip;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Material(
-      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-      borderRadius: BorderRadius.circular(4),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(4),
-        child: Tooltip(
-          message: tooltip,
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: Icon(
-              icon,
-              size: 16,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

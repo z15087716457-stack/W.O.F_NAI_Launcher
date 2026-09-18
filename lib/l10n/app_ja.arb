@@ -591,6 +591,7 @@
     }
   },
   "img2img_title": "Image2Image",
+  "img2img_subtitle": "元画像からバリエーションを生成",
   "img2img_enabled": "有効",
   "img2img_sourceImage": "ソース画像",
   "img2img_strength": "強度",
@@ -609,6 +610,8 @@
   "img2img_editImage": "画像を編集",
   "img2img_editApplied": "編集された画像が新しいソース画像になりました",
   "img2img_uploadImage": "画像をアップロード",
+  "img2img_dropToAdd": "ドロップして元画像に設定",
+  "img2img_moreActions": "その他の操作",
   "img2img_drawSketch": "スケッチを描く",
   "img2img_inpaint": "インペイント",
   "img2img_inpaintStrength": "インペイント強度",
@@ -2541,6 +2544,7 @@
   "statistics_saturday": "土",
   "fixedTags_negativeTitle": "除外したい要素固定タグ",
   "reversePrompt_title": "逆プロンプト",
+  "reversePrompt_subtitle": "画像からタグやプロンプトを抽出",
   "reversePrompt_pending": "保留中",
   "reversePrompt_imageCount": "{count} 画像",
   "@reversePrompt_imageCount": {
@@ -2982,6 +2986,7 @@
   "drop_useAsRawImageSubtitle": "再エンコード (2 Anlas を消費します)",
   "drop_dragToImg2ImgOrOther": "Image2Image または別のターゲットにドラッグします",
   "preciseRef_title": "精密参照",
+  "preciseRef_subtitle": "キャラクターやスタイル参照に生成を結び付ける",
   "preciseRef_description": "参照画像を追加し、タイプとパラメータを設定します。複数の参照を同時に使用できます。",
   "preciseRef_addReference": "参照の追加",
   "preciseRef_clearAll": "すべてクリア",

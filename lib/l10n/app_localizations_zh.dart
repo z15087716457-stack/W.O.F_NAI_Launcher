@@ -1260,6 +1260,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_title => '图生图';
 
   @override
+  String get img2img_subtitle => '基于底图生成变体';
+
+  @override
   String get img2img_enabled => '已启用';
 
   @override
@@ -1299,6 +1302,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get img2img_uploadImage => '上传图片';
+
+  @override
+  String get img2img_dropToAdd => '松开以设为底图';
+
+  @override
+  String get img2img_moreActions => '更多操作';
 
   @override
   String get img2img_drawSketch => '绘制草图';
@@ -4849,6 +4858,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reversePrompt_title => '反推';
 
   @override
+  String get reversePrompt_subtitle => '从图片提取标签或提示词';
+
+  @override
   String get reversePrompt_pending => '待添加';
 
   @override
@@ -5801,6 +5813,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get preciseRef_title => '精准参考';
+
+  @override
+  String get preciseRef_subtitle => '将生成绑定到角色或风格参考';
 
   @override
   String get preciseRef_description => '添加参考图并设置类型和参数，可同时使用多个参考。';

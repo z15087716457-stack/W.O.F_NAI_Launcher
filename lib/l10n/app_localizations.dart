@@ -2445,6 +2445,12 @@ abstract class AppLocalizations {
   /// **'Image2Image'**
   String get img2img_title;
 
+  /// No description provided for @img2img_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate variations from a source image'**
+  String get img2img_subtitle;
+
   /// No description provided for @img2img_enabled.
   ///
   /// In en, this message translates to:
@@ -2522,6 +2528,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upload Image'**
   String get img2img_uploadImage;
+
+  /// No description provided for @img2img_dropToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Release to set as source image'**
+  String get img2img_dropToAdd;
+
+  /// No description provided for @img2img_moreActions.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get img2img_moreActions;
 
   /// No description provided for @img2img_drawSketch.
   ///
@@ -8989,6 +9007,12 @@ abstract class AppLocalizations {
   /// **'Reverse Prompt'**
   String get reversePrompt_title;
 
+  /// No description provided for @reversePrompt_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Extract tags or prompts from an image'**
+  String get reversePrompt_subtitle;
+
   /// No description provided for @reversePrompt_pending.
   ///
   /// In en, this message translates to:
@@ -10775,6 +10799,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Precise Reference'**
   String get preciseRef_title;
+
+  /// No description provided for @preciseRef_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tie generation to a character or style reference'**
+  String get preciseRef_subtitle;
 
   /// No description provided for @preciseRef_description.
   ///

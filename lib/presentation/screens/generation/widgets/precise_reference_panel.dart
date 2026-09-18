@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
@@ -50,6 +51,17 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
 
   @override
   Widget build(BuildContext context) {
+    // Precise Reference 仅 V4.5 家族支持（V4.0 与 V5 均无此能力），
+    // 不支持时整行隐藏（官网式：不渲染不可用的参考行）。
+    final supportsPreciseRef = ref.watch(
+      generationParamsNotifierProvider.select(
+        (params) => params.modelSpec.characterReferences,
+      ),
+    );
+    if (!supportsPreciseRef) {
+      return const SizedBox.shrink();
+    }
+
     final theme = Theme.of(context);
     final references = ref.watch(
       generationParamsNotifierProvider.select(
@@ -61,22 +73,23 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
         .where((reference) => reference.enabled)
         .length;
     final hasActiveReferences = activeReferenceCount > 0;
-    // Precise Reference 仅 V4.5 家族支持（V4.0 与 V5 均无此能力）
-    final supportsPreciseRef = ref.watch(
-      generationParamsNotifierProvider.select(
-        (params) => params.modelSpec.characterReferences,
-      ),
-    );
 
     // 判断是否显示背景（折叠且有数据时显示）
     final showBackground = hasReferences && !_isExpanded;
 
     return CollapsibleImagePanel(
       title: context.l10n.preciseRef_title,
+      subtitle: context.l10n.preciseRef_subtitle,
       icon: Icons.person_pin,
+      iconAsset: 'assets/icons/nai-icon-precise-reference.svg',
       isExpanded: _isExpanded,
       onToggle: () => setState(() => _isExpanded = !_isExpanded),
       hasData: hasReferences,
+      headerActions: _buildHeaderActions(
+        theme,
+        showBackground: showBackground,
+        hasReferences: hasReferences,
+      ),
       backgroundImage: showBackground
           ? (references.length == 1
                 ? DecodedMemoryImage(
@@ -165,38 +178,6 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
           children: [
             const ThemedDivider(),
 
-            // 非 V4 模型提示
-            if (!supportsPreciseRef) ...[
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.errorContainer.withValues(
-                    alpha: 0.3,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      size: 16,
-                      color: theme.colorScheme.error,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        context.l10n.preciseRef_v4Only,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.error,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-
             // 说明文字
             Text(
               context.l10n.preciseRef_description,
@@ -229,9 +210,8 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
 
             // 添加按钮
             _buildAddReferenceDropTarget(
-              enabled: supportsPreciseRef,
               child: OutlinedButton.icon(
-                onPressed: supportsPreciseRef ? _addReference : null,
+                onPressed: _addReference,
                 icon: Icon(
                   _isFileDraggingOver ? Icons.file_download_rounded : Icons.add,
                   size: 18,
@@ -242,40 +222,6 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
                       : context.l10n.preciseRef_addReference,
                 ),
               ),
-            ),
-
-            // 库操作：从库导入 / 保存到库
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    key: const Key('precise-ref-panel-from-library'),
-                    onPressed: supportsPreciseRef ? _importFromLibrary : null,
-                    icon: const Icon(Icons.photo_library_outlined, size: 16),
-                    label: Text(
-                      context.l10n.preciseRefLib_fromLibrary,
-                      style: const TextStyle(fontSize: 12),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    key: const Key('precise-ref-panel-save-to-library'),
-                    onPressed: hasReferences ? _saveReferencesToLibrary : null,
-                    icon: const Icon(Icons.bookmark_add_outlined, size: 16),
-                    label: Text(
-                      context.l10n.preciseRefLib_saveCurrentToLibrary,
-                      style: const TextStyle(fontSize: 12),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-              ],
             ),
 
             // 清除全部按钮
@@ -296,14 +242,95 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
     );
   }
 
-  Widget _buildAddReferenceDropTarget({
-    required bool enabled,
-    required Widget child,
+  /// 头部操作列：保存到库（文本钮）+ 方形“添加”钮（弹出 添加参考图/从库导入）。
+  List<Widget> _buildHeaderActions(
+    ThemeData theme, {
+    required bool showBackground,
+    required bool hasReferences,
   }) {
-    if (!enabled) {
-      return child;
-    }
+    final foreground = showBackground
+        ? Colors.white
+        : theme.colorScheme.onSurfaceVariant;
+    return [
+      TextButton.icon(
+        key: const Key('precise-ref-panel-save-to-library'),
+        onPressed: hasReferences ? _saveReferencesToLibrary : null,
+        icon: SvgPicture.asset(
+          'assets/icons/nai-icon-save.svg',
+          width: 13,
+          height: 13,
+          colorFilter: ColorFilter.mode(
+            hasReferences
+                ? foreground
+                : foreground.withValues(alpha: 0.38),
+            BlendMode.srcIn,
+          ),
+        ),
+        label: Text(
+          context.l10n.preciseRefLib_saveCurrentToLibrary,
+          style: const TextStyle(fontSize: 12),
+        ),
+        style: TextButton.styleFrom(
+          foregroundColor: showBackground
+              ? Colors.white
+              : theme.colorScheme.primary,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          minimumSize: const Size(0, 30),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+      ),
+      Builder(
+        builder: (buttonContext) => PanelHeaderIconButton(
+          key: const Key('precise-ref-panel-add-menu'),
+          iconAsset: 'assets/icons/nai-icon-rounded-plus.svg',
+          tooltip: context.l10n.preciseRef_addReference,
+          color: foreground,
+          onPressed: () => _showAddMenu(buttonContext),
+        ),
+      ),
+    ];
+  }
 
+  /// 方形钮正下方弹出 添加参考图 / 从库导入 菜单（官网式）。
+  void _showAddMenu(BuildContext buttonContext) {
+    final overlayBox =
+        Overlay.of(buttonContext).context.findRenderObject() as RenderBox;
+    final box = buttonContext.findRenderObject() as RenderBox;
+    final triggerRect = box.localToGlobal(Offset.zero) & box.size;
+
+    showMenu<String>(
+      context: buttonContext,
+      position: RelativeRect.fromLTRB(
+        triggerRect.left,
+        triggerRect.bottom + 4,
+        overlayBox.size.width - triggerRect.right,
+        0,
+      ),
+      items: [
+        PopupMenuItem<String>(
+          value: 'add',
+          height: 40,
+          child: Text(context.l10n.preciseRef_addReference),
+        ),
+        PopupMenuItem<String>(
+          key: const Key('precise-ref-panel-from-library'),
+          value: 'library',
+          height: 40,
+          child: Text(context.l10n.preciseRefLib_fromLibrary),
+        ),
+      ],
+    ).then((value) {
+      if (!mounted) return;
+      switch (value) {
+        case 'add':
+          unawaited(_addReference());
+        case 'library':
+          unawaited(_importFromLibrary());
+      }
+    });
+  }
+
+  Widget _buildAddReferenceDropTarget({required Widget child}) {
     return DropRegion(
       formats: Formats.standardFormats,
       hitTestBehavior: HitTestBehavior.opaque,

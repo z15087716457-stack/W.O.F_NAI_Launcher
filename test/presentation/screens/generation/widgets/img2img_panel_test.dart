@@ -40,6 +40,10 @@ void main() {
 
       await tester.pumpAndSettle();
 
+      // 导演工具移入“更多操作”溢出菜单（官网式行内布局）
+      await tester.tap(find.byKey(const Key('img2img-overflow-menu')));
+      await tester.pumpAndSettle();
+
       expect(find.text('导演工具'), findsWidgets);
       expect(tester.takeException(), isNull);
     });

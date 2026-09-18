@@ -592,6 +592,7 @@
     }
   },
   "img2img_title": "Image2Image",
+  "img2img_subtitle": "Generate variations from a source image",
   "img2img_enabled": "Enabled",
   "img2img_sourceImage": "Source Image",
   "img2img_strength": "Strength",
@@ -610,6 +611,8 @@
   "img2img_editImage": "Edit Image",
   "img2img_editApplied": "The edited image is now the new source image",
   "img2img_uploadImage": "Upload Image",
+  "img2img_dropToAdd": "Release to set as source image",
+  "img2img_moreActions": "More actions",
   "img2img_drawSketch": "Draw Sketch",
   "img2img_inpaint": "Inpaint",
   "img2img_inpaintStrength": "Inpaint Strength",
@@ -2541,6 +2544,7 @@
   "statistics_saturday": "Sat",
   "fixedTags_negativeTitle": "Undesired Content Fixed Tags",
   "reversePrompt_title": "Reverse Prompt",
+  "reversePrompt_subtitle": "Extract tags or prompts from an image",
   "reversePrompt_pending": "Pending",
   "reversePrompt_imageCount": "{count} image(s)",
   "@reversePrompt_imageCount": {
@@ -2982,6 +2986,7 @@
   "drop_useAsRawImageSubtitle": "Re-encode (costs 2 Anlas)",
   "drop_dragToImg2ImgOrOther": "Drag to Image2Image or another target",
   "preciseRef_title": "Precise Reference",
+  "preciseRef_subtitle": "Tie generation to a character or style reference",
   "preciseRef_description": "Add reference images and set type and parameters. Multiple references can be used simultaneously.",
   "preciseRef_addReference": "Add Reference",
   "preciseRef_clearAll": "Clear All",

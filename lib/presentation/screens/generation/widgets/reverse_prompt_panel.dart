@@ -42,7 +42,9 @@ class _ReversePromptPanelState extends ConsumerState<ReversePromptPanel> {
 
     return CollapsibleImagePanel(
       title: context.l10n.reversePrompt_title,
+      subtitle: context.l10n.reversePrompt_subtitle,
       icon: Icons.manage_search_rounded,
+      iconAsset: 'assets/icons/nai-icon-prompt-chunk.svg',
       isExpanded: _isExpanded,
       onToggle: () => setState(() => _isExpanded = !_isExpanded),
       hasData: hasImages || state.finalPrompt.isNotEmpty,

@@ -1280,6 +1280,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_title => 'Image2Image';
 
   @override
+  String get img2img_subtitle => '元画像からバリエーションを生成';
+
+  @override
   String get img2img_enabled => '有効';
 
   @override
@@ -1319,6 +1322,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get img2img_uploadImage => '画像をアップロード';
+
+  @override
+  String get img2img_dropToAdd => 'ドロップして元画像に設定';
+
+  @override
+  String get img2img_moreActions => 'その他の操作';
 
   @override
   String get img2img_drawSketch => 'スケッチを描く';
@@ -4917,6 +4926,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reversePrompt_title => '逆プロンプト';
 
   @override
+  String get reversePrompt_subtitle => '画像からタグやプロンプトを抽出';
+
+  @override
   String get reversePrompt_pending => '保留中';
 
   @override
@@ -5883,6 +5895,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get preciseRef_title => '精密参照';
+
+  @override
+  String get preciseRef_subtitle => 'キャラクターやスタイル参照に生成を結び付ける';
 
   @override
   String get preciseRef_description =>
