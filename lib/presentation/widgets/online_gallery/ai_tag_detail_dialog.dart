@@ -21,7 +21,6 @@ import '../../providers/online_favorites_provider.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/online_gallery_provider.dart';
 import '../../providers/pending_prompt_provider.dart';
-import '../../providers/reverse_prompt_provider.dart';
 import '../common/app_toast.dart';
 
 Future<int?> showAiTagDetailDialog(
@@ -560,11 +559,6 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
               label: Text(context.l10n.onlineGallery_sendToTextToImage),
             ),
             OutlinedButton.icon(
-              onPressed: () => _sendToReverse(media),
-              icon: const Icon(Icons.manage_search, size: 16),
-              label: Text(context.l10n.onlineGallery_sendToReversePrompt),
-            ),
-            OutlinedButton.icon(
               onPressed: _downloadTotal > 0
                   ? null
                   : () => _downloadMedia(detail, [media]),
@@ -696,32 +690,6 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
         );
     Navigator.pop(context);
     context.go(AppRoutes.generation);
-  }
-
-  Future<void> _sendToReverse(GalleryMedia media) async {
-    try {
-      final file = await DanbooruImageCacheManager.instance.getSingleFile(
-        media.downloadUrl,
-        key: onlineGalleryImageCacheKeyForUrl(media.downloadUrl),
-        headers: onlineGalleryImageHeadersForUrl(media.downloadUrl),
-      );
-      await ref
-          .read(reversePromptProvider.notifier)
-          .addImage(
-            await file.readAsBytes(),
-            name: 'ai_tag_${widget.item.id}_${_mediaIndex + 1}',
-          );
-      if (!mounted) return;
-      Navigator.pop(context);
-      context.go(AppRoutes.generation);
-    } catch (error) {
-      if (mounted) {
-        AppToast.error(
-          context,
-          context.l10n.onlineGallery_reversePromptSendFailed('$error'),
-        );
-      }
-    }
   }
 
   Future<void> _downloadMedia(

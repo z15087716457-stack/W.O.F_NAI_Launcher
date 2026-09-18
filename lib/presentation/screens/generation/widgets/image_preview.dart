@@ -30,7 +30,6 @@ import '../../../providers/character_prompt_provider.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/local_gallery_provider.dart';
 import '../../../providers/quality_preset_provider.dart';
-import '../../../providers/reverse_prompt_provider.dart';
 import '../../../providers/shortcuts_provider.dart';
 import '../../../providers/uc_preset_provider.dart';
 import '../../../services/image_workflow_launcher.dart';
@@ -600,9 +599,6 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
           ? context.l10n.generation_failedStreamSnapshotHint
           : null,
       onTap: () => _showFullscreenImage(image),
-      onReversePrompt: canUseAsInput
-          ? () => unawaited(_sendPreviewImageToReversePrompt(context, image))
-          : null,
       onImageToImage: canUseAsInput
           ? () => _sendPreviewImageToImageToImage(context, image)
           : null,
@@ -686,26 +682,6 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
       return p.basename(filePath);
     }
     return 'generation_${image.id}.png';
-  }
-
-  Future<void> _sendPreviewImageToReversePrompt(
-    BuildContext context,
-    GeneratedImage image,
-  ) async {
-    final l10n = context.l10n;
-
-    try {
-      await ref
-          .read(reversePromptProvider.notifier)
-          .addImage(image.bytes, name: _previewImageFileName(image));
-
-      if (!context.mounted) return;
-      AppToast.success(context, l10n.drop_addedToReversePrompt);
-    } catch (e) {
-      if (context.mounted) {
-        AppToast.error(context, l10n.gallery_sendFailed(e.toString()));
-      }
-    }
   }
 
   void _sendPreviewImageToImageToImage(

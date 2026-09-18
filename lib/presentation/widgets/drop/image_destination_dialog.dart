@@ -12,9 +12,6 @@ enum ImageDestination {
   /// 图生图
   img2img,
 
-  /// 反推
-  reversePrompt,
-
   /// Vibe Transfer
   vibeTransfer,
 
@@ -186,14 +183,6 @@ class ImageDestinationDialog extends ConsumerWidget {
                     const ThemedDivider(height: 1),
                     const SizedBox(height: 16),
                   ],
-                  _DestinationButton(
-                    icon: Icons.manage_search_rounded,
-                    label: context.l10n.drop_reversePrompt,
-                    onTap: () => Navigator.of(
-                      context,
-                    ).pop(ImageDestination.reversePrompt),
-                  ),
-                  const SizedBox(height: 12),
                   _DestinationButton(
                     icon: Icons.image_outlined,
                     label: context.l10n.drop_img2img,

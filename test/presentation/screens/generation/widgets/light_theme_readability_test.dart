@@ -4,10 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/presentation/providers/comfyui/comfyui_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
-import 'package:nai_launcher/presentation/providers/reverse_prompt_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/img2img_panel.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/precise_reference_panel.dart';
-import 'package:nai_launcher/presentation/screens/generation/widgets/reverse_prompt_panel.dart';
 
 import '../../../../helpers/light_theme_contrast.dart';
 
@@ -105,29 +103,6 @@ void main() {
       );
 
       expectNoUnreadableLightText(tester, panelName: 'Img2ImgPanel（空状态）');
-    });
-
-    testWidgets('ReversePromptPanel（展开并打开各处理链）', (tester) async {
-      final container = createStorageFreeContainer();
-      addTearDown(container.dispose);
-
-      final notifier = container.read(reversePromptProvider.notifier);
-      // 打开这两个开关才会渲染 taggerFilterHint / replacementEmptyHint，
-      // 它们正是此前写死 Colors.white70 的位置。
-      await notifier.setUseOnnxTagger(true);
-      await notifier.setUseCharacterReplace(true);
-
-      await pumpPanelInLightTheme(
-        tester,
-        container: container,
-        panel: const ReversePromptPanel(),
-      );
-
-      // 面板默认折叠，点开标题展开内容区。
-      await tester.tap(find.text('反推'));
-      await tester.pumpAndSettle();
-
-      expectNoUnreadableLightText(tester, panelName: 'ReversePromptPanel');
     });
 
     testWidgets('PreciseReferencePanel（展开）', (tester) async {

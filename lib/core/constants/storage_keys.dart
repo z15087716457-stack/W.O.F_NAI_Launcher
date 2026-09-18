@@ -345,12 +345,6 @@ class StorageKeys {
   static const String workflowEnhanceMaxUpscale =
       'workflow_enhance_max_upscale';
 
-  // 反推/本地模型设置
-  static const String reversePromptStateJson = 'reverse_prompt_state_json';
-  static const String reversePromptCharacterConfigJson =
-      'reverse_prompt_character_config_json';
-  static const String onnxTaggerModelDirectory = 'onnx_tagger_model_directory';
-
   // 保护模式设置
   static const String protectionMode = 'protection_mode';
   static const String protectionConfirmDangerousActions =

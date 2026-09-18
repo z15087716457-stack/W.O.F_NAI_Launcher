@@ -2491,10 +2491,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gallery_sentToImg2Img => 'Image sent to Image2Image';
 
   @override
-  String get gallery_sentToReversePrompt =>
-      'Image sent to reverse-prompt module';
-
-  @override
   String gallery_sendFailed(Object error) {
     return 'Send failed: $error';
   }
@@ -2601,26 +2597,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onlineGallery_sentToTextToImage => 'Sent to text-to-image';
 
   @override
-  String get onlineGallery_sendToReversePrompt => 'Send to Reverse Prompt';
-
-  @override
-  String get onlineGallery_sentToReversePrompt =>
-      'Sent to reverse-prompt module';
-
-  @override
-  String onlineGallery_reversePromptSendFailed(Object error) {
-    return 'Failed to send to reverse prompt: $error';
-  }
-
-  @override
   String get onlineGallery_noTagInfo => 'This image has no tag information';
 
   @override
   String get onlineGallery_promptSentToGeneration =>
       'Prompt sent to generation page';
-
-  @override
-  String get onlineGallery_noImageUrl => 'This image has no available URL';
 
   @override
   String get onlineGallery_gifLoadFailed => 'Failed to load GIF';
@@ -4243,18 +4224,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get localGallery_sentToReversePrompt => 'Image sent to reverse prompt';
-
-  @override
   String localGallery_sendToKritaFailed(Object error) {
     return 'Failed to send to Krita: $error';
   }
 
   @override
   String get localGallery_sendToImg2Img => 'Send to Image2Image';
-
-  @override
-  String get localGallery_sendToReversePrompt => 'Send to Reverse Prompt';
 
   @override
   String get localGallery_sendToStyleTransfer => 'Send to Vibe Transfer';
@@ -5025,120 +5000,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fixedTags_negativeTitle => 'Undesired Content Fixed Tags';
 
   @override
-  String get reversePrompt_title => 'Reverse Prompt';
-
-  @override
-  String get reversePrompt_subtitle => 'Extract tags or prompts from an image';
-
-  @override
-  String get reversePrompt_pending => 'Pending';
-
-  @override
-  String reversePrompt_imageCount(Object count) {
-    return '$count image(s)';
-  }
-
-  @override
-  String get reversePrompt_llmReverse => 'LLM Reverse';
-
-  @override
-  String get reversePrompt_characterReplace => 'Character Replace';
-
-  @override
-  String get reversePrompt_finalResult => 'Final Result';
-
-  @override
-  String get reversePrompt_dropToAdd => 'Release to add to reverse prompt';
-
-  @override
-  String get reversePrompt_addOrDropImages => 'Add images / drop images';
-
-  @override
-  String get reversePrompt_localTaggerModel => 'Local tagger model';
-
-  @override
-  String get reversePrompt_localTaggerModelHint =>
-      'Configure model folder in Settings';
-
-  @override
-  String get reversePrompt_generalThreshold => 'General tag threshold';
-
-  @override
-  String get reversePrompt_characterThreshold => 'Character tag threshold';
-
-  @override
-  String get reversePrompt_taggerFilterHint =>
-      'Only General / Character tags are output. Rating, Artist, Copyright, Meta, and other categories are filtered.';
-
-  @override
-  String get reversePrompt_replacementEmptyHint =>
-      'No replacement target character selected. Choose a character from the tag library here; it will not be injected into the prompt.';
-
-  @override
-  String get reversePrompt_selectReplacementCharacter =>
-      'Choose replacement target character from library';
-
-  @override
-  String get reversePrompt_selectReplacementTargetTitle =>
-      'Choose Replacement Target Character';
-
-  @override
-  String get reversePrompt_change => 'Change';
-
-  @override
-  String get reversePrompt_start => 'Start Reverse Prompt';
-
-  @override
-  String get reversePrompt_sentToPrompt => 'Sent to prompt';
-
-  @override
-  String get reversePrompt_sendToPrompt => 'Send to Prompt';
-
-  @override
-  String get reversePrompt_externalTarget =>
-      'multimodal LLM reverse prompt service';
-
-  @override
-  String get reversePrompt_dropUnreadable =>
-      'The dropped source did not provide a readable image file or image URL';
-
-  @override
-  String get reversePrompt_needImageAndMethod =>
-      'Add an image and enable at least ONNX tagger or LLM reverse prompt';
-
-  @override
-  String get reversePrompt_stagePreparing => 'Preparing reverse prompt';
-
-  @override
-  String get reversePrompt_stageOnnxTagger => 'ONNX tagger reverse prompting';
-
-  @override
-  String get reversePrompt_stageLlmReverse => 'LLM image reverse prompting';
-
-  @override
-  String get reversePrompt_stageCharacterReplace => 'Replacing character';
-
-  @override
-  String get reversePrompt_needReplacementCharacter =>
-      'Choose a valid character from the reverse-prompt character library first';
-
-  @override
-  String get reversePrompt_needPromptForCharacterReplace =>
-      'Character replacement requires a reverse-prompt result first';
-
-  @override
-  String get reversePrompt_noOnnxModel =>
-      'No ONNX tagger model found. Configure the model folder in Settings first';
-
-  @override
   String get promptAssistant_translateProcessing => 'Translating';
 
   @override
   String get promptAssistant_optimizeProcessing => 'Optimizing';
-
-  @override
-  String get promptAssistant_characterReplaceProcessing =>
-      'Replacing character';
 
   @override
   String get promptAssistant_customProcessing => 'Processing custom request';
@@ -5146,10 +5011,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get promptAssistant_imageInputDisabled =>
       'The current custom-task provider does not have image input enabled';
-
-  @override
-  String get promptAssistant_needCharacter =>
-      'Add a valid character in the reverse-prompt character library first';
 
   @override
   String get promptAssistant_assistantSettings => 'Assistant Settings';
@@ -5186,9 +5047,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptAssistant_custom => 'Custom';
-
-  @override
-  String get promptAssistant_characterReplace => 'Character Replace';
 
   @override
   String get promptAssistant_cancelTask => 'Cancel Task';
@@ -5947,9 +5805,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get drop_img2img => 'Image2Image';
 
   @override
-  String get drop_reversePrompt => 'Reverse Prompt';
-
-  @override
   String get drop_vibeTransfer => 'Vibe Transfer';
 
   @override
@@ -5960,9 +5815,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get drop_addedToImg2Img => 'Added to Image2Image';
-
-  @override
-  String get drop_addedToReversePrompt => 'Added to Reverse Prompt';
 
   @override
   String get drop_addedToVibe => 'Added to Vibe Transfer';
@@ -7462,20 +7314,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Each cooldown is drawn at random from base interval ± this percentage, so the pacing is less mechanical. Enter 0–50; 0 disables jitter.';
 
   @override
-  String get settings_selectLocalOnnxTaggerFolder =>
-      'Select ONNX tagger model folder';
-
-  @override
-  String get settings_localOnnxTaggerFolderSaved =>
-      'ONNX tagger model folder saved';
-
-  @override
-  String get settings_localOnnxTaggerFolder => 'Local ONNX tagger model folder';
-
-  @override
-  String get settings_notConfigured => 'Not configured';
-
-  @override
   String get settings_confirmExternalSendTitle =>
       'Protection Mode: Confirm External Send';
 
@@ -8380,9 +8218,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get detail_sendToImg2Img => 'Send to Image2Image';
-
-  @override
-  String get detail_sendToReversePrompt => 'Send to Reverse Prompt';
 
   @override
   String get detail_loadingImage => 'Loading image...';

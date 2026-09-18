@@ -5,7 +5,6 @@ import '../../../core/utils/localization_extension.dart';
 enum LocalImageContextAction {
   sendToTextToImage,
   sendToImg2Img,
-  sendToReversePrompt,
   sendToStyleTransfer,
   sendToPreciseReference,
   saveToPreciseRefLibrary,
@@ -146,12 +145,6 @@ class LocalImageContextMenu {
         value: LocalImageContextAction.sendToImg2Img,
         icon: Icons.image_outlined,
         label: context.l10n.localGallery_sendToImg2Img,
-      ),
-      _item(
-        context,
-        value: LocalImageContextAction.sendToReversePrompt,
-        icon: Icons.manage_search_rounded,
-        label: context.l10n.localGallery_sendToReversePrompt,
       ),
       _item(
         context,

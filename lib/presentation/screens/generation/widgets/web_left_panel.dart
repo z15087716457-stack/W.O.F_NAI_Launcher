@@ -19,7 +19,6 @@ import 'generation_param_sections.dart';
 import 'img2img_panel.dart';
 import 'precise_reference_panel.dart';
 import 'prompt_input.dart';
-import 'reverse_prompt_panel.dart';
 import 'section_header.dart';
 import 'unified_reference_panel.dart';
 
@@ -226,14 +225,12 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                         const InlineCharacterSection(),
                         const SizedBox(height: 10),
 
-                        // 功能面板：反推 / 图生图 / 风格迁移 / 精准参考
+                        // 功能面板：图生图 / 风格迁移 / 精准参考
                         // （官网 Reference Images 小节）
                         SectionHeader(
                           title: context.l10n.generation_sectionReferenceImages,
                         ),
                         const SizedBox(height: 6),
-                        const ReversePromptPanel(),
-                        const SizedBox(height: 8),
                         const Img2ImgPanel(),
                         const SizedBox(height: 8),
                         const UnifiedReferencePanel(),

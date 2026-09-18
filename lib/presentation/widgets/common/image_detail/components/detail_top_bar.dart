@@ -20,7 +20,6 @@ class DetailTopBar extends StatelessWidget {
   final VoidCallback? onSave;
   final VoidCallback? onCopyImage;
   final VoidCallback? onSendToImg2Img;
-  final VoidCallback? onSendToReversePrompt;
 
   /// 删除当前图片（仅支持删除的调用方传入，如本地画廊）
   final VoidCallback? onDelete;
@@ -36,7 +35,6 @@ class DetailTopBar extends StatelessWidget {
     this.onSave,
     this.onCopyImage,
     this.onSendToImg2Img,
-    this.onSendToReversePrompt,
     this.onDelete,
   });
 
@@ -118,14 +116,6 @@ class DetailTopBar extends StatelessWidget {
               icon: const Icon(Icons.image_search, color: Colors.white),
               onPressed: onSendToImg2Img,
               tooltip: l10n.detail_sendToImg2Img,
-            ),
-
-          // 发送到反推模块
-          if (onSendToReversePrompt != null)
-            IconButton(
-              icon: const Icon(Icons.auto_fix_high, color: Colors.white),
-              onPressed: onSendToReversePrompt,
-              tooltip: l10n.detail_sendToReversePrompt,
             ),
 
           // 复制图像按钮

@@ -1172,7 +1172,6 @@
   },
   "gallery_upscale": "拡大",
   "gallery_sentToImg2Img": "画像を Image2Image に送信しました",
-  "gallery_sentToReversePrompt": "画像がリバースプロンプトモジュールに送信されました",
   "gallery_sendFailed": "送信失敗: {error}",
   "@gallery_sendFailed": {
     "placeholders": {
@@ -1217,17 +1216,8 @@
   "onlineGallery_send": "送信",
   "onlineGallery_sendToTextToImage": "テキストから画像へ送信",
   "onlineGallery_sentToTextToImage": "text-to-image に送信されました",
-  "onlineGallery_sendToReversePrompt": "逆プロンプトに送信",
-  "onlineGallery_sentToReversePrompt": "リバースプロンプトモジュールに送信されました",
-  "onlineGallery_reversePromptSendFailed": "逆プロンプトへの送信に失敗しました: {error}",
-  "@onlineGallery_reversePromptSendFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "onlineGallery_noTagInfo": "この画像にはタグ情報がありません",
   "onlineGallery_promptSentToGeneration": "プロンプトが生成ページに送信されました",
-  "onlineGallery_noImageUrl": "この画像には利用可能な URL がありません",
   "onlineGallery_gifLoadFailed": "GIFのロードに失敗しました",
   "onlineGallery_pinchToZoom": "ピンチしてズーム",
   "onlineGallery_metadata": "メタデータ",
@@ -2099,7 +2089,6 @@
       "error": {}
     }
   },
-  "localGallery_sentToReversePrompt": "画像がリバース プロンプトに送信されました",
   "localGallery_sendToKritaFailed": "Krita への送信に失敗しました: {error}",
   "@localGallery_sendToKritaFailed": {
     "placeholders": {
@@ -2107,7 +2096,6 @@
     }
   },
   "localGallery_sendToImg2Img": "Image2Image に送信",
-  "localGallery_sendToReversePrompt": "逆プロンプトに送信",
   "localGallery_sendToStyleTransfer": "バイブストランスファーに送信",
   "localGallery_sendToPreciseReference": "精密参照に送信",
   "localGallery_sendToKrita": "Krita に送信",
@@ -2539,48 +2527,10 @@
   "statistics_friday": "金",
   "statistics_saturday": "土",
   "fixedTags_negativeTitle": "除外したい要素固定タグ",
-  "reversePrompt_title": "逆プロンプト",
-  "reversePrompt_subtitle": "画像からタグやプロンプトを抽出",
-  "reversePrompt_pending": "保留中",
-  "reversePrompt_imageCount": "{count} 画像",
-  "@reversePrompt_imageCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "reversePrompt_llmReverse": "LLM リバース",
-  "reversePrompt_characterReplace": "キャラクター置換",
-  "reversePrompt_finalResult": "最終結果",
-  "reversePrompt_dropToAdd": "逆プロンプトに追加するには放します",
-  "reversePrompt_addOrDropImages": "画像を追加/画像をドロップ",
-  "reversePrompt_localTaggerModel": "ローカルタガーモデル",
-  "reversePrompt_localTaggerModelHint": "設定でモデルフォルダーを構成します",
-  "reversePrompt_generalThreshold": "一般タグしきい値",
-  "reversePrompt_characterThreshold": "キャラクタータグのしきい値",
-  "reversePrompt_taggerFilterHint": "一般/キャラクタータグのみが出力されます。評価、アーティスト、著作権、メタ、その他のカテゴリはフィルターされます。",
-  "reversePrompt_replacementEmptyHint": "置換対象キャラクターが選択されていません。ここでタグライブラリからキャラクターを選択します。プロンプトには挿入されません。",
-  "reversePrompt_selectReplacementCharacter": "置換対象のキャラクターをライブラリから選択してください",
-  "reversePrompt_selectReplacementTargetTitle": "置換対象キャラクターを選択してください",
-  "reversePrompt_change": "変更",
-  "reversePrompt_start": "リバースプロンプトの開始",
-  "reversePrompt_sentToPrompt": "プロンプトに送信されました",
-  "reversePrompt_sendToPrompt": "プロンプトに送信",
-  "reversePrompt_externalTarget": "マルチモーダル LLM リバース プロンプト サービス",
-  "reversePrompt_dropUnreadable": "ドロップされたソースは、読み取り可能な画像ファイルまたは画像 URL を提供しませんでした",
-  "reversePrompt_needImageAndMethod": "画像を追加し、少なくとも ONNX タガーまたは LLM リバース プロンプトを有効にしてください",
-  "reversePrompt_stagePreparing": "逆プロンプトを準備しています",
-  "reversePrompt_stageOnnxTagger": "ONNX タガーのリバース プロンプト",
-  "reversePrompt_stageLlmReverse": "LLM イメージの逆プロンプト",
-  "reversePrompt_stageCharacterReplace": "キャラクターを置換します",
-  "reversePrompt_needReplacementCharacter": "最初にリバースプロンプトのキャラクターライブラリから有効なキャラクターを選択してください",
-  "reversePrompt_needPromptForCharacterReplace": "キャラクター置換には、最初にリバースプロンプトの結果が必要です",
-  "reversePrompt_noOnnxModel": "ONNX タガー モデルが見つかりません。最初に設定でモデルフォルダーを構成します",
   "promptAssistant_translateProcessing": "翻訳中",
   "promptAssistant_optimizeProcessing": "最適化中",
-  "promptAssistant_characterReplaceProcessing": "キャラクターを置換しています",
   "promptAssistant_customProcessing": "カスタムリクエストを処理しています",
   "promptAssistant_imageInputDisabled": "現在のカスタム タスク プロバイダーでは画像入力が有効になっていません",
-  "promptAssistant_needCharacter": "先にリバースプロンプトのキャラクターライブラリに有効なキャラクターを追加してください",
   "promptAssistant_assistantSettings": "アシスタントの設定",
   "promptAssistant_serviceSettings": "サービス設定",
   "promptAssistant_ruleSettings": "ルール設定",
@@ -2593,7 +2543,6 @@
   "promptAssistant_translate": "翻訳",
   "promptAssistant_optimize": "最適化",
   "promptAssistant_custom": "カスタム",
-  "promptAssistant_characterReplace": "キャラクター置換",
   "promptAssistant_cancelTask": "タスクのキャンセル",
   "promptAssistant_menu": "メニュー",
   "promptAssistant_customDialogTitle": "カスタム Prompt Assistant",
@@ -2945,12 +2894,10 @@
   "drop_dialogTitle": "この画像はどのように使用しますか?",
   "drop_hint": "ここに画像をドロップしてください",
   "drop_img2img": "Image2Image",
-  "drop_reversePrompt": "逆プロンプト",
   "drop_vibeTransfer": "バイブストランスファー",
   "drop_characterReference": "精密参照",
   "drop_unsupportedFormat": "サポートされていないファイル形式です",
   "drop_addedToImg2Img": "Image2Image に追加しました",
-  "drop_addedToReversePrompt": "リバースプロンプトに追加されました",
   "drop_addedToVibe": "バイブストランスファーに追加しました",
   "drop_addedMultipleToVibe": "{count} 件のバイブストランスファー参照を追加しました",
   "@drop_addedMultipleToVibe": {
@@ -4005,10 +3952,6 @@
   },
   "settings_setGenerationIntervalJitterTitle": "間隔ジッターを設定",
   "settings_generationIntervalJitterHelper": "各クールダウンは「基準間隔 ± この割合」の範囲でランダムに決まり、生成ペースが機械的になりにくくなります。0～50 で設定、0 で無効になります。",
-  "settings_selectLocalOnnxTaggerFolder": "ONNX タガー モデル フォルダーを選択してください",
-  "settings_localOnnxTaggerFolderSaved": "ONNX タガー モデル フォルダーが保存されました",
-  "settings_localOnnxTaggerFolder": "ローカル ONNX タガー モデル フォルダー",
-  "settings_notConfigured": "未構成",
   "settings_confirmExternalSendTitle": "保護モード: 外部送信の確認",
   "settings_confirmExternalSendContent": "{count} 枚のローカル画像を {target} に送信しようとしています。画像データはローカル アプリの外部に送信されます。これが想定どおりであることを確認してください。",
   "@settings_confirmExternalSendContent": {
@@ -4515,7 +4458,6 @@
   },
   "vibe_encodeSkipImage": "この画像をスキップ",
   "detail_sendToImg2Img": "Image2Image に送信",
-  "detail_sendToReversePrompt": "逆プロンプトに送信",
   "detail_loadingImage": "画像を読み込み中...",
   "detail_imageLoadFailed": "画像のロードに失敗しました",
   "detail_noImage": "画像がありません",

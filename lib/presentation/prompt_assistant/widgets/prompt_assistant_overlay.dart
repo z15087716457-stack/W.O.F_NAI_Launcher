@@ -7,11 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../widgets/common/app_toast.dart';
 import '../../../core/utils/localization_extension.dart';
-import '../../../data/models/character/character_prompt.dart';
-import '../../../data/models/prompt_block/prompt_block.dart';
-import '../../providers/prompt_block_library_provider.dart';
-import '../../providers/reverse_prompt_provider.dart';
-import '../../widgets/common/prompt_block_picker_dialog.dart';
 import '../models/prompt_assistant_models.dart';
 import '../providers/prompt_assistant_config_provider.dart';
 import '../providers/prompt_assistant_history_provider.dart';
@@ -131,65 +126,6 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
       (provider) => provider?.id == providerId,
       orElse: () => enabledProviders.first,
     );
-  }
-
-  Future<void> _runCharacterReplace() async {
-    final processingLabel =
-        context.l10n.promptAssistant_characterReplaceProcessing;
-    final character = await _selectCharacterForReplacement();
-    if (character == null) {
-      return;
-    }
-
-    final inputText = _assistantInputText();
-    await _runAction(
-      processingLabel,
-      inputText,
-      (service, input) => service.replaceCharacterPrompt(
-        input,
-        sessionId: widget.sessionId,
-        characterName: character.name,
-        characterPrompt: character.prompt,
-      ),
-    );
-  }
-
-  Future<CharacterPrompt?> _selectCharacterForReplacement() async {
-    final character = ref
-        .read(reversePromptCharacterProvider.notifier)
-        .selectedCharacter;
-    if (character != null) {
-      return character;
-    }
-    return await _pickReplacementCharacterFromLibrary();
-  }
-
-  Future<CharacterPrompt?> _pickReplacementCharacterFromLibrary() async {
-    final block = await showDialog<PromptBlock>(
-      context: context,
-      builder: (context) => PromptBlockPickerDialog(
-        title: context.l10n.reversePrompt_selectReplacementTargetTitle,
-      ),
-    );
-    if (block == null) {
-      if (mounted) {
-        AppToast.warning(context, context.l10n.promptAssistant_needCharacter);
-      }
-      return null;
-    }
-
-    ref
-        .read(promptBlockLibraryNotifierProvider.notifier)
-        .incrementUseCount(block.id);
-    final character = CharacterPrompt.create(
-      name: block.displayTitle,
-      prompt: block.content,
-      thumbnailPath: block.thumbnail,
-    );
-    ref
-        .read(reversePromptCharacterProvider.notifier)
-        .setReplacementCharacter(character);
-    return character;
   }
 
   Future<void> _runAction(
@@ -612,11 +548,6 @@ class _PromptAssistantOverlayState extends ConsumerState<PromptAssistantOverlay>
                     icon: Icons.tune_rounded,
                     tooltip: context.l10n.promptAssistant_custom,
                     onPressed: isProcessing ? null : _runCustom,
-                  ),
-                  _miniButton(
-                    icon: Icons.manage_accounts_rounded,
-                    tooltip: context.l10n.promptAssistant_characterReplace,
-                    onPressed: isProcessing ? null : _runCharacterReplace,
                   ),
                   _miniButton(
                     icon: isProcessing ? Icons.stop_circle : Icons.more_horiz,

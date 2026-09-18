@@ -35,7 +35,6 @@ import '../../providers/image_generation_provider.dart';
 import '../../providers/krita/krita_bridge_notifier.dart';
 import '../../providers/local_gallery_provider.dart';
 import '../../providers/gallery_scan_progress_provider.dart';
-import '../../providers/reverse_prompt_provider.dart';
 import '../../router/app_router.dart';
 import '../../services/image_workflow_launcher.dart';
 import '../../utils/asset_protection_guard.dart';
@@ -1614,34 +1613,6 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     }
   }
 
-  Future<void> _sendToReversePrompt(LocalImageRecord record) async {
-    try {
-      final file = File(record.path);
-      if (!await file.exists()) {
-        if (mounted) {
-          AppToast.info(context, context.l10n.localGallery_imageFileMissing);
-        }
-        return;
-      }
-
-      await ref
-          .read(reversePromptProvider.notifier)
-          .addImage(await file.readAsBytes(), name: path.basename(record.path));
-
-      if (mounted) {
-        context.go(AppRoutes.home);
-        AppToast.success(
-          context,
-          context.l10n.localGallery_sentToReversePrompt,
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        AppToast.error(context, context.l10n.localGallery_sendFailed('$e'));
-      }
-    }
-  }
-
   Future<void> _sendToKrita(LocalImageRecord record) async {
     try {
       final file = File(record.path);
@@ -1702,8 +1673,6 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         await _importImageMetadata(record);
       case LocalImageContextAction.sendToImg2Img:
         await _sendToImg2Img(record);
-      case LocalImageContextAction.sendToReversePrompt:
-        await _sendToReversePrompt(record);
       case LocalImageContextAction.sendToStyleTransfer:
         await _sendToStyleTransfer(record);
       case LocalImageContextAction.sendToPreciseReference:

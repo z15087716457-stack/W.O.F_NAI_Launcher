@@ -2437,9 +2437,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gallery_sentToImg2Img => '画像を Image2Image に送信しました';
 
   @override
-  String get gallery_sentToReversePrompt => '画像がリバースプロンプトモジュールに送信されました';
-
-  @override
   String gallery_sendFailed(Object error) {
     return '送信失敗: $error';
   }
@@ -2546,24 +2543,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onlineGallery_sentToTextToImage => 'text-to-image に送信されました';
 
   @override
-  String get onlineGallery_sendToReversePrompt => '逆プロンプトに送信';
-
-  @override
-  String get onlineGallery_sentToReversePrompt => 'リバースプロンプトモジュールに送信されました';
-
-  @override
-  String onlineGallery_reversePromptSendFailed(Object error) {
-    return '逆プロンプトへの送信に失敗しました: $error';
-  }
-
-  @override
   String get onlineGallery_noTagInfo => 'この画像にはタグ情報がありません';
 
   @override
   String get onlineGallery_promptSentToGeneration => 'プロンプトが生成ページに送信されました';
-
-  @override
-  String get onlineGallery_noImageUrl => 'この画像には利用可能な URL がありません';
 
   @override
   String get onlineGallery_gifLoadFailed => 'GIFのロードに失敗しました';
@@ -4149,18 +4132,12 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get localGallery_sentToReversePrompt => '画像がリバース プロンプトに送信されました';
-
-  @override
   String localGallery_sendToKritaFailed(Object error) {
     return 'Krita への送信に失敗しました: $error';
   }
 
   @override
   String get localGallery_sendToImg2Img => 'Image2Image に送信';
-
-  @override
-  String get localGallery_sendToReversePrompt => '逆プロンプトに送信';
 
   @override
   String get localGallery_sendToStyleTransfer => 'バイブストランスファーに送信';
@@ -4911,117 +4888,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get fixedTags_negativeTitle => '除外したい要素固定タグ';
 
   @override
-  String get reversePrompt_title => '逆プロンプト';
-
-  @override
-  String get reversePrompt_subtitle => '画像からタグやプロンプトを抽出';
-
-  @override
-  String get reversePrompt_pending => '保留中';
-
-  @override
-  String reversePrompt_imageCount(Object count) {
-    return '$count 画像';
-  }
-
-  @override
-  String get reversePrompt_llmReverse => 'LLM リバース';
-
-  @override
-  String get reversePrompt_characterReplace => 'キャラクター置換';
-
-  @override
-  String get reversePrompt_finalResult => '最終結果';
-
-  @override
-  String get reversePrompt_dropToAdd => '逆プロンプトに追加するには放します';
-
-  @override
-  String get reversePrompt_addOrDropImages => '画像を追加/画像をドロップ';
-
-  @override
-  String get reversePrompt_localTaggerModel => 'ローカルタガーモデル';
-
-  @override
-  String get reversePrompt_localTaggerModelHint => '設定でモデルフォルダーを構成します';
-
-  @override
-  String get reversePrompt_generalThreshold => '一般タグしきい値';
-
-  @override
-  String get reversePrompt_characterThreshold => 'キャラクタータグのしきい値';
-
-  @override
-  String get reversePrompt_taggerFilterHint =>
-      '一般/キャラクタータグのみが出力されます。評価、アーティスト、著作権、メタ、その他のカテゴリはフィルターされます。';
-
-  @override
-  String get reversePrompt_replacementEmptyHint =>
-      '置換対象キャラクターが選択されていません。ここでタグライブラリからキャラクターを選択します。プロンプトには挿入されません。';
-
-  @override
-  String get reversePrompt_selectReplacementCharacter =>
-      '置換対象のキャラクターをライブラリから選択してください';
-
-  @override
-  String get reversePrompt_selectReplacementTargetTitle =>
-      '置換対象キャラクターを選択してください';
-
-  @override
-  String get reversePrompt_change => '変更';
-
-  @override
-  String get reversePrompt_start => 'リバースプロンプトの開始';
-
-  @override
-  String get reversePrompt_sentToPrompt => 'プロンプトに送信されました';
-
-  @override
-  String get reversePrompt_sendToPrompt => 'プロンプトに送信';
-
-  @override
-  String get reversePrompt_externalTarget => 'マルチモーダル LLM リバース プロンプト サービス';
-
-  @override
-  String get reversePrompt_dropUnreadable =>
-      'ドロップされたソースは、読み取り可能な画像ファイルまたは画像 URL を提供しませんでした';
-
-  @override
-  String get reversePrompt_needImageAndMethod =>
-      '画像を追加し、少なくとも ONNX タガーまたは LLM リバース プロンプトを有効にしてください';
-
-  @override
-  String get reversePrompt_stagePreparing => '逆プロンプトを準備しています';
-
-  @override
-  String get reversePrompt_stageOnnxTagger => 'ONNX タガーのリバース プロンプト';
-
-  @override
-  String get reversePrompt_stageLlmReverse => 'LLM イメージの逆プロンプト';
-
-  @override
-  String get reversePrompt_stageCharacterReplace => 'キャラクターを置換します';
-
-  @override
-  String get reversePrompt_needReplacementCharacter =>
-      '最初にリバースプロンプトのキャラクターライブラリから有効なキャラクターを選択してください';
-
-  @override
-  String get reversePrompt_needPromptForCharacterReplace =>
-      'キャラクター置換には、最初にリバースプロンプトの結果が必要です';
-
-  @override
-  String get reversePrompt_noOnnxModel =>
-      'ONNX タガー モデルが見つかりません。最初に設定でモデルフォルダーを構成します';
-
-  @override
   String get promptAssistant_translateProcessing => '翻訳中';
 
   @override
   String get promptAssistant_optimizeProcessing => '最適化中';
-
-  @override
-  String get promptAssistant_characterReplaceProcessing => 'キャラクターを置換しています';
 
   @override
   String get promptAssistant_customProcessing => 'カスタムリクエストを処理しています';
@@ -5029,10 +4899,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get promptAssistant_imageInputDisabled =>
       '現在のカスタム タスク プロバイダーでは画像入力が有効になっていません';
-
-  @override
-  String get promptAssistant_needCharacter =>
-      '先にリバースプロンプトのキャラクターライブラリに有効なキャラクターを追加してください';
 
   @override
   String get promptAssistant_assistantSettings => 'アシスタントの設定';
@@ -5069,9 +4935,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get promptAssistant_custom => 'カスタム';
-
-  @override
-  String get promptAssistant_characterReplace => 'キャラクター置換';
 
   @override
   String get promptAssistant_cancelTask => 'タスクのキャンセル';
@@ -5819,9 +5682,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get drop_img2img => 'Image2Image';
 
   @override
-  String get drop_reversePrompt => '逆プロンプト';
-
-  @override
   String get drop_vibeTransfer => 'バイブストランスファー';
 
   @override
@@ -5832,9 +5692,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get drop_addedToImg2Img => 'Image2Image に追加しました';
-
-  @override
-  String get drop_addedToReversePrompt => 'リバースプロンプトに追加されました';
 
   @override
   String get drop_addedToVibe => 'バイブストランスファーに追加しました';
@@ -7300,20 +7157,6 @@ class AppLocalizationsJa extends AppLocalizations {
       '各クールダウンは「基準間隔 ± この割合」の範囲でランダムに決まり、生成ペースが機械的になりにくくなります。0～50 で設定、0 で無効になります。';
 
   @override
-  String get settings_selectLocalOnnxTaggerFolder =>
-      'ONNX タガー モデル フォルダーを選択してください';
-
-  @override
-  String get settings_localOnnxTaggerFolderSaved =>
-      'ONNX タガー モデル フォルダーが保存されました';
-
-  @override
-  String get settings_localOnnxTaggerFolder => 'ローカル ONNX タガー モデル フォルダー';
-
-  @override
-  String get settings_notConfigured => '未構成';
-
-  @override
   String get settings_confirmExternalSendTitle => '保護モード: 外部送信の確認';
 
   @override
@@ -8199,9 +8042,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get detail_sendToImg2Img => 'Image2Image に送信';
-
-  @override
-  String get detail_sendToReversePrompt => '逆プロンプトに送信';
 
   @override
   String get detail_loadingImage => '画像を読み込み中...';

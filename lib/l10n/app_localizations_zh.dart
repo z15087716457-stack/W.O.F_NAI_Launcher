@@ -2402,9 +2402,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gallery_sentToImg2Img => '图片已发送到图生图';
 
   @override
-  String get gallery_sentToReversePrompt => '图片已发送到反推模块';
-
-  @override
   String gallery_sendFailed(Object error) {
     return '发送失败: $error';
   }
@@ -2511,24 +2508,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onlineGallery_sentToTextToImage => '已发送到文生图';
 
   @override
-  String get onlineGallery_sendToReversePrompt => '发送到反推';
-
-  @override
-  String get onlineGallery_sentToReversePrompt => '已发送到反推模块';
-
-  @override
-  String onlineGallery_reversePromptSendFailed(Object error) {
-    return '发送反推失败: $error';
-  }
-
-  @override
   String get onlineGallery_noTagInfo => '此图片没有标签信息';
 
   @override
   String get onlineGallery_promptSentToGeneration => '提示词已发送到生成页面';
-
-  @override
-  String get onlineGallery_noImageUrl => '此图片没有可用地址';
 
   @override
   String get onlineGallery_gifLoadFailed => 'GIF加载失败';
@@ -4084,18 +4067,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get localGallery_sentToReversePrompt => '图片已发送到反推模块';
-
-  @override
   String localGallery_sendToKritaFailed(Object error) {
     return '发送到 Krita 失败: $error';
   }
 
   @override
   String get localGallery_sendToImg2Img => '发送到图生图';
-
-  @override
-  String get localGallery_sendToReversePrompt => '发送到反推';
 
   @override
   String get localGallery_sendToStyleTransfer => '发送到风格迁移';
@@ -4843,120 +4820,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fixedTags_negativeTitle => '负向固定词';
 
   @override
-  String get reversePrompt_title => '反推';
-
-  @override
-  String get reversePrompt_subtitle => '从图片提取标签或提示词';
-
-  @override
-  String get reversePrompt_pending => '待添加';
-
-  @override
-  String reversePrompt_imageCount(Object count) {
-    return '$count 张';
-  }
-
-  @override
-  String get reversePrompt_llmReverse => 'LLM 反推';
-
-  @override
-  String get reversePrompt_characterReplace => '角色替换';
-
-  @override
-  String get reversePrompt_finalResult => '最终结果';
-
-  @override
-  String get reversePrompt_dropToAdd => '松开后添加到反推';
-
-  @override
-  String get reversePrompt_addOrDropImages => '增加图片 / 拖入图片';
-
-  @override
-  String get reversePrompt_localTaggerModel => '本地 tagger 模型';
-
-  @override
-  String get reversePrompt_localTaggerModelHint => '请在设置中配置模型文件夹';
-
-  @override
-  String get reversePrompt_generalThreshold => '通用标签阈值';
-
-  @override
-  String get reversePrompt_characterThreshold => '角色标签阈值';
-
-  @override
-  String get reversePrompt_taggerFilterHint =>
-      '只输出 General / Character 分类标签；Rating、Artist、Copyright、Meta 等分类会被过滤。';
-
-  @override
-  String get reversePrompt_replacementEmptyHint =>
-      '替换目标角色为空。这里从词库选择一个角色作为替换目标，不会注入到正向提示词。';
-
-  @override
-  String get reversePrompt_selectReplacementCharacter => '从词库选择替换目标角色';
-
-  @override
-  String get reversePrompt_selectReplacementTargetTitle => '选择替换目标角色';
-
-  @override
-  String get reversePrompt_change => '更换';
-
-  @override
-  String get reversePrompt_start => '开始反推';
-
-  @override
-  String get reversePrompt_sentToPrompt => '已发送到提示词';
-
-  @override
-  String get reversePrompt_sendToPrompt => '发送到提示词';
-
-  @override
-  String get reversePrompt_externalTarget => '多模态 LLM 反推服务';
-
-  @override
-  String get reversePrompt_dropUnreadable => '拖入源未提供可读取的图片文件或图片链接';
-
-  @override
-  String get reversePrompt_needImageAndMethod =>
-      '请先添加图片，并至少启用 ONNX tagger 或 LLM 反推';
-
-  @override
-  String get reversePrompt_stagePreparing => '准备反推';
-
-  @override
-  String get reversePrompt_stageOnnxTagger => 'ONNX tagger 反推中';
-
-  @override
-  String get reversePrompt_stageLlmReverse => 'LLM 读图反推中';
-
-  @override
-  String get reversePrompt_stageCharacterReplace => '角色替换中';
-
-  @override
-  String get reversePrompt_needReplacementCharacter => '请先在反推角色库中选择一个有效角色';
-
-  @override
-  String get reversePrompt_needPromptForCharacterReplace => '角色替换需要先获得反推提示词';
-
-  @override
-  String get reversePrompt_noOnnxModel => '未找到 ONNX tagger 模型，请先在设置中配置模型文件夹';
-
-  @override
   String get promptAssistant_translateProcessing => '翻译中';
 
   @override
   String get promptAssistant_optimizeProcessing => '优化中';
 
   @override
-  String get promptAssistant_characterReplaceProcessing => '角色替换中';
-
-  @override
   String get promptAssistant_customProcessing => '自定义处理中';
 
   @override
   String get promptAssistant_imageInputDisabled => '当前自定义任务服务商未启用图片输入';
-
-  @override
-  String get promptAssistant_needCharacter => '请先在反推角色库中添加有效角色';
 
   @override
   String get promptAssistant_assistantSettings => '助手设置';
@@ -4993,9 +4866,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptAssistant_custom => '自定义';
-
-  @override
-  String get promptAssistant_characterReplace => '角色替换';
 
   @override
   String get promptAssistant_cancelTask => '取消任务';
@@ -5737,9 +5607,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get drop_img2img => '图生图';
 
   @override
-  String get drop_reversePrompt => '反推';
-
-  @override
   String get drop_vibeTransfer => '风格迁移';
 
   @override
@@ -5750,9 +5617,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get drop_addedToImg2Img => '已添加到图生图';
-
-  @override
-  String get drop_addedToReversePrompt => '已添加到反推';
 
   @override
   String get drop_addedToVibe => '已添加到风格迁移';
@@ -7191,18 +7055,6 @@ class AppLocalizationsZh extends AppLocalizations {
       '每次冷却在「基础间隔 ± 该百分比」内均匀随机取值，让生图节奏不那么机械。可设 0–50，0 为关闭。';
 
   @override
-  String get settings_selectLocalOnnxTaggerFolder => '选择 ONNX tagger 模型文件夹';
-
-  @override
-  String get settings_localOnnxTaggerFolderSaved => 'ONNX tagger 模型文件夹已保存';
-
-  @override
-  String get settings_localOnnxTaggerFolder => '本地 ONNX tagger 模型文件夹';
-
-  @override
-  String get settings_notConfigured => '未配置';
-
-  @override
   String get settings_confirmExternalSendTitle => '保护模式：确认外部发送';
 
   @override
@@ -8070,9 +7922,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get detail_sendToImg2Img => '发送到图生图';
-
-  @override
-  String get detail_sendToReversePrompt => '发送到反推';
 
   @override
   String get detail_loadingImage => '加载图片中...';

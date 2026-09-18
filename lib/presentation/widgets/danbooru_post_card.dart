@@ -12,7 +12,6 @@ import '../../data/models/online_gallery/danbooru_post.dart';
 import '../../core/autocomplete/tag_translation_lookup.dart';
 import '../providers/character_prompt_provider.dart';
 import '../providers/pending_prompt_provider.dart';
-import '../providers/reverse_prompt_provider.dart';
 import 'common/card_action_buttons.dart';
 
 import 'common/app_toast.dart';
@@ -713,65 +712,6 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
                                   context,
                                   context.l10n.onlineGallery_sentToTextToImage,
                                 );
-                              },
-                            ),
-                            CardActionButtonConfig(
-                              icon: Icons.manage_search_rounded,
-                              tooltip: context
-                                  .l10n
-                                  .onlineGallery_sendToReversePrompt,
-                              onPressed: () async {
-                                final imageUrl =
-                                    widget.post.sampleUrl ??
-                                    widget.post.fileUrl ??
-                                    widget.post.previewUrl;
-                                if (imageUrl.isEmpty) {
-                                  AppToast.warning(
-                                    context,
-                                    context.l10n.onlineGallery_noImageUrl,
-                                  );
-                                  return;
-                                }
-                                try {
-                                  final file = await DanbooruImageCacheManager
-                                      .instance
-                                      .getSingleFile(
-                                        imageUrl,
-                                        key: onlineGalleryImageCacheKeyForUrl(
-                                          imageUrl,
-                                        ),
-                                        headers:
-                                            onlineGalleryImageHeadersForUrl(
-                                              imageUrl,
-                                            ),
-                                      );
-                                  final bytes = await file.readAsBytes();
-                                  await ref
-                                      .read(reversePromptProvider.notifier)
-                                      .addImage(
-                                        bytes,
-                                        name: 'danbooru_${widget.post.id}',
-                                      );
-                                  if (context.mounted) {
-                                    context.go('/');
-                                    AppToast.info(
-                                      context,
-                                      context
-                                          .l10n
-                                          .onlineGallery_sentToReversePrompt,
-                                    );
-                                  }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    AppToast.error(
-                                      context,
-                                      context.l10n
-                                          .onlineGallery_reversePromptSendFailed(
-                                            '$e',
-                                          ),
-                                    );
-                                  }
-                                }
                               },
                             ),
                             CardActionButtonConfig(

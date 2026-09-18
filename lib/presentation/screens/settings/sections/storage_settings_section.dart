@@ -12,7 +12,6 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../../core/utils/vibe_library_path_helper.dart';
 import '../../../../data/repositories/gallery_folder_repository.dart';
 import '../../../../data/services/gallery/tag_index_import_service.dart';
-import '../../../../data/services/local_onnx_model_service.dart';
 import '../../../providers/image_save_settings_provider.dart';
 import '../../../providers/tag_index_import_provider.dart';
 import '../../../widgets/common/app_toast.dart';
@@ -54,54 +53,9 @@ class _StorageSettingsSectionState
     }
   }
 
-  Future<void> _selectLocalOnnxTaggerDirectory() async {
-    try {
-      final result = await FilePicker.platform.getDirectoryPath(
-        dialogTitle: context.l10n.settings_selectLocalOnnxTaggerFolder,
-      );
-      if (result == null) {
-        return;
-      }
-      final service = ref.read(localOnnxModelServiceProvider);
-      await service.setTaggerDirectory(result);
-      if (mounted) {
-        setState(() {});
-        AppToast.success(
-          context,
-          context.l10n.settings_localOnnxTaggerFolderSaved,
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        AppToast.error(
-          context,
-          '${context.l10n.settings_selectFolderFailed}: $e',
-        );
-      }
-    }
-  }
-
-  Future<void> _openLocalOnnxTaggerDirectory(String path) async {
-    if (path.isEmpty) {
-      return;
-    }
-
-    final openFolderFailed = context.l10n.settings_openFolderFailed;
-    try {
-      await launchUrl(
-        Uri.directory(path),
-        mode: LaunchMode.externalApplication,
-      );
-    } catch (e) {
-      AppLogger.e(openFolderFailed, e);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final saveSettings = ref.watch(imageSaveSettingsNotifierProvider);
-    final localOnnxService = ref.watch(localOnnxModelServiceProvider);
-    final localOnnxDirectory = localOnnxService.taggerDirectory;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -184,31 +138,6 @@ class _StorageSettingsSectionState
                 },
               ),
               const Divider(height: 24),
-              ListTile(
-                leading: const Icon(Icons.sell_outlined),
-                title: Text(context.l10n.settings_localOnnxTaggerFolder),
-                subtitle: Text(
-                  localOnnxDirectory.isEmpty
-                      ? context.l10n.settings_notConfigured
-                      : localOnnxDirectory,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (localOnnxDirectory.isNotEmpty)
-                      IconButton(
-                        icon: const Icon(Icons.folder_open, size: 20),
-                        tooltip: context.l10n.settings_openFolder,
-                        onPressed: () =>
-                            _openLocalOnnxTaggerDirectory(localOnnxDirectory),
-                      ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-                onTap: _selectLocalOnnxTaggerDirectory,
-              ),
               // Vibe库保存路径设置
               const VibeLibraryPathTile(),
               // Hive 数据存储路径设置

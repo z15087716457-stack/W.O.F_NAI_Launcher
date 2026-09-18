@@ -1098,7 +1098,6 @@
   },
   "gallery_upscale": "放大",
   "gallery_sentToImg2Img": "图片已发送到图生图",
-  "gallery_sentToReversePrompt": "图片已发送到反推模块",
   "gallery_sendFailed": "发送失败: {error}",
   "@gallery_sendFailed": {
     "placeholders": {
@@ -1138,17 +1137,8 @@
   "onlineGallery_send": "发送",
   "onlineGallery_sendToTextToImage": "发送到文生图",
   "onlineGallery_sentToTextToImage": "已发送到文生图",
-  "onlineGallery_sendToReversePrompt": "发送到反推",
-  "onlineGallery_sentToReversePrompt": "已发送到反推模块",
-  "onlineGallery_reversePromptSendFailed": "发送反推失败: {error}",
-  "@onlineGallery_reversePromptSendFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "onlineGallery_noTagInfo": "此图片没有标签信息",
   "onlineGallery_promptSentToGeneration": "提示词已发送到生成页面",
-  "onlineGallery_noImageUrl": "此图片没有可用地址",
   "onlineGallery_gifLoadFailed": "GIF加载失败",
   "onlineGallery_pinchToZoom": "双指缩放",
   "onlineGallery_metadata": "元数据",
@@ -1483,12 +1473,10 @@
   "drop_hint": "拖拽图片到这里",
   "drop_processing": "正在解析图片...",
   "drop_img2img": "图生图",
-  "drop_reversePrompt": "反推",
   "drop_vibeTransfer": "风格迁移",
   "drop_characterReference": "精准参考",
   "drop_unsupportedFormat": "不支持的文件格式",
   "drop_addedToImg2Img": "已添加到图生图",
-  "drop_addedToReversePrompt": "已添加到反推",
   "drop_addedToVibe": "已添加到风格迁移",
   "drop_addedMultipleToVibe": "已添加 {count} 个风格参考",
   "@drop_addedMultipleToVibe": {
@@ -2011,7 +1999,6 @@
       "error": {}
     }
   },
-  "localGallery_sentToReversePrompt": "图片已发送到反推模块",
   "localGallery_sendToKritaFailed": "发送到 Krita 失败: {error}",
   "@localGallery_sendToKritaFailed": {
     "placeholders": {
@@ -2019,7 +2006,6 @@
     }
   },
   "localGallery_sendToImg2Img": "发送到图生图",
-  "localGallery_sendToReversePrompt": "发送到反推",
   "localGallery_sendToStyleTransfer": "发送到风格迁移",
   "localGallery_sendToPreciseReference": "发送到精准参考",
   "localGallery_sendToKrita": "发送到 Krita",
@@ -2534,48 +2520,10 @@
   "statistics_friday": "周五",
   "statistics_saturday": "周六",
   "fixedTags_negativeTitle": "负向固定词",
-  "reversePrompt_title": "反推",
-  "reversePrompt_subtitle": "从图片提取标签或提示词",
-  "reversePrompt_pending": "待添加",
-  "reversePrompt_imageCount": "{count} 张",
-  "@reversePrompt_imageCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "reversePrompt_llmReverse": "LLM 反推",
-  "reversePrompt_characterReplace": "角色替换",
-  "reversePrompt_finalResult": "最终结果",
-  "reversePrompt_dropToAdd": "松开后添加到反推",
-  "reversePrompt_addOrDropImages": "增加图片 / 拖入图片",
-  "reversePrompt_localTaggerModel": "本地 tagger 模型",
-  "reversePrompt_localTaggerModelHint": "请在设置中配置模型文件夹",
-  "reversePrompt_generalThreshold": "通用标签阈值",
-  "reversePrompt_characterThreshold": "角色标签阈值",
-  "reversePrompt_taggerFilterHint": "只输出 General / Character 分类标签；Rating、Artist、Copyright、Meta 等分类会被过滤。",
-  "reversePrompt_replacementEmptyHint": "替换目标角色为空。这里从词库选择一个角色作为替换目标，不会注入到正向提示词。",
-  "reversePrompt_selectReplacementCharacter": "从词库选择替换目标角色",
-  "reversePrompt_selectReplacementTargetTitle": "选择替换目标角色",
-  "reversePrompt_change": "更换",
-  "reversePrompt_start": "开始反推",
-  "reversePrompt_sentToPrompt": "已发送到提示词",
-  "reversePrompt_sendToPrompt": "发送到提示词",
-  "reversePrompt_externalTarget": "多模态 LLM 反推服务",
-  "reversePrompt_dropUnreadable": "拖入源未提供可读取的图片文件或图片链接",
-  "reversePrompt_needImageAndMethod": "请先添加图片，并至少启用 ONNX tagger 或 LLM 反推",
-  "reversePrompt_stagePreparing": "准备反推",
-  "reversePrompt_stageOnnxTagger": "ONNX tagger 反推中",
-  "reversePrompt_stageLlmReverse": "LLM 读图反推中",
-  "reversePrompt_stageCharacterReplace": "角色替换中",
-  "reversePrompt_needReplacementCharacter": "请先在反推角色库中选择一个有效角色",
-  "reversePrompt_needPromptForCharacterReplace": "角色替换需要先获得反推提示词",
-  "reversePrompt_noOnnxModel": "未找到 ONNX tagger 模型，请先在设置中配置模型文件夹",
   "promptAssistant_translateProcessing": "翻译中",
   "promptAssistant_optimizeProcessing": "优化中",
-  "promptAssistant_characterReplaceProcessing": "角色替换中",
   "promptAssistant_customProcessing": "自定义处理中",
   "promptAssistant_imageInputDisabled": "当前自定义任务服务商未启用图片输入",
-  "promptAssistant_needCharacter": "请先在反推角色库中添加有效角色",
   "promptAssistant_assistantSettings": "助手设置",
   "promptAssistant_serviceSettings": "服务设置",
   "promptAssistant_ruleSettings": "规则设置",
@@ -2588,7 +2536,6 @@
   "promptAssistant_translate": "翻译",
   "promptAssistant_optimize": "优化",
   "promptAssistant_custom": "自定义",
-  "promptAssistant_characterReplace": "角色替换",
   "promptAssistant_cancelTask": "取消任务",
   "promptAssistant_menu": "菜单",
   "promptAssistant_customDialogTitle": "自定义提示词助手",
@@ -3754,10 +3701,6 @@
   },
   "settings_setGenerationIntervalJitterTitle": "设置间隔随机抖动",
   "settings_generationIntervalJitterHelper": "每次冷却在「基础间隔 ± 该百分比」内均匀随机取值，让生图节奏不那么机械。可设 0–50，0 为关闭。",
-  "settings_selectLocalOnnxTaggerFolder": "选择 ONNX tagger 模型文件夹",
-  "settings_localOnnxTaggerFolderSaved": "ONNX tagger 模型文件夹已保存",
-  "settings_localOnnxTaggerFolder": "本地 ONNX tagger 模型文件夹",
-  "settings_notConfigured": "未配置",
   "settings_confirmExternalSendTitle": "保护模式：确认外部发送",
   "settings_confirmExternalSendContent": "即将把 {count} 张本地图片发送到 {target}。图片会离开本地应用边界，请确认这符合你的预期。",
   "@settings_confirmExternalSendContent": {
@@ -4264,7 +4207,6 @@
   },
   "vibe_encodeSkipImage": "跳过此图",
   "detail_sendToImg2Img": "发送到图生图",
-  "detail_sendToReversePrompt": "发送到反推",
   "detail_loadingImage": "加载图片中...",
   "detail_imageLoadFailed": "无法加载图片",
   "detail_noImage": "无图片",

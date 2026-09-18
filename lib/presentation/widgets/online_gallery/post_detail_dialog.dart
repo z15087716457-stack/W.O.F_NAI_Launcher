@@ -14,7 +14,6 @@ import '../../../core/autocomplete/tag_translation_lookup.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/online_gallery_provider.dart';
 import '../../providers/pending_prompt_provider.dart';
-import '../../providers/reverse_prompt_provider.dart';
 import '../tag_chip.dart';
 import '../../widgets/common/themed_divider.dart';
 import '../../widgets/common/app_toast.dart';
@@ -574,17 +573,6 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _sendToReversePrompt,
-                  icon: const Icon(Icons.manage_search_rounded, size: 16),
-                  label: Text(context.l10n.reversePrompt_title),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
                 child: FilledButton.icon(
                   onPressed: _sendToGenerate,
                   icon: const Icon(Icons.send, size: 16),
@@ -647,37 +635,6 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
       context,
       context.l10n.onlineGallery_promptSentToGeneration,
     );
-  }
-
-  Future<void> _sendToReversePrompt() async {
-    final imageUrl =
-        widget.post.sampleUrl ?? widget.post.fileUrl ?? widget.post.previewUrl;
-    if (imageUrl.isEmpty) {
-      AppToast.info(context, context.l10n.onlineGallery_noImageUrl);
-      return;
-    }
-    try {
-      final file = await DanbooruImageCacheManager.instance.getSingleFile(
-        imageUrl,
-        key: onlineGalleryImageCacheKeyForUrl(imageUrl),
-        headers: onlineGalleryImageHeadersForUrl(imageUrl),
-      );
-      final bytes = await file.readAsBytes();
-      await ref
-          .read(reversePromptProvider.notifier)
-          .addImage(bytes, name: 'danbooru_${widget.post.id}');
-      if (!mounted) return;
-      Navigator.pop(context);
-      context.go(AppRoutes.generation);
-      AppToast.success(context, context.l10n.onlineGallery_sentToReversePrompt);
-    } catch (e) {
-      if (mounted) {
-        AppToast.error(
-          context,
-          context.l10n.onlineGallery_reversePromptSendFailed('$e'),
-        );
-      }
-    }
   }
 
   /// 在浏览器中打开

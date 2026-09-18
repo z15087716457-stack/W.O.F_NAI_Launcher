@@ -7,7 +7,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nai_launcher/core/cache/gallery_cache_manager.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
-import 'package:nai_launcher/data/services/local_onnx_model_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/data_source_cache_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/storage_settings_section.dart';
@@ -42,9 +41,7 @@ void main() {
 
   setUp(() async {
     await Hive.box(StorageKeys.settingsBox).clear();
-    storage = _MemoryLocalStorageService({
-      StorageKeys.onnxTaggerModelDirectory: r'C:\models\onnx_tagger',
-    });
+    storage = _MemoryLocalStorageService({});
   });
 
   tearDownAll(() async {
@@ -52,24 +49,6 @@ void main() {
     if (await tempDir.exists()) {
       await tempDir.delete(recursive: true);
     }
-  });
-
-  testWidgets('local ONNX tagger path tile exposes an open-folder button', (
-    tester,
-  ) async {
-    await tester.pumpWidget(_buildSubject(storage));
-    await tester.pump();
-
-    final onnxTile = find.ancestor(
-      of: find.text('本地 ONNX tagger 模型文件夹'),
-      matching: find.byType(ListTile),
-    );
-
-    expect(onnxTile, findsOneWidget);
-    expect(
-      find.descendant(of: onnxTile, matching: find.byTooltip('打开文件夹')),
-      findsOneWidget,
-    );
   });
 
   testWidgets('聚焦数据与存储：保护模式移出，数据源缓存迁入', (tester) async {
@@ -126,9 +105,6 @@ Widget _buildSubject(_MemoryLocalStorageService storage) {
   return ProviderScope(
     overrides: [
       localStorageServiceProvider.overrideWith((ref) => storage),
-      localOnnxModelServiceProvider.overrideWith(
-        (ref) => LocalOnnxModelService(storage),
-      ),
       cacheStatisticsProvider.overrideWith(
         (ref) async => CacheStatistics(
           l1MemorySize: 0,

@@ -4525,12 +4525,6 @@ abstract class AppLocalizations {
   /// **'Image sent to Image2Image'**
   String get gallery_sentToImg2Img;
 
-  /// No description provided for @gallery_sentToReversePrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Image sent to reverse-prompt module'**
-  String get gallery_sentToReversePrompt;
-
   /// No description provided for @gallery_sendFailed.
   ///
   /// In en, this message translates to:
@@ -4735,24 +4729,6 @@ abstract class AppLocalizations {
   /// **'Sent to text-to-image'**
   String get onlineGallery_sentToTextToImage;
 
-  /// No description provided for @onlineGallery_sendToReversePrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Send to Reverse Prompt'**
-  String get onlineGallery_sendToReversePrompt;
-
-  /// No description provided for @onlineGallery_sentToReversePrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Sent to reverse-prompt module'**
-  String get onlineGallery_sentToReversePrompt;
-
-  /// No description provided for @onlineGallery_reversePromptSendFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to send to reverse prompt: {error}'**
-  String onlineGallery_reversePromptSendFailed(Object error);
-
   /// No description provided for @onlineGallery_noTagInfo.
   ///
   /// In en, this message translates to:
@@ -4764,12 +4740,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Prompt sent to generation page'**
   String get onlineGallery_promptSentToGeneration;
-
-  /// No description provided for @onlineGallery_noImageUrl.
-  ///
-  /// In en, this message translates to:
-  /// **'This image has no available URL'**
-  String get onlineGallery_noImageUrl;
 
   /// No description provided for @onlineGallery_gifLoadFailed.
   ///
@@ -7615,12 +7585,6 @@ abstract class AppLocalizations {
   /// **'Send failed: {error}'**
   String localGallery_sendFailed(Object error);
 
-  /// No description provided for @localGallery_sentToReversePrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Image sent to reverse prompt'**
-  String get localGallery_sentToReversePrompt;
-
   /// No description provided for @localGallery_sendToKritaFailed.
   ///
   /// In en, this message translates to:
@@ -7632,12 +7596,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send to Image2Image'**
   String get localGallery_sendToImg2Img;
-
-  /// No description provided for @localGallery_sendToReversePrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Send to Reverse Prompt'**
-  String get localGallery_sendToReversePrompt;
 
   /// No description provided for @localGallery_sendToStyleTransfer.
   ///
@@ -8977,192 +8935,6 @@ abstract class AppLocalizations {
   /// **'Undesired Content Fixed Tags'**
   String get fixedTags_negativeTitle;
 
-  /// No description provided for @reversePrompt_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Reverse Prompt'**
-  String get reversePrompt_title;
-
-  /// No description provided for @reversePrompt_subtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Extract tags or prompts from an image'**
-  String get reversePrompt_subtitle;
-
-  /// No description provided for @reversePrompt_pending.
-  ///
-  /// In en, this message translates to:
-  /// **'Pending'**
-  String get reversePrompt_pending;
-
-  /// No description provided for @reversePrompt_imageCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} image(s)'**
-  String reversePrompt_imageCount(Object count);
-
-  /// No description provided for @reversePrompt_llmReverse.
-  ///
-  /// In en, this message translates to:
-  /// **'LLM Reverse'**
-  String get reversePrompt_llmReverse;
-
-  /// No description provided for @reversePrompt_characterReplace.
-  ///
-  /// In en, this message translates to:
-  /// **'Character Replace'**
-  String get reversePrompt_characterReplace;
-
-  /// No description provided for @reversePrompt_finalResult.
-  ///
-  /// In en, this message translates to:
-  /// **'Final Result'**
-  String get reversePrompt_finalResult;
-
-  /// No description provided for @reversePrompt_dropToAdd.
-  ///
-  /// In en, this message translates to:
-  /// **'Release to add to reverse prompt'**
-  String get reversePrompt_dropToAdd;
-
-  /// No description provided for @reversePrompt_addOrDropImages.
-  ///
-  /// In en, this message translates to:
-  /// **'Add images / drop images'**
-  String get reversePrompt_addOrDropImages;
-
-  /// No description provided for @reversePrompt_localTaggerModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Local tagger model'**
-  String get reversePrompt_localTaggerModel;
-
-  /// No description provided for @reversePrompt_localTaggerModelHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Configure model folder in Settings'**
-  String get reversePrompt_localTaggerModelHint;
-
-  /// No description provided for @reversePrompt_generalThreshold.
-  ///
-  /// In en, this message translates to:
-  /// **'General tag threshold'**
-  String get reversePrompt_generalThreshold;
-
-  /// No description provided for @reversePrompt_characterThreshold.
-  ///
-  /// In en, this message translates to:
-  /// **'Character tag threshold'**
-  String get reversePrompt_characterThreshold;
-
-  /// No description provided for @reversePrompt_taggerFilterHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Only General / Character tags are output. Rating, Artist, Copyright, Meta, and other categories are filtered.'**
-  String get reversePrompt_taggerFilterHint;
-
-  /// No description provided for @reversePrompt_replacementEmptyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'No replacement target character selected. Choose a character from the tag library here; it will not be injected into the prompt.'**
-  String get reversePrompt_replacementEmptyHint;
-
-  /// No description provided for @reversePrompt_selectReplacementCharacter.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose replacement target character from library'**
-  String get reversePrompt_selectReplacementCharacter;
-
-  /// No description provided for @reversePrompt_selectReplacementTargetTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose Replacement Target Character'**
-  String get reversePrompt_selectReplacementTargetTitle;
-
-  /// No description provided for @reversePrompt_change.
-  ///
-  /// In en, this message translates to:
-  /// **'Change'**
-  String get reversePrompt_change;
-
-  /// No description provided for @reversePrompt_start.
-  ///
-  /// In en, this message translates to:
-  /// **'Start Reverse Prompt'**
-  String get reversePrompt_start;
-
-  /// No description provided for @reversePrompt_sentToPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Sent to prompt'**
-  String get reversePrompt_sentToPrompt;
-
-  /// No description provided for @reversePrompt_sendToPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Send to Prompt'**
-  String get reversePrompt_sendToPrompt;
-
-  /// No description provided for @reversePrompt_externalTarget.
-  ///
-  /// In en, this message translates to:
-  /// **'multimodal LLM reverse prompt service'**
-  String get reversePrompt_externalTarget;
-
-  /// No description provided for @reversePrompt_dropUnreadable.
-  ///
-  /// In en, this message translates to:
-  /// **'The dropped source did not provide a readable image file or image URL'**
-  String get reversePrompt_dropUnreadable;
-
-  /// No description provided for @reversePrompt_needImageAndMethod.
-  ///
-  /// In en, this message translates to:
-  /// **'Add an image and enable at least ONNX tagger or LLM reverse prompt'**
-  String get reversePrompt_needImageAndMethod;
-
-  /// No description provided for @reversePrompt_stagePreparing.
-  ///
-  /// In en, this message translates to:
-  /// **'Preparing reverse prompt'**
-  String get reversePrompt_stagePreparing;
-
-  /// No description provided for @reversePrompt_stageOnnxTagger.
-  ///
-  /// In en, this message translates to:
-  /// **'ONNX tagger reverse prompting'**
-  String get reversePrompt_stageOnnxTagger;
-
-  /// No description provided for @reversePrompt_stageLlmReverse.
-  ///
-  /// In en, this message translates to:
-  /// **'LLM image reverse prompting'**
-  String get reversePrompt_stageLlmReverse;
-
-  /// No description provided for @reversePrompt_stageCharacterReplace.
-  ///
-  /// In en, this message translates to:
-  /// **'Replacing character'**
-  String get reversePrompt_stageCharacterReplace;
-
-  /// No description provided for @reversePrompt_needReplacementCharacter.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a valid character from the reverse-prompt character library first'**
-  String get reversePrompt_needReplacementCharacter;
-
-  /// No description provided for @reversePrompt_needPromptForCharacterReplace.
-  ///
-  /// In en, this message translates to:
-  /// **'Character replacement requires a reverse-prompt result first'**
-  String get reversePrompt_needPromptForCharacterReplace;
-
-  /// No description provided for @reversePrompt_noOnnxModel.
-  ///
-  /// In en, this message translates to:
-  /// **'No ONNX tagger model found. Configure the model folder in Settings first'**
-  String get reversePrompt_noOnnxModel;
-
   /// No description provided for @promptAssistant_translateProcessing.
   ///
   /// In en, this message translates to:
@@ -9175,12 +8947,6 @@ abstract class AppLocalizations {
   /// **'Optimizing'**
   String get promptAssistant_optimizeProcessing;
 
-  /// No description provided for @promptAssistant_characterReplaceProcessing.
-  ///
-  /// In en, this message translates to:
-  /// **'Replacing character'**
-  String get promptAssistant_characterReplaceProcessing;
-
   /// No description provided for @promptAssistant_customProcessing.
   ///
   /// In en, this message translates to:
@@ -9192,12 +8958,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The current custom-task provider does not have image input enabled'**
   String get promptAssistant_imageInputDisabled;
-
-  /// No description provided for @promptAssistant_needCharacter.
-  ///
-  /// In en, this message translates to:
-  /// **'Add a valid character in the reverse-prompt character library first'**
-  String get promptAssistant_needCharacter;
 
   /// No description provided for @promptAssistant_assistantSettings.
   ///
@@ -9270,12 +9030,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Custom'**
   String get promptAssistant_custom;
-
-  /// No description provided for @promptAssistant_characterReplace.
-  ///
-  /// In en, this message translates to:
-  /// **'Character Replace'**
-  String get promptAssistant_characterReplace;
 
   /// No description provided for @promptAssistant_cancelTask.
   ///
@@ -10656,12 +10410,6 @@ abstract class AppLocalizations {
   /// **'Image2Image'**
   String get drop_img2img;
 
-  /// No description provided for @drop_reversePrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Reverse Prompt'**
-  String get drop_reversePrompt;
-
   /// No description provided for @drop_vibeTransfer.
   ///
   /// In en, this message translates to:
@@ -10685,12 +10433,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Added to Image2Image'**
   String get drop_addedToImg2Img;
-
-  /// No description provided for @drop_addedToReversePrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to Reverse Prompt'**
-  String get drop_addedToReversePrompt;
 
   /// No description provided for @drop_addedToVibe.
   ///
@@ -13158,30 +12900,6 @@ abstract class AppLocalizations {
   /// **'Each cooldown is drawn at random from base interval ± this percentage, so the pacing is less mechanical. Enter 0–50; 0 disables jitter.'**
   String get settings_generationIntervalJitterHelper;
 
-  /// No description provided for @settings_selectLocalOnnxTaggerFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'Select ONNX tagger model folder'**
-  String get settings_selectLocalOnnxTaggerFolder;
-
-  /// No description provided for @settings_localOnnxTaggerFolderSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'ONNX tagger model folder saved'**
-  String get settings_localOnnxTaggerFolderSaved;
-
-  /// No description provided for @settings_localOnnxTaggerFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'Local ONNX tagger model folder'**
-  String get settings_localOnnxTaggerFolder;
-
-  /// No description provided for @settings_notConfigured.
-  ///
-  /// In en, this message translates to:
-  /// **'Not configured'**
-  String get settings_notConfigured;
-
   /// No description provided for @settings_confirmExternalSendTitle.
   ///
   /// In en, this message translates to:
@@ -14693,12 +14411,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send to Image2Image'**
   String get detail_sendToImg2Img;
-
-  /// No description provided for @detail_sendToReversePrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Send to Reverse Prompt'**
-  String get detail_sendToReversePrompt;
 
   /// No description provided for @detail_loadingImage.
   ///

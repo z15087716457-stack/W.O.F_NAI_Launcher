@@ -123,7 +123,6 @@ void main() {
     (tester) async {
       await tester.pumpWidget(
         _buildCardApp(
-          onReversePrompt: _noop,
           onImageToImage: _noop,
           onVibeTransfer: _noop,
           onPreciseReference: _noop,
@@ -136,7 +135,6 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.byType(SelectableImageCard)));
       await tester.pumpAndSettle();
 
-      expect(find.byTooltip('反推'), findsOneWidget);
       expect(find.byTooltip('图生图'), findsOneWidget);
       expect(find.byTooltip('风格迁移'), findsOneWidget);
       expect(find.byTooltip('精准参考'), findsOneWidget);
@@ -149,7 +147,6 @@ void main() {
   ) async {
     await tester.pumpWidget(
       _buildCardApp(
-        onReversePrompt: _noop,
         onImageToImage: _noop,
         onVibeTransfer: _noop,
         onPreciseReference: _noop,
@@ -167,7 +164,6 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(find.text('反推'), findsOneWidget);
     expect(find.text('图生图'), findsOneWidget);
     expect(find.text('风格迁移'), findsOneWidget);
     expect(find.text('精准参考'), findsOneWidget);
@@ -188,7 +184,6 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.byType(SelectableImageCard)));
       await tester.pumpAndSettle();
 
-      expect(find.byTooltip('反推'), findsOneWidget);
       expect(find.byTooltip('图生图'), findsOneWidget);
       expect(find.byTooltip('风格迁移'), findsOneWidget);
       expect(find.byTooltip('精准参考'), findsOneWidget);
@@ -216,7 +211,6 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
 
-      expect(find.text('反推'), findsOneWidget);
       expect(find.text('图生图'), findsOneWidget);
       expect(find.text('风格迁移'), findsOneWidget);
       expect(find.text('精准参考'), findsOneWidget);
@@ -602,7 +596,6 @@ Widget _buildCardApp({
   VoidCallback? onFavoriteToggle,
   VoidCallback? onInpaint = _noop,
   VoidCallback? onUpscale = _noop,
-  VoidCallback? onReversePrompt,
   VoidCallback? onImageToImage,
   VoidCallback? onVibeTransfer,
   VoidCallback? onPreciseReference,
@@ -634,7 +627,6 @@ Widget _buildCardApp({
               onFavoriteToggle: onFavoriteToggle,
               onInpaint: onInpaint,
               onUpscale: onUpscale,
-              onReversePrompt: onReversePrompt,
               onImageToImage: onImageToImage,
               onVibeTransfer: onVibeTransfer,
               onPreciseReference: onPreciseReference,

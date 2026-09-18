@@ -30,7 +30,6 @@ import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/models/tag/local_tag.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_library_entry.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
-import 'package:nai_launcher/data/services/local_onnx_tagger_service.dart';
 import 'package:nai_launcher/data/services/statistics_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
@@ -2307,41 +2306,6 @@ void main() {
                 isNot(contains('secret')),
               ),
         ),
-      );
-    });
-  });
-
-  group('ONNX tagger categories', () {
-    test('keeps only general and character label categories by default', () {
-      expect(
-        const OnnxTaggerLabel(name: '1girl', category: 'General').isGeneral,
-        isTrue,
-      );
-      expect(
-        const OnnxTaggerLabel(
-          name: 'hakurei_reimu',
-          category: 'Character',
-        ).isCharacter,
-        isTrue,
-      );
-      expect(
-        const OnnxTaggerLabel(name: '1girl', category: '0').isGeneral,
-        isTrue,
-      );
-      expect(
-        const OnnxTaggerLabel(name: 'hakurei_reimu', category: '4').isCharacter,
-        isTrue,
-      );
-      expect(
-        const OnnxTaggerLabel(name: 'general', category: 'Rating').isRating,
-        isTrue,
-      );
-      expect(
-        const OnnxTaggerLabel(
-          name: 'artist_name',
-          category: 'Artist',
-        ).labelCategory,
-        OnnxTaggerLabelCategory.other,
       );
     });
   });

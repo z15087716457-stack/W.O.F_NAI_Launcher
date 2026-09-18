@@ -37,9 +37,6 @@ class ImageDetailCallbacks {
   /// 发送到图生图回调
   final Future<void> Function(ImageDetailData image)? onSendToImg2Img;
 
-  /// 发送到反推模块回调
-  final Future<void> Function(ImageDetailData image)? onSendToReversePrompt;
-
   /// 删除当前图片回调（返回是否删除成功；查看器据此从列表移除并翻页）
   final Future<bool> Function(ImageDetailData image)? onDelete;
 
@@ -49,7 +46,6 @@ class ImageDetailCallbacks {
     this.onSave,
     this.onCopyImage,
     this.onSendToImg2Img,
-    this.onSendToReversePrompt,
     this.onDelete,
   });
 }
@@ -577,10 +573,6 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
                 : null,
             onSendToImg2Img: widget.callbacks?.onSendToImg2Img != null
                 ? () => widget.callbacks!.onSendToImg2Img!(_currentImage)
-                : null,
-            onSendToReversePrompt:
-                widget.callbacks?.onSendToReversePrompt != null
-                ? () => widget.callbacks!.onSendToReversePrompt!(_currentImage)
                 : null,
             onDelete: widget.callbacks?.onDelete != null
                 ? () => _deleteImage()

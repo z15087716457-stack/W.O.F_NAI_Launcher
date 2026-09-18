@@ -6,7 +6,6 @@ import '../../../providers/image_generation_provider.dart';
 import 'generation_param_sections.dart';
 import 'img2img_panel.dart';
 import 'precise_reference_panel.dart';
-import 'reverse_prompt_panel.dart';
 import 'unified_reference_panel.dart';
 
 /// 参数面板组件（经典布局与移动端使用）
@@ -62,11 +61,6 @@ class ParameterPanel extends ConsumerWidget {
         const SizedBox(height: 16),
 
         // ==================== 新功能面板 ====================
-
-        // 反推面板
-        const ReversePromptPanel(),
-
-        const SizedBox(height: 8),
 
         // 图生图面板
         const Img2ImgPanel(),

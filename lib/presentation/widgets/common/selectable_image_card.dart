@@ -101,9 +101,6 @@ class SelectableImageCard extends ConsumerStatefulWidget {
   /// 放大回调（用于单图显示放大按钮）
   final VoidCallback? onUpscale;
 
-  /// 发送到反推回调
-  final VoidCallback? onReversePrompt;
-
   /// 发送到图生图回调
   final VoidCallback? onImageToImage;
 
@@ -203,7 +200,6 @@ class SelectableImageCard extends ConsumerStatefulWidget {
     this.onCompletionPlaceholderSettled,
     this.enableSelection = true,
     this.onUpscale,
-    this.onReversePrompt,
     this.onImageToImage,
     this.onVibeTransfer,
     this.onPreciseReference,
@@ -1316,12 +1312,6 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                 tooltip: context.l10n.image_copy,
                 onTap: () => _copyImage(context),
               ),
-            if (widget.onReversePrompt != null)
-              _HoverActionButton(
-                icon: Icons.manage_search_rounded,
-                tooltip: context.l10n.drop_reversePrompt,
-                onTap: widget.onReversePrompt,
-              ),
             if (widget.onImageToImage != null)
               _HoverActionButton(
                 icon: Icons.image_outlined,
@@ -1403,7 +1393,6 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
   bool get _hasHoverActions =>
       widget.enableSaveAction ||
       widget.enableCopyAction ||
-      widget.onReversePrompt != null ||
       widget.onImageToImage != null ||
       widget.onVibeTransfer != null ||
       widget.onPreciseReference != null ||
@@ -1661,22 +1650,11 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
       );
     }
 
-    if (widget.onReversePrompt != null ||
-        widget.onImageToImage != null ||
+    if (widget.onImageToImage != null ||
         widget.onVibeTransfer != null ||
         widget.onPreciseReference != null ||
         widget.onSaveToPreciseRefLibrary != null) {
       addDividerIfNeeded();
-      if (widget.onReversePrompt != null) {
-        items.add(
-          ProMenuItem(
-            id: 'reverse_prompt',
-            label: context.l10n.drop_reversePrompt,
-            icon: Icons.manage_search_rounded,
-            onTap: widget.onReversePrompt!,
-          ),
-        );
-      }
       if (widget.onImageToImage != null) {
         items.add(
           ProMenuItem(

@@ -25,7 +25,6 @@ import '../../../providers/generation/preview_selection_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/local_gallery_provider.dart';
-import '../../../providers/reverse_prompt_provider.dart';
 import '../../../providers/share_image_settings_provider.dart';
 import '../../../services/image_workflow_launcher.dart';
 import '../../../widgets/common/app_toast.dart';
@@ -716,15 +715,6 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                             enableHoverScale: true,
                             hoverEffectsEnabled: !_isHistoryScrolling,
                             shareWarmupEnabled: false,
-                            onReversePrompt:
-                                historyImage.canUseAsGenerationInput
-                                ? () => unawaited(
-                                    _sendHistoryImageToReversePrompt(
-                                      context,
-                                      historyImage,
-                                    ),
-                                  )
-                                : null,
                             onImageToImage: historyImage.canUseAsGenerationInput
                                 ? () => _sendHistoryImageToImageToImage(
                                     context,
@@ -947,10 +937,6 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           enableHoverScale: true,
           hoverEffectsEnabled: !_isHistoryScrolling,
           shareWarmupEnabled: false,
-          onReversePrompt: image.canUseAsGenerationInput
-              ? () =>
-                    unawaited(_sendHistoryImageToReversePrompt(context, image))
-              : null,
           onImageToImage: image.canUseAsGenerationInput
               ? () => _sendHistoryImageToImageToImage(context, image)
               : null,
@@ -1287,26 +1273,6 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
       return p.basename(filePath);
     }
     return 'history_${image.id}.png';
-  }
-
-  Future<void> _sendHistoryImageToReversePrompt(
-    BuildContext context,
-    GeneratedImage image,
-  ) async {
-    final l10n = context.l10n;
-
-    try {
-      await ref
-          .read(reversePromptProvider.notifier)
-          .addImage(image.bytes, name: _historyImageFileName(image));
-
-      if (!context.mounted) return;
-      AppToast.success(context, l10n.drop_addedToReversePrompt);
-    } catch (e) {
-      if (context.mounted) {
-        AppToast.error(context, l10n.gallery_sendFailed(e.toString()));
-      }
-    }
   }
 
   void _sendHistoryImageToImageToImage(

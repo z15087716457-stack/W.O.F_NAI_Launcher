@@ -1173,7 +1173,6 @@
   },
   "gallery_upscale": "Upscale",
   "gallery_sentToImg2Img": "Image sent to Image2Image",
-  "gallery_sentToReversePrompt": "Image sent to reverse-prompt module",
   "gallery_sendFailed": "Send failed: {error}",
   "@gallery_sendFailed": {
     "placeholders": {
@@ -1218,17 +1217,8 @@
   "onlineGallery_send": "Send",
   "onlineGallery_sendToTextToImage": "Send to Text to Image",
   "onlineGallery_sentToTextToImage": "Sent to text-to-image",
-  "onlineGallery_sendToReversePrompt": "Send to Reverse Prompt",
-  "onlineGallery_sentToReversePrompt": "Sent to reverse-prompt module",
-  "onlineGallery_reversePromptSendFailed": "Failed to send to reverse prompt: {error}",
-  "@onlineGallery_reversePromptSendFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "onlineGallery_noTagInfo": "This image has no tag information",
   "onlineGallery_promptSentToGeneration": "Prompt sent to generation page",
-  "onlineGallery_noImageUrl": "This image has no available URL",
   "onlineGallery_gifLoadFailed": "Failed to load GIF",
   "onlineGallery_pinchToZoom": "Pinch to zoom",
   "onlineGallery_metadata": "Metadata",
@@ -2099,7 +2089,6 @@
       "error": {}
     }
   },
-  "localGallery_sentToReversePrompt": "Image sent to reverse prompt",
   "localGallery_sendToKritaFailed": "Failed to send to Krita: {error}",
   "@localGallery_sendToKritaFailed": {
     "placeholders": {
@@ -2107,7 +2096,6 @@
     }
   },
   "localGallery_sendToImg2Img": "Send to Image2Image",
-  "localGallery_sendToReversePrompt": "Send to Reverse Prompt",
   "localGallery_sendToStyleTransfer": "Send to Vibe Transfer",
   "localGallery_sendToPreciseReference": "Send to Precise Reference",
   "localGallery_sendToKrita": "Send to Krita",
@@ -2539,48 +2527,10 @@
   "statistics_friday": "Fri",
   "statistics_saturday": "Sat",
   "fixedTags_negativeTitle": "Undesired Content Fixed Tags",
-  "reversePrompt_title": "Reverse Prompt",
-  "reversePrompt_subtitle": "Extract tags or prompts from an image",
-  "reversePrompt_pending": "Pending",
-  "reversePrompt_imageCount": "{count} image(s)",
-  "@reversePrompt_imageCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "reversePrompt_llmReverse": "LLM Reverse",
-  "reversePrompt_characterReplace": "Character Replace",
-  "reversePrompt_finalResult": "Final Result",
-  "reversePrompt_dropToAdd": "Release to add to reverse prompt",
-  "reversePrompt_addOrDropImages": "Add images / drop images",
-  "reversePrompt_localTaggerModel": "Local tagger model",
-  "reversePrompt_localTaggerModelHint": "Configure model folder in Settings",
-  "reversePrompt_generalThreshold": "General tag threshold",
-  "reversePrompt_characterThreshold": "Character tag threshold",
-  "reversePrompt_taggerFilterHint": "Only General / Character tags are output. Rating, Artist, Copyright, Meta, and other categories are filtered.",
-  "reversePrompt_replacementEmptyHint": "No replacement target character selected. Choose a character from the tag library here; it will not be injected into the prompt.",
-  "reversePrompt_selectReplacementCharacter": "Choose replacement target character from library",
-  "reversePrompt_selectReplacementTargetTitle": "Choose Replacement Target Character",
-  "reversePrompt_change": "Change",
-  "reversePrompt_start": "Start Reverse Prompt",
-  "reversePrompt_sentToPrompt": "Sent to prompt",
-  "reversePrompt_sendToPrompt": "Send to Prompt",
-  "reversePrompt_externalTarget": "multimodal LLM reverse prompt service",
-  "reversePrompt_dropUnreadable": "The dropped source did not provide a readable image file or image URL",
-  "reversePrompt_needImageAndMethod": "Add an image and enable at least ONNX tagger or LLM reverse prompt",
-  "reversePrompt_stagePreparing": "Preparing reverse prompt",
-  "reversePrompt_stageOnnxTagger": "ONNX tagger reverse prompting",
-  "reversePrompt_stageLlmReverse": "LLM image reverse prompting",
-  "reversePrompt_stageCharacterReplace": "Replacing character",
-  "reversePrompt_needReplacementCharacter": "Choose a valid character from the reverse-prompt character library first",
-  "reversePrompt_needPromptForCharacterReplace": "Character replacement requires a reverse-prompt result first",
-  "reversePrompt_noOnnxModel": "No ONNX tagger model found. Configure the model folder in Settings first",
   "promptAssistant_translateProcessing": "Translating",
   "promptAssistant_optimizeProcessing": "Optimizing",
-  "promptAssistant_characterReplaceProcessing": "Replacing character",
   "promptAssistant_customProcessing": "Processing custom request",
   "promptAssistant_imageInputDisabled": "The current custom-task provider does not have image input enabled",
-  "promptAssistant_needCharacter": "Add a valid character in the reverse-prompt character library first",
   "promptAssistant_assistantSettings": "Assistant Settings",
   "promptAssistant_serviceSettings": "Service Settings",
   "promptAssistant_ruleSettings": "Rule Settings",
@@ -2593,7 +2543,6 @@
   "promptAssistant_translate": "Translate",
   "promptAssistant_optimize": "Optimize",
   "promptAssistant_custom": "Custom",
-  "promptAssistant_characterReplace": "Character Replace",
   "promptAssistant_cancelTask": "Cancel Task",
   "promptAssistant_menu": "Menu",
   "promptAssistant_customDialogTitle": "Custom Prompt Assistant",
@@ -2945,12 +2894,10 @@
   "drop_dialogTitle": "How to use this image?",
   "drop_hint": "Drop image here",
   "drop_img2img": "Image2Image",
-  "drop_reversePrompt": "Reverse Prompt",
   "drop_vibeTransfer": "Vibe Transfer",
   "drop_characterReference": "Precise Reference",
   "drop_unsupportedFormat": "Unsupported file format",
   "drop_addedToImg2Img": "Added to Image2Image",
-  "drop_addedToReversePrompt": "Added to Reverse Prompt",
   "drop_addedToVibe": "Added to Vibe Transfer",
   "drop_addedMultipleToVibe": "Added {count} vibe references",
   "@drop_addedMultipleToVibe": {
@@ -4005,10 +3952,6 @@
   },
   "settings_setGenerationIntervalJitterTitle": "Set Interval Jitter",
   "settings_generationIntervalJitterHelper": "Each cooldown is drawn at random from base interval ± this percentage, so the pacing is less mechanical. Enter 0–50; 0 disables jitter.",
-  "settings_selectLocalOnnxTaggerFolder": "Select ONNX tagger model folder",
-  "settings_localOnnxTaggerFolderSaved": "ONNX tagger model folder saved",
-  "settings_localOnnxTaggerFolder": "Local ONNX tagger model folder",
-  "settings_notConfigured": "Not configured",
   "settings_confirmExternalSendTitle": "Protection Mode: Confirm External Send",
   "settings_confirmExternalSendContent": "About to send {count} local image(s) to {target}. The image data will leave the local app boundary. Confirm this is expected.",
   "@settings_confirmExternalSendContent": {
@@ -4515,7 +4458,6 @@
   },
   "vibe_encodeSkipImage": "Skip this image",
   "detail_sendToImg2Img": "Send to Image2Image",
-  "detail_sendToReversePrompt": "Send to Reverse Prompt",
   "detail_loadingImage": "Loading image...",
   "detail_imageLoadFailed": "Failed to load image",
   "detail_noImage": "No image",

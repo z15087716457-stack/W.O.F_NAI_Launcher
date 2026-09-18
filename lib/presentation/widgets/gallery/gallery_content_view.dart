@@ -16,7 +16,6 @@ import '../../../data/models/gallery/local_image_record.dart';
 import '../../../data/services/gallery/gallery_view_mode.dart';
 import '../../providers/krita/krita_bridge_notifier.dart';
 import '../../providers/local_gallery_provider.dart';
-import '../../providers/reverse_prompt_provider.dart';
 import '../../router/app_router.dart';
 import '../../services/image_workflow_launcher.dart';
 import '../../providers/selection_mode_provider.dart';
@@ -1177,27 +1176,6 @@ class LocalGalleryContentView extends ConsumerWidget {
               Navigator.of(context).pop();
               context.go(AppRoutes.home);
               AppToast.success(context, context.l10n.gallery_sentToImg2Img);
-            } catch (e) {
-              if (context.mounted) {
-                AppToast.error(context, context.l10n.gallery_sendFailed('$e'));
-              }
-            }
-          },
-          onSendToReversePrompt: (data) async {
-            try {
-              await ref
-                  .read(reversePromptProvider.notifier)
-                  .addImage(
-                    await data.getImageBytes(),
-                    name: data.fileInfo?.fileName ?? 'gallery-image',
-                  );
-              if (!context.mounted) return;
-              Navigator.of(context).pop();
-              context.go(AppRoutes.home);
-              AppToast.success(
-                context,
-                context.l10n.gallery_sentToReversePrompt,
-              );
             } catch (e) {
               if (context.mounted) {
                 AppToast.error(context, context.l10n.gallery_sendFailed('$e'));

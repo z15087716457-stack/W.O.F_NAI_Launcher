@@ -100,15 +100,15 @@ void main() {
     await tester.tap(find.byIcon(Icons.send));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Send to Reverse Prompt'), findsOneWidget);
+    expect(find.text('Send to Image2Image'), findsOneWidget);
     expect(find.text('Import Image Metadata'), findsNothing);
 
-    await tester.tap(find.text('Send to Reverse Prompt'));
+    await tester.tap(find.text('Send to Image2Image'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(selectedRecord, same(record));
-    expect(selectedAction, LocalImageContextAction.sendToReversePrompt);
+    expect(selectedAction, LocalImageContextAction.sendToImg2Img);
   });
 }
 

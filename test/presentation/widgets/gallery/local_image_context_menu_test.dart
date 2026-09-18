@@ -28,7 +28,6 @@ void main() {
     expect(items.map((item) => item.value).toList(), const [
       LocalImageContextAction.sendToTextToImage,
       LocalImageContextAction.sendToImg2Img,
-      LocalImageContextAction.sendToReversePrompt,
       LocalImageContextAction.sendToStyleTransfer,
       LocalImageContextAction.sendToPreciseReference,
       LocalImageContextAction.saveToPreciseRefLibrary,
@@ -45,7 +44,6 @@ void main() {
     expect(find.text('Send to...'), findsNothing);
     expect(find.text('Send to Text to Image'), findsOneWidget);
     expect(find.text('Send to Image2Image'), findsOneWidget);
-    expect(find.text('Send to Reverse Prompt'), findsOneWidget);
     expect(find.text('Send to Vibe Transfer'), findsOneWidget);
     expect(find.text('Send to Precise Reference'), findsOneWidget);
     expect(find.text('Upscale'), findsOneWidget);
@@ -121,7 +119,6 @@ void main() {
     expect(actions, const [
       LocalImageContextAction.sendToTextToImage,
       LocalImageContextAction.sendToImg2Img,
-      LocalImageContextAction.sendToReversePrompt,
       LocalImageContextAction.sendToStyleTransfer,
       LocalImageContextAction.sendToPreciseReference,
       LocalImageContextAction.saveToPreciseRefLibrary,
