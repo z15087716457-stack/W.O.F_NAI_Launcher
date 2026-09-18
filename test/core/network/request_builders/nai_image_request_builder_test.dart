@@ -1044,7 +1044,7 @@ void main() {
     test(
       'should inject fur dataset prefix into v4_prompt base_caption only',
       () async {
-        final params = ImageParams(
+        const params = ImageParams(
           prompt: '1girl',
           model: ImageModels.animeDiffusionV5Full,
           furryMode: true,
@@ -1075,7 +1075,7 @@ void main() {
     test(
       'should not inject fur dataset prefix when furryMode is off',
       () async {
-        final params = ImageParams(
+        const params = ImageParams(
           prompt: '1girl',
           model: ImageModels.animeDiffusionV5Full,
           ucPreset: UcPresets.noneApiValue,
