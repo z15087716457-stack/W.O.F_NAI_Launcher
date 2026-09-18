@@ -8953,8 +8953,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_atomRestoreHint => '点击还原成文本再编辑';
 
   @override
+  String get promptBlockLibrary_atomOrphan => '未知标记';
+
+  @override
   String get promptBlockLibrary_atomEditorTutorial =>
-      '每行一个原子：输入后回车成块，点击块还原成文本；未成块的文本保存时自动转为原子，抽取时原子之间以逗号分隔。';
+      '输入后回车成块，点击还原为文本，保存时所有未成块文本自动转化。';
 
   @override
   String get promptBlockLibrary_color => '颜色';

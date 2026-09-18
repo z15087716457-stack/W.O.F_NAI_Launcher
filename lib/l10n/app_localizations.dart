@@ -16248,10 +16248,16 @@ abstract class AppLocalizations {
   /// **'Click to restore as editable text'**
   String get promptBlockLibrary_atomRestoreHint;
 
+  /// No description provided for @promptBlockLibrary_atomOrphan.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown marker'**
+  String get promptBlockLibrary_atomOrphan;
+
   /// No description provided for @promptBlockLibrary_atomEditorTutorial.
   ///
   /// In en, this message translates to:
-  /// **'Each line is one atom: press Enter to block it, click a block to edit it back; leftover text becomes atoms on save, and atoms are joined with commas when drawn.'**
+  /// **'Enter makes a block, click a block to restore text; unblocked text becomes atoms on save.'**
   String get promptBlockLibrary_atomEditorTutorial;
 
   /// No description provided for @promptBlockLibrary_color.

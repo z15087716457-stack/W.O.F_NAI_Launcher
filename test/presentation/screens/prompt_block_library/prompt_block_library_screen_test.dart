@@ -616,17 +616,10 @@ void main() {
     );
     await tester.enterText(fields.first, '已编辑');
 
-    // FEAT-79：正文是原子编辑器——预切原子 'before' 先解开清空删掉，
-    // 再在尾部输入行贴多行文本（换行切成原子）。
-    await tester.tap(find.byKey(const Key('atom-editor-atom-0')));
-    await tester.pump();
-    await tester.enterText(find.byKey(const Key('atom-editor-raw-0')), '');
-    await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
-
+    // FEAT-79：正文是单文本流原子编辑器——整段换成多行文本，
+    // 换行把每行切成原子，末行留原文（保存口径照样取出）。
     await tester.enterText(
-      find.byKey(const Key('atom-editor-raw-0')),
+      find.byKey(const Key('atom-editor-field')),
       'first line\nsecond line',
     );
     await tester.pump();

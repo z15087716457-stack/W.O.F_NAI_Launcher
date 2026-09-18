@@ -9282,8 +9282,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Click to restore as editable text';
 
   @override
+  String get promptBlockLibrary_atomOrphan => 'Unknown marker';
+
+  @override
   String get promptBlockLibrary_atomEditorTutorial =>
-      'Each line is one atom: press Enter to block it, click a block to edit it back; leftover text becomes atoms on save, and atoms are joined with commas when drawn.';
+      'Enter makes a block, click a block to restore text; unblocked text becomes atoms on save.';
 
   @override
   String get promptBlockLibrary_color => 'Color';

@@ -2,21 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/utils/localization_extension.dart';
+import '../../../../data/models/prompt_block/atom_document.dart';
 import '../../../widgets/common/inset_shadow_container.dart';
+import '../../../widgets/prompt/nai_syntax_controller.dart';
 
-/// 块内原子编辑器（FEAT-79）。
+/// 块内原子编辑器（FEAT-79）：单文本流自由编辑。
 ///
-/// 段列表 `Atom|Raw` 顺序即原子顺序：原子渲染为整行堆叠的描边框
-/// （无填充、描边跟主题色）；未提交文本渲染为内嵌文本行。
-/// - 回车 = 聚焦的整段文本变成一个原子（不做光标处切分；拍板①）；
-/// - 点击原子 = 原位还原成可编辑文本，再敲回车还原回块；
-/// - 粘贴含 `\n` 切成多个原子 + 余段留作新文本行（逗号不切——
-///   想批量成块就用换行列表）；
-/// - 底部恒空一行输入行；
-/// - 保存时调用方读 [AtomListEditorController.atoms]：剩余文本行
-///   按顺序转成原子（空白行丢弃）。
+/// 整块正文是一个连续可编辑文本，原子以药丸同款私用区标记字符
+/// 嵌在流里渲染为描边 chip——光标随便插、正常打字、退格删原子，
+/// 与主提示词框药丸同构。
 ///
-/// v1 不做拖拽重排（拍板③）。
+/// - 回车 = 光标**前**的连续文本收成原子，光标**后**留原文
+///   （静拍板，不做整段兜底）；
+/// - 点击原子 = 标记原位换回原文，光标落文本末尾；
+/// - 粘贴 `\n` → 每行各成一个原子，末行留作可编辑原文；
+/// - 保存时调用方读 [AtomListEditorController.atoms]：标记取表内
+///   原文，连续原文段按序收尾，空白/孤儿标记丢弃。
 class AtomListEditor extends StatefulWidget {
   const AtomListEditor({
     super.key,
@@ -26,7 +27,7 @@ class AtomListEditor extends StatefulWidget {
 
   final AtomListEditorController controller;
 
-  /// 编辑区固定高度；内部行超出滚动。
+  /// 编辑区固定高度；内部滚动。
   final double height;
 
   @override
@@ -37,27 +38,71 @@ class _AtomListEditorState extends State<AtomListEditor> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final controller = widget.controller;
     return SizedBox(
       height: widget.height,
       child: InsetShadowContainer(
         borderRadius: 8,
         child: ListenableBuilder(
-          listenable: widget.controller,
+          listenable: controller,
           builder: (context, _) {
-            return ListView.builder(
-              padding: const EdgeInsets.all(10),
-              itemCount: widget.controller.segmentCount,
-              itemBuilder: (context, index) {
-                final seg = widget.controller.segmentAt(index);
-                final isLast = index == widget.controller.segmentCount - 1;
-                return Padding(
-                  key: ObjectKey(seg),
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: seg is _AtomSeg
-                      ? _buildAtomRow(theme, seg, index)
-                      : _buildRawRow(theme, seg as _RawSeg, index, isLast),
-                );
-              },
+            controller.field.pillBuilder = _atomSpanBuilder;
+            return Column(
+              children: [
+                Expanded(
+                  child: TextField(
+                    key: const Key('atom-editor-field'),
+                    controller: controller.field,
+                    focusNode: controller.focusNode,
+                    expands: true,
+                    minLines: null,
+                    maxLines: null,
+                    textAlignVertical: TextAlignVertical.top,
+                    // middle 对齐时行高=chip 高度（行间 0 空隙），
+                    // 靠文本行高撑出 chip 行之间的空隙。
+                    style: theme.textTheme.bodyMedium?.copyWith(height: 1.8),
+                    decoration: InputDecoration(
+                      // 主题 inputDecorationTheme 全局 filled=true：
+                      // 填充色会让底部教程行露出更深的容器底色，
+                      // 关掉填充让整框共用内阴影容器背景。
+                      filled: false,
+                      hintText: context.l10n.promptBlockLibrary_atomInputHint,
+                      hintStyle: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.5,
+                        ),
+                        fontSize: 13,
+                      ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      isDense: true,
+                      contentPadding: const EdgeInsets.all(10),
+                    ),
+                  ),
+                ),
+                // 内框底部右下角操作教程（FEAT-79）
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 10,
+                      right: 10,
+                      bottom: 6,
+                    ),
+                    child: Text(
+                      context.l10n.promptBlockLibrary_atomEditorTutorial,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.5,
+                        ),
+                        fontSize: 11,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             );
           },
         ),
@@ -65,236 +110,188 @@ class _AtomListEditorState extends State<AtomListEditor> {
     );
   }
 
-  /// 原子行：整行描边框（无填充），点击原位还原成文本行。
-  Widget _buildAtomRow(ThemeData theme, _AtomSeg seg, int index) {
-    return Tooltip(
-      message: context.l10n.promptBlockLibrary_atomRestoreHint,
-      waitDuration: const Duration(milliseconds: 500),
-      child: InkWell(
-        key: Key('atom-editor-atom-$index'),
-        borderRadius: BorderRadius.circular(8),
-        onTap: () => widget.controller.unAtom(index),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: theme.colorScheme.outlineVariant),
-          ),
-          child: Text(seg.text, style: theme.textTheme.bodyMedium),
-        ),
-      ),
-    );
-  }
-
-  /// 未提交文本行：无边框内嵌字段；回车成块（经焦点节点 onKeyEvent
-  /// 抢在 EditableText 之前拦截），粘贴 \n 由 onChanged 切成原子。
-  Widget _buildRawRow(
-    ThemeData theme,
-    _RawSeg seg,
-    int index,
-    bool isLast,
+  /// 标记字符 → 描边 chip（无填充、点击还原）；
+  /// 未知标记（外来粘贴私用区字符）= 墓碑 chip，点击删除字符。
+  InlineSpan? _atomSpanBuilder(
+    BuildContext context,
+    String marker,
+    int occurrence,
   ) {
-    return TextField(
-      key: Key('atom-editor-raw-$index'),
-      controller: seg.controller,
-      focusNode: seg.focusNode,
-      maxLines: null,
-      style: theme.textTheme.bodyMedium,
-      decoration: InputDecoration(
-        hintText: isLast ? context.l10n.promptBlockLibrary_atomInputHint : null,
-        hintStyle: TextStyle(
-          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-          fontSize: 13,
+    final theme = Theme.of(context);
+    final atomText = widget.controller.atomMap[marker];
+    if (atomText == null) {
+      return WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: GestureDetector(
+          key: Key('atom-editor-orphan-$occurrence'),
+          onTap: () => widget.controller.removeOrphanMarker(marker),
+          child: _AtomChip(
+            text: context.l10n.promptBlockLibrary_atomOrphan,
+            theme: theme,
+            borderColor: theme.colorScheme.error,
+          ),
         ),
-        border: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        isDense: true,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 4,
-          vertical: 8,
+      );
+    }
+    return WidgetSpan(
+      alignment: PlaceholderAlignment.middle,
+      child: Tooltip(
+        message: context.l10n.promptBlockLibrary_atomRestoreHint,
+        waitDuration: const Duration(milliseconds: 500),
+        child: GestureDetector(
+          key: Key('atom-editor-atom-${marker.codeUnitAt(0)}-$occurrence'),
+          onTap: () => widget.controller.unAtom(marker, occurrence),
+          child: _AtomChip(text: atomText, theme: theme),
         ),
       ),
-      onChanged: (value) {
-        if (value.contains('\n')) widget.controller.splitRawAtNewlines(index);
-      },
     );
   }
 }
 
-/// 编辑器控制器：持有段列表与各文本行的 controller/focus。
-/// [initialAtoms] 即初始段（旧块 = atomsOrSplit 预切结果），
-/// 尾部自动补一个空文本行，保证「底部恒空一行」不变量。
+/// 紧凑描边 chip：无图标、无内部填充色，描边跟主题色。
+class _AtomChip extends StatelessWidget {
+  const _AtomChip({required this.text, required this.theme, this.borderColor});
+
+  final String text;
+  final ThemeData theme;
+  final Color? borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: borderColor ?? theme.colorScheme.outlineVariant,
+        ),
+      ),
+      child: Text(
+        text,
+        style: theme.textTheme.bodyMedium?.copyWith(height: 1.1),
+      ),
+    );
+  }
+}
+
+/// 编辑器控制器：一个 [NaiSyntaxController] 文本字段 + atoms 表。
+/// [initialAtoms] 即初始原子序列（旧块 = atomsOrSplit 预切结果），
+/// 播种为标记流；正文后续就是用户自由编辑的单文本。
 class AtomListEditorController extends ChangeNotifier {
   AtomListEditorController(List<String> initialAtoms)
-    : _segments = [
-        for (final atom in initialAtoms)
-          if (atom.trim().isNotEmpty) _AtomSeg(atom.trim()),
-        _RawSeg.fresh(),
-      ] {
-    _bindLastFocus();
+    : _document = AtomDocument.fromAtoms(initialAtoms) {
+    field = NaiSyntaxController(text: _document.text)
+      ..addListener(_handleTextChanged);
+    focusNode = FocusNode()..onKeyEvent = _handleKey;
   }
 
-  final List<Object> _segments;
+  late final NaiSyntaxController field;
+  late final FocusNode focusNode;
+  AtomDocument _document;
 
-  int get segmentCount => _segments.length;
+  /// 当前 atoms 表（标记 → 原文），供 span builder 取文本。
+  Map<String, String> get atomMap => _document.atoms;
 
-  Object segmentAt(int index) => _segments[index];
+  /// 底层文档文本（含标记字符）；测试观察用。
+  String get documentText => _document.text;
 
-  /// 测试用：当前各段的文本快照（原子/文本行混排）。
-  List<String> get segmentTexts => [
-        for (final seg in _segments)
-          seg is _AtomSeg ? seg.text : (seg as _RawSeg).controller.text,
-      ];
+  /// 保存口径：文档顺序扫描，标记→原文，连续原文按序收尾，
+  /// 空白段/孤儿标记丢弃。
+  List<String> get atoms => AtomDocumentEditor.extractAtoms(_document);
 
-  /// 保存口径：所有段按序转原子，空白行丢弃（永不产出空原子）。
-  List<String> get atoms => [
-        for (final seg in _segments)
-          if ((seg is _AtomSeg
-                  ? seg.text
-                  : (seg as _RawSeg).controller.text)
-              .trim()
-              .isNotEmpty)
-            (seg is _AtomSeg
-                    ? seg.text
-                    : (seg as _RawSeg).controller.text)
-                .trim(),
-      ];
+  /// 回车拦截（挂在字段 FocusNode 上，先于 EditableText 换行处理）：
+  /// 光标前文本收成原子。IME 组合中不拦截（交给输入法确认）。
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (event.logicalKey != LogicalKeyboardKey.enter &&
+        event.logicalKey != LogicalKeyboardKey.numpadEnter) {
+      return KeyEventResult.ignored;
+    }
+    final composing = field.value.composing;
+    if (composing.isValid && !composing.isCollapsed) {
+      return KeyEventResult.ignored;
+    }
+    _commitBeforeCaret();
+    return KeyEventResult.handled;
+  }
 
-  /// 文本行回车：整段转原子（拍板①）。尾行转原子后追新空行并聚焦；
-  /// 中间行转原子后焦点移回尾部空行。空段：尾行忽略、中间行删除。
-  void commitRaw(int index) {
-    final seg = _segments[index];
-    if (seg is! _RawSeg) return;
-    final text = seg.controller.text.trim();
-    if (text.isEmpty) {
-      if (index != _segments.length - 1) {
-        _disposeSeg(seg);
-        _segments.removeAt(index);
-        notifyListeners();
-      }
+  void _commitBeforeCaret() {
+    final (doc, caret) = AtomDocumentEditor.commitBeforeCaret(
+      _document,
+      field.selection.baseOffset,
+    );
+    if (identical(doc, _document)) return;
+    _apply(doc, caret);
+  }
+
+  /// 点击原子：该标记的本次出现换回原文，光标落还原处末尾。
+  void unAtom(String marker, int occurrence) {
+    final (doc, caret) = AtomDocumentEditor.unAtomAt(
+      _document,
+      marker,
+      occurrence,
+    );
+    if (identical(doc, _document)) return;
+    _apply(doc, caret);
+  }
+
+  /// 孤儿标记 chip 点击清除（字符连同 atoms 表残留一并清）。
+  void removeOrphanMarker(String marker) {
+    final text = _document.text.replaceAll(marker, '');
+    final atoms = Map<String, String>.of(_document.atoms)..remove(marker);
+    _apply(AtomDocument(text: text, atoms: atoms), field.selection.baseOffset);
+  }
+
+  /// 文本变化对账：粘贴换行切原子 + 清孤儿标记的表项。
+  /// 直接改 field.value 走 controller 通路，撤销栈保持连贯。
+  void _handleTextChanged() {
+    final value = field.value;
+    if (value.text == _document.text) {
+      // 纯选区变化不进对账。
       return;
     }
-    final isLast = index == _segments.length - 1;
-    _disposeSeg(seg);
-    _segments[index] = _AtomSeg(text);
-    if (isLast) {
-      final tail = _RawSeg.fresh();
-      _segments.add(tail);
-      _bindNewlineFocus(tail);
-      _focusTailAfterFrame(tail);
+    final (doc, caret) = AtomDocumentEditor.reconcile(
+      _document,
+      value.text,
+      value.selection.baseOffset,
+    );
+    if (doc.text != value.text) {
+      // 发生了换行改写：把规范化文本写回字段。
+      _document = doc;
+      field.value = value.copyWith(
+        text: doc.text,
+        selection: TextSelection.collapsed(offset: caret),
+        composing: TextRange.empty,
+      );
+      field.refreshPillSpans();
     } else {
-      _focusTailAfterFrame(null);
+      // atoms 表是否变化（如删除了标记字符）：先比后赋。
+      final atomsChanged = doc.atoms.length != _document.atoms.length;
+      _document = doc;
+      if (atomsChanged) field.refreshPillSpans();
     }
     notifyListeners();
   }
 
-  /// 点击原子：原位还原成文本行并聚焦到行尾。
-  void unAtom(int index) {
-    final seg = _segments[index];
-    if (seg is! _AtomSeg) return;
-    final raw = _RawSeg.fresh(seg.text);
-    _bindNewlineFocus(raw);
-    _segments[index] = raw;
+  /// 把新文档写回字段（标记操作统一入口），保持选区有效。
+  void _apply(AtomDocument doc, int caret) {
+    _document = doc;
+    field.value = field.value.copyWith(
+      text: doc.text,
+      selection: TextSelection.collapsed(
+        offset: caret.clamp(0, doc.text.length),
+      ),
+      composing: TextRange.empty,
+    );
+    field.refreshPillSpans();
     notifyListeners();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      raw.focusNode.requestFocus();
-      raw.controller.selection = TextSelection.collapsed(
-        offset: raw.controller.text.length,
-      );
-    });
-  }
-
-  /// 文本行内容含换行（粘贴多行）：按 \n 切分——非末行各成一个原子，
-  /// 末行留在原位继续当文本行（可为空，保存时丢弃）。焦点挪到最后
-  /// 一个文本段（本行或尾部空行）。
-  void splitRawAtNewlines(int index) {
-    final seg = _segments[index];
-    if (seg is! _RawSeg) return;
-    final text = seg.controller.text;
-    if (!text.contains('\n')) return;
-    final parts = text.split('\n');
-    final tail = parts.last;
-    final committed = [
-      for (final part in parts.sublist(0, parts.length - 1))
-        if (part.trim().isNotEmpty) _AtomSeg(part.trim()),
-    ];
-    _disposeSeg(seg);
-    _segments.replaceRange(index, index + 1, [
-      ...committed,
-      _RawSeg.fresh(tail),
-    ]);
-    final newRaw = _segments[index + committed.length] as _RawSeg;
-    _bindNewlineFocus(newRaw);
-    notifyListeners();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      newRaw.focusNode.requestFocus();
-      newRaw.controller.selection = TextSelection.collapsed(
-        offset: newRaw.controller.text.length,
-      );
-    });
-  }
-
-  void _bindLastFocus() {
-    final last = _segments.last;
-    if (last is _RawSeg) _bindNewlineFocus(last);
-  }
-
-  /// 文本行的回车拦截挂在自己的 FocusNode.onKeyEvent 上——先于
-  /// EditableText 内部的换行处理，把回车翻译成「整段成块」。
-  void _bindNewlineFocus(_RawSeg seg) {
-    seg.focusNode.onKeyEvent = (node, event) {
-      if (event is KeyDownEvent &&
-          (event.logicalKey == LogicalKeyboardKey.enter ||
-              event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
-        final index = _segments.indexOf(seg);
-        if (index >= 0) commitRaw(index);
-        return KeyEventResult.handled;
-      }
-      return KeyEventResult.ignored;
-    };
-  }
-
-  void _focusTailAfterFrame(_RawSeg? preferred) {
-    final tail = preferred ?? _segments.last;
-    if (tail is! _RawSeg) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      tail.focusNode.requestFocus();
-      tail.controller.selection = TextSelection.collapsed(
-        offset: tail.controller.text.length,
-      );
-    });
-  }
-
-  void _disposeSeg(_RawSeg seg) {
-    seg.focusNode.dispose();
-    seg.controller.dispose();
   }
 
   @override
   void dispose() {
-    for (final seg in _segments) {
-      if (seg is _RawSeg) _disposeSeg(seg);
-    }
+    field.dispose();
+    focusNode.dispose();
     super.dispose();
   }
-}
-
-sealed class _Seg {
-  const _Seg();
-}
-
-class _AtomSeg extends _Seg {
-  const _AtomSeg(this.text);
-  final String text;
-}
-
-class _RawSeg extends _Seg {
-  _RawSeg.fresh([String text = ''])
-    : controller = TextEditingController(text: text),
-      focusNode = FocusNode();
-
-  final TextEditingController controller;
-  final FocusNode focusNode;
 }

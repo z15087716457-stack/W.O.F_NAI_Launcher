@@ -290,17 +290,6 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
               ),
               const SizedBox(height: 6),
               AtomListEditor(controller: _atomController, height: 260),
-              const SizedBox(height: 6),
-              Text(
-                l10n.promptBlockLibrary_atomEditorTutorial,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant.withValues(
-                    alpha: 0.7,
-                  ),
-                  fontSize: 11,
-                  height: 1.4,
-                ),
-              ),
               const SizedBox(height: 16),
               Text(
                 l10n.promptBlockLibrary_color,

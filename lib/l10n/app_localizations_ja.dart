@@ -9077,8 +9077,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_atomRestoreHint => 'クリックでテキストに戻して再編集';
 
   @override
+  String get promptBlockLibrary_atomOrphan => '不明なマーカー';
+
+  @override
   String get promptBlockLibrary_atomEditorTutorial =>
-      '1行＝1原子：入力後Enterでブロック化、ブロックをクリックでテキストに戻す。ブロック化されなかったテキストは保存時に自動で原子化され、抽出時はカンマで連結されます。';
+      'Enterでブロック化、クリックでテキストに戻す。未ブロックのテキストは保存時に自動で原子化。';
 
   @override
   String get promptBlockLibrary_color => '色';
