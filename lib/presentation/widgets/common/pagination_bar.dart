@@ -43,7 +43,7 @@ class PaginationBar extends StatefulWidget {
     this.totalItems = 0,
     this.itemsPerPage = 50,
     this.onItemsPerPageChanged,
-    this.itemsPerPageOptions = const [20, 50, 100, 200],
+    this.itemsPerPageOptions = const [20, 50, 100, 200, 500],
     this.showItemsPerPage = true,
     this.showTotalInfo = true,
     this.compact = false,
