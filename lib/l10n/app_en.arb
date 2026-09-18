@@ -409,12 +409,8 @@
     }
   },
   "generation_noiseSchedule": "Noise Schedule",
-  "generation_modelMode": "Mode",
-  "generation_modeAnime": "Anime",
-  "generation_modeFurry": "Furry",
   "generation_modelGroupNew": "NEW",
   "generation_modelGroupLegacy": "LEGACY",
-  "generation_modelBadgeNew": "NEW",
   "generation_modelDesc_v5Curated": "Our newest model, trained on a curated subset of images. Recommended for streaming.",
   "generation_modelDesc_v5Full": "Our newest and best model.",
   "generation_modelDesc_v45Curated": "Our V4.5 model trained on a curated subset of images. No longer recommended for use.",

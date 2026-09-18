@@ -408,12 +408,8 @@
     }
   },
   "generation_noiseSchedule": "ノイズスケジュール",
-  "generation_modelMode": "モード",
-  "generation_modeAnime": "アニメ",
-  "generation_modeFurry": "ファーリー",
   "generation_modelGroupNew": "新着",
   "generation_modelGroupLegacy": "レガシー",
-  "generation_modelBadgeNew": "NEW",
   "generation_modelDesc_v5Curated": "画像の厳選サブセットで学習した最新モデル。ストリーミングにおすすめです。",
   "generation_modelDesc_v5Full": "最新かつ最高のモデルです。",
   "generation_modelDesc_v45Curated": "厳選画像サブセットで学習した V4.5 モデル。現在は非推奨です。",

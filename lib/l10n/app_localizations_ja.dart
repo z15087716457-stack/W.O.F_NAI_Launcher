@@ -926,22 +926,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_noiseSchedule => 'ノイズスケジュール';
 
   @override
-  String get generation_modelMode => 'モード';
-
-  @override
-  String get generation_modeAnime => 'アニメ';
-
-  @override
-  String get generation_modeFurry => 'ファーリー';
-
-  @override
   String get generation_modelGroupNew => '新着';
 
   @override
   String get generation_modelGroupLegacy => 'レガシー';
-
-  @override
-  String get generation_modelBadgeNew => 'NEW';
 
   @override
   String get generation_modelDesc_v5Curated =>

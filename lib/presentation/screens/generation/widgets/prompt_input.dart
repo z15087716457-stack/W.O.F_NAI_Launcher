@@ -583,7 +583,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     return PopupMenuButton<String>(
       tooltip: context.l10n.prompt_chunksMenu,
       iconSize: 18,
-      offset: const Offset(0, 32),
+      offset: const Offset(0, 4),
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       onOpened: () => setState(() => _chunksMenuOpen = true),

@@ -1809,24 +1809,6 @@ abstract class AppLocalizations {
   /// **'Noise Schedule'**
   String get generation_noiseSchedule;
 
-  /// No description provided for @generation_modelMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Mode'**
-  String get generation_modelMode;
-
-  /// No description provided for @generation_modeAnime.
-  ///
-  /// In en, this message translates to:
-  /// **'Anime'**
-  String get generation_modeAnime;
-
-  /// No description provided for @generation_modeFurry.
-  ///
-  /// In en, this message translates to:
-  /// **'Furry'**
-  String get generation_modeFurry;
-
   /// No description provided for @generation_modelGroupNew.
   ///
   /// In en, this message translates to:
@@ -1838,12 +1820,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'LEGACY'**
   String get generation_modelGroupLegacy;
-
-  /// No description provided for @generation_modelBadgeNew.
-  ///
-  /// In en, this message translates to:
-  /// **'NEW'**
-  String get generation_modelBadgeNew;
 
   /// No description provided for @generation_modelDesc_v5Curated.
   ///

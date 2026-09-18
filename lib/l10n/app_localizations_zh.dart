@@ -912,22 +912,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_noiseSchedule => '噪声调度';
 
   @override
-  String get generation_modelMode => '模式';
-
-  @override
-  String get generation_modeAnime => '动画';
-
-  @override
-  String get generation_modeFurry => '福瑞';
-
-  @override
   String get generation_modelGroupNew => '最新';
 
   @override
   String get generation_modelGroupLegacy => '旧版';
-
-  @override
-  String get generation_modelBadgeNew => 'NEW';
 
   @override
   String get generation_modelDesc_v5Curated => '我们最新的模型，基于精选图像子集训练。推荐用于流式传输。';

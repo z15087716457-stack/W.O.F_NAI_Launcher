@@ -944,22 +944,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_noiseSchedule => 'Noise Schedule';
 
   @override
-  String get generation_modelMode => 'Mode';
-
-  @override
-  String get generation_modeAnime => 'Anime';
-
-  @override
-  String get generation_modeFurry => 'Furry';
-
-  @override
   String get generation_modelGroupNew => 'NEW';
 
   @override
   String get generation_modelGroupLegacy => 'LEGACY';
-
-  @override
-  String get generation_modelBadgeNew => 'NEW';
 
   @override
   String get generation_modelDesc_v5Curated =>

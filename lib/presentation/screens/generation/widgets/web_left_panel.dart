@@ -372,7 +372,7 @@ class _ModelMenuButton extends ConsumerWidget {
       alignment: Alignment.centerLeft,
       child: PopupMenuButton<String>(
         tooltip: fullName,
-        offset: const Offset(0, 32),
+        offset: const Offset(0, 4),
         position: PopupMenuPosition.under,
         constraints: const BoxConstraints(minWidth: 220, maxWidth: 300),
         itemBuilder: (context) => [
@@ -397,10 +397,22 @@ class _ModelMenuButton extends ConsumerWidget {
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(8),
+            // 官网式描边胶囊
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.4),
+            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // 官网胶囊带 Model 前缀标签
+              Text(
+                'Model',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                ),
+              ),
+              const SizedBox(width: 6),
               Image.asset(
                 'assets/icons/novelai-icon.png',
                 width: 15,
@@ -488,17 +500,7 @@ class _ModelMenuButton extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (ModelDisplay.isNewModel(m)) ...[
-                      const SizedBox(width: 6),
-                      Text(
-                        l10n.generation_modelBadgeNew,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          fontSize: 9,
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+                    // 静拍板：官网 NEW 徽标不搬，去掉（显得很怪）
                   ],
                 ),
                 if (description != null) ...[
@@ -531,7 +533,6 @@ class _ModeCapsule extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final l10n = context.l10n;
     final model = ref.watch(
       generationParamsNotifierProvider.select((params) => params.model),
     );
@@ -555,12 +556,17 @@ class _ModeCapsule extends ConsumerWidget {
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(8),
+            // 官网式描边胶囊
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.4),
+            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // 官网 Mode 胶囊恒为英文（静拍板：纯英文）
               Text(
-                l10n.generation_modelMode,
+                'Mode',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                 ),
@@ -580,9 +586,7 @@ class _ModeCapsule extends ConsumerWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                furryMode
-                    ? l10n.generation_modeFurry
-                    : l10n.generation_modeAnime,
+                furryMode ? 'Furry' : 'Anime',
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),

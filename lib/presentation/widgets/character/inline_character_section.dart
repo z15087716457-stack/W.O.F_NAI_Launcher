@@ -134,7 +134,7 @@ class _AddCharacterMenu extends ConsumerWidget {
     return PopupMenuButton<CharacterGender>(
       tooltip: l10n.character_addCharacter,
       iconSize: 20,
-      offset: const Offset(0, 30),
+      offset: const Offset(0, 4),
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       onSelected: (gender) => ref
