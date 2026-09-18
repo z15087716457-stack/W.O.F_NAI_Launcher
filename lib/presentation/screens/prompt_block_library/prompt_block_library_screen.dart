@@ -890,12 +890,17 @@ class _PromptBlockLibraryScreenState
         child: TextField(
           controller: _searchController,
           focusNode: _searchFocusNode,
+          style: theme.textTheme.bodyMedium,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
             hintText: tipHint(
               context.l10n,
               TipModule.blockLibrary,
               epoch: watchTipEpoch(ref),
+            ),
+            hintStyle: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+              fontSize: 13,
             ),
             prefixIcon: const Icon(Icons.search, size: 18),
             suffixIcon: _searchController.text.isEmpty
