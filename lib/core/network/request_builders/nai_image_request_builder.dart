@@ -184,9 +184,15 @@ class NAIImageRequestBuilder {
       });
     }
 
+    // 福瑞模式（官网 modelMode=Furry）：向 base_caption 注入 `fur dataset, `
+    // 前缀，与官网及社区实现一致；仅写入 v4_prompt，不污染 input 字段。
+    final v4BaseCaption = params.furryMode
+        ? 'fur dataset, $effectivePrompt'
+        : effectivePrompt;
+
     requestParameters['v4_prompt'] = {
       'caption': {
-        'base_caption': effectivePrompt,
+        'base_caption': v4BaseCaption,
         'char_captions': charCaptions,
       },
       'use_coords': params.useCoords,

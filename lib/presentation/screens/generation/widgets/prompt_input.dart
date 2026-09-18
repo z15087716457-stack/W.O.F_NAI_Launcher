@@ -736,7 +736,8 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       key: const ValueKey('generation_prompt_positive_input'),
       compact: false,
       autoGrow: widget.autoGrow,
-      minLines: widget.autoGrow ? 2 : null,
+      // 官网式：主提示词框 9 行起步，随内容继续增高（探索页 autoGrow=false 不动）
+      minLines: widget.autoGrow ? 9 : null,
       sessionId: PromptHistorySessionIds.generationPrompt,
       allowEvolutionToggle: widget.allowEvolutionToggle,
       onOpenAssistantSettings: _openAssistantQuickSettings,
@@ -887,7 +888,8 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       initialPlainText: _negativeController.text,
       compact: false,
       autoGrow: widget.autoGrow,
-      minLines: widget.autoGrow ? 2 : null,
+      // 同主提示词框：9 行起步（官网式）
+      minLines: widget.autoGrow ? 9 : null,
       sessionId: PromptHistorySessionIds.generationNegative,
       allowEvolutionToggle: false,
       onOpenAssistantSettings: _openAssistantQuickSettings,

@@ -5,6 +5,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/constants/model_display.dart';
+import '../../../../core/constants/model_spec.dart';
 import '../../../../data/models/image/image_params.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/layout_state_provider.dart';
@@ -18,6 +20,7 @@ import 'img2img_panel.dart';
 import 'precise_reference_panel.dart';
 import 'prompt_input.dart';
 import 'reverse_prompt_panel.dart';
+import 'section_header.dart';
 import 'unified_reference_panel.dart';
 
 /// 官网式布局左栏
@@ -143,8 +146,8 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
           child: Row(
             children: [
               const SizedBox(width: 8),
-              // 模型选择常驻面板头部（官网式）：点击弹菜单切换；
-              // Opus 额度 + Anlas 余额芯片随其后（自底栏上移，官网式）
+              // 模型选择 + 模式胶囊常驻面板头部（官网式）：模型与模式一组，
+              // Opus 额度与 Anlas 余额一组，组间拉开间隙（静定排版）
               const Expanded(
                 child: Align(
                   alignment: Alignment.centerLeft,
@@ -154,10 +157,10 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         _ModelMenuButton(),
-                        OpusUsageChip(
-                          compact: true,
-                          margin: EdgeInsets.only(left: 8),
-                        ),
+                        SizedBox(width: 6),
+                        _ModeCapsule(),
+                        SizedBox(width: 16),
+                        OpusUsageChip(compact: true),
                         SizedBox(width: 6),
                         AnlasBalanceChip(compact: true),
                       ],
@@ -203,6 +206,12 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                         const SizedBox(height: 10),
 
                         // 功能面板：反推 / 图生图 / 风格迁移 / 精准参考
+                        // （官网 Reference Images 小节）
+                        SectionHeader(
+                          title: context
+                              .l10n.generation_sectionReferenceImages,
+                        ),
+                        const SizedBox(height: 6),
                         const ReversePromptPanel(),
                         const SizedBox(height: 8),
                         const Img2ImgPanel(),
@@ -212,7 +221,12 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                         const PreciseReferencePanel(),
                         const SizedBox(height: 10),
 
-                        // 尺寸设置：低频控件下沉至滚动列末尾（官网 Layout A）
+                        // 尺寸/数量：低频控件下沉至滚动列末尾
+                        // （官网 Image Settings 小节）
+                        SectionHeader(
+                          title: context.l10n.generation_sectionImageSettings,
+                        ),
+                        const SizedBox(height: 6),
                         const SizeSection(),
                         const SizedBox(height: 12),
 
@@ -339,48 +353,39 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
   }
 }
 
-/// 头部条模型选择器：紧凑胶囊，点击弹菜单切换模型
+/// 头部条模型选择器：紧凑胶囊，点击弹分组卡式菜单切换模型（官网式：
+/// NEW / LEGACY 两段，每项展示全名 + 简介行）
 class _ModelMenuButton extends ConsumerWidget {
   const _ModelMenuButton();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final model = ref.watch(
       generationParamsNotifierProvider.select((params) => params.model),
     );
-    final modelName = ImageModels.modelDisplayNames[model] ?? model;
+    final shortName = ModelDisplay.shortNameOf(model);
+    final fullName = ImageModels.modelDisplayNames[model] ?? model;
 
     return Align(
       alignment: Alignment.centerLeft,
       child: PopupMenuButton<String>(
-        tooltip: modelName,
+        tooltip: fullName,
         offset: const Offset(0, 32),
         position: PopupMenuPosition.under,
+        constraints: const BoxConstraints(minWidth: 220, maxWidth: 300),
         itemBuilder: (context) => [
-          for (final m in ImageModels.allModels)
-            PopupMenuItem<String>(
-              value: m,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.check,
-                    size: 16,
-                    color: m == model
-                        ? theme.colorScheme.primary
-                        : Colors.transparent,
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      ImageModels.modelDisplayNames[m] ?? m,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          _modelGroupHeader(theme, l10n.generation_modelGroupNew),
+          for (final m in ImageModels.allModels.where(
+            (m) => ModelDisplay.groupOf(m) == ModelListGroup.newer,
+          ))
+            _modelMenuItem(context, l10n, theme, m, model),
+          _modelGroupHeader(theme, l10n.generation_modelGroupLegacy),
+          for (final m in ImageModels.allModels.where(
+            (m) => ModelDisplay.groupOf(m) == ModelListGroup.legacy,
+          ))
+            _modelMenuItem(context, l10n, theme, m, model),
         ],
         onSelected: (value) {
           ref.read(generationParamsNotifierProvider.notifier).updateModel(value);
@@ -407,7 +412,7 @@ class _ModelMenuButton extends ConsumerWidget {
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
-                  modelName,
+                  shortName,
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -420,6 +425,162 @@ class _ModelMenuButton extends ConsumerWidget {
                 Icons.keyboard_arrow_down,
                 size: 16,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  PopupMenuEntry<String> _modelGroupHeader(ThemeData theme, String label) {
+    return PopupMenuItem<String>(
+      enabled: false,
+      height: 26,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Text(
+        label,
+        style: theme.textTheme.labelSmall?.copyWith(
+          fontSize: 10,
+          letterSpacing: 0.8,
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+        ),
+      ),
+    );
+  }
+
+  PopupMenuEntry<String> _modelMenuItem(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+    String m,
+    String current,
+  ) {
+    final fullName = ImageModels.modelDisplayNames[m] ?? m;
+    final description = ModelDisplay.descriptionOf(l10n, m);
+    return PopupMenuItem<String>(
+      value: m,
+      height: description != null ? 48 : 36,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          Icon(
+            Icons.check,
+            size: 16,
+            color: m == current
+                ? theme.colorScheme.primary
+                : Colors.transparent,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        fullName,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (ModelDisplay.isNewModel(m)) ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        l10n.generation_modelBadgeNew,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontSize: 9,
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                if (description != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    description,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: 11,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 头部条模式胶囊（官网 modelMode）：仅 V4+ 模型显示，
+/// 点击在 Anime / Furry 间切换，furry 时向 v4_prompt.base_caption
+/// 注入 `fur dataset, ` 前缀（与官网机制一致）。
+class _ModeCapsule extends ConsumerWidget {
+  const _ModeCapsule();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final model = ref.watch(
+      generationParamsNotifierProvider.select((params) => params.model),
+    );
+    // 模式切换只对 v4_prompt 结构有意义（V3 及以下无 base_caption）
+    if (!ModelSpecs.of(model).v4Prompts) return const SizedBox.shrink();
+
+    final furryMode = ref.watch(
+      generationParamsNotifierProvider.select((params) => params.furryMode),
+    );
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => ref
+            .read(generationParamsNotifierProvider.notifier)
+            .updateModelMode(!furryMode),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          height: 28,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.generation_modelMode,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                ),
+              ),
+              const SizedBox(width: 6),
+              // TODO(official-icon): Anime=rdB / Furry=O21（官网图标字形，
+              // 素材到手后替换此 Material 近似形）
+              Icon(
+                furryMode ? Icons.pets : Icons.face,
+                size: 15,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                furryMode
+                    ? l10n.generation_modeFurry
+                    : l10n.generation_modeAnime,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),

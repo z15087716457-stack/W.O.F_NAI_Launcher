@@ -944,7 +944,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_noiseSchedule => 'Noise Schedule';
 
   @override
+  String get generation_modelMode => 'Mode';
+
+  @override
+  String get generation_modeAnime => 'Anime';
+
+  @override
+  String get generation_modeFurry => 'Furry';
+
+  @override
+  String get generation_modelGroupNew => 'NEW';
+
+  @override
+  String get generation_modelGroupLegacy => 'LEGACY';
+
+  @override
+  String get generation_modelBadgeNew => 'NEW';
+
+  @override
+  String get generation_modelDesc_v5Curated =>
+      'Our newest model, trained on a curated subset of images. Recommended for streaming.';
+
+  @override
+  String get generation_modelDesc_v5Full => 'Our newest and best model.';
+
+  @override
+  String get generation_modelDesc_v45Curated =>
+      'Our V4.5 model trained on a curated subset of images. No longer recommended for use.';
+
+  @override
+  String get generation_modelDesc_v45Full => 'Our V4.5 full model.';
+
+  @override
+  String get generation_modelDesc_v4Curated =>
+      'Our V4 model trained on a curated subset of images.';
+
+  @override
+  String get generation_modelDesc_v4Full => 'Our V4 full model.';
+
+  @override
+  String get generation_sectionCharacters => 'Character Prompts';
+
+  @override
+  String get generation_sectionReferenceImages => 'Reference Images';
+
+  @override
+  String get generation_sectionImageSettings => 'Image Settings';
+
+  @override
+  String get anlas_subscription => 'Subscription';
+
+  @override
+  String get anlas_purchased => 'Purchased';
+
+  @override
   String get prompt_positive => 'Prompt';
+
+  @override
+  String get prompt_baseTab => 'Base Prompt';
+
+  @override
+  String get prompt_negativeTab => 'Undesired Content';
 
   @override
   String get prompt_positivePrompt => 'Prompt';

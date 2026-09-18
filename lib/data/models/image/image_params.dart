@@ -168,6 +168,12 @@ class ImageParams with _$ImageParams {
     /// 服务端端到端放大（2x、3MP 面积上限），宽高保持源图。
     @Default(false) bool upscaledEnhance,
 
+    /// 福瑞模式（官网 `modelMode` = Furry）。
+    ///
+    /// 机制 = 向 `v4_prompt.base_caption` 注入 `fur dataset, ` 前缀
+    /// （与官网及社区实现一致），不是独立模型。仅 V4+ 模型生效。
+    @Default(false) bool furryMode,
+
     /// 当前 img2img 是否来自增强（Enhance）工作流。
     ///
     /// 仅请求层使用：非 Max 增强按官方 enhancePromptAdd 行为向提示词

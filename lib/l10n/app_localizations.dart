@@ -1809,11 +1809,125 @@ abstract class AppLocalizations {
   /// **'Noise Schedule'**
   String get generation_noiseSchedule;
 
+  /// No description provided for @generation_modelMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode'**
+  String get generation_modelMode;
+
+  /// No description provided for @generation_modeAnime.
+  ///
+  /// In en, this message translates to:
+  /// **'Anime'**
+  String get generation_modeAnime;
+
+  /// No description provided for @generation_modeFurry.
+  ///
+  /// In en, this message translates to:
+  /// **'Furry'**
+  String get generation_modeFurry;
+
+  /// No description provided for @generation_modelGroupNew.
+  ///
+  /// In en, this message translates to:
+  /// **'NEW'**
+  String get generation_modelGroupNew;
+
+  /// No description provided for @generation_modelGroupLegacy.
+  ///
+  /// In en, this message translates to:
+  /// **'LEGACY'**
+  String get generation_modelGroupLegacy;
+
+  /// No description provided for @generation_modelBadgeNew.
+  ///
+  /// In en, this message translates to:
+  /// **'NEW'**
+  String get generation_modelBadgeNew;
+
+  /// No description provided for @generation_modelDesc_v5Curated.
+  ///
+  /// In en, this message translates to:
+  /// **'Our newest model, trained on a curated subset of images. Recommended for streaming.'**
+  String get generation_modelDesc_v5Curated;
+
+  /// No description provided for @generation_modelDesc_v5Full.
+  ///
+  /// In en, this message translates to:
+  /// **'Our newest and best model.'**
+  String get generation_modelDesc_v5Full;
+
+  /// No description provided for @generation_modelDesc_v45Curated.
+  ///
+  /// In en, this message translates to:
+  /// **'Our V4.5 model trained on a curated subset of images. No longer recommended for use.'**
+  String get generation_modelDesc_v45Curated;
+
+  /// No description provided for @generation_modelDesc_v45Full.
+  ///
+  /// In en, this message translates to:
+  /// **'Our V4.5 full model.'**
+  String get generation_modelDesc_v45Full;
+
+  /// No description provided for @generation_modelDesc_v4Curated.
+  ///
+  /// In en, this message translates to:
+  /// **'Our V4 model trained on a curated subset of images.'**
+  String get generation_modelDesc_v4Curated;
+
+  /// No description provided for @generation_modelDesc_v4Full.
+  ///
+  /// In en, this message translates to:
+  /// **'Our V4 full model.'**
+  String get generation_modelDesc_v4Full;
+
+  /// No description provided for @generation_sectionCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Character Prompts'**
+  String get generation_sectionCharacters;
+
+  /// No description provided for @generation_sectionReferenceImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference Images'**
+  String get generation_sectionReferenceImages;
+
+  /// No description provided for @generation_sectionImageSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Image Settings'**
+  String get generation_sectionImageSettings;
+
+  /// No description provided for @anlas_subscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get anlas_subscription;
+
+  /// No description provided for @anlas_purchased.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchased'**
+  String get anlas_purchased;
+
   /// No description provided for @prompt_positive.
   ///
   /// In en, this message translates to:
   /// **'Prompt'**
   String get prompt_positive;
+
+  /// No description provided for @prompt_baseTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Base Prompt'**
+  String get prompt_baseTab;
+
+  /// No description provided for @prompt_negativeTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Undesired Content'**
+  String get prompt_negativeTab;
 
   /// No description provided for @prompt_positivePrompt.
   ///

@@ -140,6 +140,20 @@ class LocalStorageService {
     await setSetting(StorageKeys.defaultModel, model);
   }
 
+  /// 获取模型模式（false=Anime, true=Furry；官网 modelMode）
+  bool getDefaultModelMode() {
+    return getSetting<bool>(
+          StorageKeys.defaultModelMode,
+          defaultValue: false,
+        ) ??
+        false;
+  }
+
+  /// 保存模型模式
+  Future<void> setDefaultModelMode(bool furry) async {
+    await setSetting(StorageKeys.defaultModelMode, furry);
+  }
+
   /// 获取默认采样器
   String getDefaultSampler() {
     return getSetting<String>(

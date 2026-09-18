@@ -166,6 +166,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       varietyPlus: storage.getLastVarietyPlus(),
       qualityToggle: qualityPresetState.usesNativePreset,
       qualityTagPreset: qualityPresetState.nativePreset,
+      furryMode: storage.getDefaultModelMode(),
       // 种子恒为会话态：-1 随机，有值即固定（无独立锁标志）
       seed: -1,
     );
@@ -199,6 +200,12 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
           .read(pillWorkspaceProvider(PillScopes.negative).notifier)
           .syncFromPlainText(negativePrompt);
     });
+  }
+
+  /// 切换模型模式（官网 modelMode：false=Anime, true=Furry）
+  void updateModelMode(bool furryMode) {
+    state = state.copyWith(furryMode: furryMode);
+    _storage.setDefaultModelMode(furryMode);
   }
 
   /// 更新模型

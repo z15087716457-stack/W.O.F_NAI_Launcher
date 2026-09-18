@@ -82,6 +82,36 @@ void main() {
     expect(params.qualityTagPreset, QualityTagPreset.light);
   });
 
+  test('updateModelMode should persist the furry mode flag', () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    final notifier = container.read(generationParamsNotifierProvider.notifier);
+
+    notifier.updateModelMode(true);
+    expect(container.read(generationParamsNotifierProvider).furryMode, isTrue);
+
+    final storage = LocalStorageService();
+    expect(storage.getDefaultModelMode(), isTrue);
+
+    notifier.updateModelMode(false);
+    expect(
+      container.read(generationParamsNotifierProvider).furryMode,
+      isFalse,
+    );
+    expect(storage.getDefaultModelMode(), isFalse);
+  });
+
+  test('build should restore persisted furry mode', () async {
+    final storage = LocalStorageService();
+    await storage.setDefaultModelMode(true);
+
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    expect(container.read(generationParamsNotifierProvider).furryMode, isTrue);
+  });
+
   test('quality preset updates should keep params and UI provider in sync', () {
     final container = ProviderContainer();
     addTearDown(container.dispose);

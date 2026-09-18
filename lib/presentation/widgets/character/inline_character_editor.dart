@@ -147,10 +147,10 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
       pillScope: scope,
       initialPlainText: initialText,
       compact: widget.compact,
-      // 常驻卡（非 compact，官网布局）跟随内容自增高：3 行起步、12 行封顶，
-      // 封顶后框内滚动；经典布局面板（compact）维持 1/4 紧凑规格
-      minLines: widget.compact ? 1 : 3,
-      maxLines: widget.compact ? 4 : 12,
+      // 常驻卡（非 compact，官网布局）跟随内容无限自增高：4 行起步、不设上限；
+      // 经典布局面板（compact）维持 1/4 紧凑规格
+      minLines: widget.compact ? 1 : 4,
+      maxLines: widget.compact ? 4 : null,
       config: UnifiedPromptConfig.compactMode.copyWith(
         hintText: hintText,
         enableAutocomplete: enableAutocomplete,

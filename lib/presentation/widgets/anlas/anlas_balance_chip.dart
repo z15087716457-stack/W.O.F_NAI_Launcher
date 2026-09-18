@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../data/models/user/user_subscription.dart';
 import '../../providers/cost_estimate_provider.dart';
 import '../../providers/subscription_provider.dart';
 
@@ -36,7 +37,7 @@ class AnlasBalanceChip extends ConsumerWidget {
         context,
         ref,
         theme,
-        state.subscription.anlasBalance,
+        state.subscription,
         estimatedCost,
         compact,
       ),
@@ -88,10 +89,11 @@ class AnlasBalanceChip extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     ThemeData theme,
-    int balance,
+    UserSubscription subscription,
     int estimatedCost,
     bool compact,
   ) {
+    final balance = subscription.anlasBalance;
     final isInsufficient = balance < estimatedCost;
     final formatter = NumberFormat('#,###');
 
@@ -106,7 +108,9 @@ class AnlasBalanceChip extends ConsumerWidget {
       backgroundColor = null;
     }
 
-    return InkWell(
+    // 悬停拆分余额来源：订阅赠送（每月重置）+ 付费购买（永久）
+    final steps = subscription.trainingStepsLeft;
+    final chip = InkWell(
       onTap: () {
         HapticFeedback.lightImpact();
         ref.read(subscriptionNotifierProvider.notifier).refreshBalance();
@@ -131,6 +135,16 @@ class AnlasBalanceChip extends ConsumerWidget {
           ],
         ),
       ),
+    );
+
+    if (steps == null) return chip;
+    return Tooltip(
+      message:
+          '${context.l10n.anlas_subscription}: '
+          '${formatter.format(steps.fixedTrainingStepsLeft)}\n'
+          '${context.l10n.anlas_purchased}: '
+          '${formatter.format(steps.purchasedTrainingSteps)}',
+      child: chip,
     );
   }
 

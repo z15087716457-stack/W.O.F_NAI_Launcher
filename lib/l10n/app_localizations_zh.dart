@@ -912,7 +912,64 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_noiseSchedule => '噪声调度';
 
   @override
+  String get generation_modelMode => '模式';
+
+  @override
+  String get generation_modeAnime => '动画';
+
+  @override
+  String get generation_modeFurry => '福瑞';
+
+  @override
+  String get generation_modelGroupNew => '最新';
+
+  @override
+  String get generation_modelGroupLegacy => '旧版';
+
+  @override
+  String get generation_modelBadgeNew => 'NEW';
+
+  @override
+  String get generation_modelDesc_v5Curated => '我们最新的模型，基于精选图像子集训练。推荐用于流式传输。';
+
+  @override
+  String get generation_modelDesc_v5Full => '我们最新且最强的模型。';
+
+  @override
+  String get generation_modelDesc_v45Curated => '基于精选图像子集训练的 V4.5 模型。不再推荐使用。';
+
+  @override
+  String get generation_modelDesc_v45Full => '我们的 V4.5 全量模型。';
+
+  @override
+  String get generation_modelDesc_v4Curated => '基于精选图像子集训练的 V4 模型。';
+
+  @override
+  String get generation_modelDesc_v4Full => '我们的 V4 全量模型。';
+
+  @override
+  String get generation_sectionCharacters => '角色/定位';
+
+  @override
+  String get generation_sectionReferenceImages => '参考图';
+
+  @override
+  String get generation_sectionImageSettings => '图像设置';
+
+  @override
+  String get anlas_subscription => '订阅赠送';
+
+  @override
+  String get anlas_purchased => '付费购买';
+
+  @override
   String get prompt_positive => '正面';
+
+  @override
+  String get prompt_baseTab => '基础提示词';
+
+  @override
+  String get prompt_negativeTab => '负面';
 
   @override
   String get prompt_positivePrompt => '正向提示词';

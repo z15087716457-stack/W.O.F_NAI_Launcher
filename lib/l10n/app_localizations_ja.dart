@@ -926,7 +926,66 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_noiseSchedule => 'ノイズスケジュール';
 
   @override
+  String get generation_modelMode => 'モード';
+
+  @override
+  String get generation_modeAnime => 'アニメ';
+
+  @override
+  String get generation_modeFurry => 'ファーリー';
+
+  @override
+  String get generation_modelGroupNew => '新着';
+
+  @override
+  String get generation_modelGroupLegacy => 'レガシー';
+
+  @override
+  String get generation_modelBadgeNew => 'NEW';
+
+  @override
+  String get generation_modelDesc_v5Curated =>
+      '画像の厳選サブセットで学習した最新モデル。ストリーミングにおすすめです。';
+
+  @override
+  String get generation_modelDesc_v5Full => '最新かつ最高のモデルです。';
+
+  @override
+  String get generation_modelDesc_v45Curated =>
+      '厳選画像サブセットで学習した V4.5 モデル。現在は非推奨です。';
+
+  @override
+  String get generation_modelDesc_v45Full => 'V4.5 フルモデルです。';
+
+  @override
+  String get generation_modelDesc_v4Curated => '厳選画像サブセットで学習した V4 モデルです。';
+
+  @override
+  String get generation_modelDesc_v4Full => 'V4 フルモデルです。';
+
+  @override
+  String get generation_sectionCharacters => 'キャラクタープロンプト';
+
+  @override
+  String get generation_sectionReferenceImages => '参照画像';
+
+  @override
+  String get generation_sectionImageSettings => '画像設定';
+
+  @override
+  String get anlas_subscription => 'サブスク';
+
+  @override
+  String get anlas_purchased => '購入済み';
+
+  @override
   String get prompt_positive => 'プロンプト';
+
+  @override
+  String get prompt_baseTab => 'ベースプロンプト';
+
+  @override
+  String get prompt_negativeTab => '除外したい要素';
 
   @override
   String get prompt_positivePrompt => 'プロンプト';

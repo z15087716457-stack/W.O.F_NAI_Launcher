@@ -1040,6 +1040,59 @@ void main() {
         expect(result.vibeEncodingMap, isEmpty);
       },
     );
+
+    test(
+      'should inject fur dataset prefix into v4_prompt base_caption only',
+      () async {
+        final params = ImageParams(
+          prompt: '1girl',
+          model: ImageModels.animeDiffusionV5Full,
+          furryMode: true,
+          ucPreset: UcPresets.noneApiValue,
+        );
+        final builder = NAIImageRequestBuilder(
+          params: params,
+          encodeVibe: _fakeEncodeVibe,
+        );
+
+        final result = await builder.build(sampler: Samplers.kEuler);
+
+        // 官网 modelMode=Furry 的机制：前缀注入 v4_prompt.base_caption，
+        // input/effectivePrompt 保持原文，元数据回环不被污染
+        expect(
+          result.requestParameters['v4_prompt']['caption']['base_caption'],
+          startsWith('fur dataset, '),
+        );
+        expect(
+          result.requestParameters['v4_prompt']['caption']['base_caption'],
+          contains('1girl'),
+        );
+        expect(result.requestData['input'], isNot(startsWith('fur dataset')));
+        expect(result.effectivePrompt, isNot(startsWith('fur dataset')));
+      },
+    );
+
+    test(
+      'should not inject fur dataset prefix when furryMode is off',
+      () async {
+        final params = ImageParams(
+          prompt: '1girl',
+          model: ImageModels.animeDiffusionV5Full,
+          ucPreset: UcPresets.noneApiValue,
+        );
+        final builder = NAIImageRequestBuilder(
+          params: params,
+          encodeVibe: _fakeEncodeVibe,
+        );
+
+        final result = await builder.build(sampler: Samplers.kEuler);
+
+        expect(
+          result.requestParameters['v4_prompt']['caption']['base_caption'],
+          isNot(startsWith('fur dataset')),
+        );
+      },
+    );
   });
 }
 
