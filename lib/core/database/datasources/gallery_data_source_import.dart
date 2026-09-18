@@ -22,6 +22,29 @@ String _buildImportedFullPromptText(TagIndexImportEntry entry) {
   return buffer.toString();
 }
 
+/// 与 [_buildSearchablePromptText] 同口径的正向可搜索文本：
+/// JSONL 导入无角色框字段，主提示词 + 生成参数列即可。
+String _buildImportedSearchableText(TagIndexImportEntry entry) {
+  final buffer = StringBuffer();
+
+  void append(String? value) {
+    final text = value?.trim();
+    if (text == null || text.isEmpty) return;
+    if (buffer.isNotEmpty) {
+      buffer.write(' ');
+    }
+    buffer.write(text);
+  }
+
+  append(entry.prompt);
+  append(entry.model);
+  append(entry.sampler);
+  append(entry.software);
+  append(entry.source);
+
+  return buffer.toString();
+}
+
 /// 批量导入标签索引条目（JSONL 索引导入专用，幂等可重导）
 ///
 /// 每批在一个事务内完成：
@@ -153,6 +176,7 @@ Future<(int, int)> _importTagIndexEntries(
 
           // 2. 元数据（整行覆盖，幂等）
           final fullPromptText = _buildImportedFullPromptText(entry);
+          final positivePromptText = _buildImportedSearchableText(entry);
           await txn.insert(
             GalleryDataSource._metadataTable,
             {
@@ -187,11 +211,12 @@ Future<(int, int)> _importTagIndexEntries(
                   ? 1
                   : 0,
               'full_prompt_text': fullPromptText,
+              'positive_prompt_text': positivePromptText,
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
 
-          ftsUpdates[imageId] = fullPromptText;
+          ftsUpdates[imageId] = positivePromptText;
 
           // 3. 标签：先清旧关联再插入（幂等可重导）
           final oldTagRows = await txn.rawQuery(

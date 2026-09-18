@@ -982,6 +982,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
   Future<void> upsertMetadata(int imageId, NaiImageMetadata metadata) async {
     try {
       final fullPromptText = _buildFullPromptText(metadata);
+      final positivePromptText = _buildSearchablePromptText(metadata);
 
       await execute(
         'upsertMetadata',
@@ -1027,13 +1028,14 @@ class GalleryDataSource extends EnhancedBaseDataSource
             'has_metadata': metadata.hasData ? 1 : 0,
             'is_nsfw': existingNsfw,
             'full_prompt_text': fullPromptText,
+            'positive_prompt_text': positivePromptText,
           }, conflictAlgorithm: ConflictAlgorithm.replace);
         },
         timeout: const Duration(seconds: 30),
         maxRetries: 3,
       );
 
-      await _updateFtsIndex(imageId, fullPromptText);
+      await _updateFtsIndex(imageId, positivePromptText);
       _markDataChanged();
 
       // 【优化】高频操作不记录，避免日志刷屏
@@ -1062,6 +1064,35 @@ class GalleryDataSource extends EnhancedBaseDataSource
       append(cp);
     }
     for (final cp in metadata.characterNegativePrompts) {
+      append(cp);
+    }
+    append(metadata.model);
+    append(metadata.sampler);
+    append(metadata.software);
+    append(metadata.source);
+    append(metadata.version);
+
+    return buffer.toString();
+  }
+
+  /// 拼「可搜索正向文本」（positive_prompt_text 列 / FTS 索引口径）：
+  /// 与 [_buildFullPromptText] 同序但剔除主/角色负面提示词——搜索框
+  /// 语义是按画面内容找图，UC 里的常驻词（worst quality、watermark
+  /// 等）不应命中。
+  String _buildSearchablePromptText(NaiImageMetadata metadata) {
+    final buffer = StringBuffer();
+
+    void append(String? value) {
+      final text = value?.trim();
+      if (text == null || text.isEmpty) return;
+      if (buffer.isNotEmpty) {
+        buffer.write(' ');
+      }
+      buffer.write(text);
+    }
+
+    append(metadata.prompt);
+    for (final cp in metadata.characterPrompts) {
       append(cp);
     }
     append(metadata.model);
@@ -1147,6 +1178,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
             final imageId = entry.key;
             final metadata = entry.value;
             final fullPromptText = _buildFullPromptText(metadata);
+            final positivePromptText = _buildSearchablePromptText(metadata);
 
             await txn.insert(_metadataTable, {
               'image_id': imageId,
@@ -1175,9 +1207,10 @@ class GalleryDataSource extends EnhancedBaseDataSource
               'has_metadata': metadata.hasData ? 1 : 0,
               'is_nsfw': existingNsfw[imageId] ?? 0,
               'full_prompt_text': fullPromptText,
+              'positive_prompt_text': positivePromptText,
             }, conflictAlgorithm: ConflictAlgorithm.replace);
 
-            ftsUpdates[imageId] = fullPromptText;
+            ftsUpdates[imageId] = positivePromptText;
           }
 
           await _batchUpdateFtsIndex(txn, ftsUpdates);
@@ -1344,27 +1377,44 @@ class GalleryDataSource extends EnhancedBaseDataSource
   /// （全库 4.9 万行约 518MB → 84MB）。
   Future<Map<int, String>> getFullPromptTextsByImageIds(
     List<int> imageIds,
+  ) {
+    return _getPromptTextsByImageIds(imageIds, 'full_prompt_text');
+  }
+
+  /// 批量读取正向可搜索文本（标签过滤兜底匹配用）。
+  ///
+  /// 与搜索框同口径：主/角色负面提示词不参与匹配——标签 chip 语义是
+  /// 「画面上有这个内容」，UC 里的词不该命中。
+  Future<Map<int, String>> getPositivePromptTextsByImageIds(
+    List<int> imageIds,
+  ) {
+    return _getPromptTextsByImageIds(imageIds, 'positive_prompt_text');
+  }
+
+  Future<Map<int, String>> _getPromptTextsByImageIds(
+    List<int> imageIds,
+    String column,
   ) async {
     if (imageIds.isEmpty) return {};
 
-    return _trackQuery('getFullPromptTextsByImageIds', () async {
+    return _trackQuery('getPromptTextsByImageIds:$column', () async {
       final results = <int, String>{};
 
       try {
         const batchSize = 900;
         for (final batch in chunk(imageIds, batchSize)) {
           await execute(
-            'getFullPromptTextsByImageIds',
+            'getPromptTextsByImageIds:$column',
             (db) async {
               final placeholders = List.filled(batch.length, '?').join(',');
               final dbResults = await db.rawQuery(
-                'SELECT image_id, full_prompt_text FROM $_metadataTable '
+                'SELECT image_id, $column FROM $_metadataTable '
                 'WHERE image_id IN ($placeholders)',
                 batch,
               );
               for (final row in dbResults) {
                 results[row['image_id'] as int] =
-                    row['full_prompt_text'] as String? ?? '';
+                    row[column] as String? ?? '';
               }
             },
             timeout: const Duration(seconds: 30),
@@ -1373,7 +1423,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
         }
       } catch (e, stack) {
         AppLogger.e(
-          'Failed to get full prompt texts: ${imageIds.length} IDs',
+          'Failed to get prompt texts ($column): ${imageIds.length} IDs',
           e,
           stack,
           'GalleryDS',
@@ -1767,15 +1817,11 @@ class GalleryDataSource extends EnhancedBaseDataSource
 
     return _trackQuery('searchByMetadataText', () async {
       try {
+        // 可搜索列统一收敛到 positive_prompt_text：主/角色负面提示词
+        // 不命中（见 _buildSearchablePromptText 口径），且单列 LIKE 比
+        // 逐列 OR 少一次表达式求值。
         const searchableColumns = [
-          'm.full_prompt_text',
-          'm.prompt',
-          'm.negative_prompt',
-          'm.model',
-          'm.sampler',
-          'm.software',
-          'm.source',
-          'm.version',
+          'm.positive_prompt_text',
         ];
 
         final termConditions = <String>[];
@@ -1871,18 +1917,14 @@ class GalleryDataSource extends EnhancedBaseDataSource
       'searchByDelimitedTextSegments',
       () async {
         try {
+          // 文件名/路径 + 正向可搜索文本（positive_prompt_text 已含
+          // 主/角色正向提示词与 model/sampler/software/source/version，
+          // 负面提示词不参与匹配）。
           const searchableTextExpression = '''
             LOWER(
               COALESCE(i.file_name, '') || ' ' ||
               COALESCE(i.file_path, '') || ' ' ||
-              COALESCE(m.full_prompt_text, '') || ' ' ||
-              COALESCE(m.prompt, '') || ' ' ||
-              COALESCE(m.negative_prompt, '') || ' ' ||
-              COALESCE(m.model, '') || ' ' ||
-              COALESCE(m.sampler, '') || ' ' ||
-              COALESCE(m.software, '') || ' ' ||
-              COALESCE(m.source, '') || ' ' ||
-              COALESCE(m.version, '')
+              COALESCE(m.positive_prompt_text, '')
             )
           ''';
 

@@ -31,6 +31,10 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       // 迁移：清理冗余毒瘤索引并执行一次 ANALYZE（一次性，gallery_meta 记完成标记）
       await _migrateDropRedundantIndexesAndAnalyze(db);
 
+      // 迁移：positive_prompt_text 列 + 正向化 FTS 重建（一次性，
+      // gallery_meta 记完成标记）
+      await _migratePositiveOnlySearchText(db);
+
       AppLogger.i('Gallery tables initialized', 'GalleryDS');
     });
   }
@@ -218,6 +222,126 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
     }
   }
 
+  /// 迁移：补 positive_prompt_text 列并把 FTS 重建为「仅正向」口径。
+  ///
+  /// 历史原因：搜索框命中源里混入主/角色负面提示词，搜画面词会带出
+  /// UC 常驻词（worst quality、watermark 等）匹配的无关图。此迁移后
+  /// FTS 索引与 LIKE 可搜列统一走 positive_prompt_text（主提示词 +
+  /// 角色正向 + model/sampler/software/source/version），
+  /// full_prompt_text 维持全量口径供标签精确匹配使用。
+  ///
+  /// 回填两段式：先用列合成全覆盖（角色框行此步缺角色正向，第二步
+  /// 按 raw_json 里的 char_captions 重新解析补齐），随后整体重建 FTS。
+  /// 幂等：gallery_meta 有标记即整体跳过；中途失败不落标记下次重试。
+  Future<void> _migratePositiveOnlySearchText(Database db) async {
+    try {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ${GalleryDataSource._galleryMetaTable} (
+          key TEXT PRIMARY KEY,
+          value TEXT
+        )
+      ''');
+      final done = await db.rawQuery(
+        "SELECT value FROM ${GalleryDataSource._galleryMetaTable} "
+        "WHERE key = 'positive_search_text_v1'",
+      );
+      if (done.isNotEmpty) return;
+
+      // 1. 列缺失则补列（CREATE TABLE 对新库已含，老库靠这里幂等补齐）
+      final tableInfo = await db.rawQuery(
+        'PRAGMA table_info(${GalleryDataSource._metadataTable})',
+      );
+      final hasColumn = tableInfo.any(
+        (col) => col['name'] == 'positive_prompt_text',
+      );
+      if (!hasColumn) {
+        await db.execute(
+          'ALTER TABLE ${GalleryDataSource._metadataTable} '
+          "ADD COLUMN positive_prompt_text TEXT NOT NULL DEFAULT ''",
+        );
+        AppLogger.i(
+          '[Migration] positive_prompt_text column added',
+          'GalleryDS',
+        );
+      }
+
+      // 2. 全量回填：列合成（主提示词 + 生成参数；角色框行下一步补齐）
+      await db.execute('''
+        UPDATE ${GalleryDataSource._metadataTable}
+        SET positive_prompt_text = TRIM(
+          COALESCE(prompt, '') || ' ' ||
+          COALESCE(model, '') || ' ' ||
+          COALESCE(sampler, '') || ' ' ||
+          COALESCE(software, '') || ' ' ||
+          COALESCE(source, '') || ' ' ||
+          COALESCE(version, '')
+        )
+      ''');
+
+      // 3. 角色框行：raw_json 里有 char_captions 的重新解析，覆盖为
+      // 与 _buildSearchablePromptText 完全一致的口径（含角色正向）
+      final charRows = await db.rawQuery(
+        'SELECT image_id, raw_json FROM ${GalleryDataSource._metadataTable} '
+        "WHERE raw_json LIKE '%char_captions%'",
+      );
+      var charPatched = 0;
+      if (charRows.isNotEmpty) {
+        final source = this as GalleryDataSource;
+        final batch = db.batch();
+        for (final row in charRows) {
+          final rawJson = row['raw_json'] as String?;
+          if (rawJson == null || rawJson.isEmpty) continue;
+          final parsed = NovelAiParser().parse({'Comment': rawJson});
+          if (parsed == null || !parsed.hasCharacters) continue;
+          batch.update(
+            GalleryDataSource._metadataTable,
+            {
+              'positive_prompt_text': source._buildSearchablePromptText(
+                parsed,
+              ),
+            },
+            where: 'image_id = ?',
+            whereArgs: [(row['image_id'] as num).toInt()],
+          );
+          charPatched++;
+        }
+        if (charPatched > 0) {
+          await batch.commit(noResult: true);
+        }
+      }
+
+      // 4. 整体重建 FTS 为正向口径
+      await db.execute(
+        'DELETE FROM ${GalleryDataSource._ftsIndexTable}',
+      );
+      await db.execute('''
+        INSERT INTO ${GalleryDataSource._ftsIndexTable} (image_id, prompt_text)
+        SELECT image_id, positive_prompt_text
+        FROM ${GalleryDataSource._metadataTable}
+        WHERE positive_prompt_text != ''
+      ''');
+
+      await db.insert(GalleryDataSource._galleryMetaTable, {
+        'key': 'positive_search_text_v1',
+        'value': '${DateTime.now().millisecondsSinceEpoch}',
+      });
+      (this as GalleryDataSource)._markDataChanged();
+      AppLogger.i(
+        '[Migration] positive_prompt_text backfilled and FTS rebuilt '
+        '($charPatched char-caption rows reparsed)',
+        'GalleryDS',
+      );
+    } catch (e, stack) {
+      // 迁移失败不阻止应用启动（不落标记：下次启动重试）
+      AppLogger.e(
+        '[Migration] Failed to build positive-only search text',
+        e,
+        stack,
+        'GalleryDS',
+      );
+    }
+  }
+
   Future<void> _createImagesTable(Database db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS ${GalleryDataSource._imagesTable} (
@@ -385,6 +509,7 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
         has_metadata INTEGER NOT NULL DEFAULT 0,
         is_nsfw INTEGER NOT NULL DEFAULT 0,
         full_prompt_text TEXT NOT NULL DEFAULT '',
+        positive_prompt_text TEXT NOT NULL DEFAULT '',
         vibe_encoding TEXT,
         vibe_strength REAL,
         vibe_info_extracted REAL,

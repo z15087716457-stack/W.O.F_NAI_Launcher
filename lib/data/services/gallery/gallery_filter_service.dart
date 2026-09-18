@@ -754,13 +754,14 @@ class GalleryFilterService {
         files.map((f) => f.path).toList(),
       );
 
-      // 获取所有图片的标签；元数据只取参与匹配的完整提示词一列
-      // （全库约 4.9 万行：拉全行约 518MB 文本 → 84MB）
+      // 获取所有图片的标签；元数据只取参与匹配的正向提示词一列
+      // （全库约 4.9 万行：拉全行约 518MB 文本 → 84MB）。
+      // 兜底匹配用 positive_prompt_text：负面提示词里的词不算命中
+      // （标签 chip 语义 = 画面内容，UC 常驻词不该带出无关图）。
       final imageIds = pathToIdMap.values.whereType<int>().toList();
       final tagsMap = await _dataSource.getTagsByImageIds(imageIds);
-      final promptTextsMap = await _dataSource.getFullPromptTextsByImageIds(
-        imageIds,
-      );
+      final promptTextsMap = await _dataSource
+          .getPositivePromptTextsByImageIds(imageIds);
 
       return files.where((file) {
         if (cancelToken.isCancelled) return false;
