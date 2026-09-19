@@ -176,11 +176,17 @@ class NAILauncherApp extends ConsumerWidget {
 
           // 字体缩放全局应用 + FEAT-23 内置一体标题栏（Windows）
           builder: (context, child) {
+            // builder 位于 Navigator 之上，树内没有 Overlay；标题栏内
+            // 不能依赖 Overlay 的组件（Tooltip 已改为树内浮签实现）。
+            // child 作为普通子组件直传，保证 element 在 MaterialApp
+            // rebuild 时原地更新、不拆树重建。
             return MediaQuery(
               data: MediaQuery.of(
                 context,
               ).copyWith(textScaler: TextScaler.linear(fontScale)),
-              child: IntegratedTitleBarShell(child: child!),
+              child: IntegratedTitleBarShell(
+                child: child ?? const SizedBox.shrink(),
+              ),
             );
           },
         ),

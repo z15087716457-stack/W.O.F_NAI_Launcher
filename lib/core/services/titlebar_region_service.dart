@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
@@ -17,8 +18,30 @@ class TitleBarRegionService {
   static const MethodChannel _channel =
       MethodChannel('com.nailauncher/titlebar');
 
+  /// 活跃标题栏实例计数。
+  ///
+  /// `MaterialApp.router` 的 builder 在 provider 就绪时会重建整棵子树，
+  /// `_TitleBar` 会被「mount → mount → unmount」走一遍，实际时序里
+  /// 旧实例的 dispose 晚于新实例的 initState，若 dispose 里直接 clear
+  /// 会把新实例刚上报的命中区抹掉。改用引用计数：initState `retain()`、
+  /// dispose `release()`，计数归零才真正下发 clear。
+  static int _activeBars = 0;
+
   /// 平台通道是否可用（Windows 桌面端才有对应原生实现）。
   static bool get isSupported => !kIsWeb && Platform.isWindows;
+
+  /// 标题栏实例挂载时调用：计数 +1。
+  static void retain() {
+    _activeBars++;
+  }
+
+  /// 标题栏实例卸载时调用：计数 -1；归零时清除原生命中区。
+  static void release() {
+    if (_activeBars > 0) _activeBars--;
+    if (_activeBars == 0) {
+      unawaited(_invokeClear());
+    }
+  }
 
   /// 上报标题栏命中区。
   ///
@@ -44,7 +67,9 @@ class TitleBarRegionService {
   }
 
   /// 清除命中区（标题栏卸载或禁用时恢复默认命中）。
-  static Future<void> clear() async {
+  ///
+  /// 外部调用走 [release] 计数路径；真正卸载（计数归零）才下发。
+  static Future<void> _invokeClear() async {
     if (!isSupported) return;
     try {
       await _channel.invokeMethod<void>('clear');

@@ -33,6 +33,11 @@ namespace titlebar_region {
 void SetRegion(double bar_height, double reserved_right);
 void Clear();
 
+// 仅做命中判断：lparam 为屏幕坐标点，hwnd 为「拥有该命中区的窗口」
+// （即顶层父窗口；子窗口 subclass 透传命中测试时同样按父客户区
+// 判断，保证两处坐标系一致）。命中标题栏拖拽区返回 true。
+bool IsInDragArea(HWND hwnd, LPARAM lparam);
+
 // WM_NCHITTEST 处理。lParam 与 DefWindowProc 收到的原始值相同
 // （坐标为屏幕坐标）。命中标题栏区（且不在按钮保留区）时返回
 // HTCAPTION，否则返回 std::nullopt 表示「不处理，交给默认链」。

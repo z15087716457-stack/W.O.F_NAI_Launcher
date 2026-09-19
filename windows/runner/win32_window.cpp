@@ -4,6 +4,7 @@
 #include <dwmapi.h>
 #include <flutter_windows.h>
 #include <uiautomation.h>
+#include <windowsx.h>
 
 #include "resource.h"
 #include "titlebar_region.h"
@@ -33,6 +34,37 @@ constexpr const wchar_t kGetPreferredBrightnessRegValue[] = L"AppsUseLightTheme"
 static int g_active_window_count = 0;
 
 constexpr UINT_PTR kFlutterAccessibilityCrashGuardSubclassId = 1;
+constexpr UINT_PTR kTitleBarHitTestSubclassId = 2;
+
+// FEAT-23：FlutterView 子窗口铺满整个客户区，鼠标落在其上时
+// WM_NCHITTEST 只发给子窗口，父窗口的 HTCAPTION 分支永远收不到，
+// 标题栏拖拽/双击最大化因此失效。
+//
+// 这里对子窗口再挂一个 subclass：命中标题栏拖拽区时返回
+// HTTRANSPARENT，把命中测试透传给底下的父窗口；父窗口的
+// WM_NCHITTEST（titlebar_region::HandleNcHitTest）再返回
+// HTCAPTION，原生拖拽/双击/Aero Snap 恢复。按钮保留区与栏外
+// 区域正常走 DefSubclassProc → 返回 HTCLIENT，Flutter 输入不受影响。
+LRESULT CALLBACK TitleBarHitTestProc(HWND window,
+                                     UINT message,
+                                     WPARAM wparam,
+                                     LPARAM lparam,
+                                     UINT_PTR subclass_id,
+                                     DWORD_PTR /* reference_data */) {
+  if (message == WM_NCHITTEST) {
+    if (HWND parent = GetParent(window)) {
+      if (titlebar_region::IsInDragArea(parent, lparam)) {
+        return HTTRANSPARENT;
+      }
+    }
+  }
+
+  if (message == WM_NCDESTROY) {
+    RemoveWindowSubclass(window, TitleBarHitTestProc, subclass_id);
+  }
+
+  return DefSubclassProc(window, message, wparam, lparam);
+}
 
 bool IsFlutterAccessibilityRootRequest(LPARAM lparam) {
   const DWORD object_id =
@@ -285,6 +317,12 @@ Win32Window* Win32Window::GetThisFromHandle(HWND const window) noexcept {
 bool Win32Window::SetChildContent(HWND content) {
   if (!SetWindowSubclass(content, FlutterAccessibilityCrashGuardProc,
                          kFlutterAccessibilityCrashGuardSubclassId, 0)) {
+    return false;
+  }
+  // FEAT-23：标题栏命中透传 subclass。与上面的 CrashGuard 一样挂在
+  // FlutterView 子窗口上，二者互不干扰。
+  if (!SetWindowSubclass(content, TitleBarHitTestProc,
+                         kTitleBarHitTestSubclassId, 0)) {
     return false;
   }
 

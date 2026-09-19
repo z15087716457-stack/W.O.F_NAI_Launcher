@@ -61,28 +61,45 @@ class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
     if (!TitleBarRegionService.isSupported) {
       return widget.child;
     }
-    return Column(
+    // Stack 布局：内容在下、标题栏最后画——按钮浮签（_CaptionButton 树内
+    // 实现）需要盖在内容之上，Column 的「标题栏先画」顺序做不到。
+    const double barH = IntegratedTitleBarShell.barHeight;
+    return Stack(
       children: [
-        const _TitleBar(),
-        ValueListenableBuilder<bool>(
-          valueListenable: _contentScrolled,
-          builder: (context, scrolled, _) {
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 120),
-              height: 0.5,
-              color: scrolled
-                  ? Theme.of(context)
-                      .colorScheme
-                      .outlineVariant
-                      .withValues(alpha: 0.5)
-                  : Colors.transparent,
-            );
-          },
-        ),
-        Expanded(
+        Positioned(
+          top: barH + 0.5,
+          left: 0,
+          right: 0,
+          bottom: 0,
           child: NotificationListener<ScrollNotification>(
             onNotification: _onScrollNotification,
             child: widget.child,
+          ),
+        ),
+        const Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: _TitleBar(),
+        ),
+        Positioned(
+          top: barH,
+          left: 0,
+          right: 0,
+          child: ValueListenableBuilder<bool>(
+            valueListenable: _contentScrolled,
+            builder: (context, scrolled, _) {
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 120),
+                height: 0.5,
+                color: scrolled
+                    ? Theme.of(context)
+                        .colorScheme
+                        .outlineVariant
+                        .withValues(alpha: 0.5)
+                    : Colors.transparent,
+              );
+            },
           ),
         ),
       ],
@@ -104,6 +121,7 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
   void initState() {
     super.initState();
     windowManager.addListener(this);
+    TitleBarRegionService.retain();
     _reportRegion();
     unawaited(_syncMaximized());
   }
@@ -111,7 +129,9 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
   @override
   void dispose() {
     windowManager.removeListener(this);
-    unawaited(TitleBarRegionService.clear());
+    // 引用计数：builder 重建时本实例会被「先挂新再拆旧」，计数不为
+    // 零就不下发 clear，不会误清新实例上报的命中区。
+    TitleBarRegionService.release();
     super.dispose();
   }
 
@@ -162,7 +182,8 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    // 首帧 l10n 可能未就绪（builder 层早于路由内容），用兜底文案。
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       height: IntegratedTitleBarShell.barHeight,
@@ -193,15 +214,15 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
           const Spacer(),
           _CaptionButton(
             icon: Icons.remove,
-            tooltip: l10n.titleBar_minimize,
+            tooltip: l10n?.titleBar_minimize ?? 'Minimize',
             onTap: () => _safeWindowCall(windowManager.minimize),
           ),
           _CaptionButton(
             icon: _isMaximized ? Icons.filter_none : Icons.crop_square,
             iconSize: _isMaximized ? 14 : 15,
             tooltip: _isMaximized
-                ? l10n.titleBar_restore
-                : l10n.titleBar_maximize,
+                ? (l10n?.titleBar_restore ?? 'Restore')
+                : (l10n?.titleBar_maximize ?? 'Maximize'),
             onTap: () => _safeWindowCall(
               _isMaximized
                   ? windowManager.unmaximize
@@ -210,7 +231,7 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
           ),
           _CaptionButton(
             icon: Icons.close,
-            tooltip: l10n.titleBar_close,
+            tooltip: l10n?.titleBar_close ?? 'Close',
             isClose: true,
             // windowManager.close() 发 SC_CLOSE → WM_CLOSE；
             // setPreventClose(true) 下走 onWindowClose → 隐藏托盘。
@@ -244,6 +265,26 @@ class _CaptionButton extends StatefulWidget {
 
 class _CaptionButtonState extends State<_CaptionButton> {
   bool _hover = false;
+  bool _tipVisible = false;
+  Timer? _tipTimer;
+
+  void _setHover(bool hover) {
+    setState(() => _hover = hover);
+    _tipTimer?.cancel();
+    if (hover) {
+      _tipTimer = Timer(const Duration(milliseconds: 400), () {
+        if (mounted) setState(() => _tipVisible = true);
+      });
+    } else if (_tipVisible) {
+      setState(() => _tipVisible = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _tipTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -257,20 +298,52 @@ class _CaptionButtonState extends State<_CaptionButton> {
     final Color fg = widget.isClose && hovered
         ? Colors.white
         : colorScheme.onSurface.withValues(alpha: 0.9);
-    return Tooltip(
-      message: widget.tooltip,
-      waitDuration: const Duration(milliseconds: 400),
+    // 注意：本组件挂在 MaterialApp.router builder 之上（Navigator/Overlay
+    // 的兄弟），不能用 Tooltip——它在树内找不到 Overlay 会直接红屏。
+    // 浮签用 Stack 内联实现。
+    return Semantics(
+      label: widget.tooltip,
+      button: true,
       child: MouseRegion(
-        onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) => setState(() => _hover = false),
+        onEnter: (_) => _setHover(true),
+        onExit: (_) => _setHover(false),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: widget.onTap,
-          child: Container(
-            width: IntegratedTitleBarShell.buttonWidth,
-            height: IntegratedTitleBarShell.barHeight,
-            color: bg,
-            child: Icon(widget.icon, size: widget.iconSize, color: fg),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: IntegratedTitleBarShell.buttonWidth,
+                height: IntegratedTitleBarShell.barHeight,
+                color: bg,
+                child: Icon(widget.icon, size: widget.iconSize, color: fg),
+              ),
+              if (_tipVisible)
+                Positioned(
+                  top: IntegratedTitleBarShell.barHeight + 4,
+                  left: 0,
+                  child: IgnorePointer(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.inverseSurface,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        widget.tooltip,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: colorScheme.onInverseSurface,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),

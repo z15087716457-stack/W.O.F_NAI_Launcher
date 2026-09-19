@@ -27,35 +27,38 @@ void Clear() {
   g_reserved_right_logical = 0.0;
 }
 
-std::optional<LRESULT> HandleNcHitTest(HWND hwnd, LPARAM lparam) {
+bool IsInDragArea(HWND hwnd, LPARAM lparam) {
   if (g_bar_height_logical <= 0.0) {
-    return std::nullopt;
+    return false;
   }
 
-  // lParam 是屏幕坐标，转成客户区坐标再判断。
+  // lParam 是屏幕坐标，转成 hwnd 的客户区坐标再判断。
+  // 调用方传父窗口 hwnd：子窗口 subclass 里也把命中测试按父客户区
+  // 判定，两处逻辑保持一致。
   POINT pt{GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
   ScreenToClient(hwnd, &pt);
 
-  // 非客户区（边框/标题带残留条）直接交给默认链，保证原生
-  // 边缘缩放、最大化后的顶部 8px 补边命中不受影响。
+  // 非客户区（边框/标题带残留条）不算命中。
   if (pt.x < 0 || pt.y < 0) {
-    return std::nullopt;
+    return false;
   }
 
   RECT client{};
   if (!GetClientRect(hwnd, &client)) {
-    return std::nullopt;
+    return false;
   }
   const int client_width = client.right - client.left;
 
   const int bar_px = ToPixels(hwnd, g_bar_height_logical);
   const int reserved_px = ToPixels(hwnd, g_reserved_right_logical);
 
-  if (pt.y >= bar_px) {
-    return std::nullopt;  // 标题栏以下，交给 Flutter/默认链。
-  }
-  if (pt.x >= client_width - reserved_px) {
-    return std::nullopt;  // 按钮保留区保持 HTCLIENT。
+  // 栏高以下（正文）与右侧按钮保留区都不命中拖拽区。
+  return (pt.y < bar_px) && (pt.x < client_width - reserved_px);
+}
+
+std::optional<LRESULT> HandleNcHitTest(HWND hwnd, LPARAM lparam) {
+  if (!IsInDragArea(hwnd, lparam)) {
+    return std::nullopt;
   }
   return HTCAPTION;
 }
