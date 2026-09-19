@@ -432,6 +432,35 @@ void main() {
       },
     );
 
+    testWidgets('chips flow-wrap: short chips share a row', (tester) async {
+      final blocks = [
+        PromptBlock.create(id: 'b-1', title: 'A', content: 'a'),
+        PromptBlock.create(id: 'b-2', title: 'B', content: 'b'),
+      ];
+      final container = ProviderContainer(
+        overrides: [
+          promptBlockPaletteNotifierProvider.overrideWith(
+            () => _FakePaletteNotifier(blocks),
+          ),
+          promptBlockLibraryNotifierProvider.overrideWith(
+            _NoopLibraryNotifier.new,
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(buildApp(container));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('prompt-block-palette-toggle')));
+      await tester.pump();
+      await tester.pump();
+
+      // 两个窄芯片并排同一行（A 的右边挨着 B 的左边，顶部对齐）。
+      final a = tester.getRect(find.text('A').first);
+      final b = tester.getRect(find.text('B').first);
+      expect(a.top, closeTo(b.top, 1));
+      expect(b.left, greaterThan(a.left));
+    });
+
     testWidgets('multi-select mode picks chips and removes selection', (
       tester,
     ) async {

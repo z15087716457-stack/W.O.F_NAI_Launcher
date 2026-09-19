@@ -467,20 +467,24 @@ class _PromptBlockPaletteCardState
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      for (var i = 0; i < blocks.length; i++)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: _PaletteChipRow(
-                            block: blocks[i],
-                            index: i,
-                            folders: folders,
-                            multiSelectMode: _multiSelectMode,
-                            selected: selectedIds.contains(blocks[i].id),
-                            onToggleSelected: _multiSelectMode
-                                ? () => _toggleSelected(blocks[i].id)
-                                : null,
-                          ),
-                        ),
+                      // 流式排布：一行摆不下整块就自动换到下一行。
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          for (var i = 0; i < blocks.length; i++)
+                            _PaletteChipRow(
+                              block: blocks[i],
+                              index: i,
+                              folders: folders,
+                              multiSelectMode: _multiSelectMode,
+                              selected: selectedIds.contains(blocks[i].id),
+                              onToggleSelected: _multiSelectMode
+                                  ? () => _toggleSelected(blocks[i].id)
+                                  : null,
+                            ),
+                        ],
+                      ),
                       if (blocks.isEmpty)
                         Padding(
                           padding: const EdgeInsets.fromLTRB(4, 8, 4, 10),
@@ -603,6 +607,8 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
                 : null,
           ),
           child: Stack(
+            // 流式排布下收缩到芯片尺寸，别吃满 Wrap 给的宽松宽。
+            fit: StackFit.loose,
             children: [
               Draggable<PromptBlockDragData>(
                 data: PromptBlockDragData(
@@ -620,7 +626,11 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
                   ),
                 ),
                 childWhenDragging: Opacity(opacity: 0.35, child: chip),
-                child: Align(alignment: Alignment.centerLeft, child: chip),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: 1,
+                  child: chip,
+                ),
               ),
               if (_hovering && !widget.multiSelectMode)
                 Positioned(
