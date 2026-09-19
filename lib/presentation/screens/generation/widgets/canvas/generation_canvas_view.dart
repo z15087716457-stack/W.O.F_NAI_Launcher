@@ -77,6 +77,10 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   // 当前布局使用的展开组 key（用于 build 期检测组选中变化重排）
   String? _layoutExpandedKey;
 
+  // 组覆盖层工具条 items 缓存：buildCanvasToolbarItems 逐帧重建会让
+  // 每个相机 tick 都重跑注册表；数据变化（recomputeLayout）时统一失效。
+  final Map<String, List<CanvasToolbarItem>> _toolbarItemsCache = {};
+
   // 懒露出窗口：初渲只布局前 N 组，视口底接近内容底（<800px）时增量露出
   // 更老的组（对标官网无限滚动触底翻页；我方历史为内存态 take(50)，
   // 此窗口等价提供「触底再露出」的浏览手感与初始布局成本控制）。
@@ -182,6 +186,8 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       previousKeys.isEmpty ? _initialVisibleGroups : visible.length,
     );
     _groups = visible;
+    // 组数据可能变化（filePath 回写等），工具条注册项按新数据重建。
+    _toolbarItemsCache.clear();
 
     // 组级选中 → 该组进展开态（组内 tile 单行横排）。
     final result = layoutCanvasFeed(
@@ -673,26 +679,22 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     final theme = Theme.of(context);
     final inv = 1.0 / camScale;
 
-    // 反缩放锚点：屏幕恒定尺寸条 = OverflowBox + Transform.scale(inv)。
-    // 头部条：组上方（世界 y - 44*inv），水平居中于组中心。
+    // 反缩放锚点：屏幕恒定尺寸条 = Positioned(loose) + Transform.scale(inv)。
+    // 不需要 OverflowBox——Positioned 本就给无界约束；叠 OverflowBox 反而
+    // 触发 infinite-size 布局错误，并把 FractionalTranslation 算成 NaN。
+    // 居中/贴边由调用处在 scale 内层包 FractionalTranslation 实现。
     Widget antiScaled({
       required double worldX,
       required double worldY,
       required Widget child,
-      double screenW = 0, // 0=自适应
     }) {
       return Positioned(
         left: worldX,
         top: worldY,
-        child: OverflowBox(
-          maxWidth: double.infinity,
-          maxHeight: double.infinity,
+        child: Transform.scale(
+          scale: inv,
           alignment: Alignment.topLeft,
-          child: Transform.scale(
-            scale: inv,
-            alignment: Alignment.topLeft,
-            child: child,
-          ),
+          child: child,
         ),
       );
     }
@@ -752,6 +754,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       ),
       // 底部工具条（R3）：作用于组内首图，top 条挂图上方 / bottom 条挂图下方，
       // 两者都由 CanvasTileToolbar 内部拆分；可用屏幕宽按组宽*camScale 估算塌缩。
+      // items 按组 key 缓存，相机逐帧 Transform 不重建注册表。
       if (firstImage != null)
         antiScaled(
           worldX: rect.center.dx,
@@ -759,10 +762,13 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
           child: FractionalTranslation(
             translation: const Offset(-0.5, 0),
             child: CanvasTileToolbar(
-              items: buildCanvasToolbarItems(
-                context: context,
-                ref: ref,
-                image: firstImage,
+              items: _toolbarItemsCache.putIfAbsent(
+                group.key,
+                () => buildCanvasToolbarItems(
+                  context: context,
+                  ref: ref,
+                  image: firstImage,
+                ),
               ),
               // 组在屏幕上的投影宽度即工具条可用宽（反缩放后 1:1）。
               maxWidth: math.max(120.0, rect.width * camScale - 24),
@@ -805,6 +811,8 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         ref: ref,
         image: image,
         showIndex: false,
+        canvasTile: true, // 轻量模式：关 hover/gloss/预热/拖拽包装
+        decodeScale: 0.5, // 画布 tile 半尺寸解码（zoom>0.5 才损失清晰度）
         enableHoverScale: false, // 世界空间内 hover 放大等于挪世界，禁用
         // 组级选中态：组内任一 tile 命中即整组高亮（卡片描边仍按 tile 级）
         isSelected:

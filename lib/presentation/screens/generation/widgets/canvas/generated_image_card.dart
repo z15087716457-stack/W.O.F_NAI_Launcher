@@ -29,6 +29,17 @@ Widget buildGeneratedImageCard({
   bool isSelected = false,
   VoidCallback? onTap,
   bool enableHoverScale = true,
+
+  /// 画布 tile 轻量模式：关 hover 特效/光泽/分享预热/右键菜单/拖拽包装。
+  ///
+  /// 画布滑动时 tile 批量滑过光标会连环触发 onEnter→warmUp（写临时文件
+  /// +isolate 编解码）和 hover setState，是滑卡卡死的主因；画布上动作面
+  /// 由 CanvasTileToolbar（R3）承担，右键菜单与拖拽暂不在画布提供。
+  bool canvasTile = false,
+
+  /// 解码降采样（0.5=半尺寸解码）。画布 tile 按自然像素布局，全尺寸
+  /// 解码 + 双阴影在相机逐帧 Transform 下是 GPU/内存炸弹。
+  double? decodeScale,
 }) {
   final actions = GeneratedImageActions(ref);
   final imageBytes = image.bytes;
@@ -42,7 +53,13 @@ Widget buildGeneratedImageCard({
     showIndex: showIndex,
     isSelected: isSelected,
     enableSelection: false,
-    enableHoverScale: enableHoverScale,
+    enableHoverScale: canvasTile ? false : enableHoverScale,
+    // 右键菜单保留兜底（详情/发送到工作流），只是不再有 hover 特效与预热。
+    enableContextMenu: true,
+    enableGlossEffect: !canvasTile,
+    hoverEffectsEnabled: !canvasTile,
+    shareWarmupEnabled: !canvasTile,
+    decodeScale: decodeScale,
     enableSaveAction: image.canSave,
     enableCopyAction: image.canSave,
     statusBadgeLabel: isFailedSnapshot
@@ -113,7 +130,8 @@ Widget buildGeneratedImageCard({
         : null,
   );
 
-  if (!image.canDrag) {
+  // 画布 tile 不挂拖拽（避免 hover→warmUp 预热写盘）；canDrag 兜底同原。
+  if (canvasTile || !image.canDrag) {
     return card;
   }
 
