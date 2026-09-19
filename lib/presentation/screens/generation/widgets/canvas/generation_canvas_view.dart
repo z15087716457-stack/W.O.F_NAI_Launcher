@@ -602,10 +602,30 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                   color: theme.colorScheme.surfaceContainerLowest,
                   child: Stack(
                     children: [
-                      // 世界层：Transform(offset+scale) 承载全部 tile
+                      // 世界层：Transform(offset+scale) 承载全部 tile。
+                      // 关键性能结构：tile Stack 挂在 AnimatedBuilder.child——
+                      // 相机每个 tick 只更新 Transform 的 RenderObject 矩阵，
+                      // 子树 widget 实例不变 → element 零重建（对标官网
+                      // 「相机直写 style.transform 不走 React 渲染」）。
+                      // tile 列表只在 setState（布局/选中变化）时重建。
                       AnimatedBuilder(
                         animation: _controller,
-                        builder: (context, _) {
+                        // 世界层 Stack 尺寸=视口、原点在左上，tile 世界坐标
+                        // 以 x=0 居中（负 x 占半幅）——默认 hardEdge 会把
+                        // 负 x 部分裁掉，必须 Clip.none；视口裁剪交给外层。
+                        // 不再按相机可见性剔除：child 不逐帧重建，剔除失去
+                        // 意义；Flutter paint 阶段天然跳过屏外元素。
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            for (final p in _placements)
+                              Positioned.fromRect(
+                                rect: p.rect,
+                                child: _buildTile(p),
+                              ),
+                          ],
+                        ),
+                        builder: (context, world) {
                           final cam = _controller.camera;
                           return Transform(
                             transform: Matrix4.identity()
@@ -617,29 +637,16 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                               )
                               ..scaleByDouble(cam.scale, cam.scale, 1, 1),
                             alignment: Alignment.topLeft,
-                            // 世界层 Stack 尺寸=视口、原点在左上，tile 世界坐标
-                            // 以 x=0 居中（负 x 占半幅）——默认 hardEdge 会把
-                            // 负 x 部分裁掉，必须 Clip.none；视口裁剪交给外层。
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                for (final p in _placements)
-                                  if (_isPlacementVisible(p, cam))
-                                    Positioned.fromRect(
-                                      rect: p.rect,
-                                      child: _buildTile(p),
-                                    ),
-                                // 组展开态：选中组的 groupRect 上覆组级头部条
-                                // （反缩放：随相机 zoom 反比放大，保持屏幕恒定字号）。
-                                for (final g in _groups)
-                                  if (_layoutExpandedKey == g.key &&
-                                      _groupRects.containsKey(g) &&
-                                      !g.isInFlight)
-                                    ..._buildGroupOverlay(g, cam.scale),
-                              ],
-                            ),
+                            child: world,
                           );
                         },
+                      ),
+                      // 组展开态覆盖层：屏幕空间 UI（头部条+工具条），
+                      // 不随 Transform——屏幕恒定尺寸天然成立，无需反缩放。
+                      // 每帧只重建这俩轻量条的位置，不碰 tile 树。
+                      AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, _) => _buildScreenSpaceOverlays(),
                       ),
                       // 空态
                       if (_placements.isEmpty)
@@ -666,39 +673,33 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     );
   }
 
-  bool _isPlacementVisible(CanvasPlacement p, CanvasCamera cam) {
-    if (_viewportSize.isEmpty) return false;
-    final visible = cam.visibleWorldRect(_viewportSize).inflate(80);
-    return p.rect.overlaps(visible);
-  }
+  /// 组展开态覆盖层（屏幕空间）：选中组的头部条挂组上方、工具条挂组下方。
+  /// 不随世界 Transform——屏幕恒定尺寸天然成立；每帧只按相机投影重算
+  /// 两个条的位置，tile 树完全不参与。
+  Widget _buildScreenSpaceOverlays() {
+    if (_viewportSize.isEmpty) return const SizedBox.shrink();
+    final cam = _controller.camera;
+    CanvasGroup? group;
+    for (final g in _groups) {
+      if (_layoutExpandedKey == g.key && !g.isInFlight) {
+        group = g;
+        break;
+      }
+    }
+    if (group == null) return const SizedBox.shrink();
+    final worldRect = _groupRects[group];
+    if (worldRect == null) return const SizedBox.shrink();
 
-  /// 组展开态世界层覆盖：组上方出反缩放的头部条（组序号/张数/种子），
-  /// 底部留出工具条挂点占位（R3 填内容）。返回若干 Positioned。
-  List<Widget> _buildGroupOverlay(CanvasGroup group, double camScale) {
-    final rect = _groupRects[group]!;
-    final theme = Theme.of(context);
-    final inv = 1.0 / camScale;
-
-    // 反缩放锚点：屏幕恒定尺寸条 = Positioned(loose) + Transform.scale(inv)。
-    // 不需要 OverflowBox——Positioned 本就给无界约束；叠 OverflowBox 反而
-    // 触发 infinite-size 布局错误，并把 FractionalTranslation 算成 NaN。
-    // 居中/贴边由调用处在 scale 内层包 FractionalTranslation 实现。
-    Widget antiScaled({
-      required double worldX,
-      required double worldY,
-      required Widget child,
-    }) {
-      return Positioned(
-        left: worldX,
-        top: worldY,
-        child: Transform.scale(
-          scale: inv,
-          alignment: Alignment.topLeft,
-          child: child,
-        ),
-      );
+    // 世界 rect → 屏幕 rect（相机 offset+scale 投影）
+    final topLeft = cam.worldToScreen(worldRect.topLeft);
+    final bottomRight = cam.worldToScreen(worldRect.bottomRight);
+    final screenRect = Rect.fromPoints(topLeft, bottomRight);
+    // 完全在视口外就不画（屏幕空间下可直接用视口 rect 判）
+    if (!screenRect.overlaps(Offset.zero & _viewportSize)) {
+      return const SizedBox.shrink();
     }
 
+    final theme = Theme.of(context);
     final firstImage = group.tiles
         .map((t) => t.image)
         .whereType<GeneratedImage>()
@@ -710,72 +711,76 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         .whereType<int>()
         .toList();
 
-    return [
-      // 头部条：组上方间距区（屏幕 y 恒定）
-      antiScaled(
-        worldX: rect.center.dx,
-        worldY: rect.top - 10 * inv,
-        child: FractionalTranslation(
-          // 条体以自身左上为基准，水平居中于组中心
-          translation: const Offset(-0.5, -1.0),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface.withValues(alpha: 0.92),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // 头部条：组投影上方、水平居中于组中心
+        Positioned(
+          left: screenRect.center.dx,
+          top: screenRect.top - 10,
+          child: FractionalTranslation(
+            translation: const Offset(-0.5, -1.0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 5,
               ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.photo_library_outlined,
-                  size: 13,
-                  color: theme.colorScheme.onSurfaceVariant,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withValues(alpha: 0.92),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color:
+                      theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  [
-                    if (runId != null) 'run $runId',
-                    '$tileCount 图',
-                    if (indices.length > 1)
-                      '#${indices.first + 1}-${indices.last + 1}',
-                  ].join(' · '),
-                  style: theme.textTheme.labelSmall?.copyWith(
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.photo_library_outlined,
+                    size: 13,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      // 底部工具条（R3）：作用于组内首图，top 条挂图上方 / bottom 条挂图下方，
-      // 两者都由 CanvasTileToolbar 内部拆分；可用屏幕宽按组宽*camScale 估算塌缩。
-      // items 按组 key 缓存，相机逐帧 Transform 不重建注册表。
-      if (firstImage != null)
-        antiScaled(
-          worldX: rect.center.dx,
-          worldY: rect.bottom + 10 * inv,
-          child: FractionalTranslation(
-            translation: const Offset(-0.5, 0),
-            child: CanvasTileToolbar(
-              items: _toolbarItemsCache.putIfAbsent(
-                group.key,
-                () => buildCanvasToolbarItems(
-                  context: context,
-                  ref: ref,
-                  image: firstImage,
-                ),
+                  const SizedBox(width: 6),
+                  Text(
+                    [
+                      if (runId != null) 'run $runId',
+                      '$tileCount 图',
+                      if (indices.length > 1)
+                        '#${indices.first + 1}-${indices.last + 1}',
+                    ].join(' · '),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
-              // 组在屏幕上的投影宽度即工具条可用宽（反缩放后 1:1）。
-              maxWidth: math.max(120.0, rect.width * camScale - 24),
             ),
           ),
         ),
-    ];
+        // 底部工具条：作用于组内首图，屏幕恒定尺寸（位置随相机每帧刷新）。
+        if (firstImage != null)
+          Positioned(
+            left: screenRect.center.dx,
+            top: screenRect.bottom + 10,
+            child: FractionalTranslation(
+              translation: const Offset(-0.5, 0),
+              child: CanvasTileToolbar(
+                items: _toolbarItemsCache.putIfAbsent(
+                  group.key,
+                  () => buildCanvasToolbarItems(
+                    context: context,
+                    ref: ref,
+                    image: firstImage,
+                  ),
+                ),
+                // 可用屏宽 = 组投影宽度（屏幕空间下无需反缩放换算）。
+                maxWidth: math.max(120.0, screenRect.width - 24),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   Widget _buildTile(CanvasPlacement p) {
@@ -812,7 +817,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         image: image,
         showIndex: false,
         canvasTile: true, // 轻量模式：关 hover/gloss/预热/拖拽包装
-        decodeScale: 0.5, // 画布 tile 半尺寸解码（zoom>0.5 才损失清晰度）
         enableHoverScale: false, // 世界空间内 hover 放大等于挪世界，禁用
         // 组级选中态：组内任一 tile 命中即整组高亮（卡片描边仍按 tile 级）
         isSelected:

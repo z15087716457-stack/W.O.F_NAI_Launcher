@@ -172,10 +172,6 @@ class SelectableImageCard extends ConsumerStatefulWidget {
   /// 图像高度（用于计算比例，生成中状态需要）
   final int? imageHeight;
 
-  /// 解码降采样倍率（null=按布局尺寸×像素比，0.5=半尺寸解码）。
-  /// 画布 tile 按自然像素布局时用它避免全尺寸解码。
-  final double? decodeScale;
-
   const SelectableImageCard({
     super.key,
     this.imageBytes,
@@ -228,7 +224,6 @@ class SelectableImageCard extends ConsumerStatefulWidget {
     this.focusedPreviewPlacement,
     this.imageWidth,
     this.imageHeight,
-    this.decodeScale,
   }) : assert(
          !isGenerating || (imageWidth != null && imageHeight != null),
          'imageWidth and imageHeight are required when isGenerating is true',
@@ -988,7 +983,6 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                       ),
                       bytes: completionPlaceholderBytes,
                       fit: BoxFit.cover,
-                      decodeScale: widget.decodeScale ?? 1.0,
                     ),
                   ),
                 RepaintBoundary(
@@ -996,7 +990,6 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                     key: const ValueKey('selectable-image-completed-image'),
                     bytes: widget.imageBytes!,
                     fit: BoxFit.cover,
-                    decodeScale: widget.decodeScale ?? 1.0,
                     frameBuilder: _buildCompletedImageFrame,
                   ),
                 ),

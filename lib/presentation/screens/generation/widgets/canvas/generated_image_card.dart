@@ -36,10 +36,6 @@ Widget buildGeneratedImageCard({
   /// +isolate 编解码）和 hover setState，是滑卡卡死的主因；画布上动作面
   /// 由 CanvasTileToolbar（R3）承担，右键菜单与拖拽暂不在画布提供。
   bool canvasTile = false,
-
-  /// 解码降采样（0.5=半尺寸解码）。画布 tile 按自然像素布局，全尺寸
-  /// 解码 + 双阴影在相机逐帧 Transform 下是 GPU/内存炸弹。
-  double? decodeScale,
 }) {
   final actions = GeneratedImageActions(ref);
   final imageBytes = image.bytes;
@@ -59,7 +55,6 @@ Widget buildGeneratedImageCard({
     enableGlossEffect: !canvasTile,
     hoverEffectsEnabled: !canvasTile,
     shareWarmupEnabled: !canvasTile,
-    decodeScale: decodeScale,
     enableSaveAction: image.canSave,
     enableCopyAction: image.canSave,
     statusBadgeLabel: isFailedSnapshot
