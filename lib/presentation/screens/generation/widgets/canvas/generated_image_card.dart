@@ -17,8 +17,9 @@ import 'generated_image_actions.dart';
 ///
 /// 历史预览网格与 G11 画布 tile 共用同一套 SelectableImageCard 装配：
 /// 右键菜单、详情页、发送到工作流、拖拽注入（DraggableMemoryImage）全保留。
-/// 调用方可通过 [onTap] 覆盖点击语义（画布内 tap=详情，与预览一致），
-/// 或用 [enableHoverScale] 关掉画布里会造成世界抖动的 hover 放大。
+/// 调用方可通过 [onTap] 覆盖点击语义（画布内 tap=仅选中，不弹详情；
+/// 预览网格默认仍走全屏详情），或用 [enableHoverScale] 关掉画布里
+/// 会造成世界抖动的 hover 放大。
 Widget buildGeneratedImageCard({
   required BuildContext context,
   required WidgetRef ref,

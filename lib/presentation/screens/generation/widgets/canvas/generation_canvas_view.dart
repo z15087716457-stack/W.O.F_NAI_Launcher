@@ -10,14 +10,14 @@ import '../../../../../core/utils/localization_extension.dart';
 import '../../../../providers/generation/generation_models.dart';
 import '../../../../providers/generation/preview_selection_provider.dart';
 import 'canvas_feed_layout.dart';
-import 'generated_image_actions.dart';
 import 'generated_image_card.dart';
 import 'generation_canvas_controller.dart';
 
 /// G11 NAI5 自由画布视图（V1）。
 ///
-/// 接管生成页中央预览区：全部生成图按批分组竖向铺开（索引0=顶端=最旧，
-/// 新批在底部），世界坐标自然像素尺寸摆放，相机手势全集对标官网：
+/// 接管生成页中央预览区：全部生成图按批分组竖向铺开（索引0=顶端=最新批，
+/// 向下翻历史；2026-09-19 静拍板「新上旧下」，覆盖官网逆向「新图在下」），
+/// 世界坐标自然像素尺寸摆放，相机手势全集对标官网：
 ///
 /// - Ctrl+滚轮：以指针为锚离散缩放（×1.2/÷1.2，连滚复利）
 /// - 裸滚轮：平移 (-dx,-dy)；Shift+滚轮：纵转横
@@ -35,7 +35,7 @@ class GenerationCanvasView extends ConsumerStatefulWidget {
   const GenerationCanvasView({required this.images, super.key});
 
   /// feed 数据源：mergedPanelImages 顺序（当前批在前，history 新→旧），
-  /// 视图内自行翻转为最旧在上、最新在下。
+  /// feed 顶部 = 最新批（索引0），向下滚动回到更早批次。
   final List<GeneratedImage> images;
 
   @override
@@ -47,6 +47,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     with TickerProviderStateMixin {
   late final GenerationCanvasController _controller;
   final FocusNode _focusNode = FocusNode(debugLabel: 'generation-canvas');
+  ProviderSubscription<String?>? _selectionSub;
 
   List<CanvasGroup> _groups = const [];
   List<CanvasPlacement> _placements = const [];
@@ -84,6 +85,14 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     super.initState();
     _controller = GenerationCanvasController(vsync: this);
     _controller.addListener(_scheduleSettle);
+    // 历史面板/快捷键等外部选中变化 → 画布联动飞到对应 tile（对标官网联动）。
+    // 自身 120ms 自动选中触发时 tile 已在视口中心，flyToRect 距离≈0 近似空操作。
+    _selectionSub = ref.listenManual(generationPreviewSelectionProvider, (
+      _,
+      selectedId,
+    ) {
+      if (selectedId != null) _flyToImage(selectedId);
+    });
     _recomputeLayout();
   }
 
@@ -97,6 +106,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
 
   @override
   void dispose() {
+    _selectionSub?.close();
     _settleTimer?.cancel();
     _lostTimer?.cancel();
     _controller.dispose();
@@ -105,9 +115,8 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   }
 
   void _recomputeLayout() {
-    // images 是新→旧（当前批在前），feed 要求索引0=最旧在顶端。
-    final feed = widget.images.reversed.toList();
-    _groups = groupCanvasImages(feed);
+    // images 是新→旧（当前批在前），feed 顶部=最新批（索引0），向下翻历史。
+    _groups = groupCanvasImages(widget.images);
     final result = layoutCanvasFeed(_groups);
     _placements = result.placements;
     _groupRects = {for (final p in _placements) p.group: p.groupRect};
@@ -115,7 +124,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       _lastGroupKey = null;
       return;
     }
-    final key = _groups.last.key;
+    final key = _groups.first.key;
     if (!_initialFlyDone) {
       _initialFlyDone = true;
       _lastGroupKey = key;
@@ -184,7 +193,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     // 飞回离视口中心最近的组
     final cam = _controller.camera;
     final centerWorld = cam.screenToWorld(_viewportSize.center(Offset.zero));
-    var best = _groups.last;
+    var best = _groups.first;
     var bestDist = double.infinity;
     for (final g in _groups) {
       final rect = _groupRects[g];
@@ -392,15 +401,27 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
 
   void _flyToLatestGroup() {
     if (_groups.isEmpty) return;
-    final rect = _groupRects[_groups.last];
+    // 最新批在 feed 顶端（索引0）。
+    final rect = _groupRects[_groups.first];
     if (rect != null) _controller.flyToRect(rect, _viewportSize);
+  }
+
+  /// 外部选中联动：飞到包含该图的 tile（比整组更聚焦，大图组不易偏）。
+  /// tile 不在当前 feed（被清理等）时静默忽略。
+  void _flyToImage(String imageId) {
+    for (final p in _placements) {
+      if (p.image.id == imageId) {
+        _controller.flyToRect(p.rect, _viewportSize);
+        return;
+      }
+    }
   }
 
   // ============ tile ============
 
+  /// 画布内点 tile 只更新预览选中态，不弹全屏详情（右键菜单仍兜底）。
   void _onTileTap(GeneratedImage image) {
     ref.read(generationPreviewSelectionProvider.notifier).select(image.id);
-    unawaited(GeneratedImageActions(ref).showFullscreenImage(context, image));
   }
 
   Widget _buildTile(CanvasPlacement placement) {
@@ -489,7 +510,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
           // 新批落地自动飞（post-frame，避免 build 期触发 notify）
           if (_pendingNewGroupFly && _groups.isNotEmpty) {
             _pendingNewGroupFly = false;
-            final rect = _groupRects[_groups.last];
+            final rect = _groupRects[_groups.first];
             if (rect != null) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!mounted) return;
@@ -531,7 +552,12 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                             )
                             ..scaleByDouble(cam.scale, cam.scale, 1, 1),
                           alignment: Alignment.topLeft,
+                          // 世界层 Stack：尺寸 = 视口约束、原点在左上，而 tile
+                          // 世界坐标以 x=0 居中（负 x 占一半）。默认 hardEdge 会
+                          // 把局部坐标 <0 的部分裁掉（tile 被啃左半），必须
+                          // Clip.none——视口裁剪由外层 ClipRect 负责。
                           child: Stack(
+                            clipBehavior: Clip.none,
                             children: [
                               for (final p in visible)
                                 Positioned.fromRect(
