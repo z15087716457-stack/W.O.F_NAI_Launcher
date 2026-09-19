@@ -119,10 +119,10 @@ class PromptBlockDetailView extends StatelessWidget {
             // runSpacing 给比编辑器更宽的行距。
             : LayoutBuilder(
                 builder: (context, constraints) {
-                  final atomStyle = contentStyle?.copyWith(height: 1.2);
+                  final atomStyle = contentStyle?.copyWith(height: 1.35);
                   return Wrap(
                     spacing: 4,
-                    runSpacing: 8,
+                    runSpacing: 6,
                     children: [
                       for (final atom in block.atomsOrSplit)
                         ConstrainedBox(

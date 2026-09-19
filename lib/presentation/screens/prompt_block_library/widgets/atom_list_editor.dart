@@ -57,6 +57,11 @@ class _AtomListEditorState extends State<AtomListEditor> {
                     expands: true,
                     minLines: null,
                     maxLines: null,
+                    // EditableText 默认 forceStrutHeight 锁单行高，
+                    // 多行 WidgetSpan 会溢出槽位与下文交叠；关 strut
+                    // 让 placeholder 高度生效（纯文本行距仍由
+                    // style.height 决定）。
+                    strutStyle: StrutStyle.disabled,
                     textAlignVertical: TextAlignVertical.top,
                     // middle 对齐时行高=chip 高度（行间 0 空隙），
                     // 靠文本行高撑出 chip 行之间的空隙。
@@ -121,7 +126,7 @@ class _AtomListEditorState extends State<AtomListEditor> {
     final atomText = widget.controller.atomMap[marker];
     if (atomText == null) {
       return WidgetSpan(
-        alignment: PlaceholderAlignment.middle,
+        alignment: PlaceholderAlignment.top,
         child: GestureDetector(
           key: Key('atom-editor-orphan-$occurrence'),
           onTap: () => widget.controller.removeOrphanMarker(marker),
@@ -134,7 +139,9 @@ class _AtomListEditorState extends State<AtomListEditor> {
       );
     }
     return WidgetSpan(
-      alignment: PlaceholderAlignment.middle,
+      // top 对齐：行高由 chip 占位撑开，贴行顶零偏移；
+      // middle 会把多行 chip 上移半个 descent（「跳一根」的成因）。
+      alignment: PlaceholderAlignment.top,
       child: Tooltip(
         message: context.l10n.promptBlockLibrary_atomRestoreHint,
         waitDuration: const Duration(milliseconds: 500),
@@ -150,6 +157,13 @@ class _AtomListEditorState extends State<AtomListEditor> {
 
 /// 紧凑描边 chip：无图标、无内部填充色，描边跟主题色。
 /// 编辑器内联使用；详情面板正文原子化渲染同件复用。
+///
+/// 折行语义（静拍板·多层换行）：长原子文本超过可用宽度时，
+/// chip 内部按 [TextPainter] 预折行渲染成**一列逐行小框**——
+/// 每行一个真 widget（自带描边），行间留缝，缝的左缘用一条
+/// 竖虚线角对角连接上下行框（右缘参差处不画），直观表现
+/// 「这是一个换行过的块」。
+/// 一个原子仍是一个 [WidgetSpan] 占位，编辑语义零改动。
 class AtomChip extends StatelessWidget {
   const AtomChip({
     super.key,
@@ -163,26 +177,284 @@ class AtomChip extends StatelessWidget {
   final ThemeData theme;
   final Color? borderColor;
 
-  /// 缺省 = bodyMedium/1.1（编辑器内联度量）；展示场景可传更小样式。
+  /// 缺省 = bodyMedium/1.35（编辑器内联度量）；展示场景可传更小样式。
   final TextStyle? textStyle;
+
+  static const double _radius = 5;
+
+  /// 缝高：行框竖边已是虚线，缝里只补一段同轴虚线柱，
+  /// 不用留太大；段 2+空 2，6px 恰两段。
+  static const double _seamGap = 6;
+  static const EdgeInsets _pad =
+      EdgeInsets.symmetric(horizontal: 8, vertical: 2);
+
+  /// 行框给文字的富余宽：RenderParagraph 对行宽有 ceil 取整，
+  /// 槽宽恰等于 advance 时会误判 hasVisualOverflow 把末字形
+  /// overhang 啃掉；留 4px 槽余量 + overflow.visible 兜底。
+  static const double _textSlack = 4;
 
   @override
   Widget build(BuildContext context) {
+    final style =
+        textStyle ?? theme.textTheme.bodyMedium?.copyWith(height: 1.35);
+    final color = borderColor ?? theme.colorScheme.outlineVariant;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // WidgetSpan 子树拿 BoxConstraints(maxWidth: 段落宽)、不限高：
+        // maxWidth 即文本区可用宽，扣掉内边距就是折行宽。
+        // 无界场景（理论上）退化为单行 chip。
+        final maxW = constraints.maxWidth;
+        final wrapWidth =
+            maxW.isFinite ? maxW - _pad.horizontal - 4 : double.infinity;
+        final segs = _wrapSegments(context, style, wrapWidth);
+
+        if (segs.length <= 1) {
+          return _lineBox(context, style, color, segs.first,
+              topRounded: true, bottomRounded: true);
+        }
+        // 逐行小框（静拍板）：首/末行整框实线，中间行横边实线+
+        // 竖边虚线；行间缝补一段左缘竖虚线同轴连接。
+        final children = <Widget>[];
+        for (var i = 0; i < segs.length; i++) {
+          if (i > 0) {
+            children.add(_SeamDashes(color: color, height: _seamGap));
+          }
+          children.add(_lineBox(
+            context,
+            style,
+            color,
+            segs[i],
+            topRounded: i == 0,
+            bottomRounded: i == segs.length - 1,
+            dashedSides: i != 0 && i != segs.length - 1,
+          ));
+        }
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        );
+      },
+    );
+  }
+
+  /// 预折行：返回每视觉行的文本段与整行框宽（文本宽+水平内边距）。
+  List<_Seg> _wrapSegments(
+      BuildContext context, TextStyle? style, double wrapWidth) {
+    final tp = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout(maxWidth: wrapWidth.isFinite ? wrapWidth : 1e9);
+
+    final segs = <_Seg>[];
+    var start = 0;
+    while (start < text.length) {
+      final range = tp.getLineBoundary(TextPosition(offset: start));
+      var end = range.end;
+      if (end <= start) end = start + 1; // 防死循环
+      var segText = text.substring(start, end);
+      // 行尾空白不渲染（折点空白吃掉，拼接不靠它）。
+      segText = segText.trimRight();
+      if (segText.isNotEmpty) {
+        final w = _measure(context, style, segText) +
+            _pad.horizontal +
+            _textSlack;
+        segs.add(_Seg(segText, w));
+      }
+      start = end;
+    }
+    if (segs.isEmpty) {
+      segs.add(_Seg(
+        text,
+        _measure(context, style, text) + _pad.horizontal + _textSlack,
+      ));
+    }
+    return segs;
+  }
+
+  double _measure(BuildContext context, TextStyle? style, String s) {
+    final tp = TextPainter(
+      text: TextSpan(text: s, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    return tp.width;
+  }
+
+  /// 单行框：自绘描边。首/末行（及单行）整框实线含圆角；
+  /// 中间行实线横边+虚线竖边（接缝角直角）。border 画在
+  /// 文字上层，overhang 墨迹被描边遮住，视觉「线在字外」。
+  Widget _lineBox(
+    BuildContext context,
+    TextStyle? style,
+    Color color,
+    _Seg seg, {
+    required bool topRounded,
+    required bool bottomRounded,
+    bool dashedSides = false,
+  }) {
+    const r = Radius.circular(_radius);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 2),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: borderColor ?? theme.colorScheme.outlineVariant,
+      width: seg.width,
+      // CustomPaint 必须包在 Padding 外：描边按 child 尺寸画，
+      // 放内层会把 padding 画到框外、文字贴边。
+      child: CustomPaint(
+        foregroundPainter: _DashedBoxPainter(
+          color: color,
+          topLeft: topRounded ? r : Radius.zero,
+          topRight: topRounded ? r : Radius.zero,
+          bottomLeft: bottomRounded ? r : Radius.zero,
+          bottomRight: bottomRounded ? r : Radius.zero,
+          dashedSides: dashedSides,
         ),
-      ),
-      child: Text(
-        text,
-        style: textStyle ?? theme.textTheme.bodyMedium?.copyWith(height: 1.1),
+        child: Padding(
+          padding: _pad,
+          child: Text(
+            seg.text,
+            style: style,
+            softWrap: false,
+            // 槽已留余量，溢出=墨迹 overhang 允许画到 padding 区。
+            overflow: TextOverflow.visible,
+          ),
+        ),
       ),
     );
   }
+}
+
+/// 行框描边（静拍板）：首行/末行/单行 chip = 整框实线（含圆角）；
+/// 中间行 = 上/下横边实线 + 左/右竖边虚线（接缝角必为直角，
+/// 无圆角）。1px 线以边中线居中（0.5 偏移）。
+class _DashedBoxPainter extends CustomPainter {
+  _DashedBoxPainter({
+    required this.color,
+    required this.topLeft,
+    required this.topRight,
+    required this.bottomLeft,
+    required this.bottomRight,
+    required this.dashedSides,
+  });
+
+  final Color color;
+  final Radius topLeft;
+  final Radius topRight;
+  final Radius bottomLeft;
+  final Radius bottomRight;
+
+  /// true = 中间行：只画实线横边 + 虚线竖边。
+  final bool dashedSides;
+
+  static const double _dash = 2;
+  static const double _gap = 2;
+  static const double _c = 0.5;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    final rect = Offset.zero & size;
+    if (!dashedSides) {
+      canvas.drawRRect(
+        RRect.fromRectAndCorners(
+          rect.deflate(_c),
+          topLeft: topLeft,
+          topRight: topRight,
+          bottomLeft: bottomLeft,
+          bottomRight: bottomRight,
+        ),
+        paint,
+      );
+      return;
+    }
+    final w = size.width;
+    final h = size.height;
+    canvas.drawLine(const Offset(0, _c), Offset(w, _c), paint);
+    canvas.drawLine(Offset(0, h - _c), Offset(w, h - _c), paint);
+    _dashedV(canvas, paint, _c, 0, h);
+    _dashedV(canvas, paint, w - _c, 0, h);
+  }
+
+  /// 竖虚线：首段从 y1 起画（顶到上横边），末段顶到 y2。
+  void _dashedV(
+      Canvas canvas, Paint paint, double x, double y1, double y2) {
+    var y = y1;
+    while (y < y2) {
+      final end = (y + _dash).clamp(y, y2);
+      canvas.drawLine(Offset(x, y), Offset(x, end.toDouble()), paint);
+      y += _dash + _gap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedBoxPainter oldDelegate) =>
+      oldDelegate.color != color ||
+      oldDelegate.topLeft != topLeft ||
+      oldDelegate.topRight != topRight ||
+      oldDelegate.bottomLeft != bottomLeft ||
+      oldDelegate.bottomRight != bottomRight ||
+      oldDelegate.dashedSides != dashedSides;
+}
+
+/// 一行文本段 + 它的行框宽。
+class _Seg {
+  const _Seg(this.text, this.width);
+  final String text;
+  final double width;
+}
+
+/// 行间竖虚线：左缘一列，上下端分别接上行底边与下行顶边
+/// （静拍板：接缝=两条平行线+左端一条虚线，右缘不画）。
+/// 行框水平外边距=2、描边线心再内收 0.5，列心 x=2.5 与
+/// 左虚线边同轴。
+class _SeamDashes extends StatelessWidget {
+  const _SeamDashes({required this.color, required this.height});
+
+  final Color color;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      width: 4,
+      child: CustomPaint(
+        painter: _SeamDashPainter(color: color),
+      ),
+    );
+  }
+}
+
+class _SeamDashPainter extends CustomPainter {
+  _SeamDashPainter({required this.color});
+
+  final Color color;
+
+  static const double _dash = 2;
+  static const double _gap = 2;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    const x = 2.5;
+    var y = 0.0;
+    while (y < size.height) {
+      final end = (y + _dash).clamp(y, size.height);
+      canvas.drawLine(Offset(x, y), Offset(x, end.toDouble()), paint);
+      y += _dash + _gap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SeamDashPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 /// 编辑器控制器：一个 [NaiSyntaxController] 文本字段 + atoms 表。
