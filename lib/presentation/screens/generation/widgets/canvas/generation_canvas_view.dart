@@ -656,12 +656,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                           ),
                         ),
-                      // 屏幕空间 HUD：缩放百分比 + 控件
-                      Positioned(
-                        right: 16,
-                        bottom: 16,
-                        child: _buildZoomHud(theme),
-                      ),
+                      // 官网画布无缩放控制条，HUD 去除
                     ],
                   ),
                 ),
@@ -789,62 +784,4 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     }
   }
 
-  Widget _buildZoomHud(ThemeData theme) {
-    final cam = _controller.camera;
-    final pct = (cam.scale * 100).round();
-    Widget btn(IconData icon, String tip, VoidCallback onTap) {
-      return Tooltip(
-        message: tip,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(6),
-          child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          btn(
-            Icons.remove,
-            '缩小 (-)',
-            () => _controller.keyboardZoom(_viewportSize, zoomIn: false),
-          ),
-          SizedBox(
-            width: 46,
-            child: Text(
-              '$pct%',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: theme.colorScheme.onSurface,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ),
-          btn(
-            Icons.add,
-            '放大 (+)',
-            () => _controller.keyboardZoom(_viewportSize, zoomIn: true),
-          ),
-          btn(
-            Icons.fit_screen,
-            '适应窗口 (f)',
-            () => _flyToFocusGroup(),
-          ),
-          btn(Icons.my_location, '回最新 (q)', _flyToHeadGroup),
-        ],
-      ),
-    );
-  }
 }
