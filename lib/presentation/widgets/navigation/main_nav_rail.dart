@@ -73,8 +73,6 @@ class MainNavRail extends ConsumerWidget {
         child: Column(
           children: [
             const SizedBox(height: 16),
-            // 账户头像区域
-            _AccountAvatarButton(ref: ref),
 
             Expanded(
               child: SingleChildScrollView(
@@ -164,6 +162,17 @@ class MainNavRail extends ConsumerWidget {
               ),
             ),
 
+            // 收起/展开按钮
+            _NavRailToggle(
+              isExpanded: isExpanded,
+              onTap: () {
+                ref
+                    .read(layoutStateNotifierProvider.notifier)
+                    .toggleMainNavRail();
+              },
+            ),
+            const SizedBox(height: 2),
+
             // GitHub 仓库
             _GitHubIcon(
               url: 'https://github.com/z15087716457-stack/W.O.F_NAI_Launcher',
@@ -178,16 +187,10 @@ class MainNavRail extends ConsumerWidget {
               showBadge: showUpdateBadge,
               onTap: () => navigationShell.goBranch(AppBranch.settings.index),
             ),
-            const SizedBox(height: 2),
-            _NavRailToggle(
-              isExpanded: isExpanded,
-              onTap: () {
-                ref
-                    .read(layoutStateNotifierProvider.notifier)
-                    .toggleMainNavRail();
-              },
-            ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
+
+            // 账户头像（底部，符合主流前端惯例）
+            _AccountAvatarButton(ref: ref),
           ],
         ),
       ),
