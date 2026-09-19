@@ -94,7 +94,6 @@ void main() {
     expect(find.text('本地画廊'), findsOneWidget);
     expect(find.text('提示词块'), findsOneWidget);
     expect(find.byIcon(Icons.view_module_outlined), findsOneWidget);
-    expect(find.text('Discord 社群'), findsOneWidget);
     expect(find.text('GitHub 仓库'), findsOneWidget);
     expect(find.text('收起侧边栏'), findsOneWidget);
     expect(find.byIcon(Icons.keyboard_double_arrow_left), findsOneWidget);

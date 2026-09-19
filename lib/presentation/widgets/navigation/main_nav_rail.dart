@@ -164,14 +164,6 @@ class MainNavRail extends ConsumerWidget {
               ),
             ),
 
-            // Discord 社群
-            _ExternalLinkIcon(
-              icon: Icons.discord,
-              label: context.l10n.nav_discordCommunity,
-              color: const Color(0xFF5865F2), // Discord 紫色
-              url: 'https://discord.gg/R48n6GwXzD',
-            ),
-
             // GitHub 仓库
             _GitHubIcon(
               url: 'https://github.com/z15087716457-stack/W.O.F_NAI_Launcher',
@@ -564,55 +556,6 @@ class _GitHubLogoPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _GitHubLogoPainter oldDelegate) {
     return oldDelegate.color != color;
-  }
-}
-
-/// 外部链接图标
-class _ExternalLinkIcon extends StatefulWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final String url;
-
-  const _ExternalLinkIcon({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.url,
-  });
-
-  @override
-  State<_ExternalLinkIcon> createState() => _ExternalLinkIconState();
-}
-
-class _ExternalLinkIconState extends State<_ExternalLinkIcon> {
-  bool _isHovering = false;
-  bool _isPressed = false;
-
-  Future<void> _launchUrl() async {
-    final uri = Uri.parse(widget.url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _RailLinkItem(
-      label: widget.label,
-      color: widget.color,
-      isHovering: _isHovering,
-      isPressed: _isPressed,
-      onTap: _launchUrl,
-      onHover: (value) => setState(() => _isHovering = value),
-      onTapDown: () => setState(() => _isPressed = true),
-      onTapEnd: () => setState(() => _isPressed = false),
-      icon: Icon(
-        widget.icon,
-        color: widget.color.withValues(alpha: _isHovering ? 1.0 : 0.7),
-        size: 24,
-      ),
-    );
   }
 }
 

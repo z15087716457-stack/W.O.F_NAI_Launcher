@@ -604,12 +604,6 @@ abstract class AppLocalizations {
   /// **'Online Gallery'**
   String get nav_onlineGallery;
 
-  /// No description provided for @nav_discordCommunity.
-  ///
-  /// In en, this message translates to:
-  /// **'Discord Community'**
-  String get nav_discordCommunity;
-
   /// No description provided for @nav_githubRepo.
   ///
   /// In en, this message translates to:
