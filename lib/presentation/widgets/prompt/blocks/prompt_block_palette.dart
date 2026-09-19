@@ -12,9 +12,9 @@ import '../../../screens/prompt_block_library/widgets/prompt_block_card.dart';
 import '../../../screens/prompt_block_library/widgets/prompt_block_detail.dart';
 import 'prompt_block_drag_data.dart';
 
-/// 颜料版按钮（生成页提示词顶栏，原位替换旧固定词 📌）。
+/// 积木按钮（生成页提示词卡头部右侧，原颜料板重命名归来）。
 ///
-/// 点击 = 开/关颜料版悬浮窗；把块拖上按钮 = 直接收纳进板。
+/// 点击 = 开/关积木悬浮窗；把块拖上按钮 = 直接收纳进板。
 class PromptBlockPaletteButton extends ConsumerStatefulWidget {
   const PromptBlockPaletteButton({super.key});
 
@@ -90,7 +90,7 @@ class _PromptBlockPaletteButtonState
                 : theme.colorScheme.onSurfaceVariant,
           ),
           onPressed: _toggle,
-          icon: const Icon(Icons.palette_outlined),
+          icon: const Icon(Icons.category_outlined),
         ),
       ),
     );

@@ -9523,14 +9523,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_waterfallView => 'Waterfall view';
 
   @override
-  String get promptBlockPalette_tooltip => 'Palette';
+  String get promptBlockPalette_tooltip => 'Blocks';
 
   @override
   String get promptBlockPalette_emptyHint =>
       'Drag blocks here to keep them handy; tap to insert at the caret, or drag into the prompt box';
 
   @override
-  String get promptBlockPalette_remove => 'Remove from palette';
+  String get promptBlockPalette_remove => 'Remove from blocks';
 
   @override
   String get promptBlockLibrary_sortBy => 'Sort by';
@@ -10278,8 +10278,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tips_blocklib_fun_3 => 'A use count is a block\'s CV';
 
   @override
-  String get tips_blocklib_fun_4 =>
-      'The palette board is for the greatest hits';
+  String get tips_blocklib_fun_4 => 'The blocks tray is for the greatest hits';
 
   @override
   String get tips_blocklib_fun_5 => 'If in doubt, make it a block';

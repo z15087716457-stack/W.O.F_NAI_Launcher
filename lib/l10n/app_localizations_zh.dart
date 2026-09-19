@@ -9188,14 +9188,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_waterfallView => '瀑布流视图';
 
   @override
-  String get promptBlockPalette_tooltip => '颜料版';
+  String get promptBlockPalette_tooltip => '积木';
 
   @override
   String get promptBlockPalette_emptyHint =>
       '把常用的块拖进来收纳；用的时候点一下插到光标处，或直接拖进提示词框';
 
   @override
-  String get promptBlockPalette_remove => '从颜料版移除';
+  String get promptBlockPalette_remove => '从积木移除';
 
   @override
   String get promptBlockLibrary_sortBy => '排序方式';
@@ -9884,7 +9884,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tips_blocklib_fun_3 => '使用次数就是块的履历表';
 
   @override
-  String get tips_blocklib_fun_4 => '颜料版留给钉子户';
+  String get tips_blocklib_fun_4 => '积木留给钉子户';
 
   @override
   String get tips_blocklib_fun_5 => '犹豫就做成块';

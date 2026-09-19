@@ -9314,14 +9314,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_waterfallView => 'ウォーターフォール表示';
 
   @override
-  String get promptBlockPalette_tooltip => 'パレット';
+  String get promptBlockPalette_tooltip => 'ブロック';
 
   @override
   String get promptBlockPalette_emptyHint =>
       'よく使うブロックをここにドラッグして収納。使う時はクリックでカーソル位置に挿入、またはプロンプトへドラッグ';
 
   @override
-  String get promptBlockPalette_remove => 'パレットから削除';
+  String get promptBlockPalette_remove => 'ブロックから削除';
 
   @override
   String get promptBlockLibrary_sortBy => '並べ替え';
@@ -10019,7 +10019,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tips_blocklib_fun_3 => '使用回数はブロックの履歴書';
 
   @override
-  String get tips_blocklib_fun_4 => 'パレットは常連さん専用席';
+  String get tips_blocklib_fun_4 => 'ブロックは常連さん専用席';
 
   @override
   String get tips_blocklib_fun_5 => '迷ったらブロック化';

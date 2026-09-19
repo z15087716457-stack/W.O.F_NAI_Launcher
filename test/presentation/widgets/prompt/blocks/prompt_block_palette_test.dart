@@ -461,7 +461,7 @@ class _NoopLibraryNotifier extends PromptBlockLibraryNotifier {
   Future<void> incrementUseCount(String blockId) async {}
 }
 
-/// 测试用颜料版 notifier：内存态，跳过 Hive。
+/// 测试用积木 notifier：内存态，跳过 Hive。
 class _FakePaletteNotifier extends PromptBlockPaletteNotifier {
   _FakePaletteNotifier(List<PromptBlock> blocks) : _blocks = List.of(blocks);
 

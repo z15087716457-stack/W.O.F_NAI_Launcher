@@ -35,6 +35,7 @@ import '../../../widgets/prompt/quality_tags_selector.dart';
 import '../../../widgets/prompt/transparent_background_chip.dart';
 import '../../../widgets/prompt/regex_rules_dialog.dart';
 import '../../../widgets/prompt/uc_preset_selector.dart';
+import '../../../widgets/prompt/blocks/prompt_block_palette.dart';
 import '../../../widgets/character/character_prompt_button.dart';
 import '../../../providers/pending_prompt_provider.dart';
 
@@ -483,7 +484,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
               const SizedBox(width: 2),
             ],
             // 块库左侧预留扩展槽（翻译/Agent 动态提示扩展位）
-            const SizedBox.shrink(),
+            const PromptBlockPaletteButton(),
             _buildChunksMenuButton(theme),
             if (widget.showMaximizeButton)
               IconButton(

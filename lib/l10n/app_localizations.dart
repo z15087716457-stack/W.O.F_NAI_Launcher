@@ -16632,7 +16632,7 @@ abstract class AppLocalizations {
   /// No description provided for @promptBlockPalette_tooltip.
   ///
   /// In en, this message translates to:
-  /// **'Palette'**
+  /// **'Blocks'**
   String get promptBlockPalette_tooltip;
 
   /// No description provided for @promptBlockPalette_emptyHint.
@@ -16644,7 +16644,7 @@ abstract class AppLocalizations {
   /// No description provided for @promptBlockPalette_remove.
   ///
   /// In en, this message translates to:
-  /// **'Remove from palette'**
+  /// **'Remove from blocks'**
   String get promptBlockPalette_remove;
 
   /// No description provided for @promptBlockLibrary_sortBy.
@@ -17898,7 +17898,7 @@ abstract class AppLocalizations {
   /// No description provided for @tips_blocklib_fun_4.
   ///
   /// In en, this message translates to:
-  /// **'The palette board is for the greatest hits'**
+  /// **'The blocks tray is for the greatest hits'**
   String get tips_blocklib_fun_4;
 
   /// No description provided for @tips_blocklib_fun_5.
