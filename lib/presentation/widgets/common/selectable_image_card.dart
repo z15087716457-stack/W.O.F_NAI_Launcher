@@ -172,6 +172,11 @@ class SelectableImageCard extends ConsumerStatefulWidget {
   /// 图像高度（用于计算比例，生成中状态需要）
   final int? imageHeight;
 
+  /// 隐藏选中/悬浮的全部装饰（发光边框 + 顶部压暗渐变 + hover 边框）。
+  /// 画布 tile 用：组级选中态已由组覆盖层头部条表达，tile 上的发光
+  /// 边框与内部渐变会直接污染画面。选中描边仍保留 drop shadow 无外框。
+  final bool hideSelectionDecoration;
+
   const SelectableImageCard({
     super.key,
     this.imageBytes,
@@ -224,6 +229,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
     this.focusedPreviewPlacement,
     this.imageWidth,
     this.imageHeight,
+    this.hideSelectionDecoration = false,
   }) : assert(
          !isGenerating || (imageWidth != null && imageHeight != null),
          'imageWidth and imageHeight are required when isGenerating is true',
@@ -935,7 +941,9 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
           transformAlignment: Alignment.center,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: widget.isSelected
+            border: widget.hideSelectionDecoration
+                ? null
+                : widget.isSelected
                 ? Border.all(color: theme.colorScheme.primary, width: 3)
                 : widget.isPreviewActive
                 ? Border.all(color: theme.colorScheme.tertiary, width: 3)
@@ -1107,7 +1115,8 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                   ),
 
                 // 4. 悬浮/选中时的渐变遮罩（使用 IgnorePointer 让点击穿透）
-                if (_isHovering || widget.isSelected)
+                if (!widget.hideSelectionDecoration &&
+                    (_isHovering || widget.isSelected))
                   IgnorePointer(
                     child: Container(
                       decoration: BoxDecoration(

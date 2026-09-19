@@ -55,6 +55,9 @@ Widget buildGeneratedImageCard({
     enableGlossEffect: !canvasTile,
     hoverEffectsEnabled: !canvasTile,
     shareWarmupEnabled: !canvasTile,
+    // 画布选中态走组覆盖层表达：tile 上的发光边框与内部压暗渐变全关，
+    // 否则组级选中整组 tile 画面被边框/遮罩污染。
+    hideSelectionDecoration: canvasTile,
     enableSaveAction: image.canSave,
     enableCopyAction: image.canSave,
     statusBadgeLabel: isFailedSnapshot
