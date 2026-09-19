@@ -55,3 +55,20 @@ FocusNode generationPreviewFocusNode(Ref ref) {
   ref.onDispose(node.dispose);
   return node;
 }
+
+/// 画布组级选中（G11 V2）：值为画布 feed 的组 key——
+/// 'run:<generationRunId>' 或 'img:<imageId>'（无 runId 单图组）。
+///
+/// 对标官网「自动选图=选中 tile 所属组」，工具条/展开态/q 跳组都以组为粒度。
+/// 与 tile 级的 [generationPreviewSelectionProvider] 并存：
+/// 画布内外仍用 tile 级做预览/历史高亮，画布内部用组级驱动工具条与展开态。
+@Riverpod(keepAlive: true)
+class GenerationCanvasGroupSelection
+    extends _$GenerationCanvasGroupSelection {
+  @override
+  String? build() => null;
+
+  void select(String groupKey) => state = groupKey;
+
+  void clear() => state = null;
+}

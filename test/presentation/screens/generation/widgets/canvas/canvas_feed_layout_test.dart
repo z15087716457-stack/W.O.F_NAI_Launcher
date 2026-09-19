@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+﻿import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_models.dart';
@@ -36,7 +36,7 @@ void main() {
       final groups = groupCanvasImages(images);
       expect(groups.length, 3);
       expect(groups[0].key, 'run:1');
-      expect(groups[0].images.map((e) => e.id), ['a', 'b']);
+      expect(groups[0].tiles.map((e) => e.image!.id), ['a', 'b']);
       expect(groups[1].key, 'run:2');
       expect(groups[2].key, 'img:d');
     });
@@ -53,7 +53,7 @@ void main() {
         ),
       ];
       final groups = groupCanvasImages(images);
-      expect(groups[0].images.map((e) => e.id), ['b', 'a', 'c']);
+      expect(groups[0].tiles.map((e) => e.image!.id), ['b', 'a', 'c']);
     });
 
     test('保持传入的组顺序（feed 顺序）', () {
@@ -81,8 +81,14 @@ void main() {
 
   group('layoutCanvasFeed', () {
     test('组竖向堆叠间距 340，x=0 居中', () {
-      final g1 = CanvasGroup(key: 'run:1', images: [_img(id: 'a')]);
-      final g2 = CanvasGroup(key: 'run:2', images: [_img(id: 'b')]);
+      final g1 = CanvasGroup(
+        key: 'run:1',
+        tiles: [CanvasTileSpec.image(_img(id: 'a'))],
+      );
+      final g2 = CanvasGroup(
+        key: 'run:2',
+        tiles: [CanvasTileSpec.image(_img(id: 'b'))],
+      );
       final result = layoutCanvasFeed([g1, g2]);
 
       expect(result.placements.length, 2);
@@ -100,11 +106,11 @@ void main() {
     test('组内网格 tile 各自世界矩形且不重叠', () {
       final g = CanvasGroup(
         key: 'run:1',
-        images: [
-          _img(id: 'a'),
-          _img(id: 'b'),
-          _img(id: 'c'),
-          _img(id: 'd'),
+        tiles: [
+          CanvasTileSpec.image(_img(id: 'a')),
+          CanvasTileSpec.image(_img(id: 'b')),
+          CanvasTileSpec.image(_img(id: 'c')),
+          CanvasTileSpec.image(_img(id: 'd')),
         ],
       );
       final result = layoutCanvasFeed([g]);

@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -6,37 +6,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/utils/localization_extension.dart';
 import '../../../../providers/generation/generation_models.dart';
+import '../../../../providers/image_generation_provider.dart';
 import '../../../../providers/generation/preview_selection_provider.dart';
+import '../../../../widgets/common/selectable_image_card.dart';
 import 'canvas_feed_layout.dart';
+import 'canvas_tile_toolbar.dart';
 import 'generated_image_card.dart';
 import 'generation_canvas_controller.dart';
 
-/// G11 NAI5 自由画布视图（V1）。
+/// NAI5 自由画布视图（V2 重写版）。
 ///
-/// 接管生成页中央预览区：全部生成图按批分组竖向铺开（索引0=顶端=最新批，
-/// 向下翻历史；2026-09-19 静拍板「新上旧下」，覆盖官网逆向「新图在下」），
+/// 接管生成页中央预览区（含生成期）：全部生成图按批分组竖向铺开
+/// （索引0=顶端=最新批，向下翻历史），生成中的批次以占位 tile 置顶渲染，
+/// 响应后流式帧、完成落成新组，画布全程在位不卸载。
 /// 世界坐标自然像素尺寸摆放，相机手势全集对标官网：
+/// Ctrl+滚轮缩放 / 裸滚轮平移 / Shift+滚轮横移 / 中键或 Shift+左键拖 / 惯性 /
+/// WASD 平移 / f 聚焦 / q 跳最新组 / +- 缩放 / 1=100% / Esc 清空。
 ///
-/// - Ctrl+滚轮：以指针为锚离散缩放（×1.2/÷1.2，连滚复利）
-/// - 裸滚轮：平移 (-dx,-dy)；Shift+滚轮：纵转横
-/// - 中键 或 Shift+左键拖：平移（5px 死区），松手 <60ms 带速度进惯性甩动
-/// - WASD：持续平移 1000px/s（对角归一）；f 飞聚焦组；q 飞最新组；
-///   +/- 键盘缩放 ×1.3；1 回 100%；Esc 清选中
-/// - 相机停稳 120ms：自动选中离视口中心最近 tile（预览选中态联动）
-/// - 视野 2s 无内容：自动飞回最近组（防迷失）
-/// - 新批落地：自动飞新组
-/// - 剔除：只渲染可见世界矩形内的 tile
-///
-/// V1 未做：hover 工具条（SelectableImageCard 右键菜单兜底）、组展开、
-/// Pins 钉板/探索货架、离屏跳针、无限滚动（history 只有内存 50 条）。
+/// 相机/布局纯函数分别见 generation_canvas_controller.dart /
+/// canvas_feed_layout.dart，可 widget test。
 class GenerationCanvasView extends ConsumerStatefulWidget {
-  const GenerationCanvasView({required this.images, super.key});
+  /// 完整生成状态：画布自行取 history/streamPreviewSlots/isGenerating 等。
+  final ImageGenerationState generationState;
 
-  /// feed 数据源：mergedPanelImages 顺序（当前批在前，history 新→旧），
-  /// feed 顶部 = 最新批（索引0），向下滚动回到更早批次。
-  final List<GeneratedImage> images;
+  const GenerationCanvasView({
+    super.key,
+    required this.generationState,
+  });
 
   @override
   ConsumerState<GenerationCanvasView> createState() =>
@@ -49,35 +46,33 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   final FocusNode _focusNode = FocusNode(debugLabel: 'generation-canvas');
   ProviderSubscription<String?>? _selectionSub;
 
-  List<CanvasGroup> _groups = const [];
-  List<CanvasPlacement> _placements = const [];
-  Map<CanvasGroup, Rect> _groupRects = const {};
-
+  List<CanvasGroup> _groups = [];
+  List<CanvasPlacement> _placements = [];
+  Map<CanvasGroup, Rect> _groupRects = {};
   Size _viewportSize = Size.zero;
 
-  // ---- 停稳自动选择 / 防迷失 ----
+  /// 上一次 feed 首组 key（用于新批/在飞组落地自动飞）
+  String? _lastHeadGroupKey;
+  bool _initialFlyDone = false;
+  bool _pendingHeadGroupFly = false;
+
+  // 120ms 停稳自动选中
   Timer? _settleTimer;
-  Timer? _lostTimer;
   static const _settleDelay = Duration(milliseconds: 120);
+
+  // 迷失恢复：视口内无可见 tile 且相机停稳 2s → 飞回内容
+  Timer? _lostTimer;
   static const _lostDelay = Duration(seconds: 2);
 
-  // ---- 新批检测 ----
-  String? _lastGroupKey;
-  bool _initialFlyDone = false;
-  bool _pendingNewGroupFly = false;
-
-  // ---- 指针拖平移 ----
+  // 中键/Shift+左键拖拽
+  Offset? _lastPanPosition;
   int? _panPointer;
-  Offset _panLast = Offset.zero;
-  Offset _panAccum = Offset.zero;
-  bool _panActive = false;
-  Duration? _lastMoveTime;
-  Offset _emaVelocity = Offset.zero; // px/ms
-  bool _panningCursor = false;
-  static const _dragDeadzone = 5.0;
-  static const _flingReleaseWindow = Duration(milliseconds: 60);
+  final List<(Offset, DateTime)> _panTrail = [];
 
-  // ---- 键盘 ----
+  // 当前布局使用的展开组 key（用于 build 期检测组选中变化重排）
+  String? _layoutExpandedKey;
+
+  // WASD 按住键集合（screen 方向）
   final Set<LogicalKeyboardKey> _heldKeys = {};
 
   @override
@@ -85,21 +80,22 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     super.initState();
     _controller = GenerationCanvasController(vsync: this);
     _controller.addListener(_scheduleSettle);
-    // 历史面板/快捷键等外部选中变化 → 画布联动飞到对应 tile（对标官网联动）。
-    // 自身 120ms 自动选中触发时 tile 已在视口中心，flyToRect 距离≈0 近似空操作。
+    // 外部选中变化（历史面板点击/方向键/详情返回）→ 画布联动飞到对应 tile。
+    // 选中值是 tile 级 image.id（画布内部再转成组级）。
     _selectionSub = ref.listenManual(generationPreviewSelectionProvider, (
       _,
       selectedId,
     ) {
       if (selectedId != null) _flyToImage(selectedId);
     });
+    _layoutExpandedKey = ref.read(generationCanvasGroupSelectionProvider);
     _recomputeLayout();
   }
 
   @override
   void didUpdateWidget(GenerationCanvasView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.images, widget.images)) {
+    if (!identical(oldWidget.generationState, widget.generationState)) {
       _recomputeLayout();
     }
   }
@@ -114,473 +110,718 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     super.dispose();
   }
 
+  // ============================ 布局与数据 ============================
+
+  /// feed 数据源：current+history 去重（新→旧），顶部=最新批。
+  /// 生成中批次以占位槽组成 inflight 组置顶。
+  List<GeneratedImage> get _feedImages =>
+      widget.generationState.mergedPanelImages;
+
   void _recomputeLayout() {
-    // images 是新→旧（当前批在前），feed 顶部=最新批（索引0），向下翻历史。
-    _groups = groupCanvasImages(widget.images);
-    final result = layoutCanvasFeed(_groups);
+    final state = widget.generationState;
+    final feed = _feedImages;
+
+    _groups = groupCanvasImages(feed);
+    // 生成期：inflight 组置顶（新批在 feed 顶部）
+    if (state.isGenerating) {
+      final bw = state.batchWidth;
+      final bh = state.batchHeight;
+      if (bw != null && bh != null && bw > 0 && bh > 0) {
+        final tileW = bw.toDouble();
+        final tileH = bh.toDouble();
+        final slots = state.streamPreviewSlots.isNotEmpty
+            ? state.streamPreviewSlots
+            : [
+                // 响应未回：按 totalImages 合成纯占位槽（加载图标）
+                for (var i = 1; i <= state.totalImages; i++)
+                  StreamPreviewSlot(
+                    imageNumber: i,
+                    totalImages: state.totalImages,
+                    progress: 0.0,
+                  ),
+              ];
+        if (slots.isNotEmpty) {
+          _groups.insert(
+            0,
+            inflightGroup(
+              slots: slots,
+              tileWidth: tileW,
+              tileHeight: tileH,
+            ),
+          );
+        }
+      }
+    }
+
+    // 组级选中 → 该组进展开态（组内 tile 单行横排）。
+    final result = layoutCanvasFeed(
+      _groups,
+      expandedGroupKey: _layoutExpandedKey,
+    );
     _placements = result.placements;
     _groupRects = {for (final p in _placements) p.group: p.groupRect};
     if (_groups.isEmpty) {
-      _lastGroupKey = null;
+      _lastHeadGroupKey = null;
       return;
     }
     final key = _groups.first.key;
     if (!_initialFlyDone) {
       _initialFlyDone = true;
-      _lastGroupKey = key;
-      _pendingNewGroupFly = true;
-    } else if (key != _lastGroupKey) {
-      _lastGroupKey = key;
-      _pendingNewGroupFly = true;
+      _lastHeadGroupKey = key;
+      _pendingHeadGroupFly = true;
+    } else if (key != _lastHeadGroupKey) {
+      // 首组变化（含 inflight→run:X 无缝切换）：仅当首组尺寸变化或
+      // 当前相机不在首组附近时才重飞，避免完成瞬间无意义抖动。
+      _lastHeadGroupKey = key;
+      _pendingHeadGroupFly = true;
     }
   }
 
-  // ============ 相机停稳自动选择 + 防迷失 ============
-
-  void _scheduleSettle() {
-    _settleTimer?.cancel();
-    _settleTimer = Timer(_settleDelay, _onCameraSettled);
-  }
-
-  void _onCameraSettled() {
-    if (!mounted) return;
-    if (_controller.isAnimating || _panPointer != null) {
-      _scheduleSettle();
-      return;
-    }
-    _autoSelectNearest();
-    _armLostRecovery();
-  }
-
-  void _autoSelectNearest() {
-    if (_placements.isEmpty) return;
-    final cam = _controller.camera;
-    final centerWorld = cam.screenToWorld(_viewportSize.center(Offset.zero));
-    CanvasPlacement? best;
-    var bestDist = double.infinity;
-    for (final p in _placements) {
-      final d = (p.rect.center - centerWorld).distanceSquared;
-      if (d < bestDist) {
-        bestDist = d;
-        best = p;
-      }
-    }
-    if (best == null) return;
-    final bestId = best.image.id;
-    final current = ref.read(generationPreviewSelectionProvider);
-    if (current != bestId) {
-      ref.read(generationPreviewSelectionProvider.notifier).select(bestId);
-    }
-  }
-
-  void _armLostRecovery() {
-    _lostTimer?.cancel();
-    if (_groups.isEmpty) return;
-    final visible = _controller.camera.visibleWorldRect(_viewportSize);
-    final anyVisible = _groups.any(
-      (g) => _groupRects[g]?.overlaps(visible) ?? false,
-    );
-    if (anyVisible) return;
-    _lostTimer = Timer(_lostDelay, _recoverFromLost);
-  }
-
-  void _recoverFromLost() {
-    if (!mounted || _groups.isEmpty) return;
-    final visible = _controller.camera.visibleWorldRect(_viewportSize);
-    if (_groups.any((g) => _groupRects[g]?.overlaps(visible) ?? false)) {
-      return;
-    }
-    // 飞回离视口中心最近的组
-    final cam = _controller.camera;
-    final centerWorld = cam.screenToWorld(_viewportSize.center(Offset.zero));
-    var best = _groups.first;
-    var bestDist = double.infinity;
-    for (final g in _groups) {
-      final rect = _groupRects[g];
-      if (rect == null) continue;
-      final d = (rect.center - centerWorld).distanceSquared;
-      if (d < bestDist) {
-        bestDist = d;
-        best = g;
-      }
-    }
-    final target = _groupRects[best];
-    if (target != null) _controller.flyToRect(target, _viewportSize);
-  }
-
-  // ============ 指针手势 ============
-
-  void _onPointerDown(PointerDownEvent e) {
-    _focusNode.requestFocus();
-    final isMiddle = e.buttons & kMiddleMouseButton != 0;
-    final isShiftLeft =
-        e.buttons & kPrimaryMouseButton != 0 &&
-        HardwareKeyboard.instance.isShiftPressed;
-    if (!isMiddle && !isShiftLeft) return;
-
-    _panPointer = e.pointer;
-    _panLast = e.localPosition;
-    _panAccum = Offset.zero;
-    _panActive = false;
-    _emaVelocity = Offset.zero;
-    _lastMoveTime = null;
-    _controller.haltMotion();
-    _lostTimer?.cancel();
-  }
-
-  void _onPointerMove(PointerMoveEvent e) {
-    if (e.pointer != _panPointer) return;
-    final stillPanning =
-        e.buttons & kMiddleMouseButton != 0 ||
-        (e.buttons & kPrimaryMouseButton != 0 &&
-            HardwareKeyboard.instance.isShiftPressed);
-    if (!stillPanning) {
-      _endPan(e);
-      return;
-    }
-
-    final delta = e.localPosition - _panLast;
-    _panLast = e.localPosition;
-
-    // 速度 EMA（官网 alpha = 1-exp(-dt/50)）
-    final last = _lastMoveTime;
-    _lastMoveTime = e.timeStamp;
-    if (last != null) {
-      final dtMs = (e.timeStamp - last).inMicroseconds / 1000.0;
-      if (dtMs > 0) {
-        final alpha = 1 - math.exp(-dtMs / 50.0);
-        _emaVelocity =
-            _emaVelocity * (1 - alpha) + (delta / dtMs) * alpha;
-      }
-    }
-
-    // 5px 死区
-    if (!_panActive) {
-      _panAccum += delta;
-      if (_panAccum.distance < _dragDeadzone) return;
-      _panActive = true;
-      if (!_panningCursor) {
-        setState(() => _panningCursor = true);
-      }
-    }
-    _controller.panBy(delta);
-  }
-
-  void _onPointerUp(PointerEvent e) {
-    if (e.pointer != _panPointer) return;
-    _endPan(e);
-  }
-
-  void _endPan(PointerEvent e) {
-    // 松手 <60ms 内带速度 → 惯性甩动
-    final last = _lastMoveTime;
-    final releaseDt = last == null ? null : e.timeStamp - last;
-    if (_panActive &&
-        releaseDt != null &&
-        releaseDt < _flingReleaseWindow &&
-        _emaVelocity.distance > 0) {
-      _controller.fling(_emaVelocity);
-    }
-    _panPointer = null;
-    _panActive = false;
-    _emaVelocity = Offset.zero;
-    _lastMoveTime = null;
-    if (_panningCursor) {
-      setState(() => _panningCursor = false);
-    }
-  }
-
-  void _onPointerSignal(PointerSignalEvent e) {
-    if (e is! PointerScrollEvent) return;
-    final keyboard = HardwareKeyboard.instance;
-    if (keyboard.isControlPressed) {
-      _controller.discreteZoomAt(
-        e.localPosition,
-        zoomIn: e.scrollDelta.dy < 0,
-      );
-    } else if (keyboard.isShiftPressed) {
-      // 纵 delta 转横向
-      _controller.panBy(Offset(-e.scrollDelta.dy, 0));
-    } else {
-      _controller.panBy(Offset(-e.scrollDelta.dx, -e.scrollDelta.dy));
-    }
-    _lostTimer?.cancel();
-  }
-
-  // ============ 键盘 ============
-
-  KeyEventResult _onKeyEvent(KeyEvent e) {
-    final key = e.logicalKey;
-    if (e is KeyDownEvent) {
-      if (_isWasdKey(key)) {
-        if (_heldKeys.add(key)) _syncWasd();
-        return KeyEventResult.handled;
-      }
-      return _handleActionKey(key);
-    }
-    if (e is KeyUpEvent) {
-      if (_heldKeys.remove(key)) {
-        _syncWasd();
-        return KeyEventResult.handled;
-      }
-    }
-    return KeyEventResult.ignored;
-  }
-
-  bool _isWasdKey(LogicalKeyboardKey key) {
-    return key == LogicalKeyboardKey.keyW ||
-        key == LogicalKeyboardKey.keyA ||
-        key == LogicalKeyboardKey.keyS ||
-        key == LogicalKeyboardKey.keyD;
-  }
-
-  void _syncWasd() {
-    // 方向语义：W=画面上移（看上方内容，offset +y）、A=左移（offset +x）。
-    // 对角归一化。
-    final dx =
-        (_heldKeys.contains(LogicalKeyboardKey.keyA) ? 1 : 0) -
-        (_heldKeys.contains(LogicalKeyboardKey.keyD) ? 1 : 0);
-    final dy =
-        (_heldKeys.contains(LogicalKeyboardKey.keyW) ? 1 : 0) -
-        (_heldKeys.contains(LogicalKeyboardKey.keyS) ? 1 : 0);
-    var dir = Offset(dx.toDouble(), dy.toDouble());
-    if (dir != Offset.zero && dir.distance > 1) {
-      dir = dir / dir.distance;
-    }
-    _controller.setPanDirection(dir);
-  }
-
-  KeyEventResult _handleActionKey(LogicalKeyboardKey key) {
-    if (key == LogicalKeyboardKey.keyF) {
-      _flyToFocusGroup();
-      return KeyEventResult.handled;
-    }
-    if (key == LogicalKeyboardKey.keyQ) {
-      _flyToLatestGroup();
-      return KeyEventResult.handled;
-    }
-    if (key == LogicalKeyboardKey.equal ||
-        key == LogicalKeyboardKey.add ||
-        key == LogicalKeyboardKey.numpadAdd) {
-      _controller.keyboardZoom(_viewportSize, zoomIn: true);
-      return KeyEventResult.handled;
-    }
-    if (key == LogicalKeyboardKey.minus ||
-        key == LogicalKeyboardKey.numpadSubtract) {
-      _controller.keyboardZoom(_viewportSize, zoomIn: false);
-      return KeyEventResult.handled;
-    }
-    if (key == LogicalKeyboardKey.digit1 ||
-        key == LogicalKeyboardKey.numpad1) {
-      _controller.resetZoom(_viewportSize);
-      return KeyEventResult.handled;
-    }
-    if (key == LogicalKeyboardKey.escape) {
-      ref.read(generationPreviewSelectionProvider.notifier).clear();
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
-  }
-
-  void _flyToFocusGroup() {
-    if (_groups.isEmpty) return;
-    final selectedId = ref.read(generationPreviewSelectionProvider);
-    if (selectedId != null) {
-      for (final g in _groups) {
-        if (g.images.any((img) => img.id == selectedId)) {
-          final rect = _groupRects[g];
-          if (rect != null) {
-            _controller.flyToRect(rect, _viewportSize);
-            return;
-          }
-        }
-      }
-    }
-    _flyToLatestGroup();
-  }
-
-  void _flyToLatestGroup() {
-    if (_groups.isEmpty) return;
-    // 最新批在 feed 顶端（索引0）。
-    final rect = _groupRects[_groups.first];
-    if (rect != null) _controller.flyToRect(rect, _viewportSize);
-  }
-
-  /// 外部选中联动：飞到包含该图的 tile（比整组更聚焦，大图组不易偏）。
-  /// tile 不在当前 feed（被清理等）时静默忽略。
+  /// 选中联动：外部 tile 级选中 → 同步组级（官网语义=选中 tile 所属组），
+  /// 再飞到该 tile。tile 不在 feed（被清理等）静默忽略。
   void _flyToImage(String imageId) {
     for (final p in _placements) {
-      if (p.image.id == imageId) {
-        _controller.flyToRect(p.rect, _viewportSize);
+      final image = p.tile.image;
+      if (image != null && image.id == imageId) {
+        if (ref.read(generationCanvasGroupSelectionProvider) != p.group.key) {
+          ref
+              .read(generationCanvasGroupSelectionProvider.notifier)
+              .select(p.group.key);
+        }
+        _controller.flyToRect(p.rect, _viewportSize, instant: false);
         return;
       }
     }
   }
 
-  // ============ tile ============
+  // ============================ 相机停稳后处理 ============================
 
-  /// 画布内点 tile 只更新预览选中态，不弹全屏详情（右键菜单仍兜底）。
-  void _onTileTap(GeneratedImage image) {
-    ref.read(generationPreviewSelectionProvider.notifier).select(image.id);
+  void _scheduleSettle() {
+    _settleTimer?.cancel();
+    _settleTimer = Timer(_settleDelay, _onCameraSettled);
+    _lostTimer?.cancel();
   }
 
-  Widget _buildTile(CanvasPlacement placement) {
-    final image = placement.image;
-    final selected = ref.watch(generationPreviewSelectionProvider) == image.id;
-    return buildGeneratedImageCard(
-      context: context,
-      ref: ref,
-      image: image,
-      showIndex: false,
-      isSelected: selected,
-      enableHoverScale: false,
-      onTap: () => _onTileTap(image),
-    );
+  void _onCameraSettled() {
+    _armLostRecovery();
+    _autoSelectNearest();
   }
 
-  // ============ HUD ============
+  /// 相机停稳后自动选中离视口中心最近的 tile（跳过在飞槽位）。
+  void _autoSelectNearest() {
+    if (_placements.isEmpty || _viewportSize.isEmpty) return;
+    final cam = _controller.camera;
+    final centerWorld = cam.screenToWorld(_viewportSize.center(Offset.zero));
+    final visible = cam.visibleWorldRect(_viewportSize).inflate(80);
 
-  Widget _buildZoomHud(CanvasCamera cam) {
-    final l10n = context.l10n;
-    final theme = Theme.of(context);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            iconSize: 18,
-            icon: const Icon(Icons.remove),
-            tooltip: l10n.generation_canvasZoomOut,
-            onPressed: () =>
-                _controller.keyboardZoom(_viewportSize, zoomIn: false),
-          ),
-          SizedBox(
-            width: 46,
-            child: Text(
-              '${(cam.scale * 100).round()}%',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.labelSmall,
-            ),
-          ),
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            iconSize: 18,
-            icon: const Icon(Icons.add),
-            tooltip: l10n.generation_canvasZoomIn,
-            onPressed: () =>
-                _controller.keyboardZoom(_viewportSize, zoomIn: true),
-          ),
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            iconSize: 18,
-            icon: const Icon(Icons.fit_screen),
-            tooltip: l10n.generation_canvasFlyToLatest,
-            onPressed: _flyToLatestGroup,
-          ),
-        ],
-      ),
-    );
+    CanvasPlacement? best;
+    var bestDist = double.infinity;
+    for (final p in _placements) {
+      if (p.isInFlight) continue; // 生成中占位不参与选中
+      if (!p.rect.overlaps(visible)) continue;
+      final d = (p.rect.center - centerWorld).distance;
+      if (d < bestDist) {
+        bestDist = d;
+        best = p;
+      }
+    }
+    if (best != null) {
+      // 组级选中：官网语义是选中 tile 所属组，工具条跟组走。
+      final groupKey = best.group.key;
+      if (ref.read(generationCanvasGroupSelectionProvider) != groupKey) {
+        ref.read(generationCanvasGroupSelectionProvider.notifier).select(groupKey);
+      }
+      // tile 级 provider 同步成组内首图，保持历史面板/详情等外部联动一致。
+      final firstImage = best.group.tiles
+          .map((t) => t.image)
+          .whereType<GeneratedImage>()
+          .firstOrNull;
+      if (firstImage != null &&
+          ref.read(generationPreviewSelectionProvider) != firstImage.id) {
+        ref
+            .read(generationPreviewSelectionProvider.notifier)
+            .select(firstImage.id);
+      }
+    }
   }
 
-  // ============ build ============
+  /// 视口内无任何可见 tile → 2s 后飞回离中心最近的组。
+  void _armLostRecovery() {
+    _lostTimer?.cancel();
+    if (_placements.isEmpty || _viewportSize.isEmpty) return;
+    final visible = _controller.camera.visibleWorldRect(_viewportSize);
+    final anyVisible = _groupRects.values.any((r) => r.overlaps(visible));
+    if (anyVisible) return;
+    _lostTimer = Timer(_lostDelay, _recoverFromLost);
+  }
+
+  void _recoverFromLost() {
+    if (!mounted || _groups.isEmpty || _viewportSize.isEmpty) return;
+    final cam = _controller.camera;
+    final centerWorld = cam.screenToWorld(_viewportSize.center(Offset.zero));
+    var best = _groups.first;
+    var bestDist = double.infinity;
+    for (final g in _groups) {
+      final r = _groupRects[g];
+      if (r == null) continue;
+      final d = (r.center - centerWorld).distance;
+      if (d < bestDist) {
+        bestDist = d;
+        best = g;
+      }
+    }
+    final rect = _groupRects[best];
+    if (rect != null) {
+      _controller.flyToRect(rect, _viewportSize);
+    }
+  }
+
+  void _flyToHeadGroup() {
+    if (_groups.isEmpty) return;
+    final rect = _groupRects[_groups.first];
+    if (rect != null) {
+      _controller.flyToRect(rect, _viewportSize, instant: false);
+    }
+  }
+
+  // ============================ 手势 ============================
+
+  void _onPointerSignal(PointerSignalEvent event) {
+    if (event is PointerScrollEvent) {
+      final pos = event.localPosition;
+      if (HardwareKeyboard.instance.isControlPressed ||
+          HardwareKeyboard.instance.isMetaPressed) {
+        // 触控板捏合/平滑滚动（|deltaY|<50）走增量缩放，鼠标离散步进
+        final dy = event.scrollDelta.dy.abs();
+        if (dy < 50 && dy > 0.01) {
+          // 平滑：指数衰减增量，约每 50px 一档
+          _controller.smoothZoomAt(pos, math.pow(1.2, -event.scrollDelta.dy / 50).toDouble());
+        } else {
+          _controller.discreteZoomAt(pos, zoomIn: event.scrollDelta.dy < 0);
+        }
+      } else if (HardwareKeyboard.instance.isShiftPressed) {
+        _controller.haltMotion();
+        _controller.panBy(Offset(-event.scrollDelta.dy, 0));
+      } else {
+        _controller.haltMotion();
+        _controller.panBy(
+          Offset(-event.scrollDelta.dx, -event.scrollDelta.dy),
+        );
+      }
+    }
+  }
+
+  bool _isPanPointer(PointerDownEvent e) {
+    if (e.buttons & kMiddleMouseButton != 0) return true;
+    if (e.buttons & kPrimaryMouseButton != 0 &&
+        HardwareKeyboard.instance.isShiftPressed) {
+      return true;
+    }
+    return false;
+  }
+
+  void _onPointerDown(PointerDownEvent e) {
+    _focusNode.requestFocus();
+        if (_isPanPointer(e)) {
+      _panPointer = e.pointer;
+      _lastPanPosition = e.position;
+      _panTrail.clear();
+      _panTrail.add((e.position, DateTime.now()));
+      _controller.haltMotion();
+    }
+  }
+
+  void _onPointerMove(PointerMoveEvent e) {
+    if (_panPointer != e.pointer || _lastPanPosition == null) return;
+    final delta = e.position - _lastPanPosition!;
+    _lastPanPosition = e.position;
+    _panTrail.add((e.position, DateTime.now()));
+    if (_panTrail.length > 8) _panTrail.removeAt(0);
+    _controller.panBy(delta);
+  }
+
+  void _onPointerUp(PointerUpEvent e) {
+        if (_panPointer == e.pointer) {
+      _panPointer = null;
+      _lastPanPosition = null;
+      _flingFromTrail();
+      _panTrail.clear();
+    }
+  }
+
+  void _onPointerCancel(PointerCancelEvent e) {
+        if (_panPointer == e.pointer) {
+      _panPointer = null;
+      _lastPanPosition = null;
+      _panTrail.clear();
+    }
+  }
+
+  void _flingFromTrail() {
+    if (_panTrail.length < 2) return;
+    final now = DateTime.now();
+    final cutoff = now.subtract(const Duration(milliseconds: 100));
+    final samples = _panTrail.where((s) => s.$2.isAfter(cutoff)).toList();
+    if (samples.length < 2) return;
+    final dt = samples.last.$2.difference(samples.first.$2).inMilliseconds;
+    if (dt <= 0) return;
+    final v = (samples.last.$1 - samples.first.$1) / dt.toDouble();
+    _controller.fling(v);
+  }
+
+  // ============================ 键盘 ============================
+
+  KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
+    final key = event.logicalKey;
+    if (event is KeyDownEvent) {
+      if (key == LogicalKeyboardKey.shiftLeft ||
+          key == LogicalKeyboardKey.shiftRight) {
+        return KeyEventResult.ignored;
+      }
+      switch (key) {
+        case LogicalKeyboardKey.keyW:
+        case LogicalKeyboardKey.keyA:
+        case LogicalKeyboardKey.keyS:
+        case LogicalKeyboardKey.keyD:
+        case LogicalKeyboardKey.arrowUp:
+        case LogicalKeyboardKey.arrowDown:
+        case LogicalKeyboardKey.arrowLeft:
+        case LogicalKeyboardKey.arrowRight:
+          _heldKeys.add(key);
+          _updatePanTicker();
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.keyF:
+          _flyToFocusGroup();
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.keyQ:
+          _flyToHeadGroup();
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.equal:
+        case LogicalKeyboardKey.numpadAdd:
+          _controller.keyboardZoom(_viewportSize, zoomIn: true);
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.minus:
+        case LogicalKeyboardKey.numpadSubtract:
+          _controller.keyboardZoom(_viewportSize, zoomIn: false);
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.digit1:
+        case LogicalKeyboardKey.numpad1:
+          _controller.resetZoom(_viewportSize);
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.escape:
+          // 组级选中态清空（画布内部），tile 级同步清空
+          ref.read(generationCanvasGroupSelectionProvider.notifier).clear();
+          ref.read(generationPreviewSelectionProvider.notifier).clear();
+          return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    }
+    if (event is KeyUpEvent) {
+      if (key == LogicalKeyboardKey.shiftLeft ||
+          key == LogicalKeyboardKey.shiftRight) {
+        return KeyEventResult.ignored;
+      }
+      if (_heldKeys.remove(key)) {
+        _updatePanTicker();
+        return KeyEventResult.handled;
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
+  void _updatePanTicker() {
+    
+    var dx = 0.0, dy = 0.0;
+    for (final k in _heldKeys) {
+      switch (k) {
+        case LogicalKeyboardKey.keyW:
+        case LogicalKeyboardKey.arrowUp:
+          dy += 1; // W = 看上方内容 = 视口下移 = offset +y
+          break;
+        case LogicalKeyboardKey.keyS:
+        case LogicalKeyboardKey.arrowDown:
+          dy -= 1;
+          break;
+        case LogicalKeyboardKey.keyA:
+        case LogicalKeyboardKey.arrowLeft:
+          dx += 1;
+          break;
+        case LogicalKeyboardKey.keyD:
+        case LogicalKeyboardKey.arrowRight:
+          dx -= 1;
+          break;
+        default:
+          break;
+      }
+    }
+    _controller.setPanDirection(Offset(dx, dy));
+  }
+
+  void _flyToFocusGroup() {
+    // f = 飞到当前选中组；组级选中优先，无选中回退 tile 级 → 首组
+    final groupKey = ref.read(generationCanvasGroupSelectionProvider);
+    final selectedId = ref.read(generationPreviewSelectionProvider);
+    CanvasGroup? target;
+    if (groupKey != null) {
+      for (final g in _groups) {
+        if (g.key == groupKey) {
+          target = g;
+          break;
+        }
+      }
+    }
+    if (target == null && selectedId != null) {
+      for (final p in _placements) {
+        final image = p.tile.image;
+        if (image != null && image.id == selectedId) {
+          target = p.group;
+          break;
+        }
+      }
+    }
+    target ??= _groups.isNotEmpty ? _groups.first : null;
+    if (target == null) return;
+    final rect = _groupRects[target];
+    if (rect != null) {
+      _controller.flyToRect(rect, _viewportSize);
+    }
+  }
+
+  // ============================ 构建 ============================
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    // 组选中变化 → 重排（展开态切换）。选中值本身 tile 渲染里再 watch。
+    final groupSel = ref.watch(generationCanvasGroupSelectionProvider);
+    if (groupSel != _layoutExpandedKey) {
+      _layoutExpandedKey = groupSel;
+      _recomputeLayout();
+    }
+
     return Focus(
       focusNode: _focusNode,
-      onKeyEvent: (node, event) => _onKeyEvent(event),
-      onFocusChange: (hasFocus) {
-        if (!hasFocus && _heldKeys.isNotEmpty) {
-          _heldKeys.clear();
-          _syncWasd();
-        }
-      },
+      onKeyEvent: _onKeyEvent,
       child: LayoutBuilder(
         builder: (context, constraints) {
           _viewportSize = constraints.biggest;
 
-          // 新批落地自动飞（post-frame，避免 build 期触发 notify）
-          if (_pendingNewGroupFly && _groups.isNotEmpty) {
-            _pendingNewGroupFly = false;
+          // 首组变化自动飞（post-frame，避免 build 期触发 notify）
+          if (_pendingHeadGroupFly && _groups.isNotEmpty) {
+            _pendingHeadGroupFly = false;
             final rect = _groupRects[_groups.first];
             if (rect != null) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!mounted) return;
-                _controller.flyToRect(rect, _viewportSize);
+                _controller.flyToRect(
+                  rect,
+                  _viewportSize,
+                  instant: false,
+                );
               });
             }
           }
 
-          return MouseRegion(
-            cursor: _panningCursor
-                ? SystemMouseCursors.grabbing
-                : SystemMouseCursors.grab,
-            child: Listener(
-              onPointerDown: _onPointerDown,
-              onPointerMove: _onPointerMove,
-              onPointerUp: _onPointerUp,
-              onPointerCancel: _onPointerUp,
-              onPointerSignal: _onPointerSignal,
-              child: ClipRect(
-                child: AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, _) {
-                    final cam = _controller.camera;
-                    final visibleWorld = cam.visibleWorldRect(_viewportSize);
-                    final visible = _placements.where(
-                      (p) => p.rect.overlaps(visibleWorld),
-                    );
-
-                    return Stack(
-                      children: [
-                        // 世界层：相机变换 + 世界坐标 Positioned tile
-                        Transform(
-                          transform: Matrix4.identity()
-                            ..translateByDouble(
-                              cam.offset.dx,
-                              cam.offset.dy,
-                              0,
-                              1,
-                            )
-                            ..scaleByDouble(cam.scale, cam.scale, 1, 1),
-                          alignment: Alignment.topLeft,
-                          // 世界层 Stack：尺寸 = 视口约束、原点在左上，而 tile
-                          // 世界坐标以 x=0 居中（负 x 占一半）。默认 hardEdge 会
-                          // 把局部坐标 <0 的部分裁掉（tile 被啃左半），必须
-                          // Clip.none——视口裁剪由外层 ClipRect 负责。
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              for (final p in visible)
-                                Positioned.fromRect(
-                                  rect: p.rect,
-                                  child: _buildTile(p),
-                                ),
-                            ],
+          return ClipRect(
+            child: MouseRegion(
+              cursor: _panPointer != null
+                  ? SystemMouseCursors.grabbing
+                  : SystemMouseCursors.grab,
+              child: Listener(
+                onPointerSignal: _onPointerSignal,
+                onPointerDown: _onPointerDown,
+                onPointerMove: _onPointerMove,
+                onPointerUp: _onPointerUp,
+                onPointerCancel: _onPointerCancel,
+                child: Container(
+                  color: theme.colorScheme.surfaceContainerLowest,
+                  child: Stack(
+                    children: [
+                      // 世界层：Transform(offset+scale) 承载全部 tile
+                      AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, _) {
+                          final cam = _controller.camera;
+                          return Transform(
+                            transform: Matrix4.identity()
+                              ..translateByDouble(
+                                cam.offset.dx,
+                                cam.offset.dy,
+                                0,
+                                1,
+                              )
+                              ..scaleByDouble(cam.scale, cam.scale, 1, 1),
+                            alignment: Alignment.topLeft,
+                            // 世界层 Stack 尺寸=视口、原点在左上，tile 世界坐标
+                            // 以 x=0 居中（负 x 占半幅）——默认 hardEdge 会把
+                            // 负 x 部分裁掉，必须 Clip.none；视口裁剪交给外层。
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                for (final p in _placements)
+                                  if (_isPlacementVisible(p, cam))
+                                    Positioned.fromRect(
+                                      rect: p.rect,
+                                      child: _buildTile(p),
+                                    ),
+                                // 组展开态：选中组的 groupRect 上覆组级头部条
+                                // （反缩放：随相机 zoom 反比放大，保持屏幕恒定字号）。
+                                for (final g in _groups)
+                                  if (_layoutExpandedKey == g.key &&
+                                      _groupRects.containsKey(g) &&
+                                      !g.isInFlight)
+                                    ..._buildGroupOverlay(g, cam.scale),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      // 空态
+                      if (_placements.isEmpty)
+                        Center(
+                          child: Text(
+                            '暂无生成记录',
+                            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                           ),
                         ),
-                        // 屏幕空间 HUD：缩放百分比 + 快捷按钮
-                        Positioned(
-                          right: 12,
-                          bottom: 12,
-                          child: _buildZoomHud(cam),
-                        ),
-                      ],
-                    );
-                  },
+                      // 屏幕空间 HUD：缩放百分比 + 控件
+                      Positioned(
+                        right: 16,
+                        bottom: 16,
+                        child: _buildZoomHud(theme),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  bool _isPlacementVisible(CanvasPlacement p, CanvasCamera cam) {
+    if (_viewportSize.isEmpty) return false;
+    final visible = cam.visibleWorldRect(_viewportSize).inflate(80);
+    return p.rect.overlaps(visible);
+  }
+
+  /// 组展开态世界层覆盖：组上方出反缩放的头部条（组序号/张数/种子），
+  /// 底部留出工具条挂点占位（R3 填内容）。返回若干 Positioned。
+  List<Widget> _buildGroupOverlay(CanvasGroup group, double camScale) {
+    final rect = _groupRects[group]!;
+    final theme = Theme.of(context);
+    final inv = 1.0 / camScale;
+
+    // 反缩放锚点：屏幕恒定尺寸条 = OverflowBox + Transform.scale(inv)。
+    // 头部条：组上方（世界 y - 44*inv），水平居中于组中心。
+    Widget antiScaled({
+      required double worldX,
+      required double worldY,
+      required Widget child,
+      double screenW = 0, // 0=自适应
+    }) {
+      return Positioned(
+        left: worldX,
+        top: worldY,
+        child: OverflowBox(
+          maxWidth: double.infinity,
+          maxHeight: double.infinity,
+          alignment: Alignment.topLeft,
+          child: Transform.scale(
+            scale: inv,
+            alignment: Alignment.topLeft,
+            child: child,
+          ),
+        ),
+      );
+    }
+
+    final firstImage = group.tiles
+        .map((t) => t.image)
+        .whereType<GeneratedImage>()
+        .firstOrNull;
+    final tileCount = group.tiles.length;
+    final runId = firstImage?.generationRunId;
+    final indices = group.tiles
+        .map((t) => t.image?.batchIndex)
+        .whereType<int>()
+        .toList();
+
+    return [
+      // 头部条：组上方间距区（屏幕 y 恒定）
+      antiScaled(
+        worldX: rect.center.dx,
+        worldY: rect.top - 10 * inv,
+        child: FractionalTranslation(
+          // 条体以自身左上为基准，水平居中于组中心
+          translation: const Offset(-0.5, -1.0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.photo_library_outlined,
+                  size: 13,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  [
+                    if (runId != null) 'run $runId',
+                    '$tileCount 图',
+                    if (indices.length > 1)
+                      '#${indices.first + 1}-${indices.last + 1}',
+                  ].join(' · '),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      // 底部工具条（R3）：作用于组内首图，top 条挂图上方 / bottom 条挂图下方，
+      // 两者都由 CanvasTileToolbar 内部拆分；可用屏幕宽按组宽*camScale 估算塌缩。
+      if (firstImage != null)
+        antiScaled(
+          worldX: rect.center.dx,
+          worldY: rect.bottom + 10 * inv,
+          child: FractionalTranslation(
+            translation: const Offset(-0.5, 0),
+            child: CanvasTileToolbar(
+              items: buildCanvasToolbarItems(
+                context: context,
+                ref: ref,
+                image: firstImage,
+              ),
+              // 组在屏幕上的投影宽度即工具条可用宽（反缩放后 1:1）。
+              maxWidth: math.max(120.0, rect.width * camScale - 24),
+            ),
+          ),
+        ),
+    ];
+  }
+
+  Widget _buildTile(CanvasPlacement p) {
+    final tile = p.tile;
+    final slot = tile.slot;
+    if (slot != null) {
+      // 生成中 tile：批参数尺寸 + 流式帧/加载占位
+      return SelectableImageCard(
+        isGenerating: true,
+        progress: slot.progress,
+        currentImage: slot.imageNumber,
+        totalImages: widget.generationState.totalImages,
+        streamPreview: slot.previewBytes,
+        imageWidth: widget.generationState.batchWidth,
+        imageHeight: widget.generationState.batchHeight,
+        showIndex: false,
+        enableContextMenu: false,
+        enableHoverScale: false,
+        enableGlossEffect: false,
+        enableSelection: false,
+        enableSaveAction: false,
+        enableCopyAction: false,
+        hoverEffectsEnabled: false,
+        shareWarmupEnabled: false,
+      );
+    }
+    final image = tile.image!;
+    final selectedGroupKey = ref.watch(generationCanvasGroupSelectionProvider);
+    final selectedImageId = ref.watch(generationPreviewSelectionProvider);
+    return RepaintBoundary(
+      child: buildGeneratedImageCard(
+        context: context,
+        ref: ref,
+        image: image,
+        showIndex: false,
+        enableHoverScale: false, // 世界空间内 hover 放大等于挪世界，禁用
+        // 组级选中态：组内任一 tile 命中即整组高亮（卡片描边仍按 tile 级）
+        isSelected:
+            p.group.key == selectedGroupKey || image.id == selectedImageId,
+        onTap: () => _onTileTap(p),
+      ),
+    );
+  }
+
+  /// 画布内点 tile：选中所属组（组级），tile 级 provider 同步为该图。
+  /// 不弹全屏详情（右键菜单仍兜底）。
+  void _onTileTap(CanvasPlacement p) {
+    ref
+        .read(generationCanvasGroupSelectionProvider.notifier)
+        .select(p.group.key);
+    final image = p.tile.image;
+    if (image != null) {
+      ref.read(generationPreviewSelectionProvider.notifier).select(image.id);
+    }
+  }
+
+  Widget _buildZoomHud(ThemeData theme) {
+    final cam = _controller.camera;
+    final pct = (cam.scale * 100).round();
+    Widget btn(IconData icon, String tip, VoidCallback onTap) {
+      return Tooltip(
+        message: tip,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(6),
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          btn(
+            Icons.remove,
+            '缩小 (-)',
+            () => _controller.keyboardZoom(_viewportSize, zoomIn: false),
+          ),
+          SizedBox(
+            width: 46,
+            child: Text(
+              '$pct%',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: theme.colorScheme.onSurface,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ),
+          btn(
+            Icons.add,
+            '放大 (+)',
+            () => _controller.keyboardZoom(_viewportSize, zoomIn: true),
+          ),
+          btn(
+            Icons.fit_screen,
+            '适应窗口 (f)',
+            () => _flyToFocusGroup(),
+          ),
+          btn(Icons.my_location, '回最新 (q)', _flyToHeadGroup),
+        ],
       ),
     );
   }

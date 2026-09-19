@@ -97,6 +97,7 @@ class GenerationCanvasController extends ChangeNotifier {
   double _flyFromScale = 1.0;
   double _flyToScale = 1.0;
   bool _flying = false;
+  Curve _flyCurve = Curves.easeInOutCubic;
 
   // 滚轮动画目标（连滚复利基值）
   double? _pendingZoomTarget;
@@ -106,7 +107,7 @@ class GenerationCanvasController extends ChangeNotifier {
   Duration? _lastInertiaTime;
 
   // WASD 持续平移
-  Offset _panDirection = Offset.zero; // 归一化方向（世界坐标系，每秒1000px屏幕）
+  Offset _panDirection = Offset.zero; // 归一化方向（屏幕坐标系，每秒1000px）
   Duration? _lastPanTime;
 
   static const double inertiaMaxSpeed = 4000.0; // px/s（官网钳 4px/ms）
@@ -291,8 +292,6 @@ class GenerationCanvasController extends ChangeNotifier {
     _flying = true;
     _flyController.forward(from: 0);
   }
-
-  Curve _flyCurve = Curves.easeInOutCubic;
 
   void _onFlyTick() {
     if (!_flying) return;

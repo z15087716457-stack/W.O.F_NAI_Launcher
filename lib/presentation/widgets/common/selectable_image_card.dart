@@ -232,6 +232,71 @@ class SelectableImageCard extends ConsumerStatefulWidget {
   @override
   ConsumerState<SelectableImageCard> createState() =>
       _SelectableImageCardState();
+
+  /// 画布工具条等外部调用：保存图像字节到画廊目录（原子保存+去重+toast）。
+  ///
+  /// 与卡片实例的 [_saveImage] 走同一套 ImageSaveUtils 管线（日期分类路径、
+  /// 字节级去重、独占防冲突）；无 filePath 回写（外部调用无 imageIdentity）。
+  static Future<void> saveImageBytesToGallery(
+    BuildContext context,
+    Uint8List bytes,
+  ) async {
+    final l10n = context.l10n;
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    try {
+      final rootPath = await GalleryFolderRepository.instance.getRootPath();
+      if (rootPath == null || rootPath.isEmpty) {
+        AppToast.errorOnOverlay(overlay, l10n.toast_saveDirNotSet);
+        return;
+      }
+      final seed = await ImageSaveUtils.resolveSeed(bytes: bytes);
+      final identicalPath = await ImageSaveUtils.findIdenticalDatedFile(
+        rootPath: rootPath,
+        bytes: bytes,
+        seed: seed,
+      );
+      if (identicalPath != null) {
+        AppToast.successOnOverlay(overlay, l10n.toast_savedTo(rootPath));
+        return;
+      }
+      await ImageSaveUtils.saveBytesToDatedPath(
+        rootPath: rootPath,
+        bytes: bytes,
+        seed: seed,
+      );
+      AppToast.successOnOverlay(overlay, l10n.toast_savedTo(rootPath));
+    } catch (e) {
+      AppToast.errorOnOverlay(overlay, l10n.image_saveFailed(e.toString()));
+    }
+  }
+
+  /// 画布工具条等外部调用：复制图像字节到剪贴板（统一规范化 PNG）。
+  ///
+  /// 与卡片实例的复制流一致：走 ShareImageTransferCache 的元数据剥离设置
+  /// 与跨平台 PNG 规范化。
+  static Future<void> copyImageBytesToClipboard(
+    BuildContext context,
+    WidgetRef ref,
+    Uint8List bytes,
+  ) async {
+    final l10n = context.l10n;
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    try {
+      final stripMetadata = ref
+          .read(shareImageSettingsProvider)
+          .effectiveStripMetadataForCopyAndDrag;
+      final clipboardWriter = ref.read(imageClipboardWriterProvider);
+      final cache = ShareImageTransferCache(
+        imageBytes: bytes,
+        fileName: 'generated.png',
+      );
+      final shareImage = await cache.prepareImage(stripMetadata: stripMetadata);
+      await clipboardWriter(shareImage.bytes);
+      AppToast.successOnOverlay(overlay, l10n.image_copiedToClipboard);
+    } catch (e) {
+      AppToast.errorOnOverlay(overlay, l10n.image_copyFailed(e.toString()));
+    }
+  }
 }
 
 class _SelectableImageCardState extends ConsumerState<SelectableImageCard>

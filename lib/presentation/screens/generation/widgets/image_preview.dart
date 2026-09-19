@@ -122,6 +122,14 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
     final batchWidth = state.batchWidth ?? previewDimensions.width;
     final batchHeight = state.batchHeight ?? previewDimensions.height;
 
+    // V2 自由画布（G11 FEAT-65 重写）：接管含生成期的全部预览态——
+    // 生成中渲染 inflight 占位组置顶 + 流式帧，画布不卸载不回退。
+    // simpleOutputViewer=true 时回退经典输出查看器。
+    final simpleViewer = ref.watch(simpleOutputViewerNotifierProvider);
+    if (!simpleViewer && (state.mergedPanelImages.isNotEmpty || state.isGenerating)) {
+      return GenerationCanvasView(generationState: state);
+    }
+
     // 生成中状态
     if (state.isGenerating) {
       final previewSlots = _visibleStreamPreviewSlots(state);
@@ -152,17 +160,6 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
         ref.watch(characterPositionCanvasAvailableProvider);
     if (showCharacterCanvas) {
       return const CharacterPositionCanvasView();
-    }
-
-    // G11 自由画布：simpleOutputViewer=false（默认）且有历史/当前图像时接管。
-    // 数据源用 mergedPanelImages（当前批 + history 去重），比 displayImages
-    // 更接近官网「全部已生成图」语义；无图时落回空态。
-    final simpleViewer = ref.watch(simpleOutputViewerNotifierProvider);
-    if (!simpleViewer) {
-      final feed = state.mergedPanelImages;
-      if (feed.isNotEmpty) {
-        return GenerationCanvasView(images: feed);
-      }
     }
 
     final behavior = ref.watch(historyClickBehaviorNotifierProvider);
