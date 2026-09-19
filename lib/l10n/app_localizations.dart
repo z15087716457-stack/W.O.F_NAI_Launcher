@@ -12414,6 +12414,30 @@ abstract class AppLocalizations {
   /// **'Classic centered/grid preview for low-spec machines or the familiar layout'**
   String get settings_outputViewer_simpleDescription;
 
+  /// No description provided for @settings_canvasLockCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock canvas camera'**
+  String get settings_canvasLockCamera;
+
+  /// No description provided for @settings_canvasLockCameraDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Disables wheel zoom/pan, drag panning, WASD and other manual camera input; auto-select and navigation jumps still work'**
+  String get settings_canvasLockCameraDescription;
+
+  /// No description provided for @settings_canvasReducedMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce canvas motion'**
+  String get settings_canvasReducedMotion;
+
+  /// No description provided for @settings_canvasReducedMotionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera flights, zooms and inertia become instant, reducing animation'**
+  String get settings_canvasReducedMotionDescription;
+
   /// No description provided for @image_viewDetail.
   ///
   /// In en, this message translates to:

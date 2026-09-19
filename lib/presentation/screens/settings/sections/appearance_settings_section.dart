@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/localization_extension.dart';
+import '../../../providers/canvas_settings_provider.dart';
 import '../../../providers/font_provider.dart';
 import '../../../providers/font_scale_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
@@ -101,6 +104,34 @@ class _AppearanceSettingsSectionState
             ),
             onTap: () =>
                 _showOutputViewerDialog(context, simpleOutputViewer),
+          ),
+
+          // 画布门控（官网 canvasLockCamera / canvasReducedMotion）
+          SwitchListTile(
+            secondary: const Icon(Icons.lock_outline),
+            title: Text(context.l10n.settings_canvasLockCamera),
+            subtitle: Text(
+              context.l10n.settings_canvasLockCameraDescription,
+            ),
+            value: ref.watch(canvasLockCameraNotifierProvider),
+            onChanged: (v) => unawaited(
+              ref
+                  .read(canvasLockCameraNotifierProvider.notifier)
+                  .setLocked(v),
+            ),
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.motion_photos_off_outlined),
+            title: Text(context.l10n.settings_canvasReducedMotion),
+            subtitle: Text(
+              context.l10n.settings_canvasReducedMotionDescription,
+            ),
+            value: ref.watch(canvasReducedMotionNotifierProvider),
+            onChanged: (v) => unawaited(
+              ref
+                  .read(canvasReducedMotionNotifierProvider.notifier)
+                  .setReduced(v),
+            ),
           ),
         ],
       ),

@@ -6789,6 +6789,19 @@ class AppLocalizationsZh extends AppLocalizations {
       '经典居中/网格预览，适合低配置或习惯旧界面的场景';
 
   @override
+  String get settings_canvasLockCamera => '锁定画布相机';
+
+  @override
+  String get settings_canvasLockCameraDescription =>
+      '禁用滚轮缩放/平移、拖拽与 WASD 等手动相机输入；自动选中与跳转不受影响';
+
+  @override
+  String get settings_canvasReducedMotion => '减少画布动效';
+
+  @override
+  String get settings_canvasReducedMotionDescription => '飞行、缩放与惯性改为瞬时切换，降低动画负担';
+
+  @override
   String get image_viewDetail => '查看详情';
 
   @override

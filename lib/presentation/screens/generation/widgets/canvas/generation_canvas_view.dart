@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../providers/canvas_settings_provider.dart';
 import '../../../../providers/generation/generation_models.dart';
 import '../../../../providers/image_generation_provider.dart';
 import '../../../../providers/generation/preview_selection_provider.dart';
@@ -46,6 +47,10 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   final FocusNode _focusNode = FocusNode(debugLabel: 'generation-canvas');
   ProviderSubscription<String?>? _selectionSub;
 
+  /// 完整组序列（新→旧，索引 0 = 最新批/置顶 inflight）。
+  List<CanvasGroup> _allGroups = [];
+
+  /// 已露出布局的组（懒露出窗口尾部，新→旧）。
   List<CanvasGroup> _groups = [];
   List<CanvasPlacement> _placements = [];
   Map<CanvasGroup, Rect> _groupRects = {};
@@ -72,6 +77,14 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   // 当前布局使用的展开组 key（用于 build 期检测组选中变化重排）
   String? _layoutExpandedKey;
 
+  // 懒露出窗口：初渲只布局前 N 组，视口底接近内容底（<800px）时增量露出
+  // 更老的组（对标官网无限滚动触底翻页；我方历史为内存态 take(50)，
+  // 此窗口等价提供「触底再露出」的浏览手感与初始布局成本控制）。
+  int _visibleGroupCount = 12;
+  static const int _initialVisibleGroups = 12;
+  static const int _visibleGroupsGrowBy = 8;
+  static const double _bottomRevealThreshold = 800.0;
+
   // WASD 按住键集合（screen 方向）
   final Set<LogicalKeyboardKey> _heldKeys = {};
 
@@ -89,6 +102,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       if (selectedId != null) _flyToImage(selectedId);
     });
     _layoutExpandedKey = ref.read(generationCanvasGroupSelectionProvider);
+    _controller.reducedMotion = ref.read(canvasReducedMotionNotifierProvider);
     _recomputeLayout();
   }
 
@@ -121,7 +135,8 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     final state = widget.generationState;
     final feed = _feedImages;
 
-    _groups = groupCanvasImages(feed);
+    // 懒露出窗口保持：先按 key 集增量露出已存在的窗口，再覆盖当前数据。
+    _allGroups = groupCanvasImages(feed);
     // 生成期：inflight 组置顶（新批在 feed 顶部）
     if (state.isGenerating) {
       final bw = state.batchWidth;
@@ -141,7 +156,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                   ),
               ];
         if (slots.isNotEmpty) {
-          _groups.insert(
+          _allGroups.insert(
             0,
             inflightGroup(
               slots: slots,
@@ -152,6 +167,21 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         }
       }
     }
+
+    // 懒露出：上次已露出的组（按 key）+ 头部补足到 _visibleGroupCount。
+    // 换批后组对象重建，用 key 集判定哪些历史组已露出过。
+    final previousKeys = {for (final g in _groups) g.key};
+    final visible = <CanvasGroup>[];
+    for (final g in _allGroups) {
+      if (visible.length < _visibleGroupCount || previousKeys.contains(g.key)) {
+        visible.add(g);
+      }
+    }
+    _visibleGroupCount = math.max(
+      _visibleGroupCount,
+      previousKeys.isEmpty ? _initialVisibleGroups : visible.length,
+    );
+    _groups = visible;
 
     // 组级选中 → 该组进展开态（组内 tile 单行横排）。
     final result = layoutCanvasFeed(
@@ -205,6 +235,21 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   void _onCameraSettled() {
     _armLostRecovery();
     _autoSelectNearest();
+    _maybeRevealMore();
+  }
+
+  /// 无限滚动等价物：视口底距内容底 <800px → 露出更老的组。
+  /// 历史为内存态 take(50) 无分页源，此窗口提供同语义的触底增量露出。
+  void _maybeRevealMore() {
+    if (_groups.length >= _allGroups.length) return;
+    if (_viewportSize.isEmpty || _groups.isEmpty) return;
+    final lastRect = _groupRects[_groups.last];
+    if (lastRect == null) return;
+    final visible = _controller.camera.visibleWorldRect(_viewportSize);
+    if (visible.bottom > lastRect.bottom - _bottomRevealThreshold) {
+      _visibleGroupCount += _visibleGroupsGrowBy;
+      setState(_recomputeLayout);
+    }
   }
 
   /// 相机停稳后自动选中离视口中心最近的 tile（跳过在飞槽位）。
@@ -286,16 +331,24 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
 
   // ============================ 手势 ============================
 
+  /// 锁相机（官网 `canvasLockCamera`）：禁用一切手动相机输入。
+  /// 程序化飞行（f/q/选中联动/防迷失/新批自动飞）不在此列。
+  bool get _cameraLocked => ref.read(canvasLockCameraNotifierProvider);
+
   void _onPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent) {
+      if (_cameraLocked) return;
       final pos = event.localPosition;
       if (HardwareKeyboard.instance.isControlPressed ||
           HardwareKeyboard.instance.isMetaPressed) {
         // 触控板捏合/平滑滚动（|deltaY|<50）走增量缩放，鼠标离散步进
         final dy = event.scrollDelta.dy.abs();
         if (dy < 50 && dy > 0.01) {
-          // 平滑：指数衰减增量，约每 50px 一档
-          _controller.smoothZoomAt(pos, math.pow(1.2, -event.scrollDelta.dy / 50).toDouble());
+          // 平滑：官网 exp(clamp(-0.01·deltaY, ±0.25)) 增量直写
+          final factor = math.exp(
+            (-0.01 * event.scrollDelta.dy).clamp(-0.25, 0.25),
+          );
+          _controller.smoothZoomAt(pos, factor);
         } else {
           _controller.discreteZoomAt(pos, zoomIn: event.scrollDelta.dy < 0);
         }
@@ -322,7 +375,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
 
   void _onPointerDown(PointerDownEvent e) {
     _focusNode.requestFocus();
-        if (_isPanPointer(e)) {
+        if (!_cameraLocked && _isPanPointer(e)) {
       _panPointer = e.pointer;
       _lastPanPosition = e.position;
       _panTrail.clear();
@@ -387,6 +440,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         case LogicalKeyboardKey.arrowDown:
         case LogicalKeyboardKey.arrowLeft:
         case LogicalKeyboardKey.arrowRight:
+          if (_cameraLocked) return KeyEventResult.ignored;
           _heldKeys.add(key);
           _updatePanTicker();
           return KeyEventResult.handled;
@@ -398,14 +452,17 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
           return KeyEventResult.handled;
         case LogicalKeyboardKey.equal:
         case LogicalKeyboardKey.numpadAdd:
+          if (_cameraLocked) return KeyEventResult.ignored;
           _controller.keyboardZoom(_viewportSize, zoomIn: true);
           return KeyEventResult.handled;
         case LogicalKeyboardKey.minus:
         case LogicalKeyboardKey.numpadSubtract:
+          if (_cameraLocked) return KeyEventResult.ignored;
           _controller.keyboardZoom(_viewportSize, zoomIn: false);
           return KeyEventResult.handled;
         case LogicalKeyboardKey.digit1:
         case LogicalKeyboardKey.numpad1:
+          if (_cameraLocked) return KeyEventResult.ignored;
           _controller.resetZoom(_viewportSize);
           return KeyEventResult.handled;
         case LogicalKeyboardKey.escape:
@@ -492,6 +549,8 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // 减动效（canvasReducedMotion）：即时写入控制器，飞行/缩放/惯性瞬移。
+    _controller.reducedMotion = ref.watch(canvasReducedMotionNotifierProvider);
     // 组选中变化 → 重排（展开态切换）。选中值本身 tile 渲染里再 watch。
     final groupSel = ref.watch(generationCanvasGroupSelectionProvider);
     if (groupSel != _layoutExpandedKey) {

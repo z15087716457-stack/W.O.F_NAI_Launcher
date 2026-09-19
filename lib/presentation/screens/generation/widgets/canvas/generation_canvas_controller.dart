@@ -91,6 +91,10 @@ class GenerationCanvasController extends ChangeNotifier {
   CanvasCamera _camera;
   CanvasCamera get camera => _camera;
 
+  /// 减动效（官网 `canvasReducedMotion`）：true 时飞行/缩放动画与
+  /// 惯性全部改为瞬移。视图层 watch 门控 provider 并写入此字段。
+  bool reducedMotion = false;
+
   // 飞行/缩放动画
   Offset _flyFromOffset = Offset.zero;
   Offset _flyToOffset = Offset.zero;
@@ -140,7 +144,9 @@ class GenerationCanvasController extends ChangeNotifier {
   }
 
   /// 惯性甩动：松手时调用。velocity 为屏幕 px/ms。
+  /// 减动效下不产生惯性。
   void fling(Offset velocityPxPerMs) {
+    if (reducedMotion) return;
     var speed = velocityPxPerMs.distance * 1000;
     if (speed <= 0 || speed < inertiaStopSpeed) return;
     speed = math.min(speed, inertiaMaxSpeed);
@@ -279,6 +285,11 @@ class GenerationCanvasController extends ChangeNotifier {
     required Duration duration,
     required Curve curve,
   }) {
+    if (reducedMotion) {
+      haltMotion();
+      _setCamera(target);
+      return;
+    }
     _inertiaTicker.stop();
     _inertiaVelocity = Offset.zero;
     _flyFromOffset = _camera.offset;

@@ -7028,6 +7028,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Classic centered/grid preview for low-spec machines or the familiar layout';
 
   @override
+  String get settings_canvasLockCamera => 'Lock canvas camera';
+
+  @override
+  String get settings_canvasLockCameraDescription =>
+      'Disables wheel zoom/pan, drag panning, WASD and other manual camera input; auto-select and navigation jumps still work';
+
+  @override
+  String get settings_canvasReducedMotion => 'Reduce canvas motion';
+
+  @override
+  String get settings_canvasReducedMotionDescription =>
+      'Camera flights, zooms and inertia become instant, reducing animation';
+
+  @override
   String get image_viewDetail => 'View details';
 
   @override

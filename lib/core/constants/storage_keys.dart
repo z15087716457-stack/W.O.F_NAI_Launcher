@@ -50,6 +50,8 @@ class StorageKeys {
   static const String promptMaximized = 'prompt_maximized';
   static const String historyClickBehavior = 'history_click_behavior';
   static const String simpleOutputViewer = 'simple_output_viewer';
+  static const String canvasLockCamera = 'canvas_lock_camera';
+  static const String canvasReducedMotion = 'canvas_reduced_motion';
   static const String mainNavRailExpanded = 'main_nav_rail_expanded';
   static const String webLeftPanelWidth = 'web_left_panel_width';
   static const String webLeftPanelExpanded = 'web_left_panel_expanded';

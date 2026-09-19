@@ -676,6 +676,34 @@ class LocalStorageService {
     await setSetting(StorageKeys.simpleOutputViewer, simple);
   }
 
+  /// 获取画布锁相机设置（true=禁用一切手动相机输入；官网 `canvasLockCamera`）
+  bool getCanvasLockCamera() {
+    return getSetting<bool>(
+          StorageKeys.canvasLockCamera,
+          defaultValue: false,
+        ) ??
+        false;
+  }
+
+  /// 保存画布锁相机设置
+  Future<void> setCanvasLockCamera(bool locked) async {
+    await setSetting(StorageKeys.canvasLockCamera, locked);
+  }
+
+  /// 获取画布减动效设置（true=飞行/缩放/惯性全部瞬移；官网 `canvasReducedMotion`）
+  bool getCanvasReducedMotion() {
+    return getSetting<bool>(
+          StorageKeys.canvasReducedMotion,
+          defaultValue: false,
+        ) ??
+        false;
+  }
+
+  /// 保存画布减动效设置
+  Future<void> setCanvasReducedMotion(bool reduced) async {
+    await setSetting(StorageKeys.canvasReducedMotion, reduced);
+  }
+
   /// 获取官网式布局左栏宽度 (默认400)
   double getWebLeftPanelWidth() {
     return getSetting<double>(

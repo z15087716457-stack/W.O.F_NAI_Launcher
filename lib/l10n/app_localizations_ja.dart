@@ -6881,6 +6881,20 @@ class AppLocalizationsJa extends AppLocalizations {
       '従来の中央/グリッドプレビュー。低スペックや慣れたレイアウト向け';
 
   @override
+  String get settings_canvasLockCamera => 'キャンバスカメラをロック';
+
+  @override
+  String get settings_canvasLockCameraDescription =>
+      'ホイールズーム/パン、ドラッグ、WASD など手動カメラ入力を無効化。自動選択とジャンプは有効';
+
+  @override
+  String get settings_canvasReducedMotion => 'キャンバスモーションを削減';
+
+  @override
+  String get settings_canvasReducedMotionDescription =>
+      '飛行・ズーム・慣性を瞬時切替にし、アニメーションを抑える';
+
+  @override
   String get image_viewDetail => '詳細を表示';
 
   @override
