@@ -617,26 +617,34 @@ class _AccountProfileBottomSheetState
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              // 头像
+              // 头像（FEAT-30：微圆角方形 + 品牌蓝底白字）
               if (hasValidAvatar)
-                CircleAvatar(
-                  radius: 20,
-                  backgroundImage: FileImage(File(avatarPath)),
+                ClipRRect(
+                  borderRadius: avatarBorderRadius(40),
+                  child: Image.file(
+                    File(avatarPath),
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                  ),
                 )
               else
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: _getColorFromName(
-                    account.displayName,
-                    theme,
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: kAvatarBackground,
+                    borderRadius: avatarBorderRadius(40),
                   ),
-                  child: Text(
-                    account.displayName.isNotEmpty
-                        ? account.displayName.characters.first.toUpperCase()
-                        : '?',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                  child: Center(
+                    child: Text(
+                      account.displayName.isNotEmpty
+                          ? account.displayName.characters.first.toUpperCase()
+                          : '?',
+                      style: const TextStyle(
+                        color: kAvatarForeground,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -717,25 +725,4 @@ class _AccountProfileBottomSheetState
     );
   }
 
-  /// 根据名称生成稳定的颜色
-  Color _getColorFromName(String name, ThemeData theme) {
-    final colors = [
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-      Colors.teal,
-      Colors.pink,
-      Colors.indigo,
-      Colors.amber,
-      Colors.cyan,
-      Colors.deepOrange,
-    ];
-
-    if (name.isEmpty) {
-      return theme.colorScheme.primary;
-    }
-
-    return colors[name.hashCode.abs() % colors.length];
-  }
 }

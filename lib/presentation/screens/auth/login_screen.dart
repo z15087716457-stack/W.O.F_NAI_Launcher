@@ -321,10 +321,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               const ThemedDivider(),
               ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer,
+                // FEAT-30：与账户头像同形（微圆角方形）；动作位
+                // 保留 primaryContainer 色与用户头像的品牌蓝区分
+                leading: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: avatarBorderRadius(36),
+                  ),
                   child: Icon(
                     Icons.add,
                     color: Theme.of(context).colorScheme.primary,
@@ -1152,7 +1157,7 @@ class _ShimmerBoxState extends State<_ShimmerBox>
   }
 }
 
-/// 闪烁圆形头像骨架
+/// 闪烁头像骨架（FEAT-30：与账户头像同形，微圆角方形）
 class _ShimmerCircleAvatar extends StatefulWidget {
   final double size;
 
@@ -1197,7 +1202,7 @@ class _ShimmerCircleAvatarState extends State<_ShimmerCircleAvatar>
         width: widget.size,
         height: widget.size,
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
+          borderRadius: avatarBorderRadius(widget.size),
           gradient: LinearGradient(
             begin: Alignment(-1.0 + _animation.value, 0.0),
             end: Alignment(1.0 + _animation.value, 0.0),

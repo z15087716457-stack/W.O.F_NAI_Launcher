@@ -5,6 +5,17 @@ import 'package:flutter/material.dart';
 
 import '../../../data/models/auth/saved_account.dart';
 
+/// 账户头像统一品牌底（FEAT-30）：W.O.F logo 主蓝 #0160FB。
+/// 静拍板「深蓝色内部字体为白色」——所有账号同底色、按首字区分。
+const Color kAvatarBackground = Color(0xFF0160FB);
+
+/// 头像字色：深蓝底恒白
+const Color kAvatarForeground = Colors.white;
+
+/// 微圆角方形：非锐利直角，半径 = 边长 × 0.2（40px→8、32px→6.4、100px→20）
+BorderRadius avatarBorderRadius(double size) =>
+    BorderRadius.circular(size * 0.2);
+
 /// 账号头像组件
 /// 支持显示自定义头像或昵称首字
 class AccountAvatar extends StatelessWidget {
@@ -23,15 +34,16 @@ class AccountAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final radius = avatarBorderRadius(size);
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(size / 2),
+        borderRadius: radius,
         splashColor: Theme.of(
           context,
         ).colorScheme.primary.withValues(alpha: 0.2),
-        customBorder: const CircleBorder(side: BorderSide.none),
+        customBorder: RoundedRectangleBorder(borderRadius: radius),
         child: Padding(
           padding: EdgeInsets.all(showEditBadge ? size * 0.15 : 0),
           child: Stack(
@@ -59,9 +71,14 @@ class AccountAvatar extends StatelessWidget {
           future: avatarFile.readAsBytes(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return CircleAvatar(
-                radius: size / 2,
-                backgroundImage: MemoryImage(snapshot.data!),
+              return ClipRRect(
+                borderRadius: avatarBorderRadius(size),
+                child: Image.memory(
+                  snapshot.data!,
+                  width: size,
+                  height: size,
+                  fit: BoxFit.cover,
+                ),
               );
             }
             // 加载中或失败时显示默认头像
@@ -80,15 +97,21 @@ class AccountAvatar extends StatelessWidget {
         ? account.displayName.characters.first.toUpperCase()
         : '?';
 
-    return CircleAvatar(
-      radius: size / 2,
-      backgroundColor: _getColorFromName(account.displayName, theme),
-      child: Text(
-        firstChar,
-        style: TextStyle(
-          fontSize: size * 0.4,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: kAvatarBackground,
+        borderRadius: avatarBorderRadius(size),
+      ),
+      child: Center(
+        child: Text(
+          firstChar,
+          style: TextStyle(
+            fontSize: size * 0.4,
+            fontWeight: FontWeight.bold,
+            color: kAvatarForeground,
+          ),
         ),
       ),
     );
@@ -116,28 +139,6 @@ class AccountAvatar extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// 根据名称生成稳定的颜色
-  Color _getColorFromName(String name, ThemeData theme) {
-    final colors = [
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-      Colors.teal,
-      Colors.pink,
-      Colors.indigo,
-      Colors.amber,
-      Colors.cyan,
-      Colors.deepOrange,
-    ];
-
-    if (name.isEmpty) {
-      return theme.colorScheme.primary;
-    }
-
-    return colors[name.hashCode.abs() % colors.length];
   }
 }
 
@@ -171,16 +172,21 @@ class AccountAvatarSmall extends StatelessWidget {
               return Container(
                 decoration: isSelected
                     ? BoxDecoration(
-                        shape: BoxShape.circle,
+                        borderRadius: avatarBorderRadius(size),
                         border: Border.all(
                           color: theme.colorScheme.primary,
                           width: 2,
                         ),
                       )
                     : null,
-                child: CircleAvatar(
-                  radius: size / 2,
-                  backgroundImage: MemoryImage(snapshot.data!),
+                child: ClipRRect(
+                  borderRadius: avatarBorderRadius(size),
+                  child: Image.memory(
+                    snapshot.data!,
+                    width: size,
+                    height: size,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               );
             }
@@ -200,39 +206,23 @@ class AccountAvatarSmall extends StatelessWidget {
         ? account.displayName.characters.first.toUpperCase()
         : '?';
 
-    final colors = [
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-      Colors.teal,
-      Colors.pink,
-      Colors.indigo,
-      Colors.amber,
-      Colors.cyan,
-      Colors.deepOrange,
-    ];
-
-    final bgColor = account.displayName.isEmpty
-        ? theme.colorScheme.primary
-        : colors[account.displayName.hashCode.abs() % colors.length];
-
     return Container(
-      decoration: isSelected
-          ? BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: theme.colorScheme.primary, width: 2),
-            )
-          : null,
-      child: CircleAvatar(
-        radius: size / 2,
-        backgroundColor: bgColor,
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: kAvatarBackground,
+        borderRadius: avatarBorderRadius(size),
+        border: isSelected
+            ? Border.all(color: theme.colorScheme.primary, width: 2)
+            : null,
+      ),
+      child: Center(
         child: Text(
           firstChar,
           style: TextStyle(
             fontSize: size * 0.4,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: kAvatarForeground,
           ),
         ),
       ),

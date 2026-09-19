@@ -7,6 +7,7 @@ import '../../providers/account_manager_provider.dart';
 import '../../providers/auth_provider.dart';
 
 import '../common/app_toast.dart';
+import 'account_avatar.dart';
 import 'subscription_expiry_text.dart';
 
 /// 账号头像下拉菜单组件（Google 风格）
@@ -206,20 +207,23 @@ class _AccountListTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // 头像
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.primaryContainer,
-              child: Text(
-                account.displayName[0].toUpperCase(),
-                style: TextStyle(
-                  color: isSelected
-                      ? theme.colorScheme.onPrimary
-                      : theme.colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+            // 头像（FEAT-30：方形品牌蓝底白字；选中态由行底色表达，
+            // 头像不分深浅）
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: kAvatarBackground,
+                borderRadius: avatarBorderRadius(36),
+              ),
+              child: Center(
+                child: Text(
+                  account.displayName[0].toUpperCase(),
+                  style: const TextStyle(
+                    color: kAvatarForeground,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ),

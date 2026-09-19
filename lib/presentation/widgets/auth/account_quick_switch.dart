@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/account_manager_provider.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../../data/models/auth/saved_account.dart';
+import 'account_avatar.dart';
 import 'subscription_expiry_text.dart';
 
 /// 账号快速切换组件
@@ -157,14 +158,21 @@ class AccountQuickSwitch extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: ListTile(
-        leading: CircleAvatar(
-          radius: 18,
-          backgroundColor: theme.colorScheme.primaryContainer,
-          child: Text(
-            account.displayName[0].toUpperCase(),
-            style: TextStyle(
-              color: theme.colorScheme.onPrimaryContainer,
-              fontWeight: FontWeight.w600,
+        // FEAT-30：方形品牌蓝底白字，与公共件同规格
+        leading: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: kAvatarBackground,
+            borderRadius: avatarBorderRadius(36),
+          ),
+          child: Center(
+            child: Text(
+              account.displayName[0].toUpperCase(),
+              style: const TextStyle(
+                color: kAvatarForeground,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
