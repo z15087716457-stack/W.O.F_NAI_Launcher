@@ -831,7 +831,7 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
             height: 40,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
+              borderRadius: avatarBorderRadius(40),
             ),
             child: Icon(
               Icons.person,

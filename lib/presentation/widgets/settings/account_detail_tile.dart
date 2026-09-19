@@ -310,12 +310,12 @@ class AccountDetailTile extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
-                // 头像占位
+                // 头像占位（FEAT-30：与账户头像同形微圆角方形）
                 Container(
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
+                    borderRadius: avatarBorderRadius(44),
                     color: theme.colorScheme.outline.withValues(alpha: 0.1),
                   ),
                   child: Icon(
