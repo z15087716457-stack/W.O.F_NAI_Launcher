@@ -128,7 +128,9 @@ class OpusUsageChip extends ConsumerWidget {
   }) {
     return Container(
       padding: inline
-          ? const EdgeInsets.symmetric(horizontal: 4, vertical: 6)
+          // 同 AnlasBalanceChip：inline 交给外层容器定高，不再吃
+          // 垂直内边距，避免 16px 图标被 16px 内容盒裁边
+          ? const EdgeInsets.symmetric(horizontal: 4)
           : const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: inline
           ? null

@@ -234,7 +234,9 @@ class _ChipContainer extends StatelessWidget {
 
     return Container(
       padding: inline
-          ? const EdgeInsets.symmetric(horizontal: 4, vertical: 6)
+          // inline 模式交给外层容器定高（头部条胶囊 28），自身不再吃
+          // 垂直内边距，否则 28 - 12 = 16 的内容盒会裁到 16px 图标
+          ? const EdgeInsets.symmetric(horizontal: 4)
           : EdgeInsets.symmetric(
               horizontal: compact ? 8 : 12,
               vertical: compact ? 4 : 6,
