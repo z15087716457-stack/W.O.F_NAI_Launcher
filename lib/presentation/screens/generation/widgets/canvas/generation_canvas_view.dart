@@ -699,66 +699,16 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       return const SizedBox.shrink();
     }
 
-    final theme = Theme.of(context);
     final firstImage = group.tiles
         .map((t) => t.image)
         .whereType<GeneratedImage>()
         .firstOrNull;
-    final tileCount = group.tiles.length;
-    final runId = firstImage?.generationRunId;
-    final indices = group.tiles
-        .map((t) => t.image?.batchIndex)
-        .whereType<int>()
-        .toList();
 
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // 头部条：组投影上方、水平居中于组中心
-        Positioned(
-          left: screenRect.center.dx,
-          top: screenRect.top - 10,
-          child: FractionalTranslation(
-            translation: const Offset(-0.5, -1.0),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 5,
-              ),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withValues(alpha: 0.92),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color:
-                      theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.photo_library_outlined,
-                    size: 13,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    [
-                      if (runId != null) 'run $runId',
-                      '$tileCount 图',
-                      if (indices.length > 1)
-                        '#${indices.first + 1}-${indices.last + 1}',
-                    ].join(' · '),
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
         // 底部工具条：作用于组内首图，屏幕恒定尺寸（位置随相机每帧刷新）。
+        // 官网组顶无 run/张数头部条（顶部栏为工具条与展开态 chips，R3/A2 再补）。
         if (firstImage != null)
           Positioned(
             left: screenRect.center.dx,
