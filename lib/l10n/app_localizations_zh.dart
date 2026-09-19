@@ -912,22 +912,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_modelGroupLegacy => '旧版';
 
   @override
-  String get generation_modelDesc_v5Curated => '我们最新的模型，基于精选图像子集训练。推荐用于流式传输。';
+  String get generation_modelDesc_v5Curated =>
+      'NovelAI 的最新模型，基于精选图像子集训练。推荐用于流式传输。';
 
   @override
-  String get generation_modelDesc_v5Full => '我们最新且最强的模型。';
+  String get generation_modelDesc_v5Full => 'NovelAI 最新且最强的模型。';
 
   @override
   String get generation_modelDesc_v45Curated => '基于精选图像子集训练的 V4.5 模型。不再推荐使用。';
 
   @override
-  String get generation_modelDesc_v45Full => '我们的 V4.5 全量模型。';
+  String get generation_modelDesc_v45Full => 'NovelAI 的 V4.5 全量模型。';
 
   @override
   String get generation_modelDesc_v4Curated => '基于精选图像子集训练的 V4 模型。';
 
   @override
-  String get generation_modelDesc_v4Full => '我们的 V4 全量模型。';
+  String get generation_modelDesc_v4Full => 'NovelAI 的 V4 全量模型。';
 
   @override
   String get generation_sectionCharacters => '角色/定位';

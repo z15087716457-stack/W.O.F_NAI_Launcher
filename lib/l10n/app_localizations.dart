@@ -1812,37 +1812,37 @@ abstract class AppLocalizations {
   /// No description provided for @generation_modelDesc_v5Curated.
   ///
   /// In en, this message translates to:
-  /// **'Our newest model, trained on a curated subset of images. Recommended for streaming.'**
+  /// **'NovelAI\'s newest model, trained on a curated subset of images. Recommended for streaming.'**
   String get generation_modelDesc_v5Curated;
 
   /// No description provided for @generation_modelDesc_v5Full.
   ///
   /// In en, this message translates to:
-  /// **'Our newest and best model.'**
+  /// **'NovelAI\'s newest and best model.'**
   String get generation_modelDesc_v5Full;
 
   /// No description provided for @generation_modelDesc_v45Curated.
   ///
   /// In en, this message translates to:
-  /// **'Our V4.5 model trained on a curated subset of images. No longer recommended for use.'**
+  /// **'NovelAI\'s V4.5 model trained on a curated subset of images. No longer recommended for use.'**
   String get generation_modelDesc_v45Curated;
 
   /// No description provided for @generation_modelDesc_v45Full.
   ///
   /// In en, this message translates to:
-  /// **'Our V4.5 full model.'**
+  /// **'NovelAI\'s V4.5 full model.'**
   String get generation_modelDesc_v45Full;
 
   /// No description provided for @generation_modelDesc_v4Curated.
   ///
   /// In en, this message translates to:
-  /// **'Our V4 model trained on a curated subset of images.'**
+  /// **'NovelAI\'s V4 model trained on a curated subset of images.'**
   String get generation_modelDesc_v4Curated;
 
   /// No description provided for @generation_modelDesc_v4Full.
   ///
   /// In en, this message translates to:
-  /// **'Our V4 full model.'**
+  /// **'NovelAI\'s V4 full model.'**
   String get generation_modelDesc_v4Full;
 
   /// No description provided for @generation_sectionCharacters.

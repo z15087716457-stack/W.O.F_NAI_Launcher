@@ -945,24 +945,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generation_modelDesc_v5Curated =>
-      'Our newest model, trained on a curated subset of images. Recommended for streaming.';
+      'NovelAI\'s newest model, trained on a curated subset of images. Recommended for streaming.';
 
   @override
-  String get generation_modelDesc_v5Full => 'Our newest and best model.';
+  String get generation_modelDesc_v5Full => 'NovelAI\'s newest and best model.';
 
   @override
   String get generation_modelDesc_v45Curated =>
-      'Our V4.5 model trained on a curated subset of images. No longer recommended for use.';
+      'NovelAI\'s V4.5 model trained on a curated subset of images. No longer recommended for use.';
 
   @override
-  String get generation_modelDesc_v45Full => 'Our V4.5 full model.';
+  String get generation_modelDesc_v45Full => 'NovelAI\'s V4.5 full model.';
 
   @override
   String get generation_modelDesc_v4Curated =>
-      'Our V4 model trained on a curated subset of images.';
+      'NovelAI\'s V4 model trained on a curated subset of images.';
 
   @override
-  String get generation_modelDesc_v4Full => 'Our V4 full model.';
+  String get generation_modelDesc_v4Full => 'NovelAI\'s V4 full model.';
 
   @override
   String get generation_sectionCharacters => 'Character Prompts';
