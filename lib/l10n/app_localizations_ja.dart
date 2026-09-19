@@ -9324,6 +9324,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockPalette_remove => 'ブロックから削除';
 
   @override
+  String get promptBlockPalette_clearAll => 'ブロックをすべて削除';
+
+  @override
+  String get promptBlockPalette_clearAllArmed => 'もう一度押してすべて削除';
+
+  @override
+  String promptBlockPalette_removeSelected(int count) {
+    return '選択した $count 個を削除';
+  }
+
+  @override
   String get promptBlockLibrary_sortBy => '並べ替え';
 
   @override

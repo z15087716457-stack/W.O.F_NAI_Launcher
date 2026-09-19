@@ -16647,6 +16647,24 @@ abstract class AppLocalizations {
   /// **'Remove from blocks'**
   String get promptBlockPalette_remove;
 
+  /// No description provided for @promptBlockPalette_clearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear blocks'**
+  String get promptBlockPalette_clearAll;
+
+  /// No description provided for @promptBlockPalette_clearAllArmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap again to clear all'**
+  String get promptBlockPalette_clearAllArmed;
+
+  /// No description provided for @promptBlockPalette_removeSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {count} selected'**
+  String promptBlockPalette_removeSelected(int count);
+
   /// No description provided for @promptBlockLibrary_sortBy.
   ///
   /// In en, this message translates to:

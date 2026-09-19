@@ -9198,6 +9198,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockPalette_remove => '从积木移除';
 
   @override
+  String get promptBlockPalette_clearAll => '清空积木';
+
+  @override
+  String get promptBlockPalette_clearAllArmed => '再点一次确认清空';
+
+  @override
+  String promptBlockPalette_removeSelected(int count) {
+    return '移除选中的 $count 个块';
+  }
+
+  @override
   String get promptBlockLibrary_sortBy => '排序方式';
 
   @override

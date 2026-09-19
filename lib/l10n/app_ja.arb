@@ -5529,6 +5529,16 @@
   "promptBlockPalette_tooltip": "ブロック",
   "promptBlockPalette_emptyHint": "よく使うブロックをここにドラッグして収納。使う時はクリックでカーソル位置に挿入、またはプロンプトへドラッグ",
   "promptBlockPalette_remove": "ブロックから削除",
+  "promptBlockPalette_clearAll": "ブロックをすべて削除",
+  "promptBlockPalette_clearAllArmed": "もう一度押してすべて削除",
+  "promptBlockPalette_removeSelected": "選択した {count} 個を削除",
+  "@promptBlockPalette_removeSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "promptBlockLibrary_sortBy": "並べ替え",
   "promptBlockLibrary_sortCustom": "既定（手動順）",
   "promptBlockLibrary_sortUpdated": "更新日時",

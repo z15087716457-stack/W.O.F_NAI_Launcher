@@ -134,6 +134,48 @@ void main() {
       expect(await storage.getPaletteBlockIds(), [ids[2], ids[0]]);
     });
 
+    test('removeBlocks and clear update state and persist', () async {
+      final container = makeContainer();
+      final library = await seedLibrary(container, [
+        (title: 'A', content: 'a'),
+        (title: 'B', content: 'b'),
+        (title: 'C', content: 'c'),
+      ]);
+      final ids = library.state.value!.blocks.map((b) => b.id).toList();
+      final notifier = container.read(
+        promptBlockPaletteNotifierProvider.notifier,
+      );
+      for (final id in ids) {
+        await notifier.addBlock(id);
+      }
+
+      // 批量移除两个。
+      await notifier.removeBlocks({ids[0], ids[2]});
+      var palette = await container.read(
+        promptBlockPaletteNotifierProvider.future,
+      );
+      expect(palette.blocks.map((b) => b.id), [ids[1]]);
+      expect(await storage.getPaletteBlockIds(), [ids[1]]);
+
+      // 不存在的 id 批量移除 = 空操作。
+      await notifier.removeBlocks({'ghost'});
+      palette = await container.read(
+        promptBlockPaletteNotifierProvider.future,
+      );
+      expect(palette.blocks.map((b) => b.id), [ids[1]]);
+
+      // 清空。
+      await notifier.clear();
+      palette = await container.read(
+        promptBlockPaletteNotifierProvider.future,
+      );
+      expect(palette.blocks, isEmpty);
+      expect(await storage.getPaletteBlockIds(), isEmpty);
+
+      // 空板上 clear = 空操作，不炸。
+      await notifier.clear();
+    });
+
     test(
       'palette resolves live block data and prunes deleted blocks',
       () async {
@@ -390,6 +432,98 @@ void main() {
       },
     );
 
+    testWidgets('multi-select mode picks chips and removes selection', (
+      tester,
+    ) async {
+      final blocks = [
+        PromptBlock.create(id: 'b-1', title: 'One', content: 'one'),
+        PromptBlock.create(id: 'b-2', title: 'Two', content: 'two'),
+      ];
+      final container = ProviderContainer(
+        overrides: [
+          promptBlockPaletteNotifierProvider.overrideWith(
+            () => _FakePaletteNotifier(blocks),
+          ),
+          promptBlockLibraryNotifierProvider.overrideWith(
+            _NoopLibraryNotifier.new,
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(buildApp(container));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('prompt-block-palette-toggle')));
+      await tester.pump();
+      await tester.pump();
+
+      // 进入多选：操作条出现、计数 0。
+      await tester.tap(
+        find.byKey(const Key('prompt-block-palette-multi-select')),
+      );
+      await tester.pump();
+      expect(find.textContaining('已选 0 项'), findsOne);
+
+      // 点芯片 = 切换选中（不是插入提示词）。
+      await tester.tap(find.text('One').first);
+      await tester.pump();
+      expect(find.textContaining('已选 1 项'), findsOne);
+      final lane = container.read(pillWorkspaceProvider(PillScopes.main));
+      expect(
+        lane.document.instances.values.any((i) => i.blockId == 'b-1'),
+        isFalse,
+      );
+
+      // 移除选中 → 板上只剩 Two。
+      await tester.tap(
+        find.byKey(const Key('prompt-block-palette-remove-selected')),
+      );
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('One'), findsNothing);
+      expect(find.text('Two'), findsWidgets);
+
+      // 退出多选 → 操作条消失。
+      await tester.tap(
+        find.byKey(const Key('prompt-block-palette-multi-select')),
+      );
+      await tester.pump();
+      expect(find.textContaining('已选'), findsNothing);
+    });
+
+    testWidgets('clear-all needs a confirming second tap', (tester) async {
+      final fake = _FakePaletteNotifier([
+        PromptBlock.create(id: 'b-1', title: 'One', content: 'one'),
+      ]);
+      final container = ProviderContainer(
+        overrides: [
+          promptBlockPaletteNotifierProvider.overrideWith(() => fake),
+          promptBlockLibraryNotifierProvider.overrideWith(
+            _NoopLibraryNotifier.new,
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(buildApp(container));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('prompt-block-palette-toggle')));
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('One'), findsWidgets);
+
+      // 第一击 = armed，不删。
+      await tester.tap(find.byKey(const Key('prompt-block-palette-clear')));
+      await tester.pump();
+      expect(find.text('One'), findsWidgets);
+      expect(fake.state.valueOrNull?.blocks, hasLength(1));
+
+      // 第二击 = 确认清空。
+      await tester.tap(find.byKey(const Key('prompt-block-palette-clear')));
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('One'), findsNothing);
+      expect(fake.state.valueOrNull?.blocks, isEmpty);
+    });
+
     testWidgets('dragging a library block onto the button adds it to palette', (
       tester,
     ) async {
@@ -495,6 +629,18 @@ class _FakePaletteNotifier extends PromptBlockPaletteNotifier {
   @override
   Future<void> removeBlock(String blockId) async {
     _blocks.removeWhere((b) => b.id == blockId);
+    _emit();
+  }
+
+  @override
+  Future<void> removeBlocks(Set<String> blockIds) async {
+    _blocks.removeWhere((b) => blockIds.contains(b.id));
+    _emit();
+  }
+
+  @override
+  Future<void> clear() async {
+    _blocks.clear();
     _emit();
   }
 

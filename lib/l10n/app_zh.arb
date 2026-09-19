@@ -5529,6 +5529,16 @@
   "promptBlockPalette_tooltip": "积木",
   "promptBlockPalette_emptyHint": "把常用的块拖进来收纳；用的时候点一下插到光标处，或直接拖进提示词框",
   "promptBlockPalette_remove": "从积木移除",
+  "promptBlockPalette_clearAll": "清空积木",
+  "promptBlockPalette_clearAllArmed": "再点一次确认清空",
+  "promptBlockPalette_removeSelected": "移除选中的 {count} 个块",
+  "@promptBlockPalette_removeSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "promptBlockLibrary_sortBy": "排序方式",
   "promptBlockLibrary_sortCustom": "默认（手动顺序）",
   "promptBlockLibrary_sortUpdated": "修改时间",

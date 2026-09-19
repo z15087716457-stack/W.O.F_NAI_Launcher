@@ -9533,6 +9533,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockPalette_remove => 'Remove from blocks';
 
   @override
+  String get promptBlockPalette_clearAll => 'Clear blocks';
+
+  @override
+  String get promptBlockPalette_clearAllArmed => 'Tap again to clear all';
+
+  @override
+  String promptBlockPalette_removeSelected(int count) {
+    return 'Remove $count selected';
+  }
+
+  @override
   String get promptBlockLibrary_sortBy => 'Sort by';
 
   @override

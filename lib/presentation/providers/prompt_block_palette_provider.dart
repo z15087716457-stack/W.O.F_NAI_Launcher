@@ -77,6 +77,17 @@ class PromptBlockPaletteNotifier extends _$PromptBlockPaletteNotifier {
         : null,
   );
 
+  /// 批量移除一组块（不动库）。
+  Future<void> removeBlocks(Set<String> blockIds) => _update(
+    (ids) => ids.any(blockIds.contains)
+        ? ids.where((id) => !blockIds.contains(id)).toList()
+        : null,
+  );
+
+  /// 清空板上全部块（不动库）。
+  Future<void> clear() =>
+      _update((ids) => ids.isEmpty ? null : const <String>[]);
+
   /// 板内移动。索引语义与 ReorderableListView.onReorder 一致：
   /// [newIndex] 已是「移除旧项之后」的坐标系，直接使用。
   Future<void> move(int oldIndex, int newIndex) => _update((ids) {

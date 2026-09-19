@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -114,7 +115,9 @@ class _PromptBlockPaletteOverlay extends StatefulWidget {
 
 class _PromptBlockPaletteOverlayState
     extends State<_PromptBlockPaletteOverlay> {
-  static const double _windowWidth = 272;
+  /// 方形悬浮窗边长：内容少时随内容收缩，超过上限后列表内部滚动。
+  static const double _windowWidth = 400;
+  static const double _windowMaxHeight = 400;
 
   /// 会话内记住上次拖动到的位置。
   static Offset? _lastOffset;
@@ -143,7 +146,10 @@ class _PromptBlockPaletteOverlayState
 
   Offset _clamp(Offset offset, Size screen) => Offset(
     offset.dx.clamp(8.0, math.max(8.0, screen.width - _windowWidth - 8)),
-    offset.dy.clamp(8.0, math.max(8.0, screen.height - 120)),
+    offset.dy.clamp(
+      8.0,
+      math.max(8.0, screen.height - _windowMaxHeight - 8),
+    ),
   );
 
   @override
@@ -165,6 +171,7 @@ class _PromptBlockPaletteOverlayState
             onTap: () {},
             child: _PromptBlockPaletteCard(
               width: _windowWidth,
+              maxHeight: _windowMaxHeight,
               onClose: widget.onClose,
               onPanUpdate: (delta) => setState(() {
                 _offset = _clamp(_offset! + delta, screen);
@@ -178,26 +185,96 @@ class _PromptBlockPaletteOverlayState
   }
 }
 
-/// 悬浮窗本体：标题栏（拖拽柄 + X）+ 块列表 + 空态提示。
-class _PromptBlockPaletteCard extends ConsumerWidget {
+/// 悬浮窗本体：标题栏（拖拽柄 + 多选 + 清空 + X）+ 块列表 + 空态提示。
+class _PromptBlockPaletteCard extends ConsumerStatefulWidget {
   const _PromptBlockPaletteCard({
     required this.width,
+    required this.maxHeight,
     required this.onClose,
     required this.onPanUpdate,
   });
 
   final double width;
+  final double maxHeight;
   final VoidCallback onClose;
   final ValueChanged<Offset> onPanUpdate;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_PromptBlockPaletteCard> createState() =>
+      _PromptBlockPaletteCardState();
+}
+
+class _PromptBlockPaletteCardState
+    extends ConsumerState<_PromptBlockPaletteCard> {
+  /// 多选模式：点芯片切换选中，拖放与插入停用。
+  bool _multiSelectMode = false;
+  final Set<String> _multiSelectedIds = <String>{};
+
+  /// 「清空」需要连点两次才生效（armed 状态由图标颜色表达），
+  /// 避免误触把辛苦收纳的板子一键清光。armed 3 秒后自动解除。
+  bool _clearArmed = false;
+  Timer? _clearArmTimer;
+
+  @override
+  void dispose() {
+    _clearArmTimer?.cancel();
+    super.dispose();
+  }
+
+  void _disarmClear() {
+    _clearArmTimer?.cancel();
+    _clearArmTimer = null;
+    _clearArmed = false;
+  }
+
+  void _toggleMultiSelect() => setState(() {
+    _multiSelectMode = !_multiSelectMode;
+    _multiSelectedIds.clear();
+    _disarmClear();
+  });
+
+  void _toggleSelected(String blockId) => setState(() {
+    if (!_multiSelectedIds.remove(blockId)) {
+      _multiSelectedIds.add(blockId);
+    }
+  });
+
+  Future<void> _removeSelected() async {
+    final ids = Set<String>.of(_multiSelectedIds);
+    setState(() => _multiSelectedIds.clear());
+    await ref
+        .read(promptBlockPaletteNotifierProvider.notifier)
+        .removeBlocks(ids);
+  }
+
+  /// 连点两次确认清空；armed 图标变红，3 秒无第二击自动解除。
+  void _onClearAllPressed() {
+    if (!_clearArmed) {
+      setState(() => _clearArmed = true);
+      _clearArmTimer = Timer(const Duration(seconds: 3), () {
+        if (mounted) setState(_disarmClear);
+      });
+      return;
+    }
+    setState(_disarmClear);
+    ref.read(promptBlockPaletteNotifierProvider.notifier).clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final palette = ref.watch(promptBlockPaletteNotifierProvider).valueOrNull;
     final blocks = palette?.blocks ?? const <PromptBlock>[];
     final folders = palette?.folders ?? const <PromptBlockFolder>[];
-    final maxHeight = math.min(420.0, MediaQuery.sizeOf(context).height * 0.6);
+    // 块被移除/清库后自动把失效 id 从选中集里剔除（有效选中，state 不脏）。
+    final selectedIds = _multiSelectedIds
+        .where((id) => blocks.any((block) => block.id == id))
+        .toSet();
+    final maxHeight = math.min(
+      widget.maxHeight,
+      math.max(160.0, MediaQuery.sizeOf(context).height - 16),
+    );
 
     return Material(
       elevation: 8,
@@ -206,17 +283,17 @@ class _PromptBlockPaletteCard extends ConsumerWidget {
       clipBehavior: Clip.antiAlias,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minWidth: width,
-          maxWidth: width,
+          minWidth: widget.width,
+          maxWidth: widget.width,
           maxHeight: maxHeight,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 标题栏：拖拽柄 + X（窗内唯一常驻控制钮）
+            // 标题栏：拖拽柄 + 多选 + 清空 + X
             GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onPanUpdate: (details) => onPanUpdate(details.delta),
+              onPanUpdate: (details) => widget.onPanUpdate(details.delta),
               child: MouseRegion(
                 cursor: SystemMouseCursors.move,
                 child: Padding(
@@ -224,7 +301,7 @@ class _PromptBlockPaletteCard extends ConsumerWidget {
                   child: Row(
                     children: [
                       Icon(
-                        Icons.palette_outlined,
+                        Icons.category_outlined,
                         size: 15,
                         color: theme.colorScheme.primary,
                       ),
@@ -238,6 +315,40 @@ class _PromptBlockPaletteCard extends ConsumerWidget {
                         ),
                       ),
                       IconButton(
+                        key: const Key('prompt-block-palette-multi-select'),
+                        iconSize: 15,
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 28,
+                          minHeight: 28,
+                        ),
+                        isSelected: _multiSelectMode,
+                        tooltip: _multiSelectMode
+                            ? l10n.promptBlockLibrary_exitMultiSelect
+                            : l10n.promptBlockLibrary_multiSelect,
+                        onPressed: _toggleMultiSelect,
+                        icon: const Icon(Icons.checklist),
+                      ),
+                      IconButton(
+                        key: const Key('prompt-block-palette-clear'),
+                        iconSize: 15,
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 28,
+                          minHeight: 28,
+                        ),
+                        tooltip: _clearArmed
+                            ? l10n.promptBlockPalette_clearAllArmed
+                            : l10n.promptBlockPalette_clearAll,
+                        onPressed: blocks.isEmpty ? null : _onClearAllPressed,
+                        icon: Icon(
+                          Icons.delete_sweep_outlined,
+                          color: _clearArmed ? theme.colorScheme.error : null,
+                        ),
+                      ),
+                      IconButton(
                         key: const Key('prompt-block-palette-close'),
                         iconSize: 15,
                         visualDensity: VisualDensity.compact,
@@ -246,7 +357,7 @@ class _PromptBlockPaletteCard extends ConsumerWidget {
                           minWidth: 28,
                           minHeight: 28,
                         ),
-                        onPressed: onClose,
+                        onPressed: widget.onClose,
                         icon: const Icon(Icons.close),
                       ),
                     ],
@@ -259,9 +370,83 @@ class _PromptBlockPaletteCard extends ConsumerWidget {
               thickness: 1,
               color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
             ),
-            // 列表区：拖到空白处 = 追加到末尾
+            // 多选操作条：计数 + 全选 + 取消选择 + 移除选中（与块库多选条同款）
+            if (_multiSelectMode)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 4, 4, 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.promptBlockLibrary_selectedCount(
+                          selectedIds.length,
+                        ),
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      key: const Key('prompt-block-palette-select-all'),
+                      iconSize: 15,
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 28,
+                        minHeight: 28,
+                      ),
+                      tooltip: l10n.promptBlockLibrary_selectAllVisible,
+                      onPressed:
+                          selectedIds.length == blocks.length
+                          ? null
+                          : () => setState(
+                              () => _multiSelectedIds.addAll(
+                                blocks.map((block) => block.id),
+                              ),
+                            ),
+                      icon: const Icon(Icons.select_all),
+                    ),
+                    IconButton(
+                      key: const Key('prompt-block-palette-deselect'),
+                      iconSize: 15,
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 28,
+                        minHeight: 28,
+                      ),
+                      tooltip: l10n.promptBlockLibrary_clearSelection,
+                      onPressed: selectedIds.isEmpty
+                          ? null
+                          : () => setState(_multiSelectedIds.clear),
+                      icon: const Icon(Icons.deselect),
+                    ),
+                    IconButton(
+                      key: const Key('prompt-block-palette-remove-selected'),
+                      iconSize: 15,
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 28,
+                        minHeight: 28,
+                      ),
+                      tooltip: l10n.promptBlockPalette_removeSelected(
+                        selectedIds.length,
+                      ),
+                      onPressed: selectedIds.isEmpty ? null : _removeSelected,
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            // 列表区：拖到空白处 = 追加到末尾（多选模式下拖放整体停用）
             Flexible(
               child: DragTarget<PromptBlockDragData>(
+                onWillAcceptWithDetails: (_) => !_multiSelectMode,
                 onAcceptWithDetails: (details) {
                   final notifier = ref.read(
                     promptBlockPaletteNotifierProvider.notifier,
@@ -289,6 +474,11 @@ class _PromptBlockPaletteCard extends ConsumerWidget {
                             block: blocks[i],
                             index: i,
                             folders: folders,
+                            multiSelectMode: _multiSelectMode,
+                            selected: selectedIds.contains(blocks[i].id),
+                            onToggleSelected: _multiSelectMode
+                                ? () => _toggleSelected(blocks[i].id)
+                                : null,
                           ),
                         ),
                       if (blocks.isEmpty)
@@ -322,11 +512,19 @@ class _PaletteChipRow extends ConsumerStatefulWidget {
     required this.block,
     required this.index,
     required this.folders,
+    required this.multiSelectMode,
+    required this.selected,
+    this.onToggleSelected,
   });
 
   final PromptBlock block;
   final int index;
   final List<PromptBlockFolder> folders;
+
+  /// 多选模式下点芯片 = 切换选中；拖放、插入与悬停 X 都停用。
+  final bool multiSelectMode;
+  final bool selected;
+  final VoidCallback? onToggleSelected;
 
   @override
   ConsumerState<_PaletteChipRow> createState() => _PaletteChipRowState();
@@ -364,12 +562,14 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
     final chip = PromptBlockPill(
       block: block,
       displayTitle: title,
-      maxWidth: 240,
-      onTap: _insertAtCaret,
+      maxWidth: 340,
+      multiSelected: widget.selected,
+      onTap: widget.onToggleSelected ?? _insertAtCaret,
     );
 
     return DragTarget<PromptBlockDragData>(
       onWillAcceptWithDetails: (details) =>
+          !widget.multiSelectMode &&
           details.data.paletteIndex != widget.index,
       onMove: (_) {
         if (!_dropHover) setState(() => _dropHover = true);
@@ -410,6 +610,7 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
                   paletteIndex: widget.index,
                 ),
                 rootOverlay: true,
+                maxSimultaneousDrags: widget.multiSelectMode ? 0 : 1,
                 dragAnchorStrategy: pointerDragAnchorStrategy,
                 feedback: Material(
                   color: Colors.transparent,
@@ -421,7 +622,7 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
                 childWhenDragging: Opacity(opacity: 0.35, child: chip),
                 child: Align(alignment: Alignment.centerLeft, child: chip),
               ),
-              if (_hovering)
+              if (_hovering && !widget.multiSelectMode)
                 Positioned(
                   right: 2,
                   top: 0,
