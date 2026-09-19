@@ -6,6 +6,7 @@ import '../../../providers/font_provider.dart';
 import '../../../providers/font_scale_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
 import '../../../providers/locale_provider.dart';
+import '../../../providers/simple_output_viewer_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../themes/app_theme.dart';
 import '../../../widgets/common/themed_divider.dart';
@@ -33,6 +34,7 @@ class _AppearanceSettingsSectionState
     final historyClickBehavior = ref.watch(
       historyClickBehaviorNotifierProvider,
     );
+    final simpleOutputViewer = ref.watch(simpleOutputViewerNotifierProvider);
 
     return SettingsCard(
       title: context.l10n.settings_appearance,
@@ -87,8 +89,70 @@ class _AppearanceSettingsSectionState
             onTap: () =>
                 _showHistoryClickBehaviorDialog(context, historyClickBehavior),
           ),
+
+          // 输出查看器模式（G11 自由画布 / 简单视图）
+          ListTile(
+            leading: const Icon(Icons.dashboard_outlined),
+            title: Text(context.l10n.settings_outputViewer),
+            subtitle: Text(
+              simpleOutputViewer
+                  ? context.l10n.settings_outputViewer_simple
+                  : context.l10n.settings_outputViewer_canvas,
+            ),
+            onTap: () =>
+                _showOutputViewerDialog(context, simpleOutputViewer),
+          ),
         ],
       ),
+    );
+  }
+
+  void _showOutputViewerDialog(BuildContext context, bool simpleCurrent) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(context.l10n.settings_outputViewer),
+          content: SizedBox(
+            width: 380,
+            child: RadioGroup<bool>(
+              groupValue: simpleCurrent,
+              onChanged: (value) async {
+                if (value == null) return;
+                await ref
+                    .read(simpleOutputViewerNotifierProvider.notifier)
+                    .setSimple(value);
+                if (dialogContext.mounted) Navigator.pop(dialogContext);
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RadioListTile<bool>(
+                    title: Text(context.l10n.settings_outputViewer_canvas),
+                    subtitle: Text(
+                      context.l10n.settings_outputViewer_canvasDescription,
+                    ),
+                    value: false,
+                  ),
+                  RadioListTile<bool>(
+                    title: Text(context.l10n.settings_outputViewer_simple),
+                    subtitle: Text(
+                      context.l10n.settings_outputViewer_simpleDescription,
+                    ),
+                    value: true,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(context.l10n.common_cancel),
+            ),
+          ],
+        );
+      },
     );
   }
 

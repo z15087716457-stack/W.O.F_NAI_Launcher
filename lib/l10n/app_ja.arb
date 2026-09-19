@@ -364,6 +364,9 @@
       "progress": {}
     }
   },
+  "generation_canvasZoomIn": "拡大",
+  "generation_canvasZoomOut": "縮小",
+  "generation_canvasFlyToLatest": "最新グループへ移動",
   "generation_params": "パラメータ",
   "generation_paramsSettings": "パラメータ設定",
   "generation_history": "履歴",
@@ -3823,6 +3826,11 @@
   "settings_historyClickBehavior_classicDescription": "履歴画像をクリックして詳細を開きます",
   "settings_historyClickBehavior_linked": "プレビュー連動",
   "settings_historyClickBehavior_linkedDescription": "クリックで中央プレビューを切り替え、ダブルクリックまたは長押しで詳細を開き、左右キーで移動します",
+  "settings_outputViewer": "出力ビューア",
+  "settings_outputViewer_canvas": "フリーキャンバス",
+  "settings_outputViewer_canvasDescription": "NAI5 風の無限キャンバス：生成画像をバッチごとに配置、中ボタン/Shift+左ドラッグでパン、Ctrl+ホイールでズーム、WASD/f/q で移動",
+  "settings_outputViewer_simple": "シンプルビュー",
+  "settings_outputViewer_simpleDescription": "従来の中央/グリッドプレビュー。低スペックや慣れたレイアウト向け",
   "image_viewDetail": "詳細を表示",
   "settings_defaultImagesPath": "デフォルト (Documents/NAI_Launcher/images/)",
   "settings_defaultVibePath": "{path} (デフォルト)",

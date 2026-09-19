@@ -818,6 +818,15 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get generation_canvasZoomIn => '放大';
+
+  @override
+  String get generation_canvasZoomOut => '缩小';
+
+  @override
+  String get generation_canvasFlyToLatest => '飞到最新组';
+
+  @override
   String get generation_params => '参数';
 
   @override
@@ -6761,6 +6770,23 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get settings_historyClickBehavior_linkedDescription =>
       '单击切换中央预览，双击或长按打开详情，并支持左右方向键浏览';
+
+  @override
+  String get settings_outputViewer => '输出查看器';
+
+  @override
+  String get settings_outputViewer_canvas => '自由画布';
+
+  @override
+  String get settings_outputViewer_canvasDescription =>
+      'NAI5 官网式无限画布：全部生成图按批铺开，中键/Shift+左键平移、Ctrl+滚轮缩放、WASD/f/q 导航';
+
+  @override
+  String get settings_outputViewer_simple => '简单视图';
+
+  @override
+  String get settings_outputViewer_simpleDescription =>
+      '经典居中/网格预览，适合低配置或习惯旧界面的场景';
 
   @override
   String get image_viewDetail => '查看详情';

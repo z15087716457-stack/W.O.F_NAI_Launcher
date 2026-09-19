@@ -830,6 +830,15 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get generation_canvasZoomIn => '拡大';
+
+  @override
+  String get generation_canvasZoomOut => '縮小';
+
+  @override
+  String get generation_canvasFlyToLatest => '最新グループへ移動';
+
+  @override
   String get generation_params => 'パラメータ';
 
   @override
@@ -6853,6 +6862,23 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get settings_historyClickBehavior_linkedDescription =>
       'クリックで中央プレビューを切り替え、ダブルクリックまたは長押しで詳細を開き、左右キーで移動します';
+
+  @override
+  String get settings_outputViewer => '出力ビューア';
+
+  @override
+  String get settings_outputViewer_canvas => 'フリーキャンバス';
+
+  @override
+  String get settings_outputViewer_canvasDescription =>
+      'NAI5 風の無限キャンバス：生成画像をバッチごとに配置、中ボタン/Shift+左ドラッグでパン、Ctrl+ホイールでズーム、WASD/f/q で移動';
+
+  @override
+  String get settings_outputViewer_simple => 'シンプルビュー';
+
+  @override
+  String get settings_outputViewer_simpleDescription =>
+      '従来の中央/グリッドプレビュー。低スペックや慣れたレイアウト向け';
 
   @override
   String get image_viewDetail => '詳細を表示';

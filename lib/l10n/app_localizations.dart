@@ -1635,6 +1635,24 @@ abstract class AppLocalizations {
   /// **'Generating... {progress}%'**
   String generation_progress(Object progress);
 
+  /// No description provided for @generation_canvasZoomIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in'**
+  String get generation_canvasZoomIn;
+
+  /// No description provided for @generation_canvasZoomOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom out'**
+  String get generation_canvasZoomOut;
+
+  /// No description provided for @generation_canvasFlyToLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Fly to latest group'**
+  String get generation_canvasFlyToLatest;
+
   /// No description provided for @generation_params.
   ///
   /// In en, this message translates to:
@@ -12365,6 +12383,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Click to switch the central preview, double-click or hold for details, and browse with Left/Right'**
   String get settings_historyClickBehavior_linkedDescription;
+
+  /// No description provided for @settings_outputViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Output viewer'**
+  String get settings_outputViewer;
+
+  /// No description provided for @settings_outputViewer_canvas.
+  ///
+  /// In en, this message translates to:
+  /// **'Free canvas'**
+  String get settings_outputViewer_canvas;
+
+  /// No description provided for @settings_outputViewer_canvasDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'NAI5-style infinite canvas: all generated images laid out by batch, middle/Shift+left drag to pan, Ctrl+wheel to zoom, WASD/f/q to navigate'**
+  String get settings_outputViewer_canvasDescription;
+
+  /// No description provided for @settings_outputViewer_simple.
+  ///
+  /// In en, this message translates to:
+  /// **'Simple view'**
+  String get settings_outputViewer_simple;
+
+  /// No description provided for @settings_outputViewer_simpleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic centered/grid preview for low-spec machines or the familiar layout'**
+  String get settings_outputViewer_simpleDescription;
 
   /// No description provided for @image_viewDetail.
   ///

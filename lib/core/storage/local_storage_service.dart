@@ -662,6 +662,20 @@ class LocalStorageService {
     await setSetting(StorageKeys.historyClickBehavior, behavior);
   }
 
+  /// 获取输出查看器模式（true=简单经典视图，false=NAI5 自由画布）
+  bool getSimpleOutputViewer() {
+    return getSetting<bool>(
+          StorageKeys.simpleOutputViewer,
+          defaultValue: false,
+        ) ??
+        false;
+  }
+
+  /// 保存输出查看器模式
+  Future<void> setSimpleOutputViewer(bool simple) async {
+    await setSetting(StorageKeys.simpleOutputViewer, simple);
+  }
+
   /// 获取官网式布局左栏宽度 (默认400)
   double getWebLeftPanelWidth() {
     return getSetting<double>(

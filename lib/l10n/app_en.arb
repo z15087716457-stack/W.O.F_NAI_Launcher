@@ -365,6 +365,9 @@
       "progress": {}
     }
   },
+  "generation_canvasZoomIn": "Zoom in",
+  "generation_canvasZoomOut": "Zoom out",
+  "generation_canvasFlyToLatest": "Fly to latest group",
   "generation_params": "Parameters",
   "generation_paramsSettings": "Parameter Settings",
   "generation_history": "History",
@@ -3823,6 +3826,11 @@
   "settings_historyClickBehavior_classicDescription": "Click a history image to open its details",
   "settings_historyClickBehavior_linked": "Linked preview",
   "settings_historyClickBehavior_linkedDescription": "Click to switch the central preview, double-click or hold for details, and browse with Left/Right",
+  "settings_outputViewer": "Output viewer",
+  "settings_outputViewer_canvas": "Free canvas",
+  "settings_outputViewer_canvasDescription": "NAI5-style infinite canvas: all generated images laid out by batch, middle/Shift+left drag to pan, Ctrl+wheel to zoom, WASD/f/q to navigate",
+  "settings_outputViewer_simple": "Simple view",
+  "settings_outputViewer_simpleDescription": "Classic centered/grid preview for low-spec machines or the familiar layout",
   "image_viewDetail": "View details",
   "settings_defaultImagesPath": "Default (Documents/NAI_Launcher/images/)",
   "settings_defaultVibePath": "{path} (Default)",

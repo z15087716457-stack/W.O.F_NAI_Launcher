@@ -23,6 +23,12 @@ class GeneratedImage {
   /// 当图像被保存到磁盘后，此字段会被填充
   final String? filePath;
 
+  /// 所属生成运行 ID（同一批次分组的依据；外部登记图可为 null）。
+  final int? generationRunId;
+
+  /// 批次内槽位序号（0-based，按生成顺序稳定排序）。
+  final int? batchIndex;
+
   GeneratedImage({
     required this.id,
     required this.bytes,
@@ -32,6 +38,8 @@ class GeneratedImage {
     this.kind = GeneratedImageKind.completed,
     this.metadata,
     this.filePath,
+    this.generationRunId,
+    this.batchIndex,
   }) : createdAt = createdAt ?? DateTime.now();
 
   /// 创建新的生成图像（自动生成ID）
@@ -41,6 +49,8 @@ class GeneratedImage {
     required int height,
     GeneratedImageKind kind = GeneratedImageKind.completed,
     NaiImageMetadata? metadata,
+    int? generationRunId,
+    int? batchIndex,
   }) {
     final encodedSize = NaiResolutionAdapter.readImageSize(bytes);
     return GeneratedImage(
@@ -50,6 +60,8 @@ class GeneratedImage {
       height: encodedSize?.$2 ?? height,
       kind: kind,
       metadata: metadata,
+      generationRunId: generationRunId,
+      batchIndex: batchIndex,
     );
   }
 
@@ -64,6 +76,24 @@ class GeneratedImage {
       kind: kind,
       metadata: metadata,
       filePath: path,
+      generationRunId: generationRunId,
+      batchIndex: batchIndex,
+    );
+  }
+
+  /// 回填批次归属（生成服务产出的图像由 provider 统一打 runId/batchIndex）。
+  GeneratedImage copyWith({int? generationRunId, int? batchIndex}) {
+    return GeneratedImage(
+      id: id,
+      bytes: bytes,
+      width: width,
+      height: height,
+      createdAt: createdAt,
+      kind: kind,
+      metadata: metadata,
+      filePath: filePath,
+      generationRunId: generationRunId ?? this.generationRunId,
+      batchIndex: batchIndex ?? this.batchIndex,
     );
   }
 

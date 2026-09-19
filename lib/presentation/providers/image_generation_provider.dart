@@ -321,6 +321,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         outputWidth: resolvedSize.$1,
         outputHeight: resolvedSize.$2,
       ),
+      generationRunId: generationRunId,
+      batchIndex: imageNumber - 1,
     );
 
     state = state.copyWith(
@@ -986,12 +988,14 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           );
           return;
         }
-        final generatedList = imageBytes
+        final generatedList = imageBytes.indexed
             .map(
-              (b) => GeneratedImage.create(
-                b,
+              (e) => GeneratedImage.create(
+                e.$2,
                 width: batchParams.width,
                 height: batchParams.height,
+                generationRunId: generationRunId,
+                batchIndex: allImages.length + e.$1,
               ),
             )
             .toList();
@@ -1892,12 +1896,14 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         if (imageBytes.isEmpty) {
           throw Exception('No images returned from generation');
         }
-        final generatedList = imageBytes
+        final generatedList = imageBytes.indexed
             .map(
-              (b) => GeneratedImage.create(
-                b,
+              (e) => GeneratedImage.create(
+                e.$2,
                 width: params.width,
                 height: params.height,
+                generationRunId: generationRunId,
+                batchIndex: e.$1,
               ),
             )
             .toList();
@@ -1933,12 +1939,14 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         if (_shouldAbortGenerationRun(generationRunId)) return;
         final orderedImages = finalImages.entries.toList()
           ..sort((a, b) => a.key.compareTo(b.key));
-        final generatedList = orderedImages
+        final generatedList = orderedImages.indexed
             .map(
-              (entry) => GeneratedImage.create(
-                entry.value,
+              (e) => GeneratedImage.create(
+                e.$2.value,
                 width: params.width,
                 height: params.height,
+                generationRunId: generationRunId,
+                batchIndex: e.$1,
               ),
             )
             .toList();
@@ -1977,12 +1985,14 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         if (imageBytes.isEmpty) {
           throw Exception('No images returned from generation');
         }
-        final generatedList = imageBytes
+        final generatedList = imageBytes.indexed
             .map(
-              (b) => GeneratedImage.create(
-                b,
+              (e) => GeneratedImage.create(
+                e.$2,
                 width: params.width,
                 height: params.height,
+                generationRunId: generationRunId,
+                batchIndex: e.$1,
               ),
             )
             .toList();
@@ -2059,12 +2069,14 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           if (imageBytes.isEmpty) {
             throw Exception('No images returned from generation');
           }
-          final generatedList = imageBytes
+          final generatedList = imageBytes.indexed
               .map(
-                (b) => GeneratedImage.create(
-                  b,
+                (e) => GeneratedImage.create(
+                  e.$2,
                   width: params.width,
                   height: params.height,
+                  generationRunId: generationRunId,
+                  batchIndex: e.$1,
                 ),
               )
               .toList();

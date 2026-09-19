@@ -1,50 +1,25 @@
-import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart' as p;
 
-import '../../../../core/enums/precise_ref_type.dart';
 import '../../../../core/shortcuts/default_shortcuts.dart';
 import '../../../../core/shortcuts/shortcut_config.dart';
 import '../../../../core/shortcuts/shortcut_manager.dart';
-import '../../../../core/utils/app_logger.dart';
-import '../../../../core/utils/file_explorer_utils.dart';
-import '../../../../core/utils/image_save_utils.dart';
 import '../../../../core/utils/localization_extension.dart';
-import '../../../../core/utils/nai_resolution_adapter.dart';
-import '../../../../core/utils/prompt_preset_resolution.dart';
-import '../../../../core/utils/vibe_file_parser.dart';
 import '../../../../data/models/image/image_stream_chunk.dart';
-import '../../../../data/repositories/gallery_folder_repository.dart';
-import '../../../../data/services/alias_resolver_service.dart';
-import '../../../../data/services/image_metadata_service.dart';
 import '../../../providers/generation/generation_params_selectors.dart';
 import '../../../providers/generation/preview_selection_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
 import '../../../providers/character_position_canvas_provider.dart';
-import '../../../providers/character_prompt_provider.dart';
 import '../../../providers/image_generation_provider.dart';
-import '../../../providers/local_gallery_provider.dart';
-import '../../../providers/quality_preset_provider.dart';
 import '../../../providers/shortcuts_provider.dart';
-import '../../../providers/uc_preset_provider.dart';
-import '../../../services/image_workflow_launcher.dart';
+import '../../../providers/simple_output_viewer_provider.dart';
 import '../../../widgets/character/character_position_canvas.dart';
-import '../../../widgets/common/app_toast.dart';
-import '../../../widgets/common/draggable_memory_image.dart';
-import '../../../widgets/common/image_detail/file_image_detail_data.dart';
-import '../../../widgets/common/image_detail/image_detail_data.dart';
-import '../../../widgets/common/image_detail/image_detail_viewer.dart';
 import '../../../widgets/common/selectable_image_card.dart';
-import '../../../widgets/image_editor/image_editor_screen.dart';
-import '../../../utils/image_detail_opener.dart';
-import '../../../utils/krita_send_helper.dart';
-import '../../../utils/precise_ref_library_import_helper.dart';
-import '../../prompt_block_library/widgets/prompt_block_edit_dialog.dart';
+import 'canvas/generated_image_card.dart' as canvas_card;
+import 'canvas/generation_canvas_view.dart';
 
 class PreviewNavShortcuts extends ConsumerWidget {
   const PreviewNavShortcuts({required this.child, super.key});
@@ -177,6 +152,17 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
         ref.watch(characterPositionCanvasAvailableProvider);
     if (showCharacterCanvas) {
       return const CharacterPositionCanvasView();
+    }
+
+    // G11 自由画布：simpleOutputViewer=false（默认）且有历史/当前图像时接管。
+    // 数据源用 mergedPanelImages（当前批 + history 去重），比 displayImages
+    // 更接近官网「全部已生成图」语义；无图时落回空态。
+    final simpleViewer = ref.watch(simpleOutputViewerNotifierProvider);
+    if (!simpleViewer) {
+      final feed = state.mergedPanelImages;
+      if (feed.isNotEmpty) {
+        return GenerationCanvasView(images: feed);
+      }
     }
 
     final behavior = ref.watch(historyClickBehaviorNotifierProvider);
@@ -580,257 +566,13 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
     required bool showIndex,
     int? index,
   }) {
-    final imageBytes = image.bytes;
-    final canUseAsInput = image.canUseAsGenerationInput;
-    final isFailedSnapshot = image.isFailedStreamSnapshot;
-
-    final card = SelectableImageCard(
-      imageBytes: imageBytes,
-      sourceFilePath: image.filePath,
-      index: index,
+    return canvas_card.buildGeneratedImageCard(
+      context: context,
+      ref: ref,
+      image: image,
       showIndex: showIndex,
-      enableSelection: false,
-      enableSaveAction: image.canSave,
-      enableCopyAction: image.canSave,
-      statusBadgeLabel: isFailedSnapshot
-          ? context.l10n.generation_failedStreamSnapshot
-          : null,
-      statusBadgeTooltip: isFailedSnapshot
-          ? context.l10n.generation_failedStreamSnapshotHint
-          : null,
-      onTap: () => _showFullscreenImage(image),
-      onImageToImage: canUseAsInput
-          ? () => _sendPreviewImageToImageToImage(context, image)
-          : null,
-      onVibeTransfer: canUseAsInput
-          ? () => unawaited(_sendPreviewImageToVibeTransfer(context, image))
-          : null,
-      onPreciseReference: canUseAsInput
-          ? () => unawaited(_sendPreviewImageToPreciseReference(context, image))
-          : null,
-      onSaveToPreciseRefLibrary: canUseAsInput
-          ? () => unawaited(
-              saveBytesToPreciseRefLibrary(ref, context, image.bytes),
-            )
-          : null,
-      onEditImage: canUseAsInput
-          ? () => ImageWorkflowLauncher.openEditor(
-              context,
-              ref,
-              imageBytes,
-              mode: ImageEditorMode.edit,
-            )
-          : null,
-      onInpaint: canUseAsInput
-          ? () => ImageWorkflowLauncher.openInpaint(context, ref, imageBytes)
-          : null,
-      onGenerateVariations: canUseAsInput
-          ? () => ImageWorkflowLauncher.generateVariations(
-              context,
-              ref,
-              imageBytes,
-            )
-          : null,
-      onDirectorTools: canUseAsInput
-          ? () => ImageWorkflowLauncher.openDirectorTools(
-              context,
-              ref,
-              imageBytes,
-            )
-          : null,
-      onEnhance: canUseAsInput
-          ? () => ImageWorkflowLauncher.openEnhance(ref, imageBytes)
-          : null,
-      onUpscale: canUseAsInput
-          ? () => ImageWorkflowLauncher.openUpscale(ref, imageBytes)
-          : null,
-      onSendToKrita: canUseAsInput
-          ? () => KritaSendHelper.sendImageBytes(
-              context,
-              ref,
-              imageBytes,
-              name: _previewImageFileName(image),
-            )
-          : null,
-      onOpenInExplorer: image.canSave
-          ? () => _openImageInExplorer(context, image)
-          : null,
-      onSaveToLibrary: canUseAsInput
-          ? (bytes, _) => _showSaveToLibraryDialog(context, bytes)
-          : null,
+      index: index,
     );
-
-    if (!image.canDrag) {
-      return card;
-    }
-
-    return DraggableMemoryImage(
-      imageId: image.id,
-      imageBytes: imageBytes,
-      feedbackPixelWidth: image.width,
-      feedbackPixelHeight: image.height,
-      feedbackFormat: 'PNG',
-      fileName: _previewImageFileName(image),
-      sourceFilePath: image.filePath,
-      child: card,
-    );
-  }
-
-  String _previewImageFileName(GeneratedImage image) {
-    final filePath = image.filePath;
-    if (filePath != null && filePath.isNotEmpty) {
-      return p.basename(filePath);
-    }
-    return 'generation_${image.id}.png';
-  }
-
-  void _sendPreviewImageToImageToImage(
-    BuildContext context,
-    GeneratedImage image,
-  ) {
-    ImageWorkflowLauncher.openImageToImage(ref, image.bytes);
-    AppToast.success(context, context.l10n.drop_addedToImg2Img);
-  }
-
-  Future<void> _sendPreviewImageToVibeTransfer(
-    BuildContext context,
-    GeneratedImage image,
-  ) async {
-    final l10n = context.l10n;
-
-    try {
-      final currentState = ref.read(generationParamsNotifierProvider);
-      final currentCount = currentState.vibeReferencesV4.length;
-      const maxCount = 16;
-      final vibes = await VibeFileParser.parseFile(
-        _previewImageFileName(image),
-        image.bytes,
-      );
-
-      if (!context.mounted) return;
-      if (currentCount + vibes.length > maxCount) {
-        AppToast.warning(context, l10n.toast_styleReferenceLimit(maxCount));
-        return;
-      }
-
-      ref
-          .read(generationParamsNotifierProvider.notifier)
-          .addVibeReferences(vibes);
-
-      final message = currentCount > 0
-          ? l10n.toast_appendedStyleReferences(vibes.length)
-          : vibes.length == 1
-          ? l10n.drop_addedToVibe
-          : l10n.drop_addedMultipleToVibe(vibes.length);
-      AppToast.success(context, message);
-    } catch (e) {
-      if (context.mounted) {
-        AppToast.error(context, '${l10n.vibeParseFailed}: $e');
-      }
-    }
-  }
-
-  Future<void> _sendPreviewImageToPreciseReference(
-    BuildContext context,
-    GeneratedImage image,
-  ) async {
-    final l10n = context.l10n;
-
-    try {
-      await ref
-          .read(generationParamsNotifierProvider.notifier)
-          .addPreciseReferenceFromImage(
-            image.bytes,
-            type: PreciseRefType.character,
-            strength: 1.0,
-            fidelity: 1.0,
-          );
-
-      if (!context.mounted) return;
-      AppToast.success(context, l10n.drop_addedToCharacterRef);
-    } catch (e) {
-      if (context.mounted) {
-        AppToast.error(context, l10n.gallery_sendFailed(e.toString()));
-      }
-    }
-  }
-
-  /// 回读状态中同 id 且已带 filePath 的最新图像对象；没有则返回原对象。
-  /// 构建期捕获的 image 可能早于自动保存的 filePath 回写，点击时应以状态为准。
-  GeneratedImage _freshImageWithPath(GeneratedImage image) {
-    final s = ref.read(imageGenerationNotifierProvider);
-    for (final list in [s.currentImages, s.history, s.displayImages]) {
-      for (final candidate in list) {
-        if (candidate.id == image.id &&
-            candidate.filePath != null &&
-            candidate.filePath!.isNotEmpty) {
-          return candidate;
-        }
-      }
-    }
-    return image;
-  }
-
-  /// 在文件夹中定位图片。已保存的图片直接定位原文件，未保存时先保存再定位。
-  Future<void> _openImageInExplorer(
-    BuildContext context,
-    GeneratedImage image,
-  ) async {
-    try {
-      final existingPath = _freshImageWithPath(image).filePath;
-      if (existingPath != null &&
-          existingPath.isNotEmpty &&
-          await File(existingPath).exists()) {
-        await FileExplorerUtils.revealFile(existingPath);
-        return;
-      }
-
-      final saveDirPath = await GalleryFolderRepository.instance.getRootPath();
-      if (saveDirPath == null) return;
-
-      final seed = await ImageSaveUtils.resolveSeed(
-        metadata: image.metadata,
-        bytes: image.bytes,
-      );
-
-      // 兜底去重：同一 seed 且字节一致的文件今日已存在则直接定位，
-      // 不再另存副本（覆盖 filePath 未回写/跨会话等一切缺路径场景）
-      final identicalPath = await ImageSaveUtils.findIdenticalDatedFile(
-        rootPath: saveDirPath,
-        bytes: image.bytes,
-        seed: seed,
-      );
-      if (identicalPath != null) {
-        ref
-            .read(imageGenerationNotifierProvider.notifier)
-            .updateImageFilePath(image.id, identicalPath);
-        await FileExplorerUtils.revealFile(identicalPath);
-        return;
-      }
-
-      // 原子保存：日期分类路径 + 独占防冲突 + 失败清理，全部在工具内完成
-      final filePath = await ImageSaveUtils.saveBytesToDatedPath(
-        rootPath: saveDirPath,
-        bytes: image.bytes,
-        seed: seed,
-      );
-
-      // 回写保存路径，后续「打开文件夹」「保存图像」直接复用原文件
-      ref
-          .read(imageGenerationNotifierProvider.notifier)
-          .updateImageFilePath(image.id, filePath);
-
-      ref.read(localGalleryNotifierProvider.notifier).refresh();
-      await FileExplorerUtils.revealFile(filePath);
-
-      if (context.mounted) {
-        AppToast.success(context, context.l10n.image_imageSaved(saveDirPath));
-      }
-    } catch (e) {
-      if (context.mounted) {
-        AppToast.error(context, context.l10n.image_saveFailed(e.toString()));
-      }
-    }
   }
 
   Widget _buildSingleAspectRatioCard({
@@ -875,257 +617,5 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
       width.clamp(0.0, maxWidth).toDouble(),
       height.clamp(0.0, maxHeight).toDouble(),
     );
-  }
-
-  /// 显示保存到词库对话框
-  Future<void> _showSaveToLibraryDialog(
-    BuildContext context,
-    Uint8List bytes,
-  ) async {
-    final params = ref.read(generationParamsNotifierProvider);
-    final characterConfig = ref.read(characterPromptNotifierProvider);
-
-    // 使用竖线格式合并正面提示词和角色提示词
-    final positivePrompt = params.prompt;
-    final enabledCharacters = characterConfig.characters
-        .where((c) => c.enabled && c.prompt.isNotEmpty)
-        .toList();
-
-    final String combinedPrompt;
-    if (enabledCharacters.isEmpty) {
-      combinedPrompt = positivePrompt;
-    } else {
-      // 使用竖线格式：主提示词 | 角色1 | 角色2
-      final buffer = StringBuffer(positivePrompt);
-      for (final char in enabledCharacters) {
-        buffer.write('\n| ${char.prompt}');
-      }
-      combinedPrompt = buffer.toString();
-    }
-
-    // 解析别名引用，保存实际内容到块库
-    final aliasResolver = ref.read(aliasResolverServiceProvider.notifier);
-    final resolvedPrompt = aliasResolver.resolveAliases(combinedPrompt);
-
-    if (!context.mounted) return;
-
-    await PromptBlockEditDialog.createWithDialog(
-      context,
-      ref,
-      initialContent: resolvedPrompt,
-      initialImageBytes: bytes,
-    );
-  }
-
-  Future<void> _showFullscreenImage(GeneratedImage selectedImage) async {
-    final state = ref.read(imageGenerationNotifierProvider);
-    final linkedSelection =
-        ref.read(historyClickBehaviorNotifierProvider) ==
-            HistoryClickBehavior.selectPreview &&
-        ref.read(generationPreviewSelectionProvider) == selectedImage.id;
-    final sequence = linkedSelection
-        ? state.detailSequenceFor(selectedImage)
-        : state.displayImages;
-    if (sequence.isEmpty) return;
-    final selectedIndex = sequence.indexWhere(
-      (image) => image.id == selectedImage.id,
-    );
-    final initialIndex = selectedIndex < 0 ? 0 : selectedIndex;
-
-    // 简化逻辑：统一使用 FileImageDetailData 从 PNG 文件解析
-    // - 已保存的图像直接使用 filePath
-    // - 未保存的图像使用 GeneratedImageDetailData 作为 fallback
-    final allImages = sequence.map((img) {
-      if (img.filePath != null && img.filePath!.isNotEmpty) {
-        // 加入预加载队列（如果尚未解析）
-        ImageMetadataService().enqueuePreload(
-          taskId: img.id,
-          filePath: img.filePath,
-        );
-        return FileImageDetailData(
-          filePath: img.filePath!,
-          cachedBytes: img.bytes,
-          id: img.id,
-          initialMetadata: img.metadata,
-          showCopyButton: img.canSave,
-        );
-      }
-
-      // 未保存的图像：使用 GeneratedImageDetailData 作为 fallback
-      return GeneratedImageDetailData(
-        imageBytes: img.bytes,
-        metadata: img.metadata,
-        id: img.id,
-        showSaveButton: img.canSave,
-        showCopyButton: img.canSave,
-      );
-    }).toList();
-
-    // 使用 ImageDetailOpener 打开详情页
-    ImageDetailOpener.showMultipleImmediate(
-      context,
-      images: allImages,
-      initialIndex: initialIndex,
-      showMetadataPanel: true,
-      showThumbnails: allImages.length > 1,
-      callbacks: ImageDetailCallbacks(
-        onSave: (image) async {
-          if (!image.showSaveButton) return;
-          await _saveImage(context, image);
-        },
-      ),
-    );
-  }
-
-  /// 获取保存目录
-  Future<Directory?> _getSaveDirectory() async {
-    final dirPath = await GalleryFolderRepository.instance.getRootPath();
-    if (dirPath == null) return null;
-    final dir = Directory(dirPath);
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-    }
-    return dir;
-  }
-
-  /// 保存图像
-  Future<void> _saveImage(BuildContext context, ImageDetailData image) async {
-    try {
-      final imageBytes = await image.getImageBytes();
-      final saveDir = await _getSaveDirectory();
-      if (saveDir == null) return;
-
-      // 统一解析真实 seed：文件名与元数据嵌入共用同一结果
-      final resolvedSeed = await ImageSaveUtils.resolveSeed(
-        metadata: image.metadata,
-        bytes: imageBytes,
-      );
-      final params = ref.read(generationParamsNotifierProvider);
-      // 最终 seed：解析结果优先，回退当前参数，仍未知则随机。
-      // 在生成文件名前确定，保证文件名与嵌入元数据完全一致。
-      final finalSeed = resolvedSeed ?? params.seed;
-      final actualSeed = finalSeed < 0
-          ? Random().nextInt(4294967295)
-          : finalSeed;
-
-      // 构建最终字节：已有 NAI 元数据则原样保留，否则按当前参数重建
-      final Uint8List finalBytes;
-      if (ImageSaveUtils.hasEmbeddedNovelAiMetadata(imageBytes)) {
-        finalBytes = imageBytes;
-      } else {
-        final characterConfig = ref.read(characterPromptNotifierProvider);
-
-        // 解析别名
-        final aliasResolver = ref.read(aliasResolverServiceProvider.notifier);
-        final resolvedPrompt = aliasResolver.resolveAliases(params.prompt);
-        final resolvedNegative = aliasResolver.resolveAliases(
-          params.negativePrompt,
-        );
-        final qualityState = ref.read(qualityPresetNotifierProvider);
-        final qualityContent = ref
-            .read(qualityPresetNotifierProvider.notifier)
-            .getEffectiveContent(params.model);
-        final ucState = ref.read(ucPresetNotifierProvider);
-        final ucPresetContent = ref
-            .read(ucPresetNotifierProvider.notifier)
-            .getEffectiveContent(params.model);
-        final presetResolution = resolvePromptPresetSettings(
-          prompt: resolvedPrompt,
-          negativePrompt: resolvedNegative,
-          qualityMode: qualityState.mode,
-          qualityContent: qualityContent,
-          ucPresetType: ucState.presetType,
-          ucPresetContent: ucPresetContent,
-          useCustomUcPreset: ucState.isCustom,
-        );
-
-        // 构建 V4 多角色提示词结构（解析别名）
-        final charCaptions = <Map<String, dynamic>>[];
-        final charNegCaptions = <Map<String, dynamic>>[];
-
-        for (final char in characterConfig.characters.where(
-          (c) => c.enabled && c.prompt.isNotEmpty,
-        )) {
-          charCaptions.add({
-            'char_caption': aliasResolver.resolveAliases(char.prompt),
-            'centers': [
-              {'x': 0.5, 'y': 0.5},
-            ],
-          });
-          charNegCaptions.add({
-            'char_caption': aliasResolver.resolveAliases(char.negativePrompt),
-            'centers': [
-              {'x': 0.5, 'y': 0.5},
-            ],
-          });
-        }
-
-        final encodedSize = NaiResolutionAdapter.readImageSize(imageBytes);
-        final paramsForSave = params.copyWith(
-          prompt: presetResolution.prompt,
-          negativePrompt: presetResolution.negativePrompt,
-          qualityToggle: presetResolution.qualityToggle,
-          qualityTagPreset: presetResolution.qualityTagPreset,
-          ucPreset: presetResolution.ucPreset,
-          width: encodedSize?.$1 ?? params.width,
-          height: encodedSize?.$2 ?? params.height,
-        );
-        finalBytes = await ImageSaveUtils.rebuildImageBytesWithMetadata(
-          imageBytes: imageBytes,
-          params: paramsForSave,
-          actualSeed: actualSeed,
-          charCaptions: charCaptions,
-          charNegCaptions: charNegCaptions,
-          useCoords: !characterConfig.globalAiChoice,
-        );
-      }
-
-      // 原子保存：日期分类路径 + 独占防冲突 + 失败清理，全部在工具内完成
-      final filePath = await ImageSaveUtils.saveBytesToDatedPath(
-        rootPath: saveDir.path,
-        bytes: finalBytes,
-        seed: actualSeed,
-      );
-
-      // 立即解析并缓存刚保存图像的元数据
-      unawaited(
-        ImageMetadataService()
-            .getMetadata(filePath)
-            .then((metadata) {
-              AppLogger.d(
-                '生成图像元数据已缓存: ${metadata?.prompt.substring(0, metadata.prompt.length > 30 ? 30 : metadata.prompt.length)}...',
-                'ImagePreview',
-              );
-            })
-            .catchError((e) {
-              AppLogger.w('生成图像元数据缓存失败: $e', 'ImagePreview');
-            }),
-      );
-
-      // 更新保存图像的文件路径到状态
-      final currentState = ref.read(imageGenerationNotifierProvider);
-      final updatedImages = currentState.displayImages.map((img) {
-        if (img.id == image.identifier) {
-          return img.copyWithFilePath(filePath);
-        }
-        return img;
-      }).toList();
-
-      if (updatedImages.isNotEmpty) {
-        ref
-            .read(imageGenerationNotifierProvider.notifier)
-            .updateDisplayImages(updatedImages);
-      }
-
-      ref.read(localGalleryNotifierProvider.notifier).refresh();
-
-      if (context.mounted) {
-        AppToast.success(context, context.l10n.image_imageSaved(saveDir.path));
-      }
-    } catch (e) {
-      if (context.mounted) {
-        AppToast.error(context, context.l10n.image_saveFailed(e.toString()));
-      }
-    }
   }
 }

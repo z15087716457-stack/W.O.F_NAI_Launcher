@@ -847,6 +847,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get generation_canvasZoomIn => 'Zoom in';
+
+  @override
+  String get generation_canvasZoomOut => 'Zoom out';
+
+  @override
+  String get generation_canvasFlyToLatest => 'Fly to latest group';
+
+  @override
   String get generation_params => 'Parameters';
 
   @override
@@ -7000,6 +7009,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settings_historyClickBehavior_linkedDescription =>
       'Click to switch the central preview, double-click or hold for details, and browse with Left/Right';
+
+  @override
+  String get settings_outputViewer => 'Output viewer';
+
+  @override
+  String get settings_outputViewer_canvas => 'Free canvas';
+
+  @override
+  String get settings_outputViewer_canvasDescription =>
+      'NAI5-style infinite canvas: all generated images laid out by batch, middle/Shift+left drag to pan, Ctrl+wheel to zoom, WASD/f/q to navigate';
+
+  @override
+  String get settings_outputViewer_simple => 'Simple view';
+
+  @override
+  String get settings_outputViewer_simpleDescription =>
+      'Classic centered/grid preview for low-spec machines or the familiar layout';
 
   @override
   String get image_viewDetail => 'View details';
