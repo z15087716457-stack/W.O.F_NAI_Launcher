@@ -115,8 +115,10 @@ class _PromptBlockPaletteOverlay extends StatefulWidget {
 
 class _PromptBlockPaletteOverlayState
     extends State<_PromptBlockPaletteOverlay> {
-  /// 方形悬浮窗边长：内容少时随内容收缩，超过上限后列表内部滚动。
+  /// 方形悬浮窗边长：空窗/稀疏也有默认块头（图观感≈大方块），
+  /// 内容超过上限后列表内部滚动。
   static const double _windowWidth = 400;
+  static const double _windowMinHeight = 340;
   static const double _windowMaxHeight = 400;
 
   /// 会话内记住上次拖动到的位置。
@@ -171,6 +173,7 @@ class _PromptBlockPaletteOverlayState
             onTap: () {},
             child: _PromptBlockPaletteCard(
               width: _windowWidth,
+              minHeight: _windowMinHeight,
               maxHeight: _windowMaxHeight,
               onClose: widget.onClose,
               onPanUpdate: (delta) => setState(() {
@@ -189,12 +192,14 @@ class _PromptBlockPaletteOverlayState
 class _PromptBlockPaletteCard extends ConsumerStatefulWidget {
   const _PromptBlockPaletteCard({
     required this.width,
+    required this.minHeight,
     required this.maxHeight,
     required this.onClose,
     required this.onPanUpdate,
   });
 
   final double width;
+  final double minHeight;
   final double maxHeight;
   final VoidCallback onClose;
   final ValueChanged<Offset> onPanUpdate;
@@ -275,6 +280,7 @@ class _PromptBlockPaletteCardState
       widget.maxHeight,
       math.max(160.0, MediaQuery.sizeOf(context).height - 16),
     );
+    final minHeight = math.min(widget.minHeight, maxHeight);
 
     return Material(
       elevation: 8,
@@ -285,6 +291,7 @@ class _PromptBlockPaletteCardState
         constraints: BoxConstraints(
           minWidth: widget.width,
           maxWidth: widget.width,
+          minHeight: minHeight,
           maxHeight: maxHeight,
         ),
         child: Column(
@@ -458,47 +465,65 @@ class _PromptBlockPaletteCardState
                     notifier.addBlock(details.data.blockId);
                   }
                 },
-                builder: (context, _, _) => SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // 流式排布：一行摆不下整块就自动换到下一行。
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: [
-                          for (var i = 0; i < blocks.length; i++)
-                            _PaletteChipRow(
-                              block: blocks[i],
-                              index: i,
-                              folders: folders,
-                              multiSelectMode: _multiSelectMode,
-                              selected: selectedIds.contains(blocks[i].id),
-                              onToggleSelected: _multiSelectMode
-                                  ? () => _toggleSelected(blocks[i].id)
-                                  : null,
-                            ),
-                        ],
-                      ),
-                      if (blocks.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(4, 8, 4, 10),
-                          child: Text(
-                            l10n.promptBlockPalette_emptyHint,
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              height: 1.5,
+                builder: (context, _, _) => LayoutBuilder(
+                  builder: (context, listConstraints) =>
+                      SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 8,
+                        ),
+                        child: ConstrainedBox(
+                          // 内容不足时占满列表区，让空态/稀疏内容垂直居中，
+                          // 窗口保持方块观感而非一条窄带。
+                          constraints: BoxConstraints(
+                            minHeight: math.max(
+                              0,
+                              listConstraints.maxHeight - 16,
                             ),
                           ),
+                          child: blocks.isEmpty
+                              ? Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                    ),
+                                    child: Text(
+                                      l10n.promptBlockPalette_emptyHint,
+                                      textAlign: TextAlign.center,
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                            height: 1.5,
+                                          ),
+                                    ),
+                                  ),
+                                )
+                              // 流式排布：一行摆不下整块就自动换到下一行。
+                              : Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: [
+                                    for (var i = 0; i < blocks.length; i++)
+                                      _PaletteChipRow(
+                                        block: blocks[i],
+                                        index: i,
+                                        folders: folders,
+                                        multiSelectMode: _multiSelectMode,
+                                        selected: selectedIds.contains(
+                                          blocks[i].id,
+                                        ),
+                                        onToggleSelected: _multiSelectMode
+                                            ? () => _toggleSelected(
+                                                blocks[i].id,
+                                              )
+                                            : null,
+                                      ),
+                                  ],
+                                ),
                         ),
-                    ],
-                  ),
+                      ),
                 ),
               ),
             ),
