@@ -177,9 +177,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
   /// tile 上的发光边框与内部渐变/色罩会直接污染画面、毁色准。
   final bool hideSelectionDecoration;
 
-  /// 生成中卡片的呼吸发光动画（primary BoxShadow 0.1↔0.35 循环）。
-  /// 画布 inflight 占位槽关闭——呼吸荧光边同样污染画面观感。
-  final bool enableGlowAnimation;
+
 
   const SelectableImageCard({
     super.key,
@@ -234,7 +232,6 @@ class SelectableImageCard extends ConsumerStatefulWidget {
     this.imageWidth,
     this.imageHeight,
     this.hideSelectionDecoration = false,
-    this.enableGlowAnimation = true,
   }) : assert(
          !isGenerating || (imageWidth != null && imageHeight != null),
          'imageWidth and imageHeight are required when isGenerating is true',
@@ -334,10 +331,6 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
   late AnimationController _glossController;
   late Animation<double> _glossAnimation;
 
-  // 生成中状态的发光动画
-  AnimationController? _glowController;
-  Animation<double>? _glowAnimation;
-
   // 防止重复点击打开多个详情页
   bool _isTapping = false;
   DateTime? _lastTapTime;
@@ -364,10 +357,6 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
       CurvedAnimation(parent: _glossController, curve: Curves.easeInOut),
     );
 
-    // 如果是生成中状态，初始化发光动画（画布占位槽可关）
-    if (widget.isGenerating && widget.enableGlowAnimation) {
-      _initGlowAnimation();
-    }
     _shareTransferCache = _createShareTransferCache();
   }
 
@@ -377,31 +366,9 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
     _scheduleCompletedImagePrecache();
   }
 
-  void _initGlowAnimation() {
-    _glowController?.dispose();
-    _glowController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _glowAnimation = Tween<double>(begin: 0.1, end: 0.35).animate(
-      CurvedAnimation(parent: _glowController!, curve: Curves.easeInOut),
-    );
-  }
-
   @override
   void didUpdateWidget(SelectableImageCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // 状态变化时管理发光动画
-    if (widget.isGenerating &&
-        !oldWidget.isGenerating &&
-        widget.enableGlowAnimation) {
-      _initGlowAnimation();
-    } else if (!widget.isGenerating && oldWidget.isGenerating) {
-      _glowController?.dispose();
-      _glowController = null;
-      _glowAnimation = null;
-    }
 
     if (widget.streamPreview?.isNotEmpty == true) {
       _lastStreamPreviewBytes = widget.streamPreview;
@@ -457,7 +424,6 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
   @override
   void dispose() {
     _glossController.dispose();
-    _glowController?.dispose();
     _completionPlaceholderFallbackTimer?.cancel();
     _legacyTapResetTimer?.cancel();
     _doubleTapResetTimer?.cancel();
@@ -615,69 +581,60 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
     final currentImage = widget.currentImage ?? 0;
     final totalImages = widget.totalImages ?? 0;
 
-    return AnimatedBuilder(
-      animation: _glowAnimation ?? const AlwaysStoppedAnimation(0.2),
-      builder: (context, child) {
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: widget.enableGlowAnimation
-                ? [
-                    BoxShadow(
-                      color: primaryColor.withValues(
-                        alpha: _glowAnimation?.value ?? 0.2,
-                      ),
-                      blurRadius: 40,
-                      spreadRadius: 0,
-                    ),
-                  ]
-                : null,
-          ),
-          child: child,
-        );
-      },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // 流式预览图像
-            _buildStreamPreviewImage(),
-            // 半透明遮罩 + 进度指示
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.4),
-                  ],
-                ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // 流式预览图像
+          _buildStreamPreviewImage(),
+          // 半透明遮罩 + 进度指示
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.4),
+                ],
               ),
             ),
-            // 底部进度信息
-            Positioned(
-              left: 8,
-              right: 8,
-              bottom: 8,
-              child: Row(
-                children: [
-                  // 进度环
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      value: progress > 0 ? progress : null,
-                      strokeWidth: 2,
-                      backgroundColor: Colors.white.withValues(alpha: 0.2),
-                      color: Colors.white,
-                    ),
+          ),
+          // 底部进度信息
+          Positioned(
+            left: 8,
+            right: 8,
+            bottom: 8,
+            child: Row(
+              children: [
+                // 进度环
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    value: progress > 0 ? progress : null,
+                    strokeWidth: 2,
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    color: Colors.white,
                   ),
-                  const SizedBox(width: 8),
-                  // 进度文字
+                ),
+                const SizedBox(width: 8),
+                // 进度文字
+                Text(
+                  '$currentImage/$totalImages',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+                  ),
+                ),
+                const Spacer(),
+                // 百分比
+                if (progress > 0)
                   Text(
-                    '$currentImage/$totalImages',
+                    '${(progress * 100).toInt()}%',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -685,23 +642,10 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                       shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
                     ),
                   ),
-                  const Spacer(),
-                  // 百分比
-                  if (progress > 0)
-                    Text(
-                      '${(progress * 100).toInt()}%',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
-                      ),
-                    ),
-                ],
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -792,32 +736,15 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
     final currentImage = currentImageOverride ?? widget.currentImage ?? 0;
     final totalImages = totalImagesOverride ?? widget.totalImages ?? 0;
 
-    return AnimatedBuilder(
-      animation: _glowAnimation ?? const AlwaysStoppedAnimation(0.2),
-      builder: (context, child) {
-        return Container(
-          decoration: BoxDecoration(
-            color: surfaceColor,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: primaryColor.withValues(alpha: 0.15),
-              width: 1,
-            ),
-            boxShadow: widget.enableGlowAnimation
-                ? [
-                    BoxShadow(
-                      color: primaryColor.withValues(
-                        alpha: _glowAnimation?.value ?? 0.2,
-                      ),
-                      blurRadius: 40,
-                      spreadRadius: 0,
-                    ),
-                  ]
-                : null,
-          ),
-          child: child,
-        );
-      },
+    return Container(
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: primaryColor.withValues(alpha: 0.15),
+          width: 1,
+        ),
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

@@ -805,8 +805,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         enableCopyAction: false,
         hoverEffectsEnabled: false,
         shareWarmupEnabled: false,
-        // 画布占位槽去呼吸发光（primary BoxShadow 0.1↔0.35 循环荧光边）
-        enableGlowAnimation: false,
         hideSelectionDecoration: true,
       );
     }
