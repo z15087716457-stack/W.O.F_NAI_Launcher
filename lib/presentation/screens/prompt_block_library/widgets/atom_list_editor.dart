@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -210,10 +212,12 @@ class AtomChip extends StatelessWidget {
 
         if (segs.length <= 1) {
           return _lineBox(context, style, color, segs.first,
-              topRounded: true, bottomRounded: true);
+              topRounded: true, bottomRounded: true,
+              solidLeft: true, solidRight: true);
         }
-        // 逐行小框（静拍板）：首/末行整框实线，中间行横边实线+
-        // 竖边虚线；行间缝补一段左缘竖虚线同轴连接。
+        // 逐行小框（静拍板·实线只留首尾）：横边恒实；首行左竖
+        // 边实、末行右竖边实，其余竖边全虚线；行间缝补一段左缘
+        // 竖虚线同轴连接。
         final children = <Widget>[];
         for (var i = 0; i < segs.length; i++) {
           if (i > 0) {
@@ -226,7 +230,8 @@ class AtomChip extends StatelessWidget {
             segs[i],
             topRounded: i == 0,
             bottomRounded: i == segs.length - 1,
-            dashedSides: i != 0 && i != segs.length - 1,
+            solidLeft: i == 0,
+            solidRight: i == segs.length - 1,
           ));
         }
         return Column(
@@ -283,9 +288,10 @@ class AtomChip extends StatelessWidget {
     return tp.width;
   }
 
-  /// 单行框：自绘描边。首/末行（及单行）整框实线含圆角；
-  /// 中间行实线横边+虚线竖边（接缝角直角）。border 画在
-  /// 文字上层，overhang 墨迹被描边遮住，视觉「线在字外」。
+  /// 单行框：自绘描边（静拍板·实线只留首尾）。横边恒实线；
+  /// 首行左竖边实、末行右竖边实（「起点/终点」），其余竖边
+  /// 全虚线；四角在相邻两边都实时画圆弧，否则直角。border
+  /// 画在文字上层，overhang 墨迹被描边遮住，视觉「线在字外」。
   Widget _lineBox(
     BuildContext context,
     TextStyle? style,
@@ -293,7 +299,8 @@ class AtomChip extends StatelessWidget {
     _Seg seg, {
     required bool topRounded,
     required bool bottomRounded,
-    bool dashedSides = false,
+    required bool solidLeft,
+    required bool solidRight,
   }) {
     const r = Radius.circular(_radius);
     return Container(
@@ -304,11 +311,11 @@ class AtomChip extends StatelessWidget {
       child: CustomPaint(
         foregroundPainter: _DashedBoxPainter(
           color: color,
-          topLeft: topRounded ? r : Radius.zero,
-          topRight: topRounded ? r : Radius.zero,
-          bottomLeft: bottomRounded ? r : Radius.zero,
-          bottomRight: bottomRounded ? r : Radius.zero,
-          dashedSides: dashedSides,
+          radius: r,
+          topRounded: topRounded,
+          bottomRounded: bottomRounded,
+          solidLeft: solidLeft,
+          solidRight: solidRight,
         ),
         child: Padding(
           padding: _pad,
@@ -325,27 +332,26 @@ class AtomChip extends StatelessWidget {
   }
 }
 
-/// 行框描边（静拍板）：首行/末行/单行 chip = 整框实线（含圆角）；
-/// 中间行 = 上/下横边实线 + 左/右竖边虚线（接缝角必为直角，
-/// 无圆角）。1px 线以边中线居中（0.5 偏移）。
+/// 行框描边（静拍板·实线只留首尾）：横边恒实线；左右竖边
+/// 由 [solidLeft]/[solidRight] 决定实线或虚线。四角仅当
+/// 相邻两边都是实线时画 [radius] 圆弧（虚线边不能转弧，
+/// 落直角）。1px 线以边中线居中（0.5 偏移）。
 class _DashedBoxPainter extends CustomPainter {
   _DashedBoxPainter({
     required this.color,
-    required this.topLeft,
-    required this.topRight,
-    required this.bottomLeft,
-    required this.bottomRight,
-    required this.dashedSides,
+    required this.radius,
+    required this.topRounded,
+    required this.bottomRounded,
+    required this.solidLeft,
+    required this.solidRight,
   });
 
   final Color color;
-  final Radius topLeft;
-  final Radius topRight;
-  final Radius bottomLeft;
-  final Radius bottomRight;
-
-  /// true = 中间行：只画实线横边 + 虚线竖边。
-  final bool dashedSides;
+  final Radius radius;
+  final bool topRounded;
+  final bool bottomRounded;
+  final bool solidLeft;
+  final bool solidRight;
 
   static const double _dash = 2;
   static const double _gap = 2;
@@ -357,31 +363,41 @@ class _DashedBoxPainter extends CustomPainter {
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
-    final rect = Offset.zero & size;
-    if (!dashedSides) {
-      canvas.drawRRect(
-        RRect.fromRectAndCorners(
-          rect.deflate(_c),
-          topLeft: topLeft,
-          topRight: topRight,
-          bottomLeft: bottomLeft,
-          bottomRight: bottomRight,
-        ),
-        paint,
-      );
-      return;
-    }
     final w = size.width;
     final h = size.height;
-    canvas.drawLine(const Offset(0, _c), Offset(w, _c), paint);
-    canvas.drawLine(Offset(0, h - _c), Offset(w, h - _c), paint);
-    _dashedV(canvas, paint, _c, 0, h);
-    _dashedV(canvas, paint, w - _c, 0, h);
+    final r = radius.x;
+    // 四角弧条件：角有资格圆（首/末外角）且相邻两边都实。
+    final tl = topRounded && solidLeft ? r : 0.0;
+    final tr = topRounded && solidRight ? r : 0.0;
+    final bl = bottomRounded && solidLeft ? r : 0.0;
+    final br = bottomRounded && solidRight ? r : 0.0;
+
+    canvas.drawLine(Offset(tl, _c), Offset(w - tr, _c), paint);
+    canvas.drawLine(Offset(bl, h - _c), Offset(w - br, h - _c), paint);
+    if (tl > 0) {
+      _arc(canvas, paint, tl, tl, math.pi, math.pi / 2);
+    }
+    if (tr > 0) {
+      _arc(canvas, paint, w - tr, tr, -math.pi / 2, math.pi / 2);
+    }
+    if (br > 0) {
+      _arc(canvas, paint, w - br, h - br, 0, math.pi / 2);
+    }
+    if (bl > 0) {
+      _arc(canvas, paint, bl, h - bl, math.pi / 2, math.pi / 2);
+    }
+    _edgeV(canvas, paint, _c, tl, h - bl, solidLeft);
+    _edgeV(canvas, paint, w - _c, tr, h - br, solidRight);
   }
 
-  /// 竖虚线：首段从 y1 起画（顶到上横边），末段顶到 y2。
-  void _dashedV(
-      Canvas canvas, Paint paint, double x, double y1, double y2) {
+  /// 竖边：实线一条到底；虚线首段顶 y1（接上横边/弧端）、
+  /// 末段顶 y2。
+  void _edgeV(
+      Canvas canvas, Paint paint, double x, double y1, double y2, bool solid) {
+    if (solid) {
+      canvas.drawLine(Offset(x, y1), Offset(x, y2), paint);
+      return;
+    }
     var y = y1;
     while (y < y2) {
       final end = (y + _dash).clamp(y, y2);
@@ -390,14 +406,28 @@ class _DashedBoxPainter extends CustomPainter {
     }
   }
 
+  /// 四分之一圆弧（逆时针坐标系下的角弧），线心半径 = 角
+  /// 半径 - 0.5 保证外缘对齐框边。
+  void _arc(Canvas canvas, Paint paint, double cx, double cy,
+      double start, double sweep) {
+    final rr = radius.x - _c;
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(cx, cy), radius: rr),
+      start,
+      sweep,
+      false,
+      paint,
+    );
+  }
+
   @override
   bool shouldRepaint(covariant _DashedBoxPainter oldDelegate) =>
       oldDelegate.color != color ||
-      oldDelegate.topLeft != topLeft ||
-      oldDelegate.topRight != topRight ||
-      oldDelegate.bottomLeft != bottomLeft ||
-      oldDelegate.bottomRight != bottomRight ||
-      oldDelegate.dashedSides != dashedSides;
+      oldDelegate.radius != radius ||
+      oldDelegate.topRounded != topRounded ||
+      oldDelegate.bottomRounded != bottomRounded ||
+      oldDelegate.solidLeft != solidLeft ||
+      oldDelegate.solidRight != solidRight;
 }
 
 /// 一行文本段 + 它的行框宽。
