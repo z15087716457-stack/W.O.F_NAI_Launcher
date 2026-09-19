@@ -893,27 +893,32 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                           width: 2,
                         )
                       : null),
-            boxShadow: [
-              // 主阴影
-              BoxShadow(
-                color: widget.isSelected
-                    ? theme.colorScheme.primary.withValues(alpha: 0.3)
-                    : (_isHovering
-                          ? Colors.black.withValues(alpha: 0.35)
-                          : Colors.black.withValues(alpha: 0.12)),
-                blurRadius: widget.isSelected ? 16 : (_isHovering ? 28 : 10),
-                offset: Offset(0, _isHovering ? 14 : 4),
-                spreadRadius: _isHovering ? 2 : 0,
-              ),
-              // 次阴影（悬浮时增加深度感）
-              if (_isHovering)
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 40,
-                  offset: const Offset(0, 20),
-                  spreadRadius: -4,
-                ),
-            ],
+            // 画布 tile 彻底无阴影：选中态的 primary 0.3 blur16 会在图边缘
+            // 晕一圈荧光（hideSelectionDecoration 一并关）；官网画布无投影。
+            boxShadow: widget.hideSelectionDecoration
+                ? null
+                : [
+                    // 主阴影
+                    BoxShadow(
+                      color: widget.isSelected
+                          ? theme.colorScheme.primary.withValues(alpha: 0.3)
+                          : (_isHovering
+                                ? Colors.black.withValues(alpha: 0.35)
+                                : Colors.black.withValues(alpha: 0.12)),
+                      blurRadius:
+                          widget.isSelected ? 16 : (_isHovering ? 28 : 10),
+                      offset: Offset(0, _isHovering ? 14 : 4),
+                      spreadRadius: _isHovering ? 2 : 0,
+                    ),
+                    // 次阴影（悬浮时增加深度感）
+                    if (_isHovering)
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 40,
+                        offset: const Offset(0, 20),
+                        spreadRadius: -4,
+                      ),
+                  ],
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
