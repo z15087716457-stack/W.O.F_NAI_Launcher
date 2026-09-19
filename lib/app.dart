@@ -16,6 +16,7 @@ import 'presentation/providers/prompt_block_library_provider.dart';
 import 'presentation/providers/subscription_provider.dart'
     hide anlasBalanceProvider;
 import 'presentation/themes/app_theme.dart';
+import 'presentation/widgets/navigation/integrated_title_bar.dart';
 import 'presentation/widgets/shortcuts/shortcut_aware_widget.dart';
 import 'presentation/widgets/shortcuts/shortcut_help_dialog.dart';
 
@@ -173,13 +174,13 @@ class NAILauncherApp extends ConsumerWidget {
           // 路由
           routerConfig: router,
 
-          // 字体缩放全局应用
+          // 字体缩放全局应用 + FEAT-23 内置一体标题栏（Windows）
           builder: (context, child) {
             return MediaQuery(
               data: MediaQuery.of(
                 context,
               ).copyWith(textScaler: TextScaler.linear(fontScale)),
-              child: child!,
+              child: IntegratedTitleBarShell(child: child!),
             );
           },
         ),

@@ -5978,5 +5978,9 @@
   "tips_fun_2": "シードはランダム、センスは非ランダム",
   "tips_fun_3": "どこかの GPU が今か今かと唸っています",
   "tips_fun_4": "ここで一番高いボタンは生成——Anlas を食べます",
-  "tips_fun_5": "この欄は何千もの傑作（と数枚の黒歴史）を見てきました"
+  "tips_fun_5": "この欄は何千もの傑作（と数枚の黒歴史）を見てきました",
+  "titleBar_minimize": "最小化",
+  "titleBar_maximize": "最大化",
+  "titleBar_restore": "元に戻す",
+  "titleBar_close": "閉じる"
 }

@@ -630,7 +630,9 @@ Future<void> _bootstrapApplication() async {
         center: fillBounds == null && (savedX == null || savedY == null),
         backgroundColor: const Color(0xFF121212), // 深色背景，避免窗口透明
         skipTaskbar: false,
-        titleBarStyle: TitleBarStyle.normal,
+        // FEAT-23 内置一体标题栏：隐藏原生栏，由 Flutter 自绘
+        // （拖拽/双击/Aero Snap 经 runner WM_NCHITTEST 返回 HTCAPTION）。
+        titleBarStyle: TitleBarStyle.hidden,
         title: 'NAI Launcher',
       );
 

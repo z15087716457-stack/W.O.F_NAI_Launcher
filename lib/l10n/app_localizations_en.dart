@@ -10328,4 +10328,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tips_fun_5 =>
       'This box has seen thousands of masterpieces (and a few regrets)';
+
+  @override
+  String get titleBar_minimize => 'Minimize';
+
+  @override
+  String get titleBar_maximize => 'Maximize';
+
+  @override
+  String get titleBar_restore => 'Restore';
+
+  @override
+  String get titleBar_close => 'Close';
 }

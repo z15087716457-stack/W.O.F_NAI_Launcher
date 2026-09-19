@@ -17984,6 +17984,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This box has seen thousands of masterpieces (and a few regrets)'**
   String get tips_fun_5;
+
+  /// No description provided for @titleBar_minimize.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize'**
+  String get titleBar_minimize;
+
+  /// No description provided for @titleBar_maximize.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximize'**
+  String get titleBar_maximize;
+
+  /// No description provided for @titleBar_restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get titleBar_restore;
+
+  /// No description provided for @titleBar_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get titleBar_close;
 }
 
 class _AppLocalizationsDelegate

@@ -5978,5 +5978,9 @@
   "tips_fun_2": "The seed was random; the taste wasn't",
   "tips_fun_3": "Somewhere, a GPU hums in anticipation",
   "tips_fun_4": "The most expensive button here is Generate — it eats Anlas",
-  "tips_fun_5": "This box has seen thousands of masterpieces (and a few regrets)"
+  "tips_fun_5": "This box has seen thousands of masterpieces (and a few regrets)",
+  "titleBar_minimize": "Minimize",
+  "titleBar_maximize": "Maximize",
+  "titleBar_restore": "Restore",
+  "titleBar_close": "Close"
 }

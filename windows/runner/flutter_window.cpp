@@ -8,6 +8,7 @@
 #include <flutter/method_channel.h>
 #include <flutter/standard_method_codec.h>
 #include "flutter/generated_plugin_registrant.h"
+#include "titlebar_region.h"
 
 // Global set to store font names
 static std::set<std::wstring> g_font_names;
@@ -142,6 +143,50 @@ bool FlutterWindow::OnCreate() {
                          SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE |
                              SWP_FRAMECHANGED);
           }
+          result->Success();
+        } else {
+          result->NotImplemented();
+        }
+      });
+
+  // Register integrated title bar MethodChannel (Dart -> native).
+  // FEAT-23：Dart 侧把自绘标题栏的命中参数（栏高 + 右侧按钮保留宽，
+  // 逻辑像素）上报给原生，由 titlebar_region 在 WM_NCHITTEST 里
+  // 返回 HTCAPTION，恢复原生拖拽/双击最大化/Aero Snap。
+  auto titlebar_channel =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(),
+          "com.nailauncher/titlebar",
+          &flutter::StandardMethodCodec::GetInstance());
+  titlebar_channel->SetMethodCallHandler(
+      [](const flutter::MethodCall<flutter::EncodableValue>& call,
+         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>>
+             result) {
+        if (call.method_name() == "setRegion") {
+          const auto* args =
+              std::get_if<flutter::EncodableMap>(call.arguments());
+          double bar_height = 0.0;
+          double reserved_right = 0.0;
+          if (args != nullptr) {
+            const auto height_it =
+                args->find(flutter::EncodableValue("barHeight"));
+            if (height_it != args->end()) {
+              if (const auto* v = std::get_if<double>(&height_it->second)) {
+                bar_height = *v;
+              }
+            }
+            const auto reserved_it =
+                args->find(flutter::EncodableValue("reservedRight"));
+            if (reserved_it != args->end()) {
+              if (const auto* v = std::get_if<double>(&reserved_it->second)) {
+                reserved_right = *v;
+              }
+            }
+          }
+          titlebar_region::SetRegion(bar_height, reserved_right);
+          result->Success();
+        } else if (call.method_name() == "clear") {
+          titlebar_region::Clear();
           result->Success();
         } else {
           result->NotImplemented();

@@ -5978,5 +5978,9 @@
   "tips_fun_2": "种子是随机的，品味不是",
   "tips_fun_3": "某处有一块显卡正在摩拳擦掌",
   "tips_fun_4": "这里最贵的按钮是生成——它吃 Anlas",
-  "tips_fun_5": "这个框见证过上千张神作（和几张黑历史）"
+  "tips_fun_5": "这个框见证过上千张神作（和几张黑历史）",
+  "titleBar_minimize": "最小化",
+  "titleBar_maximize": "最大化",
+  "titleBar_restore": "还原",
+  "titleBar_close": "关闭"
 }

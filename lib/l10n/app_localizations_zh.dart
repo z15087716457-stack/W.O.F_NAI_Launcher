@@ -9929,4 +9929,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tips_fun_5 => '这个框见证过上千张神作（和几张黑历史）';
+
+  @override
+  String get titleBar_minimize => '最小化';
+
+  @override
+  String get titleBar_maximize => '最大化';
+
+  @override
+  String get titleBar_restore => '还原';
+
+  @override
+  String get titleBar_close => '关闭';
 }

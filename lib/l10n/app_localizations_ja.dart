@@ -10064,4 +10064,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get tips_fun_5 => 'この欄は何千もの傑作（と数枚の黒歴史）を見てきました';
+
+  @override
+  String get titleBar_minimize => '最小化';
+
+  @override
+  String get titleBar_maximize => '最大化';
+
+  @override
+  String get titleBar_restore => '元に戻す';
+
+  @override
+  String get titleBar_close => '閉じる';
 }

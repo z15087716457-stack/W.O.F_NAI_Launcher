@@ -1,4 +1,4 @@
-#include "win32_window.h"
+﻿#include "win32_window.h"
 
 #include <commctrl.h>
 #include <dwmapi.h>
@@ -6,6 +6,7 @@
 #include <uiautomation.h>
 
 #include "resource.h"
+#include "titlebar_region.h"
 
 namespace {
 
@@ -249,6 +250,16 @@ Win32Window::MessageHandler(HWND hwnd,
     case WM_DWMCOLORIZATIONCOLORCHANGED:
       UpdateTheme(hwnd);
       return 0;
+
+    case WM_NCHITTEST:
+      // FEAT-23：自绘标题栏命中区。命中返回 HTCAPTION（原生拖拽/
+      // 双击最大化/Aero Snap），未命中返回 std::nullopt 继续走
+      // DefWindowProc（边缘缩放/最大化补边由 window_manager 的
+      // WM_NCCALCSIZE 保留的非客户边框承担）。
+      if (auto result = titlebar_region::HandleNcHitTest(hwnd, lparam)) {
+        return *result;
+      }
+      break;
   }
 
   return DefWindowProc(window_handle_, message, wparam, lparam);
