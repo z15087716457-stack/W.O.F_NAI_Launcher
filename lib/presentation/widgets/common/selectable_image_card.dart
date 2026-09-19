@@ -1194,8 +1194,9 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                   ),
                 ),
 
-                // 8. 选中覆盖层（使用 IgnorePointer 让点击穿透）
-                if (widget.isSelected)
+                // 8. 选中覆盖层：primary 半透明色罩整图荧光调色、毁色准——
+                // 画布走 hideSelectionDecoration 全关（IgnorePointer 穿透）
+                if (widget.isSelected && !widget.hideSelectionDecoration)
                   Positioned.fill(
                     child: IgnorePointer(
                       child: Container(
