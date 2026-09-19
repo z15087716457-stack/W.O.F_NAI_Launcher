@@ -172,10 +172,14 @@ class SelectableImageCard extends ConsumerStatefulWidget {
   /// 图像高度（用于计算比例，生成中状态需要）
   final int? imageHeight;
 
-  /// 隐藏选中/悬浮的全部装饰（发光边框 + 顶部压暗渐变 + hover 边框）。
-  /// 画布 tile 用：组级选中态已由组覆盖层头部条表达，tile 上的发光
-  /// 边框与内部渐变会直接污染画面。选中描边仍保留 drop shadow 无外框。
+  /// 隐藏选中/悬浮的全部装饰（发光边框 + 顶部压暗渐变 + hover 边框 +
+  /// 选中色罩）。画布 tile 用：组级选中态已由组覆盖层头部条表达，
+  /// tile 上的发光边框与内部渐变/色罩会直接污染画面、毁色准。
   final bool hideSelectionDecoration;
+
+  /// 生成中卡片的呼吸发光动画（primary BoxShadow 0.1↔0.35 循环）。
+  /// 画布 inflight 占位槽关闭——呼吸荧光边同样污染画面观感。
+  final bool enableGlowAnimation;
 
   const SelectableImageCard({
     super.key,
@@ -230,6 +234,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
     this.imageWidth,
     this.imageHeight,
     this.hideSelectionDecoration = false,
+    this.enableGlowAnimation = true,
   }) : assert(
          !isGenerating || (imageWidth != null && imageHeight != null),
          'imageWidth and imageHeight are required when isGenerating is true',
@@ -359,8 +364,8 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
       CurvedAnimation(parent: _glossController, curve: Curves.easeInOut),
     );
 
-    // 如果是生成中状态，初始化发光动画
-    if (widget.isGenerating) {
+    // 如果是生成中状态，初始化发光动画（画布占位槽可关）
+    if (widget.isGenerating && widget.enableGlowAnimation) {
       _initGlowAnimation();
     }
     _shareTransferCache = _createShareTransferCache();
@@ -388,7 +393,9 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
   void didUpdateWidget(SelectableImageCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     // 状态变化时管理发光动画
-    if (widget.isGenerating && !oldWidget.isGenerating) {
+    if (widget.isGenerating &&
+        !oldWidget.isGenerating &&
+        widget.enableGlowAnimation) {
       _initGlowAnimation();
     } else if (!widget.isGenerating && oldWidget.isGenerating) {
       _glowController?.dispose();
@@ -614,15 +621,17 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
         return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: primaryColor.withValues(
-                  alpha: _glowAnimation?.value ?? 0.2,
-                ),
-                blurRadius: 40,
-                spreadRadius: 0,
-              ),
-            ],
+            boxShadow: widget.enableGlowAnimation
+                ? [
+                    BoxShadow(
+                      color: primaryColor.withValues(
+                        alpha: _glowAnimation?.value ?? 0.2,
+                      ),
+                      blurRadius: 40,
+                      spreadRadius: 0,
+                    ),
+                  ]
+                : null,
           ),
           child: child,
         );
@@ -794,15 +803,17 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
               color: primaryColor.withValues(alpha: 0.15),
               width: 1,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: primaryColor.withValues(
-                  alpha: _glowAnimation?.value ?? 0.2,
-                ),
-                blurRadius: 40,
-                spreadRadius: 0,
-              ),
-            ],
+            boxShadow: widget.enableGlowAnimation
+                ? [
+                    BoxShadow(
+                      color: primaryColor.withValues(
+                        alpha: _glowAnimation?.value ?? 0.2,
+                      ),
+                      blurRadius: 40,
+                      spreadRadius: 0,
+                    ),
+                  ]
+                : null,
           ),
           child: child,
         );
