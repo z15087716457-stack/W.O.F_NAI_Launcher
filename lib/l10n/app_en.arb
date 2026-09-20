@@ -1,4 +1,4 @@
-{
+﻿{
   "@@locale": "en",
   "app_title": "NAI Launcher",
   "app_subtitle": "NovelAI Third-party Client",
@@ -368,6 +368,8 @@
   "generation_lockHistoryScroll": "Lock history scrolling",
   "generation_unlockHistoryScroll": "Unlock history scrolling",
   "generation_downloadAllImages": "Download all images",
+  "generation_selectMultiple": "Select multiple",
+  "generation_deselectAll": "Exit multi-select",
   "generation_deleteSelectedImages": "Delete selected images ({count})",
   "@generation_deleteSelectedImages": {
     "placeholders": {

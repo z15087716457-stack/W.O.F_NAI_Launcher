@@ -839,6 +839,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_downloadAllImages => 'すべての画像をダウンロード';
 
   @override
+  String get generation_selectMultiple => '複数選択';
+
+  @override
+  String get generation_deselectAll => '選択を解除';
+
+  @override
   String generation_deleteSelectedImages(int count) {
     return '選択した画像を削除 ($count)';
   }

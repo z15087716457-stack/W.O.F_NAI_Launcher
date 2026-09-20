@@ -29,7 +29,7 @@ GeneratedImage _img({
 CanvasFeedGroup _group(GeneratedImage img) => CanvasFeedGroup(
       key: 'run:1',
       runId: 1,
-      images: [img],
+      tiles: [CanvasTileSpec.image(img)],
       requestedCount: 1,
     );
 

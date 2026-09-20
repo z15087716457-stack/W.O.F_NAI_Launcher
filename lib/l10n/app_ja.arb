@@ -1,4 +1,4 @@
-{
+﻿{
   "@@locale": "ja",
   "app_title": "NAI Launcher",
   "app_subtitle": "NovelAI サードパーティ クライアント",
@@ -367,6 +367,8 @@
   "generation_lockHistoryScroll": "履歴スクロールをロック",
   "generation_unlockHistoryScroll": "履歴スクロールのロックを解除",
   "generation_downloadAllImages": "すべての画像をダウンロード",
+  "generation_selectMultiple": "複数選択",
+  "generation_deselectAll": "選択を解除",
   "generation_deleteSelectedImages": "選択した画像を削除 ({count})",
   "@generation_deleteSelectedImages": {
     "placeholders": {

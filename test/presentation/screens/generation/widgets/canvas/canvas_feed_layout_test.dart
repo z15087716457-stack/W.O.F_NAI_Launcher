@@ -76,57 +76,86 @@ void main() {
     });
   });
 
-  group('layoutCanvasFeed', () {
-    test('组纵向堆叠：组间 50、原点 (0,0)、左对齐', () {
+  group('layoutCanvasFeed（官网逐字）', () {
+    test('组纵向堆叠：组间 340、单图组水平居中于 x=0', () {
       final g1 = CanvasFeedGroup(
         key: 'run:1',
         runId: 1,
-        images: [_img(id: 'a')],
+        tiles: [CanvasTileSpec.image(_img(id: 'a'))],
       );
       final g2 = CanvasFeedGroup(
         key: 'run:2',
         runId: 2,
-        images: [_img(id: 'b')],
+        tiles: [CanvasTileSpec.image(_img(id: 'b'))],
       );
-      final items = layoutCanvasFeed([g1, g2]);
+      final result = layoutCanvasFeed([g1, g2]);
+      final items = result.items;
 
       expect(items.length, 2);
-      expect(items[0].worldRect.left, 0);
+      // 单图 832 宽 → 居中 x=-416
+      expect(items[0].worldRect.left, -416);
       expect(items[0].worldRect.top, 0);
       expect(
         items[1].worldRect.top,
         1216 + kCanvasGroupSpacing,
       );
-      expect(items[1].worldRect.left, 0);
+      expect(items[1].worldRect.left, -416);
+      // 官网 bounds.height = cursorY-340（i 含尾随 340）：
+      // (1216+340)+(1216+340)-340 = 2772
+      expect(result.bounds.height, 2772);
     });
 
-    test('组内子图纵向堆叠间距 40，互不重叠', () {
+    test('4 张走 ceil(sqrt(4))=2 列近方阵，行/列 48px 间隙，互不重叠', () {
       final g = CanvasFeedGroup(
         key: 'run:1',
         runId: 1,
-        images: [
-          _img(id: 'a'),
-          _img(id: 'b'),
-          _img(id: 'c'),
-          _img(id: 'd'),
+        tiles: [
+          CanvasTileSpec.image(_img(id: 'a')),
+          CanvasTileSpec.image(_img(id: 'b')),
+          CanvasTileSpec.image(_img(id: 'c')),
+          CanvasTileSpec.image(_img(id: 'd')),
         ],
       );
-      final items = layoutCanvasFeed([g]);
+      final items = layoutCanvasFeed([g]).items;
       expect(items.length, 4);
       for (var i = 0; i < 4; i++) {
         expect(items[i].subimageIndex, i);
-        if (i > 0) {
-          expect(
-            items[i].worldRect.top,
-            items[i - 1].worldRect.bottom + kCanvasSubimageSpacing,
-          );
-        }
         for (var j = i + 1; j < 4; j++) {
           expect(
             items[i].worldRect.overlaps(items[j].worldRect),
             false,
             reason: 'tile $i 与 $j 重叠',
           );
+        }
+      }
+      // 2×2：a,b 同排（top=0），c,d 第二排 top=1216+48
+      expect(items[0].worldRect.top, 0);
+      expect(items[1].worldRect.top, 0);
+      expect(items[2].worldRect.top, 1216 + kCanvasGridGap);
+      // b 的 left = a.right + 48（组内坐标系，组整体居中）
+      expect(
+        items[1].worldRect.left - items[0].worldRect.right,
+        kCanvasGridGap,
+      );
+    });
+
+    test('3 张走哈希三角：同 id 结果确定、无重叠', () {
+      CanvasFeedGroup make() => CanvasFeedGroup(
+        key: 'run:7',
+        runId: 7,
+        tiles: [
+          CanvasTileSpec.image(_img(id: 'a')),
+          CanvasTileSpec.image(_img(id: 'b')),
+          CanvasTileSpec.image(_img(id: 'c')),
+        ],
+      );
+      final items1 = layoutCanvasFeed([make()]).items;
+      final items2 = layoutCanvasFeed([make()]).items;
+      // 确定性：同 key 两次布局一致
+      for (var i = 0; i < 3; i++) {
+        expect(items1[i].worldRect, items2[i].worldRect);
+        for (var j = i + 1; j < 3; j++) {
+          expect(items1[i].worldRect.overlaps(items1[j].worldRect), false);
         }
       }
     });

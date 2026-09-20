@@ -856,6 +856,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_downloadAllImages => 'Download all images';
 
   @override
+  String get generation_selectMultiple => 'Select multiple';
+
+  @override
+  String get generation_deselectAll => 'Exit multi-select';
+
+  @override
   String generation_deleteSelectedImages(int count) {
     return 'Delete selected images ($count)';
   }

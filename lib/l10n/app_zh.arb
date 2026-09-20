@@ -1,4 +1,4 @@
-{
+﻿{
   "@@locale": "zh",
   "app_title": "NAI 启动器",
   "app_subtitle": "NovelAI 第三方客户端",
@@ -348,6 +348,8 @@
   "generation_lockHistoryScroll": "锁定历史滚动",
   "generation_unlockHistoryScroll": "解锁历史滚动",
   "generation_downloadAllImages": "下载全部图像",
+  "generation_selectMultiple": "多选",
+  "generation_deselectAll": "退出多选",
   "generation_deleteSelectedImages": "删除选中图像 ({count})",
   "@generation_deleteSelectedImages": {
     "placeholders": {

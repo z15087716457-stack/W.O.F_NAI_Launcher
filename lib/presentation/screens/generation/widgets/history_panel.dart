@@ -103,6 +103,11 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
   /// 官网底栏「lock history scrolling」：开启后点选不再自动滚动历史列表
   bool _historyScrollLocked = false;
 
+  /// 显式多选模式（自研）：头部多选钮开启后，即使清空选中也不自动
+  /// 退出，需点关闭钮或再点多选钮退出。Ctrl+点击隐式多选仍走
+  /// _selectedIds 自动显隐。
+  bool _multiSelectMode = false;
+
   @override
   void initState() {
     super.initState();
@@ -219,10 +224,11 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                 ),
         ),
 
-        // 官网底栏（常驻）：AutoSave | 锁滚动 | 全部下载 | 删除选中/清空
-        // 有选中时再叠多选操作条（打包/保存）
+        // 官网底栏（常驻）：AutoSave | 锁滚动 | 多选 | 全部下载 | 删除
+        // 有选中或显式多选态时叠多选操作条（打包/保存/关闭）
         _buildBottomToolbar(context, state, theme),
-        if (_selectedIds.isNotEmpty) _buildBottomActions(context, state, theme),
+        if (_selectedIds.isNotEmpty || _multiSelectMode)
+          _buildBottomActions(context, state, theme),
       ],
     );
   }
@@ -256,6 +262,22 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
             color: _historyScrollLocked ? theme.colorScheme.primary : null,
             onPressed: () =>
                 setState(() => _historyScrollLocked = !_historyScrollLocked),
+          ),
+          // 多选入口（自研，官网无）：点击进显式多选态；再点退出并清空。
+          _BottomToolButton(
+            icon: _multiSelectMode || _selectedIds.isNotEmpty
+                ? Icons.library_add_check
+                : Icons.library_add_check_outlined,
+            tooltip: _multiSelectMode || _selectedIds.isNotEmpty
+                ? context.l10n.generation_deselectAll
+                : context.l10n.generation_selectMultiple,
+            color: _multiSelectMode ? theme.colorScheme.primary : null,
+            onPressed: hasContent
+                ? () => setState(() {
+                    _multiSelectMode = !_multiSelectMode;
+                    if (!_multiSelectMode) _selectedIds.clear();
+                  })
+                : null,
           ),
           _BottomToolButton(
             icon: Icons.save_alt,
@@ -1158,6 +1180,9 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     if (!image.canBulkSelect) return;
     setState(() {
       if (!_selectedIds.add(image.id)) _selectedIds.remove(image.id);
+      // 用户规则：多选只剩 1 张时再 Ctrl+点击最后一张 → 自动退出
+      // 多选态（选中清空即退出，含显式模式）。
+      if (_selectedIds.isEmpty) _multiSelectMode = false;
     });
   }
 
@@ -1166,7 +1191,8 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     GeneratedImage image,
     HistoryClickBehavior behavior,
   ) {
-    if (_isMultiSelectModifierPressed && image.canBulkSelect) {
+    if ((_isMultiSelectModifierPressed || _multiSelectMode) &&
+        image.canBulkSelect) {
       _toggleSelectedImage(image);
       return;
     }
@@ -1408,13 +1434,18 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
       ),
       child: Row(
         children: [
-          // 打包按钮
+          // 打包按钮（防拆行：标签禁换行+超长省略）
           Expanded(
             child: OutlinedButton.icon(
-              onPressed: () => _packSelectedImages(context, state),
+              onPressed: _selectedIds.isEmpty
+                  ? null
+                  : () => _packSelectedImages(context, state),
               icon: const Icon(Icons.archive_outlined, size: 20),
               label: Text(
                 '${context.l10n.common_pack} (${_selectedIds.length})',
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
               ),
               style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
             ),
@@ -1423,13 +1454,30 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           // 保存按钮
           Expanded(
             child: FilledButton.icon(
-              onPressed: () => _saveSelectedImages(context, state),
+              onPressed: _selectedIds.isEmpty
+                  ? null
+                  : () => _saveSelectedImages(context, state),
               icon: const Icon(Icons.save_alt, size: 20),
               label: Text(
                 '${context.l10n.image_save} (${_selectedIds.length})',
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
               ),
               style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
             ),
+          ),
+          const SizedBox(width: 8),
+          // 退出多选（自研，官网无）：清空选中并关显式多选态
+          IconButton(
+            tooltip: context.l10n.generation_deselectAll,
+            iconSize: 18,
+            visualDensity: VisualDensity.compact,
+            onPressed: () => setState(() {
+              _selectedIds.clear();
+              _multiSelectMode = false;
+            }),
+            icon: const Icon(Icons.close),
           ),
         ],
       ),

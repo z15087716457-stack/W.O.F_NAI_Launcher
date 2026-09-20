@@ -827,6 +827,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_downloadAllImages => '下载全部图像';
 
   @override
+  String get generation_selectMultiple => '多选';
+
+  @override
+  String get generation_deselectAll => '退出多选';
+
+  @override
   String generation_deleteSelectedImages(int count) {
     return '删除选中图像 ($count)';
   }

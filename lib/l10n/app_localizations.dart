@@ -1653,6 +1653,18 @@ abstract class AppLocalizations {
   /// **'Download all images'**
   String get generation_downloadAllImages;
 
+  /// No description provided for @generation_selectMultiple.
+  ///
+  /// In en, this message translates to:
+  /// **'Select multiple'**
+  String get generation_selectMultiple;
+
+  /// No description provided for @generation_deselectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit multi-select'**
+  String get generation_deselectAll;
+
   /// No description provided for @generation_deleteSelectedImages.
   ///
   /// In en, this message translates to:
