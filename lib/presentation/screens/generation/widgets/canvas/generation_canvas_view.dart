@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -40,6 +41,14 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     with TickerProviderStateMixin {
   Size _viewport = Size.zero;
 
+  // 官网 WASD 平移：1000px/s、对角归一、blur 清键
+  final Set<LogicalKeyboardKey> _wasdKeys = {};
+  Ticker? _wasdTicker;
+  Duration _wasdLast = Duration.zero;
+
+  // 防迷失：视口闲置且看不到内容 → 2s 后自动飞回最近组
+  Timer? _lostTimer;
+
   /// 正在画布上按压的指针集合（平移/捏合判定）
   final Set<int> _pointers = {};
 
@@ -60,14 +69,15 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   Timer? _clickTimer;
   int _clickCount = 0;
 
-  GenerationCanvasCameraNotifier get _camera =>
-      ref.read(generationCanvasCameraProvider.notifier);
+  // dispose() 里 ref 已失效，相机 notifier 必须在 initState 缓存
+  late final GenerationCanvasCameraNotifier _camera;
 
   bool get _cameraLocked => ref.read(canvasLockCameraNotifierProvider);
 
   @override
   void initState() {
     super.initState();
+    _camera = ref.read(generationCanvasCameraProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _camera.attachTicker(this);
@@ -80,6 +90,8 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   @override
   void dispose() {
     _clickTimer?.cancel();
+    _lostTimer?.cancel();
+    _wasdTicker?.dispose();
     _camera.onIdle = null;
     _camera.disposeTicker();
     super.dispose();
@@ -87,7 +99,62 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
 
   // ── 相机停稳 → 官网：自动选中心距视口中心最近的组（120ms 由控制器节流）──
 
-  void _onCameraIdle() => _autoSelectNearestGroup();
+  void _onCameraIdle() {
+    _autoSelectNearestGroup();
+    _checkLostAndFlyBack();
+  }
+
+  /// 官网防迷失：视口闲置且看不到任何内容 → 2s 后自动飞回最近组。
+  void _checkLostAndFlyBack() {
+    _lostTimer?.cancel();
+    if (_viewport.isEmpty) return;
+    final layout = ref.read(canvasFeedLayoutProvider);
+    if (layout.groups.isEmpty) return;
+    final camera = ref.read(generationCanvasCameraProvider);
+    final visible = camera.visibleWorldRect(_viewport);
+    final anyVisible = layout.groups.any((g) {
+      if (g.images.isEmpty) return false;
+      final b = _groupBounds(layout, g);
+      return !b.isEmpty && b.overlaps(visible);
+    });
+    if (anyVisible) return;
+    _lostTimer = Timer(const Duration(seconds: 2), () {
+      if (!mounted || _viewport.isEmpty) return;
+      final lo = ref.read(canvasFeedLayoutProvider);
+      if (lo.groups.isEmpty) return;
+      final cam = ref.read(generationCanvasCameraProvider);
+      final vis = cam.visibleWorldRect(_viewport);
+      final stillEmpty = lo.groups.every((g) {
+        if (g.images.isEmpty) return true;
+        final b = _groupBounds(lo, g);
+        return b.isEmpty || !b.overlaps(vis);
+      });
+      if (!stillEmpty) return;
+      // 飞回距视口中心最近的组
+      final centerWorld = cam.screenToWorld(
+        Offset(_viewport.width / 2, _viewport.height / 2),
+      );
+      String? bestKey;
+      double best = double.infinity;
+      for (final g in lo.groups) {
+        if (g.images.isEmpty) continue;
+        final b = _groupBounds(lo, g);
+        if (b.isEmpty) continue;
+        final d = (b.center - centerWorld).distance;
+        if (d < best) {
+          best = d;
+          bestKey = g.key;
+        }
+      }
+      if (bestKey == null) return;
+      final g = lo.groups.firstWhere((x) => x.key == bestKey);
+      ref
+          .read(generationCanvasGroupSelectionProvider.notifier)
+          .selectGroup(g.key);
+      _syncPreviewToGroup(lo, g.key);
+      _flyToGroup(lo, g);
+    });
+  }
 
   void _autoSelectNearestGroup() {
     if (_viewport.isEmpty) return;
@@ -276,6 +343,9 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
 
     return Focus(
       focusNode: ref.watch(generationPreviewFocusNodeProvider),
+      onFocusChange: (hasFocus) {
+        if (!hasFocus) _stopWasd();
+      },
       onKeyEvent: (node, event) => _onKey(event, layout),
       child: GestureDetector(
         onTapUp: _onCanvasTapUp,
@@ -491,13 +561,68 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     );
   }
 
+  static final Set<LogicalKeyboardKey> _wasdKeysSet = {
+    LogicalKeyboardKey.keyW,
+    LogicalKeyboardKey.keyA,
+    LogicalKeyboardKey.keyS,
+    LogicalKeyboardKey.keyD,
+  };
+
+  void _startWasd() {
+    if (_wasdTicker != null) return;
+    _wasdLast = Duration.zero;
+    _wasdTicker = createTicker((elapsed) {
+      final dt = elapsed - _wasdLast;
+      _wasdLast = elapsed;
+      if (dt <= Duration.zero || dt.inMilliseconds > 100) return;
+      var dx = 0.0, dy = 0.0;
+      if (_wasdKeys.contains(LogicalKeyboardKey.keyA)) dx -= 1;
+      if (_wasdKeys.contains(LogicalKeyboardKey.keyD)) dx += 1;
+      if (_wasdKeys.contains(LogicalKeyboardKey.keyW)) dy -= 1;
+      if (_wasdKeys.contains(LogicalKeyboardKey.keyS)) dy += 1;
+      if (dx == 0 && dy == 0) {
+        _stopWasd();
+        return;
+      }
+      // 对角归一 + 官网 1000px/s（屏幕系位移即世界系 offset 增量）
+      final len = math.sqrt(dx * dx + dy * dy);
+      const speed = 1000.0; // px/s（官网 WASD 1000px/s）
+      final secs = dt.inMicroseconds / 1e6;
+      _camera.panBy(Offset(dx / len * speed * secs, dy / len * speed * secs));
+    })..start();
+  }
+
+  void _stopWasd() {
+    _wasdKeys.clear();
+    _wasdTicker?.dispose();
+    _wasdTicker = null;
+  }
+
   KeyEventResult _onKey(KeyEvent event, CanvasFeedLayoutResult layout) {
-    if (event is! KeyDownEvent) return KeyEventResult.ignored;
     final key = event.logicalKey;
     final ctrl = HardwareKeyboard.instance.isControlPressed ||
         HardwareKeyboard.instance.isMetaPressed;
+    final shift = HardwareKeyboard.instance.isShiftPressed;
     final groups = layout.groups;
     if (groups.isEmpty) return KeyEventResult.ignored;
+
+    // 官网 WASD 平移：按住持续移动（键松开/失焦即停；锁相机/Ctrl 时不触发）
+    if (_wasdKeysSet.contains(key) &&
+        !ctrl &&
+        !shift &&
+        !_cameraLocked) {
+      if (event is KeyDownEvent) {
+        _wasdKeys.add(key);
+        _startWasd();
+        return KeyEventResult.handled;
+      }
+      if (event is KeyUpEvent) {
+        _wasdKeys.remove(key);
+        if (_wasdKeys.isEmpty) _stopWasd();
+        return KeyEventResult.handled;
+      }
+    }
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
 
     final focus = ref.read(generationCanvasGroupSelectionProvider);
     final idx = focus == null
@@ -506,7 +631,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
 
     if (key == LogicalKeyboardKey.keyQ) {
       // q 跳组：Shift+q 前 / 裸 q 后
-      final next = HardwareKeyboard.instance.isShiftPressed
+      final next = shift
           ? (idx <= 0 ? groups.length - 1 : idx - 1)
           : (idx < 0 || idx >= groups.length - 1 ? 0 : idx + 1);
       final g = groups[next];
@@ -515,6 +640,38 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
           .selectGroup(g.key);
       _syncPreviewToGroup(layout, g.key);
       _flyToGroup(layout, g);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.keyF) {
+      // f 飞回焦点组（无焦点则飞最近组）
+      if (focus != null) {
+        final g =
+            groups.where((x) => x.key == focus.group).firstOrNull;
+        if (g != null) {
+          if (focus.subimage != null) {
+            _flyToSubimage(layout, g, focus.subimage!);
+          } else {
+            _flyToGroup(layout, g);
+          }
+        }
+      } else {
+        _checkLostAndFlyBack();
+      }
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.escape) {
+      // Esc 退子图态 → 整组边界（官网逐字）
+      if (focus?.subimage != null) {
+        ref
+            .read(generationCanvasGroupSelectionProvider.notifier)
+            .selectGroup(focus!.group);
+        final g =
+            groups.where((x) => x.key == focus.group).firstOrNull;
+        if (g != null) {
+          _syncPreviewToGroup(layout, g.key);
+          _flyToGroup(layout, g);
+        }
+      }
       return KeyEventResult.handled;
     }
     if (key == LogicalKeyboardKey.home) {
@@ -547,8 +704,33 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       }
       return KeyEventResult.handled;
     }
+    if (key == LogicalKeyboardKey.equal ||
+        key == LogicalKeyboardKey.numpadAdd) {
+      _camera.zoomBy(
+        1.3,
+        anchor: Offset(_viewport.width / 2, _viewport.height / 2),
+      );
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.minus ||
+        key == LogicalKeyboardKey.numpadSubtract) {
+      _camera.zoomBy(
+        1 / 1.3,
+        anchor: Offset(_viewport.width / 2, _viewport.height / 2),
+      );
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.digit1 ||
+        key == LogicalKeyboardKey.numpad1) {
+      // 回 100%：锚定视口中心
+      final center = Offset(_viewport.width / 2, _viewport.height / 2);
+      _camera.zoomBy(1 / _cameraState().scale, anchor: center);
+      return KeyEventResult.handled;
+    }
     return KeyEventResult.ignored;
   }
+
+  CanvasCamera _cameraState() => ref.read(generationCanvasCameraProvider);
 
   Future<void> _saveFocusedImage(GeneratedImage img) async {
     final detail = GeneratedImageDetailData(
@@ -694,6 +876,21 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       _clickCount = 0;
       _clickTimer?.cancel();
       ref.read(canvasZoomToFillNotifierProvider.notifier).toggle();
+      // 官网：切放大填充同时按新 fitMax 重飞焦点组
+      final focus = ref.read(generationCanvasGroupSelectionProvider);
+      final layout = ref.read(canvasFeedLayoutProvider);
+      final g = focus == null
+          ? null
+          : layout.groups
+              .where((x) => x.key == focus.group)
+              .firstOrNull;
+      if (g != null) {
+        if (focus!.subimage != null) {
+          _flyToSubimage(layout, g, focus.subimage!);
+        } else {
+          _flyToGroup(layout, g);
+        }
+      }
     }
   }
 }

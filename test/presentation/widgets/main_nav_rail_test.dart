@@ -72,9 +72,10 @@ void main() {
     expect(find.byType(DnaIcon), findsOneWidget);
     expect(find.byIcon(Icons.biotech), findsNothing);
     expect(find.byIcon(Icons.keyboard_double_arrow_right), findsOneWidget);
+    // d28096d0 后展开/收起钮在底部簇顶端（GitHub、设置之上）
     expect(
       tester.getCenter(find.byKey(const Key('main-nav-toggle'))).dy,
-      greaterThan(tester.getCenter(find.byIcon(Icons.settings)).dy),
+      lessThan(tester.getCenter(find.byIcon(Icons.settings)).dy),
     );
     expect(
       tester.getSize(find.byKey(const Key('main-nav-rail'))).width,

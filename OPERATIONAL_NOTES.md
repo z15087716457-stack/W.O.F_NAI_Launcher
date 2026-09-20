@@ -78,6 +78,28 @@
 - `NaiWeightSyntax` 是所有自产生器的数值权重闭合入口；权重正文以数字或句号结尾时，在闭合 `::` 前隔开，避免被服务端误读为新权重。已覆盖 SD 转换、PromptTag、权重工具、pill、探索变异和 Enhance 固定串。
 - 提示词补全展示/插入使用空格形态；搜索、数据库、别名和词库 canonical 仍保留下划线。实际生成和 Krita 桥接在请求副本阶段按 `autoFormatPrompt` / `sdSyntaxAutoConvert` 设置执行，SD 转换先于格式化，不改用户草稿。旧 `autocomplete_replace_underscores` 设置已随统一空格形态退役（键留置无读取，无迁移必要）。
 
+## 画布架构（V3 · NAI5 对标重写 2026-04）
+
+生图页中央预览区是对标 NAI5 官网的自由画布。官网逐字核验的真值档案在 `../04_工具/开发计划/素材/nai5-生图页前端逆向.md`（第八节勘误表最权威）；改画布前先读它，别凭记忆。
+
+**文件分工**（`lib/presentation/screens/generation/widgets/canvas/`）：
+
+| 文件 | 职责 |
+|---|---|
+| `generation_canvas_view.dart` | 装配层：Listener 指针事件 + Focus 键位 + 渲染循环 |
+| `generation_canvas_controller.dart` | `CanvasCamera`(offset/scale 物理) + `GenerationCanvasController`(点击/拖拽/hover/焦点) |
+| `canvas_feed_layout.dart` | 纯函数：`groupCanvasImages` 按任务分组、`layoutCanvasFeed` 竖排布局 |
+| `canvas_tile_toolbar.dart` | tile 底部迷你条 + 焦点组的 edge bars（左上/底左/底右） |
+| `history_sidebar.dart` | 右侧历史栏：50 格网格、Ctrl 多选、拖拽到角色框 |
+| `canvas_utils.dart` | `rrectFromSize`/`parseAspect`/`hexToColor` |
+| `models.dart` | `CanvasImageData`/`CanvasImageGroup`/`CanvasTileVisual` |
+
+**Provider**：`canvas_settings_provider.dart`（锁/减弱动态/填充缩放/钉板 Hive 持久化）；`preview_selection_provider.dart`（焦点组=共享选中，喂参数面板和 emotion）；`image_generation_provider.dart` 的 `mergedPanelImages` 是唯一数据源——**生成中 currentImages + 历史 take(50)**，和官网同语义。子图态零 API，纯粹前端焦点（`generationPreviewSubFocusProvider`）。
+
+**已核验的官网行为**（别改回旧直觉）：滚轮=平移永不缩放（Shift 纵转横）、Ctrl+滚轮=缩放、停稳 120ms 自动选最近组、拖拽 5px 死区+惯性、飞行是指数插值（speed 11，距离>3×视口直接瞬移）、scale 硬夹 [0.1, 8]、非焦点组 scale(0.98)+hover 回 1、edge bars 三区（top 8 件/bottom.start 宽高+设置+种子/bottom.end 5 件含 upscale 官网分档价签）、钉板 `CanvasPinnedNotifier` 持久化且钉住组不参与自动夺焦、历史栏方框 `contain`+米色双层 boxShadow+底栏三钮。
+
+**有意不做 / 待核验**：Shift 按住出边栏（显隐条件已知、内容未核，未实现）；无限滚动（`history` 硬上限 50，要做先得给历史加持久层）；×N 批量徽标（数据结构是一个任务一卡带 `imageIds`，不需要）。键位补全（WASD 平移/f 飞回/Esc 退子图态/±缩放/1 复位）+ 双击空处重飞 + 视口全空 2s 自动飞回是 2026-04 收尾加的。
+
 ## 构建与更新
 
 - 工作区构建前关闭正在运行的启动器，避免 release 文件锁。Flutter 位于 `C:/flutter`，NuGet 位于 `C:/tools/nuget`，下载和 git 使用本机代理 `http://127.0.0.1:7897`。NSIS 3.12 已装于默认位置（makensis 在 PATH/Program Files (x86)），安装器打包与 `scripts/validate_windows_installer_process_handling.ps1` 依赖它。

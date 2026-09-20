@@ -1635,23 +1635,41 @@ abstract class AppLocalizations {
   /// **'Generating... {progress}%'**
   String generation_progress(Object progress);
 
-  /// No description provided for @generation_canvasZoomIn.
+  /// No description provided for @generation_lockHistoryScroll.
   ///
   /// In en, this message translates to:
-  /// **'Zoom in'**
-  String get generation_canvasZoomIn;
+  /// **'Lock history scrolling'**
+  String get generation_lockHistoryScroll;
 
-  /// No description provided for @generation_canvasZoomOut.
+  /// No description provided for @generation_unlockHistoryScroll.
   ///
   /// In en, this message translates to:
-  /// **'Zoom out'**
-  String get generation_canvasZoomOut;
+  /// **'Unlock history scrolling'**
+  String get generation_unlockHistoryScroll;
 
-  /// No description provided for @generation_canvasFlyToLatest.
+  /// No description provided for @generation_downloadAllImages.
   ///
   /// In en, this message translates to:
-  /// **'Fly to latest group'**
-  String get generation_canvasFlyToLatest;
+  /// **'Download all images'**
+  String get generation_downloadAllImages;
+
+  /// No description provided for @generation_deleteSelectedImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected images ({count})'**
+  String generation_deleteSelectedImages(int count);
+
+  /// No description provided for @generation_deleteSelectedImagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Selected Images'**
+  String get generation_deleteSelectedImagesTitle;
+
+  /// No description provided for @generation_deleteSelectedImagesConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} image(s) will be removed from records (files saved to disk are kept)'**
+  String generation_deleteSelectedImagesConfirm(int count);
 
   /// No description provided for @generation_params.
   ///

@@ -10,6 +10,7 @@ import 'package:nai_launcher/presentation/providers/generation/preview_selection
 import 'package:nai_launcher/presentation/providers/history_click_behavior_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
+import 'package:nai_launcher/presentation/providers/simple_output_viewer_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/image_preview.dart';
 import 'package:nai_launcher/presentation/widgets/common/selectable_image_card.dart';
 
@@ -34,6 +35,12 @@ class _DefaultShortcutConfigNotifier extends ShortcutConfigNotifier {
   Future<ShortcutConfig> build() async => ShortcutConfig.createDefault();
 }
 
+/// 画布（G11）接管默认预览；本文件断言经典网格/单卡选中语义，钉回旧实现。
+class _SimpleViewerNotifier extends SimpleOutputViewerNotifier {
+  @override
+  bool build() => true;
+}
+
 void main() {
   testWidgets(
     'selected history image replaces display grid and missing id falls back',
@@ -55,6 +62,9 @@ void main() {
           ),
           shortcutConfigNotifierProvider.overrideWith(
             _DefaultShortcutConfigNotifier.new,
+          ),
+          simpleOutputViewerNotifierProvider.overrideWith(
+            _SimpleViewerNotifier.new,
           ),
         ],
       );
@@ -100,6 +110,9 @@ void main() {
         ),
         shortcutConfigNotifierProvider.overrideWith(
           _DefaultShortcutConfigNotifier.new,
+        ),
+        simpleOutputViewerNotifierProvider.overrideWith(
+          _SimpleViewerNotifier.new,
         ),
       ],
     );

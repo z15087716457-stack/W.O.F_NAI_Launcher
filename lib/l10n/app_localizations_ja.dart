@@ -830,13 +830,26 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get generation_canvasZoomIn => '拡大';
+  String get generation_lockHistoryScroll => '履歴スクロールをロック';
 
   @override
-  String get generation_canvasZoomOut => '縮小';
+  String get generation_unlockHistoryScroll => '履歴スクロールのロックを解除';
 
   @override
-  String get generation_canvasFlyToLatest => '最新グループへ移動';
+  String get generation_downloadAllImages => 'すべての画像をダウンロード';
+
+  @override
+  String generation_deleteSelectedImages(int count) {
+    return '選択した画像を削除 ($count)';
+  }
+
+  @override
+  String get generation_deleteSelectedImagesTitle => '選択した画像を削除';
+
+  @override
+  String generation_deleteSelectedImagesConfirm(int count) {
+    return 'レコードから $count 枚の画像を削除します（ディスクに保存されたファイルは保持されます）';
+  }
 
   @override
   String get generation_params => 'パラメータ';

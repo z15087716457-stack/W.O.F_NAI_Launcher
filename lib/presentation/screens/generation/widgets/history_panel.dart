@@ -251,15 +251,15 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           _BottomToolButton(
             icon: _historyScrollLocked ? Icons.lock : Icons.lock_open,
             tooltip: _historyScrollLocked
-                ? '解锁历史滚动'
-                : '锁定历史滚动',
+                ? context.l10n.generation_unlockHistoryScroll
+                : context.l10n.generation_lockHistoryScroll,
             color: _historyScrollLocked ? theme.colorScheme.primary : null,
             onPressed: () =>
                 setState(() => _historyScrollLocked = !_historyScrollLocked),
           ),
           _BottomToolButton(
             icon: Icons.save_alt,
-            tooltip: '下载全部图像',
+            tooltip: context.l10n.generation_downloadAllImages,
             onPressed: hasContent && allImages.isNotEmpty
                 ? () => unawaited(_saveImageIds(
                     context,
@@ -271,8 +271,10 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           _BottomToolButton(
             icon: Icons.delete_outline,
             tooltip: _selectedIds.isNotEmpty
-                ? '删除选中图像 (${_selectedIds.length})'
-                : '清空历史',
+                ? context.l10n.generation_deleteSelectedImages(
+                    _selectedIds.length,
+                  )
+                : context.l10n.generation_clearHistory,
             color: theme.colorScheme.error,
             onPressed: hasContent
                 ? () => _showDeleteDialog(context, ref)
@@ -289,10 +291,12 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     final confirmed = await ThemedConfirmDialog.show(
       context: context,
       title: hasSelection
-          ? '删除选中图像'
+          ? context.l10n.generation_deleteSelectedImagesTitle
           : context.l10n.generation_clearHistory,
       content: hasSelection
-          ? '将从记录中移除 ${_selectedIds.length} 张图像（已保存到磁盘的文件保留）'
+          ? context.l10n.generation_deleteSelectedImagesConfirm(
+              _selectedIds.length,
+            )
           : context.l10n.generation_clearHistoryConfirm,
       confirmText: context.l10n.common_clear,
       cancelText: context.l10n.common_cancel,

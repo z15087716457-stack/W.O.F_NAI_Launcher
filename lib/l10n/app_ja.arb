@@ -364,9 +364,26 @@
       "progress": {}
     }
   },
-  "generation_canvasZoomIn": "拡大",
-  "generation_canvasZoomOut": "縮小",
-  "generation_canvasFlyToLatest": "最新グループへ移動",
+  "generation_lockHistoryScroll": "履歴スクロールをロック",
+  "generation_unlockHistoryScroll": "履歴スクロールのロックを解除",
+  "generation_downloadAllImages": "すべての画像をダウンロード",
+  "generation_deleteSelectedImages": "選択した画像を削除 ({count})",
+  "@generation_deleteSelectedImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generation_deleteSelectedImagesTitle": "選択した画像を削除",
+  "generation_deleteSelectedImagesConfirm": "レコードから {count} 枚の画像を削除します（ディスクに保存されたファイルは保持されます）",
+  "@generation_deleteSelectedImagesConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "generation_params": "パラメータ",
   "generation_paramsSettings": "パラメータ設定",
   "generation_history": "履歴",

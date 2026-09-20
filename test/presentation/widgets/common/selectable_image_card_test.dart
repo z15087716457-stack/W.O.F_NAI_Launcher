@@ -11,6 +11,7 @@ import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/data/models/image/image_stream_chunk.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/simple_output_viewer_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/history_panel.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/image_preview.dart';
 import 'package:nai_launcher/presentation/widgets/common/draggable_memory_image.dart';
@@ -353,7 +354,13 @@ void main() {
   testWidgets('generation preview renders multiple stream preview slots', (
     tester,
   ) async {
-    final container = ProviderContainer();
+    final container = ProviderContainer(
+      overrides: [
+        simpleOutputViewerNotifierProvider.overrideWith(
+          _SimpleViewerNotifier.new,
+        ),
+      ],
+    );
     addTearDown(container.dispose);
 
     final firstPreview = Uint8List.fromList(
@@ -526,11 +533,22 @@ void main() {
 
 void _noop() {}
 
+/// 画布（G11）是默认预览实现；这些用例断言经典网格/单卡语义，
+/// 一律强制 simpleOutputViewer=true 走回退档。
+class _SimpleViewerNotifier extends SimpleOutputViewerNotifier {
+  @override
+  bool build() => true;
+}
+
 ProviderContainer _createContainerWithPreviewImage({
   ImageClipboardWriter? clipboardWriter,
 }) {
   final container = ProviderContainer(
     overrides: [
+      // 经典预览档：画布接管后 SelectableImageCard 由画布 tile 复用，断言要钉回旧实现
+      simpleOutputViewerNotifierProvider.overrideWith(
+        _SimpleViewerNotifier.new,
+      ),
       if (clipboardWriter != null)
         imageClipboardWriterProvider.overrideWithValue(clipboardWriter),
     ],

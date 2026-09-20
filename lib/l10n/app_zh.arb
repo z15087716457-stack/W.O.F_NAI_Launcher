@@ -345,9 +345,26 @@
   "generation_imageWillShowHere": "图像将在这里显示",
   "generation_generationFailed": "生成失败",
   "generation_progress": "生成中... {progress}%",
-  "generation_canvasZoomIn": "放大",
-  "generation_canvasZoomOut": "缩小",
-  "generation_canvasFlyToLatest": "飞到最新组",
+  "generation_lockHistoryScroll": "锁定历史滚动",
+  "generation_unlockHistoryScroll": "解锁历史滚动",
+  "generation_downloadAllImages": "下载全部图像",
+  "generation_deleteSelectedImages": "删除选中图像 ({count})",
+  "@generation_deleteSelectedImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generation_deleteSelectedImagesTitle": "删除选中图像",
+  "generation_deleteSelectedImagesConfirm": "将从记录中移除 {count} 张图像（已保存到磁盘的文件保留）",
+  "@generation_deleteSelectedImagesConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "generation_params": "参数",
   "generation_paramsSettings": "生成参数",
   "generation_history": "历史",

@@ -818,13 +818,26 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get generation_canvasZoomIn => '放大';
+  String get generation_lockHistoryScroll => '锁定历史滚动';
 
   @override
-  String get generation_canvasZoomOut => '缩小';
+  String get generation_unlockHistoryScroll => '解锁历史滚动';
 
   @override
-  String get generation_canvasFlyToLatest => '飞到最新组';
+  String get generation_downloadAllImages => '下载全部图像';
+
+  @override
+  String generation_deleteSelectedImages(int count) {
+    return '删除选中图像 ($count)';
+  }
+
+  @override
+  String get generation_deleteSelectedImagesTitle => '删除选中图像';
+
+  @override
+  String generation_deleteSelectedImagesConfirm(int count) {
+    return '将从记录中移除 $count 张图像（已保存到磁盘的文件保留）';
+  }
 
   @override
   String get generation_params => '参数';

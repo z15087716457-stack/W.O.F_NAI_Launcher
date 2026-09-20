@@ -847,13 +847,26 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get generation_canvasZoomIn => 'Zoom in';
+  String get generation_lockHistoryScroll => 'Lock history scrolling';
 
   @override
-  String get generation_canvasZoomOut => 'Zoom out';
+  String get generation_unlockHistoryScroll => 'Unlock history scrolling';
 
   @override
-  String get generation_canvasFlyToLatest => 'Fly to latest group';
+  String get generation_downloadAllImages => 'Download all images';
+
+  @override
+  String generation_deleteSelectedImages(int count) {
+    return 'Delete selected images ($count)';
+  }
+
+  @override
+  String get generation_deleteSelectedImagesTitle => 'Delete Selected Images';
+
+  @override
+  String generation_deleteSelectedImagesConfirm(int count) {
+    return '$count image(s) will be removed from records (files saved to disk are kept)';
+  }
 
   @override
   String get generation_params => 'Parameters';

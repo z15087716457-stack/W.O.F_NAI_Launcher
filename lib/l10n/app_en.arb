@@ -365,9 +365,26 @@
       "progress": {}
     }
   },
-  "generation_canvasZoomIn": "Zoom in",
-  "generation_canvasZoomOut": "Zoom out",
-  "generation_canvasFlyToLatest": "Fly to latest group",
+  "generation_lockHistoryScroll": "Lock history scrolling",
+  "generation_unlockHistoryScroll": "Unlock history scrolling",
+  "generation_downloadAllImages": "Download all images",
+  "generation_deleteSelectedImages": "Delete selected images ({count})",
+  "@generation_deleteSelectedImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "generation_deleteSelectedImagesTitle": "Delete Selected Images",
+  "generation_deleteSelectedImagesConfirm": "{count} image(s) will be removed from records (files saved to disk are kept)",
+  "@generation_deleteSelectedImagesConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "generation_params": "Parameters",
   "generation_paramsSettings": "Parameter Settings",
   "generation_history": "History",
