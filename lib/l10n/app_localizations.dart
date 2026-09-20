@@ -1671,6 +1671,42 @@ abstract class AppLocalizations {
   /// **'{count} image(s) will be removed from records (files saved to disk are kept)'**
   String generation_deleteSelectedImagesConfirm(int count);
 
+  /// No description provided for @generation_seedWrittenBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed written back: {seed}'**
+  String generation_seedWrittenBack(int seed);
+
+  /// No description provided for @generation_setAsReferenceImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as reference image'**
+  String get generation_setAsReferenceImage;
+
+  /// No description provided for @generation_canvasDisplaySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Canvas Display'**
+  String get generation_canvasDisplaySettings;
+
+  /// No description provided for @generation_canvasZoomToFill.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom to fill (allows >100%)'**
+  String get generation_canvasZoomToFill;
+
+  /// No description provided for @generation_canvasSmoothZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Smooth zoom (Ctrl+scroll)'**
+  String get generation_canvasSmoothZoom;
+
+  /// No description provided for @generation_canvasEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Canvas is empty'**
+  String get generation_canvasEmpty;
+
   /// No description provided for @generation_params.
   ///
   /// In en, this message translates to:

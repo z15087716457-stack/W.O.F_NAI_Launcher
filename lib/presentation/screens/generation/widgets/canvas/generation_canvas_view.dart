@@ -17,6 +17,7 @@ import 'canvas_feed_layout.dart';
 import 'canvas_tile_toolbar.dart';
 import 'generated_image_card.dart';
 import 'generation_canvas_controller.dart';
+import '../../../../../core/utils/localization_extension.dart';
 
 /// 生成画布（G11 V3）：对标 NAI5 官网无限画布，逐字对码模块 22099。
 /// - 世界层 = Transform 包的 Stack，tile 按世界坐标 Positioned
@@ -1061,7 +1062,9 @@ class _CanvasEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            isGenerating ? '生成中…' : '画布为空',
+            isGenerating
+                ? context.l10n.generation_generating
+                : context.l10n.generation_canvasEmpty,
             style: theme.textTheme.titleMedium?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
             ),

@@ -869,6 +869,26 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String generation_seedWrittenBack(int seed) {
+    return 'Seed written back: $seed';
+  }
+
+  @override
+  String get generation_setAsReferenceImage => 'Set as reference image';
+
+  @override
+  String get generation_canvasDisplaySettings => 'Canvas Display';
+
+  @override
+  String get generation_canvasZoomToFill => 'Zoom to fill (allows >100%)';
+
+  @override
+  String get generation_canvasSmoothZoom => 'Smooth zoom (Ctrl+scroll)';
+
+  @override
+  String get generation_canvasEmpty => 'Canvas is empty';
+
+  @override
   String get generation_params => 'Parameters';
 
   @override

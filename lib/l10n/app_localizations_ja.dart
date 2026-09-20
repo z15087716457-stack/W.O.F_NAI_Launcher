@@ -852,6 +852,26 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String generation_seedWrittenBack(int seed) {
+    return 'シードを書き戻しました: $seed';
+  }
+
+  @override
+  String get generation_setAsReferenceImage => '参照画像に設定しました';
+
+  @override
+  String get generation_canvasDisplaySettings => 'キャンバス表示';
+
+  @override
+  String get generation_canvasZoomToFill => 'ズームしてフィル（100%超を許可）';
+
+  @override
+  String get generation_canvasSmoothZoom => 'スムーズズーム（Ctrl+スクロール）';
+
+  @override
+  String get generation_canvasEmpty => 'キャンバスは空です';
+
+  @override
   String get generation_params => 'パラメータ';
 
   @override

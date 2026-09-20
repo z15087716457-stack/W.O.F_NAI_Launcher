@@ -15,6 +15,7 @@ import '../../../../widgets/common/app_toast.dart';
 import '../../../../widgets/image_editor/image_editor_screen.dart';
 import '../../../../utils/clipboard_image.dart';
 import '../../services/generation_save_service.dart';
+import '../../../../../core/utils/localization_extension.dart';
 import '../../../../widgets/common/image_detail/image_detail_data.dart';
 import 'canvas_feed_layout.dart';
 import 'generated_image_actions.dart';
@@ -277,7 +278,7 @@ class _ToolbarStrip extends ConsumerWidget {
     final seed = image.metadata?.seed;
     if (seed == null) return;
     ref.read(generationParamsNotifierProvider.notifier).updateSeed(seed);
-    AppToast.success(context, '种子已写回: $seed');
+    AppToast.success(context, context.l10n.generation_seedWrittenBack(seed));
   }
 }
 
@@ -409,7 +410,7 @@ class _IconBtn extends ConsumerWidget {
         ImageWorkflowLauncher.openUpscale(ref, bytes);
       case 'nai-icon-set-init.svg':
         ImageWorkflowLauncher.openImageToImage(ref, bytes);
-        AppToast.success(context, '已设为参考图');
+        AppToast.success(context, context.l10n.generation_setAsReferenceImage);
       case 'nai-icon-edit.svg':
         unawaited(ImageWorkflowLauncher.openEditor(
           context,
@@ -447,9 +448,13 @@ class _IconBtn extends ConsumerWidget {
   Future<void> _copyImage(BuildContext context, WidgetRef ref) async {
     try {
       await writeImageBytesToClipboardAsPng(image.bytes);
-      if (context.mounted) AppToast.success(context, '已复制到剪贴板');
-    } catch (_) {
-      if (context.mounted) AppToast.error(context, '复制失败');
+      if (context.mounted) {
+        AppToast.success(context, context.l10n.image_copiedToClipboard);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppToast.error(context, context.l10n.image_copyFailed('$e'));
+      }
     }
   }
 
@@ -470,12 +475,12 @@ class _IconBtn extends ConsumerWidget {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('画布显示'),
+        title: Text(context.l10n.generation_canvasDisplaySettings),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             SwitchListTile(
-              title: const Text('放大填充（允许 >100%）'),
+              title: Text(context.l10n.generation_canvasZoomToFill),
               value: zoomToFill,
               onChanged: (v) {
                 ref.read(canvasZoomToFillNotifierProvider.notifier).set(v);
@@ -483,7 +488,7 @@ class _IconBtn extends ConsumerWidget {
               },
             ),
             SwitchListTile(
-              title: const Text('平滑缩放（Ctrl+滚轮）'),
+              title: Text(context.l10n.generation_canvasSmoothZoom),
               value: smooth,
               onChanged: (v) {
                 ref.read(canvasSmoothZoomNotifierProvider.notifier).set(v);

@@ -385,6 +385,19 @@
       }
     }
   },
+  "generation_seedWrittenBack": "Seed written back: {seed}",
+  "@generation_seedWrittenBack": {
+    "placeholders": {
+      "seed": {
+        "type": "int"
+      }
+    }
+  },
+  "generation_setAsReferenceImage": "Set as reference image",
+  "generation_canvasDisplaySettings": "Canvas Display",
+  "generation_canvasZoomToFill": "Zoom to fill (allows >100%)",
+  "generation_canvasSmoothZoom": "Smooth zoom (Ctrl+scroll)",
+  "generation_canvasEmpty": "Canvas is empty",
   "generation_params": "Parameters",
   "generation_paramsSettings": "Parameter Settings",
   "generation_history": "History",

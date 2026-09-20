@@ -365,6 +365,19 @@
       }
     }
   },
+  "generation_seedWrittenBack": "种子已写回: {seed}",
+  "@generation_seedWrittenBack": {
+    "placeholders": {
+      "seed": {
+        "type": "int"
+      }
+    }
+  },
+  "generation_setAsReferenceImage": "已设为参考图",
+  "generation_canvasDisplaySettings": "画布显示",
+  "generation_canvasZoomToFill": "放大填充（允许 >100%）",
+  "generation_canvasSmoothZoom": "平滑缩放（Ctrl+滚轮）",
+  "generation_canvasEmpty": "画布为空",
   "generation_params": "参数",
   "generation_paramsSettings": "生成参数",
   "generation_history": "历史",

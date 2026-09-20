@@ -840,6 +840,26 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String generation_seedWrittenBack(int seed) {
+    return '种子已写回: $seed';
+  }
+
+  @override
+  String get generation_setAsReferenceImage => '已设为参考图';
+
+  @override
+  String get generation_canvasDisplaySettings => '画布显示';
+
+  @override
+  String get generation_canvasZoomToFill => '放大填充（允许 >100%）';
+
+  @override
+  String get generation_canvasSmoothZoom => '平滑缩放（Ctrl+滚轮）';
+
+  @override
+  String get generation_canvasEmpty => '画布为空';
+
+  @override
   String get generation_params => '参数';
 
   @override

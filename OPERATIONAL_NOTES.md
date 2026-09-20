@@ -90,7 +90,7 @@
 | `generation_canvas_controller.dart` | `CanvasCamera`(offset/scale 物理) + `GenerationCanvasController`(点击/拖拽/hover/焦点) |
 | `canvas_feed_layout.dart` | 纯函数：`groupCanvasImages` 按任务分组、`layoutCanvasFeed` 竖排布局 |
 | `canvas_tile_toolbar.dart` | tile 底部迷你条 + 焦点组的 edge bars（左上/底左/底右） |
-| `history_sidebar.dart` | 右侧历史栏：50 格网格、Ctrl 多选、拖拽到角色框 |
+| `../history_panel.dart` | 右侧历史栏（不在 canvas/ 目录）：50 格网格、Ctrl 多选、拖拽到角色框、底栏锁/全存/删 |
 | `canvas_utils.dart` | `rrectFromSize`/`parseAspect`/`hexToColor` |
 | `models.dart` | `CanvasImageData`/`CanvasImageGroup`/`CanvasTileVisual` |
 
