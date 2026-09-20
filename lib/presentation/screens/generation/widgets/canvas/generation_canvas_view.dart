@@ -73,12 +73,18 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   // dispose() 里 ref 已失效，相机 notifier 必须在 initState 缓存
   late final GenerationCanvasCameraNotifier _camera;
 
+  // 画布独占焦点节点：不能复用 generationPreviewFocusNodeProvider——
+  // 外层 PreviewNavShortcuts 已把它挂成 Focus，画布再嵌套使用会导致
+  // "Tried to make a child into a parent of itself"（红屏断言）。
+  late final FocusNode _canvasFocusNode;
+
   bool get _cameraLocked => ref.read(canvasLockCameraNotifierProvider);
 
   @override
   void initState() {
     super.initState();
     _camera = ref.read(generationCanvasCameraProvider.notifier);
+    _canvasFocusNode = FocusNode(debugLabel: 'generation-canvas');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _camera.attachTicker(this);
@@ -95,6 +101,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     _wasdTicker?.dispose();
     _camera.onIdle = null;
     _camera.disposeTicker();
+    _canvasFocusNode.dispose();
     super.dispose();
   }
 
@@ -343,7 +350,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     }
 
     return Focus(
-      focusNode: ref.watch(generationPreviewFocusNodeProvider),
+      focusNode: _canvasFocusNode,
       onFocusChange: (hasFocus) {
         if (!hasFocus) _stopWasd();
       },
@@ -752,7 +759,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   void _onPointerDown(PointerDownEvent e) {
     _pointers.add(e.pointer);
     _consumedUiPointers.remove(e.pointer);
-    ref.read(generationPreviewFocusNodeProvider).requestFocus();
+    _canvasFocusNode.requestFocus();
     if (_uiPointers.contains(e.pointer)) return;
     _panAccum = Offset.zero;
     _panActive = false;
