@@ -20,6 +20,7 @@ import '../../../providers/layout_state_provider.dart';
 
 import '../../../../data/services/image_metadata_service.dart';
 import '../../../../data/repositories/gallery_folder_repository.dart';
+import '../../../providers/canvas_settings_provider.dart';
 import '../../../providers/generation/generation_params_selectors.dart';
 import '../../../providers/generation/preview_selection_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
@@ -170,6 +171,33 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
+              ),
+              // 官网顶栏 `History >` + Pins 计数（有钉住才显）
+              Consumer(
+                builder: (context, ref, _) {
+                  final count =
+                      ref.watch(canvasPinnedNotifierProvider).length;
+                  if (count == 0) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        'Pins $count',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
               const Spacer(),
             ],

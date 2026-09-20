@@ -98,10 +98,13 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       (_viewport.width / 2 - camera.offset.dx) / camera.scale,
       (_viewport.height / 2 - camera.offset.dy) / camera.scale,
     );
+    final pinned = ref.read(canvasPinnedNotifierProvider);
     String? bestKey;
     double best = double.infinity;
     for (final g in layout.groups) {
       if (g.images.isEmpty) continue;
+      // 官网钉板：含钉住图的组不参与自动夺焦（钉板与 feed 分离）
+      if (g.images.any((img) => pinned.contains(img.id))) continue;
       final bounds = _groupBounds(layout, g);
       if (bounds.isEmpty) continue;
       final d = (bounds.center - centerWorld).distance;
@@ -356,6 +359,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     ThemeData theme,
   ) {
     final tiles = <Widget>[];
+    final pinned = ref.watch(canvasPinnedNotifierProvider);
     final visible = camera.scale > 0
         ? camera.visibleWorldRect(_viewport).inflate(500)
         : null;
@@ -378,6 +382,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
             subimageIndex: item.subimageIndex,
             isFocusGroup: isFocusGroup,
             isFocusSubimage: isFocusSubimage,
+            isPinned: pinned.contains(item.image.id),
             cameraScale: camera.scale,
             uiPointers: _uiPointers,
             onSelect: () => _onTileTap(item),
@@ -701,6 +706,7 @@ class _CanvasTile extends ConsumerStatefulWidget {
     required this.subimageIndex,
     required this.isFocusGroup,
     required this.isFocusSubimage,
+    required this.isPinned,
     required this.cameraScale,
     required this.uiPointers,
     required this.onSelect,
@@ -711,6 +717,7 @@ class _CanvasTile extends ConsumerStatefulWidget {
   final int subimageIndex;
   final bool isFocusGroup;
   final bool isFocusSubimage;
+  final bool isPinned;
   final double cameraScale;
   final Set<int> uiPointers;
   final VoidCallback onSelect;
@@ -750,7 +757,31 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
                 ),
               ),
             ),
-            // 非焦点 hover 迷你条：contest|pin|copy|download + 种子
+            // 钉住角标（官网钉板标记）：实心 pin，右上反缩放恒屏大小
+            if (widget.isPinned)
+              Positioned(
+                top: -30 / widget.cameraScale.clamp(0.5, 2.5),
+                right: 0,
+                child: Transform.scale(
+                  scale: (1 / widget.cameraScale).clamp(0.4, 2.5),
+                  alignment: Alignment.topRight,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.55),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Icon(
+                      Icons.push_pin,
+                      size: 13,
+                      color: Colors.white.withValues(alpha: 0.92),
+                    ),
+                  ),
+                ),
+              ),
+            // 非焦点 hover 迷你条：pin|copy|download + 种子
             // （官网 --canvas-ui-scale 反缩放，屏幕恒定大小）
             if (unfocused && _hovering)
               Positioned(

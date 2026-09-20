@@ -64,3 +64,30 @@ class CanvasSmoothZoomNotifier extends _$CanvasSmoothZoomNotifier {
   void toggle() => state = !state;
   void set(bool value) => state = value;
 }
+
+/// 画布钉板（官网 save.pin / Pins 计数）：被钉住的图像 id 集合，持久化到
+/// `canvas_pinned_images`。语义：
+/// - 钉住的组不参与「相机停稳 120ms 自动选中最近组」（官网钉板隔离自动夺焦）；
+/// - 钉住的 tile 右上出实心 pin 角标；
+/// - 历史栏顶栏显示 `Pins N` 计数。
+@Riverpod(keepAlive: true)
+class CanvasPinnedNotifier extends _$CanvasPinnedNotifier {
+  @override
+  Set<String> build() {
+    return ref.read(localStorageServiceProvider).getCanvasPinnedImages();
+  }
+
+  /// 切换钉住状态
+  Future<void> toggle(String imageId) async {
+    final next = {...state};
+    if (!next.remove(imageId)) {
+      next.add(imageId);
+    }
+    state = next;
+    await ref
+        .read(localStorageServiceProvider)
+        .setCanvasPinnedImages(next);
+  }
+
+  bool isPinned(String imageId) => state.contains(imageId);
+}

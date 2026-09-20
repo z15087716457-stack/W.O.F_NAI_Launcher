@@ -6,6 +6,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../providers/cost_estimate_provider.dart';
 import '../../../../providers/canvas_settings_provider.dart';
+import '../../../../providers/subscription_provider.dart';
+import '../../../../../core/services/anlas_calculator.dart';
 import '../../../../providers/generation/preview_selection_provider.dart';
 import '../../../../providers/image_generation_provider.dart';
 import '../../../../services/image_workflow_launcher.dart';
@@ -299,6 +301,14 @@ class _IconBtn extends ConsumerWidget {
     final theme = Theme.of(context);
     final enabled = _resolveEnabled(ref);
     final price = item.priceBadge ? _priceFor(ref) : null;
+    // 官网：已钉住换实心 pin（save.pin 双态）
+    final icon = item.icon == 'nai-icon-pin.svg' &&
+            ref.watch(
+              canvasPinnedNotifierProvider
+                  .select((pins) => pins.contains(image.id)),
+            )
+        ? 'nai-icon-pin-filled.svg'
+        : item.icon;
 
     final btn = InkWell(
       onTap: enabled ? () => _dispatch(context, ref) : null,
@@ -308,9 +318,9 @@ class _IconBtn extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (item.icon != null)
+            if (icon != null)
               SvgPicture.asset(
-                'assets/icons/${item.icon}',
+                'assets/icons/$icon',
                 width: 16,
                 height: 16,
                 colorFilter: ColorFilter.mode(
@@ -372,13 +382,19 @@ class _IconBtn extends ConsumerWidget {
   }
 
   int _estimateUpscale(WidgetRef ref) {
-    // 用计算器按 upscale 4x 估（AnlasCalculator.calculateNovelAiUpscaleCost 等价）
-    final w = image.width;
-    final h = image.height;
-    // 近似：4x upscale = 4×像素 → 用 request 成本近似；真实计算器在服务端
-    // 这里直接复用 estimateCostForBatchSize(1) 的现成值不可靠，改走简单公式：
-    final mp = (w * h * 16) / 1e6; // 4x = 16×像素
-    return (mp * 1.5).ceil().clamp(1, 999);
+    // 官网价签 = s7 实时价；接入 AnlasCalculator.calculateNovelAiUpscaleCost
+    // （云端 4x 分档计费，Opus ≤640×640 免费、>1MP 返回 invalidCost）。
+    final subscription = ref.read(
+      subscriptionNotifierProvider.select((s) => s.subscription),
+    );
+    final tier =
+        subscription?.isOpus == true ? AnlasCalculator.opusTier : 0;
+    return AnlasCalculator.calculateNovelAiUpscaleCost(
+      inputWidth: image.width,
+      inputHeight: image.height,
+      scale: 4,
+      subscriptionTier: tier,
+    );
   }
 
   void _dispatch(BuildContext context, WidgetRef ref) {
@@ -407,9 +423,13 @@ class _IconBtn extends ConsumerWidget {
         // 官网：push 队列头 + 切 ImageTools 视图；本工程走 DirectorTools 兜底
         unawaited(ImageWorkflowLauncher.openDirectorTools(context, ref, bytes));
       case 'nai-icon-pin.svg':
-        // 官网钉板：本工程映射为图库收藏语义——走历史栏同款心形（收藏写文件元数据侧）
-        // 画布 pin = 收藏该图（toggle favorite，与历史栏心形同源）
-        AppToast.info(context, '收藏走历史栏心形（同源语义）');
+      case 'nai-icon-pin-filled.svg':
+        // 官网 save.pin = togglePin：钉板集合切（钉住组不参与自动夺焦）
+        unawaited(
+          ref
+              .read(canvasPinnedNotifierProvider.notifier)
+              .toggle(image.id),
+        );
       case 'nai-icon-copy.svg':
         _copyImage(context, ref);
       case 'nai-icon-download.svg':

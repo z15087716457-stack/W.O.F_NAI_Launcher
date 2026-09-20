@@ -704,6 +704,21 @@ class LocalStorageService {
     await setSetting(StorageKeys.canvasReducedMotion, reduced);
   }
 
+  /// 画布钉板（官网 save.pin / Pins）：被钉住的图像 id 集合持久化。
+  /// 钉住的组不参与「相机停稳自动选中最近组」。
+  Set<String> getCanvasPinnedImages() {
+    final list = getSetting<List<dynamic>>(
+      StorageKeys.canvasPinnedImages,
+      defaultValue: const [],
+    );
+    return list?.map((e) => e.toString()).toSet() ?? <String>{};
+  }
+
+  /// 保存画布钉板集合
+  Future<void> setCanvasPinnedImages(Set<String> ids) async {
+    await setSetting(StorageKeys.canvasPinnedImages, ids.toList());
+  }
+
   /// 获取官网式布局左栏宽度 (默认400)
   double getWebLeftPanelWidth() {
     return getSetting<double>(
