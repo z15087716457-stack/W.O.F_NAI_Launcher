@@ -177,6 +177,14 @@ class SelectableImageCard extends ConsumerStatefulWidget {
   /// tile 上的发光边框与内部渐变/色罩会直接污染画面、毁色准。
   final bool hideSelectionDecoration;
 
+  /// 历史栏缩略图模式（对标官网 sc-f0ebfba1-25）：
+  /// 1:1 方框 + contain 居中、选中态用米色双层 boxShadow 环（不发边框光）。
+  final bool historyThumb;
+
+  /// 历史栏右下角「×N」批次角标（官网同组生成件数的角标）。
+  /// 仅 historyThumb 模式渲染；≤1 或 null 不显示。
+  final int? batchBadgeCount;
+
 
 
   const SelectableImageCard({
@@ -232,6 +240,8 @@ class SelectableImageCard extends ConsumerStatefulWidget {
     this.imageWidth,
     this.imageHeight,
     this.hideSelectionDecoration = false,
+    this.historyThumb = false,
+    this.batchBadgeCount,
   }) : assert(
          !isGenerating || (imageWidth != null && imageHeight != null),
          'imageWidth and imageHeight are required when isGenerating is true',
@@ -872,14 +882,20 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
           duration: const Duration(milliseconds: 150),
           curve: Curves.easeOut,
           transform: Matrix4.diagonal3Values(
-            widget.enableHoverScale && _isHovering ? 1.03 : 1.0,
-            widget.enableHoverScale && _isHovering ? 1.03 : 1.0,
+            widget.enableHoverScale && _isHovering && !widget.historyThumb
+                ? 1.03
+                : 1.0,
+            widget.enableHoverScale && _isHovering && !widget.historyThumb
+                ? 1.03
+                : 1.0,
             1.0,
           ),
           transformAlignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: widget.hideSelectionDecoration
+            borderRadius: BorderRadius.circular(
+              widget.historyThumb ? 3 : 12,
+            ),
+            border: widget.hideSelectionDecoration || widget.historyThumb
                 ? null
                 : widget.isSelected
                 ? Border.all(color: theme.colorScheme.primary, width: 3)
@@ -893,12 +909,29 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                           width: 2,
                         )
                       : null),
-            // 画布 tile 彻底无阴影：选中态的 primary 0.3 blur16 会在图边缘
-            // 晕一圈荧光（hideSelectionDecoration 一并关）；官网画布无投影。
-            boxShadow: widget.hideSelectionDecoration
+            // 官网历史栏：选中/预览联动用米色双层 boxShadow 环
+            // （rgb(245,243,194)）0 0 0 2px 实环 + 0 0 6px 45% 光晕。
+            boxShadow: widget.historyThumb
+                ? (widget.isSelected || widget.isPreviewActive
+                      ? [
+                          BoxShadow(
+                            color: const Color(
+                              0xFFF5F3C2,
+                            ).withValues(alpha: 0.75),
+                            blurRadius: 0,
+                            spreadRadius: 2,
+                          ),
+                          BoxShadow(
+                            color: const Color(
+                              0xFFF5F3C2,
+                            ).withValues(alpha: 0.45),
+                            blurRadius: 6,
+                          ),
+                        ]
+                      : null)
+                : widget.hideSelectionDecoration
                 ? null
                 : [
-                    // 主阴影
                     BoxShadow(
                       color: widget.isSelected
                           ? theme.colorScheme.primary.withValues(alpha: 0.3)
@@ -910,7 +943,6 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                       offset: Offset(0, _isHovering ? 14 : 4),
                       spreadRadius: _isHovering ? 2 : 0,
                     ),
-                    // 次阴影（悬浮时增加深度感）
                     if (_isHovering)
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.15),
@@ -921,7 +953,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                   ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(widget.historyThumb ? 3 : 12),
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -933,15 +965,21 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                         'completed-image-preview-placeholder',
                       ),
                       bytes: completionPlaceholderBytes,
-                      fit: BoxFit.cover,
+                      fit: widget.historyThumb ? BoxFit.contain : BoxFit.cover,
                     ),
                   ),
                 RepaintBoundary(
-                  child: DecodedMemoryImage(
-                    key: const ValueKey('selectable-image-completed-image'),
-                    bytes: widget.imageBytes!,
-                    fit: BoxFit.cover,
-                    frameBuilder: _buildCompletedImageFrame,
+                  child: Container(
+                    color: widget.historyThumb
+                        ? theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.5)
+                        : null,
+                    child: DecodedMemoryImage(
+                      key: const ValueKey('selectable-image-completed-image'),
+                      bytes: widget.imageBytes!,
+                      fit: widget.historyThumb ? BoxFit.contain : BoxFit.cover,
+                      frameBuilder: _buildCompletedImageFrame,
+                    ),
                   ),
                 ),
 
@@ -1058,7 +1096,9 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                   ),
 
                 // 4. 悬浮/选中时的渐变遮罩（使用 IgnorePointer 让点击穿透）
+                // 官网历史栏缩略图无任何压暗遮罩（用户验收批"浮层全拆"）
                 if (!widget.hideSelectionDecoration &&
+                    !widget.historyThumb &&
                     (_isHovering || widget.isSelected))
                   IgnorePointer(
                     child: Container(
@@ -1082,18 +1122,49 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                     child: _buildStatusBadge(context),
                   ),
 
-                // 5. 左上角：选择框（悬浮或选中时显示）
-                if (widget.enableSelection &&
+                // 5. 左上角：选择框（悬浮或选中时显示）——历史栏官网无此圈，
+                // 多选走 Ctrl+点击，不叠浮层
+                if (!widget.historyThumb &&
+                    widget.enableSelection &&
                     widget.statusBadgeLabel == null &&
                     (_isHovering || widget.isSelected))
                   Positioned(top: 8, left: 8, child: _buildCheckbox(theme)),
 
-                // 5.5 右上角：本地画廊收藏按钮
-                if (widget.onFavoriteToggle != null)
+                // 5.5 右上角：本地画廊收藏按钮——历史栏官网无心形浮层
+                if (!widget.historyThumb && widget.onFavoriteToggle != null)
                   Positioned(
                     top: 8,
                     right: 8,
                     child: _buildFavoriteButton(context),
+                  ),
+
+                // 5.6 右下角：批次「×N」角标（官网 28×28、bottom:5 right:5，
+                // 同组生成 >1 张才显示）
+                if (widget.historyThumb &&
+                    widget.batchBadgeCount != null &&
+                    widget.batchBadgeCount! > 1)
+                  Positioned(
+                    bottom: 5,
+                    right: 5,
+                    child: IgnorePointer(
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.55),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '×${widget.batchBadgeCount}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
 
                 // 6. 操作按钮（悬浮时显示；本地魔改默认关闭，见 showHoverActionBar）

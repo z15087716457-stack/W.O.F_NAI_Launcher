@@ -99,6 +99,9 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
   ProviderSubscription<String?>? _selectionSubscription;
   int _scrollRequestEpoch = 0;
 
+  /// 官网底栏「lock history scrolling」：开启后点选不再自动滚动历史列表
+  bool _historyScrollLocked = false;
+
   @override
   void initState() {
     super.initState();
@@ -168,76 +171,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (state.history.isNotEmpty ||
-                  state.currentImages.isNotEmpty) ...[
-                const SizedBox(width: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 5,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '${_getAllSelectableImages(state).length}',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ),
-              ],
               const Spacer(),
-              // 自动保存开关（原底栏芯片，改为标题栏图标切换）
-              const AutoSaveToggleIcon(),
-              const SizedBox(width: 4),
-              // 全选按钮
-              if (state.history.isNotEmpty || state.currentImages.isNotEmpty)
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      final allImages = _getAllSelectableImages(state);
-                      if (_selectedIds.length == allImages.length) {
-                        _selectedIds.clear();
-                      } else {
-                        _selectedIds.clear();
-                        _selectedIds.addAll(allImages.map((img) => img.id));
-                      }
-                    });
-                  },
-                  icon: Icon(
-                    _selectedIds.length == _getAllSelectableImages(state).length
-                        ? Icons.deselect
-                        : Icons.select_all,
-                    size: 20,
-                  ),
-                  tooltip:
-                      _selectedIds.length ==
-                          _getAllSelectableImages(state).length
-                      ? context.l10n.common_deselectAll
-                      : context.l10n.common_selectAll,
-                  style: IconButton.styleFrom(
-                    foregroundColor: theme.colorScheme.primary,
-                  ),
-                  visualDensity: VisualDensity.compact,
-                  constraints: const BoxConstraints(),
-                  padding: const EdgeInsets.all(8),
-                ),
-              if (state.history.isNotEmpty || state.currentImages.isNotEmpty)
-                IconButton(
-                  onPressed: () {
-                    _showClearDialog(context, ref);
-                  },
-                  icon: const Icon(Icons.delete_outline, size: 20),
-                  tooltip: context.l10n.common_clear,
-                  style: IconButton.styleFrom(
-                    foregroundColor: theme.colorScheme.error,
-                  ),
-                  visualDensity: VisualDensity.compact,
-                  constraints: const BoxConstraints(),
-                  padding: const EdgeInsets.all(8),
-                ),
             ],
           ),
         ),
@@ -257,10 +191,99 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                 ),
         ),
 
-        // 底部操作栏（有选中时显示）
+        // 官网底栏（常驻）：AutoSave | 锁滚动 | 全部下载 | 删除选中/清空
+        // 有选中时再叠多选操作条（打包/保存）
+        _buildBottomToolbar(context, state, theme),
         if (_selectedIds.isNotEmpty) _buildBottomActions(context, state, theme),
       ],
     );
+  }
+
+  /// 官网底栏三件（38×28 图标钮）+ 本地 AutoSave 开关挪到底部。
+  /// lock history scrolling | download all images | delete image(s)
+  Widget _buildBottomToolbar(
+    BuildContext context,
+    ImageGenerationState state,
+    ThemeData theme,
+  ) {
+    final hasContent = state.history.isNotEmpty || state.currentImages.isNotEmpty;
+    final allImages = _getAllSelectableImages(state);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border: Border(
+          top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.3)),
+        ),
+      ),
+      child: Row(
+        children: [
+          const AutoSaveToggleIcon(),
+          const Spacer(),
+          _BottomToolButton(
+            icon: _historyScrollLocked ? Icons.lock : Icons.lock_open,
+            tooltip: _historyScrollLocked
+                ? '解锁历史滚动'
+                : '锁定历史滚动',
+            color: _historyScrollLocked ? theme.colorScheme.primary : null,
+            onPressed: () =>
+                setState(() => _historyScrollLocked = !_historyScrollLocked),
+          ),
+          _BottomToolButton(
+            icon: Icons.save_alt,
+            tooltip: '下载全部图像',
+            onPressed: hasContent && allImages.isNotEmpty
+                ? () => unawaited(_saveImageIds(
+                    context,
+                    state,
+                    allImages.map((img) => img.id).toSet(),
+                  ))
+                : null,
+          ),
+          _BottomToolButton(
+            icon: Icons.delete_outline,
+            tooltip: _selectedIds.isNotEmpty
+                ? '删除选中图像 (${_selectedIds.length})'
+                : '清空历史',
+            color: theme.colorScheme.error,
+            onPressed: hasContent
+                ? () => _showDeleteDialog(context, ref)
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 删除：有选中删选中（内存移除，磁盘文件保留）；无选中=清空历史
+  void _showDeleteDialog(BuildContext context, WidgetRef ref) async {
+    final hasSelection = _selectedIds.isNotEmpty;
+    final confirmed = await ThemedConfirmDialog.show(
+      context: context,
+      title: hasSelection
+          ? '删除选中图像'
+          : context.l10n.generation_clearHistory,
+      content: hasSelection
+          ? '将从记录中移除 ${_selectedIds.length} 张图像（已保存到磁盘的文件保留）'
+          : context.l10n.generation_clearHistoryConfirm,
+      confirmText: context.l10n.common_clear,
+      cancelText: context.l10n.common_cancel,
+      type: ThemedConfirmDialogType.danger,
+      icon: Icons.delete_sweep_outlined,
+    );
+
+    if (confirmed) {
+      if (hasSelection) {
+        ref
+            .read(imageGenerationNotifierProvider.notifier)
+            .removeImages(_selectedIds);
+      } else {
+        ref.read(imageGenerationNotifierProvider.notifier).clearHistory();
+      }
+      setState(() {
+        _selectedIds.clear();
+      });
+    }
   }
 
   Widget _buildCollapseButton(ThemeData theme) {
@@ -519,11 +542,6 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
       generationParamsNotifierProvider.select(selectPreviewDimensionsViewData),
     );
     final history = state.history;
-    // 使用批次分辨率（点击生成时捕获），fallback 到全局参数
-    final batchAspectRatio =
-        (state.batchWidth != null && state.batchHeight != null)
-        ? state.batchWidth! / state.batchHeight!
-        : previewDimensions.width / previewDimensions.height;
 
     // 计算当前生成区块的项目数
     final currentGenerationCount = _getCurrentGenerationCount(state);
@@ -539,6 +557,15 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
         .where((img) => !currentImageIds.contains(img.id))
         .toList();
 
+    // 官网「×N」角标：同一次生成请求（generationRunId）的件数
+    final runCounts = <int, int>{};
+    for (final img in [...state.currentImages, ...deduplicatedHistory]) {
+      final runId = img.generationRunId;
+      if (runId != null && runId > 0) {
+        runCounts[runId] = (runCounts[runId] ?? 0) + 1;
+      }
+    }
+
     final totalCount = currentGenerationCount + deduplicatedHistory.length;
 
     return LayoutBuilder(
@@ -547,33 +574,20 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           1.0,
           double.infinity,
         );
+        // 官网：缩略图统一 1:1 方框 contain（sc-f0ebfba1-25 aspect-ratio:1/1）
+        final squareExtent = rowWidth + 8;
         final descriptors = <_HistoryRowDescriptor>[
           for (var index = 0; index < currentGenerationCount; index++)
             _HistoryRowDescriptor(
               imageId: index < state.currentImages.length
                   ? state.currentImages[index].id
                   : null,
-              extent:
-                  rowWidth /
-                      resolveCurrentHistoryPreviewAspectRatio(
-                        batchAspectRatio,
-                        completedImageAspectRatio:
-                            index < state.currentImages.length
-                            ? state.currentImages[index].aspectRatio
-                            : null,
-                      ) +
-                  8,
+              extent: squareExtent,
             ),
           for (final image in deduplicatedHistory)
             _HistoryRowDescriptor(
               imageId: image.id,
-              extent:
-                  rowWidth /
-                      resolveHistoryPreviewAspectRatio(
-                        image.aspectRatio,
-                        fallback: batchAspectRatio,
-                      ) +
-                  8,
+              extent: squareExtent,
             ),
         ];
         _rowDescriptors = descriptors;
@@ -592,22 +606,16 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
             itemCount: totalCount,
             itemExtentBuilder: (index, _) => descriptors[index].extent,
             itemBuilder: (context, index) {
-              // 已完成图片使用自身比例；流式占位仍使用本批次分辨率。
+              // 已完成图片与流式占位统一 1:1 方框（官网 contain 语义）。
               if (index < currentGenerationCount) {
-                final completedImageAspectRatio =
-                    index < state.currentImages.length
-                    ? state.currentImages[index].aspectRatio
-                    : null;
                 final currentImage = index < state.currentImages.length
                     ? state.currentImages[index]
                     : null;
                 final item = Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: AspectRatio(
-                    aspectRatio: resolveCurrentHistoryPreviewAspectRatio(
-                      batchAspectRatio,
-                      completedImageAspectRatio: completedImageAspectRatio,
-                    ),
+                    // 官网：统一 1:1 方框（contain 在卡片内部处理）
+                    aspectRatio: 1.0,
                     child: _buildCurrentGenerationItem(
                       context,
                       index,
@@ -617,6 +625,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                       stripMetadata: stripMetadata,
                       clickBehavior: clickBehavior,
                       selectedPreviewId: selectedPreviewId,
+                      runCounts: runCounts,
                     ),
                   ),
                 );
@@ -640,10 +649,8 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: AspectRatio(
-                    aspectRatio: resolveHistoryPreviewAspectRatio(
-                      historyImage.aspectRatio,
-                      fallback: batchAspectRatio,
-                    ),
+                    // 官网：统一 1:1 方框（contain 在卡片内部处理）
+                    aspectRatio: 1.0,
                     child: _buildPreparedHistoryItem(
                       context: context,
                       image: historyImage,
@@ -655,6 +662,9 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                             sourceFilePath: historyImage.filePath,
                             index: actualHistoryIndex,
                             showIndex: false,
+                            historyThumb: true,
+                            batchBadgeCount:
+                                runCounts[historyImage.generationRunId],
                             isSelected: _selectedIds.contains(historyImage.id),
                             isPreviewActive:
                                 selectedPreviewId == historyImage.id,
@@ -872,6 +882,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     required bool stripMetadata,
     required HistoryClickBehavior clickBehavior,
     required String? selectedPreviewId,
+    required Map<int, int> runCounts,
   }) {
     final completedImages = state.currentImages;
 
@@ -890,7 +901,9 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           imageBytes: imageBytes,
           sourceFilePath: image.filePath,
           index: index,
-          showIndex: true,
+          showIndex: false,
+          historyThumb: true,
+          batchBadgeCount: runCounts[image.generationRunId],
           isSelected: _selectedIds.contains(image.id),
           isPreviewActive: selectedPreviewId == image.id,
           imageIdentity: image.id,
@@ -1046,6 +1059,8 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
       _imageKeys.putIfAbsent(imageId, GlobalKey.new);
 
   void _scheduleScrollToSelection(String? imageId) {
+    // 官网底栏 lock history scrolling：锁定后不跟随选区自动滚动
+    if (_historyScrollLocked) return;
     final epoch = ++_scrollRequestEpoch;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || imageId == null) return;
@@ -1394,15 +1409,26 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     ImageGenerationState state,
   ) async {
     if (_selectedIds.isEmpty) return;
+    await _saveImageIds(context, state, _selectedIds, clearSelection: true);
+  }
+
+  /// 按 id 集合保存图像（选中保存与「下载全部」共用）。
+  Future<void> _saveImageIds(
+    BuildContext context,
+    ImageGenerationState state,
+    Set<String> ids, {
+    bool clearSelection = false,
+  }) async {
+    if (ids.isEmpty) return;
 
     try {
       final saveDirPath = await GalleryFolderRepository.instance.getRootPath();
       if (saveDirPath == null) return;
 
-      // 从所有可选图像中查找选中的图像
+      // 从所有可选图像中查找目标图像
       final allImages = _getAllSelectableImages(state);
       final selectedImages = allImages
-          .where((img) => _selectedIds.contains(img.id))
+          .where((img) => ids.contains(img.id))
           .toList();
 
       // 原子保存：日期分类路径 + 独占防冲突 + 失败清理，全部在工具内完成
@@ -1422,9 +1448,11 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
 
       if (context.mounted) {
         AppToast.success(context, context.l10n.image_imageSaved(saveDirPath));
-        setState(() {
-          _selectedIds.clear();
-        });
+        if (clearSelection) {
+          setState(() {
+            _selectedIds.clear();
+          });
+        }
       }
     } catch (e) {
       if (context.mounted) {
@@ -1719,22 +1747,37 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     );
   }
 
-  void _showClearDialog(BuildContext context, WidgetRef ref) async {
-    final confirmed = await ThemedConfirmDialog.show(
-      context: context,
-      title: context.l10n.generation_clearHistory,
-      content: context.l10n.generation_clearHistoryConfirm,
-      confirmText: context.l10n.common_clear,
-      cancelText: context.l10n.common_cancel,
-      type: ThemedConfirmDialogType.danger,
-      icon: Icons.delete_sweep_outlined,
-    );
+}
 
-    if (confirmed) {
-      ref.read(imageGenerationNotifierProvider.notifier).clearHistory();
-      setState(() {
-        _selectedIds.clear();
-      });
-    }
+/// 官网底栏图标钮（38×28、紧凑密度）
+class _BottomToolButton extends StatelessWidget {
+  const _BottomToolButton({
+    required this.icon,
+    required this.tooltip,
+    this.color,
+    this.onPressed,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final Color? color;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18),
+      tooltip: tooltip,
+      style: IconButton.styleFrom(
+        foregroundColor: color ?? theme.colorScheme.onSurface,
+        disabledForegroundColor:
+            theme.colorScheme.onSurface.withValues(alpha: 0.3),
+      ),
+      visualDensity: VisualDensity.compact,
+      constraints: const BoxConstraints(minWidth: 38, minHeight: 28),
+      padding: const EdgeInsets.all(4),
+    );
   }
 }

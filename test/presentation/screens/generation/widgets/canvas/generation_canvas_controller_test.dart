@@ -1,8 +1,9 @@
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_test/src/test_vsync.dart' as test_vsync;
+import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_controller.dart';
 
 void main() {
@@ -42,44 +43,49 @@ void main() {
     });
   });
 
-  group('GenerationCanvasController', () {
-    test('panBy 累加 offset 并打断动画', () {
-      final c = GenerationCanvasController(
-        vsync: const test_vsync.TestVSync(),
+  group('GenerationCanvasCameraNotifier', () {
+    ProviderContainer buildContainer() {
+      final container = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWith(
+            (ref) => _FakeCanvasStorage(),
+          ),
+        ],
       );
-      c.panBy(const Offset(10, 20));
-      c.panBy(const Offset(5, -5));
-      expect(c.camera.offset, const Offset(15, 15));
-      c.dispose();
+      addTearDown(container.dispose);
+      return container;
+    }
+
+    test('panBy 累加 offset', () {
+      final container = buildContainer();
+      final n = container.read(generationCanvasCameraProvider.notifier);
+      final before =
+          container.read(generationCanvasCameraProvider).offset;
+      n.panBy(const Offset(10, 20));
+      n.panBy(const Offset(5, -5));
+      expect(
+        container.read(generationCanvasCameraProvider).offset,
+        before + const Offset(15, 15),
+      );
     });
 
-    test('fling 慢速不动', () {
-      final c = GenerationCanvasController(
-        vsync: const test_vsync.TestVSync(),
-      );
-      // 0.01 px/ms = 10px/s < 20px/s 停止阈值 → 不起惯性
-      c.fling(const Offset(0.01, 0));
-      expect(c.camera.offset, Offset.zero);
-      c.dispose();
+    test('fling 无 ticker 时不抛异常', () {
+      final container = buildContainer();
+      final n = container.read(generationCanvasCameraProvider.notifier);
+      n.fling(const Offset(0.5, 0.5), const Size(800, 600));
+      // 未 attachTicker 时 _anim 为 null：不应崩溃，状态不变
+      expect(container.read(generationCanvasCameraProvider).scale, 1);
     });
 
-    test('setPanDirection 零向量停止 ticker', () {
-      final c = GenerationCanvasController(
-        vsync: const test_vsync.TestVSync(),
-      );
-      c.setPanDirection(const Offset(1, 0));
-      c.setPanDirection(Offset.zero);
-      c.dispose();
-    });
-
-    test('flyToRect 近距离走动画路径不抛异常', () {
-      final c = GenerationCanvasController(
-        vsync: const test_vsync.TestVSync(),
-      );
+    test('adjustTargetForTeleport 近距离不瞬移', () {
+      final container = buildContainer();
+      final n = container.read(generationCanvasCameraProvider.notifier);
       const viewport = Size(800, 600);
-      const rect = Rect.fromLTWH(-416, -608, 832, 1216);
-      c.flyToRect(rect, viewport);
-      c.dispose();
+      const target = CanvasCamera(offset: Offset(200, 200), scale: 2);
+      final adjusted = n.adjustTargetForTeleport(target, viewport);
+      // 目标中心距视口中心未超 3×视口 → 原样返回
+      expect(adjusted.offset, target.offset);
+      expect(adjusted.scale, target.scale);
     });
   });
 }
@@ -99,4 +105,12 @@ class _OffsetMatcher extends Matcher {
   @override
   Description describe(Description description) =>
       description.add('offset ≈ $expected');
+}
+
+class _FakeCanvasStorage extends LocalStorageService {
+  @override
+  bool getCanvasLockCamera() => false;
+
+  @override
+  bool getCanvasReducedMotion() => false;
 }

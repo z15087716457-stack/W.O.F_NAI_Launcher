@@ -2200,6 +2200,24 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     _retainSharePreparationCacheForCurrentHistory();
   }
 
+  /// 从历史/当前批次/显示列表中移除指定图像（官网底栏 delete image(s)）。
+  /// 只移除内存记录；已保存到磁盘的文件保留不删。
+  void removeImages(Set<String> imageIds) {
+    if (imageIds.isEmpty) return;
+    state = state.copyWith(
+      currentImages: state.currentImages
+          .where((img) => !imageIds.contains(img.id))
+          .toList(),
+      history: state.history
+          .where((img) => !imageIds.contains(img.id))
+          .toList(),
+      displayImages: state.displayImages
+          .where((img) => !imageIds.contains(img.id))
+          .toList(),
+    );
+    _retainSharePreparationCacheForCurrentHistory();
+  }
+
   /// 更新显示图像列表
   ///
   /// 用于保存图像后更新 filePath 等信息

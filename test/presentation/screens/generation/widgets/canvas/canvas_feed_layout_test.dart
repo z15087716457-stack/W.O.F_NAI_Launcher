@@ -36,7 +36,7 @@ void main() {
       final groups = groupCanvasImages(images);
       expect(groups.length, 3);
       expect(groups[0].key, 'run:1');
-      expect(groups[0].tiles.map((e) => e.image!.id), ['a', 'b']);
+      expect(groups[0].images.map((e) => e.id), ['a', 'b']);
       expect(groups[1].key, 'run:2');
       expect(groups[2].key, 'img:d');
     });
@@ -53,10 +53,10 @@ void main() {
         ),
       ];
       final groups = groupCanvasImages(images);
-      expect(groups[0].tiles.map((e) => e.image!.id), ['b', 'a', 'c']);
+      expect(groups[0].images.map((e) => e.id), ['b', 'a', 'c']);
     });
 
-    test('保持传入的组顺序（feed 顺序）', () {
+    test('保持传入的组顺序（mergedPanelImages 新→旧）', () {
       final images = [
         _img(id: 'new', runId: 9),
         _img(id: 'old', runId: 1),
@@ -64,69 +64,71 @@ void main() {
       final groups = groupCanvasImages(images);
       expect(groups.map((g) => g.key), ['run:9', 'run:1']);
     });
-  });
 
-  group('canvasGridShape', () {
-    test('1 图单格', () => expect(canvasGridShape(1), (1, 1)));
-    test('4 图 2x2', () => expect(canvasGridShape(4), (2, 2)));
-    test('8 图 4x2（宽高比接近 1.6）', () => expect(canvasGridShape(8), (4, 2)));
-    test('网格容量 >= 数量且余量 <= 1', () {
-      for (var n = 1; n <= 16; n++) {
-        final (c, r) = canvasGridShape(n);
-        expect(c * r, greaterThanOrEqualTo(n), reason: 'n=$n');
-        expect(c * r - n, lessThanOrEqualTo(1), reason: 'n=$n');
-      }
+    test('requestedCount 回填为组内张数', () {
+      final groups = groupCanvasImages([
+        _img(id: 'a', runId: 1),
+        _img(id: 'b', runId: 1),
+        _img(id: 'c'),
+      ]);
+      expect(groups[0].requestedCount, 2);
+      expect(groups[1].requestedCount, 1);
     });
   });
 
   group('layoutCanvasFeed', () {
-    test('组竖向堆叠间距 340，x=0 居中', () {
-      final g1 = CanvasGroup(
+    test('组纵向堆叠：组间 50、原点 (0,0)、左对齐', () {
+      final g1 = CanvasFeedGroup(
         key: 'run:1',
-        tiles: [CanvasTileSpec.image(_img(id: 'a'))],
+        runId: 1,
+        images: [_img(id: 'a')],
       );
-      final g2 = CanvasGroup(
+      final g2 = CanvasFeedGroup(
         key: 'run:2',
-        tiles: [CanvasTileSpec.image(_img(id: 'b'))],
+        runId: 2,
+        images: [_img(id: 'b')],
       );
-      final result = layoutCanvasFeed([g1, g2]);
+      final items = layoutCanvasFeed([g1, g2]);
 
-      expect(result.placements.length, 2);
-      final p1 = result.placements[0];
-      final p2 = result.placements[1];
-
-      // 单图组：组 rect 即 tile rect，水平居中于 x=0
-      expect(p1.rect.left, -832 / 2);
-      expect(p1.rect.top, 0);
-      expect(p2.rect.top, 1216 + kCanvasGroupSpacing);
-      expect(p2.rect.left, -832 / 2);
-      expect(result.bounds.height, greaterThan(1216 * 2));
+      expect(items.length, 2);
+      expect(items[0].worldRect.left, 0);
+      expect(items[0].worldRect.top, 0);
+      expect(
+        items[1].worldRect.top,
+        1216 + kCanvasGroupSpacing,
+      );
+      expect(items[1].worldRect.left, 0);
     });
 
-    test('组内网格 tile 各自世界矩形且不重叠', () {
-      final g = CanvasGroup(
+    test('组内子图纵向堆叠间距 40，互不重叠', () {
+      final g = CanvasFeedGroup(
         key: 'run:1',
-        tiles: [
-          CanvasTileSpec.image(_img(id: 'a')),
-          CanvasTileSpec.image(_img(id: 'b')),
-          CanvasTileSpec.image(_img(id: 'c')),
-          CanvasTileSpec.image(_img(id: 'd')),
+        runId: 1,
+        images: [
+          _img(id: 'a'),
+          _img(id: 'b'),
+          _img(id: 'c'),
+          _img(id: 'd'),
         ],
       );
-      final result = layoutCanvasFeed([g]);
-      expect(result.placements.length, 4);
+      final items = layoutCanvasFeed([g]);
+      expect(items.length, 4);
       for (var i = 0; i < 4; i++) {
+        expect(items[i].subimageIndex, i);
+        if (i > 0) {
+          expect(
+            items[i].worldRect.top,
+            items[i - 1].worldRect.bottom + kCanvasSubimageSpacing,
+          );
+        }
         for (var j = i + 1; j < 4; j++) {
           expect(
-            result.placements[i].rect.overlaps(result.placements[j].rect),
+            items[i].worldRect.overlaps(items[j].worldRect),
             false,
             reason: 'tile $i 与 $j 重叠',
           );
         }
       }
-      // 2x2 组整体居中
-      final groupRect = result.placements.first.groupRect;
-      expect(groupRect.center.dx, 0);
     });
   });
 }

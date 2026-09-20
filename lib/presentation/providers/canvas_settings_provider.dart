@@ -42,3 +42,25 @@ class CanvasReducedMotionNotifier extends _$CanvasReducedMotionNotifier {
         .setCanvasReducedMotion(reduced);
   }
 }
+
+/// 放大填充（官网 `wb` 原子）：焦点夺焦时 fitMaxScale 开=∞（允许放大超 100%）、
+/// 关=1（封顶 100% 像素级）。
+@Riverpod(keepAlive: true)
+class CanvasZoomToFillNotifier extends _$CanvasZoomToFillNotifier {
+  @override
+  bool build() => false;
+
+  void toggle() => state = !state;
+  void set(bool value) => state = value;
+}
+
+/// 平滑缩放（官网 smoothZoom 设置）：Ctrl+滚轮平滑档 exp(-0.01·dy)，
+/// 关=离散档 ×1.2 / ÷1.2。
+@Riverpod(keepAlive: true)
+class CanvasSmoothZoomNotifier extends _$CanvasSmoothZoomNotifier {
+  @override
+  bool build() => false;
+
+  void toggle() => state = !state;
+  void set(bool value) => state = value;
+}

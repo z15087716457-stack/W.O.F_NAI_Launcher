@@ -56,19 +56,71 @@ FocusNode generationPreviewFocusNode(Ref ref) {
   return node;
 }
 
-/// 画布组级选中（G11 V2）：值为画布 feed 的组 key——
-/// 'run:<generationRunId>' 或 'img:<imageId>'（无 runId 单图组）。
+/// 画布组级选中（G11 V3）：官网真值 {group, subimage, variation}。
 ///
-/// 对标官网「自动选图=选中 tile 所属组」，工具条/展开态/q 跳组都以组为粒度。
-/// 与 tile 级的 [generationPreviewSelectionProvider] 并存：
-/// 画布内外仍用 tile 级做预览/历史高亮，画布内部用组级驱动工具条与展开态。
+/// - group: 'run:<generationRunId>' 或 'img:<imageId>'（无 runId 单图组）
+/// - subimage: 组内焦点图索引；null=整组焦点（展开态）
+/// - variation: 多变体索引（GeneratedImage.data 变体槽；本工程多为 0）
+///
+/// 对标官网「自动选图=选中 tile 所属组 + 点击夺焦 subimage + 再点展开组」，
+/// 工具条/展开态/q 跳组都以此驱动。
+class CanvasFocus {
+  const CanvasFocus({required this.group, this.subimage, this.variation = 0});
+
+  final String group;
+  final int? subimage;
+  final int variation;
+
+  CanvasFocus copyWith({
+    String? group,
+    int? Function()? subimage,
+    int? variation,
+  }) {
+    return CanvasFocus(
+      group: group ?? this.group,
+      subimage: subimage != null ? subimage() : this.subimage,
+      variation: variation ?? this.variation,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CanvasFocus &&
+          other.group == group &&
+          other.subimage == subimage &&
+          other.variation == variation;
+
+  @override
+  int get hashCode => Object.hash(group, subimage, variation);
+}
+
 @Riverpod(keepAlive: true)
 class GenerationCanvasGroupSelection
     extends _$GenerationCanvasGroupSelection {
   @override
-  String? build() => null;
+  CanvasFocus? build() => null;
 
-  void select(String groupKey) => state = groupKey;
+  /// 夺焦到组（subimage=null = 整组展开态入口）
+  void selectGroup(String groupKey) =>
+      state = CanvasFocus(group: groupKey);
+
+  /// 夺焦到组内某图（subimage=组内索引）
+  void selectTile(String groupKey, int subimage, {int variation = 0}) =>
+      state = CanvasFocus(group: groupKey, subimage: subimage, variation: variation);
+
+  /// 在焦点组内切换 subimage（官网 subimage 点击/箭头逻辑）
+  void setSubimage(int? subimage) {
+    final s = state;
+    if (s == null) return;
+    state = s.copyWith(subimage: () => subimage);
+  }
+
+  void setVariation(int variation) {
+    final s = state;
+    if (s == null) return;
+    state = s.copyWith(variation: variation);
+  }
 
   void clear() => state = null;
 }
