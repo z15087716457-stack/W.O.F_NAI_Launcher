@@ -460,18 +460,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
 
     // 组 ×N 徽标：每组一次，贴在组包围盒右下（世界坐标反缩放恒屏）
     final groupBadgeEmitted = <String>{};
-    // 悬停放大到焦点同档（自研，官网只回到 1.0）：目标屏幕高度 = 焦点
-    // tile 的屏幕高度，世界像素比即所求倍率。无焦点时回退 1.0。
-    double? focusedWorldH;
-    if (focus != null) {
-      final fg = layout.groups
-          .where((x) => x.key == focus.group)
-          .firstOrNull;
-      if (fg != null && fg.tiles.isNotEmpty) {
-        final idx = (focus.subimage ?? 0).clamp(0, fg.tiles.length - 1);
-        focusedWorldH = fg.tiles[idx].resolvedHeight;
-      }
-    }
 
     for (final item in layout.items) {
       final rect = item.worldRect;
@@ -480,13 +468,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       final isFocusSubimage =
           isFocusGroup && focus?.subimage == item.subimageIndex;
       final image = item.image;
-      // 悬停倍率：非焦点子图且存在焦点 → 放大到焦点 tile 同档屏幕尺寸。
-      final hoverScale = (!isFocusSubimage &&
-              !item.isInFlight &&
-              focusedWorldH != null &&
-              item.tile.resolvedHeight > 0)
-          ? (focusedWorldH / item.tile.resolvedHeight).clamp(1.0, 3.0)
-          : 1.0;
       tiles.add(
         Positioned(
           left: rect.left,
@@ -502,7 +483,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
             isPinned: image != null && pinned.contains(image.id),
             cameraScale: camera.scale,
             uiPointers: _uiPointers,
-            hoverScale: hoverScale,
             onSelect: () => _onTileTap(item),
           ),
         ),
@@ -1052,7 +1032,6 @@ class _CanvasTile extends ConsumerStatefulWidget {
     required this.isPinned,
     required this.cameraScale,
     required this.uiPointers,
-    required this.hoverScale,
     required this.onSelect,
   });
 
@@ -1064,10 +1043,6 @@ class _CanvasTile extends ConsumerStatefulWidget {
   final bool isPinned;
   final double cameraScale;
   final Set<int> uiPointers;
-
-  /// 自研悬停倍率：非焦点组悬停放大到焦点 tile 同档屏幕尺寸。
-  /// 官网只有回 1.0；用户拍板超出官网，按焦点屏幕高度等比放大。
-  final double hoverScale;
   final VoidCallback onSelect;
 
   @override
@@ -1080,13 +1055,8 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
   @override
   Widget build(BuildContext context) {
     final unfocused = !widget.isFocusSubimage;
-    // 官网：非焦点 scale(0.98)；悬停回 1；0.25s cubic-bezier(0.22,1,0.36,1)。
-    // 自研扩展：非焦点组悬停直接放大到 hoverScale（焦点同档屏幕尺寸）。
-    final base = unfocused && !_hovering ? 0.98 : 1.0;
-    final scale =
-        _hovering && unfocused && widget.hoverScale > 1.0
-            ? widget.hoverScale
-            : base;
+    // 官网：非焦点 scale(0.98)；悬停回 1；0.25s cubic-bezier(0.22,1,0.36,1)
+    final scale = unfocused && !_hovering ? 0.98 : 1.0;
 
     // 生成中占位槽（官网 image-grid-generating）：批参数尺寸 + 三点
     // 弹跳动画，有流式帧时叠预览帧。

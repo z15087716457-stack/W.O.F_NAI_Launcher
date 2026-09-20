@@ -96,7 +96,7 @@
 
 **Provider**：`canvas_settings_provider.dart`（锁/减弱动态/填充缩放/钉板 Hive 持久化）；`preview_selection_provider.dart`（焦点组=共享选中，喂参数面板和 emotion）；`image_generation_provider.dart` 的 `mergedPanelImages` 是唯一数据源——**生成中 currentImages + 历史 take(50)**，和官网同语义。子图态零 API，纯粹前端焦点（`generationPreviewSubFocusProvider`）。
 
-**已核验的官网行为**（别改回旧直觉）：滚轮=平移永不缩放（Shift 纵转横）、Ctrl+滚轮=缩放、停稳 120ms 自动选最近组、拖拽 5px 死区+惯性、飞行是指数插值（speed 11，距离>3×视口直接瞬移）、scale 硬夹 [0.1, 8]、非焦点组 scale(0.98)+hover 回 1（自研扩展：悬停非焦点放大到焦点 tile 同档屏幕尺寸 `focusedH/selfH` clamp[1,3]）、edge bars 贴焦点 tile（顶条 translateY(-76px) 于 tile 顶中心、底左右条贴 tile 底边内 12px，`--canvas-ui-scale=1/相机` 反缩放恒屏），钉板 `CanvasPinnedNotifier` 持久化且钉住组不参与自动夺焦、历史栏方框 `contain`+米色双层 boxShadow。
+**已核验的官网行为**（别改回旧直觉）：滚轮=平移永不缩放（Shift 纵转横）、Ctrl+滚轮=缩放、停稳 120ms 自动选最近组、拖拽 5px 死区+惯性、飞行是指数插值（speed 11，距离>3×视口直接瞬移）、scale 硬夹 [0.1, 8]、非焦点组 scale(0.98)+hover 回 1、edge bars 贴焦点 tile（顶条 translateY(-76px) 于 tile 顶中心、底左右条贴 tile 底边内 12px，`--canvas-ui-scale=1/相机` 反缩放恒屏），钉板 `CanvasPinnedNotifier` 持久化且钉住组不参与自动夺焦、历史栏方框 `contain`+米色双层 boxShadow。
 
 **布局真值（V3.1 逐字对码 chunk 5285）**：组间 `kCanvasGroupSpacing=340`、组内默认 `ceil(sqrt(N))` 列 row-major 近方阵 48px 间隙、N=3 走 `floor(4*FNV(id+':tri'))` 哈希四式三角（上1下2/上2下1/左1右2/左2右1）、gridXLength>0 列紧凑 24px、组水平居中 `x=-width/2`（`0*o` 错动是死代码）、`bounds.height=cursorY-340` 含尾随距。归组 `run:<generationRunId>`；无 runId 兜底按同尺寸+createdAt≤120s 相邻合并（外部登记/桥接漏打 runId 的图不致散组）。生成中 inflight 组置顶 = `totalImages` 槽（完成图渲染实图、未完成渲染三点弹跳 `image-grid-generating` 占位，尺寸=batchW×H），`deferFocus` 组**不自动夺焦不飞**——官网非流式等 all finished 才飞，流式组创建即夺焦。
 
