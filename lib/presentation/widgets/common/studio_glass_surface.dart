@@ -38,8 +38,8 @@ class StudioGlassSurface extends StatelessWidget {
       base,
     );
     // Keep native backdrop colours visible; in-app cards remain fully opaque.
-    final topOpacity = nativeBackdrop ? (dark ? .66 : .74) : 1.0;
-    final bottomOpacity = nativeBackdrop ? (dark ? .74 : .82) : 1.0;
+    final topOpacity = nativeBackdrop ? (dark ? .42 : .48) : 1.0;
+    final bottomOpacity = nativeBackdrop ? (dark ? .50 : .58) : 1.0;
     return ClipRRect(
       borderRadius: borderRadius,
       clipBehavior: clipBehavior,
@@ -58,17 +58,22 @@ class StudioGlassSurface extends StatelessWidget {
                 ),
         ),
         child: CustomPaint(
-          painter: highContrast ? null : _GlassGrain(dark),
+          // Native acrylic already has grain; avoid a second frosted layer.
+          painter: highContrast || nativeBackdrop ? null : _GlassGrain(dark),
           foregroundPainter: _GlassEdge(
             borderRadius,
             highContrast
                 ? theme.colorScheme.outline
                 : Colors.white.withValues(
-                    alpha: dark ? (nativeBackdrop ? .08 : .15) : .92,
+                    alpha: nativeBackdrop
+                        ? (dark ? .05 : .38)
+                        : (dark ? .15 : .92),
                   ),
             highContrast
                 ? theme.colorScheme.outline
-                : theme.colorScheme.outline.withValues(alpha: dark ? .32 : .38),
+                : theme.colorScheme.outline.withValues(
+                    alpha: nativeBackdrop ? .18 : (dark ? .32 : .38),
+                  ),
           ),
           child: child,
         ),
