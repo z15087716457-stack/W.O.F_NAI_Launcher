@@ -21,7 +21,11 @@ class StudioGlassSurface extends StatelessWidget {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
     final highContrast = MediaQuery.highContrastOf(context);
-    final base = theme.colorScheme.surfaceContainerLow;
+    // DWM already supplies the blur. A darker tint lets the native title reveal
+    // more backdrop colour without washing out into a pale grey strip.
+    final base = nativeBackdrop && dark
+        ? Colors.black
+        : theme.colorScheme.surfaceContainerLow;
     final highlightOpacity = dark ? (nativeBackdrop ? .015 : .065) : .8;
     final top = Color.alphaBlend(
       Colors.white.withValues(alpha: highlightOpacity),
@@ -33,10 +37,9 @@ class StudioGlassSurface extends StatelessWidget {
       ),
       base,
     );
-    // Match each workspace with a stronger neutral tint, keeping only a hint
-    // of desktop colour instead of a contrasting strip above the content.
-    final topOpacity = nativeBackdrop ? (dark ? .90 : .84) : 1.0;
-    final bottomOpacity = nativeBackdrop ? (dark ? .94 : .90) : 1.0;
+    // Keep native backdrop colours visible; in-app cards remain fully opaque.
+    final topOpacity = nativeBackdrop ? (dark ? .66 : .74) : 1.0;
+    final bottomOpacity = nativeBackdrop ? (dark ? .74 : .82) : 1.0;
     return ClipRRect(
       borderRadius: borderRadius,
       clipBehavior: clipBehavior,
