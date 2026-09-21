@@ -1563,6 +1563,10 @@
   "characterEditor_promptHint": "このキャラクターのプロンプトを入力してください...",
   "characterEditor_negativePromptHint": "このキャラクターの除外したい要素を入力してください...",
   "characterCanvas_title": "キャラクター位置",
+  "characterCanvas_finishEditing": "位置の編集を完了",
+  "@characterCanvas_finishEditing": {
+    "description": "Button that exits character position editing"
+  },
   "characterCanvas_aiChoice": "AIにおまかせ",
   "characterCanvas_custom": "カスタム",
   "characterCanvas_aiHint": "AIがすべてのキャラクターの位置を自動で決めます",

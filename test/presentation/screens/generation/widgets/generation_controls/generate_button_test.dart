@@ -96,7 +96,7 @@ void main() {
     expect(find.text(l10n.generation_stopAllGeneration), findsOneWidget);
     expect(find.byIcon(Icons.stop_circle_outlined), findsOneWidget);
 
-    await tester.tap(find.byType(OutlinedButton));
+    await tester.tap(find.byKey(const ValueKey('stop-all-generation')));
     expect(cancelCalled, isTrue);
     expect(generateCalled, isFalse);
   });
@@ -162,12 +162,7 @@ void main() {
         onCancel: () => cancelCalled = true,
       );
 
-      await tester.tap(
-        find.widgetWithText(
-          OutlinedButton,
-          '${l10n.generation_skipCurrentBatch} 2/4',
-        ),
-      );
+      await tester.tap(find.byKey(const ValueKey('skip-current-generation')));
 
       expect(skipCalled, isTrue);
       expect(cancelCalled, isFalse);

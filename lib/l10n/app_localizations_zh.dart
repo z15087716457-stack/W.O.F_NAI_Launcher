@@ -3340,6 +3340,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get characterCanvas_title => '角色位置';
 
   @override
+  String get characterCanvas_finishEditing => '完成位置编辑';
+
+  @override
   String get characterCanvas_aiChoice => 'AI 选择';
 
   @override

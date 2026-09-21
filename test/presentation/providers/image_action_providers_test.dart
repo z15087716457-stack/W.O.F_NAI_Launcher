@@ -11,6 +11,7 @@ import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_action_providers.dart';
+import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 
@@ -36,8 +37,60 @@ class _Subscription extends SubscriptionNotifier {
       const SubscriptionState.loaded(UserSubscription(tier: 1));
 }
 
+class _Workflow extends ImageWorkflowController {
+  @override
+  ImageWorkflowState build() => const ImageWorkflowState(
+    upscale: UpscaleWorkflowSettings(backend: UpscaleBackend.novelai),
+  );
+  void backend(UpscaleBackend backend) =>
+      state = state.copyWith(upscale: state.upscale.copyWith(backend: backend));
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test(
+    'upscale quote follows selected image and backend, never the draft size',
+    () {
+      final small = GeneratedImage(
+        id: 'small',
+        bytes: Uint8List(0),
+        width: 512,
+        height: 512,
+      );
+      final large = GeneratedImage(
+        id: 'large',
+        bytes: Uint8List(0),
+        width: 832,
+        height: 1216,
+      );
+      final invalid = GeneratedImage(
+        id: 'too-large',
+        bytes: Uint8List(0),
+        width: 2048,
+        height: 2048,
+      );
+      final container = ProviderContainer(
+        overrides: [
+          generationParamsNotifierProvider.overrideWith(_Params.new),
+          imageWorkflowControllerProvider.overrideWith(_Workflow.new),
+          subscriptionNotifierProvider.overrideWith(_Subscription.new),
+        ],
+      );
+      addTearDown(container.dispose);
+      final subscription = container.listen(
+        imageUpscaleCostProvider(large),
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+      expect(container.read(imageUpscaleCostProvider(small)), 1);
+      expect(container.read(imageUpscaleCostProvider(large)), 7);
+      expect(container.read(imageUpscaleCostProvider(invalid)), isNull);
+      (container.read(imageWorkflowControllerProvider.notifier) as _Workflow)
+          .backend(UpscaleBackend.comfyui);
+      expect(container.read(imageUpscaleCostProvider(large)), 0);
+    },
+  );
 
   test(
     'reads seed from PNG when generated image metadata field is empty',

@@ -20,6 +20,7 @@ import '../../../../widgets/common/image_detail/image_detail_data.dart';
 import 'canvas_feed_layout.dart';
 import 'canvas_display_settings.dart';
 import 'generated_image_actions.dart';
+import '../generation_sidebar_style.dart';
 
 /// 画布工具条分区（官网 md 布局表逐字对码）
 enum CanvasToolbarZone { top, bottomStart, bottomEnd }
@@ -105,6 +106,7 @@ class _ToolbarItem {
   factory _ToolbarItem.upscale() => _ToolbarItem._(
     icon: 'nai-icon-upscale.svg',
     tooltip: (l10n) => l10n.image_upscale,
+    priceBadge: true,
   );
 
   factory _ToolbarItem.setInit() => _ToolbarItem._(
@@ -312,11 +314,39 @@ class _IconBtn extends ConsumerWidget {
               ),
             if (price != null && price >= 0) ...[
               const SizedBox(width: 4),
-              Text(
-                '$price',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
+              Ink(
+                key: ValueKey('canvas-cost-${item.icon}'),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: GenSidebarStyle.selectedSurface(theme),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$price',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: enabled ? 1 : .35,
+                        ),
+                        fontWeight: FontWeight.w600,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                    const SizedBox(width: 3),
+                    SvgPicture.asset(
+                      'assets/icons/nai-icon-anlas.svg',
+                      width: 12,
+                      height: 12,
+                      colorFilter: ColorFilter.mode(
+                        theme.colorScheme.onSurface.withValues(
+                          alpha: enabled ? 1 : .35,
+                        ),
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -357,9 +387,11 @@ class _IconBtn extends ConsumerWidget {
     }
   }
 
-  int? _priceFor(WidgetRef ref) => item.icon == 'nai-icon-variations.svg'
-      ? ref.watch(imageVariationCostProvider(image))
-      : null;
+  int? _priceFor(WidgetRef ref) => switch (item.icon) {
+    'nai-icon-variations.svg' => ref.watch(imageVariationCostProvider(image)),
+    'nai-icon-upscale.svg' => ref.watch(imageUpscaleCostProvider(image)),
+    _ => null,
+  };
 
   void _dispatch(BuildContext context, WidgetRef ref) {
     final bytes = image.bytes;

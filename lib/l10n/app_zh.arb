@@ -1548,6 +1548,10 @@
   "characterEditor_promptHint": "输入角色的正向提示词...",
   "characterEditor_negativePromptHint": "输入角色的负面提示词...",
   "characterCanvas_title": "角色位置",
+  "characterCanvas_finishEditing": "完成位置编辑",
+  "@characterCanvas_finishEditing": {
+    "description": "Button that exits character position editing"
+  },
   "characterCanvas_aiChoice": "AI 选择",
   "characterCanvas_custom": "自定义",
   "characterCanvas_aiHint": "AI 将自动安排角色位置",

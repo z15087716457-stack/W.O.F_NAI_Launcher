@@ -1563,6 +1563,10 @@
   "characterEditor_promptHint": "Enter prompt for this character...",
   "characterEditor_negativePromptHint": "Enter Undesired Content for this character...",
   "characterCanvas_title": "Character Positions",
+  "characterCanvas_finishEditing": "Finish Editing Positions",
+  "@characterCanvas_finishEditing": {
+    "description": "Button that exits character position editing"
+  },
   "characterCanvas_aiChoice": "AI's Choice",
   "characterCanvas_custom": "Custom",
   "characterCanvas_aiHint": "AI will place all characters automatically",

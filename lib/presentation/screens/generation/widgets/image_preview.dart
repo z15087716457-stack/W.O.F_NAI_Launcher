@@ -105,7 +105,8 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
             fit: StackFit.expand,
             children: [
               Center(child: _buildContent(context, ref, state, theme)),
-              const GenerationToolPanel(),
+              if (!ref.watch(characterPositionCanvasProvider))
+                const GenerationToolPanel(),
             ],
           ),
         ),
@@ -122,6 +123,15 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
     // 错误状态
     if (state.status == GenerationStatus.error) {
       return _buildErrorState(theme, state.errorMessage, context);
+    }
+
+    // Position editing takes precedence over either idle output viewer, including
+    // a canvas containing history. Availability keeps generation/error visible.
+    final showCharacterCanvas =
+        ref.watch(characterPositionCanvasProvider) &&
+        ref.watch(characterPositionCanvasAvailableProvider);
+    if (showCharacterCanvas) {
+      return const CharacterPositionCanvasView();
     }
 
     // 使用批次分辨率（点击生成时捕获），fallback 到全局参数
@@ -162,14 +172,6 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
         batchWidth,
         batchHeight,
       );
-    }
-
-    // 角色位置画布不能遮挡生成与错误状态，也不能跨越模型/角色能力边界。
-    final showCharacterCanvas =
-        ref.watch(characterPositionCanvasProvider) &&
-        ref.watch(characterPositionCanvasAvailableProvider);
-    if (showCharacterCanvas) {
-      return const CharacterPositionCanvasView();
     }
 
     final behavior = ref.watch(historyClickBehaviorNotifierProvider);

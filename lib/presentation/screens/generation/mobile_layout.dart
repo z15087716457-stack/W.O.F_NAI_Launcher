@@ -15,6 +15,7 @@ import 'widgets/prompt_input.dart';
 import 'widgets/image_preview.dart';
 import '../../widgets/common/anlas_cost_badge.dart';
 import 'widgets/parameter_panel.dart';
+import 'widgets/generation_controls/generate_button.dart';
 
 import '../../widgets/common/app_toast.dart';
 
@@ -208,41 +209,13 @@ class _MobileGenerateButton extends ConsumerWidget {
     required this.onSkipCurrent,
   });
 
-  bool get _canSkipCurrentBatch =>
-      showCancel &&
-      generationState.currentImage > 0 &&
-      generationState.totalImages > generationState.currentImage;
-
-  String _progressText() =>
-      '${generationState.currentImage}/${generationState.totalImages}';
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (showCancel) {
-      return Row(
-        children: [
-          if (_canSkipCurrentBatch) ...[
-            Expanded(
-              child: ThemedButton(
-                onPressed: onSkipCurrent,
-                icon: const Icon(Icons.skip_next),
-                label: Text(
-                  '${context.l10n.generation_skipCurrentBatch} ${_progressText()}',
-                ),
-                style: ThemedButtonStyle.outlined,
-              ),
-            ),
-            const SizedBox(width: 8),
-          ],
-          Expanded(
-            child: ThemedButton(
-              onPressed: onCancel,
-              icon: const Icon(Icons.stop_circle_outlined),
-              label: Text(context.l10n.generation_stopAllGeneration),
-              style: ThemedButtonStyle.outlined,
-            ),
-          ),
-        ],
+      return GenerationCancelButtons(
+        generationState: generationState,
+        onCancel: onCancel,
+        onSkipCurrent: onSkipCurrent,
       );
     }
 

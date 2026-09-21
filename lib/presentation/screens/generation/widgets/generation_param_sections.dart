@@ -244,31 +244,18 @@ class _CountPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          height: 28,
-          decoration: BoxDecoration(
-            color: selected
-                ? GenSidebarStyle.selectedSurface(theme)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(3),
-          ),
-          child: Center(
-            child: Text(
-              '$value',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: selected
-                    ? theme.colorScheme.onSurface
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.75),
-              ),
-            ),
-          ),
+    return SidebarSegmentButton(
+      key: ValueKey('image-count-$value'),
+      selected: selected,
+      onPressed: onTap,
+      child: Text(
+        '$value',
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: selected
+              ? theme.colorScheme.onSurface
+              : theme.colorScheme.onSurface.withValues(alpha: 0.75),
         ),
       ),
     );

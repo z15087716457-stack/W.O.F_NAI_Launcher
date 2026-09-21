@@ -7,6 +7,7 @@ import '../../../data/services/image_metadata_service.dart';
 import '../../utils/metadata_import_applier.dart';
 import '../image_generation_provider.dart';
 import '../subscription_provider.dart';
+import 'image_workflow_controller.dart';
 
 /// The PNG is authoritative even when the in-memory image has not been hydrated.
 final generatedImageMetadataProvider = FutureProvider.autoDispose
@@ -17,7 +18,6 @@ final generatedImageMetadataProvider = FutureProvider.autoDispose
     });
 
 /// Only quote a variation when the selected image has sufficient request data.
-/// Opening the upscale settings panel itself has no price.
 final imageVariationCostProvider = Provider.autoDispose
     .family<int?, GeneratedImage>((ref, image) {
       final metadata = ref
@@ -63,4 +63,26 @@ final imageVariationCostProvider = Provider.autoDispose
         oneTimeCost: AnlasCalculator.resolveVibeEncodingCost(params),
         opusUsageExhausted: subscription?.isOpusUsageExhausted ?? false,
       );
+    });
+
+/// Estimate the selected image with the backend that the upscale panel will
+/// open with. Opening the panel itself never submits a request.
+final imageUpscaleCostProvider = Provider.autoDispose
+    .family<int?, GeneratedImage>((ref, image) {
+      final backend = ref.watch(
+        imageWorkflowControllerProvider.select(
+          (workflow) => workflow.upscale.backend,
+        ),
+      );
+      if (backend == UpscaleBackend.comfyui) return 0;
+      final subscription = ref.watch(subscriptionNotifierProvider).subscription;
+      final cost = AnlasCalculator.calculateNovelAiUpscaleCost(
+        inputWidth: image.width,
+        inputHeight: image.height,
+        scale: 4,
+        subscriptionTier: subscription?.isOpus == true
+            ? AnlasCalculator.opusTier
+            : 0,
+      );
+      return cost < 0 ? null : cost;
     });

@@ -114,3 +114,53 @@ class SidebarTitleScope extends StatelessWidget {
     );
   }
 }
+
+/// A neutral inset segment with its own ink surface. This keeps hover/focus
+/// visible even when the surrounding theme uses identical surface colors.
+class SidebarSegmentButton extends StatelessWidget {
+  const SidebarSegmentButton({
+    super.key,
+    required this.selected,
+    required this.onPressed,
+    required this.child,
+    this.padding = const EdgeInsets.symmetric(horizontal: 10),
+  });
+
+  final bool selected;
+  final VoidCallback? onPressed;
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final radius = BorderRadius.circular(3);
+    return Semantics(
+      selected: selected,
+      button: true,
+      enabled: onPressed != null,
+      child: Material(
+        color: selected
+            ? GenSidebarStyle.selectedSurface(theme)
+            : Colors.transparent,
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: radius,
+          hoverColor: theme.colorScheme.onSurface.withValues(alpha: .07),
+          focusColor: theme.colorScheme.onSurface.withValues(alpha: .10),
+          highlightColor: theme.colorScheme.onSurface.withValues(alpha: .14),
+          splashFactory: NoSplash.splashFactory,
+          child: SizedBox(
+            height: 28,
+            child: Padding(
+              padding: padding,
+              child: Center(child: child),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

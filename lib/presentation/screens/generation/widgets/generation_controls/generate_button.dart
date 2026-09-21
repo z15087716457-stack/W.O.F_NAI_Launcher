@@ -44,11 +44,6 @@ class GenerateButtonWithCost extends ConsumerWidget {
     this.copySeed = 0,
   });
 
-  bool get _canSkipCurrentBatch =>
-      showCancel &&
-      generationState.currentImage > 0 &&
-      generationState.totalImages > generationState.currentImage;
-
   String _progressText() =>
       '${generationState.currentImage}/${generationState.totalImages}';
 
@@ -74,30 +69,11 @@ class GenerateButtonWithCost extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (showCancel) {
-      return SizedBox(
+      return GenerationCancelButtons(
         height: height,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (_canSkipCurrentBatch) ...[
-              ThemedButton(
-                onPressed: onSkipCurrent,
-                icon: const Icon(Icons.skip_next),
-                label: Text(
-                  '${context.l10n.generation_skipCurrentBatch} ${_progressText()}',
-                ),
-                style: ThemedButtonStyle.outlined,
-              ),
-              const SizedBox(width: 8),
-            ],
-            ThemedButton(
-              onPressed: onCancel,
-              icon: const Icon(Icons.stop_circle_outlined),
-              label: Text(context.l10n.generation_stopAllGeneration),
-              style: ThemedButtonStyle.outlined,
-            ),
-          ],
-        ),
+        generationState: generationState,
+        onCancel: onCancel,
+        onSkipCurrent: onSkipCurrent,
       );
     }
 
@@ -136,4 +112,130 @@ class GenerateButtonWithCost extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Stop always occupies the same full-width slot as Generate. A separate
+/// secondary row keeps batch skipping available without shrinking Stop.
+class GenerationCancelButtons extends StatelessWidget {
+  const GenerationCancelButtons({
+    super.key,
+    required this.generationState,
+    required this.onCancel,
+    required this.onSkipCurrent,
+    this.height = 48,
+  });
+
+  final ImageGenerationState generationState;
+  final VoidCallback onCancel;
+  final VoidCallback onSkipCurrent;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    const yellow = Color(0xffe2c35b);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (generationState.currentImage > 0 &&
+            generationState.totalImages > generationState.currentImage)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              key: const ValueKey('skip-current-generation'),
+              onPressed: onSkipCurrent,
+              icon: const Icon(Icons.skip_next, size: 16),
+              label: Text(
+                '${context.l10n.generation_skipCurrentBatch} '
+                '${generationState.currentImage}/${generationState.totalImages}',
+              ),
+              style: TextButton.styleFrom(
+                minimumSize: const Size(0, 28),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              ),
+            ),
+          ),
+        SizedBox(
+          key: const ValueKey('stop-all-generation'),
+          width: double.infinity,
+          height: height,
+          child: DecoratedBox(
+            position: DecorationPosition.foreground,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              border: Border.all(color: yellow.withValues(alpha: .6)),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: CustomPaint(
+                painter: const _StopStripesPainter(),
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: InkWell(
+                    onTap: onCancel,
+                    hoverColor: yellow.withValues(alpha: .12),
+                    focusColor: yellow.withValues(alpha: .12),
+                    highlightColor: yellow.withValues(alpha: .2),
+                    splashFactory: NoSplash.splashFactory,
+                    child: Semantics(
+                      button: true,
+                      child: Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.stop_circle_outlined,
+                              size: 18,
+                              color: yellow,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              context.l10n.generation_stopAllGeneration,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: yellow,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StopStripesPainter extends CustomPainter {
+  const _StopStripesPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = const Color(0xff202019),
+    );
+    final paint = Paint()..color = const Color(0xff363322);
+    for (double x = -size.height; x < size.width + size.height; x += 28) {
+      canvas.drawPath(
+        Path()
+          ..moveTo(x, size.height)
+          ..lineTo(x + size.height, 0)
+          ..lineTo(x + size.height + 14, 0)
+          ..lineTo(x + 14, size.height)
+          ..close(),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_StopStripesPainter oldDelegate) => false;
 }

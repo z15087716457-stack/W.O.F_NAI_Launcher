@@ -427,6 +427,9 @@ class _SizeSelectorState extends State<SizeSelector> {
         icon: Icon(icon, size: 18),
         tooltip: _getTypeName(context, type),
         style: IconButton.styleFrom(
+          hoverColor: theme.colorScheme.onSurface.withValues(alpha: .07),
+          focusColor: theme.colorScheme.onSurface.withValues(alpha: .10),
+          highlightColor: theme.colorScheme.onSurface.withValues(alpha: .14),
           backgroundColor: highlighted
               ? GenSidebarStyle.selectedSurface(theme)
               : Colors.transparent,

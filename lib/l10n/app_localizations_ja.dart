@@ -3396,6 +3396,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get characterCanvas_title => 'キャラクター位置';
 
   @override
+  String get characterCanvas_finishEditing => '位置の編集を完了';
+
+  @override
   String get characterCanvas_aiChoice => 'AIにおまかせ';
 
   @override

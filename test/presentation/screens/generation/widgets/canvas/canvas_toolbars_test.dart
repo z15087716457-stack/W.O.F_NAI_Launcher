@@ -10,6 +10,7 @@ import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_models.dart';
+import 'package:nai_launcher/presentation/providers/generation/image_action_providers.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_tile_toolbar.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_controller.dart';
@@ -39,6 +40,7 @@ Widget _wrap(Widget child) {
     overrides: [
       localStorageServiceProvider.overrideWith((ref) => _FakeCanvasStorage()),
       estimatedCostProvider.overrideWithValue(7),
+      imageUpscaleCostProvider.overrideWith((ref, image) => 7),
     ],
     child: MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -53,6 +55,60 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('CanvasEdgeToolbar', () {
+    testWidgets('cost pills show amount then Anlas icon for each priced tool', (
+      tester,
+    ) async {
+      final image = _img(id: 'quoted');
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            imageVariationCostProvider(image).overrideWithValue(63),
+            imageUpscaleCostProvider(image).overrideWithValue(1),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: Center(
+                child: CanvasEdgeToolbar(
+                  zone: CanvasToolbarZone.top,
+                  image: image,
+                  group: _group(image),
+                  focus: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      for (final entry in {'variations': '63', 'upscale': '1'}.entries) {
+        final pill = find.byKey(
+          ValueKey('canvas-cost-nai-icon-${entry.key}.svg'),
+        );
+        final number = find.descendant(
+          of: pill,
+          matching: find.text(entry.value),
+        );
+        final icon = find.descendant(
+          of: pill,
+          matching: find.byType(SvgPicture),
+        );
+        expect(number, findsOneWidget);
+        expect(icon, findsOneWidget);
+        expect(
+          tester.getRect(number).right,
+          lessThan(tester.getRect(icon).left),
+        );
+        final picture = tester.widget<SvgPicture>(icon);
+        expect(
+          (picture.bytesLoader as SvgAssetLoader).assetName,
+          'assets/icons/nai-icon-anlas.svg',
+        );
+        expect(tester.getSize(pill).height, lessThanOrEqualTo(26));
+      }
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('top zone renders 7 icons + divider', (tester) async {
       final img = _img(id: 'a');
       await tester.pumpWidget(
@@ -65,9 +121,17 @@ void main() {
           ),
         ),
       );
-      expect(find.byType(SvgPicture), findsNWidgets(7));
-      // No metadata quote yet; opening upscale settings is not a cloud request.
-      expect(find.text('7'), findsNothing);
+      expect(find.byType(SvgPicture), findsNWidgets(8));
+      // Unknown variation metadata stays unquoted; selected-source upscale is 7.
+      expect(
+        find.byKey(const ValueKey('canvas-cost-nai-icon-variations.svg')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('canvas-cost-nai-icon-upscale.svg')),
+        findsOneWidget,
+      );
+      expect(find.text('7'), findsOneWidget);
     });
 
     testWidgets('bottomStart renders WxH + settings + seed', (tester) async {

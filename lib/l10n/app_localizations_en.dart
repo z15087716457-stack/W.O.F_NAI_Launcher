@@ -3468,6 +3468,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get characterCanvas_title => 'Character Positions';
 
   @override
+  String get characterCanvas_finishEditing => 'Finish Editing Positions';
+
+  @override
   String get characterCanvas_aiChoice => 'AI\'s Choice';
 
   @override

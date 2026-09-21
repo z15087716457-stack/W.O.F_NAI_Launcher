@@ -6313,6 +6313,12 @@ abstract class AppLocalizations {
   /// **'Character Positions'**
   String get characterCanvas_title;
 
+  /// Button that exits character position editing
+  ///
+  /// In en, this message translates to:
+  /// **'Finish Editing Positions'**
+  String get characterCanvas_finishEditing;
+
   /// No description provided for @characterCanvas_aiChoice.
   ///
   /// In en, this message translates to:

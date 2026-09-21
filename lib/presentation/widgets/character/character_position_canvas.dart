@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -10,7 +9,9 @@ import '../../../data/models/character/character_prompt.dart';
 import '../../providers/character_position_canvas_provider.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/generation/generation_params_selectors.dart';
+import '../../providers/generation/preview_selection_provider.dart';
 import '../../providers/image_generation_provider.dart';
+import '../../screens/generation/widgets/generation_sidebar_style.dart';
 import '../common/decoded_memory_image.dart';
 
 /// 芯片显示信息：性别符号 + 显示名
@@ -54,7 +55,7 @@ CharacterChipDisplay resolveCharacterChipDisplay(CharacterPrompt character) {
 /// 直接拖动角色锚点设置构图位置。坐标连续生效（0-1 百分比），
 /// 拖到哪 API 就收到哪，无格线、无量化。
 ///
-/// - 顶栏：标题 + AI 选择/自定义分段 + 关闭
+/// - 顶部选择角色，右下角完成退出
 /// - 芯片条：每个角色一个切换芯片，点击选中（与角色卡编辑态联动）
 /// - AI 选择模式：锚点隐藏，位置数据保留，切回自定义原样恢复
 class CharacterPositionCanvasView extends ConsumerStatefulWidget {
@@ -82,9 +83,11 @@ class _CharacterPositionCanvasViewState
 
     return Column(
       children: [
-        _buildHeader(context, theme, l10n, config.globalAiChoice),
         if (characters.isNotEmpty)
-          _ChipBar(characters: characters, selectedId: selectedId),
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 8),
+            child: _ChipBar(characters: characters, selectedId: selectedId),
+          ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -92,58 +95,35 @@ class _CharacterPositionCanvasViewState
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Text(
-            config.globalAiChoice
-                ? l10n.characterCanvas_aiHint
-                : l10n.characterCanvas_dragHint,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-            ),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  config.globalAiChoice
+                      ? l10n.characterCanvas_aiHint
+                      : l10n.characterCanvas_dragHint,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: .6),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              FilledButton(
+                key: const ValueKey('finish-character-positions'),
+                onPressed: () =>
+                    ref.read(characterPositionCanvasProvider.notifier).close(),
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+                child: Text(l10n.characterCanvas_finishEditing),
+              ),
+            ],
           ),
         ),
       ],
-    );
-  }
-
-  // ==================== 顶栏 ====================
-
-  Widget _buildHeader(
-    BuildContext context,
-    ThemeData theme,
-    AppLocalizations l10n,
-    bool globalAiChoice,
-  ) {
-    final colorScheme = theme.colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Icon(
-            Icons.control_camera,
-            size: 20,
-            color: colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            l10n.characterCanvas_title,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const Spacer(),
-          IconButton(
-            onPressed: () =>
-                ref.read(characterPositionCanvasProvider.notifier).close(),
-            icon: const Icon(Icons.close, size: 20),
-            tooltip: l10n.common_close,
-            style: IconButton.styleFrom(
-              foregroundColor: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -161,9 +141,10 @@ class _CharacterPositionCanvasViewState
       generationParamsNotifierProvider.select(selectPreviewDimensionsViewData),
     );
 
-    final backgroundImage = generationState.displayImages.isNotEmpty
-        ? generationState.displayImages.first
-        : null;
+    final selectedImageId = ref.watch(generationPreviewSelectionProvider);
+    final backgroundImage =
+        generationState.findImageById(selectedImageId) ??
+        generationState.displayImages.firstOrNull;
     final aspectRatio =
         backgroundImage?.aspectRatio ??
         previewDimensions.width / previewDimensions.height;
@@ -171,7 +152,8 @@ class _CharacterPositionCanvasViewState
     return AspectRatio(
       aspectRatio: aspectRatio,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+        key: const ValueKey('character-position-surface'),
+        borderRadius: BorderRadius.circular(3),
         child: LayoutBuilder(
           builder: (context, constraints) {
             final size = constraints.biggest;
@@ -192,13 +174,11 @@ class _CharacterPositionCanvasViewState
                 ] else
                   Container(
                     decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.4,
-                      ),
+                      color: GenSidebarStyle.promptSurface(theme),
                       border: Border.all(
                         color: colorScheme.outline.withValues(alpha: 0.3),
                       ),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(3),
                     ),
                   ),
                 if (config.globalAiChoice)
@@ -292,7 +272,7 @@ class _CharacterPositionCanvasViewState
     final isSelected = selectedId == character.id;
     final isDragging = _draggingId == character.id;
     final position = _anchorPosition(config, character);
-    final diameter = isDragging ? 40.0 : (isSelected ? 36.0 : 32.0);
+    const diameter = 28.0;
     final centerX = position.column * canvasSize.width;
     final centerY = position.row * canvasSize.height;
 
@@ -304,6 +284,8 @@ class _CharacterPositionCanvasViewState
       top: centerY - diameter / 2,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
+        onTap: () =>
+            ref.read(selectedCharacterIdProvider.notifier).select(character.id),
         onPanStart: (_) {
           ref.read(selectedCharacterIdProvider.notifier).select(character.id);
           setState(() {
@@ -336,10 +318,21 @@ class _CharacterPositionCanvasViewState
 
   void _commitDrag(CharacterPrompt character) {
     if (_draggingId != character.id) return;
+    // A prompt/name may have changed while dragging; commit only coordinates
+    // against the current character rather than restoring a stale snapshot.
+    final current = ref
+        .read(characterPromptNotifierProvider)
+        .characters
+        .where((item) => item.id == character.id)
+        .firstOrNull;
+    if (current == null) {
+      setState(() => _draggingId = null);
+      return;
+    }
     ref
         .read(characterPromptNotifierProvider.notifier)
         .updateCharacter(
-          character.copyWith(
+          current.copyWith(
             positionMode: CharacterPositionMode.custom,
             customPosition: CharacterPosition(
               mode: CharacterPositionMode.custom,
@@ -367,10 +360,12 @@ class CharacterPositionModeSegments extends ConsumerWidget {
       characterPromptNotifierProvider.select((c) => c.globalAiChoice),
     );
     final canvasOpen = ref.watch(characterPositionCanvasProvider);
+    final canvasAvailable = ref.watch(characterPositionCanvasAvailableProvider);
 
     Widget segment(Widget child) => expanded ? Expanded(child: child) : child;
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
+      key: const ValueKey('character-position-segments'),
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
@@ -380,10 +375,10 @@ class CharacterPositionModeSegments extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           segment(
-            _ModeSegment(
+            SidebarSegmentButton(
+              key: const ValueKey('character-position-ai'),
               selected: globalAiChoice,
-              radius: BorderRadius.circular(3),
-              onTap: () => ref
+              onPressed: () => ref
                   .read(characterPromptNotifierProvider.notifier)
                   .setGlobalAiChoice(true),
               child: Text(
@@ -394,11 +389,12 @@ class CharacterPositionModeSegments extends ConsumerWidget {
               ),
             ),
           ),
+          const SizedBox(width: 3),
           segment(
-            _ModeSegment(
+            SidebarSegmentButton(
+              key: const ValueKey('character-position-custom'),
               selected: !globalAiChoice,
-              radius: BorderRadius.circular(3),
-              onTap: () => ref
+              onPressed: () => ref
                   .read(characterPromptNotifierProvider.notifier)
                   .setGlobalAiChoice(false),
               child: Text(
@@ -409,23 +405,52 @@ class CharacterPositionModeSegments extends ConsumerWidget {
               ),
             ),
           ),
+          Container(
+            key: const ValueKey('character-position-divider'),
+            width: 1,
+            height: 22,
+            margin: const EdgeInsets.symmetric(horizontal: 3),
+            color: colorScheme.outline.withValues(alpha: .25),
+          ),
           // 位置画布入口（官网网格图标）
           Tooltip(
             message: l10n.characterCanvas_title,
             waitDuration: const Duration(milliseconds: 500),
-            child: _ModeSegment(
+            child: SidebarSegmentButton(
+              key: const ValueKey('character-position-toggle'),
               selected: canvasOpen,
-              radius: const BorderRadius.horizontal(right: Radius.circular(6)),
-              onTap: () =>
-                  ref.read(characterPositionCanvasProvider.notifier).toggle(),
+              padding: const EdgeInsets.symmetric(horizontal: 7),
+              onPressed: canvasAvailable
+                  ? () {
+                      if (!canvasOpen) {
+                        ref
+                            .read(characterPromptNotifierProvider.notifier)
+                            .setGlobalAiChoice(false);
+                        final characters = ref
+                            .read(characterPromptNotifierProvider)
+                            .characters;
+                        final selectedId = ref.read(
+                          selectedCharacterIdProvider,
+                        );
+                        if (!characters.any((item) => item.id == selectedId)) {
+                          ref
+                              .read(selectedCharacterIdProvider.notifier)
+                              .select(characters.first.id);
+                        }
+                      }
+                      ref
+                          .read(characterPositionCanvasProvider.notifier)
+                          .toggle();
+                    }
+                  : null,
               child: SvgPicture.asset(
                 'assets/icons/nai-icon-characterpositions.svg',
                 width: 15,
                 height: 15,
                 colorFilter: ColorFilter.mode(
-                  canvasOpen
-                      ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                  colorScheme.onSurface.withValues(
+                    alpha: !canvasAvailable ? .3 : (canvasOpen ? 1 : .65),
+                  ),
                   BlendMode.srcIn,
                 ),
               ),
@@ -447,43 +472,6 @@ class CharacterPositionModeSegments extends ConsumerWidget {
   }
 }
 
-/// 分段按钮外壳（官网式中性高亮：选中段灰底+实描边，不灌主题色）
-class _ModeSegment extends StatelessWidget {
-  final bool selected;
-  final BorderRadius radius;
-  final VoidCallback onTap;
-  final Widget child;
-
-  const _ModeSegment({
-    required this.selected,
-    required this.radius,
-    required this.onTap,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: radius,
-      child: Container(
-        height: 28,
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: selected
-              ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.55)
-              : Colors.transparent,
-          borderRadius: radius,
-        ),
-        child: child,
-      ),
-    );
-  }
-}
-
 /// 角色切换芯片条
 class _ChipBar extends ConsumerWidget {
   final List<CharacterPrompt> characters;
@@ -494,24 +482,27 @@ class _ChipBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
-      height: 34,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            for (var i = 0; i < characters.length; i++) ...[
-              _CharacterChip(
-                character: characters[i],
-                index: i,
-                selected: characters[i].id == selectedId,
-                onTap: () => ref
-                    .read(selectedCharacterIdProvider.notifier)
-                    .select(characters[i].id),
-              ),
-              const SizedBox(width: 6),
+      height: 38,
+      child: Center(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < characters.length; i++) ...[
+                _CharacterChip(
+                  character: characters[i],
+                  index: i,
+                  selected: characters[i].id == selectedId,
+                  onTap: () => ref
+                      .read(selectedCharacterIdProvider.notifier)
+                      .select(characters[i].id),
+                ),
+                const SizedBox(width: 6),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -538,62 +529,59 @@ class _CharacterChip extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final display = resolveCharacterChipDisplay(character);
     final foreground = selected
-        ? colorScheme.onSurface
+        ? colorScheme.surface
         : colorScheme.onSurfaceVariant;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: selected
-              ? colorScheme.surfaceContainerHighest
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: selected
-                ? colorScheme.outline.withValues(alpha: 0.6)
-                : colorScheme.outline.withValues(alpha: 0.35),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '${index + 1}',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: foreground,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            if (display.genderIcon != null) ...[
-              const SizedBox(width: 3),
-              Icon(display.genderIcon, size: 14, color: foreground),
-            ],
-            if (display.label != null) ...[
-              const SizedBox(width: 4),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 120),
-                child: Text(
-                  display.label!,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: foreground,
-                  ),
+    return Material(
+      color: selected
+          ? colorScheme.onSurface
+          : GenSidebarStyle.panelSurface(theme),
+      borderRadius: BorderRadius.circular(3),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(3),
+        hoverColor: foreground.withValues(alpha: .1),
+        child: Container(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${index + 1}',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: foreground,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
+              if (display.genderIcon != null) ...[
+                const SizedBox(width: 3),
+                Icon(display.genderIcon, size: 14, color: foreground),
+              ],
+              if (display.label != null) ...[
+                const SizedBox(width: 4),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 120),
+                  child: Text(
+                    display.label!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: foreground,
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// 锚点圆点：性别色填充（词库角色显示圆形缩略图）+ 序号 + 白描边
+/// Neutral numbered markers match the role chips without covering the image.
 class _AnchorDot extends StatelessWidget {
   final CharacterPrompt character;
   final int index;
@@ -607,28 +595,14 @@ class _AnchorDot extends StatelessWidget {
     required this.emphasized,
   });
 
-  static Color _genderColor(CharacterGender gender) {
-    switch (gender) {
-      case CharacterGender.female:
-        return const Color(0xFFEC4899);
-      case CharacterGender.male:
-        return const Color(0xFF3B82F6);
-      case CharacterGender.other:
-        return const Color(0xFF8B5CF6);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final hasThumbnail =
-        character.thumbnailPath != null && character.thumbnailPath!.isNotEmpty;
-
     final anchor = AnimatedContainer(
       duration: const Duration(milliseconds: 120),
       width: diameter,
       height: diameter,
       decoration: BoxDecoration(
-        color: _genderColor(character.effectiveGender),
+        color: const Color(0xfffafafa),
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: emphasized ? 2.5 : 2),
         boxShadow: const [
@@ -640,32 +614,15 @@ class _AnchorDot extends StatelessWidget {
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (hasThumbnail)
-            Image.file(
-              File(character.thumbnailPath!),
-              fit: BoxFit.cover,
-              cacheWidth: DecodedMemoryImage.resolveCacheDimension(
-                logicalSize: math.max(diameter, 40),
-                constrainedSize: null,
-                pixelRatio: MediaQuery.devicePixelRatioOf(context),
-              ),
-              errorBuilder: (context, error, stack) => const SizedBox.shrink(),
-            ),
-          Center(
-            child: Text(
-              '${index + 1}',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: diameter * 0.4,
-                fontWeight: FontWeight.w600,
-                shadows: const [Shadow(color: Colors.black87, blurRadius: 4)],
-              ),
-            ),
+      child: Center(
+        child: Text(
+          '${index + 1}',
+          style: TextStyle(
+            color: const Color(0xff202020),
+            fontSize: diameter * 0.4,
+            fontWeight: FontWeight.w600,
           ),
-        ],
+        ),
       ),
     );
 
