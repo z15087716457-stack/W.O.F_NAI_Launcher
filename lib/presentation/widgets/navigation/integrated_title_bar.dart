@@ -185,7 +185,8 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
       color: colorScheme.surface,
       child: Row(
         children: [
-          const SizedBox(width: 12),
+          // Center the 50px logo over the collapsed 60px navigation rail.
+          const SizedBox(width: 5),
           Image.asset(
             'assets/images/wof_logo_block.png',
             width: 50,
@@ -194,12 +195,17 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              'NAI Studio',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: StudioTypography.wordmark.copyWith(
-                color: colorScheme.onSurface.withValues(alpha: 0.9),
+            // Pixel Line's visible glyphs sit slightly above its line center.
+            child: Transform.translate(
+              offset: const Offset(0, 3),
+              child: Text(
+                'NAI Studio',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: StudioTypography.wordmark.copyWith(
+                  fontSize: 17,
+                  color: colorScheme.onSurface.withValues(alpha: 0.9),
+                ),
               ),
             ),
           ),
