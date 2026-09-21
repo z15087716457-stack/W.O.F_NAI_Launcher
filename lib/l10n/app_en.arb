@@ -400,6 +400,31 @@
   "generation_canvasZoomToFill": "Zoom to fill (allows >100%)",
   "generation_canvasSmoothZoom": "Smooth zoom (Ctrl+scroll)",
   "generation_canvasEmpty": "Canvas is empty",
+  "generation_canvasBackground": "Transparency background",
+  "generation_canvasBackgroundChecker": "Checkerboard",
+  "generation_canvasBackgroundCheckerLight": "Light checkerboard",
+  "generation_canvasBackgroundCheckerDark": "Dark checkerboard",
+  "generation_canvasBackgroundNone": "No background",
+  "generation_canvasBackgroundBlack": "Black",
+  "generation_canvasBackgroundWhite": "White",
+  "generation_canvasBackgroundGray": "Gray",
+  "generation_canvasBackgroundRed": "Red",
+  "generation_canvasBackgroundGreen": "Green",
+  "generation_canvasBackgroundBlue": "Blue",
+  "generation_canvasBackgroundCustom": "Custom color",
+  "generation_canvasSetInitImage": "Use as img2img source",
+  "generation_canvasSendToTools": "Send to image tools",
+  "generation_canvasPinImage": "Pin image",
+  "generation_canvasUnpinImage": "Unpin image",
+  "generation_canvasUseSeed": "Click to use this seed",
+  "generation_canvasPinnedCount": "Pins {count}",
+  "@generation_canvasPinnedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "generation_params": "Parameters",
   "generation_paramsSettings": "Parameter Settings",
   "generation_history": "History",

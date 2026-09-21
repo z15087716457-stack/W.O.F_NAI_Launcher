@@ -41,6 +41,9 @@ Widget _wrap(Widget child) {
       estimatedCostProvider.overrideWithValue(7),
     ],
     child: MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('zh'),
       home: Scaffold(body: Center(child: child)),
     ),
   );

@@ -12,11 +12,201 @@ import 'package:nai_launcher/presentation/providers/history_click_behavior_provi
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/history_panel.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/history_batch.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import 'package:nai_launcher/presentation/widgets/common/image_detail/image_detail_viewer.dart';
 import 'package:nai_launcher/presentation/widgets/common/selectable_image_card.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test(
+    'groups only explicit runs, sorts by slot and deduplicates current/history',
+    () {
+      final images = [
+        for (var i = 0; i < 4; i++)
+          _image('batch-$i').copyWith(generationRunId: 7, batchIndex: i),
+      ];
+      final legacy1 = _image('legacy-1');
+      final legacy2 = _image('legacy-2');
+      final batches = buildHistoryBatches(
+        ImageGenerationState(
+          currentImages: [images[0]],
+          history: [...images.reversed, legacy1, legacy2],
+        ),
+      );
+      expect(batches, hasLength(3));
+      expect(
+        batches.first.images.map((image) => image.id),
+        images.map((image) => image.id),
+      );
+      expect(batches.first.cover?.id, images.first.id);
+      expect(batches.first.count, 4);
+      expect(batches.skip(1).map((batch) => batch.count), [1, 1]);
+    },
+  );
+
+  testWidgets('batch uses first cover and selects/deletes all four images', (
+    tester,
+  ) async {
+    final images = [
+      for (var i = 0; i < 4; i++)
+        _image('batch-$i').copyWith(generationRunId: 7, batchIndex: i),
+    ];
+    final container = _createContainer(
+      images.reversed.toList(),
+      behavior: HistoryClickBehavior.selectPreview,
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(_historyApp(container));
+    await tester.pumpAndSettle();
+    expect(find.byType(SelectableImageCard), findsOneWidget);
+    expect(find.byKey(const ValueKey('batch-0')), findsOneWidget);
+    expect(find.text('×4'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('batch-0')));
+    await tester.pumpAndSettle();
+    expect(container.read(canvasHistoryFocusRequestProvider)?.group, 'run:7');
+    expect(container.read(generationPreviewSelectionProvider), 'batch-0');
+    await tester.tap(find.byIcon(Icons.library_add_check_outlined));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('batch-0')));
+    await tester.pumpAndSettle();
+    expect(find.text('保存 (4)'), findsOneWidget);
+    expect(find.text('打包 (4)'), findsOneWidget);
+    await tester.tap(find.byTooltip('删除选中图像 (4)'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('清除').last);
+    await tester.pumpAndSettle();
+    expect(container.read(imageGenerationNotifierProvider).history, isEmpty);
+    expect(find.byType(SelectableImageCard), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'selecting a non-cover child scrolls to and highlights its batch',
+    (tester) async {
+      final cover = _image(
+        'target-cover',
+      ).copyWith(generationRunId: 1, batchIndex: 0);
+      final child = _image(
+        'target-child',
+      ).copyWith(generationRunId: 1, batchIndex: 1);
+      final container = _createContainer([
+        for (var i = 0; i < 8; i++)
+          _image('other-$i').copyWith(generationRunId: i + 2, batchIndex: 0),
+        child,
+        cover,
+      ], behavior: HistoryClickBehavior.selectPreview);
+      addTearDown(container.dispose);
+      await tester.pumpWidget(_historyApp(container));
+      await tester.pumpAndSettle();
+      container
+          .read(generationPreviewSelectionProvider.notifier)
+          .select(child.id);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 150));
+      final card = tester.widget<SelectableImageCard>(
+        find.byKey(ValueKey(cover.id)),
+      );
+      expect(card.isPreviewActive, isTrue);
+      expect(find.byKey(ValueKey(child.id)), findsNothing);
+      expect(
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
+        greaterThan(0),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'waiting, out-of-order responses and completion keep one row and cover',
+    (tester) async {
+      final images = [
+        for (var i = 0; i < 4; i++)
+          _image('stream-$i').copyWith(generationRunId: 9, batchIndex: i),
+      ];
+      final container = _createContainer(
+        [],
+        behavior: HistoryClickBehavior.selectPreview,
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(imageGenerationNotifierProvider.notifier);
+      notifier.state = notifier.state.copyWith(
+        status: GenerationStatus.generating,
+        generationRunId: 9,
+        totalImages: 4,
+      );
+      await tester.pumpWidget(_historyApp(container));
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(find.byType(SelectableImageCard), findsOneWidget);
+      expect(find.text('×4'), findsOneWidget);
+      await tester.tap(find.byType(SelectableImageCard));
+      await tester.pump();
+      expect(container.read(canvasHistoryFocusRequestProvider)?.group, 'run:9');
+      notifier.state = notifier.state.copyWith(
+        currentImages: [images[2]],
+        history: [images[2]],
+        currentImage: 3,
+      );
+      await tester.pump();
+      expect(
+        tester
+            .widget<SelectableImageCard>(find.byType(SelectableImageCard))
+            .isGenerating,
+        isTrue,
+      );
+      notifier.state = notifier.state.copyWith(
+        currentImages: [images[2], images[0]],
+        history: [images[2], images[0]],
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(SelectableImageCard), findsOneWidget);
+      expect(find.byKey(const ValueKey('stream-0')), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.library_add_check_outlined));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('stream-0')));
+      await tester.pumpAndSettle();
+      expect(find.text('保存 (2)'), findsOneWidget);
+      notifier.state = notifier.state.copyWith(
+        status: GenerationStatus.idle,
+        currentImages: [],
+        history: images.reversed.toList(),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(SelectableImageCard), findsOneWidget);
+      expect(find.byKey(const ValueKey('stream-0')), findsOneWidget);
+      expect(find.text('×4'), findsOneWidget);
+      expect(find.text('保存 (4)'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'cancelled partial batch counts only remaining images and exits group selection',
+    (tester) async {
+      final image = _image(
+        'partial',
+      ).copyWith(generationRunId: 5, batchIndex: 2);
+      final container = _createContainer([
+        image,
+      ], behavior: HistoryClickBehavior.selectPreview);
+      addTearDown(container.dispose);
+      await tester.pumpWidget(_historyApp(container));
+      await tester.pumpAndSettle();
+      expect(find.byType(SelectableImageCard), findsOneWidget);
+      expect(find.text('×4'), findsNothing);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(find.byKey(ValueKey(image.id)));
+      await tester.pumpAndSettle();
+      expect(find.text('保存 (1)'), findsOneWidget);
+      await tester.tap(find.byKey(ValueKey(image.id)));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+      expect(find.text('保存 (1)'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   for (final locale in ['zh', 'en', 'ja']) {
     for (final width in [200.0, 280.0, 400.0]) {

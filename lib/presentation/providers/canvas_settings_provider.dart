@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/storage/local_storage_service.dart';
+import '../../core/constants/storage_keys.dart';
 import '../../core/utils/app_logger.dart';
 import '../../data/services/canvas_pin_repository.dart';
 import 'generation/generation_models.dart';
@@ -50,10 +51,84 @@ class CanvasReducedMotionNotifier extends _$CanvasReducedMotionNotifier {
 @Riverpod(keepAlive: true)
 class CanvasZoomToFillNotifier extends _$CanvasZoomToFillNotifier {
   @override
-  bool build() => false;
+  bool build() =>
+      ref
+          .read(localStorageServiceProvider)
+          .getSetting<bool>(
+            StorageKeys.canvasZoomToFill,
+            defaultValue: false,
+          ) ??
+      false;
 
-  void toggle() => state = !state;
-  void set(bool value) => state = value;
+  void toggle() => set(!state);
+  void set(bool value) {
+    state = value;
+    unawaited(
+      _saveCanvasPreference(
+        ref.read(localStorageServiceProvider),
+        StorageKeys.canvasZoomToFill,
+        value,
+      ),
+    );
+  }
+}
+
+/// Preview-only transparency backdrop. Never changes exported pixels or params.
+@Riverpod(keepAlive: true)
+class CanvasImageBackgroundNotifier extends _$CanvasImageBackgroundNotifier {
+  static const presets = [
+    'checker',
+    'checkerLight',
+    'checkerDark',
+    'none',
+    'black',
+    'white',
+    'gray',
+    'red',
+    'green',
+    'blue',
+  ];
+
+  static bool isValid(String value) =>
+      presets.contains(value) || RegExp(r'^#[0-9a-fA-F]{6}$').hasMatch(value);
+
+  @override
+  String build() {
+    final value = ref
+        .read(localStorageServiceProvider)
+        .getSetting<String>(
+          StorageKeys.canvasImageBackground,
+          defaultValue: 'checker',
+        );
+    return value != null && isValid(value) ? value : 'checker';
+  }
+
+  void set(String value) {
+    if (!isValid(value)) return;
+    state = value;
+    unawaited(
+      _saveCanvasPreference(
+        ref.read(localStorageServiceProvider),
+        StorageKeys.canvasImageBackground,
+        value,
+      ),
+    );
+  }
+}
+
+Future<void> _saveCanvasPreference<T>(
+  LocalStorageService storage,
+  String key,
+  T value,
+) async {
+  try {
+    await storage.setSetting(key, value);
+  } catch (error) {
+    AppLogger.w(
+      'Could not persist canvas preference $key: $error',
+      'CanvasSettings',
+    );
+  }
 }
 
 /// 平滑缩放（官网 smoothZoom 设置）：Ctrl+滚轮平滑档 exp(-0.01·dy)，

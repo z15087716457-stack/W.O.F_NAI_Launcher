@@ -878,6 +878,62 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_canvasEmpty => 'キャンバスは空です';
 
   @override
+  String get generation_canvasBackground => '透明部分の背景';
+
+  @override
+  String get generation_canvasBackgroundChecker => '市松模様';
+
+  @override
+  String get generation_canvasBackgroundCheckerLight => '明るい市松模様';
+
+  @override
+  String get generation_canvasBackgroundCheckerDark => '暗い市松模様';
+
+  @override
+  String get generation_canvasBackgroundNone => '背景なし';
+
+  @override
+  String get generation_canvasBackgroundBlack => '黒';
+
+  @override
+  String get generation_canvasBackgroundWhite => '白';
+
+  @override
+  String get generation_canvasBackgroundGray => 'グレー';
+
+  @override
+  String get generation_canvasBackgroundRed => '赤';
+
+  @override
+  String get generation_canvasBackgroundGreen => '緑';
+
+  @override
+  String get generation_canvasBackgroundBlue => '青';
+
+  @override
+  String get generation_canvasBackgroundCustom => 'カスタムカラー';
+
+  @override
+  String get generation_canvasSetInitImage => '画像から生成の元画像に設定';
+
+  @override
+  String get generation_canvasSendToTools => '画像ツールに送る';
+
+  @override
+  String get generation_canvasPinImage => '画像を固定';
+
+  @override
+  String get generation_canvasUnpinImage => '固定を解除';
+
+  @override
+  String get generation_canvasUseSeed => 'クリックしてこのシードを再利用';
+
+  @override
+  String generation_canvasPinnedCount(int count) {
+    return '固定 $count';
+  }
+
+  @override
   String get generation_params => 'パラメータ';
 
   @override

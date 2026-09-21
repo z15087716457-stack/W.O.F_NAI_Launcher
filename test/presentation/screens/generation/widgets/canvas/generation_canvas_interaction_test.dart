@@ -139,6 +139,43 @@ class _Pins extends CanvasPinnedNotifier {
 }
 
 void main() {
+  testWidgets('history batch request returns from child focus to whole batch', (
+    tester,
+  ) async {
+    final images = [for (var i = 0; i < 4; i++) _image(1, index: i)];
+    final container = _container(
+      ImageGenerationState(history: images.reversed.toList()),
+    );
+    addTearDown(container.dispose);
+    await _mount(tester, container);
+    await tester.pumpAndSettle();
+    container
+        .read(generationCanvasGroupSelectionProvider.notifier)
+        .selectTile('run:1', 0);
+    container
+        .read(generationPreviewSelectionProvider.notifier)
+        .select(images.first.id);
+    await tester.pump();
+    container.read(canvasHistoryFocusRequestProvider.notifier).state = (
+      group: 'run:1',
+      imageId: images.first.id,
+      revision: 1,
+    );
+    await tester.pumpAndSettle();
+    final focus = container.read(generationCanvasGroupSelectionProvider)!;
+    expect(focus.group, 'run:1');
+    expect(focus.subimage, isNull);
+    final camera = container.read(generationCanvasCameraProvider);
+    final viewport = tester.getSize(find.byType(GenerationCanvasView));
+    final visible = camera.visibleWorldRect(viewport);
+    final layout = container.read(canvasFeedLayoutProvider);
+    for (final item in layout.items) {
+      expect(visible.contains(item.worldRect.topLeft), isTrue);
+      expect(visible.contains(item.worldRect.bottomRight), isTrue);
+    }
+    expect(tester.takeException(), isNull);
+    await _unmount(tester);
+  });
   testWidgets('hover toolbar outside the image remains clickable', (
     tester,
   ) async {
@@ -358,9 +395,10 @@ void main() {
           .read(generationPreviewSelectionProvider.notifier)
           .select(old.id);
       await tester.pump();
-      final tooltip = find.byWidgetPredicate(
-        (w) => w is Tooltip && w.message == 'Variations',
-      );
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(GenerationCanvasView)),
+      )!;
+      final tooltip = find.byTooltip(l10n.img2img_generateVariations);
       final button = tester.widget<InkWell>(
         find.descendant(of: tooltip, matching: find.byType(InkWell)),
       );

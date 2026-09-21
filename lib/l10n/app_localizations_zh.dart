@@ -866,6 +866,62 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_canvasEmpty => '画布为空';
 
   @override
+  String get generation_canvasBackground => '透明区域底色';
+
+  @override
+  String get generation_canvasBackgroundChecker => '棋盘格';
+
+  @override
+  String get generation_canvasBackgroundCheckerLight => '浅色棋盘格';
+
+  @override
+  String get generation_canvasBackgroundCheckerDark => '深色棋盘格';
+
+  @override
+  String get generation_canvasBackgroundNone => '无底色';
+
+  @override
+  String get generation_canvasBackgroundBlack => '黑色';
+
+  @override
+  String get generation_canvasBackgroundWhite => '白色';
+
+  @override
+  String get generation_canvasBackgroundGray => '灰色';
+
+  @override
+  String get generation_canvasBackgroundRed => '红色';
+
+  @override
+  String get generation_canvasBackgroundGreen => '绿色';
+
+  @override
+  String get generation_canvasBackgroundBlue => '蓝色';
+
+  @override
+  String get generation_canvasBackgroundCustom => '自定义颜色';
+
+  @override
+  String get generation_canvasSetInitImage => '设为图生图底图';
+
+  @override
+  String get generation_canvasSendToTools => '发送到图像工具';
+
+  @override
+  String get generation_canvasPinImage => '固定图片';
+
+  @override
+  String get generation_canvasUnpinImage => '取消固定';
+
+  @override
+  String get generation_canvasUseSeed => '点击复用此种子';
+
+  @override
+  String generation_canvasPinnedCount(int count) {
+    return '固定 $count';
+  }
+
+  @override
   String get generation_params => '参数';
 
   @override

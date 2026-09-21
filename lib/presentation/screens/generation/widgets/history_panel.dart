@@ -22,6 +22,7 @@ import '../../../../data/services/image_metadata_service.dart';
 import '../../../../data/repositories/gallery_folder_repository.dart';
 import '../../../providers/canvas_settings_provider.dart';
 import 'canvas/canvas_feed_layout.dart';
+import 'history_batch.dart';
 import '../../../providers/generation/generation_params_selectors.dart';
 import '../../../providers/generation/preview_selection_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
@@ -66,9 +67,9 @@ double resolveCurrentHistoryPreviewAspectRatio(
 }
 
 class _HistoryRowDescriptor {
-  const _HistoryRowDescriptor({required this.imageId, required this.extent});
+  const _HistoryRowDescriptor({required this.batch, required this.extent});
 
-  final String? imageId;
+  final HistoryBatch batch;
   final double extent;
 }
 
@@ -82,6 +83,8 @@ class HistoryPanel extends ConsumerStatefulWidget {
 
 class _HistoryPanelState extends ConsumerState<HistoryPanel> {
   final Set<String> _selectedIds = {};
+  final Set<String> _selectedBatchKeys = {};
+  List<HistoryBatch> _batches = const [];
   final ShareImagePreparationService _sharePreparationService =
       ShareImagePreparationService.instance;
   Timer? _historyScrollIdleTimer;
@@ -90,6 +93,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
   bool _isHistoryScrolling = false;
   String? _lastSharePreparationMaintenanceKey;
   Uint8List? _lastStreamPreviewBytes;
+  int? _lastStreamPreviewRunId;
   final Map<String, Uint8List> _completionPreviewPlaceholders = {};
   final Map<String, bool> _favoriteStates = {};
   final Map<String, String?> _favoriteStatePaths = {};
@@ -139,6 +143,17 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(imageGenerationNotifierProvider);
+    _batches = buildHistoryBatches(state);
+    final validKeys = _batches.map((batch) => batch.key).toSet();
+    _selectedBatchKeys.removeWhere((key) => !validKeys.contains(key));
+    _selectedIds.retainAll(
+      state.selectableMergedImages.map((image) => image.id),
+    );
+    for (final batch in _batches) {
+      if (_selectedBatchKeys.contains(batch.key)) {
+        _selectedIds.addAll(batch.selectableImages.map((image) => image.id));
+      }
+    }
     final hasContent =
         state.history.isNotEmpty || state.currentImages.isNotEmpty;
     final stripMetadata = ref.watch(
@@ -202,7 +217,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          'Pins $count',
+                          context.l10n.generation_canvasPinnedCount(count),
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.onSecondaryContainer,
                           ),
@@ -224,7 +239,10 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                 onPressed: hasContent
                     ? () => setState(() {
                         _multiSelectMode = !_multiSelectMode;
-                        if (!_multiSelectMode) _selectedIds.clear();
+                        if (!_multiSelectMode) {
+                          _selectedIds.clear();
+                          _selectedBatchKeys.clear();
+                        }
                       })
                     : null,
               ),
@@ -346,6 +364,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
       }
       setState(() {
         _selectedIds.clear();
+        _selectedBatchKeys.clear();
       });
     }
   }
@@ -543,15 +562,25 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
   }
 
   void _syncCompletionPreviewPlaceholder(ImageGenerationState state) {
-    if (state.hasStreamPreview) {
-      _lastStreamPreviewBytes = state.streamPreview;
-      return;
+    if (_lastStreamPreviewRunId != state.generationRunId) {
+      _lastStreamPreviewRunId = state.generationRunId;
+      _lastStreamPreviewBytes = null;
     }
-
-    if (_lastStreamPreviewBytes != null && state.currentImages.isNotEmpty) {
-      final newestImage = state.currentImages.first;
+    final first = state.currentImages
+        .where((image) => image.batchIndex == 0 || image.batchIndex == null)
+        .firstOrNull;
+    final preview =
+        state.streamPreviewSlots
+            .where((slot) => slot.imageNumber == 1)
+            .firstOrNull
+            ?.previewBytes ??
+        (state.currentImage <= 1 ? state.streamPreview : null);
+    if (first == null && preview != null && preview.isNotEmpty) {
+      _lastStreamPreviewBytes = preview;
+    }
+    if (_lastStreamPreviewBytes != null && first != null) {
       _completionPreviewPlaceholders.putIfAbsent(
-        newestImage.id,
+        first.id,
         () => _lastStreamPreviewBytes!,
       );
       _lastStreamPreviewBytes = null;
@@ -573,27 +602,6 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     setState(() {});
   }
 
-  List<StreamPreviewSlot> _visibleStreamPreviewSlots(
-    ImageGenerationState state,
-  ) {
-    final completedCount = state.currentImages.length;
-    return [
-      for (final slot in state.streamPreviewSlots)
-        if (slot.imageNumber > completedCount) slot,
-    ]..sort((a, b) => a.imageNumber.compareTo(b.imageNumber));
-  }
-
-  /// 计算当前生成区块的项目数
-  int _getCurrentGenerationCount(ImageGenerationState state) {
-    if (!_hasCurrentGeneration(state)) return 0;
-    int count = state.currentImages.length;
-    if (state.isGenerating) {
-      final previewSlotCount = _visibleStreamPreviewSlots(state).length;
-      count += previewSlotCount > 0 ? previewSlotCount : 1;
-    }
-    return count;
-  }
-
   Widget _buildHistoryGrid(
     ImageGenerationState state,
     ThemeData theme,
@@ -605,284 +613,41 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     final previewDimensions = ref.watch(
       generationParamsNotifierProvider.select(selectPreviewDimensionsViewData),
     );
-    final history = state.history;
-
-    // 计算当前生成区块的项目数
-    final currentGenerationCount = _getCurrentGenerationCount(state);
-
-    // 使用唯一 ID 去重：收集 currentImages 的 ID
-    final currentImageIds = <String>{};
-    for (final img in state.currentImages) {
-      currentImageIds.add(img.id);
-    }
-
-    // 从历史中过滤掉已在 currentImages 中显示的图像
-    final deduplicatedHistory = history
-        .where((img) => !currentImageIds.contains(img.id))
-        .toList();
-
-    // 官网「×N」角标：同一次生成请求（generationRunId）的件数
-    final runCounts = <int, int>{};
-    for (final img in [...state.currentImages, ...deduplicatedHistory]) {
-      final runId = img.generationRunId;
-      if (runId != null && runId > 0) {
-        runCounts[runId] = (runCounts[runId] ?? 0) + 1;
-      }
-    }
-
-    final totalCount = currentGenerationCount + deduplicatedHistory.length;
-
     return LayoutBuilder(
       builder: (context, constraints) {
-        final rowWidth = (constraints.maxWidth - 16).clamp(
-          1.0,
-          double.infinity,
-        );
-        // 官网：缩略图统一 1:1 方框 contain（sc-f0ebfba1-25 aspect-ratio:1/1）
-        final squareExtent = rowWidth + 8;
-        final descriptors = <_HistoryRowDescriptor>[
-          for (var index = 0; index < currentGenerationCount; index++)
-            _HistoryRowDescriptor(
-              imageId: index < state.currentImages.length
-                  ? state.currentImages[index].id
-                  : null,
-              extent: squareExtent,
-            ),
-          for (final image in deduplicatedHistory)
-            _HistoryRowDescriptor(imageId: image.id, extent: squareExtent),
+        final extent =
+            (constraints.maxWidth - 16).clamp(1.0, double.infinity) + 8;
+        _rowDescriptors = [
+          for (final batch in _batches)
+            _HistoryRowDescriptor(batch: batch, extent: extent),
         ];
-        _rowDescriptors = descriptors;
-        final retainedIds = descriptors
-            .map((row) => row.imageId)
-            .whereType<String>()
-            .toSet();
-        _imageKeys.removeWhere((id, _) => !retainedIds.contains(id));
-
+        final retainedKeys = _batches.map((batch) => batch.key).toSet();
+        _imageKeys.removeWhere((key, _) => !retainedKeys.contains(key));
         return NotificationListener<ScrollNotification>(
           onNotification: (notification) =>
               _handleHistoryScrollNotification(notification, stripMetadata),
           child: ListView.builder(
             controller: _scrollController,
             padding: const EdgeInsets.all(8),
-            itemCount: totalCount,
-            itemExtentBuilder: (index, _) => descriptors[index].extent,
+            itemCount: _batches.length,
+            itemExtent: extent,
             itemBuilder: (context, index) {
-              // 已完成图片与流式占位统一 1:1 方框（官网 contain 语义）。
-              if (index < currentGenerationCount) {
-                final currentImage = index < state.currentImages.length
-                    ? state.currentImages[index]
-                    : null;
-                final item = Padding(
+              final batch = _batches[index];
+              return KeyedSubtree(
+                key: _imageKeyFor(batch.key),
+                child: Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: AspectRatio(
-                    // 官网：统一 1:1 方框（contain 在卡片内部处理）
-                    aspectRatio: 1.0,
-                    child: _buildCurrentGenerationItem(
+                    aspectRatio: 1,
+                    child: _buildHistoryBatchItem(
                       context,
-                      index,
+                      batch,
                       state,
                       state.batchWidth ?? previewDimensions.width,
                       state.batchHeight ?? previewDimensions.height,
                       stripMetadata: stripMetadata,
                       clickBehavior: clickBehavior,
                       selectedPreviewId: selectedPreviewId,
-                      runCounts: runCounts,
-                    ),
-                  ),
-                );
-                return currentImage == null
-                    ? item
-                    : KeyedSubtree(
-                        key: _imageKeyFor(currentImage.id),
-                        child: item,
-                      );
-              }
-
-              // 历史图像（已去重）- 使用图像自己的宽高比
-              final historyIndex = index - currentGenerationCount;
-              final historyImage = deduplicatedHistory[historyIndex];
-              final isFavorite = _favoriteStateFor(historyImage);
-              final isFailedSnapshot = historyImage.isFailedStreamSnapshot;
-              // 计算在原始 history 中的真实索引（用于选择操作）
-              final actualHistoryIndex = history.indexOf(historyImage);
-              return KeyedSubtree(
-                key: _imageKeyFor(historyImage.id),
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: AspectRatio(
-                    // 官网：统一 1:1 方框（contain 在卡片内部处理）
-                    aspectRatio: 1.0,
-                    child: _buildPreparedHistoryItem(
-                      context: context,
-                      image: historyImage,
-                      stripMetadata: stripMetadata,
-                      childBuilder: (dragPreparationReady) =>
-                          SelectableImageCard(
-                            key: ValueKey(historyImage.id),
-                            imageBytes: historyImage.bytes,
-                            sourceFilePath: historyImage.filePath,
-                            index: actualHistoryIndex,
-                            showIndex: false,
-                            historyThumb: true,
-                            batchBadgeCount:
-                                runCounts[historyImage.generationRunId],
-                            isSelected: _selectedIds.contains(historyImage.id),
-                            isPreviewActive:
-                                selectedPreviewId == historyImage.id,
-                            imageIdentity: historyImage.id,
-                            allowRepeatedModifierTaps: true,
-                            isFavorite: isFavorite,
-                            dragPreparationReady: dragPreparationReady,
-                            enableSelection: historyImage.canBulkSelect,
-                            enableSaveAction: historyImage.canSave,
-                            enableCopyAction: historyImage.canSave,
-                            statusBadgeLabel: isFailedSnapshot
-                                ? context.l10n.generation_failedStreamSnapshot
-                                : null,
-                            statusBadgeTooltip: isFailedSnapshot
-                                ? context
-                                      .l10n
-                                      .generation_failedStreamSnapshotHint
-                                : null,
-                            onFavoriteToggle: historyImage.canFavorite
-                                ? () => _toggleHistoryFavorite(
-                                    context,
-                                    historyImage,
-                                  )
-                                : null,
-                            onSelectionChanged: (selected) {
-                              if (!historyImage.canBulkSelect) {
-                                return;
-                              }
-                              setState(() {
-                                if (selected) {
-                                  _selectedIds.add(historyImage.id);
-                                } else {
-                                  _selectedIds.remove(historyImage.id);
-                                }
-                              });
-                            },
-                            onTap: () => _handleImageTap(
-                              context,
-                              historyImage,
-                              clickBehavior,
-                            ),
-                            onDoubleTap:
-                                clickBehavior ==
-                                    HistoryClickBehavior.selectPreview
-                                ? () => _showLinkedDetail(context, historyImage)
-                                : null,
-                            onLongPress:
-                                clickBehavior ==
-                                    HistoryClickBehavior.selectPreview
-                                ? () => _showLinkedDetail(context, historyImage)
-                                : null,
-                            onFullscreen: () => _showDetailForBehavior(
-                              context,
-                              historyImage,
-                              clickBehavior,
-                            ),
-                            enableContextMenu: true,
-                            enableHoverScale: true,
-                            hoverEffectsEnabled: !_isHistoryScrolling,
-                            shareWarmupEnabled: false,
-                            onImageToImage: historyImage.canUseAsGenerationInput
-                                ? () => _sendHistoryImageToImageToImage(
-                                    context,
-                                    historyImage,
-                                  )
-                                : null,
-                            onVibeTransfer: historyImage.canUseAsGenerationInput
-                                ? () => unawaited(
-                                    _sendHistoryImageToVibeTransfer(
-                                      context,
-                                      historyImage,
-                                    ),
-                                  )
-                                : null,
-                            onPreciseReference:
-                                historyImage.canUseAsGenerationInput
-                                ? () => unawaited(
-                                    _sendHistoryImageToPreciseReference(
-                                      context,
-                                      historyImage,
-                                    ),
-                                  )
-                                : null,
-                            onSaveToPreciseRefLibrary:
-                                historyImage.canUseAsGenerationInput
-                                ? () => unawaited(
-                                    saveBytesToPreciseRefLibrary(
-                                      ref,
-                                      context,
-                                      historyImage.bytes,
-                                    ),
-                                  )
-                                : null,
-                            onEditImage: historyImage.canUseAsGenerationInput
-                                ? () => ImageWorkflowLauncher.openEditor(
-                                    context,
-                                    ref,
-                                    historyImage.bytes,
-                                    mode: ImageEditorMode.edit,
-                                  )
-                                : null,
-                            onInpaint: historyImage.canUseAsGenerationInput
-                                ? () => ImageWorkflowLauncher.openInpaint(
-                                    context,
-                                    ref,
-                                    historyImage.bytes,
-                                  )
-                                : null,
-                            onGenerateVariations:
-                                historyImage.canUseAsGenerationInput
-                                ? () =>
-                                      ImageWorkflowLauncher.generateVariations(
-                                        context,
-                                        ref,
-                                        historyImage.bytes,
-                                      )
-                                : null,
-                            onDirectorTools:
-                                historyImage.canUseAsGenerationInput
-                                ? () => ImageWorkflowLauncher.openDirectorTools(
-                                    context,
-                                    ref,
-                                    historyImage.bytes,
-                                  )
-                                : null,
-                            onEnhance: historyImage.canUseAsGenerationInput
-                                ? () => ImageWorkflowLauncher.openEnhance(
-                                    ref,
-                                    historyImage.bytes,
-                                  )
-                                : null,
-                            onUpscale: historyImage.canUseAsGenerationInput
-                                ? () => ImageWorkflowLauncher.openUpscale(
-                                    ref,
-                                    historyImage.bytes,
-                                  )
-                                : null,
-                            onSendToKrita: historyImage.canUseAsGenerationInput
-                                ? () => KritaSendHelper.sendImageBytes(
-                                    context,
-                                    ref,
-                                    historyImage.bytes,
-                                    name: 'history_${historyImage.id}.png',
-                                  )
-                                : null,
-                            onOpenInExplorer: historyImage.canSave
-                                ? () => _openImageInExplorer(
-                                    context,
-                                    historyImage,
-                                  )
-                                : null,
-                            onSaveToLibrary:
-                                historyImage.canUseAsGenerationInput
-                                ? (bytes, _) =>
-                                      _showSaveToLibraryDialog(context, bytes)
-                                : null,
-                          ),
                     ),
                   ),
                 ),
@@ -934,22 +699,18 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
   }
 
   /// 构建当前生成区块的单个项目
-  Widget _buildCurrentGenerationItem(
+  Widget _buildHistoryBatchItem(
     BuildContext context,
-    int index,
+    HistoryBatch batch,
     ImageGenerationState state,
     int imageWidth,
     int imageHeight, {
     required bool stripMetadata,
     required HistoryClickBehavior clickBehavior,
     required String? selectedPreviewId,
-    required Map<int, int> runCounts,
   }) {
-    final completedImages = state.currentImages;
-
-    // 已完成的当前图像（支持选择）
-    if (index < completedImages.length) {
-      final image = completedImages[index];
+    final image = batch.cover;
+    if (image != null) {
       final imageBytes = image.bytes;
       final isFavorite = _favoriteStateFor(image);
       final isFailedSnapshot = image.isFailedStreamSnapshot;
@@ -961,12 +722,12 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           key: ValueKey(image.id),
           imageBytes: imageBytes,
           sourceFilePath: image.filePath,
-          index: index,
+          index: state.mergedPanelImages.indexOf(image),
           showIndex: false,
           historyThumb: true,
-          batchBadgeCount: runCounts[image.generationRunId],
-          isSelected: _selectedIds.contains(image.id),
-          isPreviewActive: selectedPreviewId == image.id,
+          batchBadgeCount: batch.count,
+          isSelected: _isBatchSelected(batch),
+          isPreviewActive: batch.contains(selectedPreviewId),
           imageIdentity: image.id,
           allowRepeatedModifierTaps: true,
           isFavorite: isFavorite,
@@ -974,7 +735,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           completionPlaceholderBytes: _completionPreviewPlaceholders[image.id],
           onCompletionPlaceholderSettled: () =>
               _clearCompletionPreviewPlaceholder(image.id),
-          enableSelection: image.canBulkSelect,
+          enableSelection: batch.selectableImages.isNotEmpty,
           enableSaveAction: image.canSave,
           enableCopyAction: image.canSave,
           statusBadgeLabel: isFailedSnapshot
@@ -986,19 +747,9 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           onFavoriteToggle: image.canFavorite
               ? () => _toggleHistoryFavorite(context, image)
               : null,
-          onSelectionChanged: (selected) {
-            if (!image.canBulkSelect) {
-              return;
-            }
-            setState(() {
-              if (selected) {
-                _selectedIds.add(image.id);
-              } else {
-                _selectedIds.remove(image.id);
-              }
-            });
-          },
-          onTap: () => _handleImageTap(context, image, clickBehavior),
+          onSelectionChanged: (selected) => _setBatchSelected(batch, selected),
+          onTap: () =>
+              _handleImageTap(context, image, clickBehavior, batch: batch),
           onDoubleTap: clickBehavior == HistoryClickBehavior.selectPreview
               ? () => _showLinkedDetail(context, image)
               : null,
@@ -1077,43 +828,61 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
       );
     }
 
-    if (state.isGenerating) {
-      final generationIndex = index - completedImages.length;
-      final previewSlots = _visibleStreamPreviewSlots(state);
-
-      if (previewSlots.isNotEmpty && generationIndex < previewSlots.length) {
-        final slot = previewSlots[generationIndex];
-        return SelectableImageCard(
-          isGenerating: true,
-          currentImage: slot.imageNumber,
-          totalImages: slot.totalImages,
-          progress: slot.progress,
-          streamPreview: slot.previewBytes,
-          focusedPreviewPlacement: slot.focusedPreviewPlacement,
-          imageWidth: imageWidth,
-          imageHeight: imageHeight,
-          enableSelection: false,
-          enableContextMenu: false,
-        );
-      }
-
-      if (previewSlots.isEmpty && generationIndex == 0) {
-        return SelectableImageCard(
-          isGenerating: true,
-          currentImage: state.currentImage,
-          totalImages: state.totalImages,
-          progress: state.progress,
-          streamPreview: state.streamPreview,
-          focusedPreviewPlacement: state.focusedPreviewPlacement,
-          imageWidth: imageWidth,
-          imageHeight: imageHeight,
-          enableSelection: false,
-          enableContextMenu: false,
-        );
-      }
-    }
-
-    return const SizedBox.shrink();
+    final slot = state.streamPreviewSlots
+        .where((slot) => slot.imageNumber == 1)
+        .firstOrNull;
+    final firstIsStreaming = state.currentImage <= 1;
+    return GestureDetector(
+      onTap: () => _requestBatchFocus(batch),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          SelectableImageCard(
+            key: ValueKey('history-loading:${batch.key}'),
+            isGenerating: true,
+            historyThumb: true,
+            batchBadgeCount: batch.count,
+            currentImage: 1,
+            totalImages: batch.count,
+            progress:
+                slot?.progress ?? (firstIsStreaming ? state.progress : null),
+            streamPreview:
+                slot?.previewBytes ??
+                (firstIsStreaming ? state.streamPreview : null),
+            focusedPreviewPlacement:
+                slot?.focusedPreviewPlacement ??
+                (firstIsStreaming ? state.focusedPreviewPlacement : null),
+            imageWidth: imageWidth,
+            imageHeight: imageHeight,
+            enableSelection: false,
+            enableContextMenu: false,
+          ),
+          if (batch.count > 1)
+            Positioned(
+              right: 6,
+              bottom: 6,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 3,
+                    ),
+                    child: Text(
+                      '×${batch.count}',
+                      style: const TextStyle(color: Colors.white, fontSize: 11),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   GlobalKey _imageKeyFor(String imageId) =>
@@ -1131,7 +900,9 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
 
   Future<void> _scrollToSelection(String imageId, int epoch) async {
     if (!_scrollController.hasClients) return;
-    final index = _rowDescriptors.indexWhere((row) => row.imageId == imageId);
+    final index = _rowDescriptors.indexWhere(
+      (row) => row.batch.contains(imageId),
+    );
     if (index < 0) return;
 
     var precedingExtent = 8.0;
@@ -1165,7 +936,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           ref.read(generationPreviewSelectionProvider) != imageId) {
         return;
       }
-      final itemContext = _imageKeys[imageId]?.currentContext;
+      final itemContext = _imageKeys[row.batch.key]?.currentContext;
       if (itemContext != null) {
         unawaited(
           Scrollable.ensureVisible(
@@ -1183,29 +954,52 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     return keyboard.isControlPressed || keyboard.isMetaPressed;
   }
 
-  void _toggleSelectedImage(GeneratedImage image) {
-    if (!image.canBulkSelect) return;
+  bool _isBatchSelected(HistoryBatch batch) =>
+      batch.selectableImages.isNotEmpty &&
+      batch.selectableImages.every((image) => _selectedIds.contains(image.id));
+
+  void _setBatchSelected(HistoryBatch batch, bool selected) {
+    if (batch.selectableImages.isEmpty) return;
     setState(() {
-      if (!_selectedIds.add(image.id)) _selectedIds.remove(image.id);
-      // 用户规则：多选只剩 1 张时再 Ctrl+点击最后一张 → 自动退出
-      // 多选态（选中清空即退出，含显式模式）。
-      if (_selectedIds.isEmpty) _multiSelectMode = false;
+      final ids = batch.selectableImages.map((image) => image.id);
+      if (selected) {
+        _selectedBatchKeys.add(batch.key);
+        _selectedIds.addAll(ids);
+      } else {
+        _selectedBatchKeys.remove(batch.key);
+        _selectedIds.removeAll(ids);
+        if (_selectedIds.isEmpty) _multiSelectMode = false;
+      }
     });
+  }
+
+  void _requestBatchFocus(HistoryBatch batch) {
+    final request = ref.read(canvasHistoryFocusRequestProvider.notifier);
+    request.state = (
+      group: batch.key,
+      imageId: batch.cover?.id,
+      revision: (request.state?.revision ?? 0) + 1,
+    );
+    final cover = batch.cover;
+    if (cover != null) {
+      ref.read(generationPreviewSelectionProvider.notifier).select(cover.id);
+    }
+    ref.read(generationPreviewFocusNodeProvider).requestFocus();
   }
 
   void _handleImageTap(
     BuildContext context,
     GeneratedImage image,
-    HistoryClickBehavior behavior,
-  ) {
+    HistoryClickBehavior behavior, {
+    required HistoryBatch batch,
+  }) {
     if ((_isMultiSelectModifierPressed || _multiSelectMode) &&
-        image.canBulkSelect) {
-      _toggleSelectedImage(image);
+        batch.selectableImages.isNotEmpty) {
+      _setBatchSelected(batch, !_isBatchSelected(batch));
       return;
     }
     if (behavior == HistoryClickBehavior.selectPreview) {
-      ref.read(generationPreviewSelectionProvider.notifier).select(image.id);
-      ref.read(generationPreviewFocusNodeProvider).requestFocus();
+      _requestBatchFocus(batch);
       return;
     }
     _showSingleDetail(context, image);
@@ -1479,6 +1273,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
             visualDensity: VisualDensity.compact,
             onPressed: () => setState(() {
               _selectedIds.clear();
+              _selectedBatchKeys.clear();
               _multiSelectMode = false;
             }),
             icon: const Icon(Icons.close),
@@ -1567,6 +1362,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
         if (clearSelection) {
           setState(() {
             _selectedIds.clear();
+            _selectedBatchKeys.clear();
           });
         }
       }
@@ -1638,6 +1434,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           );
           setState(() {
             _selectedIds.clear();
+            _selectedBatchKeys.clear();
           });
         } else {
           AppToast.error(context, context.l10n.toast_packFailed);

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../../l10n/app_localizations.dart';
 import '../../../../providers/generation/image_action_providers.dart';
 import '../../../../../core/constants/api_constants.dart';
 import '../../../../providers/canvas_settings_provider.dart';
@@ -17,6 +18,7 @@ import '../../services/generation_save_service.dart';
 import '../../../../../core/utils/localization_extension.dart';
 import '../../../../widgets/common/image_detail/image_detail_data.dart';
 import 'canvas_feed_layout.dart';
+import 'canvas_display_settings.dart';
 import 'generated_image_actions.dart';
 
 /// 画布工具条分区（官网 md 布局表逐字对码）
@@ -118,49 +120,65 @@ class _ToolbarItem {
 
   factory _ToolbarItem.divider() => _ToolbarItem._(isDivider: true);
 
-  factory _ToolbarItem.enhance() =>
-      _ToolbarItem._(icon: 'nai-icon-enhance.svg', tooltip: 'Enhance');
+  factory _ToolbarItem.enhance() => _ToolbarItem._(
+    icon: 'nai-icon-enhance.svg',
+    tooltip: (l10n) => l10n.img2img_enhance,
+  );
 
   factory _ToolbarItem.variations() => _ToolbarItem._(
     icon: 'nai-icon-variations.svg',
-    tooltip: 'Variations',
+    tooltip: (l10n) => l10n.img2img_generateVariations,
     priceBadge: true,
   );
 
-  factory _ToolbarItem.upscale() =>
-      _ToolbarItem._(icon: 'nai-icon-upscale.svg', tooltip: 'Upscale');
+  factory _ToolbarItem.upscale() => _ToolbarItem._(
+    icon: 'nai-icon-upscale.svg',
+    tooltip: (l10n) => l10n.image_upscale,
+  );
 
   factory _ToolbarItem.setInit() => _ToolbarItem._(
     icon: 'nai-icon-set-init.svg',
-    tooltip: 'Set as init image',
+    tooltip: (l10n) => l10n.generation_canvasSetInitImage,
   );
 
-  factory _ToolbarItem.edit() =>
-      _ToolbarItem._(icon: 'nai-icon-edit.svg', tooltip: 'Edit image');
+  factory _ToolbarItem.edit() => _ToolbarItem._(
+    icon: 'nai-icon-edit.svg',
+    tooltip: (l10n) => l10n.img2img_editImage,
+  );
 
-  factory _ToolbarItem.inpaint() =>
-      _ToolbarItem._(icon: 'nai-icon-inpaint2.svg', tooltip: 'Inpaint');
+  factory _ToolbarItem.inpaint() => _ToolbarItem._(
+    icon: 'nai-icon-inpaint2.svg',
+    tooltip: (l10n) => l10n.img2img_inpaint,
+  );
 
   factory _ToolbarItem.sendToTools() => _ToolbarItem._(
     icon: 'nai-icon-send-tools.svg',
-    tooltip: 'Send to Image Tools',
+    tooltip: (l10n) => l10n.generation_canvasSendToTools,
   );
 
-  factory _ToolbarItem.pin() =>
-      _ToolbarItem._(icon: 'nai-icon-pin.svg', tooltip: 'Pin');
+  factory _ToolbarItem.pin() => _ToolbarItem._(
+    icon: 'nai-icon-pin.svg',
+    tooltip: (l10n) => l10n.generation_canvasPinImage,
+  );
 
-  factory _ToolbarItem.copy() =>
-      _ToolbarItem._(icon: 'nai-icon-copy.svg', tooltip: 'Copy');
+  factory _ToolbarItem.copy() => _ToolbarItem._(
+    icon: 'nai-icon-copy.svg',
+    tooltip: (l10n) => l10n.image_copy,
+  );
 
-  factory _ToolbarItem.download() =>
-      _ToolbarItem._(icon: 'nai-icon-download.svg', tooltip: 'Download');
+  factory _ToolbarItem.download() => _ToolbarItem._(
+    icon: 'nai-icon-download.svg',
+    tooltip: (l10n) => l10n.image_save,
+  );
 
-  factory _ToolbarItem.info() =>
-      _ToolbarItem._(icon: 'nai-icon-info.svg', tooltip: 'Info');
+  factory _ToolbarItem.info() => _ToolbarItem._(
+    icon: 'nai-icon-info.svg',
+    tooltip: (l10n) => l10n.image_viewDetail,
+  );
 
   factory _ToolbarItem.settings() => _ToolbarItem._(
     icon: 'nai-icon-settings.svg',
-    tooltip: 'Display settings',
+    tooltip: (l10n) => l10n.generation_canvasDisplaySettings,
   );
 
   factory _ToolbarItem.resolution(GeneratedImage img) =>
@@ -169,12 +187,12 @@ class _ToolbarItem {
   factory _ToolbarItem.seedPill(GeneratedImage img) => _ToolbarItem._(
     label: img.metadata?.seed?.toString() ?? '—',
     isSeedPill: true,
-    tooltip: 'Click to use this seed',
+    tooltip: (l10n) => l10n.generation_canvasUseSeed,
   );
 
   final String? icon;
   final String? label;
-  final String? tooltip;
+  final String Function(AppLocalizations)? tooltip;
   final bool isDivider;
   final bool isSeedPill;
   final bool isResolution;
@@ -253,9 +271,12 @@ class _ToolbarStrip extends ConsumerWidget {
                 ?.seed
                 ?.toString() ??
             '—',
-        tooltip: item.tooltip,
+        tooltip: item.tooltip?.call(context.l10n),
         onTap: () => _writeBackSeed(context, ref),
       );
+    }
+    if (item.icon == 'nai-icon-settings.svg') {
+      return const CanvasDisplaySettingsButton();
     }
     return _IconBtn(
       item: item,
@@ -342,14 +363,14 @@ class _IconBtn extends ConsumerWidget {
         ),
       ),
     );
-    return item.tooltip != null
-        ? Tooltip(message: item.tooltip!, child: btn)
-        : btn;
+    final tooltip = icon == 'nai-icon-pin-filled.svg'
+        ? context.l10n.generation_canvasUnpinImage
+        : item.tooltip?.call(context.l10n);
+    return tooltip != null ? Tooltip(message: tooltip, child: btn) : btn;
   }
 
   bool _resolveEnabled(WidgetRef ref) {
     switch (item.icon) {
-      case 'nai-icon-settings.svg':
       case 'nai-icon-info.svg':
         return true;
       case 'nai-icon-copy.svg':
@@ -417,8 +438,6 @@ class _IconBtn extends ConsumerWidget {
         unawaited(_saveImage(context, ref));
       case 'nai-icon-info.svg':
         actions.showFullscreenImage(context, image);
-      case 'nai-icon-settings.svg':
-        _showDisplaySettings(context, ref);
     }
   }
 
@@ -454,36 +473,6 @@ class _IconBtn extends ConsumerWidget {
       showCopyButton: image.canSave,
     );
     await GenerationSaveService.saveImageFromDetail(context, ref, detail);
-  }
-
-  void _showDisplaySettings(BuildContext context, WidgetRef ref) {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => Consumer(
-        builder: (context, ref, _) => AlertDialog(
-          title: Text(context.l10n.generation_canvasDisplaySettings),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SwitchListTile(
-                title: Text(context.l10n.generation_canvasZoomToFill),
-                value: ref.watch(canvasZoomToFillNotifierProvider),
-                onChanged: (v) {
-                  ref.read(canvasZoomToFillNotifierProvider.notifier).set(v);
-                },
-              ),
-              SwitchListTile(
-                title: Text(context.l10n.generation_canvasSmoothZoom),
-                value: ref.watch(canvasSmoothZoomNotifierProvider),
-                onChanged: (v) {
-                  ref.read(canvasSmoothZoomNotifierProvider.notifier).set(v);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 

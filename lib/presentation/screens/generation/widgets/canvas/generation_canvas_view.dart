@@ -17,6 +17,7 @@ import 'canvas_feed_layout.dart';
 import 'canvas_world_viewport.dart';
 import '../../../../widgets/common/selectable_image_card.dart';
 import 'canvas_tile_toolbar.dart';
+import 'canvas_image_background.dart';
 import 'generated_image_card.dart';
 import 'generation_canvas_controller.dart';
 import '../../../../../core/utils/localization_extension.dart';
@@ -285,6 +286,19 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     return CanvasCamera(offset: Offset(tx, ty), scale: y);
   }
 
+  void _refitCurrentFocus() {
+    final focus = ref.read(generationCanvasGroupSelectionProvider);
+    if (focus == null) return;
+    final layout = ref.read(canvasFeedLayoutProvider);
+    final group = layout.groups.where((g) => g.key == focus.group).firstOrNull;
+    if (group == null) return;
+    if (focus.subimage != null) {
+      _flyToSubimage(layout, group, focus.subimage!);
+    } else {
+      _flyToGroup(layout, group);
+    }
+  }
+
   /// 画布更新共享选中时，不把自身的通知再次当成历史栏点击来飞行。
   void _syncPreviewSelection(String? imageId) {
     if (ref.read(generationPreviewSelectionProvider) == imageId) return;
@@ -374,11 +388,35 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       _flyToGroup(pins, board);
     });
 
+    ref.listen(canvasHistoryFocusRequestProvider, (previous, request) {
+      if (request == null) return;
+      final layout = ref.read(canvasFeedLayoutProvider);
+      final group = layout.groups
+          .where(
+            (group) =>
+                group.key == request.group ||
+                (!group.isPinnedGroup &&
+                    group.images.any((image) => image.id == request.imageId)),
+          )
+          .firstOrNull;
+      if (group == null) return;
+      _manualOverview = false;
+      ref
+          .read(generationCanvasGroupSelectionProvider.notifier)
+          .selectGroup(group.key);
+      _syncPreviewSelection(request.imageId ?? group.images.firstOrNull?.id);
+      _flyToGroup(layout, group);
+    });
+
     ref.listen(canvasLockCameraNotifierProvider, (prev, locked) {
       if (!locked) return;
       _stopWasd();
       _panActive = false;
       _camera.jump(ref.read(generationCanvasCameraProvider));
+    });
+
+    ref.listen(canvasZoomToFillNotifierProvider, (previous, next) {
+      if (previous != next) _refitCurrentFocus();
     });
 
     final tiles = _buildTiles(layout, focus);
@@ -1062,19 +1100,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       _clickCount = 0;
       _clickTimer?.cancel();
       ref.read(canvasZoomToFillNotifierProvider.notifier).toggle();
-      // 官网：切放大填充同时按新 fitMax 重飞焦点组
-      final focus = ref.read(generationCanvasGroupSelectionProvider);
-      final layout = ref.read(canvasFeedLayoutProvider);
-      final g = focus == null
-          ? null
-          : layout.groups.where((x) => x.key == focus.group).firstOrNull;
-      if (g != null) {
-        if (focus!.subimage != null) {
-          _flyToSubimage(layout, g, focus.subimage!);
-        } else {
-          _flyToGroup(layout, g);
-        }
-      }
     }
   }
 }
@@ -1145,7 +1170,14 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            Positioned.fill(child: RepaintBoundary(child: widget.imageChild!)),
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CanvasImageBackground(
+                  child: RepaintBoundary(child: widget.imageChild!),
+                ),
+              ),
+            ),
             // 钉住角标（官网钉板标记）：实心 pin，右上反缩放恒屏大小
             if (widget.isPinned)
               Positioned(
@@ -1240,70 +1272,74 @@ class _InflightSlotTileState extends State<_InflightSlotTile>
     final preview = widget.slot.previewBytes;
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
-      child: Container(
-        color: theme.colorScheme.surfaceContainerHigh,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (preview != null && preview.isNotEmpty)
-              buildStreamPreviewImage(
-                bytes: preview,
-                placement: widget.slot.focusedPreviewPlacement,
+      child: CanvasImageBackground(
+        child: ColoredBox(
+          color: preview != null && preview.isNotEmpty
+              ? Colors.transparent
+              : theme.colorScheme.surfaceContainerHigh,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (preview != null && preview.isNotEmpty)
+                buildStreamPreviewImage(
+                  bytes: preview,
+                  placement: widget.slot.focusedPreviewPlacement,
+                ),
+              Container(
+                color: theme.colorScheme.surface.withValues(
+                  alpha: preview != null && preview.isNotEmpty ? 0.35 : 0.0,
+                ),
               ),
-            Container(
-              color: theme.colorScheme.surface.withValues(
-                alpha: preview != null && preview.isNotEmpty ? 0.35 : 0.0,
-              ),
-            ),
-            Center(
-              child: AnimatedBuilder(
-                animation: _dots,
-                builder: (context, _) {
-                  // 官网三点弹跳：三圆依次起落的 loading 节奏
-                  Widget dot(int i) {
-                    final phase = (_dots.value * 3 - i).clamp(0.0, 1.0);
-                    final bump = math.sin(phase * math.pi);
-                    return Transform.translate(
-                      offset: Offset(0, -6 * bump),
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.55 + 0.35 * bump,
+              Center(
+                child: AnimatedBuilder(
+                  animation: _dots,
+                  builder: (context, _) {
+                    // 官网三点弹跳：三圆依次起落的 loading 节奏
+                    Widget dot(int i) {
+                      final phase = (_dots.value * 3 - i).clamp(0.0, 1.0);
+                      final bump = math.sin(phase * math.pi);
+                      return Transform.translate(
+                        offset: Offset(0, -6 * bump),
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.55 + 0.35 * bump,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  }
+                      );
+                    }
 
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          dot(0),
-                          const SizedBox(width: 8),
-                          dot(1),
-                          const SizedBox(width: 8),
-                          dot(2),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        preview?.isNotEmpty == true
-                            ? context.l10n.generation_generating
-                            : context.l10n.common_loading,
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                    ],
-                  );
-                },
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            dot(0),
+                            const SizedBox(width: 8),
+                            dot(1),
+                            const SizedBox(width: 8),
+                            dot(2),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          preview?.isNotEmpty == true
+                              ? context.l10n.generation_generating
+                              : context.l10n.common_loading,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

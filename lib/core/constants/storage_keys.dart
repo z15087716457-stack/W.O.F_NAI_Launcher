@@ -52,6 +52,8 @@ class StorageKeys {
   static const String simpleOutputViewer = 'simple_output_viewer';
   static const String canvasLockCamera = 'canvas_lock_camera';
   static const String canvasReducedMotion = 'canvas_reduced_motion';
+  static const String canvasZoomToFill = 'canvas_zoom_to_fill';
+  static const String canvasImageBackground = 'canvas_image_background';
   static const String canvasPinnedImages = 'canvas_pinned_images';
   static const String mainNavRailExpanded = 'main_nav_rail_expanded';
   static const String webLeftPanelWidth = 'web_left_panel_width';

@@ -91,7 +91,7 @@
 | `generation_canvas_controller.dart` | `CanvasCamera`(offset/scale 物理) + `GenerationCanvasController`(点击/拖拽/hover/焦点) |
 | `canvas_feed_layout.dart` | 纯函数：`groupCanvasImages` 按任务分组、`layoutCanvasFeed` 竖排布局 |
 | `canvas_tile_toolbar.dart` | tile 底部迷你条 + 视口固定的主工具条（顶中/底左/底右） |
-| `../history_panel.dart` | 右侧历史栏（不在 canvas/ 目录）：50 格网格、Ctrl 多选、拖拽到角色框、底栏锁/全存/删 |
+| `../history_panel.dart` / `../history_batch.dart` | 右侧历史栏按请求合并：第一张封面 + 数量，整批多选、拖拽封面到角色框、底栏锁/全存/删；底层图片历史仍有 50 张上限 |
 | `canvas_utils.dart` | `rrectFromSize`/`parseAspect`/`hexToColor` |
 | `models.dart` | `CanvasImageData`/`CanvasImageGroup`/`CanvasTileVisual` |
 
@@ -106,6 +106,10 @@
 **画布外围留白**：自由画布预览区四周保留 4px 内边距，侧栏拖拽分隔条独立保留；经典查看器仍为 16px。
 
 **主工具条定位（用户确认，2026-09-21）**：三个主工具条常驻中央生图视口的顶部居中、左下角和右下角，距边缘 12px；位置与大小独立于相机平移/缩放，操作对象仍随当前焦点图更新。无可操作图片时沿用空态。此要求覆盖旧逆向文档中“edge bars 贴 tile”的定位结论；非焦点图片的悬停迷你条维持原行为。
+
+**左下齿轮**：按缓存 chunk 5285 的 `display.settings` 与 5468 模块 80341，使用按钮上方的小浮层。放大填充开关即时重新适配当前焦点；透明底选项仅在当前模型的 `ModelSpec.transparency` 为 true 时显示，提供默认/浅/深棋盘格、无底色、六种纯色和自定义 HSV/HEX 取色。源码中的吸管形图标是自定义颜色选择器入口，不是屏幕取色。偏好持久化，底色仅在图片下方绘制，不合成进保存字节、不改生成参数。平滑缩放不属于此菜单。主条和悬停条提示均走三语国际化，导演工具图标向右、信息图标为圆圈 i。
+
+**历史批次**：同一 `generationRunId` 只显示一条，按 `batchIndex` 选择首图封面，右下角标实际张数；生成中数量含待完成槽位。无 runId 的旧图保持独立，不能仅凭时间/尺寸合并。并行返回晚到的首图在同一行接管占位；取消后按留存图片计数。画布中任一子图被选中，历史栏均定位并高亮该批封面；点历史封面发起显式整组对焦。多选按整批展开到真实图片 ID，后来完成的同批图片继续纳入选中，保存/打包/删除均使用这些 ID。
 
 **当前布局常量（参考保存的 chunk 5285）**：组间 `kCanvasGroupSpacing=340`、组内默认 `ceil(sqrt(N))` 列 row-major 近方阵 48px 间隙、N=3 走 `floor(4*FNV(id+':tri'))` 哈希四式三角（上1下2/上2下1/左1右2/左2右1）、gridXLength>0 列紧凑 24px、组水平居中 `x=-width/2`（`0*o` 错动是死代码）、`bounds.height=cursorY-340` 含尾随距。归组 `run:<generationRunId>`；无 runId 兜底按同尺寸+createdAt≤120s 相邻合并（外部登记/桥接漏打 runId 的图不致散组）。生成中 inflight 组置顶 = `totalImages` 槽（尺寸=batchW×H）。
 

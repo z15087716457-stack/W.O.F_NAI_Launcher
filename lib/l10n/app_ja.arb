@@ -399,6 +399,31 @@
   "generation_canvasZoomToFill": "ズームしてフィル（100%超を許可）",
   "generation_canvasSmoothZoom": "スムーズズーム（Ctrl+スクロール）",
   "generation_canvasEmpty": "キャンバスは空です",
+  "generation_canvasBackground": "透明部分の背景",
+  "generation_canvasBackgroundChecker": "市松模様",
+  "generation_canvasBackgroundCheckerLight": "明るい市松模様",
+  "generation_canvasBackgroundCheckerDark": "暗い市松模様",
+  "generation_canvasBackgroundNone": "背景なし",
+  "generation_canvasBackgroundBlack": "黒",
+  "generation_canvasBackgroundWhite": "白",
+  "generation_canvasBackgroundGray": "グレー",
+  "generation_canvasBackgroundRed": "赤",
+  "generation_canvasBackgroundGreen": "緑",
+  "generation_canvasBackgroundBlue": "青",
+  "generation_canvasBackgroundCustom": "カスタムカラー",
+  "generation_canvasSetInitImage": "画像から生成の元画像に設定",
+  "generation_canvasSendToTools": "画像ツールに送る",
+  "generation_canvasPinImage": "画像を固定",
+  "generation_canvasUnpinImage": "固定を解除",
+  "generation_canvasUseSeed": "クリックしてこのシードを再利用",
+  "generation_canvasPinnedCount": "固定 {count}",
+  "@generation_canvasPinnedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "generation_params": "パラメータ",
   "generation_paramsSettings": "パラメータ設定",
   "generation_history": "履歴",

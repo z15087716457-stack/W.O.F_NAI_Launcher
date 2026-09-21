@@ -1719,6 +1719,114 @@ abstract class AppLocalizations {
   /// **'Canvas is empty'**
   String get generation_canvasEmpty;
 
+  /// No description provided for @generation_canvasBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparency background'**
+  String get generation_canvasBackground;
+
+  /// No description provided for @generation_canvasBackgroundChecker.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkerboard'**
+  String get generation_canvasBackgroundChecker;
+
+  /// No description provided for @generation_canvasBackgroundCheckerLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light checkerboard'**
+  String get generation_canvasBackgroundCheckerLight;
+
+  /// No description provided for @generation_canvasBackgroundCheckerDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark checkerboard'**
+  String get generation_canvasBackgroundCheckerDark;
+
+  /// No description provided for @generation_canvasBackgroundNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No background'**
+  String get generation_canvasBackgroundNone;
+
+  /// No description provided for @generation_canvasBackgroundBlack.
+  ///
+  /// In en, this message translates to:
+  /// **'Black'**
+  String get generation_canvasBackgroundBlack;
+
+  /// No description provided for @generation_canvasBackgroundWhite.
+  ///
+  /// In en, this message translates to:
+  /// **'White'**
+  String get generation_canvasBackgroundWhite;
+
+  /// No description provided for @generation_canvasBackgroundGray.
+  ///
+  /// In en, this message translates to:
+  /// **'Gray'**
+  String get generation_canvasBackgroundGray;
+
+  /// No description provided for @generation_canvasBackgroundRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Red'**
+  String get generation_canvasBackgroundRed;
+
+  /// No description provided for @generation_canvasBackgroundGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green'**
+  String get generation_canvasBackgroundGreen;
+
+  /// No description provided for @generation_canvasBackgroundBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue'**
+  String get generation_canvasBackgroundBlue;
+
+  /// No description provided for @generation_canvasBackgroundCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom color'**
+  String get generation_canvasBackgroundCustom;
+
+  /// No description provided for @generation_canvasSetInitImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Use as img2img source'**
+  String get generation_canvasSetInitImage;
+
+  /// No description provided for @generation_canvasSendToTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to image tools'**
+  String get generation_canvasSendToTools;
+
+  /// No description provided for @generation_canvasPinImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin image'**
+  String get generation_canvasPinImage;
+
+  /// No description provided for @generation_canvasUnpinImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin image'**
+  String get generation_canvasUnpinImage;
+
+  /// No description provided for @generation_canvasUseSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to use this seed'**
+  String get generation_canvasUseSeed;
+
+  /// No description provided for @generation_canvasPinnedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pins {count}'**
+  String generation_canvasPinnedCount(int count);
+
   /// No description provided for @generation_params.
   ///
   /// In en, this message translates to:

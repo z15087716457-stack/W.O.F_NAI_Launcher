@@ -895,6 +895,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_canvasEmpty => 'Canvas is empty';
 
   @override
+  String get generation_canvasBackground => 'Transparency background';
+
+  @override
+  String get generation_canvasBackgroundChecker => 'Checkerboard';
+
+  @override
+  String get generation_canvasBackgroundCheckerLight => 'Light checkerboard';
+
+  @override
+  String get generation_canvasBackgroundCheckerDark => 'Dark checkerboard';
+
+  @override
+  String get generation_canvasBackgroundNone => 'No background';
+
+  @override
+  String get generation_canvasBackgroundBlack => 'Black';
+
+  @override
+  String get generation_canvasBackgroundWhite => 'White';
+
+  @override
+  String get generation_canvasBackgroundGray => 'Gray';
+
+  @override
+  String get generation_canvasBackgroundRed => 'Red';
+
+  @override
+  String get generation_canvasBackgroundGreen => 'Green';
+
+  @override
+  String get generation_canvasBackgroundBlue => 'Blue';
+
+  @override
+  String get generation_canvasBackgroundCustom => 'Custom color';
+
+  @override
+  String get generation_canvasSetInitImage => 'Use as img2img source';
+
+  @override
+  String get generation_canvasSendToTools => 'Send to image tools';
+
+  @override
+  String get generation_canvasPinImage => 'Pin image';
+
+  @override
+  String get generation_canvasUnpinImage => 'Unpin image';
+
+  @override
+  String get generation_canvasUseSeed => 'Click to use this seed';
+
+  @override
+  String generation_canvasPinnedCount(int count) {
+    return 'Pins $count';
+  }
+
+  @override
   String get generation_params => 'Parameters';
 
   @override

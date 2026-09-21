@@ -7,6 +7,13 @@ import '../../../../providers/image_generation_provider.dart';
 import '../../../../providers/canvas_settings_provider.dart';
 import 'generation_canvas_controller.dart';
 
+/// An explicit history-row click focuses a batch, even if its cover is already
+/// selected. Shared image selection still handles individual canvas/keyboard use.
+final canvasHistoryFocusRequestProvider =
+    StateProvider<({String group, String? imageId, int revision})?>(
+      (ref) => null,
+    );
+
 // ── 官网逐字常量（chunk 5285 布局函数对码）──────────────────────────
 
 /// 组间垂直间距（官网 `i += n.height + 340`）。

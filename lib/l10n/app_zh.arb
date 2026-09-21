@@ -380,6 +380,31 @@
   "generation_canvasZoomToFill": "放大填充（允许 >100%）",
   "generation_canvasSmoothZoom": "平滑缩放（Ctrl+滚轮）",
   "generation_canvasEmpty": "画布为空",
+  "generation_canvasBackground": "透明区域底色",
+  "generation_canvasBackgroundChecker": "棋盘格",
+  "generation_canvasBackgroundCheckerLight": "浅色棋盘格",
+  "generation_canvasBackgroundCheckerDark": "深色棋盘格",
+  "generation_canvasBackgroundNone": "无底色",
+  "generation_canvasBackgroundBlack": "黑色",
+  "generation_canvasBackgroundWhite": "白色",
+  "generation_canvasBackgroundGray": "灰色",
+  "generation_canvasBackgroundRed": "红色",
+  "generation_canvasBackgroundGreen": "绿色",
+  "generation_canvasBackgroundBlue": "蓝色",
+  "generation_canvasBackgroundCustom": "自定义颜色",
+  "generation_canvasSetInitImage": "设为图生图底图",
+  "generation_canvasSendToTools": "发送到图像工具",
+  "generation_canvasPinImage": "固定图片",
+  "generation_canvasUnpinImage": "取消固定",
+  "generation_canvasUseSeed": "点击复用此种子",
+  "generation_canvasPinnedCount": "固定 {count}",
+  "@generation_canvasPinnedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "generation_params": "参数",
   "generation_paramsSettings": "生成参数",
   "generation_history": "历史",
