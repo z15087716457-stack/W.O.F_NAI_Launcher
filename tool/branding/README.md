@@ -35,9 +35,9 @@
 
 ## Geist 色彩与层级
 
-依据 [官方色彩](https://vercel.com/geist/colors)、[材质](https://vercel.com/geist/materials) 与 [字体规范](https://vercel.com/geist/typography)，使用纯黑 / 纯白页面、低对比灰阶面板、细边框和蓝色操作强调。`GeistTheme` 显式设置所有 Material surface/container 槽及透明 surfaceTint，避免种子色或弹层海拔把大面积背景染蓝。
+参考 [官方色彩](https://vercel.com/geist/colors)、[材质](https://vercel.com/geist/materials) 与 [字体规范](https://vercel.com/geist/typography)，使用柔和炭灰 / 纯白页面、分层灰阶面板、细边框和蓝色操作强调。深色采用适合长期创作的中性炭灰，不使用纯黑铺底。`GeistTheme` 显式设置所有 Material surface/container 槽及透明 surfaceTint，避免种子色或弹层海拔把大面积背景染蓝。
 
-- 深色：背景 `#000000`，分区 `#0A0A0A`，浮层 `#111111`，控件 `#1A1A1A`；正文 `#EDEDED`，次级文字 `#A0A0A0`。
+- 深色：背景 `#181818`，分区 `#202020`，卡片 / 浮层 `#262626`，控件 `#303030`，悬停 `#363636`，选中 `#3D3D3D`；正文 `#E4E4E4`，次级文字 `#A8A8A8`，边框 `#3B3B3B`。
 - 浅色：背景 `#FFFFFF`，分区 `#FAFAFA`，控件 `#F2F2F2`；正文 `#171717`，次级文字 `#666666`。
 - 主要按钮沿用品牌蓝 `#005DFF` 配白字；可交互文字 / 焦点使用深色 `#50A8FF`、浅色 `#0064E2`。大容器选中底色仍用中性灰。
 - 常规控件 6px 圆角，菜单 / 对话框 12px。正文 / 标签 14px，辅助文字 12–13px；保留已验收的生图侧栏紧凑层级。

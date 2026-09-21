@@ -204,7 +204,9 @@ void main() {
           expect(theme.brightness, brightness);
           expect(
             theme.scaffoldBackgroundColor,
-            brightness == Brightness.dark ? Colors.black : Colors.white,
+            brightness == Brightness.dark
+                ? const Color(0xFF181818)
+                : Colors.white,
           );
           for (final surface in [
             theme.colorScheme.surface,

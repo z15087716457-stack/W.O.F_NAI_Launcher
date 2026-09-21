@@ -190,7 +190,9 @@ void main() {
         expect(theme.brightness, brightness);
         expect(
           theme.scaffoldBackgroundColor,
-          brightness == Brightness.dark ? Colors.black : Colors.white,
+          brightness == Brightness.dark
+              ? const Color(0xFF181818)
+              : Colors.white,
         );
         if (brightness == Brightness.light) {
           expectNoUnreadableLightText(tester, panelName: name);
