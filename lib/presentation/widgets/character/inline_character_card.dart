@@ -11,6 +11,7 @@ import '../../providers/character_position_canvas_provider.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../screens/generation/widgets/generation_sidebar_style.dart';
 import '../common/decoded_memory_image.dart';
+import '../common/studio_glass_surface.dart';
 import 'add_to_library_dialog.dart';
 import 'inline_character_editor.dart';
 
@@ -166,7 +167,7 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
       curve: _animCurve,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: GenSidebarStyle.promptSurface(theme),
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: isEditing
@@ -225,7 +226,14 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
       opacity: enabled ? 1.0 : 0.48,
       child: Focus(
         focusNode: _cardFocusNode,
-        child: TapRegion(onTapOutside: (_) => _handleTapOutside(), child: card),
+        child: TapRegion(
+          onTapOutside: (_) => _handleTapOutside(),
+          child: StudioGlassSurface(
+            borderRadius: BorderRadius.circular(6),
+            drawBorder: false,
+            child: card,
+          ),
+        ),
       ),
     );
   }
@@ -256,7 +264,7 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
           if (hasThumbnail)
             _HeaderThumbnail(path: character.thumbnailPath!)
           else
-            ColoredBox(color: colorScheme.surface),
+            const SizedBox.shrink(),
           Material(
             color: Colors.transparent,
             child: InkWell(

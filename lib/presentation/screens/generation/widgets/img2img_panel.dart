@@ -171,7 +171,8 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
           ? DecodedMemoryImage(
               bytes: params.sourceImage!,
               fit: BoxFit.cover,
-              decodeScale: 0.5,
+              decodeForCover: true,
+              filterQuality: FilterQuality.medium,
             )
           : null,
       badge: Container(

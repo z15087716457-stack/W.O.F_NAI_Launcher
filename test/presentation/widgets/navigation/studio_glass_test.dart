@@ -1,14 +1,22 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/services/window_material_service.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/widgets/common/collapsible_image_panel.dart';
+import 'package:nai_launcher/presentation/widgets/common/decoded_memory_image.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_glass_surface.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
+import '../../../helpers/official_ui_capture_fonts.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(loadOfficialUiCaptureFonts);
   const channel = MethodChannel('com.nailauncher/window_material');
   final requests = <Map<dynamic, dynamic>>[];
   setUp(() {
@@ -94,6 +102,117 @@ void main() {
   });
 
   for (final brightness in Brightness.values) {
+    testWidgets(
+      'image glass keeps foreground clear and expands in ${brightness.name}',
+      (tester) async {
+        final source = img.Image(width: 600, height: 900);
+        for (var y = 0; y < 900; y += 30) {
+          for (var x = 0; x < 600; x += 30) {
+            img.fillRect(
+              source,
+              x1: x,
+              y1: y,
+              x2: x + 29,
+              y2: y + 29,
+              color: img.ColorRgb8(50 + x ~/ 4, 70 + y ~/ 6, 150),
+            );
+          }
+        }
+        final bytes = Uint8List.fromList(img.encodePng(source));
+        final boundary = GlobalKey();
+        var expanded = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: brightness == Brightness.dark
+                ? GeistTheme.dark
+                : GeistTheme.light,
+            home: Scaffold(
+              body: Center(
+                child: RepaintBoundary(
+                  key: boundary,
+                  child: SizedBox(
+                    width: 400,
+                    child: StatefulBuilder(
+                      builder: (context, setState) => Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CollapsibleImagePanel(
+                            frosted: true,
+                            title: '精准参考',
+                            subtitle: '将生成绑定到角色或风格参考',
+                            icon: Icons.person_pin,
+                            hasData: true,
+                            backgroundImage: DecodedMemoryImage(
+                              bytes: bytes,
+                              decodeForCover: true,
+                            ),
+                            isExpanded: expanded,
+                            onToggle: () =>
+                                setState(() => expanded = !expanded),
+                            child: const SizedBox(
+                              height: 100,
+                              child: Text('参考参数'),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          CollapsibleImagePanel(
+                            frosted: true,
+                            title: '图生图',
+                            subtitle: '基于底图生成变体',
+                            icon: Icons.image,
+                            isExpanded: false,
+                            onToggle: () {},
+                            child: const SizedBox.shrink(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(ImageFiltered), findsOneWidget);
+        final imageFinder = find.byType(Image);
+        await tester.runAsync(
+          () => precacheImage(
+            tester.widget<Image>(imageFinder).image,
+            tester.element(imageFinder),
+          ),
+        );
+        await tester.pump();
+        expect(
+          find.ancestor(
+            of: find.text('精准参考'),
+            matching: find.byType(ImageFiltered),
+          ),
+          findsNothing,
+        );
+        if (Platform.environment['CAPTURE_STUDIO_UI'] == '1') {
+          await tester.runAsync(() async {
+            final image =
+                await (boundary.currentContext!.findRenderObject()!
+                        as RenderRepaintBoundary)
+                    .toImage(pixelRatio: 2);
+            final png = await image.toByteData(format: ui.ImageByteFormat.png);
+            final file = File(
+              '.dart_tool/glass-rollout-captures/cards-${brightness.name}.png',
+            );
+            await file.parent.create(recursive: true);
+            await file.writeAsBytes(png!.buffer.asUint8List());
+            image.dispose();
+          });
+        }
+        await tester.tap(find.text('精准参考'));
+        await tester.pumpAndSettle();
+        expect(expanded, isTrue);
+        expect(find.byType(ImageFiltered), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets(
       'glass card preserves import and expand actions in ${brightness.name}',
       (tester) async {

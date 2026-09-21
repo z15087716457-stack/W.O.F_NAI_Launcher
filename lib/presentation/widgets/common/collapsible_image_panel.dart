@@ -67,8 +67,9 @@ class CollapsibleImagePanel extends StatelessWidget {
                     child: frosted && !MediaQuery.highContrastOf(context)
                         ? ImageFiltered(
                             imageFilter: ui.ImageFilter.blur(
-                              sigmaX: 10,
-                              sigmaY: 10,
+                              sigmaX: 2.4,
+                              sigmaY: 2.4,
+                              tileMode: ui.TileMode.clamp,
                             ),
                             child: backgroundImage!,
                           )
@@ -81,12 +82,22 @@ class CollapsibleImagePanel extends StatelessWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.black.withValues(alpha: 0.5),
-                          Colors.black.withValues(alpha: 0.75),
+                          Colors.black.withValues(alpha: frosted ? 0.62 : 0.5),
+                          Colors.black.withValues(alpha: frosted ? 0.68 : 0.75),
                         ],
                       ),
                     ),
                   ),
+                  if (frosted)
+                    const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0x0AFFFFFF), Color(0x00FFFFFF)],
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -135,7 +146,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   fontSize: 11,
                                   color: showBackground
-                                      ? Colors.white.withValues(alpha: 0.8)
+                                      ? Colors.white.withValues(alpha: 0.9)
                                       : theme.colorScheme.onSurface.withValues(
                                           alpha: 0.55,
                                         ),

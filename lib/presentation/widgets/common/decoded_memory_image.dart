@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +16,7 @@ class DecodedMemoryImage extends StatelessWidget {
     this.maxLogicalWidth,
     this.maxLogicalHeight,
     this.decodeScale = 1.0,
+    this.decodeForCover = false,
     this.errorBuilder,
     this.frameBuilder,
   });
@@ -25,6 +29,10 @@ class DecodedMemoryImage extends StatelessWidget {
   final double? maxLogicalWidth;
   final double? maxLogicalHeight;
   final double decodeScale;
+
+  /// Decode enough pixels for a cropped banner, rather than fitting the full
+  /// source inside the banner and magnifying the smaller decoded result.
+  final bool decodeForCover;
   final ImageErrorWidgetBuilder? errorBuilder;
   final ImageFrameBuilder? frameBuilder;
 
@@ -56,6 +64,8 @@ class DecodedMemoryImage extends StatelessWidget {
         final ImageProvider<Object> imageProvider;
         if (cacheWidth == null && cacheHeight == null) {
           imageProvider = memoryImage;
+        } else if (decodeForCover && fit == BoxFit.cover) {
+          imageProvider = _CoverMemoryImage(bytes, cacheWidth, cacheHeight);
         } else {
           imageProvider = ResizeImage(
             memoryImage,
@@ -94,4 +104,48 @@ class DecodedMemoryImage extends StatelessWidget {
         .clamp(1, 4096);
     return physicalSize;
   }
+}
+
+/// Source dimensions are supplied by the codec, so portrait and panorama
+/// banners keep their aspect ratio without a second decode or full-size cache.
+class _CoverMemoryImage extends MemoryImage {
+  const _CoverMemoryImage(super.bytes, this.targetWidth, this.targetHeight);
+
+  final int? targetWidth;
+  final int? targetHeight;
+
+  @override
+  ImageStreamCompleter loadImage(MemoryImage key, ImageDecoderCallback decode) {
+    return super.loadImage(
+      key,
+      (buffer, {getTargetSize}) => decode(
+        buffer,
+        getTargetSize: (width, height) {
+          final coverScale = math.max(
+            (targetWidth ?? 0) / width,
+            (targetHeight ?? 0) / height,
+          );
+          // Never upscale a small original or decode an unbounded panorama.
+          final scale = math.min(
+            math.min(1.0, coverScale),
+            4096 / math.max(width, height),
+          );
+          return ui.TargetImageSize(
+            width: math.max(1, (width * scale).ceil()),
+            height: math.max(1, (height * scale).ceil()),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is _CoverMemoryImage &&
+      super == other &&
+      targetWidth == other.targetWidth &&
+      targetHeight == other.targetHeight;
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, targetWidth, targetHeight);
 }

@@ -342,6 +342,7 @@ class _UnifiedReferencePanelState extends ConsumerState<UnifiedReferencePanel> {
     final showBackground = hasVibes && !_isExpanded;
 
     return CollapsibleImagePanel(
+      frosted: true,
       title: context.l10n.vibe_title,
       subtitle: context.l10n.vibe_description,
       icon: Icons.auto_fix_high,
@@ -421,7 +422,8 @@ class _UnifiedReferencePanelState extends ConsumerState<UnifiedReferencePanel> {
           (data) => DecodedMemoryImage(
             bytes: data,
             fit: BoxFit.cover,
-            decodeScale: 0.5,
+            decodeForCover: true,
+            filterQuality: FilterQuality.medium,
           ),
         )
         .toList();

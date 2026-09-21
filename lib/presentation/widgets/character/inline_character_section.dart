@@ -7,6 +7,7 @@ import '../../../data/models/character/character_prompt.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../screens/generation/widgets/generation_sidebar_style.dart';
+import '../common/studio_glass_surface.dart';
 import 'character_position_canvas.dart';
 import 'inline_character_card.dart';
 import 'inline_character_editor.dart';
@@ -28,53 +29,52 @@ class InlineCharacterSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          key: const ValueKey('character-section-header'),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            border: Border.all(color: GenSidebarStyle.border(theme)),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.generation_sectionCharacters,
-                          style: GenSidebarStyle.sectionTitle(theme),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          l10n.generation_sectionCharactersSub,
-                          style: GenSidebarStyle.sectionSubtitle(theme),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  _AddCharacterMenu(hasCharacters: characters.isNotEmpty),
-                ],
-              ),
-              if (characters.isNotEmpty) ...[
-                const SizedBox(height: 10),
+        StudioGlassSurface(
+          borderRadius: BorderRadius.circular(6),
+          child: Container(
+            key: const ValueKey('character-section-header'),
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
                 Row(
                   children: [
-                    Text(
-                      l10n.character_positionLabel,
-                      style: GenSidebarStyle.fieldLabel(theme),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.generation_sectionCharacters,
+                            style: GenSidebarStyle.sectionTitle(theme),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            l10n.generation_sectionCharactersSub,
+                            style: GenSidebarStyle.sectionSubtitle(theme),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: CharacterPositionModeSegments(expanded: true),
-                    ),
+                    const SizedBox(width: 8),
+                    _AddCharacterMenu(hasCharacters: characters.isNotEmpty),
                   ],
                 ),
+                if (characters.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Text(
+                        l10n.character_positionLabel,
+                        style: GenSidebarStyle.fieldLabel(theme),
+                      ),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: CharacterPositionModeSegments(expanded: true),
+                      ),
+                    ],
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
         for (var i = 0; i < characters.length; i++)

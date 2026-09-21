@@ -78,6 +78,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
     final showBackground = hasReferences && !_isExpanded;
 
     return CollapsibleImagePanel(
+      frosted: true,
       title: context.l10n.preciseRef_title,
       subtitle: context.l10n.preciseRef_subtitle,
       icon: Icons.person_pin,
@@ -95,7 +96,8 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
                 ? DecodedMemoryImage(
                     bytes: references.first.image,
                     fit: BoxFit.cover,
-                    decodeScale: 0.75,
+                    decodeForCover: true,
+                    filterQuality: FilterQuality.medium,
                   )
                 : Row(
                     children: references.map((ref) {
@@ -103,7 +105,8 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
                         child: DecodedMemoryImage(
                           bytes: ref.image,
                           fit: BoxFit.cover,
-                          decodeScale: 0.75,
+                          decodeForCover: true,
+                          filterQuality: FilterQuality.medium,
                         ),
                       );
                     }).toList(),
