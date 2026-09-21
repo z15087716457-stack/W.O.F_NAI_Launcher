@@ -108,6 +108,18 @@ class _AddCharacterMenu extends ConsumerWidget {
       padding: EdgeInsets.zero,
       position: PopupMenuPosition.under,
       offset: const Offset(0, 4),
+      style: IconButton.styleFrom(
+        fixedSize: const Size(36, 36),
+        minimumSize: const Size(36, 36),
+        maximumSize: const Size(36, 36),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.standard,
+        backgroundColor: GenSidebarStyle.selectedSurface(theme),
+        hoverColor: theme.colorScheme.onSurface.withValues(alpha: .09),
+        focusColor: theme.colorScheme.onSurface.withValues(alpha: .12),
+        highlightColor: theme.colorScheme.onSurface.withValues(alpha: .16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       onSelected: (action) {
         if (action == _AddAction.clear) {
@@ -143,15 +155,7 @@ class _AddCharacterMenu extends ConsumerWidget {
           ),
         ],
       ],
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: GenSidebarStyle.selectedSurface(theme),
-          borderRadius: BorderRadius.circular(3),
-        ),
-        child: Icon(Icons.add, size: 24, color: theme.colorScheme.onSurface),
-      ),
+      icon: Icon(Icons.add, size: 24, color: theme.colorScheme.onSurface),
     );
   }
 

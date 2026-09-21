@@ -123,6 +123,7 @@ class _DetailedContent extends StatelessWidget {
                     if (i > 0) const SizedBox(height: 8),
                     _CharacterItem(
                       character: config.characters[i],
+                      index: i,
                       globalAiChoice: config.globalAiChoice,
                       aliasResolver: aliasResolver,
                       l10n: l10n,
@@ -206,6 +207,7 @@ class _GlobalAiStatusRow extends StatelessWidget {
 /// 单个角色项
 class _CharacterItem extends StatelessWidget {
   final CharacterPrompt character;
+  final int index;
   final bool globalAiChoice;
   final AliasResolverService aliasResolver;
   final AppLocalizations l10n;
@@ -214,6 +216,7 @@ class _CharacterItem extends StatelessWidget {
 
   const _CharacterItem({
     required this.character,
+    required this.index,
     required this.globalAiChoice,
     required this.aliasResolver,
     required this.l10n,
@@ -271,7 +274,9 @@ class _CharacterItem extends StatelessWidget {
                 // 角色名称
                 Expanded(
                   child: Text(
-                    character.name,
+                    character.customName.isEmpty
+                        ? l10n.character_number(index + 1)
+                        : character.customName,
                     style: TextStyle(
                       color: colorScheme.onSurface,
                       fontSize: 13,

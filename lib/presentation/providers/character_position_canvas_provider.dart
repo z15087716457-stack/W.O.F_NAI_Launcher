@@ -61,6 +61,12 @@ class CharacterPositionCanvas extends _$CharacterPositionCanvas {
         state = false;
       }
     });
+    ref.listen<bool>(
+      characterPromptNotifierProvider.select((config) => config.globalAiChoice),
+      (_, aiChoice) {
+        if (aiChoice && state) close();
+      },
+    );
     return false;
   }
 
@@ -68,6 +74,16 @@ class CharacterPositionCanvas extends _$CharacterPositionCanvas {
     if (!ref.read(characterPositionCanvasAvailableProvider)) {
       state = false;
       return;
+    }
+
+    ref.read(characterPromptNotifierProvider.notifier).setGlobalAiChoice(false);
+    final characters = ref.read(characterPromptNotifierProvider).characters;
+    final selectedId = ref.read(selectedCharacterIdProvider);
+    if (characters.isNotEmpty &&
+        !characters.any((item) => item.id == selectedId)) {
+      ref
+          .read(selectedCharacterIdProvider.notifier)
+          .select(characters.first.id);
     }
 
     final promptMaximized = ref.read(promptMaximizeNotifierProvider);

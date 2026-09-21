@@ -60,12 +60,12 @@ void main() {
       return CharacterPrompt(id: 'id', name: name, prompt: prompt);
     }
 
-    test('首 tag 为 girl 时显示女性符号且名称取第二个 tag', () {
+    test('未命名角色显示女性符号但不从提示词取名称', () {
       final display = resolveCharacterChipDisplay(
         buildCharacter(prompt: 'girl, hahaha, qw'),
       );
       expect(display.genderIcon, Icons.female);
-      expect(display.label, 'hahaha');
+      expect(display.label, isNull);
     });
 
     test('首 tag 为 1boy 时显示男性符号', () {
@@ -73,15 +73,15 @@ void main() {
         buildCharacter(prompt: '1boy, 1231'),
       );
       expect(display.genderIcon, Icons.male);
-      expect(display.label, '1231');
+      expect(display.label, isNull);
     });
 
-    test('首 tag 非性别时无符号且名称取首 tag', () {
+    test('首 tag 非性别时显示其他图标且不取首 tag 作为名称', () {
       final display = resolveCharacterChipDisplay(
         buildCharacter(prompt: 'silver hair, maid'),
       );
-      expect(display.genderIcon, isNull);
-      expect(display.label, 'silver hair');
+      expect(display.genderIcon, Icons.circle_outlined);
+      expect(display.label, isNull);
     });
 
     test('只有性别 tag 时无名称', () {
@@ -92,13 +92,13 @@ void main() {
       expect(display.label, isNull);
     });
 
-    test('空提示词无符号无名称', () {
+    test('空提示词显示其他图标且无名称', () {
       final display = resolveCharacterChipDisplay(buildCharacter());
-      expect(display.genderIcon, isNull);
+      expect(display.genderIcon, Icons.circle_outlined);
       expect(display.label, isNull);
     });
 
-    test('自定义名称优先于提示词提取', () {
+    test('只使用角色自定义名称', () {
       final display = resolveCharacterChipDisplay(
         buildCharacter(name: '爱丽丝', prompt: 'girl, hahaha'),
       );

@@ -277,12 +277,18 @@ Future<void> confirmClearAllCharacters(
 /// 角色名称就地编辑框
 ///
 /// 嵌在卡片/编辑面板头部的名字位置，点击即可直接改名，
-/// 输入实时写回 provider（空白输入不生效，保留原名）。
+/// 失焦或回车提交，清空名称后恢复序号占位。
 class CharacterNameField extends ConsumerStatefulWidget {
   final CharacterPrompt character;
+  final int index;
   final TextStyle? style;
 
-  const CharacterNameField({super.key, required this.character, this.style});
+  const CharacterNameField({
+    super.key,
+    required this.character,
+    required this.index,
+    this.style,
+  });
 
   @override
   ConsumerState<CharacterNameField> createState() => _CharacterNameFieldState();
@@ -290,9 +296,10 @@ class CharacterNameField extends ConsumerStatefulWidget {
 
 class _CharacterNameFieldState extends ConsumerState<CharacterNameField> {
   late final TextEditingController _controller = TextEditingController(
-    text: widget.character.name,
+    text: widget.character.customName,
   );
   final FocusNode _focusNode = FocusNode();
+  bool _dirty = false;
 
   @override
   void initState() {
@@ -309,23 +316,39 @@ class _CharacterNameFieldState extends ConsumerState<CharacterNameField> {
   }
 
   void _commit() {
+    final current = ref
+        .read(characterPromptNotifierProvider)
+        .findCharacterById(widget.character.id);
+    if (current == null) return;
+    if (!_dirty) {
+      if (_controller.text != current.customName) {
+        _controller.text = current.customName;
+      }
+      return;
+    }
+    _dirty = false;
     final trimmed = _controller.text.trim();
-    if (trimmed.isEmpty || trimmed == widget.character.name) return;
+    if (trimmed == current.customName) return;
     ref
         .read(characterPromptNotifierProvider.notifier)
-        .updateCharacter(widget.character.copyWith(name: trimmed));
+        .updateCharacter(
+          current.copyWith(name: trimmed, nameIsCustom: trimmed.isNotEmpty),
+        );
   }
 
   @override
   void didUpdateWidget(CharacterNameField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.character.id != widget.character.id) {
-      _controller.text = widget.character.name;
+      _dirty = false;
+      _controller.text = widget.character.customName;
       return;
     }
     // 外部改名时同步；编辑中（持有焦点）不覆盖用户输入
-    if (!_focusNode.hasFocus && widget.character.name != _controller.text) {
-      _controller.text = widget.character.name;
+    if (!_focusNode.hasFocus &&
+        widget.character.customName != _controller.text) {
+      _dirty = false;
+      _controller.text = widget.character.customName;
     }
   }
 
@@ -341,27 +364,32 @@ class _CharacterNameFieldState extends ConsumerState<CharacterNameField> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return TextField(
-      controller: _controller,
-      focusNode: _focusNode,
-      maxLength: 50,
-      maxLines: 1,
-      style: widget.style,
-      decoration: InputDecoration(
-        isDense: true,
-        isCollapsed: true,
-        filled: false,
-        contentPadding: EdgeInsets.zero,
-        counterText: '',
-        border: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        hintText: l10n.characterEditor_nameHint,
-        hintStyle: widget.style?.copyWith(
-          color: widget.style?.color?.withValues(alpha: 0.5),
+    return Semantics(
+      label: l10n.characterEditor_nameHint,
+      child: TextField(
+        controller: _controller,
+        focusNode: _focusNode,
+        maxLength: 50,
+        maxLines: 1,
+        style: widget.style,
+        decoration: InputDecoration(
+          isDense: true,
+          isCollapsed: true,
+          filled: false,
+          contentPadding: EdgeInsets.zero,
+          counterText: '',
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          hintText: l10n.character_number(widget.index + 1),
+          hintStyle: widget.style?.copyWith(
+            color: widget.style?.color?.withValues(alpha: 0.5),
+          ),
         ),
+        onSubmitted: (_) => _commit(),
+        onChanged: (_) => _dirty = true,
+        onTapOutside: (_) => _focusNode.unfocus(),
       ),
-      onSubmitted: (_) => _commit(),
     );
   }
 }

@@ -124,12 +124,14 @@ class SidebarSegmentButton extends StatelessWidget {
     required this.onPressed,
     required this.child,
     this.padding = const EdgeInsets.symmetric(horizontal: 10),
+    this.backgroundColor,
   });
 
   final bool selected;
   final VoidCallback? onPressed;
   final Widget child;
   final EdgeInsetsGeometry padding;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -140,9 +142,11 @@ class SidebarSegmentButton extends StatelessWidget {
       button: true,
       enabled: onPressed != null,
       child: Material(
-        color: selected
-            ? GenSidebarStyle.selectedSurface(theme)
-            : Colors.transparent,
+        color:
+            backgroundColor ??
+            (selected
+                ? GenSidebarStyle.selectedSurface(theme)
+                : Colors.transparent),
         borderRadius: radius,
         clipBehavior: Clip.antiAlias,
         child: InkWell(

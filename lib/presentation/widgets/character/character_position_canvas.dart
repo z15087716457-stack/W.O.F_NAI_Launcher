@@ -17,36 +17,15 @@ import '../common/decoded_memory_image.dart';
 /// 芯片显示信息：性别符号 + 显示名
 typedef CharacterChipDisplay = ({IconData? genderIcon, String? label});
 
-/// 解析角色切换芯片的显示信息（官网规则）
-///
-/// - 性别符号：仅当提示词**第一个 tag** 为 girl/boy 系（girl/1girl/boy/1boy，
-///   大小写不敏感）时显示，判断依据是提示词内容而非 gender 字段
-/// - 显示名：用户自定义过名称（不匹配默认 `Character N`，含词库导入名）
-///   优先用名称；否则取提示词第一个 tag，第一个是性别 tag 则取第二个
+/// 名称只来自用户命名；未命名时显示编号和类型图标，不提取提示词。
 CharacterChipDisplay resolveCharacterChipDisplay(CharacterPrompt character) {
-  final tags = character.prompt
-      .split(',')
-      .map((t) => t.trim())
-      .where((t) => t.isNotEmpty)
-      .toList();
-
-  // 性别符号与配色同源：依提示词首 tag 推导的有效性别
   final genderIcon = switch (character.effectiveGender) {
-    CharacterGender.female when tags.isNotEmpty => Icons.female,
-    CharacterGender.male when tags.isNotEmpty => Icons.male,
-    _ => null,
+    CharacterGender.female => Icons.female,
+    CharacterGender.male => Icons.male,
+    CharacterGender.other => Icons.circle_outlined,
   };
-  var labelFromPrompt = tags.isNotEmpty ? tags.first : null;
-  if (genderIcon != null) {
-    labelFromPrompt = tags.length > 1 ? tags[1] : null;
-  }
-
-  final hasCustomName = !RegExp(
-    r'^Character \d+$',
-  ).hasMatch(character.name.trim());
-  final label = hasCustomName ? character.name.trim() : labelFromPrompt;
-
-  return (genderIcon: genderIcon, label: label);
+  final name = character.customName;
+  return (genderIcon: genderIcon, label: name.isEmpty ? null : name);
 }
 
 /// 角色位置画布
@@ -169,8 +148,11 @@ class _CharacterPositionCanvasViewState
                     maxLogicalHeight: size.height,
                     gaplessPlayback: true,
                   ),
-                  // 轻微暗化，让锚点在亮图上也清晰
-                  const ColoredBox(color: Color(0x26000000)),
+                  // 只压暗定位背景；编号锚点在遮罩上方保持明亮。
+                  const ColoredBox(
+                    key: ValueKey('character-position-dim'),
+                    color: Color(0xA6000000),
+                  ),
                 ] else
                   Container(
                     decoration: BoxDecoration(
@@ -391,68 +373,74 @@ class CharacterPositionModeSegments extends ConsumerWidget {
           ),
           const SizedBox(width: 3),
           segment(
-            SidebarSegmentButton(
-              key: const ValueKey('character-position-custom'),
-              selected: !globalAiChoice,
-              onPressed: () => ref
-                  .read(characterPromptNotifierProvider.notifier)
-                  .setGlobalAiChoice(false),
-              child: Text(
-                l10n.characterCanvas_custom,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: _segmentTextStyle(context, !globalAiChoice),
-              ),
-            ),
-          ),
-          Container(
-            key: const ValueKey('character-position-divider'),
-            width: 1,
-            height: 22,
-            margin: const EdgeInsets.symmetric(horizontal: 3),
-            color: colorScheme.outline.withValues(alpha: .25),
-          ),
-          // 位置画布入口（官网网格图标）
-          Tooltip(
-            message: l10n.characterCanvas_title,
-            waitDuration: const Duration(milliseconds: 500),
-            child: SidebarSegmentButton(
-              key: const ValueKey('character-position-toggle'),
-              selected: canvasOpen,
-              padding: const EdgeInsets.symmetric(horizontal: 7),
-              onPressed: canvasAvailable
-                  ? () {
-                      if (!canvasOpen) {
-                        ref
-                            .read(characterPromptNotifierProvider.notifier)
-                            .setGlobalAiChoice(false);
-                        final characters = ref
-                            .read(characterPromptNotifierProvider)
-                            .characters;
-                        final selectedId = ref.read(
-                          selectedCharacterIdProvider,
-                        );
-                        if (!characters.any((item) => item.id == selectedId)) {
-                          ref
-                              .read(selectedCharacterIdProvider.notifier)
-                              .select(characters.first.id);
-                        }
-                      }
-                      ref
-                          .read(characterPositionCanvasProvider.notifier)
-                          .toggle();
-                    }
-                  : null,
-              child: SvgPicture.asset(
-                'assets/icons/nai-icon-characterpositions.svg',
-                width: 15,
-                height: 15,
-                colorFilter: ColorFilter.mode(
-                  colorScheme.onSurface.withValues(
-                    alpha: !canvasAvailable ? .3 : (canvasOpen ? 1 : .65),
+            Material(
+              key: const ValueKey('character-position-custom-group'),
+              color: !globalAiChoice
+                  ? GenSidebarStyle.selectedSurface(Theme.of(context))
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(3),
+              clipBehavior: Clip.antiAlias,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  segment(
+                    SidebarSegmentButton(
+                      key: const ValueKey('character-position-custom'),
+                      selected: !globalAiChoice,
+                      backgroundColor: Colors.transparent,
+                      onPressed: () => ref
+                          .read(characterPromptNotifierProvider.notifier)
+                          .setGlobalAiChoice(false),
+                      child: Text(
+                        l10n.characterCanvas_custom,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: _segmentTextStyle(context, !globalAiChoice),
+                      ),
+                    ),
                   ),
-                  BlendMode.srcIn,
-                ),
+                  Container(
+                    key: const ValueKey('character-position-divider'),
+                    width: 1,
+                    height: 22,
+                    color: colorScheme.outline.withValues(alpha: .25),
+                  ),
+                  Tooltip(
+                    message: l10n.characterCanvas_title,
+                    waitDuration: const Duration(milliseconds: 500),
+                    child: SidebarSegmentButton(
+                      key: const ValueKey('character-position-toggle'),
+                      selected: canvasOpen && !globalAiChoice,
+                      backgroundColor: canvasOpen && !globalAiChoice
+                          ? Color.alphaBlend(
+                              colorScheme.onSurface.withValues(alpha: .1),
+                              GenSidebarStyle.selectedSurface(
+                                Theme.of(context),
+                              ),
+                            )
+                          : Colors.transparent,
+                      padding: const EdgeInsets.symmetric(horizontal: 7),
+                      onPressed: canvasAvailable
+                          ? () => ref
+                                .read(characterPositionCanvasProvider.notifier)
+                                .toggle()
+                          : null,
+                      child: SvgPicture.asset(
+                        'assets/icons/nai-icon-characterpositions.svg',
+                        width: 15,
+                        height: 15,
+                        colorFilter: ColorFilter.mode(
+                          colorScheme.onSurface.withValues(
+                            alpha: !canvasAvailable
+                                ? .3
+                                : (!globalAiChoice ? 1 : .65),
+                          ),
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -627,7 +615,9 @@ class _AnchorDot extends StatelessWidget {
     );
 
     return Tooltip(
-      message: character.name,
+      message: character.customName.isEmpty
+          ? AppLocalizations.of(context)!.character_number(index + 1)
+          : character.customName,
       waitDuration: const Duration(milliseconds: 600),
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 150),

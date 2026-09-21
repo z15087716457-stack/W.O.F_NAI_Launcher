@@ -282,6 +282,7 @@ class _RowEditorPanelState extends ConsumerState<_RowEditorPanel> {
                     child: CharacterNameField(
                       key: ValueKey('panel-name-${widget.character.id}'),
                       character: widget.character,
+                      index: widget.index,
                       style: theme.textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -308,7 +309,7 @@ class _RowEditorPanelState extends ConsumerState<_RowEditorPanel> {
                     onTap: () => _openModal(
                       () => AddToLibraryDialog.show(
                         context,
-                        name: widget.character.name,
+                        name: widget.character.customName,
                         content: widget.character.prompt,
                       ),
                     ),

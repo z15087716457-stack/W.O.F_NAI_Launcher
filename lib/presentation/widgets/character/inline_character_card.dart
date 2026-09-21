@@ -293,11 +293,14 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
                             return CharacterNameField(
                               key: ValueKey('name-${character.id}'),
                               character: character,
+                              index: widget.index,
                               style: nameStyle,
                             );
                           }
                           return Text(
-                            character.name,
+                            character.customName.isEmpty
+                                ? l10n.character_number(widget.index + 1)
+                                : character.customName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: nameStyle,
@@ -368,7 +371,7 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
               _openModal(
                 () => AddToLibraryDialog.show(
                   context,
-                  name: widget.character.name,
+                  name: widget.character.customName,
                   content: widget.character.prompt,
                 ),
               );

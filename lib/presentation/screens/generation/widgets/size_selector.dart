@@ -424,7 +424,7 @@ class _SizeSelectorState extends State<SizeSelector> {
       child: IconButton(
         key: Key('size-aspect-${type.name}'),
         onPressed: enabled ? () => _onTypeSelected(type) : null,
-        icon: Icon(icon, size: 18),
+        icon: Icon(icon, size: 20),
         tooltip: _getTypeName(context, type),
         style: IconButton.styleFrom(
           hoverColor: theme.colorScheme.onSurface.withValues(alpha: .07),
@@ -441,8 +441,9 @@ class _SizeSelectorState extends State<SizeSelector> {
           ),
           padding: EdgeInsets.zero,
           minimumSize: const Size(0, 28),
+          fixedSize: const Size.fromHeight(28),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          visualDensity: VisualDensity.compact,
+          visualDensity: VisualDensity.standard,
           side: BorderSide.none,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
         ),

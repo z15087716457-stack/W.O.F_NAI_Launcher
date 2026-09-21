@@ -39,7 +39,7 @@ class CharacterPromptNotifier extends _$CharacterPromptNotifier {
   /// 添加新角色
   ///
   /// [gender] 角色性别
-  /// [name] 角色名称，为空时自动生成
+  /// [name] 用户角色名称；未指定时保留空值，界面显示占位序号
   /// [prompt] 正向提示词，为空时根据性别生成默认值
   /// [thumbnailPath] 缩略图路径（词库导入时）
   ///

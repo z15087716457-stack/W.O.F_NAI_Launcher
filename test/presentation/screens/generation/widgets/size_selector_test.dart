@@ -95,6 +95,12 @@ void main() {
       final square = find.byKey(const Key('size-aspect-square'));
       for (final segment in [landscape, portrait, square]) {
         expect(segment, findsOneWidget);
+        final surface = find.descendant(
+          of: segment,
+          matching: find.byType(Material),
+        );
+        expect(tester.getSize(surface).height, 28);
+        expect(tester.getCenter(segment).dy, tester.getCenter(group).dy);
       }
       final landscapeWidth = tester.getSize(landscape).width;
       expect(tester.getSize(portrait).width, landscapeWidth);

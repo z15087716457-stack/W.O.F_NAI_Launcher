@@ -218,8 +218,12 @@ class CharacterPrompt with _$CharacterPrompt {
     /// 唯一标识
     required String id,
 
-    /// 角色名称
-    required String name,
+    /// 用户填写的角色名称；未命名保持空值，由界面显示序号占位。
+    @Default('') String name,
+
+    /// null 表示旧数据。旧版自动填入的 Character N 仅作占位显示，
+    /// 原始 name 保留；新输入显式记录来源，允许用户真的命名为 Character N。
+    bool? nameIsCustom,
 
     /// 角色性别
     @Default(CharacterGender.female) CharacterGender gender,
@@ -248,7 +252,7 @@ class CharacterPrompt with _$CharacterPrompt {
 
   /// 创建新角色
   factory CharacterPrompt.create({
-    required String name,
+    String name = '',
     CharacterGender gender = CharacterGender.female,
     String prompt = '',
     String negativePrompt = 'lowres, aliasing, ',
@@ -259,6 +263,7 @@ class CharacterPrompt with _$CharacterPrompt {
     return CharacterPrompt(
       id: const Uuid().v4(),
       name: name,
+      nameIsCustom: name.trim().isNotEmpty,
       gender: gender,
       prompt: prompt,
       negativePrompt: negativePrompt,
@@ -266,6 +271,17 @@ class CharacterPrompt with _$CharacterPrompt {
       customPosition: customPosition,
       thumbnailPath: thumbnailPath,
     );
+  }
+
+  /// 名称展示与编辑统一读取此值，绝不从提示词推导名称。
+  String get customName {
+    final trimmed = name.trim();
+    if (nameIsCustom == false) return '';
+    if (nameIsCustom == null &&
+        RegExp(r'^Character [1-9]\d*$').hasMatch(trimmed)) {
+      return '';
+    }
+    return trimmed;
   }
 
   /// 依提示词首 tag 推导的有效性别
@@ -406,11 +422,6 @@ class CharacterPromptConfig with _$CharacterPromptConfig {
         .join('\n');
   }
 
-  /// 获取下一个角色的默认名称
-  String getNextCharacterName() {
-    return 'Character ${characters.length + 1}';
-  }
-
   /// 预定义的默认位置列表（0-1 百分比坐标，分散排布尽量不重合）
   static const List<CharacterPosition> _defaultPositions = [
     CharacterPosition(row: 0.5, column: 0.5), // 中心
@@ -478,7 +489,7 @@ class CharacterPromptConfig with _$CharacterPromptConfig {
     final defaultPosition = _getNextDefaultPosition();
 
     final newCharacter = CharacterPrompt.create(
-      name: name ?? getNextCharacterName(),
+      name: name ?? '',
       gender: gender,
       prompt: initialPrompt,
       positionMode: CharacterPositionMode.custom,

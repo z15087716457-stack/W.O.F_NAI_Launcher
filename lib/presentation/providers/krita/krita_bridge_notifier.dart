@@ -469,7 +469,6 @@ final kritaBridgeNotifierProvider =
               //      + 生成参数态（generationParams.characters，桥接 generate 用）
               final uiChars = <char_model.CharacterPrompt>[];
               final paramChars = <CharacterPrompt>[];
-              var index = 0;
               for (final entry in chars) {
                 if (entry is! Map || entry['prompt'] is! String) continue;
                 final prompt = entry['prompt'] as String;
@@ -484,7 +483,6 @@ final kritaBridgeNotifierProvider =
                 uiChars.add(
                   char_model.CharacterPrompt(
                     id: const Uuid().v4(),
-                    name: 'Character ${index + 1}',
                     prompt: prompt,
                     negativePrompt: uc,
                     positionMode: hasPos
@@ -510,7 +508,6 @@ final kritaBridgeNotifierProvider =
                     positionY: y,
                   ),
                 );
-                index++;
               }
               ref
                   .read(characterPromptNotifierProvider.notifier)
@@ -519,7 +516,7 @@ final kritaBridgeNotifierProvider =
               for (final c in paramChars) {
                 notifier.addCharacter(c);
               }
-              applied.add('characters($index)');
+              applied.add('characters(${uiChars.length})');
             } else if (flag('clear_characters') == true) {
               ref
                   .read(characterPromptNotifierProvider.notifier)

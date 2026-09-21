@@ -80,7 +80,6 @@ class ComfyuiPromptParser {
 
       characters.add(
         CharacterPrompt.create(
-          name: 'Character ${i + 1}',
           gender: parsed.inferredGender ?? CharacterGender.female,
           prompt: parsed.prompt,
           positionMode: positionMode,

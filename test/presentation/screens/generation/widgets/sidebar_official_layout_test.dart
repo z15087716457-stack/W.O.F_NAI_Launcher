@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -59,7 +60,6 @@ class _Characters extends CharacterPromptNotifier {
     super.build();
     return const CharacterPromptConfig().addCharacter(
       gender: CharacterGender.female,
-      name: 'Character 1',
       prompt: 'blue eyes, white hair',
     );
   }
@@ -144,15 +144,16 @@ void main() {
           await tester.pumpWidget(
             UncontrolledProviderScope(
               container: container,
-              child: MaterialApp(
-                theme: officialUiCaptureTheme(),
-                locale: Locale(language),
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                supportedLocales: AppLocalizations.supportedLocales,
-                home: Scaffold(
-                  body: RepaintBoundary(
-                    key: boundary,
-                    child: WebLeftPanel(negativeModeNotifier: mode),
+              child: RepaintBoundary(
+                key: boundary,
+                child: MaterialApp(
+                  theme: officialUiCaptureTheme(),
+                  locale: Locale(language),
+                  localizationsDelegates:
+                      AppLocalizations.localizationsDelegates,
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  home: Scaffold(
+                    body: WebLeftPanel(negativeModeNotifier: mode),
                   ),
                 ),
               ),
@@ -219,6 +220,50 @@ void main() {
             });
           }
           if (width == 400 && language == 'zh') {
+            final add = find.byKey(const ValueKey('add-character-menu'));
+            final sample = tester.getTopLeft(add) + const Offset(8, 8);
+            Future<int> redAtButton() async => (await tester.runAsync(() async {
+              final image =
+                  await (boundary.currentContext!.findRenderObject()
+                          as RenderRepaintBoundary)
+                      .toImage();
+              final data = await image.toByteData(
+                format: ui.ImageByteFormat.rawRgba,
+              );
+              final red = data!.getUint8(
+                (sample.dy.toInt() * image.width + sample.dx.toInt()) * 4,
+              );
+              image.dispose();
+              return red;
+            }))!;
+            final normal = await redAtButton();
+            final mouse = await tester.createGesture(
+              kind: PointerDeviceKind.mouse,
+            );
+            await mouse.addPointer(location: Offset.zero);
+            await mouse.moveTo(tester.getCenter(add));
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 250));
+            expect(await redAtButton(), greaterThan(normal));
+            await tester.pump(const Duration(seconds: 2));
+            expect(find.text(l10n.character_addCharacter), findsOneWidget);
+            if (Platform.environment['CAPTURE_OFFICIAL_UI'] == '1') {
+              await tester.runAsync(() async {
+                final image =
+                    await (boundary.currentContext!.findRenderObject()
+                            as RenderRepaintBoundary)
+                        .toImage();
+                final data = await image.toByteData(
+                  format: ui.ImageByteFormat.png,
+                );
+                await File(
+                  '.dart_tool/official-ui-captures/sidebar-add-hover.png',
+                ).writeAsBytes(data!.buffer.asUint8List());
+                image.dispose();
+              });
+            }
+            await mouse.removePointer();
+            await tester.pumpAndSettle();
             container
                 .read(characterPromptNotifierProvider.notifier)
                 .clearAllCharacters();

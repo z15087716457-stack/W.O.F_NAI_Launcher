@@ -1369,6 +1369,9 @@ class _PositivePromptTooltip extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: enabledCharacters.map((character) {
+                  final name = character.customName.isEmpty
+                      ? l10n.character_number(characters.indexOf(character) + 1)
+                      : character.customName;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Row(
@@ -1388,7 +1391,7 @@ class _PositivePromptTooltip extends StatelessWidget {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            '${character.name}: ${character.toNaiPrompt(useAiPosition: globalAiChoice)}',
+                            '$name: ${character.toNaiPrompt(useAiPosition: globalAiChoice)}',
                             style: TextStyle(
                               fontSize: 10,
                               color: theme.colorScheme.onSurface.withValues(

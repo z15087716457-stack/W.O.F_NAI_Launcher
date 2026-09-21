@@ -237,7 +237,6 @@ class MetadataImportCoordinator {
 
       characters.add(
         char.CharacterPrompt.create(
-          name: 'Character ${i + 1}',
           gender: _inferGenderFromPrompt(prompt),
           prompt: prompt,
           negativePrompt: negativePrompt,
