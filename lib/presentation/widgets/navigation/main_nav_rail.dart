@@ -24,18 +24,6 @@ class MainNavRail extends ConsumerWidget {
   static const double expandedWidth = 196;
   static const Duration animationDuration = Duration(milliseconds: 240);
 
-  static const List<AppBranch> _railBranches = [
-    AppBranch.generation,
-    AppBranch.localGallery,
-    AppBranch.promptBlockLibrary,
-    AppBranch.styleExplore,
-    AppBranch.onlineGallery,
-    AppBranch.vibeLibrary,
-    AppBranch.preciseRefLibrary,
-    AppBranch.statistics,
-    AppBranch.settings,
-  ];
-
   final StatefulNavigationShell navigationShell;
 
   const MainNavRail({super.key, required this.navigationShell});
@@ -51,9 +39,6 @@ class MainNavRail extends ConsumerWidget {
       updateStateProvider.select((state) => state.hasNewVersion),
     );
     final currentIndex = navigationShell.currentIndex;
-    final selectedIndex = _railBranches.indexWhere(
-      (branch) => branch.index == currentIndex,
-    );
 
     return _NavRailExpansionScope(
       isExpanded: isExpanded,
@@ -79,33 +64,13 @@ class MainNavRail extends ConsumerWidget {
                 key: const Key('main-nav-primary-scroll'),
                 child: Column(
                   children: [
-                    // Navigation Items
+                    // 创作：主生图、画风探索。
                     _NavIcon(
                       icon: Icons.brush, // Canvas/Edit
                       label: context.l10n.nav_canvas,
-                      isSelected: selectedIndex == 0,
+                      isSelected: currentIndex == AppBranch.generation.index,
                       onTap: () =>
                           navigationShell.goBranch(AppBranch.generation.index),
-                    ),
-
-                    // 本地画廊（App生成的图片）
-                    _NavIcon(
-                      icon: Icons.folder, // Local Generated Images
-                      label: context.l10n.localGallery_title,
-                      isSelected: selectedIndex == 1,
-                      onTap: () => navigationShell.goBranch(
-                        AppBranch.localGallery.index,
-                      ),
-                    ),
-
-                    // 全局 Prompt 块库
-                    _NavIcon(
-                      icon: Icons.view_module_outlined,
-                      label: context.l10n.nav_promptBlockLibrary,
-                      isSelected: selectedIndex == 2,
-                      onTap: () => navigationShell.goBranch(
-                        AppBranch.promptBlockLibrary.index,
-                      ),
                     ),
 
                     // 画风探索
@@ -114,19 +79,40 @@ class MainNavRail extends ConsumerWidget {
                       // 复用药丸角标同款自绘双螺旋。
                       customIcon: (color) => DnaIcon(size: 24, color: color),
                       label: context.l10n.nav_styleExplore,
-                      isSelected: selectedIndex == 3,
+                      isSelected: currentIndex == AppBranch.styleExplore.index,
                       onTap: () => navigationShell.goBranch(
                         AppBranch.styleExplore.index,
                       ),
                     ),
 
-                    // 在线画廊
+                    const _NavGroupDivider(),
+
+                    // 素材：本地图库、在线画廊、块库及参考仓库。
+                    _NavIcon(
+                      icon: Icons.folder,
+                      label: context.l10n.localGallery_title,
+                      isSelected: currentIndex == AppBranch.localGallery.index,
+                      onTap: () => navigationShell.goBranch(
+                        AppBranch.localGallery.index,
+                      ),
+                    ),
+
                     _NavIcon(
                       icon: Icons.photo_library, // Online Gallery
                       label: context.l10n.nav_onlineGallery,
-                      isSelected: selectedIndex == 4,
+                      isSelected: currentIndex == AppBranch.onlineGallery.index,
                       onTap: () => navigationShell.goBranch(
                         AppBranch.onlineGallery.index,
+                      ),
+                    ),
+
+                    _NavIcon(
+                      icon: Icons.view_module_outlined,
+                      label: context.l10n.nav_promptBlockLibrary,
+                      isSelected:
+                          currentIndex == AppBranch.promptBlockLibrary.index,
+                      onTap: () => navigationShell.goBranch(
+                        AppBranch.promptBlockLibrary.index,
                       ),
                     ),
 
@@ -134,7 +120,7 @@ class MainNavRail extends ConsumerWidget {
                     _NavIcon(
                       icon: Icons.auto_awesome, // Vibe Library
                       label: context.l10n.vibeLibrary_title,
-                      isSelected: selectedIndex == 5,
+                      isSelected: currentIndex == AppBranch.vibeLibrary.index,
                       onTap: () =>
                           navigationShell.goBranch(AppBranch.vibeLibrary.index),
                     ),
@@ -143,17 +129,20 @@ class MainNavRail extends ConsumerWidget {
                     _NavIcon(
                       icon: Icons.center_focus_strong,
                       label: context.l10n.nav_preciseRefLibrary,
-                      isSelected: selectedIndex == 6,
+                      isSelected:
+                          currentIndex == AppBranch.preciseRefLibrary.index,
                       onTap: () => navigationShell.goBranch(
                         AppBranch.preciseRefLibrary.index,
                       ),
                     ),
 
-                    // 画廊统计
+                    const _NavGroupDivider(),
+
+                    // 统计独立分组。
                     _NavIcon(
                       icon: Icons.bar_chart, // Gallery Statistics
                       label: context.l10n.statistics_title,
-                      isSelected: selectedIndex == 7,
+                      isSelected: currentIndex == AppBranch.statistics.index,
                       onTap: () =>
                           navigationShell.goBranch(AppBranch.statistics.index),
                     ),
@@ -183,7 +172,7 @@ class MainNavRail extends ConsumerWidget {
             _NavIcon(
               icon: Icons.settings,
               label: context.l10n.nav_settings,
-              isSelected: selectedIndex == 8,
+              isSelected: currentIndex == AppBranch.settings.index,
               showBadge: showUpdateBadge,
               onTap: () => navigationShell.goBranch(AppBranch.settings.index),
             ),
@@ -196,6 +185,19 @@ class MainNavRail extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _NavGroupDivider extends StatelessWidget {
+  const _NavGroupDivider();
+
+  @override
+  Widget build(BuildContext context) => Divider(
+    height: 17,
+    thickness: 1,
+    indent: 16,
+    endIndent: 16,
+    color: Theme.of(context).dividerColor,
+  );
 }
 
 class _NavRailExpansionScope extends InheritedWidget {
