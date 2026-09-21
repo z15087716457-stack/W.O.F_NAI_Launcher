@@ -42,3 +42,11 @@
 - 主要按钮沿用品牌蓝 `#005DFF` 配白字；可交互文字 / 焦点使用深色 `#50A8FF`、浅色 `#0064E2`。大容器选中底色仍用中性灰。
 - 常规控件 6px 圆角，菜单 / 对话框 12px。正文 / 标签 14px，辅助文字 12–13px；保留已验收的生图侧栏紧凑层级。
 - `test/presentation/themes/studio_theme_test.dart` 覆盖磁盘恢复、根路由与保活页面、弹窗和快捷键切换；`studio_workspace_theme_test.dart` 实绘图库、块库与主题选择器，注入测试数据，不读取用户库。
+
+## 磨砂材质小样
+
+范围限于标题栏和「图生图」卡片，等待用户核验后再考虑其他面板。`StudioGlassSurface` 使用随主题变化的烟灰 / 乳白渐变、静态细颗粒及边缘高光；文字、图标和按钮保持清晰，画布与其他页面保持不透明。卡片存在收起的底图时只模糊该底图，不对整个窗口做实时模糊。
+
+Windows 标题栏通过 `WindowMaterialService` 与 `window_material.cpp` 接入 [DWM desktop acrylic](https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwm_systembackdrop_type)（Windows 11 22H2 起）。仅原生接口确认可用后允许标题栏半透明；系统关闭透明、启用高对比度或系统不支持时，使用不透明表面。系统设置改变时重新检测；应用明暗选择决定材质明暗，不更改 Windows 设置。避免向 `window_manager` 设置实色原生背景，否则它会覆盖 DWM 材质。
+
+窗口拖拽 / 双击、按钮命中区及原有图标资源沿用现有实现；标题栏不裁剪向下延伸的按钮提示。`studio_glass_test.dart` 检查主题 / 高对比度 / 不支持回退和卡片上传、展开操作。widget 截图只能检查 Flutter 表面，原生桌面透景需在运行包中核验。

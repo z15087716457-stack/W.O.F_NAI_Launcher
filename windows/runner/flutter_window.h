@@ -3,6 +3,8 @@
 
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
+#include <flutter/method_channel.h>
+#include <flutter/encodable_value.h>
 
 #include <memory>
 
@@ -23,6 +25,12 @@ class FlutterWindow : public Win32Window {
                          LPARAM const lparam) noexcept override;
 
  private:
+  bool UpdateWindowMaterial();
+  bool material_enabled_ = false;
+  bool material_dark_ = true;
+  bool material_available_ = false;
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> material_channel_;
+
   // The project to run.
   flutter::DartProject project_;
 

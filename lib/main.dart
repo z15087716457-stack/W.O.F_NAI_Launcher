@@ -631,7 +631,9 @@ Future<void> _bootstrapApplication() async {
         size: Size(effWidth, effHeight),
         minimumSize: const Size(800, 600),
         center: fillBounds == null && (savedX == null || savedY == null),
-        backgroundColor: const Color(0xFF121212), // 深色背景，避免窗口透明
+        // Windows DWM owns the title-bar backdrop. Flutter pages stay opaque;
+        // a solid native accent here would cover the system acrylic material.
+        backgroundColor: Platform.isWindows ? null : const Color(0xFF121212),
         skipTaskbar: false,
         // FEAT-23 内置一体标题栏：隐藏原生栏，由 Flutter 自绘
         // （拖拽/双击/Aero Snap 经 runner WM_NCHITTEST 返回 HTCAPTION）。

@@ -9,6 +9,7 @@
 #include <flutter/standard_method_codec.h>
 #include "flutter/generated_plugin_registrant.h"
 #include "titlebar_region.h"
+#include "window_material.h"
 
 // Global set to store font names
 static std::set<std::wstring> g_font_names;
@@ -143,10 +144,40 @@ bool FlutterWindow::OnCreate() {
                          SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE |
                              SWP_FRAMECHANGED);
           }
+          UpdateWindowMaterial();
           result->Success();
         } else {
           result->NotImplemented();
         }
+      });
+
+  material_channel_ =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(),
+          "com.nailauncher/window_material",
+          &flutter::StandardMethodCodec::GetInstance());
+  material_channel_->SetMethodCallHandler(
+      [this](const auto& call, auto result) {
+        if (call.method_name() != "configure") {
+          result->NotImplemented();
+          return;
+        }
+        const auto* args = std::get_if<flutter::EncodableMap>(call.arguments());
+        if (args == nullptr) {
+          result->Error("invalid_arguments", "Expected material settings.");
+          return;
+        }
+        const auto enabled = args->find(flutter::EncodableValue("enabled"));
+        const auto dark = args->find(flutter::EncodableValue("dark"));
+        if (enabled == args->end() || dark == args->end() ||
+            !std::holds_alternative<bool>(enabled->second) ||
+            !std::holds_alternative<bool>(dark->second)) {
+          result->Error("invalid_arguments", "Expected enabled and dark booleans.");
+          return;
+        }
+        material_enabled_ = std::get<bool>(enabled->second);
+        material_dark_ = std::get<bool>(dark->second);
+        result->Success(flutter::EncodableValue(UpdateWindowMaterial()));
       });
 
   // Register integrated title bar MethodChannel (Dart -> native).
@@ -206,11 +237,26 @@ bool FlutterWindow::OnCreate() {
 }
 
 void FlutterWindow::OnDestroy() {
+  material_channel_.reset();
   if (flutter_controller_) {
     flutter_controller_ = nullptr;
   }
 
   Win32Window::OnDestroy();
+}
+
+bool FlutterWindow::UpdateWindowMaterial() {
+  const bool available = window_material::Apply(
+      GetHandle(), material_enabled_, material_dark_);
+  if (available != material_available_) {
+    material_available_ = available;
+    if (material_channel_) {
+      material_channel_->InvokeMethod(
+          "availabilityChanged",
+          std::make_unique<flutter::EncodableValue>(available));
+    }
+  }
+  return available;
 }
 
 LRESULT
@@ -249,5 +295,11 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
       break;
   }
 
-  return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
+  const auto handled = Win32Window::MessageHandler(hwnd, message, wparam, lparam);
+  if (message == WM_SETTINGCHANGE || message == WM_THEMECHANGED ||
+      message == WM_DWMCOMPOSITIONCHANGED ||
+      message == WM_DWMCOLORIZATIONCOLORCHANGED) {
+    UpdateWindowMaterial();
+  }
+  return handled;
 }

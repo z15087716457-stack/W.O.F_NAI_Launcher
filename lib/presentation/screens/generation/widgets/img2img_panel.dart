@@ -122,6 +122,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     );
 
     return CollapsibleImagePanel(
+      frosted: true,
       title: context.l10n.img2img_title,
       subtitle: context.l10n.img2img_subtitle,
       icon: Icons.image,

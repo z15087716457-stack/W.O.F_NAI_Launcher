@@ -6,6 +6,8 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../../core/services/titlebar_region_service.dart';
+import '../../../core/services/window_material_service.dart';
+import '../common/studio_glass_surface.dart';
 
 /// FEAT-23 内置一体标题栏。
 ///
@@ -110,6 +112,25 @@ class _TitleBar extends StatefulWidget {
 
 class _TitleBarState extends State<_TitleBar> with WindowListener {
   bool _isMaximized = false;
+  (bool, bool)? _materialSettings;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final settings = (
+      Theme.of(context).brightness == Brightness.dark,
+      !MediaQuery.highContrastOf(context),
+    );
+    if (_materialSettings != settings) {
+      _materialSettings = settings;
+      unawaited(
+        WindowMaterialService.configure(
+          dark: settings.$1,
+          enabled: settings.$2,
+        ),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -179,9 +200,8 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
     // 首帧 l10n 可能未就绪（builder 层早于路由内容），用兜底文案。
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    return Container(
+    final content = SizedBox(
       height: IntegratedTitleBarShell.barHeight,
-      color: colorScheme.surface,
       child: Row(
         children: [
           const SizedBox(width: 12),
@@ -234,6 +254,17 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
             onTap: () => _safeWindowCall(windowManager.close),
           ),
         ],
+      ),
+    );
+    return ValueListenableBuilder<bool>(
+      valueListenable: WindowMaterialService.available,
+      child: content,
+      builder: (context, available, child) => StudioGlassSurface(
+        // Caption hints extend below the title bar, outside Navigator overlays.
+        clipBehavior: Clip.none,
+        borderRadius: BorderRadius.zero,
+        nativeBackdrop: available,
+        child: child!,
       ),
     );
   }

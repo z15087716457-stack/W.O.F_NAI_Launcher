@@ -1,7 +1,10 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../screens/generation/widgets/generation_sidebar_style.dart';
+import 'studio_glass_surface.dart';
 
 /// A common collapsible panel with optional background image support.
 ///
@@ -20,6 +23,7 @@ class CollapsibleImagePanel extends StatelessWidget {
   final Widget? trailing;
   final List<Widget>? headerActions;
   final Widget child;
+  final bool frosted;
 
   const CollapsibleImagePanel({
     super.key,
@@ -35,6 +39,7 @@ class CollapsibleImagePanel extends StatelessWidget {
     this.trailing,
     this.headerActions,
     required this.child,
+    this.frosted = false,
   });
 
   @override
@@ -42,13 +47,13 @@ class CollapsibleImagePanel extends StatelessWidget {
     final theme = Theme.of(context);
     final showBackground = hasData && !isExpanded;
 
-    return Card(
+    final panel = Card(
       clipBehavior: Clip.antiAlias,
       elevation: 0,
-      color: theme.colorScheme.surface,
+      color: frosted ? Colors.transparent : theme.colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: theme.dividerColor),
+        side: frosted ? BorderSide.none : BorderSide(color: theme.dividerColor),
       ),
       child: Stack(
         children: [
@@ -58,7 +63,17 @@ class CollapsibleImagePanel extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  _CollapsedBackgroundImage(child: backgroundImage!),
+                  _CollapsedBackgroundImage(
+                    child: frosted && !MediaQuery.highContrastOf(context)
+                        ? ImageFiltered(
+                            imageFilter: ui.ImageFilter.blur(
+                              sigmaX: 10,
+                              sigmaY: 10,
+                            ),
+                            child: backgroundImage!,
+                          )
+                        : backgroundImage!,
+                  ),
                   // Dark Overlay
                   Container(
                     decoration: BoxDecoration(
@@ -180,6 +195,7 @@ class CollapsibleImagePanel extends StatelessWidget {
         ],
       ),
     );
+    return frosted ? StudioGlassSurface(child: panel) : panel;
   }
 
   Widget _buildHeaderIcon(ThemeData theme, bool showBackground) {
