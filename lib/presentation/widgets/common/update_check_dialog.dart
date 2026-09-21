@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -332,7 +333,8 @@ class UpdateCheckDialog extends ConsumerWidget {
         blockSpacing: 10,
         listIndent: 22,
         code: theme.textTheme.bodySmall?.copyWith(
-          fontFamily: 'monospace',
+          fontFamily: StudioTypography.mono,
+          fontFamilyFallback: StudioTypography.fallback,
           color: colorScheme.onSurface,
           backgroundColor: colorScheme.surfaceContainerHighest,
         ),

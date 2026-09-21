@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/shortcuts/shortcut_manager.dart';
@@ -126,7 +127,8 @@ class _RichTooltipContent extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
-                fontFamily: 'monospace',
+                fontFamily: StudioTypography.mono,
+                fontFamilyFallback: StudioTypography.fallback,
               ),
             ),
           ),
@@ -228,7 +230,8 @@ class ShortcutBadge extends ConsumerWidget {
                   Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontSize: 9,
                     fontWeight: FontWeight.w600,
-                    fontFamily: 'monospace',
+                    fontFamily: StudioTypography.mono,
+                    fontFamilyFallback: StudioTypography.fallback,
                   ),
             ),
           ),
@@ -301,7 +304,8 @@ class ShortcutText extends ConsumerWidget {
           style:
               style ??
               Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontFamily: 'monospace',
+                fontFamily: StudioTypography.mono,
+                fontFamilyFallback: StudioTypography.fallback,
                 color: Theme.of(context).colorScheme.outline,
               ),
         );
@@ -368,7 +372,8 @@ class ShortcutLabel extends ConsumerWidget {
         shortcutLabel,
         style: theme.textTheme.labelSmall?.copyWith(
           color: foregroundColor ?? theme.colorScheme.onSurfaceVariant,
-          fontFamily: 'monospace',
+          fontFamily: StudioTypography.mono,
+          fontFamilyFallback: StudioTypography.fallback,
           fontWeight: FontWeight.w500,
         ),
       ),

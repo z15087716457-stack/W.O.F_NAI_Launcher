@@ -301,4 +301,4 @@ Contributions via Issues and Pull Requests are welcome. Before submitting a PR, 
 
 This project is open-source under the MIT License. See [LICENSE](LICENSE) for details. Original copyright belongs to the upstream NAI Launcher Contributors; new work in this fork is copyrighted by W.O.F (z15087716457-stack).
 
-The interface uses its original theme fonts and icons, with bundled LXGW ZhenKai GB as the default and system fonts or Google Fonts available in settings. The title bar pairs the W.O.F logo with the NAI Studio name and its yellow underline; see the [asset guide](tool/branding/README.md).
+The interface bundles Geist Sans / Mono / Pixel Line and HarmonyOS Sans SC fonts, alongside the original interface icons. Fonts retain their own licenses; see the [asset guide](tool/branding/README.md) and [license files](assets/licenses/), also available from the app’s About page.

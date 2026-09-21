@@ -14,6 +14,7 @@ import 'package:screen_retriever/screen_retriever.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import 'core/constants/app_version.dart';
+import 'core/utils/studio_asset_licenses.dart';
 import 'core/constants/storage_keys.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/app_localizations_en.dart';
@@ -317,6 +318,7 @@ void main() {
 
 Future<void> _bootstrapApplication() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerStudioAssetLicenses();
   AppErrorReporter.installGlobalHandlers();
 
   // 先初始化控制台日志；文件日志稍后读取设置后按需开启，默认关闭。

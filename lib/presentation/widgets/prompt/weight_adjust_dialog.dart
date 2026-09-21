@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -183,7 +184,8 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
                           : context.l10n.weight_noBrackets,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.outline,
-                        fontFamily: 'monospace',
+                        fontFamily: StudioTypography.mono,
+                        fontFamilyFallback: StudioTypography.fallback,
                       ),
                     ),
                   ],

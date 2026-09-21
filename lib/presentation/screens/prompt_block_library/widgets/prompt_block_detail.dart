@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -79,7 +80,8 @@ class PromptBlockDetailView extends StatelessWidget {
         ? l10n.detail_noContent
         : block.content;
     final contentStyle = theme.textTheme.bodySmall?.copyWith(
-      fontFamily: 'monospace',
+      fontFamily: StudioTypography.mono,
+      fontFamilyFallback: StudioTypography.fallback,
       color: theme.colorScheme.onSurfaceVariant,
       height: 1.4,
     );

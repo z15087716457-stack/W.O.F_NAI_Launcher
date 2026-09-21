@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -278,7 +279,8 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
                 child: Text(
                   widget.content,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontFamily: 'monospace',
+                    fontFamily: StudioTypography.mono,
+                    fontFamilyFallback: StudioTypography.fallback,
                   ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,

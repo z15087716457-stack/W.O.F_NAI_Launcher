@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -896,7 +897,8 @@ class _ColorPickerMagnifier extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 10,
                       color: Colors.black87,
-                      fontFamily: 'monospace',
+                      fontFamily: StudioTypography.mono,
+                      fontFamilyFallback: StudioTypography.fallback,
                     ),
                   ),
                 ],

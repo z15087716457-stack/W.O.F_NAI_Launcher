@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -111,7 +112,8 @@ class _ShortcutBindingEditorState extends ConsumerState<ShortcutBindingEditor> {
                         ? l10n.shortcut_settings_unassigned
                         : _controller.text,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      fontFamily: 'monospace',
+                      fontFamily: StudioTypography.mono,
+                      fontFamilyFallback: StudioTypography.fallback,
                       color: widget.binding.hasCustomShortcut
                           ? theme.colorScheme.primary
                           : theme.colorScheme.onSurface,
@@ -217,7 +219,8 @@ class _ShortcutBindingEditorState extends ConsumerState<ShortcutBindingEditor> {
                                 _controller.text,
                               ),
                               style: theme.textTheme.headlineSmall?.copyWith(
-                                fontFamily: 'monospace',
+                                fontFamily: StudioTypography.mono,
+                                fontFamilyFallback: StudioTypography.fallback,
                                 fontWeight: FontWeight.bold,
                                 color: widget.binding.hasCustomShortcut
                                     ? theme.colorScheme.primary

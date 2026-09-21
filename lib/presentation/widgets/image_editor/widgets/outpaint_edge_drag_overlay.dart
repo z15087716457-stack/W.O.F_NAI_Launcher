@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -927,7 +928,8 @@ class _PreviewLabel extends StatelessWidget {
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: Theme.of(context).colorScheme.onInverseSurface,
                 fontWeight: FontWeight.w700,
-                fontFamily: 'monospace',
+                fontFamily: StudioTypography.mono,
+                fontFamilyFallback: StudioTypography.fallback,
               ),
             ),
           ),

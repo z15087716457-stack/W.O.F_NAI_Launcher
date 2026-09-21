@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -383,7 +384,8 @@ class _TagChipState extends ConsumerState<TagChip>
                   : TagChipSizes.normalFontSize,
               fontWeight: FontWeight.w500,
               height: 1.2,
-              fontFamily: 'monospace',
+              fontFamily: StudioTypography.mono,
+              fontFamilyFallback: StudioTypography.fallback,
               color: isEnabled
                   ? effectiveColor.withValues(alpha: 0.9)
                   : theme.colorScheme.onSurface.withValues(alpha: 0.35),

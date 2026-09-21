@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -287,7 +288,8 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
             child: Text(
               shortcutLabel,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontFamily: 'monospace',
+                fontFamily: StudioTypography.mono,
+                fontFamilyFallback: StudioTypography.fallback,
                 fontWeight: FontWeight.w600,
                 color: theme.colorScheme.primary,
               ),

@@ -5,10 +5,10 @@
 | 用途 | 字体 |
 |---|---|
 | 标题栏 NAI Studio | 旧版普通文字，13px / w500，黄色双下划线，左边距 12px，Logo 与文字间距 8px |
-| 正文与控件 | 原有主题字体；默认落霞孤鹜真楷 GB，保留系统 / Google 字体选择 |
-| 参数、尺寸、快捷键、代码 | 原有 monospace |
+| 正文与控件 | Geist Sans + HarmonyOS Sans SC fallback，400 / 500 / 600 / 700 |
+| 参数、尺寸、快捷键、代码 | Geist Mono + HarmonyOS Sans SC fallback，400 / 500 |
 
-16 套工作区主题使用原有排版模块，不再统一覆盖字体。默认使用随包提供的 `fonts/LXGWZhenKaiGB-Regular.ttf`；`system`、空键和撤回的 `bundled:` 键读取为旧默认，不改写本地设置。Geist / HarmonyOS 字体覆盖与资源已移除。标题栏黄线按旧版效果显式保留，不依赖上层 Material 的缺省警示样式。
+`StudioTypography` 负责正文、控件与等宽数据字体，16 套工作区主题保留原有配色，共用离线 Geist / HarmonyOS 字体。显式系统 / Google 字体选择仍有效，旧默认键 `system`、空键使用应用默认组合。只有标题栏 NAI Studio 使用旧版普通字体和黄色双下划线，不采用像素体；黄线是显式样式，不依赖上层 Material 缺省样式。字体许可在 `assets/licenses/` 和应用「关于 → 界面字体与许可」。
 
 界面图标已全部恢复原有 Material `Icon` 和已有专用符号。不要重新引入被撤回的 Geist SVG 注册表。
 
@@ -28,7 +28,7 @@
 ## 验证
 
 - `test/presentation/screens/brand_entry_test.dart`：真实登录 / 载入 widget，深浅色、三种语言、390px 窄屏和 125% 字号、登录方式切换、明暗切换保留输入、游客入口、已保存账号、真实进度。
-- `studio_visual_system_test.dart`：旧默认恢复、撤回字体键兼容、用户字体选择保留。
+- `studio_visual_system_test.dart`：离线字体、CJK 回退和显式字体选择兼容。
 - `integrated_title_bar_test.dart`：完整 Logo、标题、原图标与原生标题栏命中区。
 
 设置 `CAPTURE_STUDIO_UI=1` 运行入口测试，会把实际字体 / Logo 的渲染保存到 `.dart_tool/brand-entry-captures/`。这些是 widget 渲染，不应冒充运行中的用户窗口截图。
