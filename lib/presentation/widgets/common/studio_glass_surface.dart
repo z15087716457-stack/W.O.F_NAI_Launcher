@@ -9,14 +9,12 @@ class StudioGlassSurface extends StatelessWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(10)),
     this.nativeBackdrop = false,
     this.clipBehavior = Clip.antiAlias,
-    this.drawBorder = true,
   });
 
   final Widget child;
   final BorderRadius borderRadius;
   final bool nativeBackdrop;
   final Clip clipBehavior;
-  final bool drawBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -58,21 +56,17 @@ class StudioGlassSurface extends StatelessWidget {
         ),
         child: CustomPaint(
           painter: highContrast ? null : _GlassGrain(dark),
-          foregroundPainter: !drawBorder
-              ? null
-              : _GlassEdge(
-                  borderRadius,
-                  highContrast
-                      ? theme.colorScheme.outline
-                      : Colors.white.withValues(
-                          alpha: dark ? (nativeBackdrop ? .08 : .15) : .92,
-                        ),
-                  highContrast
-                      ? theme.colorScheme.outline
-                      : theme.colorScheme.outline.withValues(
-                          alpha: dark ? .32 : .38,
-                        ),
-                ),
+          foregroundPainter: _GlassEdge(
+            borderRadius,
+            highContrast
+                ? theme.colorScheme.outline
+                : Colors.white.withValues(
+                    alpha: dark ? (nativeBackdrop ? .08 : .15) : .92,
+                  ),
+            highContrast
+                ? theme.colorScheme.outline
+                : theme.colorScheme.outline.withValues(alpha: dark ? .32 : .38),
+          ),
           child: child,
         ),
       ),
