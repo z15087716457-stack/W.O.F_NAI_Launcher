@@ -162,7 +162,7 @@ const wchar_t* WindowClassRegistrar::GetWindowClass() {
     window_class.cbWndExtra = 0;
     window_class.hInstance = GetModuleHandle(nullptr);
     window_class.hIcon =
-        LoadIcon(window_class.hInstance, MAKEINTRESOURCE(IDI_APP_ICON));
+        LoadIcon(window_class.hInstance, MAKEINTRESOURCE(IDI_WINDOW_ICON));
     window_class.hbrBackground = 0;
     window_class.lpszMenuName = nullptr;
     window_class.lpfnWndProc = Win32Window::WndProc;
@@ -210,6 +210,7 @@ bool Win32Window::Create(const std::wstring& title,
     return false;
   }
 
+  UpdateWindowIcons(window, dpi);
   UpdateTheme(window);
 
   return OnCreate();
@@ -254,6 +255,7 @@ Win32Window::MessageHandler(HWND hwnd,
       return 0;
 
     case WM_DPICHANGED: {
+      UpdateWindowIcons(hwnd, HIWORD(wparam));
       auto newRectSize = reinterpret_cast<RECT*>(lparam);
       LONG newWidth = newRectSize->right - newRectSize->left;
       LONG newHeight = newRectSize->bottom - newRectSize->top;
@@ -303,6 +305,14 @@ void Win32Window::Destroy() {
   if (window_handle_) {
     DestroyWindow(window_handle_);
     window_handle_ = nullptr;
+  }
+  if (large_icon_) {
+    DestroyIcon(large_icon_);
+    large_icon_ = nullptr;
+  }
+  if (small_icon_) {
+    DestroyIcon(small_icon_);
+    small_icon_ = nullptr;
   }
   if (g_active_window_count == 0) {
     WindowClassRegistrar::GetInstance()->UnregisterWindowClass();
@@ -358,6 +368,28 @@ bool Win32Window::OnCreate() {
 
 void Win32Window::OnDestroy() {
   // No-op; provided for subclasses.
+}
+
+void Win32Window::UpdateWindowIcons(HWND window, UINT dpi) {
+  const auto replace_icon = [window, dpi](WPARAM kind, int metric_x,
+                                         int metric_y, HICON& owned_icon) {
+    // Do not use LR_SHARED: its resource cache can return the first size loaded
+    // for both requests. Keep distinct small/large handles at the current DPI.
+    HICON icon = static_cast<HICON>(LoadImageW(
+        GetModuleHandleW(nullptr), MAKEINTRESOURCEW(IDI_WINDOW_ICON), IMAGE_ICON,
+        GetSystemMetricsForDpi(metric_x, dpi),
+        GetSystemMetricsForDpi(metric_y, dpi), LR_DEFAULTCOLOR));
+    if (!icon) {
+      return;  // Retain the existing icon or the class's square-W fallback.
+    }
+    SendMessageW(window, WM_SETICON, kind, reinterpret_cast<LPARAM>(icon));
+    if (owned_icon) {
+      DestroyIcon(owned_icon);
+    }
+    owned_icon = icon;
+  };
+  replace_icon(ICON_BIG, SM_CXICON, SM_CYICON, large_icon_);
+  replace_icon(ICON_SMALL, SM_CXSMICON, SM_CYSMICON, small_icon_);
 }
 
 void Win32Window::UpdateTheme(HWND const window) {

@@ -1,4 +1,4 @@
-// Fit the complete rectangular W.O.F / NAI STUDIO logo into transparent square ICO frames.
+// Export separate icon roles: rectangular Explorer/desktop and square-W window/tray.
 // Requires Node.js and sharp; optional --brand-dir exports a separate local size library.
 const fs = require('node:fs/promises');
 const path = require('node:path');
@@ -34,27 +34,37 @@ async function main() {
   }
   const brandDir = args.length ? path.resolve(args[1]) : null;
   const logo = await fs.readFile(source);
+  const squareW = await fs.readFile(path.join(root, 'assets/icons/wof_icon.svg'));
+  const windowImages = new Map();
   const images = new Map();
   for (const size of exportSizes) {
     const png = await sharp(logo).resize(size, size, {
       fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 }, kernel: 'lanczos3',
     }).png().toBuffer();
     images.set(size, png);
+    const oversampled = await sharp(squareW).resize(size * 4, size * 4).png().toBuffer();
+    windowImages.set(size, await sharp(oversampled).resize(size, size, { kernel: 'lanczos3' }).png().toBuffer());
   }
   const ico = makeIco(iconSizes.map(size => ({ size, png: images.get(size) })));
   for (const target of ['assets/icons/app_icon.ico', 'windows/runner/resources/app_icon.ico']) {
     await fs.writeFile(path.join(root, target), ico);
+  }
+  const windowIco = makeIco(iconSizes.map(size => ({ size, png: windowImages.get(size) })));
+  for (const target of ['assets/icons/window_icon.ico', 'windows/runner/resources/window_icon.ico']) {
+    await fs.writeFile(path.join(root, target), windowIco);
   }
   if (brandDir) {
     const sizeDir = path.join(brandDir, 'Windows完整Logo尺寸');
     await fs.mkdir(sizeDir, { recursive: true });
     await fs.writeFile(path.join(brandDir, 'wof_full_icon_1024.png'), images.get(1024));
     await fs.writeFile(path.join(brandDir, 'app_icon.ico'), ico);
+    await fs.writeFile(path.join(brandDir, 'window_icon.ico'), windowIco);
     for (const size of exportSizes.filter(size => size !== 1024)) {
       await fs.writeFile(path.join(sizeDir, `wof_full_icon_${size}.png`), images.get(size));
     }
   }
-  console.log(`Generated Windows ICO: ${iconSizes.join(', ')}px; ${ico.length} bytes`);
+  console.log(`Generated desktop ICO: ${iconSizes.join(', ')}px; ${ico.length} bytes`);
+  console.log(`Generated window/tray W ICO: ${windowIco.length} bytes`);
   if (brandDir) console.log(`Brand exports: ${brandDir}`);
 }
 

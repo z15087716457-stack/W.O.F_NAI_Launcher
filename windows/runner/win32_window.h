@@ -91,6 +91,12 @@ class Win32Window {
   // Update the window frame's theme to match the system theme.
   static void UpdateTheme(HWND const window);
 
+  // Window/taskbar icons are separate from the executable's Explorer icon.
+  void UpdateWindowIcons(HWND window, UINT dpi);
+
+  HICON large_icon_ = nullptr;
+  HICON small_icon_ = nullptr;
+
   bool quit_on_close_ = false;
 
   // window handle for top level window.

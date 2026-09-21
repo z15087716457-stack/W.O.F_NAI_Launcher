@@ -673,7 +673,7 @@ Future<void> _bootstrapApplication() async {
           // macOS 菜单栏不支持 .ico，使用 png
           await trayManager.setIcon(
             Platform.isWindows
-                ? 'assets/icons/app_icon.ico'
+                ? 'assets/icons/window_icon.ico'
                 : 'assets/icons/tray_icon.png',
           );
           await trayManager.setToolTip(Brand.name);
