@@ -15,6 +15,7 @@ import '../../../../widgets/common/image_detail/image_detail_data.dart';
 import '../../services/generation_save_service.dart';
 import 'canvas_feed_layout.dart';
 import 'canvas_world_viewport.dart';
+import 'canvas_pixel_background.dart';
 import '../../../../widgets/common/selectable_image_card.dart';
 import 'canvas_tile_toolbar.dart';
 import 'canvas_image_background.dart';
@@ -465,10 +466,19 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                           return Stack(
                             children: [
                               Positioned.fill(
-                                child: CustomPaint(
-                                  painter: _GridPainter(
-                                    camera: camera,
-                                    theme: theme,
+                                child: RepaintBoundary(
+                                  child: CustomPaint(
+                                    key: const ValueKey(
+                                      'canvas-pixel-background',
+                                    ),
+                                    painter: CanvasPixelBackgroundPainter(
+                                      camera: camera,
+                                      theme: theme,
+                                      devicePixelRatio:
+                                          MediaQuery.devicePixelRatioOf(
+                                            context,
+                                          ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -1131,39 +1141,6 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
       ),
     );
   }
-}
-
-/// 网格底纹：世界坐标 256px 倍数线（随相机平移缩放正确对齐）
-class _GridPainter extends CustomPainter {
-  _GridPainter({required this.camera, required this.theme});
-
-  final CanvasCamera camera;
-  final ThemeData theme;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final gridPaint = Paint()
-      ..color = theme.colorScheme.outlineVariant.withValues(alpha: 0.25)
-      ..strokeWidth = 1;
-    const step = 256.0;
-    final s = camera.scale;
-    final off = camera.offset;
-    final stepScreen = step * s;
-    if (stepScreen < 4) return;
-    // 世界线 k·256 → 屏幕 k·256·s + off；首条可见线 = off 取模步长
-    final startX = off.dx - (off.dx / stepScreen).floor() * stepScreen;
-    final startY = off.dy - (off.dy / stepScreen).floor() * stepScreen;
-    for (var x = startX; x < size.width; x += stepScreen) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
-    }
-    for (var y = startY; y < size.height; y += stepScreen) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_GridPainter old) =>
-      old.camera != camera || old.theme != theme;
 }
 
 /// 生成中占位 tile（官网 `image-grid-generating`）：批参数尺寸的卡面 +

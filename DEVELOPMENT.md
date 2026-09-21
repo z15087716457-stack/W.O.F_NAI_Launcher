@@ -33,6 +33,14 @@ Windows 桌面热重载优先使用 `scripts/dev_hot_reload_window.ps1`，它会
 
 `assets/databases/*.db` 通过 Git LFS 管理，发布前应确认本地文件是真实 SQLite 数据库而不是 LFS pointer。`assets/translations/`、`assets/data/` 和 `assets/images/` 会随 Flutter assets 打包，移动或重命名后需要同步检查 `pubspec.yaml`。发布前确认 `CHANGELOG.md`、`dist/release_notes_<tag>.md`、`pubspec.yaml` 版本号和 Windows release build。
 
+### Windows 品牌图标
+
+方形应用图标的母版是 `assets/icons/wof_icon.svg`：纯蓝底、完整白色 W，与标题栏的完整 `assets/images/wof_logo_block.png` 分开维护。不要从完整 Logo 裁切应用图标。
+
+使用 Node.js 和 `sharp` 运行 `node tool/branding/generate_windows_icons.cjs`，同步导出程序资源 `windows/runner/resources/app_icon.ico` 与 Windows 托盘资源 `assets/icons/app_icon.ico`。ICO 内嵌 16、20、24、32、40、48、64、96、128、256px，共十档。可追加 `--brand-dir <目录>` 导出 SVG、1024px PNG、多尺寸 PNG 和 ICO 到品牌资产库。
+
+ICO 属于原生程序资源；更新后必须重新构建 Windows 程序才能改变 EXE 自身的图标，仅 Flutter 热重载不会更新。macOS 和移动端的图标资源独立维护。
+
 ## Changelog 与 Release Notes 规范
 
 `CHANGELOG.md` 是 GitHub Release notes 的“更新内容”来源；Release workflow 不会自动根据 git commit 生成变更摘要。准备发布前必须对比上一个 tag 到当前 HEAD 的提交，把本版本用户可见变化整理进对应版本段落，例如 `## [1.0.0] - YYYY-MM-DD`。
