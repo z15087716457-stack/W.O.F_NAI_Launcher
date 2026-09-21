@@ -31,9 +31,11 @@ import 'layers/layer.dart';
 import 'painters/focused_overlay_painter.dart';
 import 'tools/tool_base.dart';
 import 'canvas/editor_canvas.dart';
-import 'widgets/toolbar/desktop_toolbar.dart';
+import 'widgets/toolbar/editor_overlay_toolbar.dart';
 import 'widgets/toolbar/mobile_toolbar.dart';
 import 'widgets/panels/layer_panel.dart';
+import 'widgets/panels/layer_thumbnail_tray.dart';
+import 'widgets/panels/editor_quick_settings.dart';
 import 'widgets/panels/color_panel.dart';
 import 'widgets/panels/canvas_size_dialog.dart';
 import 'widgets/panels/shift_edges_dialog.dart';
@@ -179,6 +181,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   bool _isInitialized = false;
   bool _didStartInitialization = false;
   bool _showLayerPanel = true;
+  bool _showLayerFlyout = false;
   bool _isOutpaintCommitPending = false;
   String? _sourceLayerId;
   Uint8List? _outpaintSourceImage;
@@ -501,7 +504,9 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
     // 适应视口
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _state.canvasController.fitToViewport(_state.canvasSize);
+      if (mounted) {
+        _state.canvasController.fitToViewport(_state.canvasSize, padding: 64);
+      }
     });
   }
 
@@ -1840,8 +1845,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
               ),
             ),
           ),
-        if (_isInpaintMode)
-          Positioned(top: 16, left: 16, child: _buildFocusedSelectionCard()),
         if (_isMagicWandProcessing)
           Positioned.fill(child: _buildMagicWandProgressOverlay()),
       ],

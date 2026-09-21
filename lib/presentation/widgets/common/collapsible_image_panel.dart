@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../screens/generation/widgets/generation_sidebar_style.dart';
+
 /// A common collapsible panel with optional background image support.
 ///
 /// Used for Precise Reference, Vibe Transfer, and Img2Img panels.
+/// 官网式扁平卡片：无阴影、细描边、标题行紧凑单行。
 class CollapsibleImagePanel extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -41,6 +44,12 @@ class CollapsibleImagePanel extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      color: theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: theme.dividerColor),
+      ),
       child: Stack(
         children: [
           // Background Image Layer
@@ -75,10 +84,13 @@ class CollapsibleImagePanel extends StatelessWidget {
               InkWell(
                 onTap: onToggle,
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(12),
+                  top: Radius.circular(10),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: GenSidebarStyle.cardGutter,
+                    vertical: 10,
+                  ),
                   child: Row(
                     children: [
                       _buildHeaderIcon(theme, showBackground),
@@ -90,13 +102,16 @@ class CollapsibleImagePanel extends StatelessWidget {
                           children: [
                             Text(
                               title,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                color: showBackground
-                                    ? Colors.white
-                                    : hasData
-                                    ? theme.colorScheme.primary
-                                    : null,
-                              ),
+                              style: GenSidebarStyle.sectionTitle(theme)
+                                  .copyWith(
+                                    color: showBackground
+                                        ? Colors.white
+                                        : hasData
+                                        ? theme.colorScheme.primary
+                                        : null,
+                                  ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             if (subtitle != null) ...[
                               const SizedBox(height: 2),
@@ -106,7 +121,9 @@ class CollapsibleImagePanel extends StatelessWidget {
                                   fontSize: 11,
                                   color: showBackground
                                       ? Colors.white.withValues(alpha: 0.8)
-                                      : theme.colorScheme.onSurfaceVariant,
+                                      : theme.colorScheme.onSurface.withValues(
+                                          alpha: 0.55,
+                                        ),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -123,7 +140,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                           spacing: 4,
                           children: headerActions!,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                       ],
                       if (trailing != null) ...[
                         trailing!,
@@ -131,14 +148,18 @@ class CollapsibleImagePanel extends StatelessWidget {
                       ],
                       if (hasData && badge != null) ...[
                         badge!,
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                       ],
                       Icon(
                         isExpanded
                             ? Icons.keyboard_arrow_up
                             : Icons.keyboard_arrow_down,
-                        size: 20,
-                        color: showBackground ? Colors.white : null,
+                        size: 18,
+                        color: showBackground
+                            ? Colors.white
+                            : theme.colorScheme.onSurface.withValues(
+                                alpha: 0.55,
+                              ),
                       ),
                     ],
                   ),
@@ -172,13 +193,13 @@ class CollapsibleImagePanel extends StatelessWidget {
     if (asset != null) {
       return SvgPicture.asset(
         asset,
-        width: 20,
-        height: 20,
+        width: 17,
+        height: 17,
         colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
       );
     }
 
-    return Icon(icon, size: 20, color: color);
+    return Icon(icon, size: 17, color: color);
   }
 }
 

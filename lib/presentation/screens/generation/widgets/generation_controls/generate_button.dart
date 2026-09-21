@@ -17,6 +17,7 @@ class GenerateButtonWithCost extends ConsumerWidget {
   final VoidCallback onCancel;
   final VoidCallback onSkipCurrent;
   final int? costOverride;
+  final String? labelOverride;
 
   /// 按钮高度（紧凑布局可压低）
   final double height;
@@ -37,6 +38,7 @@ class GenerateButtonWithCost extends ConsumerWidget {
     required this.onCancel,
     required this.onSkipCurrent,
     this.costOverride,
+    this.labelOverride,
     this.height = 48,
     this.imageCount = 1,
     this.copySeed = 0,
@@ -61,6 +63,7 @@ class GenerateButtonWithCost extends ConsumerWidget {
         cooldownRemainingSeconds,
       );
     }
+    if (labelOverride != null) return labelOverride!;
     return GenerateButtonCopy.pick(
       seed: copySeed,
       count: imageCount,

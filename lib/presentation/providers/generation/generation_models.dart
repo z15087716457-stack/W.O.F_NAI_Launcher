@@ -6,6 +6,8 @@ import 'package:uuid/uuid.dart';
 import '../../../core/utils/nai_resolution_adapter.dart';
 import '../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../data/models/image/image_stream_chunk.dart';
+import '../../../data/models/image/image_operation.dart';
+import '../../../data/models/image/image_params.dart';
 
 enum GeneratedImageKind { completed, failedStreamSnapshot }
 
@@ -18,6 +20,8 @@ class GeneratedImage {
   final int height;
   final GeneratedImageKind kind;
   final NaiImageMetadata? metadata;
+  final ImageOperation? operation;
+  final Uint8List? originalBytes;
 
   /// 已保存的文件路径（如果有）
   /// 当图像被保存到磁盘后，此字段会被填充
@@ -37,6 +41,8 @@ class GeneratedImage {
     DateTime? createdAt,
     this.kind = GeneratedImageKind.completed,
     this.metadata,
+    this.operation,
+    this.originalBytes,
     this.filePath,
     this.generationRunId,
     this.batchIndex,
@@ -49,6 +55,9 @@ class GeneratedImage {
     required int height,
     GeneratedImageKind kind = GeneratedImageKind.completed,
     NaiImageMetadata? metadata,
+    ImageParams? sourceParams,
+    ImageOperation? operation,
+    Uint8List? originalBytes,
     int? generationRunId,
     int? batchIndex,
   }) {
@@ -60,6 +69,12 @@ class GeneratedImage {
       height: encodedSize?.$2 ?? height,
       kind: kind,
       metadata: metadata,
+      operation:
+          operation ??
+          (sourceParams == null
+              ? null
+              : ImageOperation.fromParams(sourceParams)),
+      originalBytes: originalBytes ?? sourceParams?.sourceImage,
       generationRunId: generationRunId,
       batchIndex: batchIndex,
     );
@@ -76,6 +91,8 @@ class GeneratedImage {
       kind: kind,
       metadata: metadata,
       filePath: path,
+      operation: operation,
+      originalBytes: originalBytes,
       generationRunId: generationRunId,
       batchIndex: batchIndex,
     );
@@ -92,6 +109,8 @@ class GeneratedImage {
       kind: kind,
       metadata: metadata,
       filePath: filePath,
+      operation: operation,
+      originalBytes: originalBytes,
       generationRunId: generationRunId ?? this.generationRunId,
       batchIndex: batchIndex ?? this.batchIndex,
     );

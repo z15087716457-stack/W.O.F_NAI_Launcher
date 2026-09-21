@@ -166,7 +166,7 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
   }
 }
 
-/// 编辑态正/负切换小标签
+/// 编辑态正/负切换小标签（与主提示词卡页签同款中性高亮，不用主题色填充）
 class _EditorTab extends StatelessWidget {
   final String label;
   final bool selected;
@@ -190,17 +190,18 @@ class _EditorTab extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: selected
-              ? colorScheme.primary.withValues(alpha: 0.12)
+              ? colorScheme.surfaceContainerHighest
               : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
           label,
-          style: theme.textTheme.labelSmall?.copyWith(
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 13,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
             color: selected
-                ? colorScheme.primary
-                : colorScheme.onSurfaceVariant,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                ? colorScheme.onSurface
+                : colorScheme.onSurface.withValues(alpha: 0.55),
           ),
         ),
       ),

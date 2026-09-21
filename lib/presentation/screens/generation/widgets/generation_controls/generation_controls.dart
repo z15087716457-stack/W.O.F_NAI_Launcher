@@ -14,6 +14,7 @@ import 'package:nai_launcher/presentation/widgets/generation/auto_save_toggle_ch
 import 'package:nai_launcher/presentation/widgets/anlas/anlas_balance_chip.dart';
 import 'package:nai_launcher/presentation/widgets/anlas/opus_usage_chip.dart';
 import 'generate_button.dart';
+import '../../../../providers/generation/image_workflow_controller.dart';
 
 /// 生成控制按钮
 class GenerationControls extends ConsumerStatefulWidget {
@@ -76,6 +77,9 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
         : false;
     final isGenerating =
         isLauncherGenerating ||
+        ref.watch(
+          imageWorkflowControllerProvider.select((w) => w.isToolRunning),
+        ) ||
         kritaBridgeState.isBridgeGenerating ||
         exploreRunnerBusy;
 
@@ -83,8 +87,9 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
     final showCancel = isLauncherGenerating;
 
     // 探索页强制逐张请求：文案张数只反映请求次数
-    final imageCount =
-        widget.exploreMode ? params.nSamples : params.nSamples * perRequest;
+    final imageCount = widget.exploreMode
+        ? params.nSamples
+        : params.nSamples * perRequest;
     if (imageCount != _lastImageCount) {
       _lastImageCount = imageCount;
       _copySeed++;
@@ -97,6 +102,13 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
     // 快捷键已由父级 WebStyleGenerationLayout 统一处理
     // 这里只负责布局
     final generateButton = GenerateButtonWithCost(
+      labelOverride:
+          !widget.exploreMode &&
+              ref.watch(
+                imageWorkflowControllerProvider.select((w) => w.isEnhance),
+              )
+          ? context.l10n.img2img_enhanceAction
+          : null,
       height: widget.compact ? 40 : 48,
       isGenerating: isGenerating,
       showCancel: showCancel,
@@ -160,10 +172,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
           child: FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
-            child: SizedBox(
-              width: minNaturalWidth,
-              child: inner,
-            ),
+            child: SizedBox(width: minNaturalWidth, child: inner),
           ),
         );
       },

@@ -322,6 +322,24 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     state = state.copyWith(sourceImage: image);
   }
 
+  /// Restore only fields temporarily owned by an image tool. Prompt, seed,
+  /// sampler and reference edits made while the panel was open stay current.
+  void restoreImageToolFields(ImageParams snapshot) {
+    state = state.copyWith(
+      sourceImage: snapshot.sourceImage,
+      maskImage: snapshot.maskImage,
+      width: snapshot.width,
+      height: snapshot.height,
+      action: snapshot.action,
+      strength: snapshot.strength,
+      noise: snapshot.noise,
+      inpaintStrength: snapshot.inpaintStrength,
+      isOutpaint: snapshot.isOutpaint,
+      enhanceWorkflow: snapshot.enhanceWorkflow,
+      upscaledEnhance: snapshot.upscaledEnhance,
+    );
+  }
+
   /// 更新强度 (img2img)
   void updateStrength(double strength) {
     state = state.copyWith(strength: strength);

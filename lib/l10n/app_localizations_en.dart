@@ -889,9 +889,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_canvasZoomToFill => 'Zoom to fill (allows >100%)';
 
   @override
-  String get generation_canvasSmoothZoom => 'Smooth zoom (Ctrl+scroll)';
-
-  @override
   String get generation_canvasEmpty => 'Canvas is empty';
 
   @override
@@ -1449,10 +1446,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_directorTools => 'Director Tools';
 
   @override
-  String get img2img_directorToolsHint =>
-      'Send the current source image through a Director Tool. When the result is ready, you can apply it back as the new source image.';
-
-  @override
   String get img2img_directorPrompt => 'Extra Prompt';
 
   @override
@@ -1460,20 +1453,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add guidance when needed, such as target emotion or color direction';
 
   @override
-  String img2img_directorRun(Object tool) {
-    return 'Run $tool';
-  }
-
-  @override
   String get img2img_directorRunning => 'Processing...';
 
   @override
   String get img2img_directorResult => 'Result';
-
-  @override
-  String img2img_directorResultReady(Object tool) {
-    return '$tool completed';
-  }
 
   @override
   String get img2img_directorApplied =>
@@ -1483,18 +1466,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_directorDefry => 'Defry';
 
   @override
-  String get img2img_directorDefryHint =>
-      'Reduce noise or over-saturation in the result (0 = off, 5 = max)';
-
-  @override
   String get img2img_directorEmotionLevel => 'Emotion Level';
-
-  @override
-  String get img2img_directorEmotionLevelHint =>
-      'How strongly the emotion is applied (0 = subtle, 5 = strong)';
-
-  @override
-  String get img2img_directorEmotionPresets => 'Presets';
 
   @override
   String get img2img_directorApplyAsSource => 'Use as Source';
@@ -1527,15 +1499,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_enhance => 'Enhance';
 
   @override
-  String get img2img_enhanceHint =>
-      'Enhance keeps using the current prompt while it upscales and regenerates the source image in latent space.';
-
-  @override
   String get img2img_enhanceMagnitude => 'Magnitude';
-
-  @override
-  String get img2img_enhanceShowIndividualSettings =>
-      'Show Individual Settings';
 
   @override
   String get img2img_enhanceUpscaleAmount => 'Upscale Amount';
@@ -2229,32 +2193,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String editor_layerName(Object count) {
     return 'Layer $count';
   }
-
-  @override
-  String editor_statusZoom(Object value) {
-    return 'Zoom: $value%';
-  }
-
-  @override
-  String editor_statusCanvas(Object width, Object height) {
-    return 'Canvas: $width x $height';
-  }
-
-  @override
-  String editor_statusLayers(Object count) {
-    return 'Layers: $count';
-  }
-
-  @override
-  String get editor_statusHasSelection => 'Selection active';
-
-  @override
-  String editor_statusRotation(Object degrees) {
-    return 'Rotation: $degrees°';
-  }
-
-  @override
-  String get editor_statusMirrored => 'Mirrored';
 
   @override
   String editor_focusMinimumContextArea(Object value) {
@@ -6901,9 +6839,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcuts_customize => 'Customize Shortcuts';
 
   @override
-  String get image_editor_select_tool => 'Select Tool';
-
-  @override
   String get selection_clear_selection => 'Clear Selection';
 
   @override
@@ -10475,4 +10410,116 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get titleBar_close => 'Close';
+
+  @override
+  String get img2img_pixelSnap => 'Pixel Snap';
+
+  @override
+  String get img2img_original => 'Original';
+
+  @override
+  String get img2img_directorAddToQueue => 'Use result as next input';
+
+  @override
+  String get img2img_transform => 'Transform';
+
+  @override
+  String get img2img_palette => 'Palettize';
+
+  @override
+  String get img2img_paletteOff => 'Off';
+
+  @override
+  String get img2img_paletteAuto => 'Auto';
+
+  @override
+  String get img2img_paletteCustom => 'Custom';
+
+  @override
+  String get img2img_avoidOverRefining => 'Avoid Over-Refining';
+
+  @override
+  String get img2img_keepGridHint => 'Preserve the detected pixel grid.';
+
+  @override
+  String get img2img_refineGridHint =>
+      'A finer pixel size may be used when it matches the image better.';
+
+  @override
+  String get img2img_pixelUpscaleHint =>
+      'Enlarge the result with crisp, nearest-neighbor pixels.';
+
+  @override
+  String get img2img_pixelNativeHint =>
+      'Keep the result at its snapped pixel size.';
+
+  @override
+  String get img2img_masked => 'Masked';
+
+  @override
+  String get img2img_generated => 'Generated';
+
+  @override
+  String get img2img_blend => 'Blend';
+
+  @override
+  String get img2img_emotionHappy => 'Happy';
+
+  @override
+  String get img2img_emotionLaugh => 'Laughing';
+
+  @override
+  String get img2img_emotionSad => 'Sad';
+
+  @override
+  String get img2img_emotionAngry => 'Angry';
+
+  @override
+  String get img2img_emotionSurprised => 'Surprised';
+
+  @override
+  String get img2img_emotionShy => 'Shy';
+
+  @override
+  String get img2img_emotionExcited => 'Excited';
+
+  @override
+  String get img2img_emotionDisgusted => 'Disgusted';
+
+  @override
+  String get img2img_emotionSmug => 'Smug';
+
+  @override
+  String get img2img_emotionWorried => 'Worried';
+
+  @override
+  String get img2img_emotionLove => 'Loving';
+
+  @override
+  String get img2img_emotionPlayful => 'Playful';
+
+  @override
+  String get img2img_emotionTired => 'Tired';
+
+  @override
+  String get img2img_emotionNeutral => 'Neutral';
+
+  @override
+  String get img2img_enhanceAction => 'Enhance!';
+
+  @override
+  String get img2img_showAdvanced => 'Show Advanced';
+
+  @override
+  String get img2img_hideAdvanced => 'Hide Advanced';
+
+  @override
+  String get editor_focusAreaTitle => 'Focused Area';
+
+  @override
+  String get editor_focusedInpaint => 'Focused Inpaint';
+
+  @override
+  String get editor_outpaintFocusConflict =>
+      'Outpaint cannot be used together with Focused Inpaint.';
 }

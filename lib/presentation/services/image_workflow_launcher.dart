@@ -9,6 +9,7 @@ import '../../core/utils/inpaint_mask_utils.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../data/models/gallery/nai_image_metadata.dart';
 import '../../data/models/image/image_params.dart';
+import '../../data/models/image/image_operation.dart';
 import '../../data/models/metadata/metadata_import_options.dart';
 import '../../data/services/image_metadata_service.dart';
 import '../providers/generation/image_workflow_controller.dart';
@@ -45,18 +46,15 @@ class ImageWorkflowLauncher {
     final workflowNotifier = ref.read(imageWorkflowControllerProvider.notifier);
     final workflow = ref.read(imageWorkflowControllerProvider);
 
-    if (mode == ImageEditorMode.edit) {
-      workflowNotifier.enterBaseMode(clearMask: true);
-    } else if (ref.read(imageWorkflowControllerProvider).isEnhance) {
-      workflowNotifier.enterBaseMode(clearMask: false);
-    }
-
     final params = ref.read(generationParamsNotifierProvider);
+    final editingCurrentSource = identical(params.sourceImage, imageBytes);
     final result = await ImageEditorScreen.show(
       context,
       initialImage: imageBytes,
-      existingMask: mode == ImageEditorMode.inpaint ? params.maskImage : null,
-      existingFocusRect: mode == ImageEditorMode.inpaint
+      existingMask: mode == ImageEditorMode.inpaint && editingCurrentSource
+          ? params.maskImage
+          : null,
+      existingFocusRect: mode == ImageEditorMode.inpaint && editingCurrentSource
           ? workflow.focusedSelectionRect
           : null,
       initialMinimumContextMegaPixels: mode == ImageEditorMode.inpaint
@@ -124,6 +122,8 @@ class ImageWorkflowLauncher {
 
     if (mode == ImageEditorMode.edit) {
       if (result.hasImageChanges && result.modifiedImage != null) {
+        workflowNotifier.closeTemporaryTool();
+        workflowNotifier.enterBaseMode(clearMask: true);
         workflowNotifier.replaceSourceImage(
           result.modifiedImage!,
           sourceWidth: result.outputWidth,
@@ -141,6 +141,13 @@ class ImageWorkflowLauncher {
             InpaintMaskUtils.hasMaskedPixels(result.maskImage!)
         ? result.maskImage
         : null;
+    workflowNotifier.closeTemporaryTool();
+    if (!identical(
+      ref.read(generationParamsNotifierProvider).sourceImage,
+      imageBytes,
+    )) {
+      workflowNotifier.replaceSourceImage(imageBytes);
+    }
     workflowNotifier.applyInpaintEditorResult(
       sourceImage: result.hasOutpaintChanges
           ? result.outpaintSourceImage
@@ -168,9 +175,7 @@ class ImageWorkflowLauncher {
 
   static void openEnhance(WidgetRef ref, Uint8List imageBytes) {
     final workflowNotifier = ref.read(imageWorkflowControllerProvider.notifier);
-    workflowNotifier.replaceSourceImage(imageBytes);
-    workflowNotifier.enterEnhanceMode();
-    workflowNotifier.setPanelExpanded(true);
+    workflowNotifier.openTemporaryTool(imageBytes, ImageWorkflowMode.enhance);
   }
 
   static Future<void> openInpaint(
@@ -178,18 +183,13 @@ class ImageWorkflowLauncher {
     WidgetRef ref,
     Uint8List imageBytes,
   ) async {
-    final workflowNotifier = ref.read(imageWorkflowControllerProvider.notifier);
-    workflowNotifier.replaceSourceImage(imageBytes);
-    workflowNotifier.setPanelExpanded(true);
     await openEditor(context, ref, imageBytes, mode: ImageEditorMode.inpaint);
   }
 
   /// 打开图生图「超分」子面板（内嵌，非弹窗）
   static void openUpscale(WidgetRef ref, Uint8List imageBytes) {
     final workflowNotifier = ref.read(imageWorkflowControllerProvider.notifier);
-    workflowNotifier.replaceSourceImage(imageBytes);
-    workflowNotifier.enterUpscaleMode();
-    workflowNotifier.setPanelExpanded(true);
+    workflowNotifier.openTemporaryTool(imageBytes, ImageWorkflowMode.upscale);
   }
 
   static Future<void> openDirectorTools(
@@ -262,7 +262,7 @@ class ImageWorkflowLauncher {
       final currentParams = ref.read(generationParamsNotifierProvider);
       ref
           .read(imageGenerationNotifierProvider.notifier)
-          .generate(currentParams);
+          .generate(currentParams, operation: ImageOperation.variations);
     } catch (error) {
       AppLogger.w('Variation preparation failed: $error', 'ImageWorkflow');
       if (context.mounted) {

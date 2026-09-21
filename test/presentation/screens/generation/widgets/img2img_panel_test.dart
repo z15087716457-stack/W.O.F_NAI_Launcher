@@ -109,7 +109,7 @@ void main() {
             locale: Locale('zh'),
             supportedLocales: AppLocalizations.supportedLocales,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
-            home: Scaffold(body: Img2ImgPanel()),
+            home: Scaffold(body: Img2ImgPanel(toolOnly: true)),
           ),
         ),
       );

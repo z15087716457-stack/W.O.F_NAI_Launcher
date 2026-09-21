@@ -315,6 +315,27 @@ class ImageSaveUtils {
     );
   }
 
+  /// A derived image inherits its source metadata, never the current draft.
+  /// Outputs with their own metadata and sources without metadata stay intact.
+  static Future<Uint8List> inheritSourceMetadata({
+    required Uint8List imageBytes,
+    required Uint8List sourceBytes,
+    required int width,
+    required int height,
+  }) async {
+    if (hasEmbeddedNovelAiMetadata(imageBytes)) return imageBytes;
+    final source = _extractEmbeddedPngMetadata(sourceBytes);
+    if (source == null) return imageBytes;
+    return _embedNaiAlignedMetadata(
+      imageBytes: imageBytes,
+      commentJson: {...source.commentJson, 'width': width, 'height': height},
+      description: source.description,
+      software: source.software,
+      source: source.source,
+      useStealth: false,
+    );
+  }
+
   /// 从元数据重新构建 ImageParams
   ///
   /// 用于导入图像时恢复生成参数

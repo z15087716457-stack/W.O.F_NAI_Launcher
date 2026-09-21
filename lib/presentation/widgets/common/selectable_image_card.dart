@@ -185,6 +185,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
   /// 历史栏右下角「×N」批次角标（官网同组生成件数的角标）。
   /// 仅 historyThumb 模式渲染；≤1 或 null 不显示。
   final int? batchBadgeCount;
+  final Widget? sourceBadge;
 
   const SelectableImageCard({
     super.key,
@@ -242,6 +243,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
     this.hideSelectionDecoration = false,
     this.historyThumb = false,
     this.batchBadgeCount,
+    this.sourceBadge,
   }) : assert(
          !isGenerating || (imageWidth != null && imageHeight != null),
          'imageWidth and imageHeight are required when isGenerating is true',
@@ -1048,6 +1050,8 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                     ),
                   ),
 
+                if (widget.sourceBadge != null)
+                  Positioned(top: 6, left: 6, child: widget.sourceBadge!),
                 if (widget.statusBadgeLabel != null)
                   Positioned(
                     top: 8,

@@ -290,6 +290,7 @@ class StreamGenerationNotifier extends _$StreamGenerationNotifier {
     final height = _lastParams?.height ?? 1216;
     final generatedImage = GeneratedImage.create(
       imageBytes,
+      sourceParams: _lastParams,
       width: width,
       height: height,
     );
@@ -351,6 +352,7 @@ class StreamGenerationNotifier extends _$StreamGenerationNotifier {
         final height = params.height;
         final generatedImage = GeneratedImage.create(
           imageBytes.first,
+          sourceParams: params,
           width: width,
           height: height,
         );

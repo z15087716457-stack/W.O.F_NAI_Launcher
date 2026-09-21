@@ -860,9 +860,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_canvasZoomToFill => '放大填充（允许 >100%）';
 
   @override
-  String get generation_canvasSmoothZoom => '平滑缩放（Ctrl+滚轮）';
-
-  @override
   String get generation_canvasEmpty => '画布为空';
 
   @override
@@ -1402,19 +1399,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_directorTools => '导演工具';
 
   @override
-  String get img2img_directorToolsHint =>
-      '将当前源图送入导演工具处理。处理完成后，可以把结果回填为新的源图继续生成。';
-
-  @override
   String get img2img_directorPrompt => '附加提示词';
 
   @override
   String get img2img_directorPromptHint => '需要时补充描述，例如目标情绪或上色方向';
-
-  @override
-  String img2img_directorRun(Object tool) {
-    return '运行 $tool';
-  }
 
   @override
   String get img2img_directorRunning => '正在处理...';
@@ -1423,27 +1411,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_directorResult => '处理结果';
 
   @override
-  String img2img_directorResultReady(Object tool) {
-    return '$tool 处理完成';
-  }
-
-  @override
   String get img2img_directorApplied => '已将导演工具结果设为新的源图';
 
   @override
   String get img2img_directorDefry => 'Defry';
 
   @override
-  String get img2img_directorDefryHint => '降低结果中的噪声或过饱和程度（0 = 关闭，5 = 最强）';
-
-  @override
   String get img2img_directorEmotionLevel => '表情强度';
-
-  @override
-  String get img2img_directorEmotionLevelHint => 'AI 改变表情的力度（0 = 轻微，5 = 强烈）';
-
-  @override
-  String get img2img_directorEmotionPresets => '快速预设';
 
   @override
   String get img2img_directorApplyAsSource => '设为源图';
@@ -1476,13 +1450,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_enhance => '增强';
 
   @override
-  String get img2img_enhanceHint => '增强会继续参考当前提示词，对源图进行潜空间放大与再生成。';
-
-  @override
   String get img2img_enhanceMagnitude => '幅度';
-
-  @override
-  String get img2img_enhanceShowIndividualSettings => '显示单独设置';
 
   @override
   String get img2img_enhanceUpscaleAmount => '放大倍数';
@@ -2149,32 +2117,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String editor_layerName(Object count) {
     return '图层 $count';
   }
-
-  @override
-  String editor_statusZoom(Object value) {
-    return '缩放: $value%';
-  }
-
-  @override
-  String editor_statusCanvas(Object width, Object height) {
-    return '画布: $width x $height';
-  }
-
-  @override
-  String editor_statusLayers(Object count) {
-    return '图层: $count';
-  }
-
-  @override
-  String get editor_statusHasSelection => '有选区';
-
-  @override
-  String editor_statusRotation(Object degrees) {
-    return '旋转: $degrees°';
-  }
-
-  @override
-  String get editor_statusMirrored => '镜像';
 
   @override
   String editor_focusMinimumContextArea(Object value) {
@@ -6671,9 +6613,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcuts_customize => '自定义快捷键';
 
   @override
-  String get image_editor_select_tool => '选择工具';
-
-  @override
   String get selection_clear_selection => '清除选区';
 
   @override
@@ -10076,4 +10015,112 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get titleBar_close => '关闭';
+
+  @override
+  String get img2img_pixelSnap => '像素对齐';
+
+  @override
+  String get img2img_original => '原图';
+
+  @override
+  String get img2img_directorAddToQueue => '将结果加入输入队列';
+
+  @override
+  String get img2img_transform => '转换';
+
+  @override
+  String get img2img_palette => '调色板';
+
+  @override
+  String get img2img_paletteOff => '关闭';
+
+  @override
+  String get img2img_paletteAuto => '自动';
+
+  @override
+  String get img2img_paletteCustom => '自定义';
+
+  @override
+  String get img2img_avoidOverRefining => '避免过度细化';
+
+  @override
+  String get img2img_keepGridHint => '保留检测到的像素网格。';
+
+  @override
+  String get img2img_refineGridHint => '更细的像素尺寸更合适时，允许细化网格。';
+
+  @override
+  String get img2img_pixelUpscaleHint => '使用邻近像素放大，保持清晰的像素边缘。';
+
+  @override
+  String get img2img_pixelNativeHint => '保留对齐后的原生像素尺寸。';
+
+  @override
+  String get img2img_masked => '透明抠图';
+
+  @override
+  String get img2img_generated => '生成结果';
+
+  @override
+  String get img2img_blend => '混合结果';
+
+  @override
+  String get img2img_emotionHappy => '开心';
+
+  @override
+  String get img2img_emotionLaugh => '大笑';
+
+  @override
+  String get img2img_emotionSad => '伤心';
+
+  @override
+  String get img2img_emotionAngry => '生气';
+
+  @override
+  String get img2img_emotionSurprised => '惊讶';
+
+  @override
+  String get img2img_emotionShy => '害羞';
+
+  @override
+  String get img2img_emotionExcited => '兴奋';
+
+  @override
+  String get img2img_emotionDisgusted => '嫌弃';
+
+  @override
+  String get img2img_emotionSmug => '得意';
+
+  @override
+  String get img2img_emotionWorried => '担忧';
+
+  @override
+  String get img2img_emotionLove => '爱慕';
+
+  @override
+  String get img2img_emotionPlayful => '俏皮';
+
+  @override
+  String get img2img_emotionTired => '疲惫';
+
+  @override
+  String get img2img_emotionNeutral => '平静';
+
+  @override
+  String get img2img_enhanceAction => '增强！';
+
+  @override
+  String get img2img_showAdvanced => '显示高级设置';
+
+  @override
+  String get img2img_hideAdvanced => '收起高级设置';
+
+  @override
+  String get editor_focusAreaTitle => '聚焦区域';
+
+  @override
+  String get editor_focusedInpaint => '聚焦重绘';
+
+  @override
+  String get editor_outpaintFocusConflict => '扩图与聚焦重绘不能同时使用。';
 }

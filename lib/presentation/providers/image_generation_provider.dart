@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import '../../data/models/image/image_operation.dart';
 
 import 'package:dio/dio.dart';
 import 'package:image/image.dart' as img;
@@ -100,6 +101,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   bool _isCancelled = false;
   int _generationRunCounter = 0;
   int _activeGenerationRunId = 0;
+  ImageOperation? _activeImageOperation;
   final Map<String, _RememberedStreamPreview> _streamPreviewsForSnapshots =
       <String, _RememberedStreamPreview>{};
   final Set<String> _failedStreamSnapshotKeys = <String>{};
@@ -108,7 +110,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   int? _activeRequestEndImage;
   bool _activeRequestCancelRequested = false;
 
-  int _startGenerationRun() {
+  int _startGenerationRun({ImageOperation? operation}) {
+    _activeImageOperation = operation;
     _isCancelled = false;
     _activeGenerationRunId = ++_generationRunCounter;
     _streamPreviewsForSnapshots.clear();
@@ -316,6 +319,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       width: resolvedSize.$1,
       height: resolvedSize.$2,
       kind: GeneratedImageKind.failedStreamSnapshot,
+      sourceParams: params,
+      operation: _activeImageOperation,
       metadata: _metadataFromParams(
         params,
         outputWidth: resolvedSize.$1,
@@ -712,11 +717,13 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     ImageParams params, {
     GenerationBatchCallback? onBatchEvent,
     int? imagesPerRequestOverride,
+    ImageOperation? operation,
   }) => _withPostBillingRefresh(
     () => _generate(
       params,
       onBatchEvent: onBatchEvent,
       imagesPerRequestOverride: imagesPerRequestOverride,
+      operation: operation,
     ),
   );
 
@@ -828,6 +835,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     ImageParams params, {
     GenerationBatchCallback? onBatchEvent,
     int? imagesPerRequestOverride,
+    ImageOperation? operation,
   }) async {
     // 同步在途门禁：已有生成进行中时直接丢弃本次调用。
     // 必须先于冷却扣减与 _startGenerationRun——重入若走到 run 创建，
@@ -846,6 +854,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
     final generationRunId = _startGenerationRun();
 
+    _activeImageOperation = operation;
     final effectiveParams = params;
 
     // 在参数准备/网络请求的首次 await 前发布完整占位信息。
@@ -1045,6 +1054,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
               (e) => GeneratedImage.create(
                 e.$2,
                 width: batchParams.width,
+                sourceParams: batchParams,
+                operation: _activeImageOperation,
                 height: batchParams.height,
                 generationRunId: generationRunId,
                 batchIndex: slotStart - 1 + e.$1,
@@ -1239,6 +1250,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     bool syncToGalleryIndex = true,
     bool addToDisplay = false,
     bool replaceCurrentDisplay = false,
+    ImageOperation? operation,
+    Uint8List? originalBytes,
   }) async {
     assert(
       !addToDisplay || !replaceCurrentDisplay,
@@ -1256,16 +1269,25 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       width: resolvedSize.$1,
       height: resolvedSize.$2,
     );
-    final normalizedBytes = await ImageSaveUtils.rebuildImageBytesWithMetadata(
-      imageBytes: imageBytes,
-      params: effectiveParams,
-      actualSeed: existingMetadata?.seed,
-    );
+    final normalizedBytes = operation != null && originalBytes != null
+        ? await ImageSaveUtils.inheritSourceMetadata(
+            imageBytes: imageBytes,
+            sourceBytes: originalBytes,
+            width: resolvedSize.$1,
+            height: resolvedSize.$2,
+          )
+        : await ImageSaveUtils.rebuildImageBytesWithMetadata(
+            imageBytes: imageBytes,
+            params: effectiveParams,
+            actualSeed: existingMetadata?.seed,
+          );
 
     final generatedImage = GeneratedImage.create(
       normalizedBytes,
       width: resolvedSize.$1,
       height: resolvedSize.$2,
+      operation: operation,
+      originalBytes: originalBytes,
     );
 
     final shouldDisplay = addToDisplay || replaceCurrentDisplay;
@@ -1299,6 +1321,39 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
     _preloadMetadataInBackground([generatedImage]);
     return null;
+  }
+
+  /// Tool results keep their own identity and operation. They must not acquire
+  /// the unrelated prompt currently typed in the generation sidebar.
+  List<GeneratedImage> registerToolResults(
+    List<Uint8List> images, {
+    required ImageOperation operation,
+    required Uint8List originalBytes,
+  }) {
+    final runId = ++_generationRunCounter;
+    final results = <GeneratedImage>[];
+    for (final entry in images.indexed) {
+      final size = _resolveImageSize(entry.$2);
+      if (size == null) continue;
+      results.add(
+        GeneratedImage.create(
+          entry.$2,
+          width: size.$1,
+          height: size.$2,
+          generationRunId: runId,
+          batchIndex: entry.$1,
+          operation: operation,
+          originalBytes: originalBytes,
+        ),
+      );
+    }
+    if (results.isEmpty) return const [];
+    state = state.copyWith(
+      history: [...results, ...state.history].take(50).toList(),
+    );
+    _retainSharePreparationCacheForCurrentHistory();
+    _preloadMetadataInBackground(results);
+    return results;
   }
 
   String? _firstSavedPathForImage(String id) {
@@ -1377,7 +1432,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           // 原子保存：日期分类路径 + 独占防冲突 + 失败清理，全部在工具内完成
           final filePath = await ImageSaveUtils.saveBytesToDatedPath(
             rootPath: saveDirPath,
-            bytes: hasEmbeddedMetadata
+            bytes:
+                hasEmbeddedMetadata || image.operation == ImageOperation.upscale
                 ? image.bytes
                 : await ImageSaveUtils.rebuildImageBytesWithMetadata(
                     imageBytes: image.bytes,
@@ -1977,6 +2033,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
               (e) => GeneratedImage.create(
                 e.$2,
                 width: params.width,
+                sourceParams: params,
+                operation: _activeImageOperation,
                 height: params.height,
                 generationRunId: generationRunId,
                 batchIndex: e.$1,
@@ -2020,6 +2078,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
               (e) => GeneratedImage.create(
                 e.$2.value,
                 width: params.width,
+                sourceParams: params,
+                operation: _activeImageOperation,
                 height: params.height,
                 generationRunId: generationRunId,
                 batchIndex: e.$1,
@@ -2066,6 +2126,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
               (e) => GeneratedImage.create(
                 e.$2,
                 width: params.width,
+                sourceParams: params,
+                operation: _activeImageOperation,
                 height: params.height,
                 generationRunId: generationRunId,
                 batchIndex: e.$1,
@@ -2150,6 +2212,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
                 (e) => GeneratedImage.create(
                   e.$2,
                   width: params.width,
+                  sourceParams: params,
+                  operation: _activeImageOperation,
                   height: params.height,
                   generationRunId: generationRunId,
                   batchIndex: e.$1,

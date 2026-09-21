@@ -7,6 +7,7 @@ import '../../../core/constants/api_constants.dart';
 import '../../../data/models/character/character_prompt.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/image_generation_provider.dart';
+import '../../screens/generation/widgets/generation_sidebar_style.dart';
 import 'character_position_canvas.dart';
 import 'inline_character_card.dart';
 import 'inline_character_editor.dart';
@@ -43,50 +44,34 @@ class InlineCharacterSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 官网式小节头：标题 + 副题，右端清空全部 + 添加 `+`
+        // 官网式模块头：标题行右端清空全部 + 添加 `+`，副题独立成行
+        // （动作与标题同线对齐，不再挂在两行块右侧）
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.generation_sectionCharacters,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    l10n.generation_sectionCharactersSub,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+              child: Text(
+                l10n.generation_sectionCharacters,
+                style: GenSidebarStyle.sectionTitle(theme),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             if (hasCharacters)
-              Tooltip(
-                message: l10n.characterEditor_clearAll,
-                waitDuration: const Duration(milliseconds: 500),
-                child: InkWell(
-                  onTap: () => confirmClearAllCharacters(context, ref),
-                  borderRadius: BorderRadius.circular(4),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Icon(
-                      Icons.delete_sweep,
-                      size: 16,
-                      color: theme.colorScheme.error,
-                    ),
-                  ),
-                ),
+              _SectionIconAction(
+                icon: Icons.delete_sweep,
+                color: theme.colorScheme.error,
+                tooltip: l10n.characterEditor_clearAll,
+                onTap: () => confirmClearAllCharacters(context, ref),
               ),
             _AddCharacterMenu(theme: theme, l10n: l10n),
           ],
+        ),
+        const SizedBox(height: 1),
+        Text(
+          l10n.generation_sectionCharactersSub,
+          style: GenSidebarStyle.sectionSubtitle(theme),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
         // 官网 Position 行：标签 + AI's Choice/Custom 分段 + 网格画布钮
         if (hasCharacters) ...[
@@ -95,10 +80,7 @@ class InlineCharacterSection extends ConsumerWidget {
             children: [
               Text(
                 l10n.character_positionLabel,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: GenSidebarStyle.fieldLabel(theme),
               ),
               const SizedBox(width: 10),
               const CharacterPositionModeSegments(),
@@ -109,7 +91,7 @@ class InlineCharacterSection extends ConsumerWidget {
           const SizedBox(height: 8),
         for (var i = 0; i < characters.length; i++)
           Padding(
-            padding: const EdgeInsets.only(bottom: 6),
+            padding: const EdgeInsets.only(bottom: GenSidebarStyle.cardGap),
             child: InlineCharacterCard(
               key: ValueKey(characters[i].id),
               character: characters[i],
@@ -118,6 +100,37 @@ class InlineCharacterSection extends ConsumerWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// 小节头行内小图标动作（清空全部等）：24px 命中区、16px 图标。
+class _SectionIconAction extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  const _SectionIconAction({
+    required this.icon,
+    required this.color,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      waitDuration: const Duration(milliseconds: 500),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Icon(icon, size: 16, color: color),
+        ),
+      ),
     );
   }
 }
@@ -133,7 +146,8 @@ class _AddCharacterMenu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return PopupMenuButton<CharacterGender>(
       tooltip: l10n.character_addCharacter,
-      iconSize: 20,
+      iconSize: 16,
+      padding: EdgeInsets.zero,
       offset: const Offset(0, 4),
       position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -147,8 +161,8 @@ class _AddCharacterMenu extends ConsumerWidget {
       ],
       icon: SvgPicture.asset(
         'assets/icons/nai-icon-rounded-plus.svg',
-        width: 20,
-        height: 20,
+        width: 16,
+        height: 16,
         colorFilter: ColorFilter.mode(
           theme.colorScheme.onSurfaceVariant,
           BlendMode.srcIn,

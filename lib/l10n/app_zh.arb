@@ -1,4 +1,4 @@
-﻿{
+{
   "@@locale": "zh",
   "app_title": "NAI 启动器",
   "app_subtitle": "NovelAI 第三方客户端",
@@ -378,7 +378,6 @@
   "generation_setAsReferenceImage": "已设为参考图",
   "generation_canvasDisplaySettings": "画布显示",
   "generation_canvasZoomToFill": "放大填充（允许 >100%）",
-  "generation_canvasSmoothZoom": "平滑缩放（Ctrl+滚轮）",
   "generation_canvasEmpty": "画布为空",
   "generation_canvasBackground": "透明区域底色",
   "generation_canvasBackgroundChecker": "棋盘格",
@@ -609,29 +608,13 @@
   "img2img_inpaintMaskReady": "局部重绘遮罩已准备好",
   "img2img_generateVariations": "生成变体",
   "img2img_directorTools": "导演工具",
-  "img2img_directorToolsHint": "将当前源图送入导演工具处理。处理完成后，可以把结果回填为新的源图继续生成。",
   "img2img_directorPrompt": "附加提示词",
   "img2img_directorPromptHint": "需要时补充描述，例如目标情绪或上色方向",
-  "img2img_directorRun": "运行 {tool}",
-  "@img2img_directorRun": {
-    "placeholders": {
-      "tool": {}
-    }
-  },
   "img2img_directorRunning": "正在处理...",
   "img2img_directorResult": "处理结果",
-  "img2img_directorResultReady": "{tool} 处理完成",
-  "@img2img_directorResultReady": {
-    "placeholders": {
-      "tool": {}
-    }
-  },
   "img2img_directorApplied": "已将导演工具结果设为新的源图",
   "img2img_directorDefry": "Defry",
-  "img2img_directorDefryHint": "降低结果中的噪声或过饱和程度（0 = 关闭，5 = 最强）",
   "img2img_directorEmotionLevel": "表情强度",
-  "img2img_directorEmotionLevelHint": "AI 改变表情的力度（0 = 轻微，5 = 强烈）",
-  "img2img_directorEmotionPresets": "快速预设",
   "img2img_directorApplyAsSource": "设为源图",
   "img2img_directorSourceImage": "源图",
   "img2img_variationsStarted": "正在生成变体...",
@@ -642,9 +625,7 @@
   "img2img_directorEmotion": "表情修复",
   "img2img_directorDeclutter": "杂线清理",
   "img2img_enhance": "增强",
-  "img2img_enhanceHint": "增强会继续参考当前提示词，对源图进行潜空间放大与再生成。",
   "img2img_enhanceMagnitude": "幅度",
-  "img2img_enhanceShowIndividualSettings": "显示单独设置",
   "img2img_enhanceUpscaleAmount": "放大倍数",
   "img2img_enhanceMax": "Max✨",
   "img2img_focusedInpaint": "Focused Inpainting（聚焦重绘）",
@@ -1000,33 +981,6 @@
       "count": {}
     }
   },
-  "editor_statusZoom": "缩放: {value}%",
-  "@editor_statusZoom": {
-    "placeholders": {
-      "value": {}
-    }
-  },
-  "editor_statusCanvas": "画布: {width} x {height}",
-  "@editor_statusCanvas": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "editor_statusLayers": "图层: {count}",
-  "@editor_statusLayers": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "editor_statusHasSelection": "有选区",
-  "editor_statusRotation": "旋转: {degrees}°",
-  "@editor_statusRotation": {
-    "placeholders": {
-      "degrees": {}
-    }
-  },
-  "editor_statusMirrored": "镜像",
   "editor_focusMinimumContextArea": "最小上下文区域：{value}",
   "@editor_focusMinimumContextArea": {
     "placeholders": {
@@ -3557,7 +3511,6 @@
     }
   },
   "shortcuts_customize": "自定义快捷键",
-  "image_editor_select_tool": "选择工具",
   "selection_clear_selection": "清除选区",
   "selection_invert_selection": "反转选区",
   "selection_cut_to_layer": "剪切到新图层",
@@ -6051,5 +6004,41 @@
   "titleBar_minimize": "最小化",
   "titleBar_maximize": "最大化",
   "titleBar_restore": "还原",
-  "titleBar_close": "关闭"
+  "titleBar_close": "关闭",
+  "img2img_pixelSnap": "像素对齐",
+  "img2img_original": "原图",
+  "img2img_directorAddToQueue": "将结果加入输入队列",
+  "img2img_transform": "转换",
+  "img2img_palette": "调色板",
+  "img2img_paletteOff": "关闭",
+  "img2img_paletteAuto": "自动",
+  "img2img_paletteCustom": "自定义",
+  "img2img_avoidOverRefining": "避免过度细化",
+  "img2img_keepGridHint": "保留检测到的像素网格。",
+  "img2img_refineGridHint": "更细的像素尺寸更合适时，允许细化网格。",
+  "img2img_pixelUpscaleHint": "使用邻近像素放大，保持清晰的像素边缘。",
+  "img2img_pixelNativeHint": "保留对齐后的原生像素尺寸。",
+  "img2img_masked": "透明抠图",
+  "img2img_generated": "生成结果",
+  "img2img_blend": "混合结果",
+  "img2img_emotionHappy": "开心",
+  "img2img_emotionLaugh": "大笑",
+  "img2img_emotionSad": "伤心",
+  "img2img_emotionAngry": "生气",
+  "img2img_emotionSurprised": "惊讶",
+  "img2img_emotionShy": "害羞",
+  "img2img_emotionExcited": "兴奋",
+  "img2img_emotionDisgusted": "嫌弃",
+  "img2img_emotionSmug": "得意",
+  "img2img_emotionWorried": "担忧",
+  "img2img_emotionLove": "爱慕",
+  "img2img_emotionPlayful": "俏皮",
+  "img2img_emotionTired": "疲惫",
+  "img2img_emotionNeutral": "平静",
+  "img2img_enhanceAction": "增强！",
+  "img2img_showAdvanced": "显示高级设置",
+  "img2img_hideAdvanced": "收起高级设置",
+  "editor_focusAreaTitle": "聚焦区域",
+  "editor_focusedInpaint": "聚焦重绘",
+  "editor_outpaintFocusConflict": "扩图与聚焦重绘不能同时使用。"
 }

@@ -33,19 +33,17 @@ class CharacterPromptButton extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    // 官网式中性描边钮：有角色时不再灌主题色，状态由角标和性别色图标传达
     final buttonContent = Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: hasCharacters
-              ? colorScheme.primary.withValues(alpha: 0.5)
+              ? colorScheme.outline.withValues(alpha: 0.5)
               : colorScheme.outline.withValues(alpha: 0.3),
           width: 1,
         ),
-        color: hasCharacters
-            ? colorScheme.primary.withValues(alpha: 0.1)
-            : Colors.transparent,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -61,7 +59,7 @@ class CharacterPromptButton extends ConsumerWidget {
             AppLocalizations.of(context)!.character_buttonLabel,
             style: theme.textTheme.labelMedium?.copyWith(
               color: hasCharacters
-                  ? colorScheme.primary
+                  ? colorScheme.onSurface
                   : colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),

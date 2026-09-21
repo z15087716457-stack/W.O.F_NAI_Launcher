@@ -107,6 +107,20 @@ class NAIImageEnhancementApiService {
     required String reqType,
     String? prompt,
     int defry = 0,
+  }) async => (await augmentImages(
+    image,
+    reqType: reqType,
+    prompt: prompt,
+    defry: defry,
+  )).first;
+
+  /// Keep every returned variant, including the three background-removal
+  /// treatments. Single-image callers retain the legacy convenience method.
+  Future<List<Uint8List>> augmentImages(
+    Uint8List image, {
+    required String reqType,
+    String? prompt,
+    int defry = 0,
   }) async {
     try {
       final decoded = img.decodeImage(image);
@@ -137,7 +151,7 @@ class NAIImageEnhancementApiService {
         throw Exception('No images found in augment response');
       }
 
-      return images.first;
+      return images;
     } on DioException catch (e) {
       AppLogger.w('Augment image failed: ${e.message}', 'NAIEnhancement');
       throw Exception('图像增强失败: ${_mapDioError(e)}');

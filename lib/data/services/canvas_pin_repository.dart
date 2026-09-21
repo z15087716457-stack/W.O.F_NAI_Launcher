@@ -10,6 +10,7 @@ import '../../core/storage/local_storage_service.dart';
 import '../../core/utils/app_logger.dart';
 import '../../presentation/providers/generation/generation_models.dart';
 import '../models/gallery/nai_image_metadata.dart';
+import '../models/image/image_operation.dart';
 import 'metadata/unified_metadata_parser.dart';
 
 /// manifest 单条记录：pin 副本文件名 + 图像身份数据。
@@ -23,6 +24,7 @@ class CanvasPinRecord {
     this.kind = GeneratedImageKind.completed,
     this.metadata,
     this.savedPath,
+    this.operation,
   });
 
   /// 图像 ID（沿用 GeneratedImage.id，不是路径的一部分）。
@@ -36,6 +38,7 @@ class CanvasPinRecord {
   final GeneratedImageKind kind;
   final NaiImageMetadata? metadata;
   final String? savedPath;
+  final ImageOperation? operation;
 
   Map<String, Object?> toJson() => {
     'id': imageId,
@@ -46,6 +49,7 @@ class CanvasPinRecord {
     'kind': kind.name,
     if (metadata != null) 'metadata': metadata!.toJson(),
     if (savedPath != null) 'savedPath': savedPath,
+    if (operation != null) 'operation': operation!.name,
   };
 
   /// 宽容解析：字段缺失/类型错误返回 null，由调用方跳过该条。
@@ -93,6 +97,7 @@ class CanvasPinRecord {
           GeneratedImageKind.completed,
       metadata: metadata,
       savedPath: raw['savedPath'] is String ? raw['savedPath'] as String : null,
+      operation: ImageOperation.values.asNameMap()[raw['operation']],
     );
   }
 }
@@ -233,6 +238,7 @@ class CanvasPinRepository {
       kind: image.kind,
       metadata: embeddedMetadata == null ? image.metadata : null,
       savedPath: image.filePath,
+      operation: image.operation,
     );
     if (index < 0) {
       records.add(record);
@@ -322,6 +328,7 @@ class CanvasPinRepository {
       kind: record.kind,
       metadata: metadata,
       filePath: record.savedPath,
+      operation: record.operation,
       generationRunId: null,
     );
   }

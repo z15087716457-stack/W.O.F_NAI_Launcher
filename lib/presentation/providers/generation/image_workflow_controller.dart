@@ -293,7 +293,7 @@ class EnhanceWorkflowSettings {
     this.showIndividualSettings = false,
     this.upscaleFactor = 1.0,
     this.strength = 0.5,
-    this.noise = 0.175,
+    this.noise = 0.0,
     this.maxUpscale = false,
   });
 
@@ -341,6 +341,7 @@ class ImageWorkflowState {
     this.enhance = const EnhanceWorkflowSettings(),
     this.upscale = const UpscaleWorkflowSettings(),
     this.isPanelExpanded = false,
+    this.isToolRunning = false,
     this.isOutpaint = false,
     this.focusedInpaintEnabled = false,
     this.minimumContextMegaPixels = 88.0,
@@ -359,6 +360,7 @@ class ImageWorkflowState {
   final EnhanceWorkflowSettings enhance;
   final UpscaleWorkflowSettings upscale;
   final bool isPanelExpanded;
+  final bool isToolRunning;
   final bool isOutpaint;
   final bool focusedInpaintEnabled;
   final double minimumContextMegaPixels;
@@ -381,6 +383,7 @@ class ImageWorkflowState {
     EnhanceWorkflowSettings? enhance,
     UpscaleWorkflowSettings? upscale,
     bool? isPanelExpanded,
+    bool? isToolRunning,
     bool? isOutpaint,
     bool? focusedInpaintEnabled,
     double? minimumContextMegaPixels,
@@ -410,6 +413,7 @@ class ImageWorkflowState {
       enhance: enhance ?? this.enhance,
       upscale: upscale ?? this.upscale,
       isPanelExpanded: isPanelExpanded ?? this.isPanelExpanded,
+      isToolRunning: isToolRunning ?? this.isToolRunning,
       isOutpaint: isOutpaint ?? this.isOutpaint,
       focusedInpaintEnabled:
           focusedInpaintEnabled ?? this.focusedInpaintEnabled,
@@ -430,6 +434,52 @@ final imageWorkflowControllerProvider =
 class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   int _sourceImageRequestId = 0;
   bool _isDisposed = false;
+  ImageParams? _toolParamsSnapshot;
+  ImageWorkflowState? _toolWorkflowSnapshot;
+  Uint8List? _toolSource;
+
+  /// A toolbar operation owns a temporary source. Reopening another tool keeps
+  /// the original draft snapshot until the temporary operation is dismissed.
+  void openTemporaryTool(Uint8List image, ImageWorkflowMode mode) {
+    if (state.isToolRunning) return;
+    if (_toolSource == null || !identical(_params.sourceImage, _toolSource)) {
+      _toolParamsSnapshot = _params;
+      _toolWorkflowSnapshot = state;
+    } else {
+      closeTemporaryTool();
+      _toolParamsSnapshot = _params;
+      _toolWorkflowSnapshot = state;
+    }
+    enterBaseMode(clearMask: true);
+    replaceSourceImage(image, autoAdapt: false);
+    _toolSource = _params.sourceImage;
+    if (mode == ImageWorkflowMode.enhance) {
+      enterEnhanceMode();
+    } else {
+      enterUpscaleMode();
+    }
+  }
+
+  void closeTemporaryTool() {
+    if (state.isToolRunning) return;
+    final params = _toolParamsSnapshot;
+    final workflow = _toolWorkflowSnapshot;
+    final source = _toolSource;
+    _toolParamsSnapshot = null;
+    _toolWorkflowSnapshot = null;
+    _toolSource = null;
+    if (params != null &&
+        workflow != null &&
+        identical(_params.sourceImage, source)) {
+      final enhance = state.enhance;
+      final upscale = state.upscale;
+      _sourceImageRequestId++;
+      _paramsNotifier.restoreImageToolFields(params);
+      state = workflow.copyWith(enhance: enhance, upscale: upscale);
+    } else if (state.isEnhance || state.isUpscale) {
+      enterBaseMode(clearMask: false);
+    }
+  }
 
   ImageWorkflowState _buildDefaultState({
     EnhanceWorkflowSettings? enhance,
@@ -663,7 +713,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
       upscaleFactor: asDouble(
         rawUpscaleFactor,
         const EnhanceWorkflowSettings().upscaleFactor,
-      ).clamp(1.0, 1.5),
+      ).clamp(1.0, 2.0),
       strength: asDouble(
         rawStrength,
         const EnhanceWorkflowSettings().strength,
@@ -788,6 +838,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     int? sourceHeight,
     bool autoAdapt = true,
   }) {
+    if (state.isToolRunning) return;
     _sourceImageRequestId++;
 
     int? effectiveWidth = sourceWidth;
@@ -826,6 +877,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     int? sourceHeight,
     bool autoAdapt = true,
   }) async {
+    if (state.isToolRunning) return;
     if (!autoAdapt) {
       replaceSourceImage(
         imageBytes,
@@ -918,6 +970,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void clearSourceImage() {
+    if (state.isToolRunning) return;
     if (state.baseWidth != null || state.baseHeight != null) {
       _restoreBaseParams();
     } else if (ImageModels.isInpaintingModel(_params.model)) {
@@ -936,6 +989,9 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     state = state.copyWith(isPanelExpanded: value);
   }
 
+  void setToolRunning(bool value) =>
+      state = state.copyWith(isToolRunning: value);
+
   void setSourceImageDimensions(int? width, int? height) {
     state = state.copyWith(sourceWidth: width, sourceHeight: height);
     if (state.mode == ImageWorkflowMode.enhance) {
@@ -944,6 +1000,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void enterUpscaleMode() {
+    if (state.isToolRunning) return;
     if (_params.sourceImage == null) {
       return;
     }
@@ -967,6 +1024,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void exitUpscaleMode() {
+    if (state.isToolRunning) return;
     if (state.mode != ImageWorkflowMode.upscale) {
       return;
     }
@@ -1218,6 +1276,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void enterEnhanceMode() {
+    if (state.isToolRunning) return;
     if (_params.sourceImage == null) {
       return;
     }
@@ -1233,10 +1292,16 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
       isOutpaint: false,
     );
     _paramsNotifier.updateIsOutpaint(false);
+    if (!availableEnhanceFactors.contains(state.enhance.upscaleFactor)) {
+      state = state.copyWith(
+        enhance: state.enhance.copyWith(upscaleFactor: 1.0),
+      );
+    }
     _applyEnhanceToParams();
   }
 
   void exitEnhanceMode() {
+    if (state.isToolRunning) return;
     if (state.mode != ImageWorkflowMode.enhance) {
       return;
     }
@@ -1256,6 +1321,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void enterInpaintMode() {
+    if (state.isToolRunning) return;
     if (_params.sourceImage == null) {
       return;
     }
@@ -1279,6 +1345,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void enterBaseMode({bool clearMask = true}) {
+    if (state.isToolRunning) return;
     final shouldRestoreBaseSnapshot =
         state.mode == ImageWorkflowMode.enhance ||
         state.mode == ImageWorkflowMode.inpaint ||
@@ -1337,8 +1404,8 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     final resolved = _resolveMagnitude(state.enhance.magnitude);
     final nextSettings = state.enhance.copyWith(
       showIndividualSettings: value,
-      strength: value ? state.enhance.strength : resolved.$1,
-      noise: value ? state.enhance.noise : resolved.$2,
+      strength: value ? _params.strength : resolved.$1,
+      noise: value ? _params.noise : resolved.$2,
     );
     state = state.copyWith(enhance: nextSettings);
     _persistEnhanceSettings(nextSettings);
@@ -1346,8 +1413,9 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void updateEnhanceUpscaleFactor(double factor) {
+    if (!availableEnhanceFactors.contains(factor)) return;
     final nextSettings = state.enhance.copyWith(
-      upscaleFactor: factor <= 1.0 ? 1.0 : 1.5,
+      upscaleFactor: factor,
       maxUpscale: false,
     );
     state = state.copyWith(enhance: nextSettings);
@@ -1371,6 +1439,23 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     state.sourceWidth,
     state.sourceHeight,
   );
+
+  List<double> get availableEnhanceFactors {
+    final width = state.sourceWidth ?? _params.width;
+    final height = state.sourceHeight ?? _params.height;
+    if ((width == 832 && height == 1216) || (width == 1216 && height == 832)) {
+      return const [1.0, 1.5];
+    }
+    final step = _params.isV5Model ? 32 : 64;
+    return [1.0, 1.5, 2.0]
+        .where(
+          (factor) =>
+              width * height * factor * factor <= MaxEnhanceMath.maxArea &&
+              (width * factor) % step == 0 &&
+              (height * factor) % step == 0,
+        )
+        .toList();
+  }
 
   void updateEnhanceIndividualSettings({double? strength, double? noise}) {
     final nextSettings = state.enhance.copyWith(
@@ -1429,14 +1514,10 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     final maxEnabled = state.enhance.maxUpscale && isEnhanceMaxUpscaleEligible;
     final requestWidth = maxEnabled
         ? baseWidth
-        : _normalizeDimension(
-            (baseWidth * state.enhance.upscaleFactor).round(),
-          );
+        : (baseWidth * state.enhance.upscaleFactor).round();
     final requestHeight = maxEnabled
         ? baseHeight
-        : _normalizeDimension(
-            (baseHeight * state.enhance.upscaleFactor).round(),
-          );
+        : (baseHeight * state.enhance.upscaleFactor).round();
     final resolved = state.enhance.showIndividualSettings
         ? (state.enhance.strength, state.enhance.noise)
         : _resolveMagnitude(state.enhance.magnitude);
@@ -1475,15 +1556,14 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   (double, double) _resolveMagnitude(double magnitude) {
-    final clamped = magnitude.clamp(0.0, 1.0);
-    // Magnitude 在 UI 中作为 Strength/Noise 的快捷联动值使用。
-    // 这里先采用保守映射，避免增强时默认噪声过高。
-    return (clamped, clamped * 0.35);
-  }
-
-  int _normalizeDimension(int value) {
-    final normalized = ((value + 32) ~/ 64) * 64;
-    return normalized.clamp(64, 4096);
+    const presets = [
+      (0.2, 0.0),
+      (0.4, 0.0),
+      (0.5, 0.0),
+      (0.6, 0.0),
+      (0.7, 0.1),
+    ];
+    return presets[(magnitude.clamp(0.0, 1.0) * 4).round()];
   }
 
   bool _usesStableDiffusionImportBounds(String model) {

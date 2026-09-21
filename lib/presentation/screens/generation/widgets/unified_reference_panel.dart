@@ -363,15 +363,15 @@ class _UnifiedReferencePanelState extends ConsumerState<UnifiedReferencePanel> {
         decoration: BoxDecoration(
           color: showBackground
               ? Colors.white.withValues(alpha: 0.2)
-              : theme.colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(12),
+              : theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           '${vibes.length}/16',
           style: theme.textTheme.labelSmall?.copyWith(
             color: showBackground
                 ? Colors.white
-                : theme.colorScheme.onPrimaryContainer,
+                : theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
       ),

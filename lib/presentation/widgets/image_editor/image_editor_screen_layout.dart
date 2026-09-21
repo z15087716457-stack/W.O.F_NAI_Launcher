@@ -1,62 +1,58 @@
 part of 'image_editor_screen.dart';
 
 extension _ImageEditorScreenLayout on _ImageEditorScreenState {
-  /// 桌面端布局
+  /// 浮层与屏幕边缘的间距
+  static const double _overlayInset = 12;
+
+  /// 桌面端布局 - 官方风格全屏画布 + 四角浮层
   Widget _buildDesktopLayout() {
+    final mediaSize = MediaQuery.sizeOf(context);
+
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          // 顶部菜单栏
-          _buildDesktopMenuBar(),
+          // 全屏画布区域（保留 outpaint / 焦点蒙版 / 蒙版填充等既有覆盖层）
+          Positioned.fill(child: _buildCanvasArea()),
 
-          // 主体区域
-          Expanded(
-            child: Row(
-              children: [
-                // 左侧工具栏
-                DesktopToolbar(
-                  state: _state,
-                  onClear: _isInpaintMode ? _resetInpaintMask : null,
-                  onFillMask: _isInpaintMode
-                      ? _handleFillClosedMaskRegions
-                      : null,
-                  canFillMask: _isInpaintMode ? _hasMaskContent : null,
-                  allowedToolIds: _isInpaintMode
-                      ? _ImageEditorScreenState._inpaintToolIds
-                      : null,
-                ),
-
-                // 中间画布区域
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(child: _buildCanvasArea()),
-                      // 底部状态栏
-                      _buildStatusBar(),
-                    ],
-                  ),
-                ),
-
-                // 右侧面板
-                if (_showLayerPanel)
-                  SizedBox(
-                    width: 280,
-                    child: Column(
-                      children: [
-                        // 图层面板
-                        Expanded(flex: 2, child: LayerPanel(state: _state)),
-                        const ThemedDivider(height: 1),
-                        // 工具设置面板
-                        Expanded(flex: 2, child: _buildToolSettingsPanel()),
-                        const ThemedDivider(height: 1),
-                        // 颜色面板
-                        if (!_isInpaintMode) ColorPanel(state: _state),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
+          // 左上：焦点蒙版卡片 + 当前工具设置
+          Positioned(
+            top: _overlayInset,
+            left: _overlayInset,
+            child: _buildTopLeftOverlay(mediaSize),
           ),
+
+          // 右上：压缩控制、下载画布、保存并关闭、退出
+          Positioned(
+            top: _overlayInset,
+            right: _overlayInset,
+            child: _buildTopRightActions(mediaSize),
+          ),
+
+          // 底部居中：悬浮主工具栏
+          Positioned(
+            left: _overlayInset,
+            right: _overlayInset,
+            bottom: _overlayInset,
+            child: Center(child: _buildFloatingToolbar(mediaSize)),
+          ),
+
+          // 右下：图层缩略图托盘 + 计数开关
+          if (_showLayerPanel)
+            Positioned(
+              right: _overlayInset,
+              bottom: _overlayInset,
+              child: _buildLayerTrayOverlay(),
+            ),
+
+          // 详细图层面板 flyout（非模态浮层，避开右下托盘与顶部栏）
+          if (_showLayerPanel && _showLayerFlyout)
+            Positioned(
+              top: _overlayInset + 56,
+              right: _overlayInset + 92,
+              bottom: _overlayInset + 56,
+              width: 300,
+              child: _buildLayerDetailFlyout(),
+            ),
         ],
       ),
     );
@@ -105,7 +101,19 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
       body: Column(
         children: [
           // 画布区域
-          Expanded(child: _buildCanvasArea()),
+          Expanded(
+            child: Stack(
+              children: [
+                Positioned.fill(child: _buildCanvasArea()),
+                if (_isInpaintMode)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: _buildFocusedSelectionCard(),
+                  ),
+              ],
+            ),
+          ),
 
           // 工具设置（可折叠）
           _buildMobileToolSettings(),
@@ -126,243 +134,307 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
     );
   }
 
-  /// 桌面端菜单栏
-  Widget _buildDesktopMenuBar() {
-    final theme = Theme.of(context);
-
-    return Container(
-      height: 40,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.3)),
+  /// 左上浮层：焦点蒙版卡片（inpaint）+ 当前工具设置卡片
+  Widget _buildTopLeftOverlay(Size mediaSize) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: 264,
+        maxHeight: mediaSize.height * 0.72,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildToolSettingsPanel(),
+            if (_isInpaintMode) ...[
+              const SizedBox(height: 8),
+              if (_focusedInpaintEnabled)
+                _buildFocusedSelectionCard()
+              else
+                EditorOverlayCard(
+                  child: TextButton.icon(
+                    icon: const Icon(Icons.filter_center_focus, size: 16),
+                    label: Text(
+                      context.l10n.editor_focusedInpaint,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    onPressed: _toggleFocusedInpaint,
+                  ),
+                ),
+            ],
+          ],
         ),
       ),
+    );
+  }
+
+  /// 右上浮层：压缩控制、下载画布、保存并关闭、退出
+  Widget _buildTopRightActions(Size mediaSize) {
+    final l10n = context.l10n;
+
+    return EditorOverlayCard(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // 返回按钮
-          IconButton(
-            icon: const Icon(Icons.arrow_back, size: 20),
-            onPressed: () => _confirmExit(),
-            tooltip: context.l10n.editor_back,
-          ),
-
-          Text(_editorTitle(), style: theme.textTheme.titleSmall),
-
-          const Spacer(),
-
-          _buildDesktopCompressionControl(
-            expanded: MediaQuery.sizeOf(context).width >= 1700,
+          // 宽屏时展示完整压缩滑杆，其余宽度用紧凑图标
+          if (mediaSize.width >= 1700)
+            _buildDesktopCompressionControl(expanded: true)
+          else
+            EditorOverlayIconButton(
+              icon: Icons.compress,
+              tooltip: l10n.editor_compressionTooltip,
+              onPressed: _showCompressionSheet,
+            ),
+          EditorOverlayIconButton(
+            icon: Icons.download_outlined,
+            tooltip: l10n.common_download,
+            onPressed: _downloadCanvasImage,
           ),
           const SizedBox(width: 4),
-
-          if (!_isInpaintMode)
-            if (MediaQuery.sizeOf(context).width >= 1280)
-              TextButton.icon(
-                icon: const Icon(Icons.tune_rounded, size: 18),
-                label: Text(context.l10n.editor_effects),
-                onPressed: _showEffectsDialog,
-              )
-            else
-              IconButton(
-                icon: const Icon(Icons.tune_rounded, size: 20),
-                onPressed: _showEffectsDialog,
-                tooltip: context.l10n.editor_effects,
+          FilledButton.icon(
+            onPressed: _canExportAndClose ? () => _exportAndClose() : null,
+            icon: const Icon(Icons.check, size: 16),
+            label: Text(l10n.editor_saveAndExit),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
               ),
-
-          // 画布尺寸按钮（使用细粒度监听）
-          TextButton.icon(
-            icon: const Icon(Icons.aspect_ratio, size: 18),
-            label: ValueListenableBuilder<Size>(
-              valueListenable: _state.canvasSizeNotifier,
-              builder: (context, size, _) =>
-                  Text('${size.width.toInt()} x ${size.height.toInt()}'),
+              minimumSize: const Size(0, 32),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              visualDensity: VisualDensity.compact,
             ),
-            onPressed: _changeCanvasSize,
           ),
-
-          // 加载蒙版按钮
-          if (_isInpaintMode)
-            IconButton(
-              icon: const Icon(Icons.upload_file, size: 20),
-              onPressed: _loadMask,
-              tooltip: context.l10n.editor_loadMask,
-            ),
-
-          if (_isInpaintMode)
-            if (MediaQuery.sizeOf(context).width >= 1280)
-              TextButton.icon(
-                icon: const Icon(Icons.open_in_full, size: 18),
-                label: Text(context.l10n.editor_shiftEdges),
-                onPressed: _showShiftEdgesDialog,
-              )
-            else
-              IconButton(
-                icon: const Icon(Icons.open_in_full, size: 20),
-                onPressed: _showShiftEdgesDialog,
-                tooltip: context.l10n.editor_shiftEdges,
-              ),
-
-          const ThemedDivider(
-            height: 1,
-            vertical: true,
-            indent: 8,
-            endIndent: 8,
-          ),
-
-          // 切换面板
-          IconButton(
-            icon: Icon(
-              _showLayerPanel
-                  ? Icons.view_sidebar
-                  : Icons.view_sidebar_outlined,
-              size: 20,
-            ),
-            onPressed: () {
-              _updateLayoutState(() {
-                _showLayerPanel = !_showLayerPanel;
-              });
-            },
-            tooltip: context.l10n.editor_togglePanels,
-          ),
-
-          // 快捷键帮助
-          IconButton(
-            icon: const Icon(Icons.keyboard, size: 20),
-            onPressed: _showShortcutHelp,
-            tooltip: context.l10n.editor_shortcutHelpTitle,
-          ),
-
-          const ThemedDivider(
-            height: 1,
-            vertical: true,
-            indent: 8,
-            endIndent: 8,
-          ),
-
-          // 导出按钮
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: FilledButton.icon(
-              icon: const Icon(Icons.check, size: 18),
-              label: Text(context.l10n.editor_done),
-              onPressed: _canExportAndClose ? _exportAndClose : null,
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-              ),
-            ),
+          EditorOverlayIconButton(
+            icon: Icons.close,
+            tooltip: l10n.common_close,
+            onPressed: () => _confirmExit(),
           ),
         ],
       ),
     );
   }
 
-  /// 状态栏
-  /// 使用 Listenable.merge 实现细粒度监听
-  Widget _buildStatusBar() {
-    final theme = Theme.of(context);
+  /// 底部悬浮工具栏
+  Widget _buildFloatingToolbar(Size mediaSize) {
+    final l10n = context.l10n;
+    // 为右下图层托盘预留水平空间，避免窄窗口下重叠
+    final reservedRight = _showLayerPanel ? 200.0 : 40.0;
 
-    return ListenableBuilder(
-      listenable: Listenable.merge([
-        _state.canvasController, // 缩放、旋转、镜像
-        _state.canvasSizeNotifier, // 画布尺寸
-        _state.layerManager, // 图层数量
-        _state.selectionManager, // 选区状态
-      ]),
-      builder: (context, _) {
-        return Container(
-          height: 24,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
-            border: Border(
-              top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.3)),
-            ),
-          ),
-          child: Row(
-            children: [
-              Text(
-                context.l10n.editor_statusZoom(
-                  (_state.canvasController.scale * 100).round(),
-                ),
-                style: theme.textTheme.bodySmall,
-              ),
-              const SizedBox(width: 16),
-              Text(
-                context.l10n.editor_statusCanvas(
-                  _state.canvasSize.width.toInt(),
-                  _state.canvasSize.height.toInt(),
-                ),
-                style: theme.textTheme.bodySmall,
-              ),
-              const SizedBox(width: 16),
-              Text(
-                context.l10n.editor_statusLayers(
-                  _state.layerManager.layerCount,
-                ),
-                style: theme.textTheme.bodySmall,
-              ),
-              if (_state.selectionPath != null) ...[
-                const SizedBox(width: 16),
-                Text(
-                  context.l10n.editor_statusHasSelection,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ],
-              // 旋转角度显示
-              if (_state.canvasController.rotation != 0) ...[
-                const SizedBox(width: 16),
-                Text(
-                  context.l10n.editor_statusRotation(
-                    (_state.canvasController.rotation * 180 / 3.14159265359)
-                        .round(),
-                  ),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.secondary,
-                  ),
-                ),
-              ],
-              // 镜像状态显示
-              if (_state.canvasController.isMirroredHorizontally) ...[
-                const SizedBox(width: 16),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.flip,
-                      size: 14,
-                      color: theme.colorScheme.secondary,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      context.l10n.editor_statusMirrored,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.secondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-          ),
-        );
-      },
+    return EditorFloatingToolbar(
+      state: _state,
+      allowedToolIds: _isInpaintMode
+          ? _ImageEditorScreenState._inpaintToolIds
+          : null,
+      maxWidth: (mediaSize.width - reservedRight)
+          .clamp(240.0, 1100.0)
+          .toDouble(),
+      onClear: _isInpaintMode ? _resetInpaintMask : null,
+      clearTooltip: _isInpaintMode ? l10n.editor_resetMask : null,
+      onFillMask: _isInpaintMode ? _handleFillClosedMaskRegions : null,
+      canFillMask: _isInpaintMode ? _hasMaskContent : null,
+      fillMaskActive: _isMaskFillMode,
+      menuActions: _buildMoreMenuActions(),
     );
   }
 
-  /// 工具设置面板
+  /// “更多”菜单动作项（null = 分隔线）
+  List<EditorMenuAction?> _buildMoreMenuActions() {
+    final l10n = context.l10n;
+    return [
+      if (_isInpaintMode)
+        EditorMenuAction(
+          icon: Icons.upload_file,
+          label: l10n.editor_loadMask,
+          onPressed: _loadMask,
+        ),
+      if (_isInpaintMode)
+        EditorMenuAction(
+          icon: Icons.open_in_full,
+          label: l10n.editor_shiftEdges,
+          onPressed: _showShiftEdgesDialog,
+        ),
+      if (!_isInpaintMode)
+        EditorMenuAction(
+          icon: Icons.tune_rounded,
+          label: l10n.editor_effects,
+          onPressed: _showEffectsDialog,
+        ),
+      EditorMenuAction(
+        icon: Icons.aspect_ratio,
+        label: l10n.editor_changeCanvasSize,
+        onPressed: _changeCanvasSize,
+      ),
+      EditorMenuAction(
+        icon: Icons.compress,
+        label: l10n.editor_compressionTitle,
+        onPressed: _showCompressionSheet,
+      ),
+      null,
+      EditorMenuAction(
+        icon: Icons.restart_alt,
+        label: l10n.editor_resetView,
+        onPressed: () => _state.canvasController.resetView(_state.canvasSize),
+      ),
+      EditorMenuAction(
+        icon: _showLayerPanel
+            ? Icons.view_sidebar
+            : Icons.view_sidebar_outlined,
+        label: l10n.editor_togglePanels,
+        checked: _showLayerPanel,
+        onPressed: () => _updateLayoutState(() {
+          _showLayerPanel = !_showLayerPanel;
+          if (!_showLayerPanel) {
+            _showLayerFlyout = false;
+          }
+        }),
+      ),
+      null,
+      EditorMenuAction(
+        icon: Icons.keyboard,
+        label: l10n.editor_shortcutHelpTitle,
+        onPressed: _showShortcutHelp,
+      ),
+    ];
+  }
+
+  /// 右下图层托盘
+  Widget _buildLayerTrayOverlay() {
+    return EditorLayerTray(
+      state: _state,
+      detailsOpen: _showLayerFlyout,
+      onOpenDetails: () => _updateLayoutState(() {
+        _showLayerFlyout = !_showLayerFlyout;
+      }),
+    );
+  }
+
+  /// 详细图层面板浮层：完整 LayerPanel + 颜色面板（编辑模式）
+  Widget _buildLayerDetailFlyout() {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+
+    return EditorOverlayCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 2, 4, 2),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.editor_layers,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                EditorOverlayIconButton(
+                  icon: Icons.close,
+                  tooltip: l10n.common_close,
+                  size: 28,
+                  iconSize: 16,
+                  onPressed: () => _updateLayoutState(() {
+                    _showLayerFlyout = false;
+                  }),
+                ),
+              ],
+            ),
+          ),
+          const ThemedDivider(height: 1),
+          Expanded(child: LayerPanel(state: _state)),
+          if (!_isInpaintMode) ...[
+            const ThemedDivider(height: 1),
+            ColorPanel(state: _state),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// 将当前画布导出为 PNG 文件（不影响保存/关闭流程）
+  Future<void> _downloadCanvasImage() async {
+    final l10n = context.l10n;
+    try {
+      final bytes = await ImageExporterNew.exportMergedImage(
+        _state.layerManager,
+        _state.canvasSize,
+      );
+      if (!mounted) return;
+      final path = await FilePicker.platform.saveFile(
+        dialogTitle: l10n.common_download,
+        fileName: 'canvas_${DateTime.now().millisecondsSinceEpoch}.png',
+        type: FileType.custom,
+        allowedExtensions: const ['png'],
+      );
+      if (path == null || !mounted) return;
+      final filePath = path.toLowerCase().endsWith('.png') ? path : '$path.png';
+      await File(filePath).writeAsBytes(bytes);
+      if (mounted) {
+        AppToast.success(context, l10n.image_imageSaved(filePath));
+      }
+    } catch (e) {
+      if (mounted) {
+        AppToast.error(context, l10n.editor_exportFailed(e));
+      }
+    }
+  }
+
+  /// 工具设置面板 - 左上紧凑卡片，跟随当前工具
   /// 使用 toolChangeNotifier 实现细粒度监听，仅在工具切换时重建
   Widget _buildToolSettingsPanel() {
     return ValueListenableBuilder<EditorTool?>(
       valueListenable: _state.toolChangeNotifier,
       builder: (context, tool, _) {
         if (tool == null) {
-          return Center(child: Text(context.l10n.image_editor_select_tool));
+          return const SizedBox.shrink();
         }
-        return SingleChildScrollView(
-          child: tool.buildSettingsPanel(context, _state),
+        if (tool.id == 'brush' || tool.id == 'eraser') {
+          return EditorQuickSettings(
+            state: _state,
+            tool: tool,
+            inpaint: _isInpaintMode,
+            onDetails: () => showDialog<void>(
+              context: context,
+              builder: (context) => Dialog(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: 340,
+                    maxHeight: 640,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            tooltip: context.l10n.common_close,
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.close),
+                          ),
+                        ),
+                        tool.buildSettingsPanel(context, _state),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+        return EditorOverlayCard(
+          width: 252,
+          padding: EdgeInsets.zero,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 340),
+            child: SingleChildScrollView(
+              child: tool.buildSettingsPanel(context, _state),
+            ),
+          ),
         );
       },
     );

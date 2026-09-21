@@ -872,9 +872,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_canvasZoomToFill => 'ズームしてフィル（100%超を許可）';
 
   @override
-  String get generation_canvasSmoothZoom => 'スムーズズーム（Ctrl+スクロール）';
-
-  @override
   String get generation_canvasEmpty => 'キャンバスは空です';
 
   @override
@@ -1422,19 +1419,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_directorTools => 'ディレクターツール';
 
   @override
-  String get img2img_directorToolsHint =>
-      'ディレクターツールを通じて現在のソース イメージを送信します。結果の準備ができたら、それを新しいソース イメージとして再度適用できます。';
-
-  @override
   String get img2img_directorPrompt => '追加のプロンプト';
 
   @override
   String get img2img_directorPromptHint => 'ターゲットの感情や色の方向など、必要に応じてガイダンスを追加します';
-
-  @override
-  String img2img_directorRun(Object tool) {
-    return '$tool を実行します';
-  }
 
   @override
   String get img2img_directorRunning => '処理中...';
@@ -1443,27 +1431,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_directorResult => '結果';
 
   @override
-  String img2img_directorResultReady(Object tool) {
-    return '$tool が完了しました';
-  }
-
-  @override
   String get img2img_directorApplied => 'ディレクターツールの結果を新しいソース イメージとして適用しました';
 
   @override
   String get img2img_directorDefry => 'デフライ';
 
   @override
-  String get img2img_directorDefryHint => '結果のノイズまたは過飽和を低減します (0 = オフ、5 = 最大)';
-
-  @override
   String get img2img_directorEmotionLevel => '感情レベル';
-
-  @override
-  String get img2img_directorEmotionLevelHint => '感情が適用される強さ (0 = 微妙、5 = 強い)';
-
-  @override
-  String get img2img_directorEmotionPresets => 'プリセット';
 
   @override
   String get img2img_directorApplyAsSource => 'ソースとして使用';
@@ -1496,14 +1470,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_enhance => '品質向上';
 
   @override
-  String get img2img_enhanceHint =>
-      '品質向上は、潜在スペースでソース画像を拡大して再生成する間、現在のプロンプトを使用し続けます。';
-
-  @override
   String get img2img_enhanceMagnitude => '大きさ';
-
-  @override
-  String get img2img_enhanceShowIndividualSettings => '個別設定を表示';
 
   @override
   String get img2img_enhanceUpscaleAmount => '画像の拡大率';
@@ -2180,32 +2147,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String editor_layerName(Object count) {
     return 'レイヤー $count';
   }
-
-  @override
-  String editor_statusZoom(Object value) {
-    return 'ズーム: $value%';
-  }
-
-  @override
-  String editor_statusCanvas(Object width, Object height) {
-    return 'キャンバス: $width × $height';
-  }
-
-  @override
-  String editor_statusLayers(Object count) {
-    return 'レイヤー: $count';
-  }
-
-  @override
-  String get editor_statusHasSelection => '選択が有効です';
-
-  @override
-  String editor_statusRotation(Object degrees) {
-    return '回転: $degrees°';
-  }
-
-  @override
-  String get editor_statusMirrored => 'ミラーリングされました';
 
   @override
   String editor_focusMinimumContextArea(Object value) {
@@ -6760,9 +6701,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shortcuts_customize => 'ショートカットをカスタマイズする';
 
   @override
-  String get image_editor_select_tool => 'ツールの選択';
-
-  @override
   String get selection_clear_selection => '選択をクリア';
 
   @override
@@ -10211,4 +10149,112 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get titleBar_close => '閉じる';
+
+  @override
+  String get img2img_pixelSnap => 'ピクセルスナップ';
+
+  @override
+  String get img2img_original => '元画像';
+
+  @override
+  String get img2img_directorAddToQueue => '結果を入力キューに追加';
+
+  @override
+  String get img2img_transform => '変換';
+
+  @override
+  String get img2img_palette => 'パレット化';
+
+  @override
+  String get img2img_paletteOff => 'オフ';
+
+  @override
+  String get img2img_paletteAuto => '自動';
+
+  @override
+  String get img2img_paletteCustom => 'カスタム';
+
+  @override
+  String get img2img_avoidOverRefining => '過剰な細分化を抑制';
+
+  @override
+  String get img2img_keepGridHint => '検出されたピクセル格子を維持します。';
+
+  @override
+  String get img2img_refineGridHint => '画像に合う場合は、より細かいピクセルサイズを使います。';
+
+  @override
+  String get img2img_pixelUpscaleHint => 'ニアレストネイバーでピクセルを鮮明に拡大します。';
+
+  @override
+  String get img2img_pixelNativeHint => 'スナップ後のピクセルサイズを維持します。';
+
+  @override
+  String get img2img_masked => '背景透過';
+
+  @override
+  String get img2img_generated => '生成結果';
+
+  @override
+  String get img2img_blend => '合成結果';
+
+  @override
+  String get img2img_emotionHappy => '喜び';
+
+  @override
+  String get img2img_emotionLaugh => '笑い';
+
+  @override
+  String get img2img_emotionSad => '悲しみ';
+
+  @override
+  String get img2img_emotionAngry => '怒り';
+
+  @override
+  String get img2img_emotionSurprised => '驚き';
+
+  @override
+  String get img2img_emotionShy => '照れ';
+
+  @override
+  String get img2img_emotionExcited => '興奮';
+
+  @override
+  String get img2img_emotionDisgusted => '嫌悪';
+
+  @override
+  String get img2img_emotionSmug => '得意顔';
+
+  @override
+  String get img2img_emotionWorried => '心配';
+
+  @override
+  String get img2img_emotionLove => '愛情';
+
+  @override
+  String get img2img_emotionPlayful => 'お茶目';
+
+  @override
+  String get img2img_emotionTired => '疲れ';
+
+  @override
+  String get img2img_emotionNeutral => '無表情';
+
+  @override
+  String get img2img_enhanceAction => '強化！';
+
+  @override
+  String get img2img_showAdvanced => '詳細設定を表示';
+
+  @override
+  String get img2img_hideAdvanced => '詳細設定を隠す';
+
+  @override
+  String get editor_focusAreaTitle => 'フォーカス範囲';
+
+  @override
+  String get editor_focusedInpaint => 'フォーカスインペイント';
+
+  @override
+  String get editor_outpaintFocusConflict => 'アウトペイントとフォーカスインペイントは同時に使用できません。';
 }

@@ -43,6 +43,50 @@ void main() {
 
   group('ImageSaveUtils metadata semantics', () {
     test(
+      'derived outputs inherit only source metadata and actual dimensions',
+      () async {
+        final plain = Uint8List.fromList(
+          img.encodePng(img.Image(width: 4, height: 6)),
+        );
+        final source = UnifiedMetadataParser.embedTextChunkOnly(
+          plain,
+          'Comment',
+          '{"prompt":"original prompt","seed":123,"width":2,"height":3}',
+        );
+        final output = await ImageSaveUtils.inheritSourceMetadata(
+          imageBytes: plain,
+          sourceBytes: source,
+          width: 4,
+          height: 6,
+        );
+        final metadata = UnifiedMetadataParser.parseFromImageBytes(
+          output,
+        ).metadata!;
+        expect(metadata.prompt, 'original prompt');
+        expect(metadata.seed, 123);
+        expect(metadata.width, 4);
+        expect(metadata.height, 6);
+        expect(
+          await ImageSaveUtils.inheritSourceMetadata(
+            imageBytes: plain,
+            sourceBytes: plain,
+            width: 4,
+            height: 6,
+          ),
+          same(plain),
+        );
+        expect(
+          await ImageSaveUtils.inheritSourceMetadata(
+            imageBytes: output,
+            sourceBytes: plain,
+            width: 4,
+            height: 6,
+          ),
+          same(output),
+        );
+      },
+    );
+    test(
       'should build metadata from request prompt and explicit preset flags',
       () {
         final params = ImageParams(

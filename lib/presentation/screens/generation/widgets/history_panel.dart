@@ -23,6 +23,7 @@ import '../../../../data/repositories/gallery_folder_repository.dart';
 import '../../../providers/canvas_settings_provider.dart';
 import 'canvas/canvas_feed_layout.dart';
 import 'history_batch.dart';
+import 'image_operation_badge.dart';
 import '../../../providers/generation/generation_params_selectors.dart';
 import '../../../providers/generation/preview_selection_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
@@ -726,6 +727,9 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           showIndex: false,
           historyThumb: true,
           batchBadgeCount: batch.count,
+          sourceBadge: image.operation == null || isFailedSnapshot
+              ? null
+              : ImageOperationBadge(operation: image.operation!),
           isSelected: _isBatchSelected(batch),
           isPreviewActive: batch.contains(selectedPreviewId),
           imageIdentity: image.id,

@@ -1707,12 +1707,6 @@ abstract class AppLocalizations {
   /// **'Zoom to fill (allows >100%)'**
   String get generation_canvasZoomToFill;
 
-  /// No description provided for @generation_canvasSmoothZoom.
-  ///
-  /// In en, this message translates to:
-  /// **'Smooth zoom (Ctrl+scroll)'**
-  String get generation_canvasSmoothZoom;
-
   /// No description provided for @generation_canvasEmpty.
   ///
   /// In en, this message translates to:
@@ -2709,12 +2703,6 @@ abstract class AppLocalizations {
   /// **'Director Tools'**
   String get img2img_directorTools;
 
-  /// No description provided for @img2img_directorToolsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Send the current source image through a Director Tool. When the result is ready, you can apply it back as the new source image.'**
-  String get img2img_directorToolsHint;
-
   /// No description provided for @img2img_directorPrompt.
   ///
   /// In en, this message translates to:
@@ -2726,12 +2714,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add guidance when needed, such as target emotion or color direction'**
   String get img2img_directorPromptHint;
-
-  /// No description provided for @img2img_directorRun.
-  ///
-  /// In en, this message translates to:
-  /// **'Run {tool}'**
-  String img2img_directorRun(Object tool);
 
   /// No description provided for @img2img_directorRunning.
   ///
@@ -2745,12 +2727,6 @@ abstract class AppLocalizations {
   /// **'Result'**
   String get img2img_directorResult;
 
-  /// No description provided for @img2img_directorResultReady.
-  ///
-  /// In en, this message translates to:
-  /// **'{tool} completed'**
-  String img2img_directorResultReady(Object tool);
-
   /// No description provided for @img2img_directorApplied.
   ///
   /// In en, this message translates to:
@@ -2763,29 +2739,11 @@ abstract class AppLocalizations {
   /// **'Defry'**
   String get img2img_directorDefry;
 
-  /// No description provided for @img2img_directorDefryHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Reduce noise or over-saturation in the result (0 = off, 5 = max)'**
-  String get img2img_directorDefryHint;
-
   /// No description provided for @img2img_directorEmotionLevel.
   ///
   /// In en, this message translates to:
   /// **'Emotion Level'**
   String get img2img_directorEmotionLevel;
-
-  /// No description provided for @img2img_directorEmotionLevelHint.
-  ///
-  /// In en, this message translates to:
-  /// **'How strongly the emotion is applied (0 = subtle, 5 = strong)'**
-  String get img2img_directorEmotionLevelHint;
-
-  /// No description provided for @img2img_directorEmotionPresets.
-  ///
-  /// In en, this message translates to:
-  /// **'Presets'**
-  String get img2img_directorEmotionPresets;
 
   /// No description provided for @img2img_directorApplyAsSource.
   ///
@@ -2847,23 +2805,11 @@ abstract class AppLocalizations {
   /// **'Enhance'**
   String get img2img_enhance;
 
-  /// No description provided for @img2img_enhanceHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enhance keeps using the current prompt while it upscales and regenerates the source image in latent space.'**
-  String get img2img_enhanceHint;
-
   /// No description provided for @img2img_enhanceMagnitude.
   ///
   /// In en, this message translates to:
   /// **'Magnitude'**
   String get img2img_enhanceMagnitude;
-
-  /// No description provided for @img2img_enhanceShowIndividualSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Show Individual Settings'**
-  String get img2img_enhanceShowIndividualSettings;
 
   /// No description provided for @img2img_enhanceUpscaleAmount.
   ///
@@ -4056,42 +4002,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Layer {count}'**
   String editor_layerName(Object count);
-
-  /// No description provided for @editor_statusZoom.
-  ///
-  /// In en, this message translates to:
-  /// **'Zoom: {value}%'**
-  String editor_statusZoom(Object value);
-
-  /// No description provided for @editor_statusCanvas.
-  ///
-  /// In en, this message translates to:
-  /// **'Canvas: {width} x {height}'**
-  String editor_statusCanvas(Object width, Object height);
-
-  /// No description provided for @editor_statusLayers.
-  ///
-  /// In en, this message translates to:
-  /// **'Layers: {count}'**
-  String editor_statusLayers(Object count);
-
-  /// No description provided for @editor_statusHasSelection.
-  ///
-  /// In en, this message translates to:
-  /// **'Selection active'**
-  String get editor_statusHasSelection;
-
-  /// No description provided for @editor_statusRotation.
-  ///
-  /// In en, this message translates to:
-  /// **'Rotation: {degrees}°'**
-  String editor_statusRotation(Object degrees);
-
-  /// No description provided for @editor_statusMirrored.
-  ///
-  /// In en, this message translates to:
-  /// **'Mirrored'**
-  String get editor_statusMirrored;
 
   /// No description provided for @editor_focusMinimumContextArea.
   ///
@@ -12180,12 +12090,6 @@ abstract class AppLocalizations {
   /// **'Customize Shortcuts'**
   String get shortcuts_customize;
 
-  /// No description provided for @image_editor_select_tool.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Tool'**
-  String get image_editor_select_tool;
-
   /// No description provided for @selection_clear_selection.
   ///
   /// In en, this message translates to:
@@ -18254,6 +18158,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get titleBar_close;
+
+  /// No description provided for @img2img_pixelSnap.
+  ///
+  /// In en, this message translates to:
+  /// **'Pixel Snap'**
+  String get img2img_pixelSnap;
+
+  /// No description provided for @img2img_original.
+  ///
+  /// In en, this message translates to:
+  /// **'Original'**
+  String get img2img_original;
+
+  /// No description provided for @img2img_directorAddToQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Use result as next input'**
+  String get img2img_directorAddToQueue;
+
+  /// No description provided for @img2img_transform.
+  ///
+  /// In en, this message translates to:
+  /// **'Transform'**
+  String get img2img_transform;
+
+  /// No description provided for @img2img_palette.
+  ///
+  /// In en, this message translates to:
+  /// **'Palettize'**
+  String get img2img_palette;
+
+  /// No description provided for @img2img_paletteOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get img2img_paletteOff;
+
+  /// No description provided for @img2img_paletteAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get img2img_paletteAuto;
+
+  /// No description provided for @img2img_paletteCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get img2img_paletteCustom;
+
+  /// No description provided for @img2img_avoidOverRefining.
+  ///
+  /// In en, this message translates to:
+  /// **'Avoid Over-Refining'**
+  String get img2img_avoidOverRefining;
+
+  /// No description provided for @img2img_keepGridHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Preserve the detected pixel grid.'**
+  String get img2img_keepGridHint;
+
+  /// No description provided for @img2img_refineGridHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A finer pixel size may be used when it matches the image better.'**
+  String get img2img_refineGridHint;
+
+  /// No description provided for @img2img_pixelUpscaleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enlarge the result with crisp, nearest-neighbor pixels.'**
+  String get img2img_pixelUpscaleHint;
+
+  /// No description provided for @img2img_pixelNativeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the result at its snapped pixel size.'**
+  String get img2img_pixelNativeHint;
+
+  /// No description provided for @img2img_masked.
+  ///
+  /// In en, this message translates to:
+  /// **'Masked'**
+  String get img2img_masked;
+
+  /// No description provided for @img2img_generated.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated'**
+  String get img2img_generated;
+
+  /// No description provided for @img2img_blend.
+  ///
+  /// In en, this message translates to:
+  /// **'Blend'**
+  String get img2img_blend;
+
+  /// No description provided for @img2img_emotionHappy.
+  ///
+  /// In en, this message translates to:
+  /// **'Happy'**
+  String get img2img_emotionHappy;
+
+  /// No description provided for @img2img_emotionLaugh.
+  ///
+  /// In en, this message translates to:
+  /// **'Laughing'**
+  String get img2img_emotionLaugh;
+
+  /// No description provided for @img2img_emotionSad.
+  ///
+  /// In en, this message translates to:
+  /// **'Sad'**
+  String get img2img_emotionSad;
+
+  /// No description provided for @img2img_emotionAngry.
+  ///
+  /// In en, this message translates to:
+  /// **'Angry'**
+  String get img2img_emotionAngry;
+
+  /// No description provided for @img2img_emotionSurprised.
+  ///
+  /// In en, this message translates to:
+  /// **'Surprised'**
+  String get img2img_emotionSurprised;
+
+  /// No description provided for @img2img_emotionShy.
+  ///
+  /// In en, this message translates to:
+  /// **'Shy'**
+  String get img2img_emotionShy;
+
+  /// No description provided for @img2img_emotionExcited.
+  ///
+  /// In en, this message translates to:
+  /// **'Excited'**
+  String get img2img_emotionExcited;
+
+  /// No description provided for @img2img_emotionDisgusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Disgusted'**
+  String get img2img_emotionDisgusted;
+
+  /// No description provided for @img2img_emotionSmug.
+  ///
+  /// In en, this message translates to:
+  /// **'Smug'**
+  String get img2img_emotionSmug;
+
+  /// No description provided for @img2img_emotionWorried.
+  ///
+  /// In en, this message translates to:
+  /// **'Worried'**
+  String get img2img_emotionWorried;
+
+  /// No description provided for @img2img_emotionLove.
+  ///
+  /// In en, this message translates to:
+  /// **'Loving'**
+  String get img2img_emotionLove;
+
+  /// No description provided for @img2img_emotionPlayful.
+  ///
+  /// In en, this message translates to:
+  /// **'Playful'**
+  String get img2img_emotionPlayful;
+
+  /// No description provided for @img2img_emotionTired.
+  ///
+  /// In en, this message translates to:
+  /// **'Tired'**
+  String get img2img_emotionTired;
+
+  /// No description provided for @img2img_emotionNeutral.
+  ///
+  /// In en, this message translates to:
+  /// **'Neutral'**
+  String get img2img_emotionNeutral;
+
+  /// No description provided for @img2img_enhanceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Enhance!'**
+  String get img2img_enhanceAction;
+
+  /// No description provided for @img2img_showAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Advanced'**
+  String get img2img_showAdvanced;
+
+  /// No description provided for @img2img_hideAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Advanced'**
+  String get img2img_hideAdvanced;
+
+  /// No description provided for @editor_focusAreaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused Area'**
+  String get editor_focusAreaTitle;
+
+  /// No description provided for @editor_focusedInpaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused Inpaint'**
+  String get editor_focusedInpaint;
+
+  /// No description provided for @editor_outpaintFocusConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Outpaint cannot be used together with Focused Inpaint.'**
+  String get editor_outpaintFocusConflict;
 }
 
 class _AppLocalizationsDelegate

@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -76,12 +76,7 @@ class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
             child: widget.child,
           ),
         ),
-        const Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: _TitleBar(),
-        ),
+        const Positioned(top: 0, left: 0, right: 0, child: _TitleBar()),
         Positioned(
           top: barH,
           left: 0,
@@ -93,10 +88,9 @@ class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
                 duration: const Duration(milliseconds: 120),
                 height: 0.5,
                 color: scrolled
-                    ? Theme.of(context)
-                        .colorScheme
-                        .outlineVariant
-                        .withValues(alpha: 0.5)
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.outlineVariant.withValues(alpha: 0.5)
                     : Colors.transparent,
               );
             },
@@ -196,22 +190,22 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
             height: 20,
             filterQuality: FilterQuality.medium,
             // 资产缺失/测试环境加载失败时退化为图标，不炸布局。
-            errorBuilder: (context, error, stackTrace) => Icon(
-              Icons.auto_awesome,
-              size: 18,
-              color: colorScheme.primary,
-            ),
+            errorBuilder: (context, error, stackTrace) =>
+                Icon(Icons.auto_awesome, size: 18, color: colorScheme.primary),
           ),
           const SizedBox(width: 8),
-          Text(
-            'NAI Launcher',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: colorScheme.onSurface.withValues(alpha: 0.9),
+          Expanded(
+            child: Text(
+              'NAI Launcher',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: colorScheme.onSurface.withValues(alpha: 0.9),
+              ),
             ),
           ),
-          const Spacer(),
           _CaptionButton(
             icon: Icons.remove,
             tooltip: l10n?.titleBar_minimize ?? 'Minimize',
@@ -224,9 +218,7 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
                 ? (l10n?.titleBar_restore ?? 'Restore')
                 : (l10n?.titleBar_maximize ?? 'Maximize'),
             onTap: () => _safeWindowCall(
-              _isMaximized
-                  ? windowManager.unmaximize
-                  : windowManager.maximize,
+              _isMaximized ? windowManager.unmaximize : windowManager.maximize,
             ),
           ),
           _CaptionButton(
@@ -293,8 +285,8 @@ class _CaptionButtonState extends State<_CaptionButton> {
     final Color bg = !hovered
         ? Colors.transparent
         : widget.isClose
-            ? const Color(0xFFE81123)
-            : colorScheme.onSurface.withValues(alpha: 0.08);
+        ? const Color(0xFFE81123)
+        : colorScheme.onSurface.withValues(alpha: 0.08);
     final Color fg = widget.isClose && hovered
         ? Colors.white
         : colorScheme.onSurface.withValues(alpha: 0.9);

@@ -15,9 +15,9 @@ import '../../../../core/comfyui/workflow_template.dart';
 import '../../../../core/utils/focused_inpaint_utils.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
-import '../../../../core/utils/max_enhance_utils.dart';
 import '../../../../data/datasources/remote/nai_image_enhancement_api_service.dart';
 import '../../../../data/models/image/image_params.dart';
+import '../../../../data/models/image/image_operation.dart';
 import '../../../../data/services/precise_ref_library_storage_service.dart';
 import '../../../providers/comfyui/comfyui_provider.dart';
 import '../../../providers/cost_estimate_provider.dart';
@@ -92,7 +92,8 @@ const _upscaleModuleProfiles = [
 
 /// Img2Img 面板组件
 class Img2ImgPanel extends ConsumerStatefulWidget {
-  const Img2ImgPanel({super.key});
+  const Img2ImgPanel({super.key, this.toolOnly = false});
+  final bool toolOnly;
 
   @override
   ConsumerState<Img2ImgPanel> createState() => _Img2ImgPanelState();
@@ -111,6 +112,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
       generationParamsNotifierProvider.select(selectImg2ImgPanelViewData),
     );
     final workflow = ref.watch(imageWorkflowControllerProvider);
+    if (widget.toolOnly) return _buildUpscalePanel(theme, workflow);
     final hasSourceImage = params.sourceImage != null;
     final showBackground = hasSourceImage && !workflow.isPanelExpanded;
     final supportsInpaint = ref.watch(
@@ -197,12 +199,10 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
             _buildSourceImageSection(theme, params, workflow),
             if (hasSourceImage) ...[
               const SizedBox(height: 16),
-              if (workflow.isEnhance)
-                _buildEnhancePanel(theme, workflow)
+              if (workflow.isEnhance || workflow.isUpscale)
+                const SizedBox.shrink()
               else if (workflow.isInpaint)
                 _buildInpaintPanel(theme, params)
-              else if (workflow.isUpscale)
-                _buildUpscalePanel(theme, workflow)
               else ...[
                 _buildStrengthSlider(theme, params),
                 const SizedBox(height: 12),
@@ -418,10 +418,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
           icon: Icons.bookmark_add_outlined,
           label: context.l10n.preciseRefLib_saveCurrentToLibrary,
         ),
-        if (comfyItems.isNotEmpty) ...[
-          const PopupMenuDivider(),
-          ...comfyItems,
-        ],
+        if (comfyItems.isNotEmpty) ...[const PopupMenuDivider(), ...comfyItems],
       ],
     ).then((value) {
       if (value == null || !mounted) return;
@@ -512,10 +509,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
       if (reader == null) {
         continue;
       }
-      final file = await DroppedFileReader.read(
-        reader,
-        logTag: 'Img2ImgDrop',
-      );
+      final file = await DroppedFileReader.read(reader, logTag: 'Img2ImgDrop');
       if (file != null && mounted) {
         unawaited(
           ref
@@ -853,128 +847,6 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildEnhancePanel(ThemeData theme, ImageWorkflowState workflow) {
-    final controller = ref.read(imageWorkflowControllerProvider.notifier);
-    final enhance = workflow.enhance;
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: _subPanelDecoration(theme),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            context.l10n.img2img_enhance,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            context.l10n.img2img_enhanceHint,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 12),
-          _buildSliderSection(
-            theme,
-            label: context.l10n.img2img_enhanceMagnitude,
-            value: enhance.magnitude,
-            onChanged: controller.updateEnhanceMagnitude,
-          ),
-          // 子面板容器带背景色，ListTile 的水波纹会被它遮住，
-          // 需要自带一层透明 Material（与放大面板中的开关保持一致）。
-          Material(
-            type: MaterialType.transparency,
-            child: SwitchListTile.adaptive(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                context.l10n.img2img_enhanceShowIndividualSettings,
-                style: theme.textTheme.bodyMedium,
-              ),
-              value: enhance.showIndividualSettings,
-              onChanged: controller.toggleEnhanceIndividualSettings,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            context.l10n.img2img_enhanceUpscaleAmount,
-            style: theme.textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 8),
-          Builder(
-            builder: (context) {
-              // Max✨ 档（V5 专属）：服务端端到端放大，按资格位显隐。
-              final controller = ref.read(
-                imageWorkflowControllerProvider.notifier,
-              );
-              final model = ref.watch(
-                generationParamsNotifierProvider.select(
-                  (params) => params.model,
-                ),
-              );
-              final sourceWidth = workflow.sourceWidth;
-              final sourceHeight = workflow.sourceHeight;
-              final maxEligible = MaxEnhanceMath.isEligible(
-                model,
-                sourceWidth,
-                sourceHeight,
-              );
-              return Wrap(
-                spacing: 8,
-                children: [
-                  if (maxEligible)
-                    ChoiceChip(
-                      label: Text(
-                        context.l10n.img2img_enhanceMax,
-                        style: TextStyle(
-                          color: enhance.maxUpscale
-                              ? theme.colorScheme.primary
-                              : null,
-                        ),
-                      ),
-                      selected: enhance.maxUpscale,
-                      onSelected: (_) =>
-                          controller.setEnhanceMaxUpscale(!enhance.maxUpscale),
-                    ),
-                  for (final factor in const [1.0, 1.5])
-                    ChoiceChip(
-                      label: Text(factor == 1.0 ? '1x' : '1.5x'),
-                      selected:
-                          !enhance.maxUpscale &&
-                          enhance.upscaleFactor == factor,
-                      onSelected: (_) =>
-                          controller.updateEnhanceUpscaleFactor(factor),
-                    ),
-                ],
-              );
-            },
-          ),
-          if (enhance.showIndividualSettings) ...[
-            const SizedBox(height: 12),
-            _buildSliderSection(
-              theme,
-              label: context.l10n.img2img_strength,
-              value: enhance.strength,
-              onChanged: (value) =>
-                  controller.updateEnhanceIndividualSettings(strength: value),
-            ),
-            const SizedBox(height: 12),
-            _buildSliderSection(
-              theme,
-              label: context.l10n.img2img_noise,
-              value: enhance.noise,
-              onChanged: (value) =>
-                  controller.updateEnhanceIndividualSettings(noise: value),
-            ),
-          ],
-        ],
-      ),
     );
   }
 
@@ -1607,6 +1479,8 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
   }
 
   Future<void> _runUpscale() async {
+    final controller = ref.read(imageWorkflowControllerProvider.notifier);
+    if (ref.read(imageWorkflowControllerProvider).isToolRunning) return;
     final params = ref.read(generationParamsNotifierProvider);
     final src = params.sourceImage;
     if (src == null) {
@@ -1624,12 +1498,17 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
       _upscaleLogTag,
     );
 
-    if (wf.upscale.backend == UpscaleBackend.novelai) {
-      AppLogger.d('Dispatching to NovelAI upscale', _upscaleLogTag);
-      await _runNaiUpscale(params, src);
-    } else {
-      AppLogger.d('Dispatching to ComfyUI upscale', _upscaleLogTag);
-      await _runComfyUpscale(params, src, wf);
+    controller.setToolRunning(true);
+    try {
+      if (wf.upscale.backend == UpscaleBackend.novelai) {
+        AppLogger.d('Dispatching to NovelAI upscale', _upscaleLogTag);
+        await _runNaiUpscale(params, src);
+      } else {
+        AppLogger.d('Dispatching to ComfyUI upscale', _upscaleLogTag);
+        await _runComfyUpscale(params, src, wf);
+      }
+    } finally {
+      controller.setToolRunning(false);
     }
   }
 
@@ -1684,6 +1563,8 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
           .registerExternalImage(
             result,
             params: params,
+            operation: ImageOperation.upscale,
+            originalBytes: src,
             saveToLocal: saveSettings.autoSave,
             replaceCurrentDisplay: true,
           );
@@ -1823,6 +1704,8 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
         .registerExternalImage(
           bytes,
           params: params,
+          operation: ImageOperation.upscale,
+          originalBytes: src,
           width: outW,
           height: outH,
           saveToLocal: saveSettings.autoSave,
@@ -1937,6 +1820,8 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
         .registerExternalImage(
           bytes,
           params: params,
+          operation: ImageOperation.upscale,
+          originalBytes: src,
           width: outW,
           height: outH,
           saveToLocal: saveSettings.autoSave,
@@ -2028,6 +1913,8 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
         .registerExternalImage(
           bytes,
           params: params,
+          operation: ImageOperation.upscale,
+          originalBytes: src,
           width: outW,
           height: outH,
           saveToLocal: saveSettings.autoSave,
@@ -2151,28 +2038,30 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     final template = workflows.where((t) => t.id == templateId).firstOrNull;
     if (template == null) return;
 
-    ComfyUIWorkflowDialog.show(
-      context,
-      template: template,
-      image: sourceImage,
-    );
+    ComfyUIWorkflowDialog.show(context, template: template, image: sourceImage);
   }
 
   void _toggleEnhance(ImageWorkflowState workflow) {
     final controller = ref.read(imageWorkflowControllerProvider.notifier);
     if (workflow.isEnhance) {
-      controller.exitEnhanceMode();
+      controller.closeTemporaryTool();
     } else {
-      controller.enterEnhanceMode();
+      final source = ref.read(generationParamsNotifierProvider).sourceImage;
+      if (source != null) {
+        controller.openTemporaryTool(source, ImageWorkflowMode.enhance);
+      }
     }
   }
 
   void _toggleUpscale(ImageWorkflowState workflow) {
     final controller = ref.read(imageWorkflowControllerProvider.notifier);
     if (workflow.isUpscale) {
-      controller.exitUpscaleMode();
+      controller.closeTemporaryTool();
     } else {
-      controller.enterUpscaleMode();
+      final source = ref.read(generationParamsNotifierProvider).sourceImage;
+      if (source != null) {
+        controller.openTemporaryTool(source, ImageWorkflowMode.upscale);
+      }
     }
   }
 
@@ -2381,4 +2270,3 @@ class _FocusedCropOverlayPainter extends CustomPainter {
         imageHeight != oldDelegate.imageHeight;
   }
 }
-

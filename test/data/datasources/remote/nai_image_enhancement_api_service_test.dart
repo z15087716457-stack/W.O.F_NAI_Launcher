@@ -16,6 +16,41 @@ void main() {
 
   group('NAIImageEnhancementApiService', () {
     test(
+      'director tools preserve all three background removal variants',
+      () async {
+        final dio = _MockDio();
+        final images = [
+          for (final width in [12, 24, 36]) _buildPng(width: width, height: 8),
+        ];
+        final archive = Archive();
+        for (final entry in images.indexed) {
+          archive.addFile(
+            ArchiveFile('${entry.$1}.png', entry.$2.length, entry.$2),
+          );
+        }
+        when(
+          () => dio.post<dynamic>(
+            any(),
+            data: any(named: 'data'),
+            options: any(named: 'options'),
+          ),
+        ).thenAnswer(
+          (_) async => Response<dynamic>(
+            data: Uint8List.fromList(ZipEncoder().encode(archive)!),
+            requestOptions: RequestOptions(path: '/augment-image'),
+          ),
+        );
+        final result = await NAIImageEnhancementApiService(
+          dio,
+        ).augmentImages(images.first, reqType: 'bg-removal');
+        expect(result, hasLength(3));
+        for (var i = 0; i < images.length; i++) {
+          expect(result[i], images[i]);
+        }
+      },
+    );
+
+    test(
       'upscaleImage should send scale alongside source dimensions',
       () async {
         final dio = _MockDio();

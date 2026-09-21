@@ -260,7 +260,7 @@ void main() {
       lessThanOrEqualTo(FocusedInpaintUtils.maxRequestAreaPixels),
     );
 
-    await tester.tap(find.text('Focused Area Selection'));
+    await tester.tap(find.text('聚焦区域'));
     await tester.pump();
     state.debugSetToolById('rect_selection');
     final normalGesture = await tester.startGesture(start);

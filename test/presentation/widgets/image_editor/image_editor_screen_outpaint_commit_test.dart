@@ -36,7 +36,7 @@ void main() {
     await tester.pump();
 
     final saveButton = find.ancestor(
-      of: find.text('完成'),
+      of: find.text('保存并退出'),
       matching: find.byType(FilledButton),
     );
     expect(saveButton, findsOneWidget);

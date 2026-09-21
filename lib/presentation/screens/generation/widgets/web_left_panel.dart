@@ -17,6 +17,7 @@ import '../../../widgets/character/inline_character_section.dart';
 import 'collapsed_panel.dart';
 import 'generation_controls/generation_controls.dart';
 import 'generation_param_sections.dart';
+import 'generation_sidebar_style.dart';
 import 'img2img_panel.dart';
 import 'precise_reference_panel.dart';
 import 'prompt_input.dart';
@@ -161,13 +162,11 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                   crossAxisAlignment: WrapCrossAlignment.center,
                   runSpacing: 2,
                   children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _ModelMenuButton(),
-                        SizedBox(width: 6),
-                        _ModeCapsule(),
-                      ],
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [_ModelMenuButton(), _ModeCapsule()],
                     ),
                     Padding(
                       padding: EdgeInsets.only(right: 36),
@@ -210,11 +209,11 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                           showMaximizeButton: false,
                           negativeModeNotifier: widget.negativeModeNotifier,
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: GenSidebarStyle.sectionGap),
 
                         // 角色区：内联在主提示词正下方（官网式，内容常显）
                         const InlineCharacterSection(),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: GenSidebarStyle.sectionGap),
 
                         // 功能面板：图生图 / 风格迁移 / 精准参考
                         // （官网 Reference Images 小节）
@@ -223,11 +222,11 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                         ),
                         const SizedBox(height: 6),
                         const Img2ImgPanel(),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: GenSidebarStyle.cardGap),
                         const UnifiedReferencePanel(),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: GenSidebarStyle.cardGap),
                         const PreciseReferencePanel(),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: GenSidebarStyle.sectionGap),
 
                         // 尺寸/数量：低频控件下沉至滚动列末尾
                         // （官网 Image Settings 小节）
@@ -235,12 +234,14 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                           title: context.l10n.generation_sectionImageSettings,
                         ),
                         const SizedBox(height: 6),
-                        const SizeSection(),
+                        // Resolution / Number of Images 是官网式模块标题档：
+                        // 用作用域把 ParamSectionTitle 放大到 15/600
+                        const SidebarTitleScope(child: SizeSection()),
                         const SizedBox(height: 12),
 
                         // 生成数量：请求次数步进 + 每次张数分段（官网 Image
                         // Settings 式），与钉底生成按钮文案实时联动
-                        const ImageCountSection(),
+                        const SidebarTitleScope(child: ImageCountSection()),
                       ],
                     ),
                   ),
@@ -776,17 +777,19 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
                 }
               },
             ),
-            Builder(
-              builder: (buttonContext) => tappableColumn(
-                l10n.generation_sampler,
-                Text(
-                  Samplers.samplerDisplayNames[params.sampler] ??
-                      params.sampler,
+            Expanded(
+              child: Builder(
+                builder: (buttonContext) => tappableColumn(
+                  l10n.generation_sampler,
+                  Text(
+                    Samplers.samplerDisplayNames[params.sampler] ??
+                        params.sampler,
+                  ),
+                  () =>
+                      _showSamplerMenu(buttonContext, ref, theme, l10n, params),
                 ),
-                () => _showSamplerMenu(buttonContext, ref, theme, l10n, params),
               ),
             ),
-            const Spacer(),
             // 右端箭头同样开合抽屉（与官网一致）；GestureDetector 无 hover/涟漪装饰
             MouseRegion(
               cursor: SystemMouseCursors.click,

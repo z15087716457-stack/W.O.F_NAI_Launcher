@@ -114,7 +114,9 @@ class _EditorCanvasState extends State<EditorCanvas>
                           // 背景 - 独立重绘区域（静态内容）
                           Positioned.fill(
                             child: RepaintBoundary(
-                              child: Container(color: Colors.grey.shade800),
+                              child: Container(
+                                color: Theme.of(context).colorScheme.surface,
+                              ),
                             ),
                           ),
 

@@ -110,20 +110,20 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
                   ))
           : null,
       badge: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
         decoration: BoxDecoration(
           color: showBackground
               ? Colors.white.withValues(alpha: 0.2)
-              : theme.colorScheme.secondaryContainer,
-          borderRadius: BorderRadius.circular(4),
+              : theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           '${references.length}',
           style: theme.textTheme.labelSmall?.copyWith(
             color: showBackground
                 ? Colors.white
-                : theme.colorScheme.onSecondaryContainer,
-            fontSize: 10,
+                : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            fontSize: 11,
           ),
         ),
       ),
@@ -214,12 +214,17 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
                 onPressed: _addReference,
                 icon: Icon(
                   _isFileDraggingOver ? Icons.file_download_rounded : Icons.add,
-                  size: 18,
+                  size: 16,
                 ),
                 label: Text(
                   _isFileDraggingOver
                       ? context.l10n.preciseRef_dropToAdd
                       : context.l10n.preciseRef_addReference,
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  minimumSize: const Size(0, 34),
+                  visualDensity: VisualDensity.compact,
                 ),
               ),
             ),
@@ -227,12 +232,19 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
             // 清除全部按钮
             if (hasReferences) ...[
               const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: _clearAllReferences,
-                icon: const Icon(Icons.clear_all, size: 18),
-                label: Text(context.l10n.preciseRef_clearAll),
-                style: TextButton.styleFrom(
-                  foregroundColor: theme.colorScheme.error,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: _clearAllReferences,
+                  icon: const Icon(Icons.clear_all, size: 16),
+                  label: Text(context.l10n.preciseRef_clearAll),
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.error,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: const Size(0, 30),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
                 ),
               ),
             ],
@@ -260,9 +272,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
           width: 13,
           height: 13,
           colorFilter: ColorFilter.mode(
-            hasReferences
-                ? foreground
-                : foreground.withValues(alpha: 0.38),
+            hasReferences ? foreground : foreground.withValues(alpha: 0.38),
             BlendMode.srcIn,
           ),
         ),
@@ -666,11 +676,14 @@ class _PreciseReferenceCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+        ),
       ),
       child: AnimatedOpacity(
         key: ValueKey('precise-reference-enabled-opacity-$index'),
@@ -686,7 +699,7 @@ class _PreciseReferenceCard extends StatelessWidget {
               children: [
                 // 左侧：缩略图
                 _buildThumbnail(theme),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
 
                 // 中间：类型选择
                 Expanded(
@@ -694,7 +707,7 @@ class _PreciseReferenceCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildEnabledToggle(context, theme),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       _buildTypeDropdown(context, theme),
                     ],
                   ),
@@ -733,7 +746,7 @@ class _PreciseReferenceCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
 
             // 强度滑条
             _buildSliderRow(
@@ -762,14 +775,14 @@ class _PreciseReferenceCard extends StatelessWidget {
     final thumbnail = ClipRRect(
       borderRadius: BorderRadius.circular(6),
       child: Container(
-        width: 64,
-        height: 64,
+        width: 56,
+        height: 56,
         color: theme.colorScheme.surfaceContainerHighest,
         child: DecodedMemoryImage(
           bytes: reference.image,
           fit: BoxFit.cover,
-          maxLogicalWidth: 64,
-          maxLogicalHeight: 64,
+          maxLogicalWidth: 56,
+          maxLogicalHeight: 56,
           errorBuilder: (context, error, stackTrace) {
             return _buildPlaceholder(theme);
           },
@@ -782,7 +795,7 @@ class _PreciseReferenceCard extends StatelessWidget {
 
   Widget _buildPlaceholder(ThemeData theme) {
     return Center(
-      child: Icon(Icons.person, size: 24, color: theme.colorScheme.outline),
+      child: Icon(Icons.person, size: 22, color: theme.colorScheme.outline),
     );
   }
 
@@ -796,13 +809,13 @@ class _PreciseReferenceCard extends StatelessWidget {
             color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 6),
         Tooltip(
           message: reference.enabled
               ? context.l10n.reference_disable
               : context.l10n.reference_enable,
           child: Transform.scale(
-            scale: 0.78,
+            scale: 0.75,
             child: Switch(
               key: ValueKey('precise-reference-enabled-switch-$index'),
               value: reference.enabled,
@@ -821,8 +834,9 @@ class _PreciseReferenceCard extends StatelessWidget {
       isDense: true,
       decoration: InputDecoration(
         labelText: context.l10n.preciseRef_referenceType,
+        isDense: true,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       ),
       items: PreciseRefType.values.map((type) {
         return DropdownMenuItem<PreciseRefType>(
@@ -882,9 +896,9 @@ class _PreciseReferenceCard extends StatelessWidget {
         // 滑条
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
-            trackHeight: 4,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+            trackHeight: 3,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5.5),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 11),
           ),
           child: Slider(
             value: sliderValue,

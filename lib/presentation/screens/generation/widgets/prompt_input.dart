@@ -38,6 +38,7 @@ import '../../../widgets/prompt/uc_preset_selector.dart';
 import '../../../widgets/prompt/blocks/prompt_block_palette.dart';
 import '../../../widgets/character/character_prompt_button.dart';
 import '../../../providers/pending_prompt_provider.dart';
+import 'generation_sidebar_style.dart';
 
 bool usesRichPromptTypeTooltip(TargetPlatform platform) =>
     platform != TargetPlatform.windows;
@@ -96,10 +97,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     // 使用 NAI 语法高亮控制器作为兼容投影/工具栏读数。
     _promptController = NaiSyntaxController(text: params.prompt);
     _negativeController = NaiSyntaxController(text: params.negativePrompt);
-    _bootstrapWorkspace(
-      prompt: params.prompt,
-      negativePrompt: params.negativePrompt,
-    );
 
     _promptFocusNode.addListener(_onPromptFocusChanged);
     _negativeFocusNode.addListener(_onNegativeFocusChanged);
@@ -108,6 +105,12 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
 
     // 检查并消费待填充提示词（从画廊发送）
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final current = ref.read(generationParamsNotifierProvider);
+      _bootstrapWorkspace(
+        prompt: current.prompt,
+        negativePrompt: current.negativePrompt,
+      );
       _consumePendingPrompt();
     });
 
@@ -471,7 +474,8 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   /// 卡内头部（官网式）：左 = 正面/负面页签，右 = 扩展槽 + 块库/设置 + 全屏。
   Widget _buildCardHeader(ThemeData theme) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 4, 6, 0),
+      // 页签自带 10px 水平内距：2+10=12，与编辑区 12px 卡内沟槽对齐
+      padding: const EdgeInsets.fromLTRB(2, 4, 6, 0),
       child: _widthGuardedRow(
         Row(
           children: [
@@ -1751,7 +1755,7 @@ class _PromptTypeButtonState extends State<_PromptTypeButton>
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOutCubic,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               // 官网式：选中项中性底色高亮，未选中悬停才出底
               color: widget.isSelected
@@ -1765,14 +1769,10 @@ class _PromptTypeButtonState extends State<_PromptTypeButton>
             ),
             child: Text(
               widget.label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: widget.isSelected
-                    ? FontWeight.w600
-                    : FontWeight.w500,
-                color: widget.isSelected
-                    ? theme.colorScheme.onSurface
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.55),
+              // 官网 Base/Undesired 页签档：13px、选中 600
+              style: GenSidebarStyle.tabLabel(
+                theme,
+                selected: widget.isSelected,
               ),
             ),
           ),

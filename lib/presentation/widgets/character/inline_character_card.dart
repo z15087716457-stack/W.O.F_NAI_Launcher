@@ -197,7 +197,7 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
                       key: const ValueKey('editor'),
                       width: double.infinity,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
+                        padding: const EdgeInsets.fromLTRB(10, 6, 10, 10),
                         child: CharacterPromptEditor(
                           character: widget.character,
                           compact: widget.compact,
@@ -303,8 +303,8 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
                         },
                       ),
                     ),
-                    // 官网式动作列：▲ ▼ │ ✓ │ 入库 │ 🗑 │ 位置画布，
-                    // 竖线分隔，纯图标。名字用 Expanded 省略号吸收宽度。
+                    // 官网式动作列：▲ ▼ ✓ 🗑 ⋯ 紧凑单行纯图标；
+                    // 名字用 Expanded 省略号吸收宽度。
                     ..._buildFullActions(context, ref, l10n, onHeader),
                   ],
                 ),
@@ -324,6 +324,8 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
   ) {
     final character = widget.character;
     final canvasOpen = ref.watch(characterPositionCanvasProvider);
+    // 官网式紧凑单行：主动作 ▲ ▼ ✓ 🗑 直出，
+    // 低频动作（入库 / 位置画布）收进 ⋯ 菜单，不再一字排开加竖线
     return [
       _HeaderIconButton(
         asset: 'assets/icons/nai-icon-dir-arrow-up.svg',
@@ -339,7 +341,6 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
         enabled: widget.index < widget.total - 1,
         onTap: () => _notifier.moveCharacterDown(widget.index),
       ),
-      const _HeaderDivider(),
       _HeaderIconButton(
         asset: 'assets/icons/nai-icon-check.svg',
         color: character.enabled
@@ -348,33 +349,31 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
         tooltip: l10n.characterEditor_enabled,
         onTap: () => _notifier.toggleCharacterEnabled(character.id),
       ),
-      const _HeaderDivider(),
-      _HeaderIconButton(
-        icon: Icons.library_add_outlined,
-        color: onHeader,
-        tooltip: l10n.promptBlockLibrary_addToLibrary,
-        onTap: () => _openModal(
-          () => AddToLibraryDialog.show(
-            context,
-            name: widget.character.name,
-            content: widget.character.prompt,
-          ),
-        ),
-      ),
-      const _HeaderDivider(),
       _HeaderIconButton(
         asset: 'assets/icons/nai-icon-trash.svg',
         color: Theme.of(context).colorScheme.error,
         tooltip: l10n.common_delete,
         onTap: _deleteCharacter,
       ),
-      const _HeaderDivider(),
-      _HeaderIconButton(
-        asset: 'assets/icons/nai-icon-swap.svg',
-        color: canvasOpen ? Theme.of(context).colorScheme.primary : onHeader,
-        tooltip: l10n.characterCanvas_title,
-        onTap: () =>
-            ref.read(characterPositionCanvasProvider.notifier).toggle(),
+      _HeaderOverflowMenu(
+        color: onHeader,
+        canvasOpen: canvasOpen,
+        addToLibraryLabel: l10n.promptBlockLibrary_addToLibrary,
+        canvasLabel: l10n.characterCanvas_title,
+        onSelected: (action) {
+          switch (action) {
+            case _CharacterHeaderMenuAction.addToLibrary:
+              _openModal(
+                () => AddToLibraryDialog.show(
+                  context,
+                  name: widget.character.name,
+                  content: widget.character.prompt,
+                ),
+              );
+            case _CharacterHeaderMenuAction.positionCanvas:
+              ref.read(characterPositionCanvasProvider.notifier).toggle();
+          }
+        },
       ),
     ];
   }
@@ -501,23 +500,86 @@ class _HeaderIconButton extends StatelessWidget {
       child: InkWell(
         onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(4),
-        child: Padding(padding: const EdgeInsets.all(4), child: glyph),
+        child: Padding(padding: const EdgeInsets.all(3), child: glyph),
       ),
     );
   }
 }
 
-/// 动作列竖线分隔（官网式）
-class _HeaderDivider extends StatelessWidget {
-  const _HeaderDivider();
+/// 角色卡头部 ⋯ 溢出菜单承载的低频动作
+enum _CharacterHeaderMenuAction { addToLibrary, positionCanvas }
+
+/// 头部条 ⋯ 溢出菜单（官网式：低频动作收进菜单，保持单行紧凑）
+class _HeaderOverflowMenu extends StatelessWidget {
+  final Color color;
+  final bool canvasOpen;
+  final String addToLibraryLabel;
+  final String canvasLabel;
+  final ValueChanged<_CharacterHeaderMenuAction> onSelected;
+
+  const _HeaderOverflowMenu({
+    required this.color,
+    required this.canvasOpen,
+    required this.addToLibraryLabel,
+    required this.canvasLabel,
+    required this.onSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 14,
-      margin: const EdgeInsets.symmetric(horizontal: 2),
-      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+    final theme = Theme.of(context);
+    final itemForeground = theme.colorScheme.onSurface.withValues(alpha: 0.8);
+    return PopupMenuButton<_CharacterHeaderMenuAction>(
+      iconSize: 16,
+      padding: EdgeInsets.zero,
+      offset: const Offset(0, 4),
+      position: PopupMenuPosition.under,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      onSelected: onSelected,
+      itemBuilder: (context) => [
+        PopupMenuItem<_CharacterHeaderMenuAction>(
+          value: _CharacterHeaderMenuAction.addToLibrary,
+          height: 36,
+          child: Row(
+            children: [
+              Icon(Icons.library_add_outlined, size: 15, color: itemForeground),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  addToLibraryLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem<_CharacterHeaderMenuAction>(
+          value: _CharacterHeaderMenuAction.positionCanvas,
+          height: 36,
+          child: Row(
+            children: [
+              SvgPicture.asset(
+                'assets/icons/nai-icon-characterpositions.svg',
+                width: 14,
+                height: 14,
+                colorFilter: ColorFilter.mode(itemForeground, BlendMode.srcIn),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  canvasLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (canvasOpen)
+                Icon(Icons.check, size: 15, color: theme.colorScheme.primary),
+            ],
+          ),
+        ),
+      ],
+      icon: Icon(Icons.more_horiz, size: 18, color: color),
     );
   }
 }

@@ -76,6 +76,96 @@ void main() {
       },
     );
 
+    test(
+      'enhance uses the five website presets and preserves fractional source scaling',
+      () {
+        final controller = container.read(
+          imageWorkflowControllerProvider.notifier,
+        );
+        final params = container.read(
+          generationParamsNotifierProvider.notifier,
+        );
+        params.setSourceImage(Uint8List.fromList([1]));
+        controller.setSourceImageDimensions(832, 1216);
+        controller.enterEnhanceMode();
+        controller.updateEnhanceUpscaleFactor(1.5);
+        expect(container.read(generationParamsNotifierProvider).width, 1248);
+        expect(container.read(generationParamsNotifierProvider).height, 1824);
+        const expected = [
+          (0.2, 0.0),
+          (0.4, 0.0),
+          (0.5, 0.0),
+          (0.6, 0.0),
+          (0.7, 0.1),
+        ];
+        for (var i = 0; i < expected.length; i++) {
+          controller.updateEnhanceMagnitude(i / 4);
+          final p = container.read(generationParamsNotifierProvider);
+          expect((p.strength, p.noise), expected[i]);
+        }
+      },
+    );
+
+    test(
+      'closing temporary tools restores image state but keeps a newly typed prompt',
+      () async {
+        final controller = container.read(
+          imageWorkflowControllerProvider.notifier,
+        );
+        final params = container.read(
+          generationParamsNotifierProvider.notifier,
+        );
+        final original = Uint8List.fromList(
+          img.encodePng(img.Image(width: 64, height: 64)),
+        );
+        final toolSource = Uint8List.fromList(
+          img.encodePng(img.Image(width: 128, height: 64)),
+        );
+        final mask = Uint8List.fromList([9, 8, 7]);
+        controller.replaceSourceImage(original, autoAdapt: false);
+        controller.enterInpaintMode();
+        controller.onMaskChanged(mask);
+        final before = container.read(generationParamsNotifierProvider);
+        controller.openTemporaryTool(toolSource, ImageWorkflowMode.enhance);
+        controller.updateEnhanceMagnitude(1);
+        params.updatePrompt('new user draft');
+        await Future<void>.delayed(Duration.zero);
+        controller.closeTemporaryTool();
+        final after = container.read(generationParamsNotifierProvider);
+        expect(after.sourceImage, same(original));
+        expect(after.maskImage, same(mask));
+        expect(after.action, before.action);
+        expect(
+          (after.width, after.height, after.strength, after.noise),
+          (before.width, before.height, before.strength, before.noise),
+        );
+        expect(after.prompt, 'new user draft');
+        expect(
+          container.read(imageWorkflowControllerProvider).mode,
+          ImageWorkflowMode.inpaint,
+        );
+      },
+    );
+
+    test('closing a tool does not replace a newer input image', () {
+      final controller = container.read(
+        imageWorkflowControllerProvider.notifier,
+      );
+      final a = Uint8List.fromList(
+        img.encodePng(img.Image(width: 64, height: 64)),
+      );
+      final b = Uint8List.fromList(
+        img.encodePng(img.Image(width: 128, height: 64)),
+      );
+      controller.openTemporaryTool(a, ImageWorkflowMode.enhance);
+      controller.replaceSourceImage(b, autoAdapt: false);
+      controller.closeTemporaryTool();
+      expect(
+        container.read(generationParamsNotifierProvider).sourceImage,
+        same(b),
+      );
+    });
+
     test('exitEnhanceMode should restore original img2img params', () {
       final controller = container.read(
         imageWorkflowControllerProvider.notifier,
@@ -214,27 +304,25 @@ void main() {
       },
     );
 
-    test(
-      'updateEnhanceUpscaleFactor should clamp unsupported values to web range',
-      () {
-        final controller = container.read(
-          imageWorkflowControllerProvider.notifier,
-        );
-        final paramsNotifier = container.read(
-          generationParamsNotifierProvider.notifier,
-        );
+    test('updateEnhanceUpscaleFactor should reject unavailable values', () {
+      final controller = container.read(
+        imageWorkflowControllerProvider.notifier,
+      );
+      final paramsNotifier = container.read(
+        generationParamsNotifierProvider.notifier,
+      );
 
-        paramsNotifier.setSourceImage(Uint8List.fromList([1, 2, 3]));
-        controller.setSourceImageDimensions(768, 1024);
-        controller.enterEnhanceMode();
+      paramsNotifier.setSourceImage(Uint8List.fromList([1, 2, 3]));
+      controller.setSourceImageDimensions(768, 1024);
+      controller.enterEnhanceMode();
 
-        controller.updateEnhanceUpscaleFactor(4.0);
+      controller.updateEnhanceUpscaleFactor(1.5);
+      controller.updateEnhanceUpscaleFactor(4.0);
 
-        final workflow = container.read(imageWorkflowControllerProvider);
+      final workflow = container.read(imageWorkflowControllerProvider);
 
-        expect(workflow.enhance.upscaleFactor, equals(1.5));
-      },
-    );
+      expect(workflow.enhance.upscaleFactor, equals(1.5));
+    });
 
     test('enterBaseMode from enhance should restore base workflow', () {
       final controller = container.read(

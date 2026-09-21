@@ -127,20 +127,11 @@ class _VibeTransferContentState extends ConsumerState<VibeTransferContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 说明文字
-        Text(
-          context.l10n.vibe_description,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: showBackground
-                ? Colors.white70
-                : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ),
-        const SizedBox(height: 12),
+        // 说明文字不再内嵌：面板头部副标题行已承载同一句文案
 
         // Normalize 复选框
         _buildNormalizeOption(context, theme, showBackground),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
 
         // Vibe 列表或空状态（包裹 DragTarget 支持拖拽）
         _buildDragTargetWrapper(
@@ -158,19 +149,27 @@ class _VibeTransferContentState extends ConsumerState<VibeTransferContent> {
               onPressed: widget.onAddVibe,
               icon: Icon(
                 _isFileDraggingOver ? Icons.file_download_rounded : Icons.add,
-                size: 18,
+                size: 16,
               ),
               label: Text(
                 _isFileDraggingOver
                     ? context.l10n.vibe_releaseToAddStyleReference
                     : context.l10n.vibe_addReference,
               ),
-              style: showBackground
-                  ? OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.white38),
-                    )
-                  : null,
+              style:
+                  (showBackground
+                          ? OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: Colors.white38),
+                            )
+                          : OutlinedButton.styleFrom())
+                      .copyWith(
+                        padding: WidgetStateProperty.all(
+                          const EdgeInsets.symmetric(horizontal: 12),
+                        ),
+                        minimumSize: WidgetStateProperty.all(const Size(0, 34)),
+                        visualDensity: VisualDensity.compact,
+                      ),
             ),
           ),
 
@@ -188,14 +187,21 @@ class _VibeTransferContentState extends ConsumerState<VibeTransferContent> {
         // 清除全部按钮
         if (hasVibes) ...[
           const SizedBox(height: 8),
-          TextButton.icon(
-            onPressed: widget.onClearAll,
-            icon: const Icon(Icons.clear_all, size: 18),
-            label: Text(context.l10n.vibe_clearAll),
-            style: TextButton.styleFrom(
-              foregroundColor: showBackground
-                  ? Colors.red[300]
-                  : theme.colorScheme.error,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: widget.onClearAll,
+              icon: const Icon(Icons.clear_all, size: 16),
+              label: Text(context.l10n.vibe_clearAll),
+              style: TextButton.styleFrom(
+                foregroundColor: showBackground
+                    ? Colors.red[300]
+                    : theme.colorScheme.error,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: const Size(0, 30),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+              ),
             ),
           ),
         ],
@@ -339,17 +345,24 @@ class _VibeTransferContentState extends ConsumerState<VibeTransferContent> {
     List<VibeReference> vibes,
   ) {
     final l10n = context.l10n;
+    final denseStyle = OutlinedButton.styleFrom(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      minimumSize: const Size(0, 32),
+      visualDensity: VisualDensity.compact,
+    );
     return Row(
       children: [
         // 保存到库按钮
         Expanded(
           child: OutlinedButton.icon(
             onPressed: vibes.isNotEmpty ? widget.onSaveToLibrary : null,
-            icon: const Icon(Icons.save_outlined, size: 16),
-            label: Text(l10n.vibeLibrary_save),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+            icon: const Icon(Icons.save_outlined, size: 15),
+            label: Text(
+              l10n.vibeLibrary_save,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
+            style: denseStyle,
           ),
         ),
         const SizedBox(width: 8),
@@ -357,11 +370,13 @@ class _VibeTransferContentState extends ConsumerState<VibeTransferContent> {
         Expanded(
           child: OutlinedButton.icon(
             onPressed: widget.onImportFromLibrary,
-            icon: const Icon(Icons.folder_open_outlined, size: 16),
-            label: Text(l10n.vibeLibrary_import),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+            icon: const Icon(Icons.folder_open_outlined, size: 15),
+            label: Text(
+              l10n.vibeLibrary_import,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
+            style: denseStyle,
           ),
         ),
       ],
@@ -556,34 +571,39 @@ class _EmptyStateCardState extends State<_EmptyStateCard> {
           onTap: widget.onTap,
           borderRadius: BorderRadius.circular(8),
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
             child: Column(
               children: [
                 AnimatedScale(
-                  scale: _isHovered ? 1.1 : 1.0,
+                  scale: _isHovered ? 1.08 : 1.0,
                   duration: const Duration(milliseconds: 150),
                   child: Icon(
                     widget.icon,
-                    size: 40,
+                    size: 30,
                     color: _isHovered
                         ? theme.colorScheme.primary
                         : theme.colorScheme.outline.withValues(alpha: 0.6),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Text(
                   widget.title,
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 12.5,
                     color: _isHovered
                         ? theme.colorScheme.primary
                         : theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   widget.subtitle,
                   style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 11,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                   textAlign: TextAlign.center,

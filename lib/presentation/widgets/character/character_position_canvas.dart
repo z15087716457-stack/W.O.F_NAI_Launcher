@@ -120,7 +120,11 @@ class _CharacterPositionCanvasViewState
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          Icon(Icons.control_camera, size: 20, color: colorScheme.primary),
+          Icon(
+            Icons.control_camera,
+            size: 20,
+            color: colorScheme.onSurfaceVariant,
+          ),
           const SizedBox(width: 8),
           Text(
             l10n.characterCanvas_title,
@@ -403,7 +407,7 @@ class CharacterPositionModeSegments extends ConsumerWidget {
               height: 15,
               colorFilter: ColorFilter.mode(
                 canvasOpen
-                    ? Theme.of(context).colorScheme.primary
+                    ? Theme.of(context).colorScheme.onSurface
                     : Theme.of(context).colorScheme.onSurfaceVariant,
                 BlendMode.srcIn,
               ),
@@ -418,14 +422,14 @@ class CharacterPositionModeSegments extends ConsumerWidget {
     final theme = Theme.of(context);
     return theme.textTheme.labelMedium?.copyWith(
       color: selected
-          ? theme.colorScheme.primary
+          ? theme.colorScheme.onSurface
           : theme.colorScheme.onSurfaceVariant,
       fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
     );
   }
 }
 
-/// 分段按钮外壳
+/// 分段按钮外壳（官网式中性高亮：选中段灰底+实描边，不灌主题色）
 class _ModeSegment extends StatelessWidget {
   final bool selected;
   final BorderRadius radius;
@@ -450,12 +454,12 @@ class _ModeSegment extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: selected
-              ? colorScheme.primary.withValues(alpha: 0.15)
+              ? colorScheme.surfaceContainerHighest
               : Colors.transparent,
           borderRadius: radius,
           border: Border.all(
             color: selected
-                ? colorScheme.primary.withValues(alpha: 0.6)
+                ? colorScheme.outline.withValues(alpha: 0.55)
                 : colorScheme.outline.withValues(alpha: 0.3),
           ),
         ),
@@ -519,7 +523,7 @@ class _CharacterChip extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final display = resolveCharacterChipDisplay(character);
     final foreground = selected
-        ? colorScheme.onPrimary
+        ? colorScheme.onSurface
         : colorScheme.onSurfaceVariant;
 
     return InkWell(
@@ -529,11 +533,13 @@ class _CharacterChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: selected ? colorScheme.primary : Colors.transparent,
+          color: selected
+              ? colorScheme.surfaceContainerHighest
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
             color: selected
-                ? colorScheme.primary
+                ? colorScheme.outline.withValues(alpha: 0.6)
                 : colorScheme.outline.withValues(alpha: 0.35),
           ),
         ),

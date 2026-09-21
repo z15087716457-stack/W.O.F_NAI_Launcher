@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/image/resolution_preset.dart';
 import '../../../widgets/common/themed_dropdown.dart';
+import 'generation_sidebar_style.dart';
 
 /// 尺寸选择器 (官网式布局：分组下拉 + 宽高比图标 + 自定义输入)
 ///
@@ -207,19 +208,30 @@ class _SizeSelectorState extends State<SizeSelector> {
         matchedPreset.group == _selectedGroup &&
         matchedPreset.type == type;
 
+    // 官网式紧凑宽高比钮：34px 描边方块，选中才出主题色淡底；
+    // 未选中透明底+细描边，避免三枚灰色填充块挤在标题下
     return IconButton(
       onPressed: enabled ? () => _onTypeSelected(type) : null,
-      icon: Icon(icon, size: 20),
+      icon: Icon(icon, size: 18),
       tooltip: _getTypeName(context, type),
       style: IconButton.styleFrom(
         backgroundColor: highlighted
             ? theme.colorScheme.primary.withValues(alpha: 0.15)
-            : theme.colorScheme.surfaceContainerHighest,
+            : Colors.transparent,
         foregroundColor: highlighted
             ? theme.colorScheme.primary
             : theme.colorScheme.onSurface.withValues(alpha: 0.7),
         disabledForegroundColor: theme.colorScheme.onSurface.withValues(
           alpha: 0.3,
+        ),
+        padding: EdgeInsets.zero,
+        minimumSize: const Size(34, 34),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
+        side: BorderSide(
+          color: highlighted
+              ? theme.colorScheme.primary.withValues(alpha: 0.55)
+              : theme.colorScheme.outline.withValues(alpha: 0.3),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -243,22 +255,27 @@ class _SizeSelectorState extends State<SizeSelector> {
           // 分节标题行：右端显示当前分辨率徽标（自定义分组时隐藏）
           Row(
             children: [
-              Expanded(child: widget.title!),
+              // 标题提升为模块标题档（官网 Resolution 同款），
+              // 外层传入的 ParamSectionTitle 样式经作用域放大
+              Expanded(child: SidebarTitleScope(child: widget.title!)),
               if (!isCustomGroup)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 3,
+                    horizontal: 8,
+                    vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(10),
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.7,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     '${widget.width}×${widget.height}',
                     style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      fontSize: 11.5,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ),
@@ -355,7 +372,7 @@ class _SizeSelectorState extends State<SizeSelector> {
                   onChanged: (_) => _onManualSizeChanged(),
                 ),
               ),
-              // 交换宽高按钮
+              // 交换宽高按钮（与宽高比钮同款紧凑描边样式）
               const SizedBox(width: 8),
               IconButton(
                 onPressed: () {
@@ -364,10 +381,19 @@ class _SizeSelectorState extends State<SizeSelector> {
                   _heightController.text = temp;
                   _onManualSizeChanged();
                 },
-                icon: const Icon(Icons.swap_horiz, size: 20),
+                icon: const Icon(Icons.swap_horiz, size: 18),
                 tooltip: context.l10n.common_swap,
                 style: IconButton.styleFrom(
-                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  foregroundColor: theme.colorScheme.onSurface.withValues(
+                    alpha: 0.7,
+                  ),
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(34, 34),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                  side: BorderSide(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),

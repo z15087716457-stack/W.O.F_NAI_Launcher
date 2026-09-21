@@ -38,7 +38,7 @@ extension _ImageEditorScreenFocused on _ImageEditorScreenState {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(4),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.35),
         ),
@@ -67,8 +67,8 @@ extension _ImageEditorScreenFocused on _ImageEditorScreenState {
                   ),
                   label: Text(
                     _focusedInpaintEnabled
-                        ? 'Focused Area Selection'
-                        : 'Focused Inpaint',
+                        ? context.l10n.editor_focusAreaTitle
+                        : context.l10n.editor_focusedInpaint,
                   ),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
@@ -203,10 +203,7 @@ extension _ImageEditorScreenFocused on _ImageEditorScreenState {
 
   void _toggleFocusedInpaint() {
     if (_hasOutpaintChanges && !_focusedInpaintEnabled) {
-      AppToast.warning(
-        context,
-        'Outpaint cannot be used together with Focused Inpaint.',
-      );
+      AppToast.warning(context, context.l10n.editor_outpaintFocusConflict);
       return;
     }
 

@@ -288,6 +288,7 @@ class ImageGenerationService {
               (entry) => GeneratedImage.create(
                 entry.value,
                 width: params.width,
+                sourceParams: params,
                 height: params.height,
               ),
             )
@@ -477,6 +478,7 @@ class ImageGenerationService {
           GeneratedImage.create(
             image,
             width: params.width,
+            sourceParams: params,
             height: params.height,
           ),
         );
@@ -505,6 +507,7 @@ class ImageGenerationService {
               (b) => GeneratedImage.create(
                 b,
                 width: params.width,
+                sourceParams: params,
                 height: params.height,
               ),
             )

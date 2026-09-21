@@ -96,6 +96,7 @@ class MagicWandTool extends EditorTool {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<MagicWandSelectionMode>(
+                isExpanded: true,
                 initialValue: _mode,
                 decoration: InputDecoration(
                   labelText: context.l10n.editor_magicWandMode,
