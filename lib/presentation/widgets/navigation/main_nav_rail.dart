@@ -196,7 +196,9 @@ class _NavGroupDivider extends StatelessWidget {
     thickness: 1,
     indent: 16,
     endIndent: 16,
-    color: Theme.of(context).dividerColor,
+    color: Theme.of(context).brightness == Brightness.light
+        ? Theme.of(context).colorScheme.outline
+        : Theme.of(context).dividerColor,
   );
 }
 
