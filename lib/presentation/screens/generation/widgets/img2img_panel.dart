@@ -111,7 +111,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     final params = ref.watch(
       generationParamsNotifierProvider.select(selectImg2ImgPanelViewData),
     );
-    final workflow = ref.watch(imageWorkflowControllerProvider);
+    final workflow = ref.watch(draftImageWorkflowProvider);
     if (widget.toolOnly) return _buildUpscalePanel(theme, workflow);
     final hasSourceImage = params.sourceImage != null;
     final showBackground = hasSourceImage && !workflow.isPanelExpanded;
@@ -676,7 +676,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
   }
 
   Widget _buildInpaintPanel(ThemeData theme, Img2ImgPanelViewData params) {
-    final workflow = ref.watch(imageWorkflowControllerProvider);
+    final workflow = ref.watch(draftImageWorkflowProvider);
     final generationSize = ref.watch(
       generationParamsNotifierProvider.select(
         (generationParams) => (generationParams.width, generationParams.height),

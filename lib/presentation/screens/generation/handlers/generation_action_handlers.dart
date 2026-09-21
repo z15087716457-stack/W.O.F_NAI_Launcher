@@ -11,7 +11,7 @@ import '../../../widgets/common/app_toast.dart';
 /// 带资产保护确认的生成入口（经典布局与官网式布局共用）
 Future<void> generateWithProtection(BuildContext context, WidgetRef ref) async {
   if (ref.read(imageWorkflowControllerProvider).isToolRunning) return;
-  final currentParams = ref.read(generationParamsNotifierProvider);
+  final currentParams = ref.read(generationRequestParamsProvider);
   if (ref.read(generationCooldownProvider).isActive) {
     return;
   }

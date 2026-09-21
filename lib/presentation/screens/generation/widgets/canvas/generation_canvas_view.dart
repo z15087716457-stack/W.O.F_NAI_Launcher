@@ -46,8 +46,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   Size _viewport = Size.zero;
   bool _syncingPreviewSelection = false;
   bool _manualOverview = false;
-  String? _hoveredTile;
-  Timer? _hoverExitTimer;
 
   // 官网 WASD 平移：1000px/s、对角归一、blur 清键
   final Set<LogicalKeyboardKey> _wasdKeys = {};
@@ -104,7 +102,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   @override
   void dispose() {
     _clickTimer?.cancel();
-    _hoverExitTimer?.cancel();
     _lostTimer?.cancel();
     _wasdTicker?.dispose();
     _camera.onIdle = null;
@@ -490,7 +487,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                                 ),
                               ),
                               ..._buildGroupBadges(layout, camera),
-                              ..._buildHoverToolbar(layout, camera),
                             ],
                           );
                         },
@@ -540,10 +536,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                   focus?.group == item.group.key &&
                   focus?.subimage == item.subimageIndex,
               isPinned: item.image != null && pinned.contains(item.image!.id),
-              onHover: (hovering) => _setHover(
-                '${item.group.key}:${item.subimageIndex}',
-                hovering,
-              ),
               onSelect: () => _onTileTap(item),
               imageChild: item.image == null
                   ? null
@@ -606,70 +598,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
               ),
             ),
           ),
-    ];
-  }
-
-  void _setHover(String key, bool hovering) {
-    _hoverExitTimer?.cancel();
-    if (hovering) {
-      if (_hoveredTile != key) setState(() => _hoveredTile = key);
-    } else {
-      _hoverExitTimer = Timer(const Duration(milliseconds: 150), () {
-        if (mounted && _hoveredTile == key) {
-          setState(() => _hoveredTile = null);
-        }
-      });
-    }
-  }
-
-  List<Widget> _buildHoverToolbar(
-    CanvasFeedLayoutResult layout,
-    CanvasCamera camera,
-  ) {
-    final item = layout.items
-        .where(
-          (item) => '${item.group.key}:${item.subimageIndex}' == _hoveredTile,
-        )
-        .firstOrNull;
-    if (item?.image == null) return const [];
-    final focus = ref.read(generationCanvasGroupSelectionProvider);
-    if (focus?.group == item!.group.key &&
-        focus?.subimage == item.subimageIndex) {
-      return const [];
-    }
-    final anchor = camera.worldToScreen(item.worldRect.bottomCenter);
-    if (anchor.dy < 0 || anchor.dy > _viewport.height) return const [];
-    final toolbarWidth = math.min(260.0, math.max(0.0, _viewport.width - 24));
-    final hoverKey = '${item.group.key}:${item.subimageIndex}';
-    return [
-      Positioned(
-        left: anchor.dx.clamp(
-          toolbarWidth / 2 + 12,
-          math.max(
-            toolbarWidth / 2 + 12,
-            _viewport.width - toolbarWidth / 2 - 12,
-          ),
-        ),
-        top: math.min(anchor.dy + 8, _viewport.height - 48),
-        child: FractionalTranslation(
-          translation: const Offset(-0.5, 0),
-          child: MouseRegion(
-            onEnter: (_) => _setHover(hoverKey, true),
-            onExit: (_) {
-              if (_hoveredTile != null) _setHover(_hoveredTile!, false);
-            },
-            child: Listener(
-              onPointerDown: (e) => _uiPointers.add(e.pointer),
-              onPointerUp: (e) => _uiPointers.remove(e.pointer),
-              onPointerCancel: (e) => _uiPointers.remove(e.pointer),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: toolbarWidth),
-                child: CanvasMiniToolbar(image: item.image!, group: item.group),
-              ),
-            ),
-          ),
-        ),
-      ),
     ];
   }
 
@@ -1104,7 +1032,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   }
 }
 
-/// 单 tile：非焦点 scale(0.98) + 悬停回 1 + hover 迷你条（官网 R.I3 condensed）
+/// 单 tile：非焦点 scale(0.98) + 悬停回 1
 class _CanvasTile extends ConsumerStatefulWidget {
   const _CanvasTile({
     required this.group,
@@ -1113,7 +1041,6 @@ class _CanvasTile extends ConsumerStatefulWidget {
     required this.isFocusGroup,
     required this.isFocusSubimage,
     required this.isPinned,
-    required this.onHover,
     required this.onSelect,
     required this.imageChild,
   });
@@ -1124,7 +1051,6 @@ class _CanvasTile extends ConsumerStatefulWidget {
   final bool isFocusGroup;
   final bool isFocusSubimage;
   final bool isPinned;
-  final ValueChanged<bool> onHover;
   final VoidCallback onSelect;
   final Widget? imageChild;
 
@@ -1157,11 +1083,9 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
     return MouseRegion(
       onEnter: (_) {
         setState(() => _hovering = true);
-        widget.onHover(true);
       },
       onExit: (_) {
         setState(() => _hovering = false);
-        widget.onHover(false);
       },
       child: AnimatedScale(
         scale: scale,

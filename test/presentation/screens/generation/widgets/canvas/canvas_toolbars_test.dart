@@ -210,19 +210,6 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
     },
   );
-
-  group('CanvasMiniToolbar', () {
-    testWidgets('renders pin|copy|download + seed pill', (tester) async {
-      final img = _img(id: 'a');
-      await tester.pumpWidget(
-        _wrap(CanvasMiniToolbar(image: img, group: _group(img))),
-      );
-      expect(
-        find.byType(SvgPicture),
-        findsNWidgets(4),
-      ); // pin|copy|download|seed
-    });
-  });
 }
 
 class _FakeCanvasStorage extends LocalStorageService {

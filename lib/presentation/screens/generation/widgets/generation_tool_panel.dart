@@ -4,6 +4,7 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/generation/image_workflow_controller.dart';
 import '../../../providers/image_generation_provider.dart';
 import 'img2img_panel.dart';
+import 'generation_sidebar_style.dart';
 
 /// Screen-space tool controls leave the image and camera free to move.
 class GenerationToolPanel extends ConsumerWidget {
@@ -14,8 +15,10 @@ class GenerationToolPanel extends ConsumerWidget {
     final hasSource = ref.watch(
       generationParamsNotifierProvider.select((p) => p.sourceImage != null),
     );
-    if (!hasSource) return const SizedBox.shrink();
     final workflow = ref.watch(imageWorkflowControllerProvider);
+    if (!hasSource && workflow.temporaryEnhanceSource == null) {
+      return const SizedBox.shrink();
+    }
     if (!workflow.isEnhance && !workflow.isUpscale) {
       return const SizedBox.shrink();
     }
@@ -43,10 +46,14 @@ class GenerationToolPanel extends ConsumerWidget {
                 maxHeight: (constraints.maxHeight - 128).clamp(120, 640),
               ),
               child: Material(
-                color: theme.colorScheme.surfaceContainer,
+                key: const Key('generation-tool-surface'),
+                color: GenSidebarStyle.panelSurface(theme),
                 elevation: 8,
                 shadowColor: Colors.black45,
-                borderRadius: BorderRadius.circular(4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  side: BorderSide(color: GenSidebarStyle.border(theme)),
+                ),
                 clipBehavior: Clip.antiAlias,
                 child: SingleChildScrollView(
                   child: Padding(
@@ -130,25 +137,34 @@ class GenerationToolPanel extends ConsumerWidget {
               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 4,
-              runSpacing: 4,
-              children: [
-                for (final factor in controller.availableEnhanceFactors)
-                  _option(
-                    context,
-                    '${factor == factor.roundToDouble() ? factor.toInt() : factor}x',
-                    !settings.maxUpscale && settings.upscaleFactor == factor,
-                    () => controller.updateEnhanceUpscaleFactor(factor),
-                  ),
-                if (controller.isEnhanceMaxUpscaleEligible)
-                  _option(
-                    context,
-                    context.l10n.img2img_enhanceMax,
-                    settings.maxUpscale,
-                    () => controller.setEnhanceMaxUpscale(true),
-                  ),
-              ],
+            Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: GenSidebarStyle.border(Theme.of(context)),
+                ),
+              ),
+              child: Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: [
+                  for (final factor in controller.availableEnhanceFactors)
+                    _option(
+                      context,
+                      '${factor == factor.roundToDouble() ? factor.toInt() : factor}x',
+                      !settings.maxUpscale && settings.upscaleFactor == factor,
+                      () => controller.updateEnhanceUpscaleFactor(factor),
+                    ),
+                  if (controller.isEnhanceMaxUpscaleEligible)
+                    _option(
+                      context,
+                      context.l10n.img2img_enhanceMax,
+                      settings.maxUpscale,
+                      () => controller.setEnhanceMaxUpscale(true),
+                    ),
+                ],
+              ),
             ),
           ],
         );
@@ -196,7 +212,9 @@ class GenerationToolPanel extends ConsumerWidget {
                   foregroundColor: Theme.of(
                     context,
                   ).colorScheme.onSurfaceVariant,
-                  textStyle: const TextStyle(fontSize: 12),
+                  textStyle: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(fontSize: 12),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: Text(
@@ -218,9 +236,9 @@ class GenerationToolPanel extends ConsumerWidget {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Flexible(flex: 2, child: scaleOptions),
+            SizedBox(width: constraints.maxWidth * .34, child: scaleOptions),
             const SizedBox(width: 20),
-            Expanded(flex: 3, child: parameters),
+            Expanded(child: parameters),
           ],
         );
       },
@@ -234,7 +252,7 @@ class GenerationToolPanel extends ConsumerWidget {
     VoidCallback action,
   ) => Material(
     color: selected
-        ? Theme.of(context).colorScheme.primaryContainer
+        ? GenSidebarStyle.selectedSurface(Theme.of(context))
         : Colors.transparent,
     borderRadius: BorderRadius.circular(3),
     child: InkWell(

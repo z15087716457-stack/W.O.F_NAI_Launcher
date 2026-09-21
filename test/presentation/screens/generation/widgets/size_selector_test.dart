@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/image/resolution_preset.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/size_selector.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/generation_sidebar_style.dart';
 
 void main() {
   Future<_HarnessState> pumpSelector(
@@ -28,6 +29,23 @@ void main() {
     return tester.state<_HarnessState>(find.byType(_Harness));
   }
 
+  void expectDimensions(WidgetTester tester, String width, String height) {
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('size-width-input')))
+          .controller!
+          .text,
+      width,
+    );
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('size-height-input')))
+          .controller!
+          .text,
+      height,
+    );
+  }
+
   IconButton aspectButton(WidgetTester tester, IconData icon) {
     return tester.widget<IconButton>(
       find.ancestor(of: find.byIcon(icon), matching: find.byType(IconButton)),
@@ -42,7 +60,7 @@ void main() {
   }
 
   Future<void> selectGroup(WidgetTester tester, String groupName) async {
-    await tester.tap(find.byType(DropdownButtonFormField<ResolutionGroup>));
+    await tester.tap(find.byType(DropdownButton<ResolutionGroup>));
     await tester.pumpAndSettle();
     await tester.tap(find.text(groupName).last);
     await tester.pumpAndSettle();
@@ -52,7 +70,7 @@ void main() {
     testWidgets('紧凑下拉 + 等宽分段组按横屏/竖屏/方形顺序排列', (tester) async {
       await pumpSelector(tester, harnessWidth: 320);
 
-      final dropdown = find.byType(DropdownButtonFormField<ResolutionGroup>);
+      final dropdown = find.byType(DropdownButton<ResolutionGroup>);
       final group = find.byKey(const Key('size-aspect-group'));
       expect(dropdown, findsOneWidget);
       expect(group, findsOneWidget);
@@ -60,6 +78,14 @@ void main() {
       // 下拉紧凑（约 100px），分段组占据剩余大部分宽度
       final dropdownWidth = tester.getSize(dropdown).width;
       final groupWidth = tester.getSize(group).width;
+      expect(
+        tester.getCenter(find.byIcon(Icons.expand_more)).dy,
+        closeTo(tester.getCenter(group).dy, 1),
+      );
+      expect(
+        tester.getCenter(find.text('常规')).dy,
+        closeTo(tester.getCenter(group).dy, 2),
+      );
       expect(dropdownWidth, lessThanOrEqualTo(140));
       expect(groupWidth, greaterThan(dropdownWidth));
 
@@ -92,11 +118,10 @@ void main() {
       await pumpSelector(tester);
 
       final theme = Theme.of(tester.element(find.byType(SizeSelector)));
-      final highlightedBg = theme.colorScheme.surfaceContainerHighest
-          .withValues(alpha: 0.55);
+      final highlightedBg = GenSidebarStyle.selectedSurface(theme);
 
       // 常规-竖屏：分辨率徽标显示 832 × 1216，竖屏图标高亮
-      expect(find.text('832 × 1216'), findsOneWidget);
+      expectDimensions(tester, '832', '1216');
       expect(
         aspectButtonBackground(tester, Icons.crop_portrait),
         highlightedBg,
@@ -109,8 +134,7 @@ void main() {
         aspectButtonBackground(tester, Icons.crop_square),
         isNot(highlightedBg),
       );
-      // 预设模式下不显示自定义输入框
-      expect(find.byType(TextField), findsNothing);
+      expect(find.byType(TextField), findsNWidgets(2));
     });
 
     testWidgets('切换分组沿用当前宽高比类型并更新徽标', (tester) async {
@@ -122,15 +146,14 @@ void main() {
       // 竖屏保持 → 大尺寸-竖屏 1024 × 1536
       expect(harness.width, 1024);
       expect(harness.height, 1536);
-      expect(find.text('1024 × 1536'), findsOneWidget);
+      expectDimensions(tester, '1024', '1536');
       expect(find.text('大尺寸'), findsOneWidget);
     });
 
     testWidgets('点击宽高比图标应用对应预设', (tester) async {
       final harness = await pumpSelector(tester);
       final theme = Theme.of(tester.element(find.byType(SizeSelector)));
-      final highlightedBg = theme.colorScheme.surfaceContainerHighest
-          .withValues(alpha: 0.55);
+      final highlightedBg = GenSidebarStyle.selectedSurface(theme);
 
       await tester.tap(find.byIcon(Icons.crop_landscape));
       await tester.pump();
@@ -138,7 +161,7 @@ void main() {
       // 常规-横屏 1216 × 832
       expect(harness.width, 1216);
       expect(harness.height, 832);
-      expect(find.text('1216 × 832'), findsOneWidget);
+      expectDimensions(tester, '1216', '832');
       expect(
         aspectButtonBackground(tester, Icons.crop_landscape),
         highlightedBg,
@@ -150,7 +173,7 @@ void main() {
       // 常规-方形 1024 × 1024
       expect(harness.width, 1024);
       expect(harness.height, 1024);
-      expect(find.text('1024 × 1024'), findsOneWidget);
+      expectDimensions(tester, '1024', '1024');
       expect(aspectButtonBackground(tester, Icons.crop_square), highlightedBg);
     });
 
@@ -163,7 +186,7 @@ void main() {
       // 壁纸-竖屏 1088 × 1920
       expect(harness.width, 1088);
       expect(harness.height, 1920);
-      expect(find.text('1088 × 1920'), findsOneWidget);
+      expectDimensions(tester, '1088', '1920');
 
       // 壁纸组没有方形预设 → 方形图标禁用
       expect(aspectButton(tester, Icons.crop_square).onPressed, isNull);
@@ -176,69 +199,78 @@ void main() {
       expect(harness.height, 1920);
     });
 
-    testWidgets('选择自定义显示输入框、隐藏徽标并禁用图标', (tester) async {
-      await pumpSelector(tester);
-
-      await selectGroup(tester, '自定义');
-      await tester.pump();
-
-      // 自定义输入框出现且保留当前宽高
-      expect(find.byType(TextField), findsNWidgets(2));
-      expect(
-        tester.widget<TextField>(find.byType(TextField).at(0)).controller!.text,
-        '832',
-      );
-      expect(
-        tester.widget<TextField>(find.byType(TextField).at(1)).controller!.text,
-        '1216',
-      );
-
-      // 徽标隐藏（即使当前尺寸仍命中预设）
-      expect(find.text('832 × 1216'), findsNothing);
-
-      // 三个宽高比图标全部禁用，交换按钮仍可用
-      expect(aspectButton(tester, Icons.crop_portrait).onPressed, isNull);
-      expect(aspectButton(tester, Icons.crop_landscape).onPressed, isNull);
-      expect(aspectButton(tester, Icons.crop_square).onPressed, isNull);
-      expect(aspectButton(tester, Icons.swap_horiz).onPressed, isNotNull);
-    });
-
-    testWidgets('手动输入匹配预设时自动跳回该预设', (tester) async {
+    testWidgets('the inline separator preserves swap without an extra button', (
+      tester,
+    ) async {
       final harness = await pumpSelector(tester);
-      final theme = Theme.of(tester.element(find.byType(SizeSelector)));
-      final highlightedBg = theme.colorScheme.surfaceContainerHighest
-          .withValues(alpha: 0.55);
-
-      await selectGroup(tester, '自定义');
+      await tester.tap(find.text('×'));
       await tester.pump();
-      expect(find.byType(TextField), findsNWidgets(2));
-
-      // 输入不匹配预设的尺寸 → 保持自定义
-      await tester.enterText(find.byType(EditableText).at(0), '1000');
-      await tester.pump();
-      expect(harness.width, 1000);
-      expect(harness.height, 1216);
-      expect(find.byType(TextField), findsNWidgets(2));
-      expect(find.text('1000 × 1216'), findsNothing);
-
-      // 输入 1216 × 832 → 自动匹配常规-横屏，退出自定义
-      await tester.enterText(find.byType(EditableText).at(0), '1216');
-      await tester.pump();
-      await tester.enterText(find.byType(EditableText).at(1), '832');
-      await tester.pump();
-
-      expect(harness.width, 1216);
-      expect(harness.height, 832);
-      // 输入框收起、徽标恢复、横屏图标高亮
-      expect(find.byType(TextField), findsNothing);
-      expect(find.text('1216 × 832'), findsOneWidget);
-      expect(find.text('常规'), findsOneWidget);
-      expect(
-        aspectButtonBackground(tester, Icons.crop_landscape),
-        highlightedBg,
-      );
-      expect(aspectButton(tester, Icons.crop_square).onPressed, isNotNull);
+      expect((harness.width, harness.height), (1216, 832));
+      expect(find.text('自定义'), findsOneWidget);
+      expectDimensions(tester, '1216', '832');
     });
+
+    testWidgets('custom focuses the inline dimensions without another row', (
+      tester,
+    ) async {
+      await pumpSelector(tester);
+      final originalHeight = tester.getSize(find.byType(SizeSelector)).height;
+      await selectGroup(tester, '自定义');
+      expect(find.byType(TextField), findsNWidgets(2));
+      expectDimensions(tester, '832', '1216');
+      expect(tester.getSize(find.byType(SizeSelector)).height, originalHeight);
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('size-width-input')))
+            .focusNode!
+            .hasFocus,
+        isTrue,
+      );
+      expect(aspectButton(tester, Icons.crop_portrait).onPressed, isNull);
+    });
+
+    testWidgets('inline edits commit as custom even when matching a preset', (
+      tester,
+    ) async {
+      final harness = await pumpSelector(tester);
+      await tester.enterText(find.byKey(const Key('size-width-input')), '1216');
+      await tester.enterText(find.byKey(const Key('size-height-input')), '832');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+      expect((harness.width, harness.height), (1216, 832));
+      expect(find.text('自定义'), findsOneWidget);
+      expectDimensions(tester, '1216', '832');
+      await selectGroup(tester, '大尺寸');
+      expect((harness.width, harness.height), (1536, 1024));
+      expectDimensions(tester, '1536', '1024');
+      expect(find.text('大尺寸'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+      'blur commits both fields; blank and zero never change the size',
+      (tester) async {
+        final harness = await pumpSelector(tester);
+        await tester.enterText(
+          find.byKey(const Key('size-width-input')),
+          '896',
+        );
+        await tester.enterText(
+          find.byKey(const Key('size-height-input')),
+          '1280',
+        );
+        tester.binding.focusManager.primaryFocus?.unfocus();
+        await tester.pump();
+        expect((harness.width, harness.height), (896, 1280));
+        expect(find.text('自定义'), findsOneWidget);
+        await tester.enterText(find.byKey(const Key('size-width-input')), '');
+        await tester.enterText(find.byKey(const Key('size-height-input')), '0');
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pump();
+        expectDimensions(tester, '896', '1280');
+        expect((harness.width, harness.height), (896, 1280));
+      },
+    );
   });
 }
 

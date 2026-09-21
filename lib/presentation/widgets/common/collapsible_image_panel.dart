@@ -94,7 +94,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                   child: Row(
                     children: [
                       _buildHeaderIcon(theme, showBackground),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -187,19 +187,19 @@ class CollapsibleImagePanel extends StatelessWidget {
         ? Colors.white
         : hasData
         ? theme.colorScheme.primary
-        : theme.colorScheme.onSurface.withValues(alpha: 0.6);
+        : theme.colorScheme.onSurface.withValues(alpha: 0.85);
 
     final asset = iconAsset;
     if (asset != null) {
       return SvgPicture.asset(
         asset,
-        width: 17,
-        height: 17,
+        width: 22,
+        height: 22,
         colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
       );
     }
 
-    return Icon(icon, size: 17, color: color);
+    return Icon(icon, size: 22, color: color);
   }
 }
 

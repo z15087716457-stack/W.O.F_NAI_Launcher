@@ -346,6 +346,7 @@ class ImageWorkflowState {
     this.focusedInpaintEnabled = false,
     this.minimumContextMegaPixels = 88.0,
     this.focusedSelectionRect,
+    this.temporaryEnhanceSource,
   });
 
   final ImageWorkflowMode mode;
@@ -365,6 +366,9 @@ class ImageWorkflowState {
   final bool focusedInpaintEnabled;
   final double minimumContextMegaPixels;
   final Rect? focusedSelectionRect;
+
+  /// A canvas Enhance source belongs to the tool, never to the img2img draft.
+  final Uint8List? temporaryEnhanceSource;
 
   bool get isEnhance => mode == ImageWorkflowMode.enhance;
   bool get isInpaint => mode == ImageWorkflowMode.inpaint;
@@ -388,12 +392,15 @@ class ImageWorkflowState {
     bool? focusedInpaintEnabled,
     double? minimumContextMegaPixels,
     Rect? focusedSelectionRect,
+    Uint8List? temporaryEnhanceSource,
     bool clearSourceSize = false,
     bool clearBaseSnapshot = false,
     bool clearFocusedSelectionRect = false,
   }) {
     return ImageWorkflowState(
       mode: mode ?? this.mode,
+      temporaryEnhanceSource:
+          temporaryEnhanceSource ?? this.temporaryEnhanceSource,
       sourceWidth: clearSourceSize ? null : (sourceWidth ?? this.sourceWidth),
       sourceHeight: clearSourceSize
           ? null
@@ -431,6 +438,21 @@ final imageWorkflowControllerProvider =
       ImageWorkflowController.new,
     );
 
+/// Request/cost projection. Reading it never writes into the user's draft.
+final generationRequestParamsProvider = Provider<ImageParams>((ref) {
+  final params = ref.watch(generationParamsNotifierProvider);
+  ref.watch(imageWorkflowControllerProvider);
+  return ref
+      .read(imageWorkflowControllerProvider.notifier)
+      .paramsForGeneration(params);
+});
+
+/// The sidebar continues to show its own workflow while a canvas tool is open.
+final draftImageWorkflowProvider = Provider<ImageWorkflowState>((ref) {
+  ref.watch(imageWorkflowControllerProvider);
+  return ref.read(imageWorkflowControllerProvider.notifier).draftWorkflow;
+});
+
 class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   int _sourceImageRequestId = 0;
   bool _isDisposed = false;
@@ -438,30 +460,83 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   ImageWorkflowState? _toolWorkflowSnapshot;
   Uint8List? _toolSource;
 
+  ImageWorkflowState get draftWorkflow => state.temporaryEnhanceSource != null
+      ? (_toolWorkflowSnapshot ?? state)
+      : state;
+
+  ImageParams paramsForGeneration(ImageParams draft) {
+    final source = state.temporaryEnhanceSource;
+    if (source == null) return draft;
+    final model = ImageModels.resolveBaseModel(draft.model);
+    final width = state.sourceWidth ?? draft.width;
+    final height = state.sourceHeight ?? draft.height;
+    final maxEnabled =
+        state.enhance.maxUpscale &&
+        MaxEnhanceMath.isEligible(model, width, height);
+    final factor = availableEnhanceFactors.contains(state.enhance.upscaleFactor)
+        ? state.enhance.upscaleFactor
+        : 1.0;
+    final resolved = state.enhance.showIndividualSettings
+        ? (state.enhance.strength, state.enhance.noise)
+        : _resolveMagnitude(state.enhance.magnitude);
+    return draft.copyWith(
+      model: model,
+      sourceImage: source,
+      maskImage: null,
+      action: ImageGenerationAction.img2img,
+      isOutpaint: false,
+      enhanceWorkflow: true,
+      upscaledEnhance: maxEnabled,
+      width: maxEnabled ? width : (width * factor).round(),
+      height: maxEnabled ? height : (height * factor).round(),
+      strength: resolved.$1,
+      noise: resolved.$2,
+    );
+  }
+
   /// A toolbar operation owns a temporary source. Reopening another tool keeps
   /// the original draft snapshot until the temporary operation is dismissed.
   void openTemporaryTool(Uint8List image, ImageWorkflowMode mode) {
     if (state.isToolRunning) return;
-    if (_toolSource == null || !identical(_params.sourceImage, _toolSource)) {
-      _toolParamsSnapshot = _params;
-      _toolWorkflowSnapshot = state;
-    } else {
+    if (state.temporaryEnhanceSource != null || _toolSource != null) {
       closeTemporaryTool();
-      _toolParamsSnapshot = _params;
-      _toolWorkflowSnapshot = state;
     }
+    if (mode == ImageWorkflowMode.enhance) {
+      _toolWorkflowSnapshot = state;
+      final size = _resolveImageSize(image);
+      state = ImageWorkflowState(
+        mode: ImageWorkflowMode.enhance,
+        temporaryEnhanceSource: image,
+        sourceWidth: size?.$1,
+        sourceHeight: size?.$2,
+        sourceImageWidth: size?.$1,
+        sourceImageHeight: size?.$2,
+        enhance: state.enhance,
+        upscale: state.upscale,
+      );
+      if (!availableEnhanceFactors.contains(state.enhance.upscaleFactor)) {
+        state = state.copyWith(
+          enhance: state.enhance.copyWith(upscaleFactor: 1),
+        );
+      }
+      return;
+    }
+    _toolParamsSnapshot = _params;
+    _toolWorkflowSnapshot = state;
     enterBaseMode(clearMask: true);
     replaceSourceImage(image, autoAdapt: false);
     _toolSource = _params.sourceImage;
-    if (mode == ImageWorkflowMode.enhance) {
-      enterEnhanceMode();
-    } else {
-      enterUpscaleMode();
-    }
+    enterUpscaleMode();
   }
 
   void closeTemporaryTool() {
     if (state.isToolRunning) return;
+    if (state.temporaryEnhanceSource != null) {
+      final draft = _toolWorkflowSnapshot ?? _buildDefaultState();
+      _toolWorkflowSnapshot = null;
+      state = draft.copyWith(enhance: state.enhance, upscale: state.upscale);
+      return;
+    }
     final params = _toolParamsSnapshot;
     final workflow = _toolWorkflowSnapshot;
     final source = _toolSource;
@@ -913,6 +988,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     int? effectiveHeight,
     NaiImportImageInfo? importInfo,
   }) {
+    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
     if (importInfo != null && importInfo.sizeChanged) {
       AppLogger.i(
         'Image import size adapted: ${importInfo.resizeDescription}',
@@ -971,6 +1047,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
 
   void clearSourceImage() {
     if (state.isToolRunning) return;
+    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
     if (state.baseWidth != null || state.baseHeight != null) {
       _restoreBaseParams();
     } else if (ImageModels.isInpaintingModel(_params.model)) {
@@ -986,6 +1063,11 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void setPanelExpanded(bool value) {
+    if (state.temporaryEnhanceSource != null) {
+      _toolWorkflowSnapshot = draftWorkflow.copyWith(isPanelExpanded: value);
+      state = state.copyWith();
+      return;
+    }
     state = state.copyWith(isPanelExpanded: value);
   }
 
@@ -1001,6 +1083,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
 
   void enterUpscaleMode() {
     if (state.isToolRunning) return;
+    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
     if (_params.sourceImage == null) {
       return;
     }
@@ -1127,6 +1210,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void setFocusedInpaintEnabled(bool value) {
+    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
     state = state.copyWith(
       focusedInpaintEnabled: value,
       clearFocusedSelectionRect: !value,
@@ -1134,6 +1218,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void setMinimumContextMegaPixels(double value) {
+    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
     final context = value.clamp(16.0, 192.0);
     final constrainedSelection = _constrainFocusedSelection(
       state.focusedSelectionRect,
@@ -1148,6 +1233,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void setFocusedSelectionRect(Rect? rect) {
+    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
     final constrainedSelection = _constrainFocusedSelection(
       rect,
       minimumContextMegaPixels: state.minimumContextMegaPixels,
@@ -1186,6 +1272,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     bool sourceIsOutpaint = true,
     bool useExactSourceDimensions = false,
   }) {
+    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
     final hasReplacementSource = sourceImage != null;
     if (hasReplacementSource) {
       if (sourceWidth == null || sourceHeight == null) {
@@ -1277,6 +1364,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
 
   void enterEnhanceMode() {
     if (state.isToolRunning) return;
+    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
     if (_params.sourceImage == null) {
       return;
     }
@@ -1302,6 +1390,10 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
 
   void exitEnhanceMode() {
     if (state.isToolRunning) return;
+    if (state.temporaryEnhanceSource != null) {
+      closeTemporaryTool();
+      return;
+    }
     if (state.mode != ImageWorkflowMode.enhance) {
       return;
     }
@@ -1322,6 +1414,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
 
   void enterInpaintMode() {
     if (state.isToolRunning) return;
+    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
     if (_params.sourceImage == null) {
       return;
     }
@@ -1346,6 +1439,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
 
   void enterBaseMode({bool clearMask = true}) {
     if (state.isToolRunning) return;
+    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
     final shouldRestoreBaseSnapshot =
         state.mode == ImageWorkflowMode.enhance ||
         state.mode == ImageWorkflowMode.inpaint ||
@@ -1375,6 +1469,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void onMaskChanged(Uint8List? mask) {
+    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
     _paramsNotifier.setMaskImage(mask);
     if (state.mode == ImageWorkflowMode.inpaint) {
       _syncInpaintRequestState();
@@ -1435,7 +1530,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
 
   /// 当前模型与源图是否可用 Max✨ 档。
   bool get isEnhanceMaxUpscaleEligible => MaxEnhanceMath.isEligible(
-    _params.model,
+    ImageModels.resolveBaseModel(_params.model),
     state.sourceWidth,
     state.sourceHeight,
   );
@@ -1504,6 +1599,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void _applyEnhanceToParams() {
+    if (state.temporaryEnhanceSource != null) return;
     if (_params.sourceImage == null) {
       return;
     }

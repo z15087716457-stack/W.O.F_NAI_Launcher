@@ -1,6 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
+import 'package:nai_launcher/data/models/image/image_params.dart';
+import 'package:nai_launcher/data/models/image/image_operation.dart';
+import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
+import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
@@ -14,6 +21,71 @@ import 'package:nai_launcher/presentation/screens/generation/widgets/generation_
 import 'package:nai_launcher/presentation/widgets/generation/auto_save_toggle_chip.dart';
 
 void main() {
+  testWidgets(
+    'enhance button submits tool parameters while the img2img draft stays untouched',
+    (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWithValue(
+            _MemoryLocalStorageService({}),
+          ),
+          generationParamsNotifierProvider.overrideWith(_DraftParams.new),
+          imageGenerationNotifierProvider.overrideWith(_CaptureGeneration.new),
+          kritaBridgeNotifierProvider.overrideWith(
+            (ref) => _TestKritaBridgeNotifier(),
+          ),
+          subscriptionNotifierProvider.overrideWith(
+            _TestSubscriptionNotifier.new,
+          ),
+          estimatedCostProvider.overrideWithValue(0),
+          isFreeGenerationProvider.overrideWithValue(true),
+        ],
+      );
+      addTearDown(container.dispose);
+      final source = Uint8List.fromList(
+        img.encodePng(img.Image(width: 832, height: 1216)),
+      );
+      final before = container.read(generationParamsNotifierProvider);
+      final controller = container.read(
+        imageWorkflowControllerProvider.notifier,
+      );
+      controller.openTemporaryTool(source, ImageWorkflowMode.enhance);
+      controller.updateEnhanceUpscaleFactor(1.5);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
+            locale: Locale('zh'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: Scaffold(
+              body: GenerationControls(
+                compact: true,
+                showBalanceChips: false,
+                showAutoSaveChip: false,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      tester
+          .widget<GenerateButtonWithCost>(find.byType(GenerateButtonWithCost))
+          .onGenerate();
+      await tester.pump();
+      final sent =
+          (container.read(imageGenerationNotifierProvider.notifier)
+                  as _CaptureGeneration)
+              .submitted!;
+      expect(sent.sourceImage, same(source));
+      expect(sent.enhanceWorkflow, isTrue);
+      expect((sent.width, sent.height), (1248, 1824));
+      expect(container.read(generationParamsNotifierProvider), same(before));
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
   testWidgets('compact web controls show only the full-width button', (
     tester,
   ) async {
@@ -149,6 +221,26 @@ void main() {
     expect(find.byType(GenerateButtonWithCost), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+}
+
+class _DraftParams extends GenerationParamsNotifier {
+  @override
+  ImageParams build() => const ImageParams(prompt: 'city lights');
+}
+
+class _CaptureGeneration extends ImageGenerationNotifier {
+  ImageParams? submitted;
+  @override
+  ImageGenerationState build() => const ImageGenerationState();
+  @override
+  Future<void> generate(
+    ImageParams params, {
+    GenerationBatchCallback? onBatchEvent,
+    int? imagesPerRequestOverride,
+    ImageOperation? operation,
+  }) async {
+    submitted = params;
+  }
 }
 
 class _MemoryLocalStorageService extends LocalStorageService {

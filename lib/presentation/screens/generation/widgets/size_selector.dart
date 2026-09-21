@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/image/resolution_preset.dart';
-import '../../../widgets/common/themed_dropdown.dart';
 import 'generation_sidebar_style.dart';
 
 /// 尺寸选择器 (官网式布局：紧凑分组下拉 + 等宽宽高比分段组 + 自定义输入)
@@ -11,7 +11,7 @@ import 'generation_sidebar_style.dart';
 /// 官网式布局的置顶尺寸区共用。
 ///
 /// 传入 [title] 时会在控件顶部渲染分节标题行，右端附带当前分辨率
-/// 徽标（自定义分组下隐藏）。
+/// 可直接编辑的宽高小框。
 class SizeSelector extends StatefulWidget {
   final int width;
   final int height;
@@ -39,6 +39,7 @@ class _SizeSelectorState extends State<SizeSelector> {
   late FocusNode _heightFocusNode;
   final FocusNode _dropdownFocusNode = FocusNode();
   late ResolutionGroup _selectedGroup;
+  (int, int)? _manualSize;
 
   @override
   void initState() {
@@ -47,6 +48,8 @@ class _SizeSelectorState extends State<SizeSelector> {
     _heightController = TextEditingController(text: widget.height.toString());
     _widthFocusNode = FocusNode();
     _heightFocusNode = FocusNode();
+    _widthFocusNode.addListener(_onSizeFocusChanged);
+    _heightFocusNode.addListener(_onSizeFocusChanged);
     _updateSelectedGroup();
   }
 
@@ -90,6 +93,11 @@ class _SizeSelectorState extends State<SizeSelector> {
   }
 
   void _updateSelectedGroup() {
+    if (_manualSize == (widget.width, widget.height)) {
+      _selectedGroup = ResolutionGroup.custom;
+      return;
+    }
+    _manualSize = null;
     final matchedPreset = ResolutionPreset.findBySize(
       widget.width,
       widget.height,
@@ -147,10 +155,17 @@ class _SizeSelectorState extends State<SizeSelector> {
 
     setState(() {
       _selectedGroup = group;
+      _manualSize = group == ResolutionGroup.custom
+          ? (widget.width, widget.height)
+          : null;
     });
 
     if (group == ResolutionGroup.custom) {
-      // 保持当前宽高不变
+      _widthFocusNode.requestFocus();
+      _widthController.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _widthController.text.length,
+      );
       return;
     }
 
@@ -177,19 +192,143 @@ class _SizeSelectorState extends State<SizeSelector> {
     widget.onChanged(preset.width, preset.height);
   }
 
-  void _onManualSizeChanged() {
-    final newWidth = int.tryParse(_widthController.text) ?? widget.width;
-    final newHeight = int.tryParse(_heightController.text) ?? widget.height;
+  void _onSizeFocusChanged() {
+    if (!_widthFocusNode.hasFocus && !_heightFocusNode.hasFocus) {
+      _commitManualSize();
+    }
+    if (mounted) setState(() {});
+  }
 
-    // 检查是否匹配某个预设，匹配则自动跳回该预设所在分组
-    final matchedPreset = ResolutionPreset.findBySize(newWidth, newHeight);
-    setState(() {
-      _selectedGroup = matchedPreset?.group ?? ResolutionGroup.custom;
-    });
-
+  void _commitManualSize() {
+    final width = int.tryParse(_widthController.text);
+    final height = int.tryParse(_heightController.text);
+    final newWidth = width != null && width > 0 ? width : widget.width;
+    final newHeight = height != null && height > 0 ? height : widget.height;
+    _widthController.text = newWidth.toString();
+    _heightController.text = newHeight.toString();
     if (newWidth != widget.width || newHeight != widget.height) {
+      setState(() {
+        _manualSize = (newWidth, newHeight);
+        _selectedGroup = ResolutionGroup.custom;
+      });
       widget.onChanged(newWidth, newHeight);
     }
+  }
+
+  Widget _buildResolutionInput(BuildContext context) {
+    final theme = Theme.of(context);
+    final focused = _widthFocusNode.hasFocus || _heightFocusNode.hasFocus;
+    Widget field(
+      String key,
+      String label,
+      TextEditingController controller,
+      FocusNode focus,
+      TextInputAction action,
+    ) => SizedBox(
+      width: 43,
+      child: TextField(
+        key: Key(key),
+        controller: controller,
+        focusNode: focus,
+        keyboardType: TextInputType.number,
+        textInputAction: action,
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(5),
+        ],
+        textAlign: TextAlign.center,
+        textAlignVertical: TextAlignVertical.center,
+        style: TextStyle(
+          fontSize: 12,
+          height: 1,
+          color: theme.colorScheme.onSurface,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
+        decoration: InputDecoration(
+          isDense: true,
+          isCollapsed: true,
+          filled: false,
+          contentPadding: const EdgeInsets.symmetric(vertical: 7),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          hintText: label,
+        ),
+        onTap: () => controller.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: controller.text.length,
+        ),
+        onSubmitted: (_) {
+          _commitManualSize();
+          if (action == TextInputAction.next) {
+            _heightFocusNode.requestFocus();
+          } else {
+            focus.unfocus();
+          }
+        },
+        onTapOutside: (_) => focus.unfocus(),
+      ),
+    );
+    return Container(
+      key: const Key('size-resolution-input'),
+      padding: const EdgeInsets.symmetric(horizontal: 5),
+      decoration: BoxDecoration(
+        color: GenSidebarStyle.selectedSurface(theme),
+        borderRadius: BorderRadius.circular(3),
+        border: Border.all(
+          color: focused
+              ? theme.colorScheme.onSurface.withValues(alpha: .45)
+              : GenSidebarStyle.border(theme),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Tooltip(
+            message: context.l10n.resolution_width,
+            child: field(
+              'size-width-input',
+              context.l10n.resolution_width,
+              _widthController,
+              _widthFocusNode,
+              TextInputAction.next,
+            ),
+          ),
+          Tooltip(
+            message: context.l10n.common_swap,
+            child: InkWell(
+              onTap: () {
+                final width = _widthController.text;
+                _widthController.text = _heightController.text;
+                _heightController.text = width;
+                _commitManualSize();
+              },
+              borderRadius: BorderRadius.circular(2),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
+                child: Text(
+                  '×',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurface.withValues(alpha: .55),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Tooltip(
+            message: context.l10n.resolution_height,
+            child: field(
+              'size-height-input',
+              context.l10n.resolution_height,
+              _heightController,
+              _heightFocusNode,
+              TextInputAction.done,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   /// 分组下拉的紧凑宽度：随最长组名收缩（约 100px），把行宽让给宽高比组
@@ -311,7 +450,6 @@ class _SizeSelectorState extends State<SizeSelector> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = context.l10n;
     final isCustomGroup = _selectedGroup == ResolutionGroup.custom;
     final matchedPreset = ResolutionPreset.findBySize(
       widget.width,
@@ -321,38 +459,17 @@ class _SizeSelectorState extends State<SizeSelector> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.title != null) ...[
-          // 分节标题行：右端显示当前分辨率徽标（自定义分组时隐藏）
-          Row(
-            children: [
-              // 标题提升为模块标题档（官网 Resolution 同款），
-              // 外层传入的 ParamSectionTitle 样式经作用域放大
-              Expanded(child: SidebarTitleScope(child: widget.title!)),
-              if (!isCustomGroup)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(
-                      alpha: 0.7,
-                    ),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                  child: Text(
-                    '${widget.width} × ${widget.height}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-        ],
+        Row(
+          children: [
+            Expanded(
+              child: widget.title == null
+                  ? const SizedBox.shrink()
+                  : SidebarTitleScope(child: widget.title!),
+            ),
+            _buildResolutionInput(context),
+          ],
+        ),
+        const SizedBox(height: 8),
 
         // 紧凑分组下拉 + 占满剩余宽度的宽高比分段组（官网式）
         Row(
@@ -365,36 +482,31 @@ class _SizeSelectorState extends State<SizeSelector> {
                 color: GenSidebarStyle.selectedSurface(theme),
                 borderRadius: BorderRadius.circular(5),
               ),
-              child: DropdownButtonFormField<ResolutionGroup>(
-                initialValue: _selectedGroup,
-                isExpanded: true,
-                isDense: true,
-                icon: const Icon(Icons.expand_more, size: 18),
-                dropdownColor: theme.colorScheme.surfaceContainerHigh,
-                decoration: const InputDecoration(
-                  filled: false,
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                ),
-                focusNode: _dropdownFocusNode,
-                items: [
-                  for (final group in ResolutionGroup.values)
-                    if ((ResolutionPreset.groupedPresets[group] ?? [])
-                        .isNotEmpty)
-                      DropdownMenuItem<ResolutionGroup>(
-                        value: group,
-                        child: Text(
-                          _getGroupName(context, group),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 13),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<ResolutionGroup>(
+                  value: _selectedGroup,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  isExpanded: true,
+                  isDense: false,
+                  icon: const Icon(Icons.expand_more, size: 18),
+                  dropdownColor: theme.colorScheme.surfaceContainerHigh,
+                  focusNode: _dropdownFocusNode,
+                  items: [
+                    for (final group in ResolutionGroup.values)
+                      if ((ResolutionPreset.groupedPresets[group] ?? [])
+                          .isNotEmpty)
+                        DropdownMenuItem<ResolutionGroup>(
+                          value: group,
+                          child: Text(
+                            _getGroupName(context, group),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 13),
+                          ),
                         ),
-                      ),
-                ],
-                onChanged: _onGroupSelected,
+                  ],
+                  onChanged: _onGroupSelected,
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -403,75 +515,6 @@ class _SizeSelectorState extends State<SizeSelector> {
             ),
           ],
         ),
-
-        // 自定义宽高输入（仅自定义分组显示）
-        if (isCustomGroup) ...[
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              // 宽度输入
-              Expanded(
-                child: ThemedTextField(
-                  controller: _widthController,
-                  focusNode: _widthFocusNode,
-                  keyboardType: TextInputType.number,
-                  labelText: l10n.resolution_width,
-                  style: const TextStyle(fontSize: 13),
-                  onChanged: (_) => _onManualSizeChanged(),
-                ),
-              ),
-              // × 符号
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  '×',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-              ),
-              // 高度输入
-              Expanded(
-                child: ThemedTextField(
-                  controller: _heightController,
-                  focusNode: _heightFocusNode,
-                  keyboardType: TextInputType.number,
-                  labelText: l10n.resolution_height,
-                  style: const TextStyle(fontSize: 13),
-                  onChanged: (_) => _onManualSizeChanged(),
-                ),
-              ),
-              // 交换宽高按钮（与宽高比钮同款紧凑描边样式）
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () {
-                  final temp = _widthController.text;
-                  _widthController.text = _heightController.text;
-                  _heightController.text = temp;
-                  _onManualSizeChanged();
-                },
-                icon: const Icon(Icons.swap_horiz, size: 18),
-                tooltip: context.l10n.common_swap,
-                style: IconButton.styleFrom(
-                  foregroundColor: theme.colorScheme.onSurface.withValues(
-                    alpha: 0.7,
-                  ),
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(34, 34),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  visualDensity: VisualDensity.compact,
-                  side: BorderSide(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
       ],
     );
   }

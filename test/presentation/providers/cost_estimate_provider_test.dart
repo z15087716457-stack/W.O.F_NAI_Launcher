@@ -54,6 +54,46 @@ void main() {
       container.dispose();
     });
 
+    test(
+      'canvas enhance price uses its own source and options without changing the draft',
+      () {
+        final workflow = container.read(
+          imageWorkflowControllerProvider.notifier,
+        );
+        container.read(subscriptionNotifierProvider.notifier).state =
+            const SubscriptionState.loaded(UserSubscription(tier: 1));
+        final before = container.read(generationParamsNotifierProvider);
+        final exploreCost = container.read(
+          estimatedCostForBatchSizeProvider(1),
+        );
+        workflow.openTemporaryTool(
+          _buildPng(width: 832, height: 1216),
+          ImageWorkflowMode.enhance,
+        );
+        workflow.updateEnhanceUpscaleFactor(1.5);
+        workflow.updateEnhanceMagnitude(1);
+        expect(container.read(generationParamsNotifierProvider), same(before));
+        final request = container.read(generationRequestParamsProvider);
+        final expected = AnlasCalculator.calculateRequestCost(
+          width: 1248,
+          height: 1824,
+          strength: .7,
+          steps: request.steps,
+          batchCount: request.nSamples,
+          batchSize: container.read(imagesPerRequestProvider),
+          smea: request.effectiveSmea,
+          smeaDyn: request.effectiveSmeaDyn,
+          model: request.model,
+          subscriptionTier: 0,
+        );
+        expect(container.read(estimatedCostProvider), expected);
+        expect(
+          container.read(estimatedCostForBatchSizeProvider(1)),
+          exploreCost,
+        );
+      },
+    );
+
     test('should return zero for comfyui local upscale', () {
       final workflow = container.read(imageWorkflowControllerProvider.notifier);
       final subscription = container.read(

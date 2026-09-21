@@ -180,7 +180,9 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
   }
 
   Future<void> _handleGenerate(BuildContext context, WidgetRef ref) async {
-    final params = ref.read(generationParamsNotifierProvider);
+    final params = widget.exploreMode
+        ? ref.read(generationParamsNotifierProvider)
+        : ref.read(generationRequestParamsProvider);
     if (params.prompt.isEmpty) {
       AppToast.warning(context, context.l10n.generation_pleaseInputPrompt);
       return;

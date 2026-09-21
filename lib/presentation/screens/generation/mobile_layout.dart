@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../providers/image_generation_provider.dart';
+import '../../providers/generation/image_workflow_controller.dart';
 import '../../providers/krita/krita_bridge_notifier.dart';
 import '../../providers/prompt_maximize_provider.dart';
 import '../../utils/asset_protection_guard.dart';
@@ -135,12 +136,12 @@ class _MobileGenerationLayoutState
               top: BorderSide(color: theme.dividerColor, width: 1),
             ),
           ),
-            child: Row(
-              children: [
-                // Anlas 余额显示
-                const AnlasBalanceChip(compact: true),
-                const SizedBox(width: 8),
-                // 生成按钮（集成价格徽章）
+          child: Row(
+            children: [
+              // Anlas 余额显示
+              const AnlasBalanceChip(compact: true),
+              const SizedBox(width: 8),
+              // 生成按钮（集成价格徽章）
               Expanded(
                 child: _MobileGenerateButton(
                   isGenerating: isGenerating,
@@ -164,7 +165,7 @@ class _MobileGenerationLayoutState
   }
 
   Future<void> _handleGenerate(BuildContext context, WidgetRef ref) async {
-    final params = ref.read(generationParamsNotifierProvider);
+    final params = ref.read(generationRequestParamsProvider);
     if (ref.read(kritaBridgeNotifierProvider).isBridgeGenerating) {
       AppToast.warning(context, context.l10n.toast_kritaBusy);
       return;

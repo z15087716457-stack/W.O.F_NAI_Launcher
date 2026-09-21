@@ -91,7 +91,7 @@ _GenerationCostInput _resolveGenerationCostInput(
 @riverpod
 FocusedInpaintGeometry? focusedInpaintMaskRequestSize(Ref ref) {
   final needsMaskSize = ref.watch(
-    imageWorkflowControllerProvider.select(
+    draftImageWorkflowProvider.select(
       (workflow) =>
           workflow.focusedInpaintEnabled &&
           workflow.focusedSelectionRect == null,
@@ -112,7 +112,7 @@ FocusedInpaintGeometry? focusedInpaintMaskRequestSize(Ref ref) {
   }
 
   final minContextMegaPixels = ref.watch(
-    imageWorkflowControllerProvider.select(
+    draftImageWorkflowProvider.select(
       (workflow) => workflow.minimumContextMegaPixels,
     ),
   );
@@ -122,9 +122,17 @@ FocusedInpaintGeometry? focusedInpaintMaskRequestSize(Ref ref) {
   );
 }
 
-int _calculateEstimatedCost(Ref ref, {required int batchSize}) {
-  final params = ref.watch(generationParamsNotifierProvider);
-  final workflow = ref.watch(imageWorkflowControllerProvider);
+int _calculateEstimatedCost(
+  Ref ref, {
+  required int batchSize,
+  bool includeCanvasTool = true,
+}) {
+  final params = includeCanvasTool
+      ? ref.watch(generationRequestParamsProvider)
+      : ref.watch(generationParamsNotifierProvider);
+  final workflow = includeCanvasTool
+      ? ref.watch(imageWorkflowControllerProvider)
+      : ref.watch(draftImageWorkflowProvider);
   final subscription = ref.watch(
     subscriptionNotifierProvider.select((state) => state.subscription),
   );
@@ -191,7 +199,11 @@ int estimatedCost(Ref ref) {
 /// 指定单次请求批次大小的消耗，用于探索页强制 N×1。
 @riverpod
 int estimatedCostForBatchSize(Ref ref, int batchSize) {
-  return _calculateEstimatedCost(ref, batchSize: batchSize);
+  return _calculateEstimatedCost(
+    ref,
+    batchSize: batchSize,
+    includeCanvasTool: false,
+  );
 }
 
 /// 是否免费生成 Provider

@@ -13,6 +13,7 @@ import '../../../widgets/common/themed_dropdown.dart';
 import '../../../widgets/common/themed_input.dart';
 import '../../../widgets/common/themed_slider.dart';
 import 'size_selector.dart';
+import 'generation_sidebar_style.dart';
 
 /// 生成参数分节控件集
 ///
@@ -135,20 +136,29 @@ class ImageCountSection extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            for (var i = 1; i <= 4; i++) ...[
-              if (i > 1) const SizedBox(width: 6),
-              Expanded(
-                child: _CountPill(
-                  value: i,
-                  selected: i == perRequest,
-                  onTap: () =>
-                      ref.read(imagesPerRequestProvider.notifier).set(i),
+        Container(
+          key: const Key('image-count-segments'),
+          height: 36,
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            border: Border.all(color: GenSidebarStyle.border(theme)),
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Row(
+            children: [
+              for (var i = 1; i <= 4; i++) ...[
+                if (i > 1) const SizedBox(width: 3),
+                Expanded(
+                  child: _CountPill(
+                    value: i,
+                    selected: i == perRequest,
+                    onTap: () =>
+                        ref.read(imagesPerRequestProvider.notifier).set(i),
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
         if (total > 1) ...[
           const SizedBox(height: 6),
@@ -176,9 +186,7 @@ class _RequestStepper extends StatelessWidget {
     final theme = Theme.of(context);
     Widget arrow(IconData icon, bool enabled, VoidCallback onTap) {
       return MouseRegion(
-        cursor: enabled
-            ? SystemMouseCursors.click
-            : SystemMouseCursors.basic,
+        cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: enabled ? onTap : null,
@@ -201,11 +209,7 @@ class _RequestStepper extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          arrow(
-            Icons.chevron_left,
-            value > 1,
-            () => onChanged(value - 1),
-          ),
+          arrow(Icons.chevron_left, value > 1, () => onChanged(value - 1)),
           DraggableNumberInput(
             value: value,
             min: 1,
@@ -246,12 +250,12 @@ class _CountPill extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          height: 32,
+          height: 28,
           decoration: BoxDecoration(
             color: selected
-                ? theme.colorScheme.primary
-                : theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
+                ? GenSidebarStyle.selectedSurface(theme)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(3),
           ),
           child: Center(
             child: Text(
@@ -260,7 +264,7 @@ class _CountPill extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: selected
-                    ? theme.colorScheme.onPrimary
+                    ? theme.colorScheme.onSurface
                     : theme.colorScheme.onSurface.withValues(alpha: 0.75),
               ),
             ),
@@ -308,12 +312,12 @@ class SamplerSection extends ConsumerWidget {
         );
 
     DropdownMenuItem<String> valueItem(String s) => DropdownMenuItem<String>(
-          value: s,
-          child: Text(
-            Samplers.samplerDisplayNames[s] ?? s,
-            style: const TextStyle(fontSize: 13),
-          ),
-        );
+      value: s,
+      child: Text(
+        Samplers.samplerDisplayNames[s] ?? s,
+        style: const TextStyle(fontSize: 13),
+      ),
+    );
 
     final items = <DropdownMenuItem<String>>[
       if (recommended.isNotEmpty) ...[
@@ -601,10 +605,7 @@ class _SeedSectionState extends ConsumerState<SeedSection> {
                           Clipboard.setData(
                             ClipboardData(text: seed.toString()),
                           );
-                          AppToast.success(
-                            context,
-                            context.l10n.common_copied,
-                          );
+                          AppToast.success(context, context.l10n.common_copied);
                         },
                       ),
               ),

@@ -176,7 +176,7 @@ void main() {
     expect(tester.takeException(), isNull);
     await _unmount(tester);
   });
-  testWidgets('hover toolbar outside the image remains clickable', (
+  testWidgets('hover and selection keep only the three viewport toolbars', (
     tester,
   ) async {
     final container = ProviderContainer(
@@ -197,14 +197,18 @@ void main() {
       tester.getCenter(find.byKey(const ValueKey('canvas-tile:run:1:0'))),
     );
     await tester.pump();
-    final toolbar = find.byType(CanvasMiniToolbar);
-    expect(toolbar, findsOneWidget);
+    expect(find.byType(CanvasEdgeToolbar), findsNWidgets(3));
+    expect(find.byTooltip('Unpin image'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('canvas-tile:run:1:0')));
+    await tester.pump();
+    expect(find.byType(CanvasEdgeToolbar), findsNWidgets(3));
+    expect(find.byTooltip('Unpin image'), findsOneWidget);
+    final toolbar = find.byWidgetPredicate(
+      (w) => w is CanvasEdgeToolbar && w.zone == CanvasToolbarZone.bottomEnd,
+    );
     final pinButton = find
         .descendant(of: toolbar, matching: find.byType(InkWell))
         .first;
-    await pointer.moveTo(tester.getCenter(pinButton));
-    await tester.pump(const Duration(milliseconds: 180));
-    expect(toolbar, findsOneWidget);
     await tester.tap(pinButton);
     await tester.pump();
     expect(

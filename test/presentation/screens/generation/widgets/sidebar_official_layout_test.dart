@@ -145,10 +145,7 @@ void main() {
             UncontrolledProviderScope(
               container: container,
               child: MaterialApp(
-                theme: ThemeData(
-                  brightness: Brightness.dark,
-                  fontFamily: 'OfficialUiCapture',
-                ),
+                theme: officialUiCaptureTheme(),
                 locale: Locale(language),
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,

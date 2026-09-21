@@ -76,11 +76,7 @@ void main() {
           UncontrolledProviderScope(
             container: container,
             child: MaterialApp(
-              theme: ThemeData(
-                brightness: Brightness.dark,
-                useMaterial3: true,
-                fontFamily: 'OfficialUiCapture',
-              ),
+              theme: officialUiCaptureTheme(),
               locale: const Locale('zh'),
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,

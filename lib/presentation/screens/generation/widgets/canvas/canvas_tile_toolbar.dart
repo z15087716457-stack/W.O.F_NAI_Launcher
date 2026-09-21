@@ -78,35 +78,6 @@ class CanvasEdgeToolbar extends ConsumerWidget {
   }
 }
 
-/// 非焦点 tile 悬停迷你条（官网 R.I3 condensed：contest|pin|copy|download + 种子）
-class CanvasMiniToolbar extends ConsumerWidget {
-  const CanvasMiniToolbar({
-    super.key,
-    required this.image,
-    required this.group,
-  });
-
-  final GeneratedImage image;
-  final CanvasFeedGroup group;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return _ToolbarStrip(
-      condensed: true,
-      items: [
-        // 官网 condensed：contest(订阅件) 不渲染 → pin|copy|download + 种子
-        _ToolbarItem.pin(),
-        _ToolbarItem.copy(),
-        _ToolbarItem.download(),
-        _ToolbarItem.seedPill(image),
-      ],
-      image: image,
-      group: group,
-      focus: null,
-    );
-  }
-}
-
 class _ToolbarItem {
   _ToolbarItem._({
     this.icon,
@@ -205,14 +176,12 @@ class _ToolbarStrip extends ConsumerWidget {
     required this.image,
     required this.group,
     this.focus,
-    this.condensed = false,
   });
 
   final List<_ToolbarItem> items;
   final GeneratedImage image;
   final CanvasFeedGroup group;
   final CanvasFocus? focus;
-  final bool condensed;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -278,13 +247,7 @@ class _ToolbarStrip extends ConsumerWidget {
     if (item.icon == 'nai-icon-settings.svg') {
       return const CanvasDisplaySettingsButton();
     }
-    return _IconBtn(
-      item: item,
-      image: image,
-      group: group,
-      focus: focus,
-      condensed: condensed,
-    );
+    return _IconBtn(item: item, image: image, group: group, focus: focus);
   }
 
   Future<void> _writeBackSeed(BuildContext context, WidgetRef ref) async {
@@ -304,14 +267,12 @@ class _IconBtn extends ConsumerWidget {
     required this.image,
     required this.group,
     this.focus,
-    this.condensed = false,
   });
 
   final _ToolbarItem item;
   final GeneratedImage image;
   final CanvasFeedGroup group;
   final CanvasFocus? focus;
-  final bool condensed;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

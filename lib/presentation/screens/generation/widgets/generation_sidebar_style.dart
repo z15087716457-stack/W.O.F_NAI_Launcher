@@ -32,8 +32,16 @@ final class GenSidebarStyle {
   static Color border(ThemeData theme) =>
       theme.colorScheme.outline.withValues(alpha: 0.2);
 
-  static Color selectedSurface(ThemeData theme) =>
-      theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.55);
+  static Color selectedSurface(ThemeData theme) => Color.alphaBlend(
+    theme.colorScheme.onSurface.withValues(alpha: .08),
+    theme.colorScheme.surface,
+  );
+
+  /// Custom themes may alias all surfaceContainer slots to the same color.
+  static Color panelSurface(ThemeData theme) => Color.alphaBlend(
+    theme.colorScheme.onSurface.withValues(alpha: .035),
+    theme.colorScheme.surface,
+  );
 
   /// 小节标签（官网 `Reference Images` / `Image Settings` 同款：
   /// 小字、常规字重、弱色，只做分组提示）。

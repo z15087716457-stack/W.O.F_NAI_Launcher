@@ -128,8 +128,22 @@ void main() {
         final before = container.read(generationParamsNotifierProvider);
         controller.openTemporaryTool(toolSource, ImageWorkflowMode.enhance);
         controller.updateEnhanceMagnitude(1);
+        expect(container.read(generationParamsNotifierProvider), same(before));
+        expect(container.read(draftImageWorkflowProvider).isInpaint, isTrue);
+        final request = container.read(generationRequestParamsProvider);
+        expect(request.sourceImage, same(toolSource));
+        expect(request.maskImage, isNull);
+        expect(request.action, ImageGenerationAction.img2img);
+        expect(request.enhanceWorkflow, isTrue);
+        expect((request.strength, request.noise), (0.7, 0.1));
+        expect((request.width, request.height), (128, 64));
         params.updatePrompt('new user draft');
+        params.updateSize(896, 1280, persist: false);
         await Future<void>.delayed(Duration.zero);
+        expect(
+          container.read(generationRequestParamsProvider).prompt,
+          'new user draft',
+        );
         controller.closeTemporaryTool();
         final after = container.read(generationParamsNotifierProvider);
         expect(after.sourceImage, same(original));
@@ -137,7 +151,7 @@ void main() {
         expect(after.action, before.action);
         expect(
           (after.width, after.height, after.strength, after.noise),
-          (before.width, before.height, before.strength, before.noise),
+          (896, 1280, before.strength, before.noise),
         );
         expect(after.prompt, 'new user draft');
         expect(
@@ -146,6 +160,31 @@ void main() {
         );
       },
     );
+
+    test('canvas enhance leaves an empty img2img draft empty throughout', () {
+      final controller = container.read(
+        imageWorkflowControllerProvider.notifier,
+      );
+      final before = container.read(generationParamsNotifierProvider);
+      final source = Uint8List.fromList(
+        img.encodePng(img.Image(width: 832, height: 1216)),
+      );
+      controller.openTemporaryTool(source, ImageWorkflowMode.enhance);
+      controller.updateEnhanceUpscaleFactor(1.5);
+      controller.updateEnhanceIndividualSettings(strength: .42, noise: .16);
+      expect(container.read(generationParamsNotifierProvider), same(before));
+      expect(
+        container.read(draftImageWorkflowProvider).isPanelExpanded,
+        isFalse,
+      );
+      final request = container.read(generationRequestParamsProvider);
+      expect((request.width, request.height), (1248, 1824));
+      expect((request.strength, request.noise), (.42, .16));
+      expect(request.sourceImage, same(source));
+      controller.closeTemporaryTool();
+      expect(container.read(generationParamsNotifierProvider), same(before));
+      expect(container.read(generationRequestParamsProvider), same(before));
+    });
 
     test('closing a tool does not replace a newer input image', () {
       final controller = container.read(

@@ -63,6 +63,27 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
     super.dispose();
   }
 
+  ColorScheme get _scheme => Theme.of(context).colorScheme;
+
+  Color get _outline => _scheme.onSurface.withValues(alpha: .10);
+
+  Color get _panelSurface => Color.alphaBlend(
+    _scheme.onSurface.withValues(alpha: .05),
+    _scheme.surface,
+  );
+
+  Color get _insetSurface => Color.alphaBlend(
+    (_scheme.brightness == Brightness.dark ? Colors.black : Colors.white)
+        .withValues(alpha: .28),
+    _scheme.surface,
+  );
+
+  BoxDecoration get _panelDecoration => BoxDecoration(
+    color: _panelSurface,
+    border: Border.all(color: _outline),
+    borderRadius: BorderRadius.circular(6),
+  );
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(directorToolsNotifierProvider);
@@ -174,8 +195,11 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
     );
   }
 
-  Widget _header(DirectorToolsState state) => SizedBox(
+  Widget _header(DirectorToolsState state) => Container(
     height: 48,
+    decoration: BoxDecoration(
+      border: Border(bottom: BorderSide(color: _outline)),
+    ),
     child: Row(
       children: [
         _icon(
@@ -219,16 +243,20 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
   Widget _sourceQueue(DirectorToolsState state, {bool horizontal = false}) {
     final actions = Wrap(
       alignment: WrapAlignment.center,
+      spacing: 4,
+      runSpacing: 4,
       children: [
         _icon(
           Icons.file_upload_outlined,
           context.l10n.common_import,
           state.isRunning ? null : _import,
+          surface: true,
         ),
         _icon(
           Icons.content_paste,
           context.l10n.common_paste,
           state.isRunning ? null : _paste,
+          surface: true,
         ),
       ],
     );
@@ -275,19 +303,40 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
         );
       },
     );
-    return horizontal
-        ? Row(
-            children: [
-              SizedBox(width: 84, child: actions),
-              Expanded(child: list),
-            ],
-          )
-        : Column(
-            children: [
-              actions,
-              Expanded(child: list),
-            ],
-          );
+    final queue = DecoratedBox(
+      decoration: BoxDecoration(
+        color: _insetSurface,
+        border: Border.all(color: _outline),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: list,
+    );
+    return Padding(
+      padding: horizontal
+          ? const EdgeInsets.fromLTRB(12, 4, 12, 4)
+          : const EdgeInsets.fromLTRB(8, 8, 4, 8),
+      child: DecoratedBox(
+        decoration: _panelDecoration,
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: horizontal
+              ? Row(
+                  children: [
+                    SizedBox(width: 84, child: Center(child: actions)),
+                    const SizedBox(width: 6),
+                    Expanded(child: queue),
+                  ],
+                )
+              : Column(
+                  children: [
+                    actions,
+                    const SizedBox(height: 6),
+                    Expanded(child: queue),
+                  ],
+                ),
+        ),
+      ),
+    );
   }
 
   Widget _imageFrame(DirectorToolsState state, {required bool output}) {
@@ -300,30 +349,37 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
         ? result?.height ?? state.imageHeight
         : state.imageHeight;
     final theme = Theme.of(context);
-    return DecoratedBox(
+    return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLowest,
-        border: Border.all(color: theme.dividerColor.withValues(alpha: .4)),
-        borderRadius: BorderRadius.circular(4),
+        color: _insetSurface,
+        border: Border.all(color: _outline),
+        borderRadius: BorderRadius.circular(6),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
           if (output && state.resultVariants.length > 1)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (
-                    var index = 0;
-                    index < state.resultVariants.length;
-                    index++
-                  )
-                    _segment(
-                      _variantLabel(state, index),
-                      state.variantIndex == index,
-                      () => _controller.selectVariant(index),
-                    ),
-                ],
+            Container(
+              decoration: BoxDecoration(
+                color: _panelSurface,
+                border: Border(bottom: BorderSide(color: _outline)),
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (
+                      var index = 0;
+                      index < state.resultVariants.length;
+                      index++
+                    )
+                      _segment(
+                        _variantLabel(state, index),
+                        state.variantIndex == index,
+                        () => _controller.selectVariant(index),
+                      ),
+                  ],
+                ),
               ),
             ),
           Expanded(
@@ -400,61 +456,79 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
               ],
             ),
           ),
-          Padding(
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: _panelSurface,
+              border: Border(top: BorderSide(color: _outline)),
+            ),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Row(
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
+                if (output) _dimsBadge(theme, width, height),
                 if (output)
-                  Text('$width × $height', style: theme.textTheme.labelSmall),
-                if (output) const Spacer(),
-                if (output) ...[
-                  _icon(
-                    Icons.arrow_back,
-                    context.l10n.img2img_directorAddToQueue,
-                    result == null || state.isRunning
-                        ? null
-                        : _controller.applyResultAsSource,
-                  ),
-                  _icon(
-                    Icons.content_copy,
-                    context.l10n.image_copy,
-                    result == null ? null : () => _copy(result.bytes),
-                  ),
-                  _icon(
-                    Icons.save_outlined,
-                    context.l10n.image_save,
-                    result == null ? null : () => _save(result),
-                  ),
-                  PopupMenuButton<String>(
-                    tooltip: context.l10n.img2img_moreActions,
-                    enabled: result != null && !state.isRunning,
-                    onSelected: (_) => Navigator.pop(context, result!.bytes),
-                    itemBuilder: (_) => [
-                      PopupMenuItem(
-                        value: 'use',
-                        child: Text(context.l10n.img2img_directorApplyAsSource),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _icon(
+                        Icons.arrow_back,
+                        context.l10n.img2img_directorAddToQueue,
+                        result == null || state.isRunning
+                            ? null
+                            : _controller.applyResultAsSource,
+                      ),
+                      _icon(
+                        Icons.content_copy,
+                        context.l10n.image_copy,
+                        result == null ? null : () => _copy(result.bytes),
+                      ),
+                      _icon(
+                        Icons.save_outlined,
+                        context.l10n.image_save,
+                        result == null ? null : () => _save(result),
+                      ),
+                      PopupMenuButton<String>(
+                        tooltip: context.l10n.img2img_moreActions,
+                        enabled: result != null && !state.isRunning,
+                        onSelected: (_) =>
+                            Navigator.pop(context, result!.bytes),
+                        itemBuilder: (_) => [
+                          PopupMenuItem(
+                            value: 'use',
+                            child: Text(
+                              context.l10n.img2img_directorApplyAsSource,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                else
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _icon(
+                        Icons.content_copy,
+                        context.l10n.image_copy,
+                        bytes == null ? null : () => _copy(bytes),
+                      ),
+                      _icon(
+                        Icons.photo_size_select_large,
+                        context.l10n.image_upscale,
+                        bytes == null || state.isRunning
+                            ? null
+                            : () {
+                                ImageWorkflowLauncher.openUpscale(ref, bytes);
+                                Navigator.pop(context);
+                              },
                       ),
                     ],
                   ),
-                ] else ...[
-                  _icon(
-                    Icons.content_copy,
-                    context.l10n.image_copy,
-                    bytes == null ? null : () => _copy(bytes),
-                  ),
-                  _icon(
-                    Icons.photo_size_select_large,
-                    context.l10n.image_upscale,
-                    bytes == null || state.isRunning
-                        ? null
-                        : () {
-                            ImageWorkflowLauncher.openUpscale(ref, bytes);
-                            Navigator.pop(context);
-                          },
-                  ),
-                  const Spacer(),
-                  Text('$width × $height', style: theme.textTheme.labelSmall),
-                ],
+                if (!output) _dimsBadge(theme, width, height),
               ],
             ),
           ),
@@ -463,12 +537,31 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
     );
   }
 
+  Widget _dimsBadge(ThemeData theme, int width, int height) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+    decoration: BoxDecoration(
+      color: Color.alphaBlend(
+        theme.colorScheme.onSurface.withValues(alpha: .06),
+        _panelSurface,
+      ),
+      border: Border.all(
+        color: theme.colorScheme.onSurface.withValues(alpha: .14),
+      ),
+      borderRadius: BorderRadius.circular(4),
+    ),
+    child: Text('$width × $height', style: theme.textTheme.labelSmall),
+  );
+
   Widget _toolDock(DirectorToolsState state, double availableHeight) {
     final theme = Theme.of(context);
     final tool = state.selectedTool;
     final cost = state.estimatedAnlasCost(
       isOpus: ref.watch(isOpusSubscriptionProvider),
     );
+    final hasHeader =
+        tool == DirectorToolType.pixelSnap ||
+        tool.needsPrompt ||
+        state.error != null;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       child: ConstrainedBox(
@@ -477,29 +570,46 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
           maxHeight: availableHeight * .48,
         ),
         child: Material(
-          color: theme.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(4),
+          color: _panelSurface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+            side: BorderSide(color: _outline),
+          ),
+          clipBehavior: Clip.antiAlias,
           child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (tool == DirectorToolType.pixelSnap) _pixelOptions(state),
-                  if (tool.needsPrompt) _promptOptions(state),
-                  if (state.error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        state.error!,
-                        style: TextStyle(
-                          color: theme.colorScheme.error,
-                          fontSize: 12,
-                        ),
-                      ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (hasHeader)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (tool == DirectorToolType.pixelSnap)
+                          _pixelOptions(state),
+                        if (tool.needsPrompt) _promptOptions(state),
+                        if (state.error != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              state.error!,
+                              style: TextStyle(
+                                color: theme.colorScheme.error,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
-                  LayoutBuilder(
+                  ),
+                if (hasHeader)
+                  Divider(height: 1, thickness: 1, color: _outline),
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: LayoutBuilder(
                     builder: (context, c) {
                       final run = FilledButton(
                         onPressed: state.canRun ? _run : null,
@@ -568,8 +678,8 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
                             );
                     },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -802,85 +912,103 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
     final batches = buildHistoryBatches(
       ref.watch(imageGenerationNotifierProvider),
     );
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(12),
-          child: Text(context.l10n.generation_history),
-        ),
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.all(8),
-            itemCount: batches.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 8),
-            itemBuilder: (_, index) {
-              final batch = batches[index];
-              final cover = batch.cover;
-              if (cover == null) return const SizedBox.shrink();
-              final runIndex = state.runs.indexWhere(
-                (r) => r.images.any((i) => i.id == cover.id),
-              );
-              return SizedBox(
-                height: 140,
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: _thumbnail(
-                        cover.bytes,
-                        selected:
-                            state.selectedRun?.images.any(
-                              (i) => batch.contains(i.id),
-                            ) ==
-                            true,
-                        onTap: state.isRunning
-                            ? null
-                            : () {
-                                if (runIndex >= 0) {
-                                  _controller.selectRun(
-                                    runIndex,
-                                    copySettings:
-                                        HardwareKeyboard
-                                            .instance
-                                            .isControlPressed ||
-                                        HardwareKeyboard.instance.isMetaPressed,
-                                  );
-                                } else {
-                                  _controller.addSource(cover.bytes);
-                                }
-                              },
-                      ),
-                    ),
-                    if (cover.operation != null)
-                      Positioned(
-                        top: 4,
-                        left: 4,
-                        child: ImageOperationBadge(operation: cover.operation!),
-                      ),
-                    if (batch.count > 1)
-                      Positioned(
-                        bottom: 4,
-                        right: 4,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface,
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: Text(
-                              '×${batch.count}',
-                              style: const TextStyle(fontSize: 11),
-                            ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
+      child: DecoratedBox(
+        decoration: _panelDecoration,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 9),
+              child: Text(
+                context.l10n.generation_history,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Divider(height: 1, thickness: 1, color: _outline),
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.all(8),
+                itemCount: batches.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
+                itemBuilder: (_, index) {
+                  final batch = batches[index];
+                  final cover = batch.cover;
+                  if (cover == null) return const SizedBox.shrink();
+                  final runIndex = state.runs.indexWhere(
+                    (r) => r.images.any((i) => i.id == cover.id),
+                  );
+                  return SizedBox(
+                    height: 140,
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: _thumbnail(
+                            cover.bytes,
+                            selected:
+                                state.selectedRun?.images.any(
+                                  (i) => batch.contains(i.id),
+                                ) ==
+                                true,
+                            onTap: state.isRunning
+                                ? null
+                                : () {
+                                    if (runIndex >= 0) {
+                                      _controller.selectRun(
+                                        runIndex,
+                                        copySettings:
+                                            HardwareKeyboard
+                                                .instance
+                                                .isControlPressed ||
+                                            HardwareKeyboard
+                                                .instance
+                                                .isMetaPressed,
+                                      );
+                                    } else {
+                                      _controller.addSource(cover.bytes);
+                                    }
+                                  },
                           ),
                         ),
-                      ),
-                  ],
-                ),
-              );
-            },
-          ),
+                        if (cover.operation != null)
+                          Positioned(
+                            top: 4,
+                            left: 4,
+                            child: ImageOperationBadge(
+                              operation: cover.operation!,
+                            ),
+                          ),
+                        if (batch.count > 1)
+                          Positioned(
+                            bottom: 4,
+                            right: 4,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface,
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: Text(
+                                  '×${batch.count}',
+                                  style: const TextStyle(fontSize: 11),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -890,15 +1018,16 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
     required VoidCallback? onTap,
   }) => Material(
     color: selected
-        ? Theme.of(context).colorScheme.primary.withValues(alpha: .12)
-        : Theme.of(context).colorScheme.surfaceContainerLow,
+        ? _scheme.primary.withValues(alpha: .16)
+        : Color.alphaBlend(
+            _scheme.onSurface.withValues(alpha: .04),
+            _scheme.surface,
+          ),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(3),
       side: BorderSide(
-        color: selected
-            ? Theme.of(context).colorScheme.primary
-            : Colors.transparent,
-        width: 1.5,
+        color: selected ? _scheme.primary : _outline,
+        width: selected ? 1.5 : 1,
       ),
     ),
     clipBehavior: Clip.antiAlias,
@@ -916,6 +1045,7 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
     String label,
     VoidCallback? onPressed, {
     double size = 18,
+    bool surface = false,
   }) => IconButton(
     icon: Icon(icon, size: size),
     tooltip: label,
@@ -923,6 +1053,21 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
     padding: const EdgeInsets.all(6),
     constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
     visualDensity: VisualDensity.compact,
+    style: surface
+        ? IconButton.styleFrom(
+            fixedSize: const Size(32, 32),
+            minimumSize: const Size(32, 32),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            backgroundColor: Color.alphaBlend(
+              _scheme.onSurface.withValues(alpha: .06),
+              _scheme.surface,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+              side: BorderSide(color: _outline),
+            ),
+          )
+        : null,
   );
 
   Widget _segment(
