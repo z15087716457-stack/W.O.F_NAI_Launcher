@@ -197,13 +197,13 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
           Expanded(
             // Pixel Line's visible glyphs sit slightly above its line center.
             child: Transform.translate(
-              offset: const Offset(0, 3),
+              offset: const Offset(0, 2),
               child: Text(
                 'NAI Studio',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: StudioTypography.wordmark.copyWith(
-                  fontSize: 17,
+                  fontSize: 13,
                   color: colorScheme.onSurface.withValues(alpha: 0.9),
                 ),
               ),

@@ -4,7 +4,7 @@
 
 | 用途 | 字体 |
 |---|---|
-| 标题栏 NAI Studio | Geist Pixel Line，17px，视觉高度对齐 Logo 内白字 |
+| 标题栏 NAI Studio | Geist Pixel Line，13px，垂直居中，作为 W.O.F Logo 的次级文字 |
 | 正文与控件 | Geist Sans + HarmonyOS Sans SC fallback，400 / 500 / 600 / 700 |
 | 参数、尺寸、快捷键、代码 | Geist Mono + HarmonyOS Sans SC fallback，400 / 500 |
 
