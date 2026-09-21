@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/character/character_prompt.dart';
 import '../../providers/character_position_canvas_provider.dart';
 import '../../providers/character_prompt_provider.dart';
+import '../../screens/generation/widgets/generation_sidebar_style.dart';
 import '../common/decoded_memory_image.dart';
 import 'add_to_library_dialog.dart';
 import 'inline_character_editor.dart';
@@ -165,13 +166,13 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
       curve: _animCurve,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
+        color: GenSidebarStyle.promptSurface(theme),
+        borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: isEditing
-              ? colorScheme.primary
-              : colorScheme.outline.withValues(alpha: 0.3),
-          width: 1.5,
+              ? colorScheme.onSurface.withValues(alpha: 0.55)
+              : GenSidebarStyle.border(theme),
+          width: 1,
         ),
       ),
       child: Column(
@@ -197,7 +198,7 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
                       key: const ValueKey('editor'),
                       width: double.infinity,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 6, 10, 10),
+                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 4),
                         child: CharacterPromptEditor(
                           character: widget.character,
                           compact: widget.compact,
@@ -243,7 +244,7 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
         character.thumbnailPath != null &&
         character.thumbnailPath!.isNotEmpty &&
         File(character.thumbnailPath!).existsSync();
-    final headerHeight = widget.compact ? 30.0 : 34.0;
+    const headerHeight = 28.0;
     // 缩略图铺满头部时文字压图，统一转白色
     final onHeader = hasThumbnail ? Colors.white : colorScheme.onSurfaceVariant;
 
@@ -255,15 +256,13 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
           if (hasThumbnail)
             _HeaderThumbnail(path: character.thumbnailPath!)
           else
-            ColoredBox(
-              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-            ),
+            ColoredBox(color: colorScheme.surface),
           Material(
             color: Colors.transparent,
             child: InkWell(
               onTap: _toggleEditing,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                padding: const EdgeInsets.only(left: 10),
                 child: Row(
                   children: [
                     _genderIcon(character.effectiveGender, onHeader),
@@ -275,7 +274,10 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
                               ?.copyWith(
                                 color: hasThumbnail
                                     ? Colors.white
-                                    : colorScheme.onSurface,
+                                    : colorScheme.onSurface.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 shadows: hasThumbnail
                                     ? const [
@@ -343,15 +345,15 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
       ),
       _HeaderIconButton(
         asset: 'assets/icons/nai-icon-check.svg',
-        color: character.enabled
-            ? Theme.of(context).colorScheme.primary
-            : onHeader,
+        separated: true,
+        color: onHeader,
         tooltip: l10n.characterEditor_enabled,
         onTap: () => _notifier.toggleCharacterEnabled(character.id),
       ),
       _HeaderIconButton(
         asset: 'assets/icons/nai-icon-trash.svg',
-        color: Theme.of(context).colorScheme.error,
+        separated: true,
+        color: onHeader,
         tooltip: l10n.common_delete,
         onTap: _deleteCharacter,
       ),
@@ -380,10 +382,12 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
 
   /// 官网式性别符号图标（♀/♂/⚥），单色。
   static Widget _genderIcon(CharacterGender gender, Color onHeader) {
+    if (gender == CharacterGender.other) {
+      return Icon(Icons.circle_outlined, size: 11, color: onHeader);
+    }
     final asset = switch (gender) {
       CharacterGender.female => 'assets/icons/nai-icon-gender-female.svg',
       CharacterGender.male => 'assets/icons/nai-icon-gender-male.svg',
-      // TODO(official-icon): gender-other ⚥ glyph not yet exported; reuse female glyph
       CharacterGender.other => 'assets/icons/nai-icon-gender-female.svg',
     };
     return SvgPicture.asset(
@@ -473,6 +477,7 @@ class _HeaderIconButton extends StatelessWidget {
   final String tooltip;
   final VoidCallback onTap;
   final bool enabled;
+  final bool separated;
 
   const _HeaderIconButton({
     this.icon,
@@ -481,6 +486,7 @@ class _HeaderIconButton extends StatelessWidget {
     required this.tooltip,
     required this.onTap,
     this.enabled = true,
+    this.separated = false,
   }) : assert(icon != null || asset != null, 'icon or asset required');
 
   @override
@@ -489,8 +495,8 @@ class _HeaderIconButton extends StatelessWidget {
     final glyph = asset != null
         ? SvgPicture.asset(
             asset!,
-            width: 14,
-            height: 14,
+            width: asset!.contains('dir-arrow') ? 11 : 13,
+            height: asset!.contains('dir-arrow') ? 7 : 13,
             colorFilter: ColorFilter.mode(tint, BlendMode.srcIn),
           )
         : Icon(icon, size: 15, color: tint);
@@ -500,7 +506,21 @@ class _HeaderIconButton extends StatelessWidget {
       child: InkWell(
         onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(4),
-        child: Padding(padding: const EdgeInsets.all(3), child: glyph),
+        child: Container(
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
+          decoration: separated
+              ? BoxDecoration(
+                  border: Border(
+                    left: BorderSide(
+                      color: GenSidebarStyle.border(Theme.of(context)),
+                    ),
+                  ),
+                )
+              : null,
+          child: glyph,
+        ),
       ),
     );
   }
@@ -530,6 +550,14 @@ class _HeaderOverflowMenu extends StatelessWidget {
     final theme = Theme.of(context);
     final itemForeground = theme.colorScheme.onSurface.withValues(alpha: 0.8);
     return PopupMenuButton<_CharacterHeaderMenuAction>(
+      style: IconButton.styleFrom(
+        minimumSize: const Size(28, 28),
+        maximumSize: const Size(28, 28),
+        padding: EdgeInsets.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: const RoundedRectangleBorder(),
+        side: BorderSide(color: GenSidebarStyle.border(theme)),
+      ),
       iconSize: 16,
       padding: EdgeInsets.zero,
       offset: const Offset(0, 4),

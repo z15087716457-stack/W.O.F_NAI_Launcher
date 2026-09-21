@@ -10522,4 +10522,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get editor_outpaintFocusConflict =>
       'Outpaint cannot be used together with Focused Inpaint.';
+
+  @override
+  String promptToken_usage(int used, int limit) {
+    return 'Token usage: $used / $limit';
+  }
+
+  @override
+  String promptToken_promptShare(int used, int total, int limit) {
+    return 'This prompt: $used tokens; total usage: $total / $limit';
+  }
 }

@@ -367,16 +367,27 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     final comfyItems = _buildComfyUIMenuItems(params);
     final overlayBox =
         Overlay.of(buttonContext).context.findRenderObject() as RenderBox;
-    final box = buttonContext.findRenderObject() as RenderBox;
-    final triggerRect = box.localToGlobal(Offset.zero) & box.size;
+    final buttonBox = buttonContext.findRenderObject() as RenderBox;
+    // 锚点矩形必须在 overlay 坐标系内（ancestor: overlayBox）；
+    // 用全局坐标而 overlay 有偏移时菜单会整体向右下方漂移。
+    final triggerRect = Rect.fromPoints(
+      buttonBox.localToGlobal(Offset.zero, ancestor: overlayBox),
+      buttonBox.localToGlobal(
+        buttonBox.size.bottomRight(Offset.zero),
+        ancestor: overlayBox,
+      ),
+    );
 
     showMenu<String>(
       context: buttonContext,
-      position: RelativeRect.fromLTRB(
-        triggerRect.left,
-        triggerRect.bottom + 4,
-        overlayBox.size.width - triggerRect.right,
-        0,
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(
+          triggerRect.left,
+          triggerRect.bottom + 4,
+          triggerRect.width,
+          0,
+        ),
+        Offset.zero & overlayBox.size,
       ),
       items: [
         _overflowItem(
@@ -532,24 +543,15 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
         const SizedBox(height: 12),
         Row(
           children: [
+            // 上传入口已在标题行；这里放精准参考库导入（官网式）
             Expanded(
               child: ImagePickerCard(
-                icon: Icons.upload_file,
-                label: context.l10n.img2img_uploadImage,
+                key: const Key('img2img-from-precise-ref-library'),
+                icon: Icons.photo_library_outlined,
+                label: context.l10n.img2img_fromPreciseRefLibrary,
                 height: 80,
-                onImageSelected: (bytes, fileName, path) {
-                  unawaited(
-                    ref
-                        .read(imageWorkflowControllerProvider.notifier)
-                        .replaceSourceImageAsync(bytes),
-                  );
-                },
-                onError: (error) {
-                  AppToast.error(
-                    context,
-                    context.l10n.img2img_selectFailed(error),
-                  );
-                },
+                enableDragDrop: false,
+                onTap: () => unawaited(_importSourceFromPreciseRefLibrary()),
               ),
             ),
             const SizedBox(width: 8),
@@ -563,18 +565,6 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
               ),
             ),
           ],
-        ),
-        const SizedBox(height: 8),
-        OutlinedButton.icon(
-          key: const Key('img2img-from-precise-ref-library'),
-          onPressed: _importSourceFromPreciseRefLibrary,
-          icon: const Icon(Icons.photo_library_outlined, size: 16),
-          label: Text(
-            context.l10n.img2img_fromPreciseRefLibrary,
-            style: const TextStyle(fontSize: 12),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
         ),
       ],
     );

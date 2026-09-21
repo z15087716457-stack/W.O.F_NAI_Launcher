@@ -1032,7 +1032,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_modelDesc_v4Full => 'NovelAI 的 V4 全量模型。';
 
   @override
-  String get generation_sectionCharacters => '角色/定位';
+  String get generation_sectionCharacters => '角色提示词';
 
   @override
   String get generation_sectionCharactersSub => '为场景中的角色创建独立提示词。';
@@ -10123,4 +10123,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get editor_outpaintFocusConflict => '扩图与聚焦重绘不能同时使用。';
+
+  @override
+  String promptToken_usage(int used, int limit) {
+    return 'Token 用量：$used / $limit';
+  }
+
+  @override
+  String promptToken_promptShare(int used, int total, int limit) {
+    return '此提示词：$used Token；总用量：$total / $limit';
+  }
 }

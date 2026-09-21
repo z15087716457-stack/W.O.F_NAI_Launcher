@@ -6040,5 +6040,30 @@
   "img2img_hideAdvanced": "詳細設定を隠す",
   "editor_focusAreaTitle": "フォーカス範囲",
   "editor_focusedInpaint": "フォーカスインペイント",
-  "editor_outpaintFocusConflict": "アウトペイントとフォーカスインペイントは同時に使用できません。"
+  "editor_outpaintFocusConflict": "アウトペイントとフォーカスインペイントは同時に使用できません。",
+  "promptToken_usage": "トークン使用量：{used} / {limit}",
+  "promptToken_promptShare": "このプロンプト：{used} トークン；合計：{total} / {limit}",
+  "@promptToken_usage": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "@promptToken_promptShare": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  }
 }

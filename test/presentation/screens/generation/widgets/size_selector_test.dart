@@ -9,6 +9,7 @@ void main() {
     WidgetTester tester, {
     int width = 832,
     int height = 1216,
+    double harnessWidth = 400,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -17,7 +18,7 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         home: Scaffold(
           body: SizedBox(
-            width: 400,
+            width: harnessWidth,
             child: _Harness(initialWidth: width, initialHeight: height),
           ),
         ),
@@ -48,14 +49,54 @@ void main() {
   }
 
   group('SizeSelector', () {
+    testWidgets('紧凑下拉 + 等宽分段组按横屏/竖屏/方形顺序排列', (tester) async {
+      await pumpSelector(tester, harnessWidth: 320);
+
+      final dropdown = find.byType(DropdownButtonFormField<ResolutionGroup>);
+      final group = find.byKey(const Key('size-aspect-group'));
+      expect(dropdown, findsOneWidget);
+      expect(group, findsOneWidget);
+
+      // 下拉紧凑（约 100px），分段组占据剩余大部分宽度
+      final dropdownWidth = tester.getSize(dropdown).width;
+      final groupWidth = tester.getSize(group).width;
+      expect(dropdownWidth, lessThanOrEqualTo(140));
+      expect(groupWidth, greaterThan(dropdownWidth));
+
+      // 三段等宽且命中宽度充足（320px 下约 70px/段）
+      final landscape = find.byKey(const Key('size-aspect-landscape'));
+      final portrait = find.byKey(const Key('size-aspect-portrait'));
+      final square = find.byKey(const Key('size-aspect-square'));
+      for (final segment in [landscape, portrait, square]) {
+        expect(segment, findsOneWidget);
+      }
+      final landscapeWidth = tester.getSize(landscape).width;
+      expect(tester.getSize(portrait).width, landscapeWidth);
+      expect(tester.getSize(square).width, landscapeWidth);
+      expect(landscapeWidth, greaterThanOrEqualTo(44));
+
+      // 顺序：横屏 → 竖屏 → 方形（官网同款）
+      expect(
+        tester.getCenter(landscape).dx,
+        lessThan(tester.getCenter(portrait).dx),
+      );
+      expect(
+        tester.getCenter(portrait).dx,
+        lessThan(tester.getCenter(square).dx),
+      );
+
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('高亮当前宽高比图标并显示分辨率徽标', (tester) async {
       await pumpSelector(tester);
 
       final theme = Theme.of(tester.element(find.byType(SizeSelector)));
-      final highlightedBg = theme.colorScheme.primary.withValues(alpha: 0.15);
+      final highlightedBg = theme.colorScheme.surfaceContainerHighest
+          .withValues(alpha: 0.55);
 
-      // 常规-竖屏：分辨率徽标显示 832×1216，竖屏图标高亮
-      expect(find.text('832×1216'), findsOneWidget);
+      // 常规-竖屏：分辨率徽标显示 832 × 1216，竖屏图标高亮
+      expect(find.text('832 × 1216'), findsOneWidget);
       expect(
         aspectButtonBackground(tester, Icons.crop_portrait),
         highlightedBg,
@@ -78,25 +119,26 @@ void main() {
       await selectGroup(tester, '大尺寸');
       await tester.pump();
 
-      // 竖屏保持 → 大尺寸-竖屏 1024×1536
+      // 竖屏保持 → 大尺寸-竖屏 1024 × 1536
       expect(harness.width, 1024);
       expect(harness.height, 1536);
-      expect(find.text('1024×1536'), findsOneWidget);
+      expect(find.text('1024 × 1536'), findsOneWidget);
       expect(find.text('大尺寸'), findsOneWidget);
     });
 
     testWidgets('点击宽高比图标应用对应预设', (tester) async {
       final harness = await pumpSelector(tester);
       final theme = Theme.of(tester.element(find.byType(SizeSelector)));
-      final highlightedBg = theme.colorScheme.primary.withValues(alpha: 0.15);
+      final highlightedBg = theme.colorScheme.surfaceContainerHighest
+          .withValues(alpha: 0.55);
 
       await tester.tap(find.byIcon(Icons.crop_landscape));
       await tester.pump();
 
-      // 常规-横屏 1216×832
+      // 常规-横屏 1216 × 832
       expect(harness.width, 1216);
       expect(harness.height, 832);
-      expect(find.text('1216×832'), findsOneWidget);
+      expect(find.text('1216 × 832'), findsOneWidget);
       expect(
         aspectButtonBackground(tester, Icons.crop_landscape),
         highlightedBg,
@@ -105,10 +147,10 @@ void main() {
       await tester.tap(find.byIcon(Icons.crop_square));
       await tester.pump();
 
-      // 常规-方形 1024×1024
+      // 常规-方形 1024 × 1024
       expect(harness.width, 1024);
       expect(harness.height, 1024);
-      expect(find.text('1024×1024'), findsOneWidget);
+      expect(find.text('1024 × 1024'), findsOneWidget);
       expect(aspectButtonBackground(tester, Icons.crop_square), highlightedBg);
     });
 
@@ -118,10 +160,10 @@ void main() {
       await selectGroup(tester, '壁纸');
       await tester.pump();
 
-      // 壁纸-竖屏 1088×1920
+      // 壁纸-竖屏 1088 × 1920
       expect(harness.width, 1088);
       expect(harness.height, 1920);
-      expect(find.text('1088×1920'), findsOneWidget);
+      expect(find.text('1088 × 1920'), findsOneWidget);
 
       // 壁纸组没有方形预设 → 方形图标禁用
       expect(aspectButton(tester, Icons.crop_square).onPressed, isNull);
@@ -152,7 +194,7 @@ void main() {
       );
 
       // 徽标隐藏（即使当前尺寸仍命中预设）
-      expect(find.text('832×1216'), findsNothing);
+      expect(find.text('832 × 1216'), findsNothing);
 
       // 三个宽高比图标全部禁用，交换按钮仍可用
       expect(aspectButton(tester, Icons.crop_portrait).onPressed, isNull);
@@ -164,7 +206,8 @@ void main() {
     testWidgets('手动输入匹配预设时自动跳回该预设', (tester) async {
       final harness = await pumpSelector(tester);
       final theme = Theme.of(tester.element(find.byType(SizeSelector)));
-      final highlightedBg = theme.colorScheme.primary.withValues(alpha: 0.15);
+      final highlightedBg = theme.colorScheme.surfaceContainerHighest
+          .withValues(alpha: 0.55);
 
       await selectGroup(tester, '自定义');
       await tester.pump();
@@ -176,9 +219,9 @@ void main() {
       expect(harness.width, 1000);
       expect(harness.height, 1216);
       expect(find.byType(TextField), findsNWidgets(2));
-      expect(find.text('1000×1216'), findsNothing);
+      expect(find.text('1000 × 1216'), findsNothing);
 
-      // 输入 1216×832 → 自动匹配常规-横屏，退出自定义
+      // 输入 1216 × 832 → 自动匹配常规-横屏，退出自定义
       await tester.enterText(find.byType(EditableText).at(0), '1216');
       await tester.pump();
       await tester.enterText(find.byType(EditableText).at(1), '832');
@@ -188,7 +231,7 @@ void main() {
       expect(harness.height, 832);
       // 输入框收起、徽标恢复、横屏图标高亮
       expect(find.byType(TextField), findsNothing);
-      expect(find.text('1216×832'), findsOneWidget);
+      expect(find.text('1216 × 832'), findsOneWidget);
       expect(find.text('常规'), findsOneWidget);
       expect(
         aspectButtonBackground(tester, Icons.crop_landscape),

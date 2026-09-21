@@ -6,6 +6,9 @@ import '../../../data/models/character/character_prompt.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/pill_workspace_provider.dart';
+import '../../providers/prompt_token_counter_provider.dart';
+import '../../screens/generation/widgets/generation_sidebar_style.dart';
+import '../prompt/prompt_token_count_bar.dart';
 import '../prompt/pills/prompt_pill_editor.dart';
 import '../prompt/unified/unified.dart';
 
@@ -92,17 +95,21 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
       children: [
         Row(
           children: [
-            _EditorTab(
-              label: l10n.prompt_positive,
-              selected: _tabIndex == 0,
-              onTap: () => setState(() => _tabIndex = 0),
+            Flexible(
+              child: _EditorTab(
+                label: l10n.prompt_positive,
+                selected: _tabIndex == 0,
+                onTap: () => setState(() => _tabIndex = 0),
+              ),
             ),
             const SizedBox(width: 6),
             // 负向提示词 tab（官网 Undesired Content 页签，与主提示词卡同键）
-            _EditorTab(
-              label: l10n.prompt_negativeTab,
-              selected: _tabIndex == 1,
-              onTap: () => setState(() => _tabIndex = 1),
+            Flexible(
+              child: _EditorTab(
+                label: l10n.prompt_negativeTab,
+                selected: _tabIndex == 1,
+                onTap: () => setState(() => _tabIndex = 1),
+              ),
             ),
           ],
         ),
@@ -124,6 +131,25 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
               widget.character.copyWith(negativePrompt: value),
             ),
           ),
+        const SizedBox(height: 2),
+        PromptTokenCountAsyncBar(
+          usage: ref.watch(
+            characterPromptTokenUsageProvider((
+              characterId: widget.character.id,
+              negative: _tabIndex == 1,
+            )),
+          ),
+          totalTokens: ref
+              .watch(
+                promptTokenUsageProvider(
+                  _tabIndex == 1
+                      ? PromptTokenCountTarget.negative
+                      : PromptTokenCountTarget.positive,
+                ),
+              )
+              .valueOrNull
+              ?.usedTokens,
+        ),
       ],
     );
   }
@@ -147,11 +173,12 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
       pillScope: scope,
       initialPlainText: initialText,
       compact: widget.compact,
-      // 常驻卡（非 compact，官网布局）跟随内容无限自增高：4 行起步、不设上限；
+      // 常驻卡跟随内容自增高，保留三行起步的紧凑编辑区。
       // 经典布局面板（compact）维持 1/4 紧凑规格
-      minLines: widget.compact ? 1 : 4,
+      minLines: widget.compact ? 1 : 3,
       maxLines: widget.compact ? 4 : null,
       config: UnifiedPromptConfig.compactMode.copyWith(
+        embedded: true,
         hintText: hintText,
         enableAutocomplete: enableAutocomplete,
         enableAutoFormat: enableAutoFormat,
@@ -160,6 +187,9 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
         // 清空由 UnifiedPromptInput 内部处理并回调 onChanged('')，无需重复
         showClearButton: true,
         clearNeedsConfirm: true,
+      ),
+      decoration: const InputDecoration(
+        contentPadding: EdgeInsets.fromLTRB(0, 0, 22, 4),
       ),
       onChanged: onChanged,
     );
@@ -187,15 +217,17 @@ class _EditorTab extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(6),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
         decoration: BoxDecoration(
           color: selected
-              ? colorScheme.surfaceContainerHighest
+              ? GenSidebarStyle.selectedSurface(theme)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(3),
         ),
         child: Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: theme.textTheme.bodySmall?.copyWith(
             fontSize: 13,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
@@ -318,8 +350,12 @@ class _CharacterNameFieldState extends ConsumerState<CharacterNameField> {
       decoration: InputDecoration(
         isDense: true,
         isCollapsed: true,
+        filled: false,
+        contentPadding: EdgeInsets.zero,
         counterText: '',
         border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
         hintText: l10n.characterEditor_nameHint,
         hintStyle: widget.style?.copyWith(
           color: widget.style?.color?.withValues(alpha: 0.5),

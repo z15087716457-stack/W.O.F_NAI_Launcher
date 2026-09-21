@@ -9,7 +9,7 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/screens/generation/widgets/prompt_input.dart';
 
 void main() {
-  testWidgets('紧凑模式会显示正向 token 计数', (tester) async {
+  testWidgets('紧凑模式的正向 token 计数由悬浮提示显示', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -44,7 +44,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(find.text('12 / 512'), findsOneWidget);
+    expect(find.text('12 / 512'), findsNothing);
+    expect(find.byTooltip('Token usage: 12 / 512'), findsOneWidget);
   });
 }
 
@@ -102,7 +103,6 @@ class _TestLocalStorageService extends LocalStorageService {
 
   @override
   String getLastNoiseSchedule() => 'native';
-
 }
 
 /// 药丸编辑器（正向主提示词）依赖块库；无 Hive 的测试环境用空库替代。

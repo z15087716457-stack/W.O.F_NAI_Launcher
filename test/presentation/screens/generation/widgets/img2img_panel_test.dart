@@ -9,11 +9,62 @@ import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/presentation/providers/comfyui/comfyui_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/img2img_panel.dart';
+import 'package:nai_launcher/presentation/widgets/common/image_picker_card/image_picker_card.dart';
 
 import '../../../../helpers/light_theme_contrast.dart';
 
 void main() {
   group('Img2ImgPanel', () {
+    testWidgets('空底图区为参考库导入+绘制草图双卡，且无重复上传/底部导入行', (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      // 320px 侧栏宽度下不应溢出
+      await tester.binding.setSurfaceSize(const Size(320, 800));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      container
+          .read(imageWorkflowControllerProvider.notifier)
+          .setPanelExpanded(true);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
+            locale: Locale('zh'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: Scaffold(body: Img2ImgPanel()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // 标题行保留唯一的“上传图片”入口（大上传块已移除）
+      expect(find.text('上传图片'), findsOneWidget);
+
+      // 空态内容区：左侧精准参考库导入卡片，右侧绘制草图卡片
+      final libraryCard = find.byKey(
+        const Key('img2img-from-precise-ref-library'),
+      );
+      final sketchCard = find.widgetWithText(ImagePickerCard, '绘制草图');
+      expect(libraryCard, findsOneWidget);
+      expect(sketchCard, findsOneWidget);
+      expect(find.text('从精准参考库导入'), findsOneWidget);
+      expect(
+        tester.getCenter(libraryCard).dx,
+        lessThan(tester.getCenter(sketchCard).dx),
+      );
+
+      // 底部独立的整行导入按钮已删除，导入入口只有卡片一处
+      expect(find.widgetWithText(OutlinedButton, '从精准参考库导入'), findsNothing);
+
+      // 卡片走自定义 onTap（打开参考库对话框而非文件选择）
+      expect(tester.widget<ImagePickerCard>(libraryCard).onTap, isNotNull);
+      expect(tester.widget<ImagePickerCard>(sketchCard).onTap, isNotNull);
+
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('点击导演工具会导航到独立页面而不抛异常', (tester) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);

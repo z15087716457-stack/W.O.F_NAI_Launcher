@@ -439,7 +439,7 @@
   "generation_modelDesc_v45Full": "NovelAI 的 V4.5 全量模型。",
   "generation_modelDesc_v4Curated": "基于精选图像子集训练的 V4 模型。",
   "generation_modelDesc_v4Full": "NovelAI 的 V4 全量模型。",
-  "generation_sectionCharacters": "角色/定位",
+  "generation_sectionCharacters": "角色提示词",
   "generation_sectionCharactersSub": "为场景中的角色创建独立提示词。",
   "character_positionLabel": "定位",
   "generation_sectionReferenceImages": "参考图",
@@ -6040,5 +6040,30 @@
   "img2img_hideAdvanced": "收起高级设置",
   "editor_focusAreaTitle": "聚焦区域",
   "editor_focusedInpaint": "聚焦重绘",
-  "editor_outpaintFocusConflict": "扩图与聚焦重绘不能同时使用。"
+  "editor_outpaintFocusConflict": "扩图与聚焦重绘不能同时使用。",
+  "promptToken_usage": "Token 用量：{used} / {limit}",
+  "promptToken_promptShare": "此提示词：{used} Token；总用量：{total} / {limit}",
+  "@promptToken_usage": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "@promptToken_promptShare": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  }
 }

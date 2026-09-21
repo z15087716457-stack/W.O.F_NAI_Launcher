@@ -11,7 +11,7 @@ import '../../providers/generation/generation_params_notifier.dart';
 /// 仅 transparency 能力位开启的模型显示；点击切换
 /// [ImageParams.transparentBackground]，开启后等效提示词追加
 /// `transparent background` 并随请求发送 `tag_hint_transparent_background`。
-/// 官网式双态片：棋盘格图标 + ✕(关/暗)/✓(开/亮) + 文案。
+/// Compact checkerboard toggle; its name is exposed on hover and to semantics.
 class TransparentBackgroundChip extends ConsumerWidget {
   const TransparentBackgroundChip({super.key});
 
@@ -35,55 +35,45 @@ class TransparentBackgroundChip extends ConsumerWidget {
         : theme.colorScheme.onSurface.withValues(alpha: 0.45);
 
     return Tooltip(
-      message: context.l10n.transparentBackground_tooltip,
+      message:
+          '${context.l10n.prompt_transparentBg}\n${context.l10n.transparentBackground_tooltip}',
       preferBelow: true,
       verticalOffset: 20,
       waitDuration: const Duration(milliseconds: 300),
-      child: InkWell(
-        onTap: () => ref
-            .read(generationParamsNotifierProvider.notifier)
-            .updateTransparentBackground(!enabled),
-        borderRadius: BorderRadius.circular(6),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(
-                alpha: enabled ? 0.5 : 0.25,
-              ),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // 官方棋盘格（深浅主题各一版，自带配色不再着色）
-              ClipRRect(
-                borderRadius: BorderRadius.circular(3),
-                child: SvgPicture.asset(
-                  isDark
-                      ? 'assets/icons/nai-icon-checkerboard-dark.svg'
-                      : 'assets/icons/nai-icon-checkerboard-light.svg',
-                  width: 14,
-                  height: 14,
+      child: Semantics(
+        label: context.l10n.prompt_transparentBg,
+        toggled: enabled,
+        button: true,
+        child: InkWell(
+          onTap: () => ref
+              .read(generationParamsNotifierProvider.notifier)
+              .updateTransparentBackground(!enabled),
+          borderRadius: BorderRadius.circular(6),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 官方棋盘格（深浅主题各一版，自带配色不再着色）
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: SvgPicture.asset(
+                    isDark
+                        ? 'assets/icons/nai-icon-checkerboard-dark.svg'
+                        : 'assets/icons/nai-icon-checkerboard-light.svg',
+                    width: 14,
+                    height: 14,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                enabled ? Icons.check : Icons.close,
-                size: 12,
-                color: contentColor,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                context.l10n.prompt_transparentBg,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
+                const SizedBox(width: 4),
+                Icon(
+                  enabled ? Icons.check : Icons.close,
+                  size: 12,
                   color: contentColor,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

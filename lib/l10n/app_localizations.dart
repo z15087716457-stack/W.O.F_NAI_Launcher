@@ -18374,6 +18374,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Outpaint cannot be used together with Focused Inpaint.'**
   String get editor_outpaintFocusConflict;
+
+  /// No description provided for @promptToken_usage.
+  ///
+  /// In en, this message translates to:
+  /// **'Token usage: {used} / {limit}'**
+  String promptToken_usage(int used, int limit);
+
+  /// No description provided for @promptToken_promptShare.
+  ///
+  /// In en, this message translates to:
+  /// **'This prompt: {used} tokens; total usage: {total} / {limit}'**
+  String promptToken_promptShare(int used, int total, int limit);
 }
 
 class _AppLocalizationsDelegate

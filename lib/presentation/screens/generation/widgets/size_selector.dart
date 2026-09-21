@@ -5,7 +5,7 @@ import '../../../../data/models/image/resolution_preset.dart';
 import '../../../widgets/common/themed_dropdown.dart';
 import 'generation_sidebar_style.dart';
 
-/// 尺寸选择器 (官网式布局：分组下拉 + 宽高比图标 + 自定义输入)
+/// 尺寸选择器 (官网式布局：紧凑分组下拉 + 等宽宽高比分段组 + 自定义输入)
 ///
 /// 从 ParameterPanel 提取的公开组件，经典布局的参数面板与
 /// 官网式布局的置顶尺寸区共用。
@@ -192,7 +192,78 @@ class _SizeSelectorState extends State<SizeSelector> {
     }
   }
 
-  Widget _buildAspectButton(
+  /// 分组下拉的紧凑宽度：随最长组名收缩（约 100px），把行宽让给宽高比组
+  double _measureGroupDropdownWidth(BuildContext context) {
+    const style = TextStyle(fontSize: 13);
+    var maxTextWidth = 0.0;
+    for (final group in ResolutionGroup.values) {
+      if ((ResolutionPreset.groupedPresets[group] ?? []).isEmpty) {
+        continue;
+      }
+      final painter = TextPainter(
+        text: TextSpan(text: _getGroupName(context, group), style: style),
+        textDirection: Directionality.of(context),
+        maxLines: 1,
+      )..layout();
+      if (painter.width > maxTextWidth) {
+        maxTextWidth = painter.width;
+      }
+    }
+    // 文本宽 + 水平内边距(24) + 下拉图标(~24) + 留白
+    return (maxTextWidth + 44).clamp(96.0, 112.0).toDouble();
+  }
+
+  /// 官网式宽高比分段控件：横屏/竖屏/方形三个等宽按钮共用一个
+  /// 描边圆角组，选中段填充主题中性表面色。
+  Widget _buildAspectGroup(
+    BuildContext context,
+    bool isCustomGroup,
+    ResolutionPreset? matchedPreset,
+  ) {
+    final theme = Theme.of(context);
+    final borderRadius = BorderRadius.circular(5);
+    return Container(
+      key: const Key('size-aspect-group'),
+      height: 36,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.3),
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: Row(
+          children: [
+            _buildAspectSegment(
+              context,
+              ResolutionType.landscape,
+              Icons.crop_landscape,
+              isCustomGroup,
+              matchedPreset,
+            ),
+            _buildAspectSegment(
+              context,
+              ResolutionType.portrait,
+              Icons.crop_portrait,
+              isCustomGroup,
+              matchedPreset,
+            ),
+            _buildAspectSegment(
+              context,
+              ResolutionType.square,
+              Icons.crop_square,
+              isCustomGroup,
+              matchedPreset,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAspectSegment(
     BuildContext context,
     ResolutionType type,
     IconData icon,
@@ -208,32 +279,31 @@ class _SizeSelectorState extends State<SizeSelector> {
         matchedPreset.group == _selectedGroup &&
         matchedPreset.type == type;
 
-    // 官网式紧凑宽高比钮：34px 描边方块，选中才出主题色淡底；
-    // 未选中透明底+细描边，避免三枚灰色填充块挤在标题下
-    return IconButton(
-      onPressed: enabled ? () => _onTypeSelected(type) : null,
-      icon: Icon(icon, size: 18),
-      tooltip: _getTypeName(context, type),
-      style: IconButton.styleFrom(
-        backgroundColor: highlighted
-            ? theme.colorScheme.primary.withValues(alpha: 0.15)
-            : Colors.transparent,
-        foregroundColor: highlighted
-            ? theme.colorScheme.primary
-            : theme.colorScheme.onSurface.withValues(alpha: 0.7),
-        disabledForegroundColor: theme.colorScheme.onSurface.withValues(
-          alpha: 0.3,
+    // 等宽段占满分段组宽度（320px 下每段约 70px），命中面积远大于
+    // 原先的 34px 孤立图标钮；选中段出主题表面色淡底，不再用 primary 描边
+    return Expanded(
+      child: IconButton(
+        key: Key('size-aspect-${type.name}'),
+        onPressed: enabled ? () => _onTypeSelected(type) : null,
+        icon: Icon(icon, size: 18),
+        tooltip: _getTypeName(context, type),
+        style: IconButton.styleFrom(
+          backgroundColor: highlighted
+              ? GenSidebarStyle.selectedSurface(theme)
+              : Colors.transparent,
+          foregroundColor: highlighted
+              ? theme.colorScheme.onSurface
+              : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          disabledForegroundColor: theme.colorScheme.onSurface.withValues(
+            alpha: 0.3,
+          ),
+          padding: EdgeInsets.zero,
+          minimumSize: const Size(0, 28),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
+          side: BorderSide.none,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
         ),
-        padding: EdgeInsets.zero,
-        minimumSize: const Size(34, 34),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.compact,
-        side: BorderSide(
-          color: highlighted
-              ? theme.colorScheme.primary.withValues(alpha: 0.55)
-              : theme.colorScheme.outline.withValues(alpha: 0.3),
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
@@ -261,19 +331,19 @@ class _SizeSelectorState extends State<SizeSelector> {
               if (!isCustomGroup)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
+                    horizontal: 10,
+                    vertical: 4,
                   ),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surfaceContainerHighest.withValues(
                       alpha: 0.7,
                     ),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(3),
                   ),
                   child: Text(
-                    '${widget.width}×${widget.height}',
+                    '${widget.width} × ${widget.height}',
                     style: TextStyle(
-                      fontSize: 11.5,
+                      fontSize: 12,
                       fontFeatures: const [FontFeature.tabularFigures()],
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
@@ -284,13 +354,31 @@ class _SizeSelectorState extends State<SizeSelector> {
           const SizedBox(height: 8),
         ],
 
-        // 分组下拉 + 宽高比图标
+        // 紧凑分组下拉 + 占满剩余宽度的宽高比分段组（官网式）
         Row(
           children: [
-            // 分组下拉菜单（只显示分组名）
-            Expanded(
-              child: ThemedDropdown<ResolutionGroup>(
-                value: _selectedGroup,
+            // 分组下拉菜单（只显示分组名，宽度随组名收缩约 100px）
+            Container(
+              width: _measureGroupDropdownWidth(context),
+              height: 36,
+              decoration: BoxDecoration(
+                color: GenSidebarStyle.selectedSurface(theme),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: DropdownButtonFormField<ResolutionGroup>(
+                initialValue: _selectedGroup,
+                isExpanded: true,
+                isDense: true,
+                icon: const Icon(Icons.expand_more, size: 18),
+                dropdownColor: theme.colorScheme.surfaceContainerHigh,
+                decoration: const InputDecoration(
+                  filled: false,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
                 focusNode: _dropdownFocusNode,
                 items: [
                   for (final group in ResolutionGroup.values)
@@ -300,6 +388,8 @@ class _SizeSelectorState extends State<SizeSelector> {
                         value: group,
                         child: Text(
                           _getGroupName(context, group),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 13),
                         ),
                       ),
@@ -308,28 +398,8 @@ class _SizeSelectorState extends State<SizeSelector> {
               ),
             ),
             const SizedBox(width: 8),
-            _buildAspectButton(
-              context,
-              ResolutionType.portrait,
-              Icons.crop_portrait,
-              isCustomGroup,
-              matchedPreset,
-            ),
-            const SizedBox(width: 4),
-            _buildAspectButton(
-              context,
-              ResolutionType.landscape,
-              Icons.crop_landscape,
-              isCustomGroup,
-              matchedPreset,
-            ),
-            const SizedBox(width: 4),
-            _buildAspectButton(
-              context,
-              ResolutionType.square,
-              Icons.crop_square,
-              isCustomGroup,
-              matchedPreset,
+            Expanded(
+              child: _buildAspectGroup(context, isCustomGroup, matchedPreset),
             ),
           ],
         ),

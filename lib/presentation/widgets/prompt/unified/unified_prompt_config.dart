@@ -55,6 +55,9 @@ class UnifiedPromptConfig {
   /// 紧凑模式下隐藏视图切换按钮等额外 UI 元素。
   final bool compact;
 
+  /// Share the surrounding prompt card's surface instead of drawing an inset.
+  final bool embedded;
+
   /// 是否只读
   ///
   /// 只读模式下禁用所有编辑功能。
@@ -106,6 +109,7 @@ class UnifiedPromptConfig {
     this.enableRegexReplace = true,
     this.enableComfyuiImport = false,
     this.compact = false,
+    this.embedded = false,
     this.readOnly = false,
     this.maxHeight,
     this.emptyHint,
@@ -181,6 +185,7 @@ class UnifiedPromptConfig {
     bool? enableRegexReplace,
     bool? enableComfyuiImport,
     bool? compact,
+    bool? embedded,
     bool? readOnly,
     double? maxHeight,
     String? emptyHint,
@@ -204,6 +209,7 @@ class UnifiedPromptConfig {
       enableRegexReplace: enableRegexReplace ?? this.enableRegexReplace,
       enableComfyuiImport: enableComfyuiImport ?? this.enableComfyuiImport,
       compact: compact ?? this.compact,
+      embedded: embedded ?? this.embedded,
       readOnly: readOnly ?? this.readOnly,
       maxHeight: maxHeight ?? this.maxHeight,
       emptyHint: emptyHint ?? this.emptyHint,
@@ -229,6 +235,7 @@ class UnifiedPromptConfig {
         other.enableRegexReplace == enableRegexReplace &&
         other.enableComfyuiImport == enableComfyuiImport &&
         other.compact == compact &&
+        other.embedded == embedded &&
         other.readOnly == readOnly &&
         other.maxHeight == maxHeight &&
         other.emptyHint == emptyHint &&
@@ -248,6 +255,7 @@ class UnifiedPromptConfig {
       enableRegexReplace,
       enableComfyuiImport,
       compact,
+      embedded,
       readOnly,
       maxHeight,
       emptyHint,

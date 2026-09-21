@@ -90,11 +90,13 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
           child: AnimatedContainer(
             key: _buttonKey,
             duration: const Duration(milliseconds: 150),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
               color: _isHovering
                   ? theme.colorScheme.surfaceContainerHighest
-                  : Colors.transparent,
+                  : theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.25,
+                    ),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Row(
@@ -102,15 +104,19 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
               children: [
                 // 官网式中性片：「Undesired Content Preset: <名> ▾」，
                 // 无预设时 0.55 淡显
-                Text(
-                  '${context.l10n.ucPreset_presetChip}: '
-                  '${_getDisplayLabel(context, presetState, currentEntry)}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: isEnabled
-                        ? theme.colorScheme.onSurface.withValues(alpha: 0.85)
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                Flexible(
+                  child: Text(
+                    '${context.l10n.ucPreset_presetChip}: '
+                    '${_getDisplayLabel(context, presetState, currentEntry)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: isEnabled
+                          ? theme.colorScheme.onSurface.withValues(alpha: 0.85)
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 2),

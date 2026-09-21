@@ -17,6 +17,39 @@ import 'uc_preset_provider.dart';
 
 enum PromptTokenCountTarget { positive, negative }
 
+/// Per-character contribution. The main usage provider remains the shared total.
+final characterPromptTokenUsageProvider = FutureProvider.autoDispose
+    .family<PromptTokenUsage?, ({String characterId, bool negative})>((
+      ref,
+      target,
+    ) async {
+      final text = ref.watch(
+        characterPromptNotifierProvider.select((config) {
+          for (final character in config.characters) {
+            if (character.id == target.characterId) {
+              return target.negative
+                  ? character.negativePrompt
+                  : character.prompt;
+            }
+          }
+          return null;
+        }),
+      );
+      if (text == null) return null;
+      final model = ref.watch(
+        generationParamsNotifierProvider.select((p) => p.model),
+      );
+      ref.watch(promptBlockLibraryNotifierProvider);
+      final resolver = ref.read(aliasResolverServiceProvider.notifier);
+      final resolved = resolver.resolveAliases(text);
+      final service = await ref.watch(promptTokenCounterServiceProvider.future);
+      return service.countUsageFromTexts(
+        model: model,
+        mainText: resolved,
+        applyWebAdjustment: false,
+      );
+    });
+
 class PromptTokenCountPayload {
   const PromptTokenCountPayload({
     required this.mainText,

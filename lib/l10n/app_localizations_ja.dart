@@ -10257,4 +10257,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get editor_outpaintFocusConflict => 'アウトペイントとフォーカスインペイントは同時に使用できません。';
+
+  @override
+  String promptToken_usage(int used, int limit) {
+    return 'トークン使用量：$used / $limit';
+  }
+
+  @override
+  String promptToken_promptShare(int used, int total, int limit) {
+    return 'このプロンプト：$used トークン；合計：$total / $limit';
+  }
 }

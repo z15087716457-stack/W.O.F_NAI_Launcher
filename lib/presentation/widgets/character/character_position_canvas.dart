@@ -357,7 +357,8 @@ class _CharacterPositionCanvasViewState
 /// 绑定全局 globalAiChoice，常驻在角色模块头部。
 /// 「自定义」右侧的图标是位置画布的唯一入口（官网同款布局）。
 class CharacterPositionModeSegments extends ConsumerWidget {
-  const CharacterPositionModeSegments({super.key});
+  const CharacterPositionModeSegments({super.key, this.expanded = false});
+  final bool expanded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -367,54 +368,71 @@ class CharacterPositionModeSegments extends ConsumerWidget {
     );
     final canvasOpen = ref.watch(characterPositionCanvasProvider);
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _ModeSegment(
-          selected: globalAiChoice,
-          radius: const BorderRadius.horizontal(left: Radius.circular(6)),
-          onTap: () => ref
-              .read(characterPromptNotifierProvider.notifier)
-              .setGlobalAiChoice(true),
-          child: Text(
-            l10n.characterCanvas_aiChoice,
-            style: _segmentTextStyle(context, globalAiChoice),
-          ),
-        ),
-        _ModeSegment(
-          selected: !globalAiChoice,
-          radius: BorderRadius.zero,
-          onTap: () => ref
-              .read(characterPromptNotifierProvider.notifier)
-              .setGlobalAiChoice(false),
-          child: Text(
-            l10n.characterCanvas_custom,
-            style: _segmentTextStyle(context, !globalAiChoice),
-          ),
-        ),
-        // 位置画布入口（官网网格图标）
-        Tooltip(
-          message: l10n.characterCanvas_title,
-          waitDuration: const Duration(milliseconds: 500),
-          child: _ModeSegment(
-            selected: canvasOpen,
-            radius: const BorderRadius.horizontal(right: Radius.circular(6)),
-            onTap: () =>
-                ref.read(characterPositionCanvasProvider.notifier).toggle(),
-            child: SvgPicture.asset(
-              'assets/icons/nai-icon-characterpositions.svg',
-              width: 15,
-              height: 15,
-              colorFilter: ColorFilter.mode(
-                canvasOpen
-                    ? Theme.of(context).colorScheme.onSurface
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-                BlendMode.srcIn,
+    Widget segment(Widget child) => expanded ? Expanded(child: child) : child;
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          segment(
+            _ModeSegment(
+              selected: globalAiChoice,
+              radius: BorderRadius.circular(3),
+              onTap: () => ref
+                  .read(characterPromptNotifierProvider.notifier)
+                  .setGlobalAiChoice(true),
+              child: Text(
+                l10n.characterCanvas_aiChoice,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: _segmentTextStyle(context, globalAiChoice),
               ),
             ),
           ),
-        ),
-      ],
+          segment(
+            _ModeSegment(
+              selected: !globalAiChoice,
+              radius: BorderRadius.circular(3),
+              onTap: () => ref
+                  .read(characterPromptNotifierProvider.notifier)
+                  .setGlobalAiChoice(false),
+              child: Text(
+                l10n.characterCanvas_custom,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: _segmentTextStyle(context, !globalAiChoice),
+              ),
+            ),
+          ),
+          // 位置画布入口（官网网格图标）
+          Tooltip(
+            message: l10n.characterCanvas_title,
+            waitDuration: const Duration(milliseconds: 500),
+            child: _ModeSegment(
+              selected: canvasOpen,
+              radius: const BorderRadius.horizontal(right: Radius.circular(6)),
+              onTap: () =>
+                  ref.read(characterPositionCanvasProvider.notifier).toggle(),
+              child: SvgPicture.asset(
+                'assets/icons/nai-icon-characterpositions.svg',
+                width: 15,
+                height: 15,
+                colorFilter: ColorFilter.mode(
+                  canvasOpen
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                  BlendMode.srcIn,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -451,17 +469,14 @@ class _ModeSegment extends StatelessWidget {
       onTap: onTap,
       borderRadius: radius,
       child: Container(
+        height: 28,
+        alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: selected
-              ? colorScheme.surfaceContainerHighest
+              ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.55)
               : Colors.transparent,
           borderRadius: radius,
-          border: Border.all(
-            color: selected
-                ? colorScheme.outline.withValues(alpha: 0.55)
-                : colorScheme.outline.withValues(alpha: 0.3),
-          ),
         ),
         child: child,
       ),

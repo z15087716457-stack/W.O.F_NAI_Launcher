@@ -1177,6 +1177,12 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     // 否则 TextField 会创建自己的内部 focusNode，
     // 导致 _onFocusChanged 监听不到失焦事件
     final baseInput = ThemedInput(
+      embedded: widget.config.embedded,
+      style: widget.config.embedded
+          ? Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontSize: 14, height: 1.55)
+          : null,
       controller: _effectiveController,
       focusNode: _effectiveFocusNode,
       decoration: effectiveDecoration,

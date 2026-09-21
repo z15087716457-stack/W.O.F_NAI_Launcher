@@ -15,6 +15,7 @@ import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
+import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
@@ -23,17 +24,28 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/tips_provider.dart';
+import 'package:nai_launcher/presentation/providers/layout_state_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/web_left_panel.dart';
+import 'package:nai_launcher/presentation/widgets/character/inline_character_card.dart';
+import 'package:nai_launcher/presentation/widgets/common/inset_shadow_container.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/transparent_background_chip.dart';
 import '../../../../helpers/light_theme_contrast.dart';
 import '../../../../helpers/official_ui_capture_fonts.dart';
 
 class _Storage extends InMemoryLocalStorageService {
+  @override
+  String getDefaultModel() => 'nai-diffusion-5-full';
   @override
   bool getEnableAutocomplete() => false;
   @override
   bool getEnableCooccurrenceRecommendation() => false;
   @override
   String getLastPrompt() => 'city lights, scenery, no humans, very aesthetic';
+}
+
+class _TokenEncoder implements PromptTokenEncoder {
+  @override
+  Future<int> countTokens(String text) async => text.split(' ').length;
 }
 
 class _Generation extends ImageGenerationNotifier {
@@ -43,11 +55,21 @@ class _Generation extends ImageGenerationNotifier {
 
 class _Characters extends CharacterPromptNotifier {
   @override
-  CharacterPromptConfig build() => const CharacterPromptConfig().addCharacter(
-    gender: CharacterGender.female,
-    name: 'Character 1',
-    prompt: 'blue eyes, white hair',
-  );
+  CharacterPromptConfig build() {
+    super.build();
+    return const CharacterPromptConfig().addCharacter(
+      gender: CharacterGender.female,
+      name: 'Character 1',
+      prompt: 'blue eyes, white hair',
+    );
+  }
+}
+
+class _CharacterRepository extends CharacterPromptRepository {
+  @override
+  CharacterPromptConfig load() => const CharacterPromptConfig();
+  @override
+  Future<bool> save(CharacterPromptConfig config) async => true;
 }
 
 class _Library extends PromptBlockLibraryNotifier {
@@ -83,75 +105,185 @@ void main() {
     await setUpTemporaryHive();
     await Hive.openBox(StorageKeys.settingsBox);
   });
-  testWidgets(
-    'official sidebar renders grouped typography and compact character actions',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(460, 1250));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      final mode = ValueNotifier(false);
-      addTearDown(mode.dispose);
-      final container = createStorageFreeContainer(
-        overrides: [
-          localStorageServiceProvider.overrideWithValue(_Storage()),
-          imageGenerationNotifierProvider.overrideWith(_Generation.new),
-          characterPromptNotifierProvider.overrideWith(_Characters.new),
-          promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
-          subscriptionNotifierProvider.overrideWith(_Subscription.new),
-          tipEpochProvider.overrideWith((ref) => Stream.value(0)),
-          for (final target in PromptTokenCountTarget.values)
-            promptTokenUsageProvider(target).overrideWith(
-              (ref) async => const PromptTokenUsage(usedTokens: 12, limit: 512),
-            ),
-        ],
-      );
-      addTearDown(container.dispose);
-      final boundary = GlobalKey();
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp(
-            theme: ThemeData(
-              brightness: Brightness.dark,
-              fontFamily: 'OfficialUiCapture',
-            ),
-            locale: const Locale('zh'),
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(
-              body: RepaintBoundary(
-                key: boundary,
-                child: WebLeftPanel(negativeModeNotifier: mode),
+  for (final width in [320.0, 400.0]) {
+    for (final language in ['zh', 'en']) {
+      testWidgets(
+        'official sidebar renders unified cards and compact controls at $width in $language',
+        (tester) async {
+          await tester.binding.setSurfaceSize(Size(width, 1250));
+          addTearDown(() => tester.binding.setSurfaceSize(null));
+          final mode = ValueNotifier(false);
+          addTearDown(mode.dispose);
+          final container = createStorageFreeContainer(
+            overrides: [
+              localStorageServiceProvider.overrideWithValue(_Storage()),
+              characterPromptRepositoryProvider.overrideWithValue(
+                _CharacterRepository(),
+              ),
+              promptTokenCounterServiceProvider.overrideWith(
+                (ref) async =>
+                    PromptTokenCounterService(encoder: _TokenEncoder()),
+              ),
+              imageGenerationNotifierProvider.overrideWith(_Generation.new),
+              characterPromptNotifierProvider.overrideWith(_Characters.new),
+              promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
+              subscriptionNotifierProvider.overrideWith(_Subscription.new),
+              tipEpochProvider.overrideWith((ref) => Stream.value(0)),
+              for (final target in PromptTokenCountTarget.values)
+                promptTokenUsageProvider(target).overrideWith(
+                  (ref) async =>
+                      const PromptTokenUsage(usedTokens: 12, limit: 512),
+                ),
+            ],
+          );
+          await container
+              .read(layoutStateNotifierProvider.notifier)
+              .setWebLeftPanelWidth(width);
+          addTearDown(container.dispose);
+          final boundary = GlobalKey();
+          await tester.pumpWidget(
+            UncontrolledProviderScope(
+              container: container,
+              child: MaterialApp(
+                theme: ThemeData(
+                  brightness: Brightness.dark,
+                  fontFamily: 'OfficialUiCapture',
+                ),
+                locale: Locale(language),
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                home: Scaffold(
+                  body: RepaintBoundary(
+                    key: boundary,
+                    child: WebLeftPanel(negativeModeNotifier: mode),
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
+          );
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
+          expect(tester.takeException(), isNull);
+          expect(
+            container.read(generationParamsNotifierProvider).prompt,
+            'city lights, scenery, no humans, very aesthetic',
+          );
+          final l10n = AppLocalizations.of(
+            tester.element(find.byType(WebLeftPanel)),
+          )!;
+          final label = tester.widget<Text>(
+            find.text(l10n.generation_sectionReferenceImages),
+          );
+          final title = tester.widget<Text>(
+            find.text(l10n.generation_imageSize),
+          );
+          expect(label.style!.fontSize, lessThan(title.style!.fontSize!));
+          expect(find.byIcon(Icons.more_horiz), findsWidgets);
+          final promptCard = find.byKey(const ValueKey('main-prompt-card'));
+          expect(
+            find.descendant(
+              of: promptCard,
+              matching: find.byType(InsetShadowContainer),
+            ),
+            findsNothing,
+          );
+          expect(
+            find.descendant(
+              of: find.byType(InlineCharacterCard),
+              matching: find.byType(InsetShadowContainer),
+            ),
+            findsNothing,
+          );
+          expect(
+            find.descendant(
+              of: find.byType(TransparentBackgroundChip),
+              matching: find.byType(Text),
+            ),
+            findsNothing,
+          );
+          expect(tester.getSize(promptCard).height, lessThan(230));
+          expect(find.text('12 / 512'), findsNothing);
+          expect(find.byType(LinearProgressIndicator), findsNWidgets(2));
+          if (Platform.environment['CAPTURE_OFFICIAL_UI'] == '1') {
+            await tester.runAsync(() async {
+              final image =
+                  await (boundary.currentContext!.findRenderObject()
+                          as RenderRepaintBoundary)
+                      .toImage();
+              final bytes = await image.toByteData(
+                format: ui.ImageByteFormat.png,
+              );
+              final file = File(
+                '.dart_tool/official-ui-captures/sidebar-$language-$width.png',
+              );
+              await file.parent.create(recursive: true);
+              await file.writeAsBytes(bytes!.buffer.asUint8List());
+              image.dispose();
+            });
+          }
+          if (width == 400 && language == 'zh') {
+            container
+                .read(characterPromptNotifierProvider.notifier)
+                .clearAllCharacters();
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 300));
+            expect(find.byType(InlineCharacterCard), findsNothing);
+            expect(find.text(l10n.character_positionLabel), findsNothing);
+            await tester.tap(find.byKey(const ValueKey('add-character-menu')));
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 350));
+            expect(
+              find.text(l10n.characterEditor_genderFemale),
+              findsOneWidget,
+            );
+            expect(find.text(l10n.characterEditor_genderMale), findsOneWidget);
+            expect(find.text(l10n.characterEditor_genderOther), findsOneWidget);
+            await tester.tap(find.text(l10n.characterEditor_genderFemale));
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 350));
+            final character = container
+                .read(characterPromptNotifierProvider)
+                .characters
+                .single;
+            expect(character.gender, CharacterGender.female);
+            expect(find.byType(InlineCharacterCard), findsOneWidget);
+            expect(find.text(l10n.character_positionLabel), findsOneWidget);
+            final editor = find.descendant(
+              of: find.byKey(
+                ValueKey('character-pill-char:${character.id}:pos'),
+              ),
+              matching: find.byType(TextField),
+            );
+            await tester.enterText(editor, 'blue eyes, white hair');
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 350));
+            expect(
+              container
+                  .read(characterPromptNotifierProvider)
+                  .characters
+                  .single
+                  .prompt,
+              'blue eyes, white hair',
+            );
+            final counted = container
+                .read(
+                  characterPromptTokenUsageProvider((
+                    characterId: character.id,
+                    negative: false,
+                  )),
+                )
+                .valueOrNull;
+            expect(counted?.usedTokens, 4);
+            expect(
+              container.read(generationParamsNotifierProvider).prompt,
+              'city lights, scenery, no humans, very aesthetic',
+            );
+            expect(tester.takeException(), isNull);
+          }
+          await tester.pumpWidget(const SizedBox());
+          await tester.pump();
+        },
       );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(tester.takeException(), isNull);
-      expect(
-        container.read(generationParamsNotifierProvider).prompt,
-        'city lights, scenery, no humans, very aesthetic',
-      );
-      final label = tester.widget<Text>(find.text('参考图'));
-      final title = tester.widget<Text>(find.text('图像尺寸'));
-      expect(label.style!.fontSize, lessThan(title.style!.fontSize!));
-      expect(find.byIcon(Icons.more_horiz), findsWidgets);
-      if (Platform.environment['CAPTURE_OFFICIAL_UI'] == '1') {
-        await tester.runAsync(() async {
-          final image =
-              await (boundary.currentContext!.findRenderObject()
-                      as RenderRepaintBoundary)
-                  .toImage();
-          final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-          final file = File('.dart_tool/official-ui-captures/sidebar.png');
-          await file.parent.create(recursive: true);
-          await file.writeAsBytes(bytes!.buffer.asUint8List());
-          image.dispose();
-        });
-      }
-      await tester.pumpWidget(const SizedBox());
-      await tester.pump();
-    },
-  );
+    }
+  }
 }

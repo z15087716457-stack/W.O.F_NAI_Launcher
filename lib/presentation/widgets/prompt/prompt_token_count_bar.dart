@@ -5,9 +5,14 @@ import '../../../core/services/prompt_token_counter_service.dart';
 import '../../../core/utils/localization_extension.dart';
 
 class PromptTokenCountAsyncBar extends StatelessWidget {
-  const PromptTokenCountAsyncBar({super.key, required this.usage});
+  const PromptTokenCountAsyncBar({
+    super.key,
+    required this.usage,
+    this.totalTokens,
+  });
 
   final AsyncValue<PromptTokenUsage?> usage;
+  final int? totalTokens;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +21,7 @@ class PromptTokenCountAsyncBar extends StatelessWidget {
       skipLoadingOnRefresh: true,
       data: (usage) => usage == null
           ? const SizedBox.shrink()
-          : PromptTokenCountBar(usage: usage),
+          : PromptTokenCountBar(usage: usage, totalTokens: totalTokens),
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
     );
@@ -24,64 +29,54 @@ class PromptTokenCountAsyncBar extends StatelessWidget {
 }
 
 class PromptTokenCountBar extends StatelessWidget {
-  const PromptTokenCountBar({super.key, required this.usage});
+  const PromptTokenCountBar({super.key, required this.usage, this.totalTokens});
 
   final PromptTokenUsage usage;
+  final int? totalTokens;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = usage.isOverLimit
+    final overLimit = (totalTokens ?? usage.usedTokens) > usage.limit;
+    final color = overLimit
         ? theme.colorScheme.error
-        : theme.colorScheme.onSurfaceVariant;
-    final tokenText = '${usage.usedTokens} / ${usage.limit}';
-    final label = Text(
-      tokenText,
-      style: theme.textTheme.bodySmall?.copyWith(
-        color: color,
-        fontWeight: usage.isOverLimit ? FontWeight.w600 : FontWeight.w500,
-        fontSize: 11,
-      ),
-    );
-
-    // 官网式横向长条：满宽细进度条 + 右端计数；超额整条转 error 色。
-    // 窄宽（面板被挤压/探索页小窗）时计数退位，只留细条，避免溢出。
-    final fill = (usage.usedTokens / usage.limit).clamp(0.0, 1.0).toDouble();
-    final progress = ClipRRect(
-      borderRadius: BorderRadius.circular(2),
-      child: LinearProgressIndicator(
-        value: fill,
-        minHeight: 3,
-        backgroundColor: theme.colorScheme.surfaceContainerHighest,
-        valueColor: AlwaysStoppedAnimation<Color>(
-          usage.isOverLimit
-              ? theme.colorScheme.error
-              : theme.colorScheme.primary.withValues(alpha: 0.5),
+        : theme.colorScheme.onSurface;
+    final fill = usage.limit > 0
+        ? (usage.usedTokens / usage.limit).clamp(0.0, 1.0).toDouble()
+        : 0.0;
+    final summary = totalTokens == null
+        ? context.l10n.promptToken_usage(usage.usedTokens, usage.limit)
+        : context.l10n.promptToken_promptShare(
+            usage.usedTokens,
+            totalTokens!,
+            usage.limit,
+          );
+    final breakdown = _buildTooltipMessage(context);
+    final message = breakdown.isEmpty ? summary : '$summary\n$breakdown';
+    return Tooltip(
+      message: message,
+      waitDuration: const Duration(milliseconds: 250),
+      child: Semantics(
+        label: summary,
+        child: SizedBox(
+          height: 14,
+          // Keep the hover target comfortable without making the line thicker.
+          child: Center(
+            child: LinearProgressIndicator(
+              value: fill,
+              minHeight: 3,
+              borderRadius: BorderRadius.zero,
+              trackGap: 0,
+              stopIndicatorRadius: 0,
+              backgroundColor: theme.colorScheme.onSurface.withValues(
+                alpha: 0.08,
+              ),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
         ),
       ),
     );
-    final bar = LayoutBuilder(
-      builder: (context, constraints) {
-        if (!constraints.maxWidth.isFinite || constraints.maxWidth >= 96) {
-          return Row(
-            children: [
-              Expanded(child: progress),
-              const SizedBox(width: 8),
-              label,
-            ],
-          );
-        }
-        return progress;
-      },
-    );
-
-    return usage.breakdown.isEmpty
-        ? bar
-        : Tooltip(
-            message: _buildTooltipMessage(context),
-            waitDuration: const Duration(milliseconds: 250),
-            child: bar,
-          );
   }
 
   String _buildTooltipMessage(BuildContext context) {

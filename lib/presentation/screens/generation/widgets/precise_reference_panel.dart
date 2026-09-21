@@ -304,18 +304,44 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
   /// 方形钮正下方弹出 添加参考图 / 从库导入 菜单（官网式）。
   void _showAddMenu(BuildContext buttonContext) {
     final overlayBox =
-        Overlay.of(buttonContext).context.findRenderObject() as RenderBox;
-    final box = buttonContext.findRenderObject() as RenderBox;
-    final triggerRect = box.localToGlobal(Offset.zero) & box.size;
+        Navigator.of(buttonContext).overlay!.context.findRenderObject()
+            as RenderBox;
+    final buttonBox = buttonContext.findRenderObject() as RenderBox;
+    // 锚点矩形必须在 overlay 坐标系内（ancestor: overlayBox）；
+    // 用全局坐标而 overlay 有偏移时菜单会整体向右下方漂移。
+    var triggerRect = Rect.fromPoints(
+      buttonBox.localToGlobal(Offset.zero, ancestor: overlayBox),
+      buttonBox.localToGlobal(
+        buttonBox.size.bottomRight(Offset.zero),
+        ancestor: overlayBox,
+      ),
+    );
 
     showMenu<String>(
       context: buttonContext,
-      position: RelativeRect.fromLTRB(
-        triggerRect.left,
-        triggerRect.bottom + 4,
-        overlayBox.size.width - triggerRect.right,
-        0,
-      ),
+      constraints: const BoxConstraints.tightFor(width: 208),
+      // The plus sits on the right of the sidebar: align the menu's right edge
+      // to it, instead of letting a wide window place the menu outside the pane.
+      positionBuilder: (context, constraints) {
+        if (buttonBox.attached) {
+          triggerRect = Rect.fromPoints(
+            buttonBox.localToGlobal(Offset.zero, ancestor: overlayBox),
+            buttonBox.localToGlobal(
+              buttonBox.size.bottomRight(Offset.zero),
+              ancestor: overlayBox,
+            ),
+          );
+        }
+        return RelativeRect.fromRect(
+          Rect.fromLTWH(
+            triggerRect.right - 208,
+            triggerRect.bottom + 4,
+            208,
+            0,
+          ),
+          Offset.zero & overlayBox.size,
+        );
+      },
       items: [
         PopupMenuItem<String>(
           value: 'add',

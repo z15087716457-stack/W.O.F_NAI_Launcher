@@ -22,6 +22,19 @@ final class GenSidebarStyle {
   /// 同一小节内相邻卡片间距。
   static const double cardGap = 8;
 
+  /// A single darker writing surface, shared by the main and character cards.
+  static Color promptSurface(ThemeData theme) => Color.lerp(
+    theme.colorScheme.surface,
+    theme.brightness == Brightness.dark ? Colors.black : Colors.white,
+    theme.brightness == Brightness.dark ? 0.3 : 0.6,
+  )!;
+
+  static Color border(ThemeData theme) =>
+      theme.colorScheme.outline.withValues(alpha: 0.2);
+
+  static Color selectedSurface(ThemeData theme) =>
+      theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.55);
+
   /// 小节标签（官网 `Reference Images` / `Image Settings` 同款：
   /// 小字、常规字重、弱色，只做分组提示）。
   static TextStyle sectionLabel(ThemeData theme) =>

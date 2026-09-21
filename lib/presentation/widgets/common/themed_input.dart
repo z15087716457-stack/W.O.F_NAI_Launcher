@@ -127,6 +127,9 @@ class ThemedInput extends StatefulWidget {
   /// Whether to add a native Ctrl+Y redo shortcut for plain text fields.
   final bool enableNativeRedoShortcut;
 
+  /// The parent owns the input surface (for a single unified prompt card).
+  final bool embedded;
+
   const ThemedInput({
     super.key,
     this.controller,
@@ -169,6 +172,7 @@ class ThemedInput extends StatefulWidget {
     this.clearNeedsConfirm = false,
     this.contextMenuBuilder,
     this.enableNativeRedoShortcut = true,
+    this.embedded = false,
   });
 
   /// 创建多行输入框
@@ -211,6 +215,7 @@ class ThemedInput extends StatefulWidget {
     this.clearNeedsConfirm = false,
     this.contextMenuBuilder,
     this.enableNativeRedoShortcut = true,
+    this.embedded = false,
   });
 
   @override
@@ -346,6 +351,10 @@ class _ThemedInputState extends State<ThemedInput> {
       );
     }
 
+    if (widget.embedded) {
+      inputDecoration = inputDecoration.copyWith(filled: false);
+    }
+
     final field = TextField(
       controller: _effectiveController,
       undoController: widget.undoController,
@@ -400,17 +409,22 @@ class _ThemedInputState extends State<ThemedInput> {
             Positioned(
               top: 4,
               right: 4,
-              child: _ClearButton(onPressed: _handleClear),
+              child: _ClearButton(
+                onPressed: _handleClear,
+                embedded: widget.embedded,
+              ),
             ),
         ],
       );
     }
 
-    final container = InsetShadowContainer(
-      borderRadius: widget.borderRadius,
-      enabled: widget.enabled ? null : false,
-      child: content,
-    );
+    final container = widget.embedded
+        ? content
+        : InsetShadowContainer(
+            borderRadius: widget.borderRadius,
+            enabled: widget.enabled ? null : false,
+            child: content,
+          );
 
     // 如果有帮助文字，添加在下方
     if (widget.helperText != null) {
@@ -438,14 +452,17 @@ class _ThemedInputState extends State<ThemedInput> {
 /// 清空按钮组件
 class _ClearButton extends StatelessWidget {
   final VoidCallback onPressed;
+  final bool embedded;
 
-  const _ClearButton({required this.onPressed});
+  const _ClearButton({required this.onPressed, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.8),
+      color: embedded
+          ? Colors.transparent
+          : colorScheme.surfaceContainerHighest.withValues(alpha: 0.8),
       shape: const CircleBorder(),
       child: InkWell(
         onTap: onPressed,

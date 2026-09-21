@@ -6040,5 +6040,30 @@
   "img2img_hideAdvanced": "Hide Advanced",
   "editor_focusAreaTitle": "Focused Area",
   "editor_focusedInpaint": "Focused Inpaint",
-  "editor_outpaintFocusConflict": "Outpaint cannot be used together with Focused Inpaint."
+  "editor_outpaintFocusConflict": "Outpaint cannot be used together with Focused Inpaint.",
+  "promptToken_usage": "Token usage: {used} / {limit}",
+  "promptToken_promptShare": "This prompt: {used} tokens; total usage: {total} / {limit}",
+  "@promptToken_usage": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "@promptToken_promptShare": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  }
 }

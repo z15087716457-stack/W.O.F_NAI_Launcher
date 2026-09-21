@@ -99,26 +99,36 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
             link: _layerLink,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: _isHovering
                     ? theme.colorScheme.surfaceContainerHighest
-                    : Colors.transparent,
+                    : theme.colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.25,
+                      ),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // 官网式中性片：「Quality Tags: <预设名> ▾」，无预设时 0.55 淡显
-                  Text(
-                    '${context.l10n.qualityTags_presetChip}: '
-                    '${_getDisplayLabel(context, presetState, customEntries)}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: isEnabled
-                          ? theme.colorScheme.onSurface.withValues(alpha: 0.85)
-                          : theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                  Flexible(
+                    child: Text(
+                      '${context.l10n.qualityTags_presetChip}: '
+                      '${_getDisplayLabel(context, presetState, customEntries)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: isEnabled
+                            ? theme.colorScheme.onSurface.withValues(
+                                alpha: 0.85,
+                              )
+                            : theme.colorScheme.onSurface.withValues(
+                                alpha: 0.45,
+                              ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 2),
