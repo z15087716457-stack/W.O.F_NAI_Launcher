@@ -32,6 +32,10 @@ class StudioGlassSurface extends StatelessWidget {
       ),
       base,
     );
+    // Light acrylic needs more white tint to sit beside the white workspace.
+    // Keep a little desktop colour visible without a separate grey strip.
+    final topOpacity = nativeBackdrop ? (dark ? .48 : .84) : 1.0;
+    final bottomOpacity = nativeBackdrop ? (dark ? .66 : .90) : 1.0;
     return ClipRRect(
       borderRadius: borderRadius,
       clipBehavior: clipBehavior,
@@ -44,8 +48,8 @@ class StudioGlassSurface extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    top.withValues(alpha: nativeBackdrop ? .48 : 1),
-                    bottom.withValues(alpha: nativeBackdrop ? .66 : 1),
+                    top.withValues(alpha: topOpacity),
+                    bottom.withValues(alpha: bottomOpacity),
                   ],
                 ),
         ),
