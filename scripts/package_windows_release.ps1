@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$Version,
   [switch]$SkipFlutterBuild,
   [string]$DistDir = "dist"
@@ -59,6 +59,8 @@ if (-not $SkipFlutterBuild) {
 if (-not (Test-Path -LiteralPath $exePath)) {
   throw "Windows release executable was not found: $exePath"
 }
+
+& (Join-Path $PSScriptRoot 'validate_windows_data_identity.ps1') -ExecutablePath $exePath
 
 # 便携版更新使用该清单区分应用文件与用户放在程序目录中的个人文件。
 $filesManifestPath = Join-Path $buildPath "app_files_manifest.json"

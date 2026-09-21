@@ -140,6 +140,8 @@
 
 ## 构建与更新
 
+- Windows 数据路径取自原生版本资源 `CompanyName=com.example` 与 `ProductName=nai_launcher`，不是 InternalName；品牌显示名使用 FileDescription / 窗口标题。构建后须检查实际 EXE 的版本资源，确保继续读取 `%APPDATA%/com.example/nai_launcher/`，不能把新空目录覆盖回原图库 / 块库目录。
+
 - 正常覆盖构建需目标文件未被运行实例锁定；用户要求自行核验时，不自动关闭程序，可使用独立 CMake 产物目录。Flutter 位于 `C:/flutter`，NuGet 位于 `C:/tools/nuget`，下载和 git 使用本机代理 `http://127.0.0.1:7897`。NSIS 3.12 已装于默认位置（makensis 在 PATH/Program Files (x86)），安装器打包与 `scripts/validate_windows_installer_process_handling.ps1` 依赖它。
 - 安装器（`installer/windows/nai_launcher.nsi`）进程检测自 2026-09-09 起为「软化 fail-closed」语义：进程枚举/查询失败时不再直接阻断，改为以 `CreateFileW(GENERIC_WRITE, share=0)` 探 `$INSTDIR\nai_launcher.exe` 文件锁——文件可写打开或不存在（全新安装）则放行，共享冲突/拒绝访问（文件真被占用）或其他未知错误仍阻断（静默退出码 3 不变）。每次检查失败会把失败阶段、GetLastError、疑似 PID、探锁结果追加写入 `$INSTDIR\install_diagnostics.log`（UTF-16，随卸载删除）。验证脚本已覆盖四场景：目标在跑阻断 / 他目录实例放行 / 查询失败+无锁放行+落诊断 / 全新目录放行。
 - 远程布局（2026-09-11 整理）：origin=本分叉仓库（z15087716457-stack/W.O.F_NAI_Launcher）；上游 Aaalice233 不再常驻远程——需要观察上游改动时临时 `git remote add upstream https://github.com/Aaalice233/Aaalice_NAI_Launcher.git` 并 fetch，看完 `git remote remove upstream`。自行实现有价值的改动，不直接 merge 或 cherry-pick 上游提交。

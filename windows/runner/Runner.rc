@@ -96,7 +96,9 @@ BEGIN
             VALUE "InternalName", "nai_launcher" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "nai_launcher.exe" "\0"
-            VALUE "ProductName", "W.O.F NAI Studio" "\0"
+            // path_provider_windows uses CompanyName/ProductName as the data
+            // directory identity. Keep these stable across display-name changes.
+            VALUE "ProductName", "nai_launcher" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
