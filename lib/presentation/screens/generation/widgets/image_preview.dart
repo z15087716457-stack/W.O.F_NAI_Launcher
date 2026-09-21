@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -417,7 +416,7 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        StudioIcon(
+        Icon(
           Icons.image_outlined,
           size: 80,
           color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
@@ -451,11 +450,7 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        StudioIcon(
-          Icons.error_outline,
-          size: 64,
-          color: theme.colorScheme.error,
-        ),
+        Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
         const SizedBox(height: 16),
         Text(
           errorTitle,

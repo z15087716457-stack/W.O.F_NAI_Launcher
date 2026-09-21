@@ -59,7 +59,7 @@ extension _ImageEditorScreenFocused on _ImageEditorScreenState {
               Expanded(
                 child: FilledButton.icon(
                   onPressed: _toggleFocusedInpaint,
-                  icon: StudioIcon(
+                  icon: Icon(
                     _focusedInpaintEnabled
                         ? Icons.crop_free
                         : Icons.filter_center_focus,
@@ -121,7 +121,7 @@ extension _ImageEditorScreenFocused on _ImageEditorScreenState {
                         });
                       }
                     : null,
-                icon: const StudioIcon(Icons.clear, size: 16),
+                icon: const Icon(Icons.clear, size: 16),
                 label: Text(context.l10n.editor_clearSelection),
               ),
             ),
@@ -175,7 +175,7 @@ extension _ImageEditorScreenFocused on _ImageEditorScreenState {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          StudioIcon(
+          Icon(
             Icons.info_outline,
             size: 17,
             color: colorScheme.onSurfaceVariant,
@@ -279,7 +279,7 @@ extension _ImageEditorScreenFocused on _ImageEditorScreenState {
         onPressed: () {
           _state.setToolById(toolId);
         },
-        icon: StudioIcon(icon, size: 16),
+        icon: Icon(icon, size: 16),
         label: Text(label),
         style: OutlinedButton.styleFrom(
           foregroundColor: selected

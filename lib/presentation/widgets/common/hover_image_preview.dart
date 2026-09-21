@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -80,7 +79,7 @@ class _HoverImagePreviewState extends State<HoverImagePreview> {
                   width: 100,
                   height: 100,
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: StudioIcon(
+                  child: Icon(
                     Icons.broken_image_outlined,
                     size: 32,
                     color: Theme.of(context).colorScheme.outline,

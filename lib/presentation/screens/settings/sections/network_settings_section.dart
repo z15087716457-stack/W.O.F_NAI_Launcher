@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,7 +62,7 @@ class NetworkSettingsSectionState
         children: [
           // 启用代理开关
           SwitchListTile(
-            secondary: const StudioIcon(Icons.wifi_tethering),
+            secondary: const Icon(Icons.wifi_tethering),
             title: Text(l10n.settings_enableProxy),
             subtitle: Text(
               proxySettings.enabled
@@ -88,11 +87,11 @@ class NetworkSettingsSectionState
           // 代理模式选择（仅在启用时显示）
           if (proxySettings.enabled) ...[
             ListTile(
-              leading: const StudioIcon(Icons.security_outlined),
+              leading: const Icon(Icons.security_outlined),
               title: Text(l10n.settings_proxyTrafficDisclosure),
             ),
             ListTile(
-              leading: const StudioIcon(Icons.settings_ethernet),
+              leading: const Icon(Icons.settings_ethernet),
               title: Text(l10n.settings_proxyMode),
               subtitle: Text(
                 proxySettings.mode == ProxyMode.auto
@@ -165,7 +164,7 @@ class NetworkSettingsSectionState
 
             // 测试连接按钮
             ListTile(
-              leading: const StudioIcon(Icons.network_check),
+              leading: const Icon(Icons.network_check),
               title: Text(l10n.settings_testConnection),
               subtitle: Text(_testResult ?? l10n.settings_testConnectionHint),
               trailing: _isTesting
@@ -175,7 +174,7 @@ class NetworkSettingsSectionState
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : IconButton(
-                      icon: const StudioIcon(Icons.play_arrow),
+                      icon: const Icon(Icons.play_arrow),
                       onPressed: _testProxyConnection,
                     ),
             ),

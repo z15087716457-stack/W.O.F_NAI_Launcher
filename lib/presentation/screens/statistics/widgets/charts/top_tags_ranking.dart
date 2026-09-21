@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
@@ -222,6 +221,6 @@ class _MiniTrendIndicator extends StatelessWidget {
         ? Icons.south
         : Icons.remove;
 
-    return StudioIcon(icon, size: 14, color: color);
+    return Icon(icon, size: 14, color: color);
   }
 }

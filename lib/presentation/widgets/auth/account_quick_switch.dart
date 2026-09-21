@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -204,7 +203,7 @@ class AccountQuickSwitch extends ConsumerWidget {
           ],
         ),
         trailing: isCurrent
-            ? StudioIcon(
+            ? Icon(
                 Icons.check_circle,
                 color: theme.colorScheme.primary,
                 size: 20,
@@ -213,12 +212,12 @@ class AccountQuickSwitch extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const StudioIcon(Icons.swap_horiz, size: 20),
+                    icon: const Icon(Icons.swap_horiz, size: 20),
                     onPressed: onTap,
                     tooltip: context.l10n.auth_switchAccount,
                   ),
                   IconButton(
-                    icon: StudioIcon(
+                    icon: Icon(
                       Icons.delete_outline,
                       size: 20,
                       color: theme.colorScheme.error.withValues(alpha: 0.7),

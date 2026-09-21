@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/localization_extension.dart';
@@ -132,7 +131,7 @@ class _ExploreCreateFamilyDialogState extends State<ExploreCreateFamilyDialog> {
                         onPressed: () => setState(() {
                           _customControllers.removeAt(i).dispose();
                         }),
-                        icon: const StudioIcon(Icons.remove_circle_outline),
+                        icon: const Icon(Icons.remove_circle_outline),
                       ),
                     ],
                   ),
@@ -142,7 +141,7 @@ class _ExploreCreateFamilyDialogState extends State<ExploreCreateFamilyDialog> {
                 onPressed: () => setState(() {
                   _customControllers.add(TextEditingController());
                 }),
-                icon: const StudioIcon(Icons.add, size: 16),
+                icon: const Icon(Icons.add, size: 16),
                 label: Text(l10n.styleExplore_addCustomParent),
               ),
             ],

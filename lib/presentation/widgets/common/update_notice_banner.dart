@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -70,7 +69,7 @@ class UpdateNoticeBanner extends ConsumerWidget {
                         color: accent.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: StudioIcon(
+                      child: Icon(
                         isError
                             ? Icons.error_outline_rounded
                             : isReady
@@ -119,7 +118,7 @@ class UpdateNoticeBanner extends ConsumerWidget {
                       tooltip: context.l10n.remindMeLater,
                       onPressed: () =>
                           ref.read(updateStateProvider.notifier).remindLater(),
-                      icon: const StudioIcon(Icons.close_rounded, size: 20),
+                      icon: const Icon(Icons.close_rounded, size: 20),
                     ),
                   ],
                 ),

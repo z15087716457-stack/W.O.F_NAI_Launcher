@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -68,7 +67,7 @@ class TransparentBackgroundChip extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 4),
-                StudioIcon(
+                Icon(
                   enabled ? Icons.check : Icons.close,
                   size: 12,
                   color: contentColor,

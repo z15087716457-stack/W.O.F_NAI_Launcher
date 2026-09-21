@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -185,10 +184,7 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
               // 标题
               Row(
                 children: [
-                  StudioIcon(
-                    Icons.waves_outlined,
-                    color: theme.colorScheme.primary,
-                  ),
+                  Icon(Icons.waves_outlined, color: theme.colorScheme.primary),
                   const SizedBox(width: 12),
                   Text(
                     context.l10n.vibe_export_title,
@@ -199,7 +195,7 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
                   const Spacer(),
                   if (!_isExporting)
                     IconButton(
-                      icon: const StudioIcon(Icons.close),
+                      icon: const Icon(Icons.close),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                 ],
@@ -266,7 +262,7 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
                     const SizedBox(width: 8),
                     FilledButton.icon(
                       onPressed: _selectedEntryIds.isEmpty ? null : _export,
-                      icon: const StudioIcon(Icons.file_download),
+                      icon: const Icon(Icons.file_download),
                       label: Text(
                         context.l10n.vibe_export_exportSelected(
                           _selectedEntryIds.length,
@@ -465,7 +461,7 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
           children: [
             OutlinedButton.icon(
               onPressed: _pickCarrierImage,
-              icon: const StudioIcon(Icons.image_search_outlined),
+              icon: const Icon(Icons.image_search_outlined),
               label: Text(
                 _selectedExternalCarrierImagePath == null
                     ? context.l10n.vibe_export_selectExternalPngImage
@@ -631,7 +627,7 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
           IconButton(
             tooltip: context.l10n.common_selectAll,
             onPressed: allSelected ? null : _selectAll,
-            icon: const StudioIcon(Icons.select_all, size: 18),
+            icon: const Icon(Icons.select_all, size: 18),
             visualDensity: VisualDensity.compact,
           ),
           IconButton(
@@ -639,7 +635,7 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
             onPressed: _selectedEntryIds.isEmpty && _selectedCategoryIds.isEmpty
                 ? null
                 : _selectNone,
-            icon: const StudioIcon(Icons.deselect, size: 18),
+            icon: const Icon(Icons.deselect, size: 18),
             visualDensity: VisualDensity.compact,
           ),
         ];
@@ -648,7 +644,7 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
       return [
         TextButton.icon(
           onPressed: allSelected ? null : _selectAll,
-          icon: const StudioIcon(Icons.select_all, size: 18),
+          icon: const Icon(Icons.select_all, size: 18),
           label: Text(context.l10n.common_selectAll),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -658,7 +654,7 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
           onPressed: _selectedEntryIds.isEmpty && _selectedCategoryIds.isEmpty
               ? null
               : _selectNone,
-          icon: const StudioIcon(Icons.deselect, size: 18),
+          icon: const Icon(Icons.deselect, size: 18),
           label: Text(context.l10n.common_deselectAll),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -752,7 +748,7 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
           child: Row(
             children: [
               IconButton(
-                icon: StudioIcon(
+                icon: Icon(
                   isExpanded
                       ? Icons.keyboard_arrow_down
                       : Icons.keyboard_arrow_right,
@@ -794,7 +790,7 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
                   },
                 ),
               ),
-              StudioIcon(
+              Icon(
                 Icons.folder_open_outlined,
                 size: 20,
                 color: theme.colorScheme.outline,
@@ -893,7 +889,7 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
                 // 展开/折叠按钮
                 if (childCategories.isNotEmpty || categoryEntries.isNotEmpty)
                   IconButton(
-                    icon: StudioIcon(
+                    icon: Icon(
                       isExpanded
                           ? Icons.keyboard_arrow_down
                           : Icons.keyboard_arrow_right,
@@ -948,7 +944,7 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
                 ),
 
                 // 图标
-                StudioIcon(
+                Icon(
                   isExpanded ? Icons.folder_open : Icons.folder,
                   size: 20,
                   color: theme.colorScheme.primary,
@@ -1046,14 +1042,14 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
                       thumbnailData,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        return StudioIcon(
+                        return Icon(
                           Icons.image_not_supported,
                           size: 20,
                           color: theme.colorScheme.outline,
                         );
                       },
                     )
-                  : StudioIcon(
+                  : Icon(
                       Icons.image,
                       size: 20,
                       color: theme.colorScheme.outline,
@@ -1076,7 +1072,7 @@ class _VibeExportDialogState extends ConsumerState<VibeExportDialog> {
                         ),
                       ),
                       if (entry.isFavorite)
-                        const StudioIcon(
+                        const Icon(
                           Icons.favorite,
                           size: 14,
                           color: Colors.pink,
@@ -1352,7 +1348,7 @@ class _StatItem extends StatelessWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        StudioIcon(icon, size: 16, color: color),
+        Icon(icon, size: 16, color: color),
         const SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,

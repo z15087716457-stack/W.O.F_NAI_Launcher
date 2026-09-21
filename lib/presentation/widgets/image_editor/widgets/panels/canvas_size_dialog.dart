@@ -1,5 +1,4 @@
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
@@ -235,7 +234,7 @@ class _CanvasSizeDialogState extends State<CanvasSizeDialog> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: IconButton(
-                    icon: StudioIcon(
+                    icon: Icon(
                       _linkDimensions ? Icons.link : Icons.link_off,
                       color: _linkDimensions
                           ? theme.colorScheme.primary
@@ -459,7 +458,7 @@ class _CanvasSizePreview extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              StudioIcon(
+              Icon(
                 Icons.preview,
                 size: 16,
                 color: theme.colorScheme.onSurfaceVariant,
@@ -807,7 +806,7 @@ class _SizeInfo extends StatelessWidget {
           children: [
             Row(
               children: [
-                StudioIcon(
+                Icon(
                   Icons.crop_square,
                   size: 14,
                   color: theme.colorScheme.outline,
@@ -840,7 +839,7 @@ class _SizeInfo extends StatelessWidget {
           children: [
             Row(
               children: [
-                StudioIcon(
+                Icon(
                   Icons.check_box,
                   size: 14,
                   color: theme.colorScheme.primary,
@@ -895,7 +894,7 @@ class _SizeInfo extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              StudioIcon(
+              Icon(
                 _getModeIcon(mode),
                 size: 12,
                 color: theme.colorScheme.onSecondaryContainer,

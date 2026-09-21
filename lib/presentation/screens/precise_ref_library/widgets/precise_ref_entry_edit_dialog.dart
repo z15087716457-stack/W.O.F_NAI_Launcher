@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
@@ -123,7 +122,7 @@ class _PreciseRefEntryEditDialogState extends State<PreciseRefEntryEditDialog> {
                 for (final type in PreciseRefType.values)
                   ButtonSegment(
                     value: type,
-                    icon: StudioIcon(type.icon, size: 16),
+                    icon: Icon(type.icon, size: 16),
                     label: Text(
                       _typeLabel(context, type),
                       style: const TextStyle(fontSize: 12),

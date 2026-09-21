@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 
@@ -110,7 +109,7 @@ class PromptEditorToolbar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return IconButton(
-      icon: StudioIcon(
+      icon: Icon(
         Icons.fullscreen,
         size: iconSize,
         color: onFullscreenPressed != null
@@ -141,7 +140,7 @@ class PromptEditorToolbar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return IconButton(
-      icon: StudioIcon(
+      icon: Icon(
         Icons.clear,
         size: iconSize,
         color: onClearPressed != null
@@ -169,7 +168,7 @@ class PromptEditorToolbar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return PopupMenuButton<bool>(
-      icon: StudioIcon(
+      icon: Icon(
         Icons.clear,
         size: iconSize,
         color: onClearPressed != null
@@ -190,7 +189,7 @@ class PromptEditorToolbar extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              StudioIcon(
+              Icon(
                 Icons.delete_outline,
                 size: isCompact ? 16 : 18,
                 color: theme.colorScheme.error,
@@ -225,7 +224,7 @@ class PromptEditorToolbar extends StatelessWidget {
 
     return Builder(
       builder: (buttonContext) => IconButton(
-        icon: StudioIcon(
+        icon: Icon(
           Icons.settings,
           size: iconSize,
           color: onSettingsPressed != null

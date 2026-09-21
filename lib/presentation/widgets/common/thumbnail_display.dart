@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -200,7 +199,7 @@ class _ThumbnailDisplayState extends State<ThumbnailDisplay> {
     width: widget.width,
     height: widget.height,
     color: Colors.grey.shade800,
-    child: const StudioIcon(Icons.broken_image_outlined, color: Colors.white38),
+    child: const Icon(Icons.broken_image_outlined, color: Colors.white38),
   );
 
   static int? _decodeCacheExtent(

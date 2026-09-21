@@ -1,13 +1,11 @@
-// Rebuild the Windows icon from the standalone SVG, never from a cropped logo.
-// Requires Node.js and sharp. Usage:
-//   node tool/branding/generate_windows_icons.cjs [--brand-dir <directory>]
-// --brand-dir also exports the SVG, PNG sizes, and ICO into a local asset library.
+// Fit the complete rectangular W.O.F / NAI STUDIO logo into transparent square ICO frames.
+// Requires Node.js and sharp; optional --brand-dir exports a separate local size library.
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const sharp = require('sharp');
 
 const root = path.resolve(__dirname, '../..');
-const source = path.join(root, 'assets/icons/wof_icon.svg');
+const source = path.join(root, 'assets/images/wof_logo_full.png');
 const iconSizes = [16, 20, 24, 32, 40, 48, 64, 96, 128, 256];
 const exportSizes = [...iconSizes, 512, 1024];
 
@@ -35,12 +33,12 @@ async function main() {
     throw new Error('Usage: node generate_windows_icons.cjs [--brand-dir <directory>]');
   }
   const brandDir = args.length ? path.resolve(args[1]) : null;
-  const svg = await fs.readFile(source);
+  const logo = await fs.readFile(source);
   const images = new Map();
   for (const size of exportSizes) {
-    // Oversample the vector at each target size for clean diagonal edges.
-    const large = await sharp(svg).resize(size * 4, size * 4).ensureAlpha().png().toBuffer();
-    const png = await sharp(large).resize(size, size, { kernel: 'lanczos3' }).png().toBuffer();
+    const png = await sharp(logo).resize(size, size, {
+      fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 }, kernel: 'lanczos3',
+    }).png().toBuffer();
     images.set(size, png);
   }
   const ico = makeIco(iconSizes.map(size => ({ size, png: images.get(size) })));
@@ -48,13 +46,12 @@ async function main() {
     await fs.writeFile(path.join(root, target), ico);
   }
   if (brandDir) {
-    const sizeDir = path.join(brandDir, 'Windows尺寸');
+    const sizeDir = path.join(brandDir, 'Windows完整Logo尺寸');
     await fs.mkdir(sizeDir, { recursive: true });
-    await fs.writeFile(path.join(brandDir, 'wof_icon.svg'), svg);
-    await fs.writeFile(path.join(brandDir, 'wof_icon_1024.png'), images.get(1024));
+    await fs.writeFile(path.join(brandDir, 'wof_full_icon_1024.png'), images.get(1024));
     await fs.writeFile(path.join(brandDir, 'app_icon.ico'), ico);
     for (const size of exportSizes.filter(size => size !== 1024)) {
-      await fs.writeFile(path.join(sizeDir, `wof_icon_${size}.png`), images.get(size));
+      await fs.writeFile(path.join(sizeDir, `wof_full_icon_${size}.png`), images.get(size));
     }
   }
   console.log(`Generated Windows ICO: ${iconSizes.join(', ')}px; ${ico.length} bytes`);

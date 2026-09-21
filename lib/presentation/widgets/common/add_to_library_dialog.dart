@@ -1,5 +1,4 @@
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -244,7 +243,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          StudioIcon(Icons.library_add, color: colorScheme.primary),
+          Icon(Icons.library_add, color: colorScheme.primary),
           const SizedBox(width: 8),
           Text(l10n.tagLibrary_addToLibrary),
         ],
@@ -295,10 +294,10 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
                 decoration: InputDecoration(
                   labelText: l10n.addGroup_displayNameLabel,
                   hintText: l10n.addToLibrary_displayNameHint,
-                  prefixIcon: const StudioIcon(Icons.label_outline),
+                  prefixIcon: const Icon(Icons.label_outline),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
-                    icon: const StudioIcon(Icons.clear),
+                    icon: const Icon(Icons.clear),
                     onPressed: () => _nameController.clear(),
                     tooltip: l10n.common_clear,
                   ),
@@ -315,7 +314,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
                     initialValue: _selectedCategoryId,
                     decoration: InputDecoration(
                       labelText: l10n.addGroup_targetCategoryLabel,
-                      prefixIcon: const StudioIcon(Icons.folder_outlined),
+                      prefixIcon: const Icon(Icons.folder_outlined),
                       border: const OutlineInputBorder(),
                     ),
                     items: [
@@ -349,10 +348,10 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
                 decoration: InputDecoration(
                   labelText: l10n.tag_addTag,
                   hintText: l10n.addToLibrary_tagHint,
-                  prefixIcon: const StudioIcon(Icons.tag),
+                  prefixIcon: const Icon(Icons.tag),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
-                    icon: const StudioIcon(Icons.add),
+                    icon: const Icon(Icons.add),
                     onPressed: _addTag,
                     tooltip: l10n.tag_addTag,
                   ),
@@ -368,7 +367,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
                       .map(
                         (tag) => Chip(
                           label: Text(tag, style: theme.textTheme.bodySmall),
-                          deleteIcon: const StudioIcon(Icons.clear, size: 16),
+                          deleteIcon: const Icon(Icons.clear, size: 16),
                           onDeleted: () => _removeTag(tag),
                           visualDensity: VisualDensity.compact,
                           materialTapTargetSize:
@@ -395,7 +394,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const StudioIcon(Icons.save, size: 18),
+              : const Icon(Icons.save, size: 18),
           label: Text(_isSaving ? l10n.common_saving : l10n.common_save),
         ),
       ],

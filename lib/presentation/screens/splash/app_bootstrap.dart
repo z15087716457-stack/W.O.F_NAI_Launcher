@@ -12,6 +12,8 @@ import '../../providers/locale_provider.dart';
 import '../../providers/update_provider.dart';
 import '../../providers/warmup_provider.dart';
 import 'splash_screen.dart';
+import '../../themes/brand_entry_theme.dart';
+import '../../widgets/navigation/integrated_title_bar.dart';
 
 /// 应用启动引导器
 /// 管理预加载流程和页面切换
@@ -57,7 +59,11 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(),
+      theme: BrandEntryTheme.forBrightness(
+        ref.watch(brandEntryBrightnessProvider),
+      ),
+      builder: (context, child) =>
+          IntegratedTitleBarShell(child: child ?? const SizedBox.shrink()),
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,

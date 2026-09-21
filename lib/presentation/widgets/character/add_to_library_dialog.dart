@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -199,11 +198,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
               color: Colors.red.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: StudioIcon(
-              Icons.favorite,
-              size: 18,
-              color: Colors.red.shade400,
-            ),
+            child: Icon(Icons.favorite, size: 18, color: Colors.red.shade400),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -216,7 +211,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
           ),
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: const StudioIcon(Icons.close),
+            icon: const Icon(Icons.close),
             tooltip: l10n.common_close,
             style: IconButton.styleFrom(
               foregroundColor: colorScheme.onSurfaceVariant,
@@ -425,7 +420,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
                       color: colorScheme.onPrimary,
                     ),
                   )
-                : const StudioIcon(Icons.favorite, size: 18),
+                : const Icon(Icons.favorite, size: 18),
             label: Text(l10n.promptBlockLibrary_confirmAdd),
           ),
         ],

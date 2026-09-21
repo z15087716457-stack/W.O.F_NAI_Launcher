@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -212,7 +211,7 @@ class _VibeBundleImportDialogState extends State<VibeBundleImportDialog> {
   Widget _buildHeader(ThemeData theme) {
     return Row(
       children: [
-        StudioIcon(Icons.folder_zip, color: theme.colorScheme.primary),
+        Icon(Icons.folder_zip, color: theme.colorScheme.primary),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
@@ -223,7 +222,7 @@ class _VibeBundleImportDialogState extends State<VibeBundleImportDialog> {
           ),
         ),
         IconButton(
-          icon: const StudioIcon(Icons.close),
+          icon: const Icon(Icons.close),
           onPressed: _cancel,
           tooltip: context.l10n.common_cancel,
         ),
@@ -246,7 +245,7 @@ class _VibeBundleImportDialogState extends State<VibeBundleImportDialog> {
         children: [
           Row(
             children: [
-              StudioIcon(
+              Icon(
                 Icons.folder_outlined,
                 size: 20,
                 color: theme.colorScheme.primary,
@@ -300,7 +299,7 @@ class _VibeBundleImportDialogState extends State<VibeBundleImportDialog> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StudioIcon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
+          Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: 6),
           Text(
             label,
@@ -395,7 +394,7 @@ class _VibeBundleImportDialogState extends State<VibeBundleImportDialog> {
           children: [
             Radio<BundleImportOption>(value: option),
             const SizedBox(width: 8),
-            StudioIcon(
+            Icon(
               icon,
               size: 24,
               color: isSelected
@@ -794,7 +793,7 @@ class _VibeBundleImportDialogState extends State<VibeBundleImportDialog> {
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return Center(
-                                  child: StudioIcon(
+                                  child: Icon(
                                     Icons.image_not_supported,
                                     size: 28,
                                     color: theme.colorScheme.outline,
@@ -803,7 +802,7 @@ class _VibeBundleImportDialogState extends State<VibeBundleImportDialog> {
                               },
                             )
                           : Center(
-                              child: StudioIcon(
+                              child: Icon(
                                 Icons.image,
                                 size: 28,
                                 color: theme.colorScheme.outline,
@@ -834,7 +833,7 @@ class _VibeBundleImportDialogState extends State<VibeBundleImportDialog> {
                                 ),
                               ],
                             ),
-                            child: StudioIcon(
+                            child: Icon(
                               Icons.check,
                               size: 14,
                               color: theme.colorScheme.onPrimary,
@@ -911,7 +910,7 @@ class _VibeBundleImportDialogState extends State<VibeBundleImportDialog> {
         const SizedBox(width: 8),
         FilledButton.icon(
           onPressed: canConfirm ? _confirm : null,
-          icon: const StudioIcon(Icons.download),
+          icon: const Icon(Icons.download),
           label: Text(context.l10n.common_import),
         ),
       ],

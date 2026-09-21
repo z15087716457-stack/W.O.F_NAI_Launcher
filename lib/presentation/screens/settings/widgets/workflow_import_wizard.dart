@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -95,7 +94,7 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
       ),
       child: Row(
         children: [
-          StudioIcon(Icons.upload_file, color: theme.colorScheme.primary),
+          Icon(Icons.upload_file, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -116,7 +115,7 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
             ),
           ),
           IconButton(
-            icon: const StudioIcon(Icons.close),
+            icon: const Icon(Icons.close),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
@@ -174,7 +173,7 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
               else
                 FilledButton.icon(
                   onPressed: _saveWorkflow,
-                  icon: const StudioIcon(Icons.check, size: 18),
+                  icon: const Icon(Icons.check, size: 18),
                   label: Text(context.l10n.workflowImport_finish),
                 ),
             ],
@@ -251,7 +250,7 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
                   ? Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        StudioIcon(
+                        Icon(
                           Icons.check_circle,
                           color: theme.colorScheme.primary,
                           size: 36,
@@ -283,7 +282,7 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
                   : Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        StudioIcon(
+                        Icon(
                           Icons.upload_file,
                           size: 40,
                           color: theme.colorScheme.onSurface.withValues(
@@ -459,7 +458,7 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          StudioIcon(icon, size: 16, color: theme.colorScheme.primary),
+          Icon(icon, size: 16, color: theme.colorScheme.primary),
           const SizedBox(width: 8),
           Text(label, style: theme.textTheme.bodySmall),
           const Spacer(),
@@ -532,7 +531,7 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          StudioIcon(icon, size: 18, color: theme.colorScheme.primary),
+          Icon(icon, size: 18, color: theme.colorScheme.primary),
           const SizedBox(width: 8),
           Text(
             title,
@@ -591,7 +590,7 @@ class _WorkflowImportWizardState extends ConsumerState<WorkflowImportWizard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        StudioIcon(
+        Icon(
           Icons.check_circle_outline,
           size: 48,
           color: theme.colorScheme.primary,

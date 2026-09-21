@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -186,7 +185,7 @@ class _ImagePickerCardState extends State<ImagePickerCard> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          StudioIcon(
+          Icon(
             widget.icon,
             size: 28,
             color: _isHovered || _isDragOver
@@ -299,7 +298,7 @@ class _ImagePickerCardState extends State<ImagePickerCard> {
           borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.all(4),
-            child: StudioIcon(
+            child: Icon(
               Icons.close,
               size: 14,
               color: theme.colorScheme.onSurfaceVariant,
@@ -320,7 +319,7 @@ class _ImagePickerCardState extends State<ImagePickerCard> {
           border: Border.all(color: theme.colorScheme.primary, width: 2),
         ),
         child: Center(
-          child: StudioIcon(
+          child: Icon(
             Icons.add_photo_alternate_outlined,
             size: 32,
             color: theme.colorScheme.primary,

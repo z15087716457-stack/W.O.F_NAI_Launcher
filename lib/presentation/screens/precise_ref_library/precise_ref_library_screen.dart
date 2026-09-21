@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -384,11 +383,7 @@ class _PreciseRefLibraryScreenState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            StudioIcon(
-              Icons.error_outline,
-              size: 40,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 40, color: theme.colorScheme.error),
             const SizedBox(height: 12),
             Text(
               l10n.preciseRefLib_loadFailed(error),
@@ -401,7 +396,7 @@ class _PreciseRefLibraryScreenState
               onPressed: () => ref
                   .read(preciseRefLibraryNotifierProvider.notifier)
                   .reload(showLoading: true),
-              icon: const StudioIcon(Icons.refresh),
+              icon: const Icon(Icons.refresh),
               label: Text(l10n.common_retry),
             ),
           ],
@@ -424,7 +419,7 @@ class _PreciseRefLibraryScreenState
       ),
       child: Row(
         children: [
-          StudioIcon(
+          Icon(
             Icons.center_focus_strong,
             size: 22,
             color: theme.colorScheme.primary,
@@ -455,7 +450,7 @@ class _PreciseRefLibraryScreenState
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: l10n.preciseRefLib_searchHint,
-                prefixIcon: const StudioIcon(Icons.search, size: 18),
+                prefixIcon: const Icon(Icons.search, size: 18),
                 isDense: true,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -472,7 +467,7 @@ class _PreciseRefLibraryScreenState
           IconButton(
             key: const Key('precise-ref-library-favorites-toggle'),
             tooltip: l10n.preciseRefLib_favoritesOnly,
-            icon: StudioIcon(
+            icon: Icon(
               state.favoritesOnly ? Icons.star : Icons.star_border,
               color: state.favoritesOnly ? Colors.amber : null,
             ),
@@ -485,7 +480,7 @@ class _PreciseRefLibraryScreenState
           PopupMenuButton<PreciseRefLibrarySortOrder>(
             key: const Key('precise-ref-library-sort-menu'),
             tooltip: l10n.preciseRefLib_sortBy,
-            icon: const StudioIcon(Icons.sort),
+            icon: const Icon(Icons.sort),
             onSelected: (order) {
               ref
                   .read(preciseRefLibraryNotifierProvider.notifier)
@@ -518,10 +513,7 @@ class _PreciseRefLibraryScreenState
           FilledButton.icon(
             key: const Key('precise-ref-library-import-button'),
             onPressed: _isPickingFile ? null : _importImages,
-            icon: const StudioIcon(
-              Icons.add_photo_alternate_outlined,
-              size: 18,
-            ),
+            icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
             label: Text(l10n.preciseRefLib_import),
           ),
         ],
@@ -541,7 +533,7 @@ class _PreciseRefLibraryScreenState
         children: [
           Expanded(child: Text(label)),
           if (selected)
-            StudioIcon(
+            Icon(
               state.sortDescending ? Icons.arrow_downward : Icons.arrow_upward,
               size: 16,
             ),
@@ -590,7 +582,7 @@ class _PreciseRefLibraryScreenState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            StudioIcon(
+            Icon(
               Icons.filter_alt_off_outlined,
               size: 48,
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
@@ -612,7 +604,7 @@ class _PreciseRefLibraryScreenState
                     .read(preciseRefLibraryNotifierProvider.notifier)
                     .clearFilters();
               },
-              icon: const StudioIcon(Icons.filter_alt_off, size: 18),
+              icon: const Icon(Icons.filter_alt_off, size: 18),
               label: Text(l10n.localGallery_clearFilters),
             ),
           ],
@@ -624,7 +616,7 @@ class _PreciseRefLibraryScreenState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StudioIcon(
+          Icon(
             Icons.center_focus_strong,
             size: 56,
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
@@ -649,10 +641,7 @@ class _PreciseRefLibraryScreenState
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: _isPickingFile ? null : _importImages,
-              icon: const StudioIcon(
-                Icons.add_photo_alternate_outlined,
-                size: 18,
-              ),
+              icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
               label: Text(l10n.preciseRefLib_import),
             ),
           ],
@@ -678,7 +667,7 @@ class _PreciseRefLibraryScreenState
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  StudioIcon(Icons.download, color: theme.colorScheme.primary),
+                  Icon(Icons.download, color: theme.colorScheme.primary),
                   const SizedBox(width: 8),
                   Text(
                     context.l10n.preciseRefLib_empty,

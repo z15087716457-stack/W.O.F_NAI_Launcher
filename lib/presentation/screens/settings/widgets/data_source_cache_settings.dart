@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -91,7 +90,7 @@ class DataSourceCacheSettings extends ConsumerWidget {
                 ),
                 const Divider(),
                 ListTile(
-                  leading: const StudioIcon(Icons.storage_outlined),
+                  leading: const Icon(Icons.storage_outlined),
                   title: Text(context.l10n.autocomplete_dataSourcesTitle),
                 ),
                 _CatalogStatus(ref: ref),
@@ -132,7 +131,7 @@ class DataSourceCacheSettings extends ConsumerWidget {
                 FutureBuilder<int>(
                   future: _loadCooccurrenceCount(ref),
                   builder: (context, snapshot) => ListTile(
-                    leading: const StudioIcon(Icons.hub_outlined),
+                    leading: const Icon(Icons.hub_outlined),
                     title: Text(context.l10n.autocomplete_cooccurrence),
                     subtitle: Text(
                       context.l10n.autocomplete_entryCount(snapshot.data ?? 0),
@@ -141,7 +140,7 @@ class DataSourceCacheSettings extends ConsumerWidget {
                 ),
                 const Divider(),
                 ListTile(
-                  leading: const StudioIcon(Icons.cleaning_services_outlined),
+                  leading: const Icon(Icons.cleaning_services_outlined),
                   title: Text(context.l10n.autocomplete_cacheTitle),
                 ),
                 Wrap(
@@ -160,7 +159,7 @@ class DataSourceCacheSettings extends ConsumerWidget {
                           );
                         }
                       },
-                      icon: const StudioIcon(Icons.cloud_off_outlined),
+                      icon: const Icon(Icons.cloud_off_outlined),
                       label: Text(context.l10n.autocomplete_clearDanbooruCache),
                     ),
                     OutlinedButton.icon(
@@ -175,7 +174,7 @@ class DataSourceCacheSettings extends ConsumerWidget {
                           );
                         }
                       },
-                      icon: const StudioIcon(Icons.translate_outlined),
+                      icon: const Icon(Icons.translate_outlined),
                       label: Text(context.l10n.autocomplete_clearAiCache),
                     ),
                   ],
@@ -210,7 +209,7 @@ class _CatalogStatus extends StatelessWidget {
       builder: (context, snapshot) {
         final metadata = snapshot.data;
         return ListTile(
-          leading: StudioIcon(
+          leading: Icon(
             metadata == null ? Icons.hourglass_top : Icons.check_circle_outline,
           ),
           title: Text(context.l10n.autocomplete_baseCatalog),
@@ -246,7 +245,7 @@ class _ZhDictionaryStatus extends ConsumerWidget {
                 value: state.progress > 0 ? state.progress : null,
               ),
             )
-          : StudioIcon(
+          : Icon(
               state.isInstalled
                   ? Icons.translate_outlined
                   : Icons.download_outlined,
@@ -268,14 +267,14 @@ class _ZhDictionaryStatus extends ConsumerWidget {
             IconButton(
               tooltip: context.l10n.common_cancel,
               onPressed: service.cancelInstall,
-              icon: const StudioIcon(Icons.close),
+              icon: const Icon(Icons.close),
             )
           else ...[
             if (state.isInstalled)
               IconButton(
                 tooltip: context.l10n.autocomplete_checkUpdate,
                 onPressed: () => service.checkForUpdate(force: true),
-                icon: const StudioIcon(Icons.refresh),
+                icon: const Icon(Icons.refresh),
               ),
             FilledButton.tonal(
               onPressed: () async {
@@ -338,7 +337,7 @@ class _ZhDictionaryStatus extends ConsumerWidget {
                   );
                   if (confirmed == true) await service.remove();
                 },
-                icon: const StudioIcon(Icons.delete_outline),
+                icon: const Icon(Icons.delete_outline),
               ),
           ],
         ],

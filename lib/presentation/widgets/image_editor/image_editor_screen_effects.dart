@@ -128,7 +128,7 @@ extension _ImageEditorScreenEffects on _ImageEditorScreenState {
                           IconButton(
                             tooltip: context.l10n.common_close,
                             onPressed: () => Navigator.pop(context, false),
-                            icon: const StudioIcon(Icons.close),
+                            icon: const Icon(Icons.close),
                           ),
                         ],
                       ),
@@ -228,7 +228,7 @@ extension _ImageEditorScreenEffects on _ImageEditorScreenState {
                             onPressed: previewLoading || previewError.isNotEmpty
                                 ? null
                                 : () => Navigator.pop(context, true),
-                            icon: const StudioIcon(Icons.check),
+                            icon: const Icon(Icons.check),
                             label: Text(
                               context.l10n.editor_applyToCurrentLayer,
                             ),
@@ -341,7 +341,7 @@ extension _ImageEditorScreenEffects on _ImageEditorScreenState {
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StudioIcon(_effectIcon(effect), size: prominent ? 20 : 18),
+          Icon(_effectIcon(effect), size: prominent ? 20 : 18),
           const SizedBox(width: 6),
           Text(
             _effectLabel(effect),
@@ -372,7 +372,7 @@ extension _ImageEditorScreenEffects on _ImageEditorScreenState {
           padding: const EdgeInsets.all(14),
           child: Row(
             children: [
-              StudioIcon(_effectIcon(effectType), color: colorScheme.primary),
+              Icon(_effectIcon(effectType), color: colorScheme.primary),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -401,7 +401,7 @@ extension _ImageEditorScreenEffects on _ImageEditorScreenState {
           children: [
             Row(
               children: [
-                StudioIcon(_effectIcon(effectType), color: colorScheme.primary),
+                Icon(_effectIcon(effectType), color: colorScheme.primary),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(

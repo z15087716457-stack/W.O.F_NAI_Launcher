@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -112,17 +111,25 @@ class _CredentialsLoginFormState extends ConsumerState<CredentialsLoginForm> {
           const SizedBox(height: 16),
 
           // 自动登录开关
-          Row(
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              ThemedCheckbox(
-                value: ref.watch(autoLoginProvider),
-                onChanged: (value) {
-                  ref.read(authModeNotifierProvider.notifier).toggleAutoLogin();
-                },
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ThemedCheckbox(
+                    value: ref.watch(autoLoginProvider),
+                    onChanged: (value) {
+                      ref
+                          .read(authModeNotifierProvider.notifier)
+                          .toggleAutoLogin();
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  Text(context.l10n.auth_autoLogin),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text(context.l10n.auth_autoLogin),
-              const Spacer(),
               TextButton(
                 onPressed: _openPasswordReset,
                 child: Text(context.l10n.auth_forgotPassword),
@@ -176,7 +183,7 @@ class _CredentialsLoginFormState extends ConsumerState<CredentialsLoginForm> {
                 children: [
                   Row(
                     children: [
-                      StudioIcon(
+                      Icon(
                         Icons.error_outline,
                         color: Theme.of(context).colorScheme.onErrorContainer,
                       ),
@@ -216,7 +223,7 @@ class _CredentialsLoginFormState extends ConsumerState<CredentialsLoginForm> {
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
                       onPressed: isLoading ? null : _handleLogin,
-                      icon: const StudioIcon(Icons.refresh, size: 18),
+                      icon: const Icon(Icons.refresh, size: 18),
                       label: Text(context.l10n.common_retry),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.error,

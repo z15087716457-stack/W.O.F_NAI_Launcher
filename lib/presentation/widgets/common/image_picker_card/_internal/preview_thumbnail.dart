@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -103,7 +102,7 @@ class PreviewThumbnail extends StatelessWidget {
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
-      child: StudioIcon(
+      child: Icon(
         fallbackIcon,
         size: size * 0.5,
         color: theme.colorScheme.onSurfaceVariant,

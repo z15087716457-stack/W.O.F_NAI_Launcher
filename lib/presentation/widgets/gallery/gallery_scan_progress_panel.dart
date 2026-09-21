@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -151,7 +150,7 @@ class GalleryScanProgressPanel extends ConsumerWidget {
         children: [
           Row(
             children: [
-              StudioIcon(
+              Icon(
                 Icons.storage_outlined,
                 size: 14,
                 color: theme.colorScheme.primary,
@@ -223,7 +222,7 @@ class GalleryScanProgressPanel extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        StudioIcon(icon, size: 14, color: theme.colorScheme.outline),
+        Icon(icon, size: 14, color: theme.colorScheme.outline),
         const SizedBox(height: 4),
         Text(
           value,
@@ -258,7 +257,7 @@ class GalleryScanProgressPanel extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          StudioIcon(
+          Icon(
             Icons.insert_drive_file_outlined,
             size: 12,
             color: theme.colorScheme.outline,

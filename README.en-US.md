@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/icons/wof_icon.svg" alt="W.O.F NAI Studio Logo" width="120">
+  <img src="assets/images/wof_logo_full.png" alt="W.O.F NAI Studio Logo" width="240">
 </p>
 
 <p align="center">
@@ -301,4 +301,4 @@ Contributions via Issues and Pull Requests are welcome. Before submitting a PR, 
 
 This project is open-source under the MIT License. See [LICENSE](LICENSE) for details. Original copyright belongs to the upstream NAI Launcher Contributors; new work in this fork is copyrighted by W.O.F (z15087716457-stack).
 
-The interface bundles Geist Sans / Mono / Pixel Line, HarmonyOS Sans SC, and Geist-style SVG icons. Fonts and icons retain their own licenses; see the [asset guide](tool/branding/README.md) and [license files](assets/licenses/), also available from the app’s About page.
+The interface bundles Geist Sans / Mono / Pixel Line and HarmonyOS Sans SC fonts, alongside the original interface icons. Fonts retain their own licenses; see the [asset guide](tool/branding/README.md) and [license files](assets/licenses/), also available from the app’s About page.

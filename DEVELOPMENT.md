@@ -35,15 +35,15 @@ Windows 桌面热重载优先使用 `scripts/dev_hot_reload_window.ps1`，它会
 
 ### Windows 品牌图标
 
-方形应用图标的母版是 `assets/icons/wof_icon.svg`：纯蓝底、完整白色 W，与标题栏的完整 `assets/images/wof_logo_block.png` 分开维护。不要从完整 Logo 裁切应用图标。
+Windows 应用与托盘图标使用完整长方形 Logo `assets/images/wof_logo_full.png`，等比放入透明方框，不裁掉 W.O.F 或 NAI STUDIO。标题栏使用完整 W.O.F 蓝块 `assets/images/wof_logo_block.png`＋Pixel Line 字体的 `NAI Studio`。
 
-使用 Node.js 和 `sharp` 运行 `node tool/branding/generate_windows_icons.cjs`，同步导出程序资源 `windows/runner/resources/app_icon.ico` 与 Windows 托盘资源 `assets/icons/app_icon.ico`。ICO 内嵌 16、20、24、32、40、48、64、96、128、256px，共十档。可追加 `--brand-dir <目录>` 导出 SVG、1024px PNG、多尺寸 PNG 和 ICO 到品牌资产库。
+使用 Node.js 和 `sharp` 运行 `node tool/branding/generate_windows_icons.cjs`，同步导出程序资源 `windows/runner/resources/app_icon.ico` 与 Windows 托盘资源 `assets/icons/app_icon.ico`。ICO 内嵌 16、20、24、32、40、48、64、96、128、256px，共十档。可追加 `--brand-dir <目录>` 导出 1024px PNG、多尺寸 PNG 和 ICO 到品牌资产库。
 
 ICO 属于原生程序资源；更新后必须重新构建 Windows 程序才能改变 EXE 自身的图标，仅 Flutter 热重载不会更新。macOS 和移动端的图标资源独立维护。
 
 ### Studio 字体与界面图标
 
-显示名为 `W.O.F NAI Studio`；数据目录、单实例标识、可执行文件名和更新仓库保持既有标识。界面字族使用随包提供的 Geist Sans / Mono / Pixel Line 与 HarmonyOS Sans SC，字体角色、图标语义映射、许可和实绘验证见 [tool/branding/README.md](tool/branding/README.md)。新 UI 使用 `StudioIcon` 和 `StudioTypography`；没有语义准确的 Geist 替代时保留原图，不随意替换专用符号。字体、SVG、许可或原生显示名变更后需交付包含新资源的完整运行包。
+显示名为 `W.O.F NAI Studio`；数据目录、单实例标识、可执行文件名和更新仓库保持既有标识。界面字族使用随包提供的 Geist Sans / Mono / Pixel Line 与 HarmonyOS Sans SC，字体角色、品牌入口、许可和实绘验证见 [tool/branding/README.md](tool/branding/README.md)。界面图标已恢复原有 `Icon` 和专用符号，只保留 `StudioTypography` 字体角色。登录与载入使用独立的 `BrandEntryTheme` / `BrandEntryScene`，明暗选择在当前会话内共享，不覆盖工作区主题或账户状态。字体、Logo、许可或原生显示名变更后需交付包含新资源的完整运行包。
 
 ## Changelog 与 Release Notes 规范
 

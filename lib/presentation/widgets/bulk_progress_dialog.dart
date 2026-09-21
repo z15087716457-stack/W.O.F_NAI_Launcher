@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -71,7 +70,7 @@ class _BulkProgressDialogState extends ConsumerState<BulkProgressDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          StudioIcon(operationIcon, color: theme.colorScheme.primary),
+          Icon(operationIcon, color: theme.colorScheme.primary),
           const SizedBox(width: 8),
           Expanded(
             child: Text(operationTitle, overflow: TextOverflow.ellipsis),
@@ -79,7 +78,7 @@ class _BulkProgressDialogState extends ConsumerState<BulkProgressDialog> {
           // Close button (only when not in progress)
           if (!state.isOperationInProgress)
             IconButton(
-              icon: const StudioIcon(Icons.close),
+              icon: const Icon(Icons.close),
               onPressed: () => Navigator.of(context).pop(false),
               tooltip: l10n.common_close,
             ),
@@ -154,7 +153,7 @@ class _BulkProgressDialogState extends ConsumerState<BulkProgressDialog> {
             if (state.isCompleted && !state.isOperationInProgress) ...[
               Row(
                 children: [
-                  StudioIcon(
+                  Icon(
                     Icons.check_circle_outline,
                     color: theme.colorScheme.primary,
                     size: 20,
@@ -186,7 +185,7 @@ class _BulkProgressDialogState extends ConsumerState<BulkProgressDialog> {
                 ),
                 child: Row(
                   children: [
-                    StudioIcon(
+                    Icon(
                       Icons.error_outline,
                       color: theme.colorScheme.error,
                       size: 20,
@@ -239,7 +238,7 @@ class _BulkProgressDialogState extends ConsumerState<BulkProgressDialog> {
           Row(
             children: [
               // Success count
-              StudioIcon(
+              Icon(
                 Icons.check_circle,
                 color: theme.colorScheme.primary,
                 size: 16,
@@ -254,11 +253,7 @@ class _BulkProgressDialogState extends ConsumerState<BulkProgressDialog> {
               const SizedBox(width: 16),
               // Failed count
               if (result.failed > 0) ...[
-                StudioIcon(
-                  Icons.error,
-                  color: theme.colorScheme.error,
-                  size: 16,
-                ),
+                Icon(Icons.error, color: theme.colorScheme.error, size: 16),
                 const SizedBox(width: 6),
                 Text(
                   l10n.bulkProgress_failed(result.failed),

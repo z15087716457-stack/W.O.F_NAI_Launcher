@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -194,7 +193,7 @@ class CacheMonitorWidget extends ConsumerWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              StudioIcon(
+              Icon(
                 Icons.storage_outlined,
                 size: 16,
                 color: colorScheme.primary,
@@ -261,10 +260,7 @@ class CacheMonitorWidget extends ConsumerWidget {
             // 标题栏
             Row(
               children: [
-                StudioIcon(
-                  Icons.analytics_outlined,
-                  color: colorScheme.primary,
-                ),
+                Icon(Icons.analytics_outlined, color: colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   context.l10n.localGallery_cacheMonitor,
@@ -284,13 +280,13 @@ class CacheMonitorWidget extends ConsumerWidget {
                   )
                 else
                   IconButton(
-                    icon: const StudioIcon(Icons.refresh),
+                    icon: const Icon(Icons.refresh),
                     onPressed: controller.refresh,
                     tooltip: context.l10n.common_refresh,
                   ),
                 if (onClose != null)
                   IconButton(
-                    icon: const StudioIcon(Icons.close),
+                    icon: const Icon(Icons.close),
                     onPressed: onClose,
                     tooltip: context.l10n.common_close,
                   ),
@@ -308,7 +304,7 @@ class CacheMonitorWidget extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    StudioIcon(
+                    Icon(
                       Icons.error_outline,
                       color: colorScheme.error,
                       size: 16,
@@ -442,7 +438,7 @@ class _CacheStatisticsPanel extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              StudioIcon(
+              Icon(
                 Icons.storage,
                 color: Colors.orange.withValues(alpha: 0.7),
                 size: 20,
@@ -533,7 +529,7 @@ class _CacheLevelCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          StudioIcon(icon, color: color.withValues(alpha: 0.7), size: 20),
+          Icon(icon, color: color.withValues(alpha: 0.7), size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -716,7 +712,7 @@ class _ActionButtons extends StatelessWidget {
   }) {
     return OutlinedButton.icon(
       onPressed: onPressed,
-      icon: StudioIcon(icon, size: 16, color: color),
+      icon: Icon(icon, size: 16, color: color),
       label: Text(label),
       style: OutlinedButton.styleFrom(
         foregroundColor: color,
@@ -776,7 +772,7 @@ class FloatingCacheMonitorButton extends StatelessWidget {
         );
       },
       tooltip: context.l10n.localGallery_cacheMonitor,
-      child: const StudioIcon(Icons.analytics_outlined),
+      child: const Icon(Icons.analytics_outlined),
     );
   }
 }

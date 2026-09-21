@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 /// 悬浮操作按钮组
@@ -203,7 +202,7 @@ class _FloatingActionButtonItemState extends State<_FloatingActionButtonItem> {
                   : null,
             ),
             child: Center(
-              child: StudioIcon(
+              child: Icon(
                 widget.icon,
                 size: widget.size * 0.57, // 图标大小约为按钮的 57%
                 color: widget.iconColor ?? Colors.white,

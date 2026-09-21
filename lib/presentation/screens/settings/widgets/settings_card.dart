@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 /// 设置卡片组件
@@ -52,11 +51,7 @@ class SettingsCard extends StatelessWidget {
               child: Row(
                 children: [
                   if (icon != null) ...[
-                    StudioIcon(
-                      icon,
-                      size: 20,
-                      color: theme.colorScheme.primary,
-                    ),
+                    Icon(icon, size: 20, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
                   ],
                   Expanded(

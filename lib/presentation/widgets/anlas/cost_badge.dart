@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -54,7 +53,7 @@ class CostBadge extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (!isFree) ...[
-            StudioIcon(
+            Icon(
               Icons.diamond_outlined,
               size: compact ? 10 : 12,
               color: textColor,

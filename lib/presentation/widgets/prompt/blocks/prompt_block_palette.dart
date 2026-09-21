@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -92,7 +91,7 @@ class _PromptBlockPaletteButtonState
                 : theme.colorScheme.onSurfaceVariant,
           ),
           onPressed: _toggle,
-          icon: const StudioIcon(Icons.category_outlined),
+          icon: const Icon(Icons.category_outlined),
         ),
       ),
     );
@@ -305,7 +304,7 @@ class _PromptBlockPaletteCardState
                   padding: const EdgeInsets.fromLTRB(10, 6, 4, 6),
                   child: Row(
                     children: [
-                      StudioIcon(
+                      Icon(
                         Icons.category_outlined,
                         size: 15,
                         color: theme.colorScheme.primary,
@@ -333,7 +332,7 @@ class _PromptBlockPaletteCardState
                             ? l10n.promptBlockLibrary_exitMultiSelect
                             : l10n.promptBlockLibrary_multiSelect,
                         onPressed: _toggleMultiSelect,
-                        icon: const StudioIcon(Icons.checklist),
+                        icon: const Icon(Icons.checklist),
                       ),
                       IconButton(
                         key: const Key('prompt-block-palette-clear'),
@@ -348,7 +347,7 @@ class _PromptBlockPaletteCardState
                             ? l10n.promptBlockPalette_clearAllArmed
                             : l10n.promptBlockPalette_clearAll,
                         onPressed: blocks.isEmpty ? null : _onClearAllPressed,
-                        icon: StudioIcon(
+                        icon: Icon(
                           Icons.delete_sweep_outlined,
                           color: _clearArmed ? theme.colorScheme.error : null,
                         ),
@@ -363,7 +362,7 @@ class _PromptBlockPaletteCardState
                           minHeight: 28,
                         ),
                         onPressed: widget.onClose,
-                        icon: const StudioIcon(Icons.close),
+                        icon: const Icon(Icons.close),
                       ),
                     ],
                   ),
@@ -409,7 +408,7 @@ class _PromptBlockPaletteCardState
                                 blocks.map((block) => block.id),
                               ),
                             ),
-                      icon: const StudioIcon(Icons.select_all),
+                      icon: const Icon(Icons.select_all),
                     ),
                     IconButton(
                       key: const Key('prompt-block-palette-deselect'),
@@ -424,7 +423,7 @@ class _PromptBlockPaletteCardState
                       onPressed: selectedIds.isEmpty
                           ? null
                           : () => setState(_multiSelectedIds.clear),
-                      icon: const StudioIcon(Icons.deselect),
+                      icon: const Icon(Icons.deselect),
                     ),
                     IconButton(
                       key: const Key('prompt-block-palette-remove-selected'),
@@ -439,7 +438,7 @@ class _PromptBlockPaletteCardState
                         selectedIds.length,
                       ),
                       onPressed: selectedIds.isEmpty ? null : _removeSelected,
-                      icon: StudioIcon(
+                      icon: Icon(
                         Icons.delete_outline,
                         color: theme.colorScheme.error,
                       ),
@@ -663,7 +662,7 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
                             onTap: _remove,
                             child: Padding(
                               padding: const EdgeInsets.all(2),
-                              child: StudioIcon(
+                              child: Icon(
                                 Icons.close,
                                 size: 12,
                                 color: theme.colorScheme.onSurfaceVariant,

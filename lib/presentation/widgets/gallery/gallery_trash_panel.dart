@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -185,7 +184,7 @@ class _GalleryTrashPanelDialogState
     return AlertDialog(
       title: Row(
         children: [
-          StudioIcon(Icons.delete_outline, color: theme.colorScheme.error),
+          Icon(Icons.delete_outline, color: theme.colorScheme.error),
           const SizedBox(width: 8),
           Text(l10n.localGallery_trashTitle),
           const Spacer(),
@@ -206,7 +205,7 @@ class _GalleryTrashPanelDialogState
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    StudioIcon(
+                    Icon(
                       Icons.delete_outline,
                       size: 48,
                       color: theme.colorScheme.outline,
@@ -255,7 +254,7 @@ class _GalleryTrashPanelDialogState
               foregroundColor: theme.colorScheme.onError,
             ),
             onPressed: _busy ? null : _deleteAllForever,
-            icon: const StudioIcon(Icons.delete_forever, size: 18),
+            icon: const Icon(Icons.delete_forever, size: 18),
             label: Text(l10n.localGallery_trashDeleteAll),
           ),
         ],
@@ -283,15 +282,12 @@ class _GalleryTrashPanelDialogState
               ? Image.file(
                   File(entry.path),
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => StudioIcon(
+                  errorBuilder: (_, __, ___) => Icon(
                     Icons.broken_image_outlined,
                     color: theme.colorScheme.outline,
                   ),
                 )
-              : StudioIcon(
-                  Icons.help_outline,
-                  color: theme.colorScheme.outline,
-                ),
+              : Icon(Icons.help_outline, color: theme.colorScheme.outline),
         ),
       ),
       title: Text(entry.fileName, maxLines: 1, overflow: TextOverflow.ellipsis),

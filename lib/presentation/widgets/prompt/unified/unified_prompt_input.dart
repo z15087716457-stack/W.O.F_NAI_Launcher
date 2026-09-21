@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -1118,7 +1117,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
         style: theme.textTheme.bodyMedium,
         decoration: InputDecoration(
           hintText: hintText,
-          prefixIcon: StudioIcon(prefixIcon, size: 18),
+          prefixIcon: Icon(prefixIcon, size: 18),
           isDense: true,
           filled: true,
           fillColor: colorScheme.surface.withValues(alpha: 0.86),
@@ -1297,7 +1296,7 @@ class _PromptSearchIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: StudioIcon(icon, size: 18),
+      icon: Icon(icon, size: 18),
       tooltip: tooltip,
       onPressed: onPressed,
       visualDensity: VisualDensity.compact,

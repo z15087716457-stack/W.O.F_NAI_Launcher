@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -96,7 +95,7 @@ class StyleExplorePromptPreviewDialog extends StatelessWidget {
             TextButton.icon(
               key: copyButtonKey,
               onPressed: isEmpty ? null : () => _copy(context, text),
-              icon: const StudioIcon(Icons.copy, size: 16),
+              icon: const Icon(Icons.copy, size: 16),
               label: Text(
                 title == l10n.styleExplore_positive
                     ? l10n.styleExplore_copyPositive

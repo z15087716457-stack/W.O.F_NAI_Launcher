@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -94,9 +93,7 @@ class FloatingLabelInput extends StatelessWidget {
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
-        prefixIcon: prefixIcon != null
-            ? StudioIcon(prefixIcon, size: 20)
-            : null,
+        prefixIcon: prefixIcon != null ? Icon(prefixIcon, size: 20) : null,
         suffixIcon: suffix,
         floatingLabelBehavior: FloatingLabelBehavior.auto,
       ),
@@ -193,7 +190,7 @@ class _FloatingLabelPasswordInputState
       autovalidateMode: widget.autovalidateMode,
       required: widget.required,
       suffix: IconButton(
-        icon: StudioIcon(
+        icon: Icon(
           _isObscured
               ? Icons.visibility_outlined
               : Icons.visibility_off_outlined,

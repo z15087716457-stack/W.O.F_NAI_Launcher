@@ -1,5 +1,4 @@
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -150,7 +149,7 @@ class PromptBlockDetailView extends StatelessWidget {
         children: [
           Row(
             children: [
-              StudioIcon(
+              Icon(
                 promptBlockIconFromName(block.iconName),
                 size: 20,
                 color: blockColor,
@@ -169,7 +168,7 @@ class PromptBlockDetailView extends StatelessWidget {
               if (block.isFavorite)
                 Padding(
                   padding: const EdgeInsets.only(left: 6),
-                  child: StudioIcon(Icons.star, size: 18, color: blockColor),
+                  child: Icon(Icons.star, size: 18, color: blockColor),
                 ),
             ],
           ),
@@ -251,7 +250,7 @@ class _MetaRow extends StatelessWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        StudioIcon(icon, size: 14, color: theme.colorScheme.outline),
+        Icon(icon, size: 14, color: theme.colorScheme.outline),
         const SizedBox(width: 4),
         Expanded(
           child: Text(
@@ -356,7 +355,7 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
               color: blockColor.withValues(alpha: 0.18),
               borderRadius: radius,
             ),
-            child: StudioIcon(
+            child: Icon(
               promptBlockIconFromName(block.iconName),
               size: 40,
               color: blockColor,
@@ -376,7 +375,7 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
               borderRadius: radius,
             ),
             child: const Center(
-              child: StudioIcon(
+              child: Icon(
                 Icons.image_outlined,
                 size: 32,
                 color: Colors.white38,
@@ -408,7 +407,7 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
                   ),
                   cacheWidth: (width * devicePixelRatio).ceil(),
                   errorBuilder: (_, __, ___) => Center(
-                    child: StudioIcon(
+                    child: Icon(
                       Icons.broken_image_outlined,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -433,7 +432,7 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
                 fit: BoxFit.contain,
                 cacheWidth: (width * devicePixelRatio).ceil(),
                 errorBuilder: (_, __, ___) => Center(
-                  child: StudioIcon(
+                  child: Icon(
                     Icons.broken_image_outlined,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -684,7 +683,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      StudioIcon(
+                      Icon(
                         Icons.info_outline,
                         size: 19,
                         color: theme.colorScheme.primary,
@@ -705,7 +704,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
                         tooltip: l10n.common_collapse,
                         visualDensity: VisualDensity.compact,
                         onPressed: onCollapse,
-                        icon: const StudioIcon(Icons.keyboard_arrow_right),
+                        icon: const Icon(Icons.keyboard_arrow_right),
                       ),
                     ],
                   ),
@@ -748,10 +747,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
                             FilledButton.icon(
                               key: const Key('prompt-block-detail-action-edit'),
                               onPressed: onEdit,
-                              icon: const StudioIcon(
-                                Icons.edit_outlined,
-                                size: 18,
-                              ),
+                              icon: const Icon(Icons.edit_outlined, size: 18),
                               label: Text(l10n.common_edit),
                             ),
                             Builder(
@@ -763,7 +759,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
                                       : Offset.zero;
                                   onToggleFavorite(anchor);
                                 },
-                                icon: StudioIcon(
+                                icon: Icon(
                                   block.isFavorite
                                       ? Icons.star
                                       : Icons.star_border,
@@ -778,15 +774,12 @@ class PromptBlockDetailPanel extends StatelessWidget {
                             ),
                             OutlinedButton.icon(
                               onPressed: _copyContent,
-                              icon: const StudioIcon(
-                                Icons.copy_outlined,
-                                size: 18,
-                              ),
+                              icon: const Icon(Icons.copy_outlined, size: 18),
                               label: Text(l10n.common_copy),
                             ),
                             OutlinedButton.icon(
                               onPressed: onExport,
-                              icon: const StudioIcon(
+                              icon: const Icon(
                                 Icons.file_upload_outlined,
                                 size: 18,
                               ),
@@ -796,7 +789,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
                             ),
                             TextButton.icon(
                               onPressed: onDelete,
-                              icon: StudioIcon(
+                              icon: Icon(
                                 Icons.delete_outline,
                                 size: 18,
                                 color: theme.colorScheme.error,
@@ -845,7 +838,7 @@ class PromptBlockDetailRailCollapsed extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            StudioIcon(
+            Icon(
               Icons.info_outline,
               size: 19,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.65),

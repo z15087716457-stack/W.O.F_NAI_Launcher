@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
@@ -179,7 +178,7 @@ class ThemedConfirmDialog extends StatelessWidget {
       title: Row(
         children: [
           if (icon != null) ...[
-            StudioIcon(icon, color: accentColor, size: 24),
+            Icon(icon, color: accentColor, size: 24),
             const SizedBox(width: 12),
           ],
           Expanded(

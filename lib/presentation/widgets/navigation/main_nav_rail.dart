@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -254,7 +253,7 @@ class _NavRailToggle extends StatelessWidget {
                       minimumSize: const Size(0, 36),
                       visualDensity: VisualDensity.compact,
                     ),
-                    icon: const StudioIcon(
+                    icon: const Icon(
                       Icons.keyboard_double_arrow_left,
                       size: 18,
                     ),
@@ -275,7 +274,7 @@ class _NavRailToggle extends StatelessWidget {
                         alpha: 0.1,
                       ),
                     ),
-                    icon: const StudioIcon(
+                    icon: const Icon(
                       Icons.keyboard_double_arrow_right,
                       size: 20,
                     ),
@@ -694,7 +693,7 @@ class _NavIconState extends State<_NavIcon> {
     final color = widget.isSelected
         ? theme.colorScheme.primary
         : theme.iconTheme.color?.withValues(alpha: 0.7);
-    // 自绘图标吃非空色：与 StudioIcon(color: null) 的 IconTheme 兜底同口径解出实色。
+    // 自绘图标吃非空色：与 Icon(color: null) 的 IconTheme 兜底同口径解出实色。
     final resolvedColor =
         color ?? IconTheme.of(context).color ?? theme.colorScheme.onSurface;
 
@@ -757,11 +756,7 @@ class _NavIconState extends State<_NavIcon> {
                               smallSize: 7,
                               child: widget.customIcon != null
                                   ? widget.customIcon!(resolvedColor)
-                                  : StudioIcon(
-                                      widget.icon,
-                                      color: color,
-                                      size: 24,
-                                    ),
+                                  : Icon(widget.icon, color: color, size: 24),
                             ),
                           ),
                         ),
@@ -841,7 +836,7 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
               color: theme.colorScheme.primary.withValues(alpha: 0.2),
               borderRadius: avatarBorderRadius(40),
             ),
-            child: StudioIcon(
+            child: Icon(
               Icons.person,
               color: theme.colorScheme.primary,
               size: 24,
@@ -906,7 +901,7 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
                         ),
                         Opacity(
                           opacity: labelOpacity,
-                          child: StudioIcon(
+                          child: Icon(
                             Icons.expand_more,
                             size: 18,
                             color: theme.colorScheme.onSurfaceVariant,
@@ -998,11 +993,7 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
                   ),
                 ),
                 if (account.id == authState.accountId)
-                  StudioIcon(
-                    Icons.check,
-                    color: theme.colorScheme.primary,
-                    size: 20,
-                  ),
+                  Icon(Icons.check, color: theme.colorScheme.primary, size: 20),
               ],
             ),
           ),
@@ -1015,11 +1006,7 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
           value: 'add',
           child: Row(
             children: [
-              StudioIcon(
-                Icons.add,
-                color: theme.colorScheme.onSurface,
-                size: 20,
-              ),
+              Icon(Icons.add, color: theme.colorScheme.onSurface, size: 20),
               const SizedBox(width: 12),
               Text(context.l10n.auth_addAccount),
             ],
@@ -1031,11 +1018,7 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
           value: 'logout',
           child: Row(
             children: [
-              StudioIcon(
-                Icons.logout,
-                color: theme.colorScheme.error,
-                size: 20,
-              ),
+              Icon(Icons.logout, color: theme.colorScheme.error, size: 20),
               const SizedBox(width: 12),
               Text(
                 context.l10n.auth_logout,
@@ -1162,7 +1145,7 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: const StudioIcon(Icons.close),
+                      icon: const Icon(Icons.close),
                       onPressed: () => Navigator.pop(dialogContext),
                     ),
                   ],

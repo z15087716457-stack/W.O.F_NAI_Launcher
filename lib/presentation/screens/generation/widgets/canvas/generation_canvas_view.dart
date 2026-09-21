@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -1129,7 +1128,7 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
                       color: Colors.black.withValues(alpha: 0.55),
                       borderRadius: BorderRadius.circular(5),
                     ),
-                    child: StudioIcon(
+                    child: Icon(
                       Icons.push_pin,
                       size: 13,
                       color: Colors.white.withValues(alpha: 0.92),
@@ -1260,7 +1259,7 @@ class _CanvasEmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StudioIcon(
+          Icon(
             Icons.image_outlined,
             size: 64,
             color: theme.colorScheme.onSurface.withValues(alpha: 0.2),

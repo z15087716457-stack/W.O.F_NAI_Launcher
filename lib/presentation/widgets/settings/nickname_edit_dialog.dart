@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
@@ -148,7 +147,7 @@ class _NicknameEditDialogState extends State<NicknameEditDialog> {
             // 标题
             Row(
               children: [
-                StudioIcon(
+                Icon(
                   Icons.badge_outlined,
                   color: theme.colorScheme.primary,
                   size: 24,
@@ -180,7 +179,7 @@ class _NicknameEditDialogState extends State<NicknameEditDialog> {
                   errorText: error,
                   counterText:
                       '${_controller.text.characters.length}/$_maxLength',
-                  prefixIcon: const StudioIcon(Icons.person_outline),
+                  prefixIcon: const Icon(Icons.person_outline),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,

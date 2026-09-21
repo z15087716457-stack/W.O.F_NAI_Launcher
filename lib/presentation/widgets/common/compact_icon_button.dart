@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import '../shortcuts/shortcut_tooltip.dart';
 
@@ -136,7 +135,7 @@ class _CompactIconButtonState extends State<CompactIconButton> {
                   ),
                 )
               else
-                StudioIcon(widget.icon, size: 18, color: iconColor),
+                Icon(widget.icon, size: 18, color: iconColor),
               if (hasLabel) ...[
                 const SizedBox(width: 6),
                 Text(

@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/utils/localization_extension.dart';
@@ -168,11 +167,7 @@ class _DetailImagePageState extends State<DetailImagePage>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const StudioIcon(
-                Icons.broken_image,
-                size: 64,
-                color: Colors.grey,
-              ),
+              const Icon(Icons.broken_image, size: 64, color: Colors.grey),
               const SizedBox(height: 16),
               Text(
                 context.l10n.detail_imageLoadFailed,

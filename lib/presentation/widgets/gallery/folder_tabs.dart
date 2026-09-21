@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -131,7 +130,7 @@ class FolderTabs extends ConsumerWidget {
         PopupMenuItem(
           child: Row(
             children: [
-              const StudioIcon(Icons.edit_outlined, size: 18),
+              const Icon(Icons.edit_outlined, size: 18),
               const SizedBox(width: 8),
               Text(context.l10n.common_rename),
             ],
@@ -141,7 +140,7 @@ class FolderTabs extends ConsumerWidget {
         PopupMenuItem(
           child: Row(
             children: [
-              StudioIcon(
+              Icon(
                 Icons.delete_outline,
                 size: 18,
                 color: Theme.of(context).colorScheme.error,
@@ -449,7 +448,7 @@ class _CreateFolderButtonState extends State<_CreateFolderButton> {
               ),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: StudioIcon(
+            child: Icon(
               Icons.create_new_folder_outlined,
               size: 20,
               color: _isHovered

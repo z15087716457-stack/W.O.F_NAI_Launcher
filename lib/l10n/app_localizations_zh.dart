@@ -12,7 +12,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get app_title => 'W.O.F NAI Studio';
 
   @override
-  String get settings_visualAssets => '界面字体、图标与许可';
+  String get settings_visualAssets => '界面字体与许可';
+
+  @override
+  String get brand_entryTagline => '给想象，一个发生的地方。';
+
+  @override
+  String get brand_switchToLight => '切换到浅色';
+
+  @override
+  String get brand_switchToDark => '切换到深色';
 
   @override
   String get app_subtitle => 'NovelAI 第三方客户端';

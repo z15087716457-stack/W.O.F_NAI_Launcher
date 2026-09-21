@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/utils/localization_extension.dart';
@@ -87,7 +86,7 @@ class EditorOverlayIconButton extends StatelessWidget {
         child: SizedBox(
           width: size,
           height: size,
-          child: StudioIcon(icon, size: iconSize, color: color),
+          child: Icon(icon, size: iconSize, color: color),
         ),
       ),
     );
@@ -338,7 +337,7 @@ class EditorFloatingToolbar extends StatelessWidget {
                       if (state.canvasController.isMirroredHorizontally)
                         Padding(
                           padding: const EdgeInsets.only(left: 2),
-                          child: StudioIcon(
+                          child: Icon(
                             Icons.flip,
                             size: 14,
                             color: theme.colorScheme.secondary,
@@ -465,7 +464,7 @@ class _MenuToolRow extends StatelessWidget {
         : theme.colorScheme.onSurface;
     return Row(
       children: [
-        StudioIcon(tool.icon, size: 18, color: color),
+        Icon(tool.icon, size: 18, color: color),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
@@ -473,7 +472,7 @@ class _MenuToolRow extends StatelessWidget {
             style: theme.textTheme.bodyMedium?.copyWith(color: color),
           ),
         ),
-        if (selected) StudioIcon(Icons.check, size: 16, color: color),
+        if (selected) Icon(Icons.check, size: 16, color: color),
       ],
     );
   }
@@ -492,7 +491,7 @@ class _MenuActionRow extends StatelessWidget {
         : theme.colorScheme.onSurface.withValues(alpha: 0.4);
     return Row(
       children: [
-        StudioIcon(action.icon, size: 18, color: color),
+        Icon(action.icon, size: 18, color: color),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
@@ -501,7 +500,7 @@ class _MenuActionRow extends StatelessWidget {
           ),
         ),
         if (action.checked)
-          StudioIcon(Icons.check, size: 16, color: theme.colorScheme.primary),
+          Icon(Icons.check, size: 16, color: theme.colorScheme.primary),
       ],
     );
   }

@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/localization_extension.dart';
@@ -44,7 +43,7 @@ class RecentVibesSection extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
             child: Row(
               children: [
-                StudioIcon(
+                Icon(
                   Icons.history,
                   size: 14,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -61,7 +60,7 @@ class RecentVibesSection extends StatelessWidget {
                 AnimatedRotation(
                   turns: isCollapsed ? 0.75 : 1.0,
                   duration: const Duration(milliseconds: 200),
-                  child: StudioIcon(
+                  child: Icon(
                     Icons.chevron_left,
                     size: 16,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
@@ -147,7 +146,7 @@ class RecentVibeItem extends StatelessWidget {
                         : Container(
                             color: theme.colorScheme.surfaceContainerHighest,
                             child: const Center(
-                              child: StudioIcon(Icons.image, size: 24),
+                              child: Icon(Icons.image, size: 24),
                             ),
                           ),
                     // Bundle 标识
@@ -166,7 +165,7 @@ class RecentVibeItem extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              StudioIcon(
+                              Icon(
                                 Icons.layers,
                                 size: 10,
                                 color: theme.colorScheme.onPrimary,
@@ -214,7 +213,7 @@ class RecentVibeItem extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  StudioIcon(
+                  Icon(
                     Icons.label_outline,
                     size: 8,
                     color: theme.colorScheme.primary,

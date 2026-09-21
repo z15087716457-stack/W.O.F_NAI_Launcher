@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -149,7 +148,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    StudioIcon(
+                    Icon(
                       Icons.warning_amber_rounded,
                       size: 12,
                       color: showBackground
@@ -213,7 +212,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
             _buildAddReferenceDropTarget(
               child: OutlinedButton.icon(
                 onPressed: _addReference,
-                icon: StudioIcon(
+                icon: Icon(
                   _isFileDraggingOver ? Icons.file_download_rounded : Icons.add,
                   size: 16,
                 ),
@@ -237,7 +236,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
                   onPressed: _clearAllReferences,
-                  icon: const StudioIcon(Icons.clear_all, size: 16),
+                  icon: const Icon(Icons.clear_all, size: 16),
                   label: Text(context.l10n.preciseRef_clearAll),
                   style: TextButton.styleFrom(
                     foregroundColor: theme.colorScheme.error,
@@ -747,7 +746,7 @@ class _PreciseReferenceCard extends StatelessWidget {
                   child: IconButton(
                     key: Key('precise-reference-save-to-library-$index'),
                     padding: EdgeInsets.zero,
-                    icon: StudioIcon(
+                    icon: Icon(
                       Icons.bookmark_add_outlined,
                       size: 18,
                       color: theme.colorScheme.primary,
@@ -761,7 +760,7 @@ class _PreciseReferenceCard extends StatelessWidget {
                   width: 28,
                   child: IconButton(
                     padding: EdgeInsets.zero,
-                    icon: StudioIcon(
+                    icon: Icon(
                       Icons.delete_outline,
                       size: 18,
                       color: theme.colorScheme.error,
@@ -822,11 +821,7 @@ class _PreciseReferenceCard extends StatelessWidget {
 
   Widget _buildPlaceholder(ThemeData theme) {
     return Center(
-      child: StudioIcon(
-        Icons.person,
-        size: 22,
-        color: theme.colorScheme.outline,
-      ),
+      child: Icon(Icons.person, size: 22, color: theme.colorScheme.outline),
     );
   }
 

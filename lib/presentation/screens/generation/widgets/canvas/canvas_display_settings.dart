@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -85,8 +84,8 @@ class _DisplaySettingsPanelState extends ConsumerState<_DisplaySettingsPanel> {
               IconButton(
                 tooltip: l10n.generation_canvasZoomToFill,
                 isSelected: fill,
-                icon: const StudioIcon(Icons.open_in_full, size: 18),
-                selectedIcon: const StudioIcon(Icons.open_in_full, size: 18),
+                icon: const Icon(Icons.open_in_full, size: 18),
+                selectedIcon: const Icon(Icons.open_in_full, size: 18),
                 onPressed: () => ref
                     .read(canvasZoomToFillNotifierProvider.notifier)
                     .toggle(),
@@ -95,7 +94,7 @@ class _DisplaySettingsPanelState extends ConsumerState<_DisplaySettingsPanel> {
                 IconButton(
                   tooltip: l10n.generation_canvasBackground,
                   isSelected: _showBackground || background != 'checker',
-                  icon: const StudioIcon(Icons.grid_on, size: 18),
+                  icon: const Icon(Icons.grid_on, size: 18),
                   onPressed: () =>
                       setState(() => _showBackground = !_showBackground),
                 ),
@@ -136,7 +135,7 @@ class _DisplaySettingsPanelState extends ConsumerState<_DisplaySettingsPanel> {
                         child: IconButton(
                           padding: EdgeInsets.zero,
                           tooltip: l10n.generation_canvasBackgroundCustom,
-                          icon: const StudioIcon(Icons.colorize, size: 17),
+                          icon: const Icon(Icons.colorize, size: 17),
                           onPressed: () =>
                               setState(() => _showCustom = !_showCustom),
                         ),
@@ -167,43 +166,43 @@ class _DisplaySettingsPanelState extends ConsumerState<_DisplaySettingsPanel> {
     );
   }
 
-  Widget _swatch(BuildContext context, String value, String selected) =>
-      Tooltip(
-        message: _backgroundLabel(context.l10n, value),
-        child: Semantics(
-          button: true,
-          selected: selected == value,
-          child: InkWell(
-            key: ValueKey('canvas-background:$value'),
-            onTap: () => ref
-                .read(canvasImageBackgroundNotifierProvider.notifier)
-                .set(value),
-            customBorder: const CircleBorder(),
-            child: Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  width: 2,
-                  color: selected == value
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).dividerColor,
-                ),
-              ),
-              padding: const EdgeInsets.all(2),
-              child: ClipOval(
-                child: CanvasImageBackdrop(
-                  value: value,
-                  child: value == 'none'
-                      ? const StudioIcon(Icons.block, size: 18)
-                      : null,
-                ),
-              ),
+  Widget _swatch(
+    BuildContext context,
+    String value,
+    String selected,
+  ) => Tooltip(
+    message: _backgroundLabel(context.l10n, value),
+    child: Semantics(
+      button: true,
+      selected: selected == value,
+      child: InkWell(
+        key: ValueKey('canvas-background:$value'),
+        onTap: () =>
+            ref.read(canvasImageBackgroundNotifierProvider.notifier).set(value),
+        customBorder: const CircleBorder(),
+        child: Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              width: 2,
+              color: selected == value
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).dividerColor,
+            ),
+          ),
+          padding: const EdgeInsets.all(2),
+          child: ClipOval(
+            child: CanvasImageBackdrop(
+              value: value,
+              child: value == 'none' ? const Icon(Icons.block, size: 18) : null,
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 String _backgroundLabel(AppLocalizations l10n, String value) => switch (value) {

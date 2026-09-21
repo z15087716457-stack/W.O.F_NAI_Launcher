@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 
@@ -181,7 +180,7 @@ class _CardActionButtonState extends State<_CardActionButton> {
                       color: Colors.white,
                     ),
                   )
-                : StudioIcon(
+                : Icon(
                     widget.config.icon,
                     color: widget.config.iconColor ?? Colors.white,
                     size: 16,

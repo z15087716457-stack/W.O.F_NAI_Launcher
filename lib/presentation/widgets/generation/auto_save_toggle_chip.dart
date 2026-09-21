@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -206,7 +205,7 @@ class _AutoSaveToggleChipState extends ConsumerState<AutoSaveToggleChip>
                     scale: _checkAnimation.value,
                     child: Transform.rotate(
                       angle: (1 - _checkAnimation.value) * 0.3,
-                      child: const StudioIcon(
+                      child: const Icon(
                         Icons.check_rounded,
                         size: 13,
                         color: Colors.white,
@@ -264,7 +263,7 @@ class AutoSaveToggleIcon extends ConsumerWidget {
         HapticFeedback.lightImpact();
         ref.read(imageSaveSettingsNotifierProvider.notifier).toggleAutoSave();
       },
-      icon: StudioIcon(
+      icon: Icon(
         isEnabled ? Icons.save_rounded : Icons.save_outlined,
         size: 20,
       ),

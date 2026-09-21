@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -189,7 +188,7 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
       height: 40,
       child: Row(
         children: [
-          StudioIcon(icon, size: 18),
+          Icon(icon, size: 18),
           const SizedBox(width: 10),
           Expanded(child: Text(label)),
         ],
@@ -309,7 +308,7 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          StudioIcon(
+                          Icon(
                             Icons.layers,
                             size: 15,
                             color: widget.detailsOpen
@@ -394,7 +393,7 @@ class _LayerThumbTile extends StatelessWidget {
                       ),
                     )
                   else
-                    StudioIcon(
+                    Icon(
                       Icons.image_outlined,
                       size: 18,
                       color: theme.colorScheme.onSurfaceVariant.withValues(
@@ -403,7 +402,7 @@ class _LayerThumbTile extends StatelessWidget {
                     ),
                   if (!layer.visible)
                     Center(
-                      child: StudioIcon(
+                      child: Icon(
                         Icons.visibility_off,
                         size: 14,
                         color: theme.colorScheme.onSurfaceVariant,
@@ -413,7 +412,7 @@ class _LayerThumbTile extends StatelessWidget {
                     Positioned(
                       right: 1,
                       bottom: 1,
-                      child: StudioIcon(
+                      child: Icon(
                         Icons.lock,
                         size: 11,
                         color: theme.colorScheme.onSurfaceVariant,
@@ -423,7 +422,7 @@ class _LayerThumbTile extends StatelessWidget {
                     Positioned(
                       left: 1,
                       top: 1,
-                      child: StudioIcon(
+                      child: Icon(
                         Icons.view_in_ar,
                         size: 11,
                         color: theme.colorScheme.onSurfaceVariant,

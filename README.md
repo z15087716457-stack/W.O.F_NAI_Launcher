@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/icons/wof_icon.svg" alt="W.O.F NAI Studio Logo" width="120">
+  <img src="assets/images/wof_logo_full.png" alt="W.O.F NAI Studio Logo" width="240">
 </p>
 
 <p align="center">
@@ -301,4 +301,4 @@ type(scope): 中文描述
 
 本项目基于 MIT License 开源，详见 [LICENSE](LICENSE)。原版权归属上游 NAI Launcher Contributors，本分支新增部分的版权归 W.O.F (z15087716457-stack)。
 
-界面使用随包提供的 Geist Sans / Mono / Pixel Line、HarmonyOS Sans SC 和 Geist 风格 SVG。字体及图标遵循各自许可，见 [素材说明](tool/branding/README.md) 与 [许可文件](assets/licenses/)；应用「关于」页亦可查看。
+界面使用随包提供的 Geist Sans / Mono / Pixel Line 与 HarmonyOS Sans SC 字体，界面图标沿用原有图标。字体遵循各自许可，见 [素材说明](tool/branding/README.md) 与 [许可文件](assets/licenses/)；应用「关于」页亦可查看。

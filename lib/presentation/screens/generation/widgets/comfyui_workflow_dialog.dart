@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -147,7 +146,7 @@ class _ComfyUIWorkflowDialogState extends ConsumerState<ComfyUIWorkflowDialog> {
       ),
       child: Row(
         children: [
-          StudioIcon(
+          Icon(
             widget.template.isBuiltin
                 ? Icons.auto_fix_high
                 : Icons.account_tree,
@@ -175,7 +174,7 @@ class _ComfyUIWorkflowDialogState extends ConsumerState<ComfyUIWorkflowDialog> {
             ),
           ),
           IconButton(
-            icon: const StudioIcon(Icons.close),
+            icon: const Icon(Icons.close),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
@@ -212,13 +211,13 @@ class _ComfyUIWorkflowDialogState extends ConsumerState<ComfyUIWorkflowDialog> {
           if (!taskState.isRunning)
             FilledButton.icon(
               onPressed: canExecute ? _execute : null,
-              icon: const StudioIcon(Icons.play_arrow, size: 18),
+              icon: const Icon(Icons.play_arrow, size: 18),
               label: Text(context.l10n.comfyWorkflow_execute),
             )
           else
             OutlinedButton.icon(
               onPressed: () => ref.read(comfyUITaskProvider.notifier).cancel(),
-              icon: const StudioIcon(Icons.stop, size: 18),
+              icon: const Icon(Icons.stop, size: 18),
               label: Text(context.l10n.common_cancel),
             ),
         ],
@@ -304,7 +303,7 @@ class _ComfyUIWorkflowDialogState extends ConsumerState<ComfyUIWorkflowDialog> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      StudioIcon(
+                      Icon(
                         slot.dataType == SlotDataType.mask
                             ? Icons.format_paint
                             : Icons.add_photo_alternate_outlined,
@@ -607,7 +606,7 @@ class _ComfyUIWorkflowDialogState extends ConsumerState<ComfyUIWorkflowDialog> {
       ),
       child: Row(
         children: [
-          StudioIcon(Icons.error_outline, color: theme.colorScheme.error),
+          Icon(Icons.error_outline, color: theme.colorScheme.error),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -628,7 +627,7 @@ class _ComfyUIWorkflowDialogState extends ConsumerState<ComfyUIWorkflowDialog> {
       children: [
         Row(
           children: [
-            StudioIcon(
+            Icon(
               Icons.check_circle,
               color: theme.colorScheme.primary,
               size: 20,
@@ -699,7 +698,7 @@ class _MiniButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         child: Padding(
           padding: const EdgeInsets.all(4),
-          child: StudioIcon(icon, size: 16, color: Colors.white),
+          child: Icon(icon, size: 16, color: Colors.white),
         ),
       ),
     );

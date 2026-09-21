@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -116,7 +115,7 @@ class _PreciseRefSelectorDialogState
               key: const Key('precise-ref-selector-search'),
               decoration: InputDecoration(
                 hintText: l10n.preciseRefLib_searchHint,
-                prefixIcon: const StudioIcon(Icons.search, size: 20),
+                prefixIcon: const Icon(Icons.search, size: 20),
                 isDense: true,
                 border: const OutlineInputBorder(),
               ),
@@ -205,7 +204,7 @@ class _PreciseRefSelectorDialogState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StudioIcon(Icons.error_outline, color: theme.colorScheme.error),
+          Icon(Icons.error_outline, color: theme.colorScheme.error),
           const SizedBox(height: 8),
           Text(
             l10n.preciseRefLib_loadFailed(error),
@@ -217,7 +216,7 @@ class _PreciseRefSelectorDialogState
             onPressed: () => ref
                 .read(preciseRefLibraryNotifierProvider.notifier)
                 .reload(showLoading: true),
-            icon: const StudioIcon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             label: Text(l10n.common_retry),
           ),
         ],
@@ -304,7 +303,7 @@ class _SelectorItemState extends ConsumerState<_SelectorItem> {
                   else
                     Container(
                       color: theme.colorScheme.surfaceContainerHighest,
-                      child: StudioIcon(
+                      child: Icon(
                         Icons.image_outlined,
                         size: 24,
                         color: theme.colorScheme.onSurfaceVariant.withValues(
@@ -322,7 +321,7 @@ class _SelectorItemState extends ConsumerState<_SelectorItem> {
                           shape: BoxShape.circle,
                         ),
                         padding: const EdgeInsets.all(2),
-                        child: StudioIcon(
+                        child: Icon(
                           Icons.check,
                           size: 12,
                           color: theme.colorScheme.onPrimary,
@@ -336,7 +335,7 @@ class _SelectorItemState extends ConsumerState<_SelectorItem> {
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
               child: Row(
                 children: [
-                  StudioIcon(
+                  Icon(
                     entry.type.icon,
                     size: 11,
                     color: theme.colorScheme.primary,

@@ -208,7 +208,7 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
     if (plan == null) return const SizedBox.shrink();
     if (!expanded) {
       return IconButton(
-        icon: const StudioIcon(Icons.compress, size: 20),
+        icon: const Icon(Icons.compress, size: 20),
         onPressed: _showCompressionSheet,
         tooltip: context.l10n.editor_compressionTooltip,
       );
@@ -223,7 +223,7 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const StudioIcon(Icons.compress, size: 18),
+            const Icon(Icons.compress, size: 18),
             const SizedBox(width: 6),
             SizedBox(
               width: 92,
@@ -256,7 +256,7 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
 
   Widget _buildMobileCompressionAction() {
     return IconButton(
-      icon: const StudioIcon(Icons.compress),
+      icon: const Icon(Icons.compress),
       onPressed: _showCompressionSheet,
       tooltip: context.l10n.editor_compressionTooltip,
     );

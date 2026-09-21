@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
@@ -212,7 +211,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 onPressed: _clearImg2Img,
-                icon: const StudioIcon(Icons.clear, size: 18),
+                icon: const Icon(Icons.clear, size: 18),
                 label: Text(context.l10n.img2img_clearSettings),
               ),
             ],
@@ -460,7 +459,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     final theme = Theme.of(context);
     return Row(
       children: [
-        StudioIcon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+        Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 8),
         Text(label),
       ],
@@ -628,7 +627,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          StudioIcon(
+          Icon(
             isReady ? Icons.check_circle : Icons.info_outline,
             size: 16,
             color: foreground,
@@ -918,12 +917,12 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
               const ButtonSegment(
                 value: UpscaleBackend.novelai,
                 label: Text('NovelAI'),
-                icon: StudioIcon(Icons.cloud_outlined, size: 16),
+                icon: Icon(Icons.cloud_outlined, size: 16),
               ),
               ButtonSegment(
                 value: UpscaleBackend.comfyui,
                 label: const Text('ComfyUI'),
-                icon: const StudioIcon(Icons.computer, size: 16),
+                icon: const Icon(Icons.computer, size: 16),
                 enabled: comfyEnabled,
               ),
             ],
@@ -962,20 +961,17 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
                   ButtonSegment(
                     value: ComfyUpscaleModule.regular,
                     label: Text(context.l10n.img2img_upscaleRegularModel),
-                    icon: const StudioIcon(
-                      Icons.auto_fix_high_outlined,
-                      size: 16,
-                    ),
+                    icon: const Icon(Icons.auto_fix_high_outlined, size: 16),
                   ),
                   const ButtonSegment(
                     value: ComfyUpscaleModule.seedvr2,
                     label: Text('SeedVR2'),
-                    icon: StudioIcon(Icons.video_settings_outlined, size: 16),
+                    icon: Icon(Icons.video_settings_outlined, size: 16),
                   ),
                   const ButtonSegment(
                     value: ComfyUpscaleModule.rtx,
                     label: Text('RTX'),
-                    icon: StudioIcon(Icons.memory_outlined, size: 16),
+                    icon: Icon(Icons.memory_outlined, size: 16),
                   ),
                 ],
                 selected: {comfyModule},
@@ -1065,7 +1061,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
                   child: TextButton.icon(
                     onPressed: () =>
                         ref.read(comfyUISeedvr2ModelsProvider.notifier).fetch(),
-                    icon: const StudioIcon(Icons.refresh, size: 14),
+                    icon: const Icon(Icons.refresh, size: 14),
                     label: Text(
                       context.l10n.img2img_refreshModelList,
                       style: theme.textTheme.labelSmall,
@@ -1115,7 +1111,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
           const SizedBox(height: 8),
           FilledButton.icon(
             onPressed: canStart ? _runUpscale : null,
-            icon: const StudioIcon(Icons.play_arrow, size: 20),
+            icon: const Icon(Icons.play_arrow, size: 20),
             label: Text(context.l10n.img2img_startUpscale),
           ),
         ],
@@ -2009,7 +2005,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
         height: 40,
         child: Row(
           children: [
-            StudioIcon(
+            Icon(
               icon,
               size: 16,
               color: Theme.of(context).colorScheme.onSurfaceVariant,

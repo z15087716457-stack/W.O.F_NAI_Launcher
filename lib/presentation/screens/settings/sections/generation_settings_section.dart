@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,7 +51,7 @@ class _GenerationSettingsSectionState
         children: [
           SettingsSectionLabel(l10n.settings_generationInputSection),
           SwitchListTile(
-            secondary: const StudioIcon(Icons.mouse_outlined),
+            secondary: const Icon(Icons.mouse_outlined),
             title: Text(l10n.settings_enablePromptWeightScroll),
             subtitle: Text(l10n.settings_enablePromptWeightScrollSubtitle),
             value: promptWeightScrollEnabled,
@@ -73,7 +72,7 @@ class _GenerationSettingsSectionState
           ),
           SettingsSectionLabel(l10n.settings_generationFeedbackSection),
           SwitchListTile(
-            secondary: const StudioIcon(Icons.volume_up_outlined),
+            secondary: const Icon(Icons.volume_up_outlined),
             title: Text(l10n.settings_notificationSound),
             subtitle: Text(l10n.settings_notificationSoundSubtitle),
             value: notificationSettings.soundEnabled,
@@ -81,7 +80,7 @@ class _GenerationSettingsSectionState
           ),
           if (notificationSettings.soundEnabled)
             ListTile(
-              leading: const StudioIcon(Icons.audiotrack_outlined),
+              leading: const Icon(Icons.audiotrack_outlined),
               title: Text(l10n.settings_notificationCustomSound),
               subtitle: Text(
                 notificationSettings.customSoundPath != null
@@ -97,12 +96,12 @@ class _GenerationSettingsSectionState
                 children: [
                   if (notificationSettings.customSoundPath != null)
                     IconButton(
-                      icon: const StudioIcon(Icons.close, size: 20),
+                      icon: const Icon(Icons.close, size: 20),
                       tooltip: l10n.settings_notificationResetSound,
                       onPressed: () =>
                           notificationNotifier.setCustomSoundPath(null),
                     ),
-                  const StudioIcon(Icons.chevron_right),
+                  const Icon(Icons.chevron_right),
                 ],
               ),
               onTap: () => _selectCustomSound(notificationNotifier),

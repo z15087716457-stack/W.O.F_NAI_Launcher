@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -1048,7 +1047,7 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
     double size = 18,
     bool surface = false,
   }) => IconButton(
-    icon: StudioIcon(icon, size: size),
+    icon: Icon(icon, size: size),
     tooltip: label,
     onPressed: onPressed,
     padding: const EdgeInsets.all(6),
@@ -1092,10 +1091,7 @@ class _DirectorToolsScreenState extends ConsumerState<DirectorToolsScreen> {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (icon != null) ...[
-          StudioIcon(icon, size: 15),
-          const SizedBox(width: 5),
-        ],
+        if (icon != null) ...[Icon(icon, size: 15), const SizedBox(width: 5)],
         Text(
           text,
           style: const TextStyle(fontSize: 12),

@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -163,7 +162,7 @@ class _AnimatedFavoriteButtonState extends State<AnimatedFavoriteButton>
           scale: widget.isFavorite
               ? _scaleAnimation.value
               : (_isHovered ? 1.15 : 1.0),
-          child: StudioIcon(
+          child: Icon(
             widget.isFavorite ? Icons.favorite : Icons.favorite_border,
             size: widget.size,
             color: _isHovered && !widget.isFavorite ? color : color,
@@ -378,7 +377,7 @@ class _BaseFavoriteButtonState extends State<_BaseFavoriteButton>
                   scale: widget.isFavorite
                       ? _scaleAnimation.value
                       : (_isHovered ? 1.1 : 1.0),
-                  child: StudioIcon(
+                  child: Icon(
                     widget.isFavorite ? Icons.favorite : Icons.favorite_border,
                     size: widget.size,
                     color: widget.isFavorite

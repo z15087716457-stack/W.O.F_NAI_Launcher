@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -396,7 +395,7 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
           onTap: () => widget.onCreateCollection?.call(parentId, false),
           child: Row(
             children: [
-              const StudioIcon(Icons.collections_bookmark_outlined, size: 18),
+              const Icon(Icons.collections_bookmark_outlined, size: 18),
               const SizedBox(width: 8),
               Text(context.l10n.promptBlockLibrary_newCollection),
             ],
@@ -406,7 +405,7 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
           onTap: () => widget.onCreateCollection?.call(parentId, true),
           child: Row(
             children: [
-              const StudioIcon(Icons.create_new_folder_outlined, size: 18),
+              const Icon(Icons.create_new_folder_outlined, size: 18),
               const SizedBox(width: 8),
               Text(context.l10n.promptBlockLibrary_newCollectionFolder),
             ],
@@ -678,7 +677,7 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            StudioIcon(icon, size: 18, color: Colors.amber.shade700),
+            Icon(icon, size: 18, color: Colors.amber.shade700),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -959,7 +958,7 @@ class _FolderTreeRow extends StatelessWidget {
                                 : context.l10n.common_expand,
                             padding: EdgeInsets.zero,
                             onPressed: onToggleExpanded,
-                            icon: StudioIcon(
+                            icon: Icon(
                               expanded
                                   ? Icons.keyboard_arrow_down
                                   : Icons.keyboard_arrow_right,
@@ -969,7 +968,7 @@ class _FolderTreeRow extends StatelessWidget {
                           )
                         : null,
                   ),
-                  StudioIcon(icon, size: 19, color: iconColor ?? foreground),
+                  Icon(icon, size: 19, color: iconColor ?? foreground),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -1005,7 +1004,7 @@ class _FolderTreeRow extends StatelessWidget {
                             child: InkWell(
                               borderRadius: BorderRadius.circular(13),
                               onTap: onAdd,
-                              child: StudioIcon(
+                              child: Icon(
                                 Icons.add,
                                 size: 18,
                                 color: theme.colorScheme.onSurfaceVariant,
@@ -1018,7 +1017,7 @@ class _FolderTreeRow extends StatelessWidget {
                                 context.l10n.promptBlockLibrary_reorderFolders,
                             child: ReorderableDragStartListener(
                               index: reorderIndex!,
-                              child: StudioIcon(
+                              child: Icon(
                                 Icons.drag_handle,
                                 size: 18,
                                 color: theme.colorScheme.onSurfaceVariant,

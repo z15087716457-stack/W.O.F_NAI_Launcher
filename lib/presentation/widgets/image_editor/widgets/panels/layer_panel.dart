@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
 
@@ -332,21 +331,21 @@ class _LayerPanelHeader extends StatelessWidget {
           const Spacer(),
           // 添加图层
           IconButton(
-            icon: const StudioIcon(Icons.add, size: 20),
+            icon: const Icon(Icons.add, size: 20),
             tooltip: context.l10n.layer_add,
             onPressed: onAddLayer,
             visualDensity: VisualDensity.compact,
           ),
           // 添加 3D 模型图层
           IconButton(
-            icon: const StudioIcon(Icons.view_in_ar, size: 20),
+            icon: const Icon(Icons.view_in_ar, size: 20),
             tooltip: context.l10n.model3d_addLayerTooltip,
             onPressed: onAdd3dLayer,
             visualDensity: VisualDensity.compact,
           ),
           // 向下合并
           IconButton(
-            icon: const StudioIcon(Icons.merge, size: 20),
+            icon: const Icon(Icons.merge, size: 20),
             tooltip: context.l10n.layer_mergeDown,
             onPressed: onMergeDown,
             visualDensity: VisualDensity.compact,
@@ -451,7 +450,7 @@ class _LayerTileState extends State<_LayerTile>
 
                 // 可见性
                 IconButton(
-                  icon: StudioIcon(
+                  icon: Icon(
                     widget.layer.visible
                         ? Icons.visibility
                         : Icons.visibility_off,
@@ -464,7 +463,7 @@ class _LayerTileState extends State<_LayerTile>
 
                 // 锁定
                 IconButton(
-                  icon: StudioIcon(
+                  icon: Icon(
                     widget.layer.locked ? Icons.lock : Icons.lock_open,
                     size: 18,
                   ),
@@ -548,7 +547,7 @@ class _LayerTileState extends State<_LayerTile>
                 // 拖动手柄
                 ReorderableDragStartListener(
                   index: widget.index,
-                  child: const StudioIcon(Icons.drag_handle, size: 18),
+                  child: const Icon(Icons.drag_handle, size: 18),
                 ),
               ],
             ),
@@ -593,7 +592,7 @@ class _LayerTileState extends State<_LayerTile>
           value: 'duplicate',
           child: Row(
             children: [
-              const StudioIcon(Icons.copy_outlined, size: 18),
+              const Icon(Icons.copy_outlined, size: 18),
               const SizedBox(width: 12),
               Text(context.l10n.layer_duplicate),
             ],
@@ -606,7 +605,7 @@ class _LayerTileState extends State<_LayerTile>
           enabled: canDelete,
           child: Row(
             children: [
-              StudioIcon(
+              Icon(
                 Icons.delete_outlined,
                 size: 18,
                 color: theme.colorScheme.error,
@@ -626,7 +625,7 @@ class _LayerTileState extends State<_LayerTile>
           enabled: canMergeDown,
           child: Row(
             children: [
-              const StudioIcon(Icons.merge_type, size: 18),
+              const Icon(Icons.merge_type, size: 18),
               const SizedBox(width: 12),
               Text(context.l10n.layer_merge),
             ],
@@ -640,7 +639,7 @@ class _LayerTileState extends State<_LayerTile>
           value: 'toggle_visibility',
           child: Row(
             children: [
-              StudioIcon(
+              Icon(
                 widget.layer.visible ? Icons.visibility_off : Icons.visibility,
                 size: 18,
               ),
@@ -659,7 +658,7 @@ class _LayerTileState extends State<_LayerTile>
           value: 'toggle_lock',
           child: Row(
             children: [
-              StudioIcon(
+              Icon(
                 widget.layer.locked ? Icons.lock_open : Icons.lock,
                 size: 18,
               ),
@@ -678,7 +677,7 @@ class _LayerTileState extends State<_LayerTile>
           value: 'rename',
           child: Row(
             children: [
-              const StudioIcon(Icons.edit_outlined, size: 18),
+              const Icon(Icons.edit_outlined, size: 18),
               const SizedBox(width: 12),
               Text(context.l10n.layer_rename),
             ],
@@ -693,7 +692,7 @@ class _LayerTileState extends State<_LayerTile>
           enabled: canMoveUp,
           child: Row(
             children: [
-              const StudioIcon(Icons.arrow_upward, size: 18),
+              const Icon(Icons.arrow_upward, size: 18),
               const SizedBox(width: 12),
               Text(context.l10n.layer_moveUp),
             ],
@@ -706,7 +705,7 @@ class _LayerTileState extends State<_LayerTile>
           enabled: canMoveDown,
           child: Row(
             children: [
-              const StudioIcon(Icons.arrow_downward, size: 18),
+              const Icon(Icons.arrow_downward, size: 18),
               const SizedBox(width: 12),
               Text(context.l10n.layer_moveDown),
             ],

@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -145,7 +144,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
               Row(
                 children: [
                   IconButton(
-                    icon: const StudioIcon(Icons.chevron_left),
+                    icon: const Icon(Icons.chevron_left),
                     tooltip: l10n.localGallery_dateRangePrevMonth,
                     onPressed: () {
                       final target = DateTime(
@@ -169,7 +168,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
                     ),
                   ),
                   IconButton(
-                    icon: const StudioIcon(Icons.chevron_right),
+                    icon: const Icon(Icons.chevron_right),
                     tooltip: l10n.localGallery_dateRangeNextMonth,
                     onPressed:
                         _visibleMonth.isBefore(

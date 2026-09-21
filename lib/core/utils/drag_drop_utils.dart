@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -215,7 +214,7 @@ Widget buildImageDragFeedback(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      StudioIcon(
+                      Icon(
                         Icons.touch_app_rounded,
                         size: 9,
                         color: colorScheme.onSurfaceVariant,
@@ -289,7 +288,7 @@ Widget buildProtectedImageDragFeedback(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const StudioIcon(
+                  const Icon(
                     Icons.shield_outlined,
                     color: Colors.white,
                     size: 28,
@@ -397,7 +396,7 @@ Widget _buildPlaceholder(ThemeData theme, ImageDragData dragData) {
           color: colorScheme.surface.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: StudioIcon(
+        child: Icon(
           dragData.isPng
               ? Icons.image_rounded
               : Icons.insert_drive_file_rounded,

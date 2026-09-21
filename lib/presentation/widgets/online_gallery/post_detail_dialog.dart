@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -234,11 +233,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const StudioIcon(
-                        Icons.error,
-                        color: Colors.white54,
-                        size: 48,
-                      ),
+                      const Icon(Icons.error, color: Colors.white54, size: 48),
                       const SizedBox(height: 8),
                       Text(
                         context.l10n.onlineGallery_gifLoadFailed,
@@ -269,7 +264,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const StudioIcon(
+                        const Icon(
                           Icons.error,
                           color: Colors.white54,
                           size: 48,
@@ -290,7 +285,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
               left: 8,
               child: IconButton.filled(
                 onPressed: _close,
-                icon: const StudioIcon(Icons.close),
+                icon: const Icon(Icons.close),
                 style: IconButton.styleFrom(
                   backgroundColor: Colors.black.withValues(alpha: 0.5),
                   foregroundColor: Colors.white,
@@ -314,7 +309,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const StudioIcon(
+                      const Icon(
                         Icons.zoom_in,
                         color: Colors.white54,
                         size: 14,
@@ -423,7 +418,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
                     .read(onlineGalleryNotifierProvider.notifier)
                     .toggleFavorite(widget.post);
               },
-              icon: StudioIcon(
+              icon: Icon(
                 isFavorited ? Icons.favorite : Icons.favorite_border,
                 color: isFavorited ? Colors.red : null,
               ),
@@ -437,11 +432,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
               message: context.l10n.onlineGallery_gelbooruReadOnly,
               child: const Padding(
                 padding: EdgeInsets.all(8),
-                child: StudioIcon(
-                  Icons.favorite,
-                  color: Colors.redAccent,
-                  size: 22,
-                ),
+                child: Icon(Icons.favorite, color: Colors.redAccent, size: 22),
               ),
             ),
         ],
@@ -573,7 +564,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _copyTags,
-                  icon: const StudioIcon(Icons.copy, size: 16),
+                  icon: const Icon(Icons.copy, size: 16),
                   label: Text(context.l10n.onlineGallery_copyTags),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -584,7 +575,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
               Expanded(
                 child: FilledButton.icon(
                   onPressed: _sendToGenerate,
-                  icon: const StudioIcon(Icons.send, size: 16),
+                  icon: const Icon(Icons.send, size: 16),
                   label: Text(context.l10n.onlineGallery_send),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -600,7 +591,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _openInBrowser,
-                  icon: const StudioIcon(Icons.open_in_new, size: 16),
+                  icon: const Icon(Icons.open_in_new, size: 16),
                   label: Text(context.l10n.onlineGallery_open),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -689,7 +680,7 @@ class _InfoRow extends StatelessWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        StudioIcon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
+        Icon(icon, size: 14, color: theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 8),
         SizedBox(
           width: 60,

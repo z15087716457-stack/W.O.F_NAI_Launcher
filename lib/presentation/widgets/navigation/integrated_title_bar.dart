@@ -1,7 +1,4 @@
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:nai_launcher/core/constants/brand.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -189,16 +186,16 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
       child: Row(
         children: [
           const SizedBox(width: 12),
-          SvgPicture.asset(
-            'assets/icons/wof_icon.svg',
-            width: 24,
-            height: 24,
+          Image.asset(
+            'assets/images/wof_logo_block.png',
+            width: 50,
+            height: 20,
             excludeFromSemantics: true,
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              Brand.name,
+              'NAI Studio',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: StudioTypography.wordmark.copyWith(
@@ -309,11 +306,7 @@ class _CaptionButtonState extends State<_CaptionButton> {
                 width: IntegratedTitleBarShell.buttonWidth,
                 height: IntegratedTitleBarShell.barHeight,
                 color: bg,
-                child: StudioIcon(
-                  widget.icon,
-                  size: widget.iconSize,
-                  color: fg,
-                ),
+                child: Icon(widget.icon, size: widget.iconSize, color: fg),
               ),
               if (_tipVisible)
                 Positioned(

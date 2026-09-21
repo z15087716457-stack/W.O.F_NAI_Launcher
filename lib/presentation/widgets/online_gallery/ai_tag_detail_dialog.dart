@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -109,13 +108,13 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const StudioIcon(Icons.broken_image_outlined, size: 48),
+                      const Icon(Icons.broken_image_outlined, size: 48),
                       const SizedBox(height: 12),
                       Text(_detailErrorMessage(snapshot.error)),
                       const SizedBox(height: 12),
                       FilledButton.icon(
                         onPressed: _retry,
-                        icon: const StudioIcon(Icons.refresh),
+                        icon: const Icon(Icons.refresh),
                         label: Text(context.l10n.common_retry),
                       ),
                     ],
@@ -267,7 +266,7 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
                         _favTick.value++;
                       }
                     },
-                    icon: StudioIcon(
+                    icon: Icon(
                       isFav ? Icons.favorite : Icons.favorite_border,
                       color: isFav ? Colors.red.shade400 : null,
                     ),
@@ -291,7 +290,7 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
                           );
                         }
                       },
-                      icon: StudioIcon(
+                      icon: Icon(
                         authorFav
                             ? Icons.person
                             : Icons.person_add_alt_outlined,
@@ -307,7 +306,7 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
             IconButton(
               key: ValueKey('ai-tag-detail-view-author-${item.uploaderId}'),
               onPressed: () => Navigator.pop(context, item.uploaderId),
-              icon: const StudioIcon(Icons.person_search_outlined),
+              icon: const Icon(Icons.person_search_outlined),
               tooltip: context.l10n.onlineGallery_viewAuthor,
             ),
           if (_downloadTotal > 0)
@@ -320,12 +319,12 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
               Uri.parse(item.postUrl),
               mode: LaunchMode.externalApplication,
             ),
-            icon: const StudioIcon(Icons.open_in_new),
+            icon: const Icon(Icons.open_in_new),
             tooltip: context.l10n.onlineGallery_open,
           ),
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const StudioIcon(Icons.close),
+            icon: const Icon(Icons.close),
             tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           ),
         ],
@@ -379,7 +378,7 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
                               );
                               if (mounted) setState(() {});
                             },
-                            icon: const StudioIcon(Icons.refresh),
+                            icon: const Icon(Icons.refresh),
                             label: Text(context.l10n.common_retry),
                           ),
                         ),
@@ -450,7 +449,7 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
       child: Center(
         child: IconButton.filledTonal(
           onPressed: () => _moveTo(detail, _mediaIndex + (left ? -1 : 1)),
-          icon: StudioIcon(left ? Icons.chevron_left : Icons.chevron_right),
+          icon: Icon(left ? Icons.chevron_left : Icons.chevron_right),
         ),
       ),
     );
@@ -539,38 +538,38 @@ class _AiTagDetailDialogState extends ConsumerState<_AiTagDetailDialog> {
               onPressed: media.prompt?.isNotEmpty == true
                   ? () => _copy(media.prompt!)
                   : null,
-              icon: const StudioIcon(Icons.copy, size: 16),
+              icon: const Icon(Icons.copy, size: 16),
               label: Text(context.l10n.localGallery_copyPrompt),
             ),
             OutlinedButton.icon(
               onPressed: media.negativePrompt?.isNotEmpty == true
                   ? () => _copy(media.negativePrompt!)
                   : null,
-              icon: const StudioIcon(Icons.copy_all, size: 16),
+              icon: const Icon(Icons.copy_all, size: 16),
               label: Text(context.l10n.prompt_negativePrompt),
             ),
             OutlinedButton.icon(
               onPressed: () => _copy(_fullMetadata(media)),
-              icon: const StudioIcon(Icons.data_object, size: 16),
+              icon: const Icon(Icons.data_object, size: 16),
               label: Text(context.l10n.onlineGallery_copyFullMetadata),
             ),
             FilledButton.tonalIcon(
               onPressed: () => _sendToGenerate(detail, media),
-              icon: const StudioIcon(Icons.auto_awesome, size: 16),
+              icon: const Icon(Icons.auto_awesome, size: 16),
               label: Text(context.l10n.onlineGallery_sendToTextToImage),
             ),
             OutlinedButton.icon(
               onPressed: _downloadTotal > 0
                   ? null
                   : () => _downloadMedia(detail, [media]),
-              icon: const StudioIcon(Icons.download, size: 16),
+              icon: const Icon(Icons.download, size: 16),
               label: Text(context.l10n.common_download),
             ),
             OutlinedButton.icon(
               onPressed: _downloadTotal > 0
                   ? null
                   : () => _downloadMedia(detail, detail.media),
-              icon: const StudioIcon(Icons.download_for_offline, size: 16),
+              icon: const Icon(Icons.download_for_offline, size: 16),
               label: Text(context.l10n.onlineGallery_downloadAllMedia),
             ),
           ],

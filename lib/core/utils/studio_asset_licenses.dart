@@ -7,7 +7,6 @@ void registerStudioAssetLicenses() {
     for (final entry in const {
       'Geist / Geist Mono / Geist Pixel': 'Geist-OFL.txt',
       'HarmonyOS Sans SC': 'HarmonyOS-Sans-LICENSE.txt',
-      'Geist UI Icons (community snapshot)': 'Geist-Icons-MIT.txt',
     }.entries) {
       yield LicenseEntryWithLineBreaks([
         entry.key,

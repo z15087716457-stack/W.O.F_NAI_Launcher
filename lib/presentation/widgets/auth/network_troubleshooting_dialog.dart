@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
@@ -24,7 +23,7 @@ class NetworkTroubleshootingDialog extends StatelessWidget {
     return AlertDialog(
       title: Row(
         children: [
-          StudioIcon(Icons.wifi_find, color: theme.colorScheme.primary),
+          Icon(Icons.wifi_find, color: theme.colorScheme.primary),
           const SizedBox(width: 8),
           Text(l10n.api_error_network),
         ],
@@ -95,7 +94,7 @@ class NetworkTroubleshootingDialog extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        StudioIcon(icon, size: 20, color: theme.colorScheme.primary),
+        Icon(icon, size: 20, color: theme.colorScheme.primary),
         const SizedBox(width: 12),
         Expanded(
           child: Column(

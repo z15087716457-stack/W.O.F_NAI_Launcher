@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 /// 折叠状态面板
@@ -27,7 +26,7 @@ class CollapsedPanel extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            StudioIcon(
+            Icon(
               icon,
               size: 20,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -76,7 +75,7 @@ class CollapseButton extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(4),
           ),
-          child: StudioIcon(
+          child: Icon(
             icon,
             size: 16,
             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),

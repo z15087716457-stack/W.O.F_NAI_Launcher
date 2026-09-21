@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -36,7 +35,7 @@ class _ImageComparisonScreenState extends ConsumerState<ImageComparisonScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              StudioIcon(
+              Icon(
                 Icons.image_not_supported,
                 size: 64,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
@@ -61,7 +60,7 @@ class _ImageComparisonScreenState extends ConsumerState<ImageComparisonScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              StudioIcon(
+              Icon(
                 Icons.error_outline,
                 size: 64,
                 color: theme.colorScheme.error,
@@ -111,10 +110,7 @@ class _ImageComparisonScreenState extends ConsumerState<ImageComparisonScreen> {
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: StudioIcon(
-                  Icons.close,
-                  color: theme.colorScheme.onSurface,
-                ),
+                icon: Icon(Icons.close, color: theme.colorScheme.onSurface),
                 tooltip: l10n.comparison_close,
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -226,7 +222,7 @@ class _ImageComparisonScreenState extends ConsumerState<ImageComparisonScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        StudioIcon(
+                        Icon(
                           Icons.error_outline,
                           size: 48,
                           color: theme.colorScheme.error,

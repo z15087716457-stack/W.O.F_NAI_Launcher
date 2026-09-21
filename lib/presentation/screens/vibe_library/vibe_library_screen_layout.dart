@@ -166,14 +166,14 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             fontSize: 13,
           ),
-          prefixIcon: StudioIcon(
+          prefixIcon: Icon(
             Icons.search,
             size: 18,
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
           ),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-                  icon: StudioIcon(
+                  icon: Icon(
                     Icons.close,
                     size: 16,
                     color: theme.colorScheme.onSurfaceVariant.withValues(
@@ -247,10 +247,10 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            StudioIcon(sortIcon, size: 16),
+            Icon(sortIcon, size: 16),
             const SizedBox(width: 4),
             Text(sortLabel, style: const TextStyle(fontSize: 12)),
-            StudioIcon(
+            Icon(
               state.sortDescending
                   ? Icons.arrow_drop_down
                   : Icons.arrow_drop_up,
@@ -302,7 +302,7 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
       value: order,
       child: Row(
         children: [
-          StudioIcon(icon, size: 18, color: isSelected ? Colors.blue : null),
+          Icon(icon, size: 18, color: isSelected ? Colors.blue : null),
           const SizedBox(width: 8),
           Text(
             label,
@@ -313,7 +313,7 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
           ),
           if (isSelected) ...[
             const Spacer(),
-            StudioIcon(
+            Icon(
               state.sortDescending ? Icons.arrow_downward : Icons.arrow_upward,
               size: 16,
               color: Colors.blue,
@@ -491,7 +491,7 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(
-            icon: const StudioIcon(Icons.chevron_left),
+            icon: const Icon(Icons.chevron_left),
             onPressed: state.currentPage > 0
                 ? () {
                     ref
@@ -511,7 +511,7 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
             ),
           ),
           IconButton(
-            icon: const StudioIcon(Icons.chevron_right),
+            icon: const Icon(Icons.chevron_right),
             onPressed: state.currentPage < state.totalPages - 1
                 ? () {
                     ref

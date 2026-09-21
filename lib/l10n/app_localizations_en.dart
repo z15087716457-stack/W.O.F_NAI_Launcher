@@ -12,7 +12,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get app_title => 'W.O.F NAI Studio';
 
   @override
-  String get settings_visualAssets => 'Interface fonts, icons & licenses';
+  String get settings_visualAssets => 'Interface fonts & licenses';
+
+  @override
+  String get brand_entryTagline => 'A place for your imagination.';
+
+  @override
+  String get brand_switchToLight => 'Switch to light mode';
+
+  @override
+  String get brand_switchToDark => 'Switch to dark mode';
 
   @override
   String get app_subtitle => 'NovelAI Third-party Client';

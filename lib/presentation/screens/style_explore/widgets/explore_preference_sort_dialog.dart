@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -303,7 +302,7 @@ class _ParentCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            StudioIcon(
+            Icon(
               Icons.broken_image_outlined,
               size: 32,
               color: theme.colorScheme.onSurfaceVariant,

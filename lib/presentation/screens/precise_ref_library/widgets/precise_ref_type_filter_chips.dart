@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
@@ -35,7 +34,7 @@ class PreciseRefTypeFilterChips extends StatelessWidget {
         for (final type in PreciseRefType.values)
           ChoiceChip(
             key: Key('precise-ref-type-filter-${type.name}'),
-            avatar: StudioIcon(
+            avatar: Icon(
               type.icon,
               size: 14,
               color: value == type

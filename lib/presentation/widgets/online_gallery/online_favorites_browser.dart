@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -205,7 +204,7 @@ class _OnlineFavoritesBrowserState
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: ActionChip(
-              avatar: const StudioIcon(Icons.add, size: 18),
+              avatar: const Icon(Icons.add, size: 18),
               label: Text(context.l10n.onlineFav_newCollection),
               onPressed: _createCollection,
               visualDensity: VisualDensity.compact,
@@ -231,7 +230,7 @@ class _OnlineFavoritesBrowserState
         onDeleted: onMenu,
         deleteIcon: onMenu == null
             ? const SizedBox.shrink()
-            : const StudioIcon(Icons.more_vert, size: 16),
+            : const Icon(Icons.more_vert, size: 16),
         deleteButtonTooltipMessage: onMenu == null ? '' : null,
         visualDensity: VisualDensity.compact,
       ),
@@ -247,7 +246,7 @@ class _OnlineFavoritesBrowserState
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: StudioIcon(
+              leading: Icon(
                 Icons.edit_outlined,
                 color: theme.colorScheme.primary,
               ),
@@ -255,7 +254,7 @@ class _OnlineFavoritesBrowserState
               onTap: () => Navigator.pop(context, 'rename'),
             ),
             ListTile(
-              leading: StudioIcon(
+              leading: Icon(
                 Icons.delete_outline,
                 color: theme.colorScheme.error,
               ),
@@ -331,7 +330,7 @@ class _OnlineFavoritesBrowserState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            StudioIcon(
+            Icon(
               Icons.favorite_border,
               size: 48,
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
@@ -441,10 +440,7 @@ class _FavoriteCardMenu extends ConsumerWidget {
     return IconButton(
       iconSize: 18,
       visualDensity: VisualDensity.compact,
-      icon: StudioIcon(
-        Icons.more_vert,
-        color: Theme.of(context).colorScheme.outline,
-      ),
+      icon: Icon(Icons.more_vert, color: Theme.of(context).colorScheme.outline),
       onPressed: () async {
         final notifier = ref.read(onlineFavoritesNotifierProvider.notifier);
         final collections = ref
@@ -457,21 +453,19 @@ class _FavoriteCardMenu extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  leading: const StudioIcon(Icons.folder_outlined),
+                  leading: const Icon(Icons.folder_outlined),
                   title: Text(context.l10n.onlineFav_rootCollection),
                   subtitle: Text(context.l10n.onlineFav_moveHere),
                   onTap: () => Navigator.pop(context, 'root'),
                 ),
                 for (final collection in collections)
                   ListTile(
-                    leading: const StudioIcon(
-                      Icons.collections_bookmark_outlined,
-                    ),
+                    leading: const Icon(Icons.collections_bookmark_outlined),
                     title: Text(collection.name),
                     onTap: () => Navigator.pop(context, collection.id),
                   ),
                 ListTile(
-                  leading: StudioIcon(
+                  leading: Icon(
                     Icons.favorite_border,
                     color: Theme.of(context).colorScheme.error,
                   ),
@@ -657,7 +651,7 @@ class _AuthorCard extends StatelessWidget {
               visualDensity: VisualDensity.compact,
               iconSize: 17,
               color: theme.colorScheme.error.withValues(alpha: 0.72),
-              icon: const StudioIcon(Icons.person_remove_outlined),
+              icon: const Icon(Icons.person_remove_outlined),
             ),
           ),
         ],

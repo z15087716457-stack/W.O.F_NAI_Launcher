@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -546,7 +545,7 @@ class _CharacterChip extends StatelessWidget {
               ),
               if (display.genderIcon != null) ...[
                 const SizedBox(width: 3),
-                StudioIcon(display.genderIcon, size: 14, color: foreground),
+                Icon(display.genderIcon, size: 14, color: foreground),
               ],
               if (display.label != null) ...[
                 const SizedBox(width: 4),

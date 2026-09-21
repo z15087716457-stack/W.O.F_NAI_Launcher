@@ -1,5 +1,4 @@
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/shortcuts/default_shortcuts.dart';
@@ -98,7 +97,7 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  StudioIcon(Icons.keyboard, color: theme.colorScheme.primary),
+                  Icon(Icons.keyboard, color: theme.colorScheme.primary),
                   const SizedBox(width: 12),
                   Text(
                     context.l10n.shortcut_settings_title,
@@ -107,13 +106,13 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
                   const Spacer(),
                   // 帮助按钮
                   IconButton(
-                    icon: const StudioIcon(Icons.help_outline),
+                    icon: const Icon(Icons.help_outline),
                     tooltip: context.l10n.shortcut_settings_help,
                     onPressed: () => ShortcutHelpDialog.show(context),
                   ),
                   // 关闭按钮
                   IconButton(
-                    icon: const StudioIcon(Icons.close),
+                    icon: const Icon(Icons.close),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -128,7 +127,7 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
                       controller: _searchController,
                       decoration: InputDecoration(
                         hintText: context.l10n.shortcut_settings_search,
-                        prefixIcon: const StudioIcon(Icons.search, size: 20),
+                        prefixIcon: const Icon(Icons.search, size: 20),
                         isDense: true,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -215,7 +214,7 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
                   // 重置所有按钮
                   TextButton.icon(
                     onPressed: _showResetConfirmDialog,
-                    icon: const StudioIcon(Icons.refresh, size: 16),
+                    icon: const Icon(Icons.refresh, size: 16),
                     label: Text(context.l10n.shortcut_settings_reset_all),
                   ),
                 ],
@@ -265,7 +264,7 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
         // 上下文标题
         ListTile(
           dense: true,
-          leading: StudioIcon(
+          leading: Icon(
             isExpanded ? Icons.expand_less : Icons.expand_more,
             color: theme.colorScheme.primary,
           ),
@@ -378,7 +377,7 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
           const SizedBox(width: 8),
           // 编辑按钮
           IconButton(
-            icon: const StudioIcon(Icons.edit, size: 18),
+            icon: const Icon(Icons.edit, size: 18),
             tooltip: context.l10n.common_edit,
             visualDensity: VisualDensity.compact,
             onPressed: () {
@@ -390,7 +389,7 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
           // 重置按钮（仅当有自定义快捷键时显示）
           if (binding.hasCustomShortcut)
             IconButton(
-              icon: const StudioIcon(Icons.refresh, size: 18),
+              icon: const Icon(Icons.refresh, size: 18),
               tooltip: context.l10n.shortcut_settings_reset_to_default,
               visualDensity: VisualDensity.compact,
               onPressed: () async {
@@ -412,7 +411,7 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            StudioIcon(
+            Icon(
               Icons.search_off,
               size: 48,
               color: Theme.of(context).colorScheme.outline,

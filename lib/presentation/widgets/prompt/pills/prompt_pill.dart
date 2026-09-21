@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import 'dna_icon.dart';
@@ -86,10 +85,10 @@ class PromptPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StudioIcon(icon, size: 13, color: borderColor),
+          Icon(icon, size: 13, color: borderColor),
           if (variant == PromptPillVariant.normal && locked) ...[
             const SizedBox(width: 2),
-            StudioIcon(Icons.lock_outline, size: 12, color: borderColor),
+            Icon(Icons.lock_outline, size: 12, color: borderColor),
           ],
           const SizedBox(width: 4),
           Flexible(
@@ -111,7 +110,7 @@ class PromptPill extends StatelessWidget {
             DnaIcon(size: 12, color: color),
           ] else if (variant == PromptPillVariant.normal && showRollBadge) ...[
             const SizedBox(width: 2),
-            StudioIcon(rollBadgeIcon, size: 11, color: borderColor),
+            Icon(rollBadgeIcon, size: 11, color: borderColor),
           ],
         ],
       ),

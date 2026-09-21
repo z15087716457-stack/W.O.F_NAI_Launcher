@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -188,7 +187,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
           OutlinedButton.icon(
             key: const Key('style-explore-preview'),
             onPressed: _showPreview,
-            icon: const StudioIcon(Icons.visibility_outlined, size: 18),
+            icon: const Icon(Icons.visibility_outlined, size: 18),
             label: Text(l10n.styleExplore_preview),
           ),
           _buildGalleryToggle(theme, maxWidth, galleryVisible),
@@ -219,7 +218,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
               )
             : null,
         onPressed: () => _toggleRunSidebar(layoutState),
-        icon: const StudioIcon(Icons.explore, size: 18),
+        icon: const Icon(Icons.explore, size: 18),
         label: Text(context.l10n.styleExplore_runSectionTitle),
       ),
     );
@@ -247,7 +246,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
               : theme.colorScheme.onSurfaceVariant,
         ),
         onPressed: () => _toggleGallery(maxWidth),
-        icon: const StudioIcon(Icons.photo_library_outlined),
+        icon: const Icon(Icons.photo_library_outlined),
       ),
     );
   }
@@ -588,7 +587,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
           padding: const EdgeInsets.fromLTRB(12, 8, 4, 4),
           child: Row(
             children: [
-              StudioIcon(
+              Icon(
                 Icons.photo_library_outlined,
                 size: 18,
                 color: theme.colorScheme.onSurfaceVariant,
@@ -610,7 +609,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                 iconSize: 18,
                 onPressed: () =>
                     setState(() => _galleryExpandedOverride = false),
-                icon: const StudioIcon(Icons.close),
+                icon: const Icon(Icons.close),
               ),
             ],
           ),

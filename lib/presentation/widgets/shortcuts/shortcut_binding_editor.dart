@@ -1,5 +1,4 @@
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -127,7 +126,7 @@ class _ShortcutBindingEditorState extends ConsumerState<ShortcutBindingEditor> {
         if (widget.binding.hasCustomShortcut) ...[
           const SizedBox(width: 4),
           IconButton(
-            icon: const StudioIcon(Icons.refresh, size: 16),
+            icon: const Icon(Icons.refresh, size: 16),
             tooltip: l10n.shortcut_settings_reset_to_default,
             visualDensity: VisualDensity.compact,
             onPressed: _resetToDefault,
@@ -136,7 +135,7 @@ class _ShortcutBindingEditorState extends ConsumerState<ShortcutBindingEditor> {
         if (_controller.text.isNotEmpty) ...[
           const SizedBox(width: 4),
           IconButton(
-            icon: const StudioIcon(Icons.clear, size: 16),
+            icon: const Icon(Icons.clear, size: 16),
             tooltip: l10n.common_clear,
             visualDensity: VisualDensity.compact,
             onPressed: _clear,
@@ -246,7 +245,7 @@ class _ShortcutBindingEditorState extends ConsumerState<ShortcutBindingEditor> {
                     ),
                     child: Row(
                       children: [
-                        StudioIcon(
+                        Icon(
                           Icons.warning_amber,
                           size: 16,
                           color: theme.colorScheme.error,
@@ -277,7 +276,7 @@ class _ShortcutBindingEditorState extends ConsumerState<ShortcutBindingEditor> {
               if (widget.binding.hasCustomShortcut)
                 TextButton.icon(
                   onPressed: _resetToDefault,
-                  icon: const StudioIcon(Icons.refresh),
+                  icon: const Icon(Icons.refresh),
                   label: Text(l10n.shortcut_settings_reset_to_default),
                 ),
 

@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -133,7 +132,7 @@ class AccountAvatar extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(color: theme.colorScheme.surface, width: 2),
         ),
-        child: StudioIcon(
+        child: Icon(
           Icons.camera_alt,
           size: badgeSize * 0.6,
           color: theme.colorScheme.onPrimary,

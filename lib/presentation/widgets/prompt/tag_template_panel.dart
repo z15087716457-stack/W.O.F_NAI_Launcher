@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -190,11 +189,7 @@ class _TagTemplatePanelState extends ConsumerState<TagTemplatePanel> {
 
     return Row(
       children: [
-        StudioIcon(
-          Icons.bookmark_border,
-          size: 20,
-          color: theme.colorScheme.primary,
-        ),
+        Icon(Icons.bookmark_border, size: 20, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           context.l10n.tag_templatesTitle,
@@ -225,7 +220,7 @@ class _TagTemplatePanelState extends ConsumerState<TagTemplatePanel> {
         if (!widget.readOnly)
           IconButton(
             onPressed: _createTemplate,
-            icon: const StudioIcon(Icons.add),
+            icon: const Icon(Icons.add),
             iconSize: 20,
             tooltip: context.l10n.tag_templateCreate,
             style: IconButton.styleFrom(
@@ -247,7 +242,7 @@ class _TagTemplatePanelState extends ConsumerState<TagTemplatePanel> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            StudioIcon(
+            Icon(
               Icons.bookmark_border,
               size: 48,
               color: theme.colorScheme.primary.withValues(alpha: 0.4),
@@ -314,7 +309,7 @@ class _TagTemplatePanelState extends ConsumerState<TagTemplatePanel> {
           child: Row(
             children: [
               // 模板图标
-              StudioIcon(
+              Icon(
                 Icons.bookmark,
                 size: 16,
                 color: theme.colorScheme.primary.withValues(alpha: 0.7),
@@ -365,7 +360,7 @@ class _TagTemplatePanelState extends ConsumerState<TagTemplatePanel> {
               ),
 
               // 插入提示
-              StudioIcon(
+              Icon(
                 Icons.add_circle_outline,
                 size: 18,
                 color: theme.colorScheme.primary.withValues(alpha: 0.5),
@@ -373,7 +368,7 @@ class _TagTemplatePanelState extends ConsumerState<TagTemplatePanel> {
               const SizedBox(width: 4),
 
               // 更多操作提示
-              StudioIcon(
+              Icon(
                 Icons.more_vert,
                 size: 18,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.4),

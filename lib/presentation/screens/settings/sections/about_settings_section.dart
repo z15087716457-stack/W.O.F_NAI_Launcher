@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -38,19 +37,19 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
       child: Column(
         children: [
           ListTile(
-            leading: const StudioIcon(Icons.info_outline),
+            leading: const Icon(Icons.info_outline),
             title: Text(context.l10n.app_title),
             subtitle: Text(
               context.l10n.settings_version(AppVersion.versionName),
             ),
           ),
           ListTile(
-            leading: const StudioIcon(Icons.text_fields),
+            leading: const Icon(Icons.text_fields),
             title: Text(context.l10n.settings_visualAssets),
             subtitle: const Text(
-              'Geist Sans / Mono / Pixel Line · HarmonyOS Sans SC · Geist UI Icons',
+              'Geist Sans / Mono / Pixel Line · HarmonyOS Sans SC',
             ),
-            trailing: const StudioIcon(Icons.chevron_right),
+            trailing: const Icon(Icons.chevron_right),
             onTap: () => showLicensePage(
               context: context,
               applicationName: context.l10n.app_title,
@@ -58,7 +57,7 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
             ),
           ),
           SwitchListTile(
-            secondary: const StudioIcon(Icons.article_outlined),
+            secondary: const Icon(Icons.article_outlined),
             title: Text(context.l10n.settings_fileLogging),
             subtitle: Text(context.l10n.settings_fileLoggingSubtitle),
             value: fileLoggingEnabled,
@@ -81,7 +80,7 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
                 leading: Badge(
                   isLabelVisible: updateState.hasNewVersion,
                   smallSize: 7,
-                  child: const StudioIcon(Icons.system_update),
+                  child: const Icon(Icons.system_update),
                 ),
                 title: Text(context.l10n.checkForUpdate),
                 subtitle: Text(
@@ -101,7 +100,7 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const StudioIcon(Icons.chevron_right),
+                    : const Icon(Icons.chevron_right),
                 onTap: updateState.isChecking
                     ? null
                     : () async {
@@ -124,7 +123,7 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
             builder: (context, snapshot) {
               final includePrerelease = snapshot.data ?? false;
               return SwitchListTile(
-                secondary: const StudioIcon(Icons.new_releases_outlined),
+                secondary: const Icon(Icons.new_releases_outlined),
                 title: Text(context.l10n.includePrereleaseUpdates),
                 subtitle: Text(
                   context.l10n.includePrereleaseUpdatesDescription,
@@ -140,10 +139,10 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
             },
           ),
           ListTile(
-            leading: const StudioIcon(Icons.code),
+            leading: const Icon(Icons.code),
             title: Text(context.l10n.settings_openSource),
             subtitle: Text(context.l10n.settings_openSourceSubtitle),
-            trailing: const StudioIcon(Icons.open_in_new),
+            trailing: const Icon(Icons.open_in_new),
             onTap: () async {
               final uri = Uri.parse(
                 'https://github.com/z15087716457-stack/W.O.F_NAI_Launcher',

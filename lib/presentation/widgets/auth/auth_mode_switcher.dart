@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/config/auth_feature_flags.dart';
@@ -8,7 +7,8 @@ import '../../providers/auth_mode_provider.dart';
 
 /// 登录模式切换组件
 class AuthModeSwitcher extends ConsumerWidget {
-  const AuthModeSwitcher({super.key});
+  const AuthModeSwitcher({super.key, this.compact = false});
+  final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,14 +19,19 @@ class AuthModeSwitcher extends ConsumerWidget {
         ? AuthMode.token
         : currentMode;
 
-    return Row(
+    final tabs = Row(
       key: const Key('auth_mode_switcher'),
+      crossAxisAlignment: compact
+          ? CrossAxisAlignment.stretch
+          : CrossAxisAlignment.center,
       children: [
         Expanded(
           child: _buildModeButton(
             key: const Key('auth_mode_token'),
             context: context,
-            label: context.l10n.auth_tokenLoginRecommended,
+            label: compact
+                ? 'API Token'
+                : context.l10n.auth_tokenLoginRecommended,
             icon: Icons.key_outlined,
             isSelected: effectiveMode == AuthMode.token,
             onTap: () {
@@ -70,6 +75,7 @@ class AuthModeSwitcher extends ConsumerWidget {
         ),
       ],
     );
+    return compact ? IntrinsicHeight(child: tabs) : tabs;
   }
 
   Widget _buildModeButton({
@@ -88,6 +94,52 @@ class AuthModeSwitcher extends ConsumerWidget {
               ? theme.colorScheme.primary
               : theme.colorScheme.onSurfaceVariant)
         : theme.disabledColor;
+
+    if (compact) {
+      return Semantics(
+        selected: isSelected,
+        button: true,
+        child: Tooltip(
+          message: !enabled && disabledTooltip != null
+              ? disabledTooltip
+              : label == 'API Token'
+              ? context.l10n.auth_tokenLoginRecommended
+              : label,
+          child: InkWell(
+            key: key,
+            onTap: enabled ? onTap : null,
+            borderRadius: BorderRadius.circular(4),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 160),
+              constraints: const BoxConstraints(minHeight: 48),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outline,
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontSize: 12,
+                    height: 1.4,
+                    color: foregroundColor,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     final button = InkWell(
       key: key,
@@ -118,7 +170,7 @@ class AuthModeSwitcher extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              StudioIcon(icon, size: 20, color: foregroundColor),
+              Icon(icon, size: 20, color: foregroundColor),
               const SizedBox(height: 6),
               Flexible(
                 child: Text(

@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -141,11 +140,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const StudioIcon(
-                Icons.error_outline,
-                color: Colors.white54,
-                size: 48,
-              ),
+              const Icon(Icons.error_outline, color: Colors.white54, size: 48),
               const SizedBox(height: 12),
               Text(
                 context.l10n.onlineGallery_videoLoadFailed,
@@ -251,7 +246,7 @@ class OnlineGalleryVideoControls extends StatelessWidget {
                     color: Colors.black.withValues(alpha: 0.5),
                     shape: BoxShape.circle,
                   ),
-                  child: StudioIcon(
+                  child: Icon(
                     isPlaying ? Icons.pause : Icons.play_arrow,
                     color: Colors.white,
                     size: 48,
@@ -285,7 +280,7 @@ class OnlineGalleryVideoControls extends StatelessWidget {
                     children: [
                       GestureDetector(
                         onTap: onTogglePlayPause,
-                        child: StudioIcon(
+                        child: Icon(
                           isPlaying ? Icons.pause : Icons.play_arrow,
                           color: Colors.white,
                           size: 20,

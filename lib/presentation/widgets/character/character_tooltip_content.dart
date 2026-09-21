@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,7 +57,7 @@ class _EmptyStateContent extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StudioIcon(
+          Icon(
             Icons.people_outline,
             size: 32,
             color: colorScheme.outline.withValues(alpha: 0.5),
@@ -183,7 +182,7 @@ class _GlobalAiStatusRow extends StatelessWidget {
             style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
           ),
           const SizedBox(width: 6),
-          StudioIcon(
+          Icon(
             globalAiChoice ? Icons.check_circle : Icons.cancel,
             size: 14,
             color: globalAiChoice ? colorScheme.primary : colorScheme.outline,
@@ -544,7 +543,7 @@ class _SummaryRow extends StatelessWidget {
         const SizedBox(height: 4),
         Row(
           children: [
-            StudioIcon(Icons.touch_app, size: 12, color: colorScheme.outline),
+            Icon(Icons.touch_app, size: 12, color: colorScheme.outline),
             const SizedBox(width: 4),
             Text(
               l10n.characterTooltip_viewFullConfig,

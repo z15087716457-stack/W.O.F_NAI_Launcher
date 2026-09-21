@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -200,7 +199,7 @@ class VibeDetailParamPanel extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StudioIcon(Icons.label_outline, size: 12, color: color),
+          Icon(Icons.label_outline, size: 12, color: color),
           const SizedBox(width: 4),
           Text(
             context.vibeSourceTypeLabel(entry.sourceType),
@@ -391,7 +390,7 @@ class VibeDetailParamPanel extends StatelessWidget {
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const StudioIcon(Icons.save_outlined),
+                  : const Icon(Icons.save_outlined),
               label: Text(l10n.vibeDetail_saveParameters),
             ),
           ),
@@ -400,7 +399,7 @@ class VibeDetailParamPanel extends StatelessWidget {
             width: double.infinity,
             child: FilledButton.icon(
               onPressed: onSendToGeneration,
-              icon: const StudioIcon(Icons.send),
+              icon: const Icon(Icons.send),
               label: Text(l10n.vibeLibrary_sendToGeneration),
             ),
           ),
@@ -416,7 +415,7 @@ class VibeDetailParamPanel extends StatelessWidget {
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const StudioIcon(Icons.drive_file_rename_outline),
+                      : const Icon(Icons.drive_file_rename_outline),
                   label: Text(l10n.common_rename),
                 ),
               ),
@@ -424,7 +423,7 @@ class VibeDetailParamPanel extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: onExport,
-                  icon: const StudioIcon(Icons.file_download_outlined),
+                  icon: const Icon(Icons.file_download_outlined),
                   label: Text(l10n.common_export),
                 ),
               ),
@@ -432,7 +431,7 @@ class VibeDetailParamPanel extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: onDelete,
-                  icon: const StudioIcon(Icons.delete_outline),
+                  icon: const Icon(Icons.delete_outline),
                   label: Text(l10n.common_delete),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: theme.colorScheme.error,

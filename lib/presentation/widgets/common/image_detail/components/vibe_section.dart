@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -111,7 +110,7 @@ class _VibeSectionState extends State<VibeSection> {
                   : SystemMouseCursors.basic,
               child: Row(
                 children: [
-                  StudioIcon(
+                  Icon(
                     Icons.style_outlined,
                     size: 16,
                     color: hasVibes
@@ -151,7 +150,7 @@ class _VibeSectionState extends State<VibeSection> {
                     ),
                   const Spacer(),
                   if (hasVibes)
-                    StudioIcon(
+                    Icon(
                       _isExpanded ? Icons.expand_less : Icons.expand_more,
                       size: 20,
                       color: colorScheme.onSurfaceVariant,
@@ -167,7 +166,7 @@ class _VibeSectionState extends State<VibeSection> {
           // 复制全部按钮
           IconButton(
             onPressed: _copyAllVibes,
-            icon: StudioIcon(
+            icon: Icon(
               Icons.copy_all,
               size: 16,
               color: colorScheme.onSurfaceVariant,
@@ -303,11 +302,7 @@ class _VibeCard extends StatelessWidget {
           if (onSaveToLibrary != null)
             IconButton(
               onPressed: onSaveToLibrary,
-              icon: StudioIcon(
-                Icons.save_alt,
-                size: 18,
-                color: colorScheme.primary,
-              ),
+              icon: Icon(Icons.save_alt, size: 18, color: colorScheme.primary),
               tooltip: context.l10n.detail_saveToVibeLibrary,
               style: IconButton.styleFrom(
                 padding: const EdgeInsets.all(6),
@@ -373,7 +368,7 @@ class _VibeCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
       ),
-      child: StudioIcon(
+      child: Icon(
         Icons.image_outlined,
         size: 24,
         color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
@@ -393,7 +388,7 @@ class _VibeCard extends StatelessWidget {
 
     return Row(
       children: [
-        StudioIcon(icon, size: 12, color: colorScheme.onSurfaceVariant),
+        Icon(icon, size: 12, color: colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),
         Text(
           '$label:',

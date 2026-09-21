@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
@@ -354,7 +353,7 @@ Widget _defaultImageBuilder(BuildContext context, String filePath) {
     errorBuilder: (context, error, stackTrace) => SizedBox(
       width: 120,
       height: 120,
-      child: StudioIcon(
+      child: Icon(
         Icons.broken_image_outlined,
         size: 32,
         color: Theme.of(context).colorScheme.outline,

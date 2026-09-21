@@ -1,37 +1,34 @@
-# W.O.F NAI Studio · 界面素材
+# W.O.F NAI Studio · 品牌素材
 
-## 字体角色
+## 字体
 
-| 用途 | 字体 | 字重 / 尺寸 |
-|---|---|---|
-| 标题栏品牌名 | Geist Pixel **Line** | Regular，20px，标题栏高 40px |
-| 启动 / 登录品牌名 | Geist Pixel Line | 32 / 30px |
-| 正文与控件 | Geist Sans + HarmonyOS Sans SC fallback | 正文 400，控件 500，分组标题 600 / 700 |
-| 参数、尺寸、快捷键、代码 | Geist Mono + HarmonyOS Sans SC fallback | 400 / 500，沿用各控件实际字号 |
+| 用途 | 字体 |
+|---|---|
+| 标题栏 NAI Studio | Geist Pixel Line，20px |
+| 正文与控件 | Geist Sans + HarmonyOS Sans SC fallback，400 / 500 / 600 / 700 |
+| 参数、尺寸、快捷键、代码 | Geist Mono + HarmonyOS Sans SC fallback，400 / 500 |
 
-Pixel 只用于品牌名，不用于小字按钮、提示词或参数。中文正文使用鸿蒙黑体，混排中的拉丁文与数字自然使用 Geist；数据字段单独用 Mono。`StudioTypography` 定义角色，16 套主题保留原有配色，共用离线字体。HarmonyOS 字体按原始 TTF 完整打包，不裁切、不改写。显式选择的系统 / Google 字体仍有效；旧默认键 `system`、空键映射到应用默认组合。
+`StudioTypography` 定义角色，16 套工作区主题保留原有配色，共用离线字体。HarmonyOS 原始 TTF 完整打包，不裁切、不改写。显式选择的系统 / Google 字体仍有效；旧默认键 `system`、空键映射到应用默认组合。许可在 `assets/licenses/` 和应用「关于 → 界面字体与许可」。
 
-## 图标
+界面图标已全部恢复原有 Material `Icon` 和已有专用符号。不要重新引入被撤回的 Geist SVG 注册表。
 
-所有应用自行绘制的 `Icon` 控件统一使用 `StudioIcon`。组件保留原始 `IconData`，遵守大小、颜色、禁用透明度、文字方向、无障碍名称；有匹配时绘制 Geist SVG，没有匹配时保留 Material 原图。需要字体阴影或混合效果的调用保留原渲染。画笔光标的底层 TextPainter、Flutter 内建组件和已有 NovelAI 专用 / DNA 图标不改动。
+## Logo 与 Windows 图标
 
-SVG 必须在外层图标盒内居中，用松约束绘制指定尺寸。按钮和输入框可能强制提供 40 / 48px 容器，不能把这个容器尺寸传给图案，否则 16 / 20px 图标会被撑满。容器点击范围与图案大小分别验证。
+- `assets/images/wof_logo_full.png`：原品牌完整 Logo，只移除外围透明留白，保留 W.O.F 与 NAI STUDIO 的原始比例和字形。源文件来自工作区品牌资产 `wof_logo_full.png`，取原图 `(0, 328, 1111, 547)` 区域。
+- `assets/images/wof_logo_block.png`：完整蓝色 W.O.F 长块，用于标题栏，旁边搭配 Pixel Line 的 NAI Studio。
+- Windows ICO：运行 `node tool/branding/generate_windows_icons.cjs`（依赖 sharp）。完整长方形 Logo 等比置于透明方框，十档 16–256px，不裁成单个 W。程序资源和托盘 ICO 同步输出；可用 `--brand-dir <目录>` 导出独立完整 Logo 尺寸库。
+- ICO 改动必须重编原生 Windows runner，并检查 EXE 中 RT_GROUP_ICON / RT_ICON 与源 ICO 一致。
 
-当前使用 150 枚单色 SVG，对应 344 个原图标名称。明确匹配见 `geist_icon_manifest.json`；剩余的性别、调色、比例、抠图等专用符号留待设计。停止操作保留方形符号，不使用上游名为 `stop-fill` 的八角警示牌。
+## 登录与载入
 
-素材来自社区 `jarvis394/geist-icons` 的 `f478dfba63570bccb7efeacd7df82df994064058` 快照，不是 Vercel 官方 Flutter 包。导入时仅把 JSX 数字宽高改为合法 SVG 属性；150 个文件的路径和其余属性逐项与上游核对。来源与许可声明随代码保留。
+`BrandEntryScene` 提供完整 Logo、留白、边缘几何细节和明暗切换；`BrandEntryTheme` 提供蓝黑 / 蓝白配色与有边界的表单控件。登录方式用紧凑页签，已有账号用紧凑账号卡。载入进度直接读取 WarmupState，显示真实进度、任务和错误信息，不制造假进度或无休止的装饰动画。
 
-修改 `import_geist_icons.py` 中的明确语义映射，然后执行：
-
-```sh
-python tool/branding/import_geist_icons.py --source <Geist-SVG-directory>
-dart format lib/presentation/widgets/common/studio_icon_registry.dart
-```
-
-后续自定义图标也从同一注册入口接入，先检查 16 / 20 / 24px、小尺寸留白、选中与未选中状态，再替换。不要仅凭文件名猜测含义。新增资产同步声明 `pubspec.yaml`，删除不用的 SVG 前确认注册表无引用。
+明暗选择只存在当前会话，由载入页延续到登录页；工作区配色独立。路由切换时标题栏同步入口主题，进入工作区恢复已选主题。登录验证、账号保存、第三方地址、游客状态和预热调度仍由现有 provider 负责。
 
 ## 验证
 
-`studio_visual_system_test.dart` 加载实际字体并绘制完整图标目录，覆盖离线主题、CJK 回退、旧字体选项、SVG 语义 / 透明度 / 尺寸 / RTL 和保留图标。设置 `CAPTURE_STUDIO_UI=1` 可输出到 `.dart_tool/studio-captures/`。
+- `test/presentation/screens/brand_entry_test.dart`：真实登录 / 载入 widget，深浅色、三种语言、390px 窄屏和 125% 字号、登录方式切换、明暗切换保留输入、游客入口、已保存账号、真实进度。
+- `studio_visual_system_test.dart`：离线字体、CJK 回退和旧字体选择兼容。
+- `integrated_title_bar_test.dart`：完整 Logo、标题、原图标与原生标题栏命中区。
 
-侧栏测试同时设置 `CAPTURE_STUDIO_UI=1 CAPTURE_OFFICIAL_UI=1`，使用实际应用主题与字体绘制 320 / 400px、中英文及悬停状态。素材许可在应用「关于 → 界面字体、图标与许可」可查看。
+设置 `CAPTURE_STUDIO_UI=1` 运行入口测试，会把实际字体 / Logo 的渲染保存到 `.dart_tool/brand-entry-captures/`。这些是 widget 渲染，不应冒充运行中的用户窗口截图。

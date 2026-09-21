@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -87,7 +86,7 @@ class GenerateButtonWithCost extends ConsumerWidget {
         icon: isGenerating
             ? null
             : cooldownRemainingSeconds > 0
-            ? const StudioIcon(Icons.hourglass_bottom_outlined)
+            ? const Icon(Icons.hourglass_bottom_outlined)
             : null,
         isLoading: isGenerating,
         // Flexible 使 label Row 成为 ThemedButton 内容 Row 的 flex 子项，
@@ -146,7 +145,7 @@ class GenerationCancelButtons extends StatelessWidget {
             child: TextButton.icon(
               key: const ValueKey('skip-current-generation'),
               onPressed: onSkipCurrent,
-              icon: const StudioIcon(Icons.skip_next, size: 16),
+              icon: const Icon(Icons.skip_next, size: 16),
               label: Text(
                 '${context.l10n.generation_skipCurrentBatch} '
                 '${generationState.currentImage}/${generationState.totalImages}',
@@ -186,7 +185,7 @@ class GenerationCancelButtons extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const StudioIcon(
+                            const Icon(
                               Icons.stop_circle_outlined,
                               size: 18,
                               color: yellow,

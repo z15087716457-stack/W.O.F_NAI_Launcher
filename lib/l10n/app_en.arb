@@ -1,7 +1,10 @@
 {
   "@@locale": "en",
   "app_title": "W.O.F NAI Studio",
-  "settings_visualAssets": "Interface fonts, icons & licenses",
+  "settings_visualAssets": "Interface fonts & licenses",
+  "brand_entryTagline": "A place for your imagination.",
+  "brand_switchToLight": "Switch to light mode",
+  "brand_switchToDark": "Switch to dark mode",
   "app_subtitle": "NovelAI Third-party Client",
   "common_cancel": "Cancel",
   "onlineFav_all": "All",

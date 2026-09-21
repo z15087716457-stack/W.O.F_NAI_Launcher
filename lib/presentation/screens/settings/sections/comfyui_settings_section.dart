@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -56,7 +55,7 @@ class _ComfyUISettingsSectionState
           child: Column(
             children: [
               SwitchListTile(
-                secondary: const StudioIcon(Icons.power),
+                secondary: const Icon(Icons.power),
                 title: Text(context.l10n.settings_comfyUiEnable),
                 subtitle: Text(
                   settings.enabled
@@ -87,7 +86,7 @@ class _ComfyUISettingsSectionState
                             hintText: 'http://127.0.0.1:8188',
                             border: const OutlineInputBorder(),
                             isDense: true,
-                            prefixIcon: const StudioIcon(Icons.dns_outlined),
+                            prefixIcon: const Icon(Icons.dns_outlined),
                           ),
                           onChanged: (value) {
                             ref
@@ -120,7 +119,7 @@ class _ComfyUISettingsSectionState
                     ),
                     child: Row(
                       children: [
-                        StudioIcon(
+                        Icon(
                           _testResult == 'ok'
                               ? Icons.check_circle
                               : Icons.error_outline,
@@ -147,7 +146,7 @@ class _ComfyUISettingsSectionState
                   ),
                 if (connStatus == ComfyUIConnectionStatus.connected)
                   ListTile(
-                    leading: const StudioIcon(
+                    leading: const Icon(
                       Icons.circle,
                       color: Colors.green,
                       size: 12,
@@ -186,7 +185,7 @@ class _ComfyUISettingsSectionState
                     ),
                     child: Row(
                       children: [
-                        StudioIcon(
+                        Icon(
                           Icons.inventory_2,
                           size: 16,
                           color: theme.colorScheme.onSurface.withValues(
@@ -216,7 +215,7 @@ class _ComfyUISettingsSectionState
                   ),
                   child: Row(
                     children: [
-                      StudioIcon(
+                      Icon(
                         Icons.person,
                         size: 16,
                         color: theme.colorScheme.onSurface.withValues(
@@ -235,7 +234,7 @@ class _ComfyUISettingsSectionState
                       const Spacer(),
                       TextButton.icon(
                         onPressed: () => WorkflowImportWizard.show(context),
-                        icon: const StudioIcon(Icons.add, size: 18),
+                        icon: const Icon(Icons.add, size: 18),
                         label: Text(context.l10n.common_import),
                       ),
                     ],
@@ -272,7 +271,7 @@ class _ComfyUISettingsSectionState
     final description = template.localizedDescription(context);
 
     return ListTile(
-      leading: StudioIcon(
+      leading: Icon(
         template.isBuiltin ? Icons.inventory_2 : Icons.account_tree,
         color: template.isBuiltin
             ? theme.colorScheme.primary
@@ -294,7 +293,7 @@ class _ComfyUISettingsSectionState
               visualDensity: VisualDensity.compact,
             )
           : IconButton(
-              icon: StudioIcon(
+              icon: Icon(
                 Icons.delete_outline,
                 color: theme.colorScheme.error,
                 size: 20,

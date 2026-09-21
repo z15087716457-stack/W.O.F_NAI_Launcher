@@ -17,6 +17,7 @@ import 'presentation/providers/prompt_block_library_provider.dart';
 import 'presentation/providers/subscription_provider.dart'
     hide anlasBalanceProvider;
 import 'presentation/themes/app_theme.dart';
+import 'presentation/themes/brand_entry_theme.dart';
 import 'presentation/widgets/navigation/integrated_title_bar.dart';
 import 'presentation/widgets/shortcuts/shortcut_aware_widget.dart';
 import 'presentation/widgets/shortcuts/shortcut_help_dialog.dart';
@@ -107,6 +108,7 @@ class NAILauncherApp extends ConsumerWidget {
     final fontScale = ref.watch(fontScaleNotifierProvider);
     final locale = ref.watch(localeNotifierProvider);
     final router = ref.watch(appRouterProvider);
+    final entryBrightness = ref.watch(brandEntryBrightnessProvider);
 
     // 定义全局快捷键映射
     final globalShortcuts = <String, VoidCallback>{
@@ -185,8 +187,19 @@ class NAILauncherApp extends ConsumerWidget {
               data: MediaQuery.of(
                 context,
               ).copyWith(textScaler: TextScaler.linear(fontScale)),
-              child: IntegratedTitleBarShell(
-                child: child ?? const SizedBox.shrink(),
+              child: ListenableBuilder(
+                listenable: router.routeInformationProvider,
+                child: IntegratedTitleBarShell(
+                  child: child ?? const SizedBox.shrink(),
+                ),
+                builder: (context, shell) => Theme(
+                  data:
+                      router.routeInformationProvider.value.uri.path ==
+                          AppRoutes.login
+                      ? BrandEntryTheme.forBrightness(entryBrightness)
+                      : Theme.of(context),
+                  child: shell!,
+                ),
               ),
             );
           },

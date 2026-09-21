@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 /// 滑动切换组件 - 精致的分段切换器
@@ -151,7 +150,7 @@ class SlidingToggle<T> extends StatelessWidget {
 
     // 如果有图标
     if (option.icon != null) {
-      return StudioIcon(option.icon, size: iconSize, color: color);
+      return Icon(option.icon, size: iconSize, color: color);
     }
 
     // 如果有文本

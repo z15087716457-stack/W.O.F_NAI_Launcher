@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,11 +18,13 @@ class LoginFormContainer extends ConsumerWidget {
   /// 是否显示游客入口。仅登录页等未认证语境传 true；
   /// 已登录的添加账号等复用场景默认不显示。
   final bool showGuestEntry;
+  final bool compact;
 
   const LoginFormContainer({
     super.key,
     this.onLoginSuccess,
     this.showGuestEntry = false,
+    this.compact = false,
   });
 
   @override
@@ -36,12 +37,12 @@ class LoginFormContainer extends ConsumerWidget {
         : currentMode;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: compact ? 0 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // 登录模式切换器
-          const AuthModeSwitcher(),
+          AuthModeSwitcher(compact: compact),
           const SizedBox(height: 24),
 
           // 根据当前模式显示对应的登录表单
@@ -102,7 +103,7 @@ class LoginFormContainer extends ConsumerWidget {
               onPressed: () {
                 ref.read(guestSessionNotifierProvider.notifier).enterGuest();
               },
-              icon: const StudioIcon(Icons.explore_outlined),
+              icon: const Icon(Icons.explore_outlined),
               label: Text(context.l10n.auth_guestEntry),
             ),
           ],

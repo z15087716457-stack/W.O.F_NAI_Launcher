@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -179,11 +178,7 @@ class _GalleryGridState extends State<GalleryGrid> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const StudioIcon(
-              Icons.image_not_supported,
-              size: 64,
-              color: Colors.grey,
-            ),
+            const Icon(Icons.image_not_supported, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
               context.l10n.localGallery_noImagesFound,

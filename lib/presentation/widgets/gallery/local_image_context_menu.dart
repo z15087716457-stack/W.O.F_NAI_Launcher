@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
@@ -200,7 +199,7 @@ class LocalImageContextMenu {
       enabled: enabled,
       child: Row(
         children: [
-          StudioIcon(icon, size: 18, color: color),
+          Icon(icon, size: 18, color: color),
           const SizedBox(width: 8),
           Flexible(
             child: Text(

@@ -1,333 +1,87 @@
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
-import 'package:nai_launcher/core/constants/brand.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/constants/app_version.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../providers/warmup_provider.dart';
+import '../../themes/studio_typography.dart';
 import '../../utils/warmup_message_localizer.dart';
+import '../../widgets/branding/brand_entry_scene.dart';
 
-/// 启动画面
-/// 显示应用品牌和预加载进度
-class SplashScreen extends ConsumerStatefulWidget {
+/// A calm, centered brand screen driven by real warmup progress.
+class SplashScreen extends ConsumerWidget {
   const SplashScreen({super.key});
 
   @override
-  ConsumerState<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends ConsumerState<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _breathController;
-  late Animation<double> _breathAnimation;
-  late Animation<double> _glowAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Logo 呼吸动画
-    _breathController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    )..repeat(reverse: true);
-
-    _breathAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
-      CurvedAnimation(parent: _breathController, curve: Curves.easeInOut),
-    );
-
-    _glowAnimation = Tween<double>(begin: 0.3, end: 0.8).animate(
-      CurvedAnimation(parent: _breathController, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _breathController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final warmupState = ref.watch(warmupNotifierProvider);
-    final progress = warmupState.progress;
-    final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
-    final backgroundColor = theme.colorScheme.surface;
-
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      body: Stack(
-        children: [
-          // 背景装饰
-          _buildBackground(primaryColor, backgroundColor),
-
-          // 主内容
-          Center(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(warmupNotifierProvider);
+    return BrandEntryScene(
+      loading: true,
+      child: Builder(
+        builder: (context) {
+          final scheme = Theme.of(context).colorScheme;
+          final progress = state.progress.progress.clamp(0.0, 1.0);
+          final task = WarmupMessageLocalizer.localizeTask(
+            context.l10n,
+            state.progress.currentTask,
+          );
+          final error = state.error ?? state.progress.error;
+          return ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 360),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(flex: 3),
-
-                // Logo 动画
-                _buildLogo(primaryColor),
-
-                const SizedBox(height: 24),
-
-                // 应用名称
-                _buildTitle(theme, primaryColor),
-
-                const Spacer(flex: 2),
-
-                // 进度区域
-                _buildProgressSection(
-                  theme,
-                  primaryColor,
-                  progress,
-                  warmupState.subTaskMessage,
-                ),
-
-                const SizedBox(height: 48),
-              ],
-            ),
-          ),
-
-          // 版本号显示在右下角
-          Positioned(
-            right: 16,
-            bottom: 16,
-            child: Text(
-              AppVersion.versionName,
-              style: TextStyle(
-                fontSize: 12,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBackground(Color primaryColor, Color backgroundColor) {
-    return AnimatedBuilder(
-      animation: _glowAnimation,
-      builder: (context, child) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: const Alignment(0, -0.3),
-              radius: 1.5,
-              colors: [
-                primaryColor.withValues(alpha: _glowAnimation.value * 0.15),
-                backgroundColor,
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildLogo(Color primaryColor) {
-    return AnimatedBuilder(
-      animation: _breathAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _breathAnimation.value,
-          child: Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [primaryColor, primaryColor.withValues(alpha: 0.6)],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: primaryColor.withValues(
-                    alpha: _glowAnimation.value * 0.5,
-                  ),
-                  blurRadius: 40,
-                  spreadRadius: 5,
-                ),
-              ],
-            ),
-            child: const StudioIcon(
-              Icons.auto_awesome,
-              size: 56,
-              color: Colors.white,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildTitle(ThemeData theme, Color primaryColor) {
-    final lighterColor = Color.lerp(primaryColor, Colors.white, 0.4)!;
-
-    return Column(
-      children: [
-        ShaderMask(
-          shaderCallback: (bounds) => LinearGradient(
-            colors: [primaryColor, lighterColor],
-          ).createShader(bounds),
-          child: Text(
-            Brand.name,
-            style: StudioTypography.wordmark.copyWith(
-              fontSize: 32,
-              color: Colors.white,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'NovelAI Image Generation',
-          style: TextStyle(
-            fontSize: 14,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-            letterSpacing: 1,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProgressSection(
-    ThemeData theme,
-    Color primaryColor,
-    WarmupProgress progress,
-    String? subTaskMessage,
-  ) {
-    final l10n = context.l10n;
-    final translatedTask = WarmupMessageLocalizer.localizeTask(
-      l10n,
-      progress.currentTask,
-    );
-    final percentage = (progress.progress * 100).toInt();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 48),
-      child: Column(
-        children: [
-          // 进度条 + 百分比
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Flexible(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 260),
-                  child: _buildProgressBar(
-                    theme,
-                    primaryColor,
-                    progress.progress,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              // 百分比文字（使用等宽数字特性）
-              SizedBox(
-                width: 42,
-                child: Text(
-                  '$percentage%',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: primaryColor,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // 当前任务（带加载指示器）
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: Row(
-              key: ValueKey(progress.currentTask),
-              mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (!progress.isComplete) ...[
-                  SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        task,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                Text(
-                  translatedTask,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // 子任务进度（如"下载中... 50%"）
-          if (subTaskMessage != null && !progress.isComplete) ...[
-            const SizedBox(height: 8),
-            Text(
-              WarmupMessageLocalizer.localizeSubTask(l10n, subTaskMessage),
-              style: TextStyle(
-                fontSize: 11,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProgressBar(ThemeData theme, Color primaryColor, double value) {
-    final lighterColor = Color.lerp(primaryColor, Colors.white, 0.4)!;
-
-    return Container(
-      height: 4,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(2),
-        color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return Stack(
-            children: [
-              // 进度填充
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutCubic,
-                width: constraints.maxWidth * value,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(2),
-                  gradient: LinearGradient(
-                    colors: [primaryColor, lighterColor],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: primaryColor.withValues(alpha: 0.5),
-                      blurRadius: 8,
+                    const SizedBox(width: 16),
+                    Text(
+                      '${(progress * 100).round().toString().padLeft(2, '0')}%',
+                      style: StudioTypography.data.copyWith(
+                        fontSize: 12,
+                        color: scheme.onSurface,
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 14),
+                LinearProgressIndicator(
+                  key: const Key('brand_warmup_progress'),
+                  value: progress,
+                  backgroundColor: scheme.outline,
+                  semanticsLabel: task,
+                  semanticsValue: '${(progress * 100).round()}%',
+                ),
+                const SizedBox(height: 14),
+                if (error != null)
+                  Text(
+                    WarmupMessageLocalizer.localizeSubTask(context.l10n, error),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: scheme.error),
+                  )
+                else if (state.subTaskMessage != null && !state.isComplete)
+                  Text(
+                    WarmupMessageLocalizer.localizeSubTask(
+                      context.l10n,
+                      state.subTaskMessage!,
+                    ),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  )
+                else
+                  const SizedBox(height: 16),
+              ],
+            ),
           );
         },
       ),

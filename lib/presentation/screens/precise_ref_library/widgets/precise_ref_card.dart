@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -106,7 +105,7 @@ class _PreciseRefCardState extends ConsumerState<PreciseRefCard> {
         else
           Container(
             color: theme.colorScheme.surfaceContainerHighest,
-            child: StudioIcon(
+            child: Icon(
               Icons.image_outlined,
               size: 32,
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
@@ -125,7 +124,7 @@ class _PreciseRefCardState extends ConsumerState<PreciseRefCard> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                StudioIcon(
+                Icon(
                   entry.type.icon,
                   size: 12,
                   color: theme.colorScheme.primary,
@@ -147,7 +146,7 @@ class _PreciseRefCardState extends ConsumerState<PreciseRefCard> {
             key: Key('precise-ref-card-favorite-${entry.id}'),
             visualDensity: VisualDensity.compact,
             iconSize: 18,
-            icon: StudioIcon(
+            icon: Icon(
               entry.isFavorite ? Icons.star : Icons.star_border,
               color: entry.isFavorite
                   ? Colors.amber
@@ -277,7 +276,7 @@ class _HoverActionButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              StudioIcon(
+              Icon(
                 icon,
                 size: 14,
                 color: primary ? theme.colorScheme.onPrimary : Colors.black87,
@@ -325,7 +324,7 @@ class _HoverIconButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(6),
           child: Padding(
             padding: const EdgeInsets.all(5),
-            child: StudioIcon(
+            child: Icon(
               icon,
               size: 15,
               color: isDestructive ? Colors.red.shade700 : Colors.black87,

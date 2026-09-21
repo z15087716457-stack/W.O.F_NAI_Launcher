@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
@@ -29,7 +28,7 @@ class ColumnWidthMenuButton extends StatelessWidget {
       builder: (context, controller, child) => Tooltip(
         message: l10n.localGallery_columnWidth,
         child: IconButton(
-          icon: StudioIcon(
+          icon: Icon(
             Icons.view_column_outlined,
             size: 18,
             color: colorScheme.onSurfaceVariant,

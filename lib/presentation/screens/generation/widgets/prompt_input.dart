@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -500,7 +499,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
                   () => ref
                       .read(promptMaximizeNotifierProvider.notifier)
                       .toggle(),
-              icon: StudioIcon(
+              icon: Icon(
                 Icons.fullscreen,
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -768,7 +767,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       value: value,
       child: Row(
         children: [
-          StudioIcon(
+          Icon(
             isEnabled ? Icons.check_box : Icons.check_box_outline_blank,
             size: 20,
             color: isEnabled ? theme.colorScheme.primary : null,
@@ -806,7 +805,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       value: value,
       child: Row(
         children: [
-          StudioIcon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
+          Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -822,11 +821,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
               ],
             ),
           ),
-          StudioIcon(
-            Icons.chevron_right,
-            size: 18,
-            color: theme.colorScheme.outline,
-          ),
+          Icon(Icons.chevron_right, size: 18, color: theme.colorScheme.outline),
         ],
       ),
     );
@@ -944,7 +939,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
                 children: [
                   if (widget.showMaximizeButton)
                     IconButton(
-                      icon: const StudioIcon(Icons.fullscreen),
+                      icon: const Icon(Icons.fullscreen),
                       tooltip: context.l10n.tooltip_fullscreenEdit,
                       onPressed:
                           widget.onToggleMaximize ??
@@ -954,7 +949,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
                     ),
                   if (_promptController.text.isNotEmpty)
                     IconButton(
-                      icon: const StudioIcon(Icons.clear, size: 20),
+                      icon: const Icon(Icons.clear, size: 20),
                       onPressed: _clearPrompt,
                     ),
                 ],
@@ -1123,11 +1118,7 @@ class _PositivePromptTooltip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StudioIcon(
-            Icons.auto_awesome,
-            size: 14,
-            color: theme.colorScheme.primary,
-          ),
+          Icon(Icons.auto_awesome, size: 14, color: theme.colorScheme.primary),
           const SizedBox(width: 6),
           Text(
             l10n.prompt_positivePrompt,
@@ -1176,7 +1167,7 @@ class _PositivePromptTooltip extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              StudioIcon(icon, size: 12, color: color),
+              Icon(icon, size: 12, color: color),
               const SizedBox(width: 4),
               Text(
                 label,
@@ -1240,7 +1231,7 @@ class _PositivePromptTooltip extends StatelessWidget {
         children: [
           Row(
             children: [
-              StudioIcon(
+              Icon(
                 Icons.output_rounded,
                 size: 12,
                 color: theme.colorScheme.primary,
@@ -1343,7 +1334,7 @@ class _PositivePromptTooltip extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              const StudioIcon(Icons.people_rounded, size: 12, color: color),
+              const Icon(Icons.people_rounded, size: 12, color: color),
               const SizedBox(width: 4),
               Text(
                 l10n.prompt_characterPrompts,
@@ -1386,7 +1377,7 @@ class _PositivePromptTooltip extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        StudioIcon(
+                        Icon(
                           character.gender == CharacterGender.female
                               ? Icons.female
                               : character.gender == CharacterGender.male
@@ -1519,7 +1510,7 @@ class _NegativePromptTooltip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StudioIcon(Icons.block, size: 14, color: theme.colorScheme.error),
+          Icon(Icons.block, size: 14, color: theme.colorScheme.error),
           const SizedBox(width: 6),
           Text(
             l10n.prompt_negativePrompt,
@@ -1568,7 +1559,7 @@ class _NegativePromptTooltip extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              StudioIcon(icon, size: 12, color: color),
+              Icon(icon, size: 12, color: color),
               const SizedBox(width: 4),
               Text(
                 label,
@@ -1632,7 +1623,7 @@ class _NegativePromptTooltip extends StatelessWidget {
         children: [
           Row(
             children: [
-              StudioIcon(
+              Icon(
                 Icons.output_rounded,
                 size: 12,
                 color: theme.colorScheme.error,
@@ -1861,7 +1852,7 @@ class _CopyIconButtonState extends State<_CopyIconButton> {
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(4),
           ),
-          child: StudioIcon(
+          child: Icon(
             Icons.copy_rounded,
             size: 14,
             color: _isHovering

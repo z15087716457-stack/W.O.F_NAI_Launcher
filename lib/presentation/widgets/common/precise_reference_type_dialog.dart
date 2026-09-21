@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/enums/precise_ref_type.dart';
@@ -24,7 +23,7 @@ class PreciseReferenceTypeDialog extends StatelessWidget {
         children: PreciseRefType.values.map((type) {
           return ListTile(
             key: ValueKey('precise-reference-type-${type.name}'),
-            leading: StudioIcon(type.icon),
+            leading: Icon(type.icon),
             title: Text(
               type.getDisplayName(
                 character: context.l10n.preciseRef_typeCharacter,

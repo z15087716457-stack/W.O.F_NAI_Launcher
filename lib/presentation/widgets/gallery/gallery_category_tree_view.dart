@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -279,7 +278,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
           onTap: () => widget.onAddSubCategory?.call(null),
           child: Row(
             children: [
-              const StudioIcon(Icons.create_new_folder, size: 18),
+              const Icon(Icons.create_new_folder, size: 18),
               const SizedBox(width: 8),
               Text(context.l10n.localGallery_createCategoryTitle),
             ],
@@ -726,7 +725,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
           onTap: () => widget.onCreateCollection?.call(parentId, false),
           child: Row(
             children: [
-              const StudioIcon(Icons.add, size: 18),
+              const Icon(Icons.add, size: 18),
               const SizedBox(width: 8),
               Text(context.l10n.localGallery_createCollectionTitle),
             ],
@@ -736,7 +735,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
           onTap: () => widget.onCreateCollection?.call(parentId, true),
           child: Row(
             children: [
-              const StudioIcon(Icons.create_new_folder, size: 18),
+              const Icon(Icons.create_new_folder, size: 18),
               const SizedBox(width: 8),
               Text(context.l10n.localGallery_createCollectionFolderTitle),
             ],
@@ -802,7 +801,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            StudioIcon(icon, size: 18, color: theme.colorScheme.primary),
+            Icon(icon, size: 18, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -1170,7 +1169,7 @@ class _CategoryItemState extends State<_CategoryItem> {
                       onTap: widget.onExpand,
                       child: Padding(
                         padding: const EdgeInsets.only(right: 4),
-                        child: StudioIcon(
+                        child: Icon(
                           widget.isExpanded
                               ? Icons.expand_more
                               : Icons.chevron_right,
@@ -1181,7 +1180,7 @@ class _CategoryItemState extends State<_CategoryItem> {
                     )
                   else
                     const SizedBox(width: 20),
-                  StudioIcon(
+                  Icon(
                     widget.icon,
                     size: 18,
                     color:
@@ -1231,7 +1230,7 @@ class _CategoryItemState extends State<_CategoryItem> {
                       borderRadius: BorderRadius.circular(4),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: StudioIcon(
+                        child: Icon(
                           Icons.add,
                           size: 16,
                           color: theme.colorScheme.primary,
@@ -1241,7 +1240,7 @@ class _CategoryItemState extends State<_CategoryItem> {
                   if (_isHovering && widget.showDragHandle)
                     Padding(
                       padding: const EdgeInsets.only(right: 4),
-                      child: StudioIcon(
+                      child: Icon(
                         Icons.drag_indicator,
                         size: 14,
                         color: theme.colorScheme.outline.withValues(alpha: 0.5),
@@ -1280,7 +1279,7 @@ class _CategoryItemState extends State<_CategoryItem> {
             }),
             child: Row(
               children: [
-                const StudioIcon(Icons.edit, size: 18),
+                const Icon(Icons.edit, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.common_rename),
               ],
@@ -1291,7 +1290,7 @@ class _CategoryItemState extends State<_CategoryItem> {
             onTap: widget.onAddSubCategory,
             child: Row(
               children: [
-                const StudioIcon(Icons.create_new_folder, size: 18),
+                const Icon(Icons.create_new_folder, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.localGallery_createSubCategoryTitle),
               ],
@@ -1302,7 +1301,7 @@ class _CategoryItemState extends State<_CategoryItem> {
             onTap: widget.onAddSubCollection,
             child: Row(
               children: [
-                const StudioIcon(Icons.add, size: 18),
+                const Icon(Icons.add, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.localGallery_createCollectionTitle),
               ],
@@ -1313,7 +1312,7 @@ class _CategoryItemState extends State<_CategoryItem> {
             onTap: widget.onAddSubFolder,
             child: Row(
               children: [
-                const StudioIcon(Icons.create_new_folder, size: 18),
+                const Icon(Icons.create_new_folder, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.localGallery_createCollectionFolderTitle),
               ],
@@ -1324,7 +1323,7 @@ class _CategoryItemState extends State<_CategoryItem> {
             onTap: widget.onMoveToRoot,
             child: Row(
               children: [
-                const StudioIcon(Icons.drive_file_move_outline, size: 18),
+                const Icon(Icons.drive_file_move_outline, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.localGallery_moveToRoot),
               ],
@@ -1335,7 +1334,7 @@ class _CategoryItemState extends State<_CategoryItem> {
             onTap: widget.onDelete,
             child: Row(
               children: [
-                StudioIcon(
+                Icon(
                   Icons.delete,
                   size: 18,
                   color: Theme.of(context).colorScheme.error,

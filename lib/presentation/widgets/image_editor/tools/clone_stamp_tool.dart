@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -262,7 +261,7 @@ class CloneStampTool extends EditorTool {
   @override
   Widget? buildCursor(EditorState state, {Offset? screenCursorPosition}) {
     if (_sourcePoint == null || screenCursorPosition == null) return null;
-    return const StudioIcon(Icons.add, color: Colors.cyanAccent, size: 16);
+    return const Icon(Icons.add, color: Colors.cyanAccent, size: 16);
   }
 
   @override

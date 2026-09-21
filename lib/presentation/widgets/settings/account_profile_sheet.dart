@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -338,7 +337,7 @@ class _AccountProfileBottomSheetState
         // 更换头像按钮
         TextButton.icon(
           onPressed: _changeAvatar,
-          icon: const StudioIcon(Icons.photo_library),
+          icon: const Icon(Icons.photo_library),
           label: Text(context.l10n.settings_changeAvatar),
         ),
         if (hasCustomAvatar) ...[
@@ -346,7 +345,7 @@ class _AccountProfileBottomSheetState
           // 移除头像按钮
           TextButton.icon(
             onPressed: _removeAvatar,
-            icon: StudioIcon(Icons.delete_outline, color: Colors.red.shade400),
+            icon: Icon(Icons.delete_outline, color: Colors.red.shade400),
             label: Text(
               context.l10n.settings_removeAvatar,
               style: TextStyle(color: Colors.red.shade400),
@@ -368,7 +367,7 @@ class _AccountProfileBottomSheetState
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
         child: Row(
           children: [
-            StudioIcon(
+            Icon(
               Icons.badge_outlined,
               size: 20,
               color: theme.colorScheme.outline,
@@ -382,7 +381,7 @@ class _AccountProfileBottomSheetState
             ),
             const Spacer(),
             Text(currentAccount.displayName, style: theme.textTheme.bodyMedium),
-            StudioIcon(
+            Icon(
               Icons.chevron_right,
               size: 20,
               color: theme.colorScheme.outline,
@@ -469,7 +468,7 @@ class _AccountProfileBottomSheetState
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
       child: Row(
         children: [
-          StudioIcon(icon, size: 20, color: theme.colorScheme.outline),
+          Icon(icon, size: 20, color: theme.colorScheme.outline),
           const SizedBox(width: 12),
           Text(
             label,
@@ -498,7 +497,7 @@ class _AccountProfileBottomSheetState
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
         child: Row(
           children: [
-            StudioIcon(
+            Icon(
               Icons.star_border_outlined,
               size: 20,
               color: isDefault
@@ -708,13 +707,13 @@ class _AccountProfileBottomSheetState
               ),
               // 当前账号标识或切换按钮
               if (isCurrent)
-                StudioIcon(
+                Icon(
                   Icons.check_circle,
                   color: theme.colorScheme.primary,
                   size: 20,
                 )
               else
-                StudioIcon(
+                Icon(
                   Icons.swap_horiz,
                   color: theme.colorScheme.outline,
                   size: 20,

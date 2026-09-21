@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -89,7 +88,7 @@ class TrendChartCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            StudioIcon(
+            Icon(
               Icons.show_chart_outlined,
               size: 48,
               color: theme.colorScheme.onSurfaceVariant,
@@ -115,11 +114,7 @@ class TrendChartCard extends StatelessWidget {
   ) {
     return Row(
       children: [
-        StudioIcon(
-          Icons.show_chart,
-          size: 20,
-          color: theme.colorScheme.primary,
-        ),
+        Icon(Icons.show_chart, size: 20, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Expanded(
           child: Text(

@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -357,7 +356,7 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
                           ),
                           errorWidget: (context, url, error) => Container(
                             color: theme.colorScheme.surfaceContainerHighest,
-                            child: StudioIcon(
+                            child: Icon(
                               Icons.broken_image,
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
@@ -376,10 +375,7 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
                             Container(
                               color: Colors.grey.withValues(alpha: 0.7),
                               child: const Center(
-                                child: StudioIcon(
-                                  Icons.block,
-                                  color: Colors.white54,
-                                ),
+                                child: Icon(Icons.block, color: Colors.white54),
                               ),
                             ),
                           // Checkbox
@@ -400,7 +396,7 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(4),
-                                  child: StudioIcon(
+                                  child: Icon(
                                     Icons.check,
                                     size: 16,
                                     color: widget.isSelected
@@ -425,7 +421,7 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
                                     color: Colors.black.withValues(alpha: 0.6),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const StudioIcon(
+                                  child: const Icon(
                                     Icons.favorite,
                                     size: 14,
                                     color: Colors.redAccent,
@@ -472,7 +468,7 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const StudioIcon(
+                                    const Icon(
                                       Icons.collections_outlined,
                                       size: 11,
                                       color: Colors.white,
@@ -508,7 +504,7 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    StudioIcon(
+                                    Icon(
                                       widget.post.isVideo
                                           ? Icons.play_circle_fill
                                           : Icons.gif_box,
@@ -600,7 +596,7 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
                                   Row(
                                     children: [
                                       if (widget.post.score != null) ...[
-                                        const StudioIcon(
+                                        const Icon(
                                           Icons.arrow_upward,
                                           size: 10,
                                           color: Colors.white70,
@@ -615,7 +611,7 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
                                         const SizedBox(width: 8),
                                       ],
                                       if (widget.post.viewCount != null) ...[
-                                        const StudioIcon(
+                                        const Icon(
                                           Icons.visibility_outlined,
                                           size: 10,
                                           color: Colors.white70,
@@ -630,7 +626,7 @@ class _DanbooruPostCardState extends State<DanbooruPostCard> {
                                         const SizedBox(width: 8),
                                       ],
                                       if (widget.post.favCount != null) ...[
-                                        const StudioIcon(
+                                        const Icon(
                                           Icons.favorite,
                                           size: 10,
                                           color: Colors.white70,
@@ -895,7 +891,7 @@ class _HoverPreviewCardInner extends ConsumerWidget {
                             color: Colors.black.withValues(alpha: 0.5),
                             shape: BoxShape.circle,
                           ),
-                          child: StudioIcon(
+                          child: Icon(
                             post.isVideo ? Icons.play_arrow : Icons.gif,
                             color: Colors.white,
                             size: 32,
@@ -1041,7 +1037,7 @@ class _StatItem extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        StudioIcon(icon, size: 12, color: theme.colorScheme.onSurfaceVariant),
+        Icon(icon, size: 12, color: theme.colorScheme.onSurfaceVariant),
         const SizedBox(width: 3),
         Text(
           value,
@@ -1106,7 +1102,7 @@ class _TagRowState extends State<_TagRow> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        StudioIcon(widget.icon, size: 14, color: widget.color),
+        Icon(widget.icon, size: 14, color: widget.color),
         const SizedBox(width: 6),
         Expanded(
           child: Wrap(

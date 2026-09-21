@@ -1,5 +1,4 @@
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/utils/localization_extension.dart';
@@ -204,7 +203,7 @@ class _ColorPreview extends StatelessWidget {
                 ),
                 // 底色写死为白，图标也必须写死深色，
                 // 否则在深色主题下会继承成近白色，变成白底白图标。
-                child: const StudioIcon(
+                child: const Icon(
                   Icons.swap_horiz,
                   size: 14,
                   color: Colors.black87,

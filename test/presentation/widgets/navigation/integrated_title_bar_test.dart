@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -47,15 +46,15 @@ void main() {
       await tester.pumpWidget(buildShell(child: const SizedBox.expand()));
       await tester.pump();
 
-      expect(find.text('W.O.F NAI Studio'), findsOneWidget);
+      expect(find.text('NAI Studio'), findsOneWidget);
 
       expect(
         find.byWidgetPredicate(
           (widget) =>
-              widget is SvgPicture &&
-              widget.bytesLoader is SvgAssetLoader &&
-              (widget.bytesLoader as SvgAssetLoader).assetName ==
-                  'assets/icons/wof_icon.svg',
+              widget is Image &&
+              widget.image is AssetImage &&
+              (widget.image as AssetImage).assetName ==
+                  'assets/images/wof_logo_block.png',
         ),
         findsOneWidget,
       );
@@ -63,12 +62,7 @@ void main() {
       expect(find.byIcon(Icons.crop_square), findsOneWidget);
       expect(find.byIcon(Icons.close), findsOneWidget);
       for (final icon in [Icons.remove, Icons.close]) {
-        final drawing = find.descendant(
-          of: find.byIcon(icon),
-          matching: find.byType(SvgPicture),
-        );
-        expect(tester.getSize(drawing), const Size(16, 16));
-        expect(tester.getCenter(drawing), tester.getCenter(find.byIcon(icon)));
+        expect(tester.widget<Icon>(find.byIcon(icon)).size, 16);
       }
     });
 

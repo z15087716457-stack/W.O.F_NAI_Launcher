@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -277,7 +276,7 @@ class AppToast {
       SnackBar(
         content: Row(
           children: [
-            StudioIcon(icon, color: Colors.white, size: 20),
+            Icon(icon, color: Colors.white, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Text(message, style: const TextStyle(color: Colors.white)),
@@ -395,7 +394,7 @@ class _SingleToastWidgetState extends State<_SingleToastWidget>
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  StudioIcon(icon, color: Colors.white, size: 20),
+                  Icon(icon, color: Colors.white, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -413,11 +412,7 @@ class _SingleToastWidgetState extends State<_SingleToastWidget>
                     borderRadius: BorderRadius.circular(12),
                     child: const Padding(
                       padding: EdgeInsets.all(4),
-                      child: StudioIcon(
-                        Icons.close,
-                        size: 18,
-                        color: Colors.white70,
-                      ),
+                      child: Icon(Icons.close, size: 18, color: Colors.white70),
                     ),
                   ),
                 ],
@@ -577,13 +572,9 @@ class _ProgressToastWidgetState extends State<_ProgressToastWidget>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (_type == ToastType.progress)
-                        StudioIcon(
-                          Icons.downloading_rounded,
-                          color: color,
-                          size: 20,
-                        )
+                        Icon(Icons.downloading_rounded, color: color, size: 20)
                       else
-                        StudioIcon(icon, color: Colors.white, size: 20),
+                        Icon(icon, color: Colors.white, size: 20),
                       const SizedBox(width: 12),
                       Flexible(
                         child: Text(
@@ -604,7 +595,7 @@ class _ProgressToastWidgetState extends State<_ProgressToastWidget>
                           borderRadius: BorderRadius.circular(12),
                           child: Padding(
                             padding: const EdgeInsets.all(4),
-                            child: StudioIcon(
+                            child: Icon(
                               Icons.close,
                               size: 18,
                               color: _type == ToastType.progress

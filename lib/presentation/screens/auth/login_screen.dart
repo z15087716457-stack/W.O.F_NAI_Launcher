@@ -1,5 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,12 +13,13 @@ import '../../providers/auth_provider.dart';
 import '../../providers/guest_session_provider.dart';
 import '../../widgets/auth/account_avatar.dart';
 import '../../widgets/auth/login_form_container.dart';
+import '../../widgets/branding/brand_entry_scene.dart';
 import '../../widgets/auth/network_troubleshooting_dialog.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/themed_divider.dart';
 import '../../widgets/common/update_notice_banner.dart';
 
-/// 登录页面 - QQ 风格
+/// Brand entry page; account and authentication behavior stays in the providers.
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -29,8 +28,6 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  static const double _wideScreenBreakpoint = 800;
-
   final _avatarService = AvatarService();
   final _authErrorService = AuthErrorService();
   final _dateFormattingService = DateFormattingService();
@@ -85,7 +82,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final accountState = ref.watch(accountManagerNotifierProvider);
     final accounts = accountState.accounts;
     final isLoading = accountState.isLoading;
@@ -94,74 +90,69 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _handleAuthStateChange(previous, next);
     });
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final isWideScreen =
-                    constraints.maxWidth >= _wideScreenBreakpoint;
-
-                return Center(
-                  child: SingleChildScrollView(
+    return Stack(
+      children: [
+        BrandEntryScene(
+          child: Builder(
+            builder: (context) {
+              final theme = Theme.of(context);
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
                     padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _Header(theme: theme),
-                        const SizedBox(height: 32),
-                        _buildMainContent(
-                          context,
-                          theme,
-                          isWideScreen,
-                          isLoading,
-                          accounts,
-                        ),
-                        const SizedBox(height: 16),
-                        if (_showTroubleshootingButton)
-                          _TroubleshootingButton(),
-                        const SizedBox(height: 24),
-                        _LoginTip(theme: theme),
-                      ],
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainer,
+                      border: Border.all(color: theme.colorScheme.outline),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: _buildMainContent(
+                      context,
+                      theme,
+                      isLoading,
+                      accounts,
                     ),
                   ),
-                );
-              },
-            ),
+                  if (_showTroubleshootingButton) ...[
+                    const SizedBox(height: 12),
+                    _TroubleshootingButton(),
+                  ],
+                  const SizedBox(height: 22),
+                  _LoginTip(theme: theme),
+                ],
+              );
+            },
           ),
-          const Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: UpdateNoticeBanner(),
-          ),
-        ],
-      ),
+        ),
+        const Positioned(
+          top: 52,
+          left: 0,
+          right: 0,
+          child: UpdateNoticeBanner(),
+        ),
+      ],
     );
   }
 
   Widget _buildMainContent(
     BuildContext context,
     ThemeData theme,
-    bool isWideScreen,
     bool isLoading,
     List<SavedAccount> accounts,
   ) {
     if (isLoading) {
-      return _AccountSwitcherSkeleton(theme: theme, isWideScreen: isWideScreen);
+      return const Padding(
+        padding: EdgeInsets.all(32),
+        child: LinearProgressIndicator(),
+      );
     }
 
     if (accounts.isEmpty) {
-      return ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: isWideScreen ? 550 : 420),
-        child: const LoginFormContainer(showGuestEntry: true),
-      );
+      return const LoginFormContainer(showGuestEntry: true, compact: true);
     }
 
     return _QuickLoginView(
       theme: theme,
-      isWideScreen: isWideScreen,
       accounts: accounts,
       onAvatarTap: (account) => _showAvatarOptions(context, ref, account),
       onAccountSelectorTap: (accounts, current) =>
@@ -293,7 +284,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             Text(context.l10n.auth_selectAccount),
             const Spacer(),
             IconButton(
-              icon: const StudioIcon(Icons.close),
+              icon: const Icon(Icons.close),
               onPressed: () => Navigator.pop(dialogContext),
             ),
           ],
@@ -332,7 +323,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: avatarBorderRadius(36),
                   ),
-                  child: StudioIcon(
+                  child: Icon(
                     Icons.add,
                     color: Theme.of(context).colorScheme.primary,
                   ),
@@ -408,7 +399,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: const StudioIcon(Icons.close),
+                      icon: const Icon(Icons.close),
                       onPressed: () => Navigator.pop(dialogContext),
                     ),
                   ],
@@ -437,7 +428,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const StudioIcon(Icons.photo_library),
+              leading: const Icon(Icons.photo_library),
               title: Text(context.l10n.auth_selectFromGallery),
               onTap: () {
                 Navigator.pop(sheetContext);
@@ -445,7 +436,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               },
             ),
             ListTile(
-              leading: const StudioIcon(Icons.camera_alt),
+              leading: const Icon(Icons.camera_alt),
               title: Text(context.l10n.auth_takePhoto),
               onTap: () {
                 Navigator.pop(sheetContext);
@@ -454,10 +445,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             if (account.avatarPath != null)
               ListTile(
-                leading: StudioIcon(
-                  Icons.delete_outline,
-                  color: Colors.red.shade400,
-                ),
+                leading: Icon(Icons.delete_outline, color: Colors.red.shade400),
                 title: Text(
                   context.l10n.auth_removeAvatar,
                   style: TextStyle(color: Colors.red.shade400),
@@ -526,51 +514,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
-/// 页面头部组件
-class _Header extends StatelessWidget {
-  final ThemeData theme;
-
-  const _Header({required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: StudioIcon(
-            Icons.auto_awesome,
-            size: 40,
-            color: theme.colorScheme.primary,
-          ),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          context.l10n.app_title,
-          style: StudioTypography.wordmark.copyWith(
-            fontSize: 30,
-            color: theme.colorScheme.onSurface,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          context.l10n.app_subtitle,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-}
-
 /// 登录提示文本
 class _LoginTip extends StatelessWidget {
   final ThemeData theme;
@@ -582,7 +525,8 @@ class _LoginTip extends StatelessWidget {
     return Text(
       context.l10n.auth_loginTip,
       style: theme.textTheme.bodySmall?.copyWith(
-        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+        color: theme.colorScheme.onSurfaceVariant,
+        height: 1.6,
       ),
       textAlign: TextAlign.center,
     );
@@ -597,7 +541,7 @@ class _TroubleshootingButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: OutlinedButton.icon(
         onPressed: () => NetworkTroubleshootingDialog.show(context),
-        icon: const StudioIcon(Icons.help_outline, size: 18),
+        icon: const Icon(Icons.help_outline, size: 18),
         label: Text(context.l10n.auth_viewTroubleshootingTips),
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -607,96 +551,9 @@ class _TroubleshootingButton extends StatelessWidget {
   }
 }
 
-/// 账号切换器骨架屏
-class _AccountSwitcherSkeleton extends StatelessWidget {
-  final ThemeData theme;
-  final bool isWideScreen;
-
-  const _AccountSwitcherSkeleton({
-    required this.theme,
-    required this.isWideScreen,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: isWideScreen ? 550 : 420),
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: theme.colorScheme.outline.withValues(alpha: 0.2),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: isWideScreen ? _buildWideLayout() : _buildMobileLayout(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWideLayout() {
-    return Row(
-      children: [
-        const _ShimmerCircleAvatar(size: 100),
-        const SizedBox(width: 24),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _ShimmerBox(width: 150, height: 24, theme: theme),
-              const SizedBox(height: 4),
-              _ShimmerBox(width: 80, height: 14, theme: theme),
-              const SizedBox(height: 16),
-              _ShimmerBox(
-                width: double.infinity,
-                height: 48,
-                theme: theme,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(height: 16),
-              const ThemedDivider(),
-              const SizedBox(height: 8),
-              _ShimmerBox(width: 100, height: 16, theme: theme),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMobileLayout() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Center(child: _ShimmerCircleAvatar(size: 100)),
-        const SizedBox(height: 16),
-        Center(child: _ShimmerBox(width: 150, height: 24, theme: theme)),
-        const SizedBox(height: 4),
-        Center(child: _ShimmerBox(width: 80, height: 14, theme: theme)),
-        const SizedBox(height: 24),
-        _ShimmerBox(
-          width: double.infinity,
-          height: 48,
-          theme: theme,
-          color: theme.colorScheme.primary,
-        ),
-        const SizedBox(height: 16),
-        const ThemedDivider(),
-        const SizedBox(height: 8),
-        Center(child: _ShimmerBox(width: 100, height: 16, theme: theme)),
-      ],
-    );
-  }
-}
-
 /// 快速登录视图
 class _QuickLoginView extends ConsumerWidget {
   final ThemeData theme;
-  final bool isWideScreen;
   final List<SavedAccount> accounts;
   final void Function(SavedAccount) onAvatarTap;
   final void Function(List<SavedAccount>, SavedAccount) onAccountSelectorTap;
@@ -706,7 +563,6 @@ class _QuickLoginView extends ConsumerWidget {
 
   const _QuickLoginView({
     required this.theme,
-    required this.isWideScreen,
     required this.accounts,
     required this.onAvatarTap,
     required this.onAccountSelectorTap,
@@ -725,129 +581,64 @@ class _QuickLoginView extends ConsumerWidget {
       });
     final defaultAccount = sortedAccounts.first;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: isWideScreen ? 550 : 420),
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: theme.colorScheme.outline.withValues(alpha: 0.2),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: isWideScreen
-              ? _buildWideLayout(context, ref, defaultAccount)
-              : _buildMobileLayout(context, ref, defaultAccount),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWideLayout(
-    BuildContext context,
-    WidgetRef ref,
-    SavedAccount account,
-  ) {
-    return Row(
-      children: [
-        AccountAvatar(
-          account: account,
-          size: 100,
-          showEditBadge: true,
-          onTap: () => onAvatarTap(account),
-        ),
-        const SizedBox(width: 24),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _AccountSelectorButton(
-                account: account,
-                accounts: accounts,
-                onTap: () => onAccountSelectorTap(accounts, account),
-              ),
-              Text(
-                context.l10n.auth_switchAccount,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: _QuickLoginButton(
-                  account: account,
-                  onLogin: onQuickLogin,
-                ),
-              ),
-              const SizedBox(height: 16),
-              const ThemedDivider(),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: onAddAccount,
-                icon: const StudioIcon(Icons.add),
-                label: Text(context.l10n.auth_addAccount),
-              ),
-              TextButton.icon(
-                key: const Key('auth_guest_entry_quick_login'),
-                onPressed: onGuestEntry,
-                icon: const StudioIcon(Icons.explore_outlined),
-                label: Text(context.l10n.auth_guestEntry),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMobileLayout(
-    BuildContext context,
-    WidgetRef ref,
-    SavedAccount account,
-  ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        AccountAvatar(
-          account: account,
-          size: 100,
-          showEditBadge: true,
-          onTap: () => onAvatarTap(account),
-        ),
-        const SizedBox(height: 16),
-        _AccountSelectorButton(
-          account: account,
-          accounts: accounts,
-          onTap: () => onAccountSelectorTap(accounts, account),
-        ),
-        Text(
-          context.l10n.auth_switchAccount,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-          ),
+        Row(
+          children: [
+            AccountAvatar(
+              account: defaultAccount,
+              size: 56,
+              showEditBadge: true,
+              onTap: () => onAvatarTap(defaultAccount),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _AccountSelectorButton(
+                    account: defaultAccount,
+                    accounts: accounts,
+                    onTap: () => onAccountSelectorTap(accounts, defaultAccount),
+                  ),
+                  Text(
+                    context.l10n.auth_switchAccount,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 24),
         SizedBox(
           width: double.infinity,
-          child: _QuickLoginButton(account: account, onLogin: onQuickLogin),
+          child: _QuickLoginButton(
+            account: defaultAccount,
+            onLogin: onQuickLogin,
+          ),
         ),
-        const SizedBox(height: 16),
-        const ThemedDivider(),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         TextButton.icon(
           onPressed: onAddAccount,
-          icon: const StudioIcon(Icons.add),
+          icon: const Icon(Icons.add, size: 18),
           label: Text(context.l10n.auth_addAccount),
         ),
-        TextButton.icon(
-          key: const Key('auth_guest_entry_quick_login'),
-          onPressed: onGuestEntry,
-          icon: const StudioIcon(Icons.explore_outlined),
-          label: Text(context.l10n.auth_guestEntry),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 12),
+          child: Divider(height: 1),
+        ),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            key: const Key('auth_guest_entry_quick_login'),
+            onPressed: onGuestEntry,
+            icon: const Icon(Icons.explore_outlined, size: 18),
+            label: Text(context.l10n.auth_guestEntry),
+          ),
         ),
       ],
     );
@@ -888,7 +679,7 @@ class _AccountSelectorButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            StudioIcon(
+            Icon(
               Icons.arrow_drop_down,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
@@ -921,7 +712,7 @@ class _QuickLoginButton extends ConsumerWidget {
                 color: Colors.white,
               ),
             )
-          : const StudioIcon(Icons.login),
+          : const Icon(Icons.login),
       label: Text(context.l10n.auth_quickLogin),
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -982,7 +773,7 @@ class _AccountListItem extends StatelessWidget {
           if (isSelected)
             Padding(
               padding: const EdgeInsets.only(left: 8),
-              child: StudioIcon(
+              child: Icon(
                 Icons.check,
                 color: theme.colorScheme.primary,
                 size: 20,
@@ -997,7 +788,7 @@ class _AccountListItem extends StatelessWidget {
         ),
       ),
       trailing: IconButton(
-        icon: StudioIcon(
+        icon: Icon(
           Icons.delete_outline,
           color: theme.colorScheme.onSurfaceVariant,
         ),
@@ -1087,133 +878,6 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 闪烁骨架盒子
-class _ShimmerBox extends StatefulWidget {
-  final double width;
-  final double height;
-  final ThemeData theme;
-  final Color? color;
-
-  const _ShimmerBox({
-    required this.width,
-    required this.height,
-    required this.theme,
-    this.color,
-  });
-
-  @override
-  State<_ShimmerBox> createState() => _ShimmerBoxState();
-}
-
-class _ShimmerBoxState extends State<_ShimmerBox>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    )..repeat();
-    _animation = Tween<double>(begin: -2.0, end: 2.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final baseColor =
-        widget.color?.withValues(alpha: 0.3) ??
-        widget.theme.colorScheme.surfaceContainerHighest;
-    final highlightColor =
-        widget.color?.withValues(alpha: 0.1) ??
-        widget.theme.colorScheme.surface;
-
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) => Container(
-        width: widget.width,
-        height: widget.height,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
-          gradient: LinearGradient(
-            begin: Alignment(-1.0 + _animation.value, 0.0),
-            end: Alignment(1.0 + _animation.value, 0.0),
-            colors: [baseColor, highlightColor, baseColor],
-            stops: const [0.0, 0.5, 1.0],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 闪烁头像骨架（FEAT-30：与账户头像同形，微圆角方形）
-class _ShimmerCircleAvatar extends StatefulWidget {
-  final double size;
-
-  const _ShimmerCircleAvatar({required this.size});
-
-  @override
-  State<_ShimmerCircleAvatar> createState() => _ShimmerCircleAvatarState();
-}
-
-class _ShimmerCircleAvatarState extends State<_ShimmerCircleAvatar>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    )..repeat();
-    _animation = Tween<double>(begin: -2.0, end: 2.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final baseColor = theme.colorScheme.surfaceContainerHighest;
-    final highlightColor = theme.colorScheme.surface;
-
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) => Container(
-        width: widget.size,
-        height: widget.size,
-        decoration: BoxDecoration(
-          borderRadius: avatarBorderRadius(widget.size),
-          gradient: LinearGradient(
-            begin: Alignment(-1.0 + _animation.value, 0.0),
-            end: Alignment(1.0 + _animation.value, 0.0),
-            colors: [baseColor, highlightColor, baseColor],
-            stops: const [0.0, 0.5, 1.0],
           ),
         ),
       ),

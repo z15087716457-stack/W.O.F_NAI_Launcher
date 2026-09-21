@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -336,7 +335,7 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
           onToggleDrawer: _toggleParamsMenu,
           arrow: RotationTransition(
             turns: Tween<double>(begin: 0, end: -0.25).animate(_menuAnimation),
-            child: const StudioIcon(Icons.play_arrow, size: 20),
+            child: const Icon(Icons.play_arrow, size: 20),
           ),
         ),
 
@@ -452,7 +451,7 @@ class _ModelMenuButton extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  StudioIcon(
+                  Icon(
                     Icons.keyboard_arrow_down,
                     size: 15,
                     color: theme.colorScheme.surface,
@@ -497,7 +496,7 @@ class _ModelMenuButton extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         children: [
-          StudioIcon(
+          Icon(
             Icons.check,
             size: 16,
             color: m == current
@@ -920,7 +919,7 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         children: [
-          StudioIcon(
+          Icon(
             Icons.check,
             size: 16,
             color: sampler == current

@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -104,13 +103,13 @@ class _ThirdPartyApiLoginCardState
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: const StudioIcon(Icons.paste, size: 20),
+                  icon: const Icon(Icons.paste, size: 20),
                   tooltip: context.l10n.common_paste,
                   onPressed: _pasteFromClipboard,
                   splashRadius: 20,
                 ),
                 IconButton(
-                  icon: StudioIcon(
+                  icon: Icon(
                     _obscureToken
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
@@ -149,7 +148,7 @@ class _ThirdPartyApiLoginCardState
                       color: Colors.white,
                     ),
                   )
-                : const StudioIcon(Icons.login),
+                : const Icon(Icons.login),
             label: Text(context.l10n.auth_validateAndLogin),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -165,10 +164,7 @@ class _ThirdPartyApiLoginCardState
               ),
               child: Row(
                 children: [
-                  StudioIcon(
-                    Icons.error_outline,
-                    color: theme.colorScheme.error,
-                  ),
+                  Icon(Icons.error_outline, color: theme.colorScheme.error),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(

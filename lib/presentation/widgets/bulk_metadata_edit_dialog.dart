@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -188,7 +187,7 @@ class _BulkMetadataEditDialogState
             // Header
             Row(
               children: [
-                StudioIcon(
+                Icon(
                   Icons.edit_outlined,
                   color: theme.colorScheme.primary,
                   size: 20,
@@ -203,7 +202,7 @@ class _BulkMetadataEditDialogState
                   ),
                 ),
                 IconButton(
-                  icon: const StudioIcon(Icons.close),
+                  icon: const Icon(Icons.close),
                   onPressed: () => Navigator.of(context).pop(),
                   tooltip: l10n.common_close,
                 ),
@@ -285,7 +284,7 @@ class _BulkMetadataEditDialogState
                           ),
                           child: Row(
                             children: [
-                              StudioIcon(
+                              Icon(
                                 Icons.info_outline,
                                 size: 16,
                                 color: theme.colorScheme.outline,
@@ -320,7 +319,7 @@ class _BulkMetadataEditDialogState
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const StudioIcon(Icons.close, size: 18),
+                    icon: const Icon(Icons.close, size: 18),
                     label: Text(l10n.common_cancel),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
@@ -334,7 +333,7 @@ class _BulkMetadataEditDialogState
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: _applyEdit,
-                    icon: const StudioIcon(Icons.check, size: 18),
+                    icon: const Icon(Icons.check, size: 18),
                     label: Text(context.l10n.common_apply),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
@@ -364,11 +363,7 @@ class _BulkMetadataEditDialogState
       children: [
         Row(
           children: [
-            StudioIcon(
-              icon,
-              size: 16,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
             const SizedBox(width: 6),
             Text(
               label,
@@ -449,7 +444,7 @@ class _BulkMetadataEditDialogState
         const SizedBox(width: 8),
         IconButton(
           onPressed: onAdd,
-          icon: const StudioIcon(Icons.add, size: 20),
+          icon: const Icon(Icons.add, size: 20),
           tooltip: context.l10n.tag_addTag,
           style: IconButton.styleFrom(
             backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),

@@ -14,6 +14,7 @@
 
 ## 登录与游客会话
 
+- 登录与载入共用 `BrandEntryScene`：中央完整 W.O.F / NAI STUDIO Logo，蓝黑 / 蓝白两套外观。右上角明暗选择由 `brandEntryBrightnessProvider` 在会话内共享，不写账户数据，不改变工作区主题。标题栏在入口路由同步外观，进入工作区恢复已选主题。紧凑登录页签只在入口传 `LoginFormContainer.compact: true`，添加账号对话框保留原布局。
 - 登录页提供“跳过登录，以游客身份进入”入口；无保存账号和已有账号快速登录两条路径都接入同一游客会话 provider。`LoginFormContainer.showGuestEntry` 默认 false——已登录的添加账号等复用场景不显示游客入口，仅登录页语境显式传 true。
 - 游客状态只存在于当前运行时，不写入持久化存储；路由会在游客状态变化时刷新，游客可进入主应用及本地功能。
 - Token、第三方 Token、credentials/access token、credentials 登录和 `tryAddAccount` 成功后清除游客状态；`logout()` 同样清除游客状态，避免退出登录后继续放行。

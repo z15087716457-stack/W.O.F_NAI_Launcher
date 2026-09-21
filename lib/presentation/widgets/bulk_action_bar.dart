@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -271,7 +270,7 @@ class _ActionButtonState extends State<_ActionButton> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                StudioIcon(widget.icon, size: 18, color: displayColor),
+                Icon(widget.icon, size: 18, color: displayColor),
                 if (!widget.compact) ...[
                   const SizedBox(width: 6),
                   Text(

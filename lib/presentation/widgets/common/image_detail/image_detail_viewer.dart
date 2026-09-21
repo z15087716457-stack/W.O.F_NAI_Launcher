@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -761,7 +760,7 @@ class _NavigationButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: StudioIcon(icon, color: Colors.white, size: 32),
+          child: Icon(icon, color: Colors.white, size: 32),
         ),
       ),
     );

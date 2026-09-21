@@ -109,8 +109,26 @@ abstract class AppLocalizations {
   /// No description provided for @settings_visualAssets.
   ///
   /// In en, this message translates to:
-  /// **'Interface fonts, icons & licenses'**
+  /// **'Interface fonts & licenses'**
   String get settings_visualAssets;
+
+  /// No description provided for @brand_entryTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'A place for your imagination.'**
+  String get brand_entryTagline;
+
+  /// No description provided for @brand_switchToLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to light mode'**
+  String get brand_switchToLight;
+
+  /// No description provided for @brand_switchToDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to dark mode'**
+  String get brand_switchToDark;
 
   /// No description provided for @app_subtitle.
   ///

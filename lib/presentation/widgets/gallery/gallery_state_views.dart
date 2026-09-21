@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,11 +25,7 @@ class GalleryErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          StudioIcon(
-            Icons.error_outline,
-            size: 48,
-            color: theme.colorScheme.error,
-          ),
+          Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
           const SizedBox(height: 16),
           Text(
             context.l10n.localGallery_loadFailed(
@@ -112,7 +107,7 @@ class GalleryEmptyView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          StudioIcon(
+          Icon(
             icon,
             size: 64,
             color: theme.colorScheme.onSurfaceVariant.withValues(
@@ -175,7 +170,7 @@ class GalleryNoResultsView extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          StudioIcon(
+          Icon(
             icon ?? Icons.search_off,
             size: 48,
             color: theme.colorScheme.onSurfaceVariant.withValues(
@@ -207,7 +202,7 @@ class GalleryNoResultsView extends ConsumerWidget {
                       .read(localGalleryNotifierProvider.notifier)
                       .clearAllFilters();
                 },
-            icon: const StudioIcon(Icons.filter_alt_off, size: 16),
+            icon: const Icon(Icons.filter_alt_off, size: 16),
             label: Text(context.l10n.localGallery_clearFilters),
             style: TextButton.styleFrom(
               foregroundColor: theme.colorScheme.primary,

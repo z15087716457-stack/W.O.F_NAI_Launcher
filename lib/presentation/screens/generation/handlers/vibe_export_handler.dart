@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -382,11 +381,7 @@ class VibeExportHandler {
     final l10n = context.l10n;
 
     return PopupMenuButton<String>(
-      icon: StudioIcon(
-        Icons.download,
-        size: 18,
-        color: theme.colorScheme.primary,
-      ),
+      icon: Icon(Icons.download, size: 18, color: theme.colorScheme.primary),
       tooltip: l10n.vibe_export_title,
       offset: const Offset(0, 32),
       itemBuilder: (context) => [
@@ -394,7 +389,7 @@ class VibeExportHandler {
           value: 'vibe',
           child: Row(
             children: [
-              StudioIcon(
+              Icon(
                 Icons.file_download,
                 size: 18,
                 color: theme.colorScheme.primary,
@@ -408,11 +403,7 @@ class VibeExportHandler {
           value: 'image',
           child: Row(
             children: [
-              StudioIcon(
-                Icons.image,
-                size: 18,
-                color: theme.colorScheme.secondary,
-              ),
+              Icon(Icons.image, size: 18, color: theme.colorScheme.secondary),
               const SizedBox(width: 8),
               Text(l10n.vibe_embedToImage),
             ],

@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -57,7 +56,7 @@ class ImageOperationBadge extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(5),
             child: asset == null
-                ? StudioIcon(icon, size: 16)
+                ? Icon(icon, size: 16)
                 : SvgPicture.asset(
                     'assets/icons/nai-icon-$asset.svg',
                     width: 16,

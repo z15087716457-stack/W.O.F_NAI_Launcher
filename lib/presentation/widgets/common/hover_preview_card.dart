@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -182,7 +181,7 @@ class PreviewCardError extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          StudioIcon(Icons.error_outline, size: 32, color: colorScheme.error),
+          Icon(Icons.error_outline, size: 32, color: colorScheme.error),
           const SizedBox(height: 8),
           Text(
             message ?? context.l10n.common_previewLoadFailed,

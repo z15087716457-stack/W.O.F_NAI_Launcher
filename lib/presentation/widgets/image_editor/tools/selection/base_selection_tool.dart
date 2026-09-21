@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -218,7 +217,7 @@ class SelectionSettingsPanel extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  StudioIcon(
+                  Icon(
                     Icons.info_outline,
                     size: 16,
                     color: theme.colorScheme.onSurfaceVariant,
@@ -248,7 +247,7 @@ class SelectionSettingsPanel extends StatelessWidget {
             children: [
               OutlinedButton.icon(
                 onPressed: () => state.clearSelection(),
-                icon: const StudioIcon(Icons.deselect, size: 16),
+                icon: const Icon(Icons.deselect, size: 16),
                 label: Text(context.l10n.selection_clear_selection),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
@@ -260,7 +259,7 @@ class SelectionSettingsPanel extends StatelessWidget {
               ),
               OutlinedButton.icon(
                 onPressed: () => state.invertSelection(),
-                icon: const StudioIcon(Icons.flip, size: 16),
+                icon: const Icon(Icons.flip, size: 16),
                 label: Text(context.l10n.selection_invert_selection),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
@@ -277,7 +276,7 @@ class SelectionSettingsPanel extends StatelessWidget {
                     onPressed: selectionPath != null
                         ? () => state.cutSelectionToNewLayer()
                         : null,
-                    icon: const StudioIcon(Icons.content_cut, size: 16),
+                    icon: const Icon(Icons.content_cut, size: 16),
                     label: Text(context.l10n.selection_cut_to_layer),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(

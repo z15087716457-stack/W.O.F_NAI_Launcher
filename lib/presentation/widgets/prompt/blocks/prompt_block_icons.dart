@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/localization_extension.dart';
@@ -89,7 +88,7 @@ class PromptBlockIconPicker extends StatelessWidget {
               controller.open();
             }
           },
-          icon: StudioIcon(
+          icon: Icon(
             promptBlockIconFromName(selected),
             size: 19,
             color: theme.colorScheme.primary,
@@ -155,7 +154,7 @@ class PromptBlockIconPicker extends StatelessWidget {
               width: isSelected ? 1.4 : 0.8,
             ),
           ),
-          child: StudioIcon(
+          child: Icon(
             entry.value,
             size: 17,
             color: isSelected

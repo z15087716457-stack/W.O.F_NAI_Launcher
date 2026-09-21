@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
@@ -68,7 +67,7 @@ class PromptBlockDropMenu extends StatelessWidget {
               // 标题区域
               Row(
                 children: [
-                  StudioIcon(
+                  Icon(
                     Icons.image_outlined,
                     color: theme.colorScheme.primary,
                     size: 28,
@@ -130,7 +129,7 @@ class PromptBlockDropMenu extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: () =>
                     Navigator.of(context).pop(PromptBlockDropAction.cancel),
-                icon: const StudioIcon(Icons.close, size: 18),
+                icon: const Icon(Icons.close, size: 18),
                 label: Text(l10n.common_cancel),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
@@ -179,10 +178,7 @@ class _ActionButton extends StatelessWidget {
                   color: theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: StudioIcon(
-                  icon,
-                  color: theme.colorScheme.onPrimaryContainer,
-                ),
+                child: Icon(icon, color: theme.colorScheme.onPrimaryContainer),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -207,7 +203,7 @@ class _ActionButton extends StatelessWidget {
                   ],
                 ),
               ),
-              StudioIcon(Icons.chevron_right, color: theme.colorScheme.outline),
+              Icon(Icons.chevron_right, color: theme.colorScheme.outline),
             ],
           ),
         ),

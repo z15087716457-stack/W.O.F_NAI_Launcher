@@ -151,7 +151,6 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-    - assets/icons/geist/
     - assets/licenses/
     - assets/translations/
     - assets/data/

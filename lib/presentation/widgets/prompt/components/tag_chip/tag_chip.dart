@@ -1,5 +1,4 @@
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -1040,7 +1039,7 @@ class _DeleteButtonState extends State<_DeleteButton>
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: StudioIcon(
+                      child: Icon(
                         Icons.close,
                         size: 12,
                         color: _isHovering
@@ -1147,7 +1146,7 @@ class _FavoriteButtonState extends State<_FavoriteButton>
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: StudioIcon(
+                    child: Icon(
                       widget.isFavorite
                           ? Icons.favorite
                           : Icons.favorite_border,
@@ -1304,11 +1303,7 @@ class _BatchSelectionCheckbox extends StatelessWidget {
           ),
         ),
         child: isSelected
-            ? StudioIcon(
-                Icons.check,
-                size: 12,
-                color: theme.colorScheme.onPrimary,
-              )
+            ? Icon(Icons.check, size: 12, color: theme.colorScheme.onPrimary)
             : null,
       ),
     );

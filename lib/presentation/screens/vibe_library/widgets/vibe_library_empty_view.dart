@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
@@ -54,7 +53,7 @@ class VibeLibraryEmptyView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          StudioIcon(
+          Icon(
             _getIconData(iconName),
             size: 64,
             color: theme.colorScheme.outline.withAlpha(128),

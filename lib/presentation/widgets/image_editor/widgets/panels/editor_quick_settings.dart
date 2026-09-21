@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/utils/localization_extension.dart';
 import '../../core/editor_state.dart';
@@ -34,7 +33,7 @@ class EditorQuickSettings extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                StudioIcon(tool.icon, size: 18),
+                Icon(tool.icon, size: 18),
                 const SizedBox(height: 5),
                 Text(
                   tool.id == 'eraser'
