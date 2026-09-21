@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -57,7 +58,7 @@ class _StatisticsExportDialogState
     return AlertDialog(
       title: Row(
         children: [
-          Icon(Icons.download_outlined, color: theme.colorScheme.primary),
+          StudioIcon(Icons.download_outlined, color: theme.colorScheme.primary),
           const SizedBox(width: 8),
           Text(l10n.common_export),
         ],
@@ -105,7 +106,7 @@ class _StatisticsExportDialogState
               ),
               child: Row(
                 children: [
-                  Icon(
+                  StudioIcon(
                     Icons.info_outline,
                     size: 16,
                     color: theme.colorScheme.primary,
@@ -144,7 +145,7 @@ class _StatisticsExportDialogState
               : Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.download, size: 18),
+                    const StudioIcon(Icons.download, size: 18),
                     const SizedBox(width: 8),
                     Text(l10n.common_export),
                   ],
@@ -191,7 +192,7 @@ class _StatisticsExportDialogState
         ),
         child: Row(
           children: [
-            Icon(
+            StudioIcon(
               icon,
               size: 20,
               color: isSelected
@@ -211,7 +212,7 @@ class _StatisticsExportDialogState
               ),
             ),
             if (isSelected)
-              Icon(
+              StudioIcon(
                 Icons.check_circle,
                 size: 20,
                 color: theme.colorScheme.primary,
@@ -490,7 +491,7 @@ class _StatisticsExportDialogState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        icon: Icon(
+        icon: StudioIcon(
           Icons.error_outline,
           color: theme.colorScheme.error,
           size: 48,

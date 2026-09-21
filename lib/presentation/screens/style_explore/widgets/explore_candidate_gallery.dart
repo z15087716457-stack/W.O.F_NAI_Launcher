@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -154,9 +155,7 @@ class _ExploreCandidateGalleryState
                     ),
                     for (final entry in run.folders.indexed)
                       ReorderableDragStartListener(
-                        key: ValueKey(
-                          'explore-filter-folder-${entry.$2.id}',
-                        ),
+                        key: ValueKey('explore-filter-folder-${entry.$2.id}'),
                         index: lockedChipCount + entry.$1,
                         child: _filterChip(
                           label: entry.$2.name,
@@ -191,7 +190,7 @@ class _ExploreCandidateGalleryState
             visualDensity: VisualDensity.compact,
             tooltip: l10n.styleExplore_newFolder,
             onPressed: () => promptCreateExploreFolder(context, ref, run.id),
-            icon: const Icon(Icons.create_new_folder_outlined),
+            icon: const StudioIcon(Icons.create_new_folder_outlined),
           ),
           // 多选模式。
           IconButton(
@@ -200,7 +199,7 @@ class _ExploreCandidateGalleryState
             visualDensity: VisualDensity.compact,
             tooltip: l10n.styleExplore_selectCandidates,
             onPressed: () => setState(() => _selectionMode = true),
-            icon: const Icon(Icons.checklist),
+            icon: const StudioIcon(Icons.checklist),
           ),
         ],
       ),
@@ -242,7 +241,7 @@ class _ExploreCandidateGalleryState
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, size: 14),
+                  StudioIcon(icon, size: 14),
                   const SizedBox(width: 4),
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 120),
@@ -276,7 +275,7 @@ class _ExploreCandidateGalleryState
             visualDensity: VisualDensity.compact,
             tooltip: l10n.common_close,
             onPressed: _exitSelection,
-            icon: const Icon(Icons.close),
+            icon: const StudioIcon(Icons.close),
           ),
           Text(
             l10n.styleExplore_selectedCount(_selectedIds.length),
@@ -287,20 +286,21 @@ class _ExploreCandidateGalleryState
             onPressed: _selectedIds.isEmpty
                 ? null
                 : () => _createFamilyFromSelection(run),
-            icon: const Icon(Icons.account_tree_outlined, size: 16),
+            icon: const StudioIcon(Icons.account_tree_outlined, size: 16),
             label: Text(l10n.styleExplore_createFamily),
           ),
           FilledButton.tonalIcon(
             key: const Key('explore-gallery-merge-adopt'),
             onPressed: _selectedIds.isEmpty ? null : () => _adoptSelected(run),
-            icon: const Icon(Icons.inventory_2_outlined, size: 16),
+            icon: const StudioIcon(Icons.inventory_2_outlined, size: 16),
             label: Text(l10n.styleExplore_mergeAdopt),
           ),
           // FEAT-56：无底色删除钮——批量删图（FEAT-42 同链路），
           // 仅当选择集里有已落副本的候选时启用。
           TextButton.icon(
             key: const Key('explore-gallery-delete'),
-            onPressed: run.candidates.any(
+            onPressed:
+                run.candidates.any(
                   (candidate) =>
                       _selectedIds.contains(candidate.id) &&
                       candidate.generation.filePath != null,
@@ -310,7 +310,7 @@ class _ExploreCandidateGalleryState
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
             ),
-            icon: const Icon(Icons.delete_outline, size: 16),
+            icon: const StudioIcon(Icons.delete_outline, size: 16),
             label: Text(l10n.styleExplore_deleteImage),
           ),
         ],
@@ -383,7 +383,7 @@ class _ExploreCandidateGalleryState
         padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: color),
+            StudioIcon(icon, size: 16, color: color),
             const SizedBox(width: 6),
             Text(
               '$title · ${members.length}',
@@ -397,7 +397,7 @@ class _ExploreCandidateGalleryState
                 visualDensity: VisualDensity.compact,
                 tooltip: context.l10n.styleExplore_renameFolder,
                 onPressed: () => _renameFolder(run, folderId),
-                icon: const Icon(Icons.drive_file_rename_outline),
+                icon: const StudioIcon(Icons.drive_file_rename_outline),
               ),
               IconButton(
                 key: Key('explore-folder-delete-$folderId'),
@@ -405,7 +405,7 @@ class _ExploreCandidateGalleryState
                 visualDensity: VisualDensity.compact,
                 tooltip: context.l10n.styleExplore_deleteFolder,
                 onPressed: () => _deleteFolder(run, folderId),
-                icon: const Icon(Icons.delete_outline),
+                icon: const StudioIcon(Icons.delete_outline),
               ),
             ],
           ],
@@ -645,7 +645,6 @@ class _ExploreCandidateGalleryState
       }
     }
   }
-
 }
 
 class _EmptyHint extends StatelessWidget {
@@ -663,7 +662,11 @@ class _EmptyHint extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 40, color: theme.colorScheme.onSurfaceVariant),
+            StudioIcon(
+              icon,
+              size: 40,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(height: 12),
             Text(
               text,
@@ -768,7 +771,7 @@ class _CandidateCard extends ConsumerWidget {
   }
 
   Widget _buildSelectionIndicator(ThemeData theme) {
-    return Icon(
+    return StudioIcon(
       selected ? Icons.check_circle : Icons.radio_button_unchecked,
       size: 18,
       color: selected
@@ -838,7 +841,7 @@ class _CandidateCard extends ConsumerWidget {
           color: theme.colorScheme.surface.withValues(alpha: 0.75),
           shape: BoxShape.circle,
         ),
-        child: Icon(
+        child: StudioIcon(
           hearted ? Icons.favorite : Icons.favorite_border,
           size: 14,
           color: hearted
@@ -866,7 +869,11 @@ class _ThumbnailPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final child = Center(
-      child: Icon(icon, size: 32, color: theme.colorScheme.onSurfaceVariant),
+      child: StudioIcon(
+        icon,
+        size: 32,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
     );
     final message = tooltip;
     if (message == null || message.isEmpty) return child;
@@ -908,7 +915,11 @@ class _OverlayIcon extends StatelessWidget {
         color: theme.colorScheme.surface.withValues(alpha: 0.75),
         shape: BoxShape.circle,
       ),
-      child: Icon(icon, size: 14, color: color ?? theme.colorScheme.onSurface),
+      child: StudioIcon(
+        icon,
+        size: 14,
+        color: color ?? theme.colorScheme.onSurface,
+      ),
     );
   }
 }
@@ -1020,7 +1031,7 @@ class _ExploreCandidateDetailDialogState
                       tooltip: l10n.common_close,
                       iconSize: 18,
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close),
+                      icon: const StudioIcon(Icons.close),
                     ),
                   ],
                 ),
@@ -1148,7 +1159,7 @@ class _ExploreCandidateDetailDialogState
                                 onPressed: roll == null
                                     ? null
                                     : () => _copySnapshot(context, roll),
-                                icon: const Icon(Icons.copy_outlined),
+                                icon: const StudioIcon(Icons.copy_outlined),
                               ),
                             ],
                           ),
@@ -1278,7 +1289,7 @@ class _ExploreCandidateDetailDialogState
       key: key,
       tooltip: tooltip,
       onPressed: onPressed,
-      icon: Icon(icon),
+      icon: StudioIcon(icon),
     );
   }
 
@@ -1307,7 +1318,7 @@ class _ExploreCandidateDetailDialogState
                   run: run,
                   candidate: candidate,
                 ),
-          icon: const Icon(Icons.inventory_2_outlined, size: 16),
+          icon: const StudioIcon(Icons.inventory_2_outlined, size: 16),
           label: Text(l10n.styleExplore_adoptAsBlock),
         ),
         OutlinedButton.icon(
@@ -1319,7 +1330,7 @@ class _ExploreCandidateDetailDialogState
                   ref,
                   candidate: candidate,
                 ),
-          icon: const Icon(Icons.input_outlined, size: 16),
+          icon: const StudioIcon(Icons.input_outlined, size: 16),
           label: Text(l10n.styleExplore_fixateAsTemplate),
         ),
         if (canDeleteImage)
@@ -1334,7 +1345,7 @@ class _ExploreCandidateDetailDialogState
               runId: run.id,
               candidate: candidate,
             ),
-            icon: const Icon(Icons.delete_outline, size: 16),
+            icon: const StudioIcon(Icons.delete_outline, size: 16),
             label: Text(l10n.styleExplore_deleteImage),
           ),
       ],

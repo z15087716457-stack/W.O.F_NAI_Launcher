@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
-  "app_title": "NAI Launcher",
+  "app_title": "W.O.F NAI Studio",
+  "settings_visualAssets": "Interface fonts, icons & licenses",
   "app_subtitle": "NovelAI Third-party Client",
   "common_cancel": "Cancel",
   "onlineFav_all": "All",

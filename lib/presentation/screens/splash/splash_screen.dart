@@ -1,3 +1,6 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/core/constants/brand.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -155,7 +158,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 ),
               ],
             ),
-            child: const Icon(
+            child: const StudioIcon(
               Icons.auto_awesome,
               size: 56,
               color: Colors.white,
@@ -175,13 +178,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           shaderCallback: (bounds) => LinearGradient(
             colors: [primaryColor, lighterColor],
           ).createShader(bounds),
-          child: const Text(
-            'NAI Launcher',
-            style: TextStyle(
+          child: Text(
+            Brand.name,
+            style: StudioTypography.wordmark.copyWith(
               fontSize: 32,
-              fontWeight: FontWeight.bold,
               color: Colors.white,
-              letterSpacing: 2,
             ),
           ),
         ),

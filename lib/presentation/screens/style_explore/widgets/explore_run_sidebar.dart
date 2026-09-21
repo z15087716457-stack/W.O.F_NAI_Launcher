@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -45,7 +46,7 @@ class ExploreRunSidebarSection extends ConsumerWidget {
                 tooltip: l10n.styleExplore_newRun,
                 iconSize: 18,
                 onPressed: () => _createRun(context, ref),
-                icon: const Icon(Icons.add),
+                icon: const StudioIcon(Icons.add),
               ),
             ],
           ),
@@ -167,7 +168,7 @@ class _ExploreRunCard extends ConsumerWidget {
         dense: true,
         selected: selected,
         contentPadding: const EdgeInsets.only(left: 12),
-        leading: Icon(Icons.circle, size: 10, color: statusColor),
+        leading: StudioIcon(Icons.circle, size: 10, color: statusColor),
         minLeadingWidth: 14,
         title: Text(
           run.displayName,

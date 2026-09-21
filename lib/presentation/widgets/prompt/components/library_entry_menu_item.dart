@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/localization_extension.dart';
@@ -49,7 +50,11 @@ class _LibraryEntryMenuItemState extends State<LibraryEntryMenuItem> {
             children: [
               // 选中指示
               if (widget.isSelected)
-                Icon(Icons.check, size: 16, color: theme.colorScheme.primary)
+                StudioIcon(
+                  Icons.check,
+                  size: 16,
+                  color: theme.colorScheme.primary,
+                )
               else
                 const SizedBox(width: 16),
               const SizedBox(width: 8),
@@ -108,7 +113,7 @@ class _LibraryEntryMenuItemState extends State<LibraryEntryMenuItem> {
                 duration: const Duration(milliseconds: 150),
                 child: IconButton(
                   onPressed: widget.onDelete,
-                  icon: Icon(
+                  icon: StudioIcon(
                     Icons.close,
                     size: 18,
                     color: theme.colorScheme.error,
@@ -127,7 +132,7 @@ class _LibraryEntryMenuItemState extends State<LibraryEntryMenuItem> {
   Widget _buildPlaceholder(ThemeData theme) {
     return Container(
       color: theme.colorScheme.surfaceContainerHighest,
-      child: Icon(
+      child: StudioIcon(
         Icons.library_books_outlined,
         size: 20,
         color: theme.colorScheme.outline,

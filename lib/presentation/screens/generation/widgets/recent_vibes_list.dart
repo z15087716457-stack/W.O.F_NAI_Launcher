@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -35,7 +36,7 @@ class RecentVibesList extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
             child: Row(
               children: [
-                Icon(
+                StudioIcon(
                   Icons.history,
                   size: 14,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -52,7 +53,7 @@ class RecentVibesList extends ConsumerWidget {
                 AnimatedRotation(
                   turns: isCollapsed ? 0.75 : 1.0,
                   duration: const Duration(milliseconds: 200),
-                  child: Icon(
+                  child: StudioIcon(
                     Icons.chevron_left,
                     size: 16,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.4),

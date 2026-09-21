@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -232,7 +233,7 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
       ),
       child: Row(
         children: [
-          Icon(Icons.crop_free, color: theme.colorScheme.primary),
+          StudioIcon(Icons.crop_free, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
           Text(
             l10n.promptBlockLibrary_adjustThumbnailTitle,
@@ -243,7 +244,7 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
           const Spacer(),
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.close),
+            icon: const StudioIcon(Icons.close),
             tooltip: l10n.common_cancel,
           ),
         ],
@@ -255,7 +256,7 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
   Widget _buildHint(ThemeData theme, AppLocalizations l10n) {
     return Row(
       children: [
-        Icon(Icons.touch_app, size: 16, color: theme.colorScheme.outline),
+        StudioIcon(Icons.touch_app, size: 16, color: theme.colorScheme.outline),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -326,7 +327,7 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
                   height: displayedSize.height,
                   color: Colors.grey.shade800,
                   child: const Center(
-                    child: Icon(
+                    child: StudioIcon(
                       Icons.broken_image,
                       size: 48,
                       color: Colors.white38,
@@ -390,7 +391,7 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
                         ],
                       ),
                       child: const Center(
-                        child: Icon(
+                        child: StudioIcon(
                           Icons.open_with,
                           color: Colors.white,
                           size: 24,
@@ -422,7 +423,7 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
           // 重置按钮
           TextButton.icon(
             onPressed: _reset,
-            icon: const Icon(Icons.restart_alt),
+            icon: const StudioIcon(Icons.restart_alt),
             label: Text(l10n.common_reset),
           ),
           const SizedBox(width: 8),
@@ -435,7 +436,7 @@ class _ThumbnailCropDialogState extends State<ThumbnailCropDialog> {
           // 确认按钮
           FilledButton.icon(
             onPressed: _confirm,
-            icon: const Icon(Icons.check),
+            icon: const StudioIcon(Icons.check),
             label: Text(l10n.common_confirm),
           ),
         ],

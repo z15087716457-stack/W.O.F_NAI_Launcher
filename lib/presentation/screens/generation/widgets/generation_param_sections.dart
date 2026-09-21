@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -192,7 +193,7 @@ class _RequestStepper extends StatelessWidget {
           onTap: enabled ? onTap : null,
           child: Padding(
             padding: const EdgeInsets.all(4),
-            child: Icon(
+            child: StudioIcon(
               icon,
               size: 18,
               color: theme.colorScheme.onSurface.withValues(
@@ -803,7 +804,7 @@ class _SmeaAutoButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              StudioIcon(
                 isAuto ? Icons.check_box : Icons.check_box_outline_blank,
                 size: 18,
                 color: isAuto
@@ -895,7 +896,7 @@ class _SmeaOptions extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          StudioIcon(
             value ? Icons.check_box : Icons.check_box_outline_blank,
             size: 20,
             color: color,
@@ -975,7 +976,7 @@ class _ToggleButtonState extends State<_ToggleButton> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (widget.isEnabled) ...[
-                Icon(
+                StudioIcon(
                   Icons.check_rounded,
                   size: 14,
                   color: theme.colorScheme.onPrimary,
@@ -1035,7 +1036,7 @@ class _SeedIconButtonState extends State<_SeedIconButton> {
           onTap: widget.onPressed,
           child: Padding(
             padding: const EdgeInsets.all(8),
-            child: Icon(
+            child: StudioIcon(
               widget.icon,
               size: 18,
               color: _isHovered

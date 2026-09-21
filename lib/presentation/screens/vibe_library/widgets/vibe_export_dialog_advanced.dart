@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -207,7 +208,7 @@ class _VibeExportDialogAdvancedState
               // 标题
               Row(
                 children: [
-                  Icon(
+                  StudioIcon(
                     Icons.file_upload_outlined,
                     color: theme.colorScheme.primary,
                   ),
@@ -222,7 +223,7 @@ class _VibeExportDialogAdvancedState
                   ),
                   if (!_isExporting)
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const StudioIcon(Icons.close),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                 ],
@@ -282,7 +283,7 @@ class _VibeExportDialogAdvancedState
                     ),
                     child: Row(
                       children: [
-                        Icon(
+                        StudioIcon(
                           Icons.error_outline,
                           color: theme.colorScheme.error,
                           size: 20,
@@ -315,7 +316,7 @@ class _VibeExportDialogAdvancedState
                       onPressed: _validateExportOptions().isValid
                           ? _export
                           : null,
-                      icon: const Icon(Icons.file_upload),
+                      icon: const StudioIcon(Icons.file_upload),
                       label: Text(context.l10n.common_export),
                     ),
                   ],
@@ -345,7 +346,7 @@ class _VibeExportDialogAdvancedState
         children: [
           Row(
             children: [
-              Icon(
+              StudioIcon(
                 Icons.folder_zip_outlined,
                 size: 20,
                 color: theme.colorScheme.primary,
@@ -367,12 +368,12 @@ class _VibeExportDialogAdvancedState
               ButtonSegment<bool>(
                 value: true,
                 label: Text(context.l10n.vibe_export_wholeBundle),
-                icon: const Icon(Icons.folder_zip),
+                icon: const StudioIcon(Icons.folder_zip),
               ),
               ButtonSegment<bool>(
                 value: false,
                 label: Text(context.l10n.vibe_export_internalVibe),
-                icon: const Icon(Icons.layers),
+                icon: const StudioIcon(Icons.layers),
               ),
             ],
             selected: {_exportWholeBundle},
@@ -417,7 +418,11 @@ class _VibeExportDialogAdvancedState
         children: [
           Row(
             children: [
-              Icon(Icons.checklist, size: 20, color: theme.colorScheme.primary),
+              StudioIcon(
+                Icons.checklist,
+                size: 20,
+                color: theme.colorScheme.primary,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -486,7 +491,7 @@ class _VibeExportDialogAdvancedState
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Container(
                               color: theme.colorScheme.surfaceContainerHighest,
-                              child: Icon(
+                              child: StudioIcon(
                                 Icons.image,
                                 size: 20,
                                 color: theme.colorScheme.outline,
@@ -720,7 +725,7 @@ class _VibeExportDialogAdvancedState
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.folder_open),
+                        : const StudioIcon(Icons.folder_open),
                     label: Text(
                       context.l10n.vibe_export_selectExternalPngImage,
                     ),
@@ -761,7 +766,7 @@ class _VibeExportDialogAdvancedState
                             const SizedBox(height: 4),
                             TextButton.icon(
                               onPressed: _isValidatingImage ? null : _pickImage,
-                              icon: const Icon(Icons.refresh, size: 16),
+                              icon: const StudioIcon(Icons.refresh, size: 16),
                               label: Text(context.l10n.common_change),
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
@@ -817,12 +822,12 @@ class _VibeExportDialogAdvancedState
                     ButtonSegment<bool>(
                       value: true,
                       label: Text('JSON'),
-                      icon: Icon(Icons.data_object),
+                      icon: StudioIcon(Icons.data_object),
                     ),
                     ButtonSegment<bool>(
                       value: false,
                       label: Text('Base64'),
-                      icon: Icon(Icons.text_fields),
+                      icon: StudioIcon(Icons.text_fields),
                     ),
                   ],
                   selected: {_encodingAsJson},
@@ -1506,7 +1511,7 @@ class _OptionCard extends StatelessWidget {
                         : theme.colorScheme.surface,
                   ),
                   child: isSelected && !isDisabled
-                      ? Icon(
+                      ? StudioIcon(
                           Icons.check,
                           size: 16,
                           color: theme.colorScheme.onPrimary,
@@ -1520,7 +1525,7 @@ class _OptionCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(
+                          StudioIcon(
                             icon,
                             size: 20,
                             color: isDisabled

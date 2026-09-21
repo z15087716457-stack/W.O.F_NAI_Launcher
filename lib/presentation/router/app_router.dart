@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -520,25 +521,25 @@ class MobileShell extends ConsumerWidget {
         onDestinationSelected: (index) => _onNavigate(index),
         destinations: [
           NavigationDestination(
-            icon: const Icon(Icons.auto_awesome_outlined),
-            selectedIcon: const Icon(Icons.auto_awesome),
+            icon: const StudioIcon(Icons.auto_awesome_outlined),
+            selectedIcon: const StudioIcon(Icons.auto_awesome),
             label: context.l10n.nav_generate,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.photo_library_outlined),
-            selectedIcon: const Icon(Icons.photo_library),
+            icon: const StudioIcon(Icons.photo_library_outlined),
+            selectedIcon: const StudioIcon(Icons.photo_library),
             label: context.l10n.nav_gallery,
           ),
           NavigationDestination(
             icon: Badge(
               isLabelVisible: showUpdateBadge,
               smallSize: 7,
-              child: const Icon(Icons.settings_outlined),
+              child: const StudioIcon(Icons.settings_outlined),
             ),
             selectedIcon: Badge(
               isLabelVisible: showUpdateBadge,
               smallSize: 7,
-              child: const Icon(Icons.settings),
+              child: const StudioIcon(Icons.settings),
             ),
             label: context.l10n.nav_settings,
           ),

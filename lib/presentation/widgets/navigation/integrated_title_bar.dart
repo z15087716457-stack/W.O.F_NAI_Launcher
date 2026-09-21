@@ -1,3 +1,7 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:nai_launcher/core/constants/brand.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -185,23 +189,19 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
       child: Row(
         children: [
           const SizedBox(width: 12),
-          Image.asset(
-            'assets/images/wof_logo_block.png',
-            height: 20,
-            filterQuality: FilterQuality.medium,
-            // 资产缺失/测试环境加载失败时退化为图标，不炸布局。
-            errorBuilder: (context, error, stackTrace) =>
-                Icon(Icons.auto_awesome, size: 18, color: colorScheme.primary),
+          SvgPicture.asset(
+            'assets/icons/wof_icon.svg',
+            width: 24,
+            height: 24,
+            excludeFromSemantics: true,
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'NAI Launcher',
+              Brand.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+              style: StudioTypography.wordmark.copyWith(
                 color: colorScheme.onSurface.withValues(alpha: 0.9),
               ),
             ),
@@ -309,7 +309,11 @@ class _CaptionButtonState extends State<_CaptionButton> {
                 width: IntegratedTitleBarShell.buttonWidth,
                 height: IntegratedTitleBarShell.barHeight,
                 color: bg,
-                child: Icon(widget.icon, size: widget.iconSize, color: fg),
+                child: StudioIcon(
+                  widget.icon,
+                  size: widget.iconSize,
+                  color: fg,
+                ),
               ),
               if (_tipVisible)
                 Positioned(

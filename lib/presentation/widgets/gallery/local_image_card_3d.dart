@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
@@ -535,7 +536,7 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            StudioIcon(
               Icons.image_not_supported_outlined,
               color: Colors.grey[600],
               size: 32,
@@ -584,7 +585,7 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.broken_image, color: Colors.red[400], size: 40),
+            StudioIcon(Icons.broken_image, color: Colors.red[400], size: 40),
             const SizedBox(height: 8),
             Text(
               context.l10n.onlineGallery_loadFailed,
@@ -593,7 +594,7 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
             const SizedBox(height: 4),
             TextButton.icon(
               onPressed: _loadThumbnail,
-              icon: Icon(Icons.refresh, color: Colors.red[300], size: 16),
+              icon: StudioIcon(Icons.refresh, color: Colors.red[300], size: 16),
               label: Text(
                 context.l10n.common_retry,
                 style: TextStyle(color: Colors.red[300], fontSize: 11),
@@ -742,7 +743,7 @@ class _LocalImageCard3DState extends ConsumerState<LocalImageCard3D>
             ),
           ],
         ),
-        child: Icon(Icons.check, color: colorScheme.onPrimary, size: 18),
+        child: StudioIcon(Icons.check, color: colorScheme.onPrimary, size: 18),
       ),
     );
   }

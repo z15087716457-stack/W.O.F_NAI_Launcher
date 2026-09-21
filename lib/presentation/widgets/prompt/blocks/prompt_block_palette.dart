@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -91,7 +92,7 @@ class _PromptBlockPaletteButtonState
                 : theme.colorScheme.onSurfaceVariant,
           ),
           onPressed: _toggle,
-          icon: const Icon(Icons.category_outlined),
+          icon: const StudioIcon(Icons.category_outlined),
         ),
       ),
     );
@@ -148,10 +149,7 @@ class _PromptBlockPaletteOverlayState
 
   Offset _clamp(Offset offset, Size screen) => Offset(
     offset.dx.clamp(8.0, math.max(8.0, screen.width - _windowWidth - 8)),
-    offset.dy.clamp(
-      8.0,
-      math.max(8.0, screen.height - _windowMaxHeight - 8),
-    ),
+    offset.dy.clamp(8.0, math.max(8.0, screen.height - _windowMaxHeight - 8)),
   );
 
   @override
@@ -307,7 +305,7 @@ class _PromptBlockPaletteCardState
                   padding: const EdgeInsets.fromLTRB(10, 6, 4, 6),
                   child: Row(
                     children: [
-                      Icon(
+                      StudioIcon(
                         Icons.category_outlined,
                         size: 15,
                         color: theme.colorScheme.primary,
@@ -335,7 +333,7 @@ class _PromptBlockPaletteCardState
                             ? l10n.promptBlockLibrary_exitMultiSelect
                             : l10n.promptBlockLibrary_multiSelect,
                         onPressed: _toggleMultiSelect,
-                        icon: const Icon(Icons.checklist),
+                        icon: const StudioIcon(Icons.checklist),
                       ),
                       IconButton(
                         key: const Key('prompt-block-palette-clear'),
@@ -350,7 +348,7 @@ class _PromptBlockPaletteCardState
                             ? l10n.promptBlockPalette_clearAllArmed
                             : l10n.promptBlockPalette_clearAll,
                         onPressed: blocks.isEmpty ? null : _onClearAllPressed,
-                        icon: Icon(
+                        icon: StudioIcon(
                           Icons.delete_sweep_outlined,
                           color: _clearArmed ? theme.colorScheme.error : null,
                         ),
@@ -365,7 +363,7 @@ class _PromptBlockPaletteCardState
                           minHeight: 28,
                         ),
                         onPressed: widget.onClose,
-                        icon: const Icon(Icons.close),
+                        icon: const StudioIcon(Icons.close),
                       ),
                     ],
                   ),
@@ -404,15 +402,14 @@ class _PromptBlockPaletteCardState
                         minHeight: 28,
                       ),
                       tooltip: l10n.promptBlockLibrary_selectAllVisible,
-                      onPressed:
-                          selectedIds.length == blocks.length
+                      onPressed: selectedIds.length == blocks.length
                           ? null
                           : () => setState(
                               () => _multiSelectedIds.addAll(
                                 blocks.map((block) => block.id),
                               ),
                             ),
-                      icon: const Icon(Icons.select_all),
+                      icon: const StudioIcon(Icons.select_all),
                     ),
                     IconButton(
                       key: const Key('prompt-block-palette-deselect'),
@@ -427,7 +424,7 @@ class _PromptBlockPaletteCardState
                       onPressed: selectedIds.isEmpty
                           ? null
                           : () => setState(_multiSelectedIds.clear),
-                      icon: const Icon(Icons.deselect),
+                      icon: const StudioIcon(Icons.deselect),
                     ),
                     IconButton(
                       key: const Key('prompt-block-palette-remove-selected'),
@@ -442,7 +439,7 @@ class _PromptBlockPaletteCardState
                         selectedIds.length,
                       ),
                       onPressed: selectedIds.isEmpty ? null : _removeSelected,
-                      icon: Icon(
+                      icon: StudioIcon(
                         Icons.delete_outline,
                         color: theme.colorScheme.error,
                       ),
@@ -466,64 +463,55 @@ class _PromptBlockPaletteCardState
                   }
                 },
                 builder: (context, _, _) => LayoutBuilder(
-                  builder: (context, listConstraints) =>
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 8,
-                        ),
-                        child: ConstrainedBox(
-                          // 内容不足时占满列表区，让空态/稀疏内容垂直居中，
-                          // 窗口保持方块观感而非一条窄带。
-                          constraints: BoxConstraints(
-                            minHeight: math.max(
-                              0,
-                              listConstraints.maxHeight - 16,
-                            ),
-                          ),
-                          child: blocks.isEmpty
-                              ? Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 4,
-                                    ),
-                                    child: Text(
-                                      l10n.promptBlockPalette_emptyHint,
-                                      textAlign: TextAlign.center,
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: theme
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                            height: 1.5,
-                                          ),
-                                    ),
-                                  ),
-                                )
-                              // 流式排布：一行摆不下整块就自动换到下一行。
-                              : Wrap(
-                                  spacing: 6,
-                                  runSpacing: 6,
-                                  children: [
-                                    for (var i = 0; i < blocks.length; i++)
-                                      _PaletteChipRow(
-                                        block: blocks[i],
-                                        index: i,
-                                        folders: folders,
-                                        multiSelectMode: _multiSelectMode,
-                                        selected: selectedIds.contains(
-                                          blocks[i].id,
-                                        ),
-                                        onToggleSelected: _multiSelectMode
-                                            ? () => _toggleSelected(
-                                                blocks[i].id,
-                                              )
-                                            : null,
-                                      ),
-                                  ],
-                                ),
-                        ),
+                  builder: (context, listConstraints) => SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
+                    child: ConstrainedBox(
+                      // 内容不足时占满列表区，让空态/稀疏内容垂直居中，
+                      // 窗口保持方块观感而非一条窄带。
+                      constraints: BoxConstraints(
+                        minHeight: math.max(0, listConstraints.maxHeight - 16),
                       ),
+                      child: blocks.isEmpty
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                child: Text(
+                                  l10n.promptBlockPalette_emptyHint,
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                            )
+                          // 流式排布：一行摆不下整块就自动换到下一行。
+                          : Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: [
+                                for (var i = 0; i < blocks.length; i++)
+                                  _PaletteChipRow(
+                                    block: blocks[i],
+                                    index: i,
+                                    folders: folders,
+                                    multiSelectMode: _multiSelectMode,
+                                    selected: selectedIds.contains(
+                                      blocks[i].id,
+                                    ),
+                                    onToggleSelected: _multiSelectMode
+                                        ? () => _toggleSelected(blocks[i].id)
+                                        : null,
+                                  ),
+                              ],
+                            ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -598,8 +586,7 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
 
     return DragTarget<PromptBlockDragData>(
       onWillAcceptWithDetails: (details) =>
-          !widget.multiSelectMode &&
-          details.data.paletteIndex != widget.index,
+          !widget.multiSelectMode && details.data.paletteIndex != widget.index,
       onMove: (_) {
         if (!_dropHover) setState(() => _dropHover = true);
       },
@@ -624,71 +611,71 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
           block: block,
           folders: widget.folders,
           child: AnimatedContainer(
-          duration: const Duration(milliseconds: 120),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: _dropHover
-                ? Border.all(color: theme.colorScheme.primary, width: 1.4)
-                : null,
-          ),
-          child: Stack(
-            // 流式排布下收缩到芯片尺寸，别吃满 Wrap 给的宽松宽。
-            fit: StackFit.loose,
-            children: [
-              Draggable<PromptBlockDragData>(
-                data: PromptBlockDragData(
-                  blockId: block.id,
-                  paletteIndex: widget.index,
-                ),
-                rootOverlay: true,
-                maxSimultaneousDrags: widget.multiSelectMode ? 0 : 1,
-                dragAnchorStrategy: pointerDragAnchorStrategy,
-                feedback: Material(
-                  color: Colors.transparent,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 200),
-                    child: Opacity(opacity: 0.9, child: chip),
+            duration: const Duration(milliseconds: 120),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: _dropHover
+                  ? Border.all(color: theme.colorScheme.primary, width: 1.4)
+                  : null,
+            ),
+            child: Stack(
+              // 流式排布下收缩到芯片尺寸，别吃满 Wrap 给的宽松宽。
+              fit: StackFit.loose,
+              children: [
+                Draggable<PromptBlockDragData>(
+                  data: PromptBlockDragData(
+                    blockId: block.id,
+                    paletteIndex: widget.index,
+                  ),
+                  rootOverlay: true,
+                  maxSimultaneousDrags: widget.multiSelectMode ? 0 : 1,
+                  dragAnchorStrategy: pointerDragAnchorStrategy,
+                  feedback: Material(
+                    color: Colors.transparent,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 200),
+                      child: Opacity(opacity: 0.9, child: chip),
+                    ),
+                  ),
+                  childWhenDragging: Opacity(opacity: 0.35, child: chip),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: 1,
+                    child: chip,
                   ),
                 ),
-                childWhenDragging: Opacity(opacity: 0.35, child: chip),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: 1,
-                  child: chip,
-                ),
-              ),
-              if (_hovering && !widget.multiSelectMode)
-                Positioned(
-                  right: 2,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: Material(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      shape: const CircleBorder(),
-                      clipBehavior: Clip.antiAlias,
-                      child: Tooltip(
-                        message: context.l10n.promptBlockPalette_remove,
-                        child: InkWell(
-                          key: ValueKey(
-                            'prompt-block-palette-remove-${block.id}',
-                          ),
-                          onTap: _remove,
-                          child: Padding(
-                            padding: const EdgeInsets.all(2),
-                            child: Icon(
-                              Icons.close,
-                              size: 12,
-                              color: theme.colorScheme.onSurfaceVariant,
+                if (_hovering && !widget.multiSelectMode)
+                  Positioned(
+                    right: 2,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: Material(
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        shape: const CircleBorder(),
+                        clipBehavior: Clip.antiAlias,
+                        child: Tooltip(
+                          message: context.l10n.promptBlockPalette_remove,
+                          child: InkWell(
+                            key: ValueKey(
+                              'prompt-block-palette-remove-${block.id}',
+                            ),
+                            onTap: _remove,
+                            child: Padding(
+                              padding: const EdgeInsets.all(2),
+                              child: StudioIcon(
+                                Icons.close,
+                                size: 12,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          ),
+              ],
+            ),
           ),
         ),
       ),

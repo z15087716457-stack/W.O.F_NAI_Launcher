@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -414,12 +415,12 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
           actions: [
             IconButton(
               tooltip: l10n.model3d_undo,
-              icon: const Icon(Icons.undo),
+              icon: const StudioIcon(Icons.undo),
               onPressed: hasModel && !_busy ? () => _bridge!.undoPose() : null,
             ),
             IconButton(
               tooltip: l10n.model3d_resetPose,
-              icon: const Icon(Icons.restart_alt),
+              icon: const StudioIcon(Icons.restart_alt),
               onPressed: hasModel && !_busy ? () => _bridge!.resetPose() : null,
             ),
             const SizedBox(width: 8),
@@ -520,18 +521,18 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
             const SizedBox(width: 12),
             IconButton(
               tooltip: l10n.model3d_light,
-              icon: const Icon(Icons.light_mode, size: 20),
+              icon: const StudioIcon(Icons.light_mode, size: 20),
               onPressed: hasModel && !_busy ? _showLightDialog : null,
             ),
             const SizedBox(width: 12),
             IconButton(
               tooltip: l10n.model3d_addMannequin,
-              icon: const Icon(Icons.accessibility_new, size: 20),
+              icon: const StudioIcon(Icons.accessibility_new, size: 20),
               onPressed: _ready && !_busy ? () => _loadBuiltin() : null,
             ),
             IconButton(
               tooltip: l10n.model3d_importModel,
-              icon: const Icon(Icons.file_open, size: 20),
+              icon: const StudioIcon(Icons.file_open, size: 20),
               onPressed: _ready && !_busy ? _importModel : null,
             ),
           ],
@@ -552,13 +553,13 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: _busy ? null : () => _loadBuiltin(confirm: false),
-                icon: const Icon(Icons.accessibility_new),
+                icon: const StudioIcon(Icons.accessibility_new),
                 label: Text(l10n.model3d_addMannequin),
               ),
               const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: _busy ? null : _importModel,
-                icon: const Icon(Icons.file_open),
+                icon: const StudioIcon(Icons.file_open),
                 label: Text(l10n.model3d_importModel),
               ),
             ],

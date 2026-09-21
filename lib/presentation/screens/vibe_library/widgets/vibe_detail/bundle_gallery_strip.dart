@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -123,7 +124,7 @@ class BundleGalleryStrip extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            StudioIcon(
               Icons.select_all,
               size: 24,
               color: isSelected

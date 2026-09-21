@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/localization_extension.dart';
@@ -24,7 +25,7 @@ class LibraryActionsRow extends StatelessWidget {
         Expanded(
           child: OutlinedButton.icon(
             onPressed: vibes.isNotEmpty ? onSaveToLibrary : null,
-            icon: const Icon(Icons.save_outlined, size: 16),
+            icon: const StudioIcon(Icons.save_outlined, size: 16),
             label: Text(context.l10n.vibeLibrary_save),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -36,7 +37,7 @@ class LibraryActionsRow extends StatelessWidget {
         Expanded(
           child: OutlinedButton.icon(
             onPressed: onImportFromLibrary,
-            icon: const Icon(Icons.folder_open_outlined, size: 16),
+            icon: const StudioIcon(Icons.folder_open_outlined, size: 16),
             label: Text(context.l10n.vibe_addFromLibraryTitle),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8),

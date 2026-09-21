@@ -1,3 +1,5 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -291,7 +293,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             Text(context.l10n.auth_selectAccount),
             const Spacer(),
             IconButton(
-              icon: const Icon(Icons.close),
+              icon: const StudioIcon(Icons.close),
               onPressed: () => Navigator.pop(dialogContext),
             ),
           ],
@@ -330,7 +332,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: avatarBorderRadius(36),
                   ),
-                  child: Icon(
+                  child: StudioIcon(
                     Icons.add,
                     color: Theme.of(context).colorScheme.primary,
                   ),
@@ -406,7 +408,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const StudioIcon(Icons.close),
                       onPressed: () => Navigator.pop(dialogContext),
                     ),
                   ],
@@ -435,7 +437,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_library),
+              leading: const StudioIcon(Icons.photo_library),
               title: Text(context.l10n.auth_selectFromGallery),
               onTap: () {
                 Navigator.pop(sheetContext);
@@ -443,7 +445,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.camera_alt),
+              leading: const StudioIcon(Icons.camera_alt),
               title: Text(context.l10n.auth_takePhoto),
               onTap: () {
                 Navigator.pop(sheetContext);
@@ -452,7 +454,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             if (account.avatarPath != null)
               ListTile(
-                leading: Icon(Icons.delete_outline, color: Colors.red.shade400),
+                leading: StudioIcon(
+                  Icons.delete_outline,
+                  color: Colors.red.shade400,
+                ),
                 title: Text(
                   context.l10n.auth_removeAvatar,
                   style: TextStyle(color: Colors.red.shade400),
@@ -538,7 +543,7 @@ class _Header extends StatelessWidget {
             color: theme.colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Icon(
+          child: StudioIcon(
             Icons.auto_awesome,
             size: 40,
             color: theme.colorScheme.primary,
@@ -547,8 +552,9 @@ class _Header extends StatelessWidget {
         const SizedBox(height: 20),
         Text(
           context.l10n.app_title,
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
+          style: StudioTypography.wordmark.copyWith(
+            fontSize: 30,
+            color: theme.colorScheme.onSurface,
           ),
           textAlign: TextAlign.center,
         ),
@@ -591,7 +597,7 @@ class _TroubleshootingButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: OutlinedButton.icon(
         onPressed: () => NetworkTroubleshootingDialog.show(context),
-        icon: const Icon(Icons.help_outline, size: 18),
+        icon: const StudioIcon(Icons.help_outline, size: 18),
         label: Text(context.l10n.auth_viewTroubleshootingTips),
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -782,13 +788,13 @@ class _QuickLoginView extends ConsumerWidget {
               const SizedBox(height: 8),
               TextButton.icon(
                 onPressed: onAddAccount,
-                icon: const Icon(Icons.add),
+                icon: const StudioIcon(Icons.add),
                 label: Text(context.l10n.auth_addAccount),
               ),
               TextButton.icon(
                 key: const Key('auth_guest_entry_quick_login'),
                 onPressed: onGuestEntry,
-                icon: const Icon(Icons.explore_outlined),
+                icon: const StudioIcon(Icons.explore_outlined),
                 label: Text(context.l10n.auth_guestEntry),
               ),
             ],
@@ -834,13 +840,13 @@ class _QuickLoginView extends ConsumerWidget {
         const SizedBox(height: 8),
         TextButton.icon(
           onPressed: onAddAccount,
-          icon: const Icon(Icons.add),
+          icon: const StudioIcon(Icons.add),
           label: Text(context.l10n.auth_addAccount),
         ),
         TextButton.icon(
           key: const Key('auth_guest_entry_quick_login'),
           onPressed: onGuestEntry,
-          icon: const Icon(Icons.explore_outlined),
+          icon: const StudioIcon(Icons.explore_outlined),
           label: Text(context.l10n.auth_guestEntry),
         ),
       ],
@@ -882,7 +888,7 @@ class _AccountSelectorButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            Icon(
+            StudioIcon(
               Icons.arrow_drop_down,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
@@ -915,7 +921,7 @@ class _QuickLoginButton extends ConsumerWidget {
                 color: Colors.white,
               ),
             )
-          : const Icon(Icons.login),
+          : const StudioIcon(Icons.login),
       label: Text(context.l10n.auth_quickLogin),
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -976,7 +982,7 @@ class _AccountListItem extends StatelessWidget {
           if (isSelected)
             Padding(
               padding: const EdgeInsets.only(left: 8),
-              child: Icon(
+              child: StudioIcon(
                 Icons.check,
                 color: theme.colorScheme.primary,
                 size: 20,
@@ -991,7 +997,7 @@ class _AccountListItem extends StatelessWidget {
         ),
       ),
       trailing: IconButton(
-        icon: Icon(
+        icon: StudioIcon(
           Icons.delete_outline,
           color: theme.colorScheme.onSurfaceVariant,
         ),

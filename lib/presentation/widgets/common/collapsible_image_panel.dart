@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -150,7 +151,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                         badge!,
                         const SizedBox(width: 6),
                       ],
-                      Icon(
+                      StudioIcon(
                         isExpanded
                             ? Icons.keyboard_arrow_up
                             : Icons.keyboard_arrow_down,
@@ -199,7 +200,7 @@ class CollapsibleImagePanel extends StatelessWidget {
       );
     }
 
-    return Icon(icon, size: 22, color: color);
+    return StudioIcon(icon, size: 22, color: color);
   }
 }
 
@@ -251,7 +252,7 @@ class PanelHeaderIconButton extends StatelessWidget {
         colorFilter: ColorFilter.mode(foreground, BlendMode.srcIn),
       );
     } else {
-      iconWidget = Icon(icon, size: 15, color: foreground);
+      iconWidget = StudioIcon(icon, size: 15, color: foreground);
     }
 
     return Tooltip(

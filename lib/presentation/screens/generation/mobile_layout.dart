@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -51,7 +52,7 @@ class _MobileGenerationLayoutState
         actions: [
           // 参数设置按钮 (打开侧边抽屉)
           IconButton(
-            icon: const Icon(Icons.tune),
+            icon: const StudioIcon(Icons.tune),
             onPressed: () {
               _scaffoldKey.currentState?.openEndDrawer();
             },
@@ -74,7 +75,7 @@ class _MobileGenerationLayoutState
                       style: theme.textTheme.titleLarge,
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const StudioIcon(Icons.close),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -226,8 +227,8 @@ class _MobileGenerateButton extends ConsumerWidget {
       icon: isGenerating
           ? null
           : cooldownRemainingSeconds > 0
-          ? const Icon(Icons.hourglass_bottom_outlined)
-          : const Icon(Icons.auto_awesome),
+          ? const StudioIcon(Icons.hourglass_bottom_outlined)
+          : const StudioIcon(Icons.auto_awesome),
       isLoading: isGenerating,
       label: Row(
         mainAxisSize: MainAxisSize.min,

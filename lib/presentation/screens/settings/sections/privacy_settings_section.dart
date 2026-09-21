@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -175,7 +176,7 @@ class _PrivacySettingsSectionState
           child: Column(
             children: [
               SwitchListTile(
-                secondary: const Icon(Icons.shield_outlined),
+                secondary: const StudioIcon(Icons.shield_outlined),
                 title: Text(context.l10n.settings_protectionMode),
                 subtitle: Text(context.l10n.settings_protectionModeSubtitle),
                 value: shareSettings.protectionMode,
@@ -187,7 +188,7 @@ class _PrivacySettingsSectionState
               ),
               SettingsSectionLabel(context.l10n.settings_protectionFeatures),
               SwitchListTile(
-                secondary: const Icon(Icons.cleaning_services_outlined),
+                secondary: const StudioIcon(Icons.cleaning_services_outlined),
                 title: Text(context.l10n.settings_stripMetadataTitle),
                 subtitle: Text(context.l10n.settings_stripMetadataSubtitle),
                 value: shareSettings.stripMetadataForCopyAndDrag,
@@ -200,7 +201,7 @@ class _PrivacySettingsSectionState
                     : null,
               ),
               SwitchListTile(
-                secondary: const Icon(Icons.warning_amber_rounded),
+                secondary: const StudioIcon(Icons.warning_amber_rounded),
                 title: Text(context.l10n.settings_confirmDangerousActionsTitle),
                 subtitle: Text(
                   context.l10n.settings_confirmDangerousActionsSubtitle,
@@ -215,7 +216,7 @@ class _PrivacySettingsSectionState
                     : null,
               ),
               SwitchListTile(
-                secondary: const Icon(Icons.cloud_upload_outlined),
+                secondary: const StudioIcon(Icons.cloud_upload_outlined),
                 title: Text(context.l10n.settings_warnExternalImageSendTitle),
                 subtitle: Text(
                   context.l10n.settings_warnExternalImageSendSubtitle,
@@ -230,7 +231,7 @@ class _PrivacySettingsSectionState
                     : null,
               ),
               SwitchListTile(
-                secondary: const Icon(Icons.file_copy_outlined),
+                secondary: const StudioIcon(Icons.file_copy_outlined),
                 title: Text(context.l10n.settings_preventOverwriteTitle),
                 subtitle: Text(context.l10n.settings_preventOverwriteSubtitle),
                 value: shareSettings.preventOverwrite,
@@ -243,7 +244,7 @@ class _PrivacySettingsSectionState
                     : null,
               ),
               SwitchListTile(
-                secondary: const Icon(Icons.toll_outlined),
+                secondary: const StudioIcon(Icons.toll_outlined),
                 title: Text(context.l10n.settings_warnHighAnlasCostTitle),
                 subtitle: Text(
                   context.l10n.settings_warnHighAnlasCostSubtitle(
@@ -263,10 +264,10 @@ class _PrivacySettingsSectionState
                 enabled:
                     shareSettings.protectionMode &&
                     shareSettings.warnHighAnlasCost,
-                leading: const Icon(Icons.speed_outlined),
+                leading: const StudioIcon(Icons.speed_outlined),
                 title: Text(context.l10n.settings_highAnlasCostThresholdTitle),
                 subtitle: Text('${shareSettings.highAnlasCostThreshold} Anlas'),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const StudioIcon(Icons.chevron_right),
                 onTap:
                     shareSettings.protectionMode &&
                         shareSettings.warnHighAnlasCost
@@ -274,7 +275,7 @@ class _PrivacySettingsSectionState
                     : null,
               ),
               SwitchListTile(
-                secondary: const Icon(Icons.timer_outlined),
+                secondary: const StudioIcon(Icons.timer_outlined),
                 title: Text(context.l10n.settings_limitGenerationIntervalTitle),
                 subtitle: Text(
                   context.l10n.settings_limitGenerationIntervalSubtitle,
@@ -292,14 +293,14 @@ class _PrivacySettingsSectionState
                 enabled:
                     shareSettings.protectionMode &&
                     shareSettings.limitGenerationInterval,
-                leading: const Icon(Icons.hourglass_bottom_outlined),
+                leading: const StudioIcon(Icons.hourglass_bottom_outlined),
                 title: Text(context.l10n.settings_generationIntervalTitle),
                 subtitle: Text(
                   context.l10n.settings_generationIntervalValue(
                     shareSettings.generationIntervalSeconds,
                   ),
                 ),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const StudioIcon(Icons.chevron_right),
                 onTap:
                     shareSettings.protectionMode &&
                         shareSettings.limitGenerationInterval
@@ -310,14 +311,16 @@ class _PrivacySettingsSectionState
                 enabled:
                     shareSettings.protectionMode &&
                     shareSettings.limitGenerationInterval,
-                leading: const Icon(Icons.shuffle_outlined),
-                title: Text(context.l10n.settings_generationIntervalJitterTitle),
+                leading: const StudioIcon(Icons.shuffle_outlined),
+                title: Text(
+                  context.l10n.settings_generationIntervalJitterTitle,
+                ),
                 subtitle: Text(
                   context.l10n.settings_generationIntervalJitterValue(
                     shareSettings.generationIntervalJitterPercent,
                   ),
                 ),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const StudioIcon(Icons.chevron_right),
                 onTap:
                     shareSettings.protectionMode &&
                         shareSettings.limitGenerationInterval

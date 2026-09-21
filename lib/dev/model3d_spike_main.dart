@@ -6,6 +6,7 @@
 //
 // 无人值守自检:onReady 时写 %TEMP%/model3d_spike_ready.txt 并自动请求一次
 // 渲染,PNG 落盘 %TEMP%/model3d_spike_render.png,供无屏环境验证全链路。
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -118,13 +119,13 @@ class _SpikePageState extends State<_SpikePage> {
             heroTag: 'mannequin',
             onPressed: () =>
                 _dispatch({'type': 'loadModel', 'builtin': 'mannequin'}),
-            child: const Icon(Icons.accessibility_new),
+            child: const StudioIcon(Icons.accessibility_new),
           ),
           const SizedBox(height: 8),
           FloatingActionButton(
             heroTag: 'render',
             onPressed: _requestRender,
-            child: const Icon(Icons.camera_alt),
+            child: const StudioIcon(Icons.camera_alt),
           ),
         ],
       ),

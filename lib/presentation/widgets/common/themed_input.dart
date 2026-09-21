@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -469,7 +470,7 @@ class _ClearButton extends StatelessWidget {
         customBorder: const CircleBorder(),
         child: Padding(
           padding: const EdgeInsets.all(4),
-          child: Icon(
+          child: StudioIcon(
             Icons.close,
             size: 14,
             color: colorScheme.onSurfaceVariant,

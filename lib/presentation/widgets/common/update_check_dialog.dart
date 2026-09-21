@@ -1,3 +1,5 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -118,7 +120,7 @@ class UpdateCheckDialog extends ConsumerWidget {
           if (versionInfo.primaryAsset != null) ...[
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(
+              leading: StudioIcon(
                 versionInfo.supportsInAppInstall
                     ? Icons.system_update_alt
                     : Icons.open_in_new,
@@ -208,7 +210,7 @@ class UpdateCheckDialog extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          StudioIcon(
             Icons.check_circle_outline,
             size: 48,
             color: theme.colorScheme.primary,
@@ -332,7 +334,8 @@ class UpdateCheckDialog extends ConsumerWidget {
         blockSpacing: 10,
         listIndent: 22,
         code: theme.textTheme.bodySmall?.copyWith(
-          fontFamily: 'monospace',
+          fontFamily: StudioTypography.mono,
+          fontFamilyFallback: StudioTypography.fallback,
           color: colorScheme.onSurface,
           backgroundColor: colorScheme.surfaceContainerHighest,
         ),
@@ -400,7 +403,7 @@ class UpdateCheckDialog extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            StudioIcon(
               Icons.check_circle_outline,
               size: 48,
               color: theme.colorScheme.primary,
@@ -428,7 +431,11 @@ class UpdateCheckDialog extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
+            StudioIcon(
+              Icons.error_outline,
+              size: 48,
+              color: theme.colorScheme.error,
+            ),
             const SizedBox(height: 16),
             Text(
               errorMessage ?? context.l10n.updateError,

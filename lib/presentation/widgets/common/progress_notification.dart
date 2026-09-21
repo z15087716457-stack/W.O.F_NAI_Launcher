@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -390,7 +391,7 @@ class _ProgressNotificationCard extends StatelessWidget {
                           ),
                   )
                 else
-                  Icon(
+                  StudioIcon(
                     isError ? Icons.cancel_rounded : Icons.check_circle_rounded,
                     color: iconColor,
                     size: 20,
@@ -413,7 +414,7 @@ class _ProgressNotificationCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     child: Padding(
                       padding: const EdgeInsets.all(4),
-                      child: Icon(
+                      child: StudioIcon(
                         Icons.cancel_outlined,
                         size: 18,
                         color: theme.colorScheme.error,
@@ -428,7 +429,7 @@ class _ProgressNotificationCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     child: Padding(
                       padding: const EdgeInsets.all(4),
-                      child: Icon(
+                      child: StudioIcon(
                         Icons.close,
                         size: 18,
                         color: isError || isSuccess

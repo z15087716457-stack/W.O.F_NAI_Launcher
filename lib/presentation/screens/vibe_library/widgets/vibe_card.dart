@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -273,7 +274,7 @@ class _VibeCardState extends ConsumerState<VibeCard>
                 return Container(
                   color: Colors.grey[300],
                   child: const Center(
-                    child: Icon(
+                    child: StudioIcon(
                       Icons.broken_image,
                       size: 48,
                       color: Colors.grey,
@@ -285,7 +286,7 @@ class _VibeCardState extends ConsumerState<VibeCard>
           : Container(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: Center(
-                child: Icon(
+                child: StudioIcon(
                   widget.entry.isBundle ? Icons.style : Icons.auto_fix_high,
                   size: 32,
                   color: Theme.of(context).colorScheme.outline,
@@ -452,7 +453,7 @@ class _VibeCardState extends ConsumerState<VibeCard>
               gaplessPlayback: true,
               errorBuilder: (context, error, stackTrace) => Container(
                 color: Colors.grey[800],
-                child: const Icon(
+                child: const StudioIcon(
                   Icons.image_not_supported,
                   color: Colors.grey,
                   size: 20,
@@ -595,7 +596,7 @@ class _VibeCardState extends ConsumerState<VibeCard>
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.folder_copy, size: 10, color: Colors.white),
+            const StudioIcon(Icons.folder_copy, size: 10, color: Colors.white),
             const SizedBox(width: 2),
             Text(
               '${widget.entry.bundledVibeCount}',
@@ -628,7 +629,11 @@ class _VibeCardState extends ConsumerState<VibeCard>
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: Colors.white, width: 2),
               ),
-              child: Icon(Icons.check, color: colorScheme.onPrimary, size: 18),
+              child: StudioIcon(
+                Icons.check,
+                color: colorScheme.onPrimary,
+                size: 18,
+              ),
             ),
           ),
         ),
@@ -769,7 +774,7 @@ class _ActionButtonState extends State<_ActionButton> {
                 duration: const Duration(milliseconds: 120),
                 curve: Curves.easeOut,
                 scale: _isHovered ? 1.08 : 1.0,
-                child: Icon(widget.icon, size: 16, color: iconColor),
+                child: StudioIcon(widget.icon, size: 16, color: iconColor),
               ),
             ),
             // 自定义 Tooltip

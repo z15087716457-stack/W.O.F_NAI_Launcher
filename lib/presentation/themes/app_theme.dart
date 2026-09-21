@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../providers/font_provider.dart';
+import 'studio_typography.dart';
 
 // Import all 16 theme presets
 import 'presets/bold_retro_theme.dart';
@@ -244,7 +245,7 @@ class AppTheme {
         baseTheme,
         fontConfig.fontFamily,
       ),
-      FontSource.system => (
+      FontSource.system || FontSource.bundled => (
         baseTheme.textTheme.apply(fontFamily: fontConfig.fontFamily),
         baseTheme.primaryTextTheme.apply(fontFamily: fontConfig.fontFamily),
         fontConfig.fontFamily,
@@ -279,9 +280,13 @@ class AppTheme {
     final fontFamily = textTheme.labelLarge?.fontFamily;
     if (fontFamily == null) return chipTheme;
     return chipTheme.copyWith(
-      labelStyle: chipTheme.labelStyle?.copyWith(fontFamily: fontFamily),
+      labelStyle: chipTheme.labelStyle?.copyWith(
+        fontFamily: fontFamily,
+        fontFamilyFallback: StudioTypography.fallback,
+      ),
       secondaryLabelStyle: chipTheme.secondaryLabelStyle?.copyWith(
         fontFamily: fontFamily,
+        fontFamilyFallback: StudioTypography.fallback,
       ),
     );
   }
@@ -341,7 +346,8 @@ class AppTheme {
       textStyle: TextStyle(
         color: baseTheme.colorScheme.onSurface.withValues(alpha: 0.8),
         fontSize: 12,
-        fontFamily: fontFamily,
+        fontFamily: fontFamily ?? StudioTypography.sans,
+        fontFamilyFallback: StudioTypography.fallback,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       waitDuration: const Duration(milliseconds: 500),

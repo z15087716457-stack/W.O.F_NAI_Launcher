@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
@@ -71,7 +72,7 @@ class _ComfyuiImportDialogState extends State<ComfyuiImportDialog> {
               color: theme.colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+            child: StudioIcon(
               Icons.transform,
               color: theme.colorScheme.primary,
               size: 20,
@@ -205,7 +206,11 @@ class _GlobalPromptCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.public, size: 14, color: theme.colorScheme.primary),
+              StudioIcon(
+                Icons.public,
+                size: 14,
+                color: theme.colorScheme.primary,
+              ),
               const SizedBox(width: 6),
               Text(
                 context.l10n.comfyImport_globalPrompt,
@@ -273,7 +278,7 @@ class _CharacterCard extends StatelessWidget {
           const SizedBox(width: 8),
 
           // 性别图标
-          Icon(
+          StudioIcon(
             gender == CharacterGender.male ? Icons.male : Icons.female,
             size: 16,
             color: gender == CharacterGender.male ? Colors.blue : Colors.pink,

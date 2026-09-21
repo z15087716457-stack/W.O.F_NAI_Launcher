@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -88,7 +89,7 @@ class PromptBlockListItem extends StatelessWidget {
                         Row(
                           children: [
                             if (multiSelected) ...[
-                              Icon(
+                              StudioIcon(
                                 Icons.check_circle,
                                 size: 17,
                                 color: theme.colorScheme.primary,
@@ -127,7 +128,7 @@ class PromptBlockListItem extends StatelessWidget {
                   index: reorderIndex!,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
-                    child: Icon(
+                    child: StudioIcon(
                       Icons.drag_handle,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -146,7 +147,7 @@ class PromptBlockListItem extends StatelessWidget {
                           : Offset.zero;
                       onToggleFavorite?.call(anchor);
                     },
-                    icon: Icon(
+                    icon: StudioIcon(
                       block.isFavorite ? Icons.star : Icons.star_border,
                       size: 19,
                       color: block.isFavorite
@@ -159,7 +160,7 @@ class PromptBlockListItem extends StatelessWidget {
                 IconButton(
                   tooltip: context.l10n.promptBlockLibrary_exportBlockAsTxt,
                   onPressed: onExport,
-                  icon: const Icon(Icons.file_upload_outlined, size: 19),
+                  icon: const StudioIcon(Icons.file_upload_outlined, size: 19),
                 ),
               IconButton(
                 tooltip: context.l10n.common_copy,
@@ -167,17 +168,17 @@ class PromptBlockListItem extends StatelessWidget {
                   await Clipboard.setData(ClipboardData(text: block.content));
                   onCopy();
                 },
-                icon: const Icon(Icons.copy_outlined, size: 19),
+                icon: const StudioIcon(Icons.copy_outlined, size: 19),
               ),
               IconButton(
                 tooltip: context.l10n.common_edit,
                 onPressed: onEdit,
-                icon: const Icon(Icons.edit_outlined, size: 19),
+                icon: const StudioIcon(Icons.edit_outlined, size: 19),
               ),
               IconButton(
                 tooltip: context.l10n.common_delete,
                 onPressed: onDelete,
-                icon: Icon(
+                icon: StudioIcon(
                   Icons.delete_outline,
                   size: 19,
                   color: theme.colorScheme.error,

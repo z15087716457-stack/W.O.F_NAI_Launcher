@@ -1,3 +1,5 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -183,7 +185,8 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
                           : context.l10n.weight_noBrackets,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.outline,
-                        fontFamily: 'monospace',
+                        fontFamily: StudioTypography.mono,
+                        fontFamilyFallback: StudioTypography.fallback,
                       ),
                     ),
                   ],
@@ -197,7 +200,7 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
                   // 减少按钮
                   IconButton.filled(
                     onPressed: _decrementWeight,
-                    icon: const Icon(Icons.remove),
+                    icon: const StudioIcon(Icons.remove),
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.blue.withValues(alpha: 0.1),
                       foregroundColor: Colors.blue,
@@ -242,7 +245,7 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
                   // 增加按钮
                   IconButton.filled(
                     onPressed: _incrementWeight,
-                    icon: const Icon(Icons.add),
+                    icon: const StudioIcon(Icons.add),
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.orange.withValues(alpha: 0.1),
                       foregroundColor: Colors.orange,
@@ -280,7 +283,7 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
                           widget.onDelete?.call();
                           Navigator.pop(context);
                         },
-                        icon: const Icon(Icons.delete_outline),
+                        icon: const StudioIcon(Icons.delete_outline),
                         label: Text(context.l10n.tag_delete),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: theme.colorScheme.error,
@@ -293,7 +296,7 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: _resetWeight,
-                      icon: const Icon(Icons.refresh),
+                      icon: const StudioIcon(Icons.refresh),
                       label: Text(context.l10n.weight_reset),
                     ),
                   ),
@@ -302,7 +305,7 @@ class _WeightAdjustDialogState extends State<WeightAdjustDialog> {
                   Expanded(
                     child: FilledButton.icon(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.check),
+                      icon: const StudioIcon(Icons.check),
                       label: Text(context.l10n.weight_done),
                     ),
                   ),

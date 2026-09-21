@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 import 'dart:ui';
 
@@ -432,7 +433,7 @@ class _TagViewState extends ConsumerState<TagView>
               borderRadius: BorderRadius.circular(20),
               child: Container(
                 padding: const EdgeInsets.all(6),
-                child: Icon(
+                child: StudioIcon(
                   Icons.close,
                   size: 18,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -469,8 +470,12 @@ class _TagViewState extends ConsumerState<TagView>
             ),
           ),
           child: allSelected
-              ? Icon(Icons.check, size: 14, color: theme.colorScheme.onPrimary)
-              : Icon(
+              ? StudioIcon(
+                  Icons.check,
+                  size: 14,
+                  color: theme.colorScheme.onPrimary,
+                )
+              : StudioIcon(
                   Icons.check_box_outline_blank,
                   size: 18,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -501,7 +506,7 @@ class _TagViewState extends ConsumerState<TagView>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 16, color: color),
+              StudioIcon(icon, size: 16, color: color),
               const SizedBox(width: 4),
               Text(
                 label,
@@ -658,7 +663,7 @@ class _TagViewState extends ConsumerState<TagView>
                     angle: (1 - iconValue) * 0.3,
                     child: Opacity(
                       opacity: iconValue,
-                      child: Icon(
+                      child: StudioIcon(
                         Icons.label_outline_rounded,
                         size: 56,
                         color: theme.colorScheme.primary.withValues(alpha: 0.6),
@@ -859,7 +864,7 @@ class _TagViewState extends ConsumerState<TagView>
             ),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(
+          child: StudioIcon(
             Icons.delete_outline,
             color: theme.colorScheme.error,
             size: 20,
@@ -901,7 +906,7 @@ class _TagViewState extends ConsumerState<TagView>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  StudioIcon(
                     Icons.add,
                     size: 14,
                     color: theme.colorScheme.primary.withValues(alpha: 0.8),
@@ -1022,7 +1027,7 @@ class _TagViewState extends ConsumerState<TagView>
           width: 28,
           height: 28,
           alignment: Alignment.center,
-          child: Icon(icon, size: 18, color: color),
+          child: StudioIcon(icon, size: 18, color: color),
         ),
       ),
     );

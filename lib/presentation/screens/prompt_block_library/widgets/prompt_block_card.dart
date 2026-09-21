@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -102,7 +103,7 @@ class PromptBlockCard extends StatelessWidget {
                                     color: blockColor.withValues(alpha: 0.18),
                                     borderRadius: BorderRadius.circular(9),
                                   ),
-                                  child: Icon(
+                                  child: StudioIcon(
                                     promptBlockIconFromName(block.iconName),
                                     size: compact ? 18 : 20,
                                     color: blockColor,
@@ -122,7 +123,7 @@ class PromptBlockCard extends StatelessWidget {
                                 if (block.isFavorite && !compact)
                                   Padding(
                                     padding: const EdgeInsets.only(left: 4),
-                                    child: Icon(
+                                    child: StudioIcon(
                                       Icons.star,
                                       size: 17,
                                       color: blockColor,
@@ -158,7 +159,7 @@ class PromptBlockCard extends StatelessWidget {
             Positioned(
               top: 6,
               right: 6,
-              child: Icon(
+              child: StudioIcon(
                 Icons.check_circle,
                 size: 18,
                 color: theme.colorScheme.primary,
@@ -191,7 +192,7 @@ class PromptBlockCard extends StatelessWidget {
                   : context.l10n.common_favorite,
               visualDensity: VisualDensity.compact,
               onPressed: () => onToggleFavorite?.call(_anchorOf(buttonContext)),
-              icon: Icon(
+              icon: StudioIcon(
                 block.isFavorite ? Icons.star : Icons.star_border,
                 size: 18,
                 color: block.isFavorite
@@ -205,25 +206,25 @@ class PromptBlockCard extends StatelessWidget {
             tooltip: context.l10n.promptBlockLibrary_exportBlockAsTxt,
             visualDensity: VisualDensity.compact,
             onPressed: onExport,
-            icon: const Icon(Icons.file_upload_outlined, size: 18),
+            icon: const StudioIcon(Icons.file_upload_outlined, size: 18),
           ),
         IconButton(
           tooltip: context.l10n.common_copy,
           visualDensity: VisualDensity.compact,
           onPressed: _copyContent,
-          icon: const Icon(Icons.copy_outlined, size: 18),
+          icon: const StudioIcon(Icons.copy_outlined, size: 18),
         ),
         IconButton(
           tooltip: context.l10n.common_edit,
           visualDensity: VisualDensity.compact,
           onPressed: onEdit,
-          icon: const Icon(Icons.edit_outlined, size: 18),
+          icon: const StudioIcon(Icons.edit_outlined, size: 18),
         ),
         IconButton(
           tooltip: context.l10n.common_delete,
           visualDensity: VisualDensity.compact,
           onPressed: onDelete,
-          icon: Icon(
+          icon: StudioIcon(
             Icons.delete_outline,
             size: 18,
             color: theme.colorScheme.error,
@@ -253,7 +254,7 @@ class PromptBlockCard extends StatelessWidget {
       builder: (menuContext) => PopupMenuButton<_PromptBlockCardAction>(
         key: ValueKey('prompt-block-card-actions-${block.id}'),
         tooltip: context.l10n.common_edit,
-        icon: const Icon(Icons.more_horiz, size: 20),
+        icon: const StudioIcon(Icons.more_horiz, size: 20),
         onSelected: (action) {
           switch (action) {
             case _PromptBlockCardAction.favorite:
@@ -377,7 +378,7 @@ class PromptBlockPill extends StatelessWidget {
                           block.thumbnailOffsetY.clamp(-1.0, 1.0),
                         ),
                         filterQuality: FilterQuality.medium,
-                        errorBuilder: (_, __, ___) => Icon(
+                        errorBuilder: (_, __, ___) => StudioIcon(
                           promptBlockIconFromName(block.iconName),
                           size: 16,
                           color: blockColor,
@@ -385,7 +386,7 @@ class PromptBlockPill extends StatelessWidget {
                       ),
                     )
                   else
-                    Icon(
+                    StudioIcon(
                       promptBlockIconFromName(block.iconName),
                       size: 16,
                       color: blockColor,
@@ -403,7 +404,7 @@ class PromptBlockPill extends StatelessWidget {
                   ),
                   if (multiSelected) ...[
                     const SizedBox(width: 6),
-                    Icon(
+                    StudioIcon(
                       Icons.check_circle,
                       size: 15,
                       color: theme.colorScheme.primary,

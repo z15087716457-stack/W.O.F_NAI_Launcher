@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -235,7 +236,7 @@ class _VibeBulkOperationDialogState
   Widget _buildHeader(ThemeData theme) {
     return Row(
       children: [
-        Icon(_getOperationIcon(), color: _getOperationColor(theme)),
+        StudioIcon(_getOperationIcon(), color: _getOperationColor(theme)),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
@@ -247,7 +248,7 @@ class _VibeBulkOperationDialogState
         ),
         if (!_isProcessing)
           IconButton(
-            icon: const Icon(Icons.close),
+            icon: const StudioIcon(Icons.close),
             onPressed: _close,
             tooltip: context.l10n.common_close,
           ),
@@ -346,7 +347,7 @@ class _VibeBulkOperationDialogState
         // 完成状态
         Row(
           children: [
-            Icon(
+            StudioIcon(
               isSuccess ? Icons.check_circle_outline : Icons.warning_amber,
               color: isSuccess ? theme.colorScheme.primary : Colors.orange,
               size: 24,
@@ -422,7 +423,7 @@ class _VibeBulkOperationDialogState
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
+                            StudioIcon(
                               Icons.error_outline,
                               size: 14,
                               color: theme.colorScheme.error,
@@ -472,7 +473,7 @@ class _VibeBulkOperationDialogState
   }) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: color),
+        StudioIcon(icon, size: 18, color: color),
         const SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -506,7 +507,11 @@ class _VibeBulkOperationDialogState
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: theme.colorScheme.error, size: 24),
+          StudioIcon(
+            Icons.error_outline,
+            color: theme.colorScheme.error,
+            size: 24,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -209,13 +210,13 @@ class _TagGroupBrowserState extends ConsumerState<TagGroupBrowser> {
               fontSize: 14,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
-            prefixIcon: Icon(
+            prefixIcon: StudioIcon(
               Icons.search,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
-                    icon: Icon(
+                    icon: StudioIcon(
                       Icons.clear,
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
@@ -269,7 +270,7 @@ class _TagGroupBrowserState extends ConsumerState<TagGroupBrowser> {
           // 标题
           Row(
             children: [
-              Icon(
+              StudioIcon(
                 Icons.cloud_outlined,
                 size: 16,
                 color: theme.colorScheme.primary,
@@ -448,7 +449,7 @@ class _TagGroupBrowserState extends ConsumerState<TagGroupBrowser> {
                   AnimatedRotation(
                     duration: const Duration(milliseconds: 200),
                     turns: isExpanded ? 0.5 : 0,
-                    child: Icon(
+                    child: StudioIcon(
                       Icons.expand_more,
                       color: theme.colorScheme.outline,
                     ),
@@ -577,7 +578,7 @@ class _TagGroupBrowserState extends ConsumerState<TagGroupBrowser> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            StudioIcon(
               Icons.library_books_outlined,
               size: 64,
               color: theme.colorScheme.outline.withValues(alpha: 0.5),
@@ -612,7 +613,7 @@ class _TagGroupBrowserState extends ConsumerState<TagGroupBrowser> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            StudioIcon(
               Icons.category_outlined,
               size: 64,
               color: theme.colorScheme.outline.withValues(alpha: 0.5),

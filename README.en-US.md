@@ -1,11 +1,11 @@
-# W.O.F NAI Launcher
+# W.O.F NAI Studio
 
 <p align="center">
   <a href="README.md">简体中文</a> | English
 </p>
 
 <p align="center">
-  <img src="assets/icons/Icon.png" alt="NAI Launcher Logo" width="120">
+  <img src="assets/icons/wof_icon.svg" alt="W.O.F NAI Studio Logo" width="120">
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 >
 > The genetic algorithm design of the style-exploration module is inspired by [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio) (GPL-3.0). The implementation here is a Dart rewrite that copies no source code; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-NAI Launcher is a third-party client for NovelAI built with Flutter. It integrates image generation, image-to-image, inpainting, Vibe / Precise Reference, local gallery, online gallery, generation queues, Krita integration, and statistical tools into a single desktop application, making it ideal for daily generation, batch processing, and long-term management of local artwork.
+W.O.F NAI Studio is a third-party client for NovelAI built with Flutter. It integrates image generation, image-to-image, inpainting, Vibe / Precise Reference, local gallery, online gallery, generation queues, Krita integration, and statistical tools into a single desktop application, making it ideal for daily generation, batch processing, and long-term management of local artwork.
 
 > This project is not an official NovelAI product. Please ensure you have your own NovelAI account and comply with NovelAI's Terms of Service before use.
 
@@ -300,3 +300,5 @@ Contributions via Issues and Pull Requests are welcome. Before submitting a PR, 
 ## 📄 License
 
 This project is open-source under the MIT License. See [LICENSE](LICENSE) for details. Original copyright belongs to the upstream NAI Launcher Contributors; new work in this fork is copyrighted by W.O.F (z15087716457-stack).
+
+The interface bundles Geist Sans / Mono / Pixel Line, HarmonyOS Sans SC, and Geist-style SVG icons. Fonts and icons retain their own licenses; see the [asset guide](tool/branding/README.md) and [license files](assets/licenses/), also available from the app’s About page.

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -112,7 +113,7 @@ class AccountDetailTile extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
                 // 编辑箭头
-                Icon(
+                StudioIcon(
                   Icons.chevron_right_rounded,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                   size: 20,
@@ -178,7 +179,7 @@ class AccountDetailTile extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  StudioIcon(
                     Icons.diamond_outlined,
                     size: 12,
                     color: theme.colorScheme.tertiary,
@@ -198,8 +199,11 @@ class AccountDetailTile extends ConsumerWidget {
           ],
         );
       },
-      error: (_) =>
-          Icon(Icons.error_outline, size: 16, color: theme.colorScheme.error),
+      error: (_) => StudioIcon(
+        Icons.error_outline,
+        size: 16,
+        color: theme.colorScheme.error,
+      ),
     );
   }
 
@@ -318,7 +322,7 @@ class AccountDetailTile extends ConsumerWidget {
                     borderRadius: avatarBorderRadius(44),
                     color: theme.colorScheme.outline.withValues(alpha: 0.1),
                   ),
-                  child: Icon(
+                  child: StudioIcon(
                     Icons.person_outline_rounded,
                     size: 24,
                     color: theme.colorScheme.outline,

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,7 +88,7 @@ class OpusUsageChip extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.bolt_outlined, size: 16, color: accent),
+                    StudioIcon(Icons.bolt_outlined, size: 16, color: accent),
                     const SizedBox(width: 5),
                     _QuotaBar(
                       value: usage.displayPercent / 100,
@@ -143,7 +144,7 @@ class OpusUsageChip extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          StudioIcon(
             Icons.bolt_outlined,
             size: 16,
             color: warning ? scheme.error : scheme.primary,

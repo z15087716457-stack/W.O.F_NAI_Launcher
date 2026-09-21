@@ -1,3 +1,5 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -697,7 +699,7 @@ class _ColorPickerSettingsPanel extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
+                StudioIcon(
                   Icons.info_outline,
                   size: 16,
                   color: theme.colorScheme.onSurfaceVariant,
@@ -896,7 +898,8 @@ class _ColorPickerMagnifier extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 10,
                       color: Colors.black87,
-                      fontFamily: 'monospace',
+                      fontFamily: StudioTypography.mono,
+                      fontFamilyFallback: StudioTypography.fallback,
                     ),
                   ),
                 ],

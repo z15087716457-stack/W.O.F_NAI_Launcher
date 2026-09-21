@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -161,7 +162,7 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              StudioIcon(
                 Icons.image_not_supported,
                 size: 64,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
@@ -202,7 +203,7 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.error_outline, size: 64),
+                          const StudioIcon(Icons.error_outline, size: 64),
                           const SizedBox(height: 16),
                           Text(
                             l10n.localGallery_progressiveLoadError,
@@ -259,7 +260,7 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
                     const Spacer(),
                     // 退出按钮
                     IconButton(
-                      icon: Icon(
+                      icon: StudioIcon(
                         Icons.close,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -295,7 +296,7 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
                   children: [
                     // 上一张按钮
                     IconButton(
-                      icon: Icon(
+                      icon: StudioIcon(
                         Icons.arrow_back_ios,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -305,7 +306,7 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
                     const Spacer(),
                     // 播放/暂停按钮
                     IconButton(
-                      icon: Icon(
+                      icon: StudioIcon(
                         _isPlaying ? Icons.pause : Icons.play_arrow,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -317,7 +318,7 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
                     const Spacer(),
                     // 下一张按钮
                     IconButton(
-                      icon: Icon(
+                      icon: StudioIcon(
                         Icons.arrow_forward_ios,
                         color: theme.colorScheme.onSurface,
                       ),

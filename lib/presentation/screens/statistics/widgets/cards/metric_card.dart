@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../../themes/theme_extension.dart';
@@ -117,7 +118,7 @@ class _MetricCardState extends State<MetricCard> {
             color: effectiveIconColor.withValues(alpha: isDark ? 0.15 : 0.1),
             borderRadius: BorderRadius.circular(6),
           ),
-          child: Icon(widget.icon, size: 18, color: effectiveIconColor),
+          child: StudioIcon(widget.icon, size: 18, color: effectiveIconColor),
         ),
         const SizedBox(width: 12),
         // Label
@@ -167,7 +168,11 @@ class _MetricCardState extends State<MetricCard> {
                 ),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Icon(widget.icon, size: 20, color: effectiveIconColor),
+              child: StudioIcon(
+                widget.icon,
+                size: 20,
+                color: effectiveIconColor,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -296,7 +301,7 @@ class TrendIndicator extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: iconSize, color: primaryColor),
+          StudioIcon(icon, size: iconSize, color: primaryColor),
           const SizedBox(width: 5),
           Text(
             displayValue,

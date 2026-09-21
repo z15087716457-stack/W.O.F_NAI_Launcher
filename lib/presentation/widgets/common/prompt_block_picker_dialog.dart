@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -103,7 +104,7 @@ class _PromptBlockPickerDialogState
   Widget _buildHeader(ThemeData theme) {
     return Row(
       children: [
-        Icon(
+        StudioIcon(
           Icons.library_books_outlined,
           color: theme.colorScheme.primary,
           size: 24,
@@ -118,7 +119,7 @@ class _PromptBlockPickerDialogState
         const Spacer(),
         IconButton(
           onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.close),
+          icon: const StudioIcon(Icons.close),
           tooltip: context.l10n.common_close,
         ),
       ],
@@ -146,7 +147,7 @@ class _PromptBlockPickerDialogState
                 TipModule.blockLibrary,
                 epoch: watchTipEpoch(ref),
               ),
-              prefixIcon: const Icon(Icons.search, size: 20),
+              prefixIcon: const StudioIcon(Icons.search, size: 20),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -227,7 +228,7 @@ class _PromptBlockPickerDialogState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            StudioIcon(
               Icons.inbox_outlined,
               size: 64,
               color: theme.colorScheme.outline,
@@ -417,7 +418,11 @@ class _BlockSelectCardState extends State<_BlockSelectCard> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.check, size: 16, color: Colors.white),
+                        const StudioIcon(
+                          Icons.check,
+                          size: 16,
+                          color: Colors.white,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           context.l10n.common_select,
@@ -446,7 +451,11 @@ class _BlockSelectCardState extends State<_BlockSelectCard> {
                 color: Colors.red.shade400,
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: const Icon(Icons.favorite, size: 12, color: Colors.white),
+              child: const StudioIcon(
+                Icons.favorite,
+                size: 12,
+                color: Colors.white,
+              ),
             ),
           ),
       ],
@@ -457,7 +466,7 @@ class _BlockSelectCardState extends State<_BlockSelectCard> {
     return Container(
       color: theme.colorScheme.surfaceContainerHighest,
       child: Center(
-        child: Icon(
+        child: StudioIcon(
           Icons.image_outlined,
           size: 32,
           color: theme.colorScheme.outline.withValues(alpha: 0.5),

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -61,7 +62,7 @@ class DetailTopBar extends StatelessWidget {
         children: [
           // 关闭按钮
           IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
+            icon: const StudioIcon(Icons.close, color: Colors.white),
             onPressed: onClose,
             tooltip: l10n.common_close,
           ),
@@ -97,7 +98,7 @@ class DetailTopBar extends StatelessWidget {
           // 保存按钮（仅生成图像显示）
           if (currentImage.showSaveButton && onSave != null)
             IconButton(
-              icon: const Icon(Icons.save_alt, color: Colors.white),
+              icon: const StudioIcon(Icons.save_alt, color: Colors.white),
               onPressed: onSave,
               tooltip: l10n.common_save,
             ),
@@ -105,7 +106,7 @@ class DetailTopBar extends StatelessWidget {
           // 复用参数按钮
           if (metadata != null && onReuseMetadata != null)
             IconButton(
-              icon: const Icon(Icons.input, color: Colors.white),
+              icon: const StudioIcon(Icons.input, color: Colors.white),
               onPressed: onReuseMetadata,
               tooltip: l10n.shortcut_action_reuse_params,
             ),
@@ -113,7 +114,7 @@ class DetailTopBar extends StatelessWidget {
           // 发送到图生图
           if (onSendToImg2Img != null)
             IconButton(
-              icon: const Icon(Icons.image_search, color: Colors.white),
+              icon: const StudioIcon(Icons.image_search, color: Colors.white),
               onPressed: onSendToImg2Img,
               tooltip: l10n.detail_sendToImg2Img,
             ),
@@ -121,7 +122,7 @@ class DetailTopBar extends StatelessWidget {
           // 复制图像按钮
           if (onCopyImage != null)
             IconButton(
-              icon: const Icon(Icons.copy, color: Colors.white),
+              icon: const StudioIcon(Icons.copy, color: Colors.white),
               onPressed: onCopyImage,
               tooltip: l10n.shortcut_action_copy_image,
             ),
@@ -164,7 +165,10 @@ class DetailTopBar extends StatelessWidget {
           // 删除按钮（仅支持删除的调用方显示）
           if (onDelete != null)
             IconButton(
-              icon: Icon(Icons.delete_outline, color: Colors.red.shade300),
+              icon: StudioIcon(
+                Icons.delete_outline,
+                color: Colors.red.shade300,
+              ),
               onPressed: onDelete,
               tooltip: l10n.common_delete,
             ),

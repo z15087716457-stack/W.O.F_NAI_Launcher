@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -46,7 +47,7 @@ class _AppearanceSettingsSectionState
         children: [
           // 主题选择
           ListTile(
-            leading: const Icon(Icons.palette_outlined),
+            leading: const StudioIcon(Icons.palette_outlined),
             title: Text(context.l10n.settings_style),
             subtitle: Text(
               currentTheme == AppStyle.grungeCollage
@@ -58,7 +59,7 @@ class _AppearanceSettingsSectionState
 
           // 字体选择
           ListTile(
-            leading: const Icon(Icons.text_fields),
+            leading: const StudioIcon(Icons.text_fields),
             title: Text(context.l10n.settings_font),
             subtitle: Text(currentFont.displayName),
             onTap: () => _showFontDialog(context, currentFont),
@@ -66,7 +67,7 @@ class _AppearanceSettingsSectionState
 
           // 字体大小选择
           ListTile(
-            leading: const Icon(Icons.format_size),
+            leading: const StudioIcon(Icons.format_size),
             title: Text(context.l10n.settings_fontScale),
             subtitle: Text(context.l10n.settings_fontScale_description),
             trailing: Text('${(fontScale * 100).round()}%'),
@@ -75,14 +76,14 @@ class _AppearanceSettingsSectionState
 
           // 语言选择
           ListTile(
-            leading: const Icon(Icons.language),
+            leading: const StudioIcon(Icons.language),
             title: Text(context.l10n.settings_language),
             subtitle: Text(_languageLabel(context, currentLocale.languageCode)),
             onTap: () => _showLanguageDialog(context, currentLocale),
           ),
 
           ListTile(
-            leading: const Icon(Icons.photo_library_outlined),
+            leading: const StudioIcon(Icons.photo_library_outlined),
             title: Text(context.l10n.settings_historyClickBehavior),
             subtitle: Text(
               historyClickBehavior == HistoryClickBehavior.selectPreview
@@ -95,33 +96,28 @@ class _AppearanceSettingsSectionState
 
           // 输出查看器模式（G11 自由画布 / 简单视图）
           ListTile(
-            leading: const Icon(Icons.dashboard_outlined),
+            leading: const StudioIcon(Icons.dashboard_outlined),
             title: Text(context.l10n.settings_outputViewer),
             subtitle: Text(
               simpleOutputViewer
                   ? context.l10n.settings_outputViewer_simple
                   : context.l10n.settings_outputViewer_canvas,
             ),
-            onTap: () =>
-                _showOutputViewerDialog(context, simpleOutputViewer),
+            onTap: () => _showOutputViewerDialog(context, simpleOutputViewer),
           ),
 
           // 画布门控（官网 canvasLockCamera / canvasReducedMotion）
           SwitchListTile(
-            secondary: const Icon(Icons.lock_outline),
+            secondary: const StudioIcon(Icons.lock_outline),
             title: Text(context.l10n.settings_canvasLockCamera),
-            subtitle: Text(
-              context.l10n.settings_canvasLockCameraDescription,
-            ),
+            subtitle: Text(context.l10n.settings_canvasLockCameraDescription),
             value: ref.watch(canvasLockCameraNotifierProvider),
             onChanged: (v) => unawaited(
-              ref
-                  .read(canvasLockCameraNotifierProvider.notifier)
-                  .setLocked(v),
+              ref.read(canvasLockCameraNotifierProvider.notifier).setLocked(v),
             ),
           ),
           SwitchListTile(
-            secondary: const Icon(Icons.motion_photos_off_outlined),
+            secondary: const StudioIcon(Icons.motion_photos_off_outlined),
             title: Text(context.l10n.settings_canvasReducedMotion),
             subtitle: Text(
               context.l10n.settings_canvasReducedMotionDescription,
@@ -364,7 +360,7 @@ class _AppearanceSettingsSectionState
                                             padding: const EdgeInsets.only(
                                               left: 8,
                                             ),
-                                            child: Icon(
+                                            child: StudioIcon(
                                               Icons.check,
                                               color: Theme.of(
                                                 context,
@@ -629,7 +625,7 @@ class _AppearanceSettingsSectionState
                     });
                     ref.read(fontScaleNotifierProvider.notifier).reset();
                   },
-                  icon: const Icon(Icons.refresh),
+                  icon: const StudioIcon(Icons.refresh),
                   label: Text(context.l10n.settings_fontScale_reset),
                 ),
                 // 完成按钮

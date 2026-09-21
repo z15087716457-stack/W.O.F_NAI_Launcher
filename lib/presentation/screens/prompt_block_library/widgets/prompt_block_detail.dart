@@ -1,3 +1,5 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -79,7 +81,8 @@ class PromptBlockDetailView extends StatelessWidget {
         ? l10n.detail_noContent
         : block.content;
     final contentStyle = theme.textTheme.bodySmall?.copyWith(
-      fontFamily: 'monospace',
+      fontFamily: StudioTypography.mono,
+      fontFamilyFallback: StudioTypography.fallback,
       color: theme.colorScheme.onSurfaceVariant,
       height: 1.4,
     );
@@ -108,37 +111,36 @@ class PromptBlockDetailView extends StatelessWidget {
             ),
           )
         : block.content.isEmpty
-            ? Text(
-                content,
-                style: contentStyle,
-                maxLines: contentMaxLines,
-                overflow:
-                    contentMaxLines == null ? null : TextOverflow.ellipsis,
-              )
-            // FEAT-79 点击态：正文按原子切分成描边 chip（与编辑器同件），
-            // runSpacing 给比编辑器更宽的行距。
-            : LayoutBuilder(
-                builder: (context, constraints) {
-                  final atomStyle = contentStyle?.copyWith(height: 1.35);
-                  return Wrap(
-                    spacing: 4,
-                    runSpacing: 6,
-                    children: [
-                      for (final atom in block.atomsOrSplit)
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth: constraints.maxWidth,
-                          ),
-                          child: AtomChip(
-                            text: atom,
-                            theme: theme,
-                            textStyle: atomStyle,
-                          ),
-                        ),
-                    ],
-                  );
-                },
+        ? Text(
+            content,
+            style: contentStyle,
+            maxLines: contentMaxLines,
+            overflow: contentMaxLines == null ? null : TextOverflow.ellipsis,
+          )
+        // FEAT-79 点击态：正文按原子切分成描边 chip（与编辑器同件），
+        // runSpacing 给比编辑器更宽的行距。
+        : LayoutBuilder(
+            builder: (context, constraints) {
+              final atomStyle = contentStyle?.copyWith(height: 1.35);
+              return Wrap(
+                spacing: 4,
+                runSpacing: 6,
+                children: [
+                  for (final atom in block.atomsOrSplit)
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: constraints.maxWidth,
+                      ),
+                      child: AtomChip(
+                        text: atom,
+                        theme: theme,
+                        textStyle: atomStyle,
+                      ),
+                    ),
+                ],
               );
+            },
+          );
 
     final body = Padding(
       padding: const EdgeInsets.all(16),
@@ -148,7 +150,7 @@ class PromptBlockDetailView extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
+              StudioIcon(
                 promptBlockIconFromName(block.iconName),
                 size: 20,
                 color: blockColor,
@@ -167,7 +169,7 @@ class PromptBlockDetailView extends StatelessWidget {
               if (block.isFavorite)
                 Padding(
                   padding: const EdgeInsets.only(left: 6),
-                  child: Icon(Icons.star, size: 18, color: blockColor),
+                  child: StudioIcon(Icons.star, size: 18, color: blockColor),
                 ),
             ],
           ),
@@ -249,7 +251,7 @@ class _MetaRow extends StatelessWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(icon, size: 14, color: theme.colorScheme.outline),
+        StudioIcon(icon, size: 14, color: theme.colorScheme.outline),
         const SizedBox(width: 4),
         Expanded(
           child: Text(
@@ -354,7 +356,7 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
               color: blockColor.withValues(alpha: 0.18),
               borderRadius: radius,
             ),
-            child: Icon(
+            child: StudioIcon(
               promptBlockIconFromName(block.iconName),
               size: 40,
               color: blockColor,
@@ -374,7 +376,7 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
               borderRadius: radius,
             ),
             child: const Center(
-              child: Icon(
+              child: StudioIcon(
                 Icons.image_outlined,
                 size: 32,
                 color: Colors.white38,
@@ -406,7 +408,7 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
                   ),
                   cacheWidth: (width * devicePixelRatio).ceil(),
                   errorBuilder: (_, __, ___) => Center(
-                    child: Icon(
+                    child: StudioIcon(
                       Icons.broken_image_outlined,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -431,7 +433,7 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
                 fit: BoxFit.contain,
                 cacheWidth: (width * devicePixelRatio).ceil(),
                 errorBuilder: (_, __, ___) => Center(
-                  child: Icon(
+                  child: StudioIcon(
                     Icons.broken_image_outlined,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -521,11 +523,7 @@ class PromptBlockPreviewOverlay extends StatelessWidget {
                   displayTitle: block.title.isEmpty
                       ? l10n.promptBlockLibrary_unnamedBlock
                       : block.title,
-                  locationLabel: promptBlockLocationLabel(
-                    block,
-                    folders,
-                    l10n,
-                  ),
+                  locationLabel: promptBlockLocationLabel(block, folders, l10n),
                 ),
               ),
             ),
@@ -686,7 +684,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      StudioIcon(
                         Icons.info_outline,
                         size: 19,
                         color: theme.colorScheme.primary,
@@ -707,7 +705,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
                         tooltip: l10n.common_collapse,
                         visualDensity: VisualDensity.compact,
                         onPressed: onCollapse,
-                        icon: const Icon(Icons.keyboard_arrow_right),
+                        icon: const StudioIcon(Icons.keyboard_arrow_right),
                       ),
                     ],
                   ),
@@ -750,7 +748,10 @@ class PromptBlockDetailPanel extends StatelessWidget {
                             FilledButton.icon(
                               key: const Key('prompt-block-detail-action-edit'),
                               onPressed: onEdit,
-                              icon: const Icon(Icons.edit_outlined, size: 18),
+                              icon: const StudioIcon(
+                                Icons.edit_outlined,
+                                size: 18,
+                              ),
                               label: Text(l10n.common_edit),
                             ),
                             Builder(
@@ -762,7 +763,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
                                       : Offset.zero;
                                   onToggleFavorite(anchor);
                                 },
-                                icon: Icon(
+                                icon: StudioIcon(
                                   block.isFavorite
                                       ? Icons.star
                                       : Icons.star_border,
@@ -777,12 +778,15 @@ class PromptBlockDetailPanel extends StatelessWidget {
                             ),
                             OutlinedButton.icon(
                               onPressed: _copyContent,
-                              icon: const Icon(Icons.copy_outlined, size: 18),
+                              icon: const StudioIcon(
+                                Icons.copy_outlined,
+                                size: 18,
+                              ),
                               label: Text(l10n.common_copy),
                             ),
                             OutlinedButton.icon(
                               onPressed: onExport,
-                              icon: const Icon(
+                              icon: const StudioIcon(
                                 Icons.file_upload_outlined,
                                 size: 18,
                               ),
@@ -792,7 +796,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
                             ),
                             TextButton.icon(
                               onPressed: onDelete,
-                              icon: Icon(
+                              icon: StudioIcon(
                                 Icons.delete_outline,
                                 size: 18,
                                 color: theme.colorScheme.error,
@@ -841,7 +845,7 @@ class PromptBlockDetailRailCollapsed extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            StudioIcon(
               Icons.info_outline,
               size: 19,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.65),

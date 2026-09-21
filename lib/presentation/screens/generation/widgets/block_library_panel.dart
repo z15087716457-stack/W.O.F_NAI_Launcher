@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -162,7 +163,8 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
     final manualHeight = (availableHeight * _blocksRatio)
         .clamp(0.0, availableHeight)
         .toDouble();
-    final fixedHeight = _manualBlocksHeight ??
+    final fixedHeight =
+        _manualBlocksHeight ??
         (_persistedBlocksRatio != null
             ? _persistedBlocksRatio! * availableHeight
             : _lockedBlocksHeight);
@@ -274,7 +276,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
       padding: const EdgeInsets.fromLTRB(12, 8, 4, 4),
       child: Row(
         children: [
-          Icon(
+          StudioIcon(
             Icons.view_module_outlined,
             size: 18,
             color: theme.colorScheme.onSurfaceVariant,
@@ -297,7 +299,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
             onPressed: () => ref
                 .read(layoutStateNotifierProvider.notifier)
                 .setBlockLibraryPanelExpanded(false),
-            icon: const Icon(Icons.close),
+            icon: const StudioIcon(Icons.close),
           ),
         ],
       ),
@@ -322,7 +324,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             fontSize: 13,
           ),
-          prefixIcon: const Icon(Icons.search, size: 18),
+          prefixIcon: const StudioIcon(Icons.search, size: 18),
           prefixIconConstraints: const BoxConstraints(
             minWidth: 36,
             minHeight: 30,
@@ -333,7 +335,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
                   tooltip: context.l10n.common_clear,
                   visualDensity: VisualDensity.compact,
                   onPressed: _searchController.clear,
-                  icon: const Icon(Icons.close, size: 16),
+                  icon: const StudioIcon(Icons.close, size: 16),
                 ),
           suffixIconConstraints: const BoxConstraints(
             minWidth: 32,
@@ -429,7 +431,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            StudioIcon(
               promptBlockIconFromName(block.iconName),
               size: 15,
               color: color,
@@ -449,7 +451,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
             ),
             if (block.isFavorite) ...[
               const SizedBox(width: 4),
-              Icon(Icons.star, size: 13, color: color),
+              StudioIcon(Icons.star, size: 13, color: color),
             ],
           ],
         ),
@@ -508,7 +510,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
             onPressed: () => _showFolderNameDialog(
               parentId: _allSelected ? null : _selectedFolderId,
             ),
-            icon: const Icon(Icons.create_new_folder_outlined),
+            icon: const StudioIcon(Icons.create_new_folder_outlined),
           ),
         ],
       ),
@@ -624,7 +626,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
           child: ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.edit_outlined, size: 18),
+            leading: const StudioIcon(Icons.edit_outlined, size: 18),
             title: Text(l10n.promptBlockLibrary_editBlock),
           ),
         ),
@@ -633,7 +635,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
           child: ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            leading: Icon(
+            leading: StudioIcon(
               block.isFavorite ? Icons.star : Icons.star_outline,
               size: 18,
             ),
@@ -657,7 +659,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
           child: ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            leading: Icon(
+            leading: StudioIcon(
               Icons.delete_outline,
               size: 18,
               color: Theme.of(context).colorScheme.error,
@@ -1032,7 +1034,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            StudioIcon(
               Icons.error_outline,
               color: Theme.of(context).colorScheme.error,
             ),

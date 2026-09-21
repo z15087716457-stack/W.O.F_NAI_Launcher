@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/editor_state.dart';
@@ -158,7 +159,7 @@ class _MobileToolButton extends StatelessWidget {
             width: 44,
             height: 44,
             alignment: Alignment.center,
-            child: Icon(
+            child: StudioIcon(
               tool.icon,
               size: 22,
               color: isSelected
@@ -196,7 +197,7 @@ class _ActionButton extends StatelessWidget {
           width: 48,
           height: 56,
           alignment: Alignment.center,
-          child: Icon(
+          child: StudioIcon(
             icon,
             size: 22,
             color: enabled

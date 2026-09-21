@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -51,7 +52,11 @@ class StatisticsScreen extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.bar_chart_rounded, size: 24, color: colorScheme.primary),
+          StudioIcon(
+            Icons.bar_chart_rounded,
+            size: 24,
+            color: colorScheme.primary,
+          ),
           const SizedBox(width: 12),
           Text(
             l10n.statistics_title,
@@ -143,7 +148,7 @@ class StatisticsScreen extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 48, color: Colors.red),
+          const StudioIcon(Icons.error_outline, size: 48, color: Colors.red),
           const SizedBox(height: 16),
           Text(l10n.statistics_error(error)),
           const SizedBox(height: 16),

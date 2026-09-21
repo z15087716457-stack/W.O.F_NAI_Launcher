@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -403,7 +404,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
                         top: 4,
                         right: 4,
                         child: IconButton.filled(
-                          icon: const Icon(Icons.close, size: 16),
+                          icon: const StudioIcon(Icons.close, size: 16),
                           style: IconButton.styleFrom(
                             backgroundColor: Colors.black54,
                             foregroundColor: Colors.white,
@@ -416,7 +417,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
                     ],
                   )
                 : Center(
-                    child: Icon(
+                    child: StudioIcon(
                       Icons.add_photo_alternate_outlined,
                       size: 28,
                       color: theme.colorScheme.outline,
@@ -491,7 +492,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.image),
+              leading: const StudioIcon(Icons.image),
               title: Text(context.l10n.promptBlockLibrary_selectNewImage),
               onTap: () {
                 Navigator.pop(sheetContext);
@@ -499,7 +500,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.crop_free),
+              leading: const StudioIcon(Icons.crop_free),
               title: Text(context.l10n.promptBlockLibrary_adjustDisplayRange),
               onTap: () {
                 Navigator.pop(sheetContext);
@@ -507,7 +508,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete_outline),
+              leading: const StudioIcon(Icons.delete_outline),
               title: Text(context.l10n.common_delete),
               onTap: () {
                 Navigator.pop(sheetContext);

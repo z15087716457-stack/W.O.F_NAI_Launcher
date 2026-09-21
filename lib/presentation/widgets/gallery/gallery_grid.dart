@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -178,7 +179,11 @@ class _GalleryGridState extends State<GalleryGrid> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.image_not_supported, size: 64, color: Colors.grey),
+            const StudioIcon(
+              Icons.image_not_supported,
+              size: 64,
+              color: Colors.grey,
+            ),
             const SizedBox(height: 16),
             Text(
               context.l10n.localGallery_noImagesFound,
@@ -308,7 +313,7 @@ class _GalleryGridState extends State<GalleryGrid> {
     }
 
     if ((_preloadIndices.difference(newPreloadIndices).isNotEmpty ||
-            newPreloadIndices.difference(_preloadIndices).isNotEmpty)) {
+        newPreloadIndices.difference(_preloadIndices).isNotEmpty)) {
       // 只赋值不 setState：重建统一由 _setCardVisible 调度的 flush 合并触发
       _preloadIndices
         ..clear()

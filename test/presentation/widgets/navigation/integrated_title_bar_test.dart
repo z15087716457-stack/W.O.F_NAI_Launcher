@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -15,9 +16,9 @@ void main() {
     calls.clear();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
-      calls.add(call);
-      return null;
-    });
+          calls.add(call);
+          return null;
+        });
   });
 
   tearDown(() {
@@ -35,35 +36,37 @@ void main() {
   }
 
   Finder dividerFinder() => find.descendant(
-        of: find.byType(IntegratedTitleBarShell),
-        matching: find.byType(AnimatedContainer),
-      );
+    of: find.byType(IntegratedTitleBarShell),
+    matching: find.byType(AnimatedContainer),
+  );
 
   group('IntegratedTitleBarShell', () {
-    testWidgets('renders logo, app title and three caption buttons',
-        (tester) async {
+    testWidgets('renders logo, app title and three caption buttons', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildShell(child: const SizedBox.expand()));
       await tester.pump();
 
-      expect(find.text('NAI Launcher'), findsOneWidget);
+      expect(find.text('W.O.F NAI Studio'), findsOneWidget);
 
-      final image = tester.widget<Image>(find.byType(Image));
       expect(
-        image.image,
-        isA<AssetImage>().having(
-          (a) => a.assetName,
-          'assetName',
-          'assets/images/wof_logo_block.png',
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SvgPicture &&
+              widget.bytesLoader is SvgAssetLoader &&
+              (widget.bytesLoader as SvgAssetLoader).assetName ==
+                  'assets/icons/wof_icon.svg',
         ),
+        findsOneWidget,
       );
-
       expect(find.byIcon(Icons.remove), findsOneWidget);
       expect(find.byIcon(Icons.crop_square), findsOneWidget);
       expect(find.byIcon(Icons.close), findsOneWidget);
     });
 
-    testWidgets('reports caption region on mount and clears on dispose',
-        (tester) async {
+    testWidgets('reports caption region on mount and clears on dispose', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildShell(child: const SizedBox.expand()));
       await tester.pump();
 
@@ -91,8 +94,9 @@ void main() {
       expect(calls.map((c) => c.method), contains('clear'));
     });
 
-    testWidgets('hairline divider appears only after content scrolls',
-        (tester) async {
+    testWidgets('hairline divider appears only after content scrolls', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildShell(
           child: ListView.builder(
@@ -103,10 +107,10 @@ void main() {
       );
       await tester.pump();
 
-      Color dividerColor() => (tester
-              .widget<AnimatedContainer>(dividerFinder())
-              .decoration as BoxDecoration)
-          .color!;
+      Color dividerColor() =>
+          (tester.widget<AnimatedContainer>(dividerFinder()).decoration
+                  as BoxDecoration)
+              .color!;
 
       expect(dividerColor(), Colors.transparent);
 
@@ -123,8 +127,9 @@ void main() {
       expect(dividerColor(), Colors.transparent);
     });
 
-    testWidgets('caption buttons do not overflow a narrow window',
-        (tester) async {
+    testWidgets('caption buttons do not overflow a narrow window', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(360, 500);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -181,10 +182,10 @@ class _CollectionSelectDialogState
                 controller: _filterController,
                 decoration: InputDecoration(
                   hintText: l10n.collectionSelect_filterHint,
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: const StudioIcon(Icons.search),
                   suffixIcon: _filterQuery.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear),
+                          icon: const StudioIcon(Icons.clear),
                           onPressed: () {
                             _filterController.clear();
                           },
@@ -252,7 +253,7 @@ class _CollectionSelectDialogState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            StudioIcon(
               Icons.folder_outlined,
               size: 48,
               color: theme.colorScheme.outline,
@@ -283,7 +284,7 @@ class _CollectionSelectDialogState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            StudioIcon(
               Icons.search_off_outlined,
               size: 48,
               color: theme.colorScheme.outline,
@@ -350,12 +351,9 @@ class _CollectionSelectDialogState
     bool expanded,
   ) {
     return ListTile(
-      contentPadding: EdgeInsets.only(
-        left: 16 + depth * 20.0,
-        right: 16,
-      ),
+      contentPadding: EdgeInsets.only(left: 16 + depth * 20.0, right: 16),
       dense: true,
-      leading: Icon(
+      leading: StudioIcon(
         expanded ? Icons.folder_open : Icons.folder,
         color: Colors.amber.shade700,
       ),
@@ -372,7 +370,7 @@ class _CollectionSelectDialogState
           color: theme.colorScheme.outline,
         ),
       ),
-      trailing: Icon(
+      trailing: StudioIcon(
         expanded ? Icons.expand_less : Icons.chevron_right,
         color: theme.colorScheme.outline,
       ),
@@ -394,7 +392,7 @@ class _CollectionSelectDialogState
     return Opacity(
       opacity: hasNone ? 0.45 : 1.0,
       child: ListTile(
-        leading: Icon(Icons.favorite, color: Colors.red.shade400),
+        leading: StudioIcon(Icons.favorite, color: Colors.red.shade400),
         title: Text(
           l10n.common_favorite,
           style: theme.textTheme.bodyLarge?.copyWith(
@@ -435,11 +433,11 @@ class _CollectionSelectDialogState
     return Opacity(
       opacity: hasNone ? 0.45 : 1.0,
       child: ListTile(
-        contentPadding: EdgeInsets.only(
-          left: 16 + depth * 20.0,
-          right: 16,
+        contentPadding: EdgeInsets.only(left: 16 + depth * 20.0, right: 16),
+        leading: StudioIcon(
+          Icons.folder_outlined,
+          color: theme.colorScheme.primary,
         ),
-        leading: Icon(Icons.folder_outlined, color: theme.colorScheme.primary),
         title: Text(
           collection.name,
           style: theme.textTheme.bodyLarge?.copyWith(
@@ -474,7 +472,10 @@ class _CollectionSelectDialogState
         ),
         trailing: isRemove
             ? null
-            : Icon(Icons.add_circle_outline, color: theme.colorScheme.primary),
+            : StudioIcon(
+                Icons.add_circle_outline,
+                color: theme.colorScheme.primary,
+              ),
         onTap: () => _selectCollection(collection),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -353,7 +354,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       constraints: const BoxConstraints(minHeight: 62),
       child: Row(
         children: [
-          Icon(
+          StudioIcon(
             Icons.folder_outlined,
             size: 20,
             color: theme.colorScheme.primary,
@@ -371,7 +372,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
           ),
           FilledButton.tonalIcon(
             onPressed: _createCategory,
-            icon: const Icon(Icons.add, size: 18),
+            icon: const StudioIcon(Icons.add, size: 18),
             label: Text(
               context.l10n.common_new,
               style: const TextStyle(fontSize: 13),
@@ -1098,7 +1099,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(
+            StudioIcon(
               Icons.warning_amber_rounded,
               color: Theme.of(context).colorScheme.error,
             ),

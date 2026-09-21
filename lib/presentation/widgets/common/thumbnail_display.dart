@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -102,7 +103,9 @@ class _ThumbnailDisplayState extends State<ThumbnailDisplay> {
     // 容器尺寸
     final containerWidth = widget.width;
     final containerHeight =
-        (_imageSize!.height > _imageSize!.width ? widget.portraitHeight : null) ??
+        (_imageSize!.height > _imageSize!.width
+            ? widget.portraitHeight
+            : null) ??
         widget.height;
     const containerAspectRatio = 2.5; // 与 EntryCard 一致
 
@@ -197,7 +200,7 @@ class _ThumbnailDisplayState extends State<ThumbnailDisplay> {
     width: widget.width,
     height: widget.height,
     color: Colors.grey.shade800,
-    child: const Icon(Icons.broken_image_outlined, color: Colors.white38),
+    child: const StudioIcon(Icons.broken_image_outlined, color: Colors.white38),
   );
 
   static int? _decodeCacheExtent(

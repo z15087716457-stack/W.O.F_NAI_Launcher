@@ -67,32 +67,32 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
           _buildMobileCompressionAction(),
           // 图层按钮
           IconButton(
-            icon: const Icon(Icons.layers),
+            icon: const StudioIcon(Icons.layers),
             onPressed: _showMobileLayerSheet,
             tooltip: context.l10n.editor_layers,
           ),
           // 加载蒙版按钮
           if (_isInpaintMode)
             IconButton(
-              icon: const Icon(Icons.upload_file),
+              icon: const StudioIcon(Icons.upload_file),
               onPressed: _loadMask,
               tooltip: context.l10n.editor_loadMask,
             ),
           if (_isInpaintMode)
             IconButton(
-              icon: const Icon(Icons.open_in_full),
+              icon: const StudioIcon(Icons.open_in_full),
               onPressed: _showShiftEdgesDialog,
               tooltip: context.l10n.editor_shiftEdges,
             ),
           if (!_isInpaintMode)
             IconButton(
-              icon: const Icon(Icons.tune_rounded),
+              icon: const StudioIcon(Icons.tune_rounded),
               onPressed: _showEffectsDialog,
               tooltip: context.l10n.editor_effects,
             ),
           // 导出按钮
           IconButton(
-            icon: const Icon(Icons.check),
+            icon: const StudioIcon(Icons.check),
             onPressed: _canExportAndClose ? _exportAndClose : null,
             tooltip: context.l10n.editor_done,
           ),
@@ -154,7 +154,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
               else
                 EditorOverlayCard(
                   child: TextButton.icon(
-                    icon: const Icon(Icons.filter_center_focus, size: 16),
+                    icon: const StudioIcon(Icons.filter_center_focus, size: 16),
                     label: Text(
                       context.l10n.editor_focusedInpaint,
                       style: const TextStyle(fontSize: 12),
@@ -195,7 +195,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
           const SizedBox(width: 4),
           FilledButton.icon(
             onPressed: _canExportAndClose ? () => _exportAndClose() : null,
-            icon: const Icon(Icons.check, size: 16),
+            icon: const StudioIcon(Icons.check, size: 16),
             label: Text(l10n.editor_saveAndExit),
             style: FilledButton.styleFrom(
               shape: RoundedRectangleBorder(
@@ -414,7 +414,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
                           child: IconButton(
                             tooltip: context.l10n.common_close,
                             onPressed: () => Navigator.pop(context),
-                            icon: const Icon(Icons.close),
+                            icon: const StudioIcon(Icons.close),
                           ),
                         ),
                         tool.buildSettingsPanel(context, _state),
@@ -482,7 +482,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            const Icon(Icons.keyboard),
+            const StudioIcon(Icons.keyboard),
             const SizedBox(width: 8),
             Text(context.l10n.editor_shortcutHelpTitle),
           ],
@@ -608,7 +608,8 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
                     child: Text(
                       s.$1,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        fontFamily: 'monospace',
+                        fontFamily: StudioTypography.mono,
+                        fontFamilyFallback: StudioTypography.fallback,
                       ),
                     ),
                   ),

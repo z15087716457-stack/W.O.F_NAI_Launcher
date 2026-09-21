@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -84,7 +85,7 @@ class TagCloudWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            StudioIcon(
               Icons.tag_outlined,
               size: 48,
               color: theme.colorScheme.onSurfaceVariant,
@@ -111,7 +112,7 @@ class TagCloudWidget extends StatelessWidget {
   Widget _buildHeader(BuildContext context, ThemeData theme) {
     return Row(
       children: [
-        Icon(Icons.tag, size: 20, color: theme.colorScheme.primary),
+        StudioIcon(Icons.tag, size: 20, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Expanded(
           child: Text(

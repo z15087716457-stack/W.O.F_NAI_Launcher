@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -711,7 +712,11 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                     color: primaryColor,
                   ),
                 ),
-                Icon(Icons.auto_awesome_rounded, size: 22, color: primaryColor),
+                StudioIcon(
+                  Icons.auto_awesome_rounded,
+                  size: 22,
+                  color: primaryColor,
+                ),
               ],
             ),
           ),
@@ -1297,7 +1302,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                 ),
               ],
             ),
-            child: Icon(
+            child: StudioIcon(
               widget.isFavorite ? Icons.favorite : Icons.favorite_border,
               color: widget.isFavorite ? Colors.redAccent : Colors.white,
               size: 17,
@@ -1461,7 +1466,11 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
           ],
         ),
         child: widget.isSelected
-            ? Icon(Icons.check, color: theme.colorScheme.onPrimary, size: 18)
+            ? StudioIcon(
+                Icons.check,
+                color: theme.colorScheme.onPrimary,
+                size: 18,
+              )
             : null,
       ),
     );
@@ -1964,7 +1973,7 @@ class _HoverActionButtonState extends State<_HoverActionButton> {
                         : Colors.transparent),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Icon(
+            child: StudioIcon(
               widget.icon,
               size: 20,
               color: widget.isPrimary

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -35,7 +36,7 @@ class BlockLibraryPanelToggleButton extends ConsumerWidget {
         onPressed: () => ref
             .read(layoutStateNotifierProvider.notifier)
             .toggleBlockLibraryPanel(),
-        icon: const Icon(Icons.view_module_outlined),
+        icon: const StudioIcon(Icons.view_module_outlined),
       ),
     );
   }

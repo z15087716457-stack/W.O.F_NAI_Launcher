@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -206,12 +207,12 @@ class _ExplorePileManageDialogState
             segments: [
               ButtonSegment(
                 value: false,
-                icon: const Icon(Icons.grid_on, size: 16),
+                icon: const StudioIcon(Icons.grid_on, size: 16),
                 tooltip: l10n.common_grid,
               ),
               ButtonSegment(
                 value: true,
-                icon: const Icon(Icons.dashboard_outlined, size: 16),
+                icon: const StudioIcon(Icons.dashboard_outlined, size: 16),
                 tooltip: l10n.localGallery_masonryViewLabel,
               ),
             ],
@@ -224,7 +225,7 @@ class _ExplorePileManageDialogState
             tooltip: l10n.common_close,
             iconSize: 18,
             onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.close),
+            icon: const StudioIcon(Icons.close),
           ),
         ],
       ),
@@ -371,7 +372,7 @@ class _ExplorePileManageDialogState
                   onPressed: enabled
                       ? () => _setHearts(run, selected, !allHearted)
                       : null,
-                  icon: Icon(
+                  icon: StudioIcon(
                     allHearted ? Icons.favorite_border : Icons.favorite,
                     size: 16,
                   ),
@@ -390,7 +391,7 @@ class _ExplorePileManageDialogState
                         value: folder.id,
                         child: Row(
                           children: [
-                            const Icon(Icons.folder_outlined, size: 16),
+                            const StudioIcon(Icons.folder_outlined, size: 16),
                             const SizedBox(width: 8),
                             Text(folder.name),
                           ],
@@ -401,7 +402,7 @@ class _ExplorePileManageDialogState
                       value: '',
                       child: Row(
                         children: [
-                          Icon(Icons.inbox_outlined, size: 16),
+                          StudioIcon(Icons.inbox_outlined, size: 16),
                           SizedBox(width: 8),
                           // 占位文本在 onSelected 里取 l10n，itemBuilder 无 context.l10n
                           // 闭包问题——直接在下面用 Builder 不合适，这里用固定引用。
@@ -413,7 +414,10 @@ class _ExplorePileManageDialogState
                       value: '__new__',
                       child: Row(
                         children: [
-                          Icon(Icons.create_new_folder_outlined, size: 16),
+                          StudioIcon(
+                            Icons.create_new_folder_outlined,
+                            size: 16,
+                          ),
                           SizedBox(width: 8),
                           _NewFolderLabel(),
                         ],
@@ -423,7 +427,10 @@ class _ExplorePileManageDialogState
                   onSelected: (value) => _assignSelected(run, selected, value),
                   child: OutlinedButton.icon(
                     onPressed: null,
-                    icon: const Icon(Icons.drive_file_move_outlined, size: 16),
+                    icon: const StudioIcon(
+                      Icons.drive_file_move_outlined,
+                      size: 16,
+                    ),
                     label: Text(l10n.styleExplore_assignToFolder),
                     style: OutlinedButton.styleFrom(
                       disabledForegroundColor: enabled
@@ -437,7 +444,7 @@ class _ExplorePileManageDialogState
                   onPressed: enabled
                       ? () => _adoptSelected(run, selected)
                       : null,
-                  icon: const Icon(Icons.inventory_2_outlined, size: 16),
+                  icon: const StudioIcon(Icons.inventory_2_outlined, size: 16),
                   label: Text(l10n.styleExplore_mergeAdopt),
                 ),
                 Tooltip(
@@ -447,7 +454,7 @@ class _ExplorePileManageDialogState
                     onPressed: enabled && branchReady
                         ? () => _createBranch(run, selected)
                         : null,
-                    icon: const Icon(Icons.call_split, size: 16),
+                    icon: const StudioIcon(Icons.call_split, size: 16),
                     label: Text(l10n.styleExplore_createBranch),
                   ),
                 ),
@@ -459,7 +466,7 @@ class _ExplorePileManageDialogState
                   onPressed: enabled && hasImages
                       ? () => _deleteSelected(run, selected)
                       : null,
-                  icon: const Icon(Icons.delete_outline, size: 16),
+                  icon: const StudioIcon(Icons.delete_outline, size: 16),
                   label: Text(l10n.styleExplore_deleteImage),
                 ),
               ],
@@ -748,7 +755,7 @@ class _PileManageCard extends StatelessWidget {
                     color: theme.colorScheme.surface.withValues(alpha: 0.75),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
+                  child: StudioIcon(
                     selected
                         ? Icons.check_circle
                         : Icons.radio_button_unchecked,
@@ -823,7 +830,7 @@ class _PileManageCard extends StatelessWidget {
         : null;
 
     Widget placeholder() => Center(
-      child: Icon(
+      child: StudioIcon(
         placeholderIcon,
         size: 32,
         color: theme.colorScheme.onSurfaceVariant,
@@ -883,7 +890,11 @@ class _BadgeIcon extends StatelessWidget {
         color: theme.colorScheme.surface.withValues(alpha: 0.75),
         shape: BoxShape.circle,
       ),
-      child: Icon(icon, size: 14, color: color ?? theme.colorScheme.onSurface),
+      child: StudioIcon(
+        icon,
+        size: 14,
+        color: color ?? theme.colorScheme.onSurface,
+      ),
     );
   }
 }

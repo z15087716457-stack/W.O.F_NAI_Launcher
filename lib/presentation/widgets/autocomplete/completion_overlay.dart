@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 
@@ -202,7 +203,7 @@ class _EmptyCompletionBody extends StatelessWidget {
                   ),
                 )
               else
-                Icon(
+                StudioIcon(
                   error == null
                       ? Icons.manage_search_rounded
                       : Icons.error_outline_rounded,
@@ -347,7 +348,7 @@ class _CompletionHeader extends StatelessWidget {
               else
                 Tooltip(
                   message: _shortcutDescription(context),
-                  child: Icon(
+                  child: StudioIcon(
                     Icons.keyboard_alt_outlined,
                     size: 16,
                     color: theme.colorScheme.onSurfaceVariant,
@@ -508,7 +509,7 @@ class _CompletionTile extends StatelessWidget {
                   if (showCategory) ...[
                     Tooltip(
                       message: _categoryLabel(context, candidate.category),
-                      child: Icon(
+                      child: StudioIcon(
                         _categoryIcon(candidate.category),
                         key: ValueKey(
                           'autocomplete-category-${candidate.category.name}',
@@ -707,7 +708,7 @@ class _CandidateSecondary extends StatelessWidget {
                       color: theme.colorScheme.primary,
                     ),
                   )
-                : Icon(
+                : StudioIcon(
                     translationMissing
                         ? Icons.translate_rounded
                         : Icons.menu_book_rounded,
@@ -1161,7 +1162,7 @@ class _StatusIndicator extends StatelessWidget {
                 ),
               )
             else
-              Icon(descriptor.icon, size: 14, color: toneColor),
+              StudioIcon(descriptor.icon, size: 14, color: toneColor),
             const SizedBox(width: 5),
             Flexible(
               child: Text.rich(
@@ -1251,7 +1252,7 @@ class _NonFocusableIconButtonState extends State<_NonFocusableIconButton> {
                 ? colors.primary
                 : colors.onSurfaceVariant,
             onPressed: widget.onPressed,
-            icon: Icon(widget.icon),
+            icon: StudioIcon(widget.icon),
           ),
         ),
       ),

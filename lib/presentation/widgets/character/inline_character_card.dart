@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -386,7 +387,7 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
   /// 官网式性别符号图标（♀/♂/⚥），单色。
   static Widget _genderIcon(CharacterGender gender, Color onHeader) {
     if (gender == CharacterGender.other) {
-      return Icon(Icons.circle_outlined, size: 11, color: onHeader);
+      return StudioIcon(Icons.circle_outlined, size: 11, color: onHeader);
     }
     final asset = switch (gender) {
       CharacterGender.female => 'assets/icons/nai-icon-gender-female.svg',
@@ -502,7 +503,7 @@ class _HeaderIconButton extends StatelessWidget {
             height: asset!.contains('dir-arrow') ? 7 : 13,
             colorFilter: ColorFilter.mode(tint, BlendMode.srcIn),
           )
-        : Icon(icon, size: 15, color: tint);
+        : StudioIcon(icon, size: 15, color: tint);
     return Tooltip(
       message: tooltip,
       waitDuration: const Duration(milliseconds: 500),
@@ -573,7 +574,11 @@ class _HeaderOverflowMenu extends StatelessWidget {
           height: 36,
           child: Row(
             children: [
-              Icon(Icons.library_add_outlined, size: 15, color: itemForeground),
+              StudioIcon(
+                Icons.library_add_outlined,
+                size: 15,
+                color: itemForeground,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -605,12 +610,16 @@ class _HeaderOverflowMenu extends StatelessWidget {
                 ),
               ),
               if (canvasOpen)
-                Icon(Icons.check, size: 15, color: theme.colorScheme.primary),
+                StudioIcon(
+                  Icons.check,
+                  size: 15,
+                  color: theme.colorScheme.primary,
+                ),
             ],
           ),
         ),
       ],
-      icon: Icon(Icons.more_horiz, size: 18, color: color),
+      icon: StudioIcon(Icons.more_horiz, size: 18, color: color),
     );
   }
 }

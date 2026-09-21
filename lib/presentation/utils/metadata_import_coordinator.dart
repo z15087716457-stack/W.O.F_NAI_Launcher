@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/models/character/character_prompt.dart' as char;
@@ -182,7 +183,7 @@ class MetadataImportCoordinator {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            const Icon(Icons.check_circle, color: Colors.green),
+            const StudioIcon(Icons.check_circle, color: Colors.green),
             const SizedBox(width: 8),
             Text(l10n.metadataImport_appliedTitle),
           ],

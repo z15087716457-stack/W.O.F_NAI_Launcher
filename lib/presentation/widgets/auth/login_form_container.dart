@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -101,7 +102,7 @@ class LoginFormContainer extends ConsumerWidget {
               onPressed: () {
                 ref.read(guestSessionNotifierProvider.notifier).enterGuest();
               },
-              icon: const Icon(Icons.explore_outlined),
+              icon: const StudioIcon(Icons.explore_outlined),
               label: Text(context.l10n.auth_guestEntry),
             ),
           ],

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'themed_divider.dart';
 
@@ -132,7 +133,7 @@ class _ContextMenuItemState extends State<_ContextMenuItem> {
           child: Row(
             children: [
               if (widget.item.icon != null) ...[
-                Icon(
+                StudioIcon(
                   widget.item.icon,
                   size: 16,
                   color: _isHovered

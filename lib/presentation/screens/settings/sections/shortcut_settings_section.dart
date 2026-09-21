@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,10 +25,10 @@ class _ShortcutSettingsSectionState
       title: context.l10n.shortcut_settings_title,
       icon: Icons.keyboard,
       child: ListTile(
-        leading: const Icon(Icons.keyboard_outlined),
+        leading: const StudioIcon(Icons.keyboard_outlined),
         title: Text(context.l10n.shortcut_settings_title),
         subtitle: Text(context.l10n.settings_shortcutsSubtitle),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: const StudioIcon(Icons.chevron_right),
         onTap: () => ShortcutSettingsPanel.show(context),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 /// 空状态卡片组件 - 双按钮布局用
@@ -88,7 +89,7 @@ class _EmptyStateCardState extends State<EmptyStateCard> {
                           key: const ValueKey('icon'),
                           scale: _isHovered ? 1.1 : 1.0,
                           duration: const Duration(milliseconds: 150),
-                          child: Icon(
+                          child: StudioIcon(
                             widget.icon,
                             size: 40,
                             color: _isHovered

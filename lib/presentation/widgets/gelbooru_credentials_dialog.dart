@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -122,7 +123,10 @@ class _GelbooruCredentialsDialogState
               children: [
                 Row(
                   children: [
-                    Icon(Icons.key_rounded, color: theme.colorScheme.primary),
+                    StudioIcon(
+                      Icons.key_rounded,
+                      color: theme.colorScheme.primary,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -170,7 +174,7 @@ class _GelbooruCredentialsDialogState
                   enabled: !_isLoading,
                   required: true,
                   suffix: IconButton(
-                    icon: Icon(
+                    icon: StudioIcon(
                       _obscureApiKey
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
@@ -196,7 +200,7 @@ class _GelbooruCredentialsDialogState
                           _accountSettingsUri,
                           mode: LaunchMode.externalApplication,
                         ),
-                  icon: const Icon(Icons.open_in_new, size: 16),
+                  icon: const StudioIcon(Icons.open_in_new, size: 16),
                   label: Text(context.l10n.gelbooru_openAccountSettings),
                 ),
                 if (authState.error != null) ...[

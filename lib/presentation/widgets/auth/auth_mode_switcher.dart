@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/config/auth_feature_flags.dart';
@@ -117,7 +118,7 @@ class AuthModeSwitcher extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 20, color: foregroundColor),
+              StudioIcon(icon, size: 20, color: foregroundColor),
               const SizedBox(height: 6),
               Flexible(
                 child: Text(

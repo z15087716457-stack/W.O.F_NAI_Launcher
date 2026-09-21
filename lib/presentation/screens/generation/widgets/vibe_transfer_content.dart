@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -147,7 +148,7 @@ class _VibeTransferContentState extends ConsumerState<VibeTransferContent> {
           _wrapWithFileDropRegion(
             child: OutlinedButton.icon(
               onPressed: widget.onAddVibe,
-              icon: Icon(
+              icon: StudioIcon(
                 _isFileDraggingOver ? Icons.file_download_rounded : Icons.add,
                 size: 16,
               ),
@@ -191,7 +192,7 @@ class _VibeTransferContentState extends ConsumerState<VibeTransferContent> {
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               onPressed: widget.onClearAll,
-              icon: const Icon(Icons.clear_all, size: 16),
+              icon: const StudioIcon(Icons.clear_all, size: 16),
               label: Text(context.l10n.vibe_clearAll),
               style: TextButton.styleFrom(
                 foregroundColor: showBackground
@@ -356,7 +357,7 @@ class _VibeTransferContentState extends ConsumerState<VibeTransferContent> {
         Expanded(
           child: OutlinedButton.icon(
             onPressed: vibes.isNotEmpty ? widget.onSaveToLibrary : null,
-            icon: const Icon(Icons.save_outlined, size: 15),
+            icon: const StudioIcon(Icons.save_outlined, size: 15),
             label: Text(
               l10n.vibeLibrary_save,
               maxLines: 1,
@@ -370,7 +371,7 @@ class _VibeTransferContentState extends ConsumerState<VibeTransferContent> {
         Expanded(
           child: OutlinedButton.icon(
             onPressed: widget.onImportFromLibrary,
-            icon: const Icon(Icons.folder_open_outlined, size: 15),
+            icon: const StudioIcon(Icons.folder_open_outlined, size: 15),
             label: Text(
               l10n.vibeLibrary_import,
               maxLines: 1,
@@ -577,7 +578,7 @@ class _EmptyStateCardState extends State<_EmptyStateCard> {
                 AnimatedScale(
                   scale: _isHovered ? 1.08 : 1.0,
                   duration: const Duration(milliseconds: 150),
-                  child: Icon(
+                  child: StudioIcon(
                     widget.icon,
                     size: 30,
                     color: _isHovered

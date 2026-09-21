@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -206,7 +207,7 @@ class _PaginationBarState extends State<PaginationBar> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
+        StudioIcon(
           Icons.image_outlined,
           size: 16,
           color: colorScheme.onSurfaceVariant,
@@ -291,7 +292,7 @@ class _PaginationBarState extends State<PaginationBar> {
     VoidCallback? onPressed,
   }) {
     return IconButton(
-      icon: Icon(icon, size: 20),
+      icon: StudioIcon(icon, size: 20),
       tooltip: tooltip,
       onPressed: onPressed,
       visualDensity: VisualDensity.compact,
@@ -440,7 +441,7 @@ class _PaginationBarState extends State<PaginationBar> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              StudioIcon(
                 Icons.arrow_forward,
                 size: 14,
                 color: colorScheme.onSurfaceVariant,

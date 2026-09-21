@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -93,7 +94,7 @@ class _VibeBulkCategoryDialogState
               // 标题
               Row(
                 children: [
-                  Icon(
+                  StudioIcon(
                     Icons.drive_file_move_outline,
                     color: theme.colorScheme.primary,
                   ),
@@ -107,7 +108,7 @@ class _VibeBulkCategoryDialogState
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const StudioIcon(Icons.close),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -205,7 +206,7 @@ class _VibeBulkCategoryDialogState
           children: [
             const Radio<String?>(value: ''),
             const SizedBox(width: 8),
-            Icon(
+            StudioIcon(
               Icons.folder_open_outlined,
               size: 20,
               color: theme.colorScheme.outline,
@@ -221,7 +222,11 @@ class _VibeBulkCategoryDialogState
               ),
             ),
             if (isSelected)
-              Icon(Icons.check, size: 20, color: theme.colorScheme.primary),
+              StudioIcon(
+                Icons.check,
+                size: 20,
+                color: theme.colorScheme.primary,
+              ),
           ],
         ),
       ),
@@ -278,7 +283,7 @@ class _VibeBulkCategoryDialogState
                     // 展开/折叠按钮
                     if (childCategories.isNotEmpty)
                       IconButton(
-                        icon: Icon(
+                        icon: StudioIcon(
                           isExpanded
                               ? Icons.keyboard_arrow_down
                               : Icons.keyboard_arrow_right,
@@ -309,7 +314,7 @@ class _VibeBulkCategoryDialogState
                     const SizedBox(width: 8),
 
                     // 文件夹图标
-                    Icon(
+                    StudioIcon(
                       isExpanded ? Icons.folder_open : Icons.folder,
                       size: 20,
                       color: isSelected
@@ -348,7 +353,7 @@ class _VibeBulkCategoryDialogState
 
                     // 选中标记
                     if (isSelected)
-                      Icon(
+                      StudioIcon(
                         Icons.check,
                         size: 20,
                         color: theme.colorScheme.primary,

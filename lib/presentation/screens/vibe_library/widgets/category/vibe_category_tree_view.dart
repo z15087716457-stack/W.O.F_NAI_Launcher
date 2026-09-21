@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -128,7 +129,7 @@ class _VibeCategoryTreeViewState extends State<VibeCategoryTreeView> {
           onTap: () => widget.onAddSubCategory?.call(null),
           child: Row(
             children: [
-              const Icon(Icons.create_new_folder, size: 18),
+              const StudioIcon(Icons.create_new_folder, size: 18),
               const SizedBox(width: 8),
               Text(context.l10n.tagLibrary_newCategory),
             ],
@@ -229,7 +230,11 @@ class _VibeCategoryTreeViewState extends State<VibeCategoryTreeView> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.folder, size: 18, color: theme.colorScheme.primary),
+              StudioIcon(
+                Icons.folder,
+                size: 18,
+                color: theme.colorScheme.primary,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

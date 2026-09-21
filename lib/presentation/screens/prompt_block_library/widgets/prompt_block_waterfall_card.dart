@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -163,7 +164,7 @@ class _PromptBlockWaterfallCardState extends State<PromptBlockWaterfallCard> {
             Positioned(
               top: 6,
               right: 6,
-              child: Icon(
+              child: StudioIcon(
                 Icons.check_circle,
                 size: 18,
                 color: theme.colorScheme.primary,
@@ -222,7 +223,7 @@ class _PromptBlockWaterfallCardState extends State<PromptBlockWaterfallCard> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Row(
         children: [
-          Icon(
+          StudioIcon(
             promptBlockIconFromName(widget.block.iconName),
             size: 16,
             color: blockColor,
@@ -240,7 +241,7 @@ class _PromptBlockWaterfallCardState extends State<PromptBlockWaterfallCard> {
           ),
           if (widget.block.isFavorite) ...[
             const SizedBox(width: 6),
-            Icon(Icons.star, size: 15, color: blockColor),
+            StudioIcon(Icons.star, size: 15, color: blockColor),
           ],
         ],
       ),
@@ -255,7 +256,7 @@ class _PromptBlockWaterfallCardState extends State<PromptBlockWaterfallCard> {
       padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
       child: Row(
         children: [
-          Icon(
+          StudioIcon(
             promptBlockIconFromName(widget.block.iconName),
             size: 16,
             color: theme.colorScheme.onSurfaceVariant,
@@ -283,7 +284,7 @@ class _PromptBlockWaterfallCardState extends State<PromptBlockWaterfallCard> {
           ),
           if (widget.block.isFavorite) ...[
             const SizedBox(width: 6),
-            Icon(Icons.star, size: 15, color: blockColor),
+            StudioIcon(Icons.star, size: 15, color: blockColor),
           ],
         ],
       ),
@@ -295,7 +296,7 @@ class _PromptBlockWaterfallCardState extends State<PromptBlockWaterfallCard> {
     return Container(
       color: theme.colorScheme.surfaceContainerHighest,
       child: Center(
-        child: Icon(
+        child: StudioIcon(
           Icons.image_outlined,
           size: 28,
           color: theme.colorScheme.outline.withValues(alpha: 0.6),

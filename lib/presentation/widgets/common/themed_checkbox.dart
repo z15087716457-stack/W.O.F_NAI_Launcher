@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../themes/theme_extension.dart';
@@ -209,7 +210,7 @@ class _ThemedCheckboxState extends State<ThemedCheckbox>
     }
 
     // 完全选中 - 勾选标记
-    return Icon(Icons.check, size: widget.size * 0.75, color: checkColor);
+    return StudioIcon(Icons.check, size: widget.size * 0.75, color: checkColor);
   }
 }
 

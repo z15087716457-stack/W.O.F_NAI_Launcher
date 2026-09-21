@@ -12,13 +12,14 @@ constexpr const wchar_t kSingleInstanceMutexName[] =
     L"NAI_Launcher_SingleInstance_Mutex";
 constexpr const wchar_t kFlutterRunnerWindowClassName[] =
     L"FLUTTER_RUNNER_WIN32_WINDOW";
-constexpr const wchar_t kLauncherWindowTitle[] = L"NAI Launcher";
+constexpr const wchar_t kLauncherWindowTitle[] = L"W.O.F NAI Studio";
+constexpr const wchar_t kLegacyLauncherWindowTitle[] = L"NAI Launcher";
 constexpr const wchar_t kWakeUpMessageName[] =
     L"NAI_Launcher_WakeUp_Message";
 constexpr DWORD kExistingWindowWaitTimeoutMs = 3000;
 constexpr DWORD kExistingWindowPollIntervalMs = 200;
 constexpr const wchar_t kAlreadyStartingMessage[] =
-    L"NAI Launcher is already starting.\n"
+    L"W.O.F NAI Studio is already starting.\n"
     L"Please wait a few seconds and try again.";
 
 static UINT GetWakeUpMessage() {
@@ -110,7 +111,8 @@ bool IsLauncherWindow(HWND hwnd) {
     return false;
   }
 
-  if (GetWindowTitle(hwnd) != kLauncherWindowTitle) {
+  const std::wstring title = GetWindowTitle(hwnd);
+  if (title != kLauncherWindowTitle && title != kLegacyLauncherWindowTitle) {
     return false;
   }
 
@@ -231,7 +233,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(L"NAI Launcher", origin, size)) {
+  if (!window.Create(kLauncherWindowTitle, origin, size)) {
     if (single_instance_mutex != nullptr) {
       CloseHandle(single_instance_mutex);
     }

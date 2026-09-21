@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -153,8 +154,7 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
         final topFlex = (_splitRatio * 1000).round().clamp(1, 999);
         final bottomFlex = ((1.0 - _splitRatio) * 1000).round().clamp(1, 999);
         // 分割区高度 = 总高 - 固定三行 - 手柄；拖动位移按它换算比例才跟手。
-        final splitHeight =
-            totalHeight - _kFixedRowsHeight - _kHandleHeight;
+        final splitHeight = totalHeight - _kFixedRowsHeight - _kHandleHeight;
         return Column(
           key: const Key('prompt-block-folder-tree'),
           children: [
@@ -173,13 +173,17 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
                 if (splitHeight.isFinite && splitHeight > 0) {
                   final dy = details.globalPosition.dy - _dragStartGlobalY;
                   // 上下区各留一行像素下限，比例界限随可用高度换算。
-                  final minRatio =
-                      (_kMinTopPaneHeight / splitHeight).clamp(0.0, 0.5);
-                  final maxRatio =
-                      (1 - _kMinBottomPaneHeight / splitHeight).clamp(0.5, 1.0);
+                  final minRatio = (_kMinTopPaneHeight / splitHeight).clamp(
+                    0.0,
+                    0.5,
+                  );
+                  final maxRatio = (1 - _kMinBottomPaneHeight / splitHeight)
+                      .clamp(0.5, 1.0);
                   final newRatio = minRatio <= maxRatio
-                      ? (_dragStartRatio + dy / splitHeight)
-                          .clamp(minRatio, maxRatio)
+                      ? (_dragStartRatio + dy / splitHeight).clamp(
+                          minRatio,
+                          maxRatio,
+                        )
                       : 0.5;
                   if (newRatio != _splitRatio) {
                     setState(() => _splitRatio = newRatio);
@@ -312,7 +316,11 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
   /// 空区提示：收藏区/文件夹区无内容时给一句引导。
   /// 分区内垂直居中（内容超高时仍可滚动）；降级单列表高度无界，
   /// 直接按内容排版交给外层 ListView 滚动。
-  Widget _buildEmptyPaneHint(ThemeData theme, String message, {int indent = 0}) {
+  Widget _buildEmptyPaneHint(
+    ThemeData theme,
+    String message, {
+    int indent = 0,
+  }) {
     final text = Padding(
       padding: EdgeInsets.only(
         left: 20.0 + indent * 16,
@@ -388,7 +396,7 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
           onTap: () => widget.onCreateCollection?.call(parentId, false),
           child: Row(
             children: [
-              const Icon(Icons.collections_bookmark_outlined, size: 18),
+              const StudioIcon(Icons.collections_bookmark_outlined, size: 18),
               const SizedBox(width: 8),
               Text(context.l10n.promptBlockLibrary_newCollection),
             ],
@@ -398,7 +406,7 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
           onTap: () => widget.onCreateCollection?.call(parentId, true),
           child: Row(
             children: [
-              const Icon(Icons.create_new_folder_outlined, size: 18),
+              const StudioIcon(Icons.create_new_folder_outlined, size: 18),
               const SizedBox(width: 8),
               Text(context.l10n.promptBlockLibrary_newCollectionFolder),
             ],
@@ -670,7 +678,7 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18, color: Colors.amber.shade700),
+            StudioIcon(icon, size: 18, color: Colors.amber.shade700),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -951,7 +959,7 @@ class _FolderTreeRow extends StatelessWidget {
                                 : context.l10n.common_expand,
                             padding: EdgeInsets.zero,
                             onPressed: onToggleExpanded,
-                            icon: Icon(
+                            icon: StudioIcon(
                               expanded
                                   ? Icons.keyboard_arrow_down
                                   : Icons.keyboard_arrow_right,
@@ -961,7 +969,7 @@ class _FolderTreeRow extends StatelessWidget {
                           )
                         : null,
                   ),
-                  Icon(icon, size: 19, color: iconColor ?? foreground),
+                  StudioIcon(icon, size: 19, color: iconColor ?? foreground),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -997,7 +1005,7 @@ class _FolderTreeRow extends StatelessWidget {
                             child: InkWell(
                               borderRadius: BorderRadius.circular(13),
                               onTap: onAdd,
-                              child: Icon(
+                              child: StudioIcon(
                                 Icons.add,
                                 size: 18,
                                 color: theme.colorScheme.onSurfaceVariant,
@@ -1010,7 +1018,7 @@ class _FolderTreeRow extends StatelessWidget {
                                 context.l10n.promptBlockLibrary_reorderFolders,
                             child: ReorderableDragStartListener(
                               index: reorderIndex!,
-                              child: Icon(
+                              child: StudioIcon(
                                 Icons.drag_handle,
                                 size: 18,
                                 color: theme.colorScheme.onSurfaceVariant,

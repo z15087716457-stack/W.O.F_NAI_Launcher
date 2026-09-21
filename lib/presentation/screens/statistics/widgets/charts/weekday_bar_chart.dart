@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -316,7 +317,7 @@ class _DaySummaryCardState extends State<_DaySummaryCard> {
                 color: widget.color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(widget.icon, color: widget.color, size: 20),
+              child: StudioIcon(widget.icon, color: widget.color, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(

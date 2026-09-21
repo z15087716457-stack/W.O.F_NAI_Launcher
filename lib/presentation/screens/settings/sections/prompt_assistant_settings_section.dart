@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -231,7 +232,7 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
             context.l10n.promptAssistant_providerManagementSubtitle,
           ),
           trailing: IconButton(
-            icon: const Icon(Icons.add),
+            icon: const StudioIcon(Icons.add),
             onPressed: () => _showProviderDialog(context, notifier, state),
           ),
         ),
@@ -302,14 +303,19 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
                             notifier,
                             provider: provider,
                           ),
-                          icon: const Icon(Icons.link, size: 16),
+                          icon: const StudioIcon(Icons.link, size: 16),
                           label: Text(
                             context.l10n.promptAssistant_connectionConfig,
                           ),
                         ),
-                        Icon(hasApiKey ? Icons.key : Icons.key_off, size: 18),
+                        StudioIcon(
+                          hasApiKey ? Icons.key : Icons.key_off,
+                          size: 18,
+                        ),
                         IconButton(
-                          icon: const Icon(Icons.download_for_offline_outlined),
+                          icon: const StudioIcon(
+                            Icons.download_for_offline_outlined,
+                          ),
                           tooltip: context.l10n.promptAssistant_pullModelList,
                           onPressed: () => _pullProviderModels(
                             context,
@@ -319,7 +325,7 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.edit),
+                          icon: const StudioIcon(Icons.edit),
                           tooltip: context.l10n.promptAssistant_editProvider,
                           onPressed: () => _showProviderDialog(
                             context,
@@ -329,7 +335,7 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete_outline),
+                          icon: const StudioIcon(Icons.delete_outline),
                           tooltip: context.l10n.promptAssistant_deleteProvider,
                           onPressed: () => notifier.deleteProvider(provider.id),
                         ),

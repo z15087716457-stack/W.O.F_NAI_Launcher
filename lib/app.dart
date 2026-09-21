@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/constants/brand.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -151,7 +152,7 @@ class NAILauncherApp extends ConsumerWidget {
       child: GlobalShortcuts(
         shortcuts: globalShortcuts,
         child: MaterialApp.router(
-          title: 'NAI Launcher',
+          title: Brand.name,
           debugShowCheckedModeBanner: false,
 
           // 主题 (fontFamily 为空时使用主题原生字体)

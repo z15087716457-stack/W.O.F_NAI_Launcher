@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -424,7 +425,7 @@ class _SizeSelectorState extends State<SizeSelector> {
       child: IconButton(
         key: Key('size-aspect-${type.name}'),
         onPressed: enabled ? () => _onTypeSelected(type) : null,
-        icon: Icon(icon, size: 20),
+        icon: StudioIcon(icon, size: 20),
         tooltip: _getTypeName(context, type),
         style: IconButton.styleFrom(
           hoverColor: theme.colorScheme.onSurface.withValues(alpha: .07),
@@ -492,7 +493,7 @@ class _SizeSelectorState extends State<SizeSelector> {
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   isExpanded: true,
                   isDense: false,
-                  icon: const Icon(Icons.expand_more, size: 18),
+                  icon: const StudioIcon(Icons.expand_more, size: 18),
                   dropdownColor: theme.colorScheme.surfaceContainerHigh,
                   focusNode: _dropdownFocusNode,
                   items: [

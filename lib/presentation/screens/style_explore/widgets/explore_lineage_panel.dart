@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -88,7 +89,7 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
             padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
             child: Row(
               children: [
-                Icon(
+                StudioIcon(
                   Icons.account_tree_outlined,
                   size: 16,
                   color: theme.colorScheme.onSurfaceVariant,
@@ -100,7 +101,7 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                     style: theme.textTheme.titleSmall,
                   ),
                 ),
-                Icon(
+                StudioIcon(
                   _expanded ? Icons.expand_less : Icons.expand_more,
                   size: 18,
                   color: theme.colorScheme.onSurfaceVariant,
@@ -281,7 +282,7 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       visualDensity: VisualDensity.compact,
                     ),
-                    icon: const Icon(Icons.sort, size: 16),
+                    icon: const StudioIcon(Icons.sort, size: 16),
                     label: Text(l10n.styleExplore_sortParents),
                   ),
                 ],
@@ -425,7 +426,7 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                               !exploreParentSetRoundsComplete(run, parentSet)
                               ? null
                               : () => setState(() => _branchSelecting = true),
-                          icon: const Icon(Icons.call_split, size: 16),
+                          icon: const StudioIcon(Icons.call_split, size: 16),
                           label: Text(l10n.styleExplore_branchSelect),
                         ),
                       )
@@ -435,7 +436,7 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                         onPressed: _branchSelected.isEmpty
                             ? null
                             : () => _createBranch(family, parentSet),
-                        icon: const Icon(Icons.call_split, size: 16),
+                        icon: const StudioIcon(Icons.call_split, size: 16),
                         label: Text(
                           '${l10n.styleExplore_createBranch}'
                           ' (${_branchSelected.length})',
@@ -448,7 +449,7 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                         iconSize: 18,
                         visualDensity: VisualDensity.compact,
                         onPressed: _exitBranchSelection,
-                        icon: const Icon(Icons.close),
+                        icon: const StudioIcon(Icons.close),
                       ),
                     ],
                   const SizedBox(width: 4),
@@ -461,7 +462,10 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                       familyId: family.id,
                       parentSetId: parentSet.id,
                     ),
-                    icon: const Icon(Icons.photo_library_outlined, size: 16),
+                    icon: const StudioIcon(
+                      Icons.photo_library_outlined,
+                      size: 16,
+                    ),
                     label: Text(l10n.styleExplore_managePile),
                   ),
                 ],
@@ -629,7 +633,7 @@ class _DeepRoundControlState extends ConsumerState<_DeepRoundControl> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             visualDensity: VisualDensity.compact,
           ),
-          icon: const Icon(Icons.play_arrow, size: 16),
+          icon: const StudioIcon(Icons.play_arrow, size: 16),
           label: Text(l10n.styleExplore_createDeepRound),
         ),
         Tooltip(
@@ -680,7 +684,7 @@ class _ParentThumb extends StatelessWidget {
         ? null
         : run.candidateById(parent.sourceCandidateId!)?.generation.filePath;
     // 图标区分两类占位：自定义串（无来源候选）vs 有来源但图缺失。
-    final placeholder = Icon(
+    final placeholder = StudioIcon(
       parent.sourceCandidateId == null
           ? Icons.text_snippet_outlined
           : Icons.broken_image_outlined,
@@ -792,7 +796,7 @@ class _PileThumb extends StatelessWidget {
                 Positioned(
                   right: 2,
                   top: 2,
-                  child: Icon(
+                  child: StudioIcon(
                     selected
                         ? Icons.check_circle
                         : Icons.radio_button_unchecked,
@@ -813,7 +817,11 @@ class _PileThumb extends StatelessWidget {
     return ColoredBox(
       color: theme.colorScheme.surfaceContainerHighest,
       child: Center(
-        child: Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
+        child: StudioIcon(
+          icon,
+          size: 20,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
@@ -975,7 +983,7 @@ class _ScrollArrow extends StatelessWidget {
         child: SizedBox(
           width: 20,
           height: 20,
-          child: Icon(icon, size: 14, color: iconColor),
+          child: StudioIcon(icon, size: 14, color: iconColor),
         ),
       ),
     );
@@ -995,7 +1003,7 @@ class _AdoptedBadge extends StatelessWidget {
         color: theme.colorScheme.surface.withValues(alpha: 0.75),
         borderRadius: BorderRadius.circular(3),
       ),
-      child: Icon(
+      child: StudioIcon(
         Icons.account_tree_outlined,
         size: 12,
         color: theme.colorScheme.tertiary,

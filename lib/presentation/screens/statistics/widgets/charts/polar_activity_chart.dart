@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -393,7 +394,7 @@ class _PeakTimeIndicatorState extends State<PeakTimeIndicator>
                         ),
                       ],
                     ),
-                    child: Icon(timeIcon, color: primaryColor, size: 24),
+                    child: StudioIcon(timeIcon, color: primaryColor, size: 24),
                   ),
                   const SizedBox(width: 14),
                   Column(

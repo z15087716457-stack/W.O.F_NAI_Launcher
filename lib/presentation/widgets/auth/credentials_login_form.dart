@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -175,7 +176,7 @@ class _CredentialsLoginFormState extends ConsumerState<CredentialsLoginForm> {
                 children: [
                   Row(
                     children: [
-                      Icon(
+                      StudioIcon(
                         Icons.error_outline,
                         color: Theme.of(context).colorScheme.onErrorContainer,
                       ),
@@ -215,7 +216,7 @@ class _CredentialsLoginFormState extends ConsumerState<CredentialsLoginForm> {
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
                       onPressed: isLoading ? null : _handleLogin,
-                      icon: const Icon(Icons.refresh, size: 18),
+                      icon: const StudioIcon(Icons.refresh, size: 18),
                       label: Text(context.l10n.common_retry),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.error,

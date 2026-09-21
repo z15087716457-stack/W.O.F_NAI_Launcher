@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -276,7 +277,7 @@ class _VibePreviewDropZoneState extends State<VibePreviewDropZone> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(Icons.auto_awesome, size: 64, color: Colors.white54),
+        const StudioIcon(Icons.auto_awesome, size: 64, color: Colors.white54),
         const SizedBox(height: DesignTokens.spacingMd),
         Text(
           context.l10n.vibeDetail_noPreviewImage,
@@ -308,7 +309,7 @@ class _VibePreviewDropZoneState extends State<VibePreviewDropZone> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              const StudioIcon(
                 Icons.file_download_outlined,
                 size: 48,
                 color: Colors.white70,
@@ -344,7 +345,7 @@ class _VibePreviewDropZoneState extends State<VibePreviewDropZone> {
           borderRadius: DesignTokens.borderRadiusLg,
           child: Padding(
             padding: const EdgeInsets.all(10),
-            child: Icon(icon, color: Colors.white, size: 20),
+            child: StudioIcon(icon, color: Colors.white, size: 20),
           ),
         ),
       ),
@@ -363,7 +364,7 @@ class _VibePreviewDropZoneState extends State<VibePreviewDropZone> {
           customBorder: const CircleBorder(),
           child: const Padding(
             padding: EdgeInsets.all(12),
-            child: Icon(Icons.close, color: Colors.white, size: 24),
+            child: StudioIcon(Icons.close, color: Colors.white, size: 24),
           ),
         ),
       ),

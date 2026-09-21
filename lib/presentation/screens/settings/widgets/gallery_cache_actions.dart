@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -71,7 +72,11 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        icon: const Icon(Icons.refresh_rounded, color: Colors.green, size: 48),
+        icon: const StudioIcon(
+          Icons.refresh_rounded,
+          color: Colors.green,
+          size: 48,
+        ),
         title: Text(context.l10n.galleryCache_rescanTitle),
         content: Text(context.l10n.galleryCache_rescanContent),
         actions: [
@@ -81,7 +86,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
           ),
           FilledButton.icon(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            icon: const Icon(Icons.refresh),
+            icon: const StudioIcon(Icons.refresh),
             label: Text(context.l10n.galleryCache_startScan),
           ),
         ],
@@ -187,7 +192,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        icon: const Icon(
+        icon: const StudioIcon(
           Icons.cleaning_services_rounded,
           color: Colors.blue,
           size: 48,
@@ -201,7 +206,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
           ),
           FilledButton.icon(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            icon: const Icon(Icons.cleaning_services_rounded),
+            icon: const StudioIcon(Icons.cleaning_services_rounded),
             label: Text(l10n.galleryCache_evictThumbnailsStart),
           ),
         ],
@@ -287,7 +292,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
                       width: _isScanning ? 2 : 1,
                     ),
                   ),
-                  child: Icon(
+                  child: StudioIcon(
                     Icons.refresh_rounded,
                     color: _isScanning
                         ? Colors.green
@@ -367,7 +372,11 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.refresh, size: 16, color: colorScheme.primary),
+                      StudioIcon(
+                        Icons.refresh,
+                        size: 16,
+                        color: colorScheme.primary,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         context.l10n.galleryCache_scanAction,
@@ -404,7 +413,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
                 width: _isEvictingThumbnails ? 2 : 1,
               ),
             ),
-            child: Icon(
+            child: StudioIcon(
               Icons.cleaning_services_rounded,
               color: _isEvictingThumbnails
                   ? Colors.blue
@@ -455,7 +464,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      StudioIcon(
                         Icons.cleaning_services_rounded,
                         size: 16,
                         color: colorScheme.tertiary,

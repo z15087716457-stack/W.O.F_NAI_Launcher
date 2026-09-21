@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -55,7 +56,7 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                StudioIcon(
                   Icons.circle,
                   size: 10,
                   color: ExploreRunActions.statusColor(
@@ -114,14 +115,14 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
             key: const Key('explore-run-pause'),
             onPressed: () =>
                 ref.read(exploreRunRunnerProvider.notifier).pause(),
-            icon: const Icon(Icons.pause, size: 18),
+            icon: const StudioIcon(Icons.pause, size: 18),
             label: Text(l10n.styleExplore_pauseRun),
           ),
           const SizedBox(width: 8),
           OutlinedButton.icon(
             key: const Key('explore-run-cancel'),
             onPressed: () => _confirmCancel(run),
-            icon: const Icon(Icons.stop, size: 18),
+            icon: const StudioIcon(Icons.stop, size: 18),
             label: Text(l10n.common_cancel),
           ),
         ];
@@ -130,14 +131,14 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
           FilledButton.tonalIcon(
             key: const Key('explore-run-resume'),
             onPressed: () => _start(run.id),
-            icon: const Icon(Icons.play_arrow, size: 18),
+            icon: const StudioIcon(Icons.play_arrow, size: 18),
             label: Text(l10n.common_continue),
           ),
           const SizedBox(width: 8),
           OutlinedButton.icon(
             key: const Key('explore-run-cancel'),
             onPressed: () => _confirmCancel(run),
-            icon: const Icon(Icons.stop, size: 18),
+            icon: const StudioIcon(Icons.stop, size: 18),
             label: Text(l10n.common_cancel),
           ),
         ];
@@ -149,7 +150,7 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
                 FilledButton.tonalIcon(
                   key: const Key('explore-run-retry'),
                   onPressed: () => _retryFailed(run.id),
-                  icon: const Icon(Icons.refresh, size: 18),
+                  icon: const StudioIcon(Icons.refresh, size: 18),
                   label: Text(l10n.styleExplore_retryFailed(run.failedCount)),
                 ),
               ]

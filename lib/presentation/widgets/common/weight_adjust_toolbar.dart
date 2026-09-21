@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -674,7 +675,11 @@ class _WeightButton extends StatelessWidget {
             height: 28,
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
             alignment: Alignment.center,
-            child: Icon(icon, size: 18, color: colorScheme.onSurfaceVariant),
+            child: StudioIcon(
+              icon,
+              size: 18,
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ),

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -166,7 +167,7 @@ class _SaveVibeDialogState extends ConsumerState<SaveVibeDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(Icons.style_outlined, color: colorScheme.primary),
+          StudioIcon(Icons.style_outlined, color: colorScheme.primary),
           const SizedBox(width: 8),
           Text(l10n.vibe_saveToLibrary_title),
         ],
@@ -184,7 +185,7 @@ class _SaveVibeDialogState extends ConsumerState<SaveVibeDialog> {
                 decoration: InputDecoration(
                   labelText: l10n.vibe_saveToLibrary_nameLabel,
                   hintText: l10n.vibe_saveToLibrary_nameHint,
-                  prefixIcon: const Icon(Icons.label_outline),
+                  prefixIcon: const StudioIcon(Icons.label_outline),
                 ),
                 enabled: !_isSaving,
               ),
@@ -196,7 +197,7 @@ class _SaveVibeDialogState extends ConsumerState<SaveVibeDialog> {
                   initialValue: _selectedCategoryId,
                   decoration: InputDecoration(
                     labelText: l10n.common_category,
-                    prefixIcon: const Icon(Icons.folder_outlined),
+                    prefixIcon: const StudioIcon(Icons.folder_outlined),
                   ),
                   items: [
                     DropdownMenuItem<String?>(
@@ -251,7 +252,7 @@ class _SaveVibeDialogState extends ConsumerState<SaveVibeDialog> {
                       decoration: InputDecoration(
                         labelText: l10n.tagLibrary_tags,
                         hintText: l10n.vibe_saveToLibrary_tagHint,
-                        prefixIcon: const Icon(Icons.tag),
+                        prefixIcon: const StudioIcon(Icons.tag),
                       ),
                       enabled: !_isSaving,
                       onSubmitted: (_) => _addTag(),
@@ -260,7 +261,7 @@ class _SaveVibeDialogState extends ConsumerState<SaveVibeDialog> {
                   const SizedBox(width: 8),
                   IconButton(
                     onPressed: _isSaving ? null : _addTag,
-                    icon: const Icon(Icons.add),
+                    icon: const StudioIcon(Icons.add),
                     tooltip: l10n.tag_addTag,
                   ),
                 ],
@@ -275,7 +276,7 @@ class _SaveVibeDialogState extends ConsumerState<SaveVibeDialog> {
                   children: _tags.map((tag) {
                     return Chip(
                       label: Text(tag),
-                      deleteIcon: const Icon(Icons.close, size: 18),
+                      deleteIcon: const StudioIcon(Icons.close, size: 18),
                       onDeleted: _isSaving ? null : () => _removeTag(tag),
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     );

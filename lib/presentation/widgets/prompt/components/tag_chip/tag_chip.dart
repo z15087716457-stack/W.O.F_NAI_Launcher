@@ -1,3 +1,5 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -383,7 +385,8 @@ class _TagChipState extends ConsumerState<TagChip>
                   : TagChipSizes.normalFontSize,
               fontWeight: FontWeight.w500,
               height: 1.2,
-              fontFamily: 'monospace',
+              fontFamily: StudioTypography.mono,
+              fontFamilyFallback: StudioTypography.fallback,
               color: isEnabled
                   ? effectiveColor.withValues(alpha: 0.9)
                   : theme.colorScheme.onSurface.withValues(alpha: 0.35),
@@ -1037,7 +1040,7 @@ class _DeleteButtonState extends State<_DeleteButton>
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Icon(
+                      child: StudioIcon(
                         Icons.close,
                         size: 12,
                         color: _isHovering
@@ -1144,7 +1147,7 @@ class _FavoriteButtonState extends State<_FavoriteButton>
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Icon(
+                    child: StudioIcon(
                       widget.isFavorite
                           ? Icons.favorite
                           : Icons.favorite_border,
@@ -1301,7 +1304,11 @@ class _BatchSelectionCheckbox extends StatelessWidget {
           ),
         ),
         child: isSelected
-            ? Icon(Icons.check, size: 12, color: theme.colorScheme.onPrimary)
+            ? StudioIcon(
+                Icons.check,
+                size: 12,
+                color: theme.colorScheme.onPrimary,
+              )
             : null,
       ),
     );

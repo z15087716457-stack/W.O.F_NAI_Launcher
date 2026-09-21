@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/utils/localization_extension.dart';
@@ -196,7 +197,7 @@ class _ToolButton extends StatelessWidget {
               width: 40,
               height: 40,
               alignment: Alignment.center,
-              child: Icon(
+              child: StudioIcon(
                 tool.icon,
                 size: 20,
                 color: isSelected
@@ -280,7 +281,7 @@ class _ActionButton extends StatelessWidget {
               width: 40,
               height: 40,
               alignment: Alignment.center,
-              child: Icon(
+              child: StudioIcon(
                 icon,
                 size: 20,
                 color: enabled

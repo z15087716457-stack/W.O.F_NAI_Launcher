@@ -1,3 +1,4 @@
+import 'package:nai_launcher/core/constants/brand.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -13,6 +14,7 @@ import 'package:screen_retriever/screen_retriever.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import 'core/constants/app_version.dart';
+import 'core/utils/studio_asset_licenses.dart';
 import 'core/constants/storage_keys.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/app_localizations_en.dart';
@@ -316,6 +318,7 @@ void main() {
 
 Future<void> _bootstrapApplication() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerStudioAssetLicenses();
   AppErrorReporter.installGlobalHandlers();
 
   // 先初始化控制台日志；文件日志稍后读取设置后按需开启，默认关闭。
@@ -633,7 +636,7 @@ Future<void> _bootstrapApplication() async {
         // FEAT-23 内置一体标题栏：隐藏原生栏，由 Flutter 自绘
         // （拖拽/双击/Aero Snap 经 runner WM_NCHITTEST 返回 HTCAPTION）。
         titleBarStyle: TitleBarStyle.hidden,
-        title: 'NAI Launcher',
+        title: Brand.name,
       );
 
       await windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -673,7 +676,7 @@ Future<void> _bootstrapApplication() async {
                 ? 'assets/icons/app_icon.ico'
                 : 'assets/icons/tray_icon.png',
           );
-          await trayManager.setToolTip('NAI Launcher');
+          await trayManager.setToolTip(Brand.name);
 
           // 获取本地化字符串
           final l10n = _getLocalizedStrings();

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -66,7 +67,7 @@ class _DanbooruLoginDialogState extends ConsumerState<DanbooruLoginDialog> {
               // 标题
               Row(
                 children: [
-                  Icon(Icons.login, color: theme.colorScheme.primary),
+                  StudioIcon(Icons.login, color: theme.colorScheme.primary),
                   const SizedBox(width: 12),
                   Text(
                     context.l10n.danbooru_loginTitle,
@@ -114,7 +115,7 @@ class _DanbooruLoginDialogState extends ConsumerState<DanbooruLoginDialog> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: Icon(
+                      icon: StudioIcon(
                         _obscureApiKey
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
@@ -158,7 +159,7 @@ class _DanbooruLoginDialogState extends ConsumerState<DanbooruLoginDialog> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      StudioIcon(
                         Icons.error,
                         color: theme.colorScheme.error,
                         size: 20,

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -61,7 +62,11 @@ class _OnlineGalleryBlacklistSettingsPanelState
           children: [
             Row(
               children: [
-                Icon(Icons.block, size: 20, color: theme.colorScheme.primary),
+                StudioIcon(
+                  Icons.block,
+                  size: 20,
+                  color: theme.colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -80,7 +85,7 @@ class _OnlineGalleryBlacklistSettingsPanelState
                           height: 14,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.sync, size: 16),
+                      : const StudioIcon(Icons.sync, size: 16),
                   label: Text(context.l10n.dataSource_syncNow),
                   style: FilledButton.styleFrom(
                     visualDensity: VisualDensity.compact,
@@ -124,7 +129,7 @@ class _OnlineGalleryBlacklistSettingsPanelState
                 IconButton(
                   tooltip: context.l10n.common_add,
                   onPressed: _addTag,
-                  icon: const Icon(Icons.add),
+                  icon: const StudioIcon(Icons.add),
                 ),
               ],
             ),
@@ -243,7 +248,7 @@ Future<void> showOnlineGalleryBlacklistDialog(
                 if (!isLoggedIn) ...[
                   Row(
                     children: [
-                      const Icon(Icons.info_outline, size: 16),
+                      const StudioIcon(Icons.info_outline, size: 16),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(

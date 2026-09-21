@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
@@ -196,7 +197,7 @@ class _TrendBadge extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 12, color: color),
+        StudioIcon(icon, size: 12, color: color),
         Text(
           '${trend.abs().toStringAsFixed(0)}%',
           style: TextStyle(

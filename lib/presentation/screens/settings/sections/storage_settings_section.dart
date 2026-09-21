@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -67,7 +68,7 @@ class _StorageSettingsSectionState
             children: [
               // 图片保存路径设置
               ListTile(
-                leading: const Icon(Icons.folder_outlined),
+                leading: const StudioIcon(Icons.folder_outlined),
                 title: Text(context.l10n.settings_imageSavePath),
                 subtitle: Text(
                   saveSettings.getDisplayPath(
@@ -80,7 +81,7 @@ class _StorageSettingsSectionState
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.folder_open, size: 20),
+                      icon: const StudioIcon(Icons.folder_open, size: 20),
                       tooltip: context.l10n.settings_openFolder,
                       onPressed: () async {
                         final openFolderFailed =
@@ -106,7 +107,7 @@ class _StorageSettingsSectionState
                     ),
                     if (saveSettings.hasCustomPath)
                       IconButton(
-                        icon: const Icon(Icons.close, size: 20),
+                        icon: const StudioIcon(Icons.close, size: 20),
                         tooltip: context.l10n.common_reset,
                         onPressed: () async {
                           await ref
@@ -120,14 +121,14 @@ class _StorageSettingsSectionState
                           }
                         },
                       ),
-                    const Icon(Icons.chevron_right),
+                    const StudioIcon(Icons.chevron_right),
                   ],
                 ),
                 onTap: () => _selectSaveDirectory(context),
               ),
               // 自动保存开关
               SwitchListTile(
-                secondary: const Icon(Icons.save_outlined),
+                secondary: const StudioIcon(Icons.save_outlined),
                 title: Text(context.l10n.settings_autoSave),
                 subtitle: Text(context.l10n.settings_autoSaveSubtitle),
                 value: saveSettings.autoSave,
@@ -265,7 +266,7 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
           final confirmed = await showDialog<bool>(
             context: context,
             builder: (dialogContext) => AlertDialog(
-              icon: const Icon(Icons.upload_file_outlined),
+              icon: const StudioIcon(Icons.upload_file_outlined),
               title: Text(l10n.settings_extraRootsIndexImportTitle),
               content: Text(l10n.settings_extraRootsIndexImportContent(result)),
               actions: [
@@ -396,7 +397,7 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        icon: const Icon(Icons.folder_off_outlined, color: Colors.orange),
+        icon: const StudioIcon(Icons.folder_off_outlined, color: Colors.orange),
         title: Text(context.l10n.settings_extraRootsRemoveConfirmTitle),
         content: Text(
           context.l10n.settings_extraRootsRemoveConfirmContent(path),
@@ -461,7 +462,7 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
             ..._extraRoots.map(
               (path) => ListTile(
                 dense: true,
-                leading: const Icon(Icons.folder_outlined, size: 20),
+                leading: const StudioIcon(Icons.folder_outlined, size: 20),
                 title: Text(
                   path,
                   maxLines: 1,
@@ -469,7 +470,7 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
                   style: theme.textTheme.bodySmall,
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.close, size: 18),
+                  icon: const StudioIcon(Icons.close, size: 18),
                   tooltip: context.l10n.settings_extraRootsRemove,
                   onPressed: () => _removeExtraRoot(path),
                 ),
@@ -479,7 +480,10 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             child: FilledButton.tonalIcon(
               onPressed: _addExtraRoot,
-              icon: const Icon(Icons.create_new_folder_outlined, size: 18),
+              icon: const StudioIcon(
+                Icons.create_new_folder_outlined,
+                size: 18,
+              ),
               label: Text(context.l10n.settings_extraRootsAdd),
             ),
           ),
@@ -491,7 +495,7 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
               children: [
                 FilledButton.tonalIcon(
                   onPressed: importState.isImporting ? null : _importTagIndex,
-                  icon: const Icon(Icons.upload_file_outlined, size: 18),
+                  icon: const StudioIcon(Icons.upload_file_outlined, size: 18),
                   label: Text(context.l10n.settings_importTagIndex),
                 ),
                 if (importState.isImporting) ...[
@@ -572,7 +576,7 @@ class _VibeLibraryPathTileState extends State<VibeLibraryPathTile> {
     final hasCustomPath = _pathHelper.hasCustomPath;
 
     return ListTile(
-      leading: const Icon(Icons.style_outlined),
+      leading: const StudioIcon(Icons.style_outlined),
       title: Text(context.l10n.settings_vibeLibraryPath),
       subtitle: FutureBuilder<String>(
         future: _pathHelper.getPath(),
@@ -595,7 +599,7 @@ class _VibeLibraryPathTileState extends State<VibeLibraryPathTile> {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: const Icon(Icons.folder_open, size: 20),
+            icon: const StudioIcon(Icons.folder_open, size: 20),
             tooltip: context.l10n.settings_openFolder,
             onPressed: () async {
               final openFolderFailed = context.l10n.settings_openFolderFailed;
@@ -612,11 +616,11 @@ class _VibeLibraryPathTileState extends State<VibeLibraryPathTile> {
           ),
           if (hasCustomPath)
             IconButton(
-              icon: const Icon(Icons.close, size: 20),
+              icon: const StudioIcon(Icons.close, size: 20),
               tooltip: context.l10n.common_reset,
               onPressed: () => _resetToDefault(context),
             ),
-          const Icon(Icons.chevron_right),
+          const StudioIcon(Icons.chevron_right),
         ],
       ),
       onTap: () => _selectVibeLibraryDirectory(context),
@@ -646,7 +650,10 @@ class _HiveStoragePathTileState extends State<HiveStoragePathTile> {
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (dialogContext) => AlertDialog(
-            icon: const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+            icon: const StudioIcon(
+              Icons.warning_amber_rounded,
+              color: Colors.orange,
+            ),
             title: Text(context.l10n.settings_restartRequiredTitle),
             content: Text(context.l10n.settings_changePathConfirm),
             actions: [
@@ -685,7 +692,10 @@ class _HiveStoragePathTileState extends State<HiveStoragePathTile> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        icon: const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+        icon: const StudioIcon(
+          Icons.warning_amber_rounded,
+          color: Colors.orange,
+        ),
         title: Text(context.l10n.settings_restartRequiredTitle),
         content: Text(context.l10n.settings_resetPathConfirm),
         actions: [
@@ -719,7 +729,7 @@ class _HiveStoragePathTileState extends State<HiveStoragePathTile> {
     final hasCustomPath = _hiveHelper.hasCustomPath;
 
     return ListTile(
-      leading: const Icon(Icons.storage_outlined),
+      leading: const StudioIcon(Icons.storage_outlined),
       title: Text(context.l10n.settings_hiveStoragePath),
       subtitle: Text(
         hasCustomPath
@@ -732,7 +742,7 @@ class _HiveStoragePathTileState extends State<HiveStoragePathTile> {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: const Icon(Icons.folder_open, size: 20),
+            icon: const StudioIcon(Icons.folder_open, size: 20),
             tooltip: context.l10n.settings_openFolder,
             onPressed: () async {
               final openFolderFailed = context.l10n.settings_openFolderFailed;
@@ -749,11 +759,11 @@ class _HiveStoragePathTileState extends State<HiveStoragePathTile> {
           ),
           if (hasCustomPath)
             IconButton(
-              icon: const Icon(Icons.close, size: 20),
+              icon: const StudioIcon(Icons.close, size: 20),
               tooltip: context.l10n.common_reset,
               onPressed: () => _resetToDefault(context),
             ),
-          const Icon(Icons.chevron_right),
+          const StudioIcon(Icons.chevron_right),
         ],
       ),
       onTap: () => _selectHiveStorageDirectory(context),

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/localization_extension.dart';
@@ -64,7 +65,7 @@ class GenerationToolPanel extends ConsumerWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(
+                            StudioIcon(
                               workflow.isEnhance
                                   ? Icons.auto_awesome
                                   : Icons.photo_size_select_large,
@@ -92,7 +93,7 @@ class GenerationToolPanel extends ConsumerWidget {
                                 height: 28,
                               ),
                               padding: EdgeInsets.zero,
-                              icon: const Icon(Icons.close, size: 18),
+                              icon: const StudioIcon(Icons.close, size: 18),
                             ),
                           ],
                         ),

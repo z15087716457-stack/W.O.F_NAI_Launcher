@@ -1,3 +1,5 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -51,7 +53,7 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(Icons.keyboard, color: theme.colorScheme.primary),
+                  StudioIcon(Icons.keyboard, color: theme.colorScheme.primary),
                   const SizedBox(width: 12),
                   Text(
                     context.l10n.shortcut_help_title,
@@ -65,7 +67,7 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
                       controller: _searchController,
                       decoration: InputDecoration(
                         hintText: context.l10n.shortcut_help_search,
-                        prefixIcon: const Icon(Icons.search, size: 20),
+                        prefixIcon: const StudioIcon(Icons.search, size: 20),
                         isDense: true,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -84,7 +86,7 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const StudioIcon(Icons.close),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -141,7 +143,7 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
               ),
               child: Row(
                 children: [
-                  Icon(
+                  StudioIcon(
                     Icons.info_outline,
                     size: 16,
                     color: theme.colorScheme.outline,
@@ -167,7 +169,7 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
                         }
                       });
                     },
-                    icon: const Icon(Icons.settings, size: 16),
+                    icon: const StudioIcon(Icons.settings, size: 16),
                     label: Text(context.l10n.shortcuts_customize),
                   ),
                 ],
@@ -287,7 +289,8 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
             child: Text(
               shortcutLabel,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontFamily: 'monospace',
+                fontFamily: StudioTypography.mono,
+                fontFamilyFallback: StudioTypography.fallback,
                 fontWeight: FontWeight.w600,
                 color: theme.colorScheme.primary,
               ),
@@ -306,7 +309,7 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            StudioIcon(
               Icons.search_off,
               size: 48,
               color: Theme.of(context).colorScheme.outline,
@@ -466,7 +469,7 @@ class ShortcutHelpFab extends ConsumerWidget {
       heroTag: 'shortcut_help',
       onPressed: () => ShortcutHelpDialog.show(context),
       tooltip: context.l10n.shortcut_help_fabTooltip,
-      child: const Icon(Icons.keyboard),
+      child: const StudioIcon(Icons.keyboard),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -118,7 +119,7 @@ class AnlasCostCard extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            StudioIcon(
               Icons.savings_outlined,
               size: 40,
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -386,7 +387,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
             ),
             borderRadius: BorderRadius.circular(4),
           ),
-          child: Icon(
+          child: StudioIcon(
             Icons.chevron_right,
             size: 16,
             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -401,7 +402,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          StudioIcon(
             Icons.history,
             size: 48,
             color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
@@ -1243,7 +1244,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
             onPressed: _selectedIds.isEmpty
                 ? null
                 : () => _packSelectedImages(context, state),
-            icon: const Icon(Icons.archive_outlined, size: 18),
+            icon: const StudioIcon(Icons.archive_outlined, size: 18),
             label: Text(
               '${context.l10n.common_pack} (${_selectedIds.length})',
               maxLines: 1,
@@ -1259,7 +1260,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
             onPressed: _selectedIds.isEmpty
                 ? null
                 : () => _saveSelectedImages(context, state),
-            icon: const Icon(Icons.image_outlined, size: 18),
+            icon: const StudioIcon(Icons.image_outlined, size: 18),
             label: Text(
               '${context.l10n.image_save} (${_selectedIds.length})',
               maxLines: 1,
@@ -1280,7 +1281,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
               _selectedBatchKeys.clear();
               _multiSelectMode = false;
             }),
-            icon: const Icon(Icons.close),
+            icon: const StudioIcon(Icons.close),
           );
 
           // 窄栏给每个操作完整一行，避免图标、文字及按钮内边距互相挤压。
@@ -1684,7 +1685,7 @@ class _BottomToolButton extends StatelessWidget {
     final theme = Theme.of(context);
     return IconButton(
       onPressed: onPressed,
-      icon: Icon(icon, size: 18),
+      icon: StudioIcon(icon, size: 18),
       tooltip: tooltip,
       style: IconButton.styleFrom(
         foregroundColor: color ?? theme.colorScheme.onSurface,

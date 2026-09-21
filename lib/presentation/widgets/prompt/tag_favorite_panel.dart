@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -221,7 +222,11 @@ class _TagFavoritePanelState extends ConsumerState<TagFavoritePanel> {
 
     return Row(
       children: [
-        Icon(Icons.favorite_border, size: 20, color: theme.colorScheme.primary),
+        StudioIcon(
+          Icons.favorite_border,
+          size: 20,
+          color: theme.colorScheme.primary,
+        ),
         const SizedBox(width: 8),
         Text(
           context.l10n.tag_favoritesTitle,
@@ -263,13 +268,13 @@ class _TagFavoritePanelState extends ConsumerState<TagFavoritePanel> {
           fontSize: 14,
           color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
         ),
-        prefixIcon: Icon(
+        prefixIcon: StudioIcon(
           Icons.search,
           color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
         ),
         suffixIcon: _searchController.text.isNotEmpty
             ? IconButton(
-                icon: Icon(
+                icon: StudioIcon(
                   Icons.clear,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
@@ -311,7 +316,7 @@ class _TagFavoritePanelState extends ConsumerState<TagFavoritePanel> {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Row(
             children: [
-              Icon(
+              StudioIcon(
                 Icons.cloud_outlined,
                 size: 16,
                 color: theme.colorScheme.primary,
@@ -384,7 +389,7 @@ class _TagFavoritePanelState extends ConsumerState<TagFavoritePanel> {
           child: Row(
             children: [
               // 建议图标
-              Icon(
+              StudioIcon(
                 Icons.cloud_outlined,
                 size: 16,
                 color: theme.colorScheme.primary.withValues(alpha: 0.7),
@@ -425,7 +430,7 @@ class _TagFavoritePanelState extends ConsumerState<TagFavoritePanel> {
 
               // 已添加标识
               if (isInCurrent) ...[
-                Icon(
+                StudioIcon(
                   Icons.check_circle,
                   size: 18,
                   color: theme.colorScheme.primary,
@@ -434,7 +439,7 @@ class _TagFavoritePanelState extends ConsumerState<TagFavoritePanel> {
               ],
 
               // 添加图标
-              Icon(
+              StudioIcon(
                 Icons.add_circle_outline,
                 size: 18,
                 color: isInCurrent
@@ -458,7 +463,7 @@ class _TagFavoritePanelState extends ConsumerState<TagFavoritePanel> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            StudioIcon(
               Icons.favorite_border,
               size: 48,
               color: theme.colorScheme.primary.withValues(alpha: 0.4),
@@ -535,7 +540,7 @@ class _TagFavoritePanelState extends ConsumerState<TagFavoritePanel> {
           child: Row(
             children: [
               // 收藏图标
-              Icon(
+              StudioIcon(
                 Icons.favorite,
                 size: 16,
                 color: isInCurrent
@@ -580,7 +585,7 @@ class _TagFavoritePanelState extends ConsumerState<TagFavoritePanel> {
 
               // 已添加标识
               if (isInCurrent) ...[
-                Icon(
+                StudioIcon(
                   Icons.check_circle,
                   size: 18,
                   color: theme.colorScheme.primary,
@@ -589,7 +594,7 @@ class _TagFavoritePanelState extends ConsumerState<TagFavoritePanel> {
               ],
 
               // 更多操作提示
-              Icon(
+              StudioIcon(
                 Icons.more_vert,
                 size: 18,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.4),

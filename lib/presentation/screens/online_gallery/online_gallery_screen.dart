@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:math';
 
@@ -322,7 +323,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
             onPressed: state.page > 1 && !state.isLoading
                 ? () => _galleryNotifier.goToPage(state.page - 1)
                 : null,
-            icon: const Icon(Icons.chevron_left, size: 24),
+            icon: const StudioIcon(Icons.chevron_left, size: 24),
             tooltip: context.l10n.onlineGallery_previousPage,
           ),
           const SizedBox(width: 8),
@@ -336,7 +337,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
             onPressed: state.hasMore && !state.isLoading
                 ? () => _galleryNotifier.goToPage(state.page + 1)
                 : null,
-            icon: const Icon(Icons.chevron_right, size: 24),
+            icon: const StudioIcon(Icons.chevron_right, size: 24),
             tooltip: context.l10n.onlineGallery_nextPage,
           ),
           const SizedBox(width: 24),
@@ -385,7 +386,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Icon(
+                  StudioIcon(
                     Icons.edit,
                     size: 12,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
@@ -645,7 +646,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
                     key: const ValueKey('ai-tag-author-return-button'),
                     tooltip: context.l10n.onlineGallery_returnFromAuthor,
                     onPressed: _returnFromAiTagAuthorSearch,
-                    icon: const Icon(Icons.arrow_back, size: 18),
+                    icon: const StudioIcon(Icons.arrow_back, size: 18),
                     padding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
                     constraints: const BoxConstraints.tightFor(
@@ -704,7 +705,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             fontSize: 13,
           ),
-          prefixIcon: Icon(icon, size: 18),
+          prefixIcon: StudioIcon(icon, size: 18),
           suffixIcon: suffixIcon,
           suffixIconConstraints: suffixIcon == null
               ? null
@@ -755,14 +756,14 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
               fontSize: 13,
             ),
-            prefixIcon: Icon(
+            prefixIcon: StudioIcon(
               Icons.search,
               size: 18,
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
             ),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
-                    icon: Icon(
+                    icon: StudioIcon(
                       Icons.close,
                       size: 16,
                       color: theme.colorScheme.onSurfaceVariant.withValues(
@@ -872,7 +873,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
                 state.viewMode == GalleryViewMode.popular))
           _buildAiTagNaiVersionSegment(theme, state),
         IconButton(
-          icon: const Icon(Icons.block),
+          icon: const StudioIcon(Icons.block),
           tooltip: context.l10n.onlineGallery_blacklistTags,
           onPressed: () => showOnlineGalleryBlacklistDialog(context, ref),
         ),
@@ -888,7 +889,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
                     color: theme.colorScheme.onSecondaryContainer,
                   ),
                 )
-              : const Icon(Icons.refresh, size: 18),
+              : const StudioIcon(Icons.refresh, size: 18),
           label: Text(context.l10n.onlineGallery_refresh),
           style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -897,7 +898,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
         ),
         // 多选模式切换
         IconButton(
-          icon: const Icon(Icons.checklist),
+          icon: const StudioIcon(Icons.checklist),
           tooltip: context.l10n.common_multiSelect,
           onPressed: _selectionNotifier.enter,
         ),
@@ -1001,9 +1002,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
                     height: 22,
                     child: naiOnly
                         ? Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
                             decoration: BoxDecoration(
                               color: colorScheme.onSurface,
                               borderRadius: BorderRadius.circular(5),
@@ -1082,7 +1081,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
                         children: [
                           Expanded(child: Text('NAI $version')),
                           if (version == selectedVersion)
-                            Icon(
+                            StudioIcon(
                               Icons.check,
                               size: 16,
                               color: colorScheme.primary,
@@ -1099,9 +1098,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          versionActive
-                              ? 'Ver $selectedVersion'
-                              : 'Ver',
+                          versionActive ? 'Ver $selectedVersion' : 'Ver',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: versionActive
@@ -1110,7 +1107,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
                             color: versionActive ? activeColor : null,
                           ),
                         ),
-                        Icon(
+                        StudioIcon(
                           Icons.keyboard_arrow_down,
                           size: 15,
                           color: versionActive ? activeColor : inactiveColor,
@@ -1136,7 +1133,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
       link: _dateRangeLayerLink,
       child: OutlinedButton.icon(
         onPressed: () => _toggleDateRangePopup(state),
-        icon: Icon(
+        icon: StudioIcon(
           Icons.date_range,
           size: 16,
           color: hasDateRange ? theme.colorScheme.primary : null,
@@ -1251,7 +1248,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
             : context.l10n.onlineGallery_configureGelbooruApi,
         child: OutlinedButton.icon(
           onPressed: () => _showGelbooruCredentialsDialog(context),
-          icon: Icon(
+          icon: StudioIcon(
             invalid
                 ? Icons.error_outline
                 : ready
@@ -1303,7 +1300,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
             value: 'logout',
             child: Row(
               children: [
-                const Icon(Icons.logout, size: 18),
+                const StudioIcon(Icons.logout, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.onlineGallery_logout),
               ],
@@ -1317,7 +1314,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
             color: theme.colorScheme.primaryContainer,
             shape: BoxShape.circle,
           ),
-          child: Icon(
+          child: StudioIcon(
             Icons.person,
             size: 18,
             color: theme.colorScheme.onPrimaryContainer,
@@ -1328,7 +1325,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
 
     return FilledButton.icon(
       onPressed: () => _showLoginDialog(context),
-      icon: const Icon(Icons.login, size: 18),
+      icon: const StudioIcon(Icons.login, size: 18),
       label: Text(context.l10n.onlineGallery_login),
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1417,7 +1414,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
         ),
         OutlinedButton.icon(
           onPressed: () => _selectDate(context, state),
-          icon: const Icon(Icons.calendar_today, size: 14),
+          icon: const StudioIcon(Icons.calendar_today, size: 14),
           label: Text(
             state.popularDate != null
                 ? _dateFormattingService.formatWithPattern(
@@ -1435,7 +1432,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
         if (state.popularDate != null)
           IconButton(
             onPressed: () => _galleryNotifier.setPopularDate(null),
-            icon: const Icon(Icons.close, size: 16),
+            icon: const StudioIcon(Icons.close, size: 16),
             tooltip: context.l10n.onlineGallery_clear,
           ),
         Text(
@@ -1502,7 +1499,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          StudioIcon(
             Icons.lock_outline,
             size: 15,
             color: theme.colorScheme.onSecondaryContainer,
@@ -1543,7 +1540,11 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
+          StudioIcon(
+            Icons.error_outline,
+            size: 48,
+            color: theme.colorScheme.error,
+          ),
           const SizedBox(height: 12),
           Text(
             context.l10n.onlineGallery_loadFailed,
@@ -1560,7 +1561,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
             onPressed: needsGelbooruCredentials
                 ? () => _showGelbooruCredentialsDialog(context)
                 : _galleryNotifier.refresh,
-            icon: Icon(
+            icon: StudioIcon(
               needsGelbooruCredentials ? Icons.key_outlined : Icons.refresh,
               size: 18,
             ),
@@ -1633,7 +1634,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          StudioIcon(
             icon,
             size: 48,
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
@@ -1659,7 +1660,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          StudioIcon(
             Icons.view_module_outlined,
             size: 16,
             color: theme.colorScheme.outline,
@@ -1746,7 +1747,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
                       _galleryNotifier.loadDetail(post, forceRefresh: true);
                       setState(() {});
                     },
-                    icon: const Icon(Icons.refresh),
+                    icon: const StudioIcon(Icons.refresh),
                     label: Text(context.l10n.common_retry),
                   ),
                 ),
@@ -1831,7 +1832,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
       return Center(
         child: TextButton.icon(
           onPressed: _galleryNotifier.retryAppend,
-          icon: Icon(Icons.refresh, color: theme.colorScheme.error),
+          icon: StudioIcon(Icons.refresh, color: theme.colorScheme.error),
           label: Text(
             context.l10n.onlineGallery_retryAppend,
             style: TextStyle(color: theme.colorScheme.error),
@@ -2309,7 +2310,7 @@ class _ModeButtonState extends State<_ModeButton> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              StudioIcon(
                 widget.icon,
                 size: 18,
                 color: widget.isSelected
@@ -2380,7 +2381,11 @@ class _SourceDropdown extends StatelessWidget {
               ),
               if (isSelected) ...[
                 const Spacer(),
-                Icon(Icons.check, size: 16, color: theme.colorScheme.primary),
+                StudioIcon(
+                  Icons.check,
+                  size: 16,
+                  color: theme.colorScheme.primary,
+                ),
               ],
             ],
           ),
@@ -2406,7 +2411,7 @@ class _SourceDropdown extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            Icon(
+            StudioIcon(
               Icons.arrow_drop_down,
               size: 16,
               color: theme.colorScheme.onSurfaceVariant,
@@ -2539,7 +2544,7 @@ class _DateRangePopupState extends State<_DateRangePopup> {
             children: [
               Row(
                 children: [
-                  Icon(
+                  StudioIcon(
                     Icons.date_range_rounded,
                     size: 18,
                     color: theme.colorScheme.primary,
@@ -2554,7 +2559,7 @@ class _DateRangePopupState extends State<_DateRangePopup> {
                   const Spacer(),
                   IconButton(
                     onPressed: widget.onClose,
-                    icon: const Icon(Icons.close, size: 18),
+                    icon: const StudioIcon(Icons.close, size: 18),
                     visualDensity: VisualDensity.compact,
                     tooltip: context.l10n.common_close,
                   ),
@@ -2747,7 +2752,11 @@ class _RatingDropdown extends StatelessWidget {
               ),
               if (isSelected) ...[
                 const Spacer(),
-                Icon(Icons.check, size: 16, color: theme.colorScheme.primary),
+                StudioIcon(
+                  Icons.check,
+                  size: 16,
+                  color: theme.colorScheme.primary,
+                ),
               ],
             ],
           ),
@@ -2777,7 +2786,7 @@ class _RatingDropdown extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            Icon(
+            StudioIcon(
               Icons.arrow_drop_down,
               size: 16,
               color: theme.colorScheme.onSurfaceVariant,

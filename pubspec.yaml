@@ -1,5 +1,5 @@
 name: nai_launcher
-description: W.O.F NAI Launcher - NovelAI 跨平台第三方客户端（Aaalice_NAI_Launcher 分支）
+description: W.O.F NAI Studio - NovelAI 跨平台第三方客户端（Aaalice_NAI_Launcher 分支）
 publish_to: "none"
 version: 1.1.1+5
 
@@ -151,6 +151,8 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/icons/geist/
+    - assets/licenses/
     - assets/translations/
     - assets/data/
     - assets/data/wordlists/
@@ -167,3 +169,30 @@ flutter:
     - family: LXGW ZhenKai GB
       fonts:
         - asset: fonts/LXGWZhenKaiGB-Regular.ttf
+    - family: Geist
+      fonts:
+        - asset: assets/fonts/Geist-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Geist-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Geist-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Geist-Bold.ttf
+          weight: 700
+    - family: Geist Mono
+      fonts:
+        - asset: assets/fonts/GeistMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/GeistMono-Medium.ttf
+          weight: 500
+    - family: Geist Pixel Line
+      fonts:
+        - asset: assets/fonts/GeistPixel-Line.ttf
+    - family: HarmonyOS Sans SC
+      fonts:
+        - asset: assets/fonts/HarmonyOS_Sans_SC_Regular.ttf
+          weight: 400
+        - asset: assets/fonts/HarmonyOS_Sans_SC_Medium.ttf
+          weight: 500
+        - asset: assets/fonts/HarmonyOS_Sans_SC_Bold.ttf
+          weight: 700

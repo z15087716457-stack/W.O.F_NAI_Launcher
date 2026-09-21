@@ -9,7 +9,10 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
-  String get app_title => 'NAI Launcher';
+  String get app_title => 'W.O.F NAI Studio';
+
+  @override
+  String get settings_visualAssets => 'UI のフォント・アイコン・ライセンス';
 
   @override
   String get app_subtitle => 'NovelAI サードパーティ クライアント';

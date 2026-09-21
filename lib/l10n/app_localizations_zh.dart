@@ -9,7 +9,10 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get app_title => 'NAI 启动器';
+  String get app_title => 'W.O.F NAI Studio';
+
+  @override
+  String get settings_visualAssets => '界面字体、图标与许可';
 
   @override
   String get app_subtitle => 'NovelAI 第三方客户端';

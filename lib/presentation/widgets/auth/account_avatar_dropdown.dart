@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -62,7 +63,7 @@ class AccountAvatarDropdown extends ConsumerWidget {
             // 标题
             Row(
               children: [
-                Icon(
+                StudioIcon(
                   Icons.account_circle_outlined,
                   color: theme.colorScheme.primary,
                   size: 20,
@@ -108,7 +109,7 @@ class AccountAvatarDropdown extends ConsumerWidget {
                   if (accounts.length > 5)
                     ListTile(
                       dense: true,
-                      leading: const Icon(Icons.more_horiz),
+                      leading: const StudioIcon(Icons.more_horiz),
                       title: Text(
                         context.l10n.auth_moreAccounts(accounts.length - 5),
                       ),
@@ -123,7 +124,7 @@ class AccountAvatarDropdown extends ConsumerWidget {
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 onPressed: onAddAccount,
-                icon: const Icon(Icons.add),
+                icon: const StudioIcon(Icons.add),
                 label: Text(context.l10n.auth_addAccount),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
@@ -283,13 +284,13 @@ class _AccountListTile extends StatelessWidget {
             ),
             // 选中图标
             if (isSelected)
-              Icon(
+              StudioIcon(
                 Icons.check_circle,
                 color: theme.colorScheme.primary,
                 size: 20,
               )
             else
-              Icon(
+              StudioIcon(
                 Icons.chevron_right,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
               ),

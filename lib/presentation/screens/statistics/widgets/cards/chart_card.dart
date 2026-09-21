@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import '../../../../themes/theme_extension.dart';
 
@@ -35,7 +36,7 @@ class SectionHeader extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, size: 18, color: colorScheme.primary),
+          child: StudioIcon(icon, size: 18, color: colorScheme.primary),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -147,7 +148,7 @@ class _ChartCardState extends State<ChartCard> {
                             ),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Icon(
+                          child: StudioIcon(
                             widget.titleIcon,
                             size: 18,
                             color: accentColor,
@@ -296,7 +297,7 @@ class ChartEmptyState extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Icon(
+                    child: StudioIcon(
                       icon,
                       size: 48,
                       color: colorScheme.onSurfaceVariant.withValues(

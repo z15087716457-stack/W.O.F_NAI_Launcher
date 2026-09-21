@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,14 +85,14 @@ class _TokenLoginCardState extends ConsumerState<TokenLoginCard> {
               children: [
                 // 粘贴按钮
                 IconButton(
-                  icon: const Icon(Icons.paste, size: 20),
+                  icon: const StudioIcon(Icons.paste, size: 20),
                   tooltip: context.l10n.common_paste,
                   onPressed: _pasteFromClipboard,
                   splashRadius: 20,
                 ),
                 // 显示/隐藏切换
                 IconButton(
-                  icon: Icon(
+                  icon: StudioIcon(
                     _obscureToken
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
@@ -130,7 +131,7 @@ class _TokenLoginCardState extends ConsumerState<TokenLoginCard> {
                       color: Colors.white,
                     ),
                   )
-                : const Icon(Icons.login),
+                : const StudioIcon(Icons.login),
             label: Text(context.l10n.auth_validateAndLogin),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -151,7 +152,10 @@ class _TokenLoginCardState extends ConsumerState<TokenLoginCard> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.error_outline, color: theme.colorScheme.error),
+                      StudioIcon(
+                        Icons.error_outline,
+                        color: theme.colorScheme.error,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -190,7 +194,7 @@ class _TokenLoginCardState extends ConsumerState<TokenLoginCard> {
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
                       onPressed: authState.isLoading ? null : _handleLogin,
-                      icon: const Icon(Icons.refresh, size: 18),
+                      icon: const StudioIcon(Icons.refresh, size: 18),
                       label: Text(context.l10n.common_retry),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.colorScheme.error,
@@ -214,7 +218,7 @@ class _TokenLoginCardState extends ConsumerState<TokenLoginCard> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  StudioIcon(
                     Icons.help_outline,
                     size: 16,
                     color: theme.colorScheme.primary,

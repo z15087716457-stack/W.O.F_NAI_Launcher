@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -198,7 +199,7 @@ class _VibeImageEncodeDialogState extends State<VibeImageEncodeDialog> {
   Widget _buildHeader(ThemeData theme) {
     return Row(
       children: [
-        Icon(Icons.image_search, color: theme.colorScheme.primary),
+        StudioIcon(Icons.image_search, color: theme.colorScheme.primary),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
@@ -243,7 +244,7 @@ class _VibeImageEncodeDialogState extends State<VibeImageEncodeDialog> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.image, size: 48, color: theme.colorScheme.outline),
+        StudioIcon(Icons.image, size: 48, color: theme.colorScheme.outline),
         const SizedBox(height: 8),
         Text(
           context.l10n.vibe_imagePreview,
@@ -260,7 +261,11 @@ class _VibeImageEncodeDialogState extends State<VibeImageEncodeDialog> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.broken_image, size: 48, color: theme.colorScheme.outline),
+        StudioIcon(
+          Icons.broken_image,
+          size: 48,
+          color: theme.colorScheme.outline,
+        ),
         const SizedBox(height: 8),
         Text(
           context.l10n.vibe_previewLoadFailed,
@@ -281,7 +286,7 @@ class _VibeImageEncodeDialogState extends State<VibeImageEncodeDialog> {
         labelText: context.l10n.vibe_saveToLibrary_nameLabel,
         hintText: context.l10n.vibe_saveToLibrary_nameHint,
         errorText: _errorText,
-        prefixIcon: const Icon(Icons.label_outline),
+        prefixIcon: const StudioIcon(Icons.label_outline),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
         fillColor: theme.colorScheme.surfaceContainerHighest,
@@ -307,7 +312,7 @@ class _VibeImageEncodeDialogState extends State<VibeImageEncodeDialog> {
       children: [
         Row(
           children: [
-            Icon(Icons.tune, size: 18, color: theme.colorScheme.primary),
+            StudioIcon(Icons.tune, size: 18, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -350,7 +355,7 @@ class _VibeImageEncodeDialogState extends State<VibeImageEncodeDialog> {
       children: [
         Row(
           children: [
-            Icon(
+            StudioIcon(
               Icons.info_outline,
               size: 18,
               color: theme.colorScheme.primary,
@@ -402,7 +407,7 @@ class _VibeImageEncodeDialogState extends State<VibeImageEncodeDialog> {
       ),
       child: Row(
         children: [
-          Icon(
+          StudioIcon(
             Icons.account_balance_wallet,
             size: 20,
             color: theme.colorScheme.primary,
@@ -435,7 +440,7 @@ class _VibeImageEncodeDialogState extends State<VibeImageEncodeDialog> {
         // 开始编码按钮
         FilledButton.icon(
           onPressed: _confirm,
-          icon: const Icon(Icons.play_arrow),
+          icon: const StudioIcon(Icons.play_arrow),
           label: Text(context.l10n.vibe_encodeStartButton),
         ),
       ],
@@ -538,7 +543,11 @@ class VibeImageEncodeErrorDialog extends StatelessWidget {
     final l10n = context.l10n;
 
     return AlertDialog(
-      icon: Icon(Icons.error_outline, color: theme.colorScheme.error, size: 32),
+      icon: StudioIcon(
+        Icons.error_outline,
+        color: theme.colorScheme.error,
+        size: 32,
+      ),
       title: Text(l10n.vibe_import_encodingFailed),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -556,13 +565,13 @@ class VibeImageEncodeErrorDialog extends StatelessWidget {
         TextButton.icon(
           onPressed: () =>
               Navigator.of(context).pop(VibeEncodeErrorAction.skip),
-          icon: const Icon(Icons.skip_next),
+          icon: const StudioIcon(Icons.skip_next),
           label: Text(l10n.vibe_encodeSkipImage),
         ),
         FilledButton.icon(
           onPressed: () =>
               Navigator.of(context).pop(VibeEncodeErrorAction.retry),
-          icon: const Icon(Icons.refresh),
+          icon: const StudioIcon(Icons.refresh),
           label: Text(l10n.common_retry),
         ),
       ],

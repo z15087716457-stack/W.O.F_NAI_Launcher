@@ -3,11 +3,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/services/system_font_service.dart';
 import '../../core/storage/local_storage_service.dart';
+import '../themes/studio_typography.dart';
 
 part 'font_provider.g.dart';
 
 /// 字体来源类型
 enum FontSource {
+  bundled, // 随应用提供，离线可用
   system, // 系统字体
   google, // Google Fonts
 }
@@ -34,9 +36,11 @@ class FontConfig {
     }
     final parts = key.split(':');
     if (parts.length >= 2) {
-      final source = parts[0] == 'google'
-          ? FontSource.google
-          : FontSource.system;
+      final source = switch (parts[0]) {
+        'google' => FontSource.google,
+        'bundled' => FontSource.bundled,
+        _ => FontSource.system,
+      };
       final fontFamily = parts.sublist(1).join(':'); // 处理字体名中包含冒号的情况
 
       // 检查是否是默认字体
@@ -63,11 +67,11 @@ class FontConfig {
     return defaultFont;
   }
 
-  /// 默认字体（落霞孤鹜真楷 GB）
+  /// 默认字体组合。旧的默认键会自然使用此组合；显式系统字体保留。
   static const defaultFont = FontConfig(
-    displayName: '落霞孤鹜真楷',
-    fontFamily: 'LXGW ZhenKai GB',
-    source: FontSource.system,
+    displayName: 'Geist + HarmonyOS Sans',
+    fontFamily: StudioTypography.sans,
+    source: FontSource.bundled,
   );
 
   @override

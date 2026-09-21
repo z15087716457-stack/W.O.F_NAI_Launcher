@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,7 +22,7 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
       child: Column(
         children: [
           SwitchListTile(
-            secondary: Icon(_statusIcon(state.status)),
+            secondary: StudioIcon(_statusIcon(state.status)),
             title: Text(l10n.settings_kritaBridgeEnable),
             subtitle: Text(_statusText(context, state)),
             value: state.enabled,
@@ -34,7 +35,7 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
           if (state.enabled) ...[
             const Divider(height: 1),
             ListTile(
-              leading: Icon(
+              leading: StudioIcon(
                 Icons.circle,
                 size: 12,
                 color: _statusColor(theme, state.status),
@@ -47,13 +48,13 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
                     : () async {
                         await notifier.regenerateSession();
                       },
-                icon: const Icon(Icons.refresh, size: 18),
+                icon: const StudioIcon(Icons.refresh, size: 18),
                 label: Text(l10n.settings_kritaBridgeRegenerateSession),
               ),
             ),
             if (state.discoveryFilePath != null)
               ListTile(
-                leading: const Icon(Icons.description_outlined),
+                leading: const StudioIcon(Icons.description_outlined),
                 title: Text(l10n.settings_kritaBridgeDiscoveryFile),
                 subtitle: SelectableText(state.discoveryFilePath!),
               ),
@@ -62,7 +63,7 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: Row(
                   children: [
-                    Icon(
+                    StudioIcon(
                       Icons.error_outline,
                       size: 16,
                       color: theme.colorScheme.error,

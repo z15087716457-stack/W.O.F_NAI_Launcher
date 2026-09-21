@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -341,7 +342,7 @@ class _DetailMetadataPanelState extends State<DetailMetadataPanel> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            StudioIcon(
               Icons.info_outline,
               size: 48,
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
@@ -371,7 +372,7 @@ class _DetailMetadataPanelState extends State<DetailMetadataPanel> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                StudioIcon(
                   Icons.chevron_left,
                   size: 16,
                   color: colorScheme.onSurfaceVariant,
@@ -408,7 +409,7 @@ class _PanelHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          Icon(Icons.info_outline, size: 20, color: colorScheme.primary),
+          StudioIcon(Icons.info_outline, size: 20, color: colorScheme.primary),
           const SizedBox(width: 8),
           Text(
             context.l10n.detail_imageDetails,
@@ -418,7 +419,7 @@ class _PanelHeader extends StatelessWidget {
           ),
           const Spacer(),
           IconButton(
-            icon: Icon(
+            icon: StudioIcon(
               isExpanded ? Icons.chevron_right : Icons.chevron_left,
               size: 20,
             ),
@@ -816,7 +817,7 @@ class _InfoSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(icon, size: 16, color: colorScheme.primary),
+            StudioIcon(icon, size: 16, color: colorScheme.primary),
             const SizedBox(width: 6),
             Text(
               title,
@@ -1020,7 +1021,7 @@ class _ActionButtonState extends State<_ActionButton> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              StudioIcon(
                 widget.icon,
                 size: 16,
                 color: _isHovered

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -66,7 +67,10 @@ class _VibeBulkTagDialogState extends ConsumerState<VibeBulkTagDialog> {
               // 标题
               Row(
                 children: [
-                  Icon(Icons.label_outlined, color: theme.colorScheme.primary),
+                  StudioIcon(
+                    Icons.label_outlined,
+                    color: theme.colorScheme.primary,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -77,7 +81,7 @@ class _VibeBulkTagDialogState extends ConsumerState<VibeBulkTagDialog> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const StudioIcon(Icons.close),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -141,7 +145,7 @@ class _VibeBulkTagDialogState extends ConsumerState<VibeBulkTagDialog> {
             controller: _tagInputController,
             decoration: InputDecoration(
               hintText: context.l10n.vibeBulkTag_inputHint,
-              prefixIcon: const Icon(Icons.add),
+              prefixIcon: const StudioIcon(Icons.add),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -169,7 +173,7 @@ class _VibeBulkTagDialogState extends ConsumerState<VibeBulkTagDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            StudioIcon(
               Icons.label_off_outlined,
               size: 48,
               color: theme.colorScheme.outline.withValues(alpha: 0.5),
@@ -252,7 +256,7 @@ class _VibeBulkTagDialogState extends ConsumerState<VibeBulkTagDialog> {
   Widget _buildTagItem(ThemeData theme, String tag, {required bool isNew}) {
     return ListTile(
       dense: true,
-      leading: Icon(
+      leading: StudioIcon(
         Icons.label,
         size: 18,
         color: isNew ? theme.colorScheme.primary : theme.colorScheme.outline,
@@ -284,7 +288,7 @@ class _VibeBulkTagDialogState extends ConsumerState<VibeBulkTagDialog> {
             ),
           const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(Icons.remove_circle_outline, size: 20),
+            icon: const StudioIcon(Icons.remove_circle_outline, size: 20),
             color: theme.colorScheme.error,
             onPressed: () => _removeTag(tag),
             tooltip: context.l10n.vibeBulkTag_removeTag,
@@ -300,7 +304,11 @@ class _VibeBulkTagDialogState extends ConsumerState<VibeBulkTagDialog> {
   Widget _buildRemovedTagItem(ThemeData theme, String tag) {
     return ListTile(
       dense: true,
-      leading: Icon(Icons.label_off, size: 18, color: theme.colorScheme.error),
+      leading: StudioIcon(
+        Icons.label_off,
+        size: 18,
+        color: theme.colorScheme.error,
+      ),
       title: Text(
         tag,
         style: theme.textTheme.bodyMedium?.copyWith(
@@ -310,7 +318,7 @@ class _VibeBulkTagDialogState extends ConsumerState<VibeBulkTagDialog> {
       ),
       trailing: TextButton.icon(
         onPressed: () => _restoreTag(tag),
-        icon: const Icon(Icons.undo, size: 16),
+        icon: const StudioIcon(Icons.undo, size: 16),
         label: Text(context.l10n.common_undo),
         style: TextButton.styleFrom(
           foregroundColor: theme.colorScheme.primary,
@@ -333,7 +341,7 @@ class _VibeBulkTagDialogState extends ConsumerState<VibeBulkTagDialog> {
         children: [
           Row(
             children: [
-              Icon(
+              StudioIcon(
                 Icons.info_outline,
                 size: 16,
                 color: theme.colorScheme.outline,
@@ -390,7 +398,7 @@ class _VibeBulkTagDialogState extends ConsumerState<VibeBulkTagDialog> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 16, color: color),
+          StudioIcon(icon, size: 16, color: color),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -114,7 +115,7 @@ class InlineCharacterRow extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(4),
                     child: Padding(
                       padding: const EdgeInsets.all(2),
-                      child: Icon(
+                      child: StudioIcon(
                         Icons.delete_sweep,
                         size: 16,
                         color: theme.colorScheme.error,
@@ -370,7 +371,7 @@ class _PanelIconButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         child: Padding(
           padding: const EdgeInsets.all(4),
-          child: Icon(
+          child: StudioIcon(
             icon,
             size: 15,
             color: enabled ? color : color.withValues(alpha: 0.3),
@@ -430,7 +431,7 @@ class _AddCharacterChip extends ConsumerWidget {
           ),
         ),
         child: Center(
-          child: Icon(
+          child: StudioIcon(
             Icons.add,
             size: 18,
             color: theme.colorScheme.onSurfaceVariant,
@@ -443,7 +444,7 @@ class _AddCharacterChip extends ConsumerWidget {
   Widget _menuRow(IconData icon, String label, Color color) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: color),
+        StudioIcon(icon, size: 18, color: color),
         const SizedBox(width: 10),
         Text(label),
       ],

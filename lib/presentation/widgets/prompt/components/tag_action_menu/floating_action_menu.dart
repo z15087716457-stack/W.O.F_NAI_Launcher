@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -286,7 +287,7 @@ class _MenuIconButtonState extends State<_MenuIconButton> {
               borderRadius: BorderRadius.circular(4),
             ),
             alignment: Alignment.center,
-            child: Icon(
+            child: StudioIcon(
               widget.icon,
               size: TagChipSizes.menuIconSize,
               color: _isHovered

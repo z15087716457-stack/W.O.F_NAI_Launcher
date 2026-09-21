@@ -1,6 +1,7 @@
 {
   "@@locale": "zh",
-  "app_title": "NAI 启动器",
+  "app_title": "W.O.F NAI Studio",
+  "settings_visualAssets": "界面字体、图标与许可",
   "app_subtitle": "NovelAI 第三方客户端",
   "common_cancel": "取消",
   "onlineFav_all": "全部",

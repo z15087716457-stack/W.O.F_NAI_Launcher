@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -156,10 +157,10 @@ class _CategoryPickerDialogState extends ConsumerState<CategoryPickerDialog> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: l10n.localGallery_categoryFilterHint,
-                prefixIcon: const Icon(Icons.search, size: 20),
+                prefixIcon: const StudioIcon(Icons.search, size: 20),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, size: 18),
+                        icon: const StudioIcon(Icons.clear, size: 18),
                         onPressed: () => _searchController.clear(),
                       )
                     : null,
@@ -237,7 +238,7 @@ class _CategoryPickerDialogState extends ConsumerState<CategoryPickerDialog> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Row(
           children: [
-            Icon(
+            StudioIcon(
               Icons.photo_library_outlined,
               size: 20,
               color: theme.colorScheme.primary,
@@ -290,8 +291,12 @@ class _CategoryPickerDialogState extends ConsumerState<CategoryPickerDialog> {
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
                   setState(() {
-                    if (CategoryPickerDialog._sessionExpandedIds.contains(category.id)) {
-                      CategoryPickerDialog._sessionExpandedIds.remove(category.id);
+                    if (CategoryPickerDialog._sessionExpandedIds.contains(
+                      category.id,
+                    )) {
+                      CategoryPickerDialog._sessionExpandedIds.remove(
+                        category.id,
+                      );
                     } else {
                       CategoryPickerDialog._sessionExpandedIds.add(category.id);
                     }
@@ -299,8 +304,10 @@ class _CategoryPickerDialogState extends ConsumerState<CategoryPickerDialog> {
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(right: 4),
-                  child: Icon(
-                    CategoryPickerDialog._sessionExpandedIds.contains(category.id)
+                  child: StudioIcon(
+                    CategoryPickerDialog._sessionExpandedIds.contains(
+                          category.id,
+                        )
                         ? Icons.expand_more
                         : Icons.chevron_right,
                     size: 18,
@@ -310,7 +317,7 @@ class _CategoryPickerDialogState extends ConsumerState<CategoryPickerDialog> {
               )
             else
               const SizedBox(width: 22),
-            Icon(
+            StudioIcon(
               isExternal ? Icons.folder_shared_outlined : Icons.folder_outlined,
               size: 20,
               color: isExternal

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -131,11 +132,11 @@ class _RegexRulesDialogState extends ConsumerState<RegexRulesDialog> {
       ),
       child: Row(
         children: [
-          Icon(Icons.find_replace, color: colorScheme.primary),
+          StudioIcon(Icons.find_replace, color: colorScheme.primary),
           const SizedBox(width: 8),
           Expanded(child: Text(title, style: theme.textTheme.titleMedium)),
           IconButton(
-            icon: const Icon(Icons.close),
+            icon: const StudioIcon(Icons.close),
             tooltip: context.l10n.common_close,
             onPressed: () => Navigator.of(context).pop(),
           ),
@@ -273,7 +274,7 @@ class _RegexRulesDialogState extends ConsumerState<RegexRulesDialog> {
         children: [
           FilledButton.icon(
             onPressed: _createRule,
-            icon: const Icon(Icons.add, size: 18),
+            icon: const StudioIcon(Icons.add, size: 18),
             label: Text(context.l10n.regexRules_add),
           ),
           const Spacer(),
@@ -330,7 +331,7 @@ class _RuleTile extends StatelessWidget {
                   index: index,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Icon(
+                    child: StudioIcon(
                       Icons.drag_indicator,
                       size: 18,
                       color: colorScheme.outline,
@@ -395,12 +396,12 @@ class _RuleTile extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  icon: const StudioIcon(Icons.edit_outlined, size: 18),
                   tooltip: l10n.common_edit,
                   onPressed: onEdit,
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 18),
+                  icon: const StudioIcon(Icons.delete_outline, size: 18),
                   tooltip: l10n.common_delete,
                   onPressed: onDelete,
                 ),

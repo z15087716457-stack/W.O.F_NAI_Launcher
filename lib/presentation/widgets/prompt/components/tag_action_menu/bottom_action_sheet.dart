@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -525,7 +526,7 @@ class _ActionButton extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 22, color: color.withValues(alpha: 0.8)),
+              StudioIcon(icon, size: 22, color: color.withValues(alpha: 0.8)),
               const SizedBox(height: 4),
               Text(
                 label,

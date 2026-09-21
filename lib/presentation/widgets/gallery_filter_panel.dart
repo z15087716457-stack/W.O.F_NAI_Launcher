@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -367,7 +368,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
                                   const SizedBox(width: 8),
                                   IconButton.filledTonal(
                                     onPressed: _addTag,
-                                    icon: const Icon(Icons.add, size: 18),
+                                    icon: const StudioIcon(Icons.add, size: 18),
                                     tooltip: l10n.localGallery_addTag,
                                   ),
                                 ],
@@ -687,17 +688,17 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
         ),
         ButtonSegment(
           value: 'landscape',
-          icon: const Icon(Icons.landscape_outlined, size: 16),
+          icon: const StudioIcon(Icons.landscape_outlined, size: 16),
           label: Text(l10n.localGallery_orientationLandscape),
         ),
         ButtonSegment(
           value: 'portrait',
-          icon: const Icon(Icons.portrait_outlined, size: 16),
+          icon: const StudioIcon(Icons.portrait_outlined, size: 16),
           label: Text(l10n.localGallery_orientationPortrait),
         ),
         ButtonSegment(
           value: 'square',
-          icon: const Icon(Icons.square_outlined, size: 16),
+          icon: const StudioIcon(Icons.square_outlined, size: 16),
           label: Text(l10n.localGallery_orientationSquare),
         ),
       ],
@@ -782,7 +783,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
               color: colorScheme.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
+            child: StudioIcon(
               Icons.filter_list_rounded,
               color: colorScheme.primary,
               size: 22,
@@ -810,7 +811,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
             ),
           ),
           IconButton(
-            icon: Icon(
+            icon: StudioIcon(
               Icons.close_rounded,
               color: colorScheme.onSurfaceVariant,
             ),
@@ -864,7 +865,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
                   color: iconColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 16, color: iconColor),
+                child: StudioIcon(icon, size: 16, color: iconColor),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -907,7 +908,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
       children: [
         for (final tag in tags)
           InputChip(
-            avatar: const Icon(Icons.tag, size: 14),
+            avatar: const StudioIcon(Icons.tag, size: 14),
             label: Text(tag),
             onDeleted: () {
               ref
@@ -965,7 +966,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
           isDense: true,
           suffixIcon: controller.text.isNotEmpty
               ? IconButton(
-                  icon: Icon(
+                  icon: StudioIcon(
                     Icons.clear_rounded,
                     size: 18,
                     color: colorScheme.onSurfaceVariant,
@@ -1013,7 +1014,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Icon(
+          child: StudioIcon(
             Icons.remove,
             size: 16,
             color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
@@ -1117,7 +1118,11 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.filter_alt, size: 14, color: colorScheme.tertiary),
+                  StudioIcon(
+                    Icons.filter_alt,
+                    size: 14,
+                    color: colorScheme.tertiary,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     l10n.localGallery_activeFiltersSet,
@@ -1135,7 +1140,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
           // Reset button
           TextButton.icon(
             onPressed: _hasActiveFilters ? _resetFilters : null,
-            icon: Icon(
+            icon: StudioIcon(
               Icons.refresh_rounded,
               size: 18,
               color: _hasActiveFilters
@@ -1156,7 +1161,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
           // Apply button
           FilledButton.icon(
             onPressed: _applyFilters,
-            icon: const Icon(Icons.check_rounded, size: 18),
+            icon: const StudioIcon(Icons.check_rounded, size: 18),
             label: Text(l10n.localGallery_applyFilters),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -189,7 +190,7 @@ class _VibeImportNamingDialogState extends State<VibeImportNamingDialog> {
   Widget _buildHeader(ThemeData theme) {
     return Row(
       children: [
-        Icon(Icons.edit_note, color: theme.colorScheme.primary),
+        StudioIcon(Icons.edit_note, color: theme.colorScheme.primary),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
@@ -202,7 +203,7 @@ class _VibeImportNamingDialogState extends State<VibeImportNamingDialog> {
         if (widget.hasNameConflict)
           Tooltip(
             message: context.l10n.vibe_import_nameConflictOverwrite,
-            child: Icon(
+            child: StudioIcon(
               Icons.warning_amber,
               color: theme.colorScheme.error,
               size: 20,
@@ -232,7 +233,7 @@ class _VibeImportNamingDialogState extends State<VibeImportNamingDialog> {
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                StudioIcon(
                   Icons.broken_image,
                   size: 48,
                   color: theme.colorScheme.outline,
@@ -261,7 +262,7 @@ class _VibeImportNamingDialogState extends State<VibeImportNamingDialog> {
         labelText: context.l10n.vibe_saveToLibrary_nameLabel,
         hintText: context.l10n.vibe_saveToLibrary_nameHint,
         errorText: _errorText,
-        prefixIcon: const Icon(Icons.label_outline),
+        prefixIcon: const StudioIcon(Icons.label_outline),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
         fillColor: theme.colorScheme.surfaceContainerHighest,
@@ -286,7 +287,7 @@ class _VibeImportNamingDialogState extends State<VibeImportNamingDialog> {
       ),
       child: Row(
         children: [
-          Icon(
+          StudioIcon(
             Icons.batch_prediction,
             size: 20,
             color: theme.colorScheme.primary,
@@ -335,7 +336,7 @@ class _VibeImportNamingDialogState extends State<VibeImportNamingDialog> {
         if (widget.isBatchImport) ...[
           TextButton.icon(
             onPressed: _skip,
-            icon: const Icon(Icons.skip_next),
+            icon: const StudioIcon(Icons.skip_next),
             label: Text(context.l10n.vibe_import_skip),
           ),
           const SizedBox(width: 8),
@@ -349,7 +350,7 @@ class _VibeImportNamingDialogState extends State<VibeImportNamingDialog> {
         // 确认按钮
         FilledButton.icon(
           onPressed: _confirm,
-          icon: const Icon(Icons.check),
+          icon: const StudioIcon(Icons.check),
           label: Text(context.l10n.vibe_import_confirm),
         ),
       ],

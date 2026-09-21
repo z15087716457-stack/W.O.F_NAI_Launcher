@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -109,7 +110,7 @@ class ExploreFolderAssignBar extends ConsumerWidget {
               FilterChip(
                 key: Key('explore-assign-folder-${folder.id}'),
                 label: Text(folder.name),
-                avatar: const Icon(Icons.folder_outlined, size: 16),
+                avatar: const StudioIcon(Icons.folder_outlined, size: 16),
                 selected: candidate.folderId == folder.id,
                 visualDensity: VisualDensity.compact,
                 onSelected: (_) => _assign(
@@ -132,7 +133,7 @@ class ExploreFolderAssignBar extends ConsumerWidget {
                 if (folder == null || !context.mounted) return;
                 await _assign(context, ref, folder.id);
               },
-              icon: const Icon(Icons.create_new_folder_outlined),
+              icon: const StudioIcon(Icons.create_new_folder_outlined),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -265,7 +266,7 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  StudioIcon(
                     Icons.add_photo_alternate_outlined,
                     size: 48,
                     color: theme.colorScheme.primary,

@@ -1,3 +1,5 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
@@ -233,7 +235,7 @@ class _CanvasSizeDialogState extends State<CanvasSizeDialog> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: IconButton(
-                    icon: Icon(
+                    icon: StudioIcon(
                       _linkDimensions ? Icons.link : Icons.link_off,
                       color: _linkDimensions
                           ? theme.colorScheme.primary
@@ -457,7 +459,7 @@ class _CanvasSizePreview extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              StudioIcon(
                 Icons.preview,
                 size: 16,
                 color: theme.colorScheme.onSurfaceVariant,
@@ -805,7 +807,7 @@ class _SizeInfo extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
+                StudioIcon(
                   Icons.crop_square,
                   size: 14,
                   color: theme.colorScheme.outline,
@@ -823,7 +825,8 @@ class _SizeInfo extends StatelessWidget {
               '${originalSize.width.toInt()} x ${originalSize.height.toInt()}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.outline,
-                fontFamily: 'monospace',
+                fontFamily: StudioTypography.mono,
+                fontFamilyFallback: StudioTypography.fallback,
               ),
             ),
           ],
@@ -837,7 +840,7 @@ class _SizeInfo extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
+                StudioIcon(
                   Icons.check_box,
                   size: 14,
                   color: theme.colorScheme.primary,
@@ -858,7 +861,8 @@ class _SizeInfo extends StatelessWidget {
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'monospace',
+                    fontFamily: StudioTypography.mono,
+                    fontFamilyFallback: StudioTypography.fallback,
                   ),
                 ),
                 if (widthDiff != 0 || heightDiff != 0) ...[
@@ -869,7 +873,8 @@ class _SizeInfo extends StatelessWidget {
                       color: widthDiff >= 0 && heightDiff >= 0
                           ? theme.colorScheme.primary
                           : theme.colorScheme.error,
-                      fontFamily: 'monospace',
+                      fontFamily: StudioTypography.mono,
+                      fontFamilyFallback: StudioTypography.fallback,
                     ),
                   ),
                 ],
@@ -890,7 +895,7 @@ class _SizeInfo extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              StudioIcon(
                 _getModeIcon(mode),
                 size: 12,
                 color: theme.colorScheme.onSecondaryContainer,

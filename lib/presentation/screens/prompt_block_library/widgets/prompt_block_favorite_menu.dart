@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -158,7 +159,7 @@ class _BlockFavoriteMenuPanelState
                         ),
                         child: Row(
                           children: [
-                            Icon(
+                            StudioIcon(
                               Icons.collections_bookmark_outlined,
                               size: 16,
                               color: theme.colorScheme.outline,
@@ -286,7 +287,11 @@ class _MenuRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 17, color: iconColor ?? theme.colorScheme.primary),
+            StudioIcon(
+              icon,
+              size: 17,
+              color: iconColor ?? theme.colorScheme.primary,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -307,7 +312,7 @@ class _MenuRow extends StatelessWidget {
             ],
             const SizedBox(width: 6),
             if (checked != null)
-              Icon(
+              StudioIcon(
                 checked! ? Icons.check : Icons.check_box_outline_blank,
                 size: 16,
                 color: checked!
@@ -315,7 +320,7 @@ class _MenuRow extends StatelessWidget {
                     : theme.colorScheme.outlineVariant,
               )
             else if (isExpanded != null)
-              Icon(
+              StudioIcon(
                 isExpanded! ? Icons.expand_more : Icons.chevron_right,
                 size: 16,
                 color: theme.colorScheme.outline,

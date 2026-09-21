@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/enums/precise_ref_type.dart';
@@ -85,7 +86,10 @@ class _MetadataImportDialogState extends State<MetadataImportDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(Icons.file_download_outlined, color: theme.colorScheme.primary),
+          StudioIcon(
+            Icons.file_download_outlined,
+            color: theme.colorScheme.primary,
+          ),
           const SizedBox(width: 8),
           Text(l10n.metadataImport_title),
         ],
@@ -135,7 +139,7 @@ class _MetadataImportDialogState extends State<MetadataImportDialog> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  StudioIcon(
                     Icons.check_circle_outline,
                     size: 16,
                     color: theme.colorScheme.primary,
@@ -177,7 +181,7 @@ class _MetadataImportDialogState extends State<MetadataImportDialog> {
       runSpacing: 8,
       children: [
         ActionChip(
-          avatar: const Icon(Icons.select_all, size: 18),
+          avatar: const StudioIcon(Icons.select_all, size: 18),
           label: Text(l10n.metadataImport_selectAll),
           onPressed: () => setState(() {
             _options = MetadataImportOptions.all();
@@ -185,7 +189,7 @@ class _MetadataImportDialogState extends State<MetadataImportDialog> {
           }),
         ),
         ActionChip(
-          avatar: const Icon(Icons.text_fields, size: 18),
+          avatar: const StudioIcon(Icons.text_fields, size: 18),
           label: Text(l10n.metadataImport_promptsOnly),
           onPressed: () => setState(() {
             _options = MetadataImportOptions.promptsOnly();
@@ -193,7 +197,7 @@ class _MetadataImportDialogState extends State<MetadataImportDialog> {
           }),
         ),
         ActionChip(
-          avatar: const Icon(Icons.tune, size: 18),
+          avatar: const StudioIcon(Icons.tune, size: 18),
           label: Text(l10n.metadataImport_generationOnly),
           onPressed: () => setState(() {
             _options = MetadataImportOptions.generationOnly();
@@ -201,7 +205,7 @@ class _MetadataImportDialogState extends State<MetadataImportDialog> {
           }),
         ),
         ActionChip(
-          avatar: const Icon(Icons.deselect, size: 18),
+          avatar: const StudioIcon(Icons.deselect, size: 18),
           label: Text(l10n.metadataImport_clear),
           onPressed: () =>
               setState(() => _options = MetadataImportOptions.none()),
@@ -572,7 +576,7 @@ class _MetadataImportDialogState extends State<MetadataImportDialog> {
 
     return Row(
       children: [
-        Icon(icon, size: 18, color: theme.colorScheme.primary),
+        StudioIcon(icon, size: 18, color: theme.colorScheme.primary),
         const SizedBox(width: 6),
         Text(
           title,
@@ -793,7 +797,10 @@ class _OfficialMetadataImportDialogState
     return AlertDialog(
       title: Row(
         children: [
-          Icon(Icons.file_download_outlined, color: theme.colorScheme.primary),
+          StudioIcon(
+            Icons.file_download_outlined,
+            color: theme.colorScheme.primary,
+          ),
           const SizedBox(width: 8),
           Expanded(child: Text(l10n.metadataImport_title)),
         ],

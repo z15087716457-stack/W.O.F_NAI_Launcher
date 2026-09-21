@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/localization_extension.dart';
@@ -47,7 +48,9 @@ class RecentVibeItem extends StatelessWidget {
                       )
                     : Container(
                         color: theme.colorScheme.surfaceContainerHighest,
-                        child: const Center(child: Icon(Icons.image, size: 24)),
+                        child: const Center(
+                          child: StudioIcon(Icons.image, size: 24),
+                        ),
                       ),
               ),
             ),
@@ -77,7 +80,7 @@ class RecentVibeItem extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  StudioIcon(
                     entry.isPreEncoded ? Icons.check_circle : Icons.warning,
                     size: 8,
                     color: entry.isPreEncoded ? Colors.green : Colors.orange,

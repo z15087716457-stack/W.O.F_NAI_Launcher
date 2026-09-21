@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -331,7 +332,7 @@ class _PromptBlockLibraryScreenState
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      StudioIcon(
                         Icons.info_outline,
                         size: 19,
                         color: theme.colorScheme.primary,
@@ -352,7 +353,7 @@ class _PromptBlockLibraryScreenState
                         tooltip: l10n.common_collapse,
                         visualDensity: VisualDensity.compact,
                         onPressed: () => _setDetailPanelExpanded(false),
-                        icon: const Icon(Icons.keyboard_arrow_right),
+                        icon: const StudioIcon(Icons.keyboard_arrow_right),
                       ),
                     ],
                   ),
@@ -367,7 +368,7 @@ class _PromptBlockLibraryScreenState
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      StudioIcon(
                         icon,
                         size: 28,
                         color: theme.colorScheme.onSurfaceVariant,
@@ -415,7 +416,7 @@ class _PromptBlockLibraryScreenState
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    Icon(
+                    StudioIcon(
                       Icons.folder_copy_outlined,
                       size: 20,
                       color: theme.colorScheme.primary,
@@ -432,7 +433,7 @@ class _PromptBlockLibraryScreenState
                     IconButton(
                       tooltip: context.l10n.promptBlockLibrary_newFolder,
                       onPressed: () => _showFolderNameDialog(context),
-                      icon: const Icon(
+                      icon: const StudioIcon(
                         Icons.create_new_folder_outlined,
                         size: 19,
                       ),
@@ -531,7 +532,7 @@ class _PromptBlockLibraryScreenState
                       children: [
                         PopupMenuButton<String>(
                           tooltip: context.l10n.promptBlockLibrary_importExport,
-                          icon: const Icon(Icons.import_export),
+                          icon: const StudioIcon(Icons.import_export),
                           itemBuilder: (context) => [
                             PopupMenuItem(
                               value: 'importTxt',
@@ -598,14 +599,14 @@ class _PromptBlockLibraryScreenState
                           children: [
                             Tooltip(
                               message: context.l10n.promptBlockLibrary_listView,
-                              child: const Icon(
+                              child: const StudioIcon(
                                 Icons.view_agenda_outlined,
                                 size: 18,
                               ),
                             ),
                             Tooltip(
                               message: context.l10n.promptBlockLibrary_gridView,
-                              child: const Icon(
+                              child: const StudioIcon(
                                 Icons.grid_view_outlined,
                                 size: 18,
                               ),
@@ -613,7 +614,7 @@ class _PromptBlockLibraryScreenState
                             Tooltip(
                               message:
                                   context.l10n.promptBlockLibrary_waterfallView,
-                              child: const Icon(
+                              child: const StudioIcon(
                                 Icons.view_quilt_outlined,
                                 size: 18,
                               ),
@@ -624,7 +625,7 @@ class _PromptBlockLibraryScreenState
                           key: const Key('prompt-block-multi-select-toggle'),
                           tooltip: context.l10n.promptBlockLibrary_multiSelect,
                           onPressed: () => _enterMultiSelectEmpty(),
-                          icon: const Icon(Icons.checklist, size: 20),
+                          icon: const StudioIcon(Icons.checklist, size: 20),
                         ),
                         _buildSortControls(context),
                         IconButton(
@@ -632,11 +633,11 @@ class _PromptBlockLibraryScreenState
                           onPressed: () => ref
                               .read(promptBlockLibraryNotifierProvider.notifier)
                               .refresh(),
-                          icon: const Icon(Icons.refresh),
+                          icon: const StudioIcon(Icons.refresh),
                         ),
                         FilledButton.icon(
                           onPressed: () => _showFolderNameDialog(context),
-                          icon: const Icon(
+                          icon: const StudioIcon(
                             Icons.create_new_folder_outlined,
                             size: 18,
                           ),
@@ -647,7 +648,7 @@ class _PromptBlockLibraryScreenState
                         const SizedBox(width: 8),
                         FilledButton.icon(
                           onPressed: () => _showCreateBlock(context),
-                          icon: const Icon(Icons.add, size: 18),
+                          icon: const StudioIcon(Icons.add, size: 18),
                           label: Text(context.l10n.promptBlockLibrary_newBlock),
                         ),
                       ],
@@ -656,7 +657,7 @@ class _PromptBlockLibraryScreenState
               final heading = Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  StudioIcon(
                     Icons.view_module_outlined,
                     color: theme.colorScheme.primary,
                   ),
@@ -692,7 +693,7 @@ class _PromptBlockLibraryScreenState
                           onPressed: () => ref
                               .read(promptBlockLibraryNotifierProvider.notifier)
                               .refresh(),
-                          icon: const Icon(Icons.refresh),
+                          icon: const StudioIcon(Icons.refresh),
                         ),
                       ],
                     ),
@@ -757,7 +758,7 @@ class _PromptBlockLibraryScreenState
           key: const Key('prompt-block-multi-select-all'),
           tooltip: l10n.promptBlockLibrary_selectAllVisible,
           onPressed: allSelected ? null : () => _selectAllVisible(visible),
-          icon: const Icon(Icons.select_all, size: 19),
+          icon: const StudioIcon(Icons.select_all, size: 19),
         ),
         IconButton(
           key: const Key('prompt-block-multi-select-clear'),
@@ -765,18 +766,18 @@ class _PromptBlockLibraryScreenState
           onPressed: hasSelection
               ? () => setState(() => _multiSelectedIds.clear())
               : null,
-          icon: const Icon(Icons.deselect, size: 19),
+          icon: const StudioIcon(Icons.deselect, size: 19),
         ),
         const SizedBox(width: 4),
         IconButton(
           tooltip: l10n.common_favorite,
           onPressed: hasSelection ? () => _setBlocksFavorite(true) : null,
-          icon: const Icon(Icons.star_border, size: 19),
+          icon: const StudioIcon(Icons.star_border, size: 19),
         ),
         IconButton(
           tooltip: l10n.common_unfavorite,
           onPressed: hasSelection ? () => _setBlocksFavorite(false) : null,
-          icon: const Icon(Icons.star, size: 19),
+          icon: const StudioIcon(Icons.star, size: 19),
         ),
         IconButton(
           key: const Key('prompt-block-multi-select-move'),
@@ -784,7 +785,7 @@ class _PromptBlockLibraryScreenState
           onPressed: hasSelection
               ? () => _moveBlocksToFolderDialog(_multiSelectedIds.toList())
               : null,
-          icon: const Icon(Icons.drive_file_move_outline, size: 19),
+          icon: const StudioIcon(Icons.drive_file_move_outline, size: 19),
         ),
         IconButton(
           key: const Key('prompt-block-multi-select-delete'),
@@ -794,7 +795,7 @@ class _PromptBlockLibraryScreenState
           onPressed: hasSelection
               ? () => _deleteBlocks(context, _multiSelectedIds.toList())
               : null,
-          icon: Icon(
+          icon: StudioIcon(
             Icons.delete_outline,
             size: 19,
             color: theme.colorScheme.error,
@@ -805,7 +806,7 @@ class _PromptBlockLibraryScreenState
           key: const Key('prompt-block-multi-select-exit'),
           tooltip: l10n.promptBlockLibrary_exitMultiSelect,
           onPressed: _exitMultiSelect,
-          icon: const Icon(Icons.close, size: 19),
+          icon: const StudioIcon(Icons.close, size: 19),
         ),
       ],
     );
@@ -840,7 +841,7 @@ class _PromptBlockLibraryScreenState
                     SizedBox(
                       width: 20,
                       child: field == _sortField
-                          ? const Icon(Icons.check, size: 16)
+                          ? const StudioIcon(Icons.check, size: 16)
                           : null,
                     ),
                     const SizedBox(width: 6),
@@ -858,7 +859,7 @@ class _PromptBlockLibraryScreenState
           onPressed: _sortField.overridesManualOrder
               ? _toggleSortDirection
               : null,
-          icon: Icon(
+          icon: StudioIcon(
             _sortDescending ? Icons.south : Icons.north,
             size: 18,
             color: _sortField.overridesManualOrder
@@ -902,7 +903,7 @@ class _PromptBlockLibraryScreenState
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
               fontSize: 13,
             ),
-            prefixIcon: const Icon(Icons.search, size: 18),
+            prefixIcon: const StudioIcon(Icons.search, size: 18),
             suffixIcon: _searchController.text.isEmpty
                 ? null
                 : IconButton(
@@ -911,7 +912,7 @@ class _PromptBlockLibraryScreenState
                       _searchController.clear();
                       setState(() {});
                     },
-                    icon: const Icon(Icons.close, size: 16),
+                    icon: const StudioIcon(Icons.close, size: 16),
                   ),
             filled: true,
             fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
@@ -1390,7 +1391,7 @@ class _PromptBlockLibraryScreenState
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              StudioIcon(
                 Icons.view_module_outlined,
                 size: 17,
                 color: theme.colorScheme.onSurfaceVariant,
@@ -1408,7 +1409,7 @@ class _PromptBlockLibraryScreenState
                   onChangeEnd: _persistCardWidth,
                 ),
               ),
-              Icon(
+              StudioIcon(
                 Icons.view_module,
                 size: 19,
                 color: theme.colorScheme.onSurfaceVariant,
@@ -1684,11 +1685,8 @@ class _PromptBlockLibraryScreenState
       for (final anchor in anchors) {
         final ro = _findCardRenderObject(scrollable, anchor.cardKey);
         if (ro == null || !ro.attached) continue;
-        final target =
-            (viewport.getOffsetToReveal(ro, 0).offset - anchor.dy).clamp(
-              position.minScrollExtent,
-              position.maxScrollExtent,
-            );
+        final target = (viewport.getOffsetToReveal(ro, 0).offset - anchor.dy)
+            .clamp(position.minScrollExtent, position.maxScrollExtent);
         if ((target - position.pixels).abs() > 0.5) position.jumpTo(target);
         return;
       }
@@ -2163,7 +2161,7 @@ class _PromptBlockLibraryScreenState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          StudioIcon(
             icon,
             size: 64,
             color: theme.colorScheme.outline.withValues(alpha: 0.5),
@@ -2192,7 +2190,7 @@ class _PromptBlockLibraryScreenState
                   _searchController.clear();
                   setState(() {});
                 },
-                icon: const Icon(Icons.clear),
+                icon: const StudioIcon(Icons.clear),
                 label: Text(context.l10n.common_clear),
               ),
             )
@@ -2201,7 +2199,7 @@ class _PromptBlockLibraryScreenState
               padding: const EdgeInsets.only(top: 20),
               child: FilledButton.icon(
                 onPressed: () => _showCreateBlock(context),
-                icon: const Icon(Icons.add),
+                icon: const StudioIcon(Icons.add),
                 label: Text(context.l10n.promptBlockLibrary_newBlock),
               ),
             ),
@@ -2215,7 +2213,7 @@ class _PromptBlockLibraryScreenState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          StudioIcon(
             Icons.error_outline,
             size: 48,
             color: Theme.of(context).colorScheme.error,
@@ -2226,7 +2224,7 @@ class _PromptBlockLibraryScreenState
           FilledButton.icon(
             onPressed: () =>
                 ref.read(promptBlockLibraryNotifierProvider.notifier).refresh(),
-            icon: const Icon(Icons.refresh),
+            icon: const StudioIcon(Icons.refresh),
             label: Text(context.l10n.common_retry),
           ),
         ],
@@ -2991,7 +2989,7 @@ class _FolderSectionHeaderDelegate extends SliverPersistentHeaderDelegate {
           Expanded(
             child: Row(
               children: [
-                Icon(
+                StudioIcon(
                   Icons.folder_outlined,
                   size: 16,
                   color: theme.colorScheme.primary,

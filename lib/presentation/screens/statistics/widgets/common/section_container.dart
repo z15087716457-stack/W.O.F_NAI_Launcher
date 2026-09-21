@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import '../../../../widgets/common/themed_divider.dart';
 
@@ -49,7 +50,7 @@ class SectionContainer extends StatelessWidget {
                   color: colorScheme.primaryContainer.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Icon(icon, size: 20, color: colorScheme.primary),
+                child: StudioIcon(icon, size: 20, color: colorScheme.primary),
               ),
               const SizedBox(width: 12),
               Expanded(

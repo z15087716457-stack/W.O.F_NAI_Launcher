@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -168,7 +169,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ? Builder(
                 builder: (context) {
                   return IconButton(
-                    icon: const Icon(Icons.menu),
+                    icon: const StudioIcon(Icons.menu),
                     onPressed: () => Scaffold.of(context).openDrawer(),
                   );
                 },
@@ -237,8 +238,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       destinations: sections.map((section) {
         return NavigationRailDestination(
-          icon: Icon(section.icon),
-          selectedIcon: Icon(section.selectedIcon),
+          icon: StudioIcon(section.icon),
+          selectedIcon: StudioIcon(section.selectedIcon),
           label: Text(section.label),
         );
       }).toList(),
@@ -263,7 +264,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
+                    StudioIcon(
                       Icons.settings,
                       size: 48,
                       color: theme.colorScheme.primary,
@@ -287,7 +288,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   final isSelected = _selectedIndex == index;
 
                   return ListTile(
-                    leading: Icon(
+                    leading: StudioIcon(
                       isSelected ? section.selectedIcon : section.icon,
                       color: isSelected
                           ? theme.colorScheme.primary

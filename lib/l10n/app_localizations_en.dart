@@ -9,7 +9,10 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get app_title => 'NAI Launcher';
+  String get app_title => 'W.O.F NAI Studio';
+
+  @override
+  String get settings_visualAssets => 'Interface fonts, icons & licenses';
 
   @override
   String get app_subtitle => 'NovelAI Third-party Client';

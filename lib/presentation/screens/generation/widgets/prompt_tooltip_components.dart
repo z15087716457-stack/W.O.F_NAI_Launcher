@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/localization_extension.dart';
@@ -36,7 +37,7 @@ class TooltipHeader extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          StudioIcon(icon, size: 14, color: color),
           const SizedBox(width: 6),
           Text(
             label,
@@ -100,7 +101,7 @@ class TooltipSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              Icon(icon, size: 12, color: color),
+              StudioIcon(icon, size: 12, color: color),
               const SizedBox(width: 4),
               Text(
                 label,
@@ -181,7 +182,7 @@ class TooltipFinalPromptSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
+              StudioIcon(
                 Icons.output_rounded,
                 size: 12,
                 color: theme.colorScheme.primary,

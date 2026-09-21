@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -102,7 +103,7 @@ class _AnimatedRefreshButtonState extends ConsumerState<AnimatedRefreshButton>
                 builder: (context, child) {
                   return Transform.rotate(
                     angle: _rotationController.value * 2 * 3.14159,
-                    child: Icon(
+                    child: StudioIcon(
                       Icons.refresh_rounded,
                       size: 16,
                       color: _isHovered && !isLoading

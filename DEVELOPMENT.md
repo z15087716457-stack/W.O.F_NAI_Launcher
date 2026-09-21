@@ -41,6 +41,10 @@ Windows 桌面热重载优先使用 `scripts/dev_hot_reload_window.ps1`，它会
 
 ICO 属于原生程序资源；更新后必须重新构建 Windows 程序才能改变 EXE 自身的图标，仅 Flutter 热重载不会更新。macOS 和移动端的图标资源独立维护。
 
+### Studio 字体与界面图标
+
+显示名为 `W.O.F NAI Studio`；数据目录、单实例标识、可执行文件名和更新仓库保持既有标识。界面字族使用随包提供的 Geist Sans / Mono / Pixel Line 与 HarmonyOS Sans SC，字体角色、图标语义映射、许可和实绘验证见 [tool/branding/README.md](tool/branding/README.md)。新 UI 使用 `StudioIcon` 和 `StudioTypography`；没有语义准确的 Geist 替代时保留原图，不随意替换专用符号。字体、SVG、许可或原生显示名变更后需交付包含新资源的完整运行包。
+
 ## Changelog 与 Release Notes 规范
 
 `CHANGELOG.md` 是 GitHub Release notes 的“更新内容”来源；Release workflow 不会自动根据 git commit 生成变更摘要。准备发布前必须对比上一个 tag 到当前 HEAD 的提交，把本版本用户可见变化整理进对应版本段落，例如 `## [1.0.0] - YYYY-MM-DD`。

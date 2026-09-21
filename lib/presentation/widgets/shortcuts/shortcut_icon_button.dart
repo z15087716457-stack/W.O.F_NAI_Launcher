@@ -1,3 +1,5 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/shortcuts/shortcut_manager.dart';
@@ -46,7 +48,7 @@ class ShortcutIconButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final button = IconButton(
-      icon: Icon(icon),
+      icon: StudioIcon(icon),
       isSelected: isSelected,
       iconSize: iconSize,
       visualDensity: visualDensity,
@@ -107,7 +109,7 @@ class ShortcutFab extends ConsumerWidget {
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       tooltip: tooltip,
-      child: Icon(icon),
+      child: StudioIcon(icon),
     );
 
     if (shortcutId == null) {
@@ -126,7 +128,7 @@ class ShortcutFab extends ConsumerWidget {
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       tooltip: '$tooltip ($shortcutLabel)',
-      child: Icon(icon),
+      child: StudioIcon(icon),
     );
   }
 }
@@ -174,7 +176,8 @@ class ShortcutMenuItem extends ConsumerWidget {
           child: Text(
             shortcutLabel,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontFamily: 'monospace',
+              fontFamily: StudioTypography.mono,
+              fontFamilyFallback: StudioTypography.fallback,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),

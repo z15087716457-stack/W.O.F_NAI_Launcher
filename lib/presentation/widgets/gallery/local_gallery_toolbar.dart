@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -683,14 +684,14 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             fontSize: 13,
           ),
-          prefixIcon: Icon(
+          prefixIcon: StudioIcon(
             Icons.search,
             size: 18,
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
           ),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-                  icon: Icon(
+                  icon: StudioIcon(
                     Icons.close,
                     size: 16,
                     color: theme.colorScheme.onSurfaceVariant.withValues(
@@ -774,7 +775,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
           ),
           for (final tag in tags)
             InputChip(
-              avatar: const Icon(Icons.tag, size: 14),
+              avatar: const StudioIcon(Icons.tag, size: 14),
               label: Text(tag),
               onDeleted: () {
                 ref
@@ -866,9 +867,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                     child: naiOnly
                         // 激活：官网式反色内胆（浅色底↔深色内容随主题镜像）
                         ? Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
                             decoration: BoxDecoration(
                               color: colorScheme.onSurface,
                               borderRadius: BorderRadius.circular(5),
@@ -956,7 +955,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                         children: [
                           Expanded(child: Text('NAI $version')),
                           if (version == activeVersion)
-                            Icon(
+                            StudioIcon(
                               Icons.check,
                               size: 16,
                               color: colorScheme.primary,
@@ -976,20 +975,20 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                           versionActive
                               ? 'Ver $activeVersion'
                               : l10n.localGallery_naiVersionFilterLabel,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: versionActive
-                              ? FontWeight.w600
-                              : FontWeight.w400,
-                          color: versionActive ? activeColor : null,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: versionActive
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            color: versionActive ? activeColor : null,
+                          ),
                         ),
-                      ),
-                      Icon(
-                        Icons.keyboard_arrow_down,
-                        size: 15,
-                        color: versionActive ? activeColor : inactiveColor,
-                      ),
-                    ],
+                        StudioIcon(
+                          Icons.keyboard_arrow_down,
+                          size: 15,
+                          color: versionActive ? activeColor : inactiveColor,
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -1074,11 +1073,11 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                 value: field,
                 child: Row(
                   children: [
-                    Icon(icon, size: 16),
+                    StudioIcon(icon, size: 16),
                     const SizedBox(width: 8),
                     Expanded(child: Text(label)),
                     if (field == state.sortField)
-                      Icon(
+                      StudioIcon(
                         Icons.check,
                         size: 16,
                         color: theme.colorScheme.primary,
@@ -1094,7 +1093,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
             child: showLabel
                 ? OutlinedButton.icon(
                     onPressed: () {},
-                    icon: const Icon(Icons.sort, size: 16),
+                    icon: const StudioIcon(Icons.sort, size: 16),
                     label: Text(
                       currentFieldLabel,
                       style: const TextStyle(fontSize: 12),
@@ -1117,7 +1116,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                       visualDensity: VisualDensity.compact,
                       minimumSize: const Size(32, 0),
                     ),
-                    child: const Icon(Icons.sort, size: 16),
+                    child: const StudioIcon(Icons.sort, size: 16),
                   ),
           ),
         ),
@@ -1144,7 +1143,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
               visualDensity: VisualDensity.compact,
               minimumSize: const Size(32, 0),
             ),
-            child: Icon(
+            child: StudioIcon(
               state.sortDirection == GallerySortDirection.descending
                   ? Icons.arrow_downward
                   : Icons.arrow_upward,
@@ -1171,7 +1170,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
 
     return OutlinedButton.icon(
       onPressed: () => _showDateRangeDialog(),
-      icon: Icon(
+      icon: StudioIcon(
         Icons.calendar_today,
         size: 16,
         color: hasDateRange ? theme.colorScheme.primary : null,

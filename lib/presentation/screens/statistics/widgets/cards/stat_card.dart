@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import '../animated/animated_number.dart';
 
@@ -60,7 +61,7 @@ class StatCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, size: 20, color: color),
+                StudioIcon(icon, size: 20, color: color),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -119,7 +120,7 @@ class TrendSummaryItem extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: theme.colorScheme.primary),
+        StudioIcon(icon, size: 16, color: theme.colorScheme.primary),
         const SizedBox(width: 4),
         Text(
           '$label: ',

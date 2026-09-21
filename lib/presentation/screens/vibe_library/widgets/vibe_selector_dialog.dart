@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -499,7 +500,7 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
   Widget _buildHeader(ThemeData theme) {
     return Row(
       children: [
-        Icon(Icons.style_outlined, color: theme.colorScheme.primary),
+        StudioIcon(Icons.style_outlined, color: theme.colorScheme.primary),
         const SizedBox(width: 12),
         Text(
           widget.title ?? context.l10n.vibe_selector_title,
@@ -525,7 +526,7 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
           ),
         const SizedBox(width: 12),
         IconButton(
-          icon: const Icon(Icons.close),
+          icon: const StudioIcon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],
@@ -539,9 +540,12 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
       onChanged: _onSearchChanged,
       decoration: InputDecoration(
         hintText: context.l10n.vibeLibrary_searchHint,
-        prefixIcon: const Icon(Icons.search),
+        prefixIcon: const StudioIcon(Icons.search),
         suffixIcon: _searchQuery.isNotEmpty
-            ? IconButton(icon: const Icon(Icons.clear), onPressed: _clearSearch)
+            ? IconButton(
+                icon: const StudioIcon(Icons.clear),
+                onPressed: _clearSearch,
+              )
             : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -570,7 +574,7 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
             label: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                StudioIcon(
                   _favoritesOnly ? Icons.favorite : Icons.favorite_border,
                   size: 16,
                   color: _favoritesOnly ? Colors.red : null,
@@ -646,7 +650,11 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
               Text(context.l10n.vibeSelectorFilterSourceAll),
               if (_selectedSourceType == null) ...[
                 const Spacer(),
-                Icon(Icons.check, size: 18, color: theme.colorScheme.primary),
+                StudioIcon(
+                  Icons.check,
+                  size: 18,
+                  color: theme.colorScheme.primary,
+                ),
               ],
             ],
           ),
@@ -670,7 +678,11 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
                 Text(context.vibeSourceTypeLabel(type)),
                 if (_selectedSourceType == type) ...[
                   const Spacer(),
-                  Icon(Icons.check, size: 18, color: theme.colorScheme.primary),
+                  StudioIcon(
+                    Icons.check,
+                    size: 18,
+                    color: theme.colorScheme.primary,
+                  ),
                 ],
               ],
             ),
@@ -719,7 +731,7 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
               Text(sortLabelMap[order]!),
               if (isSelected) ...[
                 const Spacer(),
-                Icon(
+                StudioIcon(
                   _sortDescending ? Icons.arrow_downward : Icons.arrow_upward,
                   size: 16,
                   color: theme.colorScheme.primary,
@@ -730,7 +742,7 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
         );
       }).toList(),
       child: Chip(
-        avatar: Icon(
+        avatar: StudioIcon(
           _sortDescending ? Icons.arrow_downward : Icons.arrow_upward,
           size: 14,
         ),
@@ -791,12 +803,12 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
                   const Spacer(),
                   TextButton.icon(
                     onPressed: _selectAll,
-                    icon: const Icon(Icons.select_all, size: 18),
+                    icon: const StudioIcon(Icons.select_all, size: 18),
                     label: Text(context.l10n.selectAll),
                   ),
                   TextButton.icon(
                     onPressed: _clearSelection,
-                    icon: const Icon(Icons.deselect, size: 18),
+                    icon: const StudioIcon(Icons.deselect, size: 18),
                     label: Text(context.l10n.clearSelection),
                   ),
                 ],
@@ -907,13 +919,17 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
                       maxLogicalHeight: 24,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.broken_image, size: 18);
+                        return const StudioIcon(Icons.broken_image, size: 18);
                       },
                     ),
                   ),
                 )
               else
-                Icon(Icons.image, size: 18, color: theme.colorScheme.outline),
+                StudioIcon(
+                  Icons.image,
+                  size: 18,
+                  color: theme.colorScheme.outline,
+                ),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
@@ -929,7 +945,7 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
               ),
               if (isSelected) ...[
                 const SizedBox(width: 4),
-                Icon(
+                StudioIcon(
                   Icons.check_circle,
                   size: 16,
                   color: theme.colorScheme.primary,
@@ -972,7 +988,7 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            StudioIcon(
               Icons.style_outlined,
               size: 64,
               color: theme.colorScheme.outline,
@@ -1002,7 +1018,11 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off, size: 48, color: theme.colorScheme.outline),
+          StudioIcon(
+            Icons.search_off,
+            size: 48,
+            color: theme.colorScheme.outline,
+          ),
           const SizedBox(height: 16),
           Text(
             context.l10n.search_noResults,
@@ -1041,12 +1061,12 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
                     ButtonSegment(
                       value: false,
                       label: Text(context.l10n.addToCurrent),
-                      icon: const Icon(Icons.add),
+                      icon: const StudioIcon(Icons.add),
                     ),
                     ButtonSegment(
                       value: true,
                       label: Text(context.l10n.replaceExisting),
-                      icon: const Icon(Icons.swap_horiz),
+                      icon: const StudioIcon(Icons.swap_horiz),
                     ),
                   ],
                   selected: {_isReplaceMode},
@@ -1068,7 +1088,7 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
             const SizedBox(width: 8),
             FilledButton.icon(
               onPressed: _selectedIds.isNotEmpty ? _confirmSelection : null,
-              icon: const Icon(Icons.check),
+              icon: const StudioIcon(Icons.check),
               label: Text(
                 '${context.l10n.confirmSelection} (${_selectedIds.length})',
               ),

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -71,7 +72,7 @@ class PillInstanceCard extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.circle, size: 10, color: color),
+                StudioIcon(Icons.circle, size: 10, color: color),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -121,7 +122,7 @@ class PillInstanceCard extends ConsumerWidget {
                 if (mode == PillRollMode.random)
                   _cardButton(
                     key: const Key('pill-reroll'),
-                    icon: const Icon(Icons.casino_outlined, size: 18),
+                    icon: const StudioIcon(Icons.casino_outlined, size: 18),
                     tooltip: instance.locked
                         ? l10n.pillCardRerollLocked
                         : l10n.pillCardReroll,
@@ -132,7 +133,7 @@ class PillInstanceCard extends ConsumerWidget {
                 if (mode == PillRollMode.sequential) ...[
                   _cardButton(
                     key: const Key('pill-step-back'),
-                    icon: const Icon(Icons.arrow_back, size: 18),
+                    icon: const StudioIcon(Icons.arrow_back, size: 18),
                     tooltip: l10n.pillCardStepBack,
                     onPressed: !instance.locked
                         ? () => workspaceNotifier.stepSequence(marker, -1)
@@ -140,7 +141,7 @@ class PillInstanceCard extends ConsumerWidget {
                   ),
                   _cardButton(
                     key: const Key('pill-step-forward'),
-                    icon: const Icon(Icons.arrow_forward, size: 18),
+                    icon: const StudioIcon(Icons.arrow_forward, size: 18),
                     tooltip: l10n.pillCardStepForward,
                     onPressed: !instance.locked
                         ? () => workspaceNotifier.stepSequence(marker, 1)
@@ -148,12 +149,12 @@ class PillInstanceCard extends ConsumerWidget {
                   ),
                 ],
                 _cardButton(
-                  icon: const Icon(Icons.tune, size: 18),
+                  icon: const StudioIcon(Icons.tune, size: 18),
                   tooltip: l10n.pillCardSettings,
                   onPressed: () => _openSettings(context, ref, instance),
                 ),
                 _cardButton(
-                  icon: Icon(
+                  icon: StudioIcon(
                     instance.enabled
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
@@ -201,7 +202,7 @@ class PillInstanceCard extends ConsumerWidget {
                 if (hasRoll)
                   _cardButton(
                     key: const Key('pill-lock-toggle'),
-                    icon: Icon(
+                    icon: StudioIcon(
                       instance.locked
                           ? Icons.lock_outline
                           : Icons.lock_open_outlined,
@@ -215,7 +216,7 @@ class PillInstanceCard extends ConsumerWidget {
                         : null,
                   ),
                 _cardButton(
-                  icon: Icon(
+                  icon: StudioIcon(
                     Icons.delete_outline,
                     size: 18,
                     color: theme.colorScheme.error,

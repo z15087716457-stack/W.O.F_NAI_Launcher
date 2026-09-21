@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -91,12 +92,12 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
     return statsAsync.when(
       data: (stats) => _buildContent(context, ref, stats),
       loading: () => ListTile(
-        leading: const Icon(Icons.analytics_outlined),
+        leading: const StudioIcon(Icons.analytics_outlined),
         title: Text(context.l10n.cacheStats_title),
         subtitle: const LinearProgressIndicator(),
       ),
       error: (error, _) => ListTile(
-        leading: const Icon(Icons.error_outline, color: Colors.red),
+        leading: const StudioIcon(Icons.error_outline, color: Colors.red),
         title: Text(context.l10n.cacheStats_title),
         subtitle: Text(context.l10n.settings_loadFailed(error.toString())),
       ),
@@ -114,7 +115,7 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
     return Column(
       children: [
         ListTile(
-          leading: const Icon(Icons.analytics_outlined),
+          leading: const StudioIcon(Icons.analytics_outlined),
           title: Text(context.l10n.cacheStats_title),
           subtitle: Text(
             context.l10n.cacheStats_autoRefreshUpdated(
@@ -133,7 +134,7 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
               ),
               const SizedBox(width: 8),
               IconButton(
-                icon: const Icon(Icons.refresh, size: 20),
+                icon: const StudioIcon(Icons.refresh, size: 20),
                 tooltip: context.l10n.cacheStats_refreshNow,
                 onPressed: () {
                   _refreshStats();
@@ -141,7 +142,7 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.delete_sweep, size: 20),
+                icon: const StudioIcon(Icons.delete_sweep, size: 20),
                 tooltip: context.l10n.cacheStats_resetStats,
                 onPressed: () {
                   GalleryCacheManager().resetStatistics();
@@ -313,7 +314,7 @@ class _CacheIndicator extends StatelessWidget {
               color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: StudioIcon(icon, color: color, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(

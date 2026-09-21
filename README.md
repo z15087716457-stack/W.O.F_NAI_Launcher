@@ -1,11 +1,11 @@
-# W.O.F NAI Launcher
+# W.O.F NAI Studio
 
 <p align="center">
   简体中文 | <a href="README.en-US.md">English</a>
 </p>
 
 <p align="center">
-  <img src="assets/icons/Icon.png" alt="NAI Launcher Logo" width="120">
+  <img src="assets/icons/wof_icon.svg" alt="W.O.F NAI Studio Logo" width="120">
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 >
 > 画风探索的遗传算法思路参考自 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)（GPL-3.0），本仓库中的实现为 Dart 重写，未复制其源码，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
-NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它把图像生成、图生图、局部重绘、Vibe / Precise Reference、本地图库、在线图库、生成队列、Krita 联动和统计工具整合在一个桌面应用里，适合日常生成、批量出图和长期管理本地作品。
+W.O.F NAI Studio 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它把图像生成、图生图、局部重绘、Vibe / Precise Reference、本地图库、在线图库、生成队列、Krita 联动和统计工具整合在一个桌面应用里，适合日常生成、批量出图和长期管理本地作品。
 
 > 本项目不是 NovelAI 官方产品。使用前请确保你拥有自己的 NovelAI 账号，并遵守 NovelAI 的服务条款。
 
@@ -300,3 +300,5 @@ type(scope): 中文描述
 ## 📄 许可证
 
 本项目基于 MIT License 开源，详见 [LICENSE](LICENSE)。原版权归属上游 NAI Launcher Contributors，本分支新增部分的版权归 W.O.F (z15087716457-stack)。
+
+界面使用随包提供的 Geist Sans / Mono / Pixel Line、HarmonyOS Sans SC 和 Geist 风格 SVG。字体及图标遵循各自许可，见 [素材说明](tool/branding/README.md) 与 [许可文件](assets/licenses/)；应用「关于」页亦可查看。

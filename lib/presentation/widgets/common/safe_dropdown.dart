@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 
 import 'inset_shadow_container.dart';
@@ -51,7 +52,7 @@ class SafeDropdown<T> extends StatelessWidget {
               : null,
           icon:
               icon ??
-              Icon(
+              StudioIcon(
                 Icons.keyboard_arrow_down,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),

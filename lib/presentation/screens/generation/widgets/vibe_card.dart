@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:collection';
 import 'dart:typed_data';
 
@@ -163,7 +164,7 @@ class _VibeCardState extends ConsumerState<VibeCard> {
                         child: IconButton(
                           key: Key('vibe-card-save-to-library-${widget.index}'),
                           padding: EdgeInsets.zero,
-                          icon: Icon(
+                          icon: StudioIcon(
                             Icons.bookmark_add_outlined,
                             size: 18,
                             color: theme.colorScheme.primary,
@@ -178,7 +179,7 @@ class _VibeCardState extends ConsumerState<VibeCard> {
                         height: 28,
                         child: IconButton(
                           padding: EdgeInsets.zero,
-                          icon: Icon(
+                          icon: StudioIcon(
                             Icons.delete_outline,
                             size: 18,
                             color: theme.colorScheme.error,
@@ -282,7 +283,7 @@ class _VibeCardState extends ConsumerState<VibeCard> {
 
   Widget _buildPlaceholder(ThemeData theme) {
     return Center(
-      child: Icon(
+      child: StudioIcon(
         Icons.auto_awesome,
         size: 24,
         color: theme.colorScheme.outline,
@@ -368,7 +369,7 @@ class _VibeCardState extends ConsumerState<VibeCard> {
           if (customWidget != null)
             customWidget
           else if (icon != null)
-            Icon(icon, size: 12, color: color),
+            StudioIcon(icon, size: 12, color: color),
           if (icon != null || customWidget != null) const SizedBox(width: 4),
           Flexible(
             child: Text(
@@ -410,7 +411,7 @@ class _VibeCardState extends ConsumerState<VibeCard> {
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  const StudioIcon(
                     Icons.warning_amber,
                     color: Colors.orange,
                     size: 20,
@@ -505,7 +506,7 @@ class _VibeCardState extends ConsumerState<VibeCard> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            StudioIcon(
               Icons.folder_zip,
               size: 12,
               color: theme.colorScheme.onTertiaryContainer,

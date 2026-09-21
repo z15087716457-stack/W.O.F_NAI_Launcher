@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -155,7 +156,7 @@ class _AddCharacterMenu extends ConsumerWidget {
           ),
         ],
       ],
-      icon: Icon(Icons.add, size: 24, color: theme.colorScheme.onSurface),
+      icon: StudioIcon(Icons.add, size: 24, color: theme.colorScheme.onSurface),
     );
   }
 
@@ -167,7 +168,11 @@ class _AddCharacterMenu extends ConsumerWidget {
     value: action,
     height: 36,
     child: Row(
-      children: [Icon(icon, size: 16), const SizedBox(width: 8), Text(label)],
+      children: [
+        StudioIcon(icon, size: 16),
+        const SizedBox(width: 8),
+        Text(label),
+      ],
     ),
   );
 }

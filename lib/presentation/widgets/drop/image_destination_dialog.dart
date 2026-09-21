@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -105,7 +106,7 @@ class ImageDestinationDialog extends ConsumerWidget {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const StudioIcon(Icons.close),
                     onPressed: () => Navigator.of(context).pop(),
                     tooltip: context.l10n.common_close,
                   ),
@@ -141,7 +142,7 @@ class ImageDestinationDialog extends ConsumerWidget {
                           width: 200,
                           height: 200,
                           color: theme.colorScheme.surfaceContainerHighest,
-                          child: Icon(
+                          child: StudioIcon(
                             Icons.broken_image_outlined,
                             size: 64,
                             color: theme.colorScheme.outline,
@@ -251,7 +252,7 @@ class ImageDestinationDialog extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                Icon(
+                StudioIcon(
                   Icons.auto_awesome,
                   size: 20,
                   color: Colors.amber.shade700,
@@ -412,7 +413,7 @@ class _DestinationButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              Icon(
+              StudioIcon(
                 icon,
                 size: 24,
                 color: isPrimary
@@ -449,7 +450,7 @@ class _DestinationButton extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
+              StudioIcon(
                 Icons.chevron_right,
                 size: 20,
                 color: isPrimary

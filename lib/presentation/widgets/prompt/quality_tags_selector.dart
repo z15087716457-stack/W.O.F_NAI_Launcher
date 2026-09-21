@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -132,7 +133,7 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
                     ),
                   ),
                   const SizedBox(width: 2),
-                  Icon(
+                  StudioIcon(
                     Icons.arrow_drop_down,
                     size: 14,
                     color: theme.colorScheme.onSurface.withValues(
@@ -232,7 +233,11 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
           child: Row(
             children: [
               if (isSelected)
-                Icon(Icons.check, size: 16, color: theme.colorScheme.primary)
+                StudioIcon(
+                  Icons.check,
+                  size: 16,
+                  color: theme.colorScheme.primary,
+                )
               else
                 const SizedBox(width: 16),
               const SizedBox(width: 8),
@@ -265,7 +270,7 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
         value: 'add_from_library',
         child: Row(
           children: [
-            Icon(Icons.add, size: 16, color: theme.colorScheme.primary),
+            StudioIcon(Icons.add, size: 16, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
               context.l10n.qualityTags_addFromLibrary,

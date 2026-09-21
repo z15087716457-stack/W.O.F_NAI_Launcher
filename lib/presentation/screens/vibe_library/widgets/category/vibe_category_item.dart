@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -125,7 +126,7 @@ class _VibeCategoryItemState extends State<VibeCategoryItem> {
                       onTap: widget.onExpand,
                       child: Padding(
                         padding: const EdgeInsets.only(right: 4),
-                        child: Icon(
+                        child: StudioIcon(
                           widget.isExpanded
                               ? Icons.expand_more
                               : Icons.chevron_right,
@@ -138,7 +139,7 @@ class _VibeCategoryItemState extends State<VibeCategoryItem> {
                     const SizedBox(width: 20),
 
                   // 图标
-                  Icon(
+                  StudioIcon(
                     widget.icon,
                     size: 18,
                     color:
@@ -196,7 +197,7 @@ class _VibeCategoryItemState extends State<VibeCategoryItem> {
                   if (_isHovering && widget.onRename != null)
                     Padding(
                       padding: const EdgeInsets.only(right: 4),
-                      child: Icon(
+                      child: StudioIcon(
                         Icons.drag_indicator,
                         size: 14,
                         color: theme.colorScheme.outline.withAlpha(128),
@@ -241,7 +242,7 @@ class _VibeCategoryItemState extends State<VibeCategoryItem> {
             },
             child: Row(
               children: [
-                const Icon(Icons.edit, size: 18),
+                const StudioIcon(Icons.edit, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.common_rename),
               ],
@@ -252,7 +253,7 @@ class _VibeCategoryItemState extends State<VibeCategoryItem> {
             onTap: widget.onAddSubCategory,
             child: Row(
               children: [
-                const Icon(Icons.create_new_folder, size: 18),
+                const StudioIcon(Icons.create_new_folder, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.vibeLibrary_newSubCategory),
               ],
@@ -263,7 +264,7 @@ class _VibeCategoryItemState extends State<VibeCategoryItem> {
             onTap: widget.onDelete,
             child: Row(
               children: [
-                Icon(
+                StudioIcon(
                   Icons.delete,
                   size: 18,
                   color: Theme.of(context).colorScheme.error,

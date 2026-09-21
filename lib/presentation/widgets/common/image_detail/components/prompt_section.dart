@@ -1,3 +1,5 @@
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -127,7 +129,7 @@ class _PromptSectionState extends State<PromptSection> {
                   : SystemMouseCursors.basic,
               child: Row(
                 children: [
-                  Icon(widget.icon, size: 16, color: primaryColor),
+                  StudioIcon(widget.icon, size: 16, color: primaryColor),
                   const SizedBox(width: 6),
                   Text(
                     widget.title,
@@ -159,7 +161,7 @@ class _PromptSectionState extends State<PromptSection> {
                     ),
                   const Spacer(),
                   if (hasContent)
-                    Icon(
+                    StudioIcon(
                       _isExpanded ? Icons.expand_less : Icons.expand_more,
                       size: 20,
                       color: colorScheme.onSurfaceVariant,
@@ -173,7 +175,7 @@ class _PromptSectionState extends State<PromptSection> {
           const SizedBox(width: 4),
           IconButton(
             onPressed: _copyContent,
-            icon: Icon(
+            icon: StudioIcon(
               Icons.copy,
               size: 16,
               color: colorScheme.onSurfaceVariant,
@@ -187,7 +189,7 @@ class _PromptSectionState extends State<PromptSection> {
           if (widget.showAddToLibrary && widget.onAddToLibrary != null)
             IconButton(
               onPressed: widget.onAddToLibrary,
-              icon: Icon(
+              icon: StudioIcon(
                 Icons.library_add,
                 size: 16,
                 color: colorScheme.onSurfaceVariant,
@@ -431,7 +433,8 @@ class CharacterPromptCard extends StatelessWidget {
             child: SelectableText(
               prompt,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontFamily: 'monospace',
+                fontFamily: StudioTypography.mono,
+                fontFamilyFallback: StudioTypography.fallback,
                 height: 1.5,
               ),
             ),
@@ -466,7 +469,7 @@ class CharacterPromptCard extends StatelessWidget {
         ),
         if (position?.isNotEmpty == true) ...[
           const SizedBox(width: 8),
-          Icon(
+          StudioIcon(
             Icons.location_on_outlined,
             size: 12,
             color: colorScheme.onSurfaceVariant,
@@ -490,7 +493,11 @@ class CharacterPromptCard extends StatelessWidget {
             AppToast.success(context, context.l10n.toast_characterPromptCopied);
             onCopy?.call();
           },
-          icon: Icon(Icons.copy, size: 16, color: colorScheme.onSurfaceVariant),
+          icon: StudioIcon(
+            Icons.copy,
+            size: 16,
+            color: colorScheme.onSurfaceVariant,
+          ),
           tooltip: context.l10n.detail_copyCharacterPrompt,
           style: IconButton.styleFrom(
             padding: const EdgeInsets.all(4),
@@ -514,7 +521,7 @@ class CharacterPromptCard extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           children: [
-            Icon(
+            StudioIcon(
               Icons.block_outlined,
               size: 12,
               color: colorScheme.error.withValues(alpha: 0.7),
@@ -533,7 +540,8 @@ class CharacterPromptCard extends StatelessWidget {
           child: SelectableText(
             negativePrompt!,
             style: theme.textTheme.bodySmall?.copyWith(
-              fontFamily: 'monospace',
+              fontFamily: StudioTypography.mono,
+              fontFamilyFallback: StudioTypography.fallback,
               height: 1.5,
               color: colorScheme.error.withValues(alpha: 0.8),
             ),

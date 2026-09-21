@@ -7,7 +7,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/presentation/themes/core/theme_composer.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/palettes/minimal_glass_palette.dart';
-import 'package:nai_launcher/presentation/themes/modules/typography/presets/material_typography.dart';
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:nai_launcher/presentation/themes/modules/shape/presets/standard_shapes.dart';
 import 'package:nai_launcher/presentation/themes/modules/shadow/presets/soft_shadow.dart';
 import 'package:nai_launcher/presentation/themes/modules/effect/presets/glassmorphism_effect.dart';
@@ -29,7 +29,7 @@ class MinimalGlassTheme {
 
   static const _composer = ThemeComposer(
     color: MinimalGlassPalette(),
-    typography: MaterialTypography(),
+    typography: StudioTypographyModule(),
     shape: StandardShapes(),
     shadow: SoftShadow(),
     effect: GlassmorphismEffect(),

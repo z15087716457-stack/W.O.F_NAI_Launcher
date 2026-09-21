@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icon.dart';
 import 'dart:io';
 import 'dart:async';
 import 'dart:ui' as ui;
@@ -228,7 +229,7 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
                               constraints: const BoxConstraints(minHeight: 62),
                               child: Row(
                                 children: [
-                                  Icon(
+                                  StudioIcon(
                                     Icons.folder_outlined,
                                     size: 20,
                                     color: theme.colorScheme.primary,
@@ -248,7 +249,7 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
                                   FilledButton.tonalIcon(
                                     onPressed: () =>
                                         _showCreateCategoryDialog(context),
-                                    icon: const Icon(Icons.add, size: 18),
+                                    icon: const StudioIcon(Icons.add, size: 18),
                                     label: Text(
                                       context.l10n.common_new,
                                       style: const TextStyle(fontSize: 13),
@@ -465,14 +466,14 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
             itemBuilder: (context, index) {
               if (index == 0) {
                 return ListTile(
-                  leading: const Icon(Icons.folder_outlined),
+                  leading: const StudioIcon(Icons.folder_outlined),
                   title: Text(context.l10n.vibeLibrary_uncategorized),
                   onTap: () => Navigator.of(context).pop(null),
                 );
               }
               final category = categories[index - 1];
               return ListTile(
-                leading: const Icon(Icons.folder),
+                leading: const StudioIcon(Icons.folder),
                 title: Text(category.name),
                 onTap: () => Navigator.of(context).pop(category),
               );
@@ -1295,7 +1296,7 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  StudioIcon(
                     Icons.file_upload_outlined,
                     size: 48,
                     color: theme.colorScheme.primary,
