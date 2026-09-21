@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
@@ -824,8 +823,7 @@ class _SizeInfo extends StatelessWidget {
               '${originalSize.width.toInt()} x ${originalSize.height.toInt()}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.outline,
-                fontFamily: StudioTypography.mono,
-                fontFamilyFallback: StudioTypography.fallback,
+                fontFamily: 'monospace',
               ),
             ),
           ],
@@ -860,8 +858,7 @@ class _SizeInfo extends StatelessWidget {
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
-                    fontFamily: StudioTypography.mono,
-                    fontFamilyFallback: StudioTypography.fallback,
+                    fontFamily: 'monospace',
                   ),
                 ),
                 if (widthDiff != 0 || heightDiff != 0) ...[
@@ -872,8 +869,7 @@ class _SizeInfo extends StatelessWidget {
                       color: widthDiff >= 0 && heightDiff >= 0
                           ? theme.colorScheme.primary
                           : theme.colorScheme.error,
-                      fontFamily: StudioTypography.mono,
-                      fontFamilyFallback: StudioTypography.fallback,
+                      fontFamily: 'monospace',
                     ),
                   ),
                 ],

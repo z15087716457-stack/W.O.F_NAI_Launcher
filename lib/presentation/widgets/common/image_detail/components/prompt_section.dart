@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -432,8 +431,7 @@ class CharacterPromptCard extends StatelessWidget {
             child: SelectableText(
               prompt,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontFamily: StudioTypography.mono,
-                fontFamilyFallback: StudioTypography.fallback,
+                fontFamily: 'monospace',
                 height: 1.5,
               ),
             ),
@@ -535,8 +533,7 @@ class CharacterPromptCard extends StatelessWidget {
           child: SelectableText(
             negativePrompt!,
             style: theme.textTheme.bodySmall?.copyWith(
-              fontFamily: StudioTypography.mono,
-              fontFamilyFallback: StudioTypography.fallback,
+              fontFamily: 'monospace',
               height: 1.5,
               color: colorScheme.error.withValues(alpha: 0.8),
             ),

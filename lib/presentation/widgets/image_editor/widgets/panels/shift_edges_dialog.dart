@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -353,8 +352,7 @@ class _SizeSummary extends StatelessWidget {
                   )
                 : l10n.editor_requestedSizeInvalid,
             style: theme.textTheme.bodyMedium?.copyWith(
-              fontFamily: StudioTypography.mono,
-              fontFamilyFallback: StudioTypography.fallback,
+              fontFamily: 'monospace',
             ),
           ),
           const SizedBox(height: 6),
@@ -370,8 +368,7 @@ class _SizeSummary extends StatelessWidget {
                   ? theme.colorScheme.error
                   : theme.colorScheme.primary,
               fontWeight: FontWeight.w600,
-              fontFamily: StudioTypography.mono,
-              fontFamilyFallback: StudioTypography.fallback,
+              fontFamily: 'monospace',
             ),
           ),
           const SizedBox(height: 6),
@@ -386,8 +383,7 @@ class _SizeSummary extends StatelessWidget {
                 : l10n.editor_appliedEdgesInvalid,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
-              fontFamily: StudioTypography.mono,
-              fontFamilyFallback: StudioTypography.fallback,
+              fontFamily: 'monospace',
             ),
           ),
           if (hasOversizedAppliedDimensions) ...[

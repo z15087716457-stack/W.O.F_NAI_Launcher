@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -185,27 +184,29 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
       color: colorScheme.surface,
       child: Row(
         children: [
-          // Center the 50px logo over the collapsed 60px navigation rail.
-          const SizedBox(width: 5),
+          const SizedBox(width: 12),
           Image.asset(
             'assets/images/wof_logo_block.png',
-            width: 50,
             height: 20,
-            excludeFromSemantics: true,
+            filterQuality: FilterQuality.medium,
+            // 资产缺失/测试环境加载失败时退化为图标，不炸布局。
+            errorBuilder: (context, error, stackTrace) =>
+                Icon(Icons.auto_awesome, size: 18, color: colorScheme.primary),
           ),
           const SizedBox(width: 8),
           Expanded(
-            // Pixel Line's visible glyphs sit slightly above its line center.
-            child: Transform.translate(
-              offset: const Offset(0, 2),
-              child: Text(
-                'NAI Studio',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: StudioTypography.wordmark.copyWith(
-                  fontSize: 13,
-                  color: colorScheme.onSurface.withValues(alpha: 0.9),
-                ),
+            child: Text(
+              'NAI Studio',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 13,
+                fontFamily: 'monospace',
+                decoration: TextDecoration.underline,
+                decorationColor: const Color(0xFFFFFF00),
+                decorationStyle: TextDecorationStyle.double,
+                fontWeight: FontWeight.w500,
+                color: colorScheme.onSurface.withValues(alpha: 0.9),
               ),
             ),
           ),

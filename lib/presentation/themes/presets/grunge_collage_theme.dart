@@ -7,7 +7,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/presentation/themes/core/theme_composer.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/palettes/grunge_palette.dart';
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/themes/modules/typography/presets/grunge_typography.dart';
 import 'package:nai_launcher/presentation/themes/modules/shape/presets/standard_shapes.dart';
 import 'package:nai_launcher/presentation/themes/modules/shadow/presets/hard_offset_shadow.dart';
 import 'package:nai_launcher/presentation/themes/modules/effect/presets/texture_effect.dart';
@@ -31,7 +31,7 @@ class GrungeCollageTheme {
 
   static const _composer = ThemeComposer(
     color: GrungePalette(),
-    typography: StudioTypographyModule(),
+    typography: GrungeTypography(),
     shape: StandardShapes(),
     shadow: HardOffsetShadow(),
     effect: TextureEffect(),

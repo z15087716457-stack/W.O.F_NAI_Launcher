@@ -12,9 +12,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get app_title => 'W.O.F NAI Studio';
 
   @override
-  String get settings_visualAssets => 'Interface fonts & licenses';
-
-  @override
   String get brand_entryTagline => 'A place for your imagination.';
 
   @override

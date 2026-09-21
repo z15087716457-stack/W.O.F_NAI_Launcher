@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/utils/localization_extension.dart';
@@ -80,8 +79,7 @@ class ColorPanel extends StatelessWidget {
               Text(
                 '#${state.foregroundColor.toARGB32().toRadixString(16).substring(2).toUpperCase()}',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontFamily: StudioTypography.mono,
-                  fontFamilyFallback: StudioTypography.fallback,
+                  fontFamily: 'monospace',
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),

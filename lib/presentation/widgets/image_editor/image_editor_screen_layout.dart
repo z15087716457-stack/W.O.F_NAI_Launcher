@@ -608,8 +608,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
                     child: Text(
                       s.$1,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        fontFamily: StudioTypography.mono,
-                        fontFamilyFallback: StudioTypography.fallback,
+                        fontFamily: 'monospace',
                       ),
                     ),
                   ),

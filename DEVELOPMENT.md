@@ -35,7 +35,7 @@ Windows 桌面热重载优先使用 `scripts/dev_hot_reload_window.ps1`，它会
 
 ### Windows 品牌图标
 
-Windows 桌面 / 文件图标使用完整长方形 Logo `assets/images/wof_logo_full.png`，等比放入透明方框；窗口 / 任务栏及托盘使用独立方形 W 母版 `assets/icons/wof_icon.svg`。标题栏使用完整 W.O.F 蓝块 `assets/images/wof_logo_block.png`＋Pixel Line 字体的 `NAI Studio`。
+Windows 桌面 / 文件图标使用完整长方形 Logo `assets/images/wof_logo_full.png`，等比放入透明方框；窗口 / 任务栏及托盘使用独立方形 W 母版 `assets/icons/wof_icon.svg`。标题栏使用旧版 W.O.F 蓝块 `assets/images/wof_logo_block.png`＋13px 普通文字 `NAI Studio`，保留旧版间距与黄色双下划线。
 
 使用 Node.js 和 `sharp` 运行 `node tool/branding/generate_windows_icons.cjs`，导出桌面 `app_icon.ico` 与窗口 / 托盘 `window_icon.ico` 两套资源，分别同步到 `windows/runner/resources/` 和 `assets/icons/`。EXE 的最低图标资源 ID 101 留给横版；窗口类回退与大小窗口图标使用方形 W 的 ID 102，DPI 变化时更新窗口图标并释放旧句柄；Windows 托盘读取 `assets/icons/window_icon.ico`。ICO 内嵌 16、20、24、32、40、48、64、96、128、256px，共十档。可追加 `--brand-dir <目录>` 导出 1024px PNG、多尺寸 PNG 和 ICO 到品牌资产库。
 
@@ -43,7 +43,7 @@ ICO 属于原生程序资源；更新后必须重新构建 Windows 程序才能�
 
 ### Studio 字体与界面图标
 
-显示名为 `W.O.F NAI Studio`；数据目录、单实例标识、可执行文件名和更新仓库保持既有标识。界面字族使用随包提供的 Geist Sans / Mono / Pixel Line 与 HarmonyOS Sans SC，字体角色、品牌入口、许可和实绘验证见 [tool/branding/README.md](tool/branding/README.md)。界面图标已恢复原有 `Icon` 和专用符号，只保留 `StudioTypography` 字体角色。登录与载入使用独立的 `BrandEntryTheme` / `BrandEntryScene`，明暗选择在当前会话内共享，不覆盖工作区主题或账户状态。字体、Logo、许可或原生显示名变更后需交付包含新资源的完整运行包。
+显示名为 `W.O.F NAI Studio`；数据目录、单实例标识、可执行文件名和更新仓库保持既有标识。界面字体使用原有主题配置，默认仍为随包提供的落霞孤鹜真楷，用户选择的系统 / Google 字体继续生效；撤回的 `bundled:` 默认键按旧默认解释，不改写用户设置。界面图标使用原有 `Icon` 和专用符号。登录与载入使用独立的 `BrandEntryTheme` / `BrandEntryScene`，明暗选择在当前会话内共享，不覆盖工作区主题或账户状态。品牌入口与实绘验证见 [tool/branding/README.md](tool/branding/README.md)。字体、Logo 或原生显示名变更后需交付包含新资源的完整运行包。
 
 ## Changelog 与 Release Notes 规范
 

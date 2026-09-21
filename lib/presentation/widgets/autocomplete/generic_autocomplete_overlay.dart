@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
@@ -170,8 +169,7 @@ class GenericAutocompleteOverlay extends StatelessWidget {
             key,
             style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
-              fontFamily: StudioTypography.mono,
-              fontFamilyFallback: StudioTypography.fallback,
+              fontFamily: 'monospace',
               fontSize: 10,
             ),
           ),

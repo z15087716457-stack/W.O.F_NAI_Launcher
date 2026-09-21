@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/shortcuts/shortcut_manager.dart';
@@ -175,8 +174,7 @@ class ShortcutMenuItem extends ConsumerWidget {
           child: Text(
             shortcutLabel,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontFamily: StudioTypography.mono,
-              fontFamilyFallback: StudioTypography.fallback,
+              fontFamily: 'monospace',
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),

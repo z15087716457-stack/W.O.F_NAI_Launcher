@@ -7,7 +7,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/presentation/themes/core/theme_composer.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/palettes/social_palette.dart';
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/themes/modules/typography/presets/material_typography.dart';
 import 'package:nai_launcher/presentation/themes/modules/shape/presets/standard_shapes.dart';
 import 'package:nai_launcher/presentation/themes/modules/shadow/presets/none_shadow.dart';
 import 'package:nai_launcher/presentation/themes/modules/effect/presets/none_effect.dart';
@@ -21,7 +21,7 @@ class SocialTheme {
 
   static const _composer = ThemeComposer(
     color: SocialPalette(),
-    typography: StudioTypographyModule(),
+    typography: MaterialTypography(),
     shape: StandardShapes(),
     shadow: NoneShadow(),
     effect: NoneEffect(),

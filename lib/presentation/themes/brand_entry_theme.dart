@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'studio_typography.dart';
+import '../providers/font_provider.dart';
 
 /// Entry screens share an appearance choice for this session. The studio's
 /// chosen workspace theme stays independent, and no account state is touched.
@@ -42,15 +42,13 @@ abstract final class BrandEntryTheme {
       brightness: brightness,
       colorScheme: scheme,
       scaffoldBackgroundColor: background,
-      fontFamily: StudioTypography.sans,
-      fontFamilyFallback: StudioTypography.fallback,
+      fontFamily: FontConfig.defaultFont.fontFamily,
       textTheme:
           (dark
                   ? Typography.material2021().white
                   : Typography.material2021().black)
               .apply(
-                fontFamily: StudioTypography.sans,
-                fontFamilyFallback: StudioTypography.fallback,
+                fontFamily: FontConfig.defaultFont.fontFamily,
                 bodyColor: ink,
                 displayColor: ink,
               ),
@@ -72,11 +70,8 @@ abstract final class BrandEntryTheme {
           horizontal: 16,
           vertical: 18,
         ),
-        labelStyle: StudioTypography.body.copyWith(color: muted, fontSize: 14),
-        hintStyle: StudioTypography.body.copyWith(
-          color: muted.withValues(alpha: 0.7),
-          fontSize: 14,
-        ),
+        labelStyle: TextStyle(color: muted, fontSize: 14),
+        hintStyle: TextStyle(color: muted.withValues(alpha: 0.7), fontSize: 14),
         prefixIconColor: muted,
         suffixIconColor: muted,
         border: OutlineInputBorder(
@@ -106,10 +101,7 @@ abstract final class BrandEntryTheme {
           foregroundColor: Colors.white,
           minimumSize: const Size(0, 48),
           shape: const RoundedRectangleBorder(borderRadius: radius),
-          textStyle: StudioTypography.body.copyWith(
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -118,16 +110,13 @@ abstract final class BrandEntryTheme {
           side: BorderSide(color: border),
           minimumSize: const Size(0, 44),
           shape: const RoundedRectangleBorder(borderRadius: radius),
-          textStyle: StudioTypography.body.copyWith(
-            fontWeight: FontWeight.w500,
-            fontSize: 13,
-          ),
+          textStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: accent,
-          textStyle: StudioTypography.body.copyWith(fontSize: 13),
+          textStyle: const TextStyle(fontSize: 13),
           shape: const RoundedRectangleBorder(borderRadius: radius),
         ),
       ),
@@ -136,10 +125,7 @@ abstract final class BrandEntryTheme {
         linearMinHeight: 3,
       ),
       tooltipTheme: TooltipThemeData(
-        textStyle: StudioTypography.body.copyWith(
-          color: background,
-          fontSize: 12,
-        ),
+        textStyle: TextStyle(color: background, fontSize: 12),
       ),
     );
   }

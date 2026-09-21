@@ -106,12 +106,6 @@ abstract class AppLocalizations {
   /// **'W.O.F NAI Studio'**
   String get app_title;
 
-  /// No description provided for @settings_visualAssets.
-  ///
-  /// In en, this message translates to:
-  /// **'Interface fonts & licenses'**
-  String get settings_visualAssets;
-
   /// No description provided for @brand_entryTagline.
   ///
   /// In en, this message translates to:

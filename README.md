@@ -301,4 +301,4 @@ type(scope): 中文描述
 
 本项目基于 MIT License 开源，详见 [LICENSE](LICENSE)。原版权归属上游 NAI Launcher Contributors，本分支新增部分的版权归 W.O.F (z15087716457-stack)。
 
-界面使用随包提供的 Geist Sans / Mono / Pixel Line 与 HarmonyOS Sans SC 字体，界面图标沿用原有图标。字体遵循各自许可，见 [素材说明](tool/branding/README.md) 与 [许可文件](assets/licenses/)；应用「关于」页亦可查看。
+界面沿用原有主题字体与图标，默认使用随包提供的落霞孤鹜真楷 GB，也可在设置中选择系统字体或 Google Fonts。标题栏采用 W.O.F Logo 与带黄色下划线的 NAI Studio 文字，见 [素材说明](tool/branding/README.md)。

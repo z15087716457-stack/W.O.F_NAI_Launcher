@@ -106,8 +106,6 @@ class ThemeComposer {
       brightness: effectiveBrightness,
       colorScheme: colorScheme,
       textTheme: textTheme,
-      fontFamily: typography.bodyFontFamily,
-      fontFamilyFallback: const ['HarmonyOS Sans SC'],
 
       // Icon theme - ensures icons have good visibility by default
       // Uses onSurface for proper contrast on surface backgrounds

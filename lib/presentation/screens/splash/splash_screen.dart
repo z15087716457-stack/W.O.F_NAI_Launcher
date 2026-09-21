@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../providers/warmup_provider.dart';
-import '../../themes/studio_typography.dart';
 import '../../utils/warmup_message_localizer.dart';
 import '../../widgets/branding/brand_entry_scene.dart';
 
@@ -44,7 +43,8 @@ class SplashScreen extends ConsumerWidget {
                     const SizedBox(width: 16),
                     Text(
                       '${(progress * 100).round().toString().padLeft(2, '0')}%',
-                      style: StudioTypography.data.copyWith(
+                      style: TextStyle(
+                        fontFamily: 'monospace',
                         fontSize: 12,
                         color: scheme.onSurface,
                       ),

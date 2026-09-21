@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_version.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../themes/brand_entry_theme.dart';
-import '../../themes/studio_typography.dart';
 
 /// The complete, original wordmark. The asset only removes empty source margins;
 /// both the W.O.F block and the NAI STUDIO signature remain in their original ratio.
@@ -118,7 +117,8 @@ class BrandEntryScene extends ConsumerWidget {
                         const SizedBox(width: 10),
                         Text(
                           loading ? 'STUDIO / START' : 'STUDIO / ACCESS',
-                          style: StudioTypography.data.copyWith(
+                          style: TextStyle(
+                            fontFamily: 'monospace',
                             fontSize: 10,
                             letterSpacing: 1.2,
                             color: scheme.onSurfaceVariant,
@@ -169,7 +169,8 @@ class BrandEntryScene extends ConsumerWidget {
                         const SizedBox(width: 12),
                         Text(
                           'v${AppVersion.versionName}',
-                          style: StudioTypography.data.copyWith(
+                          style: TextStyle(
+                            fontFamily: 'monospace',
                             fontSize: 10,
                             color: scheme.onSurfaceVariant,
                           ),

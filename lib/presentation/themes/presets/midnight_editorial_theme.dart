@@ -7,7 +7,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/presentation/themes/core/theme_composer.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/palettes/editorial_palette.dart';
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/themes/modules/typography/presets/editorial_typography.dart';
 import 'package:nai_launcher/presentation/themes/modules/shape/presets/standard_shapes.dart';
 import 'package:nai_launcher/presentation/themes/modules/shadow/presets/soft_shadow.dart';
 import 'package:nai_launcher/presentation/themes/modules/effect/presets/none_effect.dart';
@@ -31,7 +31,7 @@ class MidnightEditorialTheme {
 
   static const _composer = ThemeComposer(
     color: EditorialPalette(),
-    typography: StudioTypographyModule(),
+    typography: EditorialTypography(),
     shape: StandardShapes(),
     shadow: SoftShadow(),
     effect: NoneEffect(),

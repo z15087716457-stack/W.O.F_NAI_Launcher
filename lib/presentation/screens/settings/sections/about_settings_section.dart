@@ -43,19 +43,6 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
               context.l10n.settings_version(AppVersion.versionName),
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.text_fields),
-            title: Text(context.l10n.settings_visualAssets),
-            subtitle: const Text(
-              'Geist Sans / Mono / Pixel Line · HarmonyOS Sans SC',
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => showLicensePage(
-              context: context,
-              applicationName: context.l10n.app_title,
-              applicationVersion: AppVersion.versionName,
-            ),
-          ),
           SwitchListTile(
             secondary: const Icon(Icons.article_outlined),
             title: Text(context.l10n.settings_fileLogging),

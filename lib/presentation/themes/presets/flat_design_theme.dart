@@ -7,7 +7,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/presentation/themes/core/theme_composer.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/palettes/flat_palette.dart';
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/themes/modules/typography/presets/flat_typography.dart';
 import 'package:nai_launcher/presentation/themes/modules/shape/presets/sharp_shapes.dart';
 import 'package:nai_launcher/presentation/themes/modules/shadow/presets/none_shadow.dart';
 import 'package:nai_launcher/presentation/themes/modules/effect/presets/none_effect.dart';
@@ -31,7 +31,7 @@ class FlatDesignTheme {
 
   static const _composer = ThemeComposer(
     color: FlatPalette(),
-    typography: StudioTypographyModule(),
+    typography: FlatTypography(),
     shape: SharpShapes(),
     shadow: NoneShadow(),
     effect: NoneEffect(),

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:nai_launcher/presentation/themes/core/theme_composer.dart';
 import 'package:nai_launcher/presentation/themes/core/theme_modules.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/palettes/hand_drawn_palette.dart';
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
+import 'package:nai_launcher/presentation/themes/modules/typography/presets/hand_drawn_typography.dart';
 import 'package:nai_launcher/presentation/themes/modules/shape/presets/wobbly_shapes.dart';
 import 'package:nai_launcher/presentation/themes/modules/shadow/presets/hard_offset_shadow.dart';
 import 'package:nai_launcher/presentation/themes/modules/motion/presets/jitter_motion.dart';
@@ -34,7 +34,7 @@ class HandDrawnTheme {
 
   static const _composer = ThemeComposer(
     color: HandDrawnPalette(),
-    typography: StudioTypographyModule(),
+    typography: HandDrawnTypography(),
     shape: WobblyShapes(),
     shadow: HardOffsetShadow(),
     effect: _paperTextureEffect,
