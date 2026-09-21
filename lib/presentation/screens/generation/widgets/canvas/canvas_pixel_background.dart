@@ -15,8 +15,11 @@ class CanvasPixelBackgroundPainter extends CustomPainter {
   final ThemeData theme;
   final double devicePixelRatio;
 
-  static const period = 512.0;
-  static final List<Rect> _rects = _buildPattern();
+  static const _cellSize = 160.0;
+  static const _cellsPerChunk = 4;
+  static const _chunkSize = _cellSize * _cellsPerChunk;
+  static final List<List<Rect>> _variants = _buildVariants();
+  static final _chunks = <(int, int), List<_Circuit>>{};
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -37,25 +40,36 @@ class CanvasPixelBackgroundPainter extends CustomPainter {
       ..isAntiAlias = false
       ..color = (dark ? const Color(0xFF96ACC6) : const Color(0xFF45576A))
           .withValues(alpha: (dark ? 0.15 : 0.10) * visibility);
-    final step = period * scale;
-    final startX = camera.offset.dx % step - step;
-    final startY = camera.offset.dy % step - step;
+    final viewport = Offset.zero & size;
+    final world = camera.visibleWorldRect(size).inflate(64);
     double snap(double value) =>
-        (value * devicePixelRatio).roundToDouble() / devicePixelRatio;
+        (value * devicePixelRatio + 0.5).floorToDouble() / devicePixelRatio;
 
-    // Include the preceding tile: motifs can extend beyond the right/bottom
-    // edges. Drawing them here wraps those portions without clipping seams.
-    for (var x = startX; x < size.width; x += step) {
-      for (var y = startY; y < size.height; y += step) {
-        for (final rect in _rects) {
-          final screen = Rect.fromLTRB(
-            snap(x + rect.left * scale),
-            snap(y + rect.top * scale),
-            snap(x + rect.right * scale),
-            snap(y + rect.bottom * scale),
-          );
-          if (!screen.isEmpty && screen.overlaps(Offset.zero & size)) {
-            canvas.drawRect(screen, paint);
+    // Chunks only bound computation, not the artwork. Each motif has a stable
+    // world position, including beyond chunk edges, and is never re-rolled.
+    for (
+      var x = (world.left / _chunkSize).floor();
+      x <= (world.right / _chunkSize).floor();
+      x++
+    ) {
+      for (
+        var y = (world.top / _chunkSize).floor();
+        y <= (world.bottom / _chunkSize).floor();
+        y++
+      ) {
+        for (final circuit in _chunk(x, y)) {
+          if (!world.contains(circuit.position)) continue;
+          final origin = camera.worldToScreen(circuit.position);
+          for (final rect in _variants[circuit.variant]) {
+            final screen = Rect.fromLTRB(
+              snap(origin.dx + rect.left * scale),
+              snap(origin.dy + rect.top * scale),
+              snap(origin.dx + rect.right * scale),
+              snap(origin.dy + rect.bottom * scale),
+            );
+            if (!screen.isEmpty && screen.overlaps(viewport)) {
+              canvas.drawRect(screen, paint);
+            }
           }
         }
       }
@@ -69,24 +83,100 @@ class CanvasPixelBackgroundPainter extends CustomPainter {
       theme != oldDelegate.theme ||
       devicePixelRatio != oldDelegate.devicePixelRatio;
 
-  static List<Rect> _buildPattern() {
-    const anchors = [
-      Offset(36, 52),
-      Offset(234, 18),
-      Offset(412, 106),
-      Offset(132, 212),
-      Offset(322, 276),
-      Offset(22, 396),
-      Offset(224, 462),
-      Offset(466, 426),
+  static List<List<Rect>> _buildVariants() {
+    return [
+      for (var kind = 0; kind < 5; kind++)
+        for (var turns = 0; turns < 4; turns++)
+          (() {
+            final rects = <Rect>[];
+            _PixelMotif(rects, Offset.zero, turns).draw(kind);
+            final bounds = rects.reduce((a, b) => a.expandToInclude(b));
+            final center = Offset(
+              (bounds.center.dx / 2).round() * 2,
+              (bounds.center.dy / 2).round() * 2,
+            );
+            return List<Rect>.unmodifiable(
+              rects.map((rect) => rect.shift(-center)),
+            );
+          })(),
     ];
-    final rects = <Rect>[];
-    for (var i = 0; i < anchors.length; i++) {
-      _PixelMotif(rects, anchors[i], i % 4).draw(i % 5);
-    }
-    _PixelMotif(rects, const Offset(502, 502), 0).draw(0);
-    return List.unmodifiable(rects);
   }
+
+  static int _hash(int x, int y) {
+    var value = (x * 374761393 + y * 668265263 + 0x574F46) & 0xFFFFFFFF;
+    value = ((value ^ (value >> 13)) * 1274126177) & 0xFFFFFFFF;
+    return value ^ (value >> 16);
+  }
+
+  static _Circuit _candidate(int x, int y) {
+    final seed = _hash(x, y);
+    return _Circuit(
+      position: Offset(
+        x * _cellSize + 16 + (seed & 63) * 2,
+        y * _cellSize + 16 + ((seed >> 8) & 63) * 2,
+      ),
+      variant: (seed >> 16) % _variants.length,
+      priority: seed,
+    );
+  }
+
+  static List<_Circuit> _chunk(int chunkX, int chunkY) {
+    final key = (chunkX, chunkY);
+    final cached = _chunks.remove(key);
+    if (cached != null) {
+      _chunks[key] = cached;
+      return cached;
+    }
+    final circuits = <_Circuit>[];
+    for (
+      var x = chunkX * _cellsPerChunk;
+      x < (chunkX + 1) * _cellsPerChunk;
+      x++
+    ) {
+      for (
+        var y = chunkY * _cellsPerChunk;
+        y < (chunkY + 1) * _cellsPerChunk;
+        y++
+      ) {
+        final candidate = _candidate(x, y);
+        var crowded = false;
+        for (var dx = -1; dx <= 1 && !crowded; dx++) {
+          for (var dy = -1; dy <= 1; dy++) {
+            if (dx == 0 && dy == 0) continue;
+            final neighbor = _candidate(x + dx, y + dy);
+            final earlier =
+                neighbor.priority < candidate.priority ||
+                (neighbor.priority == candidate.priority &&
+                    (dx < 0 || (dx == 0 && dy < 0)));
+            if (earlier &&
+                (neighbor.position - candidate.position).distanceSquared <
+                    80 * 80) {
+              crowded = true;
+              break;
+            }
+          }
+        }
+        if (!crowded) circuits.add(candidate);
+      }
+    }
+    final result = List<_Circuit>.unmodifiable(circuits);
+    // Bounded cache: an indefinitely scrolling canvas cannot grow memory forever.
+    if (_chunks.length >= 256) _chunks.remove(_chunks.keys.first);
+    _chunks[key] = result;
+    return result;
+  }
+}
+
+class _Circuit {
+  const _Circuit({
+    required this.position,
+    required this.variant,
+    required this.priority,
+  });
+
+  final Offset position;
+  final int variant;
+  final int priority;
 }
 
 class _PixelMotif {

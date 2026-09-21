@@ -40,7 +40,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test(
-    'scrolling a whole tile is seamless at negative offsets and zoom',
+    'scrolling across chunks preserves shared pixels at negative offsets and zoom',
     () async {
       for (final scale in [0.5, 1.0, 1.375, 3.25]) {
         for (final dpr in [1.0, 1.5]) {
@@ -49,34 +49,78 @@ void main() {
             CanvasCamera(offset: offset, scale: scale),
             dpr: dpr,
           );
-          final repeated = await _pixels(
-            CanvasCamera(
-              offset: offset + Offset(512 * scale, -512 * scale),
-              scale: scale,
-            ),
+          final moved = await _pixels(
+            CanvasCamera(offset: offset + const Offset(64, 80), scale: scale),
             dpr: dpr,
           );
-          expect(repeated, initial, reason: 'scale=$scale, dpr=$dpr');
+          final width = (640 * dpr).round();
+          final height = (560 * dpr).round();
+          final dx = (64 * dpr).round();
+          final dy = (80 * dpr).round();
+          final originalCrop = BytesBuilder();
+          final movedCrop = BytesBuilder();
+          for (var y = 2; y < height - dy - 2; y++) {
+            originalCrop.add(
+              initial.sublist(
+                (y * width + 2) * 4,
+                (y * width + width - dx - 2) * 4,
+              ),
+            );
+            movedCrop.add(
+              moved.sublist(
+                ((y + dy) * width + dx + 2) * 4,
+                ((y + dy) * width + width - 2) * 4,
+              ),
+            );
+          }
+          expect(
+            movedCrop.takeBytes(),
+            originalCrop.takeBytes(),
+            reason: 'scale=$scale, dpr=$dpr',
+          );
         }
       }
     },
   );
 
-  test('edge-crossing circuits continue across both tile boundaries', () async {
-    final pixels = await _pixels(CanvasCamera.init);
-    int red(int x, int y) => pixels[(y * 640 + x) * 4];
-    expect(red(511, 504), greaterThan(25));
-    expect(red(0, 504), red(511, 504));
-    expect(red(20, 511), greaterThan(25));
-    expect(red(20, 0), red(20, 511));
+  test(
+    'layout is sparse and no longer repeats every 512 world pixels',
+    () async {
+      final pixels = await _pixels(CanvasCamera.init);
+      for (final offset in [
+        const Offset(512, 0),
+        const Offset(0, 512),
+        const Offset(640, 640),
+      ]) {
+        final shifted = await _pixels(CanvasCamera(offset: offset, scale: 1));
+        expect(shifted, isNot(orderedEquals(pixels)));
+      }
 
-    var marked = 0;
-    for (var i = 0; i < pixels.length; i += 4) {
-      if (pixels[i] != 25) marked++;
-      expect(pixels[i + 3], 255);
-    }
-    expect(marked / (640 * 560), inExclusiveRange(0.002, 0.04));
-  });
+      var marked = 0;
+      for (var i = 0; i < pixels.length; i += 4) {
+        if (pixels[i] != 25) marked++;
+        expect(pixels[i + 3], 255);
+      }
+      expect(marked / (640 * 560), inExclusiveRange(0.002, 0.04));
+    },
+  );
+
+  test(
+    'returning from distant canvas regions restores the same arrangement',
+    () async {
+      const camera = CanvasCamera(offset: Offset(315, -701), scale: 0.5);
+      final before = await _pixels(camera);
+      for (var index = 0; index < 20; index++) {
+        await _pixels(
+          CanvasCamera(
+            offset: Offset(index * 12000 + 30000, -index * 9000 - 30000),
+            scale: 0.5,
+          ),
+        );
+      }
+      expect(await _pixels(camera), before);
+    },
+  );
 
   test(
     'one-pixel pan translates the artwork without changing its layout',
@@ -113,19 +157,24 @@ void main() {
     },
   );
 
-  test('captures approved dark pattern and zoomed edge detail', () async {
+  test('captures scattered pattern at wide and portrait sizes', () async {
     if (Platform.environment['CAPTURE_OFFICIAL_UI'] != '1') return;
-    for (final (name, camera) in [
-      ('pixel-circuit', const CanvasCamera(offset: Offset(-48, -72), scale: 1)),
+    for (final (name, camera, size) in [
       (
-        'pixel-circuit-zoom',
-        const CanvasCamera(offset: Offset(-680, -708), scale: 1.375),
+        'pixel-scatter-wide',
+        const CanvasCamera(offset: Offset(-48, -72), scale: 1),
+        const Size(1440, 900),
+      ),
+      (
+        'pixel-scatter-portrait',
+        const CanvasCamera(offset: Offset(-680, -708), scale: 0.8125),
+        const Size(1040, 1240),
       ),
     ]) {
-      final image = await _render(camera, size: const Size(1024, 640));
+      final image = await _render(camera, size: size);
       final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
       image.dispose();
-      final file = File('.dart_tool/brand-background-captures/$name.png');
+      final file = File('.dart_tool/pixel-scatter-captures/$name.png');
       await file.parent.create(recursive: true);
       await file.writeAsBytes(bytes!.buffer.asUint8List());
     }
