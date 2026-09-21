@@ -48,14 +48,18 @@ class StudioIcon extends Icon {
       child: ExcludeSemantics(
         child: SizedBox.square(
           dimension: scaledSize,
-          child: SvgPicture.asset(
-            asset,
-            width: scaledSize,
-            height: scaledSize,
-            colorFilter: ColorFilter.mode(resolvedColor, BlendMode.srcIn),
-            matchTextDirection: icon!.matchTextDirection,
-            // Directionality is explicitly inherited by the SVG below.
-            excludeFromSemantics: true,
+          // A caption button or InputDecorator can force the outer box to be
+          // larger than size. Like Flutter's Icon, loosen those constraints
+          // for the artwork without shrinking the button's layout/hit region.
+          child: Center(
+            child: SvgPicture.asset(
+              asset,
+              width: scaledSize,
+              height: scaledSize,
+              colorFilter: ColorFilter.mode(resolvedColor, BlendMode.srcIn),
+              matchTextDirection: icon!.matchTextDirection,
+              excludeFromSemantics: true,
+            ),
           ),
         ),
       ),

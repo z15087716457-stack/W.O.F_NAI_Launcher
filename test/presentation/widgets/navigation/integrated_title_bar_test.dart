@@ -62,6 +62,14 @@ void main() {
       expect(find.byIcon(Icons.remove), findsOneWidget);
       expect(find.byIcon(Icons.crop_square), findsOneWidget);
       expect(find.byIcon(Icons.close), findsOneWidget);
+      for (final icon in [Icons.remove, Icons.close]) {
+        final drawing = find.descendant(
+          of: find.byIcon(icon),
+          matching: find.byType(SvgPicture),
+        );
+        expect(tester.getSize(drawing), const Size(16, 16));
+        expect(tester.getCenter(drawing), tester.getCenter(find.byIcon(icon)));
+      }
     });
 
     testWidgets('reports caption region on mount and clears on dispose', (
