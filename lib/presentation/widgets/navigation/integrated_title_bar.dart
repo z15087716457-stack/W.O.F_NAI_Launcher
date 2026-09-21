@@ -12,7 +12,7 @@ import '../common/studio_glass_surface.dart';
 /// FEAT-23 内置一体标题栏。
 ///
 /// 挂在 `MaterialApp.router` 的 `builder` 上，以 Column 包住全部
-/// 路由内容（splash / login / 主屏共享同一条栏）。栏高 40 逻辑像素，
+/// 路由内容（splash / login / 主屏共享同一条栏）。栏高 36 逻辑像素，
 /// 左侧 W.O.F logo + 标题，右侧自绘最小化/最大化/关闭三钮。
 ///
 /// 原生窗口行为（拖拽移动、双击最大化、Aero Snap）不依赖 Flutter
@@ -27,7 +27,7 @@ class IntegratedTitleBarShell extends StatefulWidget {
   final Widget child;
 
   /// 栏高（逻辑像素），与原生命中区换算共用。
-  static const double barHeight = 40;
+  static const double barHeight = 36;
 
   /// 单个窗口按钮宽 ×3 = 右侧保留宽（逻辑像素）。
   static const double buttonWidth = 46;
