@@ -1250,7 +1250,7 @@ class _CategoryItemState extends State<_CategoryItem> {
                     widget.count.toString(),
                     style: TextStyle(
                       fontSize: 11,
-                      color: theme.colorScheme.outline,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],

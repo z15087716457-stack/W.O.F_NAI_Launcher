@@ -18416,6 +18416,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This prompt: {used} tokens; total usage: {total} / {limit}'**
   String promptToken_promptShare(int used, int total, int limit);
+
+  /// No description provided for @settings_geistDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Geist Dark'**
+  String get settings_geistDark;
+
+  /// No description provided for @settings_geistLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Geist Light'**
+  String get settings_geistLight;
+
+  /// No description provided for @settings_geistDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'One appearance across your studio. Black or white surfaces, with blue accents.'**
+  String get settings_geistDescription;
 }
 
 class _AppLocalizationsDelegate

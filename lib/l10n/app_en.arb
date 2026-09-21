@@ -6073,5 +6073,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "settings_geistDark": "Geist Dark",
+  "settings_geistLight": "Geist Light",
+  "settings_geistDescription": "One appearance across your studio. Black or white surfaces, with blue accents."
 }

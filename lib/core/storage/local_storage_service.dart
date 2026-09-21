@@ -41,6 +41,14 @@ class LocalStorageService {
 
   // ==================== Theme ====================
 
+  /// Explicit light/dark appearance; legacy theme_type indices stay untouched.
+  String getStudioThemeMode() =>
+      getSetting<String>(StorageKeys.studioThemeMode, defaultValue: 'dark') ??
+      'dark';
+
+  Future<void> setStudioThemeMode(String mode) =>
+      setSetting(StorageKeys.studioThemeMode, mode);
+
   /// 获取风格类型索引
   int getThemeIndex() {
     // 默认值 0 对应 AppStyle.grungeCollage (拼贴朋克风格)

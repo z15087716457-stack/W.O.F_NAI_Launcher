@@ -76,7 +76,7 @@ void main() {
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
         final key = GlobalKey();
-        final theme = AppTheme.getTheme(AppStyle.grungeCollage, brightness);
+        final theme = AppTheme.getTheme(AppStyle.geist, brightness);
         await tester.pumpWidget(
           MaterialApp(
             theme: theme,

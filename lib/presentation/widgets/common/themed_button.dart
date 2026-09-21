@@ -109,6 +109,14 @@ class ThemedButton extends StatelessWidget {
     AppInteractionStyle interaction,
   ) {
     if (style == ThemedButtonStyle.filled) {
+      if (interaction == AppInteractionStyle.material) {
+        // A loading FilledButton is disabled. Its actual fill/ink may differ
+        // from ColorScheme.primary (e.g. the studio's neutral disabled surface).
+        return theme.filledButtonTheme.style?.foregroundColor?.resolve({
+              WidgetState.disabled,
+            }) ??
+            theme.colorScheme.onSurface.withValues(alpha: .38);
+      }
       return theme.colorScheme.onPrimary;
     }
     return theme.colorScheme.primary;

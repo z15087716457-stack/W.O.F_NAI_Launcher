@@ -6073,5 +6073,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "settings_geistDark": "Geist 深色",
+  "settings_geistLight": "Geist 浅色",
+  "settings_geistDescription": "全工作室统一外观：黑白灰底色，蓝色作为操作强调。"
 }

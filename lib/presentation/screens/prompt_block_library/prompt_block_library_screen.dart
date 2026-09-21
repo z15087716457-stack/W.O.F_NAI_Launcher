@@ -2169,7 +2169,7 @@ class _PromptBlockLibraryScreenState
           Text(
             title,
             style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.outline,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
@@ -2178,7 +2178,7 @@ class _PromptBlockLibraryScreenState
                 ? context.l10n.promptBlockLibrary_tryDifferentSearch
                 : context.l10n.promptBlockLibrary_emptyHint,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.outline.withValues(alpha: 0.7),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           if (hasSearch)

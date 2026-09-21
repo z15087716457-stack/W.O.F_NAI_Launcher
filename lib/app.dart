@@ -7,7 +7,6 @@ import 'package:window_manager/window_manager.dart';
 import 'core/shortcuts/default_shortcuts.dart';
 import 'presentation/router/app_router.dart';
 import 'presentation/providers/theme_provider.dart';
-import 'presentation/providers/font_provider.dart';
 import 'presentation/providers/font_scale_provider.dart';
 import 'presentation/providers/locale_provider.dart';
 import 'presentation/providers/background_refresh_provider.dart';
@@ -16,8 +15,6 @@ import 'presentation/providers/notification_settings_provider.dart';
 import 'presentation/providers/prompt_block_library_provider.dart';
 import 'presentation/providers/subscription_provider.dart'
     hide anlasBalanceProvider;
-import 'presentation/themes/app_theme.dart';
-import 'presentation/themes/brand_entry_theme.dart';
 import 'presentation/widgets/navigation/integrated_title_bar.dart';
 import 'presentation/widgets/shortcuts/shortcut_aware_widget.dart';
 import 'presentation/widgets/shortcuts/shortcut_help_dialog.dart';
@@ -103,12 +100,10 @@ class NAILauncherApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeType = ref.watch(themeNotifierProvider);
-    final fontType = ref.watch(fontNotifierProvider);
+    final brightness = ref.watch(themeNotifierProvider);
     final fontScale = ref.watch(fontScaleNotifierProvider);
     final locale = ref.watch(localeNotifierProvider);
     final router = ref.watch(appRouterProvider);
-    final entryBrightness = ref.watch(brandEntryBrightnessProvider);
 
     // 定义全局快捷键映射
     final globalShortcuts = <String, VoidCallback>{
@@ -157,18 +152,11 @@ class NAILauncherApp extends ConsumerWidget {
           title: Brand.name,
           debugShowCheckedModeBanner: false,
 
-          // 主题 (fontFamily 为空时使用主题原生字体)
-          theme: AppTheme.getTheme(
-            themeType,
-            Brightness.light,
-            fontConfig: fontType.fontFamily.isEmpty ? null : fontType,
-          ),
-          darkTheme: AppTheme.getTheme(
-            themeType,
-            Brightness.dark,
-            fontConfig: fontType.fontFamily.isEmpty ? null : fontType,
-          ),
-          themeMode: ThemeMode.dark, // 默认深色模式
+          theme: ref.watch(studioLightThemeProvider),
+          darkTheme: ref.watch(studioDarkThemeProvider),
+          themeMode: brightness == Brightness.dark
+              ? ThemeMode.dark
+              : ThemeMode.light,
           // 国际化
           locale: locale,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -187,19 +175,8 @@ class NAILauncherApp extends ConsumerWidget {
               data: MediaQuery.of(
                 context,
               ).copyWith(textScaler: TextScaler.linear(fontScale)),
-              child: ListenableBuilder(
-                listenable: router.routeInformationProvider,
-                child: IntegratedTitleBarShell(
-                  child: child ?? const SizedBox.shrink(),
-                ),
-                builder: (context, shell) => Theme(
-                  data:
-                      router.routeInformationProvider.value.uri.path ==
-                          AppRoutes.login
-                      ? BrandEntryTheme.forBrightness(entryBrightness)
-                      : Theme.of(context),
-                  child: shell!,
-                ),
+              child: IntegratedTitleBarShell(
+                child: child ?? const SizedBox.shrink(),
               ),
             );
           },

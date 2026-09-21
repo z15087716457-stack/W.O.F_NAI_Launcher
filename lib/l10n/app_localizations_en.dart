@@ -10547,4 +10547,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String promptToken_promptShare(int used, int total, int limit) {
     return 'This prompt: $used tokens; total usage: $total / $limit';
   }
+
+  @override
+  String get settings_geistDark => 'Geist Dark';
+
+  @override
+  String get settings_geistLight => 'Geist Light';
+
+  @override
+  String get settings_geistDescription =>
+      'One appearance across your studio. Black or white surfaces, with blue accents.';
 }

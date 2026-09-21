@@ -330,7 +330,7 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
       child: Text(
         message,
         style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.outline,
+          color: theme.colorScheme.onSurfaceVariant,
         ),
       ),
     );

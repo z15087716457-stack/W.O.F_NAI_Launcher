@@ -244,7 +244,12 @@ void main() {
             await mouse.moveTo(tester.getCenter(add));
             await tester.pump();
             await tester.pump(const Duration(milliseconds: 250));
-            expect(await redAtButton(), greaterThan(normal));
+            expect(
+              await redAtButton(),
+              officialUiCaptureTheme().brightness == Brightness.dark
+                  ? greaterThan(normal)
+                  : lessThan(normal),
+            );
             await tester.pump(const Duration(seconds: 2));
             expect(find.text(l10n.character_addCharacter), findsOneWidget);
             if (Platform.environment['CAPTURE_OFFICIAL_UI'] == '1') {

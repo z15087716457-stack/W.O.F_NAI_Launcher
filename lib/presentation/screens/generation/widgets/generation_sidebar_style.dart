@@ -30,7 +30,7 @@ final class GenSidebarStyle {
   )!;
 
   static Color border(ThemeData theme) =>
-      theme.colorScheme.outline.withValues(alpha: 0.2);
+      theme.colorScheme.outlineVariant;
 
   static Color selectedSurface(ThemeData theme) => Color.alphaBlend(
     theme.colorScheme.onSurface.withValues(alpha: .08),
@@ -58,7 +58,7 @@ final class GenSidebarStyle {
       (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
         fontSize: 12,
         height: 1.4,
-        color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+        color: theme.colorScheme.onSurfaceVariant,
       );
 
   /// 模块标题（官网 `Character Prompts` / `Resolution` /

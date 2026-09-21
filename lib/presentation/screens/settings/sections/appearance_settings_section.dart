@@ -11,7 +11,7 @@ import '../../../providers/history_click_behavior_provider.dart';
 import '../../../providers/locale_provider.dart';
 import '../../../providers/simple_output_viewer_provider.dart';
 import '../../../providers/theme_provider.dart';
-import '../../../themes/app_theme.dart';
+import '../../../widgets/settings/studio_theme_picker.dart';
 import '../../../widgets/common/themed_divider.dart';
 import '../widgets/settings_card.dart';
 
@@ -49,11 +49,11 @@ class _AppearanceSettingsSectionState
             leading: const Icon(Icons.palette_outlined),
             title: Text(context.l10n.settings_style),
             subtitle: Text(
-              currentTheme == AppStyle.grungeCollage
-                  ? context.l10n.settings_defaultPreset
-                  : currentTheme.displayName,
+              currentTheme == Brightness.dark
+                  ? context.l10n.settings_geistDark
+                  : context.l10n.settings_geistLight,
             ),
-            onTap: () => _showThemeDialog(context, currentTheme),
+            onTap: () => _showThemeDialog(context),
           ),
 
           // 字体选择
@@ -182,49 +182,19 @@ class _AppearanceSettingsSectionState
     );
   }
 
-  void _showThemeDialog(BuildContext context, AppStyle currentTheme) {
-    // grungeCollage 已是 enum 第一个，无需手动排序
-    const sortedStyles = AppStyle.values;
-
+  void _showThemeDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(context.l10n.settings_selectStyle),
-          content: SizedBox(
-            width: 300,
-            height: 400,
-            child: RadioGroup<AppStyle>(
-              groupValue: currentTheme,
-              onChanged: (value) {
-                if (value != null) {
-                  ref.read(themeNotifierProvider.notifier).setTheme(value);
-                  Navigator.pop(dialogContext);
-                }
-              },
-              child: ListView(
-                shrinkWrap: true,
-                children: sortedStyles.map((style) {
-                  // grungeCollage 使用多语言的"默认"
-                  final displayName = style == AppStyle.grungeCollage
-                      ? context.l10n.settings_defaultPreset
-                      : style.displayName;
-                  return RadioListTile<AppStyle>(
-                    title: Text(displayName),
-                    value: style,
-                  );
-                }).toList(),
-              ),
-            ),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.settings_selectStyle),
+        content: const SizedBox(width: 420, child: StudioThemePicker()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(context.l10n.common_close),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(context.l10n.common_cancel),
-            ),
-          ],
-        );
-      },
+        ],
+      ),
     );
   }
 

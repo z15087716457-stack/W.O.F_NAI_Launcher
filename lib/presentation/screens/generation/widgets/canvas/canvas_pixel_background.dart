@@ -26,8 +26,7 @@ class CanvasPixelBackgroundPainter extends CustomPainter {
     final dark = theme.brightness == Brightness.dark;
     canvas.drawRect(
       Offset.zero & size,
-      Paint()
-        ..color = dark ? const Color(0xFF191919) : theme.colorScheme.surface,
+      Paint()..color = theme.colorScheme.surface,
     );
 
     final scale = camera.scale;

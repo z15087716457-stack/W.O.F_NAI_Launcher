@@ -10282,4 +10282,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String promptToken_promptShare(int used, int total, int limit) {
     return 'このプロンプト：$used トークン；合計：$total / $limit';
   }
+
+  @override
+  String get settings_geistDark => 'Geist ダーク';
+
+  @override
+  String get settings_geistLight => 'Geist ライト';
+
+  @override
+  String get settings_geistDescription => 'スタジオ全体で共通の外観。白黒の背景にブルーのアクセント。';
 }

@@ -10148,4 +10148,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String promptToken_promptShare(int used, int total, int limit) {
     return '此提示词：$used Token；总用量：$total / $limit';
   }
+
+  @override
+  String get settings_geistDark => 'Geist 深色';
+
+  @override
+  String get settings_geistLight => 'Geist 浅色';
+
+  @override
+  String get settings_geistDescription => '全工作室统一外观：黑白灰底色，蓝色作为操作强调。';
 }

@@ -12,7 +12,8 @@ import '../../providers/locale_provider.dart';
 import '../../providers/update_provider.dart';
 import '../../providers/warmup_provider.dart';
 import 'splash_screen.dart';
-import '../../themes/brand_entry_theme.dart';
+import '../../providers/theme_provider.dart';
+import '../../providers/font_scale_provider.dart';
 import '../../widgets/navigation/integrated_title_bar.dart';
 
 /// 应用启动引导器
@@ -59,11 +60,17 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: BrandEntryTheme.forBrightness(
-        ref.watch(brandEntryBrightnessProvider),
+      theme: ref.watch(studioLightThemeProvider),
+      darkTheme: ref.watch(studioDarkThemeProvider),
+      themeMode: ref.watch(themeNotifierProvider) == Brightness.dark
+          ? ThemeMode.dark
+          : ThemeMode.light,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          textScaler: TextScaler.linear(ref.watch(fontScaleNotifierProvider)),
+        ),
+        child: IntegratedTitleBarShell(child: child ?? const SizedBox.shrink()),
       ),
-      builder: (context, child) =>
-          IntegratedTitleBarShell(child: child ?? const SizedBox.shrink()),
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,

@@ -6073,5 +6073,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "settings_geistDark": "Geist ダーク",
+  "settings_geistLight": "Geist ライト",
+  "settings_geistDescription": "スタジオ全体で共通の外観。白黒の背景にブルーのアクセント。"
 }

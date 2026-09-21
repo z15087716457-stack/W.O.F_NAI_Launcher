@@ -16,6 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 判定"近白色"的相对亮度阈值。
@@ -95,7 +96,7 @@ Future<void> pumpPanelInLightTheme(
     UncontrolledProviderScope(
       container: container,
       child: MaterialApp(
-        theme: ThemeData.light(),
+        theme: GeistTheme.light,
         locale: const Locale('zh'),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,

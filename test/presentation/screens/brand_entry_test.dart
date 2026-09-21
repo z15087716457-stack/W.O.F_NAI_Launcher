@@ -18,7 +18,9 @@ import 'package:nai_launcher/presentation/providers/update_provider.dart';
 import 'package:nai_launcher/presentation/providers/warmup_provider.dart';
 import 'package:nai_launcher/presentation/screens/auth/login_screen.dart';
 import 'package:nai_launcher/presentation/screens/splash/splash_screen.dart';
-import 'package:nai_launcher/presentation/themes/brand_entry_theme.dart';
+import 'package:nai_launcher/presentation/providers/theme_provider.dart';
+import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import '../../helpers/light_theme_contrast.dart';
 import 'package:nai_launcher/presentation/widgets/branding/brand_entry_scene.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 
@@ -79,20 +81,24 @@ Future<GlobalKey> pumpEntry(
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final key = GlobalKey();
+  final storage = InMemoryLocalStorageService();
+  await storage.setStudioThemeMode(brightness.name);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         authNotifierProvider.overrideWith(_Auth.new),
         accountManagerNotifierProvider.overrideWith(() => _Accounts(accounts)),
         updateStateProvider.overrideWith(_Updates.new),
-        brandEntryBrightnessProvider.overrideWith((ref) => brightness),
+        localStorageServiceProvider.overrideWithValue(storage),
         warmupNotifierProvider.overrideWith(() => _Warmup(warmup)),
       ],
       child: Consumer(
         builder: (context, ref, _) => MaterialApp(
-          theme: BrandEntryTheme.forBrightness(
-            ref.watch(brandEntryBrightnessProvider),
-          ),
+          theme: ref.watch(studioLightThemeProvider),
+          darkTheme: ref.watch(studioDarkThemeProvider),
+          themeMode: ref.watch(themeNotifierProvider) == Brightness.dark
+              ? ThemeMode.dark
+              : ThemeMode.light,
           locale: locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -201,7 +207,7 @@ void main() {
       final container = ProviderScope.containerOf(
         tester.element(find.byType(LoginScreen)),
       );
-      expect(container.read(brandEntryBrightnessProvider), Brightness.light);
+      expect(container.read(themeNotifierProvider), Brightness.light);
       await capture(tester, key, 'login-light-after-switch');
       await tester.ensureVisible(find.byKey(const Key('auth_guest_entry')));
       await tester.tap(find.byKey(const Key('auth_guest_entry')));
@@ -272,7 +278,7 @@ void main() {
     (container.read(warmupNotifierProvider.notifier) as _Warmup).complete();
     await tester.pumpAndSettle();
     expect(find.text('100%'), findsOneWidget);
-    expect(container.read(brandEntryBrightnessProvider), Brightness.light);
+    expect(container.read(themeNotifierProvider), Brightness.light);
     expect(tester.takeException(), isNull);
   });
 }

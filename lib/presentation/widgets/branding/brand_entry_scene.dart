@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_version.dart';
 import '../../../core/utils/localization_extension.dart';
-import '../../themes/brand_entry_theme.dart';
+import '../../providers/theme_provider.dart';
+import '../../themes/presets/geist_theme.dart';
 import '../../themes/studio_typography.dart';
 
 /// The complete, original wordmark. The asset only removes empty source margins;
@@ -34,155 +35,139 @@ class BrandEntryScene extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final brightness = ref.watch(brandEntryBrightnessProvider);
-    return Theme(
-      data: BrandEntryTheme.forBrightness(brightness),
-      child: Builder(
-        builder: (context) {
-          final scheme = Theme.of(context).colorScheme;
-          final dark = brightness == Brightness.dark;
-          return Scaffold(
-            body: Stack(
-              children: [
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: CustomPaint(
-                      painter: _EntryFramePainter(scheme.outline, dark),
-                    ),
+    return Builder(
+      builder: (context) {
+        final scheme = Theme.of(context).colorScheme;
+        final dark = scheme.brightness == Brightness.dark;
+        return Scaffold(
+          body: Stack(
+            children: [
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: CustomPaint(
+                    painter: _EntryFramePainter(scheme.outline, dark),
                   ),
                 ),
-                Positioned.fill(
-                  top: 60,
-                  bottom: 50,
-                  child: SafeArea(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final logoWidth = math.min(
-                          360.0,
-                          constraints.maxWidth - 96,
-                        );
-                        return SingleChildScrollView(
-                          key: const Key('brand_entry_scroll'),
-                          padding: const EdgeInsets.fromLTRB(24, 22, 24, 22),
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              minHeight: math.max(
-                                0,
-                                constraints.maxHeight - 44,
-                              ),
-                            ),
-                            child: Center(
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 460,
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    BrandLogo(width: logoWidth),
-                                    const SizedBox(height: 22),
-                                    Text(
-                                      context.l10n.brand_entryTagline,
-                                      textAlign: TextAlign.center,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            color: scheme.onSurfaceVariant,
-                                            letterSpacing: 1.2,
-                                          ),
-                                    ),
-                                    SizedBox(height: loading ? 52 : 32),
-                                    child,
-                                  ],
-                                ),
+              ),
+              Positioned.fill(
+                top: 60,
+                bottom: 50,
+                child: SafeArea(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final logoWidth = math.min(
+                        360.0,
+                        constraints.maxWidth - 96,
+                      );
+                      return SingleChildScrollView(
+                        key: const Key('brand_entry_scroll'),
+                        padding: const EdgeInsets.fromLTRB(24, 22, 24, 22),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: math.max(0, constraints.maxHeight - 44),
+                          ),
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 460),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  BrandLogo(width: logoWidth),
+                                  const SizedBox(height: 22),
+                                  Text(
+                                    context.l10n.brand_entryTagline,
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: scheme.onSurfaceVariant,
+                                          letterSpacing: 1.2,
+                                        ),
+                                  ),
+                                  SizedBox(height: loading ? 52 : 32),
+                                  child,
+                                ],
                               ),
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-                Positioned(
-                  top: 22,
-                  left: 28,
-                  child: ExcludeSemantics(
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          color: BrandEntryTheme.blue,
+              ),
+              Positioned(
+                top: 22,
+                left: 28,
+                child: ExcludeSemantics(
+                  child: Row(
+                    children: [
+                      Container(width: 6, height: 6, color: GeistTheme.blue),
+                      const SizedBox(width: 10),
+                      Text(
+                        loading ? 'STUDIO / START' : 'STUDIO / ACCESS',
+                        style: StudioTypography.data.copyWith(
+                          fontSize: 10,
+                          letterSpacing: 1.2,
+                          color: scheme.onSurfaceVariant,
                         ),
-                        const SizedBox(width: 10),
-                        Text(
-                          loading ? 'STUDIO / START' : 'STUDIO / ACCESS',
-                          style: StudioTypography.data.copyWith(
-                            fontSize: 10,
-                            letterSpacing: 1.2,
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-                Positioned(
-                  top: 10,
-                  right: 18,
-                  child: IconButton(
-                    key: const Key('brand_appearance_toggle'),
-                    tooltip: dark
-                        ? context.l10n.brand_switchToLight
-                        : context.l10n.brand_switchToDark,
-                    onPressed: () =>
-                        ref.read(brandEntryBrightnessProvider.notifier).state =
-                            dark ? Brightness.light : Brightness.dark,
-                    icon: Icon(
-                      dark
-                          ? Icons.light_mode_outlined
-                          : Icons.dark_mode_outlined,
-                      size: 19,
-                    ),
+              ),
+              Positioned(
+                top: 10,
+                right: 18,
+                child: IconButton(
+                  key: const Key('brand_appearance_toggle'),
+                  tooltip: dark
+                      ? context.l10n.brand_switchToLight
+                      : context.l10n.brand_switchToDark,
+                  onPressed: () =>
+                      ref.read(themeNotifierProvider.notifier).nextTheme(),
+                  icon: Icon(
+                    dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                    size: 19,
                   ),
                 ),
-                Positioned(
-                  left: 28,
-                  right: 28,
-                  bottom: 20,
-                  child: IgnorePointer(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            context.l10n.app_subtitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  fontSize: 11,
-                                  color: scheme.onSurfaceVariant,
-                                ),
-                          ),
+              ),
+              Positioned(
+                left: 28,
+                right: 28,
+                bottom: 20,
+                child: IgnorePointer(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          context.l10n.app_subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                fontSize: 11,
+                                color: scheme.onSurfaceVariant,
+                              ),
                         ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'v${AppVersion.versionName}',
-                          style: StudioTypography.data.copyWith(
-                            fontSize: 10,
-                            color: scheme.onSurfaceVariant,
-                          ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'v${AppVersion.versionName}',
+                        style: StudioTypography.data.copyWith(
+                          fontSize: 10,
+                          color: scheme.onSurfaceVariant,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          );
-        },
-      ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -219,7 +204,7 @@ class _EntryFramePainter extends CustomPainter {
       }
     }
     final squares = Paint()
-      ..color = BrandEntryTheme.blue.withValues(alpha: dark ? 0.14 : 0.08);
+      ..color = GeistTheme.blue.withValues(alpha: dark ? 0.14 : 0.08);
     for (final point in [
       Offset(left - 48, 146),
       Offset(right + 38, size.height - 160),

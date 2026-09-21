@@ -210,6 +210,11 @@ class AnlasBalanceChip extends ConsumerWidget {
       height: compact ? 13 : 14,
       colorFilter: isWarning == true
           ? ColorFilter.mode(theme.colorScheme.error, BlendMode.srcIn)
+          : theme.brightness == Brightness.light
+          ? ColorFilter.mode(
+              theme.colorScheme.onSurfaceVariant,
+              BlendMode.srcIn,
+            )
           : null,
     );
   }

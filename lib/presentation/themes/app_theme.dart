@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/font_provider.dart';
 import 'studio_typography.dart';
 
-// Import all 16 theme presets
+// Legacy presets remain readable without reordering their stored indices.
 import 'presets/bold_retro_theme.dart';
 import 'presets/grunge_collage_theme.dart';
 import 'presets/fluid_saturated_theme.dart';
@@ -21,12 +21,13 @@ import 'presets/retro_wave_theme.dart';
 import 'presets/brutalist_theme.dart';
 import 'presets/apple_light_theme.dart';
 import 'presets/system_theme.dart';
+import 'presets/geist_theme.dart';
 import 'theme_extension.dart';
 
-/// 风格类型枚举 - 16 套主题
+/// 历史风格索引与当前 Geist 主题。应用只暴露 Geist 深浅选择。
 enum AppStyle {
   // 8 套新设计主题
-  grungeCollage, // 拼贴朋克 (默认)
+  grungeCollage, // 拼贴朋克（历史默认）
   boldRetro, // 复古现代主义
   fluidSaturated, // 流体饱和
   materialYou, // Material You
@@ -43,11 +44,13 @@ enum AppStyle {
   brutalist, // 原 motorolaFixBeeper - LCD 电子
   appleLight, // 原 pureLight - 纯净白
   system, // 跟随系统
+  geist, // Studio 深浅主题。仅追加，保持历史存储索引稳定。
 }
 
 extension AppStyleExtension on AppStyle {
   /// 主题元数据映射
   static final _metadata = <AppStyle, _ThemeMetadata>{
+    AppStyle.geist: const _ThemeMetadata('Geist', '中性黑白灰与品牌蓝', true),
     AppStyle.boldRetro: _ThemeMetadata(
       BoldRetroTheme.displayName,
       BoldRetroTheme.description,
@@ -156,6 +159,7 @@ class AppTheme {
 
   /// 主题构建器映射
   static final _themeBuilders = <AppStyle, _ThemeBuilder>{
+    AppStyle.geist: _ThemeBuilder(GeistTheme.light, GeistTheme.dark),
     AppStyle.boldRetro: _ThemeBuilder(
       BoldRetroTheme.light,
       BoldRetroTheme.dark,
@@ -357,6 +361,10 @@ class AppTheme {
   /// 主题扩展构建器映射
   static final _extensionBuilders =
       <AppStyle, _ThemeBuilder<AppThemeExtension>>{
+        AppStyle.geist: _ThemeBuilder(
+          GeistTheme.extension(Brightness.light),
+          GeistTheme.extension(Brightness.dark),
+        ),
         AppStyle.boldRetro: _ThemeBuilder(
           BoldRetroTheme.lightExtension,
           BoldRetroTheme.darkExtension,

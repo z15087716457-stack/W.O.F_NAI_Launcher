@@ -8,7 +8,12 @@ import 'studio_capture_fonts.dart';
 /// Exercises themes whose surface slots are identical, as in the user's UI.
 ThemeData officialUiCaptureTheme() =>
     Platform.environment['CAPTURE_STUDIO_UI'] == '1'
-    ? AppTheme.getTheme(AppStyle.grungeCollage, Brightness.dark)
+    ? AppTheme.getTheme(
+        AppStyle.geist,
+        Platform.environment['STUDIO_APPEARANCE'] == 'light'
+            ? Brightness.light
+            : Brightness.dark,
+      )
     : ThemeData(
         brightness: Brightness.dark,
         fontFamily: 'OfficialUiCapture',

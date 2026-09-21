@@ -47,7 +47,7 @@ Windows `Runner.rc` 的 `CompanyName=com.example`、`ProductName=nai_launcher` �
 
 ### Studio 字体与界面图标
 
-显示名为 `W.O.F NAI Studio`；数据目录、单实例标识、可执行文件名和更新仓库保持既有标识。界面字族使用随包提供的 Geist Sans / Mono / Pixel Line 与 HarmonyOS Sans SC，字体角色、品牌入口、许可和实绘验证见 [tool/branding/README.md](tool/branding/README.md)。界面图标已恢复原有 `Icon` 和专用符号，只保留 `StudioTypography` 字体角色。登录与载入使用独立的 `BrandEntryTheme` / `BrandEntryScene`，明暗选择在当前会话内共享，不覆盖工作区主题或账户状态。字体、Logo、许可或原生显示名变更后需交付包含新资源的完整运行包。
+显示名为 `W.O.F NAI Studio`；数据目录、单实例标识、可执行文件名和更新仓库保持既有标识。界面字族使用随包提供的 Geist Sans / Mono / Pixel Line 与 HarmonyOS Sans SC，字体角色、品牌入口、许可和实绘验证见 [tool/branding/README.md](tool/branding/README.md)。界面图标已恢复原有 `Icon` 和专用符号，只保留 `StudioTypography` 字体角色。应用统一使用 Geist 深色 / 浅色两套主题，`themeNotifierProvider` 持久化明暗选择，载入、登录、工作区与弹窗继承同一根主题。背景和面板使用黑白灰，蓝色仅用于操作强调；标题栏、图标与字体角色保持原有约定。字体、Logo、许可或原生显示名变更后需交付包含新资源的完整运行包。
 
 ## Changelog 与 Release Notes 规范
 

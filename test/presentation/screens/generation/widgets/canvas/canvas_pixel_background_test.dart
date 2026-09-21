@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_pixel_background.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_controller.dart';
 
@@ -17,7 +18,7 @@ Future<ui.Image> _render(
   final canvas = Canvas(recorder)..scale(dpr);
   CanvasPixelBackgroundPainter(
     camera: camera,
-    theme: theme ?? ThemeData.dark(),
+    theme: theme ?? GeistTheme.dark,
     devicePixelRatio: dpr,
   ).paint(canvas, size);
   final picture = recorder.endRecording();
@@ -98,7 +99,7 @@ void main() {
 
       var marked = 0;
       for (var i = 0; i < pixels.length; i += 4) {
-        if (pixels[i] != 25) marked++;
+        if (pixels[i] != 0) marked++;
         expect(pixels[i + 3], 255);
       }
       expect(marked / (640 * 560), inExclusiveRange(0.002, 0.04));
@@ -142,7 +143,7 @@ void main() {
       final pixels = await _pixels(
         const CanvasCamera(offset: Offset(-12, -7), scale: 0.1),
       );
-      expect(pixels.toSet(), {25, 255});
+      expect(pixels.toSet(), {0, 255});
       final image = await _render(
         const CanvasCamera(offset: Offset.zero, scale: 0.1),
         theme: ThemeData.light().copyWith(
