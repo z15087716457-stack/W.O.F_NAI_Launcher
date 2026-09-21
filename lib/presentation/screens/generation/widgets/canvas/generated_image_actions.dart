@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -8,23 +7,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../../../core/enums/precise_ref_type.dart';
-import '../../../../../core/utils/app_logger.dart';
 import '../../../../../core/utils/file_explorer_utils.dart';
-import '../../../../../core/utils/image_save_utils.dart';
 import '../../../../../core/utils/localization_extension.dart';
-import '../../../../../core/utils/nai_resolution_adapter.dart';
-import '../../../../../core/utils/prompt_preset_resolution.dart';
 import '../../../../../core/utils/vibe_file_parser.dart';
 import '../../../../../data/repositories/gallery_folder_repository.dart';
-import '../../../../../data/services/alias_resolver_service.dart';
 import '../../../../../data/services/image_metadata_service.dart';
 import '../../../../providers/generation/preview_selection_provider.dart';
 import '../../../../providers/history_click_behavior_provider.dart';
-import '../../../../providers/character_prompt_provider.dart';
 import '../../../../providers/image_generation_provider.dart';
 import '../../../../providers/local_gallery_provider.dart';
-import '../../../../providers/quality_preset_provider.dart';
-import '../../../../providers/uc_preset_provider.dart';
 import '../../../../services/image_workflow_launcher.dart';
 import '../../../../widgets/common/app_toast.dart';
 import '../../../../widgets/common/image_detail/file_image_detail_data.dart';
@@ -32,6 +23,7 @@ import '../../../../widgets/common/image_detail/image_detail_data.dart';
 import '../../../../widgets/common/image_detail/image_detail_viewer.dart';
 import '../../../../utils/image_detail_opener.dart';
 import '../../../prompt_block_library/widgets/prompt_block_edit_dialog.dart';
+import '../../services/generation_save_service.dart';
 
 /// 生成图的可复用操作集合。
 ///
@@ -153,32 +145,15 @@ class GeneratedImageActions {
       final saveDirPath = await GalleryFolderRepository.instance.getRootPath();
       if (saveDirPath == null) return;
 
-      final seed = await ImageSaveUtils.resolveSeed(
-        metadata: image.metadata,
-        bytes: image.bytes,
-      );
-
-      // 兜底去重：同一 seed 且字节一致的文件今日已存在则直接定位，
-      // 不再另存副本（覆盖 filePath 未回写、跨会话等一切缺路径场景）。
-      final identicalPath = await ImageSaveUtils.findIdenticalDatedFile(
+      final filePath = await GenerationSaveService.saveToDirectory(
+        GeneratedImageDetailData(
+          id: image.id,
+          imageBytes: image.bytes,
+          metadata: image.metadata,
+        ),
         rootPath: saveDirPath,
-        bytes: image.bytes,
-        seed: seed,
       );
-      if (identicalPath != null) {
-        ref
-            .read(imageGenerationNotifierProvider.notifier)
-            .updateImageFilePath(image.id, identicalPath);
-        await FileExplorerUtils.revealFile(identicalPath);
-        return;
-      }
-
-      // 原子保存：日期分类路径 + 独占防冲突 + 失败清理，全在工具内完成。
-      final filePath = await ImageSaveUtils.saveBytesToDatedPath(
-        rootPath: saveDirPath,
-        bytes: image.bytes,
-        seed: seed,
-      );
+      if (!context.mounted) return;
 
       // 回写保存路径，后续「打开文件夹」「保存图像」直接复用原文件
       ref
@@ -203,37 +178,20 @@ class GeneratedImageActions {
     BuildContext context,
     Uint8List bytes,
   ) async {
-    final params = ref.read(generationParamsNotifierProvider);
-    final characterConfig = ref.read(characterPromptNotifierProvider);
-
-    // 使用竖线格式合并正面提示词和角色提示词
-    final positivePrompt = params.prompt;
-    final enabledCharacters = characterConfig.characters
-        .where((c) => c.enabled && c.prompt.isNotEmpty)
-        .toList();
-
-    final String combinedPrompt;
-    if (enabledCharacters.isEmpty) {
-      combinedPrompt = positivePrompt;
-    } else {
-      // 使用竖线格式：主提示词 | 角色1 | 角色2
-      final buffer = StringBuffer(positivePrompt);
-      for (final char in enabledCharacters) {
-        buffer.write('\n| ${char.prompt}');
-      }
-      combinedPrompt = buffer.toString();
-    }
-
-    // 解析别名引用，保存实际内容到块库
-    final aliasResolver = ref.read(aliasResolverServiceProvider.notifier);
-    final resolvedPrompt = aliasResolver.resolveAliases(combinedPrompt);
+    final metadata = await ImageMetadataService().getMetadataFromBytes(bytes);
+    // Save the clicked image's prompt; a missing PNG prompt stays empty.
+    final combinedPrompt = [
+      if (metadata?.prompt.isNotEmpty == true) metadata!.prompt,
+      for (final prompt in metadata?.characterPrompts ?? const <String>[])
+        if (prompt.isNotEmpty) '| $prompt',
+    ].join('\n');
 
     if (!context.mounted) return;
 
     await PromptBlockEditDialog.createWithDialog(
       context,
       ref,
-      initialContent: resolvedPrompt,
+      initialContent: combinedPrompt,
       initialImageBytes: bytes,
     );
   }
@@ -252,10 +210,12 @@ class GeneratedImageActions {
         ref.read(historyClickBehaviorNotifierProvider) ==
             HistoryClickBehavior.selectPreview &&
         ref.read(generationPreviewSelectionProvider) == selectedImage.id;
-    final sequence = linkedSelection
+    final candidates = linkedSelection
         ? state.detailSequenceFor(selectedImage)
         : state.displayImages;
-    if (sequence.isEmpty) return;
+    final sequence = candidates.any((image) => image.id == selectedImage.id)
+        ? candidates
+        : [selectedImage, ...candidates];
     final selectedIndex = sequence.indexWhere(
       (image) => image.id == selectedImage.id,
     );
@@ -306,155 +266,7 @@ class GeneratedImageActions {
     );
   }
 
-  /// 获取保存目录
-  Future<Directory?> _getSaveDirectory() async {
-    final dirPath = await GalleryFolderRepository.instance.getRootPath();
-    if (dirPath == null) return null;
-    final dir = Directory(dirPath);
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-    }
-    return dir;
-  }
-
-  /// 保存图像（详情页保存回调使用，入参为 ImageDetailData）
-  Future<void> saveImage(BuildContext context, ImageDetailData image) async {
-    try {
-      final imageBytes = await image.getImageBytes();
-      final saveDir = await _getSaveDirectory();
-      if (saveDir == null) return;
-
-      // 统一解析真实 seed：文件名与元数据嵌入共用同一结果
-      final resolvedSeed = await ImageSaveUtils.resolveSeed(
-        metadata: image.metadata,
-        bytes: imageBytes,
-      );
-      final params = ref.read(generationParamsNotifierProvider);
-      // 最终 seed：解析结果优先，回退当前参数，仍未知道则随机。
-      // 在生成文件名之前确定，保证文件名与嵌入元数据完全一致。
-      final finalSeed = resolvedSeed ?? params.seed;
-      final actualSeed = finalSeed < 0
-          ? Random().nextInt(4294967295)
-          : finalSeed;
-
-      // 构建最终字节：已有 NAI 元数据则原样保留，否则按当前参数重建
-      final Uint8List finalBytes;
-      if (ImageSaveUtils.hasEmbeddedNovelAiMetadata(imageBytes)) {
-        finalBytes = imageBytes;
-      } else {
-        final characterConfig = ref.read(characterPromptNotifierProvider);
-
-        // 解析别名
-        final aliasResolver = ref.read(aliasResolverServiceProvider.notifier);
-        final resolvedPrompt = aliasResolver.resolveAliases(params.prompt);
-        final resolvedNegative = aliasResolver.resolveAliases(
-          params.negativePrompt,
-        );
-        final qualityState = ref.read(qualityPresetNotifierProvider);
-        final qualityContent = ref
-            .read(qualityPresetNotifierProvider.notifier)
-            .getEffectiveContent(params.model);
-        final ucState = ref.read(ucPresetNotifierProvider);
-        final ucPresetContent = ref
-            .read(ucPresetNotifierProvider.notifier)
-            .getEffectiveContent(params.model);
-        final presetResolution = resolvePromptPresetSettings(
-          prompt: resolvedPrompt,
-          negativePrompt: resolvedNegative,
-          qualityMode: qualityState.mode,
-          qualityContent: qualityContent,
-          ucPresetType: ucState.presetType,
-          ucPresetContent: ucPresetContent,
-          useCustomUcPreset: ucState.isCustom,
-        );
-
-        // 构建 V4 多角色提示词结构（解析别名）
-        final charCaptions = <Map<String, dynamic>>[];
-        final charNegCaptions = <Map<String, dynamic>>[];
-
-        for (final char in characterConfig.characters.where(
-          (c) => c.enabled && c.prompt.isNotEmpty,
-        )) {
-          charCaptions.add({
-            'char_caption': aliasResolver.resolveAliases(char.prompt),
-            'centers': [
-              {'x': 0.5, 'y': 0.5},
-            ],
-          });
-          charNegCaptions.add({
-            'char_caption': aliasResolver.resolveAliases(char.negativePrompt),
-            'centers': [
-              {'x': 0.5, 'y': 0.5},
-            ],
-          });
-        }
-
-        final encodedSize = NaiResolutionAdapter.readImageSize(imageBytes);
-        final paramsForSave = params.copyWith(
-          prompt: presetResolution.prompt,
-          negativePrompt: presetResolution.negativePrompt,
-          qualityToggle: presetResolution.qualityToggle,
-          qualityTagPreset: presetResolution.qualityTagPreset,
-          ucPreset: presetResolution.ucPreset,
-          width: encodedSize?.$1 ?? params.width,
-          height: encodedSize?.$2 ?? params.height,
-        );
-        finalBytes = await ImageSaveUtils.rebuildImageBytesWithMetadata(
-          imageBytes: imageBytes,
-          params: paramsForSave,
-          actualSeed: actualSeed,
-          charCaptions: charCaptions,
-          charNegCaptions: charNegCaptions,
-          useCoords: !characterConfig.globalAiChoice,
-        );
-      }
-
-      // 原子保存：日期分类路径 + 独占防冲突 + 失败清理，全在工具内完成
-      final filePath = await ImageSaveUtils.saveBytesToDatedPath(
-        rootPath: saveDir.path,
-        bytes: finalBytes,
-        seed: actualSeed,
-      );
-
-      // 立即解析并缓存刚保存图像的元数据
-      unawaited(
-        ImageMetadataService()
-            .getMetadata(filePath)
-            .then((metadata) {
-              AppLogger.d(
-                '生成图像元数据已缓存: ${metadata?.prompt.substring(0, metadata.prompt.length > 30 ? 30 : metadata.prompt.length)}...',
-                'ImagePreview',
-              );
-            })
-            .catchError((e) {
-              AppLogger.w('生成图像元数据缓存失败: $e', 'ImagePreview');
-            }),
-      );
-
-      // 更新保存图像的文件路径到状态
-      final currentState = ref.read(imageGenerationNotifierProvider);
-      final updatedImages = currentState.displayImages.map((img) {
-        if (img.id == image.identifier) {
-          return img.copyWithFilePath(filePath);
-        }
-        return img;
-      }).toList();
-
-      if (updatedImages.isNotEmpty) {
-        ref
-            .read(imageGenerationNotifierProvider.notifier)
-            .updateDisplayImages(updatedImages);
-      }
-
-      ref.read(localGalleryNotifierProvider.notifier).refresh();
-
-      if (context.mounted) {
-        AppToast.success(context, context.l10n.image_imageSaved(saveDir.path));
-      }
-    } catch (e) {
-      if (context.mounted) {
-        AppToast.error(context, context.l10n.image_saveFailed(e.toString()));
-      }
-    }
-  }
+  /// All generation surfaces share metadata-preserving, idempotent saving.
+  Future<void> saveImage(BuildContext context, ImageDetailData image) =>
+      GenerationSaveService.saveImageFromDetail(context, ref, image);
 }

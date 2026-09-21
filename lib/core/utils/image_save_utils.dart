@@ -638,8 +638,10 @@ class ImageSaveUtils {
     required Uint8List bytes,
     required int? seed,
     DateTime? now,
+    bool matchWithoutSeed = false,
   }) async {
-    if (seed == null || seed < 0) return null;
+    final hasSeed = seed != null && seed >= 0;
+    if (!hasSeed && !matchWithoutSeed) return null;
     final time = now ?? DateTime.now();
     String two(int v) => v.toString().padLeft(2, '0');
     final dateFolder = '${time.year}-${two(time.month)}-${two(time.day)}';
@@ -651,9 +653,12 @@ class ImageSaveUtils {
     await for (final entity in dir.list()) {
       if (entity is! File) continue;
       final name = p.basename(entity.path);
-      if (!name.endsWith(plainSuffix) && !variantPattern.hasMatch(name)) {
+      if (hasSeed &&
+          !name.endsWith(plainSuffix) &&
+          !variantPattern.hasMatch(name)) {
         continue;
       }
+      if (!hasSeed && p.extension(name).toLowerCase() != '.png') continue;
       try {
         if (await entity.length() != bytes.length) continue;
         if (await _fileBytesEqual(entity, bytes)) return entity.path;

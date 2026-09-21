@@ -55,6 +55,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
   final bool isPreviewActive;
   final Object? imageIdentity;
   final bool allowRepeatedModifierTaps;
+  final bool debounceTap;
 
   /// 是否启用右键菜单
   final bool enableContextMenu;
@@ -185,8 +186,6 @@ class SelectableImageCard extends ConsumerStatefulWidget {
   /// 仅 historyThumb 模式渲染；≤1 或 null 不显示。
   final int? batchBadgeCount;
 
-
-
   const SelectableImageCard({
     super.key,
     this.imageBytes,
@@ -201,6 +200,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
     this.isPreviewActive = false,
     this.imageIdentity,
     this.allowRepeatedModifierTaps = false,
+    this.debounceTap = true,
     this.enableContextMenu = true,
     this.enableHoverScale = true,
     this.enableGlossEffect = true,
@@ -660,77 +660,10 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
     );
   }
 
-  Widget _buildStreamPreviewImage() {
-    final focusedPreviewPlacement = widget.focusedPreviewPlacement;
-    if (focusedPreviewPlacement == null || !focusedPreviewPlacement.isValid) {
-      return DecodedMemoryImage(
-        bytes: widget.streamPreview!,
-        fit: BoxFit.cover,
-        gaplessPlayback: true,
-      );
-    }
-
-    if (focusedPreviewPlacement.hasMask) {
-      return _FocusedStreamPreviewImage(
-        previewImage: widget.streamPreview!,
-        placement: focusedPreviewPlacement,
-      );
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (!constraints.hasBoundedWidth || !constraints.hasBoundedHeight) {
-          return DecodedMemoryImage(
-            bytes: widget.streamPreview!,
-            fit: BoxFit.cover,
-            gaplessPlayback: true,
-          );
-        }
-
-        final xPercent = focusedPreviewPlacement.xPercent
-            .clamp(0.0, 1.0)
-            .toDouble();
-        final yPercent = focusedPreviewPlacement.yPercent
-            .clamp(0.0, 1.0)
-            .toDouble();
-        final widthPercent = focusedPreviewPlacement.widthPercent
-            .clamp(0.0, 1.0 - xPercent)
-            .toDouble();
-        final heightPercent = focusedPreviewPlacement.heightPercent
-            .clamp(0.0, 1.0 - yPercent)
-            .toDouble();
-        final overlayWidth = math.max(1.0, constraints.maxWidth * widthPercent);
-        final overlayHeight = math.max(
-          1.0,
-          constraints.maxHeight * heightPercent,
-        );
-
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            DecodedMemoryImage(
-              bytes: focusedPreviewPlacement.sourceImage,
-              fit: BoxFit.cover,
-              gaplessPlayback: true,
-            ),
-            Positioned(
-              left: constraints.maxWidth * xPercent,
-              top: constraints.maxHeight * yPercent,
-              width: overlayWidth,
-              height: overlayHeight,
-              child: ClipRect(
-                child: DecodedMemoryImage(
-                  bytes: widget.streamPreview!,
-                  fit: BoxFit.fill,
-                  gaplessPlayback: true,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  Widget _buildStreamPreviewImage() => buildStreamPreviewImage(
+    bytes: widget.streamPreview!,
+    placement: widget.focusedPreviewPlacement,
+  );
 
   /// 构建加载动画卡片（无预览时）
   Widget _buildLoadingCard(
@@ -892,9 +825,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
           ),
           transformAlignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(
-              widget.historyThumb ? 3 : 12,
-            ),
+            borderRadius: BorderRadius.circular(widget.historyThumb ? 3 : 12),
             border: widget.hideSelectionDecoration || widget.historyThumb
                 ? null
                 : widget.isSelected
@@ -938,8 +869,9 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                           : (_isHovering
                                 ? Colors.black.withValues(alpha: 0.35)
                                 : Colors.black.withValues(alpha: 0.12)),
-                      blurRadius:
-                          widget.isSelected ? 16 : (_isHovering ? 28 : 10),
+                      blurRadius: widget.isSelected
+                          ? 16
+                          : (_isHovering ? 28 : 10),
                       offset: Offset(0, _isHovering ? 14 : 4),
                       spreadRadius: _isHovering ? 2 : 0,
                     ),
@@ -971,8 +903,9 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                 RepaintBoundary(
                   child: Container(
                     color: widget.historyThumb
-                        ? theme.colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.5)
+                        ? theme.colorScheme.surfaceContainerHighest.withValues(
+                            alpha: 0.5,
+                          )
                         : null,
                     child: DecodedMemoryImage(
                       key: const ValueKey('selectable-image-completed-image'),
@@ -1238,7 +1171,8 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
 
   void _handleLegacyTap() {
     final bypassDebounce =
-        widget.allowRepeatedModifierTaps && _isMultiSelectModifierPressed;
+        !widget.debounceTap ||
+        (widget.allowRepeatedModifierTaps && _isMultiSelectModifierPressed);
     if (_isTapping && !bypassDebounce) return;
     if (!bypassDebounce) _isTapping = true;
 
@@ -2457,4 +2391,80 @@ class _GlossPainter extends CustomPainter {
   bool shouldRepaint(_GlossPainter oldDelegate) {
     return oldDelegate.progress != progress;
   }
+}
+
+/// Shared composition for history and canvas streaming previews.
+Widget buildStreamPreviewImage({
+  required Uint8List bytes,
+  FocusedStreamPreviewPlacement? placement,
+}) {
+  final focusedPreviewPlacement = placement;
+  if (focusedPreviewPlacement == null || !focusedPreviewPlacement.isValid) {
+    return DecodedMemoryImage(
+      bytes: bytes,
+      fit: BoxFit.cover,
+      gaplessPlayback: true,
+    );
+  }
+
+  if (focusedPreviewPlacement.hasMask) {
+    return _FocusedStreamPreviewImage(
+      previewImage: bytes,
+      placement: focusedPreviewPlacement,
+    );
+  }
+
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      if (!constraints.hasBoundedWidth || !constraints.hasBoundedHeight) {
+        return DecodedMemoryImage(
+          bytes: bytes,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+        );
+      }
+
+      final xPercent = focusedPreviewPlacement.xPercent
+          .clamp(0.0, 1.0)
+          .toDouble();
+      final yPercent = focusedPreviewPlacement.yPercent
+          .clamp(0.0, 1.0)
+          .toDouble();
+      final widthPercent = focusedPreviewPlacement.widthPercent
+          .clamp(0.0, 1.0 - xPercent)
+          .toDouble();
+      final heightPercent = focusedPreviewPlacement.heightPercent
+          .clamp(0.0, 1.0 - yPercent)
+          .toDouble();
+      final overlayWidth = math.max(1.0, constraints.maxWidth * widthPercent);
+      final overlayHeight = math.max(
+        1.0,
+        constraints.maxHeight * heightPercent,
+      );
+
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          DecodedMemoryImage(
+            bytes: focusedPreviewPlacement.sourceImage,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+          ),
+          Positioned(
+            left: constraints.maxWidth * xPercent,
+            top: constraints.maxHeight * yPercent,
+            width: overlayWidth,
+            height: overlayHeight,
+            child: ClipRect(
+              child: DecodedMemoryImage(
+                bytes: bytes,
+                fit: BoxFit.fill,
+                gaplessPlayback: true,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
 }

@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../providers/cost_estimate_provider.dart';
+import '../../../../providers/generation/image_action_providers.dart';
+import '../../../../../core/constants/api_constants.dart';
 import '../../../../providers/canvas_settings_provider.dart';
-import '../../../../providers/subscription_provider.dart';
-import '../../../../../core/services/anlas_calculator.dart';
 import '../../../../providers/generation/preview_selection_provider.dart';
 import '../../../../providers/image_generation_provider.dart';
 import '../../../../services/image_workflow_launcher.dart';
@@ -45,37 +44,45 @@ class CanvasEdgeToolbar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final items = switch (zone) {
       CanvasToolbarZone.top => [
-          _ToolbarItem.enhance(),
-          _ToolbarItem.variations(),
-          _ToolbarItem.upscale(),
-          _ToolbarItem.divider(),
-          _ToolbarItem.setInit(),
-          _ToolbarItem.edit(),
-          _ToolbarItem.inpaint(),
-          _ToolbarItem.sendToTools(),
-        ],
+        _ToolbarItem.enhance(),
+        _ToolbarItem.variations(),
+        _ToolbarItem.upscale(),
+        _ToolbarItem.divider(),
+        _ToolbarItem.setInit(),
+        _ToolbarItem.edit(),
+        _ToolbarItem.inpaint(),
+        _ToolbarItem.sendToTools(),
+      ],
       CanvasToolbarZone.bottomStart => [
-          _ToolbarItem.resolution(image),
-          _ToolbarItem.divider(),
-          _ToolbarItem.settings(),
-          _ToolbarItem.seedPill(image),
-        ],
+        _ToolbarItem.resolution(image),
+        _ToolbarItem.divider(),
+        _ToolbarItem.settings(),
+        _ToolbarItem.seedPill(image),
+      ],
       CanvasToolbarZone.bottomEnd => [
-          // 官网条件渲染件：old-compare(需 originalImage 追踪) 与 contest(订阅功能) 暂无 → 不出现
-          _ToolbarItem.pin(),
-          _ToolbarItem.copy(),
-          _ToolbarItem.download(),
-          _ToolbarItem.info(),
-          _ToolbarItem.exploreUpload(),
-        ],
+        // 官网条件渲染件：old-compare(需 originalImage 追踪) 与 contest(订阅功能) 暂无 → 不出现
+        _ToolbarItem.pin(),
+        _ToolbarItem.copy(),
+        _ToolbarItem.download(),
+        _ToolbarItem.info(),
+      ],
     };
-    return _ToolbarStrip(items: items, image: image, group: group, focus: focus);
+    return _ToolbarStrip(
+      items: items,
+      image: image,
+      group: group,
+      focus: focus,
+    );
   }
 }
 
 /// 非焦点 tile 悬停迷你条（官网 R.I3 condensed：contest|pin|copy|download + 种子）
 class CanvasMiniToolbar extends ConsumerWidget {
-  const CanvasMiniToolbar({super.key, required this.image, required this.group});
+  const CanvasMiniToolbar({
+    super.key,
+    required this.image,
+    required this.group,
+  });
 
   final GeneratedImage image;
   final CanvasFeedGroup group;
@@ -111,83 +118,59 @@ class _ToolbarItem {
 
   factory _ToolbarItem.divider() => _ToolbarItem._(isDivider: true);
 
-  factory _ToolbarItem.enhance() => _ToolbarItem._(
-        icon: 'nai-icon-enhance.svg',
-        tooltip: 'Enhance',
-      );
+  factory _ToolbarItem.enhance() =>
+      _ToolbarItem._(icon: 'nai-icon-enhance.svg', tooltip: 'Enhance');
 
   factory _ToolbarItem.variations() => _ToolbarItem._(
-        icon: 'nai-icon-variations.svg',
-        tooltip: 'Variations',
-        priceBadge: true,
-      );
+    icon: 'nai-icon-variations.svg',
+    tooltip: 'Variations',
+    priceBadge: true,
+  );
 
-  factory _ToolbarItem.upscale() => _ToolbarItem._(
-        icon: 'nai-icon-upscale.svg',
-        tooltip: 'Upscale',
-        priceBadge: true,
-      );
+  factory _ToolbarItem.upscale() =>
+      _ToolbarItem._(icon: 'nai-icon-upscale.svg', tooltip: 'Upscale');
 
   factory _ToolbarItem.setInit() => _ToolbarItem._(
-        icon: 'nai-icon-set-init.svg',
-        tooltip: 'Set as init image',
-      );
+    icon: 'nai-icon-set-init.svg',
+    tooltip: 'Set as init image',
+  );
 
-  factory _ToolbarItem.edit() => _ToolbarItem._(
-        icon: 'nai-icon-edit.svg',
-        tooltip: 'Edit image',
-      );
+  factory _ToolbarItem.edit() =>
+      _ToolbarItem._(icon: 'nai-icon-edit.svg', tooltip: 'Edit image');
 
-  factory _ToolbarItem.inpaint() => _ToolbarItem._(
-        icon: 'nai-icon-inpaint2.svg',
-        tooltip: 'Inpaint',
-      );
+  factory _ToolbarItem.inpaint() =>
+      _ToolbarItem._(icon: 'nai-icon-inpaint2.svg', tooltip: 'Inpaint');
 
   factory _ToolbarItem.sendToTools() => _ToolbarItem._(
-        icon: 'nai-icon-send-tools.svg',
-        tooltip: 'Send to Image Tools',
-      );
+    icon: 'nai-icon-send-tools.svg',
+    tooltip: 'Send to Image Tools',
+  );
 
-  factory _ToolbarItem.pin() => _ToolbarItem._(
-        icon: 'nai-icon-pin.svg',
-        tooltip: 'Pin',
-      );
+  factory _ToolbarItem.pin() =>
+      _ToolbarItem._(icon: 'nai-icon-pin.svg', tooltip: 'Pin');
 
-  factory _ToolbarItem.copy() => _ToolbarItem._(
-        icon: 'nai-icon-copy.svg',
-        tooltip: 'Copy',
-      );
+  factory _ToolbarItem.copy() =>
+      _ToolbarItem._(icon: 'nai-icon-copy.svg', tooltip: 'Copy');
 
-  factory _ToolbarItem.download() => _ToolbarItem._(
-        icon: 'nai-icon-download.svg',
-        tooltip: 'Download',
-      );
+  factory _ToolbarItem.download() =>
+      _ToolbarItem._(icon: 'nai-icon-download.svg', tooltip: 'Download');
 
-  factory _ToolbarItem.info() => _ToolbarItem._(
-        icon: 'nai-icon-info.svg',
-        tooltip: 'Info',
-      );
-
-  factory _ToolbarItem.exploreUpload() => _ToolbarItem._(
-        icon: 'nai-icon-explore-upload.svg',
-        tooltip: 'Upload to explore',
-      );
+  factory _ToolbarItem.info() =>
+      _ToolbarItem._(icon: 'nai-icon-info.svg', tooltip: 'Info');
 
   factory _ToolbarItem.settings() => _ToolbarItem._(
-        icon: 'nai-icon-settings.svg',
-        tooltip: 'Display settings',
-      );
+    icon: 'nai-icon-settings.svg',
+    tooltip: 'Display settings',
+  );
 
-  factory _ToolbarItem.resolution(GeneratedImage img) => _ToolbarItem._(
-        label: '${img.width} × ${img.height}',
-        isResolution: true,
-      );
+  factory _ToolbarItem.resolution(GeneratedImage img) =>
+      _ToolbarItem._(label: '${img.width} × ${img.height}', isResolution: true);
 
   factory _ToolbarItem.seedPill(GeneratedImage img) => _ToolbarItem._(
-        label: img.metadata?.seed?.toString() ?? '—',
-        isSeedPill: true,
-        tooltip: 'Click to use this seed',
-      );
+    label: img.metadata?.seed?.toString() ?? '—',
+    isSeedPill: true,
+    tooltip: 'Click to use this seed',
+  );
 
   final String? icon;
   final String? label;
@@ -223,11 +206,14 @@ class _ToolbarStrip extends ConsumerWidget {
       clipBehavior: Clip.antiAlias,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: items
-              .map((it) => _buildItem(context, ref, theme, it))
-              .toList(),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: items
+                .map((it) => _buildItem(context, ref, theme, it))
+                .toList(),
+          ),
         ),
       ),
     );
@@ -260,7 +246,13 @@ class _ToolbarStrip extends ConsumerWidget {
     }
     if (item.isSeedPill) {
       return _SeedPill(
-        label: item.label ?? '—',
+        label:
+            ref
+                .watch(generatedImageMetadataProvider(image))
+                .valueOrNull
+                ?.seed
+                ?.toString() ??
+            '—',
         tooltip: item.tooltip,
         onTap: () => _writeBackSeed(context, ref),
       );
@@ -275,7 +267,10 @@ class _ToolbarStrip extends ConsumerWidget {
   }
 
   Future<void> _writeBackSeed(BuildContext context, WidgetRef ref) async {
-    final seed = image.metadata?.seed;
+    final seed = (await ref.read(
+      generatedImageMetadataProvider(image).future,
+    ))?.seed;
+    if (!context.mounted) return;
     if (seed == null) return;
     ref.read(generationParamsNotifierProvider.notifier).updateSeed(seed);
     AppToast.success(context, context.l10n.generation_seedWrittenBack(seed));
@@ -303,10 +298,12 @@ class _IconBtn extends ConsumerWidget {
     final enabled = _resolveEnabled(ref);
     final price = item.priceBadge ? _priceFor(ref) : null;
     // 官网：已钉住换实心 pin（save.pin 双态）
-    final icon = item.icon == 'nai-icon-pin.svg' &&
+    final icon =
+        item.icon == 'nai-icon-pin.svg' &&
             ref.watch(
-              canvasPinnedNotifierProvider
-                  .select((pins) => pins.contains(image.id)),
+              canvasPinnedNotifierProvider.select(
+                (pins) => pins.contains(image.id),
+              ),
             )
         ? 'nai-icon-pin-filled.svg'
         : item.icon;
@@ -331,7 +328,7 @@ class _IconBtn extends ConsumerWidget {
                   BlendMode.srcIn,
                 ),
               ),
-            if (price != null && price > 0) ...[
+            if (price != null && price >= 0) ...[
               const SizedBox(width: 4),
               Text(
                 '$price',
@@ -351,52 +348,36 @@ class _IconBtn extends ConsumerWidget {
   }
 
   bool _resolveEnabled(WidgetRef ref) {
-    if (!image.canUseAsGenerationInput) return false;
     switch (item.icon) {
-      case 'nai-icon-inpaint2.svg':
-        // 官网：仅模型支持 inpainting 才渲染（enabled 由门控决定）
-        return _modelSupportsInpaint(ref);
+      case 'nai-icon-settings.svg':
+      case 'nai-icon-info.svg':
+        return true;
+      case 'nai-icon-copy.svg':
+      case 'nai-icon-download.svg':
+      case 'nai-icon-pin.svg':
+        return image.canSave;
       default:
+        if (!image.canUseAsGenerationInput ||
+            ref.watch(
+              imageGenerationNotifierProvider.select((s) => s.isGenerating),
+            )) {
+          return false;
+        }
+        if (item.icon == 'nai-icon-inpaint2.svg') {
+          return ImageModels.supportsImg2ImgInpainting(
+            ref.watch(generationParamsNotifierProvider.select((p) => p.model)),
+          );
+        }
+        if (item.icon == 'nai-icon-variations.svg') {
+          return !ref.watch(generationCooldownProvider).isActive;
+        }
         return true;
     }
   }
 
-  bool _modelSupportsInpaint(WidgetRef ref) {
-    final params = ref.read(generationParamsNotifierProvider);
-    final model = params.model.toLowerCase();
-    return model.contains('inpaint') ||
-        model.contains('nai-diffusion-3') ||
-        model.contains('nai-diffusion-4') ||
-        model.contains('nai-diffusion-4-5');
-  }
-
-  int? _priceFor(WidgetRef ref) {
-    // 官网：variations/upscale 钮带实时 Anlas 价签（按当前选中图尺寸估价）
-    if (item.icon == 'nai-icon-variations.svg') {
-      return ref.watch(estimatedCostProvider);
-    }
-    if (item.icon == 'nai-icon-upscale.svg') {
-      // 官网 generateUpscale 直接生成；价签 = 当前图尺寸 upscale 估价（4x）
-      return _estimateUpscale(ref);
-    }
-    return null;
-  }
-
-  int _estimateUpscale(WidgetRef ref) {
-    // 官网价签 = s7 实时价；接入 AnlasCalculator.calculateNovelAiUpscaleCost
-    // （云端 4x 分档计费，Opus ≤640×640 免费、>1MP 返回 invalidCost）。
-    final subscription = ref.read(
-      subscriptionNotifierProvider.select((s) => s.subscription),
-    );
-    final tier =
-        subscription?.isOpus == true ? AnlasCalculator.opusTier : 0;
-    return AnlasCalculator.calculateNovelAiUpscaleCost(
-      inputWidth: image.width,
-      inputHeight: image.height,
-      scale: 4,
-      subscriptionTier: tier,
-    );
-  }
+  int? _priceFor(WidgetRef ref) => item.icon == 'nai-icon-variations.svg'
+      ? ref.watch(imageVariationCostProvider(image))
+      : null;
 
   void _dispatch(BuildContext context, WidgetRef ref) {
     final bytes = image.bytes;
@@ -405,19 +386,23 @@ class _IconBtn extends ConsumerWidget {
       case 'nai-icon-enhance.svg':
         ImageWorkflowLauncher.openEnhance(ref, bytes);
       case 'nai-icon-variations.svg':
-        unawaited(ImageWorkflowLauncher.generateVariations(context, ref, bytes));
+        unawaited(
+          ImageWorkflowLauncher.generateVariations(context, ref, bytes),
+        );
       case 'nai-icon-upscale.svg':
         ImageWorkflowLauncher.openUpscale(ref, bytes);
       case 'nai-icon-set-init.svg':
         ImageWorkflowLauncher.openImageToImage(ref, bytes);
         AppToast.success(context, context.l10n.generation_setAsReferenceImage);
       case 'nai-icon-edit.svg':
-        unawaited(ImageWorkflowLauncher.openEditor(
-          context,
-          ref,
-          bytes,
-          mode: ImageEditorMode.edit,
-        ));
+        unawaited(
+          ImageWorkflowLauncher.openEditor(
+            context,
+            ref,
+            bytes,
+            mode: ImageEditorMode.edit,
+          ),
+        );
       case 'nai-icon-inpaint2.svg':
         unawaited(ImageWorkflowLauncher.openInpaint(context, ref, bytes));
       case 'nai-icon-send-tools.svg':
@@ -425,23 +410,25 @@ class _IconBtn extends ConsumerWidget {
         unawaited(ImageWorkflowLauncher.openDirectorTools(context, ref, bytes));
       case 'nai-icon-pin.svg':
       case 'nai-icon-pin-filled.svg':
-        // 官网 save.pin = togglePin：钉板集合切（钉住组不参与自动夺焦）
-        unawaited(
-          ref
-              .read(canvasPinnedNotifierProvider.notifier)
-              .toggle(image.id),
-        );
+        unawaited(_togglePin(context, ref));
       case 'nai-icon-copy.svg':
         _copyImage(context, ref);
       case 'nai-icon-download.svg':
         unawaited(_saveImage(context, ref));
       case 'nai-icon-info.svg':
         actions.showFullscreenImage(context, image);
-      case 'nai-icon-explore-upload.svg':
-        // 官网：上传探索；本工程无——映射存精准参考库
-        unawaited(actions.showSaveToLibraryDialog(context, bytes));
       case 'nai-icon-settings.svg':
         _showDisplaySettings(context, ref);
+    }
+  }
+
+  Future<void> _togglePin(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(canvasPinnedNotifierProvider.notifier).toggle(image);
+    } catch (error) {
+      if (context.mounted) {
+        AppToast.error(context, context.l10n.image_saveFailed('$error'));
+      }
     }
   }
 
@@ -470,32 +457,30 @@ class _IconBtn extends ConsumerWidget {
   }
 
   void _showDisplaySettings(BuildContext context, WidgetRef ref) {
-    final zoomToFill = ref.read(canvasZoomToFillNotifierProvider);
-    final smooth = ref.read(canvasSmoothZoomNotifierProvider);
     showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.l10n.generation_canvasDisplaySettings),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SwitchListTile(
-              title: Text(context.l10n.generation_canvasZoomToFill),
-              value: zoomToFill,
-              onChanged: (v) {
-                ref.read(canvasZoomToFillNotifierProvider.notifier).set(v);
-                Navigator.pop(ctx);
-              },
-            ),
-            SwitchListTile(
-              title: Text(context.l10n.generation_canvasSmoothZoom),
-              value: smooth,
-              onChanged: (v) {
-                ref.read(canvasSmoothZoomNotifierProvider.notifier).set(v);
-                Navigator.pop(ctx);
-              },
-            ),
-          ],
+      builder: (ctx) => Consumer(
+        builder: (context, ref, _) => AlertDialog(
+          title: Text(context.l10n.generation_canvasDisplaySettings),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SwitchListTile(
+                title: Text(context.l10n.generation_canvasZoomToFill),
+                value: ref.watch(canvasZoomToFillNotifierProvider),
+                onChanged: (v) {
+                  ref.read(canvasZoomToFillNotifierProvider.notifier).set(v);
+                },
+              ),
+              SwitchListTile(
+                title: Text(context.l10n.generation_canvasSmoothZoom),
+                value: ref.watch(canvasSmoothZoomNotifierProvider),
+                onChanged: (v) {
+                  ref.read(canvasSmoothZoomNotifierProvider.notifier).set(v);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -518,7 +503,9 @@ class _SeedPill extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+          color: theme.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.6,
+          ),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -547,5 +534,3 @@ class _SeedPill extends StatelessWidget {
     return tooltip != null ? Tooltip(message: tooltip!, child: pill) : pill;
   }
 }
-
-

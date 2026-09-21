@@ -575,6 +575,28 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     return params.copyWith(vibeReferencesV4: encodedVibes);
   }
 
+  Future<ImageParams?> _prepareGenerationParams(
+    ImageParams params,
+    int generationRunId,
+  ) async {
+    try {
+      return await _prepareVibesForGeneration(_applyPromptPipeline(params));
+    } catch (error) {
+      // 准备参数时占位已经出现；失败必须结束加载，旧请求不能改写新请求。
+      if (!_shouldAbortGenerationRun(generationRunId)) {
+        state = state.copyWith(
+          status: GenerationStatus.error,
+          errorMessage: error.toString(),
+          progress: 0.0,
+          currentImage: 0,
+          totalImages: 0,
+          clearStreamPreview: true,
+        );
+      }
+      return null;
+    }
+  }
+
   PromptPresetResolution _resolvePromptPresets(ImageParams params) {
     final qualityState = ref.read(qualityPresetNotifierProvider);
     final qualityContent = ref
@@ -727,6 +749,12 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   Future<ExploreGenerationResult?> _generateForExplore(
     ImageParams params,
   ) async {
+    // 与 _generate 共用同一在途门禁：探索生成同样不得顶替
+    // 当前 run 或把冷却计数花在注定被丢弃的调用上。
+    if (state.isGenerating) {
+      return null;
+    }
+
     final canStart = ref
         .read(generationCooldownProvider.notifier)
         .tryStartGeneration();
@@ -740,7 +768,12 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     // 完成时 _generateSingle 会整体替换 currentImages（新列表实例），
     // 记账的 identical 判定与失败快照语义均不受影响。
     state = state.copyWith(
+      generationRunId: generationRunId,
       status: GenerationStatus.generating,
+      progress: 0.0,
+      currentImage: 1,
+      totalImages: 1,
+      clearStreamPreview: true,
       batchWidth: params.width,
       batchHeight: params.height,
     );
@@ -751,9 +784,13 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     };
 
     final stopwatch = Stopwatch()..start();
-    final baseParams = _applyPromptPipeline(params.copyWith(nSamples: 1));
-    final preparedParams = await _prepareVibesForGeneration(baseParams);
-    if (_shouldAbortGenerationRun(generationRunId)) return null;
+    final preparedParams = await _prepareGenerationParams(
+      params.copyWith(nSamples: 1),
+      generationRunId,
+    );
+    if (preparedParams == null || _shouldAbortGenerationRun(generationRunId)) {
+      return null;
+    }
 
     // 随机种子在进入请求前实体化，结果对象带回真实 seed（复现链）。
     final materializedParams = _materializeRandomSeed(preparedParams);
@@ -792,6 +829,14 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     GenerationBatchCallback? onBatchEvent,
     int? imagesPerRequestOverride,
   }) async {
+    // 同步在途门禁：已有生成进行中时直接丢弃本次调用。
+    // 必须先于冷却扣减与 _startGenerationRun——重入若走到 run 创建，
+    // 会顶替当前 run 标识，使在途请求脱离取消/陈旧更新防护；
+    // 取消后 isGenerating 已回落，cancel→重新生成不受影响。
+    if (state.isGenerating) {
+      return;
+    }
+
     final canStart = ref
         .read(generationCooldownProvider.notifier)
         .tryStartGeneration();
@@ -803,25 +848,32 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
     final effectiveParams = params;
 
-    // 开始生成前清空当前图片
-    state = state.copyWith(
-      currentImages: [],
-      status: GenerationStatus.generating,
-      batchWidth: effectiveParams.width,
-      batchHeight: effectiveParams.height,
-    );
-
-    // nSamples = 批次数量（请求次数）
-    // batchSize = 每次请求生成的图片数量
+    // 在参数准备/网络请求的首次 await 前发布完整占位信息。
+    // nSamples 是请求次数，batchSize 是每次请求的图片数。
     final batchCount = effectiveParams.nSamples;
     final configuredBatchSize =
         imagesPerRequestOverride ?? ref.read(imagesPerRequestProvider) ?? 1;
     final batchSize = configuredBatchSize.clamp(1, 4).toInt();
     final totalImages = batchCount * batchSize;
+    state = state.copyWith(
+      generationRunId: generationRunId,
+      currentImages: [],
+      status: GenerationStatus.generating,
+      progress: 0.0,
+      currentImage: 1,
+      totalImages: totalImages,
+      clearStreamPreview: true,
+      batchWidth: effectiveParams.width,
+      batchHeight: effectiveParams.height,
+    );
 
-    final baseParams = _applyPromptPipeline(effectiveParams);
-    final preparedParams = await _prepareVibesForGeneration(baseParams);
-    if (_shouldAbortGenerationRun(generationRunId)) return;
+    final preparedParams = await _prepareGenerationParams(
+      effectiveParams,
+      generationRunId,
+    );
+    if (preparedParams == null || _shouldAbortGenerationRun(generationRunId)) {
+      return;
+    }
 
     // 如果只生成 1 张，直接生成；随机种子在进入请求前实体化，便于失败快照保留真实 seed。
     if (batchCount == 1 && batchSize == 1) {
@@ -995,7 +1047,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
                 width: batchParams.width,
                 height: batchParams.height,
                 generationRunId: generationRunId,
-                batchIndex: allImages.length + e.$1,
+                batchIndex: slotStart - 1 + e.$1,
               ),
             )
             .toList();
@@ -1786,6 +1838,13 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       currentImage: current,
       totalImages: total,
       clearStreamPreview: true,
+      streamPreviewSlots: [
+        StreamPreviewSlot(
+          imageNumber: current,
+          totalImages: total,
+          progress: 0,
+        ),
+      ],
     );
 
     try {
@@ -1864,6 +1923,15 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
             progress: chunk.progress,
             streamPreview: chunk.previewImage,
             focusedPreviewPlacement: chunk.focusedPreviewPlacement,
+            streamPreviewSlots: [
+              StreamPreviewSlot(
+                imageNumber: current,
+                totalImages: total,
+                progress: chunk.progress,
+                previewBytes: chunk.previewImage,
+                focusedPreviewPlacement: chunk.focusedPreviewPlacement,
+              ),
+            ],
           );
         }
 
@@ -1882,6 +1950,14 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
             progress: 1.0,
             streamPreview: chunk.finalImage,
             clearFocusedPreviewPlacement: true,
+            streamPreviewSlots: [
+              StreamPreviewSlot(
+                imageNumber: current,
+                totalImages: total,
+                progress: 1,
+                previewBytes: chunk.finalImage,
+              ),
+            ],
           );
         }
       }

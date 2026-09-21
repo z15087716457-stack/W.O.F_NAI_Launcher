@@ -18,6 +18,83 @@ import 'package:nai_launcher/presentation/widgets/common/selectable_image_card.d
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  for (final locale in ['zh', 'en', 'ja']) {
+    for (final width in [200.0, 280.0, 400.0]) {
+      testWidgets('bulk actions fit ${width}px history in $locale', (
+        tester,
+      ) async {
+        final container = _createContainer([
+          _image('bulk-layout'),
+        ], behavior: HistoryClickBehavior.selectPreview);
+        addTearDown(container.dispose);
+        await tester.pumpWidget(
+          _historyApp(
+            container,
+            width: width,
+            locale: Locale(locale),
+            theme: ThemeData(
+              filledButtonTheme: FilledButtonThemeData(
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+              outlinedButtonTheme: OutlinedButtonThemeData(
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byIcon(Icons.library_add_check_outlined));
+        await tester.pumpAndSettle();
+
+        final pack = find.widgetWithIcon(
+          OutlinedButton,
+          Icons.archive_outlined,
+        );
+        final save = find.widgetWithIcon(FilledButton, Icons.image_outlined);
+        expect(tester.widget<OutlinedButton>(pack).onPressed, isNull);
+        expect(tester.widget<FilledButton>(save).onPressed, isNull);
+        expect(tester.takeException(), isNull);
+
+        final packRect = tester.getRect(pack);
+        final saveRect = tester.getRect(save);
+        final panelRect = tester.getRect(find.byType(HistoryPanel));
+        expect(panelRect.contains(packRect.topLeft), isTrue);
+        expect(panelRect.contains(saveRect.bottomRight), isTrue);
+        if (width < 296) {
+          expect(packRect.bottom, lessThan(saveRect.top));
+        } else {
+          expect(packRect.top, saveRect.top);
+          expect(packRect.right, lessThan(saveRect.left));
+        }
+
+        final tile = find.byKey(const ValueKey('bulk-layout'));
+        await tester.tap(tile);
+        await tester.pumpAndSettle();
+        expect(tester.widget<SelectableImageCard>(tile).isSelected, isTrue);
+        expect(tester.widget<OutlinedButton>(pack).onPressed, isNotNull);
+        expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
+        expect(tester.takeException(), isNull);
+
+        await tester.tap(find.byIcon(Icons.close));
+        await tester.pumpAndSettle();
+        expect(pack, findsNothing);
+        expect(save, findsNothing);
+        expect(tester.widget<SelectableImageCard>(tile).isSelected, isFalse);
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
+
   testWidgets('classic single click opens one image detail', (tester) async {
     final container = _createContainer([_image('classic')]);
     addTearDown(container.dispose);
@@ -344,19 +421,23 @@ GeneratedImage _image(
 Widget _historyApp(
   ProviderContainer container, {
   ValueNotifier<bool>? visible,
+  double width = 320,
+  Locale locale = const Locale('zh'),
+  ThemeData? theme,
 }) {
   final previewFocusNode = container.read(generationPreviewFocusNodeProvider);
   return UncontrolledProviderScope(
     container: container,
     child: MaterialApp(
-      locale: const Locale('zh'),
+      locale: locale,
+      theme: theme,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: Scaffold(
         body: Focus(
           focusNode: previewFocusNode,
           child: SizedBox(
-            width: 320,
+            width: width,
             height: 640,
             child: visible == null
                 ? const HistoryPanel()

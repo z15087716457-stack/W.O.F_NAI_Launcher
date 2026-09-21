@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../providers/image_generation_provider.dart';
+import '../../../../providers/canvas_settings_provider.dart';
 import 'generation_canvas_controller.dart';
 
 // ── 官网逐字常量（chunk 5285 布局函数对码）──────────────────────────
@@ -60,14 +61,12 @@ class CanvasTileSpec {
 /// - key `run:<generationRunId>`：正常完成批；inflight 批在建组时直接
 ///   用 `run:<activeRunId>`，完成图与占位共存于一组（官网同组混合渲染）。
 /// - key `img:<imageId>`：无 runId 的外部登记图，各自成组。
-/// - `deferFocus`：官网真值——组内存在未 finished 图时该组**不参与**
-///   自动夺焦/自动飞行（流式开启时除外：官网流式组创建即夺焦）。
+/// - 生成中的槽位和完成图共享 run 身份，点击生成即允许选中占位组。
 class CanvasFeedGroup {
   CanvasFeedGroup({
     required this.key,
     required this.runId,
     required this.tiles,
-    this.deferFocus = false,
     this.requestedCount = 1,
   });
 
@@ -75,10 +74,7 @@ class CanvasFeedGroup {
   final int? runId;
   final List<CanvasTileSpec> tiles;
 
-  /// 官网 deferFocus：含未完成槽位的组不自动夺焦。
-  bool deferFocus;
-
-  /// 组内张数（完成图数量；占位不计入）。
+  /// 组内张数（生成中包含等待完成的槽位）。
   int requestedCount;
 
   /// 兼容旧代码访问：组内已完成图（占位槽剔除）。
@@ -87,7 +83,8 @@ class CanvasFeedGroup {
       if (t.image != null) t.image!,
   ];
 
-  bool get isInFlight => deferFocus && tiles.any((t) => t.isInFlight);
+  bool get isInFlight => tiles.any((t) => t.isInFlight);
+  bool get isPinnedGroup => key.startsWith('pin:');
 }
 
 /// 已布局 tile（世界坐标）。
@@ -372,6 +369,7 @@ List<CanvasFeedGroup> groupCanvasImages(List<GeneratedImage> images) {
 /// inflight 组与完成后 run:<id> 组无缝衔接。
 CanvasFeedGroup inflightGroup({
   required String runKey,
+  int? runId,
   required List<StreamPreviewSlot> slots,
   required double tileWidth,
   required double tileHeight,
@@ -379,29 +377,34 @@ CanvasFeedGroup inflightGroup({
 }) {
   final sorted = [...slots]
     ..sort((a, b) => a.imageNumber.compareTo(b.imageNumber));
-  // 槽位映射到批内序号（1-based imageNumber → 0-based tile index）
-  final tiles = <CanvasTileSpec>[];
-  for (final slot in sorted) {
-    final doneIdx = slot.imageNumber - 1;
-    if (doneIdx >= 0 && doneIdx < doneImages.length) {
-      // 该槽位已完成 → 用实图占位（官网 finished 语义）
-      tiles.add(CanvasTileSpec.image(doneImages[doneIdx]));
-    } else {
-      tiles.add(
-        CanvasTileSpec.slot(slot, slotWidth: tileWidth, slotHeight: tileHeight),
-      );
+  // 用真实批内序号配对，不能把失败/取消后的稀疏完成列表当连续槽位。
+  final doneByNumber = <int, GeneratedImage>{};
+  for (final (index, image) in doneImages.indexed) {
+    final number = (image.batchIndex ?? index) + 1;
+    if (!doneByNumber.containsKey(number) || image.canSave) {
+      doneByNumber[number] = image;
     }
   }
-  // 完成图多于槽位（边界情形）→ 补在尾部
-  for (var i = sorted.length; i < doneImages.length; i++) {
-    tiles.add(CanvasTileSpec.image(doneImages[i]));
+  final tiles = <CanvasTileSpec>[];
+  for (final slot in sorted) {
+    final done = doneByNumber.remove(slot.imageNumber);
+    tiles.add(
+      done != null
+          ? CanvasTileSpec.image(done)
+          : CanvasTileSpec.slot(
+              slot,
+              slotWidth: tileWidth,
+              slotHeight: tileHeight,
+            ),
+    );
   }
+  tiles.addAll(doneByNumber.values.map(CanvasTileSpec.image));
   return CanvasFeedGroup(
     key: runKey,
-    runId: null,
+    runId: runId,
     tiles: tiles,
-    deferFocus: true,
-  )..requestedCount = tiles.length;
+    requestedCount: tiles.length,
+  );
 }
 
 // ── feed 布局（官网逐字）──────────────────────────────────────────
@@ -420,8 +423,7 @@ CanvasFeedGroup inflightGroup({
   for (final group in groups) {
     if (group.tiles.isEmpty) continue;
     final sizes = [
-      for (final t in group.tiles)
-        _TileSize(t.resolvedWidth, t.resolvedHeight),
+      for (final t in group.tiles) _TileSize(t.resolvedWidth, t.resolvedHeight),
     ];
     // gridXLength 由首图带出（官网 images[0].gridXLength）；本项目无网格
     // 生成入口，恒 null → 走三角/近方阵。
@@ -465,32 +467,34 @@ CanvasFeedGroup inflightGroup({
 
 // ── Provider ──────────────────────────────────────────────────────
 
-/// feed 分组与布局（官网 grid 栈）：current+history 去重按 runId 归组；
-/// 生成中 inflight 组置顶（deferFocus：未完成槽位组不自动夺焦）。
+/// 当前批占位始终置顶，使用与最终图片相同的 run 身份。
+/// 保留已有组的世界位置，让新组出现在其上方，相机确实向新组移动。
 class CanvasFeedLayoutNotifier extends Notifier<CanvasFeedLayoutResult> {
+  CanvasFeedLayoutResult? _previousLayout;
+
   @override
   CanvasFeedLayoutResult build() {
     final state = ref.watch(imageGenerationNotifierProvider);
-    final done = state.currentImages;
+    final runId = state.generationRunId;
+    final mergedImages = state.mergedPanelImages;
+    final done = runId == null
+        ? state.currentImages
+        : mergedImages
+              .where((image) => image.generationRunId == runId)
+              .toList();
     final doneIds = {for (final img in done) img.id};
-    // 生成期：本批已完成图归 inflight 组统一渲染（与未完成槽位同组），
-    // 不再重复进 run:<id> 组——官网是同组混合。
-    final merged = [
-      for (final img in state.mergedPanelImages)
+    final groups = groupCanvasImages([
+      for (final img in mergedImages)
         if (!state.isGenerating || !doneIds.contains(img.id)) img,
-    ];
-    final groups = groupCanvasImages(merged);
+    ]);
 
-    // inflight 组置顶（官网 deferFocus 门控——含未完成槽位的组不自动
-    // 夺焦不自动飞）。槽位 = totalImages 全槽：已完成的渲染实图，未
-    // 完成的渲染三点占位（有流式槽时带进度帧）。
     if (state.isGenerating) {
       final bw = state.batchWidth;
       final bh = state.batchHeight;
       final total = math.max(state.totalImages, done.length);
       if (bw != null && bh != null && bw > 0 && bh > 0 && total > 0) {
         final slotByNumber = {
-          for (final s in state.streamPreviewSlots) s.imageNumber: s,
+          for (final slot in state.streamPreviewSlots) slot.imageNumber: slot,
         };
         final slots = [
           for (var n = 1; n <= total; n++)
@@ -498,13 +502,20 @@ class CanvasFeedLayoutNotifier extends Notifier<CanvasFeedLayoutResult> {
                 StreamPreviewSlot(
                   imageNumber: n,
                   totalImages: total,
-                  progress: 0.0,
+                  progress: n == state.currentImage ? state.progress : 0,
+                  previewBytes: n == state.currentImage
+                      ? state.streamPreview
+                      : null,
+                  focusedPreviewPlacement: n == state.currentImage
+                      ? state.focusedPreviewPlacement
+                      : null,
                 ),
         ];
         groups.insert(
           0,
           inflightGroup(
-            runKey: 'inflight',
+            runKey: runId == null ? 'inflight' : 'run:$runId',
+            runId: runId,
             slots: slots,
             tileWidth: bw.toDouble(),
             tileHeight: bh.toDouble(),
@@ -515,10 +526,65 @@ class CanvasFeedLayoutNotifier extends Notifier<CanvasFeedLayoutResult> {
     }
 
     final laid = layoutCanvasFeed(groups);
-    return CanvasFeedLayoutResult(
-      items: laid.items,
+    final previousRects = {
+      for (final item in _previousLayout?.items ?? const <CanvasFeedItem>[])
+        item.group.key: item.groupRect,
+    };
+    var shift = Offset.zero;
+    for (final item in laid.items) {
+      final previousRect = previousRects[item.group.key];
+      if (previousRect != null) {
+        shift = Offset(0, previousRect.top - item.groupRect.top);
+        break;
+      }
+    }
+    final result = CanvasFeedLayoutResult(
+      items: [
+        for (final item in laid.items)
+          CanvasFeedItem(
+            group: item.group,
+            tile: item.tile,
+            subimageIndex: item.subimageIndex,
+            worldRect: item.worldRect.shift(shift),
+            groupRect: item.groupRect.shift(shift),
+          ),
+      ],
       groups: groups,
-      bounds: laid.bounds,
+      bounds: laid.bounds.shift(shift),
+    );
+    _previousLayout = result;
+    ref.watch(canvasPinnedNotifierProvider);
+    final pins = ref.read(canvasPinnedNotifierProvider.notifier).images;
+    if (pins.isEmpty) return result;
+    final pinGroups = [
+      for (final image in pins)
+        CanvasFeedGroup(
+          key: 'pin:${image.id}',
+          runId: null,
+          tiles: [CanvasTileSpec.image(image)],
+        ),
+    ];
+    final pinLayout = layoutCanvasFeed(pinGroups);
+    // Separate retained images from the output feed. The board stays anchored
+    // while newly generated groups are inserted above the existing feed.
+    final pinShift = Offset(-2400 - pinLayout.bounds.right, 0);
+    final pinBounds = pinLayout.bounds.shift(pinShift);
+    return CanvasFeedLayoutResult(
+      groups: [...result.groups, ...pinGroups],
+      items: [
+        ...result.items,
+        for (final item in pinLayout.items)
+          CanvasFeedItem(
+            group: item.group,
+            tile: item.tile,
+            subimageIndex: item.subimageIndex,
+            worldRect: item.worldRect.shift(pinShift),
+            groupRect: item.groupRect.shift(pinShift),
+          ),
+      ],
+      bounds: result.bounds.isEmpty
+          ? pinBounds
+          : result.bounds.expandToInclude(pinBounds),
     );
   }
 }
@@ -527,6 +593,9 @@ final canvasFeedLayoutProvider =
     NotifierProvider<CanvasFeedLayoutNotifier, CanvasFeedLayoutResult>(
       CanvasFeedLayoutNotifier.new,
     );
+
+/// Navigation only: requesting the board never rewrites history selection.
+final canvasPinboardFocusRequestProvider = StateProvider<int>((ref) => 0);
 
 /// 画布相机 Provider（Notifier 持有动画控制器与惯性）
 final generationCanvasCameraProvider =

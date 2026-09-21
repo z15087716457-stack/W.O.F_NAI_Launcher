@@ -217,6 +217,8 @@ class StreamPreviewSlot {
 
 /// 图像生成状态
 class ImageGenerationState {
+  /// 从点击生成到完成保持不变，连接画布占位、预览帧与最终图片。
+  final int? generationRunId;
   final GenerationStatus status;
   final List<GeneratedImage> currentImages;
   final List<GeneratedImage> history;
@@ -246,6 +248,7 @@ class ImageGenerationState {
   final int? displayHeight;
 
   const ImageGenerationState({
+    this.generationRunId,
     this.status = GenerationStatus.idle,
     this.currentImages = const [],
     this.history = const [],
@@ -264,6 +267,7 @@ class ImageGenerationState {
   });
 
   ImageGenerationState copyWith({
+    int? generationRunId,
     GenerationStatus? status,
     List<GeneratedImage>? currentImages,
     List<GeneratedImage>? history,
@@ -283,6 +287,7 @@ class ImageGenerationState {
     int? displayHeight,
   }) {
     return ImageGenerationState(
+      generationRunId: generationRunId ?? this.generationRunId,
       status: status ?? this.status,
       currentImages: currentImages ?? this.currentImages,
       history: history ?? this.history,

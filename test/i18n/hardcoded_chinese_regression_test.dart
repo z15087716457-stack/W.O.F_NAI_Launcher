@@ -63,6 +63,7 @@ void main() {
       'lib/presentation/screens/generation/widgets/history_panel.dart',
       'lib/presentation/screens/generation/widgets/canvas/canvas_tile_toolbar.dart',
       'lib/presentation/screens/generation/widgets/canvas/generation_canvas_view.dart',
+      'lib/presentation/screens/generation/widgets/canvas/canvas_world_viewport.dart',
       'lib/presentation/screens/generation/widgets/canvas/generated_image_actions.dart',
       'lib/presentation/screens/generation/widgets/canvas/generated_image_card.dart',
       'lib/presentation/screens/generation/handlers/vibe_import_handler.dart',

@@ -78,35 +78,46 @@
 - `NaiWeightSyntax` 是所有自产生器的数值权重闭合入口；权重正文以数字或句号结尾时，在闭合 `::` 前隔开，避免被服务端误读为新权重。已覆盖 SD 转换、PromptTag、权重工具、pill、探索变异和 Enhance 固定串。
 - 提示词补全展示/插入使用空格形态；搜索、数据库、别名和词库 canonical 仍保留下划线。实际生成和 Krita 桥接在请求副本阶段按 `autoFormatPrompt` / `sdSyntaxAutoConvert` 设置执行，SD 转换先于格式化，不改用户草稿。旧 `autocomplete_replace_underscores` 设置已随统一空格形态退役（键留置无读取，无迁移必要）。
 
-## 画布架构（V3 · NAI5 对标重写 2026-04）
+## 画布架构
 
-生图页中央预览区是对标 NAI5 官网的自由画布。官网逐字核验的真值档案在 `../04_工具/开发计划/素材/nai5-生图页前端逆向.md`（第八节勘误表最权威）；改画布前先读它，别凭记忆。
+生图页中央预览区是对标 NAI5 官网的自由画布。逆向参考在 `../04_工具/开发计划/素材/nai5-生图页前端逆向.md`（含第八、九节勘误）；其中模型整理的结论需要结合代码核验，明确的用户交互要求优先。
 
 **文件分工**（`lib/presentation/screens/generation/widgets/canvas/`）：
 
 | 文件 | 职责 |
 |---|---|
-| `generation_canvas_view.dart` | 装配层：Listener 指针事件 + Focus 键位 + 渲染循环 |
+| `generation_canvas_view.dart` | 装配层：指针/键盘、焦点与屏幕空间工具条 |
+| `canvas_world_viewport.dart` | 世界图块布局；绘制、点击、右键使用同一相机矩阵，支持负世界坐标 |
 | `generation_canvas_controller.dart` | `CanvasCamera`(offset/scale 物理) + `GenerationCanvasController`(点击/拖拽/hover/焦点) |
 | `canvas_feed_layout.dart` | 纯函数：`groupCanvasImages` 按任务分组、`layoutCanvasFeed` 竖排布局 |
-| `canvas_tile_toolbar.dart` | tile 底部迷你条 + 焦点组的 edge bars（左上/底左/底右） |
+| `canvas_tile_toolbar.dart` | tile 底部迷你条 + 视口固定的主工具条（顶中/底左/底右） |
 | `../history_panel.dart` | 右侧历史栏（不在 canvas/ 目录）：50 格网格、Ctrl 多选、拖拽到角色框、底栏锁/全存/删 |
 | `canvas_utils.dart` | `rrectFromSize`/`parseAspect`/`hexToColor` |
 | `models.dart` | `CanvasImageData`/`CanvasImageGroup`/`CanvasTileVisual` |
 
-**Provider**：`canvas_settings_provider.dart`（锁/减弱动态/填充缩放/钉板 Hive 持久化）；`preview_selection_provider.dart`（焦点组=共享选中，喂参数面板和 emotion）；`image_generation_provider.dart` 的 `mergedPanelImages` 是唯一数据源——**生成中 currentImages + 历史 take(50)**，和官网同语义。子图态零 API，纯粹前端焦点（`generationPreviewSubFocusProvider`）。
+**Provider**：`canvas_settings_provider.dart`（锁/减弱动态/填充缩放/固定图片持久化）；`preview_selection_provider.dart`（焦点组=共享选中，喂参数面板和 emotion）；`image_generation_provider.dart` 的 `mergedPanelImages` 是输出历史的数据源——**生成中 currentImages + 历史 take(50)**，；独立固定图片区由 `CanvasPinRepository` 提供。子图态零 API，纯粹前端焦点（`generationPreviewSubFocusProvider`）。
 
-**已核验的官网行为**（别改回旧直觉）：滚轮=平移永不缩放（Shift 纵转横）、Ctrl+滚轮=缩放、停稳 120ms 自动选最近组、拖拽 5px 死区+惯性、飞行是指数插值（speed 11，距离>3×视口直接瞬移）、scale 硬夹 [0.1, 8]、非焦点组 scale(0.98)+hover 回 1、edge bars 贴焦点 tile（顶条 translateY(-76px) 于 tile 顶中心、底左右条贴 tile 底边内 12px，`--canvas-ui-scale=1/相机` 反缩放恒屏），钉板 `CanvasPinnedNotifier` 持久化且钉住组不参与自动夺焦、历史栏方框 `contain`+米色双层 boxShadow。
+**当前相机与输入约定**：裸滚轮平移（Shift 转横向）、Ctrl+滚轮缩放；仅中键或 Shift+鼠标左键拖动相机；触控板平移/缩放按事件增量处理。锁相机阻止手动平移、缩放及复位，程序化对焦仍可用；WASD 松键始终清理按键状态。相机停稳 120ms 可选最近组，Ctrl+0 主动总览时暂不自动选中。远跳先移近起点再抵达准确终点，连续离散缩放累积未完成目标，平滑模式直接更新。scale 夹在 [0.1, 8]；非焦点图 scale(0.98)，悬停回 1。相机逐帧变换不重建重图子树，仅挂载可见范围及缓冲区。
 
-**布局真值（V3.1 逐字对码 chunk 5285）**：组间 `kCanvasGroupSpacing=340`、组内默认 `ceil(sqrt(N))` 列 row-major 近方阵 48px 间隙、N=3 走 `floor(4*FNV(id+':tri'))` 哈希四式三角（上1下2/上2下1/左1右2/左2右1）、gridXLength>0 列紧凑 24px、组水平居中 `x=-width/2`（`0*o` 错动是死代码）、`bounds.height=cursorY-340` 含尾随距。归组 `run:<generationRunId>`；无 runId 兜底按同尺寸+createdAt≤120s 相邻合并（外部登记/桥接漏打 runId 的图不致散组）。生成中 inflight 组置顶 = `totalImages` 槽（完成图渲染实图、未完成渲染三点弹跳 `image-grid-generating` 占位，尺寸=batchW×H），`deferFocus` 组**不自动夺焦不飞**——官网非流式等 all finished 才飞，流式组创建即夺焦。
+**固定图片**：`canvas_pins/` 保存字节副本，`canvas_pin_records` manifest 保存身份及未嵌入图片的元数据；载入只计健康图片，旧 UUID 列表保留但不计幽灵数量。原输出组仍正常选择；独立固定图区使用 `pin:<id>` 分组，点击历史栏 Pins 计数跳转，历史被淘汰后仍可访问。内部缓存路径不能冒充已保存到图库的路径。完整便签/箭头/自由布局编辑器未实现。
 
-**历史栏多选（自研，官网无）**：底栏多选钮进显式态（平点也勾选）；操作条 = 打包/保存/✕退出，标签 `softWrap:false` 防拆行；`_selectedIds` 清空即自动退出（含「仅剩 1 张再 Ctrl+点击」）。
+**动作数据与保存**：工具条种子以图片 PNG 元数据为准，缺失才取对象缓存；变体价签仅在所选图片参数已知时给出估算，超分设置入口不标固定价。生成中的变体和编辑动作禁用；变体入口在修改参数前检查生成/桥接/冷却，解析后复查，生成 provider 再拒绝重入。保存/详情/打开目录共用保存服务，保留原 PNG 元数据，缺少参数不采用当前草稿补写；重复保存去重并回写状态路径。流式局部重绘沿用共享源图、裁片与蒙版合成。
 
-**有意不做 / 待核验**：Shift 按住出边栏（显隐条件已知、内容未核，未实现）；无限滚动（`history` 硬上限 50，要做先得给历史加持久层）。键位补全（WASD 平移/f 飞回/Esc 退子图态/±缩放/1 复位）+ 双击空处重飞 + 视口全空 2s 自动飞回是 2026-04 收尾加的。
+**画布外围留白**：自由画布预览区四周保留 4px 内边距，侧栏拖拽分隔条独立保留；经典查看器仍为 16px。
+
+**主工具条定位（用户确认，2026-09-21）**：三个主工具条常驻中央生图视口的顶部居中、左下角和右下角，距边缘 12px；位置与大小独立于相机平移/缩放，操作对象仍随当前焦点图更新。无可操作图片时沿用空态。此要求覆盖旧逆向文档中“edge bars 贴 tile”的定位结论；非焦点图片的悬停迷你条维持原行为。
+
+**当前布局常量（参考保存的 chunk 5285）**：组间 `kCanvasGroupSpacing=340`、组内默认 `ceil(sqrt(N))` 列 row-major 近方阵 48px 间隙、N=3 走 `floor(4*FNV(id+':tri'))` 哈希四式三角（上1下2/上2下1/左1右2/左2右1）、gridXLength>0 列紧凑 24px、组水平居中 `x=-width/2`（`0*o` 错动是死代码）、`bounds.height=cursorY-340` 含尾随距。归组 `run:<generationRunId>`；无 runId 兜底按同尺寸+createdAt≤120s 相邻合并（外部登记/桥接漏打 runId 的图不致散组）。生成中 inflight 组置顶 = `totalImages` 槽（尺寸=batchW×H）。
+
+**生成占位与焦点（用户要求）**：点击生成后，在参数准备和网络等待之前同步发布 runId、数量和尺寸，立即出现加载占位并飞向最新组。已有组保留世界位置，新组排在它们上方。占位、流式帧和最终图统一使用 `run:<generationRunId>`，成图替换对应槽位，不再二次飞行；多图按 `batchIndex` 对槽，准备失败/取消结束加载。首帧到达前显示加载动画与文案，随后在同一位置渐进显示图片。用户等待期间切到历史图时，预览帧和成图不抢回焦点。此要求覆盖旧 `deferFocus` 等待完成才飞的实现。
+
+**历史栏多选（自研，官网无）**：多选入口固定在“历史记录”标题行最右侧，底栏不再放多选钮；点击进显式态（平点也勾选）；操作条 = 打包/保存/✕退出；栏宽不足时打包与保存上下排列，宽栏并排，退出按钮在右侧；按钮使用紧凑内边距，标签单行省略；`_selectedIds` 清空即自动退出（含「仅剩 1 张再 Ctrl+点击」）。
+
+**有意不做 / 待核验**：完整项目状态见 `../04_工具/开发计划/画布修复验收.md`。Shift 按住出边栏（显隐条件已知、内容未核，未实现）；无限滚动（`history` 硬上限 50，要做先得给历史加持久层）。键位补全（WASD 平移/f 飞回/Esc 退子图态/±缩放/1 复位）+ 双击空处重飞 + 视口全空 2s 自动飞回是 2026-04 收尾加的。
 
 ## 构建与更新
 
-- 工作区构建前关闭正在运行的启动器，避免 release 文件锁。Flutter 位于 `C:/flutter`，NuGet 位于 `C:/tools/nuget`，下载和 git 使用本机代理 `http://127.0.0.1:7897`。NSIS 3.12 已装于默认位置（makensis 在 PATH/Program Files (x86)），安装器打包与 `scripts/validate_windows_installer_process_handling.ps1` 依赖它。
+- 正常覆盖构建需目标文件未被运行实例锁定；用户要求自行核验时，不自动关闭程序，可使用独立 CMake 产物目录。Flutter 位于 `C:/flutter`，NuGet 位于 `C:/tools/nuget`，下载和 git 使用本机代理 `http://127.0.0.1:7897`。NSIS 3.12 已装于默认位置（makensis 在 PATH/Program Files (x86)），安装器打包与 `scripts/validate_windows_installer_process_handling.ps1` 依赖它。
 - 安装器（`installer/windows/nai_launcher.nsi`）进程检测自 2026-09-09 起为「软化 fail-closed」语义：进程枚举/查询失败时不再直接阻断，改为以 `CreateFileW(GENERIC_WRITE, share=0)` 探 `$INSTDIR\nai_launcher.exe` 文件锁——文件可写打开或不存在（全新安装）则放行，共享冲突/拒绝访问（文件真被占用）或其他未知错误仍阻断（静默退出码 3 不变）。每次检查失败会把失败阶段、GetLastError、疑似 PID、探锁结果追加写入 `$INSTDIR\install_diagnostics.log`（UTF-16，随卸载删除）。验证脚本已覆盖四场景：目标在跑阻断 / 他目录实例放行 / 查询失败+无锁放行+落诊断 / 全新目录放行。
 - 远程布局（2026-09-11 整理）：origin=本分叉仓库（z15087716457-stack/W.O.F_NAI_Launcher）；上游 Aaalice233 不再常驻远程——需要观察上游改动时临时 `git remote add upstream https://github.com/Aaalice233/Aaalice_NAI_Launcher.git` 并 fetch，看完 `git remote remove upstream`。自行实现有价值的改动，不直接 merge 或 cherry-pick 上游提交。
 - build_runner 绑定的 analyzer 不接受 Dart 3.9 null-aware collection element；使用 collection-if。窗口隐藏后恢复要保留现有 `refreshWindowFrame()` 刷新非客户区的调用。

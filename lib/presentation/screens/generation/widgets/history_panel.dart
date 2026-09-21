@@ -21,6 +21,7 @@ import '../../../providers/layout_state_provider.dart';
 import '../../../../data/services/image_metadata_service.dart';
 import '../../../../data/repositories/gallery_folder_repository.dart';
 import '../../../providers/canvas_settings_provider.dart';
+import 'canvas/canvas_feed_layout.dart';
 import '../../../providers/generation/generation_params_selectors.dart';
 import '../../../providers/generation/preview_selection_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
@@ -138,6 +139,8 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(imageGenerationNotifierProvider);
+    final hasContent =
+        state.history.isNotEmpty || state.currentImages.isNotEmpty;
     final stripMetadata = ref.watch(
       shareImageSettingsProvider.select(
         (settings) => settings.effectiveStripMetadataForCopyAndDrag,
@@ -168,7 +171,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
               // 折叠按钮
               _buildCollapseButton(theme),
               const SizedBox(width: 8),
-              Flexible(
+              Expanded(
                 child: Text(
                   context.l10n.generation_historyRecord,
                   style: theme.textTheme.titleSmall?.copyWith(
@@ -180,31 +183,51 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
               // 官网顶栏 `History >` + Pins 计数（有钉住才显）
               Consumer(
                 builder: (context, ref, _) {
-                  final count =
-                      ref.watch(canvasPinnedNotifierProvider).length;
+                  final count = ref.watch(canvasPinnedNotifierProvider).length;
                   if (count == 0) return const SizedBox.shrink();
                   return Padding(
                     padding: const EdgeInsets.only(left: 6),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.secondaryContainer,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        'Pins $count',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSecondaryContainer,
+                    child: InkWell(
+                      onTap: () => ref
+                          .read(canvasPinboardFocusRequestProvider.notifier)
+                          .state++,
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.secondaryContainer,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          'Pins $count',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onSecondaryContainer,
+                          ),
                         ),
                       ),
                     ),
                   );
                 },
               ),
-              const Spacer(),
+              // 多选入口（自研，官网无）：点击进显式多选态；再点退出并清空。
+              _BottomToolButton(
+                icon: _multiSelectMode || _selectedIds.isNotEmpty
+                    ? Icons.library_add_check
+                    : Icons.library_add_check_outlined,
+                tooltip: _multiSelectMode || _selectedIds.isNotEmpty
+                    ? context.l10n.generation_deselectAll
+                    : context.l10n.generation_selectMultiple,
+                color: _multiSelectMode ? theme.colorScheme.primary : null,
+                onPressed: hasContent
+                    ? () => setState(() {
+                        _multiSelectMode = !_multiSelectMode;
+                        if (!_multiSelectMode) _selectedIds.clear();
+                      })
+                    : null,
+              ),
             ],
           ),
         ),
@@ -224,7 +247,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                 ),
         ),
 
-        // 官网底栏（常驻）：AutoSave | 锁滚动 | 多选 | 全部下载 | 删除
+        // 官网底栏（常驻）：AutoSave | 锁滚动 | 全部下载 | 删除
         // 有选中或显式多选态时叠多选操作条（打包/保存/关闭）
         _buildBottomToolbar(context, state, theme),
         if (_selectedIds.isNotEmpty || _multiSelectMode)
@@ -240,7 +263,8 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     ImageGenerationState state,
     ThemeData theme,
   ) {
-    final hasContent = state.history.isNotEmpty || state.currentImages.isNotEmpty;
+    final hasContent =
+        state.history.isNotEmpty || state.currentImages.isNotEmpty;
     final allImages = _getAllSelectableImages(state);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -263,31 +287,17 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
             onPressed: () =>
                 setState(() => _historyScrollLocked = !_historyScrollLocked),
           ),
-          // 多选入口（自研，官网无）：点击进显式多选态；再点退出并清空。
-          _BottomToolButton(
-            icon: _multiSelectMode || _selectedIds.isNotEmpty
-                ? Icons.library_add_check
-                : Icons.library_add_check_outlined,
-            tooltip: _multiSelectMode || _selectedIds.isNotEmpty
-                ? context.l10n.generation_deselectAll
-                : context.l10n.generation_selectMultiple,
-            color: _multiSelectMode ? theme.colorScheme.primary : null,
-            onPressed: hasContent
-                ? () => setState(() {
-                    _multiSelectMode = !_multiSelectMode;
-                    if (!_multiSelectMode) _selectedIds.clear();
-                  })
-                : null,
-          ),
           _BottomToolButton(
             icon: Icons.save_alt,
             tooltip: context.l10n.generation_downloadAllImages,
             onPressed: hasContent && allImages.isNotEmpty
-                ? () => unawaited(_saveImageIds(
-                    context,
-                    state,
-                    allImages.map((img) => img.id).toSet(),
-                  ))
+                ? () => unawaited(
+                    _saveImageIds(
+                      context,
+                      state,
+                      allImages.map((img) => img.id).toSet(),
+                    ),
+                  )
                 : null,
           ),
           _BottomToolButton(
@@ -639,10 +649,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
               extent: squareExtent,
             ),
           for (final image in deduplicatedHistory)
-            _HistoryRowDescriptor(
-              imageId: image.id,
-              extent: squareExtent,
-            ),
+            _HistoryRowDescriptor(imageId: image.id, extent: squareExtent),
         ];
         _rowDescriptors = descriptors;
         final retainedIds = descriptors
@@ -1425,51 +1432,48 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     ThemeData theme,
   ) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         border: Border(
           top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.3)),
         ),
       ),
-      child: Row(
-        children: [
-          // 打包按钮（防拆行：标签禁换行+超长省略）
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: _selectedIds.isEmpty
-                  ? null
-                  : () => _packSelectedImages(context, state),
-              icon: const Icon(Icons.archive_outlined, size: 20),
-              label: Text(
-                '${context.l10n.common_pack} (${_selectedIds.length})',
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-              ),
-              style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final packButton = OutlinedButton.icon(
+            onPressed: _selectedIds.isEmpty
+                ? null
+                : () => _packSelectedImages(context, state),
+            icon: const Icon(Icons.archive_outlined, size: 18),
+            label: Text(
+              '${context.l10n.common_pack} (${_selectedIds.length})',
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          const SizedBox(width: 8),
-          // 保存按钮
-          Expanded(
-            child: FilledButton.icon(
-              onPressed: _selectedIds.isEmpty
-                  ? null
-                  : () => _saveSelectedImages(context, state),
-              icon: const Icon(Icons.save_alt, size: 20),
-              label: Text(
-                '${context.l10n.image_save} (${_selectedIds.length})',
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-              ),
-              style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(0, 40),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             ),
-          ),
-          const SizedBox(width: 8),
-          // 退出多选（自研，官网无）：清空选中并关显式多选态
-          IconButton(
+          );
+          final saveButton = FilledButton.icon(
+            onPressed: _selectedIds.isEmpty
+                ? null
+                : () => _saveSelectedImages(context, state),
+            icon: const Icon(Icons.image_outlined, size: 18),
+            label: Text(
+              '${context.l10n.image_save} (${_selectedIds.length})',
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+            ),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(0, 40),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            ),
+          );
+          final closeButton = IconButton(
             tooltip: context.l10n.generation_deselectAll,
             iconSize: 18,
             visualDensity: VisualDensity.compact,
@@ -1478,8 +1482,40 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
               _multiSelectMode = false;
             }),
             icon: const Icon(Icons.close),
-          ),
-        ],
+          );
+
+          // 窄栏给每个操作完整一行，避免图标、文字及按钮内边距互相挤压。
+          if (constraints.maxWidth < 280) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      packButton,
+                      const SizedBox(height: 6),
+                      saveButton,
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                closeButton,
+              ],
+            );
+          }
+
+          return Row(
+            children: [
+              Expanded(child: packButton),
+              const SizedBox(width: 8),
+              Expanded(child: saveButton),
+              const SizedBox(width: 8),
+              closeButton,
+            ],
+          );
+        },
       ),
     );
   }
@@ -1826,7 +1862,6 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
       initialImageBytes: bytes,
     );
   }
-
 }
 
 /// 官网底栏图标钮（38×28、紧凑密度）
@@ -1852,8 +1887,9 @@ class _BottomToolButton extends StatelessWidget {
       tooltip: tooltip,
       style: IconButton.styleFrom(
         foregroundColor: color ?? theme.colorScheme.onSurface,
-        disabledForegroundColor:
-            theme.colorScheme.onSurface.withValues(alpha: 0.3),
+        disabledForegroundColor: theme.colorScheme.onSurface.withValues(
+          alpha: 0.3,
+        ),
       ),
       visualDensity: VisualDensity.compact,
       constraints: const BoxConstraints(minWidth: 38, minHeight: 28),

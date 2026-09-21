@@ -50,6 +50,7 @@ Widget buildGeneratedImageCard({
     isSelected: isSelected,
     enableSelection: false,
     enableHoverScale: canvasTile ? false : enableHoverScale,
+    debounceTap: !canvasTile,
     // 右键菜单保留兜底（详情/发送到工作流），只是不再有 hover 特效与预热。
     enableContextMenu: true,
     enableGlossEffect: !canvasTile,
@@ -77,9 +78,8 @@ Widget buildGeneratedImageCard({
         ? () => unawaited(actions.sendToPreciseReference(context, image))
         : null,
     onSaveToPreciseRefLibrary: canUseAsInput
-        ? () => unawaited(
-            saveBytesToPreciseRefLibrary(ref, context, image.bytes),
-          )
+        ? () =>
+              unawaited(saveBytesToPreciseRefLibrary(ref, context, image.bytes))
         : null,
     onEditImage: canUseAsInput
         ? () => ImageWorkflowLauncher.openEditor(
@@ -93,18 +93,12 @@ Widget buildGeneratedImageCard({
         ? () => ImageWorkflowLauncher.openInpaint(context, ref, imageBytes)
         : null,
     onGenerateVariations: canUseAsInput
-        ? () => ImageWorkflowLauncher.generateVariations(
-            context,
-            ref,
-            imageBytes,
-          )
+        ? () =>
+              ImageWorkflowLauncher.generateVariations(context, ref, imageBytes)
         : null,
     onDirectorTools: canUseAsInput
-        ? () => ImageWorkflowLauncher.openDirectorTools(
-            context,
-            ref,
-            imageBytes,
-          )
+        ? () =>
+              ImageWorkflowLauncher.openDirectorTools(context, ref, imageBytes)
         : null,
     onEnhance: canUseAsInput
         ? () => ImageWorkflowLauncher.openEnhance(ref, imageBytes)

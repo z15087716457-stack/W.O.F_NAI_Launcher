@@ -24,12 +24,25 @@ import 'package:nai_launcher/presentation/providers/image_save_settings_provider
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/notification_settings_provider.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 
 class MockNAIImageGenerationApiService extends Mock
     implements NAIImageGenerationApiService {}
 
 class FakeNAIImageEnhancementApiService extends Mock
     implements NAIImageEnhancementApiService {}
+
+class _PendingVibeParams extends GenerationParamsNotifier {
+  _PendingVibeParams(this.prepared);
+  final Completer<List<VibeReference>> prepared;
+
+  @override
+  Future<List<VibeReference>> ensureVibeReferencesEncoded(
+    List<VibeReference> vibes, {
+    String? model,
+    bool syncCurrentState = true,
+  }) => prepared.future;
+}
 
 class TestSubscriptionNotifier extends SubscriptionNotifier {
   int refreshBalanceCallCount = 0;
@@ -109,6 +122,151 @@ void main() {
       container.dispose();
       await Hive.box(StorageKeys.settingsBox).clear();
     });
+
+    for (final outcome in ['failure', 'cancel', 'late failure after new run']) {
+      test(
+        'canvas placeholder starts before preparation and handles $outcome',
+        () async {
+          final prepared = Completer<List<VibeReference>>();
+          final api = MockNAIImageGenerationApiService();
+          final stream = StreamController<ImageStreamChunk>();
+          when(() => api.cancelGeneration()).thenReturn(null);
+          when(
+            () => api.generateImageStream(
+              any(),
+              focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
+              minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
+              focusedSelectionRect: any(named: 'focusedSelectionRect'),
+            ),
+          ).thenAnswer((_) => stream.stream);
+          container.dispose();
+          container = ProviderContainer(
+            overrides: [
+              generationParamsNotifierProvider.overrideWith(
+                () => _PendingVibeParams(prepared),
+              ),
+              naiImageGenerationApiServiceProvider.overrideWithValue(api),
+              subscriptionNotifierProvider.overrideWith(
+                TestSubscriptionNotifier.new,
+              ),
+            ],
+          );
+          await container
+              .read(imageSaveSettingsNotifierProvider.notifier)
+              .setAutoSave(false);
+          await container
+              .read(notificationSettingsNotifierProvider.notifier)
+              .setSoundEnabled(false);
+          final params = container
+              .read(generationParamsNotifierProvider)
+              .copyWith(
+                width: 512,
+                height: 768,
+                nSamples: 2,
+                vibeReferencesV4: [
+                  const VibeReference(
+                    displayName: 'Pending',
+                    vibeEncoding: 'pending',
+                  ),
+                ],
+              );
+          final notifier = container.read(
+            imageGenerationNotifierProvider.notifier,
+          );
+          final pending = notifier.generate(
+            params,
+            imagesPerRequestOverride: 2,
+          );
+          // No await: the preparation service has not completed yet.
+          final loading = container.read(imageGenerationNotifierProvider);
+          expect(loading.isGenerating, true);
+          expect(loading.generationRunId, isNotNull);
+          expect(loading.totalImages, 4);
+          expect(loading.currentImage, 1);
+          expect(loading.batchWidth, 512);
+          expect(loading.batchHeight, 768);
+          expect(loading.hasStreamPreview, false);
+          final group = container.read(canvasFeedLayoutProvider).groups.single;
+          expect(group.key, 'run:${loading.generationRunId}');
+          expect(group.tiles.length, 4);
+          expect(group.tiles.every((tile) => tile.isInFlight), true);
+
+          if (outcome == 'late failure after new run') {
+            notifier.cancel();
+            final next = notifier.generate(
+              params.copyWith(nSamples: 1, vibeReferencesV4: []),
+              imagesPerRequestOverride: 1,
+            );
+            final newRun = container
+                .read(imageGenerationNotifierProvider)
+                .generationRunId;
+            expect(newRun, isNot(loading.generationRunId));
+            prepared.completeError(StateError('old preparation failed'));
+            await pending;
+            expect(
+              container.read(imageGenerationNotifierProvider).isGenerating,
+              true,
+            );
+            expect(
+              container.read(imageGenerationNotifierProvider).generationRunId,
+              newRun,
+            );
+            expect(
+              container.read(canvasFeedLayoutProvider).groups.single.key,
+              'run:$newRun',
+            );
+            stream.add(
+              ImageStreamChunk.complete(
+                _validImageBytes(width: 512, height: 768),
+              ),
+            );
+            await stream.close();
+            await next;
+            expect(
+              container.read(imageGenerationNotifierProvider).status,
+              GenerationStatus.completed,
+            );
+            expect(
+              container
+                  .read(imageGenerationNotifierProvider)
+                  .currentImages
+                  .single
+                  .generationRunId,
+              newRun,
+            );
+          } else {
+            if (outcome == 'cancel') {
+              notifier.cancel();
+              prepared.complete([]);
+            } else {
+              prepared.completeError(StateError('preparation failed'));
+            }
+            await pending;
+            final terminal = container.read(imageGenerationNotifierProvider);
+            expect(
+              terminal.status,
+              outcome == 'cancel'
+                  ? GenerationStatus.cancelled
+                  : GenerationStatus.error,
+            );
+            expect(terminal.streamPreviewSlots, isEmpty);
+            expect(container.read(canvasFeedLayoutProvider).groups, isEmpty);
+            verifyNever(
+              () => api.generateImageStream(
+                any(),
+                focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
+                minimumContextMegaPixels: any(
+                  named: 'minimumContextMegaPixels',
+                ),
+                focusedSelectionRect: any(named: 'focusedSelectionRect'),
+              ),
+            );
+            // No listener was installed for this unused controller.
+            unawaited(stream.close());
+          }
+        },
+      );
+    }
 
     test(
       'GeneratedImage should prefer encoded dimensions over request hints',
@@ -1116,6 +1274,18 @@ void main() {
         final generationFuture = container
             .read(imageGenerationNotifierProvider.notifier)
             .generate(params);
+        final loadingState = container.read(imageGenerationNotifierProvider);
+        final runId = loadingState.generationRunId;
+        expect(runId, isNotNull);
+        expect(loadingState.totalImages, 1);
+        expect(loadingState.batchWidth, 640);
+        expect(loadingState.batchHeight, 960);
+        final placeholder = container
+            .read(canvasFeedLayoutProvider)
+            .items
+            .single;
+        expect(placeholder.group.key, 'run:$runId');
+        expect(placeholder.isInFlight, true);
         await Future<void>.delayed(Duration.zero);
         controller.add(
           ImageStreamChunk.progress(
@@ -1129,6 +1299,19 @@ void main() {
         final streamingState = container.read(imageGenerationNotifierProvider);
         expect(streamingState.streamPreview, orderedEquals(preview));
         expect(streamingState.focusedPreviewPlacement, same(placement));
+        expect(streamingState.generationRunId, runId);
+        expect(
+          streamingState.streamPreviewSlots.single.previewBytes,
+          orderedEquals(preview),
+        );
+        expect(
+          streamingState.streamPreviewSlots.single.focusedPreviewPlacement,
+          same(placement),
+        );
+        expect(
+          container.read(canvasFeedLayoutProvider).items.single.worldRect,
+          placeholder.worldRect,
+        );
 
         controller.add(ImageStreamChunk.complete(finalImage));
         await controller.close();
@@ -1138,6 +1321,15 @@ void main() {
         expect(completedState.status, GenerationStatus.completed);
         expect(completedState.focusedPreviewPlacement, isNull);
         expect(completedState.streamPreviewSlots, isEmpty);
+        expect(completedState.currentImages.single.generationRunId, runId);
+        expect(
+          container.read(canvasFeedLayoutProvider).groups.single.key,
+          'run:$runId',
+        );
+        expect(
+          container.read(canvasFeedLayoutProvider).items.single.worldRect,
+          placeholder.worldRect,
+        );
       },
     );
 
@@ -1343,6 +1535,168 @@ void main() {
         ),
       ).called(1);
     });
+
+    test(
+      'reentrant generate is rejected and keeps the active run identity',
+      () async {
+        final mockApiService = MockNAIImageGenerationApiService();
+        final stream = StreamController<ImageStreamChunk>();
+        var streamCalls = 0;
+        addTearDown(() async {
+          if (!stream.isClosed) await stream.close();
+        });
+        when(
+          () => mockApiService.generateImageStream(
+            any(),
+            focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
+            minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
+            focusedSelectionRect: any(named: 'focusedSelectionRect'),
+          ),
+        ).thenAnswer((_) {
+          streamCalls++;
+          return stream.stream;
+        });
+        when(() => mockApiService.cancelGeneration()).thenReturn(null);
+
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            naiImageGenerationApiServiceProvider.overrideWithValue(
+              mockApiService,
+            ),
+            subscriptionNotifierProvider.overrideWith(
+              TestSubscriptionNotifier.new,
+            ),
+          ],
+        );
+        await container
+            .read(notificationSettingsNotifierProvider.notifier)
+            .setSoundEnabled(false);
+        await container
+            .read(imageSaveSettingsNotifierProvider.notifier)
+            .setAutoSave(false);
+
+        final notifier = container.read(
+          imageGenerationNotifierProvider.notifier,
+        );
+        final params = container
+            .read(generationParamsNotifierProvider)
+            .copyWith(prompt: 'first run', width: 512, height: 768);
+
+        final first = notifier.generate(params);
+        for (var i = 0; i < 200 && streamCalls == 0; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 1));
+        }
+        expect(streamCalls, 1);
+        final activeRun = container.read(imageGenerationNotifierProvider);
+        final runId = activeRun.generationRunId;
+        expect(runId, isNotNull);
+        expect(activeRun.isGenerating, isTrue);
+
+        // 在途期间第二个 generate 必须同步丢弃：
+        // 不重复请求、不顶替 run、不向新调用方发出批次事件。
+        final secondEvents = <GenerationBatchEvent>[];
+        await notifier.generate(
+          params.copyWith(prompt: 'second run'),
+          onBatchEvent: secondEvents.add,
+        );
+        expect(secondEvents, isEmpty);
+        expect(streamCalls, 1);
+        final afterSecond = container.read(imageGenerationNotifierProvider);
+        expect(afterSecond.generationRunId, runId);
+        expect(afterSecond.isGenerating, isTrue);
+        verifyNever(() => mockApiService.cancelGeneration());
+
+        stream.add(
+          ImageStreamChunk.complete(_validImageBytes(width: 512, height: 768)),
+        );
+        await stream.close();
+        await first;
+        expect(
+          container.read(imageGenerationNotifierProvider).status,
+          GenerationStatus.completed,
+        );
+      },
+    );
+
+    test(
+      'generateForExplore returns null while another run is active',
+      () async {
+        final mockApiService = MockNAIImageGenerationApiService();
+        final stream = StreamController<ImageStreamChunk>();
+        var streamCalls = 0;
+        addTearDown(() async {
+          if (!stream.isClosed) await stream.close();
+        });
+        when(
+          () => mockApiService.generateImageStream(
+            any(),
+            focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
+            minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
+            focusedSelectionRect: any(named: 'focusedSelectionRect'),
+          ),
+        ).thenAnswer((_) {
+          streamCalls++;
+          return stream.stream;
+        });
+        when(() => mockApiService.cancelGeneration()).thenReturn(null);
+
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            naiImageGenerationApiServiceProvider.overrideWithValue(
+              mockApiService,
+            ),
+            subscriptionNotifierProvider.overrideWith(
+              TestSubscriptionNotifier.new,
+            ),
+          ],
+        );
+        await container
+            .read(notificationSettingsNotifierProvider.notifier)
+            .setSoundEnabled(false);
+        await container
+            .read(imageSaveSettingsNotifierProvider.notifier)
+            .setAutoSave(false);
+
+        final notifier = container.read(
+          imageGenerationNotifierProvider.notifier,
+        );
+        final params = container
+            .read(generationParamsNotifierProvider)
+            .copyWith(prompt: 'main run', width: 512, height: 768);
+
+        final first = notifier.generate(params);
+        for (var i = 0; i < 200 && streamCalls == 0; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 1));
+        }
+        expect(streamCalls, 1);
+        final runId = container
+            .read(imageGenerationNotifierProvider)
+            .generationRunId;
+
+        // 探索生成与主生成共用同一在途门禁。
+        final exploreResult = await notifier.generateForExplore(
+          params.copyWith(prompt: 'explore candidate'),
+        );
+        expect(exploreResult, isNull);
+        expect(streamCalls, 1);
+        expect(
+          container.read(imageGenerationNotifierProvider).generationRunId,
+          runId,
+        );
+
+        stream.add(
+          ImageStreamChunk.complete(_validImageBytes(width: 512, height: 768)),
+        );
+        await stream.close();
+        await first;
+        expect(
+          container.read(imageGenerationNotifierProvider).status,
+          GenerationStatus.completed,
+        );
+      },
+    );
   });
 }
 

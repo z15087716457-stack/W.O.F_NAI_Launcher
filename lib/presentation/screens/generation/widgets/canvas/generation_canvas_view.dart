@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
@@ -14,14 +14,16 @@ import '../../../../providers/image_generation_provider.dart';
 import '../../../../widgets/common/image_detail/image_detail_data.dart';
 import '../../services/generation_save_service.dart';
 import 'canvas_feed_layout.dart';
+import 'canvas_world_viewport.dart';
+import '../../../../widgets/common/selectable_image_card.dart';
 import 'canvas_tile_toolbar.dart';
 import 'generated_image_card.dart';
 import 'generation_canvas_controller.dart';
 import '../../../../../core/utils/localization_extension.dart';
 
 /// 生成画布（G11 V3）：对标 NAI5 官网无限画布，逐字对码模块 22099。
-/// - 世界层 = Transform 包的 Stack，tile 按世界坐标 Positioned
-/// - 交互：中键/左键拖平移（5px 死区）+松手惯性（v 钳 4px/ms、摩擦 exp(-dt·5/1000)）；
+/// - 世界层使用同一变换绘制与命中，相机动画不重建图片子树
+/// - 交互：中键/Shift+左键拖平移（5px 死区）+松手惯性（v 钳 4px/ms、摩擦 exp(-dt·5/1000)）；
 ///   Ctrl+滚轮缩放（离散 ×1.2 / 平滑 exp(-0.01·dy)）；裸滚轮平移 + Shift 纵转横；
 ///   点击 tile 夺焦飞行（指数趋近 speed 11）；相机停稳 120ms 自动选中心最近组；
 ///   q 跳组；Home/End 首尾；Ctrl+0 复位；Ctrl+S 保存焦点图；双击空处切放大填充
@@ -41,6 +43,10 @@ class GenerationCanvasView extends ConsumerStatefulWidget {
 class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     with TickerProviderStateMixin {
   Size _viewport = Size.zero;
+  bool _syncingPreviewSelection = false;
+  bool _manualOverview = false;
+  String? _hoveredTile;
+  Timer? _hoverExitTimer;
 
   // 官网 WASD 平移：1000px/s、对角归一、blur 清键
   final Set<LogicalKeyboardKey> _wasdKeys = {};
@@ -97,6 +103,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   @override
   void dispose() {
     _clickTimer?.cancel();
+    _hoverExitTimer?.cancel();
     _lostTimer?.cancel();
     _wasdTicker?.dispose();
     _camera.onIdle = null;
@@ -108,6 +115,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   // ── 相机停稳 → 官网：自动选中心距视口中心最近的组（120ms 由控制器节流）──
 
   void _onCameraIdle() {
+    if (_manualOverview) return;
     _autoSelectNearestGroup();
     _checkLostAndFlyBack();
   }
@@ -138,14 +146,14 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         return b.isEmpty || !b.overlaps(vis);
       });
       if (!stillEmpty) return;
-      // 飞回距视口中心最近的组（inflight 组不算可选目标）
+      // 飞回距视口中心最近的组（包括正在生成的占位组）
       final centerWorld = cam.screenToWorld(
         Offset(_viewport.width / 2, _viewport.height / 2),
       );
       String? bestKey;
       double best = double.infinity;
       for (final g in lo.groups) {
-        if (g.tiles.isEmpty || g.deferFocus) continue;
+        if (g.tiles.isEmpty) continue;
         final b = _groupBounds(lo, g);
         if (b.isEmpty) continue;
         final d = (b.center - centerWorld).distance;
@@ -173,13 +181,10 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       (_viewport.width / 2 - camera.offset.dx) / camera.scale,
       (_viewport.height / 2 - camera.offset.dy) / camera.scale,
     );
-    final pinned = ref.read(canvasPinnedNotifierProvider);
     String? bestKey;
     double best = double.infinity;
     for (final g in layout.groups) {
-      if (g.tiles.isEmpty || g.deferFocus) continue;
-      // 官网钉板：含钉住图的组不参与自动夺焦（钉板与 feed 分离）
-      if (g.images.any((img) => pinned.contains(img.id))) continue;
+      if (g.tiles.isEmpty) continue;
       final bounds = _groupBounds(layout, g);
       if (bounds.isEmpty) continue;
       final d = (bounds.center - centerWorld).distance;
@@ -199,7 +204,8 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   }
 
   Rect _groupBounds(CanvasFeedLayoutResult layout, CanvasFeedGroup g) {
-    var l = double.infinity, t = double.infinity, r = 0.0, b = 0.0;
+    var l = double.infinity, t = double.infinity;
+    var r = double.negativeInfinity, b = double.negativeInfinity;
     var found = false;
     for (final item in layout.items) {
       if (item.group.key != g.key) continue;
@@ -217,21 +223,17 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     final layout = ref.read(canvasFeedLayoutProvider);
     if (layout.groups.isEmpty) return;
     final focus = ref.read(generationCanvasGroupSelectionProvider);
-    if (focus == null) {
-      // 官网挂载态：默认夺焦最新组（groups[0]，mergedPanelImages 新→旧）
-      final g = layout.groups.first;
+    final g =
+        layout.groups.where((x) => x.key == focus?.group).firstOrNull ??
+        layout.groups.first;
+    if (focus?.group != g.key) {
       ref
           .read(generationCanvasGroupSelectionProvider.notifier)
           .selectGroup(g.key);
       _syncPreviewToGroup(layout, g.key);
-      return;
     }
-    final g = layout.groups
-        .where((x) => x.key == focus.group)
-        .firstOrNull;
-    if (g == null) return;
-    if (focus.subimage != null) {
-      _flyToSubimage(layout, g, focus.subimage!);
+    if (focus?.group == g.key && focus?.subimage != null) {
+      _flyToSubimage(layout, g, focus!.subimage!);
     } else {
       _flyToGroup(layout, g);
     }
@@ -252,9 +254,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   ) {
     if (_viewport.isEmpty) return;
     final rect = layout.items
-        .where(
-          (it) => it.group.key == g.key && it.subimageIndex == index,
-        )
+        .where((it) => it.group.key == g.key && it.subimageIndex == index)
         .map((it) => it.worldRect)
         .firstOrNull;
     if (rect == null || rect.isEmpty) return;
@@ -285,21 +285,29 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     return CanvasCamera(offset: Offset(tx, ty), scale: y);
   }
 
-  /// 画布选中 → 历史预览联动（历史栏滚到该图）
-  void _syncPreviewToGroup(CanvasFeedLayoutResult layout, String groupKey) {
-    final g = layout.groups.where((x) => x.key == groupKey).firstOrNull;
-    if (g == null || g.images.isEmpty) return;
-    ref.read(generationPreviewSelectionProvider.notifier).select(
-      g.images.first.id,
-    );
+  /// 画布更新共享选中时，不把自身的通知再次当成历史栏点击来飞行。
+  void _syncPreviewSelection(String? imageId) {
+    if (ref.read(generationPreviewSelectionProvider) == imageId) return;
+    _syncingPreviewSelection = true;
+    try {
+      final selection = ref.read(generationPreviewSelectionProvider.notifier);
+      imageId == null ? selection.clear() : selection.select(imageId);
+    } finally {
+      _syncingPreviewSelection = false;
+    }
   }
 
-  void _syncPreviewToImage(GeneratedImage image) {
-    ref.read(generationPreviewSelectionProvider.notifier).select(image.id);
+  void _syncPreviewToGroup(CanvasFeedLayoutResult layout, String groupKey) {
+    final g = layout.groups.where((x) => x.key == groupKey).firstOrNull;
+    _syncPreviewSelection(g?.images.firstOrNull?.id);
   }
+
+  void _syncPreviewToImage(GeneratedImage image) =>
+      _syncPreviewSelection(image.id);
 
   /// 历史栏点选 → 画布夺焦联动
   void _focusImageById(String imageId) {
+    _manualOverview = false;
     final layout = ref.read(canvasFeedLayoutProvider);
     final item = layout.items
         .where((it) => it.image?.id == imageId)
@@ -320,21 +328,18 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final layout = ref.watch(canvasFeedLayoutProvider);
-    final camera = ref.watch(generationCanvasCameraProvider);
     final focus = ref.watch(generationCanvasGroupSelectionProvider);
 
-    // 新批置顶（groups[0] 变更）→ 官网「新批自动飞」：夺焦并飞过去。
-    // deferFocus（官网）：含未完成槽位的组不夺焦不飞，等组内全部
-    // finished 后由 deferFocus→false 的翻转补飞。
+    // 新批占位出现时立即飞过去；流式帧和最终图更新使用同一组身份。
     ref.listen(canvasFeedLayoutProvider, (prev, next) {
-      if (next.groups.isEmpty) return;
+      if (!mounted || _viewport.isEmpty || next.groups.isEmpty) return;
       final head = next.groups.first;
-      // 同一组 deferFocus 翻转完成 → 补飞（官网等 all finished 才飞）
-      if (prev != null &&
-          prev.groups.firstOrNull?.key == head.key &&
-          prev.groups.first.deferFocus &&
-          !head.deferFocus) {
-        if (!mounted || _viewport.isEmpty) return;
+      final selected = ref.read(generationCanvasGroupSelectionProvider);
+      final selectionMissing =
+          selected != null &&
+          !next.groups.any((group) => group.key == selected.group);
+      if (prev?.groups.firstOrNull?.key != head.key || selectionMissing) {
+        _manualOverview = false;
         ref
             .read(generationCanvasGroupSelectionProvider.notifier)
             .selectGroup(head.key);
@@ -342,26 +347,51 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         _flyToGroup(next, head);
         return;
       }
-      if (prev?.groups.firstOrNull?.key == head.key) return;
-      if (!mounted || _viewport.isEmpty) return;
-      if (head.deferFocus) return; // 生成中占位组不夺焦
-      ref
-          .read(generationCanvasGroupSelectionProvider.notifier)
-          .selectGroup(head.key);
-      _syncPreviewToGroup(next, head.key);
-      _flyToGroup(next, head);
+      // 完成图接管占位后只同步共享选中，不再次飞行或抢回用户移开的焦点。
+      final image = _resolveSelectedImage(next, selected);
+      if (image != null) _syncPreviewToImage(image);
     });
 
     // 历史栏点选 → 画布夺焦联动
     ref.listen(generationPreviewSelectionProvider, (prev, next) {
-      if (next == null || next == prev) return;
+      if (_syncingPreviewSelection || next == null || next == prev) return;
       _focusImageById(next);
     });
 
+    ref.listen(generationCanvasCameraProvider, (prev, next) {
+      _lostTimer?.cancel();
+    });
+
+    ref.listen(canvasPinboardFocusRequestProvider, (prev, next) {
+      final pins = ref.read(canvasFeedLayoutProvider);
+      final board = pins.groups.where((g) => g.isPinnedGroup).firstOrNull;
+      if (board == null) return;
+      _manualOverview = false;
+      ref
+          .read(generationCanvasGroupSelectionProvider.notifier)
+          .selectGroup(board.key);
+      _syncPreviewToGroup(pins, board.key);
+      _flyToGroup(pins, board);
+    });
+
+    ref.listen(canvasLockCameraNotifierProvider, (prev, locked) {
+      if (!locked) return;
+      _stopWasd();
+      _panActive = false;
+      _camera.jump(ref.read(generationCanvasCameraProvider));
+    });
+
+    final tiles = _buildTiles(layout, focus);
     if (layout.groups.isEmpty) {
-      return _CanvasEmptyState(
-        theme: theme,
-        isGenerating: widget.generationState.isGenerating,
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          _viewport = Size(constraints.maxWidth, constraints.maxHeight);
+          _camera.setViewport(_viewport);
+          return _CanvasEmptyState(
+            theme: theme,
+            isGenerating: widget.generationState.isGenerating,
+          );
+        },
       );
     }
 
@@ -379,6 +409,8 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
           onPointerUp: _onPointerUp,
           onPointerCancel: _onPointerCancel,
           onPointerSignal: _onPointerSignal,
+          onPointerPanZoomStart: _onPanZoomStart,
+          onPointerPanZoomUpdate: _onPanZoomUpdate,
           child: LayoutBuilder(
             builder: (context, constraints) {
               _viewport = Size(constraints.maxWidth, constraints.maxHeight);
@@ -389,40 +421,45 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
               return ClipRect(
                 child: Stack(
                   children: [
-                    // 网格底纹（对齐世界坐标倍数线）
                     Positioned.fill(
-                      child: CustomPaint(
-                        painter: _GridPainter(camera: camera, theme: theme),
-                      ),
-                    ),
-                    // 世界层：Transform 包静态子树，ref.watch(camera) 驱动重建
-                    Positioned.fill(
-                      child: Transform(
-                        transform: Matrix4.identity()
-                          ..translateByDouble(
-                            camera.offset.dx,
-                            camera.offset.dy,
-                            0,
-                            1,
-                          )
-                          ..scaleByDouble(
-                            camera.scale,
-                            camera.scale,
-                            1,
-                            1,
-                          ),
-                        alignment: Alignment.topLeft,
-                        child: RepaintBoundary(
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: _buildTiles(layout, focus, camera, theme),
-                          ),
-                        ),
+                      child: Consumer(
+                        builder: (context, ref, _) {
+                          final camera = ref.watch(
+                            generationCanvasCameraProvider,
+                          );
+                          return Stack(
+                            children: [
+                              Positioned.fill(
+                                child: CustomPaint(
+                                  painter: _GridPainter(
+                                    camera: camera,
+                                    theme: theme,
+                                  ),
+                                ),
+                              ),
+                              Positioned.fill(
+                                child: CanvasWorldViewport(
+                                  camera: camera,
+                                  children: tiles
+                                      .where(
+                                        (tile) => tile.rect.overlaps(
+                                          camera
+                                              .visibleWorldRect(_viewport)
+                                              .inflate(500),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                              ),
+                              ..._buildGroupBadges(layout, camera),
+                              ..._buildHoverToolbar(layout, camera),
+                            ],
+                          );
+                        },
                       ),
                     ),
                     // 屏幕空间覆盖层：焦点组 edge bars（顶中/底左/底右）
-                    if (showEdgeBars)
-                      _buildEdgeBars(context, layout, focus, camera, theme),
+                    if (showEdgeBars) _buildEdgeBars(layout, focus),
                   ],
                 ),
               );
@@ -438,110 +475,173 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     CanvasFocus? focus,
   ) {
     if (focus == null) return null;
-    final g = layout.groups
-        .where((x) => x.key == focus.group)
-        .firstOrNull;
-    if (g == null || g.images.isEmpty) return null;
-    final idx = focus.subimage ?? 0;
-    return idx < g.images.length ? g.images[idx] : g.images.first;
+    final g = layout.groups.where((x) => x.key == focus.group).firstOrNull;
+    if (g == null) return null;
+    final index = focus.subimage;
+    if (index == null) return g.images.firstOrNull;
+    return index >= 0 && index < g.tiles.length ? g.tiles[index].image : null;
   }
 
-  List<Widget> _buildTiles(
+  List<CanvasWorldItem> _buildTiles(
     CanvasFeedLayoutResult layout,
     CanvasFocus? focus,
-    CanvasCamera camera,
-    ThemeData theme,
   ) {
-    final tiles = <Widget>[];
     final pinned = ref.watch(canvasPinnedNotifierProvider);
-    final visible = camera.scale > 0
-        ? camera.visibleWorldRect(_viewport).inflate(500)
-        : null;
-
-    // 组 ×N 徽标：每组一次，贴在组包围盒右下（世界坐标反缩放恒屏）
-    final groupBadgeEmitted = <String>{};
-
-    for (final item in layout.items) {
-      final rect = item.worldRect;
-      if (visible != null && !visible.overlaps(rect)) continue;
-      final isFocusGroup = focus?.group == item.group.key;
-      final isFocusSubimage =
-          isFocusGroup && focus?.subimage == item.subimageIndex;
-      final image = item.image;
-      tiles.add(
-        Positioned(
-          left: rect.left,
-          top: rect.top,
-          width: rect.width,
-          height: rect.height,
-          child: _CanvasTile(
-            group: item.group,
-            tile: item.tile,
-            subimageIndex: item.subimageIndex,
-            isFocusGroup: isFocusGroup,
-            isFocusSubimage: isFocusSubimage,
-            isPinned: image != null && pinned.contains(image.id),
-            cameraScale: camera.scale,
-            uiPointers: _uiPointers,
-            onSelect: () => _onTileTap(item),
+    return [
+      for (final item in layout.items)
+        CanvasWorldItem(
+          key: ValueKey('canvas-tile:${item.group.key}:${item.subimageIndex}'),
+          rect: item.worldRect,
+          child: RepaintBoundary(
+            child: _CanvasTile(
+              group: item.group,
+              tile: item.tile,
+              subimageIndex: item.subimageIndex,
+              isFocusGroup: focus?.group == item.group.key,
+              isFocusSubimage:
+                  focus?.group == item.group.key &&
+                  focus?.subimage == item.subimageIndex,
+              isPinned: item.image != null && pinned.contains(item.image!.id),
+              onHover: (hovering) => _setHover(
+                '${item.group.key}:${item.subimageIndex}',
+                hovering,
+              ),
+              onSelect: () => _onTileTap(item),
+              imageChild: item.image == null
+                  ? null
+                  : buildGeneratedImageCard(
+                      context: context,
+                      ref: ref,
+                      image: item.image!,
+                      showIndex: false,
+                      canvasTile: true,
+                      onTap: () => _onTileTap(item),
+                    ),
+            ),
           ),
         ),
-      );
-      // ×N 徽标（官网组张数徽标）：每组贴一次，组包围盒右下。
-      final groupKey = item.group.key;
-      if (!groupBadgeEmitted.contains(groupKey) &&
-          item.group.tiles.length > 1) {
-        groupBadgeEmitted.add(groupKey);
-        final gr = item.groupRect;
-        tiles.add(
+    ];
+  }
+
+  List<Widget> _buildGroupBadges(
+    CanvasFeedLayoutResult layout,
+    CanvasCamera camera,
+  ) {
+    final visible = camera.visibleWorldRect(_viewport);
+    return [
+      for (final group in layout.groups)
+        if (group.tiles.length > 1 &&
+            _groupBounds(layout, group).overlaps(visible))
           Positioned(
-            left: gr.right - 60,
-            top: gr.bottom - 30,
-            width: 60,
-            height: 30,
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: Transform.scale(
-                scale: (1 / camera.scale).clamp(0.4, 2.5),
-                alignment: Alignment.bottomRight,
-                child: Container(
+            right:
+                _viewport.width -
+                camera
+                    .worldToScreen(_groupBounds(layout, group).bottomRight)
+                    .dx +
+                6,
+            bottom:
+                _viewport.height -
+                camera
+                    .worldToScreen(_groupBounds(layout, group).bottomRight)
+                    .dy +
+                6,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 7,
                     vertical: 3,
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(7),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.25),
-                    ),
-                  ),
                   child: Text(
-                    '×${item.group.tiles.length}',
+                    '×${group.tiles.length}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      height: 1.1,
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        );
-      }
+    ];
+  }
+
+  void _setHover(String key, bool hovering) {
+    _hoverExitTimer?.cancel();
+    if (hovering) {
+      if (_hoveredTile != key) setState(() => _hoveredTile = key);
+    } else {
+      _hoverExitTimer = Timer(const Duration(milliseconds: 150), () {
+        if (mounted && _hoveredTile == key) {
+          setState(() => _hoveredTile = null);
+        }
+      });
     }
-    return tiles;
+  }
+
+  List<Widget> _buildHoverToolbar(
+    CanvasFeedLayoutResult layout,
+    CanvasCamera camera,
+  ) {
+    final item = layout.items
+        .where(
+          (item) => '${item.group.key}:${item.subimageIndex}' == _hoveredTile,
+        )
+        .firstOrNull;
+    if (item?.image == null) return const [];
+    final focus = ref.read(generationCanvasGroupSelectionProvider);
+    if (focus?.group == item!.group.key &&
+        focus?.subimage == item.subimageIndex) {
+      return const [];
+    }
+    final anchor = camera.worldToScreen(item.worldRect.bottomCenter);
+    if (anchor.dy < 0 || anchor.dy > _viewport.height) return const [];
+    final toolbarWidth = math.min(260.0, math.max(0.0, _viewport.width - 24));
+    final hoverKey = '${item.group.key}:${item.subimageIndex}';
+    return [
+      Positioned(
+        left: anchor.dx.clamp(
+          toolbarWidth / 2 + 12,
+          math.max(
+            toolbarWidth / 2 + 12,
+            _viewport.width - toolbarWidth / 2 - 12,
+          ),
+        ),
+        top: math.min(anchor.dy + 8, _viewport.height - 48),
+        child: FractionalTranslation(
+          translation: const Offset(-0.5, 0),
+          child: MouseRegion(
+            onEnter: (_) => _setHover(hoverKey, true),
+            onExit: (_) {
+              if (_hoveredTile != null) _setHover(_hoveredTile!, false);
+            },
+            child: Listener(
+              onPointerDown: (e) => _uiPointers.add(e.pointer),
+              onPointerUp: (e) => _uiPointers.remove(e.pointer),
+              onPointerCancel: (e) => _uiPointers.remove(e.pointer),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: toolbarWidth),
+                child: CanvasMiniToolbar(image: item.image!, group: item.group),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ];
   }
 
   void _onTileTap(CanvasFeedItem item) {
-    // 生成中占位槽不参与选中/飞行（官网 inflight tile 无焦点语义）
-    if (item.isInFlight || item.image == null) return;
+    _manualOverview = false;
+    // 占位卡与成图使用同样的选中/飞行路径。
     final layout = ref.read(canvasFeedLayoutProvider);
     final focus = ref.read(generationCanvasGroupSelectionProvider);
-    final isFocused = focus?.group == item.group.key &&
-        focus?.subimage == item.subimageIndex;
+    final isFocused =
+        focus?.group == item.group.key && focus?.subimage == item.subimageIndex;
     if (isFocused) {
       // 官网：再点已焦点图 → 飞出到整组边界（subimage=null = 整组展开态）
       ref
@@ -553,21 +653,13 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       ref
           .read(generationCanvasGroupSelectionProvider.notifier)
           .selectTile(item.group.key, item.subimageIndex);
-      _syncPreviewToImage(item.image!);
+      _syncPreviewSelection(item.image?.id);
       _flyToSubimage(layout, item.group, item.subimageIndex);
     }
   }
 
-  Widget _buildEdgeBars(
-    BuildContext context,
-    CanvasFeedLayoutResult layout,
-    CanvasFocus? focus,
-    CanvasCamera camera,
-    ThemeData theme,
-  ) {
-    final g = layout.groups
-        .where((x) => x.key == focus!.group)
-        .firstOrNull;
+  Widget _buildEdgeBars(CanvasFeedLayoutResult layout, CanvasFocus? focus) {
+    final g = layout.groups.where((x) => x.key == focus!.group).firstOrNull;
     final img = _resolveSelectedImage(layout, focus);
     if (g == null || img == null) return const SizedBox.shrink();
 
@@ -580,109 +672,53 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       },
       onPointerCancel: (e) {
         _uiPointers.remove(e.pointer);
-        _consumedUiPointers.add(e.pointer);
+        _consumedUiPointers.remove(e.pointer);
       },
       child: child,
     );
 
-    // 官网 edge bar 贴焦点 tile 四周（非钉屏幕三边）：
-    // 顶条 = tile 顶边中心上方 76px，左条 = tile 左边中点左移 24px，
-    // 底左/底右 = tile 底边两侧；全部按 --canvas-ui-scale=1/相机 反缩放，
-    // 屏幕恒定大小并随焦点 tile 移动。
-    final item = layout.items
-        .where(
-          (it) =>
-              it.group.key == g.key &&
-              it.subimageIndex == (focus!.subimage ?? 0),
-        )
-        .firstOrNull;
-    if (item == null) return const SizedBox.shrink();
-    final worldRect = item.worldRect;
-    final s = camera.scale;
-    final uiScale = (1 / s).clamp(0.4, 2.5);
-    // 世界坐标 → 屏幕坐标（offset = 平移量，scale = 缩放）
-    final tileLeft = worldRect.left * s + camera.offset.dx;
-    final tileTop = worldRect.top * s + camera.offset.dy;
-    final tileRight = worldRect.right * s + camera.offset.dx;
-    final tileBottom = worldRect.bottom * s + camera.offset.dy;
-    final tileCenterX = (tileLeft + tileRight) / 2;
-    // CSS transform-origin 语义：锚点先在屏幕坐标定位，再整体按
-    // uiScale 缩放自身大小（translate 分量含在 scale 内一起缩放）。
-    Widget barAt(
-      double anchorX,
-      double anchorY,
-      Alignment anchor,
-      Widget child,
-    ) {
-      return Positioned(
-        left: anchorX,
-        top: anchorY,
-        child: Transform.scale(
-          scale: uiScale,
-          alignment: anchor,
-          child: FractionalTranslation(
-            // Alignment(-1..+1) → 锚点平移系数：左=0、中=-0.5、右=-1
-            translation: Offset(
-              -(anchor.x + 1) / 2,
-              -(anchor.y + 1) / 2,
-            ),
-            child: child,
-          ),
-        ),
-      );
-    }
-
+    // 三个主工具条固定在中央画布视口边缘，位置与尺寸均不经过相机变换。
+    // 操作对象仍是当前焦点图；图片移出视口时工具条也保持可见。
     return Positioned.fill(
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // top.center：enhance|variations|upscale ‖ set-init|edit|inpaint|send
-          // 官网 translateY(-76px) → 条整体悬在 tile 上方 76px（屏幕系
-          // 经 uiScale 折回世界偏移）。
-          barAt(
-            tileCenterX,
-            tileTop - 76 * uiScale,
-            Alignment.bottomCenter,
-            guarded(
-              CanvasEdgeToolbar(
-                zone: CanvasToolbarZone.top,
-                image: img,
-                group: g,
-                focus: focus,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.topCenter,
+              child: guarded(
+                CanvasEdgeToolbar(
+                  zone: CanvasToolbarZone.top,
+                  image: img,
+                  group: g,
+                  focus: focus,
+                ),
               ),
             ),
-          ),
-          // bottom.start：宽×高 ‖ ⚙settings | 种子药丸
-          // 贴 tile 左下角内侧。
-          barAt(
-            tileLeft + 12 * uiScale,
-            tileBottom - 12 * uiScale,
-            Alignment.bottomLeft,
-            guarded(
-              CanvasEdgeToolbar(
-                zone: CanvasToolbarZone.bottomStart,
-                image: img,
-                group: g,
-                focus: focus,
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: guarded(
+                CanvasEdgeToolbar(
+                  zone: CanvasToolbarZone.bottomStart,
+                  image: img,
+                  group: g,
+                  focus: focus,
+                ),
               ),
             ),
-          ),
-          // bottom.end：[contest|pin|copy|download] [info] [explore-upload]
-          // 贴 tile 右下角内侧。
-          barAt(
-            tileRight - 12 * uiScale,
-            tileBottom - 12 * uiScale,
-            Alignment.bottomRight,
-            guarded(
-              CanvasEdgeToolbar(
-                zone: CanvasToolbarZone.bottomEnd,
-                image: img,
-                group: g,
-                focus: focus,
+            Align(
+              alignment: Alignment.bottomRight,
+              child: guarded(
+                CanvasEdgeToolbar(
+                  zone: CanvasToolbarZone.bottomEnd,
+                  image: img,
+                  group: g,
+                  focus: focus,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -726,17 +762,20 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
 
   KeyEventResult _onKey(KeyEvent event, CanvasFeedLayoutResult layout) {
     final key = event.logicalKey;
-    final ctrl = HardwareKeyboard.instance.isControlPressed ||
+    final ctrl =
+        HardwareKeyboard.instance.isControlPressed ||
         HardwareKeyboard.instance.isMetaPressed;
     final shift = HardwareKeyboard.instance.isShiftPressed;
+    // Release movement even when modifiers or camera lock changed meanwhile.
+    if (event is KeyUpEvent && _wasdKeys.remove(key)) {
+      if (_wasdKeys.isEmpty) _stopWasd();
+      return KeyEventResult.handled;
+    }
     final groups = layout.groups;
     if (groups.isEmpty) return KeyEventResult.ignored;
 
     // 官网 WASD 平移：按住持续移动（键松开/失焦即停；锁相机/Ctrl 时不触发）
-    if (_wasdKeysSet.contains(key) &&
-        !ctrl &&
-        !shift &&
-        !_cameraLocked) {
+    if (_wasdKeysSet.contains(key) && !ctrl && !shift && !_cameraLocked) {
       if (event is KeyDownEvent) {
         _wasdKeys.add(key);
         _startWasd();
@@ -771,8 +810,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     if (key == LogicalKeyboardKey.keyF) {
       // f 飞回焦点组（无焦点则飞最近组）
       if (focus != null) {
-        final g =
-            groups.where((x) => x.key == focus.group).firstOrNull;
+        final g = groups.where((x) => x.key == focus.group).firstOrNull;
         if (g != null) {
           if (focus.subimage != null) {
             _flyToSubimage(layout, g, focus.subimage!);
@@ -791,8 +829,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         ref
             .read(generationCanvasGroupSelectionProvider.notifier)
             .selectGroup(focus!.group);
-        final g =
-            groups.where((x) => x.key == focus.group).firstOrNull;
+        final g = groups.where((x) => x.key == focus.group).firstOrNull;
         if (g != null) {
           _syncPreviewToGroup(layout, g.key);
           _flyToGroup(layout, g);
@@ -818,7 +855,8 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       _flyToGroup(layout, g);
       return KeyEventResult.handled;
     }
-    if (ctrl && key == LogicalKeyboardKey.digit0) {
+    if (!_cameraLocked && ctrl && key == LogicalKeyboardKey.digit0) {
+      _manualOverview = true;
       ref.read(generationCanvasGroupSelectionProvider.notifier).clear();
       _camera.flyTo(CanvasCamera.init);
       return KeyEventResult.handled;
@@ -830,24 +868,27 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       }
       return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.equal ||
-        key == LogicalKeyboardKey.numpadAdd) {
+    if (!_cameraLocked &&
+        (key == LogicalKeyboardKey.equal ||
+            key == LogicalKeyboardKey.numpadAdd)) {
       _camera.zoomBy(
         1.3,
         anchor: Offset(_viewport.width / 2, _viewport.height / 2),
       );
       return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.minus ||
-        key == LogicalKeyboardKey.numpadSubtract) {
+    if (!_cameraLocked &&
+        (key == LogicalKeyboardKey.minus ||
+            key == LogicalKeyboardKey.numpadSubtract)) {
       _camera.zoomBy(
         1 / 1.3,
         anchor: Offset(_viewport.width / 2, _viewport.height / 2),
       );
       return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.digit1 ||
-        key == LogicalKeyboardKey.numpad1) {
+    if (!_cameraLocked &&
+        (key == LogicalKeyboardKey.digit1 ||
+            key == LogicalKeyboardKey.numpad1)) {
       // 回 100%：锚定视口中心
       final center = Offset(_viewport.width / 2, _viewport.height / 2);
       _camera.zoomBy(1 / _cameraState().scale, anchor: center);
@@ -872,7 +913,10 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   // ── 指针交互（官网逐字：5px 死区 / 惯性抛掷 / Ctrl 缩放 / 裸滚轮平移）──
 
   bool _isPanButton(PointerEvent e) =>
-      (e.buttons & (kPrimaryMouseButton | kMiddleMouseButton)) != 0;
+      (e.buttons & kMiddleMouseButton) != 0 ||
+      ((e.buttons & kPrimaryMouseButton) != 0 &&
+          (e.kind != PointerDeviceKind.mouse ||
+              HardwareKeyboard.instance.isShiftPressed));
 
   void _onPointerDown(PointerDownEvent e) {
     _pointers.add(e.pointer);
@@ -889,8 +933,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     if (_uiPointers.contains(e.pointer)) return;
     if (_cameraLocked) return;
     if (_pointers.length == 2) {
-      // 双指捏合：桌面端走触控板 PointerScrollEvent.scale 信号，
-      // PointerMove 无 scale 增量，这里不处理。
+      // Desktop trackpad gestures use PointerPanZoom events below.
       return;
     }
     if (_pointers.isEmpty || !_isPanButton(e)) return;
@@ -900,6 +943,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       _panAccum += e.localDelta;
       if (_panAccum.distance <= 5) return;
       _panActive = true;
+      _manualOverview = false;
       _camera.panBy(_panAccum);
     } else {
       _camera.panBy(e.localDelta);
@@ -911,10 +955,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     if (last != null) {
       final dt = now.difference(last).inMilliseconds;
       if (dt > 0) {
-        _inertiaVelocity = Offset(
-          e.localDelta.dx / dt,
-          e.localDelta.dy / dt,
-        );
+        _inertiaVelocity = Offset(e.localDelta.dx / dt, e.localDelta.dy / dt);
       }
     }
     _lastPanAt = now;
@@ -941,6 +982,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   void _onPointerCancel(PointerCancelEvent e) {
     _pointers.remove(e.pointer);
     _uiPointers.remove(e.pointer);
+    _consumedUiPointers.remove(e.pointer);
     if (_pointers.isEmpty) {
       _panActive = false;
       _panAccum = Offset.zero;
@@ -955,27 +997,47 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     final ctrl = kb.isControlPressed || kb.isMetaPressed;
     final shift = kb.isShiftPressed;
     final dy = e.scrollDelta.dy;
+    _manualOverview = false;
 
     if (ctrl) {
+      if (dy == 0) return;
       // 官网：Ctrl+滚轮缩放；平滑档 exp(clamp(-0.01·dy,±0.25))，
       // 离散档 dy<0 ×1.2 / dy>0 ÷1.2，锚点=光标
       final smooth = ref.read(canvasSmoothZoomNotifierProvider);
       if (smooth) {
         final factor = math.exp((-0.01 * dy).clamp(-0.25, 0.25));
-        _camera.zoomBy(factor, anchor: e.localPosition);
+        _camera.zoomBy(factor, anchor: e.localPosition, smooth: true);
       } else {
         _camera.zoomBy(dy < 0 ? 1.2 : 1 / 1.2, anchor: e.localPosition);
       }
     } else {
       // 裸滚轮平移（无缩放、无翻页）；Shift 纵转横
       _camera.panBy(
-        shift ? Offset(-(e.scrollDelta.dx + dy), 0) : Offset(-e.scrollDelta.dx, -dy),
+        shift
+            ? Offset(-(e.scrollDelta.dx + dy), 0)
+            : Offset(-e.scrollDelta.dx, -dy),
       );
     }
   }
 
+  double _panZoomScale = 1;
+
+  void _onPanZoomStart(PointerPanZoomStartEvent event) {
+    _panZoomScale = 1;
+    _canvasFocusNode.requestFocus();
+  }
+
+  void _onPanZoomUpdate(PointerPanZoomUpdateEvent event) {
+    final factor = event.scale / _panZoomScale;
+    _panZoomScale = event.scale;
+    if (_cameraLocked) return;
+    _camera.panBy(event.panDelta);
+    _camera.zoomBy(factor, anchor: event.localPosition, smooth: true);
+  }
+
   /// 双击空处切「放大填充」；单击/双击落在 tile 或 UI 上不触发。
   void _onCanvasTapUp(TapUpDetails details) {
+    if (_cameraLocked) return;
     // 用世界坐标命中检测：落在任一 tile 上 → 是 tile tap，不是画布 tap
     final layout = ref.read(canvasFeedLayoutProvider);
     final camera = ref.read(generationCanvasCameraProvider);
@@ -983,9 +1045,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       (details.localPosition.dx - camera.offset.dx) / camera.scale,
       (details.localPosition.dy - camera.offset.dy) / camera.scale,
     );
-    final hitTile = layout.items.any(
-      (it) => it.worldRect.contains(world),
-    );
+    final hitTile = layout.items.any((it) => it.worldRect.contains(world));
     if (hitTile) return;
     // edge bars 命中（屏幕坐标近似区）
     if (_consumedUiPointers.isNotEmpty) {
@@ -1007,9 +1067,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       final layout = ref.read(canvasFeedLayoutProvider);
       final g = focus == null
           ? null
-          : layout.groups
-              .where((x) => x.key == focus.group)
-              .firstOrNull;
+          : layout.groups.where((x) => x.key == focus.group).firstOrNull;
       if (g != null) {
         if (focus!.subimage != null) {
           _flyToSubimage(layout, g, focus.subimage!);
@@ -1030,9 +1088,9 @@ class _CanvasTile extends ConsumerStatefulWidget {
     required this.isFocusGroup,
     required this.isFocusSubimage,
     required this.isPinned,
-    required this.cameraScale,
-    required this.uiPointers,
+    required this.onHover,
     required this.onSelect,
+    required this.imageChild,
   });
 
   final CanvasFeedGroup group;
@@ -1041,9 +1099,9 @@ class _CanvasTile extends ConsumerStatefulWidget {
   final bool isFocusGroup;
   final bool isFocusSubimage;
   final bool isPinned;
-  final double cameraScale;
-  final Set<int> uiPointers;
+  final ValueChanged<bool> onHover;
   final VoidCallback onSelect;
+  final Widget? imageChild;
 
   @override
   ConsumerState<_CanvasTile> createState() => _CanvasTileState();
@@ -1055,18 +1113,31 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
   @override
   Widget build(BuildContext context) {
     final unfocused = !widget.isFocusSubimage;
+    final cameraScale = ref.watch(
+      generationCanvasCameraProvider.select((c) => c.scale),
+    );
     // 官网：非焦点 scale(0.98)；悬停回 1；0.25s cubic-bezier(0.22,1,0.36,1)
     final scale = unfocused && !_hovering ? 0.98 : 1.0;
 
     // 生成中占位槽（官网 image-grid-generating）：批参数尺寸 + 三点
     // 弹跳动画，有流式帧时叠预览帧。
     if (widget.tile.isInFlight) {
-      return _InflightSlotTile(slot: widget.tile.slot!);
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onSelect,
+        child: _InflightSlotTile(slot: widget.tile.slot!),
+      );
     }
 
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
+      onEnter: (_) {
+        setState(() => _hovering = true);
+        widget.onHover(true);
+      },
+      onExit: (_) {
+        setState(() => _hovering = false);
+        widget.onHover(false);
+      },
       child: AnimatedScale(
         scale: scale,
         duration: const Duration(milliseconds: 250),
@@ -1074,25 +1145,14 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            Positioned.fill(
-              child: RepaintBoundary(
-                child: buildGeneratedImageCard(
-                  context: context,
-                  ref: ref,
-                  image: widget.tile.image!,
-                  showIndex: false,
-                  canvasTile: true,
-                  onTap: widget.onSelect,
-                ),
-              ),
-            ),
+            Positioned.fill(child: RepaintBoundary(child: widget.imageChild!)),
             // 钉住角标（官网钉板标记）：实心 pin，右上反缩放恒屏大小
             if (widget.isPinned)
               Positioned(
-                top: -30 / widget.cameraScale.clamp(0.5, 2.5),
+                top: -30 / cameraScale.clamp(0.5, 2.5),
                 right: 0,
                 child: Transform.scale(
-                  scale: (1 / widget.cameraScale).clamp(0.4, 2.5),
+                  scale: (1 / cameraScale).clamp(0.4, 2.5),
                   alignment: Alignment.topRight,
                   child: Container(
                     width: 24,
@@ -1106,30 +1166,6 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
                       Icons.push_pin,
                       size: 13,
                       color: Colors.white.withValues(alpha: 0.92),
-                    ),
-                  ),
-                ),
-              ),
-            // 非焦点 hover 迷你条：pin|copy|download + 种子
-            // （官网 --canvas-ui-scale 反缩放，屏幕恒定大小）
-            if (unfocused && _hovering)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: -46 / widget.cameraScale.clamp(0.5, 2.5),
-                child: Transform.scale(
-                  scale: (1 / widget.cameraScale).clamp(0.4, 2.5),
-                  alignment: Alignment.bottomCenter,
-                  child: Center(
-                    child: Listener(
-                      onPointerDown: (e) => widget.uiPointers.add(e.pointer),
-                      onPointerUp: (e) => widget.uiPointers.remove(e.pointer),
-                      onPointerCancel: (e) =>
-                          widget.uiPointers.remove(e.pointer),
-                      child: CanvasMiniToolbar(
-                        image: widget.tile.image!,
-                        group: widget.group,
-                      ),
                     ),
                   ),
                 ),
@@ -1210,7 +1246,10 @@ class _InflightSlotTileState extends State<_InflightSlotTile>
           fit: StackFit.expand,
           children: [
             if (preview != null && preview.isNotEmpty)
-              Image.memory(preview, fit: BoxFit.cover, gaplessPlayback: true),
+              buildStreamPreviewImage(
+                bytes: preview,
+                placement: widget.slot.focusedPreviewPlacement,
+              ),
             Container(
               color: theme.colorScheme.surface.withValues(
                 alpha: preview != null && preview.isNotEmpty ? 0.35 : 0.0,
@@ -1238,14 +1277,27 @@ class _InflightSlotTileState extends State<_InflightSlotTile>
                       ),
                     );
                   }
-                  return Row(
+
+                  return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      dot(0),
-                      const SizedBox(width: 8),
-                      dot(1),
-                      const SizedBox(width: 8),
-                      dot(2),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          dot(0),
+                          const SizedBox(width: 8),
+                          dot(1),
+                          const SizedBox(width: 8),
+                          dot(2),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        preview?.isNotEmpty == true
+                            ? context.l10n.generation_generating
+                            : context.l10n.common_loading,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                     ],
                   );
                 },

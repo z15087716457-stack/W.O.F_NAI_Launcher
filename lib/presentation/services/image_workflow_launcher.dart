@@ -24,6 +24,11 @@ import '../widgets/image_editor/image_editor_screen.dart';
 class ImageWorkflowLauncher {
   const ImageWorkflowLauncher._();
 
+  /// 「生成变体」同动作占位：元数据解析是异步的，解析完成前
+  /// `state.isGenerating` 仍为 false，仅靠它挡不住双击；
+  /// 占位期间的重复调用直接丢弃，不发生第二次解析/批改。
+  static bool _variationsLaunching = false;
+
   static void openImageToImage(WidgetRef ref, Uint8List imageBytes) {
     final workflowNotifier = ref.read(imageWorkflowControllerProvider.notifier);
     workflowNotifier.replaceSourceImage(imageBytes);
@@ -211,37 +216,76 @@ class ImageWorkflowLauncher {
     WidgetRef ref,
     Uint8List imageBytes,
   ) async {
-    final workflowNotifier = ref.read(imageWorkflowControllerProvider.notifier);
-    final paramsNotifier = ref.read(generationParamsNotifierProvider.notifier);
-
-    workflowNotifier.replaceSourceImage(imageBytes);
-    workflowNotifier.enterBaseMode(clearMask: true);
-    workflowNotifier.setPanelExpanded(true);
-
-    final metadata = await ImageMetadataService().getMetadataFromBytes(
-      imageBytes,
-    );
-    if (!context.mounted) {
+    if (_variationsLaunching || !context.mounted) {
       return;
     }
+    _variationsLaunching = true;
+    try {
+      // 所有闸门必须先于任何工作流/参数改动：
+      // 被拦截的动作不得修改用户当前草稿与画布状态。
+      if (_isVariationLaunchBlocked(context, ref)) {
+        return;
+      }
 
-    if (metadata != null && metadata.hasData) {
-      _applyVariationMetadata(
-        metadata,
-        ref,
-        paramsNotifier,
-        fallbackModel: ref.read(generationParamsNotifierProvider).model,
+      // 先解析元数据再动笔；解析期间闸门状态可能翻转，await 后必须复核。
+      final metadata = await ImageMetadataService().getMetadataFromBytes(
+        imageBytes,
       );
-    } else {
-      paramsNotifier.randomizeSeed();
-      paramsNotifier.updateStrength(0.45);
-      paramsNotifier.updateNoise(0.0);
-    }
+      if (!context.mounted || _isVariationLaunchBlocked(context, ref)) {
+        return;
+      }
 
-    if (!context.mounted) return;
+      final workflowNotifier = ref.read(
+        imageWorkflowControllerProvider.notifier,
+      );
+      final paramsNotifier = ref.read(
+        generationParamsNotifierProvider.notifier,
+      );
+      workflowNotifier.replaceSourceImage(imageBytes);
+      workflowNotifier.enterBaseMode(clearMask: true);
+      workflowNotifier.setPanelExpanded(true);
+
+      if (metadata != null && metadata.hasData) {
+        _applyVariationMetadata(
+          metadata,
+          ref,
+          paramsNotifier,
+          fallbackModel: ref.read(generationParamsNotifierProvider).model,
+        );
+      } else {
+        paramsNotifier.randomizeSeed();
+        paramsNotifier.updateStrength(0.45);
+        paramsNotifier.updateNoise(0.0);
+      }
+
+      AppToast.info(context, context.l10n.img2img_variationsStarted);
+      final currentParams = ref.read(generationParamsNotifierProvider);
+      ref
+          .read(imageGenerationNotifierProvider.notifier)
+          .generate(currentParams);
+    } catch (error) {
+      AppLogger.w('Variation preparation failed: $error', 'ImageWorkflow');
+      if (context.mounted) {
+        AppToast.error(
+          context,
+          context.l10n.toast_processImageFailed(error.toString()),
+        );
+      }
+    } finally {
+      _variationsLaunching = false;
+    }
+  }
+
+  /// 变体生成的统一闸门：启动器在途生成、Krita 桥接占用、冷却期
+  /// 任一命中即拦截并提示。返回 true 表示本次动作被拒绝。
+  static bool _isVariationLaunchBlocked(BuildContext context, WidgetRef ref) {
+    if (ref.read(imageGenerationNotifierProvider).isGenerating) {
+      AppToast.info(context, context.l10n.generation_generating);
+      return true;
+    }
     if (ref.read(kritaBridgeNotifierProvider).isBridgeGenerating) {
       AppToast.warning(context, context.l10n.toast_kritaBusy);
-      return;
+      return true;
     }
     final cooldownState = ref.read(generationCooldownProvider);
     if (cooldownState.isActive) {
@@ -251,12 +295,9 @@ class ImageWorkflowLauncher {
           cooldownState.remainingSeconds,
         ),
       );
-      return;
+      return true;
     }
-    AppToast.info(context, context.l10n.img2img_variationsStarted);
-
-    final currentParams = ref.read(generationParamsNotifierProvider);
-    ref.read(imageGenerationNotifierProvider.notifier).generate(currentParams);
+    return false;
   }
 
   static void _applyVariationMetadata(

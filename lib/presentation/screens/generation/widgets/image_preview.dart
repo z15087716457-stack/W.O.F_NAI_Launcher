@@ -85,6 +85,7 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
   Widget build(BuildContext context) {
     final state = ref.watch(imageGenerationNotifierProvider);
     final theme = Theme.of(context);
+    final simpleViewer = ref.watch(simpleOutputViewerNotifierProvider);
 
     // 使用 GestureDetector 吸收整个区域的点击事件，避免 Windows 系统提示音
     return PreviewNavShortcuts(
@@ -97,7 +98,8 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
           }
         },
         child: Container(
-          padding: const EdgeInsets.all(16),
+          // 自由画布只留细缝，避免预览区外围形成厚重的内框。
+          padding: EdgeInsets.all(simpleViewer ? 16 : 4),
           child: Center(child: _buildContent(context, ref, state, theme)),
         ),
       ),
@@ -126,7 +128,8 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
     // 生成中渲染 inflight 占位组置顶 + 流式帧，画布不卸载不回退。
     // simpleOutputViewer=true 时回退经典输出查看器。
     final simpleViewer = ref.watch(simpleOutputViewerNotifierProvider);
-    if (!simpleViewer && (state.mergedPanelImages.isNotEmpty || state.isGenerating)) {
+    if (!simpleViewer &&
+        (state.mergedPanelImages.isNotEmpty || state.isGenerating)) {
       return GenerationCanvasView(generationState: state);
     }
 
