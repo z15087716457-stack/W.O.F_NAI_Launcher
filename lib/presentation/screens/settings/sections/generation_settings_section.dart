@@ -45,8 +45,6 @@ class _GenerationSettingsSectionState
     );
 
     return SettingsCard(
-      title: l10n.settings_generation,
-      icon: Icons.tune_outlined,
       child: Column(
         children: [
           SettingsSectionLabel(l10n.settings_generationInputSection),

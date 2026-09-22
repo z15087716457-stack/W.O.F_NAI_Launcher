@@ -170,6 +170,14 @@
       "name": {}
     }
   },
+  "auth_deleteCurrentAccountConfirm": "Delete \"{name}\" and sign out?",
+  "@auth_deleteCurrentAccountConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "auth_switchFailedDeletePrompt": "Couldn't sign in to this account (it may be invalid). Remove it from the list?",
+  "auth_switchFailedDeletePromptMissingToken": "No saved credentials for this account. Remove it from the list?",
   "auth_removeAvatar": "Remove Avatar",
   "auth_selectFromGallery": "Select from Gallery",
   "auth_takePhoto": "Take Photo",
@@ -208,6 +216,7 @@
   "common_default": "Default",
   "settings_title": "Settings",
   "settings_account": "Account",
+  "settings_savedAccounts": "Saved Accounts",
   "settings_appearance": "Appearance",
   "settings_style": "Style",
   "settings_font": "Font",
@@ -5943,6 +5952,7 @@
   },
   "subscriptionExpired": "Expired",
   "subscriptionGracePeriod": "Grace period",
+  "subscriptionTierNone": "No subscription",
   "settings_modelsAndInterfaces": "Models & APIs",
   "promptAssistant_launcherInterfaces": "Launcher Interfaces",
   "promptAssistant_launcherInterfacesSubtitle": "Bind providers and models for the prompt and tag translators; unconfigured slots fall back to the first enabled provider",

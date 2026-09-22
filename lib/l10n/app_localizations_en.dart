@@ -432,6 +432,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String auth_deleteCurrentAccountConfirm(Object name) {
+    return 'Delete \"$name\" and sign out?';
+  }
+
+  @override
+  String get auth_switchFailedDeletePrompt =>
+      'Couldn\'t sign in to this account (it may be invalid). Remove it from the list?';
+
+  @override
+  String get auth_switchFailedDeletePromptMissingToken =>
+      'No saved credentials for this account. Remove it from the list?';
+
+  @override
   String get auth_removeAvatar => 'Remove Avatar';
 
   @override
@@ -539,6 +552,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_account => 'Account';
+
+  @override
+  String get settings_savedAccounts => 'Saved Accounts';
 
   @override
   String get settings_appearance => 'Appearance';
@@ -10171,6 +10187,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionGracePeriod => 'Grace period';
+
+  @override
+  String get subscriptionTierNone => 'No subscription';
 
   @override
   String get settings_modelsAndInterfaces => 'Models & APIs';

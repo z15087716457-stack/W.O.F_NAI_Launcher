@@ -165,6 +165,14 @@
       "name": {}
     }
   },
+  "auth_deleteCurrentAccountConfirm": "将删除账号 \"{name}\" 并退出登录，确定继续吗？",
+  "@auth_deleteCurrentAccountConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "auth_switchFailedDeletePrompt": "无法登录该账号（可能已失效）。是否从列表中删除？",
+  "auth_switchFailedDeletePromptMissingToken": "未找到此账号的登录凭据（可能已失效）。是否从列表中删除？",
   "auth_removeAvatar": "移除头像",
   "auth_selectFromGallery": "从相册选择",
   "auth_takePhoto": "拍摄照片",
@@ -203,6 +211,7 @@
   "common_default": "默认",
   "settings_title": "设置",
   "settings_account": "账户",
+  "settings_savedAccounts": "已保存账号",
   "settings_appearance": "外观",
   "settings_style": "风格",
   "settings_font": "字体",
@@ -5943,6 +5952,7 @@
   },
   "subscriptionExpired": "已过期",
   "subscriptionGracePeriod": "宽限期",
+  "subscriptionTierNone": "无订阅",
   "settings_modelsAndInterfaces": "模型与接口",
   "promptAssistant_launcherInterfaces": "启动器接口",
   "promptAssistant_launcherInterfacesSubtitle": "提示词翻译与词库标签翻译可分别绑定服务商与模型；未配置时使用第一个启用的服务商",

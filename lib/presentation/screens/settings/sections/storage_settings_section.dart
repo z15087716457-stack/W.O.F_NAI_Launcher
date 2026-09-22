@@ -61,8 +61,6 @@ class _StorageSettingsSectionState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SettingsCard(
-          title: context.l10n.settings_dataStorage,
-          icon: Icons.storage,
           child: Column(
             children: [
               // 图片保存路径设置

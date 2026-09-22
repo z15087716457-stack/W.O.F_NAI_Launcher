@@ -32,8 +32,6 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
     final fileLoggingEnabled = localStorageService.getFileLoggingEnabled();
 
     return SettingsCard(
-      title: context.l10n.settings_about,
-      icon: Icons.info,
       child: Column(
         children: [
           ListTile(

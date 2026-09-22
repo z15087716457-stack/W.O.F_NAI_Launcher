@@ -424,6 +424,19 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String auth_deleteCurrentAccountConfirm(Object name) {
+    return '「$name」を削除してログアウトしますか?';
+  }
+
+  @override
+  String get auth_switchFailedDeletePrompt =>
+      'このアカウントにログインできませんでした（無効の可能性）。一覧から削除しますか?';
+
+  @override
+  String get auth_switchFailedDeletePromptMissingToken =>
+      'このアカウントのログイン情報が見つかりません。一覧から削除しますか?';
+
+  @override
   String get auth_removeAvatar => 'アバターを削除';
 
   @override
@@ -530,6 +543,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_account => 'アカウント';
+
+  @override
+  String get settings_savedAccounts => '保存済みアカウント';
 
   @override
   String get settings_appearance => '外観';
@@ -9951,6 +9967,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get subscriptionGracePeriod => '猶予期間';
+
+  @override
+  String get subscriptionTierNone => '未契約';
 
   @override
   String get settings_modelsAndInterfaces => 'モデルとAPI';

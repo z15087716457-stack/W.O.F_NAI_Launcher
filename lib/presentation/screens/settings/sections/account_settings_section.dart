@@ -7,11 +7,13 @@ import '../../../providers/account_manager_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/settings/account_detail_tile.dart';
 import '../../../widgets/settings/account_profile_sheet.dart';
+import '../../../widgets/settings/saved_accounts_section.dart';
 import '../widgets/settings_card.dart';
 
 /// 账户设置板块
 ///
-/// 显示当前账户信息，支持编辑账户资料和登录功能。
+/// 分为两个区块：当前账号卡片（点击编辑资料）和已保存账号列表
+/// （切换、删除、添加账号）。
 class AccountSettingsSection extends ConsumerStatefulWidget {
   const AccountSettingsSection({super.key});
 
@@ -24,17 +26,21 @@ class _AccountSettingsSectionState
     extends ConsumerState<AccountSettingsSection> {
   @override
   Widget build(BuildContext context) {
-    return SettingsCard(
-      title: context.l10n.settings_account,
-      icon: Icons.person,
-      // 移除默认padding，因为AccountDetailTile内部已有margin
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-        child: AccountDetailTile(
-          onEdit: () => _showProfileSheet(context),
-          onLogin: () => _navigateToLogin(context),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsCard(
+          // 移除默认padding，因为AccountDetailTile内部已有margin
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+            child: AccountDetailTile(
+              onEdit: () => _showProfileSheet(context),
+              onLogin: () => _navigateToLogin(context),
+            ),
+          ),
         ),
-      ),
+        const SavedAccountsSection(),
+      ],
     );
   }
 

@@ -892,6 +892,24 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to delete \"{name}\"? This cannot be undone.'**
   String auth_deleteAccountConfirm(Object name);
 
+  /// No description provided for @auth_deleteCurrentAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\" and sign out?'**
+  String auth_deleteCurrentAccountConfirm(Object name);
+
+  /// No description provided for @auth_switchFailedDeletePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t sign in to this account (it may be invalid). Remove it from the list?'**
+  String get auth_switchFailedDeletePrompt;
+
+  /// No description provided for @auth_switchFailedDeletePromptMissingToken.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved credentials for this account. Remove it from the list?'**
+  String get auth_switchFailedDeletePromptMissingToken;
+
   /// No description provided for @auth_removeAvatar.
   ///
   /// In en, this message translates to:
@@ -1089,6 +1107,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account'**
   String get settings_account;
+
+  /// No description provided for @settings_savedAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Accounts'**
+  String get settings_savedAccounts;
 
   /// No description provided for @settings_appearance.
   ///
@@ -17768,6 +17792,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grace period'**
   String get subscriptionGracePeriod;
+
+  /// No description provided for @subscriptionTierNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No subscription'**
+  String get subscriptionTierNone;
 
   /// No description provided for @settings_modelsAndInterfaces.
   ///

@@ -21,8 +21,6 @@ class _ShortcutSettingsSectionState
   @override
   Widget build(BuildContext context) {
     return SettingsCard(
-      title: context.l10n.shortcut_settings_title,
-      icon: Icons.keyboard,
       child: ListTile(
         leading: const Icon(Icons.keyboard_outlined),
         title: Text(context.l10n.shortcut_settings_title),

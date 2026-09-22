@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/account_manager_provider.dart';
-import '../../widgets/common/app_toast.dart';
 import '../../../data/models/auth/saved_account.dart';
 import 'account_avatar.dart';
+import 'account_switch_helper.dart';
 import 'subscription_expiry_text.dart';
 
 /// 账号快速切换组件
@@ -46,96 +46,16 @@ class AccountQuickSwitch extends ConsumerWidget {
                           .accountApiEndpoints[account.id]
                           ?.isThirdParty ??
                       false,
-                  onTap: () async {
-                    // 切换到该账号
-                    final token = await ref
-                        .read(accountManagerNotifierProvider.notifier)
-                        .getAccountToken(account.id);
-
-                    if (token == null) {
-                      if (context.mounted) {
-                        AppToast.error(
-                          context,
-                          context.l10n.auth_tokenNotFound,
-                        );
-                      }
-                      return;
-                    }
-
-                    final success = await ref
-                        .read(authNotifierProvider.notifier)
-                        .switchAccount(
-                          account.id,
-                          token,
-                          displayName: account.displayName,
-                          accountType: account.accountType,
-                        );
-
-                    if (!success && context.mounted) {
-                      final authState = ref.read(authNotifierProvider);
-                      String errorMessage;
-
-                      switch (authState.errorCode) {
-                        case AuthErrorCode.networkTimeout:
-                          errorMessage = context.l10n.auth_error_networkTimeout;
-                          break;
-                        case AuthErrorCode.networkError:
-                          errorMessage = context.l10n.auth_error_networkError;
-                          break;
-                        case AuthErrorCode.authFailed:
-                        case AuthErrorCode.tokenInvalid:
-                          errorMessage = context.l10n.auth_error_authFailed;
-                          break;
-                        case AuthErrorCode.credentialsLoginUnavailable:
-                          errorMessage = context
-                              .l10n
-                              .auth_error_credentialsLoginUnavailable;
-                          break;
-                        case AuthErrorCode.serverError:
-                          errorMessage = context.l10n.auth_error_serverError;
-                          break;
-                        default:
-                          errorMessage = context.l10n.auth_loginFailed;
-                      }
-
-                      AppToast.error(context, errorMessage);
-                    }
-                  },
-                  onDelete: () async {
-                    // 删除账号
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text(context.l10n.auth_deleteAccount),
-                        content: Text(
-                          context.l10n.auth_deleteAccountConfirm(
-                            account.displayName,
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: Text(context.l10n.common_cancel),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            style: TextButton.styleFrom(
-                              foregroundColor: Theme.of(
-                                context,
-                              ).colorScheme.error,
-                            ),
-                            child: Text(context.l10n.common_delete),
-                          ),
-                        ],
-                      ),
-                    );
-
-                    if (confirm == true) {
-                      await ref
-                          .read(accountManagerNotifierProvider.notifier)
-                          .removeAccount(account.id);
-                    }
-                  },
+                  onTap: () => AccountSwitchHelper.switchToAccount(
+                    context,
+                    ref,
+                    account,
+                  ),
+                  onDelete: () => AccountSwitchHelper.removeAccount(
+                    context,
+                    ref,
+                    account,
+                  ),
                 ),
               ),
             ],

@@ -7,17 +7,15 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../data/models/auth/saved_account.dart';
 import '../../providers/account_manager_provider.dart';
-import '../../providers/auth_mode_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/layout_state_provider.dart';
 import '../../providers/update_provider.dart';
 import '../../router/app_branch.dart';
 import '../auth/account_avatar.dart';
-import '../auth/login_form_container.dart';
+import '../auth/account_switch_helper.dart';
+import '../auth/add_account_dialog.dart';
 import '../auth/subscription_expiry_text.dart';
 import '../prompt/pills/dna_icon.dart';
-
-import '../common/app_toast.dart';
 
 class MainNavRail extends ConsumerWidget {
   static const double collapsedWidth = 60;
@@ -1062,107 +1060,12 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
   Future<void> _switchAccount(String accountId) async {
     final accounts = widget.ref.read(accountManagerNotifierProvider).accounts;
     final account = accounts.firstWhere((a) => a.id == accountId);
-
-    // 获取 Token
-    final token = await widget.ref
-        .read(accountManagerNotifierProvider.notifier)
-        .getAccountToken(account.id);
-
-    if (token == null) {
-      if (mounted) {
-        AppToast.info(context, context.l10n.auth_tokenNotFound);
-      }
-      return;
-    }
-
-    // 使用 switchAccount（根据账号类型选择验证方式）
-    final success = await widget.ref
-        .read(authNotifierProvider.notifier)
-        .switchAccount(
-          account.id,
-          token,
-          displayName: account.displayName,
-          accountType: account.accountType,
-        );
-
-    if (success) {
-      // 更新最后使用时间
-      widget.ref
-          .read(accountManagerNotifierProvider.notifier)
-          .updateLastUsed(account.id);
-    } else {
-      // 切换失败，显示错误提示并停留在当前账号
-      if (mounted) {
-        final authState = widget.ref.read(authNotifierProvider);
-        String errorMessage;
-
-        switch (authState.errorCode) {
-          case AuthErrorCode.networkTimeout:
-            errorMessage = context.l10n.auth_error_networkTimeout;
-            break;
-          case AuthErrorCode.networkError:
-            errorMessage = context.l10n.auth_error_networkError;
-            break;
-          case AuthErrorCode.authFailed:
-          case AuthErrorCode.tokenInvalid:
-            errorMessage = context.l10n.auth_error_authFailed;
-            break;
-          case AuthErrorCode.credentialsLoginUnavailable:
-            errorMessage = context.l10n.auth_error_credentialsLoginUnavailable;
-            break;
-          case AuthErrorCode.serverError:
-            errorMessage = context.l10n.auth_error_serverError;
-            break;
-          default:
-            errorMessage = context.l10n.auth_loginFailed;
-        }
-
-        AppToast.error(context, errorMessage);
-      }
-    }
+    if (!mounted) return;
+    await AccountSwitchHelper.switchToAccount(context, widget.ref, account);
   }
 
   /// 显示添加账号对话框
   void _showAddAccountDialog(BuildContext context) {
-    // 重置 AuthMode 为当前默认登录模式
-    widget.ref.read(authModeNotifierProvider.notifier).reset();
-    // 立即清除之前的登录错误状态（无延迟）
-    widget.ref.read(authNotifierProvider.notifier).clearError(delayMs: 0);
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => Dialog(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 450),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 标题栏
-                Row(
-                  children: [
-                    const SizedBox(width: 16),
-                    Text(
-                      context.l10n.auth_addAccount,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(dialogContext),
-                    ),
-                  ],
-                ),
-                // 登录表单容器（支持账号密码和Token两种方式）
-                LoginFormContainer(
-                  onLoginSuccess: () => Navigator.pop(dialogContext),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+    AddAccountDialog.show(context, widget.ref);
   }
 }

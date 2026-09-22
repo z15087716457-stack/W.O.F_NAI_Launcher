@@ -420,6 +420,18 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String auth_deleteCurrentAccountConfirm(Object name) {
+    return '将删除账号 \"$name\" 并退出登录，确定继续吗？';
+  }
+
+  @override
+  String get auth_switchFailedDeletePrompt => '无法登录该账号（可能已失效）。是否从列表中删除？';
+
+  @override
+  String get auth_switchFailedDeletePromptMissingToken =>
+      '未找到此账号的登录凭据（可能已失效）。是否从列表中删除？';
+
+  @override
   String get auth_removeAvatar => '移除头像';
 
   @override
@@ -521,6 +533,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_account => '账户';
+
+  @override
+  String get settings_savedAccounts => '已保存账号';
 
   @override
   String get settings_appearance => '外观';
@@ -9819,6 +9834,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get subscriptionGracePeriod => '宽限期';
+
+  @override
+  String get subscriptionTierNone => '无订阅';
 
   @override
   String get settings_modelsAndInterfaces => '模型与接口';

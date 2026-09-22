@@ -40,8 +40,6 @@ class _AppearanceSettingsSectionState
     final simpleOutputViewer = ref.watch(simpleOutputViewerNotifierProvider);
 
     return SettingsCard(
-      title: context.l10n.settings_appearance,
-      icon: Icons.palette_outlined,
       child: Column(
         children: [
           // 主题选择

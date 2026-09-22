@@ -169,6 +169,14 @@
       "name": {}
     }
   },
+  "auth_deleteCurrentAccountConfirm": "「{name}」を削除してログアウトしますか?",
+  "@auth_deleteCurrentAccountConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "auth_switchFailedDeletePrompt": "このアカウントにログインできませんでした（無効の可能性）。一覧から削除しますか?",
+  "auth_switchFailedDeletePromptMissingToken": "このアカウントのログイン情報が見つかりません。一覧から削除しますか?",
   "auth_removeAvatar": "アバターを削除",
   "auth_selectFromGallery": "ギャラリーから選択",
   "auth_takePhoto": "写真を撮る",
@@ -207,6 +215,7 @@
   "common_default": "デフォルト",
   "settings_title": "設定",
   "settings_account": "アカウント",
+  "settings_savedAccounts": "保存済みアカウント",
   "settings_appearance": "外観",
   "settings_style": "スタイル",
   "settings_font": "フォント",
@@ -5943,6 +5952,7 @@
   },
   "subscriptionExpired": "期限切れ",
   "subscriptionGracePeriod": "猶予期間",
+  "subscriptionTierNone": "未契約",
   "settings_modelsAndInterfaces": "モデルとAPI",
   "promptAssistant_launcherInterfaces": "ランチャーインターフェース",
   "promptAssistant_launcherInterfacesSubtitle": "プロンプト翻訳とタグ翻訳にプロバイダーとモデルを個別に割り当てます。未設定の場合は最初の有効なプロバイダーを使用します",

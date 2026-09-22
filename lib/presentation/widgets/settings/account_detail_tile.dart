@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
 import '../../../core/utils/subscription_expiry_utils.dart';
@@ -143,7 +144,11 @@ class AccountDetailTile extends ConsumerWidget {
         ),
       ),
       loaded: (subscription) {
-        final tierColor = _getTierColor(subscription.tier);
+        final hasActiveTier =
+            subscription.tier > 0 && subscription.hasActiveSubscription;
+        final tierColor = hasActiveTier
+            ? _getTierColor(subscription.tier)
+            : Colors.grey;
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -155,7 +160,9 @@ class AccountDetailTile extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                subscription.tierName,
+                hasActiveTier
+                    ? subscription.tierName
+                    : context.l10n.subscriptionTierNone,
                 style: TextStyle(
                   color: tierColor,
                   fontSize: 11,
@@ -178,10 +185,13 @@ class AccountDetailTile extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.diamond_outlined,
-                    size: 12,
-                    color: theme.colorScheme.tertiary,
+                  SvgPicture.asset(
+                    'assets/icons/nai-icon-anlas.svg',
+                    height: 12,
+                    colorFilter: ColorFilter.mode(
+                      theme.colorScheme.tertiary,
+                      BlendMode.srcIn,
+                    ),
                   ),
                   const SizedBox(width: 4),
                   Text(

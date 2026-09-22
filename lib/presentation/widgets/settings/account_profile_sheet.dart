@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -8,7 +6,6 @@ import '../../../core/services/avatar_service.dart';
 import '../../../core/utils/subscription_expiry_utils.dart';
 import '../../../data/models/auth/saved_account.dart';
 import '../../providers/account_manager_provider.dart';
-import '../../providers/auth_provider.dart';
 import '../auth/account_avatar.dart';
 import '../auth/subscription_expiry_text.dart';
 import '../common/app_toast.dart';
@@ -190,48 +187,17 @@ class _AccountProfileBottomSheetState
     }
   }
 
-  /// 切换到指定账号
-  Future<void> _switchToAccount(SavedAccount account) async {
-    // 关闭底部面板
-    Navigator.of(context).pop();
-
-    // 切换账号
-    final token = await ref
-        .read(accountManagerNotifierProvider.notifier)
-        .getAccountToken(account.id);
-
-    if (token == null) {
-      if (mounted) {
-        AppToast.error(context, context.l10n.auth_tokenNotFound);
-      }
-      return;
-    }
-
-    final success = await ref
-        .read(authNotifierProvider.notifier)
-        .switchAccount(
-          account.id,
-          token,
-          displayName: account.displayName,
-          accountType: account.accountType,
-        );
-
-    if (!success && mounted) {
-      AppToast.error(context, context.l10n.auth_loginFailed);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     // 使用 ref.watch 实现响应式更新
     final accounts = ref.watch(accountManagerNotifierProvider).accounts;
-    final currentAccountId = ref.watch(authNotifierProvider).accountId;
     final defaultAccount = ref
         .read(accountManagerNotifierProvider.notifier)
         .defaultAccount;
     final isDefaultAccount = defaultAccount?.id == currentAccount.id;
     final hasMultipleAccounts = accounts.length > 1;
+    // 账号切换列表已移至设置页「已保存账号」区块
 
     return Container(
       decoration: BoxDecoration(
@@ -277,16 +243,6 @@ class _AccountProfileBottomSheetState
                   // 设为默认（多账号时显示）
                   if (hasMultipleAccounts) ...[
                     _buildSetAsDefaultRow(context, isDefaultAccount),
-                    const SizedBox(height: 16),
-                  ],
-                  // 多账号列表
-                  if (hasMultipleAccounts) ...[
-                    _buildAccountsList(
-                      context,
-                      accounts,
-                      currentAccountId,
-                      currentAccount,
-                    ),
                     const SizedBox(height: 16),
                   ],
                 ],
@@ -534,194 +490,4 @@ class _AccountProfileBottomSheetState
     );
   }
 
-  /// 构建多账号列表
-  Widget _buildAccountsList(
-    BuildContext context,
-    List<SavedAccount> accounts,
-    String? currentAccountId,
-    SavedAccount currentProfileAccount,
-  ) {
-    final theme = Theme.of(context);
-
-    // 过滤掉当前正在编辑的账号
-    final otherAccounts = accounts
-        .where((account) => account.id != currentProfileAccount.id)
-        .toList();
-
-    if (otherAccounts.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 分隔线和标题
-        Divider(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
-        const SizedBox(height: 8),
-        Text(
-          context.l10n.auth_switchAccount,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: theme.colorScheme.outline,
-          ),
-        ),
-        const SizedBox(height: 12),
-        // 账号列表
-        ...otherAccounts.map(
-          (account) => _buildAccountListItem(
-            context,
-            account,
-            account.id == currentAccountId,
-            ref
-                    .read(accountManagerNotifierProvider.notifier)
-                    .defaultAccount
-                    ?.id ==
-                account.id,
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// 构建账号列表项
-  Widget _buildAccountListItem(
-    BuildContext context,
-    SavedAccount account,
-    bool isCurrent,
-    bool isDefault,
-  ) {
-    final theme = Theme.of(context);
-
-    // 检查头像文件是否存在
-    final avatarPath = account.avatarPath;
-    final hasValidAvatar =
-        avatarPath != null &&
-        avatarPath.isNotEmpty &&
-        File(avatarPath).existsSync();
-
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isCurrent
-              ? theme.colorScheme.primary
-              : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-          width: isCurrent ? 2 : 1,
-        ),
-      ),
-      child: InkWell(
-        onTap: isCurrent ? null : () => _switchToAccount(account),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              // 头像（FEAT-30：微圆角方形 + 品牌蓝底白字）
-              if (hasValidAvatar)
-                ClipRRect(
-                  borderRadius: avatarBorderRadius(40),
-                  child: Image.file(
-                    File(avatarPath),
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                  ),
-                )
-              else
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: kAvatarBackground,
-                    borderRadius: avatarBorderRadius(40),
-                  ),
-                  child: Center(
-                    child: Text(
-                      account.displayName.isNotEmpty
-                          ? account.displayName.characters.first.toUpperCase()
-                          : '?',
-                      style: const TextStyle(
-                        color: kAvatarForeground,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              const SizedBox(width: 12),
-              // 名称和邮箱
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            account.displayName,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: isCurrent
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (isDefault) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              context.l10n.settings_defaultAccount,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onPrimaryContainer,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      account.email,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.outline,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (account.subscriptionExpiresAt != null)
-                      SubscriptionExpiryText(
-                        expiresAt: account.subscriptionExpiresAt!,
-                      ),
-                  ],
-                ),
-              ),
-              // 当前账号标识或切换按钮
-              if (isCurrent)
-                Icon(
-                  Icons.check_circle,
-                  color: theme.colorScheme.primary,
-                  size: 20,
-                )
-              else
-                Icon(
-                  Icons.swap_horiz,
-                  color: theme.colorScheme.outline,
-                  size: 20,
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

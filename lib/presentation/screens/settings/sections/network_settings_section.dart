@@ -56,8 +56,6 @@ class NetworkSettingsSectionState
     }
 
     return SettingsCard(
-      title: l10n.settings_network,
-      icon: Icons.network_check,
       child: Column(
         children: [
           // 启用代理开关

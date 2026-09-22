@@ -170,8 +170,6 @@ class _PrivacySettingsSectionState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SettingsCard(
-          title: context.l10n.settings_privacySharing,
-          icon: Icons.shield_outlined,
           child: Column(
             children: [
               SwitchListTile(
