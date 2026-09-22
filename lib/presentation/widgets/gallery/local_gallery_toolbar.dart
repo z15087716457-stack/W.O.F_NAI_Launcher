@@ -173,6 +173,39 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     ],
   };
 
+  /// 版本 → Full/Curated 变体子集（版本行悬停子菜单可选粒度）。
+  /// 子集沿用该版本 inpainting 变体；NAI 3 无变体之分故不挂子菜单。
+  static const Map<String, List<String>> _naiVersionFullIds = {
+    '4': [
+      ImageModels.animeDiffusionV4Full,
+      ImageModels.animeDiffusionV4FullInpainting,
+    ],
+    '4.5': [
+      ImageModels.animeDiffusionV45Full,
+      ImageModels.animeDiffusionV45FullInpainting,
+    ],
+    '5': [
+      ImageModels.animeDiffusionV5Full,
+      ImageModels.animeDiffusionV5FullInpainting,
+    ],
+  };
+
+  /// 见 [_naiVersionFullIds]。
+  static const Map<String, List<String>> _naiVersionCuratedIds = {
+    '4': [
+      ImageModels.animeDiffusionV4Curated,
+      ImageModels.animeDiffusionV4CuratedInpainting,
+    ],
+    '4.5': [
+      ImageModels.animeDiffusionV45Curated,
+      ImageModels.animeDiffusionV45CuratedInpainting,
+    ],
+    '5': [
+      ImageModels.animeDiffusionV5Curated,
+      ImageModels.animeDiffusionV5CuratedInpainting,
+    ],
+  };
+
   @override
   void initState() {
     super.initState();
@@ -812,10 +845,25 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     final naiOnly = state.filterCriteria.naiOnly;
 
     String? activeVersion;
+    String? activeVariantKind; // 'F' / 'C'：filterModels 精确命中某变体子集
     for (final version in _naiVersionLabels) {
       if (_isNaiVersionActive(state, version)) {
         activeVersion = version;
         break;
+      }
+    }
+    if (activeVersion == null) {
+      for (final version in _naiVersionLabels) {
+        if (_matchesModels(state, _naiVersionFullIds[version])) {
+          activeVersion = version;
+          activeVariantKind = 'F';
+          break;
+        }
+        if (_matchesModels(state, _naiVersionCuratedIds[version])) {
+          activeVersion = version;
+          activeVariantKind = 'C';
+          break;
+        }
       }
     }
     final versionActive = activeVersion != null;
@@ -932,35 +980,43 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                 offset: const Offset(0, 2),
                 padding: EdgeInsets.zero,
                 onSelected: (version) {
-                  final notifier = ref.read(
-                    localGalleryNotifierProvider.notifier,
-                  );
-                  notifier.setFilterModels(
+                  _applyNaiVersionSelection(
                     version == activeVersion
                         ? const <String>[]
                         : (_naiVersionModelIds[version] ?? const []),
+                    enableNai: !naiOnly && version != activeVersion,
                   );
-                  // 选中版本自动点亮 NAI（版本过滤是 NAI 子集）
-                  if (!naiOnly && version != activeVersion) {
-                    notifier.setNaiOnly(true);
-                    unawaited(const GalleryNaiOnlyStore().save(true));
-                  }
                 },
                 itemBuilder: (context) => [
                   for (final version in _naiVersionLabels)
                     PopupMenuItem(
                       value: version,
-                      child: Row(
-                        children: [
-                          Expanded(child: Text('NAI $version')),
-                          if (version == activeVersion)
-                            Icon(
-                              Icons.check,
-                              size: 16,
-                              color: colorScheme.primary,
+                      child: _naiVersionFullIds.containsKey(version)
+                          ? _NaiVersionRow(
+                              version: version,
+                              selected: version == activeVersion,
+                              activeVariant: version == activeVersion
+                                  ? activeVariantKind
+                                  : null,
+                              fullIds: _naiVersionFullIds[version]!,
+                              curatedIds: _naiVersionCuratedIds[version]!,
+                              onSelectVariant: (ids) =>
+                                  _applyNaiVersionSelection(
+                                    ids,
+                                    enableNai: !naiOnly,
+                                  ),
+                            )
+                          : Row(
+                              children: [
+                                Expanded(child: Text('NAI $version')),
+                                if (version == activeVersion)
+                                  Icon(
+                                    Icons.check,
+                                    size: 16,
+                                    color: colorScheme.primary,
+                                  ),
+                              ],
                             ),
-                        ],
-                      ),
                     ),
                 ],
                 child: Padding(
@@ -972,7 +1028,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                       children: [
                         Text(
                           versionActive
-                              ? 'Ver $activeVersion'
+                              ? 'Ver $activeVersion${activeVariantKind ?? ''}'
                               : l10n.localGallery_naiVersionFilterLabel,
                           style: TextStyle(
                             fontSize: 12,
@@ -1001,10 +1057,30 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
 
   /// 当前 filterModels 是否正好等于某个版本 ID 集（集合级相等；空/非空区分）。
   bool _isNaiVersionActive(LocalGalleryState state, String version) {
+    return _matchesModels(state, _naiVersionModelIds[version]);
+  }
+
+  /// filterModels 与给定 ID 集做集合级相等比较（[ids] 为 null 时不命中）。
+  bool _matchesModels(LocalGalleryState state, List<String>? ids) {
+    if (ids == null) return false;
     final current = state.filterCriteria.filterModels;
-    final ids = _naiVersionModelIds[version] ?? const <String>[];
     if (current.length != ids.length) return false;
     return setEquals(current.toSet(), ids.toSet());
+  }
+
+  /// 版本/变体菜单共用的过滤写入：写 filterModels，选中时按需点亮 NAI。
+  ///
+  /// [enableNai] 为 true 时同步打开 NAI-only（版本过滤本就是 NAI 子集）。
+  void _applyNaiVersionSelection(
+    List<String> modelIds, {
+    required bool enableNai,
+  }) {
+    final notifier = ref.read(localGalleryNotifierProvider.notifier);
+    notifier.setFilterModels(modelIds);
+    if (enableNai && modelIds.isNotEmpty) {
+      notifier.setNaiOnly(true);
+      unawaited(const GalleryNaiOnlyStore().save(true));
+    }
   }
 
   /// Build sort control: field menu (left) + direction toggle (right)
@@ -1225,5 +1301,214 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     await ref
         .read(localGalleryNotifierProvider.notifier)
         .setDateRange(result.start, result.end);
+  }
+}
+
+/// NAI 版本菜单中带变体子菜单的行（Full/Curated）。
+///
+/// 悬停 800ms 在行右缘展开变体子菜单，悬停/展开期间行尾出现 `›`；
+/// 点击行本身由外层 [PopupMenuItem] 处理 = 选该版本全部变体。
+/// 子菜单挂 root overlay 以便盖在主菜单之上。
+class _NaiVersionRow extends StatefulWidget {
+  const _NaiVersionRow({
+    required this.version,
+    required this.selected,
+    required this.activeVariant,
+    required this.fullIds,
+    required this.curatedIds,
+    required this.onSelectVariant,
+  });
+
+  /// 版本标签（如 '4.5'）。
+  final String version;
+
+  /// 该版本是否处于激活态（全量或任一子集命中）。
+  final bool selected;
+
+  /// 激活的变体（'F'/'C'）；未激活或非变体命中为 null。
+  final String? activeVariant;
+
+  /// Full / Curated 子集对应的模型 ID 集。
+  final List<String> fullIds;
+  final List<String> curatedIds;
+
+  /// 子菜单选中变体后的回调（宿主负责写过滤与关菜单收尾）。
+  final ValueChanged<List<String>> onSelectVariant;
+
+  /// 同一时刻只保留一个展开的子菜单；悬停切行时顶替旧的。
+  static VoidCallback? _closeOpenSubmenu;
+
+  @override
+  State<_NaiVersionRow> createState() => _NaiVersionRowState();
+}
+
+class _NaiVersionRowState extends State<_NaiVersionRow> {
+  static const _kHoverDelay = Duration(milliseconds: 800);
+  static const _kCloseGrace = Duration(milliseconds: 200);
+
+  Timer? _openTimer;
+  Timer? _closeTimer;
+  OverlayEntry? _submenuEntry;
+  bool _hoverRow = false;
+  bool _hoverSubmenu = false;
+
+  bool get _submenuOpen => _submenuEntry != null;
+
+  @override
+  void dispose() {
+    _openTimer?.cancel();
+    _closeTimer?.cancel();
+    _submenuEntry?.remove();
+    _submenuEntry = null;
+    if (identical(_NaiVersionRow._closeOpenSubmenu, _hideSubmenu)) {
+      _NaiVersionRow._closeOpenSubmenu = null;
+    }
+    super.dispose();
+  }
+
+  void _onRowEnter() {
+    _closeTimer?.cancel();
+    setState(() => _hoverRow = true);
+    // 已是展开状态（指针从子菜单折返行上）则不再计时
+    if (!_submenuOpen) {
+      _openTimer?.cancel();
+      _openTimer = Timer(_kHoverDelay, _showSubmenu);
+    }
+  }
+
+  void _onRowExit() {
+    _openTimer?.cancel();
+    setState(() => _hoverRow = false);
+    _scheduleClose();
+  }
+
+  void _scheduleClose() {
+    _closeTimer?.cancel();
+    _closeTimer = Timer(_kCloseGrace, () {
+      if (!_hoverRow && !_hoverSubmenu) _hideSubmenu();
+    });
+  }
+
+  void _showSubmenu() {
+    if (!mounted || _submenuOpen) return;
+    final overlay = Overlay.of(context, rootOverlay: true);
+    final rowBox = context.findRenderObject() as RenderBox?;
+    if (rowBox == null || !rowBox.hasSize) return;
+    final topRight = rowBox.localToGlobal(Offset(rowBox.size.width, 0));
+    final screenSize = MediaQuery.sizeOf(context);
+    const menuWidth = 150.0;
+    const itemHeight = 48.0;
+    const menuHeight = itemHeight * 2 + 16; // 两条目 + 菜单上下 padding
+    final dx = (topRight.dx + menuWidth > screenSize.width)
+        ? (topRight.dx - rowBox.size.width - menuWidth).clamp(
+            0.0,
+            screenSize.width,
+          )
+        : topRight.dx;
+    final dy = topRight.dy.clamp(
+      0.0,
+      (screenSize.height - menuHeight).clamp(0.0, double.infinity),
+    );
+
+    _NaiVersionRow._closeOpenSubmenu?.call();
+    _submenuEntry = OverlayEntry(
+      builder: (overlayContext) => Positioned(
+        left: dx,
+        top: dy,
+        child: MouseRegion(
+          onEnter: (_) {
+            _closeTimer?.cancel();
+            _hoverSubmenu = true;
+          },
+          onExit: (_) {
+            _hoverSubmenu = false;
+            _scheduleClose();
+          },
+          child: Material(
+            elevation: 8,
+            borderRadius: BorderRadius.circular(8),
+            clipBehavior: Clip.antiAlias,
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: menuWidth),
+              child: IntrinsicWidth(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _variantItem('Full', 'F', widget.fullIds),
+                    _variantItem('Curated', 'C', widget.curatedIds),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    overlay.insert(_submenuEntry!);
+    _NaiVersionRow._closeOpenSubmenu = _hideSubmenu;
+    setState(() {}); // 触发箭头显示
+  }
+
+  Widget _variantItem(String label, String kind, List<String> ids) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: () {
+        widget.onSelectVariant(ids);
+        _hideSubmenu();
+        // 关掉整个版本菜单（子菜单不返回值，主菜单无 onSelected）
+        Navigator.of(context).maybePop();
+      },
+      child: Container(
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            Expanded(child: Text(label, style: const TextStyle(fontSize: 14))),
+            if (widget.activeVariant == kind)
+              Icon(Icons.check, size: 16, color: colorScheme.primary),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _hideSubmenu() {
+    _submenuEntry?.remove();
+    _submenuEntry = null;
+    if (identical(_NaiVersionRow._closeOpenSubmenu, _hideSubmenu)) {
+      _NaiVersionRow._closeOpenSubmenu = null;
+    }
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final showArrow = _hoverRow || _submenuOpen;
+    return MouseRegion(
+      onEnter: (_) => _onRowEnter(),
+      onExit: (_) => _onRowExit(),
+      child: SizedBox(
+        height: 48,
+        child: Row(
+          children: [
+            Expanded(child: Text('NAI ${widget.version}')),
+            if (widget.selected)
+              Icon(Icons.check, size: 16, color: colorScheme.primary),
+            if (showArrow)
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Icon(
+                  Icons.chevron_right,
+                  size: 16,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
