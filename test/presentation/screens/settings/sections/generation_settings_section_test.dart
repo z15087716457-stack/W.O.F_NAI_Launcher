@@ -27,15 +27,30 @@ void main() {
     );
     await tester.pump();
 
-    final tileFinder = find.widgetWithText(SwitchListTile, '滚轮调整提示词权重');
+    final tileFinder = find.widgetWithText(ListTile, '滚轮调整提示词权重');
     expect(tileFinder, findsOneWidget);
-    expect(tester.widget<SwitchListTile>(tileFinder).value, isTrue);
-    expect(find.textContaining('不再触发页面滚动'), findsOneWidget);
+    expect(
+      tester.widget<Switch>(find.descendant(
+        of: tileFinder,
+        matching: find.byType(Switch),
+      )).value,
+      isTrue,
+    );
+    expect(find.textContaining('按住所选修饰键'), findsOneWidget);
 
-    await tester.tap(find.text('滚轮调整提示词权重'));
+    await tester.tap(find.descendant(
+      of: tileFinder,
+      matching: find.byType(Switch),
+    ));
     await tester.pump();
 
-    expect(tester.widget<SwitchListTile>(tileFinder).value, isFalse);
+    expect(
+      tester.widget<Switch>(find.descendant(
+        of: tileFinder,
+        matching: find.byType(Switch),
+      )).value,
+      isFalse,
+    );
     expect(storage.values[StorageKeys.enablePromptWeightScroll], isFalse);
   });
 
@@ -61,14 +76,68 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.text('滚轮调整提示词权重'));
+    final tileFinder = find.widgetWithText(ListTile, '滚轮调整提示词权重');
+    await tester.tap(find.descendant(
+      of: tileFinder,
+      matching: find.byType(Switch),
+    ));
     await tester.pump();
     await tester.pump();
 
-    final tileFinder = find.widgetWithText(SwitchListTile, '滚轮调整提示词权重');
-    expect(tester.widget<SwitchListTile>(tileFinder).value, isTrue);
+    expect(
+      tester.widget<Switch>(find.descendant(
+        of: tileFinder,
+        matching: find.byType(Switch),
+      )).value,
+      isTrue,
+    );
     expect(find.textContaining('保存失败'), findsOneWidget);
     expect(storage.values, isEmpty);
+  });
+
+  testWidgets('修饰键下拉默认 Alt 且持久化，开关关闭时置灰', (tester) async {
+    final storage = _MemoryLocalStorageService();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
+        child: const MaterialApp(
+          locale: Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SingleChildScrollView(child: GenerationSettingsSection()),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final tileFinder = find.widgetWithText(ListTile, '滚轮调整提示词权重');
+    final dropdownFinder = find.descendant(
+      of: tileFinder,
+      matching: find.byType(DropdownButton<String>),
+    );
+    expect(dropdownFinder, findsOneWidget);
+    expect(tester.widget<DropdownButton<String>>(dropdownFinder).value, 'alt');
+
+    // 选 Ctrl → 持久化
+    await tester.tap(dropdownFinder);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ctrl').last);
+    await tester.pumpAndSettle();
+    expect(storage.values[StorageKeys.promptWeightScrollModifier], 'ctrl');
+
+    // 关掉开关 → 下拉置灰
+    await tester.tap(find.descendant(
+      of: tileFinder,
+      matching: find.byType(Switch),
+    ));
+    await tester.pump();
+    expect(
+      tester.widget<DropdownButton<String>>(dropdownFinder).onChanged,
+      isNull,
+    );
   });
 
   testWidgets('按任务流展示输入、提醒两个小节', (tester) async {

@@ -5176,7 +5176,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_enablePromptWeightScrollSubtitle =>
-      'プロンプトを選択している間は、ホイールで重みだけを調整し、ページスクロールなどの操作は行いません。';
+      'プロンプトを選択している間、選択した修飾キー＋ホイールで重みを調整します。修飾キーを押さないホイールは通常どおりスクロールします。';
+
+  @override
+  String get settings_weightScrollModifierAlt => 'Alt';
+
+  @override
+  String get settings_weightScrollModifierCtrl => 'Ctrl';
+
+  @override
+  String get settings_weightScrollModifierShift => 'Shift';
+
+  @override
+  String get settings_weightScrollModifierNone => 'なし（従来動作）';
 
   @override
   String get unit_seconds => '秒';

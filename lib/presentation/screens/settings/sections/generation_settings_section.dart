@@ -48,25 +48,70 @@ class _GenerationSettingsSectionState
       child: Column(
         children: [
           SettingsSectionLabel(l10n.settings_generationInputSection),
-          SwitchListTile(
-            secondary: const Icon(Icons.mouse_outlined),
+          ListTile(
+            leading: const Icon(Icons.mouse_outlined),
             title: Text(l10n.settings_enablePromptWeightScroll),
             subtitle: Text(l10n.settings_enablePromptWeightScrollSubtitle),
-            value: promptWeightScrollEnabled,
-            onChanged: (value) async {
-              final messenger = ScaffoldMessenger.maybeOf(context);
-              try {
-                await ref
-                    .read(promptWeightScrollSettingsProvider.notifier)
-                    .set(value);
-              } catch (error) {
-                messenger?.showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.globalSettings_saveFailed('$error')),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: ref.watch(
+                      promptWeightScrollModifierSettingsProvider,
+                    ),
+                    onChanged: promptWeightScrollEnabled
+                        ? (value) {
+                            if (value == null) return;
+                            ref
+                                .read(
+                                  promptWeightScrollModifierSettingsProvider
+                                      .notifier,
+                                )
+                                .set(value);
+                          }
+                        : null,
+                    items: [
+                      DropdownMenuItem(
+                        value: 'alt',
+                        child: Text(l10n.settings_weightScrollModifierAlt),
+                      ),
+                      DropdownMenuItem(
+                        value: 'ctrl',
+                        child: Text(l10n.settings_weightScrollModifierCtrl),
+                      ),
+                      DropdownMenuItem(
+                        value: 'shift',
+                        child: Text(l10n.settings_weightScrollModifierShift),
+                      ),
+                      DropdownMenuItem(
+                        value: 'none',
+                        child: Text(l10n.settings_weightScrollModifierNone),
+                      ),
+                    ],
                   ),
-                );
-              }
-            },
+                ),
+                Switch(
+                  value: promptWeightScrollEnabled,
+                  onChanged: (value) async {
+                    final messenger = ScaffoldMessenger.maybeOf(context);
+                    try {
+                      await ref
+                          .read(promptWeightScrollSettingsProvider.notifier)
+                          .set(value);
+                    } catch (error) {
+                      messenger?.showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            l10n.globalSettings_saveFailed('$error'),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
           SettingsSectionLabel(l10n.settings_generationFeedbackSection),
           SwitchListTile(

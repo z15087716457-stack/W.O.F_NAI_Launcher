@@ -516,6 +516,20 @@ class LocalStorageService {
     await setSetting(StorageKeys.enablePromptWeightScroll, value);
   }
 
+  /// 获取滚轮调权重所需修饰键（默认 alt；none = 旧行为选中即吞滚轮）
+  String getPromptWeightScrollModifier() {
+    return getSetting<String>(
+          StorageKeys.promptWeightScrollModifier,
+          defaultValue: 'alt',
+        ) ??
+        'alt';
+  }
+
+  /// 保存滚轮调权重修饰键（none/alt/ctrl/shift）
+  Future<void> setPromptWeightScrollModifier(String value) async {
+    await setSetting(StorageKeys.promptWeightScrollModifier, value);
+  }
+
   // ==================== Cooccurrence Recommendation ====================
 
   /// 获取是否启用共现推荐 (默认开启)

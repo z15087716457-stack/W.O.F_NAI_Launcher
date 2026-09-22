@@ -82,6 +82,25 @@ final sdSyntaxAutoConvertSettingsProvider =
 );
 
 typedef _$SdSyntaxAutoConvertSettings = Notifier<bool>;
+String _$promptWeightScrollModifierSettingsHash() =>
+    r'e4befd89754356c92129fd2e4af2e1ed58d4f2d9';
+
+/// 滚轮调权重修饰键设置 Notifier（FEAT-61：none/alt/ctrl/shift，默认 alt）
+///
+/// Copied from [PromptWeightScrollModifierSettings].
+@ProviderFor(PromptWeightScrollModifierSettings)
+final promptWeightScrollModifierSettingsProvider =
+    NotifierProvider<PromptWeightScrollModifierSettings, String>.internal(
+  PromptWeightScrollModifierSettings.new,
+  name: r'promptWeightScrollModifierSettingsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$promptWeightScrollModifierSettingsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$PromptWeightScrollModifierSettings = Notifier<String>;
 String _$resolveAliasOnCopySettingsHash() =>
     r'9c8654b27b0c93ece1a13c7e67b9d7c5f3707142';
 

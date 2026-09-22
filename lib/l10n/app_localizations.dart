@@ -9490,8 +9490,32 @@ abstract class AppLocalizations {
   /// No description provided for @settings_enablePromptWeightScrollSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'When prompt text is selected, use the wheel only to adjust its weight and suppress other scroll actions.'**
+  /// **'When prompt text is selected, hold the chosen modifier + wheel to adjust weight; a bare wheel scrolls the page as usual.'**
   String get settings_enablePromptWeightScrollSubtitle;
+
+  /// No description provided for @settings_weightScrollModifierAlt.
+  ///
+  /// In en, this message translates to:
+  /// **'Alt'**
+  String get settings_weightScrollModifierAlt;
+
+  /// No description provided for @settings_weightScrollModifierCtrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl'**
+  String get settings_weightScrollModifierCtrl;
+
+  /// No description provided for @settings_weightScrollModifierShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift'**
+  String get settings_weightScrollModifierShift;
+
+  /// No description provided for @settings_weightScrollModifierNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None (legacy)'**
+  String get settings_weightScrollModifierNone;
 
   /// No description provided for @unit_seconds.
   ///

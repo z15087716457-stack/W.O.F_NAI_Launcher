@@ -5289,7 +5289,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_enablePromptWeightScrollSubtitle =>
-      'When prompt text is selected, use the wheel only to adjust its weight and suppress other scroll actions.';
+      'When prompt text is selected, hold the chosen modifier + wheel to adjust weight; a bare wheel scrolls the page as usual.';
+
+  @override
+  String get settings_weightScrollModifierAlt => 'Alt';
+
+  @override
+  String get settings_weightScrollModifierCtrl => 'Ctrl';
+
+  @override
+  String get settings_weightScrollModifierShift => 'Shift';
+
+  @override
+  String get settings_weightScrollModifierNone => 'None (legacy)';
 
   @override
   String get unit_seconds => 'seconds';

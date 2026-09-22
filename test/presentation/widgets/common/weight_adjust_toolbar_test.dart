@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
@@ -405,6 +406,81 @@ void main() {
     },
   );
 
+  testWidgets('modifier gate releases bare wheel and captures Alt+wheel', (
+    tester,
+  ) async {
+    final prompt = TextEditingController(text: 'cat, dog');
+    final focus = FocusNode();
+    final page = ScrollController(initialScrollOffset: 100);
+    _registerCleanup(tester, prompt, focus, page);
+
+    await _pumpHarness(
+      tester,
+      prompt: prompt,
+      focus: focus,
+      page: page,
+      enableWheelAdjustment: true,
+      wheelModifier: PromptWeightScrollModifier.alt,
+      scrollPhysics: WeightAdjustScrollPhysics(
+        controllerProvider: () => prompt,
+        modifierProvider: () => PromptWeightScrollModifier.alt,
+      ),
+    );
+    focus.requestFocus();
+    prompt.selection = const TextSelection(baseOffset: 0, extentOffset: 3);
+    await tester.pump();
+    final pageOffsetBefore = page.offset;
+
+    // 裸滚轮：放行页面滚动，不动权重
+    await _sendWheel(tester);
+    expect(prompt.text, 'cat, dog');
+    expect(page.offset, greaterThan(pageOffsetBefore));
+
+    // 按住 Alt + 滚轮：进权重分支且页面不滚
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.pump();
+    final pageOffsetAfterBare = page.offset;
+
+    await _sendWheel(tester);
+    expect(prompt.text, '0.95::cat::, dog');
+    expect(page.offset, pageOffsetAfterBare);
+
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await tester.pump();
+
+    // 松开后恢复放行
+    await _sendWheel(tester);
+    expect(prompt.text, '0.95::cat::, dog');
+    expect(page.offset, greaterThan(pageOffsetAfterBare));
+  });
+
+  test('modifier parse falls back to alt for unknown values', () {
+    expect(
+      PromptWeightScrollModifier.parse('alt'),
+      PromptWeightScrollModifier.alt,
+    );
+    expect(
+      PromptWeightScrollModifier.parse('ctrl'),
+      PromptWeightScrollModifier.ctrl,
+    );
+    expect(
+      PromptWeightScrollModifier.parse('shift'),
+      PromptWeightScrollModifier.shift,
+    );
+    expect(
+      PromptWeightScrollModifier.parse('none'),
+      PromptWeightScrollModifier.none,
+    );
+    expect(
+      PromptWeightScrollModifier.parse('bogus'),
+      PromptWeightScrollModifier.alt,
+    );
+    expect(
+      PromptWeightScrollModifier.parse(null),
+      PromptWeightScrollModifier.alt,
+    );
+  });
+
   test('exclusive prompt physics is desktop-only', () {
     expect(supportsPromptWeightScrollPhysics(TargetPlatform.windows), isTrue);
     expect(supportsPromptWeightScrollPhysics(TargetPlatform.macOS), isTrue);
@@ -571,6 +647,9 @@ void main() {
 class _WheelEnabledStorage extends LocalStorageService {
   @override
   bool getEnablePromptWeightScroll() => true;
+
+  @override
+  String getPromptWeightScrollModifier() => 'none';
 }
 
 void _registerControllerSwapCleanup(
@@ -603,6 +682,7 @@ Future<void> _pumpHarness(
   required FocusNode focus,
   required ScrollController page,
   required bool enableWheelAdjustment,
+  PromptWeightScrollModifier wheelModifier = PromptWeightScrollModifier.none,
   ScrollPhysics? scrollPhysics,
 }) {
   return tester.pumpWidget(
@@ -623,6 +703,7 @@ Future<void> _pumpHarness(
                     controller: prompt,
                     focusNode: focus,
                     enableWheelAdjustment: enableWheelAdjustment,
+                    wheelModifier: wheelModifier,
                     child: ThemedInput(
                       key: _fieldKey,
                       controller: prompt,

@@ -1138,6 +1138,9 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
   /// 构建文本输入框
   Widget _buildTextField() {
     final enableWheelAdjustment = ref.watch(promptWeightScrollSettingsProvider);
+    final wheelModifier = PromptWeightScrollModifier.parse(
+      ref.watch(promptWeightScrollModifierSettingsProvider),
+    );
     final effectiveContentPadding =
         widget.decoration?.contentPadding ??
         const EdgeInsets.symmetric(horizontal: 12, vertical: 10);
@@ -1194,6 +1197,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
               supportsPromptWeightScrollPhysics(defaultTargetPlatform)
           ? WeightAdjustScrollPhysics(
               controllerProvider: _effectiveControllerProvider,
+              modifierProvider: () => wheelModifier,
             )
           : null,
       textAlignVertical: widget.expands ? TextAlignVertical.top : null,
@@ -1227,6 +1231,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       controller: _effectiveController,
       focusNode: _effectiveFocusNode,
       enableWheelAdjustment: enableWheelAdjustment,
+      wheelModifier: wheelModifier,
       child: clipboardAwareInput,
     );
 

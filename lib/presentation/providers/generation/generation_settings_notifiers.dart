@@ -69,6 +69,21 @@ class SdSyntaxAutoConvertSettings extends _$SdSyntaxAutoConvertSettings {
   }
 }
 
+/// 滚轮调权重修饰键设置 Notifier（FEAT-61：none/alt/ctrl/shift，默认 alt）
+@Riverpod(keepAlive: true)
+class PromptWeightScrollModifierSettings
+    extends _$PromptWeightScrollModifierSettings {
+  LocalStorageService get _storage => ref.read(localStorageServiceProvider);
+
+  @override
+  String build() => _storage.getPromptWeightScrollModifier();
+
+  void set(String value) {
+    state = value;
+    _storage.setPromptWeightScrollModifier(value);
+  }
+}
+
 /// 复制时展开词库别名设置 Notifier
 @Riverpod(keepAlive: true)
 class ResolveAliasOnCopySettings extends _$ResolveAliasOnCopySettings {

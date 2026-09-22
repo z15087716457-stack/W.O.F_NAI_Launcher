@@ -1,8 +1,38 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/core/utils/nai_weight_syntax.dart';
+
+/// 滚轮调权重的修饰键门控（FEAT-61）
+///
+/// none = 旧行为（选中即吞滚轮）；其余 = 按住对应修饰键才进权重分支，
+/// 裸滚轮原样放行页面滚动。
+enum PromptWeightScrollModifier {
+  none,
+  alt,
+  ctrl,
+  shift;
+
+  static PromptWeightScrollModifier parse(String? value) {
+    return PromptWeightScrollModifier.values.asNameMap()[value] ??
+        PromptWeightScrollModifier.alt;
+  }
+
+  /// 当前是否满足滚轮拦截条件
+  bool get isWheelCaptured {
+    return switch (this) {
+      PromptWeightScrollModifier.none => true,
+      PromptWeightScrollModifier.alt =>
+        HardwareKeyboard.instance.isAltPressed,
+      PromptWeightScrollModifier.ctrl =>
+        HardwareKeyboard.instance.isControlPressed,
+      PromptWeightScrollModifier.shift =>
+        HardwareKeyboard.instance.isShiftPressed,
+    };
+  }
+}
 
 /// 权重调整工具条包装器
 ///
@@ -36,6 +66,9 @@ class WeightAdjustToolbarWrapper extends StatefulWidget {
   /// 是否允许通过鼠标滚轮调整权重
   final bool enableWheelAdjustment;
 
+  /// 滚轮拦截所需的修饰键（none = 旧行为，选中即吞滚轮）
+  final PromptWeightScrollModifier wheelModifier;
+
   const WeightAdjustToolbarWrapper({
     super.key,
     required this.child,
@@ -43,6 +76,7 @@ class WeightAdjustToolbarWrapper extends StatefulWidget {
     this.focusNode,
     this.enabled = true,
     this.enableWheelAdjustment = true,
+    this.wheelModifier = PromptWeightScrollModifier.alt,
   });
 
   @override
@@ -91,7 +125,8 @@ class _WeightAdjustToolbarWrapperState
       }
       _initFocusNode();
     }
-    if (oldWidget.enableWheelAdjustment != widget.enableWheelAdjustment) {
+    if (oldWidget.enableWheelAdjustment != widget.enableWheelAdjustment ||
+        oldWidget.wheelModifier != widget.wheelModifier) {
       final overlayEntry = _overlayEntry;
       if (overlayEntry != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -171,6 +206,7 @@ class _WeightAdjustToolbarWrapperState
         textFieldKey: _textFieldKey,
         onClose: _hideToolbar,
         enableWheelAdjustment: widget.enableWheelAdjustment,
+        wheelModifier: widget.wheelModifier,
         onInteractingChanged: (interacting) {
           _isInteractingWithToolbar = interacting;
         },
@@ -200,6 +236,7 @@ class _WeightAdjustToolbarWrapperState
         event.scrollDelta.dy == 0 ||
         !widget.enabled ||
         !widget.enableWheelAdjustment ||
+        !widget.wheelModifier.isWheelCaptured ||
         !_WeightSelectionEditor.hasSelection(widget.controller)) {
       return;
     }
@@ -368,23 +405,33 @@ class _WeightSelectionEditor {
 class WeightAdjustScrollPhysics extends ScrollPhysics {
   const WeightAdjustScrollPhysics({
     required this.controllerProvider,
+    this.modifierProvider,
     super.parent,
   });
 
   /// Resolves lazily because Flutter can retain same-type physics on rebuild.
   final ValueGetter<TextEditingController> controllerProvider;
 
+  /// 修饰键读取器（null = none，选中即吞滚轮的旧行为）
+  final ValueGetter<PromptWeightScrollModifier>? modifierProvider;
+
   @override
   WeightAdjustScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return WeightAdjustScrollPhysics(
       controllerProvider: controllerProvider,
+      modifierProvider: modifierProvider,
       parent: buildParent(ancestor),
     );
   }
 
   @override
   bool shouldAcceptUserOffset(ScrollMetrics position) {
-    if (_WeightSelectionEditor.hasSelection(controllerProvider())) {
+    // 修饰键门控：按住已配置修饰键时才拦截滚动去调权重；
+    // 未按住时原样放行，选中态也能正常翻页。
+    final modifier =
+        modifierProvider?.call() ?? PromptWeightScrollModifier.none;
+    if (modifier.isWheelCaptured &&
+        _WeightSelectionEditor.hasSelection(controllerProvider())) {
       return false;
     }
     return super.shouldAcceptUserOffset(position);
@@ -409,6 +456,7 @@ class _WeightAdjustToolbar extends StatefulWidget {
   final GlobalKey textFieldKey;
   final VoidCallback onClose;
   final bool enableWheelAdjustment;
+  final PromptWeightScrollModifier wheelModifier;
   final ValueChanged<bool> onInteractingChanged;
 
   const _WeightAdjustToolbar({
@@ -417,6 +465,7 @@ class _WeightAdjustToolbar extends StatefulWidget {
     required this.textFieldKey,
     required this.onClose,
     required this.enableWheelAdjustment,
+    required this.wheelModifier,
     required this.onInteractingChanged,
   });
 
@@ -462,7 +511,8 @@ class _WeightAdjustToolbarState extends State<_WeightAdjustToolbar> {
   void _handlePointerSignal(PointerSignalEvent event) {
     if (event is! PointerScrollEvent ||
         event.scrollDelta.dy == 0 ||
-        !widget.enableWheelAdjustment) {
+        !widget.enableWheelAdjustment ||
+        !widget.wheelModifier.isWheelCaptured) {
       return;
     }
 

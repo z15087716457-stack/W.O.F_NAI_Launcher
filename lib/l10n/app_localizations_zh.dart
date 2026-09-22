@@ -5109,7 +5109,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_enablePromptWeightScrollSubtitle =>
-      '选中提示词时，滚轮仅调整权重，不再触发页面滚动等其他滚轮操作';
+      '选中提示词时，按住所选修饰键 + 滚轮调整权重；裸滚轮照常翻页';
+
+  @override
+  String get settings_weightScrollModifierAlt => 'Alt';
+
+  @override
+  String get settings_weightScrollModifierCtrl => 'Ctrl';
+
+  @override
+  String get settings_weightScrollModifierShift => 'Shift';
+
+  @override
+  String get settings_weightScrollModifierNone => '无（旧行为）';
 
   @override
   String get unit_seconds => '秒';
