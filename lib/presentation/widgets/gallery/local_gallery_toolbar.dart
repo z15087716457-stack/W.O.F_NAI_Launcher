@@ -989,35 +989,33 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                 },
                 itemBuilder: (context) => [
                   for (final version in _naiVersionLabels)
-                    PopupMenuItem(
-                      value: version,
-                      child: _naiVersionFullIds.containsKey(version)
-                          ? _NaiVersionRow(
-                              version: version,
-                              selected: version == activeVersion,
-                              activeVariant: version == activeVersion
-                                  ? activeVariantKind
-                                  : null,
-                              fullIds: _naiVersionFullIds[version]!,
-                              curatedIds: _naiVersionCuratedIds[version]!,
-                              onSelectVariant: (ids) =>
-                                  _applyNaiVersionSelection(
-                                    ids,
-                                    enableNai: !naiOnly,
-                                  ),
-                            )
-                          : Row(
-                              children: [
-                                Expanded(child: Text('NAI $version')),
-                                if (version == activeVersion)
-                                  Icon(
-                                    Icons.check,
-                                    size: 16,
-                                    color: colorScheme.primary,
-                                  ),
-                              ],
-                            ),
-                    ),
+                    if (_naiVersionFullIds.containsKey(version))
+                      _NaiVersionEntry(
+                        version: version,
+                        selected: version == activeVersion,
+                        activeVariant: version == activeVersion
+                            ? activeVariantKind
+                            : null,
+                        fullIds: _naiVersionFullIds[version]!,
+                        curatedIds: _naiVersionCuratedIds[version]!,
+                        onSelectVariant: (ids) =>
+                            _applyNaiVersionSelection(ids, enableNai: !naiOnly),
+                      )
+                    else
+                      PopupMenuItem(
+                        value: version,
+                        child: Row(
+                          children: [
+                            Expanded(child: Text('NAI $version')),
+                            if (version == activeVersion)
+                              Icon(
+                                Icons.check,
+                                size: 16,
+                                color: colorScheme.primary,
+                              ),
+                          ],
+                        ),
+                      ),
                 ],
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -1304,20 +1302,22 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
   }
 }
 
-/// NAI 版本菜单中带变体子菜单的行（Full/Curated）。
+/// NAI 版本菜单中带变体子菜单的条目（Full/Curated）。
 ///
-/// 悬停 800ms 在行右缘展开变体子菜单，悬停/展开期间行尾出现 `›`；
-/// 点击行本身由外层 [PopupMenuItem] 处理 = 选该版本全部变体。
-/// 子菜单挂 root overlay 以便盖在主菜单之上。
-class _NaiVersionRow extends StatefulWidget {
-  const _NaiVersionRow({
+/// 继承 [PopupMenuItem] 直接复用其行高/文字/内边距/语义实现（行高随
+/// fontScale 与主菜单其他行严格一致）：点击 = 选该版本全部变体
+/// （默认 handleTap pop 返回值走外层 PopupMenuButton.onSelected）；
+/// 悬停 800ms 在条目外框右缘展开变体子菜单，悬停/展开期间行尾出现 `›`。
+/// 子菜单挂 root overlay 以便盖在主菜单之上，条目中按右缘对齐。
+class _NaiVersionEntry extends PopupMenuItem<String> {
+  const _NaiVersionEntry({
     required this.version,
     required this.selected,
     required this.activeVariant,
     required this.fullIds,
     required this.curatedIds,
     required this.onSelectVariant,
-  });
+  }) : super(value: version, child: const SizedBox.shrink());
 
   /// 版本标签（如 '4.5'）。
   final String version;
@@ -1339,16 +1339,19 @@ class _NaiVersionRow extends StatefulWidget {
   static VoidCallback? _closeOpenSubmenu;
 
   @override
-  State<_NaiVersionRow> createState() => _NaiVersionRowState();
+  PopupMenuItemState<String, _NaiVersionEntry> createState() =>
+      _NaiVersionEntryState();
 }
 
-class _NaiVersionRowState extends State<_NaiVersionRow> {
+class _NaiVersionEntryState
+    extends PopupMenuItemState<String, _NaiVersionEntry> {
   static const _kHoverDelay = Duration(milliseconds: 800);
   static const _kCloseGrace = Duration(milliseconds: 200);
 
   Timer? _openTimer;
   Timer? _closeTimer;
   OverlayEntry? _submenuEntry;
+  final LayerLink _link = LayerLink();
   bool _hoverRow = false;
   bool _hoverSubmenu = false;
 
@@ -1360,8 +1363,8 @@ class _NaiVersionRowState extends State<_NaiVersionRow> {
     _closeTimer?.cancel();
     _submenuEntry?.remove();
     _submenuEntry = null;
-    if (identical(_NaiVersionRow._closeOpenSubmenu, _hideSubmenu)) {
-      _NaiVersionRow._closeOpenSubmenu = null;
+    if (identical(_NaiVersionEntry._closeOpenSubmenu, _hideSubmenu)) {
+      _NaiVersionEntry._closeOpenSubmenu = null;
     }
     super.dispose();
   }
@@ -1392,53 +1395,66 @@ class _NaiVersionRowState extends State<_NaiVersionRow> {
   void _showSubmenu() {
     if (!mounted || _submenuOpen) return;
     final overlay = Overlay.of(context, rootOverlay: true);
-    final rowBox = context.findRenderObject() as RenderBox?;
-    if (rowBox == null || !rowBox.hasSize) return;
-    final topRight = rowBox.localToGlobal(Offset(rowBox.size.width, 0));
-    final screenSize = MediaQuery.sizeOf(context);
-    const menuWidth = 150.0;
-    const itemHeight = 48.0;
-    const menuHeight = itemHeight * 2 + 16; // 两条目 + 菜单上下 padding
-    final dx = (topRight.dx + menuWidth > screenSize.width)
-        ? (topRight.dx - rowBox.size.width - menuWidth).clamp(
-            0.0,
-            screenSize.width,
-          )
-        : topRight.dx;
-    final dy = topRight.dy.clamp(
-      0.0,
-      (screenSize.height - menuHeight).clamp(0.0, double.infinity),
-    );
+    const menuWidth = 140.0;
 
-    _NaiVersionRow._closeOpenSubmenu?.call();
+    _NaiVersionEntry._closeOpenSubmenu?.call();
+    final popupTheme = PopupMenuTheme.of(context);
+    // 子菜单纵向内边距与主菜单同源（M3 默认上下 8），跟随菜单主题
+    final menuPadding =
+        popupTheme.menuPadding?.resolve(Directionality.of(context)) ??
+        const EdgeInsets.symmetric(vertical: 8);
     _submenuEntry = OverlayEntry(
-      builder: (overlayContext) => Positioned(
-        left: dx,
-        top: dy,
-        child: MouseRegion(
-          onEnter: (_) {
-            _closeTimer?.cancel();
-            _hoverSubmenu = true;
-          },
-          onExit: (_) {
-            _hoverSubmenu = false;
-            _scheduleClose();
-          },
-          child: Material(
-            elevation: 8,
-            borderRadius: BorderRadius.circular(8),
-            clipBehavior: Clip.antiAlias,
-            color: Theme.of(context).colorScheme.surfaceContainer,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: menuWidth),
-              child: IntrinsicWidth(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _variantItem('Full', 'F', widget.fullIds),
-                    _variantItem('Curated', 'C', widget.curatedIds),
-                  ],
+      // OverlayEntry 的 child 是 overlay theatre（Stack）的直接子节点，
+      // Positioned.fill 可直接做根。
+      builder: (overlayContext) => Positioned.fill(
+        // CompositedTransformFollower 直接挂在条目渲染对象的 layer 上：
+        // 子菜单左缘贴条目右缘、顶边上移一个菜单内边距，让首项文字
+        // 与所在行文字对齐（级联菜单惯例）。
+        child: CompositedTransformFollower(
+          link: _link,
+          targetAnchor: Alignment.topRight,
+          followerAnchor: Alignment.topLeft,
+          offset: Offset(0, -menuPadding.top),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: MouseRegion(
+              onEnter: (_) {
+                _closeTimer?.cancel();
+                _hoverSubmenu = true;
+              },
+              onExit: (_) {
+                _hoverSubmenu = false;
+                _scheduleClose();
+              },
+              // 与主菜单同一套 popupMenuTheme（底色/圆角/阴影/文字样式）
+              child: Material(
+                elevation: popupTheme.elevation ?? 8,
+                shadowColor: popupTheme.shadowColor,
+                surfaceTintColor: popupTheme.surfaceTintColor,
+                shape: popupTheme.shape,
+                clipBehavior: Clip.antiAlias,
+                color:
+                    popupTheme.color ??
+                    Theme.of(context).colorScheme.surfaceContainer,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minWidth: menuWidth),
+                  child: IntrinsicWidth(
+                    child: Padding(
+                      // 与主菜单一致的纵向 menuPadding
+                      padding: menuPadding,
+                      child: Semantics(
+                        role: ui.SemanticsRole.menu,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _variantItem('Full', 'F', widget.fullIds),
+                            _variantItem('Curated', 'C', widget.curatedIds),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -1447,29 +1463,32 @@ class _NaiVersionRowState extends State<_NaiVersionRow> {
       ),
     );
     overlay.insert(_submenuEntry!);
-    _NaiVersionRow._closeOpenSubmenu = _hideSubmenu;
+    _NaiVersionEntry._closeOpenSubmenu = _hideSubmenu;
     setState(() {}); // 触发箭头显示
   }
 
+  /// 子菜单项：关菜单必须经 [context]（挂在弹窗路由内部、归属持有该路由的
+  /// 分支 Navigator）pop；子菜单 item 自己的 context 在根 Overlay 里，
+  /// PopupMenuItem 默认 handleTap 的 pop 会弹掉根 Navigator 上的页面路由
+  /// （嵌套 Navigator/StatefulShellRoute 下即整页白屏），故不能用默认实现。
   Widget _variantItem(String label, String kind, List<String> ids) {
     final colorScheme = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: () {
-        widget.onSelectVariant(ids);
+    return _VariantMenuItem(
+      onSelect: () {
+        final selectVariant = widget.onSelectVariant;
+        // 先 pop 弹窗路由（沿用 PopupMenuItem.handleTap 的顺序：pop 在前，
+        // 回调在后，避免回调里推新路由被 pop 误伤）；路由移除会连带 dispose
+        // 本条目并清掉子菜单 OverlayEntry，随后回调写过滤。
+        Navigator.of(context).pop();
         _hideSubmenu();
-        // 关掉整个版本菜单（子菜单不返回值，主菜单无 onSelected）
-        Navigator.of(context).maybePop();
+        selectVariant(ids);
       },
-      child: Container(
-        height: 48,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            Expanded(child: Text(label, style: const TextStyle(fontSize: 14))),
-            if (widget.activeVariant == kind)
-              Icon(Icons.check, size: 16, color: colorScheme.primary),
-          ],
-        ),
+      child: Row(
+        children: [
+          Expanded(child: Text(label)),
+          if (widget.activeVariant == kind)
+            Icon(Icons.check, size: 16, color: colorScheme.primary),
+        ],
       ),
     );
   }
@@ -1477,38 +1496,70 @@ class _NaiVersionRowState extends State<_NaiVersionRow> {
   void _hideSubmenu() {
     _submenuEntry?.remove();
     _submenuEntry = null;
-    if (identical(_NaiVersionRow._closeOpenSubmenu, _hideSubmenu)) {
-      _NaiVersionRow._closeOpenSubmenu = null;
+    if (identical(_NaiVersionEntry._closeOpenSubmenu, _hideSubmenu)) {
+      _NaiVersionEntry._closeOpenSubmenu = null;
     }
     if (mounted) setState(() {});
   }
 
+  /// 复用 PopupMenuItem 的 build 产出（AnimatedDefaultTextStyle +
+  /// ConstrainedBox(minHeight) + M3 内边距 + Align + InkWell + 语义），
+  /// 外层只补悬停检测的 MouseRegion。
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final showArrow = _hoverRow || _submenuOpen;
-    return MouseRegion(
-      onEnter: (_) => _onRowEnter(),
-      onExit: (_) => _onRowExit(),
-      child: SizedBox(
-        height: 48,
-        child: Row(
-          children: [
-            Expanded(child: Text('NAI ${widget.version}')),
-            if (widget.selected)
-              Icon(Icons.check, size: 16, color: colorScheme.primary),
-            if (showArrow)
-              Padding(
-                padding: const EdgeInsets.only(left: 4),
-                child: Icon(
-                  Icons.chevron_right,
-                  size: 16,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-          ],
-        ),
+    return CompositedTransformTarget(
+      link: _link,
+      child: MouseRegion(
+        onEnter: (_) => _onRowEnter(),
+        onExit: (_) => _onRowExit(),
+        child: super.build(context),
       ),
     );
+  }
+
+  /// 菜单行内容：版本名 + 选中勾 + 悬停/展开时的级联箭头。
+  @override
+  Widget buildChild() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final showArrow = _hoverRow || _submenuOpen;
+    return Row(
+      children: [
+        Expanded(child: Text('NAI ${widget.version}')),
+        if (widget.selected)
+          Icon(Icons.check, size: 16, color: colorScheme.primary),
+        if (showArrow)
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Icon(
+              Icons.chevron_right,
+              size: 16,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// 变体子菜单项：视觉与 [PopupMenuItem] 完全一致（直接继承其 build），
+/// 但点击不走默认 handleTap 的 pop——item 挂在根 Overlay 的 OverlayEntry
+/// 里，默认 pop 弹掉的是根 Navigator 上的页面路由（白屏）。改由
+/// [onSelect] 回调用条目宿主（弹窗路由内部）的 context 关菜单。
+class _VariantMenuItem extends PopupMenuItem<String> {
+  const _VariantMenuItem({required this.onSelect, required super.child});
+
+  /// 点选回调：由宿主负责关弹窗 + 写过滤。
+  final VoidCallback onSelect;
+
+  @override
+  PopupMenuItemState<String, _VariantMenuItem> createState() =>
+      _VariantMenuItemState();
+}
+
+class _VariantMenuItemState
+    extends PopupMenuItemState<String, _VariantMenuItem> {
+  @override
+  void handleTap() {
+    widget.onSelect();
   }
 }

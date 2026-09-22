@@ -137,11 +137,40 @@ void main() {
     expect(notifier.lastFilterModels, hasLength(2));
     expect(find.text('Ver 5C'), findsOneWidget);
   });
+
+  testWidgets('nested Navigator: tapping submenu item closes popup and keeps '
+      'the host page (no white screen)', (tester) async {
+    // 复刻真实应用结构：StatefulShellBranch 给画廊一个嵌套 Navigator，
+    // PopupMenuButton(useRootNavigator: false) 把弹窗路由 push 到内层
+    // Navigator；子菜单 OverlayEntry 却挂在根 Overlay——item 若用自己的
+    // context pop 会弹掉根 Navigator 上的页面路由（白屏）。修复后必须用
+    // 条目（弹窗路由内部）的 context 只关弹窗。
+    final notifier = await _pumpToolbar(tester, nestedNavigator: true);
+    await openVersionMenu(tester);
+    await hover(tester, find.text('NAI 4.5'));
+    await tester.pump(const Duration(milliseconds: 900));
+
+    await tester.tap(find.text('Full'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    // 弹窗已关、宿主页面仍存活
+    expect(find.text('NAI 4.5'), findsNothing);
+    expect(find.byType(LocalGalleryToolbar), findsOneWidget);
+    expect(
+      notifier.lastFilterModels,
+      containsAll([
+        ImageModels.animeDiffusionV45Full,
+        ImageModels.animeDiffusionV45FullInpainting,
+      ]),
+    );
+  });
 }
 
 Future<_FakeGalleryNotifier> _pumpToolbar(
   WidgetTester tester, {
   List<String> initialModels = const [],
+  bool nestedNavigator = false,
 }) async {
   tester.view.physicalSize = const Size(2400, 900);
   tester.view.devicePixelRatio = 1.0;
@@ -158,6 +187,17 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
     ),
   );
 
+  // nestedNavigator = true 时模拟 StatefulShellBranch：工具栏放进内层
+  // Navigator 的页面里，弹窗路由落在内层、子菜单 OverlayEntry 仍挂根
+  // Overlay——与实机的 Navigator 归属关系一致。
+  final Widget home = nestedNavigator
+      ? Navigator(
+          onGenerateRoute: (settings) => MaterialPageRoute<void>(
+            builder: (_) => const Scaffold(body: LocalGalleryToolbar()),
+          ),
+        )
+      : const Scaffold(body: LocalGalleryToolbar());
+
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -169,11 +209,11 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
           _FakeShortcutConfigNotifier.new,
         ),
       ],
-      child: const MaterialApp(
-        locale: Locale('zh'),
+      child: MaterialApp(
+        locale: const Locale('zh'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: LocalGalleryToolbar()),
+        home: home,
       ),
     ),
   );
