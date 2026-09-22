@@ -57,6 +57,8 @@ class StorageKeys {
   static const String canvasImageBackground = 'canvas_image_background';
   static const String canvasPinnedImages = 'canvas_pinned_images';
   static const String mainNavRailExpanded = 'main_nav_rail_expanded';
+  static const String mainNavRailCollapseMigrated =
+      'main_nav_rail_collapse_migrated';
   static const String webLeftPanelWidth = 'web_left_panel_width';
   static const String webLeftPanelExpanded = 'web_left_panel_expanded';
   static const String blockLibraryPanelExpanded =

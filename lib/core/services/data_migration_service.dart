@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -67,6 +68,7 @@ class DataMigrationService {
       result.imageMigrated = true;
 
       await _migrateAutocompleteSettings();
+      await migrateNavRailCollapse();
 
       onProgress?.call('数据迁移完成', 1.0);
       AppLogger.i('数据迁移流程完成', 'DataMigration');
@@ -109,6 +111,23 @@ class DataMigrationService {
       'Autocomplete settings migrated to unified pipeline',
       'DataMigration',
     );
+  }
+
+  /// 一次性迁移：存量用户侧栏展开态强制收回（FEAT-29）
+  ///
+  /// 默认值本就是收起；老用户曾手动展开被持久化，升级后首启重置为收起，
+  /// 只跑一次。此后手动展开照常持久化。
+  @visibleForTesting
+  Future<void> migrateNavRailCollapse() async {
+    if (!Hive.isBoxOpen(StorageKeys.settingsBox)) return;
+    final box = Hive.box(StorageKeys.settingsBox);
+    if (box.get(StorageKeys.mainNavRailCollapseMigrated, defaultValue: false)
+        as bool) {
+      return;
+    }
+    await box.put(StorageKeys.mainNavRailExpanded, false);
+    await box.put(StorageKeys.mainNavRailCollapseMigrated, true);
+    AppLogger.i('主导航栏展开态已一次性重置为收起', 'DataMigration');
   }
 
   /// 迁移图片存储
