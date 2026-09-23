@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/localization_extension.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../providers/generation/generation_settings_notifiers.dart';
 import '../../../providers/notification_settings_provider.dart';
 import '../widgets/settings_card.dart';
@@ -31,6 +32,68 @@ class _GenerationSettingsSectionState
     }
   }
 
+  /// 修饰键选择菜单
+  ///
+  /// 用 PopupMenuButton 而非 DropdownButton：后者按最宽项撑开且没法随
+  /// 选中项变窄，这里需要宽度跟随当前值。
+  Widget _buildModifierMenu(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool enabled,
+  ) {
+    final theme = Theme.of(context);
+    final current = ref.watch(promptWeightScrollModifierSettingsProvider);
+    final entries = <(String, String)>[
+      ('alt', l10n.settings_weightScrollModifierAlt),
+      ('ctrl', l10n.settings_weightScrollModifierCtrl),
+      ('shift', l10n.settings_weightScrollModifierShift),
+      ('none', l10n.settings_weightScrollModifierNone),
+    ];
+    final currentLabel = entries
+        .firstWhere((e) => e.$1 == current, orElse: () => entries.first)
+        .$2;
+    final color = enabled
+        ? theme.colorScheme.onSurface
+        : theme.colorScheme.onSurface.withValues(alpha: 0.38);
+
+    return PopupMenuButton<String>(
+      enabled: enabled,
+      position: PopupMenuPosition.under,
+      offset: const Offset(0, 2),
+      padding: EdgeInsets.zero,
+      initialValue: current,
+      onSelected: (value) => ref
+          .read(promptWeightScrollModifierSettingsProvider.notifier)
+          .set(value),
+      itemBuilder: (context) => [
+        for (final (value, label) in entries)
+          PopupMenuItem(
+            value: value,
+            child: Row(
+              children: [
+                Expanded(child: Text(label)),
+                if (value == current)
+                  Icon(Icons.check, size: 16, color: theme.colorScheme.primary),
+              ],
+            ),
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              currentLabel,
+              style: theme.textTheme.bodyMedium?.copyWith(color: color),
+            ),
+            Icon(Icons.keyboard_arrow_down, size: 15, color: color),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -55,42 +118,7 @@ class _GenerationSettingsSectionState
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: ref.watch(
-                      promptWeightScrollModifierSettingsProvider,
-                    ),
-                    onChanged: promptWeightScrollEnabled
-                        ? (value) {
-                            if (value == null) return;
-                            ref
-                                .read(
-                                  promptWeightScrollModifierSettingsProvider
-                                      .notifier,
-                                )
-                                .set(value);
-                          }
-                        : null,
-                    items: [
-                      DropdownMenuItem(
-                        value: 'alt',
-                        child: Text(l10n.settings_weightScrollModifierAlt),
-                      ),
-                      DropdownMenuItem(
-                        value: 'ctrl',
-                        child: Text(l10n.settings_weightScrollModifierCtrl),
-                      ),
-                      DropdownMenuItem(
-                        value: 'shift',
-                        child: Text(l10n.settings_weightScrollModifierShift),
-                      ),
-                      DropdownMenuItem(
-                        value: 'none',
-                        child: Text(l10n.settings_weightScrollModifierNone),
-                      ),
-                    ],
-                  ),
-                ),
+                _buildModifierMenu(context, l10n, promptWeightScrollEnabled),
                 Switch(
                   value: promptWeightScrollEnabled,
                   onChanged: (value) async {

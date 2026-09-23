@@ -30,25 +30,26 @@ void main() {
     final tileFinder = find.widgetWithText(ListTile, '滚轮调整提示词权重');
     expect(tileFinder, findsOneWidget);
     expect(
-      tester.widget<Switch>(find.descendant(
-        of: tileFinder,
-        matching: find.byType(Switch),
-      )).value,
+      tester
+          .widget<Switch>(
+            find.descendant(of: tileFinder, matching: find.byType(Switch)),
+          )
+          .value,
       isTrue,
     );
     expect(find.textContaining('按住所选修饰键'), findsOneWidget);
 
-    await tester.tap(find.descendant(
-      of: tileFinder,
-      matching: find.byType(Switch),
-    ));
+    await tester.tap(
+      find.descendant(of: tileFinder, matching: find.byType(Switch)),
+    );
     await tester.pump();
 
     expect(
-      tester.widget<Switch>(find.descendant(
-        of: tileFinder,
-        matching: find.byType(Switch),
-      )).value,
+      tester
+          .widget<Switch>(
+            find.descendant(of: tileFinder, matching: find.byType(Switch)),
+          )
+          .value,
       isFalse,
     );
     expect(storage.values[StorageKeys.enablePromptWeightScroll], isFalse);
@@ -77,25 +78,25 @@ void main() {
     await tester.pump();
 
     final tileFinder = find.widgetWithText(ListTile, '滚轮调整提示词权重');
-    await tester.tap(find.descendant(
-      of: tileFinder,
-      matching: find.byType(Switch),
-    ));
+    await tester.tap(
+      find.descendant(of: tileFinder, matching: find.byType(Switch)),
+    );
     await tester.pump();
     await tester.pump();
 
     expect(
-      tester.widget<Switch>(find.descendant(
-        of: tileFinder,
-        matching: find.byType(Switch),
-      )).value,
+      tester
+          .widget<Switch>(
+            find.descendant(of: tileFinder, matching: find.byType(Switch)),
+          )
+          .value,
       isTrue,
     );
     expect(find.textContaining('保存失败'), findsOneWidget);
     expect(storage.values, isEmpty);
   });
 
-  testWidgets('修饰键下拉默认 Alt 且持久化，开关关闭时置灰', (tester) async {
+  testWidgets('修饰键菜单默认 Alt 且持久化，开关关闭时置灰', (tester) async {
     final storage = _MemoryLocalStorageService();
 
     await tester.pumpWidget(
@@ -114,30 +115,29 @@ void main() {
     await tester.pump();
 
     final tileFinder = find.widgetWithText(ListTile, '滚轮调整提示词权重');
-    final dropdownFinder = find.descendant(
+    final menuFinder = find.descendant(
       of: tileFinder,
-      matching: find.byType(DropdownButton<String>),
+      matching: find.byType(PopupMenuButton<String>),
     );
-    expect(dropdownFinder, findsOneWidget);
-    expect(tester.widget<DropdownButton<String>>(dropdownFinder).value, 'alt');
+    expect(menuFinder, findsOneWidget);
+    expect(
+      tester.widget<PopupMenuButton<String>>(menuFinder).initialValue,
+      'alt',
+    );
 
     // 选 Ctrl → 持久化
-    await tester.tap(dropdownFinder);
+    await tester.tap(menuFinder);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ctrl').last);
     await tester.pumpAndSettle();
     expect(storage.values[StorageKeys.promptWeightScrollModifier], 'ctrl');
 
-    // 关掉开关 → 下拉置灰
-    await tester.tap(find.descendant(
-      of: tileFinder,
-      matching: find.byType(Switch),
-    ));
-    await tester.pump();
-    expect(
-      tester.widget<DropdownButton<String>>(dropdownFinder).onChanged,
-      isNull,
+    // 关掉开关 → 菜单置灰
+    await tester.tap(
+      find.descendant(of: tileFinder, matching: find.byType(Switch)),
     );
+    await tester.pump();
+    expect(tester.widget<PopupMenuButton<String>>(menuFinder).enabled, isFalse);
   });
 
   testWidgets('按任务流展示输入、提醒两个小节', (tester) async {
