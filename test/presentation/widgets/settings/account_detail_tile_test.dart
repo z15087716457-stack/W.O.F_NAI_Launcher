@@ -90,7 +90,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Paper'), findsOneWidget);
+    // Paper 没有有效订阅：等级徽章显示「无订阅」而不是等级名
+    expect(find.text('无订阅'), findsOneWidget);
+    expect(find.text('Paper'), findsNothing);
     // 不应有到期相关的徽章文案
     expect(find.textContaining('剩 '), findsNothing);
     expect(find.text('已过期'), findsNothing);
@@ -143,7 +145,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Scroll'), findsOneWidget);
+    // 订阅已过期：等级徽章显示「无订阅」，到期徽章仍提示已过期
+    expect(find.text('无订阅'), findsOneWidget);
+    expect(find.text('Scroll'), findsNothing);
     final expiredBadge = find.text('已过期');
     expect(expiredBadge, findsOneWidget);
 
@@ -173,7 +177,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Tablet'), findsOneWidget);
+    // 到期时间已过即不算有效订阅（与网页端一致），宽限期由到期徽章提示
+    expect(find.text('无订阅'), findsOneWidget);
+    expect(find.text('Tablet'), findsNothing);
     final graceBadge = find.text('宽限期');
     expect(graceBadge, findsOneWidget);
 
