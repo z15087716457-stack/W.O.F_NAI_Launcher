@@ -7,7 +7,7 @@ import '../../providers/subscription_provider.dart';
 
 /// Anlas 成本徽章
 ///
-/// 官网风格：生成按钮右端的深色小框，内容为「数字 + Anlas 图标」。
+/// 生成按钮右端的页面底色小框，内容为「数字 + Anlas 图标」。
 /// 消耗为 0 时也照常显示；余额不足时整框换警示色。
 class AnlasCostBadge extends ConsumerWidget {
   final bool isGenerating;
@@ -34,13 +34,14 @@ class AnlasCostBadge extends ConsumerWidget {
         ? ref.watch(isBalanceInsufficientProvider)
         : balance != null && balance < cost;
 
-    // 官网式固定深灰底白字（不跟主题色——奶油色主题下
-    // inverseSurface 也是浅色）；余额不足时整框换 error
-    final Color badgeColor =
-        isInsufficient ? theme.colorScheme.error : const Color(0xFF2B2B33);
-    const Color badgeTextColor = Colors.white;
-    final Color iconColor =
-        isInsufficient ? theme.colorScheme.onError : badgeTextColor;
+    // 页面底色小框：浅色白底黑字黑钻石、深色炭黑底白字白钻石，
+    // 数字与图标同色；余额不足时整框换 error
+    final Color badgeColor = isInsufficient
+        ? theme.colorScheme.error
+        : theme.colorScheme.surface;
+    final Color inkColor = isInsufficient
+        ? theme.colorScheme.onError
+        : theme.colorScheme.onSurface;
 
     return Container(
       margin: const EdgeInsets.only(left: 8),
@@ -54,8 +55,8 @@ class AnlasCostBadge extends ConsumerWidget {
         children: [
           Text(
             '$cost',
-            style: const TextStyle(
-              color: badgeTextColor,
+            style: TextStyle(
+              color: inkColor,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
@@ -64,10 +65,7 @@ class AnlasCostBadge extends ConsumerWidget {
           SvgPicture.asset(
             'assets/icons/nai-icon-anlas.svg',
             height: 12,
-            // 常态保留金钻原色；不足时随文字一起换警示色保持整体一致
-            colorFilter: isInsufficient
-                ? ColorFilter.mode(iconColor, BlendMode.srcIn)
-                : null,
+            colorFilter: ColorFilter.mode(inkColor, BlendMode.srcIn),
           ),
         ],
       ),

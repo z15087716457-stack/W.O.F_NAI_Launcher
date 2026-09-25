@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
+import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/widgets/common/anlas_cost_badge.dart';
 
 void main() {
@@ -38,7 +40,7 @@ void main() {
         ),
       );
 
-      // 官网风格：消耗为 0 也照常显示深色小框
+      // 消耗为 0 也照常显示小框
       expect(find.byType(Container), findsOneWidget);
       expect(find.text('0'), findsOneWidget);
     });
@@ -83,26 +85,38 @@ void main() {
       expect(decoration.color, equals(Colors.red));
     });
 
-    testWidgets('shows dark chip regardless of theme when balance sufficient', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            isFreeGenerationProvider.overrideWith((ref) => false),
-            estimatedCostProvider.overrideWith((ref) => 5),
-            isBalanceInsufficientProvider.overrideWith((ref) => false),
-          ],
-          child: const MaterialApp(
-            home: Scaffold(body: AnlasCostBadge(isGenerating: false)),
+    for (final dark in [false, true]) {
+      testWidgets('badge takes page colours in ${dark ? 'dark' : 'light'}', (
+        tester,
+      ) async {
+        final theme = dark ? GeistTheme.dark : GeistTheme.light;
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              isFreeGenerationProvider.overrideWith((ref) => false),
+              estimatedCostProvider.overrideWith((ref) => 5),
+              isBalanceInsufficientProvider.overrideWith((ref) => false),
+            ],
+            child: MaterialApp(
+              theme: theme,
+              home: const Scaffold(body: AnlasCostBadge(isGenerating: false)),
+            ),
           ),
-        ),
-      );
+        );
 
-      final container = tester.widget<Container>(find.byType(Container));
-      final decoration = container.decoration as BoxDecoration;
-      // 官网式固定深灰底，不随主题 inverseSurface 浮动
-      expect(decoration.color, equals(const Color(0xFF2B2B33)));
-    });
+        final container = tester.widget<Container>(find.byType(Container));
+        final decoration = container.decoration as BoxDecoration;
+        // 浅色白底黑字黑钻石，深色炭黑底白字白钻石
+        expect(decoration.color, theme.colorScheme.surface);
+        expect(
+          tester.widget<Text>(find.text('5')).style?.color,
+          theme.colorScheme.onSurface,
+        );
+        expect(
+          tester.widget<SvgPicture>(find.byType(SvgPicture)).colorFilter,
+          ColorFilter.mode(theme.colorScheme.onSurface, BlendMode.srcIn),
+        );
+      });
+    }
   });
 }

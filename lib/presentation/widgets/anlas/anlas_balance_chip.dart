@@ -204,18 +204,17 @@ class AnlasBalanceChip extends ConsumerWidget {
   }
 
   Widget _buildIcon(ThemeData theme, bool? isWarning) {
-    // 官方 Anlas 图标（SVG 素材自带金色填充）；余额不足时按警示色重着色
+    // 官方 Anlas 图标不用素材金色：浅色黑、深色白（onSurface），
+    // 与生成按钮徽章一致；余额不足时按警示色重着色
     return SvgPicture.asset(
       'assets/icons/nai-icon-anlas.svg',
       height: compact ? 13 : 14,
-      colorFilter: isWarning == true
-          ? ColorFilter.mode(theme.colorScheme.error, BlendMode.srcIn)
-          : theme.brightness == Brightness.light
-          ? ColorFilter.mode(
-              theme.colorScheme.onSurfaceVariant,
-              BlendMode.srcIn,
-            )
-          : null,
+      colorFilter: ColorFilter.mode(
+        isWarning == true
+            ? theme.colorScheme.error
+            : theme.colorScheme.onSurface,
+        BlendMode.srcIn,
+      ),
     );
   }
 }
