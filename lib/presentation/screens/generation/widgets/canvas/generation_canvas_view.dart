@@ -1184,7 +1184,7 @@ class _InflightSlotTileState extends State<_InflightSlotTile>
               if (preview != null && preview.isNotEmpty)
                 buildStreamPreviewImage(
                   bytes: preview,
-                  placement: widget.slot.focusedPreviewPlacement,
+                  placement: widget.slot.inpaintPreviewPlacement,
                 ),
               Container(
                 color: theme.colorScheme.surface.withValues(

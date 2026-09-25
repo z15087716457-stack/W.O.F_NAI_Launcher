@@ -256,7 +256,7 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
     required int totalImages,
     required double progress,
     Uint8List? streamPreview,
-    FocusedStreamPreviewPlacement? focusedPreviewPlacement,
+    InpaintStreamPreviewPlacement? inpaintPreviewPlacement,
   }) {
     return SelectableImageCard(
       isGenerating: true,
@@ -264,7 +264,7 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
       totalImages: totalImages,
       progress: progress,
       streamPreview: streamPreview,
-      focusedPreviewPlacement: focusedPreviewPlacement,
+      inpaintPreviewPlacement: inpaintPreviewPlacement,
       imageWidth: imageWidth,
       imageHeight: imageHeight,
       enableSelection: false,
@@ -367,7 +367,7 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
                 totalImages: slot.totalImages,
                 progress: slot.progress,
                 streamPreview: slot.previewBytes,
-                focusedPreviewPlacement: slot.focusedPreviewPlacement,
+                inpaintPreviewPlacement: slot.inpaintPreviewPlacement,
               );
             }
 
@@ -378,7 +378,7 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
               totalImages: state.totalImages,
               progress: state.progress,
               streamPreview: state.streamPreview,
-              focusedPreviewPlacement: state.focusedPreviewPlacement,
+              inpaintPreviewPlacement: state.inpaintPreviewPlacement,
             );
           },
         );
@@ -406,8 +406,8 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
         totalImages: slot?.totalImages ?? state.totalImages,
         progress: slot?.progress ?? state.progress,
         streamPreview: slot?.previewBytes ?? state.streamPreview,
-        focusedPreviewPlacement:
-            slot?.focusedPreviewPlacement ?? state.focusedPreviewPlacement,
+        inpaintPreviewPlacement:
+            slot?.inpaintPreviewPlacement ?? state.inpaintPreviewPlacement,
       ),
     );
   }

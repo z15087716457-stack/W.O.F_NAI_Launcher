@@ -1495,17 +1495,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_enhanceMax => 'Max✨';
 
   @override
-  String get img2img_focusedInpaint => 'Focused インペイント';
-
-  @override
-  String get img2img_focusedInpaintEnabledHint =>
-      '有効になりました。インペイント エディターの左上のコントロールからフォーカス エリアと最小コンテキスト エリアを調整します。';
-
-  @override
-  String get img2img_focusedInpaintDisabledHint =>
-      '通常のインペイントがデフォルトです。Focused インペイントを使うには、インペイントエディター左上のコントロールから有効にし、フォーカスエリアを描画します。';
-
-  @override
   String get img2img_disabled => '無効';
 
   @override
@@ -1650,9 +1639,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get editor_clearLayer => 'クリアレイヤー';
-
-  @override
-  String get editor_clearSelection => '選択をクリア';
 
   @override
   String get editor_resetView => 'ビューをリセット';
@@ -2041,28 +2027,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get editor_focusInactiveHint =>
-      'ボタンをクリックしてフォーカス モードに入り、フォーカス エリアを描画してマスクをペイントします。';
-
-  @override
-  String get editor_focusReadyHint =>
-      'フォーカス エリアが選択されました。ブラシを使用してマスクの編集を続けることができます。';
-
-  @override
-  String get editor_focusNeedsSelectionHint =>
-      '最初にフォーカス エリアを描画し、次にブラシに切り替えてマスクをペイントします。';
-
-  @override
-  String get editor_focusSelection => '選択';
-
-  @override
-  String get editor_focusBrush => 'ブラシ';
-
-  @override
-  String get editor_focusContextHint =>
-      '外側の長方形は Focused インペイントに送信される領域です。内側の長方形が主な再描画領域です。その間の帯が最小コンテキスト領域です。';
-
-  @override
   String get editor_compressionTitle => '出力解像度';
 
   @override
@@ -2098,21 +2062,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get editor_compressionUnavailable =>
       '作業キャンバスはすでに最低圧縮段階より小さいため、解像度を下げられません。';
-
-  @override
-  String get editor_compressionFocusLimited =>
-      '現在の Focused Inpaint 選択範囲では、これ以上の解像度がリクエスト面積上限を超えるため、スライダー上限を制限しています。';
-
-  @override
-  String editor_focusRequestSummary(
-    int outerWidth,
-    int outerHeight,
-    int requestWidth,
-    int requestHeight,
-    int cost,
-  ) {
-    return '外側の切り抜き $outerWidth×$outerHeight、送信サイズ $requestWidth×$requestHeight、推定 $cost Anlas。';
-  }
 
   @override
   String editor_unsupportedImageFormat(Object extension) {
@@ -2162,11 +2111,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String editor_layerName(Object count) {
     return 'レイヤー $count';
-  }
-
-  @override
-  String editor_focusMinimumContextArea(Object value) {
-    return '最小コンテキスト領域: $value';
   }
 
   @override
@@ -10282,15 +10226,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get img2img_hideAdvanced => '詳細設定を隠す';
-
-  @override
-  String get editor_focusAreaTitle => 'フォーカス範囲';
-
-  @override
-  String get editor_focusedInpaint => 'フォーカスインペイント';
-
-  @override
-  String get editor_outpaintFocusConflict => 'アウトペイントとフォーカスインペイントは同時に使用できません。';
 
   @override
   String promptToken_usage(int used, int limit) {

@@ -292,7 +292,6 @@ class VirtualOutpaintMaskPainter extends CustomPainter {
 class SelectionPainter extends CustomPainter {
   final EditorState state;
   final Animation<double> animation;
-  final bool suppressSelectionOverlay;
 
   /// 缓存的选区路径
   static Path? _cachedPath;
@@ -302,18 +301,11 @@ class SelectionPainter extends CustomPainter {
 
   /// 使用 renderNotifier 和 animation 的合并监听
   /// 只有渲染相关变化才会触发重绘
-  SelectionPainter({
-    required this.state,
-    required this.animation,
-    this.suppressSelectionOverlay = false,
-  }) : super(repaint: Listenable.merge([state.renderNotifier, animation]));
+  SelectionPainter({required this.state, required this.animation})
+    : super(repaint: Listenable.merge([state.renderNotifier, animation]));
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (suppressSelectionOverlay) {
-      return;
-    }
-
     final controller = state.canvasController;
     final canvasSize = state.canvasSize;
 

@@ -3,19 +3,16 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/services/anlas_calculator.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/inpaint_mask_utils.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../data/models/gallery/nai_image_metadata.dart';
-import '../../data/models/image/image_params.dart';
 import '../../data/models/image/image_operation.dart';
 import '../../data/models/metadata/metadata_import_options.dart';
 import '../../data/services/image_metadata_service.dart';
 import '../providers/generation/image_workflow_controller.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/krita/krita_bridge_notifier.dart';
-import '../providers/subscription_provider.dart';
 import '../screens/director_tools/director_tools_screen.dart';
 import '../utils/metadata_import_applier.dart';
 import '../utils/prompt_preset_import_utils.dart';
@@ -44,7 +41,6 @@ class ImageWorkflowLauncher {
     required ImageEditorMode mode,
   }) async {
     final workflowNotifier = ref.read(imageWorkflowControllerProvider.notifier);
-    final workflow = ref.read(imageWorkflowControllerProvider);
 
     final params = ref.read(generationParamsNotifierProvider);
     final editingCurrentSource = identical(params.sourceImage, imageBytes);
@@ -53,39 +49,6 @@ class ImageWorkflowLauncher {
       initialImage: imageBytes,
       existingMask: mode == ImageEditorMode.inpaint && editingCurrentSource
           ? params.maskImage
-          : null,
-      existingFocusRect: mode == ImageEditorMode.inpaint && editingCurrentSource
-          ? workflow.focusedSelectionRect
-          : null,
-      initialMinimumContextMegaPixels: mode == ImageEditorMode.inpaint
-          ? workflow.minimumContextMegaPixels
-          : 88.0,
-      initialFocusedInpaintEnabled: mode == ImageEditorMode.inpaint
-          ? workflow.focusedInpaintEnabled
-          : false,
-      focusedInpaintCostConfig: mode == ImageEditorMode.inpaint
-          ? ImageEditorFocusedInpaintCostConfig(
-              model: params.model,
-              steps: params.steps,
-              batchCount: params.nSamples,
-              batchSize: ref.read(imagesPerRequestProvider),
-              smea: params.effectiveSmea,
-              smeaDyn: params.effectiveSmeaDyn,
-              strength: params.inpaintStrength,
-              subscriptionTier:
-                  ref.read(subscriptionNotifierProvider).subscription?.isOpus ==
-                      true
-                  ? AnlasCalculator.opusTier
-                  : 0,
-              extraPerSampleCost:
-                  AnlasCalculator.resolvePreciseReferenceExtraCost(params),
-              opusUsageExhausted:
-                  ref
-                      .read(subscriptionNotifierProvider)
-                      .subscription
-                      ?.isOpusUsageExhausted ??
-                  false,
-            )
           : null,
       showMaskExport: mode == ImageEditorMode.inpaint,
       mode: mode,
@@ -113,10 +76,7 @@ class ImageWorkflowLauncher {
           'sourceWasNormalized=${result.sourceWasNormalized}, '
           'outputWidth=${result.outputWidth}, '
           'outputHeight=${result.outputHeight}, '
-          'compressionApplied=${result.compressionApplied}, '
-          'focusRect=${result.focusAreaRect}, '
-          'minContext=${result.minimumContextMegaPixels.toStringAsFixed(2)}, '
-          'focusedEnabled=${result.focusedInpaintEnabled}',
+          'compressionApplied=${result.compressionApplied}',
       'ImageWorkflow',
     );
 
@@ -159,10 +119,6 @@ class ImageWorkflowLauncher {
           ? result.outpaintSourceHeight
           : result.inpaintSourceHeight,
       maskImage: effectiveMask,
-      focusedInpaintEnabled: result.focusedInpaintEnabled,
-      focusedSelectionRect: result.focusAreaRect,
-      minimumContextMegaPixels: result.minimumContextMegaPixels,
-      forceDisableFocusedInpaint: result.hasOutpaintChanges,
       sourceIsOutpaint: result.hasOutpaintChanges,
       useExactSourceDimensions: result.compressionApplied,
     );

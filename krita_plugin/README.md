@@ -72,7 +72,7 @@ For a quick local summary after real GUI validation, add only the manual
 evidence flags that were actually confirmed:
 
 ```powershell
-python krita_plugin/acceptance_report.py --evidence-plugin-manager-visible --evidence-docker-visible --evidence-launcher-settings-toggle --evidence-auto-discovery-connect --evidence-auth-failure-safe --evidence-img2img-e2e --evidence-inpaint-e2e --evidence-focused-inpaint-e2e --evidence-krita-cancel-e2e --evidence-no-selection-behavior --evidence-large-canvas-rejected --evidence-disconnect-generation-safe --evidence-preview-throttle --evidence-result-layer-aligned --evidence-launcher-history-recorded --evidence-novelai-token-launcher-only --evidence-bridge-rejects-unauthenticated --evidence-gallery-send-e2e --evidence-disabled-bridge-existing-flows --output-json build/krita_acceptance/acceptance.json --output-markdown build/krita_acceptance/acceptance.md
+python krita_plugin/acceptance_report.py --evidence-plugin-manager-visible --evidence-docker-visible --evidence-launcher-settings-toggle --evidence-auto-discovery-connect --evidence-auth-failure-safe --evidence-img2img-e2e --evidence-inpaint-e2e --evidence-krita-cancel-e2e --evidence-no-selection-behavior --evidence-large-canvas-rejected --evidence-disconnect-generation-safe --evidence-preview-throttle --evidence-result-layer-aligned --evidence-launcher-history-recorded --evidence-novelai-token-launcher-only --evidence-bridge-rejects-unauthenticated --evidence-gallery-send-e2e --evidence-disabled-bridge-existing-flows --output-json build/krita_acceptance/acceptance.json --output-markdown build/krita_acceptance/acceptance.md
 ```
 
 When using the report as a hard release gate, copy
@@ -150,9 +150,8 @@ python krita_plugin/install_plugin.py --restore --apply --backup-dir build/krita
 3. Use `Get Params` to copy the current Launcher prompt/settings into Krita.
 4. Click `Img2Img` to send the visible document projection to Launcher.
 5. For inpaint, create a non-empty Krita selection; the docker always uses that selection as the repaint mask.
-6. If `Focused Inpaint` is enabled, keep the active Krita selection on the inner repaint area. The selected inner frame is also the actual repaint mask. `Minimum Context` automatically derives the outer focus/context frame. The docker updates the frame text immediately as the active selection or `Minimum Context` changes, then debounces the temporary `NAI Focus Preview` layer write so Krita selection dragging stays responsive. Disabling `Focused Inpaint` removes that double-frame preview.
-7. Before exporting a new request, bridge-owned preview layers are removed from the visible projection so temporary `NAI Preview` or `NAI Focus Preview` overlays are not sent back into Launcher as source pixels. Focused Inpaint restores the live focus frame after the clean canvas export.
-8. Progress previews update the `NAI Preview` layer at most every 350 ms when NovelAI streaming returns preview frames; the last progress preview is kept visible when the final result arrives. Final images appear in the Docker result area; single-click a result to preview it, double-click it to insert it as a new layer when dimensions match the active document, otherwise it opens as a new document. Use `Delete` to remove selected results or `Clear` to empty the result area.
+6. Before exporting a new request, bridge-owned preview layers are removed from the visible projection so temporary `NAI Preview` overlays are not sent back into Launcher as source pixels.
+7. Progress previews update the `NAI Preview` layer at most every 350 ms when NovelAI streaming returns preview frames; the last progress preview is kept visible when the final result arrives. Final images appear in the Docker result area; single-click a result to preview it, double-click it to insert it as a new layer when dimensions match the active document, otherwise it opens as a new document. Use `Delete` to remove selected results or `Clear` to empty the result area.
 
 The V1 bridge rejects very small canvases and canvases larger than `4096x4096` instead of silently rescaling the image or mask.
 If Launcher disconnects during a request, the docker clears the preview layer,
@@ -171,10 +170,8 @@ Diagnostics gate can pass.
 For runtime supporting evidence inside the real Krita process, open Krita's
 Scripter, run `tool/krita_bridge_runtime_probe.py`, and inspect
 `%APPDATA%/nai-launcher/krita-bridge-runtime-probe.json`. The probe creates a
-small document and verifies the live Focused Inpaint frame behavior, including
-the absent manual preview button, `Minimum Context` updates, selection changes,
-clean source export without baking in `NAI Focus Preview`, and removal of the
-double-frame layer when Focused Inpaint is disabled.
+small document, instantiates the docker, records the connection status, and
+runs the Diagnostics checks.
 
 ## Troubleshooting
 

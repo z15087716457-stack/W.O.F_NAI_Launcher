@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -383,89 +382,6 @@ void main() {
     });
 
     test(
-      'focused inpaint settings should expose web-aligned defaults and updates',
-      () {
-        final controller = container.read(
-          imageWorkflowControllerProvider.notifier,
-        );
-
-        var workflow = container.read(imageWorkflowControllerProvider);
-        expect(workflow.focusedInpaintEnabled, isFalse);
-        expect(workflow.minimumContextMegaPixels, equals(88.0));
-
-        controller.setFocusedSelectionRect(
-          const Rect.fromLTWH(100, 120, 200, 220),
-        );
-        controller.setFocusedInpaintEnabled(false);
-        controller.setMinimumContextMegaPixels(120);
-
-        workflow = container.read(imageWorkflowControllerProvider);
-        expect(workflow.focusedInpaintEnabled, isFalse);
-        expect(workflow.minimumContextMegaPixels, equals(120.0));
-        expect(workflow.focusedSelectionRect, isNull);
-      },
-    );
-
-    test(
-      'focused inpaint minimum context should clamp to safe lower bound',
-      () {
-        final controller = container.read(
-          imageWorkflowControllerProvider.notifier,
-        );
-        final paramsNotifier = container.read(
-          generationParamsNotifierProvider.notifier,
-        );
-
-        controller.setMinimumContextMegaPixels(0);
-
-        var workflow = container.read(imageWorkflowControllerProvider);
-        expect(workflow.minimumContextMegaPixels, equals(16.0));
-
-        paramsNotifier.setSourceImage(
-          _validImageBytes(width: 768, height: 1024),
-        );
-        controller.applyInpaintEditorResult(
-          maskImage: Uint8List.fromList([9, 9, 9]),
-          focusedInpaintEnabled: true,
-          focusedSelectionRect: const Rect.fromLTWH(120, 160, 240, 320),
-          minimumContextMegaPixels: 0,
-        );
-
-        workflow = container.read(imageWorkflowControllerProvider);
-        expect(workflow.minimumContextMegaPixels, equals(16.0));
-      },
-    );
-
-    test(
-      'focused selection rect should persist and clear with workflow resets',
-      () {
-        final controller = container.read(
-          imageWorkflowControllerProvider.notifier,
-        );
-        final paramsNotifier = container.read(
-          generationParamsNotifierProvider.notifier,
-        );
-
-        paramsNotifier.setSourceImage(
-          _validImageBytes(width: 768, height: 1024),
-        );
-        controller.setFocusedSelectionRect(
-          const Rect.fromLTWH(120, 160, 240, 320),
-        );
-
-        var workflow = container.read(imageWorkflowControllerProvider);
-        expect(
-          workflow.focusedSelectionRect,
-          const Rect.fromLTWH(120, 160, 240, 320),
-        );
-
-        controller.enterBaseMode(clearMask: true);
-        workflow = container.read(imageWorkflowControllerProvider);
-        expect(workflow.focusedSelectionRect, isNull);
-      },
-    );
-
-    test(
       'enterInpaintMode should sync request size to source image dimensions',
       () {
         final controller = container.read(
@@ -492,7 +408,7 @@ void main() {
     );
 
     test(
-      'applyInpaintEditorResult should commit focused inpaint state in one coherent transition',
+      'applyInpaintEditorResult should commit inpaint state in one coherent transition',
       () {
         final controller = container.read(
           imageWorkflowControllerProvider.notifier,
@@ -513,9 +429,6 @@ void main() {
 
         controller.applyInpaintEditorResult(
           maskImage: Uint8List.fromList([9, 9, 9]),
-          focusedInpaintEnabled: true,
-          focusedSelectionRect: const Rect.fromLTWH(120, 160, 360, 420),
-          minimumContextMegaPixels: 120,
         );
 
         final workflow = container.read(imageWorkflowControllerProvider);
@@ -523,12 +436,6 @@ void main() {
 
         expect(workflow.mode, ImageWorkflowMode.inpaint);
         expect(workflow.isPanelExpanded, isTrue);
-        expect(workflow.focusedInpaintEnabled, isTrue);
-        expect(
-          workflow.focusedSelectionRect,
-          const Rect.fromLTWH(120, 160, 360, 420),
-        );
-        expect(workflow.minimumContextMegaPixels, equals(120.0));
         expect(params.width, equals(896));
         expect(params.height, equals(1344));
         expect(params.maskImage, isNotNull);
@@ -557,10 +464,6 @@ void main() {
           sourceWidth: 1472,
           sourceHeight: 1664,
           maskImage: expandedMask,
-          focusedInpaintEnabled: true,
-          focusedSelectionRect: const Rect.fromLTWH(64, 96, 512, 640),
-          minimumContextMegaPixels: 88,
-          forceDisableFocusedInpaint: true,
         );
 
         final workflow = container.read(imageWorkflowControllerProvider);
@@ -572,8 +475,6 @@ void main() {
         expect(workflow.sourceImageWidth, equals(1472));
         expect(workflow.sourceImageHeight, equals(1664));
         expect(workflow.isOutpaint, isTrue);
-        expect(workflow.focusedInpaintEnabled, isFalse);
-        expect(workflow.focusedSelectionRect, isNull);
         expect(params.sourceImage, same(expandedSource));
         expect(params.maskImage, same(expandedMask));
         expect(params.width, equals(1472));
@@ -598,9 +499,6 @@ void main() {
           sourceHeight: 900,
           sourceIsOutpaint: false,
           maskImage: workingMask,
-          focusedInpaintEnabled: true,
-          focusedSelectionRect: const Rect.fromLTWH(120, 160, 900, 500),
-          minimumContextMegaPixels: 88,
         );
 
         final workflow = container.read(imageWorkflowControllerProvider);
@@ -614,7 +512,6 @@ void main() {
         expect(params.sourceImage, same(workingSource));
         expect((params.width, params.height), (1472, 896));
         expect(params.isOutpaint, isFalse);
-        expect(workflow.focusedInpaintEnabled, isTrue);
       },
     );
 
@@ -634,9 +531,6 @@ void main() {
           sourceIsOutpaint: false,
           useExactSourceDimensions: true,
           maskImage: mask,
-          focusedInpaintEnabled: true,
-          focusedSelectionRect: const Rect.fromLTWH(128, 64, 640, 320),
-          minimumContextMegaPixels: 88,
         );
 
         final workflow = container.read(imageWorkflowControllerProvider);
@@ -649,7 +543,6 @@ void main() {
         expect((params.width, params.height), (1344, 640));
         expect(params.sourceImage, same(source));
         expect(params.maskImage, same(mask));
-        expect(workflow.focusedInpaintEnabled, isTrue);
       },
     );
 
@@ -665,9 +558,6 @@ void main() {
             sourceImage: _validImageBytes(width: 1472, height: 1664),
             sourceWidth: 1472,
             maskImage: _validMaskBytes(width: 1472, height: 1664),
-            focusedInpaintEnabled: false,
-            focusedSelectionRect: null,
-            minimumContextMegaPixels: 88,
           ),
           throwsA(
             isA<ArgumentError>().having(
@@ -693,9 +583,6 @@ void main() {
             sourceWidth: 1473,
             sourceHeight: 1664,
             maskImage: _validMaskBytes(width: 1472, height: 1664),
-            focusedInpaintEnabled: false,
-            focusedSelectionRect: null,
-            minimumContextMegaPixels: 88,
           ),
           throwsA(
             isA<ArgumentError>().having(

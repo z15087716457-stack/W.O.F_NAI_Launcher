@@ -688,9 +688,6 @@
   "img2img_enhanceMagnitude": "Magnitude",
   "img2img_enhanceUpscaleAmount": "Upscale Amount",
   "img2img_enhanceMax": "Max✨",
-  "img2img_focusedInpaint": "Focused Inpainting",
-  "img2img_focusedInpaintEnabledHint": "Enabled. Adjust the focus area and Minimum Context Area from the top-left control in the inpaint editor.",
-  "img2img_focusedInpaintDisabledHint": "Regular inpaint is the default. To use Focused Inpaint, enable it from the top-left control in the inpaint editor and draw a focus area.",
   "img2img_disabled": "Disabled",
   "img2img_novelAiCloudUpscale": "NovelAI cloud upscale (fixed 4x)",
   "img2img_comfyuiEnableHint": "Enable and connect ComfyUI in Settings > ComfyUI first.",
@@ -752,7 +749,6 @@
   "editor_undo": "Undo",
   "editor_redo": "Redo",
   "editor_clearLayer": "Clear Layer",
-  "editor_clearSelection": "Clear Selection",
   "editor_resetView": "Reset View",
   "editor_zoom": "Zoom",
   "editor_toolBrush": "Brush",
@@ -937,12 +933,6 @@
       "error": {}
     }
   },
-  "editor_focusInactiveHint": "Click the button to enter focus mode, then draw a focus area and paint the mask.",
-  "editor_focusReadyHint": "Focus area selected. You can continue editing the mask with the brush.",
-  "editor_focusNeedsSelectionHint": "Draw a focus area first, then switch to the brush and paint the mask.",
-  "editor_focusSelection": "Selection",
-  "editor_focusBrush": "Brush",
-  "editor_focusContextHint": "The outer rectangle is the area sent to Focused Inpaint. The inner rectangle is the main repaint area. The band between them is the Minimum Context Area.",
   "editor_compressionTitle": "Output resolution",
   "editor_compressionTooltip": "Choose output resolution",
   "editor_compressionUncompressed": "Original work resolution; no compression will be applied.",
@@ -982,27 +972,6 @@
     }
   },
   "editor_compressionUnavailable": "This work canvas is already below the lowest compression step.",
-  "editor_compressionFocusLimited": "Higher resolutions are unavailable because the current Focused Inpaint selection would exceed the request area limit.",
-  "editor_focusRequestSummary": "Outer crop {outerWidth}×{outerHeight}, request {requestWidth}×{requestHeight}, estimated {cost} Anlas.",
-  "@editor_focusRequestSummary": {
-    "placeholders": {
-      "outerWidth": {
-        "type": "int"
-      },
-      "outerHeight": {
-        "type": "int"
-      },
-      "requestWidth": {
-        "type": "int"
-      },
-      "requestHeight": {
-        "type": "int"
-      },
-      "cost": {
-        "type": "int"
-      }
-    }
-  },
   "editor_unsupportedImageFormat": "Unsupported file format: .{extension}\nPlease choose an image file (PNG, JPG, WEBP, etc.)",
   "@editor_unsupportedImageFormat": {
     "placeholders": {
@@ -1039,12 +1008,6 @@
   "@editor_layerName": {
     "placeholders": {
       "count": {}
-    }
-  },
-  "editor_focusMinimumContextArea": "Minimum Context Area: {value}",
-  "@editor_focusMinimumContextArea": {
-    "placeholders": {
-      "value": {}
     }
   },
   "editor_canvasSizeTitle": "Canvas Size",
@@ -6052,9 +6015,6 @@
   "img2img_enhanceAction": "Enhance!",
   "img2img_showAdvanced": "Show Advanced",
   "img2img_hideAdvanced": "Hide Advanced",
-  "editor_focusAreaTitle": "Focused Area",
-  "editor_focusedInpaint": "Focused Inpaint",
-  "editor_outpaintFocusConflict": "Outpaint cannot be used together with Focused Inpaint.",
   "promptToken_usage": "Token usage: {used} / {limit}",
   "promptToken_promptShare": "This prompt: {used} tokens; total usage: {total} / {limit}",
   "@promptToken_usage": {

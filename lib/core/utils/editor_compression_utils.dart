@@ -1,10 +1,8 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:image/image.dart' as img;
 
-import 'focused_inpaint_utils.dart';
 import 'isolate_pool.dart';
 import 'pica_lanczos_resizer.dart';
 
@@ -41,11 +39,10 @@ class EditorCompressionPlan {
     required this.minimumTarget,
   });
 
-  static const int dimensionStep = FocusedInpaintUtils.dimensionStep;
-  static const int normalAreaPixels =
-      FocusedInpaintUtils.focusedTargetAreaPixels;
-  static const int maxRequestAreaPixels =
-      FocusedInpaintUtils.maxRequestAreaPixels;
+  // NovelAI web build ae6a6aa-production, verified 2026-07-16.
+  static const int dimensionStep = 64;
+  static const int normalAreaPixels = 1048576;
+  static const int maxRequestAreaPixels = 3145728;
 
   final int workWidth;
   final int workHeight;
@@ -80,9 +77,6 @@ class EditorCompressionPlan {
   static EditorCompressionPlan resolve({
     required int workWidth,
     required int workHeight,
-    required bool focusedInpaintEnabled,
-    Rect? focusedSelectionRect,
-    double minimumContextPixels = 88,
   }) {
     if (workWidth <= 0 || workHeight <= 0) {
       throw ArgumentError('Editor work dimensions must be positive.');
@@ -129,7 +123,7 @@ class EditorCompressionPlan {
         longSide: longSide,
         aspect: aspect,
         maxShortSide: workShortSide,
-        maxAreaInclusive: focusedInpaintEnabled ? null : maxRequestAreaPixels,
+        maxAreaInclusive: maxRequestAreaPixels,
       );
       if (shortSide == null) continue;
       final target = _fromOriented((
@@ -137,32 +131,13 @@ class EditorCompressionPlan {
         shortSide: shortSide,
       ), isLandscape: isLandscape);
       if (target.width > workWidth || target.height > workHeight) continue;
-      if (!focusedInpaintEnabled && target.area > maxRequestAreaPixels) {
-        continue;
-      }
-      if (!_isFocusedTargetLegal(
-        target,
-        workWidth: workWidth,
-        workHeight: workHeight,
-        focusedInpaintEnabled: focusedInpaintEnabled,
-        focusedSelectionRect: focusedSelectionRect,
-        minimumContextPixels: minimumContextPixels,
-      )) {
+      if (target.area > maxRequestAreaPixels) {
         continue;
       }
       candidates.add(target);
     }
 
-    if (_isFocusedTargetLegal(
-      original,
-      workWidth: workWidth,
-      workHeight: workHeight,
-      focusedInpaintEnabled: focusedInpaintEnabled,
-      focusedSelectionRect: focusedSelectionRect,
-      minimumContextPixels: minimumContextPixels,
-    )) {
-      candidates.add(original);
-    }
+    candidates.add(original);
 
     final unique = <String, EditorCompressionTarget>{};
     for (final candidate in candidates) {
@@ -182,8 +157,7 @@ class EditorCompressionPlan {
       });
 
     if (targets.isEmpty) {
-      // The minimum target is always small enough for Focused Inpaint, but
-      // retain a deterministic fallback for malformed extreme dimensions.
+      // Retain a deterministic fallback for malformed extreme dimensions.
       targets.add(original);
     }
 
@@ -194,33 +168,6 @@ class EditorCompressionPlan {
       normalTarget: normalTarget,
       minimumTarget: minimumTarget,
     );
-  }
-
-  static bool _isFocusedTargetLegal(
-    EditorCompressionTarget target, {
-    required int workWidth,
-    required int workHeight,
-    required bool focusedInpaintEnabled,
-    required Rect? focusedSelectionRect,
-    required double minimumContextPixels,
-  }) {
-    if (!focusedInpaintEnabled || focusedSelectionRect == null) {
-      return true;
-    }
-    final projected = EditorCompressionGeometry.projectRect(
-      focusedSelectionRect,
-      sourceWidth: workWidth,
-      sourceHeight: workHeight,
-      targetWidth: target.width,
-      targetHeight: target.height,
-    );
-    final geometry = FocusedInpaintUtils.resolveGeometryForSelection(
-      sourceWidth: target.width,
-      sourceHeight: target.height,
-      selectionRect: projected,
-      minContextMegaPixels: minimumContextPixels,
-    );
-    return geometry != null && !geometry.wasDynamicallyConstrained;
   }
 
   static ({int longSide, int shortSide}) _resolveNormalOriented(double aspect) {
@@ -335,118 +282,6 @@ class EditorCompressionPlan {
     return math.max(
       dimensionStep,
       ((value + dimensionStep - 1) ~/ dimensionStep) * dimensionStep,
-    );
-  }
-}
-
-class EditorCompressionGeometry {
-  const EditorCompressionGeometry._();
-
-  static Rect projectRect(
-    Rect rect, {
-    required int sourceWidth,
-    required int sourceHeight,
-    required int targetWidth,
-    required int targetHeight,
-  }) {
-    final scaleX = targetWidth / sourceWidth;
-    final scaleY = targetHeight / sourceHeight;
-    return Rect.fromLTRB(
-      rect.left * scaleX,
-      rect.top * scaleY,
-      rect.right * scaleX,
-      rect.bottom * scaleY,
-    );
-  }
-
-  static Offset projectOffset(
-    Offset offset, {
-    required int sourceWidth,
-    required int sourceHeight,
-    required int targetWidth,
-    required int targetHeight,
-  }) {
-    return Offset(
-      offset.dx * targetWidth / sourceWidth,
-      offset.dy * targetHeight / sourceHeight,
-    );
-  }
-
-  static FocusedInpaintGeometry? resolveFocusedGeometry({
-    required int workWidth,
-    required int workHeight,
-    required EditorCompressionTarget target,
-    required Rect workSelectionRect,
-    required double minimumContextPixels,
-  }) {
-    final targetSelection = projectRect(
-      workSelectionRect,
-      sourceWidth: workWidth,
-      sourceHeight: workHeight,
-      targetWidth: target.width,
-      targetHeight: target.height,
-    );
-    return FocusedInpaintUtils.resolveGeometryForSelection(
-      sourceWidth: target.width,
-      sourceHeight: target.height,
-      selectionRect: targetSelection,
-      minContextMegaPixels: minimumContextPixels,
-    );
-  }
-
-  static Rect? constrainWorkSelection({
-    required int workWidth,
-    required int workHeight,
-    required EditorCompressionTarget target,
-    required Rect workSelectionRect,
-    required double minimumContextPixels,
-    Offset? fixedWorkAnchor,
-  }) {
-    final targetSelection = projectRect(
-      workSelectionRect,
-      sourceWidth: workWidth,
-      sourceHeight: workHeight,
-      targetWidth: target.width,
-      targetHeight: target.height,
-    );
-    final targetAnchor = fixedWorkAnchor == null
-        ? null
-        : projectOffset(
-            fixedWorkAnchor,
-            sourceWidth: workWidth,
-            sourceHeight: workHeight,
-            targetWidth: target.width,
-            targetHeight: target.height,
-          );
-    final constrained = FocusedInpaintUtils.constrainSelectionRect(
-      sourceWidth: target.width,
-      sourceHeight: target.height,
-      selectionRect: targetSelection,
-      minContextMegaPixels: minimumContextPixels,
-      fixedAnchor: targetAnchor,
-    );
-    if (constrained == null) return null;
-    return projectRect(
-      constrained,
-      sourceWidth: target.width,
-      sourceHeight: target.height,
-      targetWidth: workWidth,
-      targetHeight: workHeight,
-    );
-  }
-
-  static Rect projectTargetCropToWorkCanvas({
-    required FocusedInpaintCrop targetCrop,
-    required int workWidth,
-    required int workHeight,
-    required EditorCompressionTarget target,
-  }) {
-    return projectRect(
-      targetCrop.rect,
-      sourceWidth: target.width,
-      sourceHeight: target.height,
-      targetWidth: workWidth,
-      targetHeight: workHeight,
     );
   }
 }

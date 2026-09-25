@@ -17,14 +17,6 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
         target.height != _state.canvasSize.height.round();
   }
 
-  bool get _compressionIsFocusLimited {
-    final plan = _compressionPlan;
-    return _isInpaintMode &&
-        _focusedInpaintEnabled &&
-        plan != null &&
-        !plan.targets.any((target) => target.isOriginal);
-  }
-
   double get _compressionLinearScale {
     return _activeCompressionTarget.linearScaleFor(
       _state.canvasSize.width.round(),
@@ -47,9 +39,6 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
     final plan = EditorCompressionPlan.resolve(
       workWidth: workWidth,
       workHeight: workHeight,
-      focusedInpaintEnabled: _isInpaintMode && _focusedInpaintEnabled,
-      focusedSelectionRect: _focusedSelectionState.committedRect,
-      minimumContextPixels: _minimumContextMegaPixels,
     );
 
     EditorCompressionTarget target;
@@ -63,7 +52,6 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
     }
     _compressionPlan = plan;
     _compressionTarget = target;
-    _syncFocusedSelectionConstraint();
   }
 
   void _selectCompressionTarget(int index) {
@@ -72,51 +60,7 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
     final resolvedIndex = index.clamp(0, plan.targets.length - 1);
     _updateLayoutState(() {
       _compressionTarget = plan.targets[resolvedIndex];
-      _syncFocusedSelectionConstraint();
     });
-  }
-
-  Rect _projectWorkRectToCompressionTarget(Rect rect) {
-    final target = _activeCompressionTarget;
-    return EditorCompressionGeometry.projectRect(
-      rect,
-      sourceWidth: _state.canvasSize.width.round(),
-      sourceHeight: _state.canvasSize.height.round(),
-      targetWidth: target.width,
-      targetHeight: target.height,
-    );
-  }
-
-  FocusedInpaintGeometry? _resolveFocusedGeometryForWorkRect(Rect rect) {
-    return EditorCompressionGeometry.resolveFocusedGeometry(
-      workWidth: _state.canvasSize.width.round(),
-      workHeight: _state.canvasSize.height.round(),
-      target: _activeCompressionTarget,
-      workSelectionRect: rect,
-      minimumContextPixels: _minimumContextMegaPixels,
-    );
-  }
-
-  Rect? _constrainFocusedWorkRect(Rect rect, {Offset? fixedAnchor}) {
-    return EditorCompressionGeometry.constrainWorkSelection(
-      workWidth: _state.canvasSize.width.round(),
-      workHeight: _state.canvasSize.height.round(),
-      target: _activeCompressionTarget,
-      workSelectionRect: rect,
-      minimumContextPixels: _minimumContextMegaPixels,
-      fixedWorkAnchor: fixedAnchor,
-    );
-  }
-
-  Rect? _resolveFocusedContextCropOnWorkCanvas(Rect selection) {
-    final geometry = _resolveFocusedGeometryForWorkRect(selection);
-    if (geometry == null) return null;
-    return EditorCompressionGeometry.projectTargetCropToWorkCanvas(
-      targetCrop: geometry.contextCrop,
-      workWidth: _state.canvasSize.width.round(),
-      workHeight: _state.canvasSize.height.round(),
-      target: _activeCompressionTarget,
-    );
   }
 
   Future<Uint8List> _exportMergedImageAtCompressionTarget() async {
@@ -165,17 +109,6 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
       mask,
       targetWidth: target.width,
       targetHeight: target.height,
-    );
-  }
-
-  Future<Uint8List> _exportFocusedSelectionMaskAtCompressionTarget(
-    Rect workSelection,
-  ) {
-    final target = _activeCompressionTarget;
-    return InpaintMaskUtils.createRectMaskBytesAsync(
-      width: target.width,
-      height: target.height,
-      rect: _projectWorkRectToCompressionTarget(workSelection),
     );
   }
 
@@ -338,15 +271,6 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
                         context.l10n.editor_compressionUnavailable,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                    if (_compressionIsFocusLimited) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        context.l10n.editor_compressionFocusLimited,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.tertiary,
                         ),
                       ),
                     ],

@@ -2,61 +2,6 @@ part of 'image_editor_screen.dart';
 
 enum ImageEditorMode { edit, inpaint }
 
-class ImageEditorFocusedInpaintCostConfig {
-  const ImageEditorFocusedInpaintCostConfig({
-    required this.model,
-    required this.steps,
-    required this.batchCount,
-    required this.batchSize,
-    required this.smea,
-    required this.smeaDyn,
-    required this.subscriptionTier,
-    this.strength = 1.0,
-    this.extraPerSampleCost = 0,
-    this.opusUsageExhausted = false,
-  });
-
-  final String model;
-  final int steps;
-  final int batchCount;
-  final int batchSize;
-  final bool smea;
-  final bool smeaDyn;
-  final int subscriptionTier;
-  final double strength;
-  final int extraPerSampleCost;
-
-  /// Opus 免费额度是否已耗尽（V5 类模型用尽后不再免除首张费用）
-  final bool opusUsageExhausted;
-
-  int estimate({required int width, required int height}) {
-    return AnlasCalculator.calculateRequestCost(
-      opusUsageExhausted: opusUsageExhausted,
-      width: width,
-      height: height,
-      steps: steps,
-      batchCount: batchCount,
-      batchSize: batchSize,
-      smea: smea,
-      smeaDyn: smeaDyn,
-      model: model,
-      subscriptionTier: subscriptionTier,
-      strength: strength,
-      extraPerSampleCost: extraPerSampleCost,
-    );
-  }
-}
-
-class _FocusedInpaintCostEstimate {
-  const _FocusedInpaintCostEstimate({
-    required this.geometry,
-    required this.cost,
-  });
-
-  final FocusedInpaintGeometry geometry;
-  final int cost;
-}
-
 /// 图像编辑器返回结果
 class ImageEditorResult {
   /// 修改后的图像（涂鸦合并）
@@ -70,15 +15,6 @@ class ImageEditorResult {
 
   /// 是否有蒙版修改
   final bool hasMaskChanges;
-
-  /// Focused Inpaint 选区范围
-  final Rect? focusAreaRect;
-
-  /// Focused Inpaint 上下文带宽
-  final double minimumContextMegaPixels;
-
-  /// 是否启用 Focused Inpaint
-  final bool focusedInpaintEnabled;
 
   /// Outpaint 扩展后的源图像
   final Uint8List? outpaintSourceImage;
@@ -113,9 +49,6 @@ class ImageEditorResult {
     this.maskImage,
     this.hasImageChanges = false,
     this.hasMaskChanges = false,
-    this.focusAreaRect,
-    this.minimumContextMegaPixels = 88.0,
-    this.focusedInpaintEnabled = false,
     this.outpaintSourceImage,
     this.outpaintSourceWidth,
     this.outpaintSourceHeight,

@@ -401,7 +401,7 @@ void main() {
     expect(find.text('2/2'), findsOneWidget);
   });
 
-  testWidgets('focused stream preview with mask uses masked preview path', (
+  testWidgets('inpaint stream preview with mask uses masked preview path', (
     tester,
   ) async {
     final sourceBytes = Uint8List.fromList(
@@ -427,7 +427,7 @@ void main() {
               child: SelectableImageCard(
                 imageBytes: sourceBytes,
                 streamPreview: previewBytes,
-                focusedPreviewPlacement: FocusedStreamPreviewPlacement(
+                inpaintPreviewPlacement: InpaintStreamPreviewPlacement(
                   sourceImage: sourceBytes,
                   maskImage: maskBytes,
                   xPercent: 0.25,
@@ -454,7 +454,7 @@ void main() {
     expect(
       find.byWidgetPredicate(
         (widget) =>
-            widget.runtimeType.toString() == '_FocusedStreamPreviewImage',
+            widget.runtimeType.toString() == '_InpaintStreamPreviewImage',
       ),
       findsOneWidget,
     );

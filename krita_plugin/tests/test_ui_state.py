@@ -129,20 +129,6 @@ class FakeSlider(FakeSpinBox):
     pass
 
 
-class FakeCheckBox(FakeWidget):
-    def __init__(self, *_args, **_kwargs):
-        super().__init__()
-        self._checked = False
-        self.toggled = FakeSignal()
-
-    def isChecked(self):
-        return self._checked
-
-    def setChecked(self, checked):
-        self._checked = bool(checked)
-        self.toggled.emit(self._checked)
-
-
 class FakeComboBox(FakeWidget):
     def __init__(self, *_args, **_kwargs):
         super().__init__()
@@ -327,18 +313,13 @@ class FakeCanvasIO:
 
     def __init__(self):
         self.removed_preview = 0
-        self.removed_focus_preview = 0
         self.previews = []
-        self.focus_previews = []
         self.results = []
         self.mask_error = None
         self.preview_error = None
-        self.focus_preview_error = None
         self.write_error = None
         self.write_result_mode = "layer"
         self.active_document = True
-        self.selection_bounds = None
-        self.focus_constraint_calls = 0
         self.mask_sources = []
         self.events = []
 
@@ -355,67 +336,9 @@ class FakeCanvasIO:
         self.mask_sources.append(_source)
         return b"mask"
 
-    def active_selection_rect(self):
-        return None
-
-    def active_selection_bounds(self):
-        return self.selection_bounds
-
-    def constrain_active_focus_selection(self, _minimum_context_pixels):
-        self.focus_constraint_calls += 1
-        return self.selection_bounds
-
-    def active_focus_preview_rects(self, minimum_context_pixels):
-        inner = self.selection_bounds
-        if inner is None:
-            return None
-        outer = {
-            "x": max(0, inner["x"] - minimum_context_pixels),
-            "y": max(0, inner["y"] - minimum_context_pixels),
-            "w": inner["w"] + minimum_context_pixels * 2,
-            "h": inner["h"] + minimum_context_pixels * 2,
-        }
-        return inner, outer
-
-    def focus_request_size_for_context(self, outer):
-        import math
-
-        area = outer["w"] * outer["h"]
-        scale = math.sqrt(1048576 / area) if area <= 1048576 else 1.0
-        width = max(64, int(outer["w"] * scale) // 64 * 64)
-        height = max(64, int(outer["h"] * scale) // 64 * 64)
-        return {"w": width, "h": height}
-
-    def active_focus_geometry(self, minimum_context_pixels):
-        inner = self.constrain_active_focus_selection(minimum_context_pixels)
-        rects = self.active_focus_preview_rects(minimum_context_pixels)
-        if inner is None or rects is None:
-            return None
-        _, outer = rects
-        return {
-            "inner": inner,
-            "outer": outer,
-            "request": self.focus_request_size_for_context(outer),
-        }
-
-    def write_focus_preview(self, minimum_context_pixels):
-        self.events.append("write_focus_preview")
-        if self.focus_preview_error is not None:
-            raise RuntimeError(self.focus_preview_error)
-        rects = self.active_focus_preview_rects(minimum_context_pixels)
-        if rects is None:
-            raise RuntimeError("Create a Krita selection before inpaint")
-        inner, outer = rects
-        self.focus_previews.append((minimum_context_pixels, inner, outer))
-        return inner, outer
-
     def remove_preview_layer(self):
         self.events.append("remove_preview")
         self.removed_preview += 1
-
-    def remove_focus_preview_layer(self):
-        self.events.append("remove_focus_preview")
-        self.removed_focus_preview += 1
 
     def write_png_preview(self, image):
         if self.preview_error is not None:
@@ -453,7 +376,6 @@ def _install_stubs():
     qtgui.QPixmap = FakePixmap
 
     qtwidgets.QAbstractItemView = types.SimpleNamespace(SingleSelection=1)
-    qtwidgets.QCheckBox = FakeCheckBox
     qtwidgets.QComboBox = FakeComboBox
     qtwidgets.QDoubleSpinBox = FakeSpinBox
     qtwidgets.QFormLayout = FakeLayout
@@ -517,24 +439,6 @@ class DockerStateTests(unittest.TestCase):
 
         self.assertIn("#f9a825", docker._status_indicator.styleSheet())
 
-    def test_minimum_context_controls_are_enabled_only_for_focused_inpaint(self):
-        ui = _load_ui_module()
-        docker = ui.NAILauncherBridgeDocker()
-
-        self.assertFalse(docker._focused_inpaint.isChecked())
-        self.assertFalse(docker._minimum_context._enabled)
-        self.assertFalse(docker._minimum_context_slider._enabled)
-
-        docker._focused_inpaint.setChecked(True)
-
-        self.assertTrue(docker._minimum_context._enabled)
-        self.assertTrue(docker._minimum_context_slider._enabled)
-
-        docker._focused_inpaint.setChecked(False)
-
-        self.assertFalse(docker._minimum_context._enabled)
-        self.assertFalse(docker._minimum_context_slider._enabled)
-
     def test_inpaint_mask_layer_source_is_not_exposed(self):
         ui = _load_ui_module()
         docker = ui.NAILauncherBridgeDocker()
@@ -561,98 +465,12 @@ class DockerStateTests(unittest.TestCase):
         docker._inpaint_strength.setValue(0.55)
         self.assertEqual(docker._inpaint_strength_slider.value(), 55)
 
-        docker._minimum_context_slider.setValue(24)
-        self.assertEqual(docker._minimum_context.value(), 24)
-        docker._minimum_context.setValue(96)
-        self.assertEqual(docker._minimum_context_slider.value(), 96)
-
-    def test_workflow_hint_explains_selection_mask_and_live_focus_frame(self):
+    def test_workflow_hint_explains_selection_mask(self):
         ui = _load_ui_module()
         docker = ui.NAILauncherBridgeDocker()
 
         self.assertIn("当前 Krita 选区 = 重绘蒙版", docker._workflow_hint.text())
         self.assertNotIn("Inpaint Mask", docker._workflow_hint.text())
-
-        docker._focused_inpaint.setChecked(True)
-
-        self.assertIn("当前选区 = 内层重绘蒙版", docker._workflow_hint.text())
-        self.assertIn("Minimum Context", docker._workflow_hint.text())
-        self.assertIn("自动推导同心外框", docker._workflow_hint.text())
-        self.assertIn("实时", docker._workflow_hint.text())
-
-    def test_focused_inpaint_live_preview_starts_and_syncs_selection(self):
-        ui = _load_ui_module()
-        fake_canvas = FakeCanvasIO()
-        fake_canvas.selection_bounds = {"x": 8, "y": 9, "w": 64, "h": 72}
-        ui.canvas_io = fake_canvas
-        docker = ui.NAILauncherBridgeDocker()
-        docker._focused_inpaint.setChecked(True)
-
-        self.assertTrue(docker._focus_preview_timer.started)
-        self.assertEqual(fake_canvas.focus_previews, [])
-        self.assertTrue(docker._focus_preview_write_timer.started)
-        self.assertIn("inner 8,9 64x72", docker._focus_rect_label.text())
-        self.assertIn("outer 0,0 240x248", docker._focus_rect_label.text())
-        self.assertIn("request ", docker._focus_rect_label.text())
-
-        docker._focus_preview_write_timer.timeout.emit()
-
-        self.assertEqual(fake_canvas.focus_previews[0][0], 88)
-        self.assertIn("inner 8,9 64x72", docker._focus_rect_label.text())
-        self.assertIn("outer 0,0 240x248", docker._focus_rect_label.text())
-
-        fake_canvas.selection_bounds = {"x": 20, "y": 30, "w": 40, "h": 50}
-        docker._focus_preview_timer.timeout.emit()
-
-        self.assertEqual(len(fake_canvas.focus_previews), 1)
-        self.assertIn("inner 20,30 40x50", docker._focus_rect_label.text())
-
-        docker._focus_preview_write_timer.timeout.emit()
-
-        self.assertEqual(fake_canvas.focus_previews[-1][1], fake_canvas.selection_bounds)
-        self.assertIn("inner 20,30 40x50", docker._focus_rect_label.text())
-
-    def test_minimum_context_change_updates_live_focus_outer_frame(self):
-        ui = _load_ui_module()
-        fake_canvas = FakeCanvasIO()
-        fake_canvas.selection_bounds = {"x": 20, "y": 30, "w": 40, "h": 50}
-        ui.canvas_io = fake_canvas
-        docker = ui.NAILauncherBridgeDocker()
-        docker._focused_inpaint.setChecked(True)
-        docker._focus_preview_write_timer.timeout.emit()
-        fake_canvas.focus_previews.clear()
-
-        docker._minimum_context.setValue(24)
-
-        self.assertEqual(fake_canvas.focus_previews, [])
-        self.assertIn("inner 20,30 40x50", docker._focus_rect_label.text())
-        self.assertIn("outer 0,6 88x98", docker._focus_rect_label.text())
-
-        docker._focus_preview_write_timer.timeout.emit()
-
-        self.assertEqual(fake_canvas.focus_previews[-1][0], 24)
-        self.assertIn("inner 20,30 40x50", docker._focus_rect_label.text())
-        self.assertIn("outer 0,6 88x98", docker._focus_rect_label.text())
-
-    def test_disabling_focused_inpaint_clears_live_double_frame(self):
-        ui = _load_ui_module()
-        fake_canvas = FakeCanvasIO()
-        fake_canvas.selection_bounds = {"x": 8, "y": 9, "w": 64, "h": 72}
-        ui.canvas_io = fake_canvas
-        docker = ui.NAILauncherBridgeDocker()
-
-        docker._focused_inpaint.setChecked(True)
-        docker._focus_preview_write_timer.timeout.emit()
-        docker._focused_inpaint.setChecked(False)
-        fake_canvas.selection_bounds = {"x": 20, "y": 30, "w": 40, "h": 50}
-        docker._focus_preview_timer.timeout.emit()
-        docker._focus_preview_write_timer.timeout.emit()
-
-        self.assertFalse(docker._focus_preview_timer.started)
-        self.assertFalse(docker._focus_preview_write_timer.started)
-        self.assertGreaterEqual(fake_canvas.removed_focus_preview, 1)
-        self.assertIn("Focus Frame: off", docker._focus_rect_label.text())
-        self.assertEqual(len(fake_canvas.focus_previews), 1)
 
     def test_buttons_require_connection_and_active_document(self):
         ui = _load_ui_module()
@@ -1002,171 +820,19 @@ class DockerStateTests(unittest.TestCase):
         self.assertIn("请先标记重绘区域", docker._status.text())
         self.assertNotIn("Create a Krita selection", docker._status.text())
 
-    def test_non_focused_inpaint_does_not_read_selection_rect(self):
+    def test_inpaint_sends_selection_mask_source(self):
         ui = _load_ui_module()
         fake_canvas = FakeCanvasIO()
-
-        def fail_if_called():
-            raise RuntimeError("selection rect should not be read")
-
-        fake_canvas.active_selection_rect = fail_if_called
         ui.canvas_io = fake_canvas
         docker = ui.NAILauncherBridgeDocker()
 
         docker._send_inpaint()
 
-        self.assertIsNotNone(docker._active_request_id)
-        self.assertNotIn("selection rect should not be read", docker._status.text())
-
-    def test_focused_inpaint_requires_current_selection_before_sending(self):
-        ui = _load_ui_module()
-        fake_canvas = FakeCanvasIO()
-        ui.canvas_io = fake_canvas
-        docker = ui.NAILauncherBridgeDocker()
-        docker._focused_inpaint.setChecked(True)
-
-        docker._send_inpaint()
-
-        self.assertIsNone(docker._active_request_id)
-        self.assertEqual(docker._client.sent, [])
-        self.assertIn("Minimum Context", docker._status.text())
-
-    def test_focused_inpaint_sends_current_selection_as_inner_focus_rect(self):
-        ui = _load_ui_module()
-        fake_canvas = FakeCanvasIO()
-        fake_canvas.selection_bounds = {"x": 8, "y": 9, "w": 64, "h": 72}
-        ui.canvas_io = fake_canvas
-        docker = ui.NAILauncherBridgeDocker()
-        docker._focused_inpaint.setChecked(True)
-        calls_before_send = fake_canvas.focus_constraint_calls
-
-        docker._send_inpaint()
-
-        self.assertIsNotNone(docker._active_request_id)
         payload = json.loads(docker._client.sent[-1])
-        self.assertEqual(payload["selection_rect"], {"x": 8, "y": 9, "w": 64, "h": 72})
-        self.assertEqual(payload["minimum_context_pixels"], 88)
-        self.assertGreater(fake_canvas.focus_constraint_calls, calls_before_send)
-
-    def test_inpaint_always_uses_selection_mask_source(self):
-        ui = _load_ui_module()
-        fake_canvas = FakeCanvasIO()
-        fake_canvas.selection_bounds = {"x": 8, "y": 9, "w": 64, "h": 72}
-        ui.canvas_io = fake_canvas
-        docker = ui.NAILauncherBridgeDocker()
-        docker._focused_inpaint.setChecked(True)
-
-        docker._send_inpaint()
-
+        self.assertNotIn("focused_inpaint", payload)
+        self.assertNotIn("selection_rect", payload)
+        self.assertNotIn("minimum_context_pixels", payload)
         self.assertEqual(fake_canvas.mask_sources, [fake_canvas.MASK_SOURCE_SELECTION])
-
-    def test_non_focused_inpaint_uses_selection_mask_source(self):
-        ui = _load_ui_module()
-        fake_canvas = FakeCanvasIO()
-        fake_canvas.selection_bounds = {"x": 8, "y": 9, "w": 64, "h": 72}
-        ui.canvas_io = fake_canvas
-        docker = ui.NAILauncherBridgeDocker()
-        docker._focused_inpaint.setChecked(True)
-        docker._focused_inpaint.setChecked(False)
-
-        docker._send_inpaint()
-
-        payload = json.loads(docker._client.sent[-1])
-        self.assertFalse(payload["focused_inpaint"])
-        self.assertIsNone(payload["selection_rect"])
-        self.assertEqual(fake_canvas.mask_sources, [fake_canvas.MASK_SOURCE_SELECTION])
-
-    def test_non_focused_inpaint_does_not_constrain_native_selection(self):
-        ui = _load_ui_module()
-        fake_canvas = FakeCanvasIO()
-        fake_canvas.selection_bounds = {"x": 0, "y": 0, "w": 2400, "h": 1600}
-        ui.canvas_io = fake_canvas
-        docker = ui.NAILauncherBridgeDocker()
-
-        docker._send_inpaint()
-
-        self.assertEqual(fake_canvas.focus_constraint_calls, 0)
-        payload = json.loads(docker._client.sent[-1])
-        self.assertFalse(payload["focused_inpaint"])
-        self.assertIsNone(payload["selection_rect"])
-
-    def test_focused_inpaint_send_exports_clean_canvas_and_restores_live_frame(self):
-        ui = _load_ui_module()
-        fake_canvas = FakeCanvasIO()
-        fake_canvas.selection_bounds = {"x": 8, "y": 9, "w": 64, "h": 72}
-        ui.canvas_io = fake_canvas
-        docker = ui.NAILauncherBridgeDocker()
-        docker._focused_inpaint.setChecked(True)
-        docker._focus_preview_write_timer.timeout.emit()
-        fake_canvas.events.clear()
-
-        docker._send_inpaint()
-
-        self.assertIsNotNone(docker._active_request_id)
-        self.assertEqual(
-            fake_canvas.events[:4],
-            [
-                "remove_preview",
-                "remove_focus_preview",
-                "export_canvas",
-                "write_focus_preview",
-            ],
-        )
-        self.assertEqual(fake_canvas.focus_previews[-1][0], 88)
-        self.assertIn("inner 8,9 64x72", docker._focus_rect_label.text())
-
-    def test_focused_inpaint_send_continues_when_restoring_live_frame_fails(self):
-        ui = _load_ui_module()
-        fake_canvas = FakeCanvasIO()
-        fake_canvas.selection_bounds = {"x": 8, "y": 9, "w": 64, "h": 72}
-        ui.canvas_io = fake_canvas
-        docker = ui.NAILauncherBridgeDocker()
-        docker._focused_inpaint.setChecked(True)
-        docker._focus_preview_write_timer.timeout.emit()
-        fake_canvas.events.clear()
-        fake_canvas.focus_preview_error = "Krita failed to add preview layer"
-
-        docker._send_inpaint()
-
-        self.assertIsNotNone(docker._active_request_id)
-        payload = json.loads(docker._client.sent[-1])
-        self.assertTrue(payload["focused_inpaint"])
-        self.assertEqual(payload["selection_rect"], {"x": 8, "y": 9, "w": 64, "h": 72})
-        self.assertEqual(fake_canvas.mask_sources, [fake_canvas.MASK_SOURCE_SELECTION])
-        self.assertEqual(
-            fake_canvas.events[:4],
-            [
-                "remove_preview",
-                "remove_focus_preview",
-                "export_canvas",
-                "write_focus_preview",
-            ],
-        )
-        self.assertNotIn("Krita failed", docker._status.text())
-
-    def test_repeated_focus_preview_layer_failure_is_not_reported_every_timer_tick(self):
-        ui = _load_ui_module()
-        fake_canvas = FakeCanvasIO()
-        fake_canvas.selection_bounds = {"x": 8, "y": 9, "w": 64, "h": 72}
-        fake_canvas.focus_preview_error = "Krita failed to add preview layer"
-        ui.canvas_io = fake_canvas
-        docker = ui.NAILauncherBridgeDocker()
-        status_updates = []
-        original_set_status = docker._set_status
-
-        def capture_status(text, *args, **kwargs):
-            status_updates.append(text)
-            original_set_status(text, *args, **kwargs)
-
-        docker._set_status = capture_status
-
-        docker._focused_inpaint.setChecked(True)
-        docker._focus_preview_write_timer.timeout.emit()
-        docker._focus_preview_write_timer.timeout.emit()
-
-        self.assertEqual(status_updates, ["Krita 预览层写入失败，已跳过本帧"])
-        self.assertIn("预览层写入失败", docker._status.text())
-        self.assertNotIn("Krita failed", docker._status.text())
 
     def test_img2img_export_removes_stale_bridge_preview_layer(self):
         ui = _load_ui_module()
@@ -1179,8 +845,8 @@ class DockerStateTests(unittest.TestCase):
 
         self.assertIsNotNone(docker._active_request_id)
         self.assertEqual(
-            fake_canvas.events[:3],
-            ["remove_preview", "remove_focus_preview", "export_canvas"],
+            fake_canvas.events[:2],
+            ["remove_preview", "export_canvas"],
         )
 
     def test_cancel_sends_current_request_id_only(self):

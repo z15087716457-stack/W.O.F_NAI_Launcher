@@ -5,7 +5,6 @@ from PyQt5.QtCore import QSize, Qt, QTimer
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import (
     QAbstractItemView,
-    QCheckBox,
     QDoubleSpinBox,
     QFormLayout,
     QHBoxLayout,
@@ -17,7 +16,6 @@ from PyQt5.QtWidgets import (
     QProgressBar,
     QPushButton,
     QSlider,
-    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
@@ -46,17 +44,9 @@ class NAILauncherBridgeDocker(DockWidget):
         self._pending_params_request_id: Optional[str] = None
         self._last_preview_at: Optional[float] = None
         self._last_preview_error_text: Optional[str] = None
-        self._last_focus_preview_error_text: Optional[str] = None
-        self._last_focus_preview_key: Optional[tuple[int, int, int, int, int]] = None
-        self._pending_focus_preview_key: Optional[tuple[int, int, int, int, int]] = None
         self._result_items: Dict[int, tuple[bytes, str]] = {}
         self._preview_frame_count = 0
         self._syncing_numeric_controls = False
-        self._focus_preview_timer = QTimer(self)
-        self._focus_preview_timer.setInterval(100)
-        self._focus_preview_write_timer = QTimer(self)
-        self._focus_preview_write_timer.setInterval(140)
-        self._focus_preview_write_timer.setSingleShot(True)
 
         root = QWidget(self)
         layout = QVBoxLayout(root)
@@ -89,28 +79,17 @@ class NAILauncherBridgeDocker(DockWidget):
             self._inpaint_strength_slider,
             inpaint_strength_control,
         ) = self._create_double_slider_control(value=1.0)
-        (
-            self._minimum_context,
-            self._minimum_context_slider,
-            minimum_context_control,
-        ) = self._create_int_slider_control(minimum=16, maximum=192, value=88)
-        self._focused_inpaint = QCheckBox("Focused Inpaint")
         form.addRow("Prompt", self._prompt)
         form.addRow("Negative", self._negative_prompt)
         form.addRow("Strength", strength_control)
         form.addRow("Noise", noise_control)
         form.addRow("Inpaint Strength", inpaint_strength_control)
-        form.addRow("Minimum Context", minimum_context_control)
-        form.addRow("", self._focused_inpaint)
         layout.addLayout(form)
 
         self._workflow_hint = QLabel()
         self._workflow_hint.setWordWrap(True)
+        self._workflow_hint.setText("普通 Inpaint：当前 Krita 选区 = 重绘蒙版。")
         layout.addWidget(self._workflow_hint)
-
-        self._focus_rect_label = QLabel("Focus Frame: off")
-        self._focus_rect_label.setWordWrap(True)
-        layout.addWidget(self._focus_rect_label)
 
         buttons = QHBoxLayout()
         self._connect_button = QPushButton("Connect")
@@ -155,7 +134,6 @@ class NAILauncherBridgeDocker(DockWidget):
         self.setWidget(root)
         self._set_connection_indicator("red")
         self._connect_signals()
-        self._update_focused_inpaint_controls()
         self._update_buttons()
         self._client.start()
 
@@ -192,29 +170,6 @@ class NAILauncherBridgeDocker(DockWidget):
                 raw_value,
                 scale=scale,
             )
-        )
-        return spinbox, slider, self._build_slider_row(slider, spinbox)
-
-    def _create_int_slider_control(
-        self,
-        *,
-        minimum: int,
-        maximum: int,
-        value: int,
-    ) -> tuple[QSpinBox, QSlider, QWidget]:
-        spinbox = QSpinBox()
-        spinbox.setRange(minimum, maximum)
-
-        slider = QSlider(Qt.Horizontal)
-        slider.setRange(minimum, maximum)
-
-        spinbox.setValue(value)
-        slider.setValue(value)
-        slider.valueChanged.connect(
-            lambda raw_value: self._sync_int_spinbox_from_slider(spinbox, raw_value)
-        )
-        spinbox.valueChanged.connect(
-            lambda raw_value: self._sync_int_slider_from_spinbox(slider, raw_value)
         )
         return spinbox, slider, self._build_slider_row(slider, spinbox)
 
@@ -257,32 +212,6 @@ class NAILauncherBridgeDocker(DockWidget):
         finally:
             self._syncing_numeric_controls = False
 
-    def _sync_int_spinbox_from_slider(
-        self,
-        spinbox: QSpinBox,
-        raw_value: int,
-    ) -> None:
-        if self._syncing_numeric_controls:
-            return
-        self._syncing_numeric_controls = True
-        try:
-            spinbox.setValue(int(raw_value))
-        finally:
-            self._syncing_numeric_controls = False
-
-    def _sync_int_slider_from_spinbox(
-        self,
-        slider: QSlider,
-        raw_value: int,
-    ) -> None:
-        if self._syncing_numeric_controls:
-            return
-        self._syncing_numeric_controls = True
-        try:
-            slider.setValue(int(raw_value))
-        finally:
-            self._syncing_numeric_controls = False
-
     def canvasChanged(self, canvas) -> None:
         self._update_buttons()
 
@@ -293,10 +222,6 @@ class NAILauncherBridgeDocker(DockWidget):
         self._img2img_button.clicked.connect(self._send_img2img)
         self._inpaint_button.clicked.connect(self._send_inpaint)
         self._cancel_button.clicked.connect(self._cancel)
-        self._focused_inpaint.toggled.connect(self._update_focused_inpaint_controls)
-        self._minimum_context.valueChanged.connect(self._on_minimum_context_changed)
-        self._focus_preview_timer.timeout.connect(self._sync_focus_preview)
-        self._focus_preview_write_timer.timeout.connect(self._write_pending_focus_preview)
         self._result_list.itemClicked.connect(self._preview_result_item)
         self._result_list.itemDoubleClicked.connect(self._insert_result_item)
         self._delete_result_button.clicked.connect(self._delete_selected_results)
@@ -304,154 +229,6 @@ class NAILauncherBridgeDocker(DockWidget):
         self._client.connected_changed.connect(self._on_connected_changed)
         self._client.status_changed.connect(self._on_client_status_changed)
         self._client.message_received.connect(self._handle_message)
-
-    def _update_focused_inpaint_controls(self, *_args) -> None:
-        focused = self._focused_inpaint.isChecked()
-        self._minimum_context.setEnabled(focused)
-        self._minimum_context_slider.setEnabled(focused)
-        if focused:
-            self._workflow_hint.setText(
-                "Focused：当前选区 = 内层重绘蒙版；"
-                "Minimum Context 会自动推导同心外框，并随选区实时更新。"
-            )
-            self._focus_preview_timer.start()
-            self._sync_focus_preview(force=True, quiet=True)
-        else:
-            self._focus_preview_timer.stop()
-            self._focus_preview_write_timer.stop()
-            self._last_focus_preview_key = None
-            self._pending_focus_preview_key = None
-            canvas_io.remove_focus_preview_layer()
-            self._focus_rect_label.setText("Focus Frame: off")
-            self._workflow_hint.setText(
-                "普通 Inpaint：当前 Krita 选区 = 重绘蒙版。"
-            )
-
-    def _on_minimum_context_changed(self, *_args) -> None:
-        self._sync_focus_preview(force=True, quiet=True)
-
-    def _sync_focus_preview(
-        self,
-        *_args,
-        force: bool = False,
-        quiet: bool = False,
-        write_now: bool = False,
-    ) -> None:
-        if not self._focused_inpaint.isChecked():
-            return
-        try:
-            minimum_context = self._minimum_context.value()
-            geometry = canvas_io.active_focus_geometry(minimum_context)
-            if geometry is None:
-                self._last_focus_preview_key = None
-                self._pending_focus_preview_key = None
-                self._focus_preview_write_timer.stop()
-                canvas_io.remove_focus_preview_layer()
-                self._last_focus_preview_error_text = None
-                self._focus_rect_label.setText("Focus Frame: select inner repaint area")
-                return
-
-            selection_rect = geometry["inner"]
-            key = (
-                int(minimum_context),
-                int(selection_rect.get("x", 0)),
-                int(selection_rect.get("y", 0)),
-                int(selection_rect.get("w", 0)),
-                int(selection_rect.get("h", 0)),
-            )
-            if not force and key == self._last_focus_preview_key:
-                return
-
-            inner_rect = geometry["inner"]
-            outer_rect = geometry["outer"]
-            request_size = geometry["request"]
-            self._last_focus_preview_key = key
-            self._pending_focus_preview_key = key
-            self._last_focus_preview_error_text = None
-            self._focus_rect_label.setText(
-                "Focus Frame: "
-                f"inner {self._format_rect(inner_rect)} / "
-                f"outer {self._format_rect(outer_rect)} / "
-                f"request {request_size['w']}x{request_size['h']}"
-            )
-            if write_now:
-                self._write_focus_preview_layer(quiet=quiet)
-            else:
-                self._focus_preview_write_timer.start()
-            if not quiet and not write_now:
-                self._set_status(
-                    "已同步 Focus 同心框："
-                    f"内框 {self._format_rect(inner_rect)}，"
-                    f"外框 {self._format_rect(outer_rect)}"
-                )
-        except Exception as error:
-            self._last_focus_preview_key = None
-            if quiet:
-                return
-            localized = self._localized_local_error(error)
-            if localized == self._last_focus_preview_error_text:
-                return
-            self._last_focus_preview_error_text = localized
-            self._set_status(localized, error=True)
-
-    def _write_pending_focus_preview(self, *_args) -> None:
-        self._write_focus_preview_layer(quiet=False)
-
-    def _write_focus_preview_layer(self, *, quiet: bool) -> None:
-        if (
-            not self._focused_inpaint.isChecked()
-            or self._pending_focus_preview_key is None
-        ):
-            return
-        try:
-            inner_rect, outer_rect = canvas_io.write_focus_preview(
-                self._minimum_context.value()
-            )
-            request_size = canvas_io.focus_request_size_for_context(outer_rect)
-            self._pending_focus_preview_key = None
-            self._last_focus_preview_error_text = None
-            self._focus_rect_label.setText(
-                "Focus Frame: "
-                f"inner {self._format_rect(inner_rect)} / "
-                f"outer {self._format_rect(outer_rect)} / "
-                f"request {request_size['w']}x{request_size['h']}"
-            )
-            if not quiet:
-                self._set_status(
-                    "已同步 Focus 同心框："
-                    f"内框 {self._format_rect(inner_rect)}，"
-                    f"外框 {self._format_rect(outer_rect)}"
-                )
-        except Exception as error:
-            self._last_focus_preview_key = None
-            if quiet:
-                return
-            localized = self._localized_local_error(error)
-            if localized == self._last_focus_preview_error_text:
-                return
-            self._last_focus_preview_error_text = localized
-            self._set_status(localized, error=True)
-
-    def _resolve_focus_rect(
-        self,
-        focused_inpaint: bool,
-    ) -> Optional[Dict[str, int]]:
-        if not focused_inpaint:
-            return None
-        selection_rect = canvas_io.constrain_active_focus_selection(
-            self._minimum_context.value()
-        )
-        if selection_rect is None:
-            raise RuntimeError(
-                "请先框选内层重绘区域；Minimum Context 会自动推导外层 Focus 框"
-            )
-        return selection_rect
-
-    def _format_rect(self, rect: Dict[str, int]) -> str:
-        return (
-            f"{rect.get('x', 0)},{rect.get('y', 0)} "
-            f"{rect.get('w', 0)}x{rect.get('h', 0)}"
-        )
 
     def _request_params(self) -> None:
         request_id = self._new_request_id("params")
@@ -489,8 +266,6 @@ class NAILauncherBridgeDocker(DockWidget):
         if self._active_request_id is not None:
             return
         try:
-            focused_inpaint = self._focused_inpaint.isChecked()
-            selection_rect = self._resolve_focus_rect(focused_inpaint)
             image_png = self._export_clean_canvas()
             mask_png = canvas_io.export_inpaint_mask_png()
             request_id = self._new_request_id("inpaint")
@@ -504,9 +279,6 @@ class NAILauncherBridgeDocker(DockWidget):
                     strength=self._strength.value(),
                     noise=self._noise.value(),
                     inpaint_strength=self._inpaint_strength.value(),
-                    minimum_context_pixels=self._minimum_context.value(),
-                    focused_inpaint=focused_inpaint,
-                    selection_rect=selection_rect,
                 )
             ):
                 self._start_request(request_id)
@@ -514,15 +286,8 @@ class NAILauncherBridgeDocker(DockWidget):
             self._set_status(self._localized_local_error(error), error=True)
 
     def _export_clean_canvas(self) -> bytes:
-        should_restore_focus_preview = self._focused_inpaint.isChecked()
         canvas_io.remove_preview_layer()
-        canvas_io.remove_focus_preview_layer()
-        self._last_focus_preview_key = None
-        try:
-            return canvas_io.export_active_document_png()
-        finally:
-            if should_restore_focus_preview and self._focused_inpaint.isChecked():
-                self._sync_focus_preview(force=True, quiet=True, write_now=True)
+        return canvas_io.export_active_document_png()
 
     def _cancel(self) -> None:
         if self._active_request_id is None:
@@ -586,7 +351,6 @@ class NAILauncherBridgeDocker(DockWidget):
         self._strength.setValue(float(message.get("strength", 0.5)))
         self._noise.setValue(float(message.get("noise", 0.0)))
         self._inpaint_strength.setValue(float(message.get("inpaint_strength", 1.0)))
-        self._minimum_context.setValue(int(message.get("minimum_context_pixels", 88)))
         self._pending_params_request_id = None
         self._set_status("已从 NAI Launcher 复制参数")
 

@@ -249,12 +249,12 @@ void main() {
   });
 
   testWidgets(
-    'focused stream crop keeps its position and size within the source',
+    'inpaint stream crop keeps its position and size within the source',
     (tester) async {
       final crop = Uint8List.fromList(
         img.encodePng(img.Image(width: 4, height: 4)),
       );
-      final placement = FocusedStreamPreviewPlacement(
+      final placement = InpaintStreamPreviewPlacement(
         sourceImage: _png,
         xPercent: .25,
         yPercent: .2,
@@ -270,7 +270,7 @@ void main() {
               totalImages: 1,
               progress: .5,
               previewBytes: crop,
-              focusedPreviewPlacement: placement,
+              inpaintPreviewPlacement: placement,
             ),
           ],
         ),

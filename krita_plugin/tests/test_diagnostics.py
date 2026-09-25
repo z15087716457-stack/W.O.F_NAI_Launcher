@@ -134,7 +134,6 @@ class DiagnosticsTests(unittest.TestCase):
 
     def test_selection_diagnostics_accepts_non_rectangular_selection_bounds(self):
         original_active_document = diagnostics.canvas_io.active_document
-        original_selection_rect = diagnostics.canvas_io.active_selection_rect
         original_selection_bounds = diagnostics.canvas_io.active_selection_bounds
         original_export_mask = diagnostics.canvas_io.export_inpaint_mask_png
 
@@ -147,7 +146,6 @@ class DiagnosticsTests(unittest.TestCase):
 
         try:
             diagnostics.canvas_io.active_document = lambda: FakeDocument()
-            diagnostics.canvas_io.active_selection_rect = lambda: None
             diagnostics.canvas_io.active_selection_bounds = lambda: {
                 "x": 10,
                 "y": 12,
@@ -171,7 +169,6 @@ class DiagnosticsTests(unittest.TestCase):
             self.assertIn("selection bounds", checks[0]["detail"])
         finally:
             diagnostics.canvas_io.active_document = original_active_document
-            diagnostics.canvas_io.active_selection_rect = original_selection_rect
             diagnostics.canvas_io.active_selection_bounds = original_selection_bounds
             diagnostics.canvas_io.export_inpaint_mask_png = original_export_mask
 

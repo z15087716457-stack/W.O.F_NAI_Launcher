@@ -114,10 +114,7 @@ abstract class ShapeSelectionTool extends BaseSelectionTool {
 
     if (startPoint != null) {
       final currentPoint = event.localPosition;
-      final candidate = Rect.fromPoints(startPoint!, currentPoint);
-      final rect = id == 'rect_selection'
-          ? state.constrainRectSelection(candidate, startPoint!)
-          : candidate;
+      final rect = Rect.fromPoints(startPoint!, currentPoint);
       final path = createShapePath(rect);
       state.setPreviewPath(path);
     }
@@ -133,10 +130,7 @@ abstract class ShapeSelectionTool extends BaseSelectionTool {
 
     if (startPoint != null) {
       final endPoint = event.localPosition;
-      final candidate = Rect.fromPoints(startPoint!, endPoint);
-      final rect = id == 'rect_selection'
-          ? state.constrainRectSelection(candidate, startPoint!)
-          : candidate;
+      final rect = Rect.fromPoints(startPoint!, endPoint);
 
       if (rect.width > 2 && rect.height > 2) {
         final path = createShapePath(rect);

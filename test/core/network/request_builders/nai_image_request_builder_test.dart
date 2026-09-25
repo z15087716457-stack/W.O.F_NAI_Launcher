@@ -962,7 +962,7 @@ void main() {
     );
 
     test(
-      'should allow focused inpaint masks to skip extra post expansion',
+      'should allow small inpaint masks to skip extra post expansion',
       () async {
         final singlePixelMask = img.Image(width: 128, height: 128);
         img.fill(singlePixelMask, color: img.ColorRgba8(0, 0, 0, 255));

@@ -99,38 +99,6 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('重绘模式下应显示聚焦重绘控件', (tester) async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      await tester.binding.setSurfaceSize(const Size(1400, 1600));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-
-      final controller = container.read(
-        imageWorkflowControllerProvider.notifier,
-      );
-      controller.replaceSourceImage(_testImageBytes);
-      controller.enterInpaintMode();
-      controller.setPanelExpanded(true);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(
-            locale: Locale('zh'),
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            home: Scaffold(body: Img2ImgPanel()),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      expect(find.text('Focused Inpainting（聚焦重绘）'), findsOneWidget);
-      expect(find.textContaining('Minimum Context Area'), findsNothing);
-      expect(find.textContaining('重绘编辑器左上角按钮'), findsOneWidget);
-    });
-
     testWidgets('超分模型下拉项不重复显示当前模块前缀', (tester) async {
       final container = ProviderContainer(
         overrides: [

@@ -284,7 +284,6 @@ class AcceptanceReportTests(unittest.TestCase):
                     "auth_failure_safe": True,
                     "img2img_e2e": True,
                     "inpaint_e2e": True,
-                    "focused_inpaint_e2e": True,
                     "krita_cancel_e2e": True,
                     "no_selection_behavior": True,
                     "large_canvas_rejected": True,
@@ -308,7 +307,6 @@ class AcceptanceReportTests(unittest.TestCase):
             self.assertEqual("pass", by_name["auth_failure_safe"])
             self.assertEqual("pass", by_name["img2img_e2e"])
             self.assertEqual("pass", by_name["inpaint_e2e"])
-            self.assertEqual("pass", by_name["focused_inpaint_e2e"])
             self.assertEqual("pass", by_name["krita_cancel_e2e"])
             self.assertEqual("pass", by_name["no_selection_behavior"])
             self.assertEqual("pass", by_name["large_canvas_rejected"])
@@ -350,7 +348,6 @@ class AcceptanceReportTests(unittest.TestCase):
             self.assertEqual("pending", by_name["auth_failure_safe"])
             self.assertEqual("pending", by_name["img2img_e2e"])
             self.assertEqual("pending", by_name["inpaint_e2e"])
-            self.assertEqual("pending", by_name["focused_inpaint_e2e"])
             self.assertEqual("pending", by_name["krita_cancel_e2e"])
             self.assertEqual("pending", by_name["no_selection_behavior"])
             self.assertEqual("pending", by_name["large_canvas_rejected"])
@@ -703,7 +700,6 @@ class AcceptanceReportTests(unittest.TestCase):
                 "--evidence-auth-failure-safe",
                 "--evidence-img2img-e2e",
                 "--evidence-inpaint-e2e",
-                "--evidence-focused-inpaint-e2e",
                 "--evidence-krita-cancel-e2e",
                 "--evidence-no-selection-behavior",
                 "--evidence-large-canvas-rejected",

@@ -190,25 +190,6 @@ void main() {
       expect(result.error?.code, KritaBridgeErrorCode.invalidRequest);
     });
 
-    test('rejects focused inpaint when selection rect exceeds PNG bounds', () {
-      final result = KritaBridgeProtocol.decodeIncoming(
-        jsonEncode({
-          'type': 'inpaint',
-          'id': 'req-rect-outside',
-          'image': base64Encode(_pngWithDimensions(128, 128)),
-          'mask': base64Encode(_pngWithDimensions(128, 128)),
-          'focused_inpaint': true,
-          'selection_rect': {'x': 96, 'y': 96, 'w': 64, 'h': 32},
-        }),
-        sessionSecret: 'session-secret',
-        authenticated: true,
-      );
-
-      expect(result.message, isNull);
-      expect(result.error?.id, 'req-rect-outside');
-      expect(result.error?.code, KritaBridgeErrorCode.invalidRequest);
-    });
-
     test('returns unsupported_message for unknown authenticated type', () {
       final result = KritaBridgeProtocol.decodeIncoming(
         jsonEncode({'type': 'mystery', 'id': 'req-2'}),
@@ -271,23 +252,20 @@ void main() {
       expect(legacyOff.qualityTagPreset, QualityTagPreset.none);
     });
 
-    test('maps focused inpaint fields onto ImageParams and clamps context', () {
+    test('maps inpaint fields onto ImageParams', () {
       final result = KritaBridgeProtocol.decodeIncoming(
         jsonEncode({
           'type': 'inpaint',
           'id': 'req-inpaint',
           'image': base64Encode(_pngWithDimensions(1024, 768)),
           'mask': base64Encode(_pngWithDimensions(1024, 768)),
-          'selection_rect': {'x': 200, 'y': 150, 'w': 400, 'h': 300},
           'prompt': 'paint stars',
           'negative_prompt': 'blurry',
           'strength': 0.7,
           'noise': 0.05,
           'inpaint_strength': 0.9,
-          'minimum_context_pixels': 999,
           'mask_closing_iterations': 2,
           'mask_expansion_iterations': 3,
-          'focused_inpaint': true,
         }),
         sessionSecret: 'session-secret',
         authenticated: true,
@@ -308,34 +286,6 @@ void main() {
       expect(mapping.params.inpaintStrength, 0.9);
       expect(mapping.params.inpaintMaskClosingIterations, 2);
       expect(mapping.params.inpaintMaskExpansionIterations, 3);
-      expect(mapping.focusedInpaintEnabled, isTrue);
-      expect(mapping.minimumContextPixels, 192);
-      expect(mapping.selectionRect?.x, 200);
-      expect(mapping.selectionRect?.y, 150);
-      expect(mapping.selectionRect?.width, 400);
-      expect(mapping.selectionRect?.height, 300);
-    });
-
-    test('clamps focused inpaint context to safe lower bound', () {
-      final result = KritaBridgeProtocol.decodeIncoming(
-        jsonEncode({
-          'type': 'inpaint',
-          'id': 'req-inpaint-min-context',
-          'image': base64Encode(_pngWithDimensions(1024, 768)),
-          'mask': base64Encode(_pngWithDimensions(1024, 768)),
-          'selection_rect': {'x': 200, 'y': 150, 'w': 400, 'h': 300},
-          'minimum_context_pixels': 0,
-          'focused_inpaint': true,
-        }),
-        sessionSecret: 'session-secret',
-        authenticated: true,
-      );
-
-      final mapping = (result.message! as KritaInpaintMessage).toImageParams(
-        const ImageParams(model: 'nai-diffusion-4-5-full-inpainting'),
-      );
-
-      expect(mapping.minimumContextPixels, 16);
     });
 
     test('maps non-inpainting base models to matching inpainting models', () {
@@ -356,62 +306,6 @@ void main() {
 
       expect(mapping.params.action, ImageGenerationAction.infill);
       expect(mapping.params.model, 'nai-diffusion-4-5-full-inpainting');
-    });
-
-    test('rejects focused inpaint without a selection rect', () {
-      final result = KritaBridgeProtocol.decodeIncoming(
-        jsonEncode({
-          'type': 'inpaint',
-          'id': 'req-focused-no-rect',
-          'image': base64Encode(_pngWithDimensions(128, 128)),
-          'mask': base64Encode(_pngWithDimensions(128, 128)),
-          'focused_inpaint': true,
-        }),
-        sessionSecret: 'session-secret',
-        authenticated: true,
-      );
-
-      expect(result.message, isNull);
-      expect(result.error?.id, 'req-focused-no-rect');
-      expect(result.error?.code, KritaBridgeErrorCode.invalidRequest);
-    });
-
-    test('rejects invalid selection rect dimensions', () {
-      final result = KritaBridgeProtocol.decodeIncoming(
-        jsonEncode({
-          'type': 'inpaint',
-          'id': 'req-bad-rect',
-          'image': base64Encode(_pngWithDimensions(128, 128)),
-          'mask': base64Encode(_pngWithDimensions(128, 128)),
-          'focused_inpaint': true,
-          'selection_rect': {'x': 0, 'y': 0, 'w': 0, 'h': 300},
-        }),
-        sessionSecret: 'session-secret',
-        authenticated: true,
-      );
-
-      expect(result.message, isNull);
-      expect(result.error?.id, 'req-bad-rect');
-      expect(result.error?.code, KritaBridgeErrorCode.invalidRequest);
-    });
-
-    test('rejects fractional selection rect coordinates', () {
-      final result = KritaBridgeProtocol.decodeIncoming(
-        jsonEncode({
-          'type': 'inpaint',
-          'id': 'req-fractional-rect',
-          'image': base64Encode(_pngWithDimensions(128, 128)),
-          'mask': base64Encode(_pngWithDimensions(128, 128)),
-          'focused_inpaint': true,
-          'selection_rect': {'x': 1.5, 'y': 0, 'w': 32, 'h': 32},
-        }),
-        sessionSecret: 'session-secret',
-        authenticated: true,
-      );
-
-      expect(result.message, isNull);
-      expect(result.error?.id, 'req-fractional-rect');
-      expect(result.error?.code, KritaBridgeErrorCode.invalidRequest);
     });
 
     test(
@@ -443,7 +337,6 @@ void main() {
         expect(mapping.params.noise, 0.2);
         expect(mapping.params.model, 'nai-diffusion-4-full');
         expect(mapping.params.width, 1024);
-        expect(mapping.focusedInpaintEnabled, isFalse);
       },
     );
   });

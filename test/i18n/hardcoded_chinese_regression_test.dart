@@ -19,7 +19,6 @@ void main() {
       'lib/presentation/widgets/image_editor/widgets/panels/layer_thumbnail_tray.dart',
       'lib/presentation/widgets/image_editor/widgets/panels/editor_quick_settings.dart',
       'lib/presentation/widgets/image_editor/image_editor_screen_layout.dart',
-      'lib/presentation/widgets/image_editor/image_editor_screen_focused.dart',
       'lib/presentation/widgets/image_editor/widgets/toolbar/editor_overlay_toolbar.dart',
       'lib/presentation/screens/director_tools/director_tools_screen.dart',
       'lib/presentation/screens/generation/widgets/image_operation_badge.dart',

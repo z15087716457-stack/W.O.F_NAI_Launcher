@@ -107,23 +107,15 @@ void main() {
         () => mockApiService.generateImage(
           any(),
           onProgress: any(named: 'onProgress'),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
         ),
       ).thenAnswer((invocation) async {
         if (!streamUnsupported) fail('non-stream fallback was not expected');
         fallbackParams = invocation.positionalArguments.first as ImageParams;
         return ([_validImageBytes(width: 512, height: 768)], <int, String>{});
       });
-      when(
-        () => mockApiService.generateImageStream(
-          any(),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
-        ),
-      ).thenAnswer((invocation) {
+      when(() => mockApiService.generateImageStream(any())).thenAnswer((
+        invocation,
+      ) {
         capturedParams = invocation.positionalArguments.first as ImageParams;
         capturedRequests.add(capturedParams!);
         onStream?.call();

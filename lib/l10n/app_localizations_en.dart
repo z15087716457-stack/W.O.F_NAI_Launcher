@@ -1524,17 +1524,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_enhanceMax => 'Max✨';
 
   @override
-  String get img2img_focusedInpaint => 'Focused Inpainting';
-
-  @override
-  String get img2img_focusedInpaintEnabledHint =>
-      'Enabled. Adjust the focus area and Minimum Context Area from the top-left control in the inpaint editor.';
-
-  @override
-  String get img2img_focusedInpaintDisabledHint =>
-      'Regular inpaint is the default. To use Focused Inpaint, enable it from the top-left control in the inpaint editor and draw a focus area.';
-
-  @override
   String get img2img_disabled => 'Disabled';
 
   @override
@@ -1682,9 +1671,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editor_clearLayer => 'Clear Layer';
-
-  @override
-  String get editor_clearSelection => 'Clear Selection';
 
   @override
   String get editor_resetView => 'Reset View';
@@ -2085,28 +2071,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get editor_focusInactiveHint =>
-      'Click the button to enter focus mode, then draw a focus area and paint the mask.';
-
-  @override
-  String get editor_focusReadyHint =>
-      'Focus area selected. You can continue editing the mask with the brush.';
-
-  @override
-  String get editor_focusNeedsSelectionHint =>
-      'Draw a focus area first, then switch to the brush and paint the mask.';
-
-  @override
-  String get editor_focusSelection => 'Selection';
-
-  @override
-  String get editor_focusBrush => 'Brush';
-
-  @override
-  String get editor_focusContextHint =>
-      'The outer rectangle is the area sent to Focused Inpaint. The inner rectangle is the main repaint area. The band between them is the Minimum Context Area.';
-
-  @override
   String get editor_compressionTitle => 'Output resolution';
 
   @override
@@ -2143,21 +2107,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get editor_compressionUnavailable =>
       'This work canvas is already below the lowest compression step.';
-
-  @override
-  String get editor_compressionFocusLimited =>
-      'Higher resolutions are unavailable because the current Focused Inpaint selection would exceed the request area limit.';
-
-  @override
-  String editor_focusRequestSummary(
-    int outerWidth,
-    int outerHeight,
-    int requestWidth,
-    int requestHeight,
-    int cost,
-  ) {
-    return 'Outer crop $outerWidth×$outerHeight, request $requestWidth×$requestHeight, estimated $cost Anlas.';
-  }
 
   @override
   String editor_unsupportedImageFormat(Object extension) {
@@ -2208,11 +2157,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String editor_layerName(Object count) {
     return 'Layer $count';
-  }
-
-  @override
-  String editor_focusMinimumContextArea(Object value) {
-    return 'Minimum Context Area: $value';
   }
 
   @override
@@ -10546,16 +10490,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get img2img_hideAdvanced => 'Hide Advanced';
-
-  @override
-  String get editor_focusAreaTitle => 'Focused Area';
-
-  @override
-  String get editor_focusedInpaint => 'Focused Inpaint';
-
-  @override
-  String get editor_outpaintFocusConflict =>
-      'Outpaint cannot be used together with Focused Inpaint.';
 
   @override
   String promptToken_usage(int used, int limit) {

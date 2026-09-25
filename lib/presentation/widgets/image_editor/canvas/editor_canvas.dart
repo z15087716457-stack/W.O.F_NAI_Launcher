@@ -11,14 +11,12 @@ import 'stroke_preview_painter.dart';
 /// 处理绑制、手势和键盘交互
 class EditorCanvas extends StatefulWidget {
   final EditorState state;
-  final bool suppressSelectionOverlay;
   final bool showTransparentCanvasBackground;
   final bool Function(Offset localPosition)? shouldSuppressPointerInput;
 
   const EditorCanvas({
     super.key,
     required this.state,
-    this.suppressSelectionOverlay = false,
     this.showTransparentCanvasBackground = false,
     this.shouldSuppressPointerInput,
   });
@@ -150,8 +148,6 @@ class _EditorCanvasState extends State<EditorCanvas>
                                 painter: SelectionPainter(
                                   state: widget.state,
                                   animation: _selectionAnimationController,
-                                  suppressSelectionOverlay:
-                                      widget.suppressSelectionOverlay,
                                 ),
                               ),
                             ),

@@ -20,15 +20,8 @@
       "python3 -m unittest krita_plugin.tests.test_canvas_io"
     ]
   },
-  "focused_inpaint_e2e": {
-    "note": "Docker UI and canvas helper tests verify Focused Inpaint uses the active Krita selection as the repaint mask and inner repaint area, derives the outer context frame from Minimum Context, keeps the temporary concentric preview layer synchronized as the selection or Minimum Context changes, removes bridge-owned preview layers before exporting a clean source canvas, restores the live focus frame after export, still sends the focused inpaint request if restoring that live frame reports a preview-layer add failure, clears that double frame when Focused Inpaint is disabled, and matches the Launcher focused-crop golden case. This is supporting evidence only; real Krita focused-inpaint validation is still required.",
-    "commands": [
-      "python3 -m unittest krita_plugin.tests.test_ui_state",
-      "python3 -m unittest krita_plugin.tests.test_canvas_io"
-    ]
-  },
   "no_selection_behavior": {
-    "note": "Docker UI tests verify normal Inpaint and Focused Inpaint both use the current Krita selection as the repaint mask, and Focused Inpaint refuses to send without any active selection. Focused Inpaint uses selection bounds for the inner frame, so non-rectangular selections remain usable as masks. This is supporting evidence only; real Krita selection validation is still required.",
+    "note": "Docker UI tests verify normal Inpaint uses the current Krita selection as the repaint mask, so non-rectangular selections remain usable as masks. This is supporting evidence only; real Krita selection validation is still required.",
     "commands": [
       "python3 -m unittest krita_plugin.tests.test_ui_state"
     ]

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,7 +7,6 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/utils/app_logger.dart';
-import '../../../core/utils/focused_inpaint_utils.dart';
 import '../../../core/utils/max_enhance_utils.dart';
 import '../../../core/utils/nai_resolution_adapter.dart';
 import '../../../data/models/image/image_params.dart';
@@ -343,9 +341,6 @@ class ImageWorkflowState {
     this.isPanelExpanded = false,
     this.isToolRunning = false,
     this.isOutpaint = false,
-    this.focusedInpaintEnabled = false,
-    this.minimumContextMegaPixels = 88.0,
-    this.focusedSelectionRect,
     this.temporaryEnhanceSource,
   });
 
@@ -363,9 +358,6 @@ class ImageWorkflowState {
   final bool isPanelExpanded;
   final bool isToolRunning;
   final bool isOutpaint;
-  final bool focusedInpaintEnabled;
-  final double minimumContextMegaPixels;
-  final Rect? focusedSelectionRect;
 
   /// A canvas Enhance source belongs to the tool, never to the img2img draft.
   final Uint8List? temporaryEnhanceSource;
@@ -389,13 +381,9 @@ class ImageWorkflowState {
     bool? isPanelExpanded,
     bool? isToolRunning,
     bool? isOutpaint,
-    bool? focusedInpaintEnabled,
-    double? minimumContextMegaPixels,
-    Rect? focusedSelectionRect,
     Uint8List? temporaryEnhanceSource,
     bool clearSourceSize = false,
     bool clearBaseSnapshot = false,
-    bool clearFocusedSelectionRect = false,
   }) {
     return ImageWorkflowState(
       mode: mode ?? this.mode,
@@ -422,13 +410,6 @@ class ImageWorkflowState {
       isPanelExpanded: isPanelExpanded ?? this.isPanelExpanded,
       isToolRunning: isToolRunning ?? this.isToolRunning,
       isOutpaint: isOutpaint ?? this.isOutpaint,
-      focusedInpaintEnabled:
-          focusedInpaintEnabled ?? this.focusedInpaintEnabled,
-      minimumContextMegaPixels:
-          minimumContextMegaPixels ?? this.minimumContextMegaPixels,
-      focusedSelectionRect: clearFocusedSelectionRect
-          ? null
-          : (focusedSelectionRect ?? this.focusedSelectionRect),
     );
   }
 }
@@ -1013,7 +994,6 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
       sourceImageWidth: sourceImageSize?.$1,
       sourceImageHeight: sourceImageSize?.$2,
       isOutpaint: false,
-      clearFocusedSelectionRect: true,
     );
 
     switch (state.mode) {
@@ -1033,7 +1013,6 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
           mode: ImageWorkflowMode.base,
           isOutpaint: false,
           clearBaseSnapshot: true,
-          clearFocusedSelectionRect: true,
         );
         _paramsNotifier.updateAction(ImageGenerationAction.img2img);
         break;
@@ -1209,66 +1188,11 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     _persistUpscaleSettings(nextSettings);
   }
 
-  void setFocusedInpaintEnabled(bool value) {
-    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
-    state = state.copyWith(
-      focusedInpaintEnabled: value,
-      clearFocusedSelectionRect: !value,
-    );
-  }
-
-  void setMinimumContextMegaPixels(double value) {
-    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
-    final context = value.clamp(16.0, 192.0);
-    final constrainedSelection = _constrainFocusedSelection(
-      state.focusedSelectionRect,
-      minimumContextMegaPixels: context,
-    );
-    state = state.copyWith(
-      minimumContextMegaPixels: context,
-      focusedSelectionRect: constrainedSelection,
-      clearFocusedSelectionRect:
-          state.focusedSelectionRect != null && constrainedSelection == null,
-    );
-  }
-
-  void setFocusedSelectionRect(Rect? rect) {
-    if (state.temporaryEnhanceSource != null) closeTemporaryTool();
-    final constrainedSelection = _constrainFocusedSelection(
-      rect,
-      minimumContextMegaPixels: state.minimumContextMegaPixels,
-    );
-    state = state.copyWith(
-      focusedSelectionRect: constrainedSelection,
-      clearFocusedSelectionRect: constrainedSelection == null,
-    );
-  }
-
-  Rect? _constrainFocusedSelection(
-    Rect? rect, {
-    required double minimumContextMegaPixels,
-  }) {
-    if (rect == null) return null;
-    final width = state.sourceImageWidth ?? state.sourceWidth;
-    final height = state.sourceImageHeight ?? state.sourceHeight;
-    if (width == null || height == null) return rect;
-    return FocusedInpaintUtils.constrainSelectionRect(
-      sourceWidth: width,
-      sourceHeight: height,
-      selectionRect: rect,
-      minContextMegaPixels: minimumContextMegaPixels,
-    );
-  }
-
   void applyInpaintEditorResult({
     Uint8List? sourceImage,
     int? sourceWidth,
     int? sourceHeight,
     required Uint8List? maskImage,
-    required bool focusedInpaintEnabled,
-    required Rect? focusedSelectionRect,
-    required double minimumContextMegaPixels,
-    bool forceDisableFocusedInpaint = false,
     bool sourceIsOutpaint = true,
     bool useExactSourceDimensions = false,
   }) {
@@ -1320,25 +1244,6 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     final actualSourceHeight = hasReplacementSource
         ? (importInfo?.originalHeight ?? sourceHeight)
         : (state.sourceImageHeight ?? state.sourceHeight);
-    final constrainedSelection = switch ((
-      forceDisableFocusedInpaint,
-      focusedSelectionRect,
-      actualSourceWidth,
-      actualSourceHeight,
-    )) {
-      (false, final Rect rect, final int width, final int height) =>
-        FocusedInpaintUtils.constrainSelectionRect(
-          sourceWidth: width,
-          sourceHeight: height,
-          selectionRect: rect,
-          minContextMegaPixels: minimumContextMegaPixels,
-        ),
-      _ => null,
-    };
-    final effectiveFocusedInpaintEnabled =
-        !forceDisableFocusedInpaint &&
-        focusedInpaintEnabled &&
-        constrainedSelection != null;
     state = state.copyWith(
       mode: ImageWorkflowMode.inpaint,
       sourceWidth: hasReplacementSource
@@ -1351,10 +1256,6 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
       sourceImageHeight: hasReplacementSource ? actualSourceHeight : null,
       isPanelExpanded: true,
       isOutpaint: hasReplacementSource && sourceIsOutpaint,
-      focusedInpaintEnabled: effectiveFocusedInpaintEnabled,
-      minimumContextMegaPixels: minimumContextMegaPixels.clamp(16.0, 192.0),
-      focusedSelectionRect: constrainedSelection,
-      clearFocusedSelectionRect: !effectiveFocusedInpaintEnabled,
     );
 
     _applySourceSizeToParams();
@@ -1457,7 +1358,6 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
       mode: ImageWorkflowMode.base,
       isOutpaint: false,
       clearBaseSnapshot: shouldRestoreBaseSnapshot,
-      clearFocusedSelectionRect: clearMask,
     );
     _applySourceSizeToParams();
     _paramsNotifier.updateIsOutpaint(false);

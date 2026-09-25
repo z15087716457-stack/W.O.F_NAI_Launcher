@@ -213,7 +213,7 @@ class ProtocolTests(unittest.TestCase):
         self.assertIn("插件: 1", error)
         self.assertIn("支持: 1", error)
 
-    def test_encode_inpaint_includes_canvas_mask_focus_and_controls(self):
+    def test_encode_inpaint_includes_canvas_mask_and_controls(self):
         text = protocol.encode_inpaint(
             request_id="req-1",
             image_png=b"image",
@@ -223,9 +223,6 @@ class ProtocolTests(unittest.TestCase):
             strength=0.7,
             noise=0.1,
             inpaint_strength=0.9,
-            minimum_context_pixels=88,
-            focused_inpaint=True,
-            selection_rect={"x": 1, "y": 2, "w": 3, "h": 4},
         )
 
         payload = json.loads(text)
@@ -234,34 +231,14 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(payload["id"], "req-1")
         self.assertEqual(base64.b64decode(payload["image"]), b"image")
         self.assertEqual(base64.b64decode(payload["mask"]), b"mask")
-        self.assertEqual(payload["selection_rect"], {"x": 1, "y": 2, "w": 3, "h": 4})
         self.assertEqual(payload["prompt"], "1girl")
         self.assertEqual(payload["negative_prompt"], "bad anatomy")
         self.assertEqual(payload["strength"], 0.7)
         self.assertEqual(payload["noise"], 0.1)
         self.assertEqual(payload["inpaint_strength"], 0.9)
-        self.assertEqual(payload["minimum_context_pixels"], 88)
-        self.assertTrue(payload["focused_inpaint"])
-
-    def test_encode_inpaint_clears_selection_rect_when_not_focused(self):
-        text = protocol.encode_inpaint(
-            request_id="req-2",
-            image_png=b"image",
-            mask_png=b"mask",
-            prompt="1girl",
-            negative_prompt="bad anatomy",
-            strength=0.7,
-            noise=0.1,
-            inpaint_strength=0.9,
-            minimum_context_pixels=88,
-            focused_inpaint=False,
-            selection_rect={"x": 1, "y": 2, "w": 3, "h": 4},
-        )
-
-        payload = json.loads(text)
-
-        self.assertFalse(payload["focused_inpaint"])
-        self.assertIsNone(payload["selection_rect"])
+        self.assertNotIn("focused_inpaint", payload)
+        self.assertNotIn("selection_rect", payload)
+        self.assertNotIn("minimum_context_pixels", payload)
 
     def test_decode_image_field_reads_base64_image(self):
         data = protocol.decode_image_field(

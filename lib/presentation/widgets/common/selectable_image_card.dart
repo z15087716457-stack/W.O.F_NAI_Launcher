@@ -164,8 +164,8 @@ class SelectableImageCard extends ConsumerStatefulWidget {
   /// 流式预览图像（渐进式生成中显示）
   final Uint8List? streamPreview;
 
-  /// Focused inpaint 流式预览在原图上的覆盖位置。
-  final FocusedStreamPreviewPlacement? focusedPreviewPlacement;
+  /// Inpaint 流式预览在原图上的覆盖位置。
+  final InpaintStreamPreviewPlacement? inpaintPreviewPlacement;
 
   /// 图像宽度（用于计算比例，生成中状态需要）
   final int? imageWidth;
@@ -237,7 +237,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
     this.currentImage,
     this.totalImages,
     this.streamPreview,
-    this.focusedPreviewPlacement,
+    this.inpaintPreviewPlacement,
     this.imageWidth,
     this.imageHeight,
     this.hideSelectionDecoration = false,
@@ -677,7 +677,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
 
   Widget _buildStreamPreviewImage() => buildStreamPreviewImage(
     bytes: widget.streamPreview!,
-    placement: widget.focusedPreviewPlacement,
+    placement: widget.inpaintPreviewPlacement,
   );
 
   /// 构建加载动画卡片（无预览时）
@@ -1985,22 +1985,22 @@ class _HoverActionButtonState extends State<_HoverActionButton> {
   }
 }
 
-class _FocusedStreamPreviewImage extends StatefulWidget {
-  const _FocusedStreamPreviewImage({
+class _InpaintStreamPreviewImage extends StatefulWidget {
+  const _InpaintStreamPreviewImage({
     required this.previewImage,
     required this.placement,
   });
 
   final Uint8List previewImage;
-  final FocusedStreamPreviewPlacement placement;
+  final InpaintStreamPreviewPlacement placement;
 
   @override
-  State<_FocusedStreamPreviewImage> createState() =>
-      _FocusedStreamPreviewImageState();
+  State<_InpaintStreamPreviewImage> createState() =>
+      _InpaintStreamPreviewImageState();
 }
 
-class _FocusedStreamPreviewImageState
-    extends State<_FocusedStreamPreviewImage> {
+class _InpaintStreamPreviewImageState
+    extends State<_InpaintStreamPreviewImage> {
   ui.Image? _sourceImage;
   ui.Image? _previewImage;
   ui.Image? _maskImage;
@@ -2016,7 +2016,7 @@ class _FocusedStreamPreviewImageState
   }
 
   @override
-  void didUpdateWidget(covariant _FocusedStreamPreviewImage oldWidget) {
+  void didUpdateWidget(covariant _InpaintStreamPreviewImage oldWidget) {
     super.didUpdateWidget(oldWidget);
     _decodeChangedImages();
   }
@@ -2044,7 +2044,7 @@ class _FocusedStreamPreviewImageState
     }
 
     return CustomPaint(
-      painter: _FocusedStreamPreviewPainter(
+      painter: _InpaintStreamPreviewPainter(
         sourceImage: sourceImage,
         previewImage: previewImage,
         maskImage: maskImage,
@@ -2123,8 +2123,8 @@ class _FocusedStreamPreviewImageState
   }
 }
 
-class _FocusedStreamPreviewPainter extends CustomPainter {
-  _FocusedStreamPreviewPainter({
+class _InpaintStreamPreviewPainter extends CustomPainter {
+  _InpaintStreamPreviewPainter({
     required this.sourceImage,
     required this.previewImage,
     required this.maskImage,
@@ -2134,7 +2134,7 @@ class _FocusedStreamPreviewPainter extends CustomPainter {
   final ui.Image sourceImage;
   final ui.Image previewImage;
   final ui.Image maskImage;
-  final FocusedStreamPreviewPlacement placement;
+  final InpaintStreamPreviewPlacement placement;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -2212,7 +2212,7 @@ class _FocusedStreamPreviewPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _FocusedStreamPreviewPainter oldDelegate) {
+  bool shouldRepaint(covariant _InpaintStreamPreviewPainter oldDelegate) {
     return oldDelegate.sourceImage != sourceImage ||
         oldDelegate.previewImage != previewImage ||
         oldDelegate.maskImage != maskImage ||
@@ -2405,10 +2405,10 @@ class _GlossPainter extends CustomPainter {
 /// Shared composition for history and canvas streaming previews.
 Widget buildStreamPreviewImage({
   required Uint8List bytes,
-  FocusedStreamPreviewPlacement? placement,
+  InpaintStreamPreviewPlacement? placement,
 }) {
-  final focusedPreviewPlacement = placement;
-  if (focusedPreviewPlacement == null || !focusedPreviewPlacement.isValid) {
+  final inpaintPreviewPlacement = placement;
+  if (inpaintPreviewPlacement == null || !inpaintPreviewPlacement.isValid) {
     return DecodedMemoryImage(
       bytes: bytes,
       fit: BoxFit.cover,
@@ -2416,10 +2416,10 @@ Widget buildStreamPreviewImage({
     );
   }
 
-  if (focusedPreviewPlacement.hasMask) {
-    return _FocusedStreamPreviewImage(
+  if (inpaintPreviewPlacement.hasMask) {
+    return _InpaintStreamPreviewImage(
       previewImage: bytes,
-      placement: focusedPreviewPlacement,
+      placement: inpaintPreviewPlacement,
     );
   }
 
@@ -2433,16 +2433,16 @@ Widget buildStreamPreviewImage({
         );
       }
 
-      final xPercent = focusedPreviewPlacement.xPercent
+      final xPercent = inpaintPreviewPlacement.xPercent
           .clamp(0.0, 1.0)
           .toDouble();
-      final yPercent = focusedPreviewPlacement.yPercent
+      final yPercent = inpaintPreviewPlacement.yPercent
           .clamp(0.0, 1.0)
           .toDouble();
-      final widthPercent = focusedPreviewPlacement.widthPercent
+      final widthPercent = inpaintPreviewPlacement.widthPercent
           .clamp(0.0, 1.0 - xPercent)
           .toDouble();
-      final heightPercent = focusedPreviewPlacement.heightPercent
+      final heightPercent = inpaintPreviewPlacement.heightPercent
           .clamp(0.0, 1.0 - yPercent)
           .toDouble();
       final overlayWidth = math.max(1.0, constraints.maxWidth * widthPercent);
@@ -2455,7 +2455,7 @@ Widget buildStreamPreviewImage({
         fit: StackFit.expand,
         children: [
           DecodedMemoryImage(
-            bytes: focusedPreviewPlacement.sourceImage,
+            bytes: inpaintPreviewPlacement.sourceImage,
             fit: BoxFit.cover,
             gaplessPlayback: true,
           ),

@@ -687,9 +687,6 @@
   "img2img_enhanceMagnitude": "大きさ",
   "img2img_enhanceUpscaleAmount": "画像の拡大率",
   "img2img_enhanceMax": "Max✨",
-  "img2img_focusedInpaint": "Focused インペイント",
-  "img2img_focusedInpaintEnabledHint": "有効になりました。インペイント エディターの左上のコントロールからフォーカス エリアと最小コンテキスト エリアを調整します。",
-  "img2img_focusedInpaintDisabledHint": "通常のインペイントがデフォルトです。Focused インペイントを使うには、インペイントエディター左上のコントロールから有効にし、フォーカスエリアを描画します。",
   "img2img_disabled": "無効",
   "img2img_novelAiCloudUpscale": "NovelAI クラウド拡大 (4x 固定)",
   "img2img_comfyuiEnableHint": "まず、[設定] > [ComfyUI] で ComfyUI を有効にして接続します。",
@@ -751,7 +748,6 @@
   "editor_undo": "元に戻す",
   "editor_redo": "やり直し",
   "editor_clearLayer": "クリアレイヤー",
-  "editor_clearSelection": "選択をクリア",
   "editor_resetView": "ビューをリセット",
   "editor_zoom": "ズーム",
   "editor_toolBrush": "ブラシ",
@@ -936,12 +932,6 @@
       "error": {}
     }
   },
-  "editor_focusInactiveHint": "ボタンをクリックしてフォーカス モードに入り、フォーカス エリアを描画してマスクをペイントします。",
-  "editor_focusReadyHint": "フォーカス エリアが選択されました。ブラシを使用してマスクの編集を続けることができます。",
-  "editor_focusNeedsSelectionHint": "最初にフォーカス エリアを描画し、次にブラシに切り替えてマスクをペイントします。",
-  "editor_focusSelection": "選択",
-  "editor_focusBrush": "ブラシ",
-  "editor_focusContextHint": "外側の長方形は Focused インペイントに送信される領域です。内側の長方形が主な再描画領域です。その間の帯が最小コンテキスト領域です。",
   "editor_compressionTitle": "出力解像度",
   "editor_compressionTooltip": "出力解像度を選択",
   "editor_compressionUncompressed": "編集作業サイズを維持し、圧縮は行いません。",
@@ -981,27 +971,6 @@
     }
   },
   "editor_compressionUnavailable": "作業キャンバスはすでに最低圧縮段階より小さいため、解像度を下げられません。",
-  "editor_compressionFocusLimited": "現在の Focused Inpaint 選択範囲では、これ以上の解像度がリクエスト面積上限を超えるため、スライダー上限を制限しています。",
-  "editor_focusRequestSummary": "外側の切り抜き {outerWidth}×{outerHeight}、送信サイズ {requestWidth}×{requestHeight}、推定 {cost} Anlas。",
-  "@editor_focusRequestSummary": {
-    "placeholders": {
-      "outerWidth": {
-        "type": "int"
-      },
-      "outerHeight": {
-        "type": "int"
-      },
-      "requestWidth": {
-        "type": "int"
-      },
-      "requestHeight": {
-        "type": "int"
-      },
-      "cost": {
-        "type": "int"
-      }
-    }
-  },
   "editor_unsupportedImageFormat": "サポートされていないファイル形式: .{extension}\n画像ファイル(PNG、JPG、WEBPなど)を選択してください。",
   "@editor_unsupportedImageFormat": {
     "placeholders": {
@@ -1038,12 +1007,6 @@
   "@editor_layerName": {
     "placeholders": {
       "count": {}
-    }
-  },
-  "editor_focusMinimumContextArea": "最小コンテキスト領域: {value}",
-  "@editor_focusMinimumContextArea": {
-    "placeholders": {
-      "value": {}
     }
   },
   "editor_canvasSizeTitle": "キャンバスのサイズ",
@@ -6052,9 +6015,6 @@
   "img2img_enhanceAction": "強化！",
   "img2img_showAdvanced": "詳細設定を表示",
   "img2img_hideAdvanced": "詳細設定を隠す",
-  "editor_focusAreaTitle": "フォーカス範囲",
-  "editor_focusedInpaint": "フォーカスインペイント",
-  "editor_outpaintFocusConflict": "アウトペイントとフォーカスインペイントは同時に使用できません。",
   "promptToken_usage": "トークン使用量：{used} / {limit}",
   "promptToken_promptShare": "このプロンプト：{used} トークン；合計：{total} / {limit}",
   "@promptToken_usage": {

@@ -2,7 +2,6 @@ import 'dart:collection';
 import 'dart:isolate';
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:ui' show Rect;
 import 'package:image/image.dart' as img;
 
 import '../models/image_generation_artifact.dart';
@@ -170,35 +169,6 @@ class InpaintMaskUtils {
       );
       return encodeBinaryMask(resized, targetWidth, targetHeight);
     });
-  }
-
-  static Future<Uint8List> createRectMaskBytesAsync({
-    required int width,
-    required int height,
-    required Rect rect,
-  }) {
-    return ComputeGate().runIsolate(
-      () => createRectMaskBytes(width: width, height: height, rect: rect),
-    );
-  }
-
-  static Uint8List createRectMaskBytes({
-    required int width,
-    required int height,
-    required Rect rect,
-  }) {
-    if (width <= 0 || height <= 0) {
-      throw ArgumentError('Mask dimensions must be positive.');
-    }
-    final binaryMask = Uint8List(width * height);
-    final left = rect.left.floor().clamp(0, width);
-    final top = rect.top.floor().clamp(0, height);
-    final right = rect.right.ceil().clamp(0, width);
-    final bottom = rect.bottom.ceil().clamp(0, height);
-    for (var y = top; y < bottom; y++) {
-      binaryMask.fillRange(y * width + left, y * width + right, 1);
-    }
-    return encodeBinaryMask(binaryMask, width, height);
   }
 
   static Uint8List encodeBinaryMask(

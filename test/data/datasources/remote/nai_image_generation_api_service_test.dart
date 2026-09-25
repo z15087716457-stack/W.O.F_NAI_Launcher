@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
@@ -362,7 +361,7 @@ void main() {
       ]);
 
       final chunks = await chunksFuture.timeout(const Duration(seconds: 2));
-      final placement = chunks.first.focusedPreviewPlacement;
+      final placement = chunks.first.inpaintPreviewPlacement;
       final decoded = img.decodeImage(chunks.last.finalImage!)!;
 
       expect(chunks, hasLength(2));
@@ -387,95 +386,6 @@ void main() {
       expect(decoded.getPixel(128, 128).b.toInt(), greaterThan(210));
     },
   );
-
-  test('focused stream preview keeps raw crop and carries placement', () async {
-    final adapter = _PendingDioAdapter();
-    final dio = Dio()..httpClientAdapter = adapter;
-    final endpointService = NaiApiEndpointService();
-    final service = NAIImageGenerationApiService(
-      dio,
-      NAIImageEnhancementApiService(dio, endpointService),
-      endpointService,
-    );
-
-    final source = _solidPng(width: 256, height: 256, r: 10, g: 20, b: 30);
-    final mask = _rectMaskPng(
-      width: 256,
-      height: 256,
-      x: 96,
-      y: 96,
-      rectWidth: 64,
-      rectHeight: 64,
-    );
-    final previewCrop = _solidPng(
-      width: 128,
-      height: 128,
-      r: 120,
-      g: 130,
-      b: 140,
-    );
-    final finalCrop = _solidPng(
-      width: 128,
-      height: 128,
-      r: 220,
-      g: 230,
-      b: 240,
-    );
-
-    final chunksFuture = service
-        .generateImageStream(
-          ImageParams(
-            action: ImageGenerationAction.infill,
-            model: 'nai-diffusion-4-5-full-inpainting',
-            width: 256,
-            height: 256,
-            sourceImage: source,
-            maskImage: mask,
-          ),
-          focusedInpaintEnabled: true,
-          minimumContextMegaPixels: 32,
-          focusedSelectionRect: const Rect.fromLTWH(96, 96, 64, 64),
-        )
-        .toList();
-    await _waitForRequestCount(adapter, 1);
-
-    adapter.requests.single.completeWithMsgpackMessages([
-      {
-        'event_type': 'intermediate',
-        'samp_ix': 0,
-        'step_ix': 0,
-        'image': previewCrop,
-      },
-      {'event_type': 'final', 'samp_ix': 0, 'image': finalCrop},
-    ]);
-
-    final chunks = await chunksFuture.timeout(const Duration(seconds: 2));
-    final preview = chunks.first;
-    final placement = preview.focusedPreviewPlacement;
-    final decodedFinal = img.decodeImage(chunks.last.finalImage!)!;
-
-    expect(chunks, hasLength(2));
-    expect(preview.hasPreview, isTrue);
-    expect(preview.previewImage, orderedEquals(previewCrop));
-    expect(placement, isNotNull);
-    expect(placement!.sourceImage, orderedEquals(source));
-    expect(placement.hasMask, isTrue);
-    final previewMask = img.decodeImage(placement.maskImage!)!;
-    expect(previewMask.width, equals(1024));
-    expect(previewMask.height, equals(1024));
-    expect(previewMask.getPixel(0, 0).a.toInt(), equals(0));
-    expect(previewMask.getPixel(512, 512).a.toInt(), equals(255));
-    expect(placement.xPercent, closeTo(0.25, 0.001));
-    expect(placement.yPercent, closeTo(0.25, 0.001));
-    expect(placement.widthPercent, closeTo(0.5, 0.001));
-    expect(placement.heightPercent, closeTo(0.5, 0.001));
-    expect(decodedFinal.width, equals(256));
-    expect(decodedFinal.height, equals(256));
-    expect(decodedFinal.getPixel(0, 0).r.toInt(), equals(10));
-    expect(decodedFinal.getPixel(128, 128).r.toInt(), greaterThan(210));
-    expect(decodedFinal.getPixel(128, 128).g.toInt(), greaterThan(220));
-    expect(decodedFinal.getPixel(128, 128).b.toInt(), greaterThan(230));
-  });
 
   test('stream outpaint final preserves official raw service image', () async {
     final adapter = _PendingDioAdapter();
@@ -604,7 +514,7 @@ Future<void> _waitForRequestCount(
   _PendingDioAdapter adapter,
   int expectedCount,
 ) async {
-  // 聚焦重绘等预处理已移入后台 isolate，请求发出前存在真实耗时；
+  // 重绘预处理已移入后台 isolate，请求发出前存在真实耗时；
   // 条件满足即返回，上限放宽不会拖慢通过路径。
   for (var attempt = 0; attempt < 500; attempt += 1) {
     if (adapter.requests.length >= expectedCount) return;

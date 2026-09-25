@@ -52,10 +52,6 @@ MANUAL_GATES: tuple[tuple[str, str], ...] = (
         "Krita can send selection/mask inpaint through Launcher and receive a result.",
     ),
     (
-        "focused_inpaint_e2e",
-        "Krita focused inpaint preserves crop/composite parity with Launcher.",
-    ),
-    (
         "krita_cancel_e2e",
         "Krita cancel stops the active bridge generation and clears preview state.",
     ),
@@ -65,7 +61,7 @@ MANUAL_GATES: tuple[tuple[str, str], ...] = (
     ),
     (
         "large_canvas_rejected",
-        "Canvas above V1 bounds is rejected or requires explicit focused-inpaint confirmation.",
+        "Canvas above V1 bounds is rejected before any generation request.",
     ),
     (
         "disconnect_generation_safe",
@@ -490,8 +486,6 @@ def _manual_evidence_from_args(args: argparse.Namespace) -> dict[str, Any]:
         evidence["img2img_e2e"] = True
     if args.evidence_inpaint_e2e:
         evidence["inpaint_e2e"] = True
-    if args.evidence_focused_inpaint_e2e:
-        evidence["focused_inpaint_e2e"] = True
     if args.evidence_krita_cancel_e2e:
         evidence["krita_cancel_e2e"] = True
     if args.evidence_no_selection_behavior:
@@ -552,7 +546,6 @@ def main() -> int:
     parser.add_argument("--evidence-auth-failure-safe", action="store_true")
     parser.add_argument("--evidence-img2img-e2e", action="store_true")
     parser.add_argument("--evidence-inpaint-e2e", action="store_true")
-    parser.add_argument("--evidence-focused-inpaint-e2e", action="store_true")
     parser.add_argument("--evidence-krita-cancel-e2e", action="store_true")
     parser.add_argument("--evidence-no-selection-behavior", action="store_true")
     parser.add_argument("--evidence-large-canvas-rejected", action="store_true")

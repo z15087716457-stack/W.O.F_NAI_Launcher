@@ -116,19 +116,9 @@ void main() {
         () => mockApiService.generateImage(
           any(),
           onProgress: any(named: 'onProgress'),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
         ),
       ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
-      when(
-        () => mockApiService.generateImageStream(
-          any(),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
-        ),
-      ).thenAnswer((_) {
+      when(() => mockApiService.generateImageStream(any())).thenAnswer((_) {
         streamCall += 1;
         return streamCall == 1 ? firstStream.stream : secondStream.stream;
       });
@@ -192,19 +182,9 @@ void main() {
         () => mockApiService.generateImage(
           any(),
           onProgress: any(named: 'onProgress'),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
         ),
       ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
-      when(
-        () => mockApiService.generateImageStream(
-          any(),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
-        ),
-      ).thenAnswer((_) {
+      when(() => mockApiService.generateImageStream(any())).thenAnswer((_) {
         streamCall += 1;
         return stream.stream;
       });
@@ -262,18 +242,10 @@ void main() {
         () => mockApiService.generateImage(
           any(),
           onProgress: any(named: 'onProgress'),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
         ),
       ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
       when(
-        () => mockApiService.generateImageStream(
-          any(),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
-        ),
+        () => mockApiService.generateImageStream(any()),
       ).thenAnswer((_) => stream.stream);
       when(() => mockApiService.cancelGeneration()).thenReturn(null);
 
@@ -364,19 +336,11 @@ void main() {
         () => mockApiService.generateImage(
           any(),
           onProgress: any(named: 'onProgress'),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
         ),
       ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
-      when(
-        () => mockApiService.generateImageStream(
-          any(),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
-        ),
-      ).thenAnswer((invocation) {
+      when(() => mockApiService.generateImageStream(any())).thenAnswer((
+        invocation,
+      ) {
         final params = invocation.positionalArguments.first as ImageParams;
         requestSampleCounts.add(params.nSamples);
         return stream.stream;
@@ -474,19 +438,11 @@ void main() {
       () => mockApiService.generateImage(
         any(),
         onProgress: any(named: 'onProgress'),
-        focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-        minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-        focusedSelectionRect: any(named: 'focusedSelectionRect'),
       ),
     ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
-    when(
-      () => mockApiService.generateImageStream(
-        any(),
-        focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-        minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-        focusedSelectionRect: any(named: 'focusedSelectionRect'),
-      ),
-    ).thenAnswer((invocation) {
+    when(() => mockApiService.generateImageStream(any())).thenAnswer((
+      invocation,
+    ) {
       final params = invocation.positionalArguments.first as ImageParams;
       requestSampleCounts.add(params.nSamples);
       if (requestSampleCounts.length == 1) {
@@ -573,19 +529,11 @@ void main() {
       () => mockApiService.generateImage(
         any(),
         onProgress: any(named: 'onProgress'),
-        focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-        minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-        focusedSelectionRect: any(named: 'focusedSelectionRect'),
       ),
     ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
-    when(
-      () => mockApiService.generateImageStream(
-        any(),
-        focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-        minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-        focusedSelectionRect: any(named: 'focusedSelectionRect'),
-      ),
-    ).thenAnswer((invocation) {
+    when(() => mockApiService.generateImageStream(any())).thenAnswer((
+      invocation,
+    ) {
       final params = invocation.positionalArguments.first as ImageParams;
       requestSampleCounts.add(params.nSamples);
       if (requestSampleCounts.length == 1) {
@@ -677,19 +625,11 @@ void main() {
         () => mockApiService.generateImage(
           any(),
           onProgress: any(named: 'onProgress'),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
         ),
       ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
-      when(
-        () => mockApiService.generateImageStream(
-          any(),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
-        ),
-      ).thenAnswer((invocation) {
+      when(() => mockApiService.generateImageStream(any())).thenAnswer((
+        invocation,
+      ) {
         streamParams = invocation.positionalArguments.first as ImageParams;
         return stream.stream;
       });
@@ -759,19 +699,9 @@ void main() {
         () => mockApiService.generateImage(
           any(),
           onProgress: any(named: 'onProgress'),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
         ),
       ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
-      when(
-        () => mockApiService.generateImageStream(
-          any(),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
-        ),
-      ).thenAnswer(
+      when(() => mockApiService.generateImageStream(any())).thenAnswer(
         (_) => Stream<ImageStreamChunk>.fromIterable([
           ImageStreamChunk.progress(
             progress: 0.25,
@@ -856,7 +786,7 @@ void main() {
   );
 
   test(
-    'focused stream error snapshot uses shared soft-mask placement',
+    'inpaint stream error snapshot uses shared soft-mask placement',
     () async {
       final mockApiService = MockNAIImageGenerationApiService();
       final source = _solidImageBytes(
@@ -884,7 +814,7 @@ void main() {
         color: img.ColorRgba8(255, 255, 255, 255),
       );
       compositeMask.setPixelRgba(16, 16, 128, 128, 128, 128);
-      final placement = FocusedStreamPreviewPlacement(
+      final placement = InpaintStreamPreviewPlacement(
         sourceImage: source,
         maskImage: Uint8List.fromList(img.encodePng(compositeMask)),
         xPercent: 0.25,
@@ -897,28 +827,18 @@ void main() {
         () => mockApiService.generateImage(
           any(),
           onProgress: any(named: 'onProgress'),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
         ),
       ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
-      when(
-        () => mockApiService.generateImageStream(
-          any(),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
-        ),
-      ).thenAnswer(
+      when(() => mockApiService.generateImageStream(any())).thenAnswer(
         (_) => Stream<ImageStreamChunk>.fromIterable([
           ImageStreamChunk.progress(
             progress: 0.5,
             currentStep: 14,
             totalSteps: 28,
             previewImage: preview,
-            focusedPreviewPlacement: placement,
+            inpaintPreviewPlacement: placement,
           ),
-          ImageStreamChunk.error('API_ERROR_500|focused stream failed'),
+          ImageStreamChunk.error('API_ERROR_500|inpaint stream failed'),
         ]),
       );
       when(() => mockApiService.cancelGeneration()).thenReturn(null);
@@ -942,7 +862,7 @@ void main() {
       final params = container
           .read(generationParamsNotifierProvider)
           .copyWith(
-            prompt: 'focused failed snapshot',
+            prompt: 'inpaint failed snapshot',
             action: ImageGenerationAction.infill,
             model: 'nai-diffusion-4-5-full-inpainting',
             width: 256,
@@ -978,28 +898,15 @@ void main() {
         () => mockApiService.generateImage(
           any(),
           onProgress: any(named: 'onProgress'),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
         ),
       ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
       when(
         () => mockApiService.generateImageCancellable(
           any(),
           onProgress: any(named: 'onProgress'),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
         ),
       ).thenAnswer((_) async => <Uint8List>[]);
-      when(
-        () => mockApiService.generateImageStream(
-          any(),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
-        ),
-      ).thenAnswer((_) {
+      when(() => mockApiService.generateImageStream(any())).thenAnswer((_) {
         streamCall += 1;
         if (streamCall == 1) {
           return Stream<ImageStreamChunk>.fromIterable([
@@ -1070,19 +977,9 @@ void main() {
         () => mockApiService.generateImage(
           any(),
           onProgress: any(named: 'onProgress'),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
         ),
       ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
-      when(
-        () => mockApiService.generateImageStream(
-          any(),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
-        ),
-      ).thenAnswer(
+      when(() => mockApiService.generateImageStream(any())).thenAnswer(
         (_) => Stream<ImageStreamChunk>.fromIterable([
           ImageStreamChunk.progress(
             progress: 0.25,
@@ -1150,18 +1047,10 @@ void main() {
         () => mockApiService.generateImage(
           any(),
           onProgress: any(named: 'onProgress'),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
         ),
       ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
       when(
-        () => mockApiService.generateImageStream(
-          any(),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
-        ),
+        () => mockApiService.generateImageStream(any()),
       ).thenAnswer((_) => Stream.value(ImageStreamChunk.error('Cancelled')));
       when(() => mockApiService.cancelGeneration()).thenReturn(null);
 
@@ -1201,18 +1090,10 @@ void main() {
         () => mockApiService.generateImage(
           any(),
           onProgress: any(named: 'onProgress'),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
         ),
       ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
       when(
-        () => mockApiService.generateImageStream(
-          any(),
-          focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-          minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-          focusedSelectionRect: any(named: 'focusedSelectionRect'),
-        ),
+        () => mockApiService.generateImageStream(any()),
       ).thenAnswer((_) => const Stream<ImageStreamChunk>.empty());
       when(() => mockApiService.cancelGeneration()).thenReturn(null);
 
@@ -1302,19 +1183,9 @@ void main() {
       () => mockApiService.generateImage(
         any(),
         onProgress: any(named: 'onProgress'),
-        focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-        minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-        focusedSelectionRect: any(named: 'focusedSelectionRect'),
       ),
     ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
-    when(
-      () => mockApiService.generateImageStream(
-        any(),
-        focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-        minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-        focusedSelectionRect: any(named: 'focusedSelectionRect'),
-      ),
-    ).thenAnswer((_) {
+    when(() => mockApiService.generateImageStream(any())).thenAnswer((_) {
       streamCall += 1;
       if (streamCall == 1) {
         // 模拟孤儿任务仍占用 NAI 并发额度
@@ -1360,19 +1231,9 @@ void main() {
       () => mockApiService.generateImage(
         any(),
         onProgress: any(named: 'onProgress'),
-        focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-        minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-        focusedSelectionRect: any(named: 'focusedSelectionRect'),
       ),
     ).thenAnswer((_) async => (<Uint8List>[], <int, String>{}));
-    when(
-      () => mockApiService.generateImageStream(
-        any(),
-        focusedInpaintEnabled: any(named: 'focusedInpaintEnabled'),
-        minimumContextMegaPixels: any(named: 'minimumContextMegaPixels'),
-        focusedSelectionRect: any(named: 'focusedSelectionRect'),
-      ),
-    ).thenAnswer((_) {
+    when(() => mockApiService.generateImageStream(any())).thenAnswer((_) {
       streamCall += 1;
       return Stream.value(
         ImageStreamChunk.error(

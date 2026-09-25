@@ -1,11 +1,9 @@
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
-import 'package:nai_launcher/core/utils/focused_inpaint_utils.dart';
 import 'package:nai_launcher/core/utils/inpaint_outpaint_utils.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/canvas/editor_canvas.dart';
@@ -14,21 +12,7 @@ import 'package:nai_launcher/presentation/widgets/image_editor/image_editor_scre
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('focused inpaint keeps eligible Opus redraws free', () {
-    const config = ImageEditorFocusedInpaintCostConfig(
-      model: 'nai-diffusion-4-full',
-      steps: 28,
-      batchCount: 1,
-      batchSize: 1,
-      smea: false,
-      smeaDyn: false,
-      subscriptionTier: 3,
-    );
-
-    expect(config.estimate(width: 832, height: 1216), 0);
-  });
-
-  testWidgets('non-focused inpaint brush commits mask strokes on the image', (
+  testWidgets('inpaint brush commits mask strokes on the image', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 800));
@@ -56,7 +40,6 @@ void main() {
     });
 
     final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-    expect(state.debugFocusedInpaintEnabled, isFalse);
     expect(state.debugActiveLayerStrokeCount, 0);
     expect(state.debugHasMaskContent, isFalse);
 
@@ -85,51 +68,6 @@ void main() {
     expect(state.debugActiveLayerName, '图层 1');
     expect(state.debugActiveLayerStrokeCount, 1);
     expect(state.debugHasMaskContent, isTrue);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump();
-  });
-
-  testWidgets('focused inpaint card warns when the request costs Anlas', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1200, 800));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-
-    await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('zh'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: ImageEditorScreen(
-          initialImage: _buildSolidPng(1600, 1600, const Color(0xFF224466)),
-          existingFocusRect: const Rect.fromLTWH(100, 100, 1200, 1200),
-          initialMinimumContextMegaPixels: 0,
-          focusedInpaintCostConfig: const ImageEditorFocusedInpaintCostConfig(
-            model: 'nai-diffusion-4-full',
-            steps: 28,
-            batchCount: 1,
-            batchSize: 1,
-            smea: false,
-            smeaDyn: false,
-            subscriptionTier: 3,
-          ),
-          mode: ImageEditorMode.inpaint,
-          title: 'Focused inpaint cost warning test',
-          initialShowLayerPanel: false,
-        ),
-      ),
-    );
-    await _pumpForAsyncEditorWork(tester);
-    await _pumpUntil(tester, () {
-      final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-      return state.debugFocusedInpaintEnabled &&
-          find.textContaining('外层裁剪').evaluate().isNotEmpty;
-    });
-
-    expect(find.textContaining('外层裁剪 1232×1232'), findsOneWidget);
-    expect(find.textContaining('实际发送 1216×1216'), findsOneWidget);
-    expect(find.textContaining('预计 29 Anlas'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
@@ -193,133 +131,6 @@ void main() {
     expect((decoded!.width, decoded.height), (192, 128));
   });
 
-  testWidgets('focused rectangle drag never exceeds the outer-area limit', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1200, 800));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-
-    await tester.pumpWidget(
-      const MaterialApp(
-        locale: Locale('zh'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: ImageEditorScreen(
-          initialSize: Size(2600, 1800),
-          mode: ImageEditorMode.inpaint,
-          initialFocusedInpaintEnabled: true,
-          initialMinimumContextMegaPixels: 16,
-          title: 'Focus constraint test',
-          initialShowLayerPanel: false,
-        ),
-      ),
-    );
-    await _pumpForAsyncEditorWork(tester);
-    await _pumpUntil(tester, () {
-      final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-      return state.debugCurrentToolId == 'rect_selection' &&
-          find.byType(EditorCanvas).evaluate().isNotEmpty;
-    });
-
-    final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-    final editorCanvas = find.byType(EditorCanvas);
-    final canvasTopLeft = tester.getTopLeft(editorCanvas);
-    Offset screenPoint(Offset canvasPoint) =>
-        canvasTopLeft + (state.debugCanvasToScreen(canvasPoint) as Offset);
-    final start = screenPoint(const Offset(128, 1672));
-    final end = screenPoint(const Offset(2472, 128));
-
-    final gesture = await tester.startGesture(start);
-    await gesture.moveTo(end);
-    await tester.pump();
-    final preview = state.debugPreviewBounds as Rect?;
-    expect(preview, isNotNull);
-    final previewGeometry = FocusedInpaintUtils.resolveGeometryForSelection(
-      sourceWidth: 2600,
-      sourceHeight: 1800,
-      selectionRect: preview!,
-      minContextMegaPixels: 16,
-    )!;
-    expect(
-      previewGeometry.contextCrop.area,
-      lessThanOrEqualTo(FocusedInpaintUtils.maxRequestAreaPixels),
-    );
-
-    await gesture.up();
-    await tester.pump();
-    final committed = state.debugFocusedRect as Rect?;
-    expect(committed, isNotNull);
-    final committedGeometry = FocusedInpaintUtils.resolveGeometryForSelection(
-      sourceWidth: 2600,
-      sourceHeight: 1800,
-      selectionRect: committed!,
-      minContextMegaPixels: 16,
-    )!;
-    expect(
-      committedGeometry.contextCrop.area,
-      lessThanOrEqualTo(FocusedInpaintUtils.maxRequestAreaPixels),
-    );
-
-    await tester.tap(find.text('聚焦区域'));
-    await tester.pump();
-    state.debugSetToolById('rect_selection');
-    final normalGesture = await tester.startGesture(start);
-    await normalGesture.moveTo(end);
-    await normalGesture.up();
-    await tester.pump();
-    final normalSelection = state.debugSelectionBounds as Rect?;
-    expect(normalSelection, isNotNull);
-    expect(
-      normalSelection!.width * normalSelection.height,
-      greaterThan(3145728),
-    );
-  });
-
-  testWidgets('increasing Minimum Context shrinks the committed focus rect', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1200, 800));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-
-    await tester.pumpWidget(
-      const MaterialApp(
-        locale: Locale('zh'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: ImageEditorScreen(
-          initialSize: Size(2240, 1792),
-          mode: ImageEditorMode.inpaint,
-          existingFocusRect: Rect.fromLTWH(100, 100, 1900, 1500),
-          initialMinimumContextMegaPixels: 16,
-          title: 'Context constraint test',
-          initialShowLayerPanel: false,
-        ),
-      ),
-    );
-    await _pumpForAsyncEditorWork(tester);
-    final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-    final before = state.debugFocusedRect as Rect;
-    final contextSlider = find.byWidgetPredicate(
-      (widget) => widget is Slider && widget.max == 192,
-    );
-    final slider = tester.widget<Slider>(contextSlider);
-    slider.onChanged!(192);
-    await tester.pump();
-
-    final after = state.debugFocusedRect as Rect;
-    expect(after.width * after.height, lessThan(before.width * before.height));
-    final geometry = FocusedInpaintUtils.resolveGeometryForSelection(
-      sourceWidth: 2240,
-      sourceHeight: 1792,
-      selectionRect: after,
-      minContextMegaPixels: 192,
-    )!;
-    expect(
-      geometry.contextCrop.area,
-      lessThanOrEqualTo(FocusedInpaintUtils.maxRequestAreaPixels),
-    );
-  });
-
   testWidgets('outpaint edge resize does not paint brush strokes', (
     tester,
   ) async {
@@ -348,7 +159,6 @@ void main() {
     });
 
     final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-    expect(state.debugFocusedInpaintEnabled, isFalse);
     expect(state.debugCanvasSize, const Size(128, 128));
     expect(state.debugActiveLayerStrokeCount, 0);
 
@@ -387,7 +197,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('non-focused inpaint brush paints after virtual outpaint shift', (
+  testWidgets('inpaint brush paints after virtual outpaint shift', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 800));
@@ -416,7 +226,6 @@ void main() {
 
     final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
     expect(state.debugCanvasSize, const Size(128, 128));
-    expect(state.debugFocusedInpaintEnabled, isFalse);
     expect(state.debugHasMaskContent, isFalse);
 
     await tester.runAsync(() async {
@@ -431,7 +240,6 @@ void main() {
     );
 
     expect(state.debugOutpaintCommitPending, isFalse);
-    expect(state.debugFocusedInpaintEnabled, isFalse);
     expect(state.debugHasOutpaintChanges, isTrue);
     expect(state.debugVirtualOutpaintMaskRects, isNotEmpty);
 

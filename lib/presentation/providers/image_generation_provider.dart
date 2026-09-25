@@ -42,7 +42,6 @@ import 'generation/generation_models.dart';
 import 'generation/generation_cooldown_provider.dart';
 import 'generation/generation_params_notifier.dart';
 import 'generation/generation_settings_notifiers.dart';
-import 'generation/image_workflow_controller.dart';
 
 export 'generation/generation_models.dart';
 export 'generation/generation_cooldown_provider.dart';
@@ -64,12 +63,12 @@ class _RememberedStreamPreview {
   const _RememberedStreamPreview({
     required this.bytes,
     required this.params,
-    this.focusedPreviewPlacement,
+    this.inpaintPreviewPlacement,
   });
 
   final Uint8List bytes;
   final ImageParams params;
-  final FocusedStreamPreviewPlacement? focusedPreviewPlacement;
+  final InpaintStreamPreviewPlacement? inpaintPreviewPlacement;
 }
 
 /// 图像生成状态 Notifier
@@ -256,7 +255,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     required ImageParams params,
     required int generationRunId,
     required int imageNumber,
-    FocusedStreamPreviewPlacement? focusedPreviewPlacement,
+    InpaintStreamPreviewPlacement? inpaintPreviewPlacement,
   }) {
     if (_shouldAbortGenerationRun(generationRunId) || bytes.isEmpty) {
       return;
@@ -268,11 +267,11 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     )] = _RememberedStreamPreview(
       bytes: Uint8List.fromList(bytes),
       params: params,
-      focusedPreviewPlacement: focusedPreviewPlacement?.copyWith(
-        sourceImage: Uint8List.fromList(focusedPreviewPlacement.sourceImage),
-        maskImage: focusedPreviewPlacement.maskImage == null
+      inpaintPreviewPlacement: inpaintPreviewPlacement?.copyWith(
+        sourceImage: Uint8List.fromList(inpaintPreviewPlacement.sourceImage),
+        maskImage: inpaintPreviewPlacement.maskImage == null
             ? null
-            : Uint8List.fromList(focusedPreviewPlacement.maskImage!),
+            : Uint8List.fromList(inpaintPreviewPlacement.maskImage!),
       ),
     );
   }
@@ -306,10 +305,10 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final resolvedSize =
         _resolveImageSize(
           previewBytes,
-          width: rememberedPreview.focusedPreviewPlacement == null
+          width: rememberedPreview.inpaintPreviewPlacement == null
               ? params.width
               : null,
-          height: rememberedPreview.focusedPreviewPlacement == null
+          height: rememberedPreview.inpaintPreviewPlacement == null
               ? params.height
               : null,
         ) ??
@@ -345,44 +344,44 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   Uint8List _materializeRememberedStreamPreview(
     _RememberedStreamPreview rememberedPreview,
   ) {
-    final placement = rememberedPreview.focusedPreviewPlacement;
+    final placement = rememberedPreview.inpaintPreviewPlacement;
     if (placement == null || !placement.isValid) {
       return rememberedPreview.bytes;
     }
 
-    final materialized = _compositeFocusedStreamPreview(
+    final materialized = _compositeInpaintStreamPreview(
       previewBytes: rememberedPreview.bytes,
-      focusedPreviewPlacement: placement,
+      inpaintPreviewPlacement: placement,
     );
     return materialized ?? rememberedPreview.bytes;
   }
 
-  Uint8List? _compositeFocusedStreamPreview({
+  Uint8List? _compositeInpaintStreamPreview({
     required Uint8List previewBytes,
-    required FocusedStreamPreviewPlacement focusedPreviewPlacement,
+    required InpaintStreamPreviewPlacement inpaintPreviewPlacement,
   }) {
-    final source = img.decodeImage(focusedPreviewPlacement.sourceImage);
+    final source = img.decodeImage(inpaintPreviewPlacement.sourceImage);
     final preview = img.decodeImage(previewBytes);
-    final mask = focusedPreviewPlacement.maskImage == null
+    final mask = inpaintPreviewPlacement.maskImage == null
         ? null
-        : img.decodeImage(focusedPreviewPlacement.maskImage!);
+        : img.decodeImage(inpaintPreviewPlacement.maskImage!);
     if (source == null || preview == null) {
       return null;
     }
 
-    final dstX = (focusedPreviewPlacement.xPercent * source.width)
+    final dstX = (inpaintPreviewPlacement.xPercent * source.width)
         .round()
         .clamp(0, max(0, source.width - 1))
         .toInt();
-    final dstY = (focusedPreviewPlacement.yPercent * source.height)
+    final dstY = (inpaintPreviewPlacement.yPercent * source.height)
         .round()
         .clamp(0, max(0, source.height - 1))
         .toInt();
-    final dstW = (focusedPreviewPlacement.widthPercent * source.width)
+    final dstW = (inpaintPreviewPlacement.widthPercent * source.width)
         .round()
         .clamp(1, max(1, source.width - dstX))
         .toInt();
-    final dstH = (focusedPreviewPlacement.heightPercent * source.height)
+    final dstH = (inpaintPreviewPlacement.heightPercent * source.height)
         .round()
         .clamp(1, max(1, source.height - dstY))
         .toInt();
@@ -1547,7 +1546,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     int generationRunId,
   ) async {
     final apiService = ref.read(naiImageGenerationApiServiceProvider);
-    final workflow = ref.read(imageWorkflowControllerProvider);
 
     for (int retry = 0; retry <= _maxRetries; retry++) {
       try {
@@ -1558,9 +1556,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         final result = await apiService.generateImage(
           params,
           onProgress: (_, __) {},
-          focusedInpaintEnabled: workflow.focusedInpaintEnabled,
-          minimumContextMegaPixels: workflow.minimumContextMegaPixels,
-          focusedSelectionRect: workflow.focusedSelectionRect,
         );
         if (_shouldAbortGenerationRun(generationRunId)) {
           throw StateError('Generation cancelled');
@@ -1623,7 +1618,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     int generationRunId,
   ) async {
     final apiService = ref.read(naiImageGenerationApiServiceProvider);
-    final workflow = ref.read(imageWorkflowControllerProvider);
     final requestParams = _materializeRandomSeed(params);
     final batchSize = max(1, requestParams.nSamples);
     var useNonStreamFallback = false;
@@ -1656,9 +1650,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       final fallback = await apiService.generateImageCancellable(
         requestParams,
         onProgress: (_, __) {},
-        focusedInpaintEnabled: workflow.focusedInpaintEnabled,
-        minimumContextMegaPixels: workflow.minimumContextMegaPixels,
-        focusedSelectionRect: workflow.focusedSelectionRect,
       );
       if (_shouldAbortGenerationRun(generationRunId) ||
           _isActiveRequestCancel(generationRunId, currentStart)) {
@@ -1700,9 +1691,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           var streamingNotAllowed = false;
           await for (final chunk in apiService.generateImageStream(
             requestParams,
-            focusedInpaintEnabled: workflow.focusedInpaintEnabled,
-            minimumContextMegaPixels: workflow.minimumContextMegaPixels,
-            focusedSelectionRect: workflow.focusedSelectionRect,
           )) {
             if (_shouldAbortGenerationRun(generationRunId)) {
               return const <Uint8List>[];
@@ -1737,14 +1725,14 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
                 params: requestParams,
                 generationRunId: generationRunId,
                 imageNumber: imageNumber,
-                focusedPreviewPlacement: chunk.focusedPreviewPlacement,
+                inpaintPreviewPlacement: chunk.inpaintPreviewPlacement,
               );
               final slot = StreamPreviewSlot(
                 imageNumber: imageNumber,
                 totalImages: total,
                 progress: chunk.progress.clamp(0.0, 0.99).toDouble(),
                 previewBytes: chunk.previewImage,
-                focusedPreviewPlacement: chunk.focusedPreviewPlacement,
+                inpaintPreviewPlacement: chunk.inpaintPreviewPlacement,
               );
               state = state.copyWith(
                 currentImage: imageNumber,
@@ -1753,7 +1741,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
                   inFlightProgress: slot.progress,
                 ),
                 streamPreview: chunk.previewImage,
-                focusedPreviewPlacement: chunk.focusedPreviewPlacement,
+                inpaintPreviewPlacement: chunk.inpaintPreviewPlacement,
                 streamPreviewSlots: _replaceStreamPreviewSlot(
                   state.streamPreviewSlots,
                   slot,
@@ -1784,7 +1772,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
                   completedSamples: finalImages.length,
                 ),
                 streamPreview: chunk.finalImage,
-                clearFocusedPreviewPlacement: true,
+                clearInpaintPreviewPlacement: true,
                 streamPreviewSlots: _replaceStreamPreviewSlot(
                   state.streamPreviewSlots,
                   slot,
@@ -1903,14 +1891,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
     try {
       final apiService = ref.read(naiImageGenerationApiServiceProvider);
-      final workflow = ref.read(imageWorkflowControllerProvider);
 
-      final stream = apiService.generateImageStream(
-        params,
-        focusedInpaintEnabled: workflow.focusedInpaintEnabled,
-        minimumContextMegaPixels: workflow.minimumContextMegaPixels,
-        focusedSelectionRect: workflow.focusedSelectionRect,
-      );
+      final stream = apiService.generateImageStream(params);
 
       final finalImages = <int, Uint8List>{};
       bool streamingNotAllowed = false;
@@ -1971,19 +1953,19 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
             params: params,
             generationRunId: generationRunId,
             imageNumber: current,
-            focusedPreviewPlacement: chunk.focusedPreviewPlacement,
+            inpaintPreviewPlacement: chunk.inpaintPreviewPlacement,
           );
           state = state.copyWith(
             progress: chunk.progress,
             streamPreview: chunk.previewImage,
-            focusedPreviewPlacement: chunk.focusedPreviewPlacement,
+            inpaintPreviewPlacement: chunk.inpaintPreviewPlacement,
             streamPreviewSlots: [
               StreamPreviewSlot(
                 imageNumber: current,
                 totalImages: total,
                 progress: chunk.progress,
                 previewBytes: chunk.previewImage,
-                focusedPreviewPlacement: chunk.focusedPreviewPlacement,
+                inpaintPreviewPlacement: chunk.inpaintPreviewPlacement,
               ),
             ],
           );
@@ -2003,7 +1985,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           state = state.copyWith(
             progress: 1.0,
             streamPreview: chunk.finalImage,
-            clearFocusedPreviewPlacement: true,
+            clearInpaintPreviewPlacement: true,
             streamPreviewSlots: [
               StreamPreviewSlot(
                 imageNumber: current,

@@ -111,32 +111,10 @@ class KritaCancelMessage extends KritaBridgeMessage {
   final String id;
 }
 
-class KritaSelectionRect {
-  const KritaSelectionRect({
-    required this.x,
-    required this.y,
-    required this.width,
-    required this.height,
-  });
-
-  final int x;
-  final int y;
-  final int width;
-  final int height;
-}
-
 class KritaImageParamsMapping {
-  const KritaImageParamsMapping({
-    required this.params,
-    required this.focusedInpaintEnabled,
-    required this.minimumContextPixels,
-    this.selectionRect,
-  });
+  const KritaImageParamsMapping({required this.params});
 
   final ImageParams params;
-  final bool focusedInpaintEnabled;
-  final int minimumContextPixels;
-  final KritaSelectionRect? selectionRect;
 }
 
 class KritaInpaintMessage extends KritaBridgeMessage {
@@ -149,11 +127,8 @@ class KritaInpaintMessage extends KritaBridgeMessage {
     required this.strength,
     required this.noise,
     required this.inpaintStrength,
-    required this.minimumContextPixels,
     required this.maskClosingIterations,
     required this.maskExpansionIterations,
-    required this.focusedInpaint,
-    this.selectionRect,
   });
 
   @override
@@ -163,21 +138,15 @@ class KritaInpaintMessage extends KritaBridgeMessage {
   final String id;
   final Uint8List image;
   final Uint8List mask;
-  final KritaSelectionRect? selectionRect;
   final String prompt;
   final String negativePrompt;
   final double strength;
   final double noise;
   final double inpaintStrength;
-  final int minimumContextPixels;
   final int maskClosingIterations;
   final int maskExpansionIterations;
-  final bool focusedInpaint;
 
   KritaImageParamsMapping toImageParams(ImageParams baseParams) {
-    final clampedContext = minimumContextPixels.clamp(16, 192).toInt();
-    final hasFocusedRect = focusedInpaint && selectionRect != null;
-
     return KritaImageParamsMapping(
       params: baseParams.copyWith(
         action: ImageGenerationAction.infill,
@@ -192,9 +161,6 @@ class KritaInpaintMessage extends KritaBridgeMessage {
         inpaintMaskClosingIterations: maskClosingIterations,
         inpaintMaskExpansionIterations: maskExpansionIterations,
       ),
-      focusedInpaintEnabled: hasFocusedRect,
-      minimumContextPixels: clampedContext,
-      selectionRect: selectionRect,
     );
   }
 }
@@ -231,8 +197,6 @@ class KritaGenerateMessage extends KritaBridgeMessage {
   KritaImageParamsMapping toImageParams(ImageParams baseParams) {
     return KritaImageParamsMapping(
       params: applyKritaParamsOverlay(baseParams, payload),
-      focusedInpaintEnabled: false,
-      minimumContextPixels: 0,
     );
   }
 }
@@ -347,8 +311,6 @@ class KritaImg2ImgMessage extends KritaBridgeMessage {
         strength: strength,
         noise: noise,
       ),
-      focusedInpaintEnabled: false,
-      minimumContextPixels: 0,
     );
   }
 }

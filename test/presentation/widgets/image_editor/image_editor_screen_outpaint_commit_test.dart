@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -336,7 +335,6 @@ void main() {
       final previousLayerNames = List<String>.from(state.debugLayerNames);
 
       expect(state.debugCanvasSize, const Size(128, 128));
-      expect(state.debugFocusedInpaintEnabled, isFalse);
       expect(state.debugHasOutpaintChanges, isFalse);
       expect(state.debugOutpaintSourceWidth, isNull);
       expect(state.debugOutpaintSourceHeight, isNull);
@@ -349,136 +347,11 @@ void main() {
       await _pumpForAsyncEditorWork(tester);
 
       expect(state.debugCanvasSize, const Size(128, 128));
-      expect(state.debugFocusedInpaintEnabled, isFalse);
       expect(state.debugHasOutpaintChanges, isFalse);
       expect(state.debugOutpaintSourceWidth, isNull);
       expect(state.debugOutpaintSourceHeight, isNull);
       expect(state.debugLayerNames, previousLayerNames);
       expect(state.debugLayerNames.where((name) => name == '蒙版'), isEmpty);
-
-      await tester.pump(const Duration(seconds: 3));
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pump();
-    },
-  );
-
-  testWidgets(
-    'outpaint source replacement failure does not disable focused inpaint',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1200, 800));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-
-      await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('zh'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: ImageEditorScreen(
-            initialImage: _buildSolidPng(128, 96, const Color(0xFFAA3322)),
-            existingFocusRect: const Rect.fromLTWH(16, 16, 48, 48),
-            mode: ImageEditorMode.inpaint,
-            title: 'Inpaint test',
-            initialShowLayerPanel: false,
-            debugFailOutpaintSourceReplacement: true,
-          ),
-        ),
-      );
-      await _pumpForAsyncEditorWork(tester);
-      await _pumpUntil(tester, () {
-        final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-        return List<String>.from(state.debugLayerNames).contains('底图');
-      });
-
-      final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-      final previousLayerNames = List<String>.from(state.debugLayerNames);
-
-      expect(state.debugCanvasSize, const Size(128, 128));
-      expect(state.debugFocusedInpaintEnabled, isTrue);
-
-      await tester.runAsync(() async {
-        await state.debugApplyOutpaintFrameDeltaMaterialized(
-          const OutpaintFrameDelta(right: 32),
-        );
-      });
-      await _pumpForAsyncEditorWork(tester);
-
-      expect(state.debugCanvasSize, const Size(128, 128));
-      expect(state.debugFocusedInpaintEnabled, isTrue);
-      expect(state.debugHasOutpaintChanges, isFalse);
-      expect(state.debugOutpaintSourceWidth, isNull);
-      expect(state.debugOutpaintSourceHeight, isNull);
-      expect(state.debugLayerNames, previousLayerNames);
-      expect(state.debugLayerNames.where((name) => name == '蒙版'), isEmpty);
-
-      await tester.pump(const Duration(seconds: 3));
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pump();
-    },
-  );
-
-  testWidgets(
-    'later outpaint failure restores focused state, tool, selection and layers',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1200, 800));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-
-      await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('zh'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: ImageEditorScreen(
-            initialImage: _buildSolidPng(128, 96, const Color(0xFFAA3322)),
-            initialFocusedInpaintEnabled: true,
-            mode: ImageEditorMode.inpaint,
-            title: 'Inpaint test',
-            initialShowLayerPanel: false,
-            debugFailOutpaintAfterFocusedDisable: true,
-          ),
-        ),
-      );
-      await _pumpForAsyncEditorWork(tester);
-      await _pumpUntil(tester, () {
-        final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-        return List<String>.from(state.debugLayerNames).contains('底图');
-      });
-
-      final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-      state.debugSetToolById('brush');
-      state.debugSetSelectionRect(const Rect.fromLTWH(12, 14, 30, 32));
-      state.debugSetPreviewRect(const Rect.fromLTWH(20, 22, 36, 38));
-      state.debugSetToolById('rect_selection');
-      await tester.pump();
-
-      final previousLayerNames = List<String>.from(state.debugLayerNames);
-      final previousActiveLayerId = state.debugActiveLayerId as String?;
-      final previousActiveLayerName = state.debugActiveLayerName as String?;
-
-      expect(state.debugCanvasSize, const Size(128, 128));
-      expect(state.debugFocusedInpaintEnabled, isTrue);
-      expect(state.debugCurrentToolId, 'rect_selection');
-      expect(state.debugSelectionBounds, const Rect.fromLTWH(12, 14, 30, 32));
-      expect(state.debugPreviewBounds, const Rect.fromLTWH(20, 22, 36, 38));
-
-      await tester.runAsync(() async {
-        await state.debugApplyOutpaintFrameDeltaMaterialized(
-          const OutpaintFrameDelta(right: 32),
-        );
-      });
-      await _pumpForAsyncEditorWork(tester);
-
-      expect(state.debugCanvasSize, const Size(128, 128));
-      expect(state.debugFocusedInpaintEnabled, isTrue);
-      expect(state.debugCurrentToolId, 'rect_selection');
-      expect(state.debugSelectionBounds, const Rect.fromLTWH(12, 14, 30, 32));
-      expect(state.debugPreviewBounds, const Rect.fromLTWH(20, 22, 36, 38));
-      expect(state.debugHasOutpaintChanges, isFalse);
-      expect(state.debugOutpaintSourceWidth, isNull);
-      expect(state.debugOutpaintSourceHeight, isNull);
-      expect(state.debugLayerNames, previousLayerNames);
-      expect(state.debugLayerNames.where((name) => name == '蒙版'), isEmpty);
-      expect(state.debugActiveLayerId, previousActiveLayerId);
-      expect(state.debugActiveLayerName, previousActiveLayerName);
 
       await tester.pump(const Duration(seconds: 3));
       await tester.pumpWidget(const SizedBox.shrink());

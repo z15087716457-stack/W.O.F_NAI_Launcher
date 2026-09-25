@@ -192,38 +192,20 @@ class KritaBridgeProtocol {
           'image and mask PNG dimensions must match',
         );
       }
-      final focusedInpaint = _optionalBool(payload, 'focused_inpaint') ?? false;
-      final selectionRect = _selectionRect(payload['selection_rect']);
-      if (focusedInpaint && selectionRect == null) {
-        throw const _ProtocolException(
-          'focused_inpaint requires selection_rect',
-        );
-      }
-      if (selectionRect != null &&
-          !_rectFitsWithin(selectionRect, imageDimensions)) {
-        throw const _ProtocolException(
-          'selection_rect must fit within image bounds',
-        );
-      }
-
       return KritaBridgeDecodeResult.message(
         KritaInpaintMessage(
           id: id,
           image: image,
           mask: mask,
-          selectionRect: selectionRect,
           prompt: _optionalString(payload, 'prompt') ?? '',
           negativePrompt: _optionalString(payload, 'negative_prompt') ?? '',
           strength: _optionalDouble(payload, 'strength') ?? 0.7,
           noise: _optionalDouble(payload, 'noise') ?? 0.0,
           inpaintStrength: _optionalDouble(payload, 'inpaint_strength') ?? 1.0,
-          minimumContextPixels:
-              _optionalInt(payload, 'minimum_context_pixels') ?? 88,
           maskClosingIterations:
               _optionalInt(payload, 'mask_closing_iterations') ?? 0,
           maskExpansionIterations:
               _optionalInt(payload, 'mask_expansion_iterations') ?? 0,
-          focusedInpaint: focusedInpaint,
         ),
       );
     } on _PayloadTooLargeException catch (error) {
@@ -386,51 +368,9 @@ class KritaBridgeProtocol {
     }
   }
 
-  static KritaSelectionRect? _selectionRect(Object? value) {
-    if (value == null) {
-      return null;
-    }
-    if (value is! Map<String, dynamic>) {
-      throw const _ProtocolException('selection_rect must be an object');
-    }
-
-    final x = _requiredInt(value, 'x');
-    final y = _requiredInt(value, 'y');
-    final width = _requiredInt(value, 'w');
-    final height = _requiredInt(value, 'h');
-    if (x < 0 || y < 0 || width <= 0 || height <= 0) {
-      throw const _ProtocolException(
-        'selection_rect must use non-negative x/y and positive w/h',
-      );
-    }
-
-    return KritaSelectionRect(x: x, y: y, width: width, height: height);
-  }
-
-  static bool _rectFitsWithin(
-    KritaSelectionRect rect,
-    _PngDimensions dimensions,
-  ) {
-    return rect.x + rect.width <= dimensions.width &&
-        rect.y + rect.height <= dimensions.height;
-  }
-
-  static int _requiredInt(Map<String, dynamic> data, String key) {
-    final value = data[key];
-    if (value is! int) {
-      throw _ProtocolException('Missing integer field: $key');
-    }
-    return value;
-  }
-
   static String? _optionalString(Map<String, dynamic> data, String key) {
     final value = data[key];
     return value is String ? value : null;
-  }
-
-  static bool? _optionalBool(Map<String, dynamic> data, String key) {
-    final value = data[key];
-    return value is bool ? value : null;
   }
 
   static int? _optionalInt(Map<String, dynamic> data, String key) {

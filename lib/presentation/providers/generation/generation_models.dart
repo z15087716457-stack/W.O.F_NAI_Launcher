@@ -205,31 +205,31 @@ class StreamPreviewSlot {
     required this.totalImages,
     required this.progress,
     this.previewBytes,
-    this.focusedPreviewPlacement,
+    this.inpaintPreviewPlacement,
   });
 
   final int imageNumber;
   final int totalImages;
   final double progress;
   final Uint8List? previewBytes;
-  final FocusedStreamPreviewPlacement? focusedPreviewPlacement;
+  final InpaintStreamPreviewPlacement? inpaintPreviewPlacement;
 
   StreamPreviewSlot copyWith({
     int? imageNumber,
     int? totalImages,
     double? progress,
     Uint8List? previewBytes,
-    FocusedStreamPreviewPlacement? focusedPreviewPlacement,
-    bool clearFocusedPreviewPlacement = false,
+    InpaintStreamPreviewPlacement? inpaintPreviewPlacement,
+    bool clearInpaintPreviewPlacement = false,
   }) {
     return StreamPreviewSlot(
       imageNumber: imageNumber ?? this.imageNumber,
       totalImages: totalImages ?? this.totalImages,
       progress: progress ?? this.progress,
       previewBytes: previewBytes ?? this.previewBytes,
-      focusedPreviewPlacement: clearFocusedPreviewPlacement
+      inpaintPreviewPlacement: clearInpaintPreviewPlacement
           ? null
-          : (focusedPreviewPlacement ?? this.focusedPreviewPlacement),
+          : (inpaintPreviewPlacement ?? this.inpaintPreviewPlacement),
     );
   }
 }
@@ -249,8 +249,8 @@ class ImageGenerationState {
   /// 流式预览图像（渐进式生成过程中的最新预览）
   final Uint8List? streamPreview;
 
-  /// Focused inpaint 当前流式预览在原始图上的覆盖位置。
-  final FocusedStreamPreviewPlacement? focusedPreviewPlacement;
+  /// Inpaint 当前流式预览在原始图上的覆盖位置。
+  final InpaintStreamPreviewPlacement? inpaintPreviewPlacement;
 
   /// 当前请求中的流式预览槽位（用于一次请求多张时稳定历史位置）。
   final List<StreamPreviewSlot> streamPreviewSlots;
@@ -276,7 +276,7 @@ class ImageGenerationState {
     this.currentImage = 0,
     this.totalImages = 0,
     this.streamPreview,
-    this.focusedPreviewPlacement,
+    this.inpaintPreviewPlacement,
     this.streamPreviewSlots = const [],
     this.batchWidth,
     this.batchHeight,
@@ -295,10 +295,10 @@ class ImageGenerationState {
     int? currentImage,
     int? totalImages,
     Uint8List? streamPreview,
-    FocusedStreamPreviewPlacement? focusedPreviewPlacement,
+    InpaintStreamPreviewPlacement? inpaintPreviewPlacement,
     List<StreamPreviewSlot>? streamPreviewSlots,
     bool clearStreamPreview = false,
-    bool clearFocusedPreviewPlacement = false,
+    bool clearInpaintPreviewPlacement = false,
     int? batchWidth,
     int? batchHeight,
     List<GeneratedImage>? displayImages,
@@ -317,10 +317,10 @@ class ImageGenerationState {
       streamPreview: clearStreamPreview
           ? null
           : (streamPreview ?? this.streamPreview),
-      focusedPreviewPlacement:
-          clearStreamPreview || clearFocusedPreviewPlacement
+      inpaintPreviewPlacement:
+          clearStreamPreview || clearInpaintPreviewPlacement
           ? null
-          : (focusedPreviewPlacement ?? this.focusedPreviewPlacement),
+          : (inpaintPreviewPlacement ?? this.inpaintPreviewPlacement),
       streamPreviewSlots: clearStreamPreview
           ? (streamPreviewSlots ?? const [])
           : (streamPreviewSlots ?? this.streamPreviewSlots),

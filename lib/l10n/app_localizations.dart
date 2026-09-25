@@ -2853,24 +2853,6 @@ abstract class AppLocalizations {
   /// **'Max✨'**
   String get img2img_enhanceMax;
 
-  /// No description provided for @img2img_focusedInpaint.
-  ///
-  /// In en, this message translates to:
-  /// **'Focused Inpainting'**
-  String get img2img_focusedInpaint;
-
-  /// No description provided for @img2img_focusedInpaintEnabledHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enabled. Adjust the focus area and Minimum Context Area from the top-left control in the inpaint editor.'**
-  String get img2img_focusedInpaintEnabledHint;
-
-  /// No description provided for @img2img_focusedInpaintDisabledHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Regular inpaint is the default. To use Focused Inpaint, enable it from the top-left control in the inpaint editor and draw a focus area.'**
-  String get img2img_focusedInpaintDisabledHint;
-
   /// No description provided for @img2img_disabled.
   ///
   /// In en, this message translates to:
@@ -3128,12 +3110,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear Layer'**
   String get editor_clearLayer;
-
-  /// No description provided for @editor_clearSelection.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear Selection'**
-  String get editor_clearSelection;
 
   /// No description provided for @editor_resetView.
   ///
@@ -3849,42 +3825,6 @@ abstract class AppLocalizations {
   /// **'Magic Wand failed: {error}'**
   String editor_magicWandFailed(Object error);
 
-  /// No description provided for @editor_focusInactiveHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Click the button to enter focus mode, then draw a focus area and paint the mask.'**
-  String get editor_focusInactiveHint;
-
-  /// No description provided for @editor_focusReadyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Focus area selected. You can continue editing the mask with the brush.'**
-  String get editor_focusReadyHint;
-
-  /// No description provided for @editor_focusNeedsSelectionHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Draw a focus area first, then switch to the brush and paint the mask.'**
-  String get editor_focusNeedsSelectionHint;
-
-  /// No description provided for @editor_focusSelection.
-  ///
-  /// In en, this message translates to:
-  /// **'Selection'**
-  String get editor_focusSelection;
-
-  /// No description provided for @editor_focusBrush.
-  ///
-  /// In en, this message translates to:
-  /// **'Brush'**
-  String get editor_focusBrush;
-
-  /// No description provided for @editor_focusContextHint.
-  ///
-  /// In en, this message translates to:
-  /// **'The outer rectangle is the area sent to Focused Inpaint. The inner rectangle is the main repaint area. The band between them is the Minimum Context Area.'**
-  String get editor_focusContextHint;
-
   /// No description provided for @editor_compressionTitle.
   ///
   /// In en, this message translates to:
@@ -3936,24 +3876,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This work canvas is already below the lowest compression step.'**
   String get editor_compressionUnavailable;
-
-  /// No description provided for @editor_compressionFocusLimited.
-  ///
-  /// In en, this message translates to:
-  /// **'Higher resolutions are unavailable because the current Focused Inpaint selection would exceed the request area limit.'**
-  String get editor_compressionFocusLimited;
-
-  /// No description provided for @editor_focusRequestSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'Outer crop {outerWidth}×{outerHeight}, request {requestWidth}×{requestHeight}, estimated {cost} Anlas.'**
-  String editor_focusRequestSummary(
-    int outerWidth,
-    int outerHeight,
-    int requestWidth,
-    int requestHeight,
-    int cost,
-  );
 
   /// No description provided for @editor_unsupportedImageFormat.
   ///
@@ -4032,12 +3954,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Layer {count}'**
   String editor_layerName(Object count);
-
-  /// No description provided for @editor_focusMinimumContextArea.
-  ///
-  /// In en, this message translates to:
-  /// **'Minimum Context Area: {value}'**
-  String editor_focusMinimumContextArea(Object value);
 
   /// No description provided for @editor_canvasSizeTitle.
   ///
@@ -18422,24 +18338,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide Advanced'**
   String get img2img_hideAdvanced;
-
-  /// No description provided for @editor_focusAreaTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Focused Area'**
-  String get editor_focusAreaTitle;
-
-  /// No description provided for @editor_focusedInpaint.
-  ///
-  /// In en, this message translates to:
-  /// **'Focused Inpaint'**
-  String get editor_focusedInpaint;
-
-  /// No description provided for @editor_outpaintFocusConflict.
-  ///
-  /// In en, this message translates to:
-  /// **'Outpaint cannot be used together with Focused Inpaint.'**
-  String get editor_outpaintFocusConflict;
 
   /// No description provided for @promptToken_usage.
   ///

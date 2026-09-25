@@ -10,7 +10,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('ImageExporterNew.exportMaskFromLayers', () {
-    testWidgets('should export a focused selection rectangle as a full mask', (
+    testWidgets('should export a selection rectangle path as a full mask', (
       tester,
     ) async {
       await tester.runAsync(() async {

@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/services/anlas_calculator.dart';
-import '../../core/utils/focused_inpaint_utils.dart';
 import '../../core/utils/max_enhance_utils.dart';
 import '../../data/models/image/image_params.dart';
 import 'image_generation_provider.dart';
@@ -26,33 +25,7 @@ class _GenerationCostInput {
 _GenerationCostInput _resolveGenerationCostInput(
   ImageParams params,
   ImageWorkflowState workflow,
-  FocusedInpaintGeometry? focusedMaskGeometry,
 ) {
-  if (workflow.focusedInpaintEnabled && params.isInpainting) {
-    final focusedSelectionRect = workflow.focusedSelectionRect;
-    final focusedGeometry = focusedSelectionRect == null
-        ? focusedMaskGeometry
-        : FocusedInpaintUtils.resolveGeometryForSelection(
-            sourceWidth:
-                workflow.sourceImageWidth ??
-                workflow.sourceWidth ??
-                params.width,
-            sourceHeight:
-                workflow.sourceImageHeight ??
-                workflow.sourceHeight ??
-                params.height,
-            selectionRect: focusedSelectionRect,
-            minContextMegaPixels: workflow.minimumContextMegaPixels,
-          );
-    if (focusedGeometry != null) {
-      return _GenerationCostInput(
-        width: focusedGeometry.requestWidth,
-        height: focusedGeometry.requestHeight,
-        strength: params.inpaintStrength,
-      );
-    }
-  }
-
   // 增强 Max✨：请求宽高是源图尺寸，但服务端按端到端放大目标尺寸计费。
   if (workflow.isEnhance &&
       workflow.enhance.maxUpscale &&
@@ -80,45 +53,6 @@ _GenerationCostInput _resolveGenerationCostInput(
       ImageGenerationAction.infill => params.inpaintStrength,
       ImageGenerationAction.generate => 1.0,
     },
-  );
-}
-
-/// 聚焦重绘"仅蒙版"场景下的请求尺寸（轻量路径）。
-///
-/// 只解码蒙版求外接矩形，不做完整 prepareRequest 的裁剪/缩放/PNG 编码。
-/// 依赖项用 select 收窄：蒙版引用与上下文参数不变时（例如只调整
-/// steps/prompt），Riverpod 直接复用缓存结果，不会重复解码蒙版。
-@riverpod
-FocusedInpaintGeometry? focusedInpaintMaskRequestSize(Ref ref) {
-  final needsMaskSize = ref.watch(
-    draftImageWorkflowProvider.select(
-      (workflow) =>
-          workflow.focusedInpaintEnabled &&
-          workflow.focusedSelectionRect == null,
-    ),
-  );
-  final isInpainting = ref.watch(
-    generationParamsNotifierProvider.select((params) => params.isInpainting),
-  );
-  if (!needsMaskSize || !isInpainting) {
-    return null;
-  }
-
-  final maskImage = ref.watch(
-    generationParamsNotifierProvider.select((params) => params.maskImage),
-  );
-  if (maskImage == null) {
-    return null;
-  }
-
-  final minContextMegaPixels = ref.watch(
-    draftImageWorkflowProvider.select(
-      (workflow) => workflow.minimumContextMegaPixels,
-    ),
-  );
-  return FocusedInpaintUtils.resolveGeometryForMask(
-    maskImage: maskImage,
-    minContextMegaPixels: minContextMegaPixels,
   );
 }
 
@@ -160,11 +94,7 @@ int _calculateEstimatedCost(
     return 0;
   }
 
-  final requestInput = _resolveGenerationCostInput(
-    params,
-    workflow,
-    ref.watch(focusedInpaintMaskRequestSizeProvider),
-  );
+  final requestInput = _resolveGenerationCostInput(params, workflow);
   return AnlasCalculator.calculateRequestCost(
     width: requestInput.width,
     height: requestInput.height,

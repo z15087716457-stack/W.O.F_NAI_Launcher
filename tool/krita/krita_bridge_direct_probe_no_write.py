@@ -155,7 +155,7 @@ async def _main(mode: str) -> int:
             params,
         )
 
-        if mode in {"inpaint", "focused"}:
+        if mode == "inpaint":
             width = int(params.get("width") or 832)
             height = int(params.get("height") or 1216)
             width = min(width, 832)
@@ -181,18 +181,6 @@ async def _main(mode: str) -> int:
                 "strength": float(params.get("strength") or 0.7),
                 "noise": float(params.get("noise") or 0.0),
                 "inpaint_strength": float(params.get("inpaint_strength") or 1.0),
-                "minimum_context_pixels": int(
-                    params.get("minimum_context_pixels") or 88,
-                ),
-                "focused_inpaint": mode == "focused",
-                "selection_rect": {
-                    "x": rect[0],
-                    "y": rect[1],
-                    "w": rect[2],
-                    "h": rect[3],
-                }
-                if mode == "focused"
-                else None,
                 "mask_closing_iterations": 0,
                 "mask_expansion_iterations": 0,
             }
@@ -212,7 +200,7 @@ async def _main(mode: str) -> int:
                 terminal = message
                 break
             add(
-                "focused_inpaint_e2e" if mode == "focused" else "inpaint_e2e",
+                "inpaint_e2e",
                 terminal is not None
                 and terminal.get("type") == "result"
                 and terminal.get("id") == request_id,
@@ -245,7 +233,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--mode",
-        choices=("protocol", "inpaint", "focused"),
+        choices=("protocol", "inpaint"),
         default="protocol",
     )
     args = parser.parse_args()

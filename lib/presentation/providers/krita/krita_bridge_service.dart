@@ -1,14 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:ui';
-
-import 'package:image/image.dart' as img;
 
 import '../../../core/krita/krita_bridge_models.dart';
 import '../../../core/models/image_generation_artifact.dart';
 import '../../../core/utils/app_logger.dart';
-import '../../../core/utils/focused_inpaint_utils.dart';
 import '../../../data/models/image/image_params.dart';
 import '../../../data/models/image/image_stream_chunk.dart';
 
@@ -18,7 +14,6 @@ typedef KritaBridgeParamsPreparer =
 typedef KritaBridgePromptSnapshot = ({String prompt, String negativePrompt});
 typedef KritaBridgePromptSnapshotReader =
     KritaBridgePromptSnapshot Function(ImageParams params);
-typedef KritaBridgeMinimumContextReader = int Function();
 typedef KritaBridgeBusyReader = bool Function();
 typedef KritaBridgeSender = void Function(Map<String, dynamic> message);
 typedef KritaBridgeStreamGenerator =
@@ -59,19 +54,10 @@ abstract class KritaBridgeMessageService {
 }
 
 class KritaBridgeGenerateRequest {
-  const KritaBridgeGenerateRequest({
-    required this.id,
-    required this.params,
-    required this.focusedInpaintEnabled,
-    required this.minimumContextPixels,
-    this.focusedSelectionRect,
-  });
+  const KritaBridgeGenerateRequest({required this.id, required this.params});
 
   final String id;
   final ImageParams params;
-  final bool focusedInpaintEnabled;
-  final double minimumContextPixels;
-  final Rect? focusedSelectionRect;
 }
 
 class KritaBridgeService implements KritaBridgeMessageService {
@@ -90,7 +76,6 @@ class KritaBridgeService implements KritaBridgeMessageService {
     KritaBridgeCharactersReader? readCharacters,
     KritaBridgeTokensReader? readTokens,
     KritaBridgePromptSnapshotReader? readPromptSnapshot,
-    KritaBridgeMinimumContextReader? readMinimumContextPixels,
     KritaBridgeClock? clock,
     Duration failureCooldown = const Duration(seconds: 2),
   }) : _readBaseParams = readBaseParams,
@@ -111,12 +96,10 @@ class KritaBridgeService implements KritaBridgeMessageService {
        _readCharacters = readCharacters,
        _readTokens = readTokens,
        _clock = clock ?? DateTime.now,
-       _failureCooldown = failureCooldown,
-       _readMinimumContextPixels = readMinimumContextPixels ?? (() => 88);
+       _failureCooldown = failureCooldown;
 
   final KritaBridgeBaseParamsReader _readBaseParams;
   final KritaBridgePromptSnapshotReader _readPromptSnapshot;
-  final KritaBridgeMinimumContextReader _readMinimumContextPixels;
   final KritaBridgeSender _send;
   final KritaBridgeBusyReader _isUiGenerating;
   final KritaBridgeStreamGenerator _generateStream;
@@ -237,7 +220,6 @@ class KritaBridgeService implements KritaBridgeMessageService {
       'strength': params.strength,
       'noise': params.noise,
       'inpaint_strength': params.inpaintStrength,
-      'minimum_context_pixels': _readMinimumContextPixels(),
       // AI 接管扩展：全量状态回读（键名与 set_params 对称，可 get→set 往返）
       'n_samples': params.nSamples,
       'noise_schedule': params.noiseSchedule,
@@ -326,9 +308,6 @@ class KritaBridgeService implements KritaBridgeMessageService {
     final request = KritaBridgeGenerateRequest(
       id: id,
       params: _prepareParams(mapping.params.copyWith(nSamples: 1), overrides),
-      focusedInpaintEnabled: mapping.focusedInpaintEnabled,
-      minimumContextPixels: mapping.minimumContextPixels.toDouble(),
-      focusedSelectionRect: _resolveFocusedSelectionRect(mapping),
     );
 
     // 角色、预设和规范化设置也已冻结，下一张的 roll 不影响流式或回退请求。
@@ -387,30 +366,6 @@ class KritaBridgeService implements KritaBridgeMessageService {
       _activeRequestReporter?.call(null);
       _cancelled = false;
     }
-  }
-
-  Rect? _resolveFocusedSelectionRect(KritaImageParamsMapping mapping) {
-    final selection = _toRect(mapping.selectionRect);
-    final sourceImage = mapping.params.sourceImage;
-    if (!mapping.focusedInpaintEnabled ||
-        selection == null ||
-        sourceImage == null) {
-      return selection;
-    }
-    img.Image? decoded;
-    try {
-      decoded = img.decodeImage(sourceImage);
-    } catch (_) {
-      return selection;
-    }
-    if (decoded == null) return selection;
-    return FocusedInpaintUtils.constrainSelectionRect(
-          sourceWidth: decoded.width,
-          sourceHeight: decoded.height,
-          selectionRect: selection,
-          minContextMegaPixels: mapping.minimumContextPixels.toDouble(),
-        ) ??
-        selection;
   }
 
   Future<ImageGenerationArtifact?> _generateImage(
@@ -601,18 +556,6 @@ class KritaBridgeService implements KritaBridgeMessageService {
 
   bool _shouldUseDirectFallback(KritaBridgeGenerateRequest request) {
     return request.params.action == ImageGenerationAction.infill;
-  }
-
-  Rect? _toRect(KritaSelectionRect? rect) {
-    if (rect == null) {
-      return null;
-    }
-    return Rect.fromLTWH(
-      rect.x.toDouble(),
-      rect.y.toDouble(),
-      rect.width.toDouble(),
-      rect.height.toDouble(),
-    );
   }
 
   String _twoDigits(int value) => value.toString().padLeft(2, '0');

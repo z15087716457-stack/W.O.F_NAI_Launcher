@@ -12,7 +12,6 @@ import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 import '../../../../core/comfyui/comfyui_models.dart';
 import '../../../../core/comfyui/workflow_template.dart';
-import '../../../../core/utils/focused_inpaint_utils.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/datasources/remote/nai_image_enhancement_api_service.dart';
@@ -20,7 +19,6 @@ import '../../../../data/models/image/image_params.dart';
 import '../../../../data/models/image/image_operation.dart';
 import '../../../../data/services/precise_ref_library_storage_service.dart';
 import '../../../providers/comfyui/comfyui_provider.dart';
-import '../../../providers/cost_estimate_provider.dart';
 import '../../../providers/generation/generation_params_selectors.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/image_save_settings_provider.dart';
@@ -37,7 +35,6 @@ import '../../../widgets/common/decoded_memory_image.dart';
 import '../../../widgets/common/editable_double_field.dart';
 import '../../../widgets/common/image_picker_card/image_picker_card.dart';
 import '../../../widgets/common/themed_divider.dart';
-import '../../../widgets/image_editor/painters/focused_overlay_painter.dart';
 import '../../../widgets/image_editor/image_editor_screen.dart';
 import '../../precise_ref_library/widgets/precise_ref_selector_dialog.dart';
 import 'img2img_preview_cache.dart';
@@ -249,10 +246,6 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
             child: _SourceImagePreview(
               sourceBytes: params.sourceImage!,
               maskBytes: params.maskImage,
-              focusedInpaintEnabled:
-                  workflow.isInpaint && workflow.focusedInpaintEnabled,
-              focusedSelectionRect: workflow.focusedSelectionRect,
-              minimumContextMegaPixels: workflow.minimumContextMegaPixels,
               imageWidth: sourceDimensions.$1,
               imageHeight: sourceDimensions.$2,
             ),
@@ -678,31 +671,6 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
   }
 
   Widget _buildInpaintPanel(ThemeData theme, Img2ImgPanelViewData params) {
-    final workflow = ref.watch(draftImageWorkflowProvider);
-    final generationSize = ref.watch(
-      generationParamsNotifierProvider.select(
-        (generationParams) => (generationParams.width, generationParams.height),
-      ),
-    );
-    final focusRect = workflow.focusedSelectionRect;
-    final focusGeometry = focusRect == null
-        ? null
-        : FocusedInpaintUtils.resolveGeometryForSelection(
-            sourceWidth:
-                workflow.sourceImageWidth ??
-                workflow.sourceWidth ??
-                generationSize.$1,
-            sourceHeight:
-                workflow.sourceImageHeight ??
-                workflow.sourceHeight ??
-                generationSize.$2,
-            selectionRect: focusRect,
-            minContextMegaPixels: workflow.minimumContextMegaPixels,
-          );
-    final focusedCost = focusGeometry == null
-        ? null
-        : ref.watch(estimatedCostProvider);
-
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: _subPanelDecoration(theme),
@@ -719,52 +687,6 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
                   .read(generationParamsNotifierProvider.notifier)
                   .updateInpaintStrength(value);
             },
-          ),
-          const SizedBox(height: 12),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              context.l10n.img2img_focusedInpaint,
-              style: theme.textTheme.bodyMedium,
-            ),
-            subtitle: Text(
-              workflow.focusedInpaintEnabled && focusGeometry != null
-                  ? '${context.l10n.img2img_focusedInpaintEnabledHint}\n'
-                        '${context.l10n.editor_focusRequestSummary(focusGeometry.contextCrop.width, focusGeometry.contextCrop.height, focusGeometry.requestWidth, focusGeometry.requestHeight, focusedCost ?? 0)}'
-                  : workflow.focusedInpaintEnabled
-                  ? context.l10n.img2img_focusedInpaintEnabledHint
-                  : context.l10n.img2img_focusedInpaintDisabledHint,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                height: 1.4,
-              ),
-            ),
-            trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: workflow.focusedInpaintEnabled
-                    ? theme.colorScheme.primaryContainer
-                    : theme.colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.5,
-                      ),
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                  color: workflow.focusedInpaintEnabled
-                      ? theme.colorScheme.primary.withValues(alpha: 0.35)
-                      : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-                ),
-              ),
-              child: Text(
-                workflow.focusedInpaintEnabled
-                    ? context.l10n.img2img_enabled
-                    : context.l10n.img2img_disabled,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: workflow.focusedInpaintEnabled
-                      ? theme.colorScheme.onPrimaryContainer
-                      : theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
           ),
         ],
       ),
@@ -2083,16 +2005,10 @@ class _SourceImagePreview extends StatefulWidget {
     required this.imageWidth,
     required this.imageHeight,
     this.maskBytes,
-    this.focusedInpaintEnabled = false,
-    this.focusedSelectionRect,
-    this.minimumContextMegaPixels = 88.0,
   });
 
   final Uint8List sourceBytes;
   final Uint8List? maskBytes;
-  final bool focusedInpaintEnabled;
-  final Rect? focusedSelectionRect;
-  final double minimumContextMegaPixels;
   final int imageWidth;
   final int imageHeight;
 
@@ -2117,15 +2033,7 @@ class _SourceImagePreviewState extends State<_SourceImagePreview> {
   }
 
   void _syncDerivedData() {
-    _derivedData = _previewCache.resolve(
-      sourceImage: widget.sourceBytes,
-      maskImage: widget.maskBytes,
-      focusedInpaintEnabled: widget.focusedInpaintEnabled,
-      focusedSelectionRect: widget.focusedSelectionRect,
-      minContextMegaPixels: widget.minimumContextMegaPixels,
-      sourceWidth: widget.imageWidth,
-      sourceHeight: widget.imageHeight,
-    );
+    _derivedData = _previewCache.resolve(maskImage: widget.maskBytes);
   }
 
   @override
@@ -2166,17 +2074,6 @@ class _SourceImagePreviewState extends State<_SourceImagePreview> {
                         maxLogicalHeight: containedSize.height,
                       ),
                     ),
-                  if (_derivedData.focusedFrame?.contextCrop != null)
-                    IgnorePointer(
-                      child: CustomPaint(
-                        painter: _FocusedCropOverlayPainter(
-                          crop: _derivedData.focusedFrame!.contextCrop,
-                          focusBounds: _derivedData.focusedFrame!.focusBounds,
-                          imageWidth: widget.imageWidth,
-                          imageHeight: widget.imageHeight,
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -2198,67 +2095,5 @@ class _SourceImagePreviewState extends State<_SourceImagePreview> {
 
     final scale = math.min(maxWidth / imageWidth, maxHeight / imageHeight);
     return Size(imageWidth * scale, imageHeight * scale);
-  }
-}
-
-class _FocusedCropOverlayPainter extends CustomPainter {
-  const _FocusedCropOverlayPainter({
-    required this.crop,
-    required this.focusBounds,
-    required this.imageWidth,
-    required this.imageHeight,
-  });
-
-  final FocusedInpaintCrop crop;
-  final FocusedInpaintCrop? focusBounds;
-  final int imageWidth;
-  final int imageHeight;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final contextRect = Rect.fromLTWH(
-      crop.x / imageWidth * size.width,
-      crop.y / imageHeight * size.height,
-      crop.width / imageWidth * size.width,
-      crop.height / imageHeight * size.height,
-    );
-    final contextPath = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(contextRect, const Radius.circular(2)),
-      );
-
-    if (focusBounds != null) {
-      final selectionRect = Rect.fromLTWH(
-        focusBounds!.x / imageWidth * size.width,
-        focusBounds!.y / imageHeight * size.height,
-        focusBounds!.width / imageWidth * size.width,
-        focusBounds!.height / imageHeight * size.height,
-      );
-      final focusPath = Path()
-        ..addRRect(
-          RRect.fromRectAndRadius(selectionRect, const Radius.circular(2)),
-        );
-      FocusedOverlayPainter(
-        contextPath: contextPath,
-        focusPath: focusPath,
-      ).paint(canvas, size);
-      return;
-    }
-
-    FocusedOverlayPainter(contextPath: contextPath).paint(canvas, size);
-  }
-
-  @override
-  bool shouldRepaint(covariant _FocusedCropOverlayPainter oldDelegate) {
-    return crop.x != oldDelegate.crop.x ||
-        crop.y != oldDelegate.crop.y ||
-        crop.width != oldDelegate.crop.width ||
-        crop.height != oldDelegate.crop.height ||
-        focusBounds?.x != oldDelegate.focusBounds?.x ||
-        focusBounds?.y != oldDelegate.focusBounds?.y ||
-        focusBounds?.width != oldDelegate.focusBounds?.width ||
-        focusBounds?.height != oldDelegate.focusBounds?.height ||
-        imageWidth != oldDelegate.imageWidth ||
-        imageHeight != oldDelegate.imageHeight;
   }
 }

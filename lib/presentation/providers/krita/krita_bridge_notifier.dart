@@ -10,7 +10,6 @@ import '../../../core/enums/quality_tag_preset.dart';
 import '../../../core/krita/krita_bridge_server.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/datasources/remote/nai_image_generation_api_service.dart';
-import '../generation/image_workflow_controller.dart';
 import '../image_generation_provider.dart';
 import '../image_save_settings_provider.dart';
 import '../pill_roll_coordinator.dart';
@@ -307,12 +306,6 @@ final kritaBridgeNotifierProvider =
               ref.read(pillRollCoordinatorProvider).rollAllLanesAndSync(),
           readPromptSnapshot: (params) =>
               (prompt: params.prompt, negativePrompt: params.negativePrompt),
-          readMinimumContextPixels: () => ref
-              .read(imageWorkflowControllerProvider)
-              .minimumContextMegaPixels
-              .round()
-              .clamp(16, 192)
-              .toInt(),
           // AI 接管扩展：set_params → GenerationParamsNotifier setters。
           // seed_lock 是协议兼容派生值：有值即固定，无独立锁标志
           readSeedLock: () =>
@@ -532,21 +525,13 @@ final kritaBridgeNotifierProvider =
               ref.read(imageGenerationNotifierProvider).isGenerating,
           generateStream: (request) {
             final apiService = ref.read(naiImageGenerationApiServiceProvider);
-            return apiService.generateImageStream(
-              request.params,
-              focusedInpaintEnabled: request.focusedInpaintEnabled,
-              minimumContextMegaPixels: request.minimumContextPixels,
-              focusedSelectionRect: request.focusedSelectionRect,
-            );
+            return apiService.generateImageStream(request.params);
           },
           generateFallback: (request) async {
             final apiService = ref.read(naiImageGenerationApiServiceProvider);
             return apiService.generateImageArtifactsCancellable(
               request.params,
               onProgress: (_, __) {},
-              focusedInpaintEnabled: request.focusedInpaintEnabled,
-              minimumContextMegaPixels: request.minimumContextPixels,
-              focusedSelectionRect: request.focusedSelectionRect,
             );
           },
           registerExternalImage: (image, {required params, addToDisplay}) => ref

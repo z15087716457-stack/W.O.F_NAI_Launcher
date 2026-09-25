@@ -513,8 +513,8 @@ class CanvasFeedLayoutNotifier extends Notifier<CanvasFeedLayoutResult> {
                   previewBytes: n == state.currentImage
                       ? state.streamPreview
                       : null,
-                  focusedPreviewPlacement: n == state.currentImage
-                      ? state.focusedPreviewPlacement
+                  inpaintPreviewPlacement: n == state.currentImage
+                      ? state.inpaintPreviewPlacement
                       : null,
                 ),
         ];

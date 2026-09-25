@@ -2,11 +2,11 @@ import 'dart:typed_data';
 
 /// Placement data for compositing an Inpaint stream preview over its source.
 ///
-/// Focused Inpaint uses crop percentages; ordinary Inpaint uses the full-frame
-/// `0, 0, 1, 1` placement. [maskImage] is the shared request-size soft alpha
-/// mask used by both transient GPU previews and persisted failure snapshots.
-class FocusedStreamPreviewPlacement {
-  const FocusedStreamPreviewPlacement({
+/// Inpaint uses the full-frame `0, 0, 1, 1` placement. [maskImage] is the
+/// shared request-size soft alpha mask used by both transient GPU previews
+/// and persisted failure snapshots.
+class InpaintStreamPreviewPlacement {
+  const InpaintStreamPreviewPlacement({
     required this.sourceImage,
     required this.xPercent,
     required this.yPercent,
@@ -33,7 +33,7 @@ class FocusedStreamPreviewPlacement {
 
   bool get hasMask => maskImage != null && maskImage!.isNotEmpty;
 
-  FocusedStreamPreviewPlacement copyWith({
+  InpaintStreamPreviewPlacement copyWith({
     Uint8List? sourceImage,
     Uint8List? maskImage,
     double? xPercent,
@@ -41,7 +41,7 @@ class FocusedStreamPreviewPlacement {
     double? widthPercent,
     double? heightPercent,
   }) {
-    return FocusedStreamPreviewPlacement(
+    return InpaintStreamPreviewPlacement(
       sourceImage: sourceImage ?? this.sourceImage,
       maskImage: maskImage ?? this.maskImage,
       xPercent: xPercent ?? this.xPercent,
@@ -69,8 +69,8 @@ class ImageStreamChunk {
   /// 最终图像数据
   final Uint8List? finalImage;
 
-  /// Focused inpaint 中间预览在原始图上的覆盖位置。
-  final FocusedStreamPreviewPlacement? focusedPreviewPlacement;
+  /// Inpaint 中间预览在原始图上的覆盖位置。
+  final InpaintStreamPreviewPlacement? inpaintPreviewPlacement;
 
   /// 多样本流式生成中的样本索引（NovelAI `samp_ix`）。
   final int sampleIndex;
@@ -92,7 +92,7 @@ class ImageStreamChunk {
     this.progress = 0.0,
     this.isComplete = false,
     this.finalImage,
-    this.focusedPreviewPlacement,
+    this.inpaintPreviewPlacement,
     this.sampleIndex = 0,
     this.currentStep,
     this.totalSteps,
@@ -107,7 +107,7 @@ class ImageStreamChunk {
     int? currentStep,
     int? totalSteps,
     Uint8List? previewImage,
-    FocusedStreamPreviewPlacement? focusedPreviewPlacement,
+    InpaintStreamPreviewPlacement? inpaintPreviewPlacement,
   }) {
     return ImageStreamChunk(
       progress: progress,
@@ -115,7 +115,7 @@ class ImageStreamChunk {
       currentStep: currentStep,
       totalSteps: totalSteps,
       previewImage: previewImage,
-      focusedPreviewPlacement: focusedPreviewPlacement,
+      inpaintPreviewPlacement: inpaintPreviewPlacement,
     );
   }
 

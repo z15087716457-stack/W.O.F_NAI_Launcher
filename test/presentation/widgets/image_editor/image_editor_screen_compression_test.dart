@@ -9,58 +9,6 @@ import 'package:nai_launcher/presentation/widgets/image_editor/image_editor_scre
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets(
-    'compression changes Focus request summary without resizing the work canvas',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1200, 800));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          locale: Locale('zh'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: ImageEditorScreen(
-            initialSize: Size(2560, 1280),
-            mode: ImageEditorMode.inpaint,
-            existingFocusRect: Rect.fromLTWH(480, 240, 1600, 800),
-            initialFocusedInpaintEnabled: true,
-            initialMinimumContextMegaPixels: 88,
-            focusedInpaintCostConfig: ImageEditorFocusedInpaintCostConfig(
-              model: 'nai-diffusion-4-full',
-              steps: 28,
-              batchCount: 1,
-              batchSize: 1,
-              smea: false,
-              smeaDyn: false,
-              subscriptionTier: 3,
-            ),
-            title: 'Compression geometry test',
-            initialShowLayerPanel: false,
-          ),
-        ),
-      );
-      await _pumpUntil(tester, () {
-        final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-        return state.debugCompressionTargetCount > 1 &&
-            find.textContaining('实际发送').evaluate().isNotEmpty;
-      });
-
-      final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-      final beforeSummary = _focusedSummaryText(tester);
-      expect(state.debugCanvasSize, const Size(2560, 1280));
-      expect(state.debugCompressionTargetSize, const Size(2560, 1280));
-
-      state.debugSetCompressionTargetIndex(0);
-      await tester.pump();
-
-      expect(state.debugCanvasSize, const Size(2560, 1280));
-      expect(state.debugCompressionTargetSize, const Size(1344, 640));
-      expect(state.debugCompressionApplied, isTrue);
-      expect(_focusedSummaryText(tester), isNot(beforeSummary));
-    },
-  );
-
   testWidgets('mask drawn before compression follows the inpaint source size', (
     tester,
   ) async {
@@ -182,15 +130,6 @@ void main() {
     final decoded = img.decodeImage(result!.modifiedImage!);
     expect((decoded!.width, decoded.height), (1344, 640));
   });
-}
-
-String _focusedSummaryText(WidgetTester tester) {
-  final text = tester.widget<Text>(
-    find.byWidgetPredicate(
-      (widget) => widget is Text && widget.data?.contains('实际发送') == true,
-    ),
-  );
-  return text.data!;
 }
 
 Future<void> _pumpUntil(WidgetTester tester, bool Function() condition) async {

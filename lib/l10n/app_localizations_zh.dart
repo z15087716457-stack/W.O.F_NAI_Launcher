@@ -1475,17 +1475,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_enhanceMax => 'Max✨';
 
   @override
-  String get img2img_focusedInpaint => 'Focused Inpainting（聚焦重绘）';
-
-  @override
-  String get img2img_focusedInpaintEnabledHint =>
-      '已启用。请在重绘编辑器左上角按钮里调整聚焦区域与 Minimum Context Area。';
-
-  @override
-  String get img2img_focusedInpaintDisabledHint =>
-      '默认是普通重绘；如需聚焦重绘，请在重绘编辑器左上角按钮中开启并框选区域。';
-
-  @override
   String get img2img_disabled => '未启用';
 
   @override
@@ -1628,9 +1617,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get editor_clearLayer => '清除图层';
-
-  @override
-  String get editor_clearSelection => '清除选区';
 
   @override
   String get editor_resetView => '重置视图';
@@ -2016,25 +2002,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get editor_focusInactiveHint => '点击按钮后进入聚焦模式，再框选区域并绘制蒙版。';
-
-  @override
-  String get editor_focusReadyHint => '已选定聚焦区域，可继续用画笔编辑蒙版。';
-
-  @override
-  String get editor_focusNeedsSelectionHint => '先框选聚焦区域，再切换画笔绘制蒙版。';
-
-  @override
-  String get editor_focusSelection => '选区';
-
-  @override
-  String get editor_focusBrush => '画笔';
-
-  @override
-  String get editor_focusContextHint =>
-      '外框是实际送去 Focused Inpaint 的区域，内框是主要重绘区域；两框之间的带宽就是 Minimum Context Area。';
-
-  @override
   String get editor_compressionTitle => '输出分辨率';
 
   @override
@@ -2069,21 +2036,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get editor_compressionUnavailable => '当前工作画布已经低于最低压缩档，不能继续降低分辨率。';
-
-  @override
-  String get editor_compressionFocusLimited =>
-      '当前 Focused Inpaint 选区在更高分辨率下会超过请求面积上限，因此滑条上限已收紧。';
-
-  @override
-  String editor_focusRequestSummary(
-    int outerWidth,
-    int outerHeight,
-    int requestWidth,
-    int requestHeight,
-    int cost,
-  ) {
-    return '外层裁剪 $outerWidth×$outerHeight，实际发送 $requestWidth×$requestHeight，预计 $cost Anlas。';
-  }
 
   @override
   String editor_unsupportedImageFormat(Object extension) {
@@ -2132,11 +2084,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String editor_layerName(Object count) {
     return '图层 $count';
-  }
-
-  @override
-  String editor_focusMinimumContextArea(Object value) {
-    return '最小上下文区域：$value';
   }
 
   @override
@@ -10148,15 +10095,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get img2img_hideAdvanced => '收起高级设置';
-
-  @override
-  String get editor_focusAreaTitle => '聚焦区域';
-
-  @override
-  String get editor_focusedInpaint => '聚焦重绘';
-
-  @override
-  String get editor_outpaintFocusConflict => '扩图与聚焦重绘不能同时使用。';
 
   @override
   String promptToken_usage(int used, int limit) {

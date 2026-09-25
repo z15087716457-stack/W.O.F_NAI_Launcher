@@ -103,15 +103,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
           // 画布区域
           Expanded(
             child: Stack(
-              children: [
-                Positioned.fill(child: _buildCanvasArea()),
-                if (_isInpaintMode)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: _buildFocusedSelectionCard(),
-                  ),
-              ],
+              children: [Positioned.fill(child: _buildCanvasArea())],
             ),
           ),
 
@@ -134,7 +126,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
     );
   }
 
-  /// 左上浮层：焦点蒙版卡片（inpaint）+ 当前工具设置卡片
+  /// 左上浮层：当前工具设置卡片
   Widget _buildTopLeftOverlay(Size mediaSize) {
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -145,25 +137,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildToolSettingsPanel(),
-            if (_isInpaintMode) ...[
-              const SizedBox(height: 8),
-              if (_focusedInpaintEnabled)
-                _buildFocusedSelectionCard()
-              else
-                EditorOverlayCard(
-                  child: TextButton.icon(
-                    icon: const Icon(Icons.filter_center_focus, size: 16),
-                    label: Text(
-                      context.l10n.editor_focusedInpaint,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    onPressed: _toggleFocusedInpaint,
-                  ),
-                ),
-            ],
-          ],
+          children: [_buildToolSettingsPanel()],
         ),
       ),
     );

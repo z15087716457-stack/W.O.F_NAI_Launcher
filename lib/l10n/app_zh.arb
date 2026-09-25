@@ -633,9 +633,6 @@
   "img2img_enhanceMagnitude": "幅度",
   "img2img_enhanceUpscaleAmount": "放大倍数",
   "img2img_enhanceMax": "Max✨",
-  "img2img_focusedInpaint": "Focused Inpainting（聚焦重绘）",
-  "img2img_focusedInpaintEnabledHint": "已启用。请在重绘编辑器左上角按钮里调整聚焦区域与 Minimum Context Area。",
-  "img2img_focusedInpaintDisabledHint": "默认是普通重绘；如需聚焦重绘，请在重绘编辑器左上角按钮中开启并框选区域。",
   "img2img_disabled": "未启用",
   "img2img_novelAiCloudUpscale": "NovelAI 云端超分 (固定 4x 放大)",
   "img2img_comfyuiEnableHint": "请先在「设置 > ComfyUI」中启用并连接服务器。",
@@ -718,7 +715,6 @@
   "editor_shortcutUndo": "撤销 (Ctrl+Z)",
   "editor_shortcutRedo": "重做 (Ctrl+Y)",
   "editor_done": "完成",
-  "editor_clearSelection": "清除选区",
   "editor_back": "返回",
   "editor_layers": "图层",
   "editor_loadMask": "加载蒙版",
@@ -882,12 +878,6 @@
       "error": {}
     }
   },
-  "editor_focusInactiveHint": "点击按钮后进入聚焦模式，再框选区域并绘制蒙版。",
-  "editor_focusReadyHint": "已选定聚焦区域，可继续用画笔编辑蒙版。",
-  "editor_focusNeedsSelectionHint": "先框选聚焦区域，再切换画笔绘制蒙版。",
-  "editor_focusSelection": "选区",
-  "editor_focusBrush": "画笔",
-  "editor_focusContextHint": "外框是实际送去 Focused Inpaint 的区域，内框是主要重绘区域；两框之间的带宽就是 Minimum Context Area。",
   "editor_compressionTitle": "输出分辨率",
   "editor_compressionTooltip": "选择输出分辨率",
   "editor_compressionUncompressed": "保持编辑工作尺寸，不执行压缩。",
@@ -927,27 +917,6 @@
     }
   },
   "editor_compressionUnavailable": "当前工作画布已经低于最低压缩档，不能继续降低分辨率。",
-  "editor_compressionFocusLimited": "当前 Focused Inpaint 选区在更高分辨率下会超过请求面积上限，因此滑条上限已收紧。",
-  "editor_focusRequestSummary": "外层裁剪 {outerWidth}×{outerHeight}，实际发送 {requestWidth}×{requestHeight}，预计 {cost} Anlas。",
-  "@editor_focusRequestSummary": {
-    "placeholders": {
-      "outerWidth": {
-        "type": "int"
-      },
-      "outerHeight": {
-        "type": "int"
-      },
-      "requestWidth": {
-        "type": "int"
-      },
-      "requestHeight": {
-        "type": "int"
-      },
-      "cost": {
-        "type": "int"
-      }
-    }
-  },
   "editor_unsupportedImageFormat": "不支持的文件格式: .{extension}\n请选择图像文件（PNG、JPG、WEBP 等）",
   "@editor_unsupportedImageFormat": {
     "placeholders": {
@@ -984,12 +953,6 @@
   "@editor_layerName": {
     "placeholders": {
       "count": {}
-    }
-  },
-  "editor_focusMinimumContextArea": "最小上下文区域：{value}",
-  "@editor_focusMinimumContextArea": {
-    "placeholders": {
-      "value": {}
     }
   },
   "editor_canvasSizeTitle": "画布尺寸",
@@ -6052,9 +6015,6 @@
   "img2img_enhanceAction": "增强！",
   "img2img_showAdvanced": "显示高级设置",
   "img2img_hideAdvanced": "收起高级设置",
-  "editor_focusAreaTitle": "聚焦区域",
-  "editor_focusedInpaint": "聚焦重绘",
-  "editor_outpaintFocusConflict": "扩图与聚焦重绘不能同时使用。",
   "promptToken_usage": "Token 用量：{used} / {limit}",
   "promptToken_promptShare": "此提示词：{used} Token；总用量：{total} / {limit}",
   "@promptToken_usage": {

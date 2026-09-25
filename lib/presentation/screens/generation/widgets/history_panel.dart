@@ -877,9 +877,9 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
             streamPreview:
                 slot?.previewBytes ??
                 (firstIsStreaming ? state.streamPreview : null),
-            focusedPreviewPlacement:
-                slot?.focusedPreviewPlacement ??
-                (firstIsStreaming ? state.focusedPreviewPlacement : null),
+            inpaintPreviewPlacement:
+                slot?.inpaintPreviewPlacement ??
+                (firstIsStreaming ? state.inpaintPreviewPlacement : null),
             imageWidth: imageWidth,
             imageHeight: imageHeight,
             enableSelection: false,

@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
@@ -11,7 +10,6 @@ void main() {
       final wide = EditorCompressionPlan.resolve(
         workWidth: 2560,
         workHeight: 896,
-        focusedInpaintEnabled: false,
       );
       expect((wide.normalTarget.width, wide.normalTarget.height), (1728, 576));
       expect(
@@ -22,7 +20,6 @@ void main() {
       final twoToOne = EditorCompressionPlan.resolve(
         workWidth: 2560,
         workHeight: 1280,
-        focusedInpaintEnabled: false,
       );
       expect(
         (twoToOne.normalTarget.width, twoToOne.normalTarget.height),
@@ -36,7 +33,6 @@ void main() {
       final portrait = EditorCompressionPlan.resolve(
         workWidth: 832,
         workHeight: 1216,
-        focusedInpaintEnabled: false,
       );
       expect(
         (portrait.normalTarget.width, portrait.normalTarget.height),
@@ -52,7 +48,6 @@ void main() {
       final plan = EditorCompressionPlan.resolve(
         workWidth: 1001,
         workHeight: 1003,
-        focusedInpaintEnabled: false,
       );
 
       expect(plan.highestTarget.isOriginal, isTrue);
@@ -74,7 +69,6 @@ void main() {
       final plan = EditorCompressionPlan.resolve(
         workWidth: 900,
         workHeight: 900,
-        focusedInpaintEnabled: false,
       );
 
       expect((plan.minimumTarget.width, plan.minimumTarget.height), (960, 960));
@@ -83,11 +77,10 @@ void main() {
       expect(plan.targets.single.isOriginal, isTrue);
     });
 
-    test('skips oversized compressed targets outside Focus mode', () {
+    test('skips oversized compressed targets over the request area limit', () {
       final plan = EditorCompressionPlan.resolve(
         workWidth: 2560,
         workHeight: 2560,
-        focusedInpaintEnabled: false,
       );
 
       expect(plan.targets.last.isOriginal, isTrue);
@@ -104,33 +97,10 @@ void main() {
       );
     });
 
-    test(
-      'allows a large Focus source while filtering illegal high targets',
-      () {
-        final unconstrained = EditorCompressionPlan.resolve(
-          workWidth: 2560,
-          workHeight: 2560,
-          focusedInpaintEnabled: true,
-        );
-        expect(unconstrained.highestTarget.isOriginal, isTrue);
-
-        final constrained = EditorCompressionPlan.resolve(
-          workWidth: 2560,
-          workHeight: 2560,
-          focusedInpaintEnabled: true,
-          focusedSelectionRect: const Rect.fromLTWH(0, 0, 2200, 2200),
-          minimumContextPixels: 192,
-        );
-        expect(constrained.highestTarget.isOriginal, isFalse);
-        expect(constrained.targets, isNotEmpty);
-      },
-    );
-
     test('resolves the nearest target without increasing linear scale', () {
       final plan = EditorCompressionPlan.resolve(
         workWidth: 2560,
         workHeight: 1280,
-        focusedInpaintEnabled: false,
       );
       final target = plan.targetAtOrBelowScale(0.55);
 
@@ -142,31 +112,6 @@ void main() {
           greaterThan(0.55),
         );
       }
-    });
-  });
-
-  group('EditorCompressionGeometry', () {
-    test('round-trips work and target coordinates', () {
-      const workRect = Rect.fromLTWH(320, 160, 640, 320);
-      final targetRect = EditorCompressionGeometry.projectRect(
-        workRect,
-        sourceWidth: 2560,
-        sourceHeight: 1280,
-        targetWidth: 1344,
-        targetHeight: 672,
-      );
-      final roundTrip = EditorCompressionGeometry.projectRect(
-        targetRect,
-        sourceWidth: 1344,
-        sourceHeight: 672,
-        targetWidth: 2560,
-        targetHeight: 1280,
-      );
-
-      expect(roundTrip.left, closeTo(workRect.left, 1e-9));
-      expect(roundTrip.top, closeTo(workRect.top, 1e-9));
-      expect(roundTrip.right, closeTo(workRect.right, 1e-9));
-      expect(roundTrip.bottom, closeTo(workRect.bottom, 1e-9));
     });
   });
 

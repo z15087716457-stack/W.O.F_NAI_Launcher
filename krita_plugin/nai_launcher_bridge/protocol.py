@@ -57,9 +57,6 @@ def encode_inpaint(
     strength: float,
     noise: float,
     inpaint_strength: float,
-    minimum_context_pixels: int,
-    focused_inpaint: bool,
-    selection_rect: Optional[Dict[str, int]],
 ) -> str:
     return _encode(
         {
@@ -67,16 +64,13 @@ def encode_inpaint(
             "id": request_id,
             "image": _b64(image_png),
             "mask": _b64(mask_png),
-            "selection_rect": selection_rect if focused_inpaint else None,
             "prompt": prompt,
             "negative_prompt": negative_prompt,
             "strength": float(strength),
             "noise": float(noise),
             "inpaint_strength": float(inpaint_strength),
-            "minimum_context_pixels": int(minimum_context_pixels),
             "mask_closing_iterations": 0,
             "mask_expansion_iterations": 0,
-            "focused_inpaint": bool(focused_inpaint),
         }
     )
 

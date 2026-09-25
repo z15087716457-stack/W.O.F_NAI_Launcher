@@ -79,7 +79,6 @@ class EditorState extends ChangeNotifier {
   /// 画布尺寸
   Size _canvasSize = const Size(1024, 1024);
   Size get canvasSize => _canvasSize;
-  Rect Function(Rect candidate, Offset fixedAnchor)? _rectSelectionConstraint;
   MagicWandHandler? _magicWandHandler;
 
   // ===== 内部状态 =====
@@ -122,16 +121,6 @@ class EditorState extends ChangeNotifier {
   // 选区代理
   Path? get selectionPath => selectionManager.selectionPath;
   Path? get previewPath => selectionManager.previewPath;
-
-  void setRectSelectionConstraint(
-    Rect Function(Rect candidate, Offset fixedAnchor)? constraint,
-  ) {
-    _rectSelectionConstraint = constraint;
-  }
-
-  Rect constrainRectSelection(Rect candidate, Offset fixedAnchor) {
-    return _rectSelectionConstraint?.call(candidate, fixedAnchor) ?? candidate;
-  }
 
   void setMagicWandHandler(MagicWandHandler? handler) {
     _magicWandHandler = handler;

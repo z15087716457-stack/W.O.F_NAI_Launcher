@@ -9,11 +9,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
-import '../../../core/services/anlas_calculator.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/contiguous_region_selector.dart';
 import '../../../core/utils/editor_compression_utils.dart';
-import '../../../core/utils/focused_inpaint_utils.dart';
 import '../../../core/utils/inpaint_mask_utils.dart';
 import '../../../core/utils/inpaint_outpaint_utils.dart';
 import '../../../core/utils/localization_extension.dart';
@@ -23,13 +21,10 @@ import '../../utils/dropped_file_reader.dart';
 import '../../utils/internal_drag_protocol.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../widgets/common/app_toast.dart';
-import 'core/canvas_controller.dart';
 import 'core/editor_state.dart';
 import 'effects/editor_effects.dart';
-import 'core/focused_selection_state.dart';
 import 'core/history_manager.dart';
 import 'layers/layer.dart';
-import 'painters/focused_overlay_painter.dart';
 import 'tools/tool_base.dart';
 import 'canvas/editor_canvas.dart';
 import 'widgets/toolbar/editor_overlay_toolbar.dart';
@@ -47,7 +42,6 @@ import '../../widgets/common/themed_divider.dart';
 
 part 'image_editor_screen_compression.dart';
 part 'image_editor_screen_effects.dart';
-part 'image_editor_screen_focused.dart';
 part 'image_editor_screen_layout.dart';
 part 'image_editor_screen_magic_wand.dart';
 part 'image_editor_screen_types.dart';
@@ -62,18 +56,6 @@ class ImageEditorScreen extends StatefulWidget {
 
   /// 已有的蒙版图像
   final Uint8List? existingMask;
-
-  /// 已有的 Focused Inpaint 选区范围
-  final Rect? existingFocusRect;
-
-  /// Focused Inpaint 上下文带宽
-  final double initialMinimumContextMegaPixels;
-
-  /// 是否启用 Focused Inpaint
-  final bool initialFocusedInpaintEnabled;
-
-  /// Focused Inpaint 当前生成设置的点数估算配置
-  final ImageEditorFocusedInpaintCostConfig? focusedInpaintCostConfig;
 
   /// 是否显示蒙版导出选项
   final bool showMaskExport;
@@ -94,9 +76,6 @@ class ImageEditorScreen extends StatefulWidget {
   final bool debugFailOutpaintSourceReplacement;
 
   @visibleForTesting
-  final bool debugFailOutpaintAfterFocusedDisable;
-
-  @visibleForTesting
   final bool debugDisableDropRegion;
 
   @visibleForTesting
@@ -107,17 +86,12 @@ class ImageEditorScreen extends StatefulWidget {
     this.initialImage,
     this.initialSize,
     this.existingMask,
-    this.existingFocusRect,
-    this.initialMinimumContextMegaPixels = 88.0,
-    this.initialFocusedInpaintEnabled = false,
-    this.focusedInpaintCostConfig,
     this.showMaskExport = true,
     this.mode = ImageEditorMode.edit,
     this.title = '',
     this.initialOutpaintCommitPending = false,
     this.initialShowLayerPanel = true,
     this.debugFailOutpaintSourceReplacement = false,
-    this.debugFailOutpaintAfterFocusedDisable = false,
     this.debugDisableDropRegion = false,
     this.debugEfficientVitSamSelector,
   });
@@ -128,10 +102,6 @@ class ImageEditorScreen extends StatefulWidget {
     Uint8List? initialImage,
     Size? initialSize,
     Uint8List? existingMask,
-    Rect? existingFocusRect,
-    double initialMinimumContextMegaPixels = 88.0,
-    bool initialFocusedInpaintEnabled = false,
-    ImageEditorFocusedInpaintCostConfig? focusedInpaintCostConfig,
     bool showMaskExport = true,
     ImageEditorMode mode = ImageEditorMode.edit,
     String? title,
@@ -143,10 +113,6 @@ class ImageEditorScreen extends StatefulWidget {
           initialImage: initialImage,
           initialSize: initialSize,
           existingMask: existingMask,
-          existingFocusRect: existingFocusRect,
-          initialMinimumContextMegaPixels: initialMinimumContextMegaPixels,
-          initialFocusedInpaintEnabled: initialFocusedInpaintEnabled,
-          focusedInpaintCostConfig: focusedInpaintCostConfig,
           showMaskExport: showMaskExport,
           mode: mode,
           title: title ?? context.l10n.editor_defaultTitle,
@@ -173,9 +139,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   };
 
   late EditorState _state;
-  late FocusedSelectionState _focusedSelectionState;
-  late double _minimumContextMegaPixels;
-  late bool _focusedInpaintEnabled;
   bool _isMaskFillMode = false;
   EditorCompressionPlan? _compressionPlan;
   EditorCompressionTarget? _compressionTarget;
@@ -260,9 +223,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   }
 
   @visibleForTesting
-  bool get debugFocusedInpaintEnabled => _focusedInpaintEnabled;
-
-  @visibleForTesting
   bool get debugHasOutpaintChanges => _hasOutpaintChanges;
 
   @visibleForTesting
@@ -334,9 +294,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       canvasSize: _state.canvasSize,
     );
   }
-
-  @visibleForTesting
-  Rect? get debugFocusedRect => _focusedSelectionState.committedRect;
 
   @visibleForTesting
   Rect? get debugSelectionBounds => _state.selectionPath?.getBounds();
@@ -440,20 +397,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
     _efficientVitSamService = EfficientVitSamService();
     _state = EditorState();
     _state.setMagicWandHandler(_applyMagicWandAt);
-    _state.selectionManager.selectionNotifier.addListener(
-      _consumeFocusedSelection,
-    );
-    _focusedSelectionState = FocusedSelectionState(
-      canvasSize: const Size(1024, 1024),
-      initialRect: widget.existingFocusRect,
-    );
-    _minimumContextMegaPixels = widget.initialMinimumContextMegaPixels.clamp(
-      16.0,
-      192.0,
-    );
-    _focusedInpaintEnabled =
-        widget.initialFocusedInpaintEnabled || widget.existingFocusRect != null;
-    _syncFocusedSelectionConstraint();
     _isOutpaintCommitPending = widget.initialOutpaintCommitPending;
     _showLayerPanel = widget.initialShowLayerPanel;
   }
@@ -479,11 +422,9 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         initialLayerName: context.l10n.editor_defaultDrawingLayerName,
       );
       _localizeDefaultLayerName();
-      _focusedSelectionState.canvasSize = size;
 
       // 加载已有蒙版（如果有）
       await _loadExistingMask();
-      _loadExistingFocusSelection();
     }
 
     _initializeCompressionPlan();
@@ -496,11 +437,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       _state.setForegroundColor(const Color(0xFF60AAFF));
       _state.setBrushOpacity(0.55);
       _state.setBrushHardness(1.0);
-      _state.setToolById(
-        _focusedInpaintEnabled && widget.existingFocusRect == null
-            ? 'rect_selection'
-            : 'brush',
-      );
+      _state.setToolById('brush');
     }
 
     // 适应视口
@@ -549,7 +486,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         Size(image.width.toDouble(), image.height.toDouble()),
         initialLayerName: defaultDrawingLayerName,
       );
-      _focusedSelectionState.canvasSize = _state.canvasSize;
 
       // 将图像添加为底图图层
       final sourceLayer = await _state.layerManager.addLayerFromImage(
@@ -578,7 +514,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
       // 加载已有蒙版
       await _loadExistingMask();
-      _loadExistingFocusSelection();
 
       image.dispose();
     } catch (e) {
@@ -588,7 +523,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         initialLayerName: defaultDrawingLayerName,
       );
       _localizeDefaultLayerName();
-      _focusedSelectionState.canvasSize = _state.canvasSize;
     } finally {
       codec?.dispose();
     }
@@ -671,34 +605,8 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
     }
   }
 
-  void _loadExistingFocusSelection() {
-    if (!_isInpaintMode || widget.existingFocusRect == null) {
-      return;
-    }
-    final sourceWidth = _initialSourceWidth;
-    final sourceHeight = _initialSourceHeight;
-    final rect = widget.existingFocusRect!;
-    if (sourceWidth == null || sourceHeight == null) {
-      _focusedSelectionState.load(rect);
-      _constrainCommittedFocusedSelection();
-      return;
-    }
-    _focusedSelectionState.load(
-      Rect.fromLTRB(
-        rect.left * _state.canvasSize.width / sourceWidth,
-        rect.top * _state.canvasSize.height / sourceHeight,
-        rect.right * _state.canvasSize.width / sourceWidth,
-        rect.bottom * _state.canvasSize.height / sourceHeight,
-      ),
-    );
-    _constrainCommittedFocusedSelection();
-  }
-
   @override
   void dispose() {
-    _state.selectionManager.selectionNotifier.removeListener(
-      _consumeFocusedSelection,
-    );
     _state.setMagicWandHandler(null);
     _efficientVitSamService.dispose();
     _state.dispose();
@@ -758,10 +666,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
         // 使用新的 resizeCanvas 方法，支持图层内容变换
         _state.resizeCanvas(result.size, mode);
-        _focusedSelectionState.canvasSize = result.size;
         _refreshCompressionPlan(desiredScale: compressionScale);
-        _constrainCommittedFocusedSelection();
-        _refreshCompressionPlan();
 
         // 显示成功消息
         if (mounted) {
@@ -889,23 +794,10 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
           _virtualOutpaintFrame?.outpaintMaskRects ?? const <Rect>[];
       final hasMaskChanges =
           _hasMaskContent() || virtualOutpaintMaskRects.isNotEmpty;
-      final workFocusAreaRect = _focusedInpaintEnabled
-          ? _focusedSelectionState.committedRect
-          : null;
-      final focusedInpaintEnabled =
-          _focusedInpaintEnabled && workFocusAreaRect != null;
-      final focusAreaRect = focusedInpaintEnabled
-          ? _projectWorkRectToCompressionTarget(workFocusAreaRect)
-          : null;
-      final useFocusedSelectionAsMask =
-          focusedInpaintEnabled && !hasMaskChanges;
       AppLogger.d(
         'Export editor result: inpaint=$_isInpaintMode, '
             'hasImageChanges=$hasImageChanges, hasMaskChanges=$hasMaskChanges, '
             'selection=${_state.selectionPath != null}, '
-            'workFocusRect=$workFocusAreaRect, focusRect=$focusAreaRect, '
-            'focusedEnabled=$focusedInpaintEnabled, '
-            'useFocusedSelectionAsMask=$useFocusedSelectionAsMask, '
             'work=${_state.canvasSize.width.round()}x${_state.canvasSize.height.round()}, '
             'target=${target.width}x${target.height}, '
             'compressionApplied=$compressionApplied, '
@@ -927,16 +819,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
           'Exported inpaint mask bytes: ${maskImage.length}',
           'ImageEditor',
         );
-      } else if (_isInpaintMode &&
-          widget.showMaskExport &&
-          useFocusedSelectionAsMask) {
-        maskImage = await _exportFocusedSelectionMaskAtCompressionTarget(
-          workFocusAreaRect,
-        );
-        AppLogger.d(
-          'Exported focused selection mask bytes: ${maskImage.length}',
-          'ImageEditor',
-        );
       }
 
       final inpaintSource = _isInpaintMode
@@ -954,11 +836,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
             modifiedImage: modifiedImage,
             maskImage: maskImage,
             hasImageChanges: !_isInpaintMode && hasImageChanges,
-            hasMaskChanges:
-                _isInpaintMode && (hasMaskChanges || useFocusedSelectionAsMask),
-            focusAreaRect: focusAreaRect,
-            minimumContextMegaPixels: _minimumContextMegaPixels,
-            focusedInpaintEnabled: focusedInpaintEnabled,
+            hasMaskChanges: _isInpaintMode && hasMaskChanges,
             outpaintSourceImage: _isInpaintMode && _hasOutpaintChanges
                 ? inpaintSource
                 : null,
@@ -1265,8 +1143,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         _hasOutpaintChanges = applied.frame.hasOutpaintChanges;
 
         _state.setCanvasSize(resizedCanvasSize);
-        _focusedSelectionState.canvasSize = resizedCanvasSize;
-        _disableFocusedInpaintForOutpaint();
         _refreshCompressionPlan(desiredScale: compressionScale);
         _state.canvasController.fitToViewport(_state.canvasSize);
         _state.requestUiUpdate();
@@ -1365,8 +1241,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       final previousHasOutpaintChanges = _hasOutpaintChanges;
       final previousVirtualOutpaintFrame = _virtualOutpaintFrame;
       final previousCanvasSize = _state.canvasSize;
-      final previousFocusedCanvasSize = _focusedSelectionState.committedRect;
-      final previousFocusedInpaintEnabled = _focusedInpaintEnabled;
       final previousControllerScale = _state.canvasController.scale;
       final previousControllerOffset = _state.canvasController.offset;
       final previousSourceBytes = sourceBytes;
@@ -1391,9 +1265,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       void restoreScreenState() {
         restoreOutpaintTrackingFields();
         _state.setCanvasSize(previousCanvasSize);
-        _focusedSelectionState.canvasSize = previousCanvasSize;
-        _focusedSelectionState.load(previousFocusedCanvasSize);
-        _focusedInpaintEnabled = previousFocusedInpaintEnabled;
         _refreshCompressionPlan(desiredScale: compressionScale);
         _state.setSelection(previousSelectionPath, saveHistory: false);
         _state.setPreviewPath(previousPreviewPath);
@@ -1469,15 +1340,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
               );
 
               _state.setCanvasSize(resizedCanvasSize);
-              _focusedSelectionState.canvasSize = resizedCanvasSize;
-              _disableFocusedInpaintForOutpaint();
               _state.canvasController.fitToViewport(_state.canvasSize);
-
-              if (widget.debugFailOutpaintAfterFocusedDisable) {
-                throw StateError(
-                  'Simulated outpaint failure after focused disable.',
-                );
-              }
 
               if (maskLayer != null) {
                 _removeAllMaskLayers(preservedLayerIds: {maskLayer.id});
@@ -1514,15 +1377,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
     }
   }
 
-  void _disableFocusedInpaintForOutpaint() {
-    _focusedInpaintEnabled = false;
-    _syncFocusedSelectionConstraint();
-    _focusedSelectionState.clear();
-    _state.clearSelection(saveHistory: false);
-    _state.clearPreview();
-    _state.setToolById('brush');
-  }
-
   void _resetInpaintMask() {
     if (!_isInpaintMode) {
       _state.clearActiveLayerWithHistory();
@@ -1532,10 +1386,9 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
     _removeAllMaskLayers();
     _state.clearSelection(saveHistory: false);
     _state.clearPreview();
-    _focusedSelectionState.clear();
     _isMaskFillMode = false;
     _addEmptyMaskLayerAboveSource(name: context.l10n.editor_maskLayerName);
-    _state.setToolById(_focusedInpaintEnabled ? 'rect_selection' : 'brush');
+    _state.setToolById('brush');
     _refreshCompressionPlan();
     _state.requestUiUpdate();
     setState(() {});
@@ -1761,14 +1614,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   }
 
   Widget _buildCanvasArea() {
-    final focusAreaRect = _focusedInpaintEnabled
-        ? _focusedSelectionState.resolveActiveRect(
-            previewPath: _state.previewPath,
-          )
-        : null;
-    final contextCrop = focusAreaRect == null
-        ? null
-        : _resolveFocusedContextCropOnWorkCanvas(focusAreaRect);
     final virtualOutpaintMaskRects =
         _virtualOutpaintFrame?.outpaintMaskRects ?? const <Rect>[];
 
@@ -1781,18 +1626,10 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
               showTransparentCanvasBackground:
                   _isInpaintMode || _hasTransparentCutout,
               shouldSuppressPointerInput: _shouldSuppressCanvasPointerInput,
-              suppressSelectionOverlay: _focusedSelectionState
-                  .shouldSuppressSelectionOverlay(
-                    focusedEnabled: _isInpaintMode && _focusedInpaintEnabled,
-                    currentToolId: _state.currentTool?.id,
-                    previewPath: _state.previewPath,
-                  ),
             ),
           ),
         ),
-        if (_isInpaintMode &&
-            !_focusedInpaintEnabled &&
-            virtualOutpaintMaskRects.isNotEmpty)
+        if (_isInpaintMode && virtualOutpaintMaskRects.isNotEmpty)
           Positioned.fill(
             child: IgnorePointer(
               child: RepaintBoundary(
@@ -1805,7 +1642,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
               ),
             ),
           ),
-        if (_isInpaintMode && !_focusedInpaintEnabled && !_isMaskFillMode)
+        if (_isInpaintMode && !_isMaskFillMode)
           Positioned.fill(
             child: OutpaintEdgeDragOverlay(
               canvasSize: _state.canvasSize,
@@ -1813,24 +1650,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
               enabled: !_isOutpaintCommitPending,
               onCommitted: _applyOutpaintEdges,
               onFrameResizeCommitted: _applyOutpaintFrameDelta,
-            ),
-          ),
-        if (_isInpaintMode && focusAreaRect != null && contextCrop != null)
-          Positioned.fill(
-            child: IgnorePointer(
-              child: RepaintBoundary(
-                child: CustomPaint(
-                  painter: _FocusedContextOverlayPainter(
-                    canvasController: _state.canvasController,
-                    focusAreaRect: focusAreaRect,
-                    contextCrop: contextCrop,
-                    repaint: Listenable.merge([
-                      _state.renderNotifier,
-                      _state.canvasController,
-                    ]),
-                  ),
-                ),
-              ),
             ),
           ),
         if (_isInpaintMode && _isMaskFillMode)
@@ -1853,10 +1672,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   }
 
   bool _shouldSuppressCanvasPointerInput(Offset localPosition) {
-    if (!_isInpaintMode ||
-        _focusedInpaintEnabled ||
-        _isMaskFillMode ||
-        _isOutpaintCommitPending) {
+    if (!_isInpaintMode || _isMaskFillMode || _isOutpaintCommitPending) {
       return false;
     }
 

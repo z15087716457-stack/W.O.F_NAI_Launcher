@@ -17,7 +17,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/krita/krita_bridge_models.dart';
 import 'package:nai_launcher/core/models/image_generation_artifact.dart';
-import 'package:nai_launcher/core/utils/focused_inpaint_utils.dart';
 import 'package:nai_launcher/core/utils/inpaint_mask_utils.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/image/image_stream_chunk.dart';
@@ -347,7 +346,6 @@ void main() {
           noise: 0.1,
           inpaintStrength: 0.8,
         ),
-        readMinimumContextPixels: () => 64,
         send: sent.add,
         isUiGenerating: () => false,
         generateStream: (_) => const Stream.empty(),
@@ -374,7 +372,6 @@ void main() {
       expect(sent.single['strength'], 0.45);
       expect(sent.single['noise'], 0.1);
       expect(sent.single['inpaint_strength'], 0.8);
-      expect(sent.single['minimum_context_pixels'], 64);
       expect(sent.single['quality_toggle'], isTrue);
       expect(sent.single['quality_preset'], 'standard');
       expectNoSensitiveBridgeData(sent.single);
@@ -774,7 +771,6 @@ void main() {
         expect(capturedRequest.params.action, ImageGenerationAction.img2img);
         expect(capturedRequest.params.prompt, 'dog');
         expect(capturedRequest.params.negativePrompt, 'low quality');
-        expect(capturedRequest.focusedInpaintEnabled, isFalse);
         expect(sent, hasLength(2));
         expect(sent.first['type'], 'progress');
         expect(sent.first['id'], 'img-2');
@@ -878,10 +874,8 @@ void main() {
             strength: 0.7,
             noise: 0.0,
             inpaintStrength: 1.0,
-            minimumContextPixels: 88,
             maskClosingIterations: 0,
             maskExpansionIterations: 0,
-            focusedInpaint: false,
           ),
         );
 
@@ -942,10 +936,8 @@ void main() {
             strength: 0.7,
             noise: 0.0,
             inpaintStrength: 1.0,
-            minimumContextPixels: 88,
             maskClosingIterations: 0,
             maskExpansionIterations: 0,
-            focusedInpaint: false,
           ),
         );
 
@@ -959,143 +951,6 @@ void main() {
         expect(result.getPixel(1, 1).r.toInt(), equals(200));
         expect(result.getPixel(0, 0).a.toInt(), equals(0));
         expect(result.getPixel(3, 3).a.toInt(), equals(0));
-      },
-    );
-
-    test(
-      'keeps focused inpaint context active while writing only a masked patch',
-      () async {
-        final sent = <Map<String, dynamic>>[];
-        final registered = <Uint8List>[];
-        late KritaBridgeGenerateRequest capturedRequest;
-        var streamCalled = false;
-        final source = _solidPng(4, 4, 10, 20, 30);
-        final generatedFullCanvas = _solidPng(4, 4, 200, 210, 220);
-        final mask = _maskPng(4, 4, const [(1, 1)]);
-        final service = KritaBridgeService(
-          readBaseParams: () => const ImageParams(),
-          send: sent.add,
-          isUiGenerating: () => false,
-          generateStream: (request) {
-            capturedRequest = request;
-            streamCalled = true;
-            return Stream.value(ImageStreamChunk.complete(generatedFullCanvas));
-          },
-          generateFallback: (request) async {
-            capturedRequest = request;
-            return [_inpaintArtifact(source, mask, generatedFullCanvas)];
-          },
-          registerExternalImage:
-              (image, {required params, addToDisplay}) async {
-                registered.add(image);
-                return null;
-              },
-          cancelGeneration: () {},
-        );
-
-        await service.handle(
-          KritaInpaintMessage(
-            id: 'focused-inpaint-patch',
-            image: source,
-            mask: mask,
-            prompt: 'repair hand',
-            negativePrompt: '',
-            strength: 0.7,
-            noise: 0.0,
-            inpaintStrength: 1.0,
-            minimumContextPixels: 12,
-            maskClosingIterations: 0,
-            maskExpansionIterations: 0,
-            focusedInpaint: true,
-            selectionRect: const KritaSelectionRect(
-              x: 1,
-              y: 1,
-              width: 2,
-              height: 2,
-            ),
-          ),
-        );
-
-        expect(capturedRequest.focusedInpaintEnabled, isTrue);
-        expect(streamCalled, isFalse);
-        expect(capturedRequest.minimumContextPixels, equals(16));
-        expect(capturedRequest.focusedSelectionRect?.left, equals(1));
-        expect(capturedRequest.focusedSelectionRect?.top, equals(1));
-        expect(capturedRequest.focusedSelectionRect?.width, equals(2));
-        expect(capturedRequest.focusedSelectionRect?.height, equals(2));
-
-        expect(sent, hasLength(1));
-        expect(sent.single['type'], 'result');
-        final layerResult = img.decodeImage(
-          base64Decode(sent.single['image'] as String),
-        )!;
-        final historyResult = img.decodeImage(registered.single)!;
-
-        expect(layerResult.getPixel(1, 1).r.toInt(), equals(200));
-        expect(layerResult.getPixel(1, 1).a.toInt(), equals(255));
-        expect(layerResult.getPixel(0, 0).a.toInt(), equals(0));
-        expect(layerResult.getPixel(3, 3).a.toInt(), equals(0));
-        expect(historyResult.getPixel(1, 1).r.toInt(), equals(200));
-        expect(historyResult.getPixel(0, 0).r.toInt(), equals(10));
-        expect(historyResult.getPixel(3, 3).b.toInt(), equals(30));
-      },
-    );
-
-    test(
-      'reconstrains oversized focused rectangles from older plugins',
-      () async {
-        final sent = <Map<String, dynamic>>[];
-        late KritaBridgeGenerateRequest capturedRequest;
-        final source = _solidPng(2048, 1537, 10, 20, 30);
-        final service = KritaBridgeService(
-          readBaseParams: () => const ImageParams(),
-          send: sent.add,
-          isUiGenerating: () => false,
-          generateStream: (_) => const Stream.empty(),
-          generateFallback: (request) async {
-            capturedRequest = request;
-            return const [];
-          },
-          registerExternalImage: (_, {required params, addToDisplay}) async =>
-              null,
-          cancelGeneration: () {},
-        );
-
-        await service.handle(
-          KritaInpaintMessage(
-            id: 'oversized-focused-selection',
-            image: source,
-            mask: _maskPng(4, 4, const [(1, 1)]),
-            prompt: '',
-            negativePrompt: '',
-            strength: 0.7,
-            noise: 0,
-            inpaintStrength: 1,
-            minimumContextPixels: 88,
-            maskClosingIterations: 0,
-            maskExpansionIterations: 0,
-            focusedInpaint: true,
-            selectionRect: const KritaSelectionRect(
-              x: 0,
-              y: 0,
-              width: 2048,
-              height: 1537,
-            ),
-          ),
-        );
-
-        final selection = capturedRequest.focusedSelectionRect!;
-        final geometry = FocusedInpaintUtils.resolveGeometryForSelection(
-          sourceWidth: 2048,
-          sourceHeight: 1537,
-          selectionRect: selection,
-          minContextMegaPixels: 88,
-        )!;
-        expect(selection.width * selection.height, lessThan(2048 * 1537));
-        expect(
-          geometry.contextCrop.area,
-          lessThanOrEqualTo(FocusedInpaintUtils.maxRequestAreaPixels),
-        );
       },
     );
 

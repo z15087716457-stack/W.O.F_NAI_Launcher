@@ -27,10 +27,6 @@
     "passed": null,
     "note": "Use the current Krita selection as the repaint mask, run Inpaint, and confirm only the masked area is written while unmasked pixels keep the original color."
   },
-  "focused_inpaint_e2e": {
-    "passed": null,
-    "note": "Enable Focused Inpaint, use the current Krita selection as the inner repaint area and repaint mask, adjust Minimum Context, change the selection, and confirm the temporary inner/outer concentric rectangles update live, are not baked into the generated source image, and match the generated crop behavior."
-  },
   "krita_cancel_e2e": {
     "passed": null,
     "note": "Start a Krita bridge generation, cancel it from the docker, and confirm preview/progress state is cleared."
@@ -41,7 +37,7 @@
   },
   "large_canvas_rejected": {
     "passed": null,
-    "note": "Confirm a canvas above V1 bounds is rejected or requires explicit focused-inpaint confirmation."
+    "note": "Confirm a canvas above V1 bounds is rejected before any generation request."
   },
   "disconnect_generation_safe": {
     "passed": null,
