@@ -232,7 +232,6 @@
   "settings_generationInputSection": "Input",
   "settings_generationFeedbackSection": "Completion Alert",
   "settings_selectStyle": "Select Style",
-  "settings_defaultPreset": "Default",
   "settings_selectFont": "Select Font",
   "settings_selectLanguage": "Select Language",
   "settings_loadFailed": "Load failed: {error}",

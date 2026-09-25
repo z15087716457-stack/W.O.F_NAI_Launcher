@@ -231,7 +231,6 @@
   "settings_generationInputSection": "入力",
   "settings_generationFeedbackSection": "完了通知",
   "settings_selectStyle": "スタイルの選択",
-  "settings_defaultPreset": "デフォルト",
   "settings_selectFont": "フォントの選択",
   "settings_selectLanguage": "言語の選択",
   "settings_loadFailed": "ロードに失敗しました: {error}",

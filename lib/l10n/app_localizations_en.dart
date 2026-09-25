@@ -602,9 +602,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_selectStyle => 'Select Style';
 
   @override
-  String get settings_defaultPreset => 'Default';
-
-  @override
   String get settings_selectFont => 'Select Font';
 
   @override

@@ -593,9 +593,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_selectStyle => 'スタイルの選択';
 
   @override
-  String get settings_defaultPreset => 'デフォルト';
-
-  @override
   String get settings_selectFont => 'フォントの選択';
 
   @override

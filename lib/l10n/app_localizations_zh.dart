@@ -583,9 +583,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_selectStyle => '选择风格';
 
   @override
-  String get settings_defaultPreset => '默认';
-
-  @override
   String get settings_selectFont => '选择字体';
 
   @override

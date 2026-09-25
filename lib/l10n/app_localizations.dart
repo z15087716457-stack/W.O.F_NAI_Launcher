@@ -1204,12 +1204,6 @@ abstract class AppLocalizations {
   /// **'Select Style'**
   String get settings_selectStyle;
 
-  /// No description provided for @settings_defaultPreset.
-  ///
-  /// In en, this message translates to:
-  /// **'Default'**
-  String get settings_defaultPreset;
-
   /// No description provided for @settings_selectFont.
   ///
   /// In en, this message translates to:
