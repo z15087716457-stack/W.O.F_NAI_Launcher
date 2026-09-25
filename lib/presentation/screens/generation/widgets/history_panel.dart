@@ -86,13 +86,19 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
   final Set<String> _selectedIds = {};
   final Set<String> _selectedBatchKeys = {};
   List<HistoryBatch> _batches = const [];
+  List<GeneratedImage>? _derivedHistory;
+  List<GeneratedImage>? _derivedCurrentImages;
+  (bool, int?, int)? _derivedRun;
+  int _derivedVersion = 0;
+  Map<String, int> _mergedIndex = const {};
+  List<GeneratedImage> _selectableImages = const [];
   final ShareImagePreparationService _sharePreparationService =
       ShareImagePreparationService.instance;
   Timer? _historyScrollIdleTimer;
   Timer? _historyPreheatTimer;
   Timer? _hoverPreheatTimer;
   bool _isHistoryScrolling = false;
-  String? _lastSharePreparationMaintenanceKey;
+  (int, bool)? _lastSharePreparationMaintenanceKey;
   Uint8List? _lastStreamPreviewBytes;
   int? _lastStreamPreviewRunId;
   final Map<String, Uint8List> _completionPreviewPlaceholders = {};
@@ -103,6 +109,8 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
   final ScrollController _scrollController = ScrollController();
   final Map<String, GlobalKey> _imageKeys = {};
   List<_HistoryRowDescriptor> _rowDescriptors = const [];
+  int _rowsVersion = -1;
+  double _rowsExtent = -1;
   ProviderSubscription<String?>? _selectionSubscription;
   int _scrollRequestEpoch = 0;
 
@@ -141,20 +149,39 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     setState(() {});
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final state = ref.watch(imageGenerationNotifierProvider);
+  /// 历史不设上限，按列表身份缓存派生数据：只在历史、当前批次或进行中
+  /// 批次变化时重算，生成进度每次刷新不再遍历全部历史。
+  void _refreshDerived(ImageGenerationState state) {
+    final run = (state.isGenerating, state.generationRunId, state.totalImages);
+    if (identical(_derivedHistory, state.history) &&
+        identical(_derivedCurrentImages, state.currentImages) &&
+        _derivedRun == run) {
+      return;
+    }
+    _derivedHistory = state.history;
+    _derivedCurrentImages = state.currentImages;
+    _derivedRun = run;
+    _derivedVersion++;
+
     _batches = buildHistoryBatches(state);
+    final merged = state.mergedPanelImages;
+    _mergedIndex = {for (var i = 0; i < merged.length; i++) merged[i].id: i};
+    _selectableImages = merged.where((image) => image.canBulkSelect).toList();
+
     final validKeys = _batches.map((batch) => batch.key).toSet();
     _selectedBatchKeys.removeWhere((key) => !validKeys.contains(key));
-    _selectedIds.retainAll(
-      state.selectableMergedImages.map((image) => image.id),
-    );
+    _selectedIds.retainAll(_selectableImages.map((image) => image.id));
     for (final batch in _batches) {
       if (_selectedBatchKeys.contains(batch.key)) {
         _selectedIds.addAll(batch.selectableImages.map((image) => image.id));
       }
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(imageGenerationNotifierProvider);
+    _refreshDerived(state);
     final hasContent =
         state.history.isNotEmpty || state.currentImages.isNotEmpty;
     final stripMetadata = ref.watch(
@@ -284,7 +311,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
   ) {
     final hasContent =
         state.history.isNotEmpty || state.currentImages.isNotEmpty;
-    final allImages = _getAllSelectableImages(state);
+    final allImages = _selectableImages;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
@@ -432,16 +459,13 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     ImageGenerationState state,
     bool stripMetadata,
   ) {
-    final images = _getAllSelectableImages(state);
-    final imageIds = images.map((image) => image.id).toSet();
-    final maintenanceKey =
-        '${stripMetadata ? 'strip' : 'raw'}:'
-        '${imageIds.join('|')}';
-
+    final maintenanceKey = (_derivedVersion, stripMetadata);
     if (_lastSharePreparationMaintenanceKey == maintenanceKey) {
       return;
     }
     _lastSharePreparationMaintenanceKey = maintenanceKey;
+    final images = _selectableImages;
+    final imageIds = images.map((image) => image.id).toSet();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -587,12 +611,8 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
       _lastStreamPreviewBytes = null;
     }
 
-    final retainedIds = <String>{
-      for (final image in state.currentImages) image.id,
-      for (final image in state.history) image.id,
-    };
     _completionPreviewPlaceholders.removeWhere(
-      (imageId, _) => !retainedIds.contains(imageId),
+      (imageId, _) => !_mergedIndex.containsKey(imageId),
     );
   }
 
@@ -618,12 +638,16 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
       builder: (context, constraints) {
         final extent =
             (constraints.maxWidth - 16).clamp(1.0, double.infinity) + 8;
-        _rowDescriptors = [
-          for (final batch in _batches)
-            _HistoryRowDescriptor(batch: batch, extent: extent),
-        ];
-        final retainedKeys = _batches.map((batch) => batch.key).toSet();
-        _imageKeys.removeWhere((key, _) => !retainedKeys.contains(key));
+        if (_rowsVersion != _derivedVersion || _rowsExtent != extent) {
+          _rowsVersion = _derivedVersion;
+          _rowsExtent = extent;
+          _rowDescriptors = [
+            for (final batch in _batches)
+              _HistoryRowDescriptor(batch: batch, extent: extent),
+          ];
+          final retainedKeys = _batches.map((batch) => batch.key).toSet();
+          _imageKeys.removeWhere((key, _) => !retainedKeys.contains(key));
+        }
         return NotificationListener<ScrollNotification>(
           onNotification: (notification) =>
               _handleHistoryScrollNotification(notification, stripMetadata),
@@ -723,7 +747,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           key: ValueKey(image.id),
           imageBytes: imageBytes,
           sourceFilePath: image.filePath,
-          index: state.mergedPanelImages.indexOf(image),
+          index: _mergedIndex[image.id],
           showIndex: false,
           historyThumb: true,
           batchBadgeCount: batch.count,

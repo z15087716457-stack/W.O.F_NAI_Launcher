@@ -114,6 +114,61 @@ void main() {
     expect(_activeBorder(tester).top.width, 3);
   });
 
+  testWidgets('history thumb marks state with one light-blue plate only', (
+    tester,
+  ) async {
+    Widget thumb({bool active = false}) => SizedBox(
+      width: 120,
+      height: 120,
+      child: SelectableImageCard(
+        key: const ValueKey('image-card'),
+        imageBytes: base64Decode(_oneByOnePngBase64),
+        imageIdentity: 'image-1',
+        historyThumb: true,
+        isPreviewActive: active,
+        enableSelection: false,
+        onTap: () {},
+      ),
+    );
+    final edgeGlow = find.byWidgetPredicate(
+      (widget) => widget.runtimeType.toString() == '_EdgeGlowOverlay',
+    );
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: Offset.zero);
+    addTearDown(mouse.removePointer);
+
+    // Regular cards still glow on hover, so the finder is live.
+    await tester.pumpWidget(_testApp(_card()));
+    await mouse.moveTo(tester.getCenter(find.byType(SelectableImageCard)));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(edgeGlow, findsOneWidget);
+    await mouse.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(_testApp(thumb()));
+    final blue = Theme.of(
+      tester.element(find.byType(SelectableImageCard)),
+    ).colorScheme.primary;
+    expect(_historyPlate(tester), isNull);
+
+    await mouse.moveTo(tester.getCenter(find.byType(SelectableImageCard)));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(edgeGlow, findsNothing);
+    expect(_historyPlate(tester)!.color, blue.withValues(alpha: 0.11));
+
+    await tester.pumpWidget(_testApp(thumb(active: true)));
+    await tester.pump(const Duration(milliseconds: 300));
+    final plate = _historyPlate(tester)!;
+    expect(plate.color, blue.withValues(alpha: 0.22));
+    expect(plate.spreadRadius, 2);
+    expect(plate.blurRadius, 0);
+    // The letterbox turns clear so the plate shows through it.
+    expect(
+      _cardDecorations(tester).where((d) => d.color == Colors.transparent),
+      hasLength(1),
+    );
+  });
+
   testWidgets('right-click menu exposes view details', (tester) async {
     await tester.pumpWidget(
       _testApp(
@@ -163,6 +218,25 @@ Widget _card({
       enableCopyAction: enableCopyAction,
     ),
   );
+}
+
+Iterable<BoxDecoration> _cardDecorations(WidgetTester tester) {
+  return tester
+      .widgetList<AnimatedContainer>(
+        find.descendant(
+          of: find.byType(SelectableImageCard),
+          matching: find.byType(AnimatedContainer),
+        ),
+      )
+      .map((container) => container.decoration)
+      .whereType<BoxDecoration>();
+}
+
+BoxShadow? _historyPlate(WidgetTester tester) {
+  final shadows = _cardDecorations(
+    tester,
+  ).singleWhere((d) => d.borderRadius == BorderRadius.circular(3)).boxShadow;
+  return shadows == null || shadows.isEmpty ? null : shadows.single;
 }
 
 Border _activeBorder(WidgetTester tester) {

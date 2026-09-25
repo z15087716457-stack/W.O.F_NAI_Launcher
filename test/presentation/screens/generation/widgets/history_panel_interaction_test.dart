@@ -46,6 +46,43 @@ void main() {
     },
   );
 
+  testWidgets('a long history lists every image and takes new ones on top', (
+    tester,
+  ) async {
+    final images = [for (var i = 0; i < 120; i++) _image('long-$i')];
+    final container = _createContainer(images);
+    addTearDown(container.dispose);
+    await tester.pumpWidget(_historyApp(container));
+    await tester.pumpAndSettle();
+
+    final list = find.descendant(
+      of: find.byType(ListView),
+      matching: find.byType(Scrollable),
+    );
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('long-119')),
+      2000,
+      scrollable: list,
+    );
+    expect(find.byKey(const ValueKey('long-119')), findsOneWidget);
+
+    // A progress-only update keeps the list; a new image joins at the top.
+    final notifier = container.read(imageGenerationNotifierProvider.notifier);
+    notifier.state = notifier.state.copyWith(progress: 0.5);
+    await tester.pump();
+    expect(find.byKey(const ValueKey('long-119')), findsOneWidget);
+    notifier.state = notifier.state.copyWith(
+      history: [_image('long-new'), ...images],
+    );
+    await tester.pump();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('long-new')),
+      -2000,
+      scrollable: list,
+    );
+    expect(find.byKey(const ValueKey('long-new')), findsOneWidget);
+  });
+
   testWidgets('batch uses first cover and selects/deletes all four images', (
     tester,
   ) async {

@@ -14,6 +14,7 @@ import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_s
 import 'package:nai_launcher/data/datasources/remote/nai_image_generation_api_service.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/services/metadata/unified_metadata_parser.dart';
+import 'package:nai_launcher/data/models/image/image_operation.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/image/image_stream_chunk.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
@@ -281,6 +282,27 @@ void main() {
         expect(image.height, equals(960));
       },
     );
+
+    test('history keeps every image past the old 50-image cap', () {
+      final notifier = container.read(imageGenerationNotifierProvider.notifier);
+      final bytes = _validImageBytes(width: 8, height: 8);
+      final first = notifier.registerToolResults(
+        [bytes],
+        operation: ImageOperation.upscale,
+        originalBytes: bytes,
+      );
+      for (var i = 1; i < 60; i++) {
+        notifier.registerToolResults(
+          [bytes],
+          operation: ImageOperation.upscale,
+          originalBytes: bytes,
+        );
+      }
+
+      final history = container.read(imageGenerationNotifierProvider).history;
+      expect(history, hasLength(60));
+      expect(history.last.id, first.single.id);
+    });
 
     test('failed stream snapshot images should be read-only', () {
       const metadata = NaiImageMetadata(

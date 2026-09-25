@@ -97,15 +97,15 @@
 | `generation_canvas_controller.dart` | `CanvasCamera`(offset/scale 物理) + `GenerationCanvasController`(点击/拖拽/hover/焦点) |
 | `canvas_feed_layout.dart` | 纯函数：`groupCanvasImages` 按任务分组、`layoutCanvasFeed` 竖排布局 |
 | `canvas_tile_toolbar.dart` | 视口固定的主工具条（顶中/底左/底右） |
-| `../history_panel.dart` / `../history_batch.dart` | 右侧历史栏按请求合并：第一张封面 + 数量，整批多选、拖拽封面到角色框、底栏锁/全存/删；底层图片历史仍有 50 张上限 |
+| `../history_panel.dart` / `../history_batch.dart` | 右侧历史栏按请求合并：第一张封面 + 数量，整批多选、拖拽封面到角色框、底栏锁/全存/删；图片历史不设上限，只由用户删除或清空；缩略图状态只用一块淡蓝底板（选中/预览联动实色、悬停减半、外扩 2px），不叠发光/光泽 |
 | `canvas_utils.dart` | `rrectFromSize`/`parseAspect`/`hexToColor` |
 | `models.dart` | `CanvasImageData`/`CanvasImageGroup`/`CanvasTileVisual` |
 
-**Provider**：`canvas_settings_provider.dart`（锁/减弱动态/填充缩放/固定图片持久化）；`preview_selection_provider.dart`（焦点组=共享选中，喂参数面板和 emotion）；`image_generation_provider.dart` 的 `mergedPanelImages` 是输出历史的数据源——**生成中 currentImages + 历史 take(50)**，；独立固定图片区由 `CanvasPinRepository` 提供。子图态零 API，纯粹前端焦点（`generationPreviewSubFocusProvider`）。
+**Provider**：`canvas_settings_provider.dart`（锁/减弱动态/填充缩放/固定图片持久化）；`preview_selection_provider.dart`（焦点组=共享选中，喂参数面板和 emotion）；`image_generation_provider.dart` 的 `mergedPanelImages` 是输出历史的数据源——**生成中 currentImages + 全部历史（不截断）**；历史面板按列表身份缓存批次/索引，生成进度刷新不遍历全部历史；独立固定图片区由 `CanvasPinRepository` 提供。子图态零 API，纯粹前端焦点（`generationPreviewSubFocusProvider`）。
 
 **当前相机与输入约定**：裸滚轮平移（Shift 转横向）、Ctrl+滚轮缩放；仅中键或 Shift+鼠标左键拖动相机；触控板平移/缩放按事件增量处理。锁相机阻止手动平移、缩放及复位，程序化对焦仍可用；WASD 松键始终清理按键状态。相机停稳 120ms 可选最近组，Ctrl+0 主动总览时暂不自动选中。远跳先移近起点再抵达准确终点，连续离散缩放累积未完成目标，平滑模式直接更新。scale 夹在 [0.1, 8]；非焦点图 scale(0.98)，悬停回 1。相机逐帧变换不重建重图子树，仅挂载可见范围及缓冲区。
 
-**固定图片**：`canvas_pins/` 保存字节副本，`canvas_pin_records` manifest 保存身份及未嵌入图片的元数据；载入只计健康图片，旧 UUID 列表保留但不计幽灵数量。原输出组仍正常选择；独立固定图区使用 `pin:<id>` 分组，点击历史栏 Pins 计数跳转，历史被淘汰后仍可访问。内部缓存路径不能冒充已保存到图库的路径。完整便签/箭头/自由布局编辑器未实现。
+**固定图片**：`canvas_pins/` 保存字节副本，`canvas_pin_records` manifest 保存身份及未嵌入图片的元数据；载入只计健康图片，旧 UUID 列表保留但不计幽灵数量。原输出组仍正常选择；独立固定图区使用 `pin:<id>` 分组，点击历史栏 Pins 计数跳转，历史被删除或清空后仍可访问。内部缓存路径不能冒充已保存到图库的路径。完整便签/箭头/自由布局编辑器未实现。
 
 **动作数据与保存**：工具条种子以图片 PNG 元数据为准，缺失才取对象缓存；变体价签仅在所选图片参数已知时给出估算；超分价签根据所选图片尺寸、当前后端与订阅计算，ComfyUI 为 0 Anlas，云端不支持的尺寸不显示估算。两者使用数字在前、Anlas 图标在后的小方形胶囊；打开超分设置本身不发起付费请求。生成中的变体和编辑动作禁用；变体入口在修改参数前检查生成/桥接/冷却，解析后复查，生成 provider 再拒绝重入。保存/详情/打开目录共用保存服务，保留原 PNG 元数据，缺少参数不采用当前草稿补写；重复保存去重并回写状态路径。流式局部重绘沿用共享源图、裁片与蒙版合成。
 

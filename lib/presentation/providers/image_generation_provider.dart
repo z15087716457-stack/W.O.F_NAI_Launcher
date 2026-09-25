@@ -331,7 +331,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     );
 
     state = state.copyWith(
-      history: [snapshot, ...state.history].take(50).toList(),
+      history: [snapshot, ...state.history],
       clearStreamPreview: true,
     );
     _retainSharePreparationCacheForCurrentHistory();
@@ -1068,7 +1068,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           // 立即更新显示和历史
           state = state.copyWith(
             currentImages: List.from(allImages),
-            history: [...generatedList, ...state.history].take(50).toList(),
+            history: [...generatedList, ...state.history],
             clearStreamPreview: true,
           );
           _retainSharePreparationCacheForCurrentHistory();
@@ -1297,7 +1297,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           : addToDisplay
           ? [generatedImage, ...state.currentImages]
           : state.currentImages,
-      history: [generatedImage, ...state.history].take(50).toList(),
+      history: [generatedImage, ...state.history],
       displayImages: replaceCurrentDisplay
           ? [generatedImage]
           : addToDisplay
@@ -1348,9 +1348,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       );
     }
     if (results.isEmpty) return const [];
-    state = state.copyWith(
-      history: [...results, ...state.history].take(50).toList(),
-    );
+    state = state.copyWith(history: [...results, ...state.history]);
     _retainSharePreparationCacheForCurrentHistory();
     _preloadMetadataInBackground(results);
     return results;
@@ -2047,7 +2045,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           displayImages: generatedList,
           displayWidth: generatedList.first.width,
           displayHeight: generatedList.first.height,
-          history: [...generatedList, ...state.history].take(50).toList(),
+          history: [...generatedList, ...state.history],
           progress: 1.0,
           currentImage: 0,
           totalImages: 0,
@@ -2092,7 +2090,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           displayImages: generatedList,
           displayWidth: generatedList.first.width,
           displayHeight: generatedList.first.height,
-          history: [...generatedList, ...state.history].take(50).toList(),
+          history: [...generatedList, ...state.history],
           progress: 1.0,
           currentImage: 0,
           totalImages: 0,
@@ -2140,7 +2138,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           displayImages: generatedList,
           displayWidth: generatedList.first.width,
           displayHeight: generatedList.first.height,
-          history: [...generatedList, ...state.history].take(50).toList(),
+          history: [...generatedList, ...state.history],
           progress: 1.0,
           currentImage: 0,
           totalImages: 0,
@@ -2226,7 +2224,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
             displayImages: generatedList,
             displayWidth: generatedList.first.width,
             displayHeight: generatedList.first.height,
-            history: [...generatedList, ...state.history].take(50).toList(),
+            history: [...generatedList, ...state.history],
             progress: 1.0,
             currentImage: 0,
             totalImages: 0,

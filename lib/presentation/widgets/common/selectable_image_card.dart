@@ -455,7 +455,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
       return;
     }
     setState(() => _isHovering = true);
-    if (widget.enableGlossEffect) {
+    if (_glossEnabled) {
       _glossController.forward(from: 0.0);
     }
   }
@@ -553,6 +553,19 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
     final extension = theme.extension<AppThemeExtension>();
     return extension?.glowColor ?? theme.colorScheme.primary;
   }
+
+  /// 历史栏缩略图的状态底板：选中/预览联动为淡蓝，悬停减半，其余无。
+  Color? _historyPlateColor(ThemeData theme) {
+    final active = widget.isSelected || widget.isPreviewActive;
+    if (!active && !_isHovering) return null;
+    final alpha = theme.brightness == Brightness.dark ? 0.42 : 0.22;
+    return theme.colorScheme.primary.withValues(
+      alpha: active ? alpha : alpha / 2,
+    );
+  }
+
+  /// 历史栏缩略图不叠悬停发光与光泽扫过，只留底板。
+  bool get _glossEnabled => widget.enableGlossEffect && !widget.historyThumb;
 
   @override
   Widget build(BuildContext context) {
@@ -779,6 +792,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
   /// 构建已完成状态的卡片
   Widget _buildCompletedCard(BuildContext context, ThemeData theme) {
     final glowColor = _getGlowColor(context);
+    final historyPlate = widget.historyThumb ? _historyPlateColor(theme) : null;
 
     // 确保有图像数据
     if (widget.imageBytes == null) {
@@ -842,26 +856,13 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                           width: 2,
                         )
                       : null),
-            // 官网历史栏：选中/预览联动用米色双层 boxShadow 环
-            // （rgb(245,243,194)）0 0 0 2px 实环 + 0 0 6px 45% 光晕。
+            // 历史栏：选中/预览联动/悬停只用一块淡蓝底板。无模糊的阴影
+            // 会铺满整个格子，透过留边露出来，并向外多出 2px，方图填满
+            // 格子时也看得出状态。
             boxShadow: widget.historyThumb
-                ? (widget.isSelected || widget.isPreviewActive
-                      ? [
-                          BoxShadow(
-                            color: const Color(
-                              0xFFF5F3C2,
-                            ).withValues(alpha: 0.75),
-                            blurRadius: 0,
-                            spreadRadius: 2,
-                          ),
-                          BoxShadow(
-                            color: const Color(
-                              0xFFF5F3C2,
-                            ).withValues(alpha: 0.45),
-                            blurRadius: 6,
-                          ),
-                        ]
-                      : null)
+                ? (historyPlate == null
+                      ? null
+                      : [BoxShadow(color: historyPlate, spreadRadius: 2)])
                 : widget.hideSelectionDecoration
                 ? null
                 : [
@@ -903,12 +904,16 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                     ),
                   ),
                 RepaintBoundary(
-                  child: Container(
-                    color: widget.historyThumb
-                        ? theme.colorScheme.surfaceContainerHighest.withValues(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    curve: Curves.easeOut,
+                    color: !widget.historyThumb
+                        ? null
+                        : historyPlate != null
+                        ? Colors.transparent
+                        : theme.colorScheme.surfaceContainerHighest.withValues(
                             alpha: 0.5,
-                          )
-                        : null,
+                          ),
                     child: DecodedMemoryImage(
                       key: const ValueKey('selectable-image-completed-image'),
                       bytes: widget.imageBytes!,
@@ -1002,7 +1007,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                 ),
 
                 // 2. 边缘发光效果（悬浮时）
-                if (_isHovering && widget.enableGlossEffect)
+                if (_isHovering && _glossEnabled)
                   Positioned.fill(
                     child: TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0.0, end: 1.0),
@@ -1018,7 +1023,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                   ),
 
                 // 3. 光泽扫过效果（悬浮时）
-                if (_isHovering && widget.enableGlossEffect)
+                if (_isHovering && _glossEnabled)
                   Positioned.fill(
                     child: RepaintBoundary(
                       child: AnimatedBuilder(
