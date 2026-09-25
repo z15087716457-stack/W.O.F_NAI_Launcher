@@ -265,9 +265,11 @@ double? _carriedCardHeight;
 
 /// 把 Logo + 标语 + 卡片整体放在视区的视觉中心。
 ///
-/// 居中用「锚定」的卡片高度：只在 [anchorKey] 变化时取新卡片的高度，并随
-/// [glide] 从旧锚点滑过去；之后卡片内部再变高只向下延伸。内容高过视区时
-/// 顶部留 [minTop]，由外层滚动。
+/// 居中用「锚定」的卡片高度。[anchorKey] 变化（换卡片）后的 [glide] 期间
+/// 跟随卡片的实时高度，并把换卡片那一刻新旧高度之差随 [glide] 收掉：卡片
+/// 瞬间换成另一张时整体平滑滑过去，卡片自己连续长大 / 缩小（按钮展开成
+/// 表单）时整体实时居中、卡片向上下两边长开。[glide] 结束后锚点固定，
+/// 卡片内部再变高只向下延伸。内容高过视区时顶部留 [minTop]，由外层滚动。
 class _HeroPlacement extends SingleChildRenderObjectWidget {
   const _HeroPlacement({
     required this.card,
@@ -339,9 +341,10 @@ class _RenderHeroPlacement extends RenderShiftedBox {
   set anchorKey(Object? value) {
     if (value == _anchorKey) return;
     _anchorKey = value;
-    // 从当前位置出发；目标等这一趟布局量到新卡片的高度再定
+    // 从当前位置出发；与新卡片的高度差等这一趟布局量到后再定
     _from = _anchor;
-    _to = null;
+    _gap = null;
+    _tracking = true;
     markNeedsLayout();
   }
 
@@ -354,13 +357,18 @@ class _RenderHeroPlacement extends RenderShiftedBox {
     markNeedsLayout();
   }
 
+  /// 换卡片前的锚点。
   double? _from;
-  double? _to;
+
+  /// 换卡片那一刻旧锚点与新卡片高度之差，随 [glide] 收到 0。
+  double? _gap;
+
+  /// 跟随中的卡片高度；[glide] 走完的那一帧最后取一次，之后固定。
+  double _to = 0;
+  bool _tracking = true;
   double? _anchor;
 
-  void _onGlide() {
-    if (_to == null || _from != _to) markNeedsLayout();
-  }
+  void _onGlide() => markNeedsLayout();
 
   @override
   void attach(PipelineOwner owner) {
@@ -383,10 +391,15 @@ class _RenderHeroPlacement extends RenderShiftedBox {
       return;
     }
     child.layout(BoxConstraints(maxWidth: width), parentUsesSize: true);
-    final to = _to ??= _card.value;
-    final from = _from ??= to;
-    final anchor = _anchor = from + (to - from) * _glide.value;
-    _carriedCardHeight = to;
+    final live = _card.value;
+    final t = _glide.value;
+    if (_tracking) {
+      _to = live;
+      _tracking = t < 1;
+    }
+    final gap = _gap ??= (_from ?? live) - live;
+    final anchor = _anchor = _to + gap * (1 - t);
+    _carriedCardHeight = anchor;
     final head = child.size.height - _card.value;
     final top = math.max(
       minTop,

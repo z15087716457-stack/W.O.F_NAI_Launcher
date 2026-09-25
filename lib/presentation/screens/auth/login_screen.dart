@@ -23,9 +23,11 @@ import '../../widgets/common/update_notice_banner.dart';
 /// 登录页：整页「去噪」场景加一张磨砂卡片。
 ///
 /// 有保存的账号时是快速登录卡：账号行可在卡内展开切换 / 删除，一键登录
-/// （回车也可），添加账号，右下角 SKIP 以游客进入。没有账号或点了添加
-/// 账号时换成登录表单卡。认证与账号逻辑都在 provider 里，这里只负责
-/// 展示与转发；登录中不再弹全屏遮罩，按钮内显示进度、背景加速去噪。
+/// （回车也可），添加账号，右下角 SKIP 以游客进入；添加账号时卡片换成
+/// 登录表单。没有账号（首次登录）时 Logo 下只有一颗「登录」按钮和 SKIP，
+/// 点开（或回车）后按钮原地长成表单卡，返回 / Esc 收起。认证与账号逻辑都在
+/// provider 里，这里只负责展示与转发；登录中不再弹全屏遮罩，按钮内显示
+/// 进度、背景加速去噪。
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -40,6 +42,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _selectedId;
   bool _listOpen = false;
   bool _adding = false;
+
+  /// 首次登录：按钮是否已展开成表单。
+  bool _expanded = false;
 
   @override
   void initState() {
@@ -74,9 +79,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
       );
-    } else if (accounts.isEmpty || _adding) {
-      kind = 'form';
-      card = _buildFormCard(context, canGoBack: accounts.isNotEmpty);
+    } else if (accounts.isEmpty) {
+      kind = _expanded ? 'first_form' : 'first_start';
+      card = _buildFirstRunCard(context);
+    } else if (_adding) {
+      kind = 'add_form';
+      card = EntryCard(
+        key: const ValueKey('entry_card_form'),
+        child: _buildFormContent(
+          context,
+          title: context.l10n.auth_addAccount,
+          onBack: _closeAddForm,
+        ),
+      );
     } else {
       kind = 'quick';
       card = _buildQuickCard(context, accounts, authState);
@@ -126,50 +141,90 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   // ---------------------------------------------------------------- 表单卡
 
-  Widget _buildFormCard(BuildContext context, {required bool canGoBack}) {
+  /// 表单卡内容：标题 + 返回，下面是三种登录方式与 SKIP。
+  Widget _buildFormContent(
+    BuildContext context, {
+    required String title,
+    required VoidCallback onBack,
+  }) {
     final l10n = context.l10n;
     final palette = EntryPalette.of(context);
     final busy = ref.watch(authNotifierProvider.select((s) => s.isLoading));
-    return EntryCard(
-      key: const ValueKey('entry_card_form'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  canGoBack ? l10n.auth_addAccount : l10n.auth_login,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: palette.ink,
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: palette.ink,
                 ),
               ),
-              if (canGoBack)
-                Transform.translate(
-                  offset: const Offset(8, 0),
-                  child: EntryGhostButton(
-                    key: const Key('auth_back'),
-                    icon: Icons.chevron_left,
-                    label: l10n.auth_back,
-                    onPressed: busy ? null : _closeAddForm,
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          LoginFormContainer(
-            showGuestEntry: true,
-            compact: true,
-            onLoginSuccess: () {
-              if (mounted) setState(() => _adding = false);
-            },
-          ),
-        ],
+            ),
+            Transform.translate(
+              offset: const Offset(8, 0),
+              child: EntryGhostButton(
+                key: const Key('auth_back'),
+                icon: Icons.chevron_left,
+                label: l10n.auth_back,
+                onPressed: busy ? null : onBack,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        LoginFormContainer(
+          showGuestEntry: true,
+          compact: true,
+          onLoginSuccess: () {
+            if (mounted) setState(() => _adding = false);
+          },
+        ),
+      ],
+    );
+  }
+
+  /// 首次登录：一颗「登录」按钮，点开后原地长成表单卡。
+  Widget _buildFirstRunCard(BuildContext context) {
+    final l10n = context.l10n;
+    final busy = ref.watch(authNotifierProvider.select((s) => s.isLoading));
+    return EntryMorphCard(
+      key: const ValueKey('entry_card_first'),
+      expanded: _expanded,
+      onExpand: _expandFirstRun,
+      onCollapse: busy ? null : _collapseFirstRun,
+      face: EntryPrimaryButton(
+        key: const Key('auth_start_login'),
+        label: l10n.auth_login,
+        onPressed: _expandFirstRun,
+      ),
+      footer: EntrySkipButton(
+        key: const Key('auth_guest_entry_start'),
+        onPressed: () =>
+            ref.read(guestSessionNotifierProvider.notifier).enterGuest(),
+      ),
+      child: _buildFormContent(
+        context,
+        title: l10n.auth_login,
+        onBack: _collapseFirstRun,
       ),
     );
+  }
+
+  void _expandFirstRun() {
+    if (_expanded) return;
+    _clearStaleError();
+    setState(() => _expanded = true);
+  }
+
+  void _collapseFirstRun() {
+    if (!_expanded) return;
+    _clearStaleError();
+    setState(() => _expanded = false);
   }
 
   void _openAddForm() {

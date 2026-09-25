@@ -164,6 +164,14 @@ void expectOpticallyCentered(WidgetTester tester) {
   );
 }
 
+/// 首次登录：点「登录」按钮展开成表单卡。
+Future<void> expandFirstRun(WidgetTester tester) async {
+  final start = find.byKey(const Key('auth_start_login'));
+  await tester.ensureVisible(start);
+  await tester.tap(start);
+  await tester.pumpAndSettle();
+}
+
 SavedAccount _account(String id, String nickname, {DateTime? lastUsed}) =>
     SavedAccount(
       id: id,
@@ -198,7 +206,18 @@ void main() {
         var key = await pumpEntry(tester, brightness: brightness);
         expect(find.byType(BrandLogo), findsOneWidget);
         expect(find.byType(EntryField), findsOneWidget);
-        expect(find.byKey(const Key('token_form')), findsOneWidget);
+        // 首次登录先只有一颗按钮，表单收着
+        expect(
+          find.byKey(const Key('auth_start_login')).hitTestable(),
+          findsOneWidget,
+        );
+        expect(find.byType(TextField).first.hitTestable(), findsNothing);
+        expectOpticallyCentered(tester);
+        final startTop = logoTop(tester);
+        await capture(tester, key, 'login-start-${brightness.name}');
+
+        await expandFirstRun(tester);
+        expect(find.byType(TextField).first.hitTestable(), findsOneWidget);
         if (TitleBarRegionService.isSupported) {
           // 登录页标题栏收成页面底色，不再显示 Logo 标题
           expect(
@@ -214,6 +233,7 @@ void main() {
         );
         expectOpticallyCentered(tester);
         final formTop = logoTop(tester);
+        expect(formTop, lessThan(startTop - 100));
         expect(tester.takeException(), isNull);
         await capture(tester, key, 'login-${brightness.name}');
 
@@ -241,6 +261,7 @@ void main() {
     tester,
   ) async {
     final key = await pumpEntry(tester);
+    await expandFirstRun(tester);
     await tester.enterText(find.byType(TextField).first, '我的工作室');
     await tester.enterText(
       find.byType(TextField).last,
@@ -269,6 +290,7 @@ void main() {
     tester,
   ) async {
     await pumpEntry(tester);
+    await expandFirstRun(tester);
     await tester.tap(find.text('验证并登录'));
     await tester.pumpAndSettle();
     expect(find.text('请输入昵称'), findsOneWidget);
@@ -286,6 +308,7 @@ void main() {
           locale: locale,
           textScale: 1.25,
         );
+        await expandFirstRun(tester);
         for (final mode in ['credentials', 'third_party', 'token']) {
           final tab = find.byKey(Key('auth_mode_$mode'));
           await tester.ensureVisible(tab);
@@ -299,6 +322,84 @@ void main() {
       },
     );
   }
+
+  testWidgets('first run: the login button opens into the form and back', (
+    tester,
+  ) async {
+    await pumpEntry(tester);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(LoginScreen)),
+    );
+    // 表单是否可用看第一个输入框能否点到
+    final form = find.byType(TextField).first;
+
+    // 回车展开，光标落在第一个输入框
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(form.hitTestable(), findsOneWidget);
+    expect(
+      tester
+          .widget<EditableText>(find.byType(EditableText).first)
+          .focusNode
+          .hasFocus,
+      isTrue,
+    );
+    await tester.enterText(find.byType(TextField).first, '我的工作室');
+
+    // Esc 收起，再展开时输入还在
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(form.hitTestable(), findsNothing);
+    expect(
+      find.byKey(const Key('auth_start_login')).hitTestable(),
+      findsOneWidget,
+    );
+    await expandFirstRun(tester);
+    expect(
+      tester.widget<TextField>(find.byType(TextField).first).controller!.text,
+      '我的工作室',
+    );
+
+    // 「返回」同样收起；收起时 SKIP 就在按钮下方
+    await tester.tap(find.byKey(const Key('auth_back')));
+    await tester.pumpAndSettle();
+    expect(form.hitTestable(), findsNothing);
+    expectOpticallyCentered(tester);
+    await tester.tap(find.byKey(const Key('auth_guest_entry_start')));
+    await tester.pump();
+    expect(container.read(guestSessionNotifierProvider), isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the login button grows into the card around its centre', (
+    tester,
+  ) async {
+    await pumpEntry(tester, animate: true);
+    final card = find.byKey(const ValueKey('entry_card_first'));
+    final startTop = logoTop(tester);
+    final startHeight = tester.getSize(card).height;
+
+    await tester.tap(find.byKey(const Key('auth_start_login')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    // 长到一半：卡片在变高，整体一直保持在视觉中心
+    final midHeight = tester.getSize(card).height;
+    expect(midHeight, greaterThan(startHeight + 40));
+    expectOpticallyCentered(tester);
+    expect(logoTop(tester), lessThan(startTop));
+
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(tester.getSize(card).height, greaterThan(midHeight));
+    expectOpticallyCentered(tester);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+    expect(tester.getSize(card).height, moreOrLessEquals(startHeight));
+    expect(logoTop(tester), moreOrLessEquals(startTop, epsilon: .01));
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
 
   for (final brightness in Brightness.values) {
     testWidgets(

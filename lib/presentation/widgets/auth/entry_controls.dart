@@ -1,6 +1,8 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../themes/presets/geist_theme.dart';
@@ -132,6 +134,318 @@ class EntryCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// 首次登录：一颗主按钮，点开后原地长成磨砂卡片。
+///
+/// 收起时只有 [face]（宽 [faceWidth]、高 40 的按钮）和下方的 [footer]；
+/// 展开时盒子的宽高、圆角、底色、描边与阴影一起过渡到 [EntryCard] 的样子，
+/// 按钮先淡出、[child] 后淡入，footer 收起。[child] 一直在树里，收起再展开
+/// 时已输入的内容还在；收起状态下它不接收点击、焦点与读屏。收起时回车
+/// 展开，展开时 Esc 收起；展开后光标进入第一个输入框。
+class EntryMorphCard extends StatefulWidget {
+  const EntryMorphCard({
+    super.key,
+    required this.expanded,
+    required this.face,
+    required this.child,
+    this.footer,
+    this.onExpand,
+    this.onCollapse,
+    this.faceWidth = 240,
+    this.padding = const EdgeInsets.all(20),
+  });
+
+  final bool expanded;
+  final Widget face;
+  final Widget child;
+  final Widget? footer;
+  final VoidCallback? onExpand;
+
+  /// 为 null 时 Esc 不收起（例如登录进行中）。
+  final VoidCallback? onCollapse;
+  final double faceWidth;
+  final EdgeInsetsGeometry padding;
+
+  static const double faceHeight = 40;
+  static const Duration duration = Duration(milliseconds: 400);
+
+  @override
+  State<EntryMorphCard> createState() => _EntryMorphCardState();
+}
+
+class _EntryMorphCardState extends State<EntryMorphCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _morph = AnimationController(
+    vsync: this,
+    duration: EntryMorphCard.duration,
+    value: widget.expanded ? 1 : 0,
+  );
+  final _faceFocus = FocusNode(debugLabel: 'EntryMorphCard.face');
+  final _contentScope = FocusScopeNode(debugLabel: 'EntryMorphCard.content');
+
+  @override
+  void didUpdateWidget(EntryMorphCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.expanded == oldWidget.expanded) return;
+    final still = MediaQuery.disableAnimationsOf(context);
+    if (widget.expanded) {
+      if (still) {
+        _morph.value = 1;
+      } else {
+        _morph.forward();
+      }
+    } else {
+      if (still) {
+        _morph.value = 0;
+      } else {
+        _morph.reverse();
+      }
+    }
+    // 展开后光标进第一个输入框；收起后回到按钮，回车可再展开
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.expanded) {
+        // 标题行的「返回」排在输入框前面，直接找第一个文本输入框
+        final field = _contentScope.traversalDescendants
+            .where(
+              (node) =>
+                  node.context?.findAncestorWidgetOfExactType<EditableText>() !=
+                  null,
+            )
+            .firstOrNull;
+        (field ?? _contentScope).requestFocus();
+      } else {
+        _faceFocus.requestFocus();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _morph.dispose();
+    _faceFocus.dispose();
+    _contentScope.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = EntryPalette.of(context);
+    final expanded = widget.expanded;
+    final onExpand = widget.onExpand;
+    final onCollapse = widget.onCollapse;
+    final content = ExcludeSemantics(
+      excluding: !expanded,
+      child: IgnorePointer(
+        ignoring: !expanded,
+        child: ExcludeFocus(
+          excluding: !expanded,
+          child: FocusScope(
+            node: _contentScope,
+            child: Padding(padding: widget.padding, child: widget.child),
+          ),
+        ),
+      ),
+    );
+    final face = ExcludeSemantics(
+      excluding: expanded,
+      child: IgnorePointer(
+        ignoring: expanded,
+        child: ExcludeFocus(
+          excluding: expanded,
+          child: SizedBox(
+            width: widget.faceWidth,
+            height: EntryMorphCard.faceHeight,
+            child: widget.face,
+          ),
+        ),
+      ),
+    );
+    final footer = widget.footer == null
+        ? null
+        : ExcludeSemantics(
+            excluding: expanded,
+            child: IgnorePointer(
+              ignoring: expanded,
+              child: ExcludeFocus(
+                excluding: expanded,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: widget.footer,
+                ),
+              ),
+            ),
+          );
+    return CallbackShortcuts(
+      bindings: {
+        if (!expanded && onExpand != null) ...{
+          const SingleActivator(LogicalKeyboardKey.enter): onExpand,
+          const SingleActivator(LogicalKeyboardKey.numpadEnter): onExpand,
+        },
+        if (expanded && onCollapse != null)
+          const SingleActivator(LogicalKeyboardKey.escape): onCollapse,
+      },
+      child: Focus(
+        focusNode: _faceFocus,
+        autofocus: !expanded,
+        child: AnimatedBuilder(
+          animation: _morph,
+          builder: (context, _) {
+            final t = Curves.easeInOutCubic.transform(_morph.value);
+            // 先横向展开到卡片宽度、再向下长；底色在盒子还小时就换成卡片色，
+            // 内容等宽度到位后才淡入，两侧文字不会被裁
+            final widthT = (t / 0.5).clamp(0.0, 1.0);
+            final fill = (t / 0.35).clamp(0.0, 1.0);
+            final faceOpacity = 1 - (t / 0.25).clamp(0.0, 1.0);
+            final contentOpacity = ((t - 0.5) / 0.5).clamp(0.0, 1.0);
+            final radius = 8 + 4 * t;
+            final shape = BorderRadius.circular(radius);
+            final shadows = [
+              for (final shadow in palette.cardShadow)
+                BoxShadow(
+                  color: shadow.color.withValues(alpha: shadow.color.a * t),
+                  offset: shadow.offset,
+                  blurRadius: shadow.blurRadius,
+                  spreadRadius: shadow.spreadRadius,
+                ),
+            ];
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CustomPaint(
+                  painter: _OutsetShadowPainter(shadows, radius),
+                  child: ClipRRect(
+                    borderRadius: shape,
+                    child: BackdropFilter(
+                      filter: ui.ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Color.lerp(palette.blue, palette.card, fill),
+                          borderRadius: shape,
+                          border: Border.all(
+                            color: palette.border.withValues(
+                              alpha: palette.border.a * fill,
+                            ),
+                          ),
+                        ),
+                        child: _MorphSize(
+                          widthT: widthT,
+                          heightT: t,
+                          collapsed: Size(
+                            widget.faceWidth,
+                            EntryMorphCard.faceHeight,
+                          ),
+                          child: Stack(
+                            children: [
+                              Opacity(opacity: contentOpacity, child: content),
+                              Positioned(
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                height: EntryMorphCard.faceHeight,
+                                child: Center(
+                                  child: Opacity(
+                                    opacity: faceOpacity,
+                                    child: face,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                if (footer != null)
+                  ClipRect(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      heightFactor: 1 - t,
+                      child: Opacity(opacity: faceOpacity, child: footer),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// 宽、高分别在收起尺寸与子组件完整尺寸之间插值；子组件始终按完整尺寸
+/// 排版、顶部水平居中，超出部分由外层 [ClipRRect] 裁掉。
+class _MorphSize extends SingleChildRenderObjectWidget {
+  const _MorphSize({
+    required this.widthT,
+    required this.heightT,
+    required this.collapsed,
+    super.child,
+  });
+
+  final double widthT;
+  final double heightT;
+  final Size collapsed;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderMorphSize(widthT, heightT, collapsed);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderMorphSize renderObject) {
+    renderObject
+      ..widthT = widthT
+      ..heightT = heightT
+      ..collapsed = collapsed;
+  }
+}
+
+class _RenderMorphSize extends RenderShiftedBox {
+  _RenderMorphSize(this._widthT, this._heightT, this._collapsed) : super(null);
+
+  double _widthT;
+  set widthT(double value) {
+    if (value == _widthT) return;
+    _widthT = value;
+    markNeedsLayout();
+  }
+
+  double _heightT;
+  set heightT(double value) {
+    if (value == _heightT) return;
+    _heightT = value;
+    markNeedsLayout();
+  }
+
+  Size _collapsed;
+  set collapsed(Size value) {
+    if (value == _collapsed) return;
+    _collapsed = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    final child = this.child;
+    if (child == null) {
+      size = constraints.constrain(_collapsed);
+      return;
+    }
+    child.layout(constraints.loosen(), parentUsesSize: true);
+    final full = child.size;
+    size = constraints.constrain(
+      Size(
+        _collapsed.width + (full.width - _collapsed.width) * _widthT,
+        _collapsed.height + (full.height - _collapsed.height) * _heightT,
+      ),
+    );
+    (child.parentData! as BoxParentData).offset = Offset(
+      (size.width - full.width) / 2,
+      0,
     );
   }
 }
