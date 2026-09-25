@@ -82,6 +82,31 @@ void main() {
     },
   );
 
+  for (final brightness in Brightness.values) {
+    testWidgets('native title glass is a flat page tint flush with content in '
+        '${brightness.name}', (tester) async {
+      await tester.pumpWidget(shell(brightness));
+      await tester.pumpAndSettle();
+      final glass = find.byType(StudioGlassSurface);
+      final tint = tester.widget<ColoredBox>(
+        find.descendant(of: glass, matching: find.byType(ColoredBox)).first,
+      );
+      final theme = brightness == Brightness.dark
+          ? GeistTheme.dark
+          : GeistTheme.light;
+      expect(
+        tint.color,
+        theme.colorScheme.surface.withValues(
+          alpha: brightness == Brightness.dark ? .80 : .78,
+        ),
+      );
+      expect(
+        tester.getTopLeft(find.byType(Scaffold)).dy,
+        IntegratedTitleBarShell.barHeight,
+      );
+    });
+  }
+
   testWidgets('unsupported native material keeps an opaque title surface', (
     tester,
   ) async {

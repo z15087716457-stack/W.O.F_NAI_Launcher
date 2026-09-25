@@ -21,25 +21,30 @@ class StudioGlassSurface extends StatelessWidget {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
     final highContrast = MediaQuery.highContrastOf(context);
-    // DWM already supplies the blur. A darker tint lets the native title reveal
-    // more backdrop colour without washing out into a pale grey strip.
-    final base = nativeBackdrop && dark
-        ? Colors.black
-        : theme.colorScheme.surfaceContainerLow;
-    final highlightOpacity = dark ? (nativeBackdrop ? .015 : .065) : .8;
+    if (nativeBackdrop && !highContrast) {
+      // The window's own page colour laid flat over the DWM acrylic: mostly
+      // solid, letting only a soft hint of what is behind show through. No
+      // gradient or edge light, so the bar never reads as a grey strip.
+      return ClipRRect(
+        borderRadius: borderRadius,
+        clipBehavior: clipBehavior,
+        child: ColoredBox(
+          color: theme.colorScheme.surface.withValues(alpha: dark ? .80 : .78),
+          child: child,
+        ),
+      );
+    }
+    final base = theme.colorScheme.surfaceContainerLow;
     final top = Color.alphaBlend(
-      Colors.white.withValues(alpha: highlightOpacity),
+      Colors.white.withValues(alpha: dark ? .065 : .8),
       base,
     );
     final bottom = Color.alphaBlend(
       (dark ? Colors.black : theme.colorScheme.outlineVariant).withValues(
-        alpha: dark ? .03 : (nativeBackdrop ? .12 : .55),
+        alpha: dark ? .03 : .55,
       ),
       base,
     );
-    // Keep native backdrop colours visible; in-app cards remain fully opaque.
-    final topOpacity = nativeBackdrop ? (dark ? .42 : .48) : 1.0;
-    final bottomOpacity = nativeBackdrop ? (dark ? .50 : .58) : 1.0;
     return ClipRRect(
       borderRadius: borderRadius,
       clipBehavior: clipBehavior,
@@ -51,29 +56,19 @@ class StudioGlassSurface extends StatelessWidget {
               : LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    top.withValues(alpha: topOpacity),
-                    bottom.withValues(alpha: bottomOpacity),
-                  ],
+                  colors: [top, bottom],
                 ),
         ),
         child: CustomPaint(
-          // Native acrylic already has grain; avoid a second frosted layer.
-          painter: highContrast || nativeBackdrop ? null : _GlassGrain(dark),
+          painter: highContrast ? null : _GlassGrain(dark),
           foregroundPainter: _GlassEdge(
             borderRadius,
             highContrast
                 ? theme.colorScheme.outline
-                : Colors.white.withValues(
-                    alpha: nativeBackdrop
-                        ? (dark ? .05 : .38)
-                        : (dark ? .15 : .92),
-                  ),
+                : Colors.white.withValues(alpha: dark ? .15 : .92),
             highContrast
                 ? theme.colorScheme.outline
-                : theme.colorScheme.outline.withValues(
-                    alpha: nativeBackdrop ? .18 : (dark ? .32 : .38),
-                  ),
+                : theme.colorScheme.outline.withValues(alpha: dark ? .32 : .38),
           ),
           child: child,
         ),

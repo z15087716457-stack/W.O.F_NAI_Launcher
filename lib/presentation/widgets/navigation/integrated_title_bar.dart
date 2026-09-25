@@ -68,8 +68,9 @@ class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
     const double barH = IntegratedTitleBarShell.barHeight;
     return Stack(
       children: [
+        // Content starts flush with the bar; a gap would expose raw acrylic.
         Positioned(
-          top: barH + 0.5,
+          top: barH,
           left: 0,
           right: 0,
           bottom: 0,
