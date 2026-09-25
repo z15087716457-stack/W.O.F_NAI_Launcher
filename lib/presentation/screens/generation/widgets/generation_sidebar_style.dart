@@ -29,17 +29,22 @@ final class GenSidebarStyle {
     theme.brightness == Brightness.dark ? 0.3 : 0.6,
   )!;
 
-  static Color border(ThemeData theme) =>
-      theme.colorScheme.outlineVariant;
+  static Color border(ThemeData theme) => theme.colorScheme.outlineVariant;
 
+  /// Dark ink sits far above the deep charcoal base, so the dark overlays are
+  /// lighter to keep cards only a few steps above the page.
   static Color selectedSurface(ThemeData theme) => Color.alphaBlend(
-    theme.colorScheme.onSurface.withValues(alpha: .08),
+    theme.colorScheme.onSurface.withValues(
+      alpha: theme.brightness == Brightness.dark ? .055 : .08,
+    ),
     theme.colorScheme.surface,
   );
 
   /// Custom themes may alias all surfaceContainer slots to the same color.
   static Color panelSurface(ThemeData theme) => Color.alphaBlend(
-    theme.colorScheme.onSurface.withValues(alpha: .035),
+    theme.colorScheme.onSurface.withValues(
+      alpha: theme.brightness == Brightness.dark ? .023 : .035,
+    ),
     theme.colorScheme.surface,
   );
 

@@ -16,9 +16,9 @@ abstract final class GeistTheme {
     return AppThemeExtension(
       navBarStyle: AppNavBarStyle.defaultCompact,
       interactionStyle: AppInteractionStyle.material,
-      borderColor: dark ? const Color(0xFF3B3B3B) : const Color(0xFFE6E6E6),
+      borderColor: dark ? const Color(0xFF2E2E2E) : const Color(0xFFE6E6E6),
       borderWidth: 1,
-      dividerColor: dark ? const Color(0xFF353535) : const Color(0xFFE6E6E6),
+      dividerColor: dark ? const Color(0xFF292929) : const Color(0xFFE6E6E6),
       enableInsetShadow: false,
       isLightTheme: !dark,
     );
@@ -26,19 +26,20 @@ abstract final class GeistTheme {
 
   static ThemeData _build(Brightness brightness) {
     final dark = brightness == Brightness.dark;
-    // Charcoal keeps the workspace soft while stepped grays separate surfaces.
-    final background = dark ? const Color(0xFF181818) : Colors.white;
-    final panel = dark ? const Color(0xFF202020) : const Color(0xFFFAFAFA);
-    final raised = dark ? const Color(0xFF262626) : Colors.white;
-    final control = dark ? const Color(0xFF303030) : const Color(0xFFF2F2F2);
-    final hover = dark ? const Color(0xFF363636) : const Color(0xFFEBEBEB);
-    final active = dark ? const Color(0xFF3D3D3D) : const Color(0xFFE6E6E6);
-    final border = dark ? const Color(0xFF3B3B3B) : const Color(0xFFE6E6E6);
+    // Deep charcoal rather than black; surfaces sit only a few steps apart and
+    // borders do the separating, as in Geist's dark scale.
+    final background = dark ? const Color(0xFF111111) : Colors.white;
+    final panel = dark ? const Color(0xFF161616) : const Color(0xFFFAFAFA);
+    final raised = dark ? const Color(0xFF1B1B1B) : Colors.white;
+    final control = dark ? const Color(0xFF222222) : const Color(0xFFF2F2F2);
+    final hover = dark ? const Color(0xFF282828) : const Color(0xFFEBEBEB);
+    final active = dark ? const Color(0xFF2E2E2E) : const Color(0xFFE6E6E6);
+    final border = dark ? const Color(0xFF2E2E2E) : const Color(0xFFE6E6E6);
     final strongBorder = dark
-        ? const Color(0xFF555555)
+        ? const Color(0xFF454545)
         : const Color(0xFFC9C9C9);
-    final ink = dark ? const Color(0xFFE4E4E4) : const Color(0xFF171717);
-    final muted = dark ? const Color(0xFFA8A8A8) : const Color(0xFF666666);
+    final ink = dark ? const Color(0xFFEDEDED) : const Color(0xFF171717);
+    final muted = dark ? const Color(0xFFA1A1A1) : const Color(0xFF666666);
     final accent = dark ? const Color(0xFF50A8FF) : const Color(0xFF0064E2);
     final error = dark ? const Color(0xFFFF6166) : const Color(0xFFC80029);
     final scheme = ColorScheme(

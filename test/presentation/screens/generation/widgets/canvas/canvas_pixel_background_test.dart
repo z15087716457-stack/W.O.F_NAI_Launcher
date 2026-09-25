@@ -99,7 +99,7 @@ void main() {
 
       var marked = 0;
       for (var i = 0; i < pixels.length; i += 4) {
-        if (pixels[i] != 0x18) marked++;
+        if (pixels[i] != 0x11) marked++;
         expect(pixels[i + 3], 255);
       }
       expect(marked / (640 * 560), inExclusiveRange(0.002, 0.04));
@@ -143,7 +143,7 @@ void main() {
       final pixels = await _pixels(
         const CanvasCamera(offset: Offset(-12, -7), scale: 0.1),
       );
-      expect(pixels.toSet(), {0x18, 255});
+      expect(pixels.toSet(), {0x11, 255});
       final image = await _render(
         const CanvasCamera(offset: Offset.zero, scale: 0.1),
         theme: ThemeData.light().copyWith(

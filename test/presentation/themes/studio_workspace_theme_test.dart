@@ -191,7 +191,7 @@ void main() {
         expect(
           theme.scaffoldBackgroundColor,
           brightness == Brightness.dark
-              ? const Color(0xFF181818)
+              ? const Color(0xFF111111)
               : Colors.white,
         );
         if (brightness == Brightness.light) {
