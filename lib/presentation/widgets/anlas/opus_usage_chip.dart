@@ -87,7 +87,11 @@ class OpusUsageChip extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.bolt_outlined, size: 16, color: accent),
+                    Icon(
+                      Icons.bolt_outlined,
+                      size: 16,
+                      color: isLow ? scheme.error : scheme.onSurface,
+                    ),
                     const SizedBox(width: 5),
                     _QuotaBar(
                       value: usage.displayPercent / 100,
@@ -143,10 +147,11 @@ class OpusUsageChip extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // 与 Anlas 钻石同为浅色黑、深色白；额度低时换警示色
           Icon(
             Icons.bolt_outlined,
             size: 16,
-            color: warning ? scheme.error : scheme.primary,
+            color: warning ? scheme.error : scheme.onSurface,
           ),
           const SizedBox(width: 4),
           Text(
