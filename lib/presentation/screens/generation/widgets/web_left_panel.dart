@@ -11,6 +11,7 @@ import '../../../../data/models/image/image_params.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/layout_state_provider.dart';
 import '../../../providers/subscription_provider.dart';
+import '../../../themes/presets/geist_theme.dart';
 import '../../../widgets/anlas/anlas_balance_chip.dart';
 import '../../../widgets/anlas/opus_usage_chip.dart';
 import '../../../widgets/character/inline_character_section.dart';
@@ -639,7 +640,7 @@ class _ModeCapsule extends ConsumerWidget {
 }
 
 /// 头部条额度胶囊（官网式）：Opus 免费额度 + Anlas 余额两格共用一颗
-/// 与 Model/Mode 同款的描边外框（28 高 / 圆角 8），中间竖线分隔；
+/// 与 Model/Mode 同尺寸（28 高 / 圆角 8）的淡蓝半透外框，中间竖线分隔；
 /// Opus 格隐藏（V4 及更早、无额度数据）时竖线一并收起，余额单独居中。
 class _QuotaChipsCapsule extends ConsumerWidget {
   const _QuotaChipsCapsule();
@@ -662,15 +663,21 @@ class _QuotaChipsCapsule extends ConsumerWidget {
     );
     final showOpus = hasUsageLimit && hasUsageData;
 
+    // 淡蓝半透：底色透出一点生成按钮的蓝，与 Model / Mode 选择框
+    // 区分开——这颗只显示状态，不是可点开的选择器
+    final dark = theme.brightness == Brightness.dark;
+    final line = GeistTheme.blue.withValues(alpha: dark ? 0.32 : 0.22);
+
     return Container(
       height: 28,
       padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.4),
+        color: Color.alphaBlend(
+          GeistTheme.blue.withValues(alpha: dark ? 0.12 : 0.06),
+          theme.colorScheme.surface,
         ),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: line),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -682,11 +689,7 @@ class _QuotaChipsCapsule extends ConsumerWidget {
               margin: EdgeInsets.symmetric(horizontal: 2),
             ),
             // 中缝竖线：同描边色、高度留白，避免顶穿外框
-            Container(
-              width: 1,
-              height: 14,
-              color: theme.colorScheme.outline.withValues(alpha: 0.4),
-            ),
+            Container(width: 1, height: 14, color: line),
           ],
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 2),
