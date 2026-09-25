@@ -352,13 +352,27 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
             if (activeRun != null) ExploreRunControlBar(run: activeRun),
             SizedBox(
               height: promptAreaHeight,
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                child: const PromptInputWidget(
-                  showMaximizeButton: false,
-                  allowEvolutionToggle: true,
-                  tipModule: TipModule.explore,
-                ),
+              // 侧栏挤占到卡头排不下时按下限排版，超出部分由主编辑区的
+              // ClipRect 裁掉，而不是在卡内溢出
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  final width = box.maxWidth < _minPromptAreaWidth
+                      ? _minPromptAreaWidth
+                      : box.maxWidth;
+                  return OverflowBox(
+                    alignment: Alignment.topLeft,
+                    minWidth: width,
+                    maxWidth: width,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                      child: const PromptInputWidget(
+                        showMaximizeButton: false,
+                        allowEvolutionToggle: true,
+                        tipModule: TipModule.explore,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             const InlineCharacterRow(),
@@ -413,6 +427,10 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
   /// 提示词区高度下限：卡头 + 底行 + token 条 + 最小两行编辑区，
   /// 低于此值 PromptInputWidget 内部必然溢出
   static const double _minPromptAreaHeight = 160.0;
+
+  /// 提示词区排版宽度下限：卡头页签 + 角色 / 块库 / 设置钮的固有宽度，
+  /// 低于此值卡头 Row 必然溢出
+  static const double _minPromptAreaWidth = 280.0;
 
   /// 提示词区默认高度（= 固定高度时代的 280，也是 cap 的下限：
   /// 窄窗顶栏折行吃掉高度时退回默认高度，不硬压到 100 造成
