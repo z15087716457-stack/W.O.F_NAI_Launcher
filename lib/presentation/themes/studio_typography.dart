@@ -7,6 +7,8 @@ abstract final class StudioTypography {
   static const sans = 'Geist';
   static const mono = 'Geist Mono';
   static const pixel = 'Geist Pixel Line';
+  static const pixelSquare = 'Geist Pixel Square';
+  static const pixelCircle = 'Geist Pixel Circle';
   static const cjk = 'HarmonyOS Sans SC';
   static const fallback = [cjk];
 

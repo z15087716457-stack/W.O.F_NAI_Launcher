@@ -1,10 +1,14 @@
 import 'package:nai_launcher/core/constants/brand.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'core/shortcuts/default_shortcuts.dart';
+import 'presentation/providers/auth_provider.dart';
+import 'presentation/providers/guest_session_provider.dart';
 import 'presentation/router/app_router.dart';
 import 'presentation/providers/theme_provider.dart';
 import 'presentation/providers/font_scale_provider.dart';
@@ -175,13 +179,106 @@ class NAILauncherApp extends ConsumerWidget {
               data: MediaQuery.of(
                 context,
               ).copyWith(textScaler: TextScaler.linear(fontScale)),
-              child: IntegratedTitleBarShell(
+              child: _RouteAwareTitleBar(
+                router: router,
+                // 首个路由解析前按认证状态先行判断，未登录时不先闪 Logo 标题栏；
+                // 认证尚未建立（例如测试里）时不在这里触发它
+                initialImmersive: () =>
+                    ref.exists(authNotifierProvider) &&
+                    !ref.read(authNotifierProvider).isAuthenticated &&
+                    !ref.read(guestSessionNotifierProvider),
+                onToggleTheme: () =>
+                    ref.read(themeNotifierProvider.notifier).nextTheme(),
                 child: child ?? const SizedBox.shrink(),
               ),
             );
           },
         ),
       ),
+    );
+  }
+}
+
+/// 登录页使用沉浸标题栏（页面底色、只留窗口按钮），其余路由用玻璃栏。
+///
+/// 路由在首次构建期间就会通知变化，此时本组件正处于构建阶段之外的
+/// 祖先位置，不能立即 setState，留到这一帧结束后再刷新。
+class _RouteAwareTitleBar extends StatefulWidget {
+  const _RouteAwareTitleBar({
+    required this.router,
+    required this.initialImmersive,
+    required this.onToggleTheme,
+    required this.child,
+  });
+
+  final GoRouter router;
+  final bool Function() initialImmersive;
+  final VoidCallback onToggleTheme;
+  final Widget child;
+
+  @override
+  State<_RouteAwareTitleBar> createState() => _RouteAwareTitleBarState();
+}
+
+class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
+  late bool _immersive = _resolve();
+  bool _refreshQueued = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.router.routerDelegate.addListener(_onRouteChanged);
+  }
+
+  @override
+  void didUpdateWidget(_RouteAwareTitleBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.router != widget.router) {
+      oldWidget.router.routerDelegate.removeListener(_onRouteChanged);
+      widget.router.routerDelegate.addListener(_onRouteChanged);
+      _immersive = _resolve();
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.router.routerDelegate.removeListener(_onRouteChanged);
+    super.dispose();
+  }
+
+  bool _resolve() {
+    final config = widget.router.routerDelegate.currentConfiguration;
+    if (config.isEmpty) return widget.initialImmersive();
+    return config.uri.path == AppRoutes.login;
+  }
+
+  void _onRouteChanged() {
+    final building =
+        SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks;
+    if (!building) {
+      _refresh();
+    } else if (!_refreshQueued) {
+      _refreshQueued = true;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _refreshQueued = false;
+        _refresh();
+      });
+    }
+  }
+
+  void _refresh() {
+    if (!mounted) return;
+    final next = _resolve();
+    if (next != _immersive) setState(() => _immersive = next);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IntegratedTitleBarShell(
+      immersive: _immersive,
+      onToggleTheme: widget.onToggleTheme,
+      child: widget.child,
     );
   }
 }

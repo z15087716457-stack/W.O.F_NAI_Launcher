@@ -312,11 +312,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get auth_loginFailed => 'ログインに失敗しました';
 
   @override
-  String get auth_loginTip =>
-      'NovelAI アカウントでサインインしてください\nすべてのデータはローカルにのみ保存されます';
+  String get auth_guestEntry => 'ログインをスキップしてゲストとして続行';
 
   @override
-  String get auth_guestEntry => 'ログインをスキップしてゲストとして続行';
+  String get auth_recommended => '推奨';
+
+  @override
+  String get auth_getToken => 'トークンを取得';
+
+  @override
+  String get auth_localOnlyNote => 'アカウントとトークンはこの端末にのみ保存されます';
+
+  @override
+  String get auth_back => '戻る';
+
+  @override
+  String get auth_toggleVisibility => '表示 / 非表示';
 
   @override
   String get auth_loggedIn => 'ログインしました';
@@ -344,16 +355,10 @@ class AppLocalizationsJa extends AppLocalizations {
       'メールアドレス/パスワードでのログインは現在利用できません。Token ログインを使用してください。';
 
   @override
-  String get auth_tokenHint => '永続 API トークンを入力してください';
-
-  @override
   String get auth_tokenRequired => 'トークンを入力してください';
 
   @override
   String get auth_tokenInvalid => '無効なトークン形式です。pst- で始まる必要があります。';
-
-  @override
-  String get auth_nicknameOptional => 'ニックネーム (オプション)';
 
   @override
   String get auth_nicknameHint => 'このアカウントに認識可能な名前を設定します';
@@ -440,21 +445,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get auth_removeAvatar => 'アバターを削除';
 
   @override
-  String get auth_selectFromGallery => 'ギャラリーから選択';
-
-  @override
-  String get auth_takePhoto => '写真を撮る';
-
-  @override
   String get auth_quickLogin => 'クイックログイン';
 
   @override
   String get auth_nicknameRequired => 'ニックネームを入力してください';
-
-  @override
-  String auth_createdAt(Object date) {
-    return '作成日時: $date';
-  }
 
   @override
   String get auth_error_networkTimeout => '接続タイムアウト';
@@ -490,9 +484,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get auth_loggingIn => 'ログイン中...';
-
-  @override
-  String get auth_pleaseWait => 'お待ちください';
 
   @override
   String get auth_viewTroubleshootingTips => 'トラブルシューティングのヒントを表示';

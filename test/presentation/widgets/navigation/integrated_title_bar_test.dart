@@ -25,13 +25,26 @@ void main() {
         .setMockMethodCallHandler(channel, null);
   });
 
-  Widget buildShell({required Widget child}) {
+  Widget buildShell({
+    required Widget child,
+    bool immersive = false,
+    VoidCallback? onToggleTheme,
+  }) {
     return MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: const Locale('en'),
-      home: IntegratedTitleBarShell(child: child),
+      home: IntegratedTitleBarShell(
+        immersive: immersive,
+        onToggleTheme: onToggleTheme,
+        child: child,
+      ),
     );
+  }
+
+  double? lastReservedRight() {
+    final region = calls.lastWhere((c) => c.method == 'setRegion');
+    return (region.arguments as Map)['reservedRight'] as double?;
   }
 
   Finder dividerFinder() => find.descendant(
@@ -128,6 +141,46 @@ void main() {
 
       expect(dividerColor(), Colors.transparent);
     });
+
+    testWidgets(
+      'immersive bar drops logo and title, keeps theme toggle and captions',
+      (tester) async {
+        var toggles = 0;
+        await tester.pumpWidget(
+          buildShell(
+            child: const SizedBox.expand(),
+            immersive: true,
+            onToggleTheme: () => toggles++,
+          ),
+        );
+        await tester.pump();
+
+        expect(find.text('NAI Studio'), findsNothing);
+        expect(
+          find.byKey(const ValueKey('immersive_title_bar')),
+          findsOneWidget,
+        );
+        expect(find.byIcon(Icons.close), findsOneWidget);
+        // 明暗按钮也要留在可点击区
+        expect(
+          lastReservedRight(),
+          IntegratedTitleBarShell.reservedRight +
+              IntegratedTitleBarShell.themeButtonWidth +
+              IntegratedTitleBarShell.themeSeparatorWidth,
+        );
+        await tester.tap(find.byKey(const Key('brand_appearance_toggle')));
+        expect(toggles, 1);
+
+        // 离开登录页：玻璃栏淡入，命中区恢复为三个窗口按钮
+        await tester.pumpWidget(
+          buildShell(child: const SizedBox.expand(), onToggleTheme: () {}),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('NAI Studio'), findsOneWidget);
+        expect(find.byKey(const Key('brand_appearance_toggle')), findsNothing);
+        expect(lastReservedRight(), IntegratedTitleBarShell.reservedRight);
+      },
+    );
 
     testWidgets('caption buttons do not overflow a narrow window', (
       tester,

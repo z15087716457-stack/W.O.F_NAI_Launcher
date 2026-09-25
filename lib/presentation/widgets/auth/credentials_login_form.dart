@@ -6,8 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../providers/auth_mode_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../common/floating_label_input.dart';
-import '../common/themed_checkbox.dart';
+import 'entry_controls.dart';
 
 /// 邮箱密码登录表单
 class CredentialsLoginForm extends ConsumerStatefulWidget {
@@ -51,189 +50,105 @@ class _CredentialsLoginFormState extends ConsumerState<CredentialsLoginForm> {
   Widget build(BuildContext context) {
     final obscurePassword = ref.watch(obscurePasswordProvider);
     final authState = ref.watch(authNotifierProvider);
+    final l10n = context.l10n;
 
     // 统一错误状态：优先使用本地错误（添加账号场景），否则使用全局状态
-    final hasError = _localErrorCode != null || authState.hasError;
     final errorCode = _localErrorCode ?? authState.errorCode;
     final httpStatusCode = _localHttpStatusCode ?? authState.httpStatusCode;
     // 统一加载状态
     final isLoading = _isLoading || authState.isLoading;
+    final hasError =
+        !isLoading && (_localErrorCode != null || authState.hasError);
 
     return Form(
       key: formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 邮箱输入
-          FloatingLabelInput(
-            label: context.l10n.auth_email,
+          EntryTextField(
+            label: l10n.auth_email,
             controller: emailController,
-            hintText: 'user@example.com',
-            prefixIcon: Icons.email_outlined,
+            hintText: 'you@example.com',
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            required: true,
+            enabled: !isLoading,
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return context.l10n.auth_emailRequired;
+                return l10n.auth_emailRequired;
               }
               if (!value.contains('@')) {
-                return context.l10n.auth_emailInvalid;
+                return l10n.auth_emailInvalid;
               }
               return null;
             },
           ),
-          const SizedBox(height: 16),
-
-          // 密码输入
-          FloatingLabelPasswordInput(
-            label: context.l10n.auth_password,
+          const SizedBox(height: 14),
+          EntryTextField(
+            label: l10n.auth_password,
             controller: passwordController,
+            obscureText: obscurePassword,
             textInputAction: TextInputAction.done,
             onFieldSubmitted: (_) => _handleLogin(),
-            required: true,
-            isVisible: !obscurePassword,
-            onVisibilityChanged: (_) {
-              ref
-                  .read(authModeNotifierProvider.notifier)
-                  .togglePasswordVisibility();
-            },
+            enabled: !isLoading,
+            trailing: [
+              EntryFieldAction(
+                icon: obscurePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                tooltip: l10n.auth_toggleVisibility,
+                onPressed: () => ref
+                    .read(authModeNotifierProvider.notifier)
+                    .togglePasswordVisibility(),
+              ),
+            ],
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return context.l10n.auth_passwordRequired;
+                return l10n.auth_passwordRequired;
               }
               if (value.length < 6) {
-                return context.l10n.auth_passwordTooShort;
+                return l10n.auth_passwordTooShort;
               }
               return null;
             },
           ),
-          const SizedBox(height: 16),
-
-          // 自动登录开关
+          const SizedBox(height: 10),
+          // 窄窗口或放大字号时“忘记密码”换到下一行
           Wrap(
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ThemedCheckbox(
-                    value: ref.watch(autoLoginProvider),
-                    onChanged: (value) {
-                      ref
-                          .read(authModeNotifierProvider.notifier)
-                          .toggleAutoLogin();
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  Text(context.l10n.auth_autoLogin),
-                ],
+              EntryCheckbox(
+                value: ref.watch(autoLoginProvider),
+                label: l10n.auth_autoLogin,
+                onChanged: (_) => ref
+                    .read(authModeNotifierProvider.notifier)
+                    .toggleAutoLogin(),
               ),
-              TextButton(
-                onPressed: _openPasswordReset,
-                child: Text(context.l10n.auth_forgotPassword),
+              Transform.translate(
+                offset: const Offset(8, 0),
+                child: EntryGhostButton(
+                  label: l10n.auth_forgotPassword,
+                  onPressed: _openPasswordReset,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-
-          // 登录按钮
-          SizedBox(
-            height: 56,
-            child: ElevatedButton(
-              onPressed: isLoading ? null : _handleLogin,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: isLoading
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Text(
-                      context.l10n.auth_loginButton,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-            ),
+          const SizedBox(height: 12),
+          EntryPrimaryButton(
+            label: l10n.auth_loginButton,
+            busy: isLoading,
+            busyLabel: l10n.auth_loggingIn,
+            onPressed: _handleLogin,
           ),
-
-          // 错误提示
           if (hasError) ...[
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: Theme.of(context).colorScheme.onErrorContainer,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _getErrorMessage(errorCode),
-                          style: TextStyle(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onErrorContainer,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  // 显示恢复建议
-                  if (_getErrorRecoveryHint(errorCode, httpStatusCode) !=
-                      null) ...[
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 32),
-                      child: Text(
-                        _getErrorRecoveryHint(errorCode, httpStatusCode)!,
-                        style: TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onErrorContainer.withValues(alpha: 0.8),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                  // 网络错误显示重试按钮
-                  if (_isNetworkError(errorCode)) ...[
-                    const SizedBox(height: 12),
-                    ElevatedButton.icon(
-                      onPressed: isLoading ? null : _handleLogin,
-                      icon: const Icon(Icons.refresh, size: 18),
-                      label: Text(context.l10n.common_retry),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                        foregroundColor: Theme.of(context).colorScheme.onError,
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+            const SizedBox(height: 12),
+            EntryAlert(
+              title: _getErrorMessage(errorCode),
+              hint: _getErrorRecoveryHint(errorCode, httpStatusCode),
+              actionLabel: _isNetworkError(errorCode)
+                  ? l10n.common_retry
+                  : null,
+              onAction: _handleLogin,
             ),
           ],
         ],

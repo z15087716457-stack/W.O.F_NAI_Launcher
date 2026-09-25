@@ -14,8 +14,11 @@
 
 ## 登录与游客会话
 
-- 登录与载入共用 `BrandEntryScene`：中央完整 W.O.F / NAI STUDIO Logo，继承全局 Geist 黑白灰主题。右上角明暗选择、设置页和全局切换快捷键统一写 `themeNotifierProvider`，设置键为 `studio_theme_mode`（dark / light，默认 dark），跨启动与页面保存；不再按路由单独覆盖 Theme，也不再循环旧的 16 套预设。旧 `theme_type` 索引不删除、不重排，历史预设只留兼容与测试。紧凑登录页签只在入口传 `LoginFormContainer.compact: true`，添加账号对话框保留原布局。
-- 登录页提供“跳过登录，以游客身份进入”入口；无保存账号和已有账号快速登录两条路径都接入同一游客会话 provider。`LoginFormContainer.showGuestEntry` 默认 false——已登录的添加账号等复用场景不显示游客入口，仅登录页语境显式传 true。
+- 登录与载入共用 `BrandEntryScene`：Logo 按窗口高度固定位置（载入页换登录页时不挪动），下方挂载入进度或磨砂卡片 `EntryCard`；背景是「去噪」字符场 `EntryField`（Geist Pixel Square / Circle 字形图集 + `drawRawAtlas`，约 30 fps）。未解出的格子是噪点，去噪程度越高偶数行越多格子解出提示词原文，刚解出的格子闪品牌蓝；载入页的去噪程度即预热进度，登录页另有零星逐字解码和跟随指针的透镜，登录中升到 0.42。时钟与去噪程度是静态的，跨载入页 / 登录页延续；系统“关闭动画”（`MediaQuery.disableAnimations`）时只画静态一帧，窗口收进托盘时停止。测试需设 `disableAnimations` 才能 `pumpAndSettle`。
+- 登录 / 载入页的标题栏为沉浸模式（`IntegratedTitleBarShell.immersive`）：页面底色、不显示 Logo 标题，右侧只有明暗切换和窗口按钮，原生命中区的右侧保留宽随之加上明暗按钮；主应用按当前路由是否为 `/login` 切换，离开时玻璃栏淡入。预热完成后若已保存账号仍在自动验证，载入页最多再等 5 秒，直接进入登录页或主界面，不先闪主界面。
+- 快速登录卡：账号行点开后在卡内列出账号，点选只切换当前账号、不直接登录；一键登录（回车亦可）、添加账号（卡内切到表单，可返回）、SKIP 游客入口。登录失败在卡内提示（网络错误附故障排除入口），不再弹 Toast、不再按 500ms 自动清除错误；登录中不弹全屏遮罩。三种登录表单与添加账号对话框共用 `entry_controls.dart` 的输入框、主按钮与提示样式。
+- 右上角明暗选择、设置页和全局切换快捷键统一写 `themeNotifierProvider`，设置键为 `studio_theme_mode`（dark / light，默认 dark），跨启动与页面保存；不再按路由单独覆盖 Theme，也不再循环旧的 16 套预设。旧 `theme_type` 索引不删除、不重排，历史预设只留兼容与测试。
+- 登录页卡片右下角的 SKIP 即游客入口（悬停提示“跳过登录，以游客身份进入”）；无保存账号和已有账号快速登录两条路径都接入同一游客会话 provider。`LoginFormContainer.showGuestEntry` 默认 false——已登录的添加账号等复用场景不显示游客入口，仅登录页语境显式传 true。
 - 游客状态只存在于当前运行时，不写入持久化存储；路由会在游客状态变化时刷新，游客可进入主应用及本地功能。
 - Token、第三方 Token、credentials/access token、credentials 登录和 `tryAddAccount` 成功后清除游客状态；`logout()` 同样清除游客状态，避免退出登录后继续放行。
 - 完全重启应用不会恢复游客身份。代理运行时热切换不属于 Q4 登录页逃生门范围。

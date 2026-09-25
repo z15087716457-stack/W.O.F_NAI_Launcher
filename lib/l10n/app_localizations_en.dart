@@ -316,11 +316,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get auth_loginFailed => 'Login failed';
 
   @override
-  String get auth_loginTip =>
-      'Sign in with your NovelAI account\nAll data is stored locally only';
+  String get auth_guestEntry => 'Skip login and continue as guest';
 
   @override
-  String get auth_guestEntry => 'Skip login and continue as guest';
+  String get auth_recommended => 'Best';
+
+  @override
+  String get auth_getToken => 'Get token';
+
+  @override
+  String get auth_localOnlyNote => 'Accounts and tokens stay on this device';
+
+  @override
+  String get auth_back => 'Back';
+
+  @override
+  String get auth_toggleVisibility => 'Show / hide';
 
   @override
   String get auth_loggedIn => 'Logged in';
@@ -348,17 +359,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Email/password login is currently unavailable. Please use Token login.';
 
   @override
-  String get auth_tokenHint => 'Enter your Persistent API Token';
-
-  @override
   String get auth_tokenRequired => 'Please enter token';
 
   @override
   String get auth_tokenInvalid =>
       'Invalid token format, should start with pst-';
-
-  @override
-  String get auth_nicknameOptional => 'Nickname (optional)';
 
   @override
   String get auth_nicknameHint => 'Set a recognizable name for this account';
@@ -448,21 +453,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get auth_removeAvatar => 'Remove Avatar';
 
   @override
-  String get auth_selectFromGallery => 'Select from Gallery';
-
-  @override
-  String get auth_takePhoto => 'Take Photo';
-
-  @override
   String get auth_quickLogin => 'Quick Login';
 
   @override
   String get auth_nicknameRequired => 'Please enter nickname';
-
-  @override
-  String auth_createdAt(Object date) {
-    return 'Created at $date';
-  }
 
   @override
   String get auth_error_networkTimeout => 'Connection timeout';
@@ -498,9 +492,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get auth_loggingIn => 'Logging in...';
-
-  @override
-  String get auth_pleaseWait => 'Please wait';
 
   @override
   String get auth_viewTroubleshootingTips => 'View Troubleshooting Tips';

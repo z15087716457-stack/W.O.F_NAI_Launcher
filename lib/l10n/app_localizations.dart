@@ -682,17 +682,41 @@ abstract class AppLocalizations {
   /// **'Login failed'**
   String get auth_loginFailed;
 
-  /// No description provided for @auth_loginTip.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in with your NovelAI account\nAll data is stored locally only'**
-  String get auth_loginTip;
-
   /// No description provided for @auth_guestEntry.
   ///
   /// In en, this message translates to:
   /// **'Skip login and continue as guest'**
   String get auth_guestEntry;
+
+  /// No description provided for @auth_recommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Best'**
+  String get auth_recommended;
+
+  /// No description provided for @auth_getToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Get token'**
+  String get auth_getToken;
+
+  /// No description provided for @auth_localOnlyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts and tokens stay on this device'**
+  String get auth_localOnlyNote;
+
+  /// No description provided for @auth_back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get auth_back;
+
+  /// No description provided for @auth_toggleVisibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Show / hide'**
+  String get auth_toggleVisibility;
 
   /// No description provided for @auth_loggedIn.
   ///
@@ -742,12 +766,6 @@ abstract class AppLocalizations {
   /// **'Email/password login is currently unavailable. Please use Token login.'**
   String get auth_credentialsLoginUnavailable;
 
-  /// No description provided for @auth_tokenHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your Persistent API Token'**
-  String get auth_tokenHint;
-
   /// No description provided for @auth_tokenRequired.
   ///
   /// In en, this message translates to:
@@ -759,12 +777,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid token format, should start with pst-'**
   String get auth_tokenInvalid;
-
-  /// No description provided for @auth_nicknameOptional.
-  ///
-  /// In en, this message translates to:
-  /// **'Nickname (optional)'**
-  String get auth_nicknameOptional;
 
   /// No description provided for @auth_nicknameHint.
   ///
@@ -916,18 +928,6 @@ abstract class AppLocalizations {
   /// **'Remove Avatar'**
   String get auth_removeAvatar;
 
-  /// No description provided for @auth_selectFromGallery.
-  ///
-  /// In en, this message translates to:
-  /// **'Select from Gallery'**
-  String get auth_selectFromGallery;
-
-  /// No description provided for @auth_takePhoto.
-  ///
-  /// In en, this message translates to:
-  /// **'Take Photo'**
-  String get auth_takePhoto;
-
   /// No description provided for @auth_quickLogin.
   ///
   /// In en, this message translates to:
@@ -939,12 +939,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter nickname'**
   String get auth_nicknameRequired;
-
-  /// No description provided for @auth_createdAt.
-  ///
-  /// In en, this message translates to:
-  /// **'Created at {date}'**
-  String auth_createdAt(Object date);
 
   /// No description provided for @auth_error_networkTimeout.
   ///
@@ -1011,12 +1005,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Logging in...'**
   String get auth_loggingIn;
-
-  /// No description provided for @auth_pleaseWait.
-  ///
-  /// In en, this message translates to:
-  /// **'Please wait'**
-  String get auth_pleaseWait;
 
   /// No description provided for @auth_viewTroubleshootingTips.
   ///

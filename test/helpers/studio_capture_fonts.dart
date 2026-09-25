@@ -12,6 +12,8 @@ Future<void> loadStudioCaptureFonts() async {
     ],
     'Geist Mono': ['GeistMono-Regular.ttf', 'GeistMono-Medium.ttf'],
     'Geist Pixel Line': ['GeistPixel-Line.ttf'],
+    'Geist Pixel Square': ['GeistPixel-Square.ttf'],
+    'Geist Pixel Circle': ['GeistPixel-Circle.ttf'],
     'HarmonyOS Sans SC': [
       'HarmonyOS_Sans_SC_Regular.ttf',
       'HarmonyOS_Sans_SC_Medium.ttf',

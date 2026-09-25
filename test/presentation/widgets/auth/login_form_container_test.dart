@@ -6,7 +6,7 @@ import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/guest_session_provider.dart';
 import 'package:nai_launcher/presentation/widgets/auth/auth_mode_switcher.dart';
 import 'package:nai_launcher/presentation/widgets/auth/login_form_container.dart';
-import 'package:nai_launcher/presentation/widgets/common/floating_label_input.dart';
+import 'package:nai_launcher/presentation/widgets/auth/entry_controls.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeAuthNotifier extends AuthNotifier {
@@ -29,7 +29,8 @@ void main() {
     )!;
 
     expect(find.byKey(const Key('token_form')), findsOneWidget);
-    expect(find.text(l10n.auth_tokenLoginRecommended), findsOneWidget);
+    expect(find.byTooltip(l10n.auth_tokenLoginRecommended), findsOneWidget);
+    expect(find.text(l10n.auth_recommended), findsOneWidget);
     _expectSingleRowInTokenFirstOrder(tester);
   });
 
@@ -69,16 +70,19 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('credentials_form')), findsOneWidget);
-    expect(find.byType(FloatingLabelInput), findsNWidgets(2));
-    expect(find.byType(FloatingLabelPasswordInput), findsOneWidget);
+    expect(find.byType(EntryTextField), findsNWidgets(2));
 
     final l10n = AppLocalizations.of(
       tester.element(find.byKey(const Key('credentials_form'))),
     )!;
-    final labels = tester
-        .widgetList<FloatingLabelInput>(find.byType(FloatingLabelInput))
-        .map((input) => input.label);
-    expect(labels, containsAll(<String>[l10n.auth_email, l10n.auth_password]));
+    final fields = tester
+        .widgetList<EntryTextField>(find.byType(EntryTextField))
+        .toList();
+    expect(fields.map((input) => input.label), [
+      l10n.auth_email,
+      l10n.auth_password,
+    ]);
+    expect(fields.last.obscureText, isTrue);
   });
 
   for (final locale in AppLocalizations.supportedLocales) {
@@ -90,7 +94,7 @@ void main() {
         final l10n = AppLocalizations.of(
           tester.element(find.byKey(const Key('auth_mode_switcher'))),
         )!;
-        expect(find.text(l10n.auth_tokenLoginRecommended), findsOneWidget);
+        expect(find.byTooltip(l10n.auth_tokenLoginRecommended), findsOneWidget);
         expect(find.text(l10n.auth_credentialsLogin), findsOneWidget);
         expect(find.text(l10n.auth_thirdPartyLogin), findsOneWidget);
         _expectSingleRowInTokenFirstOrder(tester);

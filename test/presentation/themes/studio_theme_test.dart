@@ -128,6 +128,12 @@ void main() {
       tester.view.physicalSize = const Size(1280, 960);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
+      // 登录页的字符场在“关闭动画”时只画静态一帧，pumpAndSettle 才能结束
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
       final storage = InMemoryLocalStorageService();
       final router = GoRouter(
         initialLocation: AppRoutes.login,

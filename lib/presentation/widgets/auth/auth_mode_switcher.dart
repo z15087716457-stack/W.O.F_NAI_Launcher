@@ -4,10 +4,13 @@ import 'package:nai_launcher/core/config/auth_feature_flags.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
 import '../../providers/auth_mode_provider.dart';
+import 'entry_controls.dart';
 
-/// 登录模式切换组件
+/// 登录方式分段切换：一条浅灰轨道，选中项浮起成白 / 炭灰小块。
 class AuthModeSwitcher extends ConsumerWidget {
   const AuthModeSwitcher({super.key, this.compact = false});
+
+  /// 保留旧参数：登录页与添加账号对话框现在共用同一种分段样式。
   final bool compact;
 
   @override
@@ -18,184 +21,160 @@ class AuthModeSwitcher extends ConsumerWidget {
         !credentialsEnabled && currentMode == AuthMode.credentials
         ? AuthMode.token
         : currentMode;
+    final palette = EntryPalette.of(context);
+    final l10n = context.l10n;
 
-    final tabs = Row(
-      key: const Key('auth_mode_switcher'),
-      crossAxisAlignment: compact
-          ? CrossAxisAlignment.stretch
-          : CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: _buildModeButton(
-            key: const Key('auth_mode_token'),
-            context: context,
-            label: compact
-                ? 'API Token'
-                : context.l10n.auth_tokenLoginRecommended,
-            icon: Icons.key_outlined,
-            isSelected: effectiveMode == AuthMode.token,
-            onTap: () {
-              ref
-                  .read(authModeNotifierProvider.notifier)
-                  .switchMode(AuthMode.token);
-            },
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildModeButton(
-            key: const Key('auth_mode_credentials'),
-            context: context,
-            label: context.l10n.auth_credentialsLogin,
-            icon: Icons.email_outlined,
-            isSelected: effectiveMode == AuthMode.credentials,
-            enabled: credentialsEnabled,
-            disabledTooltip: context.l10n.auth_credentialsLoginUnavailable,
-            onTap: () {
-              ref
-                  .read(authModeNotifierProvider.notifier)
-                  .switchMode(AuthMode.credentials);
-            },
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildModeButton(
-            key: const Key('auth_mode_third_party'),
-            context: context,
-            label: context.l10n.auth_thirdPartyLogin,
-            icon: Icons.public_outlined,
-            isSelected: effectiveMode == AuthMode.thirdParty,
-            onTap: () {
-              ref
-                  .read(authModeNotifierProvider.notifier)
-                  .switchMode(AuthMode.thirdParty);
-            },
-          ),
-        ),
-      ],
-    );
-    return compact ? IntrinsicHeight(child: tabs) : tabs;
-  }
-
-  Widget _buildModeButton({
-    Key? key,
-    required BuildContext context,
-    required String label,
-    required IconData icon,
-    required bool isSelected,
-    required VoidCallback onTap,
-    bool enabled = true,
-    String? disabledTooltip,
-  }) {
-    final theme = Theme.of(context);
-    final foregroundColor = enabled
-        ? (isSelected
-              ? theme.colorScheme.primary
-              : theme.colorScheme.onSurfaceVariant)
-        : theme.disabledColor;
-
-    if (compact) {
-      return Semantics(
-        selected: isSelected,
-        button: true,
-        child: Tooltip(
-          message: !enabled && disabledTooltip != null
-              ? disabledTooltip
-              : label == 'API Token'
-              ? context.l10n.auth_tokenLoginRecommended
-              : label,
-          child: InkWell(
-            key: key,
-            onTap: enabled ? onTap : null,
-            borderRadius: BorderRadius.circular(4),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 160),
-              constraints: const BoxConstraints(minHeight: 48),
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: isSelected
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.outline,
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontSize: 12,
-                    height: 1.4,
-                    color: foregroundColor,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
+    void select(AuthMode mode) {
+      ref.read(authModeNotifierProvider.notifier).switchMode(mode);
     }
 
-    final button = InkWell(
-      key: key,
-      onTap: enabled ? onTap : null,
-      borderRadius: BorderRadius.circular(12),
-      child: Opacity(
-        opacity: enabled ? 1 : 0.55,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutCubic,
-          width: double.infinity,
-          height: 76,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? theme.colorScheme.primaryContainer
-                : theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.5,
-                  ),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: enabled && isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.outline.withValues(alpha: 0.3),
-              width: enabled && isSelected ? 2 : 1,
+    return Container(
+      key: const Key('auth_mode_switcher'),
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: palette.control,
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: _Segment(
+                key: const Key('auth_mode_token'),
+                label: 'API Token',
+                badge: l10n.auth_recommended,
+                tooltip: l10n.auth_tokenLoginRecommended,
+                selected: effectiveMode == AuthMode.token,
+                onTap: () => select(AuthMode.token),
+              ),
             ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 20, color: foregroundColor),
-              const SizedBox(height: 6),
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: foregroundColor,
-                    height: 1.1,
-                    fontWeight: enabled && isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
-                  ),
+            const SizedBox(width: 2),
+            Expanded(
+              child: _Segment(
+                key: const Key('auth_mode_credentials'),
+                label: l10n.auth_credentialsLogin,
+                tooltip: credentialsEnabled
+                    ? l10n.auth_credentialsLogin
+                    : l10n.auth_credentialsLoginUnavailable,
+                selected: effectiveMode == AuthMode.credentials,
+                enabled: credentialsEnabled,
+                onTap: () => select(AuthMode.credentials),
+              ),
+            ),
+            const SizedBox(width: 2),
+            Expanded(
+              child: _Segment(
+                key: const Key('auth_mode_third_party'),
+                label: l10n.auth_thirdPartyLogin,
+                tooltip: l10n.auth_thirdPartyLogin,
+                selected: effectiveMode == AuthMode.thirdParty,
+                onTap: () => select(AuthMode.thirdParty),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Segment extends StatefulWidget {
+  const _Segment({
+    super.key,
+    required this.label,
+    required this.tooltip,
+    required this.selected,
+    required this.onTap,
+    this.badge,
+    this.enabled = true,
+  });
+
+  final String label;
+  final String tooltip;
+  final String? badge;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  State<_Segment> createState() => _SegmentState();
+}
+
+class _SegmentState extends State<_Segment> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = EntryPalette.of(context);
+    final color = !widget.enabled
+        ? palette.faint
+        : widget.selected || _hover
+        ? palette.ink
+        : palette.muted;
+    return Tooltip(
+      message: widget.tooltip,
+      child: Semantics(
+        selected: widget.selected,
+        button: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.enabled ? widget.onTap : null,
+          child: MouseRegion(
+            cursor: widget.enabled
+                ? SystemMouseCursors.click
+                : SystemMouseCursors.basic,
+            onEnter: (_) => setState(() => _hover = true),
+            onExit: (_) => setState(() => _hover = false),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 160),
+              curve: Curves.easeOutCubic,
+              constraints: const BoxConstraints(minHeight: 28),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
+              decoration: BoxDecoration(
+                color: widget.selected ? palette.segment : Colors.transparent,
+                borderRadius: BorderRadius.circular(6),
+                boxShadow: widget.selected ? palette.segmentShadow : null,
+              ),
+              alignment: Alignment.center,
+              child: Text.rich(
+                TextSpan(
+                  text: widget.label,
+                  children: [
+                    if (widget.badge != null)
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.top,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 3),
+                          child: Text(
+                            widget.badge!,
+                            style: TextStyle(
+                              fontSize: 9,
+                              height: 1,
+                              fontWeight: FontWeight.w600,
+                              color: palette.blue,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  height: 1.25,
+                  color: color,
+                  fontWeight: widget.selected
+                      ? FontWeight.w500
+                      : FontWeight.w400,
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
-
-    if (enabled || disabledTooltip == null) {
-      return button;
-    }
-    return Tooltip(message: disabledTooltip, child: button);
   }
 }

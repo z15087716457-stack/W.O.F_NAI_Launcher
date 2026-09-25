@@ -187,6 +187,12 @@ flutter:
     - family: Geist Pixel Line
       fonts:
         - asset: assets/fonts/GeistPixel-Line.ttf
+    - family: Geist Pixel Square
+      fonts:
+        - asset: assets/fonts/GeistPixel-Square.ttf
+    - family: Geist Pixel Circle
+      fonts:
+        - asset: assets/fonts/GeistPixel-Circle.ttf
     - family: HarmonyOS Sans SC
       fonts:
         - asset: assets/fonts/HarmonyOS_Sans_SC_Regular.ttf

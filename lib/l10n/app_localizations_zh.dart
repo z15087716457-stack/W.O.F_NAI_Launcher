@@ -310,10 +310,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get auth_loginFailed => '登录失败';
 
   @override
-  String get auth_loginTip => '使用你的 NovelAI 账户登录\n所有数据仅存储在本地设备';
+  String get auth_guestEntry => '跳过登录，以游客身份进入';
 
   @override
-  String get auth_guestEntry => '跳过登录，以游客身份进入';
+  String get auth_recommended => '推荐';
+
+  @override
+  String get auth_getToken => '获取 Token';
+
+  @override
+  String get auth_localOnlyNote => '账号与 Token 仅保存在本机';
+
+  @override
+  String get auth_back => '返回';
+
+  @override
+  String get auth_toggleVisibility => '显示 / 隐藏';
 
   @override
   String get auth_loggedIn => '已登录';
@@ -340,16 +352,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get auth_credentialsLoginUnavailable => '账号密码登录当前不可用，请使用 Token 登录';
 
   @override
-  String get auth_tokenHint => '请输入您的 Persistent API Token';
-
-  @override
   String get auth_tokenRequired => '请输入 Token';
 
   @override
   String get auth_tokenInvalid => 'Token 格式无效，应以 pst- 开头';
-
-  @override
-  String get auth_nicknameOptional => '昵称（可选）';
 
   @override
   String get auth_nicknameHint => '为此账号设置一个便于识别的名称';
@@ -435,21 +441,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get auth_removeAvatar => '移除头像';
 
   @override
-  String get auth_selectFromGallery => '从相册选择';
-
-  @override
-  String get auth_takePhoto => '拍摄照片';
-
-  @override
   String get auth_quickLogin => '一键登录';
 
   @override
   String get auth_nicknameRequired => '请输入昵称';
-
-  @override
-  String auth_createdAt(Object date) {
-    return '创建于 $date';
-  }
 
   @override
   String get auth_error_networkTimeout => '连接超时，请检查网络';
@@ -484,9 +479,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get auth_loggingIn => '登录中...';
-
-  @override
-  String get auth_pleaseWait => '请稍候';
 
   @override
   String get auth_viewTroubleshootingTips => '查看故障排除提示';

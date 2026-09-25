@@ -8,6 +8,7 @@ import '../../../app.dart';
 import '../../../core/services/update_check_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/first_launch_detector.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../../providers/update_provider.dart';
 import '../../providers/warmup_provider.dart';
@@ -26,23 +27,45 @@ class AppBootstrap extends ConsumerStatefulWidget {
 }
 
 class _AppBootstrapState extends ConsumerState<AppBootstrap> {
+  /// 预热完成后最多再等这么久让已保存的账号验证完，再进入主应用。
+  static const _authSettleTimeout = Duration(seconds: 5);
+
   bool _showMainApp = false;
   bool _hasCheckedFirstLaunch = false;
+  bool _authWaitExpired = false;
+  Timer? _authWaitTimer;
+
+  @override
+  void dispose() {
+    _authWaitTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final warmupState = ref.watch(warmupNotifierProvider);
 
-    // 预加载完成后显示主应用
+    // 预加载完成后显示主应用。账号还在自动验证时先停在载入页，
+    // 这样直接进入登录页或主界面，不会先闪一下主界面再跳回登录页。
     if (warmupState.isComplete && !_showMainApp) {
-      // 延迟一帧后切换，确保动画流畅
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _showMainApp = true;
-          });
-        }
-      });
+      final status = ref.watch(authNotifierProvider.select((s) => s.status));
+      final settled =
+          status != AuthStatus.loading && status != AuthStatus.initial;
+      if (settled || _authWaitExpired) {
+        _authWaitTimer?.cancel();
+        // 延迟一帧后切换，确保动画流畅
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _showMainApp = true;
+            });
+          }
+        });
+      } else {
+        _authWaitTimer ??= Timer(_authSettleTimeout, () {
+          if (mounted) setState(() => _authWaitExpired = true);
+        });
+      }
     }
 
     // 如果显示主应用，直接返回（NAILauncherApp 自带 MaterialApp）
@@ -69,7 +92,12 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
         data: MediaQuery.of(context).copyWith(
           textScaler: TextScaler.linear(ref.watch(fontScaleNotifierProvider)),
         ),
-        child: IntegratedTitleBarShell(child: child ?? const SizedBox.shrink()),
+        child: IntegratedTitleBarShell(
+          immersive: true,
+          onToggleTheme: () =>
+              ref.read(themeNotifierProvider.notifier).nextTheme(),
+          child: child ?? const SizedBox.shrink(),
+        ),
       ),
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,

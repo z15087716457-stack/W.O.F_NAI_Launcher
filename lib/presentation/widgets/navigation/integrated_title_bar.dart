@@ -21,10 +21,23 @@ import '../common/studio_glass_surface.dart';
 ///
 /// 栏与内容之间有一条 0.5px `outlineVariant` 细线，默认透明，
 /// 任意顶层滚动内容离开顶部（pixels > 0）时浮现。
+///
+/// [immersive]（登录 / 载入页）：栏收成页面底色，不显示 Logo 与标题，
+/// 右侧只留明暗切换和三个窗口按钮，与页面连成一整块；离开这些页面时
+/// 玻璃栏淡入。
 class IntegratedTitleBarShell extends StatefulWidget {
-  const IntegratedTitleBarShell({super.key, required this.child});
+  const IntegratedTitleBarShell({
+    super.key,
+    required this.child,
+    this.immersive = false,
+    this.onToggleTheme,
+  });
 
   final Widget child;
+  final bool immersive;
+
+  /// 沉浸模式下明暗切换按钮的回调；为 null 时不显示该按钮。
+  final VoidCallback? onToggleTheme;
 
   /// 栏高（逻辑像素），与原生命中区换算共用。
   static const double barHeight = 36;
@@ -32,6 +45,10 @@ class IntegratedTitleBarShell extends StatefulWidget {
   /// 单个窗口按钮宽 ×3 = 右侧保留宽（逻辑像素）。
   static const double buttonWidth = 46;
   static const double reservedRight = buttonWidth * 3;
+
+  /// 沉浸模式的明暗切换按钮宽，及其与窗口按钮之间的分隔（1px + 两侧 4px）。
+  static const double themeButtonWidth = 40;
+  static const double themeSeparatorWidth = 9;
 
   @override
   State<IntegratedTitleBarShell> createState() =>
@@ -79,7 +96,15 @@ class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
             child: widget.child,
           ),
         ),
-        const Positioned(top: 0, left: 0, right: 0, child: _TitleBar()),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: _TitleBar(
+            immersive: widget.immersive,
+            onToggleTheme: widget.onToggleTheme,
+          ),
+        ),
         Positioned(
           top: barH,
           left: 0,
@@ -90,7 +115,7 @@ class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 120),
                 height: 0.5,
-                color: scrolled
+                color: scrolled && !widget.immersive
                     ? Theme.of(
                         context,
                       ).colorScheme.outlineVariant.withValues(alpha: 0.5)
@@ -105,7 +130,10 @@ class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
 }
 
 class _TitleBar extends StatefulWidget {
-  const _TitleBar();
+  const _TitleBar({required this.immersive, this.onToggleTheme});
+
+  final bool immersive;
+  final VoidCallback? onToggleTheme;
 
   @override
   State<_TitleBar> createState() => _TitleBarState();
@@ -152,17 +180,33 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
   }
 
   @override
+  void didUpdateWidget(_TitleBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_showsThemeButton(oldWidget) != _showsThemeButton(widget)) {
+      _reportRegion();
+    }
+  }
+
+  @override
   void reassemble() {
     super.reassemble();
     // 热重载后原生侧状态仍在，重新上报命中区。
     _reportRegion();
   }
 
+  static bool _showsThemeButton(_TitleBar bar) =>
+      bar.immersive && bar.onToggleTheme != null;
+
   void _reportRegion() {
+    // 沉浸模式多出的明暗按钮也要留在可点击区，不能被当成拖拽区。
+    final extra = _showsThemeButton(widget)
+        ? IntegratedTitleBarShell.themeButtonWidth +
+              IntegratedTitleBarShell.themeSeparatorWidth
+        : 0.0;
     unawaited(
       TitleBarRegionService.setRegion(
         barHeight: IntegratedTitleBarShell.barHeight,
-        reservedRight: IntegratedTitleBarShell.reservedRight,
+        reservedRight: IntegratedTitleBarShell.reservedRight + extra,
       ),
     );
   }
@@ -201,6 +245,87 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
     // 首帧 l10n 可能未就绪（builder 层早于路由内容），用兜底文案。
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final captionButtons = <Widget>[
+      _CaptionButton(
+        icon: Icons.remove,
+        tooltip: l10n?.titleBar_minimize ?? 'Minimize',
+        onTap: () => _safeWindowCall(windowManager.minimize),
+      ),
+      _CaptionButton(
+        icon: _isMaximized ? Icons.filter_none : Icons.crop_square,
+        iconSize: _isMaximized ? 14 : 15,
+        tooltip: _isMaximized
+            ? (l10n?.titleBar_restore ?? 'Restore')
+            : (l10n?.titleBar_maximize ?? 'Maximize'),
+        onTap: () => _safeWindowCall(
+          _isMaximized ? windowManager.unmaximize : windowManager.maximize,
+        ),
+      ),
+      _CaptionButton(
+        icon: Icons.close,
+        tooltip: l10n?.titleBar_close ?? 'Close',
+        isClose: true,
+        // windowManager.close() 发 SC_CLOSE → WM_CLOSE；
+        // setPreventClose(true) 下走 onWindowClose → 隐藏托盘。
+        onTap: () => _safeWindowCall(windowManager.close),
+      ),
+    ];
+    final Widget bar;
+    if (widget.immersive) {
+      final dark = colorScheme.brightness == Brightness.dark;
+      bar = ColoredBox(
+        key: const ValueKey('immersive_title_bar'),
+        color: colorScheme.surface,
+        child: SizedBox(
+          height: IntegratedTitleBarShell.barHeight,
+          child: Row(
+            children: [
+              const Spacer(),
+              if (widget.onToggleTheme != null) ...[
+                _CaptionButton(
+                  key: const Key('brand_appearance_toggle'),
+                  icon: dark
+                      ? Icons.light_mode_outlined
+                      : Icons.dark_mode_outlined,
+                  iconSize: 15,
+                  width: IntegratedTitleBarShell.themeButtonWidth,
+                  tooltip: dark
+                      ? (l10n?.brand_switchToLight ?? 'Light')
+                      : (l10n?.brand_switchToDark ?? 'Dark'),
+                  onTap: widget.onToggleTheme!,
+                ),
+                Container(
+                  width: 1,
+                  height: 14,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  color: colorScheme.outlineVariant,
+                ),
+              ],
+              ...captionButtons,
+            ],
+          ),
+        ),
+      );
+    } else {
+      bar = KeyedSubtree(
+        key: const ValueKey('glass_title_bar'),
+        child: _glassBar(colorScheme, captionButtons),
+      );
+    }
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 220),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      layoutBuilder: (current, previous) => Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.topCenter,
+        children: [...previous, if (current != null) current],
+      ),
+      child: bar,
+    );
+  }
+
+  Widget _glassBar(ColorScheme colorScheme, List<Widget> captionButtons) {
     final content = SizedBox(
       height: IntegratedTitleBarShell.barHeight,
       child: Row(
@@ -231,29 +356,7 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
               ),
             ),
           ),
-          _CaptionButton(
-            icon: Icons.remove,
-            tooltip: l10n?.titleBar_minimize ?? 'Minimize',
-            onTap: () => _safeWindowCall(windowManager.minimize),
-          ),
-          _CaptionButton(
-            icon: _isMaximized ? Icons.filter_none : Icons.crop_square,
-            iconSize: _isMaximized ? 14 : 15,
-            tooltip: _isMaximized
-                ? (l10n?.titleBar_restore ?? 'Restore')
-                : (l10n?.titleBar_maximize ?? 'Maximize'),
-            onTap: () => _safeWindowCall(
-              _isMaximized ? windowManager.unmaximize : windowManager.maximize,
-            ),
-          ),
-          _CaptionButton(
-            icon: Icons.close,
-            tooltip: l10n?.titleBar_close ?? 'Close',
-            isClose: true,
-            // windowManager.close() 发 SC_CLOSE → WM_CLOSE；
-            // setPreventClose(true) 下走 onWindowClose → 隐藏托盘。
-            onTap: () => _safeWindowCall(windowManager.close),
-          ),
+          ...captionButtons,
         ],
       ),
     );
@@ -274,11 +377,13 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
 /// Windows 风格扁平窗口按钮：悬停铺底色，关闭钮悬停变红。
 class _CaptionButton extends StatefulWidget {
   const _CaptionButton({
+    super.key,
     required this.icon,
     required this.tooltip,
     required this.onTap,
     this.iconSize = 16,
     this.isClose = false,
+    this.width = IntegratedTitleBarShell.buttonWidth,
   });
 
   final IconData icon;
@@ -286,6 +391,7 @@ class _CaptionButton extends StatefulWidget {
   final VoidCallback onTap;
   final double iconSize;
   final bool isClose;
+  final double width;
 
   @override
   State<_CaptionButton> createState() => _CaptionButtonState();
@@ -342,7 +448,7 @@ class _CaptionButtonState extends State<_CaptionButton> {
             clipBehavior: Clip.none,
             children: [
               Container(
-                width: IntegratedTitleBarShell.buttonWidth,
+                width: widget.width,
                 height: IntegratedTitleBarShell.barHeight,
                 color: bg,
                 child: Icon(widget.icon, size: widget.iconSize, color: fg),
