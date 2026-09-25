@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_version.dart';
@@ -31,20 +32,26 @@ class BrandLogo extends StatelessWidget {
 
 /// 登录与载入共用的整页场景。
 ///
-/// 背景是「去噪」字符场 [EntryField]；Logo 与标语固定在同一高度（只随
-/// 窗口高度变化），下方挂载入进度或登录卡片，所以载入页换成登录页时
-/// Logo 不动、背景接着走，只有下面的内容淡入替换。页脚左侧是客户端
-/// 说明，右侧是种子 / 去噪步数与版本号。
+/// 背景是「去噪」字符场 [EntryField]；Logo、标语与下方的载入进度或登录
+/// 卡片作为一个整体放在视区的视觉中心（略高于正中）。换成高矮不同的卡片
+/// 时整体平滑滑到新位置，载入页换登录页时也从载入页的位置滑过去，背景
+/// 接着走。页脚左侧是客户端说明，右侧是种子 / 去噪步数与版本号。
 class BrandEntryScene extends ConsumerStatefulWidget {
   const BrandEntryScene({
     super.key,
     required this.child,
+    this.layoutKey,
     this.loading = false,
     this.progress = 0,
     this.busy = false,
   });
 
   final Widget child;
+
+  /// 当前卡片的标识。变化时按新卡片的高度重新居中；同一张卡片内部变高
+  /// （展开账号列表、切换登录方式、出现错误提示）只向下延伸，不挪动正在
+  /// 操作的内容。
+  final Object? layoutKey;
 
   /// 载入页：背景随 [progress] 去噪，不穿插解码事件。
   final bool loading;
@@ -60,12 +67,46 @@ class BrandEntryScene extends ConsumerStatefulWidget {
   ConsumerState<BrandEntryScene> createState() => _BrandEntrySceneState();
 }
 
-class _BrandEntrySceneState extends ConsumerState<BrandEntryScene> {
+class _BrandEntrySceneState extends ConsumerState<BrandEntryScene>
+    with SingleTickerProviderStateMixin {
   final _heroKey = GlobalKey();
   final _pointer = ValueNotifier<Offset?>(null);
+  final _card = _CardHeight();
+  late final AnimationController _glide;
+  late final Animation<double> _glideCurve;
+
+  @override
+  void initState() {
+    super.initState();
+    // 新场景从上一个场景的位置滑到自己的位置（没有上一个场景时原地不动）
+    _glide = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 480),
+    )..forward();
+    _glideCurve = CurvedAnimation(parent: _glide, curve: Curves.easeInOutCubic);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) _glide.value = 1;
+  }
+
+  @override
+  void didUpdateWidget(BrandEntryScene oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.layoutKey != oldWidget.layoutKey) {
+      if (MediaQuery.disableAnimationsOf(context)) {
+        _glide.value = 1;
+      } else {
+        _glide.forward(from: 0);
+      }
+    }
+  }
 
   @override
   void dispose() {
+    _glide.dispose();
     _pointer.dispose();
     super.dispose();
   }
@@ -85,14 +126,13 @@ class _BrandEntrySceneState extends ConsumerState<BrandEntryScene> {
           builder: (context, constraints) {
             final width = constraints.maxWidth;
             final height = constraints.maxHeight;
-            // 以整窗高度排版，Logo 在载入页和登录页落在同一处
+            // Logo 按整窗高度取尺寸，载入页和登录页一样大
             final windowHeight =
                 height + (chromeInBar ? IntegratedTitleBarShell.barHeight : 0);
             final logoWidth = math.max(
               180.0,
               math.min(300.0, math.min(width - 96, (windowHeight - 80) * 0.36)),
             );
-            final top = math.max(20.0, (windowHeight - 36 - 44 - 640) * 0.42);
             return Stack(
               children: [
                 Positioned.fill(
@@ -108,8 +148,12 @@ class _BrandEntrySceneState extends ConsumerState<BrandEntryScene> {
                   bottom: 44,
                   child: SingleChildScrollView(
                     key: const Key('brand_entry_scroll'),
-                    padding: EdgeInsets.fromLTRB(16, top, 16, 40),
-                    child: Center(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _HeroPlacement(
+                      card: _card,
+                      viewportHeight: height - 44,
+                      anchorKey: widget.layoutKey,
+                      glide: _glideCurve,
                       child: Column(
                         key: _heroKey,
                         mainAxisSize: MainAxisSize.min,
@@ -133,7 +177,7 @@ class _BrandEntrySceneState extends ConsumerState<BrandEntryScene> {
                                 width - 32,
                               ),
                             ),
-                            child: widget.child,
+                            child: _CardProbe(card: _card, child: widget.child),
                           ),
                         ],
                       ),
@@ -177,6 +221,185 @@ class _BrandEntrySceneState extends ConsumerState<BrandEntryScene> {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+/// 卡片区的实测高度：[_CardProbe] 布局时写入，[_HeroPlacement] 在同一趟
+/// 布局里读取。
+class _CardHeight {
+  double value = 0;
+}
+
+class _CardProbe extends SingleChildRenderObjectWidget {
+  const _CardProbe({required this.card, super.child});
+
+  final _CardHeight card;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderCardProbe(card);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderCardProbe renderObject) {
+    renderObject.card = card;
+  }
+}
+
+class _RenderCardProbe extends RenderProxyBox {
+  _RenderCardProbe(this.card);
+
+  _CardHeight card;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    card.value = size.height;
+  }
+}
+
+/// 上一个入口场景最后锚定的卡片高度：载入页换成登录页时，Logo 从载入页
+/// 的位置滑到登录卡片对应的位置。
+double? _carriedCardHeight;
+
+/// 把 Logo + 标语 + 卡片整体放在视区的视觉中心。
+///
+/// 居中用「锚定」的卡片高度：只在 [anchorKey] 变化时取新卡片的高度，并随
+/// [glide] 从旧锚点滑过去；之后卡片内部再变高只向下延伸。内容高过视区时
+/// 顶部留 [minTop]，由外层滚动。
+class _HeroPlacement extends SingleChildRenderObjectWidget {
+  const _HeroPlacement({
+    required this.card,
+    required this.viewportHeight,
+    required this.anchorKey,
+    required this.glide,
+    required super.child,
+  });
+
+  final _CardHeight card;
+  final double viewportHeight;
+  final Object? anchorKey;
+  final Animation<double> glide;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderHeroPlacement(
+    card: card,
+    viewportHeight: viewportHeight,
+    anchorKey: anchorKey,
+    glide: glide,
+  );
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderHeroPlacement renderObject,
+  ) {
+    renderObject
+      ..card = card
+      ..viewportHeight = viewportHeight
+      ..anchorKey = anchorKey
+      ..glide = glide;
+  }
+}
+
+class _RenderHeroPlacement extends RenderShiftedBox {
+  _RenderHeroPlacement({
+    required _CardHeight card,
+    required double viewportHeight,
+    required Object? anchorKey,
+    required Animation<double> glide,
+  }) : _card = card,
+       _viewportHeight = viewportHeight,
+       _anchorKey = anchorKey,
+       _glide = glide,
+       _from = _carriedCardHeight,
+       super(null);
+
+  /// 整体中心在视区高度的这个比例处，略高于正中才显得居中。
+  static const double opticalCenter = 0.45;
+  static const double minTop = 20;
+  static const double bottomGap = 40;
+
+  _CardHeight _card;
+  set card(_CardHeight value) {
+    if (identical(value, _card)) return;
+    _card = value;
+    markNeedsLayout();
+  }
+
+  double _viewportHeight;
+  set viewportHeight(double value) {
+    if (value == _viewportHeight) return;
+    _viewportHeight = value;
+    markNeedsLayout();
+  }
+
+  Object? _anchorKey;
+  set anchorKey(Object? value) {
+    if (value == _anchorKey) return;
+    _anchorKey = value;
+    // 从当前位置出发；目标等这一趟布局量到新卡片的高度再定
+    _from = _anchor;
+    _to = null;
+    markNeedsLayout();
+  }
+
+  Animation<double> _glide;
+  set glide(Animation<double> value) {
+    if (identical(value, _glide)) return;
+    if (attached) _glide.removeListener(_onGlide);
+    _glide = value;
+    if (attached) _glide.addListener(_onGlide);
+    markNeedsLayout();
+  }
+
+  double? _from;
+  double? _to;
+  double? _anchor;
+
+  void _onGlide() {
+    if (_to == null || _from != _to) markNeedsLayout();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _glide.addListener(_onGlide);
+  }
+
+  @override
+  void detach() {
+    _glide.removeListener(_onGlide);
+    super.detach();
+  }
+
+  @override
+  void performLayout() {
+    final width = constraints.maxWidth;
+    final child = this.child;
+    if (child == null) {
+      size = constraints.constrain(Size(width, _viewportHeight));
+      return;
+    }
+    child.layout(BoxConstraints(maxWidth: width), parentUsesSize: true);
+    final to = _to ??= _card.value;
+    final from = _from ??= to;
+    final anchor = _anchor = from + (to - from) * _glide.value;
+    _carriedCardHeight = to;
+    final head = child.size.height - _card.value;
+    final top = math.max(
+      minTop,
+      _viewportHeight * opticalCenter - (head + anchor) / 2,
+    );
+    (child.parentData! as BoxParentData).offset = Offset(
+      (width - child.size.width) / 2,
+      top,
+    );
+    size = constraints.constrain(
+      Size(
+        width,
+        math.max(_viewportHeight, top + child.size.height + bottomGap),
       ),
     );
   }

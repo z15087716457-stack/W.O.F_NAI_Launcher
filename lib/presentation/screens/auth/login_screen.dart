@@ -61,8 +61,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.watch(authNotifierProvider);
     final accounts = _sorted(accountState.accounts);
 
+    final String kind;
     final Widget card;
     if (accountState.isLoading) {
+      kind = 'loading';
       card = EntryCard(
         key: const ValueKey('entry_card_loading'),
         child: SizedBox(
@@ -73,14 +75,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
       );
     } else if (accounts.isEmpty || _adding) {
+      kind = 'form';
       card = _buildFormCard(context, canGoBack: accounts.isNotEmpty);
     } else {
+      kind = 'quick';
       card = _buildQuickCard(context, accounts, authState);
     }
 
     return Stack(
       children: [
         BrandEntryScene(
+          layoutKey: kind,
           busy: authState.isLoading,
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 260),
@@ -96,9 +101,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: child,
               ),
             ),
+            // 淡出的旧卡片不占高度，场景立刻按新卡片的高度重新居中
             layoutBuilder: (current, previous) => Stack(
               alignment: Alignment.topCenter,
-              children: [...previous, if (current != null) current],
+              clipBehavior: Clip.none,
+              children: [
+                for (final child in previous)
+                  Positioned(top: 0, left: 0, right: 0, child: child),
+                if (current != null) current,
+              ],
             ),
             child: card,
           ),

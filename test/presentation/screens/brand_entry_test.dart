@@ -82,6 +82,8 @@ Future<GlobalKey> pumpEntry(
   WarmupState warmup = const WarmupState(
     progress: WarmupProgress(progress: .42, currentTask: 'warmup_fonts'),
   ),
+  // 打开动画时字符场一直在走，不能 pumpAndSettle，改为推进固定时长
+  bool animate = false,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -115,7 +117,7 @@ Future<GlobalKey> pumpEntry(
               data: MediaQueryData(
                 size: size,
                 textScaler: TextScaler.linear(textScale),
-                disableAnimations: true,
+                disableAnimations: !animate,
               ),
               child: IntegratedTitleBarShell(
                 immersive: true,
@@ -129,7 +131,10 @@ Future<GlobalKey> pumpEntry(
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  Future<void> settle() => animate
+      ? tester.pump(const Duration(seconds: 1))
+      : tester.pumpAndSettle();
+  await settle();
   // Asset decoding uses real asynchronous IO in flutter_test.
   await tester.runAsync(() async {
     final context = tester.element(find.byType(BrandLogo));
@@ -138,8 +143,25 @@ Future<GlobalKey> pumpEntry(
       context,
     );
   });
-  await tester.pumpAndSettle();
+  await settle();
   return key;
+}
+
+double logoTop(WidgetTester tester) =>
+    tester.getTopLeft(find.byType(BrandLogo)).dy;
+
+/// Logo + 标语 + 卡片整体的中心落在视区高度 45% 处（视觉中心）。
+void expectOpticallyCentered(WidgetTester tester) {
+  final viewport = tester.getRect(find.byKey(const Key('brand_entry_scroll')));
+  final hero = tester.getRect(
+    find
+        .ancestor(of: find.byType(BrandLogo), matching: find.byType(Column))
+        .first,
+  );
+  expect(
+    (hero.center.dy - viewport.top) / viewport.height,
+    moreOrLessEquals(.45, epsilon: .002),
+  );
 }
 
 SavedAccount _account(String id, String nickname, {DateTime? lastUsed}) =>
@@ -190,7 +212,8 @@ void main() {
           DefaultTextStyle.of(tester.element(buttonLabel)).style.color,
           Colors.white,
         );
-        final logoTop = tester.getTopLeft(find.byType(BrandLogo)).dy;
+        expectOpticallyCentered(tester);
+        final formTop = logoTop(tester);
         expect(tester.takeException(), isNull);
         await capture(tester, key, 'login-${brightness.name}');
 
@@ -205,8 +228,9 @@ void main() {
               .value,
           .42,
         );
-        // 载入页换成登录页时 Logo 不挪位置
-        expect(tester.getTopLeft(find.byType(BrandLogo)).dy, logoTop);
+        // 进度区比表单矮，整体仍在视觉中心，Logo 因此低一些
+        expectOpticallyCentered(tester);
+        expect(logoTop(tester), greaterThan(formTop));
         expect(tester.takeException(), isNull);
         await capture(tester, key, 'splash-${brightness.name}');
       },
@@ -293,12 +317,16 @@ void main() {
         expect(find.text('我的创作空间'), findsOneWidget);
         expect(find.text('NovelAI · Token'), findsOneWidget);
         expect(find.byKey(const Key('auth_quick_login')), findsOneWidget);
+        // 矮卡片也整体居中
+        expectOpticallyCentered(tester);
+        final quickTop = logoTop(tester);
         await capture(tester, key, 'login-saved-${brightness.name}');
 
-        // 账号列表在卡片内展开，点选只切换当前账号
+        // 账号列表在卡片内展开，点选只切换当前账号；展开只向下延伸
         await tester.tap(find.byKey(const Key('auth_account_selector')));
         await tester.pumpAndSettle();
         expect(find.byKey(const ValueKey('auth_account_alt')), findsOneWidget);
+        expect(logoTop(tester), quickTop);
         await capture(tester, key, 'login-saved-list-${brightness.name}');
         await tester.tap(find.byKey(const ValueKey('auth_account_alt')));
         await tester.pumpAndSettle();
@@ -313,10 +341,14 @@ void main() {
         await tester.tap(find.byKey(const Key('auth_add_account')));
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('token_form')), findsOneWidget);
+        // 换成高卡片后整体上移，重新居中
+        expectOpticallyCentered(tester);
+        expect(logoTop(tester), lessThan(quickTop - 40));
         await capture(tester, key, 'login-add-${brightness.name}');
         await tester.tap(find.byKey(const Key('auth_back')));
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('auth_quick_login')), findsOneWidget);
+        expect(logoTop(tester), quickTop);
 
         final guest = find.byKey(const Key('auth_guest_entry_quick_login'));
         await tester.tap(guest);
@@ -326,6 +358,33 @@ void main() {
       },
     );
   }
+
+  testWidgets('switching cards glides the logo to the new optical centre', (
+    tester,
+  ) async {
+    await pumpEntry(tester, accounts: [_account('main', 'PD')], animate: true);
+    final quickTop = logoTop(tester);
+    expectOpticallyCentered(tester);
+
+    await tester.tap(find.byKey(const Key('auth_add_account')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    final midway = logoTop(tester);
+    await tester.pump(const Duration(milliseconds: 600));
+    final formTop = logoTop(tester);
+    expect(formTop, lessThan(quickTop - 40));
+    expect(midway, lessThan(quickTop));
+    expect(midway, greaterThan(formTop));
+    expectOpticallyCentered(tester);
+
+    await tester.tap(find.byKey(const Key('auth_back')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+    expect(logoTop(tester), moreOrLessEquals(quickTop, epsilon: .01));
+    expect(tester.takeException(), isNull);
+    // 停掉一直在走的字符场
+    await tester.pumpWidget(const SizedBox());
+  });
 
   testWidgets('quick login failure is shown inside the card', (tester) async {
     final key = await pumpEntry(
