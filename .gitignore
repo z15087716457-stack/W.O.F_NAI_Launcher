@@ -75,67 +75,16 @@ Desktop.ini
 
 
 # ===========================================================================
-# 移动平台构建文件
+# 平台构建文件
 # ===========================================================================
-
-# Android
-**/android/**/gradle-wrapper.jar
-**/android/.gradle
-**/android/captures/
-**/android/gradlew
-**/android/gradlew.bat
-**/android/local.properties
-**/android/**/GeneratedPluginRegistrant.*
-**/android/key.properties
-*.jks
-*.keystore
-
-# iOS
-**/ios/**/*.mode1v3
-**/ios/**/*.mode2v3
-**/ios/**/*.moved-aside
-**/ios/**/*.pbxuser
-**/ios/**/*.perspectivev3
-**/ios/**/DerivedData/
-**/ios/**/Icon?
-**/ios/**/Pods/
-**/ios/**/.symlinks/
-**/ios/**/profile
-**/ios/**/xcuserdata
-**/ios/.generated/
-**/ios/Flutter/App.framework
-**/ios/Flutter/Flutter.framework
-**/ios/Flutter/Flutter.podspec
-**/ios/Flutter/Generated.xcconfig
-**/ios/Flutter/ephemeral
-**/ios/Flutter/app.flx
-**/ios/Flutter/app.zip
-**/ios/Flutter/flutter_assets/
-**/ios/Flutter/flutter_export_environment.sh
-**/ios/ServiceDefinitions.json
-**/ios/Runner/GeneratedPluginRegistrant.*
-
-# Linux
-**/linux/flutter/ephemeral
 
 # Windows（Flutter 特定）
 **/windows/flutter/ephemeral
-
-# macOS（Flutter 特定）
-**/macos/Flutter/ephemeral/
-**/macos/Flutter/GeneratedPluginRegistrant.swift
-**/macos/Pods/
 
 
 # ===========================================================================
 # 忽略模式例外
 # ===========================================================================
-
-# 允许默认的 Xcode 项目文件
-!**/ios/**/default.mode1v3
-!**/ios/**/default.mode2v3
-!**/ios/**/default.pbxuser
-!**/ios/**/default.perspectivev3
 
 # 允许仪表板源文件（非生成结果）
 !test_results/dashboard/
@@ -268,8 +217,6 @@ SUBTASK_*.md
 VERIFICATION_*.md
 mask_upload_*.md
 /flutter/
-!macos/Flutter/
-!macos/Flutter/*.xcconfig
 flutter_windows.zip
 dist/*.zip
 dist/*.exe

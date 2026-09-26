@@ -2181,9 +2181,6 @@
       "error": {}
     }
   },
-  "localGallery_permissionRequiredTitle": "ストレージ権限が必要です",
-  "localGallery_permissionRequiredContent": "ローカル ギャラリーには、生成された画像をスキャンするためのストレージ権限が必要です。\n\n設定で許可を与えて、もう一度お試しください。",
-  "localGallery_openSettings": "設定を開く",
   "localGallery_firstTimeTipTitle": "💡 ヒント",
   "localGallery_firstTimeTipContent": "画像を右クリック (デスクトップ) または長押し (モバイル) すると、次のことができます。\n\n• プロンプトのコピー\n• コピーシード\n• 完全なメタデータの表示",
   "localGallery_gotIt": "わかりました",

@@ -25,10 +25,10 @@ class ProxyTestResult {
       ProxyTestResult(success: false, errorMessage: error);
 }
 
-/// 跨平台代理服务
+/// 系统代理服务
 ///
 /// 负责：
-/// - 读取系统代理配置（Windows/macOS/Linux）
+/// - 读取系统代理配置（Windows）
 /// - 提供统一的代理配置接口
 /// - 测试代理连接
 class ProxyService {
@@ -41,10 +41,6 @@ class ProxyService {
     try {
       if (Platform.isWindows) {
         return _getWindowsProxy();
-      } else if (Platform.isMacOS) {
-        return _getMacOSProxy();
-      } else if (Platform.isLinux) {
-        return _getLinuxProxy();
       }
       return null;
     } catch (e, stackTrace) {
@@ -64,89 +60,6 @@ class ProxyService {
       return proxyString.substring(6);
     }
     return proxyString;
-  }
-
-  /// macOS: 通过 scutil 命令读取代理
-  static String? _getMacOSProxy() {
-    try {
-      final result = Process.runSync('scutil', ['--proxy']);
-      if (result.exitCode != 0) {
-        AppLogger.w('scutil --proxy failed: ${result.stderr}', 'PROXY');
-        return null;
-      }
-
-      final output = result.stdout as String;
-
-      // 检查是否启用了 HTTP 代理
-      final httpEnableMatch = RegExp(
-        r'HTTPEnable\s*:\s*(\d)',
-      ).firstMatch(output);
-      if (httpEnableMatch == null || httpEnableMatch.group(1) != '1') {
-        AppLogger.d('macOS HTTP proxy not enabled', 'PROXY');
-        return null;
-      }
-
-      // 提取代理主机和端口
-      final httpProxyMatch = RegExp(
-        r'HTTPProxy\s*:\s*(\S+)',
-      ).firstMatch(output);
-      final httpPortMatch = RegExp(r'HTTPPort\s*:\s*(\d+)').firstMatch(output);
-
-      if (httpProxyMatch != null && httpPortMatch != null) {
-        final host = httpProxyMatch.group(1);
-        final port = httpPortMatch.group(1);
-        AppLogger.d('macOS proxy detected: $host:$port', 'PROXY');
-        return '$host:$port';
-      }
-
-      return null;
-    } catch (e) {
-      AppLogger.w('Failed to read macOS proxy: $e', 'PROXY');
-      return null;
-    }
-  }
-
-  /// Linux: 通过环境变量读取代理
-  static String? _getLinuxProxy() {
-    // 尝试多个常见的环境变量
-    final proxyUrl =
-        Platform.environment['http_proxy'] ??
-        Platform.environment['HTTP_PROXY'] ??
-        Platform.environment['https_proxy'] ??
-        Platform.environment['HTTPS_PROXY'];
-
-    if (proxyUrl == null || proxyUrl.isEmpty) {
-      AppLogger.d('Linux proxy environment variable not set', 'PROXY');
-      return null;
-    }
-
-    // 解析 URL 格式: http://host:port 或 host:port
-    try {
-      String hostPort = proxyUrl;
-
-      // 移除协议前缀
-      if (hostPort.startsWith('http://')) {
-        hostPort = hostPort.substring(7);
-      } else if (hostPort.startsWith('https://')) {
-        hostPort = hostPort.substring(8);
-      }
-
-      // 移除尾部斜杠
-      if (hostPort.endsWith('/')) {
-        hostPort = hostPort.substring(0, hostPort.length - 1);
-      }
-
-      // 移除认证信息 (user:pass@host:port -> host:port)
-      if (hostPort.contains('@')) {
-        hostPort = hostPort.split('@').last;
-      }
-
-      AppLogger.d('Linux proxy detected: $hostPort', 'PROXY');
-      return hostPort;
-    } catch (e) {
-      AppLogger.w('Failed to parse Linux proxy URL: $proxyUrl', 'PROXY');
-      return null;
-    }
   }
 
   /// 创建测试用的 Dio 实例

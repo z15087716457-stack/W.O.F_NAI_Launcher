@@ -36,14 +36,6 @@ function Get-AssetInfo {
       description = '解压即用，支持应用内一键更新，适合放在自定义目录。'
     }
   }
-  if ($name -match '_macOS_.*_Portable\.zip$') {
-    return [ordered]@{
-      platform = 'macos'
-      type = 'macos-portable'
-      label = 'macOS 便携版'
-      description = '解压后打开应用，更新时需要手动替换。'
-    }
-  }
   return $null
 }
 
@@ -152,9 +144,6 @@ function Get-DownloadBadge {
     'windows-portable' {
       return "[![Windows Portable x64](https://img.shields.io/badge/Portable-x64-56B4D3?style=flat-square&logo=windows11&logoColor=white)]($url)"
     }
-    'macos-portable' {
-      return "[![macOS Portable ZIP](https://img.shields.io/badge/Portable-ZIP-555555?style=flat-square&logo=apple&logoColor=white)]($url)"
-    }
     default {
       throw "Cannot create download badge for asset type: $type"
     }
@@ -166,17 +155,9 @@ $windowsBadges = @(
     Where-Object { $_['platform'] -eq 'windows' } |
     ForEach-Object { Get-DownloadBadge -Asset $_ }
 )
-$macosBadges = @(
-  $assets |
-    Where-Object { $_['platform'] -eq 'macos' } |
-    ForEach-Object { Get-DownloadBadge -Asset $_ }
-)
 $downloadRows = @()
 if ($windowsBadges.Count -gt 0) {
   $downloadRows += "| **Windows** | $($windowsBadges -join '<br>') |"
-}
-if ($macosBadges.Count -gt 0) {
-  $downloadRows += "| **macOS** | $($macosBadges -join '<br>') |"
 }
 $changelogSection = Get-ChangelogSection -Version ($Version -replace '\+.*$', '')
 
@@ -195,7 +176,7 @@ $releaseLines += @(
   "",
   "> **应用内更新：** Windows 安装版用户无需手动下载。应用会自动选择 Setup x64，完成下载与 SHA256 校验后退出旧版本、静默安装并重新启动。Portable 版也支持应用内自动更新和失败回滚。更新源为本仓库 Releases。",
   "",
-  "> **安装提示：** macOS 当前需下载 ZIP 后手动替换应用。Windows Setup 为普通用户的推荐版本，Portable 适合放在自定义目录。",
+  "> **安装提示：** Windows Setup 为普通用户的推荐版本，Portable 适合放在自定义目录。",
   "",
   "## 📝 更新内容",
   "",

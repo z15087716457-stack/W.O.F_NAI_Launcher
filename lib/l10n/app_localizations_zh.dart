@@ -4334,16 +4334,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get localGallery_permissionRequiredTitle => '需要存储权限';
-
-  @override
-  String get localGallery_permissionRequiredContent =>
-      '本地画廊需要访问存储权限才能扫描您生成的图片。\n\n请在设置中授予权限后重试。';
-
-  @override
-  String get localGallery_openSettings => '打开设置';
-
-  @override
   String get localGallery_firstTimeTipTitle => '💡 使用提示';
 
   @override

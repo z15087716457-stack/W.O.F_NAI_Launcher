@@ -15,7 +15,7 @@
 <p align="center">
   <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-1.0.0-blue" alt="Version"></a>
   <img src="https://img.shields.io/badge/Flutter-3.44.2-blue?logo=flutter" alt="Flutter">
-  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS-lightgrey" alt="Platforms">
+  <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platforms">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
 </p>
 
@@ -38,7 +38,7 @@ W.O.F NAI Studio is a third-party client for NovelAI built with Flutter. It inte
 | 📚 Local Gallery | Supports multi-source recursive scanning, default masonry layout, SQLite full-text search, categories/collections/trash pool, model-version filters, metadata parsing, batch operations, and large image previews. |
 | 🌐 Online Gallery | Supports Danbooru / Safebooru / Gelbooru / AI TAG search, native rankings, multi-image details, metadata reuse, and batch downloads. |
 | 📦 Generation Queue | Supports task sorting, batch generation, pause/resume, failure handling strategies, progress statistics, and queue import/export. |
-| 🔌 External Integration | Supports full-parameter Krita bridging (AI takeover), local ComfyUI workflows, system proxy, cross-platform image copying, and file location. |
+| 🔌 External Integration | Supports full-parameter Krita bridging (AI takeover), local ComfyUI workflows, system proxy, image copying, and file location. |
 
 ### Online Gallery Sources
 
@@ -121,10 +121,7 @@ Multi-source galleries, default masonry layout, collections (root/subset linking
 
 | Platform | Status | Description |
 | --- | --- | --- |
-| Windows | Available | Primary development and release platform. Supports system tray, window state persistence, video playback, clipboard, and file location. |
-| macOS | Minimal Support | Supports building, launching, login, local database, video playback, Keychain, system proxy, image copying, and file location. System tray support to be added later. |
-| Linux | Unreleased | Desktop code branches exist, but official packages are not currently provided. |
-| Android | Planned | Still in the adaptation/planning phase. |
+| Windows | Available | The only development and release platform. Supports system tray, window state persistence, video playback, clipboard, and file location. |
 
 ## 📦 Download & Install
 
@@ -134,7 +131,6 @@ Download the latest version from [Releases](https://github.com/z15087716457-stac
 | --- | --- | --- |
 | Windows | `NAI_Launcher_Windows_<version>_Setup.exe` | Installer version, recommended for general users. Supports resumable in-app downloads, verification, automatic installation, and restart. Manual setup also detects and closes an older version still running in the tray. |
 | Windows | `NAI_Launcher_Windows_<version>_Portable.zip` | Portable version. In-app updates stage the new version, preserve user files, atomically swap directories, and automatically roll back and restart the previous version on failure. |
-| macOS | `NAI_Launcher_macOS_<version>_Portable.zip` | Portable version. Extract and open `Aaalice NAI Launcher.app`. If an unnotarized build is blocked, you can allow it to open in System Settings > Privacy & Security. |
 
 You can log in for the first time using your NovelAI account credentials or an API Token. Account data is stored locally on the device only. The desktop app uses the system's secure storage for sensitive information.
 
@@ -151,9 +147,8 @@ You can log in for the first time using your NovelAI account credentials or an A
 
 - Flutter `3.44.2` (project minimum requirement is Flutter `3.35.0` / Dart `3.10.7`)
 - Git LFS, required for pulling `assets/databases/*.db`
-- Windows Build: Visual Studio 2022 with Desktop development with C++
-- Windows Build: [NuGet CLI](https://learn.microsoft.com/nuget/install-nuget-client-tools), the directory containing `nuget.exe` must be added to `PATH`
-- macOS Build: Full Xcode, CocoaPods, Git LFS
+- Visual Studio 2022 with Desktop development with C++
+- [NuGet CLI](https://learn.microsoft.com/nuget/install-nuget-client-tools), the directory containing `nuget.exe` must be added to `PATH`
 
 ### General Steps
 
@@ -207,28 +202,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/capture_dev_window.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/capture_dev_window.ps1 -OutputPath tool/.tmp/ui.png -NoActivate
 ```
 
-### macOS
-
-```bash
-flutter build macos --release
-```
-
-Output path:
-
-```text
-build/macos/Build/Products/Release/Aaalice NAI Launcher.app
-```
-
-During local development, if the Keychain repeatedly prompts for authorization, you can first create a stable local signing certificate and then run the signed launch script:
-
-```bash
-scripts/create_macos_dev_cert.sh
-scripts/dev_run_macos_signed.sh debug
-```
-
 ## 🚀 Release Process
 
-Releases are handled by the `Release` workflow in GitHub Actions. After pushing a `v*` tag, the workflow builds the Windows installer, Windows portable, and macOS portable versions, then generates `release_manifest.json`, `checksums.txt`, and Release notes. The Release page groups direct Setup / Portable download badges by operating system and includes platform icons.
+Releases are handled by the `Release` workflow in GitHub Actions. After pushing a `v*` tag, the workflow builds the Windows installer and portable versions, then generates `release_manifest.json`, `checksums.txt`, and Release notes. The Release page provides direct Setup / Portable download badges with platform icons.
 
 ```bash
 git tag v1.0.0
@@ -257,7 +233,6 @@ nai_launcher/
 │   ├── data/               # API clients, models, repositories, and business data services
 │   ├── l10n/               # Chinese, English, and Japanese UI strings and generated files
 │   └── presentation/       # Pages, components, state management, themes, and routing
-├── macos/                  # macOS runner
 ├── scripts/                # Build, signing, database, and testing helper scripts
 ├── test/                   # Unit tests and widget tests
 ├── tool/                   # Dev tools, data processing, icon generation, and diagnostic scripts
@@ -286,7 +261,7 @@ Descriptions are written in Chinese, consistent with the repository history. Com
 
 ## 🤝 Contributing
 
-Contributions via Issues and Pull Requests are welcome. Before submitting a PR, please describe the goal of the changes, the scope of impact, and how to verify them. For UI or cross-platform behavior changes, please attach screenshots or recordings where possible.
+Contributions via Issues and Pull Requests are welcome. Before submitting a PR, please describe the goal of the changes, the scope of impact, and how to verify them. For UI behavior changes, please attach screenshots or recordings where possible.
 
 ## 🙏 Acknowledgments
 

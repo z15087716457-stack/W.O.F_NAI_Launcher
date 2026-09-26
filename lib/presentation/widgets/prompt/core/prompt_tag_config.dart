@@ -1,5 +1,3 @@
-import 'dart:io';
-
 /// 标签视图配置
 class PromptTagConfig {
   /// 是否为移动平台
@@ -36,21 +34,6 @@ class PromptTagConfig {
     this.enableBoxSelection = true,
     this.enableAnimation = true,
   });
-
-  /// 根据平台创建默认配置
-  factory PromptTagConfig.forPlatform({bool? isMobile}) {
-    final mobile = isMobile ?? (Platform.isAndroid || Platform.isIOS);
-    return PromptTagConfig(
-      isMobile: mobile,
-      showTranslation: true,
-      compact: mobile, // 移动端默认紧凑
-      hoverMenuDelay: mobile ? 0 : 100,
-      hoverMenuHideDelay: mobile ? 0 : 200,
-      dragDelay: mobile ? 300 : 200,
-      enableBoxSelection: !mobile, // 移动端禁用框选
-      enableAnimation: true,
-    );
-  }
 
   /// 复制并修改
   PromptTagConfig copyWith({

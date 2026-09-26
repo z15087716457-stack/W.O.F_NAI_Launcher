@@ -38,6 +38,8 @@ import '../../../widgets/character/character_prompt_button.dart';
 import '../../../providers/pending_prompt_provider.dart';
 import 'generation_sidebar_style.dart';
 
+/// 提示词页签是否使用富文本 Tooltip。当前仅维护 Windows，
+/// 恒为 false；保留签名以兼容既有调用与测试。
 bool usesRichPromptTypeTooltip(TargetPlatform platform) =>
     platform != TargetPlatform.windows;
 

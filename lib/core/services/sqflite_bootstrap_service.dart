@@ -25,7 +25,7 @@ class SqfliteBootstrapService {
   }
 
   Future<void> _doInitialize() async {
-    if (!(Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    if (!Platform.isWindows) {
       _initialized = true;
       return;
     }

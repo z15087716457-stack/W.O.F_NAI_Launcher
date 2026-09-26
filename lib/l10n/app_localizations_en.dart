@@ -4490,17 +4490,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get localGallery_permissionRequiredTitle =>
-      'Storage Permission Required';
-
-  @override
-  String get localGallery_permissionRequiredContent =>
-      'Local gallery needs storage permission to scan your generated images.\n\nPlease grant permission in settings and try again.';
-
-  @override
-  String get localGallery_openSettings => 'Open Settings';
-
-  @override
   String get localGallery_firstTimeTipTitle => '💡 Tips';
 
   @override

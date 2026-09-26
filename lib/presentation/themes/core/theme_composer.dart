@@ -349,11 +349,7 @@ class ThemeComposer {
       // Apply motion to page transitions
       pageTransitionsTheme: PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: _ModularPageTransitionBuilder(motion),
-          TargetPlatform.iOS: _ModularPageTransitionBuilder(motion),
           TargetPlatform.windows: _ModularPageTransitionBuilder(motion),
-          TargetPlatform.macOS: _ModularPageTransitionBuilder(motion),
-          TargetPlatform.linux: _ModularPageTransitionBuilder(motion),
         },
       ),
     );

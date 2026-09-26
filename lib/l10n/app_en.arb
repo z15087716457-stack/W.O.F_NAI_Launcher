@@ -2181,9 +2181,6 @@
       "error": {}
     }
   },
-  "localGallery_permissionRequiredTitle": "Storage Permission Required",
-  "localGallery_permissionRequiredContent": "Local gallery needs storage permission to scan your generated images.\n\nPlease grant permission in settings and try again.",
-  "localGallery_openSettings": "Open Settings",
   "localGallery_firstTimeTipTitle": "💡 Tips",
   "localGallery_firstTimeTipContent": "Right-click (desktop) or long-press (mobile) on images to:\n\n• Copy Prompt\n• Copy Seed\n• View full metadata",
   "localGallery_gotIt": "Got it",

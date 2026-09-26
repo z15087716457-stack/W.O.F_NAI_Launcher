@@ -17,7 +17,6 @@ import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/file_explorer_utils.dart';
 import '../../../data/models/gallery/nai_image_metadata.dart';
-import '../../../core/utils/permission_utils.dart';
 import '../../../core/utils/zip_utils.dart';
 import '../../../data/models/gallery/gallery_category.dart';
 import '../../../data/models/gallery/local_image_record.dart';
@@ -108,7 +107,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _restoreGalleryPreferences();
-      await _checkPermissionsAndScan();
+      await _initializeGallery();
       await _showFirstTimeTip();
     });
 
@@ -799,17 +798,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     }
   }
 
-  Future<void> _checkPermissionsAndScan() async {
-    final hasPermission = await PermissionUtils.checkGalleryPermission();
-
-    if (!hasPermission) {
-      final granted = await PermissionUtils.requestGalleryPermission();
-      if (!granted && mounted) {
-        _showPermissionDeniedDialog();
-        return;
-      }
-    }
-
+  Future<void> _initializeGallery() async {
     if (mounted) {
       await ref.read(localGalleryNotifierProvider.notifier).initialize();
       await ref.read(collectionNotifierProvider.notifier).initialize();
@@ -830,20 +819,6 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         }
       });
     }
-  }
-
-  void _showPermissionDeniedDialog() async {
-    final confirmed = await ThemedConfirmDialog.show(
-      context: context,
-      title: context.l10n.localGallery_permissionRequiredTitle,
-      content: context.l10n.localGallery_permissionRequiredContent,
-      confirmText: context.l10n.localGallery_openSettings,
-      cancelText: context.l10n.common_cancel,
-      type: ThemedConfirmDialogType.warning,
-      icon: Icons.folder_off_outlined,
-    );
-
-    if (confirmed) PermissionUtils.openAppSettings();
   }
 
   Future<void> _showFirstTimeTip() async {
@@ -885,13 +860,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         return;
       }
 
-      if (Platform.isWindows) {
-        await Process.start('explorer', [rootPath]);
-      } else if (Platform.isMacOS) {
-        await Process.start('open', [rootPath]);
-      } else if (Platform.isLinux) {
-        await Process.start('xdg-open', [rootPath]);
-      }
+      await Process.start('explorer', [rootPath]);
     } catch (e) {
       if (mounted) {
         AppToast.error(

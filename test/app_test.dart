@@ -789,23 +789,15 @@ void main() {
         },
       );
 
-      final absolutePath = Platform.isWindows
-          ? FileExplorerUtils.normalizeWindowsExplorerPath(file.absolute.path)
-          : file.absolute.path;
+      final absolutePath = FileExplorerUtils.normalizeWindowsExplorerPath(
+        file.absolute.path,
+      );
 
-      if (Platform.isWindows) {
-        expect(executable, 'explorer.exe');
-        expect(
-          arguments,
-          FileExplorerUtils.windowsRevealFileArguments(absolutePath),
-        );
-      } else if (Platform.isMacOS) {
-        expect(executable, 'open');
-        expect(arguments, ['-R', absolutePath]);
-      } else if (Platform.isLinux) {
-        expect(executable, 'xdg-open');
-        expect(arguments, [file.parent.absolute.path]);
-      }
+      expect(executable, 'explorer.exe');
+      expect(
+        arguments,
+        FileExplorerUtils.windowsRevealFileArguments(absolutePath),
+      );
     });
   });
 

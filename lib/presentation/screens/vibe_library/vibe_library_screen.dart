@@ -706,14 +706,8 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
         await dir.create(recursive: true);
       }
 
-      if (Platform.isWindows) {
-        // 使用 Process.start 避免等待进程完成导致的延迟
-        await Process.start('explorer', [vibePath]);
-      } else if (Platform.isMacOS) {
-        await Process.start('open', [vibePath]);
-      } else if (Platform.isLinux) {
-        await Process.start('xdg-open', [vibePath]);
-      }
+      // 使用 Process.start 避免等待进程完成导致的延迟
+      await Process.start('explorer', [vibePath]);
     } catch (e) {
       if (mounted) {
         AppToast.error(

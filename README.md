@@ -15,7 +15,7 @@
 <p align="center">
   <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-1.0.0-blue" alt="Version"></a>
   <img src="https://img.shields.io/badge/Flutter-3.44.2-blue?logo=flutter" alt="Flutter">
-  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS-lightgrey" alt="Platforms">
+  <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platforms">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
 </p>
 
@@ -38,7 +38,7 @@ W.O.F NAI Studio 是一个使用 Flutter 构建的 NovelAI 第三方客户端。
 | 📚 本地图库 | 支持多图库源递归扫描、默认瀑布流、SQLite 全文搜索、分类/收藏集/删除池、模型版本过滤、元数据解析、批量操作和大图预览。 |
 | 🌐 在线图库 | 支持 Danbooru / Safebooru / Gelbooru / AI TAG 搜索、真实排行榜、多图详情、元数据复用和批量下载。 |
 | 📦 生成队列 | 支持任务排序、批量生成、暂停/继续、失败策略、进度统计和队列导入导出。 |
-| 🔌 外部联动 | 支持 Krita 全参数桥接（AI 接管）、ComfyUI 本地工作流、系统代理、跨平台图片复制和文件定位。 |
+| 🔌 外部联动 | 支持 Krita 全参数桥接（AI 接管）、ComfyUI 本地工作流、系统代理、图片复制和文件定位。 |
 
 ### 在线画廊来源
 
@@ -121,10 +121,7 @@ W.O.F NAI Studio 是一个使用 Flutter 构建的 NovelAI 第三方客户端。
 
 | 平台 | 状态 | 说明 |
 | --- | --- | --- |
-| Windows | 可用 | 主要开发和发布平台，支持系统托盘、窗口状态保存、视频播放、剪贴板和文件定位。 |
-| macOS | 最小适配 | 支持构建、启动、登录、本地数据库、视频播放、Keychain、系统代理、图片复制和文件定位；系统托盘后续再补。 |
-| Linux | 未发布 | 部分桌面代码已有分支，但当前不提供正式包。 |
-| Android | 计划中 | 仍处于后续适配阶段。 |
+| Windows | 可用 | 唯一开发和发布平台，支持系统托盘、窗口状态保存、视频播放、剪贴板和文件定位。 |
 
 ## 📦 下载与安装
 
@@ -134,7 +131,6 @@ W.O.F NAI Studio 是一个使用 Flutter 构建的 NovelAI 第三方客户端。
 | --- | --- | --- |
 | Windows | `NAI_Launcher_Windows_<version>_Setup.exe` | 安装版，推荐普通用户，安装到当前用户目录；支持应用内断点下载、校验、自动安装并重启。手动运行安装包时也会检测并关闭托盘中的旧版本。 |
 | Windows | `NAI_Launcher_Windows_<version>_Portable.zip` | 便携版，解压后运行 `nai_launcher.exe`；应用内更新会暂存新版、保留用户文件、原子切换目录，失败时自动回滚并重启旧版。 |
-| macOS | `NAI_Launcher_macOS_<version>_Portable.zip` | 便携版，解压后打开 `Aaalice NAI Launcher.app`。未公证版本如被拦截，可在系统设置的隐私与安全中允许打开。 |
 
 首次登录可以使用 NovelAI 账号密码或 API Token。账号数据仅保存在本地设备，桌面端使用系统安全存储保存敏感信息。
 
@@ -151,9 +147,8 @@ W.O.F NAI Studio 是一个使用 Flutter 构建的 NovelAI 第三方客户端。
 
 - Flutter `3.44.2`（项目最低要求 Flutter `3.35.0` / Dart `3.10.7`）
 - Git LFS，用于拉取 `assets/databases/*.db`
-- Windows 构建：Visual Studio 2022 Desktop development with C++
-- Windows 构建：[NuGet CLI](https://learn.microsoft.com/nuget/install-nuget-client-tools)，`nuget.exe` 所在目录必须加入 `PATH`
-- macOS 构建：完整 Xcode、CocoaPods、Git LFS
+- Visual Studio 2022 Desktop development with C++
+- [NuGet CLI](https://learn.microsoft.com/nuget/install-nuget-client-tools)，`nuget.exe` 所在目录必须加入 `PATH`
 
 ### 通用步骤
 
@@ -207,28 +202,9 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/capture_dev_window.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/capture_dev_window.ps1 -OutputPath tool/.tmp/ui.png -NoActivate
 ```
 
-### macOS
-
-```bash
-flutter build macos --release
-```
-
-产物路径：
-
-```text
-build/macos/Build/Products/Release/Aaalice NAI Launcher.app
-```
-
-本地开发时如果 Keychain 反复弹授权，可以先创建稳定的本地签名证书，再运行签名启动脚本：
-
-```bash
-scripts/create_macos_dev_cert.sh
-scripts/dev_run_macos_signed.sh debug
-```
-
 ## 🚀 发布流程
 
-发布由 GitHub Actions 的 `Release` workflow 处理。推送 `v*` tag 后，工作流会分别构建 Windows 安装版、Windows 便携版和 macOS 便携版，并生成 `release_manifest.json`、`checksums.txt` 与 Release notes。Release 页面会按系统生成带平台图标的 Setup / Portable 直达下载按钮。
+发布由 GitHub Actions 的 `Release` workflow 处理。推送 `v*` tag 后，工作流会构建 Windows 安装版与便携版，并生成 `release_manifest.json`、`checksums.txt` 与 Release notes。Release 页面会生成带平台图标的 Setup / Portable 直达下载按钮。
 
 ```bash
 git tag v1.0.0
@@ -257,7 +233,6 @@ nai_launcher/
 │   ├── data/               # API、模型、仓库和业务数据服务
 │   ├── l10n/               # 中/英/日界面文案与生成文件
 │   └── presentation/       # 页面、组件、状态管理、主题和路由
-├── macos/                  # macOS runner
 ├── scripts/                # 构建、签名、数据库和测试辅助脚本
 ├── test/                   # 单元测试和组件测试
 ├── tool/                   # 开发工具、数据处理、图标生成和诊断脚本
@@ -286,7 +261,7 @@ type(scope): 中文描述
 
 ## 🤝 贡献
 
-欢迎通过 Issue 和 Pull Request 参与。提交 PR 前请说明变更目标、影响范围、验证方式；涉及 UI 或跨平台行为时，尽量附上截图或录屏。
+欢迎通过 Issue 和 Pull Request 参与。提交 PR 前请说明变更目标、影响范围、验证方式；涉及 UI 行为时，尽量附上截图或录屏。
 
 ## 🙏 致谢
 

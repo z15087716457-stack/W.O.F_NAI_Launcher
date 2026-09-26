@@ -21,7 +21,6 @@ import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 void main() {
   test('Windows 下提示词切换按钮不使用富文本 Tooltip', () {
     expect(usesRichPromptTypeTooltip(TargetPlatform.windows), isFalse);
-    expect(usesRichPromptTypeTooltip(TargetPlatform.macOS), isTrue);
   });
 
   testWidgets('冷启动时切换到负面提示词不会抛出异常', (tester) async {

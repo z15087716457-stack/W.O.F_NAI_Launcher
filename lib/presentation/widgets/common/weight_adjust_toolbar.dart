@@ -24,8 +24,7 @@ enum PromptWeightScrollModifier {
   bool get isWheelCaptured {
     return switch (this) {
       PromptWeightScrollModifier.none => true,
-      PromptWeightScrollModifier.alt =>
-        HardwareKeyboard.instance.isAltPressed,
+      PromptWeightScrollModifier.alt => HardwareKeyboard.instance.isAltPressed,
       PromptWeightScrollModifier.ctrl =>
         HardwareKeyboard.instance.isControlPressed,
       PromptWeightScrollModifier.shift =>
@@ -439,14 +438,7 @@ class WeightAdjustScrollPhysics extends ScrollPhysics {
 }
 
 bool supportsPromptWeightScrollPhysics(TargetPlatform platform) {
-  return switch (platform) {
-    TargetPlatform.windows ||
-    TargetPlatform.macOS ||
-    TargetPlatform.linux => true,
-    TargetPlatform.android ||
-    TargetPlatform.iOS ||
-    TargetPlatform.fuchsia => false,
-  };
+  return platform == TargetPlatform.windows;
 }
 
 /// 权重调整工具条

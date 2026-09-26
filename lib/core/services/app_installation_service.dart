@@ -6,12 +6,7 @@ import 'package:win32_registry/win32_registry.dart';
 
 part 'app_installation_service.g.dart';
 
-enum AppInstallationType {
-  windowsInstaller,
-  windowsPortable,
-  macosPortable,
-  unsupported,
-}
+enum AppInstallationType { windowsInstaller, windowsPortable, unsupported }
 
 /// 判断当前应用是安装版还是便携版。
 class AppInstallationService {
@@ -19,29 +14,24 @@ class AppInstallationService {
       r'Software\Microsoft\Windows\CurrentVersion\Uninstall\Aaalice NAI Launcher';
 
   AppInstallationType getInstallationType() {
-    if (Platform.isWindows) {
-      return _isInstalledWindowsApp()
-          ? AppInstallationType.windowsInstaller
-          : AppInstallationType.windowsPortable;
+    if (!Platform.isWindows) {
+      return AppInstallationType.unsupported;
     }
-    if (Platform.isMacOS) {
-      return AppInstallationType.macosPortable;
-    }
-    return AppInstallationType.unsupported;
+    return _isInstalledWindowsApp()
+        ? AppInstallationType.windowsInstaller
+        : AppInstallationType.windowsPortable;
   }
 
   String getReleaseAssetPreference() {
     return switch (getInstallationType()) {
       AppInstallationType.windowsInstaller => 'windows-installer',
       AppInstallationType.windowsPortable => 'windows-portable',
-      AppInstallationType.macosPortable => 'macos',
       AppInstallationType.unsupported => 'unknown',
     };
   }
 
   /// Windows 安装版与便携版都支持应用内自动更新：
   /// 安装版运行 NSIS 静默安装，便携版由辅助脚本解压覆盖并重启。
-  /// macOS 涉及签名与隔离属性，暂不支持自动替换。
   bool get supportsInAppInstall {
     final type = getInstallationType();
     return type == AppInstallationType.windowsInstaller ||

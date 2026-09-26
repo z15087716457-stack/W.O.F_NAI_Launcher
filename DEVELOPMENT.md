@@ -39,7 +39,7 @@ Windows 桌面 / 文件图标使用完整长方形 Logo `assets/images/wof_logo_
 
 使用 Node.js 和 `sharp` 运行 `node tool/branding/generate_windows_icons.cjs`，导出桌面 `app_icon.ico` 与窗口 / 托盘 `window_icon.ico` 两套资源，分别同步到 `windows/runner/resources/` 和 `assets/icons/`。EXE 的最低图标资源 ID 101 留给横版；窗口类回退与大小窗口图标使用方形 W 的 ID 102，DPI 变化时更新窗口图标并释放旧句柄；Windows 托盘读取 `assets/icons/window_icon.ico`。ICO 内嵌 16、20、24、32、40、48、64、96、128、256px，共十档。可追加 `--brand-dir <目录>` 导出 1024px PNG、多尺寸 PNG 和 ICO 到品牌资产库。
 
-ICO 属于原生程序资源；更新后必须重新构建 Windows 程序才能改变 EXE 自身的图标，仅 Flutter 热重载不会更新。macOS 和移动端的图标资源独立维护。
+ICO 属于原生程序资源；更新后必须重新构建 Windows 程序才能改变 EXE 自身的图标，仅 Flutter 热重载不会更新。
 
 Windows `Runner.rc` 的 `CompanyName=com.example`、`ProductName=nai_launcher` 是数据目录标识，必须保持稳定：`path_provider_windows` 用这两项定位 `%APPDATA%/com.example/nai_launcher/`，更改它们会让图库、块库和账号配置指向另一目录。品牌显示名写入 `FileDescription`、窗口标题与应用文案，不通过 `ProductName` 改名。
 
@@ -53,7 +53,7 @@ Windows `Runner.rc` 的 `CompanyName=com.example`、`ProductName=nai_launcher` �
 
 `CHANGELOG.md` 是 GitHub Release notes 的“更新内容”来源；Release workflow 不会自动根据 git commit 生成变更摘要。准备发布前必须对比上一个 tag 到当前 HEAD 的提交，把本版本用户可见变化整理进对应版本段落，例如 `## [1.0.0] - YYYY-MM-DD`。
 
-Changelog 条目应面向用户描述结果，不要只写内部实现名。常用分类为 `### ✨ 新增`、`### 🛠 改进`、`### 🐛 修复`，必要时才增加 `### ⚠️ 注意`。不要在 `CHANGELOG.md` 中写发布文件列表；安装版、便携版、macOS 包说明由 `scripts/generate_release_metadata.ps1` 自动生成，避免 Release notes 重复。
+Changelog 条目应面向用户描述结果，不要只写内部实现名。常用分类为 `### ✨ 新增`、`### 🛠 改进`、`### 🐛 修复`，必要时才增加 `### ⚠️ 注意`。不要在 `CHANGELOG.md` 中写发布文件列表；安装版、便携版说明由 `scripts/generate_release_metadata.ps1` 自动生成，避免 Release notes 重复。
 
 准备发布时需要检查：
 

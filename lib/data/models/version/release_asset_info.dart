@@ -1,10 +1,5 @@
 /// GitHub Release 中可下载资产的类型。
-enum ReleaseAssetType {
-  windowsInstaller,
-  windowsPortable,
-  macosPortable,
-  unknown,
-}
+enum ReleaseAssetType { windowsInstaller, windowsPortable, unknown }
 
 /// GitHub Release 中的单个下载资产。
 class ReleaseAssetInfo {
@@ -28,7 +23,7 @@ class ReleaseAssetInfo {
     this.description,
   });
 
-  /// Windows 安装版与便携版均支持应用内自动更新；macOS 需手动替换。
+  /// Windows 安装版与便携版均支持应用内自动更新。
   bool get supportsInAppInstall =>
       type == ReleaseAssetType.windowsInstaller ||
       type == ReleaseAssetType.windowsPortable;
@@ -36,7 +31,6 @@ class ReleaseAssetInfo {
   String get typeId => switch (type) {
     ReleaseAssetType.windowsInstaller => 'windows-installer',
     ReleaseAssetType.windowsPortable => 'windows-portable',
-    ReleaseAssetType.macosPortable => 'macos-portable',
     ReleaseAssetType.unknown => 'unknown',
   };
 
@@ -115,7 +109,6 @@ class ReleaseAssetInfo {
     return switch (value) {
       'windows-installer' => ReleaseAssetType.windowsInstaller,
       'windows-portable' => ReleaseAssetType.windowsPortable,
-      'macos-portable' => ReleaseAssetType.macosPortable,
       'unknown' => ReleaseAssetType.unknown,
       _ => null,
     };
@@ -132,10 +125,6 @@ class ReleaseAssetInfo {
         (lowerName.contains('portable') || lowerName.endsWith('.zip'))) {
       return ReleaseAssetType.windowsPortable;
     }
-    if ((lowerName.contains('macos') || lowerName.contains('mac')) &&
-        (lowerName.contains('portable') || lowerName.endsWith('.zip'))) {
-      return ReleaseAssetType.macosPortable;
-    }
     return ReleaseAssetType.unknown;
   }
 
@@ -143,7 +132,6 @@ class ReleaseAssetInfo {
     return switch (type) {
       ReleaseAssetType.windowsInstaller ||
       ReleaseAssetType.windowsPortable => 'windows',
-      ReleaseAssetType.macosPortable => 'macos',
       ReleaseAssetType.unknown => 'unknown',
     };
   }
@@ -152,7 +140,6 @@ class ReleaseAssetInfo {
     return switch (type) {
       ReleaseAssetType.windowsInstaller => 'Windows 安装版',
       ReleaseAssetType.windowsPortable => 'Windows 便携版',
-      ReleaseAssetType.macosPortable => 'macOS 便携版',
       ReleaseAssetType.unknown => '下载文件',
     };
   }
@@ -161,7 +148,6 @@ class ReleaseAssetInfo {
     return switch (type) {
       ReleaseAssetType.windowsInstaller => '推荐普通用户使用，支持应用内一键更新。',
       ReleaseAssetType.windowsPortable => '解压即用，支持应用内自动更新。',
-      ReleaseAssetType.macosPortable => '解压后打开应用，更新时需要手动替换。',
       ReleaseAssetType.unknown => '请查看 Release 页面说明。',
     };
   }

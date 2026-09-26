@@ -162,10 +162,9 @@ void main() {
       expect(offenders, isEmpty, reason: _fontFailureHint(offenders));
     });
 
-    // 右键菜单（文本选择工具栏）比一般组件更隐蔽：Flutter 各平台的工具栏
-    // 按钮都绕开了主题字体——桌面端与 macOS 用带 `inherit: false` 的常量
-    // 样式，Android 则整体替换 TextButton 的 textStyle，都不带 fontFamily。
-    // 项目用 buildThemedTextSelectionToolbar 接管按钮把字体补回来。
+    // 右键菜单（文本选择工具栏）比一般组件更隐蔽：Flutter 的工具栏
+    // 按钮绕开了主题字体——桌面端用带 `inherit: false` 的常量样式，
+    // 不带 fontFamily。项目用 buildThemedTextSelectionToolbar 接管按钮把字体补回来。
     testWidgets('右键菜单必须跟随用户字体', (tester) async {
       const fontConfig = FontConfig(
         displayName: 'LXGW ZhenKai GB',
@@ -180,11 +179,7 @@ void main() {
       final expected = theme.textTheme.labelLarge?.fontFamily;
 
       final offenders = <String>[];
-      for (final platform in [
-        TargetPlatform.windows,
-        TargetPlatform.linux,
-        TargetPlatform.macOS,
-      ]) {
+      for (final platform in [TargetPlatform.windows]) {
         debugDefaultTargetPlatformOverride = platform;
         await tester.pumpWidget(
           MaterialApp(

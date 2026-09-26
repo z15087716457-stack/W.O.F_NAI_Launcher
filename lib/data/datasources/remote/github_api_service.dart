@@ -41,7 +41,7 @@ class GitHubApiService {
   /// [owner] 仓库所有者
   /// [repo] 仓库名称
   /// [currentVersion] 当前版本号（用于计算是否需要更新）
-  /// [platform] 目标发布资产（windows-installer, windows-portable, macos 等）
+  /// [platform] 目标发布资产（windows-installer, windows-portable）
   /// [includePrerelease] 是否允许预发布版本
   Future<VersionInfo> fetchLatestRelease({
     required String owner,
@@ -232,9 +232,6 @@ class GitHubApiService {
         normalizedPlatform == 'windows') {
       return _firstAssetOfType(assets, ReleaseAssetType.windowsPortable) ??
           _firstAssetOfType(assets, ReleaseAssetType.windowsInstaller);
-    }
-    if (normalizedPlatform == 'macos') {
-      return _firstAssetOfType(assets, ReleaseAssetType.macosPortable);
     }
     return assets
         .where((asset) => asset.type != ReleaseAssetType.unknown)

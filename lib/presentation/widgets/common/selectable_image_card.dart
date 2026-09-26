@@ -1580,9 +1580,8 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
       }
       final shareImage = await cache.prepareImage(stripMetadata: stripMetadata);
 
-      // 跨平台复制到剪贴板（原 Windows 端走 PowerShell + System.Drawing，
-      // macOS/Linux 不可用）。统一规范化为 PNG 写入，避免 jpg/webp 原始字节
-      // 被当成 PNG 导致粘贴失败。
+      // 复制到剪贴板（原 Windows 端走 PowerShell + System.Drawing）。
+      // 统一规范化为 PNG 写入，避免 jpg/webp 原始字节被当成 PNG 导致粘贴失败。
       await clipboardWriter(shareImage.bytes);
       AppToast.successOnOverlay(overlay, l10n.image_copiedToClipboard);
     } catch (e) {

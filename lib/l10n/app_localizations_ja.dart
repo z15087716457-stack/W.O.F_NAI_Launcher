@@ -4394,16 +4394,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get localGallery_permissionRequiredTitle => 'ストレージ権限が必要です';
-
-  @override
-  String get localGallery_permissionRequiredContent =>
-      'ローカル ギャラリーには、生成された画像をスキャンするためのストレージ権限が必要です。\n\n設定で許可を与えて、もう一度お試しください。';
-
-  @override
-  String get localGallery_openSettings => '設定を開く';
-
-  @override
   String get localGallery_firstTimeTipTitle => '💡 ヒント';
 
   @override

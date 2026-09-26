@@ -21,16 +21,10 @@ void main() {
         'name': 'NAI_Launcher_Windows_1.0.0_Portable.zip',
         'browser_download_url': 'https://example.com/windows.zip',
       });
-      final macosAsset = ReleaseAssetInfo.fromGitHubAsset({
-        'name': 'NAI_Launcher_macOS_1.0.0_Portable.zip',
-        'browser_download_url': 'https://example.com/macos.zip',
-      });
 
       expect(windowsAsset.type, ReleaseAssetType.windowsPortable);
       expect(windowsAsset.supportsInAppInstall, isTrue);
-      expect(macosAsset.type, ReleaseAssetType.macosPortable);
-      expect(macosAsset.supportsInAppInstall, isFalse);
-      expect(macosAsset.platform, 'macos');
+      expect(windowsAsset.platform, 'windows');
     });
 
     test('merges manifest metadata with GitHub asset', () {

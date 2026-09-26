@@ -121,16 +121,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
   /// 替换功能是否可用（只读模式下禁用）
   bool get _canReplace => !widget.config.readOnly;
 
-  bool get _isDesktop {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.windows:
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-        return true;
-      default:
-        return false;
-    }
-  }
+  bool get _isDesktop => defaultTargetPlatform == TargetPlatform.windows;
 
   bool _handleHardwareKeyEvent(KeyEvent event) {
     if (!_isDesktop || event is! KeyDownEvent) {

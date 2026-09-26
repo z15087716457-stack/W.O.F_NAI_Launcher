@@ -329,33 +329,30 @@ class _SlideshowScreenState extends ConsumerState<SlideshowScreen> {
               ),
             ),
 
-            // 键盘提示（仅在桌面端显示）
-            if (Theme.of(context).platform == TargetPlatform.windows ||
-                Theme.of(context).platform == TargetPlatform.macOS ||
-                Theme.of(context).platform == TargetPlatform.linux)
-              Positioned(
-                bottom: 80,
-                left: 16,
-                right: 16,
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface.withValues(alpha: 0.8),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      l10n.slideshow_keyboardHint,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface,
-                      ),
+            // 键盘提示（仅桌面端显示，项目仅发布 Windows）
+            Positioned(
+              bottom: 80,
+              left: 16,
+              right: 16,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface.withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    l10n.slideshow_keyboardHint,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                 ),
               ),
+            ),
           ],
         ),
       ),

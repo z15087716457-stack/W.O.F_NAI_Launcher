@@ -114,8 +114,7 @@ class AppToast {
   static final List<_ActiveToast> _activeToasts = [];
 
   /// 判断是否为桌面端
-  static bool get _isDesktop =>
-      Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+  static bool get _isDesktop => Platform.isWindows;
 
   /// 显示成功通知
   static void success(BuildContext context, String message) {

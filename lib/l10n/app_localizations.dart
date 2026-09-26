@@ -8131,24 +8131,6 @@ abstract class AppLocalizations {
   /// **'Cannot open folder: {error}'**
   String localGallery_cannotOpenFolder(Object error);
 
-  /// No description provided for @localGallery_permissionRequiredTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Storage Permission Required'**
-  String get localGallery_permissionRequiredTitle;
-
-  /// No description provided for @localGallery_permissionRequiredContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Local gallery needs storage permission to scan your generated images.\n\nPlease grant permission in settings and try again.'**
-  String get localGallery_permissionRequiredContent;
-
-  /// No description provided for @localGallery_openSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Open Settings'**
-  String get localGallery_openSettings;
-
   /// No description provided for @localGallery_firstTimeTipTitle.
   ///
   /// In en, this message translates to:

@@ -38,7 +38,7 @@ class DesktopAppShutdownService {
       AppLogger.w('Hive shutdown skipped or failed: $error', 'AppShutdown');
     }
 
-    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+    if (Platform.isWindows) {
       try {
         await trayManager.destroy();
       } catch (error) {

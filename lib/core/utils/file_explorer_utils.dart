@@ -1,8 +1,6 @@
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-
 typedef FileExplorerProcessLauncher =
     Future<void> Function(String executable, List<String> arguments);
 
@@ -81,16 +79,8 @@ class FileExplorerUtils {
     }
 
     final launcher = startProcess ?? _startProcess;
-    final absolutePath = Platform.isWindows
-        ? normalizeWindowsExplorerPath(dir.absolute.path)
-        : dir.absolute.path;
-    if (Platform.isWindows) {
-      await launcher('explorer.exe', [absolutePath]);
-    } else if (Platform.isMacOS) {
-      await launcher('open', [absolutePath]);
-    } else if (Platform.isLinux) {
-      await launcher('xdg-open', [absolutePath]);
-    }
+    final absolutePath = normalizeWindowsExplorerPath(dir.absolute.path);
+    await launcher('explorer.exe', [absolutePath]);
   }
 
   static Future<void> revealFile(
@@ -106,19 +96,11 @@ class FileExplorerUtils {
     }
 
     final launcher = startProcess ?? _startProcess;
-    final absolutePath = Platform.isWindows
-        ? normalizeWindowsExplorerPath(file.absolute.path)
-        : file.absolute.path;
-    if (Platform.isWindows) {
-      if (startProcess == null && _tryRevealFileWithShellApi(absolutePath)) {
-        return;
-      }
-      await launcher('explorer.exe', windowsRevealFileArguments(absolutePath));
-    } else if (Platform.isMacOS) {
-      await launcher('open', ['-R', absolutePath]);
-    } else if (Platform.isLinux) {
-      await launcher('xdg-open', [path.dirname(absolutePath)]);
+    final absolutePath = normalizeWindowsExplorerPath(file.absolute.path);
+    if (startProcess == null && _tryRevealFileWithShellApi(absolutePath)) {
+      return;
     }
+    await launcher('explorer.exe', windowsRevealFileArguments(absolutePath));
   }
 
   static Future<void> _startProcess(

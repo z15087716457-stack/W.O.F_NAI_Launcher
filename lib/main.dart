@@ -119,8 +119,8 @@ Future<WindowStateSnapshot> _saveCurrentWindowState() async {
 class WindowStateObserver extends WidgetsBindingObserver {
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
-    // 仅在桌面端保存窗口状态
-    if (!(Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    // 仅桌面端保存窗口状态
+    if (!Platform.isWindows) {
       return;
     }
 
@@ -343,11 +343,8 @@ Future<void> _bootstrapApplication() async {
   PaintingBinding.instance.imageCache.maximumSizeBytes = 200 << 20; // 200MB
 
   try {
-    // 初始化桌面端视频播放支持 (media_kit: Windows + macOS)
-    VideoPlayerMediaKit.ensureInitialized(
-      windows: Platform.isWindows,
-      macOS: Platform.isMacOS,
-    );
+    // 初始化桌面端视频播放支持 (media_kit)
+    VideoPlayerMediaKit.ensureInitialized(windows: true);
   } catch (e, stackTrace) {
     AppLogger.e(
       'Video player initialization failed; continuing startup',
@@ -359,7 +356,7 @@ Future<void> _bootstrapApplication() async {
 
   // 日志系统已自动初始化，无需显式调用
 
-  // 初始化 SQLite FFI（Windows/Linux 桌面端必需）
+  // 初始化 SQLite FFI
   await SqfliteBootstrapService.instance.ensureInitialized();
 
   // 初始化 Hive（使用子目录存储，支持迁移旧数据）
@@ -571,14 +568,12 @@ Future<void> _bootstrapApplication() async {
   });
 
   // 桌面端窗口配置
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+  if (Platform.isWindows) {
     try {
       await windowManager.ensureInitialized();
 
       // 设置 Windows 唤醒消息处理（单实例唤醒）
-      if (Platform.isWindows) {
-        setupWindowsWakeUpChannel();
-      }
+      setupWindowsWakeUpChannel();
 
       // 从 Hive 读取保存的窗口状态
       final box = Hive.box(StorageKeys.settingsBox);
@@ -596,33 +591,17 @@ Future<void> _bootstrapApplication() async {
       // 读取屏幕可用工作区
       double effWidth = savedWidth;
       double effHeight = savedHeight;
-      Rect? fillBounds; // macOS 首次启动：铺满工作区时使用
       try {
         final display = await screenRetriever.getPrimaryDisplay();
         final work = display.visibleSize ?? display.size;
-        final workPos = display.visiblePosition ?? Offset.zero;
 
-        if (Platform.isMacOS) {
-          // macOS：启动时自适应屏幕，铺满可用工作区（紧贴屏幕，保留菜单栏/Dock）
-          effWidth = work.width;
-          effHeight = work.height;
-          fillBounds = Rect.fromLTWH(
-            workPos.dx,
-            workPos.dy,
-            work.width,
-            work.height,
-          );
-        } else {
-          // 其它情况：clamp 到工作区，避免窗口超出屏幕
-          final maxW = (work.width - 40)
-              .clamp(800.0, double.infinity)
-              .toDouble();
-          final maxH = (work.height - 40)
-              .clamp(600.0, double.infinity)
-              .toDouble();
-          effWidth = savedWidth.clamp(800.0, maxW).toDouble();
-          effHeight = savedHeight.clamp(600.0, maxH).toDouble();
-        }
+        // clamp 到工作区，避免窗口超出屏幕
+        final maxW = (work.width - 40).clamp(800.0, double.infinity).toDouble();
+        final maxH = (work.height - 40)
+            .clamp(600.0, double.infinity)
+            .toDouble();
+        effWidth = savedWidth.clamp(800.0, maxW).toDouble();
+        effHeight = savedHeight.clamp(600.0, maxH).toDouble();
       } catch (e) {
         AppLogger.w('获取屏幕工作区失败，使用默认窗口尺寸: $e', 'Main');
       }
@@ -630,10 +609,10 @@ Future<void> _bootstrapApplication() async {
       final windowOptions = WindowOptions(
         size: Size(effWidth, effHeight),
         minimumSize: const Size(800, 600),
-        center: fillBounds == null && (savedX == null || savedY == null),
+        center: savedX == null || savedY == null,
         // Windows DWM owns the title-bar backdrop. Flutter pages stay opaque;
         // a solid native accent here would cover the system acrylic material.
-        backgroundColor: Platform.isWindows ? null : const Color(0xFF121212),
+        backgroundColor: null,
         skipTaskbar: false,
         // FEAT-23 内置一体标题栏：隐藏原生栏，由 Flutter 自绘
         // （拖拽/双击/Aero Snap 经 runner WM_NCHITTEST 返回 HTCAPTION）。
@@ -642,14 +621,7 @@ Future<void> _bootstrapApplication() async {
       );
 
       await windowManager.waitUntilReadyToShow(windowOptions, () async {
-        if (fillBounds != null) {
-          // macOS 首次启动：精确铺满屏幕工作区
-          await windowManager.setBounds(fillBounds);
-          AppLogger.d(
-            'Window filled to work area: ${effWidth}x$effHeight',
-            'Main',
-          );
-        } else if (savedX != null && savedY != null) {
+        if (savedX != null && savedY != null) {
           await windowManager.setPosition(Offset(savedX, savedY));
           AppLogger.d(
             'Window state restored: ${effWidth}x$effHeight at ($savedX, $savedY)',
@@ -667,41 +639,34 @@ Future<void> _bootstrapApplication() async {
         await refreshWindowFrame();
       });
 
-      // 初始化系统托盘（Windows + macOS）
-      if (Platform.isWindows || Platform.isMacOS) {
-        try {
-          // 设置托盘图标和提示
-          // tray_manager 使用 Flutter 资源路径格式（相对于 data/flutter_assets/）
-          // macOS 菜单栏不支持 .ico，使用 png
-          await trayManager.setIcon(
-            Platform.isWindows
-                ? 'assets/icons/window_icon.ico'
-                : 'assets/icons/tray_icon.png',
-          );
-          await trayManager.setToolTip(Brand.name);
+      // 初始化系统托盘
+      try {
+        // 设置托盘图标和提示
+        // tray_manager 使用 Flutter 资源路径格式（相对于 data/flutter_assets/）
+        await trayManager.setIcon('assets/icons/window_icon.ico');
+        await trayManager.setToolTip(Brand.name);
 
-          // 获取本地化字符串
-          final l10n = _getLocalizedStrings();
+        // 获取本地化字符串
+        final l10n = _getLocalizedStrings();
 
-          final menu = Menu(
-            items: [
-              MenuItem(key: 'show', label: l10n.tray_show),
-              MenuItem.separator(),
-              MenuItem(key: 'exit', label: l10n.tray_exit),
-            ],
-          );
-          await trayManager.setContextMenu(menu);
+        final menu = Menu(
+          items: [
+            MenuItem(key: 'show', label: l10n.tray_show),
+            MenuItem.separator(),
+            MenuItem(key: 'exit', label: l10n.tray_exit),
+          ],
+        );
+        await trayManager.setContextMenu(menu);
 
-          // 设置阻止关闭（关闭时隐藏到托盘）
-          await windowManager.setPreventClose(true);
+        // 设置阻止关闭（关闭时隐藏到托盘）
+        await windowManager.setPreventClose(true);
 
-          trayManager.addListener(AppTrayListener());
-          windowManager.addListener(AppWindowListener());
+        trayManager.addListener(AppTrayListener());
+        windowManager.addListener(AppWindowListener());
 
-          AppLogger.d('System tray initialized', 'Main');
-        } catch (e) {
-          AppLogger.e('Failed to initialize system tray: $e', 'Main');
-        }
+        AppLogger.d('System tray initialized', 'Main');
+      } catch (e) {
+        AppLogger.e('Failed to initialize system tray: $e', 'Main');
       }
     } catch (e, stackTrace) {
       AppLogger.e(
@@ -714,7 +679,7 @@ Future<void> _bootstrapApplication() async {
   }
 
   // 系统代理配置（根据用户设置）
-  if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+  if (Platform.isWindows) {
     final settingsBox = Hive.box(StorageKeys.settingsBox);
     final proxyEnabled =
         settingsBox.get(StorageKeys.proxyEnabled, defaultValue: true) as bool;
@@ -755,8 +720,8 @@ Future<void> _bootstrapApplication() async {
     }
   }
 
-  // 注册窗口状态观察者（桌面端）
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+  // 注册窗口状态观察者
+  if (Platform.isWindows) {
     WidgetsBinding.instance.addObserver(WindowStateObserver());
     AppLogger.d('Window state observer registered', 'Main');
   }

@@ -702,9 +702,8 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
         stripMetadata: stripMetadata,
       );
 
-      // 跨平台复制到剪贴板（原 Windows 端走 PowerShell + System.Drawing，
-      // macOS/Linux 不可用）。统一规范化为 PNG，避免 jpg/webp 原始字节被当成
-      // PNG 导致粘贴失败。
+      // 复制到剪贴板（原 Windows 端走 PowerShell + System.Drawing）。
+      // 统一规范化为 PNG，避免 jpg/webp 原始字节被当成 PNG 导致粘贴失败。
       await writeImageBytesToClipboardAsPng(shareImage.bytes);
 
       if (context.mounted) {

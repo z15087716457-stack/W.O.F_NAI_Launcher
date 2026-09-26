@@ -195,85 +195,12 @@ jobs:
             dist/NAI_Launcher_Windows_*_Portable.zip
           if-no-files-found: error
 
-  build-macos:
-    name: Build macOS
-    runs-on: macos-latest
-    needs: prepare
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.RELEASE_TAG }}
-          lfs: true
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-
-      - name: Prepare CocoaPods
-        run: pod --version
-
-      - name: Pull LFS databases
-        run: |
-          git lfs install
-          git lfs pull --include="assets/databases/*.db"
-
-      - name: Verify bundled databases
-        run: |
-          for file in assets/databases/tag_catalog.db assets/databases/cooccurrence.db; do
-            test -f "$file"
-            size="$(wc -c < "$file")"
-            if [ "$size" -lt 1024 ]; then
-              echo "Database looks too small, probably an LFS pointer: $file" >&2
-              exit 1
-            fi
-            header="$(dd if="$file" bs=15 count=1 2>/dev/null)"
-            if [ "$header" != "SQLite format 3" ]; then
-              echo "Database is not a SQLite file: $file" >&2
-              exit 1
-            fi
-          done
-
-      - name: Resolve dependencies
-        run: flutter pub get
-
-      - name: Validate bundled autocomplete databases
-        run: dart run tool/tag_catalog/verify_bundled_databases.dart
-
-      - name: Generate localizations
-        run: flutter gen-l10n
-
-      - name: Generate code
-        run: dart run build_runner build --delete-conflicting-outputs
-
-      - name: Build macOS release
-        run: flutter build macos --release
-
-      - name: Package macOS artifact
-        run: |
-          version="${{ needs.prepare.outputs.version }}"
-          mkdir -p dist
-          cd "build/macos/Build/Products/Release"
-          ditto -c -k --sequesterRsrc --keepParent "Aaalice NAI Launcher.app" "$GITHUB_WORKSPACE/dist/NAI_Launcher_macOS_${version}_Portable.zip"
-
-      - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-release
-          path: dist/NAI_Launcher_macOS_*_Portable.zip
-          if-no-files-found: error
-
   publish:
     name: Publish GitHub Release
     runs-on: ubuntu-latest
     needs:
       - prepare
       - build-windows
-      - build-macos
 
     steps:
       - name: Checkout
