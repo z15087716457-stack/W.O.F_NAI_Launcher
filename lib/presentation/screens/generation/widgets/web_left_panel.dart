@@ -167,7 +167,7 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
                       spacing: 6,
                       runSpacing: 4,
                       crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [_ModelMenuButton(), _ModeCapsule()],
+                      children: [_ModelModeCapsule()],
                     ),
                     Padding(
                       padding: EdgeInsets.only(right: 36),
@@ -364,16 +364,110 @@ class _WebLeftPanelState extends ConsumerState<WebLeftPanel>
 
 /// 头部条模型选择器：紧凑胶囊，点击弹分组卡式菜单切换模型（官网式：
 /// NEW / LEGACY 两段，每项展示全名 + 简介行）
-class _ModelMenuButton extends ConsumerWidget {
-  const _ModelMenuButton();
+/// 头部条「Model + Mode」合一胶囊：共享一颗 28px 外框。
+/// 左段 Model 灰标签 + 反色内胆（PopupMenuButton 开模型菜单）；
+/// 中间细竖线；右段模式区（仅 V4+ 显示，点击切 Anime/Furry，
+/// 模式区隐藏时竖线一并收起，胶囊只剩 Model 段）。
+class _ModelModeCapsule extends ConsumerWidget {
+  const _ModelModeCapsule();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final l10n = context.l10n;
     final model = ref.watch(
       generationParamsNotifierProvider.select((params) => params.model),
     );
+    // 模式切换只对 v4_prompt 结构有意义（V3 及以下无 base_caption）
+    final showMode = ModelSpecs.of(model).v4Prompts;
+    final furryMode = showMode
+        ? ref.watch(
+            generationParamsNotifierProvider.select(
+              (params) => params.furryMode,
+            ),
+          )
+        : false;
+
+    // 官网式「胶囊套胶囊」外框：浅色底 + 描边；右段模式区直接 InkWell
+    // 不套内胆，竖线天然分段。模式段套 Flexible——合并后胶囊是单行
+    // 不可拆的 Row，窄侧栏下由次要的模式文字收缩，模型段保持自然宽度。
+    return Material(
+      color: theme.colorScheme.surfaceContainerLowest,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: theme.colorScheme.outline.withValues(alpha: 0.4),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _ModelMenuButton(theme: theme, model: model),
+          if (showMode) ...[
+            Container(
+              width: 1,
+              height: 16,
+              color: theme.colorScheme.outline.withValues(alpha: 0.35),
+            ),
+            Flexible(
+              child: InkWell(
+                onTap: () => ref
+                    .read(generationParamsNotifierProvider.notifier)
+                    .updateModelMode(!furryMode),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10, right: 8),
+                  child: SizedBox(
+                    height: 28,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // 官网同款图标：anime=sakura 樱花 / furry=爪印
+                        SvgPicture.asset(
+                          furryMode
+                              ? 'assets/icons/nai-icon-furry.svg'
+                              : 'assets/icons/nai-icon-sakura.svg',
+                          width: 14,
+                          height: 14,
+                          colorFilter: ColorFilter.mode(
+                            theme.colorScheme.onSurfaceVariant,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        // 官网 Mode 胶囊恒为英文（静拍板：纯英文）
+                        Flexible(
+                          child: Text(
+                            furryMode ? 'Furry' : 'Anime',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ModelMenuButton extends ConsumerWidget {
+  const _ModelMenuButton({required this.theme, required this.model});
+
+  final ThemeData theme;
+  final String model;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final shortName = ModelDisplay.shortNameOf(model);
     final fullName = ImageModels.modelDisplayNames[model] ?? model;
 
@@ -398,18 +492,10 @@ class _ModelMenuButton extends ConsumerWidget {
         ref.read(generationParamsNotifierProvider.notifier).updateModel(value);
       },
       child: Container(
-        // 官网式「胶囊套胶囊」：外框描边+深色底，左侧灰标签，
-        // 右嵌一颗明显更亮的内胆（图标+短名+▾）作为点击热区视觉锚点；
-        // 随内容收紧
+        // 左段：Model 灰标签 + 反色内胆（图标+短名+▾）作为点击热区视觉锚点；
+        // 外框/描边上移给 _ModelModeCapsule 共享壳。
         height: 28,
         padding: const EdgeInsets.only(left: 10, right: 3),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: theme.colorScheme.outline.withValues(alpha: 0.4),
-          ),
-        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -540,100 +626,6 @@ class _ModelMenuButton extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// 头部条模式胶囊（官网 modelMode）：仅 V4+ 模型显示，
-/// 点击在 Anime / Furry 间切换，furry 时向 v4_prompt.base_caption
-/// 注入 `fur dataset, ` 前缀（与官网机制一致）。
-class _ModeCapsule extends ConsumerWidget {
-  const _ModeCapsule();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final model = ref.watch(
-      generationParamsNotifierProvider.select((params) => params.model),
-    );
-    // 模式切换只对 v4_prompt 结构有意义（V3 及以下无 base_caption）
-    if (!ModelSpecs.of(model).v4Prompts) return const SizedBox.shrink();
-
-    final furryMode = ref.watch(
-      generationParamsNotifierProvider.select((params) => params.furryMode),
-    );
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => ref
-            .read(generationParamsNotifierProvider.notifier)
-            .updateModelMode(!furryMode),
-        borderRadius: BorderRadius.circular(8),
-        // 与 Model 同构的「胶囊套胶囊」：外框标签 Mode + 内胆图标/文本
-        child: Container(
-          height: 28,
-          padding: const EdgeInsets.only(left: 10, right: 3),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerLowest,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.4),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // 官网 Mode 胶囊恒为英文（静拍板：纯英文）
-              Text(
-                'Mode',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Container(
-                height: 22,
-                padding: const EdgeInsets.symmetric(horizontal: 7),
-                decoration: BoxDecoration(
-                  // 与 Model 同款的反色内胆
-                  color: theme.colorScheme.onSurface,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // 官网同款图标：anime=sakura 樱花 / furry=爪印
-                    SvgPicture.asset(
-                      furryMode
-                          ? 'assets/icons/nai-icon-furry.svg'
-                          : 'assets/icons/nai-icon-sakura.svg',
-                      width: 14,
-                      height: 14,
-                      colorFilter: ColorFilter.mode(
-                        theme.colorScheme.surface,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        furryMode ? 'Furry' : 'Anime',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.surface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
