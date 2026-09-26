@@ -97,6 +97,43 @@ void main() {
     expect(emissions.last, '');
   });
 
+  testWidgets('L1 card anchors to the pill with a non-zero Overlay offset', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      appOffset: const Offset(240, 120),
+      libraryState: PromptBlockLibraryState(
+        blocks: [_block('style', '画风1', 'CONTENT')],
+        folders: const [],
+      ),
+    );
+    container
+        .read(pillWorkspaceNotifierProvider.notifier)
+        .insertBlockAt(offset: 0, blockId: 'style');
+    await tester.pump();
+
+    final pill = find.byType(PromptPill);
+    final clickPosition = tester.getCenter(pill);
+    await tester.tap(pill);
+    await tester.pump();
+    await tester.pump();
+
+    final card = find.byType(PillInstanceCard);
+    expect(card, findsOneWidget);
+    final overlay = find.ancestor(of: card, matching: find.byType(Overlay));
+    expect(overlay, findsOneWidget);
+    final overlayRect = tester.getRect(overlay);
+    final localClick = clickPosition - overlayRect.topLeft;
+    final expectedLeft =
+        overlayRect.left +
+        (localClick.dx - 150).clamp(
+          8.0,
+          (overlayRect.width - 308).clamp(8.0, overlayRect.width),
+        );
+    expect(tester.getTopLeft(card).dx, closeTo(expectedLeft, 0.1));
+  });
+
   testWidgets(
     'main page hides evolution entirely: dice badge stays, card has no '
     'DNA button',
@@ -376,6 +413,7 @@ Future<ProviderContainer> _pump(
   ValueChanged<String>? onChanged,
   _FakePromptBlockLibraryNotifier? libraryNotifier,
   bool allowEvolutionToggle = false,
+  Offset appOffset = Offset.zero,
 }) async {
   final originalSize = tester.view.physicalSize;
   final originalDpr = tester.view.devicePixelRatio;
@@ -388,32 +426,48 @@ Future<ProviderContainer> _pump(
 
   final notifier =
       libraryNotifier ?? _FakePromptBlockLibraryNotifier(libraryState);
-  await tester.pumpWidget(
-    ProviderScope(
-      overrides: [
-        promptBlockLibraryNotifierProvider.overrideWith(() => notifier),
-      ],
-      child: MaterialApp(
-        locale: const Locale('zh'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: SizedBox(
-            width: 960,
-            height: 360,
-            child: PromptPillEditor(
-              config: const UnifiedPromptConfig(
-                enableAutocomplete: false,
-                enableSyntaxHighlight: false,
-                enableAutoFormat: false,
-              ),
-              allowEvolutionToggle: allowEvolutionToggle,
-              onChanged: onChanged,
+  final app = ProviderScope(
+    overrides: [
+      promptBlockLibraryNotifierProvider.overrideWith(() => notifier),
+    ],
+    child: MaterialApp(
+      locale: const Locale('zh'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        body: SizedBox(
+          width: 960,
+          height: 360,
+          child: PromptPillEditor(
+            config: const UnifiedPromptConfig(
+              enableAutocomplete: false,
+              enableSyntaxHighlight: false,
+              enableAutoFormat: false,
             ),
+            allowEvolutionToggle: allowEvolutionToggle,
+            onChanged: onChanged,
           ),
         ),
       ),
     ),
+  );
+  await tester.pumpWidget(
+    appOffset == Offset.zero
+        ? app
+        : Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: appOffset.dx,
+                  top: appOffset.dy,
+                  right: 0,
+                  bottom: 0,
+                  child: app,
+                ),
+              ],
+            ),
+          ),
   );
   await tester.pump();
   await tester.pump();

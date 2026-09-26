@@ -285,16 +285,19 @@ OverlayEntry buildPillInstanceOverlayEntry({
 }) {
   return OverlayEntry(
     builder: (overlayContext) {
-      final screen = MediaQuery.of(overlayContext).size;
+      final overlay = Overlay.of(overlayContext, rootOverlay: true);
+      final overlayBox = overlay.context.findRenderObject()! as RenderBox;
+      final screen = overlayBox.size;
+      final localPosition = overlayBox.globalToLocal(globalPosition);
       const cardWidth = 300.0;
       // 含缩略图条时的估高（无图卡稍高估只会影响贴底翻转阈值，无害）。
       const estimatedHeight = 570.0;
-      final left = (globalPosition.dx - cardWidth / 2)
+      final left = (localPosition.dx - cardWidth / 2)
           .clamp(8.0, (screen.width - cardWidth - 8).clamp(8.0, screen.width))
           .toDouble();
-      final below = globalPosition.dy + 10;
+      final below = localPosition.dy + 10;
       final top = below + estimatedHeight > screen.height
-          ? (globalPosition.dy - estimatedHeight - 10)
+          ? (localPosition.dy - estimatedHeight - 10)
                 .clamp(8.0, screen.height)
                 .toDouble()
           : below;
