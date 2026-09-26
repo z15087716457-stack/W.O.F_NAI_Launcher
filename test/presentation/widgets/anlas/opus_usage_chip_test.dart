@@ -38,12 +38,10 @@ void main() {
     final theme = dark ? GeistTheme.dark : GeistTheme.light;
     final name = dark ? 'dark' : 'light';
 
-    testWidgets('quota bolt is black in light, white in dark ($name)', (
-      tester,
-    ) async {
+    testWidgets('quota bolt uses primary blue ($name)', (tester) async {
       expect(
         await boltColor(tester, theme, percent: 60),
-        theme.colorScheme.onSurface,
+        theme.colorScheme.primary,
       );
     });
 

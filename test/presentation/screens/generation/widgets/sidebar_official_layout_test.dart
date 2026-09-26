@@ -27,7 +27,6 @@ import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/presentation/providers/layout_state_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/web_left_panel.dart';
-import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/widgets/anlas/anlas_balance_chip.dart';
 import 'package:nai_launcher/presentation/widgets/character/inline_character_card.dart';
 import 'package:nai_launcher/presentation/widgets/common/inset_shadow_container.dart';
@@ -204,9 +203,8 @@ void main() {
           expect(tester.getSize(promptCard).height, lessThan(230));
           expect(find.text('12 / 512'), findsNothing);
           expect(find.byType(LinearProgressIndicator), findsNWidgets(2));
-          // 额度胶囊：淡蓝半透底 + 蓝描边，与 Model / Mode 白底框区分
+          // 额度胶囊：与 Model / Mode 选择框同款的灰底描边壳
           final theme = Theme.of(tester.element(find.byType(WebLeftPanel)));
-          final dark = theme.brightness == Brightness.dark;
           final capsule =
               tester
                       .widget<Container>(
@@ -219,16 +217,10 @@ void main() {
                       )
                       .decoration!
                   as BoxDecoration;
-          expect(
-            capsule.color,
-            Color.alphaBlend(
-              GeistTheme.blue.withValues(alpha: dark ? 0.12 : 0.06),
-              theme.colorScheme.surface,
-            ),
-          );
+          expect(capsule.color, theme.colorScheme.surfaceContainerLowest);
           expect(
             (capsule.border! as Border).top.color,
-            GeistTheme.blue.withValues(alpha: dark ? 0.32 : 0.22),
+            theme.colorScheme.outline.withValues(alpha: 0.4),
           );
           if (Platform.environment['CAPTURE_OFFICIAL_UI'] == '1') {
             await tester.runAsync(() async {
