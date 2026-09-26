@@ -105,8 +105,12 @@ class SizeSection extends ConsumerWidget {
 /// 标题行右端是请求次数步进器（‹ ×n ›，最小 1）；
 /// 下方一整条 1–4 分段选择 = 每次请求张数（imagesPerRequest）。
 /// 总数 = 请求次数 × 每次张数，与底部生成按钮文案实时联动。
+/// [showPerRequestSegments] 关闭时不渲染 1–4 分段（如探索页强制逐张
+/// 出图的场景），合计行按每次 1 张计算。
 class ImageCountSection extends ConsumerWidget {
-  const ImageCountSection({super.key});
+  const ImageCountSection({super.key, this.showPerRequestSegments = true});
+
+  final bool showPerRequestSegments;
 
   /// 请求次数上限（与步进器输入框三位数一致）
   static const int maxRequests = 999;
@@ -118,7 +122,9 @@ class ImageCountSection extends ConsumerWidget {
     final requests = ref.watch(
       generationParamsNotifierProvider.select((params) => params.nSamples),
     );
-    final perRequest = ref.watch(imagesPerRequestProvider);
+    final perRequest = showPerRequestSegments
+        ? ref.watch(imagesPerRequestProvider)
+        : 1;
     final total = requests * perRequest;
 
     return Column(
@@ -135,31 +141,33 @@ class ImageCountSection extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        Container(
-          key: const Key('image-count-segments'),
-          height: 36,
-          padding: const EdgeInsets.all(3),
-          decoration: BoxDecoration(
-            border: Border.all(color: GenSidebarStyle.border(theme)),
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: Row(
-            children: [
-              for (var i = 1; i <= 4; i++) ...[
-                if (i > 1) const SizedBox(width: 3),
-                Expanded(
-                  child: _CountPill(
-                    value: i,
-                    selected: i == perRequest,
-                    onTap: () =>
-                        ref.read(imagesPerRequestProvider.notifier).set(i),
+        if (showPerRequestSegments) ...[
+          const SizedBox(height: 8),
+          Container(
+            key: const Key('image-count-segments'),
+            height: 36,
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              border: Border.all(color: GenSidebarStyle.border(theme)),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Row(
+              children: [
+                for (var i = 1; i <= 4; i++) ...[
+                  if (i > 1) const SizedBox(width: 3),
+                  Expanded(
+                    child: _CountPill(
+                      value: i,
+                      selected: i == perRequest,
+                      onTap: () =>
+                          ref.read(imagesPerRequestProvider.notifier).set(i),
+                    ),
                   ),
-                ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
+        ],
         if (total > 1) ...[
           const SizedBox(height: 6),
           Text(

@@ -381,8 +381,8 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
           child: GenerationParamsMenuHost(
             // 摘要条与滚动列共用一个排版下限（原 ParameterPanel 的 320）
             summaryMinWidth: _minEditorWidth,
-            // 一体式滚动列（与主生成页左栏同款，去掉生成数量段：
-            // 探索模式强制逐张出图，x1-4 分段无意义）
+            // 一体式滚动列（与主生成页左栏同款；生成数量只留请求次数
+            // 步进——探索模式强制逐张出图，1–4 每次张数分段无意义）
             child: SingleChildScrollView(
               child: UnconstrainedBox(
                 constrainedAxis: Axis.vertical,
@@ -428,6 +428,15 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                         ),
                         const SizedBox(height: 6),
                         const SidebarTitleScope(child: SizeSection()),
+                        const SizedBox(height: 12),
+
+                        // 生成数量：只留请求次数步进——探索模式强制逐张
+                        // 出图，1–4 每次张数分段无意义
+                        const SidebarTitleScope(
+                          child: ImageCountSection(
+                            showPerRequestSegments: false,
+                          ),
+                        ),
                       ],
                     ),
                   ),
