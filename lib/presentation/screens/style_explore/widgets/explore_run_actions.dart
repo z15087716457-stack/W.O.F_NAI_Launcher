@@ -5,11 +5,9 @@ import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/style_explore/explore_manual_capture.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../providers/style_explore/explore_run_runner.dart';
-import '../../../providers/style_explore_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import '../../../widgets/common/themed_input_dialog.dart';
@@ -54,44 +52,6 @@ abstract final class ExploreRunActions {
     }
   }
 
-  /// 把 Run 的提示词快照载入主双 lane（档案快照覆盖当前编辑内容，
-  /// 有未保存修改或无备份内容时先确认）。
-  static Future<void> loadSnapshot(
-    BuildContext context,
-    WidgetRef ref,
-    ExploreRun run,
-  ) async {
-    final l10n = context.l10n;
-    // runner 会话逐张读主工作区投影；载入快照会覆写双 lane，
-    // 使后续候选脱离 run 快照语义——运行中禁止。
-    if (ref.read(exploreRunRunnerProvider).isRunning) {
-      AppToast.info(context, l10n.styleExplore_runBusy);
-      return;
-    }
-    if (ref.read(styleExploreNeedsOverwriteConfirmProvider)) {
-      final confirmed = await ThemedConfirmDialog.show(
-        context: context,
-        title: l10n.styleExplore_discardChangesTitle,
-        content: l10n.styleExplore_discardChangesMessage,
-        confirmText: l10n.styleExplore_discardChangesConfirm,
-        cancelText: MaterialLocalizations.of(context).cancelButtonLabel,
-      );
-      if (!confirmed) return;
-    }
-    ref
-        .read(pillWorkspaceProvider(PillScopes.main).notifier)
-        .restoreDocument(run.recipeSnapshot.positive);
-    ref
-        .read(pillWorkspaceProvider(PillScopes.negative).notifier)
-        .restoreDocument(run.recipeSnapshot.negative);
-    if (context.mounted) {
-      AppToast.success(
-        context,
-        l10n.styleExplore_snapshotLoaded(run.displayName),
-      );
-    }
-  }
-
   static Future<void> rename(
     BuildContext context,
     WidgetRef ref,
@@ -112,13 +72,6 @@ abstract final class ExploreRunActions {
         .rename(run.id, name.trim());
   }
 
-  static Future<void> toggleArchive(WidgetRef ref, ExploreRun run) {
-    return ref
-        .read(exploreRunListNotifierProvider.notifier)
-        .setArchived(run.id, !run.isArchived);
-  }
-
-  /// 删除 Run（连带删候选图副本目录；图库源图不动）。
   static Future<void> delete(
     BuildContext context,
     WidgetRef ref,

@@ -13,8 +13,7 @@ import 'explore_run_actions.dart';
 
 /// 左栏探索任务区：Run 列表 + 新建入口。
 ///
-/// Run 快照是档案：点选只切换右栏候选与控制条目标，**不自动载入编辑器**；
-/// 「载入快照到编辑器」是卡片菜单里的显式动作。
+/// Run 快照是档案：点选只切换右栏候选与控制条目标，**不自动载入编辑器**。
 class ExploreRunSidebarSection extends ConsumerWidget {
   const ExploreRunSidebarSection({super.key});
 
@@ -161,70 +160,47 @@ class _ExploreRunCard extends ConsumerWidget {
       run.status,
     );
 
-    return Opacity(
-      opacity: run.isArchived ? 0.55 : 1,
-      child: ListTile(
-        dense: true,
-        selected: selected,
-        contentPadding: const EdgeInsets.only(left: 12),
-        leading: Icon(Icons.circle, size: 10, color: statusColor),
-        minLeadingWidth: 14,
-        title: Text(
-          run.displayName,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+    return ListTile(
+      dense: true,
+      selected: selected,
+      contentPadding: const EdgeInsets.only(left: 12),
+      leading: Icon(Icons.circle, size: 10, color: statusColor),
+      minLeadingWidth: 14,
+      title: Text(
+        run.displayName,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        '${l10n.styleExplore_runTotalCount(run.candidates.length)}'
+        ' · ${ExploreRunActions.statusLabel(l10n, run.status)}'
+        ' · ${_formatTime(run.updatedAt)}',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
         ),
-        subtitle: Text(
-          '${l10n.styleExplore_runTotalCount(run.candidates.length)}'
-          ' · ${ExploreRunActions.statusLabel(l10n, run.status)}'
-          '${run.isArchived ? ' · ${l10n.styleExplore_archivedTag}' : ''}'
-          ' · ${_formatTime(run.updatedAt)}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        trailing: PopupMenuButton<String>(
-          key: Key('explore-run-menu-${run.id}'),
-          iconSize: 18,
-          tooltip: run.displayName,
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'load',
-              child: Text(l10n.styleExplore_loadSnapshot),
-            ),
-            PopupMenuItem(
-              value: 'rename',
-              child: Text(l10n.styleExplore_rename),
-            ),
-            PopupMenuItem(
-              value: 'archive',
-              child: Text(
-                run.isArchived
-                    ? l10n.styleExplore_unarchive
-                    : l10n.styleExplore_archive,
-              ),
-            ),
-            PopupMenuItem(value: 'delete', child: Text(l10n.common_delete)),
-          ],
-          onSelected: (action) {
-            switch (action) {
-              case 'load':
-                ExploreRunActions.loadSnapshot(context, ref, run);
-              case 'rename':
-                ExploreRunActions.rename(context, ref, run);
-              case 'archive':
-                ExploreRunActions.toggleArchive(ref, run);
-              case 'delete':
-                ExploreRunActions.delete(context, ref, run);
-            }
-          },
-        ),
-        onTap: () {
-          ref.read(exploreActiveRunIdProvider.notifier).state = run.id;
+      ),
+      trailing: PopupMenuButton<String>(
+        key: Key('explore-run-menu-${run.id}'),
+        iconSize: 18,
+        tooltip: run.displayName,
+        itemBuilder: (context) => [
+          PopupMenuItem(value: 'rename', child: Text(l10n.styleExplore_rename)),
+          PopupMenuItem(value: 'delete', child: Text(l10n.common_delete)),
+        ],
+        onSelected: (action) {
+          switch (action) {
+            case 'rename':
+              ExploreRunActions.rename(context, ref, run);
+            case 'delete':
+              ExploreRunActions.delete(context, ref, run);
+          }
         },
       ),
+      onTap: () {
+        ref.read(exploreActiveRunIdProvider.notifier).state = run.id;
+      },
     );
   }
 

@@ -54,20 +54,6 @@ class StyleExploreRunRepository {
     return updated;
   }
 
-  /// 归档/取消归档。
-  Future<ExploreRun> setArchived(String id, bool archived) async {
-    final run = await _storage.getRun(id);
-    if (run == null) {
-      throw StateError('Style explore run does not exist: $id');
-    }
-    final updated = run.copyWith(
-      archivedAt: archived ? DateTime.now() : null,
-      updatedAt: DateTime.now(),
-    );
-    await _storage.putRun(updated);
-    return updated;
-  }
-
   /// 删除 Run 记录；不存在时保持幂等。run 目录副本的删除由调用方连带。
   Future<void> delete(String id) => _storage.deleteRun(id);
 }

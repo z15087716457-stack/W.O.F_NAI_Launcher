@@ -381,8 +381,6 @@ class ExploreRun with _$ExploreRun {
     required String name,
     required ExploreRunStatus status,
 
-    /// 归档时间；非 null 即已归档。
-    DateTime? archivedAt,
     required DateTime createdAt,
     required DateTime updatedAt,
 
@@ -445,8 +443,6 @@ class ExploreRun with _$ExploreRun {
 
   /// 空名称的界面兜底。
   String get displayName => name.isNotEmpty ? name : '未命名任务';
-
-  bool get isArchived => archivedAt != null;
 
   ExploreCandidate? candidateById(String candidateId) {
     for (final candidate in candidates) {

@@ -9275,23 +9275,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_runStatusCancelled => '已取消';
 
   @override
-  String get styleExplore_archivedTag => '已归档';
-
-  @override
-  String get styleExplore_archive => '归档';
-
-  @override
-  String get styleExplore_unarchive => '取消归档';
-
-  @override
-  String get styleExplore_loadSnapshot => '载入快照到编辑器';
-
-  @override
-  String styleExplore_snapshotLoaded(String name) {
-    return '已载入「$name」的快照';
-  }
-
-  @override
   String get styleExplore_pauseRun => '暂停';
 
   @override

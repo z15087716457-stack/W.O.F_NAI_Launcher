@@ -28,7 +28,7 @@ The page is a multi-pane layout — every pane can be resized and toggled:
 
 An **exploration task (Run)** freezes the prompt and parameter snapshot at creation time, batch-generates candidates, and records each image's roll result. Run lifecycle: draft → generating → generated; it can be paused and resumed, or cancelled (**cancel is irreversible** — remaining pending candidates are marked cancelled).
 
-> While a run is generating, the editor is exclusively owned by the run — the inline generate button, "Load snapshot into editor", and "Import metadata" are temporarily disabled so they can't overwrite the workspace the run is reading.
+> While a run is generating, the editor is exclusively owned by the run — the inline generate button and "Import metadata" are temporarily disabled so they can't overwrite the workspace the run is reading.
 
 ## Step 0: Make blocks heritable
 
@@ -123,7 +123,7 @@ From a candidate's detail view or the multi-select menu:
 
 - **Adopt as Block**: turn the candidate's roll string into a pill block (name it, or merge-adopt), then insert it anywhere from the generation page / block library;
 - **Import metadata**: pour the string into the main prompt editor (data-source-shared with the generation page — it lands directly on your current draft);
-- **Roll snapshot**: view and copy the actual positive / negative strings drawn for that image in the detail dialog; the run-level "Load snapshot into editor" restores the task's whole snapshot.
+- **Roll snapshot**: view and copy the actual positive / negative strings drawn for that image in the detail dialog.
 
 ## FAQ
 
@@ -132,7 +132,7 @@ From a candidate's detail view or the multi-select menu:
 - **Cancelling a run** is permanent; use "Pause" if you just need a break.
 - **Deleting candidate images** is available for any candidate with a copy; only Run-directory copies are removed — gallery sources and candidate records stay intact.
 - **No DNA icon on the generation page**: the genetics toggle is exclusive to the Style Exploration page — hidden there by design to prevent accidental changes.
-- **Why are "Import metadata" / "Load snapshot" disabled while a run is generating?** Both overwrite the workspace, which conflicts with the prompt projection the run reads image by image — so they are temporarily blocked with a "run busy" toast.
+- **Why is "Import metadata" disabled while a run is generating?** It overwrites the workspace, which conflicts with the prompt projection the run reads image by image — so it is temporarily blocked with a "run busy" toast.
 
 ---
 

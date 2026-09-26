@@ -14,7 +14,6 @@ void main() {
         id: 'run-1',
         name: '柔光试验',
         status: ExploreRunStatus.reviewing,
-        archivedAt: DateTime.utc(2026, 8, 31, 10),
         createdAt: DateTime.utc(2026, 8, 30),
         updatedAt: DateTime.utc(2026, 8, 31),
         targetCount: 30,

@@ -102,13 +102,6 @@ void main() {
     list = await c.read(exploreRunListNotifierProvider.future);
     expect(list.runs.single.name, '改名');
 
-    await notifier.setArchived(created.id, true);
-    list = await c.read(exploreRunListNotifierProvider.future);
-    expect(list.runs.single.isArchived, isTrue);
-    await notifier.setArchived(created.id, false);
-    list = await c.read(exploreRunListNotifierProvider.future);
-    expect(list.runs.single.isArchived, isFalse);
-
     // 建一个 run 目录副本再删 run，连带目录一并清除。
     final store = c.read(exploreRunImageStoreProvider);
     final dir = await store.runDirectory(created.id);
@@ -230,17 +223,11 @@ void main() {
       final inFolder = candidate(folderId: 'folder-a');
 
       expect(
-        exploreCandidateMatchesFilter(
-          plain,
-          const ExploreGalleryFilterAll(),
-        ),
+        exploreCandidateMatchesFilter(plain, const ExploreGalleryFilterAll()),
         isTrue,
       );
       expect(
-        exploreCandidateMatchesFilter(
-          hearted,
-          const ExploreGalleryFilterAll(),
-        ),
+        exploreCandidateMatchesFilter(hearted, const ExploreGalleryFilterAll()),
         isTrue,
       );
       expect(
@@ -508,10 +495,7 @@ void main() {
         exploreRunListNotifierProvider.future,
       )).runById(run.id)!;
 
-      expect(
-        stored.candidates.map((candidate) => candidate.id),
-        ['cand-3'],
-      );
+      expect(stored.candidates.map((candidate) => candidate.id), ['cand-3']);
       expect(
         stored.rounds.firstWhere((round) => round.id == 'r-1').candidateIds,
         isEmpty,
@@ -521,10 +505,9 @@ void main() {
         ['cand-3'],
       );
       // 血缘引用只清已删项，外部悬空引用（cand-x）原样保留。
-      expect(
-        stored.candidateById('cand-3')!.lineage.parentCandidateIds,
-        ['cand-x'],
-      );
+      expect(stored.candidateById('cand-3')!.lineage.parentCandidateIds, [
+        'cand-x',
+      ]);
     });
 
     test('rejects empty ids and missing candidates', () async {

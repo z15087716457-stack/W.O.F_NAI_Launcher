@@ -16827,36 +16827,6 @@ abstract class AppLocalizations {
   /// **'Cancelled'**
   String get styleExplore_runStatusCancelled;
 
-  /// No description provided for @styleExplore_archivedTag.
-  ///
-  /// In en, this message translates to:
-  /// **'Archived'**
-  String get styleExplore_archivedTag;
-
-  /// No description provided for @styleExplore_archive.
-  ///
-  /// In en, this message translates to:
-  /// **'Archive'**
-  String get styleExplore_archive;
-
-  /// No description provided for @styleExplore_unarchive.
-  ///
-  /// In en, this message translates to:
-  /// **'Unarchive'**
-  String get styleExplore_unarchive;
-
-  /// No description provided for @styleExplore_loadSnapshot.
-  ///
-  /// In en, this message translates to:
-  /// **'Load snapshot to editor'**
-  String get styleExplore_loadSnapshot;
-
-  /// No description provided for @styleExplore_snapshotLoaded.
-  ///
-  /// In en, this message translates to:
-  /// **'Loaded snapshot of \"{name}\"'**
-  String styleExplore_snapshotLoaded(String name);
-
   /// No description provided for @styleExplore_pauseRun.
   ///
   /// In en, this message translates to:

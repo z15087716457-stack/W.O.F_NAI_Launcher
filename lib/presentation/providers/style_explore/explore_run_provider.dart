@@ -78,9 +78,6 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
   Future<ExploreRun> rename(String id, String name) =>
       _mutate((repository) => repository.rename(id, name));
 
-  Future<ExploreRun> setArchived(String id, bool archived) =>
-      _mutate((repository) => repository.setArchived(id, archived));
-
   /// 删除 Run，连带删除候选图副本目录（源图不动）。
   Future<void> delete(String id) async {
     await _mutate((repository) => repository.delete(id));
@@ -250,8 +247,7 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     }).then((updated) {
       // 画廊筛选正指着被删文件夹时回落「全部」。
       final filter = ref.read(exploreGalleryFilterProvider);
-      if (filter is ExploreGalleryFilterFolder &&
-          filter.folderId == folderId) {
+      if (filter is ExploreGalleryFilterFolder && filter.folderId == folderId) {
         ref.read(exploreGalleryFilterProvider.notifier).state =
             const ExploreGalleryFilterAll();
       }

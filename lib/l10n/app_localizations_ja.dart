@@ -9399,23 +9399,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_runStatusCancelled => 'キャンセル';
 
   @override
-  String get styleExplore_archivedTag => 'アーカイブ済み';
-
-  @override
-  String get styleExplore_archive => 'アーカイブ';
-
-  @override
-  String get styleExplore_unarchive => 'アーカイブ解除';
-
-  @override
-  String get styleExplore_loadSnapshot => 'スナップショットをエディタに読み込む';
-
-  @override
-  String styleExplore_snapshotLoaded(String name) {
-    return '「$name」のスナップショットを読み込みました';
-  }
-
-  @override
   String get styleExplore_pauseRun => '一時停止';
 
   @override

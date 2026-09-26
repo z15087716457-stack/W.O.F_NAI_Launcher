@@ -5545,18 +5545,6 @@
   "styleExplore_runStatusGenerated": "生成済み",
   "styleExplore_runStatusCompleted": "完了",
   "styleExplore_runStatusCancelled": "キャンセル",
-  "styleExplore_archivedTag": "アーカイブ済み",
-  "styleExplore_archive": "アーカイブ",
-  "styleExplore_unarchive": "アーカイブ解除",
-  "styleExplore_loadSnapshot": "スナップショットをエディタに読み込む",
-  "styleExplore_snapshotLoaded": "「{name}」のスナップショットを読み込みました",
-  "@styleExplore_snapshotLoaded": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "styleExplore_pauseRun": "一時停止",
   "styleExplore_cancelRun": "ランをキャンセル",
   "styleExplore_retryFailed": "失敗を再試行（{count}）",

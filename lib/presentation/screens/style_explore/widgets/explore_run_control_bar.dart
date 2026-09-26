@@ -169,29 +169,13 @@ class _ExploreRunControlBarState extends ConsumerState<ExploreRunControlBar> {
       key: const Key('explore-run-actions'),
       iconSize: 18,
       itemBuilder: (context) => [
-        PopupMenuItem(
-          value: 'load',
-          child: Text(l10n.styleExplore_loadSnapshot),
-        ),
         PopupMenuItem(value: 'rename', child: Text(l10n.styleExplore_rename)),
-        PopupMenuItem(
-          value: 'archive',
-          child: Text(
-            run.isArchived
-                ? l10n.styleExplore_unarchive
-                : l10n.styleExplore_archive,
-          ),
-        ),
         PopupMenuItem(value: 'delete', child: Text(l10n.common_delete)),
       ],
       onSelected: (action) {
         switch (action) {
-          case 'load':
-            ExploreRunActions.loadSnapshot(context, ref, run);
           case 'rename':
             ExploreRunActions.rename(context, ref, run);
-          case 'archive':
-            ExploreRunActions.toggleArchive(ref, run);
           case 'delete':
             ExploreRunActions.delete(context, ref, run);
         }

@@ -5545,18 +5545,6 @@
   "styleExplore_runStatusGenerated": "Generated",
   "styleExplore_runStatusCompleted": "Completed",
   "styleExplore_runStatusCancelled": "Cancelled",
-  "styleExplore_archivedTag": "Archived",
-  "styleExplore_archive": "Archive",
-  "styleExplore_unarchive": "Unarchive",
-  "styleExplore_loadSnapshot": "Load snapshot to editor",
-  "styleExplore_snapshotLoaded": "Loaded snapshot of \"{name}\"",
-  "@styleExplore_snapshotLoaded": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "styleExplore_pauseRun": "Pause",
   "styleExplore_cancelRun": "Cancel run",
   "styleExplore_retryFailed": "Retry failed ({count})",

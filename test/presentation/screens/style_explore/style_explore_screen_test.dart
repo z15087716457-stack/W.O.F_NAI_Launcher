@@ -141,7 +141,6 @@ class _TestLocalStorageService extends LocalStorageService {
 
   @override
   bool getLastVarietyPlus() => false;
-
 }
 
 class _TestVibeLibraryNotifier extends VibeLibraryNotifier {
@@ -1633,7 +1632,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // 从最新的 cand-3（序列 index 0）开始连续归档。
+    // 从最新的 cand-3（序列 index 0）开始连续归类。
     await tester.tap(find.byKey(const Key('explore-candidate-cand-3')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -1643,7 +1642,7 @@ void main() {
     expect(find.text('第 1/3 张'), findsOneWidget);
     expect(find.text('pos-3'), findsOneWidget);
 
-    // 点文件夹即归档落盘 + 自动跳序列下一张未分类（更旧方向）。
+    // 点文件夹即归类落盘 + 自动跳序列下一张未分类（更旧方向）。
     await tester.tap(assignChip);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -1654,7 +1653,7 @@ void main() {
     expect(find.text('第 2/3 张'), findsOneWidget);
     expect(find.text('pos-2'), findsOneWidget);
 
-    // 再归档第二张 → 跳到第三张（最旧的 cand-1）。
+    // 再归类第二张 → 跳到第三张（最旧的 cand-1）。
     await tester.tap(assignChip);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));

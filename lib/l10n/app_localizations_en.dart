@@ -9603,23 +9603,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_runStatusCancelled => 'Cancelled';
 
   @override
-  String get styleExplore_archivedTag => 'Archived';
-
-  @override
-  String get styleExplore_archive => 'Archive';
-
-  @override
-  String get styleExplore_unarchive => 'Unarchive';
-
-  @override
-  String get styleExplore_loadSnapshot => 'Load snapshot to editor';
-
-  @override
-  String styleExplore_snapshotLoaded(String name) {
-    return 'Loaded snapshot of \"$name\"';
-  }
-
-  @override
   String get styleExplore_pauseRun => 'Pause';
 
   @override

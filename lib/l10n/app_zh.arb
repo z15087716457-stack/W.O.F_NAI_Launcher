@@ -5545,18 +5545,6 @@
   "styleExplore_runStatusGenerated": "已生成",
   "styleExplore_runStatusCompleted": "已完成",
   "styleExplore_runStatusCancelled": "已取消",
-  "styleExplore_archivedTag": "已归档",
-  "styleExplore_archive": "归档",
-  "styleExplore_unarchive": "取消归档",
-  "styleExplore_loadSnapshot": "载入快照到编辑器",
-  "styleExplore_snapshotLoaded": "已载入「{name}」的快照",
-  "@styleExplore_snapshotLoaded": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "styleExplore_pauseRun": "暂停",
   "styleExplore_cancelRun": "取消任务",
   "styleExplore_retryFailed": "重试失败（{count}）",
