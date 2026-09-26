@@ -16893,6 +16893,24 @@ abstract class AppLocalizations {
   /// **'Folder name'**
   String get styleExplore_folderNameLabel;
 
+  /// No description provided for @styleExplore_deleteFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete lineage'**
+  String get styleExplore_deleteFamily;
+
+  /// No description provided for @styleExplore_deleteFamilyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletes the lineage \"{name}\" with all its parent sets and candidate records ({count} images). Image files are kept.'**
+  String styleExplore_deleteFamilyMessage(String name, int count);
+
+  /// No description provided for @styleExplore_familyBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'This lineage still has candidates being generated. Cancel the task first'**
+  String get styleExplore_familyBusy;
+
   /// No description provided for @styleExplore_folderUncategorized.
   ///
   /// In en, this message translates to:

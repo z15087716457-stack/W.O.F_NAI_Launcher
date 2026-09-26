@@ -156,14 +156,23 @@ class _ExploreCandidateGalleryState
                       ReorderableDragStartListener(
                         key: ValueKey('explore-filter-folder-${entry.$2.id}'),
                         index: lockedChipCount + entry.$1,
-                        child: _filterChip(
-                          label: entry.$2.name,
-                          icon: Icons.folder_outlined,
-                          selected:
-                              filter is ExploreGalleryFilterFolder &&
-                              filter.folderId == entry.$2.id,
-                          onTap: () => _setFilter(
-                            ExploreGalleryFilterFolder(entry.$2.id),
+                        child: GestureDetector(
+                          // 右键小菜单：重命名/删除。空文件夹不渲染牌堆
+                          // 组头，chip 是其唯一管理入口（FEAT 补充）。
+                          onSecondaryTapUp: (details) => _showFolderMenu(
+                            run,
+                            entry.$2,
+                            details.globalPosition,
+                          ),
+                          child: _filterChip(
+                            label: entry.$2.name,
+                            icon: Icons.folder_outlined,
+                            selected:
+                                filter is ExploreGalleryFilterFolder &&
+                                filter.folderId == entry.$2.id,
+                            onTap: () => _setFilter(
+                              ExploreGalleryFilterFolder(entry.$2.id),
+                            ),
                           ),
                         ),
                       ),
@@ -207,6 +216,60 @@ class _ExploreCandidateGalleryState
 
   void _setFilter(ExploreGalleryFilter filter) {
     ref.read(exploreGalleryFilterProvider.notifier).state = filter;
+  }
+
+  /// 文件夹 chip 右键小菜单：重命名/删除。与牌堆组头按钮同链路，
+  /// 覆盖「空文件夹没有组头、无处删除」的缺口。
+  Future<void> _showFolderMenu(
+    ExploreRun run,
+    ExploreCandidateFolder folder,
+    Offset globalPosition,
+  ) async {
+    final overlay = Overlay.of(context).context.findRenderObject();
+    if (overlay is! RenderBox) return;
+    final choice = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(
+        Rect.fromPoints(globalPosition, globalPosition),
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        PopupMenuItem(
+          value: 'rename',
+          child: ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.edit_outlined, size: 18),
+            title: Text(context.l10n.styleExplore_renameFolder),
+          ),
+        ),
+        PopupMenuItem(
+          value: 'delete',
+          child: ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(
+              Icons.delete_outline,
+              size: 18,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            title: Text(
+              context.l10n.styleExplore_deleteFolder,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ),
+      ],
+    );
+    if (!mounted) return;
+    switch (choice) {
+      case 'rename':
+        await _renameFolder(run, folder.id);
+        break;
+      case 'delete':
+        await _deleteFolder(run, folder.id);
+        break;
+    }
   }
 
   /// 文件夹 chip 拖动落序：全部/收藏在前、未分类在尾均锁定，

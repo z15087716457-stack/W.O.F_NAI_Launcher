@@ -366,6 +366,91 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     });
   }
 
+  /// 删除整个家族（谱系整族清出画廊）：移除 family + 其全部父本集 +
+  /// 这些集的深度轮 + 轮内全部候选记录，并清掉存活候选
+  /// `lineage.parentCandidateIds` 里的已删引用。候选图片文件不动
+  /// （图走正常生图流程进历史，由用户自行清理）。
+  ///
+  /// 拒删条件（抛 [StateError]，消息为稳定语义串供 UI/测试断言）：
+  /// - 家族不存在；
+  /// - 族内任一深度轮处于 pending/generating，或轮内还有 pending
+  ///   候选（在途删除会中断生成会话，先取消/续跑完再删）。
+  Future<ExploreRun> deleteFamily(String runId, String familyId) {
+    return _mutateRun(runId, (run) {
+      if (run.familyById(familyId) == null) {
+        throw StateError('家族不存在: $familyId');
+      }
+      // 与 exploreFamilyGenerations 同口径：轮归属按 parentSetId 判定
+      // （familyId 字段只是冗余标注，归组真源是 parentSetId）。
+      final setIds = {
+        for (final set in run.parentSets)
+          if (set.familyId == familyId) set.id,
+      };
+      final roundIds = {
+        for (final round in run.rounds)
+          if (round.parentSetId != null && setIds.contains(round.parentSetId))
+            round.id,
+      };
+      for (final round in run.rounds) {
+        if (roundIds.contains(round.id) &&
+            (round.status == ExploreRoundStatus.pending ||
+                round.status == ExploreRoundStatus.generating)) {
+          throw StateError('家族内还有未完成的候选轮');
+        }
+      }
+      final removedCandidateIds = {
+        for (final candidate in run.candidates)
+          if (roundIds.contains(candidate.roundId)) candidate.id,
+      };
+      if (run.candidates.any(
+        (candidate) =>
+            removedCandidateIds.contains(candidate.id) &&
+            candidate.generation.status ==
+                ExploreCandidateGenerationStatus.pending,
+      )) {
+        throw StateError('家族内还有未完成的候选轮');
+      }
+      return run.copyWith(
+        families: [
+          for (final family in run.families)
+            if (family.id != familyId) family,
+        ],
+        parentSets: [
+          for (final set in run.parentSets)
+            if (!setIds.contains(set.id)) set,
+        ],
+        rounds: [
+          for (final round in run.rounds)
+            if (!roundIds.contains(round.id)) round,
+        ],
+        candidates: [
+          for (final candidate in run.candidates)
+            if (!removedCandidateIds.contains(candidate.id))
+              candidate.lineage.parentCandidateIds.any(
+                    removedCandidateIds.contains,
+                  )
+                  ? candidate.copyWith(
+                      lineage: candidate.lineage.copyWith(
+                        parentCandidateIds: [
+                          for (final pid
+                              in candidate.lineage.parentCandidateIds)
+                            if (!removedCandidateIds.contains(pid)) pid,
+                        ],
+                      ),
+                    )
+                  : candidate,
+        ],
+      );
+    }).then((updated) {
+      // 谱系面板正指着被删家族时清指针（面板本身有 ?? families.last 兜底，
+      // 显式清掉避免悬空 id 残留）。
+      if (ref.read(exploreActiveFamilyIdProvider) == familyId) {
+        ref.read(exploreActiveFamilyIdProvider.notifier).state = null;
+      }
+      return updated;
+    });
+  }
+
   /// 建家族（阶段 D）：父本串列表 → 家族 + 第一代父本集（active）。
   ///
   /// 父本串去首尾空白、去空、按串去重（保序）；至少需要一个有效串，

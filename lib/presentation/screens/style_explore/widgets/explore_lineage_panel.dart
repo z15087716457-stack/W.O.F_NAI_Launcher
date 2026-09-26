@@ -10,6 +10,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../providers/style_explore/explore_run_runner.dart';
 import '../../../widgets/common/app_toast.dart';
+import '../../../widgets/common/themed_confirm_dialog.dart';
 import '../../../widgets/common/themed_input_dialog.dart';
 import '../../generation/widgets/resize_handle.dart';
 import 'explore_candidate_hover_preview.dart';
@@ -120,20 +121,30 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                   for (final entry in families)
                     Padding(
                       padding: const EdgeInsets.only(right: 6),
-                      child: ChoiceChip(
-                        key: Key('explore-family-chip-${entry.id}'),
-                        label: Text(entry.name),
-                        selected: entry.id == family.id,
-                        visualDensity: VisualDensity.compact,
-                        onSelected: (_) {
-                          // 重按当前家族 chip 早退：不清掉进行中的分支选择。
-                          if (entry.id == family.id) return;
-                          _exitBranchSelection();
-                          ref
-                                  .read(exploreActiveFamilyIdProvider.notifier)
-                                  .state =
-                              entry.id;
-                        },
+                      child: GestureDetector(
+                        // 右键小菜单：删除整个谱系（家族 chip 的唯一出口，
+                        // 左键点按/选择行为不变）
+                        onSecondaryTapUp: (details) => _showFamilyMenu(
+                          context,
+                          run,
+                          entry,
+                          details.globalPosition,
+                        ),
+                        child: ChoiceChip(
+                          key: Key('explore-family-chip-${entry.id}'),
+                          label: Text(entry.name),
+                          selected: entry.id == family.id,
+                          visualDensity: VisualDensity.compact,
+                          onSelected: (_) {
+                            // 重按当前家族 chip 早退：不清掉进行中的分支选择。
+                            if (entry.id == family.id) return;
+                            _exitBranchSelection();
+                            ref
+                                .read(exploreActiveFamilyIdProvider.notifier)
+                                .state = entry
+                                .id;
+                          },
+                        ),
                       ),
                     ),
                 ],
@@ -478,6 +489,86 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
       _branchSelecting = false;
       _branchSelected.clear();
     });
+  }
+
+  // ==================== 家族 chip 右键菜单 ====================
+
+  /// 家族 chip 右键小菜单：当前只有「删除谱系」一项（整族删除，
+  /// 家族是唯一有谱系归属语义的粒度）。
+  Future<void> _showFamilyMenu(
+    BuildContext context,
+    ExploreRun run,
+    ExploreFamily target,
+    Offset globalPosition,
+  ) async {
+    final overlay = Overlay.of(context).context.findRenderObject();
+    if (overlay is! RenderBox) return;
+    final choice = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(
+        Rect.fromPoints(globalPosition, globalPosition),
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        PopupMenuItem(
+          value: 'delete',
+          child: ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(
+              Icons.delete_outline,
+              size: 18,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            title: Text(
+              context.l10n.styleExplore_deleteFamily,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ),
+      ],
+    );
+    if (choice == 'delete' && mounted) {
+      await _deleteFamily(run, target);
+    }
+  }
+
+  /// 整族删除：确认框带族名与候选计数；族内有在途候选时 provider
+  /// 拒删（StateError「未完成」），提示先取消任务。
+  Future<void> _deleteFamily(ExploreRun run, ExploreFamily target) async {
+    final l10n = context.l10n;
+    final setIds = {
+      for (final set in run.parentSets)
+        if (set.familyId == target.id) set.id,
+    };
+    final candidateCount = run.candidates
+        .where((c) => setIds.contains(run.roundById(c.roundId)?.parentSetId))
+        .length;
+    final confirmed = await ThemedConfirmDialog.show(
+      context: context,
+      title: l10n.styleExplore_deleteFamily,
+      content: l10n.styleExplore_deleteFamilyMessage(
+        target.name,
+        candidateCount,
+      ),
+      confirmText: l10n.common_delete,
+      type: ThemedConfirmDialogType.danger,
+      icon: Icons.delete_outline,
+    );
+    if (!confirmed || !mounted) return;
+    try {
+      await ref
+          .read(exploreRunListNotifierProvider.notifier)
+          .deleteFamily(run.id, target.id);
+    } on StateError catch (error) {
+      if (!mounted) return;
+      AppToast.error(
+        context,
+        error.message.contains('未完成')
+            ? l10n.styleExplore_familyBusy
+            : l10n.styleExplore_operationFailed,
+      );
+    }
   }
 
   // ==================== 建分支 ====================

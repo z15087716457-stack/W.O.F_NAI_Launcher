@@ -5584,6 +5584,19 @@
     }
   },
   "styleExplore_folderNameLabel": "Folder name",
+  "styleExplore_deleteFamily": "Delete lineage",
+  "styleExplore_deleteFamilyMessage": "Deletes the lineage \"{name}\" with all its parent sets and candidate records ({count} images). Image files are kept.",
+  "@styleExplore_deleteFamilyMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_familyBusy": "This lineage still has candidates being generated. Cancel the task first",
   "styleExplore_folderUncategorized": "Uncategorized",
   "styleExplore_folderCreated": "Folder \"{name}\" created",
   "@styleExplore_folderCreated": {

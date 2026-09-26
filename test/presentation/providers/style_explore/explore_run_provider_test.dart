@@ -10,6 +10,8 @@ import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/data/services/explore_run_image_store.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
 
+final _epoch = DateTime.utc(2026, 9, 1);
+
 void main() {
   late Directory hiveDirectory;
   late Directory imageDirectory;
@@ -522,6 +524,263 @@ void main() {
         () => notifier.removeCandidates(run.id, const ['ghost']),
         throwsStateError,
       );
+    });
+  });
+
+  group('deleteFamily （整族删）', () {
+    ExploreCandidate doneCandidate(
+      String id,
+      String roundId, {
+      List<String> parentCandidateIds = const [],
+    }) {
+      return ExploreCandidate.shell(roundId: roundId, id: id).copyWith(
+        generation: const ExploreCandidateGeneration(
+          status: ExploreCandidateGenerationStatus.done,
+          filePath: '/tmp/x.png',
+        ),
+        lineage: ExploreLineage(
+          operation: ExploreLineageOperation.mutation,
+          parentCandidateIds: parentCandidateIds,
+        ),
+      );
+    }
+
+    ExploreRound deepRound(
+      String id, {
+      required String parentSetId,
+      String? familyId,
+      int generation = 1,
+      ExploreRoundStatus status = ExploreRoundStatus.generated,
+      List<String> candidateIds = const [],
+    }) {
+      return ExploreRound(
+        id: id,
+        number: 2,
+        phase: ExploreRoundPhase.deep,
+        status: status,
+        createdAt: DateTime.utc(2026, 9, 1),
+        targetCount: candidateIds.length,
+        candidateIds: candidateIds,
+        familyId: familyId,
+        parentSetId: parentSetId,
+        generation: generation,
+      );
+    }
+
+    test('cascades family, parent sets, rounds and candidates', () async {
+      final c = container();
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final created = await createRun(c);
+      final run = await notifier.overwrite(
+        created.copyWith(
+          status: ExploreRunStatus.generated,
+          families: [
+            ExploreFamily(
+              id: 'fam-1',
+              name: '家族1',
+              createdAt: _epoch,
+              rootParentSetId: 'ps-1',
+              activeParentSetId: 'ps-1',
+            ),
+            ExploreFamily(
+              id: 'fam-2',
+              name: '家族2',
+              createdAt: _epoch,
+              rootParentSetId: 'ps-3',
+              activeParentSetId: 'ps-3',
+            ),
+          ],
+          parentSets: const [
+            ExploreParentSet(
+              id: 'ps-1',
+              familyId: 'fam-1',
+              generation: 1,
+              status: ExploreParentSetStatus.active,
+            ),
+            ExploreParentSet(
+              id: 'ps-2',
+              familyId: 'fam-1',
+              generation: 2,
+              status: ExploreParentSetStatus.active,
+            ),
+            ExploreParentSet(
+              id: 'ps-3',
+              familyId: 'fam-2',
+              generation: 1,
+              status: ExploreParentSetStatus.active,
+            ),
+          ],
+          rounds: [
+            deepRound(
+              'dr-1',
+              parentSetId: 'ps-1',
+              familyId: 'fam-1',
+              candidateIds: const ['cand-1'],
+            ),
+            deepRound(
+              'dr-2',
+              parentSetId: 'ps-2',
+              familyId: 'fam-1',
+              generation: 2,
+              candidateIds: const ['cand-2'],
+            ),
+            // 家族2 的轮带 fam-2 标注：归组真源是 parentSetId，
+            // 不是 familyId 冗余字段。
+            deepRound(
+              'dr-3',
+              parentSetId: 'ps-3',
+              familyId: 'fam-2',
+              candidateIds: const ['cand-3'],
+            ),
+            // 无 parentSetId 的手动轮：不该被任何家族删除波及。
+            ExploreRound(
+              id: 'mr-1',
+              number: 9,
+              phase: ExploreRoundPhase.manual,
+              status: ExploreRoundStatus.generated,
+              createdAt: DateTime.utc(2026, 9, 1),
+              targetCount: 1,
+              candidateIds: const ['cand-m'],
+            ),
+          ],
+          candidates: [
+            doneCandidate('cand-1', 'dr-1'),
+            doneCandidate('cand-2', 'dr-2'),
+            doneCandidate('cand-3', 'dr-3'),
+            // 存活候选引用了将被删除的 cand-1：引用应被清掉。
+            doneCandidate(
+              'cand-m',
+              'mr-1',
+              parentCandidateIds: const ['cand-1', 'cand-x'],
+            ),
+          ],
+        ),
+      );
+
+      c.read(exploreActiveFamilyIdProvider.notifier).state = 'fam-1';
+      await notifier.deleteFamily(run.id, 'fam-1');
+      final stored = (await c.read(
+        exploreRunListNotifierProvider.future,
+      )).runById(run.id)!;
+
+      expect(stored.families.map((family) => family.id), ['fam-2']);
+      expect(stored.parentSets.map((set) => set.id), ['ps-3']);
+      expect(stored.rounds.map((round) => round.id), ['dr-3', 'mr-1']);
+      expect(stored.candidates.map((candidate) => candidate.id), [
+        'cand-3',
+        'cand-m',
+      ]);
+      // 只清已删项，外部悬空引用（cand-x）原样保留。
+      expect(stored.candidateById('cand-m')!.lineage.parentCandidateIds, [
+        'cand-x',
+      ]);
+      // 面板指针指向被删家族时清空。
+      expect(c.read(exploreActiveFamilyIdProvider), isNull);
+    });
+
+    test('refuses while a round or candidate is still pending', () async {
+      final c = container();
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final created = await createRun(c);
+      ExploreRun base() => created.copyWith(
+        families: [
+          ExploreFamily(
+            id: 'fam-1',
+            name: '家族1',
+            createdAt: _epoch,
+            rootParentSetId: 'ps-1',
+            activeParentSetId: 'ps-1',
+          ),
+        ],
+        parentSets: const [
+          ExploreParentSet(
+            id: 'ps-1',
+            familyId: 'fam-1',
+            generation: 1,
+            status: ExploreParentSetStatus.active,
+          ),
+        ],
+      );
+
+      // pending 深度轮拒删。
+      var run = await notifier.overwrite(
+        base().copyWith(
+          rounds: [
+            deepRound(
+              'dr-1',
+              parentSetId: 'ps-1',
+              familyId: 'fam-1',
+              status: ExploreRoundStatus.pending,
+            ),
+          ],
+        ),
+      );
+      expect(() => notifier.deleteFamily(run.id, 'fam-1'), throwsStateError);
+
+      // generated 轮但轮内还有 pending 候选同样拒删。
+      run = await notifier.overwrite(
+        base().copyWith(
+          rounds: [
+            deepRound(
+              'dr-1',
+              parentSetId: 'ps-1',
+              familyId: 'fam-1',
+              candidateIds: const ['cand-1'],
+            ),
+          ],
+          candidates: [ExploreCandidate.shell(roundId: 'dr-1', id: 'cand-1')],
+        ),
+      );
+      expect(() => notifier.deleteFamily(run.id, 'fam-1'), throwsStateError);
+      final stored = (await c.read(
+        exploreRunListNotifierProvider.future,
+      )).runById(run.id)!;
+      expect(stored.families, hasLength(1));
+      expect(stored.rounds, hasLength(1));
+      expect(stored.candidates, hasLength(1));
+    });
+
+    test('deletes a shell family without rounds cleanly', () async {
+      final c = container();
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final created = await createRun(c);
+      // 空壳家族：只有 family + rootParentSet，没有轮和候选
+      // （比如建家族后从未成功出过深度轮）。
+      final run = await notifier.overwrite(
+        created.copyWith(
+          families: [
+            ExploreFamily(
+              id: 'fam-1',
+              name: '家族1',
+              createdAt: _epoch,
+              rootParentSetId: 'ps-1',
+              activeParentSetId: 'ps-1',
+            ),
+          ],
+          parentSets: const [
+            ExploreParentSet(
+              id: 'ps-1',
+              familyId: 'fam-1',
+              generation: 1,
+              status: ExploreParentSetStatus.active,
+            ),
+          ],
+        ),
+      );
+
+      await notifier.deleteFamily(run.id, 'fam-1');
+      final stored = (await c.read(
+        exploreRunListNotifierProvider.future,
+      )).runById(run.id)!;
+      expect(stored.families, isEmpty);
+      expect(stored.parentSets, isEmpty);
+    });
+
+    test('rejects unknown family id', () async {
+      final c = container();
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final run = await createRun(c);
+      expect(() => notifier.deleteFamily(run.id, 'ghost'), throwsStateError);
     });
   });
 

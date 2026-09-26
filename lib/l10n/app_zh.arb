@@ -5584,6 +5584,19 @@
     }
   },
   "styleExplore_folderNameLabel": "文件夹名称",
+  "styleExplore_deleteFamily": "删除谱系",
+  "styleExplore_deleteFamilyMessage": "将删除谱系「{name}」及其全部父本集与候选记录（{count} 张）；候选图片文件不会删除。",
+  "@styleExplore_deleteFamilyMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_familyBusy": "谱系内还有生成中的候选，请先取消任务",
   "styleExplore_folderUncategorized": "未分类",
   "styleExplore_folderCreated": "已创建文件夹「{name}」",
   "@styleExplore_folderCreated": {

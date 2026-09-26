@@ -9316,6 +9316,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_folderNameLabel => '文件夹名称';
 
   @override
+  String get styleExplore_deleteFamily => '删除谱系';
+
+  @override
+  String styleExplore_deleteFamilyMessage(String name, int count) {
+    return '将删除谱系「$name」及其全部父本集与候选记录（$count 张）；候选图片文件不会删除。';
+  }
+
+  @override
+  String get styleExplore_familyBusy => '谱系内还有生成中的候选，请先取消任务';
+
+  @override
   String get styleExplore_folderUncategorized => '未分类';
 
   @override

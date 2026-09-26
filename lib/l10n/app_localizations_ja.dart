@@ -9441,6 +9441,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_folderNameLabel => 'フォルダ名';
 
   @override
+  String get styleExplore_deleteFamily => '系統を削除';
+
+  @override
+  String styleExplore_deleteFamilyMessage(String name, int count) {
+    return '系統「$name」とその全父本セット・候補レコード（$count 枚）を削除します。画像ファイルは削除されません。';
+  }
+
+  @override
+  String get styleExplore_familyBusy => 'この系統には生成中の候補があります。先にタスクをキャンセルしてください';
+
+  @override
   String get styleExplore_folderUncategorized => '未分類';
 
   @override

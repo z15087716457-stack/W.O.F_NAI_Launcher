@@ -5584,6 +5584,19 @@
     }
   },
   "styleExplore_folderNameLabel": "フォルダ名",
+  "styleExplore_deleteFamily": "系統を削除",
+  "styleExplore_deleteFamilyMessage": "系統「{name}」とその全父本セット・候補レコード（{count} 枚）を削除します。画像ファイルは削除されません。",
+  "@styleExplore_deleteFamilyMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_familyBusy": "この系統には生成中の候補があります。先にタスクをキャンセルしてください",
   "styleExplore_folderUncategorized": "未分類",
   "styleExplore_folderCreated": "フォルダ「{name}」を作成しました",
   "@styleExplore_folderCreated": {

@@ -9645,6 +9645,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_folderNameLabel => 'Folder name';
 
   @override
+  String get styleExplore_deleteFamily => 'Delete lineage';
+
+  @override
+  String styleExplore_deleteFamilyMessage(String name, int count) {
+    return 'Deletes the lineage \"$name\" with all its parent sets and candidate records ($count images). Image files are kept.';
+  }
+
+  @override
+  String get styleExplore_familyBusy =>
+      'This lineage still has candidates being generated. Cancel the task first';
+
+  @override
   String get styleExplore_folderUncategorized => 'Uncategorized';
 
   @override
