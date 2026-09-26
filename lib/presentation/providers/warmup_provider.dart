@@ -8,11 +8,9 @@ import '../../core/network/proxy_service.dart';
 import '../../core/enums/warmup_phase.dart';
 import '../../core/database/database.dart';
 import '../../core/database/datasources/gallery_data_source.dart';
-import '../../core/services/danbooru_tags_lazy_service.dart';
 import '../../core/services/data_migration_service.dart';
 import '../../core/services/warmup_task_scheduler.dart';
 
-import 'data_source_cache_provider.dart';
 import '../../core/utils/app_logger.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import '../../data/services/gallery/unified_gallery_service.dart';
@@ -623,153 +621,6 @@ class WarmupNotifier extends _$WarmupNotifier {
       AppLogger.w('共现数据初始化时数据库正在恢复，将在后台重试: $e', 'Warmup');
     } catch (e, stack) {
       AppLogger.e('共现数据初始化失败', e, stack, 'Warmup');
-    }
-  }
-
-  /// 拉取画师标签（预热阶段同步执行）
-  ///
-  /// 使用 Provider 的 syncArtists 方法，在预热阶段同步完成
-  /// 由于有热度限制，数据量不大，不会阻塞太久
-  // ignore: unused_element
-  Future<void> _fetchArtistTagsInWarmup() async {
-    AppLogger.i('Starting artist tags fetch in warmup phase...', 'Warmup');
-
-    try {
-      // 使用 Provider 的 syncArtists 方法，确保完成后状态更新
-      // 这会正确处理重复拉取的检查，并在完成后更新 Provider 状态
-      await ref
-          .read(danbooruTagsCacheNotifierProvider.notifier)
-          .syncArtists(
-            force: false, // 如果有数据则跳过
-          );
-
-      AppLogger.i('Artist tags fetch completed in warmup phase', 'Warmup');
-    } catch (e, stack) {
-      AppLogger.e(
-        'Artist tags fetch error in warmup phase: $e',
-        e,
-        stack,
-        'Warmup',
-      );
-      // 预热阶段失败不阻塞，进入主页后可能重试
-    }
-  }
-
-  // ignore: unused_element
-  Future<void> _checkAndRecoverData() async {
-    AppLogger.i('检查数据完整性...', 'Warmup');
-
-    try {
-      // 使用新的 DatabaseManager 获取统计信息
-      final manager = await ref.watch(databaseManagerProvider.future);
-
-      // 等待初始化完成
-      await manager.initialized;
-
-      final runtimeStats = await manager.getStatistics();
-      final tableStats = runtimeStats['tables'] as Map<String, int>? ?? {};
-      final coreAssetStats = await manager.getCoreAssetStatistics();
-
-      // 获取各表记录数
-      final translationCount = coreAssetStats['translations'] ?? 0;
-      final cooccurrenceCount = coreAssetStats['cooccurrences'] ?? 0;
-      final danbooruCount = tableStats['danbooru_tags'] ?? 0;
-
-      AppLogger.i(
-        '核心资产数据库状态: translations=$translationCount, cooccurrences=$cooccurrenceCount, danbooru_tags=$danbooruCount',
-        'Warmup',
-      );
-
-      // 1. 检查 translations 和 cooccurrences 资产库
-      if (translationCount == 0 || cooccurrenceCount == 0) {
-        AppLogger.w('核心资产数据为空，请检查本地打包数据库', 'Warmup');
-      }
-
-      // 2. 恢复 danbooru_tags（从API）
-      // 不仅检查总数，还检查各分类数量
-      final service = await ref.read(danbooruTagsLazyServiceProvider.future);
-      final categoryStats = await service.getCategoryStats();
-
-      final generalCount = categoryStats['general'] ?? 0;
-      final characterCount = categoryStats['character'] ?? 0;
-      final copyrightCount = categoryStats['copyright'] ?? 0;
-      final metaCount = categoryStats['meta'] ?? 0;
-
-      AppLogger.i(
-        'Danbooru标签分类统计: general=$generalCount, character=$characterCount, '
-            'copyright=$copyrightCount, meta=$metaCount',
-        'Warmup',
-      );
-
-      // 判断哪些分类需要拉取
-      final needsGeneralFetch = generalCount == 0;
-      final needsCharacterFetch = characterCount == 0;
-      final needsCopyrightFetch = copyrightCount == 0;
-      final needsMetaFetch = metaCount == 0;
-
-      final needsAnyFetch =
-          needsGeneralFetch ||
-          needsCharacterFetch ||
-          needsCopyrightFetch ||
-          needsMetaFetch;
-
-      if (!needsAnyFetch) {
-        AppLogger.i('所有标签分类数据已存在，跳过拉取', 'Warmup');
-        return;
-      }
-
-      AppLogger.w(
-        '部分标签分类为空，触发补充拉取: '
-            'general=$needsGeneralFetch, character=$needsCharacterFetch, '
-            'copyright=$needsCopyrightFetch, meta=$needsMetaFetch',
-        'Warmup',
-      );
-      state = state.copyWith(
-        subTaskMessage: 'warmup_fetchingTagDataFromServer',
-      );
-
-      // 定义标签拉取任务
-      final fetchTasks = [
-        if (needsGeneralFetch)
-          (
-            message: 'warmup_fetchingGeneralTags',
-            fetch: () =>
-                service.fetchGeneralTags(threshold: 1000, maxPages: 50),
-          ),
-        if (needsCharacterFetch)
-          (
-            message: 'warmup_fetchingCharacterTags',
-            fetch: () =>
-                service.fetchCharacterTags(threshold: 100, maxPages: 50),
-          ),
-        if (needsCopyrightFetch)
-          (
-            message: 'warmup_fetchingCopyrightTags',
-            fetch: () =>
-                service.fetchCopyrightTags(threshold: 500, maxPages: 50),
-          ),
-        if (needsMetaFetch)
-          (
-            message: 'warmup_fetchingMetaTags',
-            fetch: () => service.fetchMetaTags(threshold: 10000, maxPages: 50),
-          ),
-      ];
-
-      for (final task in fetchTasks) {
-        state = state.copyWith(subTaskMessage: task.message);
-        await task.fetch().timeout(
-          const Duration(seconds: 60),
-          onTimeout: () => AppLogger.w('${task.message}超时，将在后台继续', 'Warmup'),
-        );
-      }
-
-      AppLogger.i('标签数据拉取完成', 'Warmup');
-    } on StateError catch (e) {
-      // 数据库正在恢复中，不阻塞启动
-      AppLogger.w('检查数据完整性时数据库正在恢复，将在后台重试: $e', 'Warmup');
-    } catch (e) {
-      AppLogger.w('检查数据完整性失败: $e', 'Warmup');
-      // 非致命错误，继续启动
     }
   }
 }
