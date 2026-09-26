@@ -250,8 +250,14 @@ class AppTheme {
         fontConfig.fontFamily,
       ),
       FontSource.system || FontSource.bundled => (
-        baseTheme.textTheme.apply(fontFamily: fontConfig.fontFamily),
-        baseTheme.primaryTextTheme.apply(fontFamily: fontConfig.fontFamily),
+        baseTheme.textTheme.apply(
+          fontFamily: fontConfig.fontFamily,
+          fontFamilyFallback: StudioTypography.fallback,
+        ),
+        baseTheme.primaryTextTheme.apply(
+          fontFamily: fontConfig.fontFamily,
+          fontFamilyFallback: StudioTypography.fallback,
+        ),
         fontConfig.fontFamily,
       ),
     };
@@ -314,8 +320,10 @@ class AppTheme {
   static TextTheme _applyGoogleFont(TextTheme base, String fontName) {
     final fontFamily = GoogleFonts.getFont(fontName).fontFamily;
 
-    TextStyle? applyFont(TextStyle? style) =>
-        style?.copyWith(fontFamily: fontFamily);
+    TextStyle? applyFont(TextStyle? style) => style?.copyWith(
+      fontFamily: fontFamily,
+      fontFamilyFallback: StudioTypography.fallback,
+    );
 
     return base.copyWith(
       displayLarge: applyFont(base.displayLarge),

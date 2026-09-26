@@ -30,9 +30,23 @@ void main() {
   test(
     'default keys adopt bundled fonts while explicit choices are preserved',
     () {
-      for (final key in ['', 'system', 'system:', 'bundled:Geist']) {
+      for (final key in ['', 'system', 'system:']) {
         expect(FontConfig.fromKey(key), FontConfig.defaultFont);
       }
+      // 默认字体的存键（任意来源写法）都归并进内置默认项
+      expect(
+        FontConfig.fromKey('bundled:HarmonyOS Sans SC'),
+        FontConfig.defaultFont,
+      );
+      expect(
+        FontConfig.fromKey('system:HarmonyOS Sans SC'),
+        FontConfig.defaultFont,
+      );
+      // 旧默认 Geist 组合降级为可选的内置预设
+      final geist = FontConfig.fromKey('bundled:Geist');
+      expect(geist.fontFamily, 'Geist');
+      expect(geist.source, FontSource.bundled);
+      expect(geist, isNot(FontConfig.defaultFont));
       final custom = FontConfig.fromKey('system:LXGW ZhenKai GB');
       expect(custom.fontFamily, 'LXGW ZhenKai GB');
       expect(custom.source, FontSource.system);
@@ -47,7 +61,10 @@ void main() {
           brightness,
           fontConfig: FontConfig.defaultFont,
         );
-        expect(theme.textTheme.bodyMedium!.fontFamily, StudioTypography.sans);
+        expect(
+          theme.textTheme.bodyMedium!.fontFamily,
+          FontConfig.defaultFont.fontFamily,
+        );
         expect(
           theme.textTheme.bodyMedium!.fontFamilyFallback,
           contains(StudioTypography.cjk),

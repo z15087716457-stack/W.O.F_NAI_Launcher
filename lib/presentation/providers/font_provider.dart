@@ -58,6 +58,14 @@ class FontConfig {
         }
       }
 
+      // 检查内置字体预设（非默认的 bundled 组合）
+      if (source == FontSource.bundled) {
+        final preset = bundledPresets.where((f) => f.fontFamily == fontFamily);
+        if (preset.isNotEmpty) {
+          return preset.first;
+        }
+      }
+
       return FontConfig(
         displayName: fontFamily,
         fontFamily: fontFamily,
@@ -69,8 +77,8 @@ class FontConfig {
 
   /// 默认字体组合。旧的默认键会自然使用此组合；显式系统字体保留。
   static const defaultFont = FontConfig(
-    displayName: 'Geist + HarmonyOS Sans',
-    fontFamily: StudioTypography.sans,
+    displayName: 'HarmonyOS Sans SC',
+    fontFamily: StudioTypography.cjk,
     source: FontSource.bundled,
   );
 
@@ -168,6 +176,15 @@ class GoogleFontPresets {
   ];
 }
 
+/// 内置字体预设（随包离线可用，默认项之外的备选组合）
+const bundledPresets = [
+  FontConfig(
+    displayName: 'Geist + HarmonyOS Sans',
+    fontFamily: StudioTypography.sans,
+    source: FontSource.bundled,
+  ),
+];
+
 /// 字体状态 Notifier
 @riverpod
 class FontNotifier extends _$FontNotifier {
@@ -218,6 +235,7 @@ Future<Map<String, List<FontConfig>>> allFonts(Ref ref) async {
 
   return {
     '应用默认': [FontConfig.defaultFont],
+    '内置字体': bundledPresets,
     'Google Fonts': googleFonts,
     '系统字体': systemFonts,
   };
