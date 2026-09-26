@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +29,167 @@ import 'widgets/explore_candidate_gallery.dart';
 import 'widgets/explore_run_control_bar.dart';
 import 'widgets/explore_run_sidebar.dart';
 
+const double _styleExploreResizeHandleWidth = 8;
+const double _styleExploreSidebarLayoutMinWidth = 160;
+const double _styleExploreGalleryLayoutMinWidth = 240;
+
+double _nonNegativePaneWidth(double width) {
+  if (!width.isFinite) return 0;
+  return math.max(0, width);
+}
+
+class _StyleExploreConcessionKey {
+  const _StyleExploreConcessionKey({
+    required this.viewportWidth,
+    required this.sidebarVisible,
+    required this.galleryVisible,
+  });
+
+  final double viewportWidth;
+  final bool sidebarVisible;
+  final bool galleryVisible;
+
+  @override
+  bool operator ==(Object other) {
+    return other is _StyleExploreConcessionKey &&
+        other.viewportWidth == viewportWidth &&
+        other.sidebarVisible == sidebarVisible &&
+        other.galleryVisible == galleryVisible;
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(viewportWidth, sidebarVisible, galleryVisible);
+}
+
+class _StyleExplorePaneLayout {
+  const _StyleExplorePaneLayout({
+    required this.contentWidth,
+    required this.mainWidth,
+    required this.sidebarWidth,
+    required this.galleryWidth,
+  });
+
+  final double contentWidth;
+  final double mainWidth;
+  final double sidebarWidth;
+  final double galleryWidth;
+
+  static double calculateRightConcession({
+    required double viewportWidth,
+    required bool sidebarVisible,
+    required bool galleryVisible,
+    required double sidebarWidth,
+    required double galleryWidth,
+    required double blockLibraryWidth,
+  }) {
+    final normalizedViewport = _nonNegativePaneWidth(viewportWidth);
+    final sidebar = sidebarVisible ? _nonNegativePaneWidth(sidebarWidth) : 0.0;
+    final gallery = galleryVisible ? _nonNegativePaneWidth(galleryWidth) : 0.0;
+    final handleWidth =
+        (sidebarVisible ? _styleExploreResizeHandleWidth : 0) +
+        (galleryVisible ? _styleExploreResizeHandleWidth : 0);
+    final total = math.max(
+      math.max(0, normalizedViewport - handleWidth),
+      sidebar + gallery,
+    );
+    if (total == 0) return 0;
+
+    final blockLibrary =
+        _nonNegativePaneWidth(blockLibraryWidth) +
+        _styleExploreResizeHandleWidth;
+    final absorbed = math.min(blockLibrary, total);
+    final theoretical = absorbed * (sidebar + gallery) / total;
+    final donor = galleryVisible ? gallery : (sidebarVisible ? sidebar : 0.0);
+    return math.min(theoretical, donor);
+  }
+
+  static double effectiveSidebarWidth({
+    required bool blockLibraryExpanded,
+    required bool sidebarVisible,
+    required bool galleryVisible,
+    required double sidebarWidth,
+    required double rightConcession,
+  }) {
+    if (!sidebarVisible) return 0;
+    final concession = blockLibraryExpanded && !galleryVisible
+        ? rightConcession
+        : 0.0;
+    return math.max(0, _nonNegativePaneWidth(sidebarWidth) - concession);
+  }
+
+  static double effectiveGalleryWidth({
+    required bool blockLibraryExpanded,
+    required bool galleryVisible,
+    required double galleryWidth,
+    required double rightConcession,
+  }) {
+    if (!galleryVisible) return 0;
+    final concession = blockLibraryExpanded ? rightConcession : 0.0;
+    return math.max(0, _nonNegativePaneWidth(galleryWidth) - concession);
+  }
+
+  factory _StyleExplorePaneLayout.calculate({
+    required double viewportWidth,
+    required bool blockLibraryExpanded,
+    required bool sidebarVisible,
+    required bool galleryVisible,
+    required double blockLibraryWidth,
+    required double sidebarWidth,
+    required double galleryWidth,
+    required double rightConcession,
+  }) {
+    final blockLibrary = blockLibraryExpanded
+        ? _nonNegativePaneWidth(blockLibraryWidth)
+        : 0.0;
+    final sidebar = effectiveSidebarWidth(
+      blockLibraryExpanded: blockLibraryExpanded,
+      sidebarVisible: sidebarVisible,
+      galleryVisible: galleryVisible,
+      sidebarWidth: sidebarWidth,
+      rightConcession: rightConcession,
+    );
+    final gallery = effectiveGalleryWidth(
+      blockLibraryExpanded: blockLibraryExpanded,
+      galleryVisible: galleryVisible,
+      galleryWidth: galleryWidth,
+      rightConcession: rightConcession,
+    );
+    final blockLibraryTotal = blockLibraryExpanded
+        ? blockLibrary + _styleExploreResizeHandleWidth
+        : 0.0;
+    final normalizedViewport = _nonNegativePaneWidth(viewportWidth);
+    final closedMainWidth = math.max(
+      0.0,
+      normalizedViewport -
+          (sidebarVisible
+              ? _nonNegativePaneWidth(sidebarWidth) +
+                    _styleExploreResizeHandleWidth
+              : 0.0) -
+          (galleryVisible
+              ? _nonNegativePaneWidth(galleryWidth) +
+                    _styleExploreResizeHandleWidth
+              : 0.0),
+    );
+    final mainConcession = blockLibraryExpanded
+        ? blockLibraryTotal - rightConcession
+        : 0.0;
+    final mainWidth = math.max(0.0, closedMainWidth - mainConcession);
+    final contentWidth =
+        mainWidth +
+        blockLibraryTotal +
+        (sidebarVisible ? sidebar + _styleExploreResizeHandleWidth : 0.0) +
+        (galleryVisible ? gallery + _styleExploreResizeHandleWidth : 0.0);
+
+    return _StyleExplorePaneLayout(
+      contentWidth: contentWidth,
+      mainWidth: mainWidth,
+      sidebarWidth: sidebar,
+      galleryWidth: gallery,
+    );
+  }
+}
+
 /// 画风探索页（主编辑 | 块库插槽 | 探索任务侧栏 | 候选画廊）。
 ///
 /// 主编辑区复用主生成页左栏整套官网式装配（胶囊头/提示词/角色/参考图/
@@ -45,6 +207,8 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
   static const double _galleryBreakpoint = 1100;
 
   String? _manualAutoRunName;
+  _StyleExploreConcessionKey? _rightConcessionKey;
+  double _rightConcession = 0;
 
   /// 候选画廊展开态的用户覆盖；null = 跟随断点自动（宽窗开、窄窗收）。
   bool? _galleryExpandedOverride;
@@ -66,6 +230,34 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
         .setStyleExploreRunSidebarVisible(!_runSidebarVisible(layout));
   }
 
+  double _syncRightConcession({
+    required double viewportWidth,
+    required bool blockLibraryExpanded,
+    required bool sidebarVisible,
+    required bool galleryVisible,
+    required LayoutState layout,
+  }) {
+    if (!blockLibraryExpanded) {
+      _rightConcessionKey = null;
+      return _rightConcession = 0;
+    }
+    final key = _StyleExploreConcessionKey(
+      viewportWidth: viewportWidth,
+      sidebarVisible: sidebarVisible,
+      galleryVisible: galleryVisible,
+    );
+    if (_rightConcessionKey == key) return _rightConcession;
+    _rightConcessionKey = key;
+    return _rightConcession = _StyleExplorePaneLayout.calculateRightConcession(
+      viewportWidth: viewportWidth,
+      sidebarVisible: sidebarVisible,
+      galleryVisible: galleryVisible,
+      sidebarWidth: layout.styleExploreRunSidebarWidth,
+      galleryWidth: layout.styleExploreGalleryWidth,
+      blockLibraryWidth: layout.blockLibraryPanelWidth,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -84,48 +276,40 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          const resizeHandleWidth = 8.0;
           final galleryVisible = _galleryVisible(constraints.maxWidth);
           final layoutState = ref.watch(layoutStateNotifierProvider);
           final runSidebarVisible = _runSidebarVisible(layoutState);
-          final blockLibraryWidth = layoutState.blockLibraryPanelExpanded
-              ? layoutState.blockLibraryPanelWidth
-                        .clamp(0.0, double.infinity)
-                        .toDouble() +
-                    resizeHandleWidth
-              : 0.0;
-          final sidebarWidth = runSidebarVisible
-              ? layoutState.styleExploreRunSidebarWidth
-                        .clamp(0.0, double.infinity)
-                        .toDouble() +
-                    resizeHandleWidth
-              : 0.0;
-          final galleryWidth = galleryVisible
-              ? layoutState.styleExploreGalleryWidth
-                        .clamp(0.0, double.infinity)
-                        .toDouble() +
-                    resizeHandleWidth
-              : 0.0;
-          final totalPaneWidth =
-              blockLibraryWidth + sidebarWidth + galleryWidth;
-          final contentWidth = constraints.maxWidth.isFinite
-              ? constraints.maxWidth > totalPaneWidth
-                    ? constraints.maxWidth
-                    : totalPaneWidth
-              : totalPaneWidth;
-          final mainWidth = contentWidth - totalPaneWidth;
+          final blockLibraryExpanded = layoutState.blockLibraryPanelExpanded;
+          final rightConcession = _syncRightConcession(
+            viewportWidth: constraints.maxWidth,
+            blockLibraryExpanded: blockLibraryExpanded,
+            sidebarVisible: runSidebarVisible,
+            galleryVisible: galleryVisible,
+            layout: layoutState,
+          );
+          final paneLayout = _StyleExplorePaneLayout.calculate(
+            viewportWidth: constraints.maxWidth,
+            blockLibraryExpanded: blockLibraryExpanded,
+            sidebarVisible: runSidebarVisible,
+            galleryVisible: galleryVisible,
+            blockLibraryWidth: layoutState.blockLibraryPanelWidth,
+            sidebarWidth: layoutState.styleExploreRunSidebarWidth,
+            galleryWidth: layoutState.styleExploreGalleryWidth,
+            rightConcession: rightConcession,
+          );
 
           return ClipRect(
             child: OverflowBox(
               alignment: Alignment.topLeft,
               minWidth: 0,
-              maxWidth: contentWidth,
+              maxWidth: paneLayout.contentWidth,
               child: SizedBox(
-                width: contentWidth,
+                width: paneLayout.contentWidth,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
+                    SizedBox(
+                      width: paneLayout.mainWidth,
                       child: ClipRect(
                         key: const Key('style-explore-main-editor'),
                         child: Column(
@@ -140,17 +324,28 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                             Expanded(
                               child: _buildCenterPanel(
                                 theme,
-                                availableWidth: mainWidth,
+                                availableWidth: paneLayout.mainWidth,
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                    if (layoutState.blockLibraryPanelExpanded)
+                    if (blockLibraryExpanded)
                       const BlockLibraryPanelSlot(rightDock: true),
-                    if (runSidebarVisible) _buildSidebar(theme),
-                    if (galleryVisible) _buildGalleryPanel(theme),
+                    if (runSidebarVisible)
+                      _buildSidebar(
+                        theme,
+                        width: paneLayout.sidebarWidth,
+                        galleryVisible: galleryVisible,
+                        rightConcession: rightConcession,
+                      ),
+                    if (galleryVisible)
+                      _buildGalleryPanel(
+                        theme,
+                        width: paneLayout.galleryWidth,
+                        rightConcession: rightConcession,
+                      ),
                   ],
                 ),
               ),
@@ -281,32 +476,39 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
 
   // ==================== Run 侧栏 ====================
 
-  Widget _buildSidebar(ThemeData theme) {
-    final width = ref
-        .watch(
-          layoutStateNotifierProvider.select(
-            (state) => state.styleExploreRunSidebarWidth,
-          ),
-        )
-        .clamp(0.0, double.infinity)
-        .toDouble();
-
+  Widget _buildSidebar(
+    ThemeData theme, {
+    required double width,
+    required bool galleryVisible,
+    required double rightConcession,
+  }) {
     final panel = SizedBox(
       width: width,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(
-            left: BorderSide(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+      key: const Key('style-explore-run-sidebar-pane'),
+      child: ClipRect(
+        child: OverflowBox(
+          alignment: Alignment.topLeft,
+          minWidth: 0,
+          maxWidth: math.max(width, _styleExploreSidebarLayoutMinWidth),
+          child: SizedBox(
+            width: math.max(width, _styleExploreSidebarLayoutMinWidth),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.3,
+                    ),
+                  ),
+                ),
+              ),
+              child: Material(
+                color: theme.colorScheme.surfaceContainerLow,
+                child: const ExploreRunSidebarSection(
+                  key: Key('style-explore-run-sidebar-section'),
+                ),
+              ),
             ),
-          ),
-        ),
-        // Material 承载背景色：ListTile 选中态与水波纹画在最近的
-        // Material 上，直接用 DecoratedBox 背景会将其遮挡。
-        child: Material(
-          color: theme.colorScheme.surfaceContainerLow,
-          child: const ExploreRunSidebarSection(
-            key: Key('style-explore-run-sidebar-section'),
           ),
         ),
       ),
@@ -320,24 +522,27 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
         ResizeHandle(
           key: const Key('style-explore-run-sidebar-resize-handle'),
           onDrag: (dx) {
-            // 读取最新布局，避免闭包捕获旧值导致不跟手。
             final layout = ref.read(layoutStateNotifierProvider);
             final currentSidebar = layout.styleExploreRunSidebarWidth;
-            // 成对补偿：侧栏 ∓Δ、左邻 ±Δ，被拖分界以外的分界不动。
-            // 块库收起时左邻是主编辑（Expanded 天然吸收），单写侧栏即可。
+            final currentWidth = _StyleExplorePaneLayout.effectiveSidebarWidth(
+              blockLibraryExpanded: layout.blockLibraryPanelExpanded,
+              sidebarVisible: _runSidebarVisible(layout),
+              galleryVisible: galleryVisible,
+              sidebarWidth: currentSidebar,
+              rightConcession: rightConcession,
+            );
             if (!layout.blockLibraryPanelExpanded) {
+              final effective = math.min(dx, currentWidth);
               ref
                   .read(layoutStateNotifierProvider.notifier)
-                  .setStyleExploreRunSidebarWidth(currentSidebar - dx);
+                  .setStyleExploreRunSidebarWidth(currentSidebar - effective);
               return;
             }
             final currentBlockLibrary = layout.blockLibraryPanelWidth;
-            // 吸收方到 0 后本次拖拽 stall，不做级联吸收。
-            var effective = dx;
-            if (effective > currentSidebar) effective = currentSidebar;
-            if (effective < -currentBlockLibrary) {
-              effective = -currentBlockLibrary;
-            }
+            final effective = dx.clamp(
+              -_nonNegativePaneWidth(currentBlockLibrary),
+              currentWidth,
+            );
             ref
                 .read(layoutStateNotifierProvider.notifier)
                 .setStyleExplorePaneWidths(
@@ -346,7 +551,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                 );
           },
         ),
-        ClipRect(child: panel),
+        panel,
       ],
     );
   }
@@ -515,21 +720,31 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
 
   // ==================== 右栏：候选画廊 ====================
 
-  Widget _buildGalleryPanel(ThemeData theme) {
-    final width = ref
-        .watch(
-          layoutStateNotifierProvider.select((s) => s.styleExploreGalleryWidth),
-        )
-        .clamp(0.0, double.infinity)
-        .toDouble();
-    final decoration = BoxDecoration(
-      color: theme.colorScheme.surfaceContainerLow,
-      border: Border(left: BorderSide(color: theme.dividerColor)),
-    );
-    final panel = Container(
+  Widget _buildGalleryPanel(
+    ThemeData theme, {
+    required double width,
+    required double rightConcession,
+  }) {
+    final panel = SizedBox(
+      key: const Key('style-explore-gallery-panel'),
       width: width,
-      decoration: decoration,
-      child: _buildGalleryContent(theme),
+      child: ClipRect(
+        child: OverflowBox(
+          alignment: Alignment.topLeft,
+          minWidth: 0,
+          maxWidth: math.max(width, _styleExploreGalleryLayoutMinWidth),
+          child: SizedBox(
+            width: math.max(width, _styleExploreGalleryLayoutMinWidth),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerLow,
+                border: Border(left: BorderSide(color: theme.dividerColor)),
+              ),
+              child: _buildGalleryContent(theme),
+            ),
+          ),
+        ),
+      ),
     );
 
     return Row(
@@ -539,20 +754,29 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
         ResizeHandle(
           key: const Key('style-explore-gallery-resize-handle'),
           onDrag: (dx) {
-            // 读取最新的宽度值，避免闭包捕获旧值导致不跟手
             final layout = ref.read(layoutStateNotifierProvider);
             final currentGallery = layout.styleExploreGalleryWidth;
-            // 成对补偿：画廊 ∓Δ、最近可见左邻 ±Δ，被拖分界以外的分界
-            // 不动；吸收方到 0 后本次拖拽 stall，不做级联吸收。
-            // 侧栏隐藏时它不算左邻——否则不可见面板的存宽被静默改写
-            // （且其存宽耗尽后画廊向左拖永久 stall），此时吸收方顺延
-            // 为块库；块库也收起则由主编辑区（Expanded 天然吸收）承担，
-            // 单写画廊即可。
+            final currentGalleryWidth =
+                _StyleExplorePaneLayout.effectiveGalleryWidth(
+                  blockLibraryExpanded: layout.blockLibraryPanelExpanded,
+                  galleryVisible: true,
+                  galleryWidth: currentGallery,
+                  rightConcession: rightConcession,
+                );
             if (_runSidebarVisible(layout)) {
               final currentSidebar = layout.styleExploreRunSidebarWidth;
-              var effective = dx;
-              if (effective > currentGallery) effective = currentGallery;
-              if (effective < -currentSidebar) effective = -currentSidebar;
+              final currentSidebarWidth =
+                  _StyleExplorePaneLayout.effectiveSidebarWidth(
+                    blockLibraryExpanded: layout.blockLibraryPanelExpanded,
+                    sidebarVisible: true,
+                    galleryVisible: true,
+                    sidebarWidth: currentSidebar,
+                    rightConcession: rightConcession,
+                  );
+              final effective = dx.clamp(
+                -currentSidebarWidth,
+                currentGalleryWidth,
+              );
               ref
                   .read(layoutStateNotifierProvider.notifier)
                   .setStyleExplorePaneWidths(
@@ -561,11 +785,10 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                   );
             } else if (layout.blockLibraryPanelExpanded) {
               final currentBlockLibrary = layout.blockLibraryPanelWidth;
-              var effective = dx;
-              if (effective > currentGallery) effective = currentGallery;
-              if (effective < -currentBlockLibrary) {
-                effective = -currentBlockLibrary;
-              }
+              final effective = dx.clamp(
+                -_nonNegativePaneWidth(currentBlockLibrary),
+                currentGalleryWidth,
+              );
               ref
                   .read(layoutStateNotifierProvider.notifier)
                   .setStyleExplorePaneWidths(
@@ -573,13 +796,14 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                     blockLibrary: currentBlockLibrary + effective,
                   );
             } else {
+              final effective = math.min(dx, currentGalleryWidth);
               ref
                   .read(layoutStateNotifierProvider.notifier)
-                  .setStyleExploreGalleryWidth(currentGallery - dx);
+                  .setStyleExploreGalleryWidth(currentGallery - effective);
             }
           },
         ),
-        ClipRect(child: panel),
+        panel,
       ],
     );
   }
@@ -587,7 +811,6 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
   Widget _buildGalleryContent(ThemeData theme) {
     final l10n = context.l10n;
     return Column(
-      key: const Key('style-explore-gallery-panel'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(

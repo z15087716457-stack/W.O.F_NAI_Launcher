@@ -366,6 +366,31 @@ void main() {
     return ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
   }
 
+  Rect mainRect(WidgetTester tester) =>
+      tester.getRect(find.byKey(const Key('style-explore-main-editor')));
+
+  Rect sidebarRect(WidgetTester tester) =>
+      tester.getRect(find.byKey(const Key('style-explore-run-sidebar')));
+
+  Rect galleryRect(WidgetTester tester) =>
+      tester.getRect(find.byKey(const Key('style-explore-gallery-panel')));
+
+  double expectedRightConcession({
+    required double viewportWidth,
+    required double blockLibraryWidth,
+    required double sidebarWidth,
+    required double galleryWidth,
+    bool sidebarVisible = true,
+    bool galleryVisible = true,
+  }) {
+    const handleWidth = 8.0;
+    final handles =
+        (sidebarVisible ? handleWidth : 0) + (galleryVisible ? handleWidth : 0);
+    final total = viewportWidth - handles;
+    final rightWidth = sidebarWidth + galleryWidth;
+    return (blockLibraryWidth + handleWidth) * rightWidth / total;
+  }
+
   /// 把画廊筛选排滚到端点：chip 溢出时被懒加载回收，
   /// ensureVisible/scrollUntilVisible 找不到元素，须直接驱动 position。
   Future<void> scrollChipRowToEnd(
@@ -622,53 +647,156 @@ void main() {
     },
   );
 
-  testWidgets('explore panes stay continuous without an artificial spacer', (
+  testWidgets(
+    'opening block library balances editor and gallery and close restores',
+    (tester) async {
+      final container = await pumpScreen(tester);
+      final notifier = container.read(layoutStateNotifierProvider.notifier);
+      final closedMain = mainRect(tester);
+      final closedSidebar = sidebarRect(tester);
+      final closedGallery = galleryRect(tester);
+      final sidebarPreference = container
+          .read(layoutStateNotifierProvider)
+          .styleExploreRunSidebarWidth;
+      final galleryPreference = container
+          .read(layoutStateNotifierProvider)
+          .styleExploreGalleryWidth;
+
+      await notifier.setBlockLibraryPanelExpanded(true);
+      await tester.pump();
+
+      const blockTotalWidth = 328.0;
+      final openedMain = mainRect(tester);
+      final openedSidebar = sidebarRect(tester);
+      final openedGallery = galleryRect(tester);
+      expect(openedMain.width, lessThan(closedMain.width));
+      expect(openedGallery.width, lessThan(closedGallery.width));
+      expect(openedSidebar.width, closedSidebar.width);
+      expect(
+        (closedMain.width - openedMain.width) +
+            (closedGallery.width - openedGallery.width),
+        closeTo(blockTotalWidth, 0.1),
+      );
+      final block = tester.getRect(find.byType(BlockLibraryPanelSlot));
+      expect(openedMain.right, closeTo(block.left, 0.1));
+      expect(block.right, closeTo(openedSidebar.left, 0.1));
+
+      await tester.tap(find.byKey(const Key('block-library-panel-close')));
+      await tester.pump();
+
+      expect(mainRect(tester), closedMain);
+      expect(sidebarRect(tester), closedSidebar);
+      expect(galleryRect(tester), closedGallery);
+      final restored = container.read(layoutStateNotifierProvider);
+      expect(restored.styleExploreRunSidebarWidth, sidebarPreference);
+      expect(restored.styleExploreGalleryWidth, galleryPreference);
+      expect(
+        localStorage.settings[StorageKeys.styleExploreRunSidebarWidth],
+        isNull,
+      );
+      expect(
+        localStorage.settings[StorageKeys.styleExploreGalleryWidth],
+        isNull,
+      );
+    },
+  );
+
+  testWidgets('custom right widths receive proportional gallery concession', (
+    tester,
+  ) async {
+    localStorage.settings[StorageKeys.blockLibraryPanelWidth] = 280.0;
+    localStorage.settings[StorageKeys.styleExploreRunSidebarWidth] = 400.0;
+    localStorage.settings[StorageKeys.styleExploreGalleryWidth] = 500.0;
+    final container = await pumpScreen(tester, width: 1800);
+    final notifier = container.read(layoutStateNotifierProvider.notifier);
+    final closedMain = mainRect(tester);
+    final closedSidebar = sidebarRect(tester);
+    final closedGallery = galleryRect(tester);
+
+    await notifier.setBlockLibraryPanelExpanded(true);
+    await tester.pump();
+
+    final expectedConcession = expectedRightConcession(
+      viewportWidth: 1800,
+      blockLibraryWidth: 280,
+      sidebarWidth: 400,
+      galleryWidth: 500,
+    );
+    expect(sidebarRect(tester).width, closedSidebar.width);
+    expect(
+      closedGallery.width - galleryRect(tester).width,
+      closeTo(expectedConcession, 0.1),
+    );
+    expect(
+      closedMain.width - mainRect(tester).width,
+      closeTo(288.0 - expectedConcession, 0.1),
+    );
+  });
+
+  testWidgets('gallery hidden shares concession between editor and sidebar', (
     tester,
   ) async {
     final container = await pumpScreen(tester);
-    final main = tester.getRect(
-      find.byKey(const Key('style-explore-main-editor')),
-    );
-    final sidebar = tester.getRect(
-      find.byKey(const Key('style-explore-run-sidebar')),
-    );
-    final galleryHandle = tester.getRect(
-      find.byKey(const Key('style-explore-gallery-resize-handle')),
-    );
-    final gallery = tester.getRect(
-      find.byKey(const Key('style-explore-gallery-panel')),
-    );
-
-    expect(
-      find.byKey(const Key('style-explore-main-editor-resize-handle')),
-      findsNothing,
-    );
-    expect(main.right, closeTo(sidebar.left, 0.1));
-    expect(sidebar.right, closeTo(galleryHandle.left, 1.1));
-    expect(galleryHandle.right, closeTo(gallery.left, 1.1));
+    await tester.tap(find.byKey(const Key('style-explore-gallery-toggle')));
+    await tester.pump();
+    final closedMain = mainRect(tester);
+    final closedSidebar = sidebarRect(tester);
 
     await container
         .read(layoutStateNotifierProvider.notifier)
         .setBlockLibraryPanelExpanded(true);
     await tester.pump();
 
-    final block = tester.getRect(find.byType(BlockLibraryPanelSlot));
-    final mainWithBlock = tester.getRect(
-      find.byKey(const Key('style-explore-main-editor')),
-    );
-    final sidebarWithBlock = tester.getRect(
-      find.byKey(const Key('style-explore-run-sidebar')),
-    );
-    final galleryHandleWithBlock = tester.getRect(
-      find.byKey(const Key('style-explore-gallery-resize-handle')),
-    );
-    final galleryWithBlock = tester.getRect(
-      find.byKey(const Key('style-explore-gallery-panel')),
-    );
-    expect(mainWithBlock.right, closeTo(block.left, 0.1));
-    expect(block.right, closeTo(sidebarWithBlock.left, 0.1));
-    expect(sidebarWithBlock.right, closeTo(galleryHandleWithBlock.left, 1.1));
-    expect(galleryHandleWithBlock.right, closeTo(galleryWithBlock.left, 1.1));
+    const blockWidth = 328.0;
+    final mainLoss = closedMain.width - mainRect(tester).width;
+    final sidebarLoss = closedSidebar.width - sidebarRect(tester).width;
+    expect(mainLoss, greaterThan(0));
+    expect(sidebarLoss, greaterThan(0));
+    expect(mainLoss + sidebarLoss, closeTo(blockWidth, 0.1));
+  });
+
+  testWidgets('sidebar hidden shares concession between editor and gallery', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester);
+    await container
+        .read(layoutStateNotifierProvider.notifier)
+        .setStyleExploreRunSidebarVisible(false);
+    await tester.pump();
+    final closedMain = mainRect(tester);
+    final closedGallery = galleryRect(tester);
+
+    await container
+        .read(layoutStateNotifierProvider.notifier)
+        .setBlockLibraryPanelExpanded(true);
+    await tester.pump();
+
+    const blockWidth = 328.0;
+    final mainLoss = closedMain.width - mainRect(tester).width;
+    final galleryLoss = closedGallery.width - galleryRect(tester).width;
+    expect(mainLoss, greaterThan(0));
+    expect(galleryLoss, greaterThan(0));
+    expect(mainLoss + galleryLoss, closeTo(blockWidth, 0.1));
+  });
+
+  testWidgets('hidden sidebar and gallery leave concession to editor only', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester);
+    final notifier = container.read(layoutStateNotifierProvider.notifier);
+    await notifier.setStyleExploreRunSidebarVisible(false);
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('style-explore-gallery-toggle')));
+    await tester.pump();
+    final closedMain = mainRect(tester);
+
+    await notifier.setBlockLibraryPanelExpanded(true);
+    await tester.pump();
+
+    const blockWidth = 328.0;
+    expect(closedMain.width - mainRect(tester).width, closeTo(blockWidth, 0.1));
+    expect(find.byKey(const Key('style-explore-run-sidebar')), findsNothing);
+    expect(find.byKey(const Key('style-explore-gallery-panel')), findsNothing);
   });
 
   testWidgets('main prompt wraps within the actual editor pane width', (
@@ -749,13 +877,13 @@ void main() {
         tester
             .getSize(find.byKey(const Key('style-explore-run-sidebar')))
             .width,
-        greaterThan(360),
+        greaterThanOrEqualTo(0),
       );
       expect(
         tester
             .getSize(find.byKey(const Key('style-explore-gallery-panel')))
             .width,
-        greaterThan(560),
+        greaterThanOrEqualTo(0),
       );
       expect(
         tester
@@ -911,10 +1039,8 @@ void main() {
     var state = container.read(layoutStateNotifierProvider);
     expect(state.styleExploreRunSidebarWidth, 0);
     expect(state.styleExploreGalleryWidth, 600);
-    expect(
-      tester.getRect(find.byKey(const Key('style-explore-main-editor'))),
-      mainBefore,
-    );
+    final mainAfterExhaustion = mainRect(tester);
+    expect(mainAfterExhaustion, mainBefore);
 
     // 侧栏已到 0：继续左拖整体 stall，不级联吸收主编辑。
     await tester.drag(
@@ -926,10 +1052,54 @@ void main() {
     state = container.read(layoutStateNotifierProvider);
     expect(state.styleExploreRunSidebarWidth, 0);
     expect(state.styleExploreGalleryWidth, 600);
-    expect(
-      tester.getRect(find.byKey(const Key('style-explore-main-editor'))),
-      mainBefore,
+    expect(mainRect(tester), mainAfterExhaustion);
+  });
+
+  testWidgets('expanded drag clamp uses visible effective gallery width', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester);
+    final notifier = container.read(layoutStateNotifierProvider.notifier);
+    await notifier.setBlockLibraryPanelExpanded(true);
+    await tester.pump();
+    final expectedEffectiveGalleryWidth =
+        360.0 -
+        expectedRightConcession(
+          viewportWidth: 1600,
+          blockLibraryWidth: 320,
+          sidebarWidth: 240,
+          galleryWidth: 360,
+        );
+    final before = container.read(layoutStateNotifierProvider);
+    final mainBefore = mainRect(tester);
+    final blockBefore = tester.getRect(find.byType(BlockLibraryPanelSlot));
+
+    // 右拖远超有效画廊宽度：画廊实际可见宽度耗尽到 0 即停，
+    // 侧栏只吃进真实可见量，主编辑与块库边界不动。
+    await tester.drag(
+      find.byKey(const Key('style-explore-gallery-resize-handle')),
+      const Offset(500, 0),
     );
+    await tester.pump();
+
+    final state = container.read(layoutStateNotifierProvider);
+    expect(
+      state.styleExploreGalleryWidth,
+      closeTo(
+        before.styleExploreGalleryWidth - expectedEffectiveGalleryWidth,
+        0.1,
+      ),
+    );
+    expect(
+      state.styleExploreRunSidebarWidth,
+      closeTo(
+        before.styleExploreRunSidebarWidth + expectedEffectiveGalleryWidth,
+        0.1,
+      ),
+    );
+    expect(galleryRect(tester).width, 0);
+    expect(mainRect(tester), mainBefore);
+    expect(tester.getRect(find.byType(BlockLibraryPanelSlot)), blockBefore);
   });
 
   testWidgets('run sidebar handle drags against the expanded block library', (
@@ -1028,10 +1198,7 @@ void main() {
     final state = container.read(layoutStateNotifierProvider);
     expect(state.blockLibraryPanelWidth, 0);
     expect(state.styleExploreRunSidebarWidth, 520);
-    expect(
-      tester.getRect(find.byKey(const Key('style-explore-main-editor'))),
-      mainBefore,
-    );
+    expect(mainRect(tester), mainBefore);
   });
 
   testWidgets(
@@ -1123,6 +1290,8 @@ void main() {
       await notifier.setStyleExploreRunSidebarVisible(false);
       await tester.pump();
 
+      final mainBefore = mainRect(tester);
+
       // 左拖远超块库余量：块库只让出到 0，隐藏侧栏存宽不受牵连。
       await tester.drag(
         find.byKey(const Key('style-explore-gallery-resize-handle')),
@@ -1134,6 +1303,8 @@ void main() {
       expect(state.blockLibraryPanelWidth, 0);
       expect(state.styleExploreGalleryWidth, 640);
       expect(state.styleExploreRunSidebarWidth, 240);
+      // 冻结让位 + 负补偿：块库耗尽后主编辑左缘与宽度都不跳。
+      expect(mainRect(tester), mainBefore);
 
       // 块库到 0 后继续左拖整体 stall，不级联吸收隐藏侧栏。
       await tester.drag(
@@ -1148,6 +1319,174 @@ void main() {
       expect(state.styleExploreRunSidebarWidth, 240);
     },
   );
+
+  testWidgets(
+    'block library handle dragging to zero conserves total geometry',
+    (tester) async {
+      final container = await pumpScreen(tester);
+      final notifier = container.read(layoutStateNotifierProvider.notifier);
+      await notifier.setBlockLibraryPanelExpanded(true);
+      await tester.pump();
+
+      final mainBefore = mainRect(tester);
+      final sidebarBefore = sidebarRect(tester);
+      final galleryBefore = galleryRect(tester);
+
+      // 右拖块库手柄超出其自身宽度：块库压到 0，主编辑收回全部让位，
+      // 冻结的右侧让位不产生重复补偿（负补偿由主编辑吃回）。
+      await tester.drag(
+        find.byKey(const Key('block-library-panel-resize-handle')),
+        const Offset(400, 0),
+      );
+      await tester.pump();
+
+      final state = container.read(layoutStateNotifierProvider);
+      expect(state.blockLibraryPanelWidth, 0);
+      expect(
+        tester.getSize(find.byType(BlockLibraryPanelSlot)).width,
+        closeTo(8, 0.1),
+      );
+      // 块库总占宽从 328 缩到 8，主编辑整段收回 320。
+      expect(mainRect(tester).width - mainBefore.width, closeTo(320, 0.1));
+      expect(sidebarRect(tester), sidebarBefore);
+      expect(galleryRect(tester), galleryBefore);
+    },
+  );
+
+  testWidgets('pre-expanded block library balances panes on first layout', (
+    tester,
+  ) async {
+    localStorage.settings[StorageKeys.blockLibraryPanelExpanded] = true;
+    await pumpScreen(tester);
+
+    final main = mainRect(tester);
+    final sidebar = sidebarRect(tester);
+    final gallery = galleryRect(tester);
+    final expected = expectedRightConcession(
+      viewportWidth: 1600,
+      blockLibraryWidth: 320,
+      sidebarWidth: 240,
+      galleryWidth: 360,
+    );
+    expect(find.byType(BlockLibraryPanelSlot), findsOneWidget);
+    // sidebarRect 含 8px 手柄；任务栏内容宽不变，画廊吃让位。
+    expect(sidebar.width, 248);
+    expect(gallery.width, closeTo(360 - expected, 0.1));
+    expect(main.width, closeTo(984 - (328 - expected), 0.1));
+  });
+
+  testWidgets('resizing the window recomputes the frozen concession', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester);
+    await container
+        .read(layoutStateNotifierProvider.notifier)
+        .setBlockLibraryPanelExpanded(true);
+    await tester.pump();
+    final closedGallery = 360.0;
+    final openedGallery = galleryRect(tester).width;
+    expect(
+      closedGallery - openedGallery,
+      closeTo(
+        expectedRightConcession(
+          viewportWidth: 1600,
+          blockLibraryWidth: 320,
+          sidebarWidth: 240,
+          galleryWidth: 360,
+        ),
+        0.1,
+      ),
+    );
+
+    tester.view.physicalSize = const Size(1200, 900);
+    await tester.pump();
+
+    expect(
+      closedGallery - galleryRect(tester).width,
+      closeTo(
+        expectedRightConcession(
+          viewportWidth: 1200,
+          blockLibraryWidth: 320,
+          sidebarWidth: 240,
+          galleryWidth: 360,
+        ),
+        0.1,
+      ),
+    );
+  });
+
+  testWidgets('pane visibility changes recompute the concession donor', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester);
+    final notifier = container.read(layoutStateNotifierProvider.notifier);
+    await notifier.setBlockLibraryPanelExpanded(true);
+    await tester.pump();
+    final openedGalleryLoss = 360.0 - galleryRect(tester).width;
+
+    // 隐藏任务栏：donor 仍是画廊，但右区基准只剩画廊，让位量重算变小。
+    await notifier.setStyleExploreRunSidebarVisible(false);
+    await tester.pump();
+    final onlyGalleryLoss = 360.0 - galleryRect(tester).width;
+    expect(onlyGalleryLoss, isNot(closeTo(openedGalleryLoss, 0.1)));
+    expect(
+      onlyGalleryLoss,
+      closeTo(
+        expectedRightConcession(
+          viewportWidth: 1600,
+          blockLibraryWidth: 320,
+          sidebarWidth: 0,
+          galleryWidth: 360,
+          sidebarVisible: false,
+        ),
+        0.1,
+      ),
+    );
+
+    // 再隐藏画廊：donor 空，让位全部落到主编辑。
+    await tester.tap(find.byKey(const Key('style-explore-gallery-toggle')));
+    await tester.pump();
+    expect(find.byKey(const Key('style-explore-gallery-panel')), findsNothing);
+    // 仅剩主编辑 + 块库：主编辑收回右侧让位后占满其余宽度。
+    expect(mainRect(tester).width, closeTo(1600 - 328, 0.1));
+  });
+
+  testWidgets('adjacent pane drags keep the frozen concession', (tester) async {
+    final container = await pumpScreen(tester);
+    await container
+        .read(layoutStateNotifierProvider.notifier)
+        .setBlockLibraryPanelExpanded(true);
+    await tester.pump();
+    final galleryBefore = galleryRect(tester);
+
+    // 画廊向左扩 40：冻结让位不变 → 可见宽与偏好宽同步 +40，
+    // 若错误重算让位量，可见宽变化会偏离拖拽量。
+    await tester.drag(
+      find.byKey(const Key('style-explore-gallery-resize-handle')),
+      const Offset(-40, 0),
+    );
+    await tester.pump();
+    expect(galleryRect(tester).width, closeTo(galleryBefore.width + 40, 0.1));
+    expect(galleryRect(tester).right, galleryBefore.right);
+  });
+
+  testWidgets('narrow window with default panes applies clipped inner layout', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester, width: 420);
+    final notifier = container.read(layoutStateNotifierProvider.notifier);
+    // 画廊按断点隐藏，任务栏显示：块库展开后任务栏有效宽被压窄，
+    // 内部仍按排版下限渲染并由外层 ClipRect 裁剪，不得溢出。
+    await notifier.setBlockLibraryPanelExpanded(true);
+    await tester.pump();
+
+    expect(find.byType(BlockLibraryPanelSlot), findsOneWidget);
+    expect(find.byKey(const Key('style-explore-run-sidebar')), findsOneWidget);
+    expect(find.byKey(const Key('style-explore-gallery-panel')), findsNothing);
+    expect(sidebarRect(tester).width, lessThan(240));
+    expect(sidebarRect(tester).width, greaterThanOrEqualTo(0));
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('narrow explore layout keeps panes and wraps controls', (
     tester,
