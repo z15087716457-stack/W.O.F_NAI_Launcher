@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -84,8 +86,10 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   // 正面/负面切换
   bool _isNegativeMode = false;
 
-  // 块库/设置弹层开启态（官网 prompt-chunks 钮开合高亮）
-  bool _chunksMenuOpen = false;
+  // 「模块与开关」弹层：自绘浮层（OverlayEntry 自管理），
+  // 钉行点击只切钉态不收回，开关行点击切换并收回。
+  OverlayEntry? _chunksMenuEntry;
+  bool get _chunksMenuOpen => _chunksMenuEntry != null;
 
   @override
   void initState() {
@@ -313,6 +317,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
 
   @override
   void dispose() {
+    // dispose 期间 mounted 仍为 true，直接移除浮层不走 setState。
+    _chunksMenuEntry?.remove();
+    _chunksMenuEntry = null;
     widget.negativeModeNotifier?.removeListener(_onExternalNegativeModeChanged);
     _promptFocusNode.removeListener(_onPromptFocusChanged);
     _negativeFocusNode.removeListener(_onNegativeFocusChanged);
@@ -525,101 +532,210 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   /// 「模块与开关」弹层钮（官网 prompt-chunks 钮）：官方 prompt_chunk 图标。
   /// 弹层上区 = 工具图标位（钉住即出现在头部，积木/块库面板），
   /// 下区 = 提示词设置开关项。
-  Widget _buildChunksMenuButton(ThemeData theme) {
-    final palettePinned = ref.watch(
-      layoutStateNotifierProvider.select((s) => s.blockPaletteToolPinned),
-    );
-    final panelToolPinned = ref.watch(
-      layoutStateNotifierProvider.select((s) => s.blockLibraryPanelToolPinned),
-    );
-    final enableAutoFormat = ref.watch(autoFormatPromptSettingsProvider);
-    final enableHighlight = ref.watch(highlightEmphasisSettingsProvider);
-    final enableSdSyntaxAutoConvert = ref.watch(
-      sdSyntaxAutoConvertSettingsProvider,
-    );
-    final enableCooccurrence = ref.watch(
-      completion_settings.autocompleteSettingsProvider.select(
-        (s) => s.relatedTagsEnabled,
-      ),
-    );
+  /// 自绘浮层：任何行点击都只切换、不收回；点按钮或菜单外才收回。
+  static const double _chunksMenuWidth = 300;
+  static const double _chunksMenuEstimatedHeight = 300;
 
+  void _closeChunksMenu() {
+    _chunksMenuEntry?.remove();
+    _chunksMenuEntry = null;
+    if (mounted) setState(() {});
+  }
+
+  void _toggleChunksMenu(BuildContext buttonContext) {
+    _chunksMenuOpen ? _closeChunksMenu() : _openChunksMenu(buttonContext);
+  }
+
+  void _openChunksMenu(BuildContext buttonContext) {
+    if (_chunksMenuEntry != null) return;
+    final anchor = buttonContext.findRenderObject() as RenderBox?;
+    _chunksMenuEntry = OverlayEntry(
+      builder: (_) => _chunksMenuOverlay(anchor: anchor),
+    );
+    Overlay.of(buttonContext).insert(_chunksMenuEntry!);
+    setState(() {});
+  }
+
+  Widget _buildChunksMenuButton(ThemeData theme) {
     final highlighted = _chunksMenuOpen;
 
-    return PopupMenuButton<String>(
-      padding: EdgeInsets.zero,
-      style: IconButton.styleFrom(
-        minimumSize: const Size(28, 28),
-        maximumSize: const Size(28, 28),
-        padding: EdgeInsets.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return Builder(
+      builder: (buttonContext) => Tooltip(
+        message: context.l10n.prompt_chunksMenu,
+        waitDuration: const Duration(milliseconds: 300),
+        child: IconButton(
+          iconSize: 18,
+          visualDensity: VisualDensity.compact,
+          style: IconButton.styleFrom(
+            backgroundColor: highlighted
+                ? theme.colorScheme.surfaceContainerHighest
+                : Colors.transparent,
+          ),
+          onPressed: () => _toggleChunksMenu(buttonContext),
+          icon: SvgPicture.asset(
+            'assets/icons/nai-icon-prompt-chunk.svg',
+            width: 16,
+            height: 16,
+            colorFilter: ColorFilter.mode(
+              highlighted
+                  ? theme.colorScheme.onSurface
+                  : theme.colorScheme.onSurfaceVariant,
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
       ),
-      tooltip: context.l10n.prompt_chunksMenu,
-      iconSize: 18,
-      offset: const Offset(0, 4),
-      position: PopupMenuPosition.under,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      onOpened: () => setState(() => _chunksMenuOpen = true),
-      onCanceled: () => setState(() => _chunksMenuOpen = false),
-      onSelected: (value) {
-        setState(() => _chunksMenuOpen = false);
-        _handleSettingsMenuResult(value);
-      },
-      itemBuilder: (context) => [
-        _buildToolPinMenuItem(
-          value: 'pin_block_palette',
-          pinned: palettePinned,
-          icon: Icons.category_outlined,
-          title: context.l10n.promptBlockPalette_tooltip,
-          theme: theme,
+    );
+  }
+
+  /// 浮层本体：半透明屏障（点外关闭）+ 锚点右对齐菜单。
+  /// Consumer 包内容，pin/开关态变化时浮层原地刷新不重建。
+  Widget _chunksMenuOverlay({required RenderBox? anchor}) {
+    const menuW = _chunksMenuWidth;
+    var dx = 16.0;
+    var dy = 120.0;
+    if (anchor != null && anchor.attached) {
+      final screen = MediaQuery.sizeOf(context);
+      final origin = anchor.localToGlobal(Offset.zero);
+      dx = (origin.dx + anchor.size.width - menuW).clamp(
+        8.0,
+        math.max(8.0, screen.width - menuW - 8),
+      );
+      var top = origin.dy + anchor.size.height + 4;
+      if (top + _chunksMenuEstimatedHeight > screen.height) {
+        top = math.max(8.0, origin.dy - 4 - _chunksMenuEstimatedHeight);
+      }
+      dy = top;
+    }
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: _closeChunksMenu,
+          ),
         ),
-        _buildToolPinMenuItem(
-          value: 'pin_block_library_panel',
-          pinned: panelToolPinned,
-          icon: Icons.view_module_outlined,
-          title: context.l10n.promptBlockEditor_library,
-          theme: theme,
-        ),
-        const PopupMenuDivider(),
-        _buildSettingsMenuItem(
-          value: 'auto_format',
-          isEnabled: enableAutoFormat,
-          title: context.l10n.prompt_autoFormat,
-          subtitle: context.l10n.prompt_autoFormatSubtitle,
-          theme: theme,
-        ),
-        _buildSettingsMenuItem(
-          value: 'highlight',
-          isEnabled: enableHighlight,
-          title: context.l10n.prompt_highlightEmphasis,
-          subtitle: context.l10n.prompt_highlightEmphasisSubtitle,
-          theme: theme,
-        ),
-        _buildSettingsMenuItem(
-          value: 'sd_syntax_convert',
-          isEnabled: enableSdSyntaxAutoConvert,
-          title: context.l10n.prompt_sdSyntaxAutoConvert,
-          subtitle: context.l10n.prompt_sdSyntaxAutoConvertSubtitle,
-          theme: theme,
-        ),
-        _buildSettingsMenuItem(
-          value: 'cooccurrence',
-          isEnabled: enableCooccurrence,
-          title: context.l10n.prompt_cooccurrenceRecommendation,
-          subtitle: context.l10n.prompt_cooccurrenceRecommendationSubtitle,
-          theme: theme,
+        Positioned(
+          left: dx,
+          top: dy,
+          child: Consumer(
+            builder: (context, ref, _) {
+              final theme = Theme.of(context);
+              final l10n = context.l10n;
+              final palettePinned = ref.watch(
+                layoutStateNotifierProvider.select(
+                  (s) => s.blockPaletteToolPinned,
+                ),
+              );
+              final panelToolPinned = ref.watch(
+                layoutStateNotifierProvider.select(
+                  (s) => s.blockLibraryPanelToolPinned,
+                ),
+              );
+              final enableAutoFormat = ref.watch(
+                autoFormatPromptSettingsProvider,
+              );
+              final enableHighlight = ref.watch(
+                highlightEmphasisSettingsProvider,
+              );
+              final enableSdSyntaxAutoConvert = ref.watch(
+                sdSyntaxAutoConvertSettingsProvider,
+              );
+              final enableCooccurrence = ref.watch(
+                completion_settings.autocompleteSettingsProvider.select(
+                  (s) => s.relatedTagsEnabled,
+                ),
+              );
+
+              return Material(
+                elevation: 8,
+                color: theme.colorScheme.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(8),
+                clipBehavior: Clip.antiAlias,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minWidth: menuW,
+                    maxWidth: menuW,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildToolPinMenuRow(
+                        pinned: palettePinned,
+                        icon: Icons.category_outlined,
+                        title: l10n.promptBlockPalette_tooltip,
+                        theme: theme,
+                        onTap: () => ref
+                            .read(layoutStateNotifierProvider.notifier)
+                            .toggleBlockPaletteToolPinned(),
+                      ),
+                      _buildToolPinMenuRow(
+                        pinned: panelToolPinned,
+                        icon: Icons.view_module_outlined,
+                        title: l10n.promptBlockEditor_library,
+                        theme: theme,
+                        onTap: () => ref
+                            .read(layoutStateNotifierProvider.notifier)
+                            .toggleBlockLibraryPanelToolPinned(),
+                      ),
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: theme.colorScheme.outlineVariant.withValues(
+                          alpha: 0.4,
+                        ),
+                      ),
+                      _buildSettingsMenuRow(
+                        isEnabled: enableAutoFormat,
+                        title: l10n.prompt_autoFormat,
+                        subtitle: l10n.prompt_autoFormatSubtitle,
+                        theme: theme,
+                        onTap: () => ref
+                            .read(autoFormatPromptSettingsProvider.notifier)
+                            .toggle(),
+                      ),
+                      _buildSettingsMenuRow(
+                        isEnabled: enableHighlight,
+                        title: l10n.prompt_highlightEmphasis,
+                        subtitle: l10n.prompt_highlightEmphasisSubtitle,
+                        theme: theme,
+                        onTap: () => ref
+                            .read(highlightEmphasisSettingsProvider.notifier)
+                            .toggle(),
+                      ),
+                      _buildSettingsMenuRow(
+                        isEnabled: enableSdSyntaxAutoConvert,
+                        title: l10n.prompt_sdSyntaxAutoConvert,
+                        subtitle: l10n.prompt_sdSyntaxAutoConvertSubtitle,
+                        theme: theme,
+                        onTap: () => ref
+                            .read(sdSyntaxAutoConvertSettingsProvider.notifier)
+                            .toggle(),
+                      ),
+                      _buildSettingsMenuRow(
+                        isEnabled: enableCooccurrence,
+                        title: l10n.prompt_cooccurrenceRecommendation,
+                        subtitle:
+                            l10n.prompt_cooccurrenceRecommendationSubtitle,
+                        theme: theme,
+                        onTap: () {
+                          final provider =
+                              completion_settings.autocompleteSettingsProvider;
+                          final current = ref.read(provider).relatedTagsEnabled;
+                          ref
+                              .read(provider.notifier)
+                              .setRelatedTagsEnabled(!current);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ],
-      icon: SvgPicture.asset(
-        'assets/icons/nai-icon-prompt-chunk.svg',
-        width: 16,
-        height: 16,
-        colorFilter: ColorFilter.mode(
-          highlighted
-              ? theme.colorScheme.onSurface
-              : theme.colorScheme.onSurfaceVariant,
-          BlendMode.srcIn,
-        ),
-      ),
     );
   }
 
@@ -752,92 +868,76 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     );
   }
 
-  PopupMenuItem<String> _buildSettingsMenuItem({
-    required String value,
-    required bool isEnabled,
-    required String title,
-    required String subtitle,
-    required ThemeData theme,
-  }) {
-    return PopupMenuItem<String>(
-      value: value,
-      child: Row(
-        children: [
-          Icon(
-            isEnabled ? Icons.check_box : Icons.check_box_outline_blank,
-            size: 20,
-            color: isEnabled ? theme.colorScheme.primary : null,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title),
-                if (subtitle.isNotEmpty)
-                  Text(
-                    subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.outline,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 「模块」区菜单行：功能图标 + 名称 + 钉子态。
+  /// 「模块」区行：功能图标 + 名称 + 钉子态。
   /// 与下方「开关」区复选框行造型刻意区分：这里点击 = 切换头部图标钉住态。
-  PopupMenuItem<String> _buildToolPinMenuItem({
-    required String value,
+  Widget _buildToolPinMenuRow({
     required bool pinned,
     required IconData icon,
     required String title,
     required ThemeData theme,
+    required VoidCallback onTap,
   }) {
-    return PopupMenuItem<String>(
-      value: value,
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 12),
-          Expanded(child: Text(title)),
-          Icon(
-            pinned ? Icons.push_pin : Icons.push_pin_outlined,
-            size: 16,
-            color: pinned
-                ? theme.colorScheme.primary
-                : theme.colorScheme.outline,
-          ),
-        ],
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
+            const SizedBox(width: 12),
+            Expanded(child: Text(title)),
+            Icon(
+              pinned ? Icons.push_pin : Icons.push_pin_outlined,
+              size: 16,
+              color: pinned
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.outline,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void _handleSettingsMenuResult(String? value) {
-    switch (value) {
-      case 'pin_block_palette':
-        ref
-            .read(layoutStateNotifierProvider.notifier)
-            .toggleBlockPaletteToolPinned();
-      case 'pin_block_library_panel':
-        ref
-            .read(layoutStateNotifierProvider.notifier)
-            .toggleBlockLibraryPanelToolPinned();
-      case 'auto_format':
-        ref.read(autoFormatPromptSettingsProvider.notifier).toggle();
-      case 'highlight':
-        ref.read(highlightEmphasisSettingsProvider.notifier).toggle();
-      case 'sd_syntax_convert':
-        ref.read(sdSyntaxAutoConvertSettingsProvider.notifier).toggle();
-      case 'cooccurrence':
-        final provider = completion_settings.autocompleteSettingsProvider;
-        final current = ref.read(provider).relatedTagsEnabled;
-        ref.read(provider.notifier).setRelatedTagsEnabled(!current);
-    }
+  /// 「开关」区行：复选框态 + 标题 + 副标题。
+  Widget _buildSettingsMenuRow({
+    required bool isEnabled,
+    required String title,
+    required String subtitle,
+    required ThemeData theme,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: [
+            Icon(
+              isEnabled ? Icons.check_box : Icons.check_box_outline_blank,
+              size: 20,
+              color: isEnabled ? theme.colorScheme.primary : null,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title),
+                  if (subtitle.isNotEmpty)
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildTextNegativeInput(ThemeData theme, bool numericEmphasisEnabled) {
