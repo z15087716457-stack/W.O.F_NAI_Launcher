@@ -9174,15 +9174,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nav_styleExplore => '画风探索';
 
   @override
-  String get styleExplore_preview => '预览';
-
-  @override
-  String get styleExplore_positive => '正向';
-
-  @override
-  String get styleExplore_negative => '负向';
-
-  @override
   String get styleExplore_rename => '重命名';
 
   @override
@@ -9201,16 +9192,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_discardChangesConfirm => '继续并丢弃';
 
   @override
-  String get styleExplore_previewTitle => 'Prompt 预览';
-
-  @override
   String get styleExplore_previewEmpty => '（空）';
-
-  @override
-  String get styleExplore_copyPositive => '复制正向';
-
-  @override
-  String get styleExplore_copyNegative => '复制负向';
 
   @override
   String get styleExplore_copiedToClipboard => '已复制';

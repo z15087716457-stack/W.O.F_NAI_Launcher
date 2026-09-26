@@ -16641,24 +16641,6 @@ abstract class AppLocalizations {
   /// **'Style Explore'**
   String get nav_styleExplore;
 
-  /// No description provided for @styleExplore_preview.
-  ///
-  /// In en, this message translates to:
-  /// **'Preview'**
-  String get styleExplore_preview;
-
-  /// No description provided for @styleExplore_positive.
-  ///
-  /// In en, this message translates to:
-  /// **'Positive'**
-  String get styleExplore_positive;
-
-  /// No description provided for @styleExplore_negative.
-  ///
-  /// In en, this message translates to:
-  /// **'Negative'**
-  String get styleExplore_negative;
-
   /// No description provided for @styleExplore_rename.
   ///
   /// In en, this message translates to:
@@ -16695,29 +16677,11 @@ abstract class AppLocalizations {
   /// **'Continue and discard'**
   String get styleExplore_discardChangesConfirm;
 
-  /// No description provided for @styleExplore_previewTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt preview'**
-  String get styleExplore_previewTitle;
-
   /// No description provided for @styleExplore_previewEmpty.
   ///
   /// In en, this message translates to:
   /// **'(empty)'**
   String get styleExplore_previewEmpty;
-
-  /// No description provided for @styleExplore_copyPositive.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy positive'**
-  String get styleExplore_copyPositive;
-
-  /// No description provided for @styleExplore_copyNegative.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy negative'**
-  String get styleExplore_copyNegative;
 
   /// No description provided for @styleExplore_copiedToClipboard.
   ///

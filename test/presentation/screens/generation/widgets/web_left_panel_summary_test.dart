@@ -6,7 +6,7 @@ import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
-import 'package:nai_launcher/presentation/screens/generation/widgets/web_left_panel.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/generation_params_menu_host.dart';
 
 void main() {
   Widget buildSubject({
@@ -15,9 +15,7 @@ void main() {
     Widget arrow = const Icon(Icons.play_arrow),
   }) {
     return ProviderScope(
-      overrides: [
-        localStorageServiceProvider.overrideWith((ref) => storage),
-      ],
+      overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
       child: MaterialApp(
         locale: const Locale('zh'),
         supportedLocales: AppLocalizations.supportedLocales,
@@ -150,7 +148,7 @@ void main() {
 
 class _MemoryLocalStorageService extends LocalStorageService {
   _MemoryLocalStorageService([Map<String, Object?>? initial])
-      : values = initial ?? {};
+    : values = initial ?? {};
 
   final Map<String, Object?> values;
 

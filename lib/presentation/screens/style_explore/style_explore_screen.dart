@@ -6,27 +6,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../providers/character_position_canvas_provider.dart';
 import '../../providers/layout_state_provider.dart';
-import '../../providers/pill_workspace_provider.dart';
 import '../../providers/style_explore/explore_manual_capture.dart';
 import '../../providers/style_explore/explore_run_provider.dart';
 import '../../providers/tips_provider.dart';
 import '../../widgets/character/character_position_canvas.dart';
-import '../../widgets/character/inline_character_row.dart';
-import '../../widgets/prompt/block_library_panel_toggle.dart';
+import '../../widgets/character/inline_character_section.dart';
+import '../../widgets/generation/auto_save_toggle_chip.dart';
 import '../generation/widgets/block_library_panel_slot.dart';
 import '../generation/widgets/generation_controls/generation_controls.dart';
-import '../generation/widgets/parameter_panel.dart';
+import '../generation/widgets/generation_param_sections.dart';
+import '../generation/widgets/generation_params_menu_host.dart';
+import '../generation/widgets/generation_sidebar_style.dart';
+import '../generation/widgets/header_capsules.dart';
+import '../generation/widgets/img2img_panel.dart';
+import '../generation/widgets/precise_reference_panel.dart';
 import '../generation/widgets/prompt_input.dart';
 import '../generation/widgets/resize_handle.dart';
+import '../generation/widgets/section_header.dart';
+import '../generation/widgets/unified_reference_panel.dart';
 import 'widgets/explore_candidate_gallery.dart';
 import 'widgets/explore_run_control_bar.dart';
 import 'widgets/explore_run_sidebar.dart';
-import 'widgets/style_explore_prompt_preview_dialog.dart';
 
 /// 画风探索页（主编辑 | 块库插槽 | 探索任务侧栏 | 候选画廊）。
 ///
-/// 主编辑区复用主生成页左栏整套面板（尺寸/种子/正·UC 提示词/角色/
-/// 生成按钮全套）且**数据同源**：提示词=main/negative lane、
+/// 主编辑区复用主生成页左栏整套官网式装配（胶囊头/提示词/角色/参考图/
+/// 尺寸/参数抽屉/生成按钮）且**数据同源**：提示词=main/negative lane、
 /// 参数=generationParamsNotifierProvider，探索页与主生成页实时同一份。
 /// 探索页点生成：主链 generate() + 按批次事件登记为活跃 run 的手动候选。
 class StyleExploreScreen extends ConsumerStatefulWidget {
@@ -165,7 +170,6 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
     bool runSidebarVisible,
     LayoutState layoutState,
   ) {
-    final l10n = context.l10n;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -184,22 +188,15 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           _buildRunSidebarToggle(theme, runSidebarVisible, layoutState),
-          OutlinedButton.icon(
-            key: const Key('style-explore-preview'),
-            onPressed: _showPreview,
-            icon: const Icon(Icons.visibility_outlined, size: 18),
-            label: Text(l10n.styleExplore_preview),
-          ),
           _buildGalleryToggle(theme, maxWidth, galleryVisible),
-          const BlockLibraryPanelToggleButton(),
+          const AutoSaveToggleIcon(),
         ],
       ),
     );
   }
 
   /// 探索任务侧栏开关（首次访问默认展开，用户切换后按存值恢复）。
-  /// FEAT-54 形制统一：图标+文字长方块（与「预览」同形制同高），
-  /// 激活态填主题主色（静当前主题 = 红）。
+  /// 图标+文字长方块，激活态填主题主色（静当前主题 = 红）。
   Widget _buildRunSidebarToggle(
     ThemeData theme,
     bool runSidebarVisible,
@@ -247,6 +244,37 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
         ),
         onPressed: () => _toggleGallery(maxWidth),
         icon: const Icon(Icons.photo_library_outlined),
+      ),
+    );
+  }
+
+  /// 头部胶囊行（官网式）：Model/Mode 合一胶囊居左，Opus/Anlas 额度胶囊居右；
+  /// 宽度不足时余额胶囊整块落第二行靠左（与主生成页头部同款 Wrap 语义）。
+  /// 低于排版下限时按 [editorWidth] 排版、超出部分裁掉（同滚动列保底）。
+  Widget _buildCapsuleBar(ThemeData theme, {required double editorWidth}) {
+    return Container(
+      constraints: const BoxConstraints(minHeight: 36),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: theme.dividerColor, width: 1)),
+      ),
+      child: UnconstrainedBox(
+        constrainedAxis: Axis.vertical,
+        alignment: Alignment.centerLeft,
+        // 自带裁剪并抑制 debug 溢出警告：窄面板时胶囊按下限排版裁右缘
+        clipBehavior: Clip.hardEdge,
+        child: SizedBox(
+          // 16 = 本行 Container 的横向 padding，先扣掉再当排版宽度
+          width: editorWidth - 16,
+          child: const Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runSpacing: 2,
+            spacing: 6,
+            children: [ModelModeCapsule(), QuotaChipsCapsule()],
+          ),
+        ),
       ),
     );
   }
@@ -323,11 +351,15 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
     );
   }
 
-  // ==================== 主编辑区：主生成页左栏整套面板（数据同源） ====================
+  // ==================== 主编辑区：主生成页左栏整套官网式装配（数据同源） ====================
+
+  /// 编辑区排版宽度下限：窄侧栏挤压到放不下时按下限排版、超出右缘裁掉，
+  /// 而不是在卡内溢出（与原 ParameterPanel 的 320 下限一致）。
+  static const double _minEditorWidth = 320.0;
 
   /// 提示词=main/negative lane、参数=generationParamsNotifierProvider，
-  /// 与主生成页实时同一份；run 控制条嵌主编辑区顶部；生成按钮走主链
-  /// generate()（探索页入口在真实批次 start 前布防手动候选登记）。
+  /// 与主生成页实时同一份；胶囊行 + Run 控制条嵌主编辑区顶部；生成按钮走
+  /// 主链 generate()（探索页入口在真实批次 start 前布防手动候选登记）。
   Widget _buildCenterPanel(ThemeData theme, {required double availableWidth}) {
     final activeRun = ref.watch(exploreActiveRunProvider);
     final activeRunId = activeRun?.id;
@@ -336,153 +368,101 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
     );
     final autoRunName = _manualAutoRunName ??= context.l10n
         .styleExplore_manualRunName(_autoRunTimestamp());
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final heightCap = _resolvePromptAreaHeightCap(constraints.maxHeight);
-        final promptAreaHeight = ref
-            .watch(
-              layoutStateNotifierProvider.select(
-                (s) => s.styleExplorePromptAreaHeight,
-              ),
-            )
-            .clamp(_minPromptAreaHeight, heightCap)
-            .toDouble();
-        return Column(
-          children: [
-            if (activeRun != null) ExploreRunControlBar(run: activeRun),
-            SizedBox(
-              height: promptAreaHeight,
-              // 侧栏挤占到卡头排不下时按下限排版，超出部分由主编辑区的
-              // ClipRect 裁掉，而不是在卡内溢出
-              child: LayoutBuilder(
-                builder: (context, box) {
-                  final width = box.maxWidth < _minPromptAreaWidth
-                      ? _minPromptAreaWidth
-                      : box.maxWidth;
-                  return OverflowBox(
-                    alignment: Alignment.topLeft,
-                    minWidth: width,
-                    maxWidth: width,
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                      child: const PromptInputWidget(
-                        showMaximizeButton: false,
-                        allowEvolutionToggle: true,
-                        tipModule: TipModule.explore,
-                      ),
+
+    final editorWidth = availableWidth < _minEditorWidth
+        ? _minEditorWidth
+        : availableWidth;
+
+    return Column(
+      children: [
+        _buildCapsuleBar(theme, editorWidth: editorWidth),
+        if (activeRun != null) ExploreRunControlBar(run: activeRun),
+        Expanded(
+          child: GenerationParamsMenuHost(
+            // 摘要条与滚动列共用一个排版下限（原 ParameterPanel 的 320）
+            summaryMinWidth: _minEditorWidth,
+            // 一体式滚动列（与主生成页左栏同款，去掉生成数量段：
+            // 探索模式强制逐张出图，x1-4 分段无意义）
+            child: SingleChildScrollView(
+              child: UnconstrainedBox(
+                constrainedAxis: Axis.vertical,
+                alignment: Alignment.topLeft,
+                // 自带裁剪并抑制 debug 溢出警告（滚动视口也会裁右缘）
+                clipBehavior: Clip.hardEdge,
+                child: SizedBox(
+                  width: editorWidth,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // 提示词：随内容自由增高（官网式，视觉锚点置顶）
+                        const PromptInputWidget(
+                          autoGrow: true,
+                          showMaximizeButton: false,
+                          allowEvolutionToggle: true,
+                          tipModule: TipModule.explore,
+                        ),
+                        const SizedBox(height: GenSidebarStyle.sectionGap),
+
+                        // 角色区：内联在主提示词正下方（官网式，内容常显）
+                        const InlineCharacterSection(),
+                        const SizedBox(height: GenSidebarStyle.sectionGap),
+
+                        // 功能面板：图生图 / 风格迁移 / 精准参考
+                        // （官网 Reference Images 小节）
+                        SectionHeader(
+                          title: context.l10n.generation_sectionReferenceImages,
+                        ),
+                        const SizedBox(height: 6),
+                        const Img2ImgPanel(),
+                        const SizedBox(height: GenSidebarStyle.cardGap),
+                        const UnifiedReferencePanel(),
+                        const SizedBox(height: GenSidebarStyle.cardGap),
+                        const PreciseReferencePanel(),
+                        const SizedBox(height: GenSidebarStyle.sectionGap),
+
+                        // 尺寸：低频控件下沉至滚动列末尾（官网 Image Settings 小节）
+                        SectionHeader(
+                          title: context.l10n.generation_sectionImageSettings,
+                        ),
+                        const SizedBox(height: 6),
+                        const SidebarTitleScope(child: SizeSection()),
+                      ],
                     ),
-                  );
-                },
-              ),
-            ),
-            const InlineCharacterRow(),
-            VerticalResizeHandle(
-              key: const Key('style-explore-prompt-area-resize-handle'),
-              onDrag: (dy) {
-                final cap = _resolvePromptAreaHeightCap(constraints.maxHeight);
-                // 拖动以存储值为基准累加（与主生成页同款）；显示高度被
-                // cap 钳制时继续拖不产生跳变，窗口恢复后高度直接生效。
-                final storedHeight = ref
-                    .read(layoutStateNotifierProvider)
-                    .styleExplorePromptAreaHeight;
-                final newHeight = (storedHeight + dy)
-                    .clamp(_minPromptAreaHeight, cap)
-                    .toDouble();
-                ref
-                    .read(layoutStateNotifierProvider.notifier)
-                    .setStyleExplorePromptAreaHeight(newHeight);
-              },
-            ),
-            Expanded(child: _buildParameterPanel()),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withValues(alpha: 0.5),
-                border: Border(
-                  top: BorderSide(color: theme.dividerColor, width: 1),
-                ),
-              ),
-              child: SizedBox(
-                width: availableWidth,
-                child: GenerationControls(
-                  // 主编辑区宽度有限，用紧凑钉底条（与主生成页左面板同款 2×2
-                  // 点数块布局），正常布局在此宽度会把点数 chips 压到重叠
-                  compact: true,
-                  exploreMode: true,
-                  onBatchEvent: (event) =>
-                      manualCaptureNotifier.handleBatchEvent(
-                        event,
-                        autoRunName: autoRunName,
-                        activeRunId: activeRunId,
-                      ),
+                  ),
                 ),
               ),
             ),
-          ],
-        );
-      },
-    );
-  }
-
-  /// 提示词区高度下限：卡头 + 底行 + token 条 + 最小两行编辑区，
-  /// 低于此值 PromptInputWidget 内部必然溢出
-  static const double _minPromptAreaHeight = 160.0;
-
-  /// 提示词区排版宽度下限：卡头页签 + 角色 / 块库 / 设置钮的固有宽度，
-  /// 低于此值卡头 Row 必然溢出
-  static const double _minPromptAreaWidth = 280.0;
-
-  /// 提示词区默认高度（= 固定高度时代的 280，也是 cap 的下限：
-  /// 窄窗顶栏折行吃掉高度时退回默认高度，不硬压到 100 造成
-  /// PromptInputWidget 内部溢出）
-  static const double _defaultPromptAreaHeight = 280.0;
-
-  /// 手柄占位高度
-  static const double _resizeHandleHeight = 8.0;
-
-  /// 底部生成控制条（紧凑态）+ padding 的预留高度
-  static const double _generationControlsReservedHeight = 150.0;
-
-  /// 角色行预留高度
-  static const double _characterRowReservedHeight = 64.0;
-
-  /// Run 控制条（有活动 Run 时出现）预留高度
-  static const double _runBarReservedHeight = 64.0;
-
-  /// 参数面板最小可见高度（拖到上限时至少留出这些）
-  static const double _minParameterPanelHeight = 240.0;
-
-  /// 提示词区高度上限：总可用高度减去其余分段的预留，保证参数面板
-  /// 与底部控制条不被挤没。
-  double _resolvePromptAreaHeightCap(double availableHeight) {
-    if (!availableHeight.isFinite || availableHeight <= 0) {
-      return double.infinity;
-    }
-    final maxByPanelBudget =
-        availableHeight -
-        _resizeHandleHeight -
-        _generationControlsReservedHeight -
-        _characterRowReservedHeight -
-        _runBarReservedHeight -
-        _minParameterPanelHeight;
-    return maxByPanelBudget
-        .clamp(_defaultPromptAreaHeight, double.infinity)
-        .toDouble();
-  }
-
-  Widget _buildParameterPanel() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (!constraints.maxWidth.isFinite || constraints.maxWidth >= 320) {
-          return const ParameterPanel();
-        }
-        return const OverflowBox(
-          alignment: Alignment.topLeft,
-          minWidth: 320,
-          maxWidth: 320,
-          child: SizedBox(width: 320, child: ParameterPanel()),
-        );
-      },
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.5),
+            border: Border(
+              top: BorderSide(color: theme.dividerColor, width: 1),
+            ),
+          ),
+          child: SizedBox(
+            width: availableWidth,
+            child: GenerationControls(
+              // 主编辑区宽度有限，用紧凑钉底条（与主生成页左面板同款 2×2
+              // 点数块布局），正常布局在此宽度会把点数 chips 压到重叠
+              compact: true,
+              exploreMode: true,
+              // Opus/Anlas 芯片与自动保存都已上移到页面顶部，底栏不再渲染
+              showBalanceChips: false,
+              showAutoSaveChip: false,
+              onBatchEvent: (event) => manualCaptureNotifier.handleBatchEvent(
+                event,
+                autoRunName: autoRunName,
+                activeRunId: activeRunId,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -524,7 +504,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
     return '${two(now.month)}-${two(now.day)} ${two(now.hour)}:${two(now.minute)}';
   }
 
-  // ==================== 右栏：候选画廊（阶段 A 空态占位） ====================
+  // ==================== 右栏：候选画廊 ====================
 
   Widget _buildGalleryPanel(ThemeData theme) {
     final width = ref
@@ -635,20 +615,6 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
         Divider(height: 1, color: theme.dividerColor),
         const Expanded(child: ExploreCandidateGallery()),
       ],
-    );
-  }
-
-  void _showPreview() {
-    final positive = ref
-        .read(pillWorkspaceProvider(PillScopes.main))
-        .projection;
-    final negative = ref
-        .read(pillWorkspaceProvider(PillScopes.negative))
-        .projection;
-    StyleExplorePromptPreviewDialog.show(
-      context,
-      positiveText: positive,
-      negativeText: negative,
     );
   }
 }

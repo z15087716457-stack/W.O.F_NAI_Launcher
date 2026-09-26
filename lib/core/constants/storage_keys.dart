@@ -74,8 +74,6 @@ class StorageKeys {
   static const String styleExploreRunSidebarVisible =
       'style_explore_run_sidebar_visible';
   static const String styleExploreGalleryWidth = 'style_explore_gallery_width';
-  static const String styleExplorePromptAreaHeight =
-      'style_explore_prompt_area_height';
   static const String styleExplorePileColumnWidth =
       'style_explore_pile_column_width';
 

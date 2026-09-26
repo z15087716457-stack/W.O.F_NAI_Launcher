@@ -17,7 +17,6 @@ class LayoutState {
   final bool blockLibraryPanelToolPinned;
   final double styleExploreRunSidebarWidth;
   final double styleExploreGalleryWidth;
-  final double styleExplorePromptAreaHeight;
 
   /// 探索页 Run 侧栏展开态；null = 从未设置过（首次访问由页面按默认展开处理）。
   final bool? styleExploreRunSidebarVisible;
@@ -34,7 +33,6 @@ class LayoutState {
     this.blockLibraryPanelToolPinned = false,
     this.styleExploreRunSidebarWidth = 240.0,
     this.styleExploreGalleryWidth = 360.0,
-    this.styleExplorePromptAreaHeight = 280.0,
     this.styleExploreRunSidebarVisible,
   });
 
@@ -51,7 +49,6 @@ class LayoutState {
     bool? blockLibraryPanelToolPinned,
     double? styleExploreRunSidebarWidth,
     double? styleExploreGalleryWidth,
-    double? styleExplorePromptAreaHeight,
     bool? styleExploreRunSidebarVisible,
   }) {
     return LayoutState(
@@ -72,8 +69,6 @@ class LayoutState {
           styleExploreRunSidebarWidth ?? this.styleExploreRunSidebarWidth,
       styleExploreGalleryWidth:
           styleExploreGalleryWidth ?? this.styleExploreGalleryWidth,
-      styleExplorePromptAreaHeight:
-          styleExplorePromptAreaHeight ?? this.styleExplorePromptAreaHeight,
       styleExploreRunSidebarVisible:
           styleExploreRunSidebarVisible ?? this.styleExploreRunSidebarVisible,
     );
@@ -100,7 +95,6 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       blockLibraryPanelToolPinned: storage.getBlockLibraryPanelToolPinned(),
       styleExploreRunSidebarWidth: storage.getStyleExploreRunSidebarWidth(),
       styleExploreGalleryWidth: storage.getStyleExploreGalleryWidth(),
-      styleExplorePromptAreaHeight: storage.getStyleExplorePromptAreaHeight(),
       styleExploreRunSidebarVisible: storage.getStyleExploreRunSidebarVisible(),
     );
   }
@@ -234,18 +228,6 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
 
     final storage = ref.read(localStorageServiceProvider);
     await storage.setStyleExploreRunSidebarVisible(visible);
-  }
-
-  /// 设置画风探索页主提示词区高度
-  ///
-  /// 业务范围钳制（最小 100 / 按可用高度算上限）在探索页调用方做，
-  /// 这里只做 ≥0 防御。
-  Future<void> setStyleExplorePromptAreaHeight(double height) async {
-    final normalized = height.clamp(0.0, double.infinity).toDouble();
-    state = state.copyWith(styleExplorePromptAreaHeight: normalized);
-
-    final storage = ref.read(localStorageServiceProvider);
-    await storage.setStyleExplorePromptAreaHeight(normalized);
   }
 
   /// 成对调整画风探索页分区宽度（手柄拖拽补偿专用）

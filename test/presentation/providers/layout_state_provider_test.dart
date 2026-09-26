@@ -304,52 +304,6 @@ void main() {
       expect(storage.styleExploreRunSidebarVisible, isNull);
     });
   });
-
-  group('LayoutState style explore prompt area height', () {
-    test('defaults to 280 and copyWith preserves other fields', () {
-      const state = LayoutState();
-
-      expect(state.styleExplorePromptAreaHeight, 280.0);
-
-      final updated = state.copyWith(
-        styleExplorePromptAreaHeight: 420.0,
-        rightPanelWidth: 360.0,
-      );
-      expect(updated.styleExplorePromptAreaHeight, 420.0);
-      expect(updated.rightPanelWidth, 360.0);
-    });
-
-    test('build reads and setter writes back with defensive clamp', () async {
-      final storage = _FakeLayoutStorage()
-        ..styleExplorePromptAreaHeight = 400.0;
-      final container = ProviderContainer(
-        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
-      );
-      addTearDown(container.dispose);
-
-      expect(
-        container
-            .read(layoutStateNotifierProvider)
-            .styleExplorePromptAreaHeight,
-        400.0,
-      );
-
-      final notifier = container.read(layoutStateNotifierProvider.notifier);
-      await notifier.setStyleExplorePromptAreaHeight(460.0);
-      expect(storage.styleExplorePromptAreaHeight, 460.0);
-      expect(
-        container
-            .read(layoutStateNotifierProvider)
-            .styleExplorePromptAreaHeight,
-        460.0,
-      );
-
-      // 业务范围钳制（最小 100 / 按可用高度的 cap）在探索页调用方做，
-      // setter 只做 ≥0 防御。
-      await notifier.setStyleExplorePromptAreaHeight(-1.0);
-      expect(storage.styleExplorePromptAreaHeight, 0.0);
-    });
-  });
 }
 
 class _FakeLayoutStorage extends LocalStorageService {
@@ -361,7 +315,6 @@ class _FakeLayoutStorage extends LocalStorageService {
   double blockLibraryPanelWidth = 320.0;
   double styleExploreRunSidebarWidth = 240.0;
   double styleExploreGalleryWidth = 360.0;
-  double styleExplorePromptAreaHeight = 280.0;
   bool? styleExploreRunSidebarVisible;
 
   @override
@@ -424,13 +377,5 @@ class _FakeLayoutStorage extends LocalStorageService {
   @override
   Future<void> setStyleExploreGalleryWidth(double value) async {
     styleExploreGalleryWidth = value;
-  }
-
-  @override
-  double getStyleExplorePromptAreaHeight() => styleExplorePromptAreaHeight;
-
-  @override
-  Future<void> setStyleExplorePromptAreaHeight(double value) async {
-    styleExplorePromptAreaHeight = value;
   }
 }

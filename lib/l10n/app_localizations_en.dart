@@ -9499,15 +9499,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nav_styleExplore => 'Style Explore';
 
   @override
-  String get styleExplore_preview => 'Preview';
-
-  @override
-  String get styleExplore_positive => 'Positive';
-
-  @override
-  String get styleExplore_negative => 'Negative';
-
-  @override
   String get styleExplore_rename => 'Rename';
 
   @override
@@ -9527,16 +9518,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_discardChangesConfirm => 'Continue and discard';
 
   @override
-  String get styleExplore_previewTitle => 'Prompt preview';
-
-  @override
   String get styleExplore_previewEmpty => '(empty)';
-
-  @override
-  String get styleExplore_copyPositive => 'Copy positive';
-
-  @override
-  String get styleExplore_copyNegative => 'Copy negative';
 
   @override
   String get styleExplore_copiedToClipboard => 'Copied';

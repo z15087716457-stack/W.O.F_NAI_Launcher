@@ -410,7 +410,6 @@ void main() {
       Theme.of(toggleElement).colorScheme.primary,
       reason: '激活态底 = colorScheme.primary',
     );
-    expect(find.byKey(const Key('style-explore-preview')), findsOneWidget);
     expect(
       find.byKey(const Key('style-explore-gallery-toggle')),
       findsOneWidget,
@@ -492,25 +491,6 @@ void main() {
       find.byKey(const Key('style-explore-gallery-resize-handle')),
     );
     expect(main.right, closeTo(galleryHandle.left, 1.1));
-  });
-
-  testWidgets('preview dialog shows pill projections without titles', (
-    tester,
-  ) async {
-    await pumpScreen(tester);
-
-    await tester.tap(find.byKey(const Key('style-explore-preview')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(find.text('Prompt 预览'), findsOneWidget);
-    expect(find.text('负向'), findsWidgets);
-    // 正负两路均为空文档，各显示一个占位。
-    expect(find.text('（空）'), findsNWidgets(2));
-    expect(
-      find.byKey(const Key('style-explore-preview-copy-positive')),
-      findsOneWidget,
-    );
   });
 
   testWidgets('editing in the explore page writes main lane and params', (
@@ -1146,104 +1126,6 @@ void main() {
       expect(state.styleExploreRunSidebarWidth, 240);
     },
   );
-
-  testWidgets('prompt area resize handle grows and shrinks the prompt box', (
-    tester,
-  ) async {
-    final container = await pumpScreen(tester);
-    final notifier = container.read(layoutStateNotifierProvider.notifier);
-    // 预置较低初值，确保 +60 不触碰按窗口高度算的上限。
-    await notifier.setStyleExplorePromptAreaHeight(200);
-    await tester.pump();
-
-    final inputBefore = tester.getSize(
-      find.byKey(const Key('generation_prompt_positive_input')),
-    );
-
-    await tester.drag(
-      find.byKey(const Key('style-explore-prompt-area-resize-handle')),
-      const Offset(0, 60),
-    );
-    await tester.pump();
-
-    expect(
-      container.read(layoutStateNotifierProvider).styleExplorePromptAreaHeight,
-      260,
-    );
-    final inputAfterGrow = tester.getSize(
-      find.byKey(const Key('generation_prompt_positive_input')),
-    );
-    expect(inputAfterGrow.height, greaterThan(inputBefore.height));
-
-    await tester.drag(
-      find.byKey(const Key('style-explore-prompt-area-resize-handle')),
-      const Offset(0, -40),
-    );
-    await tester.pump();
-
-    expect(
-      container.read(layoutStateNotifierProvider).styleExplorePromptAreaHeight,
-      220,
-    );
-    final inputAfterShrink = tester.getSize(
-      find.byKey(const Key('generation_prompt_positive_input')),
-    );
-    expect(inputAfterShrink.height, lessThan(inputAfterGrow.height));
-    // 面板 initState 里有 100ms 延迟恢复任务，推进时钟避免 pending timer。
-    await tester.pump(const Duration(milliseconds: 200));
-  });
-
-  testWidgets('prompt area resize handle clamps to the minimum height', (
-    tester,
-  ) async {
-    final container = await pumpScreen(tester);
-    await container
-        .read(layoutStateNotifierProvider.notifier)
-        .setStyleExplorePromptAreaHeight(150);
-    await tester.pump();
-
-    await tester.drag(
-      find.byKey(const Key('style-explore-prompt-area-resize-handle')),
-      const Offset(0, -500),
-    );
-    await tester.pump();
-
-    expect(
-      container.read(layoutStateNotifierProvider).styleExplorePromptAreaHeight,
-      160,
-    );
-    await tester.pump(const Duration(milliseconds: 200));
-  });
-
-  testWidgets('prompt area resize handle caps before starving lower panes', (
-    tester,
-  ) async {
-    final container = await pumpScreen(tester);
-    await container
-        .read(layoutStateNotifierProvider.notifier)
-        .setStyleExplorePromptAreaHeight(200);
-    await tester.pump();
-
-    await tester.drag(
-      find.byKey(const Key('style-explore-prompt-area-resize-handle')),
-      const Offset(0, 99999),
-    );
-    await tester.pump();
-
-    final height = container
-        .read(layoutStateNotifierProvider)
-        .styleExplorePromptAreaHeight;
-    // 停在按可用高度算出的上限：有限值、能比初值更高，但绝不吞掉
-    // 参数面板与底部控制条的生存空间，也无渲染溢出。
-    expect(height, greaterThan(200));
-    expect(height, lessThan(99999 + 200));
-    expect(
-      find.byKey(const Key('style-explore-prompt-area-resize-handle')),
-      findsOneWidget,
-    );
-    expect(tester.takeException(), isNull);
-    await tester.pump(const Duration(milliseconds: 200));
-  });
 
   testWidgets('narrow explore layout keeps panes and wraps controls', (
     tester,
