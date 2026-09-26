@@ -703,9 +703,10 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     }
     buffer.write(source.substring(cursor));
 
-    final newText = _postProcessReplacedText(buffer.toString());
+    // 替换为空串时残留的空标签位（`alpha, , beta`）保留原样，
+    // 不做隐式格式化，交给用户自行收拾。
     _applyReplacedText(
-      newText,
+      buffer.toString(),
       caretOffset: caretOffset,
       selectNextMatch: false,
     );
@@ -713,16 +714,6 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     if (mounted) {
       AppToast.info(context, context.l10n.prompt_replaceAllDone(replacedCount));
     }
-  }
-
-  /// 全部替换后的文本清理。
-  ///
-  /// 提示词是逗号分隔的标签串，把某个标签整体替换为空串后会残留
-  /// `alpha, , beta` 这样的空位。这里决定要不要以及如何收拾残局。
-  ///
-  /// TODO(用户实现)：见下方说明，可选择保持原样、收敛空标签，或整体格式化。
-  String _postProcessReplacedText(String text) {
-    return text;
   }
 
   /// 写回替换结果，并保持内部/外部控制器与搜索高亮一致。
