@@ -15,7 +15,6 @@ class GenerateButtonWithCost extends ConsumerWidget {
   final int cooldownRemainingSeconds;
   final VoidCallback onGenerate;
   final VoidCallback onCancel;
-  final VoidCallback onSkipCurrent;
   final int? costOverride;
   final String? labelOverride;
 
@@ -36,7 +35,6 @@ class GenerateButtonWithCost extends ConsumerWidget {
     this.cooldownRemainingSeconds = 0,
     required this.onGenerate,
     required this.onCancel,
-    required this.onSkipCurrent,
     this.costOverride,
     this.labelOverride,
     this.height = 48,
@@ -69,12 +67,7 @@ class GenerateButtonWithCost extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (showCancel) {
-      return GenerationCancelButtons(
-        height: height,
-        generationState: generationState,
-        onCancel: onCancel,
-        onSkipCurrent: onSkipCurrent,
-      );
+      return GenerationCancelButton(height: height, onCancel: onCancel);
     }
 
     return SizedBox(
@@ -114,93 +107,62 @@ class GenerateButtonWithCost extends ConsumerWidget {
   }
 }
 
-/// Stop always occupies the same full-width slot as Generate. A separate
-/// secondary row keeps batch skipping available without shrinking Stop.
-class GenerationCancelButtons extends StatelessWidget {
-  const GenerationCancelButtons({
+class GenerationCancelButton extends StatelessWidget {
+  const GenerationCancelButton({
     super.key,
-    required this.generationState,
     required this.onCancel,
-    required this.onSkipCurrent,
     this.height = 48,
   });
 
-  final ImageGenerationState generationState;
   final VoidCallback onCancel;
-  final VoidCallback onSkipCurrent;
   final double height;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     const yellow = Color(0xffe2c35b);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (generationState.currentImage > 0 &&
-            generationState.totalImages > generationState.currentImage)
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              key: const ValueKey('skip-current-generation'),
-              onPressed: onSkipCurrent,
-              icon: const Icon(Icons.skip_next, size: 16),
-              label: Text(
-                '${context.l10n.generation_skipCurrentBatch} '
-                '${generationState.currentImage}/${generationState.totalImages}',
-              ),
-              style: TextButton.styleFrom(
-                minimumSize: const Size(0, 28),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              ),
-            ),
-          ),
-        SizedBox(
-          key: const ValueKey('stop-all-generation'),
-          width: double.infinity,
-          height: height,
-          child: DecoratedBox(
-            position: DecorationPosition.foreground,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
-              border: Border.all(color: yellow.withValues(alpha: .6)),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(5),
-              child: CustomPaint(
-                painter: const _StopStripesPainter(),
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: InkWell(
-                    onTap: onCancel,
-                    hoverColor: yellow.withValues(alpha: .12),
-                    focusColor: yellow.withValues(alpha: .12),
-                    highlightColor: yellow.withValues(alpha: .2),
-                    splashFactory: NoSplash.splashFactory,
-                    child: Semantics(
-                      button: true,
-                      child: Center(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.stop_circle_outlined,
-                              size: 18,
-                              color: yellow,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              context.l10n.generation_stopAllGeneration,
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: yellow,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+    return SizedBox(
+      key: const ValueKey('stop-generation'),
+      width: double.infinity,
+      height: height,
+      child: DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(color: yellow.withValues(alpha: .6)),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(5),
+          child: CustomPaint(
+            painter: const _StopStripesPainter(),
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                onTap: onCancel,
+                hoverColor: yellow.withValues(alpha: .12),
+                focusColor: yellow.withValues(alpha: .12),
+                highlightColor: yellow.withValues(alpha: .2),
+                splashFactory: NoSplash.splashFactory,
+                child: Semantics(
+                  button: true,
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.stop_circle_outlined,
+                          size: 18,
+                          color: yellow,
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Text(
+                          context.l10n.generation_stopGeneration,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: yellow,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -208,7 +170,7 @@ class GenerationCancelButtons extends StatelessWidget {
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }

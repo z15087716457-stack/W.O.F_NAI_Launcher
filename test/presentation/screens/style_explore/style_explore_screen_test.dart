@@ -1742,6 +1742,14 @@ void main() {
       final menuItemRect = tester.getRect(renameText);
       expect((menuItemRect.center.dx - clickPosition.dx).abs(), lessThan(220));
       expect(menuItemRect.top, lessThan(clickPosition.dy + 100));
+      expect(
+        tester.getSize(find.byKey(const Key('explore-folder-menu-rename'))),
+        const Size(168, 40),
+      );
+      expect(
+        tester.getSize(find.byKey(const Key('explore-folder-menu-delete'))),
+        const Size(168, 40),
+      );
     },
   );
 

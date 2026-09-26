@@ -1617,17 +1617,11 @@ abstract class AppLocalizations {
   /// **'Cancel Generation'**
   String get generation_cancelGeneration;
 
-  /// No description provided for @generation_skipCurrentBatch.
+  /// No description provided for @generation_stopGeneration.
   ///
   /// In en, this message translates to:
-  /// **'Skip Current Batch'**
-  String get generation_skipCurrentBatch;
-
-  /// No description provided for @generation_stopAllGeneration.
-  ///
-  /// In en, this message translates to:
-  /// **'Stop All'**
-  String get generation_stopAllGeneration;
+  /// **'Stop Generation'**
+  String get generation_stopGeneration;
 
   /// No description provided for @generation_pleaseInputPrompt.
   ///

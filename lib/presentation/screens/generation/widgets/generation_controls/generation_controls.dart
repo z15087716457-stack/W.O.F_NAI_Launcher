@@ -120,9 +120,6 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
       onGenerate: () => unawaited(_handleGenerate(context, ref)),
       onCancel: () =>
           ref.read(imageGenerationNotifierProvider.notifier).cancel(),
-      onSkipCurrent: () => ref
-          .read(imageGenerationNotifierProvider.notifier)
-          .skipCurrentRequest(),
     );
 
     final autoSaveChip = widget.showAutoSaveChip

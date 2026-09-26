@@ -104,10 +104,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   final Map<String, _RememberedStreamPreview> _streamPreviewsForSnapshots =
       <String, _RememberedStreamPreview>{};
   final Set<String> _failedStreamSnapshotKeys = <String>{};
-  int? _activeRequestGenerationRunId;
-  int? _activeRequestStartImage;
-  int? _activeRequestEndImage;
-  bool _activeRequestCancelRequested = false;
 
   int _startGenerationRun({ImageOperation? operation}) {
     _activeImageOperation = operation;
@@ -115,14 +111,12 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     _activeGenerationRunId = ++_generationRunCounter;
     _streamPreviewsForSnapshots.clear();
     _failedStreamSnapshotKeys.clear();
-    _clearActiveRequest();
     return _activeGenerationRunId;
   }
 
   void _invalidateGenerationRun() {
     _isCancelled = true;
     _activeGenerationRunId = ++_generationRunCounter;
-    _clearActiveRequest();
   }
 
   bool _isCurrentGenerationRun(int generationRunId) =>
@@ -211,44 +205,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
   String _streamSnapshotKey(int generationRunId, int imageNumber) =>
       '$generationRunId:$imageNumber';
-
-  void _beginActiveRequest({
-    required int generationRunId,
-    required int startImage,
-    required int requestSize,
-  }) {
-    _activeRequestGenerationRunId = generationRunId;
-    _activeRequestStartImage = startImage;
-    _activeRequestEndImage = startImage + requestSize - 1;
-    _activeRequestCancelRequested = false;
-  }
-
-  void _endActiveRequest({
-    required int generationRunId,
-    required int startImage,
-  }) {
-    if (_activeRequestGenerationRunId == generationRunId &&
-        _activeRequestStartImage == startImage) {
-      _clearActiveRequest();
-    }
-  }
-
-  void _clearActiveRequest() {
-    _activeRequestGenerationRunId = null;
-    _activeRequestStartImage = null;
-    _activeRequestEndImage = null;
-    _activeRequestCancelRequested = false;
-  }
-
-  bool _isActiveRequestCancel(int generationRunId, int startImage) =>
-      _activeRequestCancelRequested &&
-      _activeRequestGenerationRunId == generationRunId &&
-      _activeRequestStartImage == startImage;
-
-  bool _activeRequestHasRemainingImages() {
-    final endImage = _activeRequestEndImage;
-    return endImage != null && state.totalImages > endImage;
-  }
 
   void _rememberStreamPreview({
     required Uint8List bytes,
@@ -1651,8 +1607,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         requestParams,
         onProgress: (_, __) {},
       );
-      if (_shouldAbortGenerationRun(generationRunId) ||
-          _isActiveRequestCancel(generationRunId, currentStart)) {
+      if (_shouldAbortGenerationRun(generationRunId)) {
         return const <Uint8List>[];
       }
       clearRememberedPreviewsForRequest(fallback.length);
@@ -1667,11 +1622,6 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           progress: 0.0,
         ),
     ];
-    _beginActiveRequest(
-      generationRunId: generationRunId,
-      startImage: currentStart,
-      requestSize: batchSize,
-    );
     state = state.copyWith(
       currentImage: currentStart,
       progress: progressForBatch(completedSamples: 0),
@@ -1679,188 +1629,162 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       clearStreamPreview: true,
     );
 
-    try {
-      for (int retry = 0; retry <= _maxRetries; retry++) {
-        final finalImages = <int, Uint8List>{};
+    for (int retry = 0; retry <= _maxRetries; retry++) {
+      final finalImages = <int, Uint8List>{};
 
-        try {
-          if (useNonStreamFallback) {
-            return await runNonStreamFallback();
-          }
+      try {
+        if (useNonStreamFallback) {
+          return await runNonStreamFallback();
+        }
 
-          var streamingNotAllowed = false;
-          await for (final chunk in apiService.generateImageStream(
-            requestParams,
-          )) {
-            if (_shouldAbortGenerationRun(generationRunId)) {
-              return const <Uint8List>[];
-            }
-            if (_isActiveRequestCancel(generationRunId, currentStart)) {
-              _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
-              return const <Uint8List>[];
-            }
-
-            if (chunk.hasError) {
-              if (_isActiveRequestCancel(generationRunId, currentStart) &&
-                  _hasCancelledText(chunk.error ?? '')) {
-                _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
-                return const <Uint8List>[];
-              }
-              if (_isStreamingNotAllowed(chunk.error ?? '')) {
-                AppLogger.w(
-                  'Streaming not allowed, falling back to non-stream API',
-                  'Generation',
-                );
-                streamingNotAllowed = true;
-                useNonStreamFallback = true;
-                break;
-              }
-              throw Exception(chunk.error);
-            }
-
-            final imageNumber = imageNumberForSample(chunk.sampleIndex);
-            if (chunk.hasPreview) {
-              _rememberStreamPreview(
-                bytes: chunk.previewImage!,
-                params: requestParams,
-                generationRunId: generationRunId,
-                imageNumber: imageNumber,
-                inpaintPreviewPlacement: chunk.inpaintPreviewPlacement,
-              );
-              final slot = StreamPreviewSlot(
-                imageNumber: imageNumber,
-                totalImages: total,
-                progress: chunk.progress.clamp(0.0, 0.99).toDouble(),
-                previewBytes: chunk.previewImage,
-                inpaintPreviewPlacement: chunk.inpaintPreviewPlacement,
-              );
-              state = state.copyWith(
-                currentImage: imageNumber,
-                progress: progressForBatch(
-                  completedSamples: finalImages.length,
-                  inFlightProgress: slot.progress,
-                ),
-                streamPreview: chunk.previewImage,
-                inpaintPreviewPlacement: chunk.inpaintPreviewPlacement,
-                streamPreviewSlots: _replaceStreamPreviewSlot(
-                  state.streamPreviewSlots,
-                  slot,
-                ),
-              );
-            }
-
-            if (chunk.isComplete && chunk.hasFinalImage) {
-              finalImages[chunk.sampleIndex] = chunk.finalImage!;
-              if (chunk.vibeEncodings?.isNotEmpty == true) {
-                _saveVibeEncodings(chunk.vibeEncodings!);
-              }
-              _rememberStreamPreview(
-                bytes: chunk.finalImage!,
-                params: requestParams,
-                generationRunId: generationRunId,
-                imageNumber: imageNumber,
-              );
-              final slot = StreamPreviewSlot(
-                imageNumber: imageNumber,
-                totalImages: total,
-                progress: 1.0,
-                previewBytes: chunk.finalImage,
-              );
-              state = state.copyWith(
-                currentImage: imageNumber,
-                progress: progressForBatch(
-                  completedSamples: finalImages.length,
-                ),
-                streamPreview: chunk.finalImage,
-                clearInpaintPreviewPlacement: true,
-                streamPreviewSlots: _replaceStreamPreviewSlot(
-                  state.streamPreviewSlots,
-                  slot,
-                ),
-              );
-            }
-          }
-
+        var streamingNotAllowed = false;
+        await for (final chunk in apiService.generateImageStream(
+          requestParams,
+        )) {
           if (_shouldAbortGenerationRun(generationRunId)) {
             return const <Uint8List>[];
           }
-          if (_isActiveRequestCancel(generationRunId, currentStart)) {
-            _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
-            return const <Uint8List>[];
-          }
 
-          if (streamingNotAllowed) {
-            final fallback = await runNonStreamFallback();
-            if (fallback.isNotEmpty) return fallback;
-            continue;
-          }
-
-          if (finalImages.isNotEmpty) {
-            final orderedImages = finalImages.entries.toList()
-              ..sort((a, b) => a.key.compareTo(b.key));
-            clearRememberedPreviewsForRequest(batchSize);
-            return orderedImages.map((entry) => entry.value).toList();
-          }
-
-          final fallback = await runNonStreamFallback();
-          if (fallback.isNotEmpty) return fallback;
-        } catch (e) {
-          if (_isActiveRequestCancel(generationRunId, currentStart)) {
-            _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
-            return const <Uint8List>[];
-          }
-          if (_isCancelledError(e, generationRunId)) {
-            _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
-            final orderedImages = finalImages.entries.toList()
-              ..sort((a, b) => a.key.compareTo(b.key));
-            return orderedImages.map((entry) => entry.value).toList();
-          }
-          if (_isRemoteCancelledError(e, generationRunId)) {
-            _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
-            rethrow;
-          }
-          if (_isConcurrencyLimited(e)) rethrow; // 交给上层等待并发额度释放
-
-          if (_isStreamingNotAllowed(e.toString())) {
-            AppLogger.w(
-              'Streaming not allowed (exception), falling back to non-stream API',
-              'Generation',
-            );
-            useNonStreamFallback = true;
-            try {
-              final fallback = await runNonStreamFallback();
-              if (fallback.isNotEmpty) return fallback;
-            } catch (fallbackError) {
-              _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
-              AppLogger.e('非流式回退生成失败: $fallbackError');
+          if (chunk.hasError) {
+            if (_isStreamingNotAllowed(chunk.error ?? '')) {
+              AppLogger.w(
+                'Streaming not allowed, falling back to non-stream API',
+                'Generation',
+              );
+              streamingNotAllowed = true;
+              useNonStreamFallback = true;
+              break;
             }
-            break;
+            throw Exception(chunk.error);
           }
 
-          if (retry < _maxRetries) {
-            AppLogger.w(
-              '生成失败，${_retryDelays[retry]}ms 后重试 (${retry + 1}/$_maxRetries): $e',
+          final imageNumber = imageNumberForSample(chunk.sampleIndex);
+          if (chunk.hasPreview) {
+            _rememberStreamPreview(
+              bytes: chunk.previewImage!,
+              params: requestParams,
+              generationRunId: generationRunId,
+              imageNumber: imageNumber,
+              inpaintPreviewPlacement: chunk.inpaintPreviewPlacement,
             );
-            await Future.delayed(Duration(milliseconds: _retryDelays[retry]));
-            if (_shouldAbortGenerationRun(generationRunId)) {
-              return const <Uint8List>[];
+            final slot = StreamPreviewSlot(
+              imageNumber: imageNumber,
+              totalImages: total,
+              progress: chunk.progress.clamp(0.0, 0.99).toDouble(),
+              previewBytes: chunk.previewImage,
+              inpaintPreviewPlacement: chunk.inpaintPreviewPlacement,
+            );
+            state = state.copyWith(
+              currentImage: imageNumber,
+              progress: progressForBatch(
+                completedSamples: finalImages.length,
+                inFlightProgress: slot.progress,
+              ),
+              streamPreview: chunk.previewImage,
+              inpaintPreviewPlacement: chunk.inpaintPreviewPlacement,
+              streamPreviewSlots: _replaceStreamPreviewSlot(
+                state.streamPreviewSlots,
+                slot,
+              ),
+            );
+          }
+
+          if (chunk.isComplete && chunk.hasFinalImage) {
+            finalImages[chunk.sampleIndex] = chunk.finalImage!;
+            if (chunk.vibeEncodings?.isNotEmpty == true) {
+              _saveVibeEncodings(chunk.vibeEncodings!);
             }
-          } else {
-            AppLogger.e('生成第 $currentStart 批图像失败: $e');
-            _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
-            rethrow;
+            _rememberStreamPreview(
+              bytes: chunk.finalImage!,
+              params: requestParams,
+              generationRunId: generationRunId,
+              imageNumber: imageNumber,
+            );
+            final slot = StreamPreviewSlot(
+              imageNumber: imageNumber,
+              totalImages: total,
+              progress: 1.0,
+              previewBytes: chunk.finalImage,
+            );
+            state = state.copyWith(
+              currentImage: imageNumber,
+              progress: progressForBatch(completedSamples: finalImages.length),
+              streamPreview: chunk.finalImage,
+              clearInpaintPreviewPlacement: true,
+              streamPreviewSlots: _replaceStreamPreviewSlot(
+                state.streamPreviewSlots,
+                slot,
+              ),
+            );
           }
         }
-      }
 
-      _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
-      return const <Uint8List>[];
-    } finally {
-      _endActiveRequest(
-        generationRunId: generationRunId,
-        startImage: currentStart,
-      );
+        if (_shouldAbortGenerationRun(generationRunId)) {
+          return const <Uint8List>[];
+        }
+
+        if (streamingNotAllowed) {
+          final fallback = await runNonStreamFallback();
+          if (fallback.isNotEmpty) return fallback;
+          continue;
+        }
+
+        if (finalImages.isNotEmpty) {
+          final orderedImages = finalImages.entries.toList()
+            ..sort((a, b) => a.key.compareTo(b.key));
+          clearRememberedPreviewsForRequest(batchSize);
+          return orderedImages.map((entry) => entry.value).toList();
+        }
+
+        final fallback = await runNonStreamFallback();
+        if (fallback.isNotEmpty) return fallback;
+      } catch (e) {
+        if (_isCancelledError(e, generationRunId)) {
+          _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
+          final orderedImages = finalImages.entries.toList()
+            ..sort((a, b) => a.key.compareTo(b.key));
+          return orderedImages.map((entry) => entry.value).toList();
+        }
+        if (_isRemoteCancelledError(e, generationRunId)) {
+          _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
+          rethrow;
+        }
+        if (_isConcurrencyLimited(e)) rethrow; // 交给上层等待并发额度释放
+
+        if (_isStreamingNotAllowed(e.toString())) {
+          AppLogger.w(
+            'Streaming not allowed (exception), falling back to non-stream API',
+            'Generation',
+          );
+          useNonStreamFallback = true;
+          try {
+            final fallback = await runNonStreamFallback();
+            if (fallback.isNotEmpty) return fallback;
+          } catch (fallbackError) {
+            _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
+            AppLogger.e('非流式回退生成失败: $fallbackError');
+          }
+          break;
+        }
+
+        if (retry < _maxRetries) {
+          AppLogger.w(
+            '生成失败，${_retryDelays[retry]}ms 后重试 (${retry + 1}/$_maxRetries): $e',
+          );
+          await Future.delayed(Duration(milliseconds: _retryDelays[retry]));
+          if (_shouldAbortGenerationRun(generationRunId)) {
+            return const <Uint8List>[];
+          }
+        } else {
+          AppLogger.e('生成第 $currentStart 批图像失败: $e');
+          _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
+          rethrow;
+        }
+      }
     }
+
+    _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
+    return const <Uint8List>[];
   }
 
   /// 生成单张（使用流式 API 支持渐进式预览）
@@ -2266,24 +2190,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     }
   }
 
-  /// 跳过当前请求，继续后续批次。
-  void skipCurrentRequest() {
-    final generationRunId = _activeGenerationRunId;
-    final apiService = ref.read(naiImageGenerationApiServiceProvider);
-
-    if (_activeRequestGenerationRunId != generationRunId ||
-        !_activeRequestHasRemainingImages()) {
-      cancel();
-      return;
-    }
-
-    _activeRequestCancelRequested = true;
-    _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
-    apiService.cancelGeneration();
-    state = state.copyWith(clearStreamPreview: true);
-  }
-
-  /// 取消生成并停止后续批次。
+  /// 取消当前请求并停止后续生成。
   void cancel() {
     final generationRunId = _activeGenerationRunId;
     final apiService = ref.read(naiImageGenerationApiServiceProvider);

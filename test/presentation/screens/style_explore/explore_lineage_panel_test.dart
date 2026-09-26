@@ -377,6 +377,11 @@ void main() {
     expect(menuRect.left, lessThan(clickPosition.dx + 24));
     expect(menuRect.right, greaterThan(clickPosition.dx - 24));
     expect(menuRect.top, lessThan(clickPosition.dy + 24));
+    expect(
+      tester.getSize(find.byKey(const Key('explore-family-menu-delete'))),
+      const Size(128, 40),
+    );
+    expect(menuRect.height, lessThanOrEqualTo(56));
   });
 
   testWidgets('两代家族下点活跃堆缩略图：计数与勾选圈同步（BUG-5 回归）', (tester) async {

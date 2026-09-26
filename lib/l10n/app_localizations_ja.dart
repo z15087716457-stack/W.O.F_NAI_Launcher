@@ -820,10 +820,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_cancelGeneration => '生成のキャンセル';
 
   @override
-  String get generation_skipCurrentBatch => '現在のバッチをスキップ';
-
-  @override
-  String get generation_stopAllGeneration => 'すべて停止';
+  String get generation_stopGeneration => '生成を停止';
 
   @override
   String get generation_pleaseInputPrompt => 'プロンプトを入力してください';

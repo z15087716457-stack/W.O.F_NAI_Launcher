@@ -147,15 +147,11 @@ class _MobileGenerationLayoutState
                 child: _MobileGenerateButton(
                   isGenerating: isGenerating,
                   showCancel: isLauncherGenerating,
-                  generationState: generationState,
                   cooldownRemainingSeconds: cooldownState.remainingSeconds,
                   onGenerate: () => _handleGenerate(context, ref),
                   onCancel: () => ref
                       .read(imageGenerationNotifierProvider.notifier)
                       .cancel(),
-                  onSkipCurrent: () => ref
-                      .read(imageGenerationNotifierProvider.notifier)
-                      .skipCurrentRequest(),
                 ),
               ),
             ],
@@ -193,30 +189,22 @@ class _MobileGenerationLayoutState
 class _MobileGenerateButton extends ConsumerWidget {
   final bool isGenerating;
   final bool showCancel;
-  final ImageGenerationState generationState;
   final int cooldownRemainingSeconds;
   final VoidCallback onGenerate;
   final VoidCallback onCancel;
-  final VoidCallback onSkipCurrent;
 
   const _MobileGenerateButton({
     required this.isGenerating,
     required this.showCancel,
-    required this.generationState,
     this.cooldownRemainingSeconds = 0,
     required this.onGenerate,
     required this.onCancel,
-    required this.onSkipCurrent,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (showCancel) {
-      return GenerationCancelButtons(
-        generationState: generationState,
-        onCancel: onCancel,
-        onSkipCurrent: onSkipCurrent,
-      );
+      return GenerationCancelButton(onCancel: onCancel);
     }
 
     return ThemedButton(

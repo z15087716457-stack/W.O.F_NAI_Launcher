@@ -359,7 +359,6 @@ void main() {
           requestedCount: 1,
         );
         var cancelled = 0;
-        var skipped = 0;
         await tester.pumpWidget(
           _app(
             container,
@@ -380,14 +379,7 @@ void main() {
                           const SizedBox(height: 16),
                           const ImageCountSection(),
                           const SizedBox(height: 16),
-                          GenerationCancelButtons(
-                            onCancel: () => cancelled++,
-                            onSkipCurrent: () => skipped++,
-                            generationState: const ImageGenerationState(
-                              currentImage: 1,
-                              totalImages: 3,
-                            ),
-                          ),
+                          GenerationCancelButton(onCancel: () => cancelled++),
                           const SizedBox(height: 16),
                           CanvasEdgeToolbar(
                             zone: CanvasToolbarZone.top,
@@ -436,15 +428,13 @@ void main() {
           isFalse,
         );
         expect(container.read(imagesPerRequestProvider), 3);
-        final stop = find.byKey(const ValueKey('stop-all-generation'));
+        final stop = find.byKey(const ValueKey('stop-generation'));
         expect(tester.getSize(stop), Size(width - 16, 48));
         final bounds = tester.getRect(stop);
         await tester.tapAt(Offset(bounds.left + 4, bounds.center.dy));
         await tester.tapAt(Offset(bounds.right - 4, bounds.center.dy));
         expect(cancelled, 2);
-        await tester.tap(find.byKey(const ValueKey('skip-current-generation')));
-        expect(skipped, 1);
-        expect(cancelled, 2);
+        expect(find.byIcon(Icons.skip_next), findsNothing);
         await mouse.moveTo(Offset.zero);
         await tester.pumpAndSettle();
         await _capture(tester, boundary, 'controls-$width');

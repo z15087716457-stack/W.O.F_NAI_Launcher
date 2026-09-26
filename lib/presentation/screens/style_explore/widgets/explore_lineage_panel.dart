@@ -504,27 +504,30 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
     final overlay = Overlay.of(context).context.findRenderObject();
     if (overlay is! RenderBox) return;
     final localPosition = overlay.globalToLocal(globalPosition);
+    final errorColor = Theme.of(context).colorScheme.error;
     final choice = await showMenu<String>(
       context: context,
+      constraints: const BoxConstraints(minWidth: 128, maxWidth: 168),
+      menuPadding: const EdgeInsets.symmetric(vertical: 4),
       position: RelativeRect.fromRect(
         Rect.fromPoints(localPosition, localPosition),
         Offset.zero & overlay.size,
       ),
       items: [
         PopupMenuItem(
+          key: const Key('explore-family-menu-delete'),
           value: 'delete',
-          child: ListTile(
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            leading: Icon(
-              Icons.delete_outline,
-              size: 18,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            title: Text(
-              context.l10n.styleExplore_deleteFamily,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            children: [
+              Icon(Icons.delete_outline, size: 18, color: errorColor),
+              const SizedBox(width: 10),
+              Text(
+                context.l10n.styleExplore_deleteFamily,
+                style: TextStyle(color: errorColor),
+              ),
+            ],
           ),
         ),
       ],
