@@ -13,6 +13,8 @@ class LayoutState {
   final bool webLeftPanelExpanded;
   final bool blockLibraryPanelExpanded;
   final double blockLibraryPanelWidth;
+  final bool blockPaletteToolPinned;
+  final bool blockLibraryPanelToolPinned;
   final double styleExploreRunSidebarWidth;
   final double styleExploreGalleryWidth;
   final double styleExplorePromptAreaHeight;
@@ -28,6 +30,8 @@ class LayoutState {
     this.webLeftPanelExpanded = true,
     this.blockLibraryPanelExpanded = false,
     this.blockLibraryPanelWidth = 320.0,
+    this.blockPaletteToolPinned = true,
+    this.blockLibraryPanelToolPinned = false,
     this.styleExploreRunSidebarWidth = 240.0,
     this.styleExploreGalleryWidth = 360.0,
     this.styleExplorePromptAreaHeight = 280.0,
@@ -43,6 +47,8 @@ class LayoutState {
     bool? webLeftPanelExpanded,
     bool? blockLibraryPanelExpanded,
     double? blockLibraryPanelWidth,
+    bool? blockPaletteToolPinned,
+    bool? blockLibraryPanelToolPinned,
     double? styleExploreRunSidebarWidth,
     double? styleExploreGalleryWidth,
     double? styleExplorePromptAreaHeight,
@@ -58,6 +64,10 @@ class LayoutState {
           blockLibraryPanelExpanded ?? this.blockLibraryPanelExpanded,
       blockLibraryPanelWidth:
           blockLibraryPanelWidth ?? this.blockLibraryPanelWidth,
+      blockPaletteToolPinned:
+          blockPaletteToolPinned ?? this.blockPaletteToolPinned,
+      blockLibraryPanelToolPinned:
+          blockLibraryPanelToolPinned ?? this.blockLibraryPanelToolPinned,
       styleExploreRunSidebarWidth:
           styleExploreRunSidebarWidth ?? this.styleExploreRunSidebarWidth,
       styleExploreGalleryWidth:
@@ -86,6 +96,8 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       webLeftPanelExpanded: storage.getWebLeftPanelExpanded(),
       blockLibraryPanelExpanded: storage.getBlockLibraryPanelExpanded(),
       blockLibraryPanelWidth: storage.getBlockLibraryPanelWidth(),
+      blockPaletteToolPinned: storage.getBlockPaletteToolPinned(),
+      blockLibraryPanelToolPinned: storage.getBlockLibraryPanelToolPinned(),
       styleExploreRunSidebarWidth: storage.getStyleExploreRunSidebarWidth(),
       styleExploreGalleryWidth: storage.getStyleExploreGalleryWidth(),
       styleExplorePromptAreaHeight: storage.getStyleExplorePromptAreaHeight(),
@@ -167,6 +179,32 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
 
     final storage = ref.read(localStorageServiceProvider);
     await storage.setBlockLibraryPanelWidth(normalized);
+  }
+
+  /// 设置积木工具钮钉住状态（提示词头部图标位显隐，模块与开关菜单管理）
+  Future<void> setBlockPaletteToolPinned(bool pinned) async {
+    state = state.copyWith(blockPaletteToolPinned: pinned);
+
+    final storage = ref.read(localStorageServiceProvider);
+    await storage.setBlockPaletteToolPinned(pinned);
+  }
+
+  /// 切换积木工具钮钉住状态
+  Future<void> toggleBlockPaletteToolPinned() async {
+    await setBlockPaletteToolPinned(!state.blockPaletteToolPinned);
+  }
+
+  /// 设置块库面板图标钉住状态（头部"块库"图标位显隐）
+  Future<void> setBlockLibraryPanelToolPinned(bool pinned) async {
+    state = state.copyWith(blockLibraryPanelToolPinned: pinned);
+
+    final storage = ref.read(localStorageServiceProvider);
+    await storage.setBlockLibraryPanelToolPinned(pinned);
+  }
+
+  /// 切换块库面板图标钉住状态
+  Future<void> toggleBlockLibraryPanelToolPinned() async {
+    await setBlockLibraryPanelToolPinned(!state.blockLibraryPanelToolPinned);
   }
 
   /// 设置画风探索页 Run 侧栏宽度

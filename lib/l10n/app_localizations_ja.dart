@@ -1093,7 +1093,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get prompt_transparentBg => '透明背景';
 
   @override
-  String get prompt_chunksMenu => 'プロンプトチャンクと設定';
+  String get prompt_chunksMenu => 'ツールとスイッチ';
 
   @override
   String get qualityTags_presetChip => '品質タグ';

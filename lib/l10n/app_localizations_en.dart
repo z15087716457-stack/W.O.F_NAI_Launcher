@@ -1113,7 +1113,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prompt_transparentBg => 'Transparent BG';
 
   @override
-  String get prompt_chunksMenu => 'Prompt chunks & settings';
+  String get prompt_chunksMenu => 'Tools & toggles';
 
   @override
   String get qualityTags_presetChip => 'Quality Tags';

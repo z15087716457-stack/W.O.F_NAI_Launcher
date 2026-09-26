@@ -2124,7 +2124,7 @@ abstract class AppLocalizations {
   /// No description provided for @prompt_chunksMenu.
   ///
   /// In en, this message translates to:
-  /// **'Prompt chunks & settings'**
+  /// **'Tools & toggles'**
   String get prompt_chunksMenu;
 
   /// No description provided for @qualityTags_presetChip.

@@ -1078,7 +1078,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prompt_transparentBg => '透明通道';
 
   @override
-  String get prompt_chunksMenu => '提示词块与设置';
+  String get prompt_chunksMenu => '模块与开关';
 
   @override
   String get qualityTags_presetChip => '质量词预设';

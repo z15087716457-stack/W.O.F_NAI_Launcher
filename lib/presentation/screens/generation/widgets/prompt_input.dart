@@ -33,6 +33,7 @@ import '../../../widgets/prompt/quality_tags_selector.dart';
 import '../../../widgets/prompt/transparent_background_chip.dart';
 import '../../../widgets/prompt/uc_preset_selector.dart';
 import '../../../widgets/prompt/blocks/prompt_block_palette.dart';
+import '../../../widgets/prompt/block_library_panel_toggle.dart';
 import '../../../widgets/character/character_prompt_button.dart';
 import '../../../providers/pending_prompt_provider.dart';
 import 'generation_sidebar_style.dart';
@@ -468,8 +469,14 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     );
   }
 
-  /// 卡内头部（官网式）：左 = 正面/负面页签，右 = 扩展槽 + 块库/设置 + 全屏。
+  /// 卡内头部（官网式）：左 = 正面/负面页签，右 = 扩展槽 + 钉住工具图标 + 模块与开关 + 全屏。
   Widget _buildCardHeader(ThemeData theme) {
+    final palettePinned = ref.watch(
+      layoutStateNotifierProvider.select((s) => s.blockPaletteToolPinned),
+    );
+    final panelToolPinned = ref.watch(
+      layoutStateNotifierProvider.select((s) => s.blockLibraryPanelToolPinned),
+    );
     return Padding(
       // Tabs and editor share the same inset inside one writing surface.
       padding: const EdgeInsets.fromLTRB(10, 8, 8, 0),
@@ -482,8 +489,16 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             const CharacterPromptButton(),
             const SizedBox(width: 2),
           ],
-          // 块库左侧预留扩展槽（翻译/Agent 动态提示扩展位）
-          const PromptBlockPaletteButton(),
+          // 模块图标位：「模块与开关」菜单钉住的工具，钉/收带动画。
+          // 预留扩展槽给未来的翻译/Agent 动态提示钮，进同一钉机制。
+          _PinnedToolSlot(
+            pinned: palettePinned,
+            child: const PromptBlockPaletteButton(),
+          ),
+          _PinnedToolSlot(
+            pinned: panelToolPinned,
+            child: const BlockLibraryPanelToggleButton(),
+          ),
           _buildChunksMenuButton(theme),
           if (widget.showMaximizeButton)
             IconButton(
@@ -507,11 +522,15 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     );
   }
 
-  /// 块库/设置弹层钮（官网 prompt-chunks 钮）：官方 prompt_chunk 图标，
-  /// 弹层首项 = 块库面板开关（勾选态随面板展开），其后为提示词设置项。
+  /// 「模块与开关」弹层钮（官网 prompt-chunks 钮）：官方 prompt_chunk 图标。
+  /// 弹层上区 = 工具图标位（钉住即出现在头部，积木/块库面板），
+  /// 下区 = 提示词设置开关项。
   Widget _buildChunksMenuButton(ThemeData theme) {
-    final panelExpanded = ref.watch(
-      layoutStateNotifierProvider.select((s) => s.blockLibraryPanelExpanded),
+    final palettePinned = ref.watch(
+      layoutStateNotifierProvider.select((s) => s.blockPaletteToolPinned),
+    );
+    final panelToolPinned = ref.watch(
+      layoutStateNotifierProvider.select((s) => s.blockLibraryPanelToolPinned),
     );
     final enableAutoFormat = ref.watch(autoFormatPromptSettingsProvider);
     final enableHighlight = ref.watch(highlightEmphasisSettingsProvider);
@@ -524,7 +543,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       ),
     );
 
-    final highlighted = panelExpanded || _chunksMenuOpen;
+    final highlighted = _chunksMenuOpen;
 
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
@@ -546,11 +565,18 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         _handleSettingsMenuResult(value);
       },
       itemBuilder: (context) => [
-        _buildSettingsMenuItem(
-          value: 'block_library',
-          isEnabled: panelExpanded,
+        _buildToolPinMenuItem(
+          value: 'pin_block_palette',
+          pinned: palettePinned,
+          icon: Icons.category_outlined,
+          title: context.l10n.promptBlockPalette_tooltip,
+          theme: theme,
+        ),
+        _buildToolPinMenuItem(
+          value: 'pin_block_library_panel',
+          pinned: panelToolPinned,
+          icon: Icons.view_module_outlined,
           title: context.l10n.promptBlockEditor_library,
-          subtitle: '',
           theme: theme,
         ),
         const PopupMenuDivider(),
@@ -763,12 +789,44 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     );
   }
 
+  /// 「模块」区菜单行：功能图标 + 名称 + 钉子态。
+  /// 与下方「开关」区复选框行造型刻意区分：这里点击 = 切换头部图标钉住态。
+  PopupMenuItem<String> _buildToolPinMenuItem({
+    required String value,
+    required bool pinned,
+    required IconData icon,
+    required String title,
+    required ThemeData theme,
+  }) {
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 12),
+          Expanded(child: Text(title)),
+          Icon(
+            pinned ? Icons.push_pin : Icons.push_pin_outlined,
+            size: 16,
+            color: pinned
+                ? theme.colorScheme.primary
+                : theme.colorScheme.outline,
+          ),
+        ],
+      ),
+    );
+  }
+
   void _handleSettingsMenuResult(String? value) {
     switch (value) {
-      case 'block_library':
+      case 'pin_block_palette':
         ref
             .read(layoutStateNotifierProvider.notifier)
-            .toggleBlockLibraryPanel();
+            .toggleBlockPaletteToolPinned();
+      case 'pin_block_library_panel':
+        ref
+            .read(layoutStateNotifierProvider.notifier)
+            .toggleBlockLibraryPanelToolPinned();
       case 'auto_format':
         ref.read(autoFormatPromptSettingsProvider.notifier).toggle();
       case 'highlight':
@@ -1785,6 +1843,38 @@ class _CopyIconButtonState extends State<_CopyIconButton> {
             color: _isHovering
                 ? widget.color
                 : widget.color.withValues(alpha: 0.6),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 头部工具图标钉槽：pinned 时宽度展开露出按钮，未钉时收成 0 宽。
+///
+/// AnimatedAlign.widthFactor 让子件保持原生尺寸被 ClipRect 裁切，
+/// 相邻图标随宽度开合自然平移，观感即「钉进来把左边图标往左挤 /
+/// 收回空位合拢」；收起后 IgnorePointer 防止隐形按钮吃点击。
+class _PinnedToolSlot extends StatelessWidget {
+  const _PinnedToolSlot({required this.pinned, required this.child});
+
+  final bool pinned;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: AnimatedAlign(
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeInOutCubic,
+        alignment: Alignment.centerRight,
+        widthFactor: pinned ? 1.0 : 0.0,
+        child: IgnorePointer(
+          ignoring: !pinned,
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 200),
+            opacity: pinned ? 1.0 : 0.0,
+            child: child,
           ),
         ),
       ),

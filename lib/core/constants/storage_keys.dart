@@ -64,6 +64,9 @@ class StorageKeys {
   static const String blockLibraryPanelExpanded =
       'block_library_panel_expanded';
   static const String blockLibraryPanelWidth = 'block_library_panel_width';
+  static const String blockPaletteToolPinned = 'block_palette_tool_pinned';
+  static const String blockLibraryPanelToolPinned =
+      'block_library_panel_tool_pinned';
   static const String blockLibraryPanelBlocksSplit =
       'block_library_panel_blocks_split';
   static const String styleExploreRunSidebarWidth =

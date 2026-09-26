@@ -488,7 +488,7 @@
   "prompt_baseTab": "ベースプロンプト",
   "prompt_negativeTab": "除外したい要素",
   "prompt_transparentBg": "透明背景",
-  "prompt_chunksMenu": "プロンプトチャンクと設定",
+  "prompt_chunksMenu": "ツールとスイッチ",
   "qualityTags_presetChip": "品質タグ",
   "ucPreset_presetChip": "除外したい要素プリセット",
   "prompt_positivePrompt": "プロンプト",

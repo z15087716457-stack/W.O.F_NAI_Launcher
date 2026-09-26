@@ -489,7 +489,7 @@
   "prompt_baseTab": "Base Prompt",
   "prompt_negativeTab": "Undesired Content",
   "prompt_transparentBg": "Transparent BG",
-  "prompt_chunksMenu": "Prompt chunks & settings",
+  "prompt_chunksMenu": "Tools & toggles",
   "qualityTags_presetChip": "Quality Tags",
   "ucPreset_presetChip": "Undesired Content Preset",
   "prompt_positivePrompt": "Prompt",

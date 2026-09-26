@@ -751,6 +751,34 @@ class LocalStorageService {
     await setSetting(StorageKeys.blockLibraryPanelExpanded, expanded);
   }
 
+  /// 获取积木工具钮钉住状态 (默认钉住)
+  bool getBlockPaletteToolPinned() {
+    return getSetting<bool>(
+          StorageKeys.blockPaletteToolPinned,
+          defaultValue: true,
+        ) ??
+        true;
+  }
+
+  /// 保存积木工具钮钉住状态
+  Future<void> setBlockPaletteToolPinned(bool pinned) async {
+    await setSetting(StorageKeys.blockPaletteToolPinned, pinned);
+  }
+
+  /// 获取块库面板图标钉住状态 (默认不钉——原来头部无此图标)
+  bool getBlockLibraryPanelToolPinned() {
+    return getSetting<bool>(
+          StorageKeys.blockLibraryPanelToolPinned,
+          defaultValue: false,
+        ) ??
+        false;
+  }
+
+  /// 保存块库面板图标钉住状态
+  Future<void> setBlockLibraryPanelToolPinned(bool pinned) async {
+    await setSetting(StorageKeys.blockLibraryPanelToolPinned, pinned);
+  }
+
   /// 获取块库面板宽度 (默认320)
   double getBlockLibraryPanelWidth() {
     final value = getSetting(StorageKeys.blockLibraryPanelWidth);

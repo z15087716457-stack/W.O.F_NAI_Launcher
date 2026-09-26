@@ -454,7 +454,7 @@
   "prompt_baseTab": "基础提示词",
   "prompt_negativeTab": "负面",
   "prompt_transparentBg": "透明通道",
-  "prompt_chunksMenu": "提示词块与设置",
+  "prompt_chunksMenu": "模块与开关",
   "qualityTags_presetChip": "质量词预设",
   "ucPreset_presetChip": "负面词预设",
   "prompt_positivePrompt": "正向提示词",
