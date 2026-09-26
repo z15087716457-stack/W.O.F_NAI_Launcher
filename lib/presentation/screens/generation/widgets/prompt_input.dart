@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -86,10 +84,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   // 正面/负面切换
   bool _isNegativeMode = false;
 
-  // 「模块与开关」弹层：自绘浮层（OverlayEntry 自管理），
-  // 钉行点击只切钉态不收回，开关行点击切换并收回。
-  OverlayEntry? _chunksMenuEntry;
-  bool get _chunksMenuOpen => _chunksMenuEntry != null;
+  // 「模块与开关」弹层：钉行/开关行点击都只切状态、不收回；
+  // 收回交给 PopupMenuRoute 自身（点菜单外 / 返回键），高亮跟 onCanceled。
+  bool _chunksMenuOpen = false;
 
   @override
   void initState() {
@@ -317,9 +314,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
 
   @override
   void dispose() {
-    // dispose 期间 mounted 仍为 true，直接移除浮层不走 setState。
-    _chunksMenuEntry?.remove();
-    _chunksMenuEntry = null;
     widget.negativeModeNotifier?.removeListener(_onExternalNegativeModeChanged);
     _promptFocusNode.removeListener(_onPromptFocusChanged);
     _negativeFocusNode.removeListener(_onNegativeFocusChanged);
@@ -532,210 +526,176 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   /// 「模块与开关」弹层钮（官网 prompt-chunks 钮）：官方 prompt_chunk 图标。
   /// 弹层上区 = 工具图标位（钉住即出现在头部，积木/块库面板），
   /// 下区 = 提示词设置开关项。
-  /// 自绘浮层：任何行点击都只切换、不收回；点按钮或菜单外才收回。
-  static const double _chunksMenuWidth = 300;
-  static const double _chunksMenuEstimatedHeight = 300;
-
-  void _closeChunksMenu() {
-    _chunksMenuEntry?.remove();
-    _chunksMenuEntry = null;
-    if (mounted) setState(() {});
-  }
-
-  void _toggleChunksMenu(BuildContext buttonContext) {
-    _chunksMenuOpen ? _closeChunksMenu() : _openChunksMenu(buttonContext);
-  }
-
-  void _openChunksMenu(BuildContext buttonContext) {
-    if (_chunksMenuEntry != null) return;
-    final anchor = buttonContext.findRenderObject() as RenderBox?;
-    _chunksMenuEntry = OverlayEntry(
-      builder: (_) => _chunksMenuOverlay(anchor: anchor),
-    );
-    Overlay.of(buttonContext).insert(_chunksMenuEntry!);
-    setState(() {});
-  }
-
+  /// 全部行用 _StayOpenPopupMenuItem：点击只切状态不收回菜单，
+  /// 收回交给 PopupMenuRoute（点菜单外 / 再点按钮 / 返回键）。
   Widget _buildChunksMenuButton(ThemeData theme) {
     final highlighted = _chunksMenuOpen;
 
-    return Builder(
-      builder: (buttonContext) => Tooltip(
-        message: context.l10n.prompt_chunksMenu,
-        waitDuration: const Duration(milliseconds: 300),
-        child: IconButton(
-          iconSize: 18,
-          visualDensity: VisualDensity.compact,
-          style: IconButton.styleFrom(
-            backgroundColor: highlighted
-                ? theme.colorScheme.surfaceContainerHighest
-                : Colors.transparent,
+    return PopupMenuButton<String>(
+      padding: EdgeInsets.zero,
+      style: IconButton.styleFrom(
+        minimumSize: const Size(28, 28),
+        maximumSize: const Size(28, 28),
+        padding: EdgeInsets.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      tooltip: context.l10n.prompt_chunksMenu,
+      iconSize: 18,
+      offset: const Offset(0, 4),
+      position: PopupMenuPosition.under,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      onOpened: () => setState(() => _chunksMenuOpen = true),
+      onCanceled: () => setState(() => _chunksMenuOpen = false),
+      onSelected: (value) => setState(() => _chunksMenuOpen = false),
+      itemBuilder: (menuContext) => [
+        _buildToolPinMenuItem(
+          pinnedProvider: layoutStateNotifierProvider.select(
+            (s) => s.blockPaletteToolPinned,
           ),
-          onPressed: () => _toggleChunksMenu(buttonContext),
-          icon: SvgPicture.asset(
-            'assets/icons/nai-icon-prompt-chunk.svg',
-            width: 16,
-            height: 16,
-            colorFilter: ColorFilter.mode(
-              highlighted
-                  ? theme.colorScheme.onSurface
-                  : theme.colorScheme.onSurfaceVariant,
-              BlendMode.srcIn,
-            ),
+          icon: Icons.category_outlined,
+          title: menuContext.l10n.promptBlockPalette_tooltip,
+          theme: theme,
+          onTap: () => ref
+              .read(layoutStateNotifierProvider.notifier)
+              .toggleBlockPaletteToolPinned(),
+        ),
+        _buildToolPinMenuItem(
+          pinnedProvider: layoutStateNotifierProvider.select(
+            (s) => s.blockLibraryPanelToolPinned,
           ),
+          icon: Icons.view_module_outlined,
+          title: menuContext.l10n.promptBlockEditor_library,
+          theme: theme,
+          onTap: () => ref
+              .read(layoutStateNotifierProvider.notifier)
+              .toggleBlockLibraryPanelToolPinned(),
+        ),
+        const PopupMenuDivider(),
+        _buildSettingsMenuItem(
+          enabledProvider: autoFormatPromptSettingsProvider,
+          title: menuContext.l10n.prompt_autoFormat,
+          subtitle: menuContext.l10n.prompt_autoFormatSubtitle,
+          theme: theme,
+          onTap: () =>
+              ref.read(autoFormatPromptSettingsProvider.notifier).toggle(),
+        ),
+        _buildSettingsMenuItem(
+          enabledProvider: highlightEmphasisSettingsProvider,
+          title: menuContext.l10n.prompt_highlightEmphasis,
+          subtitle: menuContext.l10n.prompt_highlightEmphasisSubtitle,
+          theme: theme,
+          onTap: () =>
+              ref.read(highlightEmphasisSettingsProvider.notifier).toggle(),
+        ),
+        _buildSettingsMenuItem(
+          enabledProvider: sdSyntaxAutoConvertSettingsProvider,
+          title: menuContext.l10n.prompt_sdSyntaxAutoConvert,
+          subtitle: menuContext.l10n.prompt_sdSyntaxAutoConvertSubtitle,
+          theme: theme,
+          onTap: () =>
+              ref.read(sdSyntaxAutoConvertSettingsProvider.notifier).toggle(),
+        ),
+        _buildSettingsMenuItem(
+          enabledProvider: completion_settings.autocompleteSettingsProvider
+              .select((s) => s.relatedTagsEnabled),
+          title: menuContext.l10n.prompt_cooccurrenceRecommendation,
+          subtitle: menuContext.l10n.prompt_cooccurrenceRecommendationSubtitle,
+          theme: theme,
+          onTap: () {
+            final provider = completion_settings.autocompleteSettingsProvider;
+            final current = ref.read(provider).relatedTagsEnabled;
+            ref.read(provider.notifier).setRelatedTagsEnabled(!current);
+          },
+        ),
+      ],
+      icon: SvgPicture.asset(
+        'assets/icons/nai-icon-prompt-chunk.svg',
+        width: 16,
+        height: 16,
+        colorFilter: ColorFilter.mode(
+          highlighted
+              ? theme.colorScheme.onSurface
+              : theme.colorScheme.onSurfaceVariant,
+          BlendMode.srcIn,
         ),
       ),
     );
   }
 
-  /// 浮层本体：半透明屏障（点外关闭）+ 锚点右对齐菜单。
-  /// Consumer 包内容，pin/开关态变化时浮层原地刷新不重建。
-  Widget _chunksMenuOverlay({required RenderBox? anchor}) {
-    const menuW = _chunksMenuWidth;
-    var dx = 16.0;
-    var dy = 120.0;
-    if (anchor != null && anchor.attached) {
-      final screen = MediaQuery.sizeOf(context);
-      final origin = anchor.localToGlobal(Offset.zero);
-      dx = (origin.dx + anchor.size.width - menuW).clamp(
-        8.0,
-        math.max(8.0, screen.width - menuW - 8),
-      );
-      var top = origin.dy + anchor.size.height + 4;
-      if (top + _chunksMenuEstimatedHeight > screen.height) {
-        top = math.max(8.0, origin.dy - 4 - _chunksMenuEstimatedHeight);
-      }
-      dy = top;
-    }
-
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: _closeChunksMenu,
-          ),
-        ),
-        Positioned(
-          left: dx,
-          top: dy,
-          child: Consumer(
-            builder: (context, ref, _) {
-              final theme = Theme.of(context);
-              final l10n = context.l10n;
-              final palettePinned = ref.watch(
-                layoutStateNotifierProvider.select(
-                  (s) => s.blockPaletteToolPinned,
-                ),
-              );
-              final panelToolPinned = ref.watch(
-                layoutStateNotifierProvider.select(
-                  (s) => s.blockLibraryPanelToolPinned,
-                ),
-              );
-              final enableAutoFormat = ref.watch(
-                autoFormatPromptSettingsProvider,
-              );
-              final enableHighlight = ref.watch(
-                highlightEmphasisSettingsProvider,
-              );
-              final enableSdSyntaxAutoConvert = ref.watch(
-                sdSyntaxAutoConvertSettingsProvider,
-              );
-              final enableCooccurrence = ref.watch(
-                completion_settings.autocompleteSettingsProvider.select(
-                  (s) => s.relatedTagsEnabled,
-                ),
-              );
-
-              return Material(
-                elevation: 8,
-                color: theme.colorScheme.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(8),
-                clipBehavior: Clip.antiAlias,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minWidth: menuW,
-                    maxWidth: menuW,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildToolPinMenuRow(
-                        pinned: palettePinned,
-                        icon: Icons.category_outlined,
-                        title: l10n.promptBlockPalette_tooltip,
-                        theme: theme,
-                        onTap: () => ref
-                            .read(layoutStateNotifierProvider.notifier)
-                            .toggleBlockPaletteToolPinned(),
-                      ),
-                      _buildToolPinMenuRow(
-                        pinned: panelToolPinned,
-                        icon: Icons.view_module_outlined,
-                        title: l10n.promptBlockEditor_library,
-                        theme: theme,
-                        onTap: () => ref
-                            .read(layoutStateNotifierProvider.notifier)
-                            .toggleBlockLibraryPanelToolPinned(),
-                      ),
-                      Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: theme.colorScheme.outlineVariant.withValues(
-                          alpha: 0.4,
+  /// 「开关」区菜单行：复选框态 + 标题 + 副标题。
+  /// 菜单路由不随 provider 重建，child 里 Consumer 让勾选态原地刷新。
+  _StayOpenPopupMenuItem<String> _buildSettingsMenuItem({
+    required ProviderListenable<bool> enabledProvider,
+    required String title,
+    required String subtitle,
+    required ThemeData theme,
+    required VoidCallback onTap,
+  }) {
+    return _StayOpenPopupMenuItem<String>(
+      onTap: onTap,
+      child: Consumer(
+        builder: (context, ref, _) {
+          final isEnabled = ref.watch(enabledProvider);
+          return Row(
+            children: [
+              Icon(
+                isEnabled ? Icons.check_box : Icons.check_box_outline_blank,
+                size: 20,
+                color: isEnabled ? theme.colorScheme.primary : null,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title),
+                    if (subtitle.isNotEmpty)
+                      Text(
+                        subtitle,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.outline,
                         ),
                       ),
-                      _buildSettingsMenuRow(
-                        isEnabled: enableAutoFormat,
-                        title: l10n.prompt_autoFormat,
-                        subtitle: l10n.prompt_autoFormatSubtitle,
-                        theme: theme,
-                        onTap: () => ref
-                            .read(autoFormatPromptSettingsProvider.notifier)
-                            .toggle(),
-                      ),
-                      _buildSettingsMenuRow(
-                        isEnabled: enableHighlight,
-                        title: l10n.prompt_highlightEmphasis,
-                        subtitle: l10n.prompt_highlightEmphasisSubtitle,
-                        theme: theme,
-                        onTap: () => ref
-                            .read(highlightEmphasisSettingsProvider.notifier)
-                            .toggle(),
-                      ),
-                      _buildSettingsMenuRow(
-                        isEnabled: enableSdSyntaxAutoConvert,
-                        title: l10n.prompt_sdSyntaxAutoConvert,
-                        subtitle: l10n.prompt_sdSyntaxAutoConvertSubtitle,
-                        theme: theme,
-                        onTap: () => ref
-                            .read(sdSyntaxAutoConvertSettingsProvider.notifier)
-                            .toggle(),
-                      ),
-                      _buildSettingsMenuRow(
-                        isEnabled: enableCooccurrence,
-                        title: l10n.prompt_cooccurrenceRecommendation,
-                        subtitle:
-                            l10n.prompt_cooccurrenceRecommendationSubtitle,
-                        theme: theme,
-                        onTap: () {
-                          final provider =
-                              completion_settings.autocompleteSettingsProvider;
-                          final current = ref.read(provider).relatedTagsEnabled;
-                          ref
-                              .read(provider.notifier)
-                              .setRelatedTagsEnabled(!current);
-                        },
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
-              );
-            },
-          ),
-        ),
-      ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// 「模块」区菜单行：功能图标 + 名称 + 钉子态。
+  /// 与下方「开关」区复选框行造型刻意区分：这里点击 = 切换头部图标钉住态。
+  _StayOpenPopupMenuItem<String> _buildToolPinMenuItem({
+    required ProviderListenable<bool> pinnedProvider,
+    required IconData icon,
+    required String title,
+    required ThemeData theme,
+    required VoidCallback onTap,
+  }) {
+    return _StayOpenPopupMenuItem<String>(
+      onTap: onTap,
+      child: Consumer(
+        builder: (context, ref, _) {
+          final pinned = ref.watch(pinnedProvider);
+          return Row(
+            children: [
+              Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
+              const SizedBox(width: 12),
+              Expanded(child: Text(title)),
+              Icon(
+                pinned ? Icons.push_pin : Icons.push_pin_outlined,
+                size: 16,
+                color: pinned
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.outline,
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -865,78 +825,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         _setProxyText(_promptController, value);
         ref.read(generationParamsNotifierProvider.notifier).updatePrompt(value);
       },
-    );
-  }
-
-  /// 「模块」区行：功能图标 + 名称 + 钉子态。
-  /// 与下方「开关」区复选框行造型刻意区分：这里点击 = 切换头部图标钉住态。
-  Widget _buildToolPinMenuRow({
-    required bool pinned,
-    required IconData icon,
-    required String title,
-    required ThemeData theme,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Row(
-          children: [
-            Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
-            const SizedBox(width: 12),
-            Expanded(child: Text(title)),
-            Icon(
-              pinned ? Icons.push_pin : Icons.push_pin_outlined,
-              size: 16,
-              color: pinned
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.outline,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 「开关」区行：复选框态 + 标题 + 副标题。
-  Widget _buildSettingsMenuRow({
-    required bool isEnabled,
-    required String title,
-    required String subtitle,
-    required ThemeData theme,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
-          children: [
-            Icon(
-              isEnabled ? Icons.check_box : Icons.check_box_outline_blank,
-              size: 20,
-              color: isEnabled ? theme.colorScheme.primary : null,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title),
-                  if (subtitle.isNotEmpty)
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.outline,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -1979,5 +1867,28 @@ class _PinnedToolSlot extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// 点击后不收回菜单的 [PopupMenuItem]。
+///
+/// 行为与 [PopupMenuItem] 完全一致（同一套渲染与交互），唯一区别是
+/// [handleTap] 不 `Navigator.pop` 菜单路由——菜单只在点击外部、
+/// 再点按钮或返回键时收回，供「模块与开关」这类要连续点多次的菜单使用。
+/// `onSelected` 不会收到本项的值（没有值被 pop 出去），收回走 `onCanceled`。
+class _StayOpenPopupMenuItem<T> extends PopupMenuItem<T> {
+  const _StayOpenPopupMenuItem({super.key, super.onTap, required super.child});
+
+  @override
+  PopupMenuItemState<T, _StayOpenPopupMenuItem<T>> createState() =>
+      _StayOpenPopupMenuItemState<T>();
+}
+
+class _StayOpenPopupMenuItemState<T>
+    extends PopupMenuItemState<T, _StayOpenPopupMenuItem<T>> {
+  @override
+  void handleTap() {
+    // 原版在这里 Navigator.pop 关闭菜单路由；这里跳过，只触发回调。
+    widget.onTap?.call();
   }
 }
