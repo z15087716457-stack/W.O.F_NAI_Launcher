@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -317,6 +318,66 @@ void main() {
     await tester.tap(find.byKey(const Key('explore-branch-select')));
     await tester.pump();
   }
+
+  testWidgets('家族右键菜单锚定点击位置，不叠加 Overlay 全局偏移', (tester) async {
+    final run = twoGenerationRun();
+    await storage.putRun(run);
+    tester.view.physicalSize = const Size(1400, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          styleExploreRunStorageProvider.overrideWithValue(storage),
+          exploreLineagePanelHeightProvider.overrideWith((ref) => 600.0),
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: SizedBox(
+            width: 1400,
+            height: 1600,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 240,
+                  top: 180,
+                  width: 900,
+                  height: 900,
+                  child: MaterialApp(
+                    locale: const Locale('zh'),
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    home: Scaffold(
+                      body: _PanelHost(runId: run.id, opened: const []),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final chip = find.byKey(const Key('explore-family-chip-fam-1'));
+    final clickPosition = tester.getCenter(chip);
+    await tester.tap(chip, buttons: kSecondaryMouseButton);
+    await tester.pumpAndSettle();
+
+    final menu = find.ancestor(
+      of: find.text(l10n.styleExplore_deleteFamily),
+      matching: find.byType(Material),
+    );
+    expect(menu, findsWidgets);
+    final menuRect = tester.getRect(menu.last);
+    expect(menuRect.left, lessThan(clickPosition.dx + 24));
+    expect(menuRect.right, greaterThan(clickPosition.dx - 24));
+    expect(menuRect.top, lessThan(clickPosition.dy + 24));
+  });
 
   testWidgets('两代家族下点活跃堆缩略图：计数与勾选圈同步（BUG-5 回归）', (tester) async {
     await pumpPanel(tester, twoGenerationRun(), []);
@@ -683,9 +744,7 @@ void main() {
             familyId: 'fam-$i',
             generation: 1,
             status: ExploreParentSetStatus.active,
-            parents: [
-              ExploreParent(id: 'rp-f$i', artistString: 'f$i:root'),
-            ],
+            parents: [ExploreParent(id: 'rp-f$i', artistString: 'f$i:root')],
           ),
       ],
       families: [
@@ -702,9 +761,7 @@ void main() {
     );
   }
 
-  testWidgets('家族 chips 溢出时边缘虚化显影，切家族照常（FEAT-59）', (
-    tester,
-  ) async {
+  testWidgets('家族 chips 溢出时边缘虚化显影，切家族照常（FEAT-59）', (tester) async {
     await pumpPanel(tester, manyFamiliesRun(), [], width: 360);
 
     // chips 行套了虚化包装件；溢出 → 右缘有余量 → ShaderMask 上场。
@@ -737,9 +794,7 @@ void main() {
     );
   }
 
-  testWidgets('缩略图超三排：容器截高三排、▼箭头显影且点按滚动（FEAT-57）', (
-    tester,
-  ) async {
+  testWidgets('缩略图超三排：容器截高三排、▼箭头显影且点按滚动（FEAT-57）', (tester) async {
     final opened = <ExploreCandidate>[];
     await pumpPanel(tester, bigPileRun(), opened, width: 360);
 
@@ -758,10 +813,7 @@ void main() {
     // 滚轮路径：ListView 是纵向 Scrollable 且有余量（取自身 state，
     // Scrollable.of 只查祖先会误中谱系区外层滚动）。
     final scrollableState = tester.state<ScrollableState>(
-      find.descendant(
-        of: pileCard(2, 15),
-        matching: find.byType(Scrollable),
-      ),
+      find.descendant(of: pileCard(2, 15), matching: find.byType(Scrollable)),
     );
     expect(scrollableState.position.maxScrollExtent, greaterThan(0));
     expect(scrollableState.position.pixels, 0);
@@ -784,9 +836,7 @@ void main() {
     expect(opened.map((candidate) => candidate.id), ['c-20']);
   });
 
-  testWidgets('缩略图不足三排：容器随内容收缩、无箭头（FEAT-57）', (
-    tester,
-  ) async {
+  testWidgets('缩略图不足三排：容器随内容收缩、无箭头（FEAT-57）', (tester) async {
     // ps-2 堆 6 张 / 每排 4 → 2 排。
     final run = twoGenerationRun().copyWith(
       candidates: [
@@ -807,9 +857,6 @@ void main() {
       find.byKey(const Key('explore-pile-ps-2-scroll-down')),
       findsNothing,
     );
-    expect(
-      find.byKey(const Key('explore-pile-ps-2-scroll-up')),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('explore-pile-ps-2-scroll-up')), findsNothing);
   });
 }

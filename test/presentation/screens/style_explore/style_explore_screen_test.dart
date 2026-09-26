@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -284,8 +285,11 @@ void main() {
     return run;
   }
 
-  Widget buildScreen({List<Override> extraOverrides = const []}) {
-    return ProviderScope(
+  Widget buildScreen({
+    List<Override> extraOverrides = const [],
+    Offset appOffset = Offset.zero,
+  }) {
+    final app = ProviderScope(
       overrides: [
         localStorageServiceProvider.overrideWith((ref) => localStorage),
         // 提示词区可拖矮后参数面板视口变大，Vibe 参考面板会进入视口；
@@ -326,19 +330,37 @@ void main() {
         home: StyleExploreScreen(),
       ),
     );
+    if (appOffset == Offset.zero) return app;
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: [
+          Positioned(
+            left: appOffset.dx,
+            top: appOffset.dy,
+            right: 0,
+            bottom: 0,
+            child: app,
+          ),
+        ],
+      ),
+    );
   }
 
   Future<ProviderContainer> pumpScreen(
     WidgetTester tester, {
     double width = 1600,
     List<Override> extraOverrides = const [],
+    Offset appOffset = Offset.zero,
   }) async {
     // 宽窗：左栏 + 右栏画廊都展开（画廊默认断点 1100）。
     tester.view.physicalSize = Size(width, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(buildScreen(extraOverrides: extraOverrides));
+    await tester.pumpWidget(
+      buildScreen(extraOverrides: extraOverrides, appOffset: appOffset),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     return ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
@@ -1687,6 +1709,41 @@ void main() {
     );
     expect(runStorage._store[run.id]!.folders.map((f) => f.name), ['暖光', '冷光']);
   });
+
+  testWidgets(
+    'folder right-click menu anchors to click without Overlay offset',
+    (tester) async {
+      final folder = ExploreCandidateFolder(
+        id: 'folder-a',
+        name: '暖光',
+        createdAt: DateTime.utc(2026, 9, 14),
+      );
+      final run = await seedRun(
+        '菜单定位任务',
+        status: ExploreRunStatus.generated,
+        candidates: [doneCandidate('cand-1', folderId: 'folder-a')],
+      );
+      await runStorage.putRun(run.copyWith(folders: [folder]));
+      final container = await pumpScreen(
+        tester,
+        appOffset: const Offset(240, 120),
+      );
+      container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final chip = find.byKey(const Key('explore-filter-folder-folder-a'));
+      final clickPosition = tester.getCenter(chip);
+      await tester.tap(chip, buttons: kSecondaryMouseButton);
+      await tester.pumpAndSettle();
+
+      final renameText = find.text('重命名文件夹');
+      expect(renameText, findsOneWidget);
+      final menuItemRect = tester.getRect(renameText);
+      expect((menuItemRect.center.dx - clickPosition.dx).abs(), lessThan(220));
+      expect(menuItemRect.top, lessThan(clickPosition.dy + 100));
+    },
+  );
 
   testWidgets('deleting a folder returns its candidates to uncategorized', (
     tester,
