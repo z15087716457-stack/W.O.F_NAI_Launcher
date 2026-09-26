@@ -406,7 +406,6 @@ Future<ProviderContainer> _pump(
                 enableAutocomplete: false,
                 enableSyntaxHighlight: false,
                 enableAutoFormat: false,
-                enableRegexReplace: false,
               ),
               allowEvolutionToggle: allowEvolutionToggle,
               onChanged: onChanged,

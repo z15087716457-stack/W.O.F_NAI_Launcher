@@ -19,7 +19,6 @@ import '../../../providers/image_generation_provider.dart';
 import '../../../providers/layout_state_provider.dart';
 import '../../../providers/prompt_maximize_provider.dart';
 import '../../../providers/pill_workspace_provider.dart';
-import '../../../providers/prompt_regex_rules_provider.dart';
 import '../../../providers/prompt_token_counter_provider.dart';
 import '../../../providers/quality_preset_provider.dart';
 import '../../../providers/tips_provider.dart';
@@ -32,7 +31,6 @@ import '../../../widgets/prompt/nai_syntax_controller.dart';
 import '../../../widgets/prompt/prompt_token_count_bar.dart';
 import '../../../widgets/prompt/quality_tags_selector.dart';
 import '../../../widgets/prompt/transparent_background_chip.dart';
-import '../../../widgets/prompt/regex_rules_dialog.dart';
 import '../../../widgets/prompt/uc_preset_selector.dart';
 import '../../../widgets/prompt/blocks/prompt_block_palette.dart';
 import '../../../widgets/character/character_prompt_button.dart';
@@ -515,22 +513,15 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     final panelExpanded = ref.watch(
       layoutStateNotifierProvider.select((s) => s.blockLibraryPanelExpanded),
     );
-    final enableAutocomplete = ref.watch(autocompleteSettingsProvider);
     final enableAutoFormat = ref.watch(autoFormatPromptSettingsProvider);
     final enableHighlight = ref.watch(highlightEmphasisSettingsProvider);
     final enableSdSyntaxAutoConvert = ref.watch(
       sdSyntaxAutoConvertSettingsProvider,
     );
-    final enableResolveAliasOnCopy = ref.watch(
-      resolveAliasOnCopySettingsProvider,
-    );
     final enableCooccurrence = ref.watch(
       completion_settings.autocompleteSettingsProvider.select(
         (s) => s.relatedTagsEnabled,
       ),
-    );
-    final regexRuleCount = ref.watch(
-      promptRegexRulesProvider.select((rules) => rules.length),
     );
 
     final highlighted = panelExpanded || _chunksMenuOpen;
@@ -564,13 +555,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         ),
         const PopupMenuDivider(),
         _buildSettingsMenuItem(
-          value: 'autocomplete',
-          isEnabled: enableAutocomplete,
-          title: context.l10n.prompt_smartAutocomplete,
-          subtitle: context.l10n.prompt_smartAutocompleteSubtitle,
-          theme: theme,
-        ),
-        _buildSettingsMenuItem(
           value: 'auto_format',
           isEnabled: enableAutoFormat,
           title: context.l10n.prompt_autoFormat,
@@ -589,20 +573,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           isEnabled: enableSdSyntaxAutoConvert,
           title: context.l10n.prompt_sdSyntaxAutoConvert,
           subtitle: context.l10n.prompt_sdSyntaxAutoConvertSubtitle,
-          theme: theme,
-        ),
-        _buildSettingsActionMenuItem(
-          value: 'regex_rules',
-          icon: Icons.find_replace,
-          title: context.l10n.prompt_regexRulesManage,
-          subtitle: context.l10n.prompt_regexRulesCount(regexRuleCount),
-          theme: theme,
-        ),
-        _buildSettingsMenuItem(
-          value: 'resolve_alias_on_copy',
-          isEnabled: enableResolveAliasOnCopy,
-          title: context.l10n.prompt_resolveAliasOnCopy,
-          subtitle: context.l10n.prompt_resolveAliasOnCopySubtitle,
           theme: theme,
         ),
         _buildSettingsMenuItem(
@@ -793,61 +763,18 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     );
   }
 
-  /// 构造「点击后打开子界面」的菜单项（区别于勾选式开关项）
-  PopupMenuItem<String> _buildSettingsActionMenuItem({
-    required String value,
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required ThemeData theme,
-  }) {
-    return PopupMenuItem<String>(
-      value: value,
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.outline,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right, size: 18, color: theme.colorScheme.outline),
-        ],
-      ),
-    );
-  }
-
   void _handleSettingsMenuResult(String? value) {
     switch (value) {
       case 'block_library':
         ref
             .read(layoutStateNotifierProvider.notifier)
             .toggleBlockLibraryPanel();
-      case 'autocomplete':
-        ref.read(autocompleteSettingsProvider.notifier).toggle();
       case 'auto_format':
         ref.read(autoFormatPromptSettingsProvider.notifier).toggle();
       case 'highlight':
         ref.read(highlightEmphasisSettingsProvider.notifier).toggle();
       case 'sd_syntax_convert':
         ref.read(sdSyntaxAutoConvertSettingsProvider.notifier).toggle();
-      case 'regex_rules':
-        // 菜单关闭后才回调到这里，需要重新确认 State 仍然挂载
-        if (mounted) {
-          RegexRulesDialog.show(context);
-        }
-      case 'resolve_alias_on_copy':
-        ref.read(resolveAliasOnCopySettingsProvider.notifier).toggle();
       case 'cooccurrence':
         final provider = completion_settings.autocompleteSettingsProvider;
         final current = ref.read(provider).relatedTagsEnabled;

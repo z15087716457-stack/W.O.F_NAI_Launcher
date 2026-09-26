@@ -130,11 +130,9 @@ class StorageKeys {
   static const String autoFormatPrompt = 'auto_format_prompt';
   static const String highlightEmphasis = 'highlight_emphasis';
   static const String sdSyntaxAutoConvert = 'sd_syntax_auto_convert';
-  static const String resolveAliasOnCopy = 'resolve_alias_on_copy';
   static const String enablePromptWeightScroll = 'enable_prompt_weight_scroll';
   static const String promptWeightScrollModifier =
       'prompt_weight_scroll_modifier';
-  static const String promptRegexRules = 'prompt_regex_rules'; // 规则JSON字符串列表
 
   // Last Generation Params Keys (持久化上次使用的参数)
   static const String lastPrompt = 'last_prompt';

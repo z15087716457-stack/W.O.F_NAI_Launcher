@@ -33,15 +33,6 @@ class UnifiedPromptConfig {
   /// 启用后，自动将 Stable Diffusion 语法转换为 NAI 语法。
   final bool enableSdSyntaxAutoConvert;
 
-  /// 是否启用提示词正则替换
-  ///
-  /// 失焦时按用户配置的正则规则改写提示词，执行顺序早于
-  /// SD 语法转换和自动格式化。
-  ///
-  /// 是否真的发生替换取决于用户配了几条启用中的规则，
-  /// 因此默认开启；这里的开关只用于让某个输入框整体退出该行为。
-  final bool enableRegexReplace;
-
   /// 是否启用 ComfyUI 多角色语法导入
   ///
   /// 启用后，粘贴 ComfyUI Prompt Control 格式的多角色提示词时
@@ -106,7 +97,6 @@ class UnifiedPromptConfig {
     this.numericEmphasisEnabled = true,
     this.enableAutoFormat = true,
     this.enableSdSyntaxAutoConvert = false,
-    this.enableRegexReplace = true,
     this.enableComfyuiImport = false,
     this.compact = false,
     this.embedded = false,
@@ -182,7 +172,6 @@ class UnifiedPromptConfig {
     bool? numericEmphasisEnabled,
     bool? enableAutoFormat,
     bool? enableSdSyntaxAutoConvert,
-    bool? enableRegexReplace,
     bool? enableComfyuiImport,
     bool? compact,
     bool? embedded,
@@ -206,7 +195,6 @@ class UnifiedPromptConfig {
       enableAutoFormat: enableAutoFormat ?? this.enableAutoFormat,
       enableSdSyntaxAutoConvert:
           enableSdSyntaxAutoConvert ?? this.enableSdSyntaxAutoConvert,
-      enableRegexReplace: enableRegexReplace ?? this.enableRegexReplace,
       enableComfyuiImport: enableComfyuiImport ?? this.enableComfyuiImport,
       compact: compact ?? this.compact,
       embedded: embedded ?? this.embedded,
@@ -232,7 +220,6 @@ class UnifiedPromptConfig {
         other.numericEmphasisEnabled == numericEmphasisEnabled &&
         other.enableAutoFormat == enableAutoFormat &&
         other.enableSdSyntaxAutoConvert == enableSdSyntaxAutoConvert &&
-        other.enableRegexReplace == enableRegexReplace &&
         other.enableComfyuiImport == enableComfyuiImport &&
         other.compact == compact &&
         other.embedded == embedded &&
@@ -252,7 +239,6 @@ class UnifiedPromptConfig {
       numericEmphasisEnabled,
       enableAutoFormat,
       enableSdSyntaxAutoConvert,
-      enableRegexReplace,
       enableComfyuiImport,
       compact,
       embedded,

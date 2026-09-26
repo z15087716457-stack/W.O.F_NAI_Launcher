@@ -318,7 +318,6 @@ Widget _editorAppBody({
             enableAutocomplete: false,
             enableSyntaxHighlight: false,
             enableAutoFormat: false,
-            enableRegexReplace: false,
           ),
           onChanged: onChanged,
         ),

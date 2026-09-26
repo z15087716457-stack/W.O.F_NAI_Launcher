@@ -2283,18 +2283,6 @@ abstract class AppLocalizations {
   /// **'Content you don\'t want in the image...'**
   String get prompt_unwantedContent;
 
-  /// No description provided for @prompt_smartAutocomplete.
-  ///
-  /// In en, this message translates to:
-  /// **'Smart Autocomplete'**
-  String get prompt_smartAutocomplete;
-
-  /// No description provided for @prompt_smartAutocompleteSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Show tag suggestions while typing'**
-  String get prompt_smartAutocompleteSubtitle;
-
   /// No description provided for @prompt_autoFormat.
   ///
   /// In en, this message translates to:
@@ -2331,18 +2319,6 @@ abstract class AppLocalizations {
   /// **'Convert SD weights to NAI syntax on blur or generation'**
   String get prompt_sdSyntaxAutoConvertSubtitle;
 
-  /// No description provided for @prompt_resolveAliasOnCopy.
-  ///
-  /// In en, this message translates to:
-  /// **'Expand Library On Copy'**
-  String get prompt_resolveAliasOnCopy;
-
-  /// No description provided for @prompt_resolveAliasOnCopySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Replace <library name> with its content when copying or cutting'**
-  String get prompt_resolveAliasOnCopySubtitle;
-
   /// No description provided for @prompt_cooccurrenceRecommendation.
   ///
   /// In en, this message translates to:
@@ -2354,168 +2330,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Suggest after accepting a tag; Ctrl+Shift+Space or Ctrl+click also opens related tags'**
   String get prompt_cooccurrenceRecommendationSubtitle;
-
-  /// No description provided for @prompt_regexRulesManage.
-  ///
-  /// In en, this message translates to:
-  /// **'Regex Replace Rules...'**
-  String get prompt_regexRulesManage;
-
-  /// No description provided for @prompt_regexRulesCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} rule(s) configured'**
-  String prompt_regexRulesCount(int count);
-
-  /// No description provided for @prompt_regexReplaceApplied.
-  ///
-  /// In en, this message translates to:
-  /// **'Regex replace: {count} rule(s)'**
-  String prompt_regexReplaceApplied(int count);
-
-  /// No description provided for @prompt_regexInvalidRules.
-  ///
-  /// In en, this message translates to:
-  /// **'Skipped invalid regex rule(s): {names}'**
-  String prompt_regexInvalidRules(Object names);
-
-  /// No description provided for @regexRules_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Regex Replace Rules'**
-  String get regexRules_title;
-
-  /// No description provided for @regexRules_hint.
-  ///
-  /// In en, this message translates to:
-  /// **'Rules run in order on the whole prompt, before SD conversion and auto format. Use \$1, \$2 in the replacement to reference capture groups.'**
-  String get regexRules_hint;
-
-  /// No description provided for @regexRules_empty.
-  ///
-  /// In en, this message translates to:
-  /// **'No rules yet. Create one below.'**
-  String get regexRules_empty;
-
-  /// No description provided for @regexRules_add.
-  ///
-  /// In en, this message translates to:
-  /// **'New Rule'**
-  String get regexRules_add;
-
-  /// No description provided for @regexRules_unnamed.
-  ///
-  /// In en, this message translates to:
-  /// **'Untitled rule'**
-  String get regexRules_unnamed;
-
-  /// No description provided for @regexRules_invalidBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid'**
-  String get regexRules_invalidBadge;
-
-  /// No description provided for @regexRules_deleteConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete rule'**
-  String get regexRules_deleteConfirmTitle;
-
-  /// No description provided for @regexRules_deleteConfirmMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete \"{name}\"? This cannot be undone.'**
-  String regexRules_deleteConfirmMessage(Object name);
-
-  /// No description provided for @regexRules_newTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'New Rule'**
-  String get regexRules_newTitle;
-
-  /// No description provided for @regexRules_editTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Rule'**
-  String get regexRules_editTitle;
-
-  /// No description provided for @regexRules_nameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Rule name (optional)'**
-  String get regexRules_nameLabel;
-
-  /// No description provided for @regexRules_nameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. Normalize hair color'**
-  String get regexRules_nameHint;
-
-  /// No description provided for @regexRules_patternLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Match (regular expression)'**
-  String get regexRules_patternLabel;
-
-  /// No description provided for @regexRules_patternHint.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. \\bblue[ _]hair\\b'**
-  String get regexRules_patternHint;
-
-  /// No description provided for @regexRules_replacementLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Replace with'**
-  String get regexRules_replacementLabel;
-
-  /// No description provided for @regexRules_replacementHint.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. aqua hair'**
-  String get regexRules_replacementHint;
-
-  /// No description provided for @regexRules_caseSensitive.
-  ///
-  /// In en, this message translates to:
-  /// **'Case sensitive'**
-  String get regexRules_caseSensitive;
-
-  /// No description provided for @regexRules_patternRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'The match pattern cannot be empty'**
-  String get regexRules_patternRequired;
-
-  /// No description provided for @regexRules_patternInvalid.
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid regular expression: {error}'**
-  String regexRules_patternInvalid(Object error);
-
-  /// No description provided for @regexRules_testTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Test'**
-  String get regexRules_testTitle;
-
-  /// No description provided for @regexRules_testInputHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Paste a prompt to preview the result'**
-  String get regexRules_testInputHint;
-
-  /// No description provided for @regexRules_testNoChange.
-  ///
-  /// In en, this message translates to:
-  /// **'No change'**
-  String get regexRules_testNoChange;
-
-  /// No description provided for @regexRules_testNoRules.
-  ///
-  /// In en, this message translates to:
-  /// **'No enabled rules'**
-  String get regexRules_testNoRules;
 
   /// No description provided for @prompt_formatted.
   ///
@@ -2846,12 +2660,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Max✨'**
   String get img2img_enhanceMax;
-
-  /// No description provided for @img2img_disabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Disabled'**
-  String get img2img_disabled;
 
   /// No description provided for @img2img_novelAiCloudUpscale.
   ///

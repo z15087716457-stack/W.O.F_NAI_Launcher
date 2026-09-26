@@ -78,7 +78,6 @@ void main() {
       'lib/presentation/screens/generation/widgets/canvas/generated_image_actions.dart',
       'lib/presentation/screens/generation/widgets/canvas/generated_image_card.dart',
       'lib/presentation/screens/generation/handlers/vibe_import_handler.dart',
-      'lib/presentation/widgets/prompt/regex_rules_dialog.dart',
       'lib/presentation/widgets/gallery/folder_tabs.dart',
       'lib/presentation/widgets/gallery/cache_monitor_widget.dart',
       'lib/presentation/widgets/gallery/gallery_scan_progress_panel.dart',

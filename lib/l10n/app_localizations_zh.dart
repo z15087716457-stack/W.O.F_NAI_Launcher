@@ -1169,12 +1169,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prompt_unwantedContent => '不想出现在图像中的内容...';
 
   @override
-  String get prompt_smartAutocomplete => '智能补全';
-
-  @override
-  String get prompt_smartAutocompleteSubtitle => '输入时显示标签建议';
-
-  @override
   String get prompt_autoFormat => '自动格式化';
 
   @override
@@ -1193,109 +1187,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prompt_sdSyntaxAutoConvertSubtitle => '失焦或生成时将 SD 权重语法转换为 NAI 格式';
 
   @override
-  String get prompt_resolveAliasOnCopy => '复制时展开词库';
-
-  @override
-  String get prompt_resolveAliasOnCopySubtitle => '复制或剪切时把 <词库名> 替换为词库内容';
-
-  @override
   String get prompt_cooccurrenceRecommendation => '共现标签推荐';
 
   @override
   String get prompt_cooccurrenceRecommendationSubtitle =>
       '选中标签后自动推荐，也可按 Ctrl+Shift+Space 或 Ctrl+单击';
-
-  @override
-  String get prompt_regexRulesManage => '正则替换规则…';
-
-  @override
-  String prompt_regexRulesCount(int count) {
-    return '已配置 $count 条规则';
-  }
-
-  @override
-  String prompt_regexReplaceApplied(int count) {
-    return '正则替换 $count 条';
-  }
-
-  @override
-  String prompt_regexInvalidRules(Object names) {
-    return '已跳过无效的正则规则：$names';
-  }
-
-  @override
-  String get regexRules_title => '正则替换规则';
-
-  @override
-  String get regexRules_hint =>
-      '规则按顺序作用于整段提示词，早于 SD 转换和自动格式化执行。替换内容里可用 \$1、\$2 引用捕获组。';
-
-  @override
-  String get regexRules_empty => '还没有规则，点下面的按钮新建一条';
-
-  @override
-  String get regexRules_add => '新建规则';
-
-  @override
-  String get regexRules_unnamed => '未命名规则';
-
-  @override
-  String get regexRules_invalidBadge => '无效';
-
-  @override
-  String get regexRules_deleteConfirmTitle => '删除规则';
-
-  @override
-  String regexRules_deleteConfirmMessage(Object name) {
-    return '确定删除「$name」吗？此操作不可撤销。';
-  }
-
-  @override
-  String get regexRules_newTitle => '新建规则';
-
-  @override
-  String get regexRules_editTitle => '编辑规则';
-
-  @override
-  String get regexRules_nameLabel => '规则名称（可选）';
-
-  @override
-  String get regexRules_nameHint => '例如：统一发色写法';
-
-  @override
-  String get regexRules_patternLabel => '匹配（正则表达式）';
-
-  @override
-  String get regexRules_patternHint => '例如：\\bblue[ _]hair\\b';
-
-  @override
-  String get regexRules_replacementLabel => '替换为';
-
-  @override
-  String get regexRules_replacementHint => '例如：aqua hair';
-
-  @override
-  String get regexRules_caseSensitive => '区分大小写';
-
-  @override
-  String get regexRules_patternRequired => '匹配内容不能为空';
-
-  @override
-  String regexRules_patternInvalid(Object error) {
-    return '正则表达式无效：$error';
-  }
-
-  @override
-  String get regexRules_testTitle => '测试';
-
-  @override
-  String get regexRules_testInputHint => '粘贴一段提示词看看替换效果';
-
-  @override
-  String get regexRules_testNoChange => '无变化';
-
-  @override
-  String get regexRules_testNoRules => '没有启用中的规则';
 
   @override
   String get prompt_formatted => '已格式化';
@@ -1470,9 +1366,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get img2img_enhanceMax => 'Max✨';
-
-  @override
-  String get img2img_disabled => '未启用';
 
   @override
   String get img2img_novelAiCloudUpscale => 'NovelAI 云端超分 (固定 4x 放大)';

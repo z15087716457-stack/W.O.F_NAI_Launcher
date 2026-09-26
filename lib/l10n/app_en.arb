@@ -544,74 +544,14 @@
   },
   "kritaBridge_busyGenerating": "Krita Bridge is generating. Wait for the current task to finish.",
   "prompt_unwantedContent": "Content you don't want in the image...",
-  "prompt_smartAutocomplete": "Smart Autocomplete",
-  "prompt_smartAutocompleteSubtitle": "Show tag suggestions while typing",
   "prompt_autoFormat": "Auto Format",
   "prompt_autoFormatSubtitle": "Normalize commas and whitespace, preserve word spaces and safely close weights",
   "prompt_highlightEmphasis": "Highlight Emphasis",
   "prompt_highlightEmphasisSubtitle": "Highlight brackets and weight syntax",
   "prompt_sdSyntaxAutoConvert": "SD Syntax Auto Convert",
   "prompt_sdSyntaxAutoConvertSubtitle": "Convert SD weights to NAI syntax on blur or generation",
-  "prompt_resolveAliasOnCopy": "Expand Library On Copy",
-  "prompt_resolveAliasOnCopySubtitle": "Replace <library name> with its content when copying or cutting",
   "prompt_cooccurrenceRecommendation": "Co-occurrence Tag Recommendation",
   "prompt_cooccurrenceRecommendationSubtitle": "Suggest after accepting a tag; Ctrl+Shift+Space or Ctrl+click also opens related tags",
-  "prompt_regexRulesManage": "Regex Replace Rules...",
-  "prompt_regexRulesCount": "{count} rule(s) configured",
-  "@prompt_regexRulesCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "prompt_regexReplaceApplied": "Regex replace: {count} rule(s)",
-  "@prompt_regexReplaceApplied": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "prompt_regexInvalidRules": "Skipped invalid regex rule(s): {names}",
-  "@prompt_regexInvalidRules": {
-    "placeholders": {
-      "names": {}
-    }
-  },
-  "regexRules_title": "Regex Replace Rules",
-  "regexRules_hint": "Rules run in order on the whole prompt, before SD conversion and auto format. Use $1, $2 in the replacement to reference capture groups.",
-  "regexRules_empty": "No rules yet. Create one below.",
-  "regexRules_add": "New Rule",
-  "regexRules_unnamed": "Untitled rule",
-  "regexRules_invalidBadge": "Invalid",
-  "regexRules_deleteConfirmTitle": "Delete rule",
-  "regexRules_deleteConfirmMessage": "Delete \"{name}\"? This cannot be undone.",
-  "@regexRules_deleteConfirmMessage": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "regexRules_newTitle": "New Rule",
-  "regexRules_editTitle": "Edit Rule",
-  "regexRules_nameLabel": "Rule name (optional)",
-  "regexRules_nameHint": "e.g. Normalize hair color",
-  "regexRules_patternLabel": "Match (regular expression)",
-  "regexRules_patternHint": "e.g. \\bblue[ _]hair\\b",
-  "regexRules_replacementLabel": "Replace with",
-  "regexRules_replacementHint": "e.g. aqua hair",
-  "regexRules_caseSensitive": "Case sensitive",
-  "regexRules_patternRequired": "The match pattern cannot be empty",
-  "regexRules_patternInvalid": "Invalid regular expression: {error}",
-  "@regexRules_patternInvalid": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "regexRules_testTitle": "Test",
-  "regexRules_testInputHint": "Paste a prompt to preview the result",
-  "regexRules_testNoChange": "No change",
-  "regexRules_testNoRules": "No enabled rules",
   "prompt_formatted": "Formatted",
   "image_save": "Save",
   "image_copy": "Copy",
@@ -687,7 +627,6 @@
   "img2img_enhanceMagnitude": "Magnitude",
   "img2img_enhanceUpscaleAmount": "Upscale Amount",
   "img2img_enhanceMax": "Max✨",
-  "img2img_disabled": "Disabled",
   "img2img_novelAiCloudUpscale": "NovelAI cloud upscale (fixed 4x)",
   "img2img_comfyuiEnableHint": "Enable and connect ComfyUI in Settings > ComfyUI first.",
   "img2img_upscaleMode": "Upscale Mode",

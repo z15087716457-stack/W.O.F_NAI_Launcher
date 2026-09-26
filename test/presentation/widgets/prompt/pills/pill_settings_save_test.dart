@@ -70,7 +70,6 @@ void main() {
                   enableAutocomplete: false,
                   enableSyntaxHighlight: false,
                   enableAutoFormat: false,
-                  enableRegexReplace: false,
                 ),
               ),
             ),

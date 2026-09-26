@@ -1185,12 +1185,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get prompt_unwantedContent => '画像に含めたくないコンテンツ...';
 
   @override
-  String get prompt_smartAutocomplete => 'スマート オートコンプリート';
-
-  @override
-  String get prompt_smartAutocompleteSubtitle => '入力中にタグの候補を表示します';
-
-  @override
   String get prompt_autoFormat => '自動フォーマット';
 
   @override
@@ -1210,110 +1204,11 @@ class AppLocalizationsJa extends AppLocalizations {
       'フォーカスが外れたとき、または生成時に SD の重み構文を NAI 形式に変換します';
 
   @override
-  String get prompt_resolveAliasOnCopy => 'コピー時に単語ライブラリを展開';
-
-  @override
-  String get prompt_resolveAliasOnCopySubtitle =>
-      'コピーまたは切り取り時に <ライブラリ名> をその内容に置き換えます';
-
-  @override
   String get prompt_cooccurrenceRecommendation => '共起タグの推奨事項';
 
   @override
   String get prompt_cooccurrenceRecommendationSubtitle =>
       'タグ確定後に自動表示。Ctrl+Shift+Space または Ctrl+クリックでも表示できます';
-
-  @override
-  String get prompt_regexRulesManage => '正規表現置換ルール…';
-
-  @override
-  String prompt_regexRulesCount(int count) {
-    return '$count 件のルールを設定済み';
-  }
-
-  @override
-  String prompt_regexReplaceApplied(int count) {
-    return '正規表現置換 $count 件';
-  }
-
-  @override
-  String prompt_regexInvalidRules(Object names) {
-    return '無効な正規表現ルールをスキップしました: $names';
-  }
-
-  @override
-  String get regexRules_title => '正規表現置換ルール';
-
-  @override
-  String get regexRules_hint =>
-      'ルールはプロンプト全体に順番に適用され、SD 変換と自動フォーマットより先に実行されます。置換文字列では \$1、\$2 でキャプチャグループを参照できます。';
-
-  @override
-  String get regexRules_empty => 'ルールがありません。下のボタンから作成してください';
-
-  @override
-  String get regexRules_add => 'ルールを新規作成';
-
-  @override
-  String get regexRules_unnamed => '名称未設定のルール';
-
-  @override
-  String get regexRules_invalidBadge => '無効';
-
-  @override
-  String get regexRules_deleteConfirmTitle => 'ルールを削除';
-
-  @override
-  String regexRules_deleteConfirmMessage(Object name) {
-    return '「$name」を削除しますか？この操作は取り消せません。';
-  }
-
-  @override
-  String get regexRules_newTitle => 'ルールを新規作成';
-
-  @override
-  String get regexRules_editTitle => 'ルールを編集';
-
-  @override
-  String get regexRules_nameLabel => 'ルール名（任意）';
-
-  @override
-  String get regexRules_nameHint => '例: 髪色の表記を統一';
-
-  @override
-  String get regexRules_patternLabel => 'マッチ（正規表現）';
-
-  @override
-  String get regexRules_patternHint => '例: \\bblue[ _]hair\\b';
-
-  @override
-  String get regexRules_replacementLabel => '置換後';
-
-  @override
-  String get regexRules_replacementHint => '例: aqua hair';
-
-  @override
-  String get regexRules_caseSensitive => '大文字と小文字を区別する';
-
-  @override
-  String get regexRules_patternRequired => 'マッチ内容を空にはできません';
-
-  @override
-  String regexRules_patternInvalid(Object error) {
-    return '正規表現が無効です: $error';
-  }
-
-  @override
-  String get regexRules_testTitle => 'テスト';
-
-  @override
-  String get regexRules_testInputHint => 'プロンプトを貼り付けて結果を確認';
-
-  @override
-  String get regexRules_testNoChange => '変化なし';
-
-  @override
-  String get regexRules_testNoRules => '有効なルールがありません';
 
   @override
   String get prompt_formatted => 'フォーマット済み';
@@ -1490,9 +1385,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get img2img_enhanceMax => 'Max✨';
-
-  @override
-  String get img2img_disabled => '無効';
 
   @override
   String get img2img_novelAiCloudUpscale => 'NovelAI クラウド拡大 (4x 固定)';

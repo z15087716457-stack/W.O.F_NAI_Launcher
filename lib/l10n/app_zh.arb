@@ -509,72 +509,12 @@
   },
   "kritaBridge_busyGenerating": "Krita Bridge 正在生成，请等待当前任务结束",
   "prompt_unwantedContent": "不想出现在图像中的内容...",
-  "prompt_smartAutocomplete": "智能补全",
-  "prompt_smartAutocompleteSubtitle": "输入时显示标签建议",
   "prompt_autoFormat": "自动格式化",
   "prompt_autoFormatSubtitle": "规范逗号与空白，保留词间空格并保护权重闭合",
   "prompt_highlightEmphasis": "高亮强调",
   "prompt_highlightEmphasisSubtitle": "括号和权重语法高亮显示",
   "prompt_sdSyntaxAutoConvert": "SD语法自动转换",
   "prompt_sdSyntaxAutoConvertSubtitle": "失焦或生成时将 SD 权重语法转换为 NAI 格式",
-  "prompt_resolveAliasOnCopy": "复制时展开词库",
-  "prompt_resolveAliasOnCopySubtitle": "复制或剪切时把 <词库名> 替换为词库内容",
-  "prompt_regexRulesManage": "正则替换规则…",
-  "prompt_regexRulesCount": "已配置 {count} 条规则",
-  "@prompt_regexRulesCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "prompt_regexReplaceApplied": "正则替换 {count} 条",
-  "@prompt_regexReplaceApplied": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "prompt_regexInvalidRules": "已跳过无效的正则规则：{names}",
-  "@prompt_regexInvalidRules": {
-    "placeholders": {
-      "names": {}
-    }
-  },
-  "regexRules_title": "正则替换规则",
-  "regexRules_hint": "规则按顺序作用于整段提示词，早于 SD 转换和自动格式化执行。替换内容里可用 $1、$2 引用捕获组。",
-  "regexRules_empty": "还没有规则，点下面的按钮新建一条",
-  "regexRules_add": "新建规则",
-  "regexRules_unnamed": "未命名规则",
-  "regexRules_invalidBadge": "无效",
-  "regexRules_deleteConfirmTitle": "删除规则",
-  "regexRules_deleteConfirmMessage": "确定删除「{name}」吗？此操作不可撤销。",
-  "@regexRules_deleteConfirmMessage": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "regexRules_newTitle": "新建规则",
-  "regexRules_editTitle": "编辑规则",
-  "regexRules_nameLabel": "规则名称（可选）",
-  "regexRules_nameHint": "例如：统一发色写法",
-  "regexRules_patternLabel": "匹配（正则表达式）",
-  "regexRules_patternHint": "例如：\\bblue[ _]hair\\b",
-  "regexRules_replacementLabel": "替换为",
-  "regexRules_replacementHint": "例如：aqua hair",
-  "regexRules_caseSensitive": "区分大小写",
-  "regexRules_patternRequired": "匹配内容不能为空",
-  "regexRules_patternInvalid": "正则表达式无效：{error}",
-  "@regexRules_patternInvalid": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "regexRules_testTitle": "测试",
-  "regexRules_testInputHint": "粘贴一段提示词看看替换效果",
-  "regexRules_testNoChange": "无变化",
-  "regexRules_testNoRules": "没有启用中的规则",
   "prompt_formatted": "已格式化",
   "prompt_cooccurrenceRecommendation": "共现标签推荐",
   "prompt_cooccurrenceRecommendationSubtitle": "选中标签后自动推荐，也可按 Ctrl+Shift+Space 或 Ctrl+单击",
@@ -632,7 +572,6 @@
   "img2img_enhanceMagnitude": "幅度",
   "img2img_enhanceUpscaleAmount": "放大倍数",
   "img2img_enhanceMax": "Max✨",
-  "img2img_disabled": "未启用",
   "img2img_novelAiCloudUpscale": "NovelAI 云端超分 (固定 4x 放大)",
   "img2img_comfyuiEnableHint": "请先在「设置 > ComfyUI」中启用并连接服务器。",
   "img2img_upscaleMode": "放大方式",

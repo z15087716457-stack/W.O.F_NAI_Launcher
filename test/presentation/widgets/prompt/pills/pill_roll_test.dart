@@ -968,37 +968,34 @@ void main() {
         }
       });
 
-      testWidgets(
-        'sequential card shows step arrows + shared settings/enable/'
-        'lock/delete; arrows step scenes',
-        (tester) async {
-          final container = await openCard(tester, sequentialSettings);
+      testWidgets('sequential card shows step arrows + shared settings/enable/'
+          'lock/delete; arrows step scenes', (tester) async {
+        final container = await openCard(tester, sequentialSettings);
 
-          expect(find.byKey(stepBackKey), findsOneWidget);
-          expect(find.byKey(stepForwardKey), findsOneWidget);
-          expect(find.byKey(lockKey), findsOneWidget);
-          expect(find.byIcon(Icons.delete_outline), findsOneWidget);
-          expect(find.byKey(rerollKey), findsNothing);
-          // 设置/启停为全模式共有：设置弹窗是唯一模式切换入口，
-          // 顺序块缺它会堵死回不去。
-          expect(find.byIcon(Icons.tune), findsOneWidget);
-          expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
-          expect(find.byKey(evolutionKey), findsNothing);
+        expect(find.byKey(stepBackKey), findsOneWidget);
+        expect(find.byKey(stepForwardKey), findsOneWidget);
+        expect(find.byKey(lockKey), findsOneWidget);
+        expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+        expect(find.byKey(rerollKey), findsNothing);
+        // 设置/启停为全模式共有：设置弹窗是唯一模式切换入口，
+        // 顺序块缺它会堵死回不去。
+        expect(find.byIcon(Icons.tune), findsOneWidget);
+        expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+        expect(find.byKey(evolutionKey), findsNothing);
 
-          PillInstance read() => container
-              .read(pillWorkspaceNotifierProvider)
-              .document
-              .instances[markerA]!;
+        PillInstance read() => container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!;
 
-          expect(read().currentRoll, 'A');
-          await tester.tap(find.byKey(stepForwardKey));
-          await tester.pump();
-          expect(read().currentRoll, 'B');
-          await tester.tap(find.byKey(stepBackKey));
-          await tester.pump();
-          expect(read().currentRoll, 'A');
-        },
-      );
+        expect(read().currentRoll, 'A');
+        await tester.tap(find.byKey(stepForwardKey));
+        await tester.pump();
+        expect(read().currentRoll, 'B');
+        await tester.tap(find.byKey(stepBackKey));
+        await tester.pump();
+        expect(read().currentRoll, 'A');
+      });
 
       testWidgets('sequential arrows disable while locked', (tester) async {
         await openCard(tester, sequentialSettings);
@@ -1259,7 +1256,6 @@ Future<ProviderContainer> _pumpEditor(
                 enableAutocomplete: false,
                 enableSyntaxHighlight: false,
                 enableAutoFormat: false,
-                enableRegexReplace: false,
               ),
             ),
           ),

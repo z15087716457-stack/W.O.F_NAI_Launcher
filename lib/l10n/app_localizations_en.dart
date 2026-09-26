@@ -1206,13 +1206,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Content you don\'t want in the image...';
 
   @override
-  String get prompt_smartAutocomplete => 'Smart Autocomplete';
-
-  @override
-  String get prompt_smartAutocompleteSubtitle =>
-      'Show tag suggestions while typing';
-
-  @override
   String get prompt_autoFormat => 'Auto Format';
 
   @override
@@ -1234,111 +1227,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Convert SD weights to NAI syntax on blur or generation';
 
   @override
-  String get prompt_resolveAliasOnCopy => 'Expand Library On Copy';
-
-  @override
-  String get prompt_resolveAliasOnCopySubtitle =>
-      'Replace <library name> with its content when copying or cutting';
-
-  @override
   String get prompt_cooccurrenceRecommendation =>
       'Co-occurrence Tag Recommendation';
 
   @override
   String get prompt_cooccurrenceRecommendationSubtitle =>
       'Suggest after accepting a tag; Ctrl+Shift+Space or Ctrl+click also opens related tags';
-
-  @override
-  String get prompt_regexRulesManage => 'Regex Replace Rules...';
-
-  @override
-  String prompt_regexRulesCount(int count) {
-    return '$count rule(s) configured';
-  }
-
-  @override
-  String prompt_regexReplaceApplied(int count) {
-    return 'Regex replace: $count rule(s)';
-  }
-
-  @override
-  String prompt_regexInvalidRules(Object names) {
-    return 'Skipped invalid regex rule(s): $names';
-  }
-
-  @override
-  String get regexRules_title => 'Regex Replace Rules';
-
-  @override
-  String get regexRules_hint =>
-      'Rules run in order on the whole prompt, before SD conversion and auto format. Use \$1, \$2 in the replacement to reference capture groups.';
-
-  @override
-  String get regexRules_empty => 'No rules yet. Create one below.';
-
-  @override
-  String get regexRules_add => 'New Rule';
-
-  @override
-  String get regexRules_unnamed => 'Untitled rule';
-
-  @override
-  String get regexRules_invalidBadge => 'Invalid';
-
-  @override
-  String get regexRules_deleteConfirmTitle => 'Delete rule';
-
-  @override
-  String regexRules_deleteConfirmMessage(Object name) {
-    return 'Delete \"$name\"? This cannot be undone.';
-  }
-
-  @override
-  String get regexRules_newTitle => 'New Rule';
-
-  @override
-  String get regexRules_editTitle => 'Edit Rule';
-
-  @override
-  String get regexRules_nameLabel => 'Rule name (optional)';
-
-  @override
-  String get regexRules_nameHint => 'e.g. Normalize hair color';
-
-  @override
-  String get regexRules_patternLabel => 'Match (regular expression)';
-
-  @override
-  String get regexRules_patternHint => 'e.g. \\bblue[ _]hair\\b';
-
-  @override
-  String get regexRules_replacementLabel => 'Replace with';
-
-  @override
-  String get regexRules_replacementHint => 'e.g. aqua hair';
-
-  @override
-  String get regexRules_caseSensitive => 'Case sensitive';
-
-  @override
-  String get regexRules_patternRequired => 'The match pattern cannot be empty';
-
-  @override
-  String regexRules_patternInvalid(Object error) {
-    return 'Invalid regular expression: $error';
-  }
-
-  @override
-  String get regexRules_testTitle => 'Test';
-
-  @override
-  String get regexRules_testInputHint => 'Paste a prompt to preview the result';
-
-  @override
-  String get regexRules_testNoChange => 'No change';
-
-  @override
-  String get regexRules_testNoRules => 'No enabled rules';
 
   @override
   String get prompt_formatted => 'Formatted';
@@ -1519,9 +1413,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get img2img_enhanceMax => 'Max✨';
-
-  @override
-  String get img2img_disabled => 'Disabled';
 
   @override
   String get img2img_novelAiCloudUpscale => 'NovelAI cloud upscale (fixed 4x)';

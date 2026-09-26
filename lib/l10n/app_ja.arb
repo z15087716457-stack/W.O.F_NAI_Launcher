@@ -543,74 +543,14 @@
   },
   "kritaBridge_busyGenerating": "Krita Bridge で生成中です。現在のタスクが完了するまで待ってください。",
   "prompt_unwantedContent": "画像に含めたくないコンテンツ...",
-  "prompt_smartAutocomplete": "スマート オートコンプリート",
-  "prompt_smartAutocompleteSubtitle": "入力中にタグの候補を表示します",
   "prompt_autoFormat": "自動フォーマット",
   "prompt_autoFormatSubtitle": "カンマと空白を整え、単語間の空白を保ち、重み構文を安全に閉じます",
   "prompt_highlightEmphasis": "ハイライトの強調",
   "prompt_highlightEmphasisSubtitle": "括弧と重みの構文を強調表示します",
   "prompt_sdSyntaxAutoConvert": "SD 構文自動変換",
   "prompt_sdSyntaxAutoConvertSubtitle": "フォーカスが外れたとき、または生成時に SD の重み構文を NAI 形式に変換します",
-  "prompt_resolveAliasOnCopy": "コピー時に単語ライブラリを展開",
-  "prompt_resolveAliasOnCopySubtitle": "コピーまたは切り取り時に <ライブラリ名> をその内容に置き換えます",
   "prompt_cooccurrenceRecommendation": "共起タグの推奨事項",
   "prompt_cooccurrenceRecommendationSubtitle": "タグ確定後に自動表示。Ctrl+Shift+Space または Ctrl+クリックでも表示できます",
-  "prompt_regexRulesManage": "正規表現置換ルール…",
-  "prompt_regexRulesCount": "{count} 件のルールを設定済み",
-  "@prompt_regexRulesCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "prompt_regexReplaceApplied": "正規表現置換 {count} 件",
-  "@prompt_regexReplaceApplied": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "prompt_regexInvalidRules": "無効な正規表現ルールをスキップしました: {names}",
-  "@prompt_regexInvalidRules": {
-    "placeholders": {
-      "names": {}
-    }
-  },
-  "regexRules_title": "正規表現置換ルール",
-  "regexRules_hint": "ルールはプロンプト全体に順番に適用され、SD 変換と自動フォーマットより先に実行されます。置換文字列では $1、$2 でキャプチャグループを参照できます。",
-  "regexRules_empty": "ルールがありません。下のボタンから作成してください",
-  "regexRules_add": "ルールを新規作成",
-  "regexRules_unnamed": "名称未設定のルール",
-  "regexRules_invalidBadge": "無効",
-  "regexRules_deleteConfirmTitle": "ルールを削除",
-  "regexRules_deleteConfirmMessage": "「{name}」を削除しますか？この操作は取り消せません。",
-  "@regexRules_deleteConfirmMessage": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "regexRules_newTitle": "ルールを新規作成",
-  "regexRules_editTitle": "ルールを編集",
-  "regexRules_nameLabel": "ルール名（任意）",
-  "regexRules_nameHint": "例: 髪色の表記を統一",
-  "regexRules_patternLabel": "マッチ（正規表現）",
-  "regexRules_patternHint": "例: \\bblue[ _]hair\\b",
-  "regexRules_replacementLabel": "置換後",
-  "regexRules_replacementHint": "例: aqua hair",
-  "regexRules_caseSensitive": "大文字と小文字を区別する",
-  "regexRules_patternRequired": "マッチ内容を空にはできません",
-  "regexRules_patternInvalid": "正規表現が無効です: {error}",
-  "@regexRules_patternInvalid": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "regexRules_testTitle": "テスト",
-  "regexRules_testInputHint": "プロンプトを貼り付けて結果を確認",
-  "regexRules_testNoChange": "変化なし",
-  "regexRules_testNoRules": "有効なルールがありません",
   "prompt_formatted": "フォーマット済み",
   "image_save": "保存",
   "image_copy": "コピー",
@@ -686,7 +626,6 @@
   "img2img_enhanceMagnitude": "大きさ",
   "img2img_enhanceUpscaleAmount": "画像の拡大率",
   "img2img_enhanceMax": "Max✨",
-  "img2img_disabled": "無効",
   "img2img_novelAiCloudUpscale": "NovelAI クラウド拡大 (4x 固定)",
   "img2img_comfyuiEnableHint": "まず、[設定] > [ComfyUI] で ComfyUI を有効にして接続します。",
   "img2img_upscaleMode": "拡大モード",
