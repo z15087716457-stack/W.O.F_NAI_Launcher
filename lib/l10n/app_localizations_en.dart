@@ -289,9 +289,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nav_onlineGallery => 'Online Gallery';
 
   @override
-  String get nav_githubRepo => 'GitHub Repository';
-
-  @override
   String get nav_expandSidebar => 'Expand sidebar';
 
   @override

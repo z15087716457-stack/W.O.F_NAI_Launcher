@@ -628,12 +628,6 @@ abstract class AppLocalizations {
   /// **'Online Gallery'**
   String get nav_onlineGallery;
 
-  /// No description provided for @nav_githubRepo.
-  ///
-  /// In en, this message translates to:
-  /// **'GitHub Repository'**
-  String get nav_githubRepo;
-
   /// No description provided for @nav_expandSidebar.
   ///
   /// In en, this message translates to:

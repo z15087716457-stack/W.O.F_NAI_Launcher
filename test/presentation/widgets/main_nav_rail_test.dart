@@ -116,9 +116,13 @@ void main() {
       );
     }
     expect(find.byIcon(Icons.keyboard_double_arrow_right), findsOneWidget);
-    // d28096d0 后展开/收起钮在底部簇顶端（GitHub、设置之上）
+    // 底部簇顺序：收起钮 → 头像 → 设置（最底），GitHub 入口已移入设置-关于。
     expect(
       tester.getCenter(find.byKey(const Key('main-nav-toggle'))).dy,
+      lessThan(tester.getCenter(find.byIcon(Icons.person)).dy),
+    );
+    expect(
+      tester.getCenter(find.byIcon(Icons.person)).dy,
       lessThan(tester.getCenter(find.byIcon(Icons.settings)).dy),
     );
     expect(
@@ -139,7 +143,7 @@ void main() {
     expect(find.text('本地画廊'), findsOneWidget);
     expect(find.text('提示词块'), findsOneWidget);
     expect(find.byIcon(Icons.view_module_outlined), findsOneWidget);
-    expect(find.text('GitHub 仓库'), findsOneWidget);
+    expect(find.text('GitHub 仓库'), findsNothing);
     expect(find.text('收起侧边栏'), findsOneWidget);
     expect(find.byIcon(Icons.keyboard_double_arrow_left), findsOneWidget);
 

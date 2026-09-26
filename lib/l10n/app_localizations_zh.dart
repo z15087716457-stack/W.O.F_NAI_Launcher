@@ -283,9 +283,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nav_onlineGallery => '画廊';
 
   @override
-  String get nav_githubRepo => 'GitHub 仓库';
-
-  @override
   String get nav_expandSidebar => '展开侧边栏';
 
   @override

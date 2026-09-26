@@ -8,6 +8,7 @@ import '../../../../core/services/update_check_service.dart';
 import '../../../../core/storage/local_storage_service.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../providers/update_provider.dart';
+import '../../../widgets/common/github_icon.dart';
 import '../../../widgets/common/update_check_dialog.dart';
 import '../widgets/settings_card.dart';
 
@@ -137,7 +138,7 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.code),
+            leading: const GitHubIcon(),
             title: Text(context.l10n.settings_openSource),
             subtitle: Text(context.l10n.settings_openSourceSubtitle),
             trailing: const Icon(Icons.open_in_new),
