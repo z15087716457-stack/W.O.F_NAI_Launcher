@@ -8617,6 +8617,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get galleryScan_organizingGallery => 'Organizing gallery';
+
+  @override
   String get galleryScan_processing => 'Processing';
 
   @override

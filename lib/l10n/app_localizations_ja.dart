@@ -8431,6 +8431,9 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get galleryScan_organizingGallery => 'ギャラリーを整理中';
+
+  @override
   String get galleryScan_processing => '処理中';
 
   @override

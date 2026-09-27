@@ -1,514 +1,217 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../providers/gallery_scan_progress_provider.dart';
 
-/// 画廊扫描进度面板
-///
-/// 显示流式扫描的实时状态：
-/// - 总发现文件数（动态增长）
-/// - 当前处理阶段（单文件流水线）
-/// - 元数据缓存统计（实时更新）
+/// 本地画廊扫描时固定显示在分类侧栏底部的进度卡。
 class GalleryScanProgressPanel extends ConsumerWidget {
   const GalleryScanProgressPanel({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scanState = ref.watch(galleryScanProgressProvider);
+    if (!scanState.isScanning) return const SizedBox.shrink();
+    return GalleryScanProgressCard(state: scanState);
+  }
+}
+
+/// 单次扫描的进度使用 processed / total；元数据数量是图库累计值，
+/// 因此只放在统计区，不能再混入进度条的分段比例。
+class GalleryScanProgressCard extends StatelessWidget {
+  const GalleryScanProgressCard({super.key, required this.state});
+
+  final ScanProgressState state;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final l10n = context.l10n;
-
-    // 只有在扫描中或刚完成时显示
-    if (!scanState.isScanning) {
-      return const SizedBox.shrink();
-    }
-
-    final stats = scanState.cacheStats;
-    final progress = scanState.progress;
-    // 使用处理进度百分比（processed/total），而非覆盖率
-    final percentage = (progress * 100).toStringAsFixed(1);
+    final stats = state.cacheStats;
+    final progress = state.progress.clamp(0.0, 1.0);
+    final number = NumberFormat.decimalPattern(
+      Localizations.localeOf(context).toLanguageTag(),
+    );
+    final fileName = stats.currentFile.split(RegExp(r'[/\\]')).last;
 
     return Container(
       margin: const EdgeInsets.all(12),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(14, 13, 14, 11),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
+        color: colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
-          width: 1,
+          color: colors.outlineVariant.withValues(alpha: 0.38),
         ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 头部：状态 + 覆盖率
           Row(
             children: [
-              SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    theme.colorScheme.primary,
-                  ),
+              Container(
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  color: colors.primary,
+                  shape: BoxShape.circle,
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  l10n.localGallery_cachingMetadata,
+                  l10n.galleryScan_organizingGallery,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.labelMedium?.copyWith(
+                    color: colors.onSurface,
                     fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '$percentage%',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 11,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          // 彩色分段进度条
-          _buildSegmentedProgressBar(theme, scanState),
-          const SizedBox(height: 6),
-          // 进度条图例
-          _buildProgressLegend(context, theme, scanState),
-          const SizedBox(height: 8),
-          // 当前阶段标签
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(
-                    alpha: 0.5,
-                  ),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  stats.currentStage,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: theme.colorScheme.onPrimaryContainer,
-                  ),
-                ),
-              ),
-              // 处理进度计数
+              const SizedBox(width: 5),
               Text(
-                '${scanState.processedCount} / ${stats.totalImages}',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontSize: 10,
-                  color: theme.colorScheme.outline,
+                '${(progress * 100).toStringAsFixed(1)}%',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: colors.primary,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          // 元数据缓存统计
-          _buildMetadataStatsCard(context, theme, stats),
-          // 当前文件名
-          if (stats.currentFile.isNotEmpty)
-            _buildCurrentFile(theme, stats.currentFile),
-        ],
-      ),
-    );
-  }
-
-  /// 构建元数据缓存统计卡片
-  Widget _buildMetadataStatsCard(
-    BuildContext context,
-    ThemeData theme,
-    MetadataCacheStats stats,
-  ) {
-    final l10n = context.l10n;
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
+          const SizedBox(height: 13),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: stats.totalImages > 0 ? progress : null,
+              minHeight: 4,
+              backgroundColor: colors.surfaceContainerHighest,
+              valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+            ),
+          ),
+          const SizedBox(height: 8),
           Row(
             children: [
-              Icon(
-                Icons.storage_outlined,
-                size: 14,
-                color: theme.colorScheme.primary,
+              Text(
+                l10n.galleryScan_processing,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
               ),
               const SizedBox(width: 6),
-              Text(
-                l10n.localGallery_metadataCacheStats,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.primary,
+              Expanded(
+                child: Text(
+                  '${number.format(stats.processed)} / ${number.format(stats.totalImages)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          // 四列统计（新增跳过列）
+          const SizedBox(height: 13),
+          Divider(
+            height: 1,
+            color: colors.outlineVariant.withValues(alpha: 0.32),
+          ),
+          const SizedBox(height: 11),
           Row(
             children: [
               Expanded(
-                child: _buildStatColumn(
-                  theme,
-                  label: l10n.localGallery_totalImages,
-                  value: '${stats.totalImages}',
-                  icon: Icons.photo_library_outlined,
-                ),
-              ),
-              Expanded(
-                child: _buildStatColumn(
-                  theme,
+                child: _Metric(
                   label: l10n.localGallery_withMetadata,
-                  value: '${stats.withMetadata}',
-                  icon: Icons.check_circle_outline,
-                  valueColor: Colors.green,
+                  value: number.format(stats.withMetadata),
                 ),
               ),
+              Container(
+                width: 1,
+                height: 30,
+                color: colors.outlineVariant.withValues(alpha: 0.32),
+              ),
+              const SizedBox(width: 12),
               Expanded(
-                child: _buildStatColumn(
-                  theme,
+                child: _Metric(
                   label: l10n.localGallery_skipped,
-                  value: '${stats.skipped}',
-                  icon: Icons.skip_next_outlined,
-                  valueColor: Colors.orange,
-                ),
-              ),
-              Expanded(
-                child: _buildStatColumn(
-                  theme,
-                  label: l10n.localGallery_remaining,
-                  value: '${stats.remaining}',
-                  icon: Icons.pending_outlined,
-                  valueColor: theme.colorScheme.outline,
+                  value: number.format(stats.skipped),
                 ),
               ),
             ],
           ),
+          if (stats.failedMetadata > 0) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.galleryScan_failed(stats.failedMetadata),
+              style: theme.textTheme.labelSmall?.copyWith(color: colors.error),
+            ),
+          ],
+          if (fileName.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.insert_drive_file_outlined,
+                  size: 13,
+                  color: colors.onSurfaceVariant,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    fileName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
   }
+}
 
-  /// 构建单列统计
-  Widget _buildStatColumn(
-    ThemeData theme, {
-    required String label,
-    required String value,
-    required IconData icon,
-    Color? valueColor,
-  }) {
+class _Metric extends StatelessWidget {
+  const _Metric({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 14, color: theme.colorScheme.outline),
-        const SizedBox(height: 4),
         Text(
           value,
-          style: theme.textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
-            color: valueColor ?? theme.colorScheme.onSurface,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: colors.onSurface,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: theme.textTheme.labelSmall?.copyWith(
-            fontSize: 10,
-            color: theme.colorScheme.outline,
+            color: colors.onSurfaceVariant,
           ),
         ),
       ],
     );
-  }
-
-  /// 构建当前文件名显示
-  Widget _buildCurrentFile(ThemeData theme, String filePath) {
-    final fileName = filePath.split('/').last.split('\\').last;
-
-    return Container(
-      margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.insert_drive_file_outlined,
-            size: 12,
-            color: theme.colorScheme.outline,
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              fileName,
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontSize: 10,
-                color: theme.colorScheme.outline,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 构建彩色分段进度条
-  ///
-  /// 使用不同颜色显示不同状态的文件：
-  /// - 绿色：已扫描过且跳过（缓存命中）
-  /// - 蓝色：有元数据（解析成功）
-  /// - 红色：扫描错误
-  /// - 灰色/默认：待处理
-  Widget _buildSegmentedProgressBar(
-    ThemeData theme,
-    ScanProgressState scanState,
-  ) {
-    final stats = scanState.cacheStats;
-    final total = stats.totalImages;
-
-    if (total == 0) {
-      // 初始状态显示灰色进度条
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(4),
-        child: LinearProgressIndicator(
-          value: null, // 不确定进度
-          minHeight: 8,
-          backgroundColor: theme.colorScheme.surfaceContainerHighest,
-          valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
-        ),
-      );
-    }
-
-    // 计算各状态的比例
-    final skippedRatio = stats.skipped / total;
-    final withMetadataRatio = stats.withMetadata / total;
-    final failedRatio = stats.failedMetadata / total;
-    final processedRatio = stats.processed / total;
-
-    // 当前正在处理的部分 = 已处理 - 已分类
-    final processingRatio =
-        (processedRatio - skippedRatio - withMetadataRatio - failedRatio).clamp(
-          0.0,
-          1.0,
-        );
-
-    // 待处理的部分
-    final pendingRatio = (1.0 - processedRatio).clamp(0.0, 1.0);
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(4),
-      child: SizedBox(
-        height: 8,
-        child: Row(
-          children: [
-            // 绿色：跳过的（已扫描过，缓存命中）
-            if (skippedRatio > 0)
-              Expanded(
-                flex: (skippedRatio * 1000).round(),
-                child: Container(color: Colors.green.shade400),
-              ),
-            // 蓝色：有元数据的（解析成功）
-            if (withMetadataRatio > 0)
-              Expanded(
-                flex: (withMetadataRatio * 1000).round(),
-                child: Container(color: Colors.blue.shade400),
-              ),
-            // 红色：扫描错误的
-            if (failedRatio > 0)
-              Expanded(
-                flex: (failedRatio * 1000).round(),
-                child: Container(color: Colors.red.shade400),
-              ),
-            // 紫色：正在处理的
-            if (processingRatio > 0)
-              Expanded(
-                flex: (processingRatio * 1000).round(),
-                child: Container(
-                  color: theme.colorScheme.primary,
-                  child: const _AnimatedStripes(),
-                ),
-              ),
-            // 灰色：待处理的
-            if (pendingRatio > 0)
-              Expanded(
-                flex: (pendingRatio * 1000).round(),
-                child: Container(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 构建进度条图例
-  Widget _buildProgressLegend(
-    BuildContext context,
-    ThemeData theme,
-    ScanProgressState scanState,
-  ) {
-    final stats = scanState.cacheStats;
-    final l10n = context.l10n;
-
-    return Wrap(
-      spacing: 12,
-      runSpacing: 4,
-      children: [
-        if (stats.skipped > 0)
-          _buildLegendItem(
-            Colors.green.shade400,
-            l10n.galleryScan_skipped(stats.skipped),
-          ),
-        if (stats.withMetadata > 0)
-          _buildLegendItem(
-            Colors.blue.shade400,
-            l10n.galleryScan_withMetadata(stats.withMetadata),
-          ),
-        if (stats.failedMetadata > 0)
-          _buildLegendItem(
-            Colors.red.shade400,
-            l10n.galleryScan_failed(stats.failedMetadata),
-          ),
-        _buildLegendItem(
-          theme.colorScheme.primary,
-          l10n.galleryScan_processing,
-        ),
-        _buildLegendItem(
-          theme.colorScheme.surfaceContainerHighest,
-          l10n.galleryScan_pending,
-        ),
-      ],
-    );
-  }
-
-  /// 构建图例项
-  Widget _buildLegendItem(Color color, String label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
-        ),
-      ],
-    );
-  }
-}
-
-/// 动画条纹效果（表示处理中）
-class _AnimatedStripes extends StatefulWidget {
-  const _AnimatedStripes();
-
-  @override
-  State<_AnimatedStripes> createState() => _AnimatedStripesState();
-}
-
-class _AnimatedStripesState extends State<_AnimatedStripes>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return CustomPaint(
-          size: const Size(double.infinity, 8),
-          painter: _StripesPainter(
-            progress: _controller.value,
-            color: Colors.white.withValues(alpha: 0.3),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// 条纹绘制器
-class _StripesPainter extends CustomPainter {
-  final double progress;
-  final Color color;
-
-  _StripesPainter({required this.progress, required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round;
-
-    const stripeWidth = 8.0;
-    const gap = 8.0;
-    final offset = progress * (stripeWidth + gap);
-
-    for (
-      double x = -stripeWidth;
-      x < size.width + stripeWidth;
-      x += stripeWidth + gap
-    ) {
-      canvas.drawLine(
-        Offset(x + offset, 0),
-        Offset(x + offset - stripeWidth / 2, size.height),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _StripesPainter oldDelegate) {
-    return oldDelegate.progress != progress;
   }
 }

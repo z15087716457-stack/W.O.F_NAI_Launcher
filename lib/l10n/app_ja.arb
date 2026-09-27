@@ -4897,6 +4897,7 @@
       }
     }
   },
+  "galleryScan_organizingGallery": "ギャラリーを整理中",
   "galleryScan_processing": "処理中",
   "galleryScan_pending": "処理待ち",
   "vibeDetail_useAll": "すべて使用",

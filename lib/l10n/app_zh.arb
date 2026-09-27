@@ -4897,6 +4897,7 @@
       }
     }
   },
+  "galleryScan_organizingGallery": "正在整理图库",
   "galleryScan_processing": "处理中",
   "galleryScan_pending": "待处理",
   "vibeDetail_useAll": "使用全部",

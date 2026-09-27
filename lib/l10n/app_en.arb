@@ -4897,6 +4897,7 @@
       }
     }
   },
+  "galleryScan_organizingGallery": "Organizing gallery",
   "galleryScan_processing": "Processing",
   "galleryScan_pending": "Pending",
   "vibeDetail_useAll": "Use All",

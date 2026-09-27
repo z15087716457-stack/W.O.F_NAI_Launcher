@@ -8313,6 +8313,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get galleryScan_organizingGallery => '正在整理图库';
+
+  @override
   String get galleryScan_processing => '处理中';
 
   @override

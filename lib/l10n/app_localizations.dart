@@ -15108,6 +15108,12 @@ abstract class AppLocalizations {
   /// **'Failed {count}'**
   String galleryScan_failed(int count);
 
+  /// No description provided for @galleryScan_organizingGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Organizing gallery'**
+  String get galleryScan_organizingGallery;
+
   /// No description provided for @galleryScan_processing.
   ///
   /// In en, this message translates to:
