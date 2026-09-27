@@ -15,6 +15,7 @@ import '../../../core/constants/storage_keys.dart';
 import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/file_explorer_utils.dart';
+import '../../../core/utils/gallery_path_utils.dart';
 import '../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../core/utils/zip_utils.dart';
 import '../../../data/models/gallery/gallery_category.dart';
@@ -36,6 +37,7 @@ import '../../providers/gallery_scan_progress_provider.dart';
 import '../../router/app_router.dart';
 import '../../services/image_workflow_launcher.dart';
 import '../../utils/asset_protection_guard.dart';
+import '../../utils/gallery_extra_root_add_flow.dart';
 import '../../utils/krita_send_helper.dart';
 import '../../utils/local_gallery_reference_factory.dart';
 import '../../utils/local_gallery_metadata_resolver.dart';
@@ -51,6 +53,7 @@ import '../../widgets/common/precise_reference_type_dialog.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
 import '../../widgets/common/themed_input_dialog.dart';
 import '../../widgets/gallery/gallery_category_tree_view.dart';
+import '../../widgets/gallery/gallery_add_menu_button.dart';
 import '../../widgets/gallery/gallery_content_view.dart';
 import '../../widgets/gallery/gallery_state_views.dart';
 import '../../widgets/gallery/local_image_context_menu.dart';
@@ -347,16 +350,9 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          FilledButton.tonalIcon(
-            onPressed: _createCategory,
-            icon: const Icon(Icons.add, size: 18),
-            label: Text(
-              context.l10n.common_new,
-              style: const TextStyle(fontSize: 13),
-            ),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
+          GalleryAddMenuButton(
+            onCreateCategory: _createCategory,
+            onImportFolder: _importFolder,
           ),
         ],
       ),
@@ -376,6 +372,32 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
           .read(galleryCategoryNotifierProvider.notifier)
           .createCategory(name, parentId: null);
     }
+  }
+
+  Future<void> _importFolder() async {
+    final addedPath = await GalleryExtraRootAddFlow.pickAndAdd(
+      context: context,
+      ref: ref,
+    );
+    if (addedPath == null || !mounted) return;
+
+    final categoryState = ref.read(galleryCategoryNotifierProvider);
+    final importedRoot = categoryState.categories.firstWhereOrNull(
+      (category) =>
+          category.isExternal &&
+          category.parentId == null &&
+          galleryFilePathsEqual(category.folderPath, addedPath),
+    );
+    if (importedRoot == null) return;
+
+    // The user asked to see the imported images immediately. Reset only
+    // session filters; keep the persisted NAI-only preference and view mode.
+    ref
+        .read(galleryCategoryNotifierProvider.notifier)
+        .selectCategory(importedRoot.id);
+    await ref
+        .read(localGalleryNotifierProvider.notifier)
+        .showImportedCategory(importedRoot.id, importedRoot.folderPath);
   }
 
   /// 新建收藏集/收藏文件夹（parentId=null 为收藏根级）

@@ -11,9 +11,9 @@ import '../../../../core/utils/hive_storage_helper.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../core/utils/vibe_library_path_helper.dart';
 import '../../../../data/repositories/gallery_folder_repository.dart';
-import '../../../../data/services/gallery/tag_index_import_service.dart';
 import '../../../providers/image_save_settings_provider.dart';
 import '../../../providers/tag_index_import_provider.dart';
+import '../../../utils/gallery_extra_root_add_flow.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../widgets/cache_statistics_tile.dart';
 import '../widgets/data_source_cache_settings.dart';
@@ -162,8 +162,8 @@ class _StorageSettingsSectionState
 
 /// 图库源管理
 ///
-/// 额外图库源：任意文件夹作为只读图库源加入画廊，可浏览可搜索，
-/// 不参与自动保存，文件不可删除/移动
+/// 额外图库源：任意文件夹加入画廊，可浏览可搜索，不参与自动保存。
+/// 图片级移动/复制仍遵循画廊现有的保护与确认流程。
 class GalleryExtraRootsCard extends ConsumerStatefulWidget {
   const GalleryExtraRootsCard({super.key});
 
@@ -174,9 +174,6 @@ class GalleryExtraRootsCard extends ConsumerStatefulWidget {
 
 class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
   List<String> _extraRoots = const [];
-
-  /// FilePicker 对话框打开中标志（防重入：对话框期间禁再次触发）
-  bool _isPickingFolder = false;
 
   @override
   void initState() {
@@ -191,121 +188,11 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
   }
 
   Future<void> _addExtraRoot() async {
-    // 防 FilePicker 重入（对话框打开期间禁再次触发）
-    if (_isPickingFolder) return;
-    _isPickingFolder = true;
-
-    final l10n = context.l10n;
-    try {
-      final result = await FilePicker.platform.getDirectoryPath(
-        dialogTitle: l10n.settings_extraRootsAddTitle,
-      );
-      if (result == null || !mounted) return;
-
-      // 【闪退加固】文件对话框返回后先让出一帧 + 延迟，
-      // 确保 comdlg32 对话框完全销毁再继续后续工作（含重量级 sync/扫描），
-      // 避免消息泵重入导致 0xc0000005
-      await WidgetsBinding.instance.endOfFrame;
-      await Future.delayed(const Duration(milliseconds: 150));
-      if (!mounted) return;
-
-      final repository = GalleryFolderRepository.instance;
-
-      // 校验：目录存在
-      if (!await Directory(result).exists()) {
-        if (mounted) {
-          AppToast.error(context, l10n.settings_extraRootsNotFound);
-        }
-        return;
-      }
-
-      // 校验：与主源相同
-      final rootPath = await repository.getRootPath();
-      if (rootPath != null && await _samePath(rootPath, result)) {
-        if (mounted) {
-          AppToast.warning(context, l10n.settings_extraRootsSameAsMain);
-        }
-        return;
-      }
-
-      // 校验：重复
-      final current = await repository.getExtraRootPaths();
-      for (final existing in current) {
-        if (await _samePath(existing, result)) {
-          if (mounted) {
-            AppToast.warning(context, l10n.settings_extraRootsDuplicate);
-          }
-          return;
-        }
-      }
-
-      // 校验：额外源不能包含主源、主源不能包含额外源（避免重复扫描）
-      if (rootPath != null) {
-        if (await _isWithin(result, rootPath) ||
-            await _isWithin(rootPath, result)) {
-          if (mounted) {
-            AppToast.warning(context, l10n.settings_extraRootsNested);
-          }
-          return;
-        }
-      }
-
-      final added = await repository.addExtraRootPath(result);
-      if (!mounted) return;
-
-      if (added) {
-        await _loadExtraRoots();
-        if (!mounted) return;
-
-        // 【导入先行主流程】检测到约定位置的标签索引文件时，
-        // 把导入升级为添加后的主流程（确认 → 带进度执行），
-        // 导入的记录带 last_scanned_at + size/mtime 签名，
-        // 之后扫描全部走 skip 快进，避免裸解析上万张图
-        final indexFile = await findTagIndexFileForRoot(result);
-        if (indexFile != null && mounted) {
-          final confirmed = await showDialog<bool>(
-            context: context,
-            builder: (dialogContext) => AlertDialog(
-              icon: const Icon(Icons.upload_file_outlined),
-              title: Text(l10n.settings_extraRootsIndexImportTitle),
-              content: Text(l10n.settings_extraRootsIndexImportContent(result)),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(false),
-                  child: Text(l10n.common_cancel),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(true),
-                  child: Text(l10n.settings_extraRootsIndexImportConfirm),
-                ),
-              ],
-            ),
-          );
-          if (confirmed == true && mounted) {
-            // 导入期间扫描器会被 TagIndexImportService.isImporting 拒绝，
-            // 导入完成后再提示刷新画廊
-            await _runImport(indexFile.path);
-            return;
-          }
-        }
-
-        if (mounted) {
-          AppToast.success(context, l10n.settings_extraRootsAdded);
-        }
-      } else {
-        AppToast.warning(context, l10n.settings_extraRootsDuplicate);
-      }
-    } catch (e) {
-      AppLogger.e('添加额外图库源失败', e);
-      if (mounted) {
-        AppToast.error(
-          context,
-          '${l10n.settings_selectFolderFailed}: ${e.toString()}',
-        );
-      }
-    } finally {
-      _isPickingFolder = false;
-    }
+    final added = await GalleryExtraRootAddFlow.pickAndAdd(
+      context: context,
+      ref: ref,
+    );
+    if (added != null && mounted) await _loadExtraRoots();
   }
 
   /// 选择 JSONL 标签索引文件并导入
@@ -340,57 +227,11 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
 
   /// 执行导入，完成后 toast 报告计数
   Future<void> _runImport(String filePath) async {
-    final l10n = context.l10n;
-    final notifier = ref.read(tagIndexImportProvider.notifier);
-    final importResult = await notifier.startImport(filePath);
-    if (!mounted) return;
-
-    if (importResult != null) {
-      final message = l10n.settings_importTagIndexDone(
-        importResult.imported,
-        importResult.updated,
-        importResult.skipped,
-        importResult.errors,
-      );
-      if (importResult.hasErrors) {
-        AppToast.warning(context, message);
-      } else {
-        AppToast.success(context, message);
-      }
-    } else if (!notifier.isImporting) {
-      // startImport 返回 null 且不在导入中 = 导入失败（或扫描中拒绝导入）
-      final state = ref.read(tagIndexImportProvider);
-      final message = state.blockedByScan
-          ? l10n.settings_importTagIndexBlockedByScan
-          : state.error ?? l10n.settings_importTagIndexFailed;
-      AppToast.error(context, message);
-    }
-  }
-
-  Future<bool> _samePath(String left, String right) async {
-    // 规范化后比较（Windows 大小写不敏感）
-    final leftDir = Directory(left);
-    final rightDir = Directory(right);
-    try {
-      return leftDir.absolute.path.toLowerCase() ==
-          rightDir.absolute.path.toLowerCase();
-    } catch (_) {
-      return left.toLowerCase() == right.toLowerCase();
-    }
-  }
-
-  Future<bool> _isWithin(String root, String child) async {
-    final rootKey = await _pathKey(root);
-    final childKey = await _pathKey(child);
-    return childKey.startsWith('$rootKey${Platform.pathSeparator}');
-  }
-
-  Future<String> _pathKey(String path) async {
-    try {
-      return Directory(path).absolute.path.toLowerCase();
-    } catch (_) {
-      return path.toLowerCase();
-    }
+    await GalleryExtraRootAddFlow.importTagIndex(
+      context: context,
+      ref: ref,
+      filePath: filePath,
+    );
   }
 
   Future<void> _removeExtraRoot(String path) async {

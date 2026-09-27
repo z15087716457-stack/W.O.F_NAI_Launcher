@@ -192,6 +192,40 @@ void main() {
       expect(fakeService.setSortCount, equals(2));
       expect(fakeService.getPageCount, equals(2));
     });
+
+    test('导入后切换目录只保留 NAI-only 偏好并清除旧筛选', () async {
+      final fakeService = _TrackingLocalGalleryService();
+      final container = ProviderContainer(
+        overrides: [
+          galleryServiceProvider.overrideWith(
+            () => _FakeGalleryServiceNotifier(fakeService),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(localGalleryNotifierProvider.notifier);
+      await notifier.initialize();
+      await notifier.setNaiOnly(true);
+      await notifier.setSearchQuery('old search');
+      await notifier.setShowFavoritesOnly(true);
+      await notifier.setSelectedCollection('old-collection');
+
+      final before = fakeService.applyFilterCount;
+      await notifier.showImportedCategory('new-root', '/gallery/new-root');
+
+      final criteria = container
+          .read(localGalleryNotifierProvider)
+          .filterCriteria;
+      expect(criteria.categoryId, 'new-root');
+      expect(criteria.categoryFolderPath, '/gallery/new-root');
+      expect(criteria.searchQuery, isEmpty);
+      expect(criteria.showFavoritesOnly, isFalse);
+      expect(criteria.collectionId, isNull);
+      expect(criteria.naiOnly, isTrue);
+      expect(fakeService.filter.categoryId, 'new-root');
+      expect(fakeService.applyFilterCount, before + 1);
+    });
   });
 
   group('LocalGalleryScreen empty & loading state guards (A-1)', () {

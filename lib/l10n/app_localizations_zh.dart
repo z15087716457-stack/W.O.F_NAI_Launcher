@@ -596,7 +596,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_extraRootsHint =>
-      '额外图库源：可浏览可搜索，图片可移动/复制到分类；不参与自动保存。添加后请在画廊页或本页底部执行重新扫描。';
+      '额外图库源：可浏览可搜索，图片可移动/复制到分类；不参与自动保存。添加后会立即扫描。';
 
   @override
   String get settings_extraRootsEmpty => '尚未添加额外图库源';
@@ -619,7 +619,13 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get settings_extraRootsAdded => '图库源已添加，重新扫描后生效';
+  String get settings_extraRootsAdded => '图库源已添加并完成扫描';
+
+  @override
+  String get settings_extraRootsScanFailed => '文件夹已添加，但扫描未完成，请在画廊中重试刷新';
+
+  @override
+  String get settings_extraRootsWaitingScan => '当前图库正在扫描，完成后会继续导入此文件夹';
 
   @override
   String get settings_extraRootsRemoved => '图库源已移除';
@@ -3728,6 +3734,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localGallery_createCategoryTitle => '新建分类';
+
+  @override
+  String get localGallery_newOrImport => '新建/导入';
+
+  @override
+  String get localGallery_importFolder => '导入文件夹';
 
   @override
   String get localGallery_createCategoryHint => '请输入分类名称';

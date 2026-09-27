@@ -1231,7 +1231,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_extraRootsHint.
   ///
   /// In en, this message translates to:
-  /// **'Extra gallery sources: browse and search available, images can be moved/copied to categories; not used for auto-save. After adding, run a rescan in the gallery or at the bottom of this page.'**
+  /// **'Extra gallery sources can be browsed and searched, and their images can be moved or copied to categories. They are not used for auto-save. New sources are scanned immediately.'**
   String get settings_extraRootsHint;
 
   /// No description provided for @settings_extraRootsEmpty.
@@ -1273,8 +1273,20 @@ abstract class AppLocalizations {
   /// No description provided for @settings_extraRootsAdded.
   ///
   /// In en, this message translates to:
-  /// **'Gallery source added; rescan to apply'**
+  /// **'Gallery source added and scanned'**
   String get settings_extraRootsAdded;
+
+  /// No description provided for @settings_extraRootsScanFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder added, but scanning did not finish. Refresh the gallery to retry'**
+  String get settings_extraRootsScanFailed;
+
+  /// No description provided for @settings_extraRootsWaitingScan.
+  ///
+  /// In en, this message translates to:
+  /// **'The gallery is scanning. This folder will be imported when it finishes'**
+  String get settings_extraRootsWaitingScan;
 
   /// No description provided for @settings_extraRootsRemoved.
   ///
@@ -7038,6 +7050,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New Category'**
   String get localGallery_createCategoryTitle;
+
+  /// No description provided for @localGallery_newOrImport.
+  ///
+  /// In en, this message translates to:
+  /// **'New / Import'**
+  String get localGallery_newOrImport;
+
+  /// No description provided for @localGallery_importFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Folder'**
+  String get localGallery_importFolder;
 
   /// No description provided for @localGallery_createCategoryHint.
   ///

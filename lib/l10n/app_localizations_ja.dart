@@ -605,7 +605,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_extraRootsHint =>
-      '追加のギャラリーソース: 閲覧・検索が可能で、画像をカテゴリへ移動/コピーできます（自動保存の対象外）。追加後、ギャラリーまたはこのページ下部で再スキャンしてください。';
+      '追加のギャラリーソースは閲覧・検索でき、画像をカテゴリへ移動/コピーできます（自動保存の対象外）。追加後すぐにスキャンします。';
 
   @override
   String get settings_extraRootsEmpty => '追加のギャラリーソースはありません';
@@ -628,7 +628,15 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get settings_extraRootsAdded => 'ギャラリーソースを追加しました。再スキャン後に反映されます';
+  String get settings_extraRootsAdded => 'ギャラリーソースを追加してスキャンしました';
+
+  @override
+  String get settings_extraRootsScanFailed =>
+      'フォルダを追加しましたが、スキャンが完了しませんでした。ギャラリーを更新して再試行してください';
+
+  @override
+  String get settings_extraRootsWaitingScan =>
+      'ギャラリーをスキャン中です。完了後にこのフォルダをインポートします';
 
   @override
   String get settings_extraRootsRemoved => 'ギャラリーソースを削除しました';
@@ -3781,6 +3789,12 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localGallery_createCategoryTitle => '新しいカテゴリ';
+
+  @override
+  String get localGallery_newOrImport => '新規/インポート';
+
+  @override
+  String get localGallery_importFolder => 'フォルダをインポート';
 
   @override
   String get localGallery_createCategoryHint => 'カテゴリ名を入力してください';

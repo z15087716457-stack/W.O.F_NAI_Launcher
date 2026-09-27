@@ -618,7 +618,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       return;
     }
 
-    _setState(state.copyWith(isLoading: true));
+    _setState(state.copyWith(isLoading: true, error: null));
 
     try {
       final service = await getService();
@@ -1030,6 +1030,24 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       ),
     );
 
+    await _applyFilters();
+  }
+
+  /// Show a newly imported gallery root in one filter update. Old search,
+  /// collection and favorites filters must not hide the imported images.
+  Future<void> showImportedCategory(
+    String categoryId,
+    String folderPath,
+  ) async {
+    _setState(
+      state.copyWith(
+        filterCriteria: FilterCriteria(
+          categoryId: categoryId,
+          categoryFolderPath: folderPath,
+          naiOnly: state.filterCriteria.naiOnly,
+        ),
+      ),
+    );
     await _applyFilters();
   }
 

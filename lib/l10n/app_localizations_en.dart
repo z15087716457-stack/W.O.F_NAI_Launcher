@@ -615,7 +615,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_extraRootsHint =>
-      'Extra gallery sources: browse and search available, images can be moved/copied to categories; not used for auto-save. After adding, run a rescan in the gallery or at the bottom of this page.';
+      'Extra gallery sources can be browsed and searched, and their images can be moved or copied to categories. They are not used for auto-save. New sources are scanned immediately.';
 
   @override
   String get settings_extraRootsEmpty => 'No extra gallery sources added';
@@ -639,8 +639,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get settings_extraRootsAdded =>
-      'Gallery source added; rescan to apply';
+  String get settings_extraRootsAdded => 'Gallery source added and scanned';
+
+  @override
+  String get settings_extraRootsScanFailed =>
+      'Folder added, but scanning did not finish. Refresh the gallery to retry';
+
+  @override
+  String get settings_extraRootsWaitingScan =>
+      'The gallery is scanning. This folder will be imported when it finishes';
 
   @override
   String get settings_extraRootsRemoved => 'Gallery source removed';
@@ -3862,6 +3869,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localGallery_createCategoryTitle => 'New Category';
+
+  @override
+  String get localGallery_newOrImport => 'New / Import';
+
+  @override
+  String get localGallery_importFolder => 'Import Folder';
 
   @override
   String get localGallery_createCategoryHint => 'Enter category name';
