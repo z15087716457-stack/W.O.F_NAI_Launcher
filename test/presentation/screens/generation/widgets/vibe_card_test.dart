@@ -3,12 +3,55 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/vibe_card.dart';
+import 'package:nai_launcher/presentation/widgets/common/decoded_memory_image.dart';
 import 'package:nai_launcher/presentation/widgets/common/editable_double_field.dart';
 
 void main() {
+  testWidgets('small Vibe image uses the original and cover-sized decoding', (
+    tester,
+  ) async {
+    final raw = Uint8List.fromList(
+      img.encodePng(img.Image(width: 300, height: 500)),
+    );
+    final thumbnail = Uint8List.fromList(
+      img.encodePng(img.Image(width: 30, height: 50)),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Scaffold(
+            body: VibeCard(
+              index: 0,
+              vibe: VibeReference(
+                displayName: 'portrait',
+                vibeEncoding: 'encoded',
+                rawImageData: raw,
+                thumbnail: thumbnail,
+              ),
+              onRemove: () {},
+              onStrengthChanged: (_) {},
+              onInfoExtractedChanged: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    final image = tester.widget<DecodedMemoryImage>(
+      find.byType(DecodedMemoryImage),
+    );
+    expect(identical(image.bytes, raw), isTrue);
+    expect(image.decodeForCover, isTrue);
+    expect(image.filterQuality, FilterQuality.medium);
+    expect(image.maxLogicalWidth, 100);
+    expect(image.maxLogicalHeight, 100);
+  });
+
   testWidgets('参考强度滑条保持官网范围，但数值输入不设上下限', (tester) async {
     double? changedStrength;
     final vibe = VibeReference(

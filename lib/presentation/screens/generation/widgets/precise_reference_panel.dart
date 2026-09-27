@@ -810,6 +810,8 @@ class _PreciseReferenceCard extends StatelessWidget {
         child: DecodedMemoryImage(
           bytes: reference.image,
           fit: BoxFit.cover,
+          decodeForCover: true,
+          filterQuality: FilterQuality.medium,
           maxLogicalWidth: 56,
           maxLogicalHeight: 56,
           errorBuilder: (context, error, stackTrace) {

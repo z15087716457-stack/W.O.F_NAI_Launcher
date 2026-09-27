@@ -1,11 +1,75 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
+import 'package:nai_launcher/core/enums/precise_ref_type.dart';
+import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/precise_reference_panel.dart';
+import 'package:nai_launcher/presentation/widgets/common/collapsible_image_panel.dart';
+import 'package:nai_launcher/presentation/widgets/common/decoded_memory_image.dart';
+import 'package:nai_launcher/presentation/widgets/common/hover_image_preview.dart';
+
+class _ReferenceParams extends GenerationParamsNotifier {
+  _ReferenceParams(this.image);
+
+  final Uint8List image;
+
+  @override
+  ImageParams build() => ImageParams(
+    model: 'nai-diffusion-4-5-full',
+    preciseReferences: [
+      PreciseReference(image: image, type: PreciseRefType.character),
+    ],
+  );
+}
 
 void main() {
   group('PreciseReferencePanel', () {
+    testWidgets('small reference image decodes for square cover', (
+      tester,
+    ) async {
+      final bytes = Uint8List.fromList(
+        img.encodePng(img.Image(width: 300, height: 500)),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            generationParamsNotifierProvider.overrideWith(
+              () => _ReferenceParams(bytes),
+            ),
+          ],
+          child: const MaterialApp(
+            locale: Locale('zh'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: Scaffold(
+              body: SizedBox(width: 320, child: PreciseReferencePanel()),
+            ),
+          ),
+        ),
+      );
+      tester
+          .widget<CollapsibleImagePanel>(find.byType(CollapsibleImagePanel))
+          .onToggle();
+      await tester.pumpAndSettle();
+
+      final image = tester.widget<DecodedMemoryImage>(
+        find.descendant(
+          of: find.byType(HoverImagePreview),
+          matching: find.byType(DecodedMemoryImage),
+        ),
+      );
+      expect(identical(image.bytes, bytes), isTrue);
+      expect(image.decodeForCover, isTrue);
+      expect(image.filterQuality, FilterQuality.medium);
+      expect(image.maxLogicalWidth, 56);
+      expect(image.maxLogicalHeight, 56);
+    });
+
     for (final top in [0.0, 310.0]) {
       testWidgets('头部 + 菜单锚定并在边缘避让，overlay 内 top=$top', (tester) async {
         final container = ProviderContainer();

@@ -239,10 +239,13 @@ class _VibeCardState extends ConsumerState<VibeCard> {
   }
 
   Widget _buildThumbnail(ThemeData theme) {
-    final thumbnailBytes = widget.vibe.thumbnail ?? widget.vibe.rawImageData;
+    final rawImage = widget.vibe.rawImageData;
+    final thumbnailBytes = rawImage != null && rawImage.isNotEmpty
+        ? rawImage
+        : widget.vibe.thumbnail;
 
     // 悬浮预览使用原始图片数据或缩略图
-    final previewBytes = widget.vibe.rawImageData ?? widget.vibe.thumbnail;
+    final previewBytes = thumbnailBytes;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(6),
@@ -258,6 +261,8 @@ class _VibeCardState extends ConsumerState<VibeCard> {
                         child: DecodedMemoryImage(
                           bytes: thumbnailBytes,
                           fit: BoxFit.cover,
+                          decodeForCover: true,
+                          filterQuality: FilterQuality.medium,
                           maxLogicalWidth: 100,
                           maxLogicalHeight: 100,
                           errorBuilder: (context, error, stackTrace) {
@@ -268,6 +273,8 @@ class _VibeCardState extends ConsumerState<VibeCard> {
                     : DecodedMemoryImage(
                         bytes: thumbnailBytes,
                         fit: BoxFit.cover,
+                        decodeForCover: true,
+                        filterQuality: FilterQuality.medium,
                         maxLogicalWidth: 100,
                         maxLogicalHeight: 100,
                         errorBuilder: (context, error, stackTrace) {
