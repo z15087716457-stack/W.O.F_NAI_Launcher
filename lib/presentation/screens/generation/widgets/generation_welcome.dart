@@ -39,12 +39,12 @@ class _GenerationWelcomeState extends State<GenerationWelcome> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    BrandLogo(width: math.min(240, width * .7)),
+                    BrandLogo(width: math.min(300, width * .8)),
                     const SizedBox(height: 32),
                     Text(
                       'TIP',
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: 11,
                         letterSpacing: 1.8,
                         fontWeight: FontWeight.w600,
                         color: scheme.onSurface.withValues(alpha: .32),
@@ -55,7 +55,7 @@ class _GenerationWelcomeState extends State<GenerationWelcome> {
                       tips[_tipIndex],
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 14,
                         height: 1.6,
                         color: scheme.onSurface.withValues(alpha: .48),
                       ),
