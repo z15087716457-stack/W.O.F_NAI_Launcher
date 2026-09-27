@@ -1141,124 +1141,118 @@ class _CategoryItemState extends State<_CategoryItem> {
         onSecondaryTapUp: widget.onRename != null
             ? (details) => _showContextMenu(context, details.globalPosition)
             : null,
-        child: AnimatedContainer(
-          duration: widget.isSelected
-              ? const Duration(milliseconds: 150)
-              : (_isHovering
-                    ? const Duration(milliseconds: 90)
-                    : Duration.zero),
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-          decoration: BoxDecoration(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+          child: Material(
             color: widget.isSelected
                 ? theme.colorScheme.primaryContainer
-                : (_isHovering
-                      ? theme.colorScheme.surfaceContainerHighest
-                      : Colors.transparent),
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
-          ),
-          child: InkWell(
-            onTap: widget.onTap,
-            hoverColor: Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: indent,
-                right: 8,
-                top: 8,
-                bottom: 8,
-              ),
-              child: Row(
-                children: [
-                  if (widget.hasChildren)
-                    GestureDetector(
-                      onTap: widget.onExpand,
-                      child: Padding(
+            child: InkWell(
+              onTap: widget.onTap,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: indent,
+                  right: 8,
+                  top: 8,
+                  bottom: 8,
+                ),
+                child: Row(
+                  children: [
+                    if (widget.hasChildren)
+                      GestureDetector(
+                        onTap: widget.onExpand,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: Icon(
+                            widget.isExpanded
+                                ? Icons.expand_more
+                                : Icons.chevron_right,
+                            size: 16,
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                      )
+                    else
+                      const SizedBox(width: 20),
+                    Icon(
+                      widget.icon,
+                      size: 18,
+                      color:
+                          widget.iconColor ??
+                          (widget.isSelected
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurfaceVariant),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _isEditing
+                          ? ThemedInput(
+                              controller: _editController,
+                              autofocus: true,
+                              style: const TextStyle(fontSize: 13),
+                              decoration: const InputDecoration(
+                                isDense: true,
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                              onSubmitted: (value) {
+                                if (value.trim().isNotEmpty) {
+                                  widget.onRename?.call(value.trim());
+                                }
+                                setState(() => _isEditing = false);
+                              },
+                              onTapOutside: (_) =>
+                                  setState(() => _isEditing = false),
+                            )
+                          : Text(
+                              widget.label,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: widget.isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                color: widget.isSelected
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurface,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                    ),
+                    if (_isHovering && widget.onHoverAction != null)
+                      InkWell(
+                        onTap: widget.onHoverAction,
+                        borderRadius: BorderRadius.circular(4),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Icon(
+                            Icons.add,
+                            size: 16,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    if (_isHovering && widget.showDragHandle)
+                      Padding(
                         padding: const EdgeInsets.only(right: 4),
                         child: Icon(
-                          widget.isExpanded
-                              ? Icons.expand_more
-                              : Icons.chevron_right,
-                          size: 16,
-                          color: theme.colorScheme.outline,
-                        ),
-                      ),
-                    )
-                  else
-                    const SizedBox(width: 20),
-                  Icon(
-                    widget.icon,
-                    size: 18,
-                    color:
-                        widget.iconColor ??
-                        (widget.isSelected
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurfaceVariant),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _isEditing
-                        ? ThemedInput(
-                            controller: _editController,
-                            autofocus: true,
-                            style: const TextStyle(fontSize: 13),
-                            decoration: const InputDecoration(
-                              isDense: true,
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                            onSubmitted: (value) {
-                              if (value.trim().isNotEmpty) {
-                                widget.onRename?.call(value.trim());
-                              }
-                              setState(() => _isEditing = false);
-                            },
-                            onTapOutside: (_) =>
-                                setState(() => _isEditing = false),
-                          )
-                        : Text(
-                            widget.label,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: widget.isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w500,
-                              color: widget.isSelected
-                                  ? theme.colorScheme.primary
-                                  : theme.colorScheme.onSurface,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                          Icons.drag_indicator,
+                          size: 14,
+                          color: theme.colorScheme.outline.withValues(
+                            alpha: 0.5,
                           ),
-                  ),
-                  if (_isHovering && widget.onHoverAction != null)
-                    InkWell(
-                      onTap: widget.onHoverAction,
-                      borderRadius: BorderRadius.circular(4),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Icon(
-                          Icons.add,
-                          size: 16,
-                          color: theme.colorScheme.primary,
                         ),
                       ),
-                    ),
-                  if (_isHovering && widget.showDragHandle)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 4),
-                      child: Icon(
-                        Icons.drag_indicator,
-                        size: 14,
-                        color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                    Text(
+                      widget.count.toString(),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
-                  Text(
-                    widget.count.toString(),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

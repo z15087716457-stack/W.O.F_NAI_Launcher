@@ -306,7 +306,6 @@ class _NavIcon extends StatefulWidget {
 }
 
 class _NavIconState extends State<_NavIcon> {
-  bool _isHovering = false;
   bool _isPressed = false;
 
   @override
@@ -320,15 +319,9 @@ class _NavIconState extends State<_NavIcon> {
     final resolvedColor =
         color ?? IconTheme.of(context).color ?? theme.colorScheme.onSurface;
 
-    // 计算背景色：选中状态优先，其次是 Hover 状态
-    Color backgroundColor = Colors.transparent;
-    if (widget.isSelected) {
-      backgroundColor = theme.colorScheme.primary.withValues(alpha: 0.1);
-    } else if (_isHovering) {
-      backgroundColor = theme.colorScheme.surfaceContainerHighest.withValues(
-        alpha: 0.5,
-      );
-    }
+    final backgroundColor = widget.isSelected
+        ? theme.colorScheme.primary.withValues(alpha: 0.1)
+        : Colors.transparent;
 
     return Tooltip(
       message: isExpanded ? '' : widget.label,
@@ -340,8 +333,6 @@ class _NavIconState extends State<_NavIcon> {
           color: Colors.transparent,
           child: InkWell(
             onTap: widget.onTap,
-            onHover: (val) => setState(() => _isHovering = val),
-            hoverColor: Colors.transparent,
             onTapDown: (_) => setState(() => _isPressed = true),
             onTapUp: (_) => setState(() => _isPressed = false),
             onTapCancel: () => setState(() => _isPressed = false),
@@ -351,11 +342,7 @@ class _NavIconState extends State<_NavIcon> {
               duration: const Duration(milliseconds: 140),
               curve: Curves.easeOutCubic,
               child: AnimatedContainer(
-                duration: widget.isSelected
-                    ? const Duration(milliseconds: 180)
-                    : (_isHovering
-                          ? const Duration(milliseconds: 90)
-                          : Duration.zero),
+                duration: const Duration(milliseconds: 180),
                 decoration: BoxDecoration(
                   color: backgroundColor,
                   borderRadius: BorderRadius.circular(8),
@@ -432,7 +419,6 @@ class _AccountAvatarButton extends StatefulWidget {
 }
 
 class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
-  bool _isHovering = false;
   bool _isPressed = false;
 
   @override
@@ -478,8 +464,6 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _showAccountMenu(context, currentAccount),
-          onHover: (val) => setState(() => _isHovering = val),
-          hoverColor: Colors.transparent,
           onTapDown: (_) => setState(() => _isPressed = true),
           onTapUp: (_) => setState(() => _isPressed = false),
           onTapCancel: () => setState(() => _isPressed = false),
@@ -488,62 +472,49 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
             scale: _isPressed ? 0.97 : 1.0,
             duration: const Duration(milliseconds: 140),
             curve: Curves.easeOutCubic,
-            child: AnimatedContainer(
-              duration: _isHovering
-                  ? const Duration(milliseconds: 90)
-                  : Duration.zero,
-              decoration: BoxDecoration(
-                color: _isHovering
-                    ? theme.colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.5,
-                      )
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(22),
-              ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final showLabel = constraints.maxWidth > 80;
-                  final labelOpacity = ((constraints.maxWidth - 80) / 48).clamp(
-                    0.0,
-                    1.0,
-                  );
-                  return Row(
-                    children: [
-                      SizedBox(
-                        width: constraints.maxWidth.clamp(0.0, 40.0),
-                        height: 44,
-                        child: Center(child: avatar),
-                      ),
-                      if (showLabel) ...[
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Opacity(
-                            opacity: labelOpacity,
-                            child: Text(
-                              currentAccount?.displayName ??
-                                  context.l10n.settings_account,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final showLabel = constraints.maxWidth > 80;
+                final labelOpacity = ((constraints.maxWidth - 80) / 48).clamp(
+                  0.0,
+                  1.0,
+                );
+                return Row(
+                  children: [
+                    SizedBox(
+                      width: constraints.maxWidth.clamp(0.0, 40.0),
+                      height: 44,
+                      child: Center(child: avatar),
+                    ),
+                    if (showLabel) ...[
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Opacity(
+                          opacity: labelOpacity,
+                          child: Text(
+                            currentAccount?.displayName ??
+                                context.l10n.settings_account,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
-                        Opacity(
-                          opacity: labelOpacity,
-                          child: Icon(
-                            Icons.expand_more,
-                            size: 18,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
+                      ),
+                      Opacity(
+                        opacity: labelOpacity,
+                        child: Icon(
+                          Icons.expand_more,
+                          size: 18,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
-                        const SizedBox(width: 10),
-                      ],
+                      ),
+                      const SizedBox(width: 10),
                     ],
-                  );
-                },
-              ),
+                  ],
+                );
+              },
             ),
           ),
         ),
