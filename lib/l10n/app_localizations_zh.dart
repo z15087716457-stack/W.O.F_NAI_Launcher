@@ -3648,6 +3648,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_thumbnailQualityHd => '高清';
 
   @override
+  String get settings_galleryThumbnailQuality => '本地画廊清晰度';
+
+  @override
+  String get settings_galleryThumbnailQualitySubtitle => '缩略图显示质量，默认高清';
+
+  @override
   String get localGallery_naiOnly => 'NAI';
 
   @override

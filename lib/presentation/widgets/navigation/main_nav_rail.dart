@@ -341,6 +341,7 @@ class _NavIconState extends State<_NavIcon> {
           child: InkWell(
             onTap: widget.onTap,
             onHover: (val) => setState(() => _isHovering = val),
+            hoverColor: Colors.transparent,
             onTapDown: (_) => setState(() => _isPressed = true),
             onTapUp: (_) => setState(() => _isPressed = false),
             onTapCancel: () => setState(() => _isPressed = false),
@@ -350,7 +351,11 @@ class _NavIconState extends State<_NavIcon> {
               duration: const Duration(milliseconds: 140),
               curve: Curves.easeOutCubic,
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
+                duration: widget.isSelected
+                    ? const Duration(milliseconds: 180)
+                    : (_isHovering
+                          ? const Duration(milliseconds: 90)
+                          : Duration.zero),
                 decoration: BoxDecoration(
                   color: backgroundColor,
                   borderRadius: BorderRadius.circular(8),
@@ -474,6 +479,7 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
         child: InkWell(
           onTap: () => _showAccountMenu(context, currentAccount),
           onHover: (val) => setState(() => _isHovering = val),
+          hoverColor: Colors.transparent,
           onTapDown: (_) => setState(() => _isPressed = true),
           onTapUp: (_) => setState(() => _isPressed = false),
           onTapCancel: () => setState(() => _isPressed = false),
@@ -483,7 +489,9 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
             duration: const Duration(milliseconds: 140),
             curve: Curves.easeOutCubic,
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
+              duration: _isHovering
+                  ? const Duration(milliseconds: 90)
+                  : Duration.zero,
               decoration: BoxDecoration(
                 color: _isHovering
                     ? theme.colorScheme.surfaceContainerHighest.withValues(

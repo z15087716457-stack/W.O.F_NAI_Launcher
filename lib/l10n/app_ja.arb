@@ -1823,6 +1823,8 @@
   "localGallery_columnWidth": "列の幅",
   "localGallery_thumbnailQualitySd": "標準",
   "localGallery_thumbnailQualityHd": "高画質",
+  "settings_galleryThumbnailQuality": "ローカルギャラリーの画質",
+  "settings_galleryThumbnailQualitySubtitle": "サムネイルの表示画質。初期設定は高画質",
   "localGallery_naiOnly": "NAI",
   "localGallery_naiOnlyTooltip": "NAI 生成画像のみ表示",
   "localGallery_naiVersionFilterLabel": "Ver",

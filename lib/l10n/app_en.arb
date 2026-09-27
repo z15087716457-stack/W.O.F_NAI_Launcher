@@ -1823,6 +1823,8 @@
   "localGallery_columnWidth": "Column width",
   "localGallery_thumbnailQualitySd": "Standard",
   "localGallery_thumbnailQualityHd": "High",
+  "settings_galleryThumbnailQuality": "Local gallery quality",
+  "settings_galleryThumbnailQualitySubtitle": "Thumbnail display quality; defaults to High",
   "localGallery_naiOnly": "NAI",
   "localGallery_naiOnlyTooltip": "Only show NAI-generated images",
   "localGallery_naiVersionFilterLabel": "Ver",

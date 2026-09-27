@@ -1733,6 +1733,8 @@
   "localGallery_columnWidth": "列宽",
   "localGallery_thumbnailQualitySd": "标清",
   "localGallery_thumbnailQualityHd": "高清",
+  "settings_galleryThumbnailQuality": "本地画廊清晰度",
+  "settings_galleryThumbnailQualitySubtitle": "缩略图显示质量，默认高清",
   "localGallery_naiOnly": "NAI",
   "localGallery_naiOnlyTooltip": "仅显示 NAI 生成的图片",
   "localGallery_naiVersionFilterLabel": "Ver",

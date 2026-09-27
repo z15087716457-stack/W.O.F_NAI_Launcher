@@ -3700,6 +3700,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_thumbnailQualityHd => '高画質';
 
   @override
+  String get settings_galleryThumbnailQuality => 'ローカルギャラリーの画質';
+
+  @override
+  String get settings_galleryThumbnailQualitySubtitle => 'サムネイルの表示画質。初期設定は高画質';
+
+  @override
   String get localGallery_naiOnly => 'NAI';
 
   @override

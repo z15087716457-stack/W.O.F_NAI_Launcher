@@ -18,6 +18,7 @@ import '../../../widgets/common/app_toast.dart';
 import '../widgets/cache_statistics_tile.dart';
 import '../widgets/data_source_cache_settings.dart';
 import '../widgets/gallery_cache_actions.dart';
+import '../widgets/gallery_thumbnail_quality_settings_tile.dart';
 import '../widgets/settings_card.dart';
 
 /// 存储设置板块
@@ -143,6 +144,8 @@ class _StorageSettingsSectionState
               const Divider(height: 32),
               // 缓存统计
               const CacheStatisticsTile(),
+              const Divider(height: 32),
+              const GalleryThumbnailQualitySettingsTile(),
               const Divider(height: 32),
               // 画廊缓存操作（清除缓存 + 重建索引）
               const GalleryCacheActions(),

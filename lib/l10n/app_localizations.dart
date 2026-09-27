@@ -6883,6 +6883,18 @@ abstract class AppLocalizations {
   /// **'High'**
   String get localGallery_thumbnailQualityHd;
 
+  /// No description provided for @settings_galleryThumbnailQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Local gallery quality'**
+  String get settings_galleryThumbnailQuality;
+
+  /// No description provided for @settings_galleryThumbnailQualitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumbnail display quality; defaults to High'**
+  String get settings_galleryThumbnailQualitySubtitle;
+
   /// No description provided for @localGallery_naiOnly.
   ///
   /// In en, this message translates to:

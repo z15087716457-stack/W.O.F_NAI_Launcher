@@ -3779,6 +3779,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_thumbnailQualityHd => 'High';
 
   @override
+  String get settings_galleryThumbnailQuality => 'Local gallery quality';
+
+  @override
+  String get settings_galleryThumbnailQualitySubtitle =>
+      'Thumbnail display quality; defaults to High';
+
+  @override
   String get localGallery_naiOnly => 'NAI';
 
   @override

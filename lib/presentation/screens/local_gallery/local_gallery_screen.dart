@@ -11,7 +11,6 @@ import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../core/cache/thumbnail_cache_service.dart';
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../core/utils/app_logger.dart';
@@ -46,7 +45,6 @@ import '../../widgets/bulk_metadata_edit_dialog.dart';
 import '../../widgets/collection_select_dialog.dart';
 import '../../widgets/gallery/category_picker_dialog.dart';
 import '../../widgets/common/app_toast.dart';
-import '../../widgets/common/compact_icon_button.dart';
 import '../../widgets/common/pagination_bar.dart';
 import '../../utils/precise_ref_library_import_helper.dart';
 import '../../widgets/common/precise_reference_type_dialog.dart';
@@ -247,31 +245,12 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
                         showItemsPerPage: true,
                         showTotalInfo: true,
                         compact: contentWidth < 600,
-                        trailing: _buildThumbnailQualityControl(state),
                       ),
                   ],
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildThumbnailQualityControl(LocalGalleryState state) {
-    final notifier = ref.read(localGalleryNotifierProvider.notifier);
-    final l10n = context.l10n;
-    final isHd = state.thumbnailQuality == GalleryThumbnailQuality.hd;
-    return CompactIconButton(
-      icon: isHd ? Icons.hd_outlined : Icons.sd_outlined,
-      tooltip: isHd
-          ? l10n.localGallery_thumbnailQualityHd
-          : l10n.localGallery_thumbnailQualitySd,
-      isActive: isHd,
-      onPressed: () => unawaited(
-        notifier.setThumbnailQuality(
-          isHd ? GalleryThumbnailQuality.sd : GalleryThumbnailQuality.hd,
         ),
       ),
     );
