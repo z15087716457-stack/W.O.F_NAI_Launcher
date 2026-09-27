@@ -211,6 +211,7 @@ void main() {
     );
     expect(bar.usage.usedTokens, greaterThan(0));
     expect(bar.usage.breakdown.first.label, '提示词');
+    expect(bar.referenceLimit, isTrue);
 
     await tester.tap(find.byKey(const Key('block-content-tab-1')));
     await tester.pump();

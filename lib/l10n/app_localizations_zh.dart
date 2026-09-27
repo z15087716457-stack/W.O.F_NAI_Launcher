@@ -10054,6 +10054,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get promptToken_blockReferenceHint => '单块进度仅供参考；插入后的总量取决于组合使用。';
+
+  @override
   String get settings_geistDark => 'Geist 深色';
 
   @override

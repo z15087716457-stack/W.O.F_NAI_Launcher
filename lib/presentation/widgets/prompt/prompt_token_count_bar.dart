@@ -29,14 +29,22 @@ class PromptTokenCountAsyncBar extends StatelessWidget {
 }
 
 class PromptTokenCountBar extends StatelessWidget {
-  const PromptTokenCountBar({super.key, required this.usage, this.totalTokens});
+  const PromptTokenCountBar({
+    super.key,
+    required this.usage,
+    this.totalTokens,
+    this.referenceLimit = false,
+  });
 
   final PromptTokenUsage usage;
   final int? totalTokens;
+  final bool referenceLimit;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final referenceFull =
+        referenceLimit && usage.limit > 0 && usage.usedTokens >= usage.limit;
     final overLimit = (totalTokens ?? usage.usedTokens) > usage.limit;
     final color = overLimit
         ? theme.colorScheme.error
@@ -52,27 +60,40 @@ class PromptTokenCountBar extends StatelessWidget {
             usage.limit,
           );
     final breakdown = _buildTooltipMessage(context);
-    final message = breakdown.isEmpty ? summary : '$summary\n$breakdown';
+    final details = [
+      if (breakdown.isNotEmpty) breakdown,
+      if (referenceLimit) context.l10n.promptToken_blockReferenceHint,
+    ];
+    final message = [summary, ...details].join('\n');
     return Tooltip(
       message: message,
       waitDuration: const Duration(milliseconds: 250),
       child: Semantics(
-        label: summary,
+        label: referenceLimit
+            ? '$summary. ${context.l10n.promptToken_blockReferenceHint}'
+            : summary,
         child: SizedBox(
           height: 14,
           // Keep the hover target comfortable without making the line thicker.
           child: Center(
-            child: LinearProgressIndicator(
-              value: fill,
-              minHeight: 3,
-              borderRadius: BorderRadius.zero,
-              trackGap: 0,
-              stopIndicatorRadius: 0,
-              backgroundColor: theme.colorScheme.onSurface.withValues(
-                alpha: 0.08,
-              ),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
+            child: referenceFull
+                ? const SizedBox(
+                    key: Key('prompt-token-reference-stripes'),
+                    width: double.infinity,
+                    height: 5,
+                    child: CustomPaint(painter: _ReferenceStripePainter()),
+                  )
+                : LinearProgressIndicator(
+                    value: fill,
+                    minHeight: 3,
+                    borderRadius: BorderRadius.zero,
+                    trackGap: 0,
+                    stopIndicatorRadius: 0,
+                    backgroundColor: theme.colorScheme.onSurface.withValues(
+                      alpha: 0.08,
+                    ),
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                  ),
           ),
         ),
       ),
@@ -115,4 +136,28 @@ class PromptTokenCountBar extends StatelessWidget {
       _ => label,
     };
   }
+}
+
+class _ReferenceStripePainter extends CustomPainter {
+  const _ReferenceStripePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bounds = Offset.zero & size;
+    canvas.clipRect(bounds);
+    canvas.drawRect(bounds, Paint()..color = const Color(0xFFF2C94C));
+    final stripe = Paint()
+      ..color = const Color(0xFF302A1B)
+      ..strokeWidth = 3;
+    for (var x = -size.height; x < size.width + size.height; x += 9) {
+      canvas.drawLine(
+        Offset(x, size.height),
+        Offset(x + size.height, 0),
+        stripe,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ReferenceStripePainter oldDelegate) => false;
 }

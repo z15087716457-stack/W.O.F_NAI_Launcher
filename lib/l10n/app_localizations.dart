@@ -18267,6 +18267,12 @@ abstract class AppLocalizations {
   /// **'This prompt: {used} tokens; total usage: {total} / {limit}'**
   String promptToken_promptShare(int used, int total, int limit);
 
+  /// No description provided for @promptToken_blockReferenceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This block\'s progress is a guide; the total depends on how blocks are combined.'**
+  String get promptToken_blockReferenceHint;
+
   /// No description provided for @settings_geistDark.
   ///
   /// In en, this message translates to:

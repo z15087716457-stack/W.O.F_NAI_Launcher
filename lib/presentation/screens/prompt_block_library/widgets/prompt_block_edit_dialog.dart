@@ -718,6 +718,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
                   return PromptTokenCountBar(
                     key: const Key('block-token-count-bar'),
                     usage: usage,
+                    referenceLimit: true,
                   );
                 },
               ),

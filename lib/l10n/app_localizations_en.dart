@@ -10454,6 +10454,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get promptToken_blockReferenceHint =>
+      'This block\'s progress is a guide; the total depends on how blocks are combined.';
+
+  @override
   String get settings_geistDark => 'Geist Dark';
 
   @override

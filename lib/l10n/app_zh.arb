@@ -5977,6 +5977,7 @@
   "img2img_hideAdvanced": "收起高级设置",
   "promptToken_usage": "Token 用量：{used} / {limit}",
   "promptToken_promptShare": "此提示词：{used} Token；总用量：{total} / {limit}",
+  "promptToken_blockReferenceHint": "单块进度仅供参考；插入后的总量取决于组合使用。",
   "@promptToken_usage": {
     "placeholders": {
       "used": {

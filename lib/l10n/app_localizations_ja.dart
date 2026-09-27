@@ -10188,6 +10188,10 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get promptToken_blockReferenceHint =>
+      'このブロックの進捗は目安です。合計はブロックの組み合わせによって変わります。';
+
+  @override
   String get settings_geistDark => 'Geist ダーク';
 
   @override

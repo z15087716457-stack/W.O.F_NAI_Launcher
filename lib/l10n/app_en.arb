@@ -5977,6 +5977,7 @@
   "img2img_hideAdvanced": "Hide Advanced",
   "promptToken_usage": "Token usage: {used} / {limit}",
   "promptToken_promptShare": "This prompt: {used} tokens; total usage: {total} / {limit}",
+  "promptToken_blockReferenceHint": "This block's progress is a guide; the total depends on how blocks are combined.",
   "@promptToken_usage": {
     "placeholders": {
       "used": {

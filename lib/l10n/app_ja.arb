@@ -5977,6 +5977,7 @@
   "img2img_hideAdvanced": "詳細設定を隠す",
   "promptToken_usage": "トークン使用量：{used} / {limit}",
   "promptToken_promptShare": "このプロンプト：{used} トークン；合計：{total} / {limit}",
+  "promptToken_blockReferenceHint": "このブロックの進捗は目安です。合計はブロックの組み合わせによって変わります。",
   "@promptToken_usage": {
     "placeholders": {
       "used": {

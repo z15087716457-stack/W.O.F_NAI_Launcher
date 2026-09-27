@@ -62,6 +62,56 @@ void main() {
     expect(find.textContaining('520'), findsNothing);
   });
 
+  testWidgets('block reference line becomes striped at and above the guide', (
+    tester,
+  ) async {
+    for (final used in [512, 600]) {
+      await tester.pumpWidget(
+        _host(
+          PromptTokenCountBar(
+            usage: PromptTokenUsage(usedTokens: used, limit: 512),
+            referenceLimit: true,
+          ),
+        ),
+      );
+      final stripes = find.byKey(const Key('prompt-token-reference-stripes'));
+      expect(stripes, findsOneWidget);
+      expect(tester.getSize(stripes), const Size(320, 5));
+      expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(
+        tester.widget<Tooltip>(find.byType(Tooltip)).message,
+        contains('单块进度仅供参考'),
+      );
+    }
+  });
+
+  testWidgets('block reference line stays neutral below the guide', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _host(
+        const PromptTokenCountBar(
+          usage: PromptTokenUsage(usedTokens: 511, limit: 512),
+          referenceLimit: true,
+        ),
+      ),
+    );
+    expect(
+      find.byKey(const Key('prompt-token-reference-stripes')),
+      findsNothing,
+    );
+    final progress = tester.widget<LinearProgressIndicator>(
+      find.byType(LinearProgressIndicator),
+    );
+    expect(progress.value, 511 / 512);
+    expect(
+      progress.valueColor!.value,
+      Theme.of(
+        tester.element(find.byType(PromptTokenCountBar)),
+      ).colorScheme.onSurface,
+    );
+  });
+
   testWidgets('hover includes accurate total and composition breakdown', (
     tester,
   ) async {
