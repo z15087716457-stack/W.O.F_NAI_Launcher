@@ -8,6 +8,8 @@ void main() {
     final block = PromptBlock.create(id: 'original', title: 'a', content: 'b');
     final json = Map<String, dynamic>.from(block.toJson())..remove('lineageId');
     expect(PromptBlock.fromJson(json).lineageKey, 'original');
+    json.remove('isArchived');
+    expect(PromptBlock.fromJson(json).isArchived, isFalse);
     expect(
       block.copyWith(id: 'copy', lineageId: block.lineageKey).lineageKey,
       'original',

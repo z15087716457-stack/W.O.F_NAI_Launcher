@@ -141,6 +141,12 @@ void main() {
       state = await container.read(promptBlockLibraryNotifierProvider.future);
       expect(state.blocks.map((block) => block.id), [duplicate.id]);
       expect(state.blockById(duplicate.id)?.content, 'new');
+      expect(state.blockById(original.id)?.isArchived, isTrue);
+      expect(state.blockById(original.id)?.content, 'new');
+      expect(state.archivedBlocks.map((block) => block.id), [original.id]);
+      await notifier.incrementUseCount(original.id);
+      state = await container.read(promptBlockLibraryNotifierProvider.future);
+      expect(state.blockById(original.id)?.useCount, 1);
     },
   );
 

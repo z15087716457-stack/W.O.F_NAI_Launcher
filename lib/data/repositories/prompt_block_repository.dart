@@ -195,6 +195,26 @@ class PromptBlockRepository {
     await _pruneBlocksFromCollections({blockId});
   }
 
+  /// 替换移动时隐藏来源，但保留 ID 和内容供既有提示词实例继续展开。
+  Future<PromptBlock> archiveBlockForReferences(String blockId) async {
+    final block = await _storage.getBlock(blockId);
+    if (block == null) {
+      throw StateError('Prompt block does not exist: $blockId');
+    }
+    final archived = await updateBlock(
+      block.copyWith(
+        isArchived: true,
+        folderId: null,
+        isFavorite: false,
+        sourcePath: null,
+        sourceHash: null,
+        importedAt: null,
+      ),
+    );
+    await _pruneBlocksFromCollections({blockId});
+    return archived;
+  }
+
   /// 批量写入导入的块，保留给定实体的 ID、时间戳和来源字段。
   ///
   /// 仅供外部来源导入（TXT / 策展目录 / 库备份）使用；调用方负责

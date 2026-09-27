@@ -33,11 +33,17 @@ class PromptBlockLibraryState {
     required List<PromptBlock> blocks,
     required List<PromptBlockFolder> folders,
     List<PromptBlockCollection>? collections,
-  }) : blocks = List.unmodifiable(blocks),
+    List<PromptBlock> archivedBlocks = const [],
+  }) : blocks = List.unmodifiable(blocks.where((block) => !block.isArchived)),
+       archivedBlocks = List.unmodifiable([
+         ...blocks.where((block) => block.isArchived),
+         ...archivedBlocks,
+       ]),
        folders = List.unmodifiable(folders),
        collections = List.unmodifiable(collections ?? const []);
 
   final List<PromptBlock> blocks;
+  final List<PromptBlock> archivedBlocks;
   final List<PromptBlockFolder> folders;
 
   /// 收藏集树（收藏集 + 收藏文件夹混合，parentId 挂接成树）。
@@ -176,6 +182,9 @@ class PromptBlockLibraryState {
     for (final block in blocks) {
       if (block.id == id) return block;
     }
+    for (final block in archivedBlocks) {
+      if (block.id == id) return block;
+    }
     return null;
   }
 
@@ -292,6 +301,10 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
         PromptBlockLibraryState(
           blocks: [
             for (final block in current.blocks)
+              block.id == blockId ? updated : block,
+          ],
+          archivedBlocks: [
+            for (final block in current.archivedBlocks)
               block.id == blockId ? updated : block,
           ],
           folders: current.folders,
@@ -434,6 +447,9 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
     if (sources.length != ids.toSet().length) {
       throw StateError('块库已变化，请重新选择后再试');
     }
+    if (sources.any((block) => block.isArchived)) {
+      throw StateError('隐藏的块不能作为整理来源');
+    }
     if (sources.map((block) => block.lineageKey).toSet().length !=
         sources.length) {
       throw StateError('所选块包含同源副本，请分开整理');
@@ -482,6 +498,7 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
                 sortOrder: existing.sortOrder,
                 isFavorite: existing.isFavorite,
                 thumbnail: imagePath,
+                isArchived: false,
                 createdAt: existing.createdAt,
                 useCount: existing.useCount,
                 sourcePath: null,
@@ -496,6 +513,7 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
               folderId: null,
               isFavorite: false,
               thumbnail: imagePath,
+              isArchived: false,
               useCount: 0,
               sourcePath: null,
               sourceHash: null,
@@ -558,16 +576,16 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
             await repository.toggleFavorite(placed.id);
           }
           if (existing != null) {
-            if (source.thumbnail case final path?) oldThumbnails.add(path);
-            await repository.deleteBlock(source.id);
+            await repository.archiveBlockForReferences(source.id);
           }
         }
       }
       state = AsyncData(_toState(await repository.load()));
       for (final path in oldThumbnails) {
-        if (!state.valueOrNull!.blocks.any(
-          (block) => block.thumbnail == path,
-        )) {
+        if (![
+          ...state.valueOrNull!.blocks,
+          ...state.valueOrNull!.archivedBlocks,
+        ].any((block) => block.thumbnail == path)) {
           await deletePromptBlockThumbnail(path);
         }
       }

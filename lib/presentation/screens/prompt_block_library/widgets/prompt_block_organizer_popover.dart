@@ -93,7 +93,11 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('替换同源块？'),
-          content: Text('目标中已有 $conflicts 个同源副本。替换会更新目标副本的内容；其他块不受影响。'),
+          content: Text(
+            mode == PromptBlockTransferMode.move
+                ? '目标中已有 $conflicts 个同源副本。替换后来源从块库隐藏；已插入提示词的实例仍可引用原块。'
+                : '目标中已有 $conflicts 个同源副本。替换会更新目标副本的内容，来源保留。',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),

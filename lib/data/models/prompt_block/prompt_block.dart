@@ -113,6 +113,9 @@ class PromptBlock with _$PromptBlock {
     /// 是否加入收藏。
     @Default(false) bool isFavorite,
 
+    /// 替换移动后供既有提示词实例继续解析的隐藏来源；不在块库列表显示。
+    @Default(false) bool isArchived,
+
     /// 同一文件夹内的用户排序值。
     @Default(0) int sortOrder,
 
@@ -150,6 +153,7 @@ class PromptBlock with _$PromptBlock {
     double thumbnailScale = 1.0,
     int useCount = 0,
     bool isFavorite = false,
+    bool isArchived = false,
     int sortOrder = 0,
     String? id,
     String? lineageId,
@@ -184,6 +188,7 @@ class PromptBlock with _$PromptBlock {
       thumbnailScale: thumbnailScale,
       useCount: useCount,
       isFavorite: isFavorite,
+      isArchived: isArchived,
       sortOrder: sortOrder,
       createdAt: created,
       updatedAt: updatedAt ?? created,
