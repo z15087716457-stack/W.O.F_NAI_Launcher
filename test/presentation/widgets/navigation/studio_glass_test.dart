@@ -69,6 +69,75 @@ void main() {
     );
   }
 
+  testWidgets('card glass gradient spans the width and reverses in dark mode', (
+    tester,
+  ) async {
+    for (final brightness in Brightness.values) {
+      final boundary = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: brightness == Brightness.dark
+              ? GeistTheme.dark
+              : GeistTheme.light,
+          home: Scaffold(
+            body: Center(
+              child: RepaintBoundary(
+                key: boundary,
+                child: SizedBox(
+                  width: 400,
+                  height: 64,
+                  child: ColoredBox(
+                    color: brightness == Brightness.dark
+                        ? GeistTheme.dark.colorScheme.surface
+                        : GeistTheme.light.colorScheme.surface,
+                    child: const StudioGlassSurface(
+                      backdropBlur: true,
+                      child: SizedBox.expand(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final render =
+          boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+      final pixels = (await tester.runAsync(() async {
+        final capture = await render.toImage(pixelRatio: 1);
+        final data = await capture.toByteData(
+          format: ui.ImageByteFormat.rawRgba,
+        );
+        capture.dispose();
+        return data!;
+      }))!;
+      double luminanceAt(int centerX) {
+        var sum = 0;
+        for (var y = 29; y <= 35; y++) {
+          for (var x = centerX - 3; x <= centerX + 3; x++) {
+            final offset = (y * 400 + x) * 4;
+            sum += pixels.getUint8(offset);
+            sum += pixels.getUint8(offset + 1);
+            sum += pixels.getUint8(offset + 2);
+          }
+        }
+        return sum / (7 * 7 * 3);
+      }
+
+      final left = luminanceAt(40);
+      final middle = luminanceAt(200);
+      final right = luminanceAt(360);
+      if (brightness == Brightness.light) {
+        expect(left - middle, greaterThan(4));
+        expect(middle - right, greaterThan(4));
+      } else {
+        expect(middle - left, greaterThan(4));
+        expect(right - middle, greaterThan(4));
+      }
+    }
+  });
+
   for (final brightness in Brightness.values) {
     testWidgets(
       'image glass keeps foreground clear and expands in ${brightness.name}',

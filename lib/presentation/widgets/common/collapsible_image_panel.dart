@@ -94,22 +94,24 @@ class CollapsibleImagePanel extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
                         colors: lightImageGlass
                             ? [
-                                Colors.white.withValues(alpha: .62),
+                                Colors.white.withValues(alpha: .60),
                                 Colors.white.withValues(alpha: .53),
                                 theme.colorScheme.surfaceContainerLow
-                                    .withValues(alpha: .57),
+                                    .withValues(alpha: .54),
+                              ]
+                            : frosted
+                            ? [
+                                Colors.black.withValues(alpha: .62),
+                                Colors.black.withValues(alpha: .59),
+                                Colors.black.withValues(alpha: .56),
                               ]
                             : [
-                                Colors.black.withValues(
-                                  alpha: frosted ? .56 : .5,
-                                ),
-                                Colors.black.withValues(
-                                  alpha: frosted ? .62 : .75,
-                                ),
+                                Colors.black.withValues(alpha: .5),
+                                Colors.black.withValues(alpha: .75),
                               ],
                       ),
                     ),

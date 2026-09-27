@@ -45,18 +45,30 @@ class StudioGlassSurface extends StatelessWidget {
     if (backdropBlur && !highContrast) {
       final base = theme.colorScheme.surfaceContainerLow;
       final floating = backdropStyle == StudioGlassBackdropStyle.floating;
-      final colors = dark
+      final colors = floating
+          ? dark
+                ? [
+                    theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: .64,
+                    ),
+                    base.withValues(alpha: .61),
+                    theme.colorScheme.surface.withValues(alpha: .66),
+                  ]
+                : [
+                    Colors.white.withValues(alpha: .60),
+                    base.withValues(alpha: .55),
+                    theme.colorScheme.outline.withValues(alpha: .60),
+                  ]
+          : dark
           ? [
-              theme.colorScheme.surfaceContainerHighest.withValues(
-                alpha: floating ? .64 : .68,
-              ),
-              base.withValues(alpha: floating ? .61 : .63),
-              theme.colorScheme.surface.withValues(alpha: floating ? .66 : .70),
+              theme.colorScheme.surface.withValues(alpha: .28),
+              theme.colorScheme.outline.withValues(alpha: .18),
+              theme.colorScheme.outline.withValues(alpha: .36),
             ]
           : [
-              Colors.white.withValues(alpha: floating ? .60 : .47),
-              base.withValues(alpha: floating ? .55 : .40),
-              theme.colorScheme.outline.withValues(alpha: floating ? .60 : .58),
+              Colors.white.withValues(alpha: .28),
+              theme.colorScheme.outline.withValues(alpha: .20),
+              theme.colorScheme.outline.withValues(alpha: .43),
             ];
       return ClipRRect(
         borderRadius: borderRadius,
@@ -70,8 +82,8 @@ class StudioGlassSurface extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: floating ? Alignment.topLeft : Alignment.centerLeft,
+                end: floating ? Alignment.bottomRight : Alignment.centerRight,
                 colors: colors,
               ),
             ),
