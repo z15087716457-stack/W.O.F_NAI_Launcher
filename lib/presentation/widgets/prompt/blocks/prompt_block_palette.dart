@@ -3,6 +3,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../common/studio_animated_icon.dart';
+import '../../common/studio_icons.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/prompt_block/prompt_block.dart';
@@ -29,6 +31,7 @@ class _PromptBlockPaletteButtonState
     extends ConsumerState<PromptBlockPaletteButton> {
   OverlayEntry? _overlayEntry;
   bool _dragHover = false;
+  int _motionTrigger = 0;
 
   bool get _isOpen => _overlayEntry != null;
 
@@ -40,7 +43,10 @@ class _PromptBlockPaletteButtonState
     super.dispose();
   }
 
-  void _toggle() => _isOpen ? _close() : _open();
+  void _toggle() {
+    _motionTrigger++;
+    _isOpen ? _close() : _open();
+  }
 
   void _open() {
     if (_overlayEntry != null) return;
@@ -92,7 +98,10 @@ class _PromptBlockPaletteButtonState
                 : theme.colorScheme.onSurfaceVariant,
           ),
           onPressed: _toggle,
-          icon: const Icon(Icons.category_outlined),
+          icon: StudioAnimatedIcon(
+            icon: StudioIcons.promptBlockPalette,
+            trigger: _motionTrigger,
+          ),
         ),
       ),
     );
@@ -306,7 +315,7 @@ class _PromptBlockPaletteCardState
                   child: Row(
                     children: [
                       Icon(
-                        Icons.category_outlined,
+                        StudioIcons.promptBlockPalette,
                         size: 15,
                         color: theme.colorScheme.primary,
                       ),

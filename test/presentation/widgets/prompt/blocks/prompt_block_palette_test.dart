@@ -18,6 +18,8 @@ import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_palette_provider.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_animated_icon.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_drag_data.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_palette.dart';
 
@@ -355,9 +357,26 @@ void main() {
         addTearDown(container.dispose);
         await tester.pumpWidget(buildApp(container));
         await tester.pump();
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('prompt-block-palette-toggle')),
+            matching: find.byIcon(StudioIcons.promptBlockPalette),
+          ),
+          findsOneWidget,
+        );
 
         await tester.tap(find.byKey(const Key('prompt-block-palette-toggle')));
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 120));
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('prompt-block-palette-toggle')),
+            matching: find.byWidgetPredicate(
+              (widget) =>
+                  widget is CustomPaint && widget.painter is StudioIconPainter,
+            ),
+          ),
+          findsOneWidget,
+        );
         await tester.pump(); // palette provider 的异步 build 落地
 
         // 悬浮窗出现：空态提示 + X 常驻钮。

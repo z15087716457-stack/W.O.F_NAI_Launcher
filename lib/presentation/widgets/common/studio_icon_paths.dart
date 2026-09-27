@@ -464,4 +464,50 @@ final studioIconPaths = <int, List<StudioIconPart>>{
       1.7,
     ),
   ],
+  0xe90a: [
+    StudioIconPart(
+      'body',
+      Path()
+        ..moveTo(4.5, 8.0)
+        ..lineTo(19.5, 8.0)
+        ..cubicTo(20.32843, 8.0, 21.0, 8.67157, 21.0, 9.5)
+        ..lineTo(21.0, 18.5)
+        ..cubicTo(21.0, 19.32843, 20.32843, 20.0, 19.5, 20.0)
+        ..lineTo(4.5, 20.0)
+        ..cubicTo(3.67157, 20.0, 3.0, 19.32843, 3.0, 18.5)
+        ..lineTo(3.0, 9.5)
+        ..cubicTo(3.0, 8.67157, 3.67157, 8.0, 4.5, 8.0)
+        ..close(),
+      1.7,
+    ),
+    StudioIconPart(
+      'leftStud',
+      Path()
+        ..moveTo(6.0, 8.0)
+        ..lineTo(6.0, 5.3)
+        ..cubicTo(6.0, 4.58203, 6.58203, 4.0, 7.3, 4.0)
+        ..lineTo(9.7, 4.0)
+        ..cubicTo(10.41797, 4.0, 11.0, 4.58203, 11.0, 5.3)
+        ..lineTo(11.0, 8.0),
+      1.7,
+    ),
+    StudioIconPart(
+      'rightStud',
+      Path()
+        ..moveTo(13.0, 8.0)
+        ..lineTo(13.0, 5.3)
+        ..cubicTo(13.0, 4.58203, 13.58203, 4.0, 14.3, 4.0)
+        ..lineTo(16.7, 4.0)
+        ..cubicTo(17.41797, 4.0, 18.0, 4.58203, 18.0, 5.3)
+        ..lineTo(18.0, 8.0),
+      1.7,
+    ),
+    StudioIconPart(
+      'seam',
+      Path()
+        ..moveTo(7.0, 16.0)
+        ..lineTo(17.0, 16.0),
+      1.7,
+    ),
+  ],
 };

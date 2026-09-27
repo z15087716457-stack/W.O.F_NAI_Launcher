@@ -555,7 +555,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           pinnedProvider: layoutStateNotifierProvider.select(
             (s) => s.blockPaletteToolPinned,
           ),
-          icon: Icons.category_outlined,
+          icon: StudioIcons.promptBlockPalette,
           title: menuContext.l10n.promptBlockPalette_tooltip,
           theme: theme,
           onTap: () => ref

@@ -321,6 +321,26 @@ class StudioIconPainter extends CustomPainter {
           if (part.name == 'gear') {
             _around(canvas, 12, 12, angle: math.pi / 3 * _ease(t));
           }
+        case 0xe90a:
+          // The two studs lift and click back into the brick in sequence.
+          if (part.name == 'leftStud' || part.name == 'rightStud') {
+            final delay = part.name == 'rightStud' ? .08 : 0.0;
+            final local = ((t - delay) / (1 - delay)).clamp(0.0, 1.0);
+            final lift = _keys(local, [
+              (0, 0),
+              (.24, -2.1),
+              (.42, -2.1),
+              (.67, .45),
+              (.82, -.18),
+              (1, 0),
+            ]);
+            canvas.translate(0, lift);
+          } else if (part.name == 'body') {
+            final press = _pulse(t, .45, .8);
+            _around(canvas, 12, 20, sy: 1 - .04 * press);
+          } else if (part.name == 'seam') {
+            opacity = 1 - .45 * _pulse(t, .3, .83);
+          }
       }
       _draw(canvas, part, opacity: opacity, trim: trim);
       canvas.restore();

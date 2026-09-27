@@ -19,6 +19,7 @@ const _icons = <String, IconData>{
   '统计': StudioIcons.statistics,
   '设置': StudioIcons.settings,
   '遗传按钮': StudioIcons.inherit,
+  '积木悬浮窗': StudioIcons.promptBlockPalette,
 };
 
 Finder get _painting => find.byWidgetPredicate(

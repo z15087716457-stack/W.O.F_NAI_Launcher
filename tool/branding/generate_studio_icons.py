@@ -19,7 +19,7 @@ MASTERS = Path(__file__).with_name('studio_icons')
 # Stable codepoints: append, never reorder.
 NAMES = ['style_explore', 'inherit', 'online_gallery', 'prompt_blocks',
          'precise_reference', 'vibe_library', 'generation', 'local_gallery',
-         'statistics', 'settings']
+         'statistics', 'settings', 'prompt_block_palette']
 
 
 class DartPathPen(BasePen):
