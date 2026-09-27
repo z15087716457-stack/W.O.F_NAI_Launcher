@@ -41,6 +41,8 @@ class AtomListEditor extends StatefulWidget {
 }
 
 class _AtomListEditorState extends State<AtomListEditor> {
+  static const _atomBottomGap = EdgeInsets.only(bottom: 5);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -128,13 +130,16 @@ class _AtomListEditorState extends State<AtomListEditor> {
     if (atomText == null) {
       return WidgetSpan(
         alignment: PlaceholderAlignment.top,
-        child: GestureDetector(
-          key: Key('atom-editor-orphan-$occurrence'),
-          onTap: () => widget.controller.removeOrphanMarker(marker),
-          child: AtomChip(
-            text: context.l10n.promptBlockLibrary_atomOrphan,
-            theme: theme,
-            borderColor: theme.colorScheme.error,
+        child: Padding(
+          padding: _atomBottomGap,
+          child: GestureDetector(
+            key: Key('atom-editor-orphan-$occurrence'),
+            onTap: () => widget.controller.removeOrphanMarker(marker),
+            child: AtomChip(
+              text: context.l10n.promptBlockLibrary_atomOrphan,
+              theme: theme,
+              borderColor: theme.colorScheme.error,
+            ),
           ),
         ),
       );
@@ -143,13 +148,17 @@ class _AtomListEditorState extends State<AtomListEditor> {
       // top 对齐：行高由 chip 占位撑开，贴行顶零偏移；
       // middle 会把多行 chip 上移半个 descent（「跳一根」的成因）。
       alignment: PlaceholderAlignment.top,
-      child: Tooltip(
-        message: context.l10n.promptBlockLibrary_atomRestoreHint,
-        waitDuration: const Duration(milliseconds: 500),
-        child: GestureDetector(
-          key: Key('atom-editor-atom-${marker.codeUnitAt(0)}-$occurrence'),
-          onTap: () => widget.controller.unAtom(marker, occurrence),
-          child: AtomChip(text: atomText, theme: theme),
+      child: Padding(
+        // 把留白算入占位高度：相邻两行各自的描边不会再贴在一起。
+        padding: _atomBottomGap,
+        child: Tooltip(
+          message: context.l10n.promptBlockLibrary_atomRestoreHint,
+          waitDuration: const Duration(milliseconds: 500),
+          child: GestureDetector(
+            key: Key('atom-editor-atom-${marker.codeUnitAt(0)}-$occurrence'),
+            onTap: () => widget.controller.unAtom(marker, occurrence),
+            child: AtomChip(text: atomText, theme: theme),
+          ),
         ),
       ),
     );

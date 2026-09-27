@@ -10,7 +10,7 @@ void main() {
   const markerA = '\uE000';
   const markerB = '\uE001';
 
-  Widget wrap(AtomListEditorController controller) {
+  Widget wrap(AtomListEditorController controller, {double width = 600}) {
     return MaterialApp(
       locale: const Locale('zh'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -18,7 +18,7 @@ void main() {
       home: Scaffold(
         body: Center(
           child: SizedBox(
-            width: 600,
+            width: width,
             child: AtomListEditor(controller: controller),
           ),
         ),
@@ -36,6 +36,27 @@ void main() {
     expect(find.byKey(const Key('atom-editor-field')), findsOneWidget);
     expect(controller.documentText, isEmpty);
     expect(controller.atoms, isEmpty);
+  });
+
+  testWidgets('separate wrapped atoms keep space between their frames', (
+    tester,
+  ) async {
+    final controller = AtomListEditorController(const [
+      'already dripping wet:',
+      'second atom that needs its own line and wraps across this narrow editor',
+      'third atom',
+    ]);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(wrap(controller, width: 320));
+
+    final chips = find.byType(AtomChip);
+    expect(chips, findsNWidgets(3));
+    for (var i = 1; i < 3; i++) {
+      final previousBottom = tester.getBottomLeft(chips.at(i - 1)).dy;
+      final nextTop = tester.getTopLeft(chips.at(i)).dy;
+      expect(nextTop - previousBottom, greaterThanOrEqualTo(4.5));
+    }
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Enter commits text before caret, text after caret stays', (
@@ -57,10 +78,7 @@ void main() {
 
     // 光标前整段成一个原子（逗号/权重段不切），光标后留原文。
     expect(controller.documentText, '$markerA and more');
-    expect(controller.atoms, [
-      '0.5::artist:a, 1girl::, cinematic',
-      'and more',
-    ]);
+    expect(controller.atoms, ['0.5::artist:a, 1girl::, cinematic', 'and more']);
   });
 
   testWidgets('tapping an atom chip restores its text in place', (
