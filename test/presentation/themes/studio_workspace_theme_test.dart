@@ -1,3 +1,13 @@
+import 'package:nai_launcher/presentation/providers/online_favorites_provider.dart';
+import 'package:nai_launcher/data/repositories/online_favorites_repository.dart';
+import 'package:nai_launcher/data/models/online_gallery/gallery_source.dart';
+import 'package:nai_launcher/presentation/screens/online_gallery/online_gallery_screen.dart';
+import 'package:nai_launcher/presentation/screens/precise_ref_library/precise_ref_library_screen.dart';
+import 'package:nai_launcher/presentation/providers/online_gallery_provider.dart';
+import 'package:nai_launcher/data/services/danbooru_auth_service.dart';
+import 'package:nai_launcher/data/services/gelbooru_auth_service.dart';
+import 'package:nai_launcher/presentation/providers/danbooru_suggestion_provider.dart';
+import 'package:nai_launcher/presentation/providers/precise_ref_library_provider.dart';
 import 'package:nai_launcher/presentation/widgets/common/update_capsule.dart';
 import 'package:nai_launcher/presentation/widgets/bulk_action_bar.dart';
 import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart';
@@ -128,6 +138,42 @@ class _Stats extends StatisticsNotifier {
   StatisticsData build() => const StatisticsData(isLoading: false);
 }
 
+class _Online extends OnlineGalleryNotifier {
+  @override
+  OnlineGalleryState build() => const OnlineGalleryState();
+  @override
+  Future<void> loadPosts({bool refresh = false}) async {}
+}
+
+class _Danbooru extends DanbooruAuth {
+  @override
+  DanbooruAuthState build() => const DanbooruAuthState();
+}
+
+class _Gelbooru extends GelbooruAuth {
+  @override
+  GelbooruAuthState build() =>
+      const GelbooruAuthState(status: GelbooruAuthStatus.unconfigured);
+}
+
+class _Suggestions extends DanbooruSuggestionNotifier {
+  @override
+  TagSuggestionState build() => const TagSuggestionState();
+}
+
+class _Precise extends PreciseRefLibraryNotifier {
+  @override
+  PreciseRefLibraryState build() => const PreciseRefLibraryState();
+  @override
+  Future<void> initialize() async {}
+}
+
+class _OnlineFavorites extends OnlineFavoritesNotifier {
+  _OnlineFavorites() : super(OnlineFavoritesRepository.instance);
+  @override
+  Future<void> bindSource(GallerySourceId source) async {}
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setContextOverride(
@@ -153,6 +199,9 @@ void main() {
     for (final (name, screen) in <(String, Widget)>[
       ('gallery', const LocalGalleryScreen()),
       ('vibe', const VibeLibraryScreen()),
+      ('vibe-wide', const VibeLibraryScreen()),
+      ('online', const OnlineGalleryScreen()),
+      ('precise', const PreciseRefLibraryScreen()),
       ('statistics', const StatisticsScreen()),
       ('blocks', const PromptBlockLibraryScreen()),
       (
@@ -168,7 +217,22 @@ void main() {
         SharedPreferences.setMockInitialValues({
           StorageKeys.hasSeenLocalGalleryTip: true,
         });
-        tester.view.physicalSize = Size(name == 'vibe' ? 900 : 1280, 900);
+        final isLibrary = const [
+          'gallery',
+          'vibe',
+          'vibe-wide',
+          'online',
+          'precise',
+          'blocks',
+        ].contains(name);
+        tester.view.physicalSize = Size(
+          name == 'vibe'
+              ? 900
+              : isLibrary
+              ? 2200
+              : 1280,
+          900,
+        );
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
         final storage = InMemoryLocalStorageService();
@@ -177,6 +241,14 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
+              onlineGalleryNotifierProvider.overrideWith(_Online.new),
+              onlineFavoritesNotifierProvider.overrideWith(
+                (ref) => _OnlineFavorites(),
+              ),
+              danbooruAuthProvider.overrideWith(_Danbooru.new),
+              gelbooruAuthProvider.overrideWith(_Gelbooru.new),
+              danbooruSuggestionNotifierProvider.overrideWith(_Suggestions.new),
+              preciseRefLibraryNotifierProvider.overrideWith(_Precise.new),
               vibeLibraryNotifierProvider.overrideWith(_Vibes.new),
               vibeLibraryCategoryNotifierProvider.overrideWith(
                 _VibeCategories.new,
@@ -215,13 +287,15 @@ void main() {
                 home: RepaintBoundary(
                   key: boundary,
                   child: IntegratedTitleBarShell(
-                    captionHeight: name == 'gallery' ? 62 : 36,
-                    accessoryWidth:
-                        name == 'gallery' && brightness == Brightness.dark
+                    captionHeight: name == 'blocks'
+                        ? 64
+                        : isLibrary
+                        ? 62
+                        : 36,
+                    accessoryWidth: isLibrary && brightness == Brightness.dark
                         ? UpdateCapsule.width
                         : 0,
-                    accessory:
-                        name == 'gallery' && brightness == Brightness.dark
+                    accessory: isLibrary && brightness == Brightness.dark
                         ? UpdateCapsule(onPressed: () {})
                         : null,
                     child: screen,
@@ -241,14 +315,19 @@ void main() {
               ? const Color(0xFF111111)
               : Colors.white,
         );
-        if (name == 'gallery') {
+        if (isLibrary && name != 'vibe') {
           final header = tester.getRect(find.byType(WindowHeader));
           final captions = find.byKey(const Key('window-caption-controls'));
           final minimize = find.descendant(
             of: captions,
             matching: find.byIcon(Icons.remove),
           );
-          final search = find.byType(TextField).first;
+          final search = find
+              .descendant(
+                of: find.byType(LibraryWindowHeader),
+                matching: find.byType(TextField),
+              )
+              .first;
           if (brightness == Brightness.dark) {
             final capsule = find.byKey(const Key('window-update-capsule'));
             expect(tester.getCenter(capsule).dy, tester.getCenter(minimize).dy);
@@ -262,7 +341,9 @@ void main() {
             tester.getCenter(minimize).dy,
             closeTo(tester.getCenter(search).dy, .1),
           );
-          expect(header.right, tester.getRect(captions).right);
+          if (name != 'blocks') {
+            expect(header.right, tester.getRect(captions).right);
+          }
           await tester.runAsync(() async {
             final image =
                 await (boundary.currentContext!.findRenderObject()!
@@ -286,12 +367,20 @@ void main() {
               reason:
                   'the rule is visible rather than both samples being background',
             );
+            if (name == 'blocks') {
+              expect(
+                pixel(image.width - 4, y),
+                line,
+                reason: 'the rule joins the detail rail',
+              );
+            }
             image.dispose();
           });
         }
         // Vibe retains its existing muted zero counts / empty-state caption.
         // Its new coverage here checks window chrome geometry and overflow.
-        if (brightness == Brightness.light && name != 'vibe') {
+        if (brightness == Brightness.light &&
+            !const ['vibe', 'vibe-wide', 'online', 'precise'].contains(name)) {
           expectNoUnreadableLightText(tester, panelName: name);
         }
         if (Platform.environment['CAPTURE_STUDIO_UI'] == '1') {
@@ -317,6 +406,19 @@ void main() {
             await file.writeAsBytes(data.buffer.asUint8List());
             image.dispose();
           });
+        }
+        if (name == 'blocks') {
+          await tester.tap(
+            find.byKey(const Key('prompt-block-detail-collapsed')),
+          );
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          final header = tester.getRect(find.byType(WindowHeader));
+          final captions = tester.getRect(
+            find.byKey(const Key('window-caption-controls')),
+          );
+          expect(header.right, lessThan(captions.left));
+          expect(header.bottom, 65);
         }
         if (name == 'gallery') {
           final container = ProviderScope.containerOf(

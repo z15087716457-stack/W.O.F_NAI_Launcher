@@ -391,7 +391,7 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
                       child: Column(
                         children: [
                           // 工具栏
-                          WindowHeader(
+                          LibraryWindowHeader(
                             minimumInlineWidth: 900,
                             child: _buildToolbar(state, selectionState, theme),
                           ),

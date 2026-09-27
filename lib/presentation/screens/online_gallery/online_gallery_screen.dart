@@ -279,7 +279,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
       body: Column(
         children: [
           // 顶部工具栏
-          WindowHeader(
+          LibraryWindowHeader(
             child: _buildToolbar(theme, state, authState, gelbooruAuthState),
           ),
           // 图片网格（右下角悬浮列宽滑杆）
@@ -443,6 +443,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
           allPostIds.every((id) => selectionState.selectedIds.contains(id));
 
       return BulkActionBar(
+        framed: false,
         selectedCount: selectionState.selectedIds.length,
         isAllSelected: isAllSelected,
         onExit: () => _selectionNotifier.exit(),
@@ -472,17 +473,12 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
     }
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.3)),
-        ),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final compact = constraints.maxWidth < 1750;
-          final narrow = constraints.maxWidth < 850;
+          // Leave room for both AI TAG fields beside the mode selector.
+          final narrow = constraints.maxWidth < 1000;
           final modeSelector = _buildModeSelector(
             theme,
             state,
@@ -504,25 +500,34 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (narrow) ...[
-                Align(alignment: Alignment.centerLeft, child: modeSelector),
+                SizedBox(
+                  height: 40,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: modeSelector,
+                  ),
+                ),
                 if (showQueryFields) ...[
                   const SizedBox(height: 8),
                   _buildSearchFields(theme, state),
                 ],
               ] else
-                Row(
-                  children: [
-                    modeSelector,
-                    const SizedBox(width: 16),
-                    if (showQueryFields)
-                      Expanded(child: _buildSearchFields(theme, state))
-                    else
-                      const Spacer(),
-                    if (!compact) ...[
-                      const SizedBox(width: 12),
-                      Flexible(child: actions),
+                SizedBox(
+                  height: 40,
+                  child: Row(
+                    children: [
+                      modeSelector,
+                      const SizedBox(width: 16),
+                      if (showQueryFields)
+                        Expanded(child: _buildSearchFields(theme, state))
+                      else
+                        const Spacer(),
+                      if (!compact) ...[
+                        const SizedBox(width: 12),
+                        Flexible(child: actions),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               if (compact) ...[
                 const SizedBox(height: 8),

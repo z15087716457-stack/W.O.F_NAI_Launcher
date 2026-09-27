@@ -135,6 +135,29 @@ class WindowHeader extends StatelessWidget {
   }
 }
 
+/// Shared library toolbar surface and divider, including the caption reserve.
+class LibraryWindowHeader extends StatelessWidget {
+  const LibraryWindowHeader({
+    super.key,
+    required this.child,
+    this.enabled = true,
+    this.minimumInlineWidth = 620,
+  });
+  final Widget child;
+  final bool enabled;
+  final double minimumInlineWidth;
+  @override
+  Widget build(BuildContext context) => WindowHeader(
+    enabled: enabled,
+    minimumInlineWidth: minimumInlineWidth,
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surface,
+      border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
+    ),
+    child: child,
+  );
+}
+
 /// Used only on the rightmost dock, or the exposed canvas when it is collapsed.
 /// Its own surface extends to the top; only this pane's controls move down.
 class WindowPaneInset extends StatelessWidget {

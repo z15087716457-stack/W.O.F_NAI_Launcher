@@ -343,7 +343,7 @@ class _PreciseRefLibraryScreenState
           children: [
             Column(
               children: [
-                WindowHeader(child: _buildToolbar(state)),
+                LibraryWindowHeader(child: _buildToolbar(state)),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                   child: Align(
@@ -411,14 +411,8 @@ class _PreciseRefLibraryScreenState
     final l10n = context.l10n;
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
-          ),
-        ),
-      ),
+      height: 62,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
           Icon(
@@ -428,6 +422,7 @@ class _PreciseRefLibraryScreenState
           ),
           const SizedBox(width: 8),
           Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(

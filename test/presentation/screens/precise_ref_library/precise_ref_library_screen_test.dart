@@ -46,7 +46,10 @@ void main() {
           locale: Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: IntegratedTitleBarShell(child: PreciseRefLibraryScreen()),
+          home: IntegratedTitleBarShell(
+            captionHeight: 62,
+            child: PreciseRefLibraryScreen(),
+          ),
         ),
       ),
     );

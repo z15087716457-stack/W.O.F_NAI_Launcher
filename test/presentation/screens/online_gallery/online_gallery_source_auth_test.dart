@@ -476,7 +476,10 @@ class _TestApp extends StatelessWidget {
       locale: Locale('en'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: IntegratedTitleBarShell(child: OnlineGalleryScreen()),
+      home: IntegratedTitleBarShell(
+        captionHeight: 62,
+        child: OnlineGalleryScreen(),
+      ),
     );
   }
 }

@@ -235,7 +235,7 @@ class _PromptBlockLibraryScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        WindowHeader(
+                        LibraryWindowHeader(
                           enabled: !showDetailPanel || !_detailPanelExpanded,
                           child: _buildToolbar(context, library),
                         ),
@@ -251,11 +251,9 @@ class _PromptBlockLibraryScreenState
                     ),
                   ),
                   if (showDetailPanel)
-                    WindowPaneInset(
-                      child: _buildDetailRail(
-                        selectedBlock,
-                        state?.folders ?? const <PromptBlockFolder>[],
-                      ),
+                    _buildDetailRail(
+                      selectedBlock,
+                      state?.folders ?? const <PromptBlockFolder>[],
                     ),
                 ],
               );
@@ -287,32 +285,47 @@ class _PromptBlockLibraryScreenState
           color: theme.colorScheme.surface,
           border: Border(left: BorderSide(color: theme.dividerColor)),
         ),
-        child: !_detailPanelExpanded
-            ? PromptBlockDetailRailCollapsed(
-                onExpand: () => _setDetailPanelExpanded(true),
-              )
-            : _multiSelectMode
-            ? _buildEmptyDetailPanel(
-                icon: Icons.checklist,
-                message:
-                    '${context.l10n.promptBlockLibrary_selectedCount(_multiSelectedIds.length)}\n拖动已选块到左侧的收藏或文件夹，松开后选择复制或移动。',
-              )
-            : block != null
-            ? PromptBlockDetailPanel(
-                block: block,
-                folders: folders,
-                onEdit: () => _openBlockEdit(block),
-                onToggleFavorite: (anchor) => _showFavoriteMenu(block, anchor),
-                onCopy: () => AppToast.success(
-                  context,
-                  context.l10n.promptBlockLibrary_copied,
+        child: Column(
+          children: [
+            if (WindowChromeScope.activeOf(context))
+              Container(
+                height: WindowChromeScope.heightOf(context) + 1,
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: theme.dividerColor)),
                 ),
-                onAddTag: (anchor) => _showTagMenu([block.id], anchor),
-                onDelete: () => _deleteBlock(context, block),
-                onTagTap: (tag) => setState(() => _selectedTag = tag),
-                onCollapse: () => _setDetailPanelExpanded(false),
-              )
-            : _buildEmptyDetailPanel(),
+                child: const WindowDragArea(),
+              ),
+            Expanded(
+              child: !_detailPanelExpanded
+                  ? PromptBlockDetailRailCollapsed(
+                      onExpand: () => _setDetailPanelExpanded(true),
+                    )
+                  : _multiSelectMode
+                  ? _buildEmptyDetailPanel(
+                      icon: Icons.checklist,
+                      message:
+                          '${context.l10n.promptBlockLibrary_selectedCount(_multiSelectedIds.length)}\n拖动已选块到左侧的收藏或文件夹，松开后选择复制或移动。',
+                    )
+                  : block != null
+                  ? PromptBlockDetailPanel(
+                      block: block,
+                      folders: folders,
+                      onEdit: () => _openBlockEdit(block),
+                      onToggleFavorite: (anchor) =>
+                          _showFavoriteMenu(block, anchor),
+                      onCopy: () => AppToast.success(
+                        context,
+                        context.l10n.promptBlockLibrary_copied,
+                      ),
+                      onAddTag: (anchor) => _showTagMenu([block.id], anchor),
+                      onDelete: () => _deleteBlock(context, block),
+                      onTagTap: (tag) => setState(() => _selectedTag = tag),
+                      onCollapse: () => _setDetailPanelExpanded(false),
+                    )
+                  : _buildEmptyDetailPanel(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -522,14 +535,6 @@ class _PromptBlockLibraryScreenState
           padding: EdgeInsets.symmetric(
             horizontal: 16,
             vertical: compact ? 12 : 8,
-          ),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            border: Border(
-              bottom: BorderSide(
-                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.45),
-              ),
-            ),
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {

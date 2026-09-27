@@ -257,10 +257,14 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
   }
 
   double _resolveCaptionHeight() =>
-      widget.router.routerDelegate.currentConfiguration.uri.path ==
-          AppRoutes.localGallery
-      ? 62
-      : 36;
+      switch (widget.router.routerDelegate.currentConfiguration.uri.path) {
+        AppRoutes.localGallery ||
+        AppRoutes.onlineGallery ||
+        AppRoutes.vibeLibrary ||
+        AppRoutes.preciseRefLibrary => 62,
+        AppRoutes.promptBlockLibrary => 64,
+        _ => 36,
+      };
 
   void _onRouteChanged() {
     final building =

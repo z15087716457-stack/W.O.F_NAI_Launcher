@@ -17,20 +17,8 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
           constraints: const BoxConstraints(minHeight: 62),
-          decoration: BoxDecoration(
-            color: theme.brightness == Brightness.dark
-                ? theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.9)
-                : theme.colorScheme.surface.withValues(alpha: 0.8),
-            border: Border(
-              bottom: BorderSide(
-                color: theme.dividerColor.withValues(
-                  alpha: theme.brightness == Brightness.dark ? 0.2 : 0.3,
-                ),
-              ),
-            ),
-          ),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxWidth < 900;
@@ -409,6 +397,7 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
         currentIds.every((id) => selectionState.selectedIds.contains(id));
 
     return BulkActionBar(
+      framed: false,
       selectedCount: selectionState.selectedIds.length,
       isAllSelected: isAllSelected,
       onExit: () {

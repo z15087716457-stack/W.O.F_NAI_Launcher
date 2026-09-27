@@ -223,13 +223,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
               Expanded(
                 child: Column(
                   children: [
-                    WindowHeader(
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        border: Border(
-                          bottom: BorderSide(color: theme.dividerColor),
-                        ),
-                      ),
+                    LibraryWindowHeader(
                       child: _buildToolbarOrSelectionBar(state, bulkOpState),
                     ),
                     Expanded(child: _buildBody(state, columns, itemWidth)),
