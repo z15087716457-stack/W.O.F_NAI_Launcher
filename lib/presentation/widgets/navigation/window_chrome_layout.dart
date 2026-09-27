@@ -63,6 +63,7 @@ class WindowDragArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) => GestureDetector(
     behavior: HitTestBehavior.opaque,
+    onTap: () {},
     onPanStart: (_) => unawaited(_call(windowManager.startDragging)),
     onDoubleTap: () => unawaited(
       _call(() async {

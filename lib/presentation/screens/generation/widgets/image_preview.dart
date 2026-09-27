@@ -19,6 +19,7 @@ import '../../../providers/shortcuts_provider.dart';
 import '../../../providers/simple_output_viewer_provider.dart';
 import '../../../widgets/character/character_position_canvas.dart';
 import '../../../widgets/common/selectable_image_card.dart';
+import '../../../widgets/navigation/window_chrome_layout.dart';
 import 'canvas/generated_image_card.dart' as canvas_card;
 import 'canvas/generation_canvas_view.dart';
 import 'generation_tool_panel.dart';
@@ -88,6 +89,7 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
     final state = ref.watch(imageGenerationNotifierProvider);
     final theme = Theme.of(context);
     final simpleViewer = ref.watch(simpleOutputViewerNotifierProvider);
+    final content = _buildContent(context, ref, state, theme);
 
     // 使用 GestureDetector 吸收整个区域的点击事件，避免 Windows 系统提示音
     return PreviewNavShortcuts(
@@ -105,7 +107,18 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Center(child: _buildContent(context, ref, state, theme)),
+              Center(child: content),
+              // The free canvas draws its own strip below its floating tools.
+              // Other preview modes have no edge toolbar to protect here.
+              if (content is! GenerationCanvasView &&
+                  WindowChromeScope.activeOf(context))
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: WindowChromeScope.heightOf(context),
+                  child: const WindowDragArea(),
+                ),
               if (!ref.watch(characterPositionCanvasProvider))
                 const GenerationToolPanel(),
             ],

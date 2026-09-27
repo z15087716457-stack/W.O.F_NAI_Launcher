@@ -425,9 +425,16 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         builder: (context, constraints) {
           _viewport = Size(constraints.maxWidth, constraints.maxHeight);
           _camera.setViewport(_viewport);
-          return _CanvasEmptyState(
-            theme: theme,
-            isGenerating: widget.generationState.isGenerating,
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: _CanvasEmptyState(
+                  theme: theme,
+                  isGenerating: widget.generationState.isGenerating,
+                ),
+              ),
+              if (WindowChromeScope.activeOf(context)) _buildWindowDragStrip(),
+            ],
           );
         },
       );
@@ -504,6 +511,8 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                         },
                       ),
                     ),
+                    if (WindowChromeScope.activeOf(context))
+                      _buildWindowDragStrip(),
                     // 屏幕空间覆盖层：焦点组 edge bars（顶中/底左/底右）
                     if (showEdgeBars) _buildEdgeBars(layout, focus),
                   ],
@@ -515,6 +524,25 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       ),
     );
   }
+
+  Widget _buildWindowDragStrip() => Positioned(
+    top: 0,
+    left: 0,
+    right: 0,
+    height: WindowChromeScope.heightOf(context),
+    child: Listener(
+      onPointerDown: (event) => _uiPointers.add(event.pointer),
+      onPointerUp: (event) {
+        _uiPointers.remove(event.pointer);
+        _consumedUiPointers.add(event.pointer);
+      },
+      onPointerCancel: (event) {
+        _uiPointers.remove(event.pointer);
+        _consumedUiPointers.remove(event.pointer);
+      },
+      child: const WindowDragArea(),
+    ),
+  );
 
   GeneratedImage? _resolveSelectedImage(
     CanvasFeedLayoutResult layout,

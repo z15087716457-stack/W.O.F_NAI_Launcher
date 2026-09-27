@@ -1,7 +1,6 @@
-import 'dart:typed_data';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +14,7 @@ import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canv
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_tile_toolbar.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_controller.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_view.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 
 GeneratedImage _img({required String id, int width = 832, int height = 1216}) {
   return GeneratedImage(
@@ -173,6 +173,23 @@ void main() {
   testWidgets(
     'main toolbars stay on viewport edges through pan, zoom and resize',
     (tester) async {
+      final windowCalls = <String>[];
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(
+        const MethodChannel('window_manager'),
+        (call) async {
+          windowCalls.add(call.method);
+          if (call.method == 'isFullScreen') return false;
+          return null;
+        },
+      );
+      addTearDown(
+        () => messenger.setMockMethodCallHandler(
+          const MethodChannel('window_manager'),
+          null,
+        ),
+      );
       final image = GeneratedImage(
         id: 'viewport-toolbar-image',
         bytes: Uint8List.fromList(
@@ -205,11 +222,13 @@ void main() {
           child: const MaterialApp(
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(
-              body: Padding(
-                padding: EdgeInsets.fromLTRB(200, 40, 150, 30),
-                child: GenerationCanvasView(
-                  generationState: ImageGenerationState(),
+            home: WindowChromeScope(
+              child: Scaffold(
+                body: Padding(
+                  padding: EdgeInsets.fromLTRB(200, 40, 150, 30),
+                  child: GenerationCanvasView(
+                    generationState: ImageGenerationState(),
+                  ),
                 ),
               ),
             ),
@@ -237,6 +256,22 @@ void main() {
       }
 
       expectViewportAnchors();
+      final viewport = tester.getRect(find.byType(GenerationCanvasView));
+      final cameraBeforeDrag = container
+          .read(generationCanvasCameraProvider)
+          .offset;
+      final windowDrag = await tester.startGesture(
+        Offset(viewport.left + 20, viewport.top + 12),
+        kind: PointerDeviceKind.touch,
+      );
+      await windowDrag.moveBy(const Offset(40, 24));
+      await windowDrag.up();
+      await tester.pump();
+      expect(windowCalls, contains('startDragging'));
+      expect(
+        container.read(generationCanvasCameraProvider).offset,
+        cameraBeforeDrag,
+      );
       final initial = {
         for (final zone in CanvasToolbarZone.values) zone: barRect(zone),
       };
