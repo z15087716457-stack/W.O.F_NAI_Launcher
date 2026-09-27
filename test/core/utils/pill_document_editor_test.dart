@@ -7,6 +7,26 @@ void main() {
   const markerB = '\uE001';
 
   group('allocateMarker / insertBlock', () {
+    test(
+      'negative marker survives document JSON without changing old markers',
+      () {
+        final negative = PillDocumentEditor.insertBlock(
+          PillDocument.empty(),
+          offset: 0,
+          blockId: 'paired',
+          useNegativeContent: true,
+        );
+        expect(negative.instances[markerA]!.useNegativeContent, isTrue);
+        expect(
+          PillDocument.fromJson(
+            negative.toJson(),
+          ).instances[markerA]!.useNegativeContent,
+          isTrue,
+        );
+        expect(const PillInstance(blockId: 'old').useNegativeContent, isFalse);
+      },
+    );
+
     test('allocates the smallest free private-use char', () {
       var doc = PillDocument.empty();
       doc = PillDocumentEditor.insertBlock(doc, offset: 0, blockId: 'a');

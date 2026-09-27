@@ -4,6 +4,37 @@ import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block_folder.dart';
 
 void main() {
+  test('compound block keeps both prompts and optional settings in JSON', () {
+    final block = PromptBlock.create(
+      id: 'compound',
+      title: '画风',
+      content: 'vibrant colors',
+      atoms: const ['vibrant colors'],
+      negativeContent: 'muted colors',
+      negativeAtoms: const ['muted colors'],
+      generationSettings: const PromptBlockGenerationSettings(
+        model: 'nai-diffusion-5-full',
+        steps: 28,
+        scale: 5,
+      ),
+    );
+    final json = block.toJson();
+    expect(json['generationSettings'], isA<Map<String, dynamic>>());
+    final restored = PromptBlock.fromJson(json);
+    expect(restored, block);
+    expect(restored.negativeAtomsOrSplit, ['muted colors']);
+
+    final old = PromptBlock.fromJson({
+      'id': 'old',
+      'title': '旧块',
+      'content': 'legacy',
+      'createdAt': '2026-08-01T00:00:00.000Z',
+      'updatedAt': '2026-08-01T00:00:00.000Z',
+    });
+    expect(old.negativeContent, isEmpty);
+    expect(old.generationSettings, isNull);
+  });
+
   test(
     'PromptBlock JSON round trip preserves raw content and display fields',
     () {

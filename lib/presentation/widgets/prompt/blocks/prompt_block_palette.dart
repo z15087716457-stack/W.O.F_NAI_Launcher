@@ -9,6 +9,7 @@ import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_block_palette_provider.dart';
+import '../../../utils/prompt_block_bundle_insertion.dart';
 import '../../../screens/prompt_block_library/widgets/prompt_block_card.dart';
 import '../../../screens/prompt_block_library/widgets/prompt_block_detail.dart';
 import 'prompt_block_drag_data.dart';
@@ -560,9 +561,12 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
       0,
       document.text.length,
     );
-    ref
-        .read(lane.notifier)
-        .insertBlockAt(offset: offset, blockId: widget.block.id);
+    insertPromptBlockBundle(
+      ref,
+      scope: target?.scope ?? PillScopes.main,
+      offset: offset,
+      blockId: widget.block.id,
+    );
   }
 
   void _remove() => ref

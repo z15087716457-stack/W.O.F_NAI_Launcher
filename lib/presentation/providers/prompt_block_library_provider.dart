@@ -230,6 +230,9 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
     double thumbnailScale = 1.0,
     int? sortOrder,
     List<String>? atoms,
+    String negativeContent = '',
+    List<String>? negativeAtoms,
+    PromptBlockGenerationSettings? generationSettings,
   }) {
     return _mutate(
       (repository) => repository.createBlock(
@@ -237,6 +240,9 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
         content: content,
         folderId: folderId,
         atoms: atoms,
+        negativeContent: negativeContent,
+        negativeAtoms: negativeAtoms,
+        generationSettings: generationSettings,
         color: color,
         iconName: iconName,
         thumbnail: thumbnail,

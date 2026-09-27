@@ -51,9 +51,12 @@ class PromptBlockCard extends StatelessWidget {
     final theme = Theme.of(context);
     final blockColor = promptBlockColorFromString(block.color);
     final compact = width <= 160;
-    final preview = block.content.isEmpty
+    final previewContent = block.content.isEmpty
+        ? block.negativeContent
+        : block.content;
+    final preview = previewContent.isEmpty
         ? context.l10n.detail_noContent
-        : block.content.replaceAll(RegExp(r'\s+'), ' ').trim();
+        : previewContent.replaceAll(RegExp(r'\s+'), ' ').trim();
 
     return GestureDetector(
       onSecondaryTapUp: onSecondaryTap,
@@ -301,7 +304,11 @@ class PromptBlockCard extends StatelessWidget {
   }
 
   Future<void> _copyContent() async {
-    await Clipboard.setData(ClipboardData(text: block.content));
+    await Clipboard.setData(
+      ClipboardData(
+        text: block.content.isNotEmpty ? block.content : block.negativeContent,
+      ),
+    );
     onCopy();
   }
 }

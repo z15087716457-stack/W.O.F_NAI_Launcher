@@ -49,9 +49,12 @@ class PromptBlockListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final blockColor = promptBlockColorFromString(block.color);
-    final preview = block.content.isEmpty
+    final previewContent = block.content.isEmpty
+        ? block.negativeContent
+        : block.content;
+    final preview = previewContent.isEmpty
         ? context.l10n.detail_noContent
-        : block.content.replaceAll(RegExp(r'\s+'), ' ').trim();
+        : previewContent.replaceAll(RegExp(r'\s+'), ' ').trim();
 
     return GestureDetector(
       onSecondaryTapUp: onSecondaryTap,
@@ -164,7 +167,13 @@ class PromptBlockListItem extends StatelessWidget {
               IconButton(
                 tooltip: context.l10n.common_copy,
                 onPressed: () async {
-                  await Clipboard.setData(ClipboardData(text: block.content));
+                  await Clipboard.setData(
+                    ClipboardData(
+                      text: block.content.isNotEmpty
+                          ? block.content
+                          : block.negativeContent,
+                    ),
+                  );
                   onCopy();
                 },
                 icon: const Icon(Icons.copy_outlined, size: 19),

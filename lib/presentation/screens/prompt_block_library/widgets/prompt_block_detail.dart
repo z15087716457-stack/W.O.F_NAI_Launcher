@@ -76,9 +76,12 @@ class PromptBlockDetailView extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final blockColor = promptBlockColorFromString(block.color);
-    final content = block.content.isEmpty
-        ? l10n.detail_noContent
+    final previewContent = block.content.isEmpty
+        ? block.negativeContent
         : block.content;
+    final content = previewContent.isEmpty
+        ? l10n.detail_noContent
+        : previewContent;
     final contentStyle = theme.textTheme.bodySmall?.copyWith(
       fontFamily: StudioTypography.mono,
       fontFamilyFallback: StudioTypography.fallback,
@@ -109,7 +112,7 @@ class PromptBlockDetailView extends StatelessWidget {
               },
             ),
           )
-        : block.content.isEmpty
+        : previewContent.isEmpty
         ? Text(
             content,
             style: contentStyle,
@@ -125,7 +128,10 @@ class PromptBlockDetailView extends StatelessWidget {
                 spacing: 4,
                 runSpacing: 6,
                 children: [
-                  for (final atom in block.atomsOrSplit)
+                  for (final atom
+                      in block.content.isEmpty
+                          ? block.negativeAtomsOrSplit
+                          : block.atomsOrSplit)
                     ConstrainedBox(
                       constraints: BoxConstraints(
                         maxWidth: constraints.maxWidth,
@@ -816,7 +822,11 @@ class PromptBlockDetailPanel extends StatelessWidget {
   }
 
   Future<void> _copyContent() async {
-    await Clipboard.setData(ClipboardData(text: block.content));
+    await Clipboard.setData(
+      ClipboardData(
+        text: block.content.isNotEmpty ? block.content : block.negativeContent,
+      ),
+    );
     onCopy();
   }
 }

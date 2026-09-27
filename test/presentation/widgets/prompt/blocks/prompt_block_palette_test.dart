@@ -10,10 +10,12 @@ import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
+import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
 import 'package:nai_launcher/data/services/fixed_tag_migration_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_palette_provider.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_drag_data.dart';
@@ -159,16 +161,12 @@ void main() {
 
       // 不存在的 id 批量移除 = 空操作。
       await notifier.removeBlocks({'ghost'});
-      palette = await container.read(
-        promptBlockPaletteNotifierProvider.future,
-      );
+      palette = await container.read(promptBlockPaletteNotifierProvider.future);
       expect(palette.blocks.map((b) => b.id), [ids[1]]);
 
       // 清空。
       await notifier.clear();
-      palette = await container.read(
-        promptBlockPaletteNotifierProvider.future,
-      );
+      palette = await container.read(promptBlockPaletteNotifierProvider.future);
       expect(palette.blocks, isEmpty);
       expect(await storage.getPaletteBlockIds(), isEmpty);
 
@@ -432,6 +430,62 @@ void main() {
       },
     );
 
+    testWidgets('a two-sided block inserts into positive and negative lanes', (
+      tester,
+    ) async {
+      final block = PromptBlock.create(
+        id: 'b-paired',
+        title: 'Paired',
+        content: 'bright colors',
+        negativeContent: 'muted colors',
+      );
+      final library = _SingleBlockLibraryNotifier(block);
+      final container = ProviderContainer(
+        overrides: [
+          promptBlockPaletteNotifierProvider.overrideWith(
+            () => _FakePaletteNotifier([block]),
+          ),
+          promptBlockLibraryNotifierProvider.overrideWith(() => library),
+          generationParamsNotifierProvider.overrideWith(
+            _FakeGenerationParamsNotifier.new,
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container.read(promptBlockLibraryNotifierProvider.future);
+      await tester.pumpWidget(buildApp(container));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('prompt-block-palette-toggle')));
+      await tester.pump();
+      await tester.pump();
+      await tester.tap(find.text('Paired').first);
+      await tester.pump();
+
+      final positive = container.read(pillWorkspaceProvider(PillScopes.main));
+      final negative = container.read(
+        pillWorkspaceProvider(PillScopes.negative),
+      );
+      expect(positive.projection, 'bright colors');
+      expect(negative.projection, 'muted colors');
+      expect(
+        negative.document.instances.values.single.useNegativeContent,
+        isTrue,
+      );
+
+      // 块库编辑时负面编辑器未挂载，生成参数仍须收到新投影。
+      library.publish(block.copyWith(negativeContent: 'new negative'));
+      await tester.pump();
+      await tester.pump();
+      expect(
+        container.read(pillWorkspaceProvider(PillScopes.negative)).projection,
+        'new negative',
+      );
+      expect(
+        container.read(generationParamsNotifierProvider).negativePrompt,
+        'new negative',
+      );
+    });
+
     testWidgets('chips flow-wrap: short chips share a row', (tester) async {
       final blocks = [
         PromptBlock.create(id: 'b-1', title: 'A', content: 'a'),
@@ -622,6 +676,37 @@ class _NoopLibraryNotifier extends PromptBlockLibraryNotifier {
 
   @override
   Future<void> incrementUseCount(String blockId) async {}
+}
+
+class _SingleBlockLibraryNotifier extends _NoopLibraryNotifier {
+  _SingleBlockLibraryNotifier(this.block);
+
+  final PromptBlock block;
+
+  @override
+  Future<PromptBlockLibraryState> build() async =>
+      PromptBlockLibraryState(blocks: [block], folders: const []);
+
+  void publish(PromptBlock updated) {
+    state = AsyncData(
+      PromptBlockLibraryState(blocks: [updated], folders: const []),
+    );
+  }
+}
+
+class _FakeGenerationParamsNotifier extends GenerationParamsNotifier {
+  @override
+  ImageParams build() => const ImageParams();
+
+  @override
+  void updatePrompt(String prompt) {
+    state = state.copyWith(prompt: prompt);
+  }
+
+  @override
+  void updateNegativePrompt(String negativePrompt) {
+    state = state.copyWith(negativePrompt: negativePrompt);
+  }
 }
 
 /// 测试用积木 notifier：内存态，跳过 Hive。

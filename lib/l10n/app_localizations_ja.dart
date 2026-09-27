@@ -8992,6 +8992,51 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_blockContent => '内容';
 
   @override
+  String get promptBlockLibrary_basicPrompt => '基本プロンプト';
+
+  @override
+  String get promptBlockLibrary_generationSettings => '設定';
+
+  @override
+  String get promptBlockLibrary_settingsOptionalHint =>
+      '入力した項目のみ保存します。ブロック挿入後に設定を手動で適用できます。';
+
+  @override
+  String get promptBlockLibrary_notSpecified => '指定しない';
+
+  @override
+  String get promptBlockLibrary_stepsLabel => 'ステップ数';
+
+  @override
+  String get promptBlockLibrary_cfgLabel => 'CFG Scale';
+
+  @override
+  String get promptBlockLibrary_widthLabel => '幅';
+
+  @override
+  String get promptBlockLibrary_heightLabel => '高さ';
+
+  @override
+  String get promptBlockLibrary_noiseScheduleLabel => 'ノイズスケジュール';
+
+  @override
+  String get promptBlockLibrary_cfgRescaleLabel => 'CFG Rescale';
+
+  @override
+  String get promptBlockLibrary_invalidGenerationSettings =>
+      '設定を確認してください：ステップ数 1～50、CFG 1～20、幅と高さは両方入力して64の倍数、CFG Rescale 0～1。';
+
+  @override
+  String get promptBlockLibrary_applySettings => 'ブロック設定を適用';
+
+  @override
+  String get promptBlockLibrary_settingsApplied => 'ブロックの生成設定を適用しました';
+
+  @override
+  String get promptBlockLibrary_settingsIncompatible =>
+      'ブロックのサンプラーは現在のモデルに対応していません。先にブロック設定を変更してください。';
+
+  @override
   String get promptBlockLibrary_atomInputHint => 'テキストを入力し、Enterで原子ブロック化';
 
   @override

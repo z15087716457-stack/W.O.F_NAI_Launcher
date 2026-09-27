@@ -27,6 +27,7 @@ abstract final class PillDocumentEditor {
     PillDocument document, {
     required int offset,
     required String blockId,
+    bool useNegativeContent = false,
   }) {
     final marker = allocateMarker(document);
     final safeOffset = offset.clamp(0, document.text.length);
@@ -35,7 +36,10 @@ abstract final class PillDocumentEditor {
         marker +
         document.text.substring(safeOffset);
     final instances = Map<String, PillInstance>.of(document.instances);
-    instances[marker] = PillInstance(blockId: blockId);
+    instances[marker] = PillInstance(
+      blockId: blockId,
+      useNegativeContent: useNegativeContent,
+    );
     return document.copyWith(text: text, instances: instances);
   }
 

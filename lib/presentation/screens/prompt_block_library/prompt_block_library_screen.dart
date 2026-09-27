@@ -21,6 +21,7 @@ import '../../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../../data/models/prompt_block/prompt_block_sort.dart';
 import '../../../data/repositories/prompt_block_repository.dart';
 import '../../providers/prompt_block_library_provider.dart';
+import '../../providers/generation/generation_params_notifier.dart';
 import '../../providers/tips_provider.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
@@ -1781,6 +1782,7 @@ class _PromptBlockLibraryScreenState
       context: context,
       block: block,
       folders: state.folders,
+      modelForTokenCount: ref.read(generationParamsNotifierProvider).model,
     );
     if (result == null || !mounted) return;
     await _saveBlockEdit(context, block, result);
@@ -1965,7 +1967,13 @@ class _PromptBlockLibraryScreenState
         _selectBlock(block);
         unawaited(_openBlockEdit(block));
       case _BlockContextAction.copy:
-        await Clipboard.setData(ClipboardData(text: block.content));
+        await Clipboard.setData(
+          ClipboardData(
+            text: block.content.isNotEmpty
+                ? block.content
+                : block.negativeContent,
+          ),
+        );
         if (context.mounted) {
           AppToast.success(context, l10n.promptBlockLibrary_copied);
         }
@@ -2259,7 +2267,8 @@ class _PromptBlockLibraryScreenState
       blocks.removeWhere(
         (block) =>
             !block.title.toLowerCase().contains(query) &&
-            !block.content.toLowerCase().contains(query),
+            !block.content.toLowerCase().contains(query) &&
+            !block.negativeContent.toLowerCase().contains(query),
       );
     }
     if (_allSelected) {
@@ -2481,7 +2490,10 @@ class _PromptBlockLibraryScreenState
     final path = target.toLowerCase().endsWith('.txt') ? target : '$target.txt';
 
     try {
-      await File(path).writeAsString(block.content, flush: true);
+      await File(path).writeAsString(
+        block.content.isNotEmpty ? block.content : block.negativeContent,
+        flush: true,
+      );
       if (mounted) {
         AppToast.success(context, l10n.promptBlockLibrary_exportTxtDone);
       }
@@ -2503,6 +2515,7 @@ class _PromptBlockLibraryScreenState
       context: context,
       folders: state.folders,
       initialFolderId: _allSelected ? null : _selectedFolderId,
+      modelForTokenCount: ref.read(generationParamsNotifierProvider).model,
     );
     if (result == null || !context.mounted) return;
 
@@ -2513,6 +2526,9 @@ class _PromptBlockLibraryScreenState
             title: result.title,
             content: result.content,
             atoms: result.atoms,
+            negativeContent: result.negativeContent,
+            negativeAtoms: result.negativeAtoms,
+            generationSettings: result.generationSettings,
             folderId: result.folderId,
             color: result.color,
             iconName: result.iconName,
@@ -2543,6 +2559,9 @@ class _PromptBlockLibraryScreenState
               title: result.title,
               content: result.content,
               atoms: result.atoms,
+              negativeContent: result.negativeContent,
+              negativeAtoms: result.negativeAtoms,
+              generationSettings: result.generationSettings,
               color: result.color,
               iconName: result.iconName,
               thumbnail: result.thumbnail,

@@ -25,12 +25,16 @@ class AtomListEditor extends StatefulWidget {
     super.key,
     required this.controller,
     this.height = 260,
+    this.embedded = false,
   });
 
   final AtomListEditorController controller;
 
   /// 编辑区固定高度；内部滚动。
   final double height;
+
+  /// 由外层输入框提供边框和高度时，只渲染内部编辑内容。
+  final bool embedded;
 
   @override
   State<AtomListEditor> createState() => _AtomListEditorState();
@@ -41,79 +45,74 @@ class _AtomListEditorState extends State<AtomListEditor> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final controller = widget.controller;
+    final content = ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) {
+        controller.field.pillBuilder = _atomSpanBuilder;
+        return Column(
+          children: [
+            Expanded(
+              child: TextField(
+                key: const Key('atom-editor-field'),
+                controller: controller.field,
+                focusNode: controller.focusNode,
+                expands: true,
+                minLines: null,
+                maxLines: null,
+                // EditableText 默认 forceStrutHeight 锁单行高，
+                // 多行 WidgetSpan 会溢出槽位与下文交叠；关 strut
+                // 让 placeholder 高度生效（纯文本行距仍由
+                // style.height 决定）。
+                strutStyle: StrutStyle.disabled,
+                textAlignVertical: TextAlignVertical.top,
+                // middle 对齐时行高=chip 高度（行间 0 空隙），
+                // 靠文本行高撑出 chip 行之间的空隙。
+                style: theme.textTheme.bodyMedium?.copyWith(height: 1.8),
+                decoration: InputDecoration(
+                  // 主题 inputDecorationTheme 全局 filled=true：
+                  // 填充色会让底部教程行露出更深的容器底色，
+                  // 关掉填充让整框共用内阴影容器背景。
+                  filled: false,
+                  hintText: context.l10n.promptBlockLibrary_atomInputHint,
+                  hintStyle: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.5,
+                    ),
+                    fontSize: 13,
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.all(10),
+                ),
+              ),
+            ),
+            // 内框底部右下角操作教程（FEAT-79）
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 10, right: 10, bottom: 6),
+                child: Text(
+                  context.l10n.promptBlockLibrary_atomEditorTutorial,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.5,
+                    ),
+                    fontSize: 11,
+                    height: 1.2,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    if (widget.embedded) return content;
     return SizedBox(
       height: widget.height,
-      child: InsetShadowContainer(
-        borderRadius: 8,
-        child: ListenableBuilder(
-          listenable: controller,
-          builder: (context, _) {
-            controller.field.pillBuilder = _atomSpanBuilder;
-            return Column(
-              children: [
-                Expanded(
-                  child: TextField(
-                    key: const Key('atom-editor-field'),
-                    controller: controller.field,
-                    focusNode: controller.focusNode,
-                    expands: true,
-                    minLines: null,
-                    maxLines: null,
-                    // EditableText 默认 forceStrutHeight 锁单行高，
-                    // 多行 WidgetSpan 会溢出槽位与下文交叠；关 strut
-                    // 让 placeholder 高度生效（纯文本行距仍由
-                    // style.height 决定）。
-                    strutStyle: StrutStyle.disabled,
-                    textAlignVertical: TextAlignVertical.top,
-                    // middle 对齐时行高=chip 高度（行间 0 空隙），
-                    // 靠文本行高撑出 chip 行之间的空隙。
-                    style: theme.textTheme.bodyMedium?.copyWith(height: 1.8),
-                    decoration: InputDecoration(
-                      // 主题 inputDecorationTheme 全局 filled=true：
-                      // 填充色会让底部教程行露出更深的容器底色，
-                      // 关掉填充让整框共用内阴影容器背景。
-                      filled: false,
-                      hintText: context.l10n.promptBlockLibrary_atomInputHint,
-                      hintStyle: TextStyle(
-                        color: theme.colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.5,
-                        ),
-                        fontSize: 13,
-                      ),
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      isDense: true,
-                      contentPadding: const EdgeInsets.all(10),
-                    ),
-                  ),
-                ),
-                // 内框底部右下角操作教程（FEAT-79）
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 10,
-                      right: 10,
-                      bottom: 6,
-                    ),
-                    child: Text(
-                      context.l10n.promptBlockLibrary_atomEditorTutorial,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.5,
-                        ),
-                        fontSize: 11,
-                        height: 1.2,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
+      child: InsetShadowContainer(borderRadius: 8, child: content),
     );
   }
 
@@ -187,8 +186,10 @@ class AtomChip extends StatelessWidget {
   /// 缝高：行框竖边已是虚线，缝里只补一段同轴虚线柱，
   /// 不用留太大；段 2+空 2，6px 恰两段。
   static const double _seamGap = 6;
-  static const EdgeInsets _pad =
-      EdgeInsets.symmetric(horizontal: 8, vertical: 2);
+  static const EdgeInsets _pad = EdgeInsets.symmetric(
+    horizontal: 8,
+    vertical: 2,
+  );
 
   /// 行框给文字的富余宽：RenderParagraph 对行宽有 ceil 取整，
   /// 槽宽恰等于 advance 时会误判 hasVisualOverflow 把末字形
@@ -206,14 +207,22 @@ class AtomChip extends StatelessWidget {
         // maxWidth 即文本区可用宽，扣掉内边距就是折行宽。
         // 无界场景（理论上）退化为单行 chip。
         final maxW = constraints.maxWidth;
-        final wrapWidth =
-            maxW.isFinite ? maxW - _pad.horizontal - 4 : double.infinity;
+        final wrapWidth = maxW.isFinite
+            ? maxW - _pad.horizontal - 4
+            : double.infinity;
         final segs = _wrapSegments(context, style, wrapWidth);
 
         if (segs.length <= 1) {
-          return _lineBox(context, style, color, segs.first,
-              topRounded: true, bottomRounded: true,
-              solidLeft: true, solidRight: true);
+          return _lineBox(
+            context,
+            style,
+            color,
+            segs.first,
+            topRounded: true,
+            bottomRounded: true,
+            solidLeft: true,
+            solidRight: true,
+          );
         }
         // 逐行小框（静拍板·实线只留首尾）：横边恒实；首行左竖
         // 边实、末行右竖边实，其余竖边全虚线；行间缝补一段左缘
@@ -223,16 +232,18 @@ class AtomChip extends StatelessWidget {
           if (i > 0) {
             children.add(_SeamDashes(color: color, height: _seamGap));
           }
-          children.add(_lineBox(
-            context,
-            style,
-            color,
-            segs[i],
-            topRounded: i == 0,
-            bottomRounded: i == segs.length - 1,
-            solidLeft: i == 0,
-            solidRight: i == segs.length - 1,
-          ));
+          children.add(
+            _lineBox(
+              context,
+              style,
+              color,
+              segs[i],
+              topRounded: i == 0,
+              bottomRounded: i == segs.length - 1,
+              solidLeft: i == 0,
+              solidRight: i == segs.length - 1,
+            ),
+          );
         }
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -245,7 +256,10 @@ class AtomChip extends StatelessWidget {
 
   /// 预折行：返回每视觉行的文本段与整行框宽（文本宽+水平内边距）。
   List<_Seg> _wrapSegments(
-      BuildContext context, TextStyle? style, double wrapWidth) {
+    BuildContext context,
+    TextStyle? style,
+    double wrapWidth,
+  ) {
     final tp = TextPainter(
       text: TextSpan(text: text, style: style),
       textDirection: Directionality.of(context),
@@ -262,18 +276,19 @@ class AtomChip extends StatelessWidget {
       // 行尾空白不渲染（折点空白吃掉，拼接不靠它）。
       segText = segText.trimRight();
       if (segText.isNotEmpty) {
-        final w = _measure(context, style, segText) +
-            _pad.horizontal +
-            _textSlack;
+        final w =
+            _measure(context, style, segText) + _pad.horizontal + _textSlack;
         segs.add(_Seg(segText, w));
       }
       start = end;
     }
     if (segs.isEmpty) {
-      segs.add(_Seg(
-        text,
-        _measure(context, style, text) + _pad.horizontal + _textSlack,
-      ));
+      segs.add(
+        _Seg(
+          text,
+          _measure(context, style, text) + _pad.horizontal + _textSlack,
+        ),
+      );
     }
     return segs;
   }
@@ -393,7 +408,13 @@ class _DashedBoxPainter extends CustomPainter {
   /// 竖边：实线一条到底；虚线首段顶 y1（接上横边/弧端）、
   /// 末段顶 y2。
   void _edgeV(
-      Canvas canvas, Paint paint, double x, double y1, double y2, bool solid) {
+    Canvas canvas,
+    Paint paint,
+    double x,
+    double y1,
+    double y2,
+    bool solid,
+  ) {
     if (solid) {
       canvas.drawLine(Offset(x, y1), Offset(x, y2), paint);
       return;
@@ -408,8 +429,14 @@ class _DashedBoxPainter extends CustomPainter {
 
   /// 四分之一圆弧（逆时针坐标系下的角弧），线心半径 = 角
   /// 半径 - 0.5 保证外缘对齐框边。
-  void _arc(Canvas canvas, Paint paint, double cx, double cy,
-      double start, double sweep) {
+  void _arc(
+    Canvas canvas,
+    Paint paint,
+    double cx,
+    double cy,
+    double start,
+    double sweep,
+  ) {
     final rr = radius.x - _c;
     canvas.drawArc(
       Rect.fromCircle(center: Offset(cx, cy), radius: rr),
@@ -452,9 +479,7 @@ class _SeamDashes extends StatelessWidget {
     return SizedBox(
       height: height,
       width: 4,
-      child: CustomPaint(
-        painter: _SeamDashPainter(color: color),
-      ),
+      child: CustomPaint(painter: _SeamDashPainter(color: color)),
     );
   }
 }

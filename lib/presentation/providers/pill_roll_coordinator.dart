@@ -56,12 +56,13 @@ class PillRollCoordinator {
       if (!changed) continue;
       final projection = _ref.read(provider).projection;
       rolled[scope] = projection;
-      _syncLane(scope, projection);
+      syncLaneProjection(scope, projection);
     }
     return rolled;
   }
 
-  void _syncLane(String scope, String projection) {
+  /// 块库编辑等非 roll 变更也可调用，确保未挂载编辑器的 lane 同步到生成状态。
+  void syncLaneProjection(String scope, String projection) {
     if (scope == PillScopes.main) {
       _ref
           .read(generationParamsNotifierProvider.notifier)

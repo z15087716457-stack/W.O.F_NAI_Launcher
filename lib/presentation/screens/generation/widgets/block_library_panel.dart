@@ -10,7 +10,9 @@ import '../../../../data/repositories/prompt_block_repository.dart';
 import '../../../providers/layout_state_provider.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
+import '../../../providers/generation/generation_params_notifier.dart';
 import '../../../providers/tips_provider.dart';
+import '../../../utils/prompt_block_bundle_insertion.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
@@ -599,7 +601,12 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
       0,
       document.text.length,
     );
-    ref.read(lane.notifier).insertBlockAt(offset: offset, blockId: block.id);
+    insertPromptBlockBundle(
+      ref,
+      scope: target?.scope ?? widget.fallbackScope,
+      offset: offset,
+      blockId: block.id,
+    );
   }
 
   // ==================== 块右键菜单 ====================
@@ -748,6 +755,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
       context: context,
       block: block,
       folders: state.folders,
+      modelForTokenCount: ref.read(generationParamsNotifierProvider).model,
     );
     if (result == null || !mounted) return;
     try {
@@ -758,6 +766,9 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
               title: result.title,
               content: result.content,
               atoms: result.atoms,
+              negativeContent: result.negativeContent,
+              negativeAtoms: result.negativeAtoms,
+              generationSettings: result.generationSettings,
               color: result.color,
               iconName: result.iconName,
               thumbnail: result.thumbnail,

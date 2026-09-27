@@ -8873,6 +8873,50 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_blockContent => '正文';
 
   @override
+  String get promptBlockLibrary_basicPrompt => '基础提示词';
+
+  @override
+  String get promptBlockLibrary_generationSettings => '设置';
+
+  @override
+  String get promptBlockLibrary_settingsOptionalHint => '仅保存填写的参数；插入块后可手动应用设置。';
+
+  @override
+  String get promptBlockLibrary_notSpecified => '不指定';
+
+  @override
+  String get promptBlockLibrary_stepsLabel => '步数';
+
+  @override
+  String get promptBlockLibrary_cfgLabel => 'CFG Scale';
+
+  @override
+  String get promptBlockLibrary_widthLabel => '宽度';
+
+  @override
+  String get promptBlockLibrary_heightLabel => '高度';
+
+  @override
+  String get promptBlockLibrary_noiseScheduleLabel => '噪声调度';
+
+  @override
+  String get promptBlockLibrary_cfgRescaleLabel => 'CFG Rescale';
+
+  @override
+  String get promptBlockLibrary_invalidGenerationSettings =>
+      '请检查设置：步数 1–50、CFG 1–20、宽高成对且为 64 的倍数、CFG Rescale 0–1。';
+
+  @override
+  String get promptBlockLibrary_applySettings => '应用块设置';
+
+  @override
+  String get promptBlockLibrary_settingsApplied => '已应用块内生图设置';
+
+  @override
+  String get promptBlockLibrary_settingsIncompatible =>
+      '块内采样器与当前模型不兼容，请先调整块设置。';
+
+  @override
   String get promptBlockLibrary_atomInputHint => '输入文本，回车变成原子块';
 
   @override

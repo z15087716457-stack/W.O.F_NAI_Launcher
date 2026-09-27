@@ -94,6 +94,9 @@ class PromptBlockRepository {
     double thumbnailScale = 1.0,
     int? sortOrder,
     List<String>? atoms,
+    String negativeContent = '',
+    List<String>? negativeAtoms,
+    PromptBlockGenerationSettings? generationSettings,
   }) async {
     await _ensureFolderExists(folderId);
     final blocks = await _storage.getBlocks();
@@ -102,6 +105,9 @@ class PromptBlockRepository {
       content: content,
       folderId: folderId,
       atoms: atoms,
+      negativeContent: negativeContent,
+      negativeAtoms: negativeAtoms,
+      generationSettings: generationSettings,
       color: color,
       iconName: iconName,
       thumbnail: thumbnail,

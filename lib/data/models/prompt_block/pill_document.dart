@@ -200,9 +200,13 @@ class PillInstance {
     this.currentRoll,
     this.sequenceCursor = 0,
     this.lastRollCount,
+    this.useNegativeContent = false,
   });
 
   final String blockId;
+
+  /// 同一块的负面部分。旧存档缺键时仍解析原有正文。
+  final bool useNegativeContent;
   final bool enabled;
 
   /// 随机实例是否冻结当前 `currentRoll`；固定实例不使用此字段。
@@ -239,6 +243,7 @@ class PillInstance {
     String? currentRoll,
     int? sequenceCursor,
     int? lastRollCount,
+    bool? useNegativeContent,
   }) {
     return PillInstance(
       blockId: blockId ?? this.blockId,
@@ -249,11 +254,13 @@ class PillInstance {
       currentRoll: currentRoll ?? this.currentRoll,
       sequenceCursor: sequenceCursor ?? this.sequenceCursor,
       lastRollCount: lastRollCount ?? this.lastRollCount,
+      useNegativeContent: useNegativeContent ?? this.useNegativeContent,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'blockId': blockId,
+    if (useNegativeContent) 'useNegativeContent': true,
     'enabled': enabled,
     'locked': locked,
     'evolutionEnabled': evolutionEnabled,
@@ -268,6 +275,7 @@ class PillInstance {
     final rawCursor = json['sequenceCursor'];
     return PillInstance(
       blockId: json['blockId'] as String? ?? '',
+      useNegativeContent: json['useNegativeContent'] as bool? ?? false,
       enabled: json['enabled'] as bool? ?? true,
       locked: json['locked'] as bool? ?? false,
       evolutionEnabled: json['evolutionEnabled'] as bool? ?? false,
@@ -292,6 +300,7 @@ class PillInstance {
   bool operator ==(Object other) =>
       other is PillInstance &&
       other.blockId == blockId &&
+      other.useNegativeContent == useNegativeContent &&
       other.enabled == enabled &&
       other.locked == locked &&
       other.evolutionEnabled == evolutionEnabled &&
@@ -303,6 +312,7 @@ class PillInstance {
   @override
   int get hashCode => Object.hash(
     blockId,
+    useNegativeContent,
     enabled,
     locked,
     evolutionEnabled,

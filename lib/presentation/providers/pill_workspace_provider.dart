@@ -10,6 +10,7 @@ import '../../core/utils/pill_document_editor.dart';
 import '../../core/utils/pill_roll_engine.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import 'prompt_block_library_provider.dart';
+import 'pill_roll_coordinator.dart';
 import 'style_explore/deep_round_roll_guard.dart';
 
 /// 药丸工作区状态：文档 + 最近一次投影结果。
@@ -96,6 +97,15 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   @override
   PillWorkspaceState build(String scope) {
     activeScopes.add(scope);
+    // 块定义编辑后，未挂载的负面/角色编辑器也要立即更新投影。
+    ref.listen(promptBlockLibraryNotifierProvider, (_, __) {
+      final before = state.projection;
+      refreshProjection();
+      final after = state.projection;
+      if (before != after) {
+        ref.read(pillRollCoordinatorProvider).syncLaneProjection(arg, after);
+      }
+    });
     final removeGuardListener = ref
         .read(deepRoundRollGuardControllerProvider)
         .addListener(refreshProjection);
@@ -143,20 +153,28 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   ///
   /// 点击插入与拖入插入共用此入口：成功插入即给块 `useCount` +1
   /// （fire-and-forget，统计失败不阻断编辑）。
-  void insertBlockAt({required int offset, required String blockId}) {
+  void insertBlockAt({
+    required int offset,
+    required String blockId,
+    bool useNegativeContent = false,
+    bool countUse = true,
+  }) {
     _apply(
       PillDocumentEditor.insertBlock(
         state.document,
         offset: offset,
         blockId: blockId,
+        useNegativeContent: useNegativeContent,
       ),
     );
-    unawaited(
-      ref
-          .read(promptBlockLibraryNotifierProvider.notifier)
-          .incrementUseCount(blockId)
-          .onError((_, __) {}),
-    );
+    if (countUse) {
+      unawaited(
+        ref
+            .read(promptBlockLibraryNotifierProvider.notifier)
+            .incrementUseCount(blockId)
+            .onError((_, __) {}),
+      );
+    }
   }
 
   /// 文内拖动药丸：把 [marker] 的第 [occurrence] 次出现移到 [newOffset]。
@@ -301,7 +319,10 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         _hasGuardOverride(marker, instance)) {
       return;
     }
-    final atoms = _resolveBlockAtoms(instance.blockId);
+    final atoms = _resolveBlockAtoms(
+      instance.blockId,
+      negative: instance.useNegativeContent,
+    );
     if (atoms.isEmpty) return;
 
     final windowSize = (instance.lastRollCount ?? instance.settings.countMin)
@@ -418,12 +439,12 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   /// 物化的 `currentRoll`（投影永不 roll，物化只在文档变更点发生）。
   String? _resolveInstance(PillInstance instance) {
     if (instance.settings.hasRoll) return instance.currentRoll;
-    return _resolveBlockContent(instance.blockId);
+    return _resolveBlockContent(instance);
   }
 
   String? _resolveMarkerInstance(String marker, PillInstance instance) {
     if (instance.settings.hasRoll) return _effectiveRollFor(marker, instance);
-    return _resolveBlockContent(instance.blockId);
+    return _resolveBlockContent(instance);
   }
 
   bool _hasGuardOverride(String marker, PillInstance instance) {
@@ -432,21 +453,25 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         .hasOverride(arg, marker, instance: instance);
   }
 
-  String? _resolveBlockContent(String blockId) {
-    return ref
+  String? _resolveBlockContent(PillInstance instance) {
+    final block = ref
         .read(promptBlockLibraryNotifierProvider)
         .valueOrNull
-        ?.blockById(blockId)
-        ?.content;
+        ?.blockById(instance.blockId);
+    return instance.useNegativeContent
+        ? block?.negativeContent
+        : block?.content;
   }
 
   /// 抽取用原子集合（FEAT-79）：显式 atoms 优先，否则顶层逗号切分。
-  List<String> _resolveBlockAtoms(String blockId) {
+  List<String> _resolveBlockAtoms(String blockId, {bool negative = false}) {
     final block = ref
         .read(promptBlockLibraryNotifierProvider)
         .valueOrNull
         ?.blockById(blockId);
-    return block?.atomsOrSplit ?? const [];
+    return negative
+        ? block?.negativeAtomsOrSplit ?? const []
+        : block?.atomsOrSplit ?? const [];
   }
 
   /// 未锁定随机/顺序实例的兜底物化：`currentRoll == null` 时立即 roll 一次
@@ -479,7 +504,10 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   /// 供 `lastRollCount` 记账），其余模式游标与计数原样带回（固定/随机
   /// 实例不读这两个值）。
   (String, int, int) _rollFor(PillInstance instance) {
-    final atoms = _resolveBlockAtoms(instance.blockId);
+    final atoms = _resolveBlockAtoms(
+      instance.blockId,
+      negative: instance.useNegativeContent,
+    );
     if (instance.settings.mode == PillRollMode.sequential) {
       return PillRollEngine.rollInstanceSequential(
         settings: instance.settings,

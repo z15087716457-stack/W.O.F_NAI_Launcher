@@ -9190,6 +9190,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_blockContent => 'Content';
 
   @override
+  String get promptBlockLibrary_basicPrompt => 'Base Prompt';
+
+  @override
+  String get promptBlockLibrary_generationSettings => 'Settings';
+
+  @override
+  String get promptBlockLibrary_settingsOptionalHint =>
+      'Only filled parameters are saved. Apply settings manually after inserting the block.';
+
+  @override
+  String get promptBlockLibrary_notSpecified => 'Not specified';
+
+  @override
+  String get promptBlockLibrary_stepsLabel => 'Steps';
+
+  @override
+  String get promptBlockLibrary_cfgLabel => 'CFG Scale';
+
+  @override
+  String get promptBlockLibrary_widthLabel => 'Width';
+
+  @override
+  String get promptBlockLibrary_heightLabel => 'Height';
+
+  @override
+  String get promptBlockLibrary_noiseScheduleLabel => 'Noise Schedule';
+
+  @override
+  String get promptBlockLibrary_cfgRescaleLabel => 'CFG Rescale';
+
+  @override
+  String get promptBlockLibrary_invalidGenerationSettings =>
+      'Check settings: steps 1–50, CFG 1–20, paired dimensions in multiples of 64, and CFG Rescale 0–1.';
+
+  @override
+  String get promptBlockLibrary_applySettings => 'Apply block settings';
+
+  @override
+  String get promptBlockLibrary_settingsApplied =>
+      'Block generation settings applied';
+
+  @override
+  String get promptBlockLibrary_settingsIncompatible =>
+      'The block sampler is not supported by the current model. Edit the block settings first.';
+
+  @override
   String get promptBlockLibrary_atomInputHint =>
       'Type text, press Enter to make an atom';
 

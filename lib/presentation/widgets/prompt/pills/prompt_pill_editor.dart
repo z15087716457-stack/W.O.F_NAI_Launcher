@@ -7,6 +7,7 @@ import '../../../../data/models/character/character_prompt.dart';
 import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
+import '../../../utils/prompt_block_bundle_insertion.dart';
 import '../blocks/prompt_block_colors.dart';
 import '../blocks/prompt_block_drag_data.dart';
 import '../blocks/prompt_block_icons.dart';
@@ -397,10 +398,13 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     final offset = _offsetForGlobalPosition(globalPosition);
     final dragRef = data.instanceMarker;
     if (dragRef == null) {
-      ref
-          .read(_workspace.notifier)
-          .insertBlockAt(offset: offset, blockId: data.blockId);
-      _placeCaretAfter(offset + 1);
+      final inserted = insertPromptBlockBundle(
+        ref,
+        scope: widget.pillScope,
+        offset: offset,
+        blockId: data.blockId,
+      );
+      _placeCaretAfter(offset + inserted);
     } else {
       ref
           .read(_workspace.notifier)

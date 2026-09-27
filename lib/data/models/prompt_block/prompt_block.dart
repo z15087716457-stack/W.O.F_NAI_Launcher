@@ -6,6 +6,36 @@ import '../../../core/utils/pill_roll_engine.dart';
 part 'prompt_block.freezed.dart';
 part 'prompt_block.g.dart';
 
+/// 块可选的生图参数。null 表示不改变当前值；空对象等同于不带设置。
+@freezed
+class PromptBlockGenerationSettings with _$PromptBlockGenerationSettings {
+  const PromptBlockGenerationSettings._();
+
+  const factory PromptBlockGenerationSettings({
+    String? model,
+    int? width,
+    int? height,
+    int? steps,
+    double? scale,
+    String? sampler,
+    String? noiseSchedule,
+    double? cfgRescale,
+  }) = _PromptBlockGenerationSettings;
+
+  factory PromptBlockGenerationSettings.fromJson(Map<String, dynamic> json) =>
+      _$PromptBlockGenerationSettingsFromJson(json);
+
+  bool get isEmpty =>
+      model == null &&
+      width == null &&
+      height == null &&
+      steps == null &&
+      scale == null &&
+      sampler == null &&
+      noiseSchedule == null &&
+      cfgRescale == null;
+}
+
 /// 可复用的全局 Prompt 块。
 ///
 /// [content] 是完整纯文本，创建和更新时不得自动拆分、格式化或去重。
@@ -13,6 +43,7 @@ part 'prompt_block.g.dart';
 class PromptBlock with _$PromptBlock {
   const PromptBlock._();
 
+  @JsonSerializable(explicitToJson: true)
   const factory PromptBlock({
     /// 稳定唯一标识。
     required String id,
@@ -22,6 +53,16 @@ class PromptBlock with _$PromptBlock {
 
     /// 供 Prompt 展开的完整纯文本正文。
     required String content,
+
+    /// 与正面内容同属一个块；旧块缺键时为空。
+    @Default('') String negativeContent,
+
+    /// 负面原子列表；null 时按顶层逗号切分 [negativeContent]。
+    @JsonKey(includeIfNull: false) List<String>? negativeAtoms,
+
+    /// 可选生图参数，只在用户显式应用时写入当前生图状态。
+    @JsonKey(includeIfNull: false)
+    PromptBlockGenerationSettings? generationSettings,
 
     /// 显式原子列表（FEAT-79）：非 null 时随机池/顺序幕/注入池抽取
     /// 直接按它切，原子内逗号自由；null = 旧块或纯文本新建，
@@ -101,10 +142,16 @@ class PromptBlock with _$PromptBlock {
     String? sourceHash,
     DateTime? importedAt,
     List<String>? atoms,
+    String negativeContent = '',
+    List<String>? negativeAtoms,
+    PromptBlockGenerationSettings? generationSettings,
   }) {
     final created = createdAt ?? DateTime.now();
     return PromptBlock(
       atoms: atoms,
+      negativeContent: negativeContent,
+      negativeAtoms: negativeAtoms,
+      generationSettings: generationSettings,
       id: id ?? const Uuid().v4(),
       title: title.trim(),
       content: content,
@@ -131,10 +178,11 @@ class PromptBlock with _$PromptBlock {
 
   /// 内容预览（截取前 100 个字符），供补全建议与选择器列表展示。
   String get contentPreview {
-    if (content.length > 100) {
-      return '${content.substring(0, 100)}...';
+    final preview = content.isNotEmpty ? content : negativeContent;
+    if (preview.length > 100) {
+      return '${preview.substring(0, 100)}...';
     }
-    return content;
+    return preview;
   }
 
   /// 是否已挂预览图。
@@ -145,6 +193,9 @@ class PromptBlock with _$PromptBlock {
   /// 随机池/顺序幕/注入池统一从这取原子集合。
   List<String> get atomsOrSplit =>
       atoms ?? PillRollEngine.splitTopLevelAtoms(content);
+
+  List<String> get negativeAtomsOrSplit =>
+      negativeAtoms ?? PillRollEngine.splitTopLevelAtoms(negativeContent);
 
   /// 返回更新时间已刷新的副本，不改变其他字段。
   PromptBlock touched({DateTime? at}) =>

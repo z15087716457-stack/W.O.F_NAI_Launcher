@@ -16134,6 +16134,90 @@ abstract class AppLocalizations {
   /// **'Content'**
   String get promptBlockLibrary_blockContent;
 
+  /// No description provided for @promptBlockLibrary_basicPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Base Prompt'**
+  String get promptBlockLibrary_basicPrompt;
+
+  /// No description provided for @promptBlockLibrary_generationSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get promptBlockLibrary_generationSettings;
+
+  /// No description provided for @promptBlockLibrary_settingsOptionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only filled parameters are saved. Apply settings manually after inserting the block.'**
+  String get promptBlockLibrary_settingsOptionalHint;
+
+  /// No description provided for @promptBlockLibrary_notSpecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified'**
+  String get promptBlockLibrary_notSpecified;
+
+  /// No description provided for @promptBlockLibrary_stepsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps'**
+  String get promptBlockLibrary_stepsLabel;
+
+  /// No description provided for @promptBlockLibrary_cfgLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'CFG Scale'**
+  String get promptBlockLibrary_cfgLabel;
+
+  /// No description provided for @promptBlockLibrary_widthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Width'**
+  String get promptBlockLibrary_widthLabel;
+
+  /// No description provided for @promptBlockLibrary_heightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Height'**
+  String get promptBlockLibrary_heightLabel;
+
+  /// No description provided for @promptBlockLibrary_noiseScheduleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Noise Schedule'**
+  String get promptBlockLibrary_noiseScheduleLabel;
+
+  /// No description provided for @promptBlockLibrary_cfgRescaleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'CFG Rescale'**
+  String get promptBlockLibrary_cfgRescaleLabel;
+
+  /// No description provided for @promptBlockLibrary_invalidGenerationSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Check settings: steps 1–50, CFG 1–20, paired dimensions in multiples of 64, and CFG Rescale 0–1.'**
+  String get promptBlockLibrary_invalidGenerationSettings;
+
+  /// No description provided for @promptBlockLibrary_applySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply block settings'**
+  String get promptBlockLibrary_applySettings;
+
+  /// No description provided for @promptBlockLibrary_settingsApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Block generation settings applied'**
+  String get promptBlockLibrary_settingsApplied;
+
+  /// No description provided for @promptBlockLibrary_settingsIncompatible.
+  ///
+  /// In en, this message translates to:
+  /// **'The block sampler is not supported by the current model. Edit the block settings first.'**
+  String get promptBlockLibrary_settingsIncompatible;
+
   /// No description provided for @promptBlockLibrary_atomInputHint.
   ///
   /// In en, this message translates to:

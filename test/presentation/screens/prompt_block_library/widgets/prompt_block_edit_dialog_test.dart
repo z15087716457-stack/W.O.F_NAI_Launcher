@@ -5,9 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
+import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
 import 'package:nai_launcher/presentation/widgets/common/thumbnail_display.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/prompt_token_count_bar.dart';
 
 void main() {
   Directory? tempDir;
@@ -126,4 +128,67 @@ void main() {
     expect(captured!.thumbnailOffsetY, -0.2);
     expect(captured!.thumbnailScale, 1.3);
   });
+
+  testWidgets('tabbed editor saves negative text and selected settings', (
+    tester,
+  ) async {
+    PromptBlockEditResult? captured;
+    await tester.pumpWidget(
+      wrap(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () async {
+              captured = await PromptBlockEditDialog.show(
+                context: context,
+                block: makeBlock(),
+                folders: const [],
+                tokenCounterService: const PromptTokenCounterService(
+                  encoder: _FixedTokenEncoder(),
+                ),
+              );
+            },
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('正文'), findsNothing);
+    expect(find.text('基础提示词'), findsOneWidget);
+    expect(find.byKey(const Key('block-token-count-bar')), findsOneWidget);
+    final bar = tester.widget<PromptTokenCountBar>(
+      find.byKey(const Key('block-token-count-bar')),
+    );
+    expect(bar.usage.usedTokens, greaterThan(0));
+    expect(bar.usage.breakdown.first.label, '提示词');
+
+    await tester.tap(find.byKey(const Key('block-content-tab-1')));
+    await tester.pump();
+    await tester.enterText(
+      find.byKey(const Key('atom-editor-field')),
+      'bad anatomy',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('block-content-tab-2')));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('block-setting-steps')), '30');
+    await tester.enterText(find.byKey(const Key('block-setting-scale')), '5.5');
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+
+    expect(captured, isNotNull);
+    expect(captured!.content, 'content');
+    expect(captured!.negativeContent, 'bad anatomy');
+    expect(captured!.generationSettings?.steps, 30);
+    expect(captured!.generationSettings?.scale, 5.5);
+  });
+}
+
+class _FixedTokenEncoder implements PromptTokenEncoder {
+  const _FixedTokenEncoder();
+
+  @override
+  Future<int> countTokens(String text) async => text.isEmpty ? 0 : 7;
 }

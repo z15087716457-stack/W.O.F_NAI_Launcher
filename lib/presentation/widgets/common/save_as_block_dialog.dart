@@ -10,8 +10,8 @@ import 'app_toast.dart';
 
 /// 保存为块对话框
 ///
-/// 将图片元数据的 Prompt 原文保存为块库纯文本块。
-/// 正向 / 负向各自独立成块，负向块默认使用调色板红色便于识别。
+/// 将图片元数据的正面与负面提示词保存为同一个块。
+/// 仅负面块默认使用调色板红色便于识别。
 /// 传入 [image] 时顺带把当前图片存为块预览图（FEAT-2）。
 class SaveAsBlockDialog extends ConsumerStatefulWidget {
   /// 要保存的元数据
@@ -88,7 +88,7 @@ class _SaveAsBlockDialogState extends ConsumerState<SaveAsBlockDialog> {
     String? thumbnail;
     try {
       final notifier = ref.read(promptBlockLibraryNotifierProvider.notifier);
-      // 先落预览图：正向块优先挂图；只存负向时挂负向块。
+      // 预览图归这一个块所有。
       if (widget.image != null) {
         try {
           thumbnail = await savePromptBlockThumbnail(
@@ -98,23 +98,16 @@ class _SaveAsBlockDialogState extends ConsumerState<SaveAsBlockDialog> {
           thumbnail = null; // 读图/归一化失败不阻断存块本身
         }
       }
-      if (_includePositive) {
-        await notifier.createBlock(
-          title: name,
-          content: widget.metadata.prompt,
-          thumbnail: thumbnail,
-        );
-        thumbnail = null; // 已归正向块所有
-      }
-      if (_includeNegative) {
-        await notifier.createBlock(
-          title: '$name · ${l10n.saveBlock_negativeSuffix}',
-          content: widget.metadata.negativePrompt,
-          color: '#FFE53935',
-          thumbnail: thumbnail,
-        );
-        thumbnail = null;
-      }
+      await notifier.createBlock(
+        title: _includePositive
+            ? name
+            : '$name · ${l10n.saveBlock_negativeSuffix}',
+        content: _includePositive ? widget.metadata.prompt : '',
+        negativeContent: _includeNegative ? widget.metadata.negativePrompt : '',
+        color: _includePositive ? '#FF607D8B' : '#FFE53935',
+        thumbnail: thumbnail,
+      );
+      thumbnail = null;
       if (mounted) {
         AppToast.success(context, l10n.saveBlock_saved);
         Navigator.of(context).pop(true);

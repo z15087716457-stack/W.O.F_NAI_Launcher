@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/services/prompt_token_counter_service.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/utils/pill_roll_engine.dart';
@@ -14,12 +16,15 @@ import '../../../../core/utils/thumbnail_image_normalizer.dart';
 import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../../providers/prompt_block_library_provider.dart';
+import '../../../providers/generation/generation_params_notifier.dart';
 import '../../../widgets/common/app_toast.dart';
+import '../../../widgets/common/inset_shadow_container.dart';
 import '../../../widgets/common/themed_input.dart';
 import '../../../widgets/common/thumbnail_display.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
 import '../../../widgets/common/thumbnail_crop_dialog.dart';
+import '../../../widgets/prompt/prompt_token_count_bar.dart';
 import 'atom_list_editor.dart';
 import 'prompt_block_color_picker.dart';
 
@@ -28,6 +33,9 @@ class PromptBlockEditResult {
     required this.title,
     required this.content,
     required this.atoms,
+    required this.negativeContent,
+    required this.negativeAtoms,
+    this.generationSettings,
     required this.folderId,
     required this.color,
     required this.iconName,
@@ -39,6 +47,9 @@ class PromptBlockEditResult {
 
   final String title;
   final String content;
+  final String negativeContent;
+  final List<String> negativeAtoms;
+  final PromptBlockGenerationSettings? generationSettings;
 
   /// 显式原子列表（FEAT-79）：编辑器保存口径，空白段已剔除；
   /// [content] 恒等于 `atoms.join(', ')`。
@@ -63,6 +74,8 @@ class PromptBlockEditDialog extends StatefulWidget {
     this.initialTitle,
     this.initialContent,
     this.initialImageBytes,
+    this.modelForTokenCount = ImageModels.animeDiffusionV5Full,
+    this.tokenCounterService,
   });
 
   final PromptBlock? block;
@@ -78,6 +91,10 @@ class PromptBlockEditDialog extends StatefulWidget {
   /// 新建模式下的初始预览图字节；打开弹窗时落盘为块缩略图。
   final Uint8List? initialImageBytes;
 
+  /// 当前生成模型；块没有自带模型时用于编辑期的 token 上限。
+  final String modelForTokenCount;
+  final PromptTokenCounterService? tokenCounterService;
+
   static Future<PromptBlockEditResult?> show({
     required BuildContext context,
     PromptBlock? block,
@@ -86,6 +103,8 @@ class PromptBlockEditDialog extends StatefulWidget {
     String? initialTitle,
     String? initialContent,
     Uint8List? initialImageBytes,
+    String modelForTokenCount = ImageModels.animeDiffusionV5Full,
+    PromptTokenCounterService? tokenCounterService,
   }) {
     return showDialog<PromptBlockEditResult>(
       context: context,
@@ -96,6 +115,8 @@ class PromptBlockEditDialog extends StatefulWidget {
         initialTitle: initialTitle,
         initialContent: initialContent,
         initialImageBytes: initialImageBytes,
+        modelForTokenCount: modelForTokenCount,
+        tokenCounterService: tokenCounterService,
       ),
     );
   }
@@ -121,6 +142,7 @@ class PromptBlockEditDialog extends StatefulWidget {
       initialTitle: initialTitle,
       initialContent: initialContent,
       initialImageBytes: initialImageBytes,
+      modelForTokenCount: ref.read(generationParamsNotifierProvider).model,
     );
     if (result == null) return null;
     final block = await ref
@@ -129,6 +151,9 @@ class PromptBlockEditDialog extends StatefulWidget {
           title: result.title,
           content: result.content,
           atoms: result.atoms,
+          negativeContent: result.negativeContent,
+          negativeAtoms: result.negativeAtoms,
+          generationSettings: result.generationSettings,
           folderId: result.folderId,
           color: result.color,
           iconName: result.iconName,
@@ -150,6 +175,18 @@ class PromptBlockEditDialog extends StatefulWidget {
 class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
   late final TextEditingController _titleController;
   late final AtomListEditorController _atomController;
+  late final AtomListEditorController _negativeAtomController;
+  late final TextEditingController _stepsController;
+  late final TextEditingController _scaleController;
+  late final TextEditingController _widthController;
+  late final TextEditingController _heightController;
+  late final TextEditingController _cfgRescaleController;
+  String? _settingsModel;
+  String? _settingsSampler;
+  String? _settingsNoiseSchedule;
+  int _contentTab = 0;
+  late final Future<PromptTokenCounterService> _tokenService;
+  late Future<PromptTokenUsage?> _tokenUsage;
   late String? _folderId;
   late Color _selectedColor;
   late String? _selectedIconName;
@@ -182,6 +219,28 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
       widget.block?.atomsOrSplit ??
           PillRollEngine.splitTopLevelAtoms(widget.initialContent ?? ''),
     );
+    _negativeAtomController = AtomListEditorController(
+      widget.block?.negativeAtomsOrSplit ?? const [],
+    );
+    final settings = widget.block?.generationSettings;
+    _settingsModel = settings?.model;
+    _settingsSampler = settings?.sampler;
+    _settingsNoiseSchedule = settings?.noiseSchedule;
+    _stepsController = TextEditingController(text: settings?.steps?.toString());
+    _scaleController = TextEditingController(text: settings?.scale?.toString());
+    _widthController = TextEditingController(text: settings?.width?.toString());
+    _heightController = TextEditingController(
+      text: settings?.height?.toString(),
+    );
+    _cfgRescaleController = TextEditingController(
+      text: settings?.cfgRescale?.toString(),
+    );
+    _tokenService = widget.tokenCounterService == null
+        ? PromptTokenCounterService.createDefault()
+        : Future.value(widget.tokenCounterService);
+    _atomController.addListener(_refreshTokenUsage);
+    _negativeAtomController.addListener(_refreshTokenUsage);
+    _tokenUsage = _countSelectedTokens();
     _folderId = widget.block?.folderId ?? widget.initialFolderId;
     _selectedColor = promptBlockColorFromString(
       widget.block?.color ?? '#FF607D8B',
@@ -224,7 +283,42 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
     }
     _titleController.dispose();
     _atomController.dispose();
+    _negativeAtomController.dispose();
+    _stepsController.dispose();
+    _scaleController.dispose();
+    _widthController.dispose();
+    _heightController.dispose();
+    _cfgRescaleController.dispose();
     super.dispose();
+  }
+
+  void _refreshTokenUsage() {
+    _tokenUsage = _countSelectedTokens();
+    if (mounted) setState(() {});
+  }
+
+  Future<PromptTokenUsage?> _countSelectedTokens() async {
+    final negative = _contentTab == 1;
+    final text = (negative ? _negativeAtomController : _atomController).atoms
+        .join(', ');
+    final model = _settingsModel ?? widget.modelForTokenCount;
+    final limit = PromptTokenCounterService.tokenLimitForModel(model);
+    if (limit == null) return null;
+    final service = await _tokenService;
+    final tokens = await service.countTokensForTexts([text]);
+    return PromptTokenUsage(
+      usedTokens: tokens == 0 ? 0 : tokens + 1,
+      limit: limit,
+      breakdown: tokens == 0
+          ? const []
+          : [
+              PromptTokenBreakdownEntry(
+                label: negative ? '负面提示词' : '提示词',
+                tokens: tokens,
+              ),
+              const PromptTokenBreakdownEntry(label: '网页端校准', tokens: 1),
+            ],
+    );
   }
 
   @override
@@ -284,12 +378,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
               const SizedBox(height: 12),
               _buildThumbnailSection(theme, l10n),
               const SizedBox(height: 12),
-              Text(
-                l10n.promptBlockLibrary_blockContent,
-                style: theme.textTheme.labelLarge,
-              ),
-              const SizedBox(height: 6),
-              AtomListEditor(controller: _atomController, height: 260),
+              _buildContentPanel(theme, l10n),
               const SizedBox(height: 16),
               Text(
                 l10n.promptBlockLibrary_color,
@@ -355,6 +444,258 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
               : Text(l10n.common_save),
         ),
       ],
+    );
+  }
+
+  Widget _buildContentPanel(ThemeData theme, AppLocalizations l10n) {
+    return SizedBox(
+      height: 320,
+      child: InsetShadowContainer(
+        borderRadius: 8,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 4),
+              child: Row(
+                children: [
+                  _contentTabButton(0, l10n.promptBlockLibrary_basicPrompt),
+                  const SizedBox(width: 4),
+                  _contentTabButton(1, l10n.prompt_negativeTab),
+                  const SizedBox(width: 4),
+                  _contentTabButton(
+                    2,
+                    l10n.promptBlockLibrary_generationSettings,
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: IndexedStack(
+                index: _contentTab,
+                children: [
+                  AtomListEditor(
+                    key: const Key('block-positive-editor'),
+                    controller: _atomController,
+                    embedded: true,
+                  ),
+                  AtomListEditor(
+                    key: const Key('block-negative-editor'),
+                    controller: _negativeAtomController,
+                    embedded: true,
+                  ),
+                  _buildSettingsPanel(l10n),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 2, 10, 6),
+              child: FutureBuilder<PromptTokenUsage?>(
+                future: _tokenUsage,
+                builder: (context, snapshot) {
+                  final usage = snapshot.data;
+                  if (usage == null) {
+                    return const SizedBox(height: 14);
+                  }
+                  return PromptTokenCountBar(
+                    key: const Key('block-token-count-bar'),
+                    usage: usage,
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _contentTabButton(int index, String label) {
+    final theme = Theme.of(context);
+    final selected = _contentTab == index;
+    return InkWell(
+      key: Key('block-content-tab-$index'),
+      borderRadius: BorderRadius.circular(4),
+      onTap: () {
+        if (_contentTab == index) return;
+        setState(() => _contentTab = index);
+        _refreshTokenUsage();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        decoration: BoxDecoration(
+          color: selected ? theme.colorScheme.surfaceContainerHigh : null,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: selected
+                ? theme.colorScheme.onSurface
+                : theme.colorScheme.onSurfaceVariant,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsPanel(AppLocalizations l10n) {
+    final model = _settingsModel ?? widget.modelForTokenCount;
+    final samplers = Samplers.samplersForModel(model);
+    final modelChoices = {
+      ...ImageModels.allModels,
+      if (_settingsModel != null) _settingsModel!,
+    };
+    final samplerChoices = {
+      ...samplers,
+      if (_settingsSampler != null) _settingsSampler!,
+    };
+    return SingleChildScrollView(
+      key: const Key('block-generation-settings'),
+      padding: const EdgeInsets.fromLTRB(10, 6, 10, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.promptBlockLibrary_settingsOptionalHint,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 10),
+          DropdownButtonFormField<String?>(
+            key: const Key('block-setting-model'),
+            initialValue: _settingsModel,
+            decoration: InputDecoration(labelText: l10n.generation_model),
+            items: [
+              DropdownMenuItem<String?>(
+                value: null,
+                child: Text(l10n.promptBlockLibrary_notSpecified),
+              ),
+              for (final candidate in modelChoices)
+                DropdownMenuItem<String?>(
+                  value: candidate,
+                  child: Text(
+                    ImageModels.modelDisplayNames[candidate] ?? candidate,
+                  ),
+                ),
+            ],
+            onChanged: (value) {
+              setState(() {
+                _settingsModel = value;
+                if (_settingsSampler != null &&
+                    !Samplers.samplersForModel(
+                      value ?? widget.modelForTokenCount,
+                    ).contains(_settingsSampler)) {
+                  _settingsSampler = null;
+                }
+              });
+              _refreshTokenUsage();
+            },
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _settingNumberField(
+                  _stepsController,
+                  l10n.promptBlockLibrary_stepsLabel,
+                  key: const Key('block-setting-steps'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _settingNumberField(
+                  _scaleController,
+                  l10n.promptBlockLibrary_cfgLabel,
+                  key: const Key('block-setting-scale'),
+                  decimal: true,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _settingNumberField(
+                  _widthController,
+                  l10n.promptBlockLibrary_widthLabel,
+                  key: const Key('block-setting-width'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _settingNumberField(
+                  _heightController,
+                  l10n.promptBlockLibrary_heightLabel,
+                  key: const Key('block-setting-height'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          DropdownButtonFormField<String?>(
+            key: ValueKey('block-setting-sampler-$model'),
+            initialValue: _settingsSampler,
+            decoration: InputDecoration(labelText: l10n.generation_sampler),
+            items: [
+              DropdownMenuItem<String?>(
+                value: null,
+                child: Text(l10n.promptBlockLibrary_notSpecified),
+              ),
+              for (final sampler in samplerChoices)
+                DropdownMenuItem<String?>(
+                  value: sampler,
+                  child: Text(Samplers.samplerDisplayNames[sampler] ?? sampler),
+                ),
+            ],
+            onChanged: (value) => setState(() => _settingsSampler = value),
+          ),
+          const SizedBox(height: 10),
+          DropdownButtonFormField<String?>(
+            key: const Key('block-setting-noise-schedule'),
+            initialValue: _settingsNoiseSchedule,
+            decoration: InputDecoration(
+              labelText: l10n.promptBlockLibrary_noiseScheduleLabel,
+            ),
+            items: [
+              DropdownMenuItem<String?>(
+                value: null,
+                child: Text(l10n.promptBlockLibrary_notSpecified),
+              ),
+              for (final schedule in NoiseSchedules.all)
+                DropdownMenuItem<String?>(
+                  value: schedule,
+                  child: Text(
+                    NoiseSchedules.displayNames[schedule] ?? schedule,
+                  ),
+                ),
+            ],
+            onChanged: (value) =>
+                setState(() => _settingsNoiseSchedule = value),
+          ),
+          const SizedBox(height: 10),
+          _settingNumberField(
+            _cfgRescaleController,
+            l10n.promptBlockLibrary_cfgRescaleLabel,
+            key: const Key('block-setting-cfg-rescale'),
+            decimal: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _settingNumberField(
+    TextEditingController controller,
+    String label, {
+    Key? key,
+    bool decimal = false,
+  }) {
+    return TextField(
+      key: key,
+      controller: controller,
+      keyboardType: TextInputType.numberWithOptions(decimal: decimal),
+      decoration: InputDecoration(labelText: label, isDense: true),
     );
   }
 
@@ -542,6 +883,16 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
   /// 保存：外部新选图已在选取时落进块目录；此处只需清理被替换的旧图。
   Future<void> _save() async {
     if (_isSaving) return;
+    final PromptBlockGenerationSettings? generationSettings;
+    try {
+      generationSettings = _readGenerationSettings();
+    } on FormatException {
+      AppToast.warning(
+        context,
+        context.l10n.promptBlockLibrary_invalidGenerationSettings,
+      );
+      return;
+    }
     setState(() => _isSaving = true);
     try {
       final oldThumbnail = widget.block?.thumbnail;
@@ -552,6 +903,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
       _committedThumbnailPath = _thumbnailPath;
       if (!mounted) return;
       final atoms = _atomController.atoms;
+      final negativeAtoms = _negativeAtomController.atoms;
       Navigator.of(context).pop(
         PromptBlockEditResult(
           title: _titleController.text.trim(),
@@ -559,6 +911,9 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
           // 路径全部只读 content，抽取路径读显式 atoms。
           content: atoms.join(', '),
           atoms: atoms,
+          negativeContent: negativeAtoms.join(', '),
+          negativeAtoms: negativeAtoms,
+          generationSettings: generationSettings,
           folderId: _folderId,
           color: promptBlockColorToHex(_selectedColor),
           iconName: _selectedIconName,
@@ -571,6 +926,47 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  PromptBlockGenerationSettings? _readGenerationSettings() {
+    int? readInt(TextEditingController controller) {
+      final value = controller.text.trim();
+      if (value.isEmpty) return null;
+      return int.tryParse(value) ?? (throw const FormatException());
+    }
+
+    double? readDouble(TextEditingController controller) {
+      final value = controller.text.trim();
+      if (value.isEmpty) return null;
+      final parsed = double.tryParse(value);
+      if (parsed == null || !parsed.isFinite) throw const FormatException();
+      return parsed;
+    }
+
+    final steps = readInt(_stepsController);
+    final scale = readDouble(_scaleController);
+    final width = readInt(_widthController);
+    final height = readInt(_heightController);
+    final cfgRescale = readDouble(_cfgRescaleController);
+    if ((steps != null && (steps < 1 || steps > 50)) ||
+        (scale != null && (scale < 1 || scale > 20)) ||
+        (width == null) != (height == null) ||
+        (width != null && (width <= 0 || width % 64 != 0)) ||
+        (height != null && (height <= 0 || height % 64 != 0)) ||
+        (cfgRescale != null && (cfgRescale < 0 || cfgRescale > 1))) {
+      throw const FormatException();
+    }
+    final settings = PromptBlockGenerationSettings(
+      model: _settingsModel,
+      width: width,
+      height: height,
+      steps: steps,
+      scale: scale,
+      sampler: _settingsSampler,
+      noiseSchedule: _settingsNoiseSchedule,
+      cfgRescale: cfgRescale,
+    );
+    return settings.isEmpty ? null : settings;
   }
 
   String _sourceFileName(String sourcePath) {

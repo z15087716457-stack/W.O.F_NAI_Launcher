@@ -198,6 +198,9 @@ class _RecordingLibraryNotifier extends PromptBlockLibraryNotifier {
     double thumbnailScale = 1.0,
     int? sortOrder,
     List<String>? atoms,
+    String negativeContent = '',
+    List<String>? negativeAtoms,
+    PromptBlockGenerationSettings? generationSettings,
   }) async {
     created.add((
       title: title,

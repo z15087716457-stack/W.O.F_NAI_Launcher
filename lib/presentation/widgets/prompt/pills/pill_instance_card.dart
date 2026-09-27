@@ -5,6 +5,8 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
+import '../../../utils/prompt_block_generation_settings_applier.dart';
+import '../../common/app_toast.dart';
 import '../../common/thumbnail_display.dart';
 import '../blocks/prompt_block_colors.dart';
 import 'dna_icon.dart';
@@ -57,7 +59,11 @@ class PillInstanceCard extends ConsumerWidget {
     final mode = instance.settings.mode;
     final hasRoll = instance.settings.hasRoll;
     final effectiveRoll = workspaceNotifier.effectiveRollFor(marker);
-    final content = hasRoll ? (effectiveRoll ?? '') : (block?.content ?? '');
+    final content = hasRoll
+        ? (effectiveRoll ?? '')
+        : (instance.useNegativeContent
+              ? (block?.negativeContent ?? '')
+              : (block?.content ?? ''));
 
     return Material(
       color: theme.colorScheme.surfaceContainerHigh,
@@ -114,6 +120,28 @@ class PillInstanceCard extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 4),
+            if (block?.generationSettings case final settings?)
+              if (!settings.isEmpty)
+                TextButton.icon(
+                  key: const Key('pill-apply-block-settings'),
+                  icon: const Icon(Icons.tune, size: 17),
+                  label: Text(l10n.promptBlockLibrary_applySettings),
+                  onPressed: () {
+                    try {
+                      applyPromptBlockGenerationSettings(ref, settings);
+                      AppToast.success(
+                        context,
+                        l10n.promptBlockLibrary_settingsApplied,
+                      );
+                      onDismiss();
+                    } on StateError {
+                      AppToast.warning(
+                        context,
+                        l10n.promptBlockLibrary_settingsIncompatible,
+                      );
+                    }
+                  },
+                ),
             Row(
               children: [
                 // FEAT-46：模式专属钮分化——随机=重抽、顺序=←→ 步进；
