@@ -184,7 +184,7 @@ class AtomChip extends StatelessWidget {
   static const double _radius = 5;
 
   /// 缝高：行框竖边已是虚线，缝里只补一段同轴虚线柱，
-  /// 不用留太大；段 2+空 2，6px 恰两段。
+  /// 不用留太大；3px 线段 + 2px 空隙，6px 缝内能看到两段。
   static const double _seamGap = 6;
   static const EdgeInsets _pad = EdgeInsets.symmetric(
     horizontal: 8,
@@ -201,6 +201,9 @@ class AtomChip extends StatelessWidget {
     final style =
         textStyle ?? theme.textTheme.bodyMedium?.copyWith(height: 1.35);
     final color = borderColor ?? theme.colorScheme.outlineVariant;
+    // 蓝色只标记折行产生的开口；显式错误描边（孤儿原子）仍保持红色。
+    final breakColor =
+        borderColor ?? theme.colorScheme.primary.withValues(alpha: 0.8);
     return LayoutBuilder(
       builder: (context, constraints) {
         // WidgetSpan 子树拿 BoxConstraints(maxWidth: 段落宽)、不限高：
@@ -230,7 +233,7 @@ class AtomChip extends StatelessWidget {
         final children = <Widget>[];
         for (var i = 0; i < segs.length; i++) {
           if (i > 0) {
-            children.add(_SeamDashes(color: color, height: _seamGap));
+            children.add(_SeamDashes(color: breakColor, height: _seamGap));
           }
           children.add(
             _lineBox(
@@ -238,6 +241,7 @@ class AtomChip extends StatelessWidget {
               style,
               color,
               segs[i],
+              breakColor: breakColor,
               topRounded: i == 0,
               bottomRounded: i == segs.length - 1,
               solidLeft: i == 0,
@@ -312,6 +316,7 @@ class AtomChip extends StatelessWidget {
     TextStyle? style,
     Color color,
     _Seg seg, {
+    Color? breakColor,
     required bool topRounded,
     required bool bottomRounded,
     required bool solidLeft,
@@ -326,6 +331,7 @@ class AtomChip extends StatelessWidget {
       child: CustomPaint(
         foregroundPainter: _DashedBoxPainter(
           color: color,
+          dashedColor: breakColor ?? color,
           radius: r,
           topRounded: topRounded,
           bottomRounded: bottomRounded,
@@ -350,10 +356,11 @@ class AtomChip extends StatelessWidget {
 /// 行框描边（静拍板·实线只留首尾）：横边恒实线；左右竖边
 /// 由 [solidLeft]/[solidRight] 决定实线或虚线。四角仅当
 /// 相邻两边都是实线时画 [radius] 圆弧（虚线边不能转弧，
-/// 落直角）。1px 线以边中线居中（0.5 偏移）。
+/// 落直角）。普通描边 1px，折行虚线 1.5px；线心以 0.5 偏移。
 class _DashedBoxPainter extends CustomPainter {
   _DashedBoxPainter({
     required this.color,
+    required this.dashedColor,
     required this.radius,
     required this.topRounded,
     required this.bottomRounded,
@@ -362,13 +369,14 @@ class _DashedBoxPainter extends CustomPainter {
   });
 
   final Color color;
+  final Color dashedColor;
   final Radius radius;
   final bool topRounded;
   final bool bottomRounded;
   final bool solidLeft;
   final bool solidRight;
 
-  static const double _dash = 2;
+  static const double _dash = 3;
   static const double _gap = 2;
   static const double _c = 0.5;
 
@@ -378,6 +386,10 @@ class _DashedBoxPainter extends CustomPainter {
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
+    final dashedPaint = Paint()
+      ..color = dashedColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
     final w = size.width;
     final h = size.height;
     final r = radius.x;
@@ -401,8 +413,15 @@ class _DashedBoxPainter extends CustomPainter {
     if (bl > 0) {
       _arc(canvas, paint, bl, h - bl, math.pi / 2, math.pi / 2);
     }
-    _edgeV(canvas, paint, _c, tl, h - bl, solidLeft);
-    _edgeV(canvas, paint, w - _c, tr, h - br, solidRight);
+    _edgeV(canvas, solidLeft ? paint : dashedPaint, _c, tl, h - bl, solidLeft);
+    _edgeV(
+      canvas,
+      solidRight ? paint : dashedPaint,
+      w - _c,
+      tr,
+      h - br,
+      solidRight,
+    );
   }
 
   /// 竖边：实线一条到底；虚线首段顶 y1（接上横边/弧端）、
@@ -450,6 +469,7 @@ class _DashedBoxPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _DashedBoxPainter oldDelegate) =>
       oldDelegate.color != color ||
+      oldDelegate.dashedColor != dashedColor ||
       oldDelegate.radius != radius ||
       oldDelegate.topRounded != topRounded ||
       oldDelegate.bottomRounded != bottomRounded ||
@@ -489,7 +509,7 @@ class _SeamDashPainter extends CustomPainter {
 
   final Color color;
 
-  static const double _dash = 2;
+  static const double _dash = 3;
   static const double _gap = 2;
 
   @override
@@ -497,7 +517,7 @@ class _SeamDashPainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
+      ..strokeWidth = 1.5;
     const x = 2.5;
     var y = 0.0;
     while (y < size.height) {
