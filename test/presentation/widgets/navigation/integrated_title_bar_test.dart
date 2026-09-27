@@ -189,4 +189,70 @@ void main() {
       },
     );
   }
+  for (final width in [400.0, 600.0, 1000.0]) {
+    testWidgets('full-height canvas keeps only top toolbar clear at $width', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(Size(width, 600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      var taps = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: IntegratedTitleBarShell(
+            accessoryWidth: 88,
+            accessory: const SizedBox(),
+            child: Scaffold(
+              body: Row(
+                children: [
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        const Positioned.fill(
+                          child: ColoredBox(
+                            key: Key('canvas-area'),
+                            color: Colors.blue,
+                          ),
+                        ),
+                        Positioned.fill(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: WindowSafeTopToolbar(
+                              outsideRightWidth: 56,
+                              child: SizedBox(
+                                width: 300,
+                                height: 40,
+                                child: TextButton(
+                                  key: const Key('canvas-top-tool'),
+                                  onPressed: () => taps++,
+                                  child: const Text('tool'),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 40),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final canvas = tester.getRect(find.byKey(const Key('canvas-area')));
+      final tool = tester.getRect(find.byKey(const Key('canvas-top-tool')));
+      expect(canvas.top, 0);
+      expect(canvas.height, 600);
+      expect(tool.overlaps(Rect.fromLTWH(width - 226, 0, 226, 36)), isFalse);
+      if (width == 1000) {
+        expect(tool.top, 16);
+        expect(tool.center.dx, canvas.center.dx);
+      }
+      await tester.tap(find.byKey(const Key('canvas-top-tool')));
+      expect(taps, 1);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

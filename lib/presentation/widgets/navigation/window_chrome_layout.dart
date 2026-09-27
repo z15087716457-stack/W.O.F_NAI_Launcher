@@ -230,3 +230,70 @@ class WindowPanelHeader extends StatelessWidget {
     );
   }
 }
+
+/// Reserve only the part of the caption cluster that reaches this canvas.
+/// Keep a centered toolbar unless it actually overlaps; the image stays full size.
+class WindowSafeTopToolbar extends StatelessWidget {
+  const WindowSafeTopToolbar({
+    super.key,
+    required this.child,
+    required this.outsideRightWidth,
+    this.topInset = 16,
+  });
+  final Widget child;
+  final double outsideRightWidth;
+  final double topInset;
+
+  @override
+  Widget build(BuildContext context) {
+    final active = WindowChromeScope.activeOf(context);
+    return CustomSingleChildLayout(
+      delegate: _WindowToolbarLayout(
+        rightOverlap: active
+            ? (WindowChromeScope.reservedWidthOf(context) - outsideRightWidth)
+                  .clamp(0.0, double.infinity)
+            : 0,
+        topOverlap: active
+            ? (WindowChromeScope.heightOf(context) - topInset).clamp(
+                0.0,
+                double.infinity,
+              )
+            : 0,
+      ),
+      child: child,
+    );
+  }
+}
+
+class _WindowToolbarLayout extends SingleChildLayoutDelegate {
+  const _WindowToolbarLayout({
+    required this.rightOverlap,
+    required this.topOverlap,
+  });
+  final double rightOverlap;
+  final double topOverlap;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      constraints.loosen();
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final centeredX = (size.width - childSize.width) / 2;
+    final safeRight = size.width - rightOverlap;
+    if (topOverlap <= 0 || centeredX + childSize.width <= safeRight) {
+      return Offset(centeredX, 0);
+    }
+    if (childSize.width <= safeRight) {
+      return Offset(safeRight - childSize.width, 0);
+    }
+    // A narrow canvas keeps the toolbar below the captions, without shrinking
+    // the image viewport or reducing the toolbar's touch targets.
+    return Offset(centeredX, topOverlap + 4);
+  }
+
+  @override
+  bool shouldRelayout(_WindowToolbarLayout oldDelegate) =>
+      rightOverlap != oldDelegate.rightOverlap ||
+      topOverlap != oldDelegate.topOverlap;
+}

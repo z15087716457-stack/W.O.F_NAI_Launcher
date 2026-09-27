@@ -2,7 +2,6 @@ import '../../../../helpers/studio_capture_fonts.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_welcome.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/right_panel.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
-import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/widgets/branding/brand_entry_scene.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'dart:io';
@@ -185,9 +184,7 @@ void main() {
                     body: Row(
                       children: [
                         WebLeftPanel(negativeModeNotifier: mode),
-                        const Expanded(
-                          child: WindowPaneInset(child: GenerationWelcome()),
-                        ),
+                        const Expanded(child: GenerationWelcome()),
                         const RightPanel(),
                       ],
                     ),
@@ -208,6 +205,7 @@ void main() {
         expect(tester.getTopLeft(find.byType(WebLeftPanel)).dy, 0);
         expect(find.text('TIP'), findsOneWidget);
         final welcome = find.byType(GenerationWelcome);
+        expect(tester.getTopLeft(welcome).dy, 0);
         final tipBefore = tester
             .widgetList<Text>(
               find.descendant(of: welcome, matching: find.byType(Text)),

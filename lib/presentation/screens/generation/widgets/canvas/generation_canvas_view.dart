@@ -1,3 +1,5 @@
+import '../../../../widgets/navigation/window_chrome_layout.dart';
+import '../../../../providers/layout_state_provider.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -653,6 +655,10 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       child: child,
     );
 
+    final panes = ref.watch(layoutStateNotifierProvider);
+    final rightPaneWidth = panes.rightPanelExpanded
+        ? panes.rightPanelWidth
+        : 40.0;
     // 三个主工具条固定在中央画布视口边缘，位置与尺寸均不经过相机变换。
     // 操作对象仍是当前焦点图；图片移出视口时工具条也保持可见。
     return Positioned.fill(
@@ -660,8 +666,8 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         padding: const EdgeInsets.all(12),
         child: Stack(
           children: [
-            Align(
-              alignment: Alignment.topCenter,
+            WindowSafeTopToolbar(
+              outsideRightWidth: rightPaneWidth + 16,
               child: guarded(
                 CanvasEdgeToolbar(
                   zone: CanvasToolbarZone.top,
