@@ -233,7 +233,8 @@ class AtomChip extends StatelessWidget {
         final children = <Widget>[];
         for (var i = 0; i < segs.length; i++) {
           if (i > 0) {
-            children.add(_SeamDashes(color: breakColor, height: _seamGap));
+            // 行间连接缝留灰色，蓝色只落在各行框的开口内。
+            children.add(_SeamDashes(color: color, height: _seamGap));
           }
           children.add(
             _lineBox(
