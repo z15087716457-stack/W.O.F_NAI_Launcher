@@ -12,9 +12,11 @@ class WindowChromeScope extends InheritedWidget {
     required super.child,
     this.enabled = true,
     this.extraWidth = 0,
+    this.captionHeight = height,
   });
   final bool enabled;
   final double extraWidth;
+  final double captionHeight;
 
   static const height = 36.0;
   static const controlsWidth = 138.0;
@@ -25,6 +27,12 @@ class WindowChromeScope extends InheritedWidget {
           ?.enabled ??
       false;
 
+  static double heightOf(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<WindowChromeScope>()
+          ?.captionHeight ??
+      height;
+
   static double reservedWidthOf(BuildContext context) =>
       controlsWidth +
       (context
@@ -34,7 +42,9 @@ class WindowChromeScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(WindowChromeScope oldWidget) =>
-      enabled != oldWidget.enabled || extraWidth != oldWidget.extraWidth;
+      enabled != oldWidget.enabled ||
+      extraWidth != oldWidget.extraWidth ||
+      captionHeight != oldWidget.captionHeight;
 }
 
 /// An intentionally empty region: no text fields or buttons can become drag
@@ -75,27 +85,35 @@ class WindowHeader extends StatelessWidget {
     required this.child,
     this.enabled = true,
     this.minimumInlineWidth = 620,
+    this.decoration,
   });
   final Widget child;
   final bool enabled;
   final double minimumInlineWidth;
+  final Decoration? decoration;
 
   @override
   Widget build(BuildContext context) {
-    if (!enabled || !WindowChromeScope.activeOf(context)) return child;
+    if (!enabled || !WindowChromeScope.activeOf(context)) {
+      return decoration == null
+          ? child
+          : Container(decoration: decoration!, child: child);
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         final reserved = WindowChromeScope.reservedWidthOf(context);
         final narrow =
             constraints.maxWidth <
             minimumInlineWidth + reserved - WindowChromeScope.controlsWidth;
-        return ColoredBox(
-          color: Theme.of(context).colorScheme.surface,
+        return Container(
+          decoration:
+              decoration ??
+              BoxDecoration(color: Theme.of(context).colorScheme.surface),
           child: Stack(
             children: [
               Padding(
                 padding: narrow
-                    ? const EdgeInsets.only(top: WindowChromeScope.height)
+                    ? EdgeInsets.only(top: WindowChromeScope.heightOf(context))
                     : EdgeInsets.only(
                         right: reserved + WindowChromeScope.dragWidth,
                       ),
@@ -106,7 +124,7 @@ class WindowHeader extends StatelessWidget {
                 left: narrow ? 0 : null,
                 right: reserved,
                 width: narrow ? null : WindowChromeScope.dragWidth,
-                height: WindowChromeScope.height,
+                height: WindowChromeScope.heightOf(context),
                 child: const WindowDragArea(),
               ),
             ],
@@ -131,15 +149,15 @@ class WindowPaneInset extends StatelessWidget {
       fit: StackFit.passthrough,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: WindowChromeScope.height),
+          padding: EdgeInsets.only(top: WindowChromeScope.heightOf(context)),
           child: child,
         ),
-        const Positioned(
+        Positioned(
           top: 0,
           left: 0,
           right: 0,
-          height: WindowChromeScope.height,
-          child: WindowDragArea(),
+          height: WindowChromeScope.heightOf(context),
+          child: const WindowDragArea(),
         ),
       ],
     );

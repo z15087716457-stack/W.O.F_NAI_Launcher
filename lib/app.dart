@@ -223,6 +223,7 @@ class _RouteAwareTitleBar extends StatefulWidget {
 
 class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
   late bool _immersive = _resolve();
+  late double _captionHeight = _resolveCaptionHeight();
   bool _refreshQueued = false;
   bool _updateDialogOpen = false;
 
@@ -239,6 +240,7 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
       oldWidget.router.routerDelegate.removeListener(_onRouteChanged);
       widget.router.routerDelegate.addListener(_onRouteChanged);
       _immersive = _resolve();
+      _captionHeight = _resolveCaptionHeight();
     }
   }
 
@@ -253,6 +255,12 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
     if (config.isEmpty) return widget.initialImmersive();
     return config.uri.path == AppRoutes.login;
   }
+
+  double _resolveCaptionHeight() =>
+      widget.router.routerDelegate.currentConfiguration.uri.path ==
+          AppRoutes.localGallery
+      ? 62
+      : 36;
 
   void _onRouteChanged() {
     final building =
@@ -272,7 +280,13 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
   void _refresh() {
     if (!mounted) return;
     final next = _resolve();
-    if (next != _immersive) setState(() => _immersive = next);
+    final height = _resolveCaptionHeight();
+    if (next != _immersive || height != _captionHeight) {
+      setState(() {
+        _immersive = next;
+        _captionHeight = height;
+      });
+    }
   }
 
   Future<void> _showUpdate() async {
@@ -291,6 +305,7 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
   Widget build(BuildContext context) {
     return UpdateAwareWindowShell(
       immersive: _immersive,
+      captionHeight: _captionHeight,
       onShowUpdate: _showUpdate,
       onToggleTheme: widget.onToggleTheme,
       child: widget.child,

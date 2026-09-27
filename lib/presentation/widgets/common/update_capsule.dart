@@ -21,36 +21,41 @@ class UpdateCapsule extends StatelessWidget {
     return ColoredBox(
       color: scheme.surface,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-        child: Material(
-          color: dark ? const Color(0xFF392B1A) : const Color(0xFFFFEDD5),
-          borderRadius: BorderRadius.circular(20),
-          child: InkWell(
-            key: const Key('window-update-capsule'),
-            borderRadius: BorderRadius.circular(20),
-            onTap: onPressed,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.arrow_upward_rounded,
-                      size: 14,
-                      color: foreground,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Center(
+          child: SizedBox(
+            height: 26,
+            child: Material(
+              color: dark ? const Color(0xFF392B1A) : const Color(0xFFFFEDD5),
+              borderRadius: BorderRadius.circular(20),
+              child: InkWell(
+                key: const Key('window-update-capsule'),
+                borderRadius: BorderRadius.circular(20),
+                onTap: onPressed,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.arrow_upward_rounded,
+                          size: 14,
+                          color: foreground,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          context.l10n.updateCapsuleLabel,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: foreground,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      context.l10n.updateCapsuleLabel,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: foreground,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -70,11 +75,13 @@ class UpdateAwareWindowShell extends ConsumerWidget {
     required this.onShowUpdate,
     this.immersive = false,
     this.onToggleTheme,
+    this.captionHeight = IntegratedTitleBarShell.barHeight,
   });
   final Widget child;
   final VoidCallback onShowUpdate;
   final bool immersive;
   final VoidCallback? onToggleTheme;
+  final double captionHeight;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -83,6 +90,7 @@ class UpdateAwareWindowShell extends ConsumerWidget {
     );
     return IntegratedTitleBarShell(
       immersive: immersive,
+      captionHeight: captionHeight,
       onToggleTheme: onToggleTheme,
       accessoryWidth: available ? UpdateCapsule.width : 0,
       accessory: available ? UpdateCapsule(onPressed: onShowUpdate) : null,

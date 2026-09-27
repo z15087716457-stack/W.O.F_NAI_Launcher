@@ -1,3 +1,7 @@
+import 'package:nai_launcher/presentation/widgets/common/update_capsule.dart';
+import 'package:nai_launcher/presentation/widgets/bulk_action_bar.dart';
+import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_category_provider.dart';
 import 'package:nai_launcher/presentation/screens/vibe_library/vibe_library_screen.dart';
@@ -210,7 +214,18 @@ void main() {
                 supportedLocales: AppLocalizations.supportedLocales,
                 home: RepaintBoundary(
                   key: boundary,
-                  child: IntegratedTitleBarShell(child: screen),
+                  child: IntegratedTitleBarShell(
+                    captionHeight: name == 'gallery' ? 62 : 36,
+                    accessoryWidth:
+                        name == 'gallery' && brightness == Brightness.dark
+                        ? UpdateCapsule.width
+                        : 0,
+                    accessory:
+                        name == 'gallery' && brightness == Brightness.dark
+                        ? UpdateCapsule(onPressed: () {})
+                        : null,
+                    child: screen,
+                  ),
                 ),
               ),
             ),
@@ -226,6 +241,54 @@ void main() {
               ? const Color(0xFF111111)
               : Colors.white,
         );
+        if (name == 'gallery') {
+          final header = tester.getRect(find.byType(WindowHeader));
+          final captions = find.byKey(const Key('window-caption-controls'));
+          final minimize = find.descendant(
+            of: captions,
+            matching: find.byIcon(Icons.remove),
+          );
+          final search = find.byType(TextField).first;
+          if (brightness == Brightness.dark) {
+            final capsule = find.byKey(const Key('window-update-capsule'));
+            expect(tester.getCenter(capsule).dy, tester.getCenter(minimize).dy);
+            expect(tester.getSize(capsule).height, 26);
+            expect(
+              tester.getRect(capsule).overlaps(tester.getRect(search)),
+              isFalse,
+            );
+          }
+          expect(
+            tester.getCenter(minimize).dy,
+            closeTo(tester.getCenter(search).dy, .1),
+          );
+          expect(header.right, tester.getRect(captions).right);
+          await tester.runAsync(() async {
+            final image =
+                await (boundary.currentContext!.findRenderObject()!
+                        as RenderRepaintBoundary)
+                    .toImage();
+            final data = (await image.toByteData(
+              format: ui.ImageByteFormat.rawRgba,
+            ))!;
+            int pixel(int x, int y) =>
+                data.getUint32((y * image.width + x) * 4);
+            final y = header.bottom.floor() - 1;
+            final line = pixel(header.left.ceil() + 4, y);
+            expect(
+              pixel(header.right.floor() - 4, y),
+              line,
+              reason: 'the bottom rule continues beneath the caption reserve',
+            );
+            expect(
+              pixel(header.right.floor() - 4, y + 2),
+              isNot(line),
+              reason:
+                  'the rule is visible rather than both samples being background',
+            );
+            image.dispose();
+          });
+        }
         // Vibe retains its existing muted zero counts / empty-state caption.
         // Its new coverage here checks window chrome geometry and overflow.
         if (brightness == Brightness.light && name != 'vibe') {
@@ -254,6 +317,25 @@ void main() {
             await file.writeAsBytes(data.buffer.asUint8List());
             image.dispose();
           });
+        }
+        if (name == 'gallery') {
+          final container = ProviderScope.containerOf(
+            tester.element(find.byWidget(screen)),
+          );
+          container
+              .read(localGallerySelectionNotifierProvider.notifier)
+              .enter();
+          await tester.pumpAndSettle();
+          final bulk = tester.getRect(find.byType(BulkActionBar));
+          final captions = tester.getRect(
+            find.byKey(const Key('window-caption-controls')),
+          );
+          expect(bulk.height, 62);
+          expect(bulk.center.dy, captions.center.dy);
+          expect(tester.takeException(), isNull);
+          container.read(localGallerySelectionNotifierProvider.notifier).exit();
+          await tester.pumpAndSettle();
+          expect(find.byType(TextField), findsWidgets);
         }
       });
     }

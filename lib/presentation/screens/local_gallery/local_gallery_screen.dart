@@ -224,6 +224,12 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
                 child: Column(
                   children: [
                     WindowHeader(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        border: Border(
+                          bottom: BorderSide(color: theme.dividerColor),
+                        ),
+                      ),
                       child: _buildToolbarOrSelectionBar(state, bulkOpState),
                     ),
                     Expanded(child: _buildBody(state, columns, itemWidth)),
@@ -726,6 +732,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     BulkOperationState bulkOpState,
   ) {
     return LocalGalleryToolbar(
+      framed: false,
       onRefresh: () =>
           ref.read(localGalleryNotifierProvider.notifier).refresh(),
       onEnterSelectionMode: () =>

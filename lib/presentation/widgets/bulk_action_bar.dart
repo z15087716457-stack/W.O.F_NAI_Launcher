@@ -49,7 +49,10 @@ class BulkActionBar extends StatelessWidget {
     this.deselectAllLabel,
     this.selectAllAvailableLabel,
     this.deselectAllAvailableLabel,
+    this.framed = true,
   });
+
+  final bool framed;
 
   @override
   Widget build(BuildContext context) {
@@ -62,19 +65,26 @@ class BulkActionBar extends StatelessWidget {
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: BoxDecoration(
-            color: isDark
-                ? theme.colorScheme.surface.withValues(alpha: 0.9)
-                : theme.colorScheme.surface.withValues(alpha: 0.95),
-            border: Border(
-              bottom: BorderSide(
-                color: theme.dividerColor.withValues(
-                  alpha: isDark ? 0.15 : 0.2,
-                ),
-              ),
-            ),
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: framed ? 10 : 0,
           ),
+          constraints: framed ? null : const BoxConstraints(minHeight: 62),
+          alignment: framed ? null : Alignment.centerLeft,
+          decoration: framed
+              ? BoxDecoration(
+                  color: isDark
+                      ? theme.colorScheme.surface.withValues(alpha: 0.9)
+                      : theme.colorScheme.surface.withValues(alpha: 0.95),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: theme.dividerColor.withValues(
+                        alpha: isDark ? 0.15 : 0.2,
+                      ),
+                    ),
+                  ),
+                )
+              : null,
           child: LayoutBuilder(
             builder: (context, constraints) {
               final compactActions = constraints.maxWidth < 900;

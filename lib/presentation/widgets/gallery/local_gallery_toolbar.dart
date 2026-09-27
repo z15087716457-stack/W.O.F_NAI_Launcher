@@ -118,7 +118,10 @@ class LocalGalleryToolbar extends ConsumerStatefulWidget {
     this.showCategoryPanel = true,
     this.onToggleCategoryPanel,
     this.enableSearchAutocomplete = true,
+    this.framed = true,
   });
+
+  final bool framed;
 
   @override
   ConsumerState<LocalGalleryToolbar> createState() =>
@@ -285,6 +288,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
           selectionState.selectedIds.length == selectableResultCount;
 
       return BulkActionBar(
+        framed: widget.framed,
         selectedCount: selectionState.selectedIds.length,
         isAllSelected: isCurrentPageSelected,
         isAllAvailableSelected: isAllResultSelected,
@@ -371,18 +375,27 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          constraints: const BoxConstraints(minHeight: 62),
-          decoration: BoxDecoration(
-            color: isDark
-                ? theme.colorScheme.surfaceContainerHigh.withValues(alpha: 0.9)
-                : theme.colorScheme.surface.withValues(alpha: 0.8),
-            border: Border(
-              bottom: BorderSide(
-                color: theme.dividerColor.withValues(alpha: isDark ? 0.2 : 0.3),
-              ),
-            ),
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: widget.framed ? 12 : 11,
           ),
+          constraints: const BoxConstraints(minHeight: 62),
+          decoration: widget.framed
+              ? BoxDecoration(
+                  color: isDark
+                      ? theme.colorScheme.surfaceContainerHigh.withValues(
+                          alpha: 0.9,
+                        )
+                      : theme.colorScheme.surface.withValues(alpha: 0.8),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: theme.dividerColor.withValues(
+                        alpha: isDark ? 0.2 : 0.3,
+                      ),
+                    ),
+                  ),
+                )
+              : null,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

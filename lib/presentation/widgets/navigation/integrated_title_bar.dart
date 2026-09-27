@@ -19,11 +19,13 @@ class IntegratedTitleBarShell extends StatefulWidget {
     this.onToggleTheme,
     this.accessory,
     this.accessoryWidth = 0,
+    this.captionHeight = barHeight,
   });
 
   final Widget child;
   final Widget? accessory;
   final double accessoryWidth;
+  final double captionHeight;
   final bool immersive;
 
   /// 沉浸模式下明暗切换按钮的回调；为 null 时不显示该按钮。
@@ -55,6 +57,9 @@ class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
           child: WindowChromeScope(
             enabled: !widget.immersive,
             extraWidth: widget.immersive ? 0 : widget.accessoryWidth,
+            captionHeight: widget.immersive
+                ? IntegratedTitleBarShell.barHeight
+                : widget.captionHeight,
             child: widget.child,
           ),
         ),
@@ -63,13 +68,16 @@ class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
             top: 0,
             right: IntegratedTitleBarShell.reservedRight,
             width: widget.accessoryWidth,
-            height: IntegratedTitleBarShell.barHeight,
+            height: widget.captionHeight,
             child: widget.accessory!,
           ),
         Positioned(
           top: 0,
           right: 0,
           child: _TitleBar(
+            height: widget.immersive
+                ? IntegratedTitleBarShell.barHeight
+                : widget.captionHeight,
             immersive: widget.immersive,
             onToggleTheme: widget.onToggleTheme,
           ),
@@ -80,7 +88,13 @@ class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
 }
 
 class _TitleBar extends StatefulWidget {
-  const _TitleBar({required this.immersive, this.onToggleTheme});
+  const _TitleBar({
+    required this.immersive,
+    required this.height,
+    this.onToggleTheme,
+  });
+
+  final double height;
 
   final bool immersive;
   final VoidCallback? onToggleTheme;
@@ -198,11 +212,13 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
     final colorScheme = Theme.of(context).colorScheme;
     final captionButtons = <Widget>[
       _CaptionButton(
+        height: widget.height,
         icon: Icons.remove,
         tooltip: l10n?.titleBar_minimize ?? 'Minimize',
         onTap: () => _safeWindowCall(windowManager.minimize),
       ),
       _CaptionButton(
+        height: widget.height,
         icon: _isMaximized ? Icons.filter_none : Icons.crop_square,
         iconSize: _isMaximized ? 14 : 15,
         tooltip: _isMaximized
@@ -213,6 +229,7 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
         ),
       ),
       _CaptionButton(
+        height: widget.height,
         icon: Icons.close,
         tooltip: l10n?.titleBar_close ?? 'Close',
         isClose: true,
@@ -226,7 +243,7 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
       color: colorScheme.surface,
       child: SizedBox(
         key: const Key('window-caption-controls'),
-        height: IntegratedTitleBarShell.barHeight,
+        height: widget.height,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -265,6 +282,7 @@ class _CaptionButton extends StatefulWidget {
     this.iconSize = 16,
     this.isClose = false,
     this.width = IntegratedTitleBarShell.buttonWidth,
+    this.height = IntegratedTitleBarShell.barHeight,
   });
 
   final IconData icon;
@@ -273,6 +291,7 @@ class _CaptionButton extends StatefulWidget {
   final double iconSize;
   final bool isClose;
   final double width;
+  final double height;
 
   @override
   State<_CaptionButton> createState() => _CaptionButtonState();
@@ -330,13 +349,13 @@ class _CaptionButtonState extends State<_CaptionButton> {
             children: [
               Container(
                 width: widget.width,
-                height: IntegratedTitleBarShell.barHeight,
+                height: widget.height,
                 color: bg,
                 child: Icon(widget.icon, size: widget.iconSize, color: fg),
               ),
               if (_tipVisible)
                 Positioned(
-                  top: IntegratedTitleBarShell.barHeight + 4,
+                  top: widget.height + 4,
                   left: 0,
                   child: IgnorePointer(
                     child: Container(
