@@ -2,6 +2,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+enum StudioGlassBackdropStyle { card, floating }
+
 /// Glass finish for compact in-app surfaces. The optional backdrop pass samples
 /// only pixels behind this clipped surface; child text and controls stay sharp.
 class StudioGlassSurface extends StatelessWidget {
@@ -11,6 +13,7 @@ class StudioGlassSurface extends StatelessWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(10)),
     this.nativeBackdrop = false,
     this.backdropBlur = false,
+    this.backdropStyle = StudioGlassBackdropStyle.card,
     this.clipBehavior = Clip.antiAlias,
   });
 
@@ -18,6 +21,7 @@ class StudioGlassSurface extends StatelessWidget {
   final BorderRadius borderRadius;
   final bool nativeBackdrop;
   final bool backdropBlur;
+  final StudioGlassBackdropStyle backdropStyle;
   final Clip clipBehavior;
 
   @override
@@ -40,13 +44,27 @@ class StudioGlassSurface extends StatelessWidget {
     }
     if (backdropBlur && !highContrast) {
       final base = theme.colorScheme.surfaceContainerLow;
+      final floating = backdropStyle == StudioGlassBackdropStyle.floating;
+      final colors = dark
+          ? [
+              theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: floating ? .64 : .68,
+              ),
+              base.withValues(alpha: floating ? .61 : .63),
+              theme.colorScheme.surface.withValues(alpha: floating ? .66 : .70),
+            ]
+          : [
+              Colors.white.withValues(alpha: floating ? .60 : .47),
+              base.withValues(alpha: floating ? .55 : .40),
+              theme.colorScheme.outline.withValues(alpha: floating ? .60 : .58),
+            ];
       return ClipRRect(
         borderRadius: borderRadius,
         clipBehavior: clipBehavior,
         child: BackdropFilter(
           filter: ui.ImageFilter.blur(
-            sigmaX: 12,
-            sigmaY: 12,
+            sigmaX: floating ? 10 : 8,
+            sigmaY: floating ? 10 : 8,
             tileMode: ui.TileMode.clamp,
           ),
           child: DecoratedBox(
@@ -54,10 +72,7 @@ class StudioGlassSurface extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  base.withValues(alpha: dark ? .82 : .76),
-                  theme.colorScheme.surface.withValues(alpha: dark ? .72 : .64),
-                ],
+                colors: colors,
               ),
             ),
             child: CustomPaint(

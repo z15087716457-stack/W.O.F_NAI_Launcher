@@ -82,8 +82,8 @@ class CollapsibleImagePanel extends StatelessWidget {
                     ClipRect(
                       child: BackdropFilter(
                         filter: ui.ImageFilter.blur(
-                          sigmaX: 12,
-                          sigmaY: 12,
+                          sigmaX: 8,
+                          sigmaY: 8,
                           tileMode: ui.TileMode.clamp,
                         ),
                         child: const ColoredBox(color: Colors.transparent),
@@ -94,21 +94,21 @@ class CollapsibleImagePanel extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                         colors: lightImageGlass
                             ? [
-                                Colors.white.withValues(alpha: .76),
-                                theme.colorScheme.surface.withValues(
-                                  alpha: .69,
-                                ),
+                                Colors.white.withValues(alpha: .62),
+                                Colors.white.withValues(alpha: .53),
+                                theme.colorScheme.surfaceContainerLow
+                                    .withValues(alpha: .57),
                               ]
                             : [
                                 Colors.black.withValues(
-                                  alpha: frosted ? .53 : .5,
+                                  alpha: frosted ? .56 : .5,
                                 ),
                                 Colors.black.withValues(
-                                  alpha: frosted ? .61 : .75,
+                                  alpha: frosted ? .62 : .75,
                                 ),
                               ],
                       ),
