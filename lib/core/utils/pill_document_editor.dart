@@ -28,6 +28,8 @@ abstract final class PillDocumentEditor {
     required int offset,
     required String blockId,
     bool useNegativeContent = false,
+    String? bundleId,
+    int rollScopeMask = 1,
   }) {
     final marker = allocateMarker(document);
     final safeOffset = offset.clamp(0, document.text.length);
@@ -39,6 +41,8 @@ abstract final class PillDocumentEditor {
     instances[marker] = PillInstance(
       blockId: blockId,
       useNegativeContent: useNegativeContent,
+      bundleId: bundleId,
+      rollScopeMask: rollScopeMask,
     );
     return document.copyWith(text: text, instances: instances);
   }

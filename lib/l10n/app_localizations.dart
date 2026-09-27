@@ -1926,13 +1926,13 @@ abstract class AppLocalizations {
   /// No description provided for @generation_guidance.
   ///
   /// In en, this message translates to:
-  /// **'Guidance'**
+  /// **'PG'**
   String get generation_guidance;
 
   /// No description provided for @generation_cfgScale.
   ///
   /// In en, this message translates to:
-  /// **'CFG Scale: {scale}'**
+  /// **'PG: {scale}'**
   String generation_cfgScale(Object scale);
 
   /// No description provided for @generation_seed.
@@ -1992,7 +1992,7 @@ abstract class AppLocalizations {
   /// No description provided for @generation_cfgRescale.
   ///
   /// In en, this message translates to:
-  /// **'CFG Rescale: {value}'**
+  /// **'PGR: {value}'**
   String generation_cfgRescale(Object value);
 
   /// No description provided for @generation_noiseSchedule.
@@ -4240,7 +4240,7 @@ abstract class AppLocalizations {
   /// No description provided for @gallery_metaCfgScale.
   ///
   /// In en, this message translates to:
-  /// **'CFG Scale'**
+  /// **'PG'**
   String get gallery_metaCfgScale;
 
   /// No description provided for @gallery_metaSeed.
@@ -7948,7 +7948,7 @@ abstract class AppLocalizations {
   /// No description provided for @localGallery_filterByCfg.
   ///
   /// In en, this message translates to:
-  /// **'Filter by CFG Scale'**
+  /// **'Filter by PG'**
   String get localGallery_filterByCfg;
 
   /// No description provided for @localGallery_filterByResolution.
@@ -9399,7 +9399,7 @@ abstract class AppLocalizations {
   /// No description provided for @metadataImport_scale.
   ///
   /// In en, this message translates to:
-  /// **'CFG Scale'**
+  /// **'PG'**
   String get metadataImport_scale;
 
   /// No description provided for @metadataImport_size.
@@ -9441,7 +9441,7 @@ abstract class AppLocalizations {
   /// No description provided for @metadataImport_cfgRescale.
   ///
   /// In en, this message translates to:
-  /// **'CFG Rescale'**
+  /// **'PGR'**
   String get metadataImport_cfgRescale;
 
   /// No description provided for @metadataImport_qualityToggle.
@@ -16167,20 +16167,8 @@ abstract class AppLocalizations {
   /// No description provided for @promptBlockLibrary_cfgLabel.
   ///
   /// In en, this message translates to:
-  /// **'CFG Scale'**
+  /// **'PG'**
   String get promptBlockLibrary_cfgLabel;
-
-  /// No description provided for @promptBlockLibrary_widthLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Width'**
-  String get promptBlockLibrary_widthLabel;
-
-  /// No description provided for @promptBlockLibrary_heightLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Height'**
-  String get promptBlockLibrary_heightLabel;
 
   /// No description provided for @promptBlockLibrary_noiseScheduleLabel.
   ///
@@ -16191,32 +16179,62 @@ abstract class AppLocalizations {
   /// No description provided for @promptBlockLibrary_cfgRescaleLabel.
   ///
   /// In en, this message translates to:
-  /// **'CFG Rescale'**
+  /// **'PGR'**
   String get promptBlockLibrary_cfgRescaleLabel;
 
   /// No description provided for @promptBlockLibrary_invalidGenerationSettings.
   ///
   /// In en, this message translates to:
-  /// **'Check settings: steps 1–50, CFG 1–20, paired dimensions in multiples of 64, and CFG Rescale 0–1.'**
+  /// **'Check settings: steps 1–50, PG 1–20, PGR 0–1, and model compatibility.'**
   String get promptBlockLibrary_invalidGenerationSettings;
 
   /// No description provided for @promptBlockLibrary_applySettings.
   ///
   /// In en, this message translates to:
-  /// **'Apply block settings'**
+  /// **'Import settings'**
   String get promptBlockLibrary_applySettings;
 
   /// No description provided for @promptBlockLibrary_settingsApplied.
   ///
   /// In en, this message translates to:
-  /// **'Block generation settings applied'**
+  /// **'Block settings imported to the current image'**
   String get promptBlockLibrary_settingsApplied;
 
   /// No description provided for @promptBlockLibrary_settingsIncompatible.
   ///
   /// In en, this message translates to:
-  /// **'The block sampler is not supported by the current model. Edit the block settings first.'**
+  /// **'Block settings are incompatible with the target model. No parameters were imported.'**
   String get promptBlockLibrary_settingsIncompatible;
+
+  /// No description provided for @promptBlockLibrary_noSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'No generation settings saved'**
+  String get promptBlockLibrary_noSettings;
+
+  /// No description provided for @pillCard_rollScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Variation scope'**
+  String get pillCard_rollScope;
+
+  /// No description provided for @pillCard_positiveScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Positive'**
+  String get pillCard_positiveScope;
+
+  /// No description provided for @pillCard_negativeScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative'**
+  String get pillCard_negativeScope;
+
+  /// No description provided for @promptBlockLibrary_modelResetNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported values were cleared after changing the model.'**
+  String get promptBlockLibrary_modelResetNotice;
 
   /// No description provided for @promptBlockLibrary_atomInputHint.
   ///

@@ -8,6 +8,7 @@ import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
+import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/compact_parameter_number_field.dart';
 import 'package:nai_launcher/presentation/widgets/common/thumbnail_display.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/prompt_token_count_bar.dart';
 
@@ -132,6 +133,12 @@ void main() {
   testWidgets('tabbed editor saves negative text and selected settings', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1000, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
     PromptBlockEditResult? captured;
     await tester.pumpWidget(
       wrap(
@@ -172,9 +179,41 @@ void main() {
     );
     await tester.pump();
     await tester.tap(find.byKey(const Key('block-content-tab-2')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('block-setting-steps')));
     await tester.pump();
-    await tester.enterText(find.byKey(const Key('block-setting-steps')), '30');
-    await tester.enterText(find.byKey(const Key('block-setting-scale')), '5.5');
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('block-setting-steps')),
+        matching: find.text('—'),
+      ),
+    );
+    await tester.pump();
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const Key('block-setting-steps')),
+        matching: find.byType(TextField),
+      ),
+      '30',
+    );
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('block-setting-scale')),
+        matching: find.text('—'),
+      ),
+    );
+    await tester.pump();
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const Key('block-setting-scale')),
+        matching: find.byType(TextField),
+      ),
+      '5.5',
+    );
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
     await tester.tap(find.widgetWithText(FilledButton, '保存'));
     await tester.pumpAndSettle();
 
@@ -183,6 +222,75 @@ void main() {
     expect(captured!.negativeContent, 'bad anatomy');
     expect(captured!.generationSettings?.steps, 30);
     expect(captured!.generationSettings?.scale, 5.5);
+  });
+
+  testWidgets('settings follow model capabilities and omit dimensions', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1000, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    await tester.pumpWidget(
+      wrap(PromptBlockEditDialog(block: makeBlock(), folders: const [])),
+    );
+    await tester.tap(find.byKey(const Key('block-content-tab-2')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('block-setting-width')), findsNothing);
+    expect(find.byKey(const Key('block-setting-height')), findsNothing);
+    expect(find.byKey(const Key('block-setting-cfg-rescale')), findsNothing);
+    expect(find.byKey(const Key('block-setting-noise-schedule')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('block-setting-model')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('NAI Diffusion V4 (Full)').last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('block-setting-cfg-rescale')), findsOneWidget);
+    expect(
+      find.byKey(const Key('block-setting-noise-schedule')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('block-setting-model')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('NAI Diffusion V5 (Full)').last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('block-setting-cfg-rescale')), findsOneWidget);
+    expect(find.byKey(const Key('block-setting-noise-schedule')), findsNothing);
+  });
+
+  testWidgets('compact value supports arrows, drag, and clearing', (
+    tester,
+  ) async {
+    final controller = TextEditingController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      wrap(
+        SizedBox(
+          width: 180,
+          child: CompactParameterNumberField(
+            label: 'PG',
+            controller: controller,
+            fallback: 5,
+            min: 1,
+            max: 20,
+            step: .1,
+            decimals: 1,
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byIcon(Icons.chevron_right));
+    await tester.pump();
+    expect(controller.text, '5.1');
+    await tester.drag(find.text('5.1'), const Offset(30, 0));
+    await tester.pump();
+    expect(controller.text, '5.4');
+    await tester.tap(find.byKey(const Key('clear-PG')));
+    await tester.pump();
+    expect(controller.text, isEmpty);
   });
 }
 

@@ -201,12 +201,20 @@ class PillInstance {
     this.sequenceCursor = 0,
     this.lastRollCount,
     this.useNegativeContent = false,
+    this.bundleId,
+    this.rollScopeMask = 1,
   });
 
   final String blockId;
 
   /// 同一块的负面部分。旧存档缺键时仍解析原有正文。
   final bool useNegativeContent;
+
+  /// 同一次插入的正负实例共享 ID；旧实例为 null，各自独立。
+  final String? bundleId;
+
+  /// 正面=1、负面=2、双面=3；未选时归一化为正面。
+  final int rollScopeMask;
   final bool enabled;
 
   /// 随机实例是否冻结当前 `currentRoll`；固定实例不使用此字段。
@@ -244,6 +252,8 @@ class PillInstance {
     int? sequenceCursor,
     int? lastRollCount,
     bool? useNegativeContent,
+    String? bundleId,
+    int? rollScopeMask,
   }) {
     return PillInstance(
       blockId: blockId ?? this.blockId,
@@ -255,12 +265,16 @@ class PillInstance {
       sequenceCursor: sequenceCursor ?? this.sequenceCursor,
       lastRollCount: lastRollCount ?? this.lastRollCount,
       useNegativeContent: useNegativeContent ?? this.useNegativeContent,
+      bundleId: bundleId ?? this.bundleId,
+      rollScopeMask: rollScopeMask ?? this.rollScopeMask,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'blockId': blockId,
     if (useNegativeContent) 'useNegativeContent': true,
+    if (bundleId != null) 'bundleId': bundleId,
+    if (bundleId != null) 'rollScopeMask': rollScopeMask,
     'enabled': enabled,
     'locked': locked,
     'evolutionEnabled': evolutionEnabled,
@@ -276,6 +290,13 @@ class PillInstance {
     return PillInstance(
       blockId: json['blockId'] as String? ?? '',
       useNegativeContent: json['useNegativeContent'] as bool? ?? false,
+      bundleId: json['bundleId'] as String?,
+      rollScopeMask:
+          json['rollScopeMask'] is int &&
+              (json['rollScopeMask'] as int) >= 1 &&
+              (json['rollScopeMask'] as int) <= 3
+          ? json['rollScopeMask'] as int
+          : 1,
       enabled: json['enabled'] as bool? ?? true,
       locked: json['locked'] as bool? ?? false,
       evolutionEnabled: json['evolutionEnabled'] as bool? ?? false,
@@ -301,6 +322,8 @@ class PillInstance {
       other is PillInstance &&
       other.blockId == blockId &&
       other.useNegativeContent == useNegativeContent &&
+      other.bundleId == bundleId &&
+      other.rollScopeMask == rollScopeMask &&
       other.enabled == enabled &&
       other.locked == locked &&
       other.evolutionEnabled == evolutionEnabled &&
@@ -313,6 +336,8 @@ class PillInstance {
   int get hashCode => Object.hash(
     blockId,
     useNegativeContent,
+    bundleId,
+    rollScopeMask,
     enabled,
     locked,
     evolutionEnabled,

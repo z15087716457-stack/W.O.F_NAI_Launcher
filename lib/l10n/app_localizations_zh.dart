@@ -974,11 +974,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_stepsLabel => '步数';
 
   @override
-  String get generation_guidance => 'Guidance';
+  String get generation_guidance => 'PG';
 
   @override
   String generation_cfgScale(Object scale) {
-    return 'CFG 强度：$scale';
+    return 'PG：$scale';
   }
 
   @override
@@ -1010,7 +1010,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String generation_cfgRescale(Object value) {
-    return 'CFG 重缩放：$value';
+    return 'PGR：$value';
   }
 
   @override
@@ -2227,7 +2227,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gallery_metaSampler => '采样器';
 
   @override
-  String get gallery_metaCfgScale => 'CFG 强度';
+  String get gallery_metaCfgScale => 'PG';
 
   @override
   String get gallery_metaSeed => '种子';
@@ -4239,7 +4239,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_filterBySteps => '按步数筛选';
 
   @override
-  String get localGallery_filterByCfg => '按 CFG 筛选';
+  String get localGallery_filterByCfg => '按 PG 筛选';
 
   @override
   String get localGallery_filterByResolution => '按分辨率筛选';
@@ -5057,7 +5057,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get metadataImport_steps => '步数 (Steps)';
 
   @override
-  String get metadataImport_scale => 'CFG 强度';
+  String get metadataImport_scale => 'PG';
 
   @override
   String get metadataImport_size => '尺寸 (Size)';
@@ -5078,7 +5078,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get metadataImport_noiseSchedule => '噪声计划';
 
   @override
-  String get metadataImport_cfgRescale => 'CFG 重缩放';
+  String get metadataImport_cfgRescale => 'PGR';
 
   @override
   String get metadataImport_qualityToggle => '质量标签';
@@ -8888,33 +8888,41 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_stepsLabel => '步数';
 
   @override
-  String get promptBlockLibrary_cfgLabel => 'CFG Scale';
-
-  @override
-  String get promptBlockLibrary_widthLabel => '宽度';
-
-  @override
-  String get promptBlockLibrary_heightLabel => '高度';
+  String get promptBlockLibrary_cfgLabel => 'PG';
 
   @override
   String get promptBlockLibrary_noiseScheduleLabel => '噪声调度';
 
   @override
-  String get promptBlockLibrary_cfgRescaleLabel => 'CFG Rescale';
+  String get promptBlockLibrary_cfgRescaleLabel => 'PGR';
 
   @override
   String get promptBlockLibrary_invalidGenerationSettings =>
-      '请检查设置：步数 1–50、CFG 1–20、宽高成对且为 64 的倍数、CFG Rescale 0–1。';
+      '请检查设置：步数 1–50、PG 1–20、PGR 0–1，并确认参数受所选模型支持。';
 
   @override
-  String get promptBlockLibrary_applySettings => '应用块设置';
+  String get promptBlockLibrary_applySettings => '导入设置';
 
   @override
-  String get promptBlockLibrary_settingsApplied => '已应用块内生图设置';
+  String get promptBlockLibrary_settingsApplied => '块设置已导入当前画面';
 
   @override
-  String get promptBlockLibrary_settingsIncompatible =>
-      '块内采样器与当前模型不兼容，请先调整块设置。';
+  String get promptBlockLibrary_settingsIncompatible => '块设置与目标模型不兼容，未导入任何参数。';
+
+  @override
+  String get promptBlockLibrary_noSettings => '此块未保存生图参数';
+
+  @override
+  String get pillCard_rollScope => '变化范围';
+
+  @override
+  String get pillCard_positiveScope => '正面';
+
+  @override
+  String get pillCard_negativeScope => '负面';
+
+  @override
+  String get promptBlockLibrary_modelResetNotice => '切换模型后，不支持的参数已清除。';
 
   @override
   String get promptBlockLibrary_atomInputHint => '输入文本，回车变成原子块';

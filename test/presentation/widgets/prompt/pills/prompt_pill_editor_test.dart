@@ -97,6 +97,120 @@ void main() {
     expect(emissions.last, '');
   });
 
+  testWidgets('paired scope keeps positive fixed while negative steps', (
+    tester,
+  ) async {
+    final block = _block('pair', '双面', 'bright').copyWith(
+      atoms: ['bright', 'vivid'],
+      negativeContent: 'muted, dull',
+      negativeAtoms: ['muted', 'dull'],
+    );
+    final container = await _pump(
+      tester,
+      libraryState: PromptBlockLibraryState(blocks: [block], folders: const []),
+    );
+    container
+        .read(pillWorkspaceProvider(PillScopes.main).notifier)
+        .insertBlockAt(
+          offset: 0,
+          blockId: block.id,
+          bundleId: 'pair-1',
+          rollScopeMask: 1,
+        );
+    container
+        .read(pillWorkspaceProvider(PillScopes.negative).notifier)
+        .insertBlockAt(
+          offset: 0,
+          blockId: block.id,
+          useNegativeContent: true,
+          bundleId: 'pair-1',
+          rollScopeMask: 1,
+        );
+    await tester.pump();
+
+    await tester.tap(find.byType(PromptPill));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('pill-preview-tab-2')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('pill-scope-negative')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('pill-scope-positive')));
+    await tester.pump();
+    expect(
+      container
+          .read(pillWorkspaceProvider(PillScopes.main))
+          .document
+          .instances[markerA]!
+          .rollScopeMask,
+      2,
+    );
+    expect(
+      container
+          .read(pillWorkspaceProvider(PillScopes.negative))
+          .document
+          .instances[markerA]!
+          .rollScopeMask,
+      2,
+    );
+
+    await tester.tap(find.byIcon(Icons.tune));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('顺序'));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, '确定'));
+    await tester.pumpAndSettle();
+
+    final pos = container.read(pillWorkspaceProvider(PillScopes.main));
+    final neg = container.read(pillWorkspaceProvider(PillScopes.negative));
+    expect(pos.document.instances[markerA]!.settings.mode, PillRollMode.fixed);
+    expect(
+      neg.document.instances[markerA]!.settings.mode,
+      PillRollMode.sequential,
+    );
+    expect(pos.projection, 'bright');
+    expect(neg.projection, 'muted');
+
+    await tester.tap(find.byType(PromptPill));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('pill-step-forward')));
+    await tester.pump();
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).projection,
+      'bright',
+    );
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.negative)).projection,
+      'dull',
+    );
+  });
+
+  testWidgets('generation import appears only on the settings preview', (
+    tester,
+  ) async {
+    final block = _block('settings', '画风参数', 'artist:foo').copyWith(
+      generationSettings: const PromptBlockGenerationSettings(
+        model: 'nai-diffusion-5-full',
+        steps: 30,
+        scale: 5.0,
+      ),
+    );
+    final container = await _pump(
+      tester,
+      libraryState: PromptBlockLibraryState(blocks: [block], folders: const []),
+    );
+    container
+        .read(pillWorkspaceProvider(PillScopes.main).notifier)
+        .insertBlockAt(offset: 0, blockId: block.id);
+    await tester.pump();
+    await tester.tap(find.byType(PromptPill));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('pill-apply-block-settings')), findsNothing);
+    await tester.tap(find.byKey(const Key('pill-preview-tab-2')));
+    await tester.pump();
+    expect(find.byKey(const Key('pill-apply-block-settings')), findsOneWidget);
+    expect(find.text('导入设置'), findsOneWidget);
+  });
+
   testWidgets('L1 card anchors to the pill with a non-zero Overlay offset', (
     tester,
   ) async {

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/constants/api_constants.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/prompt_block/pill_document.dart';
+import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
 import '../../../utils/prompt_block_generation_settings_applier.dart';
+import '../../../utils/prompt_block_instance_bundle.dart';
 import '../../common/app_toast.dart';
 import '../../common/thumbnail_display.dart';
 import '../blocks/prompt_block_colors.dart';
@@ -23,7 +26,7 @@ import 'pill_instance_settings_dialog.dart';
 ///
 /// 宿主编辑器用 [buildPillInstanceOverlayEntry] 生成 OverlayEntry 并自行
 /// 持有/关闭；实例消失（文本里标记被删）时卡片自动请求关闭。
-class PillInstanceCard extends ConsumerWidget {
+class PillInstanceCard extends ConsumerStatefulWidget {
   const PillInstanceCard({
     super.key,
     required this.scope,
@@ -40,9 +43,20 @@ class PillInstanceCard extends ConsumerWidget {
   final bool allowEvolutionToggle;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PillInstanceCard> createState() => _PillInstanceCardState();
+}
+
+class _PillInstanceCardState extends ConsumerState<PillInstanceCard> {
+  int _tab = 0;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final scope = widget.scope;
+    final marker = widget.marker;
+    final counterpart = _counterpartScope(scope);
+    if (counterpart != null) ref.watch(pillWorkspaceProvider(counterpart));
     final workspace = ref.watch(pillWorkspaceProvider(scope));
     final workspaceNotifier = ref.read(pillWorkspaceProvider(scope).notifier);
     final library = ref.watch(promptBlockLibraryNotifierProvider).valueOrNull;
@@ -50,20 +64,19 @@ class PillInstanceCard extends ConsumerWidget {
 
     if (instance == null) {
       // 实例已随文本编辑消失：帧末请求关闭，不留死卡
-      WidgetsBinding.instance.addPostFrameCallback((_) => onDismiss());
+      WidgetsBinding.instance.addPostFrameCallback((_) => widget.onDismiss());
       return const SizedBox.shrink();
     }
 
     final block = library?.blockById(instance.blockId);
+    final bundle = readPromptBlockInstanceBundle(ref, scope, marker);
     final color = promptBlockColorFromString(block?.color ?? '#FF607D8B');
-    final mode = instance.settings.mode;
+    final mode = bundle.isPaired ? bundle.mode : instance.settings.mode;
+    final canRoll = bundle.members.any(
+      (member) => member.instance.settings.hasRoll && !member.instance.locked,
+    );
     final hasRoll = instance.settings.hasRoll;
     final effectiveRoll = workspaceNotifier.effectiveRollFor(marker);
-    final content = hasRoll
-        ? (effectiveRoll ?? '')
-        : (instance.useNegativeContent
-              ? (block?.negativeContent ?? '')
-              : (block?.content ?? ''));
 
     return Material(
       color: theme.colorScheme.surfaceContainerHigh,
@@ -108,40 +121,8 @@ class PillInstanceCard extends ConsumerWidget {
               ),
             ],
             const SizedBox(height: 6),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 240),
-              child: SingleChildScrollView(
-                child: Text(
-                  content.trim().isEmpty ? l10n.pillCardEmptyRoll : content,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
+            _buildPreview(context, block, bundle),
             const SizedBox(height: 4),
-            if (block?.generationSettings case final settings?)
-              if (!settings.isEmpty)
-                TextButton.icon(
-                  key: const Key('pill-apply-block-settings'),
-                  icon: const Icon(Icons.tune, size: 17),
-                  label: Text(l10n.promptBlockLibrary_applySettings),
-                  onPressed: () {
-                    try {
-                      applyPromptBlockGenerationSettings(ref, settings);
-                      AppToast.success(
-                        context,
-                        l10n.promptBlockLibrary_settingsApplied,
-                      );
-                      onDismiss();
-                    } on StateError {
-                      AppToast.warning(
-                        context,
-                        l10n.promptBlockLibrary_settingsIncompatible,
-                      );
-                    }
-                  },
-                ),
             Row(
               children: [
                 // FEAT-46：模式专属钮分化——随机=重抽、顺序=←→ 步进；
@@ -150,11 +131,11 @@ class PillInstanceCard extends ConsumerWidget {
                   _cardButton(
                     key: const Key('pill-reroll'),
                     icon: const Icon(Icons.casino_outlined, size: 18),
-                    tooltip: instance.locked
+                    tooltip: !canRoll
                         ? l10n.pillCardRerollLocked
                         : l10n.pillCardReroll,
-                    onPressed: !instance.locked
-                        ? () => workspaceNotifier.rollMarker(marker)
+                    onPressed: canRoll
+                        ? () => rollPromptBlockBundle(ref, scope, marker)
                         : null,
                   ),
                 if (mode == PillRollMode.sequential) ...[
@@ -162,16 +143,26 @@ class PillInstanceCard extends ConsumerWidget {
                     key: const Key('pill-step-back'),
                     icon: const Icon(Icons.arrow_back, size: 18),
                     tooltip: l10n.pillCardStepBack,
-                    onPressed: !instance.locked
-                        ? () => workspaceNotifier.stepSequence(marker, -1)
+                    onPressed: canRoll
+                        ? () => rollPromptBlockBundle(
+                            ref,
+                            scope,
+                            marker,
+                            direction: -1,
+                          )
                         : null,
                   ),
                   _cardButton(
                     key: const Key('pill-step-forward'),
                     icon: const Icon(Icons.arrow_forward, size: 18),
                     tooltip: l10n.pillCardStepForward,
-                    onPressed: !instance.locked
-                        ? () => workspaceNotifier.stepSequence(marker, 1)
+                    onPressed: canRoll
+                        ? () => rollPromptBlockBundle(
+                            ref,
+                            scope,
+                            marker,
+                            direction: 1,
+                          )
                         : null,
                   ),
                 ],
@@ -194,7 +185,7 @@ class PillInstanceCard extends ConsumerWidget {
                 ),
                 // FEAT-46/47：遗传钮只出现在探索页的随机块上（顺序块已失
                 // 去遗传入口，固定块本无可遗传内容）。
-                if (mode == PillRollMode.random && allowEvolutionToggle)
+                if (mode == PillRollMode.random && widget.allowEvolutionToggle)
                   Builder(
                     builder: (context) {
                       final evolutionTooltip = !instance.enabled
@@ -250,14 +241,292 @@ class PillInstanceCard extends ConsumerWidget {
                   ),
                   tooltip: l10n.pillCardDeleteInstance,
                   onPressed: () {
-                    workspaceNotifier.removeMarker(marker);
-                    onDismiss();
+                    removePromptBlockBundle(ref, scope, marker);
+                    widget.onDismiss();
                   },
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  String? _counterpartScope(String scope) {
+    if (scope == PillScopes.main) return PillScopes.negative;
+    if (scope == PillScopes.negative) return PillScopes.main;
+    final positive = RegExp(r'^char:(.+):pos$').firstMatch(scope);
+    if (positive != null) return PillScopes.charNeg(positive.group(1)!);
+    final negative = RegExp(r'^char:(.+):neg$').firstMatch(scope);
+    return negative == null ? null : PillScopes.charPos(negative.group(1)!);
+  }
+
+  Widget _buildPreview(
+    BuildContext context,
+    PromptBlock? block,
+    PromptBlockInstanceBundle bundle,
+  ) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    String textFor(BundleMember? member, String fallback) {
+      if (member == null) return fallback;
+      if (!member.instance.settings.hasRoll) return fallback;
+      return ref
+              .read(pillWorkspaceProvider(member.scope).notifier)
+              .effectiveRollFor(member.marker) ??
+          '';
+    }
+
+    final positive = textFor(bundle.positive, block?.content ?? '');
+    final negative = textFor(bundle.negative, block?.negativeContent ?? '');
+    final labels = [
+      l10n.promptBlockLibrary_basicPrompt,
+      l10n.pillCard_negativeScope,
+      l10n.promptBlockLibrary_generationSettings,
+    ];
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(7),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: .55),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(5, 5, 5, 3),
+            child: Row(
+              children: [
+                for (var index = 0; index < labels.length; index++)
+                  InkWell(
+                    key: Key('pill-preview-tab-$index'),
+                    onTap: () => setState(() => _tab = index),
+                    borderRadius: BorderRadius.circular(4),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _tab == index
+                            ? theme.colorScheme.surfaceContainerHigh
+                            : null,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        labels[index],
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: _tab == index
+                              ? theme.colorScheme.onSurface
+                              : theme.colorScheme.onSurfaceVariant,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Divider(
+            height: 1,
+            color: theme.colorScheme.outlineVariant.withValues(alpha: .5),
+          ),
+          if (_tab != 2)
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 100, maxHeight: 145),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  (_tab == 0 ? positive : negative).trim().isEmpty
+                      ? l10n.pillCardEmptyRoll
+                      : (_tab == 0 ? positive : negative),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            )
+          else
+            _buildSettingsPreview(block, bundle),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsPreview(
+    PromptBlock? block,
+    PromptBlockInstanceBundle bundle,
+  ) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final settings = block?.generationSettings;
+    final rows = <(String, String)>[
+      if (settings?.model != null)
+        (
+          l10n.generation_model,
+          ImageModels.modelDisplayNames[settings!.model] ?? settings.model!,
+        ),
+      if (settings?.steps != null)
+        (l10n.promptBlockLibrary_stepsLabel, '${settings!.steps}'),
+      if (settings?.scale != null) ('PG', '${settings!.scale}'),
+      if (settings?.cfgRescale != null) ('PGR', '${settings!.cfgRescale}'),
+      if (settings?.sampler != null)
+        (
+          l10n.generation_sampler,
+          Samplers.samplerDisplayNames[settings!.sampler] ?? settings.sampler!,
+        ),
+      if (settings?.noiseSchedule != null)
+        (
+          l10n.promptBlockLibrary_noiseScheduleLabel,
+          NoiseSchedules.displayNames[settings!.noiseSchedule] ??
+              settings.noiseSchedule!,
+        ),
+    ];
+    Widget scopeButton(int bit, String label, bool available) {
+      final selected = bundle.mask & bit != 0;
+      return InkWell(
+        key: Key(bit == 1 ? 'pill-scope-positive' : 'pill-scope-negative'),
+        onTap: available && bundle.isPaired
+            ? () => updatePromptBlockBundleScope(
+                ref,
+                widget.scope,
+                widget.marker,
+                bundle.mask ^ bit,
+              )
+            : null,
+        borderRadius: BorderRadius.circular(4),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: selected
+                ? theme.colorScheme.primary.withValues(alpha: .12)
+                : null,
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(
+              color: selected
+                  ? theme.colorScheme.primary.withValues(alpha: .5)
+                  : theme.colorScheme.outlineVariant,
+            ),
+          ),
+          child: Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: available
+                  ? (selected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant)
+                  : theme.disabledColor,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 7),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (rows.isEmpty)
+            Text(
+              l10n.promptBlockLibrary_noSettings,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 5,
+              children: [
+                for (final row in rows)
+                  SizedBox(
+                    width: 126,
+                    child: Row(
+                      children: [
+                        Text(
+                          '${row.$1}  ',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontSize: 10,
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            row.$2,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelSmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          const SizedBox(height: 8),
+          Divider(
+            height: 1,
+            color: theme.colorScheme.outlineVariant.withValues(alpha: .5),
+          ),
+          const SizedBox(height: 7),
+          Row(
+            children: [
+              Text(
+                l10n.pillCard_rollScope,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const Spacer(),
+              scopeButton(
+                1,
+                l10n.pillCard_positiveScope,
+                bundle.positive != null && block?.content.isNotEmpty == true,
+              ),
+              const SizedBox(width: 5),
+              scopeButton(
+                2,
+                l10n.pillCard_negativeScope,
+                bundle.negative != null &&
+                    block?.negativeContent.isNotEmpty == true,
+              ),
+            ],
+          ),
+          if (settings != null && !settings.isEmpty) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton(
+                key: const Key('pill-apply-block-settings'),
+                onPressed: () {
+                  try {
+                    applyPromptBlockGenerationSettings(ref, settings);
+                    AppToast.success(
+                      context,
+                      l10n.promptBlockLibrary_settingsApplied,
+                    );
+                    widget.onDismiss();
+                  } on StateError {
+                    AppToast.warning(
+                      context,
+                      l10n.promptBlockLibrary_settingsIncompatible,
+                    );
+                  }
+                },
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(0, 29),
+                  padding: const EdgeInsets.symmetric(horizontal: 11),
+                  textStyle: theme.textTheme.labelSmall,
+                ),
+                child: Text(l10n.promptBlockLibrary_applySettings),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -290,15 +559,40 @@ class PillInstanceCard extends ConsumerWidget {
     // StateError（静默吞），设置永远不写。故同步发起弹窗（showDialog 立即
     // 解析 Navigator）并捕获存活于 ProviderContainer 的 notifier，随后
     // 显式关卡，结果异步经 notifier 应用。
+    final bundle = readPromptBlockInstanceBundle(
+      ref,
+      widget.scope,
+      widget.marker,
+    );
+    final source = bundle.members.firstWhere(
+      (member) => member.instance.settings.hasRoll,
+      orElse: () => BundleMember(widget.scope, widget.marker, instance),
+    );
+    final updates = [
+      for (final member in bundle.members)
+        (
+          ref.read(pillWorkspaceProvider(member.scope).notifier),
+          member.marker,
+          member.instance.useNegativeContent ? 2 : 1,
+        ),
+    ];
     final dialogFuture = PillInstanceSettingsDialog.show(
       context,
-      instance.settings,
+      source.instance.settings,
     );
-    final notifier = ref.read(pillWorkspaceProvider(scope).notifier);
-    onDismiss();
+    widget.onDismiss();
     final result = await dialogFuture;
     if (result == null) return;
-    notifier.updateInstanceSettings(marker, result);
+    for (final update in updates) {
+      update.$1.updateInstanceSettings(
+        update.$2,
+        result.copyWith(
+          mode: bundle.isPaired && bundle.mask & update.$3 == 0
+              ? PillRollMode.fixed
+              : result.mode,
+        ),
+      );
+    }
   }
 }
 
@@ -319,7 +613,7 @@ OverlayEntry buildPillInstanceOverlayEntry({
       final localPosition = overlayBox.globalToLocal(globalPosition);
       const cardWidth = 300.0;
       // 含缩略图条时的估高（无图卡稍高估只会影响贴底翻转阈值，无害）。
-      const estimatedHeight = 570.0;
+      const estimatedHeight = 510.0;
       final left = (localPosition.dx - cardWidth / 2)
           .clamp(8.0, (screen.width - cardWidth - 8).clamp(8.0, screen.width))
           .toDouble();

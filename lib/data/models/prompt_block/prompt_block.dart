@@ -27,8 +27,6 @@ class PromptBlockGenerationSettings with _$PromptBlockGenerationSettings {
 
   bool get isEmpty =>
       model == null &&
-      width == null &&
-      height == null &&
       steps == null &&
       scale == null &&
       sampler == null &&

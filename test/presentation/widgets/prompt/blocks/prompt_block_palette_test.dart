@@ -471,6 +471,12 @@ void main() {
         negative.document.instances.values.single.useNegativeContent,
         isTrue,
       );
+      final posInstance = positive.document.instances.values.single;
+      final negInstance = negative.document.instances.values.single;
+      expect(posInstance.bundleId, isNotNull);
+      expect(negInstance.bundleId, posInstance.bundleId);
+      expect(posInstance.rollScopeMask, 1);
+      expect(negInstance.rollScopeMask, 1);
 
       // 块库编辑时负面编辑器未挂载，生成参数仍须收到新投影。
       library.publish(block.copyWith(negativeContent: 'new negative'));

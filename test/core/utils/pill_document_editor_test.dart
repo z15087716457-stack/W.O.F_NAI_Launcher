@@ -27,6 +27,34 @@ void main() {
       },
     );
 
+    test('paired markers keep their shared identity and scope in JSON', () {
+      final positive = PillDocumentEditor.insertBlock(
+        PillDocument.empty(),
+        offset: 0,
+        blockId: 'pair',
+        bundleId: 'insert-1',
+        rollScopeMask: 2,
+      );
+      final negative = PillDocumentEditor.insertBlock(
+        PillDocument.empty(),
+        offset: 0,
+        blockId: 'pair',
+        useNegativeContent: true,
+        bundleId: 'insert-1',
+        rollScopeMask: 2,
+      );
+      final posRestored = PillDocument.fromJson(
+        positive.toJson(),
+      ).instances[markerA]!;
+      final negRestored = PillDocument.fromJson(
+        negative.toJson(),
+      ).instances[markerA]!;
+      expect(posRestored.bundleId, 'insert-1');
+      expect(negRestored.bundleId, posRestored.bundleId);
+      expect(posRestored.rollScopeMask, 2);
+      expect(negRestored.rollScopeMask, 2);
+    });
+
     test('allocates the smallest free private-use char', () {
       var doc = PillDocument.empty();
       doc = PillDocumentEditor.insertBlock(doc, offset: 0, blockId: 'a');

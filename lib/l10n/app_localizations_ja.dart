@@ -987,11 +987,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_stepsLabel => 'ステップ';
 
   @override
-  String get generation_guidance => 'Guidance';
+  String get generation_guidance => 'PG';
 
   @override
   String generation_cfgScale(Object scale) {
-    return 'CFG スケール: $scale';
+    return 'PG: $scale';
   }
 
   @override
@@ -1024,7 +1024,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String generation_cfgRescale(Object value) {
-    return 'CFG リスケール: $value';
+    return 'PGR: $value';
   }
 
   @override
@@ -2255,7 +2255,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gallery_metaSampler => 'サンプラー';
 
   @override
-  String get gallery_metaCfgScale => 'CFG スケール';
+  String get gallery_metaCfgScale => 'PG';
 
   @override
   String get gallery_metaSeed => 'シード';
@@ -4299,7 +4299,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_filterBySteps => 'ステップごとにフィルターする';
 
   @override
-  String get localGallery_filterByCfg => 'CFG スケールによるフィルター';
+  String get localGallery_filterByCfg => 'PG で絞り込む';
 
   @override
   String get localGallery_filterByResolution => '解像度によるフィルター';
@@ -5119,7 +5119,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get metadataImport_steps => 'ステップ数';
 
   @override
-  String get metadataImport_scale => 'CFG スケール';
+  String get metadataImport_scale => 'PG';
 
   @override
   String get metadataImport_size => 'サイズ';
@@ -5140,7 +5140,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get metadataImport_noiseSchedule => 'ノイズスケジュール';
 
   @override
-  String get metadataImport_cfgRescale => 'CFG リスケール';
+  String get metadataImport_cfgRescale => 'PGR';
 
   @override
   String get metadataImport_qualityToggle => '品質切り替え';
@@ -9008,33 +9008,42 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_stepsLabel => 'ステップ数';
 
   @override
-  String get promptBlockLibrary_cfgLabel => 'CFG Scale';
-
-  @override
-  String get promptBlockLibrary_widthLabel => '幅';
-
-  @override
-  String get promptBlockLibrary_heightLabel => '高さ';
+  String get promptBlockLibrary_cfgLabel => 'PG';
 
   @override
   String get promptBlockLibrary_noiseScheduleLabel => 'ノイズスケジュール';
 
   @override
-  String get promptBlockLibrary_cfgRescaleLabel => 'CFG Rescale';
+  String get promptBlockLibrary_cfgRescaleLabel => 'PGR';
 
   @override
   String get promptBlockLibrary_invalidGenerationSettings =>
-      '設定を確認してください：ステップ数 1～50、CFG 1～20、幅と高さは両方入力して64の倍数、CFG Rescale 0～1。';
+      '設定を確認してください：ステップ数 1～50、PG 1～20、PGR 0～1、モデルとの互換性。';
 
   @override
-  String get promptBlockLibrary_applySettings => 'ブロック設定を適用';
+  String get promptBlockLibrary_applySettings => '設定を読み込む';
 
   @override
-  String get promptBlockLibrary_settingsApplied => 'ブロックの生成設定を適用しました';
+  String get promptBlockLibrary_settingsApplied => 'ブロック設定を現在の画像に読み込みました';
 
   @override
   String get promptBlockLibrary_settingsIncompatible =>
-      'ブロックのサンプラーは現在のモデルに対応していません。先にブロック設定を変更してください。';
+      'ブロック設定は対象モデルに対応していません。パラメータは変更されませんでした。';
+
+  @override
+  String get promptBlockLibrary_noSettings => '生成設定は保存されていません';
+
+  @override
+  String get pillCard_rollScope => '変化範囲';
+
+  @override
+  String get pillCard_positiveScope => 'ポジティブ';
+
+  @override
+  String get pillCard_negativeScope => 'ネガティブ';
+
+  @override
+  String get promptBlockLibrary_modelResetNotice => 'モデル変更後、非対応の値を消去しました。';
 
   @override
   String get promptBlockLibrary_atomInputHint => 'テキストを入力し、Enterで原子ブロック化';

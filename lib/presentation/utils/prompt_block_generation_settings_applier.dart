@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/api_constants.dart';
+import '../../core/constants/model_spec.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
 import '../providers/generation/generation_params_notifier.dart';
 
@@ -11,15 +12,9 @@ void applyPromptBlockGenerationSettings(
 ) {
   final current = ref.read(generationParamsNotifierProvider);
   final model = settings.model ?? current.model;
-  if (settings.sampler != null &&
-      !Samplers.samplersForModel(model).contains(settings.sampler)) {
-    throw StateError('Sampler is not supported by the selected model');
-  }
+  validatePromptBlockGenerationSettings(settings, model);
   final notifier = ref.read(generationParamsNotifierProvider.notifier);
   if (settings.model != null) notifier.updateModel(settings.model!);
-  if (settings.width != null && settings.height != null) {
-    notifier.updateSize(settings.width!, settings.height!);
-  }
   if (settings.steps != null) notifier.updateSteps(settings.steps!);
   if (settings.scale != null) notifier.updateScale(settings.scale!);
   if (settings.sampler != null) notifier.updateSampler(settings.sampler!);
@@ -28,5 +23,39 @@ void applyPromptBlockGenerationSettings(
   }
   if (settings.cfgRescale != null) {
     notifier.updateCfgRescale(settings.cfgRescale!);
+  }
+}
+
+/// 先检查整组参数，再写入任何生成状态；旧块里的宽高不属于可复用设置。
+void validatePromptBlockGenerationSettings(
+  PromptBlockGenerationSettings settings,
+  String targetModel,
+) {
+  final spec = ModelSpecs.of(targetModel);
+  if (settings.model != null &&
+      !ImageModels.allModels.contains(settings.model)) {
+    throw StateError('Unknown model');
+  }
+  if (settings.steps case final steps?) {
+    if (steps < 1 || steps > 50) throw StateError('Invalid steps');
+  }
+  if (settings.scale case final scale?) {
+    if (!scale.isFinite || scale < 1 || scale > 20) {
+      throw StateError('Invalid PG');
+    }
+  }
+  if (settings.sampler != null &&
+      !Samplers.samplersForModel(targetModel).contains(settings.sampler)) {
+    throw StateError('Unsupported sampler');
+  }
+  if (settings.noiseSchedule != null &&
+      (!spec.noiseSchedule ||
+          !NoiseSchedules.all.contains(settings.noiseSchedule))) {
+    throw StateError('Unsupported noise schedule');
+  }
+  if (settings.cfgRescale case final rescale?) {
+    if (!spec.isV4OrLater || !rescale.isFinite || rescale < 0 || rescale > 1) {
+      throw StateError('Unsupported PGR');
+    }
   }
 }

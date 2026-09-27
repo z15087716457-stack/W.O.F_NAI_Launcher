@@ -663,7 +663,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
         children: [
           if (metadata.seed != null) _buildInfoChip('Seed: ${metadata.seed}'),
           if (metadata.steps != null) _buildInfoChip('${metadata.steps} steps'),
-          if (metadata.scale != null) _buildInfoChip('CFG: ${metadata.scale}'),
+          if (metadata.scale != null) _buildInfoChip('PG: ${metadata.scale}'),
           if (metadata.sampler != null) _buildInfoChip(metadata.displaySampler),
           if (metadata.width != null && metadata.height != null)
             _buildInfoChip('${metadata.width}×${metadata.height}'),

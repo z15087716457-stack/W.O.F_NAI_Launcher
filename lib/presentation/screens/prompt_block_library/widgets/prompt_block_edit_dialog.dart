@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/constants/model_spec.dart';
 import '../../../../core/services/prompt_token_counter_service.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -17,6 +18,7 @@ import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../../providers/prompt_block_library_provider.dart';
 import '../../../providers/generation/generation_params_notifier.dart';
+import '../../../utils/prompt_block_generation_settings_applier.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/inset_shadow_container.dart';
 import '../../../widgets/common/themed_input.dart';
@@ -26,6 +28,7 @@ import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
 import '../../../widgets/common/thumbnail_crop_dialog.dart';
 import '../../../widgets/prompt/prompt_token_count_bar.dart';
 import 'atom_list_editor.dart';
+import 'compact_parameter_number_field.dart';
 import 'prompt_block_color_picker.dart';
 
 class PromptBlockEditResult {
@@ -178,12 +181,11 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
   late final AtomListEditorController _negativeAtomController;
   late final TextEditingController _stepsController;
   late final TextEditingController _scaleController;
-  late final TextEditingController _widthController;
-  late final TextEditingController _heightController;
   late final TextEditingController _cfgRescaleController;
   String? _settingsModel;
   String? _settingsSampler;
   String? _settingsNoiseSchedule;
+  bool _clearedUnsupportedSettings = false;
   int _contentTab = 0;
   late final Future<PromptTokenCounterService> _tokenService;
   late Future<PromptTokenUsage?> _tokenUsage;
@@ -228,10 +230,6 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
     _settingsNoiseSchedule = settings?.noiseSchedule;
     _stepsController = TextEditingController(text: settings?.steps?.toString());
     _scaleController = TextEditingController(text: settings?.scale?.toString());
-    _widthController = TextEditingController(text: settings?.width?.toString());
-    _heightController = TextEditingController(
-      text: settings?.height?.toString(),
-    );
     _cfgRescaleController = TextEditingController(
       text: settings?.cfgRescale?.toString(),
     );
@@ -286,8 +284,6 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
     _negativeAtomController.dispose();
     _stepsController.dispose();
     _scaleController.dispose();
-    _widthController.dispose();
-    _heightController.dispose();
     _cfgRescaleController.dispose();
     super.dispose();
   }
@@ -470,22 +466,19 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
               ),
             ),
             Expanded(
-              child: IndexedStack(
-                index: _contentTab,
-                children: [
-                  AtomListEditor(
-                    key: const Key('block-positive-editor'),
-                    controller: _atomController,
-                    embedded: true,
-                  ),
-                  AtomListEditor(
-                    key: const Key('block-negative-editor'),
-                    controller: _negativeAtomController,
-                    embedded: true,
-                  ),
-                  _buildSettingsPanel(l10n),
-                ],
-              ),
+              child: _contentTab == 0
+                  ? AtomListEditor(
+                      key: const Key('block-positive-editor'),
+                      controller: _atomController,
+                      embedded: true,
+                    )
+                  : _contentTab == 1
+                  ? AtomListEditor(
+                      key: const Key('block-negative-editor'),
+                      controller: _negativeAtomController,
+                      embedded: true,
+                    )
+                  : _buildSettingsPanel(l10n),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 2, 10, 6),
@@ -540,162 +533,222 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
   }
 
   Widget _buildSettingsPanel(AppLocalizations l10n) {
-    final model = _settingsModel ?? widget.modelForTokenCount;
-    final samplers = Samplers.samplersForModel(model);
-    final modelChoices = {
-      ...ImageModels.allModels,
-      if (_settingsModel != null) _settingsModel!,
-    };
-    final samplerChoices = {
-      ...samplers,
-      if (_settingsSampler != null) _settingsSampler!,
-    };
-    return SingleChildScrollView(
-      key: const Key('block-generation-settings'),
-      padding: const EdgeInsets.fromLTRB(10, 6, 10, 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.promptBlockLibrary_settingsOptionalHint,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<String?>(
-            key: const Key('block-setting-model'),
-            initialValue: _settingsModel,
-            decoration: InputDecoration(labelText: l10n.generation_model),
-            items: [
-              DropdownMenuItem<String?>(
-                value: null,
-                child: Text(l10n.promptBlockLibrary_notSpecified),
+    final model = _settingsModel;
+    final spec = model == null ? null : ModelSpecs.of(model);
+    final samplers = model == null
+        ? const <String>[]
+        : Samplers.samplersForModel(model);
+    final modelChoices = {...ImageModels.allModels, if (model != null) model};
+    return ClipRect(
+      child: Padding(
+        key: const Key('block-generation-settings'),
+        padding: const EdgeInsets.fromLTRB(12, 5, 12, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.promptBlockLibrary_settingsOptionalHint,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 11,
               ),
-              for (final candidate in modelChoices)
-                DropdownMenuItem<String?>(
-                  value: candidate,
-                  child: Text(
+            ),
+            const SizedBox(height: 8),
+            _compactDropdown(
+              key: const Key('block-setting-model'),
+              label: l10n.generation_model,
+              value: model,
+              choices: [
+                for (final candidate in modelChoices)
+                  (
+                    candidate,
                     ImageModels.modelDisplayNames[candidate] ?? candidate,
                   ),
-                ),
-            ],
-            onChanged: (value) {
-              setState(() {
-                _settingsModel = value;
-                if (_settingsSampler != null &&
-                    !Samplers.samplersForModel(
-                      value ?? widget.modelForTokenCount,
-                    ).contains(_settingsSampler)) {
-                  _settingsSampler = null;
-                }
-              });
-              _refreshTokenUsage();
-            },
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _settingNumberField(
-                  _stepsController,
-                  l10n.promptBlockLibrary_stepsLabel,
-                  key: const Key('block-setting-steps'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _settingNumberField(
-                  _scaleController,
-                  l10n.promptBlockLibrary_cfgLabel,
-                  key: const Key('block-setting-scale'),
-                  decimal: true,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _settingNumberField(
-                  _widthController,
-                  l10n.promptBlockLibrary_widthLabel,
-                  key: const Key('block-setting-width'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _settingNumberField(
-                  _heightController,
-                  l10n.promptBlockLibrary_heightLabel,
-                  key: const Key('block-setting-height'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<String?>(
-            key: ValueKey('block-setting-sampler-$model'),
-            initialValue: _settingsSampler,
-            decoration: InputDecoration(labelText: l10n.generation_sampler),
-            items: [
-              DropdownMenuItem<String?>(
-                value: null,
-                child: Text(l10n.promptBlockLibrary_notSpecified),
-              ),
-              for (final sampler in samplerChoices)
-                DropdownMenuItem<String?>(
-                  value: sampler,
-                  child: Text(Samplers.samplerDisplayNames[sampler] ?? sampler),
-                ),
-            ],
-            onChanged: (value) => setState(() => _settingsSampler = value),
-          ),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<String?>(
-            key: const Key('block-setting-noise-schedule'),
-            initialValue: _settingsNoiseSchedule,
-            decoration: InputDecoration(
-              labelText: l10n.promptBlockLibrary_noiseScheduleLabel,
+              ],
+              onChanged: (value) {
+                var cleared = false;
+                setState(() {
+                  _settingsModel = value;
+                  if (value == null ||
+                      !Samplers.samplersForModel(
+                        value,
+                      ).contains(_settingsSampler)) {
+                    cleared = cleared || _settingsSampler != null;
+                    _settingsSampler = null;
+                  }
+                  if (value == null || !ModelSpecs.of(value).noiseSchedule) {
+                    cleared = cleared || _settingsNoiseSchedule != null;
+                    _settingsNoiseSchedule = null;
+                  }
+                  if (value == null || !ModelSpecs.of(value).isV4OrLater) {
+                    cleared = cleared || _cfgRescaleController.text.isNotEmpty;
+                    _cfgRescaleController.clear();
+                  }
+                  _clearedUnsupportedSettings = cleared;
+                });
+                _refreshTokenUsage();
+              },
             ),
-            items: [
-              DropdownMenuItem<String?>(
-                value: null,
-                child: Text(l10n.promptBlockLibrary_notSpecified),
-              ),
-              for (final schedule in NoiseSchedules.all)
-                DropdownMenuItem<String?>(
-                  value: schedule,
-                  child: Text(
-                    NoiseSchedules.displayNames[schedule] ?? schedule,
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: CompactParameterNumberField(
+                    key: const Key('block-setting-steps'),
+                    label: l10n.promptBlockLibrary_stepsLabel,
+                    controller: _stepsController,
+                    fallback: 28,
+                    min: 1,
+                    max: 50,
+                    step: 1,
                   ),
                 ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: CompactParameterNumberField(
+                    key: const Key('block-setting-scale'),
+                    label: 'PG',
+                    controller: _scaleController,
+                    fallback: 5,
+                    min: 1,
+                    max: 20,
+                    step: .1,
+                    decimals: 1,
+                  ),
+                ),
+                if (spec?.isV4OrLater == true) ...[
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: CompactParameterNumberField(
+                      key: const Key('block-setting-cfg-rescale'),
+                      label: 'PGR',
+                      controller: _cfgRescaleController,
+                      fallback: 0,
+                      min: 0,
+                      max: 1,
+                      step: .01,
+                      decimals: 2,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            if (model != null) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: _compactDropdown(
+                      key: const Key('block-setting-sampler'),
+                      label: l10n.generation_sampler,
+                      value: _settingsSampler,
+                      choices: [
+                        for (final sampler in samplers)
+                          (
+                            sampler,
+                            Samplers.samplerDisplayNames[sampler] ?? sampler,
+                          ),
+                      ],
+                      onChanged: (value) =>
+                          setState(() => _settingsSampler = value),
+                    ),
+                  ),
+                  if (spec!.noiseSchedule) ...[
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _compactDropdown(
+                        key: const Key('block-setting-noise-schedule'),
+                        label: l10n.promptBlockLibrary_noiseScheduleLabel,
+                        value: _settingsNoiseSchedule,
+                        choices: [
+                          for (final schedule in NoiseSchedules.all)
+                            (
+                              schedule,
+                              NoiseSchedules.displayNames[schedule] ?? schedule,
+                            ),
+                        ],
+                        onChanged: (value) =>
+                            setState(() => _settingsNoiseSchedule = value),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ],
-            onChanged: (value) =>
-                setState(() => _settingsNoiseSchedule = value),
-          ),
-          const SizedBox(height: 10),
-          _settingNumberField(
-            _cfgRescaleController,
-            l10n.promptBlockLibrary_cfgRescaleLabel,
-            key: const Key('block-setting-cfg-rescale'),
-            decimal: true,
-          ),
-        ],
+            if (_clearedUnsupportedSettings) ...[
+              const SizedBox(height: 7),
+              Text(
+                l10n.promptBlockLibrary_modelResetNotice,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _settingNumberField(
-    TextEditingController controller,
-    String label, {
-    Key? key,
-    bool decimal = false,
+  Widget _compactDropdown({
+    required Key key,
+    required String label,
+    required String? value,
+    required List<(String, String)> choices,
+    required ValueChanged<String?> onChanged,
   }) {
-    return TextField(
-      key: key,
-      controller: controller,
-      keyboardType: TextInputType.numberWithOptions(decimal: decimal),
-      decoration: InputDecoration(labelText: label, isDense: true),
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 2, bottom: 5),
+          child: Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 11,
+            ),
+          ),
+        ),
+        Container(
+          height: 34,
+          padding: const EdgeInsets.symmetric(horizontal: 9),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: .55),
+            ),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String?>(
+              key: key,
+              value: value,
+              isExpanded: true,
+              isDense: true,
+              iconSize: 18,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+              hint: Text(context.l10n.promptBlockLibrary_notSpecified),
+              items: [
+                DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text(context.l10n.promptBlockLibrary_notSpecified),
+                ),
+                for (final choice in choices)
+                  DropdownMenuItem<String?>(
+                    value: choice.$1,
+                    child: Text(choice.$2, overflow: TextOverflow.ellipsis),
+                  ),
+              ],
+              onChanged: onChanged,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -945,27 +998,30 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
 
     final steps = readInt(_stepsController);
     final scale = readDouble(_scaleController);
-    final width = readInt(_widthController);
-    final height = readInt(_heightController);
-    final cfgRescale = readDouble(_cfgRescaleController);
+    final cfgRescale =
+        _settingsModel == null || !ModelSpecs.of(_settingsModel!).isV4OrLater
+        ? null
+        : readDouble(_cfgRescaleController);
     if ((steps != null && (steps < 1 || steps > 50)) ||
         (scale != null && (scale < 1 || scale > 20)) ||
-        (width == null) != (height == null) ||
-        (width != null && (width <= 0 || width % 64 != 0)) ||
-        (height != null && (height <= 0 || height % 64 != 0)) ||
         (cfgRescale != null && (cfgRescale < 0 || cfgRescale > 1))) {
       throw const FormatException();
     }
     final settings = PromptBlockGenerationSettings(
       model: _settingsModel,
-      width: width,
-      height: height,
       steps: steps,
       scale: scale,
-      sampler: _settingsSampler,
-      noiseSchedule: _settingsNoiseSchedule,
+      sampler: _settingsModel == null ? null : _settingsSampler,
+      noiseSchedule: _settingsModel == null ? null : _settingsNoiseSchedule,
       cfgRescale: cfgRescale,
     );
+    if (_settingsModel != null) {
+      try {
+        validatePromptBlockGenerationSettings(settings, _settingsModel!);
+      } on StateError {
+        throw const FormatException();
+      }
+    }
     return settings.isEmpty ? null : settings;
   }
 

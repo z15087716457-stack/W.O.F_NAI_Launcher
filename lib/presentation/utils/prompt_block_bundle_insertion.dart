@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../providers/pill_workspace_provider.dart';
 import '../providers/prompt_block_library_provider.dart';
@@ -44,6 +45,8 @@ int insertPromptBlockBundle(
   }
 
   final hasPositive = block!.content.isNotEmpty;
+  final bundleId = const Uuid().v4();
+  final rollScopeMask = hasPositive ? 1 : 2;
   final activePositive = scope == positiveScope;
   var counted = false;
   if (hasPositive) {
@@ -54,6 +57,8 @@ int insertPromptBlockBundle(
         .insertBlockAt(
           offset: activePositive ? offset : document.text.length,
           blockId: blockId,
+          bundleId: bundleId,
+          rollScopeMask: rollScopeMask,
         );
     counted = true;
   }
@@ -66,6 +71,8 @@ int insertPromptBlockBundle(
         blockId: blockId,
         useNegativeContent: true,
         countUse: !counted,
+        bundleId: bundleId,
+        rollScopeMask: rollScopeMask,
       );
   return activePositive ? (hasPositive ? 1 : 0) : 1;
 }

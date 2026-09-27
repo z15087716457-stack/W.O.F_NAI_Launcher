@@ -1004,11 +1004,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_stepsLabel => 'Steps';
 
   @override
-  String get generation_guidance => 'Guidance';
+  String get generation_guidance => 'PG';
 
   @override
   String generation_cfgScale(Object scale) {
-    return 'CFG Scale: $scale';
+    return 'PG: $scale';
   }
 
   @override
@@ -1042,7 +1042,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String generation_cfgRescale(Object value) {
-    return 'CFG Rescale: $value';
+    return 'PGR: $value';
   }
 
   @override
@@ -2302,7 +2302,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gallery_metaSampler => 'Sampler';
 
   @override
-  String get gallery_metaCfgScale => 'CFG Scale';
+  String get gallery_metaCfgScale => 'PG';
 
   @override
   String get gallery_metaSeed => 'Seed';
@@ -4391,7 +4391,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_filterBySteps => 'Filter by Steps';
 
   @override
-  String get localGallery_filterByCfg => 'Filter by CFG Scale';
+  String get localGallery_filterByCfg => 'Filter by PG';
 
   @override
   String get localGallery_filterByResolution => 'Filter by Resolution';
@@ -5231,7 +5231,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get metadataImport_steps => 'Steps';
 
   @override
-  String get metadataImport_scale => 'CFG Scale';
+  String get metadataImport_scale => 'PG';
 
   @override
   String get metadataImport_size => 'Size';
@@ -5252,7 +5252,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get metadataImport_noiseSchedule => 'Noise Schedule';
 
   @override
-  String get metadataImport_cfgRescale => 'CFG Rescale';
+  String get metadataImport_cfgRescale => 'PGR';
 
   @override
   String get metadataImport_qualityToggle => 'Quality Toggle';
@@ -9206,34 +9206,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_stepsLabel => 'Steps';
 
   @override
-  String get promptBlockLibrary_cfgLabel => 'CFG Scale';
-
-  @override
-  String get promptBlockLibrary_widthLabel => 'Width';
-
-  @override
-  String get promptBlockLibrary_heightLabel => 'Height';
+  String get promptBlockLibrary_cfgLabel => 'PG';
 
   @override
   String get promptBlockLibrary_noiseScheduleLabel => 'Noise Schedule';
 
   @override
-  String get promptBlockLibrary_cfgRescaleLabel => 'CFG Rescale';
+  String get promptBlockLibrary_cfgRescaleLabel => 'PGR';
 
   @override
   String get promptBlockLibrary_invalidGenerationSettings =>
-      'Check settings: steps 1–50, CFG 1–20, paired dimensions in multiples of 64, and CFG Rescale 0–1.';
+      'Check settings: steps 1–50, PG 1–20, PGR 0–1, and model compatibility.';
 
   @override
-  String get promptBlockLibrary_applySettings => 'Apply block settings';
+  String get promptBlockLibrary_applySettings => 'Import settings';
 
   @override
   String get promptBlockLibrary_settingsApplied =>
-      'Block generation settings applied';
+      'Block settings imported to the current image';
 
   @override
   String get promptBlockLibrary_settingsIncompatible =>
-      'The block sampler is not supported by the current model. Edit the block settings first.';
+      'Block settings are incompatible with the target model. No parameters were imported.';
+
+  @override
+  String get promptBlockLibrary_noSettings => 'No generation settings saved';
+
+  @override
+  String get pillCard_rollScope => 'Variation scope';
+
+  @override
+  String get pillCard_positiveScope => 'Positive';
+
+  @override
+  String get pillCard_negativeScope => 'Negative';
+
+  @override
+  String get promptBlockLibrary_modelResetNotice =>
+      'Unsupported values were cleared after changing the model.';
 
   @override
   String get promptBlockLibrary_atomInputHint =>

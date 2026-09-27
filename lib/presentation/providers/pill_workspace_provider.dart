@@ -158,6 +158,8 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     required String blockId,
     bool useNegativeContent = false,
     bool countUse = true,
+    String? bundleId,
+    int rollScopeMask = 1,
   }) {
     _apply(
       PillDocumentEditor.insertBlock(
@@ -165,6 +167,8 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         offset: offset,
         blockId: blockId,
         useNegativeContent: useNegativeContent,
+        bundleId: bundleId,
+        rollScopeMask: rollScopeMask,
       ),
     );
     if (countUse) {
@@ -263,6 +267,15 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     }
     final instances = Map<String, PillInstance>.of(state.document.instances)
       ..[marker] = updated;
+    _apply(state.document.copyWith(instances: instances));
+  }
+
+  /// 双面块两侧共享的变化范围，不改变固定侧的原文内容。
+  void updateInstanceRollScopeMask(String marker, int mask) {
+    final instance = state.document.instances[marker];
+    if (instance == null || instance.rollScopeMask == mask) return;
+    final instances = Map<String, PillInstance>.of(state.document.instances)
+      ..[marker] = instance.copyWith(rollScopeMask: mask);
     _apply(state.document.copyWith(instances: instances));
   }
 
