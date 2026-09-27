@@ -75,6 +75,47 @@ void main() {
     expect(find.text('冷色'), findsOneWidget);
   });
 
+  testWidgets('tag divider starts near short title and moves with long title', (
+    tester,
+  ) async {
+    final tags = [
+      for (var i = 0; i < 8; i++)
+        PromptBlockTag(name: '标签$i', color: '#FF268BEA'),
+    ];
+    Future<(double, double)> measure(String title) async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      final block = _block('tagged', title, 'prompt').copyWith(tags: tags);
+      final container = await _pump(
+        tester,
+        libraryState: PromptBlockLibraryState(
+          blocks: [block],
+          folders: const [],
+        ),
+      );
+      container
+          .read(pillWorkspaceNotifierProvider.notifier)
+          .insertBlockAt(offset: 0, blockId: block.id);
+      await tester.pump();
+      await tester.tap(find.byType(PromptPill));
+      await tester.pumpAndSettle();
+      final card = tester.getRect(find.byType(PillInstanceCard));
+      final divider = tester.getRect(
+        find.byKey(const Key('block-tag-overflow-divider')),
+      );
+      final scroll = tester.getRect(
+        find.byKey(const Key('block-tag-scroll-area')),
+      );
+      expect(tester.takeException(), isNull);
+      return (divider.left - card.left, scroll.width);
+    }
+
+    final short = await measure('123');
+    expect(short.$1, inInclusiveRange(90, 110));
+    final long = await measure('一个非常非常长的画风块标题需要保留标签空间');
+    expect(long.$1, greaterThan(short.$1 + 60));
+    expect(long.$2, greaterThanOrEqualTo(60));
+  });
+
   testWidgets(
     'deleting main pill removes paired UC marker and its projection',
     (tester) async {

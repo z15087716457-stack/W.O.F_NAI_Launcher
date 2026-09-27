@@ -11,11 +11,13 @@ class PromptBlockTagChip extends StatelessWidget {
     required this.tag,
     this.onTap,
     this.compact = false,
+    this.maxWidth,
   });
 
   final PromptBlockTag tag;
   final VoidCallback? onTap;
   final bool compact;
+  final double? maxWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,9 @@ class PromptBlockTagChip extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(100),
           child: Container(
+            constraints: maxWidth == null
+                ? null
+                : BoxConstraints(maxWidth: maxWidth!),
             padding: EdgeInsets.symmetric(
               horizontal: compact ? 5 : 7,
               vertical: compact ? 2 : 3,
@@ -47,14 +52,10 @@ class PromptBlockTagChip extends StatelessWidget {
                   color: color,
                 ),
                 const SizedBox(width: 3),
-                Text(
-                  tag.name,
-                  maxLines: 1,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontSize: compact ? 10 : 11,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
+                if (maxWidth == null)
+                  _tagName(theme)
+                else
+                  Flexible(child: _tagName(theme)),
               ],
             ),
           ),
@@ -62,6 +63,16 @@ class PromptBlockTagChip extends StatelessWidget {
       ),
     );
   }
+
+  Widget _tagName(ThemeData theme) => Text(
+    tag.name,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: theme.textTheme.labelSmall?.copyWith(
+      fontSize: compact ? 10 : 11,
+      color: theme.colorScheme.onSurface,
+    ),
+  );
 }
 
 /// 实例浮卡标题右侧的标签条：从右侧起排，溢出时竖线分隔、滚轮横移。
@@ -115,7 +126,7 @@ class _PromptBlockTagStripState extends State<PromptBlockTagStrip> {
             key: const Key('block-tag-overflow-divider'),
             width: 1,
             height: 16,
-            color: theme.colorScheme.outlineVariant,
+            color: theme.colorScheme.outline.withValues(alpha: .85),
           ),
           const SizedBox(width: 5),
         ],

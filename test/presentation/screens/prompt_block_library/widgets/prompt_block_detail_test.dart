@@ -45,6 +45,7 @@ void main() {
     int useCount = 0,
     bool isFavorite = false,
     List<String>? atoms,
+    List<PromptBlockTag> tags = const [],
   }) {
     return PromptBlock.create(
       id: id,
@@ -57,6 +58,7 @@ void main() {
       createdAt: DateTime(2026),
       updatedAt: DateTime(2026),
       atoms: atoms,
+      tags: tags,
     );
   }
 
@@ -95,6 +97,55 @@ void main() {
   });
 
   group('PromptBlockDetailView', () {
+    testWidgets(
+      'library detail and hover tags wrap without horizontal scroll',
+      (tester) async {
+        final tags = [
+          for (var i = 0; i < 6; i++)
+            PromptBlockTag(name: '标签$i-1234567890', color: '#FF268BEA'),
+          const PromptBlockTag(
+            name: 'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW',
+            color: '#FF268BEA',
+          ),
+        ];
+        for (final compact in [false, true]) {
+          await tester.pumpWidget(
+            wrap(
+              SizedBox(
+                width: 320,
+                height: compact ? 460 : null,
+                child: PromptBlockDetailView(
+                  block: makeBlock(tags: tags),
+                  displayTitle: '测试块',
+                  locationLabel: '全部块',
+                  compactImage: compact,
+                ),
+              ),
+            ),
+          );
+          await tester.pump();
+          final tagArea = find.byKey(const Key('prompt-block-detail-tags'));
+          expect(tagArea, findsOneWidget);
+          expect(
+            find.descendant(
+              of: tagArea,
+              matching: find.byType(SingleChildScrollView),
+            ),
+            findsNothing,
+          );
+          final first = tester.getRect(find.text(tags.first.name));
+          final last = tester.getRect(find.text(tags.last.name));
+          expect(last.top, greaterThan(first.top));
+          expect(last.right, lessThanOrEqualTo(tester.getRect(tagArea).right));
+          expect(
+            tester.getRect(find.text('全部块')).top,
+            greaterThan(last.bottom),
+          );
+          expect(tester.takeException(), isNull);
+        }
+      },
+    );
+
     testWidgets('renders title/content/useCount/path; no-image placeholder', (
       tester,
     ) async {
@@ -262,10 +313,7 @@ void main() {
         findsNothing,
       );
       // 320 宽 → 0.8×宽 = 256 高，cover 裁切而非 letterbox
-      expect(
-        tester.getSize(compact).height,
-        moreOrLessEquals(256, epsilon: 1),
-      );
+      expect(tester.getSize(compact).height, moreOrLessEquals(256, epsilon: 1));
       final image_ = tester.widget<Image>(find.byType(Image));
       expect(image_.fit, BoxFit.cover);
     });

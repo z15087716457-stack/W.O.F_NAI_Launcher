@@ -198,24 +198,22 @@ class PromptBlockDetailView extends StatelessWidget {
           ),
           if (block.tags.isNotEmpty) ...[
             const SizedBox(height: 6),
-            SizedBox(
-              height: 23,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    for (final tag in block.tags) ...[
-                      PromptBlockTagChip(
-                        tag: tag,
-                        compact: true,
-                        onTap: onTagTap == null
-                            ? null
-                            : () => onTagTap!(tag.name),
-                      ),
-                      const SizedBox(width: 5),
-                    ],
-                  ],
-                ),
+            LayoutBuilder(
+              builder: (context, constraints) => Wrap(
+                key: const Key('prompt-block-detail-tags'),
+                spacing: 5,
+                runSpacing: 5,
+                children: [
+                  for (final tag in block.tags)
+                    PromptBlockTagChip(
+                      tag: tag,
+                      compact: true,
+                      maxWidth: constraints.maxWidth,
+                      onTap: onTagTap == null
+                          ? null
+                          : () => onTagTap!(tag.name),
+                    ),
+                ],
               ),
             ),
           ],

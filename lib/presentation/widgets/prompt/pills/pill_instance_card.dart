@@ -93,18 +93,32 @@ class _PillInstanceCardState extends ConsumerState<PillInstanceCard> {
               children: [
                 Icon(Icons.circle, size: 10, color: color),
                 const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    block?.displayTitle ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall,
-                  ),
-                ),
-                if (block?.tags.isNotEmpty == true)
+                if (block?.tags.isNotEmpty == true) ...[
                   ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 150),
-                    child: PromptBlockTagStrip(tags: block!.tags),
+                    // 短标题仍留稳定的起始区；长标题至多占 192，
+                    // 为右侧标签至少保留 72。浮卡正文宽 280。
+                    constraints: const BoxConstraints(
+                      minWidth: 72,
+                      maxWidth: 192,
+                    ),
+                    child: IntrinsicWidth(
+                      child: Text(
+                        block!.displayTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall,
+                      ),
+                    ),
+                  ),
+                  Expanded(child: PromptBlockTagStrip(tags: block.tags)),
+                ] else
+                  Expanded(
+                    child: Text(
+                      block?.displayTitle ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall,
+                    ),
                   ),
               ],
             ),
