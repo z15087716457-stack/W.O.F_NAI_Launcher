@@ -11,10 +11,9 @@ import '../../../../helpers/light_theme_contrast.dart';
 
 /// 生成页折叠面板的浅色主题可读性守卫。
 ///
-/// 这些面板都基于 CollapsibleImagePanel：折叠且有图时内容盖在深色渐变上，
-/// 白色文字合法；一旦展开，内容直接贴在 Card 表面，写死的白色就会在浅色
-/// 主题下变成白底白字。每个用例都把面板展开、并尽量打开会额外渲染文案的
-/// 分支，再断言没有近白色文字。
+/// 这些面板都基于 CollapsibleImagePanel：折叠带图时使用随主题变化的玻璃
+/// 色调；展开后内容直接贴在 Card 表面。每个用例都把面板展开、并尽量打开
+/// 会额外渲染文案的分支，再断言没有近白色文字。
 void main() {
   group('生成页面板浅色主题可读性', () {
     testWidgets('Img2ImgPanel（重绘）', (tester) async {
@@ -121,8 +120,7 @@ void main() {
     // UnifiedReferencePanel（Vibe Transfer）未纳入：它在构建时会拉起 Vibe
     // 库的存储与预编码链，widget test 中 pumpAndSettle 无法收敛（实测 >2
     // 分钟仍未完成）。其内容组件 vibe_transfer_content.dart 里的白色已人工
-    // 核验，全部由 showBackground 条件门控，只在深色遮罩上生效，不受此类
-    // 问题影响。
+    // 核验，折叠图片的前景色也要随浅色玻璃切换；此用例仍只覆盖展开态。
   });
 }
 

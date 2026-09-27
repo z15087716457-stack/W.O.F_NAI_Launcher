@@ -50,6 +50,15 @@ class CollapsibleImagePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final showBackground = hasData && !isExpanded;
+    final highContrast = MediaQuery.highContrastOf(context);
+    final lightImageGlass =
+        showBackground &&
+        frosted &&
+        !highContrast &&
+        theme.brightness == Brightness.light;
+    final imageForeground = lightImageGlass
+        ? theme.colorScheme.onSurface
+        : Colors.white;
 
     final panel = Card(
       clipBehavior: Clip.antiAlias,
@@ -67,28 +76,41 @@ class CollapsibleImagePanel extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  _CollapsedBackgroundImage(
-                    child: frosted && !MediaQuery.highContrastOf(context)
-                        ? ImageFiltered(
-                            imageFilter: ui.ImageFilter.blur(
-                              sigmaX: 2.4,
-                              sigmaY: 2.4,
-                              tileMode: ui.TileMode.clamp,
-                            ),
-                            child: backgroundImage!,
-                          )
-                        : backgroundImage!,
-                  ),
-                  // Dark Overlay
+                  _CollapsedBackgroundImage(child: backgroundImage!),
+                  // Blur the image below the material, never the controls.
+                  if (frosted && !highContrast)
+                    ClipRect(
+                      child: BackdropFilter(
+                        filter: ui.ImageFilter.blur(
+                          sigmaX: 12,
+                          sigmaY: 12,
+                          tileMode: ui.TileMode.clamp,
+                        ),
+                        child: const ColoredBox(color: Colors.transparent),
+                      ),
+                    ),
+                  // The image supplies the changing glass colour. The tint
+                  // keeps both light and dark foreground controls readable.
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withValues(alpha: frosted ? 0.62 : 0.5),
-                          Colors.black.withValues(alpha: frosted ? 0.68 : 0.75),
-                        ],
+                        colors: lightImageGlass
+                            ? [
+                                Colors.white.withValues(alpha: .76),
+                                theme.colorScheme.surface.withValues(
+                                  alpha: .69,
+                                ),
+                              ]
+                            : [
+                                Colors.black.withValues(
+                                  alpha: frosted ? .53 : .5,
+                                ),
+                                Colors.black.withValues(
+                                  alpha: frosted ? .61 : .75,
+                                ),
+                              ],
                       ),
                     ),
                   ),
@@ -98,7 +120,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [Color(0x0AFFFFFF), Color(0x00FFFFFF)],
+                          colors: [Color(0x1AFFFFFF), Color(0x00FFFFFF)],
                         ),
                       ),
                     ),
@@ -123,7 +145,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      _buildHeaderIcon(theme, showBackground),
+                      _buildHeaderIcon(theme, showBackground, imageForeground),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -135,7 +157,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                               style: GenSidebarStyle.sectionTitle(theme)
                                   .copyWith(
                                     color: showBackground
-                                        ? Colors.white
+                                        ? imageForeground
                                         : hasData
                                         ? theme.colorScheme.primary
                                         : null,
@@ -150,7 +172,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   fontSize: 11,
                                   color: showBackground
-                                      ? Colors.white.withValues(alpha: 0.9)
+                                      ? imageForeground.withValues(alpha: 0.74)
                                       : theme.colorScheme.onSurface.withValues(
                                           alpha: 0.55,
                                         ),
@@ -186,7 +208,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                             : Icons.keyboard_arrow_down,
                         size: 18,
                         color: showBackground
-                            ? Colors.white
+                            ? imageForeground
                             : theme.colorScheme.onSurface.withValues(
                                 alpha: 0.55,
                               ),
@@ -210,12 +232,18 @@ class CollapsibleImagePanel extends StatelessWidget {
         ],
       ),
     );
-    return frosted ? StudioGlassSurface(child: panel) : panel;
+    return frosted
+        ? StudioGlassSurface(backdropBlur: true, child: panel)
+        : panel;
   }
 
-  Widget _buildHeaderIcon(ThemeData theme, bool showBackground) {
+  Widget _buildHeaderIcon(
+    ThemeData theme,
+    bool showBackground,
+    Color imageForeground,
+  ) {
     final color = showBackground
-        ? Colors.white
+        ? imageForeground
         : hasData
         ? theme.colorScheme.primary
         : theme.colorScheme.onSurface.withValues(alpha: 0.85);

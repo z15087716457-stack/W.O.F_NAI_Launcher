@@ -142,7 +142,14 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expect(find.byType(ImageFiltered), findsOneWidget);
+        expect(find.byType(BackdropFilter), findsNWidgets(3));
+        expect(find.byType(ImageFiltered), findsNothing);
+        expect(
+          tester.widget<Text>(find.text('精准参考')).style?.color,
+          brightness == Brightness.light
+              ? GeistTheme.light.colorScheme.onSurface
+              : Colors.white,
+        );
         final imageFinder = find.byType(Image);
         await tester.runAsync(
           () => precacheImage(
@@ -151,13 +158,6 @@ void main() {
           ),
         );
         await tester.pump();
-        expect(
-          find.ancestor(
-            of: find.text('精准参考'),
-            matching: find.byType(ImageFiltered),
-          ),
-          findsNothing,
-        );
         if (Platform.environment['CAPTURE_STUDIO_UI'] == '1') {
           await tester.runAsync(() async {
             final image =
@@ -176,6 +176,7 @@ void main() {
         await tester.tap(find.text('精准参考'));
         await tester.pumpAndSettle();
         expect(expanded, isTrue);
+        expect(find.byType(BackdropFilter), findsNWidgets(2));
         expect(find.byType(ImageFiltered), findsNothing);
         expect(tester.takeException(), isNull);
       },

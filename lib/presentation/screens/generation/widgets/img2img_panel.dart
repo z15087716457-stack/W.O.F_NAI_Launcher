@@ -113,6 +113,10 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     if (widget.toolOnly) return _buildUpscalePanel(theme, workflow);
     final hasSourceImage = params.sourceImage != null;
     final showBackground = hasSourceImage && !workflow.isPanelExpanded;
+    final onDarkImage =
+        showBackground &&
+        (theme.brightness == Brightness.dark ||
+            MediaQuery.highContrastOf(context));
     final supportsInpaint = ref.watch(
       generationParamsNotifierProvider.select(
         (params) => params.modelSpec.img2imgInpainting,
@@ -135,7 +139,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
               params: params,
               workflow: workflow,
               supportsInpaint: supportsInpaint,
-              showBackground: showBackground,
+              onDarkImage: onDarkImage,
             )
           : [
               _buildImportDropTarget(
@@ -176,16 +180,20 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
       badge: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         decoration: BoxDecoration(
-          color: showBackground
+          color: onDarkImage
               ? Colors.white.withValues(alpha: 0.2)
+              : showBackground
+              ? theme.colorScheme.surface.withValues(alpha: .58)
               : theme.colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
           context.l10n.img2img_enabled,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: showBackground
+            color: onDarkImage
                 ? Colors.white
+                : showBackground
+                ? theme.colorScheme.onSurface
                 : theme.colorScheme.onPrimaryContainer,
           ),
         ),
@@ -266,10 +274,10 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     required Img2ImgPanelViewData params,
     required ImageWorkflowState workflow,
     required bool supportsInpaint,
-    required bool showBackground,
+    required bool onDarkImage,
   }) {
     final sourceImage = params.sourceImage!;
-    final foreground = showBackground ? Colors.white : null;
+    final foreground = onDarkImage ? Colors.white : null;
 
     return [
       _buildTiltedThumbnail(sourceImage),

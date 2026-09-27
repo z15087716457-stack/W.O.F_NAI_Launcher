@@ -31,6 +31,7 @@ class InlineCharacterSection extends ConsumerWidget {
       children: [
         StudioGlassSurface(
           borderRadius: BorderRadius.circular(6),
+          backdropBlur: true,
           child: Container(
             key: const ValueKey('character-section-header'),
             padding: const EdgeInsets.all(10),

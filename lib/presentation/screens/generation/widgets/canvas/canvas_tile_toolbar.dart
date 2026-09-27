@@ -12,6 +12,7 @@ import '../../../../providers/generation/preview_selection_provider.dart';
 import '../../../../providers/image_generation_provider.dart';
 import '../../../../services/image_workflow_launcher.dart';
 import '../../../../widgets/common/app_toast.dart';
+import '../../../../widgets/common/studio_glass_surface.dart';
 import '../../../../widgets/image_editor/image_editor_screen.dart';
 import '../../../../utils/clipboard_image.dart';
 import '../../services/generation_save_service.dart';
@@ -188,20 +189,36 @@ class _ToolbarStrip extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    return Material(
-      color: theme.colorScheme.surface.withValues(alpha: 0.92),
-      elevation: 6,
-      borderRadius: BorderRadius.circular(8),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: items
-                .map((it) => _buildItem(context, ref, theme, it))
-                .toList(),
+    final radius = BorderRadius.circular(11);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: theme.brightness == Brightness.dark ? .32 : .16,
+            ),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: StudioGlassSurface(
+        borderRadius: radius,
+        backdropBlur: true,
+        child: Material(
+          color: Colors.transparent,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: items
+                    .map((it) => _buildItem(context, ref, theme, it))
+                    .toList(),
+              ),
+            ),
           ),
         ),
       ),

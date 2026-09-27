@@ -1,19 +1,23 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
-/// Quiet glass finish: static grain and edge light never blur foreground text.
-/// Native translucency is opt-in and only used after DWM confirms availability.
+/// Glass finish for compact in-app surfaces. The optional backdrop pass samples
+/// only pixels behind this clipped surface; child text and controls stay sharp.
 class StudioGlassSurface extends StatelessWidget {
   const StudioGlassSurface({
     super.key,
     required this.child,
     this.borderRadius = const BorderRadius.all(Radius.circular(10)),
     this.nativeBackdrop = false,
+    this.backdropBlur = false,
     this.clipBehavior = Clip.antiAlias,
   });
 
   final Widget child;
   final BorderRadius borderRadius;
   final bool nativeBackdrop;
+  final bool backdropBlur;
   final Clip clipBehavior;
 
   @override
@@ -31,6 +35,41 @@ class StudioGlassSurface extends StatelessWidget {
         child: ColoredBox(
           color: theme.colorScheme.surface.withValues(alpha: dark ? .80 : .78),
           child: child,
+        ),
+      );
+    }
+    if (backdropBlur && !highContrast) {
+      final base = theme.colorScheme.surfaceContainerLow;
+      return ClipRRect(
+        borderRadius: borderRadius,
+        clipBehavior: clipBehavior,
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(
+            sigmaX: 12,
+            sigmaY: 12,
+            tileMode: ui.TileMode.clamp,
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  base.withValues(alpha: dark ? .82 : .76),
+                  theme.colorScheme.surface.withValues(alpha: dark ? .72 : .64),
+                ],
+              ),
+            ),
+            child: CustomPaint(
+              painter: _GlassGrain(dark),
+              foregroundPainter: _GlassEdge(
+                borderRadius,
+                Colors.white.withValues(alpha: dark ? .22 : .92),
+                theme.colorScheme.outline.withValues(alpha: dark ? .4 : .32),
+              ),
+              child: child,
+            ),
+          ),
         ),
       );
     }
