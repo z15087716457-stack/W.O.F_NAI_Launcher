@@ -65,7 +65,7 @@
 ## 本地画廊缩略图
 
 - 本地画廊缩略图质量由 `GalleryThumbnailQuality` 控制，默认 `hd`；`hd` 保持既有 `pickThumbnailSize(columnWidth, DPR)` 和显示端 1.5 倍过采样，`sd` 固定使用 `ThumbnailSize.small` 且显示端过采样为 1.0。
-- 质量偏好保存在 SharedPreferences 的 `local_gallery_thumbnail_quality`，非法或缺失值回退 `hd`；本地画廊分页条的完整和 compact 布局都提供质量控制。
+- 质量偏好保存在 SharedPreferences 的 `local_gallery_thumbnail_quality`，非法或缺失值回退 `hd`；入口在「设置 → 数据与存储」，进入设置时先恢复已有偏好，画廊分页条不再显示质量按钮。
 - 质量切换会立即更新画廊状态，并主动预取当前页、上一页和下一页；分页预取与卡片统一使用 `resolveThumbnailTier`。
 - 缩略图生成的去重身份必须是「原图路径 + `ThumbnailSize`」；CacheService 的生成集合/Completer/队列和 ThumbnailService 的活跃任务都不能只按路径去重，否则切换质量或列宽换档会串档。
 - 该设置只影响本地画廊卡片缩略图；详情大图、详情轮播、复制、发送、打包和拖拽仍使用原图路径。`.thumbs` 磁盘缓存已接入 LRU 清档（P7）：启动后台按「最久未使用」淘汰超限缓存，设置页「清理缩略图缓存」提供手动入口；默认上限 2048MB / 50000 个文件（每个图库源独立，`setCacheLimits` 可调），只删除 `.thumbs` 目录内的 `.thumb.jpg`，不触碰原图。
