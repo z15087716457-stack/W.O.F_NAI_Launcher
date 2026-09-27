@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -475,7 +476,7 @@ class _TestApp extends StatelessWidget {
       locale: Locale('en'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: OnlineGalleryScreen(),
+      home: IntegratedTitleBarShell(child: OnlineGalleryScreen()),
     );
   }
 }

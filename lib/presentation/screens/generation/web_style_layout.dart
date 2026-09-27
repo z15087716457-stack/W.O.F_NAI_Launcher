@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -132,7 +133,7 @@ class _WebStyleGenerationLayoutState
           const BlockLibraryPanelSlot(),
 
           // 中间 - 纯图像预览
-          const Expanded(child: ImagePreviewWidget()),
+          const Expanded(child: WindowPaneInset(child: ImagePreviewWidget())),
 
           if (layoutState.rightPanelExpanded)
             ResizeHandle(

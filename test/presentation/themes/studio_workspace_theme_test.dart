@@ -1,3 +1,8 @@
+import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
+import 'package:nai_launcher/presentation/providers/vibe_library_category_provider.dart';
+import 'package:nai_launcher/presentation/screens/vibe_library/vibe_library_screen.dart';
+import 'package:nai_launcher/presentation/screens/statistics/statistics_screen.dart';
+import 'package:nai_launcher/presentation/screens/statistics/statistics_state.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -102,6 +107,23 @@ class _Blocks extends PromptBlockLibraryNotifier {
   );
 }
 
+class _Vibes extends VibeLibraryNotifier {
+  @override
+  VibeLibraryState build() => const VibeLibraryState();
+  @override
+  Future<void> initialize() async {}
+}
+
+class _VibeCategories extends VibeLibraryCategoryNotifier {
+  @override
+  VibeLibraryCategoryState build() => const VibeLibraryCategoryState();
+}
+
+class _Stats extends StatisticsNotifier {
+  @override
+  StatisticsData build() => const StatisticsData(isLoading: false);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setContextOverride(
@@ -117,12 +139,17 @@ void main() {
   setUpAll(() async {
     await loadStudioCaptureFonts();
     await (FontLoader(
+      'StudioIcons',
+    )..addFont(rootBundle.load('assets/fonts/StudioIcons.ttf'))).load();
+    await (FontLoader(
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
   for (final brightness in Brightness.values) {
     for (final (name, screen) in <(String, Widget)>[
       ('gallery', const LocalGalleryScreen()),
+      ('vibe', const VibeLibraryScreen()),
+      ('statistics', const StatisticsScreen()),
       ('blocks', const PromptBlockLibraryScreen()),
       (
         'appearance',
@@ -137,7 +164,7 @@ void main() {
         SharedPreferences.setMockInitialValues({
           StorageKeys.hasSeenLocalGalleryTip: true,
         });
-        tester.view.physicalSize = const Size(1280, 900);
+        tester.view.physicalSize = Size(name == 'vibe' ? 900 : 1280, 900);
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
         final storage = InMemoryLocalStorageService();
@@ -146,6 +173,11 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
+              vibeLibraryNotifierProvider.overrideWith(_Vibes.new),
+              vibeLibraryCategoryNotifierProvider.overrideWith(
+                _VibeCategories.new,
+              ),
+              statisticsNotifierProvider.overrideWith(_Stats.new),
               localStorageServiceProvider.overrideWithValue(storage),
               shortcutConfigNotifierProvider.overrideWith(_Shortcuts.new),
               zhDictionaryServiceProvider.overrideWith(
@@ -194,7 +226,9 @@ void main() {
               ? const Color(0xFF111111)
               : Colors.white,
         );
-        if (brightness == Brightness.light) {
+        // Vibe retains its existing muted zero counts / empty-state caption.
+        // Its new coverage here checks window chrome geometry and overflow.
+        if (brightness == Brightness.light && name != 'vibe') {
           expectNoUnreadableLightText(tester, panelName: name);
         }
         if (Platform.environment['CAPTURE_STUDIO_UI'] == '1') {

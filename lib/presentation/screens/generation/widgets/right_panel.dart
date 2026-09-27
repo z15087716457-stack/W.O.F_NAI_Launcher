@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,14 +40,18 @@ class RightPanel extends ConsumerWidget {
 
     // 拖拽时不使用动画，避免粘滞感
     if (isResizing) {
-      return Container(width: width, decoration: decoration, child: child);
+      return Container(
+        width: width,
+        decoration: decoration,
+        child: WindowPaneInset(child: child),
+      );
     }
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       width: width,
       decoration: decoration,
-      child: child,
+      child: WindowPaneInset(child: child),
     );
   }
 }

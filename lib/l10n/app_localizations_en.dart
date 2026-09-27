@@ -10466,4 +10466,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settings_geistDescription =>
       'One appearance across your studio. Black or white surfaces, with blue accents.';
+
+  @override
+  String get generation_tipReuseBlocks =>
+      'Save frequently used prompts as blocks to reuse them later.';
+
+  @override
+  String get generation_tipBlockModes =>
+      'Combine blocks in sequence or random mode for new variations.';
+
+  @override
+  String get generation_tipLockBlocks =>
+      'Lock the blocks you want to keep, then randomize the rest.';
 }

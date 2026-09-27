@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -57,6 +58,8 @@ class _MobileGenerationLayoutState
             },
             tooltip: context.l10n.generation_paramsSettings,
           ),
+          if (WindowChromeScope.activeOf(context))
+            const SizedBox(width: 202, height: 36, child: WindowDragArea()),
         ],
       ),
       endDrawer: Drawer(

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -234,7 +235,10 @@ class _PromptBlockLibraryScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _buildToolbar(context, library),
+                        WindowHeader(
+                          enabled: !showDetailPanel || !_detailPanelExpanded,
+                          child: _buildToolbar(context, library),
+                        ),
                         if (!showSidebar && library.valueOrNull != null)
                           _buildCompactFolderSelector(library.requireValue),
                         Expanded(
@@ -247,9 +251,11 @@ class _PromptBlockLibraryScreenState
                     ),
                   ),
                   if (showDetailPanel)
-                    _buildDetailRail(
-                      selectedBlock,
-                      state?.folders ?? const <PromptBlockFolder>[],
+                    WindowPaneInset(
+                      child: _buildDetailRail(
+                        selectedBlock,
+                        state?.folders ?? const <PromptBlockFolder>[],
+                      ),
                     ),
                 ],
               );

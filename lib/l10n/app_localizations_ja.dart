@@ -10199,4 +10199,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_geistDescription => 'スタジオ全体で共通の外観。白黒の背景にブルーのアクセント。';
+
+  @override
+  String get generation_tipReuseBlocks => 'よく使うプロンプトをブロックに保存して、次回も再利用。';
+
+  @override
+  String get generation_tipBlockModes => '順番・ランダムモードで、ブロックの組み合わせを変えられます。';
+
+  @override
+  String get generation_tipLockBlocks => '残したいブロックをロックして、ほかの部分をランダムに。';
 }

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -222,7 +223,9 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
               Expanded(
                 child: Column(
                   children: [
-                    _buildToolbarOrSelectionBar(state, bulkOpState),
+                    WindowHeader(
+                      child: _buildToolbarOrSelectionBar(state, bulkOpState),
+                    ),
                     Expanded(child: _buildBody(state, columns, itemWidth)),
                     if (!state.isIndexing &&
                         state.filteredFiles.isNotEmpty &&

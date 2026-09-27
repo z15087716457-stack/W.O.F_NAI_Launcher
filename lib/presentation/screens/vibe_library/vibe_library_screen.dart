@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'dart:io';
 import 'dart:async';
 import 'dart:ui' as ui;
@@ -390,7 +391,10 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
                       child: Column(
                         children: [
                           // 工具栏
-                          _buildToolbar(state, selectionState, theme),
+                          WindowHeader(
+                            minimumInlineWidth: 900,
+                            child: _buildToolbar(state, selectionState, theme),
+                          ),
                           // 主体内容
                           Expanded(
                             child: _buildBody(

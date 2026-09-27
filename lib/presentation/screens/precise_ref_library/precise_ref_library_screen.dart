@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -342,7 +343,7 @@ class _PreciseRefLibraryScreenState
           children: [
             Column(
               children: [
-                _buildToolbar(state),
+                WindowHeader(child: _buildToolbar(state)),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                   child: Align(

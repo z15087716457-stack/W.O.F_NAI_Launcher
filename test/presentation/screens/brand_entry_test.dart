@@ -221,7 +221,7 @@ void main() {
         if (TitleBarRegionService.isSupported) {
           // 登录页标题栏收成页面底色，不再显示 Logo 标题
           expect(
-            find.byKey(const ValueKey('immersive_title_bar')),
+            find.byKey(const Key('window-caption-controls')),
             findsOneWidget,
           );
           expect(find.text('NAI Studio'), findsNothing);

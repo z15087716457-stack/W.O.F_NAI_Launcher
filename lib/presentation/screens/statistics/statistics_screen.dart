@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +23,7 @@ class StatisticsScreen extends ConsumerWidget {
     return Scaffold(
       body: Column(
         children: [
-          _buildHeader(context, theme, l10n),
+          WindowHeader(child: _buildHeader(context, theme, l10n)),
           Expanded(child: _buildContent(context, l10n, data, ref, screenWidth)),
         ],
       ),

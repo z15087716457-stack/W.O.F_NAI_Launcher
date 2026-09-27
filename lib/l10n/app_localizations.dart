@@ -18290,6 +18290,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'One appearance across your studio. Black or white surfaces, with blue accents.'**
   String get settings_geistDescription;
+
+  /// No description provided for @generation_tipReuseBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Save frequently used prompts as blocks to reuse them later.'**
+  String get generation_tipReuseBlocks;
+
+  /// No description provided for @generation_tipBlockModes.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine blocks in sequence or random mode for new variations.'**
+  String get generation_tipBlockModes;
+
+  /// No description provided for @generation_tipLockBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock the blocks you want to keep, then randomize the rest.'**
+  String get generation_tipLockBlocks;
 }
 
 class _AppLocalizationsDelegate

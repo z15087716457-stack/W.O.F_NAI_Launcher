@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'dart:async';
 import 'dart:math';
 
@@ -278,7 +279,9 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
       body: Column(
         children: [
           // 顶部工具栏
-          _buildToolbar(theme, state, authState, gelbooruAuthState),
+          WindowHeader(
+            child: _buildToolbar(theme, state, authState, gelbooruAuthState),
+          ),
           // 图片网格（右下角悬浮列宽滑杆）
           Expanded(
             child: Stack(

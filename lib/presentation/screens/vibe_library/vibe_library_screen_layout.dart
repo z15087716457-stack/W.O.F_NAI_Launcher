@@ -31,117 +31,135 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
               ),
             ),
           ),
-          child: Row(
-            children: [
-              // 标题
-              Text(
-                context.l10n.vibeLibrary_title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxWidth < 900;
+              final children = <Widget>[
+                // 标题
+                Text(
+                  context.l10n.vibeLibrary_title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              // 数量
-              if (!state.isLoading)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.brightness == Brightness.dark
-                        ? theme.colorScheme.primaryContainer.withValues(
-                            alpha: 0.4,
-                          )
-                        : theme.colorScheme.primaryContainer.withValues(
-                            alpha: 0.3,
-                          ),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    state.hasFilters
-                        ? '${state.filteredCount}/${state.totalCount}'
-                        : '${state.totalCount}',
-                    style: theme.textTheme.labelSmall?.copyWith(
+                const SizedBox(width: 8),
+                // 数量
+                if (!state.isLoading)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
                       color: theme.brightness == Brightness.dark
-                          ? theme.colorScheme.onPrimaryContainer
-                          : theme.colorScheme.onSurface,
-                      fontWeight: FontWeight.w500,
+                          ? theme.colorScheme.primaryContainer.withValues(
+                              alpha: 0.4,
+                            )
+                          : theme.colorScheme.primaryContainer.withValues(
+                              alpha: 0.3,
+                            ),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      state.hasFilters
+                          ? '${state.filteredCount}/${state.totalCount}'
+                          : '${state.totalCount}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.brightness == Brightness.dark
+                            ? theme.colorScheme.onPrimaryContainer
+                            : theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
+                const SizedBox(width: 12),
+                // 搜索框
+                if (compact)
+                  SizedBox(
+                    width: constraints.maxWidth.clamp(0, 260).toDouble(),
+                    child: _buildSearchField(theme, state),
+                  )
+                else
+                  Expanded(child: _buildSearchField(theme, state)),
+                const SizedBox(width: 8),
+                // 排序按钮
+                _buildSortButton(theme, state),
+                const SizedBox(width: 6),
+                // 分类面板切换
+                CompactIconButton(
+                  icon: _showCategoryPanel
+                      ? Icons.view_sidebar
+                      : Icons.view_sidebar_outlined,
+                  label: context.l10n.common_categories,
+                  tooltip: _showCategoryPanel
+                      ? context.l10n.vibeLibrary_hideCategoryPanel
+                      : context.l10n.vibeLibrary_showCategoryPanel,
+                  onPressed: () {
+                    _updateLayoutState(() {
+                      _showCategoryPanel = !_showCategoryPanel;
+                    });
+                  },
                 ),
-              const SizedBox(width: 12),
-              // 搜索框
-              Expanded(child: _buildSearchField(theme, state)),
-              const SizedBox(width: 8),
-              // 排序按钮
-              _buildSortButton(theme, state),
-              const SizedBox(width: 6),
-              // 分类面板切换
-              CompactIconButton(
-                icon: _showCategoryPanel
-                    ? Icons.view_sidebar
-                    : Icons.view_sidebar_outlined,
-                label: context.l10n.common_categories,
-                tooltip: _showCategoryPanel
-                    ? context.l10n.vibeLibrary_hideCategoryPanel
-                    : context.l10n.vibeLibrary_showCategoryPanel,
-                onPressed: () {
-                  _updateLayoutState(() {
-                    _showCategoryPanel = !_showCategoryPanel;
-                  });
-                },
-              ),
-              const SizedBox(width: 6),
-              // 选择模式
-              CompactIconButton(
-                icon: Icons.checklist,
-                label: context.l10n.common_multiSelect,
-                tooltip: context.l10n.vibeLibrary_enterSelectionMode,
-                onPressed: () {
-                  ref
-                      .read(vibeLibrarySelectionNotifierProvider.notifier)
-                      .enter();
-                },
-              ),
-              const SizedBox(width: 6),
-              // 导入按钮（支持右键菜单）
-              GestureDetector(
-                onSecondaryTapDown: (details) {
-                  if (!(_isImporting || _isPickingFile)) {
-                    _showImportMenu(details.globalPosition);
-                  }
-                },
-                child: CompactIconButton(
-                  icon: Icons.file_download_outlined,
-                  label: context.l10n.common_import,
-                  tooltip: context.l10n.vibeLibrary_importTooltip,
-                  isLoading: _isPickingFile,
-                  onPressed: (_isImporting || _isPickingFile)
+                const SizedBox(width: 6),
+                // 选择模式
+                CompactIconButton(
+                  icon: Icons.checklist,
+                  label: context.l10n.common_multiSelect,
+                  tooltip: context.l10n.vibeLibrary_enterSelectionMode,
+                  onPressed: () {
+                    ref
+                        .read(vibeLibrarySelectionNotifierProvider.notifier)
+                        .enter();
+                  },
+                ),
+                const SizedBox(width: 6),
+                // 导入按钮（支持右键菜单）
+                GestureDetector(
+                  onSecondaryTapDown: (details) {
+                    if (!(_isImporting || _isPickingFile)) {
+                      _showImportMenu(details.globalPosition);
+                    }
+                  },
+                  child: CompactIconButton(
+                    icon: Icons.file_download_outlined,
+                    label: context.l10n.common_import,
+                    tooltip: context.l10n.vibeLibrary_importTooltip,
+                    isLoading: _isPickingFile,
+                    onPressed: (_isImporting || _isPickingFile)
+                        ? null
+                        : () => _importVibes(),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                // 导出按钮
+                CompactIconButton(
+                  icon: Icons.file_upload_outlined,
+                  label: context.l10n.common_export,
+                  tooltip: context.l10n.vibeLibrary_exportTooltip,
+                  onPressed: state.entries.isEmpty
                       ? null
-                      : () => _importVibes(),
+                      : () => _exportVibes(),
                 ),
-              ),
-              const SizedBox(width: 6),
-              // 导出按钮
-              CompactIconButton(
-                icon: Icons.file_upload_outlined,
-                label: context.l10n.common_export,
-                tooltip: context.l10n.vibeLibrary_exportTooltip,
-                onPressed: state.entries.isEmpty ? null : () => _exportVibes(),
-              ),
-              const SizedBox(width: 6),
-              // 打开文件夹按钮
-              CompactIconButton(
-                icon: Icons.folder_open_outlined,
-                label: context.l10n.common_folder,
-                tooltip: context.l10n.vibeLibrary_openFolderTooltip,
-                onPressed: () => _openVibeLibraryFolder(),
-              ),
-              const SizedBox(width: 6),
-              // 刷新按钮
-              _buildRefreshButton(state, theme),
-            ],
+                const SizedBox(width: 6),
+                // 打开文件夹按钮
+                CompactIconButton(
+                  icon: Icons.folder_open_outlined,
+                  label: context.l10n.common_folder,
+                  tooltip: context.l10n.vibeLibrary_openFolderTooltip,
+                  onPressed: () => _openVibeLibraryFolder(),
+                ),
+                const SizedBox(width: 6),
+                // 刷新按钮
+                _buildRefreshButton(state, theme),
+              ];
+              return compact
+                  ? Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      runSpacing: 8,
+                      children: children,
+                    )
+                  : Row(children: children);
+            },
           ),
         ),
       ),

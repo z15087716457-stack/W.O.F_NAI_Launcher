@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -331,7 +332,7 @@ void main() {
         locale: Locale('zh'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: StyleExploreScreen(),
+        home: IntegratedTitleBarShell(child: StyleExploreScreen()),
       ),
     );
     if (appOffset == Offset.zero) return app;
@@ -1387,7 +1388,7 @@ void main() {
         .read(layoutStateNotifierProvider.notifier)
         .setBlockLibraryPanelExpanded(true);
     await tester.pump();
-    final closedGallery = 360.0;
+    const closedGallery = 360.0;
     final openedGallery = galleryRect(tester).width;
     expect(
       closedGallery - openedGallery,

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -463,11 +464,11 @@ class DesktopShell extends ConsumerWidget {
                   clipBehavior: Clip.none,
                   children: [
                     content,
-                    const Positioned(
-                      top: 0,
+                    Positioned(
+                      top: WindowChromeScope.activeOf(context) ? 36 : 0,
                       left: 0,
                       right: 0,
-                      child: UpdateNoticeBanner(),
+                      child: const UpdateNoticeBanner(),
                     ),
                   ],
                 );
@@ -504,11 +505,11 @@ class MobileShell extends ConsumerWidget {
             clipBehavior: Clip.none,
             children: [
               content,
-              const Positioned(
-                top: 0,
+              Positioned(
+                top: WindowChromeScope.activeOf(context) ? 36 : 0,
                 left: 0,
                 right: 0,
-                child: UpdateNoticeBanner(),
+                child: const UpdateNoticeBanner(),
               ),
             ],
           );

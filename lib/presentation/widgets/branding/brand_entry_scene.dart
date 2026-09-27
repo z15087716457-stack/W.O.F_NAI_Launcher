@@ -10,7 +10,6 @@ import '../../../core/utils/localization_extension.dart';
 import '../../providers/theme_provider.dart';
 import '../../themes/studio_typography.dart';
 import '../auth/entry_controls.dart';
-import '../navigation/integrated_title_bar.dart';
 import 'entry_field.dart';
 
 /// The complete, original wordmark. The asset only removes empty source margins;
@@ -127,8 +126,7 @@ class _BrandEntrySceneState extends ConsumerState<BrandEntryScene>
             final width = constraints.maxWidth;
             final height = constraints.maxHeight;
             // Logo 按整窗高度取尺寸，载入页和登录页一样大
-            final windowHeight =
-                height + (chromeInBar ? IntegratedTitleBarShell.barHeight : 0);
+            final windowHeight = height;
             final logoWidth = math.max(
               180.0,
               math.min(300.0, math.min(width - 96, (windowHeight - 80) * 0.36)),

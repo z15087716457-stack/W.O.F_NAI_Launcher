@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -68,7 +69,7 @@ void main() {
           locale: Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: SettingsScreen(),
+          home: IntegratedTitleBarShell(child: SettingsScreen()),
         ),
       ),
     );

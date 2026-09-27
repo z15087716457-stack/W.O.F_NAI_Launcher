@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -159,6 +160,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(context.l10n.settings_title),
+        actions: [
+          if (WindowChromeScope.activeOf(context))
+            const SizedBox(width: 202, height: 36, child: WindowDragArea()),
+        ],
         // 滚动后变暗色
         backgroundColor: _isContentScrolled
             ? theme.colorScheme.surfaceContainerHighest

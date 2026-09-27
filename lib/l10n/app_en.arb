@@ -6003,5 +6003,8 @@
   },
   "settings_geistDark": "Geist Dark",
   "settings_geistLight": "Geist Light",
-  "settings_geistDescription": "One appearance across your studio. Black or white surfaces, with blue accents."
+  "settings_geistDescription": "One appearance across your studio. Black or white surfaces, with blue accents.",
+  "generation_tipReuseBlocks": "Save frequently used prompts as blocks to reuse them later.",
+  "generation_tipBlockModes": "Combine blocks in sequence or random mode for new variations.",
+  "generation_tipLockBlocks": "Lock the blocks you want to keep, then randomize the rest."
 }

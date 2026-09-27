@@ -10064,4 +10064,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_geistDescription => '全工作室统一外观：黑白灰底色，蓝色作为操作强调。';
+
+  @override
+  String get generation_tipReuseBlocks => '把常用提示词保存为块，下一次直接复用。';
+
+  @override
+  String get generation_tipBlockModes => '顺序与随机模式，可以让提示词块产生不同组合。';
+
+  @override
+  String get generation_tipLockBlocks => '锁定想保留的块，再随机调整其他部分。';
 }

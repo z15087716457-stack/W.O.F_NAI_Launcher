@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -613,7 +614,7 @@ class _VibeDetailViewerState extends ConsumerState<VibeDetailViewer> {
             onClose: _close,
           ),
         ),
-        Expanded(flex: 4, child: _buildParamPanel()),
+        Expanded(flex: 4, child: WindowPaneInset(child: _buildParamPanel())),
       ],
     );
   }

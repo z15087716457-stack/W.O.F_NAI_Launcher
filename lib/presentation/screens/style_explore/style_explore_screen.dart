@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -315,12 +316,18 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                         key: const Key('style-explore-main-editor'),
                         child: Column(
                           children: [
-                            _buildTopBar(
-                              theme,
-                              constraints.maxWidth,
-                              galleryVisible,
-                              runSidebarVisible,
-                              layoutState,
+                            WindowHeader(
+                              enabled:
+                                  !galleryVisible &&
+                                  !runSidebarVisible &&
+                                  !blockLibraryExpanded,
+                              child: _buildTopBar(
+                                theme,
+                                constraints.maxWidth,
+                                galleryVisible,
+                                runSidebarVisible,
+                                layoutState,
+                              ),
                             ),
                             Expanded(
                               child: _buildCenterPanel(
@@ -333,19 +340,27 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                       ),
                     ),
                     if (blockLibraryExpanded)
-                      const BlockLibraryPanelSlot(rightDock: true),
+                      WindowPaneInset(
+                        enabled: !galleryVisible && !runSidebarVisible,
+                        child: const BlockLibraryPanelSlot(rightDock: true),
+                      ),
                     if (runSidebarVisible)
-                      _buildSidebar(
-                        theme,
-                        width: paneLayout.sidebarWidth,
-                        galleryVisible: galleryVisible,
-                        rightConcession: rightConcession,
+                      WindowPaneInset(
+                        enabled: !galleryVisible,
+                        child: _buildSidebar(
+                          theme,
+                          width: paneLayout.sidebarWidth,
+                          galleryVisible: galleryVisible,
+                          rightConcession: rightConcession,
+                        ),
                       ),
                     if (galleryVisible)
-                      _buildGalleryPanel(
-                        theme,
-                        width: paneLayout.galleryWidth,
-                        rightConcession: rightConcession,
+                      WindowPaneInset(
+                        child: _buildGalleryPanel(
+                          theme,
+                          width: paneLayout.galleryWidth,
+                          rightConcession: rightConcession,
+                        ),
                       ),
                   ],
                 ),

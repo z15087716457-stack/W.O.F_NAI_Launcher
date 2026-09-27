@@ -1,3 +1,10 @@
+import '../../../../helpers/studio_capture_fonts.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/generation_welcome.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/right_panel.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
+import 'package:nai_launcher/presentation/widgets/branding/brand_entry_scene.dart';
+import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
@@ -106,6 +113,141 @@ void main() {
     await setUpTemporaryHive();
     await Hive.openBox(StorageKeys.settingsBox);
   });
+  for (final dark in [false, true]) {
+    testWidgets(
+      'borderless generation has usable model header and stable welcome, dark=$dark',
+      (tester) async {
+        await tester.binding.setSurfaceSize(const Size(1400, 1000));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final mode = ValueNotifier(false);
+        addTearDown(mode.dispose);
+        final container = createStorageFreeContainer(
+          overrides: [
+            localStorageServiceProvider.overrideWithValue(_Storage()),
+            characterPromptRepositoryProvider.overrideWithValue(
+              _CharacterRepository(),
+            ),
+            promptTokenCounterServiceProvider.overrideWith(
+              (ref) async =>
+                  PromptTokenCounterService(encoder: _TokenEncoder()),
+            ),
+            imageGenerationNotifierProvider.overrideWith(_Generation.new),
+            characterPromptNotifierProvider.overrideWith(_Characters.new),
+            promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
+            subscriptionNotifierProvider.overrideWith(_Subscription.new),
+            tipEpochProvider.overrideWith((ref) => Stream.value(0)),
+            for (final target in PromptTokenCountTarget.values)
+              promptTokenUsageProvider(target).overrideWith(
+                (ref) async =>
+                    const PromptTokenUsage(usedTokens: 12, limit: 512),
+              ),
+          ],
+        );
+        addTearDown(container.dispose);
+        await container
+            .read(layoutStateNotifierProvider.notifier)
+            .setWebLeftPanelWidth(400);
+        await container
+            .read(layoutStateNotifierProvider.notifier)
+            .setRightPanelExpanded(true);
+        await container
+            .read(layoutStateNotifierProvider.notifier)
+            .setRightPanelWidth(220);
+        await tester.runAsync(() async {
+          await loadStudioCaptureFonts();
+          await (FontLoader('MaterialIcons')
+                ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf')))
+              .load();
+          await (FontLoader('Harmony')..addFont(
+                rootBundle.load('assets/fonts/HarmonyOS_Sans_SC_Regular.ttf'),
+              ))
+              .load();
+          await (FontLoader(
+            'StudioIcons',
+          )..addFont(rootBundle.load('assets/fonts/StudioIcons.ttf'))).load();
+        });
+        final key = GlobalKey();
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              theme: (dark ? GeistTheme.dark : GeistTheme.light).copyWith(
+                textTheme: (dark ? GeistTheme.dark : GeistTheme.light).textTheme
+                    .apply(fontFamily: 'Harmony'),
+              ),
+              locale: const Locale('zh'),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: RepaintBoundary(
+                key: key,
+                child: IntegratedTitleBarShell(
+                  child: Scaffold(
+                    body: Row(
+                      children: [
+                        WebLeftPanel(negativeModeNotifier: mode),
+                        const Expanded(
+                          child: WindowPaneInset(child: GenerationWelcome()),
+                        ),
+                        const RightPanel(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.runAsync(
+          () => precacheImage(
+            const AssetImage('assets/images/wof_logo_full.png'),
+            tester.element(find.byType(BrandLogo)),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.getTopLeft(find.byType(WebLeftPanel)).dy, 0);
+        expect(find.text('TIP'), findsOneWidget);
+        final welcome = find.byType(GenerationWelcome);
+        final tipBefore = tester
+            .widgetList<Text>(
+              find.descendant(of: welcome, matching: find.byType(Text)),
+            )
+            .last
+            .data;
+        for (final expanded in [true, false]) {
+          await container
+              .read(layoutStateNotifierProvider.notifier)
+              .setRightPanelExpanded(expanded);
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          expect(
+            tester
+                .widgetList<Text>(
+                  find.descendant(of: welcome, matching: find.byType(Text)),
+                )
+                .last
+                .data,
+            tipBefore,
+          );
+          if (Platform.environment['CAPTURE_BORDERLESS'] == '1') {
+            await tester.runAsync(() async {
+              final image =
+                  await (key.currentContext!.findRenderObject()!
+                          as RenderRepaintBoundary)
+                      .toImage(pixelRatio: 1.25);
+              final bytes = (await image.toByteData(
+                format: ui.ImageByteFormat.png,
+              ))!.buffer.asUint8List();
+              File(
+                '.dart_tool/borderless-generation-${dark ? 'dark' : 'light'}-${expanded ? 'open' : 'closed'}.png',
+              ).writeAsBytesSync(bytes);
+              image.dispose();
+            });
+          }
+        }
+      },
+    );
+  }
   for (final width in [320.0, 400.0]) {
     for (final language in ['zh', 'en']) {
       testWidgets(

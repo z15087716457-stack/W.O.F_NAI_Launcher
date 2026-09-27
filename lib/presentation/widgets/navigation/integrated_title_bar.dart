@@ -7,24 +7,10 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../../core/services/titlebar_region_service.dart';
 import '../../../core/services/window_material_service.dart';
-import '../common/studio_glass_surface.dart';
+import 'window_chrome_layout.dart';
 
-/// FEAT-23 内置一体标题栏。
-///
-/// 挂在 `MaterialApp.router` 的 `builder` 上，以 Column 包住全部
-/// 路由内容（splash / login / 主屏共享同一条栏）。栏高 36 逻辑像素，
-/// 左侧 W.O.F logo + 标题，右侧自绘最小化/最大化/关闭三钮。
-///
-/// 原生窗口行为（拖拽移动、双击最大化、Aero Snap）不依赖 Flutter
-/// 手势：Dart 侧把栏高与右侧按钮保留宽上报给 runner 的
-/// `titlebar_region`，由 `WM_NCHITTEST` 命中返回 `HTCAPTION`。
-///
-/// 栏与内容之间有一条 0.5px `outlineVariant` 细线，默认透明，
-/// 任意顶层滚动内容离开顶部（pixels > 0）时浮现。
-///
-/// [immersive]（登录 / 载入页）：栏收成页面底色，不显示 Logo 与标题，
-/// 右侧只留明暗切换和三个窗口按钮，与页面连成一整块；离开这些页面时
-/// 玻璃栏淡入。
+/// Borderless window shell: page surfaces reach the top, with a fixed caption
+/// cluster. Existing headers reserve its footprint through WindowChromeScope.
 class IntegratedTitleBarShell extends StatefulWidget {
   const IntegratedTitleBarShell({
     super.key,
@@ -56,72 +42,23 @@ class IntegratedTitleBarShell extends StatefulWidget {
 }
 
 class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
-  final ValueNotifier<bool> _contentScrolled = ValueNotifier<bool>(false);
-
-  @override
-  void dispose() {
-    _contentScrolled.dispose();
-    super.dispose();
-  }
-
-  bool _onScrollNotification(ScrollNotification notification) {
-    // 只看最内层可滚动组件的偏移；对话框等嵌套滚动不触发。
-    if (notification.depth == 0) {
-      final scrolled = notification.metrics.pixels > 0;
-      if (_contentScrolled.value != scrolled) {
-        _contentScrolled.value = scrolled;
-      }
-    }
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (!TitleBarRegionService.isSupported) {
-      return widget.child;
-    }
-    // Stack 布局：内容在下、标题栏最后画——按钮浮签（_CaptionButton 树内
-    // 实现）需要盖在内容之上，Column 的「标题栏先画」顺序做不到。
-    const double barH = IntegratedTitleBarShell.barHeight;
+    if (!TitleBarRegionService.isSupported) return widget.child;
     return Stack(
       children: [
-        // Content starts flush with the bar; a gap would expose raw acrylic.
-        Positioned(
-          top: barH,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: NotificationListener<ScrollNotification>(
-            onNotification: _onScrollNotification,
+        Positioned.fill(
+          child: WindowChromeScope(
+            enabled: !widget.immersive,
             child: widget.child,
           ),
         ),
         Positioned(
           top: 0,
-          left: 0,
           right: 0,
           child: _TitleBar(
             immersive: widget.immersive,
             onToggleTheme: widget.onToggleTheme,
-          ),
-        ),
-        Positioned(
-          top: barH,
-          left: 0,
-          right: 0,
-          child: ValueListenableBuilder<bool>(
-            valueListenable: _contentScrolled,
-            builder: (context, scrolled, _) {
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 120),
-                height: 0.5,
-                color: scrolled && !widget.immersive
-                    ? Theme.of(
-                        context,
-                      ).colorScheme.outlineVariant.withValues(alpha: 0.5)
-                    : Colors.transparent,
-              );
-            },
           ),
         ),
       ],
@@ -148,7 +85,7 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
     super.didChangeDependencies();
     final settings = (
       Theme.of(context).brightness == Brightness.dark,
-      !MediaQuery.highContrastOf(context),
+      false, // All window surfaces are now opaque, including the top edge.
     );
     if (_materialSettings != settings) {
       _materialSettings = settings;
@@ -182,7 +119,8 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
   @override
   void didUpdateWidget(_TitleBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_showsThemeButton(oldWidget) != _showsThemeButton(widget)) {
+    if (oldWidget.immersive != widget.immersive ||
+        _showsThemeButton(oldWidget) != _showsThemeButton(widget)) {
       _reportRegion();
     }
   }
@@ -205,7 +143,7 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
         : 0.0;
     unawaited(
       TitleBarRegionService.setRegion(
-        barHeight: IntegratedTitleBarShell.barHeight,
+        barHeight: widget.immersive ? IntegratedTitleBarShell.barHeight : 0,
         reservedRight: IntegratedTitleBarShell.reservedRight + extra,
       ),
     );
@@ -270,105 +208,35 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
         onTap: () => _safeWindowCall(windowManager.close),
       ),
     ];
-    final Widget bar;
-    if (widget.immersive) {
-      final dark = colorScheme.brightness == Brightness.dark;
-      bar = ColoredBox(
-        key: const ValueKey('immersive_title_bar'),
-        color: colorScheme.surface,
-        child: SizedBox(
-          height: IntegratedTitleBarShell.barHeight,
-          child: Row(
-            children: [
-              const Spacer(),
-              if (widget.onToggleTheme != null) ...[
-                _CaptionButton(
-                  key: const Key('brand_appearance_toggle'),
-                  icon: dark
-                      ? Icons.light_mode_outlined
-                      : Icons.dark_mode_outlined,
-                  iconSize: 15,
-                  width: IntegratedTitleBarShell.themeButtonWidth,
-                  tooltip: dark
-                      ? (l10n?.brand_switchToLight ?? 'Light')
-                      : (l10n?.brand_switchToDark ?? 'Dark'),
-                  onTap: widget.onToggleTheme!,
-                ),
-                Container(
-                  width: 1,
-                  height: 14,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  color: colorScheme.outlineVariant,
-                ),
-              ],
-              ...captionButtons,
-            ],
-          ),
-        ),
-      );
-    } else {
-      bar = KeyedSubtree(
-        key: const ValueKey('glass_title_bar'),
-        child: _glassBar(colorScheme, captionButtons),
-      );
-    }
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 220),
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
-      layoutBuilder: (current, previous) => Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.topCenter,
-        children: [...previous, if (current != null) current],
-      ),
-      child: bar,
-    );
-  }
-
-  Widget _glassBar(ColorScheme colorScheme, List<Widget> captionButtons) {
-    final content = SizedBox(
-      height: IntegratedTitleBarShell.barHeight,
-      child: Row(
-        children: [
-          const SizedBox(width: 12),
-          Image.asset(
-            'assets/images/wof_logo_block.png',
-            height: 20,
-            filterQuality: FilterQuality.medium,
-            // 资产缺失/测试环境加载失败时退化为图标，不炸布局。
-            errorBuilder: (context, error, stackTrace) =>
-                Icon(Icons.auto_awesome, size: 18, color: colorScheme.primary),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'NAI Studio',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 13,
-                fontFamily: 'monospace',
-                decoration: TextDecoration.underline,
-                decorationColor: const Color(0xFFFFFF00),
-                decorationStyle: TextDecorationStyle.double,
-                fontWeight: FontWeight.w500,
-                color: colorScheme.onSurface.withValues(alpha: 0.9),
+    final dark = colorScheme.brightness == Brightness.dark;
+    return ColoredBox(
+      color: colorScheme.surface,
+      child: SizedBox(
+        key: const Key('window-caption-controls'),
+        height: IntegratedTitleBarShell.barHeight,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_showsThemeButton(widget)) ...[
+              _CaptionButton(
+                key: const Key('brand_appearance_toggle'),
+                icon: dark
+                    ? Icons.light_mode_outlined
+                    : Icons.dark_mode_outlined,
+                iconSize: 15,
+                width: IntegratedTitleBarShell.themeButtonWidth,
+                tooltip: dark
+                    ? (l10n?.brand_switchToLight ?? 'Light')
+                    : (l10n?.brand_switchToDark ?? 'Dark'),
+                onTap: widget.onToggleTheme!,
               ),
-            ),
-          ),
-          ...captionButtons,
-        ],
-      ),
-    );
-    return ValueListenableBuilder<bool>(
-      valueListenable: WindowMaterialService.available,
-      child: content,
-      builder: (context, available, child) => StudioGlassSurface(
-        // Caption hints extend below the title bar, outside Navigator overlays.
-        clipBehavior: Clip.none,
-        borderRadius: BorderRadius.zero,
-        nativeBackdrop: available,
-        child: child!,
+              const SizedBox(
+                width: IntegratedTitleBarShell.themeSeparatorWidth,
+              ),
+            ],
+            ...captionButtons,
+          ],
+        ),
       ),
     );
   }

@@ -6003,5 +6003,8 @@
   },
   "settings_geistDark": "Geist 深色",
   "settings_geistLight": "Geist 浅色",
-  "settings_geistDescription": "全工作室统一外观：黑白灰底色，蓝色作为操作强调。"
+  "settings_geistDescription": "全工作室统一外观：黑白灰底色，蓝色作为操作强调。",
+  "generation_tipReuseBlocks": "把常用提示词保存为块，下一次直接复用。",
+  "generation_tipBlockModes": "顺序与随机模式，可以让提示词块产生不同组合。",
+  "generation_tipLockBlocks": "锁定想保留的块，再随机调整其他部分。"
 }

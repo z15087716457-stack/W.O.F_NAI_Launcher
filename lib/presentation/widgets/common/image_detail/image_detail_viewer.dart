@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -507,9 +508,11 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
               ? Row(
                   children: [
                     Expanded(child: _buildMainContent()),
-                    DetailMetadataPanel(
-                      currentImage: _currentImage,
-                      initialExpanded: true,
+                    WindowPaneInset(
+                      child: DetailMetadataPanel(
+                        currentImage: _currentImage,
+                        initialExpanded: true,
+                      ),
                     ),
                   ],
                 )

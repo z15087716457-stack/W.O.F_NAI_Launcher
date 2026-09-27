@@ -1,3 +1,4 @@
+import 'generation_welcome.dart';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -413,30 +414,7 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
   }
 
   Widget _buildEmptyState(ThemeData theme, BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.image_outlined,
-          size: 80,
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          context.l10n.generation_emptyPromptHint,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          context.l10n.generation_imageWillShowHere,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-          ),
-        ),
-      ],
-    );
+    return const GenerationWelcome();
   }
 
   Widget _buildErrorState(

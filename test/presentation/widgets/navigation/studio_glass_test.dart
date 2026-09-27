@@ -47,84 +47,27 @@ void main() {
         ),
       );
 
-  testWidgets(
-    'title glass follows app appearance and high contrast; body stays opaque',
-    (tester) async {
-      await tester.pumpWidget(shell(Brightness.dark));
-      await tester.pumpAndSettle();
-      expect(requests.last, {'dark': true, 'enabled': true});
-      expect(
-        tester
-            .widget<StudioGlassSurface>(find.byType(StudioGlassSurface))
-            .nativeBackdrop,
-        isTrue,
-      );
-      expect(
-        Theme.of(
-          tester.element(find.byType(Scaffold)),
-        ).scaffoldBackgroundColor.a,
-        1,
-      );
-      await tester.pumpWidget(shell(Brightness.light));
-      await tester.pumpAndSettle();
-      expect(requests.last, {'dark': false, 'enabled': true});
-      await tester.pumpWidget(shell(Brightness.light, highContrast: true));
-      await tester.pumpAndSettle();
-      expect(requests.last, {'dark': false, 'enabled': false});
-      expect(
-        tester
-            .widget<StudioGlassSurface>(find.byType(StudioGlassSurface))
-            .nativeBackdrop,
-        isFalse,
-      );
-      expect(find.text('NAI Studio'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    },
-  );
-
   for (final brightness in Brightness.values) {
-    testWidgets('native title glass is a flat page tint flush with content in '
-        '${brightness.name}', (tester) async {
-      await tester.pumpWidget(shell(brightness));
-      await tester.pumpAndSettle();
-      final glass = find.byType(StudioGlassSurface);
-      final tint = tester.widget<ColoredBox>(
-        find.descendant(of: glass, matching: find.byType(ColoredBox)).first,
-      );
-      final theme = brightness == Brightness.dark
-          ? GeistTheme.dark
-          : GeistTheme.light;
-      expect(
-        tint.color,
-        theme.colorScheme.surface.withValues(
-          alpha: brightness == Brightness.dark ? .80 : .78,
-        ),
-      );
-      expect(
-        tester.getTopLeft(find.byType(Scaffold)).dy,
-        IntegratedTitleBarShell.barHeight,
-      );
-    });
-  }
-
-  testWidgets('unsupported native material keeps an opaque title surface', (
-    tester,
-  ) async {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-          channel,
-          (_) async => throw PlatformException(code: 'unsupported'),
-        );
-    await tester.pumpWidget(shell(Brightness.dark));
-    await tester.pumpAndSettle();
-    expect(
-      tester
-          .widget<StudioGlassSurface>(find.byType(StudioGlassSurface))
-          .nativeBackdrop,
-      isFalse,
+    testWidgets(
+      'borderless shell is opaque and has no native title material in ${brightness.name}',
+      (tester) async {
+        await tester.pumpWidget(shell(brightness));
+        await tester.pumpAndSettle();
+        expect(requests.last, {
+          'dark': brightness == Brightness.dark,
+          'enabled': false,
+        });
+        expect(find.byType(StudioGlassSurface), findsNothing);
+        expect(tester.getTopLeft(find.byType(Scaffold)).dy, 0);
+        expect(find.text('NAI Studio'), findsNothing);
+        expect(find.byIcon(Icons.close), findsOneWidget);
+        await tester.pumpWidget(shell(brightness, highContrast: true));
+        await tester.pumpAndSettle();
+        expect(WindowMaterialService.available.value, isFalse);
+        expect(tester.takeException(), isNull);
+      },
     );
-    expect(tester.takeException(), isNull);
-  });
+  }
 
   for (final brightness in Brightness.values) {
     testWidgets(
