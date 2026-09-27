@@ -5248,6 +5248,7 @@
   },
   "promptBlockLibrary_blockTitle": "Title",
   "promptBlockLibrary_titleHint": "Block title",
+  "promptBlockLibrary_searchHint": "Search title, prompt, or tag",
   "promptBlockLibrary_folder": "Folder",
   "promptBlockLibrary_folderName": "Folder name",
   "promptBlockLibrary_folderNameHint": "Folder name",

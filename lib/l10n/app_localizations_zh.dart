@@ -8861,6 +8861,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_titleHint => '块标题';
 
   @override
+  String get promptBlockLibrary_searchHint => '搜索标题、提示词或标签';
+
+  @override
   String get promptBlockLibrary_folder => '文件夹';
 
   @override

@@ -5248,6 +5248,7 @@
   },
   "promptBlockLibrary_blockTitle": "标题",
   "promptBlockLibrary_titleHint": "块标题",
+  "promptBlockLibrary_searchHint": "搜索标题、提示词或标签",
   "promptBlockLibrary_folder": "文件夹",
   "promptBlockLibrary_folderName": "文件夹名称",
   "promptBlockLibrary_folderNameHint": "文件夹名称",

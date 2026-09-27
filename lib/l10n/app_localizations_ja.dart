@@ -8980,6 +8980,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_titleHint => 'ブロックのタイトル';
 
   @override
+  String get promptBlockLibrary_searchHint => 'タイトル、プロンプト、タグを検索';
+
+  @override
   String get promptBlockLibrary_folder => 'フォルダー';
 
   @override

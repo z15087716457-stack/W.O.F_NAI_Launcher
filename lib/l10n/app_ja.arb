@@ -5248,6 +5248,7 @@
   },
   "promptBlockLibrary_blockTitle": "タイトル",
   "promptBlockLibrary_titleHint": "ブロックのタイトル",
+  "promptBlockLibrary_searchHint": "タイトル、プロンプト、タグを検索",
   "promptBlockLibrary_folder": "フォルダー",
   "promptBlockLibrary_folderName": "フォルダー名",
   "promptBlockLibrary_folderNameHint": "フォルダー名",

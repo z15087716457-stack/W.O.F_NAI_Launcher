@@ -330,10 +330,11 @@ void main() {
       tester,
       find.byKey(const ValueKey('prompt-block-card-body-a')),
     );
-    expect(find.text('移动 2 个块到…'), findsOneWidget);
+    expect(find.text('已选 2 项'), findsWidgets);
+    expect(find.text('移动到文件夹'), findsOneWidget);
     expect(find.text('多选'), findsNothing);
 
-    await tester.tap(find.text('移动 2 个块到…'));
+    await tester.tap(find.text('移动到文件夹'));
     await tester.pumpAndSettle();
 
     expect(

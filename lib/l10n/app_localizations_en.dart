@@ -9178,6 +9178,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_titleHint => 'Block title';
 
   @override
+  String get promptBlockLibrary_searchHint => 'Search title, prompt, or tag';
+
+  @override
   String get promptBlockLibrary_folder => 'Folder';
 
   @override

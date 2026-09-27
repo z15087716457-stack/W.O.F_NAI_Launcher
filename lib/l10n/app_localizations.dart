@@ -16110,6 +16110,12 @@ abstract class AppLocalizations {
   /// **'Block title'**
   String get promptBlockLibrary_titleHint;
 
+  /// No description provided for @promptBlockLibrary_searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search title, prompt, or tag'**
+  String get promptBlockLibrary_searchHint;
+
   /// No description provided for @promptBlockLibrary_folder.
   ///
   /// In en, this message translates to:

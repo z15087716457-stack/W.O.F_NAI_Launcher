@@ -424,7 +424,7 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 12, 8, 8),
+                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
                     child: Row(
                       children: [
                         Icon(
@@ -449,8 +449,15 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                           '${widget.blockIds.length} 项',
                           style: theme.textTheme.labelSmall,
                         ),
+                        const SizedBox(width: 8),
                         IconButton(
-                          icon: const Icon(Icons.close, size: 18),
+                          tooltip: '关闭',
+                          icon: const Icon(Icons.close, size: 16),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints.tightFor(
+                            width: 28,
+                            height: 28,
+                          ),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ],
@@ -937,6 +944,7 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                 if (selected)
                   Icon(Icons.check, size: 15, color: theme.colorScheme.primary),
                 if (trailing != null) trailing,
+                const SizedBox(width: 12),
               ],
             ),
           ),

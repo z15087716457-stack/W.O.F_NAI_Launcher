@@ -243,6 +243,29 @@ void main() {
     );
   });
 
+  testWidgets('top search finds blocks by tag name', (tester) async {
+    final tagged = makeBlock('tagged', '画风块', 'soft light').copyWith(
+      tags: const [PromptBlockTag(name: '冷色构图', color: '#FF268BEA')],
+    );
+    final other = makeBlock('other', '人物块', 'portrait');
+    await pumpScreen(tester, buildScreen(blocks: [tagged, other]));
+
+    await tester.enterText(
+      find.byKey(const Key('prompt-block-library-search')),
+      '冷色',
+    );
+    await tester.pump();
+
+    expect(
+      find.byKey(const ValueKey('prompt-block-card-body-tagged')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('prompt-block-card-body-other')),
+      findsNothing,
+    );
+  });
+
   testWidgets('waterfall view: switch renders masonry, tap opens detail', (
     tester,
   ) async {

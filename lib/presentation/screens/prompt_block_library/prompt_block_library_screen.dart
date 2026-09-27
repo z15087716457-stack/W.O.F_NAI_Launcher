@@ -22,7 +22,6 @@ import '../../../data/models/prompt_block/prompt_block_sort.dart';
 import '../../../data/repositories/prompt_block_repository.dart';
 import '../../providers/prompt_block_library_provider.dart';
 import '../../providers/generation/generation_params_notifier.dart';
-import '../../providers/tips_provider.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
 import '../../widgets/prompt/blocks/prompt_block_drag_data.dart';
@@ -1004,16 +1003,13 @@ class _PromptBlockLibraryScreenState
       child: SizedBox(
         height: 36,
         child: TextField(
+          key: const Key('prompt-block-library-search'),
           controller: _searchController,
           focusNode: _searchFocusNode,
           style: theme.textTheme.bodyMedium,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
-            hintText: tipHint(
-              context.l10n,
-              TipModule.blockLibrary,
-              epoch: watchTipEpoch(ref),
-            ),
+            hintText: context.l10n.promptBlockLibrary_searchHint,
             hintStyle: TextStyle(
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
               fontSize: 13,
@@ -2031,25 +2027,33 @@ class _PromptBlockLibraryScreenState
       position: position,
       items: batch
           ? [
+              PopupMenuItem<_BlockContextAction>(
+                enabled: false,
+                height: 34,
+                child: Text(
+                  l10n.promptBlockLibrary_selectedCount(count),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              const PopupMenuDivider(height: 1),
               PopupMenuItem(
                 value: _BlockContextAction.batchFavorite,
-                child: Text(l10n.promptBlockLibrary_favoriteSelected(count)),
+                child: Text(l10n.common_favorite),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: _BlockContextAction.batchTag,
-                child: Text('添加标签'),
+                child: Text(l10n.promptBlockLibrary_addTag),
               ),
               PopupMenuItem(
                 value: _BlockContextAction.batchMoveTo,
-                child: Text(l10n.promptBlockLibrary_moveToSelected(count)),
+                child: Text(l10n.promptBlockLibrary_moveToFolderTitle),
               ),
               const PopupMenuDivider(),
               PopupMenuItem(
                 value: _BlockContextAction.batchDelete,
-                child: Text(
-                  l10n.promptBlockLibrary_deleteSelected(count),
-                  style: errorStyle,
-                ),
+                child: Text(l10n.common_delete, style: errorStyle),
               ),
               PopupMenuItem(
                 value: _BlockContextAction.exitMultiSelect,
