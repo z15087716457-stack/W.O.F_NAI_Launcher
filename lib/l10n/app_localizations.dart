@@ -18308,6 +18308,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lock the blocks you want to keep, then randomize the rest.'**
   String get generation_tipLockBlocks;
+
+  /// No description provided for @styleExplore_collapseGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse candidate gallery'**
+  String get styleExplore_collapseGallery;
+
+  /// No description provided for @updateCapsuleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get updateCapsuleLabel;
+
+  /// No description provided for @updateWaitForTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for the current task to finish before restarting'**
+  String get updateWaitForTask;
+
+  /// No description provided for @updateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get updateLater;
 }
 
 class _AppLocalizationsDelegate

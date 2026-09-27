@@ -6006,5 +6006,9 @@
   "settings_geistDescription": "One appearance across your studio. Black or white surfaces, with blue accents.",
   "generation_tipReuseBlocks": "Save frequently used prompts as blocks to reuse them later.",
   "generation_tipBlockModes": "Combine blocks in sequence or random mode for new variations.",
-  "generation_tipLockBlocks": "Lock the blocks you want to keep, then randomize the rest."
+  "generation_tipLockBlocks": "Lock the blocks you want to keep, then randomize the rest.",
+  "styleExplore_collapseGallery": "Collapse candidate gallery",
+  "updateCapsuleLabel": "Update",
+  "updateWaitForTask": "Wait for the current task to finish before restarting",
+  "updateLater": "Later"
 }

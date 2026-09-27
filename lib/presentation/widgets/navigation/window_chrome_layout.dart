@@ -11,8 +11,10 @@ class WindowChromeScope extends InheritedWidget {
     super.key,
     required super.child,
     this.enabled = true,
+    this.extraWidth = 0,
   });
   final bool enabled;
+  final double extraWidth;
 
   static const height = 36.0;
   static const controlsWidth = 138.0;
@@ -23,9 +25,16 @@ class WindowChromeScope extends InheritedWidget {
           ?.enabled ??
       false;
 
+  static double reservedWidthOf(BuildContext context) =>
+      controlsWidth +
+      (context
+              .dependOnInheritedWidgetOfExactType<WindowChromeScope>()
+              ?.extraWidth ??
+          0);
+
   @override
   bool updateShouldNotify(WindowChromeScope oldWidget) =>
-      enabled != oldWidget.enabled;
+      enabled != oldWidget.enabled || extraWidth != oldWidget.extraWidth;
 }
 
 /// An intentionally empty region: no text fields or buttons can become drag
@@ -76,7 +85,10 @@ class WindowHeader extends StatelessWidget {
     if (!enabled || !WindowChromeScope.activeOf(context)) return child;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final narrow = constraints.maxWidth < minimumInlineWidth;
+        final reserved = WindowChromeScope.reservedWidthOf(context);
+        final narrow =
+            constraints.maxWidth <
+            minimumInlineWidth + reserved - WindowChromeScope.controlsWidth;
         return ColoredBox(
           color: Theme.of(context).colorScheme.surface,
           child: Stack(
@@ -84,17 +96,15 @@ class WindowHeader extends StatelessWidget {
               Padding(
                 padding: narrow
                     ? const EdgeInsets.only(top: WindowChromeScope.height)
-                    : const EdgeInsets.only(
-                        right:
-                            WindowChromeScope.controlsWidth +
-                            WindowChromeScope.dragWidth,
+                    : EdgeInsets.only(
+                        right: reserved + WindowChromeScope.dragWidth,
                       ),
                 child: child,
               ),
               Positioned(
                 top: 0,
                 left: narrow ? 0 : null,
-                right: WindowChromeScope.controlsWidth,
+                right: reserved,
                 width: narrow ? null : WindowChromeScope.dragWidth,
                 height: WindowChromeScope.height,
                 child: const WindowDragArea(),
@@ -132,6 +142,49 @@ class WindowPaneInset extends StatelessWidget {
           child: WindowDragArea(),
         ),
       ],
+    );
+  }
+}
+
+/// A short panel title beside the window controls. Empty space is draggable;
+/// only panes too narrow to hold both rows place their title below the captions.
+class WindowPanelHeader extends StatelessWidget {
+  const WindowPanelHeader({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!WindowChromeScope.activeOf(context)) {
+      return SizedBox(height: 48, child: child);
+    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final reserved = WindowChromeScope.reservedWidthOf(context);
+        final narrow = constraints.maxWidth < reserved + 182;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: narrow ? WindowChromeScope.height : 48,
+              child: Row(
+                children: [
+                  if (!narrow) SizedBox(width: 166, child: child),
+                  const Expanded(child: WindowDragArea()),
+                  SizedBox(width: reserved.clamp(0.0, constraints.maxWidth)),
+                ],
+              ),
+            ),
+            if (narrow)
+              SizedBox(
+                height: 48,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(width: 166, child: child),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

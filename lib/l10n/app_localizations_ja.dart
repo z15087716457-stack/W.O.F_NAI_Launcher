@@ -10208,4 +10208,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get generation_tipLockBlocks => '残したいブロックをロックして、ほかの部分をランダムに。';
+
+  @override
+  String get styleExplore_collapseGallery => '候補ギャラリーを折りたたむ';
+
+  @override
+  String get updateCapsuleLabel => '更新';
+
+  @override
+  String get updateWaitForTask => 'タスク完了後に再起動して更新できます';
+
+  @override
+  String get updateLater => '後で';
 }

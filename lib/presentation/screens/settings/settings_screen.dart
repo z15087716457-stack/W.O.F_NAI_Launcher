@@ -162,7 +162,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         title: Text(context.l10n.settings_title),
         actions: [
           if (WindowChromeScope.activeOf(context))
-            const SizedBox(width: 202, height: 36, child: WindowDragArea()),
+            SizedBox(
+              width:
+                  WindowChromeScope.reservedWidthOf(context) +
+                  WindowChromeScope.dragWidth,
+              height: 36,
+              child: const WindowDragArea(),
+            ),
         ],
         // 滚动后变暗色
         backgroundColor: _isContentScrolled

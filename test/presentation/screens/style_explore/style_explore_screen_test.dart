@@ -1,3 +1,13 @@
+// ignore: depend_on_referenced_packages
+import 'package:irondash_message_channel/irondash_message_channel.dart';
+// ignore: implementation_imports, depend_on_referenced_packages
+import 'package:super_native_extensions/src/native/context.dart';
+import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
+import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
+import 'package:nai_launcher/presentation/widgets/common/update_capsule.dart';
+import '../../../helpers/studio_capture_fonts.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -242,6 +252,18 @@ class _TestSubscriptionNotifier extends SubscriptionNotifier {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setContextOverride(
+    MockMessageChannelContext()
+      ..registerMockMethodCallHandler('DropManager', (_) async => null)
+      ..registerMockMethodCallHandler('DragManager', (_) async => null),
+  );
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(
+        const MethodChannel('dev.irondash.engine_context'),
+        (_) async => 1,
+      );
+
   late _MemoryRunStorage runStorage;
   late _TestLocalStorageService localStorage;
 
@@ -293,6 +315,9 @@ void main() {
   Widget buildScreen({
     List<Override> extraOverrides = const [],
     Offset appOffset = Offset.zero,
+    bool? dark,
+    bool update = false,
+    GlobalKey? captureKey,
   }) {
     final app = ProviderScope(
       overrides: [
@@ -328,11 +353,24 @@ void main() {
         isFreeGenerationProvider.overrideWith((ref) => true),
         ...extraOverrides,
       ],
-      child: const MaterialApp(
-        locale: Locale('zh'),
+      child: MaterialApp(
+        theme: dark == null
+            ? null
+            : (dark ? GeistTheme.dark : GeistTheme.light).copyWith(
+                textTheme: (dark ? GeistTheme.dark : GeistTheme.light).textTheme
+                    .apply(fontFamily: 'HarmonyOS Sans SC'),
+              ),
+        locale: const Locale('zh'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: IntegratedTitleBarShell(child: StyleExploreScreen()),
+        home: RepaintBoundary(
+          key: captureKey,
+          child: IntegratedTitleBarShell(
+            accessoryWidth: update ? UpdateCapsule.width : 0,
+            accessory: update ? UpdateCapsule(onPressed: () {}) : null,
+            child: const StyleExploreScreen(),
+          ),
+        ),
       ),
     );
     if (appOffset == Offset.zero) return app;
@@ -415,6 +453,93 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
+  }
+
+  for (final dark in [false, true]) {
+    testWidgets(
+      'gallery header shares top edge and collapses locally (${dark ? 'dark' : 'light'})',
+      (tester) async {
+        tester.view.physicalSize = const Size(1600, 900);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        localStorage.settings[StorageKeys.styleExploreRunSidebarVisible] =
+            false;
+        localStorage.settings[StorageKeys.styleExploreGalleryWidth] = 700.0;
+        if (Platform.environment['CAPTURE_EXPLORE_CHROME'] == '1') {
+          await tester.runAsync(() async {
+            await loadStudioCaptureFonts();
+            await (FontLoader('MaterialIcons')
+                  ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf')))
+                .load();
+            await (FontLoader(
+              'StudioIcons',
+            )..addFont(rootBundle.load('assets/fonts/StudioIcons.ttf'))).load();
+          });
+        }
+        final capture = GlobalKey();
+        await tester.pumpWidget(
+          buildScreen(dark: dark, update: true, captureKey: capture),
+        );
+        await tester.pumpAndSettle();
+        final close = find.byKey(const Key('style-explore-gallery-close'));
+        final title = find.byKey(const Key('style-explore-gallery-header'));
+        expect(tester.getRect(title).top, 0);
+        expect(
+          tester.getRect(close).right,
+          lessThan(tester.getRect(title).right + 1),
+        );
+        expect(
+          find.descendant(of: close, matching: find.byIcon(Icons.close)),
+          findsNothing,
+        );
+        expect(
+          tester
+              .getRect(close)
+              .overlaps(
+                tester.getRect(
+                  find.byKey(const Key('window-caption-controls')),
+                ),
+              ),
+          isFalse,
+        );
+        expect(
+          tester
+              .getRect(close)
+              .overlaps(
+                tester.getRect(find.byKey(const Key('window-update-capsule'))),
+              ),
+          isFalse,
+        );
+        if (Platform.environment['CAPTURE_EXPLORE_CHROME'] == '1') {
+          await tester.runAsync(() async {
+            final image =
+                await (capture.currentContext!.findRenderObject()!
+                        as RenderRepaintBoundary)
+                    .toImage();
+            final data = (await image.toByteData(
+              format: ui.ImageByteFormat.png,
+            ))!;
+            await File(
+              '.dart_tool/explore-chrome-${dark ? 'dark' : 'light'}.png',
+            ).writeAsBytes(data.buffer.asUint8List());
+            image.dispose();
+          });
+        }
+        await tester.tap(close);
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('style-explore-gallery-panel')),
+          findsNothing,
+        );
+        await tester.tap(find.byKey(const Key('style-explore-gallery-toggle')));
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('style-explore-gallery-panel')),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
 
   testWidgets('renders the run sidebar, toolbar, and center panel', (
@@ -523,6 +648,7 @@ void main() {
   ) async {
     // 键已设 false = 用户手动关过：重开不回到默认展开。
     localStorage.settings[StorageKeys.styleExploreRunSidebarVisible] = false;
+    localStorage.settings[StorageKeys.styleExploreGalleryWidth] = 700.0;
     await pumpScreen(tester);
 
     expect(find.byKey(const Key('style-explore-run-sidebar')), findsNothing);

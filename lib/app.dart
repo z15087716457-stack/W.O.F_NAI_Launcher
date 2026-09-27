@@ -1,3 +1,5 @@
+import 'presentation/widgets/common/update_capsule.dart';
+import 'presentation/widgets/common/update_check_dialog.dart';
 import 'package:nai_launcher/core/constants/brand.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -19,7 +21,6 @@ import 'presentation/providers/notification_settings_provider.dart';
 import 'presentation/providers/prompt_block_library_provider.dart';
 import 'presentation/providers/subscription_provider.dart'
     hide anlasBalanceProvider;
-import 'presentation/widgets/navigation/integrated_title_bar.dart';
 import 'presentation/widgets/shortcuts/shortcut_aware_widget.dart';
 import 'presentation/widgets/shortcuts/shortcut_help_dialog.dart';
 
@@ -223,6 +224,7 @@ class _RouteAwareTitleBar extends StatefulWidget {
 class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
   late bool _immersive = _resolve();
   bool _refreshQueued = false;
+  bool _updateDialogOpen = false;
 
   @override
   void initState() {
@@ -273,10 +275,23 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
     if (next != _immersive) setState(() => _immersive = next);
   }
 
+  Future<void> _showUpdate() async {
+    final navigatorContext =
+        widget.router.routerDelegate.navigatorKey.currentContext;
+    if (_updateDialogOpen || navigatorContext == null) return;
+    _updateDialogOpen = true;
+    try {
+      await UpdateCheckDialog.show(navigatorContext);
+    } finally {
+      _updateDialogOpen = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return IntegratedTitleBarShell(
+    return UpdateAwareWindowShell(
       immersive: _immersive,
+      onShowUpdate: _showUpdate,
       onToggleTheme: widget.onToggleTheme,
       child: widget.child,
     );

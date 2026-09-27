@@ -17,9 +17,13 @@ class IntegratedTitleBarShell extends StatefulWidget {
     required this.child,
     this.immersive = false,
     this.onToggleTheme,
+    this.accessory,
+    this.accessoryWidth = 0,
   });
 
   final Widget child;
+  final Widget? accessory;
+  final double accessoryWidth;
   final bool immersive;
 
   /// 沉浸模式下明暗切换按钮的回调；为 null 时不显示该按钮。
@@ -50,9 +54,18 @@ class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
         Positioned.fill(
           child: WindowChromeScope(
             enabled: !widget.immersive,
+            extraWidth: widget.immersive ? 0 : widget.accessoryWidth,
             child: widget.child,
           ),
         ),
+        if (!widget.immersive && widget.accessory != null)
+          Positioned(
+            top: 0,
+            right: IntegratedTitleBarShell.reservedRight,
+            width: widget.accessoryWidth,
+            height: IntegratedTitleBarShell.barHeight,
+            child: widget.accessory!,
+          ),
         Positioned(
           top: 0,
           right: 0,

@@ -355,12 +355,10 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                         ),
                       ),
                     if (galleryVisible)
-                      WindowPaneInset(
-                        child: _buildGalleryPanel(
-                          theme,
-                          width: paneLayout.galleryWidth,
-                          rightConcession: rightConcession,
-                        ),
+                      _buildGalleryPanel(
+                        theme,
+                        width: paneLayout.galleryWidth,
+                        rightConcession: rightConcession,
                       ),
                   ],
                 ),
@@ -383,25 +381,30 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
   ) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      constraints: const BoxConstraints(minHeight: 48),
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
+        color: theme.colorScheme.surface,
         border: Border(
           bottom: BorderSide(
             color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
           ),
         ),
       ),
-      child: Wrap(
-        key: const Key('style-explore-top-bar-content'),
-        spacing: 8,
-        runSpacing: 6,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          _buildRunSidebarToggle(theme, runSidebarVisible, layoutState),
-          _buildGalleryToggle(theme, maxWidth, galleryVisible),
-          const AutoSaveToggleIcon(),
-        ],
+      child: SizedBox(
+        width: double.infinity,
+        child: Wrap(
+          key: const Key('style-explore-top-bar-content'),
+          spacing: 8,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            _buildRunSidebarToggle(theme, runSidebarVisible, layoutState),
+            _buildGalleryToggle(theme, maxWidth, galleryVisible),
+            const AutoSaveToggleIcon(),
+          ],
+        ),
       ),
     );
   }
@@ -753,10 +756,10 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
             width: math.max(width, _styleExploreGalleryLayoutMinWidth),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerLow,
+                color: theme.colorScheme.surface,
                 border: Border(left: BorderSide(color: theme.dividerColor)),
               ),
-              child: _buildGalleryContent(theme),
+              child: _buildGalleryContent(theme, width),
             ),
           ),
         ),
@@ -824,40 +827,63 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
     );
   }
 
-  Widget _buildGalleryContent(ThemeData theme) {
+  Widget _buildGalleryContent(ThemeData theme, double visibleWidth) {
     final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 4, 4),
-          child: Row(
-            children: [
-              Icon(
-                StudioIcons.localGallery,
-                size: 18,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  l10n.styleExplore_galleryTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
+        // Lay out the header at the visible width, even when the gallery body
+        // keeps its minimum layout width while the pane is being resized.
+        Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: visibleWidth,
+            child: visibleWidth < 180
+                ? const SizedBox(height: 48)
+                : WindowPanelHeader(
+                    child: SizedBox(
+                      key: const Key('style-explore-gallery-header'),
+                      height: 48,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Row(
+                          children: [
+                            Icon(
+                              StudioIcons.localGallery,
+                              size: 18,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                l10n.styleExplore_galleryTitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            IconButton(
+                              key: const Key('style-explore-gallery-close'),
+                              tooltip: l10n.styleExplore_collapseGallery,
+                              iconSize: 18,
+                              constraints: const BoxConstraints.tightFor(
+                                width: 28,
+                                height: 28,
+                              ),
+                              padding: EdgeInsets.zero,
+                              onPressed: () => setState(
+                                () => _galleryExpandedOverride = false,
+                              ),
+                              icon: const Icon(Icons.keyboard_tab_rounded),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              IconButton(
-                key: const Key('style-explore-gallery-close'),
-                tooltip: l10n.common_close,
-                iconSize: 18,
-                onPressed: () =>
-                    setState(() => _galleryExpandedOverride = false),
-                icon: const Icon(Icons.close),
-              ),
-            ],
           ),
         ),
         Divider(height: 1, color: theme.dividerColor),

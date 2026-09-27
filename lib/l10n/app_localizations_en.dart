@@ -10478,4 +10478,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get generation_tipLockBlocks =>
       'Lock the blocks you want to keep, then randomize the rest.';
+
+  @override
+  String get styleExplore_collapseGallery => 'Collapse candidate gallery';
+
+  @override
+  String get updateCapsuleLabel => 'Update';
+
+  @override
+  String get updateWaitForTask =>
+      'Wait for the current task to finish before restarting';
+
+  @override
+  String get updateLater => 'Later';
 }

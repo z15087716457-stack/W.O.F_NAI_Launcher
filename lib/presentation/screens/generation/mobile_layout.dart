@@ -59,7 +59,13 @@ class _MobileGenerationLayoutState
             tooltip: context.l10n.generation_paramsSettings,
           ),
           if (WindowChromeScope.activeOf(context))
-            const SizedBox(width: 202, height: 36, child: WindowDragArea()),
+            SizedBox(
+              width:
+                  WindowChromeScope.reservedWidthOf(context) +
+                  WindowChromeScope.dragWidth,
+              height: 36,
+              child: const WindowDragArea(),
+            ),
         ],
       ),
       endDrawer: Drawer(

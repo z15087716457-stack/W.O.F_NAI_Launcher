@@ -166,6 +166,11 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
   /// 自动检查保持安静，仅在发现新版本时显示全局提示；手动检查会展示
   /// “已是最新版”和错误状态，并允许重新查看曾经跳过的版本。
   Future<void> checkForUpdates({bool manual = false}) async {
+    if (state.status == UpdateStatus.downloading ||
+        state.status == UpdateStatus.downloaded ||
+        state.status == UpdateStatus.installing) {
+      return;
+    }
     final service = ref.read(updateCheckServiceProvider);
     if (manual) {
       await service.clearReminder();
@@ -193,7 +198,7 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
           status: UpdateStatus.error,
           errorMessage: _formatError(error),
         );
-      } else if (!state.hasDownloadedUpdate) {
+      } else if (!state.hasNewVersion && !state.hasDownloadedUpdate) {
         state = const UpdateState();
       }
     }

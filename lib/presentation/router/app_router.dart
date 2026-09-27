@@ -464,12 +464,13 @@ class DesktopShell extends ConsumerWidget {
                   clipBehavior: Clip.none,
                   children: [
                     content,
-                    Positioned(
-                      top: WindowChromeScope.activeOf(context) ? 36 : 0,
-                      left: 0,
-                      right: 0,
-                      child: const UpdateNoticeBanner(),
-                    ),
+                    if (!WindowChromeScope.activeOf(context))
+                      const Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: UpdateNoticeBanner(),
+                      ),
                   ],
                 );
               },

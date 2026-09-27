@@ -10073,4 +10073,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get generation_tipLockBlocks => '锁定想保留的块，再随机调整其他部分。';
+
+  @override
+  String get styleExplore_collapseGallery => '收起候选画廊';
+
+  @override
+  String get updateCapsuleLabel => '更新';
+
+  @override
+  String get updateWaitForTask => '任务进行中，结束后即可重启更新';
+
+  @override
+  String get updateLater => '稍后';
 }

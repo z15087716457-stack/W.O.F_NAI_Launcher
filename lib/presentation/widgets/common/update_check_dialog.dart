@@ -9,16 +9,21 @@ import '../../../core/utils/byte_format.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/version/version_info.dart';
 import '../../providers/update_provider.dart';
+import '../../providers/image_generation_provider.dart';
+import '../../providers/style_explore/explore_run_runner.dart';
 import 'app_toast.dart';
 
-/// 更新检查弹窗组件
-///
-/// 显示更新提示的 UI 组件，支持：
-/// - 显示当前版本和最新版本
-/// - 使用 GitHub Flavored Markdown 完整渲染 Release body
-/// - 按钮: [稍后提醒] [忽略此版本] [下载并安装/前往下载]
-/// - 加载状态指示器（检查中）
-/// - 错误状态显示
+/// Installation waits for generation and exploration to be idle. Keeping this
+/// projection separate also lets widget tests run without user data or APIs.
+final updateTaskBusyProvider = Provider<bool>(
+  (ref) =>
+      ref.watch(
+        imageGenerationNotifierProvider.select((s) => s.isGenerating),
+      ) ||
+      ref.watch(exploreRunRunnerProvider.select((s) => s.isRunning)),
+);
+
+/// Release notes and update actions share one dialog throughout the download.
 class UpdateCheckDialog extends ConsumerWidget {
   const UpdateCheckDialog({super.key});
 
@@ -26,10 +31,46 @@ class UpdateCheckDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(updateStateProvider);
 
-    return AlertDialog(
-      title: Text(_getTitle(context, state)),
-      content: SizedBox(width: 500, child: _buildContent(context, ref, state)),
-      actions: _buildActions(context, ref, state),
+    final canClose = state.status != UpdateStatus.installing;
+    final ready = state.hasDownloadedUpdate;
+    final busy = ready && ref.watch(updateTaskBusyProvider);
+    return PopScope(
+      canPop: canClose,
+      child: AlertDialog(
+        title: Row(
+          children: [
+            Expanded(child: Text(_getTitle(context, state))),
+            IconButton(
+              tooltip: context.l10n.common_close,
+              onPressed: canClose ? () => Navigator.of(context).pop() : null,
+              icon: const Icon(Icons.close_rounded, size: 20),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: 520,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (state.versionInfo != null &&
+                    state.status != UpdateStatus.available)
+                  _buildUpdateAvailableContent(context, state.versionInfo!),
+                _buildContent(context, ref, state),
+                if (busy)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Text(
+                      context.l10n.updateWaitForTask,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        actions: _buildActions(context, ref, state),
+      ),
     );
   }
 
@@ -116,23 +157,12 @@ class UpdateCheckDialog extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          if (versionInfo.primaryAsset != null) ...[
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(
-                versionInfo.supportsInAppInstall
-                    ? Icons.system_update_alt
-                    : Icons.open_in_new,
-              ),
-              title: Text(
-                versionInfo.primaryAsset!.label ?? context.l10n.common_download,
-              ),
-              subtitle: Text(
-                versionInfo.primaryAsset!.description ??
-                    context.l10n.updatePortableManualHint,
-              ),
+          if (versionInfo.publishedAt != null) ...[
+            Text(
+              versionInfo.publishedAt!.split('T').first,
+              style: theme.textTheme.bodySmall,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
           ],
           // 更新日志
           if (versionInfo.releaseNotes != null &&
@@ -145,6 +175,7 @@ class UpdateCheckDialog extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Container(
+              width: double.infinity,
               constraints: const BoxConstraints(maxHeight: 240),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -462,21 +493,9 @@ class UpdateCheckDialog extends ConsumerWidget {
         // 稍后提醒
         TextButton(
           onPressed: () async {
-            await ref.read(updateStateProvider.notifier).remindLater();
-            if (context.mounted) Navigator.of(context).pop();
+            Navigator.of(context).pop();
           },
-          child: Text(context.l10n.remindMeLater),
-        ),
-        // 忽略此版本
-        TextButton(
-          onPressed: () async {
-            await ref.read(updateStateProvider.notifier).skipUpdate();
-            if (context.mounted) {
-              AppToast.info(context, context.l10n.versionSkipped);
-              Navigator.of(context).pop();
-            }
-          },
-          child: Text(context.l10n.skipThisVersion),
+          child: Text(context.l10n.updateLater),
         ),
         // 下载并安装 / 前往下载
         FilledButton(
@@ -500,6 +519,10 @@ class UpdateCheckDialog extends ConsumerWidget {
       ],
       UpdateStatus.downloading => [
         TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(context.l10n.updateInstallLater),
+        ),
+        TextButton(
           onPressed: () {
             ref.read(updateStateProvider.notifier).cancelDownload();
             AppToast.info(context, context.l10n.updateDownloadCancelled);
@@ -510,13 +533,14 @@ class UpdateCheckDialog extends ConsumerWidget {
       UpdateStatus.downloaded => [
         TextButton(
           onPressed: () async {
-            await ref.read(updateStateProvider.notifier).remindLater();
-            if (context.mounted) Navigator.of(context).pop();
+            Navigator.of(context).pop();
           },
           child: Text(context.l10n.updateInstallLater),
         ),
         FilledButton(
-          onPressed: () => _confirmInstall(context, ref),
+          onPressed: ref.watch(updateTaskBusyProvider)
+              ? null
+              : () => _install(ref),
           child: Text(context.l10n.updateInstallAndRestart),
         ),
       ],
@@ -539,19 +563,22 @@ class UpdateCheckDialog extends ConsumerWidget {
             child: Text(context.l10n.goToDownload),
           ),
         FilledButton(
-          onPressed: () {
-            final notifier = ref.read(updateStateProvider.notifier);
-            // 已有版本信息说明是下载/安装阶段出错，直接重试下载；
-            // 否则重新走检查更新流程。
-            if (state.downloadedUpdate != null) {
-              _confirmInstall(context, ref);
-            } else if (state.versionInfo != null &&
-                state.versionInfo!.supportsInAppInstall) {
-              notifier.downloadUpdate();
-            } else {
-              notifier.checkForUpdates(manual: true);
-            }
-          },
+          onPressed:
+              state.hasDownloadedUpdate && ref.watch(updateTaskBusyProvider)
+              ? null
+              : () {
+                  final notifier = ref.read(updateStateProvider.notifier);
+                  // 已有版本信息说明是下载/安装阶段出错，直接重试下载；
+                  // 否则重新走检查更新流程。
+                  if (state.downloadedUpdate != null) {
+                    _install(ref);
+                  } else if (state.versionInfo != null &&
+                      state.versionInfo!.supportsInAppInstall) {
+                    notifier.downloadUpdate();
+                  } else {
+                    notifier.checkForUpdates(manual: true);
+                  }
+                },
           child: Text(context.l10n.common_retry),
         ),
       ],
@@ -564,27 +591,10 @@ class UpdateCheckDialog extends ConsumerWidget {
     };
   }
 
-  Future<void> _confirmInstall(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(context.l10n.updateInstallConfirmationTitle),
-        content: Text(context.l10n.updateInstallConfirmationBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(context.l10n.common_cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(context.l10n.updateInstallAndRestart),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true && context.mounted) {
-      await ref.read(updateStateProvider.notifier).installDownloadedUpdate();
-    }
+  Future<void> _install(WidgetRef ref) async {
+    // Recheck at the click boundary; a task may have started since the render.
+    if (ref.read(updateTaskBusyProvider)) return;
+    await ref.read(updateStateProvider.notifier).installDownloadedUpdate();
   }
 
   Future<void> _openDownloadUrl(
