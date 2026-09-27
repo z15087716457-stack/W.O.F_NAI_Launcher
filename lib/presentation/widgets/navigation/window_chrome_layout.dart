@@ -195,8 +195,9 @@ class WindowPanelHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = WindowChromeScope.heightOf(context);
     if (!WindowChromeScope.activeOf(context)) {
-      return SizedBox(height: 48, child: child);
+      return SizedBox(height: height, child: child);
     }
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -206,7 +207,7 @@ class WindowPanelHeader extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              height: narrow ? WindowChromeScope.height : 48,
+              height: height,
               child: Row(
                 children: [
                   if (!narrow) SizedBox(width: 166, child: child),
@@ -217,7 +218,7 @@ class WindowPanelHeader extends StatelessWidget {
             ),
             if (narrow)
               SizedBox(
-                height: 48,
+                height: height,
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: SizedBox(width: 166, child: child),

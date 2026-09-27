@@ -484,6 +484,13 @@ void main() {
         final close = find.byKey(const Key('style-explore-gallery-close'));
         final title = find.byKey(const Key('style-explore-gallery-header'));
         expect(tester.getRect(title).top, 0);
+        final captions = tester.getRect(
+          find.byKey(const Key('window-caption-controls')),
+        );
+        expect(tester.getRect(title).height, 36);
+        expect(tester.getCenter(close).dy, captions.center.dy);
+        expect(tester.getRect(title).bottom, captions.bottom);
+
         expect(
           tester.getRect(close).right,
           lessThan(tester.getRect(title).right + 1),

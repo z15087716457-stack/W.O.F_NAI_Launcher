@@ -839,11 +839,11 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
           child: SizedBox(
             width: visibleWidth,
             child: visibleWidth < 180
-                ? const SizedBox(height: 48)
+                ? SizedBox(height: WindowChromeScope.heightOf(context))
                 : WindowPanelHeader(
                     child: SizedBox(
                       key: const Key('style-explore-gallery-header'),
-                      height: 48,
+                      height: WindowChromeScope.heightOf(context),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Row(
