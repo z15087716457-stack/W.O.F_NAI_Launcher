@@ -25,6 +25,7 @@ import '../../../widgets/common/themed_input.dart';
 import '../../../widgets/common/thumbnail_display.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
+import '../../../widgets/prompt/blocks/prompt_block_tag_chip.dart';
 import '../../../widgets/common/thumbnail_crop_dialog.dart';
 import '../../../widgets/prompt/prompt_token_count_bar.dart';
 import 'atom_list_editor.dart';
@@ -39,6 +40,7 @@ class PromptBlockEditResult {
     required this.negativeContent,
     required this.negativeAtoms,
     this.generationSettings,
+    required this.tags,
     required this.folderId,
     required this.color,
     required this.iconName,
@@ -53,6 +55,7 @@ class PromptBlockEditResult {
   final String negativeContent;
   final List<String> negativeAtoms;
   final PromptBlockGenerationSettings? generationSettings;
+  final List<PromptBlockTag> tags;
 
   /// 显式原子列表（FEAT-79）：编辑器保存口径，空白段已剔除；
   /// [content] 恒等于 `atoms.join(', ')`。
@@ -73,6 +76,7 @@ class PromptBlockEditDialog extends StatefulWidget {
     super.key,
     required this.block,
     required this.folders,
+    this.knownTags = const [],
     this.initialFolderId,
     this.initialTitle,
     this.initialContent,
@@ -83,6 +87,7 @@ class PromptBlockEditDialog extends StatefulWidget {
 
   final PromptBlock? block;
   final List<PromptBlockFolder> folders;
+  final List<PromptBlockTag> knownTags;
   final String? initialFolderId;
 
   /// 新建模式下的初始标题（「存为块」入口预填名称）。
@@ -102,6 +107,7 @@ class PromptBlockEditDialog extends StatefulWidget {
     required BuildContext context,
     PromptBlock? block,
     required List<PromptBlockFolder> folders,
+    List<PromptBlockTag> knownTags = const [],
     String? initialFolderId,
     String? initialTitle,
     String? initialContent,
@@ -114,6 +120,7 @@ class PromptBlockEditDialog extends StatefulWidget {
       builder: (context) => PromptBlockEditDialog(
         block: block,
         folders: folders,
+        knownTags: knownTags,
         initialFolderId: initialFolderId,
         initialTitle: initialTitle,
         initialContent: initialContent,
@@ -141,6 +148,7 @@ class PromptBlockEditDialog extends StatefulWidget {
     final result = await show(
       context: context,
       folders: library.folders,
+      knownTags: [for (final block in library.blocks) ...block.tags],
       initialFolderId: initialFolderId,
       initialTitle: initialTitle,
       initialContent: initialContent,
@@ -157,6 +165,7 @@ class PromptBlockEditDialog extends StatefulWidget {
           negativeContent: result.negativeContent,
           negativeAtoms: result.negativeAtoms,
           generationSettings: result.generationSettings,
+          tags: result.tags,
           folderId: result.folderId,
           color: result.color,
           iconName: result.iconName,
@@ -192,6 +201,8 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
   late String? _folderId;
   late Color _selectedColor;
   late String? _selectedIconName;
+  late List<PromptBlockTag> _tags;
+  final List<TextEditingController> _tagDialogControllers = [];
 
   /// 预览图当前路径：可能是应用目录内已存路径或本会话新落盘的选取图。
   String? _thumbnailPath;
@@ -244,6 +255,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
       widget.block?.color ?? '#FF607D8B',
     );
     _selectedIconName = widget.block?.iconName;
+    _tags = [...?widget.block?.tags];
     _thumbnailPath = widget.block?.thumbnail;
     _thumbnailOffsetX = widget.block?.thumbnailOffsetX ?? 0.0;
     _thumbnailOffsetY = widget.block?.thumbnailOffsetY ?? 0.0;
@@ -285,6 +297,9 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
     _stepsController.dispose();
     _scaleController.dispose();
     _cfgRescaleController.dispose();
+    for (final controller in _tagDialogControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -425,22 +440,233 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.common_cancel),
-        ),
-        FilledButton(
-          onPressed: _isSaving ? null : _save,
-          child: _isSaving
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.common_save),
+        SizedBox(
+          width: (MediaQuery.sizeOf(context).width - 80).clamp(240.0, 600.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SizedBox(
+                height: 32,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (_tags.isNotEmpty)
+                      Expanded(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          reverse: true,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              for (
+                                var index = _tags.length - 1;
+                                index >= 0;
+                                index--
+                              ) ...[
+                                _buildEditableTag(index),
+                                const SizedBox(width: 5),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    TextButton.icon(
+                      key: const Key('block-add-tag'),
+                      onPressed: () => _editTag(),
+                      icon: const Icon(Icons.local_offer_outlined, size: 15),
+                      label: Text(l10n.promptBlockLibrary_addTag),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(l10n.common_cancel),
+                  ),
+                  const SizedBox(width: 6),
+                  FilledButton(
+                    onPressed: _isSaving ? null : _save,
+                    child: _isSaving
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(l10n.common_save),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ],
     );
+  }
+
+  Widget _buildEditableTag(int index) {
+    final tag = _tags[index];
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        PromptBlockTagChip(
+          key: Key('block-tag-${tag.name}'),
+          tag: tag,
+          onTap: () => _editTag(index: index),
+        ),
+        InkWell(
+          key: Key('block-remove-tag-${tag.name}'),
+          onTap: () => setState(() => _tags.removeAt(index)),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 3),
+            child: Icon(Icons.close, size: 13),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _editTag({int? index}) async {
+    final existing = index == null ? null : _tags[index];
+    final nameController = TextEditingController(text: existing?.name ?? '');
+    final initialColor = existing == null
+        ? Theme.of(context).colorScheme.primary
+        : promptBlockColorFromString(existing.color);
+    final colorController = TextEditingController(
+      text: promptBlockColorToHex(initialColor),
+    );
+    _tagDialogControllers.addAll([nameController, colorController]);
+    var selectedColor = initialColor;
+    String? error;
+    final result = await showDialog<PromptBlockTag>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, update) => AlertDialog(
+          title: Text(context.l10n.promptBlockLibrary_tags),
+          content: SizedBox(
+            width: 300,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  key: const Key('block-tag-name-input'),
+                  controller: nameController,
+                  autofocus: true,
+                  maxLength: 32,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.promptBlockLibrary_tagName,
+                    errorText: error,
+                  ),
+                ),
+                if (widget.knownTags.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    height: 28,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        for (final tag in {
+                          for (final item in widget.knownTags)
+                            item.name.toLowerCase(): item,
+                        }.values)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 5),
+                            child: PromptBlockTagChip(
+                              tag: tag,
+                              compact: true,
+                              onTap: () => update(() {
+                                nameController.text = tag.name;
+                                selectedColor = promptBlockColorFromString(
+                                  tag.color,
+                                );
+                                colorController.text = tag.color;
+                                error = null;
+                              }),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                PromptBlockColorPicker(
+                  selectedColor: selectedColor,
+                  onChanged: (value) => update(() {
+                    selectedColor = value;
+                    colorController.text = promptBlockColorToHex(value);
+                    error = null;
+                  }),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  key: const Key('block-tag-color-input'),
+                  controller: colorController,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.promptBlockLibrary_tagColor,
+                    isDense: true,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(context.l10n.common_cancel),
+            ),
+            FilledButton(
+              key: const Key('block-tag-save'),
+              onPressed: () {
+                final name = nameController.text.trim();
+                final raw = colorController.text.trim();
+                final hex = raw.startsWith('#') ? raw.substring(1) : raw;
+                if (name.isEmpty) {
+                  update(() => error = context.l10n.promptBlockLibrary_tagName);
+                  return;
+                }
+                if (_tags.indexed.any(
+                  (entry) =>
+                      entry.$1 != index &&
+                      entry.$2.name.toLowerCase() == name.toLowerCase(),
+                )) {
+                  update(
+                    () => error = context.l10n.promptBlockLibrary_duplicateTag,
+                  );
+                  return;
+                }
+                if (!RegExp(
+                  r'^(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$',
+                ).hasMatch(hex)) {
+                  update(
+                    () =>
+                        error = context.l10n.promptBlockLibrary_invalidTagColor,
+                  );
+                  return;
+                }
+                final normalized = hex.length == 6 ? '#FF$hex' : '#$hex';
+                Navigator.of(dialogContext).pop(
+                  PromptBlockTag(name: name, color: normalized.toUpperCase()),
+                );
+              },
+              child: Text(context.l10n.common_save),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (result == null || !mounted) return;
+    setState(() {
+      if (index == null) {
+        _tags.add(result);
+      } else {
+        _tags[index] = result;
+      }
+    });
   }
 
   Widget _buildContentPanel(ThemeData theme, AppLocalizations l10n) {
@@ -967,6 +1193,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
           negativeContent: negativeAtoms.join(', '),
           negativeAtoms: negativeAtoms,
           generationSettings: generationSettings,
+          tags: _tags,
           folderId: _folderId,
           color: promptBlockColorToHex(_selectedColor),
           iconName: _selectedIconName,

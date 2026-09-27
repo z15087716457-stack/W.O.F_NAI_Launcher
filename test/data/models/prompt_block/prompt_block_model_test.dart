@@ -17,12 +17,14 @@ void main() {
         steps: 28,
         scale: 5,
       ),
+      tags: const [PromptBlockTag(name: '冷色', color: '#FF268BEA')],
     );
     final json = block.toJson();
     expect(json['generationSettings'], isA<Map<String, dynamic>>());
     final restored = PromptBlock.fromJson(json);
     expect(restored, block);
     expect(restored.negativeAtomsOrSplit, ['muted colors']);
+    expect(restored.tags.single.name, '冷色');
 
     final old = PromptBlock.fromJson({
       'id': 'old',
@@ -33,6 +35,7 @@ void main() {
     });
     expect(old.negativeContent, isEmpty);
     expect(old.generationSettings, isNull);
+    expect(old.tags, isEmpty);
   });
 
   test(

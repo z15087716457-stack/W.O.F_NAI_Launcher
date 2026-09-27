@@ -9034,6 +9034,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_noSettings => '生成設定は保存されていません';
 
   @override
+  String get promptBlockLibrary_tags => 'タグ';
+
+  @override
+  String get promptBlockLibrary_addTag => 'タグを追加';
+
+  @override
+  String get promptBlockLibrary_tagName => 'タグ名';
+
+  @override
+  String get promptBlockLibrary_tagColor => 'タグの色（16進数）';
+
+  @override
+  String get promptBlockLibrary_duplicateTag => '同じ名前のタグが既にあります';
+
+  @override
+  String get promptBlockLibrary_invalidTagColor => '有効な16進数の色を入力してください';
+
+  @override
   String get pillCard_rollScope => '変化範囲';
 
   @override

@@ -201,6 +201,7 @@ class _RecordingLibraryNotifier extends PromptBlockLibraryNotifier {
     String negativeContent = '',
     List<String>? negativeAtoms,
     PromptBlockGenerationSettings? generationSettings,
+    List<PromptBlockTag> tags = const [],
   }) async {
     created.add((
       title: title,

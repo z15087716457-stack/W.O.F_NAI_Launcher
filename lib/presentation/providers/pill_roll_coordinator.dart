@@ -66,13 +66,13 @@ class PillRollCoordinator {
     if (scope == PillScopes.main) {
       _ref
           .read(generationParamsNotifierProvider.notifier)
-          .updatePrompt(projection);
+          .updatePromptFromPill(projection);
       return;
     }
     if (scope == PillScopes.negative) {
       _ref
           .read(generationParamsNotifierProvider.notifier)
-          .updateNegativePrompt(projection);
+          .updateNegativePromptFromPill(projection);
       return;
     }
     final charMatch = RegExp(r'^char:(.+):(pos|neg)$').firstMatch(scope);

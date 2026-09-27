@@ -17,7 +17,7 @@ import '../repositories/prompt_block_repository.dart';
 /// （UC/画质预设等存量引用按 id 解析条目，保 id 后重定向即可不断链）。
 /// 分类树 1:1 平移为文件夹树，同名分类不合并；条目字段 name/content/
 /// thumbnail 三参数/useCount/isFavorite/sortOrder/createdAt/updatedAt 全量
-/// 随迁，`tags` 与 `lastUsedAt` 在块模型中无对应字段，按蓝图口径丢弃。
+/// 随迁；旧标签名称转为默认色块标签，`lastUsedAt` 无对应字段。
 ///
 /// 缩略图字节级复制进 `prompt_block_thumbnails/<blockId><源扩展名>`
 /// （幂等覆盖、重试无孤儿文件）；复制失败退回原路径保证可见。
@@ -123,6 +123,7 @@ class TagLibraryMigrationService {
               ? entry.name
               : _titleFromContent(entry.content),
           content: entry.content,
+          tags: [for (final name in entry.tags) PromptBlockTag(name: name)],
           folderId: folderId,
           thumbnail: thumbnail,
           thumbnailOffsetX: entry.thumbnailOffsetX,
@@ -236,12 +237,13 @@ class TagLibraryMigrationService {
   }
 }
 
-/// 旧词库条目解码记录（仅迁移所需字段；`tags`/`lastUsedAt` 按口径丢弃）。
+/// 旧词库条目解码记录（仅迁移所需字段；`lastUsedAt` 不迁移）。
 class _LegacyEntry {
   const _LegacyEntry({
     required this.id,
     required this.name,
     required this.content,
+    required this.tags,
     required this.thumbnail,
     required this.thumbnailOffsetX,
     required this.thumbnailOffsetY,
@@ -257,6 +259,7 @@ class _LegacyEntry {
   final String id;
   final String name;
   final String content;
+  final List<String> tags;
   final String? thumbnail;
   final double thumbnailOffsetX;
   final double thumbnailOffsetY;
@@ -272,6 +275,7 @@ class _LegacyEntry {
     id: json['id'] as String,
     name: json['name'] as String? ?? '',
     content: json['content'] as String? ?? '',
+    tags: (json['tags'] as List?)?.whereType<String>().toList() ?? const [],
     thumbnail: json['thumbnail'] as String?,
     thumbnailOffsetX: (json['thumbnailOffsetX'] as num?)?.toDouble() ?? 0.0,
     thumbnailOffsetY: (json['thumbnailOffsetY'] as num?)?.toDouble() ?? 0.0,

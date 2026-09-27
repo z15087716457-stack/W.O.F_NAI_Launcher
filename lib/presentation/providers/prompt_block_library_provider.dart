@@ -233,6 +233,7 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
     String negativeContent = '',
     List<String>? negativeAtoms,
     PromptBlockGenerationSettings? generationSettings,
+    List<PromptBlockTag> tags = const [],
   }) {
     return _mutate(
       (repository) => repository.createBlock(
@@ -243,6 +244,7 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
         negativeContent: negativeContent,
         negativeAtoms: negativeAtoms,
         generationSettings: generationSettings,
+        tags: tags,
         color: color,
         iconName: iconName,
         thumbnail: thumbnail,

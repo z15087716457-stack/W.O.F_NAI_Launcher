@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/models/prompt_block/pill_document.dart';
 import '../providers/pill_workspace_provider.dart';
+import '../providers/pill_roll_coordinator.dart';
 
 class BundleMember {
   const BundleMember(this.scope, this.marker, this.instance);
@@ -134,5 +135,13 @@ void removePromptBlockBundle(WidgetRef ref, String scope, String marker) {
     ref
         .read(pillWorkspaceProvider(member.scope).notifier)
         .removeMarker(member.marker);
+  }
+  // 负面框可能未挂载：删除后显式同步各 lane 的最新投影，且投影写回
+  // 会在提交前再核对当前文档，旧的异步回调不能把 UC 内容展开留下。
+  for (final member in bundle.members) {
+    final projection = ref.read(pillWorkspaceProvider(member.scope)).projection;
+    ref
+        .read(pillRollCoordinatorProvider)
+        .syncLaneProjection(member.scope, projection);
   }
 }

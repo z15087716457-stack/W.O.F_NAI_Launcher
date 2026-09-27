@@ -14,6 +14,7 @@ import '../../../widgets/common/themed_divider.dart';
 import '../../../widgets/common/thumbnail_display.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
+import '../../../widgets/prompt/blocks/prompt_block_tag_chip.dart';
 import 'atom_list_editor.dart';
 
 const promptBlockLibraryWideHeaderHeight = 64.0;
@@ -56,6 +57,7 @@ class PromptBlockDetailView extends StatelessWidget {
     this.contentMaxLines = 8,
     this.actions = const <Widget>[],
     this.compactImage = false,
+    this.onTagTap,
   });
 
   final PromptBlock block;
@@ -70,6 +72,7 @@ class PromptBlockDetailView extends StatelessWidget {
   /// 预览态紧凑版式：竖图封顶 0.8×宽并按裁剪偏移 cover；正文弹性
   /// 截断、标题与页脚元信息保持刚性，保证浮层底部不被顶出。
   final bool compactImage;
+  final ValueChanged<String>? onTagTap;
 
   @override
   Widget build(BuildContext context) {
@@ -193,6 +196,29 @@ class PromptBlockDetailView extends StatelessWidget {
             icon: Icons.repeat,
             label: l10n.promptBlockLibrary_useCount(block.useCount),
           ),
+          if (block.tags.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            SizedBox(
+              height: 23,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (final tag in block.tags) ...[
+                      PromptBlockTagChip(
+                        tag: tag,
+                        compact: true,
+                        onTap: onTagTap == null
+                            ? null
+                            : () => onTagTap!(tag.name),
+                      ),
+                      const SizedBox(width: 5),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 6),
           _MetaRow(icon: Icons.folder_outlined, label: locationLabel),
           // 紧凑预览只留核心元信息；源文件/导入时间属次要，省略以
@@ -539,7 +565,7 @@ class PromptBlockPreviewOverlay extends StatelessWidget {
   }
 }
 
-/// 悬停 800ms 出纯预览的包装器；指针按下（点击/拖拽起手）即抑制。
+/// 短暂停留后出纯预览；指针按下（点击/拖拽起手）即抑制。
 class PromptBlockHoverPreview extends StatefulWidget {
   const PromptBlockHoverPreview({
     super.key,
@@ -547,7 +573,7 @@ class PromptBlockHoverPreview extends StatefulWidget {
     required this.folders,
     required this.child,
     this.enabled = true,
-    this.delay = const Duration(milliseconds: 800),
+    this.delay = const Duration(milliseconds: 180),
   });
 
   final PromptBlock block;
@@ -653,6 +679,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
     required this.onExport,
     required this.onDelete,
     required this.onCollapse,
+    this.onTagTap,
   });
 
   final PromptBlock block;
@@ -665,6 +692,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
   final VoidCallback onExport;
   final VoidCallback onDelete;
   final VoidCallback onCollapse;
+  final ValueChanged<String>? onTagTap;
 
   @override
   Widget build(BuildContext context) {
@@ -740,6 +768,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
                         child: PromptBlockDetailView(
                           key: const Key('prompt-block-detail-view'),
                           block: block,
+                          onTagTap: onTagTap,
                           displayTitle: block.title.isEmpty
                               ? l10n.promptBlockLibrary_unnamedBlock
                               : block.title,

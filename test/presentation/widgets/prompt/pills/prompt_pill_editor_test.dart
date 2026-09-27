@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
+import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_drag_data.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/dna_icon.dart';
@@ -41,6 +43,91 @@ void main() {
     expect(state.document.text, markerA);
     expect(state.projection, 'artist:foo, artist:bar');
   });
+
+  testWidgets('attached negative pill shows UC and card header tags', (
+    tester,
+  ) async {
+    final block = _block('style', '画风', 'bright').copyWith(
+      negativeContent: 'muted',
+      tags: const [PromptBlockTag(name: '冷色', color: '#FF268BEA')],
+    );
+    final container = await _pump(
+      tester,
+      pillScope: PillScopes.negative,
+      libraryState: PromptBlockLibraryState(blocks: [block], folders: const []),
+    );
+    container
+        .read(pillWorkspaceProvider(PillScopes.negative).notifier)
+        .insertBlockAt(
+          offset: 0,
+          blockId: block.id,
+          useNegativeContent: true,
+          bundleId: 'bundle-1',
+        );
+    await tester.pump();
+    expect(
+      tester.widget<PromptPill>(find.byType(PromptPill)).isAttachedUc,
+      isTrue,
+    );
+    expect(find.text('UC'), findsOneWidget);
+    await tester.tap(find.byType(PromptPill));
+    await tester.pumpAndSettle();
+    expect(find.text('冷色'), findsOneWidget);
+  });
+
+  testWidgets(
+    'deleting main pill removes paired UC marker and its projection',
+    (tester) async {
+      final block = _block(
+        'pair',
+        '双面',
+        'bright',
+      ).copyWith(negativeContent: 'muted');
+      final container = await _pump(
+        tester,
+        libraryState: PromptBlockLibraryState(
+          blocks: [block],
+          folders: const [],
+        ),
+        overrides: [
+          generationParamsNotifierProvider.overrideWith(
+            _FakeGenerationParamsNotifier.new,
+          ),
+        ],
+      );
+      container
+          .read(pillWorkspaceProvider(PillScopes.main).notifier)
+          .insertBlockAt(offset: 0, blockId: block.id, bundleId: 'pair-1');
+      container
+          .read(pillWorkspaceProvider(PillScopes.negative).notifier)
+          .insertBlockAt(
+            offset: 0,
+            blockId: block.id,
+            useNegativeContent: true,
+            bundleId: 'pair-1',
+          );
+      container
+          .read(generationParamsNotifierProvider.notifier)
+          .updateNegativePromptFromPill('muted');
+      await tester.pump();
+      await tester.tap(find.byType(PromptPill));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+      final positive = container.read(pillWorkspaceProvider(PillScopes.main));
+      final negative = container.read(
+        pillWorkspaceProvider(PillScopes.negative),
+      );
+      expect(positive.document.text, isEmpty);
+      expect(negative.document.text, isEmpty);
+      expect(negative.document.instances, isEmpty);
+      expect(negative.projection, isEmpty);
+      expect(
+        container.read(generationParamsNotifierProvider).negativePrompt,
+        isEmpty,
+      );
+    },
+  );
 
   testWidgets('stale post-frame projection callbacks are discarded', (
     tester,
@@ -527,7 +614,9 @@ Future<ProviderContainer> _pump(
   ValueChanged<String>? onChanged,
   _FakePromptBlockLibraryNotifier? libraryNotifier,
   bool allowEvolutionToggle = false,
+  String pillScope = PillScopes.main,
   Offset appOffset = Offset.zero,
+  List<Override> overrides = const [],
 }) async {
   final originalSize = tester.view.physicalSize;
   final originalDpr = tester.view.devicePixelRatio;
@@ -543,6 +632,7 @@ Future<ProviderContainer> _pump(
   final app = ProviderScope(
     overrides: [
       promptBlockLibraryNotifierProvider.overrideWith(() => notifier),
+      ...overrides,
     ],
     child: MaterialApp(
       locale: const Locale('zh'),
@@ -553,6 +643,7 @@ Future<ProviderContainer> _pump(
           width: 960,
           height: 360,
           child: PromptPillEditor(
+            pillScope: pillScope,
             config: const UnifiedPromptConfig(
               enableAutocomplete: false,
               enableSyntaxHighlight: false,
@@ -625,4 +716,19 @@ PromptBlock _block(String id, String title, String content) {
     createdAt: DateTime(2026, 8, 30),
     updatedAt: DateTime(2026, 8, 30),
   );
+}
+
+class _FakeGenerationParamsNotifier extends GenerationParamsNotifier {
+  @override
+  ImageParams build() => const ImageParams();
+
+  @override
+  void updatePromptFromPill(String prompt) {
+    state = state.copyWith(prompt: prompt);
+  }
+
+  @override
+  void updateNegativePromptFromPill(String prompt) {
+    state = state.copyWith(negativePrompt: prompt);
+  }
 }

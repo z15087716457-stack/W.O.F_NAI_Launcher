@@ -66,6 +66,7 @@ class _PromptBlockLibraryScreenState
     extends ConsumerState<PromptBlockLibraryScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  String? _selectedTag;
 
   bool _allSelected = true;
 
@@ -302,6 +303,7 @@ class _PromptBlockLibraryScreenState
                 ),
                 onExport: () => _exportBlockAsTxt(block),
                 onDelete: () => _deleteBlock(context, block),
+                onTagTap: (tag) => setState(() => _selectedTag = tag),
                 onCollapse: () => _setDetailPanelExpanded(false),
               )
             : _buildEmptyDetailPanel(),
@@ -699,6 +701,13 @@ class _PromptBlockLibraryScreenState
                     ),
                     const SizedBox(height: 8),
                     search,
+                    if (_selectedTag != null) ...[
+                      const SizedBox(height: 6),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: _buildActiveTagFilter(),
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerRight,
@@ -716,6 +725,10 @@ class _PromptBlockLibraryScreenState
                   heading,
                   const SizedBox(width: 16),
                   Expanded(child: search),
+                  if (_selectedTag != null) ...[
+                    const SizedBox(width: 8),
+                    _buildActiveTagFilter(),
+                  ],
                   const SizedBox(width: 12),
                   actions,
                 ],
@@ -930,6 +943,23 @@ class _PromptBlockLibraryScreenState
     );
   }
 
+  Widget _buildActiveTagFilter() {
+    return InputChip(
+      key: const Key('prompt-block-active-tag-filter'),
+      avatar: const Icon(Icons.local_offer_outlined, size: 14),
+      label: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 110),
+        child: Text(
+          _selectedTag!,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+      onDeleted: () => setState(() => _selectedTag = null),
+      visualDensity: VisualDensity.compact,
+    );
+  }
+
   /// 窄布局备用：范围选择退化为下拉框。
   /// 编码约定：`__all__` 全部块 / `__fav__` 收藏 / `coll:<id>` 收藏集节点 /
   /// `__root__` 根目录 / 其余为文件夹 id。
@@ -1051,6 +1081,7 @@ class _PromptBlockLibraryScreenState
               _selectedCollectionId == null &&
               !_sortField.overridesManualOrder &&
               _searchController.text.trim().isEmpty &&
+              _selectedTag == null &&
               blocks.every((block) => block.folderId == _selectedFolderId);
           if (reorderable) {
             return ReorderableListView.builder(
@@ -1090,6 +1121,7 @@ class _PromptBlockLibraryScreenState
       return null;
     }
     if (_searchController.text.trim().isNotEmpty) return null;
+    if (_selectedTag != null) return null;
     if (_sortField.overridesManualOrder) return null;
     if (_selectedFolderId != null &&
         state.folderById(_selectedFolderId!) == null) {
@@ -1782,6 +1814,7 @@ class _PromptBlockLibraryScreenState
       context: context,
       block: block,
       folders: state.folders,
+      knownTags: [for (final item in state.blocks) ...item.tags],
       modelForTokenCount: ref.read(generationParamsNotifierProvider).model,
     );
     if (result == null || !mounted) return;
@@ -2151,7 +2184,8 @@ class _PromptBlockLibraryScreenState
 
   Widget _buildEmptyState(BuildContext context, PromptBlockLibraryState state) {
     final theme = Theme.of(context);
-    final hasSearch = _searchController.text.trim().isNotEmpty;
+    final hasSearch =
+        _searchController.text.trim().isNotEmpty || _selectedTag != null;
     final isEntireLibraryEmpty = state.blocks.isEmpty && _allSelected;
     final title = hasSearch
         ? context.l10n.promptBlockLibrary_noSearchResults
@@ -2194,8 +2228,10 @@ class _PromptBlockLibraryScreenState
               padding: const EdgeInsets.only(top: 20),
               child: TextButton.icon(
                 onPressed: () {
-                  _searchController.clear();
-                  setState(() {});
+                  setState(() {
+                    _searchController.clear();
+                    _selectedTag = null;
+                  });
                 },
                 icon: const Icon(Icons.clear),
                 label: Text(context.l10n.common_clear),
@@ -2263,12 +2299,20 @@ class _PromptBlockLibraryScreenState
         ? state.blocksInCollectionTree(_selectedCollectionId!)
         : state.blocksInFolderTree(_selectedFolderId);
     final query = _searchController.text.trim().toLowerCase();
+    final selectedTag = _selectedTag?.toLowerCase();
+    if (selectedTag != null) {
+      blocks.removeWhere(
+        (block) =>
+            !block.tags.any((tag) => tag.name.toLowerCase() == selectedTag),
+      );
+    }
     if (query.isNotEmpty) {
       blocks.removeWhere(
         (block) =>
             !block.title.toLowerCase().contains(query) &&
             !block.content.toLowerCase().contains(query) &&
-            !block.negativeContent.toLowerCase().contains(query),
+            !block.negativeContent.toLowerCase().contains(query) &&
+            !block.tags.any((tag) => tag.name.toLowerCase().contains(query)),
       );
     }
     if (_allSelected) {
@@ -2514,6 +2558,7 @@ class _PromptBlockLibraryScreenState
     final result = await PromptBlockEditDialog.show(
       context: context,
       folders: state.folders,
+      knownTags: [for (final item in state.blocks) ...item.tags],
       initialFolderId: _allSelected ? null : _selectedFolderId,
       modelForTokenCount: ref.read(generationParamsNotifierProvider).model,
     );
@@ -2529,6 +2574,7 @@ class _PromptBlockLibraryScreenState
             negativeContent: result.negativeContent,
             negativeAtoms: result.negativeAtoms,
             generationSettings: result.generationSettings,
+            tags: result.tags,
             folderId: result.folderId,
             color: result.color,
             iconName: result.iconName,
@@ -2562,6 +2608,7 @@ class _PromptBlockLibraryScreenState
               negativeContent: result.negativeContent,
               negativeAtoms: result.negativeAtoms,
               generationSettings: result.generationSettings,
+              tags: result.tags,
               color: result.color,
               iconName: result.iconName,
               thumbnail: result.thumbnail,

@@ -825,7 +825,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       },
       onChanged: (value) {
         _setProxyText(_promptController, value);
-        ref.read(generationParamsNotifierProvider.notifier).updatePrompt(value);
+        ref
+            .read(generationParamsNotifierProvider.notifier)
+            .updatePromptFromPill(value);
       },
     );
   }
@@ -869,7 +871,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         _setProxyText(_negativeController, value);
         ref
             .read(generationParamsNotifierProvider.notifier)
-            .updateNegativePrompt(value);
+            .updateNegativePromptFromPill(value);
       },
     );
   }

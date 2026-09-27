@@ -202,6 +202,31 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     });
   }
 
+  /// 药丸工作区投影写回。异步提交前再次核对当前投影，避免删除实例后
+  /// 先前排队的旧文本把已删除的 UC 块重新写成纯文本。
+  void updatePromptFromPill(String prompt) {
+    Future.microtask(() {
+      if (ref.read(pillWorkspaceNotifierProvider).projection != prompt ||
+          state.prompt == prompt) {
+        return;
+      }
+      state = state.copyWith(prompt: prompt);
+      _storage.setLastPrompt(prompt);
+    });
+  }
+
+  void updateNegativePromptFromPill(String negativePrompt) {
+    Future.microtask(() {
+      if (ref.read(pillWorkspaceProvider(PillScopes.negative)).projection !=
+              negativePrompt ||
+          state.negativePrompt == negativePrompt) {
+        return;
+      }
+      state = state.copyWith(negativePrompt: negativePrompt);
+      _storage.setLastNegativePrompt(negativePrompt);
+    });
+  }
+
   /// 切换模型模式（官网 modelMode：false=Anime, true=Furry）
   void updateModelMode(bool furryMode) {
     state = state.copyWith(furryMode: furryMode);

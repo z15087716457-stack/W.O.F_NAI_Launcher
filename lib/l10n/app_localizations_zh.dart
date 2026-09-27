@@ -8913,6 +8913,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_noSettings => '此块未保存生图参数';
 
   @override
+  String get promptBlockLibrary_tags => '标签';
+
+  @override
+  String get promptBlockLibrary_addTag => '添加标签';
+
+  @override
+  String get promptBlockLibrary_tagName => '标签名称';
+
+  @override
+  String get promptBlockLibrary_tagColor => '标签颜色（十六进制）';
+
+  @override
+  String get promptBlockLibrary_duplicateTag => '这个块已有同名标签';
+
+  @override
+  String get promptBlockLibrary_invalidTagColor => '请输入有效的十六进制颜色';
+
+  @override
   String get pillCard_rollScope => '变化范围';
 
   @override

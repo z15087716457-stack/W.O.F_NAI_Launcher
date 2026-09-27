@@ -97,7 +97,10 @@ class _CompactParameterNumberFieldState
                           decimal: true,
                           signed: false,
                         ),
-                        style: theme.textTheme.bodySmall,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
                         decoration: const InputDecoration(
                           isDense: true,
                           filled: false,
@@ -133,7 +136,7 @@ class _CompactParameterNumberFieldState
                                 fontWeight: FontWeight.w600,
                                 color: widget.controller.text.trim().isEmpty
                                     ? muted
-                                    : null,
+                                    : theme.colorScheme.primary,
                               ),
                             ),
                           ),

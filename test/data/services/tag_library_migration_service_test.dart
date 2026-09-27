@@ -170,6 +170,7 @@ void main() {
         expect(block.thumbnailScale, 1.6);
         expect(block.useCount, 7);
         expect(block.isFavorite, isTrue);
+        expect(block.tags.map((tag) => tag.name), ['通用']);
         expect(block.sortOrder, 3);
         expect(block.createdAt, DateTime.parse('2024-01-01T00:00:00.000'));
         expect(block.updatedAt, DateTime.parse('2024-02-01T00:00:00.000'));

@@ -18,6 +18,7 @@ class PromptPill extends StatelessWidget {
     this.rollBadgeIcon = Icons.casino_outlined,
     this.evolutionEnabled = false,
     this.allowEvolutionToggle = false,
+    this.isAttachedUc = false,
     this.variant = PromptPillVariant.normal,
   });
 
@@ -43,6 +44,7 @@ class PromptPill extends StatelessWidget {
 
   /// 当前页面是否允许操作遗传开关；仅探索页渲染 DNA 角标。
   final bool allowEvolutionToggle;
+  final bool isAttachedUc;
   final PromptPillVariant variant;
 
   @override
@@ -103,6 +105,25 @@ class PromptPill extends StatelessWidget {
               ),
             ),
           ),
+          if (variant == PromptPillVariant.normal && isAttachedUc) ...[
+            const SizedBox(width: 5),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+              decoration: BoxDecoration(
+                color: borderColor.withValues(alpha: .14),
+                borderRadius: BorderRadius.circular(3),
+              ),
+              child: Text(
+                'UC',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  height: 1,
+                  color: borderColor,
+                ),
+              ),
+            ),
+          ],
           if (variant == PromptPillVariant.normal &&
               evolutionEnabled &&
               allowEvolutionToggle) ...[

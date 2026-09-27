@@ -275,6 +275,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
           instance.settings.hasRoll,
           instance.settings.mode,
           instance.evolutionEnabled,
+          instance.useNegativeContent,
+          instance.bundleId,
           widget.allowEvolutionToggle,
           block?.title ?? '',
           block?.color ?? '',
@@ -353,6 +355,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
           : Icons.casino_outlined,
       evolutionEnabled: instance.evolutionEnabled,
       allowEvolutionToggle: widget.allowEvolutionToggle,
+      isAttachedUc: instance.useNegativeContent && instance.bundleId != null,
     );
 
     return WidgetSpan(

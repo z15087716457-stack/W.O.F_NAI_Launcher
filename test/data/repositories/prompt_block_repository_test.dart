@@ -63,6 +63,32 @@ void main() {
     await reopenedStorage.close();
   });
 
+  test('same-name tags keep one color across blocks', () async {
+    final first = await repository.createBlock(
+      title: '一',
+      content: 'one',
+      tags: const [PromptBlockTag(name: '冷色', color: '#FF268BEA')],
+    );
+    final second = await repository.createBlock(
+      title: '二',
+      content: 'two',
+      tags: const [PromptBlockTag(name: '冷色', color: '#FF00ACC1')],
+    );
+    expect(
+      (await repository.getBlock(first.id))!.tags.single.color,
+      '#FF00ACC1',
+    );
+    await repository.updateBlock(
+      first.copyWith(
+        tags: const [PromptBlockTag(name: '冷色', color: '#FF8E24AA')],
+      ),
+    );
+    expect(
+      (await repository.getBlock(second.id))!.tags.single.color,
+      '#FF8E24AA',
+    );
+  });
+
   test(
     'toggleFavorite persists the favorite state and is backward compatible',
     () async {
@@ -214,29 +240,32 @@ void main() {
   );
 
   group('collections', () {
-    test('create assigns sibling sort order and requires folder parent', () async {
-      final first = await repository.createCollection(name: '集一');
-      final second = await repository.createCollection(name: '集二');
-      // 收藏文件夹与收藏集在根级混合排序
-      final folder = await repository.createCollection(
-        name: '收藏夹',
-        isFolder: true,
-      );
-      final child = await repository.createCollection(
-        name: '子集',
-        parentId: folder.id,
-      );
+    test(
+      'create assigns sibling sort order and requires folder parent',
+      () async {
+        final first = await repository.createCollection(name: '集一');
+        final second = await repository.createCollection(name: '集二');
+        // 收藏文件夹与收藏集在根级混合排序
+        final folder = await repository.createCollection(
+          name: '收藏夹',
+          isFolder: true,
+        );
+        final child = await repository.createCollection(
+          name: '子集',
+          parentId: folder.id,
+        );
 
-      expect(first.sortOrder, 0);
-      expect(second.sortOrder, 1);
-      expect(folder.sortOrder, 2);
-      expect(child.sortOrder, 0);
-      expect(child.parentId, folder.id);
-      expect(
-        () => repository.createCollection(name: 'x', parentId: first.id),
-        throwsArgumentError,
-      );
-    });
+        expect(first.sortOrder, 0);
+        expect(second.sortOrder, 1);
+        expect(folder.sortOrder, 2);
+        expect(child.sortOrder, 0);
+        expect(child.parentId, folder.id);
+        expect(
+          () => repository.createCollection(name: 'x', parentId: first.id),
+          throwsArgumentError,
+        );
+      },
+    );
 
     test('moveCollection rejects cycles', () async {
       final outer = await repository.createCollection(
@@ -284,31 +313,40 @@ void main() {
       );
     });
 
-    test('toggleBlockInCollection adds membership and auto-favorites', () async {
-      final collection = await repository.createCollection(name: '集');
-      final block = await repository.createBlock(title: 'b', content: 'c');
+    test(
+      'toggleBlockInCollection adds membership and auto-favorites',
+      () async {
+        final collection = await repository.createCollection(name: '集');
+        final block = await repository.createBlock(title: 'b', content: 'c');
 
-      expect(await repository.toggleBlockInCollection(collection.id, block.id), isTrue);
-      var data = await repository.load();
-      expect(data.getCollection(collection.id)?.blockIds, [block.id]);
-      expect(data.getBlock(block.id)?.isFavorite, isTrue);
+        expect(
+          await repository.toggleBlockInCollection(collection.id, block.id),
+          isTrue,
+        );
+        var data = await repository.load();
+        expect(data.getCollection(collection.id)?.blockIds, [block.id]);
+        expect(data.getBlock(block.id)?.isFavorite, isTrue);
 
-      // 移出收藏集不动收藏旗标
-      expect(await repository.toggleBlockInCollection(collection.id, block.id), isFalse);
-      data = await repository.load();
-      expect(data.getCollection(collection.id)?.blockIds, isEmpty);
-      expect(data.getBlock(block.id)?.isFavorite, isTrue);
+        // 移出收藏集不动收藏旗标
+        expect(
+          await repository.toggleBlockInCollection(collection.id, block.id),
+          isFalse,
+        );
+        data = await repository.load();
+        expect(data.getCollection(collection.id)?.blockIds, isEmpty);
+        expect(data.getBlock(block.id)?.isFavorite, isTrue);
 
-      // 收藏文件夹不能装成员
-      final folder = await repository.createCollection(
-        name: '夹',
-        isFolder: true,
-      );
-      expect(
-        () => repository.toggleBlockInCollection(folder.id, block.id),
-        throwsStateError,
-      );
-    });
+        // 收藏文件夹不能装成员
+        final folder = await repository.createCollection(
+          name: '夹',
+          isFolder: true,
+        );
+        expect(
+          () => repository.toggleBlockInCollection(folder.id, block.id),
+          throwsStateError,
+        );
+      },
+    );
 
     test('deleteCollection removes subtree but keeps member blocks', () async {
       final folder = await repository.createCollection(

@@ -713,6 +713,13 @@ class _FakeGenerationParamsNotifier extends GenerationParamsNotifier {
   void updateNegativePrompt(String negativePrompt) {
     state = state.copyWith(negativePrompt: negativePrompt);
   }
+
+  @override
+  void updatePromptFromPill(String prompt) => updatePrompt(prompt);
+
+  @override
+  void updateNegativePromptFromPill(String negativePrompt) =>
+      updateNegativePrompt(negativePrompt);
 }
 
 /// 测试用积木 notifier：内存态，跳过 Hive。

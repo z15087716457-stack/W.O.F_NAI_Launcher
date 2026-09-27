@@ -16,6 +16,7 @@ import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:nai_launcher/data/models/prompt/prompt_preset_mode.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
+import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,6 +59,42 @@ void main() {
     expect(params.varietyPlus, isTrue);
   });
 
+  test(
+    'stale UC projection cannot restore deleted content as plain text',
+    () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final lane = container.read(
+        pillWorkspaceProvider(PillScopes.negative).notifier,
+      );
+      final params = container.read(generationParamsNotifierProvider.notifier);
+      lane.replaceWithPlainText('old UC');
+      params.updateNegativePromptFromPill('old UC');
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        container.read(generationParamsNotifierProvider).negativePrompt,
+        'old UC',
+      );
+
+      // 删除实例后旧投影仍可能在队列里；最新空投影必须胜出。
+      params.updateNegativePromptFromPill('old UC');
+      lane.replaceWithPlainText('');
+      params.updateNegativePromptFromPill('');
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        container.read(generationParamsNotifierProvider).negativePrompt,
+        '',
+      );
+      expect(
+        container
+            .read(pillWorkspaceProvider(PillScopes.negative))
+            .document
+            .text,
+        '',
+      );
+    },
+  );
+
   test('updateVarietyPlus should persist new value', () async {
     final container = ProviderContainer();
     addTearDown(container.dispose);
@@ -95,10 +132,7 @@ void main() {
     expect(storage.getDefaultModelMode(), isTrue);
 
     notifier.updateModelMode(false);
-    expect(
-      container.read(generationParamsNotifierProvider).furryMode,
-      isFalse,
-    );
+    expect(container.read(generationParamsNotifierProvider).furryMode, isFalse);
     expect(storage.getDefaultModelMode(), isFalse);
   });
 

@@ -9233,6 +9233,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_noSettings => 'No generation settings saved';
 
   @override
+  String get promptBlockLibrary_tags => 'Tags';
+
+  @override
+  String get promptBlockLibrary_addTag => 'Add tag';
+
+  @override
+  String get promptBlockLibrary_tagName => 'Tag name';
+
+  @override
+  String get promptBlockLibrary_tagColor => 'Tag color (hex)';
+
+  @override
+  String get promptBlockLibrary_duplicateTag =>
+      'This block already has a tag with that name';
+
+  @override
+  String get promptBlockLibrary_invalidTagColor => 'Enter a valid hex color';
+
+  @override
   String get pillCard_rollScope => 'Variation scope';
 
   @override

@@ -12,6 +12,7 @@ import '../../../utils/prompt_block_instance_bundle.dart';
 import '../../common/app_toast.dart';
 import '../../common/thumbnail_display.dart';
 import '../blocks/prompt_block_colors.dart';
+import '../blocks/prompt_block_tag_chip.dart';
 import 'dna_icon.dart';
 import 'pill_instance_settings_dialog.dart';
 
@@ -100,6 +101,11 @@ class _PillInstanceCardState extends ConsumerState<PillInstanceCard> {
                     style: theme.textTheme.titleSmall,
                   ),
                 ),
+                if (block?.tags.isNotEmpty == true)
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 150),
+                    child: PromptBlockTagStrip(tags: block!.tags),
+                  ),
               ],
             ),
             // 有图块：横图 280×120、竖图 280×200，坐标系与块库详情一致

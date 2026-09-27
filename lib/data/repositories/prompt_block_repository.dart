@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart' show DeepCollectionEquality;
+
 import '../models/prompt_block/prompt_block.dart';
 import '../models/prompt_block/prompt_block_collection.dart';
 import '../models/prompt_block/prompt_block_folder.dart';
@@ -97,6 +99,7 @@ class PromptBlockRepository {
     String negativeContent = '',
     List<String>? negativeAtoms,
     PromptBlockGenerationSettings? generationSettings,
+    List<PromptBlockTag> tags = const [],
   }) async {
     await _ensureFolderExists(folderId);
     final blocks = await _storage.getBlocks();
@@ -108,6 +111,7 @@ class PromptBlockRepository {
       negativeContent: negativeContent,
       negativeAtoms: negativeAtoms,
       generationSettings: generationSettings,
+      tags: tags,
       color: color,
       iconName: iconName,
       thumbnail: thumbnail,
@@ -117,6 +121,7 @@ class PromptBlockRepository {
       sortOrder: sortOrder ?? _nextSortOrder(blocks, folderId),
     );
     await _storage.putBlock(block);
+    await _harmonizeTagColors(block.tags);
     return block;
   }
 
@@ -129,7 +134,34 @@ class PromptBlockRepository {
 
     final updated = block.copyWith(updatedAt: DateTime.now());
     await _storage.putBlock(updated);
+    if (!const DeepCollectionEquality().equals(existing.tags, updated.tags)) {
+      await _harmonizeTagColors(updated.tags);
+    }
     return updated;
+  }
+
+  /// 同名标签以最近一次明确保存的颜色为准，避免筛选视图出现同名异色。
+  Future<void> _harmonizeTagColors(List<PromptBlockTag> tags) async {
+    if (tags.isEmpty) return;
+    final colors = {for (final tag in tags) tag.name.toLowerCase(): tag.color};
+    for (final block in await _storage.getBlocks()) {
+      var changed = false;
+      final updatedTags = <PromptBlockTag>[];
+      for (final tag in block.tags) {
+        final color = colors[tag.name.toLowerCase()];
+        if (color != null && color != tag.color) {
+          updatedTags.add(tag.copyWith(color: color));
+          changed = true;
+        } else {
+          updatedTags.add(tag);
+        }
+      }
+      if (changed) {
+        await _storage.putBlock(
+          block.copyWith(tags: updatedTags, updatedAt: DateTime.now()),
+        );
+      }
+    }
   }
 
   /// 切换块的收藏状态。

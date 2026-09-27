@@ -161,7 +161,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
   }
 
-  testWidgets('card hover 800ms shows pure preview; tap opens detail panel', (
+  testWidgets('card hover 180ms shows pure preview; tap opens detail panel', (
     tester,
   ) async {
     await pumpScreen(
@@ -173,10 +173,10 @@ void main() {
     final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(card));
-    // 未到 800ms 不出预览
-    await tester.pump(const Duration(milliseconds: 400));
+    // 未到 180ms 不出预览
+    await tester.pump(const Duration(milliseconds: 100));
     expect(find.byKey(const Key('prompt-block-preview-overlay')), findsNothing);
-    await tester.pump(const Duration(milliseconds: 450));
+    await tester.pump(const Duration(milliseconds: 90));
     expect(
       find.byKey(const Key('prompt-block-preview-overlay')),
       findsOneWidget,
@@ -207,6 +207,40 @@ void main() {
       findsOneWidget,
     );
     await gesture.removePointer();
+  });
+
+  testWidgets('detail tag filters blocks and can be cleared', (tester) async {
+    final blue = makeBlock('blue', '冷色块', 'blue').copyWith(
+      tags: const [PromptBlockTag(name: '冷色', color: '#FF268BEA')],
+    );
+    final red = makeBlock('red', '暖色块', 'red');
+    await pumpScreen(tester, buildScreen(blocks: [blue, red]));
+    await tester.tap(find.byKey(const ValueKey('prompt-block-card-body-blue')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('冷色').last);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('prompt-block-active-tag-filter')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('prompt-block-card-body-blue')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('prompt-block-card-body-red')),
+      findsNothing,
+    );
+    tester
+        .widget<InputChip>(
+          find.byKey(const Key('prompt-block-active-tag-filter')),
+        )
+        .onDeleted!();
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('prompt-block-card-body-red')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('waterfall view: switch renders masonry, tap opens detail', (
@@ -902,7 +936,9 @@ void main() {
           makeBlock('member', '成员块', 'c'),
           makeBlock('other', '路人块', 'c'),
         ],
-        collections: [makeCollection('col1', '画师集', blockIds: ['member'])],
+        collections: [
+          makeCollection('col1', '画师集', blockIds: ['member']),
+        ],
       ),
     );
 
@@ -933,7 +969,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
-    expect(find.byKey(const Key('prompt-block-grouped-scroll')), findsOneWidget);
+    expect(
+      find.byKey(const Key('prompt-block-grouped-scroll')),
+      findsOneWidget,
+    );
     // 两个分段标题：选中文件夹自身 + 子层（带路径）
     expect(find.text('功能'), findsWidgets);
     expect(find.text('功能 / 子层'), findsOneWidget);
@@ -965,7 +1004,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
-    expect(find.byKey(const Key('prompt-block-grouped-scroll')), findsOneWidget);
+    expect(
+      find.byKey(const Key('prompt-block-grouped-scroll')),
+      findsOneWidget,
+    );
     expect(find.text('未分类'), findsWidgets);
     expect(find.text('功能 / 子层'), findsOneWidget);
     expect(find.text('未分类块'), findsOneWidget);
@@ -997,7 +1039,9 @@ void main() {
     // 键打在 CustomScrollView（Stateless）上，ScrollableState 在其内部第一个
     // Scrollable 子孙处；段体内的嵌套滚动组件排在其后。
     final scrollable = tester.state<ScrollableState>(
-      find.descendant(of: groupedScroll, matching: find.byType(Scrollable)).first,
+      find
+          .descendant(of: groupedScroll, matching: find.byType(Scrollable))
+          .first,
     );
     scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
     // 弹回发生在随后若干帧的 scrollOffsetCorrection，多 pump 几帧放大差异
@@ -1031,7 +1075,9 @@ void main() {
 
     final groupedScroll = find.byKey(const Key('prompt-block-grouped-scroll'));
     final scrollable = tester.state<ScrollableState>(
-      find.descendant(of: groupedScroll, matching: find.byType(Scrollable)).first,
+      find
+          .descendant(of: groupedScroll, matching: find.byType(Scrollable))
+          .first,
     );
     scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
     await tester.pump();
@@ -1047,9 +1093,7 @@ void main() {
   testWidgets('detail panel expansion keeps the top card anchored', (
     tester,
   ) async {
-    final blocks = [
-      for (var i = 0; i < 60; i++) blockIn('b$i', '块$i', null),
-    ];
+    final blocks = [for (var i = 0; i < 60; i++) blockIn('b$i', '块$i', null)];
     await pumpScreen(tester, buildScreen(blocks: blocks));
 
     // 平铺 grid（默认「全部块」范围）滚到中部
@@ -1110,7 +1154,10 @@ void main() {
 
     final menu = find.byKey(const Key('prompt-block-favorite-menu'));
     // 菜单含收藏开关行 + 收藏集勾选行（侧栏同名行需排除）
-    expect(find.descendant(of: menu, matching: find.text('收藏')), findsOneWidget);
+    expect(
+      find.descendant(of: menu, matching: find.text('收藏')),
+      findsOneWidget,
+    );
     expect(
       find.descendant(of: menu, matching: find.text('画师集')),
       findsOneWidget,

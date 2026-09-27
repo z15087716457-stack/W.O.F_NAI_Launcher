@@ -319,7 +319,7 @@ void main() {
   });
 
   group('PromptBlockHoverPreview', () {
-    testWidgets('hover 800ms shows pure preview; exit dismisses', (
+    testWidgets('hover 180ms shows pure preview; exit dismisses', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -341,7 +341,7 @@ void main() {
       await gesture.moveTo(
         tester.getCenter(find.byKey(const Key('hover-target'))),
       );
-      await tester.pump(const Duration(milliseconds: 799));
+      await tester.pump(const Duration(milliseconds: 179));
       expect(
         find.byKey(const Key('prompt-block-preview-overlay')),
         findsNothing,

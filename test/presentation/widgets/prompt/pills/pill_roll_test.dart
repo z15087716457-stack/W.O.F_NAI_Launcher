@@ -1316,6 +1316,13 @@ class _FakeGenerationParamsNotifier extends GenerationParamsNotifier {
     lastNegative = negativePrompt;
     state = state.copyWith(negativePrompt: negativePrompt);
   }
+
+  @override
+  void updatePromptFromPill(String prompt) => updatePrompt(prompt);
+
+  @override
+  void updateNegativePromptFromPill(String negativePrompt) =>
+      updateNegativePrompt(negativePrompt);
 }
 
 PromptBlock _block(String id, String title, String content) {

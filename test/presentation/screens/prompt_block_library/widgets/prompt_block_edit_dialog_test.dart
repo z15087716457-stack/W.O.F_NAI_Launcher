@@ -66,6 +66,47 @@ void main() {
     expect(find.byType(ThumbnailDisplay), findsNothing);
   });
 
+  testWidgets('tag editor saves a named custom-color tag', (tester) async {
+    tester.view.physicalSize = const Size(1000, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    PromptBlockEditResult? captured;
+    await tester.pumpWidget(
+      wrap(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () async => captured = await PromptBlockEditDialog.show(
+              context: context,
+              block: makeBlock(),
+              folders: const [],
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('block-add-tag')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('block-tag-name-input')), '冷色');
+    await tester.enterText(
+      find.byKey(const Key('block-tag-color-input')),
+      '#268BEA',
+    );
+    await tester.tap(find.byKey(const Key('block-tag-save')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('block-tag-冷色')), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+    expect(captured?.tags, const [
+      PromptBlockTag(name: '冷色', color: '#FF268BEA'),
+    ]);
+  });
+
   testWidgets(
     'block with thumbnail shows preview; clearing reverts to placeholder',
     (tester) async {

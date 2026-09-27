@@ -6,6 +6,18 @@ import '../../../core/utils/pill_roll_engine.dart';
 part 'prompt_block.freezed.dart';
 part 'prompt_block.g.dart';
 
+/// 块库标签。颜色属于标签本身，名称用于筛选与复用。
+@freezed
+class PromptBlockTag with _$PromptBlockTag {
+  const factory PromptBlockTag({
+    required String name,
+    @Default('#FF607D8B') String color,
+  }) = _PromptBlockTag;
+
+  factory PromptBlockTag.fromJson(Map<String, dynamic> json) =>
+      _$PromptBlockTagFromJson(json);
+}
+
 /// 块可选的生图参数。null 表示不改变当前值；空对象等同于不带设置。
 @freezed
 class PromptBlockGenerationSettings with _$PromptBlockGenerationSettings {
@@ -61,6 +73,9 @@ class PromptBlock with _$PromptBlock {
     /// 可选生图参数，只在用户显式应用时写入当前生图状态。
     @JsonKey(includeIfNull: false)
     PromptBlockGenerationSettings? generationSettings,
+
+    /// 二级管理标签；旧块缺键时为空。
+    @Default(<PromptBlockTag>[]) List<PromptBlockTag> tags,
 
     /// 显式原子列表（FEAT-79）：非 null 时随机池/顺序幕/注入池抽取
     /// 直接按它切，原子内逗号自由；null = 旧块或纯文本新建，
@@ -143,6 +158,7 @@ class PromptBlock with _$PromptBlock {
     String negativeContent = '',
     List<String>? negativeAtoms,
     PromptBlockGenerationSettings? generationSettings,
+    List<PromptBlockTag> tags = const [],
   }) {
     final created = createdAt ?? DateTime.now();
     return PromptBlock(
@@ -150,6 +166,7 @@ class PromptBlock with _$PromptBlock {
       negativeContent: negativeContent,
       negativeAtoms: negativeAtoms,
       generationSettings: generationSettings,
+      tags: tags,
       id: id ?? const Uuid().v4(),
       title: title.trim(),
       content: content,

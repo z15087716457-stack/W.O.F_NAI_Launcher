@@ -16212,6 +16212,42 @@ abstract class AppLocalizations {
   /// **'No generation settings saved'**
   String get promptBlockLibrary_noSettings;
 
+  /// No description provided for @promptBlockLibrary_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get promptBlockLibrary_tags;
+
+  /// No description provided for @promptBlockLibrary_addTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tag'**
+  String get promptBlockLibrary_addTag;
+
+  /// No description provided for @promptBlockLibrary_tagName.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag name'**
+  String get promptBlockLibrary_tagName;
+
+  /// No description provided for @promptBlockLibrary_tagColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag color (hex)'**
+  String get promptBlockLibrary_tagColor;
+
+  /// No description provided for @promptBlockLibrary_duplicateTag.
+  ///
+  /// In en, this message translates to:
+  /// **'This block already has a tag with that name'**
+  String get promptBlockLibrary_duplicateTag;
+
+  /// No description provided for @promptBlockLibrary_invalidTagColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid hex color'**
+  String get promptBlockLibrary_invalidTagColor;
+
   /// No description provided for @pillCard_rollScope.
   ///
   /// In en, this message translates to:
