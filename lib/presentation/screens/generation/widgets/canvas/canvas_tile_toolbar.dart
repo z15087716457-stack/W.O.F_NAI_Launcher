@@ -206,7 +206,6 @@ class _ToolbarStrip extends ConsumerWidget {
       child: StudioGlassSurface(
         borderRadius: radius,
         backdropBlur: true,
-        backdropStyle: StudioGlassBackdropStyle.floating,
         child: Material(
           color: Colors.transparent,
           child: Padding(

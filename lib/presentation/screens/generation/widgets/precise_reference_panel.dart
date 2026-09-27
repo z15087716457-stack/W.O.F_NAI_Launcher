@@ -87,10 +87,6 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
 
     // 判断是否显示背景（折叠且有数据时显示）
     final showBackground = hasReferences && !_isExpanded;
-    final onDarkImage =
-        showBackground &&
-        (theme.brightness == Brightness.dark ||
-            MediaQuery.highContrastOf(context));
 
     return CollapsibleImagePanel(
       frosted: true,
@@ -107,7 +103,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
       hasData: hasReferences,
       headerActions: _buildHeaderActions(
         theme,
-        onDarkImage: onDarkImage,
+        showBackground: showBackground,
         hasReferences: hasReferences,
       ),
       backgroundImage: showBackground
@@ -134,17 +130,15 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
       badge: Container(
         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
         decoration: BoxDecoration(
-          color: onDarkImage
+          color: showBackground
               ? Colors.white.withValues(alpha: 0.2)
-              : theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: showBackground ? .65 : 1,
-                ),
+              : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           '${references.length}',
           style: theme.textTheme.labelSmall?.copyWith(
-            color: onDarkImage
+            color: showBackground
                 ? Colors.white
                 : theme.colorScheme.onSurface.withValues(alpha: 0.7),
             fontSize: 11,
@@ -158,12 +152,12 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: onDarkImage
+                  color: showBackground
                       ? Colors.orange.withValues(alpha: 0.9)
                       : Colors.orange.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4),
                   border: Border.all(
-                    color: onDarkImage
+                    color: showBackground
                         ? Colors.orange.shade300
                         : Colors.orange.shade400,
                     width: 1,
@@ -175,7 +169,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
                     Icon(
                       Icons.warning_amber_rounded,
                       size: 12,
-                      color: onDarkImage
+                      color: showBackground
                           ? Colors.white
                           : Colors.orange.shade700,
                     ),
@@ -185,7 +179,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: onDarkImage
+                        color: showBackground
                             ? Colors.white
                             : Colors.orange.shade700,
                       ),
@@ -282,10 +276,10 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
   /// 头部操作列：保存到库 + 唯一的添加入口。
   List<Widget> _buildHeaderActions(
     ThemeData theme, {
-    required bool onDarkImage,
+    required bool showBackground,
     required bool hasReferences,
   }) {
-    final foreground = onDarkImage
+    final foreground = showBackground
         ? Colors.white
         : theme.colorScheme.onSurfaceVariant;
     return [
@@ -306,7 +300,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
           style: const TextStyle(fontSize: 12),
         ),
         style: TextButton.styleFrom(
-          foregroundColor: onDarkImage
+          foregroundColor: showBackground
               ? Colors.white
               : theme.colorScheme.primary,
           padding: const EdgeInsets.symmetric(horizontal: 8),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -341,10 +342,6 @@ class _UnifiedReferencePanelState extends ConsumerState<UnifiedReferencePanel> {
     final vibes = panelData.vibes;
     final hasVibes = vibes.isNotEmpty;
     final showBackground = hasVibes && !_isExpanded;
-    final onDarkImage =
-        showBackground &&
-        (theme.brightness == Brightness.dark ||
-            MediaQuery.highContrastOf(context));
 
     return CollapsibleImagePanel(
       frosted: true,
@@ -371,17 +368,15 @@ class _UnifiedReferencePanelState extends ConsumerState<UnifiedReferencePanel> {
       badge: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         decoration: BoxDecoration(
-          color: onDarkImage
+          color: showBackground
               ? Colors.white.withValues(alpha: 0.2)
-              : theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: showBackground ? .65 : 1,
-                ),
+              : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           '${vibes.length}/16',
           style: theme.textTheme.labelSmall?.copyWith(
-            color: onDarkImage
+            color: showBackground
                 ? Colors.white
                 : theme.colorScheme.onSurface.withValues(alpha: 0.7),
           ),

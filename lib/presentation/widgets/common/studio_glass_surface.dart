@@ -2,8 +2,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-enum StudioGlassBackdropStyle { card, floating }
-
 /// Glass finish for compact in-app surfaces. The optional backdrop pass samples
 /// only pixels behind this clipped surface; child text and controls stay sharp.
 class StudioGlassSurface extends StatelessWidget {
@@ -13,7 +11,6 @@ class StudioGlassSurface extends StatelessWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(10)),
     this.nativeBackdrop = false,
     this.backdropBlur = false,
-    this.backdropStyle = StudioGlassBackdropStyle.card,
     this.clipBehavior = Clip.antiAlias,
   });
 
@@ -21,7 +18,6 @@ class StudioGlassSurface extends StatelessWidget {
   final BorderRadius borderRadius;
   final bool nativeBackdrop;
   final bool backdropBlur;
-  final StudioGlassBackdropStyle backdropStyle;
   final Clip clipBehavior;
 
   @override
@@ -44,46 +40,31 @@ class StudioGlassSurface extends StatelessWidget {
     }
     if (backdropBlur && !highContrast) {
       final base = theme.colorScheme.surfaceContainerLow;
-      final floating = backdropStyle == StudioGlassBackdropStyle.floating;
-      final colors = floating
-          ? dark
-                ? [
-                    theme.colorScheme.surfaceContainerHighest.withValues(
-                      alpha: .64,
-                    ),
-                    base.withValues(alpha: .61),
-                    theme.colorScheme.surface.withValues(alpha: .66),
-                  ]
-                : [
-                    Colors.white.withValues(alpha: .60),
-                    base.withValues(alpha: .55),
-                    theme.colorScheme.outline.withValues(alpha: .60),
-                  ]
-          : dark
+      final colors = dark
           ? [
-              theme.colorScheme.surface.withValues(alpha: .28),
-              theme.colorScheme.outline.withValues(alpha: .18),
-              theme.colorScheme.outline.withValues(alpha: .36),
+              theme.colorScheme.surfaceContainerHighest.withValues(alpha: .64),
+              base.withValues(alpha: .61),
+              theme.colorScheme.surface.withValues(alpha: .66),
             ]
           : [
-              Colors.white.withValues(alpha: .28),
-              theme.colorScheme.outline.withValues(alpha: .20),
-              theme.colorScheme.outline.withValues(alpha: .43),
+              Colors.white.withValues(alpha: .60),
+              base.withValues(alpha: .55),
+              theme.colorScheme.outline.withValues(alpha: .60),
             ];
       return ClipRRect(
         borderRadius: borderRadius,
         clipBehavior: clipBehavior,
         child: BackdropFilter(
           filter: ui.ImageFilter.blur(
-            sigmaX: floating ? 10 : 8,
-            sigmaY: floating ? 10 : 8,
+            sigmaX: 10,
+            sigmaY: 10,
             tileMode: ui.TileMode.clamp,
           ),
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: floating ? Alignment.topLeft : Alignment.centerLeft,
-                end: floating ? Alignment.bottomRight : Alignment.centerRight,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: colors,
               ),
             ),
