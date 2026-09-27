@@ -161,9 +161,8 @@ class _AtomListEditorState extends State<AtomListEditor> {
 ///
 /// 折行语义（静拍板·多层换行）：长原子文本超过可用宽度时，
 /// chip 内部按 [TextPainter] 预折行渲染成**一列逐行小框**——
-/// 每行一个真 widget（自带描边），行间留缝，缝的左缘用一条
-/// 竖虚线角对角连接上下行框（右缘参差处不画），直观表现
-/// 「这是一个换行过的块」。
+/// 每行一个真 widget（自带描边），行间留白；行框开口处的蓝色
+/// 虚线提示「这是一个换行过的块」。
 /// 一个原子仍是一个 [WidgetSpan] 占位，编辑语义零改动。
 class AtomChip extends StatelessWidget {
   const AtomChip({
@@ -183,8 +182,7 @@ class AtomChip extends StatelessWidget {
 
   static const double _radius = 5;
 
-  /// 缝高：行框竖边已是虚线，缝里只补一段同轴虚线柱，
-  /// 不用留太大；3px 线段 + 2px 空隙，6px 缝内能看到两段。
+  /// 行框之间保留空白，避免连接线看起来越过上下框边。
   static const double _seamGap = 6;
   static const EdgeInsets _pad = EdgeInsets.symmetric(
     horizontal: 8,
@@ -227,14 +225,12 @@ class AtomChip extends StatelessWidget {
             solidRight: true,
           );
         }
-        // 逐行小框（静拍板·实线只留首尾）：横边恒实；首行左竖
-        // 边实、末行右竖边实，其余竖边全虚线；行间缝补一段左缘
-        // 竖虚线同轴连接。
+        // 逐行小框：横边恒实；首行左竖边实、末行右竖边实，
+        // 其余竖边是蓝色虚线。行间只留空白，不再绘制额外连接线。
         final children = <Widget>[];
         for (var i = 0; i < segs.length; i++) {
           if (i > 0) {
-            // 行间连接缝留灰色，蓝色只落在各行框的开口内。
-            children.add(_SeamDashes(color: color, height: _seamGap));
+            children.add(const SizedBox(height: _seamGap));
           }
           children.add(
             _lineBox(
@@ -483,54 +479,6 @@ class _Seg {
   const _Seg(this.text, this.width);
   final String text;
   final double width;
-}
-
-/// 行间竖虚线：左缘一列，上下端分别接上行底边与下行顶边
-/// （静拍板：接缝=两条平行线+左端一条虚线，右缘不画）。
-/// 行框水平外边距=2、描边线心再内收 0.5，列心 x=2.5 与
-/// 左虚线边同轴。
-class _SeamDashes extends StatelessWidget {
-  const _SeamDashes({required this.color, required this.height});
-
-  final Color color;
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
-      width: 4,
-      child: CustomPaint(painter: _SeamDashPainter(color: color)),
-    );
-  }
-}
-
-class _SeamDashPainter extends CustomPainter {
-  _SeamDashPainter({required this.color});
-
-  final Color color;
-
-  static const double _dash = 3;
-  static const double _gap = 2;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    const x = 2.5;
-    var y = 0.0;
-    while (y < size.height) {
-      final end = (y + _dash).clamp(y, size.height);
-      canvas.drawLine(Offset(x, y), Offset(x, end.toDouble()), paint);
-      y += _dash + _gap;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _SeamDashPainter oldDelegate) =>
-      oldDelegate.color != color;
 }
 
 /// 编辑器控制器：一个 [NaiSyntaxController] 文本字段 + atoms 表。
