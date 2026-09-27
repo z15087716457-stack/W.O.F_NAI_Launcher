@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -83,15 +84,18 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             builder: (context, child) => UpdateAwareWindowShell(
+              deferToRoute: true,
               onShowUpdate: () => UpdateCheckDialog.show(nav.currentContext!),
               child: child!,
             ),
-            home: const Scaffold(
-              body: Column(
-                children: [
-                  WindowHeader(child: TextField()),
-                  Expanded(child: SizedBox()),
-                ],
+            home: const WindowChromePage(
+              child: Scaffold(
+                body: Column(
+                  children: [
+                    WindowHeader(child: TextField()),
+                    Expanded(child: SizedBox()),
+                  ],
+                ),
               ),
             ),
           ),

@@ -93,6 +93,7 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
           textScaler: TextScaler.linear(ref.watch(fontScaleNotifierProvider)),
         ),
         child: IntegratedTitleBarShell(
+          deferToRoute: true,
           immersive: true,
           onToggleTheme: () =>
               ref.read(themeNotifierProvider.notifier).nextTheme(),
@@ -102,7 +103,9 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      home: const SplashScreen(key: ValueKey('splash')),
+      home: const WindowChromePage(
+        child: SplashScreen(key: ValueKey('splash')),
+      ),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -140,7 +141,9 @@ void main() {
         routes: [
           GoRoute(
             path: AppRoutes.login,
-            builder: (_, _) => const BrandEntryScene(child: Text('entry')),
+            builder: (_, _) => const WindowChromePage(
+              child: BrandEntryScene(child: Text('entry')),
+            ),
           ),
           StatefulShellRoute.indexedStack(
             builder: (_, _, shell) => shell,
@@ -154,8 +157,9 @@ void main() {
                   routes: [
                     GoRoute(
                       path: path,
-                      builder: (_, _) =>
-                          Scaffold(key: ValueKey(path), body: Text(path)),
+                      builder: (_, _) => WindowChromePage(
+                        child: Scaffold(key: ValueKey(path), body: Text(path)),
+                      ),
                     ),
                   ],
                 ),
@@ -163,16 +167,21 @@ void main() {
           ),
           GoRoute(
             path: AppRoutes.settings,
-            builder: (context, _) => Scaffold(
-              body: Center(
-                child: FilledButton(
-                  onPressed: () => showDialog<void>(
-                    context: context,
-                    builder: (_) => const AlertDialog(
-                      content: SizedBox(width: 420, child: StudioThemePicker()),
+            builder: (context, _) => WindowChromePage(
+              child: Scaffold(
+                body: Center(
+                  child: FilledButton(
+                    onPressed: () => showDialog<void>(
+                      context: context,
+                      builder: (_) => const AlertDialog(
+                        content: SizedBox(
+                          width: 420,
+                          child: StudioThemePicker(),
+                        ),
+                      ),
                     ),
+                    child: const Text('appearance'),
                   ),
-                  child: const Text('appearance'),
                 ),
               ),
             ),
@@ -241,6 +250,20 @@ void main() {
         router.go(path);
         await tester.pumpAndSettle();
         expectAppearance(Brightness.light);
+        expect(
+          find.byKey(const Key('window-caption-controls')),
+          findsOneWidget,
+        );
+        expect(
+          tester
+              .getSize(find.byKey(const Key('window-caption-controls')))
+              .height,
+          path == AppRoutes.localGallery
+              ? 62
+              : path == AppRoutes.promptBlockLibrary
+              ? 64
+              : 36,
+        );
       }
       final shortcuts = tester.widget<GlobalShortcuts>(
         find.byType(GlobalShortcuts),

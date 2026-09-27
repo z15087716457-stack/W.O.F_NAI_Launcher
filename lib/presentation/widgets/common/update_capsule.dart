@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
 
-/// Quiet, persistent entry next to the window captions. It sits outside the
-/// Navigator overlay, so its owner supplies the dialog callback.
+/// Quiet, persistent entry next to the window captions. It sits on the
+/// page surface; its owner supplies the dialog callback.
 class UpdateCapsule extends StatelessWidget {
   const UpdateCapsule({super.key, required this.onPressed});
 
@@ -76,12 +76,14 @@ class UpdateAwareWindowShell extends ConsumerWidget {
     this.immersive = false,
     this.onToggleTheme,
     this.captionHeight = IntegratedTitleBarShell.barHeight,
+    this.deferToRoute = false,
   });
   final Widget child;
   final VoidCallback onShowUpdate;
   final bool immersive;
   final VoidCallback? onToggleTheme;
   final double captionHeight;
+  final bool deferToRoute;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -90,6 +92,7 @@ class UpdateAwareWindowShell extends ConsumerWidget {
     );
     return IntegratedTitleBarShell(
       immersive: immersive,
+      deferToRoute: deferToRoute,
       captionHeight: captionHeight,
       onToggleTheme: onToggleTheme,
       accessoryWidth: available ? UpdateCapsule.width : 0,

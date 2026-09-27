@@ -1,3 +1,4 @@
+import '../widgets/navigation/integrated_title_bar.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -188,7 +189,8 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.localGallery,
                 name: 'localGallery',
-                builder: (context, state) => const LocalGalleryScreen(),
+                builder: (context, state) =>
+                    const WindowChromePage(child: LocalGalleryScreen()),
                 routes: [
                   // 幻灯片子路由
                   GoRoute(
@@ -204,9 +206,11 @@ GoRouter appRouter(Ref ref) {
 
                       return MaterialPage(
                         key: state.pageKey,
-                        child: SlideshowScreen(
-                          images: const [],
-                          initialIndex: initialIndex,
+                        child: WindowChromePage(
+                          child: SlideshowScreen(
+                            images: const [],
+                            initialIndex: initialIndex,
+                          ),
                         ),
                       );
                     },
@@ -218,7 +222,9 @@ GoRouter appRouter(Ref ref) {
                     pageBuilder: (context, state) {
                       return MaterialPage(
                         key: state.pageKey,
-                        child: const ImageComparisonScreen(images: []),
+                        child: const WindowChromePage(
+                          child: ImageComparisonScreen(images: []),
+                        ),
                       );
                     },
                   ),
@@ -234,7 +240,8 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.onlineGallery,
                 name: 'onlineGallery',
-                builder: (context, state) => const OnlineGalleryScreen(),
+                builder: (context, state) =>
+                    const WindowChromePage(child: OnlineGalleryScreen()),
               ),
             ],
           ),
@@ -246,9 +253,13 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.settings,
                 name: 'settings',
-                builder: (context, state) => SettingsScreen(
-                  initialSectionIndex:
-                      state.uri.queryParameters['section'] == 'storage' ? 3 : 0,
+                builder: (context, state) => WindowChromePage(
+                  child: SettingsScreen(
+                    initialSectionIndex:
+                        state.uri.queryParameters['section'] == 'storage'
+                        ? 3
+                        : 0,
+                  ),
                 ),
               ),
             ],
@@ -261,7 +272,8 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.statistics,
                 name: 'statistics',
-                builder: (context, state) => const StatisticsScreen(),
+                builder: (context, state) =>
+                    const WindowChromePage(child: StatisticsScreen()),
               ),
             ],
           ),
@@ -273,7 +285,8 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.vibeLibrary,
                 name: 'vibeLibrary',
-                builder: (context, state) => const VibeLibraryScreen(),
+                builder: (context, state) =>
+                    const WindowChromePage(child: VibeLibraryScreen()),
               ),
             ],
           ),
@@ -285,7 +298,8 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.preciseRefLibrary,
                 name: 'preciseRefLibrary',
-                builder: (context, state) => const PreciseRefLibraryScreen(),
+                builder: (context, state) =>
+                    const WindowChromePage(child: PreciseRefLibraryScreen()),
               ),
             ],
           ),
@@ -297,7 +311,8 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.promptBlockLibrary,
                 name: 'promptBlockLibrary',
-                builder: (context, state) => const PromptBlockLibraryScreen(),
+                builder: (context, state) =>
+                    const WindowChromePage(child: PromptBlockLibraryScreen()),
               ),
             ],
           ),
@@ -309,7 +324,8 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.styleExplore,
                 name: 'styleExplore',
-                builder: (context, state) => const StyleExploreScreen(),
+                builder: (context, state) =>
+                    const WindowChromePage(child: StyleExploreScreen()),
               ),
             ],
           ),
@@ -318,9 +334,11 @@ GoRouter appRouter(Ref ref) {
     ],
 
     // 错误页面
-    errorBuilder: (context, state) => Scaffold(
-      body: Center(
-        child: Text(context.l10n.router_pageNotFound('${state.error}')),
+    errorBuilder: (context, state) => WindowChromePage(
+      child: Scaffold(
+        body: Center(
+          child: Text(context.l10n.router_pageNotFound('${state.error}')),
+        ),
       ),
     ),
   );
@@ -578,9 +596,11 @@ CustomTransitionPage<void> _buildFadePage({
     child: child,
     transitionDuration: duration,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      return FadeTransition(
-        opacity: CurveTween(curve: _defaultCurve).animate(animation),
-        child: child,
+      return WindowChromePage(
+        child: FadeTransition(
+          opacity: CurveTween(curve: _defaultCurve).animate(animation),
+          child: child,
+        ),
       );
     },
   );
@@ -601,14 +621,16 @@ CustomTransitionPage<void> _buildFadeSlidePage({
       final curvedAnimation = CurveTween(
         curve: _defaultCurve,
       ).animate(animation);
-      return FadeTransition(
-        opacity: curvedAnimation,
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: slideOffset,
-            end: Offset.zero,
-          ).animate(curvedAnimation),
-          child: child,
+      return WindowChromePage(
+        child: FadeTransition(
+          opacity: curvedAnimation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: slideOffset,
+              end: Offset.zero,
+            ).animate(curvedAnimation),
+            child: child,
+          ),
         ),
       );
     },

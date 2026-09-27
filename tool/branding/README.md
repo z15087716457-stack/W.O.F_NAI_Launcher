@@ -58,6 +58,8 @@ SVG 母版在 `tool/branding/studio_icons/`；`generate_studio_icons.py` 将描�
 
 Windows 的 `IntegratedTitleBarShell` 不再占用一整行：各页背景延伸到窗口顶边，右上角固定 138×36 的最小化 / 最大化 / 关闭按钮簇，以页面色保证覆盖深色图片详情时仍可辨认；登录 / 载入页另有明暗切换。窗口关闭仍走原托盘策略。
 
+窗口配置由 `MaterialApp.builder` 内的 `IntegratedTitleBarShell(deferToRoute: true)` 下发，按钮与更新胶囊通过 `WindowChromePage` 在各路由页面内绘制；根 Navigator 和分支 Navigator 的提示、菜单、对话框均在按钮上方，关闭浮层后窗口按钮恢复命中。登录 / 载入、子页面和路由错误页使用相同页面层。
+
 `WindowChromeScope` 在 shell 内保持稳定层级，路由、主题改变不重建 Navigator 或丢失输入。现有主页面工具栏通过 `WindowHeader` 为按钮和 64px 拖动空白留位置，较窄时分行；最右 dock 使用 `WindowPaneInset` 留顶部操作空间，生图画布顶部同样可拖动。历史 / 块详情面板收起时仍保留窗口操作位置；全屏图片详情的自身工具栏避让窗口按钮。
 
 画风探索的候选画廊使用 `WindowPanelHeader`：面板直达顶边，48px 标题行与左侧工具条对齐；标题旁的向右收起按钮仅收起画廊，原画廊开关重新展开。空白区域可拖动窗口；极窄栏才局部分行，仍按可见宽度避让窗口按钮。

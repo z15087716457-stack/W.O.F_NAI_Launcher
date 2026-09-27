@@ -20,8 +20,12 @@ class IntegratedTitleBarShell extends StatefulWidget {
     this.accessory,
     this.accessoryWidth = 0,
     this.captionHeight = barHeight,
+    this.deferToRoute = false,
   });
 
+  /// Router hosts defer painting to WindowChromePage inside each page.
+  /// Both branch and root Navigator overlays then paint above the captions.
+  final bool deferToRoute;
   final Widget child;
   final Widget? accessory;
   final double accessoryWidth;
@@ -51,35 +55,69 @@ class _IntegratedTitleBarShellState extends State<IntegratedTitleBarShell> {
   @override
   Widget build(BuildContext context) {
     if (!TitleBarRegionService.isSupported) return widget.child;
+    final configuration = _WindowChromeConfiguration(
+      shell: widget,
+      child: WindowChromeScope(
+        enabled: !widget.immersive,
+        extraWidth: widget.immersive ? 0 : widget.accessoryWidth,
+        captionHeight: widget.immersive
+            ? IntegratedTitleBarShell.barHeight
+            : widget.captionHeight,
+        child: widget.deferToRoute
+            ? widget.child
+            : WindowChromePage(child: widget.child),
+      ),
+    );
+    return configuration;
+  }
+}
+
+class _WindowChromeConfiguration extends InheritedWidget {
+  const _WindowChromeConfiguration({required this.shell, required super.child});
+  final IntegratedTitleBarShell shell;
+
+  @override
+  bool updateShouldNotify(_WindowChromeConfiguration oldWidget) =>
+      shell.immersive != oldWidget.shell.immersive ||
+      shell.captionHeight != oldWidget.shell.captionHeight ||
+      shell.accessoryWidth != oldWidget.shell.accessoryWidth ||
+      shell.accessory != oldWidget.shell.accessory ||
+      shell.onToggleTheme != oldWidget.shell.onToggleTheme;
+}
+
+/// Paint chrome inside the route content, below every Navigator popup/overlay.
+/// The inherited scope stays above the router so popup content can still use
+/// the same caption geometry when it needs to reserve space.
+class WindowChromePage extends StatelessWidget {
+  const WindowChromePage({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final configuration = context
+        .dependOnInheritedWidgetOfExactType<_WindowChromeConfiguration>();
+    if (configuration == null) return child;
+    final shell = configuration.shell;
     return Stack(
       children: [
-        Positioned.fill(
-          child: WindowChromeScope(
-            enabled: !widget.immersive,
-            extraWidth: widget.immersive ? 0 : widget.accessoryWidth,
-            captionHeight: widget.immersive
-                ? IntegratedTitleBarShell.barHeight
-                : widget.captionHeight,
-            child: widget.child,
-          ),
-        ),
-        if (!widget.immersive && widget.accessory != null)
+        Positioned.fill(child: child),
+        if (!shell.immersive && shell.accessory != null)
           Positioned(
             top: 0,
             right: IntegratedTitleBarShell.reservedRight,
-            width: widget.accessoryWidth,
-            height: widget.captionHeight,
-            child: widget.accessory!,
+            width: shell.accessoryWidth,
+            height: shell.captionHeight,
+            child: shell.accessory!,
           ),
         Positioned(
           top: 0,
           right: 0,
           child: _TitleBar(
-            height: widget.immersive
+            height: shell.immersive
                 ? IntegratedTitleBarShell.barHeight
-                : widget.captionHeight,
-            immersive: widget.immersive,
-            onToggleTheme: widget.onToggleTheme,
+                : shell.captionHeight,
+            immersive: shell.immersive,
+            onToggleTheme: shell.onToggleTheme,
           ),
         ),
       ],
@@ -332,9 +370,7 @@ class _CaptionButtonState extends State<_CaptionButton> {
     final Color fg = widget.isClose && hovered
         ? Colors.white
         : colorScheme.onSurface.withValues(alpha: 0.9);
-    // 注意：本组件挂在 MaterialApp.router builder 之上（Navigator/Overlay
-    // 的兄弟），不能用 Tooltip——它在树内找不到 Overlay 会直接红屏。
-    // 浮签用 Stack 内联实现。
+    // 启动载入阶段可能尚无 Navigator/Overlay；浮签继续用 Stack 内联实现。
     return Semantics(
       label: widget.tooltip,
       button: true,

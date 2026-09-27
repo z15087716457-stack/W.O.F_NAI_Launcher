@@ -172,8 +172,8 @@ class NAILauncherApp extends ConsumerWidget {
 
           // 字体缩放全局应用 + FEAT-23 内置一体标题栏（Windows）
           builder: (context, child) {
-            // builder 位于 Navigator 之上，树内没有 Overlay；标题栏内
-            // 不能依赖 Overlay 的组件（Tooltip 已改为树内浮签实现）。
+            // builder 只下发窗口配置；窗口按钮在各页面内绘制，
+            // 让 Navigator 的菜单、提示与对话框位于按钮上方。
             // child 作为普通子组件直传，保证 element 在 MaterialApp
             // rebuild 时原地更新、不拆树重建。
             return MediaQuery(
@@ -308,6 +308,7 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
   @override
   Widget build(BuildContext context) {
     return UpdateAwareWindowShell(
+      deferToRoute: true,
       immersive: _immersive,
       captionHeight: _captionHeight,
       onShowUpdate: _showUpdate,
