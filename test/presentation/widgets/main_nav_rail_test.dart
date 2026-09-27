@@ -124,13 +124,13 @@ void main() {
       );
     }
     expect(find.byIcon(Icons.keyboard_double_arrow_right), findsOneWidget);
-    // 底部簇顺序：收起钮 → 头像 → 设置（最底），GitHub 入口已移入设置-关于。
-    expect(
-      tester.getCenter(find.byKey(const Key('main-nav-toggle'))).dy,
-      lessThan(tester.getCenter(find.byIcon(Icons.person)).dy),
-    );
+    // 账户固定在顶部；底部保留收起钮和设置。
     expect(
       tester.getCenter(find.byIcon(Icons.person)).dy,
+      lessThan(tester.getCenter(find.byIcon(StudioIcons.generation)).dy),
+    );
+    expect(
+      tester.getCenter(find.byKey(const Key('main-nav-toggle'))).dy,
       lessThan(tester.getCenter(find.byIcon(StudioIcons.settings)).dy),
     );
     expect(
@@ -139,10 +139,24 @@ void main() {
     );
     expect(find.text('画布'), findsNothing);
 
+    final accountTop = tester.getTopLeft(find.byIcon(Icons.person)).dy;
+    await tester.tap(find.byIcon(Icons.person));
+    await tester.pumpAndSettle();
+    final addAccount = find.text('添加账号');
+    expect(addAccount, findsOneWidget);
+    expect(tester.getTopLeft(addAccount).dy, lessThan(150));
+    expect(
+      tester.getTopLeft(addAccount).dx,
+      greaterThan(MainNavRail.collapsedWidth),
+    );
+    await tester.tapAt(const Offset(700, 400));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.byKey(const Key('main-nav-toggle')));
     await tester.pumpAndSettle();
 
     expect(storage.isExpanded, isTrue);
+    expect(tester.getTopLeft(find.byIcon(Icons.person)).dy, accountTop);
     expect(
       tester.getSize(find.byKey(const Key('main-nav-rail'))).width,
       MainNavRail.expandedWidth,
@@ -173,6 +187,8 @@ void main() {
       );
       await tester.pumpAndSettle();
     }
+
+    expect(tester.getTopLeft(find.byIcon(Icons.person)).dy, accountTop);
 
     // Focus the actual settings button, then activate with the keyboard.
     Focus.of(tester.element(find.byIcon(StudioIcons.settings))).requestFocus();

@@ -55,7 +55,10 @@ class MainNavRail extends ConsumerWidget {
         ),
         child: Column(
           children: [
-            const SizedBox(height: 16),
+            // 账户固定在顶部，导航内容单独滚动。
+            const SizedBox(height: 12),
+            _AccountAvatarButton(ref: ref),
+            const _NavGroupDivider(),
 
             Expanded(
               child: SingleChildScrollView(
@@ -157,9 +160,6 @@ class MainNavRail extends ConsumerWidget {
               },
             ),
             const SizedBox(height: 2),
-
-            // 账户头像（设置之上）
-            _AccountAvatarButton(ref: ref),
 
             // Bottom Settings（最底，符合主流前端惯例）
             _NavIcon(
