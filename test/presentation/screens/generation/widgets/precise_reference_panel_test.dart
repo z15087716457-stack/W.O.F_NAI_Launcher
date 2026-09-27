@@ -127,19 +127,26 @@ void main() {
         await tester.tap(addButton);
         await tester.pumpAndSettle();
 
-        // 两个菜单项都存在
+        // 顶部一次展开全部类型与从库导入，不再打开第二层类型对话框。
         final libraryItem = find.byKey(
           const Key('precise-ref-panel-from-library'),
         );
         expect(libraryItem, findsOneWidget);
-        final addItem = find.widgetWithText(PopupMenuItem<String>, '添加参考图');
-        expect(addItem, findsOneWidget);
+        for (final type in PreciseRefType.values) {
+          expect(
+            find.byKey(ValueKey('precise-ref-panel-type-${type.name}')),
+            findsOneWidget,
+          );
+        }
+        final heading = find.byKey(const Key('precise-ref-panel-menu-heading'));
+        expect(heading, findsOneWidget);
+        expect(find.byType(AlertDialog), findsNothing);
 
         // 菜单右缘与按钮右缘对齐、顶部位于按钮正下方，
         // 而不是被 overlay 偏移量 (140, 120) 带跑
-        final itemTopLeft = tester.getTopLeft(addItem);
+        final itemTopLeft = tester.getTopLeft(heading);
         expect(
-          (tester.getTopRight(addItem).dx - buttonRight).abs(),
+          (tester.getTopRight(heading).dx - buttonRight).abs(),
           lessThan(2),
           reason: '菜单应水平锚定在 + 按钮处',
         );
@@ -151,23 +158,12 @@ void main() {
             tester.getBottomRight(libraryItem).dy,
             lessThanOrEqualTo(520 - 8),
           );
-          expect((itemTopLeft.dy - buttonBottomLeft.dy).abs(), lessThan(112));
+          expect((itemTopLeft.dy - buttonBottomLeft.dy).abs(), lessThan(230));
         }
 
-        // 菜单项可点击：点“添加参考图”应打开类型选择对话框
-        await tester.tap(addItem);
+        Navigator.of(tester.element(libraryItem)).pop();
         await tester.pumpAndSettle();
-        expect(find.byType(AlertDialog), findsOneWidget);
         expect(libraryItem, findsNothing);
-
-        // 关掉类型选择对话框
-        await tester.tap(
-          find.descendant(
-            of: find.byType(AlertDialog),
-            matching: find.byType(TextButton),
-          ),
-        );
-        await tester.pumpAndSettle();
         expect(find.byType(AlertDialog), findsNothing);
         expect(tester.takeException(), isNull);
       });

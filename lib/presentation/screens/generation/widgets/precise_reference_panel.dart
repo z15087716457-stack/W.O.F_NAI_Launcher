@@ -20,13 +20,22 @@ import '../../../utils/precise_ref_library_import_helper.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/editable_double_field.dart';
 import '../../../widgets/common/hover_image_preview.dart';
-import '../../../widgets/common/precise_reference_type_dialog.dart';
 import '../../../widgets/common/themed_divider.dart';
 import '../../../widgets/common/collapsible_image_panel.dart';
 import '../../../widgets/common/decoded_memory_image.dart';
 import '../../precise_ref_library/widgets/precise_ref_selector_dialog.dart';
 
 const double _disabledPreciseReferenceCardOpacity = 0.48;
+
+enum _ReferenceAddChoice { character, style, characterAndStyle, library }
+
+PreciseRefType? _typeForAddChoice(_ReferenceAddChoice? choice) =>
+    switch (choice) {
+      _ReferenceAddChoice.character => PreciseRefType.character,
+      _ReferenceAddChoice.style => PreciseRefType.style,
+      _ReferenceAddChoice.characterAndStyle => PreciseRefType.characterAndStyle,
+      _ => null,
+    };
 
 /// Precise Reference 面板 - 支持多参考、类型选择、独立参数控制
 ///
@@ -174,90 +183,91 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
               ),
             )
           : null,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const ThemedDivider(),
-
-            // 说明文字
-            Text(
-              context.l10n.preciseRef_description,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // 参考列表
-            if (hasReferences) ...[
-              ...List.generate(references.length, (index) {
-                return _PreciseReferenceCard(
-                  index: index,
-                  reference: references[index],
-                  onRemove: () => _removeReference(index),
-                  onSaveToLibrary: () =>
-                      _saveSingleReferenceToLibrary(references[index]),
-                  onEnabledChanged: (value) =>
-                      _updateReferenceEnabled(index, value),
-                  onTypeChanged: (type) => _updateReferenceType(index, type),
-                  onStrengthChanged: (value) =>
-                      _updateReferenceStrength(index, value),
-                  onFidelityChanged: (value) =>
-                      _updateReferenceFidelity(index, value),
-                );
-              }),
-              const SizedBox(height: 8),
-            ],
-
-            // 添加按钮
-            _buildAddReferenceDropTarget(
-              child: OutlinedButton.icon(
-                onPressed: _addReference,
-                icon: Icon(
-                  _isFileDraggingOver ? Icons.file_download_rounded : Icons.add,
-                  size: 16,
+      child: _buildAddReferenceDropTarget(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const ThemedDivider(),
+              if (_isFileDraggingOver) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.file_download_rounded,
+                      size: 16,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      context.l10n.preciseRef_dropToAdd,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
                 ),
-                label: Text(
-                  _isFileDraggingOver
-                      ? context.l10n.preciseRef_dropToAdd
-                      : context.l10n.preciseRef_addReference,
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  minimumSize: const Size(0, 34),
-                  visualDensity: VisualDensity.compact,
+                const SizedBox(height: 8),
+              ],
+
+              // 说明文字
+              Text(
+                context.l10n.preciseRef_description,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
-            ),
+              const SizedBox(height: 12),
 
-            // 清除全部按钮
-            if (hasReferences) ...[
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: _clearAllReferences,
-                  icon: const Icon(Icons.clear_all, size: 16),
-                  label: Text(context.l10n.preciseRef_clearAll),
-                  style: TextButton.styleFrom(
-                    foregroundColor: theme.colorScheme.error,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    minimumSize: const Size(0, 30),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
+              // 参考列表
+              if (hasReferences) ...[
+                ...List.generate(references.length, (index) {
+                  return _PreciseReferenceCard(
+                    index: index,
+                    reference: references[index],
+                    onRemove: () => _removeReference(index),
+                    onSaveToLibrary: () =>
+                        _saveSingleReferenceToLibrary(references[index]),
+                    onEnabledChanged: (value) =>
+                        _updateReferenceEnabled(index, value),
+                    onTypeChanged: (type) => _updateReferenceType(index, type),
+                    onStrengthChanged: (value) =>
+                        _updateReferenceStrength(index, value),
+                    onFidelityChanged: (value) =>
+                        _updateReferenceFidelity(index, value),
+                  );
+                }),
+                const SizedBox(height: 8),
+              ],
+
+              // 清除全部按钮
+              if (hasReferences) ...[
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: _clearAllReferences,
+                    icon: const Icon(Icons.clear_all, size: 16),
+                    label: Text(context.l10n.preciseRef_clearAll),
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.colorScheme.error,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: const Size(0, 30),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 
-  /// 头部操作列：保存到库（文本钮）+ 方形“添加”钮（弹出 添加参考图/从库导入）。
+  /// 头部操作列：保存到库 + 唯一的添加入口。
   List<Widget> _buildHeaderActions(
     ThemeData theme, {
     required bool showBackground,
@@ -304,7 +314,95 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
     ];
   }
 
-  /// 方形钮正下方弹出 添加参考图 / 从库导入 菜单（官网式）。
+  List<PopupMenuEntry<_ReferenceAddChoice>> _addMenuItems({
+    required String heading,
+    required bool includeLibrary,
+  }) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final choices = [
+      (_ReferenceAddChoice.character, PreciseRefType.character),
+      (_ReferenceAddChoice.style, PreciseRefType.style),
+      (_ReferenceAddChoice.characterAndStyle, PreciseRefType.characterAndStyle),
+    ];
+    return [
+      PopupMenuItem<_ReferenceAddChoice>(
+        key: const Key('precise-ref-panel-menu-heading'),
+        enabled: false,
+        height: 32,
+        child: Text(
+          heading,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      for (final (choice, type) in choices)
+        PopupMenuItem<_ReferenceAddChoice>(
+          key: ValueKey('precise-ref-panel-type-${type.name}'),
+          value: choice,
+          height: 40,
+          child: Row(
+            children: [
+              Icon(
+                type.icon,
+                size: 18,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  type.getDisplayName(
+                    character: l10n.preciseRef_typeCharacter,
+                    style: l10n.preciseRef_typeStyle,
+                    characterAndStyle: l10n.preciseRef_typeCharacterAndStyle,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      if (includeLibrary) ...[
+        const PopupMenuDivider(height: 12),
+        PopupMenuItem<_ReferenceAddChoice>(
+          key: const Key('precise-ref-panel-from-library'),
+          value: _ReferenceAddChoice.library,
+          height: 40,
+          child: Row(
+            children: [
+              Icon(
+                Icons.folder_open_outlined,
+                size: 18,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  l10n.preciseRefLib_fromLibrary,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ];
+  }
+
+  ShapeBorder _addMenuShape() => RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+    side: BorderSide(
+      color: Theme.of(
+        context,
+      ).colorScheme.outlineVariant.withValues(alpha: 0.6),
+    ),
+  );
+
+  /// 方形钮正下方直接选择参考类型，也可从库导入。
   void _showAddMenu(BuildContext buttonContext) {
     final overlayBox =
         Navigator.of(buttonContext).overlay!.context.findRenderObject()
@@ -320,9 +418,12 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
       ),
     );
 
-    showMenu<String>(
+    showMenu<_ReferenceAddChoice>(
       context: buttonContext,
       constraints: const BoxConstraints.tightFor(width: 208),
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+      shape: _addMenuShape(),
+      elevation: 8,
       // The plus sits on the right of the sidebar: align the menu's right edge
       // to it, instead of letting a wide window place the menu outside the pane.
       positionBuilder: (context, constraints) {
@@ -345,28 +446,43 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
           Offset.zero & overlayBox.size,
         );
       },
-      items: [
-        PopupMenuItem<String>(
-          value: 'add',
-          height: 40,
-          child: Text(context.l10n.preciseRef_addReference),
-        ),
-        PopupMenuItem<String>(
-          key: const Key('precise-ref-panel-from-library'),
-          value: 'library',
-          height: 40,
-          child: Text(context.l10n.preciseRefLib_fromLibrary),
-        ),
-      ],
+      items: _addMenuItems(
+        heading: context.l10n.preciseRef_addReference,
+        includeLibrary: true,
+      ),
     ).then((value) {
       if (!mounted) return;
-      switch (value) {
-        case 'add':
-          unawaited(_addReference());
-        case 'library':
-          unawaited(_importFromLibrary());
+      if (value == _ReferenceAddChoice.library) {
+        unawaited(_importFromLibrary());
+      } else {
+        final type = _typeForAddChoice(value);
+        if (type != null) unawaited(_addReference(type));
       }
     });
+  }
+
+  Future<PreciseRefType?> _showDroppedReferenceTypeMenu(
+    Offset globalPosition,
+  ) async {
+    final overlayBox =
+        Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+    final position = overlayBox.globalToLocal(globalPosition);
+    final choice = await showMenu<_ReferenceAddChoice>(
+      context: context,
+      constraints: const BoxConstraints.tightFor(width: 208),
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+      shape: _addMenuShape(),
+      elevation: 8,
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(position.dx, position.dy, 0, 0),
+        Offset.zero & overlayBox.size,
+      ),
+      items: _addMenuItems(
+        heading: context.l10n.preciseRef_referenceType,
+        includeLibrary: false,
+      ),
+    );
+    return _typeForAddChoice(choice);
   }
 
   Widget _buildAddReferenceDropTarget({required Widget child}) {
@@ -510,11 +626,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
     }
   }
 
-  Future<void> _addReference() async {
-    // 先选择类型
-    final selectedType = await PreciseReferenceTypeDialog.show(context);
-    if (selectedType == null) return; // 用户取消了类型选择
-
+  Future<void> _addReference(PreciseRefType selectedType) async {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.image,
@@ -559,6 +671,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
     }
 
     setState(() => _isProcessingDroppedFiles = true);
+    final dropPosition = event.position.global;
     try {
       final files = <DroppedFileData>[];
       for (final item in event.session.items) {
@@ -585,7 +698,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
         return;
       }
 
-      final selectedType = await PreciseReferenceTypeDialog.show(context);
+      final selectedType = await _showDroppedReferenceTypeMenu(dropPosition);
       if (selectedType == null || !mounted) {
         return;
       }

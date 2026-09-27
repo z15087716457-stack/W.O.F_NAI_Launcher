@@ -326,9 +326,16 @@ void main() {
       await tester.tap(find.text('Precise Reference'));
       await tester.pumpAndSettle();
       expect(find.byType(DropRegion), findsOneWidget);
-      await tester.tap(find.text('Add Reference'));
+      expect(
+        find.widgetWithText(OutlinedButton, 'Add Reference'),
+        findsNothing,
+      );
+      await tester.tap(find.byKey(const Key('precise-ref-panel-add-menu')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Character'));
+      expect(find.byType(AlertDialog), findsNothing);
+      await tester.tap(
+        find.byKey(const Key('precise-ref-panel-type-character')),
+      );
       await tester.pumpAndSettle();
 
       final container = ProviderScope.containerOf(
@@ -415,7 +422,6 @@ class _TestLocalStorageService extends LocalStorageService {
 
   @override
   bool getLastVarietyPlus() => false;
-
 }
 
 class _TestVibeLibraryStorageService extends VibeLibraryStorageService {
