@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../data/models/auth/saved_account.dart';
 import '../../providers/account_manager_provider.dart';
@@ -14,7 +15,6 @@ import '../auth/account_avatar.dart';
 import '../auth/account_switch_helper.dart';
 import '../auth/add_account_dialog.dart';
 import '../auth/subscription_expiry_text.dart';
-import '../prompt/pills/dna_icon.dart';
 
 class MainNavRail extends ConsumerWidget {
   static const double collapsedWidth = 60;
@@ -72,9 +72,7 @@ class MainNavRail extends ConsumerWidget {
 
                     // 画风探索
                     _NavIcon(
-                      // Material 图标集没有 DNA 字形（biotech 实为显微镜），
-                      // 复用药丸角标同款自绘双螺旋。
-                      customIcon: (color) => DnaIcon(size: 24, color: color),
+                      icon: StudioIcons.styleExplore,
                       label: context.l10n.nav_styleExplore,
                       isSelected: currentIndex == AppBranch.styleExplore.index,
                       onTap: () => navigationShell.goBranch(
@@ -86,7 +84,7 @@ class MainNavRail extends ConsumerWidget {
 
                     // 素材：本地图库、在线画廊、块库及参考仓库。
                     _NavIcon(
-                      icon: Icons.folder,
+                      icon: StudioIcons.localGallery,
                       label: context.l10n.localGallery_title,
                       isSelected: currentIndex == AppBranch.localGallery.index,
                       onTap: () => navigationShell.goBranch(
@@ -95,7 +93,7 @@ class MainNavRail extends ConsumerWidget {
                     ),
 
                     _NavIcon(
-                      icon: Icons.photo_library, // Online Gallery
+                      icon: StudioIcons.onlineGallery,
                       label: context.l10n.nav_onlineGallery,
                       isSelected: currentIndex == AppBranch.onlineGallery.index,
                       onTap: () => navigationShell.goBranch(
@@ -104,7 +102,7 @@ class MainNavRail extends ConsumerWidget {
                     ),
 
                     _NavIcon(
-                      icon: Icons.view_module_outlined,
+                      icon: StudioIcons.promptBlocks,
                       label: context.l10n.nav_promptBlockLibrary,
                       isSelected:
                           currentIndex == AppBranch.promptBlockLibrary.index,
@@ -115,7 +113,7 @@ class MainNavRail extends ConsumerWidget {
 
                     // Vibe库
                     _NavIcon(
-                      icon: Icons.auto_awesome, // Vibe Library
+                      icon: StudioIcons.vibeLibrary,
                       label: context.l10n.vibeLibrary_title,
                       isSelected: currentIndex == AppBranch.vibeLibrary.index,
                       onTap: () =>
@@ -124,7 +122,7 @@ class MainNavRail extends ConsumerWidget {
 
                     // 精准参考库
                     _NavIcon(
-                      icon: Icons.center_focus_strong,
+                      icon: StudioIcons.preciseReference,
                       label: context.l10n.nav_preciseRefLibrary,
                       isSelected:
                           currentIndex == AppBranch.preciseRefLibrary.index,

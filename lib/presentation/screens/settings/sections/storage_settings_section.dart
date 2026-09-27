@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/hive_storage_helper.dart';
@@ -414,7 +415,7 @@ class _VibeLibraryPathTileState extends State<VibeLibraryPathTile> {
     final hasCustomPath = _pathHelper.hasCustomPath;
 
     return ListTile(
-      leading: const Icon(Icons.style_outlined),
+      leading: const Icon(StudioIcons.vibeLibrary),
       title: Text(context.l10n.settings_vibeLibraryPath),
       subtitle: FutureBuilder<String>(
         future: _pathHelper.getPath(),

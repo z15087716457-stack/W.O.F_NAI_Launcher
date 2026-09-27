@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../../data/models/vibe/vibe_library_category.dart';
 import '../../../../widgets/common/themed_divider.dart';
@@ -85,7 +86,7 @@ class _VibeCategoryTreeViewState extends State<VibeCategoryTreeView> {
         children: [
           // 全部Vibe
           VibeCategoryItem(
-            icon: Icons.auto_awesome_outlined,
+            icon: StudioIcons.vibeLibrary,
             label: context.l10n.vibeLibrary_allVibes,
             count: widget.totalEntryCount,
             isSelected: widget.selectedCategoryId == null,

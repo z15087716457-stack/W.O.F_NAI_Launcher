@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import 'dna_icon.dart';
 
@@ -57,7 +58,7 @@ class PromptPill extends StatelessWidget {
         enabled
             ? theme.colorScheme.onSurface
             : theme.colorScheme.onSurfaceVariant,
-        this.icon ?? Icons.view_module_outlined,
+        this.icon ?? StudioIcons.promptBlocks,
       ),
       PromptPillVariant.missing => (
         theme.colorScheme.error.withValues(alpha: 0.7),

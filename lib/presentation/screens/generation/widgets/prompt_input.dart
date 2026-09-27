@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/autocomplete/autocomplete_settings.dart'
     as completion_settings;
@@ -565,7 +566,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           pinnedProvider: layoutStateNotifierProvider.select(
             (s) => s.blockLibraryPanelToolPinned,
           ),
-          icon: Icons.view_module_outlined,
+          icon: StudioIcons.promptBlocks,
           title: menuContext.l10n.promptBlockEditor_library,
           theme: theme,
           onTap: () => ref

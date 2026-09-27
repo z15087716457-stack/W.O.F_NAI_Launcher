@@ -14,6 +14,7 @@ import '../../providers/gallery_category_provider.dart'
     show collectionSelectedIdPrefix;
 import '../../themes/theme_extension.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'gallery_scan_progress_panel.dart';
 import '../../../core/storage/local_storage_service.dart';
 
@@ -179,7 +180,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       _buildImageDropTarget(
         categoryId: null,
         child: _CategoryItem(
-          icon: Icons.photo_library_outlined,
+          icon: StudioIcons.localGallery,
           label: context.l10n.localGallery_allImages,
           count: widget.totalImageCount,
           isSelected: widget.selectedCategoryId == null,

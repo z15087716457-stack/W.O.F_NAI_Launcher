@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../core/utils/image_save_utils.dart';
 import '../../../core/utils/image_share_sanitizer.dart';
@@ -1352,13 +1353,13 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
               ),
             if (widget.onVibeTransfer != null)
               _HoverActionButton(
-                icon: Icons.palette_outlined,
+                icon: StudioIcons.vibeLibrary,
                 tooltip: context.l10n.drop_vibeTransfer,
                 onTap: widget.onVibeTransfer,
               ),
             if (widget.onPreciseReference != null)
               _HoverActionButton(
-                icon: Icons.center_focus_strong,
+                icon: StudioIcons.preciseReference,
                 tooltip: context.l10n.drop_characterReference,
                 onTap: widget.onPreciseReference,
               ),
@@ -1701,7 +1702,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
           ProMenuItem(
             id: 'vibe_transfer',
             label: context.l10n.drop_vibeTransfer,
-            icon: Icons.palette_outlined,
+            icon: StudioIcons.vibeLibrary,
             onTap: widget.onVibeTransfer!,
           ),
         );
@@ -1711,7 +1712,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
           ProMenuItem(
             id: 'precise_reference',
             label: context.l10n.drop_characterReference,
-            icon: Icons.center_focus_strong,
+            icon: StudioIcons.preciseReference,
             onTap: widget.onPreciseReference!,
           ),
         );

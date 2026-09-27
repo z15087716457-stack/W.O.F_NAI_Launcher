@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/storage/local_storage_service.dart';
 import '../../../../core/utils/localization_extension.dart';
@@ -278,7 +279,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
       child: Row(
         children: [
           Icon(
-            Icons.view_module_outlined,
+            StudioIcons.promptBlocks,
             size: 18,
             color: theme.colorScheme.onSurfaceVariant,
           ),

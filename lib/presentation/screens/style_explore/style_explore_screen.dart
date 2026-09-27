@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../providers/character_position_canvas_provider.dart';
@@ -438,7 +439,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
               : theme.colorScheme.onSurfaceVariant,
         ),
         onPressed: () => _toggleGallery(maxWidth),
-        icon: const Icon(Icons.photo_library_outlined),
+        icon: const Icon(StudioIcons.localGallery),
       ),
     );
   }
@@ -818,7 +819,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
           child: Row(
             children: [
               Icon(
-                Icons.photo_library_outlined,
+                StudioIcons.localGallery,
                 size: 18,
                 color: theme.colorScheme.onSurfaceVariant,
               ),

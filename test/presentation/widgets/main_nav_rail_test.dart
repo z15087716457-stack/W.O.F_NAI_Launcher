@@ -9,7 +9,7 @@ import 'package:nai_launcher/presentation/providers/account_manager_provider.dar
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/router/app_branch.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/main_nav_rail.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/pills/dna_icon.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 class _MockNavigationShell extends Mock implements StatefulNavigationShell {
   @override
@@ -71,24 +71,27 @@ void main() {
 
     expect(find.byKey(const Key('main-nav-primary-scroll')), findsOneWidget);
     expect(find.byIcon(Icons.settings), findsOneWidget);
-    // BUG-6：画风探索入口为自绘 DNA 双螺旋（Icons.biotech 是显微镜字形）。
-    expect(find.byType(DnaIcon), findsOneWidget);
+    // 画风探索使用遗传分支，块内遗传操作另用双螺旋。
+    expect(find.byIcon(StudioIcons.styleExplore), findsOneWidget);
     expect(find.byIcon(Icons.biotech), findsNothing);
     final primary = Theme.of(
-      tester.element(find.byType(DnaIcon)),
+      tester.element(find.byIcon(StudioIcons.styleExplore)),
     ).colorScheme.primary;
-    expect(tester.widget<DnaIcon>(find.byType(DnaIcon)).color, primary);
+    expect(
+      tester.widget<Icon>(find.byIcon(StudioIcons.styleExplore)).color,
+      primary,
+    );
     expect(tester.widget<Icon>(find.byIcon(Icons.brush)).color, isNot(primary));
 
     // 分组只改变显示顺序，不能改变对应的路由与选中态。
     final destinations = <(Finder, AppBranch)>[
       (find.byIcon(Icons.brush), AppBranch.generation),
-      (find.byType(DnaIcon), AppBranch.styleExplore),
-      (find.byIcon(Icons.folder), AppBranch.localGallery),
-      (find.byIcon(Icons.photo_library), AppBranch.onlineGallery),
-      (find.byIcon(Icons.view_module_outlined), AppBranch.promptBlockLibrary),
-      (find.byIcon(Icons.auto_awesome), AppBranch.vibeLibrary),
-      (find.byIcon(Icons.center_focus_strong), AppBranch.preciseRefLibrary),
+      (find.byIcon(StudioIcons.styleExplore), AppBranch.styleExplore),
+      (find.byIcon(StudioIcons.localGallery), AppBranch.localGallery),
+      (find.byIcon(StudioIcons.onlineGallery), AppBranch.onlineGallery),
+      (find.byIcon(StudioIcons.promptBlocks), AppBranch.promptBlockLibrary),
+      (find.byIcon(StudioIcons.vibeLibrary), AppBranch.vibeLibrary),
+      (find.byIcon(StudioIcons.preciseReference), AppBranch.preciseRefLibrary),
       (find.byIcon(Icons.bar_chart), AppBranch.statistics),
     ];
     for (var i = 1; i < destinations.length; i++) {
@@ -142,7 +145,7 @@ void main() {
     expect(find.text('画布'), findsOneWidget);
     expect(find.text('本地画廊'), findsOneWidget);
     expect(find.text('提示词块'), findsOneWidget);
-    expect(find.byIcon(Icons.view_module_outlined), findsOneWidget);
+    expect(find.byIcon(StudioIcons.promptBlocks), findsOneWidget);
     expect(find.text('GitHub 仓库'), findsNothing);
     expect(find.text('收起侧边栏'), findsOneWidget);
     expect(find.byIcon(Icons.keyboard_double_arrow_left), findsOneWidget);

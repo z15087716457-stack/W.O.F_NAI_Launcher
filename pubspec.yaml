@@ -159,6 +159,9 @@ flutter:
     - assets/model3d_editor/vendor/addons/utils/
 
   fonts:
+    - family: StudioIcons
+      fonts:
+        - asset: assets/fonts/StudioIcons.ttf
     - family: LXGW ZhenKai GB
       fonts:
         - asset: fonts/LXGWZhenKaiGB-Regular.ttf

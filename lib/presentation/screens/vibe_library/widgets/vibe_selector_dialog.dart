@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../core/utils/vibe_performance_diagnostics.dart';
@@ -499,7 +500,7 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
   Widget _buildHeader(ThemeData theme) {
     return Row(
       children: [
-        Icon(Icons.style_outlined, color: theme.colorScheme.primary),
+        Icon(StudioIcons.vibeLibrary, color: theme.colorScheme.primary),
         const SizedBox(width: 12),
         Text(
           widget.title ?? context.l10n.vibe_selector_title,
@@ -973,7 +974,7 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.style_outlined,
+              StudioIcons.vibeLibrary,
               size: 64,
               color: theme.colorScheme.outline,
             ),

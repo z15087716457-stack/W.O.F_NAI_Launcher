@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/vibe/vibe_library_entry.dart';
@@ -286,7 +287,9 @@ class _VibeCardState extends ConsumerState<VibeCard>
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: Center(
                 child: Icon(
-                  widget.entry.isBundle ? Icons.style : Icons.auto_fix_high,
+                  widget.entry.isBundle
+                      ? Icons.layers_outlined
+                      : StudioIcons.vibeLibrary,
                   size: 32,
                   color: Theme.of(context).colorScheme.outline,
                 ),

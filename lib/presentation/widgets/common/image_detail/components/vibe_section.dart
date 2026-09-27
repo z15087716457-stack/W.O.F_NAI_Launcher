@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../../../data/models/vibe/vibe_reference.dart';
 import '../../app_toast.dart';
@@ -111,7 +112,7 @@ class _VibeSectionState extends State<VibeSection> {
               child: Row(
                 children: [
                   Icon(
-                    Icons.style_outlined,
+                    StudioIcons.vibeLibrary,
                     size: 16,
                     color: hasVibes
                         ? colorScheme.primary

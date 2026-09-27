@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/vibe/vibe_reference.dart';
@@ -290,7 +291,7 @@ class _VibeCardState extends ConsumerState<VibeCard> {
   Widget _buildPlaceholder(ThemeData theme) {
     return Center(
       child: Icon(
-        Icons.auto_awesome,
+        StudioIcons.vibeLibrary,
         size: 24,
         color: theme.colorScheme.outline,
       ),

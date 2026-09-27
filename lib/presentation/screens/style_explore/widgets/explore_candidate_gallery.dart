@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
@@ -356,7 +357,7 @@ class _ExploreCandidateGalleryState
             onPressed: _selectedIds.isEmpty
                 ? null
                 : () => _createFamilyFromSelection(run),
-            icon: const Icon(Icons.account_tree_outlined, size: 16),
+            icon: const Icon(StudioIcons.styleExplore, size: 16),
             label: Text(l10n.styleExplore_createFamily),
           ),
           FilledButton.tonalIcon(

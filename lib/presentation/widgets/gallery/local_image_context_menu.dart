@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../core/utils/localization_extension.dart';
 
@@ -149,13 +150,13 @@ class LocalImageContextMenu {
       _item(
         context,
         value: LocalImageContextAction.sendToStyleTransfer,
-        icon: Icons.palette_outlined,
+        icon: StudioIcons.vibeLibrary,
         label: context.l10n.localGallery_sendToStyleTransfer,
       ),
       _item(
         context,
         value: LocalImageContextAction.sendToPreciseReference,
-        icon: Icons.center_focus_strong,
+        icon: StudioIcons.preciseReference,
         label: context.l10n.localGallery_sendToPreciseReference,
       ),
       _item(

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
@@ -345,7 +346,7 @@ class _UnifiedReferencePanelState extends ConsumerState<UnifiedReferencePanel> {
       frosted: true,
       title: context.l10n.vibe_title,
       subtitle: context.l10n.vibe_description,
-      icon: Icons.auto_fix_high,
+      icon: StudioIcons.vibeLibrary,
       iconAsset: 'assets/icons/nai-icon-vibe-transfer.svg',
       isExpanded: _isExpanded,
       onToggle: () => setState(() => _isExpanded = !_isExpanded),

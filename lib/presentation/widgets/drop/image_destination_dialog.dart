@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../data/models/vibe/vibe_reference.dart';
 import '../../widgets/common/themed_divider.dart';
@@ -193,7 +194,7 @@ class ImageDestinationDialog extends ConsumerWidget {
                   // Vibe Transfer 按钮（如果没有检测到预编码 Vibe）
                   if (detectedVibe == null)
                     _DestinationButton(
-                      icon: Icons.auto_awesome,
+                      icon: StudioIcons.vibeLibrary,
                       label: context.l10n.drop_vibeTransfer,
                       onTap: () => Navigator.of(
                         context,
@@ -201,7 +202,7 @@ class ImageDestinationDialog extends ConsumerWidget {
                     ),
                   const SizedBox(height: 12),
                   _DestinationButton(
-                    icon: Icons.person_outline,
+                    icon: StudioIcons.preciseReference,
                     label: context.l10n.drop_characterReference,
                     onTap: () => Navigator.of(
                       context,
@@ -252,7 +253,7 @@ class ImageDestinationDialog extends ConsumerWidget {
             child: Row(
               children: [
                 Icon(
-                  Icons.auto_awesome,
+                  StudioIcons.vibeLibrary,
                   size: 20,
                   color: Colors.amber.shade700,
                 ),

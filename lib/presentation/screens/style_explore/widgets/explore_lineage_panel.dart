@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
@@ -90,7 +91,7 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
             child: Row(
               children: [
                 Icon(
-                  Icons.account_tree_outlined,
+                  StudioIcons.styleExplore,
                   size: 16,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -472,7 +473,7 @@ class _ExploreLineagePanelState extends ConsumerState<ExploreLineagePanel> {
                       familyId: family.id,
                       parentSetId: parentSet.id,
                     ),
-                    icon: const Icon(Icons.photo_library_outlined, size: 16),
+                    icon: const Icon(StudioIcons.localGallery, size: 16),
                     label: Text(l10n.styleExplore_managePile),
                   ),
                 ],
@@ -1091,7 +1092,7 @@ class _AdoptedBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(3),
       ),
       child: Icon(
-        Icons.account_tree_outlined,
+        StudioIcons.styleExplore,
         size: 12,
         color: theme.colorScheme.tertiary,
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 
@@ -48,7 +49,7 @@ const Map<String, IconData> kPromptBlockIconOptions = {
 };
 
 /// 块未选图标时的默认图标。
-const IconData kPromptBlockDefaultIcon = Icons.view_module_outlined;
+const IconData kPromptBlockDefaultIcon = StudioIcons.promptBlocks;
 
 /// 按键名解析图标；未知/空键回退默认图标（向前兼容旧数据与被删图标）。
 IconData promptBlockIconFromName(String? name) {

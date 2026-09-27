@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../../core/enums/precise_ref_type.dart';
 import '../../../../../core/extensions/precise_ref_type_extensions.dart';
@@ -90,7 +91,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
       frosted: true,
       title: context.l10n.preciseRef_title,
       subtitle: context.l10n.preciseRef_subtitle,
-      icon: Icons.person_pin,
+      icon: StudioIcons.preciseReference,
       iconAsset: 'assets/icons/nai-icon-precise-reference.svg',
       isExpanded: _isExpanded,
       onToggle: () => setState(() => _isExpanded = !_isExpanded),

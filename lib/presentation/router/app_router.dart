@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../core/utils/localization_extension.dart';
 import '../../core/shortcuts/default_shortcuts.dart';
@@ -525,8 +526,8 @@ class MobileShell extends ConsumerWidget {
             label: context.l10n.nav_generate,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.photo_library_outlined),
-            selectedIcon: const Icon(Icons.photo_library),
+            icon: const Icon(StudioIcons.localGallery),
+            selectedIcon: const Icon(StudioIcons.localGallery),
             label: context.l10n.nav_gallery,
           ),
           NavigationDestination(

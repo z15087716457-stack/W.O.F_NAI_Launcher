@@ -5,6 +5,7 @@ import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_library_entry.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'app_toast.dart';
 
 /// 保存 Vibe 到库对话框
@@ -166,7 +167,7 @@ class _SaveVibeDialogState extends ConsumerState<SaveVibeDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(Icons.style_outlined, color: colorScheme.primary),
+          Icon(StudioIcons.vibeLibrary, color: colorScheme.primary),
           const SizedBox(width: 8),
           Text(l10n.vibe_saveToLibrary_title),
         ],

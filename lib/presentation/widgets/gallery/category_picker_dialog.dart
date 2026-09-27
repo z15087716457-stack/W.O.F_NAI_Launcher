@@ -4,6 +4,7 @@ import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/data/models/gallery/gallery_category.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/gallery_category_provider.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 /// 分类选择结果
 ///
@@ -238,7 +239,7 @@ class _CategoryPickerDialogState extends ConsumerState<CategoryPickerDialog> {
         child: Row(
           children: [
             Icon(
-              Icons.photo_library_outlined,
+              StudioIcons.localGallery,
               size: 20,
               color: theme.colorScheme.primary,
             ),

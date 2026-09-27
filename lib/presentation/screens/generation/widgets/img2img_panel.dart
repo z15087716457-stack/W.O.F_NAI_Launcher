@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image/image.dart' as img;
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/comfyui/comfyui_models.dart';
 import '../../../../core/comfyui/workflow_template.dart';
@@ -542,7 +543,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
             Expanded(
               child: ImagePickerCard(
                 key: const Key('img2img-from-precise-ref-library'),
-                icon: Icons.photo_library_outlined,
+                icon: StudioIcons.localGallery,
                 label: context.l10n.img2img_fromPreciseRefLibrary,
                 height: 80,
                 enableDragDrop: false,

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/extensions/precise_ref_type_extensions.dart';
 import '../../../../data/models/precise_ref/precise_ref_library_entry.dart';
@@ -172,7 +173,7 @@ class _PreciseRefCardState extends ConsumerState<PreciseRefCard> {
             children: [
               _HoverActionButton(
                 key: Key('precise-ref-card-send-${widget.entry.id}'),
-                icon: Icons.center_focus_strong,
+                icon: StudioIcons.preciseReference,
                 label: l10n.preciseRefLib_sendToPreciseRef,
                 primary: true,
                 onTap: widget.onSendToPreciseRef,

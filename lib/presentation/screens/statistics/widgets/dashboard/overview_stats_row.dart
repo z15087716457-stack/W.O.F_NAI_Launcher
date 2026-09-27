@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../../data/models/gallery/gallery_statistics.dart';
 import '../../utils/utils.dart';
@@ -21,7 +22,7 @@ class OverviewStatsRow extends StatelessWidget {
       children: [
         Expanded(
           child: MetricCard(
-            icon: Icons.photo_library_outlined,
+            icon: StudioIcons.localGallery,
             label: l10n.statistics_totalImages,
             value: '${stats.totalImages}',
             iconColor: theme.colorScheme.primary,

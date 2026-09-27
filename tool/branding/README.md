@@ -10,7 +10,9 @@
 
 `StudioTypography` 负责正文、控件与等宽数据字体，应用统一使用 Geist 深浅两套主题，共用离线 Geist / HarmonyOS 字体。显式系统 / Google 字体选择仍有效，旧默认键 `system`、空键使用应用默认组合。只有标题栏 NAI Studio 使用旧版普通字体和黄色双下划线，不采用像素体；黄线是显式样式，不依赖上层 Material 缺省样式。字体许可在 `assets/licenses/` 和应用「关于 → 界面字体与许可」。
 
-界面图标已全部恢复原有 Material `Icon` 和已有专用符号。不要重新引入被撤回的 Geist SVG 注册表。
+功能图标统一使用 `lib/presentation/widgets/common/studio_icons.dart` 的 `StudioIcons`：画风探索为遗传分支，块内遗传动作为双螺旋，在线画廊为图片＋地球，提示词块为模块网格，精准参考为人物叠卡，Vibe 为图片到笔触的传递。本地画廊沿用原在线画廊的 Material 叠图符号。侧栏、标题、块默认图标、菜单和参考面板复用同一造型；网格布局、通用文件夹、保存动作与用户自选块图标保持各自语义。
+
+SVG 母版在 `tool/branding/studio_icons/`；`generate_studio_icons.py` 将描边转轮廓生成 `assets/fonts/StudioIcons.ttf`，并同步精准参考 / Vibe 两份已有 SVG 资源。Flutter 原生 `IconData` 与 SVG 消费者因此保持一致，无额外运行时依赖。复建命令见脚本开头，码位只追加、不重排；母版修改后必须重新生成字体和两份 SVG。矢量图标按主题继承颜色与尺寸，不能把预览图切成位图用于控件。
 
 左侧主导航按用途分三组：生图 / 画风探索；本地图库 / 在线画廊 / 提示词块 / Vibe 库 / 精准参考库；统计。组间使用中性细线与留白，收起和展开状态共用分组顺序；设置与账户等底部操作保持固定。导航显示顺序独立于路由分支和快捷键映射。
 

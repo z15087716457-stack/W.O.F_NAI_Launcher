@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 /// Empty state view for Vibe library
 /// Vibe库空状态视图
@@ -36,8 +37,8 @@ class VibeLibraryEmptyView extends StatelessWidget {
       'search_off' => Icons.search_off,
       'favorite_border' => Icons.favorite_border,
       'folder_outlined' => Icons.folder_outlined,
-      'auto_awesome_outlined' => Icons.auto_awesome_outlined,
-      _ => Icons.auto_awesome_outlined,
+      'auto_awesome_outlined' => StudioIcons.vibeLibrary,
+      _ => StudioIcons.vibeLibrary,
     };
   }
 

@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../../core/utils/app_logger.dart';
 import '../../../../themes/design_tokens.dart';
@@ -276,7 +277,7 @@ class _VibePreviewDropZoneState extends State<VibePreviewDropZone> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(Icons.auto_awesome, size: 64, color: Colors.white54),
+        const Icon(StudioIcons.vibeLibrary, size: 64, color: Colors.white54),
         const SizedBox(height: DesignTokens.spacingMd),
         Text(
           context.l10n.vibeDetail_noPreviewImage,

@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:path/path.dart' as p;
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../core/enums/precise_ref_type.dart';
 import '../../../data/models/image/image_params.dart';
@@ -420,7 +421,7 @@ class _PreciseRefLibraryScreenState
       child: Row(
         children: [
           Icon(
-            Icons.center_focus_strong,
+            StudioIcons.preciseReference,
             size: 22,
             color: theme.colorScheme.primary,
           ),
@@ -617,7 +618,7 @@ class _PreciseRefLibraryScreenState
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.center_focus_strong,
+            StudioIcons.preciseReference,
             size: 56,
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
           ),

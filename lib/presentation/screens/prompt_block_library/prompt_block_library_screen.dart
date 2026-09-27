@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/utils/file_picker_utils.dart';
@@ -660,7 +661,7 @@ class _PromptBlockLibraryScreenState
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.view_module_outlined,
+                    StudioIcons.promptBlocks,
                     color: theme.colorScheme.primary,
                   ),
                   const SizedBox(width: 8),
@@ -919,7 +920,7 @@ class _PromptBlockLibraryScreenState
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.grid_view_outlined,
+                StudioIcons.promptBlocks,
                 size: 17,
                 color: theme.colorScheme.primary,
               ),
@@ -2210,7 +2211,7 @@ class _PromptBlockLibraryScreenState
               : _selectedCollectionId != null
               ? context.l10n.promptBlockLibrary_emptyCollection
               : context.l10n.promptBlockLibrary_emptyFolder);
-    final icon = hasSearch ? Icons.search_off : Icons.view_module_outlined;
+    final icon = hasSearch ? Icons.search_off : StudioIcons.promptBlocks;
 
     return Center(
       child: Column(
