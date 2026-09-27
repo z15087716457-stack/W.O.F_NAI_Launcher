@@ -19,6 +19,19 @@ import 'atom_list_editor.dart';
 
 const promptBlockLibraryWideHeaderHeight = 64.0;
 
+Future<Size?> _readBlockThumbnailSize(String path) async {
+  final file = File(path);
+  if (!await file.exists()) return null;
+  try {
+    final bytes = await file.readAsBytes();
+    final info = img.findDecoderForData(bytes)?.startDecode(bytes);
+    if (info == null) return null;
+    return Size(info.width.toDouble(), info.height.toDouble());
+  } catch (_) {
+    return null;
+  }
+}
+
 /// 「全部块 / 文件夹A / 文件夹B」式位置路径（对应词库浮层的分类名位置）。
 String promptBlockLocationLabel(
   PromptBlock block,
@@ -57,6 +70,8 @@ class PromptBlockDetailView extends StatelessWidget {
     this.contentMaxLines = 8,
     this.actions = const <Widget>[],
     this.compactImage = false,
+    this.initialThumbnailSize,
+    this.previewImageProvider,
     this.onTagTap,
   });
 
@@ -72,6 +87,8 @@ class PromptBlockDetailView extends StatelessWidget {
   /// 预览态紧凑版式：竖图封顶 0.8×宽并按裁剪偏移 cover；正文弹性
   /// 截断、标题与页脚元信息保持刚性，保证浮层底部不被顶出。
   final bool compactImage;
+  final Size? initialThumbnailSize;
+  final ImageProvider? previewImageProvider;
   final ValueChanged<String>? onTagTap;
 
   @override
@@ -247,7 +264,12 @@ class PromptBlockDetailView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _BlockDetailImage(block: block, compact: compactImage),
+        _BlockDetailImage(
+          block: block,
+          compact: compactImage,
+          initialThumbnailSize: initialThumbnailSize,
+          previewImageProvider: previewImageProvider,
+        ),
         if (compactImage) Flexible(child: body) else body,
       ],
     );
@@ -298,13 +320,20 @@ class _MetaRow extends StatelessWidget {
 /// 详情版式图片区：横图按裁剪参数横幅显示；竖图 letterbox 两侧留空；
 /// 无图块 = 老样子（块图标 + 块颜色）。
 class _BlockDetailImage extends StatefulWidget {
-  const _BlockDetailImage({required this.block, this.compact = false});
+  const _BlockDetailImage({
+    required this.block,
+    this.compact = false,
+    this.initialThumbnailSize,
+    this.previewImageProvider,
+  });
 
   final PromptBlock block;
 
   /// 紧凑模式（悬停预览）：竖图封顶 0.8×宽、按裁剪偏移 cover；
   /// false = 竖图等比 letterbox（右侧详情面板）。
   final bool compact;
+  final Size? initialThumbnailSize;
+  final ImageProvider? previewImageProvider;
 
   static const double landscapeHeight = 180;
 
@@ -319,14 +348,18 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
   @override
   void initState() {
     super.initState();
-    _loadImageSize();
+    _imageSize = widget.initialThumbnailSize;
+    if (_imageSize == null) _loadImageSize();
   }
 
   @override
   void didUpdateWidget(covariant _BlockDetailImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.block.thumbnail != widget.block.thumbnail) {
-      _loadImageSize();
+    if (oldWidget.block.thumbnail != widget.block.thumbnail ||
+        oldWidget.initialThumbnailSize != widget.initialThumbnailSize) {
+      _requestId++;
+      _imageSize = widget.initialThumbnailSize;
+      if (_imageSize == null) _loadImageSize();
     }
   }
 
@@ -345,22 +378,9 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
       }
       return;
     }
-    final size = await _readImageSize(path);
+    final size = await _readBlockThumbnailSize(path);
     if (!mounted || requestId != _requestId) return;
     setState(() => _imageSize = size);
-  }
-
-  Future<Size?> _readImageSize(String path) async {
-    final file = File(path);
-    if (!await file.exists()) return null;
-    try {
-      final bytes = await file.readAsBytes();
-      final info = img.findDecoderForData(bytes)?.startDecode(bytes);
-      if (info == null) return null;
-      return Size(info.width.toDouble(), info.height.toDouble());
-    } catch (_) {
-      return null;
-    }
   }
 
   @override
@@ -426,8 +446,14 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
               child: SizedBox(
                 width: width,
                 height: height,
-                child: Image.file(
-                  File(thumbnail),
+                child: Image(
+                  image:
+                      widget.previewImageProvider ??
+                      ResizeImage.resizeIfNeeded(
+                        (width * devicePixelRatio).ceil(),
+                        null,
+                        FileImage(File(thumbnail)),
+                      ),
                   width: width,
                   height: height,
                   fit: BoxFit.cover,
@@ -435,7 +461,6 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
                     block.thumbnailOffsetX.clamp(-1.0, 1.0),
                     block.thumbnailOffsetY.clamp(-1.0, 1.0),
                   ),
-                  cacheWidth: (width * devicePixelRatio).ceil(),
                   errorBuilder: (_, __, ___) => Center(
                     child: Icon(
                       Icons.broken_image_outlined,
@@ -455,12 +480,17 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
               width: width,
               height: height,
               color: Colors.grey.shade900,
-              child: Image.file(
-                File(thumbnail),
+              child: Image(
+                image:
+                    widget.previewImageProvider ??
+                    ResizeImage.resizeIfNeeded(
+                      (width * devicePixelRatio).ceil(),
+                      null,
+                      FileImage(File(thumbnail)),
+                    ),
                 width: width,
                 height: height,
                 fit: BoxFit.contain,
-                cacheWidth: (width * devicePixelRatio).ceil(),
                 errorBuilder: (_, __, ___) => Center(
                   child: Icon(
                     Icons.broken_image_outlined,
@@ -481,6 +511,8 @@ class _BlockDetailImageState extends State<_BlockDetailImage> {
           width: width,
           height: _BlockDetailImage.landscapeHeight,
           borderRadius: radius,
+          resolvedSize: widget.initialThumbnailSize,
+          imageProvider: widget.previewImageProvider,
         );
       },
     );
@@ -497,6 +529,8 @@ class PromptBlockPreviewOverlay extends StatelessWidget {
     required this.cardSize,
     required this.cardPosition,
     required this.onDismiss,
+    this.initialThumbnailSize,
+    this.previewImageProvider,
   });
 
   final PromptBlock block;
@@ -505,6 +539,8 @@ class PromptBlockPreviewOverlay extends StatelessWidget {
   final Size cardSize;
   final Offset cardPosition;
   final VoidCallback onDismiss;
+  final Size? initialThumbnailSize;
+  final ImageProvider? previewImageProvider;
 
   static const double previewWidth = 320;
   static const double previewMaxHeight = 460;
@@ -549,6 +585,8 @@ class PromptBlockPreviewOverlay extends StatelessWidget {
                   key: const Key('prompt-block-preview-view'),
                   block: block,
                   compactImage: true,
+                  initialThumbnailSize: initialThumbnailSize,
+                  previewImageProvider: previewImageProvider,
                   displayTitle: block.title.isEmpty
                       ? l10n.promptBlockLibrary_unnamedBlock
                       : block.title,
@@ -561,6 +599,13 @@ class PromptBlockPreviewOverlay extends StatelessWidget {
       ),
     );
   }
+}
+
+class _PreparedBlockThumbnail {
+  const _PreparedBlockThumbnail(this.size, this.provider);
+
+  final Size size;
+  final ImageProvider provider;
 }
 
 /// 短暂停留后出纯预览；指针按下（点击/拖拽起手）即抑制。
@@ -590,11 +635,19 @@ class _PromptBlockHoverPreviewState extends State<PromptBlockHoverPreview> {
   OverlayEntry? _overlayEntry;
   Timer? _timer;
   bool _pressed = false;
+  bool _hovering = false;
+  int _previewRequestId = 0;
 
   @override
   void didUpdateWidget(covariant PromptBlockHoverPreview oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!widget.enabled) _hidePreview();
+    if (!widget.enabled) {
+      _hidePreview();
+    } else if (_hovering &&
+        oldWidget.block.thumbnail != widget.block.thumbnail) {
+      _hidePreview();
+      _schedule();
+    }
   }
 
   @override
@@ -607,11 +660,48 @@ class _PromptBlockHoverPreviewState extends State<PromptBlockHoverPreview> {
   void _schedule() {
     _timer?.cancel();
     if (!widget.enabled || _pressed) return;
-    _timer = Timer(widget.delay, _showPreview);
+    final requestId = ++_previewRequestId;
+    // Start decoding during the hover delay. The overlay is inserted only once
+    // its image dimensions and first frame are ready, so it never changes size.
+    final thumbnail = _prepareThumbnail();
+    _timer = Timer(
+      widget.delay,
+      () => unawaited(_showPreview(requestId, thumbnail)),
+    );
   }
 
-  void _showPreview() {
-    if (!mounted || !widget.enabled || _pressed || _overlayEntry != null) {
+  Future<_PreparedBlockThumbnail?> _prepareThumbnail() async {
+    final path = widget.block.thumbnail;
+    if (path == null) return null;
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final decodeWidth = (PromptBlockPreviewOverlay.previewWidth * dpr)
+        .ceil()
+        .clamp(1, 2048);
+    final size = await _readBlockThumbnailSize(path);
+    if (size == null || !mounted) return null;
+    final provider = ResizeImage.resizeIfNeeded(
+      decodeWidth,
+      null,
+      FileImage(File(path)),
+    );
+    try {
+      await precacheImage(provider, context);
+      return _PreparedBlockThumbnail(size, provider);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _showPreview(
+    int requestId,
+    Future<_PreparedBlockThumbnail?> thumbnail,
+  ) async {
+    final prepared = await thumbnail;
+    if (!mounted ||
+        requestId != _previewRequestId ||
+        !widget.enabled ||
+        _pressed ||
+        _overlayEntry != null) {
       return;
     }
     final renderBox = context.findRenderObject() as RenderBox;
@@ -623,6 +713,8 @@ class _PromptBlockHoverPreviewState extends State<PromptBlockHoverPreview> {
         cardSize: renderBox.size,
         cardPosition: renderBox.localToGlobal(Offset.zero),
         onDismiss: _hidePreview,
+        initialThumbnailSize: prepared?.size,
+        previewImageProvider: prepared?.provider,
       ),
     );
     Overlay.of(context).insert(_overlayEntry!);
@@ -634,6 +726,7 @@ class _PromptBlockHoverPreviewState extends State<PromptBlockHoverPreview> {
   }
 
   void _hidePreview() {
+    _previewRequestId++;
     _timer?.cancel();
     _timer = null;
     _removeOverlay();
@@ -644,8 +737,12 @@ class _PromptBlockHoverPreviewState extends State<PromptBlockHoverPreview> {
     return CompositedTransformTarget(
       link: _layerLink,
       child: MouseRegion(
-        onEnter: (_) => _schedule(),
+        onEnter: (_) {
+          _hovering = true;
+          _schedule();
+        },
         onExit: (_) {
+          _hovering = false;
           _pressed = false;
           _hidePreview();
         },

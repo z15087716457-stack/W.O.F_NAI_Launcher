@@ -24,6 +24,8 @@ class ThumbnailDisplay extends StatefulWidget {
   final double? portraitHeight;
 
   final BorderRadius? borderRadius;
+  final Size? resolvedSize;
+  final ImageProvider? imageProvider;
 
   const ThumbnailDisplay({
     super.key,
@@ -35,6 +37,8 @@ class ThumbnailDisplay extends StatefulWidget {
     this.height = 80,
     this.portraitHeight,
     this.borderRadius,
+    this.resolvedSize,
+    this.imageProvider,
   });
 
   @override
@@ -48,14 +52,18 @@ class _ThumbnailDisplayState extends State<ThumbnailDisplay> {
   @override
   void initState() {
     super.initState();
-    _loadImageSize();
+    _imageSize = widget.resolvedSize;
+    if (_imageSize == null) _loadImageSize();
   }
 
   @override
   void didUpdateWidget(ThumbnailDisplay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.imagePath != widget.imagePath) {
-      _loadImageSize();
+    if (oldWidget.imagePath != widget.imagePath ||
+        oldWidget.resolvedSize != widget.resolvedSize) {
+      _imageSizeRequestId++;
+      _imageSize = widget.resolvedSize;
+      if (_imageSize == null) _loadImageSize();
     }
   }
 
@@ -151,12 +159,16 @@ class _ThumbnailDisplayState extends State<ThumbnailDisplay> {
           maxHeight: virtualHeight,
           child: Transform.translate(
             offset: Offset(-shiftX, -shiftY),
-            child: Image.file(
-              File(widget.imagePath),
+            child: Image(
+              image:
+                  widget.imageProvider ??
+                  ResizeImage.resizeIfNeeded(
+                    _decodeCacheExtent(virtualWidth, devicePixelRatio),
+                    _decodeCacheExtent(virtualHeight, devicePixelRatio),
+                    FileImage(File(widget.imagePath)),
+                  ),
               width: virtualWidth,
               height: virtualHeight,
-              cacheWidth: _decodeCacheExtent(virtualWidth, devicePixelRatio),
-              cacheHeight: _decodeCacheExtent(virtualHeight, devicePixelRatio),
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => _buildError(),
             ),
@@ -178,10 +190,14 @@ class _ThumbnailDisplayState extends State<ThumbnailDisplay> {
       child: SizedBox(
         width: widget.width,
         height: widget.height,
-        child: Image.file(
-          File(widget.imagePath),
-          cacheWidth: _decodeCacheExtent(widget.width, devicePixelRatio),
-          cacheHeight: _decodeCacheExtent(widget.height, devicePixelRatio),
+        child: Image(
+          image:
+              widget.imageProvider ??
+              ResizeImage.resizeIfNeeded(
+                _decodeCacheExtent(widget.width, devicePixelRatio),
+                _decodeCacheExtent(widget.height, devicePixelRatio),
+                FileImage(File(widget.imagePath)),
+              ),
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => _buildError(),
         ),

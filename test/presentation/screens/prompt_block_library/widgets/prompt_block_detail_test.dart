@@ -367,6 +367,95 @@ void main() {
   });
 
   group('PromptBlockHoverPreview', () {
+    testWidgets('first image hover opens with its decoded portrait layout', (
+      tester,
+    ) async {
+      final image = makeImageFile('hover-first', width: 40, height: 80);
+      await tester.pumpWidget(
+        wrap(
+          PromptBlockHoverPreview(
+            block: makeBlock(thumbnail: image.path),
+            folders: const [],
+            child: const SizedBox(
+              key: Key('hover-target'),
+              width: 120,
+              height: 60,
+            ),
+          ),
+        ),
+      );
+
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await tester.runAsync(() async {
+        await gesture.moveTo(
+          tester.getCenter(find.byKey(const Key('hover-target'))),
+        );
+        await tester.pump(const Duration(milliseconds: 181));
+        for (var i = 0; i < 10; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 30));
+          await tester.pump();
+          if (find
+              .byKey(const Key('prompt-block-preview-overlay'))
+              .evaluate()
+              .isNotEmpty) {
+            break;
+          }
+        }
+      });
+      await tester.pump();
+
+      final preview = find.byKey(const Key('prompt-block-preview-overlay'));
+      expect(preview, findsOneWidget);
+      expect(
+        find.byKey(const Key('prompt-block-detail-image-loading')),
+        findsNothing,
+      );
+      final portrait = find.byKey(
+        const Key('prompt-block-detail-image-portrait-compact'),
+      );
+      expect(portrait, findsOneWidget);
+      final firstHeight = tester.getSize(portrait).height;
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(tester.getSize(portrait).height, firstHeight);
+      await gesture.removePointer();
+    });
+
+    testWidgets('leaving an image while it prepares does not open a preview', (
+      tester,
+    ) async {
+      final image = makeImageFile('hover-cancel', width: 40, height: 80);
+      await tester.pumpWidget(
+        wrap(
+          PromptBlockHoverPreview(
+            block: makeBlock(thumbnail: image.path),
+            folders: const [],
+            child: const SizedBox(
+              key: Key('hover-target'),
+              width: 120,
+              height: 60,
+            ),
+          ),
+        ),
+      );
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await gesture.moveTo(
+        tester.getCenter(find.byKey(const Key('hover-target'))),
+      );
+      await tester.pump(const Duration(milliseconds: 20));
+      await gesture.moveTo(const Offset(4, 4));
+      await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 300));
+      });
+      expect(
+        find.byKey(const Key('prompt-block-preview-overlay')),
+        findsNothing,
+      );
+      await gesture.removePointer();
+    });
+
     testWidgets('hover 180ms shows pure preview; exit dismisses', (
       tester,
     ) async {
