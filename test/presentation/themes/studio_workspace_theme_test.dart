@@ -287,11 +287,7 @@ void main() {
                 home: RepaintBoundary(
                   key: boundary,
                   child: IntegratedTitleBarShell(
-                    captionHeight: name == 'blocks'
-                        ? 64
-                        : isLibrary
-                        ? 62
-                        : 36,
+                    captionHeight: isLibrary ? 62 : 36,
                     accessoryWidth: isLibrary && brightness == Brightness.dark
                         ? UpdateCapsule.width
                         : 0,
@@ -418,7 +414,7 @@ void main() {
             find.byKey(const Key('window-caption-controls')),
           );
           expect(header.right, lessThan(captions.left));
-          expect(header.bottom, 65);
+          expect(header.bottom, 63);
         }
         if (name == 'gallery') {
           final container = ProviderScope.containerOf(

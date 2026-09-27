@@ -431,7 +431,7 @@ class _PromptBlockLibraryScreenState
         child: Column(
           children: [
             SizedBox(
-              // 与主工具栏同高（64）垂直居中，两边分隔线/基线对齐。
+              // 与主工具栏同高（62）垂直居中，两边分隔线/基线对齐。
               height: promptBlockLibraryWideHeaderHeight,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),

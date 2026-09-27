@@ -427,7 +427,7 @@ void main() {
         tester
             .getSize(find.byKey(const Key('prompt-block-detail-header')))
             .height,
-        64,
+        62,
       );
       expect(
         find.descendant(
@@ -738,7 +738,7 @@ void main() {
 
     expect(
       tester.getSize(find.byKey(const Key('prompt-block-toolbar'))).height,
-      64,
+      62,
     );
   });
 

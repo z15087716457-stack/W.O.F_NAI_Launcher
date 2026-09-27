@@ -261,8 +261,8 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
         AppRoutes.localGallery ||
         AppRoutes.onlineGallery ||
         AppRoutes.vibeLibrary ||
-        AppRoutes.preciseRefLibrary => 62,
-        AppRoutes.promptBlockLibrary => 64,
+        AppRoutes.preciseRefLibrary ||
+        AppRoutes.promptBlockLibrary => 62,
         _ => 36,
       };
 

@@ -17,7 +17,7 @@ import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
 import '../../../widgets/prompt/blocks/prompt_block_tag_chip.dart';
 import 'atom_list_editor.dart';
 
-const promptBlockLibraryWideHeaderHeight = 64.0;
+const promptBlockLibraryWideHeaderHeight = 62.0;
 
 Future<Size?> _readBlockThumbnailSize(String path) async {
   final file = File(path);

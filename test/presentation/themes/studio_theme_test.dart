@@ -151,6 +151,9 @@ void main() {
               for (final path in [
                 AppRoutes.generation,
                 AppRoutes.localGallery,
+                AppRoutes.onlineGallery,
+                AppRoutes.vibeLibrary,
+                AppRoutes.preciseRefLibrary,
                 AppRoutes.promptBlockLibrary,
               ])
                 StatefulShellBranch(
@@ -244,6 +247,9 @@ void main() {
       for (final path in [
         AppRoutes.generation,
         AppRoutes.localGallery,
+        AppRoutes.onlineGallery,
+        AppRoutes.vibeLibrary,
+        AppRoutes.preciseRefLibrary,
         AppRoutes.promptBlockLibrary,
         AppRoutes.generation,
       ]) {
@@ -258,11 +264,7 @@ void main() {
           tester
               .getSize(find.byKey(const Key('window-caption-controls')))
               .height,
-          path == AppRoutes.localGallery
-              ? 62
-              : path == AppRoutes.promptBlockLibrary
-              ? 64
-              : 36,
+          path == AppRoutes.generation ? 36 : 62,
         );
       }
       final shortcuts = tester.widget<GlobalShortcuts>(
