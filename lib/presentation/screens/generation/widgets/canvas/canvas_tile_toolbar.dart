@@ -21,7 +21,6 @@ import '../../../../widgets/common/image_detail/image_detail_data.dart';
 import 'canvas_feed_layout.dart';
 import 'canvas_display_settings.dart';
 import 'generated_image_actions.dart';
-import '../generation_sidebar_style.dart';
 
 /// 画布工具条分区（官网 md 布局表逐字对码）
 enum CanvasToolbarZone { top, bottomStart, bottomEnd }
@@ -335,7 +334,9 @@ class _IconBtn extends ConsumerWidget {
                 key: ValueKey('canvas-cost-${item.icon}'),
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
-                  color: GenSidebarStyle.selectedSurface(theme),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.6,
+                  ),
                   borderRadius: BorderRadius.circular(3),
                 ),
                 child: Row(
