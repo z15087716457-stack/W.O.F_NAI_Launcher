@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,16 @@ import '../../../../data/repositories/prompt_block_repository.dart';
 import '../../../providers/prompt_block_library_provider.dart';
 
 enum BlockOrganizerPage { favorites, folders, tags }
+
+enum _OrganizerNodeKind { folder, collection }
+
+class _OrganizerNodeDrag {
+  const _OrganizerNodeDrag(this.kind, this.id, this.parentId);
+
+  final _OrganizerNodeKind kind;
+  final String id;
+  final String? parentId;
+}
 
 /// 管理页、生成页和拖放共用的紧凑定位窗。
 Future<void> showBlockOrganizerPopover(
@@ -60,7 +71,11 @@ class _OrganizerPanel extends ConsumerStatefulWidget {
 class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
   final _search = TextEditingController();
   final _name = TextEditingController();
+  final _listScrollController = ScrollController();
+  final _listViewportKey = GlobalKey();
   final Set<String> _expanded = {};
+  Timer? _autoScrollTimer;
+  double _autoScrollStep = 0;
   PromptBlockTransferTarget? _picked;
   bool _creating = false;
   bool _creatingCollectionFolder = false;
@@ -76,8 +91,10 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
 
   @override
   void dispose() {
+    _stopAutoScroll();
     _search.dispose();
     _name.dispose();
+    _listScrollController.dispose();
     super.dispose();
   }
 
@@ -272,12 +289,7 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
     );
   }
 
-  Future<void> _manageFolder(
-    PromptBlockFolder folder,
-    String action,
-    PromptBlockLibraryState state,
-  ) async {
-    final siblings = state.folders.childrenOf(folder.parentId);
+  Future<void> _manageFolder(PromptBlockFolder folder, String action) async {
     if (action == 'rename') {
       final name = await _askName(folder.name);
       if (name != null) {
@@ -290,23 +302,13 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
           mode: PromptBlockFolderDeleteMode.moveContentsToRoot,
         );
       }
-    } else {
-      final ids = siblings.map((item) => item.id).toList();
-      final index = ids.indexOf(folder.id);
-      final next = action == 'up' ? index - 1 : index + 1;
-      if (next < 0 || next >= ids.length) return;
-      final id = ids.removeAt(index);
-      ids.insert(next, id);
-      await _notifier.reorderFolders(folder.parentId, ids);
     }
   }
 
   Future<void> _manageCollection(
     PromptBlockCollection node,
     String action,
-    PromptBlockLibraryState state,
   ) async {
-    final siblings = state.collections.childrenOf(node.parentId);
     if (action == 'rename') {
       final name = await _askName(node.name);
       if (name != null) await _notifier.renameCollection(node.id, name);
@@ -314,15 +316,93 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
       if (await _confirmDelete('删除「${node.name}」？块本体会保留。')) {
         await _notifier.deleteCollection(node.id);
       }
-    } else {
-      final ids = siblings.map((item) => item.id).toList();
-      final index = ids.indexOf(node.id);
-      final next = action == 'up' ? index - 1 : index + 1;
-      if (next < 0 || next >= ids.length) return;
-      final id = ids.removeAt(index);
-      ids.insert(next, id);
-      await _notifier.reorderCollections(node.parentId, ids);
     }
+  }
+
+  Future<void> _reorderNode(
+    _OrganizerNodeDrag source,
+    _OrganizerNodeDrag target,
+  ) async {
+    if (_busy ||
+        source.kind != target.kind ||
+        source.parentId != target.parentId ||
+        source.id == target.id) {
+      return;
+    }
+    final state = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
+    if (state == null) return;
+    final ids = switch (source.kind) {
+      _OrganizerNodeKind.folder =>
+        state.folders
+            .childrenOf(source.parentId)
+            .map((item) => item.id)
+            .toList(),
+      _OrganizerNodeKind.collection =>
+        state.collections
+            .childrenOf(source.parentId)
+            .map((item) => item.id)
+            .toList(),
+    };
+    final from = ids.indexOf(source.id);
+    final to = ids.indexOf(target.id);
+    if (from < 0 || to < 0) return;
+    ids.removeAt(from);
+    final targetIndex = ids.indexOf(target.id);
+    ids.insert(from < to ? targetIndex + 1 : targetIndex, source.id);
+    setState(() => _busy = true);
+    try {
+      switch (source.kind) {
+        case _OrganizerNodeKind.folder:
+          await _notifier.reorderFolders(source.parentId, ids);
+        case _OrganizerNodeKind.collection:
+          await _notifier.reorderCollections(source.parentId, ids);
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$error')));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _updateAutoScroll(Offset globalPosition) {
+    final box = _listViewportKey.currentContext?.findRenderObject();
+    if (box is! RenderBox || !_listScrollController.hasClients) return;
+    final localY = box.globalToLocal(globalPosition).dy;
+    const edge = 28.0;
+    _autoScrollStep = localY < edge
+        ? -6
+        : localY > box.size.height - edge
+        ? 6
+        : 0;
+    if (_autoScrollStep == 0) {
+      _stopAutoScroll();
+    } else {
+      _autoScrollTimer ??= Timer.periodic(const Duration(milliseconds: 16), (
+        _,
+      ) {
+        if (!mounted || !_listScrollController.hasClients) {
+          _stopAutoScroll();
+          return;
+        }
+        final position = _listScrollController.position;
+        _listScrollController.jumpTo(
+          (position.pixels + _autoScrollStep).clamp(
+            position.minScrollExtent,
+            position.maxScrollExtent,
+          ),
+        );
+      });
+    }
+  }
+
+  void _stopAutoScroll() {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = null;
+    _autoScrollStep = 0;
   }
 
   Future<String?> _askName(String oldName) async {
@@ -485,6 +565,8 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                   ),
                   Flexible(
                     child: SingleChildScrollView(
+                      key: _listViewportKey,
+                      controller: _listScrollController,
                       padding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
                       child: state == null
                           ? const Center(child: CircularProgressIndicator())
@@ -691,69 +773,86 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
       ),
     ];
     void visit(String? parentId, int depth) {
-      for (final node in state.collections.childrenOf(parentId)) {
+      final siblings = state.collections.childrenOf(parentId);
+      final siblingIds = siblings.map((node) => node.id).toList();
+      for (final node in siblings) {
         if (!_matches(node.name) && _search.text.isNotEmpty) {
           if (node.isFolder) visit(node.id, depth + 1);
           continue;
         }
         rows.add(
-          _row(
-            node.isFolder
-                ? Icons.folder_outlined
-                : Icons.collections_bookmark_outlined,
-            node.name,
-            indent: depth,
-            selected:
-                !node.isFolder && widget.blockIds.every(node.blockIds.contains),
-            onTap: () {
-              if (node.isFolder) {
-                setState(() {
-                  _picked = PromptBlockTransferTarget(
-                    PromptBlockTransferKind.collection,
-                    node.id,
-                  );
-                  _expanded.add(node.id);
-                });
-              } else if (widget.dropTarget != null) {
-                setState(
-                  () => _picked = PromptBlockTransferTarget(
-                    PromptBlockTransferKind.collection,
-                    node.id,
-                  ),
-                );
-              } else {
-                setState(
-                  () => _picked = PromptBlockTransferTarget(
-                    PromptBlockTransferKind.collection,
-                    node.id,
-                  ),
-                );
-                _toggleCollection(node);
-              }
-            },
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (node.isFolder)
-                  IconButton(
-                    tooltip: _expanded.contains(node.id) ? '收起' : '展开',
-                    icon: Icon(
-                      _expanded.contains(node.id)
-                          ? Icons.expand_less
-                          : Icons.expand_more,
-                      size: 17,
+          _reorderTarget(
+            target: _OrganizerNodeDrag(
+              _OrganizerNodeKind.collection,
+              node.id,
+              parentId,
+            ),
+            siblingIds: siblingIds,
+            child: _row(
+              node.isFolder
+                  ? Icons.folder_outlined
+                  : Icons.collections_bookmark_outlined,
+              node.name,
+              indent: depth,
+              selected:
+                  !node.isFolder &&
+                  widget.blockIds.every(node.blockIds.contains),
+              onTap: () {
+                if (node.isFolder) {
+                  setState(() {
+                    _picked = PromptBlockTransferTarget(
+                      PromptBlockTransferKind.collection,
+                      node.id,
+                    );
+                    _expanded.add(node.id);
+                  });
+                } else if (widget.dropTarget != null) {
+                  setState(
+                    () => _picked = PromptBlockTransferTarget(
+                      PromptBlockTransferKind.collection,
+                      node.id,
                     ),
-                    onPressed: () => setState(() {
-                      if (!_expanded.remove(node.id)) {
-                        _expanded.add(node.id);
-                      }
-                    }),
+                  );
+                } else {
+                  setState(
+                    () => _picked = PromptBlockTransferTarget(
+                      PromptBlockTransferKind.collection,
+                      node.id,
+                    ),
+                  );
+                  _toggleCollection(node);
+                }
+              },
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (node.isFolder)
+                    IconButton(
+                      tooltip: _expanded.contains(node.id) ? '收起' : '展开',
+                      icon: Icon(
+                        _expanded.contains(node.id)
+                            ? Icons.expand_less
+                            : Icons.expand_more,
+                        size: 17,
+                      ),
+                      onPressed: () => setState(() {
+                        if (!_expanded.remove(node.id)) {
+                          _expanded.add(node.id);
+                        }
+                      }),
+                    ),
+                  _nodeActions(
+                    node: _OrganizerNodeDrag(
+                      _OrganizerNodeKind.collection,
+                      node.id,
+                      parentId,
+                    ),
+                    label: node.name,
+                    onRename: () => _manageCollection(node, 'rename'),
+                    onDelete: () => _manageCollection(node, 'delete'),
                   ),
-                _nodeActions(
-                  () => _manageCollection(node, 'rename', state),
-                  (action) => _manageCollection(node, action, state),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -784,44 +883,60 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
       ),
     ];
     void visit(String? parentId, int depth) {
-      for (final folder in state.folders.childrenOf(parentId)) {
+      final siblings = state.folders.childrenOf(parentId);
+      final siblingIds = siblings.map((folder) => folder.id).toList();
+      for (final folder in siblings) {
         if (_matches(folder.name) || _search.text.isEmpty) {
           rows.add(
-            _row(
-              Icons.folder_outlined,
-              folder.name,
-              indent: depth,
-              selected: _picked?.id == folder.id,
-              onTap: () => setState(() {
-                _picked = PromptBlockTransferTarget(
-                  PromptBlockTransferKind.folder,
-                  folder.id,
-                );
-                _expanded.add(folder.id);
-              }),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (state.folders.childrenOf(folder.id).isNotEmpty)
-                    IconButton(
-                      tooltip: _expanded.contains(folder.id) ? '收起' : '展开',
-                      icon: Icon(
-                        _expanded.contains(folder.id)
-                            ? Icons.expand_less
-                            : Icons.expand_more,
-                        size: 17,
+            _reorderTarget(
+              target: _OrganizerNodeDrag(
+                _OrganizerNodeKind.folder,
+                folder.id,
+                parentId,
+              ),
+              siblingIds: siblingIds,
+              child: _row(
+                Icons.folder_outlined,
+                folder.name,
+                indent: depth,
+                selected: _picked?.id == folder.id,
+                onTap: () => setState(() {
+                  _picked = PromptBlockTransferTarget(
+                    PromptBlockTransferKind.folder,
+                    folder.id,
+                  );
+                  _expanded.add(folder.id);
+                }),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (state.folders.childrenOf(folder.id).isNotEmpty)
+                      IconButton(
+                        tooltip: _expanded.contains(folder.id) ? '收起' : '展开',
+                        icon: Icon(
+                          _expanded.contains(folder.id)
+                              ? Icons.expand_less
+                              : Icons.expand_more,
+                          size: 17,
+                        ),
+                        onPressed: () => setState(() {
+                          if (!_expanded.remove(folder.id)) {
+                            _expanded.add(folder.id);
+                          }
+                        }),
                       ),
-                      onPressed: () => setState(() {
-                        if (!_expanded.remove(folder.id)) {
-                          _expanded.add(folder.id);
-                        }
-                      }),
+                    _nodeActions(
+                      node: _OrganizerNodeDrag(
+                        _OrganizerNodeKind.folder,
+                        folder.id,
+                        parentId,
+                      ),
+                      label: folder.name,
+                      onRename: () => _manageFolder(folder, 'rename'),
+                      onDelete: () => _manageFolder(folder, 'delete'),
                     ),
-                  _nodeActions(
-                    () => _manageFolder(folder, 'rename', state),
-                    (action) => _manageFolder(folder, action, state),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -882,19 +997,93 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
     ];
   }
 
-  Widget _nodeActions(VoidCallback rename, ValueChanged<String> action) =>
-      PopupMenuButton<String>(
-        tooltip: '管理',
-        icon: const Icon(Icons.more_horiz, size: 17),
-        padding: EdgeInsets.zero,
-        onSelected: (value) => value == 'rename' ? rename() : action(value),
-        itemBuilder: (_) => const [
-          PopupMenuItem(value: 'rename', child: Text('重命名')),
-          PopupMenuItem(value: 'up', child: Text('上移')),
-          PopupMenuItem(value: 'down', child: Text('下移')),
-          PopupMenuItem(value: 'delete', child: Text('删除')),
+  Widget _nodeActions({
+    required _OrganizerNodeDrag node,
+    required String label,
+    required VoidCallback onRename,
+    required VoidCallback onDelete,
+  }) => Draggable<_OrganizerNodeDrag>(
+    key: ValueKey('organizer-reorder-handle-${node.kind.name}-${node.id}'),
+    data: node,
+    axis: Axis.vertical,
+    rootOverlay: true,
+    maxSimultaneousDrags: _busy ? 0 : 1,
+    onDragUpdate: (details) => _updateAutoScroll(details.globalPosition),
+    onDragEnd: (_) => _stopAutoScroll(),
+    feedback: Material(
+      elevation: 8,
+      borderRadius: BorderRadius.circular(8),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 210),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ),
+      ),
+    ),
+    childWhenDragging: const SizedBox(
+      width: 32,
+      height: 32,
+      child: Icon(Icons.more_horiz, size: 17),
+    ),
+    child: PopupMenuButton<String>(
+      tooltip: '管理；拖动排序',
+      padding: EdgeInsets.zero,
+      onSelected: (value) => value == 'rename' ? onRename() : onDelete(),
+      itemBuilder: (_) => const [
+        PopupMenuItem(value: 'rename', child: Text('重命名')),
+        PopupMenuItem(value: 'delete', child: Text('删除')),
+      ],
+      child: const MouseRegion(
+        cursor: SystemMouseCursors.grab,
+        child: SizedBox(
+          width: 32,
+          height: 32,
+          child: Icon(Icons.more_horiz, size: 17),
+        ),
+      ),
+    ),
+  );
+
+  Widget _reorderTarget({
+    required _OrganizerNodeDrag target,
+    required List<String> siblingIds,
+    required Widget child,
+  }) => DragTarget<_OrganizerNodeDrag>(
+    key: ValueKey('organizer-reorder-target-${target.kind.name}-${target.id}'),
+    onWillAcceptWithDetails: (details) =>
+        details.data.kind == target.kind &&
+        details.data.parentId == target.parentId &&
+        details.data.id != target.id,
+    onAcceptWithDetails: (details) => _reorderNode(details.data, target),
+    builder: (context, candidates, _) {
+      final source = candidates.isEmpty ? null : candidates.first;
+      final sourceIndex = source == null ? -1 : siblingIds.indexOf(source.id);
+      final targetIndex = siblingIds.indexOf(target.id);
+      final fromAbove = sourceIndex >= 0 && sourceIndex < targetIndex;
+      return Stack(
+        children: [
+          child,
+          if (sourceIndex >= 0)
+            Positioned(
+              left: 8,
+              right: 8,
+              top: fromAbove ? null : 0,
+              bottom: fromAbove ? 0 : null,
+              child: IgnorePointer(
+                child: Container(
+                  height: 2,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(1),
+                  ),
+                ),
+              ),
+            ),
         ],
       );
+    },
+  );
 
   Widget _row(
     IconData icon,
