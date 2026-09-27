@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_animated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,7 +64,7 @@ class MainNavRail extends ConsumerWidget {
                   children: [
                     // 创作：主生图、画风探索。
                     _NavIcon(
-                      icon: Icons.brush, // Canvas/Edit
+                      icon: StudioIcons.generation,
                       label: context.l10n.nav_canvas,
                       isSelected: currentIndex == AppBranch.generation.index,
                       onTap: () =>
@@ -135,7 +136,7 @@ class MainNavRail extends ConsumerWidget {
 
                     // 统计独立分组。
                     _NavIcon(
-                      icon: Icons.bar_chart, // Gallery Statistics
+                      icon: StudioIcons.statistics,
                       label: context.l10n.statistics_title,
                       isSelected: currentIndex == AppBranch.statistics.index,
                       onTap: () =>
@@ -162,7 +163,7 @@ class MainNavRail extends ConsumerWidget {
 
             // Bottom Settings（最底，符合主流前端惯例）
             _NavIcon(
-              icon: Icons.settings,
+              icon: StudioIcons.settings,
               label: context.l10n.nav_settings,
               isSelected: currentIndex == AppBranch.settings.index,
               showBadge: showUpdateBadge,
@@ -305,6 +306,7 @@ class _NavIcon extends StatefulWidget {
 
 class _NavIconState extends State<_NavIcon> {
   bool _isPressed = false;
+  int _motionTrigger = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -330,7 +332,10 @@ class _NavIconState extends State<_NavIcon> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: widget.onTap,
+            onTap: () {
+              setState(() => _motionTrigger++);
+              widget.onTap();
+            },
             onTapDown: (_) => setState(() => _isPressed = true),
             onTapUp: (_) => setState(() => _isPressed = false),
             onTapCancel: () => setState(() => _isPressed = false),
@@ -369,7 +374,12 @@ class _NavIconState extends State<_NavIcon> {
                               smallSize: 7,
                               child: widget.customIcon != null
                                   ? widget.customIcon!(resolvedColor)
-                                  : Icon(widget.icon, color: color, size: 24),
+                                  : StudioAnimatedIcon(
+                                      icon: widget.icon!,
+                                      trigger: _motionTrigger,
+                                      color: color,
+                                      size: 24,
+                                    ),
                             ),
                           ),
                         ),

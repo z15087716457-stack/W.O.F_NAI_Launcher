@@ -5,6 +5,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../screens/generation/widgets/generation_sidebar_style.dart';
 import 'studio_glass_surface.dart';
+import 'studio_animated_icon.dart';
+import 'studio_icons.dart';
 
 /// A common collapsible panel with optional background image support.
 ///
@@ -15,6 +17,7 @@ class CollapsibleImagePanel extends StatelessWidget {
   final String? subtitle;
   final IconData? icon;
   final String? iconAsset;
+  final int iconTrigger;
   final bool isExpanded;
   final VoidCallback onToggle;
   final Widget? backgroundImage;
@@ -31,6 +34,7 @@ class CollapsibleImagePanel extends StatelessWidget {
     this.subtitle,
     this.icon,
     this.iconAsset,
+    this.iconTrigger = 0,
     required this.isExpanded,
     required this.onToggle,
     this.backgroundImage,
@@ -216,6 +220,15 @@ class CollapsibleImagePanel extends StatelessWidget {
         ? theme.colorScheme.primary
         : theme.colorScheme.onSurface.withValues(alpha: 0.85);
 
+    final featureIcon = icon;
+    if (featureIcon != null && StudioIcons.supportsMotion(featureIcon)) {
+      return StudioAnimatedIcon(
+        icon: featureIcon,
+        trigger: iconTrigger,
+        size: 22,
+        color: color,
+      );
+    }
     final asset = iconAsset;
     if (asset != null) {
       return SvgPicture.asset(

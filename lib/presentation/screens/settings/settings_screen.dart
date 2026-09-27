@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -264,7 +265,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.settings,
+                      StudioIcons.settings,
                       size: 48,
                       color: theme.colorScheme.primary,
                     ),

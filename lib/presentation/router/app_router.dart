@@ -521,8 +521,8 @@ class MobileShell extends ConsumerWidget {
         onDestinationSelected: (index) => _onNavigate(index),
         destinations: [
           NavigationDestination(
-            icon: const Icon(Icons.auto_awesome_outlined),
-            selectedIcon: const Icon(Icons.auto_awesome),
+            icon: const Icon(StudioIcons.generation),
+            selectedIcon: const Icon(StudioIcons.generation),
             label: context.l10n.nav_generate,
           ),
           NavigationDestination(
@@ -534,12 +534,12 @@ class MobileShell extends ConsumerWidget {
             icon: Badge(
               isLabelVisible: showUpdateBadge,
               smallSize: 7,
-              child: const Icon(Icons.settings_outlined),
+              child: const Icon(StudioIcons.settings),
             ),
             selectedIcon: Badge(
               isLabelVisible: showUpdateBadge,
               smallSize: 7,
-              child: const Icon(Icons.settings),
+              child: const Icon(StudioIcons.settings),
             ),
             label: context.l10n.nav_settings,
           ),

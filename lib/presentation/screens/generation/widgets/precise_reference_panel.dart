@@ -56,6 +56,7 @@ class PreciseReferencePanel extends ConsumerStatefulWidget {
 
 class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
   bool _isExpanded = false;
+  int _headerIconTrigger = 0;
   bool _isFileDraggingOver = false;
   bool _isProcessingDroppedFiles = false;
 
@@ -94,7 +95,11 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
       icon: StudioIcons.preciseReference,
       iconAsset: 'assets/icons/nai-icon-precise-reference.svg',
       isExpanded: _isExpanded,
-      onToggle: () => setState(() => _isExpanded = !_isExpanded),
+      iconTrigger: _headerIconTrigger,
+      onToggle: () => setState(() {
+        _headerIconTrigger++;
+        _isExpanded = !_isExpanded;
+      }),
       hasData: hasReferences,
       headerActions: _buildHeaderActions(
         theme,

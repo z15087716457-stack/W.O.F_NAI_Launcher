@@ -10,9 +10,11 @@
 
 `StudioTypography` 负责正文、控件与等宽数据字体，应用统一使用 Geist 深浅两套主题，共用离线 Geist / HarmonyOS 字体。显式系统 / Google 字体选择仍有效，旧默认键 `system`、空键使用应用默认组合。只有标题栏 NAI Studio 使用旧版普通字体和黄色双下划线，不采用像素体；黄线是显式样式，不依赖上层 Material 缺省样式。字体许可在 `assets/licenses/` 和应用「关于 → 界面字体与许可」。
 
-功能图标统一使用 `lib/presentation/widgets/common/studio_icons.dart` 的 `StudioIcons`：画风探索为遗传分支，块内遗传动作为双螺旋，在线画廊为图片＋地球，提示词块为模块网格，精准参考为人物叠卡，Vibe 为图片到笔触的传递。本地画廊沿用原在线画廊的 Material 叠图符号。侧栏、标题、块默认图标、菜单和参考面板复用同一造型；网格布局、通用文件夹、保存动作与用户自选块图标保持各自语义。
+功能图标统一使用 `lib/presentation/widgets/common/studio_icons.dart` 的 `StudioIcons`：画风探索为遗传分支，块内遗传动作为双螺旋，在线画廊为图片＋地球，提示词块为模块网格，精准参考为人物叠卡，Vibe 为方形叠卡与弯箭头；生图为画布与画笔，本地画廊为图片文件夹，统计为三级圆角柱，设置为六齿圆角齿轮。侧栏、标题、块默认图标、菜单和参考面板复用同一造型；网格布局、通用文件夹、保存动作与用户自选块图标保持各自语义。
 
-SVG 母版在 `tool/branding/studio_icons/`；`generate_studio_icons.py` 将描边转轮廓生成 `assets/fonts/StudioIcons.ttf`，并同步精准参考 / Vibe 两份已有 SVG 资源。Flutter 原生 `IconData` 与 SVG 消费者因此保持一致，无额外运行时依赖。复建命令见脚本开头，码位只追加、不重排；母版修改后必须重新生成字体和两份 SVG。矢量图标按主题继承颜色与尺寸，不能把预览图切成位图用于控件。
+SVG 母版在 `tool/branding/studio_icons/`；`generate_studio_icons.py` 将描边转轮廓生成 `assets/fonts/StudioIcons.ttf`，并同步精准参考 / Vibe 两份已有 SVG 资源及原生动画路径 `studio_icon_paths.dart`。Flutter 原生 `IconData` 与 SVG 消费者因此保持一致，无额外运行时依赖。复建命令见脚本开头，码位只追加、不重排；母版修改后必须重新生成字体、两份 SVG 和 Dart 路径，再运行 Dart 格式化。矢量图标按主题继承颜色与尺寸，不能把预览图切成位图用于控件。
+
+`StudioAnimatedIcon` 复用同源矢量路径，十种语义分别设计一次性点击动作（500–600ms），主导航、块库面板按钮、遗传按钮和参考面板展开共用。点击立即执行原操作；连续点击不重启或排队，悬停不自动播放，空闲返回普通 `Icon`。系统减少动画或页面 TickerMode 关闭时停止并回到静态。非操作性标题和块标记只显示图标。`studio_animated_icon_test.dart` 覆盖生命周期、连续触发、减少动画、隐藏页、首尾轮廓和画布边界；`CAPTURE_STUDIO_ICON_MOTION=1` 可输出实际字体与动画关键帧的深浅色对照。
 
 左侧主导航按用途分三组：生图 / 画风探索；本地图库 / 在线画廊 / 提示词块 / Vibe 库 / 精准参考库；统计。组间使用中性细线与留白，收起和展开状态共用分组顺序；设置与账户等底部操作保持固定。导航显示顺序独立于路由分支和快捷键映射。
 

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_animated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
@@ -8,11 +9,20 @@ import '../../providers/layout_state_provider.dart';
 /// 块库面板开关按钮（生成页提示词顶栏）。
 ///
 /// 切换页面级右侧块库 dock（[BlockLibraryPanelSlot]），选中态高亮。
-class BlockLibraryPanelToggleButton extends ConsumerWidget {
+class BlockLibraryPanelToggleButton extends ConsumerStatefulWidget {
   const BlockLibraryPanelToggleButton({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BlockLibraryPanelToggleButton> createState() =>
+      _BlockLibraryPanelToggleButtonState();
+}
+
+class _BlockLibraryPanelToggleButtonState
+    extends ConsumerState<BlockLibraryPanelToggleButton> {
+  int _motionTrigger = 0;
+
+  @override
+  Widget build(BuildContext context) {
     final expanded = ref.watch(
       layoutStateNotifierProvider.select((s) => s.blockLibraryPanelExpanded),
     );
@@ -33,10 +43,16 @@ class BlockLibraryPanelToggleButton extends ConsumerWidget {
               ? theme.colorScheme.onPrimaryContainer
               : theme.colorScheme.onSurfaceVariant,
         ),
-        onPressed: () => ref
-            .read(layoutStateNotifierProvider.notifier)
-            .toggleBlockLibraryPanel(),
-        icon: const Icon(StudioIcons.promptBlocks),
+        onPressed: () {
+          setState(() => _motionTrigger++);
+          ref
+              .read(layoutStateNotifierProvider.notifier)
+              .toggleBlockLibraryPanel();
+        },
+        icon: StudioAnimatedIcon(
+          icon: StudioIcons.promptBlocks,
+          trigger: _motionTrigger,
+        ),
       ),
     );
   }

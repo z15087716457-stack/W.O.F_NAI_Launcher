@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M5 3H8Q9.5 3 9.5 4.5V7.5Q9.5 9 8 9H5Q3.5 9 3.5 7.5V4.5Q3.5 3 5 3Z M16 3H19Q20.5 3 20.5 4.5V7.5Q20.5 9 19 9H16Q14.5 9 14.5 7.5V4.5Q14.5 3 16 3Z M10.5 15H13.5Q15 15 15 16.5V19.5Q15 21 13.5 21H10.5Q9 21 9 19.5V16.5Q9 15 10.5 15Z"/>
-  <path d="M6.5 9C6.5 13 12 11 12 15 M17.5 9C17.5 13 12 11 12 15"/>
+  <path id="left" d="M5 3H8Q9.5 3 9.5 4.5V7.5Q9.5 9 8 9H5Q3.5 9 3.5 7.5V4.5Q3.5 3 5 3Z"/>
+  <path id="right" d="M16 3H19Q20.5 3 20.5 4.5V7.5Q20.5 9 19 9H16Q14.5 9 14.5 7.5V4.5Q14.5 3 16 3Z"/>
+  <path id="child" d="M10.5 15H13.5Q15 15 15 16.5V19.5Q15 21 13.5 21H10.5Q9 21 9 19.5V16.5Q9 15 10.5 15Z"/>
+  <path id="branches" d="M6.5 9C6.5 13 12 11 12 15 M17.5 9C17.5 13 12 11 12 15"/>
 </svg>

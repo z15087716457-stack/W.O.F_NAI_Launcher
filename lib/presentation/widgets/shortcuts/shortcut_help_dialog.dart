@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -168,7 +169,7 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
                         }
                       });
                     },
-                    icon: const Icon(Icons.settings, size: 16),
+                    icon: const Icon(StudioIcons.settings, size: 16),
                     label: Text(context.l10n.shortcuts_customize),
                   ),
                 ],

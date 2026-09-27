@@ -12,6 +12,13 @@ abstract final class StudioIcons {
   static const preciseReference = IconData(0xe904, fontFamily: _family);
   static const vibeLibrary = IconData(0xe905, fontFamily: _family);
 
-  // The former online-gallery symbol now identifies the local image library.
-  static const localGallery = Icons.photo_library;
+  static const generation = IconData(0xe906, fontFamily: _family);
+  static const localGallery = IconData(0xe907, fontFamily: _family);
+  static const statistics = IconData(0xe908, fontFamily: _family);
+  static const settings = IconData(0xe909, fontFamily: _family);
+
+  static bool supportsMotion(IconData icon) =>
+      icon.fontFamily == _family &&
+      icon.codePoint >= 0xe900 &&
+      icon.codePoint <= 0xe909;
 }

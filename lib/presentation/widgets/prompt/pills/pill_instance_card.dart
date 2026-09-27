@@ -49,6 +49,7 @@ class PillInstanceCard extends ConsumerStatefulWidget {
 
 class _PillInstanceCardState extends ConsumerState<PillInstanceCard> {
   int _tab = 0;
+  int _inheritMotion = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -222,6 +223,7 @@ class _PillInstanceCardState extends ConsumerState<PillInstanceCard> {
                         visualDensity: VisualDensity.compact,
                         key: const Key('pill-evolution-toggle'),
                         icon: DnaIcon(
+                          trigger: _inheritMotion,
                           size: 18,
                           color: instance.enabled
                               ? theme.colorScheme.primary
@@ -231,7 +233,10 @@ class _PillInstanceCardState extends ConsumerState<PillInstanceCard> {
                         ),
                         tooltip: evolutionTooltip,
                         onPressed: instance.enabled
-                            ? () => workspaceNotifier.toggleEvolution(marker)
+                            ? () {
+                                setState(() => _inheritMotion++);
+                                workspaceNotifier.toggleEvolution(marker);
+                              }
                             : null,
                       );
                     },

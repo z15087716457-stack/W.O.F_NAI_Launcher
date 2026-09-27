@@ -52,6 +52,7 @@ class UnifiedReferencePanel extends ConsumerStatefulWidget {
 
 class _UnifiedReferencePanelState extends ConsumerState<UnifiedReferencePanel> {
   bool _isExpanded = false;
+  int _headerIconTrigger = 0;
   bool _isRecentCollapsed = true;
   List<VibeLibraryEntry> _recentEntries = [];
 
@@ -349,7 +350,11 @@ class _UnifiedReferencePanelState extends ConsumerState<UnifiedReferencePanel> {
       icon: StudioIcons.vibeLibrary,
       iconAsset: 'assets/icons/nai-icon-vibe-transfer.svg',
       isExpanded: _isExpanded,
-      onToggle: () => setState(() => _isExpanded = !_isExpanded),
+      iconTrigger: _headerIconTrigger,
+      onToggle: () => setState(() {
+        _headerIconTrigger++;
+        _isExpanded = !_isExpanded;
+      }),
       hasData: hasVibes,
       backgroundImage: _buildBackgroundImage(vibes),
       headerActions: hasVibes

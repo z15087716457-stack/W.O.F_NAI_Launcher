@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_animated_icon.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -70,7 +72,7 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const Key('main-nav-primary-scroll')), findsOneWidget);
-    expect(find.byIcon(Icons.settings), findsOneWidget);
+    expect(find.byIcon(StudioIcons.settings), findsOneWidget);
     // 画风探索使用遗传分支，块内遗传操作另用双螺旋。
     expect(find.byIcon(StudioIcons.styleExplore), findsOneWidget);
     expect(find.byIcon(Icons.biotech), findsNothing);
@@ -81,18 +83,21 @@ void main() {
       tester.widget<Icon>(find.byIcon(StudioIcons.styleExplore)).color,
       primary,
     );
-    expect(tester.widget<Icon>(find.byIcon(Icons.brush)).color, isNot(primary));
+    expect(
+      tester.widget<Icon>(find.byIcon(StudioIcons.generation)).color,
+      isNot(primary),
+    );
 
     // 分组只改变显示顺序，不能改变对应的路由与选中态。
     final destinations = <(Finder, AppBranch)>[
-      (find.byIcon(Icons.brush), AppBranch.generation),
+      (find.byIcon(StudioIcons.generation), AppBranch.generation),
       (find.byIcon(StudioIcons.styleExplore), AppBranch.styleExplore),
       (find.byIcon(StudioIcons.localGallery), AppBranch.localGallery),
       (find.byIcon(StudioIcons.onlineGallery), AppBranch.onlineGallery),
       (find.byIcon(StudioIcons.promptBlocks), AppBranch.promptBlockLibrary),
       (find.byIcon(StudioIcons.vibeLibrary), AppBranch.vibeLibrary),
       (find.byIcon(StudioIcons.preciseReference), AppBranch.preciseRefLibrary),
-      (find.byIcon(Icons.bar_chart), AppBranch.statistics),
+      (find.byIcon(StudioIcons.statistics), AppBranch.statistics),
     ];
     for (var i = 1; i < destinations.length; i++) {
       expect(
@@ -126,7 +131,7 @@ void main() {
     );
     expect(
       tester.getCenter(find.byIcon(Icons.person)).dy,
-      lessThan(tester.getCenter(find.byIcon(Icons.settings)).dy),
+      lessThan(tester.getCenter(find.byIcon(StudioIcons.settings)).dy),
     );
     expect(
       tester.getSize(find.byKey(const Key('main-nav-rail'))).width,
@@ -150,12 +155,31 @@ void main() {
     expect(find.text('收起侧边栏'), findsOneWidget);
     expect(find.byIcon(Icons.keyboard_double_arrow_left), findsOneWidget);
 
-    for (final (finder, branch) in destinations) {
+    for (final (finder, branch) in [
+      ...destinations,
+      (find.byIcon(StudioIcons.settings), AppBranch.settings),
+    ]) {
       await tester.ensureVisible(finder);
       await tester.pumpAndSettle();
       await tester.tap(finder);
       verify(() => navigationShell.goBranch(branch.index)).called(1);
+      await tester.pump();
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is CustomPaint && widget.painter is StudioIconPainter,
+        ),
+        findsOneWidget,
+      );
+      await tester.pumpAndSettle();
     }
+
+    // Focus the actual settings button, then activate with the keyboard.
+    Focus.of(tester.element(find.byIcon(StudioIcons.settings))).requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    verify(() => navigationShell.goBranch(AppBranch.settings.index)).called(1);
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('main-nav-toggle')));
     await tester.pumpAndSettle();
