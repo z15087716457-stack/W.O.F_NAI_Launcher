@@ -853,8 +853,8 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
 
-    // 单块导出按钮随列表项渲染(点击会拉起原生保存对话框,测试只验存在)。
-    expect(find.byIcon(Icons.file_upload_outlined), findsOneWidget);
+    // 单块分类入口保留在卡片操作栏，库备份导出仍在顶部菜单。
+    expect(find.byIcon(Icons.sell_outlined), findsOneWidget);
   });
 
   PromptBlockFolder makeFolder(
@@ -1152,7 +1152,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
-    final menu = find.byKey(const Key('prompt-block-favorite-menu'));
+    final menu = find.byKey(const Key('prompt-block-organizer-popover'));
     // 菜单含收藏开关行 + 收藏集勾选行（侧栏同名行需排除）
     expect(
       find.descendant(of: menu, matching: find.text('收藏')),

@@ -7,6 +7,7 @@ import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../../data/models/prompt_block/prompt_block_collection.dart';
 import '../../../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../../widgets/prompt/blocks/prompt_block_drag_data.dart';
+import '../../../providers/prompt_block_library_provider.dart';
 
 /// 块库侧栏：上区 = 固定行（全部块/根目录/收藏）+ 收藏集树（独立滚动），
 /// 下区 = 普通文件夹树（独立滚动），中间手柄可上下拖动调高度并持久化。
@@ -43,6 +44,7 @@ class PromptBlockFolderTree extends StatefulWidget {
     this.onReorderCollections,
     this.onAddBlockToCollection,
     this.onDropBlockOnFavorites,
+    this.onDropBlocks,
   });
 
   final List<PromptBlock> blocks;
@@ -82,6 +84,14 @@ class PromptBlockFolderTree extends StatefulWidget {
 
   /// 块拖到「收藏」行 = 标记收藏。
   final ValueChanged<String>? onDropBlockOnFavorites;
+
+  /// 释放后由宿主在光标处提供复制 / 移动选项。
+  final void Function(
+    PromptBlockDragData data,
+    PromptBlockTransferTarget target,
+    Offset offset,
+  )?
+  onDropBlocks;
 
   @override
   State<PromptBlockFolderTree> createState() => _PromptBlockFolderTreeState();
@@ -232,14 +242,18 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
           onTap: widget.onSelectAll,
         ),
       ),
-      _buildSpecialItem(
-        context,
+      _blockDropTarget(
         theme,
-        icon: Icons.folder_outlined,
-        label: context.l10n.promptBlockLibrary_rootFolder,
-        count: widget.blocks.where((block) => block.folderId == null).length,
-        selected: widget.rootSelected,
-        onTap: widget.onSelectRoot,
+        const PromptBlockTransferTarget(PromptBlockTransferKind.folder),
+        _buildSpecialItem(
+          context,
+          theme,
+          icon: Icons.folder_outlined,
+          label: context.l10n.promptBlockLibrary_rootFolder,
+          count: widget.blocks.where((block) => block.folderId == null).length,
+          selected: widget.rootSelected,
+          onTap: widget.onSelectRoot,
+        ),
       ),
       _buildFavoritesRow(context, theme),
     ];
@@ -293,12 +307,11 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
     );
 
     final baseRow = row;
-    row = DragTarget<PromptBlockDragData>(
-      onWillAcceptWithDetails: (_) => widget.onDropBlockOnFavorites != null,
-      onAcceptWithDetails: (details) =>
-          widget.onDropBlockOnFavorites?.call(details.data.blockId),
-      builder: (context, candidateData, rejectedData) =>
-          _dropHighlight(theme, baseRow, candidateData.isNotEmpty),
+    row = _blockDropTarget(
+      theme,
+      const PromptBlockTransferTarget(PromptBlockTransferKind.favorites),
+      baseRow,
+      fallback: (id) => widget.onDropBlockOnFavorites?.call(id),
     );
     final wrappedRow = row;
     row = DragTarget<PromptBlockCollection>(
@@ -363,6 +376,28 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: child,
+    );
+  }
+
+  Widget _blockDropTarget(
+    ThemeData theme,
+    PromptBlockTransferTarget target,
+    Widget child, {
+    ValueChanged<String>? fallback,
+  }) {
+    return DragTarget<PromptBlockDragData>(
+      onWillAcceptWithDetails: (_) =>
+          widget.onDropBlocks != null || fallback != null,
+      onAcceptWithDetails: (details) {
+        HapticFeedback.mediumImpact();
+        if (widget.onDropBlocks != null) {
+          widget.onDropBlocks!(details.data, target, details.offset);
+        } else {
+          fallback?.call(details.data.blockId);
+        }
+      },
+      builder: (context, candidateData, rejectedData) =>
+          _dropHighlight(theme, child, candidateData.isNotEmpty),
     );
   }
 
@@ -617,16 +652,11 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
 
     // 接收拖入的块：追加为该收藏集成员（顺带自动收藏）。
     final collectionRow = row;
-    row = DragTarget<PromptBlockDragData>(
-      onWillAcceptWithDetails: (details) =>
-          widget.onAddBlockToCollection != null &&
-          !node.blockIds.contains(details.data.blockId),
-      onAcceptWithDetails: (details) {
-        HapticFeedback.mediumImpact();
-        widget.onAddBlockToCollection?.call(node.id, details.data.blockId);
-      },
-      builder: (context, candidateData, rejectedData) =>
-          _dropHighlight(theme, collectionRow, candidateData.isNotEmpty),
+    row = _blockDropTarget(
+      theme,
+      PromptBlockTransferTarget(PromptBlockTransferKind.collection, node.id),
+      collectionRow,
+      fallback: (id) => widget.onAddBlockToCollection?.call(node.id, id),
     );
 
     return Draggable<PromptBlockCollection>(
@@ -840,31 +870,35 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _FolderTreeRow(
-          icon: hasChildren
-              ? (isExpanded ? Icons.folder_open : Icons.folder)
-              : Icons.folder_outlined,
-          label: label,
-          count: count,
-          selected: widget.selectedFolderId == folder.id,
-          indent: depth,
-          hasChildren: hasChildren,
-          expanded: isExpanded,
-          reorderIndex: reorderIndex,
-          onTap: () => widget.onSelectFolder(folder.id),
-          onToggleExpanded: hasChildren
-              ? () {
-                  setState(() {
-                    if (isExpanded) {
-                      _expandedIds.remove(folder.id);
-                    } else {
-                      _expandedIds.add(folder.id);
-                    }
-                  });
-                }
-              : null,
-          onSecondaryTapUp: (details) =>
-              _showFolderMenu(folder, details.globalPosition),
+        _blockDropTarget(
+          theme,
+          PromptBlockTransferTarget(PromptBlockTransferKind.folder, folder.id),
+          _FolderTreeRow(
+            icon: hasChildren
+                ? (isExpanded ? Icons.folder_open : Icons.folder)
+                : Icons.folder_outlined,
+            label: label,
+            count: count,
+            selected: widget.selectedFolderId == folder.id,
+            indent: depth,
+            hasChildren: hasChildren,
+            expanded: isExpanded,
+            reorderIndex: reorderIndex,
+            onTap: () => widget.onSelectFolder(folder.id),
+            onToggleExpanded: hasChildren
+                ? () {
+                    setState(() {
+                      if (isExpanded) {
+                        _expandedIds.remove(folder.id);
+                      } else {
+                        _expandedIds.add(folder.id);
+                      }
+                    });
+                  }
+                : null,
+            onSecondaryTapUp: (details) =>
+                _showFolderMenu(folder, details.globalPosition),
+          ),
         ),
         if (hasChildren && isExpanded)
           _buildFolderList(

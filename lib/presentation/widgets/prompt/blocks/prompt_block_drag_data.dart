@@ -6,9 +6,19 @@ class PromptBlockDragData {
     required this.blockId,
     this.instanceMarker,
     this.paletteIndex,
+    this.blockIds,
+    this.sourceCollectionId,
+    this.sourceFavorites = false,
   });
 
   final String blockId;
+
+  /// 管理页批量拖动使用；生成提示词的落点仍只取 blockId。
+  final List<String>? blockIds;
+  final String? sourceCollectionId;
+  final bool sourceFavorites;
+
+  List<String> get transferIds => blockIds ?? [blockId];
 
   /// 药丸编辑器专用：文内拖动时已存在实例的定位信息。
   /// null 表示从块库拖入的新块。

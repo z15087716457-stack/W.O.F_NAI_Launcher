@@ -8,7 +8,7 @@ import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
 
-enum _PromptBlockCardAction { favorite, copy, export, edit, delete }
+enum _PromptBlockCardAction { favorite, copy, addTag, edit, delete }
 
 class PromptBlockCard extends StatelessWidget {
   const PromptBlockCard({
@@ -20,7 +20,7 @@ class PromptBlockCard extends StatelessWidget {
     required this.onEdit,
     required this.onCopy,
     required this.onDelete,
-    this.onExport,
+    this.onAddTag,
     this.onToggleFavorite,
     this.selected = false,
     this.multiSelected = false,
@@ -34,7 +34,7 @@ class PromptBlockCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onCopy;
   final VoidCallback onDelete;
-  final VoidCallback? onExport;
+  final ValueChanged<Offset>? onAddTag;
 
   /// ★ 收藏入口：回调收到按钮的全局锚点，宿主据此弹出收藏菜单。
   final ValueChanged<Offset>? onToggleFavorite;
@@ -203,12 +203,14 @@ class PromptBlockCard extends StatelessWidget {
               ),
             ),
           ),
-        if (onExport != null)
-          IconButton(
-            tooltip: context.l10n.promptBlockLibrary_exportBlockAsTxt,
-            visualDensity: VisualDensity.compact,
-            onPressed: onExport,
-            icon: const Icon(Icons.file_upload_outlined, size: 18),
+        if (onAddTag != null)
+          Builder(
+            builder: (buttonContext) => IconButton(
+              tooltip: '添加标签',
+              visualDensity: VisualDensity.compact,
+              onPressed: () => onAddTag?.call(_anchorOf(buttonContext)),
+              icon: const Icon(Icons.sell_outlined, size: 18),
+            ),
           ),
         IconButton(
           tooltip: context.l10n.common_copy,
@@ -263,8 +265,8 @@ class PromptBlockCard extends StatelessWidget {
               onToggleFavorite?.call(_anchorOf(menuContext));
             case _PromptBlockCardAction.copy:
               _copyContent();
-            case _PromptBlockCardAction.export:
-              onExport?.call();
+            case _PromptBlockCardAction.addTag:
+              onAddTag?.call(_anchorOf(menuContext));
             case _PromptBlockCardAction.edit:
               onEdit();
             case _PromptBlockCardAction.delete:
@@ -285,10 +287,10 @@ class PromptBlockCard extends StatelessWidget {
             value: _PromptBlockCardAction.copy,
             child: Text(context.l10n.common_copy),
           ),
-          if (onExport != null)
-            PopupMenuItem(
-              value: _PromptBlockCardAction.export,
-              child: Text(context.l10n.promptBlockLibrary_exportBlockAsTxt),
+          if (onAddTag != null)
+            const PopupMenuItem(
+              value: _PromptBlockCardAction.addTag,
+              child: Text('添加标签'),
             ),
           PopupMenuItem(
             value: _PromptBlockCardAction.edit,

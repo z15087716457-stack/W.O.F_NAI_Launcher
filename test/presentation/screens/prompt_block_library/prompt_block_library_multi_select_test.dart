@@ -57,6 +57,21 @@ class _RecordingFakeNotifier extends PromptBlockLibraryNotifier {
   }
 
   @override
+  Future<void> transferBlocks(
+    List<String> ids,
+    PromptBlockTransferTarget target,
+    PromptBlockTransferMode mode, {
+    String? sourceCollectionId,
+    bool sourceFavorites = false,
+    bool replaceConflicts = false,
+  }) async {
+    if (target.kind == PromptBlockTransferKind.folder &&
+        mode == PromptBlockTransferMode.move) {
+      await moveBlocks(ids, target.id);
+    }
+  }
+
+  @override
   Future<void> setFavorite(List<String> blockIds, bool favorite) async {
     favoriteBatches.add((List.of(blockIds), favorite));
     final current = state.valueOrNull ?? initialState;
@@ -208,7 +223,7 @@ void main() {
 
     expect(find.text('多选'), findsOneWidget);
     expect(find.text('移动到…'), findsOneWidget);
-    expect(find.text('导出为 TXT'), findsOneWidget);
+    expect(find.text('添加标签'), findsOneWidget);
     expect(find.text('删除'), findsOneWidget);
 
     // 菜单项「多选」进入多选模式并选中该块。
@@ -321,10 +336,13 @@ void main() {
     await tester.tap(find.text('移动 2 个块到…'));
     await tester.pumpAndSettle();
 
-    expect(find.text('移动到文件夹'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('prompt-block-move-folder-root')));
+    expect(
+      find.byKey(const Key('prompt-block-organizer-popover')),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('根目录 / 未分类').last);
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, '确定'));
+    await tester.tap(find.widgetWithText(FilledButton, '移动'));
     await tester.pumpAndSettle();
     // 推过 toast 的 3 秒自动消失 timer，避免测试结束时 Timer pending。
     await tester.pump(const Duration(seconds: 4));
@@ -332,6 +350,45 @@ void main() {
     expect(notifier.movedBatches.length, 1);
     expect(notifier.movedBatches.first.$1.toSet(), {'a', 'b'});
     expect(notifier.movedBatches.first.$2, isNull);
+  });
+
+  testWidgets('dragging a selected group onto a folder offers copy or move', (
+    tester,
+  ) async {
+    final notifier = _RecordingFakeNotifier(
+      initialState: PromptBlockLibraryState(
+        blocks: [makeBlock('a', '块A', 'a'), makeBlock('b', '块B', 'b')],
+        folders: [PromptBlockFolder.create(id: 'f1', name: '目标夹')],
+      ),
+    );
+    await pumpScreen(tester, buildScreen(notifier: notifier));
+    await ctrlTap(
+      tester,
+      find.byKey(const ValueKey('prompt-block-card-body-a')),
+    );
+    await ctrlTap(
+      tester,
+      find.byKey(const ValueKey('prompt-block-card-body-b')),
+    );
+
+    final from = tester.getCenter(
+      find.byKey(const ValueKey('prompt-block-card-body-a')),
+    );
+    final to = tester.getCenter(find.text('目标夹').first);
+    final drag = await tester.startGesture(from);
+    await drag.moveTo(to);
+    await tester.pump(const Duration(milliseconds: 180));
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('prompt-block-organizer-popover')),
+      findsOneWidget,
+    );
+    await tester.tap(find.widgetWithText(FilledButton, '移动'));
+    await tester.pumpAndSettle();
+    expect(notifier.movedBatches.single.$1.toSet(), {'a', 'b'});
+    expect(notifier.movedBatches.single.$2, 'f1');
   });
 
   testWidgets('multi-select mode disables list reorder handles', (
@@ -464,6 +521,7 @@ void main() {
       tester,
       find.byKey(const ValueKey('prompt-block-card-body-b')),
     );
-    expect(find.text('已选 1 项'), findsNWidgets(2));
+    expect(find.text('已选 1 项'), findsOneWidget);
+    expect(find.textContaining('拖动已选块到左侧'), findsOneWidget);
   });
 }

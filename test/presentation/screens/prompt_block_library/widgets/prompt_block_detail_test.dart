@@ -497,7 +497,7 @@ void main() {
       var edited = false;
       var copied = false;
       var deleted = false;
-      var exported = false;
+      var tagged = false;
       var favorited = false;
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
@@ -515,7 +515,7 @@ void main() {
               onEdit: () => edited = true,
               onToggleFavorite: (_) => favorited = true,
               onCopy: () => copied = true,
-              onExport: () => exported = true,
+              onAddTag: (_) => tagged = true,
               onDelete: () => deleted = true,
               onCollapse: () {},
             ),
@@ -552,10 +552,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       expect(copied, isTrue);
 
-      await tester.ensureVisible(find.text('导出为 TXT'));
+      await tester.ensureVisible(find.text('添加标签'));
       await tester.pump();
-      await tester.tap(find.text('导出为 TXT'));
-      expect(exported, isTrue);
+      await tester.tap(find.text('添加标签'));
+      expect(tagged, isTrue);
 
       await tester.ensureVisible(find.text('删除'));
       await tester.pump();
@@ -574,7 +574,7 @@ void main() {
               onEdit: () {},
               onToggleFavorite: (_) {},
               onCopy: () {},
-              onExport: () {},
+              onAddTag: (_) {},
               onDelete: () {},
               onCollapse: () {},
             ),

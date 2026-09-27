@@ -1,6 +1,8 @@
 import 'package:collection/collection.dart';
+import 'dart:io';
 import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../core/storage/local_storage_service.dart';
 import '../../core/storage/prompt_block_storage.dart';
@@ -14,6 +16,16 @@ import '../../data/services/fixed_tag_migration_service.dart';
 import '../../data/services/tag_library_migration_service.dart';
 
 part 'prompt_block_library_provider.g.dart';
+
+enum PromptBlockTransferKind { folder, favorites, collection }
+
+class PromptBlockTransferTarget {
+  const PromptBlockTransferTarget(this.kind, [this.id]);
+  final PromptBlockTransferKind kind;
+  final String? id;
+}
+
+enum PromptBlockTransferMode { copy, move }
 
 /// 块库页面和后续 Prompt 工作区共用的只读状态快照。
 class PromptBlockLibraryState {
@@ -360,6 +372,214 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
       state = AsyncData(_toState(await repository.load()));
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 目标中同源实体的数量。替换前由界面明确征求确认。
+  int transferConflictCount(
+    List<String> ids,
+    PromptBlockTransferTarget target,
+  ) {
+    final current = state.valueOrNull;
+    if (current == null) return 0;
+    final destination = _blocksInTransferTarget(current, target);
+    return ids.where((id) {
+      final source = current.blockById(id);
+      return source != null &&
+          destination.any(
+            (item) =>
+                item.id != source.id && item.lineageKey == source.lineageKey,
+          );
+    }).length;
+  }
+
+  List<PromptBlock> _blocksInTransferTarget(
+    PromptBlockLibraryState current,
+    PromptBlockTransferTarget target,
+  ) => switch (target.kind) {
+    PromptBlockTransferKind.folder =>
+      current.blocks.where((block) => block.folderId == target.id).toList(),
+    PromptBlockTransferKind.favorites => current.favoriteBlocks,
+    PromptBlockTransferKind.collection =>
+      current.blocks
+          .where(
+            (block) =>
+                current
+                    .collectionById(target.id ?? '')
+                    ?.blockIds
+                    .contains(block.id) ??
+                false,
+          )
+          .toList(),
+  };
+
+  /// 复制创建独立实体；移动保留原 ID。替换保留目标 ID，使目标已有引用稳定。
+  Future<void> transferBlocks(
+    List<String> ids,
+    PromptBlockTransferTarget target,
+    PromptBlockTransferMode mode, {
+    String? sourceCollectionId,
+    bool sourceFavorites = false,
+    bool replaceConflicts = false,
+  }) async {
+    if (ids.isEmpty) return;
+    final repository = ref.read(promptBlockRepositoryProvider);
+    final current = _toState(await repository.load());
+    final destination = _blocksInTransferTarget(current, target);
+    final sources = [
+      for (final id in ids)
+        if (current.blockById(id) case final block?) block,
+    ];
+    if (sources.length != ids.toSet().length) {
+      throw StateError('块库已变化，请重新选择后再试');
+    }
+    if (sources.map((block) => block.lineageKey).toSet().length !=
+        sources.length) {
+      throw StateError('所选块包含同源副本，请分开整理');
+    }
+    final conflicts = <String, PromptBlock>{};
+    for (final source in sources) {
+      for (final item in destination) {
+        if (item.id != source.id && item.lineageKey == source.lineageKey) {
+          conflicts[source.id] = item;
+          break;
+        }
+      }
+    }
+    if (conflicts.isNotEmpty && !replaceConflicts) {
+      throw StateError('同源块已存在，请确认替换');
+    }
+    final createdThumbnails = <String>[];
+    final oldThumbnails = <String>[];
+    try {
+      for (final source in sources) {
+        final existing = conflicts[source.id];
+        // 原地复制不新增同源重影；原地移动仍需清理来源的其他分类关系。
+        if (mode == PromptBlockTransferMode.copy &&
+            destination.any((item) => item.id == source.id)) {
+          continue;
+        }
+        PromptBlock placed;
+        if (existing != null || mode == PromptBlockTransferMode.copy) {
+          String? imagePath;
+          if (source.thumbnail case final path?) {
+            final file = File(path);
+            if (await file.exists()) {
+              imagePath = await savePromptBlockThumbnail(
+                await file.readAsBytes(),
+              );
+              createdThumbnails.add(imagePath);
+            }
+          }
+          if (existing != null) {
+            if (existing.thumbnail case final path?) oldThumbnails.add(path);
+            placed = await repository.updateBlock(
+              source.copyWith(
+                id: existing.id,
+                lineageId: source.lineageKey,
+                folderId: existing.folderId,
+                sortOrder: existing.sortOrder,
+                isFavorite: existing.isFavorite,
+                thumbnail: imagePath,
+                createdAt: existing.createdAt,
+                useCount: existing.useCount,
+                sourcePath: null,
+                sourceHash: null,
+                importedAt: null,
+              ),
+            );
+          } else {
+            placed = source.copyWith(
+              id: const Uuid().v4(),
+              lineageId: source.lineageKey,
+              folderId: null,
+              isFavorite: false,
+              thumbnail: imagePath,
+              useCount: 0,
+              sourcePath: null,
+              sourceHash: null,
+              importedAt: null,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            );
+            await repository.importBlocks([placed]);
+            placed = await repository.moveBlock(placed.id, null);
+          }
+        } else {
+          placed = source;
+        }
+        if (target.kind == PromptBlockTransferKind.folder) {
+          if (placed.folderId != target.id) {
+            placed = await repository.moveBlock(placed.id, target.id);
+          }
+        } else {
+          if (!placed.isFavorite) {
+            placed = await repository.toggleFavorite(placed.id);
+          }
+          if (target.kind == PromptBlockTransferKind.collection) {
+            final collection = (await repository.load()).getCollection(
+              target.id!,
+            );
+            if (collection == null || collection.isFolder) {
+              throw StateError('收藏集不存在');
+            }
+            if (!collection.blockIds.contains(placed.id)) {
+              await repository.toggleBlockInCollection(target.id!, placed.id);
+            }
+          }
+          if (mode == PromptBlockTransferMode.move && placed.folderId != null) {
+            await repository.moveBlock(placed.id, null);
+          }
+        }
+        if (mode == PromptBlockTransferMode.move) {
+          if (sourceCollectionId != null && sourceCollectionId != target.id) {
+            final sourceNode = current.collectionById(sourceCollectionId);
+            final sourceIds = sourceNode?.isFolder == true
+                ? current.collections.getDescendantIds(sourceCollectionId)
+                : {sourceCollectionId};
+            for (final collectionId in sourceIds) {
+              if (collectionId == target.id) continue;
+              final collection = (await repository.load()).getCollection(
+                collectionId,
+              );
+              if (collection?.isFolder == false &&
+                  (collection?.blockIds.contains(source.id) ?? false)) {
+                await repository.toggleBlockInCollection(
+                  collectionId,
+                  source.id,
+                );
+              }
+            }
+          }
+          if (sourceFavorites &&
+              target.kind == PromptBlockTransferKind.folder &&
+              placed.isFavorite) {
+            await repository.toggleFavorite(placed.id);
+          }
+          if (existing != null) {
+            if (source.thumbnail case final path?) oldThumbnails.add(path);
+            await repository.deleteBlock(source.id);
+          }
+        }
+      }
+      state = AsyncData(_toState(await repository.load()));
+      for (final path in oldThumbnails) {
+        if (!state.valueOrNull!.blocks.any(
+          (block) => block.thumbnail == path,
+        )) {
+          await deletePromptBlockThumbnail(path);
+        }
+      }
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+      for (final path in createdThumbnails) {
+        if (!(await repository.load()).blocks.any(
+          (block) => block.thumbnail == path,
+        )) {
+          await deletePromptBlockThumbnail(path);
+        }
+      }
       rethrow;
     }
   }

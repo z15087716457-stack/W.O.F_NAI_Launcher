@@ -17,7 +17,7 @@ class PromptBlockListItem extends StatelessWidget {
     this.selected = false,
     this.multiSelected = false,
     this.onSecondaryTap,
-    this.onExport,
+    this.onAddTag,
     this.onToggleFavorite,
     this.reorderIndex,
     this.compact = false,
@@ -37,8 +37,7 @@ class PromptBlockListItem extends StatelessWidget {
   /// 右键菜单入口（secondary tap）。
   final void Function(TapUpDetails details)? onSecondaryTap;
 
-  /// 导出为 TXT；null 时不显示导出按钮。
-  final VoidCallback? onExport;
+  final ValueChanged<Offset>? onAddTag;
 
   /// ★ 收藏入口：回调收到按钮的全局锚点，宿主据此弹出收藏菜单。
   final ValueChanged<Offset>? onToggleFavorite;
@@ -158,11 +157,20 @@ class PromptBlockListItem extends StatelessWidget {
                     ),
                   ),
                 ),
-              if (onExport != null)
-                IconButton(
-                  tooltip: context.l10n.promptBlockLibrary_exportBlockAsTxt,
-                  onPressed: onExport,
-                  icon: const Icon(Icons.file_upload_outlined, size: 19),
+              if (onAddTag != null)
+                Builder(
+                  builder: (buttonContext) => IconButton(
+                    tooltip: '添加标签',
+                    onPressed: () {
+                      final box = buttonContext.findRenderObject();
+                      onAddTag?.call(
+                        box is RenderBox
+                            ? box.localToGlobal(Offset.zero)
+                            : Offset.zero,
+                      );
+                    },
+                    icon: const Icon(Icons.sell_outlined, size: 19),
+                  ),
                 ),
               IconButton(
                 tooltip: context.l10n.common_copy,

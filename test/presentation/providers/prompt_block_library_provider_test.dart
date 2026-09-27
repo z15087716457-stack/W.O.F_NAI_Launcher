@@ -79,6 +79,107 @@ void main() {
   });
 
   test(
+    'copy keeps two independent blocks with shared lineage; replacement updates only target',
+    () async {
+      final container = ProviderContainer(
+        overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(
+        promptBlockLibraryNotifierProvider.notifier,
+      );
+      final sourceFolder = await notifier.createFolder(name: '来源');
+      final targetFolder = await notifier.createFolder(name: '目标');
+      final original = await notifier.createBlock(
+        title: '角色',
+        content: 'old',
+        folderId: sourceFolder.id,
+      );
+      await notifier.updateBlock(
+        original.copyWith(useCount: 7, sourcePath: 'source.txt'),
+      );
+      final target = PromptBlockTransferTarget(
+        PromptBlockTransferKind.folder,
+        targetFolder.id,
+      );
+      await notifier.transferBlocks(
+        [original.id],
+        target,
+        PromptBlockTransferMode.copy,
+      );
+      var state = await container.read(
+        promptBlockLibraryNotifierProvider.future,
+      );
+      final duplicate = state.blocks.singleWhere(
+        (block) => block.folderId == targetFolder.id,
+      );
+      expect(duplicate.id, isNot(original.id));
+      expect(duplicate.lineageKey, original.id);
+      expect(duplicate.useCount, 0);
+      expect(duplicate.sourcePath, isNull);
+      expect(state.blockById(original.id)?.content, 'old');
+
+      await notifier.updateBlock(original.copyWith(content: 'new'));
+      expect(notifier.transferConflictCount([original.id], target), 1);
+      await notifier.transferBlocks(
+        [original.id],
+        target,
+        PromptBlockTransferMode.copy,
+        replaceConflicts: true,
+      );
+      state = await container.read(promptBlockLibraryNotifierProvider.future);
+      expect(state.blocks.length, 2);
+      expect(state.blockById(duplicate.id)?.content, 'new');
+      expect(state.blockById(original.id)?.folderId, sourceFolder.id);
+
+      await notifier.transferBlocks(
+        [original.id],
+        target,
+        PromptBlockTransferMode.move,
+        replaceConflicts: true,
+      );
+      state = await container.read(promptBlockLibraryNotifierProvider.future);
+      expect(state.blocks.map((block) => block.id), [duplicate.id]);
+      expect(state.blockById(duplicate.id)?.content, 'new');
+    },
+  );
+
+  test(
+    'moving from a collection into a folder removes source membership',
+    () async {
+      final container = ProviderContainer(
+        overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(
+        promptBlockLibraryNotifierProvider.notifier,
+      );
+      final parent = await notifier.createCollection(
+        name: '收藏夹',
+        isFolder: true,
+      );
+      final collection = await notifier.createCollection(
+        name: '收藏集',
+        parentId: parent.id,
+      );
+      final folder = await notifier.createFolder(name: '目标');
+      final block = await notifier.createBlock(title: '角色', content: 'prompt');
+      await notifier.toggleBlockInCollection(collection.id, block.id);
+      await notifier.transferBlocks(
+        [block.id],
+        PromptBlockTransferTarget(PromptBlockTransferKind.folder, folder.id),
+        PromptBlockTransferMode.move,
+        sourceCollectionId: parent.id,
+      );
+      final state = await container.read(
+        promptBlockLibraryNotifierProvider.future,
+      );
+      expect(state.blockById(block.id)?.folderId, folder.id);
+      expect(state.collectionById(collection.id)?.blockIds, isEmpty);
+    },
+  );
+
+  test(
     'blocksInFolderTree aggregates descendant blocks in tree order',
     () async {
       final container = ProviderContainer(
@@ -604,23 +705,17 @@ void main() {
 
         await notifier.renameCollection(a.id, 'A+');
         await notifier.moveCollection(a.id, folder.id);
-        state = await container.read(
-          promptBlockLibraryNotifierProvider.future,
-        );
+        state = await container.read(promptBlockLibraryNotifierProvider.future);
         expect(state.collectionById(a.id)?.name, 'A+');
         expect(state.collectionById(a.id)?.parentId, folder.id);
         expect(state.collectionPath(a.id), '夹 / A+');
 
         await notifier.reorderCollections(folder.id, [a.id, b.id]);
-        state = await container.read(
-          promptBlockLibraryNotifierProvider.future,
-        );
+        state = await container.read(promptBlockLibraryNotifierProvider.future);
         expect(state.collectionsIn(folder.id).map((n) => n.id), [a.id, b.id]);
 
         await notifier.deleteCollection(folder.id);
-        state = await container.read(
-          promptBlockLibraryNotifierProvider.future,
-        );
+        state = await container.read(promptBlockLibraryNotifierProvider.future);
         expect(state.collectionById(folder.id), isNull);
         expect(state.collectionById(a.id), isNull);
         expect(state.collectionById(b.id), isNull);
@@ -657,17 +752,14 @@ void main() {
         expect(state.blockById(block.id)?.isFavorite, isTrue);
         expect(state.collectionIdsOfBlock(block.id), {inner.id, outer.id});
         // 收藏文件夹视图 = 子树成员并集
-        expect(
-          state.blocksInCollectionTree(folder.id).map((x) => x.id),
-          [block.id],
-        );
+        expect(state.blocksInCollectionTree(folder.id).map((x) => x.id), [
+          block.id,
+        ]);
         expect(state.collectionTreeBlockCount(folder.id), 1);
 
         // 移出后旗标保留、成员关系解除
         await notifier.toggleBlockInCollection(inner.id, block.id);
-        state = await container.read(
-          promptBlockLibraryNotifierProvider.future,
-        );
+        state = await container.read(promptBlockLibraryNotifierProvider.future);
         expect(state.blockById(block.id)?.isFavorite, isTrue);
         expect(state.collectionIdsOfBlock(block.id), {outer.id});
         expect(state.blocksInCollectionTree(folder.id), isEmpty);

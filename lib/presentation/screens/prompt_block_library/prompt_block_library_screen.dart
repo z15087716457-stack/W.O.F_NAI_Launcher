@@ -25,14 +25,15 @@ import '../../providers/generation/generation_params_notifier.dart';
 import '../../providers/tips_provider.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
+import '../../widgets/prompt/blocks/prompt_block_drag_data.dart';
 import 'widgets/curation_import_preview_dialog.dart';
 import 'widgets/prompt_block_card.dart';
 import 'widgets/prompt_block_detail.dart';
 import 'widgets/prompt_block_edit_dialog.dart';
-import 'widgets/prompt_block_favorite_menu.dart';
 import 'widgets/prompt_block_folder_delete_dialog.dart';
 import 'widgets/prompt_block_folder_tree.dart';
 import 'widgets/prompt_block_list_item.dart';
+import 'widgets/prompt_block_organizer_popover.dart';
 import 'widgets/prompt_block_waterfall_card.dart';
 
 enum _PromptBlockViewMode { list, grid, waterfall }
@@ -44,11 +45,11 @@ enum _BlockContextAction {
   favorite,
   unfavorite,
   moveTo,
-  export,
+  addTag,
   delete,
   enterMultiSelect,
   batchFavorite,
-  batchUnfavorite,
+  batchTag,
   batchMoveTo,
   batchDelete,
   exitMultiSelect,
@@ -287,9 +288,8 @@ class _PromptBlockLibraryScreenState
             : _multiSelectMode
             ? _buildEmptyDetailPanel(
                 icon: Icons.checklist,
-                message: context.l10n.promptBlockLibrary_selectedCount(
-                  _multiSelectedIds.length,
-                ),
+                message:
+                    '${context.l10n.promptBlockLibrary_selectedCount(_multiSelectedIds.length)}\n拖动已选块到左侧的收藏或文件夹，松开后选择复制或移动。',
               )
             : block != null
             ? PromptBlockDetailPanel(
@@ -301,7 +301,7 @@ class _PromptBlockLibraryScreenState
                   context,
                   context.l10n.promptBlockLibrary_copied,
                 ),
-                onExport: () => _exportBlockAsTxt(block),
+                onAddTag: (anchor) => _showTagMenu([block.id], anchor),
                 onDelete: () => _deleteBlock(context, block),
                 onTagTap: (tag) => setState(() => _selectedTag = tag),
                 onCollapse: () => _setDetailPanelExpanded(false),
@@ -491,6 +491,7 @@ class _PromptBlockLibraryScreenState
                   onReorderCollections: _reorderCollections,
                   onAddBlockToCollection: _addBlockToCollection,
                   onDropBlockOnFavorites: _favoriteBlockFromDrop,
+                  onDropBlocks: _handleSidebarDrop,
                 ),
               ),
             ),
@@ -769,36 +770,51 @@ class _PromptBlockLibraryScreenState
         const SizedBox(width: 8),
         IconButton(
           key: const Key('prompt-block-multi-select-all'),
-          tooltip: l10n.promptBlockLibrary_selectAllVisible,
-          onPressed: allSelected ? null : () => _selectAllVisible(visible),
-          icon: const Icon(Icons.select_all, size: 19),
-        ),
-        IconButton(
-          key: const Key('prompt-block-multi-select-clear'),
-          tooltip: l10n.promptBlockLibrary_clearSelection,
-          onPressed: hasSelection
-              ? () => setState(() => _multiSelectedIds.clear())
-              : null,
-          icon: const Icon(Icons.deselect, size: 19),
+          tooltip: allSelected
+              ? l10n.promptBlockLibrary_clearSelection
+              : l10n.promptBlockLibrary_selectAllVisible,
+          onPressed: () => allSelected
+              ? setState(() => _multiSelectedIds.clear())
+              : _selectAllVisible(visible),
+          icon: Icon(allSelected ? Icons.deselect : Icons.select_all, size: 19),
         ),
         const SizedBox(width: 4),
-        IconButton(
-          tooltip: l10n.common_favorite,
-          onPressed: hasSelection ? () => _setBlocksFavorite(true) : null,
-          icon: const Icon(Icons.star_border, size: 19),
+        Builder(
+          builder: (buttonContext) => IconButton(
+            tooltip: l10n.common_favorite,
+            onPressed: hasSelection
+                ? () => _showOrganizerAtButton(
+                    BlockOrganizerPage.favorites,
+                    buttonContext,
+                  )
+                : null,
+            icon: const Icon(Icons.star_border, size: 19),
+          ),
         ),
-        IconButton(
-          tooltip: l10n.common_unfavorite,
-          onPressed: hasSelection ? () => _setBlocksFavorite(false) : null,
-          icon: const Icon(Icons.star, size: 19),
+        Builder(
+          builder: (buttonContext) => IconButton(
+            tooltip: '添加标签',
+            onPressed: hasSelection
+                ? () => _showOrganizerAtButton(
+                    BlockOrganizerPage.tags,
+                    buttonContext,
+                  )
+                : null,
+            icon: const Icon(Icons.sell_outlined, size: 19),
+          ),
         ),
-        IconButton(
-          key: const Key('prompt-block-multi-select-move'),
-          tooltip: l10n.promptBlockLibrary_moveTo,
-          onPressed: hasSelection
-              ? () => _moveBlocksToFolderDialog(_multiSelectedIds.toList())
-              : null,
-          icon: const Icon(Icons.drive_file_move_outline, size: 19),
+        Builder(
+          builder: (buttonContext) => IconButton(
+            key: const Key('prompt-block-multi-select-move'),
+            tooltip: l10n.promptBlockLibrary_moveTo,
+            onPressed: hasSelection
+                ? () => _showOrganizerAtButton(
+                    BlockOrganizerPage.folders,
+                    buttonContext,
+                  )
+                : null,
+            icon: const Icon(Icons.drive_file_move_outline, size: 19),
+          ),
         ),
         IconButton(
           key: const Key('prompt-block-multi-select-delete'),
@@ -831,6 +847,92 @@ class _PromptBlockLibraryScreenState
       _multiSelectedIds.addAll(visible.map((block) => block.id));
       _lastSelectedId ??= visible.last.id;
     });
+  }
+
+  Offset _anchorOf(BuildContext buttonContext) {
+    final box = buttonContext.findRenderObject();
+    return box is RenderBox ? box.localToGlobal(Offset.zero) : Offset.zero;
+  }
+
+  void _showOrganizerAtButton(
+    BlockOrganizerPage page,
+    BuildContext buttonContext,
+  ) {
+    final ids = _multiSelectedIds.toList();
+    if (ids.isEmpty) return;
+    showBlockOrganizerPopover(
+      context,
+      blockIds: ids,
+      anchor: _anchorOf(buttonContext),
+      page: page,
+      sourceCollectionId: _selectedCollectionId,
+      sourceFavorites: _favoritesSelected,
+    );
+  }
+
+  void _showTagMenu(List<String> ids, Offset anchor) =>
+      showBlockOrganizerPopover(
+        context,
+        blockIds: ids,
+        anchor: anchor,
+        page: BlockOrganizerPage.tags,
+      );
+
+  void _handleSidebarDrop(
+    PromptBlockDragData data,
+    PromptBlockTransferTarget target,
+    Offset offset,
+  ) {
+    showBlockOrganizerPopover(
+      context,
+      blockIds: data.transferIds,
+      anchor: offset,
+      page: target.kind == PromptBlockTransferKind.folder
+          ? BlockOrganizerPage.folders
+          : BlockOrganizerPage.favorites,
+      dropTarget: target,
+      sourceCollectionId: data.sourceCollectionId,
+      sourceFavorites: data.sourceFavorites,
+    );
+  }
+
+  Widget _dragSource(PromptBlock block, Widget child) {
+    final ids = _multiSelectMode && _multiSelectedIds.contains(block.id)
+        ? _multiSelectedIds.toList()
+        : [block.id];
+    final theme = Theme.of(context);
+    return Draggable<PromptBlockDragData>(
+      data: PromptBlockDragData(
+        blockId: block.id,
+        blockIds: ids,
+        sourceCollectionId: _selectedCollectionId,
+        sourceFavorites: _favoritesSelected,
+      ),
+      rootOverlay: true,
+      dragAnchorStrategy: pointerDragAnchorStrategy,
+      feedback: Material(
+        elevation: 7,
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(9),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.grid_view_outlined,
+                size: 17,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 7),
+              Text(ids.length == 1 ? block.displayTitle : '${ids.length} 个块'),
+            ],
+          ),
+        ),
+      ),
+      childWhenDragging: Opacity(opacity: 0.35, child: child),
+      child: child,
+    );
   }
 
   Widget _buildSortControls(BuildContext context) {
@@ -1397,15 +1499,18 @@ class _PromptBlockLibraryScreenState
       block: block,
       folders: folders,
       enabled: !_multiSelectMode,
-      child: PromptBlockPill(
-        block: block,
-        displayTitle: title,
-        maxWidth: maxWidth,
-        selected: _isBlockShownSelected(block.id),
-        multiSelected: _isBlockMultiSelected(block.id),
-        onSecondaryTap: (details) =>
-            _showBlockContextMenu(context, block, details.globalPosition),
-        onTap: () => _handleBlockTap(block),
+      child: _dragSource(
+        block,
+        PromptBlockPill(
+          block: block,
+          displayTitle: title,
+          maxWidth: maxWidth,
+          selected: _isBlockShownSelected(block.id),
+          multiSelected: _isBlockMultiSelected(block.id),
+          onSecondaryTap: (details) =>
+              _showBlockContextMenu(context, block, details.globalPosition),
+          onTap: () => _handleBlockTap(block),
+        ),
       ),
     );
   }
@@ -1511,14 +1616,17 @@ class _PromptBlockLibraryScreenState
       block: block,
       folders: folders,
       enabled: !_multiSelectMode,
-      child: PromptBlockWaterfallCard(
-        block: block,
-        displayTitle: title,
-        selected: _isBlockShownSelected(block.id),
-        multiSelected: _isBlockMultiSelected(block.id),
-        onSecondaryTap: (details) =>
-            _showBlockContextMenu(context, block, details.globalPosition),
-        onTap: () => _handleBlockTap(block),
+      child: _dragSource(
+        block,
+        PromptBlockWaterfallCard(
+          block: block,
+          displayTitle: title,
+          selected: _isBlockShownSelected(block.id),
+          multiSelected: _isBlockMultiSelected(block.id),
+          onSecondaryTap: (details) =>
+              _showBlockContextMenu(context, block, details.globalPosition),
+          onTap: () => _handleBlockTap(block),
+        ),
       ),
     );
   }
@@ -1537,21 +1645,24 @@ class _PromptBlockLibraryScreenState
       block: block,
       folders: folders,
       enabled: !_multiSelectMode,
-      child: PromptBlockListItem(
-        block: block,
-        displayTitle: title,
-        reorderIndex: reorderIndex,
-        selected: _isBlockShownSelected(block.id),
-        multiSelected: _isBlockMultiSelected(block.id),
-        onSecondaryTap: (details) =>
-            _showBlockContextMenu(context, block, details.globalPosition),
-        onTap: () => _handleBlockTap(block),
-        onEdit: () => _handleBlockEditButton(block),
-        onCopy: () =>
-            AppToast.success(context, context.l10n.promptBlockLibrary_copied),
-        onExport: () => _exportBlockAsTxt(block),
-        onToggleFavorite: (anchor) => _showFavoriteMenu(block, anchor),
-        onDelete: () => _deleteBlock(context, block),
+      child: _dragSource(
+        block,
+        PromptBlockListItem(
+          block: block,
+          displayTitle: title,
+          reorderIndex: reorderIndex,
+          selected: _isBlockShownSelected(block.id),
+          multiSelected: _isBlockMultiSelected(block.id),
+          onSecondaryTap: (details) =>
+              _showBlockContextMenu(context, block, details.globalPosition),
+          onTap: () => _handleBlockTap(block),
+          onEdit: () => _handleBlockEditButton(block),
+          onCopy: () =>
+              AppToast.success(context, context.l10n.promptBlockLibrary_copied),
+          onAddTag: (anchor) => _showTagMenu([block.id], anchor),
+          onToggleFavorite: (anchor) => _showFavoriteMenu(block, anchor),
+          onDelete: () => _deleteBlock(context, block),
+        ),
       ),
     );
   }
@@ -1570,21 +1681,24 @@ class _PromptBlockLibraryScreenState
       block: block,
       folders: folders,
       enabled: !_multiSelectMode,
-      child: PromptBlockCard(
-        block: block,
-        displayTitle: title,
-        width: width,
-        selected: _isBlockShownSelected(block.id),
-        multiSelected: _isBlockMultiSelected(block.id),
-        onSecondaryTap: (details) =>
-            _showBlockContextMenu(context, block, details.globalPosition),
-        onTap: () => _handleBlockTap(block),
-        onEdit: () => _handleBlockEditButton(block),
-        onCopy: () =>
-            AppToast.success(context, context.l10n.promptBlockLibrary_copied),
-        onExport: () => _exportBlockAsTxt(block),
-        onToggleFavorite: (anchor) => _showFavoriteMenu(block, anchor),
-        onDelete: () => _deleteBlock(context, block),
+      child: _dragSource(
+        block,
+        PromptBlockCard(
+          block: block,
+          displayTitle: title,
+          width: width,
+          selected: _isBlockShownSelected(block.id),
+          multiSelected: _isBlockMultiSelected(block.id),
+          onSecondaryTap: (details) =>
+              _showBlockContextMenu(context, block, details.globalPosition),
+          onTap: () => _handleBlockTap(block),
+          onEdit: () => _handleBlockEditButton(block),
+          onCopy: () =>
+              AppToast.success(context, context.l10n.promptBlockLibrary_copied),
+          onAddTag: (anchor) => _showTagMenu([block.id], anchor),
+          onToggleFavorite: (anchor) => _showFavoriteMenu(block, anchor),
+          onDelete: () => _deleteBlock(context, block),
+        ),
       ),
     );
   }
@@ -1911,33 +2025,20 @@ class _PromptBlockLibraryScreenState
 
     final errorStyle = TextStyle(color: theme.colorScheme.error);
     final count = _multiSelectedIds.length;
-    final state = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
-    final anyFavorite = _multiSelectedIds.any((id) {
-      final item = state?.blockById(id);
-      return item != null && item.isFavorite;
-    });
-    final anyUnfavorite = _multiSelectedIds.any((id) {
-      final item = state?.blockById(id);
-      return item == null || !item.isFavorite;
-    });
 
     final action = await showMenu<_BlockContextAction>(
       context: context,
       position: position,
       items: batch
           ? [
-              if (anyUnfavorite)
-                PopupMenuItem(
-                  value: _BlockContextAction.batchFavorite,
-                  child: Text(l10n.promptBlockLibrary_favoriteSelected(count)),
-                ),
-              if (anyFavorite)
-                PopupMenuItem(
-                  value: _BlockContextAction.batchUnfavorite,
-                  child: Text(
-                    l10n.promptBlockLibrary_unfavoriteSelected(count),
-                  ),
-                ),
+              PopupMenuItem(
+                value: _BlockContextAction.batchFavorite,
+                child: Text(l10n.promptBlockLibrary_favoriteSelected(count)),
+              ),
+              const PopupMenuItem(
+                value: _BlockContextAction.batchTag,
+                child: Text('添加标签'),
+              ),
               PopupMenuItem(
                 value: _BlockContextAction.batchMoveTo,
                 child: Text(l10n.promptBlockLibrary_moveToSelected(count)),
@@ -1978,9 +2079,9 @@ class _PromptBlockLibraryScreenState
                 value: _BlockContextAction.moveTo,
                 child: Text(l10n.promptBlockLibrary_moveTo),
               ),
-              PopupMenuItem(
-                value: _BlockContextAction.export,
-                child: Text(l10n.promptBlockLibrary_exportBlockAsTxt),
+              const PopupMenuItem(
+                value: _BlockContextAction.addTag,
+                child: Text('添加标签'),
               ),
               const PopupMenuDivider(),
               PopupMenuItem(
@@ -2014,20 +2115,39 @@ class _PromptBlockLibraryScreenState
       case _BlockContextAction.unfavorite:
         if (context.mounted) await _showFavoriteMenu(block, globalPosition);
       case _BlockContextAction.moveTo:
-        if (mounted) await _moveBlocksToFolderDialog([block.id]);
-      case _BlockContextAction.export:
-        await _exportBlockAsTxt(block);
+        if (context.mounted) {
+          await showBlockOrganizerPopover(
+            context,
+            blockIds: [block.id],
+            anchor: globalPosition,
+            page: BlockOrganizerPage.folders,
+          );
+        }
+      case _BlockContextAction.addTag:
+        _showTagMenu([block.id], globalPosition);
       case _BlockContextAction.delete:
         if (context.mounted) await _deleteBlock(context, block);
       case _BlockContextAction.enterMultiSelect:
         _enterMultiSelect(block.id);
       case _BlockContextAction.batchFavorite:
-        await _setBlocksFavorite(true);
-      case _BlockContextAction.batchUnfavorite:
-        await _setBlocksFavorite(false);
+        if (context.mounted) {
+          await showBlockOrganizerPopover(
+            context,
+            blockIds: _multiSelectedIds.toList(),
+            anchor: globalPosition,
+            page: BlockOrganizerPage.favorites,
+          );
+        }
+      case _BlockContextAction.batchTag:
+        _showTagMenu(_multiSelectedIds.toList(), globalPosition);
       case _BlockContextAction.batchMoveTo:
-        if (mounted) {
-          await _moveBlocksToFolderDialog(_multiSelectedIds.toList());
+        if (context.mounted) {
+          await showBlockOrganizerPopover(
+            context,
+            blockIds: _multiSelectedIds.toList(),
+            anchor: globalPosition,
+            page: BlockOrganizerPage.folders,
+          );
         }
       case _BlockContextAction.batchDelete:
         if (context.mounted) {
@@ -2039,22 +2159,6 @@ class _PromptBlockLibraryScreenState
   }
 
   // ---- 批量操作 ----
-
-  Future<void> _setBlocksFavorite(bool favorite) async {
-    final l10n = context.l10n;
-    final ids = _multiSelectedIds.toList();
-    if (ids.isEmpty) return;
-    try {
-      await ref
-          .read(promptBlockLibraryNotifierProvider.notifier)
-          .setFavorite(ids, favorite);
-      if (mounted) {
-        AppToast.success(context, l10n.promptBlockLibrary_saved);
-      }
-    } catch (error) {
-      if (mounted) AppToast.error(context, '$error');
-    }
-  }
 
   Future<void> _deleteBlocks(BuildContext context, List<String> ids) async {
     final l10n = context.l10n;
@@ -2085,100 +2189,6 @@ class _PromptBlockLibraryScreenState
       }
     } catch (error) {
       if (context.mounted) AppToast.error(context, '$error');
-    }
-  }
-
-  /// 「移动到…」：文件夹树平铺单选对话框（根目录 + DFS 顺序，层级缩进）。
-  Future<void> _moveBlocksToFolderDialog(List<String> ids) async {
-    final l10n = context.l10n;
-    final state = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
-    if (state == null || ids.isEmpty) return;
-
-    final flat = <(PromptBlockFolder, int)>[];
-    void visit(String? parentId, int depth) {
-      for (final folder in state.folders.childrenOf(parentId)) {
-        flat.add((folder, depth));
-        visit(folder.id, depth + 1);
-      }
-    }
-
-    visit(null, 0);
-
-    final initialFolderId = ids.length == 1
-        ? state.blockById(ids.first)?.folderId
-        : null;
-    var picked = initialFolderId;
-
-    final result = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (dialogContext, setDialogState) => AlertDialog(
-          title: Text(l10n.promptBlockLibrary_moveToFolderTitle),
-          content: SizedBox(
-            width: 360,
-            child: flat.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Text(l10n.promptBlockLibrary_rootFolder),
-                  )
-                : RadioGroup<String?>(
-                    groupValue: picked,
-                    onChanged: (value) => setDialogState(() => picked = value),
-                    child: ListView(
-                      shrinkWrap: true,
-                      children: [
-                        RadioListTile<String?>(
-                          key: const Key('prompt-block-move-folder-root'),
-                          value: null,
-                          title: Text(l10n.promptBlockLibrary_rootFolder),
-                        ),
-                        for (final (folder, depth) in flat)
-                          RadioListTile<String?>(
-                            value: folder.id,
-                            title: Padding(
-                              padding: EdgeInsets.only(left: 12.0 * depth),
-                              child: Text(
-                                folder.name.isEmpty
-                                    ? l10n.promptBlockLibrary_unnamedFolder
-                                    : folder.name,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop('__cancelled__'),
-              child: Text(l10n.common_cancel),
-            ),
-            FilledButton(
-              onPressed: () =>
-                  Navigator.of(dialogContext).pop(picked ?? '__root__'),
-              child: Text(l10n.common_confirm),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (result == null || result == '__cancelled__' || !mounted) {
-      return;
-    }
-    final folderId = result == '__root__' ? null : result;
-
-    try {
-      await ref
-          .read(promptBlockLibraryNotifierProvider.notifier)
-          .moveBlocks(ids, folderId);
-      if (mounted) {
-        AppToast.success(
-          context,
-          l10n.promptBlockLibrary_blocksMoved(ids.length),
-        );
-      }
-    } catch (error) {
-      if (mounted) AppToast.error(context, '$error');
     }
   }
 
@@ -2520,37 +2530,6 @@ class _PromptBlockLibraryScreenState
     }
   }
 
-  Future<void> _exportBlockAsTxt(PromptBlock block) async {
-    final l10n = context.l10n;
-    final rawTitle = block.title.trim().isEmpty ? 'block' : block.title.trim();
-    final safeTitle = rawTitle.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
-    final target = await FilePicker.platform.saveFile(
-      dialogTitle: l10n.promptBlockLibrary_exportBlockAsTxt,
-      fileName: '$safeTitle.txt',
-      type: FileType.custom,
-      allowedExtensions: ['txt'],
-    );
-    if (target == null || !mounted) return;
-    final path = target.toLowerCase().endsWith('.txt') ? target : '$target.txt';
-
-    try {
-      await File(path).writeAsString(
-        block.content.isNotEmpty ? block.content : block.negativeContent,
-        flush: true,
-      );
-      if (mounted) {
-        AppToast.success(context, l10n.promptBlockLibrary_exportTxtDone);
-      }
-    } catch (error) {
-      if (mounted) {
-        AppToast.error(
-          context,
-          l10n.promptBlockLibrary_exportTxtFailed('$error'),
-        );
-      }
-    }
-  }
-
   Future<void> _showCreateBlock(BuildContext context) async {
     final l10n = context.l10n;
     final state = ref.read(promptBlockLibraryNotifierProvider).valueOrNull;
@@ -2630,14 +2609,13 @@ class _PromptBlockLibraryScreenState
     }
   }
 
-  /// 单块 ★ 入口：弹出收藏菜单（收藏开关 + 收藏集勾选），
-  /// 交互模型照抄本地画廊心形菜单。
+  /// 单块 ★ 入口。
   Future<void> _showFavoriteMenu(PromptBlock block, Offset anchor) {
-    return showBlockFavoriteMenu(
+    return showBlockOrganizerPopover(
       context,
-      ref: ref,
-      block: block,
+      blockIds: [block.id],
       anchor: anchor,
+      page: BlockOrganizerPage.favorites,
     );
   }
 

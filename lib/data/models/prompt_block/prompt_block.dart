@@ -58,6 +58,9 @@ class PromptBlock with _$PromptBlock {
     /// 稳定唯一标识。
     required String id,
 
+    /// 复制链的原始身份；旧数据以自身 id 作为同源身份。
+    @JsonKey(includeIfNull: false) String? lineageId,
+
     /// 仅用于界面显示的标题。
     required String title,
 
@@ -149,6 +152,7 @@ class PromptBlock with _$PromptBlock {
     bool isFavorite = false,
     int sortOrder = 0,
     String? id,
+    String? lineageId,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? sourcePath,
@@ -168,6 +172,7 @@ class PromptBlock with _$PromptBlock {
       generationSettings: generationSettings,
       tags: tags,
       id: id ?? const Uuid().v4(),
+      lineageId: lineageId,
       title: title.trim(),
       content: content,
       folderId: folderId,
@@ -190,6 +195,8 @@ class PromptBlock with _$PromptBlock {
 
   /// 用于空标题块的界面兜底名称。
   String get displayTitle => title.isNotEmpty ? title : '未命名块';
+
+  String get lineageKey => lineageId ?? id;
 
   /// 内容预览（截取前 100 个字符），供补全建议与选择器列表展示。
   String get contentPreview {

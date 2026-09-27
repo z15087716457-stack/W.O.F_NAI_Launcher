@@ -4,6 +4,15 @@ import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block_folder.dart';
 
 void main() {
+  test('legacy block uses its own id as lineage', () {
+    final block = PromptBlock.create(id: 'original', title: 'a', content: 'b');
+    final json = Map<String, dynamic>.from(block.toJson())..remove('lineageId');
+    expect(PromptBlock.fromJson(json).lineageKey, 'original');
+    expect(
+      block.copyWith(id: 'copy', lineageId: block.lineageKey).lineageKey,
+      'original',
+    );
+  });
   test('compound block keeps both prompts and optional settings in JSON', () {
     final block = PromptBlock.create(
       id: 'compound',

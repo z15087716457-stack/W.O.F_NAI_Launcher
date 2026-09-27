@@ -20,8 +20,8 @@ import '../../../widgets/prompt/blocks/prompt_block_drag_data.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
 import '../../prompt_block_library/widgets/prompt_block_detail.dart';
 import '../../prompt_block_library/widgets/prompt_block_edit_dialog.dart';
-import '../../prompt_block_library/widgets/prompt_block_favorite_menu.dart';
 import '../../prompt_block_library/widgets/prompt_block_folder_tree.dart';
+import '../../prompt_block_library/widgets/prompt_block_organizer_popover.dart';
 
 /// 生成页右侧块库面板（页面级非模态 dock）。
 ///
@@ -465,7 +465,11 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
       block: block,
       folders: folders,
       child: Draggable<PromptBlockDragData>(
-        data: PromptBlockDragData(blockId: block.id),
+        data: PromptBlockDragData(
+          blockId: block.id,
+          sourceCollectionId: _selectedCollectionId,
+          sourceFavorites: _favoritesSelected,
+        ),
         rootOverlay: true,
         // feedback 以指针为中心：默认会把 feedback 左上角对准指针，
         // 用户以药丸视觉中心瞄准时落点系统性偏上一行。
@@ -569,6 +573,17 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
           .reorderCollections(parentId, orderedIds),
       onAddBlockToCollection: _addBlockToCollection,
       onDropBlockOnFavorites: _favoriteBlockFromDrop,
+      onDropBlocks: (data, target, offset) => showBlockOrganizerPopover(
+        context,
+        blockIds: data.transferIds,
+        anchor: offset,
+        page: target.kind == PromptBlockTransferKind.folder
+            ? BlockOrganizerPage.folders
+            : BlockOrganizerPage.favorites,
+        dropTarget: target,
+        sourceCollectionId: data.sourceCollectionId,
+        sourceFavorites: data.sourceFavorites,
+      ),
     );
   }
 
@@ -650,15 +665,24 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
             ),
           ),
         ),
-        const PopupMenuDivider(),
-        PopupMenuItem<String>(
-          enabled: false,
-          child: Text(
-            l10n.promptBlockLibrary_moveToFolder,
-            style: Theme.of(context).textTheme.labelSmall,
+        const PopupMenuItem(
+          value: 'tags',
+          child: ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(Icons.sell_outlined, size: 18),
+            title: Text('添加标签'),
           ),
         ),
-        ..._moveTargetEntries(block, state),
+        PopupMenuItem(
+          value: 'folder',
+          child: ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.folder_outlined, size: 18),
+            title: Text(l10n.promptBlockLibrary_moveToFolder),
+          ),
+        ),
         const PopupMenuDivider(),
         PopupMenuItem(
           value: 'delete',
@@ -684,66 +708,26 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
           _editBlock(block);
         case 'favorite':
           _showFavoriteMenu(block, globalPosition);
+        case 'tags':
+          showBlockOrganizerPopover(
+            context,
+            blockIds: [block.id],
+            anchor: globalPosition,
+            page: BlockOrganizerPage.tags,
+          );
+        case 'folder':
+          showBlockOrganizerPopover(
+            context,
+            blockIds: [block.id],
+            anchor: globalPosition,
+            page: BlockOrganizerPage.folders,
+          );
         case 'delete':
           _deleteBlock(block);
         default:
-          // value 形如 'move:<folderId>' 或 'move:'（根目录）
-          if (value.startsWith('move:')) {
-            final folderId = value.substring(5);
-            ref
-                .read(promptBlockLibraryNotifierProvider.notifier)
-                .moveBlock(block.id, folderId.isEmpty ? null : folderId);
-          }
+          break;
       }
     });
-  }
-
-  List<PopupMenuEntry<String>> _moveTargetEntries(
-    PromptBlock block,
-    PromptBlockLibraryState state,
-  ) {
-    final entries = <PopupMenuEntry<String>>[];
-    Widget label(String text, int depth, bool current) {
-      return Padding(
-        padding: EdgeInsets.only(left: 12.0 + depth * 12),
-        child: Text(
-          current ? '$text ✓' : text,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      );
-    }
-
-    entries.add(
-      PopupMenuItem(
-        value: 'move:',
-        enabled: block.folderId != null,
-        child: label(
-          context.l10n.promptBlockLibrary_rootFolder,
-          0,
-          block.folderId == null,
-        ),
-      ),
-    );
-
-    void walk(String? parentId, int depth) {
-      for (final folder in state.foldersIn(parentId)) {
-        final name = folder.name.isEmpty
-            ? context.l10n.promptBlockLibrary_unnamedFolder
-            : folder.name;
-        entries.add(
-          PopupMenuItem(
-            value: 'move:${folder.id}',
-            enabled: block.folderId != folder.id,
-            child: label(name, depth + 1, block.folderId == folder.id),
-          ),
-        );
-        walk(folder.id, depth + 1);
-      }
-    }
-
-    walk(null, 0);
-    return entries;
   }
 
   // ==================== 块/文件夹操作 ====================
@@ -790,14 +774,13 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
     }
   }
 
-  /// 单块 ★ 入口：弹出收藏菜单（收藏开关 + 收藏集勾选），
-  /// 交互模型照抄本地画廊心形菜单。
+  /// 单块 ★ 入口。
   Future<void> _showFavoriteMenu(PromptBlock block, Offset anchor) {
-    return showBlockFavoriteMenu(
+    return showBlockOrganizerPopover(
       context,
-      ref: ref,
-      block: block,
+      blockIds: [block.id],
       anchor: anchor,
+      page: BlockOrganizerPage.favorites,
     );
   }
 

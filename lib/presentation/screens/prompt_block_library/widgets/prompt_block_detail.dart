@@ -674,7 +674,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
     required this.onEdit,
     required this.onToggleFavorite,
     required this.onCopy,
-    required this.onExport,
+    required this.onAddTag,
     required this.onDelete,
     required this.onCollapse,
     this.onTagTap,
@@ -687,7 +687,7 @@ class PromptBlockDetailPanel extends StatelessWidget {
   /// ★ 收藏入口：回调收到按钮的全局锚点，宿主据此弹出收藏菜单。
   final ValueChanged<Offset> onToggleFavorite;
   final VoidCallback onCopy;
-  final VoidCallback onExport;
+  final ValueChanged<Offset> onAddTag;
   final VoidCallback onDelete;
   final VoidCallback onCollapse;
   final ValueChanged<String>? onTagTap;
@@ -810,14 +810,18 @@ class PromptBlockDetailPanel extends StatelessWidget {
                               icon: const Icon(Icons.copy_outlined, size: 18),
                               label: Text(l10n.common_copy),
                             ),
-                            OutlinedButton.icon(
-                              onPressed: onExport,
-                              icon: const Icon(
-                                Icons.file_upload_outlined,
-                                size: 18,
-                              ),
-                              label: Text(
-                                l10n.promptBlockLibrary_exportBlockAsTxt,
+                            Builder(
+                              builder: (buttonContext) => OutlinedButton.icon(
+                                onPressed: () {
+                                  final box = buttonContext.findRenderObject();
+                                  onAddTag(
+                                    box is RenderBox
+                                        ? box.localToGlobal(Offset.zero)
+                                        : Offset.zero,
+                                  );
+                                },
+                                icon: const Icon(Icons.sell_outlined, size: 18),
+                                label: const Text('添加标签'),
                               ),
                             ),
                             TextButton.icon(
