@@ -6648,13 +6648,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_fontScale_description => '调整应用全局字体缩放比例';
 
   @override
-  String get settings_fontScale_previewSmall => '落霞与孤鹜齐飞';
+  String get settings_fontScale_previewSmall => '光影落在画布上。';
 
   @override
-  String get settings_fontScale_previewMedium => '秋水共长天一色';
+  String get settings_fontScale_previewMedium => '色から物語が生まれる。';
 
   @override
-  String get settings_fontScale_previewLarge => '字体大小预览';
+  String get settings_fontScale_previewLarge => 'Let colors tell a story.';
 
   @override
   String get settings_fontScale_reset => '重置';

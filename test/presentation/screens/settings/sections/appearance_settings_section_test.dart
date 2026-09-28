@@ -79,6 +79,47 @@ void main() {
     );
     expect(storage.behavior, 'select_preview');
   });
+
+  for (final locale in const [Locale('zh'), Locale('ja'), Locale('en')]) {
+    testWidgets('字体大小预览在 $locale 界面同时显示中日英三语', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1000, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localStorageServiceProvider.overrideWith((ref) => _FakeStorage()),
+          ],
+          child: MaterialApp(
+            locale: locale,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(1.5)),
+              child: child!,
+            ),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const Scaffold(
+              body: SingleChildScrollView(child: AppearanceSettingsSection()),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(AppearanceSettingsSection)),
+      )!;
+      await tester.tap(find.text(l10n.settings_fontScale));
+      await tester.pumpAndSettle();
+
+      expect(find.text('光影落在画布上。'), findsOneWidget);
+      expect(find.text('色から物語が生まれる。'), findsOneWidget);
+      expect(find.text('Let colors tell a story.'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }
 
 class _FakeStorage extends LocalStorageService {

@@ -6875,15 +6875,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_fontScale_description => 'Adjust global font scale';
 
   @override
-  String get settings_fontScale_previewSmall =>
-      'The setting sun and lone duck fly together';
+  String get settings_fontScale_previewSmall => '光影落在画布上。';
 
   @override
-  String get settings_fontScale_previewMedium =>
-      'Autumn water merges with the endless sky';
+  String get settings_fontScale_previewMedium => '色から物語が生まれる。';
 
   @override
-  String get settings_fontScale_previewLarge => 'Font Size Preview';
+  String get settings_fontScale_previewLarge => 'Let colors tell a story.';
 
   @override
   String get settings_fontScale_reset => 'Reset';

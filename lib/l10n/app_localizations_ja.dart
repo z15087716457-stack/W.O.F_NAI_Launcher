@@ -6736,13 +6736,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_fontScale_description => 'グローバルフォントスケールを調整します';
 
   @override
-  String get settings_fontScale_previewSmall => '夕日と一匹のアヒルが一緒に飛ぶ';
+  String get settings_fontScale_previewSmall => '光影落在画布上。';
 
   @override
-  String get settings_fontScale_previewMedium => '秋の水が果てしない空と溶け合う';
+  String get settings_fontScale_previewMedium => '色から物語が生まれる。';
 
   @override
-  String get settings_fontScale_previewLarge => 'フォント サイズのプレビュー';
+  String get settings_fontScale_previewLarge => 'Let colors tell a story.';
 
   @override
   String get settings_fontScale_reset => 'リセット';

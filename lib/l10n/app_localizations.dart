@@ -12195,19 +12195,19 @@ abstract class AppLocalizations {
   /// No description provided for @settings_fontScale_previewSmall.
   ///
   /// In en, this message translates to:
-  /// **'The setting sun and lone duck fly together'**
+  /// **'光影落在画布上。'**
   String get settings_fontScale_previewSmall;
 
   /// No description provided for @settings_fontScale_previewMedium.
   ///
   /// In en, this message translates to:
-  /// **'Autumn water merges with the endless sky'**
+  /// **'色から物語が生まれる。'**
   String get settings_fontScale_previewMedium;
 
   /// No description provided for @settings_fontScale_previewLarge.
   ///
   /// In en, this message translates to:
-  /// **'Font Size Preview'**
+  /// **'Let colors tell a story.'**
   String get settings_fontScale_previewLarge;
 
   /// No description provided for @settings_fontScale_reset.
