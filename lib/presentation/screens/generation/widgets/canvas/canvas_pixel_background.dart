@@ -2,6 +2,17 @@ import 'package:flutter/material.dart';
 
 import 'generation_canvas_controller.dart';
 
+/// A faintly darker workspace separates the preview from its side panels.
+/// Keep the dark canvas at its established theme color.
+Color generationCanvasBackgroundColor(ThemeData theme) {
+  final surface = theme.colorScheme.surface;
+  if (theme.brightness == Brightness.dark) return surface;
+  return Color.alphaBlend(
+    theme.colorScheme.onSurface.withValues(alpha: 0.03),
+    surface,
+  );
+}
+
 /// Sparse, seamless pixel circuits anchored to the same world as the images.
 /// Rectangles are snapped to physical pixels; no large raster texture is needed.
 class CanvasPixelBackgroundPainter extends CustomPainter {
@@ -26,7 +37,7 @@ class CanvasPixelBackgroundPainter extends CustomPainter {
     final dark = theme.brightness == Brightness.dark;
     canvas.drawRect(
       Offset.zero & size,
-      Paint()..color = theme.colorScheme.surface,
+      Paint()..color = generationCanvasBackgroundColor(theme),
     );
 
     final scale = camera.scale;

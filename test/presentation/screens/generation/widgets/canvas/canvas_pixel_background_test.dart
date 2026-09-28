@@ -146,15 +146,11 @@ void main() {
       expect(pixels.toSet(), {0x11, 255});
       final image = await _render(
         const CanvasCamera(offset: Offset.zero, scale: 0.1),
-        theme: ThemeData.light().copyWith(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue,
-          ).copyWith(surface: const Color(0xFFF7F7F7)),
-        ),
+        theme: GeistTheme.light,
       );
       final light = (await image.toByteData())!.buffer.asUint8List();
       image.dispose();
-      expect(light.toSet(), {247, 255});
+      expect(light.toSet(), {248, 255});
     },
   );
 
