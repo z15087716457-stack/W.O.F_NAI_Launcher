@@ -5526,6 +5526,7 @@
   "styleExplore_newRun": "新規ラン",
   "styleExplore_galleryTitle": "候補ギャラリー",
   "styleExplore_galleryEmptyHint": "候補はまだありません。探索ランを作成または選択して一括生成を開始してください。",
+  "styleExplore_labTip": "気に入った候補を選び、世代を重ねて画風を進化させましょう。",
   "styleExplore_runNameLabel": "ラン名",
   "styleExplore_runNameHint": "例：柔らかい光 ×30",
   "styleExplore_runCreated": "「{name}」を作成しました",

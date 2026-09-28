@@ -16899,6 +16899,12 @@ abstract class AppLocalizations {
   /// **'No candidates yet. Create or select an explore run to start batch generation.'**
   String get styleExplore_galleryEmptyHint;
 
+  /// No description provided for @styleExplore_labTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your favorite candidates and evolve your style, generation by generation.'**
+  String get styleExplore_labTip;
+
   /// No description provided for @styleExplore_runNameLabel.
   ///
   /// In en, this message translates to:

@@ -9639,6 +9639,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'No candidates yet. Create or select an explore run to start batch generation.';
 
   @override
+  String get styleExplore_labTip =>
+      'Choose your favorite candidates and evolve your style, generation by generation.';
+
+  @override
   String get styleExplore_runNameLabel => 'Run name';
 
   @override

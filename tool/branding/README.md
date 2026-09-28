@@ -77,3 +77,11 @@ Windows 的 `IntegratedTitleBarShell` 不再占用一整行：各页背景延伸
 生图空画布使用 `GenerationWelcome`：原完整 Logo（最多 300px 宽，窄画布按可用宽度缩放）和一条 Tip（正文 14px、TIP 标签 11px） 在画布中心略偏上，随左右面板宽度重新居中。中英日 Tip 覆盖块复用、顺序 / 随机与锁定；进入空状态选一条，不轮播，参数刷新与面板切换不换提示。开始生成或出现图片时使用原生成 / 画布组件，不在图片上保留 Logo。
 
 窗口测试覆盖内容从 y=0 起、按钮调用、搜索输入、拖动与双击最大化、登录切换命中区；页面测试覆盖主生图区域、历史展开/收起、深浅色以及各库/探索/设置页面。`CAPTURE_BORDERLESS=1` 运行 `sidebar_official_layout_test.dart` 可输出实际部件组成的生图布局截图；这些是 widget 实绘，不是用户运行窗口截图。Windows 实际拖动吸附和交互手感仍以用户运行包验收为准。
+
+## NAI LAB 探索空画廊
+
+`assets/images/wof_nai_lab.svg` 是用户选定 C 款的矢量定稿：W.O.F 主体顶边与基线对齐，像素由左下沿字形向右上破碎；下方为轮廓化的 NAI LAB，不依赖系统字体。品牌蓝固定为 #005DFF，透明背景适配深浅主题；SVG 是独立品牌资源，主页 NAI STUDIO 标识沿用原稿。
+
+`ExploreGalleryWelcome` 在未选任务或任务没有候选时显示，最大 Logo 宽度 300px，TIP 与主生图空画布保持同款字号、间距和略偏上的居中方式。提示为“选择喜欢的候选，让画风逐代进化。”，提供中英日文本；有候选但筛选结果为空时仍走原筛选提示。无轮播和新增动效。
+
+`CAPTURE_LAB_WELCOME=1` 运行 `explore_gallery_welcome_test.dart` 可保存真实 SVG、字体的明暗主题截图至 `.dart_tool/lab-welcome-*.png`；另覆盖窄短栏和 150% 字号。

@@ -5526,6 +5526,7 @@
   "styleExplore_newRun": "新建任务",
   "styleExplore_galleryTitle": "候选画廊",
   "styleExplore_galleryEmptyHint": "暂无候选。新建或选择一个探索任务，开始批量生成。",
+  "styleExplore_labTip": "选择喜欢的候选，让画风逐代进化。",
   "styleExplore_runNameLabel": "任务名称",
   "styleExplore_runNameHint": "例如：柔光画风 ×30",
   "styleExplore_runCreated": "已创建任务「{name}」",

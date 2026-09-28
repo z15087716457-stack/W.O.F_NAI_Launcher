@@ -9304,6 +9304,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_galleryEmptyHint => '暂无候选。新建或选择一个探索任务，开始批量生成。';
 
   @override
+  String get styleExplore_labTip => '选择喜欢的候选，让画风逐代进化。';
+
+  @override
   String get styleExplore_runNameLabel => '任务名称';
 
   @override

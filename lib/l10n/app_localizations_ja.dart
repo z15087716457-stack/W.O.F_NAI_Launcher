@@ -9432,6 +9432,9 @@ class AppLocalizationsJa extends AppLocalizations {
       '候補はまだありません。探索ランを作成または選択して一括生成を開始してください。';
 
   @override
+  String get styleExplore_labTip => '気に入った候補を選び、世代を重ねて画風を進化させましょう。';
+
+  @override
   String get styleExplore_runNameLabel => 'ラン名';
 
   @override

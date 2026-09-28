@@ -5526,6 +5526,7 @@
   "styleExplore_newRun": "New run",
   "styleExplore_galleryTitle": "Candidate gallery",
   "styleExplore_galleryEmptyHint": "No candidates yet. Create or select an explore run to start batch generation.",
+  "styleExplore_labTip": "Choose your favorite candidates and evolve your style, generation by generation.",
   "styleExplore_runNameLabel": "Run name",
   "styleExplore_runNameHint": "e.g. Soft light ×30",
   "styleExplore_runCreated": "Created \"{name}\"",

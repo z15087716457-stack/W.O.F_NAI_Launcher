@@ -18,6 +18,7 @@ import 'explore_candidate_actions.dart';
 import 'explore_candidate_hover_preview.dart';
 import 'explore_create_family_dialog.dart';
 import 'explore_folder_assign_bar.dart';
+import 'explore_gallery_welcome.dart';
 import 'explore_lineage_panel.dart';
 import 'horizontal_edge_fade.dart';
 
@@ -68,10 +69,7 @@ class _ExploreCandidateGalleryState
           );
 
     if (run == null) {
-      return _EmptyHint(
-        icon: Icons.collections_outlined,
-        text: l10n.styleExplore_galleryEmptyHint,
-      );
+      return const ExploreGalleryWelcome();
     }
 
     final candidates = run.candidates;
@@ -105,7 +103,9 @@ class _ExploreCandidateGalleryState
           hoverSession: _hoverSession,
         ),
         Expanded(
-          child: filtered.isEmpty
+          child: candidates.isEmpty
+              ? const ExploreGalleryWelcome()
+              : filtered.isEmpty
               ? _EmptyHint(
                   icon: Icons.filter_alt_off_outlined,
                   text: l10n.styleExplore_galleryEmptyHint,

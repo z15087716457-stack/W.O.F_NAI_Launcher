@@ -1689,7 +1689,7 @@ void main() {
     final container = await pumpScreen(tester);
 
     // 无 activeRun 时是空态。
-    expect(find.textContaining('暂无候选'), findsOneWidget);
+    expect(find.text('选择喜欢的候选，让画风逐代进化。'), findsOneWidget);
 
     container.read(exploreActiveRunIdProvider.notifier).state = run.id;
     await tester.pump();
