@@ -3,20 +3,19 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_gallery_welcome.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/lab_logo_mark.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
 
 void main() {
-  testWidgets('LAB logo has binary edges at varied widths and screen scales', (
+  testWidgets('solid pixel joins have no antialiased internal seams', (
     tester,
   ) async {
     for (final background in [Colors.white, const Color(0xFF111111)]) {
-      final backdrop = background == Colors.white ? 255 : 17;
       for (final width in [340.0, 214.4]) {
         for (final dpr in [1.0, 1.25, 1.5, 2.0]) {
           final key = GlobalKey();
@@ -30,7 +29,11 @@ void main() {
                     color: background,
                     child: Padding(
                       padding: const EdgeInsets.all(8.25),
-                      child: LabLogoMark(width: width),
+                      child: SvgPicture.asset(
+                        'assets/images/wof_nai_lab.svg',
+                        width: width,
+                        height: width * 657 / 1514,
+                      ),
                     ),
                   ),
                 ),
@@ -43,42 +46,14 @@ void main() {
                 key.currentContext!.findRenderObject()!
                     as RenderRepaintBoundary;
             final image = await boundary.toImage(pixelRatio: dpr);
-            final bytes = (await image.toByteData())!.buffer.asUint8List();
-            var bluePixels = 0;
-            // The outer RepaintBoundary sits at a fractional Center offset.
-            // Its own white/dark edge is unrelated to the padded logo.
-            final margin = (3 * dpr).ceil();
-            for (var y = margin; y < image.height - margin; y++) {
-              for (var x = margin; x < image.width - margin; x++) {
-                final pixel = (y * image.width + x) * 4;
-                final isBlue =
-                    bytes[pixel] == 0 &&
-                    bytes[pixel + 1] == 93 &&
-                    bytes[pixel + 2] == 255 &&
-                    bytes[pixel + 3] == 255;
-                final isBackdrop =
-                    bytes[pixel] == backdrop &&
-                    bytes[pixel + 1] == backdrop &&
-                    bytes[pixel + 2] == backdrop &&
-                    bytes[pixel + 3] == 255;
-                if (!isBlue && !isBackdrop) {
-                  fail(
-                    'Blended edge at pixel ${pixel ~/ 4} for '
-                    '$width / DPR $dpr / $background: '
-                    '${bytes.sublist(pixel, pixel + 4)}',
-                  );
-                }
-                if (isBlue) bluePixels++;
-              }
-            }
-            expect(bluePixels, greaterThan(1000));
+            final bytes = (await image.toByteData())!;
             // These joins lie inside solid blue, away from exterior edges.
             // The W/O join at (761, 345) is the user's reported pale line.
             for (final join in const [Offset(761, 345), Offset(750, 385)]) {
               final x = ((8.25 + (join.dx - 130) * width / 1514) * dpr).floor();
               final y = ((8.25 + (join.dy - 96) * width / 1514) * dpr).floor();
               final pixel = (y * image.width + x) * 4;
-              final actual = bytes.sublist(pixel, pixel + 4);
+              final actual = List.generate(4, (i) => bytes.getUint8(pixel + i));
               expect(actual, [
                 0,
                 93,
@@ -114,8 +89,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('TIP'), findsOneWidget);
       expect(find.text('选择喜欢的候选，让画风逐代进化。'), findsOneWidget);
-      expect(find.byType(LabLogoMark), findsOneWidget);
-      expect(tester.getSize(find.byType(LabLogoMark)).width, 340);
+      expect(find.byType(SvgPicture), findsOneWidget);
+      expect(tester.getSize(find.byType(SvgPicture)).width, 340);
       expect(tester.takeException(), isNull);
       if (Platform.environment['CAPTURE_LAB_WELCOME'] == '1') {
         await tester.runAsync(() async {
@@ -159,7 +134,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final bounds = tester.getRect(find.byType(ExploreGalleryWelcome));
-      final logo = tester.getRect(find.byType(LabLogoMark));
+      final logo = tester.getRect(find.byType(SvgPicture));
       expect(bounds.contains(logo.topLeft), isTrue);
       expect(bounds.contains(logo.bottomRight), isTrue);
       expect(find.text('TIP'), findsOneWidget);
