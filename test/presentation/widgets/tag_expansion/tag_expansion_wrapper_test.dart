@@ -11,6 +11,7 @@ import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/utils/prompt_input_normalization.dart';
+import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/common/weight_adjust_toolbar.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
@@ -68,7 +69,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 170));
     await tester.pump();
     expect(catalog.queries.last.token, 'blue');
+    final mouse = await _hover(tester, find.text('blue hair').first);
     await tester.tap(find.byTooltip('Insert tag').first);
+    await mouse.removePointer();
     await tester.pump();
     expect(controller.text, 'solo, blue hair, ');
     expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
@@ -231,22 +234,105 @@ void main() {
     expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
   });
 
-  testWidgets('clicking a search result shows local related tags', (
-    tester,
-  ) async {
+  testWidgets(
+    'click opens wiki; hovered relation action opens the right panel',
+    (tester) async {
+      final controller = TextEditingController();
+      final focusNode = FocusNode();
+      final related = _Source([_tag('long_hair')]);
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+      await _pumpEditor(
+        tester,
+        controller,
+        focusNode,
+        _Source([_tag('blue_hair')]),
+        related: related,
+      );
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(find.byKey(const Key('prompt-editor')));
+      await tester.pump();
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.enterText(
+        find.byKey(const Key('tag-expansion-search')),
+        'blue',
+      );
+      await tester.pump(const Duration(milliseconds: 170));
+      await tester.pump();
+
+      await tester.tap(find.text('blue hair').first);
+      await tester.pump();
+      expect(find.byKey(const Key('tag-expansion-wiki-panel')), findsOneWidget);
+      expect(find.text('A local description for blue hair.'), findsOneWidget);
+      expect(related.queries, isEmpty);
+
+      final mouse = await _hover(tester, find.text('blue hair').first);
+      await tester.tap(find.byTooltip('Show related tags').first);
+      await tester.pump();
+      expect(related.queries.single.relatedTag, 'blue_hair');
+      expect(
+        find.byKey(const Key('tag-expansion-related-panel')),
+        findsOneWidget,
+      );
+      expect(find.text('long hair'), findsOneWidget);
+      await mouse.moveTo(tester.getCenter(find.text('long hair')));
+      await tester.pump(const Duration(milliseconds: 120));
+      await tester.tap(find.byTooltip('Insert tag').last);
+      await mouse.removePointer();
+      await tester.pump();
+      expect(controller.text, 'long hair, ');
+    },
+  );
+
+  testWidgets(
+    'search results use two columns and wrap into one on narrow windows',
+    (tester) async {
+      final controller = TextEditingController();
+      final focusNode = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+      await _pumpEditor(
+        tester,
+        controller,
+        focusNode,
+        _Source([_tag('blue_hair'), _tag('green_hair'), _tag('red_hair')]),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(find.byKey(const Key('prompt-editor')));
+      await tester.pump();
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.enterText(
+        find.byKey(const Key('tag-expansion-search')),
+        'hair',
+      );
+      await tester.pump(const Duration(milliseconds: 170));
+      await tester.pump();
+
+      final first = tester.getTopLeft(find.text('blue hair'));
+      final second = tester.getTopLeft(find.text('green hair'));
+      final third = tester.getTopLeft(find.text('red hair'));
+      expect(second.dy, first.dy);
+      expect(second.dx, greaterThan(first.dx));
+      expect(third.dy, greaterThan(first.dy));
+    },
+  );
+
+  testWidgets('narrow window uses one result column', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(360, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     final controller = TextEditingController();
     final focusNode = FocusNode();
-    final related = _Source([_tag('long_hair')]);
     addTearDown(controller.dispose);
     addTearDown(focusNode.dispose);
     await _pumpEditor(
       tester,
       controller,
       focusNode,
-      _Source([_tag('blue_hair')]),
-      related: related,
+      _Source([_tag('blue_hair'), _tag('green_hair')]),
     );
-
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.tap(find.byKey(const Key('prompt-editor')));
     await tester.pump();
@@ -254,19 +340,65 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.enterText(
       find.byKey(const Key('tag-expansion-search')),
-      'blue',
+      'hair',
     );
     await tester.pump(const Duration(milliseconds: 170));
     await tester.pump();
-
-    await tester.tap(find.text('blue hair').first);
-    await tester.pump();
-    expect(related.queries.single.relatedTag, 'blue_hair');
-    expect(find.text('long hair'), findsOneWidget);
-    await tester.tap(find.byTooltip('Insert tag').last);
-    await tester.pump();
-    expect(controller.text, 'long hair, ');
+    expect(
+      tester.getTopLeft(find.text('green hair')).dy,
+      greaterThan(tester.getTopLeft(find.text('blue hair')).dy),
+    );
   });
+
+  testWidgets(
+    'wiki uses natural height and caps long articles with scrolling',
+    (tester) async {
+      final controller = TextEditingController();
+      final focusNode = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+      await _pumpEditor(
+        tester,
+        controller,
+        focusNode,
+        _Source([_tag('short_tag'), _tag('long_tag')]),
+        wiki: _Wiki({
+          'short_tag': 'Short description.',
+          'long_tag': List.filled(250, 'Long article sentence.').join(' '),
+        }),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(find.byKey(const Key('prompt-editor')));
+      await tester.pump();
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.enterText(
+        find.byKey(const Key('tag-expansion-search')),
+        'tag',
+      );
+      await tester.pump(const Duration(milliseconds: 170));
+      await tester.pump();
+
+      await tester.tap(find.text('short tag'));
+      await tester.pump();
+      await tester.pump();
+      final shortHeight = tester
+          .getSize(find.byKey(const Key('tag-expansion-wiki-panel')))
+          .height;
+      await tester.tap(find.text('long tag'));
+      await tester.pump();
+      await tester.pump();
+      final longHeight = tester
+          .getSize(find.byKey(const Key('tag-expansion-wiki-panel')))
+          .height;
+      expect(longHeight, greaterThan(shortHeight));
+      expect(longHeight, lessThanOrEqualTo(230));
+      expect(
+        find.byKey(const Key('tag-expansion-wiki-scroll')),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('Ctrl+drag sends selected text to local related search', (
     tester,
@@ -485,6 +617,7 @@ void main() {
           localTagExpansionServiceProvider.overrideWithValue(
             _service(_Source([_tag('blue_hair')])),
           ),
+          tagWikiRepositoryProvider.overrideWithValue(_Wiki()),
         ],
         child: MaterialApp(
           locale: const Locale('en'),
@@ -526,6 +659,7 @@ Future<void> _pumpEditor(
   FocusNode focusNode,
   CompletionSource catalog, {
   CompletionSource? related,
+  TagWikiRepository? wiki,
   bool enabled = true,
   bool includeWeightToolbar = false,
 }) async {
@@ -550,7 +684,10 @@ Future<void> _pumpEditor(
   }
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [localTagExpansionServiceProvider.overrideWithValue(service)],
+      overrides: [
+        localTagExpansionServiceProvider.overrideWithValue(service),
+        tagWikiRepositoryProvider.overrideWithValue(wiki ?? _Wiki()),
+      ],
       child: MaterialApp(
         locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -604,4 +741,25 @@ class _Translations implements TranslationResolver {
     List<String> canonicalTags, {
     required String locale,
   }) async => const {};
+}
+
+class _Wiki implements TagWikiRepository {
+  _Wiki([this.bodies = const {}]);
+
+  final Map<String, String> bodies;
+
+  @override
+  Future<TagWikiEntry?> find(String tag) async => TagWikiEntry(
+    tag: tag,
+    body: bodies[tag] ?? 'A local description for ${tag.replaceAll('_', ' ')}.',
+    sourceUrl: '',
+  );
+}
+
+Future<TestGesture> _hover(WidgetTester tester, Finder target) async {
+  final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+  await mouse.addPointer(location: Offset.zero);
+  await mouse.moveTo(tester.getCenter(target));
+  await tester.pump(const Duration(milliseconds: 120));
+  return mouse;
 }

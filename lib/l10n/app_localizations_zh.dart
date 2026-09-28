@@ -8500,6 +8500,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tagExpansion_tabComplete => 'Tab 补全：';
 
   @override
+  String get tagExpansion_wikiTitle => '标签小百科';
+
+  @override
+  String get tagExpansion_wikiUnavailable => '本地暂未收录这个标签的释义。';
+
+  @override
   String get autocomplete_danbooruApi => 'Danbooru 在线补充';
 
   @override

@@ -33,8 +33,10 @@ void main() {
 
     final catalog = await _createCatalogFixture(tempDir.path);
     final cooccurrence = await _createCooccurrenceFixture(tempDir.path);
+    final wiki = await _createWikiFixture(tempDir.path);
     final catalogBytes = await catalog.readAsBytes();
     final cooccurrenceBytes = await cooccurrence.readAsBytes();
+    final wikiBytes = await wiki.readAsBytes();
     manifest = {
       'databases': {
         AssetDatabaseManager.tagCatalogDb: {
@@ -49,6 +51,12 @@ void main() {
           'sha256': sha256.convert(cooccurrenceBytes).toString(),
           'size': cooccurrenceBytes.length,
         },
+        AssetDatabaseManager.tagWikiDb: {
+          'schemaVersion': 1,
+          'dataVersion': 'test-data',
+          'sha256': sha256.convert(wikiBytes).toString(),
+          'size': wikiBytes.length,
+        },
       },
     };
     assets = {
@@ -58,6 +66,7 @@ void main() {
       'assets/databases/${AssetDatabaseManager.tagCatalogDb}': catalogBytes,
       'assets/databases/${AssetDatabaseManager.cooccurrenceDb}':
           cooccurrenceBytes,
+      'assets/databases/${AssetDatabaseManager.tagWikiDb}': wikiBytes,
     };
     assetLoadCounts = <String, int>{};
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -124,6 +133,23 @@ void main() {
       expect(assetLoadCounts['assets/databases/$name'], 1);
     }
     expect(await File(p.join(dbDir.path, 'translation.db')).exists(), isFalse);
+    expect(
+      await File(p.join(dbDir.path, AssetDatabaseManager.tagWikiDb)).exists(),
+      isFalse,
+    );
+  });
+
+  test('installs the wiki only on first article and reuses it', () async {
+    await AssetDatabaseManager.initialize();
+    final manager = AssetDatabaseManager.instance;
+    final first = await manager.ensureTagWikiDb();
+    final second = await manager.ensureTagWikiDb();
+    expect(first, second);
+    expect(await File(first).exists(), isTrue);
+    expect(
+      assetLoadCounts['assets/databases/${AssetDatabaseManager.tagWikiDb}'],
+      1,
+    );
   });
 
   test('legacy autocomplete migration preserves local gallery data', () async {
@@ -199,6 +225,20 @@ Future<File> _createCooccurrenceFixture(String directory) async {
   final file = File(p.join(directory, 'cooccurrence-fixture.db'));
   final db = sqlite3.open(file.path);
   db.execute('CREATE TABLE cooccurrences(tag1 TEXT, tag2 TEXT, count INTEGER)');
+  db.dispose();
+  return file;
+}
+
+Future<File> _createWikiFixture(String directory) async {
+  final file = File(p.join(directory, 'wiki-fixture.db'));
+  final db = sqlite3.open(file.path);
+  db.execute('''
+    CREATE TABLE metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);
+    INSERT INTO metadata VALUES ('schema_version', '1');
+    INSERT INTO metadata VALUES ('data_version', 'test-data');
+    CREATE TABLE wiki_pages(tag TEXT PRIMARY KEY, body TEXT NOT NULL, source_url TEXT NOT NULL);
+    INSERT INTO wiki_pages VALUES ('blue_hair', 'Blue hair.', '');
+  ''');
   db.dispose();
   return file;
 }

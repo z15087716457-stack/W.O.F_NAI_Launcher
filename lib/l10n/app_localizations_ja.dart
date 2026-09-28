@@ -8620,6 +8620,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tagExpansion_tabComplete => 'Tab で補完：';
 
   @override
+  String get tagExpansion_wikiTitle => 'タグ百科';
+
+  @override
+  String get tagExpansion_wikiUnavailable => 'このタグの説明はまだローカルにありません。';
+
+  @override
   String get autocomplete_danbooruApi => 'Danbooru オンライン補完';
 
   @override

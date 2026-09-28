@@ -8808,6 +8808,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tagExpansion_tabComplete => 'Tab to complete:';
 
   @override
+  String get tagExpansion_wikiTitle => 'Tag wiki';
+
+  @override
+  String get tagExpansion_wikiUnavailable =>
+      'No local article for this tag yet.';
+
+  @override
   String get autocomplete_danbooruApi => 'Danbooru online supplement';
 
   @override

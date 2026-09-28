@@ -18,10 +18,13 @@ class AssetDatabaseManager {
 
   static const String tagCatalogDb = 'tag_catalog.db';
   static const String cooccurrenceDb = 'cooccurrence.db';
+  static const String tagWikiDb = 'tag_wiki.db';
   static const String _manifestAsset = 'assets/databases/manifest.json';
 
   String? _tagCatalogDbPath;
   String? _cooccurrenceDbPath;
+  String? _tagWikiDbPath;
+  Future<String>? _wikiInstallation;
   static Future<void>? _initialization;
   static bool _initialized = false;
 
@@ -45,6 +48,40 @@ class AssetDatabaseManager {
     _initialization = null;
     _instance._tagCatalogDbPath = null;
     _instance._cooccurrenceDbPath = null;
+    _instance._tagWikiDbPath = null;
+    _instance._wikiInstallation = null;
+  }
+
+  /// The wiki is only copied when a tag article is opened. Search startup
+  /// therefore does not have to hash or install another 50 MB database.
+  Future<String> ensureTagWikiDb() async {
+    if (_tagWikiDbPath case final path?) return path;
+    await initialize();
+    return _wikiInstallation ??= _installWiki().whenComplete(() {
+      _wikiInstallation = null;
+    });
+  }
+
+  Future<String> _installWiki() async {
+    final appDir = await getApplicationSupportDirectory();
+    final assetDbDir = Directory(p.join(appDir.path, 'asset_databases'));
+    await assetDbDir.create(recursive: true);
+    final manifest =
+        jsonDecode(await rootBundle.loadString(_manifestAsset))
+            as Map<String, dynamic>;
+    final databases = manifest['databases'] as Map<String, dynamic>;
+    final targetPath = p.join(assetDbDir.path, tagWikiDb);
+    await _install(
+      fileName: tagWikiDb,
+      targetPath: targetPath,
+      metadata: Map<String, dynamic>.from(databases[tagWikiDb] as Map),
+      requiredTables: const {
+        'metadata': {'key', 'value'},
+        'wiki_pages': {'tag', 'body', 'source_url'},
+      },
+    );
+    _tagWikiDbPath = targetPath;
+    return _tagWikiDbPath!;
   }
 
   static Future<void> _initialize() async {

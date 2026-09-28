@@ -15438,6 +15438,18 @@ abstract class AppLocalizations {
   /// **'Tab to complete:'**
   String get tagExpansion_tabComplete;
 
+  /// No description provided for @tagExpansion_wikiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag wiki'**
+  String get tagExpansion_wikiTitle;
+
+  /// No description provided for @tagExpansion_wikiUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No local article for this tag yet.'**
+  String get tagExpansion_wikiUnavailable;
+
   /// No description provided for @autocomplete_danbooruApi.
   ///
   /// In en, this message translates to:

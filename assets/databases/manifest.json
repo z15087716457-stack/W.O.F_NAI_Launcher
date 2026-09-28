@@ -10,6 +10,12 @@
     "cooccurrence.db": {
       "sha256": "d23335978b12f0cbbdb526e745e17985943f93fb53caafe7242f4948aa69bae9",
       "size": 321454080
+    },
+    "tag_wiki.db": {
+      "schemaVersion": 1,
+      "dataVersion": "d017b2871814",
+      "sha256": "d368fa876ff23f12e62c254b95b9a4c906cc61a38b25d64c4ef38ea2417c22c9",
+      "size": 51851264
     }
   }
 }

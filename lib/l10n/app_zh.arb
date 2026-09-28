@@ -5057,6 +5057,8 @@
   "tagExpansion_localOnly": "仅本地",
   "tagExpansion_popularSource": "本地常用标签",
   "tagExpansion_tabComplete": "Tab 补全：",
+  "tagExpansion_wikiTitle": "标签小百科",
+  "tagExpansion_wikiUnavailable": "本地暂未收录这个标签的释义。",
   "autocomplete_danbooruApi": "Danbooru 在线补充",
   "autocomplete_danbooruPrivacy": "仅发送当前英文标签，不会上传完整提示词",
   "autocomplete_llmTranslation": "使用 Prompt Assistant 补译缺失汉化",

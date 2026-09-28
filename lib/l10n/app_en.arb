@@ -5057,6 +5057,8 @@
   "tagExpansion_localOnly": "Local only",
   "tagExpansion_popularSource": "Popular local tags",
   "tagExpansion_tabComplete": "Tab to complete:",
+  "tagExpansion_wikiTitle": "Tag wiki",
+  "tagExpansion_wikiUnavailable": "No local article for this tag yet.",
   "autocomplete_danbooruApi": "Danbooru online supplement",
   "autocomplete_danbooruPrivacy": "Only the current English tag is sent; the full prompt is never uploaded",
   "autocomplete_llmTranslation": "Use Prompt Assistant for missing translations",
