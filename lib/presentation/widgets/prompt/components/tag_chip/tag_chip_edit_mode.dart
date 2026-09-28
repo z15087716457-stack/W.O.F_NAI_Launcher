@@ -206,7 +206,6 @@ class _TagChipEditModeState extends ConsumerState<TagChipEditMode>
               child: AutocompleteWrapper.localTag(
                 controller: _controller,
                 focusNode: _focusNode,
-                ref: ref,
                 enabled: enableAutocomplete,
                 config: const AutocompleteConfig(
                   showTranslation: true,

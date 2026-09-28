@@ -6,9 +6,6 @@ class AutocompleteConfig {
     this.showTranslation = true,
     this.showCategory = true,
     this.showCount = true,
-    this.enableChineseSearch = true,
-    this.debounceDelay = const Duration(milliseconds: 150),
-    this.minQueryLength = 2,
     this.autoInsertComma = true,
     this.treatSpacesAsSeparators = false,
   });
@@ -18,9 +15,6 @@ class AutocompleteConfig {
   final bool showTranslation;
   final bool showCategory;
   final bool showCount;
-  final bool enableChineseSearch;
-  final Duration debounceDelay;
-  final int minQueryLength;
   final bool autoInsertComma;
 
   /// Search fields split on spaces and must insert canonical underscore tags.

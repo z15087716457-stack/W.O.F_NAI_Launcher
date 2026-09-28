@@ -193,7 +193,6 @@ class _TagGroupBrowserState extends ConsumerState<TagGroupBrowser> {
       child: AutocompleteWrapper.localTag(
         controller: _searchController,
         focusNode: _searchFocusNode,
-        ref: ref,
         config: const AutocompleteConfig(
           showTranslation: true,
           autoInsertComma: false,

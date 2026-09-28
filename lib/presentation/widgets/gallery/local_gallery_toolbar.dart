@@ -775,7 +775,6 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
       controller: _searchController,
       focusNode: _searchFocusNode,
       config: const AutocompleteConfig(
-        minQueryLength: 2,
         showTranslation: true,
         showCategory: true,
         showCount: true,

@@ -963,7 +963,6 @@ class _TagViewState extends ConsumerState<TagView>
                 child: AutocompleteWrapper.localTag(
                   controller: _addTagController,
                   focusNode: _addTagFocusNode,
-                  ref: ref,
                   enabled: enableAutocomplete,
                   config: const AutocompleteConfig(
                     showTranslation: true,

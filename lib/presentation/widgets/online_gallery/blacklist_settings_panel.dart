@@ -102,10 +102,7 @@ class _OnlineGalleryBlacklistSettingsPanelState
                   child: AutocompleteWrapper(
                     controller: _tagController,
                     focusNode: _tagFocusNode,
-                    config: const AutocompleteConfig(
-                      minQueryLength: 1,
-                      autoInsertComma: false,
-                    ),
+                    config: const AutocompleteConfig(autoInsertComma: false),
                     onSuggestionSelected: (_) => _addTag(),
                     child: TextField(
                       controller: _tagController,

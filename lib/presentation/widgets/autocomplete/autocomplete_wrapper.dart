@@ -53,7 +53,6 @@ class AutocompleteWrapper extends ConsumerStatefulWidget {
     Key? key,
     required Widget child,
     required TextEditingController controller,
-    required WidgetRef ref,
     AutocompleteConfig config = const AutocompleteConfig(),
     FocusNode? focusNode,
     bool enabled = true,
@@ -76,38 +75,6 @@ class AutocompleteWrapper extends ConsumerStatefulWidget {
       maxLines: maxLines,
       expands: expands,
       config: config,
-      child: child,
-    );
-  }
-
-  factory AutocompleteWrapper.withAlias({
-    Key? key,
-    required Widget child,
-    required TextEditingController controller,
-    required WidgetRef ref,
-    AutocompleteConfig config = const AutocompleteConfig(),
-    FocusNode? focusNode,
-    bool enabled = true,
-    ValueChanged<String>? onChanged,
-    ValueChanged<String>? onSuggestionSelected,
-    TextStyle? textStyle,
-    EdgeInsetsGeometry? contentPadding,
-    int? maxLines,
-    bool expands = false,
-  }) {
-    return AutocompleteWrapper.localTag(
-      key: key,
-      controller: controller,
-      ref: ref,
-      config: config,
-      focusNode: focusNode,
-      enabled: enabled,
-      onChanged: onChanged,
-      onSuggestionSelected: onSuggestionSelected,
-      textStyle: textStyle,
-      contentPadding: contentPadding,
-      maxLines: maxLines,
-      expands: expands,
       child: child,
     );
   }
