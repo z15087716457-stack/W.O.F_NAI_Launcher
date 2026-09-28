@@ -9,9 +9,9 @@ import '../../../../data/models/character/character_prompt.dart';
 import '../../../../presentation/utils/text_selection_utils.dart';
 import '../../../providers/generation/generation_settings_notifiers.dart';
 import '../../../screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
-import '../../autocomplete/autocomplete_wrapper.dart';
 import '../../common/app_toast.dart';
 import '../../common/weight_adjust_toolbar.dart';
+import '../../tag_expansion/tag_expansion_wrapper.dart';
 import '../comfyui_import_wrapper.dart';
 import '../nai_syntax_controller.dart';
 import 'unified_prompt_config.dart';
@@ -107,6 +107,8 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
 
   /// 焦点节点
   FocusNode? _internalFocusNode;
+  bool _tagExpansionActive = false;
+  String? _tagExpansionOpeningText;
 
   late final TextEditingController _searchController;
   late final FocusNode _searchFocusNode;
@@ -283,9 +285,25 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
 
   /// 焦点变化回调
   void _onFocusChanged() {
-    if (!_effectiveFocusNode.hasFocus) {
+    if (!_effectiveFocusNode.hasFocus && !_tagExpansionActive) {
       _formatOnBlur();
     }
+  }
+
+  void _onTagExpansionActiveChanged(bool active) {
+    _tagExpansionActive = active;
+    if (active) {
+      _tagExpansionOpeningText = _effectiveController.text;
+      return;
+    }
+    final unchanged = _tagExpansionOpeningText == _effectiveController.text;
+    _tagExpansionOpeningText = null;
+    if (!unchanged) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_tagExpansionActive && !_effectiveFocusNode.hasFocus) {
+        _formatOnBlur();
+      }
+    });
   }
 
   /// 失焦时格式化提示词
@@ -1085,7 +1103,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
                 );
               }),
             ],
-      onChanged: widget.config.enableAutocomplete ? null : _handleTextChanged,
+      onChanged: _handleTextChanged,
       onSubmitted: widget.onSubmitted,
       showClearButton: widget.config.showClearButton,
       onClearPressed: widget.config.showClearButton ? _handleClear : null,
@@ -1093,31 +1111,27 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       contextMenuBuilder: _buildContextMenu,
     );
 
-    // 包装权重调整工具条
-    Widget result = WeightAdjustToolbarWrapper(
-      controller: _effectiveController,
-      focusNode: _effectiveFocusNode,
-      enableWheelAdjustment: enableWheelAdjustment,
-      wheelModifier: wheelModifier,
-      child: baseInput,
-    );
-
-    // 如果启用自动补全，使用 AutocompleteWrapper 包装
-    if (widget.config.enableAutocomplete) {
-      result = AutocompleteWrapper(
+    // Tag expansion is explicit and independent of the old typing-completion
+    // setting. The old completion wrapper remains in other fields until REFAC-2.
+    Widget result = baseInput;
+    if (!widget.config.readOnly) {
+      result = TagExpansionWrapper(
         controller: _effectiveController,
         focusNode: _effectiveFocusNode,
-        config: widget.config.autocompleteConfig,
-        enabled: !widget.config.readOnly,
-        onChanged: _handleTextChanged,
-        contentPadding: effectiveDecoration.contentPadding,
-        maxLines: widget.maxLines,
-        expands: widget.expands,
+        onApplied: _handleTextChanged,
+        onActiveChanged: _onTagExpansionActiveChanged,
         child: result,
       );
     }
 
-    return result;
+    // The pointer listener belongs to the text field, not toolbar controls.
+    return WeightAdjustToolbarWrapper(
+      controller: _effectiveController,
+      focusNode: _effectiveFocusNode,
+      enableWheelAdjustment: enableWheelAdjustment,
+      wheelModifier: wheelModifier,
+      child: result,
+    );
   }
 }
 

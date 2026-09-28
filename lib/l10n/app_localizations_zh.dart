@@ -1190,11 +1190,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prompt_sdSyntaxAutoConvertSubtitle => '失焦或生成时将 SD 权重语法转换为 NAI 格式';
 
   @override
-  String get prompt_cooccurrenceRecommendation => '共现标签推荐';
+  String get prompt_cooccurrenceRecommendation => '标签扩展';
 
   @override
   String get prompt_cooccurrenceRecommendationSubtitle =>
-      '选中标签后自动推荐，也可按 Ctrl+Shift+Space 或 Ctrl+单击';
+      'Ctrl+单击搜索本地标签；Ctrl+拖选查看关联标签';
 
   @override
   String get prompt_formatted => '已格式化';
@@ -8467,11 +8467,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autocomplete_dataSourcesTitle => '数据源与缓存';
 
   @override
-  String get autocomplete_relatedTagsTitle => '共现与相关标签推荐';
+  String get autocomplete_relatedTagsTitle => '标签扩展';
 
   @override
-  String get autocomplete_relatedTagsSubtitle =>
-      '选中补全后自动推荐；也可在标签上按 Ctrl+Shift+Space 或 Ctrl+单击';
+  String get autocomplete_relatedTagsSubtitle => 'Ctrl+单击搜索本地标签；Ctrl+拖选查看关联标签';
+
+  @override
+  String get tagExpansion_searchHint => '搜索标签、别名或汉化名';
+
+  @override
+  String get tagExpansion_relatedTitle => '关联标签';
+
+  @override
+  String get tagExpansion_empty => '输入词语搜索本地标签';
+
+  @override
+  String get tagExpansion_noResults => '没有找到本地标签';
+
+  @override
+  String get tagExpansion_insert => '插入标签';
+
+  @override
+  String get tagExpansion_showRelated => '查看关联标签';
+
+  @override
+  String get tagExpansion_localOnly => '仅本地';
 
   @override
   String get autocomplete_danbooruApi => 'Danbooru 在线补充';

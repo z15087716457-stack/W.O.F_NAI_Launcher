@@ -2328,13 +2328,13 @@ abstract class AppLocalizations {
   /// No description provided for @prompt_cooccurrenceRecommendation.
   ///
   /// In en, this message translates to:
-  /// **'Co-occurrence Tag Recommendation'**
+  /// **'Tag Expansion'**
   String get prompt_cooccurrenceRecommendation;
 
   /// No description provided for @prompt_cooccurrenceRecommendationSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Suggest after accepting a tag; Ctrl+Shift+Space or Ctrl+click also opens related tags'**
+  /// **'Ctrl+click to search local tags; Ctrl+drag to explore related tags'**
   String get prompt_cooccurrenceRecommendationSubtitle;
 
   /// No description provided for @prompt_formatted.
@@ -15375,14 +15375,56 @@ abstract class AppLocalizations {
   /// No description provided for @autocomplete_relatedTagsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Co-occurrence and related tags'**
+  /// **'Tag Expansion'**
   String get autocomplete_relatedTagsTitle;
 
   /// No description provided for @autocomplete_relatedTagsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Suggest after accepting a tag; also use Ctrl+Shift+Space or Ctrl+click on a tag'**
+  /// **'Ctrl+click to search local tags; Ctrl+drag to explore related tags'**
   String get autocomplete_relatedTagsSubtitle;
+
+  /// No description provided for @tagExpansion_searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search tags, aliases, or translations'**
+  String get tagExpansion_searchHint;
+
+  /// No description provided for @tagExpansion_relatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Related tags'**
+  String get tagExpansion_relatedTitle;
+
+  /// No description provided for @tagExpansion_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Type to search local tags'**
+  String get tagExpansion_empty;
+
+  /// No description provided for @tagExpansion_noResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No local tags found'**
+  String get tagExpansion_noResults;
+
+  /// No description provided for @tagExpansion_insert.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert tag'**
+  String get tagExpansion_insert;
+
+  /// No description provided for @tagExpansion_showRelated.
+  ///
+  /// In en, this message translates to:
+  /// **'Show related tags'**
+  String get tagExpansion_showRelated;
+
+  /// No description provided for @tagExpansion_localOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Local only'**
+  String get tagExpansion_localOnly;
 
   /// No description provided for @autocomplete_danbooruApi.
   ///

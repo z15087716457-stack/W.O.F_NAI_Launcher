@@ -144,6 +144,59 @@ class PromptTokenParser {
     );
   }
 
+  /// Insert a picked tag after the tag under the caret, preserving that tag
+  /// and its weight syntax. Ordinary completion replaces the current token.
+  static ({String text, int cursorPosition}) insertAtCaret({
+    required String text,
+    required int cursorPosition,
+    required String canonicalTag,
+    required bool autoInsertComma,
+  }) {
+    final related = parseRelated(
+      text: text,
+      cursorPosition: cursorPosition,
+      limit: 1,
+      locale: 'en',
+    );
+    CompletionQuery insertion;
+    if (related != null) {
+      insertion = related;
+    } else {
+      final parsed = parse(
+        text: text,
+        cursorPosition: cursorPosition,
+        limit: 1,
+        locale: 'en',
+      );
+      if (parsed.kind == CompletionQueryKind.libraryAlias) {
+        return (text: text, cursorPosition: cursorPosition);
+      }
+      var offset = parsed.replacementRange.end;
+      offset += _syntaxSuffix.firstMatch(text.substring(offset))!.end;
+      while (offset < text.length && _isHorizontalSpace(text[offset])) {
+        offset++;
+      }
+      if (offset < text.length &&
+          (text[offset] == ',' || text[offset] == '，')) {
+        offset++;
+        while (offset < text.length && _isHorizontalSpace(text[offset])) {
+          offset++;
+        }
+      }
+      insertion = parsed.copyWith(
+        token: '',
+        relatedTag: parsed.token.isEmpty ? canonicalTag : parsed.token,
+        replacementRange: TextReplacementRange(start: offset, end: offset),
+      );
+    }
+    return apply(
+      text: text,
+      query: insertion,
+      canonicalTag: canonicalTag,
+      autoInsertComma: autoInsertComma,
+    );
+  }
+
   static ({String text, int cursorPosition}) apply({
     required String text,
     required CompletionQuery query,

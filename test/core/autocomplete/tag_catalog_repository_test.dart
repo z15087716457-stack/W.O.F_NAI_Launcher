@@ -111,6 +111,19 @@ void main() {
     expect(results.first.canonicalTag, 'blue_archive_001');
     expect(results.last.canonicalTag, 'blue_archive_450');
   });
+
+  test('explicit search finds mid-word canonical and alias matches', () async {
+    final canonical = await repository.searchContains('tist', limit: 10);
+    final short = await repository.searchContains('ti', limit: 10);
+    final alias = await repository.searchContains('qua', limit: 10);
+    final escaped = await repository.searchContains('blu%', limit: 10);
+
+    expect(canonical.map((tag) => tag.canonicalTag), contains('artist_blue'));
+    expect(short.map((tag) => tag.canonicalTag), contains('artist_blue'));
+    expect(alias.single.canonicalTag, 'blue_eyes');
+    expect(alias.single.matchedAlias, 'aqua_eyes');
+    expect(escaped, isEmpty);
+  });
 }
 
 CompletionQuery _query(String token, {int limit = 20}) => CompletionQuery(

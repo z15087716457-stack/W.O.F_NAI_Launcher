@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/localization_extension.dart';
@@ -387,8 +388,11 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
         // P2.5：点击从「直接切启停」改为开 L1 实例卡（启停/删除/重 roll/
         // 高级选项都在卡里）；即按即拖与 tap 天然分流，不受影响。
         child: GestureDetector(
-          onTapUp: (details) =>
-              _showInstanceCard(marker, details.globalPosition),
+          onTapUp: (details) {
+            final keyboard = HardwareKeyboard.instance;
+            if (keyboard.isControlPressed || keyboard.isMetaPressed) return;
+            _showInstanceCard(marker, details.globalPosition);
+          },
           child: pill,
         ),
       ),

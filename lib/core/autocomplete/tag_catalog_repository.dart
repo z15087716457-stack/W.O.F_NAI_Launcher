@@ -98,6 +98,61 @@ class TagCatalogRepository implements CompletionSource {
     return candidates.take(requestedLimit).toList(growable: false);
   }
 
+  /// Bounded substring fallback for the explicit tag search. The bundled FTS
+  /// index supports token prefixes, but has no trigram index for mid-word hits.
+  Future<List<CompletionCandidate>> searchContains(
+    String input, {
+    int limit = 20,
+  }) async {
+    final normalized = input.trim().toLowerCase().replaceAll(' ', '_');
+    if (normalized.runes.length < 2) return const [];
+    await initialize();
+
+    final pattern =
+        '%${normalized.replaceAll(r'\', r'\\').replaceAll('%', r'\%').replaceAll('_', r'\_')}%';
+    final rows = await _database!.rawQuery(
+      '''
+      SELECT f.term, f.kind, t.id, t.name, t.category, t.post_count
+      FROM tag_search f
+      JOIN tags t ON t.id = f.tag_id
+      WHERE f.term LIKE ? ESCAPE '\\'
+      ORDER BY t.post_count DESC, t.name ASC
+      LIMIT ?
+      ''',
+      [pattern, (limit.clamp(1, 100) * 3)],
+    );
+    if (rows.isEmpty) return const [];
+
+    final byId = <int, Map<String, Object?>>{};
+    for (final row in rows) {
+      final id = row['id'] as int;
+      final existing = byId[id];
+      if (existing == null ||
+          (existing['kind'] as int) > (row['kind'] as int)) {
+        byId[id] = row;
+      }
+    }
+    final aliasesById = await _loadAliases(byId.keys.toList());
+    return byId.values
+        .map((row) {
+          final category = TagCategory.fromCatalog(row['category'] as int);
+          if (category == null) return null;
+          final kind = row['kind'] as int;
+          return CompletionCandidate(
+            canonicalTag: row['name'] as String,
+            category: category,
+            postCount: row['post_count'] as int,
+            aliases: aliasesById[row['id'] as int] ?? const [],
+            matchedAlias: kind == 1 ? row['term'] as String : null,
+            matchKind: CompletionMatchKind.fullText,
+            sources: const {CompletionSourceKind.base},
+          );
+        })
+        .whereType<CompletionCandidate>()
+        .take(limit)
+        .toList(growable: false);
+  }
+
   Future<Map<int, List<String>>> _loadAliases(List<int> ids) async {
     if (ids.isEmpty) return const {};
     final result = <int, List<String>>{};

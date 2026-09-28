@@ -1209,11 +1209,11 @@ class AppLocalizationsJa extends AppLocalizations {
       'フォーカスが外れたとき、または生成時に SD の重み構文を NAI 形式に変換します';
 
   @override
-  String get prompt_cooccurrenceRecommendation => '共起タグの推奨事項';
+  String get prompt_cooccurrenceRecommendation => 'タグ拡張';
 
   @override
   String get prompt_cooccurrenceRecommendationSubtitle =>
-      'タグ確定後に自動表示。Ctrl+Shift+Space または Ctrl+クリックでも表示できます';
+      'Ctrl+クリックでローカル検索、Ctrl+ドラッグで関連タグを表示';
 
   @override
   String get prompt_formatted => 'フォーマット済み';
@@ -8586,11 +8586,32 @@ class AppLocalizationsJa extends AppLocalizations {
   String get autocomplete_dataSourcesTitle => 'データソースとキャッシュ';
 
   @override
-  String get autocomplete_relatedTagsTitle => '共起・関連タグ候補';
+  String get autocomplete_relatedTagsTitle => 'タグ拡張';
 
   @override
   String get autocomplete_relatedTagsSubtitle =>
-      'タグ確定後に自動表示。タグ上で Ctrl+Shift+Space または Ctrl+クリックでも表示できます';
+      'Ctrl+クリックでローカル検索、Ctrl+ドラッグで関連タグを表示';
+
+  @override
+  String get tagExpansion_searchHint => 'タグ・別名・翻訳を検索';
+
+  @override
+  String get tagExpansion_relatedTitle => '関連タグ';
+
+  @override
+  String get tagExpansion_empty => '入力してローカルタグを検索';
+
+  @override
+  String get tagExpansion_noResults => 'ローカルタグが見つかりません';
+
+  @override
+  String get tagExpansion_insert => 'タグを挿入';
+
+  @override
+  String get tagExpansion_showRelated => '関連タグを表示';
+
+  @override
+  String get tagExpansion_localOnly => 'ローカルのみ';
 
   @override
   String get autocomplete_danbooruApi => 'Danbooru オンライン補完';

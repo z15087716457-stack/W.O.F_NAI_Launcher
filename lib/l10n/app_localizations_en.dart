@@ -1231,12 +1231,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Convert SD weights to NAI syntax on blur or generation';
 
   @override
-  String get prompt_cooccurrenceRecommendation =>
-      'Co-occurrence Tag Recommendation';
+  String get prompt_cooccurrenceRecommendation => 'Tag Expansion';
 
   @override
   String get prompt_cooccurrenceRecommendationSubtitle =>
-      'Suggest after accepting a tag; Ctrl+Shift+Space or Ctrl+click also opens related tags';
+      'Ctrl+click to search local tags; Ctrl+drag to explore related tags';
 
   @override
   String get prompt_formatted => 'Formatted';
@@ -8775,11 +8774,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get autocomplete_dataSourcesTitle => 'Data Sources & Cache';
 
   @override
-  String get autocomplete_relatedTagsTitle => 'Co-occurrence and related tags';
+  String get autocomplete_relatedTagsTitle => 'Tag Expansion';
 
   @override
   String get autocomplete_relatedTagsSubtitle =>
-      'Suggest after accepting a tag; also use Ctrl+Shift+Space or Ctrl+click on a tag';
+      'Ctrl+click to search local tags; Ctrl+drag to explore related tags';
+
+  @override
+  String get tagExpansion_searchHint => 'Search tags, aliases, or translations';
+
+  @override
+  String get tagExpansion_relatedTitle => 'Related tags';
+
+  @override
+  String get tagExpansion_empty => 'Type to search local tags';
+
+  @override
+  String get tagExpansion_noResults => 'No local tags found';
+
+  @override
+  String get tagExpansion_insert => 'Insert tag';
+
+  @override
+  String get tagExpansion_showRelated => 'Show related tags';
+
+  @override
+  String get tagExpansion_localOnly => 'Local only';
 
   @override
   String get autocomplete_danbooruApi => 'Danbooru online supplement';
