@@ -35,8 +35,7 @@ import '../../widgets/online_gallery/blacklist_settings_panel.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/bulk_action_bar.dart';
 import '../../widgets/common/themed_input.dart';
-import '../../widgets/autocomplete/autocomplete_config.dart';
-import '../../widgets/autocomplete/autocomplete_wrapper.dart';
+import '../../widgets/tag_expansion/tag_expansion_wrapper.dart';
 
 /// 在线画廊页面
 class OnlineGalleryScreen extends ConsumerStatefulWidget {
@@ -727,17 +726,17 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
   }
 
   Widget _buildSearchField(ThemeData theme) {
-    return AutocompleteWrapper(
+    return TagExpansionWrapper(
       controller: _searchController,
       focusNode: _searchFocusNode,
-      config: const AutocompleteConfig(
-        autoInsertComma: false,
-        treatSpacesAsSeparators: true,
-      ),
-      onSuggestionSelected: (value) {
-        // 选择补全建议后立即触发搜索
+      splitOnSpaces: true,
+      onTagSelected: (tag) {
+        final query = _searchController.text.trim();
+        final next = query.isEmpty ? tag : '$query $tag';
+        _setControllerText(_searchController, next);
         _searchDebounceTimer?.cancel();
-        _galleryNotifier.search(value);
+        _galleryNotifier.search(next);
+        setState(() {});
       },
       child: Container(
         height: 36,

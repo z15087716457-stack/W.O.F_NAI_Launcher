@@ -27,8 +27,7 @@ import '../common/compact_icon_button.dart';
 import 'gallery_trash_panel.dart';
 import '../gallery_filter_panel.dart';
 
-import '../autocomplete/autocomplete_config.dart';
-import '../autocomplete/autocomplete_wrapper.dart';
+import '../tag_expansion/tag_expansion_wrapper.dart';
 import 'date_range_picker_dialog.dart';
 
 /// Local gallery toolbar with search, filter and actions
@@ -92,8 +91,7 @@ class LocalGalleryToolbar extends ConsumerStatefulWidget {
   /// 分类面板切换按钮回调
   final VoidCallback? onToggleCategoryPanel;
 
-  /// Whether search autocomplete is enabled.
-  /// 是否启用搜索自动补全。
+  /// Whether explicit tag search is enabled for the gallery search field.
   final bool enableSearchAutocomplete;
 
   const LocalGalleryToolbar({
@@ -771,27 +769,16 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
       return searchField;
     }
 
-    return AutocompleteWrapper(
+    return TagExpansionWrapper(
       controller: _searchController,
       focusNode: _searchFocusNode,
-      config: const AutocompleteConfig(
-        showTranslation: true,
-        showCategory: true,
-        showCount: true,
-        autoInsertComma: false,
-      ),
-      onSuggestionSelected: (value) {
-        // 选中补全建议 → 转为标签 chip（取最后一个片段），清空搜索框
+      onTagSelected: (tag) {
         _debounceTimer?.cancel();
-        final segments = value.split(RegExp(r'[,，]+'));
-        final tag = segments.isEmpty ? value.trim() : segments.last.trim();
-        if (tag.isNotEmpty) {
-          ref.read(localGalleryNotifierProvider.notifier).addSelectedTags([
-            tag,
-          ], clearSearchQuery: true);
-        }
+        ref.read(localGalleryNotifierProvider.notifier).addSelectedTags([
+          tag,
+        ], clearSearchQuery: true);
         _searchController.clear();
-        setState(() {}); // 更新清除按钮可见性
+        setState(() {});
       },
       child: searchField,
     );

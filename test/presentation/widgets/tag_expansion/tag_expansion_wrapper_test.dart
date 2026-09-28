@@ -82,6 +82,75 @@ void main() {
     expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
   });
 
+  testWidgets('gallery hosts receive a canonical tag without prompt syntax', (
+    tester,
+  ) async {
+    final controller = TextEditingController(text: 'existing query');
+    final focusNode = FocusNode();
+    final selected = <String>[];
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await _pumpEditor(
+      tester,
+      controller,
+      focusNode,
+      _Source([_tag('blue_hair')]),
+      onTagSelected: selected.add,
+    );
+
+    await tester.enterText(find.byKey(const Key('prompt-editor')), 'draft');
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tap(find.byKey(const Key('prompt-editor')));
+    await tester.pump();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.enterText(
+      find.byKey(const Key('tag-expansion-search')),
+      'blue',
+    );
+    await tester.pump(const Duration(milliseconds: 170));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    expect(selected, ['blue_hair']);
+    expect(controller.text, 'draft');
+    expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
+  });
+
+  testWidgets('space-separated gallery queries use the tag at the caret', (
+    tester,
+  ) async {
+    final controller = TextEditingController(text: '1girl blue_hair');
+    final focusNode = FocusNode();
+    final related = _Source([_tag('long_hair')]);
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await _pumpEditor(
+      tester,
+      controller,
+      focusNode,
+      _Source(const []),
+      related: related,
+      splitOnSpaces: true,
+    );
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tapAt(
+      tester.getCenter(find.byKey(const Key('prompt-editor'))) +
+          const Offset(170, 0),
+    );
+    await tester.pump();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+
+    expect(related.queries.single.relatedTag, 'blue_hair');
+    expect(controller.text, '1girl blue_hair');
+  });
+
   testWidgets('Ctrl+click keeps search empty and shows related context', (
     tester,
   ) async {
@@ -938,15 +1007,19 @@ Future<void> _pumpEditor(
   CompletionSource? related,
   TagWikiRepository? wiki,
   bool enabled = true,
+  bool splitOnSpaces = false,
   bool includeWeightToolbar = false,
   ValueChanged<bool>? onActiveChanged,
+  ValueChanged<String>? onTagSelected,
 }) async {
   final service = _service(catalog, related: related);
   Widget editor = TagExpansionWrapper(
     controller: controller,
     focusNode: focusNode,
     enabled: enabled,
+    splitOnSpaces: splitOnSpaces,
     onActiveChanged: onActiveChanged,
+    onTagSelected: onTagSelected,
     child: TextField(
       key: const Key('prompt-editor'),
       controller: controller,

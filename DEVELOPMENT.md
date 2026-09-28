@@ -25,6 +25,8 @@ Windows 桌面热重载优先使用 `scripts/dev_hot_reload_window.ps1`，它会
 
 遵循 `analysis_options.yaml` 和 Dart 默认格式化规则，使用两个空格缩进。变量和方法使用 `lowerCamelCase`，类型使用 `UpperCamelCase`。Riverpod provider 命名应以 `Provider` 或 `NotifierProvider` 结尾。新增功能优先复用现有 service、provider、widget 和 utility，保持 `core`、`data`、`presentation` 的职责边界清晰。
 
+新增可写标签的输入框复用 `TagExpansionWrapper`：Ctrl+单击或 Ctrl+拖选显式打开本地标签搜索，按输入框自身语义通过 `onTagSelected` 提交标签。普通打字不触发旧补全浮层；空格分隔的查询框设置 `splitOnSpaces: true`。
+
 ## 测试规范
 
 测试使用 `flutter_test`，需要 mock 时使用 `mocktail`。测试文件以 `_test.dart` 结尾，并放在对应功能路径下，例如 `test/core/utils/`、`test/data/services/`、`test/presentation/providers/`。UI 行为、状态管理、请求构造和文件处理的变更，按实际风险选择 widget、provider 或 service 回归覆盖。仅文档修改不运行 Flutter 测试或构建。

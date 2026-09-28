@@ -20,8 +20,8 @@ import '../../../core/wiki/tag_wiki_repository.dart';
 import '../autocomplete/tag_category_visuals.dart';
 import '../../router/app_router.dart';
 
-/// Explicit, local-only tag search for prompt editors. It does not listen to
-/// typed prompt text and never enters the old autocomplete query pipeline.
+/// Explicit, local-only tag search for editable tag fields. It does not listen
+/// to typed text and never enters the old autocomplete query pipeline.
 class TagExpansionWrapper extends ConsumerStatefulWidget {
   const TagExpansionWrapper({
     super.key,
@@ -29,6 +29,8 @@ class TagExpansionWrapper extends ConsumerStatefulWidget {
     required this.controller,
     this.focusNode,
     this.enabled = true,
+    this.splitOnSpaces = false,
+    this.onTagSelected,
     this.onApplied,
     this.onActiveChanged,
   });
@@ -37,6 +39,13 @@ class TagExpansionWrapper extends ConsumerStatefulWidget {
   final TextEditingController controller;
   final FocusNode? focusNode;
   final bool enabled;
+
+  /// Use space-separated tokens for gallery queries; prompts use commas.
+  final bool splitOnSpaces;
+
+  /// Commits a canonical tag using the host field's own input semantics.
+  /// Prompt editors use the default caret insertion when this is omitted.
+  final ValueChanged<String>? onTagSelected;
   final ValueChanged<String>? onApplied;
   final ValueChanged<bool>? onActiveChanged;
 
@@ -217,6 +226,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
               cursorPosition: offset,
               limit: 1,
               locale: Localizations.localeOf(context).toLanguageTag(),
+              splitOnSpaces: widget.splitOnSpaces,
             )?.relatedTag;
       _open(
         offset: offset,
@@ -238,6 +248,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       cursorPosition: selection.start,
       limit: 1,
       locale: Localizations.localeOf(context).toLanguageTag(),
+      splitOnSpaces: widget.splitOnSpaces,
     );
     return query.kind == CompletionQueryKind.tag &&
             query.token.isNotEmpty &&
@@ -266,6 +277,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       cursorPosition: offset,
       limit: 1,
       locale: Localizations.localeOf(context).toLanguageTag(),
+      splitOnSpaces: widget.splitOnSpaces,
     );
     _existingTags = {
       ...parsed.existingTags,
@@ -645,6 +657,11 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   void _insert(CompletionCandidate candidate) {
     if (candidate.isExisting || widget.controller.text != _openedText) {
       _close();
+      return;
+    }
+    if (widget.onTagSelected case final selectTag?) {
+      _close(restoreFocus: true);
+      selectTag(candidate.canonicalTag);
       return;
     }
     final result = PromptTokenParser.insertAtCaret(

@@ -1,9 +1,13 @@
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/datasources/remote/online_gallery/gallery_source_adapter.dart';
+import 'package:nai_launcher/core/autocomplete/completion_models.dart';
+import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart';
+import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/data/models/online_gallery/danbooru_post.dart';
 import 'package:nai_launcher/data/models/online_gallery/gelbooru_credentials.dart';
 import 'package:nai_launcher/data/services/danbooru_auth_service.dart';
@@ -13,8 +17,69 @@ import 'package:nai_launcher/presentation/providers/danbooru_suggestion_provider
 import 'package:nai_launcher/presentation/providers/online_gallery_provider.dart';
 import 'package:nai_launcher/presentation/screens/online_gallery/online_gallery_screen.dart';
 import 'package:nai_launcher/presentation/widgets/danbooru_post_card.dart';
+import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wrapper.dart';
 
 void main() {
+  testWidgets('tag picker appends a tag to the online gallery query', (
+    tester,
+  ) async {
+    await _setViewSize(tester, 1600);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          onlineGalleryNotifierProvider.overrideWith(
+            _TagSearchGalleryNotifier.new,
+          ),
+          danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
+          gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
+          danbooruSuggestionNotifierProvider.overrideWith(
+            _EmptyDanbooruSuggestionNotifier.new,
+          ),
+          localTagExpansionServiceProvider.overrideWithValue(
+            LocalTagExpansionService(
+              catalog: const _BlueHairSource(),
+              chineseDictionary: const _EmptyTagSource(),
+              relatedTags: const _EmptyTagSource(),
+              translations: const _NoTagTranslations(),
+              substringSearch: (input, {limit = 20}) async => const [],
+              popularSearch: ({limit = 12}) async => const [],
+            ),
+          ),
+        ],
+        child: const _TestApp(),
+      ),
+    );
+    await tester.pump();
+    final field = find.descendant(
+      of: find.byType(TagExpansionWrapper),
+      matching: find.byType(TextField),
+    );
+    expect(tester.widget<TextField>(field).controller!.text, '1girl');
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tap(field);
+    await tester.pump();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.enterText(
+      find.byKey(const Key('tag-expansion-search')),
+      'blue',
+    );
+    await tester.pump(const Duration(milliseconds: 170));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(OnlineGalleryScreen)),
+    );
+    expect(
+      container.read(onlineGalleryNotifierProvider).searchQuery,
+      '1girl blue_hair',
+    );
+    expect(tester.widget<TextField>(field).controller!.text, '1girl blue_hair');
+  });
+
   for (final width in [1600.0, 700.0]) {
     testWidgets('Gelbooru search uses its API account entry at width $width', (
       tester,
@@ -573,6 +638,53 @@ class _GelbooruSearchGalleryNotifier extends OnlineGalleryNotifier {
       searchCache: ModeCache(posts: [_gelbooruPost], hasMore: false),
     );
   }
+}
+
+class _TagSearchGalleryNotifier extends OnlineGalleryNotifier {
+  @override
+  OnlineGalleryState build() => const OnlineGalleryState(
+    sourceId: GallerySourceId.safebooru,
+    searchQuery: '1girl',
+    searchCache: ModeCache(posts: [_danbooruPost], hasMore: false),
+  );
+
+  @override
+  Future<void> search(String query) async {
+    state = state.copyWith(searchQuery: query);
+  }
+}
+
+class _BlueHairSource implements CompletionSource {
+  const _BlueHairSource();
+
+  @override
+  Future<List<CompletionCandidate>> search(CompletionQuery query) async => [
+    const CompletionCandidate(
+      canonicalTag: 'blue_hair',
+      category: TagCategory.general,
+      postCount: 100,
+      matchKind: CompletionMatchKind.englishPrefix,
+      sources: {CompletionSourceKind.base},
+    ),
+  ];
+}
+
+class _EmptyTagSource implements CompletionSource {
+  const _EmptyTagSource();
+
+  @override
+  Future<List<CompletionCandidate>> search(CompletionQuery query) async =>
+      const [];
+}
+
+class _NoTagTranslations implements TranslationResolver {
+  const _NoTagTranslations();
+
+  @override
+  Future<Map<String, String>> resolve(
+    List<String> canonicalTags, {
+    required String locale,
+  }) async => const {};
 }
 
 class _SafebooruSearchGalleryNotifier extends OnlineGalleryNotifier {

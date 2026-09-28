@@ -4,8 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/services/danbooru_auth_service.dart';
 import '../../providers/online_gallery_blacklist_provider.dart';
-import '../autocomplete/autocomplete_config.dart';
-import '../autocomplete/autocomplete_wrapper.dart';
+import '../tag_expansion/tag_expansion_wrapper.dart';
 import '../danbooru_login_dialog.dart';
 
 class OnlineGalleryBlacklistSettingsPanel extends ConsumerStatefulWidget {
@@ -99,11 +98,13 @@ class _OnlineGalleryBlacklistSettingsPanelState
             Row(
               children: [
                 Expanded(
-                  child: AutocompleteWrapper(
+                  child: TagExpansionWrapper(
                     controller: _tagController,
                     focusNode: _tagFocusNode,
-                    config: const AutocompleteConfig(autoInsertComma: false),
-                    onSuggestionSelected: (_) => _addTag(),
+                    onTagSelected: (tag) {
+                      _tagController.text = tag;
+                      _addTag();
+                    },
                     child: TextField(
                       controller: _tagController,
                       focusNode: _tagFocusNode,
