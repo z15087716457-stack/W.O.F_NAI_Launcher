@@ -314,7 +314,7 @@ class _NavIconState extends State<_NavIcon> {
     final isExpanded = _NavRailExpansionScope.isExpandedOf(context);
     final color = widget.isSelected
         ? theme.colorScheme.primary
-        : theme.iconTheme.color?.withValues(alpha: 0.7);
+        : theme.iconTheme.color?.withValues(alpha: 0.9);
     // 自绘图标吃非空色：与 Icon(color: null) 的 IconTheme 兜底同口径解出实色。
     final resolvedColor =
         color ?? IconTheme.of(context).color ?? theme.colorScheme.onSurface;
