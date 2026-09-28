@@ -169,6 +169,12 @@ class NaiImageMetadata with _$NaiImageMetadata {
     @HiveField(36, defaultValue: [])
     @Default([])
     List<String> fixedNegativeSuffixTags,
+
+    /// V5 请求元数据中明确记录的质量词档位；与旧布尔开关编码不同。
+    @HiveField(38) int? qualityTagHint,
+
+    /// V5 请求元数据中明确记录的 UC 档位；与 uc_preset 编码不同。
+    @HiveField(39) int? ucPresetTagHint,
   }) = _NaiImageMetadata;
 
   const NaiImageMetadata._();
@@ -223,6 +229,10 @@ class NaiImageMetadata with _$NaiImageMetadata {
         ),
         characterUseCoords:
             base.characterUseCoords ?? reparsed.characterUseCoords,
+        qualityToggle: base.qualityToggle ?? reparsed.qualityToggle,
+        ucPreset: base.ucPreset ?? reparsed.ucPreset,
+        qualityTagHint: base.qualityTagHint ?? reparsed.qualityTagHint,
+        ucPresetTagHint: base.ucPresetTagHint ?? reparsed.ucPresetTagHint,
         vibeReferences: base.vibeReferences.isEmpty
             ? reparsed.vibeReferences
             : base.vibeReferences,
@@ -358,6 +368,8 @@ class NaiImageMetadata with _$NaiImageMetadata {
         _modelIdFromSource(software);
     final importedUcPreset = _toInt(commentData['uc_preset']);
     final importedQualityToggle = _safeGetBool(commentData, 'quality_toggle');
+    final importedQualityTagHint = _toInt(commentData['tag_hint_qt']);
+    final importedUcPresetTagHint = _toInt(commentData['tag_hint_uc_preset']);
 
     // 构建元数据对象（使用try-catch包装每个字段）
     try {
@@ -378,6 +390,8 @@ class NaiImageMetadata with _$NaiImageMetadata {
         cfgRescale: _toDouble(commentData['cfg_rescale']),
         ucPreset: importedUcPreset,
         qualityToggle: importedQualityToggle,
+        qualityTagHint: importedQualityTagHint,
+        ucPresetTagHint: importedUcPresetTagHint,
         isImg2Img: commentData['image'] != null,
         strength: _toDouble(commentData['strength']),
         noise: _toDouble(commentData['noise']),
@@ -533,6 +547,10 @@ class NaiImageMetadata with _$NaiImageMetadata {
       'char_captions',
       'model_name',
       'model_hash',
+      'quality_toggle',
+      'uc_preset',
+      'tag_hint_qt',
+      'tag_hint_uc_preset',
     ];
     return markers.any(text.contains);
   }

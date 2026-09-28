@@ -1004,8 +1004,10 @@ class _OfficialMetadataImportDialogState
       if (metadata.varietyPlus != null) 'Variety+',
       if (metadata.noiseSchedule != null) l10n.metadataImport_noiseSchedule,
       if (metadata.cfgRescale != null) l10n.metadataImport_cfgRescale,
-      if (metadata.qualityToggle != null) l10n.metadataImport_qualityToggle,
-      if (metadata.ucPreset != null) l10n.metadataImport_ucPreset,
+      if (metadata.qualityToggle != null || metadata.qualityTagHint != null)
+        l10n.metadataImport_qualityToggle,
+      if (metadata.ucPreset != null || metadata.ucPresetTagHint != null)
+        l10n.metadataImport_ucPreset,
     ];
     return labels.isEmpty ? l10n.metadataImport_noData : labels.join(' · ');
   }
@@ -1022,6 +1024,8 @@ class _OfficialMetadataImportDialogState
         metadata.noiseSchedule != null ||
         metadata.cfgRescale != null ||
         metadata.qualityToggle != null ||
-        metadata.ucPreset != null;
+        metadata.qualityTagHint != null ||
+        metadata.ucPreset != null ||
+        metadata.ucPresetTagHint != null;
   }
 }

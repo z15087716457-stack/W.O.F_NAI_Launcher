@@ -45,6 +45,22 @@ void main() {
       },
     );
 
+    test('explicit None UC preset keeps raw spacing on import', () {
+      const metadata = NaiImageMetadata(
+        negativePrompt: '  bad hands  ',
+        ucPreset: UcPresets.noneApiValue,
+      );
+
+      expect(
+        MetadataImportApplier.resolveImportedNegativePrompt(
+          metadata,
+          importUcPreset: true,
+          currentModel: ImageModels.animeDiffusionV45Full,
+        ),
+        '  bad hands  ',
+      );
+    });
+
     test('fromNaiComment should parse structured negative fixed words', () {
       const metadata = NaiImageMetadata(
         negativePrompt: 'bad anatomy, plain_negative, text',
@@ -84,6 +100,40 @@ void main() {
         );
       },
     );
+
+    test(
+      'cached Comment adds explicit preset hints without inferring them',
+      () {
+        final rawJson = jsonEncode({
+          'prompt': '1girl',
+          'uc': 'bad hands',
+          'tag_hint_qt': 3,
+          'tag_hint_uc_preset': 4,
+        });
+        final upgraded = NaiImageMetadata(
+          prompt: '1girl',
+          negativePrompt: 'bad hands',
+          rawJson: rawJson,
+        ).upgradeFromRawJsonIfNeeded();
+
+        expect(upgraded.qualityTagHint, 3);
+        expect(upgraded.ucPresetTagHint, 4);
+        expect(upgraded.qualityToggle, isNull);
+        expect(upgraded.ucPreset, isNull);
+      },
+    );
+
+    test('unrecognized V5 hints do not use conflicting old fields', () {
+      const metadata = NaiImageMetadata(
+        qualityTagHint: 99,
+        ucPresetTagHint: 1,
+        qualityToggle: true,
+        ucPreset: UcPresets.heavyApiValue,
+      );
+
+      expect(MetadataImportApplier.recordedQualityPreset(metadata), isNull);
+      expect(MetadataImportApplier.recordedUcPreset(metadata), isNull);
+    });
 
     test(
       'fromNaiComment should prefer source over legacy Comment model field',

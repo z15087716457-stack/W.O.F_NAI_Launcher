@@ -28,6 +28,10 @@ void main() {
       expect(metadata.seed, 741649701);
       expect(metadata.sampler, 'k_euler_ancestral');
       expect(metadata.steps, 28);
+      expect(metadata.qualityToggle, isNull);
+      expect(metadata.ucPreset, isNull);
+      expect(metadata.qualityTagHint, isNull);
+      expect(metadata.ucPresetTagHint, isNull);
     });
 
     test('V4.5 启动器 PNG（经典 tEXt）回归不破', () {
@@ -39,6 +43,8 @@ void main() {
       expect(metadata.prompt, isNotEmpty);
       expect(metadata.seed, 4199015664);
       expect(metadata.sampler, 'k_euler_ancestral');
+      expect(metadata.qualityToggle, isNull);
+      expect(metadata.ucPreset, isNull);
     });
 
     test('webp（EXIF 通道）能读出提示词', () {
@@ -50,6 +56,8 @@ void main() {
       expect(metadata.prompt, contains('gawr gura'));
       expect(metadata.seed, 1428971741);
       expect(metadata.sampler, 'k_euler_ancestral');
+      expect(metadata.qualityToggle, isNull);
+      expect(metadata.ucPreset, isNull);
     });
 
     test('webp 剥离 EXIF 后走 alpha 隐写回退', () {
@@ -120,6 +128,19 @@ void main() {
       expect(result.success, isTrue, reason: result.errorMessage);
       expect(result.metadata!.prompt, '1girl, synth_test');
       expect(result.metadata!.model, ImageModels.animeDiffusionV5Full);
+    });
+
+    test('V5 params 中的 tag hints 保留原编码，供导入时判断档位', () {
+      final result = UnifiedMetadataParser.parseFromTextData({
+        'Comment': jsonEncode({
+          ...envelope,
+          'params': {...paramsMap, 'tag_hint_qt': 3, 'tag_hint_uc_preset': 4},
+        }),
+      });
+
+      expect(result.success, isTrue, reason: result.errorMessage);
+      expect(result.metadata!.qualityTagHint, 3);
+      expect(result.metadata!.ucPresetTagHint, 4);
     });
 
     test('JPEG APP1 EXIF 携带 V5 params 信封（UserComment）', () {

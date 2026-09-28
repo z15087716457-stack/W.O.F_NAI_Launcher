@@ -5,15 +5,21 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/enums/precise_ref_type.dart';
+import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
+import 'package:nai_launcher/core/utils/prompt_semantics_utils.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/models/metadata/metadata_import_options.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
+import 'package:nai_launcher/data/services/metadata/unified_metadata_parser.dart';
 import 'package:nai_launcher/l10n/app_localizations_en.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
+import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart';
+import 'package:nai_launcher/presentation/providers/uc_preset_provider.dart';
 import 'package:nai_launcher/presentation/utils/metadata_import_coordinator.dart';
 
 void main() {
@@ -288,6 +294,255 @@ void main() {
       expect(
         container.read(characterPromptNotifierProvider).characters,
         isEmpty,
+      );
+    },
+  );
+
+  test(
+    'missing preset fields keep prompt and UC verbatim and disable presets',
+    () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      const model = ImageModels.animeDiffusionV45Full;
+      final quality = QualityTags.getQualityTags(model)!;
+      final uc = UcPresets.getPresetContent(model, UcPresetType.heavy);
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'Source': 'NovelAI Diffusion V4.5 4BDE2A90',
+        'Comment': jsonEncode({
+          'prompt': '1girl, $quality',
+          'uc': '$uc, custom negative',
+        }),
+      });
+      expect(metadata.qualityToggle, isNull);
+      expect(metadata.ucPreset, isNull);
+
+      final notifier = container.read(
+        generationParamsNotifierProvider.notifier,
+      );
+      notifier.updateQualityPreset(QualityTagPreset.standard);
+      notifier.updateUcPreset(UcPresets.heavyApiValue);
+      await MetadataImportCoordinator.applyOfficialSelection(
+        read: container.read,
+        metadata: metadata,
+        selection: const OfficialMetadataImportSelection(
+          importPrompt: true,
+          importNegativePrompt: true,
+          importGenerationParams: true,
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      final params = container.read(generationParamsNotifierProvider);
+      expect(params.prompt, metadata.prompt);
+      expect(params.negativePrompt, metadata.negativePrompt);
+      expect(params.qualityTagPreset, QualityTagPreset.none);
+      expect(
+        container.read(qualityPresetNotifierProvider).nativePreset,
+        QualityTagPreset.none,
+      );
+      expect(
+        container.read(ucPresetNotifierProvider).presetType,
+        UcPresetType.none,
+      );
+      final effective = buildPromptSemanticsSnapshot(
+        prompt: params.prompt,
+        negativePrompt: params.negativePrompt,
+        model: params.model,
+        qualityToggle: params.qualityToggle,
+        qualityTagPreset: params.qualityTagPreset,
+        ucPreset: params.ucPreset,
+      );
+      expect(effective.effectivePrompt, metadata.prompt);
+      expect(effective.effectiveNegativePrompt, metadata.negativePrompt);
+    },
+  );
+
+  test(
+    'official V5 PNG without preset fields imports its effective text',
+    () async {
+      final result = UnifiedMetadataParser.parseFromFile(
+        'test/fixtures/metadata/v5_stealth_classic_envelope.png',
+      );
+      expect(result.success, isTrue, reason: result.errorMessage);
+      final metadata = result.metadata!;
+      expect(metadata.qualityTagHint, isNull);
+      expect(metadata.ucPresetTagHint, isNull);
+
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      await MetadataImportCoordinator.applyOfficialFullReplacement(
+        read: container.read,
+        metadata: metadata,
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      final params = container.read(generationParamsNotifierProvider);
+      expect(params.prompt, metadata.prompt);
+      expect(params.negativePrompt, metadata.negativePrompt);
+      expect(params.qualityTagPreset, QualityTagPreset.none);
+      expect(
+        container.read(ucPresetNotifierProvider).presetType,
+        UcPresetType.none,
+      );
+    },
+  );
+
+  test(
+    'recorded presets restore once when effective text includes them',
+    () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      const model = ImageModels.animeDiffusionV45Full;
+      final quality = QualityTags.getQualityTags(model)!;
+      final uc = UcPresets.getPresetContent(model, UcPresetType.heavy);
+      final metadata = NaiImageMetadata.fromNaiComment({
+        'Source': 'NovelAI Diffusion V4.5 4BDE2A90',
+        'Comment': jsonEncode({
+          'prompt': '1girl, $quality',
+          'uc': '$uc, custom negative',
+          'quality_toggle': true,
+          'uc_preset': UcPresets.heavyApiValue,
+        }),
+      });
+
+      await MetadataImportCoordinator.applyOfficialFullReplacement(
+        read: container.read,
+        metadata: metadata,
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      final params = container.read(generationParamsNotifierProvider);
+      expect(params.prompt, '1girl');
+      expect(params.negativePrompt, 'custom negative');
+      expect(params.qualityTagPreset, QualityTagPreset.standard);
+      expect(
+        container.read(ucPresetNotifierProvider).presetType,
+        UcPresetType.heavy,
+      );
+      final effective = buildPromptSemanticsSnapshot(
+        prompt: params.prompt,
+        negativePrompt: params.negativePrompt,
+        model: params.model,
+        qualityToggle: params.qualityToggle,
+        qualityTagPreset: params.qualityTagPreset,
+        ucPreset: params.ucPreset,
+      );
+      expect(effective.effectivePrompt, metadata.prompt);
+      expect(effective.effectiveNegativePrompt, metadata.negativePrompt);
+    },
+  );
+
+  test('V5 tag hints restore Light with their own numeric mapping', () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    const model = ImageModels.animeDiffusionV5Full;
+    final quality = QualityTags.getQualityTags(
+      model,
+      preset: QualityTagPreset.light,
+    )!;
+    final uc = UcPresets.getPresetContent(model, UcPresetType.light);
+    final metadata = NaiImageMetadata.fromNaiComment({
+      'Source': 'DiffusionModelMetaName.NAIv5 E32849CC',
+      'Comment': jsonEncode({
+        'prompt': '1girl, $quality',
+        'uc': '$uc, custom negative',
+        'quality_toggle': false,
+        'uc_preset': UcPresets.noneApiValue,
+        'tag_hint_qt': 3,
+        'tag_hint_uc_preset': 3,
+      }),
+    });
+    expect(metadata.qualityTagHint, 3);
+    expect(metadata.ucPresetTagHint, 3);
+
+    await MetadataImportCoordinator.applyOfficialFullReplacement(
+      read: container.read,
+      metadata: metadata,
+    );
+    await Future<void>.delayed(Duration.zero);
+
+    final params = container.read(generationParamsNotifierProvider);
+    expect(params.prompt, '1girl');
+    expect(params.negativePrompt, 'custom negative');
+    expect(params.qualityTagPreset, QualityTagPreset.light);
+    expect(
+      container.read(ucPresetNotifierProvider).presetType,
+      UcPresetType.light,
+    );
+    final effective = buildPromptSemanticsSnapshot(
+      prompt: params.prompt,
+      negativePrompt: params.negativePrompt,
+      model: params.model,
+      qualityToggle: params.qualityToggle,
+      qualityTagPreset: params.qualityTagPreset,
+      ucPreset: params.ucPreset,
+    );
+    expect(effective.effectivePrompt, metadata.prompt);
+    expect(effective.effectiveNegativePrompt, metadata.negativePrompt);
+  });
+
+  test('prompt-only selection does not replace unrelated UC preset', () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    const metadata = NaiImageMetadata(prompt: '1girl, masterpiece');
+    final notifier = container.read(generationParamsNotifierProvider.notifier);
+    notifier.updateUcPreset(UcPresets.lightApiValue);
+
+    await MetadataImportCoordinator.applyOfficialSelection(
+      read: container.read,
+      metadata: metadata,
+      selection: const OfficialMetadataImportSelection(importPrompt: true),
+    );
+    await Future<void>.delayed(Duration.zero);
+
+    expect(
+      container.read(generationParamsNotifierProvider).prompt,
+      metadata.prompt,
+    );
+    expect(
+      container.read(generationParamsNotifierProvider).qualityTagPreset,
+      QualityTagPreset.none,
+    );
+    expect(
+      container.read(ucPresetNotifierProvider).presetType,
+      UcPresetType.light,
+    );
+  });
+
+  test(
+    'UC-only selection keeps raw text when settings are not selected',
+    () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      const model = ImageModels.animeDiffusionV45Full;
+      final uc = UcPresets.getPresetContent(model, UcPresetType.heavy);
+      final metadata = NaiImageMetadata(
+        negativePrompt: '$uc, custom negative',
+        ucPreset: UcPresets.heavyApiValue,
+        model: model,
+      );
+
+      await MetadataImportCoordinator.applyOfficialSelection(
+        read: container.read,
+        metadata: metadata,
+        selection: const OfficialMetadataImportSelection(
+          importPrompt: false,
+          importNegativePrompt: true,
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        container.read(generationParamsNotifierProvider).negativePrompt,
+        metadata.negativePrompt,
+      );
+      expect(
+        container.read(ucPresetNotifierProvider).presetType,
+        UcPresetType.none,
+      );
+      expect(
+        container.read(qualityPresetNotifierProvider).nativePreset,
+        QualityTagPreset.standard,
       );
     },
   );

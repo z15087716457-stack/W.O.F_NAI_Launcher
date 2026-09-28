@@ -1,4 +1,5 @@
 import '../../core/constants/api_constants.dart';
+import '../../core/enums/quality_tag_preset.dart';
 import '../../data/models/gallery/nai_image_metadata.dart';
 import '../../data/models/metadata/metadata_import_options.dart';
 
@@ -40,6 +41,69 @@ class MetadataImportTarget {
 
 class MetadataImportApplier {
   MetadataImportApplier._();
+
+  /// Only recorded fields can restore a preset. Matching words in the prompt
+  /// are not evidence that the user selected one in the source application.
+  static QualityTagPreset? recordedQualityPreset(NaiImageMetadata metadata) {
+    if (metadata.qualityTagHint != null) {
+      return QualityTagPreset.fromTagHintValue(metadata.qualityTagHint);
+    }
+    final toggle = metadata.qualityToggle;
+    return toggle == null
+        ? null
+        : toggle
+        ? QualityTagPreset.standard
+        : QualityTagPreset.none;
+  }
+
+  static UcPresetType? recordedUcPreset(NaiImageMetadata metadata) {
+    if (metadata.ucPresetTagHint != null) {
+      return switch (metadata.ucPresetTagHint) {
+        0 => UcPresetType.none,
+        2 => UcPresetType.heavy,
+        3 => UcPresetType.light,
+        4 => UcPresetType.humanFocus,
+        5 => UcPresetType.furryFocus,
+        _ => null,
+      };
+    }
+    return switch (metadata.ucPreset) {
+      UcPresets.heavyApiValue => UcPresetType.heavy,
+      UcPresets.lightApiValue => UcPresetType.light,
+      UcPresets.humanFocusApiValue => UcPresetType.humanFocus,
+      UcPresets.noneApiValue => UcPresetType.none,
+      UCPresets.furryFocus => UcPresetType.furryFocus,
+      _ => null,
+    };
+  }
+
+  /// When a recorded preset is restored, move its generated suffix out of
+  /// the editor so the request builder adds it exactly once. Without a
+  /// recorded preset, the complete prompt is left untouched.
+  static String resolveImportedPrompt(
+    NaiImageMetadata metadata, {
+    required bool importQualityPreset,
+    required String currentModel,
+  }) {
+    final prompt = metadata.prompt;
+    final preset = recordedQualityPreset(metadata);
+    if (!importQualityPreset ||
+        preset == null ||
+        preset == QualityTagPreset.none) {
+      return prompt;
+    }
+    final model = resolveImportableModel(metadata) ?? currentModel;
+    final suffix = QualityTags.getQualityTags(model, preset: preset);
+    if (suffix == null || suffix.isEmpty) return prompt;
+
+    final trimmed = prompt.trimRight();
+    if (trimmed == suffix) return '';
+    if (!trimmed.endsWith(suffix)) return prompt;
+    final beforeSuffix = trimmed.substring(0, trimmed.length - suffix.length);
+    final beforeSeparator = beforeSuffix.trimRight();
+    if (!beforeSeparator.endsWith(',')) return prompt;
+    return beforeSeparator.substring(0, beforeSeparator.length - 1).trimRight();
+  }
 
   static int applyPromptAndGenerationParams({
     required NaiImageMetadata metadata,
@@ -145,12 +209,14 @@ class MetadataImportApplier {
     required String currentModel,
   }) {
     final baseNegative = metadata.displayNegativePrompt;
-    if (!importUcPreset || metadata.ucPreset == null) {
+    final preset = recordedUcPreset(metadata);
+    if (!importUcPreset || preset == null || preset == UcPresetType.none) {
       return baseNegative;
     }
 
     final model = resolveImportableModel(metadata) ?? currentModel;
-    return UcPresets.stripPresetByInt(baseNegative, model, metadata.ucPreset!);
+    final stripped = UcPresets.stripPreset(baseNegative, model, preset);
+    return stripped == baseNegative.trim() ? baseNegative : stripped;
   }
 
   static String? toImportableModelId(String? model) {

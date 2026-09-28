@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/api_constants.dart';
+import '../../core/enums/quality_tag_preset.dart';
 import '../../data/models/character/character_prompt.dart' as char;
 
 import '../../data/models/gallery/nai_image_metadata.dart';
@@ -52,6 +54,13 @@ class MetadataImportCoordinator {
     final notifier = read(generationParamsNotifierProvider.notifier);
     final currentModel = read(generationParamsNotifierProvider).model;
     final importGenerationParams = selection.importGenerationParams;
+    final recordedQualityPreset = MetadataImportApplier.recordedQualityPreset(
+      metadata,
+    );
+    final recordedUcPreset = MetadataImportApplier.recordedUcPreset(metadata);
+    final importQualityPreset =
+        importGenerationParams && recordedQualityPreset != null;
+    final importUcPreset = importGenerationParams && recordedUcPreset != null;
     final generationOptions = MetadataImportOptions(
       importPrompt: false,
       importNegativePrompt: false,
@@ -76,9 +85,10 @@ class MetadataImportCoordinator {
       importNoiseSchedule:
           importGenerationParams && metadata.noiseSchedule != null,
       importCfgRescale: importGenerationParams && metadata.cfgRescale != null,
-      importQualityToggle:
-          importGenerationParams && metadata.qualityToggle != null,
-      importUcPreset: importGenerationParams && metadata.ucPreset != null,
+      // Presets need the complete prompt/UC import decision below. Applying
+      // their old scalar fields here would leave missing fields unchanged.
+      importQualityToggle: false,
+      importUcPreset: false,
     );
 
     var appliedCount = MetadataImportApplier.applyPromptAndGenerationParams(
@@ -88,23 +98,44 @@ class MetadataImportCoordinator {
       target: _buildTarget(read),
     );
 
-    // The website reuses the complete prompt text, including quality words.
-    // Do not split it back into the app's fixed-tag or quality-tag stores.
+    // A missing preset field means no automatic preset on import. Keep the
+    // effective text exactly as recorded, even if it resembles official tags.
     if (selection.importPrompt) {
-      notifier.updatePrompt(metadata.prompt);
-      if (metadata.prompt.isNotEmpty) appliedCount++;
+      final importedPrompt = MetadataImportApplier.resolveImportedPrompt(
+        metadata,
+        importQualityPreset: importQualityPreset,
+        currentModel: currentModel,
+      );
+      notifier.updatePrompt(importedPrompt);
+      if (importedPrompt.isNotEmpty) appliedCount++;
     }
     if (selection.importNegativePrompt) {
-      // Keep the existing UC preset resolver, while allowing an empty source
-      // value to clear the current negative prompt.
       final importedNegativePrompt =
           MetadataImportApplier.resolveImportedNegativePrompt(
             metadata,
-            importUcPreset: generationOptions.importUcPreset,
+            importUcPreset: importUcPreset,
             currentModel: currentModel,
           );
       notifier.updateNegativePrompt(importedNegativePrompt);
       if (importedNegativePrompt.isNotEmpty) appliedCount++;
+    }
+
+    // Importing either the text or its settings replaces the corresponding
+    // preset state. Unknown state is resolved to None, never to the user's
+    // currently active preset, which could duplicate the imported text.
+    if (selection.importPrompt || importGenerationParams) {
+      notifier.updateQualityPreset(
+        importQualityPreset ? recordedQualityPreset : QualityTagPreset.none,
+      );
+      if (importQualityPreset) appliedCount++;
+    }
+    if (selection.importNegativePrompt || importGenerationParams) {
+      notifier.updateUcPreset(
+        UcPresets.toApiValue(
+          importUcPreset ? recordedUcPreset : UcPresetType.none,
+        ),
+      );
+      if (importUcPreset) appliedCount++;
     }
 
     if (selection.importCharacters) {
