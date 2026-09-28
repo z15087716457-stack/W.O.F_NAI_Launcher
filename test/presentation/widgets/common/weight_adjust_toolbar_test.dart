@@ -96,6 +96,7 @@ void main() {
     focus.requestFocus();
     prompt.selection = const TextSelection(baseOffset: 0, extentOffset: 3);
     await tester.pump();
+    expect(find.byType(TextField), findsOneWidget);
     final pageOffsetBefore = page.offset;
     bool? platformDefaultAllowed;
 
@@ -435,6 +436,7 @@ void main() {
     await _sendWheel(tester);
     expect(prompt.text, 'cat, dog');
     expect(page.offset, greaterThan(pageOffsetBefore));
+    expect(find.byType(TextField), findsOneWidget);
 
     // 按住 Alt + 滚轮：进权重分支且页面不滚
     await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
@@ -442,8 +444,10 @@ void main() {
     final pageOffsetAfterBare = page.offset;
 
     await _sendWheel(tester);
+    await tester.pump();
     expect(prompt.text, '0.95::cat::, dog');
     expect(page.offset, pageOffsetAfterBare);
+    expect(find.byType(TextField), findsNWidgets(2));
 
     await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
     await tester.pump();
@@ -452,6 +456,57 @@ void main() {
     await _sendWheel(tester);
     expect(prompt.text, '0.95::cat::, dog');
     expect(page.offset, greaterThan(pageOffsetAfterBare));
+  });
+
+  testWidgets('Ctrl drag selection stays clear until weight shortcut wheel', (
+    tester,
+  ) async {
+    final prompt = TextEditingController(text: 'cat, dog');
+    final focus = FocusNode();
+    final page = ScrollController(initialScrollOffset: 100);
+    _registerCleanup(tester, prompt, focus, page);
+    await _pumpHarness(
+      tester,
+      prompt: prompt,
+      focus: focus,
+      page: page,
+      enableWheelAdjustment: true,
+      wheelModifier: PromptWeightScrollModifier.alt,
+    );
+    await tester.tap(find.byKey(_fieldKey));
+    await tester.pump();
+    final editable = tester
+        .state<EditableTextState>(find.byType(EditableText))
+        .renderEditable;
+    Offset caret(int offset) {
+      final rect = editable.getLocalRectForCaret(TextPosition(offset: offset));
+      return editable.localToGlobal(Offset(rect.left + 1, rect.center.dy));
+    }
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    final gesture = await tester.startGesture(
+      caret(0),
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.moveTo(caret(3));
+    await tester.pump();
+    expect(find.byType(TextField), findsOneWidget);
+    await gesture.up();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    expect(
+      prompt.selection,
+      const TextSelection(baseOffset: 0, extentOffset: 3),
+    );
+    expect(find.byType(TextField), findsOneWidget);
+    expect(prompt.text, 'cat, dog');
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await _sendWheel(tester);
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    expect(prompt.text, '0.95::cat::, dog');
+    expect(find.byType(TextField), findsNWidgets(2));
   });
 
   test('modifier parse falls back to alt for unknown values', () {
@@ -506,7 +561,12 @@ void main() {
     focus.requestFocus();
     prompt.selection = const TextSelection(baseOffset: 0, extentOffset: 3);
     await tester.pump();
+    expect(find.byType(TextField), findsOneWidget);
+
+    await _sendWheel(tester);
+    await tester.pump();
     expect(find.byType(TextField), findsNWidgets(2));
+    final textAfterWheel = prompt.text;
 
     await _pumpHarness(
       tester,
@@ -516,15 +576,15 @@ void main() {
       enableWheelAdjustment: false,
     );
     await tester.pump();
-    expect(find.byType(TextField), findsNWidgets(2));
+    expect(find.byType(TextField), findsOneWidget);
 
-    final weightField = find.byType(TextField).last;
     final pointer = TestPointer(2, PointerDeviceKind.mouse)
-      ..hover(tester.getCenter(weightField));
+      ..hover(tester.getCenter(find.byKey(_fieldKey)));
     await tester.sendEventToBinding(pointer.scroll(const Offset(0, 40)));
     await tester.pump();
 
-    expect(prompt.text, 'cat');
+    expect(prompt.text, textAfterWheel);
+    expect(find.byType(TextField), findsOneWidget);
   });
 
   testWidgets('replacement controller without selection hides open toolbar', (
@@ -551,6 +611,9 @@ void main() {
     focus.requestFocus();
     controllerA.selection = const TextSelection(baseOffset: 0, extentOffset: 3);
     await tester.pump();
+    expect(find.byType(TextField), findsOneWidget);
+    await _sendWheel(tester);
+    await tester.pump();
     expect(find.byType(TextField), findsNWidgets(2));
 
     await _pumpHarness(
@@ -565,7 +628,7 @@ void main() {
     expect(find.byType(TextField), findsOneWidget);
   });
 
-  testWidgets('open toolbar targets selected replacement controller', (
+  testWidgets('toolbar targets replacement controller only after its wheel', (
     tester,
   ) async {
     final controllerA = TextEditingController(text: 'cat');
@@ -590,6 +653,9 @@ void main() {
     focus.requestFocus();
     controllerA.selection = const TextSelection(baseOffset: 0, extentOffset: 3);
     await tester.pump();
+    expect(find.byType(TextField), findsOneWidget);
+    await _sendWheel(tester);
+    await tester.pump();
     expect(find.byType(TextField), findsNWidgets(2));
 
     await _pumpHarness(
@@ -600,16 +666,18 @@ void main() {
       enableWheelAdjustment: true,
     );
     await tester.pump();
+    expect(find.byType(TextField), findsOneWidget);
+    await _sendWheel(tester, delta: const Offset(0, -40));
+    await tester.pump();
+    expect(find.byType(TextField), findsNWidgets(2));
     await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
 
-    expect(controllerA.text, 'cat');
-    expect(controllerB.text, '1.05::dog::');
+    expect(controllerA.text, '0.95::cat::');
+    expect(controllerB.text, '1.10::dog::');
   });
 
-  testWidgets('replacement controller with selection shows toolbar', (
-    tester,
-  ) async {
+  testWidgets('replacement selection stays quiet until wheel', (tester) async {
     final controllerA = TextEditingController(text: 'cat');
     final controllerB = TextEditingController(text: 'dog')
       ..selection = const TextSelection(baseOffset: 0, extentOffset: 3);
@@ -640,6 +708,9 @@ void main() {
     );
     await tester.pump();
 
+    expect(find.byType(TextField), findsOneWidget);
+    await _sendWheel(tester);
+    await tester.pump();
     expect(find.byType(TextField), findsNWidgets(2));
   });
 }

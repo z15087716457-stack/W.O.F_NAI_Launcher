@@ -115,27 +115,20 @@ class _WeightAdjustToolbarWrapperState
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller.removeListener(_onSelectionChanged);
       widget.controller.addListener(_onSelectionChanged);
-      _scheduleControllerSelectionSync(widget.controller);
+      _hideToolbar();
     }
     if (oldWidget.focusNode != widget.focusNode) {
+      _hideToolbar();
       _focusNode.removeListener(_onFocusChanged);
       if (_ownsFocusNode) {
         _focusNode.dispose();
       }
       _initFocusNode();
     }
-    if (oldWidget.enableWheelAdjustment != widget.enableWheelAdjustment ||
+    if (oldWidget.enabled != widget.enabled ||
+        oldWidget.enableWheelAdjustment != widget.enableWheelAdjustment ||
         oldWidget.wheelModifier != widget.wheelModifier) {
-      final overlayEntry = _overlayEntry;
-      if (overlayEntry != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted &&
-              identical(_overlayEntry, overlayEntry) &&
-              overlayEntry.mounted) {
-            overlayEntry.markNeedsBuild();
-          }
-        });
-      }
+      _hideToolbar();
     }
   }
 
@@ -167,32 +160,13 @@ class _WeightAdjustToolbarWrapperState
   }
 
   void _syncToolbarWithControllerSelection() {
-    if (!widget.enabled) return;
-
-    final selection = widget.controller.selection;
-    final hasSelection =
-        selection.isValid &&
-        selection.start != selection.end &&
-        selection.start >= 0 &&
-        selection.end <= widget.controller.text.length;
-
-    if (hasSelection && _overlayEntry == null) {
-      _showToolbar();
-    } else if (!hasSelection && _overlayEntry != null) {
+    if (_overlayEntry == null) return;
+    if (!widget.enabled ||
+        !_WeightSelectionEditor.hasSelection(widget.controller)) {
       _hideToolbar();
-    } else if (hasSelection && _overlayEntry != null) {
+    } else {
       _overlayEntry?.markNeedsBuild();
     }
-  }
-
-  void _scheduleControllerSelectionSync(
-    TextEditingController updatedController,
-  ) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && identical(widget.controller, updatedController)) {
-        _syncToolbarWithControllerSelection();
-      }
-    });
   }
 
   void _showToolbar() {
@@ -221,13 +195,14 @@ class _WeightAdjustToolbarWrapperState
     _overlayEntry = null;
   }
 
-  void _adjustWeightByStep(double step) {
+  bool _adjustWeightByStep(double step) {
     final result = _WeightSelectionEditor.parseSelection(widget.controller);
-    _WeightSelectionEditor.applyWeight(
+    final applied = _WeightSelectionEditor.applyWeight(
       widget.controller,
       (result.weight + step).clamp(0.1, 3.0),
     );
-    _overlayEntry?.markNeedsBuild();
+    if (applied) _overlayEntry?.markNeedsBuild();
+    return applied;
   }
 
   void _handlePointerSignal(PointerSignalEvent event) {
@@ -244,7 +219,9 @@ class _WeightAdjustToolbarWrapperState
       resolvedEvent,
     ) {
       final scrollEvent = resolvedEvent as PointerScrollEvent;
-      _adjustWeightByStep(scrollEvent.scrollDelta.dy < 0 ? 0.05 : -0.05);
+      if (_adjustWeightByStep(scrollEvent.scrollDelta.dy < 0 ? 0.05 : -0.05)) {
+        _showToolbar();
+      }
       scrollEvent.respond(allowPlatformDefault: false);
     });
   }

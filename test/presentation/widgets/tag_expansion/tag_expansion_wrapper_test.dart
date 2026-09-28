@@ -12,6 +12,7 @@ import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/utils/prompt_input_normalization.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/widgets/common/weight_adjust_toolbar.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_input.dart';
 import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wrapper.dart';
@@ -320,6 +321,50 @@ void main() {
     expect(related.queries.single.token, isEmpty);
   });
 
+  testWidgets('Ctrl drag opens tag picker without the weight toolbar', (
+    tester,
+  ) async {
+    final controller = TextEditingController(text: 'blue hair, solo');
+    final focusNode = FocusNode();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await _pumpEditor(
+      tester,
+      controller,
+      focusNode,
+      _Source(const []),
+      related: _Source([_tag('long_hair')]),
+      includeWeightToolbar: true,
+    );
+    await tester.tap(find.byKey(const Key('prompt-editor')));
+    await tester.pump();
+    final editable = tester
+        .state<EditableTextState>(find.byType(EditableText))
+        .renderEditable;
+    Offset caret(int offset) {
+      final rect = editable.getLocalRectForCaret(TextPosition(offset: offset));
+      return editable.localToGlobal(Offset(rect.left + 1, rect.center.dy));
+    }
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    final gesture = await tester.startGesture(
+      caret(0),
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.moveTo(caret(9));
+    await tester.pump();
+    expect(find.byType(TextField), findsOneWidget);
+    await gesture.up();
+    await tester.pump();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+
+    expect(find.byKey(const Key('tag-expansion-popup')), findsOneWidget);
+    expect(find.byType(TextField), findsNWidgets(2));
+    expect(controller.text, 'blue hair, solo');
+    await tester.pump(const Duration(milliseconds: 250));
+  });
+
   testWidgets('partial Ctrl+drag prefills search without forcing related', (
     tester,
   ) async {
@@ -482,8 +527,27 @@ Future<void> _pumpEditor(
   CompletionSource catalog, {
   CompletionSource? related,
   bool enabled = true,
+  bool includeWeightToolbar = false,
 }) async {
   final service = _service(catalog, related: related);
+  Widget editor = TagExpansionWrapper(
+    controller: controller,
+    focusNode: focusNode,
+    enabled: enabled,
+    child: TextField(
+      key: const Key('prompt-editor'),
+      controller: controller,
+      focusNode: focusNode,
+    ),
+  );
+  if (includeWeightToolbar) {
+    editor = WeightAdjustToolbarWrapper(
+      controller: controller,
+      focusNode: focusNode,
+      wheelModifier: PromptWeightScrollModifier.alt,
+      child: editor,
+    );
+  }
   await tester.pumpWidget(
     ProviderScope(
       overrides: [localTagExpansionServiceProvider.overrideWithValue(service)],
@@ -492,22 +556,7 @@ Future<void> _pumpEditor(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
-          body: Center(
-            child: SizedBox(
-              width: 400,
-              height: 80,
-              child: TagExpansionWrapper(
-                controller: controller,
-                focusNode: focusNode,
-                enabled: enabled,
-                child: TextField(
-                  key: const Key('prompt-editor'),
-                  controller: controller,
-                  focusNode: focusNode,
-                ),
-              ),
-            ),
-          ),
+          body: Center(child: SizedBox(width: 400, height: 80, child: editor)),
         ),
       ),
     ),
