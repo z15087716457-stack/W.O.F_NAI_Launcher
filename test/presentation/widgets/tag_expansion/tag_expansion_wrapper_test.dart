@@ -1,5 +1,6 @@
 import 'dart:ui' show PointerDeviceKind;
 
+import 'package:flutter/gestures.dart' show kSecondaryMouseButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,9 +34,16 @@ void main() {
     final controller = TextEditingController();
     final focusNode = FocusNode();
     final catalog = _Source([_tag('blue_hair')]);
+    final activeEvents = <bool>[];
     addTearDown(controller.dispose);
     addTearDown(focusNode.dispose);
-    await _pumpEditor(tester, controller, focusNode, catalog);
+    await _pumpEditor(
+      tester,
+      controller,
+      focusNode,
+      catalog,
+      onActiveChanged: activeEvents.add,
+    );
 
     await tester.enterText(find.byKey(const Key('prompt-editor')), 'solo, ');
     await tester.pump(const Duration(milliseconds: 200));
@@ -44,8 +52,10 @@ void main() {
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.tap(find.byKey(const Key('prompt-editor')));
+    await tester.idle();
+    expect(activeEvents, contains(true));
     await tester.pump();
-    await tester.pump();
+    expect(find.byKey(const Key('tag-expansion-popup')), findsOneWidget);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     expect(find.byKey(const Key('tag-expansion-popup')), findsOneWidget);
     expect(
@@ -637,6 +647,7 @@ void main() {
     final controller = TextEditingController(text: 'blue hair, solo');
     final focusNode = FocusNode();
     final related = _Source([_tag('long_hair')]);
+    final activeEvents = <bool>[];
     addTearDown(controller.dispose);
     addTearDown(focusNode.dispose);
     await _pumpEditor(
@@ -645,6 +656,7 @@ void main() {
       focusNode,
       _Source(const []),
       related: related,
+      onActiveChanged: activeEvents.add,
     );
 
     await tester.tap(find.byKey(const Key('prompt-editor')));
@@ -663,10 +675,15 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.moveTo(caret(9));
+    // Settle the selected text before release to mirror a slow mouse drag.
+    await tester.pump();
     expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
+    expect(controller.selection.isCollapsed, isFalse);
     await gesture.up();
+    await tester.idle();
+    expect(activeEvents, contains(true));
     await tester.pump();
-    await tester.pump();
+    expect(find.byKey(const Key('tag-expansion-popup')), findsOneWidget);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
 
     // Keep the selection visible in failures: the editor owns drag selection.
@@ -683,6 +700,38 @@ void main() {
     expect(related.queries, isNotEmpty);
     expect(related.queries.single.token, isEmpty);
   });
+
+  testWidgets(
+    'Ctrl secondary click and cancelled drag do not open the picker',
+    (tester) async {
+      final controller = TextEditingController(text: 'blue hair, solo');
+      final focusNode = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+      await _pumpEditor(tester, controller, focusNode, _Source(const []));
+      final target = tester.getCenter(find.byKey(const Key('prompt-editor')));
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      final secondary = await tester.startGesture(
+        target,
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await secondary.up();
+      await tester.pump();
+      expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
+
+      final cancelled = await tester.startGesture(
+        target,
+        kind: PointerDeviceKind.mouse,
+      );
+      await cancelled.moveBy(const Offset(24, 0));
+      await cancelled.cancel();
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
+    },
+  );
 
   testWidgets('Ctrl drag opens tag picker without the weight toolbar', (
     tester,
@@ -893,12 +942,14 @@ Future<void> _pumpEditor(
   TagWikiRepository? wiki,
   bool enabled = true,
   bool includeWeightToolbar = false,
+  ValueChanged<bool>? onActiveChanged,
 }) async {
   final service = _service(catalog, related: related);
   Widget editor = TagExpansionWrapper(
     controller: controller,
     focusNode: focusNode,
     enabled: enabled,
+    onActiveChanged: onActiveChanged,
     child: TextField(
       key: const Key('prompt-editor'),
       controller: controller,

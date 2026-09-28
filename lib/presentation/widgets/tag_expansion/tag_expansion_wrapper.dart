@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart' show kPrimaryMouseButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -59,7 +60,12 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   Timer? _debounce;
   OverlayEntry? _entry;
   OverlayEntry? _limitMenuEntry;
+  int? _pointerId;
   Offset? _pointerDown;
+  TextSelection? _selectionAtDown;
+  String? _textAtDown;
+  bool _dragged = false;
+  int _gestureGeneration = 0;
   Offset? _anchorGlobal;
   bool _controlAtDown = false;
   bool _active = false;
@@ -128,38 +134,81 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   }
 
   void _onPointerDown(PointerDownEvent event) {
+    if (_pointerId != null || event.buttons & kPrimaryMouseButton == 0) {
+      return;
+    }
+    _gestureGeneration++;
+    _pointerId = event.pointer;
     _pointerDown = event.position;
+    _selectionAtDown = widget.controller.selection;
+    _textAtDown = widget.controller.text;
+    _dragged = false;
     final keyboard = HardwareKeyboard.instance;
     _controlAtDown = keyboard.isControlPressed || keyboard.isMetaPressed;
   }
 
-  void _onPointerUp(PointerUpEvent event) {
-    final control = _controlAtDown;
-    final moved =
-        _pointerDown != null && (event.position - _pointerDown!).distance > 4;
+  void _onPointerMove(PointerMoveEvent event) {
+    if (_pointerId != event.pointer || _pointerDown == null) return;
+    if ((event.position - _pointerDown!).distance > 4) _dragged = true;
+  }
+
+  void _resetPointer() {
+    _pointerId = null;
     _pointerDown = null;
+    _selectionAtDown = null;
+    _textAtDown = null;
+    _dragged = false;
     _controlAtDown = false;
+  }
+
+  void _onPointerCancel(PointerCancelEvent event) {
+    if (_pointerId != event.pointer) return;
+    _gestureGeneration++;
+    _resetPointer();
+  }
+
+  void _onPointerUp(PointerUpEvent event) {
+    if (_pointerId != event.pointer) return;
+    final control = _controlAtDown;
+    final dragged =
+        _dragged ||
+        (_pointerDown != null && (event.position - _pointerDown!).distance > 4);
+    final originalSelection = _selectionAtDown;
+    final originalText = _textAtDown;
+    final generation = _gestureGeneration;
+    _resetPointer();
     if (!control || !widget.enabled) return;
     if (!ref.read(autocompleteSettingsProvider).relatedTagsEnabled) return;
 
-    // EditableText finalizes its selection after the pointer callback.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !widget.enabled) return;
+    // Read the final selection after the entire pointer event has dispatched.
+    // A post-frame callback costs an extra frame and can stall when pointer-up
+    // does not schedule one; the microtask lets the overlay paint next frame.
+    scheduleMicrotask(() {
+      if (!mounted ||
+          !widget.enabled ||
+          generation != _gestureGeneration ||
+          widget.controller.text != originalText ||
+          !ref.read(autocompleteSettingsProvider).relatedTagsEnabled) {
+        return;
+      }
       final selection = widget.controller.selection;
       if (!selection.isValid) return;
-      if (moved && selection.isCollapsed) return;
-      final selectedText = moved
+      final hasNewSelection =
+          !selection.isCollapsed && selection != originalSelection;
+      final selectedByDrag = dragged || hasNewSelection;
+      if (selectedByDrag && selection.isCollapsed) return;
+      final selectedText = selectedByDrag
           ? widget.controller.text.substring(selection.start, selection.end)
           : '';
       final selectedQuery = selectedText.trim();
-      final source = moved
+      final source = selectedByDrag
           ? _selectedTag(widget.controller.text, selection)
           : null;
       final offset = selection.extentOffset.clamp(
         0,
         widget.controller.text.length,
       );
-      final contextTag = moved
+      final contextTag = selectedByDrag
           ? null
           : PromptTokenParser.parseRelated(
               text: widget.controller.text,
@@ -1325,7 +1374,9 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       key: _anchorKey,
       child: Listener(
         onPointerDown: _onPointerDown,
+        onPointerMove: _onPointerMove,
         onPointerUp: _onPointerUp,
+        onPointerCancel: _onPointerCancel,
         child: widget.child,
       ),
     );
