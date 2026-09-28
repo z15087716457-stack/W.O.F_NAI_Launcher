@@ -10,6 +10,9 @@ import 'package:nai_launcher/presentation/providers/comfyui/comfyui_provider.dar
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/img2img_panel.dart';
 import 'package:nai_launcher/presentation/widgets/common/image_picker_card/image_picker_card.dart';
+import 'package:nai_launcher/presentation/widgets/common/collapsible_image_panel.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_animated_icon.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../helpers/light_theme_contrast.dart';
 
@@ -61,6 +64,33 @@ void main() {
       // 卡片走自定义 onTap（打开参考库对话框而非文件选择）
       expect(tester.widget<ImagePickerCard>(libraryCard).onTap, isNotNull);
       expect(tester.widget<ImagePickerCard>(sketchCard).onTap, isNotNull);
+
+      await tester.tap(find.text('图生图'));
+      await tester.pump();
+      expect(
+        tester
+            .widget<CollapsibleImagePanel>(find.byType(CollapsibleImagePanel))
+            .isExpanded,
+        isFalse,
+      );
+      final headerIcon = tester.widget<StudioAnimatedIcon>(
+        find
+            .descendant(
+              of: find.byType(CollapsibleImagePanel),
+              matching: find.byType(StudioAnimatedIcon),
+            )
+            .first,
+      );
+      expect(headerIcon.icon, StudioIcons.imageToImage);
+      expect(headerIcon.trigger, 1);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is CustomPaint && widget.painter is StudioIconPainter,
+        ),
+        findsOneWidget,
+      );
+      await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
     });

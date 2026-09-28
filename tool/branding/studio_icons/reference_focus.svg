@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+  <path id="topLeft" d="M3 7.4V4Q3 3 4 3H7.4"/>
+  <path id="topRight" d="M16.6 3H20Q21 3 21 4V7.4"/>
+  <path id="bottomLeft" d="M3 16.6V20Q3 21 4 21H7.4"/>
+  <path id="bottomRight" d="M16.6 21H20Q21 21 21 20V16.6"/>
+  <path id="circle" stroke="none" fill="currentColor" d="M11.6 9A2.6 2.6 0 1 1 6.4 9A2.6 2.6 0 1 1 11.6 9Z"/>
+  <path id="triangle" stroke="none" fill="currentColor" d="M14.4 10.9Q14.8 10.2 15.2 10.9L18.1 15.9Q18.5 16.6 17.7 16.6H11.9Q11.1 16.6 11.5 15.9Z"/>
+</svg>

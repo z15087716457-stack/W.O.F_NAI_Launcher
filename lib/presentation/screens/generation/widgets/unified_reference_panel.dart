@@ -347,7 +347,7 @@ class _UnifiedReferencePanelState extends ConsumerState<UnifiedReferencePanel> {
       frosted: true,
       title: context.l10n.vibe_title,
       subtitle: context.l10n.vibe_description,
-      icon: StudioIcons.vibeLibrary,
+      icon: StudioIcons.styleTransfer,
       iconAsset: 'assets/icons/nai-icon-vibe-transfer.svg',
       isExpanded: _isExpanded,
       iconTrigger: _headerIconTrigger,

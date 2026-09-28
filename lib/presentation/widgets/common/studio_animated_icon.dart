@@ -72,6 +72,9 @@ class _StudioAnimatedIconState extends State<StudioAnimatedIcon>
           0xe906 => 600, // Draw, lift, return.
           0xe900 => 580, // Parents to child.
           0xe908 => 560, // Staggered columns.
+          0xe90b => 560, // Source pulse, orbit, result.
+          0xe90c => 580, // Carry the style into the target.
+          0xe90d => 520, // Focus corners settle around the features.
           _ => 500,
         },
       );
@@ -163,11 +166,11 @@ class StudioIconPainter extends CustomPainter {
   }) {
     final paint = Paint()
       ..color = color.withValues(alpha: color.a * opacity.clamp(0.0, 1.0))
-      ..style = PaintingStyle.stroke
+      ..style = part.filled ? PaintingStyle.fill : PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
       ..strokeWidth = part.strokeWidth;
-    if (trim >= 1) {
+    if (trim >= 1 || part.filled) {
       canvas.drawPath(part.path, paint);
     } else if (trim > 0) {
       for (final metric in part.path.computeMetrics()) {
@@ -340,6 +343,59 @@ class StudioIconPainter extends CustomPainter {
             _around(canvas, 12, 20, sy: 1 - .04 * press);
           } else if (part.name == 'seam') {
             opacity = 1 - .45 * _pulse(t, .3, .83);
+          }
+        case 0xe90b:
+          if (part.name == 'topArc' || part.name == 'bottomArc') {
+            final turn = _keys(t, [(0, 0), (.48, 18), (.78, -2), (1, 0)]);
+            _around(canvas, 12, 12, angle: turn * math.pi / 180);
+          } else if (part.name == 'source') {
+            final scale = 1 - .12 * _pulse(t, 0, .5);
+            _around(canvas, 5.2, 12, sx: scale, sy: scale);
+          } else if (part.name == 'result') {
+            final scale = 1 + .1 * _pulse(t, .32, .95);
+            _around(canvas, 18.4, 12, sx: scale, sy: scale);
+          }
+        case 0xe90c:
+          if (part.name == 'ribbon') {
+            // The quiet base keeps the connection visible while it draws across.
+            final flow = _pulse(t, .06, .94);
+            _draw(canvas, part, opacity: 1 - .65 * flow);
+            trim = _ease((t - .12) / .56);
+            opacity = flow;
+          } else if (part.name == 'mountains') {
+            final scale = 1 - .1 * _pulse(t, 0, .46);
+            _around(canvas, 7, 10, sx: scale, sy: scale);
+          } else if (part.name == 'spark') {
+            final scale = 1 + .17 * _pulse(t, .45, 1);
+            _around(canvas, 18.5, 12.8, sx: scale, sy: scale);
+          }
+        case 0xe90d:
+          final focus = _keys(t, [
+            (0, 0),
+            (.34, .75),
+            (.64, .75),
+            (.83, -.1),
+            (1, 0),
+          ]);
+          final corner = switch (part.name) {
+            'topLeft' => const Offset(1, 1),
+            'topRight' => const Offset(-1, 1),
+            'bottomLeft' => const Offset(1, -1),
+            'bottomRight' => const Offset(-1, -1),
+            _ => Offset.zero,
+          };
+          canvas.translate(corner.dx * focus, corner.dy * focus);
+          if (part.name == 'circle' || part.name == 'triangle') {
+            final circle = part.name == 'circle';
+            final scale =
+                1 + .07 * _pulse(t, circle ? .22 : .36, circle ? .72 : .88);
+            _around(
+              canvas,
+              circle ? 9 : 14.8,
+              circle ? 9 : 14,
+              sx: scale,
+              sy: scale,
+            );
           }
       }
       _draw(canvas, part, opacity: opacity, trim: trim);

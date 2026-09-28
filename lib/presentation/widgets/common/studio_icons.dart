@@ -18,8 +18,13 @@ abstract final class StudioIcons {
   static const settings = IconData(0xe909, fontFamily: _family);
   static const promptBlockPalette = IconData(0xe90a, fontFamily: _family);
 
+  // Reference-card feature marks have their own weight and silhouettes.
+  static const imageToImage = IconData(0xe90b, fontFamily: _family);
+  static const styleTransfer = IconData(0xe90c, fontFamily: _family);
+  static const referenceFocus = IconData(0xe90d, fontFamily: _family);
+
   static bool supportsMotion(IconData icon) =>
       icon.fontFamily == _family &&
       icon.codePoint >= 0xe900 &&
-      icon.codePoint <= 0xe90a;
+      icon.codePoint <= 0xe90d;
 }

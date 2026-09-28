@@ -92,7 +92,7 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
       frosted: true,
       title: context.l10n.preciseRef_title,
       subtitle: context.l10n.preciseRef_subtitle,
-      icon: StudioIcons.preciseReference,
+      icon: StudioIcons.referenceFocus,
       iconAsset: 'assets/icons/nai-icon-precise-reference.svg',
       isExpanded: _isExpanded,
       iconTrigger: _headerIconTrigger,

@@ -20,6 +20,9 @@ const _icons = <String, IconData>{
   '设置': StudioIcons.settings,
   '遗传按钮': StudioIcons.inherit,
   '积木悬浮窗': StudioIcons.promptBlockPalette,
+  '图生图': StudioIcons.imageToImage,
+  '风格迁移': StudioIcons.styleTransfer,
+  '参考聚焦': StudioIcons.referenceFocus,
 };
 
 Finder get _painting => find.byWidgetPredicate(

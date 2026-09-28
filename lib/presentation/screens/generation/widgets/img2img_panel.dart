@@ -102,6 +102,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
 
   bool _naiUpscaling = false;
   bool _isFileDraggingOver = false;
+  int _headerIconTrigger = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -123,12 +124,16 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
       frosted: true,
       title: context.l10n.img2img_title,
       subtitle: context.l10n.img2img_subtitle,
-      icon: Icons.image,
+      icon: StudioIcons.imageToImage,
       iconAsset: 'assets/icons/nai-icon-img2img.svg',
       isExpanded: workflow.isPanelExpanded,
-      onToggle: () => ref
-          .read(imageWorkflowControllerProvider.notifier)
-          .setPanelExpanded(!workflow.isPanelExpanded),
+      iconTrigger: _headerIconTrigger,
+      onToggle: () {
+        setState(() => _headerIconTrigger++);
+        ref
+            .read(imageWorkflowControllerProvider.notifier)
+            .setPanelExpanded(!workflow.isPanelExpanded);
+      },
       hasData: hasSourceImage,
       headerActions: hasSourceImage
           ? _buildLoadedHeaderActions(

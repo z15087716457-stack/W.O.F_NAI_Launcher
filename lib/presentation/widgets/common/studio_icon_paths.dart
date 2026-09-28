@@ -2,10 +2,16 @@
 import 'dart:ui';
 
 class StudioIconPart {
-  const StudioIconPart(this.name, this.path, this.strokeWidth);
+  const StudioIconPart(
+    this.name,
+    this.path,
+    this.strokeWidth, {
+    this.filled = false,
+  });
   final String name;
   final Path path;
   final double strokeWidth;
+  final bool filled;
 }
 
 final studioIconPaths = <int, List<StudioIconPart>>{
@@ -508,6 +514,185 @@ final studioIconPaths = <int, List<StudioIconPart>>{
         ..moveTo(7.0, 16.0)
         ..lineTo(17.0, 16.0),
       1.7,
+    ),
+  ],
+  0xe90b: [
+    StudioIconPart(
+      'topArc',
+      Path()
+        ..moveTo(5.2, 5.2)
+        ..cubicTo(8.7, 1.8, 14.8, 1.8, 18.6, 5.6)
+        ..moveTo(18.7, 3.0)
+        ..lineTo(18.7, 5.9)
+        ..lineTo(15.8, 5.9),
+      2.1,
+    ),
+    StudioIconPart(
+      'bottomArc',
+      Path()
+        ..moveTo(18.8, 18.8)
+        ..cubicTo(15.3, 22.2, 9.2, 22.2, 5.4, 18.4)
+        ..moveTo(5.3, 21.0)
+        ..lineTo(5.3, 18.1)
+        ..lineTo(8.2, 18.1),
+      2.1,
+    ),
+    StudioIconPart(
+      'source',
+      Path()
+        ..moveTo(8.0, 12.0)
+        ..cubicTo(8.0, 13.5464, 6.7464, 14.8, 5.2, 14.8)
+        ..cubicTo(3.6536, 14.8, 2.4, 13.5464, 2.4, 12.0)
+        ..cubicTo(2.4, 10.4536, 3.6536, 9.2, 5.2, 9.2)
+        ..cubicTo(6.7464, 9.2, 8.0, 10.4536, 8.0, 12.0)
+        ..close(),
+      2.1,
+    ),
+    StudioIconPart(
+      'result',
+      Path()
+        ..moveTo(18.4, 8.6)
+        ..cubicTo(18.9, 10.4, 19.8, 11.4, 21.6, 12.0)
+        ..cubicTo(19.8, 12.6, 18.9, 13.6, 18.4, 15.4)
+        ..cubicTo(17.9, 13.6, 17.0, 12.6, 15.2, 12.0)
+        ..cubicTo(17.0, 11.4, 17.9, 10.4, 18.4, 8.6)
+        ..close(),
+      2.1,
+    ),
+  ],
+  0xe90c: [
+    StudioIconPart(
+      'sourceFrame',
+      Path()
+        ..moveTo(8.3, 5.0)
+        ..lineTo(3.0, 5.0)
+        ..quadraticBezierTo(2.0, 5.0, 2.0, 6.0)
+        ..lineTo(2.0, 13.8)
+        ..quadraticBezierTo(2.0, 14.8, 3.0, 14.8)
+        ..lineTo(7.4, 14.8),
+      2.1,
+    ),
+    StudioIconPart(
+      'targetFrame',
+      Path()
+        ..moveTo(16.4, 8.2)
+        ..lineTo(21.0, 8.2)
+        ..quadraticBezierTo(22.0, 8.2, 22.0, 9.2)
+        ..lineTo(22.0, 18.0)
+        ..quadraticBezierTo(22.0, 19.0, 21.0, 19.0)
+        ..lineTo(16.5, 19.0),
+      2.1,
+    ),
+    StudioIconPart(
+      'mountains',
+      Path()
+        ..moveTo(3.9, 11.6)
+        ..lineTo(5.3, 9.3)
+        ..quadraticBezierTo(5.6, 8.8, 5.9, 9.3)
+        ..lineTo(7.3, 11.6)
+        ..quadraticBezierTo(7.6, 12.1, 7.0, 12.1)
+        ..lineTo(4.2, 12.1)
+        ..quadraticBezierTo(3.6, 12.1, 3.9, 11.6)
+        ..close()
+        ..moveTo(6.7, 9.3)
+        ..lineTo(7.6, 7.9)
+        ..quadraticBezierTo(7.9, 7.4, 8.2, 7.9)
+        ..lineTo(10.2, 11.6)
+        ..quadraticBezierTo(10.5, 12.1, 9.9, 12.1)
+        ..lineTo(8.7, 12.1)
+        ..lineTo(6.7, 9.3)
+        ..close(),
+      2.1,
+      filled: true,
+    ),
+    StudioIconPart(
+      'ribbon',
+      Path()
+        ..moveTo(10.6, 11.1)
+        ..cubicTo(13.4, 10.2, 13.1, 16.1, 17.1, 15.5),
+      2.1,
+    ),
+    StudioIconPart(
+      'spark',
+      Path()
+        ..moveTo(18.5, 10.5)
+        ..quadraticBezierTo(18.8, 10.5, 18.9, 10.9)
+        ..quadraticBezierTo(19.2, 12.2, 20.3, 12.5)
+        ..quadraticBezierTo(20.9, 12.7, 20.3, 13.0)
+        ..quadraticBezierTo(19.2, 13.4, 18.9, 14.7)
+        ..quadraticBezierTo(18.8, 15.1, 18.5, 15.1)
+        ..quadraticBezierTo(18.2, 15.1, 18.1, 14.7)
+        ..quadraticBezierTo(17.8, 13.4, 16.7, 13.0)
+        ..quadraticBezierTo(16.1, 12.7, 16.7, 12.5)
+        ..quadraticBezierTo(17.8, 12.2, 18.1, 10.9)
+        ..quadraticBezierTo(18.2, 10.5, 18.5, 10.5)
+        ..close(),
+      2.1,
+      filled: true,
+    ),
+  ],
+  0xe90d: [
+    StudioIconPart(
+      'topLeft',
+      Path()
+        ..moveTo(3.0, 7.4)
+        ..lineTo(3.0, 4.0)
+        ..quadraticBezierTo(3.0, 3.0, 4.0, 3.0)
+        ..lineTo(7.4, 3.0),
+      2.1,
+    ),
+    StudioIconPart(
+      'topRight',
+      Path()
+        ..moveTo(16.6, 3.0)
+        ..lineTo(20.0, 3.0)
+        ..quadraticBezierTo(21.0, 3.0, 21.0, 4.0)
+        ..lineTo(21.0, 7.4),
+      2.1,
+    ),
+    StudioIconPart(
+      'bottomLeft',
+      Path()
+        ..moveTo(3.0, 16.6)
+        ..lineTo(3.0, 20.0)
+        ..quadraticBezierTo(3.0, 21.0, 4.0, 21.0)
+        ..lineTo(7.4, 21.0),
+      2.1,
+    ),
+    StudioIconPart(
+      'bottomRight',
+      Path()
+        ..moveTo(16.6, 21.0)
+        ..lineTo(20.0, 21.0)
+        ..quadraticBezierTo(21.0, 21.0, 21.0, 20.0)
+        ..lineTo(21.0, 16.6),
+      2.1,
+    ),
+    StudioIconPart(
+      'circle',
+      Path()
+        ..moveTo(11.6, 9.0)
+        ..cubicTo(11.6, 10.43594, 10.43594, 11.6, 9.0, 11.6)
+        ..cubicTo(7.56406, 11.6, 6.4, 10.43594, 6.4, 9.0)
+        ..cubicTo(6.4, 7.56406, 7.56406, 6.4, 9.0, 6.4)
+        ..cubicTo(10.43594, 6.4, 11.6, 7.56406, 11.6, 9.0)
+        ..close(),
+      2.1,
+      filled: true,
+    ),
+    StudioIconPart(
+      'triangle',
+      Path()
+        ..moveTo(14.4, 10.9)
+        ..quadraticBezierTo(14.8, 10.2, 15.2, 10.9)
+        ..lineTo(18.1, 15.9)
+        ..quadraticBezierTo(18.5, 16.6, 17.7, 16.6)
+        ..lineTo(11.9, 16.6)
+        ..quadraticBezierTo(11.1, 16.6, 11.5, 15.9)
+        ..lineTo(14.4, 10.9)
+        ..close(),
+      2.1,
+      filled: true,
     ),
   ],
 };
