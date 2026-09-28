@@ -56,6 +56,15 @@ add_subdirectory(${FLUTTER_MANAGED_DIR})
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
 
+# Local Pixel Snap scoring backend. The Dart implementation remains the
+# fallback when this library is absent (for example in tests or other builds).
+add_library(pixel_snap_spread SHARED "pixel_snap_spread.cpp")
+target_compile_features(pixel_snap_spread PRIVATE cxx_std_17)
+if(MSVC)
+  target_compile_options(pixel_snap_spread PRIVATE /W4 /WX /fp:precise)
+endif()
+add_dependencies(${BINARY_NAME} pixel_snap_spread)
+
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
@@ -77,6 +86,8 @@ set(INSTALL_BUNDLE_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
 set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}")
 
 install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
+  COMPONENT Runtime)
+install(TARGETS pixel_snap_spread RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
 
 install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"

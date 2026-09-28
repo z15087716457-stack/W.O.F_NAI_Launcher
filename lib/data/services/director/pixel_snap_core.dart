@@ -454,6 +454,8 @@ Float32List _spread(
   int w1,
   bool innerIsCol,
 ) {
+  final native = _tryNativeSpread(inner, outer, sat, w1, innerIsCol);
+  if (native != null) return native;
   final l = inner.a, z = inner.z, i = inner.sel;
   final u = inner.b, s = inner.p, c = inner.k;
   final h = outer.a, d = outer.z, g = outer.sel, m = outer.k;

@@ -11,11 +11,15 @@ library;
 
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ffi' as ffi;
+import 'dart:io' show Platform;
 
+import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart' show compute;
 import 'package:image/image.dart' as img;
 
 part 'pixel_snap_core.dart';
+part 'pixel_snap_native.dart';
 
 /// Palette handling, mirroring the official tool's "Palettize" control.
 enum PixelSnapPaletteMode {
@@ -95,6 +99,10 @@ class PixelSnapOptions {
 ///  * [ArgumentError] — input dimensions exceeding the memory bounds.
 class PixelSnapService {
   PixelSnapService._();
+
+  /// Whether the optional Windows spread accelerator was loaded. Other
+  /// platforms and test runners continue to use the original Dart backend.
+  static bool get hasNativeSpread => _nativeSpread != null;
 
   /// Runs the algorithm on a background isolate via Flutter `compute`.
   static Future<Uint8List> snap(
