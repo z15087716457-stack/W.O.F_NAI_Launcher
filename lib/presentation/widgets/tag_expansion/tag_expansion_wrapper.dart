@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/autocomplete/autocomplete_settings.dart';
 import '../../../core/autocomplete/completion_models.dart';
@@ -17,6 +18,7 @@ import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
 import '../../../core/wiki/tag_wiki_repository.dart';
 import '../autocomplete/tag_category_visuals.dart';
+import '../../router/app_router.dart';
 
 /// Explicit, local-only tag search for prompt editors. It does not listen to
 /// typed prompt text and never enters the old autocomplete query pipeline.
@@ -1313,6 +1315,19 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.labelMedium,
                   ),
+                ),
+                IconButton(
+                  tooltip: context.l10n.wiki_openFull,
+                  onPressed: () {
+                    final route = Uri(
+                      path: AppRoutes.tagWiki,
+                      queryParameters: {'tag': candidate.canonicalTag},
+                    ).toString();
+                    final router = GoRouter.of(context);
+                    _close();
+                    router.go(route);
+                  },
+                  icon: const Icon(Icons.open_in_new, size: 15),
                 ),
                 IconButton(
                   tooltip: context.l10n.common_close,

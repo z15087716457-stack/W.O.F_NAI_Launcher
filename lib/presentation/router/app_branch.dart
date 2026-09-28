@@ -11,6 +11,7 @@ enum AppBranch {
   preciseRefLibrary,
   promptBlockLibrary,
   styleExplore,
+  tagWiki,
 }
 
 /// Global navigation shortcuts and their destination branches.

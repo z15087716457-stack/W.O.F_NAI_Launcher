@@ -135,6 +135,14 @@ class MainNavRail extends ConsumerWidget {
                       ),
                     ),
 
+                    _NavIcon(
+                      icon: Icons.menu_book_outlined,
+                      label: context.l10n.nav_tagWiki,
+                      isSelected: currentIndex == AppBranch.tagWiki.index,
+                      onTap: () =>
+                          navigationShell.goBranch(AppBranch.tagWiki.index),
+                    ),
+
                     const _NavGroupDivider(),
 
                     // 统计独立分组。

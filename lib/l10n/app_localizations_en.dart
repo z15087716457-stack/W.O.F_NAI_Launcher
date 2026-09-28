@@ -10523,4 +10523,128 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateLater => 'Later';
+
+  @override
+  String get nav_tagWiki => 'Tag Wiki';
+
+  @override
+  String get wiki_title => 'Tag Wiki';
+
+  @override
+  String get wiki_allTags => 'All tags';
+
+  @override
+  String get wiki_bookmarks => 'Bookmarks';
+
+  @override
+  String get wiki_newCollection => 'New bookmark collection';
+
+  @override
+  String get wiki_newChildCollection => 'New child collection';
+
+  @override
+  String get wiki_renameCollection => 'Rename';
+
+  @override
+  String get wiki_deleteCollection => 'Delete collection';
+
+  @override
+  String get wiki_officialDirectory => 'Official directory';
+
+  @override
+  String get wiki_searchHint => 'Search tags, aliases, or Chinese names';
+
+  @override
+  String get wiki_typeAll => 'All types';
+
+  @override
+  String get wiki_coverageAll => 'All descriptions';
+
+  @override
+  String get wiki_withArticle => 'Has description';
+
+  @override
+  String get wiki_withoutArticle => 'No description yet';
+
+  @override
+  String get wiki_sortPopular => 'Popularity';
+
+  @override
+  String get wiki_sortName => 'Name';
+
+  @override
+  String get wiki_dataStatus => 'Data status';
+
+  @override
+  String get wiki_scopeCurrent => 'Current section';
+
+  @override
+  String get wiki_scopeAll => 'Search all tags';
+
+  @override
+  String get wiki_readingSettings => 'Reading settings';
+
+  @override
+  String get wiki_textSize => 'Article text';
+
+  @override
+  String get wiki_readingWidth => 'Reading width';
+
+  @override
+  String get wiki_small => 'Small';
+
+  @override
+  String get wiki_standard => 'Standard';
+
+  @override
+  String get wiki_large => 'Large';
+
+  @override
+  String get wiki_wide => 'Wide';
+
+  @override
+  String get wiki_hide => 'Hide';
+
+  @override
+  String get wiki_articleMissing =>
+      'This tag has no local Wiki description yet.';
+
+  @override
+  String get wiki_source => 'Source';
+
+  @override
+  String get wiki_addBookmark => 'Bookmark';
+
+  @override
+  String get wiki_removeBookmark => 'Remove bookmark';
+
+  @override
+  String get wiki_addToCollection => 'Add to collection';
+
+  @override
+  String get wiki_importBlock => 'Save as single-atom block';
+
+  @override
+  String get wiki_inBlockLibrary => 'In block library';
+
+  @override
+  String get wiki_loadMore => 'Load more';
+
+  @override
+  String get wiki_noResults => 'No matching tags';
+
+  @override
+  String get wiki_noSelection => 'Select a tag to read its description';
+
+  @override
+  String get wiki_collectionNameHint => 'Collection name';
+
+  @override
+  String get wiki_syncTags => 'Sync Danbooru tags';
+
+  @override
+  String get wiki_directorySource => 'Official group directory snapshot';
+
+  @override
+  String get wiki_openFull => 'Open in Tag Wiki';
 }

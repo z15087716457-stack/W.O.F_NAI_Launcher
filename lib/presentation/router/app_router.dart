@@ -23,6 +23,7 @@ import '../screens/style_explore/style_explore_screen.dart';
 import '../screens/precise_ref_library/precise_ref_library_screen.dart';
 import '../screens/prompt_block_library/prompt_block_library_screen.dart';
 import '../screens/vibe_library/vibe_library_screen.dart';
+import '../screens/tag_wiki/tag_wiki_screen.dart';
 import '../widgets/common/update_notice_banner.dart';
 import '../widgets/drop/global_drop_handler.dart';
 import '../widgets/navigation/main_nav_rail.dart';
@@ -49,6 +50,7 @@ final _promptBlockLibraryKey = GlobalKey<NavigatorState>(
   debugLabel: 'promptBlockLibrary',
 );
 final _styleExploreKey = GlobalKey<NavigatorState>(debugLabel: 'styleExplore');
+final _tagWikiKey = GlobalKey<NavigatorState>(debugLabel: 'tagWiki');
 
 /// 路由路径常量
 class AppRoutes {
@@ -68,6 +70,7 @@ class AppRoutes {
   static const String preciseRefLibrary = '/precise-ref-library';
   static const String promptBlockLibrary = '/prompt-block-library';
   static const String styleExplore = '/style-explore';
+  static const String tagWiki = '/tag-wiki';
 }
 
 String? appAuthRedirect({
@@ -329,6 +332,21 @@ GoRouter appRouter(Ref ref) {
               ),
             ],
           ),
+          // Branch 9: 标签百科 - 保活，维持阅读位置和目录展开状态。
+          StatefulShellBranch(
+            navigatorKey: _tagWikiKey,
+            routes: [
+              GoRoute(
+                path: AppRoutes.tagWiki,
+                name: 'tagWiki',
+                builder: (context, state) => WindowChromePage(
+                  child: TagWikiScreen(
+                    initialTag: state.uri.queryParameters['tag'],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     ],
@@ -393,6 +411,7 @@ class _MainShellState extends ConsumerState<MainShell> {
       AppBranch.vibeLibrary,
       AppBranch.preciseRefLibrary,
       AppBranch.promptBlockLibrary,
+      AppBranch.tagWiki,
     };
     final contentStack = IndexedStack(
       index: currentIndex,

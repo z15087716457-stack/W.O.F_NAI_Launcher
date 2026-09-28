@@ -10117,4 +10117,127 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get updateLater => '稍后';
+
+  @override
+  String get nav_tagWiki => '标签百科';
+
+  @override
+  String get wiki_title => '标签百科';
+
+  @override
+  String get wiki_allTags => '全部词条';
+
+  @override
+  String get wiki_bookmarks => '书签';
+
+  @override
+  String get wiki_newCollection => '新建书签集';
+
+  @override
+  String get wiki_newChildCollection => '新建子书签集';
+
+  @override
+  String get wiki_renameCollection => '重命名';
+
+  @override
+  String get wiki_deleteCollection => '删除书签集';
+
+  @override
+  String get wiki_officialDirectory => '官方目录';
+
+  @override
+  String get wiki_searchHint => '搜索标签、别名或中文译名';
+
+  @override
+  String get wiki_typeAll => '全部类型';
+
+  @override
+  String get wiki_coverageAll => '全部释义';
+
+  @override
+  String get wiki_withArticle => '有释义';
+
+  @override
+  String get wiki_withoutArticle => '暂无释义';
+
+  @override
+  String get wiki_sortPopular => '按热度';
+
+  @override
+  String get wiki_sortName => '按名称';
+
+  @override
+  String get wiki_dataStatus => '数据状态';
+
+  @override
+  String get wiki_scopeCurrent => '当前目录';
+
+  @override
+  String get wiki_scopeAll => '搜索全库';
+
+  @override
+  String get wiki_readingSettings => '阅读设置';
+
+  @override
+  String get wiki_textSize => '正文大小';
+
+  @override
+  String get wiki_readingWidth => '阅读宽度';
+
+  @override
+  String get wiki_small => '小';
+
+  @override
+  String get wiki_standard => '标准';
+
+  @override
+  String get wiki_large => '大';
+
+  @override
+  String get wiki_wide => '宽';
+
+  @override
+  String get wiki_hide => '隐藏';
+
+  @override
+  String get wiki_articleMissing => '这条标签暂时没有本地 Wiki 释义。';
+
+  @override
+  String get wiki_source => '来源';
+
+  @override
+  String get wiki_addBookmark => '加入书签';
+
+  @override
+  String get wiki_removeBookmark => '移出书签';
+
+  @override
+  String get wiki_addToCollection => '加入书签集';
+
+  @override
+  String get wiki_importBlock => '存为单原子块';
+
+  @override
+  String get wiki_inBlockLibrary => '已在块库';
+
+  @override
+  String get wiki_loadMore => '加载更多';
+
+  @override
+  String get wiki_noResults => '没有匹配的词条';
+
+  @override
+  String get wiki_noSelection => '选择一个词条查看释义';
+
+  @override
+  String get wiki_collectionNameHint => '书签集名称';
+
+  @override
+  String get wiki_syncTags => '同步 Danbooru 标签';
+
+  @override
+  String get wiki_directorySource => '官方分组目录快照';
+
+  @override
+  String get wiki_openFull => '在标签百科中打开';
 }

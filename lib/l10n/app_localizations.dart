@@ -18398,6 +18398,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Later'**
   String get updateLater;
+
+  /// No description provided for @nav_tagWiki.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag Wiki'**
+  String get nav_tagWiki;
+
+  /// No description provided for @wiki_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag Wiki'**
+  String get wiki_title;
+
+  /// No description provided for @wiki_allTags.
+  ///
+  /// In en, this message translates to:
+  /// **'All tags'**
+  String get wiki_allTags;
+
+  /// No description provided for @wiki_bookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmarks'**
+  String get wiki_bookmarks;
+
+  /// No description provided for @wiki_newCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'New bookmark collection'**
+  String get wiki_newCollection;
+
+  /// No description provided for @wiki_newChildCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'New child collection'**
+  String get wiki_newChildCollection;
+
+  /// No description provided for @wiki_renameCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get wiki_renameCollection;
+
+  /// No description provided for @wiki_deleteCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete collection'**
+  String get wiki_deleteCollection;
+
+  /// No description provided for @wiki_officialDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Official directory'**
+  String get wiki_officialDirectory;
+
+  /// No description provided for @wiki_searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search tags, aliases, or Chinese names'**
+  String get wiki_searchHint;
+
+  /// No description provided for @wiki_typeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All types'**
+  String get wiki_typeAll;
+
+  /// No description provided for @wiki_coverageAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All descriptions'**
+  String get wiki_coverageAll;
+
+  /// No description provided for @wiki_withArticle.
+  ///
+  /// In en, this message translates to:
+  /// **'Has description'**
+  String get wiki_withArticle;
+
+  /// No description provided for @wiki_withoutArticle.
+  ///
+  /// In en, this message translates to:
+  /// **'No description yet'**
+  String get wiki_withoutArticle;
+
+  /// No description provided for @wiki_sortPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popularity'**
+  String get wiki_sortPopular;
+
+  /// No description provided for @wiki_sortName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get wiki_sortName;
+
+  /// No description provided for @wiki_dataStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Data status'**
+  String get wiki_dataStatus;
+
+  /// No description provided for @wiki_scopeCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current section'**
+  String get wiki_scopeCurrent;
+
+  /// No description provided for @wiki_scopeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Search all tags'**
+  String get wiki_scopeAll;
+
+  /// No description provided for @wiki_readingSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading settings'**
+  String get wiki_readingSettings;
+
+  /// No description provided for @wiki_textSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Article text'**
+  String get wiki_textSize;
+
+  /// No description provided for @wiki_readingWidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading width'**
+  String get wiki_readingWidth;
+
+  /// No description provided for @wiki_small.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get wiki_small;
+
+  /// No description provided for @wiki_standard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get wiki_standard;
+
+  /// No description provided for @wiki_large.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get wiki_large;
+
+  /// No description provided for @wiki_wide.
+  ///
+  /// In en, this message translates to:
+  /// **'Wide'**
+  String get wiki_wide;
+
+  /// No description provided for @wiki_hide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get wiki_hide;
+
+  /// No description provided for @wiki_articleMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'This tag has no local Wiki description yet.'**
+  String get wiki_articleMissing;
+
+  /// No description provided for @wiki_source.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get wiki_source;
+
+  /// No description provided for @wiki_addBookmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark'**
+  String get wiki_addBookmark;
+
+  /// No description provided for @wiki_removeBookmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove bookmark'**
+  String get wiki_removeBookmark;
+
+  /// No description provided for @wiki_addToCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to collection'**
+  String get wiki_addToCollection;
+
+  /// No description provided for @wiki_importBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as single-atom block'**
+  String get wiki_importBlock;
+
+  /// No description provided for @wiki_inBlockLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'In block library'**
+  String get wiki_inBlockLibrary;
+
+  /// No description provided for @wiki_loadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get wiki_loadMore;
+
+  /// No description provided for @wiki_noResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching tags'**
+  String get wiki_noResults;
+
+  /// No description provided for @wiki_noSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a tag to read its description'**
+  String get wiki_noSelection;
+
+  /// No description provided for @wiki_collectionNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection name'**
+  String get wiki_collectionNameHint;
+
+  /// No description provided for @wiki_syncTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Danbooru tags'**
+  String get wiki_syncTags;
+
+  /// No description provided for @wiki_directorySource.
+  ///
+  /// In en, this message translates to:
+  /// **'Official group directory snapshot'**
+  String get wiki_directorySource;
+
+  /// No description provided for @wiki_openFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Tag Wiki'**
+  String get wiki_openFull;
 }
 
 class _AppLocalizationsDelegate

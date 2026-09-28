@@ -10253,4 +10253,127 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get updateLater => '後で';
+
+  @override
+  String get nav_tagWiki => 'タグ百科';
+
+  @override
+  String get wiki_title => 'タグ百科';
+
+  @override
+  String get wiki_allTags => 'すべてのタグ';
+
+  @override
+  String get wiki_bookmarks => 'ブックマーク';
+
+  @override
+  String get wiki_newCollection => 'コレクションを作成';
+
+  @override
+  String get wiki_newChildCollection => '子コレクションを作成';
+
+  @override
+  String get wiki_renameCollection => '名前を変更';
+
+  @override
+  String get wiki_deleteCollection => 'コレクションを削除';
+
+  @override
+  String get wiki_officialDirectory => '公式ディレクトリ';
+
+  @override
+  String get wiki_searchHint => 'タグ、別名、中国語訳を検索';
+
+  @override
+  String get wiki_typeAll => 'すべての種類';
+
+  @override
+  String get wiki_coverageAll => 'すべての説明';
+
+  @override
+  String get wiki_withArticle => '説明あり';
+
+  @override
+  String get wiki_withoutArticle => '説明なし';
+
+  @override
+  String get wiki_sortPopular => '人気順';
+
+  @override
+  String get wiki_sortName => '名前順';
+
+  @override
+  String get wiki_dataStatus => 'データの状態';
+
+  @override
+  String get wiki_scopeCurrent => '現在の項目';
+
+  @override
+  String get wiki_scopeAll => '全体を検索';
+
+  @override
+  String get wiki_readingSettings => '表示設定';
+
+  @override
+  String get wiki_textSize => '本文の大きさ';
+
+  @override
+  String get wiki_readingWidth => '本文の幅';
+
+  @override
+  String get wiki_small => '小';
+
+  @override
+  String get wiki_standard => '標準';
+
+  @override
+  String get wiki_large => '大';
+
+  @override
+  String get wiki_wide => '広い';
+
+  @override
+  String get wiki_hide => '隠す';
+
+  @override
+  String get wiki_articleMissing => 'このタグにはローカル Wiki の説明がありません。';
+
+  @override
+  String get wiki_source => '出典';
+
+  @override
+  String get wiki_addBookmark => 'ブックマークに追加';
+
+  @override
+  String get wiki_removeBookmark => 'ブックマークを解除';
+
+  @override
+  String get wiki_addToCollection => 'コレクションに追加';
+
+  @override
+  String get wiki_importBlock => '単一アトムのブロックとして保存';
+
+  @override
+  String get wiki_inBlockLibrary => 'ブロックライブラリに登録済み';
+
+  @override
+  String get wiki_loadMore => 'さらに読み込む';
+
+  @override
+  String get wiki_noResults => '一致するタグがありません';
+
+  @override
+  String get wiki_noSelection => 'タグを選択して説明を表示';
+
+  @override
+  String get wiki_collectionNameHint => 'コレクション名';
+
+  @override
+  String get wiki_syncTags => 'Danbooru タグを同期';
+
+  @override
+  String get wiki_directorySource => '公式グループ一覧のスナップショット';
+
+  @override
+  String get wiki_openFull => 'タグ百科で開く';
 }
