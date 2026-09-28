@@ -135,6 +135,15 @@ void main() {
     await tester.pump();
 
     expect(find.text('Tab to complete: blue hair'), findsOneWidget);
+    final hint = tester.getRect(
+      find.byKey(const Key('tag-expansion-tab-hint')),
+    );
+    final limit = tester.getRect(
+      find.byKey(const Key('tag-expansion-result-limit')),
+    );
+    final popup = tester.getRect(find.byKey(const Key('tag-expansion-popup')));
+    expect(limit.left - hint.right, inInclusiveRange(10, 18));
+    expect(popup.right - limit.right, lessThanOrEqualTo(2));
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
     expect(
@@ -413,6 +422,67 @@ void main() {
     await tester.pump();
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     expect(find.text('Result count 12'), findsOneWidget);
+  });
+
+  testWidgets('category icons sit beside titles and actions clear counts', (
+    tester,
+  ) async {
+    final controller = TextEditingController();
+    final focusNode = FocusNode();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await _pumpEditor(
+      tester,
+      controller,
+      focusNode,
+      _Source([
+        _tag('white_background', postCount: 1500000),
+        _tag('hakurei_reimu', category: TagCategory.character),
+        _tag('touhou', category: TagCategory.copyright),
+      ]),
+    );
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tap(find.byKey(const Key('prompt-editor')));
+    await tester.pump();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.enterText(
+      find.byKey(const Key('tag-expansion-search')),
+      'tag',
+    );
+    await tester.pump(const Duration(milliseconds: 170));
+    await tester.pump();
+
+    final generalIcon = find.byKey(const Key('tag-expansion-category-general'));
+    final characterIcon = find.byKey(
+      const Key('tag-expansion-category-character'),
+    );
+    final copyrightIcon = find.byKey(
+      const Key('tag-expansion-category-copyright'),
+    );
+    expect(generalIcon, findsOneWidget);
+    expect(characterIcon, findsOneWidget);
+    expect(copyrightIcon, findsOneWidget);
+    expect(find.byTooltip('Character'), findsOneWidget);
+    expect(find.byTooltip('Copyright'), findsOneWidget);
+    expect(
+      tester.widget<Icon>(generalIcon).color,
+      isNot(tester.widget<Icon>(characterIcon).color),
+    );
+    final title = tester.getRect(find.text('white background'));
+    final icon = tester.getRect(generalIcon);
+    expect(icon.left - title.right, inInclusiveRange(0, 6));
+
+    final mouse = await _hover(tester, find.text('white background'));
+    final count = tester.getRect(find.text('1.5m'));
+    final relatedAction = tester.getRect(
+      find.byTooltip('Show related tags').first,
+    );
+    final insertAction = tester.getRect(find.byTooltip('Insert tag').first);
+    expect(relatedAction.top, greaterThanOrEqualTo(count.bottom));
+    expect(insertAction.top, greaterThanOrEqualTo(count.bottom));
+    expect(relatedAction.height, lessThanOrEqualTo(20));
+    await mouse.removePointer();
   });
 
   testWidgets('narrow window uses one result column', (tester) async {
@@ -807,14 +877,17 @@ LocalTagExpansionService _service(
   popularSearch: ({limit = 12}) async => [_tag('solo')],
 );
 
-CompletionCandidate _tag(String name, {int postCount = 100}) =>
-    CompletionCandidate(
-      canonicalTag: name,
-      category: TagCategory.general,
-      postCount: postCount,
-      matchKind: CompletionMatchKind.englishPrefix,
-      sources: const {CompletionSourceKind.base},
-    );
+CompletionCandidate _tag(
+  String name, {
+  int postCount = 100,
+  TagCategory category = TagCategory.general,
+}) => CompletionCandidate(
+  canonicalTag: name,
+  category: category,
+  postCount: postCount,
+  matchKind: CompletionMatchKind.englishPrefix,
+  sources: const {CompletionSourceKind.base},
+);
 
 class _Source implements CompletionSource {
   _Source(this.results);

@@ -15,6 +15,7 @@ import '../../../core/tag_expansion/tag_expansion_providers.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
 import '../../../core/wiki/tag_wiki_repository.dart';
+import '../autocomplete/tag_category_visuals.dart';
 
 /// Explicit, local-only tag search for prompt editors. It does not listen to
 /// typed prompt text and never enters the old autocomplete query pipeline.
@@ -620,7 +621,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   ) {
     final titleWidth = math.max(
       1.0,
-      cellWidth - 12 - (candidate.postCount > 0 ? 48 : 0),
+      cellWidth - 12 - 18 - (candidate.postCount > 0 ? 48 : 0),
     );
     final painter = TextPainter(
       text: TextSpan(
@@ -892,7 +893,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                   ),
                 ),
               ),
-            if (showCompletion)
+            const Spacer(),
+            if (showCompletion) ...[
               Flexible(
                 flex: 2,
                 child: Align(
@@ -908,7 +910,14 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                   ),
                 ),
               ),
-            const Spacer(),
+              const SizedBox(width: 6),
+              Container(
+                width: 1,
+                height: 14,
+                color: theme.colorScheme.outlineVariant,
+              ),
+              const SizedBox(width: 6),
+            ],
             SizedBox(
               key: _limitButtonKey,
               height: 24,
@@ -1043,7 +1052,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
         ? translation!
         : alias != null
         ? TagNormalizer.toDisplay(alias)
-        : _categoryLabel(context, candidate.category);
+        : TagCategoryVisuals.label(context, candidate.category);
     final id = '${related ? 'related' : 'search'}:${candidate.stableId}';
     final showActions = _hoveredId == id || _focusedId == id;
     return MouseRegion(
@@ -1078,14 +1087,48 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: Text(
-                              TagNormalizer.toDisplay(candidate.canonicalTag),
-                              softWrap: true,
-                              style: _tagTitleStyle(context)?.copyWith(
-                                color: candidate.isExisting
-                                    ? theme.colorScheme.onSurfaceVariant
-                                    : null,
-                              ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Flexible(
+                                  fit: FlexFit.loose,
+                                  child: Text(
+                                    TagNormalizer.toDisplay(
+                                      candidate.canonicalTag,
+                                    ),
+                                    softWrap: true,
+                                    style: _tagTitleStyle(context)?.copyWith(
+                                      color: candidate.isExisting
+                                          ? theme.colorScheme.onSurfaceVariant
+                                          : null,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 2),
+                                Tooltip(
+                                  message: TagCategoryVisuals.label(
+                                    context,
+                                    candidate.category,
+                                  ),
+                                  child: SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: Icon(
+                                      TagCategoryVisuals.icon(
+                                        candidate.category,
+                                      ),
+                                      key: ValueKey(
+                                        'tag-expansion-category-${candidate.category.name}',
+                                      ),
+                                      size: 12,
+                                      color: TagCategoryVisuals.color(
+                                        context,
+                                        candidate.category,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           if (candidate.postCount > 0) ...[
@@ -1105,7 +1148,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                       ),
                       const SizedBox(height: 2),
                       Padding(
-                        padding: EdgeInsets.only(right: showActions ? 52 : 0),
+                        padding: EdgeInsets.only(right: showActions ? 42 : 0),
                         child: Text(
                           detail,
                           maxLines: 1,
@@ -1159,13 +1202,14 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     required IconData icon,
     required VoidCallback? onPressed,
   }) => SizedBox(
-    width: 26,
-    height: 26,
+    width: 20,
+    height: 18,
     child: IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
       padding: EdgeInsets.zero,
-      iconSize: 16,
+      constraints: const BoxConstraints.tightFor(width: 20, height: 18),
+      iconSize: 13,
       icon: Icon(icon),
     ),
   );
@@ -1237,20 +1281,6 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       : count >= 1000
       ? '${(count / 1000).toStringAsFixed(1)}k'
       : '$count';
-
-  static String _categoryLabel(BuildContext context, TagCategory category) =>
-      switch (category) {
-        TagCategory.general => context.l10n.autocomplete_categoryGeneral,
-        TagCategory.artist => context.l10n.autocomplete_categoryArtist,
-        TagCategory.copyright => context.l10n.autocomplete_categoryCopyright,
-        TagCategory.character => context.l10n.autocomplete_categoryCharacter,
-        TagCategory.meta => context.l10n.autocomplete_categoryMeta,
-        TagCategory.contributor =>
-          context.l10n.autocomplete_categoryContributor,
-        TagCategory.species => context.l10n.autocomplete_categorySpecies,
-        TagCategory.lore => context.l10n.autocomplete_categoryLore,
-        TagCategory.library => context.l10n.autocomplete_categoryLibrary,
-      };
 
   Widget _loadingIndicator() => const Center(
     child: SizedBox(
