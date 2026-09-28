@@ -28,7 +28,9 @@ class ExploreGalleryWelcome extends StatelessWidget {
                   children: [
                     SvgPicture.asset(
                       'assets/images/wof_nai_lab.svg',
-                      width: math.min(300, width * .8),
+                      // Pixel trails add width beyond the letter bodies.
+                      // 340px matches the optical height of the 300px STUDIO mark.
+                      width: math.min(340, width * .9),
                       semanticsLabel: 'W.O.F NAI LAB',
                     ),
                     const SizedBox(height: 32),

@@ -82,8 +82,8 @@ Windows 的 `IntegratedTitleBarShell` 不再占用一整行：各页背景延伸
 
 `assets/images/wof_nai_lab.svg` 是用户选定 C 款的矢量定稿：W.O.F 主体顶边与基线对齐，像素由左下沿字形向右上破碎；下方为轮廓化的 NAI LAB，不依赖系统字体。品牌蓝固定为 #005DFF，透明背景适配深浅主题；SVG 是独立品牌资源，主页 NAI STUDIO 标识沿用原稿。
 
-`ExploreGalleryWelcome` 在未选任务或任务没有候选时显示，最大 Logo 宽度 300px，TIP 与主生图空画布保持同款字号、间距和略偏上的居中方式。提示为“选择喜欢的候选，让画风逐代进化。”，提供中英日文本；有候选但筛选结果为空时仍走原筛选提示。无轮播和新增动效。
+`ExploreGalleryWelcome` 在未选任务或任务没有候选时显示，最大 Logo 宽度 340px，字母主体的视觉高度对齐主生图 300px 的 STUDIO 标识；NAI LAB 副标等比增大 20%，字高约 18px。TIP 与主生图空画布保持同款字号、间距和略偏上的居中方式。提示为“选择喜欢的候选，让画风逐代进化。”，提供中英日文本；有候选但筛选结果为空时仍走原筛选提示。无轮播和新增动效。
 
 `CAPTURE_LAB_WELCOME=1` 运行 `explore_gallery_welcome_test.dart` 可保存真实 SVG、字体的明暗主题截图至 `.dart_tool/lab-welcome-*.png`；另覆盖窄短栏和 150% 字号。
 
-LAB SVG 的编辑源为 `tool/branding/wof_nai_lab_source.svg`，通过 `generate_lab_logo.py` 做布尔并集后输出正式资源。相接的像素块必须合为同一填充轮廓，避免分开抗锯齿让内部接缝透出背景；不通过描边或扩大形状掩盖。测试对明暗底色、300 / 214.4px 宽度及 100% / 125% / 150% / 200% 缩放检查内部接点纯蓝。
+LAB SVG 的编辑源为 `tool/branding/wof_nai_lab_source.svg`，通过 `generate_lab_logo.py` 做布尔并集后输出正式资源。相接的像素块必须合为同一填充轮廓，避免分开抗锯齿让内部接缝透出背景；不通过描边或扩大形状掩盖。测试对明暗底色、340 / 214.4px 宽度及 100% / 125% / 150% / 200% 缩放检查内部接点纯蓝。

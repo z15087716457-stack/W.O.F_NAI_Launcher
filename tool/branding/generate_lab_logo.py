@@ -8,7 +8,7 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 
 from fontTools.pens.svgPathPen import SVGPathPen
-from fontTools.svgLib.path import parse_path
+from fontTools.svgLib.path import SVGPath
 import pathops
 
 
@@ -18,7 +18,7 @@ def main():
     outline = pathops.Path()
     for element in source.iter('{http://www.w3.org/2000/svg}path'):
         shape = pathops.Path()
-        parse_path(element.attrib['d'], shape.getPen())
+        SVGPath.fromstring(ET.tostring(element)).draw(shape.getPen())
         if element.get('fill-rule') == 'evenodd':
             shape.fillType = pathops.FillType.EVEN_ODD
         outline = pathops.op(outline, shape, pathops.PathOp.UNION)

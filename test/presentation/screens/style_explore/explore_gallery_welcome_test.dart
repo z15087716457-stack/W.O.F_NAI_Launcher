@@ -16,7 +16,7 @@ void main() {
     tester,
   ) async {
     for (final background in [Colors.white, const Color(0xFF111111)]) {
-      for (final width in [300.0, 214.4]) {
+      for (final width in [340.0, 214.4]) {
         for (final dpr in [1.0, 1.25, 1.5, 2.0]) {
           final key = GlobalKey();
           await tester.pumpWidget(
@@ -32,7 +32,7 @@ void main() {
                       child: SvgPicture.asset(
                         'assets/images/wof_nai_lab.svg',
                         width: width,
-                        height: width * 642 / 1514,
+                        height: width * 657 / 1514,
                       ),
                     ),
                   ),
@@ -90,7 +90,7 @@ void main() {
       expect(find.text('TIP'), findsOneWidget);
       expect(find.text('选择喜欢的候选，让画风逐代进化。'), findsOneWidget);
       expect(find.byType(SvgPicture), findsOneWidget);
-      expect(tester.getSize(find.byType(SvgPicture)).width, 300);
+      expect(tester.getSize(find.byType(SvgPicture)).width, 340);
       expect(tester.takeException(), isNull);
       if (Platform.environment['CAPTURE_LAB_WELCOME'] == '1') {
         await tester.runAsync(() async {
