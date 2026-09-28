@@ -142,6 +142,29 @@ class _BulkMetadataEditDialogState
     });
   }
 
+  void _commitPickedTag(
+    TextEditingController controller,
+    String tag,
+    VoidCallback onAdd,
+  ) {
+    final text = controller.text;
+    // A click queues the final draft tag; a Ctrl-drag can target an earlier
+    // selected tag without discarding its comma-separated neighbors.
+    final cursor =
+        controller.selection.isValid && !controller.selection.isCollapsed
+        ? controller.selection.extentOffset.clamp(0, text.length)
+        : text.length;
+    final separator = RegExp(r'[,\n]');
+    final before = cursor == 0 ? -1 : text.lastIndexOf(separator, cursor - 1);
+    final after = text.indexOf(separator, cursor);
+    controller.text = text.replaceRange(
+      before + 1,
+      after < 0 ? text.length : after,
+      tag,
+    );
+    onAdd();
+  }
+
   /// Remove tag from "add" list
   void _removeTagToAdd(String tag) {
     setState(() {
@@ -410,10 +433,7 @@ class _BulkMetadataEditDialogState
             child: TagExpansionWrapper(
               controller: controller,
               focusNode: focusNode,
-              onTagSelected: (tag) {
-                controller.text = tag;
-                onAdd();
-              },
+              onTagSelected: (tag) => _commitPickedTag(controller, tag, onAdd),
               child: ThemedInput(
                 controller: controller,
                 style: theme.textTheme.bodyMedium?.copyWith(
