@@ -21,7 +21,6 @@ import '../../../widgets/character/character_position_canvas.dart';
 import '../../../widgets/common/selectable_image_card.dart';
 import '../../../widgets/navigation/window_chrome_layout.dart';
 import 'canvas/generated_image_card.dart' as canvas_card;
-import 'canvas/canvas_pixel_background.dart';
 import 'canvas/generation_canvas_view.dart';
 import 'generation_tool_panel.dart';
 
@@ -103,7 +102,6 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
           }
         },
         child: Container(
-          color: generationCanvasBackgroundColor(theme),
           // 自由画布只留细缝，避免预览区外围形成厚重的内框。
           padding: EdgeInsets.all(simpleViewer ? 16 : 4),
           child: Stack(
