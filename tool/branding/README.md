@@ -85,3 +85,5 @@ Windows 的 `IntegratedTitleBarShell` 不再占用一整行：各页背景延伸
 `ExploreGalleryWelcome` 在未选任务或任务没有候选时显示，最大 Logo 宽度 300px，TIP 与主生图空画布保持同款字号、间距和略偏上的居中方式。提示为“选择喜欢的候选，让画风逐代进化。”，提供中英日文本；有候选但筛选结果为空时仍走原筛选提示。无轮播和新增动效。
 
 `CAPTURE_LAB_WELCOME=1` 运行 `explore_gallery_welcome_test.dart` 可保存真实 SVG、字体的明暗主题截图至 `.dart_tool/lab-welcome-*.png`；另覆盖窄短栏和 150% 字号。
+
+LAB SVG 的编辑源为 `tool/branding/wof_nai_lab_source.svg`，通过 `generate_lab_logo.py` 做布尔并集后输出正式资源。相接的像素块必须合为同一填充轮廓，避免分开抗锯齿让内部接缝透出背景；不通过描边或扩大形状掩盖。测试对明暗底色、300 / 214.4px 宽度及 100% / 125% / 150% / 200% 缩放检查内部接点纯蓝。

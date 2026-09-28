@@ -12,6 +12,62 @@ import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 
 void main() {
+  testWidgets('solid pixel joins have no antialiased internal seams', (
+    tester,
+  ) async {
+    for (final background in [Colors.white, const Color(0xFF111111)]) {
+      for (final width in [300.0, 214.4]) {
+        for (final dpr in [1.0, 1.25, 1.5, 2.0]) {
+          final key = GlobalKey();
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: RepaintBoundary(
+                  key: key,
+                  child: ColoredBox(
+                    color: background,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.25),
+                      child: SvgPicture.asset(
+                        'assets/images/wof_nai_lab.svg',
+                        width: width,
+                        height: width * 642 / 1514,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          await tester.runAsync(() async {
+            final boundary =
+                key.currentContext!.findRenderObject()!
+                    as RenderRepaintBoundary;
+            final image = await boundary.toImage(pixelRatio: dpr);
+            final bytes = (await image.toByteData())!;
+            // These joins lie inside solid blue, away from exterior edges.
+            // The W/O join at (761, 345) is the user's reported pale line.
+            for (final join in const [Offset(761, 345), Offset(750, 385)]) {
+              final x = ((8.25 + (join.dx - 130) * width / 1514) * dpr).floor();
+              final y = ((8.25 + (join.dy - 96) * width / 1514) * dpr).floor();
+              final pixel = (y * image.width + x) * 4;
+              final actual = List.generate(4, (i) => bytes.getUint8(pixel + i));
+              expect(actual, [
+                0,
+                93,
+                255,
+                255,
+              ], reason: 'solid join $join at width $width / DPR $dpr');
+            }
+            image.dispose();
+          });
+        }
+      }
+    }
+  });
+
   for (final dark in [false, true]) {
     testWidgets('LAB welcome renders on ${dark ? 'dark' : 'light'} surfaces', (
       tester,
