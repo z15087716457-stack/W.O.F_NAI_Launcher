@@ -225,7 +225,7 @@ class CollapsibleImagePanel extends StatelessWidget {
       return StudioAnimatedIcon(
         icon: featureIcon,
         trigger: iconTrigger,
-        size: 22,
+        size: 24,
         color: color,
       );
     }
@@ -233,13 +233,13 @@ class CollapsibleImagePanel extends StatelessWidget {
     if (asset != null) {
       return SvgPicture.asset(
         asset,
-        width: 22,
-        height: 22,
+        width: 24,
+        height: 24,
         colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
       );
     }
 
-    return Icon(icon, size: 22, color: color);
+    return Icon(icon, size: 24, color: color);
   }
 }
 
