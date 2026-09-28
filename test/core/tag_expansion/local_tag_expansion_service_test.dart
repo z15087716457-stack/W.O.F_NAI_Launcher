@@ -18,6 +18,10 @@ void main() {
           _tag('blue_hair'),
           _tag('long_blue_hair'),
         ],
+        popularSearch: ({limit = 12}) async => [
+          _tag('solo'),
+          _tag('blue_hair'),
+        ],
       );
 
       final english = await service.search(
@@ -30,6 +34,10 @@ void main() {
         'blue hair',
         locale: 'zh',
         existingTags: {'blue_hair'},
+      );
+      final popular = await service.popular(
+        locale: 'zh',
+        existingTags: {'solo'},
       );
 
       expect(english.map((row) => row.canonicalTag), [
@@ -44,6 +52,7 @@ void main() {
       expect(suggestions.single.canonicalTag, 'long_hair');
       expect(related.queries.single.relatedTag, 'blue_hair');
       expect(related.queries.single.token, isEmpty);
+      expect(popular.single.canonicalTag, 'blue_hair');
     },
   );
 }

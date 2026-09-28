@@ -3,6 +3,8 @@ import '../utils/tag_normalizer.dart';
 
 typedef SubstringTagSearch =
     Future<List<CompletionCandidate>> Function(String input, {int limit});
+typedef PopularTagSearch =
+    Future<List<CompletionCandidate>> Function({int limit});
 
 /// The explicit tag picker only reads bundled or installed local databases.
 /// It deliberately does not depend on the autocomplete orchestrator, whose
@@ -14,6 +16,7 @@ class LocalTagExpansionService {
     required this.relatedTags,
     required this.translations,
     required this.substringSearch,
+    required this.popularSearch,
   });
 
   final CompletionSource catalog;
@@ -21,6 +24,25 @@ class LocalTagExpansionService {
   final CompletionSource relatedTags;
   final TranslationResolver translations;
   final SubstringTagSearch substringSearch;
+  final PopularTagSearch popularSearch;
+
+  Future<List<CompletionCandidate>> popular({
+    required String locale,
+    Set<String> existingTags = const {},
+    int limit = 12,
+  }) async {
+    final candidates = await popularSearch(
+      limit: (limit + existingTags.length).clamp(1, 100),
+    );
+    return _decorate(
+      candidates
+          .where((candidate) => !existingTags.contains(candidate.canonicalTag))
+          .take(limit)
+          .toList(growable: false),
+      locale,
+      existingTags,
+    );
+  }
 
   Future<List<CompletionCandidate>> search(
     String input, {

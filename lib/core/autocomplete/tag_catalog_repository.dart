@@ -153,6 +153,27 @@ class TagCatalogRepository implements CompletionSource {
         .toList(growable: false);
   }
 
+  /// A small, indexed fallback for an empty explicit search box.
+  Future<List<CompletionCandidate>> popular({int limit = 12}) async {
+    await initialize();
+    final rows = await _database!.rawQuery(
+      'SELECT name, category, post_count FROM tags '
+      'WHERE category = 0 ORDER BY post_count DESC, name ASC LIMIT ?',
+      [limit.clamp(1, 100)],
+    );
+    return rows
+        .map(
+          (row) => CompletionCandidate(
+            canonicalTag: row['name'] as String,
+            category: TagCategory.general,
+            postCount: (row['post_count'] as num).toInt(),
+            matchKind: CompletionMatchKind.fullText,
+            sources: const {CompletionSourceKind.base},
+          ),
+        )
+        .toList(growable: false);
+  }
+
   Future<Map<int, List<String>>> _loadAliases(List<int> ids) async {
     if (ids.isEmpty) return const {};
     final result = <int, List<String>>{};

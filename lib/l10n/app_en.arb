@@ -5055,6 +5055,8 @@
   "tagExpansion_insert": "Insert tag",
   "tagExpansion_showRelated": "Show related tags",
   "tagExpansion_localOnly": "Local only",
+  "tagExpansion_popularSource": "Popular local tags",
+  "tagExpansion_tabComplete": "Tab to complete:",
   "autocomplete_danbooruApi": "Danbooru online supplement",
   "autocomplete_danbooruPrivacy": "Only the current English tag is sent; the full prompt is never uploaded",
   "autocomplete_llmTranslation": "Use Prompt Assistant for missing translations",

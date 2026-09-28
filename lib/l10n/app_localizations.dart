@@ -15426,6 +15426,18 @@ abstract class AppLocalizations {
   /// **'Local only'**
   String get tagExpansion_localOnly;
 
+  /// No description provided for @tagExpansion_popularSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular local tags'**
+  String get tagExpansion_popularSource;
+
+  /// No description provided for @tagExpansion_tabComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab to complete:'**
+  String get tagExpansion_tabComplete;
+
   /// No description provided for @autocomplete_danbooruApi.
   ///
   /// In en, this message translates to:

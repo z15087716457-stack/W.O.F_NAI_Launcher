@@ -51,6 +51,14 @@ void main() {
     await tester.pump();
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     expect(find.byKey(const Key('tag-expansion-popup')), findsOneWidget);
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('tag-expansion-search')))
+          .controller!
+          .text,
+      isEmpty,
+    );
+    expect(find.text('Popular local tags'), findsOneWidget);
 
     await tester.enterText(
       find.byKey(const Key('tag-expansion-search')),
@@ -63,6 +71,86 @@ void main() {
     await tester.pump();
     expect(controller.text, 'solo, blue hair, ');
     expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
+  });
+
+  testWidgets('Ctrl+click keeps search empty and shows related context', (
+    tester,
+  ) async {
+    final controller = TextEditingController(text: 'blue hair, ');
+    final focusNode = FocusNode();
+    final related = _Source([_tag('long_hair')]);
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await _pumpEditor(
+      tester,
+      controller,
+      focusNode,
+      _Source(const []),
+      related: related,
+    );
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tap(find.byKey(const Key('prompt-editor')));
+    await tester.pump();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+
+    expect(find.byKey(const Key('tag-expansion-popup')), findsOneWidget);
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('tag-expansion-search')))
+          .controller!
+          .text,
+      isEmpty,
+    );
+    expect(related.queries.single.relatedTag, 'blue_hair');
+    expect(find.text('long hair'), findsOneWidget);
+    expect(find.text('Related tags · blue hair'), findsOneWidget);
+    expect(controller.text, 'blue hair, ');
+  });
+
+  testWidgets('Tab completes search text; Enter inserts into prompt', (
+    tester,
+  ) async {
+    final controller = TextEditingController(text: 'solo, ');
+    final focusNode = FocusNode();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await _pumpEditor(
+      tester,
+      controller,
+      focusNode,
+      _Source([_tag('blue_hair')]),
+    );
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tap(find.byKey(const Key('prompt-editor')));
+    await tester.pump();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.enterText(
+      find.byKey(const Key('tag-expansion-search')),
+      'blu',
+    );
+    await tester.pump(const Duration(milliseconds: 170));
+    await tester.pump();
+
+    expect(find.text('Tab to complete: blue hair'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('tag-expansion-search')))
+          .controller!
+          .text,
+      'blue hair',
+    );
+    expect(controller.text, 'solo, ');
+    await tester.pump(const Duration(milliseconds: 170));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(controller.text, 'solo, blue hair, ');
   });
 
   testWidgets('dismisses stale popup when the prompt changes elsewhere', (
@@ -197,13 +285,21 @@ void main() {
 
     await tester.tap(find.byKey(const Key('prompt-editor')));
     await tester.pump();
-    final rect = tester.getRect(find.byType(EditableText));
+    final editable = tester
+        .state<EditableTextState>(find.byType(EditableText))
+        .renderEditable;
+    Offset caret(int offset) {
+      final rect = editable.getLocalRectForCaret(TextPosition(offset: offset));
+      return editable.localToGlobal(Offset(rect.left + 1, rect.center.dy));
+    }
+
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     final gesture = await tester.startGesture(
-      Offset(rect.left + 5, rect.center.dy),
+      caret(0),
       kind: PointerDeviceKind.mouse,
     );
-    await gesture.moveTo(Offset(rect.left + 75, rect.center.dy));
+    await gesture.moveTo(caret(9));
+    expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
     await gesture.up();
     await tester.pump();
     await tester.pump();
@@ -212,9 +308,114 @@ void main() {
     // Keep the selection visible in failures: the editor owns drag selection.
     expect(controller.selection.isValid, isTrue);
     expect(controller.selection.isCollapsed, isFalse);
+    expect(
+      controller.text.substring(
+        controller.selection.start,
+        controller.selection.end,
+      ),
+      'blue hair',
+    );
     expect(find.byKey(const Key('tag-expansion-popup')), findsOneWidget);
     expect(related.queries, isNotEmpty);
     expect(related.queries.single.token, isEmpty);
+  });
+
+  testWidgets('partial Ctrl+drag prefills search without forcing related', (
+    tester,
+  ) async {
+    final controller = TextEditingController(text: 'blue hair, solo');
+    final focusNode = FocusNode();
+    final related = _Source([_tag('long_hair')]);
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await _pumpEditor(
+      tester,
+      controller,
+      focusNode,
+      _Source([_tag('blue_hair')]),
+      related: related,
+    );
+    await tester.tap(find.byKey(const Key('prompt-editor')));
+    await tester.pump();
+    final editable = tester
+        .state<EditableTextState>(find.byType(EditableText))
+        .renderEditable;
+    Offset caret(int offset) {
+      final rect = editable.getLocalRectForCaret(TextPosition(offset: offset));
+      return editable.localToGlobal(Offset(rect.left + 1, rect.center.dy));
+    }
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    final gesture = await tester.startGesture(
+      caret(0),
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.moveTo(caret(4));
+    expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
+    await gesture.up();
+    await tester.pump();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+
+    expect(find.byKey(const Key('tag-expansion-popup')), findsOneWidget);
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('tag-expansion-search')))
+          .controller!
+          .text,
+      'blue',
+    );
+    expect(related.queries, isEmpty);
+    expect(controller.text, 'blue hair, solo');
+  });
+
+  testWidgets('multi-tag Ctrl+drag keeps the selection as a search query', (
+    tester,
+  ) async {
+    final controller = TextEditingController(text: 'blue hair, solo');
+    final focusNode = FocusNode();
+    final related = _Source([_tag('long_hair')]);
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await _pumpEditor(
+      tester,
+      controller,
+      focusNode,
+      _Source(const []),
+      related: related,
+    );
+    await tester.tap(find.byKey(const Key('prompt-editor')));
+    await tester.pump();
+    final editable = tester
+        .state<EditableTextState>(find.byType(EditableText))
+        .renderEditable;
+    Offset caret(int offset) {
+      final rect = editable.getLocalRectForCaret(TextPosition(offset: offset));
+      return editable.localToGlobal(Offset(rect.left + 1, rect.center.dy));
+    }
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    final gesture = await tester.startGesture(
+      caret(0),
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.moveTo(caret(15));
+    expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
+    await gesture.up();
+    await tester.pump();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+
+    expect(find.byKey(const Key('tag-expansion-popup')), findsOneWidget);
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('tag-expansion-search')))
+          .controller!
+          .text,
+      'blue hair, solo',
+    );
+    expect(related.queries, isEmpty);
+    expect(controller.text, 'blue hair, solo');
   });
 
   testWidgets('opening the picker does not format the prompt on focus loss', (
@@ -322,6 +523,7 @@ LocalTagExpansionService _service(
   relatedTags: related ?? _Source(const []),
   translations: const _Translations(),
   substringSearch: (input, {limit = 20}) async => const [],
+  popularSearch: ({limit = 12}) async => [_tag('solo')],
 );
 
 CompletionCandidate _tag(String name) => CompletionCandidate(

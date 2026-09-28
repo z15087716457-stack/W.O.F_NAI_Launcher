@@ -8802,6 +8802,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tagExpansion_localOnly => 'Local only';
 
   @override
+  String get tagExpansion_popularSource => 'Popular local tags';
+
+  @override
+  String get tagExpansion_tabComplete => 'Tab to complete:';
+
+  @override
   String get autocomplete_danbooruApi => 'Danbooru online supplement';
 
   @override

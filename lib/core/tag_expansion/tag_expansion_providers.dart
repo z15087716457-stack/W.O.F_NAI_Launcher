@@ -14,5 +14,6 @@ final localTagExpansionServiceProvider = Provider<LocalTagExpansionService>((
     relatedTags: ref.watch(cooccurrenceCompletionSourceProvider),
     translations: dictionary,
     substringSearch: catalog.searchContains,
+    popularSearch: catalog.popular,
   );
 });

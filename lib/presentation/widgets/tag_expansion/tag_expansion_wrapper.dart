@@ -62,6 +62,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper> {
   List<CompletionCandidate> _results = const [];
   List<CompletionCandidate> _relatedResults = const [];
   String? _relatedTag;
+  String? _contextTag;
+  bool _usingContext = false;
 
   @override
   void initState() {
@@ -93,9 +95,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper> {
   }
 
   void _onPointerUp(PointerUpEvent event) {
-    final keyboard = HardwareKeyboard.instance;
-    final control =
-        _controlAtDown || keyboard.isControlPressed || keyboard.isMetaPressed;
+    final control = _controlAtDown;
     final moved =
         _pointerDown != null && (event.position - _pointerDown!).distance > 4;
     _pointerDown = null;
@@ -112,43 +112,58 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper> {
       final selectedText = moved
           ? widget.controller.text.substring(selection.start, selection.end)
           : '';
-      final selectedQuery = TagNormalizer.normalize(selectedText);
-      final source =
-          selectedQuery.isEmpty || selectedText.contains(RegExp(r'[,，\r\n]'))
-          ? null
-          : _selectedTag(selectedText);
+      final selectedQuery = selectedText.trim();
+      final source = moved
+          ? _selectedTag(widget.controller.text, selection)
+          : null;
       final offset = selection.extentOffset.clamp(
         0,
         widget.controller.text.length,
       );
-      final parsed = PromptTokenParser.parse(
-        text: widget.controller.text,
-        cursorPosition: offset,
-        limit: 1,
-        locale: Localizations.localeOf(context).toLanguageTag(),
+      final contextTag = moved
+          ? null
+          : PromptTokenParser.parseRelated(
+              text: widget.controller.text,
+              cursorPosition: offset,
+              limit: 1,
+              locale: Localizations.localeOf(context).toLanguageTag(),
+            )?.relatedTag;
+      _open(
+        offset: offset,
+        query: selectedQuery,
+        relatedTag: source,
+        contextTag: contextTag,
       );
-      final initialQuery = selectedQuery.isNotEmpty
-          ? selectedQuery
-          : parsed.kind == CompletionQueryKind.libraryAlias
-          ? ''
-          : parsed.token;
-      _open(offset: offset, query: initialQuery, relatedTag: source);
     });
   }
 
-  String? _selectedTag(String selectedText) {
+  String? _selectedTag(String text, TextSelection selection) {
+    if (selection.isCollapsed || !selection.isValid) return null;
+    final selectedText = text.substring(selection.start, selection.end).trim();
+    if (selectedText.isEmpty || selectedText.contains(RegExp(r'[,，\r\n]'))) {
+      return null;
+    }
     final query = PromptTokenParser.parse(
-      text: selectedText,
-      cursorPosition: selectedText.length,
+      text: text,
+      cursorPosition: selection.start,
       limit: 1,
       locale: Localizations.localeOf(context).toLanguageTag(),
     );
-    return query.kind == CompletionQueryKind.tag && query.token.isNotEmpty
+    return query.kind == CompletionQueryKind.tag &&
+            query.token.isNotEmpty &&
+            TagNormalizer.normalize(selectedText) == query.token &&
+            selection.start <= query.replacementRange.start &&
+            selection.end >= query.replacementRange.end
         ? query.token
         : null;
   }
 
-  void _open({required int offset, required String query, String? relatedTag}) {
+  void _open({
+    required int offset,
+    required String query,
+    String? relatedTag,
+    String? contextTag,
+  }) {
     _close();
     final anchor = _anchorKey.currentContext;
     final anchorBox = anchor?.findRenderObject();
@@ -174,6 +189,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper> {
     _results = const [];
     _relatedResults = const [];
     _relatedTag = relatedTag;
+    _contextTag = contextTag;
+    _usingContext = contextTag != null;
     _active = true;
     widget.onActiveChanged?.call(true);
     _entry = OverlayEntry(builder: _buildOverlay);
@@ -224,11 +241,13 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper> {
     final sequence = ++_searchSequence;
     if (_searchController.text.trim().isEmpty) {
       _results = const [];
-      _searchLoading = false;
+      _searchLoading = true;
       _searchFailed = false;
       _markNeedsBuild();
+      unawaited(_runContextSuggestions(sequence));
       return;
     }
+    _usingContext = false;
     _searchLoading = true;
     _searchFailed = false;
     _markNeedsBuild();
@@ -240,6 +259,39 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper> {
         () => unawaited(_runSearch(sequence)),
       );
     }
+  }
+
+  Future<void> _runContextSuggestions(int sequence) async {
+    try {
+      final service = ref.read(localTagExpansionServiceProvider);
+      final locale = Localizations.localeOf(context).toLanguageTag();
+      var results = _contextTag == null
+          ? const <CompletionCandidate>[]
+          : await service.related(
+              _contextTag!,
+              locale: locale,
+              existingTags: _existingTags,
+              limit: 12,
+            );
+      final usingContext = results.isNotEmpty;
+      if (!usingContext) {
+        results = await service.popular(
+          locale: locale,
+          existingTags: _existingTags,
+        );
+      }
+      if (!mounted || !_active || sequence != _searchSequence) return;
+      _results = results;
+      _usingContext = usingContext;
+      _selectedIndex = 0;
+      _searchFailed = false;
+    } catch (_) {
+      if (!mounted || !_active || sequence != _searchSequence) return;
+      _results = const [];
+      _searchFailed = true;
+    }
+    _searchLoading = false;
+    _markNeedsBuild();
   }
 
   Future<void> _runSearch(int sequence) async {
@@ -299,6 +351,23 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper> {
     if (event.logicalKey == LogicalKeyboardKey.escape) {
       _close(restoreFocus: true);
       return KeyEventResult.handled;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.tab &&
+        _results.isNotEmpty &&
+        _searchController.value.composing.isCollapsed) {
+      final completion = TagNormalizer.toDisplay(
+        _results[_selectedIndex].canonicalTag,
+      );
+      if (completion != _searchController.text) {
+        if (event is KeyDownEvent) {
+          _searchController.value = TextEditingValue(
+            text: completion,
+            selection: TextSelection.collapsed(offset: completion.length),
+          );
+          _onSearchChanged(completion);
+        }
+        return KeyEventResult.handled;
+      }
     }
     if (_results.isEmpty) return KeyEventResult.ignored;
     if (event.logicalKey == LogicalKeyboardKey.arrowDown ||
@@ -434,6 +503,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper> {
                   ),
                 ),
                 const Divider(height: 1),
+                _buildSearchAssist(overlayContext),
+                const Divider(height: 1),
                 Expanded(child: _buildSearchList(overlayContext)),
                 if (_relatedTag != null) ...[
                   const Divider(height: 1),
@@ -482,6 +553,61 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper> {
       ],
     ),
   );
+
+  Widget _buildSearchAssist(BuildContext context) {
+    final theme = Theme.of(context);
+    final emptyQuery = _searchController.text.trim().isEmpty;
+    final source = !emptyQuery
+        ? ''
+        : _usingContext && _contextTag != null
+        ? '${context.l10n.tagExpansion_relatedTitle} · ${TagNormalizer.toDisplay(_contextTag!)}'
+        : context.l10n.tagExpansion_popularSource;
+    final selected = _results.isEmpty ? null : _results[_selectedIndex];
+    final completion = selected == null
+        ? null
+        : TagNormalizer.toDisplay(selected.canonicalTag);
+    final showCompletion =
+        completion != null &&
+        completion != _searchController.text &&
+        !_searchLoading;
+    return SizedBox(
+      height: 26,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          children: [
+            if (source.isNotEmpty)
+              Flexible(
+                child: Text(
+                  source,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            if (showCompletion)
+              Flexible(
+                flex: 2,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '${context.l10n.tagExpansion_tabComplete} $completion',
+                    key: const ValueKey('tag-expansion-tab-hint'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildSearchList(BuildContext context) {
     if (_searchLoading && _results.isEmpty) return _loadingIndicator();

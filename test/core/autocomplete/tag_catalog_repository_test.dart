@@ -124,6 +124,12 @@ void main() {
     expect(alias.single.matchedAlias, 'aqua_eyes');
     expect(escaped, isEmpty);
   });
+
+  test('popular fallback uses general tags in post count order', () async {
+    final results = await repository.popular(limit: 2);
+    expect(results.map((tag) => tag.canonicalTag), ['blue_hair', 'blue_eyes']);
+    expect(results.every((tag) => tag.category == TagCategory.general), isTrue);
+  });
 }
 
 CompletionQuery _query(String token, {int limit = 20}) => CompletionQuery(

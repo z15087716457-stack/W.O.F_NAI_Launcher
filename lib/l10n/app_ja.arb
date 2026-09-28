@@ -5055,6 +5055,8 @@
   "tagExpansion_insert": "タグを挿入",
   "tagExpansion_showRelated": "関連タグを表示",
   "tagExpansion_localOnly": "ローカルのみ",
+  "tagExpansion_popularSource": "よく使われるローカルタグ",
+  "tagExpansion_tabComplete": "Tab で補完：",
   "autocomplete_danbooruApi": "Danbooru オンライン補完",
   "autocomplete_danbooruPrivacy": "現在の英語タグのみ送信し、プロンプト全体は送信しません",
   "autocomplete_llmTranslation": "不足する翻訳に Prompt Assistant を使用",

@@ -8494,6 +8494,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tagExpansion_localOnly => '仅本地';
 
   @override
+  String get tagExpansion_popularSource => '本地常用标签';
+
+  @override
+  String get tagExpansion_tabComplete => 'Tab 补全：';
+
+  @override
   String get autocomplete_danbooruApi => 'Danbooru 在线补充';
 
   @override
