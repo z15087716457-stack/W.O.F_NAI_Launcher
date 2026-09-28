@@ -146,7 +146,7 @@ class ImageParams with _$ImageParams {
     /// 添加原始图像
     @Default(true) bool addOriginalImage,
 
-    /// 参数版本 (V4+ 使用 3)
+    /// 参数版本默认值；V4/V4.5 请求为 3，V5 请求由构造器覆盖为 4。
     @Default(3) int paramsVersion,
 
     /// 多样性增强 (V4+ 夏季更新)

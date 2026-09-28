@@ -42,6 +42,7 @@
 
 - Token 是两根独立预算：正向为全局段加所有角色框正向，UC 为全局段加所有角色框 UC。V4/V4.5 上限 512，V5 上限 1471；以桥接 `prompt_tokens`/`uc_tokens` 为准。
 - V5 能力由 `core/constants/model_spec.dart` 控制：没有 noise schedule 和 Variety+，有 Opus 额度、透明背景和 Max Enhance 能力位。
+- 生成请求的 `params_version` 在 `NAIImageRequestBuilder.buildV4Parameters()` 按模型区分：V5 Full/Curated 为 4，V4/V4.5 为 3；此值也用于变体/Fork 的 img2img 请求，不能全局固定为 4。
 - V5 质量词档：Standard=`very aesthetic, masterpiece, no text`，Light=`very aesthetic, amazing quality, no text`，None 不追加；桥接优先接受 `quality_preset=standard|light|none`，`quality_toggle` 仅作旧兼容别名。
 - V5 透明背景开关会把 `transparent background` 拼到有效 prompt，并发送透明背景相关请求 hint；V5 Max Enhance 在源图面积低于约 2.5MP 时保持源尺寸并交给服务端端到端放大。非 Max 增强仍使用防糊追加词。
 - Opus 免费资格只看三条：单张请求、steps≤28、面积≤1MP；不再额外排除角色参考。满足条件时每请求免 1 张。PR 参考图另加每张 5 Anlas；img2img/infill 满足条件同样可免费。

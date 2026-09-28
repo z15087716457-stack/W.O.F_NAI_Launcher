@@ -139,7 +139,7 @@ class NAIImageRequestBuilder {
     required String effectivePrompt,
     required String effectiveNegativePrompt,
   }) {
-    requestParameters['params_version'] = 3;
+    requestParameters['params_version'] = params.isV5Model ? 4 : 3;
     requestParameters['use_coords'] = params.useCoords;
     requestParameters['legacy_v3_extend'] = false;
     requestParameters['legacy_uc'] = false;
@@ -191,10 +191,7 @@ class NAIImageRequestBuilder {
         : effectivePrompt;
 
     requestParameters['v4_prompt'] = {
-      'caption': {
-        'base_caption': v4BaseCaption,
-        'char_captions': charCaptions,
-      },
+      'caption': {'base_caption': v4BaseCaption, 'char_captions': charCaptions},
       'use_coords': params.useCoords,
       'use_order': true,
     };
