@@ -173,6 +173,99 @@ void main() {
       expect(QualityTags.toTagHintValue(QualityTagPreset.standard), 1);
       expect(QualityTags.toTagHintValue(QualityTagPreset.light), 3);
       expect(QualityTags.toTagHintValue(QualityTagPreset.none), 0);
+      expect(
+        QualityTags.applyQualityTags('anthro wolf', ImageModels.furryDiffusion),
+        'masterpiece, best quality, anthro wolf',
+      );
+    });
+
+    test('each selectable model exposes only its documented UC choices', () {
+      const heavyLightNone = [
+        UcPresetType.heavy,
+        UcPresetType.light,
+        UcPresetType.none,
+      ];
+      const heavyLightHumanNone = [
+        UcPresetType.heavy,
+        UcPresetType.light,
+        UcPresetType.humanFocus,
+        UcPresetType.none,
+      ];
+      const heavyLightFurryHumanNone = [
+        UcPresetType.heavy,
+        UcPresetType.light,
+        UcPresetType.furryFocus,
+        UcPresetType.humanFocus,
+        UcPresetType.none,
+      ];
+      const expected = <String, List<UcPresetType>>{
+        ImageModels.animeDiffusionV5Full: heavyLightFurryHumanNone,
+        ImageModels.animeDiffusionV5Curated: heavyLightFurryHumanNone,
+        ImageModels.animeDiffusionV45Full: heavyLightFurryHumanNone,
+        ImageModels.animeDiffusionV45Curated: heavyLightHumanNone,
+        ImageModels.animeDiffusionV4Full: heavyLightNone,
+        ImageModels.animeDiffusionV4Curated: heavyLightNone,
+        ImageModels.animeDiffusionV3: heavyLightHumanNone,
+        ImageModels.furryDiffusionV3: heavyLightNone,
+        ImageModels.furryDiffusion: [
+          UcPresetType.badAnatomy,
+          UcPresetType.lowQuality,
+          UcPresetType.none,
+        ],
+      };
+      expect(ImageModels.allModels, expected.keys.toList());
+      for (final entry in expected.entries) {
+        expect(
+          UcPresets.getPresetsForModel(entry.key).keys.toList(),
+          entry.value,
+          reason: entry.key,
+        );
+        expect(UcPresets.getPresetContent(entry.key, UcPresetType.none), '');
+      }
+      expect(
+        UcPresets.getPresetsForModel(
+          ImageModels.animeDiffusionV45FullInpainting,
+        ).keys.toList(),
+        heavyLightFurryHumanNone,
+      );
+      expect(
+        UcPresets.effectiveTypeForModel(
+          ImageModels.animeDiffusionV4Full,
+          UcPresetType.furryFocus,
+        ),
+        UcPresetType.none,
+      );
+    });
+
+    test('old Furry UC contents and request ids match its own presets', () {
+      expect(
+        UcPresets.getPresetContent(
+          ImageModels.furryDiffusion,
+          UcPresetType.lowQuality,
+        ),
+        'worst quality, low quality, what has science done, what, nightmare fuel, eldritch horror, where is your god now, why',
+      );
+      expect(
+        UcPresets.getPresetContent(
+          ImageModels.furryDiffusion,
+          UcPresetType.badAnatomy,
+        ),
+        '{worst quality}, low quality, distracting watermark, [nightmare fuel], {{unfinished}}, deformed, outline, pattern, simple background',
+      );
+      expect(
+        UcPresets.requestValueForModel(
+          ImageModels.furryDiffusion,
+          UcPresetType.lowQuality,
+        ),
+        UCPresets.lowQuality,
+      );
+      expect(
+        UcPresets.getPresetTypeFromInt(
+          UCPresets.badAnatomy,
+          model: ImageModels.furryDiffusion,
+        ),
+        UcPresetType.badAnatomy,
+      );
     });
 
     test('negative presets should match current NovelAI documented mappings', () {

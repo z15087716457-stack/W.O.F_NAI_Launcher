@@ -8,8 +8,6 @@ import '../../../data/models/prompt/prompt_preset_mode.dart';
 import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../providers/generation/generation_params_notifier.dart';
 import '../../providers/quality_preset_provider.dart';
-import '../common/prompt_block_picker_dialog.dart';
-import 'components/library_entry_menu_item.dart';
 
 /// 当前模型在质量词菜单中公开的原生档位。
 List<PromptPresetMode> qualityNativeModesForModel(String model) {
@@ -35,7 +33,7 @@ PromptPresetMode qualityVisibleModeForModel(
 
 /// 质量词选择器组件
 ///
-/// V5 显示 Standard/Light/None；其他模型保持 NAI 默认/无，之后均可选自定义词。
+/// V5 显示 Standard/Light/None；其他模型显示 NAI 默认/无。
 class QualityTagsSelector extends ConsumerStatefulWidget {
   /// 当前选择的模型
   final String model;
@@ -172,7 +170,7 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
       context: context,
       position: position,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      items: _buildMenuItems(context, presetState, customEntries),
+      items: _buildMenuItems(context, presetState),
     );
 
     if (result != null) {
@@ -211,7 +209,6 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
   List<PopupMenuEntry<String>> _buildMenuItems(
     BuildContext context,
     QualityPresetState state,
-    List<PromptBlock> customEntries,
   ) {
     final theme = Theme.of(context);
     final items = <PopupMenuEntry<String>>[];
@@ -259,49 +256,6 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
       );
     }
 
-    items.add(const PopupMenuDivider());
-    items.add(
-      PopupMenuItem<String>(
-        value: 'add_from_library',
-        child: Row(
-          children: [
-            Icon(Icons.add, size: 16, color: theme.colorScheme.primary),
-            const SizedBox(width: 8),
-            Text(
-              context.l10n.qualityTags_addFromLibrary,
-              style: TextStyle(color: theme.colorScheme.primary),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (customEntries.isNotEmpty) {
-      items.add(const PopupMenuDivider());
-      for (final entry in customEntries) {
-        final isSelected =
-            state.mode == PromptPresetMode.custom &&
-            state.customEntryId == entry.id;
-        items.add(
-          LibraryEntryMenuItem(
-            entry: entry,
-            isSelected: isSelected,
-            onDelete: () {
-              ref
-                  .read(qualityPresetNotifierProvider.notifier)
-                  .removeCustomEntry(entry.id);
-              if (isSelected) {
-                ref
-                    .read(generationParamsNotifierProvider.notifier)
-                    .updateQualityPreset(QualityTagPreset.standard);
-              }
-              Navigator.of(context).pop();
-            },
-          ),
-        );
-      }
-    }
-
     return items;
   }
 
@@ -317,27 +271,8 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
       case 'none':
         notifier.updateQualityPreset(QualityTagPreset.none);
         break;
-      case 'add_from_library':
-        _showPromptBlockPicker();
-        break;
       default:
-        if (value.startsWith('custom_')) {
-          notifier.updateCustomQualityPreset(value.substring(7));
-        }
-    }
-  }
-
-  Future<void> _showPromptBlockPicker() async {
-    final entry = await showDialog<PromptBlock>(
-      context: context,
-      builder: (context) => PromptBlockPickerDialog(
-        title: context.l10n.qualityTags_selectFromLibrary,
-      ),
-    );
-    if (entry != null) {
-      ref
-          .read(generationParamsNotifierProvider.notifier)
-          .updateCustomQualityPreset(entry.id);
+        break;
     }
   }
 
@@ -358,6 +293,10 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
             .read(qualityPresetNotifierProvider.notifier)
             .getEffectiveContent(widget.model) ??
         '';
+    final usesFurryPrefix =
+        state.mode != PromptPresetMode.custom &&
+        ImageModels.resolveBaseModel(widget.model) ==
+            ImageModels.furryDiffusion;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -372,7 +311,9 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
         ),
         const SizedBox(height: 4),
         Text(
-          context.l10n.qualityTags_addToEnd,
+          usesFurryPrefix
+              ? context.l10n.qualityTags_addToStart
+              : context.l10n.qualityTags_addToEnd,
           style: TextStyle(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             fontSize: 11,
@@ -380,7 +321,7 @@ class _QualityTagsSelectorState extends ConsumerState<QualityTagsSelector> {
         ),
         const SizedBox(height: 4),
         Text(
-          ', $content',
+          usesFurryPrefix ? '$content, ' : ', $content',
           style: TextStyle(color: Colors.green.shade700, fontSize: 11),
         ),
       ],

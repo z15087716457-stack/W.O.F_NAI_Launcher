@@ -2984,6 +2984,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qualityTags_addToEnd => 'Add to prompt end:';
 
   @override
+  String get qualityTags_addToStart => 'Add to prompt start:';
+
+  @override
   String get qualityTags_naiDefault => 'NAI Default';
 
   @override
@@ -2994,12 +2997,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get qualityTags_none => 'None';
-
-  @override
-  String get qualityTags_addFromLibrary => 'Add from Library';
-
-  @override
-  String get qualityTags_selectFromLibrary => 'Select Quality Tag Entry';
 
   @override
   String get ucPreset_label => 'Undesired Content Preset';
@@ -3017,6 +3014,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ucPreset_humanFocus => 'Human';
 
   @override
+  String get ucPreset_lowQuality => 'Low Quality';
+
+  @override
+  String get ucPreset_badAnatomy => 'Bad Anatomy';
+
+  @override
   String get ucPreset_none => 'None';
 
   @override
@@ -3028,12 +3031,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ucPreset_nsfwHint =>
       '💡 To generate adult content, add nsfw to your prompt. The nsfw tag will be auto-removed from Undesired Content';
-
-  @override
-  String get ucPreset_addFromLibrary => 'Add from Library';
-
-  @override
-  String get ucPreset_selectFromLibrary => 'Select UC Entry';
 
   @override
   String get generation_imageCount => 'Number of Images';

@@ -568,6 +568,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         .getEffectiveContent(params.model);
 
     return resolvePromptPresetSettings(
+      model: params.model,
       prompt: params.prompt,
       negativePrompt: params.negativePrompt,
       qualityMode: qualityState.mode,

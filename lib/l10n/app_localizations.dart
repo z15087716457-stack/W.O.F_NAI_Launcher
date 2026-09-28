@@ -5449,6 +5449,12 @@ abstract class AppLocalizations {
   /// **'Add to prompt end:'**
   String get qualityTags_addToEnd;
 
+  /// No description provided for @qualityTags_addToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to prompt start:'**
+  String get qualityTags_addToStart;
+
   /// No description provided for @qualityTags_naiDefault.
   ///
   /// In en, this message translates to:
@@ -5472,18 +5478,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'None'**
   String get qualityTags_none;
-
-  /// No description provided for @qualityTags_addFromLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Add from Library'**
-  String get qualityTags_addFromLibrary;
-
-  /// No description provided for @qualityTags_selectFromLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Quality Tag Entry'**
-  String get qualityTags_selectFromLibrary;
 
   /// No description provided for @ucPreset_label.
   ///
@@ -5515,6 +5509,18 @@ abstract class AppLocalizations {
   /// **'Human'**
   String get ucPreset_humanFocus;
 
+  /// No description provided for @ucPreset_lowQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Quality'**
+  String get ucPreset_lowQuality;
+
+  /// No description provided for @ucPreset_badAnatomy.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad Anatomy'**
+  String get ucPreset_badAnatomy;
+
   /// No description provided for @ucPreset_none.
   ///
   /// In en, this message translates to:
@@ -5538,18 +5544,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'💡 To generate adult content, add nsfw to your prompt. The nsfw tag will be auto-removed from Undesired Content'**
   String get ucPreset_nsfwHint;
-
-  /// No description provided for @ucPreset_addFromLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Add from Library'**
-  String get ucPreset_addFromLibrary;
-
-  /// No description provided for @ucPreset_selectFromLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Select UC Entry'**
-  String get ucPreset_selectFromLibrary;
 
   /// No description provided for @generation_imageCount.
   ///

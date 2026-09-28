@@ -2878,6 +2878,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qualityTags_addToEnd => '添加到提示词末尾:';
 
   @override
+  String get qualityTags_addToStart => '添加到提示词开头:';
+
+  @override
   String get qualityTags_naiDefault => 'NAI 默认';
 
   @override
@@ -2888,12 +2891,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get qualityTags_none => '无';
-
-  @override
-  String get qualityTags_addFromLibrary => '从词库添加';
-
-  @override
-  String get qualityTags_selectFromLibrary => '选择质量词条目';
 
   @override
   String get ucPreset_label => '负面预设';
@@ -2911,6 +2908,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ucPreset_humanFocus => '人物';
 
   @override
+  String get ucPreset_lowQuality => '低质量';
+
+  @override
+  String get ucPreset_badAnatomy => '解剖错误';
+
+  @override
   String get ucPreset_none => '无';
 
   @override
@@ -2922,12 +2925,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get ucPreset_nsfwHint =>
       '💡 如需生成成人内容，请在正面提示词中添加 nsfw，负面提示词中的 nsfw 将自动移除';
-
-  @override
-  String get ucPreset_addFromLibrary => '从词库添加';
-
-  @override
-  String get ucPreset_selectFromLibrary => '选择负面词条目';
 
   @override
   String get generation_imageCount => '生成数量';

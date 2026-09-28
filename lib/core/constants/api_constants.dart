@@ -386,6 +386,8 @@ class QualityTags {
     ImageModels.animeDiffusionV3:
         'best quality, amazing quality, very aesthetic, absurdres',
     ImageModels.furryDiffusionV3: '{best quality}, {amazing quality}',
+    // 旧 Furry 模型使用提示词前缀，顺序与 V3 系列不同。
+    ImageModels.furryDiffusion: 'masterpiece, best quality',
   };
 
   /// 历史启动器版本写入过的质量词。
@@ -454,6 +456,10 @@ class QualityTags {
     final trimmedPrompt = prompt.trim();
     if (trimmedPrompt.isEmpty) return tags;
 
+    if (ImageModels.resolveBaseModel(model) == ImageModels.furryDiffusion) {
+      return '$tags, $trimmedPrompt';
+    }
+
     if (trimmedPrompt.endsWith(',')) {
       return '$trimmedPrompt $tags';
     }
@@ -469,6 +475,8 @@ enum UcPresetType {
   furryFocus, // Furry 聚焦
   humanFocus, // 人物聚焦（额外排除解剖问题）
   none, // 不添加预设
+  lowQuality, // 旧 Furry 模型
+  badAnatomy, // 旧 Furry 模型
 }
 
 class UcPresets {
@@ -478,6 +486,9 @@ class UcPresets {
   static const int lightApiValue = 1;
   static const int humanFocusApiValue = 2;
   static const int noneApiValue = 3;
+  // 与现代预设的 0/1/2 避免碰撞；只在客户端保存和解析。
+  static const int lowQualityApiValue = 8;
+  static const int badAnatomyApiValue = 9;
 
   static int toApiValue(UcPresetType type) {
     return switch (type) {
@@ -486,6 +497,8 @@ class UcPresets {
       UcPresetType.humanFocus => humanFocusApiValue,
       UcPresetType.none => noneApiValue,
       UcPresetType.furryFocus => UCPresets.furryFocus,
+      UcPresetType.lowQuality => lowQualityApiValue,
+      UcPresetType.badAnatomy => badAnatomyApiValue,
     };
   }
 
@@ -508,8 +521,6 @@ class UcPresets {
         'blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page',
     UcPresetType.light:
         'blurry, lowres, upscaled, artistic error, scan artifacts, jpeg artifacts, logo, too many watermarks, negative space, blank page',
-    UcPresetType.furryFocus:
-        '{worst quality}, distracting watermark, unfinished, bad quality, {widescreen}, upscale, {sequence}, {{grandfathered content}}, blurred foreground, chromatic aberration, sketch, everyone, [sketch background], simple, [flat colors], ych (character), outline, multiple scenes, [[horror (theme)]], comic',
     UcPresetType.humanFocus:
         'blurry, lowres, upscaled, artistic error, film grain, scan artifacts, bad anatomy, bad hands, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, @_@, mismatched pupils, glowing eyes, negative space, blank page',
     UcPresetType.none: '',
@@ -521,10 +532,6 @@ class UcPresets {
         'blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, multiple views, logo, too many watermarks',
     UcPresetType.light:
         'blurry, lowres, error, worst quality, bad quality, jpeg artifacts, very displeasing',
-    UcPresetType.furryFocus:
-        '{{worst quality}}, [displeasing], {unusual pupils}, guide lines, {{unfinished}}, {bad}, url, artist name, {{tall image}}, mosaic, {sketch page}, comic panel, impact (font), [dated], {logo}, ych, {what}, {where is your god now}, {distorted text}, repeated text, {floating head}, {1994}, {widescreen}, absolutely everyone, sequence, {compression artifacts}, hard translated, {cropped}, {commissioner name}, unknown text, high contrast',
-    UcPresetType.humanFocus:
-        'blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, multiple views, logo, too many watermarks, bad anatomy, bad hands',
     UcPresetType.none: '',
   };
 
@@ -534,10 +541,6 @@ class UcPresets {
         'blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, logo, dated, signature, multiple views, gigantic breasts',
     UcPresetType.light:
         'blurry, lowres, error, worst quality, bad quality, jpeg artifacts, very displeasing, logo, dated, signature',
-    UcPresetType.furryFocus:
-        '{{worst quality}}, [displeasing], {unusual pupils}, guide lines, {{unfinished}}, {bad}, url, artist name, {{tall image}}, mosaic, {sketch page}, comic panel, impact (font), [dated], {logo}, ych, {what}, {where is your god now}, {distorted text}, repeated text, {floating head}, {1994}, {widescreen}, absolutely everyone, sequence, {compression artifacts}, hard translated, {cropped}, {commissioner name}, unknown text, high contrast',
-    UcPresetType.humanFocus:
-        'blurry, lowres, error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, logo, dated, signature, multiple views, gigantic breasts, bad anatomy, bad hands',
     UcPresetType.none: '',
   };
 
@@ -560,11 +563,9 @@ class UcPresets {
         'lowres, {bad}, error, fewer, extra, missing, worst quality, jpeg artifacts, bad quality, watermark, unfinished, displeasing, chromatic aberration, signature, extra digits, artistic error, username, scan, [abstract]',
     UcPresetType.light:
         'lowres, jpeg artifacts, worst quality, watermark, blurry, very displeasing',
-    UcPresetType.furryFocus:
-        '{{worst quality}}, [displeasing], {unusual pupils}, guide lines, {{unfinished}}, {bad}, url, artist name, {{tall image}}, mosaic, {sketch page}, comic panel, impact (font), [dated], {logo}, ych, {what}, {where is your god now}, {distorted text}, repeated text, {floating head}, {1994}, {widescreen}, absolutely everyone, sequence, {compression artifacts}, hard translated, {cropped}, {commissioner name}, unknown text, high contrast',
     UcPresetType.humanFocus:
         'lowres, {bad}, error, fewer, extra, missing, worst quality, jpeg artifacts, bad quality, watermark, unfinished, displeasing, chromatic aberration, signature, extra digits, artistic error, username, scan, [abstract], bad anatomy, bad hands, @_@, mismatched pupils, heart-shaped pupils, glowing eyes',
-    UcPresetType.none: 'lowres',
+    UcPresetType.none: '',
   };
 
   /// 历史启动器版本写入过的 UC 文本。
@@ -621,10 +622,15 @@ class UcPresets {
         '{{worst quality}}, [displeasing], {unusual pupils}, guide lines, {{unfinished}}, {bad}, url, artist name, {{tall image}}, mosaic, {sketch page}, comic panel, impact (font), [dated], {logo}, ych, {what}, {where is your god now}, {distorted text}, repeated text, {floating head}, {1994}, {widescreen}, absolutely everyone, sequence, {compression artifacts}, hard translated, {cropped}, {commissioner name}, unknown text, high contrast',
     UcPresetType.light:
         '{worst quality}, guide lines, unfinished, bad, url, tall image, widescreen, compression artifacts, unknown text',
-    UcPresetType.furryFocus:
-        '{{worst quality}}, [displeasing], {unusual pupils}, guide lines, {{unfinished}}, {bad}, url, artist name, {{tall image}}, mosaic, {sketch page}, comic panel, impact (font), [dated], {logo}, ych, {what}, {where is your god now}, {distorted text}, repeated text, {floating head}, {1994}, {widescreen}, absolutely everyone, sequence, {compression artifacts}, hard translated, {cropped}, {commissioner name}, unknown text, high contrast',
-    UcPresetType.humanFocus:
-        '{{worst quality}}, [displeasing], {unusual pupils}, guide lines, {{unfinished}}, {bad}, url, artist name, {{tall image}}, mosaic, {sketch page}, comic panel, impact (font), [dated], {logo}, ych, {what}, {where is your god now}, {distorted text}, repeated text, {floating head}, {1994}, {widescreen}, absolutely everyone, sequence, {compression artifacts}, hard translated, {cropped}, {commissioner name}, unknown text, high contrast',
+    UcPresetType.none: '',
+  };
+
+  /// 旧 Furry 模型，与 Furry V3 的 Heavy/Light 命名不同。
+  static const Map<UcPresetType, String> furryPresets = {
+    UcPresetType.badAnatomy:
+        '{worst quality}, low quality, distracting watermark, [nightmare fuel], {{unfinished}}, deformed, outline, pattern, simple background',
+    UcPresetType.lowQuality:
+        'worst quality, low quality, what has science done, what, nightmare fuel, eldritch horror, where is your god now, why',
     UcPresetType.none: '',
   };
 
@@ -644,6 +650,8 @@ class UcPresets {
         return v4CuratedPresets;
       case ImageModels.furryDiffusionV3:
         return furryV3Presets;
+      case ImageModels.furryDiffusion:
+        return furryPresets;
       case ImageModels.animeDiffusionV3:
       default:
         return v3Presets;
@@ -656,8 +664,21 @@ class UcPresets {
     return presets[type] ?? '';
   }
 
-  static bool hasNativeApiValue(UcPresetType type) {
-    return type != UcPresetType.furryFocus;
+  /// 旧设置可能来自另一个模型，缺档时按“无”处理且不丢失原设置。
+  static UcPresetType effectiveTypeForModel(String model, UcPresetType type) =>
+      getPresetsForModel(model).containsKey(type) ? type : UcPresetType.none;
+
+  /// 请求中的旧 Furry 编码仍是 1/2；客户端存储使用无碰撞的 8/9。
+  static int requestValueForModel(String model, UcPresetType type) {
+    final effective = effectiveTypeForModel(model, type);
+    if (ImageModels.resolveBaseModel(model) == ImageModels.furryDiffusion) {
+      return switch (effective) {
+        UcPresetType.lowQuality => UCPresets.lowQuality,
+        UcPresetType.badAnatomy => UCPresets.badAnatomy,
+        _ => noneApiValue,
+      };
+    }
+    return toApiValue(effective);
   }
 
   /// V5 服务端标签提示（`tag_hint_uc_preset`）的数字编码。
@@ -672,6 +693,8 @@ class UcPresets {
       UcPresetType.light => 3,
       UcPresetType.humanFocus => 4,
       UcPresetType.furryFocus => 5,
+      UcPresetType.lowQuality => 7,
+      UcPresetType.badAnatomy => 8,
     };
   }
 
@@ -699,13 +722,22 @@ class UcPresets {
     return '$presetContent, $trimmedNegative';
   }
 
-  /// 根据整数 ucPreset 值获取对应的 UcPresetType
-  /// NAI API V4/V4.5 的 ucPreset 值映射：
+  /// 根据整数 ucPreset 值获取对应的 UcPresetType。
+  /// 旧 Furry 的 1/2 与现代 Light/Human 编码重合，必须传 model 消歧。
+  /// 现代模型的 ucPreset 值映射：
   /// - 0 = Heavy
   /// - 1 = Light
   /// - 2 = Human Focus
   /// - 3 = None
-  static UcPresetType getPresetTypeFromInt(int ucPreset) {
+  static UcPresetType getPresetTypeFromInt(int ucPreset, {String? model}) {
+    if (model != null &&
+        ImageModels.resolveBaseModel(model) == ImageModels.furryDiffusion) {
+      return switch (ucPreset) {
+        UCPresets.lowQuality || lowQualityApiValue => UcPresetType.lowQuality,
+        UCPresets.badAnatomy || badAnatomyApiValue => UcPresetType.badAnatomy,
+        _ => UcPresetType.none,
+      };
+    }
     switch (ucPreset) {
       case heavyApiValue:
       case UCPresets.heavy:
@@ -718,6 +750,10 @@ class UcPresets {
         return UcPresetType.humanFocus;
       case UCPresets.furryFocus:
         return UcPresetType.furryFocus;
+      case lowQualityApiValue:
+        return UcPresetType.lowQuality;
+      case badAnatomyApiValue:
+        return UcPresetType.badAnatomy;
       case noneApiValue:
       default:
         return UcPresetType.none;
@@ -727,7 +763,7 @@ class UcPresets {
   /// 读取本地设置中的 UC 预设值。
   ///
   /// 旧 provider 持久化的是 0=Heavy, 1=Light, 2=Human Focus, 3=None。
-  /// 新 provider 统一持久化请求使用的 API id，并额外用 7 表示 Furry Focus。
+  /// 新 provider 用 7 表示 Furry Focus，8/9 表示旧 Furry 两档。
   static UcPresetType getPresetTypeFromStorage(int storedValue) {
     switch (storedValue) {
       case heavyApiValue:
@@ -740,6 +776,10 @@ class UcPresets {
         return UcPresetType.humanFocus;
       case UCPresets.furryFocus:
         return UcPresetType.furryFocus;
+      case lowQualityApiValue:
+        return UcPresetType.lowQuality;
+      case badAnatomyApiValue:
+        return UcPresetType.badAnatomy;
       case noneApiValue:
       case 4:
         return UcPresetType.none;
@@ -750,7 +790,7 @@ class UcPresets {
 
   /// 根据整数 ucPreset 值和模型直接获取预设内容
   static String getPresetContentByInt(String model, int ucPreset) {
-    final presetType = getPresetTypeFromInt(ucPreset);
+    final presetType = getPresetTypeFromInt(ucPreset, model: model);
     return getPresetContent(model, presetType);
   }
 
@@ -760,7 +800,7 @@ class UcPresets {
     String model,
     int ucPreset,
   ) {
-    final presetType = getPresetTypeFromInt(ucPreset);
+    final presetType = getPresetTypeFromInt(ucPreset, model: model);
     return applyPreset(negativePrompt, model, presetType);
   }
 
@@ -822,7 +862,7 @@ class UcPresets {
     String model,
     int ucPreset,
   ) {
-    final presetType = getPresetTypeFromInt(ucPreset);
+    final presetType = getPresetTypeFromInt(ucPreset, model: model);
     return stripPreset(negativePrompt, model, presetType);
   }
 

@@ -54,7 +54,12 @@ PromptSemanticsSnapshot buildPromptSemanticsSnapshot({
     negativePrompt,
     promptWithTransparency,
     model,
-    ucPreset,
+    UcPresets.toApiValue(
+      UcPresets.effectiveTypeForModel(
+        model,
+        UcPresets.getPresetTypeFromInt(ucPreset, model: model),
+      ),
+    ),
   );
 
   return PromptSemanticsSnapshot(

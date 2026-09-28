@@ -237,13 +237,14 @@ PromptTokenCountPayload _buildPositiveTokenCountPayload({
       qualityMode ??
       _qualityModeFromLegacyFields(qualityToggle, qualityTagPreset);
   final resolvedUcPresetType =
-      ucPresetType ?? UcPresets.getPresetTypeFromInt(ucPreset);
+      ucPresetType ?? UcPresets.getPresetTypeFromInt(ucPreset, model: model);
   final resolvedQualityContent =
       qualityContent ?? _qualityPresetContent(model, resolvedQualityMode);
   final resolvedUcPresetContent =
       ucPresetContent ??
       UcPresets.getPresetContent(model, resolvedUcPresetType);
   final presetResolution = resolvePromptPresetSettings(
+    model: model,
     prompt: resolvedPrompt,
     negativePrompt: resolvedNegativePrompt,
     qualityMode: resolvedQualityMode,
@@ -313,13 +314,14 @@ PromptTokenCountPayload _buildNegativeTokenCountPayload({
       qualityMode ??
       _qualityModeFromLegacyFields(qualityToggle, qualityTagPreset);
   final resolvedUcPresetType =
-      ucPresetType ?? UcPresets.getPresetTypeFromInt(ucPreset);
+      ucPresetType ?? UcPresets.getPresetTypeFromInt(ucPreset, model: model);
   final resolvedQualityContent =
       qualityContent ?? _qualityPresetContent(model, resolvedQualityMode);
   final resolvedUcPresetContent =
       ucPresetContent ??
       UcPresets.getPresetContent(model, resolvedUcPresetType);
   final presetResolution = resolvePromptPresetSettings(
+    model: model,
     prompt: resolvedPrompt,
     negativePrompt: resolvedNegativePrompt,
     qualityMode: resolvedQualityMode,

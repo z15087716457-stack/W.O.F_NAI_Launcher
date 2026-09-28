@@ -74,7 +74,10 @@ class NAIImageRequestBuilder {
       'sampler': sampler,
       'steps': params.steps,
       'n_samples': params.nSamples,
-      'ucPreset': params.ucPreset,
+      'ucPreset': UcPresets.requestValueForModel(
+        params.model,
+        UcPresets.getPresetTypeFromInt(params.ucPreset, model: params.model),
+      ),
       'qualityToggle': params.effectiveQualityToggle,
       'autoSmea': false,
       'dynamic_thresholding': params.isV3Model && params.decrisp,
@@ -115,7 +118,10 @@ class NAIImageRequestBuilder {
         params.effectiveQualityTagPreset,
       );
       requestParameters['tag_hint_uc_preset'] = UcPresets.toTagHintValue(
-        UcPresets.getPresetTypeFromInt(params.ucPreset),
+        UcPresets.effectiveTypeForModel(
+          params.model,
+          UcPresets.getPresetTypeFromInt(params.ucPreset, model: params.model),
+        ),
       );
     }
 

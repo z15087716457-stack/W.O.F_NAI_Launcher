@@ -58,23 +58,47 @@ class MetadataImportApplier {
 
   static UcPresetType? recordedUcPreset(NaiImageMetadata metadata) {
     if (metadata.ucPresetTagHint != null) {
-      return switch (metadata.ucPresetTagHint) {
+      return _supportedUcPreset(metadata, switch (metadata.ucPresetTagHint) {
         0 => UcPresetType.none,
         2 => UcPresetType.heavy,
         3 => UcPresetType.light,
         4 => UcPresetType.humanFocus,
         5 => UcPresetType.furryFocus,
         _ => null,
-      };
+      });
     }
-    return switch (metadata.ucPreset) {
+    final rawPreset = metadata.ucPreset;
+    if (rawPreset == null) return null;
+    final model = resolveImportableModel(metadata);
+    if (model == ImageModels.furryDiffusion) {
+      return _supportedUcPreset(metadata, switch (rawPreset) {
+        UCPresets.lowQuality ||
+        UcPresets.lowQualityApiValue => UcPresetType.lowQuality,
+        UCPresets.badAnatomy ||
+        UcPresets.badAnatomyApiValue => UcPresetType.badAnatomy,
+        UcPresets.noneApiValue => UcPresetType.none,
+        _ => null,
+      });
+    }
+    return _supportedUcPreset(metadata, switch (rawPreset) {
       UcPresets.heavyApiValue => UcPresetType.heavy,
       UcPresets.lightApiValue => UcPresetType.light,
       UcPresets.humanFocusApiValue => UcPresetType.humanFocus,
       UcPresets.noneApiValue => UcPresetType.none,
       UCPresets.furryFocus => UcPresetType.furryFocus,
       _ => null,
-    };
+    });
+  }
+
+  static UcPresetType? _supportedUcPreset(
+    NaiImageMetadata metadata,
+    UcPresetType? preset,
+  ) {
+    if (preset == null) return null;
+    final model = resolveImportableModel(metadata);
+    return model == null
+        ? preset
+        : UcPresets.effectiveTypeForModel(model, preset);
   }
 
   /// When a recorded preset is restored, move its generated suffix out of
@@ -97,6 +121,13 @@ class MetadataImportApplier {
     if (suffix == null || suffix.isEmpty) return prompt;
 
     final trimmed = prompt.trimRight();
+    if (ImageModels.resolveBaseModel(model) == ImageModels.furryDiffusion) {
+      if (trimmed == suffix) return '';
+      final prefix = '$suffix, ';
+      return trimmed.startsWith(prefix)
+          ? trimmed.substring(prefix.length)
+          : prompt;
+    }
     if (trimmed == suffix) return '';
     if (!trimmed.endsWith(suffix)) return prompt;
     final beforeSuffix = trimmed.substring(0, trimmed.length - suffix.length);
@@ -194,9 +225,10 @@ class MetadataImportApplier {
       metadata.qualityToggle,
       target.updateQualityToggle,
     );
+    final recordedUc = recordedUcPreset(metadata);
     count += _applyValue<int>(
       options.importUcPreset,
-      metadata.ucPreset,
+      recordedUc == null ? null : UcPresets.toApiValue(recordedUc),
       target.updateUcPreset,
     );
 

@@ -14,6 +14,55 @@ import 'package:nai_launcher/presentation/widgets/common/image_detail/image_deta
 
 void main() {
   group('NaiImageMetadata', () {
+    test('old Furry import restores only explicitly recorded presets', () {
+      final metadata = NaiImageMetadata(
+        prompt: 'masterpiece, best quality, anthro wolf',
+        negativePrompt:
+            '${UcPresets.furryPresets[UcPresetType.badAnatomy]}, blurry',
+        model: ImageModels.furryDiffusion,
+        qualityToggle: true,
+        ucPreset: UCPresets.badAnatomy,
+      );
+      expect(
+        MetadataImportApplier.resolveImportedPrompt(
+          metadata,
+          importQualityPreset: true,
+          currentModel: ImageModels.furryDiffusion,
+        ),
+        'anthro wolf',
+      );
+      expect(
+        MetadataImportApplier.recordedUcPreset(metadata),
+        UcPresetType.badAnatomy,
+      );
+      expect(
+        MetadataImportApplier.resolveImportedNegativePrompt(
+          metadata,
+          importUcPreset: true,
+          currentModel: ImageModels.furryDiffusion,
+        ),
+        'blurry',
+      );
+      expect(
+        MetadataImportApplier.recordedUcPreset(
+          const NaiImageMetadata(
+            model: ImageModels.furryDiffusion,
+            ucPreset: 42,
+          ),
+        ),
+        isNull,
+      );
+      expect(
+        MetadataImportApplier.recordedUcPreset(
+          const NaiImageMetadata(
+            model: ImageModels.animeDiffusionV4Full,
+            ucPreset: UCPresets.furryFocus,
+          ),
+        ),
+        UcPresetType.none,
+      );
+    });
+
     test('displayNegativePrompt should mirror embedded raw uc text', () {
       final preset = UcPresets.getPresetContent(
         ImageModels.animeDiffusionV45Full,

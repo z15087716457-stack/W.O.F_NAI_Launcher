@@ -2922,6 +2922,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get qualityTags_addToEnd => 'プロンプトの最後に追加:';
 
   @override
+  String get qualityTags_addToStart => 'プロンプトの先頭に追加:';
+
+  @override
   String get qualityTags_naiDefault => 'NAI のデフォルト';
 
   @override
@@ -2932,12 +2935,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get qualityTags_none => 'なし';
-
-  @override
-  String get qualityTags_addFromLibrary => 'ライブラリから追加';
-
-  @override
-  String get qualityTags_selectFromLibrary => '品質タグエントリの選択';
 
   @override
   String get ucPreset_label => '除外したい要素プリセット';
@@ -2955,6 +2952,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ucPreset_humanFocus => '人間';
 
   @override
+  String get ucPreset_lowQuality => '低品質';
+
+  @override
+  String get ucPreset_badAnatomy => '不正確な体の構造';
+
+  @override
   String get ucPreset_none => 'なし';
 
   @override
@@ -2966,12 +2969,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get ucPreset_nsfwHint =>
       '💡 アダルト コンテンツを生成するには、プロンプトに nsfw を追加します。nsfw タグは除外したい要素から自動的に削除されます';
-
-  @override
-  String get ucPreset_addFromLibrary => 'ライブラリから追加';
-
-  @override
-  String get ucPreset_selectFromLibrary => '除外したい要素エントリを選択';
 
   @override
   String get generation_imageCount => '生成枚数';

@@ -5,12 +5,8 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../providers/uc_preset_provider.dart';
-import '../common/prompt_block_picker_dialog.dart';
-import 'components/library_entry_menu_item.dart';
 
 /// UC 预设选择器组件
-///
-/// 支持 NAI 预设类型和从词库添加自定义条目
 class UcPresetSelector extends ConsumerStatefulWidget {
   /// 当前选择的模型
   final String model;
@@ -37,6 +33,10 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
         return context.l10n.ucPreset_humanFocus;
       case UcPresetType.none:
         return context.l10n.ucPreset_none;
+      case UcPresetType.lowQuality:
+        return context.l10n.ucPreset_lowQuality;
+      case UcPresetType.badAnatomy:
+        return context.l10n.ucPreset_badAnatomy;
     }
   }
 
@@ -44,14 +44,19 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final presetState = ref.watch(ucPresetNotifierProvider);
-    final customEntries = ref.watch(ucCustomEntriesProvider);
     final currentEntry = ref.watch(currentUcEntryProvider);
+    final visibleType = UcPresets.effectiveTypeForModel(
+      widget.model,
+      presetState.presetType,
+    );
 
     // 获取实际内容用于 Tooltip 显示
-    final effectiveContent = ref
-        .read(ucPresetNotifierProvider.notifier)
-        .getEffectiveContent(widget.model);
-    final isEnabled = !presetState.isDisabled;
+    final effectiveContent = presetState.isCustom
+        ? ref
+              .read(ucPresetNotifierProvider.notifier)
+              .getEffectiveContent(widget.model)
+        : UcPresets.getPresetContent(widget.model, visibleType);
+    final isEnabled = presetState.isCustom || visibleType != UcPresetType.none;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -86,7 +91,7 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
         ),
         padding: const EdgeInsets.all(12),
         child: GestureDetector(
-          onTap: () => _showMenu(context, presetState, customEntries),
+          onTap: () => _showMenu(context, presetState),
           child: AnimatedContainer(
             key: _buttonKey,
             duration: const Duration(milliseconds: 150),
@@ -107,7 +112,7 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
                 Flexible(
                   child: Text(
                     '${context.l10n.ucPreset_presetChip}: '
-                    '${_getDisplayLabel(context, presetState, currentEntry)}',
+                    '${_getDisplayLabel(context, presetState, currentEntry, visibleType)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -138,7 +143,6 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
   Future<void> _showMenu(
     BuildContext context,
     UcPresetState presetState,
-    List<PromptBlock> customEntries,
   ) async {
     final RenderBox button =
         _buttonKey.currentContext!.findRenderObject() as RenderBox;
@@ -159,7 +163,7 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
       context: context,
       position: position,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      items: _buildMenuItems(context, presetState, customEntries),
+      items: _buildMenuItems(context, presetState),
     );
 
     if (result != null) {
@@ -171,25 +175,29 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
     BuildContext context,
     UcPresetState state,
     PromptBlock? customEntry,
+    UcPresetType visibleType,
   ) {
     if (state.isCustom && customEntry != null) {
       final name = customEntry.displayTitle;
       return name.length > 8 ? '${name.substring(0, 8)}...' : name;
     }
-    return _getPresetDisplayName(context, state.presetType);
+    return _getPresetDisplayName(context, visibleType);
   }
 
   List<PopupMenuEntry<String>> _buildMenuItems(
     BuildContext context,
     UcPresetState state,
-    List<PromptBlock> customEntries,
   ) {
     final theme = Theme.of(context);
     final items = <PopupMenuEntry<String>>[];
 
     // NAI 预设选项
-    for (final type in UcPresetType.values) {
-      final isSelected = !state.isCustom && state.presetType == type;
+    final visibleType = UcPresets.effectiveTypeForModel(
+      widget.model,
+      state.presetType,
+    );
+    for (final type in UcPresets.getPresetsForModel(widget.model).keys) {
+      final isSelected = !state.isCustom && visibleType == type;
       items.add(
         PopupMenuItem<String>(
           value: 'preset_${type.index}',
@@ -213,46 +221,6 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
       );
     }
 
-    // 分隔线
-    items.add(const PopupMenuDivider());
-
-    // 从词库添加
-    items.add(
-      PopupMenuItem<String>(
-        value: 'add_from_library',
-        child: Row(
-          children: [
-            Icon(Icons.add, size: 16, color: theme.colorScheme.primary),
-            const SizedBox(width: 8),
-            Text(
-              context.l10n.ucPreset_addFromLibrary,
-              style: TextStyle(color: theme.colorScheme.primary),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    // 所有已添加的自定义条目
-    if (customEntries.isNotEmpty) {
-      items.add(const PopupMenuDivider());
-      for (final entry in customEntries) {
-        final isSelected = state.isCustom && state.customEntryId == entry.id;
-        items.add(
-          LibraryEntryMenuItem(
-            entry: entry,
-            isSelected: isSelected,
-            onDelete: () {
-              ref
-                  .read(ucPresetNotifierProvider.notifier)
-                  .removeCustomEntry(entry.id);
-              Navigator.of(context).pop();
-            },
-          ),
-        );
-      }
-    }
-
     return items;
   }
 
@@ -264,23 +232,6 @@ class _UcPresetSelectorState extends ConsumerState<UcPresetSelector> {
             .read(ucPresetNotifierProvider.notifier)
             .setPresetType(UcPresetType.values[index]);
       }
-    } else if (value == 'add_from_library') {
-      _showPromptBlockPicker();
-    } else if (value.startsWith('custom_')) {
-      final entryId = value.substring(7);
-      ref.read(ucPresetNotifierProvider.notifier).setCustomEntry(entryId);
-    }
-  }
-
-  Future<void> _showPromptBlockPicker() async {
-    final entry = await showDialog<PromptBlock>(
-      context: context,
-      builder: (context) => PromptBlockPickerDialog(
-        title: context.l10n.ucPreset_selectFromLibrary,
-      ),
-    );
-    if (entry != null) {
-      ref.read(ucPresetNotifierProvider.notifier).setCustomEntry(entry.id);
     }
   }
 

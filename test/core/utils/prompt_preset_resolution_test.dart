@@ -62,6 +62,23 @@ void main() {
       expect(result.ucPreset, equals(UcPresets.noneApiValue));
     });
 
+    test('unsupported preset from another model resolves to None', () {
+      final result = resolvePromptPresetSettings(
+        model: ImageModels.animeDiffusionV4Full,
+        prompt: '1girl',
+        negativePrompt: 'blurry',
+        qualityMode: PromptPresetMode.naiDefault,
+        qualityContent: QualityTags.getQualityTags(
+          ImageModels.animeDiffusionV4Full,
+        ),
+        ucPresetType: UcPresetType.furryFocus,
+        ucPresetContent: '',
+        useCustomUcPreset: false,
+      );
+      expect(result.ucPreset, UcPresets.noneApiValue);
+      expect(result.negativePrompt, 'blurry');
+    });
+
     test('matches legacy quality toggle and native uc preset request ids', () {
       expect(
         resolvePromptPresetSettings(

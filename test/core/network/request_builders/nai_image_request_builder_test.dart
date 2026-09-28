@@ -13,6 +13,44 @@ import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 
 void main() {
   group('NAIImageRequestBuilder.build', () {
+    test(
+      'old Furry uses prefix quality and its model-specific UC id',
+      () async {
+        final result = await NAIImageRequestBuilder(
+          params: const ImageParams(
+            model: ImageModels.furryDiffusion,
+            prompt: 'anthro wolf',
+            ucPreset: UcPresets.lowQualityApiValue,
+          ),
+          encodeVibe: _fakeEncodeVibe,
+        ).build(sampler: Samplers.kEuler);
+        expect(
+          result.requestData['input'],
+          'masterpiece, best quality, anthro wolf',
+        );
+        expect(result.requestParameters['ucPreset'], UCPresets.lowQuality);
+        expect(
+          result.requestParameters['negative_prompt'],
+          UcPresets.furryPresets[UcPresetType.lowQuality],
+        );
+      },
+    );
+
+    test('preset left over from another model is sent as None', () async {
+      final result = await NAIImageRequestBuilder(
+        params: const ImageParams(
+          model: ImageModels.animeDiffusionV5Full,
+          prompt: '1girl',
+          negativePrompt: 'blurry',
+          ucPreset: UcPresets.lowQualityApiValue,
+        ),
+        encodeVibe: _fakeEncodeVibe,
+      ).build(sampler: Samplers.kEuler);
+      expect(result.requestParameters['ucPreset'], UcPresets.noneApiValue);
+      expect(result.requestParameters['tag_hint_uc_preset'], 0);
+      expect(result.requestParameters['negative_prompt'], 'blurry');
+    });
+
     test('uses model-specific params_version for img2img requests', () async {
       final source = _validPngBytes();
       for (final (model, expectedVersion) in [

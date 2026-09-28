@@ -19,6 +19,7 @@ class PromptPresetResolution {
 }
 
 PromptPresetResolution resolvePromptPresetSettings({
+  String? model,
   required String prompt,
   required String negativePrompt,
   required PromptPresetMode qualityMode,
@@ -27,6 +28,9 @@ PromptPresetResolution resolvePromptPresetSettings({
   required String? ucPresetContent,
   required bool useCustomUcPreset,
 }) {
+  final effectiveUcPresetType = model == null
+      ? ucPresetType
+      : UcPresets.effectiveTypeForModel(model, ucPresetType);
   final resolvedPrompt = switch (qualityMode) {
     PromptPresetMode.custom => _joinPromptParts([prompt, qualityContent]),
     PromptPresetMode.naiDefault ||
@@ -50,7 +54,7 @@ PromptPresetResolution resolvePromptPresetSettings({
     qualityTagPreset: qualityTagPreset,
     ucPreset: useCustomUcPreset
         ? UcPresets.noneApiValue
-        : UcPresets.toApiValue(ucPresetType),
+        : UcPresets.toApiValue(effectiveUcPresetType),
   );
 }
 
