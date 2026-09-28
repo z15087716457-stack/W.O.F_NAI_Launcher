@@ -63,7 +63,7 @@ class LocalTagExpansionService {
       candidates = await chineseDictionary.search(query);
     } else {
       final prefix = await catalog.search(
-        query.copyWith(limit: limit.clamp(1, 24)),
+        query.copyWith(limit: limit.clamp(1, 100)),
       );
       final contains = token.runes.length < 2
           ? const <CompletionCandidate>[]

@@ -116,6 +116,7 @@ class StorageKeys {
   static const String imagesPerRequest = 'images_per_request';
   static const String enableAutocomplete = 'enable_autocomplete';
   static const String autocompleteResultLimit = 'autocomplete_result_limit';
+  static const String tagExpansionResultLimit = 'tag_expansion_result_limit';
   static const String autocompleteShowAliases = 'autocomplete_show_aliases';
   static const String autocompleteShowTranslations =
       'autocomplete_show_translations';

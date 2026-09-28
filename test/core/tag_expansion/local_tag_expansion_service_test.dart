@@ -53,6 +53,9 @@ void main() {
       expect(related.queries.single.relatedTag, 'blue_hair');
       expect(related.queries.single.token, isEmpty);
       expect(popular.single.canonicalTag, 'blue_hair');
+
+      await service.search('b', locale: 'en', limit: 80);
+      expect(catalog.queries.last.limit, 80);
     },
   );
 }

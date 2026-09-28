@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../../core/autocomplete/autocomplete_settings.dart';
 import '../../../core/autocomplete/completion_models.dart';
 import '../../../core/autocomplete/prompt_token_parser.dart';
+import '../../../core/constants/storage_keys.dart';
 import '../../../core/tag_expansion/tag_expansion_providers.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
@@ -41,12 +43,21 @@ class TagExpansionWrapper extends ConsumerStatefulWidget {
 
 class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     with WidgetsBindingObserver {
+  static const _limitOptions = [12, 24, 40, 80];
+  static const _compactRowHeight = 44.0;
+  static const _wrappedLineHeight = 16.0;
+  static const _columnGap = 2.0;
+  static const _listInset = 4.0;
+  static const _panelGap = 3.0;
+
   final _anchorKey = GlobalKey(debugLabel: 'tag-expansion-anchor');
   final _searchController = TextEditingController();
   final _searchFocus = FocusNode();
   final _searchScroll = ScrollController();
+  final _limitButtonKey = GlobalKey(debugLabel: 'tag-expansion-limit-button');
   Timer? _debounce;
   OverlayEntry? _entry;
+  OverlayEntry? _limitMenuEntry;
   Offset? _pointerDown;
   Offset? _anchorGlobal;
   bool _controlAtDown = false;
@@ -59,6 +70,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   int _wikiSequence = 0;
   int _selectedIndex = 0;
   int _gridColumns = 2;
+  int _resultLimit = 40;
+  List<double> _rowHeights = const [];
   bool _searchLoading = false;
   bool _relatedLoading = false;
   bool _searchFailed = false;
@@ -81,10 +94,21 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     WidgetsBinding.instance.addObserver(this);
     widget.controller.addListener(_onEditorChanged);
     _searchFocus.onKeyEvent = _onSearchKey;
+    if (Hive.isBoxOpen(StorageKeys.settingsBox)) {
+      final stored = Hive.box(
+        StorageKeys.settingsBox,
+      ).get(StorageKeys.tagExpansionResultLimit);
+      if (stored is int && _limitOptions.contains(stored)) {
+        _resultLimit = stored;
+      }
+    }
   }
 
   @override
-  void didChangeMetrics() => _markNeedsBuild();
+  void didChangeMetrics() {
+    _closeLimitMenu();
+    _markNeedsBuild();
+  }
 
   @override
   void didUpdateWidget(covariant TagExpansionWrapper oldWidget) {
@@ -255,6 +279,103 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     _queueSearch();
   }
 
+  void _setResultLimit(int limit) {
+    _closeLimitMenu();
+    if (_resultLimit == limit) return;
+    _resultLimit = limit;
+    if (Hive.isBoxOpen(StorageKeys.settingsBox)) {
+      unawaited(
+        Hive.box(
+          StorageKeys.settingsBox,
+        ).put(StorageKeys.tagExpansionResultLimit, limit),
+      );
+    }
+    _queueSearch(immediate: true);
+  }
+
+  void _closeLimitMenu() {
+    final menu = _limitMenuEntry;
+    _limitMenuEntry = null;
+    menu?.remove();
+    menu?.dispose();
+  }
+
+  void _toggleLimitMenu() {
+    if (_limitMenuEntry != null) {
+      _closeLimitMenu();
+      return;
+    }
+    final overlay = Overlay.of(context, rootOverlay: true);
+    final root = overlay.context.findRenderObject();
+    final button = _limitButtonKey.currentContext?.findRenderObject();
+    if (root is! RenderBox || button is! RenderBox) return;
+    final origin = root.globalToLocal(button.localToGlobal(Offset.zero));
+    const menuWidth = 112.0;
+    const menuHeight = 4 * 36.0;
+    final left = (origin.dx + button.size.width - menuWidth)
+        .clamp(8.0, math.max(8.0, root.size.width - menuWidth - 8))
+        .toDouble();
+    final below = origin.dy + button.size.height + 3;
+    final top =
+        (below + menuHeight <= root.size.height - 8
+                ? below
+                : origin.dy - menuHeight - 3)
+            .clamp(8.0, math.max(8.0, root.size.height - menuHeight - 8))
+            .toDouble();
+    _limitMenuEntry = OverlayEntry(
+      builder: (context) => Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _closeLimitMenu,
+              child: const ColoredBox(color: Colors.transparent),
+            ),
+          ),
+          Positioned(
+            left: left,
+            top: top,
+            width: menuWidth,
+            height: menuHeight,
+            child: Material(
+              key: const ValueKey('tag-expansion-limit-menu'),
+              elevation: 16,
+              color: Theme.of(context).colorScheme.surface,
+              clipBehavior: Clip.antiAlias,
+              borderRadius: BorderRadius.circular(7),
+              child: Column(
+                children: [
+                  for (final option in _limitOptions)
+                    SizedBox(
+                      height: 36,
+                      child: InkWell(
+                        onTap: () => _setResultLimit(option),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 22,
+                                child: option == _resultLimit
+                                    ? const Icon(Icons.check, size: 16)
+                                    : null,
+                              ),
+                              Text('$option'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    overlay.insert(_limitMenuEntry!);
+  }
+
   void _queueSearch({bool immediate = false}) {
     _debounce?.cancel();
     final sequence = ++_searchSequence;
@@ -290,13 +411,14 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
               _contextTag!,
               locale: locale,
               existingTags: _existingTags,
-              limit: 12,
+              limit: _resultLimit,
             );
       final usingContext = results.isNotEmpty;
       if (!usingContext) {
         results = await service.popular(
           locale: locale,
           existingTags: _existingTags,
+          limit: _resultLimit,
         );
       }
       if (!mounted || !_active || sequence != _searchSequence) return;
@@ -321,6 +443,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
             _searchController.text,
             locale: Localizations.localeOf(context).toLanguageTag(),
             existingTags: _existingTags,
+            limit: _resultLimit,
           );
       if (!mounted || !_active || sequence != _searchSequence) return;
       _results = results;
@@ -433,8 +556,12 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     if (!_searchScroll.hasClients) return;
     final position = _searchScroll.position;
     if (!position.hasContentDimensions) return;
-    final top = (_selectedIndex ~/ _gridColumns) * 66.0;
-    final bottom = top + 66;
+    final row = _selectedIndex ~/ _gridColumns;
+    if (row >= _rowHeights.length) return;
+    final top =
+        _listInset +
+        _rowHeights.take(row).fold<double>(0, (sum, height) => sum + height);
+    final bottom = top + _rowHeights[row];
     final target = top < position.pixels
         ? top
         : bottom > position.pixels + position.viewportDimension
@@ -468,6 +595,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
 
   void _close({bool restoreFocus = false, bool notify = true}) {
     _debounce?.cancel();
+    _closeLimitMenu();
     _searchSequence++;
     _relatedSequence++;
     _wikiSequence++;
@@ -479,6 +607,53 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     _active = false;
     if (restoreFocus) widget.focusNode?.requestFocus();
     if (notify) widget.onActiveChanged?.call(false);
+  }
+
+  TextStyle? _tagTitleStyle(BuildContext context) => Theme.of(
+    context,
+  ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600, height: 1.2);
+
+  double _candidateHeight(
+    BuildContext context,
+    CompletionCandidate candidate,
+    double cellWidth,
+  ) {
+    final titleWidth = math.max(
+      1.0,
+      cellWidth - 12 - (candidate.postCount > 0 ? 48 : 0),
+    );
+    final painter = TextPainter(
+      text: TextSpan(
+        text: TagNormalizer.toDisplay(candidate.canonicalTag),
+        style: _tagTitleStyle(context),
+      ),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout(maxWidth: titleWidth);
+    final lines = painter.computeLineMetrics().length;
+    painter.dispose();
+    return _compactRowHeight + _wrappedLineHeight * math.max(0, lines - 1);
+  }
+
+  List<double> _measureSearchRows(BuildContext context, double panelWidth) {
+    final usableWidth = math.max(1.0, panelWidth - _listInset * 2);
+    final cellWidth =
+        (usableWidth - (_gridColumns - 1) * _columnGap) / _gridColumns;
+    return List<double>.generate(
+      (_results.length + _gridColumns - 1) ~/ _gridColumns,
+      (row) {
+        var height = _compactRowHeight;
+        for (var column = 0; column < _gridColumns; column++) {
+          final index = row * _gridColumns + column;
+          if (index >= _results.length) break;
+          height = math.max(
+            height,
+            _candidateHeight(context, _results[index], cellWidth),
+          );
+        }
+        return height + 2;
+      },
+    );
   }
 
   Widget _buildOverlay(BuildContext overlayContext) {
@@ -499,12 +674,20 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     );
     final relatedWidth = relatedOnly
         ? width
-        : math.min(240.0, math.max(0.0, screen.width - 22 - width));
+        : math.min(240.0, math.max(0.0, screen.width - 19 - width));
     final combinedWidth =
-        width + (hasRelated && !relatedOnly ? relatedWidth + 6 : 0);
+        width + (hasRelated && !relatedOnly ? relatedWidth + _panelGap : 0);
+    _gridColumns = width >= 380 ? 2 : 1;
+    _rowHeights = _measureSearchRows(overlayContext, width);
     final hasWiki = _wikiCandidate != null;
     final availableHeight = math.max(0.0, screen.height - 16);
-    final height = math.min(460.0, availableHeight - (hasWiki ? 96 : 0));
+    final desiredHeight =
+        (111.0 + _rowHeights.fold<double>(0, (total, row) => total + row))
+            .clamp(320.0, 460.0);
+    final height = math.min(
+      desiredHeight,
+      availableHeight - (hasWiki ? 96 : 0),
+    );
     if (width <= 0 || height <= 0) return const SizedBox.shrink();
     final theme = Theme.of(overlayContext);
     final wikiBody =
@@ -520,11 +703,11 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     final wikiHeight = hasWiki
         ? math.min(
             (68 + bodyMeasure.height).clamp(90.0, 230.0),
-            math.max(0.0, availableHeight - height - 6),
+            math.max(0.0, availableHeight - height - _panelGap),
           )
         : 0.0;
     bodyMeasure.dispose();
-    final totalHeight = height + (hasWiki ? wikiHeight + 6 : 0);
+    final totalHeight = height + (hasWiki ? wikiHeight + _panelGap : 0);
     final below = anchor.dy + 8;
     final top =
         (below + totalHeight <= screen.height - 8
@@ -591,7 +774,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
           ),
         if (hasRelated)
           Positioned(
-            left: relatedOnly ? left : left + width + 6,
+            left: relatedOnly ? left : left + width + _panelGap,
             top: top,
             width: relatedWidth,
             height: height,
@@ -641,7 +824,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
         if (hasWiki && wikiHeight > 0)
           Positioned(
             left: left,
-            top: top + height + 6,
+            top: top + height + _panelGap,
             width: width,
             height: wikiHeight,
             child: _buildWikiPanel(overlayContext),
@@ -695,7 +878,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     return SizedBox(
       height: 26,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.only(left: 10, right: 5),
         child: Row(
           children: [
             if (source.isNotEmpty)
@@ -725,6 +908,34 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                   ),
                 ),
               ),
+            const Spacer(),
+            SizedBox(
+              key: _limitButtonKey,
+              height: 24,
+              child: Tooltip(
+                message: context.l10n.autocomplete_resultLimit,
+                child: InkWell(
+                  key: const ValueKey('tag-expansion-result-limit'),
+                  onTap: _toggleLimitMenu,
+                  borderRadius: BorderRadius.circular(4),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${context.l10n.autocomplete_resultLimit} $_resultLimit',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const Icon(Icons.arrow_drop_down, size: 16),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -742,31 +953,40 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
             : context.l10n.tagExpansion_noResults,
       );
     }
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        _gridColumns = constraints.maxWidth >= 380 ? 2 : 1;
-        return GridView.builder(
-          key: const ValueKey('tag-expansion-results'),
-          controller: _searchScroll,
-          padding: const EdgeInsets.all(3),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: _gridColumns,
-            mainAxisExtent: 64,
-            crossAxisSpacing: 3,
-            mainAxisSpacing: 3,
+    return ListView.builder(
+      key: const ValueKey('tag-expansion-results'),
+      controller: _searchScroll,
+      padding: const EdgeInsets.symmetric(horizontal: _listInset, vertical: 2),
+      itemCount: _rowHeights.length,
+      itemBuilder: (context, row) => SizedBox(
+        height: _rowHeights[row],
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 2),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var column = 0; column < _gridColumns; column++) ...[
+                if (column > 0) const SizedBox(width: _columnGap),
+                Expanded(
+                  child: row * _gridColumns + column < _results.length
+                      ? _candidateRow(
+                          context,
+                          _results[row * _gridColumns + column],
+                          selected:
+                              row * _gridColumns + column == _selectedIndex,
+                          onTap: () {
+                            final index = row * _gridColumns + column;
+                            _selectedIndex = index;
+                            _openWiki(_results[index]);
+                          },
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ],
           ),
-          itemCount: _results.length,
-          itemBuilder: (context, index) => _candidateRow(
-            context,
-            _results[index],
-            selected: index == _selectedIndex,
-            onTap: () {
-              _selectedIndex = index;
-              _openWiki(_results[index]);
-            },
-          ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -779,15 +999,32 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
             : context.l10n.tagExpansion_noResults,
       );
     }
-    return ListView.builder(
-      key: const ValueKey('tag-expansion-related-results'),
-      itemExtent: 64,
-      itemCount: _relatedResults.length,
-      itemBuilder: (context, index) => _candidateRow(
-        context,
-        _relatedResults[index],
-        related: true,
-        onTap: () => _openWiki(_relatedResults[index]),
+    return LayoutBuilder(
+      builder: (context, constraints) => ListView.builder(
+        key: const ValueKey('tag-expansion-related-results'),
+        padding: const EdgeInsets.symmetric(
+          horizontal: _listInset,
+          vertical: 2,
+        ),
+        itemCount: _relatedResults.length,
+        itemBuilder: (context, index) => SizedBox(
+          height:
+              _candidateHeight(
+                context,
+                _relatedResults[index],
+                constraints.maxWidth - _listInset * 2,
+              ) +
+              2,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: _candidateRow(
+              context,
+              _relatedResults[index],
+              related: true,
+              onTap: () => _openWiki(_relatedResults[index]),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -830,27 +1067,45 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
           child: InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(9, 4, 6, 4),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.fromLTRB(6, 5, 6, 5),
+              child: Stack(
                 children: [
-                  Text(
-                    TagNormalizer.toDisplay(candidate.canonicalTag),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      height: 1.1,
-                      color: candidate.isExisting
-                          ? theme.colorScheme.onSurfaceVariant
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              TagNormalizer.toDisplay(candidate.canonicalTag),
+                              softWrap: true,
+                              style: _tagTitleStyle(context)?.copyWith(
+                                color: candidate.isExisting
+                                    ? theme.colorScheme.onSurfaceVariant
+                                    : null,
+                              ),
+                            ),
+                          ),
+                          if (candidate.postCount > 0) ...[
+                            const SizedBox(width: 4),
+                            SizedBox(
+                              width: 44,
+                              child: Text(
+                                _formatCount(candidate.postCount),
+                                textAlign: TextAlign.right,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Padding(
+                        padding: EdgeInsets.only(right: showActions ? 52 : 0),
                         child: Text(
                           detail,
                           maxLines: 1,
@@ -860,44 +1115,35 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                           ),
                         ),
                       ),
-                      if (candidate.postCount > 0)
-                        Text(
-                          _formatCount(candidate.postCount),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      const SizedBox(width: 3),
-                      SizedBox(
-                        width: 52,
-                        height: 26,
-                        child: AnimatedOpacity(
-                          opacity: showActions ? 1 : 0,
-                          duration: const Duration(milliseconds: 100),
-                          child: IgnorePointer(
-                            ignoring: !showActions,
-                            child: Row(
-                              children: [
-                                _rowAction(
-                                  tooltip:
-                                      context.l10n.tagExpansion_showRelated,
-                                  icon: Icons.hub_outlined,
-                                  onPressed: () =>
-                                      _loadRelated(candidate.canonicalTag),
-                                ),
-                                _rowAction(
-                                  tooltip: context.l10n.tagExpansion_insert,
-                                  icon: Icons.add,
-                                  onPressed: candidate.isExisting
-                                      ? null
-                                      : () => _insert(candidate),
-                                ),
-                              ],
+                    ],
+                  ),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: AnimatedOpacity(
+                      opacity: showActions ? 1 : 0,
+                      duration: const Duration(milliseconds: 100),
+                      child: IgnorePointer(
+                        ignoring: !showActions,
+                        child: Row(
+                          children: [
+                            _rowAction(
+                              tooltip: context.l10n.tagExpansion_showRelated,
+                              icon: Icons.hub_outlined,
+                              onPressed: () =>
+                                  _loadRelated(candidate.canonicalTag),
                             ),
-                          ),
+                            _rowAction(
+                              tooltip: context.l10n.tagExpansion_insert,
+                              icon: Icons.add,
+                              onPressed: candidate.isExisting
+                                  ? null
+                                  : () => _insert(candidate),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),

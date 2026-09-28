@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
@@ -20,16 +19,12 @@ import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wr
 
 void main() {
   setUp(() async {
-    Hive.init(
-      '${Directory.systemTemp.path}/tag_expansion_${DateTime.now().microsecondsSinceEpoch}',
-    );
-    await Hive.openBox(StorageKeys.settingsBox);
-    await Hive.openBox(StorageKeys.historyBox);
+    await Hive.openBox(StorageKeys.settingsBox, bytes: Uint8List(0));
+    await Hive.openBox(StorageKeys.historyBox, bytes: Uint8List(0));
   });
 
   tearDown(() async {
     await Hive.close();
-    await Hive.deleteFromDisk();
   });
 
   testWidgets('typing stays quiet; Ctrl+click searches and inserts locally', (
@@ -317,8 +312,108 @@ void main() {
       expect(second.dy, first.dy);
       expect(second.dx, greaterThan(first.dx));
       expect(third.dy, greaterThan(first.dy));
+      expect(third.dy - first.dy, lessThan(55));
     },
   );
+
+  testWidgets(
+    'long titles grow a whole paired row and counts align at the top',
+    (tester) async {
+      final controller = TextEditingController();
+      final focusNode = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+      const longName =
+          'extremely_detailed_intricate_background_with_many_small_elements';
+      await _pumpEditor(
+        tester,
+        controller,
+        focusNode,
+        _Source([
+          _tag(longName, postCount: 1234567),
+          _tag('short_tag'),
+          _tag('next_row'),
+        ]),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(find.byKey(const Key('prompt-editor')));
+      await tester.pump();
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.enterText(
+        find.byKey(const Key('tag-expansion-search')),
+        'tag',
+      );
+      await tester.pump(const Duration(milliseconds: 170));
+      await tester.pump();
+
+      final title = find.text(longName.replaceAll('_', ' '));
+      final first = tester.getTopLeft(title);
+      final second = tester.getTopLeft(find.text('short tag'));
+      final next = tester.getTopLeft(find.text('next row'));
+      final count = tester.getTopRight(find.text('1.2m'));
+      final popup = tester.getRect(
+        find.byKey(const Key('tag-expansion-popup')),
+      );
+      expect(tester.getSize(title).height, greaterThan(25));
+      expect(second.dy, closeTo(first.dy, 2));
+      expect(next.dy - first.dy, greaterThanOrEqualTo(60));
+      expect(count.dy, closeTo(first.dy, 3));
+      expect(count.dx, closeTo(popup.left + popup.width / 2, 14));
+    },
+  );
+
+  testWidgets('result limit controls main search and persists', (tester) async {
+    final controller = TextEditingController();
+    final focusNode = FocusNode();
+    final catalog = _Source([_tag('blue_hair')]);
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    await _pumpEditor(tester, controller, focusNode, catalog);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tap(find.byKey(const Key('prompt-editor')));
+    await tester.pump();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.enterText(
+      find.byKey(const Key('tag-expansion-search')),
+      'blue',
+    );
+    await tester.pump(const Duration(milliseconds: 170));
+    await tester.pump();
+    expect(catalog.queries.last.limit, 40);
+
+    await tester.tap(find.byKey(const Key('tag-expansion-result-limit')));
+    await tester.pump();
+    await tester.tap(find.text('12').last);
+    await tester.pump();
+    await tester.pump();
+    expect(catalog.queries.last.limit, 12);
+    expect(
+      Hive.box(
+        StorageKeys.settingsBox,
+      ).get(StorageKeys.tagExpansionResultLimit),
+      12,
+    );
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    final nextController = TextEditingController();
+    final nextFocus = FocusNode();
+    addTearDown(nextController.dispose);
+    addTearDown(nextFocus.dispose);
+    await _pumpEditor(
+      tester,
+      nextController,
+      nextFocus,
+      _Source([_tag('solo')]),
+    );
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tap(find.byKey(const Key('prompt-editor')));
+    await tester.pump();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    expect(find.text('Result count 12'), findsOneWidget);
+  });
 
   testWidgets('narrow window uses one result column', (tester) async {
     await tester.binding.setSurfaceSize(const Size(360, 800));
@@ -712,13 +807,14 @@ LocalTagExpansionService _service(
   popularSearch: ({limit = 12}) async => [_tag('solo')],
 );
 
-CompletionCandidate _tag(String name) => CompletionCandidate(
-  canonicalTag: name,
-  category: TagCategory.general,
-  postCount: 100,
-  matchKind: CompletionMatchKind.englishPrefix,
-  sources: const {CompletionSourceKind.base},
-);
+CompletionCandidate _tag(String name, {int postCount = 100}) =>
+    CompletionCandidate(
+      canonicalTag: name,
+      category: TagCategory.general,
+      postCount: postCount,
+      matchKind: CompletionMatchKind.englishPrefix,
+      sources: const {CompletionSourceKind.base},
+    );
 
 class _Source implements CompletionSource {
   _Source(this.results);
