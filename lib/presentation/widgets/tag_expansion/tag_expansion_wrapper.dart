@@ -535,15 +535,34 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
         return KeyEventResult.handled;
       }
     }
-    if (_results.isEmpty) return KeyEventResult.ignored;
-    if (event.logicalKey == LogicalKeyboardKey.arrowDown ||
-        event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      final delta = event.logicalKey == LogicalKeyboardKey.arrowDown
+    if (_results.isEmpty || !_searchController.value.composing.isCollapsed) {
+      return KeyEventResult.ignored;
+    }
+    final key = event.logicalKey;
+    int? nextIndex;
+    if (key == LogicalKeyboardKey.arrowDown ||
+        key == LogicalKeyboardKey.arrowUp) {
+      final delta = key == LogicalKeyboardKey.arrowDown
           ? _gridColumns
           : -_gridColumns;
-      _selectedIndex = (_selectedIndex + delta).clamp(0, _results.length - 1);
-      _markNeedsBuild();
-      _scrollToSelected();
+      nextIndex = (_selectedIndex + delta).clamp(0, _results.length - 1);
+    } else if (_gridColumns > 1 &&
+        (key == LogicalKeyboardKey.arrowRight ||
+            key == LogicalKeyboardKey.arrowLeft)) {
+      final column = _selectedIndex % _gridColumns;
+      final nextColumn =
+          column + (key == LogicalKeyboardKey.arrowRight ? 1 : -1);
+      nextIndex = nextColumn < 0 || nextColumn >= _gridColumns
+          ? _selectedIndex
+          : (_selectedIndex ~/ _gridColumns) * _gridColumns + nextColumn;
+      if (nextIndex >= _results.length) nextIndex = _selectedIndex;
+    }
+    if (nextIndex != null) {
+      if (nextIndex != _selectedIndex) {
+        _selectedIndex = nextIndex;
+        _markNeedsBuild();
+        _scrollToSelected();
+      }
       return KeyEventResult.handled;
     }
     if (event.logicalKey == LogicalKeyboardKey.enter) {
@@ -754,8 +773,12 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                       controller: _searchController,
                       focusNode: _searchFocus,
                       onChanged: _onSearchChanged,
+                      style: theme.textTheme.bodyMedium,
                       decoration: InputDecoration(
                         hintText: overlayContext.l10n.tagExpansion_searchHint,
+                        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                         prefixIcon: const Icon(Icons.search, size: 18),
                         border: InputBorder.none,
                         isDense: true,

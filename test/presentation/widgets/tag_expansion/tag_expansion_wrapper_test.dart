@@ -161,6 +161,65 @@ void main() {
     expect(controller.text, 'solo, blue hair, ');
   });
 
+  testWidgets(
+    'arrow keys navigate both result columns and search stays compact',
+    (tester) async {
+      final controller = TextEditingController();
+      final focusNode = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+      await _pumpEditor(
+        tester,
+        controller,
+        focusNode,
+        _Source([
+          _tag('first_tag'),
+          _tag('second_tag'),
+          _tag('third_tag'),
+          _tag('fourth_tag'),
+          _tag('fifth_tag'),
+        ]),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(find.byKey(const Key('prompt-editor')));
+      await tester.pump();
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      final search = find.byKey(const Key('tag-expansion-search'));
+      await tester.enterText(search, 'tag');
+      await tester.pump(const Duration(milliseconds: 170));
+      await tester.pump();
+
+      final searchField = tester.widget<TextField>(search);
+      final title = tester.widget<Text>(find.text('first tag'));
+      expect(searchField.style!.fontSize, greaterThan(title.style!.fontSize!));
+      expect(
+        searchField.style!.fontSize! - title.style!.fontSize!,
+        lessThanOrEqualTo(2),
+      );
+      expect(find.text('Tab to complete: first tag'), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(find.text('Tab to complete: second tag'), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(find.text('Tab to complete: fourth tag'), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(find.text('Tab to complete: third tag'), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(find.text('Tab to complete: first tag'), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(find.text('Tab to complete: fifth tag'), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(find.text('Tab to complete: fifth tag'), findsOneWidget);
+    },
+  );
+
   testWidgets('dismisses stale popup when the prompt changes elsewhere', (
     tester,
   ) async {
@@ -513,6 +572,13 @@ void main() {
       tester.getTopLeft(find.text('green hair')).dy,
       greaterThan(tester.getTopLeft(find.text('blue hair')).dy),
     );
+    expect(find.text('Tab to complete: blue hair'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(find.text('Tab to complete: blue hair'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(find.text('Tab to complete: green hair'), findsOneWidget);
   });
 
   testWidgets(
