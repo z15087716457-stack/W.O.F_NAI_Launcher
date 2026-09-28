@@ -878,7 +878,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     return SizedBox(
       height: 26,
       child: Padding(
-        padding: const EdgeInsets.only(left: 10, right: 5),
+        padding: const EdgeInsets.only(left: 10),
         child: Row(
           children: [
             if (source.isNotEmpty)
