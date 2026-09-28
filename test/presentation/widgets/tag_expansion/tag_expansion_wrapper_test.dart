@@ -910,10 +910,7 @@ void main() {
               child: UnifiedPromptInput(
                 controller: controller,
                 focusNode: focusNode,
-                config: const UnifiedPromptConfig(
-                  enableAutoFormat: true,
-                  enableAutocomplete: false,
-                ),
+                config: const UnifiedPromptConfig(enableAutoFormat: true),
                 maxLines: 3,
               ),
             ),

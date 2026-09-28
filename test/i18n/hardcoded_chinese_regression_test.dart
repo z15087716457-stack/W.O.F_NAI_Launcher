@@ -94,7 +94,6 @@ void main() {
       'lib/presentation/screens/generation/widgets/vibe_transfer_content.dart',
       'lib/presentation/widgets/auth/account_quick_switch.dart',
       'lib/presentation/widgets/common/image_picker_card/_internal/loading_overlay.dart',
-      'lib/presentation/widgets/prompt/components/library_entry_menu_item.dart',
       'lib/presentation/widgets/common/image_picker_card/_internal/picker_handler.dart',
       'lib/presentation/widgets/common/image_picker_card/image_picker_card.dart',
       'lib/presentation/utils/metadata_import_coordinator.dart',

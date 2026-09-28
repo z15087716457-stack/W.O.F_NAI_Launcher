@@ -358,7 +358,6 @@ void main() {
                                 controller: activeController,
                                 focusNode: focus,
                                 config: const UnifiedPromptConfig(
-                                  enableAutocomplete: false,
                                   enableSyntaxHighlight: false,
                                   enableAutoFormat: false,
                                 ),

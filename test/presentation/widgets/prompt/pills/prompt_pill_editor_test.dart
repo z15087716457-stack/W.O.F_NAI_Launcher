@@ -686,7 +686,6 @@ Future<ProviderContainer> _pump(
           child: PromptPillEditor(
             pillScope: pillScope,
             config: const UnifiedPromptConfig(
-              enableAutocomplete: false,
               enableSyntaxHighlight: false,
               enableAutoFormat: false,
             ),

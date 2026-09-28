@@ -1,82 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import '../../../core/autocomplete/completion_models.dart';
-import '../../../core/autocomplete/prompt_token_parser.dart';
-import '../../../core/utils/tag_normalizer.dart';
-import '../../../data/models/tag/local_tag.dart';
-import 'autocomplete_controller.dart';
-
-/// 自动补全工具类
-/// 提供标签提取、光标定位、建议应用等公共方法
+/// Shared caret positioning for autocomplete fields.
 class AutocompleteUtils {
   AutocompleteUtils._();
-
-  static String getCurrentTag(
-    String text,
-    int cursorPosition, {
-    bool splitOnSpaces = false,
-  }) {
-    if (cursorPosition < 0 || cursorPosition > text.length) return '';
-    final query = PromptTokenParser.parse(
-      text: text,
-      cursorPosition: cursorPosition,
-      limit: 20,
-      locale: 'en',
-      splitOnSpaces: splitOnSpaces,
-    );
-    if (query.kind == CompletionQueryKind.libraryAlias) return '';
-    final range = query.replacementRange;
-    return TagNormalizer.normalize(
-      text.substring(range.start, cursorPosition.clamp(range.start, range.end)),
-    );
-  }
-
-  static (int, int, String) findTagRange(String text, int cursorPosition) {
-    if (cursorPosition < 0 || cursorPosition > text.length) return (-1, -1, '');
-    final query = PromptTokenParser.parse(
-      text: text,
-      cursorPosition: cursorPosition,
-      limit: 20,
-      locale: 'en',
-    );
-    final range = query.replacementRange;
-    final prefix = text.substring(0, range.start);
-    final weight = RegExp(
-      r'(-?(?:\d+\.?\d*|\.\d+)::)[\s\{\[\(]*$',
-    ).firstMatch(prefix)?.group(1);
-    return (range.start, range.end, weight ?? '');
-  }
-
-  static (String newText, int newCursorPosition) applySuggestion({
-    required String text,
-    required int cursorPosition,
-    required LocalTag suggestion,
-    required AutocompleteConfig config,
-  }) {
-    if (cursorPosition < 0 || cursorPosition > text.length) {
-      return (text, cursorPosition);
-    }
-    final query = PromptTokenParser.parse(
-      text: text,
-      cursorPosition: cursorPosition,
-      limit: config.maxSuggestions ?? 20,
-      locale: 'en',
-      splitOnSpaces: config.treatSpacesAsSeparators,
-    );
-    if (query.kind == CompletionQueryKind.libraryAlias) {
-      return (text, cursorPosition);
-    }
-    final result = PromptTokenParser.apply(
-      text: text,
-      query: query,
-      canonicalTag: suggestion.tag,
-      autoInsertComma: config.autoInsertComma,
-      splitOnSpaces: config.treatSpacesAsSeparators,
-      closeOpenWeight: true,
-    );
-    return (result.text, result.cursorPosition);
-  }
 
   /// 判断实际文本输入组件是否支持多行。
   static bool isMultilineTextInput({

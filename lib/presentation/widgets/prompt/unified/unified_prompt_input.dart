@@ -21,7 +21,7 @@ import 'package:nai_launcher/presentation/widgets/common/themed_text_selection_t
 /// 统一提示词输入组件
 ///
 /// 文本输入组件，支持：
-/// - 自动补全
+/// - 显式标签扩展
 /// - 语法高亮
 /// - 自动格式化
 ///
@@ -225,8 +225,6 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     // 监听焦点变化（用于失焦格式化）
     _effectiveFocusNode.addListener(_onFocusChanged);
 
-    // 初始化自动补全策略（延迟到第一次 build 后，因为需要 ref）
-    // 策略将在 _ensureAutocompleteStrategy 中惰性创建
     HardwareKeyboard.instance.addHandler(_handleHardwareKeyEvent);
   }
 
@@ -1111,8 +1109,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       contextMenuBuilder: _buildContextMenu,
     );
 
-    // Tag expansion is explicit and independent of the old typing-completion
-    // setting. The old completion wrapper remains in other fields until REFAC-2.
+    // Tag expansion opens explicitly on Ctrl + click or selection.
     Widget result = baseInput;
     if (!widget.config.readOnly) {
       result = TagExpansionWrapper(

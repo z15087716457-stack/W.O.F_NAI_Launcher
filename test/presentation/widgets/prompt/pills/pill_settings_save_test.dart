@@ -67,7 +67,6 @@ void main() {
               height: 360,
               child: PromptPillEditor(
                 config: UnifiedPromptConfig(
-                  enableAutocomplete: false,
                   enableSyntaxHighlight: false,
                   enableAutoFormat: false,
                 ),

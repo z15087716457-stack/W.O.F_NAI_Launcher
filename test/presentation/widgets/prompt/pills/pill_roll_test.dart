@@ -1253,7 +1253,6 @@ Future<ProviderContainer> _pumpEditor(
             child: PromptPillEditor(
               allowEvolutionToggle: allowEvolutionToggle,
               config: const UnifiedPromptConfig(
-                enableAutocomplete: false,
                 enableSyntaxHighlight: false,
                 enableAutoFormat: false,
               ),

@@ -160,7 +160,6 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
     required String? hintText,
     required ValueChanged<String> onChanged,
   }) {
-    final enableAutocomplete = ref.watch(autocompleteSettingsProvider);
     final enableAutoFormat = ref.watch(autoFormatPromptSettingsProvider);
     final enableHighlight = ref.watch(highlightEmphasisSettingsProvider);
     final enableSdSyntaxAutoConvert = ref.watch(
@@ -180,7 +179,6 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
       config: UnifiedPromptConfig.compactMode.copyWith(
         embedded: true,
         hintText: hintText,
-        enableAutocomplete: enableAutocomplete,
         enableAutoFormat: enableAutoFormat,
         enableSyntaxHighlight: enableHighlight,
         enableSdSyntaxAutoConvert: enableSdSyntaxAutoConvert,

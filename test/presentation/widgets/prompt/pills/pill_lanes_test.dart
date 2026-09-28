@@ -315,7 +315,6 @@ Widget _editorAppBody({
         child: PromptPillEditor(
           pillScope: scope,
           config: const UnifiedPromptConfig(
-            enableAutocomplete: false,
             enableSyntaxHighlight: false,
             enableAutoFormat: false,
           ),

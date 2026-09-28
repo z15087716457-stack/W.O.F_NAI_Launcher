@@ -24,7 +24,6 @@ import '../../../providers/prompt_token_counter_provider.dart';
 import '../../../providers/quality_preset_provider.dart';
 import '../../../providers/tips_provider.dart';
 import '../../../providers/uc_preset_provider.dart';
-import '../../../widgets/autocomplete/autocomplete.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/prompt/pills/prompt_pill_editor.dart';
 import '../../../widgets/prompt/unified/unified_prompt_config.dart';
@@ -44,7 +43,7 @@ import 'generation_sidebar_style.dart';
 bool usesRichPromptTypeTooltip(TargetPlatform platform) =>
     platform != TargetPlatform.windows;
 
-/// Prompt 输入组件 (带自动补全)
+/// Prompt 输入组件
 class PromptInputWidget extends ConsumerStatefulWidget {
   final bool compact;
   final VoidCallback? onToggleMaximize;
@@ -773,7 +772,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   }
 
   Widget _buildTextPromptInput(ThemeData theme, bool numericEmphasisEnabled) {
-    final enableAutocomplete = ref.watch(autocompleteSettingsProvider);
     final enableAutoFormat = ref.watch(autoFormatPromptSettingsProvider);
     final enableHighlight = ref.watch(highlightEmphasisSettingsProvider);
     final enableSdSyntaxAutoConvert = ref.watch(
@@ -789,16 +787,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         embedded: true,
         enableSyntaxHighlight: enableHighlight,
         numericEmphasisEnabled: numericEmphasisEnabled,
-        enableAutocomplete: enableAutocomplete,
         enableAutoFormat: enableAutoFormat,
         enableSdSyntaxAutoConvert: enableSdSyntaxAutoConvert,
         enableComfyuiImport: true,
-        autocompleteConfig: const AutocompleteConfig(
-          showTranslation: true,
-          showCategory: true,
-          showCount: true,
-          autoInsertComma: true,
-        ),
         hintText: tipHint(
           context.l10n,
           widget.tipModule,
@@ -834,7 +825,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   }
 
   Widget _buildTextNegativeInput(ThemeData theme, bool numericEmphasisEnabled) {
-    final enableAutocomplete = ref.watch(autocompleteSettingsProvider);
     final enableAutoFormat = ref.watch(autoFormatPromptSettingsProvider);
     final enableHighlight = ref.watch(highlightEmphasisSettingsProvider);
     final enableSdSyntaxAutoConvert = ref.watch(
@@ -853,15 +843,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         embedded: true,
         enableSyntaxHighlight: enableHighlight,
         numericEmphasisEnabled: numericEmphasisEnabled,
-        enableAutocomplete: enableAutocomplete,
         enableAutoFormat: enableAutoFormat,
         enableSdSyntaxAutoConvert: enableSdSyntaxAutoConvert,
         enableComfyuiImport: false,
-        autocompleteConfig: const AutocompleteConfig(
-          showTranslation: true,
-          showCategory: false,
-          autoInsertComma: true,
-        ),
         hintText: context.l10n.prompt_unwantedContent,
         showClearButton: true,
       ),
@@ -879,7 +863,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
 
   Widget _buildCompactLayout(ThemeData theme, bool numericEmphasisEnabled) {
     final enableHighlight = ref.watch(highlightEmphasisSettingsProvider);
-    final enableAutocomplete = ref.watch(autocompleteSettingsProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -895,12 +878,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             config: UnifiedPromptConfig(
               enableSyntaxHighlight: enableHighlight,
               numericEmphasisEnabled: numericEmphasisEnabled,
-              enableAutocomplete: enableAutocomplete,
               enableComfyuiImport: true,
-              autocompleteConfig: const AutocompleteConfig(
-                showTranslation: true,
-                autoInsertComma: true,
-              ),
               hintText: tipHint(
                 context.l10n,
                 widget.tipModule,

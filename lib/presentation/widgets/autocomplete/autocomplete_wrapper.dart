@@ -17,8 +17,6 @@ import '../../router/app_router.dart';
 import 'autocomplete_config.dart';
 import 'autocomplete_utils.dart';
 import 'completion_overlay.dart';
-import 'autocomplete_strategy.dart';
-import 'legacy_autocomplete_wrapper.dart';
 
 /// Unified local-first autocomplete shared by every tag and prompt field.
 class AutocompleteWrapper extends ConsumerStatefulWidget {
@@ -26,8 +24,6 @@ class AutocompleteWrapper extends ConsumerStatefulWidget {
     super.key,
     required this.child,
     required this.controller,
-    this.strategy,
-    this.asyncStrategy,
     this.focusNode,
     this.enabled = true,
     this.onChanged,
@@ -41,10 +37,6 @@ class AutocompleteWrapper extends ConsumerStatefulWidget {
 
   final Widget child;
   final TextEditingController controller;
-  @Deprecated('Use the unified autocomplete pipeline without a strategy.')
-  final AutocompleteStrategy? strategy;
-  @Deprecated('Use the unified autocomplete pipeline without a strategy.')
-  final Future<AutocompleteStrategy>? asyncStrategy;
   final FocusNode? focusNode;
   final bool enabled;
   final ValueChanged<String>? onChanged;
@@ -56,8 +48,6 @@ class AutocompleteWrapper extends ConsumerStatefulWidget {
   final int? maxLines;
   final bool expands;
   final AutocompleteConfig? config;
-
-  bool get usesLegacyStrategy => strategy != null || asyncStrategy != null;
 
   factory AutocompleteWrapper.localTag({
     Key? key,
@@ -158,14 +148,14 @@ class _AutocompleteWrapperState extends ConsumerState<AutocompleteWrapper> {
   }
 
   void _initializeUnified() {
-    if (!mounted || widget.usesLegacyStrategy || _orchestrator != null) return;
+    if (!mounted || _orchestrator != null) return;
     _orchestrator = ref.read(autocompleteServicesProvider).createOrchestrator()
       ..addListener(_onCompletionStateChanged);
     _updateCursorMetrics();
   }
 
   void _scheduleCursorMetricsUpdate() {
-    if (_cursorMetricsScheduled || widget.usesLegacyStrategy) return;
+    if (_cursorMetricsScheduled) return;
     _cursorMetricsScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _cursorMetricsScheduled = false;
@@ -174,7 +164,7 @@ class _AutocompleteWrapperState extends ConsumerState<AutocompleteWrapper> {
   }
 
   void _updateCursorMetrics() {
-    if (!mounted || widget.usesLegacyStrategy) return;
+    if (!mounted) return;
     final anchorContext = _anchorKey.currentContext;
     if (anchorContext == null) return;
     final isMultiline = AutocompleteUtils.isMultilineTextInput(
@@ -230,11 +220,6 @@ class _AutocompleteWrapperState extends ConsumerState<AutocompleteWrapper> {
       _ownedFocusNode = widget.focusNode == null ? FocusNode() : null;
       _focusNode.addListener(_onFocusChanged);
     }
-    if (oldWidget.usesLegacyStrategy != widget.usesLegacyStrategy) {
-      _removeOverlay();
-      _disposeOrchestrator();
-      WidgetsBinding.instance.addPostFrameCallback((_) => _initializeUnified());
-    }
   }
 
   void _onTextChanged() {
@@ -246,7 +231,7 @@ class _AutocompleteWrapperState extends ConsumerState<AutocompleteWrapper> {
     final compositionCommitted = _wasComposing && !isComposing;
     _wasComposing = isComposing;
 
-    if (_applyingSuggestion || widget.usesLegacyStrategy) return;
+    if (_applyingSuggestion) return;
     _scheduleCursorMetricsUpdate();
     if (textChanged) widget.onChanged?.call(text);
 
@@ -274,7 +259,7 @@ class _AutocompleteWrapperState extends ConsumerState<AutocompleteWrapper> {
       if (_pinnedRelatedTag == null) _dismissOverlay();
       return;
     }
-    if (!widget.usesLegacyStrategy) _scheduleCursorMetricsUpdate();
+    _scheduleCursorMetricsUpdate();
   }
 
   void _startQuery({
@@ -282,7 +267,7 @@ class _AutocompleteWrapperState extends ConsumerState<AutocompleteWrapper> {
     String? relatedTagOverride,
     bool resetPinnedRelatedTag = false,
   }) {
-    if (!mounted || !widget.enabled || widget.usesLegacyStrategy) return;
+    if (!mounted || !widget.enabled) return;
     final settings = ref.read(autocompleteSettingsProvider);
     if (!ref.read(generation_settings.autocompleteSettingsProvider)) {
       _dismissOverlay();
@@ -471,8 +456,7 @@ class _AutocompleteWrapperState extends ConsumerState<AutocompleteWrapper> {
   }
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
-    if (widget.usesLegacyStrategy ||
-        (event is! KeyDownEvent && event is! KeyRepeatEvent)) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
     final keyboard = HardwareKeyboard.instance;
@@ -655,22 +639,6 @@ class _AutocompleteWrapperState extends ConsumerState<AutocompleteWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.usesLegacyStrategy) {
-      return LegacyAutocompleteWrapper(
-        controller: widget.controller,
-        strategy: widget.strategy,
-        asyncStrategy: widget.asyncStrategy,
-        focusNode: widget.focusNode,
-        enabled: widget.enabled,
-        onChanged: widget.onChanged,
-        onSuggestionSelected: widget.onSuggestionSelected,
-        textStyle: widget.textStyle,
-        contentPadding: widget.contentPadding,
-        maxLines: widget.maxLines,
-        expands: widget.expands,
-        child: widget.child,
-      );
-    }
     ref.listen<AutocompleteSettings>(autocompleteSettingsProvider, (_, next) {
       if (!next.relatedTagsEnabled) _pinnedRelatedTag = null;
       if (_focusNode.hasFocus &&

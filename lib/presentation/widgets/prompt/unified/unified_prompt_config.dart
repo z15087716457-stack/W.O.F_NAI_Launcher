@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import '../../../widgets/autocomplete/autocomplete_config.dart';
 import '../nai_syntax_controller.dart';
 
 /// 统一提示词输入配置
@@ -9,11 +8,6 @@ import '../nai_syntax_controller.dart';
 /// 支持通过预设配置快速适配不同使用场景。
 class UnifiedPromptConfig {
   // ==================== 功能开关 ====================
-
-  /// 是否启用自动补全
-  ///
-  /// 启用后，用户输入时会显示标签建议列表。
-  final bool enableAutocomplete;
 
   /// 是否启用语法高亮
   ///
@@ -76,11 +70,6 @@ class UnifiedPromptConfig {
   /// 清空前是否需要确认对话框
   final bool clearNeedsConfirm;
 
-  // ==================== 自动补全配置 ====================
-
-  /// 自动补全配置
-  final AutocompleteConfig autocompleteConfig;
-
   // ==================== 药丸块（P0 原型） ====================
 
   /// 药丸 span 构建器；非 null 时文本中的块标记字符渲染为内联药丸。
@@ -92,7 +81,6 @@ class UnifiedPromptConfig {
   final int pillVisualsSignature;
 
   const UnifiedPromptConfig({
-    this.enableAutocomplete = true,
     this.enableSyntaxHighlight = true,
     this.numericEmphasisEnabled = true,
     this.enableAutoFormat = true,
@@ -107,7 +95,6 @@ class UnifiedPromptConfig {
     this.showClearButton = false,
     this.onClearPressed,
     this.clearNeedsConfirm = false,
-    this.autocompleteConfig = const AutocompleteConfig(),
     this.pillBuilder,
     this.pillVisualsSignature = 0,
   });
@@ -115,35 +102,24 @@ class UnifiedPromptConfig {
   /// 角色编辑器预设配置
   ///
   /// 适用于 [CharacterDetailPanel] 中的提示词输入。
-  /// 启用语法高亮和自动补全。
+  /// 启用语法高亮和标签扩展。
   static const characterEditor = UnifiedPromptConfig(
-    enableAutocomplete: true,
     enableSyntaxHighlight: true,
     enableAutoFormat: true,
     enableSdSyntaxAutoConvert: false,
     compact: false,
     readOnly: false,
-    autocompleteConfig: AutocompleteConfig(
-      showTranslation: true,
-      showCategory: true,
-      autoInsertComma: true,
-    ),
   );
 
   /// 紧凑模式预设配置
   ///
   /// 适用于空间有限的场景。
   static const compactMode = UnifiedPromptConfig(
-    enableAutocomplete: true,
     enableSyntaxHighlight: true,
     enableAutoFormat: true,
     enableSdSyntaxAutoConvert: false,
     compact: true,
     readOnly: false,
-    autocompleteConfig: AutocompleteConfig(
-      showTranslation: true,
-      autoInsertComma: true,
-    ),
   );
 
   /// 主提示词输入框预设配置
@@ -151,23 +127,16 @@ class UnifiedPromptConfig {
   /// 适用于生成页面的主提示词输入框。
   /// 包含词库别名功能的提示说明。
   static const mainPromptInput = UnifiedPromptConfig(
-    enableAutocomplete: true,
     enableSyntaxHighlight: true,
     enableAutoFormat: true,
     enableSdSyntaxAutoConvert: false,
     enableComfyuiImport: true,
     compact: false,
     readOnly: false,
-    autocompleteConfig: AutocompleteConfig(
-      showTranslation: true,
-      showCategory: true,
-      autoInsertComma: true,
-    ),
   );
 
   /// 创建配置副本并覆盖指定属性
   UnifiedPromptConfig copyWith({
-    bool? enableAutocomplete,
     bool? enableSyntaxHighlight,
     bool? numericEmphasisEnabled,
     bool? enableAutoFormat,
@@ -182,12 +151,10 @@ class UnifiedPromptConfig {
     bool? showClearButton,
     VoidCallback? onClearPressed,
     bool? clearNeedsConfirm,
-    AutocompleteConfig? autocompleteConfig,
     PillSpanBuilder? pillBuilder,
     int? pillVisualsSignature,
   }) {
     return UnifiedPromptConfig(
-      enableAutocomplete: enableAutocomplete ?? this.enableAutocomplete,
       enableSyntaxHighlight:
           enableSyntaxHighlight ?? this.enableSyntaxHighlight,
       numericEmphasisEnabled:
@@ -205,7 +172,6 @@ class UnifiedPromptConfig {
       showClearButton: showClearButton ?? this.showClearButton,
       onClearPressed: onClearPressed ?? this.onClearPressed,
       clearNeedsConfirm: clearNeedsConfirm ?? this.clearNeedsConfirm,
-      autocompleteConfig: autocompleteConfig ?? this.autocompleteConfig,
       pillBuilder: pillBuilder ?? this.pillBuilder,
       pillVisualsSignature: pillVisualsSignature ?? this.pillVisualsSignature,
     );
@@ -215,7 +181,6 @@ class UnifiedPromptConfig {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is UnifiedPromptConfig &&
-        other.enableAutocomplete == enableAutocomplete &&
         other.enableSyntaxHighlight == enableSyntaxHighlight &&
         other.numericEmphasisEnabled == numericEmphasisEnabled &&
         other.enableAutoFormat == enableAutoFormat &&
@@ -234,7 +199,6 @@ class UnifiedPromptConfig {
   @override
   int get hashCode {
     return Object.hash(
-      enableAutocomplete,
       enableSyntaxHighlight,
       numericEmphasisEnabled,
       enableAutoFormat,
