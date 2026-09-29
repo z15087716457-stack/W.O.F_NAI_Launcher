@@ -11,6 +11,7 @@ import '../../../core/tag_expansion/tag_expansion_providers.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
 import '../../../core/wiki/tag_wiki_repository.dart';
+import '../../../core/wiki/auto_tag_translation_controller.dart';
 import '../../../core/wiki/wiki_bookmark_store.dart';
 import '../../../core/wiki/wiki_directory.dart';
 import '../../../data/models/prompt_block/prompt_block.dart';
@@ -33,6 +34,12 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   static const _pageSize = 80;
   final _search = TextEditingController();
   final _listScroll = ScrollController();
+  late final AutoTagTranslationController _autoTranslation;
+  bool _visibilityScheduled = false;
+  Set<String> _listVisible = {};
+  late final String _listSurface = 'tag-wiki-list-${identityHashCode(this)}';
+  late final String _articleSurface =
+      'tag-wiki-article-${identityHashCode(this)}';
   Timer? _searchTimer;
   WikiDirectory? _directory;
   WikiScope? _scope;
@@ -57,6 +64,8 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   @override
   void initState() {
     super.initState();
+    _autoTranslation = ref.read(autoTagTranslationProvider);
+    _listScroll.addListener(_scheduleVisibleUpdate);
     _initialize();
   }
 
@@ -101,6 +110,8 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
 
   @override
   void dispose() {
+    _autoTranslation.clearSurface(_listSurface);
+    _autoTranslation.clearSurface(_articleSurface);
     _searchTimer?.cancel();
     _search.dispose();
     _listScroll.dispose();
@@ -116,17 +127,45 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       _article = null;
       _translation = null;
     });
+    ref.read(autoTagTranslationProvider).clearSurface(_articleSurface);
     if (_listScroll.hasClients) _listScroll.jumpTo(0);
     _load();
   }
 
   void _selectTag(String tag) {
     if (_selected == tag) return;
+    ref.read(autoTagTranslationProvider).clearSurface(_articleSurface);
+    final article = ref.read(tagWikiRepositoryProvider).find(tag);
     setState(() {
       _selected = tag;
-      _article = ref.read(tagWikiRepositoryProvider).find(tag);
+      _article = article;
       _translation = ref.read(tagTranslationLookupProvider).translate(tag);
     });
+    unawaited(
+      article.then((entry) {
+        if (!mounted ||
+            _selected != tag ||
+            entry?.body.trim().isNotEmpty != true) {
+          return;
+        }
+        ref
+            .read(autoTagTranslationProvider)
+            .requestWiki(
+              surface: _articleSurface,
+              tag: tag,
+              tagContext: _items
+                  .where((item) => item.canonicalTag == tag)
+                  .map(
+                    (item) => AutoTagTranslationContext(
+                      category: item.category.name,
+                      aliases: item.aliases,
+                      postCount: item.postCount,
+                    ),
+                  )
+                  .firstOrNull,
+            );
+      }, onError: (Object _) {}),
+    );
   }
 
   Set<String>? _scopeTags() {
@@ -185,6 +224,10 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
 
   Future<void> _load({bool append = false}) async {
     if (_directory == null || _scope == null || (append && !_more)) return;
+    if (!append) {
+      _autoTranslation.clearSurface(_listSurface);
+      _listVisible.clear();
+    }
     final epoch = ++_epoch;
     final offset = append ? _items.length : 0;
     final query = _search.text.trim();
@@ -273,6 +316,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   }
 
   void _changeFilter(VoidCallback change) {
+    ref.read(autoTagTranslationProvider).clearSurface(_articleSurface);
     setState(() {
       change();
       _selected = null;
@@ -284,6 +328,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   }
 
   void _queueSearch({bool immediate = false}) {
+    ref.read(autoTagTranslationProvider).clearSurface(_articleSurface);
     setState(() {
       _selected = null;
       _article = null;
@@ -382,6 +427,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(autoTagTranslationProvider);
     final directory = _directory;
     if (directory == null || _scope == null) {
       return Center(
@@ -459,6 +505,28 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                       ),
                     ),
                   ],
+                  IconButton(
+                    key: const ValueKey('wiki-auto-translate'),
+                    tooltip:
+                        ref.read(autoTagTranslationProvider).lastError ??
+                        (Localizations.localeOf(context).languageCode == 'zh'
+                            ? '自动翻译可见标签与打开的百科'
+                            : 'Auto-translate visible tags and open articles'),
+                    onPressed: () {
+                      final auto = ref.read(autoTagTranslationProvider);
+                      unawaited(auto.setEnabled(!auto.enabled));
+                    },
+                    icon: Icon(
+                      Icons.translate,
+                      size: 18,
+                      color:
+                          ref.read(autoTagTranslationProvider).lastError != null
+                          ? scheme.error
+                          : ref.read(autoTagTranslationProvider).enabled
+                          ? scheme.primary
+                          : null,
+                    ),
+                  ),
                   const SizedBox(width: 18),
                   Expanded(
                     child: SizedBox(
@@ -664,7 +732,46 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     ),
   );
 
+  void _scheduleVisibleUpdate() {
+    if (_visibilityScheduled) return;
+    _visibilityScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _visibilityScheduled = false;
+      if (!mounted || !_listScroll.hasClients) return;
+      final position = _listScroll.position;
+      final first = (position.pixels / 57).floor().clamp(0, _items.length);
+      final last = ((position.pixels + position.viewportDimension) / 57)
+          .ceil()
+          .clamp(0, _items.length);
+      final visible = <String>{};
+      for (var index = first; index < last; index++) {
+        final candidate = _items[index];
+        visible.add(candidate.canonicalTag);
+        _autoTranslation.observe(
+          surface: _listSurface,
+          tag: candidate.canonicalTag,
+          visible: true,
+          existingNameZh: candidate.translation,
+          tagContext: AutoTagTranslationContext(
+            category: candidate.category.name,
+            aliases: candidate.aliases,
+            postCount: candidate.postCount,
+          ),
+        );
+      }
+      for (final tag in _listVisible.difference(visible)) {
+        _autoTranslation.observe(
+          surface: _listSurface,
+          tag: tag,
+          visible: false,
+        );
+      }
+      _listVisible = visible;
+    });
+  }
+
   Widget _results(WikiBookmarkStore bookmarks) {
+    _scheduleVisibleUpdate();
     final scheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
@@ -705,6 +812,9 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                       final candidate = _items[index];
                       final tag = candidate.canonicalTag;
                       final selected = tag == _selected;
+                      final translatedName =
+                          ref.read(autoTagTranslationProvider).nameFor(tag) ??
+                          candidate.translation;
                       return Material(
                         color: selected
                             ? scheme.primaryContainer.withValues(alpha: .48)
@@ -749,13 +859,16 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                                         ),
                                         const SizedBox(height: 3),
                                         Text(
-                                          _categoryName(candidate.category),
+                                          translatedName ??
+                                              _categoryName(candidate.category),
                                           style: TextStyle(
                                             fontSize: 10.5,
-                                            color: _categoryColor(
-                                              context,
-                                              candidate.category,
-                                            ),
+                                            color: translatedName == null
+                                                ? _categoryColor(
+                                                    context,
+                                                    candidate.category,
+                                                  )
+                                                : scheme.onSurfaceVariant,
                                           ),
                                         ),
                                       ],
@@ -872,7 +985,11 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                             child: FutureBuilder<String?>(
                               future: _translation,
                               builder: (context, snapshot) => Text(
-                                snapshot.data ?? '',
+                                snapshot.data ??
+                                    ref
+                                        .read(autoTagTranslationProvider)
+                                        .nameFor(tag) ??
+                                    '',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -960,7 +1077,10 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                           children: [
                             SelectableText(
                               article?.body.trim().isNotEmpty == true
-                                  ? article!.body
+                                  ? (ref
+                                            .read(autoTagTranslationProvider)
+                                            .wikiFor(tag) ??
+                                        article!.body)
                                   : context.l10n.wiki_articleMissing,
                               style: TextStyle(
                                 fontSize: _fontSize,

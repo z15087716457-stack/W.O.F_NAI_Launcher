@@ -17,6 +17,7 @@ import '../../../core/tag_expansion/tag_expansion_providers.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
 import '../../../core/wiki/tag_wiki_repository.dart';
+import '../../../core/wiki/auto_tag_translation_controller.dart';
 import '../autocomplete/tag_category_visuals.dart';
 import '../../router/app_router.dart';
 
@@ -67,6 +68,19 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   final _searchController = TextEditingController();
   final _searchFocus = FocusNode();
   final _searchScroll = ScrollController();
+  final _relatedScroll = ScrollController();
+  late final AutoTagTranslationController _autoTranslation;
+  bool _visibilityScheduled = false;
+  Set<String> _searchVisible = {};
+  Set<String> _relatedVisible = {};
+  double _relatedWidth = 240;
+  late final String _searchSurface =
+      'tag-expansion-search-${identityHashCode(this)}';
+  late final String _relatedSurface =
+      'tag-expansion-related-${identityHashCode(this)}';
+  late final String _wikiSurface =
+      'tag-expansion-wiki-${identityHashCode(this)}';
+  int _surfaceEpoch = 0;
   final _limitButtonKey = GlobalKey(debugLabel: 'tag-expansion-limit-button');
   Timer? _debounce;
   OverlayEntry? _entry;
@@ -109,8 +123,12 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   @override
   void initState() {
     super.initState();
+    _autoTranslation = ref.read(autoTagTranslationProvider);
     WidgetsBinding.instance.addObserver(this);
     widget.controller.addListener(_onEditorChanged);
+    _autoTranslation.addListener(_markNeedsBuild);
+    _searchScroll.addListener(_scheduleVisibleUpdate);
+    _relatedScroll.addListener(_scheduleVisibleUpdate);
     _searchFocus.onKeyEvent = _onSearchKey;
     if (Hive.isBoxOpen(StorageKeys.settingsBox)) {
       final stored = Hive.box(
@@ -266,6 +284,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     String? contextTag,
   }) {
     _close();
+    _surfaceEpoch++;
     final anchor = _anchorKey.currentContext;
     final anchorBox = anchor?.findRenderObject();
     if (anchorBox is! RenderBox || !anchorBox.hasSize) return;
@@ -333,6 +352,10 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   }
 
   void _onSearchChanged(String value) {
+    ref.read(autoTagTranslationProvider).clearSurface(_searchSurface);
+    ref.read(autoTagTranslationProvider).clearSurface(_relatedSurface);
+    ref.read(autoTagTranslationProvider).clearSurface(_wikiSurface);
+    _relatedVisible.clear();
     _relatedSequence++;
     _relatedTag = null;
     _relatedResults = const [];
@@ -441,6 +464,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   }
 
   void _queueSearch({bool immediate = false}) {
+    _autoTranslation.clearSurface(_searchSurface);
+    _searchVisible.clear();
     _debounce?.cancel();
     final sequence = ++_searchSequence;
     if (_searchController.text.trim().isEmpty) {
@@ -523,6 +548,9 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   }
 
   void _loadRelated(String tag) {
+    _autoTranslation.clearSurface(_relatedSurface);
+    _relatedVisible.clear();
+    if (_relatedScroll.hasClients) _relatedScroll.jumpTo(0);
     _relatedTag = tag;
     _relatedResults = const [];
     _relatedLoading = true;
@@ -551,6 +579,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   }
 
   void _openWiki(CompletionCandidate candidate) {
+    ref.read(autoTagTranslationProvider).clearSurface(_wikiSurface);
     _wikiCandidate = candidate;
     _wikiEntry = null;
     _wikiLoading = true;
@@ -564,6 +593,20 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
             .find(candidate.canonicalTag);
         if (!mounted || !_active || sequence != _wikiSequence) return;
         _wikiEntry = entry;
+        if (entry != null && entry.body.trim().isNotEmpty) {
+          ref
+              .read(autoTagTranslationProvider)
+              .requestWiki(
+                surface: _wikiSurface,
+                tag: candidate.canonicalTag,
+                tagContext: AutoTagTranslationContext(
+                  category: candidate.category.name,
+                  aliases: candidate.aliases,
+                  postCount: candidate.postCount,
+                  relatedTo: _relatedTag ?? _contextTag,
+                ),
+              );
+        }
       } catch (_) {
         if (!mounted || !_active || sequence != _wikiSequence) return;
         _wikiFailed = true;
@@ -682,6 +725,13 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   void _markNeedsBuild() => _entry?.markNeedsBuild();
 
   void _close({bool restoreFocus = false, bool notify = true}) {
+    _surfaceEpoch++;
+    _visibilityScheduled = false;
+    _autoTranslation.clearSurface(_searchSurface);
+    _autoTranslation.clearSurface(_relatedSurface);
+    _autoTranslation.clearSurface(_wikiSurface);
+    _searchVisible.clear();
+    _relatedVisible.clear();
     _debounce?.cancel();
     _closeLimitMenu();
     _searchSequence++;
@@ -767,6 +817,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
         width + (hasRelated && !relatedOnly ? relatedWidth + _panelGap : 0);
     _gridColumns = width >= 380 ? 2 : 1;
     _rowHeights = _measureSearchRows(overlayContext, width);
+    _relatedWidth = relatedWidth;
+    _scheduleVisibleUpdate();
     final hasWiki = _wikiCandidate != null;
     final availableHeight = math.max(0.0, screen.height - 16);
     final desiredHeight =
@@ -778,7 +830,13 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     );
     if (width <= 0 || height <= 0) return const SizedBox.shrink();
     final theme = Theme.of(overlayContext);
+    final translatedWiki = _wikiCandidate == null
+        ? null
+        : ref
+              .read(autoTagTranslationProvider)
+              .wikiFor(_wikiCandidate!.canonicalTag);
     final wikiBody =
+        translatedWiki ??
         _wikiEntry?.body ??
         (_wikiFailed
             ? overlayContext.l10n.common_error
@@ -900,6 +958,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                             _relatedSequence++;
                             _relatedTag = null;
                             _relatedResults = const [];
+                            _autoTranslation.clearSurface(_relatedSurface);
+                            _relatedVisible.clear();
                             _markNeedsBuild();
                           },
                           icon: const Icon(Icons.close, size: 16),
@@ -930,11 +990,45 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     child: Row(
       children: [
         const SizedBox(width: 12),
-        Text(
-          context.l10n.prompt_cooccurrenceRecommendation,
-          style: Theme.of(context).textTheme.labelMedium,
+        Expanded(
+          child: Text(
+            context.l10n.prompt_cooccurrenceRecommendation,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
         ),
-        const Spacer(),
+        Builder(
+          builder: (context) {
+            final translation = ref.read(autoTagTranslationProvider);
+            final language = Localizations.localeOf(context).languageCode;
+            final label = language == 'zh'
+                ? '自动翻译可见标签'
+                : language == 'ja'
+                ? '表示中のタグを自動翻訳'
+                : 'Auto-translate visible tags';
+            return IconButton(
+              key: const ValueKey('tag-expansion-auto-translate'),
+              tooltip: translation.lastError == null
+                  ? label
+                  : '$label · ${translation.lastError}',
+              onPressed: () =>
+                  unawaited(translation.setEnabled(!translation.enabled)),
+              icon: Icon(
+                Icons.translate,
+                size: 16,
+                color: translation.lastError != null
+                    ? Theme.of(context).colorScheme.error
+                    : translation.enabled
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
+              ),
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+              padding: EdgeInsets.zero,
+            );
+          },
+        ),
         Text(
           context.l10n.tagExpansion_localOnly,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -1102,6 +1196,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     return LayoutBuilder(
       builder: (context, constraints) => ListView.builder(
         key: const ValueKey('tag-expansion-related-results'),
+        controller: _relatedScroll,
         padding: const EdgeInsets.symmetric(
           horizontal: _listInset,
           vertical: 2,
@@ -1129,6 +1224,103 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     );
   }
 
+  void _scheduleVisibleUpdate() {
+    if (_visibilityScheduled || !_active) return;
+    _visibilityScheduled = true;
+    final epoch = _surfaceEpoch;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _visibilityScheduled = false;
+      if (!mounted || !_active || epoch != _surfaceEpoch) return;
+      _refreshVisible();
+    });
+  }
+
+  void _refreshVisible() {
+    if (_searchScroll.hasClients && _rowHeights.isNotEmpty) {
+      final position = _searchScroll.position;
+      final top = position.pixels;
+      final bottom = top + position.viewportDimension;
+      var cursor = 2.0;
+      final visible = <String>{};
+      for (var row = 0; row < _rowHeights.length; row++) {
+        final next = cursor + _rowHeights[row];
+        if (next > top && cursor < bottom) {
+          for (var col = 0; col < _gridColumns; col++) {
+            final index = row * _gridColumns + col;
+            if (index < _results.length) {
+              final candidate = _results[index];
+              visible.add(candidate.canonicalTag);
+              _autoTranslation.observe(
+                surface: _searchSurface,
+                tag: candidate.canonicalTag,
+                visible: true,
+                existingNameZh: candidate.translation,
+                tagContext: AutoTagTranslationContext(
+                  category: candidate.category.name,
+                  aliases: candidate.aliases,
+                  postCount: candidate.postCount,
+                  relatedTo: _contextTag,
+                ),
+              );
+            }
+          }
+        }
+        cursor = next;
+        if (cursor >= bottom) break;
+      }
+      for (final tag in _searchVisible.difference(visible)) {
+        _autoTranslation.observe(
+          surface: _searchSurface,
+          tag: tag,
+          visible: false,
+        );
+      }
+      _searchVisible = visible;
+    }
+    if (_relatedScroll.hasClients && _relatedResults.isNotEmpty) {
+      final position = _relatedScroll.position;
+      final top = position.pixels;
+      final bottom = top + position.viewportDimension;
+      var cursor = 2.0;
+      final visible = <String>{};
+      for (final candidate in _relatedResults) {
+        final height =
+            _candidateHeight(
+              context,
+              candidate,
+              _relatedWidth - _listInset * 2,
+            ) +
+            2;
+        final next = cursor + height;
+        if (next > top && cursor < bottom) {
+          visible.add(candidate.canonicalTag);
+          _autoTranslation.observe(
+            surface: _relatedSurface,
+            tag: candidate.canonicalTag,
+            visible: true,
+            existingNameZh: candidate.translation,
+            tagContext: AutoTagTranslationContext(
+              category: candidate.category.name,
+              aliases: candidate.aliases,
+              postCount: candidate.postCount,
+              relatedTo: _relatedTag,
+            ),
+          );
+        }
+        cursor = next;
+        if (cursor >= bottom) break;
+      }
+      for (final tag in _relatedVisible.difference(visible)) {
+        _autoTranslation.observe(
+          surface: _relatedSurface,
+          tag: tag,
+          visible: false,
+        );
+      }
+      _relatedVisible = visible;
+    }
+  }
+
   Widget _candidateRow(
     BuildContext context,
     CompletionCandidate candidate, {
@@ -1137,7 +1329,9 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     bool related = false,
   }) {
     final theme = Theme.of(context);
-    final translation = candidate.translation;
+    final translation =
+        candidate.translation ??
+        ref.read(autoTagTranslationProvider).nameFor(candidate.canonicalTag);
     final alias = candidate.matchedAlias;
     final detail = translation?.isNotEmpty == true
         ? translation!
@@ -1308,7 +1502,10 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   Widget _buildWikiPanel(BuildContext context) {
     final theme = Theme.of(context);
     final candidate = _wikiCandidate!;
-    final translatedName = candidate.translation;
+    final autoTranslation = ref.read(autoTagTranslationProvider);
+    final translatedName =
+        candidate.translation ??
+        autoTranslation.nameFor(candidate.canonicalTag);
     return Material(
       key: const ValueKey('tag-expansion-wiki-panel'),
       elevation: 14,
@@ -1352,6 +1549,9 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                     _wikiSequence++;
                     _wikiCandidate = null;
                     _wikiEntry = null;
+                    ref
+                        .read(autoTagTranslationProvider)
+                        .clearSurface(_wikiSurface);
                     _markNeedsBuild();
                   },
                   icon: const Icon(Icons.close, size: 16),
@@ -1367,7 +1567,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                     key: const ValueKey('tag-expansion-wiki-scroll'),
                     padding: const EdgeInsets.fromLTRB(12, 9, 12, 12),
                     child: SelectableText(
-                      _wikiEntry?.body ??
+                      autoTranslation.wikiFor(candidate.canonicalTag) ??
+                          _wikiEntry?.body ??
                           (_wikiFailed
                               ? context.l10n.common_error
                               : context.l10n.tagExpansion_wikiUnavailable),
@@ -1418,8 +1619,10 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     widget.controller.removeListener(_onEditorChanged);
+    _autoTranslation.removeListener(_markNeedsBuild);
     _close(notify: false);
     _searchScroll.dispose();
+    _relatedScroll.dispose();
     _searchFocus.dispose();
     _searchController.dispose();
     super.dispose();
