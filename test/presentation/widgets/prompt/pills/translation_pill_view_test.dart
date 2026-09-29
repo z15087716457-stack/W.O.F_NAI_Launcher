@@ -5,6 +5,138 @@ import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/translation_pill_view.dart';
 
 void main() {
+  testWidgets('both translation faces reuse prompt syntax colors', (
+    tester,
+  ) async {
+    const source = '1.4::silver hair::, {blue eyes}, |red|';
+    const translated = '1.4::银发::, {蓝眼睛}, |红|';
+    var pill = const TranslationPill(source: source, zh: translated);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) => TranslationPillView(
+              pill: pill,
+              onToggle: () => setState(
+                () => pill = pill.copyWith(showOriginal: !pill.showOriginal),
+              ),
+              onEdit: _noopPosition,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    var spans = _visibleSyntaxSpans(tester);
+    expect(_visibleText(tester), translated);
+    expect(
+      spans.any(
+        (span) =>
+            span.text!.contains('银发') && span.style?.backgroundColor != null,
+      ),
+      isTrue,
+    );
+    expect(
+      spans.any(
+        (span) => span.text == '::' && span.style?.backgroundColor != null,
+      ),
+      isTrue,
+    );
+    expect(
+      spans.any(
+        (span) =>
+            span.text!.contains('蓝眼睛') && span.style?.backgroundColor != null,
+      ),
+      isTrue,
+    );
+    expect(
+      spans.any(
+        (span) => span.text == '|' && span.style?.fontWeight == FontWeight.w800,
+      ),
+      isTrue,
+    );
+
+    final center = tester.getCenter(find.byType(TranslationPillView));
+    final middle = await tester.startGesture(
+      center,
+      kind: PointerDeviceKind.mouse,
+      buttons: kMiddleMouseButton,
+    );
+    await middle.up();
+    await tester.pump();
+
+    spans = _visibleSyntaxSpans(tester);
+    expect(_visibleText(tester), source);
+    expect(
+      spans.any(
+        (span) =>
+            span.text!.contains('silver hair') &&
+            span.style?.backgroundColor != null,
+      ),
+      isTrue,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('translation syntax follows emphasis and model switches', (
+    tester,
+  ) async {
+    var highlight = true;
+    var numeric = true;
+    late StateSetter update;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) {
+              update = setState;
+              return TranslationPillView(
+                pill: const TranslationPill(
+                  source: '2::source::',
+                  zh: '2::中文:: |甲|',
+                ),
+                highlightEnabled: highlight,
+                numericEmphasisEnabled: numeric,
+                onToggle: _noop,
+                onEdit: _noopPosition,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    expect(
+      _visibleSyntaxSpans(
+        tester,
+      ).any((span) => span.style?.backgroundColor != null),
+      isTrue,
+    );
+
+    update(() => numeric = false);
+    await tester.pump();
+    expect(
+      _visibleSyntaxSpans(
+        tester,
+      ).every((span) => span.style?.backgroundColor == null),
+      isTrue,
+    );
+
+    update(() {
+      numeric = true;
+      highlight = false;
+    });
+    await tester.pump();
+    final spans = _visibleSyntaxSpans(tester);
+    expect(spans.every((span) => span.style?.backgroundColor == null), isTrue);
+    expect(
+      spans.any(
+        (span) => span.text == '|' && span.style?.fontWeight == FontWeight.w800,
+      ),
+      isTrue,
+    );
+    expect(_visibleText(tester), '2::中文:: |甲|');
+  });
+
   testWidgets('left click opens editor at pointer; middle click toggles text', (
     tester,
   ) async {
@@ -315,6 +447,18 @@ void main() {
     );
   });
 }
+
+String _visibleText(WidgetTester tester) =>
+    tester.widget<Text>(_visibleTextFinder()).textSpan!.toPlainText();
+
+List<TextSpan> _visibleSyntaxSpans(WidgetTester tester) =>
+    (tester.widget<Text>(_visibleTextFinder()).textSpan! as TextSpan).children!
+        .cast<TextSpan>();
+
+Finder _visibleTextFinder() => find.descendant(
+  of: find.byType(TranslationPillView),
+  matching: find.byType(Text),
+);
 
 void _noop() {}
 void _noopPosition(Offset _) {}

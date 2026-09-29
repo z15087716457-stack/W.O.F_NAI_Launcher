@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../data/models/prompt_block/pill_document.dart';
+import '../nai_syntax_controller.dart';
 
 class TranslationPillView extends StatefulWidget {
   const TranslationPillView({
@@ -11,17 +12,51 @@ class TranslationPillView extends StatefulWidget {
     required this.pill,
     required this.onToggle,
     required this.onEdit,
+    this.highlightEnabled = true,
+    this.numericEmphasisEnabled = true,
   });
 
   final TranslationPill pill;
   final VoidCallback onToggle;
   final ValueChanged<Offset> onEdit;
+  final bool highlightEnabled;
+  final bool numericEmphasisEnabled;
 
   @override
   State<TranslationPillView> createState() => _TranslationPillViewState();
 }
 
 class _TranslationPillViewState extends State<TranslationPillView> {
+  late final NaiSyntaxController _syntaxController;
+
+  String _displayText(TranslationPill pill) =>
+      pill.showOriginal || pill.needsReview ? pill.source : pill.zh;
+
+  @override
+  void initState() {
+    super.initState();
+    _syntaxController = NaiSyntaxController(
+      text: _displayText(widget.pill),
+      highlightEnabled: widget.highlightEnabled,
+      numericEmphasisEnabled: widget.numericEmphasisEnabled,
+    );
+  }
+
+  @override
+  void didUpdateWidget(TranslationPillView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syntaxController.highlightEnabled = widget.highlightEnabled;
+    _syntaxController.numericEmphasisEnabled = widget.numericEmphasisEnabled;
+    final text = _displayText(widget.pill);
+    if (_syntaxController.text != text) _syntaxController.text = text;
+  }
+
+  @override
+  void dispose() {
+    _syntaxController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -29,7 +64,12 @@ class _TranslationPillViewState extends State<TranslationPillView> {
     final original = pill.showOriginal || pill.needsReview;
     final accent = scheme.primary.withValues(alpha: original ? .62 : .70);
     final fill = scheme.primary.withValues(alpha: original ? .035 : .065);
-    final text = original ? pill.source : pill.zh;
+    final textStyle =
+        Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: scheme.onSurface,
+          height: 1.25,
+        ) ??
+        TextStyle(color: scheme.onSurface, height: 1.25);
     return Semantics(
       button: true,
       label: original ? '翻译块，显示原文' : '翻译块，显示译文',
@@ -60,13 +100,13 @@ class _TranslationPillViewState extends State<TranslationPillView> {
                   const SizedBox(width: 5),
                 ],
                 Flexible(
-                  child: Text(
-                    text,
-                    softWrap: true,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurface,
-                      height: 1.25,
+                  child: Text.rich(
+                    _syntaxController.buildTextSpan(
+                      context: context,
+                      style: textStyle,
+                      withComposing: false,
                     ),
+                    softWrap: true,
                   ),
                 ),
                 if (pill.needsReview) ...[

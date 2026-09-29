@@ -327,6 +327,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     if (instance.translation case final translation?) {
       final pill = TranslationPillView(
         pill: translation,
+        highlightEnabled: widget.config.enableSyntaxHighlight,
+        numericEmphasisEnabled: widget.config.numericEmphasisEnabled,
         onToggle: () => ref
             .read(_workspace.notifier)
             .updateTranslation(
@@ -356,6 +358,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
                 constraints: const BoxConstraints(maxWidth: 300),
                 child: TranslationPillView(
                   pill: translation,
+                  highlightEnabled: widget.config.enableSyntaxHighlight,
+                  numericEmphasisEnabled: widget.config.numericEmphasisEnabled,
                   onToggle: () {},
                   onEdit: (_) {},
                 ),
