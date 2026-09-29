@@ -50,6 +50,7 @@ void main() {
         '1girl, blue eyes, BLOCK夕焼けの街',
       );
       expect(PillDocument.fromJson(converted.toJson()), converted);
+      expect(PillDocumentEditor.unwrapAllTranslations(converted), original);
     },
   );
 

@@ -670,6 +670,24 @@ void main() {
     expect(find.byType(TranslationPillView), findsNothing);
   });
 
+  testWidgets('adjacent pill borders have a small visual gap', (tester) async {
+    final container = await _pump(
+      tester,
+      libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+    );
+    final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+    notifier.insertTranslationAt(offset: 0, source: 'cat', zh: '猫');
+    notifier.insertTranslationAt(offset: 1, source: 'dog', zh: '狗');
+    await tester.pump();
+
+    final pills = find.byType(TranslationPillView);
+    expect(pills, findsNWidgets(2));
+    final first = tester.getRect(pills.at(0));
+    final second = tester.getRect(pills.at(1));
+    expect(second.left - first.right, greaterThanOrEqualTo(1.5));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('typing reconciles text and keeps instances alive', (
     tester,
   ) async {

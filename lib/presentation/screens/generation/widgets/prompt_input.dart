@@ -538,6 +538,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
 
   Widget _buildTranslationToolButton(ThemeData theme) {
     final busy = ref.watch(promptTranslationBusyProvider);
+    final negativeSide = _isNegativeMode;
     final route = ref
         .watch(promptAssistantConfigProvider)
         .promptTranslationRoute;
@@ -594,22 +595,48 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
                       .read(promptTranslationCoordinatorProvider)
                       .undoLast();
                   if (restored) AppToast.success(context, '已撤销上次翻译');
+                } else if (action == 'clear') {
+                  ref
+                      .read(promptTranslationCoordinatorProvider)
+                      .clearTranslations(negativeSide);
                 }
               },
-              itemBuilder: (_) => [
-                PopupMenuItem<String>(
-                  enabled: false,
-                  child: Text(
-                    route == null
-                        ? '尚未选择翻译模型'
-                        : '${route.provider.name} / ${route.model.displayName}',
+              itemBuilder: (_) {
+                final coordinator = ref.read(
+                  promptTranslationCoordinatorProvider,
+                );
+                return [
+                  PopupMenuItem<String>(
+                    enabled: false,
+                    child: Text(
+                      route == null
+                          ? '尚未选择翻译模型'
+                          : '${route.provider.name} / ${route.model.displayName}',
+                    ),
                   ),
-                ),
-                const PopupMenuItem(value: 'configure', child: Text('配置翻译模型')),
-                const PopupMenuDivider(),
-                const PopupMenuItem(value: 'translate', child: Text('翻译新增内容')),
-                const PopupMenuItem(value: 'undo', child: Text('撤销上次翻译')),
-              ],
+                  const PopupMenuItem(
+                    value: 'configure',
+                    child: Text('配置翻译模型'),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<String>(
+                    value: 'translate',
+                    enabled: !busy,
+                    child: const Row(
+                      children: [
+                        Icon(Icons.add, size: 18),
+                        SizedBox(width: 8),
+                        Text('翻译新增内容'),
+                      ],
+                    ),
+                  ),
+                  _TranslationMenuFooter(
+                    canUndo: !busy && coordinator.canUndoLast,
+                    canClear:
+                        !busy && coordinator.hasAnyTranslations(negativeSide),
+                  ),
+                ];
+              },
             ),
           ),
         ],
@@ -1978,6 +2005,66 @@ class _CopyIconButtonState extends State<_CopyIconButton> {
                 : widget.color.withValues(alpha: 0.6),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// 翻译菜单底部的两个独立操作入口。
+class _TranslationMenuFooter extends PopupMenuEntry<String> {
+  const _TranslationMenuFooter({required this.canUndo, required this.canClear});
+
+  final bool canUndo;
+  final bool canClear;
+
+  @override
+  double get height => 52;
+
+  @override
+  bool represents(String? value) => false;
+
+  @override
+  State<_TranslationMenuFooter> createState() => _TranslationMenuFooterState();
+}
+
+class _TranslationMenuFooterState extends State<_TranslationMenuFooter> {
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: 208,
+      height: widget.height,
+      child: Column(
+        children: [
+          const Divider(height: 1),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                children: [
+                  IconButton(
+                    key: const Key('prompt-translation-undo'),
+                    tooltip: '撤销上次翻译',
+                    onPressed: widget.canUndo
+                        ? () => Navigator.pop(context, 'undo')
+                        : null,
+                    icon: const Icon(Icons.undo, size: 19),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    key: const Key('prompt-translation-clear'),
+                    tooltip: '清空当前侧翻译块并还原原文',
+                    onPressed: widget.canClear
+                        ? () => Navigator.pop(context, 'clear')
+                        : null,
+                    color: scheme.error,
+                    icon: const Icon(Icons.delete_outline, size: 19),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

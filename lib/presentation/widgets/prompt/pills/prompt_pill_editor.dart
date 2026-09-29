@@ -311,12 +311,14 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       // 未知标记（外来粘贴的私用区字符）：点击清除
       return WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: GestureDetector(
-          onTap: () => ref.read(_workspace.notifier).removeMarker(marker),
-          child: PromptPill(
-            title: context.l10n.promptBlockPill_unknown,
-            color: Theme.of(context).colorScheme.outline,
-            variant: PromptPillVariant.unknown,
+        child: _withPillGap(
+          GestureDetector(
+            onTap: () => ref.read(_workspace.notifier).removeMarker(marker),
+            child: PromptPill(
+              title: context.l10n.promptBlockPill_unknown,
+              color: Theme.of(context).colorScheme.outline,
+              variant: PromptPillVariant.unknown,
+            ),
           ),
         ),
       );
@@ -335,31 +337,33 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       );
       return WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: Draggable<PromptBlockDragData>(
-          data: PromptBlockDragData(
-            blockId: '',
-            translation: translation,
-            instanceMarker: PillInstanceDragRef(
-              marker: marker,
-              occurrence: occurrence,
-              scope: widget.pillScope,
-            ),
-          ),
-          rootOverlay: true,
-          dragAnchorStrategy: pointerDragAnchorStrategy,
-          feedback: Material(
-            color: Colors.transparent,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 300),
-              child: TranslationPillView(
-                pill: translation,
-                onToggle: () {},
-                onEdit: (_) {},
+        child: _withPillGap(
+          Draggable<PromptBlockDragData>(
+            data: PromptBlockDragData(
+              blockId: '',
+              translation: translation,
+              instanceMarker: PillInstanceDragRef(
+                marker: marker,
+                occurrence: occurrence,
+                scope: widget.pillScope,
               ),
             ),
+            rootOverlay: true,
+            dragAnchorStrategy: pointerDragAnchorStrategy,
+            feedback: Material(
+              color: Colors.transparent,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 300),
+                child: TranslationPillView(
+                  pill: translation,
+                  onToggle: () {},
+                  onEdit: (_) {},
+                ),
+              ),
+            ),
+            childWhenDragging: Opacity(opacity: .35, child: pill),
+            child: pill,
           ),
-          childWhenDragging: Opacity(opacity: .35, child: pill),
-          child: pill,
         ),
       );
     }
@@ -368,24 +372,28 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     if (block == null) {
       if (library == null) {
         // 库未就绪：中性占位，库到达后签名变化自动重渲染
-        return const WidgetSpan(
+        return WidgetSpan(
           alignment: PlaceholderAlignment.middle,
-          child: PromptPill(
-            title: '…',
-            color: Colors.grey,
-            variant: PromptPillVariant.unknown,
+          child: _withPillGap(
+            const PromptPill(
+              title: '…',
+              color: Colors.grey,
+              variant: PromptPillVariant.unknown,
+            ),
           ),
         );
       }
       // 块已被从库中删除：红色警示，点击清除
       return WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: GestureDetector(
-          onTap: () => ref.read(_workspace.notifier).removeMarker(marker),
-          child: PromptPill(
-            title: context.l10n.promptBlockPill_missing,
-            color: Theme.of(context).colorScheme.error,
-            variant: PromptPillVariant.missing,
+        child: _withPillGap(
+          GestureDetector(
+            onTap: () => ref.read(_workspace.notifier).removeMarker(marker),
+            child: PromptPill(
+              title: context.l10n.promptBlockPill_missing,
+              color: Theme.of(context).colorScheme.error,
+              variant: PromptPillVariant.missing,
+            ),
           ),
         ),
       );
@@ -416,40 +424,47 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       // 立即拖拽与点击开关不冲突——快按快放归 tap，移动归 drag。
       // feedback 以指针为中心：默认 childDragAnchorStrategy 把 feedback
       // 左上角对准指针，用户以药丸视觉中心瞄准 → 落点系统性偏上一行。
-      child: Draggable<PromptBlockDragData>(
-        data: PromptBlockDragData(
-          blockId: block.id,
-          instanceMarker: PillInstanceDragRef(
-            marker: marker,
-            occurrence: occurrence,
-            scope: widget.pillScope,
+      child: _withPillGap(
+        Draggable<PromptBlockDragData>(
+          data: PromptBlockDragData(
+            blockId: block.id,
+            instanceMarker: PillInstanceDragRef(
+              marker: marker,
+              occurrence: occurrence,
+              scope: widget.pillScope,
+            ),
           ),
-        ),
-        // feedback 必须有界宽（PromptPill 内 Row+Flexible 在 overlay 的
-        // 无界约束下会直接布局异常），并投到根 overlay 避免被裁剪。
-        rootOverlay: true,
-        dragAnchorStrategy: pointerDragAnchorStrategy,
-        feedback: Material(
-          color: Colors.transparent,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 220),
+          // feedback 必须有界宽（PromptPill 内 Row+Flexible 在 overlay 的
+          // 无界约束下会直接布局异常），并投到根 overlay 避免被裁剪。
+          rootOverlay: true,
+          dragAnchorStrategy: pointerDragAnchorStrategy,
+          feedback: Material(
+            color: Colors.transparent,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 220),
+              child: pill,
+            ),
+          ),
+          childWhenDragging: Opacity(opacity: 0.35, child: pill),
+          // P2.5：点击从「直接切启停」改为开 L1 实例卡（启停/删除/重 roll/
+          // 高级选项都在卡里）；即按即拖与 tap 天然分流，不受影响。
+          child: GestureDetector(
+            onTapUp: (details) {
+              final keyboard = HardwareKeyboard.instance;
+              if (keyboard.isControlPressed || keyboard.isMetaPressed) return;
+              _showInstanceCard(marker, details.globalPosition);
+            },
             child: pill,
           ),
-        ),
-        childWhenDragging: Opacity(opacity: 0.35, child: pill),
-        // P2.5：点击从「直接切启停」改为开 L1 实例卡（启停/删除/重 roll/
-        // 高级选项都在卡里）；即按即拖与 tap 天然分流，不受影响。
-        child: GestureDetector(
-          onTapUp: (details) {
-            final keyboard = HardwareKeyboard.instance;
-            if (keyboard.isControlPressed || keyboard.isMetaPressed) return;
-            _showInstanceCard(marker, details.globalPosition);
-          },
-          child: pill,
         ),
       ),
     );
   }
+
+  Widget _withPillGap(Widget child) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
+    child: child,
+  );
 
   Future<void> _editTranslation(
     String marker,

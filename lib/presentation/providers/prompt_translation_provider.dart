@@ -31,12 +31,12 @@ class PromptTranslationCoordinator {
   final Ref _ref;
   Map<String, ({PillDocument before, PillDocument after})> _lastUndo = {};
 
-  List<String> _scopes(bool negative) {
+  List<String> _scopes(bool negative, {bool includeDisabled = false}) {
     final characters = _ref.read(characterPromptNotifierProvider).characters;
     return [
       negative ? PillScopes.negative : PillScopes.main,
       for (final character in characters)
-        if (character.enabled)
+        if (includeDisabled || character.enabled)
           negative
               ? PillScopes.charNeg(character.id)
               : PillScopes.charPos(character.id),
@@ -75,6 +75,31 @@ class PromptTranslationCoordinator {
         .values
         .any((instance) => instance.translation != null);
   });
+
+  bool hasAnyTranslations(bool negative) =>
+      _scopes(negative, includeDisabled: true).any((scope) {
+        return _ref
+            .read(pillWorkspaceProvider(scope))
+            .document
+            .instances
+            .values
+            .any((instance) => instance.translation != null);
+      });
+
+  int clearTranslations(bool negative) {
+    if (_ref.read(promptTranslationBusyProvider)) return 0;
+    var cleared = 0;
+    final scopes = _scopes(negative, includeDisabled: true);
+    for (final scope in scopes) {
+      cleared += _ref
+          .read(pillWorkspaceProvider(scope).notifier)
+          .unwrapAllTranslations();
+    }
+    if (cleared > 0) {
+      _lastUndo.removeWhere((scope, _) => scopes.contains(scope));
+    }
+    return cleared;
+  }
 
   void toggleAll(bool negative) {
     final scopes = _scopes(negative);
@@ -216,6 +241,11 @@ class PromptTranslationCoordinator {
       return const [];
     }
   }
+
+  bool get canUndoLast => _lastUndo.entries.any((entry) {
+    final current = _ref.read(pillWorkspaceProvider(entry.key)).document;
+    return _sameExceptDisplay(entry.value.after, current);
+  });
 
   bool undoLast() {
     var restored = false;

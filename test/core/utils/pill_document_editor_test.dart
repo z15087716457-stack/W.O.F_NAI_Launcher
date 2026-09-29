@@ -5,6 +5,7 @@ import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 void main() {
   const markerA = '\uE000';
   const markerB = '\uE001';
+  const markerC = '\uE002';
 
   group('allocateMarker / insertBlock', () {
     test(
@@ -147,6 +148,30 @@ void main() {
   });
 
   group('removeMarker / reconcile', () {
+    test(
+      'unwrapAllTranslations restores exact source and keeps library pills',
+      () {
+        const doc = PillDocument(
+          text: 'prefix $markerA$markerB$markerA $markerC suffix',
+          instances: {
+            markerA: PillInstance(
+              blockId: '',
+              translation: TranslationPill(source: 'blue, ', zh: '蓝色'),
+            ),
+            markerB: PillInstance(blockId: 'library'),
+            markerC: PillInstance(
+              blockId: '',
+              translation: TranslationPill(source: 'green\n', zh: '绿色'),
+            ),
+          },
+        );
+        final restored = PillDocumentEditor.unwrapAllTranslations(doc);
+        expect(restored.text, 'prefix blue, ${markerB}blue,  green\n suffix');
+        expect(restored.instances.keys, [markerB]);
+        expect(PillDocumentEditor.unwrapAllTranslations(restored), restored);
+      },
+    );
+
     test('unwrapTranslation restores source at each occurrence only', () {
       const doc = PillDocument(
         text: 'start $markerA, $markerB, $markerA end',

@@ -95,6 +95,30 @@ abstract final class PillDocumentEditor {
     );
   }
 
+  /// 将文档内全部翻译块展开为其当前原文，保留普通文字及库块标记。
+  static PillDocument unwrapAllTranslations(PillDocument document) {
+    final translations = <String, TranslationPill>{
+      for (final entry in document.instances.entries)
+        if (entry.value.translation case final translation?)
+          entry.key: translation,
+    };
+    if (translations.isEmpty) return document;
+
+    final text = StringBuffer();
+    for (var i = 0; i < document.text.length; i++) {
+      final codeUnit = document.text.codeUnitAt(i);
+      final translation = translations[String.fromCharCode(codeUnit)];
+      if (translation == null) {
+        text.writeCharCode(codeUnit);
+      } else {
+        text.write(stripMarkers(translation.source));
+      }
+    }
+    final instances = Map<String, PillInstance>.of(document.instances)
+      ..removeWhere((marker, _) => translations.containsKey(marker));
+    return document.copyWith(text: text.toString(), instances: instances);
+  }
+
   /// 设置实例启用态；实例不存在时原样返回。
   static PillDocument setEnabled(
     PillDocument document,

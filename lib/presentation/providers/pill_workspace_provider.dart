@@ -459,6 +459,17 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     if (after != before) _apply(after);
   }
 
+  int unwrapAllTranslations() {
+    final before = state.document;
+    final count = before.instances.values
+        .where((instance) => instance.translation != null)
+        .length;
+    if (count == 0) return 0;
+    _apply(PillDocumentEditor.unwrapAllTranslations(before));
+    _tombstones.removeWhere((_, instance) => instance.translation != null);
+    return count;
+  }
+
   /// Replace one complete, unchanged document snapshot with translation pills.
   /// A caller may retain the previous document for a one-step undo.
   bool replaceIfCurrent(PillDocument expected, PillDocument replacement) {

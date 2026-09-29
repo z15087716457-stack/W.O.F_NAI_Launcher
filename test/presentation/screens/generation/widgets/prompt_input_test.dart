@@ -87,10 +87,64 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('配置翻译模型'), findsOneWidget);
     expect(find.text('翻译新增内容'), findsOneWidget);
-    expect(find.text('撤销上次翻译'), findsOneWidget);
+    expect(find.byKey(const Key('prompt-translation-undo')), findsOneWidget);
+    expect(find.byKey(const Key('prompt-translation-clear')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.ancestor(
+          of: find.text('翻译新增内容'),
+          matching: find.byType(PopupMenuItem<String>),
+        ),
+        matching: find.byIcon(Icons.add),
+      ),
+      findsOneWidget,
+    );
     expect(
       tester.getSize(find.byType(PopupMenuItem<String>).first).width,
       greaterThan(150),
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(PromptInputWidget)),
+    );
+    final positive = container.read(
+      pillWorkspaceProvider(PillScopes.main).notifier,
+    );
+    final negative = container.read(
+      pillWorkspaceProvider(PillScopes.negative).notifier,
+    );
+    positive.replaceWithPlainText('before, after');
+    positive.insertTranslationAt(offset: 8, source: 'blue eyes', zh: '蓝眼睛');
+    negative.insertTranslationAt(offset: 0, source: 'bad hands', zh: '坏手');
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('prompt-translation-actions')));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('prompt-translation-clear')))
+          .onPressed,
+      isNotNull,
+    );
+    await tester.tap(find.byKey(const Key('prompt-translation-clear')));
+    await tester.pumpAndSettle();
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
+      'before, blue eyesafter',
+    );
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document.instances,
+      isEmpty,
+    );
+    expect(
+      container
+          .read(pillWorkspaceProvider(PillScopes.negative))
+          .document
+          .instances
+          .length,
+      1,
     );
     expect(tester.takeException(), isNull);
   });
