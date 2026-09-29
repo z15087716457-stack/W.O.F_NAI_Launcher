@@ -26,6 +26,7 @@ import '../../providers/prompt_block_library_provider.dart';
 import '../../providers/generation/generation_params_notifier.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
+import '../../widgets/tag_expansion/tag_expansion_wrapper.dart';
 import '../../widgets/prompt/blocks/prompt_block_drag_data.dart';
 import 'widgets/curation_import_preview_dialog.dart';
 import 'widgets/prompt_block_card.dart';
@@ -1010,43 +1011,53 @@ class _PromptBlockLibraryScreenState
 
   Widget _buildSearchField(BuildContext context) {
     final theme = Theme.of(context);
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 320),
-      child: SizedBox(
-        height: 36,
-        child: TextField(
-          key: const Key('prompt-block-library-search'),
-          controller: _searchController,
-          focusNode: _searchFocusNode,
-          style: theme.textTheme.bodyMedium,
-          onChanged: (_) => setState(() {}),
-          decoration: InputDecoration(
-            hintText: context.l10n.promptBlockLibrary_searchHint,
-            hintStyle: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-              fontSize: 13,
+    return TagExpansionWrapper(
+      controller: _searchController,
+      focusNode: _searchFocusNode,
+      onTagSelected: (tag) {
+        _searchController.text = tag;
+        setState(() {});
+      },
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 320),
+        child: SizedBox(
+          height: 36,
+          child: TextField(
+            key: const Key('prompt-block-library-search'),
+            controller: _searchController,
+            focusNode: _searchFocusNode,
+            style: theme.textTheme.bodyMedium,
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(
+              hintText: context.l10n.promptBlockLibrary_searchHint,
+              hintStyle: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.5,
+                ),
+                fontSize: 13,
+              ),
+              prefixIcon: const Icon(Icons.search, size: 18),
+              suffixIcon: _searchController.text.isEmpty
+                  ? null
+                  : IconButton(
+                      tooltip: context.l10n.common_clear,
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {});
+                      },
+                      icon: const Icon(Icons.close, size: 16),
+                    ),
+              filled: true,
+              fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.4,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 8),
+              isDense: true,
             ),
-            prefixIcon: const Icon(Icons.search, size: 18),
-            suffixIcon: _searchController.text.isEmpty
-                ? null
-                : IconButton(
-                    tooltip: context.l10n.common_clear,
-                    onPressed: () {
-                      _searchController.clear();
-                      setState(() {});
-                    },
-                    icon: const Icon(Icons.close, size: 16),
-                  ),
-            filled: true,
-            fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
-              alpha: 0.4,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 8),
-            isDense: true,
           ),
         ),
       ),
@@ -2325,6 +2336,7 @@ class _PromptBlockLibraryScreenState
         ? state.blocksInCollectionTree(_selectedCollectionId!)
         : state.blocksInFolderTree(_selectedFolderId);
     final query = _searchController.text.trim().toLowerCase();
+    final queryWithSpaces = query.replaceAll('_', ' ');
     final selectedTag = _selectedTag?.toLowerCase();
     if (selectedTag != null) {
       blocks.removeWhere(
@@ -2334,11 +2346,13 @@ class _PromptBlockLibraryScreenState
     }
     if (query.isNotEmpty) {
       blocks.removeWhere(
-        (block) =>
-            !block.title.toLowerCase().contains(query) &&
-            !block.content.toLowerCase().contains(query) &&
-            !block.negativeContent.toLowerCase().contains(query) &&
-            !block.tags.any((tag) => tag.name.toLowerCase().contains(query)),
+        (block) => ![block.title, block.content, block.negativeContent]
+            .followedBy(block.tags.map((tag) => tag.name))
+            .any((text) {
+              final normalized = text.toLowerCase();
+              return normalized.contains(query) ||
+                  normalized.contains(queryWithSpaces);
+            }),
       );
     }
     if (_allSelected) {

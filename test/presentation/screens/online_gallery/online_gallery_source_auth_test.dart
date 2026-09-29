@@ -20,6 +20,79 @@ import 'package:nai_launcher/presentation/widgets/danbooru_post_card.dart';
 import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wrapper.dart';
 
 void main() {
+  testWidgets('AI TAG query and prompt fields open the local tag picker', (
+    tester,
+  ) async {
+    await _setViewSize(tester, 1600);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          onlineGalleryNotifierProvider.overrideWith(
+            _AiTagTagSearchGalleryNotifier.new,
+          ),
+          danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
+          gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
+          danbooruSuggestionNotifierProvider.overrideWith(
+            _EmptyDanbooruSuggestionNotifier.new,
+          ),
+          localTagExpansionServiceProvider.overrideWithValue(
+            LocalTagExpansionService(
+              catalog: const _BlueHairSource(),
+              chineseDictionary: const _EmptyTagSource(),
+              relatedTags: const _EmptyTagSource(),
+              translations: const _NoTagTranslations(),
+              substringSearch: (input, {limit = 20}) async => const [],
+              popularSearch: ({limit = 12}) async => const [],
+            ),
+          ),
+        ],
+        child: const _TestApp(),
+      ),
+    );
+    await tester.pump();
+
+    final query = _fieldFinder(
+      'Search works, artists, titles, tags, or models',
+    );
+    final prompt = _fieldFinder(
+      'AI Prompt search (raw syntax such as ::artist: is supported)',
+    );
+    expect(find.byType(TagExpansionWrapper), findsNWidgets(2));
+    for (final field in [query, prompt]) {
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(field);
+      await tester.pump();
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(find.byKey(const Key('tag-expansion-search')), findsOneWidget);
+      await tester.enterText(
+        find.byKey(const Key('tag-expansion-search')),
+        'blue',
+      );
+      await tester.pump(const Duration(milliseconds: 170));
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+    }
+
+    final state = ProviderScope.containerOf(
+      tester.element(find.byType(OnlineGalleryScreen)),
+    ).read(onlineGalleryNotifierProvider);
+    expect(state.searchQuery, '1girl blue_hair');
+    expect(state.promptQuery, 'solo, blue_hair');
+
+    await tester.enterText(query, 'portrait');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(
+      ProviderScope.containerOf(
+        tester.element(find.byType(OnlineGalleryScreen)),
+      ).read(onlineGalleryNotifierProvider).searchQuery,
+      'portrait',
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('tag picker appends a tag to the online gallery query', (
     tester,
   ) async {
@@ -651,6 +724,17 @@ class _TagSearchGalleryNotifier extends OnlineGalleryNotifier {
   @override
   Future<void> search(String query) async {
     state = state.copyWith(searchQuery: query);
+  }
+}
+
+class _AiTagTagSearchGalleryNotifier extends _AiTagSearchGalleryNotifier {
+  @override
+  OnlineGalleryState build() =>
+      super.build().copyWith(searchQuery: '1girl', promptQuery: 'solo');
+
+  @override
+  Future<void> searchWithPrompt(String query, {required String prompt}) async {
+    state = state.copyWith(searchQuery: query, promptQuery: prompt);
   }
 }
 

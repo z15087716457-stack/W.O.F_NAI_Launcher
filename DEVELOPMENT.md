@@ -26,6 +26,7 @@ Windows 桌面热重载优先使用 `scripts/dev_hot_reload_window.ps1`，它会
 遵循 `analysis_options.yaml` 和 Dart 默认格式化规则，使用两个空格缩进。变量和方法使用 `lowerCamelCase`，类型使用 `UpperCamelCase`。Riverpod provider 命名应以 `Provider` 或 `NotifierProvider` 结尾。新增功能优先复用现有 service、provider、widget 和 utility，保持 `core`、`data`、`presentation` 的职责边界清晰。
 
 新增可写标签的输入框复用 `TagExpansionWrapper`：Ctrl+单击或 Ctrl+拖选显式打开本地标签搜索，按输入框自身语义通过 `onTagSelected` 提交标签。普通打字不触发旧补全浮层；空格分隔的查询框设置 `splitOnSpaces: true`。
+在线图库的 AI TAG 全文／提示词搜索以及块管理顶部搜索也使用此组件；选入标签时在线查询按各框原有提交路径执行，块管理按标签名或空格形式筛选块。
 
 ## 测试规范
 

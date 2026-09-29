@@ -662,6 +662,15 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
                   )
                 : null,
             onSubmitted: submit,
+            splitOnSpaces: true,
+            onTagSelected: (tag) {
+              final current = queryController.text.trim();
+              _setControllerText(
+                queryController,
+                current.isEmpty ? tag : '$current $tag',
+              );
+              submit();
+            },
           );
           final prompt = _buildPlainSearchField(
             theme,
@@ -670,6 +679,14 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
             hintText: context.l10n.onlineGallery_aiTagPromptQuery,
             icon: Icons.auto_awesome,
             onSubmitted: submit,
+            onTagSelected: (tag) {
+              final current = promptController.text.trim();
+              _setControllerText(
+                promptController,
+                current.isEmpty ? tag : '$current, $tag',
+              );
+              submit();
+            },
           );
           if (vertical) {
             return Column(children: [query, const SizedBox(height: 8), prompt]);
@@ -694,8 +711,10 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
     required IconData icon,
     Widget? suffixIcon,
     required VoidCallback onSubmitted,
+    ValueChanged<String>? onTagSelected,
+    bool splitOnSpaces = false,
   }) {
-    return Container(
+    final field = Container(
       height: 36,
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
@@ -722,6 +741,14 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
         ),
         onSubmitted: (_) => onSubmitted(),
       ),
+    );
+    if (onTagSelected == null) return field;
+    return TagExpansionWrapper(
+      controller: controller,
+      focusNode: focusNode,
+      splitOnSpaces: splitOnSpaces,
+      onTagSelected: onTagSelected,
+      child: field,
     );
   }
 

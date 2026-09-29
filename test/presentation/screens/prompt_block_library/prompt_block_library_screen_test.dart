@@ -7,6 +7,9 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/autocomplete/completion_models.dart';
+import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart';
+import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block_collection.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block_folder.dart';
@@ -19,6 +22,7 @@ import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/p
 import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_detail.dart';
 import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_icons.dart';
+import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wrapper.dart';
 
 class _FakePromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
   _FakePromptBlockLibraryNotifier({required this.initialState});
@@ -110,6 +114,39 @@ class _FakePromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
   }
 }
 
+class _BlockTagSource implements CompletionSource {
+  const _BlockTagSource();
+
+  @override
+  Future<List<CompletionCandidate>> search(CompletionQuery query) async => [
+    const CompletionCandidate(
+      canonicalTag: 'blue_hair',
+      category: TagCategory.general,
+      postCount: 100,
+      matchKind: CompletionMatchKind.englishPrefix,
+      sources: {CompletionSourceKind.base},
+    ),
+  ];
+}
+
+class _EmptyBlockTagSource implements CompletionSource {
+  const _EmptyBlockTagSource();
+
+  @override
+  Future<List<CompletionCandidate>> search(CompletionQuery query) async =>
+      const [];
+}
+
+class _NoBlockTagTranslations implements TranslationResolver {
+  const _NoBlockTagTranslations();
+
+  @override
+  Future<Map<String, String>> resolve(
+    List<String> canonicalTags, {
+    required String locale,
+  }) async => const {};
+}
+
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -130,6 +167,7 @@ void main() {
     List<PromptBlockFolder> folders = const [],
     List<PromptBlockCollection> collections = const [],
     _FakePromptBlockLibraryNotifier? notifier,
+    LocalTagExpansionService? tagService,
   }) {
     final effectiveNotifier =
         notifier ??
@@ -145,6 +183,8 @@ void main() {
         promptBlockLibraryNotifierProvider.overrideWith(
           () => effectiveNotifier,
         ),
+        if (tagService != null)
+          localTagExpansionServiceProvider.overrideWithValue(tagService),
       ],
       child: const MaterialApp(
         locale: Locale('zh'),
@@ -262,6 +302,55 @@ void main() {
     );
     expect(
       find.byKey(const ValueKey('prompt-block-card-body-other')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('Ctrl click picks a tag and finds blocks with spaced tags', (
+    tester,
+  ) async {
+    await pumpScreen(
+      tester,
+      buildScreen(
+        blocks: [
+          makeBlock('blue', '蓝发块', 'blue hair, portrait'),
+          makeBlock('red', '红发块', 'red hair, portrait'),
+        ],
+        tagService: LocalTagExpansionService(
+          catalog: const _BlockTagSource(),
+          chineseDictionary: const _EmptyBlockTagSource(),
+          relatedTags: const _EmptyBlockTagSource(),
+          translations: const _NoBlockTagTranslations(),
+          substringSearch: (input, {limit = 20}) async => const [],
+          popularSearch: ({limit = 12}) async => const [],
+        ),
+      ),
+    );
+    expect(find.byType(TagExpansionWrapper), findsOneWidget);
+    final field = find.byKey(const Key('prompt-block-library-search'));
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tap(field);
+    await tester.pump();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    expect(find.byKey(const Key('tag-expansion-search')), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('tag-expansion-search')),
+      'blue',
+    );
+    await tester.pump(const Duration(milliseconds: 170));
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    expect(tester.widget<TextField>(field).controller!.text, 'blue_hair');
+    expect(
+      find.byKey(const ValueKey('prompt-block-card-body-blue')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('prompt-block-card-body-red')),
       findsNothing,
     );
   });
