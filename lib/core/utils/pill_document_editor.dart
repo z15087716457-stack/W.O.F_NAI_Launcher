@@ -76,6 +76,25 @@ abstract final class PillDocumentEditor {
     return document.copyWith(text: text, instances: instances);
   }
 
+  /// 将一个翻译块的所有出现位置还原为普通原文，并移除其翻译实例。
+  static PillDocument unwrapTranslation(
+    PillDocument document,
+    String marker, {
+    required String source,
+  }) {
+    if (document.instances[marker]?.translation == null ||
+        !document.text.contains(marker)) {
+      return document;
+    }
+    final plain = stripMarkers(source);
+    final instances = Map<String, PillInstance>.of(document.instances)
+      ..remove(marker);
+    return document.copyWith(
+      text: document.text.replaceAll(marker, plain),
+      instances: instances,
+    );
+  }
+
   /// 设置实例启用态；实例不存在时原样返回。
   static PillDocument setEnabled(
     PillDocument document,

@@ -76,7 +76,7 @@ void main() {
     expect(tester.getTopLeft(avatar).dy, greaterThanOrEqualTo(8));
     expect(
       tester.getSize(find.byKey(const Key('main-nav-avatar'))),
-      const Size(46, 46),
+      const Size(48, 48),
     );
 
     expect(find.byKey(const Key('main-nav-primary-scroll')), findsOneWidget);

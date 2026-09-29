@@ -65,6 +65,24 @@ void main() {
     expect(find.text('前往设置'), findsOneWidget);
     await tester.tap(find.text('稍后'));
     await tester.pumpAndSettle();
+    final control = tester.widget<Container>(
+      find.byKey(const Key('prompt-translation-control')),
+    );
+    expect((control.decoration! as BoxDecoration).border, isNotNull);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('prompt-translation-control')),
+        matching: find.byKey(const Key('prompt-translation-toggle')),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('prompt-translation-control')),
+        matching: find.byKey(const Key('prompt-translation-actions')),
+      ),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(const Key('prompt-translation-actions')));
     await tester.pumpAndSettle();
     expect(find.text('配置翻译模型'), findsOneWidget);

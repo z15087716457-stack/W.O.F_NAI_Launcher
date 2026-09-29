@@ -473,6 +473,10 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     }
     if (result == 'delete') {
       ref.read(_workspace.notifier).removeMarker(marker);
+    } else if (result is TranslationPillPlainText) {
+      ref
+          .read(_workspace.notifier)
+          .unwrapTranslation(marker, source: result.source);
     } else if (result == 'retranslate') {
       try {
         final updated = await ref

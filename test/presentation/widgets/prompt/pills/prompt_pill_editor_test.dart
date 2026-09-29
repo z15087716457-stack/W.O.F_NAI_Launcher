@@ -614,7 +614,7 @@ void main() {
         find.byKey(const Key('translation-pill-editor-popover')),
         findsOne,
       );
-    expect(find.text('蓝眼睛'), findsWidgets);
+      expect(find.text('蓝眼睛'), findsWidgets);
 
       await tester.tap(find.byTooltip('关闭'));
       await tester.pump();
@@ -639,6 +639,36 @@ void main() {
       );
     },
   );
+
+  testWidgets('translation pill converts to editable source text in place', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+    );
+    final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+    notifier.setText('before, after');
+    notifier.insertTranslationAt(offset: 8, source: 'blue eyes', zh: '蓝眼睛');
+    await tester.pump();
+
+    await tester.tap(find.byType(TranslationPillView));
+    await tester.pump();
+    final fields = find.descendant(
+      of: find.byKey(const Key('translation-pill-editor-popover')),
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(fields.last, '绿眼睛');
+    await tester.enterText(fields.first, 'green eyes');
+    await tester.tap(find.byKey(const Key('translation-pill-plain-text')));
+    await tester.pump();
+
+    final state = container.read(pillWorkspaceNotifierProvider);
+    expect(state.document.text, 'before, green eyesafter');
+    expect(state.document.instances, isEmpty);
+    expect(state.projection, 'before, green eyesafter');
+    expect(find.byType(TranslationPillView), findsNothing);
+  });
 
   testWidgets('typing reconciles text and keeps instances alive', (
     tester,

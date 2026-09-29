@@ -541,69 +541,79 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     final route = ref
         .watch(promptAssistantConfigProvider)
         .promptTranslationRoute;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          key: const Key('prompt-translation-toggle'),
-          constraints: const BoxConstraints.tightFor(width: 28, height: 28),
-          padding: EdgeInsets.zero,
-          tooltip: busy
-              ? '正在翻译'
-              : route == null
-              ? '翻译 · 先配置模型'
-              : '翻译 · ${route.provider.name} / ${route.model.displayName}',
-          onPressed: busy ? null : () => _handleTranslationButton(),
-          icon: busy
-              ? const SizedBox(
-                  width: 15,
-                  height: 15,
-                  child: CircularProgressIndicator(strokeWidth: 1.7),
-                )
-              : Icon(
-                  Icons.translate_outlined,
-                  size: 18,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-        ),
-        SizedBox(
-          width: 20,
-          height: 28,
-          child: PopupMenuButton<String>(
-            key: const Key('prompt-translation-actions'),
-            tooltip: '翻译操作',
+    final outline = theme.colorScheme.outlineVariant;
+    return Container(
+      key: const Key('prompt-translation-control'),
+      decoration: BoxDecoration(
+        border: Border.all(color: outline),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            key: const Key('prompt-translation-toggle'),
+            constraints: const BoxConstraints.tightFor(width: 28, height: 28),
             padding: EdgeInsets.zero,
-            position: PopupMenuPosition.under,
-            child: const Center(child: Icon(Icons.arrow_drop_down, size: 15)),
-            onSelected: (action) {
-              if (action == 'translate') {
-                _runTranslation();
-              } else if (action == 'configure') {
-                _openTranslationSettings();
-              } else if (action == 'undo') {
-                final restored = ref
-                    .read(promptTranslationCoordinatorProvider)
-                    .undoLast();
-                if (restored) AppToast.success(context, '已撤销上次翻译');
-              }
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem<String>(
-                enabled: false,
-                child: Text(
-                  route == null
-                      ? '尚未选择翻译模型'
-                      : '${route.provider.name} / ${route.model.displayName}',
-                ),
-              ),
-              const PopupMenuItem(value: 'configure', child: Text('配置翻译模型')),
-              const PopupMenuDivider(),
-              const PopupMenuItem(value: 'translate', child: Text('翻译新增内容')),
-              const PopupMenuItem(value: 'undo', child: Text('撤销上次翻译')),
-            ],
+            tooltip: busy
+                ? '正在翻译'
+                : route == null
+                ? '翻译 · 先配置模型'
+                : '翻译 · ${route.provider.name} / ${route.model.displayName}',
+            onPressed: busy ? null : () => _handleTranslationButton(),
+            icon: busy
+                ? const SizedBox(
+                    width: 15,
+                    height: 15,
+                    child: CircularProgressIndicator(strokeWidth: 1.7),
+                  )
+                : Icon(
+                    Icons.translate_outlined,
+                    size: 18,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
           ),
-        ),
-      ],
+          Container(width: 1, height: 16, color: outline),
+          SizedBox(
+            width: 20,
+            height: 28,
+            child: PopupMenuButton<String>(
+              key: const Key('prompt-translation-actions'),
+              tooltip: '翻译操作',
+              padding: EdgeInsets.zero,
+              position: PopupMenuPosition.under,
+              child: const Center(child: Icon(Icons.arrow_drop_down, size: 15)),
+              onSelected: (action) {
+                if (action == 'translate') {
+                  _runTranslation();
+                } else if (action == 'configure') {
+                  _openTranslationSettings();
+                } else if (action == 'undo') {
+                  final restored = ref
+                      .read(promptTranslationCoordinatorProvider)
+                      .undoLast();
+                  if (restored) AppToast.success(context, '已撤销上次翻译');
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem<String>(
+                  enabled: false,
+                  child: Text(
+                    route == null
+                        ? '尚未选择翻译模型'
+                        : '${route.provider.name} / ${route.model.displayName}',
+                  ),
+                ),
+                const PopupMenuItem(value: 'configure', child: Text('配置翻译模型')),
+                const PopupMenuDivider(),
+                const PopupMenuItem(value: 'translate', child: Text('翻译新增内容')),
+                const PopupMenuItem(value: 'undo', child: Text('撤销上次翻译')),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

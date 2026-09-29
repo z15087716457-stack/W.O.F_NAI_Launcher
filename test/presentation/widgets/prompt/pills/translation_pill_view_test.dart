@@ -283,6 +283,37 @@ void main() {
     final unchanged = await reopened.result as TranslationPill;
     expect(unchanged.needsReview, isTrue);
   });
+
+  testWidgets('plain text action returns the visible source', (tester) async {
+    BuildContext? editorContext;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) {
+              editorContext = context;
+              return const SizedBox.expand();
+            },
+          ),
+        ),
+      ),
+    );
+    final editor = showTranslationPillEditor(
+      context: editorContext!,
+      initial: const TranslationPill(source: 'blue eyes', zh: '蓝眼睛'),
+      globalPosition: const Offset(120, 80),
+    );
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).first, 'green eyes');
+    await tester.tap(find.byKey(const Key('translation-pill-plain-text')));
+    final result = await editor.result as TranslationPillPlainText;
+    expect(result.source, 'green eyes');
+    await tester.pump();
+    expect(
+      find.byKey(const Key('translation-pill-editor-popover')),
+      findsNothing,
+    );
+  });
 }
 
 void _noop() {}

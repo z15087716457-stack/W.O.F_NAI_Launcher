@@ -147,6 +147,37 @@ void main() {
   });
 
   group('removeMarker / reconcile', () {
+    test('unwrapTranslation restores source at each occurrence only', () {
+      const doc = PillDocument(
+        text: 'start $markerA, $markerB, $markerA end',
+        instances: {
+          markerA: PillInstance(
+            blockId: '',
+            translation: TranslationPill(source: 'blue eyes', zh: '蓝眼睛'),
+          ),
+          markerB: PillInstance(blockId: 'other'),
+        },
+      );
+      final unwrapped = PillDocumentEditor.unwrapTranslation(
+        doc,
+        markerA,
+        source: 'edited $markerA source',
+      );
+      expect(
+        unwrapped.text,
+        'start edited  source, $markerB, edited  source end',
+      );
+      expect(unwrapped.instances.keys, [markerB]);
+      expect(
+        PillDocumentEditor.unwrapTranslation(
+          unwrapped,
+          markerB,
+          source: 'untouched',
+        ),
+        unwrapped,
+      );
+    });
+
     test('removeMarker strips all occurrences and the instance', () {
       const doc = PillDocument(
         text: 'x$markerA y$markerA',

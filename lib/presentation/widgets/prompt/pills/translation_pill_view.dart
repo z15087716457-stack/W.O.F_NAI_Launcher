@@ -151,6 +151,12 @@ class TranslationPillEditHandle {
   final VoidCallback dismiss;
 }
 
+class TranslationPillPlainText {
+  const TranslationPillPlainText(this.source);
+
+  final String source;
+}
+
 /// Open a compact editor at the click position, without dimming the canvas.
 TranslationPillEditHandle showTranslationPillEditor({
   required BuildContext context,
@@ -393,6 +399,26 @@ class _TranslationPillEditPopoverState
                     ),
                   ),
                   iconSize: 19,
+                  visualDensity: VisualDensity.compact,
+                  constraints: const BoxConstraints.tightFor(
+                    width: 32,
+                    height: 32,
+                  ),
+                  padding: EdgeInsets.zero,
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  key: const Key('translation-pill-plain-text'),
+                  tooltip: '还原为原文文本',
+                  onPressed: _source.text.isEmpty
+                      ? null
+                      : () => widget.onComplete(
+                          TranslationPillPlainText(_source.text),
+                        ),
+                  icon: const Text(
+                    'A',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
                   visualDensity: VisualDensity.compact,
                   constraints: const BoxConstraints.tightFor(
                     width: 32,
