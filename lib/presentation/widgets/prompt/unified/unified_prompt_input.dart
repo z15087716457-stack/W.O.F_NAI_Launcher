@@ -1075,6 +1075,11 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
               context,
             ).textTheme.bodyMedium?.copyWith(fontSize: 14, height: 1.55)
           : null,
+      // A translated pill may span several lines. The default forced strut
+      // only reserves a text line and lets the pill paint over its neighbors.
+      strutStyle: widget.config.pillBuilder == null
+          ? null
+          : StrutStyle.disabled,
       controller: _effectiveController,
       focusNode: _effectiveFocusNode,
       decoration: effectiveDecoration,

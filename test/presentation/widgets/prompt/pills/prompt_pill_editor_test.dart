@@ -13,6 +13,7 @@ import 'package:nai_launcher/presentation/widgets/prompt/pills/dna_icon.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/pill_instance_card.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill_editor.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/pills/translation_pill_view.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
 
 void main() {
@@ -557,6 +558,42 @@ void main() {
     expect(targetDoc.instances[markerB]!.translation!.source, 'blue eyes');
   });
 
+  testWidgets('long translation reserves its full height in the prompt field', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      editorWidth: 320,
+      libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+    );
+    final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+    notifier.setText('\n尾随文字');
+    notifier.insertTranslationAt(
+      offset: 0,
+      source: 'source',
+      zh: List.filled(55, '译文说明').join(),
+    );
+    await tester.pump();
+
+    final pill = find.byType(TranslationPillView);
+    expect(tester.getSize(pill).width, lessThanOrEqualTo(320));
+    expect(tester.getSize(pill).height, greaterThan(145));
+    final editable = tester.state<EditableTextState>(
+      find.byType(EditableText).first,
+    );
+    final tailOffset = container
+        .read(pillWorkspaceNotifierProvider)
+        .document
+        .text
+        .indexOf('尾');
+    final caret = editable.renderEditable.getLocalRectForCaret(
+      TextPosition(offset: tailOffset),
+    );
+    final tailTop = editable.renderEditable.localToGlobal(Offset(0, caret.top));
+    expect(tailTop.dy, greaterThanOrEqualTo(tester.getBottomLeft(pill).dy));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('typing reconciles text and keeps instances alive', (
     tester,
   ) async {
@@ -702,6 +739,7 @@ Future<ProviderContainer> _pump(
   bool allowEvolutionToggle = false,
   String pillScope = PillScopes.main,
   Offset appOffset = Offset.zero,
+  double editorWidth = 960,
   List<Override> overrides = const [],
 }) async {
   final originalSize = tester.view.physicalSize;
@@ -726,7 +764,7 @@ Future<ProviderContainer> _pump(
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: SizedBox(
-          width: 960,
+          width: editorWidth,
           height: 360,
           child: PromptPillEditor(
             pillScope: pillScope,

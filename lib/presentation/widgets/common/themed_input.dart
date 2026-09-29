@@ -80,6 +80,10 @@ class ThemedInput extends StatefulWidget {
   /// 文本样式
   final TextStyle? style;
 
+  /// Optional paragraph strut. Inline multi-line widgets need a flexible
+  /// line height so EditableText reserves their actual rendered height.
+  final StrutStyle? strutStyle;
+
   /// 提示文字样式
   final TextStyle? hintStyle;
 
@@ -158,6 +162,7 @@ class ThemedInput extends StatefulWidget {
     this.obscureText = false,
     this.maxLength,
     this.style,
+    this.strutStyle,
     this.hintStyle,
     this.autofocus = false,
     this.onTap,
@@ -201,6 +206,7 @@ class ThemedInput extends StatefulWidget {
     this.obscureText = false,
     this.maxLength,
     this.style,
+    this.strutStyle,
     this.hintStyle,
     this.autofocus = false,
     this.onTap,
@@ -376,6 +382,7 @@ class _ThemedInputState extends State<ThemedInput> {
       obscureText: widget.obscureText,
       maxLength: widget.maxLength,
       style: widget.style,
+      strutStyle: widget.strutStyle,
       autofocus: widget.autofocus,
       textAlign: widget.textAlign,
       textAlignVertical: widget.textAlignVertical,

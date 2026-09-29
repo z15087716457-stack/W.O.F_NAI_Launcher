@@ -629,17 +629,6 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         );
         return;
       }
-      final messenger = ScaffoldMessenger.maybeOf(context);
-      messenger?.showSnackBar(
-        SnackBar(
-          content: Text('已翻译 ${result.convertedFields} 个提示词框'),
-          action: SnackBarAction(
-            label: '撤销',
-            onPressed: () =>
-                ref.read(promptTranslationCoordinatorProvider).undoLast(),
-          ),
-        ),
-      );
     } catch (error) {
       if (mounted) AppToast.error(context, '翻译失败：$error');
     }

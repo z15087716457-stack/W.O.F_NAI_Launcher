@@ -44,66 +44,73 @@ class _TranslationPillViewState extends State<TranslationPillView> {
     final accent = scheme.primary.withValues(alpha: original ? .62 : .70);
     final fill = scheme.primary.withValues(alpha: original ? .035 : .065);
     final text = original ? pill.source : pill.zh;
-    final content = Container(
-      constraints: const BoxConstraints(maxWidth: 300),
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-      decoration: BoxDecoration(
-        color: fill,
-        borderRadius: BorderRadius.circular(6),
-        border: original ? Border.all(color: accent, width: 1) : null,
-      ),
-      foregroundDecoration: original
-          ? null
-          : ShapeDecoration(
-              shape: _DashedRoundedBorder(color: accent, radius: 6),
-            ),
-      child: CustomPaint(
-        painter: PromptBlockPatternPainter(
-          appearance: original
-              ? PromptBlockAppearance.classic
-              : PromptBlockAppearance.translation,
-          color: accent,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (original) ...[
-              Icon(Icons.translate_outlined, size: 13, color: accent),
-              const SizedBox(width: 5),
-            ],
-            Flexible(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 145),
-                child: SingleChildScrollView(
-                  child: Text(
-                    text,
-                    softWrap: true,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurface,
-                      height: 1.25,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            if (original) ...[
-              const SizedBox(width: 5),
-              Tooltip(
-                message: pill.needsReview ? '编辑双语内容 · 译文待更新' : '编辑原文与译文',
-                child: InkWell(
-                  onTap: widget.onEdit,
-                  child: Icon(Icons.build_outlined, size: 13, color: accent),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
     return Semantics(
       button: true,
       label: original ? '翻译块，显示原文' : '翻译块，显示译文',
-      child: GestureDetector(onTapUp: _handleTap, child: content),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth.isFinite
+              ? constraints.maxWidth
+              : 300.0;
+          final content = Container(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+            decoration: BoxDecoration(
+              color: fill,
+              borderRadius: BorderRadius.circular(6),
+              border: original ? Border.all(color: accent, width: 1) : null,
+            ),
+            foregroundDecoration: original
+                ? null
+                : ShapeDecoration(
+                    shape: _DashedRoundedBorder(color: accent, radius: 6),
+                  ),
+            child: CustomPaint(
+              painter: PromptBlockPatternPainter(
+                appearance: original
+                    ? PromptBlockAppearance.classic
+                    : PromptBlockAppearance.translation,
+                color: accent,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (original) ...[
+                    Icon(Icons.translate_outlined, size: 13, color: accent),
+                    const SizedBox(width: 5),
+                  ],
+                  Flexible(
+                    child: Text(
+                      text,
+                      softWrap: true,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurface,
+                        height: 1.25,
+                      ),
+                    ),
+                  ),
+                  if (original) ...[
+                    const SizedBox(width: 5),
+                    Tooltip(
+                      message: pill.needsReview ? '编辑双语内容 · 译文待更新' : '编辑原文与译文',
+                      child: InkWell(
+                        onTap: widget.onEdit,
+                        child: Icon(
+                          Icons.build_outlined,
+                          size: 13,
+                          color: accent,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+          return GestureDetector(onTapUp: _handleTap, child: content);
+        },
+      ),
     );
   }
 }

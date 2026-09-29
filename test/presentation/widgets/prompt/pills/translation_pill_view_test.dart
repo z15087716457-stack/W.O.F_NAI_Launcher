@@ -41,26 +41,39 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('long reading text stays within a bounded pill', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: TranslationPillView(
-            pill: TranslationPill(
-              source: 'source',
-              zh: List.filled(200, '很长的译文').join(),
+  testWidgets(
+    'long reading text wraps to the available width and full height',
+    (tester) async {
+      final reading = List.filled(45, '很长的译文').join();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 280,
+              child: TranslationPillView(
+                pill: TranslationPill(source: 'source', zh: reading),
+                onToggle: () {},
+                onEdit: () {},
+              ),
             ),
-            onToggle: () {},
-            onEdit: () {},
           ),
         ),
-      ),
-    );
-    final size = tester.getSize(find.byType(TranslationPillView));
-    expect(size.width, lessThanOrEqualTo(300));
-    expect(size.height, lessThanOrEqualTo(160));
-    expect(tester.takeException(), isNull);
-  });
+      );
+      final size = tester.getSize(find.byType(TranslationPillView));
+      final textSize = tester.getSize(find.text(reading));
+      expect(size.width, lessThanOrEqualTo(280));
+      expect(size.height, greaterThan(160));
+      expect(size.height, greaterThanOrEqualTo(textSize.height));
+      expect(
+        find.descendant(
+          of: find.byType(TranslationPillView),
+          matching: find.byType(Scrollable),
+        ),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('double click opens editing without leaving display toggled', (
     tester,
