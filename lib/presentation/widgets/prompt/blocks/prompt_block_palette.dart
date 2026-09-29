@@ -289,6 +289,7 @@ class _PromptBlockPaletteCardState
     final minHeight = math.min(widget.minHeight, maxHeight);
 
     return Material(
+      key: const Key('prompt-block-palette-card'),
       elevation: 8,
       color: theme.colorScheme.surfaceContainerHigh,
       borderRadius: BorderRadius.circular(12),
@@ -499,24 +500,29 @@ class _PromptBlockPaletteCardState
                               ),
                             )
                           // 流式排布：一行摆不下整块就自动换到下一行。
-                          : Wrap(
-                              spacing: 6,
-                              runSpacing: 6,
-                              children: [
-                                for (var i = 0; i < blocks.length; i++)
-                                  _PaletteChipRow(
-                                    block: blocks[i],
-                                    index: i,
-                                    folders: folders,
-                                    multiSelectMode: _multiSelectMode,
-                                    selected: selectedIds.contains(
-                                      blocks[i].id,
+                          : Align(
+                              alignment: Alignment.topLeft,
+                              child: Wrap(
+                                alignment: WrapAlignment.start,
+                                runAlignment: WrapAlignment.start,
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: [
+                                  for (var i = 0; i < blocks.length; i++)
+                                    _PaletteChipRow(
+                                      block: blocks[i],
+                                      index: i,
+                                      folders: folders,
+                                      multiSelectMode: _multiSelectMode,
+                                      selected: selectedIds.contains(
+                                        blocks[i].id,
+                                      ),
+                                      onToggleSelected: _multiSelectMode
+                                          ? () => _toggleSelected(blocks[i].id)
+                                          : null,
                                     ),
-                                    onToggleSelected: _multiSelectMode
-                                        ? () => _toggleSelected(blocks[i].id)
-                                        : null,
-                                  ),
-                              ],
+                                ],
+                              ),
                             ),
                     ),
                   ),

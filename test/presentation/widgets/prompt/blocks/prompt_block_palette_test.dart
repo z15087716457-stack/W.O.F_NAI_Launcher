@@ -536,8 +536,15 @@ void main() {
       // 两个窄芯片并排同一行（A 的右边挨着 B 的左边，顶部对齐）。
       final a = tester.getRect(find.text('A').first);
       final b = tester.getRect(find.text('B').first);
+      final card = tester.getRect(
+        find.byKey(const Key('prompt-block-palette-card')),
+      );
+      final firstChip = tester.getRect(
+        find.byKey(const ValueKey('prompt-block-pill-body-b-1')),
+      );
       expect(a.top, closeTo(b.top, 1));
       expect(b.left, greaterThan(a.left));
+      expect(firstChip.left - card.left, inInclusiveRange(8, 16));
     });
 
     testWidgets('multi-select mode picks chips and removes selection', (

@@ -56,6 +56,7 @@ class MainNavRail extends ConsumerWidget {
         child: Column(
           children: [
             // 账户固定在顶部，导航内容单独滚动。
+            const SizedBox(height: 12),
             _AccountAvatarButton(ref: ref),
             const _NavGroupDivider(),
 
@@ -458,65 +459,79 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
 
     final avatar = currentAccount != null
         ? AccountAvatarSmall(account: currentAccount, size: 40)
-        : const Icon(Icons.person, color: kAvatarForeground, size: 24);
+        : Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.2),
+              borderRadius: avatarBorderRadius(40),
+            ),
+            child: Icon(
+              Icons.person,
+              color: theme.colorScheme.primary,
+              size: 24,
+            ),
+          );
 
-    return SizedBox(
-      height: 60,
+    return Container(
+      margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+      height: 44,
       child: Material(
-        color: theme.colorScheme.surface,
+        color: Colors.transparent,
         child: InkWell(
           onTap: () => _showAccountMenu(context, currentAccount),
           onTapDown: (_) => setState(() => _isPressed = true),
           onTapUp: (_) => setState(() => _isPressed = false),
           onTapCancel: () => setState(() => _isPressed = false),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final showLabel = constraints.maxWidth > 80;
-              final labelOpacity = ((constraints.maxWidth - 80) / 48).clamp(
-                0.0,
-                1.0,
-              );
-              return Row(
-                children: [
-                  Container(
-                    key: const Key('main-nav-brand-tile'),
-                    width: constraints.maxWidth.clamp(0.0, 60.0),
-                    height: 60,
-                    color: _isPressed
-                        ? kAvatarBackground.withValues(alpha: .88)
-                        : kAvatarBackground,
-                    alignment: Alignment.center,
-                    child: avatar,
-                  ),
-                  if (showLabel) ...[
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Opacity(
-                        opacity: labelOpacity,
-                        child: Text(
-                          currentAccount?.displayName ??
-                              context.l10n.settings_account,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+          borderRadius: BorderRadius.circular(22),
+          child: AnimatedScale(
+            scale: _isPressed ? 0.97 : 1.0,
+            duration: const Duration(milliseconds: 140),
+            curve: Curves.easeOutCubic,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final showLabel = constraints.maxWidth > 80;
+                final labelOpacity = ((constraints.maxWidth - 80) / 48).clamp(
+                  0.0,
+                  1.0,
+                );
+                return Row(
+                  children: [
+                    SizedBox(
+                      width: constraints.maxWidth.clamp(0.0, 40.0),
+                      height: 44,
+                      child: Center(child: avatar),
+                    ),
+                    if (showLabel) ...[
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Opacity(
+                          opacity: labelOpacity,
+                          child: Text(
+                            currentAccount?.displayName ??
+                                context.l10n.settings_account,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Opacity(
-                      opacity: labelOpacity,
-                      child: Icon(
-                        Icons.expand_more,
-                        size: 18,
-                        color: theme.colorScheme.onSurfaceVariant,
+                      Opacity(
+                        opacity: labelOpacity,
+                        child: Icon(
+                          Icons.expand_more,
+                          size: 18,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
+                      const SizedBox(width: 10),
+                    ],
                   ],
-                ],
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),

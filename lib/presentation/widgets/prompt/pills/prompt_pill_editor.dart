@@ -91,6 +91,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
   /// L1 实例卡浮层（P2.5）：同屏只开一张，编辑器卸载时必须带走。
   OverlayEntry? _instanceCardEntry;
+  TranslationPillEditHandle? _translationEditor;
 
   @override
   void initState() {
@@ -115,6 +116,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     super.didUpdateWidget(oldWidget);
     // scope 切换（角色编辑面板 State 复用、切换编辑目标）：重绑文档
     if (oldWidget.pillScope != widget.pillScope) {
+      _translationEditor?.dismiss();
+      _translationEditor = null;
       final workspace = ref.read(_workspace);
       _applyingExternal = true;
       _controller.value = TextEditingValue(
@@ -160,6 +163,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   @override
   void dispose() {
     _dismissInstanceCard();
+    _translationEditor?.dismiss();
     _controller
       ..removeListener(_handleControllerChanged)
       ..dispose();
@@ -327,7 +331,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
               marker,
               translation.copyWith(showOriginal: !translation.showOriginal),
             ),
-        onEdit: () => _editTranslation(marker, translation),
+        onEdit: (position) => _editTranslation(marker, translation, position),
       );
       return WidgetSpan(
         alignment: PlaceholderAlignment.middle,
@@ -350,7 +354,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
               child: TranslationPillView(
                 pill: translation,
                 onToggle: () {},
-                onEdit: () {},
+                onEdit: (_) {},
               ),
             ),
           ),
@@ -447,11 +451,21 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     );
   }
 
-  Future<void> _editTranslation(String marker, TranslationPill initial) async {
-    final result = await showDialog<Object>(
+  Future<void> _editTranslation(
+    String marker,
+    TranslationPill initial,
+    Offset position,
+  ) async {
+    _dismissInstanceCard();
+    _translationEditor?.dismiss();
+    final editor = showTranslationPillEditor(
       context: context,
-      builder: (_) => TranslationPillEditDialog(initial: initial),
+      initial: initial,
+      globalPosition: position,
     );
+    _translationEditor = editor;
+    final result = await editor.result;
+    if (identical(_translationEditor, editor)) _translationEditor = null;
     if (!mounted ||
         ref.read(_workspace).document.instances[marker]?.translation !=
             initial) {

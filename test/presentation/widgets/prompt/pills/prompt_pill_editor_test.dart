@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
@@ -593,6 +594,51 @@ void main() {
     expect(tailTop.dy, greaterThanOrEqualTo(tester.getBottomLeft(pill).dy));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'translation pill opens the editor on left click and toggles on middle click',
+    (tester) async {
+      final container = await _pump(
+        tester,
+        libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+      );
+      container
+          .read(pillWorkspaceNotifierProvider.notifier)
+          .insertTranslationAt(offset: 0, source: 'blue eyes', zh: '蓝眼睛');
+      await tester.pump();
+
+      final pill = find.byType(TranslationPillView);
+      await tester.tap(pill);
+      await tester.pump();
+      expect(
+        find.byKey(const Key('translation-pill-editor-popover')),
+        findsOne,
+      );
+    expect(find.text('蓝眼睛'), findsWidgets);
+
+      await tester.tap(find.byTooltip('关闭'));
+      await tester.pump();
+      final middle = await tester.startGesture(
+        tester.getCenter(pill),
+        kind: PointerDeviceKind.mouse,
+        buttons: kMiddleMouseButton,
+      );
+      await middle.up();
+      await tester.pump();
+      expect(find.text('blue eyes'), findsOneWidget);
+      expect(
+        container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances
+            .values
+            .single
+            .translation!
+            .showOriginal,
+        isTrue,
+      );
+    },
+  );
 
   testWidgets('typing reconciles text and keeps instances alive', (
     tester,
