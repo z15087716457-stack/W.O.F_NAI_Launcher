@@ -53,34 +53,40 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('saved palette translation retains its category mark', (
-    tester,
-  ) async {
-    final block = PromptBlock.create(
-      title: '蓝眼睛',
-      content: 'blue eyes',
-      readingTranslationZh: '蓝眼睛',
-      readingTranslationMarks: const [
-        {'start': 0, 'end': 3, 'tag': 'blue_eyes', 'icon_id': 'general'},
-      ],
-      appearance: 'translation',
-    );
-    final restored = PromptBlock.fromJson(block.toJson());
-    expect(restored.readingTranslationMarks, block.readingTranslationMarks);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: PromptBlockPill(
-            block: restored,
-            displayTitle: '蓝眼睛',
-            maxWidth: 170,
-            paletteStyle: true,
-            onTap: () {},
+  testWidgets(
+    'saved palette translation retains its non-general category mark',
+    (tester) async {
+      final block = PromptBlock.create(
+        title: '画师',
+        content: 'artist:asteroid_ill',
+        readingTranslationZh: '画师',
+        readingTranslationMarks: const [
+          {
+            'start': 0,
+            'end': 2,
+            'tag': 'artist:asteroid_ill',
+            'icon_id': 'artist',
+          },
+        ],
+        appearance: 'translation',
+      );
+      final restored = PromptBlock.fromJson(block.toJson());
+      expect(restored.readingTranslationMarks, block.readingTranslationMarks);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PromptBlockPill(
+              block: restored,
+              displayTitle: '画师',
+              maxWidth: 170,
+              paletteStyle: true,
+              onTap: () {},
+            ),
           ),
         ),
-      ),
-    );
-    expect(find.byIcon(Icons.sell_rounded), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+      );
+      expect(find.byIcon(Icons.brush_rounded), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

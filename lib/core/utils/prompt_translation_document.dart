@@ -35,6 +35,10 @@ class PromptTranslationSegment {
 class PromptTranslationBatch {
   PromptTranslationBatch._(this.documents, this.segments);
 
+  static const int maxProposedTags = 64;
+  static final RegExp _tagWhitespace = RegExp(r'\s+');
+  static final RegExp _canonicalTag = RegExp(r'^[a-z0-9_():.!+\-]+$');
+
   final Map<String, PillDocument> documents;
   final Map<String, List<PromptTranslationSegment>> segments;
 
@@ -139,11 +143,48 @@ class PromptTranslationBatch {
             (value.startsWith('[') && value.endsWith(']')))) {
       value = value.substring(1, value.length - 1).trim();
     }
-    if (value.length > 80 ||
-        !RegExp(r'^[a-zA-Z0-9_():.!+\- ]+$').hasMatch(value)) {
+    return _normalizeTag(value);
+  }
+
+  static String? _normalizeTag(String value) {
+    final tag = value.trim().toLowerCase().replaceAll(_tagWhitespace, '_');
+    if (tag.isEmpty || tag.length > 80 || !_canonicalTag.hasMatch(tag)) {
       return null;
     }
-    return value.toLowerCase().replaceAll(' ', '_');
+    return tag;
+  }
+
+  /// Model suggestions are only lookup candidates. No category or icon from
+  /// the model is trusted, and each suggestion must name a source segment.
+  Set<String> proposedTags(
+    String raw, {
+    List<Map<String, String>> glossary = const [],
+  }) {
+    final decoded = jsonDecode(raw.trim());
+    if (decoded is! Map || decoded['fields'] is! List) return const {};
+    final known = {for (final item in glossary) item['tag']};
+    final validSourceIds = {
+      for (final item in segments.values.expand((items) => items)) item.id,
+    };
+    final result = <String>{};
+    for (final field in decoded['fields'] as List) {
+      if (field is! Map || field['groups'] is! List) continue;
+      for (final group in field['groups'] as List) {
+        if (group is! Map || group['parts'] is! List) continue;
+        for (final part in group['parts'] as List) {
+          if (part is! Map ||
+              part['tag'] is! String ||
+              part['source_id'] is! String ||
+              !validSourceIds.contains(part['source_id'])) {
+            continue;
+          }
+          final tag = _normalizeTag(part['tag'] as String);
+          if (tag != null && !known.contains(tag)) result.add(tag);
+          if (result.length >= maxProposedTags) return result;
+        }
+      }
+    }
+    return result;
   }
 
   String requestJson(List<Map<String, String>> glossary) => jsonEncode({
@@ -166,6 +207,7 @@ class PromptTranslationBatch {
   Map<String, List<PromptTranslationGroup>> parseGroups(
     String raw, {
     List<Map<String, String>> glossary = const [],
+    Map<String, String> verifiedTags = const {},
   }) {
     final decoded = jsonDecode(raw.trim());
     if (decoded is! Map || decoded['fields'] is! List) {
@@ -221,11 +263,21 @@ class PromptTranslationBatch {
           for (var index = first; index < cursor; index++)
             if (_candidateTag(items[index].source) case final tag?) tag,
         };
+        final groupSourceIds = {
+          for (var index = first; index < cursor; index++) items[index].id,
+        };
         groups.add((
           start: items[first].start,
           end: items[cursor - 1].end,
           zh: zh,
-          marks: _parseMarks(rawGroup['parts'], zh, sourceTags, glossaryByTag),
+          marks: _parseMarks(
+            rawGroup['parts'],
+            zh,
+            sourceTags,
+            groupSourceIds,
+            glossaryByTag,
+            verifiedTags,
+          ),
         ));
       }
       if (cursor != items.length) {
@@ -242,7 +294,9 @@ class PromptTranslationBatch {
     Object? rawParts,
     String zh,
     Set<String> sourceTags,
+    Set<String> groupSourceIds,
     Map<String, String> glossaryByTag,
+    Map<String, String> verifiedTags,
   ) {
     if (rawParts is! List || rawParts.isEmpty) return const [];
     final text = StringBuffer();
@@ -253,12 +307,25 @@ class PromptTranslationBatch {
       if (part.isEmpty) return const [];
       final start = text.length;
       text.write(part);
-      final tag = rawPart['tag'];
-      final iconId = rawPart['icon_id'];
-      if (tag is String &&
-          iconId is String &&
+      final tag = rawPart['tag'] is String
+          ? _normalizeTag(rawPart['tag'] as String)
+          : null;
+      final iconId = tag == null
+          ? null
+          : glossaryByTag[tag] ?? verifiedTags[tag];
+      final originalTag =
+          tag != null &&
           sourceTags.contains(tag) &&
-          glossaryByTag[tag] == iconId &&
+          glossaryByTag[tag] == iconId;
+      final proposedTag =
+          tag != null &&
+          verifiedTags[tag] == iconId &&
+          groupSourceIds.contains(rawPart['source_id']);
+      if (tag != null &&
+          iconId != null &&
+          iconId != 'general' &&
+          (originalTag || proposedTag) &&
+          (rawPart['icon_id'] == null || rawPart['icon_id'] == iconId) &&
           RegExp(r'[\p{L}\p{N}]', unicode: true).hasMatch(part)) {
         marks.add(
           TranslationTagMark(
@@ -310,5 +377,8 @@ class PromptTranslationBatch {
   Map<String, PillDocument> parseAndBuild(
     String raw, {
     List<Map<String, String>> glossary = const [],
-  }) => buildFromGroups(parseGroups(raw, glossary: glossary));
+    Map<String, String> verifiedTags = const {},
+  }) => buildFromGroups(
+    parseGroups(raw, glossary: glossary, verifiedTags: verifiedTags),
+  );
 }

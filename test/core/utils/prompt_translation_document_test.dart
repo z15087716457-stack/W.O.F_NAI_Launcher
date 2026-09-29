@@ -76,6 +76,16 @@ void main() {
     expect(batch.requestJson(const []), isNot(contains('block')));
   });
 
+  test('candidate lookup treats repeated spaces like underscores', () {
+    final batch = PromptTranslationBatch.prepare({
+      'main': const PillDocument(
+        text: 'Blue   Eyes, blue_eyes,',
+        instances: {},
+      ),
+    });
+    expect(batch.tagCandidates, {'blue_eyes'});
+  });
+
   test('new translation sources follow the auto format gate', () {
     const original = PillDocument(
       text: '1::blue eyes::, 1.3::red dress::',
@@ -256,12 +266,6 @@ void main() {
     )['main']!;
     final pill = converted.instances.values.single.translation!;
     expect(pill.marks, [
-      const TranslationTagMark(
-        start: 5,
-        end: 8,
-        tag: 'blue_eyes',
-        iconId: 'general',
-      ),
       TranslationTagMark(
         start: pill.zh.indexOf('画师'),
         end: pill.zh.length,
@@ -275,6 +279,122 @@ void main() {
       '1.4::blue eyes::, artist:asteroid_ill,',
     );
   });
+
+  test(
+    'model can propose a catalog verified named entity outside glossary',
+    () {
+      final batch = PromptTranslationBatch.prepare({
+        'main': const PillDocument(
+          text: 'portrait of Rin Kagamine, blue eyes',
+          instances: {},
+        ),
+      });
+      final ids = batch.segments['main']!.map((item) => item.id).toList();
+      final response = jsonEncode({
+        'fields': [
+          {
+            'id': 'main',
+            'groups': [
+              {
+                'ids': ids,
+                'zh': '镜音铃，蓝眼睛',
+                'parts': [
+                  {
+                    'text': '镜音铃',
+                    'tag': 'Kagamine Rin',
+                    'source_id': ids.first,
+                  },
+                  {'text': '，蓝眼睛'},
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      expect(batch.proposedTags(response), {'kagamine_rin'});
+      final unverified = batch.parseAndBuild(response)['main']!;
+      expect(unverified.instances.values.single.translation!.marks, isEmpty);
+      final verified = batch.parseAndBuild(
+        response,
+        verifiedTags: {'kagamine_rin': 'character'},
+      )['main']!;
+      expect(verified.instances.values.single.translation!.marks, [
+        const TranslationTagMark(
+          start: 0,
+          end: 3,
+          tag: 'kagamine_rin',
+          iconId: 'character',
+        ),
+      ]);
+    },
+  );
+
+  test(
+    'proposals require a source id in their own group and a verified icon',
+    () {
+      final batch = PromptTranslationBatch.prepare({
+        'main': const PillDocument(text: 'Rin Kagamine, sky', instances: {}),
+      });
+      final ids = batch.segments['main']!.map((item) => item.id).toList();
+      String response(String sourceId, {String? iconId}) => jsonEncode({
+        'fields': [
+          {
+            'id': 'main',
+            'groups': [
+              {
+                'ids': [ids.first],
+                'zh': '镜音铃',
+                'parts': [
+                  {
+                    'text': '镜音铃',
+                    'tag': 'kagamine_rin',
+                    'source_id': sourceId,
+                    if (iconId != null) 'icon_id': iconId,
+                  },
+                ],
+              },
+              {
+                'ids': [ids.last],
+                'zh': '天空',
+              },
+            ],
+          },
+        ],
+      });
+      expect(batch.proposedTags(response('missing')), isEmpty);
+      for (final raw in [
+        response(ids.last),
+        response(ids.first, iconId: 'artist'),
+      ]) {
+        final result = batch.parseAndBuild(
+          raw,
+          verifiedTags: {'kagamine_rin': 'character'},
+        )['main']!;
+        expect(
+          result.instances.values
+              .singleWhere(
+                (instance) => instance.translation!.source.startsWith('Rin'),
+              )
+              .translation!
+              .marks,
+          isEmpty,
+        );
+      }
+      final general = batch.parseAndBuild(
+        response(ids.first),
+        verifiedTags: {'kagamine_rin': 'general'},
+      )['main']!;
+      expect(
+        general.instances.values
+            .singleWhere(
+              (instance) => instance.translation!.source.startsWith('Rin'),
+            )
+            .translation!
+            .marks,
+        isEmpty,
+      );
+    },
+  );
 
   test('invented or mismatched icon IDs are ignored without losing zh', () {
     final batch = PromptTranslationBatch.prepare({

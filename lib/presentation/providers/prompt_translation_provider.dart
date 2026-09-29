@@ -145,7 +145,11 @@ class PromptTranslationCoordinator {
               part.requestJson(glossary),
               sessionId: 'prompt-translation-${negative ? 'neg' : 'pos'}',
             );
-        final parsed = part.parseGroups(raw, glossary: glossary);
+        final parsed = part.parseGroups(
+          raw,
+          glossary: glossary,
+          verifiedTags: await _verifyProposedTags(part, raw, glossary),
+        );
         for (final entry in parsed.entries) {
           groups.putIfAbsent(entry.key, () => []).addAll(entry.value);
         }
@@ -202,7 +206,11 @@ class PromptTranslationCoordinator {
             batch.requestJson(glossary),
             sessionId: 'prompt-translation-single',
           );
-      final rebuilt = batch.parseAndBuild(raw, glossary: glossary)['single']!;
+      final rebuilt = batch.parseAndBuild(
+        raw,
+        glossary: glossary,
+        verifiedTags: await _verifyProposedTags(batch, raw, glossary),
+      )['single']!;
       final reading = StringBuffer();
       final marks = <TranslationTagMark>[];
       for (final marker in rebuilt.text.split('')) {
@@ -274,6 +282,27 @@ class PromptTranslationCoordinator {
     } catch (_) {
       // The optional dictionary must not prevent ordinary translation.
       return const [];
+    }
+  }
+
+  Future<Map<String, String>> _verifyProposedTags(
+    PromptTranslationBatch batch,
+    String raw,
+    List<Map<String, String>> glossary,
+  ) async {
+    final proposed = batch.proposedTags(raw, glossary: glossary);
+    if (proposed.isEmpty) return const {};
+    try {
+      final candidates = await _ref
+          .read(unifiedTagRepositoryProvider)
+          .byNames(proposed);
+      return {
+        for (final candidate in candidates)
+          candidate.canonicalTag: candidate.category.name,
+      };
+    } catch (_) {
+      // Optional marks must never prevent a successful text translation.
+      return const {};
     }
   }
 

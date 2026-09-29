@@ -82,14 +82,14 @@ void main() {
     tester,
   ) async {
     var pill = const TranslationPill(
-      source: '1.4::blue eyes::, sky',
-      zh: '1.4::蓝眼睛::，天空',
+      source: '1.4::artist:asteroid_ill::, sky',
+      zh: '1.4::画师::，天空',
       marks: [
         TranslationTagMark(
           start: 5,
-          end: 8,
-          tag: 'blue_eyes',
-          iconId: 'general',
+          end: 7,
+          tag: 'artist:asteroid_ill',
+          iconId: 'artist',
         ),
       ],
     );
@@ -111,14 +111,14 @@ void main() {
         ),
       ),
     );
-    expect(find.byIcon(Icons.sell_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.brush_rounded), findsOneWidget);
     final children =
         (tester.widget<Text>(_visibleTextFinder()).textSpan! as TextSpan)
             .children!;
     final marked = children.whereType<TextSpan>().firstWhere(
-      (span) => span.text == '蓝眼睛',
+      (span) => span.text == '画师',
     );
-    final icon = tester.widget<Icon>(find.byIcon(Icons.sell_rounded));
+    final icon = tester.widget<Icon>(find.byIcon(Icons.brush_rounded));
     expect(marked.style!.decoration, TextDecoration.underline);
     expect(marked.style!.decorationColor, icon.color);
     expect(
@@ -139,9 +139,42 @@ void main() {
     );
     await middle.up();
     await tester.pump();
-    expect(find.byIcon(Icons.sell_rounded), findsNothing);
-    expect(find.text('1.4::blue eyes::, sky'), findsOneWidget);
+    expect(find.byIcon(Icons.brush_rounded), findsNothing);
+    expect(find.text('1.4::artist:asteroid_ill::, sky'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('legacy general marks show plain reading text', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: TranslationPillView(
+            pill: TranslationPill(
+              source: 'blue eyes',
+              zh: '蓝眼睛',
+              marks: [
+                TranslationTagMark(
+                  start: 0,
+                  end: 3,
+                  tag: 'blue_eyes',
+                  iconId: 'general',
+                ),
+              ],
+            ),
+            onToggle: _noop,
+            onEdit: _noopPosition,
+          ),
+        ),
+      ),
+    );
+    expect(find.byIcon(Icons.sell_rounded), findsNothing);
+    expect(find.text('蓝眼睛'), findsOneWidget);
+    expect(
+      _visibleSyntaxSpans(
+        tester,
+      ).every((span) => span.style?.decoration != TextDecoration.underline),
+      isTrue,
+    );
   });
 
   testWidgets('translation syntax follows emphasis and model switches', (

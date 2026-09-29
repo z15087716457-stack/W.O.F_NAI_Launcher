@@ -19,6 +19,7 @@ abstract final class TranslationTagSpan {
           .where((candidate) => candidate.name == mark.iconId)
           .firstOrNull;
       if (category == null ||
+          category == TagCategory.general ||
           mark.start < 0 ||
           mark.end > reading.length ||
           mark.end <= mark.start ||
