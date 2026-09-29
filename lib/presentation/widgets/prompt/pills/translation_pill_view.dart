@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../data/models/prompt_block/pill_document.dart';
+import '../../../../core/utils/prompt_input_normalization.dart';
 import '../nai_syntax_controller.dart';
 import 'translation_tag_span.dart';
 
@@ -15,6 +16,7 @@ class TranslationPillView extends StatefulWidget {
     required this.onEdit,
     this.highlightEnabled = true,
     this.numericEmphasisEnabled = true,
+    this.autoFormat = false,
   });
 
   final TranslationPill pill;
@@ -22,6 +24,7 @@ class TranslationPillView extends StatefulWidget {
   final ValueChanged<Offset> onEdit;
   final bool highlightEnabled;
   final bool numericEmphasisEnabled;
+  final bool autoFormat;
 
   @override
   State<TranslationPillView> createState() => _TranslationPillViewState();
@@ -30,8 +33,14 @@ class TranslationPillView extends StatefulWidget {
 class _TranslationPillViewState extends State<TranslationPillView> {
   late final NaiSyntaxController _syntaxController;
 
-  String _displayText(TranslationPill pill) =>
-      pill.showOriginal || pill.needsReview ? pill.source : pill.zh;
+  String _displayText(TranslationPill pill) {
+    if (!pill.showOriginal && !pill.needsReview) return pill.zh;
+    return PromptInputNormalization.normalize(
+      pill.source,
+      autoFormat: widget.autoFormat,
+      sdAutoConvert: false,
+    ).text;
+  }
 
   @override
   void initState() {

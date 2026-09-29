@@ -13,6 +13,16 @@ void main() {
         '(cinematic  lighting:1.3), blue eyes',
     '[bad\tanatomy:0.8], blue  eyes': '[bad\tanatomy:0.8], blue eyes',
     '1.4::ralada747372::': '1.4::ralada747372 ::',
+    '1::blue archive::, 1::happy, open eyes::':
+        'blue archive, happy, open eyes',
+    '1.0::blue eyes::, +01.00::red dress::': 'blue eyes, red dress',
+    '1::1.3::blue eyes::::, 0.8::red dress::':
+        '1.3::blue eyes::, 0.8::red dress::',
+    '1::blue eyes::, 1.2::red dress::': 'blue eyes, 1.2::red dress::',
+    '1::unclosed, blue eyes': '1::unclosed, blue eyes',
+    '"1::quoted::", <alias:1::literal::>, 1::real::':
+        '"1::quoted::", <alias:1::literal::>, real',
+    r'\1::escaped::, 1::real::': r'\1::escaped::, real',
     'blue dress, blue_eyes': 'blue dress, blue_eyes',
     '  girl　,\tblue dress  ': 'girl, blue dress',
     ' \t　girl\t blue　dress  ,\tblue_eyes  ': 'girl blue dress, blue_eyes',

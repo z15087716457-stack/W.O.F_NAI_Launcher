@@ -32,6 +32,23 @@ void main() {
     expect(result.changed, isFalse);
   });
 
+  test('unit weight is removed only when auto formatting is enabled', () {
+    const input = '1::blue eyes::, 1.3::red dress::';
+    final disabled = PromptInputNormalization.normalize(
+      input,
+      autoFormat: false,
+      sdAutoConvert: false,
+    );
+    expect(disabled.text, input);
+    final enabled = PromptInputNormalization.normalize(
+      input,
+      autoFormat: true,
+      sdAutoConvert: false,
+    );
+    expect(enabled.text, 'blue eyes, 1.3::red dress::');
+    expect(enabled.formatted, isTrue);
+  });
+
   test(
     'format-only preserves SD groups without leaking protection markers',
     () {

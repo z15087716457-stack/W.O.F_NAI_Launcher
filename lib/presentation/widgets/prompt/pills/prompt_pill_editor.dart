@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/localization_extension.dart';
+import '../../../../core/utils/prompt_input_normalization.dart';
 import '../../../../data/models/character/character_prompt.dart';
 import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../providers/pill_workspace_provider.dart';
@@ -329,6 +330,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
         pill: translation,
         highlightEnabled: widget.config.enableSyntaxHighlight,
         numericEmphasisEnabled: widget.config.numericEmphasisEnabled,
+        autoFormat: widget.config.enableAutoFormat,
         onToggle: () => ref
             .read(_workspace.notifier)
             .updateTranslation(
@@ -360,6 +362,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
                   pill: translation,
                   highlightEnabled: widget.config.enableSyntaxHighlight,
                   numericEmphasisEnabled: widget.config.numericEmphasisEnabled,
+                  autoFormat: widget.config.enableAutoFormat,
                   onToggle: () {},
                   onEdit: (_) {},
                 ),
@@ -479,7 +482,15 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     _translationEditor?.dismiss();
     final editor = showTranslationPillEditor(
       context: context,
-      initial: initial,
+      initial: widget.config.enableAutoFormat
+          ? initial.copyWith(
+              source: PromptInputNormalization.normalize(
+                initial.source,
+                autoFormat: true,
+                sdAutoConvert: false,
+              ).text,
+            )
+          : initial,
       globalPosition: position,
     );
     _translationEditor = editor;

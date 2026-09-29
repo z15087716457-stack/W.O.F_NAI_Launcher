@@ -2298,7 +2298,7 @@ abstract class AppLocalizations {
   /// No description provided for @prompt_autoFormatSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Normalize commas and whitespace, preserve word spaces and safely close weights'**
+  /// **'Normalize commas and whitespace; remove redundant 1x weight markers'**
   String get prompt_autoFormatSubtitle;
 
   /// No description provided for @prompt_highlightEmphasis.

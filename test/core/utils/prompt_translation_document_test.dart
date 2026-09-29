@@ -76,6 +76,34 @@ void main() {
     expect(batch.requestJson(const []), isNot(contains('block')));
   });
 
+  test('new translation sources follow the auto format gate', () {
+    const original = PillDocument(
+      text: '1::blue eyes::, 1.3::red dress::',
+      instances: {},
+    );
+    final batch = PromptTranslationBatch.prepare({'main': original});
+    final group = <String, List<PromptTranslationGroup>>{
+      'main': [
+        (
+          start: 0,
+          end: original.text.length,
+          zh: '蓝眼睛，红裙子',
+          marks: const <TranslationTagMark>[],
+        ),
+      ],
+    };
+    final formatted = batch.buildFromGroups(group, autoFormat: true)['main']!;
+    final untouched = batch.buildFromGroups(group)['main']!;
+    expect(
+      formatted.instances.values.single.translation!.source,
+      'blue eyes, 1.3::red dress::',
+    );
+    expect(
+      untouched.instances.values.single.translation!.source,
+      original.text,
+    );
+  });
+
   test('rejects missing IDs and grouping across an inserted block', () {
     const marker = '\uE000';
     final batch = PromptTranslationBatch.prepare({

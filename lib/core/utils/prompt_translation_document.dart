@@ -3,6 +3,7 @@ import 'dart:convert';
 import '../../data/models/prompt_block/pill_document.dart';
 import 'nai_prompt_syntax.dart';
 import 'pill_document_editor.dart';
+import 'prompt_input_normalization.dart';
 
 typedef PromptTranslationGroup = ({
   int start,
@@ -274,8 +275,9 @@ class PromptTranslationBatch {
 
   /// Apply validated groups from one request or multiple large-request parts.
   Map<String, PillDocument> buildFromGroups(
-    Map<String, List<PromptTranslationGroup>> allGroups,
-  ) {
+    Map<String, List<PromptTranslationGroup>> allGroups, {
+    bool autoFormat = false,
+  }) {
     final result = <String, PillDocument>{};
     for (final entry in allGroups.entries) {
       final original = documents[entry.key]!;
@@ -288,7 +290,11 @@ class PromptTranslationBatch {
         instances[marker] = PillInstance(
           blockId: '',
           translation: TranslationPill(
-            source: original.text.substring(group.start, group.end),
+            source: PromptInputNormalization.normalize(
+              original.text.substring(group.start, group.end),
+              autoFormat: autoFormat,
+              sdAutoConvert: false,
+            ).text,
             zh: group.zh,
             marks: group.marks,
           ),

@@ -546,7 +546,7 @@
   "kritaBridge_busyGenerating": "Krita Bridge is generating. Wait for the current task to finish.",
   "prompt_unwantedContent": "Content you don't want in the image...",
   "prompt_autoFormat": "Auto Format",
-  "prompt_autoFormatSubtitle": "Normalize commas and whitespace, preserve word spaces and safely close weights",
+  "prompt_autoFormatSubtitle": "Normalize commas and whitespace; remove redundant 1x weight markers",
   "prompt_highlightEmphasis": "Highlight Emphasis",
   "prompt_highlightEmphasisSubtitle": "Highlight brackets and weight syntax",
   "prompt_sdSyntaxAutoConvert": "SD Syntax Auto Convert",

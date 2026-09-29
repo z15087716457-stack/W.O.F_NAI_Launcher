@@ -7,7 +7,6 @@ import '../../core/utils/tag_normalizer.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import '../prompt_assistant/services/prompt_assistant_service.dart';
 import 'character_prompt_provider.dart';
-import 'generation/generation_params_notifier.dart';
 import 'image_generation_provider.dart';
 import 'pill_workspace_provider.dart';
 
@@ -151,7 +150,10 @@ class PromptTranslationCoordinator {
           groups.putIfAbsent(entry.key, () => []).addAll(entry.value);
         }
       }
-      final replacements = batch.buildFromGroups(groups);
+      final replacements = batch.buildFromGroups(
+        groups,
+        autoFormat: _ref.read(autoFormatPromptSettingsProvider),
+      );
       var converted = 0;
       var changed = 0;
       final undo = <String, ({PillDocument before, PillDocument after})>{};

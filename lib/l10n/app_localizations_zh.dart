@@ -1175,7 +1175,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prompt_autoFormat => '自动格式化';
 
   @override
-  String get prompt_autoFormatSubtitle => '规范逗号与空白，保留词间空格并保护权重闭合';
+  String get prompt_autoFormatSubtitle => '规范逗号与空白，移除无效的 1 倍权重符号';
 
   @override
   String get prompt_highlightEmphasis => '高亮强调';

@@ -9,6 +9,7 @@ class NaiPromptFormatter {
   static String formatTag(String tag) => format(tag);
 
   static String format(String prompt) {
+    prompt = _removeUnitWeights(prompt);
     final tokens = NaiPromptSyntax.scan(prompt);
     final buffer = StringBuffer();
     final segment = <NaiPromptToken>[];
@@ -52,6 +53,35 @@ class NaiPromptFormatter {
     appendSegment();
     buffer.write(lineBreaks);
     return NaiWeightSyntax.guardClosures(buffer.toString());
+  }
+
+  /// A complete 1x NAI weight has the same effect as its contents. Work from
+  /// syntax tokens so quoted text, aliases, escapes, and unfinished weights
+  /// keep their original spelling.
+  static String _removeUnitWeights(String prompt) {
+    final tokens = NaiPromptSyntax.scan(prompt);
+    final prefixes = <int>[];
+    final remove = <int>{};
+    for (var i = 0; i < tokens.length; i++) {
+      final token = tokens[i];
+      if (token.kind == NaiPromptTokenKind.prefix) {
+        prefixes.add(i);
+      } else if (token.kind == NaiPromptTokenKind.closure &&
+          prefixes.isNotEmpty) {
+        final prefix = prefixes.removeLast();
+        final source = tokens[prefix].source(prompt);
+        if (double.tryParse(source.substring(0, source.length - 2)) == 1) {
+          remove.add(prefix);
+          remove.add(i);
+        }
+      }
+    }
+    if (remove.isEmpty) return prompt;
+    final buffer = StringBuffer();
+    for (var i = 0; i < tokens.length; i++) {
+      if (!remove.contains(i)) buffer.write(tokens[i].source(prompt));
+    }
+    return buffer.toString();
   }
 
   static String _formatSegment(

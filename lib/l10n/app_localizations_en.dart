@@ -1214,7 +1214,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prompt_autoFormatSubtitle =>
-      'Normalize commas and whitespace, preserve word spaces and safely close weights';
+      'Normalize commas and whitespace; remove redundant 1x weight markers';
 
   @override
   String get prompt_highlightEmphasis => 'Highlight Emphasis';

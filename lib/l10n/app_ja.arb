@@ -545,7 +545,7 @@
   "kritaBridge_busyGenerating": "Krita Bridge で生成中です。現在のタスクが完了するまで待ってください。",
   "prompt_unwantedContent": "画像に含めたくないコンテンツ...",
   "prompt_autoFormat": "自動フォーマット",
-  "prompt_autoFormatSubtitle": "カンマと空白を整え、単語間の空白を保ち、重み構文を安全に閉じます",
+  "prompt_autoFormatSubtitle": "カンマと空白を整え、不要な1倍の重み記号を削除します",
   "prompt_highlightEmphasis": "ハイライトの強調",
   "prompt_highlightEmphasisSubtitle": "括弧と重みの構文を強調表示します",
   "prompt_sdSyntaxAutoConvert": "SD 構文自動変換",

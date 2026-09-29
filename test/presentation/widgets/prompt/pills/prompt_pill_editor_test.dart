@@ -640,6 +640,43 @@ void main() {
     },
   );
 
+  testWidgets(
+    'existing translation pill displays clean 1x source when enabled',
+    (tester) async {
+      final container = await _pump(
+        tester,
+        autoFormat: true,
+        libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+      );
+      container
+          .read(pillWorkspaceNotifierProvider.notifier)
+          .insertTranslationAt(
+            offset: 0,
+            source: '1::blue eyes::',
+            zh: '蓝眼睛',
+            needsReview: true,
+          );
+      await tester.pump();
+      expect(find.text('blue eyes'), findsOneWidget);
+      await tester.tap(find.byType(TranslationPillView));
+      await tester.pump();
+      final sourceField = find
+          .descendant(
+            of: find.byKey(const Key('translation-pill-editor-popover')),
+            matching: find.byType(TextField),
+          )
+          .first;
+      expect(
+        tester.widget<TextField>(sourceField).controller!.text,
+        'blue eyes',
+      );
+      expect(
+        container.read(pillWorkspaceNotifierProvider).projection,
+        '1::blue eyes::',
+      );
+    },
+  );
+
   testWidgets('translation pill converts to editable source text in place', (
     tester,
   ) async {
@@ -831,6 +868,7 @@ Future<ProviderContainer> _pump(
   ValueChanged<String>? onChanged,
   _FakePromptBlockLibraryNotifier? libraryNotifier,
   bool allowEvolutionToggle = false,
+  bool autoFormat = false,
   String pillScope = PillScopes.main,
   Offset appOffset = Offset.zero,
   double editorWidth = 960,
@@ -862,9 +900,9 @@ Future<ProviderContainer> _pump(
           height: 360,
           child: PromptPillEditor(
             pillScope: pillScope,
-            config: const UnifiedPromptConfig(
+            config: UnifiedPromptConfig(
               enableSyntaxHighlight: false,
-              enableAutoFormat: false,
+              enableAutoFormat: autoFormat,
             ),
             allowEvolutionToggle: allowEvolutionToggle,
             onChanged: onChanged,

@@ -1193,7 +1193,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get prompt_autoFormat => '自動フォーマット';
 
   @override
-  String get prompt_autoFormatSubtitle => 'カンマと空白を整え、単語間の空白を保ち、重み構文を安全に閉じます';
+  String get prompt_autoFormatSubtitle => 'カンマと空白を整え、不要な1倍の重み記号を削除します';
 
   @override
   String get prompt_highlightEmphasis => 'ハイライトの強調';
