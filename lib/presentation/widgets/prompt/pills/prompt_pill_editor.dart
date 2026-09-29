@@ -543,6 +543,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
               offset: offset,
               source: translation.source,
               zh: translation.zh,
+              marks: translation.marks,
             );
       }
       return;

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/tag_expansion/tag_expansion_providers.dart';
 import '../../core/autocomplete/tag_translation_lookup.dart';
 import '../../core/utils/prompt_translation_document.dart';
+import '../../core/utils/tag_normalizer.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import '../prompt_assistant/services/prompt_assistant_service.dart';
 import 'character_prompt_provider.dart';
@@ -138,13 +139,14 @@ class PromptTranslationCoordinator {
 
       final groups = <String, List<PromptTranslationGroup>>{};
       for (final part in batch.partitions()) {
+        final glossary = await _glossaryFor(part);
         final raw = await _ref
             .read(promptAssistantServiceProvider)
             .translatePromptGroup(
-              part.requestJson(await _glossaryFor(part)),
+              part.requestJson(glossary),
               sessionId: 'prompt-translation-${negative ? 'neg' : 'pos'}',
             );
-        final parsed = part.parseGroups(raw);
+        final parsed = part.parseGroups(raw, glossary: glossary);
         for (final entry in parsed.entries) {
           groups.putIfAbsent(entry.key, () => []).addAll(entry.value);
         }
@@ -191,17 +193,33 @@ class PromptTranslationCoordinator {
         'single': PillDocument(text: initial.source, instances: const {}),
       });
       if (batch.isEmpty) return false;
+      final glossary = await _glossaryFor(batch);
       final raw = await _ref
           .read(promptAssistantServiceProvider)
           .translatePromptGroup(
-            batch.requestJson(await _glossaryFor(batch)),
+            batch.requestJson(glossary),
             sessionId: 'prompt-translation-single',
           );
-      final rebuilt = batch.parseAndBuild(raw)['single']!;
-      final zh = [
-        for (final marker in rebuilt.text.split(''))
-          if (rebuilt.instances[marker]?.translation case final part?) part.zh,
-      ].join('，');
+      final rebuilt = batch.parseAndBuild(raw, glossary: glossary)['single']!;
+      final reading = StringBuffer();
+      final marks = <TranslationTagMark>[];
+      for (final marker in rebuilt.text.split('')) {
+        final part = rebuilt.instances[marker]?.translation;
+        if (part == null) continue;
+        if (reading.isNotEmpty) reading.write('，');
+        final offset = reading.length;
+        reading.write(part.zh);
+        marks.addAll([
+          for (final mark in part.marks)
+            TranslationTagMark(
+              start: offset + mark.start,
+              end: offset + mark.end,
+              tag: mark.tag,
+              iconId: mark.iconId,
+            ),
+        ]);
+      }
+      final zh = reading.toString();
       if (zh.isEmpty) return false;
       final current = _ref
           .read(pillWorkspaceProvider(scope))
@@ -213,7 +231,12 @@ class PromptTranslationCoordinator {
           .read(pillWorkspaceProvider(scope).notifier)
           .updateTranslation(
             marker,
-            initial.copyWith(zh: zh, showOriginal: false, needsReview: false),
+            initial.copyWith(
+              zh: zh,
+              marks: List.unmodifiable(marks),
+              showOriginal: false,
+              needsReview: false,
+            ),
           );
       return true;
     } finally {
@@ -229,12 +252,22 @@ class PromptTranslationCoordinator {
           .read(unifiedTagRepositoryProvider)
           .byNames(batch.tagCandidates);
       final names = candidates.map((item) => item.canonicalTag).toList();
-      final translations = await _ref
-          .read(tagTranslationLookupProvider)
-          .translateBatch(names);
+      Map<String, String> translations = const {};
+      try {
+        translations = await _ref
+            .read(tagTranslationLookupProvider)
+            .translateBatch(names);
+      } catch (_) {
+        // Missing optional Chinese readings must not hide verified tag icons.
+      }
       return [
-        for (final name in names)
-          {'tag': name, if (translations[name] case final zh?) 'zh': zh},
+        for (final candidate in candidates)
+          {
+            'tag': candidate.canonicalTag,
+            'title': TagNormalizer.toDisplay(candidate.canonicalTag),
+            if (translations[candidate.canonicalTag] case final zh?) 'zh': zh,
+            'icon_id': candidate.category.name,
+          },
       ];
     } catch (_) {
       // The optional dictionary must not prevent ordinary translation.

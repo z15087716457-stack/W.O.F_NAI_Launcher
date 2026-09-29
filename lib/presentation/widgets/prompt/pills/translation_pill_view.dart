@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../data/models/prompt_block/pill_document.dart';
 import '../nai_syntax_controller.dart';
+import 'translation_tag_span.dart';
 
 class TranslationPillView extends StatefulWidget {
   const TranslationPillView({
@@ -101,10 +102,15 @@ class _TranslationPillViewState extends State<TranslationPillView> {
                 ],
                 Flexible(
                   child: Text.rich(
-                    _syntaxController.buildTextSpan(
-                      context: context,
-                      style: textStyle,
-                      withComposing: false,
+                    TranslationTagSpan.annotate(
+                      context,
+                      _syntaxController.buildTextSpan(
+                        context: context,
+                        style: textStyle,
+                        withComposing: false,
+                      ),
+                      pill.zh,
+                      original ? const [] : pill.marks,
                     ),
                     softWrap: true,
                   ),
@@ -319,6 +325,9 @@ class _TranslationPillEditPopoverState
       TranslationPill(
         source: _source.text,
         zh: _zh.text.trim(),
+        marks: sourceChanged || readingChanged
+            ? const []
+            : widget.initial.marks,
         showOriginal: sourceChanged || widget.initial.showOriginal,
         needsReview: readingChanged
             ? false

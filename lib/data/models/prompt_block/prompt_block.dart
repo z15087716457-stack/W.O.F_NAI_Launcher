@@ -70,6 +70,10 @@ class PromptBlock with _$PromptBlock {
     /// Optional Chinese reading text for a copied translation block.
     @JsonKey(includeIfNull: false) String? readingTranslationZh,
 
+    /// Visual tag annotations; never part of [content] or generation text.
+    @JsonKey(includeIfNull: false)
+    List<Map<String, dynamic>>? readingTranslationMarks,
+
     /// Source changed after the last Chinese reading was reviewed.
     @Default(false) bool readingTranslationNeedsReview,
 
@@ -157,6 +161,7 @@ class PromptBlock with _$PromptBlock {
     String color = '#FF607D8B',
     String appearance = 'classic',
     String? readingTranslationZh,
+    List<Map<String, dynamic>>? readingTranslationMarks,
     bool readingTranslationNeedsReview = false,
     String? iconName,
     String? thumbnail,
@@ -192,6 +197,7 @@ class PromptBlock with _$PromptBlock {
       title: title.trim(),
       content: content,
       readingTranslationZh: readingTranslationZh,
+      readingTranslationMarks: readingTranslationMarks,
       readingTranslationNeedsReview: readingTranslationNeedsReview,
       folderId: folderId,
       color: color,

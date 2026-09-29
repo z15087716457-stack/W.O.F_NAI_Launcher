@@ -171,6 +171,10 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         offset: offset,
         source: block!.content,
         zh: translationZh,
+        marks: TranslationPill.fromJson({
+          'zh': translationZh,
+          'marks': block.readingTranslationMarks,
+        }).marks,
         needsReview: block.readingTranslationNeedsReview,
       );
       if (countUse) {
@@ -207,6 +211,7 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     required int offset,
     required String source,
     required String zh,
+    List<TranslationTagMark> marks = const [],
     bool needsReview = false,
   }) {
     final before = state.document;
@@ -218,6 +223,7 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         translation: TranslationPill(
           source: source,
           zh: zh,
+          marks: marks,
           showOriginal: needsReview,
           needsReview: needsReview,
         ),

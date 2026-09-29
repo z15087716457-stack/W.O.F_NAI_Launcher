@@ -187,4 +187,100 @@ void main() {
     expect(restored.readingTranslationNeedsReview, isTrue);
     expect(restored.appearance, 'translation');
   });
+
+  test('verified icon IDs become reading-only tag marks', () {
+    final batch = PromptTranslationBatch.prepare({
+      'main': const PillDocument(
+        text: '1.4::blue eyes::, artist:asteroid_ill,',
+        instances: {},
+      ),
+    });
+    final ids = batch.segments['main']!.map((item) => item.id).toList();
+    final glossary = [
+      {'tag': 'blue_eyes', 'zh': '蓝眼睛', 'icon_id': 'general'},
+      {'tag': 'artist:asteroid_ill', 'zh': '画师', 'icon_id': 'artist'},
+    ];
+    final converted = batch.parseAndBuild(
+      jsonEncode({
+        'fields': [
+          {
+            'id': 'main',
+            'groups': [
+              {
+                'ids': ids,
+                'zh': '1.4::蓝眼睛::，画师：asteroid_ill',
+                'parts': [
+                  {'text': '1.4::'},
+                  {'text': '蓝眼睛', 'tag': 'blue_eyes', 'icon_id': 'general'},
+                  {'text': '::，'},
+                  {
+                    'text': '画师：asteroid_ill',
+                    'tag': 'artist:asteroid_ill',
+                    'icon_id': 'artist',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+      glossary: glossary,
+    )['main']!;
+    final pill = converted.instances.values.single.translation!;
+    expect(pill.marks, [
+      const TranslationTagMark(
+        start: 5,
+        end: 8,
+        tag: 'blue_eyes',
+        iconId: 'general',
+      ),
+      TranslationTagMark(
+        start: pill.zh.indexOf('画师'),
+        end: pill.zh.length,
+        tag: 'artist:asteroid_ill',
+        iconId: 'artist',
+      ),
+    ]);
+    expect(PillDocument.fromJson(converted.toJson()), converted);
+    expect(
+      PillDocumentEditor.project(converted, (_) => null),
+      '1.4::blue eyes::, artist:asteroid_ill,',
+    );
+  });
+
+  test('invented or mismatched icon IDs are ignored without losing zh', () {
+    final batch = PromptTranslationBatch.prepare({
+      'main': const PillDocument(text: 'blue eyes', instances: {}),
+    });
+    final id = batch.segments['main']!.single.id;
+    final response = jsonEncode({
+      'fields': [
+        {
+          'id': 'main',
+          'groups': [
+            {
+              'ids': [id],
+              'zh': '蓝眼睛',
+              'parts': [
+                {'text': '蓝眼睛', 'tag': 'blue_eyes', 'icon_id': 'artist'},
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    final pill = batch
+        .parseAndBuild(
+          response,
+          glossary: [
+            {'tag': 'blue_eyes', 'icon_id': 'general'},
+          ],
+        )['main']!
+        .instances
+        .values
+        .single
+        .translation!;
+    expect(pill.zh, '蓝眼睛');
+    expect(pill.marks, isEmpty);
+  });
 }

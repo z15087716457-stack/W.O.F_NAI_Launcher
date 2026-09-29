@@ -58,10 +58,21 @@ are hints for exact complete tags only; do not force substring matches inside
 sentences into Danbooru meanings. Preserve names, relationships, counts and
 weight meanings in the Chinese reading text. Group adjacent segments by meaning,
 but never group across a field boundary or a run boundary.
+Each glossary entry provides an exact tag, a display title, an icon_id, and
+possibly a Chinese reading (zh). Use these as terminology hints.
+Only when an exact complete source tag belongs to a group and its translated
+phrase is unambiguous, mark that phrase. Never invent a tag or icon_id. The
+icon is presentation metadata, not a character in the reading or source.
 Return exactly one JSON object: {"fields":[{"id":"input field id",
-"groups":[{"ids":["consecutive input segment ids"],"zh":"Chinese reading"}]}]}.
+"groups":[{"ids":["consecutive input segment ids"],"zh":"Chinese reading",
+"parts":[{"text":"plain or marked reading fragment",
+"tag":"exact glossary tag only when marked",
+"icon_id":"matching glossary icon_id only when marked"}]}]}]}.
+The parts must concatenate exactly to zh in order. Omit parts if there is no
+unambiguous tag phrase. Put no icon character in zh or parts text. Preserve
+weight syntax and other prompt punctuation in the Chinese reading.
 Copy every field ID and every segment ID exactly once, in input order. Do not
-return source text, Markdown, code fences, comments or extra fields.
+return source text, Markdown, code fences or comments.
 ''';
 
   Future<String> translatePromptGroup(

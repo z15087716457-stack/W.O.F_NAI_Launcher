@@ -52,4 +52,35 @@ void main() {
     expect(pillShape.borderRadius.resolve(TextDirection.ltr).topLeft.x, 6);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('saved palette translation retains its category mark', (
+    tester,
+  ) async {
+    final block = PromptBlock.create(
+      title: '蓝眼睛',
+      content: 'blue eyes',
+      readingTranslationZh: '蓝眼睛',
+      readingTranslationMarks: const [
+        {'start': 0, 'end': 3, 'tag': 'blue_eyes', 'icon_id': 'general'},
+      ],
+      appearance: 'translation',
+    );
+    final restored = PromptBlock.fromJson(block.toJson());
+    expect(restored.readingTranslationMarks, block.readingTranslationMarks);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PromptBlockPill(
+            block: restored,
+            displayTitle: '蓝眼睛',
+            maxWidth: 170,
+            paletteStyle: true,
+            onTap: () {},
+          ),
+        ),
+      ),
+    );
+    expect(find.byIcon(Icons.sell_rounded), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

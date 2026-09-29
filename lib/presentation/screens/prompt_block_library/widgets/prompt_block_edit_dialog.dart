@@ -46,6 +46,7 @@ class PromptBlockEditResult {
     required this.color,
     this.appearance = PromptBlockAppearance.classic,
     this.readingTranslationZh,
+    this.readingTranslationMarks,
     this.readingTranslationNeedsReview = false,
     required this.iconName,
     this.thumbnail,
@@ -68,6 +69,7 @@ class PromptBlockEditResult {
   final String color;
   final String appearance;
   final String? readingTranslationZh;
+  final List<Map<String, dynamic>>? readingTranslationMarks;
   final bool readingTranslationNeedsReview;
   final String? iconName;
 
@@ -177,6 +179,7 @@ class PromptBlockEditDialog extends StatefulWidget {
           color: result.color,
           appearance: result.appearance,
           readingTranslationZh: result.readingTranslationZh,
+          readingTranslationMarks: result.readingTranslationMarks,
           readingTranslationNeedsReview: result.readingTranslationNeedsReview,
           iconName: result.iconName,
           thumbnail: result.thumbnail,
@@ -1253,6 +1256,9 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
               : readingZh.isEmpty
               ? null
               : readingZh,
+          readingTranslationMarks: sourceChanged || readingChanged
+              ? null
+              : widget.block?.readingTranslationMarks,
           readingTranslationNeedsReview:
               widget.block?.readingTranslationZh != null &&
               readingZh.isNotEmpty &&

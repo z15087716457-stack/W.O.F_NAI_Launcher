@@ -78,6 +78,72 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('tag icon and matching underline decorate only the zh face', (
+    tester,
+  ) async {
+    var pill = const TranslationPill(
+      source: '1.4::blue eyes::, sky',
+      zh: '1.4::蓝眼睛::，天空',
+      marks: [
+        TranslationTagMark(
+          start: 5,
+          end: 8,
+          tag: 'blue_eyes',
+          iconId: 'general',
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 180,
+            child: StatefulBuilder(
+              builder: (context, setState) => TranslationPillView(
+                pill: pill,
+                onToggle: () => setState(
+                  () => pill = pill.copyWith(showOriginal: !pill.showOriginal),
+                ),
+                onEdit: _noopPosition,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.byIcon(Icons.sell_rounded), findsOneWidget);
+    final children =
+        (tester.widget<Text>(_visibleTextFinder()).textSpan! as TextSpan)
+            .children!;
+    final marked = children.whereType<TextSpan>().firstWhere(
+      (span) => span.text == '蓝眼睛',
+    );
+    final icon = tester.widget<Icon>(find.byIcon(Icons.sell_rounded));
+    expect(marked.style!.decoration, TextDecoration.underline);
+    expect(marked.style!.decorationColor, icon.color);
+    expect(
+      children.whereType<TextSpan>().any(
+        (span) => span.text == '::' && span.style?.backgroundColor != null,
+      ),
+      isTrue,
+    );
+    expect(
+      tester.getSize(find.byType(TranslationPillView)).width,
+      lessThanOrEqualTo(180),
+    );
+
+    final middle = await tester.startGesture(
+      tester.getCenter(find.byType(TranslationPillView)),
+      kind: PointerDeviceKind.mouse,
+      buttons: kMiddleMouseButton,
+    );
+    await middle.up();
+    await tester.pump();
+    expect(find.byIcon(Icons.sell_rounded), findsNothing);
+    expect(find.text('1.4::blue eyes::, sky'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('translation syntax follows emphasis and model switches', (
     tester,
   ) async {
@@ -392,7 +458,18 @@ void main() {
     );
     final editor = showTranslationPillEditor(
       context: editorContext!,
-      initial: const TranslationPill(source: 'source', zh: '译文'),
+      initial: const TranslationPill(
+        source: 'source',
+        zh: '译文',
+        marks: [
+          TranslationTagMark(
+            start: 0,
+            end: 2,
+            tag: 'source',
+            iconId: 'general',
+          ),
+        ],
+      ),
       globalPosition: const Offset(120, 80),
     );
     await tester.pump();
@@ -403,6 +480,7 @@ void main() {
     expect(result.zh, '译文');
     expect(result.showOriginal, isTrue);
     expect(result.needsReview, isTrue);
+    expect(result.marks, isEmpty);
 
     await tester.pump();
     final reopened = showTranslationPillEditor(
@@ -414,6 +492,47 @@ void main() {
     await tester.tap(find.byKey(const Key('translation-pill-save')));
     final unchanged = await reopened.result as TranslationPill;
     expect(unchanged.needsReview, isTrue);
+  });
+
+  testWidgets('editing the reading clears stale category marks', (
+    tester,
+  ) async {
+    BuildContext? editorContext;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) {
+              editorContext = context;
+              return const SizedBox.expand();
+            },
+          ),
+        ),
+      ),
+    );
+    final editor = showTranslationPillEditor(
+      context: editorContext!,
+      initial: const TranslationPill(
+        source: 'blue eyes',
+        zh: '蓝眼睛',
+        marks: [
+          TranslationTagMark(
+            start: 0,
+            end: 3,
+            tag: 'blue_eyes',
+            iconId: 'general',
+          ),
+        ],
+      ),
+      globalPosition: const Offset(120, 80),
+    );
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).last, '青色眼睛');
+    await tester.tap(find.byKey(const Key('translation-pill-save')));
+    final result = await editor.result as TranslationPill;
+    expect(result.zh, '青色眼睛');
+    expect(result.marks, isEmpty);
+    expect(result.source, 'blue eyes');
   });
 
   testWidgets('plain text action returns the visible source', (tester) async {

@@ -4,7 +4,12 @@ import '../../data/models/prompt_block/pill_document.dart';
 import 'nai_prompt_syntax.dart';
 import 'pill_document_editor.dart';
 
-typedef PromptTranslationGroup = ({int start, int end, String zh});
+typedef PromptTranslationGroup = ({
+  int start,
+  int end,
+  String zh,
+  List<TranslationTagMark> marks,
+});
 
 /// A lossless request snapshot. The model can group segment IDs, but it never
 /// supplies source text or offsets for document mutation.
@@ -115,21 +120,29 @@ class PromptTranslationBatch {
   /// Danbooru catalog before adding any entry to the glossary.
   Set<String> get tagCandidates {
     final result = <String>{};
-    final allowed = RegExp(r'^[a-zA-Z0-9_():.!+\- ]+$');
     for (final item in segments.values.expand((items) => items)) {
-      var value = item.source.trim().replaceFirst(RegExp(r'[,，]\s*$'), '');
-      value = value.replaceFirst(RegExp(r'^[-+]?\d+(?:\.\d+)?::'), '');
-      value = value.replaceFirst(RegExp(r'::$'), '');
-      while (value.length > 2 &&
-          ((value.startsWith('{') && value.endsWith('}')) ||
-              (value.startsWith('[') && value.endsWith(']')))) {
-        value = value.substring(1, value.length - 1).trim();
-      }
-      if (value.length > 80 || !allowed.hasMatch(value)) continue;
-      result.add(value.toLowerCase().replaceAll(' ', '_'));
+      final tag = _candidateTag(item.source);
+      if (tag == null) continue;
+      result.add(tag);
       if (result.length >= 160) return result;
     }
     return result;
+  }
+
+  static String? _candidateTag(String source) {
+    var value = source.trim().replaceFirst(RegExp(r'[,，]\s*$'), '');
+    value = value.replaceFirst(RegExp(r'^[-+]?\d+(?:\.\d+)?::'), '');
+    value = value.replaceFirst(RegExp(r'::$'), '');
+    while (value.length > 2 &&
+        ((value.startsWith('{') && value.endsWith('}')) ||
+            (value.startsWith('[') && value.endsWith(']')))) {
+      value = value.substring(1, value.length - 1).trim();
+    }
+    if (value.length > 80 ||
+        !RegExp(r'^[a-zA-Z0-9_():.!+\- ]+$').hasMatch(value)) {
+      return null;
+    }
+    return value.toLowerCase().replaceAll(' ', '_');
   }
 
   String requestJson(List<Map<String, String>> glossary) => jsonEncode({
@@ -149,7 +162,10 @@ class PromptTranslationBatch {
 
   /// Validate full ordered coverage. The model supplies no source text or
   /// offsets, so every returned group is anchored to local snapshot ranges.
-  Map<String, List<PromptTranslationGroup>> parseGroups(String raw) {
+  Map<String, List<PromptTranslationGroup>> parseGroups(
+    String raw, {
+    List<Map<String, String>> glossary = const [],
+  }) {
     final decoded = jsonDecode(raw.trim());
     if (decoded is! Map || decoded['fields'] is! List) {
       throw const FormatException('Translation response needs fields');
@@ -160,6 +176,11 @@ class PromptTranslationBatch {
       throw const FormatException('Translation fields are incomplete');
     }
     final result = <String, List<PromptTranslationGroup>>{};
+    final glossaryByTag = {
+      for (final item in glossary)
+        if (item['tag'] != null && item['icon_id'] != null)
+          item['tag']!: item['icon_id']!,
+    };
     for (var fieldIndex = 0; fieldIndex < expected.length; fieldIndex++) {
       final entry = expected[fieldIndex];
       final response = output[fieldIndex];
@@ -195,10 +216,15 @@ class PromptTranslationBatch {
           }
           cursor++;
         }
+        final sourceTags = {
+          for (var index = first; index < cursor; index++)
+            if (_candidateTag(items[index].source) case final tag?) tag,
+        };
         groups.add((
           start: items[first].start,
           end: items[cursor - 1].end,
           zh: zh,
+          marks: _parseMarks(rawGroup['parts'], zh, sourceTags, glossaryByTag),
         ));
       }
       if (cursor != items.length) {
@@ -207,6 +233,43 @@ class PromptTranslationBatch {
       result[entry.key] = groups;
     }
     return result;
+  }
+
+  /// Parts are presentation hints. An invalid or invented mark never blocks
+  /// the validated Chinese reading text.
+  static List<TranslationTagMark> _parseMarks(
+    Object? rawParts,
+    String zh,
+    Set<String> sourceTags,
+    Map<String, String> glossaryByTag,
+  ) {
+    if (rawParts is! List || rawParts.isEmpty) return const [];
+    final text = StringBuffer();
+    final marks = <TranslationTagMark>[];
+    for (final rawPart in rawParts) {
+      if (rawPart is! Map || rawPart['text'] is! String) return const [];
+      final part = rawPart['text'] as String;
+      if (part.isEmpty) return const [];
+      final start = text.length;
+      text.write(part);
+      final tag = rawPart['tag'];
+      final iconId = rawPart['icon_id'];
+      if (tag is String &&
+          iconId is String &&
+          sourceTags.contains(tag) &&
+          glossaryByTag[tag] == iconId &&
+          RegExp(r'[\p{L}\p{N}]', unicode: true).hasMatch(part)) {
+        marks.add(
+          TranslationTagMark(
+            start: start,
+            end: text.length,
+            tag: tag,
+            iconId: iconId,
+          ),
+        );
+      }
+    }
+    return text.toString() == zh ? List.unmodifiable(marks) : const [];
   }
 
   /// Apply validated groups from one request or multiple large-request parts.
@@ -227,6 +290,7 @@ class PromptTranslationBatch {
           translation: TranslationPill(
             source: original.text.substring(group.start, group.end),
             zh: group.zh,
+            marks: group.marks,
           ),
         );
         text = text.replaceRange(group.start, group.end, marker);
@@ -237,6 +301,8 @@ class PromptTranslationBatch {
   }
 
   /// Convenience for a single model response.
-  Map<String, PillDocument> parseAndBuild(String raw) =>
-      buildFromGroups(parseGroups(raw));
+  Map<String, PillDocument> parseAndBuild(
+    String raw, {
+    List<Map<String, String>> glossary = const [],
+  }) => buildFromGroups(parseGroups(raw, glossary: glossary));
 }

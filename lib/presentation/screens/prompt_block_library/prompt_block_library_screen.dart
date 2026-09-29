@@ -2588,6 +2588,7 @@ class _PromptBlockLibraryScreenState
             color: result.color,
             appearance: result.appearance,
             readingTranslationZh: result.readingTranslationZh,
+            readingTranslationMarks: result.readingTranslationMarks,
             readingTranslationNeedsReview: result.readingTranslationNeedsReview,
             iconName: result.iconName,
             thumbnail: result.thumbnail,
@@ -2624,6 +2625,7 @@ class _PromptBlockLibraryScreenState
               color: result.color,
               appearance: result.appearance,
               readingTranslationZh: result.readingTranslationZh,
+              readingTranslationMarks: result.readingTranslationMarks,
               readingTranslationNeedsReview:
                   result.readingTranslationNeedsReview,
               iconName: result.iconName,

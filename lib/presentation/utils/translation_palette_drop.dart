@@ -20,6 +20,9 @@ Future<void> acceptPaletteDrag(
       title: title.length > 60 ? '${title.substring(0, 60)}…' : title,
       content: translation.source,
       readingTranslationZh: translation.zh,
+      readingTranslationMarks: [
+        for (final mark in translation.marks) mark.toJson(),
+      ],
       readingTranslationNeedsReview: translation.needsReview,
       appearance: 'translation',
       color: '#FF7187BD',

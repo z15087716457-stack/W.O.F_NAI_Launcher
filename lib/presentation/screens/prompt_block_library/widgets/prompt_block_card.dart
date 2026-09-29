@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/utils/localization_extension.dart';
+import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../../../widgets/prompt/blocks/prompt_block_appearance.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
+import '../../../widgets/prompt/pills/translation_tag_span.dart';
 
 enum _PromptBlockCardAction { favorite, copy, addTag, edit, delete }
 
@@ -353,6 +355,25 @@ class PromptBlockPill extends StatelessWidget {
     final theme = Theme.of(context);
     final blockColor = promptBlockColorFromString(block.color);
     final thumbnail = block.thumbnail;
+    final titleStyle = theme.textTheme.bodyMedium?.copyWith(
+      fontSize: paletteStyle ? 12 : null,
+      height: paletteStyle ? 1.25 : null,
+      fontWeight: paletteStyle ? FontWeight.w500 : FontWeight.w600,
+      color: PromptBlockAppearance.text(
+        block.appearance,
+        blockColor,
+        theme.colorScheme.onSurface,
+      ),
+    );
+    final marks =
+        paletteStyle &&
+            block.readingTranslationZh == displayTitle &&
+            block.readingTranslationMarks?.isNotEmpty == true
+        ? TranslationPill.fromJson({
+            'zh': displayTitle,
+            'marks': block.readingTranslationMarks,
+          }).marks
+        : const <TranslationTagMark>[];
     return GestureDetector(
       onSecondaryTapUp: onSecondaryTap,
       child: ConstrainedBox(
@@ -431,26 +452,28 @@ class PromptBlockPill extends StatelessWidget {
                       ),
                     SizedBox(width: paletteStyle ? 5 : 6),
                     Flexible(
-                      child: Text(
-                        displayTitle,
-                        maxLines: paletteStyle ? null : 1,
-                        overflow: paletteStyle
-                            ? TextOverflow.visible
-                            : TextOverflow.ellipsis,
-                        softWrap: paletteStyle,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontSize: paletteStyle ? 12 : null,
-                          height: paletteStyle ? 1.25 : null,
-                          fontWeight: paletteStyle
-                              ? FontWeight.w500
-                              : FontWeight.w600,
-                          color: PromptBlockAppearance.text(
-                            block.appearance,
-                            blockColor,
-                            theme.colorScheme.onSurface,
-                          ),
-                        ),
-                      ),
+                      child: marks.isEmpty
+                          ? Text(
+                              displayTitle,
+                              maxLines: paletteStyle ? null : 1,
+                              overflow: paletteStyle
+                                  ? TextOverflow.visible
+                                  : TextOverflow.ellipsis,
+                              softWrap: paletteStyle,
+                              style: titleStyle,
+                            )
+                          : Text.rich(
+                              TranslationTagSpan.annotate(
+                                context,
+                                TextSpan(
+                                  children: [TextSpan(text: displayTitle)],
+                                ),
+                                displayTitle,
+                                marks,
+                              ),
+                              softWrap: true,
+                              style: titleStyle,
+                            ),
                     ),
                     if (multiSelected) ...[
                       const SizedBox(width: 6),

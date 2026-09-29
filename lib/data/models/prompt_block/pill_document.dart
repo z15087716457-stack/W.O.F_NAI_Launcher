@@ -363,28 +363,85 @@ class PillInstance {
   );
 }
 
+/// Presentation metadata for a verified tag phrase inside a Chinese reading.
+class TranslationTagMark {
+  const TranslationTagMark({
+    required this.start,
+    required this.end,
+    required this.tag,
+    required this.iconId,
+  });
+
+  /// UTF-16 offsets into [TranslationPill.zh], never into generation text.
+  final int start;
+  final int end;
+  final String tag;
+  final String iconId;
+
+  Map<String, dynamic> toJson() => {
+    'start': start,
+    'end': end,
+    'tag': tag,
+    'icon_id': iconId,
+  };
+
+  static TranslationTagMark? fromJson(Map<String, dynamic> json, int length) {
+    final start = json['start'];
+    final end = json['end'];
+    final tag = json['tag'];
+    final iconId = json['icon_id'];
+    if (start is! int ||
+        end is! int ||
+        start < 0 ||
+        end <= start ||
+        end > length ||
+        tag is! String ||
+        tag.isEmpty ||
+        iconId is! String ||
+        iconId.isEmpty) {
+      return null;
+    }
+    return TranslationTagMark(start: start, end: end, tag: tag, iconId: iconId);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is TranslationTagMark &&
+      other.start == start &&
+      other.end == end &&
+      other.tag == tag &&
+      other.iconId == iconId;
+
+  @override
+  int get hashCode => Object.hash(start, end, tag, iconId);
+}
+
 /// A reading aid; only [source] participates in image generation.
 class TranslationPill {
   const TranslationPill({
     required this.source,
     required this.zh,
+    this.marks = const [],
     this.showOriginal = false,
     this.needsReview = false,
   });
 
   final String source;
   final String zh;
+  final List<TranslationTagMark> marks;
   final bool showOriginal;
   final bool needsReview;
 
   TranslationPill copyWith({
     String? source,
     String? zh,
+    List<TranslationTagMark>? marks,
     bool? showOriginal,
     bool? needsReview,
   }) => TranslationPill(
     source: source ?? this.source,
     zh: zh ?? this.zh,
+    marks: marks ?? this.marks,
     showOriginal: showOriginal ?? this.showOriginal,
     needsReview: needsReview ?? this.needsReview,
   );
@@ -392,28 +449,59 @@ class TranslationPill {
   Map<String, dynamic> toJson() => {
     'source': source,
     'zh': zh,
+    if (marks.isNotEmpty) 'marks': marks.map((mark) => mark.toJson()).toList(),
     if (showOriginal) 'showOriginal': true,
     if (needsReview) 'needsReview': true,
   };
 
-  factory TranslationPill.fromJson(Map<String, dynamic> json) =>
-      TranslationPill(
-        source: json['source'] as String? ?? '',
-        zh: json['zh'] as String? ?? '',
-        showOriginal: json['showOriginal'] as bool? ?? false,
-        needsReview: json['needsReview'] as bool? ?? false,
-      );
+  factory TranslationPill.fromJson(Map<String, dynamic> json) {
+    final zh = json['zh'] as String? ?? '';
+    final marks = <TranslationTagMark>[];
+    if (json['marks'] case final List rawMarks) {
+      for (final raw in rawMarks) {
+        if (raw is! Map) continue;
+        final mark = TranslationTagMark.fromJson(
+          Map<String, dynamic>.from(raw),
+          zh.length,
+        );
+        if (mark == null || (marks.isNotEmpty && mark.start < marks.last.end)) {
+          continue;
+        }
+        marks.add(mark);
+      }
+    }
+    return TranslationPill(
+      source: json['source'] as String? ?? '',
+      zh: zh,
+      marks: List.unmodifiable(marks),
+      showOriginal: json['showOriginal'] as bool? ?? false,
+      needsReview: json['needsReview'] as bool? ?? false,
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
       other is TranslationPill &&
       other.source == source &&
       other.zh == zh &&
+      _sameMarks(other.marks, marks) &&
       other.showOriginal == showOriginal &&
       other.needsReview == needsReview;
 
   @override
-  int get hashCode => Object.hash(source, zh, showOriginal, needsReview);
+  int get hashCode =>
+      Object.hash(source, zh, Object.hashAll(marks), showOriginal, needsReview);
+
+  static bool _sameMarks(
+    List<TranslationTagMark> a,
+    List<TranslationTagMark> b,
+  ) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 }
 
 /// 药丸工作区文档：文本（含标记字符）+ 实例表。
