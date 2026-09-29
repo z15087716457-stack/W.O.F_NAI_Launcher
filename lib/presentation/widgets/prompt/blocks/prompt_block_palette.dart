@@ -7,9 +7,12 @@ import '../../common/studio_animated_icon.dart';
 import '../../common/studio_icons.dart';
 
 import '../../../../core/utils/localization_extension.dart';
+import '../../../../core/constants/api_constants.dart';
 import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../../providers/pill_workspace_provider.dart';
+import '../../../providers/generation/generation_params_notifier.dart';
+import '../../../providers/generation/generation_settings_notifiers.dart';
 import '../../../providers/prompt_block_palette_provider.dart';
 import '../../../utils/prompt_block_bundle_insertion.dart';
 import '../../../utils/translation_palette_drop.dart';
@@ -592,16 +595,24 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
     final theme = Theme.of(context);
     final block = widget.block;
     final title = block.readingTranslationZh?.trim().isNotEmpty == true
-        ? block.readingTranslationZh!.trim()
+        ? block.readingTranslationZh!
         : block.title.trim().isEmpty
         ? block.content
         : block.title;
+    final highlightEnabled = ref.watch(highlightEmphasisSettingsProvider);
+    final numericEmphasisEnabled = ImageModels.isV4Model(
+      ref.watch(
+        generationParamsNotifierProvider.select((params) => params.model),
+      ),
+    );
 
     final chip = PromptBlockPill(
       block: block,
       displayTitle: title,
       maxWidth: 374,
       paletteStyle: true,
+      highlightEnabled: highlightEnabled,
+      numericEmphasisEnabled: numericEmphasisEnabled,
       multiSelected: widget.selected,
       onTap: widget.onToggleSelected ?? _insertAtCaret,
     );

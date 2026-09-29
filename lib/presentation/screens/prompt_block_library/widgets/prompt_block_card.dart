@@ -9,6 +9,7 @@ import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../../../widgets/prompt/blocks/prompt_block_appearance.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
+import '../../../widgets/prompt/nai_syntax_controller.dart';
 import '../../../widgets/prompt/pills/translation_tag_span.dart';
 
 enum _PromptBlockCardAction { favorite, copy, addTag, edit, delete }
@@ -330,6 +331,8 @@ class PromptBlockPill extends StatelessWidget {
     this.onSecondaryTap,
     this.showThumbnail = true,
     this.paletteStyle = false,
+    this.highlightEnabled = true,
+    this.numericEmphasisEnabled = true,
   });
 
   final PromptBlock block;
@@ -349,6 +352,34 @@ class PromptBlockPill extends StatelessWidget {
 
   /// The floating palette shows full text at a smaller, prompt-like size.
   final bool paletteStyle;
+  final bool highlightEnabled;
+  final bool numericEmphasisEnabled;
+
+  TextSpan _paletteTextSpan(
+    BuildContext context,
+    TextStyle? style,
+    List<TranslationTagMark> marks,
+  ) {
+    final controller = NaiSyntaxController(
+      text: displayTitle,
+      highlightEnabled: highlightEnabled,
+      numericEmphasisEnabled: numericEmphasisEnabled,
+    );
+    try {
+      return TranslationTagSpan.annotate(
+        context,
+        controller.buildTextSpan(
+          context: context,
+          style: style,
+          withComposing: false,
+        ),
+        displayTitle,
+        marks,
+      );
+    } finally {
+      controller.dispose();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -452,26 +483,17 @@ class PromptBlockPill extends StatelessWidget {
                       ),
                     SizedBox(width: paletteStyle ? 5 : 6),
                     Flexible(
-                      child: marks.isEmpty
-                          ? Text(
-                              displayTitle,
-                              maxLines: paletteStyle ? null : 1,
-                              overflow: paletteStyle
-                                  ? TextOverflow.visible
-                                  : TextOverflow.ellipsis,
-                              softWrap: paletteStyle,
+                      child: paletteStyle
+                          ? Text.rich(
+                              _paletteTextSpan(context, titleStyle, marks),
+                              softWrap: true,
+                              overflow: TextOverflow.visible,
                               style: titleStyle,
                             )
-                          : Text.rich(
-                              TranslationTagSpan.annotate(
-                                context,
-                                TextSpan(
-                                  children: [TextSpan(text: displayTitle)],
-                                ),
-                                displayTitle,
-                                marks,
-                              ),
-                              softWrap: true,
+                          : Text(
+                              displayTitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: titleStyle,
                             ),
                     ),

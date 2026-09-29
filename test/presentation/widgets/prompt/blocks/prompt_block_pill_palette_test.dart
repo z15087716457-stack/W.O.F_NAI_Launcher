@@ -33,7 +33,12 @@ void main() {
       ),
     );
 
-    final label = tester.widget<Text>(find.text(reading));
+    final label = tester.widget<Text>(
+      find.descendant(
+        of: find.byKey(ValueKey('prompt-block-pill-body-${block.id}')),
+        matching: find.byType(Text),
+      ),
+    );
     expect(label.maxLines, isNull);
     expect(label.overflow, TextOverflow.visible);
     expect(label.style?.fontSize, 12);
@@ -89,4 +94,83 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('palette keeps weight colors and category mark together', (
+    tester,
+  ) async {
+    const reading = '1.3::强光::, 0.7::阴影::, 画师';
+    final markStart = reading.indexOf('画师');
+    final block = PromptBlock.create(
+      title: reading,
+      content: '1.3::bright light::, 0.7::shadow::, artist:asteroid_ill',
+      readingTranslationZh: reading,
+      readingTranslationMarks: [
+        {
+          'start': markStart,
+          'end': markStart + 2,
+          'tag': 'artist:asteroid_ill',
+          'icon_id': 'artist',
+        },
+      ],
+      appearance: 'translation',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PromptBlockPill(
+            block: block,
+            displayTitle: reading,
+            maxWidth: 170,
+            paletteStyle: true,
+            onTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    final label = tester.widget<Text>(
+      find.descendant(
+        of: find.byKey(ValueKey('prompt-block-pill-body-${block.id}')),
+        matching: find.byType(Text),
+      ),
+    );
+    final leaves = <TextSpan>[];
+    void collect(InlineSpan span) {
+      if (span is! TextSpan) return;
+      if (span.text?.isNotEmpty == true) leaves.add(span);
+      for (final child in span.children ?? const <InlineSpan>[]) {
+        collect(child);
+      }
+    }
+
+    collect(label.textSpan!);
+    expect(
+      leaves.any(
+        (span) =>
+            span.text!.contains('强光') &&
+            span.style?.backgroundColor?.toARGB32() != null &&
+            (span.style!.backgroundColor!.toARGB32() & 0xFFFFFF) == 0xED5807,
+      ),
+      isTrue,
+    );
+    expect(
+      leaves.any(
+        (span) =>
+            span.text!.contains('阴影') &&
+            span.style?.backgroundColor?.toARGB32() != null &&
+            (span.style!.backgroundColor!.toARGB32() & 0xFFFFFF) == 0x079CED,
+      ),
+      isTrue,
+    );
+    expect(
+      leaves.any(
+        (span) =>
+            span.text!.contains('画师') &&
+            span.style?.decoration == TextDecoration.underline,
+      ),
+      isTrue,
+    );
+    expect(find.byIcon(Icons.brush_rounded), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
